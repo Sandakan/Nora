@@ -1,0 +1,27 @@
+{
+	"name": "oto-desktop-music-player",
+	"version": "0.0.1",
+	"description": "An elegant music player built using Electron. Inspired by Oto Music for Android by Piyush Mamidwar",
+	"main": "./main.js",
+	"scripts": {
+		"compile": "tsc --watch",
+		"start": "electron ./main.js"
+	},
+	"author": "Sandakan Nipunajith",
+	"license": "ISC",
+	"devDependencies": {
+		"electron": "^17.0.1",
+		"electron-reloader": "^1.2.3",
+		"ts-loader": "^9.2.7",
+		"webpack": "^5.70.0",
+		"webpack-cli": "^4.9.2"
+	},
+	"dependencies": {
+		"electron-store": "^8.0.1",
+		"lyrics-finder": "^21.7.0",
+		"music-metadata": "^7.11.8",
+		"node-id3": "^0.2.3",
+		"node-vibrant": "^3.2.1-alpha.1",
+		"songlyrics": "^2.2.4"
+	}
+}

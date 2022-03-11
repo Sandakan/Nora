@@ -1,0 +1,9 @@
+node_modules
+.map
+dist
+public/fonts/fontawesome-free-6.0.0-web
+public/images/artist_covers
+*.js
+*.js.map
+temp/song_covers/*
+temp/*.json
