@@ -30,11 +30,7 @@ export const parseSong = async (absoluteFilePath: string) => {
 					? metadata.common.picture[0].data
 					: await defaultSongCoverImgBuffer();
 				const songCoverPath = metadata.common.picture
-					? await storeSongArtworks(
-							metadata.common.picture,
-							path.join(__dirname, 'temp', 'song_covers'),
-							songId
-					  )
+					? await storeSongArtworks(metadata.common.picture, songId)
 					: path.join(__dirname, 'public', 'images', 'song_cover_default.png');
 				const palette = await nodeVibrant
 					.from(coverBuffer)
@@ -63,8 +59,14 @@ export const parseSong = async (absoluteFilePath: string) => {
 					format: metadata.format,
 					path: absoluteFilePath,
 					artworkPath: songCoverPath,
-					palette,
+					palette: palette
+						? {
+								DarkVibrant: { rgb: palette.DarkVibrant?.rgb },
+								LightVibrant: { rgb: palette.LightVibrant?.rgb },
+						  }
+						: undefined,
 					songId,
+					isAFavorite: false,
 					createdDate: stats ? `${stats.birthtime}` : undefined,
 					modifiedDate: stats ? `${stats.mtime}` : undefined,
 					folderInfo: {

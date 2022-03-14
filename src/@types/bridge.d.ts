@@ -35,6 +35,7 @@ declare global {
 		palette?: any;
 		path: string;
 		artworkPath: string;
+		isAFavorite: boolean;
 		createdDate: string | undefined;
 		modifiedDate: string | undefined;
 		folderInfo: {
@@ -53,6 +54,7 @@ declare global {
 		sampleRate?: number;
 		path: string;
 		album?: string;
+		isAFavorite: string;
 	}
 
 	interface Queue {
@@ -76,6 +78,14 @@ declare global {
 		artworkPath?: string;
 		path: string;
 		songId: string;
+		palette: {
+			DarkVibrant: {
+				_rgb: any;
+			};
+			LightVibrant: {
+				_rgb: any;
+			};
+		};
 	}
 	interface PlayableAudioInfo {
 		title: string;
@@ -85,6 +95,7 @@ declare global {
 		artworkPath?: string;
 		path: string;
 		songId: string;
+		isAFavorite: boolean;
 	}
 
 	interface UserData {
@@ -101,8 +112,17 @@ declare global {
 		};
 		playlist: Playlist | null;
 		recentlyPlayedSongs: SongData[];
-		musicFolders: string[];
+		musicFolders: MusicFolderData[];
 		defaultPage: 'Home' | 'Songs';
+	}
+
+	interface MusicFolderData {
+		path: string;
+		stats: {
+			lastModifiedDate: Date;
+			lastChangedDate: Date;
+			fileCreatedDate: Date;
+		};
 	}
 
 	interface Playlist {
@@ -140,5 +160,29 @@ declare global {
 		}[];
 		name: string;
 		artworkPath?: string;
+	}
+
+	interface LogData {
+		logs: {
+			time: Date | string;
+			error: {
+				name: string;
+				message: string;
+				stack: string | undefined;
+			};
+		}[];
+	}
+	interface Lyrics {
+		lyrics: string;
+		source: {
+			name: string;
+			url: string;
+			link: string;
+		};
+	}
+
+	interface toggleLikeSongReturnValue {
+		error: string | null;
+		success: boolean;
 	}
 }

@@ -7,3 +7,4 @@ public/images/artist_covers
 *.js.map
 temp/song_covers/*
 temp/*.json
+out/
