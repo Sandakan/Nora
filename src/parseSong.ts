@@ -73,23 +73,62 @@ export const parseSong = async (absoluteFilePath: string) => {
 						name: path.basename(path.dirname(absoluteFilePath)),
 						path: path.dirname(absoluteFilePath),
 					},
+					listeningRate: {
+						allTime: 0,
+						monthly: {
+							year: new Date().getFullYear(),
+							months: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+						},
+					},
 				};
 
-				const albums = metadata.common.album
-					? Array.isArray(data.albums)
-						? isAlbumAvailable(data.albums, metadata.common.album)
-							? data.albums.map((album) => {
+				// const albums = metadata.common.album
+				// 	? Array.isArray(data.albums)
+				// 		? isAlbumAvailable(data.albums, metadata.common.album)
+				// 			? data.albums.map((album) => {
+				// 					if (metadata.common.album && metadata.common.album === album.title) {
+				// 						album.songs.push({
+				// 							title: songInfo.title,
+				// 							songId: songInfo.songId,
+				// 						});
+				// 						songInfo.albumId = album.albumId;
+				// 						return album;
+				// 					} else return album;
+				// 			  })
+				// 			: addNewAlbum(data.albums, {
+				// 					title: metadata.common.album,
+				// 					artworkPath: songInfo.artworkPath,
+				// 					year: metadata.common.year || undefined,
+				// 					albumId: generateRandomId(),
+				// 					artists: songInfo.artists,
+				// 					songs: [
+				// 						{
+				// 							songId: songInfo.songId,
+				// 							title: songInfo.title,
+				// 						},
+				// 					],
+				// 			  }).allAlbums
+				// 		: []
+				// 	: data.albums;
+
+				const manageAlbums = () => {
+					if (metadata.common.album) {
+						if (Array.isArray(data.albums)) {
+							if (isAlbumAvailable(data.albums, metadata.common.album)) {
+								return data.albums.map((album) => {
 									if (metadata.common.album && metadata.common.album === album.title) {
 										album.songs.push({
 											title: songInfo.title,
 											songId: songInfo.songId,
 										});
+										songInfo.albumId = album.albumId;
 										return album;
 									} else return album;
-							  })
-							: addNewAlbum(data.albums, {
+								});
+							} else {
+								const { allAlbums, newAlbum } = addNewAlbum(data.albums, {
 									title: metadata.common.album,
-									artworkPath: '',
+									artworkPath: songInfo.artworkPath,
 									year: metadata.common.year || undefined,
 									albumId: generateRandomId(),
 									artists: songInfo.artists,
@@ -99,25 +138,36 @@ export const parseSong = async (absoluteFilePath: string) => {
 											title: songInfo.title,
 										},
 									],
-							  })
-						: []
-					: data.albums;
+								});
+								songInfo.albumId = newAlbum.albumId;
+								return allAlbums;
+							}
+						} else return [];
+					} else return data.albums;
+				};
+
+				const albums = manageAlbums();
 
 				const manageArtists = () => {
 					let result = data.artists;
 					const newArtists: Artist[] = [];
+					const relevantArtists: Artist[] = [];
 					if (Array.isArray(result)) {
 						if (songInfo.artists && songInfo.artists.length > 0) {
 							for (const newArtist of songInfo.artists) {
 								if (isArtistAvailable(data.artists, newArtist)) {
-									const z = result.filter((val) => val.name === newArtist);
-									z[0].songs.push({
-										title: songInfo.title,
-										songId: songInfo.songId,
+									let z = result.filter((val) => val.name === newArtist);
+									z = z.map((artist) => {
+										artist.songs.push({
+											title: songInfo.title,
+											songId: songInfo.songId,
+										});
+										relevantArtists.push(artist);
+										return artist;
 									});
 									result = result.filter((val) => val.name !== newArtist).concat(z);
 								} else {
-									result.push({
+									const artist = {
 										name: newArtist,
 										artistId: generateRandomId(),
 										songs: [
@@ -126,15 +176,26 @@ export const parseSong = async (absoluteFilePath: string) => {
 												title: songInfo.title,
 											},
 										],
-									});
+										artworkPath: songInfo.artworkPath || undefined,
+									};
+									relevantArtists.push(artist);
+									result.push(artist);
 								}
 							}
-							return { allArtists: result, newArtists: newArtists };
-						} else return { allArtists: result, newArtists: newArtists };
-					} else return { allArtists: [], newArtists: newArtists };
+							return { allArtists: result, newArtists, relevantArtists };
+						} else return { allArtists: result, newArtists, relevantArtists };
+					} else return { allArtists: [], newArtists, relevantArtists };
 				};
+				const { allArtists, newArtists, relevantArtists } = manageArtists();
+				songInfo.artistsId = newArtists.map((newArtist) => newArtist.artistId);
+				const artists = allArtists;
 
-				const artists = manageArtists().allArtists;
+				// const manageSongData = () => {
+				// 	const songData = songInfo;
+				// 	const artistsData = relevantArtists;
+				// 	const albumData = '';
+				// };
+
 				data.songs.push(songInfo);
 				await setData({ songs: data.songs, artists: artists, albums: albums });
 				return songInfo;
@@ -152,7 +213,7 @@ const isAlbumAvailable = (albums: Album[], title: string, albumId?: string) => {
 
 const addNewAlbum = (albums: Album[], options: Album) => {
 	albums.push(options);
-	return albums;
+	return { allAlbums: albums, newAlbum: options };
 };
 
 const isArtistAvailable = (artists: Artist[], name: string, artistId?: string) => {

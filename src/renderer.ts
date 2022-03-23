@@ -27,9 +27,17 @@ const currentSongArtists = document.getElementById('currentSongArtists') as HTML
 const volumeSlider = document.getElementById('volumeSlider') as HTMLInputElement | null;
 // CONTEXT MENU
 const contextMenu = document.querySelector('.context-menu') as HTMLElement | null;
+// DIALOG MENU
+const dialogMenusContainer = document.getElementById('dialogMenusContainer') as HTMLElement | null;
+// PROMPT MENU
+const promptMenuContainer = document.getElementById('promptMenuContainer') as HTMLElement | null;
+const promptMenu = document.getElementById('promptMenu') as HTMLElement | null;
+const promptMenuCloseBtn = document.getElementById('promptMenuCloseBtn') as HTMLElement | null;
+const promptMenuInner = document.getElementById('promptMenuInner') as HTMLElement | null;
 //OTHER
 const queueBtn = document.querySelector('.queue-btn') as HTMLElement | null;
 const likeBtn = document.querySelector('.like-btn') as HTMLElement | null;
+const miniPlayerBtn = document.querySelector('.mini-player-btn') as HTMLElement | null;
 // / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / / /
 
 const options = {
@@ -88,24 +96,20 @@ const showHomePage = (songsData: SongData[]) => {
 					if (recentlyAddedSongsContainer && songData.artists) {
 						recentlyAddedSongsContainer.innerHTML += `
 					<div class="song ${songData.songId}" data-song-id="${songData.songId}">
-							<div class="song-cover-container" data-song-id="${songData.songId}">
-								<img src="${songData.artworkPath}" loading="lazy" alt="" data-song-id="${songData.songId}" />
+							<div class="song-cover-container">
+								<img src="${songData.artworkPath}" loading="lazy" alt="" />
 							</div>
 							<div class="song-info-and-play-btn-container" style="${background}" data-song-id="${
 							songData.songId
 						}">
-								<div class="song-info-container" style="${fontColor}" data-song-id="${songData.songId}">
-									<div class="song-title" title="${songData.title}" data-song-id="${songData.songId}">${
-							songData.title
-						}</div>
+								<div class="song-info-container" style="${fontColor}">
+									<div class="song-title" title="${songData.title}">${songData.title}</div>
 									<div class="song-artists" title="${songData.artists.join(', ')}" data-song-id="${
 							songData.songId
 						}">${songData.artists.join(', ')}</div>
 								</div>
-								<div class="play-btn-container" data-song-id="${songData.songId}">
-									<i class="fa-solid fa-circle-play" onclick="getAudioData('${songData.songId}')" data-song-id="${
-							songData.songId
-						}"></i>
+								<div class="play-btn-container">
+									<i class="fa-solid fa-circle-play" onclick="getAudioData('${songData.songId}')"></i>
 								</div>
 							</div>
 						</div>`;
@@ -133,24 +137,18 @@ const showHomePage = (songsData: SongData[]) => {
 								if (recentlyPlayedSongsContainer && songData.artists) {
 									return `
 									<div class="song ${songData.songId}" data-song-id="${songData.songId}">
-										<div class="song-cover-container" data-song-id="${songData.songId}">
-											<img src="${songData.artworkPath}" loading="lazy" alt="" data-song-id="${songData.songId}" />
+										<div class="song-cover-container">
+											<img src="${songData.artworkPath}" loading="lazy" alt="" />
 										</div>
-										<div class="song-info-and-play-btn-container" style="${background}" data-song-id="${
-										songData.songId
-									}">
-											<div class="song-info-container" style="${fontColor}" data-song-id="${songData.songId}">
-												<div class="song-title" title="${songData.title}" data-song-id="${songData.songId}">${
-										songData.title
-									}</div>
-												<div class="song-artists" title="${songData.artists.join(', ')}" data-song-id="${
-										songData.songId
-									}">${songData.artists.join(', ')}</div>
+										<div class="song-info-and-play-btn-container" style="${background}">
+											<div class="song-info-container" style="${fontColor}">
+												<div class="song-title" title="${songData.title}">${songData.title}</div>
+												<div class="song-artists" title="${songData.artists.join(', ')}">${songData.artists.join(
+										', '
+									)}</div>
 											</div>
-											<div class="play-btn-container" data-song-id="${songData.songId}">
-												<i class="fa-solid fa-circle-play" onclick="getAudioData('${songData.songId}')" data-song-id="${
-										songData.songId
-									}"></i>
+											<div class="play-btn-container">
+												<i class="fa-solid fa-circle-play" onclick="getAudioData('${songData.songId}')"></i>
 											</div>
 										</div>
 									</div>`;
@@ -180,26 +178,20 @@ const showSongsList = (songsData: SongData[]) => {
 								return `<div class="song ${songData.songId}" data-song-id="${
 									songData.songId
 								}">
-							<div class="song-cover-and-play-btn-container" data-song-id="${songData.songId}">
-								<div class="play-btn-container" data-song-id="${songData.songId}">
-									<i class="fa-solid fa-circle-play" onclick="getAudioData('${songData.songId}')" data-song-id="${
-									songData.songId
-								}"></i>
+							<div class="song-cover-and-play-btn-container">
+								<div class="play-btn-container">
+									<i class="fa-solid fa-circle-play" onclick="getAudioData('${songData.songId}')"></i>
 								</div>
-								<div class="song-cover-container" data-song-id="${songData.songId}">
-									<img src="${songData.artworkPath}" loading="lazy" alt=""  data-song-id="${songData.songId}"/>
+								<div class="song-cover-container">
+									<img src="${songData.artworkPath}" loading="lazy" alt="" />
 								</div>
 							</div>
-								<div class="song-info-container" data-song-id="${songData.songId}">
-									<div class="song-title" title="${songData.title}" data-song-id="${songData.songId}">${
-									songData.title
-								}</div>
-									<div class="song-artists" title="${songData.artists.join(', ')}" data-song-id="${
-									songData.songId
-								}">${songData.artists.join(', ')}</div>
-									<div class="song-duration" data-song-id="${songData.songId}">${
-									songData.duration ? calculateTime(songData.duration) : `-- : --`
-								}</div>
+								<div class="song-info-container">
+									<div class="song-title" title="${songData.title}">${songData.title}</div>
+									<div class="song-artists" title="${songData.artists.join(', ')}">${songData.artists.join(
+									', '
+								)}</div>
+									<div class="song-duration">${songData.duration ? calculateTime(songData.duration) : `-- : --`}</div>
 								</div>
 						</div>`;
 							})
@@ -216,7 +208,7 @@ const showCurrentQueue = (queue: Queue) => {
 		clearPreviousActives('.queue-btn');
 		bodyContainer.innerHTML = `				
 				<div class="main-container songs-list-container playlist-container">
-					<div class="title-container">Playlist</div>
+					<div class="title-container">Currently Playing Queue</div>
 					<div class="songs-container">
 						${queue.queue
 							.map((songData) => {
@@ -251,7 +243,7 @@ const showSearchPage = () => {
 		bodyContainer.innerHTML = `
             <div class="main-container search-container">
 					<div class="search-bar-container">
-						<img src="images/icons/search.svg" alt="" />
+						<i class="fas fa-search"></i>
 						<input
 							type="search"
 							name="search"
@@ -266,7 +258,7 @@ const showSearchPage = () => {
 							<li>Songs</li>
 							<li>Albums</li>
 							<li>Artists</li>
-							<li>Album Artists</li>
+							<li>Playlists</li>
 						</ul>
 					</div>
 					<div class="search-results-container">
@@ -346,7 +338,7 @@ const showSearchPage = () => {
 		const artistResultsListContainer = document.querySelector(
 			'.search-results-container .artists-list-container'
 		) as HTMLElement;
-		const AlbumResultsListContainer = document.querySelector(
+		const albumResultsListContainer = document.querySelector(
 			'.search-results-container .albums-list-container'
 		) as HTMLElement;
 		const mostRelevantSong = document.querySelector('.result.most-relevant-song') as HTMLElement;
@@ -456,7 +448,12 @@ const showSearchPage = () => {
 									document.querySelector(
 										'.most-relevant-album .result-info-container .info-type-1'
 									) as HTMLElement
-								).innerText = `${firstResult.year}` || 'year unknown';
+								).innerText = `${firstResult.year || 'year unknown'}`;
+								(
+									document.querySelector(
+										'.most-relevant-album .result-info-container .info-type-2'
+									) as HTMLElement
+								).innerText = `${firstResult.songs.length} songs`;
 							} else mostRelevantAlbum.classList.remove('active');
 						} else {
 							mostRelevantResultsContainer.classList.remove('active');
@@ -473,28 +470,24 @@ const showSearchPage = () => {
 								.map((songData) => {
 									return `
 									<div class="song ${songData.songId}" data-song-id="${songData.songId}">
-										<div class="song-cover-and-play-btn-container" data-song-id="${songData.songId}">
-											<div class="play-btn-container" data-song-id="${songData.songId}">
-												<i class="fa-solid fa-circle-play" data-song-id="${songData.songId}" onclick="getAudioData('${
-										songData.songId
-									}')"></i>
+										<div class="song-cover-and-play-btn-container">
+											<div class="play-btn-container">
+												<i class="fa-solid fa-circle-play" onclick="getAudioData('${songData.songId}')"></i>
 											</div>
-											<div class="song-cover-container" data-song-id="${songData.songId}">
-												<img src="${songData.artworkPath}" loading="lazy" alt=""  data-song-id="${songData.songId}"/>
+											<div class="song-cover-container">
+												<img src="${songData.artworkPath}" loading="lazy" alt="" />
 											</div>
 										</div>
-											<div class="song-info-container" data-song-id="${songData.songId}">
-												<div class="song-title" title="${songData.title}" data-song-id="${songData.songId}">${
-										songData.title
-									}</div>
-												<div class="song-artists" title="${songData.artists.join(', ')}" data-song-id="${
-										songData.songId
-									}">${songData.artists.join(', ')}</div>
+											<div class="song-info-container">
+												<div class="song-title" title="${songData.title}">${songData.title}</div>
+												<div class="song-artists" title="${songData.artists.join(', ')}">${songData.artists.join(
+										', '
+									)}</div>
 												<div class="song-duration" title="${
 													songData.duration
 														? calculateTime(songData.duration)
 														: `unknown duration`
-												}" data-song-id="${songData.songId}">${
+												}">${
 										songData.duration ? calculateTime(songData.duration) : `-- : --`
 									}</div>
 											</div>
@@ -511,7 +504,7 @@ const showSearchPage = () => {
 										return `
 									<div class="artist" data-artist-id="${artist.artistId}">
 										<div class="artist-img-container">
-											<img src="images/artist_covers/selena-gomez.jfif" loading="lazy">
+											<img src="${artist.artworkPath || 'images/artist_covers/selena_gomez.jfif'}" loading="lazy">
 										</div>
 										<div class="artist-info-container">
 											<div class="name-container" title="${artist.name}">${artist.name}</div>
@@ -523,27 +516,28 @@ const showSearchPage = () => {
 						} else artistResultsListContainer.classList.remove('active');
 
 						if (result.albums.length > 0) {
-							AlbumResultsListContainer.classList.add('active');
+							albumResultsListContainer.classList.add('active');
 							albumResultsList.innerHTML = result.albums
 								.map((album, index) => {
 									if (index < 4) {
 										return `
 								<div class="album" data-album-id="${album.albumId}">
 									<div class="album-cover-and-play-btn-container">
-										<i class="fa-solid fa-circle-play"></i>
+										<i class="fa-solid fa-circle-play" onclick="playAlbumSongs('${album.albumId}')"></i>
 										<div class="album-cover-container">
-											<img src="images/artist_covers/cher-lloyd.jfif" alt="" loading="lazy">
+											<img src="${album.artworkPath || 'images/artist_covers/bella_porch.jfif'}" alt="" loading="lazy">
 										</div>
 									</div>
 									<div class="album-info-container">
 										<div class="album-title" title="${album.title}">${album.title}</div>
 										<div class="album-artists" title="${album.artists.join(', ')}">${album.artists.join(', ')}</div>
+										<div class="album-no-of-songs">${album.songs.length} songs</div>
 									</div>
 								</div>`;
 									}
 								})
 								.join('');
-						} else AlbumResultsListContainer.classList.remove('active');
+						} else albumResultsListContainer.classList.remove('active');
 						showContextMenu();
 					}
 				});
@@ -552,27 +546,187 @@ const showSearchPage = () => {
 	}
 };
 
-const showContextMenu = () => {
-	if (contextMenu) {
-		const songs = document.querySelectorAll('.song') as NodeListOf<HTMLElement>;
-		const viewportHeight = window.innerHeight;
-		const viewportWidth = window.innerWidth;
-		const menuHeight = contextMenu.clientHeight;
-		const menuWidth = contextMenu.clientWidth;
-		for (const song of songs) {
-			song.addEventListener('contextmenu', (e) => {
-				console.log(e);
-				contextMenuElement = e.target as HTMLElement;
-				contextMenu.classList.add('visible');
-				if (e.pageX + menuWidth > viewportWidth)
-					contextMenu.style.left = `${e.pageX - menuHeight}px`;
-				else contextMenu.style.left = `${e.pageX}px`;
-				if (e.pageY + menuHeight > viewportHeight)
-					contextMenu.style.top = `${e.pageY - menuHeight}px`;
-				else contextMenu.style.top = `${e.pageY}px`;
-			});
-		}
-	}
+const showArtistsPage = async () => {
+	await window.api.getArtistData('*').then(
+		(artists: Artist[]) => {
+			if (artists && Array.isArray(artists) && artists.length > 0) {
+				if (bodyContainer) {
+					bodyContainer.innerHTML = `
+				<div class="main-container artists-list-container">
+					<div class="title-container">Artists</div>
+					<div class="artists-container"></div>
+				</div>`;
+					const artistsContainer = document.querySelector(
+						'.artists-list-container .artists-container'
+					) as HTMLElement | null;
+					if (artistsContainer) {
+						artists
+							.sort((a, b) => {
+								const nameA = a.name.toUpperCase(); // ignore upper and lowercase
+								const nameB = b.name.toUpperCase(); // ignore upper and lowercase
+								if (nameA < nameB) return -1;
+								if (nameA > nameB) return 1;
+								return 0;
+							})
+							.forEach((artist) => {
+								const div = document.createElement('div');
+								div.classList.add('artist');
+								div.dataset.artistId = artist.artistId;
+								div.innerHTML = `
+							<div class="artist-img-container">
+								<img src="${artist?.artworkPath || 'images/artist_covers/selena_gomez.jfif'}" loading="lazy">
+							</div>
+							<div class="artist-info-container">
+								<div class="name-container" title="${artist.name}">${artist.name}</div>
+							</div>`;
+								artistsContainer.append(div);
+							});
+					}
+				}
+			}
+		},
+		(err: Error) => console.log(err)
+	);
+};
+
+const showAlbumsPage = async () => {
+	await window.api.getAlbumData('*').then(
+		(albums: Album[]) => {
+			if (albums && Array.isArray(albums) && albums.length > 0) {
+				if (bodyContainer) {
+					bodyContainer.innerHTML = `
+				<div class="main-container albums-list-container">
+					<div class="title-container">Albums</div>
+					<div class="albums-container"></div>
+				</div>`;
+					const albumsContainer = document.querySelector(
+						'.albums-list-container .albums-container'
+					) as HTMLElement | null;
+					if (albumsContainer) {
+						albums
+							.sort((a, b) => {
+								const nameA = a.title.toUpperCase(); // ignore upper and lowercase
+								const nameB = b.title.toUpperCase(); // ignore upper and lowercase
+								if (nameA < nameB) return -1;
+								if (nameA > nameB) return 1;
+								return 0;
+							})
+							.forEach(async (album) => {
+								const div = document.createElement('div');
+								div.classList.add('album');
+								div.dataset.albumId = album.albumId;
+								div.innerHTML = `
+								<div class="album-cover-and-play-btn-container">
+										<i class="fa-solid fa-circle-play" onclick="playAlbumSongs('${album.albumId}')"></i>
+										<div class="album-cover-container">
+											<img src="${album.artworkPath || 'images/artist_covers/bella_porch.jfif'}" alt="" loading="lazy">
+										</div>
+									</div>
+									<div class="album-info-container">
+										<div class="album-title" title="${album.title}">${album.title}</div>
+										<div class="album-artists" title="${album.artists.join(', ')}">${album.artists.join(', ')}</div>
+										<div class="album-no-of-songs">${album.songs.length} songs</div>
+									</div>`;
+								albumsContainer.append(div);
+							});
+					}
+					showContextMenu();
+				}
+			}
+		},
+		(err: Error) => console.log(err)
+	);
+};
+
+const showPlaylistsMenu = async () => {
+	await window.api.getPlaylistData('*').then(
+		(playlists: Playlist[]) => {
+			console.log(playlists);
+			if (playlists && Array.isArray(playlists)) {
+				if (bodyContainer) {
+					bodyContainer.innerHTML = `
+				<div class="main-container playlists-list-container">
+					<div class="title-container">Playlists</div>
+					<div class="playlists-container"></div>
+					<div class="no-playlists-container">No playlists found.</div>
+					<button class="add-new-playlist-btn"><i class="fas fa-add"></i> Add New Playlist</button>
+				</div>`;
+					const noPlaylistsContainer = document.querySelector(
+						'.playlists-list-container .no-playlists-container'
+					) as HTMLElement | null;
+					const addNewPlaylistBtn = document.querySelector(
+						'.playlists-list-container .add-new-playlist-btn'
+					) as HTMLButtonElement | null;
+					if (playlists.length > 0) {
+						if (noPlaylistsContainer) noPlaylistsContainer.classList.remove('visible');
+						const playlistsContainer = document.querySelector(
+							'.playlists-list-container .playlists-container'
+						) as HTMLElement | null;
+						if (playlistsContainer) {
+							playlistsContainer.innerHTML = playlists
+								.sort((a, b) => {
+									const nameA = a.name.toUpperCase(); // ignore upper and lowercase
+									const nameB = b.name.toUpperCase(); // ignore upper and lowercase
+									if (nameA < nameB) return -1;
+									if (nameA > nameB) return 1;
+									return 0;
+								})
+								.map((playlist) => {
+									return `
+								<div class="playlist" data-playlist-id="${playlist.playlistId}">
+									<div class="playlist-cover-and-play-btn-container">
+										<i class="fa-solid fa-circle-play" onclick="playPlaylistSongs('${playlist.playlistId}')"></i>
+										<div class="playlist-cover-container">
+											<img src="${playlist.artworkPath || 'images/playlist_cover_default.png'}" alt="" loading="lazy">
+										</div>
+									</div>
+									<div class="playlist-info-container">
+										<div class="playlist-title" title="${playlist.name}">${playlist.name}</div>
+										<div class="playlist-no-of-songs" title="${playlist.songs.length || 0} songs">${
+										playlist.songs.length || 0
+									} songs</div>
+									</div>
+								</div>`;
+								})
+								.join('');
+						}
+					} else if (noPlaylistsContainer) noPlaylistsContainer.classList.add('visible');
+					if (addNewPlaylistBtn)
+						addNewPlaylistBtn.addEventListener('click', () => {
+							const data = `<img src="images/playlist_cover_default.png">
+								<h2>Add new Playlist </h2>
+								<input type="text" name="playlistName" class="playlist-name-input" placeholder="Playlist Name">
+								<button class="add-new-playlist-confirm-btn">Add Playlist</button>
+							`;
+							showPromptMenu(data, 'add-new-playlist');
+							const playlistNameInput = document.querySelector(
+								'.playlist-name-input'
+							) as HTMLInputElement | null;
+							const playlistNameInputConfirmBtn = document.querySelector(
+								'.add-new-playlist-confirm-btn'
+							) as HTMLButtonElement | null;
+							if (playlistNameInput)
+								playlistNameInput.addEventListener('keypress', (e) => e.stopPropagation());
+							if (playlistNameInputConfirmBtn)
+								playlistNameInputConfirmBtn.addEventListener('click', async () => {
+									if (playlistNameInput && playlistNameInput.value !== '') {
+										await window.api
+											.addNewPlaylist(playlistNameInput.value.trim())
+											.then(async (res: any) => {
+												if (res && res.success) {
+													closePromptMenu();
+													await showPlaylistsMenu();
+												} else showAlert(res.message);
+											});
+									} else showAlert('Playlist name cannot be empty.');
+								});
+						});
+				}
+			}
+			showContextMenu();
+		},
+		(err: Error) => console.log(err)
+	);
 };
 
 const showLyricsTab = async () => {
@@ -589,7 +743,6 @@ const showLyricsTab = async () => {
 		if (songTitle && songArtists && lyricsContainer) {
 			await window.api.getSongLyrics(songTitle, songArtists).then(
 				(lyrics: Lyrics | undefined) => {
-					console.log(lyrics);
 					if (lyrics && lyrics.lyrics) {
 						lyricsContainer.innerHTML = `${lyrics.lyrics
 							.split('\n')
@@ -598,8 +751,10 @@ const showLyricsTab = async () => {
 							})
 							.join('')}
 					<div class="source-name">Lyrics provided by ${lyrics.source.name} using SongLyrics.</div>`;
-					} else
+					} else {
+						showAlert(`We couldn't find any lyrics for your song.`);
 						lyricsContainer.innerHTML = `<div class="no-lyrics-container">We couldn't find any lyrics for your song.</div>`;
+					}
 				},
 				(err: Error) => console.log(err)
 			);
@@ -654,19 +809,16 @@ const showRangeProgress = (sliderType: string, divider: number, divisor: number)
 };
 
 for (const link of mainLinks) {
-	link.addEventListener('click', (e) => {
+	link.addEventListener('click', async (e) => {
 		mainLinks.forEach((x) => x.classList.remove('active'));
 		if (e.target) (e.target as HTMLOListElement).classList.add('active');
 		if (audioData.length > 0) {
-			if (link.classList.contains('songs')) {
-				showSongsList(audioData);
-			}
-			if (link.classList.contains('home')) {
-				showHomePage(audioData);
-			}
-			if (link.classList.contains('search')) {
-				showSearchPage();
-			}
+			if (link.classList.contains('songs')) showSongsList(audioData);
+			if (link.classList.contains('home')) showHomePage(audioData);
+			if (link.classList.contains('search')) showSearchPage();
+			if (link.classList.contains('artists')) await showArtistsPage();
+			if (link.classList.contains('albums')) await showAlbumsPage();
+			if (link.classList.contains('playlists')) await showPlaylistsMenu();
 		}
 	});
 }
@@ -694,7 +846,7 @@ window.api.checkForSongs().then((res: SongData[]) => {
 			document.getElementById('add-new-song-folder')?.addEventListener('click', async () => {
 				await window.api.addMusicFolder().then(
 					(result: SongData[]) => {
-						console.log(result);
+						// console.log(result);
 						if (Array.isArray(result) && result.length > 0) {
 							audioData = result.sort((a, b) => {
 								if (
@@ -721,6 +873,8 @@ const getAudioData = (songId: string, startPlay = true, startFromBeginning = tru
 			if (songData) {
 				// console.log(songData);
 				const { title, artists, path, artwork } = songData;
+				// console.log(artists);
+				// getArtistArtworks('', Array.isArray(artists) ? artists.join(', ') : artists);
 				if (audio) {
 					audio.src = path;
 					const songs = document.querySelectorAll(`.playing`);
@@ -758,10 +912,13 @@ const getAudioData = (songId: string, startPlay = true, startFromBeginning = tru
 				if (currentSongTitle) {
 					currentSongTitle.innerText = title;
 					currentSongTitle.setAttribute('title', title);
+					currentSongTitle.setAttribute('onclick', `showSongInfoPage('${songId}')`);
 				}
 				if (currentSongArtists) {
 					if (Array.isArray(artists)) {
-						currentSongArtists.innerText = artists.join(', ');
+						currentSongArtists.innerHTML = artists
+							.map((artist) => `<span class="artist">${artist}</span>`)
+							.join(', ');
 						currentSongArtists.setAttribute('title', artists.join(', '));
 					} else currentSongArtists.innerText = artists;
 				}
@@ -828,7 +985,7 @@ likeBtn?.addEventListener('click', async () => {
 					document.querySelector('.like-btn i')?.classList.remove('fa-regular');
 					document.querySelector('.like-btn i')?.classList.add('fa-solid', 'liked');
 					console.log('liked successfully');
-				} else console.log(res.error);
+				} else showAlert(res.error || 'error occurred when disliking the song.');
 			});
 		} else {
 			await window.api.toggleLikeSong(songId, false).then((res: toggleLikeSongReturnValue) => {
@@ -836,7 +993,7 @@ likeBtn?.addEventListener('click', async () => {
 					document.querySelector('.like-btn i')?.classList.add('fa-regular');
 					document.querySelector('.like-btn i')?.classList.remove('fa-solid', 'liked');
 					console.log('disliked successfully');
-				} else console.log(res.error);
+				} else showAlert(res.error || 'error occurred when disliking the song.');
 			});
 		}
 	}
@@ -942,7 +1099,7 @@ if (audio && seekBarSlider) {
 				songPlayBtn?.classList.remove('fa-circle-pause');
 				songPlayBtn?.classList.add('fa-circle-play');
 			}
-			console.log(queue);
+			// console.log(queue);
 			if (skipForwardBtn) skipForwardBtn.click();
 		}
 	});
@@ -1080,10 +1237,7 @@ if (lyricsBtn && audio) {
 		} else {
 			lyricsBtn.classList.add('active');
 			showLyricsTab();
-			audio.addEventListener('songChange', () => {
-				console.log('song changed');
-				showLyricsTab();
-			});
+			audio.addEventListener('songChange', showLyricsTab);
 		}
 	});
 }
@@ -1136,52 +1290,11 @@ if (contextMenu) {
 	window.addEventListener('click', () => {
 		contextMenu.classList.remove('visible');
 	});
-
 	contextMenu.addEventListener('click', (e) => e.stopPropagation());
-
-	const menuItems = contextMenu.children;
-	for (const menuItem of menuItems) {
-		menuItem.addEventListener('click', (e) => {
-			console.log(e);
-			console.log(contextMenuElement);
-			contextMenu.classList.remove('visible');
-			const target = e.target as HTMLElement | null;
-			if (target) {
-				if (target.classList.contains('option-open-devtools')) window.api.openDevtools();
-				if (
-					contextMenuElement &&
-					target.classList.contains('option-play-now') &&
-					contextMenuElement.dataset.songId
-				)
-					getAudioData(contextMenuElement.dataset.songId, true, true);
-				if (
-					contextMenuElement &&
-					target.classList.contains('option-play-next') &&
-					contextMenuElement.dataset.songId
-				) {
-					let selectedSongData: QueuedSong = queue.queue.filter(
-						(song) => song.songId === contextMenuElement.dataset.songId
-					)[0];
-					const newQueue = queue.queue.filter(
-						(song) => song.songId !== contextMenuElement.dataset.songId
-					);
-					newQueue.splice(
-						queue.queue.length - 1 !== queue.currentSongIndex
-							? queue.currentSongIndex
-								? queue.currentSongIndex + 1
-								: 0
-							: 0,
-						0,
-						selectedSongData
-					);
-					queue.queue = newQueue;
-				}
-			}
-		});
-	}
 }
 
 window.api.addNewSong((e: unknown, songs: SongData[]) => {
+	showAlert(`${songs.length} new songs added`);
 	console.log('new songs added ', songs);
 	if (songs && songs.length > 0) {
 		songs.forEach((song) => {
@@ -1189,3 +1302,382 @@ window.api.addNewSong((e: unknown, songs: SongData[]) => {
 		});
 	}
 });
+
+const playPlaylistSongs = async (playlistId: string) => {
+	await window.api.getPlaylistData(playlistId).then(
+		(playlist: Playlist) => {
+			const playlistSongs = audioData.filter((data) => {
+				for (const songId of playlist.songs) {
+					if (songId === data.songId) return data;
+				}
+			});
+			queue.queue = playlistSongs;
+			queue.currentSongIndex = 0;
+			getAudioData(playlistSongs[0].songId);
+		},
+		(err: Error) => console.log(err)
+	);
+};
+
+const playAlbumSongs = async (albumId: string) => {
+	await window.api.getAlbumData(albumId).then(
+		(album: Album) => {
+			const albumSongs = audioData.filter((data) => {
+				for (const albumSong of album.songs) {
+					if (albumSong.songId === data.songId) return data;
+				}
+			});
+			queue.queue = albumSongs;
+			queue.currentSongIndex = 0;
+			getAudioData(albumSongs[0].songId);
+		},
+		(err: Error) => console.log(err)
+	);
+};
+
+// / / / / / / / / / DIALOG MENU / / / / / / / / / / / / / / /
+
+const showAlert = (message: string, delay = 5000) => {
+	return new Promise((resolve, reject) => {
+		if (dialogMenusContainer) {
+			const messageContainer = dialogMenusContainer.querySelector(
+				'.message-container'
+			) as HTMLElement | null;
+			const closeBtn = document.getElementById('dialogMenuCloseBtn') as HTMLElement | null;
+			if (messageContainer && closeBtn) {
+				messageContainer.innerHTML = message;
+				dialogMenusContainer.classList.add('visible');
+				if (delay === 0)
+					setTimeout(() => {
+						closeAlert();
+						resolve(true);
+					}, 5000);
+				else
+					setTimeout(() => {
+						closeAlert();
+						resolve(true);
+					}, delay);
+				closeBtn.addEventListener('click', (e) => {
+					e.stopPropagation();
+					console.log('btn clicked');
+					closeAlert();
+					return resolve(true);
+				});
+			}
+		} else reject('Dialog menu container cannot be found.');
+	});
+};
+
+const closeAlert = () => {
+	if (dialogMenusContainer) dialogMenusContainer.classList.remove('visible');
+};
+
+if (miniPlayerBtn)
+	miniPlayerBtn.addEventListener('click', () => showAlert('Mini player btn clicked.'));
+
+// / / / / / / / / / ARTIST ARTWORKS  / / / / / / / / / / / / / /
+
+const getArtistArtworks = async (artistId: string, artistName?: string) => {
+	if (artistName) console.log(await window.api.getArtistArtworks(artistId, artistName));
+};
+
+// / / / / / / / / / PROMPT MENU / / / /  / / / / / / / / / / / /
+
+const showPromptMenu = (innerHTML: string, className?: string) => {
+	if (innerHTML && innerHTML !== '') {
+		if (promptMenuContainer && promptMenu && promptMenuInner) {
+			let classList = promptMenuInner.classList.value.split(' ');
+			classList.splice(classList.indexOf('prompt-menu-inner'), 1);
+			promptMenuInner.classList.remove(...classList);
+			promptMenuContainer.classList.add('visible');
+			if (className) promptMenuInner.classList.add(className);
+			promptMenuInner.innerHTML = innerHTML;
+		}
+	}
+};
+
+const closePromptMenu = () => {
+	if (promptMenuContainer && promptMenu) {
+		promptMenuContainer.classList.remove('visible');
+	}
+};
+
+if (promptMenuCloseBtn) promptMenuCloseBtn.addEventListener('click', closePromptMenu);
+
+if (promptMenuContainer) promptMenuContainer.addEventListener('click', closePromptMenu);
+
+if (promptMenu) promptMenu.addEventListener('click', (e) => e.stopPropagation());
+
+// / / / / / / / / CONTEXT MENU / / / / / / / / / / / / / / / / / / /
+
+const positionContextMenu = (targetElement: HTMLElement, pageX: number, pageY: number) => {
+	if (contextMenu && targetElement) {
+		const viewportHeight = window.innerHeight;
+		const viewportWidth = window.innerWidth;
+		const menuHeight = contextMenu.clientHeight;
+		const menuWidth = contextMenu.clientWidth;
+		contextMenuElement = targetElement;
+		if (pageX + menuWidth > viewportWidth) contextMenu.style.left = `${pageX - menuHeight}px`;
+		else contextMenu.style.left = `${pageX}px`;
+		if (pageY + menuHeight > viewportHeight) contextMenu.style.top = `${pageY - menuHeight}px`;
+		else contextMenu.style.top = `${pageY}px`;
+	}
+};
+
+const defineContextMenuItems = (contextMenuItems: ContextMenuItem[]) => {
+	if (
+		contextMenu &&
+		contextMenuItems &&
+		Array.isArray(contextMenuItems) &&
+		contextMenuItems.length > 0
+	) {
+		contextMenu.innerHTML = '';
+		for (const contextMenuItem of contextMenuItems) {
+			const div = document.createElement('div');
+			contextMenuItem.class
+				? div.classList.add('menu-item', contextMenuItem.class)
+				: div.classList.add('menu-item');
+			div.innerText = contextMenuItem.label;
+			if (contextMenuItem.description) div.title = contextMenuItem.description;
+			div.addEventListener('click', (e) => {
+				contextMenuItem.handler(e);
+				contextMenu.classList.remove('visible');
+			});
+			contextMenu.append(div);
+		}
+	}
+};
+
+const getParentWithClassOfAChild = (element: any, className: string) => {
+	for (; element && element !== document; element = element.parentNode) {
+		if (element.classList.contains(className)) return element as HTMLElement;
+	}
+	return null;
+};
+
+const showContextMenu = () => {
+	if (contextMenu) {
+		const songs = document.querySelectorAll('.song') as NodeListOf<HTMLElement>;
+		for (const song of songs) {
+			song.addEventListener('contextmenu', (e) => {
+				// console.log(e);
+				const contextMenuItems = [
+					{
+						label: 'Play',
+						class: 'option-play-now',
+						handler: () => {
+							if (contextMenuElement.dataset.songId)
+								getAudioData(contextMenuElement.dataset.songId, true, true);
+						},
+					},
+					{
+						label: 'Play next',
+						class: 'option-play-next',
+						handler: () => {
+							let selectedSongData: QueuedSong = queue.queue.filter(
+								(song) => song.songId === contextMenuElement.dataset.songId
+							)[0];
+							const newQueue = queue.queue.filter(
+								(song) => song.songId !== contextMenuElement.dataset.songId
+							);
+							newQueue.splice(
+								queue.queue.length - 1 !== queue.currentSongIndex
+									? queue.currentSongIndex
+										? queue.currentSongIndex + 1
+										: 0
+									: 0,
+								0,
+								selectedSongData
+							);
+							queue.queue = newQueue;
+						},
+					},
+					{
+						label: 'Open Devtools',
+						class: 'option-open-devtools',
+						handler: () => window.api.openDevtools(),
+					},
+				];
+				defineContextMenuItems(contextMenuItems);
+				const target = e.target as HTMLElement;
+				positionContextMenu(
+					getParentWithClassOfAChild(target, 'song') || target,
+					e.pageX,
+					e.pageY
+				);
+				contextMenu.classList.add('visible');
+			});
+		}
+
+		const playlists = document.querySelectorAll('.playlist') as NodeListOf<HTMLElement>;
+		for (const playlist of playlists) {
+			playlist.addEventListener('contextmenu', (e) => {
+				const contextMenuItems = [
+					{
+						label: 'Play',
+						class: 'option-play-now',
+						handler: () => {
+							if (contextMenuElement.dataset.playlistId)
+								playPlaylistSongs(contextMenuElement.dataset.playlistId);
+						},
+					},
+				];
+				defineContextMenuItems(contextMenuItems);
+				const target = e.target as HTMLElement;
+				positionContextMenu(
+					getParentWithClassOfAChild(target, 'playlist') || target,
+					e.pageX,
+					e.pageY
+				);
+				contextMenu.classList.add('visible');
+			});
+		}
+
+		const albums = document.querySelectorAll('.album') as NodeListOf<HTMLElement>;
+		for (const album of albums) {
+			album.addEventListener('contextmenu', (e) => {
+				const contextMenuItems = [
+					{
+						label: 'Play',
+						class: 'option-play-now',
+						handler: () => {
+							if (contextMenuElement.dataset.albumId)
+								playAlbumSongs(contextMenuElement.dataset.albumId);
+						},
+					},
+				];
+				defineContextMenuItems(contextMenuItems);
+				const target = e.target as HTMLElement;
+				positionContextMenu(
+					getParentWithClassOfAChild(target, 'album') || target,
+					e.pageX,
+					e.pageY
+				);
+				contextMenu.classList.add('visible');
+			});
+		}
+
+		const mostRelevantSong = document.querySelector('.most-relevant-song') as HTMLElement | null;
+		if (mostRelevantSong) {
+			mostRelevantSong.addEventListener('contextmenu', (e) => {
+				const contextMenuItems = [
+					{
+						label: 'Play',
+						class: 'option-play-now',
+						handler: () => {
+							if (contextMenuElement.dataset.songId)
+								getAudioData(contextMenuElement.dataset.songId, true, true);
+						},
+					},
+					{
+						label: 'Play next',
+						class: 'option-play-next',
+						handler: () => {
+							let selectedSongData: QueuedSong = queue.queue.filter(
+								(song) => song.songId === contextMenuElement.dataset.songId
+							)[0];
+							const newQueue = queue.queue.filter(
+								(song) => song.songId !== contextMenuElement.dataset.songId
+							);
+							newQueue.splice(
+								queue.queue.length - 1 !== queue.currentSongIndex
+									? queue.currentSongIndex
+										? queue.currentSongIndex + 1
+										: 0
+									: 0,
+								0,
+								selectedSongData
+							);
+							queue.queue = newQueue;
+						},
+					},
+					{
+						label: 'Open Devtools',
+						class: 'option-open-devtools',
+						handler: () => window.api.openDevtools(),
+					},
+				];
+				defineContextMenuItems(contextMenuItems);
+				const target = e.target as HTMLElement;
+				positionContextMenu(
+					getParentWithClassOfAChild(target, 'most-relevant-song') || target,
+					e.pageX,
+					e.pageY
+				);
+				contextMenu.classList.add('visible');
+			});
+		}
+
+		const mostRelevantAlbum = document.querySelector(
+			'.most-relevant-album'
+		) as HTMLElement | null;
+		if (mostRelevantAlbum) {
+			mostRelevantAlbum.addEventListener('contextmenu', (e) => {
+				const contextMenuItems = [
+					{
+						label: 'Play',
+						class: 'option-play-now',
+						handler: () => {
+							if (contextMenuElement.dataset.albumId)
+								playAlbumSongs(contextMenuElement.dataset.albumId);
+						},
+					},
+				];
+				defineContextMenuItems(contextMenuItems);
+				const target = e.target as HTMLElement;
+				positionContextMenu(
+					getParentWithClassOfAChild(target, 'most-relevant-album') || target,
+					e.pageX,
+					e.pageY
+				);
+				contextMenu.classList.add('visible');
+			});
+		}
+	}
+};
+
+const showSongInfoPage = async (songId: string) => {
+	if (songId) {
+		await window.api.getSongInfo(songId).then((songInfo: SongData) => {
+			console.log(songInfo);
+			if (songInfo && bodyContainer) {
+				let duration = '0 seconds';
+				const [minutes, seconds] = calculateTime(songInfo.duration).split(':');
+				if (Number(minutes) === 0) duration = `${seconds} seconds`;
+				else duration = `${minutes} minutes ${seconds} seconds`;
+
+				bodyContainer.innerHTML = `
+					<div class="main-container song-information-container">
+						<div class="container">
+							<div class="song-cover-container">
+								<img src="${songInfo.artworkPath}">
+							</div>
+							<div class="song-info">
+								<div class="title info-type-1" title="${songInfo.title}">${songInfo.title}</div>
+								<div class="artists info-type-2" title="${songInfo.artists.join(', ')}">
+									${songInfo.artists.join(', ')}
+								</div>
+								<div class="info-type-2" title="${songInfo.album}">${songInfo.album}</div>
+								<div class="info-type-3" title="">${duration}</div>
+								${
+									songInfo.sampleRate
+										? `<div class="info-type-3" title="">${
+												songInfo.sampleRate / 1000
+										  } KHZ</div>`
+										: ''
+								}
+								${
+									songInfo.format.bitrate
+										? `<div class="info-type-3" title="">${
+												songInfo.format.bitrate / 1000
+										  } Kbps</div>`
+										: ''
+								}
+							</div>
+						</div>
+					</div>
+				`;
+			}
+		});
+	} else console.log(songId);
+};

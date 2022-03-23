@@ -29,8 +29,22 @@ const api = {
 	// GETS NEWLY ADDED SONGS WHEN ADDED TO A PRESELECTED FOLDER
 	addNewSong: (callback: (event: unknown, songs: SongData[]) => void) =>
 		ipcRenderer.on('app/getNewSong', callback),
+	// TOGGLE LIKE SONG
 	toggleLikeSong: (songId: string, likeSong: boolean) =>
 		ipcRenderer.invoke('app/toggleLikeSong', songId, likeSong),
+	// GET ARTISTS ARTWORKS
+	getArtistArtworks: (artistId: string, artistName?: string) =>
+		ipcRenderer.invoke('app/getArtistArtworks', artistId, artistName),
+	// GET ARTIST DATA
+	getArtistData: (artistId: string) => ipcRenderer.invoke('app/getArtistData', artistId),
+	//GET ALBUM DATA
+	getAlbumData: (albumId: string) => ipcRenderer.invoke('app/getAlbumData', albumId),
+	// GET PLAYLIST DATA
+	getPlaylistData: (playlistId: string) => ipcRenderer.invoke('app/getPlaylistData', playlistId),
+	// ADD NEW PLAYLIST
+	addNewPlaylist: (playlistName: string) => ipcRenderer.invoke('app/addNewPlaylist', playlistName),
+	// GET SONG INFO
+	getSongInfo: (songId: string) => ipcRenderer.invoke('app/getSongInfo', songId),
 };
 
 contextBridge.exposeInMainWorld('api', api);

@@ -16,8 +16,10 @@ const songDataStore = new Store({
 const userDataStore = new Store({
 	name: 'userData',
 });
-console.log(userDataStore.path);
-console.log(songDataStore.path);
+
+const playlistDataStore = new Store({
+	name: 'playlists',
+});
 
 function flatten(lists: any[]) {
 	return lists.reduce((a, b) => a.concat(b), []);
@@ -52,6 +54,7 @@ export const getFiles = async (dir: string) => {
 					lastModifiedDate: stats.mtime,
 					lastChangedDate: stats.ctime,
 					fileCreatedDate: stats.birthtime,
+					lastParsedDate: new Date(),
 				},
 			});
 		} catch (error) {
@@ -174,32 +177,88 @@ export const storeSongArtworks = (
 	});
 };
 
-const checkForNewSongs = () => {
+export const checkForNewSongs = () => {
 	const musicFolders: MusicFolderData[] = userDataStore.get('musicFolders') as any;
 	if (musicFolders) {
-		musicFolders.forEach((folder) => {
+		musicFolders.forEach(async (folder, index) => {
+			await fs.stat(folder.path).then((stats) => {
+				if (
+					stats.mtime.toUTCString() === new Date(folder.stats.lastModifiedDate).toUTCString()
+				) {
+					console.log(path.basename(folder.path), 'no folder data changed.');
+				} else {
+					console.log(path.basename(folder.path), 'folder data changed.');
+					checkFolderForUnknownModifications(folder.path);
+					musicFolders[index].stats.lastModifiedDate = stats.mtime;
+				}
+			});
 			fsOther.watch(folder.path, async (eventType, filename) => {
 				console.log(eventType, filename);
-				if (eventType === 'rename')
-					setTimeout(() => checkFolderForModifications(folder.path, filename), 500);
+				if (filename) {
+					if (eventType === 'rename') {
+						const modifiedDate = await fs
+							.stat(folder.path)
+							.then((res) => res.mtime)
+							.catch((err) => logger(err));
+						if (modifiedDate && musicFolders[index].stats.lastModifiedDate !== modifiedDate) {
+							musicFolders[index].stats.lastModifiedDate = modifiedDate;
+							userDataStore.set('musicFolders', musicFolders);
+							console.log('folder data updated.');
+						} else console.log('no need to update folder data');
+
+						setTimeout(() => checkFolderForModifications(folder.path, filename), 500);
+					}
+				} else console.log('error occurred when trying to read newly added songs.');
 			});
 		});
 	}
 };
 
-checkForNewSongs();
+const checkFolderForUnknownModifications = async (folderPath: string) => {
+	const songsData = (await songDataStore.get('songs')) as SongData[];
+	const relevantFolderSongsData = Array.isArray(songsData)
+		? songsData.filter((songData) => path.dirname(songData.path) === folderPath)
+		: undefined;
+	const newSongPaths = [];
+	if (relevantFolderSongsData) {
+		const dirs = await fs.readdir(folderPath).then((res) => {
+			return res
+				.filter((filePath) => path.extname(filePath) === '.mp3')
+				.map((filepath) => {
+					const x = path.join(folderPath, filepath);
+					return x;
+				});
+		});
+		for (const dir of dirs) {
+			if (relevantFolderSongsData.some((song) => song.path === dir)) {
+			} else newSongPaths.push(dir);
+		}
+		console.log(newSongPaths);
+		if (newSongPaths.length > 0) {
+			for (const newSongPath of newSongPaths) {
+				const newSongData = await parseSong(newSongPath);
+				if (newSongData) {
+					songsData.push(newSongData);
+					songDataStore.set('songs', songsData);
+					sendNewSong([newSongData]);
+					console.log(path.basename(newSongPath), 'song added');
+				}
+			}
+		}
+	}
+};
 
 const checkFolderForModifications = async (folderPath: string, filename: string) => {
 	// ! check for file path instead of looping through folder directories.
-	fs.readdir(folderPath).then(async (dirs) => {
+	await fs.readdir(folderPath).then(async (dirs) => {
 		for (const dir of dirs) {
 			if (dir === filename && path.extname(filename) === '.mp3') {
 				const songs: SongData[] = songDataStore.get('songs') as any;
 				if (songs) {
 					const songData = await parseSong(path.join(folderPath, filename));
-					if (songData) {
+					if (songData && Array.isArray(songData)) {
 						songs.push(songData);
-						await songDataStore.set('songs', songs);
+						songDataStore.set('songs', songs);
 						sendNewSong([songData]);
 						console.log(filename, 'song added');
 					}
@@ -211,4 +270,57 @@ const checkFolderForModifications = async (folderPath: string, filename: string)
 			}
 		}
 	});
+};
+
+export const getPlaylistData = async () => {
+	const playlistData: playlistDataTemplate = (await playlistDataStore.store) as any;
+	if (playlistData && Object.keys(playlistData).length !== 0) {
+		return playlistData.playlists;
+	} else {
+		const playlistDataTemplate: playlistDataTemplate = {
+			playlists: [
+				{
+					name: 'History',
+					playlistId: 'History',
+					createdDate: new Date(),
+					songs: [],
+					artworkPath:
+						'C:\\Users\\Sandakan Nipunajith\\OneDrive\\Documents\\My Projects\\Projects\\Desktop App Development\\Oto Desktop Music Player\\public\\images\\history-playlist-icon.png',
+				},
+				{
+					name: 'Favorites',
+					playlistId: 'Favorites',
+					createdDate: new Date(),
+					songs: [],
+					artworkPath:
+						'C:\\Users\\Sandakan Nipunajith\\OneDrive\\Documents\\My Projects\\Projects\\Desktop App Development\\Oto Desktop Music Player\\public\\images\\favorites-playlist-icon.png',
+				},
+			],
+		};
+		playlistDataStore.store = playlistDataTemplate as any;
+		return playlistDataTemplate.playlists;
+	}
+};
+
+export const setPlaylistData = async (updatedPlaylists: Playlist[]) => {
+	playlistDataStore.store = { playlists: updatedPlaylists };
+};
+
+export const updateSongListeningRate = async (songsData: SongData[], songId: string) => {
+	if (Array.isArray(songsData) && songId) {
+		songsData = songsData.map((songInfo) => {
+			if (songInfo.songId === songId) {
+				songInfo.listeningRate.allTime++;
+				if (songInfo.listeningRate.monthly.year === new Date().getFullYear()) {
+					songInfo.listeningRate.monthly.months[new Date().getMonth()]++;
+				} else {
+					songInfo.listeningRate.monthly.months = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+					songInfo.listeningRate.monthly.year = new Date().getFullYear();
+					songInfo.listeningRate.monthly.months[new Date().getMonth()]++;
+				}
+			}
+			return songInfo;
+		});
+		songDataStore.set('songs', songsData);
+	}
 };

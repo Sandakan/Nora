@@ -42,6 +42,28 @@ declare global {
 			name: string;
 			path: string;
 		};
+		albumId?: string;
+		artistsId?: string[];
+		listeningRate: {
+			allTime: number;
+			monthly: {
+				year: number;
+				months: [
+					number,
+					number,
+					number,
+					number,
+					number,
+					number,
+					number,
+					number,
+					number,
+					number,
+					number,
+					number
+				];
+			};
+		};
 	}
 
 	interface AudioData {
@@ -122,14 +144,21 @@ declare global {
 			lastModifiedDate: Date;
 			lastChangedDate: Date;
 			fileCreatedDate: Date;
+			lastParsedDate: Date;
 		};
 	}
 
 	interface Playlist {
 		name: string;
-		songs: [];
+		songs: string[];
+		createdDate: Date;
+		playlistId: string;
+		artworkPath?: string;
 	}
 
+	interface playlistDataTemplate {
+		playlists: Playlist[];
+	}
 	interface Data {
 		songs: SongData[];
 		albums: Album[];
@@ -184,5 +213,32 @@ declare global {
 	interface toggleLikeSongReturnValue {
 		error: string | null;
 		success: boolean;
+	}
+
+	interface ArtistInfoFromNetData {
+		data: ArtistInfoFromNet[];
+	}
+
+	interface ArtistInfoFromNet {
+		id: number;
+		name: string;
+		link: string;
+		picture: string;
+		picture_small: string;
+		picture_medium: string;
+		picture_big: string;
+		picture_xl: string;
+		nb_album: number;
+		nb_fan: string;
+		radio: boolean;
+		tracklist: string;
+		type: string;
+	}
+
+	interface ContextMenuItem {
+		label: string;
+		description?: string;
+		class?: string;
+		handler: (clickEvent: Event) => void;
 	}
 }
