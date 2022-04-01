@@ -1,6 +1,11 @@
 # Change Log
 
--  ### v0.0.2
+-  ### v0.1.1
+   -  Added a context menu option for songs to open them in the File Explorer.
+
+<br>
+
+-  ### v0.1.0
    -  Fixed bugs related to instant identification of newly added songs.
    -  Added a feature to monitor song listening patterns of the user for better shuffling
    -  Fixed some bugs in the search feature.

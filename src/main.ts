@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, autoUpdater, globalShortcut } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, autoUpdater, globalShortcut, shell } from 'electron';
 import path from 'path';
 import fs from 'fs/promises';
 import fsSync from 'fs';
@@ -129,6 +129,14 @@ app.whenReady().then(() => {
 	ipcMain.handle('app/addNewPlaylist', async (e, playlistName: string) =>
 		addNewPlaylist(playlistName)
 	);
+
+	ipcMain.on('revealSongInFileExplorer', async (e, songId: string) => {
+		const data = await getData();
+		const songs = data.songs;
+		for (const song of songs) {
+			if (song.songId === songId) return shell.showItemInFolder(song.path);
+		}
+	});
 
 	globalShortcut.register('F5', () => mainWindow.reload());
 

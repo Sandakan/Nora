@@ -45,6 +45,9 @@ const api = {
 	addNewPlaylist: (playlistName: string) => ipcRenderer.invoke('app/addNewPlaylist', playlistName),
 	// GET SONG INFO
 	getSongInfo: (songId: string) => ipcRenderer.invoke('app/getSongInfo', songId),
+
+	revealSongInFileExplorer: (songId: string) =>
+		ipcRenderer.send('revealSongInFileExplorer', songId),
 };
 
 contextBridge.exposeInMainWorld('api', api);

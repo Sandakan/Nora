@@ -1493,6 +1493,14 @@ const showContextMenu = () => {
 						},
 					},
 					{
+						label: 'Reveal in File Explorer',
+						class: 'reveal-file-explorer',
+						handler: () => {
+							if (contextMenuElement.dataset.songId)
+								window.api.revealSongInFileExplorer(contextMenuElement.dataset.songId);
+						},
+					},
+					{
 						label: 'Open Devtools',
 						class: 'option-open-devtools',
 						handler: () => window.api.openDevtools(),
