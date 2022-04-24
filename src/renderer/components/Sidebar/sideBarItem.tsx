@@ -1,0 +1,25 @@
+import React from 'react';
+
+interface SideBarItems {
+	id: number;
+	parentClassName: string;
+	childClassName: string;
+	content: string;
+	handleClick: (id: number) => any;
+}
+
+// const makeActive = (event: React.SyntheticEvent) => {
+// 	const sideBarItems = document.querySelectorAll('.side-bar > ul > li');
+// 	for (let x = 0; x < sideBarItems.length; x++) {
+// 		sideBarItems[x].classList.remove('active');
+// 	}
+// 	event.currentTarget.classList.add('active');
+// };
+
+export const SideBarItem = (props: SideBarItems) => {
+	return (
+		<li className={props.parentClassName} onClick={() => props.handleClick(props.id)}>
+			<i className={props.childClassName}></i> {props.content}
+		</li>
+	);
+};
