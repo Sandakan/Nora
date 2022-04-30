@@ -26,8 +26,8 @@ interface SongControlsContainerProp {
   currentSongData: AudioData;
   userData?: UserData;
   playSong: (songId: string, startPlay: boolean) => void;
-  changeCurrentActivePage: (pageTitle: string) => void;
-  currentlyActivePage: string;
+  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
+  currentlyActivePage: { pageTitle: string; data?: any };
   // queue: Queue;
   // changeQueueCurrentSongIndex: (songIndex: number) => void;
   updateContextMenuData: (
@@ -144,6 +144,7 @@ export default (props: SongControlsContainerProp) => {
   }, []);
 
   React.useEffect(() => {
+    setIsLiked(props.currentSongData.isAFavorite);
     music.addEventListener('ended', () => {
       setIsPlaying(false);
       handleSkipForwardClick();
@@ -189,6 +190,7 @@ export default (props: SongControlsContainerProp) => {
   };
 
   const handleSkipBackwardClick = () => {
+    music.currentTime = 0;
     // const { queue, currentSongIndex } = props.queue;
     // if (music.currentTime > 5) music.currentTime = 0;
     // else {
@@ -239,27 +241,31 @@ export default (props: SongControlsContainerProp) => {
               props.currentSongData.title ? props.currentSongData.title : ''
             }
             onClick={() =>
-              props.currentlyActivePage === 'Lyrics'
+              props.currentlyActivePage.pageTitle === 'SongInfo'
                 ? props.changeCurrentActivePage('Home')
                 : props.changeCurrentActivePage('SongInfo')
             }
           >
             {props.currentSongData.title ? props.currentSongData.title : ''}
           </div>
-          <div
-            className="song-artists"
-            id="currentSongArtists"
-            title={
-              Array.isArray(props.currentSongData.artists)
-                ? props.currentSongData.artists.join(', ')
-                : props.currentSongData.artists
-            }
-          >
+          <div className="song-artists" id="currentSongArtists">
             {props.currentSongData.artists ? (
               Array.isArray(props.currentSongData.artists) ? (
                 props.currentSongData.artists.map((artist, index) => (
                   <>
-                    <span className="artist" key={index}>
+                    <span
+                      className="artist"
+                      key={index}
+                      title={artist}
+                      onClick={() =>
+                        props.currentlyActivePage.pageTitle === 'ArtistInfo' &&
+                        props.currentlyActivePage.data.artistName === artist
+                          ? props.changeCurrentActivePage('Home')
+                          : props.changeCurrentActivePage('ArtistInfo', {
+                              artistName: artist,
+                            })
+                      }
+                    >
                       {artist}
                     </span>
                     {props.currentSongData.artists.length === 0 ||
@@ -269,7 +275,9 @@ export default (props: SongControlsContainerProp) => {
                   </>
                 ))
               ) : (
-                <span className="artist">{props.currentSongData.artists}</span>
+                <span className="artist" title={props.currentSongData.artists}>
+                  {props.currentSongData.artists}
+                </span>
               )
             ) : (
               ''
@@ -318,14 +326,14 @@ export default (props: SongControlsContainerProp) => {
           </div>
           <div
             className={`lyrics-btn ${
-              props.currentlyActivePage === 'Lyrics' && 'active'
+              props.currentlyActivePage.pageTitle === 'Lyrics' && 'active'
             }`}
           >
             <i
               title="Lyrics"
               className="fa-solid fa-music"
               onClick={() =>
-                props.currentlyActivePage === 'Lyrics'
+                props.currentlyActivePage.pageTitle === 'Lyrics'
                   ? props.changeCurrentActivePage('Home')
                   : props.changeCurrentActivePage('Lyrics')
               }
@@ -374,14 +382,14 @@ export default (props: SongControlsContainerProp) => {
         </div>
         <div
           className={`queue-btn ${
-            props.currentlyActivePage === 'CurrentQueue' && 'active'
+            props.currentlyActivePage.pageTitle === 'CurrentQueue' && 'active'
           }`}
         >
           <i
             title="Current Queue"
             className="fa-solid fa-play"
             onClick={() =>
-              props.currentlyActivePage === 'CurrentQueue'
+              props.currentlyActivePage.pageTitle === 'CurrentQueue'
                 ? props.changeCurrentActivePage('Home')
                 : props.changeCurrentActivePage('CurrentQueue')
             }

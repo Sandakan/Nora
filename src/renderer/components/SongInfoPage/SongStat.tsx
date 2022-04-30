@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/destructuring-assignment */
-import React from 'react';
+import { ReactElement } from 'react';
 
 interface SongStatProp {
   title: string;
-  value: number | string;
+  value: number | string | ReactElement<any, any>;
 }
 
 export default (props: SongStatProp) => {

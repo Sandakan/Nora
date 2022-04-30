@@ -9,8 +9,8 @@ import DialogMenu from './DialogMenu/DialogMenu';
 interface BodyAndSidebar {
   playSong: (url: string) => void;
   currentSongData: AudioData;
-  changeCurrentActivePage: (pageTitle: string) => void;
-  currentlyActivePage: string;
+  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
+  currentlyActivePage: { pageTitle: string; data?: any };
   changePromptMenuData: (
     isVisible?: boolean,
     content?: ReactElement<any, any>

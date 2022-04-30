@@ -1,3 +1,4 @@
+/* eslint-disable promise/no-promise-in-callback */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable global-require */
 /* eslint-disable promise/no-callback-in-promise */
@@ -38,6 +39,7 @@ import * as musicMetaData from 'music-metadata';
 // import lyricsFinder from 'lyrics-finder';
 import songLyrics from 'songlyrics';
 import httpsGet from 'simple-get';
+import nodeVibrant from 'node-vibrant';
 
 import { logger } from './logger';
 import {
@@ -201,7 +203,7 @@ app.whenReady().then(() => {
 
   ipcMain.handle(
     'app/getArtistData',
-    async (_e, artistId: string) => await getArtistData(artistId)
+    async (_e, artistIdOrName: string) => await getArtistData(artistIdOrName)
   );
 
   ipcMain.handle(
@@ -436,14 +438,14 @@ export const sendNewSong = (songs: SongData[]) => {
 const getArtistInfoFromNet = (
   artistId: string,
   artistName?: string
-): Promise<ArtistInfoFromNetData | undefined> => {
+): Promise<ArtistInfoFromNet | undefined> => {
   return new Promise(async (resolve, reject) => {
     if (artistName) {
-      httpsGet.concat(
+      return httpsGet.concat(
         `https://api.deezer.com/search/artist?q=${artistName}`,
         (err, _res, data) => {
           if (err) return reject(err);
-          resolve(JSON.parse(data.toString('utf-8')) as any);
+          return resolve(JSON.parse(data.toString('utf-8')) as any);
         }
       );
     } else if (artistId && artistId !== '') {
@@ -453,10 +455,52 @@ const getArtistInfoFromNet = (
         for (const artist of artists) {
           if (artist.artistId === artistId) {
             return httpsGet.concat(
-              `https://api.deezer.com/search/artist?q=${artist.name}`,
+              `https://api.deezer.com/search/artist?q=${encodeURI(
+                artist.name
+              )}`,
               (err, _res, data) => {
-                if (err) reject(err);
-                resolve(JSON.parse(data.toString('utf-8')));
+                if (err) return reject(undefined);
+                const arr = JSON.parse(data.toString('utf-8')) as {
+                  data: ArtistInfoFromNet[];
+                };
+                // console.log(arr);
+                nodeVibrant
+                  .from(arr.data[0].picture_medium)
+                  .getPalette()
+                  .then((palette) => {
+                    // console.log(palette);
+                    const res = arr.data[0];
+                    httpsGet.concat(
+                      `http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=${artist.name}&api_key=0aac0c7edaf4797bcc63bd8688b43b30&format=json`,
+                      (err, _res, data) => {
+                        if (err)
+                          return resolve({
+                            ...res,
+                            artistPalette:
+                              palette as unknown as NodeVibrantPalette,
+                          });
+                        const response = JSON.parse(
+                          data.toString('utf-8')
+                        ) as LastFMArtistDataApi;
+                        if (response.error)
+                          return resolve({
+                            ...res,
+                            artistPalette:
+                              palette as unknown as NodeVibrantPalette,
+                          });
+                        else {
+                          const artistBio = response.artist.bio.summary;
+                          resolve({
+                            ...res,
+                            artistPalette:
+                              palette as unknown as NodeVibrantPalette,
+                            artistBio,
+                          });
+                        }
+                      }
+                    );
+                  });
+                // resolve(data ? JSON.parse(data.toString('utf-8')) : undefined);
               }
             );
           }
@@ -466,15 +510,19 @@ const getArtistInfoFromNet = (
   });
 };
 
-const getArtistData = async (artistId = '*') => {
-  if (artistId) {
+const getArtistData = async (artistIdOrName = '*') => {
+  if (artistIdOrName) {
     const data = await getData();
     if (data && data.artists) {
       const artists = data.artists;
-      if (artistId === '*') return artists;
+      if (artistIdOrName === '*') return artists;
       else {
         for (const artist of artists) {
-          if (artist.artistId === artistId) return artist;
+          if (
+            artist.artistId === artistIdOrName ||
+            artist.name === artistIdOrName
+          )
+            return artist;
         }
         return undefined;
       }

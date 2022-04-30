@@ -4,7 +4,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
-import React from 'react';
+// import React from 'react';
 import ContextMenuItem from './ContextMenuItem';
 
 interface ContextMenuProp {

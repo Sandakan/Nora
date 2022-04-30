@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react/destructuring-assignment */
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable react/self-closing-comp */
@@ -5,7 +7,12 @@
 import React from 'react';
 import { Album } from './Album';
 
-export const AlbumsPage = () => {
+interface AlbumsPageProp {
+  currentlyActivePage: { pageTitle: string; data?: any };
+  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
+}
+
+export const AlbumsPage = (props: AlbumsPageProp) => {
   const [albums, setAlbums] = React.useState([
     {
       title: 'unknown album',
@@ -31,6 +38,8 @@ export const AlbumsPage = () => {
       artists={album.artists}
       songs={album.songs}
       year={album.year}
+      changeCurrentActivePage={props.changeCurrentActivePage}
+      currentlyActivePage={props.currentlyActivePage}
     />
   ));
   return (

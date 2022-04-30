@@ -71,7 +71,7 @@ export const parseSong = async (absoluteFilePath: string) => {
             ? metadata.common.artists.length === 1
               ? metadata.common.artists[0].split(',').map((x) => x.trim())
               : metadata.common.artists
-            : ['Unknown Artist'],
+            : [],
           duration: metadata.format.duration || 0,
           sampleRate: metadata.format.sampleRate,
           album: metadata.common.album || 'Single',
@@ -134,10 +134,12 @@ export const parseSong = async (absoluteFilePath: string) => {
         // 	: data.albums;
 
         const manageAlbums = () => {
+          const relevantAlbums: Album[] = [];
+          // const allAlbums: Album[] = [];
           if (metadata.common.album) {
             if (Array.isArray(data.albums)) {
               if (isAlbumAvailable(data.albums, metadata.common.album)) {
-                return data.albums.map((album) => {
+                const allAlbums = data.albums.map((album) => {
                   if (
                     metadata.common.album &&
                     metadata.common.album === album.title
@@ -147,9 +149,11 @@ export const parseSong = async (absoluteFilePath: string) => {
                       songId: songInfo.songId,
                     });
                     songInfo.albumId = album.albumId;
+                    relevantAlbums.push(album);
                     return album;
                   } else return album;
                 });
+                return { allAlbums, relevantAlbums, newAlbums: [] };
               } else {
                 const { allAlbums, newAlbum } = addNewAlbum(data.albums, {
                   title: metadata.common.album,
@@ -165,13 +169,24 @@ export const parseSong = async (absoluteFilePath: string) => {
                   ],
                 });
                 songInfo.albumId = newAlbum.albumId;
-                return allAlbums;
+                // return allAlbums;
+                relevantAlbums.push(newAlbum);
+                return {
+                  allAlbums,
+                  relevantAlbums,
+                  newAlbums: newAlbum,
+                };
               }
-            } else return [];
-          } else return data.albums;
+            } else return { allAlbums: [], relevantAlbums, newAlbums: [] };
+          } else
+            return {
+              allAlbums: data.albums,
+              relevantAlbums: [],
+              newAlbums: [],
+            };
         };
 
-        const albums = manageAlbums();
+        const { allAlbums, newAlbums, relevantAlbums } = manageAlbums();
 
         const manageArtists = () => {
           let result = data.artists;
@@ -187,6 +202,14 @@ export const parseSong = async (absoluteFilePath: string) => {
                       title: songInfo.title,
                       songId: songInfo.songId,
                     });
+                    if (relevantAlbums.length > 0) {
+                      relevantAlbums.forEach((relevantAlbum) =>
+                        artist.albums.push({
+                          title: relevantAlbum.title,
+                          albumId: relevantAlbum.albumId,
+                        })
+                      );
+                    }
                     relevantArtists.push(artist);
                     return artist;
                   });
@@ -204,6 +227,15 @@ export const parseSong = async (absoluteFilePath: string) => {
                       },
                     ],
                     artworkPath: songInfo.artworkPath || undefined,
+                    albums:
+                      relevantAlbums.length > 0
+                        ? [
+                            {
+                              title: relevantAlbums[0].title,
+                              albumId: relevantAlbums[0].albumId,
+                            },
+                          ]
+                        : [],
                   };
                   relevantArtists.push(artist);
                   result.push(artist);
@@ -214,7 +246,9 @@ export const parseSong = async (absoluteFilePath: string) => {
           } else return { allArtists: [], newArtists, relevantArtists };
         };
         const { allArtists, newArtists, relevantArtists } = manageArtists();
-        songInfo.artistsId = newArtists.map((newArtist) => newArtist.artistId);
+        songInfo.artistsId = relevantArtists.map(
+          (newArtist) => newArtist.artistId
+        );
         const artists = allArtists;
 
         // const manageSongData = () => {
@@ -224,7 +258,7 @@ export const parseSong = async (absoluteFilePath: string) => {
         // };
 
         data.songs.push(songInfo);
-        await setData({ songs: data.songs, artists, albums });
+        await setData({ songs: data.songs, artists, albums: allAlbums });
         return songInfo;
       })
       .catch((err) => logger(err));

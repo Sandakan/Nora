@@ -47,7 +47,10 @@ function App() {
     pageX: 200,
     pageY: 200,
   });
-  const [currentlyActivePage, setCurrentlyActivePage] = React.useState('Home');
+  const [currentlyActivePage, setCurrentlyActivePage] = React.useState({
+    pageTitle: 'Home',
+    data: {} as any,
+  });
 
   const updateContextMenuData = (
     isVisible: boolean,
@@ -74,27 +77,34 @@ function App() {
     );
   }, []);
 
-  const changeCurrentActivePage = (pageClass: string) =>
-    setCurrentlyActivePage(pageClass);
+  const changeCurrentActivePage = (pageClass: string, data?: object) =>
+    setCurrentlyActivePage((prevData) => {
+      return {
+        pageTitle: pageClass,
+        data: data || prevData.data,
+      };
+    });
 
   const playSong = (songId: string, isStartPlay = true) => {
     // console.log('isStartPlay', isStartPlay, startPlay);
     if (isStartPlay !== startPlay) setStartPlay(isStartPlay);
-    window.api.getSong(songId).then((songData) => {
-      if (typeof songData === 'object') {
-        console.log('playSong', songId, songData.path);
-        setCurrentSongData(songData);
-        window.api.saveUserData('currentSong.songId', songData.songId);
-        // if (queue.queue.length > 0 && queue.queue.includes(songData.songId)) {
-        //   setQueue((prevQueueData) => {
-        //     return {
-        //       ...prevQueueData,
-        //       currentSongIndex: queue.queue.indexOf(songData.songId),
-        //     };
-        //   });
-        // }
-      } else console.log(songData);
-    });
+    if (currentSongData.songId === songId) setStartPlay(true);
+    else
+      window.api.getSong(songId).then((songData) => {
+        if (typeof songData === 'object') {
+          console.log('playSong', songId, songData.path);
+          setCurrentSongData(songData);
+          window.api.saveUserData('currentSong.songId', songData.songId);
+          // if (queue.queue.length > 0 && queue.queue.includes(songData.songId)) {
+          //   setQueue((prevQueueData) => {
+          //     return {
+          //       ...prevQueueData,
+          //       currentSongIndex: queue.queue.indexOf(songData.songId),
+          //     };
+          //   });
+          // }
+        } else console.log(songData);
+      });
   };
 
   // const createQueue = (songsData: AudioInfo[], startPlaying = false) => {

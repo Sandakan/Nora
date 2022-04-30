@@ -108,6 +108,20 @@ export default (props: SongInfoProp) => {
                 : '0'
             }
           />
+          <SongStat
+            title={
+              songInfo.isAFavorite
+                ? 'You loved this song'
+                : "You didn't like this song"
+            }
+            value={
+              <span
+                className={`fa-${
+                  songInfo.isAFavorite ? 'solid' : 'regular'
+                } fa-heart ${songInfo.isAFavorite && 'liked'}`}
+              ></span>
+            }
+          />
         </div>
       )}
     </div>

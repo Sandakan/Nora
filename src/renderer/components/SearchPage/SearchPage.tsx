@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-autofocus */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable no-else-return */
@@ -18,6 +19,14 @@ import { ResultFilter } from './ResultFilter';
 interface SearchPageProp {
   playSong: (songId: string) => void;
   currentSongData: AudioData;
+  updateContextMenuData: (
+    isVisible: boolean,
+    menuItems: any[],
+    pageX?: number,
+    pageY?: number
+  ) => void;
+  currentlyActivePage: { pageTitle: string; data?: any };
+  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
 }
 
 export const SearchPage = (props: SearchPageProp) => {
@@ -67,6 +76,21 @@ export const SearchPage = (props: SearchPageProp) => {
         infoType1={firstResult.artists}
         infoType2={firstResult.album}
         playSong={props.playSong}
+        updateContextMenuData={props.updateContextMenuData}
+        contextMenuItems={[
+          {
+            label: 'Play',
+            handlerFunction: () => props.playSong(props.currentSongData.songId),
+          },
+          {
+            label: 'Reveal in File Explorer',
+            class: 'reveal-file-explorer',
+            handlerFunction: () =>
+              window.api.revealSongInFileExplorer(props.currentSongData.songId),
+          },
+        ]}
+        currentlyActivePage={props.currentlyActivePage}
+        changeCurrentActivePage={props.changeCurrentActivePage}
       />
     );
 
@@ -84,6 +108,9 @@ export const SearchPage = (props: SearchPageProp) => {
               songId={song.songId}
               playSong={props.playSong}
               currentSongData={props.currentSongData}
+              updateContextMenuData={props.updateContextMenuData}
+              currentlyActivePage={props.currentlyActivePage}
+              changeCurrentActivePage={props.changeCurrentActivePage}
             />
           );
         else return undefined;
@@ -102,6 +129,10 @@ export const SearchPage = (props: SearchPageProp) => {
         infoType1={`${firstResult.songs.length} song${
           firstResult.songs.length === 1 ? '' : 's'
         }`}
+        updateContextMenuData={props.updateContextMenuData}
+        contextMenuItems={[]}
+        currentlyActivePage={props.currentlyActivePage}
+        changeCurrentActivePage={props.changeCurrentActivePage}
       />
     );
 
@@ -113,6 +144,8 @@ export const SearchPage = (props: SearchPageProp) => {
               key={artist.artistId}
               name={artist.name}
               artworkPath={artist.artworkPath}
+              changeCurrentActivePage={props.changeCurrentActivePage}
+              currentlyActivePage={props.currentlyActivePage}
             />
           );
         else return undefined;
@@ -132,6 +165,10 @@ export const SearchPage = (props: SearchPageProp) => {
         infoType2={`${firstResult.songs.length} song${
           firstResult.songs.length === 1 ? '' : 's'
         }`}
+        updateContextMenuData={props.updateContextMenuData}
+        contextMenuItems={[]}
+        currentlyActivePage={props.currentlyActivePage}
+        changeCurrentActivePage={props.changeCurrentActivePage}
       />
     );
 
@@ -147,6 +184,8 @@ export const SearchPage = (props: SearchPageProp) => {
               songs={album.songs}
               title={album.title}
               year={album.year}
+              changeCurrentActivePage={props.changeCurrentActivePage}
+              currentlyActivePage={props.currentlyActivePage}
             />
           );
         else return undefined;
@@ -167,6 +206,7 @@ export const SearchPage = (props: SearchPageProp) => {
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           onKeyPress={(e) => e.stopPropagation()}
+          autoFocus
         />
       </div>
       <div className="search-filters-container">

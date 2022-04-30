@@ -293,7 +293,7 @@ span.close-btn:hover {
   background-color: transparent;
   position: relative;
   overflow: auto;
-  padding: 1em;
+  padding: 0 0 1em 0;
   order: 1;
 }
 
@@ -631,6 +631,7 @@ body .no-songs-container {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .secondary-container.albums-list-container {
@@ -1425,7 +1426,7 @@ input[type='search']::placeholder {
   max-width: 15rem;
   height: 6rem;
   margin-right: 1rem;
-  margin-top: 0.5rem;
+  margin-top: 1rem;
   border-radius: 1rem;
   background-color: var(--background-color-2);
   display: flex;
@@ -1455,6 +1456,112 @@ input[type='search']::placeholder {
 
 .stat .stat-description {
   font-size: 1.25rem;
+}
+
+/* ? / / / / / /  ARTIST INFO PAGE   / / / / / / / / */
+.artist-info-page-container {
+  background-repeat: no-repeat;
+  background-size: cover;
+  padding: 2rem 0.5rem 0.5rem 0.5rem;
+  border-radius: 0.5rem 0 0 0;
+  -webkit-border-radius: 0.5rem 0.5rem 0 0;
+  -moz-border-radius: 0.5rem 0 0 0;
+  -ms-border-radius: 0.5rem 0 0 0;
+  -o-border-radius: 0.5rem 0 0 0;
+}
+
+.artist-img-and-info-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: 2rem;
+  margin-bottom: 3rem;
+}
+
+.artist-bio-container {
+  margin: 1rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  -webkit-border-radius: 0.5rem;
+  -moz-border-radius: 0.5rem;
+  -ms-border-radius: 0.5rem;
+  -o-border-radius: 0.5rem;
+  color: var(--text-color);
+  background: var(--background-color-2);
+}
+
+.artist-img-and-info-container .artist-img-container {
+  margin-right: 2.5rem;
+}
+
+.artist-img-and-info-container .artist-img-container img {
+  border-radius: 50%;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  -ms-border-radius: 50%;
+  -o-border-radius: 50%;
+  width: 15rem;
+}
+
+.artist-img-and-info-container .artist-info-container {
+  color: var(--text-color);
+}
+
+.artist-img-and-info-container .artist-info-container .artist-name {
+  font-size: 3.25rem;
+  color: var(--background-color-3);
+}
+
+/* ? / / / / / /  ALBUM INFO PAGE   / / / / / / / / */
+
+.album-info-page-container {
+  padding: 2rem;
+}
+
+.album-info-page-container .album-img-and-info-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.album-img-and-info-container .album-cover-container {
+  margin-right: 2rem;
+}
+
+.album-img-and-info-container .album-cover-container img {
+  width: 15rem;
+  border-radius: 1rem;
+  -webkit-border-radius: 1rem;
+  -moz-border-radius: 1rem;
+  -ms-border-radius: 1rem;
+  -o-border-radius: 1rem;
+}
+
+.album-img-and-info-container .album-info-container {
+  color: var(--text-color);
+}
+
+.album-img-and-info-container .album-info-container .album-title {
+  font-size: 3rem;
+}
+
+.album-img-and-info-container .album-info-container .album-artists {
+  font-size: 1.25rem;
+}
+
+.album-img-and-info-container .album-info-container .album-no-of-songs {
+  font-size: 1rem;
+}
+
+.album-songs-container {
+  margin-top: 2rem;
+}
+
+.album-info-container :is(.album-title, .album-artists, .album-no-of-songs) {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ? / / / / / /  FOOTER   / / / / / / / / */
@@ -1527,11 +1634,13 @@ input[type='search']::placeholder {
   cursor: pointer;
 }
 
-.song-artists .artist {
+.song-artists .artist,
+.album-artists .artist {
   width: fit-content;
   height: unset;
   display: inline;
   margin: 0;
+  cursor: pointer;
 }
 
 :is(.song-title, .song-artists .artist):hover {

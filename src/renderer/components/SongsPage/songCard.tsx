@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/require-default-props */
@@ -7,7 +8,7 @@
 /* eslint-disable react/no-unused-prop-types */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
-import React from 'react';
+// import React from 'react';
 
 interface SongCardProp {
   songId: string;
@@ -18,11 +19,11 @@ interface SongCardProp {
   duration: number;
   palette?: {
     DarkVibrant: {
-      _rgb: any;
+      _rgb?: any;
       rgb?: any;
     };
     LightVibrant: {
-      _rgb: any;
+      _rgb?: any;
       rgb?: any;
     };
   };
@@ -33,6 +34,8 @@ interface SongCardProp {
     pageX?: number,
     pageY?: number
   ) => void;
+  currentlyActivePage: { pageTitle: string; data?: any };
+  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
 }
 
 export const SongCard = (props: SongCardProp) => {
@@ -92,7 +95,23 @@ export const SongCard = (props: SongCardProp) => {
             title={props.artists.join(', ')}
             data-song-id={props.songId}
           >
-            {props.artists.join(', ')}
+            {props.artists.map((artist, index) => (
+              <span
+                className="artist"
+                key={artist}
+                onClick={() =>
+                  props.currentlyActivePage.pageTitle === 'ArtistInfo' &&
+                  props.currentlyActivePage.data.artistName === artist
+                    ? props.changeCurrentActivePage('Home')
+                    : props.changeCurrentActivePage('ArtistInfo', {
+                        artistName: artist,
+                      })
+                }
+              >
+                {artist}
+                {index === props.artists.length - 1 ? '' : ', '}
+              </span>
+            ))}
           </div>
         </div>
         <div className="play-btn-container">

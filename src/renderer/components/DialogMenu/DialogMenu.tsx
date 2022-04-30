@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/self-closing-comp */
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 
 interface DialogMenuProp {
   data: DialogMenuData;

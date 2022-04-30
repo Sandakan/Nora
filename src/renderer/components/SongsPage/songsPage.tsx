@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/no-unused-prop-types */
@@ -17,6 +18,8 @@ interface SongsPageProp {
     pageX?: number,
     pageY?: number
   ) => void;
+  currentlyActivePage: { pageTitle: string; data?: any };
+  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
   // queue: Queue;
   // updateQueueData: (currentSongIndex?: number, queue?: string[]) => void;
 }
@@ -37,6 +40,8 @@ export const SongsPage = (props: SongsPageProp) => {
         playSong={props.playSong}
         currentSongData={props.currentSongData}
         updateContextMenuData={props.updateContextMenuData}
+        changeCurrentActivePage={props.changeCurrentActivePage}
+        currentlyActivePage={props.currentlyActivePage}
         // updateQueueData={props.updateQueueData}
         // queue={props.queue}
       />

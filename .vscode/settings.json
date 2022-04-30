@@ -1,12 +1,5 @@
 {
-  "cSpell.words": [
-    "RIELL",
-    "unmaximize",
-    "xmark",
-    "Yosef",
-    "unmaximize",
-    "xmark"
-  ],
+  "cSpell.words": ["Deezer", "RIELL", "unmaximize", "xmark", "Yosef"],
   "files.associations": {
     ".eslintrc": "jsonc",
     ".prettierrc": "jsonc",

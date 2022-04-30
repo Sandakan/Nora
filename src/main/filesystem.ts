@@ -128,7 +128,7 @@ export const setUserData = async (dataType: UserDataType, data: any) => {
       const val = userData.recentlyPlayedSongs.filter(
         (x) => x.songId !== data.songId
       );
-      if (val.length >= 3) val.pop();
+      if (val.length >= 5) val.pop();
       val.unshift(data);
       userData.recentlyPlayedSongs = val;
     }

@@ -10,8 +10,11 @@ export const api = {
   addMusicFolder: (): Promise<SongData[]> =>
     ipcRenderer.invoke('app/addMusicFolder'),
   // GET SONG DATA
-  getSong: (songId: string): Promise<SongData | string> =>
-    ipcRenderer.invoke('app/getSong', songId),
+  getSong: (
+    songId: string,
+    updateListeningRate = true
+  ): Promise<SongData | string> =>
+    ipcRenderer.invoke('app/getSong', songId, updateListeningRate),
   // CHECK FOR SONGS ON APP STARTUP
   checkForSongs: (): Promise<AudioInfo[] | undefined> =>
     ipcRenderer.invoke('app/checkForSongs'),
@@ -45,11 +48,16 @@ export const api = {
   ): Promise<ToggleLikeSongReturnValue | undefined> =>
     ipcRenderer.invoke('app/toggleLikeSong', songId, likeSong),
   // GET ARTISTS ARTWORKS
-  getArtistArtworks: (artistId: string, artistName?: string) =>
+  getArtistArtworks: (
+    artistId: string,
+    artistName?: string
+  ): Promise<ArtistInfoFromNet | undefined> =>
     ipcRenderer.invoke('app/getArtistArtworks', artistId, artistName),
   // GET ARTIST DATA
-  getArtistData: (artistId: string): Promise<Artist | Artist[] | undefined> =>
-    ipcRenderer.invoke('app/getArtistData', artistId),
+  getArtistData: (
+    artistIdOrName: string
+  ): Promise<Artist | Artist[] | undefined> =>
+    ipcRenderer.invoke('app/getArtistData', artistIdOrName),
   getAlbumData: (albumId: string): Promise<Album | Album[] | undefined> =>
     ipcRenderer.invoke('app/getAlbumData', albumId),
   // GET PLAYLIST DATA

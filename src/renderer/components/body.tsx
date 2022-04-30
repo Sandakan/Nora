@@ -13,12 +13,14 @@ import { SettingsPage } from './SettingsPage/SettingsPage';
 import { LyricsPage } from './LyricsPage/LyricsPage';
 import CurrentQueuePage from './CurrentQueuePage/CurrentQueuePage';
 import SongInfoPage from './SongInfoPage/SongInfoPage';
+import ArtistInfoPage from './ArtistInfoPage/ArtistInfoPage';
+import AlbumInfoPage from './AlbumInfoPage/AlbumInfoPage';
 
 interface BodyProp {
-  currentlyActivePage: string;
+  currentlyActivePage: { pageTitle: string; data?: any };
   currentSongData: AudioData;
   playSong: (songId: string) => void;
-  changeCurrentActivePage: (pageTitle: string) => void;
+  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
   changePromptMenuData: (
     isVisible: boolean,
     content: ReactElement<any, any>
@@ -41,54 +43,92 @@ interface BodyProp {
 export const Body = (props: BodyProp) => {
   return (
     <div className="body">
-      {props.currentlyActivePage === 'Songs' && (
+      {props.currentlyActivePage.pageTitle === 'Songs' && (
         <SongsPage
           playSong={props.playSong}
           currentSongData={props.currentSongData}
           updateContextMenuData={props.updateContextMenuData}
+          changeCurrentActivePage={props.changeCurrentActivePage}
+          currentlyActivePage={props.currentlyActivePage}
           // updateQueueData={props.updateQueueData}
           // queue={props.queue}
         />
       )}
-      {props.currentlyActivePage === 'Home' && (
+      {props.currentlyActivePage.pageTitle === 'Home' && (
         <HomePage
           playSong={props.playSong}
           updateContextMenuData={props.updateContextMenuData}
+          changeCurrentActivePage={props.changeCurrentActivePage}
+          currentlyActivePage={props.currentlyActivePage}
           // updateQueueData={props.updateQueueData}
           // queue={props.queue}
         />
       )}
-      {props.currentlyActivePage === 'Artists' && <ArtistPage />}
-      {props.currentlyActivePage === 'Albums' && <AlbumsPage />}
-      {props.currentlyActivePage === 'Playlists' && (
+      {props.currentlyActivePage.pageTitle === 'Artists' && (
+        <ArtistPage
+          changeCurrentActivePage={props.changeCurrentActivePage}
+          currentlyActivePage={props.currentlyActivePage}
+        />
+      )}
+      {props.currentlyActivePage.pageTitle === 'Albums' && (
+        <AlbumsPage
+          changeCurrentActivePage={props.changeCurrentActivePage}
+          currentlyActivePage={props.currentlyActivePage}
+        />
+      )}
+      {props.currentlyActivePage.pageTitle === 'Playlists' && (
         <PlaylistsPage
           changePromptMenuData={props.changePromptMenuData}
           updateDialogMenuData={props.updateDialogMenuData}
         />
       )}
-      {props.currentlyActivePage === 'Search' && (
+      {props.currentlyActivePage.pageTitle === 'Search' && (
         <SearchPage
           playSong={props.playSong}
           currentSongData={props.currentSongData}
+          updateContextMenuData={props.updateContextMenuData}
+          currentlyActivePage={props.currentlyActivePage}
+          changeCurrentActivePage={props.changeCurrentActivePage}
         />
       )}
-      {props.currentlyActivePage === 'Settings' && <SettingsPage />}
-      {props.currentlyActivePage === 'Lyrics' && (
+      {props.currentlyActivePage.pageTitle === 'Settings' && <SettingsPage />}
+      {props.currentlyActivePage.pageTitle === 'Lyrics' && (
         <LyricsPage
           songTitle={props.currentSongData.title}
           songArtists={props.currentSongData.artists}
         />
       )}
-      {/* {props.currentlyActivePage === 'CurrentQueue' && (
+      {/* {props.currentlyActivePage.pageTitle === 'CurrentQueue' && (
         <CurrentQueuePage
           queue={props.queue}
           currentSongData={props.currentSongData}
           playSong={props.playSong}
         />
       )} */}
-      {props.currentlyActivePage === 'SongInfo' && (
+      {props.currentlyActivePage.pageTitle === 'SongInfo' && (
         <SongInfoPage currentSongData={props.currentSongData} />
       )}
+      {props.currentlyActivePage.pageTitle === 'ArtistInfo' && (
+        <ArtistInfoPage
+          data={props.currentlyActivePage.data}
+          playSong={props.playSong}
+          currentSongData={props.currentSongData}
+          updateContextMenuData={props.updateContextMenuData}
+          changeCurrentActivePage={props.changeCurrentActivePage}
+          currentlyActivePage={props.currentlyActivePage}
+        />
+      )}
+      {props.currentlyActivePage.pageTitle === 'AlbumInfo' &&
+        props.currentlyActivePage.data !== '' && (
+          <AlbumInfoPage
+            data={props.currentlyActivePage.data}
+            playSong={props.playSong}
+            currentSongData={props.currentSongData}
+            updateContextMenuData={props.updateContextMenuData}
+            changeCurrentActivePage={props.changeCurrentActivePage}
+            currentlyActivePage={props.currentlyActivePage}
+          />
+        )}
     </div>
   );
 };

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable promise/always-return */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable promise/catch-or-return */
@@ -8,6 +9,14 @@ interface CurrentQueuePageProp {
   queue: Queue;
   playSong: (songId: string) => void;
   currentSongData: AudioData;
+  updateContextMenuData: (
+    isVisible: boolean,
+    menuItems: any[],
+    pageX?: number,
+    pageY?: number
+  ) => void;
+  currentlyActivePage: { pageTitle: string; data?: any };
+  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
 }
 
 export default (props: CurrentQueuePageProp) => {
@@ -37,6 +46,9 @@ export default (props: CurrentQueuePageProp) => {
         path={queuedSong.path}
         playSong={props.playSong}
         currentSongData={props.currentSongData}
+        updateContextMenuData={props.updateContextMenuData}
+        changeCurrentActivePage={props.changeCurrentActivePage}
+        currentlyActivePage={props.currentlyActivePage}
       />
     );
   });

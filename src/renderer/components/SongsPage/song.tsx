@@ -29,6 +29,8 @@ interface SongData {
     pageX?: number,
     pageY?: number
   ) => void;
+  currentlyActivePage: { pageTitle: string; data?: any };
+  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
   // updateQueueData: (currentSongIndex?: number, queue?: string[]) => void;
   // queue: Queue;
 }
@@ -116,9 +118,21 @@ export const Song = (props: SongData) => {
         <div className="song-title" title={props.title}>
           {props.title}
         </div>
-        <div className="song-artists" title={props.artists.join('')}>
+        <div className="song-artists">
           {props.artists.map((artist, index) => (
-            <span className="artist" key={index}>
+            <span
+              className="artist"
+              key={index}
+              title={artist}
+              onClick={() =>
+                props.currentlyActivePage.pageTitle === 'ArtistInfo' &&
+                props.currentlyActivePage.data.artistName === artist
+                  ? props.changeCurrentActivePage('Home')
+                  : props.changeCurrentActivePage('ArtistInfo', {
+                      artistName: artist,
+                    })
+              }
+            >
               {artist}
               {index === props.artists.length - 1 ? '' : ', '}
             </span>
