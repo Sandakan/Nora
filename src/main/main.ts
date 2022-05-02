@@ -57,8 +57,6 @@ import { parseSong } from './parseSong';
 import { generateRandomId } from './randomId';
 import { resolveHtmlPath } from './util';
 
-import appIcon from '../../assets/images/logo_light_mode.png';
-
 let mainWindow: BrowserWindow;
 
 const isDevelopment =
@@ -295,7 +293,7 @@ const sendAudioData = async (audioId: string) => {
                   '';
               await saveUserData('recentlyPlayedSongs', songInfo);
               await addToSongsHistory(songInfo.songId);
-              const data: PlayableAudioInfo = {
+              const data: AudioData = {
                 title: songInfo.title,
                 artists: songInfo.artists,
                 duration: songInfo.duration,
@@ -305,19 +303,21 @@ const sendAudioData = async (audioId: string) => {
                 path: songInfo.path,
                 songId: songInfo.songId,
                 isAFavorite: songInfo.isAFavorite,
+                album: songInfo.album,
               };
               await updateSongListeningRate(
                 jsonData.songs,
                 songInfo.songId
-              ).catch((err: Error) => console.log(err));
+              ).catch((err: Error) => logger(err));
               return data;
             }
           }
         }
-        return `no matching song for songID the songId "${audioId}"`;
-      } else logger(new Error(`jsonData error. ${jsonData}`));
+        console.log(`no matching song for songID the songId "${audioId}"`);
+        return undefined;
+      } else return await logger(new Error(`jsonData error. ${jsonData}`));
     } catch (err: any) {
-      logger(err);
+      return await logger(err);
     }
   });
 };
@@ -334,7 +334,7 @@ const checkForSongs = async () => {
             artworkPath: songInfo.artworkPath,
             path: songInfo.path,
             songId: songInfo.songId,
-            palette: songInfo.palette as any,
+            palette: songInfo.palette,
             modifiedDate: songInfo.modifiedDate,
           };
           return info;
@@ -428,7 +428,7 @@ const toggleLikeSong = async (songId: string, likeSong: boolean) => {
     });
     await setData(data);
     return result;
-  }
+  } else return result;
 };
 
 export const sendNewSong = (songs: SongData[]) => {
@@ -506,7 +506,7 @@ const getArtistInfoFromNet = (
           }
         }
       }
-    } else resolve(undefined);
+    } else return resolve(undefined);
   });
 };
 
@@ -674,7 +674,9 @@ const addToSongsHistory = (songId: string) => {
             playlist.playlistId === 'History'
           ) {
             if (playlist.songs.length + 1 > 50) playlist.songs.pop();
-            playlist.songs.push(songId);
+            if (playlist.songs.some((song) => song === songId))
+              playlist.songs = playlist.songs.filter((song) => song !== songId);
+            playlist.songs.unshift(songId);
             return playlist;
           }
           return playlist;
@@ -766,13 +768,12 @@ const removeAPlaylist = (
 
 const getSongInfo = async (songId: string) => {
   if (songId) {
-    const songsData = await getData().then(
-      (data) => data.songs,
-      (err) => {
-        console.log(err);
+    const songsData = await getData()
+      .then((data) => data.songs)
+      .catch((err) => {
+        logger(err);
         return undefined;
-      }
-    );
+      });
     if (Array.isArray(songsData)) {
       for (const songData of songsData) {
         if (songData.songId === songId) {
@@ -780,5 +781,6 @@ const getSongInfo = async (songId: string) => {
         }
       }
     }
-  }
+    return undefined;
+  } else return undefined;
 };

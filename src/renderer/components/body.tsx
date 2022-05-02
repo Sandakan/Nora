@@ -15,6 +15,7 @@ import CurrentQueuePage from './CurrentQueuePage/CurrentQueuePage';
 import SongInfoPage from './SongInfoPage/SongInfoPage';
 import ArtistInfoPage from './ArtistInfoPage/ArtistInfoPage';
 import AlbumInfoPage from './AlbumInfoPage/AlbumInfoPage';
+import PlaylistsInfoPage from './PlaylistsInfoPage/PlaylistsInfoPage';
 
 interface BodyProp {
   currentlyActivePage: { pageTitle: string; data?: any };
@@ -80,6 +81,8 @@ export const Body = (props: BodyProp) => {
         <PlaylistsPage
           changePromptMenuData={props.changePromptMenuData}
           updateDialogMenuData={props.updateDialogMenuData}
+          changeCurrentActivePage={props.changeCurrentActivePage}
+          currentlyActivePage={props.currentlyActivePage}
         />
       )}
       {props.currentlyActivePage.pageTitle === 'Search' && (
@@ -106,7 +109,11 @@ export const Body = (props: BodyProp) => {
         />
       )} */}
       {props.currentlyActivePage.pageTitle === 'SongInfo' && (
-        <SongInfoPage currentSongData={props.currentSongData} />
+        <SongInfoPage
+          currentSongData={props.currentSongData}
+          changeCurrentActivePage={props.changeCurrentActivePage}
+          currentlyActivePage={props.currentlyActivePage}
+        />
       )}
       {props.currentlyActivePage.pageTitle === 'ArtistInfo' && (
         <ArtistInfoPage
@@ -121,6 +128,17 @@ export const Body = (props: BodyProp) => {
       {props.currentlyActivePage.pageTitle === 'AlbumInfo' &&
         props.currentlyActivePage.data !== '' && (
           <AlbumInfoPage
+            data={props.currentlyActivePage.data}
+            playSong={props.playSong}
+            currentSongData={props.currentSongData}
+            updateContextMenuData={props.updateContextMenuData}
+            changeCurrentActivePage={props.changeCurrentActivePage}
+            currentlyActivePage={props.currentlyActivePage}
+          />
+        )}
+      {props.currentlyActivePage.pageTitle === 'PlaylistInfo' &&
+        props.currentlyActivePage.data !== '' && (
+          <PlaylistsInfoPage
             data={props.currentlyActivePage.data}
             playSong={props.playSong}
             currentSongData={props.currentSongData}

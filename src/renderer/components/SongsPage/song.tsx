@@ -17,7 +17,6 @@ import { calculateTime } from '../../calculateTime';
 interface SongData {
   songId: string;
   artworkPath?: string;
-  path: string;
   title: string;
   artists: string[];
   duration: number;
@@ -44,6 +43,17 @@ export const Song = (props: SongData) => {
       else return false;
     });
   }, [props.songId]);
+
+  const handlePlayBtnClick = () => {
+    setIsSongPlaying((prevState) => {
+      console.log('clicked songId', props.songId);
+      props.playSong(props.songId);
+      if (!prevState) {
+        return !prevState;
+      } else return !prevState;
+    });
+  };
+
   return (
     <div
       className={`song ${props.songId} ${isSongPlaying && 'playing'}`}
@@ -55,7 +65,7 @@ export const Song = (props: SongData) => {
           [
             {
               label: 'Play',
-              handlerFunction: () => props.playSong(props.songId),
+              handlerFunction: handlePlayBtnClick,
             },
             // {
             //   label: 'Play Next',
@@ -94,15 +104,7 @@ export const Song = (props: SongData) => {
         <div className="play-btn-container">
           <i
             className={`fa-solid fa-circle-${isSongPlaying ? 'pause' : 'play'}`}
-            onClick={() =>
-              setIsSongPlaying((prevState) => {
-                console.log('clicked songId', props.songId);
-                props.playSong(props.songId);
-                if (!prevState) {
-                  return !prevState;
-                } else return !prevState;
-              })
-            }
+            onClick={handlePlayBtnClick}
             style={isSongPlaying ? { color: `hsla(0,0%,100%,1)` } : {}}
           ></i>
         </div>
@@ -119,24 +121,26 @@ export const Song = (props: SongData) => {
           {props.title}
         </div>
         <div className="song-artists">
-          {props.artists.map((artist, index) => (
-            <span
-              className="artist"
-              key={index}
-              title={artist}
-              onClick={() =>
-                props.currentlyActivePage.pageTitle === 'ArtistInfo' &&
-                props.currentlyActivePage.data.artistName === artist
-                  ? props.changeCurrentActivePage('Home')
-                  : props.changeCurrentActivePage('ArtistInfo', {
-                      artistName: artist,
-                    })
-              }
-            >
-              {artist}
-              {index === props.artists.length - 1 ? '' : ', '}
-            </span>
-          ))}
+          {props.artists.length > 0 && props.artists[0] !== ''
+            ? props.artists.map((artist, index) => (
+                <span
+                  className="artist"
+                  key={index}
+                  title={artist}
+                  onClick={() =>
+                    props.currentlyActivePage.pageTitle === 'ArtistInfo' &&
+                    props.currentlyActivePage.data.artistName === artist
+                      ? props.changeCurrentActivePage('Home')
+                      : props.changeCurrentActivePage('ArtistInfo', {
+                          artistName: artist,
+                        })
+                  }
+                >
+                  {artist}
+                  {index === props.artists.length - 1 ? '' : ', '}
+                </span>
+              ))
+            : 'Unknown Artist'}
         </div>
         <div className="song-duration">
           {props.duration ? calculateTime(props.duration) : `-- : --`}

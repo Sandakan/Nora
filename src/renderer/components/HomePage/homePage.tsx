@@ -32,7 +32,7 @@ interface HomePageProp {
 }
 
 export const HomePage = (props: HomePageProp) => {
-  const songsData: SongData[] = [];
+  const songsData: AudioInfo[] = [];
   const recentPlayedSongs: SongData[] = [];
   const z: Artist[] = [];
   const [songData, setSongData] = React.useState(songsData);
@@ -66,7 +66,19 @@ export const HomePage = (props: HomePageProp) => {
 
   const addNewSongs = () => {
     window.api.addMusicFolder().then((songs) => {
-      setSongData(songs);
+      const relevantSongsData: AudioInfo[] = songs.map((song) => {
+        return {
+          title: song.title,
+          songId: song.songId,
+          artists: song.artists,
+          duration: song.duration,
+          palette: song.palette,
+          path: song.path,
+          artworkPath: song.artworkPath,
+          modifiedDate: song.modifiedDate,
+        };
+      });
+      setSongData(relevantSongsData);
     });
   };
 

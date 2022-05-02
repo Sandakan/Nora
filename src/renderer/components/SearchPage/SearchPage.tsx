@@ -104,7 +104,6 @@ export const SearchPage = (props: SearchPageProp) => {
               artists={song.artists}
               artworkPath={song.artworkPath}
               duration={song.duration}
-              path={song.path}
               songId={song.songId}
               playSong={props.playSong}
               currentSongData={props.currentSongData}

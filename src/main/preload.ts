@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/prefer-default-export */
 import { contextBridge, ipcRenderer } from 'electron';
 
@@ -13,7 +14,7 @@ export const api = {
   getSong: (
     songId: string,
     updateListeningRate = true
-  ): Promise<SongData | string> =>
+  ): Promise<AudioData | undefined> =>
     ipcRenderer.invoke('app/getSong', songId, updateListeningRate),
   // CHECK FOR SONGS ON APP STARTUP
   checkForSongs: (): Promise<AudioInfo[] | undefined> =>

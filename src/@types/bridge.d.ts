@@ -1,4 +1,4 @@
-import { PageTitleUpdatedEvent } from 'electron';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as musicMetaData from 'music-metadata';
 import { ReactElement } from 'react';
 import { api } from '../main/preload';
@@ -11,17 +11,6 @@ declare global {
     format: string;
     data: Buffer;
   }
-
-  // interface songInfo {
-  // 	title: string;
-  // 	artists: string[];
-  // 	duration: number | undefined;
-  // 	sampleRate: number | undefined;
-  // 	artworkPath?: string[] | string;
-  // 	palette?: unknown;
-  // 	path: string;
-  // 	songId: string;
-  // }
 
   interface SongData {
     songId: string;
@@ -77,16 +66,32 @@ declare global {
 
   interface AudioData {
     title: string;
-    duration?: number;
-    artists: string[] | string;
+    artists: string[];
+    duration: number;
     artwork?: string;
     artworkPath?: string;
-    palette?: unknown;
-    sampleRate?: number;
     path: string;
-    album?: string;
-    isAFavorite: boolean;
     songId: string;
+    isAFavorite: boolean;
+    album?: string;
+  }
+
+  interface AudioInfo {
+    title: string;
+    artists: string[];
+    duration: number;
+    artworkPath?: string;
+    path: string;
+    songId: string;
+    modifiedDate?: string;
+    palette?: {
+      DarkVibrant: {
+        rgb: unknown;
+      };
+      LightVibrant: {
+        rgb: unknown;
+      };
+    };
   }
 
   interface Queue {
@@ -102,34 +107,6 @@ declare global {
     artworkPath: string;
     duration: number;
     songId: string;
-  }
-
-  interface AudioInfo {
-    title: string;
-    artists: string[];
-    duration: number;
-    artworkPath?: string;
-    path: string;
-    songId: string;
-    modifiedDate?: string;
-    palette: {
-      DarkVibrant: {
-        _rgb: unknown;
-      };
-      LightVibrant: {
-        _rgb: unknown;
-      };
-    };
-  }
-  interface PlayableAudioInfo {
-    title: string;
-    artists: string[];
-    duration: number;
-    artwork?: string;
-    artworkPath?: string;
-    path: string;
-    songId: string;
-    isAFavorite: boolean;
   }
 
   interface UserData {
@@ -325,4 +302,6 @@ declare global {
     };
     error?: number;
   }
+
+  type SongsPageSortTypes = 'aToZ' | 'dateAdded' | 'artistName';
 }

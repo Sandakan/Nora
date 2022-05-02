@@ -1,5 +1,13 @@
 # Change Log
 
+- ### v0.3.0 - ( 02<sup>nd</sup> of May 2022 )
+  - Added function to sort songs, artists and albums.
+  - Added a PlaylistsInfoPage to display information related to playlists.
+  - Removed unnecessary react props to improve performance.
+  - Fixed some typescript type errors.
+
+<br>
+
 - ### v0.2.0 - ( 29<sup>th</sup> of April 2022 )
   - Added new styles for AlbumInfoPage, ArtistInfoPage, and updated some styles on other componenets.
   - Now ArtistInfoPage shows information of the artists from Deezer and Last.fm apis.

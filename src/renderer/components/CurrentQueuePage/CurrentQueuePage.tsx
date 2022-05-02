@@ -43,7 +43,6 @@ export default (props: CurrentQueuePageProp) => {
         artists={queuedSong.artists}
         artworkPath={queuedSong.artworkPath}
         duration={queuedSong.duration}
-        path={queuedSong.path}
         playSong={props.playSong}
         currentSongData={props.currentSongData}
         updateContextMenuData={props.updateContextMenuData}

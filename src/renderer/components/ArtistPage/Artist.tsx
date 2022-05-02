@@ -28,7 +28,7 @@ export const Artist = (props: ArtistProp) => {
       <div className="artist-info-container">
         <div
           className="name-container"
-          title={props.name}
+          title={props.name === '' ? 'Unknown Artist' : props.name}
           onClick={() =>
             props.currentlyActivePage.pageTitle === 'ArtistInfo' &&
             props.currentlyActivePage.data.artistName === props.name
@@ -38,7 +38,7 @@ export const Artist = (props: ArtistProp) => {
                 })
           }
         >
-          {props.name}
+          {props.name === '' ? 'Unknown Artist' : props.name}
         </div>
       </div>
     </div>

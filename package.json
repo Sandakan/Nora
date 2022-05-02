@@ -1,7 +1,7 @@
 {
   "name": "oto-music-for-desktop",
   "description": "An elegant music player built using Electron. Inspired by Oto Music for Android by Piyush Mamidwar.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.prod.ts",

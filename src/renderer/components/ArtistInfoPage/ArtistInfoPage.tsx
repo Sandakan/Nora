@@ -162,7 +162,6 @@ export default (props: ArtistInfoProp) => {
                   title={song.title}
                   artists={song.artists}
                   duration={song.duration}
-                  path={song.path}
                   songId={song.songId}
                   changeCurrentActivePage={props.changeCurrentActivePage}
                   currentlyActivePage={props.currentlyActivePage}

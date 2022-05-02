@@ -18,6 +18,8 @@ interface PlaylistsPageProp {
     delay: number,
     content: ReactElement<any, any>
   ) => void;
+  currentlyActivePage: { pageTitle: string; data?: any };
+  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
 }
 
 export const PlaylistsPage = (props: PlaylistsPageProp) => {
@@ -38,6 +40,8 @@ export const PlaylistsPage = (props: PlaylistsPageProp) => {
           songs={playlist.songs}
           artworkPath={playlist.artworkPath}
           key={playlist.playlistId}
+          changeCurrentActivePage={props.changeCurrentActivePage}
+          currentlyActivePage={props.currentlyActivePage}
         />
       );
     });

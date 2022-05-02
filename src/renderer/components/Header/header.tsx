@@ -24,7 +24,7 @@ export const Header = (props: HeaderProp) => {
         <span className="app-name-container">
           <span>
             Oto Music for Desktop
-            <sup className="app-env" title="v0.0.1">
+            <sup className="app-version" title="v0.0.1">
               ALPHA
             </sup>
           </span>

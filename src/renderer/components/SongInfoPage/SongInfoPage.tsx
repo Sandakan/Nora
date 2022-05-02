@@ -1,3 +1,7 @@
+/* eslint-disable react/no-array-index-key */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable no-nested-ternary */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
@@ -10,6 +14,8 @@ import SongStat from './SongStat';
 
 interface SongInfoProp {
   currentSongData: AudioData;
+  currentlyActivePage: { pageTitle: string; data?: any };
+  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
 }
 
 export default (props: SongInfoProp) => {
@@ -54,17 +60,46 @@ export default (props: SongInfoProp) => {
           >
             {props.currentSongData.title}
           </div>
-          <div
-            className="artists info-type-2"
-            title={
-              Array.isArray(props.currentSongData.artists)
-                ? props.currentSongData.artists.join(', ')
-                : props.currentSongData.artists
-            }
-          >
-            {Array.isArray(props.currentSongData.artists)
-              ? props.currentSongData.artists.join(', ')
-              : props.currentSongData.artists}
+          <div className="song-artists info-type-2">
+            {props.currentSongData.artists ? (
+              Array.isArray(props.currentSongData.artists) ? (
+                props.currentSongData.artists.length > 0 &&
+                props.currentSongData.artists[0] !== '' ? (
+                  props.currentSongData.artists.map((artist, index) => (
+                    <>
+                      <span
+                        className="artist"
+                        key={index}
+                        title={artist}
+                        onClick={() =>
+                          props.currentlyActivePage.pageTitle ===
+                            'ArtistInfo' &&
+                          props.currentlyActivePage.data.artistName === artist
+                            ? props.changeCurrentActivePage('Home')
+                            : props.changeCurrentActivePage('ArtistInfo', {
+                                artistName: artist,
+                              })
+                        }
+                      >
+                        {artist}
+                      </span>
+                      {props.currentSongData.artists.length === 0 ||
+                      props.currentSongData.artists.length - 1 === index
+                        ? ''
+                        : ', '}
+                    </>
+                  ))
+                ) : (
+                  'Unknown Artist'
+                )
+              ) : (
+                <span className="artist" title={props.currentSongData.artists}>
+                  {props.currentSongData.artists}
+                </span>
+              )
+            ) : (
+              'Unknown Artist'
+            )}
           </div>
           <div className="info-type-2" title={props.currentSongData.album}>
             {props.currentSongData.album}
@@ -79,7 +114,7 @@ export default (props: SongInfoProp) => {
 
           {songInfo && songInfo.format && songInfo.format.bitrate && (
             <div className="info-type-3">
-              {songInfo.format.bitrate / 1000} Kbps
+              {Math.floor(songInfo.format.bitrate / 1000)} Kbps
             </div>
           )}
         </div>

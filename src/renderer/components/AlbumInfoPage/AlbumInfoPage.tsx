@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable promise/always-return */
@@ -58,7 +60,6 @@ export default (props: AlbumInfoPageProp) => {
               artists={song.artists}
               artworkPath={song.artworkPath}
               duration={song.duration}
-              path={song.path}
               songId={song.songId}
               playSong={props.playSong}
               currentSongData={props.currentSongData}
@@ -88,7 +89,18 @@ export default (props: AlbumInfoPageProp) => {
               <div className="album-title">{albumData.title}</div>
               <div className="album-artists">
                 {albumData.artists.map((artist, index) => (
-                  <span className="artist" title={artist}>
+                  <span
+                    className="artist"
+                    title={artist}
+                    onClick={() =>
+                      props.currentlyActivePage.pageTitle === 'ArtistInfo' &&
+                      props.currentlyActivePage.data.artistName === artist
+                        ? props.changeCurrentActivePage('Home')
+                        : props.changeCurrentActivePage('ArtistInfo', {
+                            artistName: artist,
+                          })
+                    }
+                  >
                     {artist}
                     {index === albumData.artists.length - 1 ? '' : ', '}
                   </span>
@@ -97,6 +109,9 @@ export default (props: AlbumInfoPageProp) => {
               <div className="album-no-of-songs">{`${
                 albumData.songs.length
               } song${albumData.songs.length === 1 ? '' : 's'}`}</div>
+              {albumData.year && (
+                <div className="album-year">{albumData.year}</div>
+              )}
             </div>
           )}
       </div>

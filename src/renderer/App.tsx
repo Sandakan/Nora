@@ -52,6 +52,32 @@ function App() {
     data: {} as any,
   });
 
+  React.useEffect(() => {
+    const handleContextMenuDataUpdate = () =>
+      setContextMenuData((prevData) => {
+        return { ...prevData, isVisible: false };
+      });
+    window.addEventListener('click', handleContextMenuDataUpdate);
+    return () =>
+      window.removeEventListener('click', handleContextMenuDataUpdate);
+  }, []);
+
+  React.useEffect(() => {
+    window.api.getUserData().then((res) => {
+      if (!res) return;
+      setUserData(res);
+      setDarkMode(res.theme.isDarkMode);
+      if (res.currentSong.songId) playSong(res.currentSong.songId, false);
+    });
+
+    // window.api.checkForSongs().then((audioData) => {
+    //   if (!audioData) return undefined;
+    //   createQueue(audioData);
+    //   return undefined;
+    // });
+    // to make it run only once
+  }, []);
+
   const updateContextMenuData = (
     isVisible: boolean,
     menuItems: ContextMenuItem[] = [],
@@ -69,14 +95,6 @@ function App() {
     });
   };
 
-  React.useEffect(() => {
-    window.addEventListener('click', () =>
-      setContextMenuData((prevData) => {
-        return { ...prevData, isVisible: false };
-      })
-    );
-  }, []);
-
   const changeCurrentActivePage = (pageClass: string, data?: object) =>
     setCurrentlyActivePage((prevData) => {
       return {
@@ -86,47 +104,29 @@ function App() {
     });
 
   const playSong = (songId: string, isStartPlay = true) => {
-    // console.log('isStartPlay', isStartPlay, startPlay);
-    if (isStartPlay !== startPlay) setStartPlay(isStartPlay);
     if (currentSongData.songId === songId) setStartPlay(true);
-    else
-      window.api.getSong(songId).then((songData) => {
-        if (typeof songData === 'object') {
-          console.log('playSong', songId, songData.path);
-          setCurrentSongData(songData);
-          window.api.saveUserData('currentSong.songId', songData.songId);
-          // if (queue.queue.length > 0 && queue.queue.includes(songData.songId)) {
-          //   setQueue((prevQueueData) => {
-          //     return {
-          //       ...prevQueueData,
-          //       currentSongIndex: queue.queue.indexOf(songData.songId),
-          //     };
-          //   });
-          // }
-        } else console.log(songData);
-      });
+    else if (isStartPlay !== startPlay) setStartPlay(isStartPlay);
+    window.api.getSong(songId).then((songData) => {
+      if (songData) {
+        console.log('playSong', songId, songData.path);
+        setCurrentSongData(songData);
+        window.api.saveUserData('currentSong.songId', songData.songId);
+        // if (queue.queue.length > 0 && queue.queue.includes(songData.songId)) {
+        //   setQueue((prevQueueData) => {
+        //     return {
+        //       ...prevQueueData,
+        //       currentSongIndex: queue.queue.indexOf(songData.songId),
+        //     };
+        //   });
+        // }
+      } else console.log(songData);
+    });
   };
 
   // const createQueue = (songsData: AudioInfo[], startPlaying = false) => {
   //   queue.queue = songsData.map((songData) => songData.songId);
   //   if (startPlaying) changeQueueCurrentSongIndex(0);
   // };
-
-  React.useEffect(() => {
-    window.api.getUserData().then((res) => {
-      if (!res) return;
-      setUserData(res);
-      setDarkMode(res.theme.isDarkMode);
-      if (res.currentSong.songId) playSong(res.currentSong.songId, false);
-    });
-
-    // window.api.checkForSongs().then((audioData) => {
-    //   if (!audioData) return undefined;
-    //   createQueue(audioData);
-    //   return undefined;
-    // });
-    // to make it run only once
-  }, []);
 
   const toggleDarkMode = () => {
     setDarkMode((prevState) => {

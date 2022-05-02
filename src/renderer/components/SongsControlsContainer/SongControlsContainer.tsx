@@ -70,9 +70,10 @@ export default (props: SongControlsContainerProp) => {
 
   React.useEffect(() => {
     music.src = `otoMusic://localFiles/${props.currentSongData.path}`;
-    music.addEventListener('canplay', () => {
+    const playCurrentSong = () => {
       if (props.isStartPlay) music.play();
-    });
+    };
+    music.addEventListener('canplay', playCurrentSong);
     // ? MEDIA SESSION EVENTS
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
@@ -104,6 +105,7 @@ export default (props: SongControlsContainerProp) => {
         () => handleSkipForwardClick
       );
     }
+    return () => music.removeEventListener('canplay', playCurrentSong);
   }, [props.currentSongData.path]);
 
   React.useEffect(() => {
@@ -251,36 +253,42 @@ export default (props: SongControlsContainerProp) => {
           <div className="song-artists" id="currentSongArtists">
             {props.currentSongData.artists ? (
               Array.isArray(props.currentSongData.artists) ? (
-                props.currentSongData.artists.map((artist, index) => (
-                  <>
-                    <span
-                      className="artist"
-                      key={index}
-                      title={artist}
-                      onClick={() =>
-                        props.currentlyActivePage.pageTitle === 'ArtistInfo' &&
-                        props.currentlyActivePage.data.artistName === artist
-                          ? props.changeCurrentActivePage('Home')
-                          : props.changeCurrentActivePage('ArtistInfo', {
-                              artistName: artist,
-                            })
-                      }
-                    >
-                      {artist}
-                    </span>
-                    {props.currentSongData.artists.length === 0 ||
-                    props.currentSongData.artists.length - 1 === index
-                      ? ''
-                      : ', '}
-                  </>
-                ))
+                props.currentSongData.artists.length > 0 &&
+                props.currentSongData.artists[0] !== '' ? (
+                  props.currentSongData.artists.map((artist, index) => (
+                    <>
+                      <span
+                        className="artist"
+                        key={index}
+                        title={artist}
+                        onClick={() =>
+                          props.currentlyActivePage.pageTitle ===
+                            'ArtistInfo' &&
+                          props.currentlyActivePage.data.artistName === artist
+                            ? props.changeCurrentActivePage('Home')
+                            : props.changeCurrentActivePage('ArtistInfo', {
+                                artistName: artist,
+                              })
+                        }
+                      >
+                        {artist}
+                      </span>
+                      {props.currentSongData.artists.length === 0 ||
+                      props.currentSongData.artists.length - 1 === index
+                        ? ''
+                        : ', '}
+                    </>
+                  ))
+                ) : (
+                  'Unknown Artist'
+                )
               ) : (
                 <span className="artist" title={props.currentSongData.artists}>
                   {props.currentSongData.artists}
                 </span>
               )
             ) : (
-              ''
+              'Unknown Artist'
             )}
           </div>
         </div>
