@@ -34,22 +34,22 @@ export const Header = (props: HeaderProp) => {
         <div className="special-controls-container">
           <span className="change-theme-btn">
             <i
-              className={
-                props.isDarkMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon'
-              }
+              className="material-icons-round"
               onClick={() => props.setDarkMode()}
-            ></i>
+            >
+              {props.isDarkMode ? 'wb_sunny' : 'dark_mode'}
+            </i>
           </span>
         </div>
         <div className="window-controls-container">
           <span className="minimize-btn" onClick={minimize}>
-            <i className="fa-regular fa-window-minimize"></i>
+            <span className="material-icons-round">minimize</span>
           </span>
           <span className="maximize-btn" onClick={maximize}>
-            <i className="fa-regular fa-square"></i>
+            <span className="material-icons-round">crop_square</span>
           </span>
           <span className="close-btn" onClick={close}>
-            <i className="fa-solid fa-xmark" />
+            <span className="material-icons-round">close</span>{' '}
           </span>
         </div>
       </div>

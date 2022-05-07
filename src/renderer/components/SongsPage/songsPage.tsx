@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-console */
 /* eslint-disable promise/always-return */
 /* eslint-disable consistent-return */
@@ -11,8 +12,10 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
 // import { logger } from 'main/logger';
+import sortSongs from 'renderer/utils/sortSongs';
 import { Song } from './song';
 import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
+import { Artist } from '../ArtistPage/Artist';
 
 interface SongsPageProp {
   playSong: (url: string) => void;
@@ -40,44 +43,17 @@ export const SongsPage = (props: SongsPageProp) => {
     window.api
       .checkForSongs()
       .then((audioInfoArray) => {
-        if (audioInfoArray) return setSongData(audioInfoArray);
+        if (audioInfoArray)
+          return setSongData(sortSongs(audioInfoArray, sortingOrder));
       })
       .catch((err) => console.log(err));
   }, []);
 
-  React.useEffect(() => {
-    if (songData && songData.length > 0) {
-      let sortedSongData: AudioInfo[];
-      if (sortingOrder === 'aToZ')
-        sortedSongData = songData.sort((a, b) =>
-          a.title.replace(/\W/gi, '') > b.title.replace(/\W/gi, '')
-            ? 1
-            : a.title.replace(/\W/gi, '') < b.title.replace(/\W/gi, '')
-            ? -1
-            : 0
-        );
-      else if (sortingOrder === 'artistName')
-        sortedSongData = songData.sort((a, b) =>
-          a.artists.join(',') > b.artists.join(',')
-            ? 1
-            : a.artists.join(',') < b.artists.join(',')
-            ? -1
-            : 0
-        );
-      else if (sortingOrder === 'dateAdded')
-        sortedSongData = songData.sort((a, b) => {
-          if (a.modifiedDate && b.modifiedDate) {
-            return new Date(a.modifiedDate).getTime() <
-              new Date(b.modifiedDate).getTime()
-              ? 1
-              : -1;
-          }
-          return 0;
-        });
-      else sortedSongData = songData;
-      setSongData(sortedSongData);
-    }
-  }, [songData, sortingOrder]);
+  React.useEffect(
+    () => setSongData((prevData) => sortSongs(prevData, sortingOrder)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [sortingOrder]
+  );
 
   const songs = songData.map((song) => {
     return (
@@ -112,8 +88,13 @@ export const SongsPage = (props: SongsPageProp) => {
           }
         >
           <option value="aToZ">A to Z</option>
-          <option value="dateAdded">Date added</option>
-          <option value="artistName">Artist</option>
+          <option value="zToA">Z to A</option>
+          <option value="dateAddedAscending">Date added ( Ascending )</option>
+          <option value="dateAddedDescending">Date added ( Descending )</option>
+          <option value="artistNameAscending">Artist ( Ascending )</option>
+          <option value="artistNameDescending">Artist ( Descending )</option>
+          {/* <option value="albumNameAscending">Album ( Ascending )</option>
+          <option value="albumNameDescending">Album ( Descending )</option> */}
         </select>
       </div>
       <div className="songs-container">{songs}</div>

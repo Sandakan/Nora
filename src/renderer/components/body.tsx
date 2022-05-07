@@ -58,6 +58,7 @@ export const Body = (props: BodyProp) => {
       {props.currentlyActivePage.pageTitle === 'Home' && (
         <HomePage
           playSong={props.playSong}
+          updateDialogMenuData={props.updateDialogMenuData}
           updateContextMenuData={props.updateContextMenuData}
           changeCurrentActivePage={props.changeCurrentActivePage}
           currentlyActivePage={props.currentlyActivePage}

@@ -22,10 +22,12 @@ export default (props: DialogMenuProp) => {
       <div className="message-container">{props.data.content}</div>
       <div className="buttons-container">
         <div id="dialogMenuCloseBtn">
-          <i
-            className="fas fa-close"
+          <span
+            className="material-icons icon"
             onClick={() => props.updateDialogMenuData(0, <></>)}
-          ></i>
+          >
+            close
+          </span>
         </div>
       </div>
     </div>

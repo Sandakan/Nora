@@ -40,13 +40,14 @@ export default (props: AlbumInfoPageProp) => {
 
   React.useEffect(() => {
     if (albumData.songs && albumData.songs.length > 0) {
-      const temp: SongData[] = [];
-      for (const song of albumData.songs) {
-        window.api.getSongInfo(song.songId).then((res) => {
-          if (res) temp.push(res);
-        });
-      }
-      setSongsData(temp);
+      const temp: Promise<SongData | undefined>[] = [];
+      albumData.songs.forEach((song) => {
+        temp.push(window.api.getSongInfo(song.songId));
+      });
+      Promise.all(temp).then((res) => {
+        const data = res.filter((x) => x !== undefined) as SongData[];
+        setSongsData(data);
+      });
     }
   }, [albumData.songs]);
 

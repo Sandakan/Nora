@@ -217,6 +217,8 @@ app.whenReady().then(() => {
     addNewPlaylist(playlistName)
   );
 
+  ipcMain.handle('app/resyncSongsLibrary', async () => checkForNewSongs());
+
   ipcMain.on('revealSongInFileExplorer', async (_e, songId: string) => {
     const data = await getData();
     const songs = data.songs;
@@ -431,8 +433,8 @@ const toggleLikeSong = async (songId: string, likeSong: boolean) => {
   } else return result;
 };
 
-export const sendNewSong = (songs: SongData[]) => {
-  mainWindow.webContents.send('app/getNewSong', songs);
+export const sendNewSongUpdates = (update: string) => {
+  mainWindow.webContents.send('app/sendNewSongUpdates', update);
 };
 
 const getArtistInfoFromNet = (

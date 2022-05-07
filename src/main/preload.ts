@@ -40,8 +40,8 @@ export const api = {
   // CONTEXT MENU - OPENS DEVTOOLS
   openDevtools: () => ipcRenderer.send('app/openDevTools'),
   // ! GETS NEWLY ADDED SONGS WHEN ADDED TO A PRESELECTED FOLDER -- NOT WORKING YET
-  addNewSong: (callback: (event: unknown, songs: SongData[]) => void) =>
-    ipcRenderer.on('app/getNewSong', callback),
+  getNewSongUpdates: (callback: (event: unknown, update: string) => void) =>
+    ipcRenderer.on('app/sendNewSongUpdates', callback),
   // TOGGLE LIKE SONG
   toggleLikeSong: (
     songId: string,
@@ -74,7 +74,10 @@ export const api = {
   // GET SONG INFO
   getSongInfo: (songId: string): Promise<SongData | undefined> =>
     ipcRenderer.invoke('app/getSongInfo', songId),
-
+  // RESYNC SONGS LIBRARY
+  resyncSongsLibrary: (): Promise<true> =>
+    ipcRenderer.invoke('app/resyncSongsLibrary'),
+  // REVEAL SONG IN FILE EXPLORER
   revealSongInFileExplorer: (songId: string) =>
     ipcRenderer.send('revealSongInFileExplorer', songId),
   openInBrowser: (url: string) => ipcRenderer.send('app/openInBrowser', url),

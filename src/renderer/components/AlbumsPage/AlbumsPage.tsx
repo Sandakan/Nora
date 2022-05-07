@@ -6,6 +6,7 @@
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
+import sortAlbums from 'renderer/utils/sortAlbums';
 import { Album } from './Album';
 
 interface AlbumsPageProp {
@@ -16,48 +17,35 @@ interface AlbumsPageProp {
 export const AlbumsPage = (props: AlbumsPageProp) => {
   const [albums, setAlbums] = React.useState([] as Album[]);
   const [sortingOrder, setSortingOrder] = React.useState(
-    'aToZ' as 'aToZ' | 'noOfSongs'
+    'aToZ' as AlbumSortTypes
   );
 
   React.useEffect(() => {
     window.api.getAlbumData('*').then((res) => {
-      if (res && Array.isArray(res)) setAlbums(res);
+      if (res && Array.isArray(res)) setAlbums(sortAlbums(res, sortingOrder));
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   React.useEffect(() => {
-    let sortedAlbums: Album[];
-    if (sortingOrder === 'aToZ')
-      sortedAlbums = albums.sort((a, b) =>
-        a.title > b.title ? 1 : a.title < b.title ? -1 : 0
-      );
-    else if (sortingOrder === 'noOfSongs')
-      sortedAlbums = albums.sort((a, b) =>
-        a.songs.length < b.songs.length
-          ? 1
-          : a.songs.length > b.songs.length
-          ? -1
-          : 0
-      );
-    else return;
-    setAlbums(sortedAlbums);
-  }, [albums, sortingOrder]);
+    setAlbums((prevData) => sortAlbums(prevData, sortingOrder));
+  }, [sortingOrder]);
 
-  const albumComponents =
-    albums.length > 0 &&
-    albums.map((album) => (
-      <Album
-        key={album.albumId}
-        title={album.title}
-        artworkPath={album.artworkPath}
-        albumId={album.albumId}
-        artists={album.artists}
-        songs={album.songs}
-        year={album.year}
-        changeCurrentActivePage={props.changeCurrentActivePage}
-        currentlyActivePage={props.currentlyActivePage}
-      />
-    ));
+  // const albumComponents =
+  //   // albums.length > 0 &&
+  //   albums.map((album) => (
+  //     <Album
+  //       key={album.albumId}
+  //       title={album.title}
+  //       artworkPath={album.artworkPath}
+  //       albumId={album.albumId}
+  //       artists={album.artists}
+  //       songs={album.songs}
+  //       year={album.year}
+  //       changeCurrentActivePage={props.changeCurrentActivePage}
+  //       currentlyActivePage={props.currentlyActivePage}
+  //     />
+  //   ));
   return (
     <div className="main-container albums-list-container">
       <div className="title-container">
@@ -65,16 +53,30 @@ export const AlbumsPage = (props: AlbumsPageProp) => {
         <select
           name="sortingOrderDropdown"
           id="sortingOrderDropdown"
-          value={sortingOrder}
+          // value={sortingOrder}
           onChange={(e) =>
-            setSortingOrder(e.currentTarget.value as 'aToZ' | 'noOfSongs')
+            setSortingOrder(e.currentTarget.value as AlbumSortTypes)
           }
         >
           <option value="aToZ">A to Z</option>
           <option value="noOfSongs">No. of Songs</option>
         </select>
       </div>
-      <div className="albums-container">{albumComponents}</div>
+      <div className="albums-container">
+        {albums.map((album) => (
+          <Album
+            key={album.albumId}
+            title={album.title}
+            artworkPath={album.artworkPath}
+            albumId={album.albumId}
+            artists={album.artists}
+            songs={album.songs}
+            year={album.year}
+            changeCurrentActivePage={props.changeCurrentActivePage}
+            currentlyActivePage={props.currentlyActivePage}
+          />
+        ))}
+      </div>
     </div>
   );
 };

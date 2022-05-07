@@ -25,6 +25,7 @@ export const ContextMenu = (props: ContextMenuProp) => {
     <ContextMenuItem
       key={index}
       label={menuItem.label}
+      iconName={menuItem.iconName}
       handlerFunction={menuItem.handlerFunction}
       updateContextMenuData={props.updateContextMenuData}
     />

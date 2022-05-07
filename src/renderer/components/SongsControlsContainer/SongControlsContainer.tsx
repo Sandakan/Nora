@@ -18,7 +18,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/self-closing-comp */
 import React from 'react';
-import { calculateTime } from 'main/calculateTime';
+import { calculateTime } from '../../../main/calculateTime';
 import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
 
 interface SongControlsContainerProp {
@@ -43,7 +43,7 @@ const music = new Audio();
 export default (props: SongControlsContainerProp) => {
   const [songSlidervalue, setSongSliderValue] = React.useState(0);
   const [volumeSlidervalue, setVolumeSlidervalue] = React.useState(
-    // props.userData ? props.userData?.volume.value / 100 : 50
+    // props.userData ? props.userData?.volume.value / 100 : 50`1
     50
   );
   const [isLiked, setIsLiked] = React.useState(
@@ -69,7 +69,8 @@ export default (props: SongControlsContainerProp) => {
   volumeBarCssProperties['--volume-before-width'] = `${volumeSlidervalue}%`;
 
   React.useEffect(() => {
-    music.src = `otoMusic://localFiles/${props.currentSongData.path}`;
+    if (props.currentSongData.path)
+      music.src = `otoMusic://localFiles/${props.currentSongData.path}`;
     const playCurrentSong = () => {
       if (props.isStartPlay) music.play();
     };
@@ -98,11 +99,11 @@ export default (props: SongControlsContainerProp) => {
       });
       navigator.mediaSession.setActionHandler(
         'previoustrack',
-        () => handleSkipBackwardClick
+        handleSkipBackwardClick
       );
       navigator.mediaSession.setActionHandler(
         `nexttrack`,
-        () => handleSkipForwardClick
+        handleSkipForwardClick
       );
     }
     return () => music.removeEventListener('canplay', playCurrentSong);
@@ -118,7 +119,7 @@ export default (props: SongControlsContainerProp) => {
       showRangeProgress(
         'audio',
         props.userData?.currentSong.stoppedPosition || 0,
-        music.duration
+        music.duration || 0
       );
   }, [props.userData]);
 
@@ -145,21 +146,34 @@ export default (props: SongControlsContainerProp) => {
     document.addEventListener('keypress', manageSpaceKeyPlayback);
   }, []);
 
-  React.useEffect(() => {
-    setIsLiked(props.currentSongData.isAFavorite);
-    music.addEventListener('ended', () => {
+  const handleSongEnd = () => {
+    if (isRepeating) {
+      music.currentTime = 0;
+      music.play();
+      setIsPlaying(true);
+    } else {
       setIsPlaying(false);
       handleSkipForwardClick();
-    });
-    music.addEventListener('play', () => {
-      if (props.currentSongData.title && props.currentSongData.artists)
-        document.title = `${props.currentSongData.title} - ${
-          Array.isArray(props.currentSongData.artists)
-            ? props.currentSongData.artists.join(', ')
-            : props.currentSongData.artists
-        }`;
-    });
-  }, [props.currentSongData]);
+    }
+  };
+
+  const addSongTitleToTitleBar = () => {
+    if (props.currentSongData.title && props.currentSongData.artists)
+      document.title = `${props.currentSongData.title} - ${
+        Array.isArray(props.currentSongData.artists)
+          ? props.currentSongData.artists.join(', ')
+          : props.currentSongData.artists
+      }`;
+  };
+  React.useEffect(() => {
+    setIsLiked(props.currentSongData.isAFavorite);
+    music.addEventListener('ended', handleSongEnd);
+    music.addEventListener('play', addSongTitleToTitleBar);
+    return () => {
+      music.removeEventListener('ended', handleSongEnd);
+      music.removeEventListener('play', addSongTitleToTitleBar);
+    };
+  }, [props.currentSongData, isRepeating]);
 
   const handleSongPlayback = () => {
     if (music.paused) {
@@ -177,7 +191,8 @@ export default (props: SongControlsContainerProp) => {
     divider: number,
     divisor: number
   ) => {
-    if (sliderType === 'audio') setSongSliderValue((divider / divisor) * 100);
+    if (sliderType === 'audio')
+      setSongSliderValue(divisor && divider ? (divider / divisor) * 100 : 0);
     if (sliderType === 'volume')
       setVolumeSlidervalue((divider / divisor) * 100);
   };
@@ -186,7 +201,7 @@ export default (props: SongControlsContainerProp) => {
     window.api
       .toggleLikeSong(props.currentSongData.songId, !isLiked)
       .then((res) => {
-        if (res && !res.error) setIsLiked(!isLiked);
+        if (res && !res.error) setIsLiked((prevData) => !prevData);
         else console.log(res?.error);
       });
   };
@@ -256,6 +271,7 @@ export default (props: SongControlsContainerProp) => {
                 props.currentSongData.artists.length > 0 &&
                 props.currentSongData.artists[0] !== '' ? (
                   props.currentSongData.artists.map((artist, index) => (
+                    // !THIS REACT FRAGMENT GENERATES A KEY PROP ERROR IN CONSOLE
                     <>
                       <span
                         className="artist"
@@ -296,63 +312,75 @@ export default (props: SongControlsContainerProp) => {
       <div className="song-controls-and-seekbar-container">
         <div className="controls-container">
           <div className="like-btn">
-            <i
+            <span
               title="Like"
-              className={`fa-${isLiked ? 'solid' : 'regular'} fa-heart ${
-                isLiked && 'liked'
-              }`}
+              className={`material-icons-round icon ${isLiked && 'liked'}`}
               onClick={toggleSongLike}
-            ></i>
+            >
+              {isLiked ? 'favorite' : 'favorite_border'}
+            </span>
           </div>
           <div className={`repeat-btn ${isRepeating && 'active'}`}>
-            <i
+            <span
               title="Repeat"
-              className="fa-solid fa-repeat"
+              className="material-icons-round icon"
               onClick={() => setIsRepeating((prevState) => !prevState)}
-            ></i>
+            >
+              repeat
+            </span>
           </div>
           <div className="skip-back-btn">
-            <i
+            <span
               title="Previous Song"
-              className="fa-solid fa-backward-step"
+              className="material-icons-round icon"
               onClick={handleSkipBackwardClick}
-            ></i>
+            >
+              skip_previous
+            </span>
           </div>
           <div className="play-pause-btn">
-            <i
+            <span
               title="Play/Pause"
-              className={`fa-solid fa-circle-${isPlaying ? 'pause' : 'play'}`}
+              className="material-icons-round icon"
               onClick={handleSongPlayback}
-            ></i>
+            >
+              {isPlaying ? 'pause_circle' : 'play_circle'}
+            </span>
           </div>
           <div className="skip-forward-btn">
-            <i
+            <span
               title="Next Song"
-              className="fa-solid fa-forward-step"
+              className="material-icons-round icon"
               onClick={handleSkipForwardClick}
-            ></i>
+            >
+              skip_next
+            </span>
           </div>
           <div
             className={`lyrics-btn ${
               props.currentlyActivePage.pageTitle === 'Lyrics' && 'active'
             }`}
           >
-            <i
+            <span
               title="Lyrics"
-              className="fa-solid fa-music"
+              className="material-icons-round icon"
               onClick={() =>
                 props.currentlyActivePage.pageTitle === 'Lyrics'
                   ? props.changeCurrentActivePage('Home')
                   : props.changeCurrentActivePage('Lyrics')
               }
-            ></i>
+            >
+              notes
+            </span>
           </div>
           <div className={`shuffle-btn ${isShuffling && 'active'}`}>
-            <i
+            <span
               title="Shuffle"
-              className="fa-solid fa-shuffle"
+              className="material-icons-round icon"
               onClick={() => setIsShuffling((prevState) => !prevState)}
-            ></i>
+            >
+              shuffle
+            </span>
           </div>
         </div>
         <div className="seekbar-and-song-durations-container">
@@ -386,33 +414,39 @@ export default (props: SongControlsContainerProp) => {
       </div>
       <div className="other-controls-container">
         <div className="other-settings-btn">
-          <i title="Other Settings" className="fa-solid fa-ellipsis"></i>
+          <span title="Other Settings" className="material-icons-round icon">
+            more_horiz
+          </span>
         </div>
         <div
           className={`queue-btn ${
             props.currentlyActivePage.pageTitle === 'CurrentQueue' && 'active'
           }`}
         >
-          <i
+          <span
             title="Current Queue"
-            className="fa-solid fa-play"
+            className="material-icons-round icon"
             onClick={() =>
               props.currentlyActivePage.pageTitle === 'CurrentQueue'
                 ? props.changeCurrentActivePage('Home')
                 : props.changeCurrentActivePage('CurrentQueue')
             }
-          ></i>
+          >
+            queue
+          </span>
         </div>
         <div className="mini-player-btn">
-          <i title="Mini player" className="fa-solid fa-window-restore"></i>
+          <span className="material-icons-round icon">tab</span>
         </div>
         <div className="volume-controller-container">
           <div className="volume-btn">
-            <i
+            <span
               title="Change Volume"
-              className={`fa-solid fa-volume-${isMuted ? 'xmark' : 'high'}`}
+              className="material-icons-round icon"
               onClick={() => setIsMuted((prevState) => !prevState)}
-            ></i>
+            >
+              {isMuted ? 'volume_off' : 'volume_up'}
+            </span>
           </div>
           <div className="volume-slider-container">
             <input

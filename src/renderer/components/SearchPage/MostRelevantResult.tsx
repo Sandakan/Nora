@@ -32,22 +32,26 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
   return (
     <div
       className={`result most-relevant-${props.resultType.toLowerCase()} active`}
-      onContextMenu={(e) =>
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
         props.updateContextMenuData(
           true,
           props.contextMenuItems,
           e.pageX,
           e.pageY
-        )
-      }
+        );
+      }}
     >
       <div className="result-img-container">
         {props.resultType.toLowerCase() !== 'artist' && (
-          <i
+          <span
             title="Play Song"
-            className="fa-solid fa-circle-play"
+            className="material-icons-round icon"
             onClick={() => props.playSong && props.playSong(props.id)}
-          ></i>
+          >
+            play_circle
+          </span>
         )}{' '}
         <img
           src={`otomusic://localFiles/${props.artworkPath}`}

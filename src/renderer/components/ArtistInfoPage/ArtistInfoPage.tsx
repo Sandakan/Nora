@@ -60,33 +60,29 @@ export default (props: ArtistInfoProp) => {
 
   React.useEffect(() => {
     if (artistData.songs && artistData.songs.length > 0) {
-      const songsData: SongData[] = [];
-      for (const x of artistData.songs) {
-        window.api.getSongInfo(x.songId).then((res) => {
-          if (res) songsData.push(res);
-        });
-      }
-      setSongs(songsData);
+      const songsData = artistData.songs.map((song) =>
+        window.api.getSongInfo(song.songId)
+      );
+      Promise.all(songsData).then((res) => {
+        const data = res.filter((x) => x !== undefined) as SongData[];
+        setSongs(data);
+      });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [artistData.songs]);
 
   React.useEffect(() => {
     if (artistData.albums) {
-      const albumsData: Album[] = [];
-      for (const albumData of artistData.albums) {
-        window.api.getAlbumData(albumData.albumId).then((data) => {
-          if (data && !Array.isArray(data)) albumsData.push(data);
-        });
-      }
-      setAlbums(albumsData);
+      const albumsData = artistData.albums.map((album) =>
+        window.api.getAlbumData(album.albumId)
+      );
+      Promise.all(albumsData).then((res) => {
+        const data = res.filter(
+          (x) => x !== undefined && !Array.isArray(x)
+        ) as Album[];
+        setAlbums(data);
+      });
     }
   }, [artistData.albums]);
-
-  // if (artistData.artistPalette)
-  //   (
-  //     document.querySelector('.body-and-side-bar-container') as HTMLDivElement
-  //   ).style.background = `linear-gradient(180deg, ${`rgb(${artistData.artistPalette.LightVibrant._rgb[0]},${artistData.artistPalette.LightVibrant._rgb[1]},${artistData.artistPalette.LightVibrant._rgb[2]})`} 0%, var(--background-color-1) 90%)`;
 
   return (
     <div

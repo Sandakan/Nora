@@ -253,6 +253,7 @@ declare global {
   interface ContextMenuItem {
     label: string;
     class?: string;
+    iconName?: string;
     handlerFunction: () => void;
   }
   type UserDataType =
@@ -263,6 +264,20 @@ declare global {
     | 'volume.isMuted'
     | 'recentlyPlayedSongs'
     | 'musicFolders';
+
+  type SongsPageSortTypes =
+    | 'aToZ'
+    | 'zToA'
+    | 'dateAddedAscending'
+    | 'dateAddedDescending'
+    | 'artistNameAscending'
+    | 'artistNameDescending'
+    | 'albumNameAscending'
+    | 'albumNameDescending';
+
+  type ArtistSortTypes = 'aToZ' | 'noOfSongs';
+
+  type AlbumSortTypes = 'aToZ' | 'noOfSongs';
 
   interface NodeVibrantPalette {
     DarkMuted: NodeVibrantPaletteSwatch;
@@ -302,6 +317,4 @@ declare global {
     };
     error?: number;
   }
-
-  type SongsPageSortTypes = 'aToZ' | 'dateAdded' | 'artistName';
 }

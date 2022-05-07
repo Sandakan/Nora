@@ -29,6 +29,19 @@
   font-weight: 800;
 }
 
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/MaterialIcons-Regular.ttf');
+}
+@font-face {
+  font-family: 'Material Icons Round';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/MaterialIconsRound-Regular.otf');
+}
+
 ::-webkit-scrollbar-track {
   box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
@@ -82,6 +95,44 @@ body,
   width: 100%;
   height: 100vh;
   background-color: var(--background-color-1);
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px; /* Preferred icon size */
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'liga';
+  user-select: none;
+}
+
+.material-icons-round {
+  font-family: 'Material Icons Round';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'liga';
+  user-select: none;
 }
 
 .App {
@@ -197,7 +248,7 @@ body * {
   justify-content: center;
 }
 
-.special-controls-container span i {
+.special-controls-container span span.icon {
   cursor: pointer;
 }
 
@@ -273,8 +324,9 @@ span.close-btn:hover {
   height: 100%;
 }
 
-.side-bar ul li i {
-  margin-right: 1.25em;
+.side-bar ul li span.icon {
+  margin-right: 0.75em;
+  font-size: 2rem;
 }
 
 .side-bar ul li.settings {
@@ -372,10 +424,10 @@ body .no-songs-container {
   color: var(--text-color);
   position: absolute;
   right: 1.25rem;
-  width: 10rem;
-  height: 2rem;
+  width: 13rem;
+  height: 2.5rem;
   border: 0.2rem solid var(--background-color-2);
-  border-radius: 0.25rem;
+  border-radius: 0.5rem;
   padding: 0 0.75rem;
   outline: none;
   cursor: pointer;
@@ -508,7 +560,7 @@ select::-ms-expand {
   border-color: var(--background-color-3);
 }
 
-.song.playing .song-cover-and-play-btn-container .play-btn-container i {
+.song.playing .song-cover-and-play-btn-container .play-btn-container span.icon {
   color: hsl(0, 0%, 100%);
 }
 
@@ -567,7 +619,7 @@ select::-ms-expand {
   -o-transform: translate(-50%, -50%);
 }
 
-.play-btn-container i {
+.play-btn-container span.icon {
   font-size: 2rem;
   color: hsla(0, 0%, 100%, 0);
   transition: color 0.2s ease-in-out;
@@ -578,7 +630,7 @@ select::-ms-expand {
   cursor: pointer;
 }
 
-.song:hover .play-btn-container i {
+.song:hover .play-btn-container span.icon {
   color: hsla(0, 0%, 100%, 1);
 }
 
@@ -631,7 +683,7 @@ select::-ms-expand {
   -o-transform: translate(-50%, -50%);
 }
 
-.album-cover-and-play-btn-container i {
+.album-cover-and-play-btn-container span.icon {
   font-size: 2.5rem;
   color: hsla(0, 0%, 100%, 0);
   position: absolute;
@@ -645,7 +697,7 @@ select::-ms-expand {
   -o-transition: color 0.2s ease;
 }
 
-.album:hover .album-cover-and-play-btn-container i {
+.album:hover .album-cover-and-play-btn-container span.icon {
   color: hsla(0, 0%, 100%, 1);
   cursor: pointer;
 }
@@ -753,11 +805,11 @@ body.dark-mode .songs-list-container > .songs-container .song:hover {
   transform: translate(-50%, -50%);
 }
 
-.song .song-cover-and-play-btn-container .play-btn-container i {
+.song .song-cover-and-play-btn-container .play-btn-container span.icon {
   color: hsla(0, 0%, 100%, 0);
   font-size: 1.5rem;
 }
-.song:hover .song-cover-and-play-btn-container .play-btn-container i {
+.song:hover .song-cover-and-play-btn-container .play-btn-container span.icon {
   color: hsla(0, 0%, 100%, 1);
 }
 
@@ -826,7 +878,7 @@ body.dark-mode .songs-list-container > .songs-container .song:hover {
   -webkit-animation: appearFromBottom 0.25s ease forwards;
 }
 
-.search-bar-container i.fa-search {
+.search-bar-container > span.icon {
   width: 10%;
   padding: 0.5rem;
   font-size: 1.5rem;
@@ -982,7 +1034,7 @@ input[type='search']::placeholder {
   position: relative;
 }
 
-.result-img-container i {
+.result-img-container span.icon {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -1052,7 +1104,7 @@ input[type='search']::placeholder {
 .result:hover {
   background-color: var(--background-color-3);
 }
-.result:hover .result-img-container i {
+.result:hover .result-img-container span.icon {
   color: hsla(0, 0%, 100%, 1);
 }
 /* .result:hover .result-img-container img {
@@ -1289,7 +1341,7 @@ input[type='search']::placeholder {
   height: 70%;
 }
 
-.playlist-cover-and-play-btn-container i {
+.playlist-cover-and-play-btn-container span.icon {
   position: absolute;
   bottom: 1rem;
   right: 1rem;
@@ -1318,7 +1370,7 @@ input[type='search']::placeholder {
   height: 100%;
 }
 
-.playlist:hover i {
+.playlist:hover span.icon {
   opacity: 1;
 }
 
@@ -1363,7 +1415,7 @@ input[type='search']::placeholder {
   -webkit-animation: appearFromBottom 0.25s ease forwards;
 }
 
-.add-new-playlist-btn i {
+.add-new-playlist-btn span.icon {
   margin-right: 1rem;
 }
 
@@ -1484,6 +1536,13 @@ input[type='search']::placeholder {
   margin-right: 0.5rem;
   font-weight: 500;
   color: var(--background-color-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-value span.icon {
+  font-size: 3.5rem;
 }
 
 .stat .stat-description {
@@ -1753,22 +1812,22 @@ input[type='search']::placeholder {
   justify-content: space-around;
 }
 
-.controls-container > div i {
+.controls-container > div span.icon {
   cursor: pointer;
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   color: hsla(0, 0%, 0%, 0.75);
 }
-.App.dark-mode .controls-container > div i {
+.App.dark-mode .controls-container > div span.icon {
   color: hsla(0, 0%, 100%, 0.75);
 }
-.controls-container > div.play-pause-btn i {
-  font-size: 3rem;
+.controls-container > div.play-pause-btn span.icon {
+  font-size: 3.5rem;
   /* color: hsla(0, 0%, 100%, 0.75); */
 }
-.controls-container > div.like-btn i.liked {
+.controls-container > div.like-btn span.icon.liked {
   color: crimson;
 }
-.App .controls-container > div.active i {
+.App .controls-container > div.active span.icon {
   color: crimson;
 }
 
@@ -1999,7 +2058,7 @@ input[type='range']:active::-ms-thumb {
   margin-right: 0.75rem;
 }
 
-.queue-btn.active i {
+.queue-btn.active span.icon {
   color: crimson;
 }
 
@@ -2032,6 +2091,8 @@ input[type='range']:active::-ms-thumb {
   -moz-transition: transform 0.2s ease, visibility 0.2s ease, opacity 0.2s ease;
   -ms-transition: transform 0.2s ease, visibility 0.2s ease, opacity 0.2s ease;
   -o-transition: transform 0.2s ease, visibility 0.2s ease, opacity 0.2s ease;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
+    rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
 }
 
 .context-menu.visible {
@@ -2047,6 +2108,15 @@ input[type='range']:active::-ms-thumb {
 .menu-item {
   cursor: pointer;
   padding: 0.25rem 1rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-weight: 300;
+}
+
+.menu-item span.icon {
+  margin-right: 1rem;
+  font-size: 1.25rem;
 }
 
 .menu-item:hover {
@@ -2135,6 +2205,10 @@ input[type='range']:active::-ms-thumb {
   outline: transparent;
   cursor: pointer;
   color: var(--text-color);
+  display: flex;
+}
+.dialog-menu-container .buttons-container div span.icon {
+  font-size: 0.9rem;
 }
 
 .dialog-menu-container .message-container {

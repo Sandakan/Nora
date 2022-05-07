@@ -11,7 +11,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { SongCard } from '../SongsPage/songCard';
 import { Artist } from '../ArtistPage/Artist';
 import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
@@ -21,18 +21,22 @@ interface HomePageProp {
   playSong: (songId: string) => void;
   updateContextMenuData: (
     isVisible: boolean,
-    menuItems: any[],
+    menuItems: ContextMenuItem[],
     pageX?: number,
     pageY?: number
   ) => void;
   currentlyActivePage: { pageTitle: string; data?: any };
   changeCurrentActivePage: (pageTitle: string, data?: any) => void;
+  updateDialogMenuData: (
+    delay: number,
+    content: ReactElement<any, any>
+  ) => void;
   // updateQueueData: (currentSongIndex?: number, queue?: string[]) => void;
   // queue: Queue;
 }
 
 export const HomePage = (props: HomePageProp) => {
-  const songsData: AudioInfo[] = [];
+  const songsData: (AudioInfo | null)[] = [];
   const recentPlayedSongs: SongData[] = [];
   const z: Artist[] = [];
   const [songData, setSongData] = React.useState(songsData);
@@ -42,7 +46,7 @@ export const HomePage = (props: HomePageProp) => {
 
   React.useEffect(() => {
     window.api.checkForSongs().then((audioData) => {
-      if (!audioData) return undefined;
+      if (!audioData || audioData.length === 0) setSongData([null]);
       else {
         setSongData(audioData.slice(0, 5));
         return undefined;
@@ -83,8 +87,9 @@ export const HomePage = (props: HomePageProp) => {
   };
 
   const newlyAddedSongs = songData
+    .filter((song) => song !== null)
     .sort((a, b) => {
-      if (a.modifiedDate && b.modifiedDate) {
+      if (a && b && a.modifiedDate && b.modifiedDate) {
         return new Date(a.modifiedDate).getTime() <
           new Date(b.modifiedDate).getTime()
           ? 1
@@ -93,7 +98,7 @@ export const HomePage = (props: HomePageProp) => {
       return 0;
     })
     .map((song, index) => {
-      if (index < 3) {
+      if (song && index < 3) {
         return (
           <SongCard
             key={song.songId}
@@ -181,8 +186,40 @@ export const HomePage = (props: HomePageProp) => {
   //   .filter((artist) => artist !== undefined);
 
   return (
-    <div className="main-container home-page">
-      {songData.length > 0 && (
+    <div
+      className="main-container home-page"
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        props.updateContextMenuData(
+          true,
+          [
+            {
+              label: 'Resync Songs',
+              iconName: 'sync',
+              handlerFunction: () =>
+                window.api
+                  .resyncSongsLibrary()
+                  .then(() =>
+                    props.updateDialogMenuData(
+                      5000,
+                      <span>Songs Library updated successfully.</span>
+                    )
+                  )
+                  .catch(() => {
+                    props.updateDialogMenuData(
+                      5000,
+                      <span>Resyncing Songs Library failed.</span>
+                    );
+                  }),
+            },
+          ],
+          e.pageX,
+          e.pageY
+        );
+      }}
+    >
+      {songData.length > 0 && songData[0] !== null && (
         <div className="main-container recently-added-songs-container">
           <div className="title-container">Recently Added Songs</div>
           <div className="songs-container">{newlyAddedSongs}</div>
@@ -200,7 +237,7 @@ export const HomePage = (props: HomePageProp) => {
           <div className="artists-container">{recentlyPlayedSongArtists}</div>
         </div>
       )}
-      {recentlyPlayedSongs.length === 0 && songData.length === 0 && (
+      {songData[0] === null && (
         <div className="no-songs-container">
           <img src={NoSongsImage} alt="" />
           <span>We couldn't find any songs in your system.</span>
@@ -209,7 +246,7 @@ export const HomePage = (props: HomePageProp) => {
           </button>
         </div>
       )}
-      {recentlyPlayedSongs === undefined && (
+      {recentlyPlayedSongs.length === 0 && songData.length === 0 && (
         <div className="no-songs-container">
           <span>Fetching your songs...</span>
         </div>

@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 /* eslint-disable promise/no-return-in-finally */
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -17,10 +18,10 @@
 import fs from 'fs/promises';
 import fsOther from 'fs';
 import path from 'path';
-import { app, ipcMain } from 'electron';
-
+import { app } from 'electron';
 import Store from 'electron-store';
 import * as musicMetaData from 'music-metadata';
+import sharp from 'sharp';
 import { parseSong } from './parseSong';
 // import { sendNewSong } from './main';
 import { logger } from './logger';
@@ -181,25 +182,26 @@ export const storeSongArtworks = (
       })
       .finally(async () => {
         if (artworks[0]) {
-          const storePath = path.join(
+          const imgPath = path.join(
             app.getPath('userData'),
             'song_covers',
-            `${artworkName}.jpg`
+            `${artworkName}.webp`
           );
-          return await fs.writeFile(storePath, artworks[0].data).then(
-            () => resolve(storePath),
-            (err) => {
-              logger(err);
-              resolve(
-                path.join(
-                  __dirname,
-                  'public',
-                  'images',
-                  'song_cover_default.png'
-                )
-              );
-            }
+          const optimizedImgPath = path.join(
+            app.getPath('userData'),
+            'song_covers',
+            `${artworkName}-optimized.webp`
           );
+          await sharp(artworks[0].data)
+            .webp()
+            .toFile(imgPath)
+            .then(() => resolve(imgPath))
+            .catch((err) => logger(err));
+          await sharp(artworks[0].data)
+            .webp({ quality: 50, effort: 0 })
+            .resize(50, 50)
+            .toFile(optimizedImgPath)
+            .catch((err) => logger(err));
         }
         return resolve(
           path.join(__dirname, 'public', 'images', 'song_cover_default.png')
@@ -208,51 +210,67 @@ export const storeSongArtworks = (
   });
 };
 
-export const checkForNewSongs = () => {
-  const musicFolders: MusicFolderData[] = userDataStore.get(
-    'musicFolders'
-  ) as any;
-  if (musicFolders) {
-    musicFolders.forEach(async (folder, index) => {
-      await fs.stat(folder.path).then((stats) => {
-        if (
-          stats.mtime.toUTCString() ===
-          new Date(folder.stats.lastModifiedDate).toUTCString()
-        ) {
-          console.log(path.basename(folder.path), 'no folder data changed.');
-        } else {
-          console.log(path.basename(folder.path), 'folder data changed.');
-          checkFolderForUnknownModifications(folder.path);
-          musicFolders[index].stats.lastModifiedDate = stats.mtime;
-        }
-      });
-      fsOther.watch(folder.path, async (eventType, filename) => {
-        console.log(eventType, filename);
-        if (filename) {
-          if (eventType === 'rename') {
-            const modifiedDate = await fs
-              .stat(folder.path)
-              .then((res) => res.mtime)
-              .catch((err) => logger(err));
+export const checkForNewSongs = (): Promise<true> => {
+  return new Promise((resolve, reject) => {
+    const musicFolders: MusicFolderData[] = userDataStore.get(
+      'musicFolders'
+    ) as any;
+    if (musicFolders) {
+      musicFolders.forEach(async (folder, index) => {
+        await fs
+          .stat(folder.path)
+          .then((stats) => {
             if (
-              modifiedDate &&
-              musicFolders[index].stats.lastModifiedDate !== modifiedDate
+              stats.mtime.toUTCString() ===
+              new Date(folder.stats.lastModifiedDate).toUTCString()
             ) {
-              musicFolders[index].stats.lastModifiedDate = modifiedDate;
-              userDataStore.set('musicFolders', musicFolders);
-              console.log('folder data updated.');
-            } else console.log('no need to update folder data');
+              console.log(
+                path.basename(folder.path),
+                'no folder data changed.'
+              );
+            } else {
+              console.log(path.basename(folder.path), 'folder data changed.');
+              checkFolderForUnknownModifications(folder.path);
+              musicFolders[index].stats.lastModifiedDate = stats.mtime;
+            }
+          })
+          .catch((err) => reject(err));
+        fsOther.watch(folder.path, async (eventType, filename) => {
+          console.log(eventType, filename);
+          if (filename) {
+            if (eventType === 'rename') {
+              const modifiedDate = await fs
+                .stat(folder.path)
+                .then((res) => res.mtime)
+                .catch((err) => logger(err));
+              if (
+                modifiedDate &&
+                musicFolders[index].stats.lastModifiedDate !== modifiedDate
+              ) {
+                musicFolders[index].stats.lastModifiedDate = modifiedDate;
+                userDataStore.set('musicFolders', musicFolders);
+                console.log('folder data updated.');
+              } else console.log('no need to update folder data');
 
-            setTimeout(
-              () => checkFolderForModifications(folder.path, filename),
-              500
+              setTimeout(
+                () => checkFolderForModifications(folder.path, filename),
+                500
+              );
+              return resolve(true);
+            }
+          } else {
+            console.log(
+              'error occurred when trying to read newly added songs.'
+            );
+            return reject(
+              new Error('error occurred when trying to read newly added songs.')
             );
           }
-        } else
-          console.log('error occurred when trying to read newly added songs.');
+        });
       });
-    });
-  }
+      return resolve(true);
+    }
+  });
 };
 
 const checkFolderForUnknownModifications = async (folderPath: string) => {

@@ -2,14 +2,13 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable no-nested-ternary */
-/* eslint-disable no-restricted-syntax */
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable react/destructuring-assignment */
 import React from 'react';
-import { calculateTime } from 'renderer/calculateTime';
-import { valueRounder } from 'renderer/valueRounder';
+import { calculateTime } from 'renderer/utils/calculateTime';
+import { valueRounder } from 'renderer/utils/valueRounder';
 import SongStat from './SongStat';
 
 interface SongInfoProp {
@@ -38,9 +37,9 @@ export default (props: SongInfoProp) => {
 
   const calculateTotalListensOfTheYear = (arr: number[]) => {
     let val = 0;
-    for (const ele of arr) {
+    arr.forEach((ele) => {
       val += ele;
-    }
+    });
     return val;
   };
 
@@ -101,7 +100,19 @@ export default (props: SongInfoProp) => {
               'Unknown Artist'
             )}
           </div>
-          <div className="info-type-2" title={props.currentSongData.album}>
+          <div
+            className="info-type-2"
+            title={props.currentSongData.album}
+            // TODO - CANNOT ADD THIS FUNCTIONALITY BECAUSE OF ABSENCE OF INPUT DATA
+            // onClick={() =>
+            //   props.currentlyActivePage.pageTitle === 'ArtistInfo' &&
+            //   props.currentlyActivePage.data.artistName === artist
+            //     ? props.changeCurrentActivePage('Home')
+            //     : props.changeCurrentActivePage('ArtistInfo', {
+            //         artistName: artist,
+            //       })
+            // }
+          >
             {props.currentSongData.album}
           </div>
           <div className="info-type-3" title={songDuration}>
@@ -151,10 +162,12 @@ export default (props: SongInfoProp) => {
             }
             value={
               <span
-                className={`fa-${
-                  songInfo.isAFavorite ? 'solid' : 'regular'
-                } fa-heart ${songInfo.isAFavorite && 'liked'}`}
-              ></span>
+                className={`material-icons-round icon ${
+                  songInfo.isAFavorite && 'liked'
+                }`}
+              >
+                {songInfo.isAFavorite ? 'favorite' : 'favorite_border'}
+              </span>
             }
           />
         </div>

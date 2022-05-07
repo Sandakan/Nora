@@ -80,11 +80,13 @@ export const SearchPage = (props: SearchPageProp) => {
         contextMenuItems={[
           {
             label: 'Play',
+            iconName: 'play_arrow',
             handlerFunction: () => props.playSong(props.currentSongData.songId),
           },
           {
             label: 'Reveal in File Explorer',
             class: 'reveal-file-explorer',
+            iconName: 'folder_open',
             handlerFunction: () =>
               window.api.revealSongInFileExplorer(props.currentSongData.songId),
           },
@@ -195,7 +197,7 @@ export const SearchPage = (props: SearchPageProp) => {
   return (
     <div className="main-container search-container">
       <div className="search-bar-container">
-        <i className="fas fa-search"></i>
+        <span className="material-icons-round icon">search</span>
         <input
           type="search"
           name="search"

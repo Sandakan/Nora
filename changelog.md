@@ -1,5 +1,17 @@
 # Change Log
 
+- ### v0.3.1 - ( 07<sup>th</sup> of May 2022 )
+  - Migration from FontAwesome icons to Google Material Icons.
+  - Improved styles to support Google material icons functionality.
+  - Offloaded creation and optimization of cover arts to Sharp package.
+  - Added nanoid to create unique ids for songs, artists and albums.
+  - Added node-id3 to provide support for future id3 tag editing.
+  - Added support for icons in the context menu.
+  - Added a home page context menu item to resync songs.
+  - Improved sorting of songs, artists and albums.
+
+<br>
+
 - ### v0.3.0 - ( 02<sup>nd</sup> of May 2022 )
   - Added function to sort songs, artists and albums.
   - Added a PlaylistsInfoPage to display information related to playlists.

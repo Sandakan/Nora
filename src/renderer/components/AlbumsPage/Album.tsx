@@ -16,7 +16,7 @@ export const Album = (props: AlbumProp) => {
   return (
     <div className="album">
       <div className="album-cover-and-play-btn-container">
-        <i className="fa-solid fa-circle-play" />
+        <span className="material-icons-round icon">play_circle</span>
         <div className="album-cover-container">
           <img
             src={`otomusic://localFiles/${props.artworkPath}`}

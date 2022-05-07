@@ -8,18 +8,10 @@
 interface SideBarItems {
   id: number;
   parentClassName: string;
-  childClassName: string;
+  icon: string;
   content: string;
   handleClick: (id: number) => any;
 }
-
-// const makeActive = (event: React.SyntheticEvent) => {
-// 	const sideBarItems = document.querySelectorAll('.side-bar > ul > li');
-// 	for (let x = 0; x < sideBarItems.length; x++) {
-// 		sideBarItems[x].classList.remove('active');
-// 	}
-// 	event.currentTarget.classList.add('active');
-// };
 
 export const SideBarItem = (props: SideBarItems) => {
   return (
@@ -27,7 +19,8 @@ export const SideBarItem = (props: SideBarItems) => {
       className={props.parentClassName}
       onClick={() => props.handleClick(props.id)}
     >
-      <i className={props.childClassName} /> {props.content}
+      <span className="icon material-icons-round">{props.icon}</span>{' '}
+      {props.content}
     </li>
   );
 };

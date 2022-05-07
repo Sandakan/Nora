@@ -17,37 +17,37 @@ interface SidebarProp {
 const linkData = [
   {
     parentClassName: 'home active',
-    childClassName: 'fa solid fa-house',
+    icon: 'home',
     content: 'Home',
   },
   {
     parentClassName: 'search',
-    childClassName: 'fa solid fa-magnifying-glass',
+    icon: 'search',
     content: 'Search',
   },
   {
     parentClassName: 'songs',
-    childClassName: 'fa solid fa-music',
+    icon: 'music_note',
     content: 'Songs',
   },
   {
     parentClassName: 'playlists',
-    childClassName: 'fa solid fa-play',
+    icon: 'queue_music',
     content: 'Playlists',
   },
   {
     parentClassName: 'artists',
-    childClassName: 'fa solid fa-user',
+    icon: 'people',
     content: 'Artists',
   },
   {
     parentClassName: 'albums',
-    childClassName: 'fa solid fa-compact-disc',
+    icon: 'album',
     content: 'Albums',
   },
   {
     parentClassName: 'settings',
-    childClassName: 'fa solid fa-gear',
+    icon: 'settings',
     content: 'Settings',
   },
 ];
@@ -77,7 +77,7 @@ export const SideBar = (props: SidebarProp) => {
       key={index}
       id={index}
       parentClassName={link.parentClassName}
-      childClassName={link.childClassName}
+      icon={link.icon}
       content={link.content}
       handleClick={clickHandler}
     ></SideBarItem>

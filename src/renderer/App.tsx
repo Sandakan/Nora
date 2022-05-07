@@ -20,9 +20,9 @@ import { BodyAndSideBarContainer } from './components/bodyAndSidebarContainer';
 import SongControlsContainer from './components/SongsControlsContainer/SongControlsContainer';
 import { PromptMenu } from './components/PromptMenu/PromptMenu';
 import { ContextMenu } from './components/ContextMenu/ContextMenu';
-import '../../assets/fonts/fontawesome-free-6.0.0-web/css/all.min.css';
+// import '../../assets/fonts/fontawesome-free-6.0.0-web/css/all.min.css';
 
-function App() {
+export default function App() {
   const x: unknown = undefined;
   const [userData, setUserData] = React.useState(x as UserData | undefined);
   const [startPlay, setStartPlay] = React.useState(false);
@@ -54,6 +54,7 @@ function App() {
 
   React.useEffect(() => {
     const handleContextMenuDataUpdate = () =>
+      contextMenuData.isVisible &&
       setContextMenuData((prevData) => {
         return { ...prevData, isVisible: false };
       });
@@ -75,6 +76,10 @@ function App() {
     //   createQueue(audioData);
     //   return undefined;
     // });
+    window.api.getNewSongUpdates((_, update) => {
+      updateDialogMenuData(2500, <span>{update}</span>);
+      console.log(update);
+    });
     // to make it run only once
   }, []);
 
@@ -238,5 +243,3 @@ function App() {
     </div>
   );
 }
-
-export default App;

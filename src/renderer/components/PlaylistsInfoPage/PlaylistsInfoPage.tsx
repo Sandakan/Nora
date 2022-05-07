@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
@@ -37,15 +38,16 @@ export default (props: PlaylistInfoPageProp) => {
 
   React.useEffect(() => {
     if (playlistData.songs && playlistData.songs.length > 0) {
-      const songsData: SongData[] = [];
-      for (const data of playlistData.songs) {
-        window.api.getSongInfo(data).then((res) => {
-          if (res) songsData.push(res);
-        });
-      }
-      setPlaylistSongs(songsData);
+      const songsData: Promise<SongData | undefined>[] = [];
+      playlistData.songs.forEach((songId) => {
+        songsData.push(window.api.getSongInfo(songId));
+      });
+      Promise.all(songsData).then((res) => {
+        const y = res.filter((result) => result !== undefined) as SongData[];
+        setPlaylistSongs(y);
+      });
     }
-  }, [playlistData.songs]);
+  }, [props.data, playlistData.songs]);
 
   return (
     <div className="main-container playlist-info-page-container">

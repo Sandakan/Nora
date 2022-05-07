@@ -12,7 +12,7 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
-import { calculateTime } from '../../calculateTime';
+import { calculateTime } from '../../utils/calculateTime';
 
 interface SongData {
   songId: string;
@@ -35,14 +35,18 @@ interface SongData {
 }
 
 export const Song = (props: SongData) => {
-  const [isSongPlaying, setIsSongPlaying] = React.useState(false);
-  React.useEffect(() => {
-    setIsSongPlaying(() => {
-      if (props.currentSongData)
-        return props.currentSongData.songId === props.songId;
-      else return false;
-    });
-  }, [props.songId]);
+  const [isSongPlaying, setIsSongPlaying] = React.useState(
+    props.currentSongData
+      ? props.currentSongData.songId === props.songId
+      : false
+  );
+  // React.useEffect(() => {
+  //   setIsSongPlaying(() => {
+  //     if (props.currentSongData)
+  //       return props.currentSongData.songId === props.songId;
+  //     else return false;
+  //   });
+  // }, [props.songId]);
 
   const handlePlayBtnClick = () => {
     setIsSongPlaying((prevState) => {
@@ -60,12 +64,14 @@ export const Song = (props: SongData) => {
       data-song-id={props.songId}
       onContextMenu={(e) => {
         e.preventDefault();
+        e.stopPropagation();
         props.updateContextMenuData(
           true,
           [
             {
               label: 'Play',
               handlerFunction: handlePlayBtnClick,
+              iconName: 'play_arrow',
             },
             // {
             //   label: 'Play Next',
@@ -91,6 +97,7 @@ export const Song = (props: SongData) => {
             {
               label: 'Reveal in File Explorer',
               class: 'reveal-file-explorer',
+              iconName: 'folder_open',
               handlerFunction: () =>
                 window.api.revealSongInFileExplorer(props.songId),
             },
@@ -102,15 +109,20 @@ export const Song = (props: SongData) => {
     >
       <div className="song-cover-and-play-btn-container">
         <div className="play-btn-container">
-          <i
-            className={`fa-solid fa-circle-${isSongPlaying ? 'pause' : 'play'}`}
+          <span
+            className="material-icons-round icon"
             onClick={handlePlayBtnClick}
             style={isSongPlaying ? { color: `hsla(0,0%,100%,1)` } : {}}
-          ></i>
+          >
+            {isSongPlaying ? 'pause_circle' : 'play_circle'}
+          </span>
         </div>
         <div className="song-cover-container">
           <img
-            src={`otoMusic://localFiles/${props.artworkPath}`}
+            src={`otoMusic://localFiles/${props.artworkPath?.replace(
+              '.webp',
+              '-optimized.webp'
+            )}`}
             loading="lazy"
             alt=""
           />

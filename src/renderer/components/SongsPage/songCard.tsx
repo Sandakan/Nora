@@ -55,16 +55,19 @@ export const SongCard = (props: SongCardProp) => {
       data-song-id={props.songId}
       onContextMenu={(e) => {
         e.preventDefault();
+        e.stopPropagation();
         props.updateContextMenuData(
           true,
           [
             {
               label: 'Play',
+              iconName: 'play_arrow',
               handlerFunction: () => props.playSong(props.songId),
             },
             {
               label: 'Reveal in File Explorer',
               class: 'reveal-file-explorer',
+              iconName: 'folder_open',
               handlerFunction: () =>
                 window.api.revealSongInFileExplorer(props.songId),
             },
@@ -115,10 +118,12 @@ export const SongCard = (props: SongCardProp) => {
           </div>
         </div>
         <div className="play-btn-container">
-          <i
-            className="fa-solid fa-circle-play"
+          <span
+            className="material-icons-round icon"
             onClick={() => props.playSong(props.songId)}
-          ></i>
+          >
+            play_circle
+          </span>
         </div>
       </div>
     </div>

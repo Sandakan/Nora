@@ -4,9 +4,12 @@
 /* eslint-disable react/destructuring-assignment */
 // import react from 'react';
 
+import { spawn } from 'child_process';
+
 interface ContextMenuItemProp {
   label: string;
   class?: string;
+  iconName?: string;
   handlerFunction: () => void;
   updateContextMenuData: (
     isVisible: boolean,
@@ -19,12 +22,15 @@ interface ContextMenuItemProp {
 export default (props: ContextMenuItemProp) => {
   return (
     <div
-      className={`menu-item ${props.class}`}
+      className={`menu-item ${props.class || ''}`}
       onClick={() => {
         props.handlerFunction();
         props.updateContextMenuData(false, []);
       }}
     >
+      {props.iconName && (
+        <span className="material-icons-round icon">{props.iconName}</span>
+      )}{' '}
       {props.label}
     </div>
   );

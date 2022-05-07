@@ -5,8 +5,9 @@
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
+import sortArtists from 'renderer/utils/sortArtists';
 import { Artist } from './Artist';
-import DefaultArtistCover from '../../../../assets/images/song_cover_default.png';
+// import DefaultArtistCover from '../../../../assets/images/song_cover_default.png';
 
 interface ArtistPageProp {
   currentlyActivePage: { pageTitle: string; data?: any };
@@ -16,34 +17,22 @@ interface ArtistPageProp {
 export const ArtistPage = (props: ArtistPageProp) => {
   const [artists, setArtists] = React.useState([] as Artist[]);
   const [sortingOrder, setSortingOrder] = React.useState(
-    'aToZ' as 'aToZ' | 'noOfSongs'
+    'aToZ' as ArtistSortTypes
   );
 
   React.useEffect(() => {
     window.api.getArtistData('*').then((res) => {
       if (res && Array.isArray(res)) {
-        setArtists(res);
+        setArtists(sortArtists(res, sortingOrder));
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  React.useEffect(() => {
-    let sortedArtists: Artist[];
-    if (sortingOrder === 'aToZ')
-      sortedArtists = artists.sort((a, b) =>
-        a.name > b.name ? 1 : a.name < b.name ? -1 : 0
-      );
-    else if (sortingOrder === 'noOfSongs')
-      sortedArtists = artists.sort((a, b) =>
-        a.songs.length > b.songs.length
-          ? 1
-          : a.songs.length < b.songs.length
-          ? -1
-          : 0
-      );
-    else return;
-    setArtists(sortedArtists);
-  }, [artists, sortingOrder]);
+  React.useEffect(
+    () => setArtists((prevData) => sortArtists(prevData, sortingOrder)),
+    [sortingOrder]
+  );
 
   const artistComponenets =
     artists.length > 0 &&

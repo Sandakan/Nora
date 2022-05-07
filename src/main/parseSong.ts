@@ -1,3 +1,4 @@
+/* eslint-disable promise/no-nesting */
 /* eslint-disable no-console */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable consistent-return */
@@ -25,6 +26,7 @@ import fs from 'fs/promises';
 import { generateRandomId } from './randomId';
 import { logger } from './logger';
 import { getData, setData, storeSongArtworks } from './filesystem';
+import { sendNewSongUpdates } from './main';
 
 const defaultSongCoverImgBuffer = async () =>
   await fs
@@ -259,6 +261,7 @@ export const parseSong = async (absoluteFilePath: string) => {
 
         data.songs.push(songInfo);
         await setData({ songs: data.songs, artists, albums: allAlbums });
+        sendNewSongUpdates(`'${songTitle}' song added to the library.`);
         return songInfo;
       })
       .catch((err) => logger(err));

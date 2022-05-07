@@ -34,14 +34,16 @@ export const PromptMenu = (props: PromptMenuProp) => {
           e.stopPropagation();
         }}
       >
-        <i
-          className="fas fa-close prompt-close-btn"
+        <span
+          className="material-icons-round"
           id="promptMenuCloseBtn"
           onClick={(e) => {
             e.stopPropagation();
             props.changePromptMenuData(false);
           }}
-        ></i>
+        >
+          close
+        </span>
         <div
           className={`prompt-menu-inner ${props.data.className}`}
           id="promptMenuInner"
