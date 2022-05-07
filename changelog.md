@@ -1,5 +1,12 @@
 # Change Log
 
+- ### v0.3.2 - ( 07<sup>th</sup> of May 2022 )
+  - Started using useContext React api to reduce prop drilling.
+  - Started using useReducer React api to avoid rendering issues occurred when using useState.
+  - Improved sorting of songs, artists, and albums. Now they work as intended.
+
+<br>
+
 - ### v0.3.1 - ( 07<sup>th</sup> of May 2022 )
   - Migration from FontAwesome icons to Google Material Icons.
   - Improved styles to support Google material icons functionality.

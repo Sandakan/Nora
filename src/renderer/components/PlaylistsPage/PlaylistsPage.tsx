@@ -4,25 +4,18 @@
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable react/button-has-type */
 /* eslint-disable import/prefer-default-export */
-import React, { ReactElement } from 'react';
+import React, { useContext } from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 import { Playlist } from './Playlist';
 import NewPlaylistPrompt from './NewPlaylistPrompt';
 
-interface PlaylistsPageProp {
-  changePromptMenuData: (
-    isVisible: boolean,
-    content: ReactElement<any, any>,
-    className?: string
-  ) => void;
-  updateDialogMenuData: (
-    delay: number,
-    content: ReactElement<any, any>
-  ) => void;
-  currentlyActivePage: { pageTitle: string; data?: any };
-  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
-}
-
-export const PlaylistsPage = (props: PlaylistsPageProp) => {
+export const PlaylistsPage = () => {
+  const {
+    changePromptMenuData,
+    updateDialogMenuData,
+    currentlyActivePage,
+    changeCurrentActivePage,
+  } = useContext(AppContext);
   const [playlists, setPlaylists] = React.useState([] as Playlist[]);
   let playlistComponents;
   React.useEffect(() => {
@@ -40,8 +33,8 @@ export const PlaylistsPage = (props: PlaylistsPageProp) => {
           songs={playlist.songs}
           artworkPath={playlist.artworkPath}
           key={playlist.playlistId}
-          changeCurrentActivePage={props.changeCurrentActivePage}
-          currentlyActivePage={props.currentlyActivePage}
+          changeCurrentActivePage={changeCurrentActivePage}
+          currentlyActivePage={currentlyActivePage}
         />
       );
     });
@@ -64,12 +57,12 @@ export const PlaylistsPage = (props: PlaylistsPageProp) => {
       <button
         className="add-new-playlist-btn"
         onClick={() =>
-          props.changePromptMenuData(
+          changePromptMenuData(
             true,
             <NewPlaylistPrompt
-              changePromptMenuData={props.changePromptMenuData}
+              changePromptMenuData={changePromptMenuData}
               updatePlaylists={updatePlaylists}
-              updateDialogMenuData={props.updateDialogMenuData}
+              updateDialogMenuData={updateDialogMenuData}
             />,
             'add-new-playlist'
           )

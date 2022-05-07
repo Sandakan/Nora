@@ -6,13 +6,9 @@
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable import/prefer-default-export */
-import React from 'react';
+import React, { useContext } from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 import { SideBarItem } from './sideBarItem';
-
-interface SidebarProp {
-  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
-  currentlyActivePage: { pageTitle: string; data?: any };
-}
 
 const linkData = [
   {
@@ -52,13 +48,14 @@ const linkData = [
   },
 ];
 
-export const SideBar = (props: SidebarProp) => {
+export const SideBar = () => {
+  const { changeCurrentActivePage } = useContext(AppContext);
   const [data, setData] = React.useState(linkData);
 
   const clickHandler = (id: number) => {
     const arr = data.map((link, index) => {
       if (index === id) {
-        props.changeCurrentActivePage(link.content);
+        changeCurrentActivePage(link.content);
         return link.parentClassName.includes('active')
           ? link
           : { ...link, parentClassName: `${link.parentClassName} active` };

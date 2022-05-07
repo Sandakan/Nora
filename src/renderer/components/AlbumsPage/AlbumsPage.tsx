@@ -5,47 +5,59 @@
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
-import React from 'react';
+import React, { useContext } from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 import sortAlbums from 'renderer/utils/sortAlbums';
 import { Album } from './Album';
 
-interface AlbumsPageProp {
-  currentlyActivePage: { pageTitle: string; data?: any };
-  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
+interface AlbumsPageReducer {
+  albums: Album[];
+  sortingOrder: AlbumSortTypes;
 }
 
-export const AlbumsPage = (props: AlbumsPageProp) => {
-  const [albums, setAlbums] = React.useState([] as Album[]);
-  const [sortingOrder, setSortingOrder] = React.useState(
-    'aToZ' as AlbumSortTypes
-  );
+type AlbumPageReducerActionTypes = 'ALBUM_DATA' | 'SORTING_ORDER';
+
+const reducer = (
+  state: AlbumsPageReducer,
+  action: { type: AlbumPageReducerActionTypes; data: any }
+): AlbumsPageReducer => {
+  switch (action.type) {
+    case 'ALBUM_DATA':
+      return {
+        ...state,
+        albums: action.data,
+      };
+    case 'SORTING_ORDER':
+      return {
+        ...state,
+        albums: sortAlbums(state.albums, action.data),
+        sortingOrder: action.data,
+      };
+    default:
+      return state;
+  }
+};
+
+export const AlbumsPage = () => {
+  const { currentlyActivePage, changeCurrentActivePage } =
+    useContext(AppContext);
+
+  const [content, dispatch] = React.useReducer(reducer, {
+    albums: [],
+    sortingOrder: 'aToZ',
+  } as AlbumsPageReducer);
 
   React.useEffect(() => {
     window.api.getAlbumData('*').then((res) => {
-      if (res && Array.isArray(res)) setAlbums(sortAlbums(res, sortingOrder));
+      if (res && Array.isArray(res))
+        dispatch({
+          type: 'ALBUM_DATA',
+          data: sortAlbums(res, content.sortingOrder),
+        });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  React.useEffect(() => {
-    setAlbums((prevData) => sortAlbums(prevData, sortingOrder));
-  }, [sortingOrder]);
-
-  // const albumComponents =
-  //   // albums.length > 0 &&
-  //   albums.map((album) => (
-  //     <Album
-  //       key={album.albumId}
-  //       title={album.title}
-  //       artworkPath={album.artworkPath}
-  //       albumId={album.albumId}
-  //       artists={album.artists}
-  //       songs={album.songs}
-  //       year={album.year}
-  //       changeCurrentActivePage={props.changeCurrentActivePage}
-  //       currentlyActivePage={props.currentlyActivePage}
-  //     />
-  //   ));
   return (
     <div className="main-container albums-list-container">
       <div className="title-container">
@@ -55,7 +67,7 @@ export const AlbumsPage = (props: AlbumsPageProp) => {
           id="sortingOrderDropdown"
           // value={sortingOrder}
           onChange={(e) =>
-            setSortingOrder(e.currentTarget.value as AlbumSortTypes)
+            dispatch({ type: 'SORTING_ORDER', data: e.currentTarget.value })
           }
         >
           <option value="aToZ">A to Z</option>
@@ -63,7 +75,7 @@ export const AlbumsPage = (props: AlbumsPageProp) => {
         </select>
       </div>
       <div className="albums-container">
-        {albums.map((album) => (
+        {content.albums.map((album) => (
           <Album
             key={album.albumId}
             title={album.title}
@@ -72,8 +84,8 @@ export const AlbumsPage = (props: AlbumsPageProp) => {
             artists={album.artists}
             songs={album.songs}
             year={album.year}
-            changeCurrentActivePage={props.changeCurrentActivePage}
-            currentlyActivePage={props.currentlyActivePage}
+            changeCurrentActivePage={changeCurrentActivePage}
+            currentlyActivePage={currentlyActivePage}
           />
         ))}
       </div>

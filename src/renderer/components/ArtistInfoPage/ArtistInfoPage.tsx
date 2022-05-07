@@ -7,41 +7,35 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
-import React from 'react';
+import React, { useContext } from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 import DefaultArtistCover from '../../../../assets/images/default_artist-cover.png';
 import { Album } from '../AlbumsPage/Album';
 import { Song } from '../SongsPage/song';
 
-interface ArtistInfoProp {
-  data?: {
-    artistName: string;
-  };
-  currentlyActivePage: { pageTitle: string; data?: any };
-  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
-  playSong: (songId: string) => void;
-  currentSongData: AudioData;
-  updateContextMenuData: (
-    isVisible: boolean,
-    menuItems: any[],
-    pageX?: number,
-    pageY?: number
-  ) => void;
-}
-
-export default (props: ArtistInfoProp) => {
+export default () => {
+  const {
+    currentlyActivePage,
+    changeCurrentActivePage,
+    playSong,
+    currentSongData,
+    updateContextMenuData,
+  } = useContext(AppContext);
   const [artistData, setArtistData] = React.useState({} as ArtistInfo);
   const [albums, setAlbums] = React.useState([] as Album[]);
   const [songs, setSongs] = React.useState([] as SongData[]);
 
   React.useEffect(() => {
-    if (props.data && props.data.artistName) {
-      window.api.getArtistData(props.data.artistName).then((res) => {
-        if (res && !Array.isArray(res)) {
-          setArtistData({ ...res, artworkPath: DefaultArtistCover });
-        }
-      });
+    if (currentlyActivePage.data && currentlyActivePage.data.artistName) {
+      window.api
+        .getArtistData(currentlyActivePage.data.artistName)
+        .then((res) => {
+          if (res && !Array.isArray(res)) {
+            setArtistData({ ...res, artworkPath: DefaultArtistCover });
+          }
+        });
     }
-  }, [props.data]);
+  }, [currentlyActivePage.data]);
 
   React.useEffect(() => {
     if (artistData.artistId)
@@ -138,8 +132,8 @@ export default (props: ArtistInfoProp) => {
                   songs={album.songs}
                   title={album.title}
                   year={album.year}
-                  changeCurrentActivePage={props.changeCurrentActivePage}
-                  currentlyActivePage={props.currentlyActivePage}
+                  changeCurrentActivePage={changeCurrentActivePage}
+                  currentlyActivePage={currentlyActivePage}
                   key={index}
                 />
               );
@@ -159,12 +153,12 @@ export default (props: ArtistInfoProp) => {
                   artists={song.artists}
                   duration={song.duration}
                   songId={song.songId}
-                  changeCurrentActivePage={props.changeCurrentActivePage}
-                  currentlyActivePage={props.currentlyActivePage}
+                  changeCurrentActivePage={changeCurrentActivePage}
+                  currentlyActivePage={currentlyActivePage}
                   artworkPath={song.artworkPath}
-                  currentSongData={props.currentSongData}
-                  playSong={props.playSong}
-                  updateContextMenuData={props.updateContextMenuData}
+                  currentSongData={currentSongData}
+                  playSong={playSong}
+                  updateContextMenuData={updateContextMenuData}
                 />
               );
             })}

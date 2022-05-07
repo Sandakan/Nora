@@ -3,28 +3,24 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/self-closing-comp */
-import { ReactElement } from 'react';
+import { useContext } from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 
-interface DialogMenuProp {
-  data: DialogMenuData;
-  updateDialogMenuData: (
-    delay: number,
-    content: ReactElement<any, any>
-  ) => void;
-}
-
-export default (props: DialogMenuProp) => {
+export default () => {
+  const { updateDialogMenuData, dialogMenuData } = useContext(AppContext);
   return (
     <div
-      className={`dialog-menu-container ${props.data.isVisible && 'visible'}`}
+      className={`dialog-menu-container ${
+        dialogMenuData.isVisible && 'visible'
+      }`}
       id="dialogMenusContainer"
     >
-      <div className="message-container">{props.data.content}</div>
+      <div className="message-container">{dialogMenuData.content}</div>
       <div className="buttons-container">
         <div id="dialogMenuCloseBtn">
           <span
             className="material-icons icon"
-            onClick={() => props.updateDialogMenuData(0, <></>)}
+            onClick={() => updateDialogMenuData(0, <></>)}
           >
             close
           </span>

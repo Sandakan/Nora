@@ -9,27 +9,22 @@
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
-import React from 'react';
+import React, { useContext } from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 import { Album } from '../AlbumsPage/Album';
 import { Artist } from '../ArtistPage/Artist';
 import { Song } from '../SongsPage/song';
 import { MostRelevantResult } from './MostRelevantResult';
 import { ResultFilter } from './ResultFilter';
 
-interface SearchPageProp {
-  playSong: (songId: string) => void;
-  currentSongData: AudioData;
-  updateContextMenuData: (
-    isVisible: boolean,
-    menuItems: any[],
-    pageX?: number,
-    pageY?: number
-  ) => void;
-  currentlyActivePage: { pageTitle: string; data?: any };
-  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
-}
-
-export const SearchPage = (props: SearchPageProp) => {
+export const SearchPage = () => {
+  const {
+    playSong,
+    currentSongData,
+    updateContextMenuData,
+    currentlyActivePage,
+    changeCurrentActivePage,
+  } = useContext(AppContext);
   const [searchInput, setSearchInput] = React.useState('');
   const [searchResults, setSearchResults] = React.useState({
     albums: [],
@@ -75,24 +70,24 @@ export const SearchPage = (props: SearchPageProp) => {
         artworkPath={firstResult.artworkPath}
         infoType1={firstResult.artists}
         infoType2={firstResult.album}
-        playSong={props.playSong}
-        updateContextMenuData={props.updateContextMenuData}
+        playSong={playSong}
+        updateContextMenuData={updateContextMenuData}
         contextMenuItems={[
           {
             label: 'Play',
             iconName: 'play_arrow',
-            handlerFunction: () => props.playSong(props.currentSongData.songId),
+            handlerFunction: () => playSong(currentSongData.songId),
           },
           {
             label: 'Reveal in File Explorer',
             class: 'reveal-file-explorer',
             iconName: 'folder_open',
             handlerFunction: () =>
-              window.api.revealSongInFileExplorer(props.currentSongData.songId),
+              window.api.revealSongInFileExplorer(currentSongData.songId),
           },
         ]}
-        currentlyActivePage={props.currentlyActivePage}
-        changeCurrentActivePage={props.changeCurrentActivePage}
+        currentlyActivePage={currentlyActivePage}
+        changeCurrentActivePage={changeCurrentActivePage}
       />
     );
 
@@ -107,11 +102,11 @@ export const SearchPage = (props: SearchPageProp) => {
               artworkPath={song.artworkPath}
               duration={song.duration}
               songId={song.songId}
-              playSong={props.playSong}
-              currentSongData={props.currentSongData}
-              updateContextMenuData={props.updateContextMenuData}
-              currentlyActivePage={props.currentlyActivePage}
-              changeCurrentActivePage={props.changeCurrentActivePage}
+              playSong={playSong}
+              currentSongData={currentSongData}
+              updateContextMenuData={updateContextMenuData}
+              currentlyActivePage={currentlyActivePage}
+              changeCurrentActivePage={changeCurrentActivePage}
             />
           );
         else return undefined;
@@ -130,10 +125,10 @@ export const SearchPage = (props: SearchPageProp) => {
         infoType1={`${firstResult.songs.length} song${
           firstResult.songs.length === 1 ? '' : 's'
         }`}
-        updateContextMenuData={props.updateContextMenuData}
+        updateContextMenuData={updateContextMenuData}
         contextMenuItems={[]}
-        currentlyActivePage={props.currentlyActivePage}
-        changeCurrentActivePage={props.changeCurrentActivePage}
+        currentlyActivePage={currentlyActivePage}
+        changeCurrentActivePage={changeCurrentActivePage}
       />
     );
 
@@ -145,8 +140,8 @@ export const SearchPage = (props: SearchPageProp) => {
               key={artist.artistId}
               name={artist.name}
               artworkPath={artist.artworkPath}
-              changeCurrentActivePage={props.changeCurrentActivePage}
-              currentlyActivePage={props.currentlyActivePage}
+              changeCurrentActivePage={changeCurrentActivePage}
+              currentlyActivePage={currentlyActivePage}
             />
           );
         else return undefined;
@@ -166,10 +161,10 @@ export const SearchPage = (props: SearchPageProp) => {
         infoType2={`${firstResult.songs.length} song${
           firstResult.songs.length === 1 ? '' : 's'
         }`}
-        updateContextMenuData={props.updateContextMenuData}
+        updateContextMenuData={updateContextMenuData}
         contextMenuItems={[]}
-        currentlyActivePage={props.currentlyActivePage}
-        changeCurrentActivePage={props.changeCurrentActivePage}
+        currentlyActivePage={currentlyActivePage}
+        changeCurrentActivePage={changeCurrentActivePage}
       />
     );
 
@@ -185,8 +180,8 @@ export const SearchPage = (props: SearchPageProp) => {
               songs={album.songs}
               title={album.title}
               year={album.year}
-              changeCurrentActivePage={props.changeCurrentActivePage}
-              currentlyActivePage={props.currentlyActivePage}
+              changeCurrentActivePage={changeCurrentActivePage}
+              currentlyActivePage={currentlyActivePage}
             />
           );
         else return undefined;

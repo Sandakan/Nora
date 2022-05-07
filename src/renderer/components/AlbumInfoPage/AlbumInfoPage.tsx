@@ -5,55 +5,80 @@
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable react/destructuring-assignment */
-import React from 'react';
+import React, { useContext } from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 import { Song } from '../SongsPage/song';
 
-interface AlbumInfoPageProp {
-  data: {
-    albumId: string;
-  };
-  playSong: (songId: string) => void;
-  currentSongData: AudioData;
-  updateContextMenuData: (
-    isVisible: boolean,
-    menuItems: any[],
-    pageX?: number,
-    pageY?: number
-  ) => void;
-  currentlyActivePage: { pageTitle: string; data?: any };
-  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
+interface AlbumContentReducer {
+  albumData: Album;
+  songsData: SongData[];
 }
 
-export default (props: AlbumInfoPageProp) => {
-  const [albumData, setAlbumData] = React.useState({} as Album);
-  const [songsData, setSongsData] = React.useState([] as SongData[]);
+type AlbumContentReducerActions = 'ALBUM_DATA_UPDATE' | 'SONGS_DATA_UPDATE';
+
+const reducer = (
+  state: AlbumContentReducer,
+  action: { type: AlbumContentReducerActions; data: any }
+): AlbumContentReducer => {
+  switch (action.type) {
+    case 'ALBUM_DATA_UPDATE':
+      return {
+        ...state,
+        albumData: action.data,
+      } as AlbumContentReducer;
+    case 'SONGS_DATA_UPDATE':
+      return {
+        ...state,
+        songsData: action.data,
+      } as AlbumContentReducer;
+    default:
+      return state;
+  }
+};
+
+export default () => {
+  const {
+    currentlyActivePage,
+    changeCurrentActivePage,
+    playSong,
+    updateContextMenuData,
+    currentSongData,
+  } = useContext(AppContext);
+
+  const [albumContent, dispatch] = React.useReducer(reducer, {
+    albumData: {} as Album,
+    songsData: [] as SongData[],
+  });
 
   React.useEffect(() => {
-    if (props.data.albumId) {
-      window.api.getAlbumData(props.data.albumId).then((res) => {
+    if (currentlyActivePage.data.albumId) {
+      window.api.getAlbumData(currentlyActivePage.data.albumId).then((res) => {
         if (res && !Array.isArray(res)) {
-          setAlbumData(res);
+          dispatch({ type: 'ALBUM_DATA_UPDATE', data: res });
         }
       });
     }
-  }, [props.data]);
+  }, [currentlyActivePage.data]);
 
   React.useEffect(() => {
-    if (albumData.songs && albumData.songs.length > 0) {
+    if (
+      albumContent.albumData.songs &&
+      albumContent.albumData.songs.length > 0
+    ) {
       const temp: Promise<SongData | undefined>[] = [];
-      albumData.songs.forEach((song) => {
+      albumContent.albumData.songs.forEach((song) => {
         temp.push(window.api.getSongInfo(song.songId));
       });
       Promise.all(temp).then((res) => {
         const data = res.filter((x) => x !== undefined) as SongData[];
-        setSongsData(data);
+        dispatch({ type: 'SONGS_DATA_UPDATE', data });
       });
     }
-  }, [albumData.songs]);
+  }, [albumContent.albumData.songs]);
 
   const songComponents =
-    songsData.length > 0
-      ? songsData.map((song) => {
+    albumContent.songsData.length > 0
+      ? albumContent.songsData.map((song) => {
           return (
             <Song
               key={song.songId}
@@ -62,11 +87,11 @@ export default (props: AlbumInfoPageProp) => {
               artworkPath={song.artworkPath}
               duration={song.duration}
               songId={song.songId}
-              playSong={props.playSong}
-              currentSongData={props.currentSongData}
-              updateContextMenuData={props.updateContextMenuData}
-              currentlyActivePage={props.currentlyActivePage}
-              changeCurrentActivePage={props.changeCurrentActivePage}
+              playSong={playSong}
+              currentSongData={currentSongData}
+              updateContextMenuData={updateContextMenuData}
+              currentlyActivePage={currentlyActivePage}
+              changeCurrentActivePage={changeCurrentActivePage}
             />
           );
         })
@@ -76,42 +101,46 @@ export default (props: AlbumInfoPageProp) => {
     <div className="main-container album-info-page-container">
       <div className="album-img-and-info-container">
         <div className="album-cover-container">
-          {albumData.artworkPath && (
+          {albumContent.albumData.artworkPath && (
             <img
-              src={`otomusic://localFiles/${albumData.artworkPath}`}
+              src={`otomusic://localFiles/${albumContent.albumData.artworkPath}`}
               alt=""
             />
           )}{' '}
         </div>
-        {albumData.title &&
-          albumData.artists.length > 0 &&
-          albumData.songs.length > 0 && (
+        {albumContent.albumData.title &&
+          albumContent.albumData.artists.length > 0 &&
+          albumContent.albumData.songs.length > 0 && (
             <div className="album-info-container">
-              <div className="album-title">{albumData.title}</div>
+              <div className="album-title">{albumContent.albumData.title}</div>
               <div className="album-artists">
-                {albumData.artists.map((artist, index) => (
+                {albumContent.albumData.artists.map((artist, index) => (
                   <span
                     className="artist"
                     title={artist}
                     onClick={() =>
-                      props.currentlyActivePage.pageTitle === 'ArtistInfo' &&
-                      props.currentlyActivePage.data.artistName === artist
-                        ? props.changeCurrentActivePage('Home')
-                        : props.changeCurrentActivePage('ArtistInfo', {
+                      currentlyActivePage.pageTitle === 'ArtistInfo' &&
+                      currentlyActivePage.data.artistName === artist
+                        ? changeCurrentActivePage('Home')
+                        : changeCurrentActivePage('ArtistInfo', {
                             artistName: artist,
                           })
                     }
                   >
                     {artist}
-                    {index === albumData.artists.length - 1 ? '' : ', '}
+                    {index === albumContent.albumData.artists.length - 1
+                      ? ''
+                      : ', '}
                   </span>
                 ))}
               </div>
               <div className="album-no-of-songs">{`${
-                albumData.songs.length
-              } song${albumData.songs.length === 1 ? '' : 's'}`}</div>
-              {albumData.year && (
-                <div className="album-year">{albumData.year}</div>
+                albumContent.albumData.songs.length
+              } song${
+                albumContent.albumData.songs.length === 1 ? '' : 's'
+              }`}</div>
+              {albumContent.albumData.year && (
+                <div className="album-year">{albumContent.albumData.year}</div>
               )}
             </div>
           )}

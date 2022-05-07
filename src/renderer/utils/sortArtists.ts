@@ -8,9 +8,9 @@ export default (data: Artist[], sortType: ArtistSortTypes) => {
       );
     else if (sortType === 'noOfSongs')
       sortedArtists = data.sort((a, b) =>
-        a.songs.length > b.songs.length
+        a.songs.length < b.songs.length
           ? 1
-          : a.songs.length < b.songs.length
+          : a.songs.length > b.songs.length
           ? -1
           : 0
       );

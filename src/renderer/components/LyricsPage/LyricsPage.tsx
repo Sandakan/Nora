@@ -6,29 +6,26 @@
 /* eslint-disable react/no-unused-prop-types */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
-import React from 'react';
+import React, { useContext } from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 import { Lyric, NoLyrics, LyricsSource } from './Lyrics';
 
-interface LyricsPageProp {
-  songTitle: string;
-  songArtists: string | string[];
-}
-
-export const LyricsPage = (props: LyricsPageProp) => {
+export const LyricsPage = () => {
+  const { currentSongData } = useContext(AppContext);
   const x = null;
   const [lyrics, setLyrics] = React.useState(x as Lyrics | undefined | null);
   React.useEffect(() => {
     window.api
       .getSongLyrics(
-        props.songTitle,
-        Array.isArray(props.songArtists)
-          ? props.songArtists.join(', ')
-          : props.songArtists
+        currentSongData.title,
+        Array.isArray(currentSongData.artists)
+          ? currentSongData.artists.join(', ')
+          : currentSongData.artists
       )
       .then((res) => {
         setLyrics(res);
       });
-  }, [props.songTitle]);
+  }, [currentSongData.title]);
 
   // console.log(lyrics);
 

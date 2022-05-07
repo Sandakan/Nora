@@ -10,52 +10,69 @@
 /* eslint-disable no-else-return */
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable import/prefer-default-export */
-import React from 'react';
-// import { logger } from 'main/logger';
+import React, { useContext } from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 import sortSongs from 'renderer/utils/sortSongs';
 import { Song } from './song';
 import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
-import { Artist } from '../ArtistPage/Artist';
+// import { Artist } from '../ArtistPage/Artist';
 
-interface SongsPageProp {
-  playSong: (url: string) => void;
-  currentSongData: AudioData;
-  updateContextMenuData: (
-    isVisible: boolean,
-    menuItems: ContextMenuItem[],
-    pageX?: number,
-    pageY?: number
-  ) => void;
-  currentlyActivePage: { pageTitle: string; data?: any };
-  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
-  // queue: Queue;
-  // updateQueueData: (currentSongIndex?: number, queue?: string[]) => void;
+interface SongPageReducer {
+  songsData: AudioInfo[];
+  sortingOrder: SongsPageSortTypes;
 }
 
-export const SongsPage = (props: SongsPageProp) => {
-  const songsData: AudioInfo[] = [];
-  const [songData, setSongData] = React.useState(songsData);
-  const [sortingOrder, setSortingOrder] = React.useState(
-    'aToZ' as SongsPageSortTypes
-  );
+type SongPageReducerActionTypes = 'SONGS_DATA' | 'SORTING_ORDER';
+
+const reducer = (
+  state: SongPageReducer,
+  action: { type: SongPageReducerActionTypes; data: any }
+): SongPageReducer => {
+  switch (action.type) {
+    case 'SONGS_DATA':
+      return {
+        ...state,
+        songsData: action.data,
+      };
+    case 'SORTING_ORDER':
+      return {
+        ...state,
+        songsData: sortSongs(state.songsData, action.data),
+        sortingOrder: action.data,
+      };
+    default:
+      return state;
+  }
+};
+
+export const SongsPage = () => {
+  const {
+    playSong,
+    currentSongData,
+    updateContextMenuData,
+    currentlyActivePage,
+    changeCurrentActivePage,
+  } = useContext(AppContext);
+
+  const [content, dispatch] = React.useReducer(reducer, {
+    songsData: [],
+    sortingOrder: 'aToZ',
+  });
 
   React.useEffect(() => {
     window.api
       .checkForSongs()
       .then((audioInfoArray) => {
         if (audioInfoArray)
-          return setSongData(sortSongs(audioInfoArray, sortingOrder));
+          return dispatch({
+            type: 'SONGS_DATA',
+            data: sortSongs(audioInfoArray, content.sortingOrder),
+          });
       })
       .catch((err) => console.log(err));
   }, []);
 
-  React.useEffect(
-    () => setSongData((prevData) => sortSongs(prevData, sortingOrder)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [sortingOrder]
-  );
-
-  const songs = songData.map((song) => {
+  const songs = content.songsData.map((song) => {
     return (
       <Song
         key={song.songId}
@@ -64,13 +81,13 @@ export const SongsPage = (props: SongsPageProp) => {
         duration={song.duration}
         songId={song.songId}
         artists={song.artists}
-        playSong={props.playSong}
-        currentSongData={props.currentSongData}
-        updateContextMenuData={props.updateContextMenuData}
-        changeCurrentActivePage={props.changeCurrentActivePage}
-        currentlyActivePage={props.currentlyActivePage}
-        // updateQueueData={props.updateQueueData}
-        // queue={props.queue}
+        playSong={playSong}
+        currentSongData={currentSongData}
+        updateContextMenuData={updateContextMenuData}
+        changeCurrentActivePage={changeCurrentActivePage}
+        currentlyActivePage={currentlyActivePage}
+        // updateQueueData={updateQueueData}
+        // queue={queue}
       />
     );
   });
@@ -82,9 +99,9 @@ export const SongsPage = (props: SongsPageProp) => {
         <select
           name="sortingOrderDropdown"
           id="sortingOrderDropdown"
-          value={sortingOrder}
+          value={content.sortingOrder}
           onChange={(e) =>
-            setSortingOrder(e.currentTarget.value as SongsPageSortTypes)
+            dispatch({ type: 'SORTING_ORDER', data: e.currentTarget.value })
           }
         >
           <option value="aToZ">A to Z</option>

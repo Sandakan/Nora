@@ -17,37 +17,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/self-closing-comp */
-import React from 'react';
+import React, { useContext } from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 import { calculateTime } from '../../../main/calculateTime';
 import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
 
-interface SongControlsContainerProp {
-  isStartPlay: boolean;
-  currentSongData: AudioData;
-  userData?: UserData;
-  playSong: (songId: string, startPlay: boolean) => void;
-  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
-  currentlyActivePage: { pageTitle: string; data?: any };
-  // queue: Queue;
-  // changeQueueCurrentSongIndex: (songIndex: number) => void;
-  updateContextMenuData: (
-    isVisible: boolean,
-    menuItems: any[],
-    pageX: number,
-    pageY: number
-  ) => void;
-}
-
 const music = new Audio();
 
-export default (props: SongControlsContainerProp) => {
+export default () => {
+  const {
+    isStartPlay,
+    currentSongData,
+    userData,
+    changeCurrentActivePage,
+    currentlyActivePage,
+    // playSong,
+    // updateContextMenuData,
+  } = useContext(AppContext);
   const [songSlidervalue, setSongSliderValue] = React.useState(0);
   const [volumeSlidervalue, setVolumeSlidervalue] = React.useState(
-    // props.userData ? props.userData?.volume.value / 100 : 50`1
+    // userData ? userData?.volume.value / 100 : 50`1
     50
   );
   const [isLiked, setIsLiked] = React.useState(
-    props.currentSongData ? props.currentSongData.isAFavorite : false
+    currentSongData ? currentSongData.isAFavorite : false
   );
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [isShuffling, setIsShuffling] = React.useState(false);
@@ -69,23 +62,23 @@ export default (props: SongControlsContainerProp) => {
   volumeBarCssProperties['--volume-before-width'] = `${volumeSlidervalue}%`;
 
   React.useEffect(() => {
-    if (props.currentSongData.path)
-      music.src = `otoMusic://localFiles/${props.currentSongData.path}`;
+    if (currentSongData.path)
+      music.src = `otoMusic://localFiles/${currentSongData.path}`;
     const playCurrentSong = () => {
-      if (props.isStartPlay) music.play();
+      if (isStartPlay) music.play();
     };
     music.addEventListener('canplay', playCurrentSong);
     // ? MEDIA SESSION EVENTS
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: props.currentSongData.title,
-        artist: Array.isArray(props.currentSongData.artists)
-          ? props.currentSongData.artists.join(', ')
-          : props.currentSongData.artists,
-        album: props.currentSongData.album || 'Unknown Album',
+        title: currentSongData.title,
+        artist: Array.isArray(currentSongData.artists)
+          ? currentSongData.artists.join(', ')
+          : currentSongData.artists,
+        album: currentSongData.album || 'Unknown Album',
         artwork: [
           {
-            src: `data:;base64,${props.currentSongData.artwork}`,
+            src: `data:;base64,${currentSongData.artwork}`,
             sizes: '300x300',
             type: 'image/png',
           },
@@ -107,21 +100,18 @@ export default (props: SongControlsContainerProp) => {
       );
     }
     return () => music.removeEventListener('canplay', playCurrentSong);
-  }, [props.currentSongData.path]);
+  }, [currentSongData.path]);
 
   React.useEffect(() => {
-    if (props.userData?.volume)
-      showRangeProgress('volume', props.userData?.volume.value || 50, 100);
-    if (
-      props.userData?.currentSong &&
-      props.userData.currentSong.stoppedPosition
-    )
+    if (userData?.volume)
+      showRangeProgress('volume', userData?.volume.value || 50, 100);
+    if (userData?.currentSong && userData.currentSong.stoppedPosition)
       showRangeProgress(
         'audio',
-        props.userData?.currentSong.stoppedPosition || 0,
+        userData?.currentSong.stoppedPosition || 0,
         music.duration || 0
       );
-  }, [props.userData]);
+  }, [userData]);
 
   React.useEffect(() => {
     music.addEventListener('pause', () => {
@@ -158,22 +148,22 @@ export default (props: SongControlsContainerProp) => {
   };
 
   const addSongTitleToTitleBar = () => {
-    if (props.currentSongData.title && props.currentSongData.artists)
-      document.title = `${props.currentSongData.title} - ${
-        Array.isArray(props.currentSongData.artists)
-          ? props.currentSongData.artists.join(', ')
-          : props.currentSongData.artists
+    if (currentSongData.title && currentSongData.artists)
+      document.title = `${currentSongData.title} - ${
+        Array.isArray(currentSongData.artists)
+          ? currentSongData.artists.join(', ')
+          : currentSongData.artists
       }`;
   };
   React.useEffect(() => {
-    setIsLiked(props.currentSongData.isAFavorite);
+    setIsLiked(currentSongData.isAFavorite);
     music.addEventListener('ended', handleSongEnd);
     music.addEventListener('play', addSongTitleToTitleBar);
     return () => {
       music.removeEventListener('ended', handleSongEnd);
       music.removeEventListener('play', addSongTitleToTitleBar);
     };
-  }, [props.currentSongData, isRepeating]);
+  }, [currentSongData, isRepeating]);
 
   const handleSongPlayback = () => {
     if (music.paused) {
@@ -198,29 +188,27 @@ export default (props: SongControlsContainerProp) => {
   };
 
   const toggleSongLike = () => {
-    window.api
-      .toggleLikeSong(props.currentSongData.songId, !isLiked)
-      .then((res) => {
-        if (res && !res.error) setIsLiked((prevData) => !prevData);
-        else console.log(res?.error);
-      });
+    window.api.toggleLikeSong(currentSongData.songId, !isLiked).then((res) => {
+      if (res && !res.error) setIsLiked((prevData) => !prevData);
+      else console.log(res?.error);
+    });
   };
 
   const handleSkipBackwardClick = () => {
     music.currentTime = 0;
-    // const { queue, currentSongIndex } = props.queue;
+    // const { queue, currentSongIndex } = queue;
     // if (music.currentTime > 5) music.currentTime = 0;
     // else {
     //   if (typeof currentSongIndex === 'number') {
     //     if (currentSongIndex === 0)
-    //       props.changeQueueCurrentSongIndex(queue.length - 1);
-    //     else props.changeQueueCurrentSongIndex(currentSongIndex - 1);
-    //   } else props.changeQueueCurrentSongIndex(0);
+    //       changeQueueCurrentSongIndex(queue.length - 1);
+    //     else changeQueueCurrentSongIndex(currentSongIndex - 1);
+    //   } else changeQueueCurrentSongIndex(0);
     // }
   };
 
   const handleSkipForwardClick = () => {
-    // const { queue, currentSongIndex } = props.queue;
+    // const { queue, currentSongIndex } = queue;
     // console.log('isRepeating ', isRepeating);
     // if (isRepeating) {
     //   music.currentTime = 0;
@@ -228,12 +216,12 @@ export default (props: SongControlsContainerProp) => {
     // } else {
     //   if (typeof currentSongIndex === 'number') {
     //     if (queue.length - 1 === currentSongIndex)
-    //       props.changeQueueCurrentSongIndex(0);
-    //     else props.changeQueueCurrentSongIndex(currentSongIndex + 1);
-    //   } else props.changeQueueCurrentSongIndex(0);
+    //       changeQueueCurrentSongIndex(0);
+    //     else changeQueueCurrentSongIndex(currentSongIndex + 1);
+    //   } else changeQueueCurrentSongIndex(0);
     // const songId =
-    //   props.queue.queue[props.queue.currentSongIndex || 0];
-    // props.playSong(songId, true);
+    //   queue.queue[queue.currentSongIndex || 0];
+    // playSong(songId, true);
     // }
   };
 
@@ -243,8 +231,8 @@ export default (props: SongControlsContainerProp) => {
         <div className="song-cover-container" id="currentSongCover">
           <img
             src={
-              props.currentSongData.artworkPath
-                ? `otomusic://localFiles/${props.currentSongData.artworkPath}`
+              currentSongData.artworkPath
+                ? `otomusic://localFiles/${currentSongData.artworkPath}`
                 : DefaultSongCover
             }
             alt="Default song cover"
@@ -254,23 +242,21 @@ export default (props: SongControlsContainerProp) => {
           <div
             className="song-title"
             id="currentSongTitle"
-            title={
-              props.currentSongData.title ? props.currentSongData.title : ''
-            }
+            title={currentSongData.title ? currentSongData.title : ''}
             onClick={() =>
-              props.currentlyActivePage.pageTitle === 'SongInfo'
-                ? props.changeCurrentActivePage('Home')
-                : props.changeCurrentActivePage('SongInfo')
+              currentlyActivePage.pageTitle === 'SongInfo'
+                ? changeCurrentActivePage('Home')
+                : changeCurrentActivePage('SongInfo')
             }
           >
-            {props.currentSongData.title ? props.currentSongData.title : ''}
+            {currentSongData.title ? currentSongData.title : ''}
           </div>
           <div className="song-artists" id="currentSongArtists">
-            {props.currentSongData.artists ? (
-              Array.isArray(props.currentSongData.artists) ? (
-                props.currentSongData.artists.length > 0 &&
-                props.currentSongData.artists[0] !== '' ? (
-                  props.currentSongData.artists.map((artist, index) => (
+            {currentSongData.artists ? (
+              Array.isArray(currentSongData.artists) ? (
+                currentSongData.artists.length > 0 &&
+                currentSongData.artists[0] !== '' ? (
+                  currentSongData.artists.map((artist, index) => (
                     // !THIS REACT FRAGMENT GENERATES A KEY PROP ERROR IN CONSOLE
                     <>
                       <span
@@ -278,19 +264,18 @@ export default (props: SongControlsContainerProp) => {
                         key={index}
                         title={artist}
                         onClick={() =>
-                          props.currentlyActivePage.pageTitle ===
-                            'ArtistInfo' &&
-                          props.currentlyActivePage.data.artistName === artist
-                            ? props.changeCurrentActivePage('Home')
-                            : props.changeCurrentActivePage('ArtistInfo', {
+                          currentlyActivePage.pageTitle === 'ArtistInfo' &&
+                          currentlyActivePage.data.artistName === artist
+                            ? changeCurrentActivePage('Home')
+                            : changeCurrentActivePage('ArtistInfo', {
                                 artistName: artist,
                               })
                         }
                       >
                         {artist}
                       </span>
-                      {props.currentSongData.artists.length === 0 ||
-                      props.currentSongData.artists.length - 1 === index
+                      {currentSongData.artists.length === 0 ||
+                      currentSongData.artists.length - 1 === index
                         ? ''
                         : ', '}
                     </>
@@ -299,8 +284,8 @@ export default (props: SongControlsContainerProp) => {
                   'Unknown Artist'
                 )
               ) : (
-                <span className="artist" title={props.currentSongData.artists}>
-                  {props.currentSongData.artists}
+                <span className="artist" title={currentSongData.artists}>
+                  {currentSongData.artists}
                 </span>
               )
             ) : (
@@ -358,16 +343,16 @@ export default (props: SongControlsContainerProp) => {
           </div>
           <div
             className={`lyrics-btn ${
-              props.currentlyActivePage.pageTitle === 'Lyrics' && 'active'
+              currentlyActivePage.pageTitle === 'Lyrics' && 'active'
             }`}
           >
             <span
               title="Lyrics"
               className="material-icons-round icon"
               onClick={() =>
-                props.currentlyActivePage.pageTitle === 'Lyrics'
-                  ? props.changeCurrentActivePage('Home')
-                  : props.changeCurrentActivePage('Lyrics')
+                currentlyActivePage.pageTitle === 'Lyrics'
+                  ? changeCurrentActivePage('Home')
+                  : changeCurrentActivePage('Lyrics')
               }
             >
               notes
@@ -420,16 +405,16 @@ export default (props: SongControlsContainerProp) => {
         </div>
         <div
           className={`queue-btn ${
-            props.currentlyActivePage.pageTitle === 'CurrentQueue' && 'active'
+            currentlyActivePage.pageTitle === 'CurrentQueue' && 'active'
           }`}
         >
           <span
             title="Current Queue"
             className="material-icons-round icon"
             onClick={() =>
-              props.currentlyActivePage.pageTitle === 'CurrentQueue'
-                ? props.changeCurrentActivePage('Home')
-                : props.changeCurrentActivePage('CurrentQueue')
+              currentlyActivePage.pageTitle === 'CurrentQueue'
+                ? changeCurrentActivePage('Home')
+                : changeCurrentActivePage('CurrentQueue')
             }
           >
             queue

@@ -3,18 +3,15 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
-// import React from 'react';
+import React from 'react';
 import LightModeLogo from '../../../../assets/images/logo_light_mode.png';
+import { AppContext } from '../../contexts/AppContext';
 
-interface HeaderProp {
-  setDarkMode: () => void;
-  isDarkMode: boolean;
-}
-
-export const Header = (props: HeaderProp) => {
+export const Header = () => {
   const close = () => window.api.closeApp();
   const minimize = () => window.api.minimizeApp();
   const maximize = () => window.api.toggleMaximizeApp();
+  const { toggleDarkMode, isDarkMode } = React.useContext(AppContext);
   return (
     <header id="title-bar">
       <div className="logo-and-app-name-container">
@@ -35,9 +32,9 @@ export const Header = (props: HeaderProp) => {
           <span className="change-theme-btn">
             <i
               className="material-icons-round"
-              onClick={() => props.setDarkMode()}
+              onClick={() => toggleDarkMode()}
             >
-              {props.isDarkMode ? 'wb_sunny' : 'dark_mode'}
+              {isDarkMode ? 'wb_sunny' : 'dark_mode'}
             </i>
           </span>
         </div>

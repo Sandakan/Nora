@@ -4,27 +4,21 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
-import { ReactElement } from 'react';
+import React, { ReactElement } from 'react';
+import { AppContext } from '../../contexts/AppContext';
 
-interface PromptMenuProp {
-  data: { content: any; isVisible: boolean; className: string };
-  changePromptMenuData: (
-    isVisible: boolean,
-    content?: ReactElement<any, any>,
-    className?: string
-  ) => void;
-}
+export const PromptMenu = () => {
+  const { changePromptMenuData, promptMenuData } = React.useContext(AppContext);
 
-export const PromptMenu = (props: PromptMenuProp) => {
   return (
     <div
       id="promptMenuContainer"
       className={`prompt-menu-container ${
-        props.data.isVisible ? 'visible' : ''
+        promptMenuData.isVisible ? 'visible' : ''
       }`}
       onClick={(e) => {
         e.stopPropagation();
-        props.changePromptMenuData(false);
+        changePromptMenuData(false);
       }}
     >
       <div
@@ -39,16 +33,16 @@ export const PromptMenu = (props: PromptMenuProp) => {
           id="promptMenuCloseBtn"
           onClick={(e) => {
             e.stopPropagation();
-            props.changePromptMenuData(false);
+            changePromptMenuData(false);
           }}
         >
           close
         </span>
         <div
-          className={`prompt-menu-inner ${props.data.className}`}
+          className={`prompt-menu-inner ${promptMenuData.className}`}
           id="promptMenuInner"
         >
-          {props.data.content}
+          {promptMenuData.content}
         </div>
       </div>
     </div>

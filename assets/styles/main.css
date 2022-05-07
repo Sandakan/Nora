@@ -507,7 +507,7 @@ select::-ms-expand {
 .recently-added-songs-container .songs-container {
   width: 100%;
   height: 150px;
-  overflow: auto hidden;
+  /* overflow: auto hidden; */
   display: flex;
   padding-bottom: 1em;
 }

@@ -11,31 +11,21 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useContext } from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 import { SongCard } from '../SongsPage/songCard';
 import { Artist } from '../ArtistPage/Artist';
 import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
 import NoSongsImage from '../../../../assets/images/empty-folder.png';
 
-interface HomePageProp {
-  playSong: (songId: string) => void;
-  updateContextMenuData: (
-    isVisible: boolean,
-    menuItems: ContextMenuItem[],
-    pageX?: number,
-    pageY?: number
-  ) => void;
-  currentlyActivePage: { pageTitle: string; data?: any };
-  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
-  updateDialogMenuData: (
-    delay: number,
-    content: ReactElement<any, any>
-  ) => void;
-  // updateQueueData: (currentSongIndex?: number, queue?: string[]) => void;
-  // queue: Queue;
-}
-
-export const HomePage = (props: HomePageProp) => {
+export const HomePage = () => {
+  const {
+    playSong,
+    updateContextMenuData,
+    currentlyActivePage,
+    changeCurrentActivePage,
+    updateDialogMenuData,
+  } = useContext(AppContext);
   const songsData: (AudioInfo | null)[] = [];
   const recentPlayedSongs: SongData[] = [];
   const z: Artist[] = [];
@@ -46,7 +36,7 @@ export const HomePage = (props: HomePageProp) => {
 
   React.useEffect(() => {
     window.api.checkForSongs().then((audioData) => {
-      if (!audioData || audioData.length === 0) setSongData([null]);
+      if (!audioData || audioData.length === 0) return setSongData([null]);
       else {
         setSongData(audioData.slice(0, 5));
         return undefined;
@@ -109,10 +99,10 @@ export const HomePage = (props: HomePageProp) => {
             songId={song.songId}
             artists={song.artists}
             palette={song.palette}
-            playSong={props.playSong}
-            updateContextMenuData={props.updateContextMenuData}
-            changeCurrentActivePage={props.changeCurrentActivePage}
-            currentlyActivePage={props.currentlyActivePage}
+            playSong={playSong}
+            updateContextMenuData={updateContextMenuData}
+            changeCurrentActivePage={changeCurrentActivePage}
+            currentlyActivePage={currentlyActivePage}
           />
         );
       } else return undefined;
@@ -132,10 +122,10 @@ export const HomePage = (props: HomePageProp) => {
             songId={song.songId}
             artists={song.artists}
             palette={song.palette}
-            playSong={props.playSong}
-            updateContextMenuData={props.updateContextMenuData}
-            changeCurrentActivePage={props.changeCurrentActivePage}
-            currentlyActivePage={props.currentlyActivePage}
+            playSong={playSong}
+            updateContextMenuData={updateContextMenuData}
+            changeCurrentActivePage={changeCurrentActivePage}
+            currentlyActivePage={currentlyActivePage}
           />
         );
       } else return undefined;
@@ -156,8 +146,8 @@ export const HomePage = (props: HomePageProp) => {
                   name={artist.name}
                   key={index}
                   artworkPath={artist.artworkPath}
-                  changeCurrentActivePage={props.changeCurrentActivePage}
-                  currentlyActivePage={props.currentlyActivePage}
+                  changeCurrentActivePage={changeCurrentActivePage}
+                  currentlyActivePage={currentlyActivePage}
                 />
               );
             else return undefined;
@@ -191,7 +181,7 @@ export const HomePage = (props: HomePageProp) => {
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        props.updateContextMenuData(
+        updateContextMenuData(
           true,
           [
             {
@@ -201,13 +191,13 @@ export const HomePage = (props: HomePageProp) => {
                 window.api
                   .resyncSongsLibrary()
                   .then(() =>
-                    props.updateDialogMenuData(
+                    updateDialogMenuData(
                       5000,
                       <span>Songs Library updated successfully.</span>
                     )
                   )
                   .catch(() => {
-                    props.updateDialogMenuData(
+                    updateDialogMenuData(
                       5000,
                       <span>Resyncing Songs Library failed.</span>
                     );

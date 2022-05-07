@@ -6,34 +6,31 @@
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable react/destructuring-assignment */
-import React from 'react';
+import React, { useContext } from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 import { calculateTime } from 'renderer/utils/calculateTime';
 import { valueRounder } from 'renderer/utils/valueRounder';
 import SongStat from './SongStat';
 
-interface SongInfoProp {
-  currentSongData: AudioData;
-  currentlyActivePage: { pageTitle: string; data?: any };
-  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
-}
-
-export default (props: SongInfoProp) => {
+export default () => {
+  const { currentSongData, currentlyActivePage, changeCurrentActivePage } =
+    useContext(AppContext);
   const x: unknown = undefined;
   const [songInfo, setSongInfo] = React.useState(x as SongData | undefined);
   let songDuration = '0 seconds';
-  if (props.currentSongData && songInfo) {
+  if (currentSongData && songInfo) {
     const [minutes, seconds] = calculateTime(songInfo.duration).split(':');
     if (Number(minutes) === 0) songDuration = `${seconds} seconds`;
     else songDuration = `${minutes} minutes ${seconds} seconds`;
   }
 
   React.useEffect(() => {
-    if (props.currentSongData) {
-      window.api.getSongInfo(props.currentSongData.songId).then((res) => {
+    if (currentSongData) {
+      window.api.getSongInfo(currentSongData.songId).then((res) => {
         if (res) setSongInfo(res);
       });
     }
-  }, [props.currentSongData]);
+  }, [currentSongData]);
 
   const calculateTotalListensOfTheYear = (arr: number[]) => {
     let val = 0;
@@ -48,42 +45,38 @@ export default (props: SongInfoProp) => {
       <div className="container">
         <div className="song-cover-container">
           <img
-            src={`otomusic://localFiles/${props.currentSongData.artworkPath}`}
-            alt={`${props.currentSongData.title} cover`}
+            src={`otomusic://localFiles/${currentSongData.artworkPath}`}
+            alt={`${currentSongData.title} cover`}
           />
         </div>
         <div className="song-info">
-          <div
-            className="title info-type-1"
-            title={props.currentSongData.title}
-          >
-            {props.currentSongData.title}
+          <div className="title info-type-1" title={currentSongData.title}>
+            {currentSongData.title}
           </div>
           <div className="song-artists info-type-2">
-            {props.currentSongData.artists ? (
-              Array.isArray(props.currentSongData.artists) ? (
-                props.currentSongData.artists.length > 0 &&
-                props.currentSongData.artists[0] !== '' ? (
-                  props.currentSongData.artists.map((artist, index) => (
+            {currentSongData.artists ? (
+              Array.isArray(currentSongData.artists) ? (
+                currentSongData.artists.length > 0 &&
+                currentSongData.artists[0] !== '' ? (
+                  currentSongData.artists.map((artist, index) => (
                     <>
                       <span
                         className="artist"
                         key={index}
                         title={artist}
                         onClick={() =>
-                          props.currentlyActivePage.pageTitle ===
-                            'ArtistInfo' &&
-                          props.currentlyActivePage.data.artistName === artist
-                            ? props.changeCurrentActivePage('Home')
-                            : props.changeCurrentActivePage('ArtistInfo', {
+                          currentlyActivePage.pageTitle === 'ArtistInfo' &&
+                          currentlyActivePage.data.artistName === artist
+                            ? changeCurrentActivePage('Home')
+                            : changeCurrentActivePage('ArtistInfo', {
                                 artistName: artist,
                               })
                         }
                       >
                         {artist}
                       </span>
-                      {props.currentSongData.artists.length === 0 ||
-                      props.currentSongData.artists.length - 1 === index
+                      {currentSongData.artists.length === 0 ||
+                      currentSongData.artists.length - 1 === index
                         ? ''
                         : ', '}
                     </>
@@ -92,8 +85,8 @@ export default (props: SongInfoProp) => {
                   'Unknown Artist'
                 )
               ) : (
-                <span className="artist" title={props.currentSongData.artists}>
-                  {props.currentSongData.artists}
+                <span className="artist" title={currentSongData.artists}>
+                  {currentSongData.artists}
                 </span>
               )
             ) : (
@@ -102,18 +95,18 @@ export default (props: SongInfoProp) => {
           </div>
           <div
             className="info-type-2"
-            title={props.currentSongData.album}
+            title={currentSongData.album}
             // TODO - CANNOT ADD THIS FUNCTIONALITY BECAUSE OF ABSENCE OF INPUT DATA
             // onClick={() =>
-            //   props.currentlyActivePage.pageTitle === 'ArtistInfo' &&
-            //   props.currentlyActivePage.data.artistName === artist
-            //     ? props.changeCurrentActivePage('Home')
-            //     : props.changeCurrentActivePage('ArtistInfo', {
+            //   currentlyActivePage.pageTitle === 'ArtistInfo' &&
+            //   currentlyActivePage.data.artistName === artist
+            //     ? changeCurrentActivePage('Home')
+            //     : changeCurrentActivePage('ArtistInfo', {
             //         artistName: artist,
             //       })
             // }
           >
-            {props.currentSongData.album}
+            {currentSongData.album}
           </div>
           <div className="info-type-3" title={songDuration}>
             {songDuration}

@@ -20,6 +20,7 @@ import { BodyAndSideBarContainer } from './components/bodyAndSidebarContainer';
 import SongControlsContainer from './components/SongsControlsContainer/SongControlsContainer';
 import { PromptMenu } from './components/PromptMenu/PromptMenu';
 import { ContextMenu } from './components/ContextMenu/ContextMenu';
+import { AppContext } from './contexts/AppContext';
 // import '../../assets/fonts/fontawesome-free-6.0.0-web/css/all.min.css';
 
 export default function App() {
@@ -54,7 +55,7 @@ export default function App() {
 
   React.useEffect(() => {
     const handleContextMenuDataUpdate = () =>
-      contextMenuData.isVisible &&
+      // contextMenuData.isVisible &&
       setContextMenuData((prevData) => {
         return { ...prevData, isVisible: false };
       });
@@ -203,43 +204,37 @@ export default function App() {
   };
 
   return (
-    <div className={`App ${isDarkMode ? 'dark-mode' : ''}`}>
-      <ContextMenu
-        isVisible={contextMenuData.isVisible}
-        menuItems={contextMenuData.menuItems}
-        pageX={contextMenuData.pageX}
-        pageY={contextMenuData.pageY}
-        updateContextMenuData={updateContextMenuData}
-      />
-      <PromptMenu
-        data={promptMenuData}
-        changePromptMenuData={changePromptMenuData}
-      />
-      <Header setDarkMode={toggleDarkMode} isDarkMode={isDarkMode} />
-      <BodyAndSideBarContainer
-        playSong={playSong}
-        currentSongData={currentSongData}
-        changeCurrentActivePage={changeCurrentActivePage}
-        currentlyActivePage={currentlyActivePage}
-        changePromptMenuData={changePromptMenuData}
-        dialogMenuData={dialogMenuData}
-        updateDialogMenuData={updateDialogMenuData}
-        updateContextMenuData={updateContextMenuData}
-        // createQueue={createQueue}
-        // queue={queue}
-        // updateQueueData={updateQueueData}
-      />
-      <SongControlsContainer
-        playSong={playSong}
-        currentSongData={currentSongData}
-        userData={userData}
-        currentlyActivePage={currentlyActivePage}
-        changeCurrentActivePage={changeCurrentActivePage}
-        isStartPlay={startPlay}
-        updateContextMenuData={updateContextMenuData}
-        // changeQueueCurrentSongIndex={changeQueueCurrentSongIndex}
-        // queue={queue}
-      />
-    </div>
+    <AppContext.Provider
+      value={{
+        toggleDarkMode,
+        isDarkMode,
+        isContextMenuVisible: contextMenuData.isVisible,
+        contextMenuItems: contextMenuData.menuItems,
+        contextMenuPageX: contextMenuData.pageX,
+        contextMenuPageY: contextMenuData.pageY,
+        updateContextMenuData,
+        promptMenuData,
+        changePromptMenuData,
+        playSong,
+        currentSongData,
+        currentlyActivePage,
+        changeCurrentActivePage,
+        updateDialogMenuData,
+        dialogMenuData,
+        userData,
+        isStartPlay: startPlay,
+        // createQueue,
+        // queue,
+        // updateQueueData
+      }}
+    >
+      <div className={`App ${isDarkMode ? 'dark-mode' : ''}`}>
+        <ContextMenu />
+        <PromptMenu />
+        <Header />
+        <BodyAndSideBarContainer />
+        <SongControlsContainer />
+      </div>
+    </AppContext.Provider>
   );
 }
