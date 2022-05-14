@@ -1,3 +1,33 @@
 {
-	"cSpell.words": ["RIELL", "unmaximize", "xmark", "Yosef"]
+  "cSpell.words": [
+    "Deezer",
+    "horiz",
+    "Resyncing",
+    "RIELL",
+    "unmaximize",
+    "xmark",
+    "Yosef"
+  ],
+  "files.associations": {
+    ".eslintrc": "jsonc",
+    ".prettierrc": "jsonc",
+    ".eslintignore": "ignore"
+  },
+
+  "javascript.validate.enable": false,
+  "javascript.format.enable": false,
+  "typescript.format.enable": false,
+
+  "search.exclude": {
+    ".git": true,
+    ".eslintcache": true,
+    ".erb/dll": true,
+    "release/{build,app/dist}": true,
+    "node_modules": true,
+    "npm-debug.log.*": true,
+    "test/**/__snapshots__": true,
+    "package-lock.json": true,
+    "*.{css,sass,scss}.d.ts": true
+  },
+  "cSpell.ignoreWords": ["asar", "edata", "prettierrc"]
 }
