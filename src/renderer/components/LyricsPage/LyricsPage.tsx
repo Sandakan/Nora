@@ -11,10 +11,15 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import { Lyric, NoLyrics, LyricsSource } from './Lyrics';
 
 export const LyricsPage = () => {
-  const { currentSongData } = useContext(AppContext);
+  const { currentSongData, updateNotificationPanelData } =
+    useContext(AppContext);
   const x = null;
   const [lyrics, setLyrics] = React.useState(x as Lyrics | undefined | null);
   React.useEffect(() => {
+    updateNotificationPanelData(
+      5000,
+      <span>Fetching lyrics for &apos;{currentSongData.title}&apos;...</span>
+    );
     window.api
       .getSongLyrics(
         currentSongData.title,

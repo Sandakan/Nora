@@ -24,8 +24,8 @@ interface MostRelevantResultProp {
     pageY?: number
   ) => void;
   contextMenuItems: any[];
-  currentlyActivePage: { pageTitle: string; data?: any };
-  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
+  currentlyActivePage: { pageTitle: PageTitles; data?: any };
+  changeCurrentActivePage: (pageTitle: PageTitles, data?: any) => void;
 }
 
 export const MostRelevantResult = (props: MostRelevantResultProp) => {

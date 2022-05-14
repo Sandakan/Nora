@@ -8,7 +8,7 @@
 /* eslint-disable import/prefer-default-export */
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
-import { SideBarItem } from './sideBarItem';
+import { SideBarItem } from './SideBarItem';
 
 const linkData = [
   {
@@ -48,14 +48,15 @@ const linkData = [
   },
 ];
 
-export const SideBar = () => {
-  const { changeCurrentActivePage } = useContext(AppContext);
+export default React.memo(() => {
+  const { changeCurrentActivePage, currentlyActivePage } =
+    useContext(AppContext);
   const [data, setData] = React.useState(linkData);
 
-  const clickHandler = (id: number) => {
-    const arr = data.map((link, index) => {
-      if (index === id) {
-        changeCurrentActivePage(link.content);
+  const clickHandler = (id: string) => {
+    const arr = data.map((link) => {
+      if (link.content === id) {
+        changeCurrentActivePage(link.content as PageTitles);
         return link.parentClassName.includes('active')
           ? link
           : { ...link, parentClassName: `${link.parentClassName} active` };
@@ -69,10 +70,15 @@ export const SideBar = () => {
     setData(arr);
   };
 
+  React.useEffect(() => {
+    if (linkData.some((x) => x.content === currentlyActivePage.pageTitle))
+      clickHandler(currentlyActivePage.pageTitle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentlyActivePage.pageTitle]);
+
   const sideBarItems = data.map((link, index) => (
     <SideBarItem
       key={index}
-      id={index}
       parentClassName={link.parentClassName}
       icon={link.icon}
       content={link.content}
@@ -85,4 +91,4 @@ export const SideBar = () => {
       <ul>{sideBarItems}</ul>
     </nav>
   );
-};
+});

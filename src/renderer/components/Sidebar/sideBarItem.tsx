@@ -6,18 +6,17 @@
 // import React from 'react';
 
 interface SideBarItems {
-  id: number;
   parentClassName: string;
   icon: string;
   content: string;
-  handleClick: (id: number) => any;
+  handleClick: (id: string) => any;
 }
 
 export const SideBarItem = (props: SideBarItems) => {
   return (
     <li
       className={props.parentClassName}
-      onClick={() => props.handleClick(props.id)}
+      onClick={() => props.handleClick(props.content)}
     >
       <span className="icon material-icons-round">{props.icon}</span>{' '}
       {props.content}

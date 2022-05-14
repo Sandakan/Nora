@@ -8,8 +8,8 @@
 // import React from 'react';
 
 interface AlbumProp extends Album {
-  currentlyActivePage: { pageTitle: string; data?: any };
-  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
+  currentlyActivePage: { pageTitle: PageTitles; data?: any };
+  changeCurrentActivePage: (pageTitle: PageTitles, data?: any) => void;
 }
 
 export const Album = (props: AlbumProp) => {

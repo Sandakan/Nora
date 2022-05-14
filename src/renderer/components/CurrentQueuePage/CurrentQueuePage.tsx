@@ -2,38 +2,40 @@
 /* eslint-disable promise/always-return */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable promise/catch-or-return */
-import React from 'react';
+import React, { useContext } from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 import { Song } from '../SongsPage/song';
 
-interface CurrentQueuePageProp {
-  queue: Queue;
-  playSong: (songId: string) => void;
-  currentSongData: AudioData;
-  updateContextMenuData: (
-    isVisible: boolean,
-    menuItems: any[],
-    pageX?: number,
-    pageY?: number
-  ) => void;
-  currentlyActivePage: { pageTitle: string; data?: any };
-  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
-}
-
-export default (props: CurrentQueuePageProp) => {
+export default () => {
+  const { queue } = useContext(AppContext);
   const [queuedSongs, setQueuedSongs] = React.useState([] as AudioInfo[]);
+
   React.useEffect(() => {
     window.api.checkForSongs().then((res) => {
       if (res) {
-        const x = res
-          .map((result) => {
-            if (props.queue.queue.includes(result.songId)) return result;
-            return undefined;
+        const x = queue.queue
+          .map((songId) => {
+            return res.map((y) => {
+              if (songId === y.songId) return y;
+              return undefined;
+            });
           })
+          .flat()
           .filter((y) => y !== undefined) as AudioInfo[];
+        // res
+        //   .map((result) => {
+        //     for (let y = 0; y < queue.queue.length; y += 1) {
+        //       if (queue.queue[y] === result.songId) return result;
+        //     }
+        //     // if (queue.queue.includes(result.songId)) return result;
+        //     return undefined;
+        //   })
+        //   .filter((y) => y !== undefined) as AudioInfo[];
         setQueuedSongs(x);
       }
     });
-  }, [props.queue.queue]);
+  }, [queue.queue]);
+
   const queuedSongComponents = queuedSongs.map((queuedSong) => {
     return (
       <Song
@@ -43,11 +45,6 @@ export default (props: CurrentQueuePageProp) => {
         artists={queuedSong.artists}
         artworkPath={queuedSong.artworkPath}
         duration={queuedSong.duration}
-        playSong={props.playSong}
-        currentSongData={props.currentSongData}
-        updateContextMenuData={props.updateContextMenuData}
-        changeCurrentActivePage={props.changeCurrentActivePage}
-        currentlyActivePage={props.currentlyActivePage}
       />
     );
   });

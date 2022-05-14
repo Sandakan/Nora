@@ -1,9 +1,34 @@
 # Change Log
 
-- ### v0.3.2 - ( 07<sup>th</sup> of May 2022 )
+- ### v0.4.0 - ( 14<sup>th</sup> of May 2022 )
+  - Added song queuing. Now users can queue songs.
   - Started using useContext React api to reduce prop drilling.
   - Started using useReducer React api to avoid rendering issues occurred when using useState.
   - Improved sorting of songs, artists, and albums. Now they work as intended.
+  - Updated launch.json files in vscode to support debugging both main and renderer processes.
+  - Improved user interface styling.
+  - Adding a new song will now inform the user about the new song adding process.
+  - Added a context menu option in the homepage to reset the app.
+  - Now the app will inform the user if it couldn't find the lyrics.
+  - Added a new event that fires when songs, artists, albums, playlists, or userData gets added.
+  - Fixed some bugs related to paths in parseSong.ts
+  - Removed unnecessary comments.
+  - Added a current queue page to view the current queue of songs.
+  - Renamed DialogMenu menu to notification panel.
+  - Removed unnecessary svg icons.
+  - Improved detection of songs whose got added when the app is running and not running.
+  - Added a function to remove a song from the library.
+  - Added a function to remove a linked media folder.
+  - Added an experimental mini player.
+  - Added the feature to remove playlists.
+  - Added a function to send renderer process errors and logs to the main process and save them.
+  - Added a function that shows main process messages in the renderer process.
+  - Fixed some bugs related to parsing songs.
+  - Added a function that provides navigation previous pages. Now users can click backward button in the title bar to go to their previously visited page.
+  - Added an ErrorPrompt to inform users about possible errors.
+  - Now artists, albums and playlists show how much hours of songs they have.
+  - Added the settings page to with options to update theme, music folders, and default page.
+  - Now songsPage shows how many songs in the library.
 
 <br>
 

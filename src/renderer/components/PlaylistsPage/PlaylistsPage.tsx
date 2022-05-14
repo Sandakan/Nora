@@ -10,12 +10,7 @@ import { Playlist } from './Playlist';
 import NewPlaylistPrompt from './NewPlaylistPrompt';
 
 export const PlaylistsPage = () => {
-  const {
-    changePromptMenuData,
-    updateDialogMenuData,
-    currentlyActivePage,
-    changeCurrentActivePage,
-  } = useContext(AppContext);
+  const { changePromptMenuData } = useContext(AppContext);
   const [playlists, setPlaylists] = React.useState([] as Playlist[]);
   let playlistComponents;
   React.useEffect(() => {
@@ -23,6 +18,13 @@ export const PlaylistsPage = () => {
       if (res && Array.isArray(res)) setPlaylists(res);
     });
   }, []);
+
+  const updatePlaylists = (updatedPlaylists: Playlist[]) => {
+    setPlaylists(() => {
+      return [...updatedPlaylists];
+    });
+  };
+
   if (playlists.length > 1) {
     playlistComponents = playlists.map((playlist) => {
       return (
@@ -33,18 +35,12 @@ export const PlaylistsPage = () => {
           songs={playlist.songs}
           artworkPath={playlist.artworkPath}
           key={playlist.playlistId}
-          changeCurrentActivePage={changeCurrentActivePage}
-          currentlyActivePage={currentlyActivePage}
+          currentPlaylists={playlists}
+          updatePlaylists={updatePlaylists}
         />
       );
     });
   }
-
-  const updatePlaylists = (newPlaylist: Playlist) => {
-    setPlaylists((prevPlaylists) => {
-      return [...prevPlaylists, newPlaylist];
-    });
-  };
 
   return (
     <div className="main-container playlists-list-container">
@@ -60,15 +56,14 @@ export const PlaylistsPage = () => {
           changePromptMenuData(
             true,
             <NewPlaylistPrompt
-              changePromptMenuData={changePromptMenuData}
               updatePlaylists={updatePlaylists}
-              updateDialogMenuData={updateDialogMenuData}
+              currentPlaylists={playlists}
             />,
             'add-new-playlist'
           )
         }
       >
-        <i className="fas fa-add"></i> Add New Playlist
+        <span className="material-icons-round icon">add</span> Add New Playlist
       </button>
     </div>
   );

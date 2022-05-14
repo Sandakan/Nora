@@ -1,22 +1,72 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 import DefaultPlaylistCover from '../../../../assets/images/playlist_cover_default.png';
 
 interface PlaylistProp extends Playlist {
-  currentlyActivePage: { pageTitle: string; data?: any };
-  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
+  currentPlaylists: Playlist[];
+  updatePlaylists: (updatedPlaylists: Playlist[]) => void;
 }
 
 export const Playlist = (props: PlaylistProp) => {
-  console.log(props.artworkPath);
+  const {
+    updateContextMenuData,
+    currentlyActivePage,
+    changeCurrentActivePage,
+    updateNotificationPanelData,
+    createQueue,
+  } = React.useContext(AppContext);
+
+  const contextMenus: ContextMenuItem[] = [
+    {
+      label: 'Play',
+      iconName: 'play_arrow',
+      handlerFunction: () => createQueue(props.songs, props.playlistId, true),
+    },
+  ];
+
   return (
     <div
       className={`playlist ${props.playlistId}`}
       data-playlist-id={props.playlistId}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        updateContextMenuData(
+          true,
+          props.playlistId !== 'History' && props.playlistId !== 'Favorites'
+            ? [
+                ...contextMenus,
+                {
+                  label: 'Delete',
+                  iconName: 'delete_outline',
+                  handlerFunction: () =>
+                    window.api.removeAPlaylist(props.playlistId).then((res) => {
+                      if (res.success) {
+                        updateNotificationPanelData(
+                          5000,
+                          <span>{`Playlist '${props.name}' deleted.`}</span>
+                        );
+                        props.updatePlaylists(
+                          props.currentPlaylists.filter(
+                            (playlist) =>
+                              playlist.playlistId !== props.playlistId
+                          )
+                        );
+                      }
+                      return undefined;
+                    }),
+                },
+              ]
+            : contextMenus,
+          e.pageX,
+          e.pageY
+        );
+      }}
     >
       <div className="playlist-cover-and-play-btn-container">
         <i className="fa-solid fa-circle-play"></i>
@@ -37,10 +87,10 @@ export const Playlist = (props: PlaylistProp) => {
           className="title playlist-title"
           title={props.name}
           onClick={() =>
-            props.currentlyActivePage.pageTitle === 'ArtistInfo' &&
-            props.currentlyActivePage.data.artistName === props.playlistId
-              ? props.changeCurrentActivePage('Home')
-              : props.changeCurrentActivePage('PlaylistInfo', {
+            currentlyActivePage.pageTitle === 'ArtistInfo' &&
+            currentlyActivePage.data.artistName === props.playlistId
+              ? changeCurrentActivePage('Home')
+              : changeCurrentActivePage('PlaylistInfo', {
                   playlistId: props.playlistId,
                 })
           }

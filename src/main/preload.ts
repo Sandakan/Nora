@@ -1,12 +1,13 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/prefer-default-export */
 import { contextBridge, ipcRenderer } from 'electron';
 
 export const api = {
   // WINDOW CONTROLS
-  closeApp: () => ipcRenderer.send('app/close'),
-  minimizeApp: () => ipcRenderer.send('app/minimize'),
-  toggleMaximizeApp: () => ipcRenderer.send('app/toggleMaximize'),
+  closeApp: (): void => ipcRenderer.send('app/close'),
+  minimizeApp: (): void => ipcRenderer.send('app/minimize'),
+  toggleMaximizeApp: (): void => ipcRenderer.send('app/toggleMaximize'),
   // ADDS NEW FOLDERS
   addMusicFolder: (): Promise<SongData[]> =>
     ipcRenderer.invoke('app/addMusicFolder'),
@@ -39,9 +40,17 @@ export const api = {
     ipcRenderer.invoke('app/getSongLyrics', songTitle, songArtists),
   // CONTEXT MENU - OPENS DEVTOOLS
   openDevtools: () => ipcRenderer.send('app/openDevTools'),
-  // ! GETS NEWLY ADDED SONGS WHEN ADDED TO A PRESELECTED FOLDER -- NOT WORKING YET
-  getNewSongUpdates: (callback: (event: unknown, update: string) => void) =>
-    ipcRenderer.on('app/sendNewSongUpdates', callback),
+  // SENDS MESSAGES FROM THE MAIN TO THE RENDERER
+  getMessageFromMain: (callback: (event: unknown, message: string) => void) =>
+    ipcRenderer.on('app/sendMessageToRenderer', callback),
+  // SENDS MESSAGES FROM THE MAIN TO THE RENDERER
+  dataUpdateEvent: (
+    callback: (
+      event: unknown,
+      datType: DataUpdateEventTypes,
+      message?: string
+    ) => void
+  ) => ipcRenderer.on('app/dataUpdateEvent', callback),
   // TOGGLE LIKE SONG
   toggleLikeSong: (
     songId: string,
@@ -59,6 +68,7 @@ export const api = {
     artistIdOrName: string
   ): Promise<Artist | Artist[] | undefined> =>
     ipcRenderer.invoke('app/getArtistData', artistIdOrName),
+  // GET ALBUM DATA
   getAlbumData: (albumId: string): Promise<Album | Album[] | undefined> =>
     ipcRenderer.invoke('app/getAlbumData', albumId),
   // GET PLAYLIST DATA
@@ -66,11 +76,18 @@ export const api = {
     playlistId: string
   ): Promise<Playlist | Playlist[] | undefined> =>
     ipcRenderer.invoke('app/getPlaylistData', playlistId),
-  // ADD NEW PLAYLIST
+  // ADDS A NEW PLAYLIST
   addNewPlaylist: (
     playlistName: string
   ): Promise<{ success: boolean; message?: string; playlist?: Playlist }> =>
     ipcRenderer.invoke('app/addNewPlaylist', playlistName),
+  // REMOVES A PLAYLIST
+  removeAPlaylist: (
+    playlistId: string
+  ): Promise<{
+    success: boolean;
+    message?: string;
+  }> => ipcRenderer.invoke('app/removeAPlaylist', playlistId),
   // GET SONG INFO
   getSongInfo: (songId: string): Promise<SongData | undefined> =>
     ipcRenderer.invoke('app/getSongInfo', songId),
@@ -78,9 +95,31 @@ export const api = {
   resyncSongsLibrary: (): Promise<true> =>
     ipcRenderer.invoke('app/resyncSongsLibrary'),
   // REVEAL SONG IN FILE EXPLORER
-  revealSongInFileExplorer: (songId: string) =>
+  revealSongInFileExplorer: (songId: string): void =>
     ipcRenderer.send('revealSongInFileExplorer', songId),
-  openInBrowser: (url: string) => ipcRenderer.send('app/openInBrowser', url),
+  // OPENS URLS ON THE DEFAULT BROWSER
+  openInBrowser: (url: string): void =>
+    ipcRenderer.send('app/openInBrowser', url),
+  // SENDS RENDERER ERROR LOGS TO THE MAIN PROCESS.
+  sendLogs: (
+    logs: Error,
+    forceWindowRestart = false,
+    forceMainRestart = false
+  ): Promise<undefined> =>
+    ipcRenderer.invoke(
+      'app/getRendererLogs',
+      logs,
+      forceWindowRestart,
+      forceMainRestart
+    ),
+  // TOGGLES MINI PLAYER
+  toggleMiniPlayer: (isMiniPlayer: boolean) =>
+    ipcRenderer.invoke('app/toggleMiniPlayer', isMiniPlayer),
+  // REMOVES A MUSIC FOLDER AND ITS SONGS FROM THE MUSIC LIBRARY
+  removeAMusicFolder: (absolutePath: string) =>
+    ipcRenderer.invoke('app/removeAMusicFolder', absolutePath),
+  // RESETS THE APP
+  resetApp: (): void => ipcRenderer.send('app/resetApp'),
 };
 
 contextBridge.exposeInMainWorld('api', api);

@@ -16,7 +16,7 @@ import SongInfoPage from './SongInfoPage/SongInfoPage';
 import ArtistInfoPage from './ArtistInfoPage/ArtistInfoPage';
 import AlbumInfoPage from './AlbumInfoPage/AlbumInfoPage';
 import PlaylistsInfoPage from './PlaylistsInfoPage/PlaylistsInfoPage';
-// import CurrentQueuePage from './CurrentQueuePage/CurrentQueuePage';
+import CurrentQueuePage from './CurrentQueuePage/CurrentQueuePage';
 
 export const Body = () => {
   const { currentlyActivePage } = useContext(AppContext);
@@ -30,13 +30,7 @@ export const Body = () => {
       {currentlyActivePage.pageTitle === 'Search' && <SearchPage />}
       {currentlyActivePage.pageTitle === 'Settings' && <SettingsPage />}
       {currentlyActivePage.pageTitle === 'Lyrics' && <LyricsPage />}
-      {/* {currentlyActivePage.pageTitle === 'CurrentQueue' && (
-        <CurrentQueuePage
-          queue={queue}
-          currentSongData={currentSongData}
-          playSong={playSong}
-        />
-      )} */}
+      {currentlyActivePage.pageTitle === 'CurrentQueue' && <CurrentQueuePage />}
       {currentlyActivePage.pageTitle === 'SongInfo' && <SongInfoPage />}
       {currentlyActivePage.pageTitle === 'ArtistInfo' && <ArtistInfoPage />}
       {currentlyActivePage.pageTitle === 'AlbumInfo' &&

@@ -36,6 +36,7 @@ declare global {
     isAFavorite: boolean;
     createdDate?: string;
     modifiedDate?: string;
+    addedDate: string;
     folderInfo: {
       name: string;
       path: string;
@@ -83,7 +84,7 @@ declare global {
     artworkPath?: string;
     path: string;
     songId: string;
-    modifiedDate?: string;
+    addedDate: string;
     palette?: {
       DarkVibrant: {
         rgb: unknown;
@@ -96,8 +97,8 @@ declare global {
 
   interface Queue {
     currentSongIndex: number | null;
-    // queue: QueuedSong[];
     queue: string[];
+    playlistId?: string;
   }
 
   interface QueuedSong {
@@ -116,15 +117,16 @@ declare global {
     currentSong: {
       songId: string | null;
       stoppedPosition: number;
+      playlistId?: string;
     };
     volume: {
       isMuted: boolean;
       value: number;
     };
-    playlist: Playlist | null;
+    // playlist: Playlist | null;
     recentlyPlayedSongs: SongData[];
     musicFolders: MusicFolderData[];
-    defaultPage: 'Home' | 'Songs';
+    defaultPage: DefaultPages;
   }
 
   interface MusicFolderData {
@@ -241,13 +243,30 @@ declare global {
     content: ReactElement<any, any>;
     className: string;
   }
-  interface DialogMenuData {
+  interface NotificationPanelData {
     isVisible: boolean;
     content: ReactElement<any, any>;
   }
 
   interface AnyProp {
     currentSongData?: AudioData;
+  }
+
+  interface NavigationHistory {
+    pageTitle: PageTitles;
+    data?: any;
+  }
+
+  interface NavigationHistoryData {
+    pageHistoryIndex: number;
+    history: NavigationHistory[];
+  }
+
+  interface ContextMenuData {
+    isVisible: boolean;
+    menuItems: ContextMenuItem[];
+    pageX: number;
+    pageY: number;
   }
 
   interface ContextMenuItem {
@@ -263,7 +282,8 @@ declare global {
     | 'volume.value'
     | 'volume.isMuted'
     | 'recentlyPlayedSongs'
-    | 'musicFolders';
+    | 'musicFolders'
+    | 'defaultPage';
 
   type SongsPageSortTypes =
     | 'aToZ'
@@ -278,6 +298,34 @@ declare global {
   type ArtistSortTypes = 'aToZ' | 'noOfSongs';
 
   type AlbumSortTypes = 'aToZ' | 'noOfSongs';
+
+  type DefaultPages =
+    | 'Songs'
+    | 'Home'
+    | 'Artists'
+    | 'Albums'
+    | 'Playlists'
+    | 'Search';
+
+  type PageTitles =
+    | DefaultPages
+    | 'Search'
+    | 'Settings'
+    | 'Lyrics'
+    | 'SongInfo'
+    | 'ArtistInfo'
+    | 'AlbumInfo'
+    | 'PlaylistInfo'
+    | 'CurrentQueue';
+
+  type SearchFilters = 'All' | 'Artists' | 'Albums' | 'Songs' | 'Playlists';
+
+  type DataUpdateEventTypes =
+    | 'songs'
+    | 'artists'
+    | 'albums'
+    | 'playlists'
+    | 'userData';
 
   interface NodeVibrantPalette {
     DarkMuted: NodeVibrantPaletteSwatch;

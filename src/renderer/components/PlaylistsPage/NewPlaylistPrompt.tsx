@@ -2,37 +2,33 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
-import React, { ReactElement } from 'react';
+import React from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 import PlaylistDefaultCover from '../../../../assets/images/playlist_cover_default.png';
 
 interface NewPlaylistPromptProp {
-  changePromptMenuData: (
-    isVisible: boolean,
-    content: ReactElement<any, any>,
-    className?: string
-  ) => void;
-  updatePlaylists: (newPlaylist: Playlist) => void;
-  updateDialogMenuData: (
-    delay: number,
-    content: ReactElement<any, any>
-  ) => void;
+  updatePlaylists: (updatedPlaylist: Playlist[]) => void;
+  currentPlaylists: Playlist[];
 }
 
 export default (props: NewPlaylistPromptProp) => {
+  const { changePromptMenuData, updateNotificationPanelData } =
+    React.useContext(AppContext);
   const [input, setInput] = React.useState('');
 
   const createNewPlaylist = (playlistName: string) => {
     if (playlistName !== '') {
       window.api.addNewPlaylist(playlistName.trim()).then((res) => {
         if (res && res.success && res.playlist) {
-          props.changePromptMenuData(false, <></>);
-          props.updatePlaylists(res.playlist);
-          props.updateDialogMenuData(5000, <>Playlist added successfully.</>);
+          changePromptMenuData(false, <></>);
+          props.updatePlaylists([...props.currentPlaylists, res.playlist]);
+          updateNotificationPanelData(5000, <>Playlist added successfully.</>);
         } else {
-          props.updateDialogMenuData(5000, <>{res.message}</>);
+          updateNotificationPanelData(5000, <>{res.message}</>);
         }
       });
-    } else props.updateDialogMenuData(5000, <>Playlist name cannot be empty</>);
+    } else
+      updateNotificationPanelData(5000, <>Playlist name cannot be empty</>);
   };
 
   return (

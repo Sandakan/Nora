@@ -10,8 +10,7 @@
 /* eslint-disable no-else-return */
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable import/prefer-default-export */
-import React, { useContext } from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import React from 'react';
 import sortSongs from 'renderer/utils/sortSongs';
 import { Song } from './song';
 import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
@@ -46,14 +45,6 @@ const reducer = (
 };
 
 export const SongsPage = () => {
-  const {
-    playSong,
-    currentSongData,
-    updateContextMenuData,
-    currentlyActivePage,
-    changeCurrentActivePage,
-  } = useContext(AppContext);
-
   const [content, dispatch] = React.useReducer(reducer, {
     songsData: [],
     sortingOrder: 'aToZ',
@@ -81,13 +72,6 @@ export const SongsPage = () => {
         duration={song.duration}
         songId={song.songId}
         artists={song.artists}
-        playSong={playSong}
-        currentSongData={currentSongData}
-        updateContextMenuData={updateContextMenuData}
-        changeCurrentActivePage={changeCurrentActivePage}
-        currentlyActivePage={currentlyActivePage}
-        // updateQueueData={updateQueueData}
-        // queue={queue}
       />
     );
   });
@@ -95,7 +79,14 @@ export const SongsPage = () => {
   return (
     <div className="main-container songs-list-container">
       <div className="title-container">
-        Songs
+        <div className="container">
+          Songs{' '}
+          <div className="other-stats-container">
+            {songs.length > 0 && (
+              <span className="no-of-songs">{songs.length} songs</span>
+            )}
+          </div>
+        </div>
         <select
           name="sortingOrderDropdown"
           id="sortingOrderDropdown"

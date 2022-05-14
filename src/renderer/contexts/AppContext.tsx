@@ -3,7 +3,7 @@
 import { createContext, ReactElement } from 'react';
 
 interface AppContextType {
-  toggleDarkMode: () => void;
+  toggleDarkMode: (theme?: 'dark' | 'light') => void;
   isDarkMode: boolean;
   isContextMenuVisible: boolean;
   contextMenuItems: ContextMenuItem[];
@@ -12,29 +12,51 @@ interface AppContextType {
   updateContextMenuData: (
     isVisible: boolean,
     menuItems?: ContextMenuItem[],
-    pageX?: number | undefined,
-    pageY?: number | undefined
+    pageX?: number,
+    pageY?: number
   ) => void;
-  promptMenuData: { content: any; isVisible: boolean; className: string };
+  PromptMenuData: {
+    content: any;
+    isVisible: boolean;
+    className: string;
+  };
   changePromptMenuData: (
     isVisible: boolean,
     content?: ReactElement<any, any>,
     className?: string
   ) => void;
-  playSong: (url: string) => void;
+  playSong: (songId: string, isStartPlay?: boolean) => void;
   currentSongData: AudioData;
-  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
-  currentlyActivePage: { pageTitle: string; data?: any };
-  dialogMenuData: DialogMenuData;
-  updateDialogMenuData: (
+  changeCurrentActivePage: (pageTitle: PageTitles, data?: any) => void;
+  currentlyActivePage: { pageTitle: PageTitles; data?: any };
+  notificationPanelData: NotificationPanelData;
+  updateNotificationPanelData: (
     delay: number | undefined,
     content: ReactElement<any, any>
   ) => void;
   userData: UserData | undefined;
   isStartPlay: boolean;
-  // createQueue: (songData: AudioInfo[]) => void;
-  //   queue: Queue;
-  // updateQueueData: (currentSongIndex?: number, queue?: string[]) => void;
+  createQueue: (
+    songIds: string[],
+    playlistId?: string,
+    startPlaying?: boolean
+  ) => void;
+  queue: Queue;
+  updateQueueData: (
+    currentSongIndex?: number,
+    queue?: string[],
+    playCurrentSongIndex?: boolean
+  ) => void;
+  changeQueueCurrentSongIndex: (currentSongIndex: number) => void;
+  updateCurrentSongPlaybackState: (isPlaying: boolean) => void;
+  isCurrentSongPlaying: boolean;
+  pageHistoryIndex: number;
+  updatePageHistoryIndex: (
+    type: 'increment' | 'decrement',
+    index?: number
+  ) => void;
+  updateMiniPlayerStatus: (isVisible: boolean) => void;
+  isMiniPlayer: boolean;
 }
 
 export const AppContext = createContext({} as AppContextType);

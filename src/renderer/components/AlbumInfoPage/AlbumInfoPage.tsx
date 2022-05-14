@@ -7,6 +7,7 @@
 /* eslint-disable react/destructuring-assignment */
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
+import { calculateTime } from 'renderer/utils/calculateTime';
 import { Song } from '../SongsPage/song';
 
 interface AlbumContentReducer {
@@ -37,13 +38,8 @@ const reducer = (
 };
 
 export default () => {
-  const {
-    currentlyActivePage,
-    changeCurrentActivePage,
-    playSong,
-    updateContextMenuData,
-    currentSongData,
-  } = useContext(AppContext);
+  const { currentlyActivePage, changeCurrentActivePage } =
+    useContext(AppContext);
 
   const [albumContent, dispatch] = React.useReducer(reducer, {
     albumData: {} as Album,
@@ -87,15 +83,29 @@ export default () => {
               artworkPath={song.artworkPath}
               duration={song.duration}
               songId={song.songId}
-              playSong={playSong}
-              currentSongData={currentSongData}
-              updateContextMenuData={updateContextMenuData}
-              currentlyActivePage={currentlyActivePage}
-              changeCurrentActivePage={changeCurrentActivePage}
             />
           );
         })
       : [];
+
+  const calculateTotalTime = () => {
+    const val = calculateTime(
+      albumContent.songsData.reduce(
+        (prev, current) => prev + current.duration,
+        0
+      )
+    );
+    const duration = val.split(':');
+    return `${
+      Number(duration[0]) / 60 >= 1
+        ? `${Math.floor(Number(duration[0]) / 60)} hour${
+            Math.floor(Number(duration[0]) / 60) === 1 ? '' : 's'
+          } `
+        : ''
+    }${Math.floor(Number(duration[0]) % 60)} minute${
+      Math.floor(Number(duration[0]) % 60) === 1 ? '' : 's'
+    } ${duration[1]} second${Number(duration[1]) === 1 ? '' : 's'}`;
+  };
 
   return (
     <div className="main-container album-info-page-container">
@@ -134,6 +144,11 @@ export default () => {
                   </span>
                 ))}
               </div>
+              {albumContent.songsData.length > 0 && (
+                <div className="album-songs-total-duration">
+                  {calculateTotalTime()}
+                </div>
+              )}
               <div className="album-no-of-songs">{`${
                 albumContent.albumData.songs.length
               } song${

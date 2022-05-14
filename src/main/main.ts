@@ -34,6 +34,7 @@ import {
   protocol,
 } from 'electron';
 import path from 'path';
+import { rm, unlink } from 'fs/promises';
 
 import * as musicMetaData from 'music-metadata';
 // import lyricsFinder from 'lyrics-finder';
@@ -52,6 +53,7 @@ import {
   setPlaylistData,
   checkForNewSongs,
   updateSongListeningRate,
+  removeAMusicFolder,
 } from './filesystem';
 import { parseSong } from './parseSong';
 import { generateRandomId } from './randomId';
@@ -95,18 +97,19 @@ const createWindow = async () => {
     width: 1280,
     height: 700,
     minHeight: 500,
+    minWidth: 700,
     title: 'Oto Music for Desktop',
     webPreferences: {
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
-      devTools: true,
+      devTools: isDevelopment,
     },
     visualEffectState: 'followWindow',
     roundedCorners: true,
     frame: false,
     backgroundColor: '#fff',
-    icon: getAssetPath('images', 'icons', 'logo_light_mode.ico'),
+    icon: getAssetPath('images', 'logo_light_mode.ico'),
     titleBarStyle: 'hidden',
     show: false,
   });
@@ -114,7 +117,6 @@ const createWindow = async () => {
     mode: 'detach',
   });
   mainWindow.loadURL(resolveHtmlPath('index.html'));
-  // mainWindow.loadFile('../../public/index.html');
   mainWindow.once('ready-to-show', checkForNewSongs);
   mainWindow.webContents.setWindowOpenHandler((edata) => {
     shell.openExternal(edata.url);
@@ -122,7 +124,17 @@ const createWindow = async () => {
   });
 };
 
-console.log(app.getPath('userData'));
+const toggleMiniPlayer = (isMiniPlayer = false) => {
+  if (isMiniPlayer) {
+    mainWindow.setMaximumSize(350, 350);
+    mainWindow.setMinimumSize(250, 250);
+    mainWindow.setSize(250, 250, true);
+  } else {
+    mainWindow.setMinimumSize(700, 500);
+    mainWindow.setMaximumSize(10000, 5000);
+    mainWindow.setSize(1280, 700, true);
+  }
+};
 
 app.whenReady().then(() => {
   protocol.registerFileProtocol('otomusic', (request, callback) => {
@@ -217,7 +229,20 @@ app.whenReady().then(() => {
     addNewPlaylist(playlistName)
   );
 
+  ipcMain.handle(
+    'app/removeAPlaylist',
+    async (_e, playlistId: string) => await removeAPlaylist(playlistId)
+  );
+
+  ipcMain.handle(
+    'app/addSongToPlaylist',
+    async (_e, playlistId: string, songId: string) =>
+      await addSongToPlaylist(playlistId, songId)
+  );
+
   ipcMain.handle('app/resyncSongsLibrary', async () => checkForNewSongs());
+
+  ipcMain.on('app/resetApp', async () => await resetApp());
 
   ipcMain.on('revealSongInFileExplorer', async (_e, songId: string) => {
     const data = await getData();
@@ -230,13 +255,37 @@ app.whenReady().then(() => {
     shell.openExternal(url)
   );
 
+  ipcMain.handle(
+    'app/getRendererLogs',
+    async (_, logs: Error, forceRestart = false, forceMainRestart = false) => {
+      await logger(logs);
+      if (forceRestart) return mainWindow.reload();
+      if (forceMainRestart) {
+        app.relaunch();
+        return app.exit();
+      }
+    }
+  );
+
+  ipcMain.handle(
+    'app/removeAMusicFolder',
+    async (_, absolutePath: string) =>
+      await removeAMusicFolder(absolutePath).catch((err) => logger(err))
+  );
+
+  ipcMain.handle('app/toggleMiniPlayer', async (_e, isMiniPlayer: boolean) =>
+    toggleMiniPlayer(isMiniPlayer)
+  );
+
   globalShortcut.register('F5', () => mainWindow.reload());
 
   globalShortcut.register('F12', () =>
     mainWindow.webContents.openDevTools({ mode: 'detach', activate: true })
   );
 });
+
 // / / / / / / / / / / / / / / / / / / / / / / / / / / / /
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
@@ -271,6 +320,7 @@ const sendSongLyrics = async (songTitle: string, songArtists?: string) => {
     (res) => res,
     (err) => {
       console.log(err);
+      sendMessageToRenderer(`We couldn't find lyrics for ${songTitle}`);
       return undefined;
     }
   );
@@ -337,7 +387,7 @@ const checkForSongs = async () => {
             path: songInfo.path,
             songId: songInfo.songId,
             palette: songInfo.palette,
-            modifiedDate: songInfo.modifiedDate,
+            addedDate: songInfo.addedDate,
           };
           return info;
         });
@@ -359,8 +409,8 @@ const search = async (_e: any, filter: string, value: string) => {
     (filter === 'songs' || filter === 'all')
       ? jsonData.songs.filter(
           (data: SongData) =>
-            new RegExp(value.replace(/[^w ]/, ''), 'gim').test(data.title) ||
-            new RegExp(value.replace(/[^w ]/, ''), 'gim').test(
+            new RegExp(value.replace(/[^w ]/, ''), 'gi').test(data.title) ||
+            new RegExp(value.replace(/[^w ]/, ''), 'gi').test(
               data.artists.join(' ')
             )
         )
@@ -433,8 +483,14 @@ const toggleLikeSong = async (songId: string, likeSong: boolean) => {
   } else return result;
 };
 
-export const sendNewSongUpdates = (update: string) => {
-  mainWindow.webContents.send('app/sendNewSongUpdates', update);
+export const sendMessageToRenderer = (message: string) => {
+  mainWindow.webContents.send('app/sendMessageToRenderer', message);
+};
+export const dataUpdateEvent = (
+  dataType: DataUpdateEventTypes,
+  message?: string
+) => {
+  mainWindow.webContents.send('app/newSongEvent', dataType, message);
 };
 
 const getArtistInfoFromNet = (
@@ -461,7 +517,10 @@ const getArtistInfoFromNet = (
                 artist.name
               )}`,
               (err, _res, data) => {
-                if (err) return reject(undefined);
+                if (err) {
+                  logger(err);
+                  return reject(undefined);
+                }
                 const arr = JSON.parse(data.toString('utf-8')) as {
                   data: ArtistInfoFromNet[];
                 };
@@ -502,7 +561,6 @@ const getArtistInfoFromNet = (
                       }
                     );
                   });
-                // resolve(data ? JSON.parse(data.toString('utf-8')) : undefined);
               }
             );
           }
@@ -560,6 +618,7 @@ const sendPlaylistData = async (playlistId = '*') => {
       for (const playlist of playlists) {
         if (playlist.playlistId === playlistId) return playlist;
       }
+      return undefined;
     }
   } else return undefined;
 };
@@ -752,9 +811,16 @@ const removeAPlaylist = (
         playlists.length > 0 &&
         playlists.some((playlist) => playlist.playlistId === playlistId)
       ) {
-        playlists.filter((playlist) => playlist.playlistId !== playlistId);
-        await setPlaylistData(playlists);
-        resolve({ success: true });
+        const updatedPlaylists = playlists.filter(
+          (playlist) => playlist.playlistId !== playlistId
+        );
+        await setPlaylistData(updatedPlaylists).then(() => {
+          console.log(`Playlist with id ${playlistId} deleted.`);
+          return resolve({
+            success: true,
+            message: `Playlist with id ${playlistId} deleted.`,
+          });
+        });
       } else
         reject({
           success: false,
@@ -765,6 +831,36 @@ const removeAPlaylist = (
         success: false,
         message: 'Playlists is not an array.',
       });
+  });
+};
+
+const addSongToPlaylist = (playlistId: string, songId: string) => {
+  return new Promise(async (resolve, reject) => {
+    const playlists = await getPlaylistData();
+    if (playlists && Array.isArray(playlists) && playlists.length > 0) {
+      for (let x = 0; x < playlists.length; x++) {
+        if (playlists[x].playlistId === playlistId) {
+          if (playlists[x].songs.some((id) => id === songId)) {
+            return resolve({
+              success: false,
+              message: `Song with id ${songId} already exists in playlist ${playlists[x].name}`,
+            });
+          } else {
+            playlists[x].songs.push(songId);
+            return await setPlaylistData(playlists).then(() =>
+              resolve({
+                success: true,
+                message: `song ${songId} add to the playlist ${playlists[x].name} successfully.`,
+              })
+            );
+          }
+        }
+      }
+      return reject({
+        success: false,
+        message: `playlist with an id ${playlistId} couldn't be found.`,
+      });
+    }
   });
 };
 
@@ -785,4 +881,24 @@ const getSongInfo = async (songId: string) => {
     }
     return undefined;
   } else return undefined;
+};
+
+const resetApp = async () => {
+  try {
+    const userDataPath = app.getPath('userData');
+    await rm(path.join(userDataPath, 'song_covers'), {
+      recursive: true,
+    });
+    await unlink(path.join(userDataPath, 'data.json'));
+    await unlink(path.join(userDataPath, 'playlists.json'));
+    await unlink(path.join(userDataPath, 'userData.json'));
+    sendMessageToRenderer(
+      'Successfully resetted the app. Restarting the app now.'
+    );
+  } catch (error) {
+    sendMessageToRenderer('Resetting the app failed. Restarting the app now.');
+    logger(error as Error);
+  } finally {
+    mainWindow.webContents.reload();
+  }
 };

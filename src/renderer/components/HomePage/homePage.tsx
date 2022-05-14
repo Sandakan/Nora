@@ -11,34 +11,76 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
-import React, { ReactElement, useContext } from 'react';
+import React, { useContext } from 'react';
+import sortSongs from 'renderer/utils/sortSongs';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { SongCard } from '../SongsPage/songCard';
+import ErrorPrompt from '../ErrorPrompt';
 import { Artist } from '../ArtistPage/Artist';
 import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
 import NoSongsImage from '../../../../assets/images/empty-folder.png';
+import ResetAppConfirmationPrompt from './ResetAppConfirmationPrompt';
+
+interface HomePageReducer {
+  songsData: (AudioInfo | null)[];
+  recentlyPlayedSongsData: SongData[];
+  recentSongArtists: Artist[];
+}
+
+type HomePageReducerActionTypes =
+  | 'SONGS_DATA'
+  | 'RECENTLY_PLAYED_SONGS_DATA'
+  | 'RECENT_SONGS_ARTISTS';
+
+const reducer = (
+  state: HomePageReducer,
+  action: { type: HomePageReducerActionTypes; data?: any }
+): HomePageReducer => {
+  switch (action.type) {
+    case 'SONGS_DATA':
+      return {
+        ...state,
+        songsData: action.data,
+      };
+    case 'RECENTLY_PLAYED_SONGS_DATA':
+      return {
+        ...state,
+        recentlyPlayedSongsData: action.data,
+      };
+    case 'RECENT_SONGS_ARTISTS':
+      return {
+        ...state,
+        recentSongArtists: action.data,
+      };
+    default:
+      return state;
+  }
+};
 
 export const HomePage = () => {
   const {
-    playSong,
     updateContextMenuData,
     currentlyActivePage,
     changeCurrentActivePage,
-    updateDialogMenuData,
+    updateNotificationPanelData,
+    changePromptMenuData,
   } = useContext(AppContext);
-  const songsData: (AudioInfo | null)[] = [];
-  const recentPlayedSongs: SongData[] = [];
-  const z: Artist[] = [];
-  const [songData, setSongData] = React.useState(songsData);
-  const [recentlyPlayedSongsData, setRecentlyPlayedSongsData] =
-    React.useState(recentPlayedSongs);
-  const [recentSongArtists, setRecentSongArtists] = React.useState(z);
+
+  const [content, dispatch] = React.useReducer(reducer, {
+    songsData: [],
+    recentlyPlayedSongsData: [],
+    recentSongArtists: [],
+  });
 
   React.useEffect(() => {
     window.api.checkForSongs().then((audioData) => {
-      if (!audioData || audioData.length === 0) return setSongData([null]);
+      if (!audioData || audioData.length === 0)
+        return dispatch({ type: 'SONGS_DATA', data: [null] });
       else {
-        setSongData(audioData.slice(0, 5));
+        dispatch({
+          type: 'SONGS_DATA',
+          data: sortSongs(audioData, 'dateAddedAscending').slice(0, 5),
+        });
         return undefined;
       }
     });
@@ -47,105 +89,79 @@ export const HomePage = () => {
   React.useEffect(() => {
     window.api.getUserData().then((res) => {
       if (!res) return undefined;
-      setRecentlyPlayedSongsData(res.recentlyPlayedSongs.slice(0, 4));
+      dispatch({
+        type: 'RECENTLY_PLAYED_SONGS_DATA',
+        data: res.recentlyPlayedSongs.slice(0, 4),
+      });
       return undefined;
     });
   }, []);
 
   React.useEffect(() => {
-    window.api.getArtistData('*').then((res) => {
-      if (res && Array.isArray(res)) setRecentSongArtists(res);
-    });
-  }, []);
+    if (content.recentlyPlayedSongsData.length > 0) {
+      window.api.getArtistData('*').then((res) => {
+        if (res && Array.isArray(res))
+          dispatch({
+            type: 'RECENT_SONGS_ARTISTS',
+            data: res.filter((x) =>
+              content.recentlyPlayedSongsData.some((y) =>
+                y.artistsId ? y.artistsId.some((z) => z === x.artistId) : false
+              )
+            ),
+          });
+      });
+    }
+  }, [content.recentlyPlayedSongsData]);
 
   const addNewSongs = () => {
-    window.api.addMusicFolder().then((songs) => {
-      const relevantSongsData: AudioInfo[] = songs.map((song) => {
-        return {
-          title: song.title,
-          songId: song.songId,
-          artists: song.artists,
-          duration: song.duration,
-          palette: song.palette,
-          path: song.path,
-          artworkPath: song.artworkPath,
-          modifiedDate: song.modifiedDate,
-        };
-      });
-      setSongData(relevantSongsData);
-    });
+    window.api
+      .addMusicFolder()
+      .then((songs) => {
+        const relevantSongsData: AudioInfo[] = songs.map((song) => {
+          return {
+            title: song.title,
+            songId: song.songId,
+            artists: song.artists,
+            duration: song.duration,
+            palette: song.palette,
+            path: song.path,
+            artworkPath: song.artworkPath,
+            addedDate: song.addedDate,
+          };
+        });
+        dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
+      })
+      .catch((err) => window.api.sendLogs(err));
   };
 
-  const newlyAddedSongs = songData
-    .filter((song) => song !== null)
-    .sort((a, b) => {
-      if (a && b && a.modifiedDate && b.modifiedDate) {
-        return new Date(a.modifiedDate).getTime() <
-          new Date(b.modifiedDate).getTime()
-          ? 1
-          : -1;
-      }
-      return 0;
-    })
-    .map((song, index) => {
-      if (song && index < 3) {
-        return (
-          <SongCard
-            key={song.songId}
-            title={song.title}
-            artworkPath={song.artworkPath || DefaultSongCover}
-            path={song.path}
-            duration={song.duration}
-            songId={song.songId}
-            artists={song.artists}
-            palette={song.palette}
-            playSong={playSong}
-            updateContextMenuData={updateContextMenuData}
-            changeCurrentActivePage={changeCurrentActivePage}
-            currentlyActivePage={currentlyActivePage}
-          />
-        );
-      } else return undefined;
-    })
-    .filter((comp) => comp !== undefined);
+  const recentlyPlayedSongs = content.recentlyPlayedSongsData
+    .filter((_, index) => index < 3)
+    .map((song) => {
+      return (
+        <SongCard
+          key={song.songId}
+          title={song.title}
+          artworkPath={song.artworkPath || DefaultSongCover}
+          path={song.path}
+          duration={song.duration}
+          songId={song.songId}
+          artists={song.artists}
+          palette={song.palette}
+        />
+      );
+    });
 
-  const recentlyPlayedSongs = recentlyPlayedSongsData
-    .map((song, index) => {
-      if (index < 3) {
-        return (
-          <SongCard
-            key={song.songId}
-            title={song.title}
-            artworkPath={song.artworkPath || DefaultSongCover}
-            path={song.path}
-            duration={song.duration}
-            songId={song.songId}
-            artists={song.artists}
-            palette={song.palette}
-            playSong={playSong}
-            updateContextMenuData={updateContextMenuData}
-            changeCurrentActivePage={changeCurrentActivePage}
-            currentlyActivePage={currentlyActivePage}
-          />
-        );
-      } else return undefined;
-    })
-    .filter((comp) => comp !== undefined);
-
+  // TODO - THIS HAS ALL THE ARTISTS DATA WHICH ALL OF THEM ARE NOT REQUIRED HERE
   const recentlyPlayedSongArtists =
-    recentlyPlayedSongsData.length > 0
-      ? recentlyPlayedSongsData
-          .slice(0, 5)
-          .map((val) => (val.artistsId ? val.artistsId : []))
-          .flat()
+    content.recentlyPlayedSongsData.length > 0
+      ? content.recentSongArtists
           .map((val, index) => {
-            const artist = recentSongArtists.find((x) => x.artistId === val);
-            if (artist)
+            if (val)
               return (
                 <Artist
-                  name={artist.name}
+                  name={val.name}
                   key={index}
-                  artworkPath={artist.artworkPath}
+                  artworkPath={val.artworkPath}
                   changeCurrentActivePage={changeCurrentActivePage}
                   currentlyActivePage={currentlyActivePage}
                 />
@@ -154,26 +170,6 @@ export const HomePage = () => {
           })
           .filter((x) => x !== undefined)
       : [];
-  //  recentlyPlayedSongsData
-  //   .map((song, index) => {
-  //     if (index < 4 && song.artistsId) {
-  //       const arr = [];
-  //       window.api.getArtistData(song.artistsId[0]).then((res) => {
-  //         if (res && !Array.isArray(res))
-  //           arr.push(
-  //             <Artist
-  //               name={res.name}
-  //               artworkPath={res.artworkPath}
-  //               key={index}
-  //             />
-  //           );
-  //       });
-  //       return Artist;
-  //     }
-  //     return undefined;
-  //   })
-  //   .flat(1)
-  //   .filter((artist) => artist !== undefined);
 
   return (
     <div
@@ -191,17 +187,37 @@ export const HomePage = () => {
                 window.api
                   .resyncSongsLibrary()
                   .then(() =>
-                    updateDialogMenuData(
+                    updateNotificationPanelData(
                       5000,
                       <span>Songs Library updated successfully.</span>
                     )
                   )
                   .catch(() => {
-                    updateDialogMenuData(
+                    updateNotificationPanelData(
                       5000,
                       <span>Resyncing Songs Library failed.</span>
                     );
                   }),
+            },
+            {
+              label: 'Reset App',
+              iconName: 'auto_mode',
+              handlerFunction: () =>
+                changePromptMenuData(
+                  true,
+                  <ResetAppConfirmationPrompt />,
+                  'confirm-app-reset'
+                ),
+            },
+            {
+              label: 'Alert Error',
+              iconName: 'report',
+              handlerFunction: () =>
+                changePromptMenuData(
+                  true,
+                  <ErrorPrompt isFatal />,
+                  'error-alert-prompt'
+                ),
             },
           ],
           e.pageX,
@@ -209,10 +225,28 @@ export const HomePage = () => {
         );
       }}
     >
-      {songData.length > 0 && songData[0] !== null && (
+      {content.songsData.length > 0 && content.songsData[0] !== null && (
         <div className="main-container recently-added-songs-container">
           <div className="title-container">Recently Added Songs</div>
-          <div className="songs-container">{newlyAddedSongs}</div>
+          <div className="songs-container">
+            {content.songsData
+              .filter((_, index) => index < 3)
+              .map((song) => {
+                const songData = song as AudioInfo;
+                return (
+                  <SongCard
+                    key={songData.songId}
+                    title={songData.title}
+                    artworkPath={songData.artworkPath || DefaultSongCover}
+                    path={songData.path}
+                    duration={songData.duration}
+                    songId={songData.songId}
+                    artists={songData.artists}
+                    palette={songData.palette}
+                  />
+                );
+              })}
+          </div>
         </div>
       )}
       {recentlyPlayedSongs.length > 0 && (
@@ -227,7 +261,7 @@ export const HomePage = () => {
           <div className="artists-container">{recentlyPlayedSongArtists}</div>
         </div>
       )}
-      {songData[0] === null && (
+      {content.songsData[0] === null && (
         <div className="no-songs-container">
           <img src={NoSongsImage} alt="" />
           <span>We couldn't find any songs in your system.</span>
@@ -236,7 +270,7 @@ export const HomePage = () => {
           </button>
         </div>
       )}
-      {recentlyPlayedSongs.length === 0 && songData.length === 0 && (
+      {recentlyPlayedSongs.length === 0 && content.songsData.length === 0 && (
         <div className="no-songs-container">
           <span>Fetching your songs...</span>
         </div>

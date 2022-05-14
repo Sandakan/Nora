@@ -6,17 +6,12 @@
 /* eslint-disable react/destructuring-assignment */
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
+import { calculateTime } from 'renderer/utils/calculateTime';
 import DefaultPlaylistCover from '../../../../assets/images/playlist_cover_default.png';
 import { Song } from '../SongsPage/song';
 
 export default () => {
-  const {
-    currentlyActivePage,
-    changeCurrentActivePage,
-    playSong,
-    currentSongData,
-    updateContextMenuData,
-  } = useContext(AppContext);
+  const { currentlyActivePage } = useContext(AppContext);
   const [playlistData, setPlaylistData] = React.useState({} as Playlist);
   const [playlistSongs, setPlaylistSongs] = React.useState([] as SongData[]);
 
@@ -43,6 +38,22 @@ export default () => {
     }
   }, [currentlyActivePage.data, playlistData.songs]);
 
+  const calculateTotalTime = () => {
+    const val = calculateTime(
+      playlistSongs.reduce((prev, current) => prev + current.duration, 0)
+    );
+    const duration = val.split(':');
+    return `${
+      Number(duration[0]) / 60 >= 1
+        ? `${Math.floor(Number(duration[0]) / 60)} hour${
+            Math.floor(Number(duration[0]) / 60) === 1 ? '' : 's'
+          } `
+        : ''
+    }${Math.floor(Number(duration[0]) % 60)} minute${
+      Math.floor(Number(duration[0]) % 60) === 1 ? '' : 's'
+    } ${duration[1]} second${Number(duration[1]) === 1 ? '' : 's'}`;
+  };
+
   return (
     <div className="main-container playlist-info-page-container">
       {Object.keys(playlistData).length > 0 && (
@@ -62,6 +73,11 @@ export default () => {
                 playlistData.songs.length === 1 ? '' : 's'
               }`}
             </div>
+            {playlistSongs.length > 0 && (
+              <div className="playlist-total-duration">
+                {calculateTotalTime()}
+              </div>
+            )}
             <div className="playlist-created-date">
               {`Created on ${new Date(playlistData.createdDate).toUTCString()}`}
             </div>
@@ -80,12 +96,7 @@ export default () => {
                   artists={song.artists}
                   duration={song.duration}
                   songId={song.songId}
-                  changeCurrentActivePage={changeCurrentActivePage}
-                  currentlyActivePage={currentlyActivePage}
                   artworkPath={song.artworkPath}
-                  currentSongData={currentSongData}
-                  playSong={playSong}
-                  updateContextMenuData={updateContextMenuData}
                 />
               );
             })}

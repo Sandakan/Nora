@@ -36,9 +36,9 @@ export default (data: AudioInfo[], sortType: SongsPageSortTypes) => {
       );
     else if (sortType === 'dateAddedAscending')
       sortedSongData = data.sort((a, b) => {
-        if (a.modifiedDate && b.modifiedDate) {
-          return new Date(a.modifiedDate).getTime() <
-            new Date(b.modifiedDate).getTime()
+        if (a.addedDate && b.addedDate) {
+          return new Date(a.addedDate).getTime() <
+            new Date(b.addedDate).getTime()
             ? 1
             : -1;
         }
@@ -46,9 +46,9 @@ export default (data: AudioInfo[], sortType: SongsPageSortTypes) => {
       });
     else if (sortType === 'dateAddedDescending')
       sortedSongData = data.sort((a, b) => {
-        if (a.modifiedDate && b.modifiedDate) {
-          return new Date(a.modifiedDate).getTime() >
-            new Date(b.modifiedDate).getTime()
+        if (a.addedDate && b.addedDate) {
+          return new Date(a.addedDate).getTime() >
+            new Date(b.addedDate).getTime()
             ? 1
             : -1;
         }

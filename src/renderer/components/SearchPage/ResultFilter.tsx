@@ -7,14 +7,16 @@
 interface ResultFilterProp {
   filterType: string;
   isCurrentActiveFilter: boolean;
-  changeActiveFilter: (filterType: string) => void;
+  changeActiveFilter: (filterType: SearchFilters) => void;
 }
 
 export const ResultFilter = (props: ResultFilterProp) => {
   return (
     <li
       className={`${props.isCurrentActiveFilter && 'active'}`}
-      onClick={() => props.changeActiveFilter(props.filterType)}
+      onClick={() =>
+        props.changeActiveFilter(props.filterType as SearchFilters)
+      }
     >
       {props.filterType}
     </li>

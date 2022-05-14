@@ -9,18 +9,14 @@
 /* eslint-disable promise/catch-or-return */
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
+import { calculateTime } from 'renderer/utils/calculateTime';
 import DefaultArtistCover from '../../../../assets/images/default_artist-cover.png';
 import { Album } from '../AlbumsPage/Album';
 import { Song } from '../SongsPage/song';
 
 export default () => {
-  const {
-    currentlyActivePage,
-    changeCurrentActivePage,
-    playSong,
-    currentSongData,
-    updateContextMenuData,
-  } = useContext(AppContext);
+  const { currentlyActivePage, changeCurrentActivePage } =
+    useContext(AppContext);
   const [artistData, setArtistData] = React.useState({} as ArtistInfo);
   const [albums, setAlbums] = React.useState([] as Album[]);
   const [songs, setSongs] = React.useState([] as SongData[]);
@@ -78,12 +74,27 @@ export default () => {
     }
   }, [artistData.albums]);
 
+  const calculateTotalTime = () => {
+    const val = calculateTime(
+      songs.reduce((prev, current) => prev + current.duration, 0)
+    );
+    const duration = val.split(':');
+    return `${
+      Number(duration[0]) / 60 >= 1
+        ? `${Math.floor(Number(duration[0]) / 60)} hour${
+            Math.floor(Number(duration[0]) / 60) === 1 ? '' : 's'
+          } `
+        : ''
+    }${Math.floor(Number(duration[0]) % 60)} minute${
+      Math.floor(Number(duration[0]) % 60) === 1 ? '' : 's'
+    } ${duration[1]} second${Number(duration[1]) === 1 ? '' : 's'}`;
+  };
+
   return (
     <div
       className="artist-info-page-container"
       style={
         artistData.artistPalette && {
-          // color: `rgb(${artistData.artistPalette.LightMuted._rgb[0]},${artistData.artistPalette.DarkMuted._rgb[1]},${artistData.artistPalette.DarkMuted._rgb[2]})`,
           background: `linear-gradient(180deg, ${`rgb(${artistData.artistPalette.LightMuted._rgb[0]},${artistData.artistPalette.LightMuted._rgb[1]},${artistData.artistPalette.LightMuted._rgb[2]})`} 0%, var(--background-color-1) 90%)`,
         }
       }
@@ -115,6 +126,11 @@ export default () => {
               {` ${artistData.songs.length} song${
                 artistData.songs.length === 1 ? '' : 's'
               } `}
+            </div>
+          )}
+          {songs.length > 0 && (
+            <div className="artist-total-songs-duration">
+              {calculateTotalTime()}
             </div>
           )}
         </div>
@@ -153,12 +169,7 @@ export default () => {
                   artists={song.artists}
                   duration={song.duration}
                   songId={song.songId}
-                  changeCurrentActivePage={changeCurrentActivePage}
-                  currentlyActivePage={currentlyActivePage}
                   artworkPath={song.artworkPath}
-                  currentSongData={currentSongData}
-                  playSong={playSong}
-                  updateContextMenuData={updateContextMenuData}
                 />
               );
             })}

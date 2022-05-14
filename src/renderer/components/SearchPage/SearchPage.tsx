@@ -31,13 +31,15 @@ export const SearchPage = () => {
     artists: [],
     songs: [],
   } as SearchResult);
-  const [activeFilter, setActiveFilter] = React.useState('All');
+  const [activeFilter, setActiveFilter] = React.useState(
+    'All' as SearchFilters
+  );
   const filterTypes = 'All Songs Albums Artists Playlists'.split(' ');
   const MostRelevantResults = [];
   let songResults: any[] = [];
   let artistResults: any[] = [];
   let albumResults: any[] = [];
-  const changeActiveFilter = (filterType: string) =>
+  const changeActiveFilter = (filterType: SearchFilters) =>
     setActiveFilter(filterType);
   const filters = filterTypes.map((filterType, index) => {
     return (
@@ -102,11 +104,6 @@ export const SearchPage = () => {
               artworkPath={song.artworkPath}
               duration={song.duration}
               songId={song.songId}
-              playSong={playSong}
-              currentSongData={currentSongData}
-              updateContextMenuData={updateContextMenuData}
-              currentlyActivePage={currentlyActivePage}
-              changeCurrentActivePage={changeCurrentActivePage}
             />
           );
         else return undefined;
@@ -247,8 +244,9 @@ export const SearchPage = () => {
           searchInput !== '' && (
             <div className="no-search-results-container active">
               <div>
-                We couldn't find any songs related to your search result. Please
-                try again with different keywords.
+                We couldn't find any{' '}
+                {activeFilter === 'All' ? 'results' : activeFilter} related to
+                your search query. Please try again with different keywords.
               </div>
             </div>
           )}

@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -8,7 +9,8 @@
 /* eslint-disable react/no-unused-prop-types */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
-// import React from 'react';
+import React from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 
 interface SongCardProp {
   songId: string;
@@ -27,18 +29,31 @@ interface SongCardProp {
       rgb?: any;
     };
   };
-  playSong: (x: string) => void;
-  updateContextMenuData: (
-    isVisible: boolean,
-    menuItems: ContextMenuItem[],
-    pageX?: number,
-    pageY?: number
-  ) => void;
-  currentlyActivePage: { pageTitle: string; data?: any };
-  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
 }
 
 export const SongCard = (props: SongCardProp) => {
+  const {
+    playSong,
+    updateContextMenuData,
+    currentSongData,
+    currentlyActivePage,
+    changeCurrentActivePage,
+    updateQueueData,
+    queue,
+    isCurrentSongPlaying,
+  } = React.useContext(AppContext);
+  const [isSongPlaying, setIsSongPlaying] = React.useState(
+    currentSongData
+      ? currentSongData.songId === props.songId && isCurrentSongPlaying
+      : false
+  );
+  React.useEffect(() => {
+    setIsSongPlaying(() => {
+      if (currentSongData)
+        return currentSongData.songId === props.songId && isCurrentSongPlaying;
+      return false;
+    });
+  }, [currentSongData, isCurrentSongPlaying, props.songId]);
   // console.log(props);
   const [r, g, b] = props.palette
     ? props.palette.LightVibrant._rgb || props.palette.LightVibrant.rgb
@@ -51,18 +66,37 @@ export const SongCard = (props: SongCardProp) => {
   const fontColor = `rgba(${fr},${fg},${fb},1)`;
   return (
     <div
-      className={`song ${props.songId}`}
+      className={`song ${props.songId} ${isSongPlaying && 'playing'}`}
       data-song-id={props.songId}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        props.updateContextMenuData(
+        updateContextMenuData(
           true,
           [
             {
               label: 'Play',
               iconName: 'play_arrow',
-              handlerFunction: () => props.playSong(props.songId),
+              handlerFunction: () => playSong(props.songId),
+            },
+            {
+              label: 'Play Next',
+              iconName: 'shortcut',
+              handlerFunction: () => {
+                const newQueue = queue.queue.filter(
+                  (songId) => songId !== props.songId
+                );
+                newQueue.splice(
+                  queue.queue.length - 1 !== queue.currentSongIndex
+                    ? queue.currentSongIndex
+                      ? queue.currentSongIndex + 1
+                      : 0
+                    : 0,
+                  0,
+                  props.songId
+                );
+                updateQueueData(undefined, newQueue);
+              },
             },
             {
               label: 'Reveal in File Explorer',
@@ -90,7 +124,20 @@ export const SongCard = (props: SongCardProp) => {
         style={{ background }}
       >
         <div className="song-info-container" style={{ color: fontColor }}>
-          <div className="song-title" title={props.title}>
+          <div
+            className="song-title"
+            title={props.title}
+            onClick={() =>
+              currentlyActivePage.pageTitle === 'SongInfo' &&
+              currentlyActivePage.data &&
+              currentlyActivePage.data.songInfo &&
+              currentlyActivePage.data.songInfo.songId === props.songId
+                ? changeCurrentActivePage('Home')
+                : changeCurrentActivePage('SongInfo', {
+                    songInfo: { songId: props.songId },
+                  })
+            }
+          >
             {props.title}
           </div>
           <div
@@ -103,10 +150,10 @@ export const SongCard = (props: SongCardProp) => {
                 className="artist"
                 key={artist}
                 onClick={() =>
-                  props.currentlyActivePage.pageTitle === 'ArtistInfo' &&
-                  props.currentlyActivePage.data.artistName === artist
-                    ? props.changeCurrentActivePage('Home')
-                    : props.changeCurrentActivePage('ArtistInfo', {
+                  currentlyActivePage.pageTitle === 'ArtistInfo' &&
+                  currentlyActivePage.data.artistName === artist
+                    ? changeCurrentActivePage('Home')
+                    : changeCurrentActivePage('ArtistInfo', {
                         artistName: artist,
                       })
                 }
@@ -120,9 +167,9 @@ export const SongCard = (props: SongCardProp) => {
         <div className="play-btn-container">
           <span
             className="material-icons-round icon"
-            onClick={() => props.playSong(props.songId)}
+            onClick={() => playSong(props.songId)}
           >
-            play_circle
+            {isSongPlaying ? 'pause_circle' : 'play_circle'}
           </span>
         </div>
       </div>

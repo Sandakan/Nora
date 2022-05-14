@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
@@ -10,11 +11,19 @@ import DefaultArtistCover from '../../../../assets/images/song_cover_default.png
 interface ArtistProp {
   name: string;
   artworkPath?: string;
-  currentlyActivePage: { pageTitle: string; data?: any };
-  changeCurrentActivePage: (pageTitle: string, data?: any) => void;
+  currentlyActivePage: { pageTitle: PageTitles; data?: any };
+  changeCurrentActivePage: (pageTitle: PageTitles, data?: any) => void;
 }
 
 export const Artist = (props: ArtistProp) => {
+  const handleArtistClick = () => {
+    return props.currentlyActivePage.pageTitle === 'ArtistInfo' &&
+      props.currentlyActivePage.data.artistName === props.name
+      ? props.changeCurrentActivePage('Home')
+      : props.changeCurrentActivePage('ArtistInfo', {
+          artistName: props.name,
+        });
+  };
   return (
     <div className="artist">
       <div className="artist-img-container">
@@ -23,20 +32,14 @@ export const Artist = (props: ArtistProp) => {
             `otomusic://localFiles/${props.artworkPath}` || DefaultArtistCover
           }
           alt="Default song cover"
+          onClick={handleArtistClick}
         />
       </div>
       <div className="artist-info-container">
         <div
           className="name-container"
           title={props.name === '' ? 'Unknown Artist' : props.name}
-          onClick={() =>
-            props.currentlyActivePage.pageTitle === 'ArtistInfo' &&
-            props.currentlyActivePage.data.artistName === props.name
-              ? props.changeCurrentActivePage('Home')
-              : props.changeCurrentActivePage('ArtistInfo', {
-                  artistName: props.name,
-                })
-          }
+          onClick={handleArtistClick}
         >
           {props.name === '' ? 'Unknown Artist' : props.name}
         </div>

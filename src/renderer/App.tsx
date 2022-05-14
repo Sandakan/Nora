@@ -21,44 +21,177 @@ import SongControlsContainer from './components/SongsControlsContainer/SongContr
 import { PromptMenu } from './components/PromptMenu/PromptMenu';
 import { ContextMenu } from './components/ContextMenu/ContextMenu';
 import { AppContext } from './contexts/AppContext';
-// import '../../assets/fonts/fontawesome-free-6.0.0-web/css/all.min.css';
+import MiniPlayer from './components/MiniPlayer/MiniPlayer';
+
+interface AppReducer {
+  userData?: UserData;
+  startPlay: boolean;
+  isDarkMode: boolean;
+  currentSongData: AudioData;
+  queue: Queue;
+  PromptMenuData: PromptMenuData;
+  notificationPanelData: NotificationPanelData;
+  contextMenuData: ContextMenuData;
+  navigationHistory: NavigationHistoryData;
+  isCurrentSongPlaying: boolean;
+  isMiniPlayer: boolean;
+}
+
+type AppReducerStateActions =
+  | 'USER_DATA_CHANGE'
+  | 'START_PLAY_STATE_CHANGE'
+  | 'IS_DARK_MODE_CHANGE'
+  | 'CURRENT_SONG_DATA_CHANGE'
+  | 'CURRENT_SONG_PLAYBACK_STATE'
+  | 'QUEUE_DATA_CHANGE'
+  | 'PROMPT_MENU_DATA_CHANGE'
+  | 'NOTIFICATION_PANEL_DATA_CHANGE'
+  | 'CONTEXT_MENU_DATA_CHANGE'
+  | 'CONTEXT_MENU_VISIBILITY_CHANGE'
+  | 'CURRENT_ACTIVE_PAGE_CHANGE'
+  | 'UPDATE_NAVIGATION_HISTORY_DATA'
+  | 'UPDATE_MINI_PLAYER_STATE';
+
+const reducer = (
+  state: AppReducer,
+  action: { type: AppReducerStateActions; data?: any }
+): AppReducer => {
+  switch (action.type) {
+    case 'IS_DARK_MODE_CHANGE':
+      return {
+        ...state,
+        isDarkMode: action.data || !state.isDarkMode,
+      };
+    case 'START_PLAY_STATE_CHANGE':
+      return {
+        ...state,
+        startPlay: action.data || state.startPlay,
+      };
+    case 'USER_DATA_CHANGE':
+      return {
+        ...state,
+        userData: action.data || state.userData,
+      };
+    case 'QUEUE_DATA_CHANGE':
+      return {
+        ...state,
+        queue: (action.data as Queue) || state.queue,
+      };
+    case 'PROMPT_MENU_DATA_CHANGE':
+      return {
+        ...state,
+        PromptMenuData: (action.data as PromptMenuData) || state.PromptMenuData,
+      };
+    case 'NOTIFICATION_PANEL_DATA_CHANGE':
+      return {
+        ...state,
+        notificationPanelData:
+          (action.data as NotificationPanelData) || state.notificationPanelData,
+      };
+    case 'CONTEXT_MENU_DATA_CHANGE':
+      return {
+        ...state,
+        contextMenuData:
+          (action.data as ContextMenuData) || state.contextMenuData,
+      };
+    case 'CONTEXT_MENU_VISIBILITY_CHANGE':
+      return {
+        ...state,
+        contextMenuData: {
+          ...state.contextMenuData,
+          isVisible: action.data,
+        },
+      };
+    case 'CURRENT_ACTIVE_PAGE_CHANGE':
+      return {
+        ...state,
+        navigationHistory: {
+          pageHistoryIndex: state.navigationHistory.pageHistoryIndex + 1,
+          history: action.data
+            ? [
+                ...state.navigationHistory.history,
+                action.data as NavigationHistory,
+              ]
+            : state.navigationHistory.history,
+        },
+      };
+    case 'UPDATE_NAVIGATION_HISTORY_DATA':
+      return {
+        ...state,
+        navigationHistory: action.data || state.navigationHistory,
+      };
+    case 'CURRENT_SONG_DATA_CHANGE':
+      return {
+        ...state,
+        currentSongData:
+          Object.keys(action.data).length > 0
+            ? action.data
+            : state.currentSongData,
+      };
+    case 'CURRENT_SONG_PLAYBACK_STATE':
+      return {
+        ...state,
+        isCurrentSongPlaying: action.data || state.isCurrentSongPlaying,
+      };
+    case 'UPDATE_MINI_PLAYER_STATE':
+      window.api.toggleMiniPlayer(
+        action.data !== undefined ? action.data : state.isMiniPlayer
+      );
+      return {
+        ...state,
+        isMiniPlayer:
+          action.data !== undefined ? action.data : state.isMiniPlayer,
+      };
+    default:
+      return state;
+  }
+};
 
 export default function App() {
-  const x: unknown = undefined;
-  const [userData, setUserData] = React.useState(x as UserData | undefined);
-  const [startPlay, setStartPlay] = React.useState(false);
-  const [isDarkMode, setDarkMode] = React.useState(false);
-  const [currentSongData, setCurrentSongData] = React.useState({} as AudioData);
-  // const [queue, setQueue] = React.useState({
-  //   currentSongIndex: null,
-  //   queue: [],
-  // } as Queue);
-  const [promptMenuData, setPromptMenuData] = React.useState({
-    isVisible: false,
-    content: <span></span>,
-    className: '',
-  } as PromptMenuData);
-  const [dialogMenuData, setDialogMenuData] = React.useState({
-    isVisible: false,
-    content: <span></span>,
-  } as DialogMenuData);
-  const [contextMenuData, setContextMenuData] = React.useState({
-    isVisible: false,
-    menuItems: [] as ContextMenuItem[],
-    pageX: 200,
-    pageY: 200,
-  });
-  const [currentlyActivePage, setCurrentlyActivePage] = React.useState({
-    pageTitle: 'Home',
-    data: {} as any,
-  });
+  const [content, dispatch] = React.useReducer(reducer, {
+    isDarkMode: false,
+    startPlay: false,
+    isMiniPlayer: false,
+    userData: undefined,
+    currentSongData: {} as AudioData,
+    isCurrentSongPlaying: false,
+    navigationHistory: {
+      pageHistoryIndex: 0,
+      history: [
+        {
+          pageTitle: 'Home',
+          data: undefined,
+        },
+      ],
+    },
+    contextMenuData: {
+      isVisible: false,
+      menuItems: [],
+      pageX: 200,
+      pageY: 200,
+    },
+    notificationPanelData: {
+      isVisible: false,
+      content: <span></span>,
+    },
+    PromptMenuData: {
+      isVisible: false,
+      content: <span></span>,
+      className: '',
+    },
+    queue: {
+      currentSongIndex: null,
+      queue: [],
+    },
+  } as AppReducer);
 
+  const handleContextMenuDataUpdate = () =>
+    // content.contextMenuData.isVisible &&
+    dispatch({
+      type: 'CONTEXT_MENU_VISIBILITY_CHANGE',
+      data: false,
+    });
   React.useEffect(() => {
-    const handleContextMenuDataUpdate = () =>
-      // contextMenuData.isVisible &&
-      setContextMenuData((prevData) => {
-        return { ...prevData, isVisible: false };
-      });
     window.addEventListener('click', handleContextMenuDataUpdate);
     return () =>
       window.removeEventListener('click', handleContextMenuDataUpdate);
@@ -67,20 +200,28 @@ export default function App() {
   React.useEffect(() => {
     window.api.getUserData().then((res) => {
       if (!res) return;
-      setUserData(res);
-      setDarkMode(res.theme.isDarkMode);
+      dispatch({ type: 'USER_DATA_CHANGE', data: res });
+      dispatch({ type: 'IS_DARK_MODE_CHANGE', data: res.theme.isDarkMode });
+      content.navigationHistory.history.at(-1)?.pageTitle !== res.defaultPage &&
+        dispatch({
+          type: 'CURRENT_ACTIVE_PAGE_CHANGE',
+          data: { pageTitle: res.defaultPage, data: undefined },
+        });
       if (res.currentSong.songId) playSong(res.currentSong.songId, false);
     });
 
-    // window.api.checkForSongs().then((audioData) => {
-    //   if (!audioData) return undefined;
-    //   createQueue(audioData);
-    //   return undefined;
-    // });
-    window.api.getNewSongUpdates((_, update) => {
-      updateDialogMenuData(2500, <span>{update}</span>);
-      console.log(update);
+    window.api.checkForSongs().then((audioData) => {
+      if (!audioData) return undefined;
+      createQueue(audioData.map((song) => song.songId));
+      return undefined;
     });
+    window.api.getMessageFromMain((_, message) => {
+      updateNotificationPanelData(5000, <span>{message}</span>);
+      // console.log(message);
+    });
+    window.api.dataUpdateEvent((_, dataType, message) =>
+      console.log(dataType, message)
+    );
     // to make it run only once
   }, []);
 
@@ -91,150 +232,239 @@ export default function App() {
     pageY?: number
   ) => {
     console.log('context menu event triggered', isVisible, pageX, pageY);
-    setContextMenuData((prevData) => {
-      return {
+    dispatch({
+      type: 'CONTEXT_MENU_DATA_CHANGE',
+      data: {
         isVisible,
-        menuItems: menuItems.length > 0 ? menuItems : prevData.menuItems,
-        pageX: pageX !== undefined ? pageX : prevData.pageX,
-        pageY: pageY !== undefined ? pageY : prevData.pageY,
-      };
+        menuItems:
+          menuItems.length > 0 ? menuItems : content.contextMenuData.menuItems,
+        pageX: pageX !== undefined ? pageX : content.contextMenuData.pageX,
+        pageY: pageY !== undefined ? pageY : content.contextMenuData.pageY,
+      },
     });
   };
 
-  const changeCurrentActivePage = (pageClass: string, data?: object) =>
-    setCurrentlyActivePage((prevData) => {
-      return {
+  const changeCurrentActivePage = (pageClass: PageTitles, data?: object) =>
+    (content.navigationHistory.history.at(-1)?.pageTitle !== pageClass ||
+      content.navigationHistory.history.at(-1)?.data !== data) &&
+    dispatch({
+      type: 'CURRENT_ACTIVE_PAGE_CHANGE',
+      data: {
         pageTitle: pageClass,
-        data: data || prevData.data,
-      };
+        data,
+      },
     });
 
   const playSong = (songId: string, isStartPlay = true) => {
-    if (currentSongData.songId === songId) setStartPlay(true);
-    else if (isStartPlay !== startPlay) setStartPlay(isStartPlay);
-    window.api.getSong(songId).then((songData) => {
-      if (songData) {
-        console.log('playSong', songId, songData.path);
-        setCurrentSongData(songData);
-        window.api.saveUserData('currentSong.songId', songData.songId);
-        // if (queue.queue.length > 0 && queue.queue.includes(songData.songId)) {
-        //   setQueue((prevQueueData) => {
-        //     return {
-        //       ...prevQueueData,
-        //       currentSongIndex: queue.queue.indexOf(songData.songId),
-        //     };
-        //   });
-        // }
-      } else console.log(songData);
-    });
+    if (content.currentSongData.songId === songId)
+      dispatch({ type: 'START_PLAY_STATE_CHANGE', data: true });
+    else if (isStartPlay !== content.startPlay)
+      dispatch({ type: 'START_PLAY_STATE_CHANGE', data: isStartPlay });
+    content.currentSongData.songId !== songId &&
+      window.api.getSong(songId).then((songData) => {
+        if (songData) {
+          console.log('playSong', songId, songData.path);
+          dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: songData });
+          window.api.saveUserData('currentSong.songId', songData.songId);
+          if (
+            content.queue.queue.length > 0 &&
+            content.queue.queue.includes(songData.songId)
+          ) {
+            dispatch({
+              type: 'QUEUE_DATA_CHANGE',
+              data: {
+                ...content.queue,
+                currentSongIndex: content.queue.queue.indexOf(songData.songId),
+              },
+            });
+          }
+        } else console.log(songData);
+      });
   };
 
-  // const createQueue = (songsData: AudioInfo[], startPlaying = false) => {
-  //   queue.queue = songsData.map((songData) => songData.songId);
-  //   if (startPlaying) changeQueueCurrentSongIndex(0);
-  // };
-
-  const toggleDarkMode = () => {
-    setDarkMode((prevState) => {
-      window.api.saveUserData('theme.isDarkMode', (!prevState).toString());
-      return !prevState;
+  const createQueue = (
+    songIds: string[],
+    playlistId?: string,
+    startPlaying = false
+  ) => {
+    dispatch({
+      type: 'QUEUE_DATA_CHANGE',
+      data: {
+        currentSongIndex: 0,
+        playlistId: playlistId || undefined,
+        queue: songIds.map((songId) => songId),
+      } as Queue,
     });
+    if (startPlaying) changeQueueCurrentSongIndex(0);
   };
 
-  // const changeQueueCurrentSongIndex = (currentSongIndex: number) => {
-  //   console.log('currentSongIndex', currentSongIndex);
-  //   setQueue((prevQueueData) => {
-  //     return { ...prevQueueData, currentSongIndex };
-  //   });
-  //   playSong(queue.queue[currentSongIndex || 0]);
-  // };
+  const toggleDarkMode = (theme?: 'dark' | 'light') => {
+    if (theme) {
+      const isDarkMode = theme === 'dark';
+      isDarkMode !== content.isDarkMode &&
+        window.api.saveUserData('theme.isDarkMode', isDarkMode.toString());
+      dispatch({
+        type: 'IS_DARK_MODE_CHANGE',
+        data: isDarkMode,
+      });
+    } else {
+      window.api.saveUserData(
+        'theme.isDarkMode',
+        (!content.isDarkMode).toString()
+      );
+      dispatch({
+        type: 'IS_DARK_MODE_CHANGE',
+        data: !content.isDarkMode,
+      });
+    }
+  };
 
-  // const updateQueueData = (
-  //   currentSongIndex?: number,
-  //   newQueue?: string[],
-  //   playCurrentSongIndex = true
-  // ) => {
-  //   setQueue((prevData) => {
-  //     return {
-  //       currentSongIndex:
-  //         currentSongIndex !== undefined
-  //           ? currentSongIndex
-  //           : prevData.currentSongIndex,
-  //       queue: newQueue || prevData.queue,
-  //     };
-  //   });
-  //   if (playCurrentSongIndex && typeof currentSongIndex === 'number')
-  //     playSong(queue.queue[currentSongIndex]);
-  // };
+  const changeQueueCurrentSongIndex = (currentSongIndex: number) => {
+    console.log('currentSongIndex', currentSongIndex);
+    dispatch({
+      type: 'QUEUE_DATA_CHANGE',
+      data: { ...content.queue, currentSongIndex },
+    });
+    playSong(content.queue.queue[currentSongIndex]);
+  };
 
-  // console.log('queue', queue.currentSongIndex);
+  const updateQueueData = (
+    currentSongIndex?: number,
+    newQueue?: string[],
+    playCurrentSongIndex = true
+  ) => {
+    dispatch({
+      type: 'QUEUE_DATA_CHANGE',
+      data: {
+        ...content.queue,
+        currentSongIndex:
+          currentSongIndex !== undefined
+            ? currentSongIndex
+            : content.queue.currentSongIndex,
+        queue: newQueue || content.queue.queue,
+      },
+    });
+    if (playCurrentSongIndex && typeof currentSongIndex === 'number')
+      playSong(content.queue.queue[currentSongIndex]);
+  };
+
+  console.log('queue', content.queue.currentSongIndex);
 
   const changePromptMenuData = (
     isVisible = false,
-    content?: ReactElement<any, any>,
+    contentData?: ReactElement<any, any>,
     className = ''
   ) => {
-    setPromptMenuData((prevData) => {
-      return {
+    dispatch({
+      type: 'PROMPT_MENU_DATA_CHANGE',
+      data: {
         isVisible,
-        content: content || prevData.content,
-        className: className || prevData.className,
-      };
+        content: contentData || content.PromptMenuData.content,
+        className: className || content.PromptMenuData.className,
+      },
     });
   };
 
-  const updateDialogMenuData = (
+  const updateNotificationPanelData = (
     delay = 5000,
-    content: ReactElement<any, any>
+    contentData: ReactElement<any, any>
   ) => {
     if (delay === 0) {
-      setDialogMenuData((prevData) => {
-        return { ...prevData, isVisible: false };
+      dispatch({
+        type: 'NOTIFICATION_PANEL_DATA_CHANGE',
+        data: { ...content.notificationPanelData, isVisible: false },
       });
     } else {
-      setDialogMenuData({ isVisible: true, content });
+      dispatch({
+        type: 'NOTIFICATION_PANEL_DATA_CHANGE',
+        data: { isVisible: true, content: contentData },
+      });
       setTimeout(
         () =>
-          setDialogMenuData((prevData) => {
-            return { ...prevData, isVisible: false };
+          dispatch({
+            type: 'NOTIFICATION_PANEL_DATA_CHANGE',
+            data: { ...content.notificationPanelData, isVisible: false },
           }),
         delay
       );
     }
   };
 
+  const updateCurrentSongPlaybackState = (isPlaying: boolean) => {
+    isPlaying !== content.isCurrentSongPlaying &&
+      dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: isPlaying });
+  };
+
+  const updatePageHistoryIndex = (
+    type: 'increment' | 'decrement',
+    index?: number
+  ) => {
+    if (type === 'decrement') {
+      const { history } = content.navigationHistory;
+      history.pop();
+      dispatch({
+        type: 'UPDATE_NAVIGATION_HISTORY_DATA',
+        data: {
+          pageHistoryIndex:
+            index !== undefined
+              ? content.navigationHistory.pageHistoryIndex - index
+              : content.navigationHistory.pageHistoryIndex - 1,
+          history,
+        } as NavigationHistoryData,
+      });
+    }
+  };
+
+  const updateMiniPlayerStatus = (isVisible: boolean) => {
+    content.isMiniPlayer !== isVisible &&
+      dispatch({ type: 'UPDATE_MINI_PLAYER_STATE', data: isVisible });
+  };
+
   return (
     <AppContext.Provider
       value={{
         toggleDarkMode,
-        isDarkMode,
-        isContextMenuVisible: contextMenuData.isVisible,
-        contextMenuItems: contextMenuData.menuItems,
-        contextMenuPageX: contextMenuData.pageX,
-        contextMenuPageY: contextMenuData.pageY,
+        isDarkMode: content.isDarkMode,
+        isContextMenuVisible: content.contextMenuData.isVisible,
+        contextMenuItems: content.contextMenuData.menuItems,
+        contextMenuPageX: content.contextMenuData.pageX,
+        contextMenuPageY: content.contextMenuData.pageY,
         updateContextMenuData,
-        promptMenuData,
+        PromptMenuData: content.PromptMenuData,
         changePromptMenuData,
         playSong,
-        currentSongData,
-        currentlyActivePage,
+        currentSongData: content.currentSongData,
+        currentlyActivePage:
+          content.navigationHistory.history[
+            content.navigationHistory.pageHistoryIndex
+          ],
         changeCurrentActivePage,
-        updateDialogMenuData,
-        dialogMenuData,
-        userData,
-        isStartPlay: startPlay,
-        // createQueue,
-        // queue,
-        // updateQueueData
+        updateNotificationPanelData,
+        notificationPanelData: content.notificationPanelData,
+        userData: content.userData,
+        isStartPlay: content.startPlay,
+        createQueue,
+        queue: content.queue,
+        updateQueueData,
+        changeQueueCurrentSongIndex,
+        updateCurrentSongPlaybackState,
+        isCurrentSongPlaying: content.isCurrentSongPlaying,
+        pageHistoryIndex: content.navigationHistory.pageHistoryIndex,
+        updatePageHistoryIndex,
+        updateMiniPlayerStatus,
+        isMiniPlayer: content.isMiniPlayer,
       }}
     >
-      <div className={`App ${isDarkMode ? 'dark-mode' : ''}`}>
-        <ContextMenu />
-        <PromptMenu />
-        <Header />
-        <BodyAndSideBarContainer />
-        <SongControlsContainer />
-      </div>
+      {!content.isMiniPlayer && (
+        <div className={`App ${content.isDarkMode ? 'dark-mode' : ''}`}>
+          <ContextMenu />
+          <PromptMenu />
+          <Header />
+          <BodyAndSideBarContainer />
+          <SongControlsContainer />
+        </div>
+      )}
+      {content.isMiniPlayer && <MiniPlayer />}
     </AppContext.Provider>
   );
 }

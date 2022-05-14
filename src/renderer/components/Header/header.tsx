@@ -11,7 +11,12 @@ export const Header = () => {
   const close = () => window.api.closeApp();
   const minimize = () => window.api.minimizeApp();
   const maximize = () => window.api.toggleMaximizeApp();
-  const { toggleDarkMode, isDarkMode } = React.useContext(AppContext);
+  const {
+    toggleDarkMode,
+    isDarkMode,
+    pageHistoryIndex,
+    updatePageHistoryIndex,
+  } = React.useContext(AppContext);
   return (
     <header id="title-bar">
       <div className="logo-and-app-name-container">
@@ -26,6 +31,23 @@ export const Header = () => {
             </sup>
           </span>
         </span>
+        <div className="navigation-controls-container">
+          <button
+            type="button"
+            className={`previousPageBtn ${pageHistoryIndex > 0 && 'available'}`}
+            onClick={() => updatePageHistoryIndex('decrement')}
+            title="Go Back"
+          >
+            <span className="material-icons-round">arrow_back</span>
+          </button>
+          {/* <button
+            type="button"
+            className={`previousPageBtn ${pageHistoryIndex > 0 && 'available'}`}
+            onClick={() => updatePageHistoryIndex('decrement')}
+          >
+            <span className="material-icons-round">arrow_forward</span>
+          </button> */}
+        </div>
       </div>
       <div className="window-controls-and-special-controls-container">
         <div className="special-controls-container">

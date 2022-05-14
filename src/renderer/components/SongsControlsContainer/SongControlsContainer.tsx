@@ -24,6 +24,67 @@ import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
 
 const music = new Audio();
 
+interface SongControlsContainerReducer {
+  currentSongPosition: number;
+  volume: number;
+  isAFavorite: boolean;
+  isShuffling: boolean;
+  isRepeating: boolean;
+  isMuted: boolean;
+  isPlaying: boolean;
+}
+
+type SongControlsContainerReducerActionTypes =
+  | 'VOLUME_CHANGE'
+  | 'SONG_POSITION_CHANGE'
+  | 'FAVORITE_STATE_CHANGE'
+  | 'SHUFFLE_sTATE_CHANGE'
+  | 'REPEAT_STATE_CHANGE'
+  | 'MUTE_STATE_CHANGE'
+  | 'MUSIC_PLAYBACK_STATE';
+
+const reducer = (
+  state: SongControlsContainerReducer,
+  action: { type: SongControlsContainerReducerActionTypes; data?: any }
+): SongControlsContainerReducer => {
+  switch (action.type) {
+    case 'SONG_POSITION_CHANGE':
+      return { ...state, currentSongPosition: Math.floor(Number(action.data)) };
+    case 'VOLUME_CHANGE':
+      return { ...state, volume: Math.floor(Number(action.data)) };
+    case 'MUSIC_PLAYBACK_STATE':
+      return {
+        ...state,
+        isPlaying: action.data !== undefined ? action.data : !state.isPlaying,
+      };
+    case 'FAVORITE_STATE_CHANGE':
+      return {
+        ...state,
+        isAFavorite:
+          action.data !== undefined ? action.data : !state.isAFavorite,
+      };
+    case 'MUTE_STATE_CHANGE':
+      return {
+        ...state,
+        isMuted: action.data !== undefined ? action.data : !state.isMuted,
+      };
+    case 'REPEAT_STATE_CHANGE':
+      return {
+        ...state,
+        isRepeating:
+          action.data !== undefined ? action.data : !state.isRepeating,
+      };
+    case 'SHUFFLE_sTATE_CHANGE':
+      return {
+        ...state,
+        isShuffling:
+          action.data !== undefined ? action.data : !state.isShuffling,
+      };
+    default:
+      return state;
+  }
+};
+
 export default () => {
   const {
     isStartPlay,
@@ -31,35 +92,42 @@ export default () => {
     userData,
     changeCurrentActivePage,
     currentlyActivePage,
-    // playSong,
-    // updateContextMenuData,
+    queue,
+    changeQueueCurrentSongIndex,
+    updateQueueData,
+    isCurrentSongPlaying,
+    updateCurrentSongPlaybackState,
+    updateMiniPlayerStatus,
+    isMiniPlayer,
   } = useContext(AppContext);
-  const [songSlidervalue, setSongSliderValue] = React.useState(0);
-  const [volumeSlidervalue, setVolumeSlidervalue] = React.useState(
-    // userData ? userData?.volume.value / 100 : 50`1
-    50
-  );
-  const [isLiked, setIsLiked] = React.useState(
-    currentSongData ? currentSongData.isAFavorite : false
-  );
-  const [isPlaying, setIsPlaying] = React.useState(false);
-  const [isShuffling, setIsShuffling] = React.useState(false);
-  const [isRepeating, setIsRepeating] = React.useState(false);
-  const [isMuted, setIsMuted] = React.useState(false);
+
+  const [content, dispatch] = React.useReducer(reducer, {
+    currentSongPosition: 0,
+    volume: 50,
+    isAFavorite: currentSongData ? currentSongData.isAFavorite : false,
+    isShuffling: false,
+    isRepeating: false,
+    isMuted: false,
+    isPlaying: false,
+  });
 
   React.useEffect(() => {
-    music.muted = isMuted;
-  }, [isMuted]);
+    music.muted = content.isMuted;
+  }, [content.isMuted]);
   React.useEffect(() => {
-    music.volume = volumeSlidervalue / 100;
-  }, [volumeSlidervalue]);
+    music.volume = content.volume / 100;
+  }, [content.volume]);
+  React.useEffect(() => {
+    isCurrentSongPlaying !== content.isPlaying &&
+      updateCurrentSongPlaybackState(content.isPlaying);
+  }, [content.isPlaying]);
 
   const seekBarCssProperties: any = {};
   const volumeBarCssProperties: any = {};
   seekBarCssProperties['--seek-before-width'] = `${
-    (songSlidervalue / music.duration) * 100
+    (content.currentSongPosition / music.duration) * 100
   }%`;
-  volumeBarCssProperties['--volume-before-width'] = `${volumeSlidervalue}%`;
+  volumeBarCssProperties['--volume-before-width'] = `${content.volume}%`;
 
   React.useEffect(() => {
     if (currentSongData.path)
@@ -115,7 +183,7 @@ export default () => {
 
   React.useEffect(() => {
     music.addEventListener('pause', () => {
-      setIsPlaying(false);
+      dispatch({ type: 'MUSIC_PLAYBACK_STATE', data: false });
       document.title = `Oto Music For Desktop`;
       window.api.saveUserData(
         'currentSong.stoppedPosition',
@@ -124,25 +192,29 @@ export default () => {
     });
 
     music.addEventListener('play', () => {
-      setIsPlaying(true);
+      dispatch({ type: 'MUSIC_PLAYBACK_STATE', data: true });
     });
 
     music.addEventListener('timeupdate', (e) => {
-      setSongSliderValue(
-        Math.floor((e.target as HTMLAudioElement).currentTime)
-      );
+      dispatch({
+        type: 'SONG_POSITION_CHANGE',
+        data: Math.floor((e.target as HTMLAudioElement).currentTime),
+      });
     });
 
     document.addEventListener('keypress', manageSpaceKeyPlayback);
+    return () => {
+      document.removeEventListener('keypress', manageSpaceKeyPlayback);
+    };
   }, []);
 
   const handleSongEnd = () => {
-    if (isRepeating) {
+    if (content.isRepeating) {
       music.currentTime = 0;
       music.play();
-      setIsPlaying(true);
+      dispatch({ type: 'MUSIC_PLAYBACK_STATE', data: true });
     } else {
-      setIsPlaying(false);
+      dispatch({ type: 'MUSIC_PLAYBACK_STATE', data: false });
       handleSkipForwardClick();
     }
   };
@@ -156,19 +228,24 @@ export default () => {
       }`;
   };
   React.useEffect(() => {
-    setIsLiked(currentSongData.isAFavorite);
+    dispatch({
+      type: 'FAVORITE_STATE_CHANGE',
+      data: currentSongData.isAFavorite,
+    });
     music.addEventListener('ended', handleSongEnd);
     music.addEventListener('play', addSongTitleToTitleBar);
     return () => {
       music.removeEventListener('ended', handleSongEnd);
       music.removeEventListener('play', addSongTitleToTitleBar);
     };
-  }, [currentSongData, isRepeating]);
+  }, [currentSongData, content.isRepeating]);
 
   const handleSongPlayback = () => {
-    if (music.paused) {
-      music.play();
-    } else music.pause();
+    if (music.readyState > 0) {
+      if (music.paused) {
+        music.play();
+      } else music.pause();
+    }
   };
 
   const manageSpaceKeyPlayback = (e: KeyboardEvent) => {
@@ -182,47 +259,63 @@ export default () => {
     divisor: number
   ) => {
     if (sliderType === 'audio')
-      setSongSliderValue(divisor && divider ? (divider / divisor) * 100 : 0);
+      dispatch({
+        type: 'SONG_POSITION_CHANGE',
+        data: divisor && divider ? (divider / divisor) * 100 : 0,
+      });
     if (sliderType === 'volume')
-      setVolumeSlidervalue((divider / divisor) * 100);
+      dispatch({
+        type: 'VOLUME_CHANGE',
+        data: (divider / divisor) * 100,
+      });
   };
 
   const toggleSongLike = () => {
-    window.api.toggleLikeSong(currentSongData.songId, !isLiked).then((res) => {
-      if (res && !res.error) setIsLiked((prevData) => !prevData);
-      else console.log(res?.error);
-    });
+    window.api
+      .toggleLikeSong(currentSongData.songId, !content.isAFavorite)
+      .then((res) => {
+        if (res && !res.error) dispatch({ type: 'FAVORITE_STATE_CHANGE' });
+        else console.log(res?.error);
+      });
   };
 
   const handleSkipBackwardClick = () => {
-    music.currentTime = 0;
-    // const { queue, currentSongIndex } = queue;
-    // if (music.currentTime > 5) music.currentTime = 0;
-    // else {
-    //   if (typeof currentSongIndex === 'number') {
-    //     if (currentSongIndex === 0)
-    //       changeQueueCurrentSongIndex(queue.length - 1);
-    //     else changeQueueCurrentSongIndex(currentSongIndex - 1);
-    //   } else changeQueueCurrentSongIndex(0);
-    // }
+    // music.currentTime = 0;
+    const { currentSongIndex } = queue;
+    if (music.currentTime > 5) music.currentTime = 0;
+    else {
+      if (typeof currentSongIndex === 'number') {
+        if (currentSongIndex === 0)
+          changeQueueCurrentSongIndex(queue.queue.length - 1);
+        else changeQueueCurrentSongIndex(currentSongIndex - 1);
+      } else changeQueueCurrentSongIndex(0);
+    }
   };
 
   const handleSkipForwardClick = () => {
-    // const { queue, currentSongIndex } = queue;
-    // console.log('isRepeating ', isRepeating);
-    // if (isRepeating) {
-    //   music.currentTime = 0;
-    //   handleSongPlayback();
-    // } else {
-    //   if (typeof currentSongIndex === 'number') {
-    //     if (queue.length - 1 === currentSongIndex)
-    //       changeQueueCurrentSongIndex(0);
-    //     else changeQueueCurrentSongIndex(currentSongIndex + 1);
-    //   } else changeQueueCurrentSongIndex(0);
-    // const songId =
-    //   queue.queue[queue.currentSongIndex || 0];
-    // playSong(songId, true);
-    // }
+    const { currentSongIndex } = queue;
+    console.log('isRepeating ', content.isRepeating);
+    if (content.isRepeating) {
+      music.currentTime = 0;
+      handleSongPlayback();
+    } else {
+      if (typeof currentSongIndex === 'number') {
+        if (queue.queue.length - 1 === currentSongIndex)
+          changeQueueCurrentSongIndex(0);
+        else changeQueueCurrentSongIndex(currentSongIndex + 1);
+      } else changeQueueCurrentSongIndex(0);
+    }
+  };
+
+  const handleQueueShuffle = () => {
+    updateQueueData(
+      undefined,
+      queue.queue.sort(() => 0.5 - Math.random())
+    );
+    dispatch({
+      type: 'SHUFFLE_sTATE_CHANGE',
+      data: !content.isShuffling,
+    });
   };
 
   return (
@@ -244,9 +337,15 @@ export default () => {
             id="currentSongTitle"
             title={currentSongData.title ? currentSongData.title : ''}
             onClick={() =>
-              currentlyActivePage.pageTitle === 'SongInfo'
+              currentlyActivePage.pageTitle === 'SongInfo' &&
+              currentlyActivePage.data &&
+              currentlyActivePage.data.songInfo &&
+              currentlyActivePage.data.songInfo.songId ===
+                currentSongData.songId
                 ? changeCurrentActivePage('Home')
-                : changeCurrentActivePage('SongInfo')
+                : changeCurrentActivePage('SongInfo', {
+                    songInfo: { songId: currentSongData.songId },
+                  })
             }
           >
             {currentSongData.title ? currentSongData.title : ''}
@@ -299,17 +398,24 @@ export default () => {
           <div className="like-btn">
             <span
               title="Like"
-              className={`material-icons-round icon ${isLiked && 'liked'}`}
+              className={`material-icons-round icon ${
+                content.isAFavorite && 'liked'
+              }`}
               onClick={toggleSongLike}
             >
-              {isLiked ? 'favorite' : 'favorite_border'}
+              {content.isAFavorite ? 'favorite' : 'favorite_border'}
             </span>
           </div>
-          <div className={`repeat-btn ${isRepeating && 'active'}`}>
+          <div className={`repeat-btn ${content.isRepeating && 'active'}`}>
             <span
               title="Repeat"
               className="material-icons-round icon"
-              onClick={() => setIsRepeating((prevState) => !prevState)}
+              onClick={() =>
+                dispatch({
+                  type: 'REPEAT_STATE_CHANGE',
+                  data: !content.isRepeating,
+                })
+              }
             >
               repeat
             </span>
@@ -329,7 +435,7 @@ export default () => {
               className="material-icons-round icon"
               onClick={handleSongPlayback}
             >
-              {isPlaying ? 'pause_circle' : 'play_circle'}
+              {content.isPlaying ? 'pause_circle' : 'play_circle'}
             </span>
           </div>
           <div className="skip-forward-btn">
@@ -358,11 +464,11 @@ export default () => {
               notes
             </span>
           </div>
-          <div className={`shuffle-btn ${isShuffling && 'active'}`}>
+          <div className={`shuffle-btn ${content.isShuffling && 'active'}`}>
             <span
               title="Shuffle"
               className="material-icons-round icon"
-              onClick={() => setIsShuffling((prevState) => !prevState)}
+              onClick={() => handleQueueShuffle()}
             >
               shuffle
             </span>
@@ -370,7 +476,9 @@ export default () => {
         </div>
         <div className="seekbar-and-song-durations-container">
           <div className="current-song-duration">
-            {calculateTime(songSlidervalue)}
+            {!Number.isNaN(content.currentSongPosition)
+              ? calculateTime(content.currentSongPosition)
+              : '--:--'}
           </div>
           <div className="seek-bar">
             <input
@@ -380,7 +488,7 @@ export default () => {
               className="seek-bar-slider"
               min="0"
               max={music.duration || 0}
-              value={songSlidervalue || 0}
+              value={content.currentSongPosition || 0}
               onChange={(e) => {
                 music.currentTime = Number(e.target.value);
                 showRangeProgress(
@@ -421,16 +529,26 @@ export default () => {
           </span>
         </div>
         <div className="mini-player-btn">
-          <span className="material-icons-round icon">tab</span>
+          <span
+            className="material-icons-round icon"
+            onClick={() => updateMiniPlayerStatus(!isMiniPlayer)}
+          >
+            tab
+          </span>
         </div>
         <div className="volume-controller-container">
           <div className="volume-btn">
             <span
               title="Change Volume"
               className="material-icons-round icon"
-              onClick={() => setIsMuted((prevState) => !prevState)}
+              onClick={() =>
+                dispatch({
+                  type: 'MUTE_STATE_CHANGE',
+                  data: !content.isMuted,
+                })
+              }
             >
-              {isMuted ? 'volume_off' : 'volume_up'}
+              {content.isMuted ? 'volume_off' : 'volume_up'}
             </span>
           </div>
           <div className="volume-slider-container">
@@ -439,11 +557,12 @@ export default () => {
               id="volumeSlider"
               min="0"
               max="100"
-              value={volumeSlidervalue}
+              value={content.volume}
               onChange={(e) => {
                 const vol = Number(e.target.value);
-                showRangeProgress('volume', vol, 100);
-                window.api.saveUserData('volume.value', `${vol}`);
+                window.api
+                  .saveUserData('volume.value', `${vol}`)
+                  .then(() => showRangeProgress('volume', vol, 100));
               }}
               aria-label="Volume slider"
               style={volumeBarCssProperties}

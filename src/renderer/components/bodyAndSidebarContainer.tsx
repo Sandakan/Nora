@@ -3,15 +3,15 @@
 /* eslint-disable import/prefer-default-export */
 // import { ReactElement, useContext } from 'react';
 import { Body } from './body';
-import { SideBar } from './Sidebar/sidebar';
-import DialogMenu from './DialogMenu/DialogMenu';
+import Sidebar from './Sidebar/Sidebar';
+import NotificationPanel from './NotificationPanel/NotificationPanel';
 
 export const BodyAndSideBarContainer = () => {
   return (
     <div className="body-and-side-bar-container">
-      <DialogMenu />
+      <NotificationPanel />
       <Body />
-      <SideBar />
+      <Sidebar />
     </div>
   );
 };

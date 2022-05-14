@@ -7,20 +7,21 @@ import { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 
 export default () => {
-  const { updateDialogMenuData, dialogMenuData } = useContext(AppContext);
+  const { updateNotificationPanelData, notificationPanelData } =
+    useContext(AppContext);
   return (
     <div
-      className={`dialog-menu-container ${
-        dialogMenuData.isVisible && 'visible'
+      className={`notification-panel-container ${
+        notificationPanelData.isVisible && 'visible'
       }`}
-      id="dialogMenusContainer"
+      id="notificationPanelsContainer"
     >
-      <div className="message-container">{dialogMenuData.content}</div>
+      <div className="message-container">{notificationPanelData.content}</div>
       <div className="buttons-container">
-        <div id="dialogMenuCloseBtn">
+        <div id="notificationPanelCloseBtn">
           <span
             className="material-icons icon"
-            onClick={() => updateDialogMenuData(0, <></>)}
+            onClick={() => updateNotificationPanelData(0, <></>)}
           >
             close
           </span>
