@@ -35,6 +35,10 @@ interface AppReducer {
   navigationHistory: NavigationHistoryData;
   isCurrentSongPlaying: boolean;
   isMiniPlayer: boolean;
+  volume: { isMuted: boolean; value: number };
+  isRepeating: boolean;
+  songPosition: number;
+  isShuffling: boolean;
 }
 
 type AppReducerStateActions =
@@ -50,7 +54,15 @@ type AppReducerStateActions =
   | 'CONTEXT_MENU_VISIBILITY_CHANGE'
   | 'CURRENT_ACTIVE_PAGE_CHANGE'
   | 'UPDATE_NAVIGATION_HISTORY_DATA'
-  | 'UPDATE_MINI_PLAYER_STATE';
+  | 'UPDATE_MINI_PLAYER_STATE'
+  | 'UPDATE_VOLUME'
+  | 'UPDATE_MUTED_STATE'
+  | 'UPDATE_SONG_POSITION'
+  | 'UPDATE_IS_REPEATING_STATE'
+  | 'TOGGLE_IS_FAVORITE_STATE'
+  | 'TOGGLE_SHUFFLE_STATE'
+  | 'UPDATE_VOLUME_VALUE'
+  | 'CURRENT_SONG_INDEX_CHANGE';
 
 const reducer = (
   state: AppReducer,
@@ -76,6 +88,17 @@ const reducer = (
       return {
         ...state,
         queue: (action.data as Queue) || state.queue,
+      };
+    case 'CURRENT_SONG_INDEX_CHANGE':
+      return {
+        ...state,
+        queue: {
+          ...state.queue,
+          currentSongIndex:
+            action.data !== undefined
+              ? Number(action.data)
+              : state.queue.currentSongIndex,
+        },
       };
     case 'PROMPT_MENU_DATA_CHANGE':
       return {
@@ -131,7 +154,8 @@ const reducer = (
     case 'CURRENT_SONG_PLAYBACK_STATE':
       return {
         ...state,
-        isCurrentSongPlaying: action.data || state.isCurrentSongPlaying,
+        isCurrentSongPlaying:
+          action.data !== undefined ? action.data : !state.isCurrentSongPlaying,
       };
     case 'UPDATE_MINI_PLAYER_STATE':
       window.api.toggleMiniPlayer(
@@ -142,10 +166,63 @@ const reducer = (
         isMiniPlayer:
           action.data !== undefined ? action.data : state.isMiniPlayer,
       };
+    case 'UPDATE_SONG_POSITION':
+      return {
+        ...state,
+        songPosition:
+          action.data !== undefined ? action.data : state.songPosition,
+      };
+    case 'UPDATE_IS_REPEATING_STATE':
+      return {
+        ...state,
+        isRepeating:
+          action.data !== undefined ? action.data : !state.isRepeating,
+      };
+    case 'TOGGLE_IS_FAVORITE_STATE':
+      return {
+        ...state,
+        currentSongData: {
+          ...state.currentSongData,
+          isAFavorite:
+            action.data !== undefined
+              ? action.data
+              : !state.currentSongData.isAFavorite,
+        },
+      };
+    case 'TOGGLE_SHUFFLE_STATE':
+      return {
+        ...state,
+        isShuffling:
+          action.data !== undefined ? action.data : !state.isShuffling,
+      };
+    case 'UPDATE_VOLUME':
+      return {
+        ...state,
+        volume: action.data !== undefined ? action.data : state.volume,
+      };
+    case 'UPDATE_VOLUME_VALUE':
+      return {
+        ...state,
+        volume: {
+          ...state.volume,
+          value: action.data !== undefined ? action.data : state.volume.value,
+        },
+      };
+    case 'UPDATE_MUTED_STATE':
+      return {
+        ...state,
+        volume: {
+          ...state.volume,
+          isMuted:
+            action.data !== undefined ? action.data : !state.volume.isMuted,
+        },
+      };
     default:
       return state;
   }
 };
+
+const player = new Audio();
 
 export default function App() {
   const [content, dispatch] = React.useReducer(reducer, {
@@ -183,18 +260,133 @@ export default function App() {
       currentSongIndex: null,
       queue: [],
     },
+    volume: { isMuted: false, value: 50 },
+    isRepeating: false,
+    isShuffling: false,
+    songPosition: 0,
   } as AppReducer);
 
+  if (content.isCurrentSongPlaying && player.readyState > 0) player.play();
+  else player.pause();
+
+  React.useEffect(() => {
+    player.addEventListener('canplay', () => {
+      if (content.startPlay) player.play();
+      else player.pause();
+    });
+  }, []);
+
+  React.useEffect(
+    () => playSong(content.queue.queue[Number(content.queue.currentSongIndex)]),
+    [content.queue.currentSongIndex]
+  );
+
+  const playCurrentSong = () => content.startPlay && toggleSongPlayback();
+
+  const handleSongEnd = () => {
+    if (content.isRepeating) {
+      player.currentTime = 0;
+      player.play();
+    } else {
+      handleSkipForwardClick();
+    }
+  };
+
+  const toggleSongPlayback = () =>
+    dispatch({
+      type: 'CURRENT_SONG_PLAYBACK_STATE',
+    });
+
+  React.useEffect(() => {
+    player.addEventListener('canplay', playCurrentSong);
+    player.addEventListener('ended', handleSongEnd);
+    return () => {
+      player.removeEventListener('canplay', playCurrentSong);
+      player.addEventListener('ended', handleSongEnd);
+    };
+  }, []);
+
+  // VOLUME RELATED SETTINGS
+  React.useEffect(() => {
+    player.volume = content.volume.value / 100;
+    player.muted = content.volume.isMuted;
+  }, [content.volume]);
+
+  const manageSpaceKeyPlayback = (e: KeyboardEvent) => {
+    e.preventDefault();
+    if (e.code === 'Space') toggleSongPlayback();
+  };
+
+  const addSongTitleToTitleBar = () => {
+    if (content.currentSongData.title && content.currentSongData.artists)
+      document.title = `${content.currentSongData.title} - ${
+        Array.isArray(content.currentSongData.artists)
+          ? content.currentSongData.artists.join(', ')
+          : content.currentSongData.artists
+      }`;
+  };
+
+  React.useEffect(() => {
+    player.addEventListener('pause', () => {
+      document.title = `Oto Music For Desktop`;
+      window.api.saveUserData(
+        'currentSong.stoppedPosition',
+        player.currentTime.toString()
+      );
+    });
+
+    player.addEventListener('timeupdate', (e) => {
+      dispatch({
+        type: 'UPDATE_SONG_POSITION',
+        data: Math.floor((e.target as HTMLAudioElement).currentTime),
+      });
+    });
+    player.addEventListener('ended', handleSongEnd);
+    player.addEventListener('play', addSongTitleToTitleBar);
+    return () => {
+      player.removeEventListener('ended', handleSongEnd);
+      player.removeEventListener('play', addSongTitleToTitleBar);
+    };
+  }, []);
+
+  const toggleRepeat = () => dispatch({ type: 'UPDATE_IS_REPEATING_STATE' });
+
+  const handleSkipBackwardClick = () => {
+    const { currentSongIndex } = content.queue;
+    if (player.currentTime > 5) player.currentTime = 0;
+    else if (typeof currentSongIndex === 'number') {
+      if (currentSongIndex === 0)
+        changeQueueCurrentSongIndex(content.queue.queue.length - 1);
+      else changeQueueCurrentSongIndex(currentSongIndex - 1);
+    } else changeQueueCurrentSongIndex(0);
+  };
+
+  const handleSkipForwardClick = () => {
+    const { currentSongIndex } = content.queue;
+    console.log('isRepeating ', content.isRepeating);
+    if (content.isRepeating) {
+      player.currentTime = 0;
+      toggleSongPlayback();
+    } else if (typeof currentSongIndex === 'number') {
+      if (content.queue.queue.length - 1 === currentSongIndex)
+        changeQueueCurrentSongIndex(0);
+      else changeQueueCurrentSongIndex(currentSongIndex + 1);
+    } else changeQueueCurrentSongIndex(0);
+  };
+
   const handleContextMenuDataUpdate = () =>
-    // content.contextMenuData.isVisible &&
     dispatch({
       type: 'CONTEXT_MENU_VISIBILITY_CHANGE',
       data: false,
     });
+
   React.useEffect(() => {
     window.addEventListener('click', handleContextMenuDataUpdate);
-    return () =>
+    window.addEventListener('keypress', manageSpaceKeyPlayback);
+    return () => {
       window.removeEventListener('click', handleContextMenuDataUpdate);
+      window.removeEventListener('keypress', manageSpaceKeyPlayback);
+    };
   }, []);
 
   React.useEffect(() => {
@@ -202,6 +394,7 @@ export default function App() {
       if (!res) return;
       dispatch({ type: 'USER_DATA_CHANGE', data: res });
       dispatch({ type: 'IS_DARK_MODE_CHANGE', data: res.theme.isDarkMode });
+      dispatch({ type: 'UPDATE_VOLUME', data: res.volume });
       content.navigationHistory.history.at(-1)?.pageTitle !== res.defaultPage &&
         dispatch({
           type: 'CURRENT_ACTIVE_PAGE_CHANGE',
@@ -209,7 +402,6 @@ export default function App() {
         });
       if (res.currentSong.songId) playSong(res.currentSong.songId, false);
     });
-
     window.api.checkForSongs().then((audioData) => {
       if (!audioData) return undefined;
       createQueue(audioData.map((song) => song.songId));
@@ -217,43 +409,40 @@ export default function App() {
     });
     window.api.getMessageFromMain((_, message) => {
       updateNotificationPanelData(5000, <span>{message}</span>);
-      // console.log(message);
     });
     window.api.dataUpdateEvent((_, dataType, message) =>
       console.log(dataType, message)
     );
-    // to make it run only once
   }, []);
 
-  const updateContextMenuData = (
-    isVisible: boolean,
-    menuItems: ContextMenuItem[] = [],
-    pageX?: number,
-    pageY?: number
-  ) => {
-    console.log('context menu event triggered', isVisible, pageX, pageY);
-    dispatch({
-      type: 'CONTEXT_MENU_DATA_CHANGE',
-      data: {
-        isVisible,
-        menuItems:
-          menuItems.length > 0 ? menuItems : content.contextMenuData.menuItems,
-        pageX: pageX !== undefined ? pageX : content.contextMenuData.pageX,
-        pageY: pageY !== undefined ? pageY : content.contextMenuData.pageY,
-      },
-    });
-  };
-
-  const changeCurrentActivePage = (pageClass: PageTitles, data?: object) =>
-    (content.navigationHistory.history.at(-1)?.pageTitle !== pageClass ||
-      content.navigationHistory.history.at(-1)?.data !== data) &&
-    dispatch({
-      type: 'CURRENT_ACTIVE_PAGE_CHANGE',
-      data: {
-        pageTitle: pageClass,
-        data,
-      },
-    });
+  React.useEffect(() => {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: content.currentSongData.title,
+        artist: Array.isArray(content.currentSongData.artists)
+          ? content.currentSongData.artists.join(', ')
+          : content.currentSongData.artists,
+        album: content.currentSongData.album || 'Unknown Album',
+        artwork: [
+          {
+            src: `data:;base64,${content.currentSongData.artwork}`,
+            sizes: '300x300',
+            type: 'image/png',
+          },
+        ],
+      });
+      navigator.mediaSession.setActionHandler('pause', toggleSongPlayback);
+      navigator.mediaSession.setActionHandler('play', toggleSongPlayback);
+      navigator.mediaSession.setActionHandler(
+        'previoustrack',
+        handleSkipBackwardClick
+      );
+      navigator.mediaSession.setActionHandler(
+        `nexttrack`,
+        handleSkipForwardClick
+      );
+    }
+  }, [content.currentSongData]);
 
   const playSong = (songId: string, isStartPlay = true) => {
     if (content.currentSongData.songId === songId)
@@ -265,6 +454,7 @@ export default function App() {
         if (songData) {
           console.log('playSong', songId, songData.path);
           dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: songData });
+          player.src = `otoMusic://localFiles/${songData.path}`;
           window.api.saveUserData('currentSong.songId', songData.songId);
           if (
             content.queue.queue.length > 0 &&
@@ -298,6 +488,40 @@ export default function App() {
     if (startPlaying) changeQueueCurrentSongIndex(0);
   };
 
+  const changeQueueCurrentSongIndex = (currentSongIndex: number) => {
+    console.log('currentSongIndex', currentSongIndex);
+    dispatch({
+      type: 'CURRENT_SONG_INDEX_CHANGE',
+      data: currentSongIndex,
+    });
+  };
+
+  const updateQueueData = (
+    currentSongIndex?: number,
+    newQueue?: string[],
+    playCurrentSongIndex = true
+  ) => {
+    dispatch({
+      type: 'QUEUE_DATA_CHANGE',
+      data: {
+        ...content.queue,
+        currentSongIndex:
+          currentSongIndex !== undefined
+            ? currentSongIndex
+            : content.queue.currentSongIndex,
+        queue: newQueue || content.queue.queue,
+      },
+    });
+    dispatch({ type: 'TOGGLE_SHUFFLE_STATE' });
+    if (playCurrentSongIndex && typeof currentSongIndex === 'number')
+      playSong(content.queue.queue[currentSongIndex]);
+  };
+
+  const updateCurrentSongPlaybackState = (isPlaying: boolean) => {
+    isPlaying !== content.isCurrentSongPlaying &&
+      dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: isPlaying });
+  };
+
   const toggleDarkMode = (theme?: 'dark' | 'light') => {
     if (theme) {
       const isDarkMode = theme === 'dark';
@@ -319,36 +543,35 @@ export default function App() {
     }
   };
 
-  const changeQueueCurrentSongIndex = (currentSongIndex: number) => {
-    console.log('currentSongIndex', currentSongIndex);
-    dispatch({
-      type: 'QUEUE_DATA_CHANGE',
-      data: { ...content.queue, currentSongIndex },
-    });
-    playSong(content.queue.queue[currentSongIndex]);
-  };
-
-  const updateQueueData = (
-    currentSongIndex?: number,
-    newQueue?: string[],
-    playCurrentSongIndex = true
+  const updateContextMenuData = (
+    isVisible: boolean,
+    menuItems: ContextMenuItem[] = [],
+    pageX?: number,
+    pageY?: number
   ) => {
+    console.log('context menu event triggered', isVisible, pageX, pageY);
     dispatch({
-      type: 'QUEUE_DATA_CHANGE',
+      type: 'CONTEXT_MENU_DATA_CHANGE',
       data: {
-        ...content.queue,
-        currentSongIndex:
-          currentSongIndex !== undefined
-            ? currentSongIndex
-            : content.queue.currentSongIndex,
-        queue: newQueue || content.queue.queue,
+        isVisible,
+        menuItems:
+          menuItems.length > 0 ? menuItems : content.contextMenuData.menuItems,
+        pageX: pageX !== undefined ? pageX : content.contextMenuData.pageX,
+        pageY: pageY !== undefined ? pageY : content.contextMenuData.pageY,
       },
     });
-    if (playCurrentSongIndex && typeof currentSongIndex === 'number')
-      playSong(content.queue.queue[currentSongIndex]);
   };
 
-  console.log('queue', content.queue.currentSongIndex);
+  const changeCurrentActivePage = (pageClass: PageTitles, data?: object) =>
+    (content.navigationHistory.history.at(-1)?.pageTitle !== pageClass ||
+      content.navigationHistory.history.at(-1)?.data !== data) &&
+    dispatch({
+      type: 'CURRENT_ACTIVE_PAGE_CHANGE',
+      data: {
+        pageTitle: pageClass,
+        data,
+      },
+    });
 
   const changePromptMenuData = (
     isVisible = false,
@@ -390,11 +613,6 @@ export default function App() {
     }
   };
 
-  const updateCurrentSongPlaybackState = (isPlaying: boolean) => {
-    isPlaying !== content.isCurrentSongPlaying &&
-      dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: isPlaying });
-  };
-
   const updatePageHistoryIndex = (
     type: 'increment' | 'decrement',
     index?: number
@@ -418,6 +636,34 @@ export default function App() {
   const updateMiniPlayerStatus = (isVisible: boolean) => {
     content.isMiniPlayer !== isVisible &&
       dispatch({ type: 'UPDATE_MINI_PLAYER_STATE', data: isVisible });
+  };
+
+  const toggleIsFavorite = (isFavorite: boolean) => {
+    content.currentSongData.isAFavorite !== isFavorite &&
+      window.api
+        .toggleLikeSong(content.currentSongData.songId, isFavorite)
+        .then(() =>
+          dispatch({ type: 'TOGGLE_IS_FAVORITE_STATE', data: isFavorite })
+        )
+        .catch((err) => console.log(err));
+  };
+
+  const updateVolume = (volume: number) =>
+    dispatch({
+      type: 'UPDATE_VOLUME_VALUE',
+      data: volume,
+    });
+
+  const updateSongPosition = (position: number) => {
+    if (position >= 0 && position <= player.duration)
+      player.currentTime = position;
+  };
+
+  const toggleMutedState = (isMuted?: boolean) => {
+    if (isMuted !== undefined)
+      isMuted !== content.volume.isMuted &&
+        dispatch({ type: 'UPDATE_MUTED_STATE', data: isMuted });
+    else dispatch({ type: 'UPDATE_MUTED_STATE' });
   };
 
   return (
@@ -453,6 +699,20 @@ export default function App() {
         updatePageHistoryIndex,
         updateMiniPlayerStatus,
         isMiniPlayer: content.isMiniPlayer,
+        handleSkipBackwardClick,
+        handleSkipForwardClick,
+        songPosition: content.songPosition,
+        volume: content.volume.value,
+        isMuted: content.volume.isMuted,
+        isRepeating: content.isRepeating,
+        isShuffling: content.isShuffling,
+        toggleSongPlayback,
+        toggleRepeat,
+        toggleIsFavorite,
+        updateVolume,
+        updateSongPosition,
+        toggleMutedState,
+        isPlaying: !player.paused,
       }}
     >
       {!content.isMiniPlayer && (

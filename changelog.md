@@ -1,5 +1,12 @@
 # Change Log
 
+- ### v0.4.1 - ( 16<sup>th</sup> of May 2022 )
+  - Migrated the song player to the root of the app to provide support for features such as mini-player (Experimental).
+  - Updated readme file.
+  - Improved codebase to support building the app.
+
+<br>
+
 - ### v0.4.0 - ( 14<sup>th</sup> of May 2022 )
   - Added song queuing. Now users can queue songs.
   - Started using useContext React api to reduce prop drilling.

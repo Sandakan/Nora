@@ -17,305 +17,82 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/self-closing-comp */
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { calculateTime } from '../../../main/calculateTime';
 import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
 
-const music = new Audio();
-
-interface SongControlsContainerReducer {
-  currentSongPosition: number;
-  volume: number;
-  isAFavorite: boolean;
-  isShuffling: boolean;
-  isRepeating: boolean;
-  isMuted: boolean;
-  isPlaying: boolean;
-}
-
-type SongControlsContainerReducerActionTypes =
-  | 'VOLUME_CHANGE'
-  | 'SONG_POSITION_CHANGE'
-  | 'FAVORITE_STATE_CHANGE'
-  | 'SHUFFLE_sTATE_CHANGE'
-  | 'REPEAT_STATE_CHANGE'
-  | 'MUTE_STATE_CHANGE'
-  | 'MUSIC_PLAYBACK_STATE';
-
-const reducer = (
-  state: SongControlsContainerReducer,
-  action: { type: SongControlsContainerReducerActionTypes; data?: any }
-): SongControlsContainerReducer => {
-  switch (action.type) {
-    case 'SONG_POSITION_CHANGE':
-      return { ...state, currentSongPosition: Math.floor(Number(action.data)) };
-    case 'VOLUME_CHANGE':
-      return { ...state, volume: Math.floor(Number(action.data)) };
-    case 'MUSIC_PLAYBACK_STATE':
-      return {
-        ...state,
-        isPlaying: action.data !== undefined ? action.data : !state.isPlaying,
-      };
-    case 'FAVORITE_STATE_CHANGE':
-      return {
-        ...state,
-        isAFavorite:
-          action.data !== undefined ? action.data : !state.isAFavorite,
-      };
-    case 'MUTE_STATE_CHANGE':
-      return {
-        ...state,
-        isMuted: action.data !== undefined ? action.data : !state.isMuted,
-      };
-    case 'REPEAT_STATE_CHANGE':
-      return {
-        ...state,
-        isRepeating:
-          action.data !== undefined ? action.data : !state.isRepeating,
-      };
-    case 'SHUFFLE_sTATE_CHANGE':
-      return {
-        ...state,
-        isShuffling:
-          action.data !== undefined ? action.data : !state.isShuffling,
-      };
-    default:
-      return state;
-  }
-};
-
 export default () => {
   const {
-    isStartPlay,
     currentSongData,
-    userData,
     changeCurrentActivePage,
     currentlyActivePage,
     queue,
-    changeQueueCurrentSongIndex,
     updateQueueData,
-    isCurrentSongPlaying,
-    updateCurrentSongPlaybackState,
     updateMiniPlayerStatus,
     isMiniPlayer,
+    isMuted,
+    toggleMutedState,
+    toggleIsFavorite,
+    volume,
+    updateVolume,
+    songPosition,
+    isShuffling,
+    isRepeating,
+    toggleRepeat,
+    handleSkipForwardClick,
+    handleSkipBackwardClick,
+    isPlaying,
+    toggleSongPlayback,
+    updateSongPosition,
   } = useContext(AppContext);
-
-  const [content, dispatch] = React.useReducer(reducer, {
-    currentSongPosition: 0,
-    volume: 50,
-    isAFavorite: currentSongData ? currentSongData.isAFavorite : false,
-    isShuffling: false,
-    isRepeating: false,
-    isMuted: false,
-    isPlaying: false,
-  });
-
-  React.useEffect(() => {
-    music.muted = content.isMuted;
-  }, [content.isMuted]);
-  React.useEffect(() => {
-    music.volume = content.volume / 100;
-  }, [content.volume]);
-  React.useEffect(() => {
-    isCurrentSongPlaying !== content.isPlaying &&
-      updateCurrentSongPlaybackState(content.isPlaying);
-  }, [content.isPlaying]);
 
   const seekBarCssProperties: any = {};
   const volumeBarCssProperties: any = {};
   seekBarCssProperties['--seek-before-width'] = `${
-    (content.currentSongPosition / music.duration) * 100
+    (songPosition / currentSongData.duration) * 100
   }%`;
-  volumeBarCssProperties['--volume-before-width'] = `${content.volume}%`;
+  volumeBarCssProperties['--volume-before-width'] = `${volume}%`;
 
-  React.useEffect(() => {
-    if (currentSongData.path)
-      music.src = `otoMusic://localFiles/${currentSongData.path}`;
-    const playCurrentSong = () => {
-      if (isStartPlay) music.play();
-    };
-    music.addEventListener('canplay', playCurrentSong);
-    // ? MEDIA SESSION EVENTS
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: currentSongData.title,
-        artist: Array.isArray(currentSongData.artists)
-          ? currentSongData.artists.join(', ')
-          : currentSongData.artists,
-        album: currentSongData.album || 'Unknown Album',
-        artwork: [
-          {
-            src: `data:;base64,${currentSongData.artwork}`,
-            sizes: '300x300',
-            type: 'image/png',
-          },
-        ],
-      });
-      navigator.mediaSession.setActionHandler('pause', () => {
-        music.pause();
-      });
-      navigator.mediaSession.setActionHandler('play', () => {
-        music.play();
-      });
-      navigator.mediaSession.setActionHandler(
-        'previoustrack',
-        handleSkipBackwardClick
-      );
-      navigator.mediaSession.setActionHandler(
-        `nexttrack`,
-        handleSkipForwardClick
-      );
-    }
-    return () => music.removeEventListener('canplay', playCurrentSong);
-  }, [currentSongData.path]);
+  // React.useEffect(() => {
+  //   music.addEventListener('pause', () => {
+  //     dispatch({ type: 'MUSIC_PLAYBACK_STATE', data: false });
+  //     document.title = `Oto Music For Desktop`;
+  //     window.api.saveUserData(
+  //       'currentSong.stoppedPosition',
+  //       music.currentTime.toString()
+  //     );
+  //   });
 
-  React.useEffect(() => {
-    if (userData?.volume)
-      showRangeProgress('volume', userData?.volume.value || 50, 100);
-    if (userData?.currentSong && userData.currentSong.stoppedPosition)
-      showRangeProgress(
-        'audio',
-        userData?.currentSong.stoppedPosition || 0,
-        music.duration || 0
-      );
-  }, [userData]);
+  // const handleSongEnd = () => {
+  //   if (content.isRepeating) {
+  //     music.currentTime = 0;
+  //     music.play();
+  //     dispatch({ type: 'MUSIC_PLAYBACK_STATE', data: true });
+  //   } else {
+  //     dispatch({ type: 'MUSIC_PLAYBACK_STATE', data: false });
+  //     handleSkipForwardClick();
+  //   }
+  // };
 
-  React.useEffect(() => {
-    music.addEventListener('pause', () => {
-      dispatch({ type: 'MUSIC_PLAYBACK_STATE', data: false });
-      document.title = `Oto Music For Desktop`;
-      window.api.saveUserData(
-        'currentSong.stoppedPosition',
-        music.currentTime.toString()
-      );
-    });
-
-    music.addEventListener('play', () => {
-      dispatch({ type: 'MUSIC_PLAYBACK_STATE', data: true });
-    });
-
-    music.addEventListener('timeupdate', (e) => {
-      dispatch({
-        type: 'SONG_POSITION_CHANGE',
-        data: Math.floor((e.target as HTMLAudioElement).currentTime),
-      });
-    });
-
-    document.addEventListener('keypress', manageSpaceKeyPlayback);
-    return () => {
-      document.removeEventListener('keypress', manageSpaceKeyPlayback);
-    };
-  }, []);
-
-  const handleSongEnd = () => {
-    if (content.isRepeating) {
-      music.currentTime = 0;
-      music.play();
-      dispatch({ type: 'MUSIC_PLAYBACK_STATE', data: true });
-    } else {
-      dispatch({ type: 'MUSIC_PLAYBACK_STATE', data: false });
-      handleSkipForwardClick();
-    }
-  };
-
-  const addSongTitleToTitleBar = () => {
-    if (currentSongData.title && currentSongData.artists)
-      document.title = `${currentSongData.title} - ${
-        Array.isArray(currentSongData.artists)
-          ? currentSongData.artists.join(', ')
-          : currentSongData.artists
-      }`;
-  };
-  React.useEffect(() => {
-    dispatch({
-      type: 'FAVORITE_STATE_CHANGE',
-      data: currentSongData.isAFavorite,
-    });
-    music.addEventListener('ended', handleSongEnd);
-    music.addEventListener('play', addSongTitleToTitleBar);
-    return () => {
-      music.removeEventListener('ended', handleSongEnd);
-      music.removeEventListener('play', addSongTitleToTitleBar);
-    };
-  }, [currentSongData, content.isRepeating]);
-
-  const handleSongPlayback = () => {
-    if (music.readyState > 0) {
-      if (music.paused) {
-        music.play();
-      } else music.pause();
-    }
-  };
-
-  const manageSpaceKeyPlayback = (e: KeyboardEvent) => {
-    e.preventDefault();
-    if (e.code === 'Space') handleSongPlayback();
-  };
-
-  const showRangeProgress = (
-    sliderType: 'audio' | 'volume',
-    divider: number,
-    divisor: number
-  ) => {
-    if (sliderType === 'audio')
-      dispatch({
-        type: 'SONG_POSITION_CHANGE',
-        data: divisor && divider ? (divider / divisor) * 100 : 0,
-      });
-    if (sliderType === 'volume')
-      dispatch({
-        type: 'VOLUME_CHANGE',
-        data: (divider / divisor) * 100,
-      });
-  };
-
-  const toggleSongLike = () => {
-    window.api
-      .toggleLikeSong(currentSongData.songId, !content.isAFavorite)
-      .then((res) => {
-        if (res && !res.error) dispatch({ type: 'FAVORITE_STATE_CHANGE' });
-        else console.log(res?.error);
-      });
-  };
-
-  const handleSkipBackwardClick = () => {
-    // music.currentTime = 0;
-    const { currentSongIndex } = queue;
-    if (music.currentTime > 5) music.currentTime = 0;
-    else {
-      if (typeof currentSongIndex === 'number') {
-        if (currentSongIndex === 0)
-          changeQueueCurrentSongIndex(queue.queue.length - 1);
-        else changeQueueCurrentSongIndex(currentSongIndex - 1);
-      } else changeQueueCurrentSongIndex(0);
-    }
-  };
-
-  const handleSkipForwardClick = () => {
-    const { currentSongIndex } = queue;
-    console.log('isRepeating ', content.isRepeating);
-    if (content.isRepeating) {
-      music.currentTime = 0;
-      handleSongPlayback();
-    } else {
-      if (typeof currentSongIndex === 'number') {
-        if (queue.queue.length - 1 === currentSongIndex)
-          changeQueueCurrentSongIndex(0);
-        else changeQueueCurrentSongIndex(currentSongIndex + 1);
-      } else changeQueueCurrentSongIndex(0);
-    }
-  };
+  // React.useEffect(() => {
+  //   dispatch({
+  //     type: 'FAVORITE_STATE_CHANGE',
+  //     data: currentSongData.isAFavorite,
+  //   });
+  //   music.addEventListener('ended', handleSongEnd);
+  //   music.addEventListener('play', addSongTitleToTitleBar);
+  //   return () => {
+  //     music.removeEventListener('ended', handleSongEnd);
+  //     music.removeEventListener('play', addSongTitleToTitleBar);
+  //   };
+  // }, [currentSongData, content.isRepeating]);
 
   const handleQueueShuffle = () => {
     updateQueueData(
       undefined,
       queue.queue.sort(() => 0.5 - Math.random())
     );
-    dispatch({
-      type: 'SHUFFLE_sTATE_CHANGE',
-      data: !content.isShuffling,
-    });
   };
 
   return (
@@ -399,23 +176,18 @@ export default () => {
             <span
               title="Like"
               className={`material-icons-round icon ${
-                content.isAFavorite && 'liked'
+                currentSongData.isAFavorite && 'liked'
               }`}
-              onClick={toggleSongLike}
+              onClick={() => toggleIsFavorite(!currentSongData.isAFavorite)}
             >
-              {content.isAFavorite ? 'favorite' : 'favorite_border'}
+              {currentSongData.isAFavorite ? 'favorite' : 'favorite_border'}
             </span>
           </div>
-          <div className={`repeat-btn ${content.isRepeating && 'active'}`}>
+          <div className={`repeat-btn ${isRepeating && 'active'}`}>
             <span
               title="Repeat"
               className="material-icons-round icon"
-              onClick={() =>
-                dispatch({
-                  type: 'REPEAT_STATE_CHANGE',
-                  data: !content.isRepeating,
-                })
-              }
+              onClick={toggleRepeat}
             >
               repeat
             </span>
@@ -433,9 +205,9 @@ export default () => {
             <span
               title="Play/Pause"
               className="material-icons-round icon"
-              onClick={handleSongPlayback}
+              onClick={toggleSongPlayback}
             >
-              {content.isPlaying ? 'pause_circle' : 'play_circle'}
+              {isPlaying ? 'pause_circle' : 'play_circle'}
             </span>
           </div>
           <div className="skip-forward-btn">
@@ -464,11 +236,11 @@ export default () => {
               notes
             </span>
           </div>
-          <div className={`shuffle-btn ${content.isShuffling && 'active'}`}>
+          <div className={`shuffle-btn ${isShuffling && 'active'}`}>
             <span
               title="Shuffle"
               className="material-icons-round icon"
-              onClick={() => handleQueueShuffle()}
+              onClick={handleQueueShuffle}
             >
               shuffle
             </span>
@@ -476,8 +248,8 @@ export default () => {
         </div>
         <div className="seekbar-and-song-durations-container">
           <div className="current-song-duration">
-            {!Number.isNaN(content.currentSongPosition)
-              ? calculateTime(content.currentSongPosition)
+            {!Number.isNaN(songPosition)
+              ? calculateTime(songPosition)
               : '--:--'}
           </div>
           <div className="seek-bar">
@@ -487,21 +259,18 @@ export default () => {
               id="seek-bar-slider"
               className="seek-bar-slider"
               min="0"
-              max={music.duration || 0}
-              value={content.currentSongPosition || 0}
-              onChange={(e) => {
-                music.currentTime = Number(e.target.value);
-                showRangeProgress(
-                  'audio',
-                  Number(e.target.value),
-                  music.duration
-                );
-              }}
+              max={currentSongData.duration || 0}
+              value={songPosition || 0}
+              onChange={(e) =>
+                updateSongPosition(Number(e.currentTarget.value))
+              }
               style={seekBarCssProperties}
             />
           </div>
           <div className="full-song-duration">
-            {music.duration ? calculateTime(music.duration) : '-:-'}
+            {currentSongData.duration
+              ? calculateTime(currentSongData.duration)
+              : '-:-'}
           </div>
         </div>
       </div>
@@ -541,14 +310,9 @@ export default () => {
             <span
               title="Change Volume"
               className="material-icons-round icon"
-              onClick={() =>
-                dispatch({
-                  type: 'MUTE_STATE_CHANGE',
-                  data: !content.isMuted,
-                })
-              }
+              onClick={() => toggleMutedState()}
             >
-              {content.isMuted ? 'volume_off' : 'volume_up'}
+              {isMuted ? 'volume_off' : 'volume_up'}
             </span>
           </div>
           <div className="volume-slider-container">
@@ -557,12 +321,12 @@ export default () => {
               id="volumeSlider"
               min="0"
               max="100"
-              value={content.volume}
+              value={volume}
               onChange={(e) => {
                 const vol = Number(e.target.value);
                 window.api
                   .saveUserData('volume.value', `${vol}`)
-                  .then(() => showRangeProgress('volume', vol, 100));
+                  .then(() => updateVolume(vol));
               }}
               aria-label="Volume slider"
               style={volumeBarCssProperties}

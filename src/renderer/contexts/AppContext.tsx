@@ -57,6 +57,20 @@ interface AppContextType {
   ) => void;
   updateMiniPlayerStatus: (isVisible: boolean) => void;
   isMiniPlayer: boolean;
+  handleSkipBackwardClick: () => void;
+  handleSkipForwardClick: () => void;
+  songPosition: number;
+  volume: number;
+  isMuted: boolean;
+  isRepeating: boolean;
+  isShuffling: boolean;
+  toggleSongPlayback: () => void;
+  toggleRepeat: () => void;
+  toggleIsFavorite: (isFavorite: boolean) => void;
+  toggleMutedState: (isMuted?: boolean) => void;
+  updateVolume: (volume: number) => void;
+  updateSongPosition: (position: number) => void;
+  isPlaying: boolean;
 }
 
 export const AppContext = createContext({} as AppContextType);
