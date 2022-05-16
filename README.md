@@ -1,36 +1,5 @@
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
-   *{
-      font-family:'Poppins', Arial;
-   }
-   img.logo{
-      width:40px;
-      margin-right:1rem;
-   }
-   h1{
-      font-family:'Poppins', Arial;
-      text-align:center;
-      font-weight:500;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-   }
-   footer{
-      margin-top:2rem;
-      text-align:center;
-   }
-   footer .heart{
-      color:crimson;
-   }
-   .footnotes{
-      font-size:.8rem;
-   }
-</style>
-
-<br>
-
  <h1>
-   <img class="logo" src="assets/images/logo_light_mode.png">
+   <img class="logo" src="assets/images/logo_light_mode.png" width="50px">
    Oto Music for Desktop
  </h1>
 <p>
@@ -121,9 +90,11 @@ Run
 <br>
 
 <footer>
-   Made with <span class="heart">&#10084;</span> by Sandakan Nipunajith.
+  <div>
+    Made with <span class="heart">&#10084;</span> by Sandakan Nipunajith.
    <br>
    Love Sri Lanka.
+  </div>
 </footer>
 
 <br>
