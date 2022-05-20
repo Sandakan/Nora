@@ -104,6 +104,7 @@ export const SearchPage = () => {
               artworkPath={song.artworkPath}
               duration={song.duration}
               songId={song.songId}
+              path={song.path}
             />
           );
         else return undefined;
@@ -137,8 +138,8 @@ export const SearchPage = () => {
               key={artist.artistId}
               name={artist.name}
               artworkPath={artist.artworkPath}
-              changeCurrentActivePage={changeCurrentActivePage}
-              currentlyActivePage={currentlyActivePage}
+              artistId={artist.artistId}
+              songIds={artist.songs.map((song) => song.songId)}
             />
           );
         else return undefined;
@@ -177,8 +178,6 @@ export const SearchPage = () => {
               songs={album.songs}
               title={album.title}
               year={album.year}
-              changeCurrentActivePage={changeCurrentActivePage}
-              currentlyActivePage={currentlyActivePage}
             />
           );
         else return undefined;

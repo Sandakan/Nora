@@ -44,7 +44,12 @@ export const parseSong = (
     const metadata = await musicMetaData
       .parseFile(absoluteFilePath)
       .catch((err) => reject(err));
-    if (data && metadata && Object.keys(data).length !== 0) {
+    if (
+      data &&
+      metadata &&
+      Object.keys(data).length !== 0 &&
+      !data.songs.some((song) => song.path === absoluteFilePath)
+    ) {
       const songTitle =
         metadata.common.title ||
         path.basename(absoluteFilePath).split('.')[0] ||
@@ -165,7 +170,7 @@ export const parseSong = (
           };
       };
 
-      const { allAlbums, newAlbums, relevantAlbums } = manageAlbums();
+      const { allAlbums, relevantAlbums } = manageAlbums();
 
       const manageArtists = () => {
         let result = data.artists;
@@ -224,7 +229,7 @@ export const parseSong = (
           } else return { allArtists: result, newArtists, relevantArtists };
         } else return { allArtists: [], newArtists, relevantArtists };
       };
-      const { allArtists, newArtists, relevantArtists } = manageArtists();
+      const { allArtists, relevantArtists } = manageArtists();
       songInfo.artistsId = relevantArtists.map(
         (newArtist) => newArtist.artistId
       );

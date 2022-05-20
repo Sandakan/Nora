@@ -22,11 +22,25 @@ export const Playlist = (props: PlaylistProp) => {
     createQueue,
   } = React.useContext(AppContext);
 
+  const openPlaylistInfoPage = () =>
+    currentlyActivePage.pageTitle === 'ArtistInfo' &&
+    currentlyActivePage.data.artistName === props.playlistId
+      ? changeCurrentActivePage('Home')
+      : changeCurrentActivePage('PlaylistInfo', {
+          playlistId: props.playlistId,
+        });
+
   const contextMenus: ContextMenuItem[] = [
     {
       label: 'Play',
       iconName: 'play_arrow',
-      handlerFunction: () => createQueue(props.songs, props.playlistId, true),
+      handlerFunction: () =>
+        createQueue(props.songs, 'playlist', props.playlistId, true),
+    },
+    {
+      label: 'Info',
+      iconName: 'info',
+      handlerFunction: openPlaylistInfoPage,
     },
   ];
 
@@ -70,7 +84,10 @@ export const Playlist = (props: PlaylistProp) => {
     >
       <div className="playlist-cover-and-play-btn-container">
         <i className="fa-solid fa-circle-play"></i>
-        <div className="playlist-cover-container">
+        <div
+          className="playlist-cover-container"
+          onClick={openPlaylistInfoPage}
+        >
           <img
             src={
               props.artworkPath
@@ -86,14 +103,7 @@ export const Playlist = (props: PlaylistProp) => {
         <div
           className="title playlist-title"
           title={props.name}
-          onClick={() =>
-            currentlyActivePage.pageTitle === 'ArtistInfo' &&
-            currentlyActivePage.data.artistName === props.playlistId
-              ? changeCurrentActivePage('Home')
-              : changeCurrentActivePage('PlaylistInfo', {
-                  playlistId: props.playlistId,
-                })
-          }
+          onClick={openPlaylistInfoPage}
         >
           {props.name}
         </div>

@@ -83,6 +83,7 @@ export default () => {
               artworkPath={song.artworkPath}
               duration={song.duration}
               songId={song.songId}
+              path={song.path}
             />
           );
         })

@@ -5,8 +5,8 @@
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
-import React, { useContext } from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import React from 'react';
+// import { AppContext } from 'renderer/contexts/AppContext';
 import sortAlbums from 'renderer/utils/sortAlbums';
 import { Album } from './Album';
 
@@ -39,9 +39,6 @@ const reducer = (
 };
 
 export const AlbumsPage = () => {
-  const { currentlyActivePage, changeCurrentActivePage } =
-    useContext(AppContext);
-
   const [content, dispatch] = React.useReducer(reducer, {
     albums: [],
     sortingOrder: 'aToZ',
@@ -84,8 +81,6 @@ export const AlbumsPage = () => {
             artists={album.artists}
             songs={album.songs}
             year={album.year}
-            changeCurrentActivePage={changeCurrentActivePage}
-            currentlyActivePage={currentlyActivePage}
           />
         ))}
       </div>

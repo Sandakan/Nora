@@ -1,3 +1,6 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable jsx-a11y/label-has-associated-control */
@@ -5,6 +8,7 @@
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import MusicFolder from './MusicFolder';
+import { version } from '../../../../package.json';
 
 interface SettingsReducer {
   userData: UserData;
@@ -36,8 +40,12 @@ const reducer = (
 };
 
 export const SettingsPage = () => {
-  const { isDarkMode, toggleDarkMode, changePromptMenuData } =
-    useContext(AppContext);
+  const {
+    isDarkMode,
+    toggleDarkMode,
+    changePromptMenuData,
+    updateNotificationPanelData,
+  } = useContext(AppContext);
   const [content, dispatch] = React.useReducer(reducer, {
     userData: {},
   } as SettingsReducer);
@@ -133,6 +141,55 @@ export const SettingsPage = () => {
             <option value="Albums">Albums</option>
             <option value="Playlists">Playlists</option>
           </select>
+        </div>
+      </div>
+      <div className="main-container about-container">
+        <div className="title-container">About</div>
+        <span
+          className="release-notes-prompt-btn about-link"
+          onClick={async () => {
+            const data = await fetch(
+              'https://raw.githubusercontent.com/Sandakan/Oto-Music-for-Desktop/master/changelog.md'
+            );
+            const res = await data.text();
+            changePromptMenuData(
+              true,
+              <div dangerouslySetInnerHTML={{ __html: res }} />,
+              'release-notes'
+            );
+          }}
+        >
+          Release notes
+        </span>
+        <span
+          className="open-source-licenses-btn about-link"
+          onClick={() =>
+            updateNotificationPanelData(
+              5000,
+              <span>
+                Open source licenses will be added in an upcoming release.
+              </span>
+            )
+          }
+        >
+          Open source licenses
+        </span>
+        <span
+          className="about-link"
+          onClick={() =>
+            window.api.openInBrowser(
+              'https://github.com/Sandakan/Oto-Music-for-Desktop'
+            )
+          }
+        >
+          Github repository
+        </span>
+        <div className="about-description">
+          <div>{`Oto Music for Desktop v${version}`}</div>
+          <div>
+            Made with <span className="heart">&#10084;</span> by Sandakan
+            Nipunajith.
+          </div>
         </div>
       </div>
     </div>

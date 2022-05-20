@@ -20,6 +20,7 @@ interface SongProp {
   title: string;
   artists: string[];
   duration: number;
+  path: string;
 }
 
 export const Song = (props: SongProp) => {
@@ -47,13 +48,7 @@ export const Song = (props: SongProp) => {
   }, [currentSongData, isCurrentSongPlaying, props.songId]);
 
   const handlePlayBtnClick = () => {
-    setIsSongPlaying((prevState) => {
-      console.log('clicked songId', props.songId);
-      playSong(props.songId);
-      if (!prevState) {
-        return !prevState;
-      } else return !prevState;
-    });
+    playSong(props.songId);
   };
 
   return (
@@ -79,12 +74,8 @@ export const Song = (props: SongProp) => {
                   (songId) => songId !== props.songId
                 );
                 newQueue.splice(
-                  queue.queue.length - 1 !== queue.currentSongIndex
-                    ? queue.currentSongIndex
-                      ? queue.currentSongIndex + 1
-                      : 0
-                    : 0,
-                  0,
+                  queue.queue.indexOf(currentSongData.songId) + 1 || 0,
+                  1,
                   props.songId
                 );
                 updateQueueData(undefined, newQueue);
@@ -100,11 +91,23 @@ export const Song = (props: SongProp) => {
             {
               label: 'Info',
               class: 'info',
-              iconName: 'info',
+              iconName: 'info_outline',
               handlerFunction: () =>
                 changeCurrentActivePage('SongInfo', {
                   songInfo: { songId: props.songId },
                 }),
+            },
+            {
+              label: 'Remove from Library',
+              iconName: 'remove_circle_outline',
+              handlerFunction: () =>
+                window.api.removeSongFromLibrary(props.path),
+            },
+            {
+              label: 'Delete from System',
+              iconName: 'delete',
+              handlerFunction: () =>
+                window.api.deleteSongFromSystem(props.path),
             },
           ],
           e.pageX,

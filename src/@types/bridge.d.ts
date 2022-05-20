@@ -98,7 +98,8 @@ declare global {
   interface Queue {
     currentSongIndex: number | null;
     queue: string[];
-    playlistId?: string;
+    queueId?: string;
+    queueType: QueueTypes;
   }
 
   interface QueuedSong {
@@ -109,7 +110,7 @@ declare global {
     duration: number;
     songId: string;
   }
-
+  type QueueTypes = 'album' | 'playlist' | 'artist' | 'songs';
   interface UserData {
     theme: {
       isDarkMode: boolean;
@@ -123,7 +124,9 @@ declare global {
       isMuted: boolean;
       value: number;
     };
-    // playlist: Playlist | null;
+    queue?: Queue;
+    isShuffling: boolean;
+    isRepeating: boolean;
     recentlyPlayedSongs: SongData[];
     musicFolders: MusicFolderData[];
     defaultPage: DefaultPages;
@@ -283,7 +286,10 @@ declare global {
     | 'volume.isMuted'
     | 'recentlyPlayedSongs'
     | 'musicFolders'
-    | 'defaultPage';
+    | 'defaultPage'
+    | 'queue'
+    | 'isShuffling'
+    | 'isRepeating';
 
   type SongsPageSortTypes =
     | 'aToZ'
@@ -364,5 +370,16 @@ declare global {
       };
     };
     error?: number;
+  }
+
+  interface LogsData {
+    os: {
+      architecture: string;
+      cpu: string;
+      platform: NodeJS.Platform;
+      os: string;
+      totalMemory: number;
+    };
+    logs: Error[];
   }
 }

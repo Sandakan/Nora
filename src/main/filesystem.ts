@@ -103,6 +103,8 @@ export const getUserData = async () => {
       recentlyPlayedSongs: [],
       musicFolders: [],
       defaultPage: 'Home',
+      isShuffling: false,
+      isRepeating: false,
     };
     userDataStore.store = { ...userDataTemplate };
     return userDataTemplate;
@@ -114,28 +116,33 @@ export const setUserData = async (dataType: UserDataType, data: any) => {
     if (dataType === 'theme.isDarkMode') {
       if (data === 'true') userData.theme.isDarkMode = true;
       if (data === 'false') userData.theme.isDarkMode = false;
-    }
-    if (dataType === 'currentSong.songId') userData.currentSong.songId = data;
-    if (dataType === 'currentSong.stoppedPosition')
+    } else if (dataType === 'currentSong.songId')
+      userData.currentSong.songId = data;
+    else if (dataType === 'currentSong.stoppedPosition')
       userData.currentSong.stoppedPosition = parseFloat(data);
-    if (dataType === 'volume.value') userData.volume.value = parseInt(data, 10);
-    if (dataType === 'volume.isMuted') {
+    else if (dataType === 'volume.value')
+      userData.volume.value = parseInt(data, 10);
+    else if (dataType === 'volume.isMuted') {
       if (data === 'true') userData.volume.isMuted = true;
       if (data === 'false') userData.volume.isMuted = false;
-    }
-    if (dataType === 'recentlyPlayedSongs') {
+    } else if (dataType === 'recentlyPlayedSongs') {
       const val = userData.recentlyPlayedSongs.filter(
         (x) => x.songId !== data.songId
       );
       if (val.length >= 5) val.pop();
       val.unshift(data);
       userData.recentlyPlayedSongs = val;
-    }
-    if (dataType === 'musicFolders' && Array.isArray(data)) {
+    } else if (dataType === 'musicFolders' && Array.isArray(data)) {
       userData.musicFolders = data;
-    }
-    if (dataType === 'defaultPage' && typeof data === 'string')
+    } else if (dataType === 'defaultPage' && typeof data === 'string') {
       userData.defaultPage = data as DefaultPages;
+    } else if (dataType === 'isRepeating' && typeof data === 'boolean') {
+      userData.isRepeating = data;
+    } else if (dataType === 'isShuffling' && typeof data === 'boolean') {
+      userData.isShuffling = data;
+    } else if (dataType === 'queue' && typeof data === 'object') {
+      userData.queue = data;
+    } else console.log('dataType or data is invalid');
     userDataStore.store = { ...userData };
   } else {
     console.log('userData empty ', userData);
@@ -381,7 +388,10 @@ const checkFolderForModifications = (
   });
 };
 
-const removeSongFromLibrary = (folderPath: string, filename: string) => {
+export const removeSongFromLibrary = (
+  folderPath: string,
+  filename: string
+): Promise<{ success: boolean; message?: string }> => {
   return new Promise(async (resolve, reject) => {
     const songs: SongData[] = songDataStore.get('songs') as any;
     const artists: Artist[] = songDataStore.get('artists') as any;
@@ -506,7 +516,10 @@ const removeSongFromLibrary = (folderPath: string, filename: string) => {
     dataUpdateEvent('artists', `artists related to ${filename} updated.`);
     dataUpdateEvent('albums', `albums related to ${filename} updated.`);
     dataUpdateEvent('playlists', `playlists related to ${filename} updated.`);
-    return resolve(true);
+    return resolve({
+      success: true,
+      message: `song ${filename} deleted and artists, albums,playlists related to it updated.`,
+    });
   });
 };
 
@@ -632,4 +645,37 @@ export const updateSongListeningRate = async (
     });
     songDataStore.set('songs', songsData);
   }
+};
+
+export const deleteSongFromSystem = (absoluteFilePath: string) => {
+  return new Promise(async (resolve, reject) => {
+    if (path.extname(absoluteFilePath) === '.mp3') {
+      const res = await removeSongFromLibrary(
+        path.dirname(absoluteFilePath),
+        path.basename(absoluteFilePath)
+      ).catch((err) => {
+        logger(err);
+        return reject(err);
+      });
+      if (res && res.success)
+        await fs
+          .unlink(absoluteFilePath)
+          .then(() =>
+            resolve({
+              success: true,
+              message: `Removed '${path.basename(
+                absoluteFilePath
+              )}' from the system.`,
+            })
+          )
+          .catch((err) => {
+            logger(err);
+            return reject(err);
+          });
+    } else
+      return resolve({
+        success: false,
+        message: `'${path.basename(absoluteFilePath)}' is not a song.`,
+      });
+  });
 };

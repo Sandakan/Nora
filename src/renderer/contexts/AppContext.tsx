@@ -35,10 +35,10 @@ interface AppContextType {
     content: ReactElement<any, any>
   ) => void;
   userData: UserData | undefined;
-  isStartPlay: boolean;
   createQueue: (
     songIds: string[],
-    playlistId?: string,
+    queueType: QueueTypes,
+    queueId?: string,
     startPlaying?: boolean
   ) => void;
   queue: Queue;
@@ -64,6 +64,7 @@ interface AppContextType {
   isMuted: boolean;
   isRepeating: boolean;
   isShuffling: boolean;
+  toggleShuffling: (isShuffling?: boolean) => void;
   toggleSongPlayback: () => void;
   toggleRepeat: () => void;
   toggleIsFavorite: (isFavorite: boolean) => void;

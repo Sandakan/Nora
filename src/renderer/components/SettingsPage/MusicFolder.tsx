@@ -34,7 +34,9 @@ export default (props: { musicFolder: MusicFolderData }) => {
           )
         }
       >
-        <span className="material-icons-round icon">delete</span>
+        <span className="material-icons-round icon" title="Remove">
+          delete
+        </span>
       </button>
     </div>
   );

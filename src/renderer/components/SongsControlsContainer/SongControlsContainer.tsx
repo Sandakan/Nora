@@ -38,6 +38,7 @@ export default () => {
     updateVolume,
     songPosition,
     isShuffling,
+    toggleShuffling,
     isRepeating,
     toggleRepeat,
     handleSkipForwardClick,
@@ -89,10 +90,12 @@ export default () => {
   // }, [currentSongData, content.isRepeating]);
 
   const handleQueueShuffle = () => {
-    updateQueueData(
-      undefined,
-      queue.queue.sort(() => 0.5 - Math.random())
-    );
+    if (!isShuffling)
+      updateQueueData(
+        undefined,
+        queue.queue.sort(() => 0.5 - Math.random())
+      );
+    toggleShuffling();
   };
 
   return (
@@ -134,10 +137,10 @@ export default () => {
                 currentSongData.artists[0] !== '' ? (
                   currentSongData.artists.map((artist, index) => (
                     // !THIS REACT FRAGMENT GENERATES A KEY PROP ERROR IN CONSOLE
-                    <>
+                    <span key={index}>
                       <span
                         className="artist"
-                        key={index}
+                        key={artist}
                         title={artist}
                         onClick={() =>
                           currentlyActivePage.pageTitle === 'ArtistInfo' &&
@@ -154,7 +157,7 @@ export default () => {
                       currentSongData.artists.length - 1 === index
                         ? ''
                         : ', '}
-                    </>
+                    </span>
                   ))
                 ) : (
                   'Unknown Artist'
@@ -275,7 +278,7 @@ export default () => {
         </div>
       </div>
       <div className="other-controls-container">
-        <div className="other-settings-btn">
+        <div className="other-settings-btn" style={{ display: 'none' }}>
           <span title="Other Settings" className="material-icons-round icon">
             more_horiz
           </span>

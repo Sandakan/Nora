@@ -6,40 +6,88 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
+import React from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 import DefaultArtistCover from '../../../../assets/images/song_cover_default.png';
 
 interface ArtistProp {
+  artistId: string;
   name: string;
   artworkPath?: string;
-  currentlyActivePage: { pageTitle: PageTitles; data?: any };
-  changeCurrentActivePage: (pageTitle: PageTitles, data?: any) => void;
+  songIds: string[];
 }
 
 export const Artist = (props: ArtistProp) => {
-  const handleArtistClick = () => {
-    return props.currentlyActivePage.pageTitle === 'ArtistInfo' &&
-      props.currentlyActivePage.data.artistName === props.name
-      ? props.changeCurrentActivePage('Home')
-      : props.changeCurrentActivePage('ArtistInfo', {
+  const {
+    currentlyActivePage,
+    changeCurrentActivePage,
+    updateContextMenuData,
+    createQueue,
+    queue,
+    updateQueueData,
+  } = React.useContext(AppContext);
+
+  const showArtistInfoPage = () => {
+    return currentlyActivePage.pageTitle === 'ArtistInfo' &&
+      currentlyActivePage.data.artistName === props.name
+      ? changeCurrentActivePage('Home')
+      : changeCurrentActivePage('ArtistInfo', {
           artistName: props.name,
         });
   };
+  const playArtistSongs = () =>
+    createQueue(props.songIds, 'artist', props.artistId, true);
   return (
-    <div className="artist">
+    <div
+      className="artist"
+      onContextMenu={(e) =>
+        updateContextMenuData(
+          true,
+          [
+            {
+              label: 'Play all Songs',
+              iconName: 'play_arrow',
+              handlerFunction: playArtistSongs,
+            },
+            {
+              label: 'Info',
+              iconName: 'info',
+              handlerFunction: showArtistInfoPage,
+            },
+            {
+              label: 'Add to queue',
+              iconName: 'queue',
+              handlerFunction: () => {
+                // const newQueue = queue.queue.filter(
+                //   (songId) =>
+                //     !(props.songs.map((song) => song.songId) || []).some(
+                //       (id) => id === songId
+                //     )
+                // );
+                queue.queue.push(...props.songIds);
+                updateQueueData(undefined, queue.queue, false);
+              },
+            },
+          ],
+          e.pageX,
+          e.pageY
+        )
+      }
+    >
       <div className="artist-img-container">
         <img
           src={
             `otomusic://localFiles/${props.artworkPath}` || DefaultArtistCover
           }
           alt="Default song cover"
-          onClick={handleArtistClick}
+          onClick={showArtistInfoPage}
         />
       </div>
       <div className="artist-info-container">
         <div
           className="name-container"
           title={props.name === '' ? 'Unknown Artist' : props.name}
-          onClick={handleArtistClick}
+          onClick={showArtistInfoPage}
         >
           {props.name === '' ? 'Unknown Artist' : props.name}
         </div>

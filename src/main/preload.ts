@@ -21,12 +21,12 @@ export const api = {
   checkForSongs: (): Promise<AudioInfo[] | undefined> =>
     ipcRenderer.invoke('app/checkForSongs'),
   // SAVES AND GETS USERDATA
-  saveUserData: (dataType: UserDataType, data: string) =>
+  saveUserData: (dataType: UserDataType, data: any) =>
     ipcRenderer.invoke('app/saveUserData', dataType, data),
   getUserData: (): Promise<UserData> => ipcRenderer.invoke('app/getUserData'),
   // SENDS AND GETS CURRENTLY STOPPED SONG POSTION
-  getSongPosition: (callback: (e: any) => void) =>
-    ipcRenderer.on('app/sendSongPosition', callback),
+  beforeQuitEvent: (callback: (e: any) => void) =>
+    ipcRenderer.on('app/beforeQuitEvent', callback),
   sendSongPosition: (position: number) =>
     ipcRenderer.send('app/getSongPosition', position),
   // PROVIDES SEARCH RESULTS
@@ -91,6 +91,16 @@ export const api = {
   // GET SONG INFO
   getSongInfo: (songId: string): Promise<SongData | undefined> =>
     ipcRenderer.invoke('app/getSongInfo', songId),
+  // REMOVES A SONG FROM THE LIBRARY
+  removeSongFromLibrary: (
+    absoluteFilePath: string
+  ): Promise<{ success: boolean; message?: string }> =>
+    ipcRenderer.invoke('app/removeSongFromLibrary', absoluteFilePath),
+  // DELTEES A SONG FROM THE SYSTEM
+  deleteSongFromSystem: (
+    absoluteFilePath: string
+  ): Promise<{ success: boolean; message?: string }> =>
+    ipcRenderer.invoke('app/deleteSongFromSystem', absoluteFilePath),
   // RESYNC SONGS LIBRARY
   resyncSongsLibrary: (): Promise<true> =>
     ipcRenderer.invoke('app/resyncSongsLibrary'),

@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
@@ -5,18 +6,86 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
-// import React from 'react';
+import React from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 
-interface AlbumProp extends Album {
-  currentlyActivePage: { pageTitle: PageTitles; data?: any };
-  changeCurrentActivePage: (pageTitle: PageTitles, data?: any) => void;
-}
+export const Album = (props: Album) => {
+  const {
+    currentlyActivePage,
+    changeCurrentActivePage,
+    createQueue,
+    updateContextMenuData,
+    queue,
+    updateQueueData,
+  } = React.useContext(AppContext);
 
-export const Album = (props: AlbumProp) => {
+  const playAlbum = () => {
+    createQueue(
+      props.songs.map((song) => song.songId),
+      'album',
+      props.albumId,
+      true
+    );
+  };
+
+  const showAlbumInfoPage = () =>
+    currentlyActivePage.pageTitle === 'AlbumInfo' &&
+    currentlyActivePage.data.artistName === props.albumId
+      ? changeCurrentActivePage('Home')
+      : changeCurrentActivePage('AlbumInfo', {
+          albumId: props.albumId,
+        });
+
   return (
-    <div className="album">
-      <div className="album-cover-and-play-btn-container">
-        <span className="material-icons-round icon">play_circle</span>
+    <div
+      className="album"
+      onContextMenu={(e) =>
+        updateContextMenuData(
+          true,
+          [
+            {
+              label: 'Play',
+              iconName: 'play_arrow',
+              handlerFunction: playAlbum,
+            },
+            {
+              label: 'Add to queue',
+              iconName: 'queue',
+              handlerFunction: () => {
+                // const newQueue = queue.queue.filter(
+                //   (songId) =>
+                //     !(props.songs.map((song) => song.songId) || []).some(
+                //       (id) => id === songId
+                //     )
+                // );
+                queue.queue.push(...props.songs.map((song) => song.songId));
+                updateQueueData(undefined, queue.queue, false);
+              },
+            },
+            {
+              label: 'Info',
+              iconName: 'info',
+              handlerFunction: showAlbumInfoPage,
+            },
+          ],
+          e.pageX,
+          e.pageY
+        )
+      }
+    >
+      <div
+        className="album-cover-and-play-btn-container"
+        onClick={showAlbumInfoPage}
+      >
+        <span
+          className="material-icons-round icon"
+          onClick={(e) => {
+            e.stopPropagation();
+            playAlbum();
+          }}
+        >
+          play_circle
+        </span>
         <div className="album-cover-container">
           <img
             src={`otomusic://localFiles/${props.artworkPath}`}
@@ -28,14 +97,7 @@ export const Album = (props: AlbumProp) => {
         <div
           className="album-title"
           title={props.title}
-          onClick={() =>
-            props.currentlyActivePage.pageTitle === 'AlbumInfo' &&
-            props.currentlyActivePage.data.artistName === props.albumId
-              ? props.changeCurrentActivePage('Home')
-              : props.changeCurrentActivePage('AlbumInfo', {
-                  albumId: props.albumId,
-                })
-          }
+          onClick={showAlbumInfoPage}
         >
           {props.title}
         </div>
@@ -44,11 +106,12 @@ export const Album = (props: AlbumProp) => {
             return (
               <span
                 className="artist"
+                key={artist}
                 onClick={() =>
-                  props.currentlyActivePage.pageTitle === 'ArtistInfo' &&
-                  props.currentlyActivePage.data.artistName === artist
-                    ? props.changeCurrentActivePage('Home')
-                    : props.changeCurrentActivePage('ArtistInfo', {
+                  currentlyActivePage.pageTitle === 'ArtistInfo' &&
+                  currentlyActivePage.data.artistName === artist
+                    ? changeCurrentActivePage('Home')
+                    : changeCurrentActivePage('ArtistInfo', {
                         artistName: artist,
                       })
                 }

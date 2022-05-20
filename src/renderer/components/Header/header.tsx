@@ -26,9 +26,7 @@ export const Header = () => {
         <span className="app-name-container">
           <span>
             Oto Music for Desktop
-            <sup className="app-version" title="v0.0.1">
-              ALPHA
-            </sup>
+            <sup className="app-version">ALPHA</sup>
           </span>
         </span>
         <div className="navigation-controls-container">

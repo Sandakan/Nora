@@ -54,6 +54,8 @@ import {
   checkForNewSongs,
   updateSongListeningRate,
   removeAMusicFolder,
+  removeSongFromLibrary,
+  deleteSongFromSystem,
 } from './filesystem';
 import { parseSong } from './parseSong';
 import { generateRandomId } from './randomId';
@@ -153,7 +155,7 @@ app.whenReady().then(() => {
   });
 
   app.on('before-quit', () => {
-    mainWindow.webContents.send('app/sendSongPosition');
+    mainWindow.webContents.send('app/beforeQuitEvent');
   });
 
   ipcMain.on('app/close', () => app.quit());
@@ -165,6 +167,7 @@ app.whenReady().then(() => {
   );
 
   ipcMain.on('app/getSongPosition', async (_event, position: number) => {
+    console.log(position);
     await saveUserData('currentSong.stoppedPosition', position).catch((err) =>
       logger(err)
     );
@@ -238,6 +241,21 @@ app.whenReady().then(() => {
     'app/addSongToPlaylist',
     async (_e, playlistId: string, songId: string) =>
       await addSongToPlaylist(playlistId, songId)
+  );
+
+  ipcMain.handle(
+    'app/removeSongFromLibrary',
+    async (_e, absoluteFilePath: string) =>
+      await removeSongFromLibrary(
+        path.dirname(absoluteFilePath),
+        path.basename(absoluteFilePath)
+      )
+  );
+
+  ipcMain.handle(
+    'app/deleteSongFromSystem',
+    async (_e, absoluteFilePath: string) =>
+      await deleteSongFromSystem(absoluteFilePath)
   );
 
   ipcMain.handle('app/resyncSongsLibrary', async () => checkForNewSongs());

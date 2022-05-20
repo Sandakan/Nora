@@ -87,12 +87,8 @@ export const SongCard = (props: SongCardProp) => {
                   (songId) => songId !== props.songId
                 );
                 newQueue.splice(
-                  queue.queue.length - 1 !== queue.currentSongIndex
-                    ? queue.currentSongIndex
-                      ? queue.currentSongIndex + 1
-                      : 0
-                    : 0,
-                  0,
+                  queue.queue.indexOf(currentSongData.songId) + 1 || 0,
+                  1,
                   props.songId
                 );
                 updateQueueData(undefined, newQueue);

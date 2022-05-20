@@ -10,13 +10,12 @@
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { calculateTime } from 'renderer/utils/calculateTime';
-import DefaultArtistCover from '../../../../assets/images/default_artist-cover.png';
+import DefaultArtistCover from '../../../../assets/images/default_artist_cover.png';
 import { Album } from '../AlbumsPage/Album';
 import { Song } from '../SongsPage/song';
 
 export default () => {
-  const { currentlyActivePage, changeCurrentActivePage } =
-    useContext(AppContext);
+  const { currentlyActivePage } = useContext(AppContext);
   const [artistData, setArtistData] = React.useState({} as ArtistInfo);
   const [albums, setAlbums] = React.useState([] as Album[]);
   const [songs, setSongs] = React.useState([] as SongData[]);
@@ -148,8 +147,6 @@ export default () => {
                   songs={album.songs}
                   title={album.title}
                   year={album.year}
-                  changeCurrentActivePage={changeCurrentActivePage}
-                  currentlyActivePage={currentlyActivePage}
                   key={index}
                 />
               );
@@ -170,6 +167,7 @@ export default () => {
                   duration={song.duration}
                   songId={song.songId}
                   artworkPath={song.artworkPath}
+                  path={song.path}
                 />
               );
             })}

@@ -11,10 +11,10 @@
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 import sortSongs from 'renderer/utils/sortSongs';
 import { Song } from './song';
 import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
-// import { Artist } from '../ArtistPage/Artist';
 
 interface SongPageReducer {
   songsData: AudioInfo[];
@@ -45,6 +45,7 @@ const reducer = (
 };
 
 export const SongsPage = () => {
+  const { createQueue } = React.useContext(AppContext);
   const [content, dispatch] = React.useReducer(reducer, {
     songsData: [],
     sortingOrder: 'aToZ',
@@ -72,6 +73,7 @@ export const SongsPage = () => {
         duration={song.duration}
         songId={song.songId}
         artists={song.artists}
+        path={song.path}
       />
     );
   });
@@ -85,6 +87,21 @@ export const SongsPage = () => {
             {songs.length > 0 && (
               <span className="no-of-songs">{songs.length} songs</span>
             )}
+            <button
+              type="button"
+              className="play-all-btn"
+              onClick={() =>
+                createQueue(
+                  content.songsData.map((song) => song.songId),
+                  'songs',
+                  undefined,
+                  true
+                )
+              }
+            >
+              <span className="material-icons-round icon">play_arrow</span> Play
+              All
+            </button>
           </div>
         </div>
         <select

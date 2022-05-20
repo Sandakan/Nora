@@ -97,6 +97,7 @@ export default () => {
                   duration={song.duration}
                   songId={song.songId}
                   artworkPath={song.artworkPath}
+                  path={song.path}
                 />
               );
             })}

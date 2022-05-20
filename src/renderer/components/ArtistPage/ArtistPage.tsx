@@ -4,8 +4,7 @@
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable import/prefer-default-export */
-import React, { useContext } from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import React from 'react';
 import sortArtists from 'renderer/utils/sortArtists';
 import { Artist } from './Artist';
 // import DefaultArtistCover from '../../../../assets/images/song_cover_default.png';
@@ -39,9 +38,6 @@ const reducer = (
 };
 
 export const ArtistPage = () => {
-  const { currentlyActivePage, changeCurrentActivePage } =
-    useContext(AppContext);
-
   const [content, dispatch] = React.useReducer(reducer, {
     artists: [],
     sortingOrder: 'aToZ',
@@ -60,11 +56,11 @@ export const ArtistPage = () => {
     content.artists.length > 0 &&
     content.artists.map((artist) => (
       <Artist
+        key={artist.artistId}
+        artistId={artist.artistId}
         name={artist.name}
         artworkPath={artist.artworkPath}
-        key={artist.artistId}
-        changeCurrentActivePage={changeCurrentActivePage}
-        currentlyActivePage={currentlyActivePage}
+        songIds={artist.songs.map((song) => song.songId)}
       />
     ));
 
