@@ -328,7 +328,7 @@ export default () => {
               onChange={(e) => {
                 const vol = Number(e.target.value);
                 window.api
-                  .saveUserData('volume.value', `${vol}`)
+                  .saveUserData('volume.value', vol)
                   .then(() => updateVolume(vol));
               }}
               aria-label="Volume slider"

@@ -130,6 +130,10 @@ declare global {
     recentlyPlayedSongs: SongData[];
     musicFolders: MusicFolderData[];
     defaultPage: DefaultPages;
+    songBlacklist: string[];
+    preferences: {
+      doNotShowRemoveSongFromLibraryConfirm: boolean;
+    };
   }
 
   interface MusicFolderData {
@@ -187,6 +191,10 @@ declare global {
     }[];
     name: string;
     artworkPath?: string;
+    onlineArtworkPaths?: {
+      picture_small: string;
+      picture_medium: string;
+    };
   }
 
   interface LogData {
@@ -195,7 +203,7 @@ declare global {
       error: {
         name: string;
         message: string;
-        stack: string | undefined;
+        stack?: string;
       };
     }[];
   }
@@ -278,7 +286,7 @@ declare global {
     iconName?: string;
     handlerFunction: () => void;
   }
-  type UserDataType =
+  type UserDataTypes =
     | 'theme.isDarkMode'
     | 'currentSong.songId'
     | 'currentSong.stoppedPosition'
@@ -289,7 +297,8 @@ declare global {
     | 'defaultPage'
     | 'queue'
     | 'isShuffling'
-    | 'isRepeating';
+    | 'isRepeating'
+    | 'preferences.doNotShowRemoveSongFromLibraryConfirm';
 
   type SongsPageSortTypes =
     | 'aToZ'
@@ -301,9 +310,17 @@ declare global {
     | 'albumNameAscending'
     | 'albumNameDescending';
 
-  type ArtistSortTypes = 'aToZ' | 'noOfSongs';
+  type ArtistSortTypes =
+    | 'aToZ'
+    | 'ZToA'
+    | 'noOfSongsAscending'
+    | 'noOfSongsDescending';
 
-  type AlbumSortTypes = 'aToZ' | 'noOfSongs';
+  type AlbumSortTypes =
+    | 'aToZ'
+    | 'ZToA'
+    | 'noOfSongsAscending'
+    | 'noOfSongsDescending';
 
   type DefaultPages =
     | 'Songs'

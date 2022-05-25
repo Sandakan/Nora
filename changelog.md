@@ -2,7 +2,7 @@
 
 <ul>
   
-<li> v0.4.2-alpha - ( 19<sup>th</sup> of May 2022 )
+<li class="version"> v0.4.2-alpha - ( 19<sup>th</sup> of May 2022 )
   <ul>
     <li>Features 
      <ul>
@@ -37,7 +37,7 @@
 
   <br/>
 
-<li> v0.4.1-alpha - ( 16<sup>th</sup> of May 2022 )
+<li class="version"> v0.4.1-alpha - ( 16<sup>th</sup> of May 2022 )
   <ul>
     <li>Migrated the song player to the root of the app to provide support for features such as mini-player (Experimental).</li>
     <li>Updated readme file.</li>
@@ -47,7 +47,7 @@
 
   <br/>
 
-<li> v0.4.0-alpha - ( 14<sup>th</sup> of May 2022 )
+<li class="version"> v0.4.0-alpha - ( 14<sup>th</sup> of May 2022 )
   <ul>
     <li> Added song queuing. Now users can queue songs.</li>
     <li> Started using useContext React api to reduce prop drilling.</li>
@@ -82,7 +82,7 @@
 
 <br/>
 
-<li> v0.3.1-alpha - ( 07<sup>th</sup> of May 2022 )
+<li class="version"> v0.3.1-alpha - ( 07<sup>th</sup> of May 2022 )
   <ul>
     <li> Migration from FontAwesome icons to Google Material Icons.</li>
     <li> Improved styles to support Google material icons functionality.</li>
@@ -97,7 +97,7 @@
 
 <br/>
 
-<li> v0.3.0-alpha - ( 02<sup>nd</sup> of May 2022 )
+<li class="version"> v0.3.0-alpha - ( 02<sup>nd</sup> of May 2022 )
   <ul>
     <li> Added function to sort songs, artists and albums.</li>
     <li> Added a PlaylistsInfoPage to display information related to playlists.</li>
@@ -108,7 +108,7 @@
 
 <br/>
 
-<li> v0.2.0-alpha - ( 29<sup>th</sup> of April 2022 )
+<li class="version"> v0.2.0-alpha - ( 29<sup>th</sup> of April 2022 )
   <ul>
     <li> Added new styles for AlbumInfoPage, ArtistInfoPage, and updated some styles on other componenets.</li>
     <li> Now ArtistInfoPage shows information of the artists from Deezer and Last.fm apis.</li>
@@ -121,7 +121,7 @@
 
 <br/>
 
-<li> v0.1.1-alpha - ( 01<sup>st</sup> of April 2022 )
+<li class="version"> v0.1.1-alpha - ( 01<sup>st</sup> of April 2022 )
   <ul>
     <li>Added a context menu option for songs to open them in the File Explorer.</li>
   </ul>
@@ -129,7 +129,7 @@
 
 <br/>
 
-<li> v0.1.0-alpha - ( 23<sup>rd</sup> of March 2022 )
+<li class="version"> v0.1.0-alpha - ( 23<sup>rd</sup> of March 2022 )
   <ul>
     <li> Fixed bugs related to instant identification of newly added songs.</li>
     <li> Added a feature to monitor song listening patterns of the user for better shuffling.</li>
@@ -147,7 +147,7 @@
 
 <br/>
 
-<li> v0.0.1-alpha - ( 11<sup>th</sup> of March 2022 )
+<li class="version"> v0.0.1-alpha - ( 11<sup>th</sup> of March 2022 )
   <ul>
     <li> Initial alpha release.</li>
     <li> Added a lyrics pane which shows lyrics according to the current song.</li>

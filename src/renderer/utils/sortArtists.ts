@@ -6,14 +6,30 @@ export default (data: Artist[], sortType: ArtistSortTypes) => {
       sortedArtists = data.sort((a, b) =>
         a.name > b.name ? 1 : a.name < b.name ? -1 : 0
       );
-    else if (sortType === 'noOfSongs')
+    else if (sortType === 'ZToA')
       sortedArtists = data.sort((a, b) =>
-        a.songs.length < b.songs.length
-          ? 1
-          : a.songs.length > b.songs.length
-          ? -1
-          : 0
+        a.name < b.name ? 1 : a.name > b.name ? -1 : 0
       );
+    else if (sortType === 'noOfSongsDescending')
+      sortedArtists = data
+        .sort((a, b) => (a.name < b.name ? 1 : a.name > b.name ? -1 : 0))
+        .sort((a, b) =>
+          a.songs.length < b.songs.length
+            ? 1
+            : a.songs.length > b.songs.length
+            ? -1
+            : 0
+        );
+    else if (sortType === 'noOfSongsAscending')
+      sortedArtists = data
+        .sort((a, b) => (a.name < b.name ? 1 : a.name > b.name ? -1 : 0))
+        .sort((a, b) =>
+          a.songs.length > b.songs.length
+            ? 1
+            : a.songs.length < b.songs.length
+            ? -1
+            : 0
+        );
     else sortedArtists = data;
     return sortedArtists;
   }

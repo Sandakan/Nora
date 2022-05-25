@@ -6,6 +6,7 @@
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 // import { AppContext } from 'renderer/contexts/AppContext';
 import sortAlbums from 'renderer/utils/sortAlbums';
 import { Album } from './Album';
@@ -39,9 +40,16 @@ const reducer = (
 };
 
 export const AlbumsPage = () => {
+  const { currentlyActivePage, updateCurrentlyActivePageData } =
+    React.useContext(AppContext);
   const [content, dispatch] = React.useReducer(reducer, {
     albums: [],
-    sortingOrder: 'aToZ',
+    sortingOrder:
+      currentlyActivePage.data &&
+      currentlyActivePage.data.albumsPage &&
+      currentlyActivePage.data.albumsPage.sortingOrder
+        ? currentlyActivePage.data.albumsPage.sortingOrder
+        : 'aToZ',
   } as AlbumsPageReducer);
 
   React.useEffect(() => {
@@ -62,13 +70,21 @@ export const AlbumsPage = () => {
         <select
           name="sortingOrderDropdown"
           id="sortingOrderDropdown"
-          // value={sortingOrder}
-          onChange={(e) =>
-            dispatch({ type: 'SORTING_ORDER', data: e.currentTarget.value })
-          }
+          onChange={(e) => {
+            updateCurrentlyActivePageData({
+              albumsPage: {
+                sortingOrder: e.currentTarget.value as ArtistSortTypes,
+              },
+            });
+            dispatch({ type: 'SORTING_ORDER', data: e.currentTarget.value });
+          }}
         >
           <option value="aToZ">A to Z</option>
-          <option value="noOfSongs">No. of Songs</option>
+          <option value="ZToA">Z to A</option>
+          <option value="noOfSongsAscending">No. of Songs ( Ascending )</option>
+          <option value="noOfSongsDescending">
+            No. of Songs ( Descending )
+          </option>
         </select>
       </div>
       <div className="albums-container">

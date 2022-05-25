@@ -63,7 +63,7 @@ export default () => {
               src={`otomusic://localFiles/${
                 playlistData.artworkPath || DefaultPlaylistCover
               }`}
-              alt=""
+              alt="Playlist Cover"
             />
           </div>
           <div className="playlist-info-container">

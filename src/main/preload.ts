@@ -21,7 +21,7 @@ export const api = {
   checkForSongs: (): Promise<AudioInfo[] | undefined> =>
     ipcRenderer.invoke('app/checkForSongs'),
   // SAVES AND GETS USERDATA
-  saveUserData: (dataType: UserDataType, data: any) =>
+  saveUserData: (dataType: UserDataTypes, data: any) =>
     ipcRenderer.invoke('app/saveUserData', dataType, data),
   getUserData: (): Promise<UserData> => ipcRenderer.invoke('app/getUserData'),
   // SENDS AND GETS CURRENTLY STOPPED SONG POSTION
@@ -99,8 +99,13 @@ export const api = {
   // DELTEES A SONG FROM THE SYSTEM
   deleteSongFromSystem: (
     absoluteFilePath: string
+    // isPermanentDelete: boolean
   ): Promise<{ success: boolean; message?: string }> =>
-    ipcRenderer.invoke('app/deleteSongFromSystem', absoluteFilePath),
+    ipcRenderer.invoke(
+      'app/deleteSongFromSystem',
+      absoluteFilePath
+      // isPermanentDelete
+    ),
   // RESYNC SONGS LIBRARY
   resyncSongsLibrary: (): Promise<true> =>
     ipcRenderer.invoke('app/resyncSongsLibrary'),

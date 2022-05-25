@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable react/no-array-index-key */
@@ -34,17 +35,18 @@ export default () => {
 
   React.useEffect(() => {
     if (artistData.artistId)
-      window.api.getArtistArtworks(artistData.artistId).then((x) => {
-        if (x)
-          setArtistData((prevData) => {
-            return {
-              ...prevData,
-              artworkPath: x.picture_big || prevData.artworkPath,
-              artistPalette: x.artistPalette || prevData.artistPalette,
-              artistBio: x.artistBio || prevData.artistBio,
-            };
-          });
-      });
+      if (navigator.onLine)
+        window.api.getArtistArtworks(artistData.artistId).then((x) => {
+          if (x)
+            setArtistData((prevData) => {
+              return {
+                ...prevData,
+                artworkPath: x.picture_big || prevData.artworkPath,
+                artistPalette: x.artistPalette || prevData.artistPalette,
+                artistBio: x.artistBio || prevData.artistBio,
+              };
+            });
+        });
   }, [artistData.artistId]);
 
   React.useEffect(() => {
@@ -89,6 +91,28 @@ export default () => {
     } ${duration[1]} second${Number(duration[1]) === 1 ? '' : 's'}`;
   };
 
+  const sanitizeArtistBio = () => {
+    if (artistData.artistBio) {
+      const x = artistData.artistBio.match(/<a .*<\/a>/gm);
+      const y = x ? x[0].match(/".*"/gm) : [''];
+      const link = y ? y[0].replace(/"/gm, '') : '';
+      return (
+        <>
+          {artistData.artistBio.replace(/<a .*<\/a>/gm, '')}
+          <span
+            className="link"
+            onClick={() => window.api.openInBrowser(link)}
+            role="link"
+            tabIndex={0}
+          >
+            Read more...
+          </span>
+        </>
+      );
+    }
+    return '';
+  };
+
   return (
     <div
       className="artist-info-page-container"
@@ -101,7 +125,7 @@ export default () => {
       {/* <div className="title-container">{artistData.name}</div> */}
       <div className="artist-img-and-info-container">
         <div className="artist-img-container">
-          <img src={artistData.artworkPath} alt="" />
+          <img src={artistData.artworkPath} alt="Album Cover" />
         </div>
         <div className="artist-info-container">
           <div
@@ -175,7 +199,7 @@ export default () => {
         </div>
       )}
       {artistData.artistBio && (
-        <div className="artist-bio-container">{artistData.artistBio}</div>
+        <div className="artist-bio-container">{sanitizeArtistBio()}</div>
       )}
     </div>
   );

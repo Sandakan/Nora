@@ -138,11 +138,12 @@ export default () => {
                 : `${queue.queueType}-img`
             }
             src={`otomusic://localFiles/${queueInfo.artworkPath}`}
-            alt=""
+            alt="Current Playing Queue Cover"
           />
         </div>
         <div className="queue-info">
           <div className="queue-title">{queueInfo.title}</div>
+          <div className="queue-no-of-songs">{`${queuedSongComponents.length} songs`}</div>
           <div className="queue-total-duration">{calculateTotalTime()}</div>
         </div>
       </div>

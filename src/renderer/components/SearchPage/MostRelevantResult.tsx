@@ -16,14 +16,15 @@ interface MostRelevantResultProp {
   infoType1?: any;
   infoType2?: any;
   artworkPath?: string;
+  onlineArtworkPath?: string;
   playSong?: (songId: string) => void;
   updateContextMenuData: (
     isVisible: boolean,
-    menuItems: any[],
+    menuItems: ContextMenuItem[],
     pageX?: number,
     pageY?: number
   ) => void;
-  contextMenuItems: any[];
+  contextMenuItems: ContextMenuItem[];
   currentlyActivePage: { pageTitle: PageTitles; data?: any };
   changeCurrentActivePage: (pageTitle: PageTitles, data?: any) => void;
 }
@@ -54,14 +55,18 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
           </span>
         )}{' '}
         <img
-          src={`otomusic://localFiles/${props.artworkPath}`}
+          src={
+            navigator.onLine && props.onlineArtworkPath
+              ? props.onlineArtworkPath
+              : `otomusic://localFiles/${props.artworkPath}`
+          }
           loading="lazy"
-          alt=""
+          alt="Most Relevant Result Cover"
         />
       </div>
       <div className="result-info-container">
         <div
-          className="title "
+          className="title"
           onClick={() => {
             props.resultType === 'artist'
               ? props.currentlyActivePage.pageTitle === 'ArtistInfo' &&

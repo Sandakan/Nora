@@ -115,7 +115,7 @@ export default () => {
           {albumContent.albumData.artworkPath && (
             <img
               src={`otomusic://localFiles/${albumContent.albumData.artworkPath}`}
-              alt=""
+              alt="Album Cover"
             />
           )}{' '}
         </div>

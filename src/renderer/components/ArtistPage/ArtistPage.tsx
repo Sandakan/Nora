@@ -5,6 +5,7 @@
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 import sortArtists from 'renderer/utils/sortArtists';
 import { Artist } from './Artist';
 // import DefaultArtistCover from '../../../../assets/images/song_cover_default.png';
@@ -38,15 +39,25 @@ const reducer = (
 };
 
 export const ArtistPage = () => {
+  const { currentlyActivePage, updateCurrentlyActivePageData } =
+    React.useContext(AppContext);
   const [content, dispatch] = React.useReducer(reducer, {
     artists: [],
-    sortingOrder: 'aToZ',
+    sortingOrder:
+      currentlyActivePage.data &&
+      currentlyActivePage.data.artistsPage &&
+      currentlyActivePage.data.artistsPage.sortingOrder
+        ? currentlyActivePage.data.artistsPage.sortingOrder
+        : 'aToZ',
   } as ArtistPageReducer);
 
   React.useEffect(() => {
     window.api.getArtistData('*').then((res) => {
       if (res && Array.isArray(res)) {
-        dispatch({ type: 'ARTISTS_DATA', data: res });
+        dispatch({
+          type: 'ARTISTS_DATA',
+          data: sortArtists(res, content.sortingOrder),
+        });
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -60,6 +71,7 @@ export const ArtistPage = () => {
         artistId={artist.artistId}
         name={artist.name}
         artworkPath={artist.artworkPath}
+        onlineArtworkPaths={artist.onlineArtworkPaths}
         songIds={artist.songs.map((song) => song.songId)}
       />
     ));
@@ -72,15 +84,24 @@ export const ArtistPage = () => {
           name="sortingOrderDropdown"
           id="sortingOrderDropdown"
           value={content.sortingOrder}
-          onChange={(e) =>
+          onChange={(e) => {
+            updateCurrentlyActivePageData({
+              artistsPage: {
+                sortingOrder: e.currentTarget.value as ArtistSortTypes,
+              },
+            });
             dispatch({
               type: 'SORTING_ORDER',
               data: e.currentTarget.value as ArtistSortTypes,
-            })
-          }
+            });
+          }}
         >
           <option value="aToZ">A to Z</option>
-          <option value="noOfSongs">No. of Songs</option>
+          <option value="ZToA">Z to A</option>
+          <option value="noOfSongsAscending">No. of Songs ( Ascending )</option>
+          <option value="noOfSongsDescending">
+            No. of Songs ( Descending )
+          </option>
         </select>
       </div>
       <div className="artists-container">{artistComponenets}</div>

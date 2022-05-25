@@ -60,8 +60,6 @@ const reducer = (
 export const HomePage = () => {
   const {
     updateContextMenuData,
-    currentlyActivePage,
-    changeCurrentActivePage,
     updateNotificationPanelData,
     changePromptMenuData,
   } = useContext(AppContext);
@@ -155,15 +153,16 @@ export const HomePage = () => {
   const recentlyPlayedSongArtists =
     content.recentlyPlayedSongsData.length > 0
       ? content.recentSongArtists
-          .map((val, index) => {
+          .map((val) => {
             if (val)
               return (
                 <Artist
                   name={val.name}
-                  key={index}
+                  key={val.artistId}
                   artworkPath={val.artworkPath}
-                  changeCurrentActivePage={changeCurrentActivePage}
-                  currentlyActivePage={currentlyActivePage}
+                  artistId={val.artistId}
+                  songIds={val.songs.map((song) => song.songId)}
+                  onlineArtworkPaths={val.onlineArtworkPaths}
                 />
               );
             else return undefined;
@@ -263,7 +262,7 @@ export const HomePage = () => {
       )}
       {content.songsData[0] === null && (
         <div className="no-songs-container">
-          <img src={NoSongsImage} alt="" />
+          <img src={NoSongsImage} alt="No songs available." />
           <span>We couldn't find any songs in your system.</span>
           <button type="button" id="add-new-song-folder" onClick={addNewSongs}>
             <i className="fa-solid fa-plus"></i> Add Folder

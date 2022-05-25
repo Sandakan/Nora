@@ -45,10 +45,16 @@ const reducer = (
 };
 
 export const SongsPage = () => {
-  const { createQueue } = React.useContext(AppContext);
+  const { createQueue, currentlyActivePage, updateCurrentlyActivePageData } =
+    React.useContext(AppContext);
   const [content, dispatch] = React.useReducer(reducer, {
     songsData: [],
-    sortingOrder: 'aToZ',
+    sortingOrder:
+      currentlyActivePage.data &&
+      currentlyActivePage.data.songsPage &&
+      currentlyActivePage.data.songsPage.sortingOrder
+        ? currentlyActivePage.data.songsPage.sortingOrder
+        : 'aToZ',
   });
 
   React.useEffect(() => {
@@ -108,9 +114,14 @@ export const SongsPage = () => {
           name="sortingOrderDropdown"
           id="sortingOrderDropdown"
           value={content.sortingOrder}
-          onChange={(e) =>
-            dispatch({ type: 'SORTING_ORDER', data: e.currentTarget.value })
-          }
+          onChange={(e) => {
+            updateCurrentlyActivePageData({
+              songsPage: {
+                sortingOrder: e.currentTarget.value as ArtistSortTypes,
+              },
+            });
+            dispatch({ type: 'SORTING_ORDER', data: e.currentTarget.value });
+          }}
         >
           <option value="aToZ">A to Z</option>
           <option value="zToA">Z to A</option>

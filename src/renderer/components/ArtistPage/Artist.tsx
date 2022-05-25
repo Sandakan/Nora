@@ -15,6 +15,10 @@ interface ArtistProp {
   name: string;
   artworkPath?: string;
   songIds: string[];
+  onlineArtworkPaths?: {
+    picture_small: string;
+    picture_medium: string;
+  };
 }
 
 export const Artist = (props: ArtistProp) => {
@@ -40,7 +44,8 @@ export const Artist = (props: ArtistProp) => {
   return (
     <div
       className="artist"
-      onContextMenu={(e) =>
+      onContextMenu={(e) => {
+        e.stopPropagation();
         updateContextMenuData(
           true,
           [
@@ -58,26 +63,26 @@ export const Artist = (props: ArtistProp) => {
               label: 'Add to queue',
               iconName: 'queue',
               handlerFunction: () => {
-                // const newQueue = queue.queue.filter(
-                //   (songId) =>
-                //     !(props.songs.map((song) => song.songId) || []).some(
-                //       (id) => id === songId
-                //     )
-                // );
-                queue.queue.push(...props.songIds);
-                updateQueueData(undefined, queue.queue, false);
+                updateQueueData(
+                  undefined,
+                  [...queue.queue, ...props.songIds],
+                  false
+                );
               },
             },
           ],
           e.pageX,
           e.pageY
-        )
-      }
+        );
+      }}
     >
       <div className="artist-img-container">
         <img
           src={
-            `otomusic://localFiles/${props.artworkPath}` || DefaultArtistCover
+            navigator.onLine && props.onlineArtworkPaths
+              ? props.onlineArtworkPaths.picture_medium
+              : `otomusic://localFiles/${props.artworkPath}` ||
+                DefaultArtistCover
           }
           alt="Default song cover"
           onClick={showArtistInfoPage}

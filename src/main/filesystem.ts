@@ -21,6 +21,7 @@ import fsOther from 'fs';
 import path from 'path';
 import { app } from 'electron';
 import Store from 'electron-store';
+// import trash from 'trash';
 import * as musicMetaData from 'music-metadata';
 import sharp from 'sharp';
 import { parseSong } from './parseSong';
@@ -102,35 +103,40 @@ export const getUserData = async () => {
       volume: { isMuted: false, value: 100 },
       recentlyPlayedSongs: [],
       musicFolders: [],
+      songBlacklist: [],
       defaultPage: 'Home',
       isShuffling: false,
       isRepeating: false,
+      preferences: {
+        doNotShowRemoveSongFromLibraryConfirm: false,
+      },
     };
     userDataStore.store = { ...userDataTemplate };
     return userDataTemplate;
   }
 };
-export const setUserData = async (dataType: UserDataType, data: any) => {
+export const setUserData = async (dataType: UserDataTypes, data: unknown) => {
   const userData = await getUserData();
   if (userData) {
-    if (dataType === 'theme.isDarkMode') {
-      if (data === 'true') userData.theme.isDarkMode = true;
-      if (data === 'false') userData.theme.isDarkMode = false;
-    } else if (dataType === 'currentSong.songId')
+    if (dataType === 'theme.isDarkMode' && typeof data === 'boolean')
+      userData.theme.isDarkMode = data;
+    else if (dataType === 'currentSong.songId' && typeof data === 'string')
       userData.currentSong.songId = data;
-    else if (dataType === 'currentSong.stoppedPosition')
-      userData.currentSong.stoppedPosition = parseFloat(data);
-    else if (dataType === 'volume.value')
-      userData.volume.value = parseInt(data, 10);
-    else if (dataType === 'volume.isMuted') {
-      if (data === 'true') userData.volume.isMuted = true;
-      if (data === 'false') userData.volume.isMuted = false;
-    } else if (dataType === 'recentlyPlayedSongs') {
+    else if (
+      dataType === 'currentSong.stoppedPosition' &&
+      typeof data === 'number'
+    )
+      userData.currentSong.stoppedPosition = data;
+    else if (dataType === 'volume.value' && typeof data === 'number')
+      userData.volume.value = data;
+    else if (dataType === 'volume.isMuted' && typeof data === 'boolean')
+      userData.volume.isMuted = data;
+    else if (dataType === 'recentlyPlayedSongs' && typeof data === 'object') {
       const val = userData.recentlyPlayedSongs.filter(
-        (x) => x.songId !== data.songId
+        (x) => x.songId !== (data as SongData).songId
       );
       if (val.length >= 5) val.pop();
-      val.unshift(data);
+      val.unshift(data as SongData);
       userData.recentlyPlayedSongs = val;
     } else if (dataType === 'musicFolders' && Array.isArray(data)) {
       userData.musicFolders = data;
@@ -141,7 +147,12 @@ export const setUserData = async (dataType: UserDataType, data: any) => {
     } else if (dataType === 'isShuffling' && typeof data === 'boolean') {
       userData.isShuffling = data;
     } else if (dataType === 'queue' && typeof data === 'object') {
-      userData.queue = data;
+      userData.queue = data as Queue;
+    } else if (
+      dataType === 'preferences.doNotShowRemoveSongFromLibraryConfirm' &&
+      typeof data === 'boolean'
+    ) {
+      userData.preferences.doNotShowRemoveSongFromLibraryConfirm = data;
     } else console.log('dataType or data is invalid');
     userDataStore.store = { ...userData };
   } else {
@@ -412,6 +423,10 @@ export const removeSongFromLibrary = (
                 stoppedPosition: 0,
               },
               recentlyPlayedSongs: recentSongs,
+              songBlacklist: [
+                ...userData.songBlacklist,
+                path.join(folderPath, filename),
+              ],
             };
           }
         }
@@ -647,7 +662,10 @@ export const updateSongListeningRate = async (
   }
 };
 
-export const deleteSongFromSystem = (absoluteFilePath: string) => {
+export const deleteSongFromSystem = (
+  absoluteFilePath: string,
+  isPermanentDelete = false
+) => {
   return new Promise(async (resolve, reject) => {
     if (path.extname(absoluteFilePath) === '.mp3') {
       const res = await removeSongFromLibrary(
@@ -658,6 +676,21 @@ export const deleteSongFromSystem = (absoluteFilePath: string) => {
         return reject(err);
       });
       if (res && res.success)
+        // if (isPermanentDelete)
+        //   await trash(absoluteFilePath)
+        //     .then(() =>
+        //       resolve({
+        //         success: true,
+        //         message: `Moved '${path.basename(
+        //           absoluteFilePath
+        //         )}'to the Recycle bin/Trash.`,
+        //       })
+        //     )
+        //     .catch((err) => {
+        //       logger(err);
+        //       return reject(err);
+        //     });
+        // else
         await fs
           .unlink(absoluteFilePath)
           .then(() =>

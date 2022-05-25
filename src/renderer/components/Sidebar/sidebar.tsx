@@ -53,10 +53,10 @@ export default React.memo(() => {
     useContext(AppContext);
   const [data, setData] = React.useState(linkData);
 
-  const clickHandler = (id: string) => {
+  const clickHandler = (id: string, pageData?: any) => {
     const arr = data.map((link) => {
       if (link.content === id) {
-        changeCurrentActivePage(link.content as PageTitles);
+        changeCurrentActivePage(link.content as PageTitles, pageData);
         return link.parentClassName.includes('active')
           ? link
           : { ...link, parentClassName: `${link.parentClassName} active` };
@@ -72,7 +72,7 @@ export default React.memo(() => {
 
   React.useEffect(() => {
     if (linkData.some((x) => x.content === currentlyActivePage.pageTitle))
-      clickHandler(currentlyActivePage.pageTitle);
+      clickHandler(currentlyActivePage.pageTitle, currentlyActivePage.data);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentlyActivePage.pageTitle]);
 

@@ -94,7 +94,7 @@ export const Playlist = (props: PlaylistProp) => {
                 ? `otomusic://localFiles/${props.artworkPath}`
                 : DefaultPlaylistCover
             }
-            alt=""
+            alt="Playlist Cover"
             loading="lazy"
           />
         </div>

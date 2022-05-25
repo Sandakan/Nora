@@ -13,6 +13,7 @@
 import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { calculateTime } from '../../utils/calculateTime';
+import DeleteSongFromSystemConfrimPrompt from './DeleteSongFromSystemConfrimPrompt';
 
 interface SongProp {
   songId: string;
@@ -33,6 +34,8 @@ export const Song = (props: SongProp) => {
     updateQueueData,
     queue,
     isCurrentSongPlaying,
+    updateNotificationPanelData,
+    changePromptMenuData,
   } = React.useContext(AppContext);
   const [isSongPlaying, setIsSongPlaying] = React.useState(
     currentSongData
@@ -82,6 +85,17 @@ export const Song = (props: SongProp) => {
               },
             },
             {
+              label: 'Add to queue',
+              iconName: 'queue',
+              handlerFunction: () => {
+                updateQueueData(
+                  undefined,
+                  [...queue.queue, currentSongData.songId],
+                  false
+                );
+              },
+            },
+            {
               label: 'Reveal in File Explorer',
               class: 'reveal-file-explorer',
               iconName: 'folder_open',
@@ -101,13 +115,31 @@ export const Song = (props: SongProp) => {
               label: 'Remove from Library',
               iconName: 'remove_circle_outline',
               handlerFunction: () =>
-                window.api.removeSongFromLibrary(props.path),
+                window.api
+                  .removeSongFromLibrary(props.path)
+                  .then(
+                    (res) =>
+                      res.success &&
+                      updateNotificationPanelData(
+                        5000,
+                        <span>
+                          &apos;{props.title}&apos; song removed from the
+                          library.
+                        </span>
+                      )
+                  ),
             },
             {
               label: 'Delete from System',
               iconName: 'delete',
               handlerFunction: () =>
-                window.api.deleteSongFromSystem(props.path),
+                changePromptMenuData(
+                  true,
+                  <DeleteSongFromSystemConfrimPrompt
+                    songPath={props.path}
+                    title={props.title}
+                  />
+                ),
             },
           ],
           e.pageX,
@@ -132,7 +164,7 @@ export const Song = (props: SongProp) => {
               '-optimized.webp'
             )}`}
             loading="lazy"
-            alt=""
+            alt="Song cover"
           />
         </div>
       </div>

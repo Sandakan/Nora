@@ -35,25 +35,41 @@ export default (data: AudioInfo[], sortType: SongsPageSortTypes) => {
           : 0
       );
     else if (sortType === 'dateAddedAscending')
-      sortedSongData = data.sort((a, b) => {
-        if (a.addedDate && b.addedDate) {
-          return new Date(a.addedDate).getTime() <
-            new Date(b.addedDate).getTime()
+      sortedSongData = data
+        .sort((a, b) =>
+          a.title.replace(/\W/gi, '') > b.title.replace(/\W/gi, '')
             ? 1
-            : -1;
-        }
-        return 0;
-      });
+            : a.title.replace(/\W/gi, '') < b.title.replace(/\W/gi, '')
+            ? -1
+            : 0
+        )
+        .sort((a, b) => {
+          if (a.addedDate && b.addedDate) {
+            return new Date(a.addedDate).getTime() <
+              new Date(b.addedDate).getTime()
+              ? 1
+              : -1;
+          }
+          return 0;
+        });
     else if (sortType === 'dateAddedDescending')
-      sortedSongData = data.sort((a, b) => {
-        if (a.addedDate && b.addedDate) {
-          return new Date(a.addedDate).getTime() >
-            new Date(b.addedDate).getTime()
+      sortedSongData = data
+        .sort((a, b) =>
+          a.title.replace(/\W/gi, '') > b.title.replace(/\W/gi, '')
             ? 1
-            : -1;
-        }
-        return 0;
-      });
+            : a.title.replace(/\W/gi, '') < b.title.replace(/\W/gi, '')
+            ? -1
+            : 0
+        )
+        .sort((a, b) => {
+          if (a.addedDate && b.addedDate) {
+            return new Date(a.addedDate).getTime() >
+              new Date(b.addedDate).getTime()
+              ? 1
+              : -1;
+          }
+          return 0;
+        });
     else sortedSongData = data;
     return sortedSongData;
   }

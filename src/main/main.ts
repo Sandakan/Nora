@@ -1,29 +1,19 @@
-/* eslint-disable promise/no-promise-in-callback */
-/* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable global-require */
+/* eslint-disable promise/no-promise-in-callback */
 /* eslint-disable promise/no-callback-in-promise */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
 /* eslint-disable prefer-promise-reject-errors */
-/* eslint-disable import/prefer-default-export */
-/* eslint-disable no-lonely-if */
 /* eslint-disable promise/catch-or-return */
-/* eslint-disable prefer-destructuring */
 /* eslint-disable consistent-return */
 /* eslint-disable promise/no-nesting */
-/* eslint-disable import/newline-after-import */
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-shadow */
-/* eslint-disable prefer-const */
 /* eslint-disable no-async-promise-executor */
 /* eslint-disable @typescript-eslint/return-await */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable promise/always-return */
-/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-else-return */
-/* eslint-disable no-param-reassign */
-/* eslint-disable no-plusplus */
 import {
   app,
   BrowserWindow,
@@ -74,9 +64,8 @@ export const getAssetPath = (...paths: string[]): string => {
   return path.join(RESOURCES_PATH, ...paths);
 };
 
-if (isDevelopment) {
-  require('electron-debug')();
-}
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+isDevelopment && require('electron-debug')();
 
 const installExtensions = async () => {
   const installer = require('electron-devtools-installer');
@@ -186,7 +175,7 @@ app.whenReady().then(() => {
 
   ipcMain.handle(
     'app/saveUserData',
-    async (_event, dataType: UserDataType, data: string) =>
+    async (_event, dataType: UserDataTypes, data: string) =>
       await saveUserData(dataType, data).catch((err) => logger(err))
   );
 
@@ -254,8 +243,8 @@ app.whenReady().then(() => {
 
   ipcMain.handle(
     'app/deleteSongFromSystem',
-    async (_e, absoluteFilePath: string) =>
-      await deleteSongFromSystem(absoluteFilePath)
+    async (_e, absoluteFilePath: string, isPermanentDelete: boolean) =>
+      await deleteSongFromSystem(absoluteFilePath, isPermanentDelete)
   );
 
   ipcMain.handle('app/resyncSongsLibrary', async () => checkForNewSongs());
@@ -264,9 +253,10 @@ app.whenReady().then(() => {
 
   ipcMain.on('revealSongInFileExplorer', async (_e, songId: string) => {
     const data = await getData();
-    const songs = data.songs;
-    for (const song of songs) {
-      if (song.songId === songId) return shell.showItemInFolder(song.path);
+    const { songs } = data;
+    for (let x = 0; x < songs.length; x += 1) {
+      if (songs[x].songId === songId)
+        return shell.showItemInFolder(songs[x].path);
     }
   });
   ipcMain.on('app/openInBrowser', async (_e, url: string) =>
@@ -320,11 +310,11 @@ const addMusicFolder = async () => {
   );
   if (canceled) return 'You cancelled the prompt.';
   console.log(musicFolderPath[0]);
-  const data = await getFiles(musicFolderPath[0]);
+  const songPaths = await getFiles(musicFolderPath[0]);
   const songs: SongData[] = [];
-  if (data) {
-    for (const songPath of data) {
-      await parseSong(songPath).then((res) => {
+  if (songPaths) {
+    for (let x = 0; x < songPaths.length; x += 1) {
+      await parseSong(songPaths[x]).then((res) => {
         if (res) songs.push(res);
       });
     }
@@ -349,36 +339,37 @@ const sendAudioData = async (audioId: string) => {
 
   return await getData().then(async (jsonData) => {
     try {
-      if (jsonData) {
-        for (const songInfo of jsonData.songs) {
+      if (jsonData && jsonData.songs) {
+        const { songs } = jsonData;
+        for (let x = 0; x < songs.length; x += 1) {
+          const song = songs[x];
           // console.log(audioId, songInfo.songId, songInfo.songId === audioId);
-          if (songInfo.songId === audioId) {
+          if (song.songId === audioId) {
             const metadata = await musicMetaData
-              .parseFile(songInfo.path)
+              .parseFile(song.path)
               .catch((err) => logger(err));
             if (metadata) {
               const artworkData = metadata.common.picture
                 ? metadata.common.picture[0].data
                 : // : await getDefaultSongCoverImg();
                   '';
-              await saveUserData('recentlyPlayedSongs', songInfo);
-              await addToSongsHistory(songInfo.songId);
+              await saveUserData('recentlyPlayedSongs', song);
+              await addToSongsHistory(song.songId);
               const data: AudioData = {
-                title: songInfo.title,
-                artists: songInfo.artists,
-                duration: songInfo.duration,
+                title: song.title,
+                artists: song.artists,
+                duration: song.duration,
                 artwork:
                   Buffer.from(artworkData).toString('base64') || undefined,
-                artworkPath: songInfo.artworkPath,
-                path: songInfo.path,
-                songId: songInfo.songId,
-                isAFavorite: songInfo.isAFavorite,
-                album: songInfo.album,
+                artworkPath: song.artworkPath,
+                path: song.path,
+                songId: song.songId,
+                isAFavorite: song.isAFavorite,
+                album: song.album,
               };
-              await updateSongListeningRate(
-                jsonData.songs,
-                songInfo.songId
-              ).catch((err: Error) => logger(err));
+              await updateSongListeningRate(jsonData.songs, song.songId).catch(
+                (err: Error) => logger(err)
+              );
               return data;
             }
           }
@@ -386,7 +377,7 @@ const sendAudioData = async (audioId: string) => {
         console.log(`no matching song for songID the songId "${audioId}"`);
         return undefined;
       } else return await logger(new Error(`jsonData error. ${jsonData}`));
-    } catch (err: any) {
+    } catch (err) {
       return await logger(err);
     }
   });
@@ -419,7 +410,7 @@ const checkForSongs = async () => {
   );
 };
 
-const search = async (_e: any, filter: string, value: string) => {
+const search = async (_: unknown, filter: string, value: string) => {
   const jsonData: Data = await getData();
   const songs =
     Array.isArray(jsonData.songs) &&
@@ -458,7 +449,7 @@ const search = async (_e: any, filter: string, value: string) => {
 
 const toggleLikeSong = async (songId: string, likeSong: boolean) => {
   const data = await getData();
-  let result: ToggleLikeSongReturnValue = {
+  const result: ToggleLikeSongReturnValue = {
     success: false,
     error: null,
   };
@@ -479,20 +470,18 @@ const toggleLikeSong = async (songId: string, likeSong: boolean) => {
             result.success = true;
             return song;
           }
+        } else if (song.isAFavorite) {
+          song.isAFavorite = false;
+          result.success = true;
+          removeFromFavorites(song.songId);
+          return song;
         } else {
-          if (song.isAFavorite) {
-            song.isAFavorite = false;
-            result.success = true;
-            removeFromFavorites(song.songId);
-            return song;
-          } else {
-            console.log({
-              success: false,
-              error: `you have already disliked ${songId}`,
-            });
-            result.error = `you have already disliked ${songId}`;
-            return song;
-          }
+          console.log({
+            success: false,
+            error: `you have already disliked ${songId}`,
+          });
+          result.error = `you have already disliked ${songId}`;
+          return song;
         }
       } else return song;
     });
@@ -521,30 +510,32 @@ const getArtistInfoFromNet = (
         `https://api.deezer.com/search/artist?q=${artistName}`,
         (err, _res, data) => {
           if (err) return reject(err);
-          return resolve(JSON.parse(data.toString('utf-8')) as any);
+          return resolve(JSON.parse(data.toString('utf-8')));
         }
       );
     } else if (artistId && artistId !== '') {
       const data = await getData();
       if (data && data.artists && data.artists.length > 0) {
-        const artists = data.artists;
-        for (const artist of artists) {
+        const { artists } = data;
+        for (let x = 0; x < artists.length; x += 1) {
+          const artist = artists[x];
           if (artist.artistId === artistId) {
             return httpsGet.concat(
               `https://api.deezer.com/search/artist?q=${encodeURI(
                 artist.name
               )}`,
-              (err, _res, data) => {
+              async (err, _res, res) => {
                 if (err) {
                   logger(err);
                   return reject(undefined);
                 }
-                const arr = JSON.parse(data.toString('utf-8')) as {
+                const arr = JSON.parse(res.toString('utf-8')) as {
                   data: ArtistInfoFromNet[];
                 };
-                // console.log(arr);
+                const mostRelevantResult = arr.data[0];
+
                 nodeVibrant
-                  .from(arr.data[0].picture_medium)
+                  .from(mostRelevantResult.picture_medium)
                   .getPalette()
                   .then((palette) => {
                     // console.log(palette);
@@ -579,6 +570,11 @@ const getArtistInfoFromNet = (
                       }
                     );
                   });
+                artists[x].onlineArtworkPaths = {
+                  picture_medium: mostRelevantResult.picture_medium,
+                  picture_small: mostRelevantResult.picture_small,
+                };
+                await setData({ ...data, artists }).catch((err) => reject(err));
               }
             );
           }
@@ -592,10 +588,11 @@ const getArtistData = async (artistIdOrName = '*') => {
   if (artistIdOrName) {
     const data = await getData();
     if (data && data.artists) {
-      const artists = data.artists;
+      const { artists } = data;
       if (artistIdOrName === '*') return artists;
       else {
-        for (const artist of artists) {
+        for (let x = 0; x < artists.length; x += 1) {
+          const artist = artists[x];
           if (
             artist.artistId === artistIdOrName ||
             artist.name === artistIdOrName
@@ -614,10 +611,11 @@ const getAlbumData = async (albumId = '*') => {
   if (albumId) {
     const data = await getData();
     if (data && data.albums) {
-      const albums = data.albums;
+      const { albums } = data;
       if (albumId === '*') return albums;
       else {
-        for (const album of albums) {
+        for (let x = 0; x < albums.length; x += 1) {
+          const album = albums[x];
           if (album.albumId === albumId) return album;
         }
         return undefined;
@@ -633,7 +631,8 @@ const sendPlaylistData = async (playlistId = '*') => {
   if (playlists && Array.isArray(playlists)) {
     if (playlistId === '*') return playlists;
     else {
-      for (const playlist of playlists) {
+      for (let x = 0; x < playlists.length; x += 1) {
+        const playlist = playlists[x];
         if (playlist.playlistId === playlistId) return playlist;
       }
       return undefined;
@@ -720,7 +719,7 @@ const removeFromFavorites = async (songId: string) => {
                 (playlistSongId: string) => playlistSongId === songId
               )
             ) {
-              const songs = playlist.songs;
+              const { songs } = playlist;
               songs.splice(songs.indexOf(songId), 1);
               playlist.songs = songs;
               return playlist;
@@ -856,7 +855,7 @@ const addSongToPlaylist = (playlistId: string, songId: string) => {
   return new Promise(async (resolve, reject) => {
     const playlists = await getPlaylistData();
     if (playlists && Array.isArray(playlists) && playlists.length > 0) {
-      for (let x = 0; x < playlists.length; x++) {
+      for (let x = 0; x < playlists.length; x += 1) {
         if (playlists[x].playlistId === playlistId) {
           if (playlists[x].songs.some((id) => id === songId)) {
             return resolve({
@@ -891,7 +890,8 @@ const getSongInfo = async (songId: string) => {
         return undefined;
       });
     if (Array.isArray(songsData)) {
-      for (const songData of songsData) {
+      for (let x = 0; x < songsData.length; x += 1) {
+        const songData = songsData[x];
         if (songData.songId === songId) {
           return songData;
         }

@@ -11,6 +11,7 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
+import DeleteSongPrompt from './DeleteSongFromSystemConfrimPrompt';
 
 interface SongCardProp {
   songId: string;
@@ -41,6 +42,8 @@ export const SongCard = (props: SongCardProp) => {
     updateQueueData,
     queue,
     isCurrentSongPlaying,
+    updateNotificationPanelData,
+    changePromptMenuData,
   } = React.useContext(AppContext);
   const [isSongPlaying, setIsSongPlaying] = React.useState(
     currentSongData
@@ -64,9 +67,16 @@ export const SongCard = (props: SongCardProp) => {
 
   const background = `linear-gradient(90deg,rgba(${r},${g},${b},1) 0%,rgba(${r},${g},${b},1) 50%,rgba(${r},${g},${b},0.6) 70%,rgba(${r},${g},${b},0) 100%)`;
   const fontColor = `rgba(${fr},${fg},${fb},1)`;
+
+  const handlePlayBtnClick = () => {
+    playSong(props.songId);
+  };
+
   return (
     <div
-      className={`song ${props.songId} ${isSongPlaying && 'playing'}`}
+      className={`song ${props.songId} ${
+        currentSongData.songId === props.songId && 'current-song'
+      } ${isSongPlaying && 'playing'}`}
       data-song-id={props.songId}
       onContextMenu={(e) => {
         e.preventDefault();
@@ -76,8 +86,8 @@ export const SongCard = (props: SongCardProp) => {
           [
             {
               label: 'Play',
+              handlerFunction: handlePlayBtnClick,
               iconName: 'play_arrow',
-              handlerFunction: () => playSong(props.songId),
             },
             {
               label: 'Play Next',
@@ -101,6 +111,42 @@ export const SongCard = (props: SongCardProp) => {
               handlerFunction: () =>
                 window.api.revealSongInFileExplorer(props.songId),
             },
+            {
+              label: 'Info',
+              class: 'info',
+              iconName: 'info_outline',
+              handlerFunction: () =>
+                changeCurrentActivePage('SongInfo', {
+                  songInfo: { songId: props.songId },
+                }),
+            },
+            {
+              label: 'Remove from Library',
+              iconName: 'remove_circle_outline',
+              handlerFunction: () =>
+                window.api
+                  .removeSongFromLibrary(props.path)
+                  .then(
+                    (res) =>
+                      res.success &&
+                      updateNotificationPanelData(
+                        5000,
+                        <span>
+                          &apos;{props.title}&apos; song removed from the
+                          library.
+                        </span>
+                      )
+                  ),
+            },
+            {
+              label: 'Delete from System',
+              iconName: 'delete',
+              handlerFunction: () =>
+                changePromptMenuData(
+                  true,
+                  <DeleteSongPrompt songPath={props.path} title={props.title} />
+                ),
+            },
           ],
           e.pageX,
           e.pageY
@@ -111,7 +157,7 @@ export const SongCard = (props: SongCardProp) => {
         <img
           src={`otoMusic://localFiles/${props.artworkPath}`}
           loading="lazy"
-          alt=""
+          alt="Song cover"
         />
       </div>
       <div

@@ -13,6 +13,7 @@ import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { Album } from '../AlbumsPage/Album';
 import { Artist } from '../ArtistPage/Artist';
+// import DeleteSongFromSystemConfrimPrompt from '../SongsPage/DeleteSongFromSystemConfrimPrompt';
 import { Song } from '../SongsPage/song';
 import { MostRelevantResult } from './MostRelevantResult';
 import { ResultFilter } from './ResultFilter';
@@ -24,8 +25,18 @@ export const SearchPage = () => {
     updateContextMenuData,
     currentlyActivePage,
     changeCurrentActivePage,
+    updateCurrentlyActivePageData,
+    queue,
+    updateQueueData,
+    createQueue,
+    // changePromptMenuData,
+    // updateNotificationPanelData,
   } = useContext(AppContext);
-  const [searchInput, setSearchInput] = React.useState('');
+  const [searchInput, setSearchInput] = React.useState(
+    currentlyActivePage.data && currentlyActivePage.data.searchPage
+      ? (currentlyActivePage.data.searchPage.keyword as string)
+      : ''
+  );
   const [searchResults, setSearchResults] = React.useState({
     albums: [],
     artists: [],
@@ -77,8 +88,23 @@ export const SearchPage = () => {
         contextMenuItems={[
           {
             label: 'Play',
-            iconName: 'play_arrow',
             handlerFunction: () => playSong(currentSongData.songId),
+            iconName: 'play_arrow',
+          },
+          {
+            label: 'Play Next',
+            iconName: 'shortcut',
+            handlerFunction: () => {
+              const newQueue = queue.queue.filter(
+                (songId) => songId !== currentSongData.songId
+              );
+              newQueue.splice(
+                queue.queue.indexOf(currentSongData.songId) + 1 || 0,
+                1,
+                currentSongData.songId
+              );
+              updateQueueData(undefined, newQueue);
+            },
           },
           {
             label: 'Reveal in File Explorer',
@@ -87,6 +113,45 @@ export const SearchPage = () => {
             handlerFunction: () =>
               window.api.revealSongInFileExplorer(currentSongData.songId),
           },
+          {
+            label: 'Info',
+            class: 'info',
+            iconName: 'info_outline',
+            handlerFunction: () =>
+              changeCurrentActivePage('SongInfo', {
+                songInfo: { songId: currentSongData.songId },
+              }),
+          },
+          // {
+          //   label: 'Remove from Library',
+          //   iconName: 'remove_circle_outline',
+          //   handlerFunction: () =>
+          //     window.api
+          //       .removeSongFromLibrary(currentSongData.path)
+          //       .then(
+          //         (res) =>
+          //           res.success &&
+          //           updateNotificationPanelData(
+          //             5000,
+          //             <span>
+          //               &apos;{currentSongData.title}&apos; song removed from
+          //               the library.
+          //             </span>
+          //           )
+          //       ),
+          // },
+          // {
+          //   label: 'Delete from System',
+          //   iconName: 'delete',
+          //   handlerFunction: () =>
+          //     changePromptMenuData(
+          //       true,
+          //       <DeleteSongFromSystemConfrimPrompt
+          //         songPath={currentSongData.path}
+          //         title={currentSongData.title}
+          //       />
+          //     ),
+          // },
         ]}
         currentlyActivePage={currentlyActivePage}
         changeCurrentActivePage={changeCurrentActivePage}
@@ -120,11 +185,53 @@ export const SearchPage = () => {
         key={1}
         id={firstResult.artistId}
         artworkPath={firstResult.artworkPath}
+        onlineArtworkPath={
+          firstResult.onlineArtworkPaths
+            ? firstResult.onlineArtworkPaths.picture_medium
+            : undefined
+        }
         infoType1={`${firstResult.songs.length} song${
           firstResult.songs.length === 1 ? '' : 's'
         }`}
         updateContextMenuData={updateContextMenuData}
-        contextMenuItems={[]}
+        contextMenuItems={[
+          {
+            label: 'Play all Songs',
+            iconName: 'play_arrow',
+            handlerFunction: () =>
+              createQueue(
+                firstResult.songs.map((song) => song.songId),
+                'artist',
+                firstResult.artistId,
+                true
+              ),
+          },
+          {
+            label: 'Info',
+            iconName: 'info',
+            handlerFunction: () =>
+              currentlyActivePage.pageTitle === 'ArtistInfo' &&
+              currentlyActivePage.data.artistName === firstResult.name
+                ? changeCurrentActivePage('Home')
+                : changeCurrentActivePage('ArtistInfo', {
+                    artistName: firstResult.name,
+                  }),
+          },
+          {
+            label: 'Add to queue',
+            iconName: 'queue',
+            handlerFunction: () => {
+              updateQueueData(
+                undefined,
+                [
+                  ...queue.queue,
+                  ...firstResult.songs.map((song) => song.songId),
+                ],
+                false
+              );
+            },
+          },
+        ]}
         currentlyActivePage={currentlyActivePage}
         changeCurrentActivePage={changeCurrentActivePage}
       />
@@ -140,6 +247,7 @@ export const SearchPage = () => {
               artworkPath={artist.artworkPath}
               artistId={artist.artistId}
               songIds={artist.songs.map((song) => song.songId)}
+              onlineArtworkPaths={artist.onlineArtworkPaths}
             />
           );
         else return undefined;
@@ -196,7 +304,12 @@ export const SearchPage = () => {
           aria-label="Search"
           placeholder="Search for anything"
           value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
+          onChange={(e) => {
+            updateCurrentlyActivePageData({
+              searchPage: { keyword: e.target.value },
+            });
+            setSearchInput(e.target.value);
+          }}
           onKeyPress={(e) => e.stopPropagation()}
           autoFocus
         />

@@ -3,7 +3,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/self-closing-comp */
-/* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
@@ -90,6 +89,7 @@ export const Album = (props: Album) => {
           <img
             src={`otomusic://localFiles/${props.artworkPath}`}
             loading="lazy"
+            alt="Album Cover"
           />
         </div>
       </div>

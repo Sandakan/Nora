@@ -6,10 +6,17 @@ import ElectronStore from 'electron-store';
 
 const logStore = new ElectronStore({ name: 'log' });
 
-export const logger = async (error: Error, isFatal = false) => {
+export const logger = async (error: Error | unknown, isFatal = false) => {
   const data = {
     time: new Date().toUTCString(),
-    error: { name: error?.name, message: error.message, stack: error?.stack },
+    error:
+      typeof error === 'object' && (error as Error).name
+        ? {
+            name: (error as Error)?.name,
+            message: (error as Error).message,
+            stack: (error as Error)?.stack,
+          }
+        : { name: error as string, message: error as string },
   };
   console.log(error);
 

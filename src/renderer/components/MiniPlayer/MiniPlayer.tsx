@@ -27,7 +27,7 @@ export default function MiniPlayer() {
       <div className="background-cover-img-container">
         <img
           src={`otomusic://localFiles/${currentSongData.artworkPath}`}
-          alt=""
+          alt="Song Cover"
         />
       </div>
       <div className="container">
