@@ -180,7 +180,7 @@
     "ts-jest": "^28.0.2",
     "ts-loader": "^9.3.0",
     "ts-node": "^10.7.0",
-    "typescript": "^4.6.4",
+    "typescript": "^4.7.2",
     "url-loader": "^4.1.1",
     "webpack": "^5.72.1",
     "webpack-bundle-analyzer": "^4.5.0",
