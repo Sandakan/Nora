@@ -2,12 +2,12 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { ReactElement } from 'react';
 import '../../assets/styles/main.css';
-import { Header } from './components/Header/header';
+import Header from './components/Header/Header';
 import { BodyAndSideBarContainer } from './components/bodyAndSidebarContainer';
 import SongControlsContainer from './components/SongsControlsContainer/SongControlsContainer';
 import { PromptMenu } from './components/PromptMenu/PromptMenu';
 import ContextMenu from './components/ContextMenu/ContextMenu';
-import { AppContext } from './contexts/AppContext';
+import { AppContext, SongPositionContext } from './contexts/AppContext';
 import MiniPlayer from './components/MiniPlayer/MiniPlayer';
 
 interface AppReducer {
@@ -238,6 +238,7 @@ export default function App() {
     },
     notificationPanelData: {
       isVisible: false,
+      icon: <></>,
       content: <span />,
     },
     PromptMenuData: {
@@ -250,6 +251,8 @@ export default function App() {
     isShuffling: false,
     songPosition: 0,
   } as AppReducer);
+
+  const [, startTransition] = React.useTransition();
 
   const refStartPlay = React.useRef(false);
   const refQueue = React.useRef({
@@ -287,10 +290,10 @@ export default function App() {
         data: false,
       });
     });
-    window.api.beforeQuitEvent(() => {
+    window.api.beforeQuitEvent(async () => {
       window.api.sendSongPosition(player.currentTime);
-      window.api.saveUserData('isShuffling', content.isShuffling);
-      window.api.saveUserData('isRepeating', content.isRepeating);
+      await window.api.saveUserData('isShuffling', content.isShuffling);
+      await window.api.saveUserData('isRepeating', content.isRepeating);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -309,10 +312,13 @@ export default function App() {
       );
     });
     player.addEventListener('timeupdate', (e) => {
-      dispatch({
-        type: 'UPDATE_SONG_POSITION',
-        data: Math.floor((e.target as HTMLAudioElement).currentTime),
-      });
+      if (Math.floor((e.target as HTMLAudioElement).currentTime) % 1 === 0)
+        startTransition(() =>
+          dispatch({
+            type: 'UPDATE_SONG_POSITION',
+            data: Math.floor((e.target as HTMLAudioElement).currentTime),
+          })
+        );
     });
 
     return () => {
@@ -335,6 +341,14 @@ export default function App() {
         dispatch({ type: 'USER_DATA_CHANGE', data: res });
         dispatch({ type: 'IS_DARK_MODE_CHANGE', data: res.theme.isDarkMode });
         dispatch({ type: 'UPDATE_VOLUME', data: res.volume });
+        dispatch({
+          type: 'TOGGLE_SHUFFLE_STATE',
+          data: res.isShuffling || false,
+        });
+        dispatch({
+          type: 'UPDATE_IS_REPEATING_STATE',
+          data: res.isRepeating || false,
+        });
         if (
           content.navigationHistory.history.at(-1)?.pageTitle !==
           res.defaultPage
@@ -385,7 +399,9 @@ export default function App() {
         artist: Array.isArray(content.currentSongData.artists)
           ? content.currentSongData.artists.join(', ')
           : content.currentSongData.artists,
-        album: content.currentSongData.album || 'Unknown Album',
+        album: content.currentSongData.album
+          ? content.currentSongData.album.name || 'Unknown Album'
+          : 'Unknown Album',
         artwork: [
           {
             src: `data:;base64,${content.currentSongData.artwork}`,
@@ -456,6 +472,7 @@ export default function App() {
     if (content.isRepeating) {
       player.currentTime = 0;
       toggleSongPlayback();
+      window.api.incrementNoOfSongListens(content.currentSongData.songId);
     } else if (typeof currentSongIndex === 'number') {
       if (refQueue.current.queue.length - 1 === currentSongIndex)
         // eslint-disable-next-line @typescript-eslint/no-unused-expressions
@@ -473,17 +490,16 @@ export default function App() {
           if (songData) {
             console.log('playSong', songId, songData.path);
             dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: songData });
-            player.src = `otoMusic://localFiles/${songData.path}`;
+            if (player.src !== `otoMusic://localFiles/${songData.path}`)
+              player.src = `otoMusic://localFiles/${songData.path}`;
             window.api.saveUserData('currentSong.songId', songData.songId);
             refStartPlay.current = isStartPlay;
             if (isStartPlay) toggleSongPlayback();
-            if (
-              refQueue.current.queue.length > 0 &&
-              refQueue.current.queue.includes(songData.songId)
-            ) {
+            if (refQueue.current.queue.length > 0) {
               refQueue.current.currentSongIndex =
                 refQueue.current.queue.indexOf(songData.songId) || 0;
-            }
+            } else if (refQueue.current.queue.length === 0)
+              refQueue.current.queue.push(songData.songId);
           } else console.log(songData);
           return undefined;
         })
@@ -513,7 +529,7 @@ export default function App() {
         if (startPlaying) return changeQueueCurrentSongIndex(0);
         return undefined;
       })
-      .catch((err) => console.log(err));
+      .catch((err: Error) => console.log(err));
   };
 
   const changeQueueCurrentSongIndex = (currentSongIndex: number) => {
@@ -527,6 +543,11 @@ export default function App() {
     newQueue?: string[],
     playCurrentSongIndex = true
   ) => {
+    window.api.saveUserData('queue', {
+      ...refQueue.current,
+      currentSongIndex: currentSongIndex ?? refQueue.current.currentSongIndex,
+      queue: newQueue ?? refQueue.current.queue,
+    } as Queue);
     if (currentSongIndex !== undefined)
       refQueue.current.currentSongIndex = currentSongIndex;
     if (newQueue) refQueue.current.queue = newQueue;
@@ -608,23 +629,33 @@ export default function App() {
   const updateNotificationPanelData = (
     delay = 5000,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    contentData: ReactElement<any, any>
+    contentData: ReactElement<any, any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    icon: ReactElement<any, any> = <></>
   ) => {
     if (delay === 0) {
       dispatch({
         type: 'NOTIFICATION_PANEL_DATA_CHANGE',
-        data: { ...content.notificationPanelData, isVisible: false },
+        data: {
+          ...content.notificationPanelData,
+          isVisible: false,
+          icon: <></>,
+        },
       });
     } else {
       dispatch({
         type: 'NOTIFICATION_PANEL_DATA_CHANGE',
-        data: { isVisible: true, content: contentData },
+        data: { isVisible: true, content: contentData, icon },
       });
       setTimeout(
         () =>
           dispatch({
             type: 'NOTIFICATION_PANEL_DATA_CHANGE',
-            data: { ...content.notificationPanelData, isVisible: false },
+            data: {
+              ...content.notificationPanelData,
+              isVisible: false,
+              icon: <></>,
+            },
           }),
         delay
       );
@@ -690,63 +721,66 @@ export default function App() {
     dispatch({ type: 'CURRENT_ACTIVE_PAGE_DATA_UPDATE', data });
   };
 
+  const appContextValues = {
+    toggleDarkMode,
+    isDarkMode: content.isDarkMode,
+    isContextMenuVisible: content.contextMenuData.isVisible,
+    contextMenuItems: content.contextMenuData.menuItems,
+    contextMenuPageX: content.contextMenuData.pageX,
+    contextMenuPageY: content.contextMenuData.pageY,
+    updateContextMenuData,
+    PromptMenuData: content.PromptMenuData,
+    changePromptMenuData,
+    playSong,
+    currentSongData: content.currentSongData,
+    currentlyActivePage:
+      content.navigationHistory.history[
+        content.navigationHistory.pageHistoryIndex
+      ],
+    changeCurrentActivePage,
+    updateCurrentlyActivePageData,
+    updateNotificationPanelData,
+    notificationPanelData: content.notificationPanelData,
+    userData: content.userData,
+    createQueue,
+    queue: refQueue.current,
+    updateQueueData,
+    changeQueueCurrentSongIndex,
+    updateCurrentSongPlaybackState,
+    isCurrentSongPlaying: content.isCurrentSongPlaying,
+    pageHistoryIndex: content.navigationHistory.pageHistoryIndex,
+    updatePageHistoryIndex,
+    updateMiniPlayerStatus,
+    isMiniPlayer: content.isMiniPlayer,
+    handleSkipBackwardClick,
+    handleSkipForwardClick,
+    updateSongPosition,
+    volume: content.volume.value,
+    updateVolume,
+    isMuted: content.volume.isMuted,
+    toggleMutedState,
+    isRepeating: content.isRepeating,
+    toggleRepeat,
+    isShuffling: content.isShuffling,
+    toggleShuffling,
+    toggleIsFavorite,
+    isPlaying: !player.paused,
+    toggleSongPlayback,
+  };
+
   return (
-    <AppContext.Provider
-      value={{
-        toggleDarkMode,
-        isDarkMode: content.isDarkMode,
-        isContextMenuVisible: content.contextMenuData.isVisible,
-        contextMenuItems: content.contextMenuData.menuItems,
-        contextMenuPageX: content.contextMenuData.pageX,
-        contextMenuPageY: content.contextMenuData.pageY,
-        updateContextMenuData,
-        PromptMenuData: content.PromptMenuData,
-        changePromptMenuData,
-        playSong,
-        currentSongData: content.currentSongData,
-        currentlyActivePage:
-          content.navigationHistory.history[
-            content.navigationHistory.pageHistoryIndex
-          ],
-        changeCurrentActivePage,
-        updateCurrentlyActivePageData,
-        updateNotificationPanelData,
-        notificationPanelData: content.notificationPanelData,
-        userData: content.userData,
-        createQueue,
-        queue: refQueue.current,
-        updateQueueData,
-        changeQueueCurrentSongIndex,
-        updateCurrentSongPlaybackState,
-        isCurrentSongPlaying: content.isCurrentSongPlaying,
-        pageHistoryIndex: content.navigationHistory.pageHistoryIndex,
-        updatePageHistoryIndex,
-        updateMiniPlayerStatus,
-        isMiniPlayer: content.isMiniPlayer,
-        handleSkipBackwardClick,
-        handleSkipForwardClick,
-        songPosition: content.songPosition,
-        updateSongPosition,
-        volume: content.volume.value,
-        updateVolume,
-        isMuted: content.volume.isMuted,
-        toggleMutedState,
-        isRepeating: content.isRepeating,
-        toggleRepeat,
-        isShuffling: content.isShuffling,
-        toggleShuffling,
-        toggleIsFavorite,
-        isPlaying: !player.paused,
-        toggleSongPlayback,
-      }}
-    >
+    <AppContext.Provider value={appContextValues}>
       {!content.isMiniPlayer && (
         <div className={`App ${content.isDarkMode ? 'dark-mode' : ''}`}>
           <ContextMenu />
           <PromptMenu />
           <Header />
           <BodyAndSideBarContainer />
-          <SongControlsContainer />
+          <SongPositionContext.Provider
+            value={{ songPosition: player.currentTime }}
+          >
+            <SongControlsContainer />
+          </SongPositionContext.Provider>
         </div>
       )}
       {content.isMiniPlayer && <MiniPlayer />}

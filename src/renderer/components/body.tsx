@@ -4,7 +4,7 @@
 /* eslint-disable import/prefer-default-export */
 import { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
-import { SongsPage } from './SongsPage/songsPage';
+import { SongsPage } from './SongsPage/SongsPage';
 import { HomePage } from './HomePage/homePage';
 import { ArtistPage } from './ArtistPage/ArtistPage';
 import { AlbumsPage } from './AlbumsPage/AlbumsPage';
@@ -17,6 +17,7 @@ import ArtistInfoPage from './ArtistInfoPage/ArtistInfoPage';
 import AlbumInfoPage from './AlbumInfoPage/AlbumInfoPage';
 import PlaylistsInfoPage from './PlaylistsInfoPage/PlaylistsInfoPage';
 import CurrentQueuePage from './CurrentQueuePage/CurrentQueuePage';
+import AllSearchResultsPage from './SearchPage/AllSearchResultsPage';
 
 export const Body = () => {
   const { currentlyActivePage } = useContext(AppContext);
@@ -28,6 +29,9 @@ export const Body = () => {
       {currentlyActivePage.pageTitle === 'Albums' && <AlbumsPage />}
       {currentlyActivePage.pageTitle === 'Playlists' && <PlaylistsPage />}
       {currentlyActivePage.pageTitle === 'Search' && <SearchPage />}
+      {currentlyActivePage.pageTitle === 'AllSearchResults' && (
+        <AllSearchResultsPage />
+      )}
       {currentlyActivePage.pageTitle === 'Settings' && <SettingsPage />}
       {currentlyActivePage.pageTitle === 'Lyrics' && <LyricsPage />}
       {currentlyActivePage.pageTitle === 'CurrentQueue' && <CurrentQueuePage />}

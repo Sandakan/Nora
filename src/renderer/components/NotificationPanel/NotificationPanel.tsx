@@ -16,12 +16,13 @@ export default () => {
       }`}
       id="notificationPanelsContainer"
     >
+      <div className="icon-container">{notificationPanelData.icon}</div>
       <div className="message-container">{notificationPanelData.content}</div>
       <div className="buttons-container">
         <div id="notificationPanelCloseBtn">
           <span
             className="material-icons icon"
-            onClick={() => updateNotificationPanelData(0, <></>)}
+            onClick={() => updateNotificationPanelData(0, <></>, <></>)}
           >
             close
           </span>

@@ -18,7 +18,7 @@ interface SongCardProp {
   artworkPath: string;
   path: string;
   title: string;
-  artists: string[];
+  artists?: { name: string; artistId: string }[];
   duration: number;
   palette?: {
     DarkVibrant: {
@@ -74,7 +74,7 @@ export const SongCard = (props: SongCardProp) => {
 
   return (
     <div
-      className={`song ${props.songId} ${
+      className={`song song-card ${props.songId} ${
         currentSongData.songId === props.songId && 'current-song'
       } ${isSongPlaying && 'playing'}`}
       data-song-id={props.songId}
@@ -102,6 +102,11 @@ export const SongCard = (props: SongCardProp) => {
                   props.songId
                 );
                 updateQueueData(undefined, newQueue);
+                updateNotificationPanelData(
+                  5000,
+                  <span>&apos;{props.title}&apos; will be played next.</span>,
+                  <span className="material-icons-round">shortcut</span>
+                );
               },
             },
             {
@@ -122,7 +127,7 @@ export const SongCard = (props: SongCardProp) => {
             },
             {
               label: 'Remove from Library',
-              iconName: 'remove_circle_outline',
+              iconName: 'block',
               handlerFunction: () =>
                 window.api
                   .removeSongFromLibrary(props.path)
@@ -134,6 +139,9 @@ export const SongCard = (props: SongCardProp) => {
                         <span>
                           &apos;{props.title}&apos; song removed from the
                           library.
+                        </span>,
+                        <span className="material-icons-round">
+                          delete_outline
                         </span>
                       )
                   ),
@@ -184,26 +192,35 @@ export const SongCard = (props: SongCardProp) => {
           </div>
           <div
             className="song-artists"
-            title={props.artists.join(', ')}
+            title={props.artists ? props.artists.join(', ') : 'Unknown Artist'}
             data-song-id={props.songId}
           >
-            {props.artists.map((artist, index) => (
-              <span
-                className="artist"
-                key={artist}
-                onClick={() =>
-                  currentlyActivePage.pageTitle === 'ArtistInfo' &&
-                  currentlyActivePage.data.artistName === artist
-                    ? changeCurrentActivePage('Home')
-                    : changeCurrentActivePage('ArtistInfo', {
-                        artistName: artist,
-                      })
-                }
-              >
-                {artist}
-                {index === props.artists.length - 1 ? '' : ', '}
-              </span>
-            ))}
+            {props.artists ? (
+              props.artists.map((artist, index) => (
+                <span
+                  className="artist"
+                  key={artist.artistId}
+                  onClick={() =>
+                    currentlyActivePage.pageTitle === 'ArtistInfo' &&
+                    currentlyActivePage.data.artistName === artist
+                      ? changeCurrentActivePage('Home')
+                      : changeCurrentActivePage('ArtistInfo', {
+                          artistName: artist.name,
+                          artistId: artist.artistId,
+                        })
+                  }
+                >
+                  {artist.name}
+                  {props.artists
+                    ? index === props.artists.length - 1
+                      ? ''
+                      : ', '
+                    : ''}
+                </span>
+              ))
+            ) : (
+              <span>Unknown Artist</span>
+            )}
           </div>
         </div>
         <div className="play-btn-container">

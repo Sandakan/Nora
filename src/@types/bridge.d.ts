@@ -16,8 +16,8 @@ declare global {
     songId: string;
     title: string;
     duration: number;
-    artists: string[];
-    album?: string;
+    artists?: { artistId: string; name: string }[];
+    album?: { albumId: string; name: string };
     albumArtist?: string;
     format?: musicMetaData.IFormat;
     track: unknown;
@@ -67,19 +67,19 @@ declare global {
 
   interface AudioData {
     title: string;
-    artists: string[];
+    artists?: { artistId: string; name: string }[];
     duration: number;
     artwork?: string;
     artworkPath?: string;
     path: string;
     songId: string;
     isAFavorite: boolean;
-    album?: string;
+    album?: { albumId: string; name: string };
   }
 
   interface AudioInfo {
     title: string;
-    artists: string[];
+    artists?: { artistId: string; name: string }[];
     duration: number;
     artworkPath?: string;
     path: string;
@@ -166,11 +166,10 @@ declare global {
   interface Album {
     albumId: string;
     title: string;
-    artists: string[];
-    // artists: {
-    //   name: string;
-    //   artistId: string;
-    // }[];
+    artists?: {
+      name: string;
+      artistId: string;
+    }[];
     artworkPath: string | undefined;
     songs: {
       title: string;
@@ -191,10 +190,7 @@ declare global {
     }[];
     name: string;
     artworkPath?: string;
-    onlineArtworkPaths?: {
-      picture_small: string;
-      picture_medium: string;
-    };
+    onlineArtworkPaths?: OnlineArtistArtworks;
   }
 
   interface LogData {
@@ -225,13 +221,52 @@ declare global {
     data: ArtistInfoFromNet[];
   }
 
-  interface ArtistInfoFromNet {
+  interface ArtistInfoDeezerApi {
+    data: ArtistInfoFromDeezer[];
+    total: number;
+    next: string;
+  }
+
+  interface LastFMArtistInfo {
+    name: string;
+    mbid: string;
+    url: string;
+    image: {
+      text: string;
+      size: 'small' | 'medium' | 'large' | 'extralarge' | 'mega';
+    }[];
+    streamable: '0' | '1';
+    ontour: '0' | '1';
+    stats: {
+      listeners: number;
+      playcount: number;
+    };
+    similar: LastFMArtistInfo[];
+    tags: {
+      tag: { name: string; url: string }[];
+    };
+    bio: {
+      links: {
+        link: {
+          text: string;
+          rel: string;
+          url: string;
+        };
+      };
+      published: string;
+      summary: string;
+      content: string;
+    };
+  }
+  interface ArtistInfoLastFMApi {
+    artist: LastFMArtistInfo[];
+  }
+
+  interface ArtistInfoFromDeezer extends OnlineArtistArtworks {
     id: number;
     name: string;
     link: string;
     picture: string;
-    picture_small: string;
-    picture_medium: string;
     picture_big: string;
     picture_xl: string;
     nb_album: number;
@@ -239,14 +274,24 @@ declare global {
     radio: boolean;
     tracklist: string;
     type: string;
+  }
+
+  interface ArtistInfoFromNet {
+    artistArtworks?: OnlineArtistArtworks;
     artistPalette?: NodeVibrantPalette;
     artistBio?: string;
+  }
+
+  interface OnlineArtistArtworks {
+    picture_small: string;
+    picture_medium: string;
   }
 
   interface SearchResult {
     songs: SongData[];
     artists: Artist[];
     albums: Album[];
+    playlists: Playlist[];
   }
 
   interface PromptMenuData {
@@ -257,6 +302,7 @@ declare global {
   interface NotificationPanelData {
     isVisible: boolean;
     content: ReactElement<any, any>;
+    icon?: ReactElement<any, any>;
   }
 
   interface AnyProp {
@@ -298,7 +344,8 @@ declare global {
     | 'queue'
     | 'isShuffling'
     | 'isRepeating'
-    | 'preferences.doNotShowRemoveSongFromLibraryConfirm';
+    | 'preferences.doNotShowRemoveSongFromLibraryConfirm'
+    | 'songBlacklist';
 
   type SongsPageSortTypes =
     | 'aToZ'
@@ -339,7 +386,8 @@ declare global {
     | 'ArtistInfo'
     | 'AlbumInfo'
     | 'PlaylistInfo'
-    | 'CurrentQueue';
+    | 'CurrentQueue'
+    | 'AllSearchResults';
 
   type SearchFilters = 'All' | 'Artists' | 'Albums' | 'Songs' | 'Playlists';
 

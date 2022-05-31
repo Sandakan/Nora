@@ -25,32 +25,11 @@ export default React.memo(() => {
       updateContextMenuData={updateContextMenuData}
     />
   ));
-  // const contextMenuRef = React.useRef({} as HTMLDivElement | null);
-  // const windowHeight = window.innerHeight;
-  // const windowWidth = window.innerWidth;
-  // console.log(
-  //   'context menu event triggered',
-  //   'visibility',
-  //   isContextMenuVisible,
-  //   'pageX',
-  //   contextMenuPageX,
-  //   'windowWidth',
-  //   windowWidth,
-  //   'pageY',
-  //   contextMenuPageY,
-  //   'windowHeight',
-  //   windowHeight,
-  //   'menuWidth',
-  //   contextMenuRef.current?.clientWidth,
-  //   'menuHeight',
-  //   contextMenuRef.current?.clientHeight
-  // );
   return (
     <div
       className={`context-menu ${isContextMenuVisible ? 'visible' : ''}`}
       onClick={(e) => e.stopPropagation()}
       style={{ top: contextMenuPageY, left: contextMenuPageX }}
-      // ref={contextMenuRef}
     >
       {menuItems}
     </div>

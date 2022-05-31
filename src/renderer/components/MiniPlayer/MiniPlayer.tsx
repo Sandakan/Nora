@@ -82,7 +82,9 @@ export default function MiniPlayer() {
         <div className="song-info-container">
           <div className="song-title">{currentSongData.title}</div>
           <div className="song-artists">
-            {currentSongData.artists.join(',')}
+            {currentSongData.artists
+              ? currentSongData.artists.map((artist) => artist.name).join(',')
+              : 'Unknown Artist'}
           </div>
         </div>
         <input

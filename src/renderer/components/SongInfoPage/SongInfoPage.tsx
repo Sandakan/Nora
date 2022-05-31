@@ -60,14 +60,13 @@ export default () => {
               <div className="song-artists info-type-2">
                 {songInfo.artists ? (
                   Array.isArray(songInfo.artists) ? (
-                    songInfo.artists.length > 0 &&
-                    songInfo.artists[0] !== '' ? (
+                    songInfo.artists.length > 0 ? (
                       songInfo.artists.map((artist, index) => (
                         <>
                           <span
                             className="artist"
-                            key={index}
-                            title={artist}
+                            key={artist.artistId}
+                            title={artist.name}
                             onClick={() =>
                               currentlyActivePage.pageTitle === 'ArtistInfo' &&
                               currentlyActivePage.data.artistName === artist
@@ -77,16 +76,16 @@ export default () => {
                                   })
                             }
                           >
-                            {artist}
+                            {artist.name}
                           </span>
-                          {songInfo.artists.length === 0 ||
-                          songInfo.artists.length - 1 === index
-                            ? ''
-                            : ', '}
+                          {songInfo.artists &&
+                          songInfo.artists.length - 1 !== index
+                            ? ', '
+                            : ''}
                         </>
                       ))
                     ) : (
-                      'Unknown Artist'
+                      <span>&apos;Unknown Artist&apos;</span>
                     )
                   ) : (
                     <span className="artist" title={songInfo.artists}>
@@ -99,18 +98,20 @@ export default () => {
               </div>
               <div
                 className="info-type-2"
-                title={songInfo.album}
-                // TODO - CANNOT ADD THIS FUNCTIONALITY BECAUSE OF ABSENCE OF INPUT DATA
-                // onClick={() =>
-                //   currentlyActivePage.pageTitle === 'ArtistInfo' &&
-                //   currentlyActivePage.data.artistName === artist
-                //     ? changeCurrentActivePage('Home')
-                //     : changeCurrentActivePage('ArtistInfo', {
-                //         artistName: artist,
-                //       })
-                // }
+                title={songInfo.album ? songInfo.album.name : 'Unknown Album'}
+                onClick={() => {
+                  if (songInfo.album) {
+                    return currentlyActivePage.pageTitle === 'AlbumInfo' &&
+                      currentlyActivePage.data.albumId === songInfo.album.name
+                      ? changeCurrentActivePage('Home')
+                      : changeCurrentActivePage('AlbumInfo', {
+                          albumId: songInfo.album.albumId,
+                        });
+                  }
+                  return undefined;
+                }}
               >
-                {songInfo.album}
+                {songInfo.album ? songInfo.album.name : 'Unknown Album'}
               </div>
               <div className="info-type-3" title={songDuration}>
                 {songDuration}

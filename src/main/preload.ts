@@ -4,46 +4,50 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
 export const api = {
-  // WINDOW CONTROLS
+  /** WINDOW CONTROLS * */
   closeApp: (): void => ipcRenderer.send('app/close'),
   minimizeApp: (): void => ipcRenderer.send('app/minimize'),
   toggleMaximizeApp: (): void => ipcRenderer.send('app/toggleMaximize'),
-  // ADDS NEW FOLDERS
+  /** ADDS NEW FOLDERS * */
   addMusicFolder: (): Promise<SongData[]> =>
     ipcRenderer.invoke('app/addMusicFolder'),
-  // GET SONG DATA
+  /** GET SONG DATA * */
   getSong: (
     songId: string,
     updateListeningRate = true
   ): Promise<AudioData | undefined> =>
     ipcRenderer.invoke('app/getSong', songId, updateListeningRate),
-  // CHECK FOR SONGS ON APP STARTUP
+  /** CHECK FOR SONGS ON APP STARTUP * */
   checkForSongs: (): Promise<AudioInfo[] | undefined> =>
     ipcRenderer.invoke('app/checkForSongs'),
-  // SAVES AND GETS USERDATA
+  /** SAVES AND GETS USERDATA * */
   saveUserData: (dataType: UserDataTypes, data: any) =>
     ipcRenderer.invoke('app/saveUserData', dataType, data),
   getUserData: (): Promise<UserData> => ipcRenderer.invoke('app/getUserData'),
-  // SENDS AND GETS CURRENTLY STOPPED SONG POSTION
+  /** SENDS AN EVENT TO THE RENDERER BEFORE QUITTING THE APP. * */
   beforeQuitEvent: (callback: (e: any) => void) =>
     ipcRenderer.on('app/beforeQuitEvent', callback),
-  sendSongPosition: (position: number) =>
+  /** SENDS AND GETS CURRENTLY STOPPED SONG POSTION * */
+  sendSongPosition: (position: number): void =>
     ipcRenderer.send('app/getSongPosition', position),
-  // PROVIDES SEARCH RESULTS
+  /** INCREMENTS THE NO OF SONE LISTENS * */
+  incrementNoOfSongListens: (songId: string): void =>
+    ipcRenderer.send('app/incrementNoOfSongListens', songId),
+  /** PROVIDES SEARCH RESULTS * */
   search: (filter: string, value: string): Promise<SearchResult> =>
     ipcRenderer.invoke('app/search', filter, value),
-  // PROVIDES SONG LYRICS
+  /** PROVIDES SONG LYRICS * */
   getSongLyrics: (
     songTitle: string,
-    songArtists: string
+    songArtists?: string
   ): Promise<Lyrics | undefined> =>
     ipcRenderer.invoke('app/getSongLyrics', songTitle, songArtists),
-  // CONTEXT MENU - OPENS DEVTOOLS
+  /** CONTEXT MENU - OPENS DEVTOOLS * */
   openDevtools: () => ipcRenderer.send('app/openDevTools'),
-  // SENDS MESSAGES FROM THE MAIN TO THE RENDERER
+  /** SENDS MESSAGES FROM THE MAIN TO THE RENDERER * */
   getMessageFromMain: (callback: (event: unknown, message: string) => void) =>
     ipcRenderer.on('app/sendMessageToRenderer', callback),
-  // SENDS MESSAGES FROM THE MAIN TO THE RENDERER
+  /** SENDS MESSAGES FROM THE MAIN TO THE RENDERER * */
   dataUpdateEvent: (
     callback: (
       event: unknown,
@@ -51,71 +55,70 @@ export const api = {
       message?: string
     ) => void
   ) => ipcRenderer.on('app/dataUpdateEvent', callback),
-  // TOGGLE LIKE SONG
+  /** TOGGLE LIKE SONG * */
   toggleLikeSong: (
     songId: string,
     likeSong: boolean
   ): Promise<ToggleLikeSongReturnValue | undefined> =>
     ipcRenderer.invoke('app/toggleLikeSong', songId, likeSong),
-  // GET ARTISTS ARTWORKS
+  /** GET ARTISTS ARTWORKS * */
   getArtistArtworks: (
-    artistId: string,
-    artistName?: string
+    artistId: string
   ): Promise<ArtistInfoFromNet | undefined> =>
-    ipcRenderer.invoke('app/getArtistArtworks', artistId, artistName),
-  // GET ARTIST DATA
+    ipcRenderer.invoke('app/getArtistArtworks', artistId),
+  /** GET ARTIST DATA * */
   getArtistData: (
     artistIdOrName: string
   ): Promise<Artist | Artist[] | undefined> =>
     ipcRenderer.invoke('app/getArtistData', artistIdOrName),
-  // GET ALBUM DATA
+  /** GET ALBUM DATA * */
   getAlbumData: (albumId: string): Promise<Album | Album[] | undefined> =>
     ipcRenderer.invoke('app/getAlbumData', albumId),
-  // GET PLAYLIST DATA
+  /** GET PLAYLIST DATA * */
   getPlaylistData: (
     playlistId: string
   ): Promise<Playlist | Playlist[] | undefined> =>
     ipcRenderer.invoke('app/getPlaylistData', playlistId),
-  // ADDS A NEW PLAYLIST
+  /** ADDS A NEW PLAYLIST * */
   addNewPlaylist: (
     playlistName: string
   ): Promise<{ success: boolean; message?: string; playlist?: Playlist }> =>
     ipcRenderer.invoke('app/addNewPlaylist', playlistName),
-  // REMOVES A PLAYLIST
+  /** REMOVES A PLAYLIST * */
   removeAPlaylist: (
     playlistId: string
   ): Promise<{
     success: boolean;
     message?: string;
   }> => ipcRenderer.invoke('app/removeAPlaylist', playlistId),
-  // GET SONG INFO
+  /** GET SONG INFO * */
   getSongInfo: (songId: string): Promise<SongData | undefined> =>
     ipcRenderer.invoke('app/getSongInfo', songId),
-  // REMOVES A SONG FROM THE LIBRARY
+  /** REMOVES A SONG FROM THE LIBRARY * */
   removeSongFromLibrary: (
     absoluteFilePath: string
   ): Promise<{ success: boolean; message?: string }> =>
     ipcRenderer.invoke('app/removeSongFromLibrary', absoluteFilePath),
-  // DELTEES A SONG FROM THE SYSTEM
+  /** DELTEES A SONG FROM THE SYSTEM * */
   deleteSongFromSystem: (
-    absoluteFilePath: string
-    // isPermanentDelete: boolean
+    absoluteFilePath: string,
+    isPermanentDelete: boolean
   ): Promise<{ success: boolean; message?: string }> =>
     ipcRenderer.invoke(
       'app/deleteSongFromSystem',
-      absoluteFilePath
-      // isPermanentDelete
+      absoluteFilePath,
+      isPermanentDelete
     ),
-  // RESYNC SONGS LIBRARY
+  /** RESYNC SONGS LIBRARY * */
   resyncSongsLibrary: (): Promise<true> =>
     ipcRenderer.invoke('app/resyncSongsLibrary'),
-  // REVEAL SONG IN FILE EXPLORER
+  /** REVEAL SONG IN FILE EXPLORER * */
   revealSongInFileExplorer: (songId: string): void =>
     ipcRenderer.send('revealSongInFileExplorer', songId),
-  // OPENS URLS ON THE DEFAULT BROWSER
+  /** OPENS URLS ON THE DEFAULT BROWSER * */
   openInBrowser: (url: string): void =>
     ipcRenderer.send('app/openInBrowser', url),
-  // SENDS RENDERER ERROR LOGS TO THE MAIN PROCESS.
+  /** SENDS RENDERER ERROR LOGS TO THE MAIN PROCESS. * */
   sendLogs: (
     logs: Error,
     forceWindowRestart = false,
@@ -127,13 +130,13 @@ export const api = {
       forceWindowRestart,
       forceMainRestart
     ),
-  // TOGGLES MINI PLAYER
+  /** TOGGLES MINI PLAYER * */
   toggleMiniPlayer: (isMiniPlayer: boolean) =>
     ipcRenderer.invoke('app/toggleMiniPlayer', isMiniPlayer),
-  // REMOVES A MUSIC FOLDER AND ITS SONGS FROM THE MUSIC LIBRARY
+  /** REMOVES A MUSIC FOLDER AND ITS SONGS FROM THE MUSIC LIBRARY * */
   removeAMusicFolder: (absolutePath: string) =>
     ipcRenderer.invoke('app/removeAMusicFolder', absolutePath),
-  // RESETS THE APP
+  /** RESETS THE APP * */
   resetApp: (): void => ipcRenderer.send('app/resetApp'),
 };
 

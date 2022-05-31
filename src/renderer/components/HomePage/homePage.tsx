@@ -14,11 +14,12 @@
 import React, { useContext } from 'react';
 import sortSongs from 'renderer/utils/sortSongs';
 import { AppContext } from 'renderer/contexts/AppContext';
-import { SongCard } from '../SongsPage/songCard';
+import { SongCard } from '../SongsPage/SongCard';
 import ErrorPrompt from '../ErrorPrompt';
 import { Artist } from '../ArtistPage/Artist';
 import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
-import NoSongsImage from '../../../../assets/images/empty-folder.png';
+import NoSongsImage from '../../../../assets/images/Empty Inbox _Monochromatic.svg';
+import DataFetchingImage from '../../../../assets/images/Umbrella_Monochromatic.svg';
 import ResetAppConfirmationPrompt from './ResetAppConfirmationPrompt';
 
 interface HomePageReducer {
@@ -112,6 +113,7 @@ export const HomePage = () => {
   }, [content.recentlyPlayedSongsData]);
 
   const addNewSongs = () => {
+    dispatch({ type: 'SONGS_DATA', data: [] });
     window.api
       .addMusicFolder()
       .then((songs) => {
@@ -129,7 +131,8 @@ export const HomePage = () => {
         });
         dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
       })
-      .catch((err) => window.api.sendLogs(err));
+      // eslint-disable-next-line no-console
+      .catch(() => dispatch({ type: 'SONGS_DATA', data: [null] }));
   };
 
   const recentlyPlayedSongs = content.recentlyPlayedSongsData
@@ -263,15 +266,16 @@ export const HomePage = () => {
       {content.songsData[0] === null && (
         <div className="no-songs-container">
           <img src={NoSongsImage} alt="No songs available." />
-          <span>We couldn't find any songs in your system.</span>
+          <div>There&apos;s nothing here. Do you know where are they?</div>
           <button type="button" id="add-new-song-folder" onClick={addNewSongs}>
-            <i className="fa-solid fa-plus"></i> Add Folder
+            Add Folder
           </button>
         </div>
       )}
       {recentlyPlayedSongs.length === 0 && content.songsData.length === 0 && (
         <div className="no-songs-container">
-          <span>Fetching your songs...</span>
+          <img src={DataFetchingImage} alt="Stay calm" />
+          <span>Just hold on. We are readying everything for you...</span>
         </div>
       )}
     </div>

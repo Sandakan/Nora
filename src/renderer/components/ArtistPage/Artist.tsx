@@ -29,6 +29,7 @@ export const Artist = (props: ArtistProp) => {
     createQueue,
     queue,
     updateQueueData,
+    updateNotificationPanelData,
   } = React.useContext(AppContext);
 
   const showArtistInfoPage = () => {
@@ -67,6 +68,13 @@ export const Artist = (props: ArtistProp) => {
                   undefined,
                   [...queue.queue, ...props.songIds],
                   false
+                );
+                updateNotificationPanelData(
+                  5000,
+                  <span>
+                    Added {props.songIds.length} song
+                    {props.songIds.length === 1 ? '' : 's'} to the queue.
+                  </span>
                 );
               },
             },

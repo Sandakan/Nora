@@ -18,7 +18,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/self-closing-comp */
 import { useContext } from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext, SongPositionContext } from 'renderer/contexts/AppContext';
 import { calculateTime } from '../../../main/calculateTime';
 import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
 
@@ -36,7 +36,6 @@ export default () => {
     toggleIsFavorite,
     volume,
     updateVolume,
-    songPosition,
     isShuffling,
     toggleShuffling,
     isRepeating,
@@ -47,6 +46,7 @@ export default () => {
     toggleSongPlayback,
     updateSongPosition,
   } = useContext(AppContext);
+  const { songPosition } = useContext(SongPositionContext);
 
   const seekBarCssProperties: any = {};
   const volumeBarCssProperties: any = {};
@@ -133,38 +133,52 @@ export default () => {
           <div className="song-artists" id="currentSongArtists">
             {currentSongData.artists ? (
               Array.isArray(currentSongData.artists) ? (
-                currentSongData.artists.length > 0 &&
-                currentSongData.artists[0] !== '' ? (
+                currentSongData.artists.length > 0 ? (
                   currentSongData.artists.map((artist, index) => (
                     // !THIS REACT FRAGMENT GENERATES A KEY PROP ERROR IN CONSOLE
                     <span key={index}>
                       <span
                         className="artist"
-                        key={artist}
-                        title={artist}
+                        key={artist.artistId}
+                        title={artist.artistId}
                         onClick={() =>
                           currentlyActivePage.pageTitle === 'ArtistInfo' &&
                           currentlyActivePage.data.artistName === artist
                             ? changeCurrentActivePage('Home')
                             : changeCurrentActivePage('ArtistInfo', {
-                                artistName: artist,
+                                artistName: artist.name,
+                                artistId: artist.artistId,
                               })
                         }
                       >
-                        {artist}
+                        {artist.name}
                       </span>
-                      {currentSongData.artists.length === 0 ||
-                      currentSongData.artists.length - 1 === index
-                        ? ''
-                        : ', '}
+                      {currentSongData.artists &&
+                      currentSongData.artists.length - 1 !== index
+                        ? ', '
+                        : ''}
                     </span>
                   ))
                 ) : (
                   'Unknown Artist'
                 )
               ) : (
-                <span className="artist" title={currentSongData.artists}>
-                  {currentSongData.artists}
+                <span
+                  className="artist"
+                  title={currentSongData.artists[0]}
+                  onClick={() =>
+                    currentSongData.artists &&
+                    (currentlyActivePage.pageTitle === 'ArtistInfo' &&
+                    currentlyActivePage.data.artistName ===
+                      currentSongData.artists[0].name
+                      ? changeCurrentActivePage('Home')
+                      : changeCurrentActivePage('ArtistInfo', {
+                          artistName: currentSongData.artists[0].name,
+                          artistId: currentSongData.artists[0].artistId,
+                        }))
+                  }
+                >
+                  {currentSongData.artists[0]}
                 </span>
               )
             ) : (

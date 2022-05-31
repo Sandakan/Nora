@@ -20,20 +20,60 @@ export default (data: AudioInfo[], sortType: SongsPageSortTypes) => {
       );
     else if (sortType === 'artistNameAscending')
       sortedSongData = data.sort((a, b) =>
-        a.artists.join(',') > b.artists.join(',')
+        a.artists &&
+        b.artists &&
+        a.artists.map((artist) => artist.name).join(',') >
+          b.artists.map((artist) => artist.name).join(',')
           ? 1
-          : a.artists.join(',') < b.artists.join(',')
+          : a.artists &&
+            b.artists &&
+            a.artists.map((artist) => artist.name).join(',') <
+              b.artists.map((artist) => artist.name).join(',')
           ? -1
           : 0
       );
     else if (sortType === 'artistNameDescending')
       sortedSongData = data.sort((a, b) =>
-        a.artists.join(',') < b.artists.join(',')
+        a.artists &&
+        b.artists &&
+        a.artists.map((artist) => artist.name).join(',') <
+          b.artists.map((artist) => artist.name).join(',')
           ? 1
-          : a.artists.join(',') > b.artists.join(',')
+          : a.artists &&
+            b.artists &&
+            a.artists.map((artist) => artist.name).join(',') >
+              b.artists.map((artist) => artist.name).join(',')
           ? -1
           : 0
       );
+    // else if (sortType === 'albumNameAscending')
+    //   sortedSongData = data.sort((a, b) =>
+    //     a.album &&
+    //     b.album &&
+    //     a.album.map((artist) => artist.name).join(',') >
+    //       b.album.map((artist) => artist.name).join(',')
+    //       ? 1
+    //       : a.album &&
+    //         b.album &&
+    //         a.album.map((artist) => artist.name).join(',') <
+    //           b.album.map((artist) => artist.name).join(',')
+    //       ? -1
+    //       : 0
+    //   );
+    // else if (sortType === 'albumNameDescending')
+    //   sortedSongData = data.sort((a, b) =>
+    //     a.album &&
+    //     b.album &&
+    //     a.album.map((artist) => artist.name).join(',') <
+    //       b.album.map((artist) => artist.name).join(',')
+    //       ? 1
+    //       : a.album &&
+    //         b.album &&
+    //         a.album.map((artist) => artist.name).join(',') >
+    //           b.album.map((artist) => artist.name).join(',')
+    //       ? -1
+    //       : 0
+    //   );
     else if (sortType === 'dateAddedAscending')
       sortedSongData = data
         .sort((a, b) =>

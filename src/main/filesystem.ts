@@ -21,7 +21,7 @@ import fsOther from 'fs';
 import path from 'path';
 import { app } from 'electron';
 import Store from 'electron-store';
-// import trash from 'trash';
+import trash from 'trash';
 import * as musicMetaData from 'music-metadata';
 import sharp from 'sharp';
 import { parseSong } from './parseSong';
@@ -148,6 +148,8 @@ export const setUserData = async (dataType: UserDataTypes, data: unknown) => {
       userData.isShuffling = data;
     } else if (dataType === 'queue' && typeof data === 'object') {
       userData.queue = data as Queue;
+    } else if (dataType === 'songBlacklist' && Array.isArray(data)) {
+      userData.songBlacklist = data as string[];
     } else if (
       dataType === 'preferences.doNotShowRemoveSongFromLibraryConfirm' &&
       typeof data === 'boolean'
@@ -416,30 +418,25 @@ export const removeSongFromLibrary = (
             const recentSongs = userData.recentlyPlayedSongs.filter(
               (recentSong) => recentSong.songId !== song.songId
             );
-            userDataStore.store = {
-              ...userData,
-              currentSong: {
-                songId: null,
-                stoppedPosition: 0,
-              },
-              recentlyPlayedSongs: recentSongs,
-              songBlacklist: [
-                ...userData.songBlacklist,
-                path.join(folderPath, filename),
-              ],
-            };
+            setUserData('recentlyPlayedSongs', recentSongs)
+              .then(() => console.log('recently played songs updated.'))
+              .catch((err) => logger(err));
           }
         }
         if (
           Array.isArray(artists) &&
           artists.length > 0 &&
+          Array.isArray(song.artists) &&
+          song.artists.length > 0 &&
           artists.some((artist) =>
-            song.artists.some((str) => str === artist.name)
+            song.artists
+              ? song.artists.some((x) => x.name === artist.name)
+              : false
           )
         ) {
-          song.artists.forEach((str) => {
+          song.artists.forEach((art) => {
             for (let x = 0; x < artists.length; x++) {
-              if (artists[x].name === str) {
+              if (artists[x].name === art.name) {
                 if (artists[x].songs.length > 1) {
                   artists[x].songs = artists[x].songs.filter(
                     (y) => y.songId !== song.songId
@@ -512,10 +509,12 @@ export const removeSongFromLibrary = (
               );
           }
         }
-        fs.unlink(song.artworkPath).catch((err) => reject(err));
-        fs.unlink(song.artworkPath.replace('.webp', '-optimized.webp')).catch(
-          (err) => reject(err)
-        );
+        if (path.basename(song.artworkPath) !== 'song_cover_default.png') {
+          fs.unlink(song.artworkPath).catch((err) => reject(err));
+          fs.unlink(song.artworkPath.replace('.webp', '-optimized.webp')).catch(
+            (err) => reject(err)
+          );
+        }
         return false;
       }
       return true;
@@ -523,6 +522,13 @@ export const removeSongFromLibrary = (
     if (updatedSongs && artists && albums)
       songDataStore.store = { songs: updatedSongs, artists, albums };
     if (playlists) playlistDataStore.set('playlists', playlists);
+    if (userData)
+      setUserData('songBlacklist', [
+        ...userData.songBlacklist,
+        path.join(folderPath, filename),
+      ])
+        .then(() => console.log('blacklist updated.'))
+        .catch((err) => logger(err));
     console.log(filename, 'removed from the library.');
     dataUpdateEvent(
       'songs',
@@ -676,35 +682,35 @@ export const deleteSongFromSystem = (
         return reject(err);
       });
       if (res && res.success)
-        // if (isPermanentDelete)
-        //   await trash(absoluteFilePath)
-        //     .then(() =>
-        //       resolve({
-        //         success: true,
-        //         message: `Moved '${path.basename(
-        //           absoluteFilePath
-        //         )}'to the Recycle bin/Trash.`,
-        //       })
-        //     )
-        //     .catch((err) => {
-        //       logger(err);
-        //       return reject(err);
-        //     });
-        // else
-        await fs
-          .unlink(absoluteFilePath)
-          .then(() =>
-            resolve({
-              success: true,
-              message: `Removed '${path.basename(
-                absoluteFilePath
-              )}' from the system.`,
-            })
-          )
-          .catch((err) => {
-            logger(err);
-            return reject(err);
-          });
+        if (!isPermanentDelete)
+          await trash(absoluteFilePath)
+            .then(() =>
+              resolve({
+                success: true,
+                message: `Moved '${path.basename(
+                  absoluteFilePath
+                )}'to the Recycle bin/Trash.`,
+              })
+            )
+            .catch((err) => {
+              logger(err);
+              return reject(err);
+            });
+        else
+          await fs
+            .unlink(absoluteFilePath)
+            .then(() =>
+              resolve({
+                success: true,
+                message: `Removed '${path.basename(
+                  absoluteFilePath
+                )}' from the system.`,
+              })
+            )
+            .catch((err) => {
+              logger(err);
+              return reject(err);
+            });
     } else
       return resolve({
         success: false,

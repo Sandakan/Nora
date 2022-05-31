@@ -7,7 +7,7 @@ import React from 'react';
 import LightModeLogo from '../../../../assets/images/logo_light_mode.png';
 import { AppContext } from '../../contexts/AppContext';
 
-export const Header = () => {
+export default React.memo(() => {
   const close = () => window.api.closeApp();
   const minimize = () => window.api.minimizeApp();
   const maximize = () => window.api.toggleMaximizeApp();
@@ -17,6 +17,7 @@ export const Header = () => {
     pageHistoryIndex,
     updatePageHistoryIndex,
   } = React.useContext(AppContext);
+
   return (
     <header id="title-bar">
       <div className="logo-and-app-name-container">
@@ -60,16 +61,16 @@ export const Header = () => {
         </div>
         <div className="window-controls-container">
           <span className="minimize-btn" onClick={minimize}>
-            <span className="material-icons-round">minimize</span>
+            <span className="material-icons-sharp icon">minimize</span>
           </span>
           <span className="maximize-btn" onClick={maximize}>
-            <span className="material-icons-round">crop_square</span>
+            <span className="material-icons-sharp icon">crop_square</span>
           </span>
           <span className="close-btn" onClick={close}>
-            <span className="material-icons-round">close</span>{' '}
+            <span className="material-icons-sharp icon">close</span>{' '}
           </span>
         </div>
       </div>
     </header>
   );
-};
+});

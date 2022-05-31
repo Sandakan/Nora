@@ -8,7 +8,10 @@
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import MusicFolder from './MusicFolder';
+import Button from '../Button';
+import Checkbox from '../Checkbox';
 import { version } from '../../../../package.json';
+import ResetAppConfirmationPrompt from '../HomePage/ResetAppConfirmationPrompt';
 
 interface SettingsReducer {
   userData: UserData;
@@ -49,6 +52,8 @@ export const SettingsPage = () => {
   const [content, dispatch] = React.useReducer(reducer, {
     userData: {},
   } as SettingsReducer);
+  const reducedMotionRef = React.useRef({ isReducedMotion: false });
+
   React.useEffect(() => {
     window.api
       .getUserData()
@@ -64,6 +69,7 @@ export const SettingsPage = () => {
   return (
     <div className="main-container settings-container">
       <div className="title-container">Settings</div>
+
       <div className="main-container">
         <div className="title-container">Theme</div>
         <div className="description">
@@ -95,6 +101,7 @@ export const SettingsPage = () => {
           </div>
         </div>
       </div>
+
       <div className="main-container">
         <div className="title-container">Music Folders</div>
         <div className="description">
@@ -102,10 +109,11 @@ export const SettingsPage = () => {
           library.
         </div>
         <div className="music-folders">{musicFolders}</div>
-        <button
-          type="button"
+        <Button
+          label="Add Music Folder"
+          iconName="add"
           className="add-new-music-folder-btn"
-          onClick={async () => {
+          clickHandler={async () => {
             const data = await window.api.addMusicFolder();
             if (data.length > 0)
               window.api
@@ -115,19 +123,40 @@ export const SettingsPage = () => {
                 )
                 .catch((err) => console.log(err));
           }}
-        >
-          <span className="material-icons-round icon">add</span> Add New Folder
-        </button>
+        />
       </div>
+
+      {content.userData && content.userData.songBlacklist && (
+        <div className="main-container blacklisted-songs-container">
+          <div className="title-container">Blacklisted Songs</div>
+          <div className="description">
+            Songs that have been removed from the library will appear here.
+          </div>
+          <div className="blacklisted-songs">
+            {content.userData.songBlacklist.map((songPath, index) => (
+              <div className="blacklisted-song" key={index}>
+                <span className="blacklisted-song-name">
+                  {songPath.split('\\').at(-1)?.split('.')[0]}
+                </span>
+                <span className="blacklisted-song-path">{songPath}</span>
+                <span className="material-icons-round icon">restore</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="main-container">
         <div className="title-container">Default Page</div>
         <div className="description">
           Change the default page you want to see when you open the app.
         </div>
+
         <div className="default-page-dropdown-container">
           <select
             name="defaultPageDropdown"
             id="defaultPageDropdown"
+            className="dropdown"
             value={content.userData.defaultPage}
             onChange={(e) => {
               window.api.saveUserData('defaultPage', e.target.value);
@@ -143,9 +172,28 @@ export const SettingsPage = () => {
           </select>
         </div>
       </div>
+
+      <div className="main-container accessibility-settings-container">
+        <div className="title-container">Accessibility</div>
+        <div className="reduced-motion-checkbox-container">
+          <div className="description">
+            Removes every duration of the animations that happens in the app.
+            This will also reduce the smoothness of the app.
+          </div>
+          <Checkbox
+            id="enableReducedMotion"
+            labelContent="Enable reduced motion"
+            isChecked={reducedMotionRef.current.isReducedMotion}
+            checkedStateUpdateFunction={(state) => {
+              reducedMotionRef.current.isReducedMotion = state;
+            }}
+          />
+        </div>
+      </div>
+
       <div className="main-container about-container">
         <div className="title-container">About</div>
-        <span
+        {/* <span
           className="release-notes-prompt-btn about-link"
           onClick={async () => {
             const data = await fetch(
@@ -160,7 +208,7 @@ export const SettingsPage = () => {
           }}
         >
           Release notes
-        </span>
+        </span> */}
         <span
           className="open-source-licenses-btn about-link"
           onClick={() =>
@@ -184,6 +232,19 @@ export const SettingsPage = () => {
         >
           Github repository
         </span>
+        <div className="about-buttons-container">
+          <Button
+            label="Reset App"
+            iconName="auto_mode"
+            clickHandler={() =>
+              changePromptMenuData(
+                true,
+                <ResetAppConfirmationPrompt />,
+                'confirm-app-reset'
+              )
+            }
+          />
+        </div>
         <div className="about-description">
           <div>{`Oto Music for Desktop v${version}`}</div>
           <div>

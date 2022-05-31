@@ -32,7 +32,8 @@ interface AppContextType {
   notificationPanelData: NotificationPanelData;
   updateNotificationPanelData: (
     delay: number | undefined,
-    content: ReactElement<any, any>
+    content: ReactElement<any, any>,
+    icon?: ReactElement<any, any>
   ) => void;
   // CURRENTLY ACTVIE PAGE AND NAVIGATION HISTORY
   currentlyActivePage: { pageTitle: PageTitles; data?: any };
@@ -47,7 +48,7 @@ interface AppContextType {
   currentSongData: AudioData;
   userData: UserData | undefined;
   isCurrentSongPlaying: boolean;
-  songPosition: number;
+  // songPosition: number;
   volume: number;
   isMuted: boolean;
   isRepeating: boolean;
@@ -83,4 +84,10 @@ interface AppContextType {
   updateMiniPlayerStatus: (isVisible: boolean) => void;
 }
 
+interface SongPositionContextType {
+  songPosition: number;
+}
+
 export const AppContext = createContext({} as AppContextType);
+
+export const SongPositionContext = createContext({} as SongPositionContextType);

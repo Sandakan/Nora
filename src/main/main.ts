@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable global-require */
 /* eslint-disable promise/no-promise-in-callback */
 /* eslint-disable promise/no-callback-in-promise */
@@ -27,7 +28,6 @@ import path from 'path';
 import { rm, unlink } from 'fs/promises';
 
 import * as musicMetaData from 'music-metadata';
-// import lyricsFinder from 'lyrics-finder';
 import songLyrics from 'songlyrics';
 import httpsGet from 'simple-get';
 import nodeVibrant from 'node-vibrant';
@@ -109,7 +109,7 @@ const createWindow = async () => {
   });
   mainWindow.loadURL(resolveHtmlPath('index.html'));
   mainWindow.once('ready-to-show', checkForNewSongs);
-  mainWindow.webContents.setWindowOpenHandler((edata) => {
+  mainWindow.webContents.setWindowOpenHandler((edata: { url: string }) => {
     shell.openExternal(edata.url);
     return { action: 'deny' };
   });
@@ -128,15 +128,18 @@ const toggleMiniPlayer = (isMiniPlayer = false) => {
 };
 
 app.whenReady().then(() => {
-  protocol.registerFileProtocol('otomusic', (request, callback) => {
-    const url = decodeURI(request.url).replace('otomusic://localFiles/', '');
-    try {
-      return callback(url);
-    } catch (error) {
-      console.error(error);
-      return callback('404');
+  protocol.registerFileProtocol(
+    'otomusic',
+    (request: { url: string }, callback: (arg0: string) => any) => {
+      const url = decodeURI(request.url).replace('otomusic://localFiles/', '');
+      try {
+        return callback(url);
+      } catch (error) {
+        console.error(error);
+        return callback('404');
+      }
     }
-  });
+  );
   createWindow();
   mainWindow.show();
   app.on('activate', () => {
@@ -155,27 +158,31 @@ app.whenReady().then(() => {
     mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize()
   );
 
-  ipcMain.on('app/getSongPosition', async (_event, position: number) => {
-    console.log(position);
-    await saveUserData('currentSong.stoppedPosition', position).catch((err) =>
+  ipcMain.on('app/getSongPosition', (_event: any, position: number) =>
+    saveUserData('currentSong.stoppedPosition', position).catch((err) =>
       logger(err)
-    );
-  });
+    )
+  );
+
+  ipcMain.on('app/incrementNoOfSongListens', (_: any, songId: string) =>
+    incrementNoOfSongListens(songId)
+  );
 
   ipcMain.handle('app/addMusicFolder', addMusicFolder);
 
-  ipcMain.handle('app/getSong', (_event, id: string) => sendAudioData(id));
+  ipcMain.handle('app/getSong', (_event: any, id: string) => sendAudioData(id));
 
   ipcMain.handle(
     'app/toggleLikeSong',
-    (_e, songId: string, likeSong: boolean) => toggleLikeSong(songId, likeSong)
+    (_e: any, songId: string, likeSong: boolean) =>
+      toggleLikeSong(songId, likeSong)
   );
 
   ipcMain.handle('app/checkForSongs', () => checkForSongs());
 
   ipcMain.handle(
     'app/saveUserData',
-    async (_event, dataType: UserDataTypes, data: string) =>
+    async (_event: any, dataType: UserDataTypes, data: string) =>
       await saveUserData(dataType, data).catch((err) => logger(err))
   );
 
@@ -185,11 +192,11 @@ app.whenReady().then(() => {
 
   ipcMain.handle(
     'app/getSongLyrics',
-    async (_e, songTitle: string, songArtists: string) =>
+    async (_e: any, songTitle: string, songArtists?: string) =>
       await sendSongLyrics(songTitle, songArtists)
   );
 
-  ipcMain.handle('app/getSongInfo', (_e, songId: string) =>
+  ipcMain.handle('app/getSongInfo', (_e: any, songId: string) =>
     getSongInfo(songId)
   );
 
@@ -197,44 +204,43 @@ app.whenReady().then(() => {
     mainWindow.webContents.openDevTools({ mode: 'detach', activate: true })
   );
 
-  ipcMain.handle(
-    'app/getArtistArtworks',
-    async (_e, artistId: string, artistName?: string) =>
-      getArtistInfoFromNet(artistId, artistName)
+  ipcMain.handle('app/getArtistArtworks', async (_e: any, artistId: string) =>
+    getArtistInfoFromNet(artistId)
   );
 
   ipcMain.handle(
     'app/getArtistData',
-    async (_e, artistIdOrName: string) => await getArtistData(artistIdOrName)
+    async (_e: any, artistIdOrName: string) =>
+      await getArtistData(artistIdOrName)
   );
 
   ipcMain.handle(
     'app/getAlbumData',
-    async (_e, albumId: string) => await getAlbumData(albumId)
+    async (_e: any, albumId: string) => await getAlbumData(albumId)
   );
 
-  ipcMain.handle('app/getPlaylistData', async (_e, playlistId: string) =>
+  ipcMain.handle('app/getPlaylistData', async (_e: any, playlistId: string) =>
     sendPlaylistData(playlistId)
   );
 
-  ipcMain.handle('app/addNewPlaylist', async (_e, playlistName: string) =>
+  ipcMain.handle('app/addNewPlaylist', async (_e: any, playlistName: string) =>
     addNewPlaylist(playlistName)
   );
 
   ipcMain.handle(
     'app/removeAPlaylist',
-    async (_e, playlistId: string) => await removeAPlaylist(playlistId)
+    async (_e: any, playlistId: string) => await removeAPlaylist(playlistId)
   );
 
   ipcMain.handle(
     'app/addSongToPlaylist',
-    async (_e, playlistId: string, songId: string) =>
+    async (_e: any, playlistId: string, songId: string) =>
       await addSongToPlaylist(playlistId, songId)
   );
 
   ipcMain.handle(
     'app/removeSongFromLibrary',
-    async (_e, absoluteFilePath: string) =>
+    async (_e: any, absoluteFilePath: string) =>
       await removeSongFromLibrary(
         path.dirname(absoluteFilePath),
         path.basename(absoluteFilePath)
@@ -243,7 +249,7 @@ app.whenReady().then(() => {
 
   ipcMain.handle(
     'app/deleteSongFromSystem',
-    async (_e, absoluteFilePath: string, isPermanentDelete: boolean) =>
+    async (_e: any, absoluteFilePath: string, isPermanentDelete: boolean) =>
       await deleteSongFromSystem(absoluteFilePath, isPermanentDelete)
   );
 
@@ -251,7 +257,7 @@ app.whenReady().then(() => {
 
   ipcMain.on('app/resetApp', async () => await resetApp());
 
-  ipcMain.on('revealSongInFileExplorer', async (_e, songId: string) => {
+  ipcMain.on('revealSongInFileExplorer', async (_e: any, songId: string) => {
     const data = await getData();
     const { songs } = data;
     for (let x = 0; x < songs.length; x += 1) {
@@ -259,13 +265,18 @@ app.whenReady().then(() => {
         return shell.showItemInFolder(songs[x].path);
     }
   });
-  ipcMain.on('app/openInBrowser', async (_e, url: string) =>
+  ipcMain.on('app/openInBrowser', async (_e: any, url: string) =>
     shell.openExternal(url)
   );
 
   ipcMain.handle(
     'app/getRendererLogs',
-    async (_, logs: Error, forceRestart = false, forceMainRestart = false) => {
+    async (
+      _: any,
+      logs: Error,
+      forceRestart = false,
+      forceMainRestart = false
+    ) => {
       await logger(logs);
       if (forceRestart) return mainWindow.reload();
       if (forceMainRestart) {
@@ -277,12 +288,13 @@ app.whenReady().then(() => {
 
   ipcMain.handle(
     'app/removeAMusicFolder',
-    async (_, absolutePath: string) =>
+    async (_: any, absolutePath: string) =>
       await removeAMusicFolder(absolutePath).catch((err) => logger(err))
   );
 
-  ipcMain.handle('app/toggleMiniPlayer', async (_e, isMiniPlayer: boolean) =>
-    toggleMiniPlayer(isMiniPlayer)
+  ipcMain.handle(
+    'app/toggleMiniPlayer',
+    async (_e: any, isMiniPlayer: boolean) => toggleMiniPlayer(isMiniPlayer)
   );
 
   globalShortcut.register('F5', () => mainWindow.reload());
@@ -298,28 +310,29 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
-const addMusicFolder = async () => {
-  const { canceled, filePaths: musicFolderPath } = await dialog.showOpenDialog(
-    mainWindow,
-    {
-      title: 'Add a Music Folder',
-      buttonLabel: 'Add folder',
-      filters: [{ name: 'Audio Files', extensions: ['mp3'] }],
-      properties: ['openFile', 'openDirectory'],
-    }
-  );
-  if (canceled) return 'You cancelled the prompt.';
-  console.log(musicFolderPath[0]);
-  const songPaths = await getFiles(musicFolderPath[0]);
-  const songs: SongData[] = [];
-  if (songPaths) {
-    for (let x = 0; x < songPaths.length; x += 1) {
-      await parseSong(songPaths[x]).then((res) => {
-        if (res) songs.push(res);
+const addMusicFolder = (): Promise<SongData[]> => {
+  return new Promise(async (resolve, reject) => {
+    const { canceled, filePaths: musicFolderPath } =
+      await dialog.showOpenDialog(mainWindow, {
+        title: 'Add a Music Folder',
+        buttonLabel: 'Add folder',
+        filters: [{ name: 'Audio Files', extensions: ['mp3'] }],
+        properties: ['openFile', 'openDirectory'],
       });
+    if (canceled) return reject('You cancelled the prompt.');
+    console.log(musicFolderPath[0]);
+    const songPaths = await getFiles(musicFolderPath[0]).catch((err) =>
+      reject(err)
+    );
+    const songs: SongData[] = [];
+    if (songPaths) {
+      for (let x = 0; x < songPaths.length; x += 1) {
+        const res = await parseSong(songPaths[x]).catch((err) => reject(err));
+        if (res) songs.push(res);
+      }
     }
-  }
-  return songs;
+    return resolve(songs);
+  });
 };
 
 const sendSongLyrics = async (songTitle: string, songArtists?: string) => {
@@ -410,24 +423,31 @@ const checkForSongs = async () => {
   );
 };
 
-const search = async (_: unknown, filter: string, value: string) => {
+const search = async (
+  _: unknown,
+  filter: SearchFilters,
+  value: string
+): Promise<SearchResult> => {
   const jsonData: Data = await getData();
+  const playlistData = await getPlaylistData();
   const songs =
     Array.isArray(jsonData.songs) &&
     jsonData.songs.length > 0 &&
-    (filter === 'songs' || filter === 'all')
+    (filter === 'Songs' || filter === 'All')
       ? jsonData.songs.filter(
           (data: SongData) =>
-            new RegExp(value.replace(/[^w ]/, ''), 'gi').test(data.title) ||
-            new RegExp(value.replace(/[^w ]/, ''), 'gi').test(
-              data.artists.join(' ')
-            )
+            new RegExp(value.replace(/[^w ]/, ''), 'gim').test(data.title) ||
+            (data.artists
+              ? new RegExp(value.replace(/[^w ]/, ''), 'gim').test(
+                  data.artists.map((artist) => artist.name).join(' ')
+                )
+              : false)
         )
       : [];
   const artists =
     Array.isArray(jsonData.artists) &&
     jsonData.artists.length > 0 &&
-    (filter === 'artists' || filter === 'all')
+    (filter === 'Artists' || filter === 'All')
       ? jsonData.artists.filter((data: Artist) =>
           new RegExp(value, 'gim').test(data.name)
         )
@@ -435,15 +455,26 @@ const search = async (_: unknown, filter: string, value: string) => {
   const albums =
     Array.isArray(jsonData.albums) &&
     jsonData.albums.length > 0 &&
-    (filter === 'albums' || filter === 'all')
+    (filter === 'Albums' || filter === 'All')
       ? jsonData.albums.filter((data: Album) =>
           new RegExp(value, 'gim').test(data.title)
         )
       : [];
+
+  const playlists =
+    Array.isArray(playlistData) &&
+    playlistData.length > 0 &&
+    (filter === 'Playlists' || filter === 'All')
+      ? playlistData.filter((data: Playlist) =>
+          new RegExp(value, 'gim').test(data.name)
+        )
+      : [];
+
   return {
     songs: songs || [],
     artists: artists || [],
     albums: albums || [],
+    playlists: playlists || [],
   };
 };
 
@@ -501,90 +532,96 @@ export const dataUpdateEvent = (
 };
 
 const getArtistInfoFromNet = (
-  artistId: string,
-  artistName?: string
+  artistId: string
+  // artistName?: string
 ): Promise<ArtistInfoFromNet | undefined> => {
   return new Promise(async (resolve, reject) => {
-    if (artistName) {
-      return httpsGet.concat(
-        `https://api.deezer.com/search/artist?q=${artistName}`,
-        (err, _res, data) => {
-          if (err) return reject(err);
-          return resolve(JSON.parse(data.toString('utf-8')));
-        }
-      );
-    } else if (artistId && artistId !== '') {
-      const data = await getData();
-      if (data && data.artists && data.artists.length > 0) {
-        const { artists } = data;
+    const data = await getData();
+    if (data && data.artists) {
+      const { artists } = data;
+      if (Array.isArray(artists) && artists.length > 0) {
         for (let x = 0; x < artists.length; x += 1) {
-          const artist = artists[x];
-          if (artist.artistId === artistId) {
-            return httpsGet.concat(
-              `https://api.deezer.com/search/artist?q=${encodeURI(
-                artist.name
-              )}`,
-              async (err, _res, res) => {
-                if (err) {
-                  logger(err);
-                  return reject(undefined);
-                }
-                const arr = JSON.parse(res.toString('utf-8')) as {
-                  data: ArtistInfoFromNet[];
+          if (artists[x].artistId === artistId) {
+            const artist = artists[x];
+            const artistArtworks =
+              artist.onlineArtworkPaths ??
+              (await getArtistInfoFromDeezer(artist.name).then((res) => {
+                return {
+                  picture_small: res[0].picture_small,
+                  picture_medium: res[0].picture_medium,
                 };
-                const mostRelevantResult = arr.data[0];
-
-                nodeVibrant
-                  .from(mostRelevantResult.picture_medium)
-                  .getPalette()
-                  .then((palette) => {
-                    // console.log(palette);
-                    const res = arr.data[0];
-                    httpsGet.concat(
-                      `http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=${artist.name}&api_key=0aac0c7edaf4797bcc63bd8688b43b30&format=json`,
-                      (err, _res, data) => {
-                        if (err)
-                          return resolve({
-                            ...res,
-                            artistPalette:
-                              palette as unknown as NodeVibrantPalette,
-                          });
-                        const response = JSON.parse(
-                          data.toString('utf-8')
-                        ) as LastFMArtistDataApi;
-                        if (response.error)
-                          return resolve({
-                            ...res,
-                            artistPalette:
-                              palette as unknown as NodeVibrantPalette,
-                          });
-                        else {
-                          const artistBio = response.artist.bio.summary;
-                          resolve({
-                            ...res,
-                            artistPalette:
-                              palette as unknown as NodeVibrantPalette,
-                            artistBio,
-                          });
-                        }
-                      }
-                    );
-                  });
+              }));
+            const artistInfo = await getArtistInfoFromLastFM(artist.name);
+            if (artistArtworks && artistInfo) {
+              const artistPalette = (await nodeVibrant
+                .from(artistArtworks.picture_medium)
+                .getPalette()) as unknown as NodeVibrantPalette;
+              if (!artist.onlineArtworkPaths) {
                 artists[x].onlineArtworkPaths = {
-                  picture_medium: mostRelevantResult.picture_medium,
-                  picture_small: mostRelevantResult.picture_small,
+                  picture_medium: artistArtworks.picture_medium,
+                  picture_small: artistArtworks.picture_small,
                 };
                 await setData({ ...data, artists }).catch((err) => reject(err));
               }
-            );
+              return resolve({
+                artistArtworks,
+                artistBio: artistInfo.artist.bio.summary,
+                artistPalette,
+              } as ArtistInfoFromNet);
+            }
           }
         }
-      }
-    } else return resolve(undefined);
+        return reject(`no artists found with the given name ${artistId}`);
+      } else reject('no artists found.');
+    } else reject('no data found.');
   });
 };
 
-const getArtistData = async (artistIdOrName = '*') => {
+const getArtistInfoFromDeezer = (
+  artistName: string
+): Promise<ArtistInfoFromDeezer[]> => {
+  return new Promise((resolve, reject) => {
+    httpsGet.concat(
+      `https://api.deezer.com/search/artist?q=${artistName}`,
+      (err, _res, data) => {
+        if (err) return reject(err);
+        try {
+          const json = JSON.parse(
+            data.toString('utf-8')
+          ) as ArtistInfoDeezerApi;
+          return resolve(json.data);
+        } catch (error) {
+          return reject(error);
+        }
+      }
+    );
+  });
+};
+
+const getArtistInfoFromLastFM = (
+  artistName: string
+): Promise<LastFMArtistDataApi> => {
+  return new Promise((resolve, reject) => {
+    httpsGet.concat(
+      `http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=${artistName}&api_key=0aac0c7edaf4797bcc63bd8688b43b30&format=json`,
+      (err, _res, data) => {
+        if (err) return reject(err);
+        const response = JSON.parse(
+          data.toString('utf-8')
+        ) as LastFMArtistDataApi;
+        if (response.error)
+          return reject(
+            `An error occurred when fetching data. Error code : ${response.error}`
+          );
+        return resolve(response);
+      }
+    );
+  });
+};
+
+const getArtistData = async (
+  artistIdOrName = '*'
+): Promise<Artist | Artist[] | undefined> => {
   if (artistIdOrName) {
     const data = await getData();
     if (data && data.artists) {
@@ -919,4 +956,26 @@ const resetApp = async () => {
   } finally {
     mainWindow.webContents.reload();
   }
+};
+
+const incrementNoOfSongListens = (songId: string) => {
+  return new Promise(async (resolve, reject) => {
+    const data = await getData().catch((err) => reject(err));
+    if (data && data.songs) {
+      for (let x = 0; x < data.songs.length; x += 1) {
+        if (data.songs[x].songId === songId) {
+          data.songs[x].listeningRate.allTime += 1;
+          data.songs[x].listeningRate.monthly.months[
+            new Date().getMonth()
+          ] += 1;
+          await setData(data).then(() => {
+            console.log(`song listens incremented on '${data.songs[x].title}'`);
+            resolve(true);
+          });
+        }
+      }
+      return reject(`no song with id ${songId}`);
+    }
+    return reject('data or songData of unknown type.');
+  });
 };

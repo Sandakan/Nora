@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-restricted-syntax */
@@ -13,10 +14,17 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import { calculateTime } from 'renderer/utils/calculateTime';
 import DefaultArtistCover from '../../../../assets/images/default_artist_cover.png';
 import { Album } from '../AlbumsPage/Album';
-import { Song } from '../SongsPage/song';
+import { Song } from '../SongsPage/Song';
+import Button from '../Button';
 
 export default () => {
-  const { currentlyActivePage } = useContext(AppContext);
+  const {
+    currentlyActivePage,
+    queue,
+    createQueue,
+    updateQueueData,
+    updateNotificationPanelData,
+  } = useContext(AppContext);
   const [artistData, setArtistData] = React.useState({} as ArtistInfo);
   const [albums, setAlbums] = React.useState([] as Album[]);
   const [songs, setSongs] = React.useState([] as SongData[]);
@@ -36,17 +44,21 @@ export default () => {
   React.useEffect(() => {
     if (artistData.artistId)
       if (navigator.onLine)
-        window.api.getArtistArtworks(artistData.artistId).then((x) => {
-          if (x)
-            setArtistData((prevData) => {
-              return {
-                ...prevData,
-                artworkPath: x.picture_big || prevData.artworkPath,
-                artistPalette: x.artistPalette || prevData.artistPalette,
-                artistBio: x.artistBio || prevData.artistBio,
-              };
-            });
-        });
+        window.api
+          .getArtistArtworks(artistData.artistId)
+          .then((x) => {
+            if (x)
+              setArtistData((prevData) => {
+                return {
+                  ...prevData,
+                  artworkPath:
+                    x.artistArtworks?.picture_medium || prevData.artworkPath,
+                  artistPalette: x.artistPalette || prevData.artistPalette,
+                  artistBio: x.artistBio || prevData.artistBio,
+                };
+              });
+          })
+          .catch((err) => console.log(err));
   }, [artistData.artistId]);
 
   React.useEffect(() => {
@@ -104,6 +116,7 @@ export default () => {
             onClick={() => window.api.openInBrowser(link)}
             role="link"
             tabIndex={0}
+            title={link}
           >
             Read more...
           </span>
@@ -122,7 +135,6 @@ export default () => {
         }
       }
     >
-      {/* <div className="title-container">{artistData.name}</div> */}
       <div className="artist-img-and-info-container">
         <div className="artist-img-container">
           <img src={artistData.artworkPath} alt="Album Cover" />
@@ -154,6 +166,54 @@ export default () => {
           {songs.length > 0 && (
             <div className="artist-total-songs-duration">
               {calculateTotalTime()}
+            </div>
+          )}
+          {artistData.songs && artistData.songs.length > 0 && (
+            <div className="artist-buttons">
+              <Button
+                label="Play All"
+                iconName="play_arrow"
+                clickHandler={() =>
+                  createQueue(
+                    artistData.songs.map((song) => song.songId),
+                    'songs',
+                    undefined,
+                    true
+                  )
+                }
+              />
+              <Button
+                label="Shuffle and Play"
+                iconName="shuffle"
+                clickHandler={() =>
+                  createQueue(
+                    artistData.songs
+                      .map((song) => song.songId)
+                      .sort(() => 0.5 - Math.random()),
+                    'songs',
+                    undefined,
+                    true
+                  )
+                }
+              />
+              <Button
+                label="Add to Queue"
+                iconName="add"
+                clickHandler={() => {
+                  updateQueueData(
+                    undefined,
+                    [...queue.queue, ...songs.map((song) => song.songId)],
+                    false
+                  );
+                  updateNotificationPanelData(
+                    5000,
+                    <span>
+                      Added {songs.length} song
+                      {songs.length === 1 ? '' : 's'} to the queue.
+                    </span>
+                  );
+                }}
+              />
             </div>
           )}
         </div>

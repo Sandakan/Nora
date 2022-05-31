@@ -9,8 +9,8 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import DefaultPlaylistCover from '../../../../assets/images/playlist_cover_default.png';
 
 interface PlaylistProp extends Playlist {
-  currentPlaylists: Playlist[];
-  updatePlaylists: (updatedPlaylists: Playlist[]) => void;
+  currentPlaylists?: Playlist[];
+  updatePlaylists?: (updatedPlaylists: Playlist[]) => void;
 }
 
 export const Playlist = (props: PlaylistProp) => {
@@ -65,12 +65,13 @@ export const Playlist = (props: PlaylistProp) => {
                           5000,
                           <span>{`Playlist '${props.name}' deleted.`}</span>
                         );
-                        props.updatePlaylists(
-                          props.currentPlaylists.filter(
-                            (playlist) =>
-                              playlist.playlistId !== props.playlistId
-                          )
-                        );
+                        if (props.currentPlaylists && props.updatePlaylists)
+                          props.updatePlaylists(
+                            props.currentPlaylists.filter(
+                              (playlist) =>
+                                playlist.playlistId !== props.playlistId
+                            )
+                          );
                       }
                       return undefined;
                     }),
@@ -113,4 +114,9 @@ export const Playlist = (props: PlaylistProp) => {
       </div>
     </div>
   );
+};
+
+Playlist.defaultProps = {
+  currentPlaylists: [],
+  updatePlaylists: () => true,
 };

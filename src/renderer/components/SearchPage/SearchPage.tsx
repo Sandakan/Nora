@@ -13,10 +13,13 @@ import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { Album } from '../AlbumsPage/Album';
 import { Artist } from '../ArtistPage/Artist';
-// import DeleteSongFromSystemConfrimPrompt from '../SongsPage/DeleteSongFromSystemConfrimPrompt';
-import { Song } from '../SongsPage/song';
+import { Song } from '../SongsPage/Song';
 import { MostRelevantResult } from './MostRelevantResult';
 import { ResultFilter } from './ResultFilter';
+import SearchSomethingImage from '../../../../assets/images/Flying kite_Monochromatic.svg';
+import NoResultsImage from '../../../../assets/images/Sad face_Monochromatic.svg';
+import Button from '../Button';
+import { Playlist } from '../PlaylistsPage/Playlist';
 
 export const SearchPage = () => {
   const {
@@ -29,8 +32,7 @@ export const SearchPage = () => {
     queue,
     updateQueueData,
     createQueue,
-    // changePromptMenuData,
-    // updateNotificationPanelData,
+    updateNotificationPanelData,
   } = useContext(AppContext);
   const [searchInput, setSearchInput] = React.useState(
     currentlyActivePage.data && currentlyActivePage.data.searchPage
@@ -41,6 +43,7 @@ export const SearchPage = () => {
     albums: [],
     artists: [],
     songs: [],
+    playlists: [],
   } as SearchResult);
   const [activeFilter, setActiveFilter] = React.useState(
     'All' as SearchFilters
@@ -50,6 +53,7 @@ export const SearchPage = () => {
   let songResults: any[] = [];
   let artistResults: any[] = [];
   let albumResults: any[] = [];
+  let playlistResults: any[] = [];
   const changeActiveFilter = (filterType: SearchFilters) =>
     setActiveFilter(filterType);
   const filters = filterTypes.map((filterType, index) => {
@@ -66,11 +70,11 @@ export const SearchPage = () => {
   React.useEffect(() => {
     if (searchInput !== '')
       window.api
-        .search(activeFilter.toLowerCase(), searchInput)
+        .search(activeFilter, searchInput)
         .then((results) => setSearchResults(results));
+    else
+      setSearchResults({ albums: [], artists: [], songs: [], playlists: [] });
   }, [searchInput, activeFilter]);
-
-  // console.log(searchResults);
 
   if (searchResults.songs.length > 0) {
     const firstResult = searchResults.songs[0];
@@ -81,14 +85,18 @@ export const SearchPage = () => {
         key={0}
         id={firstResult.songId}
         artworkPath={firstResult.artworkPath}
-        infoType1={firstResult.artists}
-        infoType2={firstResult.album}
+        infoType1={
+          firstResult.artists
+            ? firstResult.artists.map((artist) => artist.name).join(',')
+            : 'Unknown Artist'
+        }
+        infoType2={firstResult.album ? firstResult.album.name : 'Unknown Album'}
         playSong={playSong}
         updateContextMenuData={updateContextMenuData}
         contextMenuItems={[
           {
             label: 'Play',
-            handlerFunction: () => playSong(currentSongData.songId),
+            handlerFunction: () => playSong(firstResult.songId),
             iconName: 'play_arrow',
           },
           {
@@ -96,14 +104,44 @@ export const SearchPage = () => {
             iconName: 'shortcut',
             handlerFunction: () => {
               const newQueue = queue.queue.filter(
-                (songId) => songId !== currentSongData.songId
+                (songId) => songId !== firstResult.songId
               );
               newQueue.splice(
                 queue.queue.indexOf(currentSongData.songId) + 1 || 0,
-                1,
-                currentSongData.songId
+                0,
+                firstResult.songId
               );
               updateQueueData(undefined, newQueue);
+              updateNotificationPanelData(
+                5000,
+                <span>
+                  &apos;{firstResult.title}&apos; will be played next.
+                </span>,
+                <span className="material-icons-round">shortcut</span>
+              );
+            },
+          },
+          {
+            label: 'Add to queue',
+            iconName: 'queue',
+            handlerFunction: () => {
+              updateQueueData(
+                undefined,
+                [...queue.queue, firstResult.songId],
+                false
+              );
+              updateNotificationPanelData(
+                5000,
+                <span>Added 1 song to the queue.</span>,
+                <img
+                  src={`otoMusic://localFiles/${firstResult.artworkPath?.replace(
+                    '.webp',
+                    '-optimized.webp'
+                  )}`}
+                  alt="Song Artwork"
+                />
+                // <span className="material-icons-round icon">playlist_add</span>
+              );
             },
           },
           {
@@ -111,7 +149,7 @@ export const SearchPage = () => {
             class: 'reveal-file-explorer',
             iconName: 'folder_open',
             handlerFunction: () =>
-              window.api.revealSongInFileExplorer(currentSongData.songId),
+              window.api.revealSongInFileExplorer(firstResult.songId),
           },
           {
             label: 'Info',
@@ -119,39 +157,9 @@ export const SearchPage = () => {
             iconName: 'info_outline',
             handlerFunction: () =>
               changeCurrentActivePage('SongInfo', {
-                songInfo: { songId: currentSongData.songId },
+                songInfo: { songId: firstResult.songId },
               }),
           },
-          // {
-          //   label: 'Remove from Library',
-          //   iconName: 'remove_circle_outline',
-          //   handlerFunction: () =>
-          //     window.api
-          //       .removeSongFromLibrary(currentSongData.path)
-          //       .then(
-          //         (res) =>
-          //           res.success &&
-          //           updateNotificationPanelData(
-          //             5000,
-          //             <span>
-          //               &apos;{currentSongData.title}&apos; song removed from
-          //               the library.
-          //             </span>
-          //           )
-          //       ),
-          // },
-          // {
-          //   label: 'Delete from System',
-          //   iconName: 'delete',
-          //   handlerFunction: () =>
-          //     changePromptMenuData(
-          //       true,
-          //       <DeleteSongFromSystemConfrimPrompt
-          //         songPath={currentSongData.path}
-          //         title={currentSongData.title}
-          //       />
-          //     ),
-          // },
         ]}
         currentlyActivePage={currentlyActivePage}
         changeCurrentActivePage={changeCurrentActivePage}
@@ -263,12 +271,43 @@ export const SearchPage = () => {
         key={2}
         id={firstResult.albumId}
         artworkPath={firstResult.artworkPath}
-        infoType1={firstResult.artists}
+        infoType1={
+          firstResult.artists
+            ? firstResult.artists.map((artist) => artist.name).join(',')
+            : 'Unknown Artist'
+        }
         infoType2={`${firstResult.songs.length} song${
           firstResult.songs.length === 1 ? '' : 's'
         }`}
         updateContextMenuData={updateContextMenuData}
-        contextMenuItems={[]}
+        contextMenuItems={[
+          {
+            label: 'Play',
+            iconName: 'play_arrow',
+            handlerFunction: () =>
+              createQueue(
+                firstResult.songs.map((song) => song.songId),
+                'album',
+                firstResult.albumId,
+                true
+              ),
+          },
+          {
+            label: 'Add to queue',
+            iconName: 'queue',
+            handlerFunction: () => {
+              queue.queue.push(...firstResult.songs.map((song) => song.songId));
+              updateQueueData(undefined, queue.queue, false);
+              updateNotificationPanelData(
+                5000,
+                <span>
+                  Added {firstResult.songs.length} song
+                  {firstResult.songs.length === 1 ? '' : 's'} to the queue.
+                </span>
+              );
+            },
+          },
+        ]}
         currentlyActivePage={currentlyActivePage}
         changeCurrentActivePage={changeCurrentActivePage}
       />
@@ -276,7 +315,7 @@ export const SearchPage = () => {
 
     albumResults = searchResults.albums
       .map((album, index) => {
-        if (index < 3)
+        if (index < 4)
           return (
             <Album
               key={album.albumId}
@@ -291,6 +330,55 @@ export const SearchPage = () => {
         else return undefined;
       })
       .filter((album) => album !== undefined);
+  }
+
+  if (searchResults.playlists.length > 0) {
+    const firstResult = searchResults.playlists[0];
+    MostRelevantResults.push(
+      <MostRelevantResult
+        resultType="playlist"
+        title={firstResult.name}
+        key={2}
+        id={firstResult.playlistId}
+        artworkPath={firstResult.artworkPath}
+        infoType1={`${firstResult.songs.length} song${
+          firstResult.songs.length === 1 ? '' : 's'
+        }`}
+        updateContextMenuData={updateContextMenuData}
+        contextMenuItems={[
+          {
+            label: 'Play',
+            iconName: 'play_arrow',
+            handlerFunction: () =>
+              createQueue(
+                firstResult.songs,
+                'playlist',
+                firstResult.playlistId,
+                true
+              ),
+          },
+        ]}
+        currentlyActivePage={currentlyActivePage}
+        changeCurrentActivePage={changeCurrentActivePage}
+      />
+    );
+
+    playlistResults = searchResults.playlists
+      .map((playlist, index) => {
+        if (index < 4)
+          return (
+            <Playlist
+              key={index}
+              name={playlist.name}
+              playlistId={playlist.playlistId}
+              createdDate={playlist.createdDate}
+              songs={playlist.songs}
+              artworkPath={playlist.artworkPath}
+            />
+          );
+        return undefined;
+      })
+      .filter((x) => x !== undefined);
   }
 
   return (
@@ -331,7 +419,42 @@ export const SearchPage = () => {
             songResults.length > 0 && 'active'
           }`}
         >
-          <div className="title-container">Songs</div>
+          <div className="title-container">
+            <div className="container">
+              <div className="container">
+                Songs{' '}
+                <div className="other-stats-container">
+                  {searchResults.songs && searchResults.songs.length > 0 && (
+                    <span className="no-of-songs">
+                      {searchResults.songs.length} results
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="other-controls-container">
+              {searchResults.songs.length > 5 && (
+                <Button
+                  label="Show All"
+                  iconName="apps"
+                  className="show-all-btn"
+                  clickHandler={() =>
+                    currentlyActivePage.pageTitle === 'AllSearchResults' &&
+                    currentlyActivePage.data.allSearchResultsPage
+                      .searchQuery === searchInput
+                      ? changeCurrentActivePage('Home')
+                      : changeCurrentActivePage('AllSearchResults', {
+                          allSearchResultsPage: {
+                            searchQuery: searchInput,
+                            searchFilter: 'Songs' as SearchFilters,
+                            searchResults: searchResults.songs,
+                          },
+                        })
+                  }
+                />
+              )}
+            </div>
+          </div>
           <div className="songs-container">{songResults}</div>
         </div>
         <div
@@ -339,7 +462,40 @@ export const SearchPage = () => {
             artistResults.length > 0 && 'active'
           }`}
         >
-          <div className="title-container">Artists</div>
+          <div className="title-container">
+            <div className="container">
+              Artists{' '}
+              <div className="other-stats-container">
+                {searchResults.artists && searchResults.artists.length > 0 && (
+                  <span className="no-of-songs">
+                    {searchResults.artists.length} results
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="other-controls-container">
+              {searchResults.artists.length > 5 && (
+                <Button
+                  label="Show All"
+                  iconName="apps"
+                  className="show-all-btn"
+                  clickHandler={() =>
+                    currentlyActivePage.pageTitle === 'AllSearchResults' &&
+                    currentlyActivePage.data.allSearchResultsPage
+                      .searchQuery === searchInput
+                      ? changeCurrentActivePage('Home')
+                      : changeCurrentActivePage('AllSearchResults', {
+                          allSearchResultsPage: {
+                            searchQuery: searchInput,
+                            searchFilter: 'Artists' as SearchFilters,
+                            searchResults: searchResults.artists,
+                          },
+                        })
+                  }
+                />
+              )}
+            </div>
+          </div>
           <div className="artists-container">{artistResults}</div>
         </div>
         <div
@@ -347,21 +503,102 @@ export const SearchPage = () => {
             albumResults.length > 0 && 'active'
           }`}
         >
-          <div className="title-container">Albums</div>
+          <div className="title-container">
+            <div className="container">
+              Albums{' '}
+              <div className="other-stats-container">
+                {searchResults.albums && searchResults.albums.length > 0 && (
+                  <span className="no-of-songs">
+                    {searchResults.albums.length} results
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="other-controls-container">
+              {searchResults.albums.length > 4 && (
+                <Button
+                  label="Show All"
+                  iconName="apps"
+                  className="show-all-btn"
+                  clickHandler={() =>
+                    currentlyActivePage.pageTitle === 'AllSearchResults' &&
+                    currentlyActivePage.data.allSearchResultsPage
+                      .searchQuery === searchInput
+                      ? changeCurrentActivePage('Home')
+                      : changeCurrentActivePage('AllSearchResults', {
+                          allSearchResultsPage: {
+                            searchQuery: searchInput,
+                            searchFilter: 'Albums' as SearchFilters,
+                            searchResults: searchResults.albums,
+                          },
+                        })
+                  }
+                />
+              )}
+            </div>
+          </div>
           <div className="albums-container">{albumResults}</div>
+        </div>
+        <div
+          className={`secondary-container playlists-list-container ${
+            playlistResults.length > 0 && 'active'
+          }`}
+        >
+          <div className="title-container">
+            <div className="container">
+              Playlists{' '}
+              <div className="other-stats-container">
+                {searchResults.playlists &&
+                  searchResults.playlists.length > 0 && (
+                    <span className="no-of-songs">
+                      {searchResults.playlists.length} results
+                    </span>
+                  )}
+              </div>
+            </div>
+            <div className="other-controls-container">
+              {searchResults.playlists.length > 4 && (
+                <Button
+                  label="Show All"
+                  iconName="apps"
+                  className="show-all-btn"
+                  clickHandler={() =>
+                    currentlyActivePage.pageTitle === 'AllSearchResults' &&
+                    currentlyActivePage.data.allSearchResultsPage
+                      .searchQuery === searchInput
+                      ? changeCurrentActivePage('Home')
+                      : changeCurrentActivePage('AllSearchResults', {
+                          allSearchResultsPage: {
+                            searchQuery: searchInput,
+                            searchFilter: 'Albums' as SearchFilters,
+                            searchResults: searchResults.playlists,
+                          },
+                        })
+                  }
+                />
+              )}
+            </div>
+          </div>
+          <div className="playlists-container">{playlistResults}</div>
         </div>
         {searchResults.songs.length === 0 &&
           searchResults.artists.length === 0 &&
           searchResults.albums.length === 0 &&
+          searchResults.playlists.length === 0 &&
           searchInput !== '' && (
             <div className="no-search-results-container active">
+              <img src={NoResultsImage} alt="Flying kite" />
               <div>
-                We couldn't find any{' '}
-                {activeFilter === 'All' ? 'results' : activeFilter} related to
-                your search query. Please try again with different keywords.
+                Hmm... There&apos;s nothing that matches with what you look for.
               </div>
             </div>
           )}
+        {searchInput === '' && (
+          <div className="no-search-results-container active">
+            <img src={SearchSomethingImage} alt="Flying kite" />
+            <div>Why thinking... Search something...</div>
+          </div>
+        )}
       </div>
     </div>
   );

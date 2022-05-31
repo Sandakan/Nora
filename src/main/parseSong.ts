@@ -78,13 +78,15 @@ export const parseSong = (
       const songInfo: SongData = {
         title: songTitle,
         artists: metadata.common.artists
-          ? metadata.common.artists.length === 1
-            ? metadata.common.artists[0].split(',').map((x) => x.trim())
-            : metadata.common.artists
-          : [],
+          ? metadata.common.artists[0].split(',').map((x) => {
+              return { name: x.trim(), artistId: '' };
+            })
+          : undefined,
         duration: metadata.format.duration || 0,
         sampleRate: metadata.format.sampleRate,
-        album: metadata.common.album || 'Single',
+        album: metadata.common.album
+          ? { name: metadata.common.album, albumId: '' }
+          : undefined,
         albumArtist: metadata.common.albumartist || undefined,
         track: metadata.common.track,
         year: metadata.common.year,
@@ -154,6 +156,7 @@ export const parseSong = (
                 ],
               });
               songInfo.albumId = newAlbum.albumId;
+              if (songInfo.album) songInfo.album.albumId = newAlbum.albumId;
               relevantAlbums.push(newAlbum);
               return {
                 allAlbums,
@@ -178,9 +181,10 @@ export const parseSong = (
         const relevantArtists: Artist[] = [];
         if (Array.isArray(result)) {
           if (songInfo.artists && songInfo.artists.length > 0) {
-            for (const newArtist of songInfo.artists) {
-              if (isArtistAvailable(data.artists, newArtist)) {
-                let z = result.filter((val) => val.name === newArtist);
+            for (let x = 0; x < songInfo.artists.length; x += 1) {
+              const newArtist = songInfo.artists[x];
+              if (isArtistAvailable(data.artists, newArtist.name)) {
+                let z = result.filter((val) => val.name === newArtist.name);
                 z = z.map((artist) => {
                   artist.songs.push({
                     title: songInfo.title,
@@ -198,11 +202,11 @@ export const parseSong = (
                   return artist;
                 });
                 result = result
-                  .filter((val) => val.name !== newArtist)
+                  .filter((val) => val.name !== newArtist.name)
                   .concat(z);
               } else {
                 const artist = {
-                  name: newArtist,
+                  name: newArtist.name,
                   artistId: generateRandomId(),
                   songs: [
                     {
@@ -221,6 +225,7 @@ export const parseSong = (
                         ]
                       : [],
                 };
+                songInfo.artists[x].artistId = artist.artistId;
                 relevantArtists.push(artist);
                 result.push(artist);
               }
@@ -235,14 +240,14 @@ export const parseSong = (
       );
 
       data.songs.push(songInfo);
-      setData({
+      return setData({
         songs: data.songs,
         artists: allArtists,
         albums: allAlbums,
       })
         .then(() => {
           sendMessageToRenderer(`'${songTitle}' song added to the library.`);
-          resolve(songInfo);
+          return resolve(songInfo);
         })
         .catch((err) => reject(err));
     }

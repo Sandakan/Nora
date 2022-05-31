@@ -10,6 +10,8 @@ import { AppContext } from 'renderer/contexts/AppContext';
 // import { AppContext } from 'renderer/contexts/AppContext';
 import sortAlbums from 'renderer/utils/sortAlbums';
 import { Album } from './Album';
+import FetchingDataImage from '../../../../assets/images/Cocktail _Monochromatic.svg';
+import NoAlbumsImage from '../../../../assets/images/Easter bunny_Monochromatic.svg';
 
 interface AlbumsPageReducer {
   albums: Album[];
@@ -54,11 +56,18 @@ export const AlbumsPage = () => {
 
   React.useEffect(() => {
     window.api.getAlbumData('*').then((res) => {
-      if (res && Array.isArray(res))
-        dispatch({
-          type: 'ALBUM_DATA',
-          data: sortAlbums(res, content.sortingOrder),
-        });
+      if (res && Array.isArray(res)) {
+        if (res.length > 0)
+          dispatch({
+            type: 'ALBUM_DATA',
+            data: sortAlbums(res, content.sortingOrder),
+          });
+        else
+          dispatch({
+            type: 'ALBUM_DATA',
+            data: null,
+          });
+      }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -66,40 +75,68 @@ export const AlbumsPage = () => {
   return (
     <div className="main-container albums-list-container">
       <div className="title-container">
-        Albums
-        <select
-          name="sortingOrderDropdown"
-          id="sortingOrderDropdown"
-          onChange={(e) => {
-            updateCurrentlyActivePageData({
-              albumsPage: {
-                sortingOrder: e.currentTarget.value as ArtistSortTypes,
-              },
-            });
-            dispatch({ type: 'SORTING_ORDER', data: e.currentTarget.value });
-          }}
-        >
-          <option value="aToZ">A to Z</option>
-          <option value="ZToA">Z to A</option>
-          <option value="noOfSongsAscending">No. of Songs ( Ascending )</option>
-          <option value="noOfSongsDescending">
-            No. of Songs ( Descending )
-          </option>
-        </select>
+        <div className="container">
+          Albums{' '}
+          <div className="other-stats-container">
+            {content.albums && (
+              <span className="no-of-albums">{`${content.albums.length} album${
+                content.albums.length === 1 ? '' : 's'
+              }`}</span>
+            )}
+          </div>
+        </div>
+        <div className="other-controls-container">
+          <select
+            name="sortingOrderDropdown"
+            id="sortingOrderDropdown"
+            className="dropdown"
+            onChange={(e) => {
+              updateCurrentlyActivePageData({
+                albumsPage: {
+                  sortingOrder: e.currentTarget.value as ArtistSortTypes,
+                },
+              });
+              dispatch({ type: 'SORTING_ORDER', data: e.currentTarget.value });
+            }}
+          >
+            <option value="aToZ">A to Z</option>
+            <option value="ZToA">Z to A</option>
+            <option value="noOfSongsAscending">
+              No. of Songs ( Ascending )
+            </option>
+            <option value="noOfSongsDescending">
+              No. of Songs ( Descending )
+            </option>
+          </select>
+        </div>
       </div>
-      <div className="albums-container">
-        {content.albums.map((album) => (
-          <Album
-            key={album.albumId}
-            title={album.title}
-            artworkPath={album.artworkPath}
-            albumId={album.albumId}
-            artists={album.artists}
-            songs={album.songs}
-            year={album.year}
-          />
-        ))}
-      </div>
+      {content.albums && content.albums.length > 0 && (
+        <div className="albums-container">
+          {content.albums.map((album) => (
+            <Album
+              key={album.albumId}
+              title={album.title}
+              artworkPath={album.artworkPath}
+              albumId={album.albumId}
+              artists={album.artists}
+              songs={album.songs}
+              year={album.year}
+            />
+          ))}
+        </div>
+      )}
+      {content.albums === null && (
+        <div className="no-songs-container">
+          <img src={NoAlbumsImage} alt="No songs available." />
+          <div>Even the bunny can&apos;t find them. How can we ?</div>
+        </div>
+      )}
+      {content.albums && content.albums.length === 0 && (
+        <div className="no-songs-container">
+          <img src={FetchingDataImage} alt="No songs available." />
+          <div>We&apos;re already there...</div>
+        </div>
+      )}
     </div>
   );
 };

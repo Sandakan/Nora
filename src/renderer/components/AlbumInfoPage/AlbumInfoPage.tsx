@@ -1,3 +1,5 @@
+/* eslint-disable react/no-array-index-key */
+/* eslint-disable no-nested-ternary */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable no-restricted-syntax */
@@ -8,7 +10,8 @@
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { calculateTime } from 'renderer/utils/calculateTime';
-import { Song } from '../SongsPage/song';
+import Button from '../Button';
+import { Song } from '../SongsPage/Song';
 
 interface AlbumContentReducer {
   albumData: Album;
@@ -38,8 +41,14 @@ const reducer = (
 };
 
 export default () => {
-  const { currentlyActivePage, changeCurrentActivePage } =
-    useContext(AppContext);
+  const {
+    currentlyActivePage,
+    changeCurrentActivePage,
+    createQueue,
+    queue,
+    updateQueueData,
+    updateNotificationPanelData,
+  } = useContext(AppContext);
 
   const [albumContent, dispatch] = React.useReducer(reducer, {
     albumData: {} as Album,
@@ -120,6 +129,7 @@ export default () => {
           )}{' '}
         </div>
         {albumContent.albumData.title &&
+          albumContent.albumData.artists &&
           albumContent.albumData.artists.length > 0 &&
           albumContent.albumData.songs.length > 0 && (
             <div className="album-info-container">
@@ -128,20 +138,24 @@ export default () => {
                 {albumContent.albumData.artists.map((artist, index) => (
                   <span
                     className="artist"
-                    title={artist}
+                    title={artist.name}
+                    key={index}
                     onClick={() =>
                       currentlyActivePage.pageTitle === 'ArtistInfo' &&
                       currentlyActivePage.data.artistName === artist
                         ? changeCurrentActivePage('Home')
                         : changeCurrentActivePage('ArtistInfo', {
-                            artistName: artist,
+                            artistName: artist.name,
+                            artistId: artist.artistId,
                           })
                     }
                   >
-                    {artist}
-                    {index === albumContent.albumData.artists.length - 1
-                      ? ''
-                      : ', '}
+                    {artist.name}
+                    {albumContent.albumData.artists
+                      ? index === albumContent.albumData.artists.length - 1
+                        ? ''
+                        : ', '
+                      : ''}
                   </span>
                 ))}
               </div>
@@ -157,6 +171,58 @@ export default () => {
               }`}</div>
               {albumContent.albumData.year && (
                 <div className="album-year">{albumContent.albumData.year}</div>
+              )}
+              {albumContent.songsData.length > 0 && (
+                <div className="album-buttons">
+                  <Button
+                    label="Play All"
+                    iconName="play_arrow"
+                    clickHandler={() =>
+                      createQueue(
+                        albumContent.songsData.map((song) => song.songId),
+                        'songs',
+                        undefined,
+                        true
+                      )
+                    }
+                  />
+                  <Button
+                    label="Shuffle and Play"
+                    iconName="shuffle"
+                    clickHandler={() =>
+                      createQueue(
+                        albumContent.songsData
+                          .map((song) => song.songId)
+                          .sort(() => 0.5 - Math.random()),
+                        'songs',
+                        undefined,
+                        true
+                      )
+                    }
+                  />
+                  <Button
+                    label="Add to Queue"
+                    iconName="add"
+                    clickHandler={() => {
+                      updateQueueData(
+                        undefined,
+                        [
+                          ...queue.queue,
+                          ...albumContent.songsData.map((song) => song.songId),
+                        ],
+                        false
+                      );
+                      updateNotificationPanelData(
+                        5000,
+                        <span>
+                          Added {albumContent.songsData.length} song
+                          {albumContent.songsData.length === 1 ? '' : 's'} to
+                          the queue.
+                        </span>
+                      );
+                    }}
+                  />
+                </div>
               )}
             </div>
           )}

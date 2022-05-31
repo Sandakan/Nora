@@ -9,13 +9,19 @@ interface LyricProp {
   lyric: string;
 }
 
+interface NoLyricsProp {
+  content: string;
+  artworkPath: string;
+}
+
 export const Lyric = (props: LyricProp) => {
   return <div className="lyrics-line">{props.lyric}</div>;
 };
 
-export const NoLyrics = () => (
+export const NoLyrics = (props: NoLyricsProp) => (
   <div className="no-lyrics-container">
-    We couldn't find any lyrics for your song.
+    <img src={props.artworkPath} alt="" />
+    {props.content}
   </div>
 );
 

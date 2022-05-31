@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable promise/always-return */
@@ -8,10 +9,18 @@ import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { calculateTime } from 'renderer/utils/calculateTime';
 import DefaultPlaylistCover from '../../../../assets/images/playlist_cover_default.png';
-import { Song } from '../SongsPage/song';
+import Button from '../Button';
+// import NoSongsImage from '../../../../assets/images/Beach_Monochromatic.svg';
+import { Song } from '../SongsPage/Song';
 
 export default () => {
-  const { currentlyActivePage } = useContext(AppContext);
+  const {
+    currentlyActivePage,
+    queue,
+    updateQueueData,
+    updateNotificationPanelData,
+    createQueue,
+  } = useContext(AppContext);
   const [playlistData, setPlaylistData] = React.useState({} as Playlist);
   const [playlistSongs, setPlaylistSongs] = React.useState([] as SongData[]);
 
@@ -81,17 +90,59 @@ export default () => {
             <div className="playlist-created-date">
               {`Created on ${new Date(playlistData.createdDate).toUTCString()}`}
             </div>
+            {playlistData.songs && playlistData.songs.length > 0 && (
+              <div className="artist-buttons">
+                <Button
+                  label="Play All"
+                  iconName="play_arrow"
+                  clickHandler={() =>
+                    createQueue(playlistData.songs, 'songs', undefined, true)
+                  }
+                />
+                <Button
+                  label="Shuffle and Play"
+                  iconName="shuffle"
+                  clickHandler={() =>
+                    createQueue(
+                      playlistData.songs.sort(() => 0.5 - Math.random()),
+                      'songs',
+                      undefined,
+                      true
+                    )
+                  }
+                />
+                <Button
+                  label="Add to Queue"
+                  iconName="add"
+                  clickHandler={() => {
+                    updateQueueData(
+                      undefined,
+                      [...queue.queue, ...playlistData.songs],
+                      false
+                    );
+                    updateNotificationPanelData(
+                      5000,
+                      <span>
+                        Added {playlistData.songs.length} song
+                        {playlistData.songs.length === 1 ? '' : 's'} to the
+                        queue.
+                      </span>
+                    );
+                  }}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}
-      <div className="songs-list-container">
-        <div className="title-container">Songs</div>
-        {playlistSongs.length > 0 && (
+      {playlistSongs.length > 0 && (
+        <div className="songs-list-container">
+          <div className="title-container">Songs</div>
           <div className="songs-container">
-            {playlistSongs.map((song) => {
+            {playlistSongs.map((song, index) => {
               return (
                 <Song
-                  key={song.songId}
+                  key={index}
                   title={song.title}
                   artists={song.artists}
                   duration={song.duration}
@@ -102,8 +153,14 @@ export default () => {
               );
             })}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+      {playlistSongs.length === 0 && (
+        <div className="no-songs-container">
+          {/* <img src={NoSongsImage} alt="" /> */}
+          This playlist is empty.
+        </div>
+      )}
     </div>
   );
 };

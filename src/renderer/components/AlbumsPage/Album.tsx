@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -16,6 +17,7 @@ export const Album = (props: Album) => {
     updateContextMenuData,
     queue,
     updateQueueData,
+    updateNotificationPanelData,
   } = React.useContext(AppContext);
 
   const playAlbum = () => {
@@ -51,14 +53,15 @@ export const Album = (props: Album) => {
               label: 'Add to queue',
               iconName: 'queue',
               handlerFunction: () => {
-                // const newQueue = queue.queue.filter(
-                //   (songId) =>
-                //     !(props.songs.map((song) => song.songId) || []).some(
-                //       (id) => id === songId
-                //     )
-                // );
                 queue.queue.push(...props.songs.map((song) => song.songId));
                 updateQueueData(undefined, queue.queue, false);
+                updateNotificationPanelData(
+                  5000,
+                  <span>
+                    Added {props.songs.length} song
+                    {props.songs.length === 1 ? '' : 's'} to the queue.
+                  </span>
+                );
               },
             },
             {
@@ -101,30 +104,38 @@ export const Album = (props: Album) => {
         >
           {props.title}
         </div>
-        <div className="album-artists" title={props.artists.join(', ')}>
-          {props.artists.map((artist, index) => {
-            return (
-              <span
-                className="artist"
-                key={artist}
-                onClick={() =>
-                  currentlyActivePage.pageTitle === 'ArtistInfo' &&
-                  currentlyActivePage.data.artistName === artist
-                    ? changeCurrentActivePage('Home')
-                    : changeCurrentActivePage('ArtistInfo', {
-                        artistName: artist,
-                      })
-                }
-              >
-                {artist}
-                {props.artists.length === 0 ||
-                props.artists.length - 1 === index
-                  ? ''
-                  : ', '}
-              </span>
-            );
-          })}
-        </div>
+        {props.artists && (
+          <div
+            className="album-artists"
+            title={props.artists.map((artist) => artist.name).join(', ')}
+          >
+            {props.artists.map((artist, index) => {
+              return (
+                <span
+                  className="artist"
+                  key={index}
+                  onClick={() =>
+                    currentlyActivePage.pageTitle === 'ArtistInfo' &&
+                    currentlyActivePage.data.artistName === artist
+                      ? changeCurrentActivePage('Home')
+                      : changeCurrentActivePage('ArtistInfo', {
+                          artistName: artist.name,
+                          artistId: artist.artistId,
+                        })
+                  }
+                >
+                  {artist.name}
+                  {props.artists
+                    ? props.artists.length === 0 ||
+                      props.artists.length - 1 === index
+                      ? ''
+                      : ', '
+                    : ''}
+                </span>
+              );
+            })}
+          </div>
+        )}
         <div className="album-no-of-songs">{`${props.songs.length} song${
           props.songs.length === 1 ? '' : 's'
         }`}</div>

@@ -13,8 +13,11 @@
 import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import sortSongs from 'renderer/utils/sortSongs';
-import { Song } from './song';
+import { Song } from './Song';
 import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
+import NoSongsImage from '../../../../assets/images/Empty Inbox _Monochromatic.svg';
+import DataFetchingImage from '../../../../assets/images/Road trip_Monochromatic.svg';
+import Button from '../Button';
 
 interface SongPageReducer {
   songsData: AudioInfo[];
@@ -62,27 +65,55 @@ export const SongsPage = () => {
       .checkForSongs()
       .then((audioInfoArray) => {
         if (audioInfoArray)
-          return dispatch({
-            type: 'SONGS_DATA',
-            data: sortSongs(audioInfoArray, content.sortingOrder),
-          });
+          return audioInfoArray.length === 0
+            ? dispatch({
+                type: 'SONGS_DATA',
+                data: null,
+              })
+            : dispatch({
+                type: 'SONGS_DATA',
+                data: sortSongs(audioInfoArray, content.sortingOrder),
+              });
       })
       .catch((err) => console.log(err));
   }, []);
 
-  const songs = content.songsData.map((song) => {
-    return (
-      <Song
-        key={song.songId}
-        title={song.title}
-        artworkPath={song.artworkPath || DefaultSongCover}
-        duration={song.duration}
-        songId={song.songId}
-        artists={song.artists}
-        path={song.path}
-      />
-    );
-  });
+  const addNewSongs = () => {
+    window.api
+      .addMusicFolder()
+      .then((songs) => {
+        const relevantSongsData: AudioInfo[] = songs.map((song) => {
+          return {
+            title: song.title,
+            songId: song.songId,
+            artists: song.artists,
+            duration: song.duration,
+            palette: song.palette,
+            path: song.path,
+            artworkPath: song.artworkPath,
+            addedDate: song.addedDate,
+          };
+        });
+        dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
+      })
+      .catch((err) => window.api.sendLogs(err));
+  };
+
+  const songs = content.songsData
+    ? content.songsData.map((song) => {
+        return (
+          <Song
+            key={song.songId}
+            title={song.title}
+            artworkPath={song.artworkPath || DefaultSongCover}
+            duration={song.duration}
+            songId={song.songId}
+            artists={song.artists}
+            path={song.path}
+          />
+        );
+      })
+    : undefined;
 
   return (
     <div className="main-container songs-list-container">
@@ -90,13 +121,18 @@ export const SongsPage = () => {
         <div className="container">
           Songs{' '}
           <div className="other-stats-container">
-            {songs.length > 0 && (
+            {songs && songs.length > 0 && (
               <span className="no-of-songs">{songs.length} songs</span>
             )}
-            <button
-              type="button"
+          </div>
+        </div>
+        <div className="other-controls-container">
+          {songs && songs.length > 0 && (
+            <Button
+              label="Play All"
               className="play-all-btn"
-              onClick={() =>
+              iconName="play_arrow"
+              clickHandler={() =>
                 createQueue(
                   content.songsData.map((song) => song.songId),
                   'songs',
@@ -104,36 +140,57 @@ export const SongsPage = () => {
                   true
                 )
               }
-            >
-              <span className="material-icons-round icon">play_arrow</span> Play
-              All
-            </button>
-          </div>
+            />
+          )}
+          <select
+            name="sortingOrderDropdown"
+            id="sortingOrderDropdown"
+            className="dropdown"
+            value={content.sortingOrder}
+            onChange={(e) => {
+              updateCurrentlyActivePageData({
+                songsPage: {
+                  sortingOrder: e.currentTarget.value as ArtistSortTypes,
+                },
+              });
+              dispatch({ type: 'SORTING_ORDER', data: e.currentTarget.value });
+            }}
+          >
+            <option value="aToZ">A to Z</option>
+            <option value="zToA">Z to A</option>
+            <option value="dateAddedAscending">Date added ( Ascending )</option>
+            <option value="dateAddedDescending">
+              Date added ( Descending )
+            </option>
+            <option value="artistNameAscending">Artist ( Ascending )</option>
+            <option value="artistNameDescending">Artist ( Descending )</option>
+            {/* <option value="albumNameAscending">Album ( Ascending )</option>
+            <option value="albumNameDescending">Album ( Descending )</option> */}
+          </select>
         </div>
-        <select
-          name="sortingOrderDropdown"
-          id="sortingOrderDropdown"
-          value={content.sortingOrder}
-          onChange={(e) => {
-            updateCurrentlyActivePageData({
-              songsPage: {
-                sortingOrder: e.currentTarget.value as ArtistSortTypes,
-              },
-            });
-            dispatch({ type: 'SORTING_ORDER', data: e.currentTarget.value });
-          }}
-        >
-          <option value="aToZ">A to Z</option>
-          <option value="zToA">Z to A</option>
-          <option value="dateAddedAscending">Date added ( Ascending )</option>
-          <option value="dateAddedDescending">Date added ( Descending )</option>
-          <option value="artistNameAscending">Artist ( Ascending )</option>
-          <option value="artistNameDescending">Artist ( Descending )</option>
-          {/* <option value="albumNameAscending">Album ( Ascending )</option>
-          <option value="albumNameDescending">Album ( Descending )</option> */}
-        </select>
       </div>
-      <div className="songs-container">{songs}</div>
+      {songs && songs.length > 0 && (
+        <div className="songs-container">{songs}</div>
+      )}
+      {content.songsData === null && (
+        <div className="no-songs-container">
+          <img src={NoSongsImage} alt="No songs available." />
+          <span>
+            What&apos;s a world without music. So let&apos;s find them...
+          </span>
+          <button type="button" id="add-new-song-folder" onClick={addNewSongs}>
+            Add Folder
+          </button>
+        </div>
+      )}
+      {content.songsData && content.songsData.length === 0 && (
+        <div className="no-songs-container">
+          <img src={DataFetchingImage} alt="No songs available." />
+          <span>
+            Like road trips? Just asking. It wouldn&apos;t take that long...
+          </span>
+        </div>
+      )}
     </div>
   );
 };

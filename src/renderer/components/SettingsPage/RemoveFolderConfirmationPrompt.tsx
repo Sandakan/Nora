@@ -20,9 +20,7 @@ export default (props: { folderName: string; absolutePath: string }) => {
         type="button"
         className="remove-folder-confirm-btn danger-btn"
         disabled={false}
-        onClick={(e) => {
-          // e.currentTarget.disabled = true;
-          // e.currentTarget.value = 'REMOVING...';
+        onClick={() => {
           window.api
             .removeAMusicFolder(absolutePath)
             .then((res) => {
@@ -33,11 +31,7 @@ export default (props: { folderName: string; absolutePath: string }) => {
                 );
               return changePromptMenuData(false);
             })
-            .catch((err) => {
-              console.log(err);
-              // e.currentTarget.disabled = false;
-              // e.currentTarget.value = 'Delete Folder';
-            });
+            .catch((err) => console.log(err));
         }}
       >
         Delete Folder

@@ -4,8 +4,6 @@
 /* eslint-disable react/destructuring-assignment */
 // import react from 'react';
 
-import { spawn } from 'child_process';
-
 interface ContextMenuItemProp {
   label: string;
   class?: string;

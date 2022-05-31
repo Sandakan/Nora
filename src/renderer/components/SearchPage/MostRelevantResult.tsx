@@ -10,11 +10,11 @@
 // import React from 'react';
 
 interface MostRelevantResultProp {
-  resultType: 'artist' | 'song' | 'album';
+  resultType: 'artist' | 'song' | 'album' | 'playlist';
   title: string;
   id: string;
-  infoType1?: any;
-  infoType2?: any;
+  infoType1?: string;
+  infoType2?: string;
   artworkPath?: string;
   onlineArtworkPath?: string;
   playSong?: (songId: string) => void;
