@@ -137,7 +137,7 @@
     "@typescript-eslint/parser": "^5.26.0",
     "autoprefixer": "^10.4.7",
     "browserslist-config-erb": "^0.0.3",
-    "chalk": "^4.1.2",
+    "chalk": "^5.0.1",
     "concurrently": "^7.1.0",
     "core-js": "^3.22.5",
     "cross-env": "^7.0.3",
