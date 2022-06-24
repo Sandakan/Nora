@@ -11,16 +11,14 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
-import React, { useContext } from 'react';
-import sortSongs from 'renderer/utils/sortSongs';
-import { AppContext } from 'renderer/contexts/AppContext';
+import React from 'react';
+// import { AppContext } from 'renderer/contexts/AppContext';
 import { SongCard } from '../SongsPage/SongCard';
-import ErrorPrompt from '../ErrorPrompt';
 import { Artist } from '../ArtistPage/Artist';
 import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
 import NoSongsImage from '../../../../assets/images/Empty Inbox _Monochromatic.svg';
 import DataFetchingImage from '../../../../assets/images/Umbrella_Monochromatic.svg';
-import ResetAppConfirmationPrompt from './ResetAppConfirmationPrompt';
+// import ResetAppConfirmationPrompt from './ResetAppConfirmationPrompt';
 
 interface HomePageReducer {
   songsData: (AudioInfo | null)[];
@@ -59,11 +57,11 @@ const reducer = (
 };
 
 export const HomePage = () => {
-  const {
-    updateContextMenuData,
-    updateNotificationPanelData,
-    changePromptMenuData,
-  } = useContext(AppContext);
+  // const {
+  //   updateContextMenuData,
+  //   changePromptMenuData,
+  //   updateNotificationPanelData,
+  // } = useContext(AppContext);
 
   const [content, dispatch] = React.useReducer(reducer, {
     songsData: [],
@@ -71,46 +69,71 @@ export const HomePage = () => {
     recentSongArtists: [],
   });
 
-  React.useEffect(() => {
-    window.api.checkForSongs().then((audioData) => {
-      if (!audioData || audioData.length === 0)
+  const fetchAllSongs = () => {
+    window.api.getAllSongs('dateAddedAscending', 1, 5).then((audioData) => {
+      if (!audioData || audioData.data.length === 0)
         return dispatch({ type: 'SONGS_DATA', data: [null] });
       else {
         dispatch({
           type: 'SONGS_DATA',
-          data: sortSongs(audioData, 'dateAddedAscending').slice(0, 5),
+          data: audioData.data,
         });
         return undefined;
       }
     });
-  }, []);
+  };
 
-  React.useEffect(() => {
+  const fetchUserData = () => {
     window.api.getUserData().then((res) => {
       if (!res) return undefined;
       dispatch({
         type: 'RECENTLY_PLAYED_SONGS_DATA',
-        data: res.recentlyPlayedSongs.slice(0, 4),
+        data: res.recentlyPlayedSongs,
       });
       return undefined;
     });
-  }, []);
+  };
 
-  React.useEffect(() => {
+  const fetchRecentArtistsData = React.useCallback(() => {
     if (content.recentlyPlayedSongsData.length > 0) {
-      window.api.getArtistData('*').then((res) => {
-        if (res && Array.isArray(res))
-          dispatch({
-            type: 'RECENT_SONGS_ARTISTS',
-            data: res.filter((x) =>
-              content.recentlyPlayedSongsData.some((y) =>
-                y.artistsId ? y.artistsId.some((z) => z === x.artistId) : false
-              )
-            ),
-          });
-      });
+      window.api
+        .getArtistData(
+          content.recentlyPlayedSongsData
+            .map((song) =>
+              song.artists
+                ? [...new Set(song.artists.map((artist) => artist.artistId))]
+                : []
+            )
+            .flat()
+            .filter((_, index) => index < 5)
+        )
+        .then((res) => {
+          if (res && Array.isArray(res))
+            dispatch({
+              type: 'RECENT_SONGS_ARTISTS',
+              data: res,
+            });
+        });
     }
   }, [content.recentlyPlayedSongsData]);
+
+  React.useEffect(() => {
+    fetchUserData();
+    fetchAllSongs();
+    window.api.dataUpdateEvent((_, dataType) => {
+      if (dataType === 'userData/recentlyPlayedSongs') fetchUserData();
+      if (
+        dataType === 'songs' ||
+        dataType === 'songs/deletedSong' ||
+        dataType === 'songs/newSong'
+      )
+        fetchAllSongs();
+      if (dataType === 'artists/artworks') fetchRecentArtistsData();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  React.useEffect(fetchRecentArtistsData, [fetchRecentArtistsData]);
 
   const addNewSongs = () => {
     dispatch({ type: 'SONGS_DATA', data: [] });
@@ -137,10 +160,10 @@ export const HomePage = () => {
 
   const recentlyPlayedSongs = content.recentlyPlayedSongsData
     .filter((_, index) => index < 3)
-    .map((song) => {
+    .map((song, index) => {
       return (
         <SongCard
-          key={song.songId}
+          key={`${song.songId}-${index}`}
           title={song.title}
           artworkPath={song.artworkPath || DefaultSongCover}
           path={song.path}
@@ -152,16 +175,15 @@ export const HomePage = () => {
       );
     });
 
-  // TODO - THIS HAS ALL THE ARTISTS DATA WHICH ALL OF THEM ARE NOT REQUIRED HERE
   const recentlyPlayedSongArtists =
     content.recentlyPlayedSongsData.length > 0
       ? content.recentSongArtists
-          .map((val) => {
+          .map((val, index) => {
             if (val)
               return (
                 <Artist
                   name={val.name}
-                  key={val.artistId}
+                  key={`${val.artistId}-${index}`}
                   artworkPath={val.artworkPath}
                   artistId={val.artistId}
                   songIds={val.songs.map((song) => song.songId)}
@@ -176,68 +198,39 @@ export const HomePage = () => {
   return (
     <div
       className="main-container home-page"
-      onContextMenu={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        updateContextMenuData(
-          true,
-          [
-            {
-              label: 'Resync Songs',
-              iconName: 'sync',
-              handlerFunction: () =>
-                window.api
-                  .resyncSongsLibrary()
-                  .then(() =>
-                    updateNotificationPanelData(
-                      5000,
-                      <span>Songs Library updated successfully.</span>
-                    )
-                  )
-                  .catch(() => {
-                    updateNotificationPanelData(
-                      5000,
-                      <span>Resyncing Songs Library failed.</span>
-                    );
-                  }),
-            },
-            {
-              label: 'Reset App',
-              iconName: 'auto_mode',
-              handlerFunction: () =>
-                changePromptMenuData(
-                  true,
-                  <ResetAppConfirmationPrompt />,
-                  'confirm-app-reset'
-                ),
-            },
-            {
-              label: 'Alert Error',
-              iconName: 'report',
-              handlerFunction: () =>
-                changePromptMenuData(
-                  true,
-                  <ErrorPrompt isFatal />,
-                  'error-alert-prompt'
-                ),
-            },
-          ],
-          e.pageX,
-          e.pageY
-        );
-      }}
+      // onContextMenu={(e) => {
+      //   e.preventDefault();
+      //   e.stopPropagation();
+      //   updateContextMenuData(
+      //     true,
+      //     [
+      //       {
+      //         label: 'Alert Error',
+      //         iconName: 'report',
+      //         handlerFunction: () =>
+      //           changePromptMenuData(
+      //             true,
+      //             <ErrorPrompt isFatal />,
+      //             'error-alert-prompt'
+      //           ),
+      //       },
+      //     ],
+      //     e.pageX,
+      //     e.pageY
+      //   );
+      // }}
     >
       {content.songsData.length > 0 && content.songsData[0] !== null && (
-        <div className="main-container recently-added-songs-container">
+        <div className="main-container recently-added-songs-container appear-from-bottom">
           <div className="title-container">Recently Added Songs</div>
           <div className="songs-container">
             {content.songsData
               .filter((_, index) => index < 3)
-              .map((song) => {
+              .map((song, index) => {
                 const songData = song as AudioInfo;
                 return (
                   <SongCard
-                    key={songData.songId}
+                    key={`${songData.songId}-${index}`}
                     title={songData.title}
                     artworkPath={songData.artworkPath || DefaultSongCover}
                     path={songData.path}
@@ -252,13 +245,13 @@ export const HomePage = () => {
         </div>
       )}
       {recentlyPlayedSongs.length > 0 && (
-        <div className="main-container recently-played-songs-container">
+        <div className="main-container recently-played-songs-container appear-from-bottom">
           <div className="title-container">Recently Played Songs</div>
           <div className="songs-container">{recentlyPlayedSongs}</div>
         </div>
       )}
       {recentlyPlayedSongArtists.length > 0 && (
-        <div className="main-container artists-list-container">
+        <div className="main-container artists-list-container appear-from-bottom">
           <div className="title-container">Recent Artists</div>
           <div className="artists-container">{recentlyPlayedSongArtists}</div>
         </div>

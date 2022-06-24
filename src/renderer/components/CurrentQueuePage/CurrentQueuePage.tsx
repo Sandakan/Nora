@@ -21,8 +21,12 @@ interface QueueInfo {
 }
 
 export default () => {
-  const { queue, updateQueueData, updateNotificationPanelData } =
-    useContext(AppContext);
+  const {
+    queue,
+    updateQueueData,
+    updateNotificationPanelData,
+    currentSongData,
+  } = useContext(AppContext);
   const [queuedSongs, setQueuedSongs] = React.useState([] as AudioInfo[]);
   const [queueInfo, setQueueInfo] = React.useState({
     artworkPath: DefaultSongCover,
@@ -30,11 +34,11 @@ export default () => {
   } as QueueInfo);
 
   React.useEffect(() => {
-    window.api.checkForSongs().then((res) => {
+    window.api.getAllSongs().then((res) => {
       if (res) {
         const x = queue.queue
           .map((songId) => {
-            return res.map((y) => {
+            return res.data.map((y) => {
               if (songId === y.songId) return y;
               return undefined;
             });
@@ -59,48 +63,48 @@ export default () => {
       }
       if (queue.queueId) {
         if (queue.queueType === 'artist') {
-          window.api.getArtistData(queue.queueId).then((res) => {
-            if (res && !Array.isArray(res)) {
+          window.api.getArtistData([queue.queueId]).then((res) => {
+            if (res && Array.isArray(res) && res[0]) {
               setQueueInfo((prevData) => {
                 return {
                   ...prevData,
-                  artworkPath: res.artworkPath
-                    ? `otomusic://localFiles/${res.artworkPath}`
+                  artworkPath: res[0].artworkPath
+                    ? `otomusic://localFiles/${res[0].artworkPath}`
                     : DefaultArtistCover,
-                  onlineArtworkPath: res.onlineArtworkPaths
-                    ? res.onlineArtworkPaths.picture_medium
+                  onlineArtworkPath: res[0].onlineArtworkPaths
+                    ? res[0].onlineArtworkPaths.picture_medium
                     : undefined,
-                  title: res.name,
+                  title: res[0].name,
                 };
               });
             }
           });
         }
         if (queue.queueType === 'album') {
-          window.api.getAlbumData(queue.queueId).then((res) => {
-            if (res && !Array.isArray(res)) {
+          window.api.getAlbumData([queue.queueId]).then((res) => {
+            if (res && res.length > 0 && res[0]) {
               setQueueInfo((prevData) => {
                 return {
                   ...prevData,
-                  artworkPath: res.artworkPath
-                    ? `otomusic://localFiles/${res.artworkPath}`
+                  artworkPath: res[0].artworkPath
+                    ? `otomusic://localFiles/${res[0].artworkPath}`
                     : DefaultAlbumCover,
-                  title: res.title,
+                  title: res[0].title,
                 };
               });
             }
           });
         }
         if (queue.queueType === 'playlist') {
-          window.api.getPlaylistData(queue.queueId).then((res) => {
-            if (res && !Array.isArray(res)) {
+          window.api.getPlaylistData([queue.queueId]).then((res) => {
+            if (res && res.length > 0 && res[0]) {
               setQueueInfo((prevData) => {
                 return {
                   ...prevData,
-                  artworkPath: res.artworkPath
-                    ? `otomusic://localFiles/${res.artworkPath}`
+                  artworkPath: res[0].artworkPath
+                    ? `otomusic://localFiles/${res[0].artworkPath}`
                     : DefaultPlaylistCover,
-                  title: res.name,
+                  title: res[0].name,
                 };
               });
             }
@@ -109,6 +113,22 @@ export default () => {
       }
     }
   }, [queue.queueId, queue.queueType]);
+
+  React.useLayoutEffect(() => {
+    setTimeout(() => {
+      const currentlyPlaying = document.querySelector(
+        `.current-queue-container .songs-container .${currentSongData.songId}`
+      );
+      if (currentlyPlaying) {
+        currentlyPlaying.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'center',
+        });
+      }
+    }, 500);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const queuedSongComponents = queuedSongs.map((queuedSong, index) => {
     return (

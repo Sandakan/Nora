@@ -18,6 +18,9 @@ import AlbumInfoPage from './AlbumInfoPage/AlbumInfoPage';
 import PlaylistsInfoPage from './PlaylistsInfoPage/PlaylistsInfoPage';
 import CurrentQueuePage from './CurrentQueuePage/CurrentQueuePage';
 import AllSearchResultsPage from './SearchPage/AllSearchResultsPage';
+import GenresPage from './GenresPage/GenresPage';
+import GenreInfoPage from './GenreInfoPage/GenreInfoPage';
+import SongTagsEditingPage from './SongTagsEditingPage/SongTagsEditingPage';
 
 export const Body = () => {
   const { currentlyActivePage } = useContext(AppContext);
@@ -29,6 +32,7 @@ export const Body = () => {
       {currentlyActivePage.pageTitle === 'Albums' && <AlbumsPage />}
       {currentlyActivePage.pageTitle === 'Playlists' && <PlaylistsPage />}
       {currentlyActivePage.pageTitle === 'Search' && <SearchPage />}
+      {currentlyActivePage.pageTitle === 'Genres' && <GenresPage />}
       {currentlyActivePage.pageTitle === 'AllSearchResults' && (
         <AllSearchResultsPage />
       )}
@@ -41,6 +45,10 @@ export const Body = () => {
         currentlyActivePage.data !== '' && <AlbumInfoPage />}
       {currentlyActivePage.pageTitle === 'PlaylistInfo' &&
         currentlyActivePage.data !== '' && <PlaylistsInfoPage />}
+      {currentlyActivePage.pageTitle === 'GenreInfo' && <GenreInfoPage />}
+      {currentlyActivePage.pageTitle === 'SongTagsEditor' && (
+        <SongTagsEditingPage />
+      )}
     </div>
   );
 };

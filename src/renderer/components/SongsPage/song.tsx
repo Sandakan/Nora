@@ -24,6 +24,7 @@ interface SongProp {
   duration: number;
   path: string;
   additionalContextMenuItems?: ContextMenuItem[];
+  index?: number;
 }
 
 export const Song = (props: SongProp) => {
@@ -102,6 +103,11 @@ export const Song = (props: SongProp) => {
       },
     },
     {
+      label: 'Hr',
+      isContextMenuItemSeperator: true,
+      handlerFunction: () => true,
+    },
+    {
       label: 'Reveal in File Explorer',
       class: 'reveal-file-explorer',
       iconName: 'folder_open',
@@ -115,6 +121,24 @@ export const Song = (props: SongProp) => {
         changeCurrentActivePage('SongInfo', {
           songInfo: { songId: props.songId },
         }),
+    },
+    {
+      label: 'Edit song tags',
+      class: 'edit',
+      iconName: 'edit',
+      handlerFunction: () =>
+        changeCurrentActivePage('SongTagsEditor', {
+          songTagsEditor: {
+            songId: props.songId,
+            songArtworkPath: props.artworkPath,
+            songPath: props.path,
+          },
+        }),
+    },
+    {
+      label: 'Hr',
+      isContextMenuItemSeperator: true,
+      handlerFunction: () => true,
     },
     {
       label: 'Remove from Library',
@@ -161,7 +185,9 @@ export const Song = (props: SongProp) => {
 
   return (
     <div
-      className={`song ${props.songId} ${isSongPlaying && 'playing'}`}
+      className={`song appear-from-bottom ${props.songId} ${
+        currentSongData.songId === props.songId && 'playing'
+      }`}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -169,16 +195,21 @@ export const Song = (props: SongProp) => {
       }}
     >
       <div className="song-cover-and-play-btn-container">
-        <div className="play-btn-container">
-          <span
-            className="material-icons-round icon"
-            onClick={handlePlayBtnClick}
-            style={isSongPlaying ? { color: `hsla(0,0%,100%,1)` } : {}}
-          >
-            {isSongPlaying ? 'pause_circle' : 'play_circle'}
-          </span>
-        </div>
+        {props.index !== undefined &&
+          userData &&
+          userData.preferences.songIndexing && (
+            <div className="song-index">{props.index}</div>
+          )}
         <div className="song-cover-container">
+          <div className="play-btn-container">
+            <span
+              className="material-icons-round icon"
+              onClick={handlePlayBtnClick}
+              style={isSongPlaying ? { color: `hsla(0,0%,100%,1)` } : {}}
+            >
+              {isSongPlaying ? 'pause_circle' : 'play_circle'}
+            </span>
+          </div>
           <img
             src={`otoMusic://localFiles/${props.artworkPath?.replace(
               '.webp',

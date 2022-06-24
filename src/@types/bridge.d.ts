@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as musicMetaData from 'music-metadata';
+import NodeID3 from 'node-id3';
 import { ReactElement } from 'react';
 import { api } from '../main/preload';
 
@@ -18,11 +19,12 @@ declare global {
     duration: number;
     artists?: { artistId: string; name: string }[];
     album?: { albumId: string; name: string };
+    genres?: { genreId: string; name: string }[];
     albumArtist?: string;
     format?: musicMetaData.IFormat;
     track: unknown;
     year?: number;
-    sampleRate: number | undefined;
+    sampleRate?: number;
     palette?: {
       DarkVibrant: {
         rgb: unknown;
@@ -41,8 +43,6 @@ declare global {
       name: string;
       path: string;
     };
-    albumId?: string;
-    artistsId?: string[];
     listeningRate: {
       allTime: number;
       monthly: {
@@ -126,13 +126,16 @@ declare global {
     };
     queue?: Queue;
     isShuffling: boolean;
-    isRepeating: boolean;
+    isRepeating: RepeatTypes;
     recentlyPlayedSongs: SongData[];
     musicFolders: MusicFolderData[];
     defaultPage: DefaultPages;
     songBlacklist: string[];
     preferences: {
       doNotShowRemoveSongFromLibraryConfirm: boolean;
+      isReducedMotion: boolean;
+      songIndexing: boolean;
+      autoLaunchApp: boolean;
     };
   }
 
@@ -161,6 +164,18 @@ declare global {
     songs: SongData[];
     albums: Album[];
     artists: Artist[];
+    genres: Genre[];
+  }
+
+  interface Genre {
+    genreId: string;
+    name: string;
+    songs: {
+      title: string;
+      songId: string;
+    }[];
+    artworkPath?: string;
+    backgroundColor?: { rgb: unknown };
   }
 
   interface Album {
@@ -192,17 +207,6 @@ declare global {
     artworkPath?: string;
     onlineArtworkPaths?: OnlineArtistArtworks;
   }
-
-  interface LogData {
-    logs: {
-      time: Date | string;
-      error: {
-        name: string;
-        message: string;
-        stack?: string;
-      };
-    }[];
-  }
   interface Lyrics {
     lyrics: string;
     source: {
@@ -210,6 +214,14 @@ declare global {
       url: string;
       link: string;
     };
+  }
+
+  interface GetAllSongsResult {
+    data: AudioInfo[];
+    pageNo: number;
+    maxResultsPerPage: number;
+    noOfPages: number;
+    sortType: SongsPageSortTypes;
   }
 
   interface ToggleLikeSongReturnValue {
@@ -303,6 +315,7 @@ declare global {
     isVisible: boolean;
     content: ReactElement<any, any>;
     icon?: ReactElement<any, any>;
+    isLoading: boolean;
   }
 
   interface AnyProp {
@@ -330,6 +343,7 @@ declare global {
     label: string;
     class?: string;
     iconName?: string;
+    isContextMenuItemSeperator?: boolean;
     handlerFunction: () => void;
   }
   type UserDataTypes =
@@ -345,6 +359,9 @@ declare global {
     | 'isShuffling'
     | 'isRepeating'
     | 'preferences.doNotShowRemoveSongFromLibraryConfirm'
+    | 'preferences.isReducedMotion'
+    | 'preferences.songIndexing'
+    | 'preferences.autoLaunchApp'
     | 'songBlacklist';
 
   type SongsPageSortTypes =
@@ -369,34 +386,59 @@ declare global {
     | 'noOfSongsAscending'
     | 'noOfSongsDescending';
 
+  type GenreSortTypes =
+    | 'aToZ'
+    | 'zToA'
+    | 'noOfSongsAscending'
+    | 'noOfSongsDescending';
+
   type DefaultPages =
     | 'Songs'
     | 'Home'
     | 'Artists'
     | 'Albums'
     | 'Playlists'
-    | 'Search';
+    | 'Search'
+    | 'Genres';
 
   type PageTitles =
     | DefaultPages
-    | 'Search'
     | 'Settings'
     | 'Lyrics'
     | 'SongInfo'
     | 'ArtistInfo'
     | 'AlbumInfo'
     | 'PlaylistInfo'
+    | 'GenreInfo'
     | 'CurrentQueue'
+    | 'SongTagsEditor'
     | 'AllSearchResults';
 
   type SearchFilters = 'All' | 'Artists' | 'Albums' | 'Songs' | 'Playlists';
 
   type DataUpdateEventTypes =
     | 'songs'
+    | 'songs/newSong'
+    | 'songs/deletedSong'
+    | 'songs/artworks'
+    | 'songs/noOfListens'
+    | 'songs/likes'
     | 'artists'
+    | 'artists/artworks'
     | 'albums'
+    | 'genres'
     | 'playlists'
-    | 'userData';
+    | 'userData'
+    | 'userData/theme'
+    | 'userData/currentSong'
+    | 'userData/recentlyPlayedSongs'
+    | 'userData/volume'
+    | 'userData/queue'
+    | 'userData/blacklist'
+    | 'userData/musicFolder'
+    | 'settings/preferences';
+
+  type RepeatTypes = 'false' | 'repeat' | 'repeat-1';
 
   interface NodeVibrantPalette {
     DarkMuted: NodeVibrantPaletteSwatch;
@@ -437,7 +479,7 @@ declare global {
     error?: number;
   }
 
-  interface LogsData {
+  interface ErrorLogData {
     os: {
       architecture: string;
       cpu: string;
@@ -445,6 +487,44 @@ declare global {
       os: string;
       totalMemory: number;
     };
-    logs: Error[];
+    logs: ErrorLog[];
+  }
+
+  interface ErrorLog {
+    time: string;
+    error: {
+      name: string;
+      message: string;
+      stack?: string;
+    };
+  }
+
+  interface LogsData {
+    logs: string[];
+  }
+
+  interface SongId3Tags {
+    title: string;
+    artist?: string;
+    artwork?: {
+      mimeType: string;
+      type: { id: number; name: string };
+      description: string;
+      imageBuffer: Buffer;
+    };
+    year?: string;
+    album?: string;
+    genres?: string;
+    unsynchronisedLyrics?: {
+      language: string;
+      shortText?: string;
+      text: string;
+    };
+    composer?: string;
+    publisher?: string;
+  }
+
+  interface NodeID3Tags extends NodeID3.Tags {
+    image: string;
   }
 }

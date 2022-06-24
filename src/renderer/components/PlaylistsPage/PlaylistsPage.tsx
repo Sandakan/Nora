@@ -8,15 +8,22 @@ import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { Playlist } from './Playlist';
 import NewPlaylistPrompt from './NewPlaylistPrompt';
+import Button from '../Button';
 
 export const PlaylistsPage = () => {
   const { changePromptMenuData } = useContext(AppContext);
   const [playlists, setPlaylists] = React.useState([] as Playlist[]);
   let playlistComponents;
-  React.useEffect(() => {
-    window.api.getPlaylistData('*').then((res) => {
-      if (res && Array.isArray(res)) setPlaylists(res);
+
+  const fetchPlaylistData = () =>
+    window.api.getPlaylistData([]).then((res) => {
+      if (res && res.length > 0) setPlaylists(res);
     });
+  React.useEffect(() => {
+    window.api.dataUpdateEvent((_, event) => {
+      if (event === 'playlists') fetchPlaylistData();
+    });
+    fetchPlaylistData();
   }, []);
 
   const updatePlaylists = (updatedPlaylists: Playlist[]) => {
@@ -50,9 +57,11 @@ export const PlaylistsPage = () => {
       ) : (
         <div className="no-playlists-container">No playlists found.</div>
       )}
-      <button
-        className="add-new-playlist-btn"
-        onClick={() =>
+      <Button
+        label="Add New Playlist"
+        className="add-new-playlist-btn appear-from-bottom"
+        iconName="add"
+        clickHandler={() =>
           changePromptMenuData(
             true,
             <NewPlaylistPrompt
@@ -62,9 +71,7 @@ export const PlaylistsPage = () => {
             'add-new-playlist'
           )
         }
-      >
-        <span className="material-icons-round icon">add</span> Add New Playlist
-      </button>
+      />
     </div>
   );
 };

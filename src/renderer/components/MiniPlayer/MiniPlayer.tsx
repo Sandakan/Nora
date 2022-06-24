@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 import React from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext, SongPositionContext } from 'renderer/contexts/AppContext';
 
 export default function MiniPlayer() {
   const {
@@ -13,9 +13,10 @@ export default function MiniPlayer() {
     isCurrentSongPlaying,
     handleSkipBackwardClick,
     handleSkipForwardClick,
-    songPosition,
     isPlaying,
+    userData,
   } = React.useContext(AppContext);
+  const { songPosition } = React.useContext(SongPositionContext);
 
   const seekBarCssProperties: any = {};
   seekBarCssProperties['--seek-before-width'] = `${
@@ -23,7 +24,11 @@ export default function MiniPlayer() {
   }%`;
 
   return (
-    <div className={`mini-player ${!isCurrentSongPlaying && 'paused'}`}>
+    <div
+      className={`mini-player ${!isCurrentSongPlaying && 'paused'} ${
+        userData && userData.preferences.isReducedMotion ? 'reduced-motion' : ''
+      }`}
+    >
       <div className="background-cover-img-container">
         <img
           src={`otomusic://localFiles/${currentSongData.artworkPath}`}
@@ -80,8 +85,15 @@ export default function MiniPlayer() {
           </button>
         </div>
         <div className="song-info-container">
-          <div className="song-title">{currentSongData.title}</div>
-          <div className="song-artists">
+          <div className="song-title" title={currentSongData.title}>
+            {currentSongData.title}
+          </div>
+          <div
+            className="song-artists"
+            title={currentSongData.artists
+              ?.map((artist) => artist.name)
+              .join(', ')}
+          >
             {currentSongData.artists
               ? currentSongData.artists.map((artist) => artist.name).join(',')
               : 'Unknown Artist'}

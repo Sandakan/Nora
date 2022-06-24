@@ -44,7 +44,7 @@ export const Artist = (props: ArtistProp) => {
     createQueue(props.songIds, 'artist', props.artistId, true);
   return (
     <div
-      className="artist"
+      className="artist appear-from-bottom"
       onContextMenu={(e) => {
         e.stopPropagation();
         updateContextMenuData(

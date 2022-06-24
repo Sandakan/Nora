@@ -57,11 +57,13 @@ export default () => {
 
   React.useEffect(() => {
     if (currentlyActivePage.data.albumId) {
-      window.api.getAlbumData(currentlyActivePage.data.albumId).then((res) => {
-        if (res && !Array.isArray(res)) {
-          dispatch({ type: 'ALBUM_DATA_UPDATE', data: res });
-        }
-      });
+      window.api
+        .getAlbumData([currentlyActivePage.data.albumId as string])
+        .then((res) => {
+          if (res && res.length > 0 && res[0]) {
+            dispatch({ type: 'ALBUM_DATA_UPDATE', data: res[0] });
+          }
+        });
     }
   }, [currentlyActivePage.data]);
 
@@ -70,23 +72,23 @@ export default () => {
       albumContent.albumData.songs &&
       albumContent.albumData.songs.length > 0
     ) {
-      const temp: Promise<SongData | undefined>[] = [];
-      albumContent.albumData.songs.forEach((song) => {
-        temp.push(window.api.getSongInfo(song.songId));
-      });
-      Promise.all(temp).then((res) => {
-        const data = res.filter((x) => x !== undefined) as SongData[];
-        dispatch({ type: 'SONGS_DATA_UPDATE', data });
-      });
+      window.api
+        .getSongInfo(albumContent.albumData.songs.map((song) => song.songId))
+        .then((res) => {
+          if (res && res.length > 0) {
+            dispatch({ type: 'SONGS_DATA_UPDATE', data: res });
+          }
+        });
     }
   }, [albumContent.albumData.songs]);
 
   const songComponents =
     albumContent.songsData.length > 0
-      ? albumContent.songsData.map((song) => {
+      ? albumContent.songsData.map((song, index) => {
           return (
             <Song
               key={song.songId}
+              index={index}
               title={song.title}
               artists={song.artists}
               artworkPath={song.artworkPath}

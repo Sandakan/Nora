@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface ButtonProps {
-  label: string;
+  label?: string;
   iconName?: string;
   className?: string;
   clickHandler: (
@@ -20,14 +20,18 @@ const Button = (props: ButtonProps) => {
       onClick={(e) => clickHandler(e)}
       onKeyDown={(e) => clickHandler(e)}
     >
-      <span className="material-icons-round icon">{iconName}</span> {label}
+      {iconName && (
+        <span className="material-icons-round icon">{iconName}</span>
+      )}
+      {label && <span className="button-label-text">{label}</span>}
     </button>
   );
 };
 
 Button.defaultProps = {
-  className: '',
+  className: undefined,
   iconName: '',
+  label: undefined,
 };
 
 export default Button;

@@ -1,10 +1,61 @@
 <h1> Change Log</h1>
 
 <ul>
+<li class="version"> v0.6.0-alpha - ( 24<sup>th</sup> of June 2022 )
+    <ul>
+      <li>🎉 Features
+      <ul>
+        <li>Added the support to edit song id3 tags. Right click on a song to go to the SongID3TagEditorPage. Currently changes to those data wouldn't be updated on the app. (Experimental)</li>
+        <li>Added the basement to provide support for m3u files to import and export playlists.</li>
+        <li>Artist artworks will be updated when the user listens to their songs.</li>
+        <li>Added keyboard shortcuts for the basic functions of teh app.</li>
+        <li>Added support for reduced motion. You can enable reduced motion in Settings > Accessibility.</li>
+        <li>Added Genres to the app. You can view details related to the genre in GenreInfoPage by clicking on a genre.</li>
+        <li>Now the app window will blur the title bar when the app loses focus.</li>
+        <li>Now enabling song indexing from Settings > Accessibility will number the songs.</li>
+        <li>In CurrentQueuePage, app will direct you to the current playing song by scrolling it to the center of the window.</li>
+        <li>Added support for repeat and repeat-1 to keep listening to your loved songs all day long.</li>
+        <li>Added a loading animation for the notification bar.</li>
+        <li>Now users can restore their blacklisted songs from the Settings Page.</li>
+        <li>Now the app can be configured to start on system startup.</li>
+        <li>Added a button for the users to open the Devtools or the log file in Settings > About.</li>
+        <li>Frequently used data such as songs, artists, playlists etc will be cached inside the app at runtime.</li>
+        <li>Song lyrics will also be cached in the app until the relevant song finishes.</li>
+        <li>Now some parts of the UI such as HomePage will be updated on data modifications. These modifications include new songs, recently played songs etc.</li>
+        <li>Updated some functions to support pagination and sorting features to remove some burden off the renderer.</li>
+      </ul>
+      </li>
+      <li>🔨 Fixes
+        <ul>
+          <li>Fixed a security vulnerability related to package 'sharp'.</li>
+          <li>Removed unnecessary css styles and optimized the styling of the app.</li>
+          <li>Fixed a possibility of duplicating songs by adding the same folder again.</li>
+          <li>Fixed a bug related to not deleting app data after an app reset.</li>
+          <li>Fixed a bug related to over-rendering of react components when a song is playing resulting higher consumption of cpu and memory. This also fixes the jitter when scrolling.</li>
+          <li>Removed unnecessary context menu options from the HomePage.</li>
+          <li>Fixed a bug related to parsing songs that are still being written to the system.</li>
+          <li>Fixed a bug where removing a song from the system will identify as a blacklisted song by the app.</li>
+          <li>Now the context menu will appear relevant to the available width and height of the window.</li>
+          <li>Fixed an error where some functions are coded asynchronous but are actually synchronous.</li>
+          <li>Updated the logger to write logs more clearly on a txt file. Now it shows more relevant information in the logs.</li>
+          <li>Some functions now can send multiple results. This reduces number of requests to the api to fetch data.</li>
+          <li>Fixed a bug where newly added songs won't be added to the library.</li>
+        </ul>
+      </li>
+      <li>🐜 Known Issues
+        <ul>
+          <li>There is still a small amount of unwanted cpu consumption due to over-rendering of components.</li>
+          <li>Blacklisting or removing a song from the library isn't working as intended.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+
+  <br/>
 
   <li class="version"> v0.5.0-alpha - ( 25<sup>th</sup> of May 2022 )
     <ul>
-      <li>Features 
+      <li>Features
       <ul>
         <li>Now queues and some other features save their states between sessions (Experimental).</li>
         <li>Now Currently Playing Queue shows information about the current queue including playlist name, artwork etc (Experimental).</li>
@@ -24,7 +75,7 @@
         <li>Added new buttons in ArtistInfoPage, AlbumInfoPage, PlaylistInfoPage, CurrentQueuePage to provide functions like play all, shuffle and play, and add to queue etc.</li>
       </ul>
       </li>
-      <li>Fixes 
+      <li>Fixes
         <ul>
           <li>Fixed a bug related to npm packages.</li>
           <li>Updated parseSong to differentiate between currently added songs and new songs. Previously this problem will duplicate the data related to the song in the library.</li>
@@ -36,7 +87,7 @@
           <li>Applied useTransition hook to improve user input responsiveness in the app when a song is playing.</li>
         </ul>
       </li>
-      <li>Known Issues 
+      <li>Known Issues
         <ul>
         <li>Sometimes newly added songs won't be added to the library. The workaround is to reset the app and linking the relevant folder again.</li>
         <li>Shuffle and Repeat states currently is not presisting states between sessions.</li>
@@ -47,7 +98,7 @@
     </ul>
   </li>
 
-    <br/>
+  <br/>
 
   <li class="version"> v0.4.1-alpha - ( 16<sup>th</sup> of May 2022 )
     <ul>

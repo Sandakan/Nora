@@ -33,7 +33,8 @@ interface AppContextType {
   updateNotificationPanelData: (
     delay: number | undefined,
     content: ReactElement<any, any>,
-    icon?: ReactElement<any, any>
+    icon?: ReactElement<any, any>,
+    isLoading?: boolean
   ) => void;
   // CURRENTLY ACTVIE PAGE AND NAVIGATION HISTORY
   currentlyActivePage: { pageTitle: PageTitles; data?: any };
@@ -47,11 +48,13 @@ interface AppContextType {
   // AUDIO PLAYBACK
   currentSongData: AudioData;
   userData: UserData | undefined;
+  toggleReducedMotion: (state?: boolean) => void;
+  toggleSongIndexing: (state?: boolean) => void;
   isCurrentSongPlaying: boolean;
   // songPosition: number;
   volume: number;
   isMuted: boolean;
-  isRepeating: boolean;
+  isRepeating: RepeatTypes;
   isShuffling: boolean;
   playSong: (songId: string, isStartPlay?: boolean) => void;
   updateCurrentSongPlaybackState: (isPlaying: boolean) => void;

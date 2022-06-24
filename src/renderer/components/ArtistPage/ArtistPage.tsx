@@ -53,7 +53,7 @@ export const ArtistPage = () => {
   } as ArtistPageReducer);
 
   React.useEffect(() => {
-    window.api.getArtistData('*').then((res) => {
+    window.api.getArtistData().then((res) => {
       if (res && Array.isArray(res)) {
         if (res.length > 0)
           dispatch({

@@ -15,7 +15,8 @@ export default (props: { songPath: string; title: string }) => {
       </div>
       <div className="description">
         This action cannot be undone. You will lose this song from your system
-        and may not be able to recover it again.
+        and may not be able to recover it again if you select &apos;Permanently
+        delete from system&apos; option.
       </div>
       <Checkbox
         id="permanentDelete"

@@ -15,7 +15,7 @@ interface NoLyricsProp {
 }
 
 export const Lyric = (props: LyricProp) => {
-  return <div className="lyrics-line">{props.lyric}</div>;
+  return <div className="lyrics-line appear-from-bottom">{props.lyric}</div>;
 };
 
 export const NoLyrics = (props: NoLyricsProp) => (
@@ -41,6 +41,7 @@ export const LyricsSource = (props: LyricsSourceProp) => (
     <span
       className="source-link"
       onClick={() => openInBrowser(props.lyricsSource.link)}
+      title={props.lyricsSource.link}
     >
       {props.lyricsSource.name}
     </span>{' '}

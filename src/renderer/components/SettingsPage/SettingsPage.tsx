@@ -12,12 +12,16 @@ import Button from '../Button';
 import Checkbox from '../Checkbox';
 import { version } from '../../../../package.json';
 import ResetAppConfirmationPrompt from '../HomePage/ResetAppConfirmationPrompt';
+import BlacklistedSong from './BlacklistedSong';
 
 interface SettingsReducer {
   userData: UserData;
 }
 
-type SettingsReducerActionTypes = 'UPDATE_USER_DATA' | 'CHANGE_DEFAULT_PAGE';
+type SettingsReducerActionTypes =
+  | 'UPDATE_USER_DATA'
+  | 'CHANGE_DEFAULT_PAGE'
+  | 'TOGGLE_AUTO_LAUNCH';
 
 const reducer = (
   state: SettingsReducer,
@@ -28,6 +32,19 @@ const reducer = (
       return {
         ...state,
         userData: (action.data as UserData) || state.userData,
+      };
+    case 'TOGGLE_AUTO_LAUNCH':
+      return {
+        ...state,
+        userData: {
+          ...state.userData,
+          preferences: {
+            ...state.userData.preferences,
+            autoLaunchApp:
+              (action.data as boolean) ||
+              state.userData.preferences.autoLaunchApp,
+          },
+        },
       };
     case 'CHANGE_DEFAULT_PAGE':
       return {
@@ -48,17 +65,19 @@ export const SettingsPage = () => {
     toggleDarkMode,
     changePromptMenuData,
     updateNotificationPanelData,
+    userData,
+    toggleReducedMotion,
+    toggleSongIndexing,
   } = useContext(AppContext);
   const [content, dispatch] = React.useReducer(reducer, {
     userData: {},
   } as SettingsReducer);
-  const reducedMotionRef = React.useRef({ isReducedMotion: false });
 
   React.useEffect(() => {
     window.api
       .getUserData()
       .then((res) => dispatch({ type: 'UPDATE_USER_DATA', data: res }))
-      .catch((err) => console.log(err));
+      .catch((err) => console.error(err));
   }, []);
 
   const musicFolders = content.userData.musicFolders
@@ -67,9 +86,10 @@ export const SettingsPage = () => {
       })
     : [];
   return (
-    <div className="main-container settings-container">
+    <div className="main-container settings-container appear-from-bottom">
       <div className="title-container">Settings</div>
 
+      {/*  THEME SETTINGS */}
       <div className="main-container">
         <div className="title-container">Theme</div>
         <div className="description">
@@ -102,6 +122,7 @@ export const SettingsPage = () => {
         </div>
       </div>
 
+      {/* MUSIC FOLDERS SETTINGS */}
       <div className="main-container">
         <div className="title-container">Music Folders</div>
         <div className="description">
@@ -114,18 +135,21 @@ export const SettingsPage = () => {
           iconName="add"
           className="add-new-music-folder-btn"
           clickHandler={async () => {
-            const data = await window.api.addMusicFolder();
-            if (data.length > 0)
+            const data = await window.api
+              .addMusicFolder()
+              .catch((err) => console.error(err));
+            if (data && data.length > 0)
               window.api
                 .getUserData()
                 .then((res) =>
                   dispatch({ type: 'UPDATE_USER_DATA', data: res })
                 )
-                .catch((err) => console.log(err));
+                .catch((err) => console.error(err));
           }}
         />
       </div>
 
+      {/* BLACKLISTED SONGS SETTINGS */}
       {content.userData && content.userData.songBlacklist && (
         <div className="main-container blacklisted-songs-container">
           <div className="title-container">Blacklisted Songs</div>
@@ -134,18 +158,13 @@ export const SettingsPage = () => {
           </div>
           <div className="blacklisted-songs">
             {content.userData.songBlacklist.map((songPath, index) => (
-              <div className="blacklisted-song" key={index}>
-                <span className="blacklisted-song-name">
-                  {songPath.split('\\').at(-1)?.split('.')[0]}
-                </span>
-                <span className="blacklisted-song-path">{songPath}</span>
-                <span className="material-icons-round icon">restore</span>
-              </div>
+              <BlacklistedSong songPath={songPath} key={index} index={index} />
             ))}
           </div>
         </div>
       )}
 
+      {/* DEFAULT PAGE SETTINGS */}
       <div className="main-container">
         <div className="title-container">Default Page</div>
         <div className="description">
@@ -173,24 +192,70 @@ export const SettingsPage = () => {
         </div>
       </div>
 
+      {/* ? ACCESSIBILITY SETTINGS */}
       <div className="main-container accessibility-settings-container">
         <div className="title-container">Accessibility</div>
         <div className="reduced-motion-checkbox-container">
+          <div className="secondary-container toggle-reduced-motion">
+            <div className="description">
+              Removes every duration of the animations that happens in the app.
+              This will also reduce the smoothness of the app.
+            </div>
+            <Checkbox
+              id="enableReducedMotion"
+              labelContent="Enable reduced motion"
+              isChecked={
+                userData !== undefined && userData.preferences.isReducedMotion
+              }
+              checkedStateUpdateFunction={(state) => toggleReducedMotion(state)}
+            />
+          </div>
+          <div className="secondary-container toggle-song-indexing">
+            <div className="description">
+              Enables indexing of songs in pages. This will help you to be in
+              order.
+            </div>
+            <Checkbox
+              id="toggleSongIndexing"
+              isChecked={
+                userData !== undefined && userData.preferences.songIndexing
+              }
+              checkedStateUpdateFunction={(state) => toggleSongIndexing(state)}
+              labelContent="Enable song indexing"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* STARTUP SETTINGS */}
+      <div className="main-container startup-settings-container">
+        <div className="title-container">Startup</div>
+        <div className="auto-launch-at-startup-checkbox-container">
           <div className="description">
-            Removes every duration of the animations that happens in the app.
-            This will also reduce the smoothness of the app.
+            Enabling this setting will automatically launch this app when you
+            log in to your computer.
           </div>
           <Checkbox
-            id="enableReducedMotion"
-            labelContent="Enable reduced motion"
-            isChecked={reducedMotionRef.current.isReducedMotion}
-            checkedStateUpdateFunction={(state) => {
-              reducedMotionRef.current.isReducedMotion = state;
-            }}
+            id="toggleAppAutoLaunch"
+            isChecked={
+              content && content.userData && content.userData.preferences
+                ? content.userData.preferences.autoLaunchApp
+                : false
+            }
+            // TODO - Add support for auto lanching the app.
+            checkedStateUpdateFunction={(state) =>
+              window.api
+                .toggleAutoLaunch(state)
+                .then(() =>
+                  dispatch({ type: 'TOGGLE_AUTO_LAUNCH', data: state })
+                )
+            }
+            labelContent="Auto launch at startup"
           />
         </div>
       </div>
 
+      {/* ABOUT SETTINGS */}
       <div className="main-container about-container">
         <div className="title-container">About</div>
         {/* <span
@@ -232,6 +297,9 @@ export const SettingsPage = () => {
         >
           Github repository
         </span>
+        <span className="about-link" onClick={() => window.api.openLogFile()}>
+          Open log file
+        </span>
         <div className="about-buttons-container">
           <Button
             label="Reset App"
@@ -243,6 +311,11 @@ export const SettingsPage = () => {
                 'confirm-app-reset'
               )
             }
+          />
+          <Button
+            label="Open Devtools"
+            iconName="code"
+            clickHandler={() => window.api.openDevtools()}
           />
         </div>
         <div className="about-description">

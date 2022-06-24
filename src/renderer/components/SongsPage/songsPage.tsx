@@ -12,7 +12,7 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
-import sortSongs from 'renderer/utils/sortSongs';
+// import sortSongs from 'renderer/utils/sortSongs';
 import { Song } from './Song';
 import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
 import NoSongsImage from '../../../../assets/images/Empty Inbox _Monochromatic.svg';
@@ -39,13 +39,14 @@ const reducer = (
     case 'SORTING_ORDER':
       return {
         ...state,
-        songsData: sortSongs(state.songsData, action.data),
         sortingOrder: action.data,
       };
     default:
       return state;
   }
 };
+
+// const row = ({ index, style }) => <div style={style}>Row {index}</div>;
 
 export const SongsPage = () => {
   const { createQueue, currentlyActivePage, updateCurrentlyActivePageData } =
@@ -59,28 +60,29 @@ export const SongsPage = () => {
         ? currentlyActivePage.data.songsPage.sortingOrder
         : 'aToZ',
   });
+  // const List = React.useMemo(() => window.api.getReactWindowComponenet(), []);
 
   React.useEffect(() => {
     window.api
-      .checkForSongs()
+      .getAllSongs(content.sortingOrder)
       .then((audioInfoArray) => {
         if (audioInfoArray)
-          return audioInfoArray.length === 0
+          return audioInfoArray.data.length === 0
             ? dispatch({
                 type: 'SONGS_DATA',
                 data: null,
               })
             : dispatch({
                 type: 'SONGS_DATA',
-                data: sortSongs(audioInfoArray, content.sortingOrder),
+                data: audioInfoArray.data,
               });
       })
-      .catch((err) => console.log(err));
-  }, []);
+      .catch((err) => console.error(err));
+  }, [content.sortingOrder]);
 
   const addNewSongs = () => {
     window.api
-      .addMusicFolder()
+      .addMusicFolder(content.sortingOrder)
       .then((songs) => {
         const relevantSongsData: AudioInfo[] = songs.map((song) => {
           return {
@@ -96,14 +98,32 @@ export const SongsPage = () => {
         });
         dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
       })
-      .catch((err) => window.api.sendLogs(err));
+      .catch((err) => console.error(err));
   };
-
-  const songs = content.songsData
-    ? content.songsData.map((song) => {
+  // const row = React.useCallback(({ index, style }) => {
+  //   const { songId, artists, duration, path, title, artworkPath } =
+  //     content.songsData[index];
+  //   return (
+  //     <div style={style}>
+  //       <Song
+  //         title={title}
+  //         duration={duration}
+  //         songId={songId}
+  //         path={path}
+  //         artists={artists}
+  //         artworkPath={artworkPath}
+  //         index={index}
+  //       />
+  //     </div>
+  //   );
+  // }, []);
+  const songs = React.useMemo(
+    () =>
+      content.songsData.map((song, index) => {
         return (
           <Song
             key={song.songId}
+            index={index}
             title={song.title}
             artworkPath={song.artworkPath || DefaultSongCover}
             duration={song.duration}
@@ -112,9 +132,9 @@ export const SongsPage = () => {
             path={song.path}
           />
         );
-      })
-    : undefined;
-
+      }),
+    [content.songsData]
+  );
   return (
     <div className="main-container songs-list-container">
       <div className="title-container">

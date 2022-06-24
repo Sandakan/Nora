@@ -46,7 +46,7 @@ export const Playlist = (props: PlaylistProp) => {
 
   return (
     <div
-      className={`playlist ${props.playlistId}`}
+      className={`playlist appear-from-bottom ${props.playlistId}`}
       data-playlist-id={props.playlistId}
       onContextMenu={(e) => {
         e.preventDefault();

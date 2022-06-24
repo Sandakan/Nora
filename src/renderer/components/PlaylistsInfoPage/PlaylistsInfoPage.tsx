@@ -27,22 +27,17 @@ export default () => {
   React.useEffect(() => {
     if (currentlyActivePage.data.playlistId) {
       window.api
-        .getPlaylistData(currentlyActivePage.data.playlistId)
+        .getPlaylistData([currentlyActivePage.data.playlistId])
         .then((res) => {
-          if (res && !Array.isArray(res)) setPlaylistData(res);
+          if (res && res.length > 0 && res[0]) setPlaylistData(res[0]);
         });
     }
   }, [currentlyActivePage.data]);
 
   React.useEffect(() => {
     if (playlistData.songs && playlistData.songs.length > 0) {
-      const songsData: Promise<SongData | undefined>[] = [];
-      playlistData.songs.forEach((songId) => {
-        songsData.push(window.api.getSongInfo(songId));
-      });
-      Promise.all(songsData).then((res) => {
-        const y = res.filter((result) => result !== undefined) as SongData[];
-        setPlaylistSongs(y);
+      window.api.getSongInfo(playlistData.songs).then((songsData) => {
+        if (songsData && songsData.length > 0) setPlaylistSongs(songsData);
       });
     }
   }, [currentlyActivePage.data, playlistData.songs]);
@@ -91,7 +86,7 @@ export default () => {
               {`Created on ${new Date(playlistData.createdDate).toUTCString()}`}
             </div>
             {playlistData.songs && playlistData.songs.length > 0 && (
-              <div className="artist-buttons">
+              <div className="playlist-buttons">
                 <Button
                   label="Play All"
                   iconName="play_arrow"
@@ -143,6 +138,7 @@ export default () => {
               return (
                 <Song
                   key={index}
+                  index={index}
                   title={song.title}
                   artists={song.artists}
                   duration={song.duration}

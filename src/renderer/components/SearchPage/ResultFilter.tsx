@@ -13,7 +13,9 @@ interface ResultFilterProp {
 export const ResultFilter = (props: ResultFilterProp) => {
   return (
     <li
-      className={`${props.isCurrentActiveFilter && 'active'}`}
+      className={`appear-from-bottom ${
+        props.isCurrentActiveFilter && 'active'
+      }`}
       onClick={() =>
         props.changeActiveFilter(props.filterType as SearchFilters)
       }

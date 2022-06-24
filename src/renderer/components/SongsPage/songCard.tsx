@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -74,7 +75,7 @@ export const SongCard = (props: SongCardProp) => {
 
   return (
     <div
-      className={`song song-card ${props.songId} ${
+      className={`song song-card appear=from-bottom ${props.songId} ${
         currentSongData.songId === props.songId && 'current-song'
       } ${isSongPlaying && 'playing'}`}
       data-song-id={props.songId}
@@ -110,6 +111,11 @@ export const SongCard = (props: SongCardProp) => {
               },
             },
             {
+              label: 'Hr',
+              isContextMenuItemSeperator: true,
+              handlerFunction: () => true,
+            },
+            {
               label: 'Reveal in File Explorer',
               class: 'reveal-file-explorer',
               iconName: 'folder_open',
@@ -124,6 +130,24 @@ export const SongCard = (props: SongCardProp) => {
                 changeCurrentActivePage('SongInfo', {
                   songInfo: { songId: props.songId },
                 }),
+            },
+            {
+              label: 'Edit song tags',
+              class: 'edit',
+              iconName: 'edit',
+              handlerFunction: () =>
+                changeCurrentActivePage('SongTagsEditor', {
+                  songTagsEditor: {
+                    songId: props.songId,
+                    songArtworkPath: props.artworkPath,
+                    songPath: props.path,
+                  },
+                }),
+            },
+            {
+              label: 'Hr',
+              isContextMenuItemSeperator: true,
+              handlerFunction: () => true,
             },
             {
               label: 'Remove from Library',
@@ -200,6 +224,7 @@ export const SongCard = (props: SongCardProp) => {
                 <span
                   className="artist"
                   key={artist.artistId}
+                  title={artist.name}
                   onClick={() =>
                     currentlyActivePage.pageTitle === 'ArtistInfo' &&
                     currentlyActivePage.data.artistName === artist

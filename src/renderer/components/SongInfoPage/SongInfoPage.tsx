@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
@@ -17,7 +19,9 @@ export default () => {
     useContext(AppContext);
   const x: unknown = undefined;
   const [songInfo, setSongInfo] = React.useState(x as SongData | undefined);
+
   let songDuration = '0 seconds';
+
   if (songInfo) {
     const [minutes, seconds] = calculateTime(songInfo.duration).split(':');
     if (Number(minutes) === 0) songDuration = `${seconds} seconds`;
@@ -27,9 +31,11 @@ export default () => {
   React.useEffect(() => {
     if (currentlyActivePage.data && currentlyActivePage.data.songInfo.songId) {
       window.api
-        .getSongInfo(currentlyActivePage.data.songInfo.songId)
+        .getSongInfo([currentlyActivePage.data.songInfo.songId])
         .then((res) => {
-          if (res) setSongInfo(res);
+          if (res && res.length > 0) {
+            setSongInfo(res[0]);
+          }
         });
     }
   }, [currentlyActivePage.data]);
@@ -46,7 +52,7 @@ export default () => {
     <>
       {songInfo && (
         <div className="main-container song-information-container">
-          <div className="container">
+          <div className="container appear-from-bottom">
             <div className="song-cover-container">
               <img
                 src={`otomusic://localFiles/${songInfo.artworkPath}`}
@@ -69,10 +75,12 @@ export default () => {
                             title={artist.name}
                             onClick={() =>
                               currentlyActivePage.pageTitle === 'ArtistInfo' &&
-                              currentlyActivePage.data.artistName === artist
+                              currentlyActivePage.data.artistName ===
+                                artist.name
                                 ? changeCurrentActivePage('Home')
                                 : changeCurrentActivePage('ArtistInfo', {
-                                    artistName: artist,
+                                    artistName: artist.name,
+                                    artistId: artist.artistId,
                                   })
                             }
                           >

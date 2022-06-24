@@ -42,20 +42,23 @@ const AllSearchResultsPage = () => {
           {data.allSearchResultsPage.searchFilter === 'Songs' && (
             <div className="songs-list-container">
               <div className="songs-container">
-                {data.allSearchResultsPage.searchResults.map((result) => {
-                  const songData = result as SongData;
-                  return (
-                    <Song
-                      key={songData.songId}
-                      songId={songData.songId}
-                      title={songData.title}
-                      duration={songData.duration}
-                      artists={songData.artists}
-                      path={songData.path}
-                      artworkPath={songData.artworkPath}
-                    />
-                  );
-                })}
+                {data.allSearchResultsPage.searchResults.map(
+                  (result, index) => {
+                    const songData = result as SongData;
+                    return (
+                      <Song
+                        key={songData.songId}
+                        index={index}
+                        songId={songData.songId}
+                        title={songData.title}
+                        duration={songData.duration}
+                        artists={songData.artists}
+                        path={songData.path}
+                        artworkPath={songData.artworkPath}
+                      />
+                    );
+                  }
+                )}
               </div>
             </div>
           )}

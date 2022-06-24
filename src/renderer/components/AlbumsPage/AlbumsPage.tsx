@@ -55,7 +55,7 @@ export const AlbumsPage = () => {
   } as AlbumsPageReducer);
 
   React.useEffect(() => {
-    window.api.getAlbumData('*').then((res) => {
+    window.api.getAlbumData([]).then((res) => {
       if (res && Array.isArray(res)) {
         if (res.length > 0)
           dispatch({

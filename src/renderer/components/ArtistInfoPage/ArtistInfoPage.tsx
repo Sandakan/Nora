@@ -32,10 +32,10 @@ export default () => {
   React.useEffect(() => {
     if (currentlyActivePage.data && currentlyActivePage.data.artistName) {
       window.api
-        .getArtistData(currentlyActivePage.data.artistName)
+        .getArtistData([currentlyActivePage.data.artistName])
         .then((res) => {
-          if (res && !Array.isArray(res)) {
-            setArtistData({ ...res, artworkPath: DefaultArtistCover });
+          if (res && res.length > 0) {
+            setArtistData({ ...res[0], artworkPath: DefaultArtistCover });
           }
         });
     }
@@ -58,32 +58,28 @@ export default () => {
                 };
               });
           })
-          .catch((err) => console.log(err));
+          .catch((err) => {
+            console.error(err);
+          });
   }, [artistData.artistId]);
 
   React.useEffect(() => {
     if (artistData.songs && artistData.songs.length > 0) {
-      const songsData = artistData.songs.map((song) =>
-        window.api.getSongInfo(song.songId)
-      );
-      Promise.all(songsData).then((res) => {
-        const data = res.filter((x) => x !== undefined) as SongData[];
-        setSongs(data);
-      });
+      window.api
+        .getSongInfo(artistData.songs.map((song) => song.songId))
+        .then((songsData) => {
+          if (songsData && songsData.length > 0) setSongs(songsData);
+        });
     }
   }, [artistData.songs]);
 
   React.useEffect(() => {
-    if (artistData.albums) {
-      const albumsData = artistData.albums.map((album) =>
-        window.api.getAlbumData(album.albumId)
-      );
-      Promise.all(albumsData).then((res) => {
-        const data = res.filter(
-          (x) => x !== undefined && !Array.isArray(x)
-        ) as Album[];
-        setAlbums(data);
-      });
+    if (artistData.albums && artistData.albums.length > 0) {
+      window.api
+        .getAlbumData(artistData.albums.map((album) => album.albumId))
+        .then((res) => {
+          if (res && res.length > 0) setAlbums(res);
+        });
     }
   }, [artistData.albums]);
 
@@ -242,10 +238,11 @@ export default () => {
         <div className="main-container songs-list-container">
           <div className="title-container">Appears on songs</div>
           <div className="songs-container">
-            {songs.map((song) => {
+            {songs.map((song, index) => {
               return (
                 <Song
                   key={song.songId}
+                  index={index}
                   title={song.title}
                   artists={song.artists}
                   duration={song.duration}

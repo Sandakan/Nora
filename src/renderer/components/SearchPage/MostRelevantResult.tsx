@@ -32,7 +32,7 @@ interface MostRelevantResultProp {
 export const MostRelevantResult = (props: MostRelevantResultProp) => {
   return (
     <div
-      className={`result most-relevant-${props.resultType.toLowerCase()} active`}
+      className={`result appear-from-bottom most-relevant-${props.resultType.toLowerCase()} active`}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();

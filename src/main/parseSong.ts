@@ -25,21 +25,26 @@ import fs from 'fs/promises';
 
 import sharp from 'sharp';
 import { generateRandomId } from './randomId';
-import { logger } from './logger';
+import log from './log';
 import { getData, setData, storeSongArtworks } from './filesystem';
-import { getAssetPath, sendMessageToRenderer } from './main';
+import { dataUpdateEvent, getAssetPath, sendMessageToRenderer } from './main';
 
 const defaultSongCoverImgBuffer = async () =>
   await fs
     .readFile(getAssetPath('images', 'song_cover_default.png'))
     .then((res) => res)
-    .catch((err) => logger(err));
+    .catch((err) =>
+      log(
+        `====== ERROR OCCURRED WHEN READING A FILE OF NAME 'song_cover_default.png'. ======\nERROR : ${err}`
+      )
+    );
 
 export const parseSong = (
   absoluteFilePath: string
 ): Promise<SongData | undefined> => {
   return new Promise(async (resolve, reject) => {
-    const data = await getData();
+    // log(`Starting the parsing process of song of path '${absoluteFilePath}'.`);
+    const data = getData();
     const stats = await fs.stat(absoluteFilePath).catch((err) => reject(err));
     const metadata = await musicMetaData
       .parseFile(absoluteFilePath)
@@ -71,9 +76,14 @@ export const parseSong = (
             .getPalette()
             .catch((err) => {
               reject(err);
-              return logger(err);
+              return log(
+                `====== ERROR OCCURRED WHEN PARSING A SONG ARTWORK TO GET A COLOR PALETTE. ======\nERROR : ${err}`
+              );
             })
         : undefined;
+
+      if (metadata.common.lyrics)
+        console.log(metadata.common.title, metadata.common.lyrics);
 
       const songInfo: SongData = {
         title: songTitle,
@@ -87,6 +97,7 @@ export const parseSong = (
         album: metadata.common.album
           ? { name: metadata.common.album, albumId: '' }
           : undefined,
+        genres: [],
         albumArtist: metadata.common.albumartist || undefined,
         track: metadata.common.track,
         year: metadata.common.year,
@@ -125,7 +136,7 @@ export const parseSong = (
             Object.keys(data).length !== 0 &&
             Array.isArray(data.albums)
           ) {
-            if (isAlbumAvailable(data.albums, metadata.common.album)) {
+            if (data.albums.some((a) => a.title === metadata.common.album)) {
               const allAlbums = data.albums.map((album) => {
                 if (
                   metadata.common.album &&
@@ -135,7 +146,6 @@ export const parseSong = (
                     title: songInfo.title,
                     songId: songInfo.songId,
                   });
-                  songInfo.albumId = album.albumId;
                   relevantAlbums.push(album);
                   return album;
                 } else return album;
@@ -155,7 +165,6 @@ export const parseSong = (
                   },
                 ],
               });
-              songInfo.albumId = newAlbum.albumId;
               if (songInfo.album) songInfo.album.albumId = newAlbum.albumId;
               relevantAlbums.push(newAlbum);
               return {
@@ -183,7 +192,9 @@ export const parseSong = (
           if (songInfo.artists && songInfo.artists.length > 0) {
             for (let x = 0; x < songInfo.artists.length; x += 1) {
               const newArtist = songInfo.artists[x];
-              if (isArtistAvailable(data.artists, newArtist.name)) {
+              if (
+                data.artists.some((artist) => artist.name === newArtist.name)
+              ) {
                 let z = result.filter((val) => val.name === newArtist.name);
                 z = z.map((artist) => {
                   artist.songs.push({
@@ -225,7 +236,6 @@ export const parseSong = (
                         ]
                       : [],
                 };
-                songInfo.artists[x].artistId = artist.artistId;
                 relevantArtists.push(artist);
                 result.push(artist);
               }
@@ -235,41 +245,89 @@ export const parseSong = (
         } else return { allArtists: [], newArtists, relevantArtists };
       };
       const { allArtists, relevantArtists } = manageArtists();
-      songInfo.artistsId = relevantArtists.map(
-        (newArtist) => newArtist.artistId
-      );
+
+      if (songInfo.artists) {
+        for (let x = 0; x < relevantArtists.length; x += 1) {
+          for (let y = 0; y < songInfo.artists.length; y += 1) {
+            if (relevantArtists[x].name === songInfo.artists[y].name)
+              songInfo.artists[y].artistId = relevantArtists[x].artistId;
+          }
+        }
+      }
+
+      const manageGenres = () => {
+        const newGenres: Genre[] = [];
+        const relevantGenres: Genre[] = [];
+        let { genres } = data;
+        if (
+          Array.isArray(metadata.common.genre) &&
+          metadata.common.genre.length > 0 &&
+          Array.isArray(genres)
+        ) {
+          for (let x = 0; x < metadata.common.genre.length; x += 1) {
+            const songGenre = metadata.common.genre[x];
+            if (genres.some((x) => x.name === songGenre)) {
+              let y = genres.filter((genre) => genre.name === songGenre);
+              y = y.map((y) => {
+                y.artworkPath = songInfo.artworkPath;
+                y.backgroundColor = songInfo.palette?.DarkVibrant;
+                y.songs.push({
+                  songId: songInfo.songId,
+                  title: songInfo.title,
+                });
+                relevantGenres.push(y);
+                return y;
+              });
+              genres = genres
+                .filter((genre) => genre.name !== songGenre)
+                .concat(y);
+            } else {
+              const newGenre: Genre = {
+                name: songGenre,
+                genreId: generateRandomId(),
+                songs: [
+                  {
+                    songId: songInfo.songId,
+                    title: songInfo.title,
+                  },
+                ],
+                artworkPath: songInfo.artworkPath,
+                backgroundColor: songInfo.palette?.DarkVibrant,
+              };
+              relevantGenres.push(newGenre);
+              newGenres.push(newGenre);
+              genres.push(newGenre);
+            }
+          }
+          return { allGenres: genres, newGenres, relevantGenres };
+        } else return { allGenres: genres || [], newGenres, relevantGenres };
+      };
+
+      const { allGenres, relevantGenres } = manageGenres();
+
+      songInfo.genres = relevantGenres.map((genre) => {
+        return { name: genre.name, genreId: genre.genreId };
+      });
 
       data.songs.push(songInfo);
-      return setData({
+      log(
+        `Finished the parsing process of song with name '${songInfo.title}'. Updated ${relevantArtists.length} no of artists, ${relevantAlbums.length} no of albums, ${relevantGenres.length} no of genres in the process of parsing song.`
+      );
+      setData({
         songs: data.songs,
         artists: allArtists,
         albums: allAlbums,
-      })
-        .then(() => {
-          sendMessageToRenderer(`'${songTitle}' song added to the library.`);
-          return resolve(songInfo);
-        })
-        .catch((err) => reject(err));
+        genres: allGenres,
+      });
+      dataUpdateEvent('songs/newSong');
+      sendMessageToRenderer(`'${songTitle}' song added to the library.`);
+      return resolve(songInfo);
     }
     resolve(undefined);
   });
 };
 
-const isAlbumAvailable = (albums: Album[], title: string) => {
-  for (const album of albums) {
-    if (album.title === title) return true;
-  }
-  return false;
-};
-
 const addNewAlbum = (albums: Album[], options: Album) => {
   albums.push(options);
   return { allAlbums: albums, newAlbum: options };
-};
-
-const isArtistAvailable = (artists: Artist[], name: string) => {
-  for (const artist of artists) {
-    if (artist.name === name) return true;
-  }
-  return false;
 };

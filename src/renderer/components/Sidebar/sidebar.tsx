@@ -46,6 +46,11 @@ const linkData = [
     icon: 'settings',
     content: 'Settings',
   },
+  {
+    parentClassName: 'genres',
+    icon: 'track_changes',
+    content: 'Genres',
+  },
 ];
 
 export default React.memo(() => {
@@ -71,8 +76,8 @@ export default React.memo(() => {
   };
 
   React.useEffect(() => {
-    if (linkData.some((x) => x.content === currentlyActivePage.pageTitle))
-      clickHandler(currentlyActivePage.pageTitle, currentlyActivePage.data);
+    // if (linkData.some((x) => x.content === currentlyActivePage.pageTitle))
+    clickHandler(currentlyActivePage.pageTitle, currentlyActivePage.data);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentlyActivePage.pageTitle]);
 

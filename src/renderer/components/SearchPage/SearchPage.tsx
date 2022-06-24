@@ -39,6 +39,7 @@ export const SearchPage = () => {
       ? (currentlyActivePage.data.searchPage.keyword as string)
       : ''
   );
+  const deferredSearchInput = React.useDeferredValue(searchInput);
   const [searchResults, setSearchResults] = React.useState({
     albums: [],
     artists: [],
@@ -68,13 +69,13 @@ export const SearchPage = () => {
   });
 
   React.useEffect(() => {
-    if (searchInput !== '')
+    if (deferredSearchInput !== '')
       window.api
-        .search(activeFilter, searchInput)
+        .search(activeFilter, deferredSearchInput)
         .then((results) => setSearchResults(results));
     else
       setSearchResults({ albums: [], artists: [], songs: [], playlists: [] });
-  }, [searchInput, activeFilter]);
+  }, [deferredSearchInput, activeFilter]);
 
   if (searchResults.songs.length > 0) {
     const firstResult = searchResults.songs[0];
@@ -171,7 +172,8 @@ export const SearchPage = () => {
         if (index < 5)
           return (
             <Song
-              key={song.songId}
+              key={`${song.songId}-${index}`}
+              index={index}
               title={song.title}
               artists={song.artists}
               artworkPath={song.artworkPath}
@@ -250,7 +252,7 @@ export const SearchPage = () => {
         if (index < 5)
           return (
             <Artist
-              key={artist.artistId}
+              key={`${artist.artistId}-${index}`}
               name={artist.name}
               artworkPath={artist.artworkPath}
               artistId={artist.artistId}
@@ -318,7 +320,7 @@ export const SearchPage = () => {
         if (index < 4)
           return (
             <Album
-              key={album.albumId}
+              key={`${album.albumId}-${index}`}
               albumId={album.albumId}
               artists={album.artists}
               artworkPath={album.artworkPath}
@@ -338,7 +340,7 @@ export const SearchPage = () => {
       <MostRelevantResult
         resultType="playlist"
         title={firstResult.name}
-        key={2}
+        key={3}
         id={firstResult.playlistId}
         artworkPath={firstResult.artworkPath}
         infoType1={`${firstResult.songs.length} song${
@@ -368,7 +370,7 @@ export const SearchPage = () => {
         if (index < 4)
           return (
             <Playlist
-              key={index}
+              key={`${playlist.playlistId}-${index}`}
               name={playlist.name}
               playlistId={playlist.playlistId}
               createdDate={playlist.createdDate}
@@ -383,7 +385,7 @@ export const SearchPage = () => {
 
   return (
     <div className="main-container search-container">
-      <div className="search-bar-container">
+      <div className="search-bar-container appear-from-bottom">
         <span className="material-icons-round icon">search</span>
         <input
           type="search"
@@ -398,7 +400,7 @@ export const SearchPage = () => {
             });
             setSearchInput(e.target.value);
           }}
-          onKeyPress={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
           autoFocus
         />
       </div>
@@ -586,7 +588,7 @@ export const SearchPage = () => {
           searchResults.albums.length === 0 &&
           searchResults.playlists.length === 0 &&
           searchInput !== '' && (
-            <div className="no-search-results-container active">
+            <div className="no-search-results-container active appear-from-bottom">
               <img src={NoResultsImage} alt="Flying kite" />
               <div>
                 Hmm... There&apos;s nothing that matches with what you look for.
@@ -594,7 +596,7 @@ export const SearchPage = () => {
             </div>
           )}
         {searchInput === '' && (
-          <div className="no-search-results-container active">
+          <div className="no-search-results-container active appear-from-bottom">
             <img src={SearchSomethingImage} alt="Flying kite" />
             <div>Why thinking... Search something...</div>
           </div>

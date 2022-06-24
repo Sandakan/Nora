@@ -9,7 +9,7 @@ interface SongStatProp {
 
 export default (props: SongStatProp) => {
   return (
-    <div className="stat">
+    <div className="stat appear-from-bottom">
       <div className="stat-value">{props.value}</div>
       <div className="stat-description">{props.title}</div>
     </div>

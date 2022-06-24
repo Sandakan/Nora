@@ -39,7 +39,7 @@ export const Album = (props: Album) => {
 
   return (
     <div
-      className="album"
+      className="album appear-from-bottom"
       onContextMenu={(e) =>
         updateContextMenuData(
           true,

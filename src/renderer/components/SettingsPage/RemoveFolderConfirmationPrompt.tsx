@@ -31,7 +31,7 @@ export default (props: { folderName: string; absolutePath: string }) => {
                 );
               return changePromptMenuData(false);
             })
-            .catch((err) => console.log(err));
+            .catch((err) => console.error(err));
         }}
       >
         Delete Folder

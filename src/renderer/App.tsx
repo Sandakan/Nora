@@ -21,7 +21,7 @@ interface AppReducer {
   isCurrentSongPlaying: boolean;
   isMiniPlayer: boolean;
   volume: { isMuted: boolean; value: number };
-  isRepeating: boolean;
+  isRepeating: RepeatTypes;
   songPosition: number;
   isShuffling: boolean;
 }
@@ -46,7 +46,10 @@ type AppReducerStateActions =
   | 'UPDATE_IS_REPEATING_STATE'
   | 'TOGGLE_IS_FAVORITE_STATE'
   | 'TOGGLE_SHUFFLE_STATE'
-  | 'UPDATE_VOLUME_VALUE';
+  | 'UPDATE_VOLUME_VALUE'
+  | 'TOGGLE_REDUCED_MOTION'
+  | 'TOGGLE_SONG_INDEXING'
+  | 'TOGGLE_SONG_INDEXING';
 
 const reducer = (
   state: AppReducer,
@@ -67,6 +70,48 @@ const reducer = (
           typeof action.data === 'object'
             ? (action.data as UserData)
             : state.userData,
+      };
+    case 'TOGGLE_REDUCED_MOTION':
+      return {
+        ...state,
+        userData:
+          typeof action.data === 'boolean'
+            ? {
+                ...(state.userData as UserData),
+                preferences: {
+                  ...(state.userData as UserData).preferences,
+                  isReducedMotion: action.data,
+                },
+              }
+            : {
+                ...(state.userData as UserData),
+                preferences: {
+                  ...(state.userData as UserData).preferences,
+                  isReducedMotion: (state.userData as UserData).preferences
+                    .isReducedMotion,
+                },
+              },
+      };
+    case 'TOGGLE_SONG_INDEXING':
+      return {
+        ...state,
+        userData:
+          typeof action.data === 'boolean'
+            ? {
+                ...(state.userData as UserData),
+                preferences: {
+                  ...(state.userData as UserData).preferences,
+                  songIndexing: action.data,
+                },
+              }
+            : {
+                ...(state.userData as UserData),
+                preferences: {
+                  ...(state.userData as UserData).preferences,
+                  songIndexing: (state.userData as UserData).preferences
+                    .songIndexing,
+                },
+              },
       };
     case 'PROMPT_MENU_DATA_CHANGE':
       return {
@@ -160,7 +205,9 @@ const reducer = (
       return {
         ...state,
         isRepeating:
-          typeof action.data === 'boolean' ? action.data : !state.isRepeating,
+          typeof action.data === 'string'
+            ? (action.data as RepeatTypes)
+            : state.isRepeating,
       };
     case 'TOGGLE_IS_FAVORITE_STATE':
       return {
@@ -240,6 +287,7 @@ export default function App() {
       isVisible: false,
       icon: <></>,
       content: <span />,
+      isLoading: false,
     },
     PromptMenuData: {
       isVisible: false,
@@ -247,34 +295,30 @@ export default function App() {
       className: '',
     },
     volume: { isMuted: false, value: 50 },
-    isRepeating: false,
+    isRepeating: 'false',
     isShuffling: false,
     songPosition: 0,
   } as AppReducer);
 
   const [, startTransition] = React.useTransition();
-
   const refStartPlay = React.useRef(false);
   const refQueue = React.useRef({
     currentSongIndex: null,
     queue: [],
     queueType: 'songs',
   } as Queue);
-
-  // const playCurrentSong = () => content.startPlay && toggleSongPlayback();
-
-  const handleSongEnd = () => {
-    if (content.isRepeating) {
-      player.currentTime = 0;
-      player.play();
-    } else {
-      handleSkipForwardClick();
-    }
-  };
+  const songDurationRef = React.useRef(0);
+  const isRepeatingRef = React.useRef('false' as RepeatTypes);
+  const isShufflingRef = React.useRef(false);
+  const currentSongDataRef = React.useRef({} as AudioData);
 
   const toggleSongPlayback = () => {
-    if (player.paused) player.play();
-    else player.pause();
+    if (player.paused) return player.play();
+    if (player.ended) {
+      player.currentTime = 0;
+      return player.play();
+    }
+    return player.pause();
   };
 
   React.useEffect(() => {
@@ -293,7 +337,15 @@ export default function App() {
     window.api.beforeQuitEvent(async () => {
       window.api.sendSongPosition(player.currentTime);
       await window.api.saveUserData('isShuffling', content.isShuffling);
-      await window.api.saveUserData('isRepeating', content.isRepeating);
+      await window.api.saveUserData('isRepeating', isRepeatingRef.current);
+    });
+    window.api.onWindowBlur(() => {
+      if (document.querySelector('.App'))
+        document.querySelector('.App')?.classList.add('blurred');
+    });
+    window.api.onWindowFocus(() => {
+      if (document.querySelector('.App'))
+        document.querySelector('.App')?.classList.remove('blurred');
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -302,7 +354,7 @@ export default function App() {
     player.addEventListener('canplay', () => {
       if (refStartPlay.current) player.play();
     });
-    player.addEventListener('ended', handleSongEnd);
+    player.addEventListener('ended', handleSkipForwardClick);
     player.addEventListener('play', addSongTitleToTitleBar);
     player.addEventListener('pause', () => {
       document.title = `Oto Music For Desktop`;
@@ -311,14 +363,19 @@ export default function App() {
         player.currentTime
       );
     });
-    player.addEventListener('timeupdate', (e) => {
-      if (Math.floor((e.target as HTMLAudioElement).currentTime) % 1 === 0)
+    setInterval(() => {
+      if (!player.paused)
         startTransition(() =>
           dispatch({
             type: 'UPDATE_SONG_POSITION',
-            data: Math.floor((e.target as HTMLAudioElement).currentTime),
+            data: Math.floor(songDurationRef.current),
           })
         );
+    }, 1000);
+    player.addEventListener('timeupdate', (e) => {
+      songDurationRef.current = Math.floor(
+        (e.target as HTMLAudioElement).currentTime
+      );
     });
 
     return () => {
@@ -341,14 +398,8 @@ export default function App() {
         dispatch({ type: 'USER_DATA_CHANGE', data: res });
         dispatch({ type: 'IS_DARK_MODE_CHANGE', data: res.theme.isDarkMode });
         dispatch({ type: 'UPDATE_VOLUME', data: res.volume });
-        dispatch({
-          type: 'TOGGLE_SHUFFLE_STATE',
-          data: res.isShuffling || false,
-        });
-        dispatch({
-          type: 'UPDATE_IS_REPEATING_STATE',
-          data: res.isRepeating || false,
-        });
+        toggleShuffling(res.isShuffling);
+        toggleRepeat(res.isRepeating);
         if (
           content.navigationHistory.history.at(-1)?.pageTitle !==
           res.defaultPage
@@ -370,23 +421,23 @@ export default function App() {
         } else {
           // eslint-disable-next-line promise/no-nesting
           window.api
-            .checkForSongs()
+            .getAllSongs()
             .then((audioData) => {
               if (!audioData) return undefined;
               createQueue(
-                audioData.map((song) => song.songId),
+                audioData.data.map((song) => song.songId),
                 'songs'
               );
               return undefined;
             })
-            .catch((err) => console.log(err));
+            .catch((err) => console.error(err));
         }
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.error(err));
     window.api.getMessageFromMain((_, message) => {
       updateNotificationPanelData(5000, <span>{message}</span>);
     });
-    window.api.dataUpdateEvent((_, dataType, message) =>
+    window.api.dataUpdateEvent((_, dataType, message = '') =>
       console.log('Data update event occurred.', dataType, message)
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -395,16 +446,18 @@ export default function App() {
   React.useEffect(() => {
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: content.currentSongData.title,
-        artist: Array.isArray(content.currentSongData.artists)
-          ? content.currentSongData.artists.join(', ')
-          : content.currentSongData.artists,
-        album: content.currentSongData.album
-          ? content.currentSongData.album.name || 'Unknown Album'
+        title: currentSongDataRef.current.title,
+        artist: Array.isArray(currentSongDataRef.current.artists)
+          ? currentSongDataRef.current.artists
+              .map((artist) => artist.name)
+              .join(', ')
+          : `Unknown Artist`,
+        album: currentSongDataRef.current.album
+          ? currentSongDataRef.current.album.name || 'Unknown Album'
           : 'Unknown Album',
         artwork: [
           {
-            src: `data:;base64,${content.currentSongData.artwork}`,
+            src: `data:;base64,${currentSongDataRef.current.artwork}`,
             sizes: '300x300',
             type: 'image/png',
           },
@@ -430,31 +483,87 @@ export default function App() {
       data: false,
     });
 
-  const manageSpaceKeyPlayback = (e: KeyboardEvent) => {
+  const managePlaybackUsingKeyboard = (e: KeyboardEvent) => {
     e.preventDefault();
-    if (e.code === 'Space') toggleSongPlayback();
+    if (e.ctrlKey && e.key === 'ArrowUp')
+      dispatch({
+        type: 'UPDATE_VOLUME_VALUE',
+        data: player.volume + 0.05 <= 1 ? player.volume * 100 + 5 : 1,
+      });
+    else if (e.ctrlKey && e.key === 'ArrowDown')
+      dispatch({
+        type: 'UPDATE_VOLUME_VALUE',
+        data: player.volume - 0.05 >= 0 ? player.volume * 100 - 5 : 0,
+      });
+    else if (e.ctrlKey && e.key === 'm') toggleMutedState(!player.muted);
+    else if (e.ctrlKey && e.key === 'ArrowRight') handleSkipForwardClick();
+    else if (e.ctrlKey && e.key === 'ArrowLeft') handleSkipBackwardClick();
+    else if (e.ctrlKey && e.key === 's') toggleShuffling();
+    else if (e.ctrlKey && e.key === 't') toggleRepeat();
+    else if (e.ctrlKey && e.key === 'h') toggleIsFavorite();
+    else if (e.ctrlKey && e.key === 'l') {
+      const currentlyActivePage =
+        content.navigationHistory.history[
+          content.navigationHistory.pageHistoryIndex
+        ];
+      if (currentlyActivePage.pageTitle === 'Lyrics')
+        changeCurrentActivePage('Home');
+      else changeCurrentActivePage('Lyrics');
+    } else if (e.ctrlKey && e.key === 'n')
+      updateMiniPlayerStatus(!content.isMiniPlayer);
+    else if (e.ctrlKey && e.key === 'q') {
+      const currentlyActivePage =
+        content.navigationHistory.history[
+          content.navigationHistory.pageHistoryIndex
+        ];
+      if (currentlyActivePage.pageTitle === 'CurrentQueue')
+        changeCurrentActivePage('Home');
+      else changeCurrentActivePage('CurrentQueue');
+    } else if (e.code === 'Space') toggleSongPlayback();
+    else if (e.key === 'ArrowLeft') {
+      if (player.currentTime - 10 >= 0) player.currentTime -= 10;
+      else player.currentTime = 0;
+    } else if (e.key === 'ArrowRight') {
+      if (player.currentTime + 10 < player.duration) player.currentTime += 10;
+    }
   };
 
   React.useEffect(() => {
     window.addEventListener('click', handleContextMenuVisibilityUpdate);
-    window.addEventListener('keypress', manageSpaceKeyPlayback);
+    window.addEventListener('keydown', managePlaybackUsingKeyboard);
     return () => {
       window.removeEventListener('click', handleContextMenuVisibilityUpdate);
-      window.removeEventListener('keypress', manageSpaceKeyPlayback);
+      window.removeEventListener('keydown', managePlaybackUsingKeyboard);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addSongTitleToTitleBar = () => {
-    if (content.currentSongData.title && content.currentSongData.artists)
-      document.title = `${content.currentSongData.title} - ${
-        Array.isArray(content.currentSongData.artists)
-          ? content.currentSongData.artists.join(', ')
-          : content.currentSongData.artists
+    if (currentSongDataRef.current.title && currentSongDataRef.current.artists)
+      document.title = `${currentSongDataRef.current.title} - ${
+        Array.isArray(currentSongDataRef.current.artists) &&
+        currentSongDataRef.current.artists
+          .map((artist) => artist.name)
+          .join(', ')
+        // : currentSongDataRef.current.artists.name
       }`;
   };
 
-  const toggleRepeat = () => dispatch({ type: 'UPDATE_IS_REPEATING_STATE' });
+  const toggleRepeat = (newState?: RepeatTypes) => {
+    const repeatState =
+      newState ||
+      // eslint-disable-next-line no-nested-ternary
+      (isRepeatingRef.current === 'false'
+        ? 'repeat'
+        : isRepeatingRef.current === 'repeat'
+        ? 'repeat-1'
+        : 'false');
+    isRepeatingRef.current = repeatState;
+    dispatch({
+      type: 'UPDATE_IS_REPEATING_STATE',
+      data: repeatState,
+    });
+  };
 
   const handleSkipBackwardClick = () => {
     const { currentSongIndex } = refQueue.current;
@@ -468,42 +577,62 @@ export default function App() {
 
   const handleSkipForwardClick = () => {
     const { currentSongIndex } = refQueue.current;
-    console.log('isRepeating ', content.isRepeating);
-    if (content.isRepeating) {
+    if (isRepeatingRef.current === 'repeat-1') {
       player.currentTime = 0;
       toggleSongPlayback();
-      window.api.incrementNoOfSongListens(content.currentSongData.songId);
+      window.api.incrementNoOfSongListens(currentSongDataRef.current.songId);
     } else if (typeof currentSongIndex === 'number') {
-      if (refQueue.current.queue.length - 1 === currentSongIndex)
-        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-        true; // changeQueueCurrentSongIndex(0); prevents repeating the playlist
-      else changeQueueCurrentSongIndex(currentSongIndex + 1);
+      if (refQueue.current.queue.length - 1 === currentSongIndex) {
+        if (isRepeatingRef.current === 'repeat') changeQueueCurrentSongIndex(0);
+      } else changeQueueCurrentSongIndex(currentSongIndex + 1);
     } else changeQueueCurrentSongIndex(0);
   };
 
   const playSong = (songId: string, isStartPlay = true) => {
-    if (content.currentSongData.songId === songId) toggleSongPlayback();
-    else
-      window.api
+    if (typeof songId === 'string') {
+      if (currentSongDataRef.current.songId === songId)
+        return toggleSongPlayback();
+      return window.api
         .getSong(songId)
         .then((songData) => {
           if (songData) {
             console.log('playSong', songId, songData.path);
             dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: songData });
+            currentSongDataRef.current = songData;
             if (player.src !== `otoMusic://localFiles/${songData.path}`)
               player.src = `otoMusic://localFiles/${songData.path}`;
             window.api.saveUserData('currentSong.songId', songData.songId);
             refStartPlay.current = isStartPlay;
             if (isStartPlay) toggleSongPlayback();
             if (refQueue.current.queue.length > 0) {
-              refQueue.current.currentSongIndex =
-                refQueue.current.queue.indexOf(songData.songId) || 0;
+              if (refQueue.current.queue.indexOf(songData.songId) !== -1)
+                refQueue.current.currentSongIndex =
+                  refQueue.current.queue.indexOf(songData.songId);
+              else {
+                console.log(
+                  `song ${songData.title} with id ${songData.songId} is not present in the queue`
+                );
+                refQueue.current.queue.push(songData.songId);
+                if (refQueue.current.currentSongIndex !== null)
+                  refQueue.current.currentSongIndex += 1;
+                else refQueue.current.currentSongIndex = 0;
+              }
             } else if (refQueue.current.queue.length === 0)
               refQueue.current.queue.push(songData.songId);
           } else console.log(songData);
           return undefined;
         })
-        .catch((err) => console.log(err));
+        .catch((err) => console.error(err));
+    }
+    updateNotificationPanelData(
+      5000,
+      <span>Seems like we can&apos;t play that song.</span>,
+      <span className="material-icons-round icon">error_outline</span>
+    );
+    return window.api.sendLogs(
+      `======= ERROR OCCURRED WHEN TRYING TO PLAY A S0NG. =======\nERROR : Song id is of unknown type; SONGIDTYPE : ${typeof songId}`
+    );
+    // todo : Alert the user about the song problem.
   };
 
   const createQueue = (
@@ -529,7 +658,7 @@ export default function App() {
         if (startPlaying) return changeQueueCurrentSongIndex(0);
         return undefined;
       })
-      .catch((err: Error) => console.log(err));
+      .catch((err: Error) => console.error(err));
   };
 
   const changeQueueCurrentSongIndex = (currentSongIndex: number) => {
@@ -555,8 +684,11 @@ export default function App() {
       playSong(refQueue.current.queue[currentSongIndex]);
   };
 
-  const toggleShuffling = (isShuffling?: boolean) =>
+  const toggleShuffling = (isShuffling?: boolean) => {
     dispatch({ type: 'TOGGLE_SHUFFLE_STATE', data: isShuffling });
+    if (isShuffling !== undefined) isShufflingRef.current = isShuffling;
+    else isShufflingRef.current = !isShufflingRef.current;
+  };
 
   const updateCurrentSongPlaybackState = (isPlaying: boolean) => {
     if (isPlaying !== content.isCurrentSongPlaying)
@@ -631,7 +763,8 @@ export default function App() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     contentData: ReactElement<any, any>,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    icon: ReactElement<any, any> = <></>
+    icon: ReactElement<any, any> = <></>,
+    isLoading = false
   ) => {
     if (delay === 0) {
       dispatch({
@@ -640,6 +773,7 @@ export default function App() {
           ...content.notificationPanelData,
           isVisible: false,
           icon: <></>,
+          isLoading,
         },
       });
     } else {
@@ -655,6 +789,7 @@ export default function App() {
               ...content.notificationPanelData,
               isVisible: false,
               icon: <></>,
+              isLoading,
             },
           }),
         delay
@@ -688,14 +823,19 @@ export default function App() {
       dispatch({ type: 'UPDATE_MINI_PLAYER_STATE', data: isVisible });
   };
 
-  const toggleIsFavorite = (isFavorite: boolean) => {
-    if (content.currentSongData.isAFavorite !== isFavorite)
+  const toggleIsFavorite = (isFavorite?: boolean) => {
+    const newFavorite = isFavorite ?? !currentSongDataRef.current.isAFavorite;
+    if (currentSongDataRef.current.isAFavorite !== newFavorite)
       window.api
-        .toggleLikeSong(content.currentSongData.songId, isFavorite)
-        .then(() =>
-          dispatch({ type: 'TOGGLE_IS_FAVORITE_STATE', data: isFavorite })
-        )
-        .catch((err) => console.log(err));
+        .toggleLikeSong(currentSongDataRef.current.songId, newFavorite)
+        .then(() => {
+          currentSongDataRef.current.isAFavorite = newFavorite;
+          return dispatch({
+            type: 'TOGGLE_IS_FAVORITE_STATE',
+            data: newFavorite,
+          });
+        })
+        .catch((err) => console.error(err));
   };
 
   const updateVolume = (volume: number) =>
@@ -721,6 +861,40 @@ export default function App() {
     dispatch({ type: 'CURRENT_ACTIVE_PAGE_DATA_UPDATE', data });
   };
 
+  const toggleReducedMotion = (state?: boolean) => {
+    window.api
+      .saveUserData(
+        'preferences.isReducedMotion',
+        state !== undefined
+          ? state
+          : content.userData?.preferences.isReducedMotion || false
+      )
+      .then(() =>
+        dispatch({
+          type: 'TOGGLE_REDUCED_MOTION',
+          data: state,
+        })
+      )
+      .catch((err) => console.error(err));
+  };
+
+  const toggleSongIndexing = (state?: boolean) => {
+    window.api
+      .saveUserData(
+        'preferences.songIndexing',
+        state !== undefined
+          ? state
+          : content.userData?.preferences.songIndexing || false
+      )
+      .then(() =>
+        dispatch({
+          type: 'TOGGLE_SONG_INDEXING',
+          data: state,
+        })
+      )
+      .catch((err) => console.error(err));
+  };
+
   const appContextValues = {
     toggleDarkMode,
     isDarkMode: content.isDarkMode,
@@ -732,7 +906,7 @@ export default function App() {
     PromptMenuData: content.PromptMenuData,
     changePromptMenuData,
     playSong,
-    currentSongData: content.currentSongData,
+    currentSongData: currentSongDataRef.current,
     currentlyActivePage:
       content.navigationHistory.history[
         content.navigationHistory.pageHistoryIndex
@@ -742,6 +916,8 @@ export default function App() {
     updateNotificationPanelData,
     notificationPanelData: content.notificationPanelData,
     userData: content.userData,
+    toggleReducedMotion,
+    toggleSongIndexing,
     createQueue,
     queue: refQueue.current,
     updateQueueData,
@@ -759,7 +935,7 @@ export default function App() {
     updateVolume,
     isMuted: content.volume.isMuted,
     toggleMutedState,
-    isRepeating: content.isRepeating,
+    isRepeating: isRepeatingRef.current,
     toggleRepeat,
     isShuffling: content.isShuffling,
     toggleShuffling,
@@ -771,7 +947,13 @@ export default function App() {
   return (
     <AppContext.Provider value={appContextValues}>
       {!content.isMiniPlayer && (
-        <div className={`App ${content.isDarkMode ? 'dark-mode' : ''}`}>
+        <div
+          className={`App ${content.isDarkMode ? 'dark-mode' : ''} ${
+            content.userData && content.userData.preferences.isReducedMotion
+              ? 'reduced-motion'
+              : ''
+          }`}
+        >
           <ContextMenu />
           <PromptMenu />
           <Header />
@@ -783,7 +965,11 @@ export default function App() {
           </SongPositionContext.Provider>
         </div>
       )}
-      {content.isMiniPlayer && <MiniPlayer />}
+      <SongPositionContext.Provider
+        value={{ songPosition: player.currentTime }}
+      >
+        {content.isMiniPlayer && <MiniPlayer />}
+      </SongPositionContext.Provider>
     </AppContext.Provider>
   );
 }

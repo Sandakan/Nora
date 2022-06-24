@@ -45,6 +45,7 @@ export default () => {
     isPlaying,
     toggleSongPlayback,
     updateSongPosition,
+    updateContextMenuData,
   } = useContext(AppContext);
   const { songPosition } = useContext(SongPositionContext);
 
@@ -55,40 +56,6 @@ export default () => {
   }%`;
   volumeBarCssProperties['--volume-before-width'] = `${volume}%`;
 
-  // React.useEffect(() => {
-  //   music.addEventListener('pause', () => {
-  //     dispatch({ type: 'MUSIC_PLAYBACK_STATE', data: false });
-  //     document.title = `Oto Music For Desktop`;
-  //     window.api.saveUserData(
-  //       'currentSong.stoppedPosition',
-  //       music.currentTime.toString()
-  //     );
-  //   });
-
-  // const handleSongEnd = () => {
-  //   if (content.isRepeating) {
-  //     music.currentTime = 0;
-  //     music.play();
-  //     dispatch({ type: 'MUSIC_PLAYBACK_STATE', data: true });
-  //   } else {
-  //     dispatch({ type: 'MUSIC_PLAYBACK_STATE', data: false });
-  //     handleSkipForwardClick();
-  //   }
-  // };
-
-  // React.useEffect(() => {
-  //   dispatch({
-  //     type: 'FAVORITE_STATE_CHANGE',
-  //     data: currentSongData.isAFavorite,
-  //   });
-  //   music.addEventListener('ended', handleSongEnd);
-  //   music.addEventListener('play', addSongTitleToTitleBar);
-  //   return () => {
-  //     music.removeEventListener('ended', handleSongEnd);
-  //     music.removeEventListener('play', addSongTitleToTitleBar);
-  //   };
-  // }, [currentSongData, content.isRepeating]);
-
   const handleQueueShuffle = () => {
     if (!isShuffling)
       updateQueueData(
@@ -97,6 +64,26 @@ export default () => {
       );
     toggleShuffling();
   };
+
+  const showArtistInfoPage = (artistName: string, artistId: string) =>
+    currentSongData.artists &&
+    (currentlyActivePage.pageTitle === 'ArtistInfo' &&
+    currentlyActivePage.data.artistName === artistName
+      ? changeCurrentActivePage('Home')
+      : changeCurrentActivePage('ArtistInfo', {
+          artistName,
+          artistId,
+        }));
+
+  const showSongInfoPage = () =>
+    currentlyActivePage.pageTitle === 'SongInfo' &&
+    currentlyActivePage.data &&
+    currentlyActivePage.data.songInfo &&
+    currentlyActivePage.data.songInfo.songId === currentSongData.songId
+      ? changeCurrentActivePage('Home')
+      : changeCurrentActivePage('SongInfo', {
+          songInfo: { songId: currentSongData.songId },
+        });
 
   return (
     <footer className="song-controls-container">
@@ -109,6 +96,21 @@ export default () => {
                 : DefaultSongCover
             }
             alt="Default song cover"
+            onContextMenu={(e) => {
+              e.stopPropagation();
+              updateContextMenuData(
+                true,
+                [
+                  {
+                    label: 'Info',
+                    iconName: 'info',
+                    handlerFunction: showSongInfoPage,
+                  },
+                ],
+                e.pageX,
+                e.pageY
+              );
+            }}
           />
         </div>
         <div className="song-info-container">
@@ -116,17 +118,22 @@ export default () => {
             className="song-title"
             id="currentSongTitle"
             title={currentSongData.title ? currentSongData.title : ''}
-            onClick={() =>
-              currentlyActivePage.pageTitle === 'SongInfo' &&
-              currentlyActivePage.data &&
-              currentlyActivePage.data.songInfo &&
-              currentlyActivePage.data.songInfo.songId ===
-                currentSongData.songId
-                ? changeCurrentActivePage('Home')
-                : changeCurrentActivePage('SongInfo', {
-                    songInfo: { songId: currentSongData.songId },
-                  })
-            }
+            onClick={showSongInfoPage}
+            onContextMenu={(e) => {
+              e.stopPropagation();
+              updateContextMenuData(
+                true,
+                [
+                  {
+                    label: 'Info',
+                    iconName: 'info',
+                    handlerFunction: showSongInfoPage,
+                  },
+                ],
+                e.pageX,
+                e.pageY
+              );
+            }}
           >
             {currentSongData.title ? currentSongData.title : ''}
           </div>
@@ -135,21 +142,33 @@ export default () => {
               Array.isArray(currentSongData.artists) ? (
                 currentSongData.artists.length > 0 ? (
                   currentSongData.artists.map((artist, index) => (
-                    // !THIS REACT FRAGMENT GENERATES A KEY PROP ERROR IN CONSOLE
                     <span key={index}>
                       <span
                         className="artist"
                         key={artist.artistId}
-                        title={artist.artistId}
+                        title={artist.name}
                         onClick={() =>
-                          currentlyActivePage.pageTitle === 'ArtistInfo' &&
-                          currentlyActivePage.data.artistName === artist
-                            ? changeCurrentActivePage('Home')
-                            : changeCurrentActivePage('ArtistInfo', {
-                                artistName: artist.name,
-                                artistId: artist.artistId,
-                              })
+                          showArtistInfoPage(artist.name, artist.artistId)
                         }
+                        onContextMenu={(e) => {
+                          e.stopPropagation();
+                          updateContextMenuData(
+                            true,
+                            [
+                              {
+                                label: 'Info',
+                                iconName: 'info',
+                                handlerFunction: () =>
+                                  showArtistInfoPage(
+                                    artist.name,
+                                    artist.artistId
+                                  ),
+                              },
+                            ],
+                            e.pageX,
+                            e.pageY
+                          );
+                        }}
                       >
                         {artist.name}
                       </span>
@@ -166,17 +185,34 @@ export default () => {
                 <span
                   className="artist"
                   title={currentSongData.artists[0]}
-                  onClick={() =>
-                    currentSongData.artists &&
-                    (currentlyActivePage.pageTitle === 'ArtistInfo' &&
-                    currentlyActivePage.data.artistName ===
-                      currentSongData.artists[0].name
-                      ? changeCurrentActivePage('Home')
-                      : changeCurrentActivePage('ArtistInfo', {
-                          artistName: currentSongData.artists[0].name,
-                          artistId: currentSongData.artists[0].artistId,
-                        }))
-                  }
+                  onClick={() => {
+                    if (currentSongData.artists)
+                      showArtistInfoPage(
+                        currentSongData.artists[0].name,
+                        currentSongData.artists[0].artistId
+                      );
+                  }}
+                  onContextMenu={(e) => {
+                    e.stopPropagation();
+                    updateContextMenuData(
+                      true,
+                      [
+                        {
+                          label: 'Info',
+                          iconName: 'info',
+                          handlerFunction: () => {
+                            if (currentSongData.artists)
+                              showArtistInfoPage(
+                                currentSongData.artists[0].name,
+                                currentSongData.artists[0].artistId
+                              );
+                          },
+                        },
+                      ],
+                      e.pageX,
+                      e.pageY
+                    );
+                  }}
                 >
                   {currentSongData.artists[0]}
                 </span>
@@ -191,7 +227,7 @@ export default () => {
         <div className="controls-container">
           <div className="like-btn">
             <span
-              title="Like"
+              title="Like (Ctrl + H)"
               className={`material-icons-round icon ${
                 currentSongData.isAFavorite && 'liked'
               }`}
@@ -200,18 +236,20 @@ export default () => {
               {currentSongData.isAFavorite ? 'favorite' : 'favorite_border'}
             </span>
           </div>
-          <div className={`repeat-btn ${isRepeating && 'active'}`}>
+          <div className={`repeat-btn ${isRepeating !== 'false' && 'active'}`}>
             <span
-              title="Repeat"
+              title="Repeat (Ctrl + T)"
               className="material-icons-round icon"
-              onClick={toggleRepeat}
+              onClick={() => toggleRepeat()}
             >
-              repeat
+              {isRepeating === 'false' || isRepeating === 'repeat'
+                ? 'repeat'
+                : 'repeat_one'}
             </span>
           </div>
           <div className="skip-back-btn">
             <span
-              title="Previous Song"
+              title="Previous Song (Ctrl + Left Arrow)"
               className="material-icons-round icon"
               onClick={handleSkipBackwardClick}
             >
@@ -220,7 +258,7 @@ export default () => {
           </div>
           <div className="play-pause-btn">
             <span
-              title="Play/Pause"
+              title="Play/Pause (Space)"
               className="material-icons-round icon"
               onClick={toggleSongPlayback}
             >
@@ -229,7 +267,7 @@ export default () => {
           </div>
           <div className="skip-forward-btn">
             <span
-              title="Next Song"
+              title="Next Song (Ctrl + Right Arrow)"
               className="material-icons-round icon"
               onClick={handleSkipForwardClick}
             >
@@ -242,7 +280,7 @@ export default () => {
             }`}
           >
             <span
-              title="Lyrics"
+              title="Lyrics (Ctrl + L)"
               className="material-icons-round icon"
               onClick={() =>
                 currentlyActivePage.pageTitle === 'Lyrics'
@@ -255,7 +293,7 @@ export default () => {
           </div>
           <div className={`shuffle-btn ${isShuffling && 'active'}`}>
             <span
-              title="Shuffle"
+              title="Shuffle (Ctrl + S)"
               className="material-icons-round icon"
               onClick={handleQueueShuffle}
             >
@@ -282,6 +320,7 @@ export default () => {
                 updateSongPosition(Number(e.currentTarget.value))
               }
               style={seekBarCssProperties}
+              title={Math.round(songPosition).toString()}
             />
           </div>
           <div className="full-song-duration">
@@ -303,7 +342,7 @@ export default () => {
           }`}
         >
           <span
-            title="Current Queue"
+            title="Current Queue (Ctrl + Q)"
             className="material-icons-round icon"
             onClick={() =>
               currentlyActivePage.pageTitle === 'CurrentQueue'
@@ -311,21 +350,22 @@ export default () => {
                 : changeCurrentActivePage('CurrentQueue')
             }
           >
-            queue
+            segment
           </span>
         </div>
         <div className="mini-player-btn">
           <span
+            title="Open in Mini player (Ctrl + N)"
             className="material-icons-round icon"
             onClick={() => updateMiniPlayerStatus(!isMiniPlayer)}
           >
-            tab
+            tab_unselected
           </span>
         </div>
         <div className="volume-controller-container">
           <div className="volume-btn">
             <span
-              title="Change Volume"
+              title="Mute/Unmute (Ctrl + M)"
               className="material-icons-round icon"
               onClick={() => toggleMutedState()}
             >
@@ -347,6 +387,7 @@ export default () => {
               }}
               aria-label="Volume slider"
               style={volumeBarCssProperties}
+              title={Math.round(volume).toString()}
             />
           </div>
         </div>
