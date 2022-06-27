@@ -103,7 +103,7 @@
   "dependencies": {
     "auto-launch": "^5.0.5",
     "electron-debug": "^3.2.0",
-    "electron-log": "^4.4.7",
+    "electron-log": "^4.4.8",
     "electron-store": "^8.0.1",
     "electron-updater": "^5.0.1",
     "lyrics-finder": "^21.7.0",
