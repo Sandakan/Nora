@@ -1,0 +1,506 @@
+{
+  "latestVersion": {
+    "version": "0.7.0-alpha",
+    "releaseDate": "2022 June 23",
+    "artwork": "/assets/other/release artworks/whats_new_0.7.0-alpha_artwork.png"
+  },
+  "versions": [
+    {
+      "version": "0.6.0-alpha",
+      "releaseDate": "2022 June 24",
+      "notes": {
+        "new": [
+          {
+            "note": "Added the support to edit song id3 tags. Right click on a song and click Edit songs tags to go to the SongID3TagEditorPage. Currently changes to those data wouldn't be updated on the app. (Experimental)"
+          },
+          {
+            "note": "Added the basement to provide support for m3u files to import and export playlists."
+          },
+          {
+            "note": "Artist artworks will be updated when the user listens to their songs."
+          },
+          {
+            "note": "Added keyboard shortcuts for the basic functions of the app."
+          },
+          {
+            "note": "Added support for reduced motion. You can enable reduced motion in Settings > Accessibility."
+          },
+          {
+            "note": "Added Genres to the app. You can view details related to the genre in GenreInfoPage by clicking on a genre."
+          },
+          {
+            "note": "Now the app window will blur the title bar when the app loses focus."
+          },
+          {
+            "note": "Now enabling song indexing from Settings > Accessibility will number the songs."
+          },
+          {
+            "note": "In CurrentQueuePage, app will direct you to the current playing song by scrolling it to the center of the window."
+          },
+          {
+            "note": "Added support for repeat and repeat-1 to keep listening to your loved songs all day long."
+          },
+          {
+            "note": "Added a loading animation for the notification bar."
+          },
+          {
+            "note": "Now users can restore their blacklisted songs from the Settings Page."
+          },
+          {
+            "note": "Now the app can be configured to start on system startup."
+          },
+          {
+            "note": "Added a button for the users to open the Devtools or the log file in Settings > About."
+          },
+          {
+            "note": "Frequently used data such as songs, artists, playlists etc will be cached inside the app at runtime."
+          },
+          {
+            "note": "Song lyrics will also be cached in the app until the relevant song finishes."
+          },
+          {
+            "note": "Now some parts of the UI such as HomePage will be updated on data modifications. These modifications include new songs, recently played songs etc."
+          },
+          {
+            "note": "Updated some functions to support pagination and sorting features to remove some burden off the renderer."
+          }
+        ],
+        "fixed": [
+          {
+            "note": "Fixed a security vulnerability related to package 'sharp'."
+          },
+          {
+            "note": "Removed unnecessary css styles and optimized the styling of the app."
+          },
+          {
+            "note": "Fixed a possibility of duplicating songs by adding the same folder again."
+          },
+          {
+            "note": "Fixed a bug related to not deleting app data after an app reset."
+          },
+          {
+            "note": "Fixed a bug related to over-rendering of react components when a song is playing resulting higher consumption of cpu and memory. This also fixes the jitter when scrolling."
+          },
+          {
+            "note": "Removed unnecessary context menu options from the HomePage."
+          },
+          {
+            "note": "Fixed a bug related to parsing songs that are still being written to the system."
+          },
+          {
+            "note": "Fixed a bug where removing a song from the system will identify as a blacklisted song by the app."
+          },
+          {
+            "note": "Now the context menu will appear relevant to the available width and height of the window."
+          },
+          {
+            "note": "Fixed an error where some functions are coded asynchronous but are actually synchronous."
+          },
+          {
+            "note": "Updated the logger to write logs more clearly on a txt file. Now it shows more relevant information in the logs."
+          },
+          {
+            "note": "Some functions now can send multiple results. This reduces number of requests to the api to fetch data."
+          },
+          {
+            "note": "Fixed a bug where newly added songs won't be added to the library."
+          }
+        ],
+        "knownIssues": [
+          {
+            "note": "There is still a small amount of unwanted cpu consumption due to over-rendering of components."
+          },
+          {
+            "note": "Blacklisting or removing a song from the library isn't working as intended."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.5.0-alpha",
+      "releaseDate": "2022 May 22",
+      "notes": {
+        "new": [
+          {
+            "note": "Now queues and some other features save their states between sessions (Experimental)."
+          },
+          {
+            "note": "Now Currently Playing Queue shows information about the current queue including playlist name, artwork etc (Experimental)."
+          },
+          {
+            "note": "Updated settings page to provide information about app version, github repository etc (Experimental)."
+          },
+          {
+            "note": "Now users can remove songs from the library, move to the recycle bin or delete permanently from the system. Removed songs from the library will be blacklisted. (Experimental)"
+          },
+          {
+            "note": "Now logger stores some information about the current system. This includes cpu model, architechture, platform, os and system memory."
+          },
+          {
+            "note": "A new event added to detect app quits to provide methods to persist session data."
+          },
+          {
+            "note": "Now playlists, albums, and artists' songs can be played by adding it to the queue."
+          },
+          {
+            "note": "Now albums and artists support context menu options."
+          },
+          {
+            "note": "Now online pictures of the artists will be shown thoughout the app after watching their profile."
+          },
+          {
+            "note": "Added a song blacklist function. Now songs removed from the library will be blacklisted and can be restored from the settings page. (Experimental)"
+          },
+          {
+            "note": "Added new images that will be displayed in situations like when the songs are loading and when there's no songs etc."
+          },
+          {
+            "note": "Now searchPage shows results about playlists."
+          },
+          {
+            "note": "Now some information about artist data and album data is saved with song data."
+          },
+          {
+            "note": "Now you can view all the search results related to your query by clicking 'See All' buttons of specific categories in searchPage."
+          },
+          {
+            "note": "Created new components Button and Checkbox."
+          },
+          {
+            "note": "Added new buttons in ArtistInfoPage, AlbumInfoPage, PlaylistInfoPage, CurrentQueuePage to provide functions like play all, shuffle and play, and add to queue etc."
+          }
+        ],
+        "fixed": [
+          {
+            "note": "Fixed a bug related to npm packages."
+          },
+          {
+            "note": "Updated parseSong to differentiate between currently added songs and new songs. Previously this problem will duplicate the data related to the song in the library."
+          },
+          {
+            "note": "Fixed some music playback issues."
+          },
+          {
+            "note": "Fixed some issues related to queuing songs."
+          },
+          {
+            "note": "Updated and improved the styles of the app."
+          },
+          {
+            "note": "Now number of listens of a song will be updated if the song is listened repeatedly by using repeat function."
+          },
+          {
+            "note": "Updated artist online information apis."
+          },
+          {
+            "note": "Applied useTransition hook to improve user input responsiveness in the app when a song is playing."
+          }
+        ],
+        "knownIssues": [
+          {
+            "note": "Sometimes newly added songs won't be added to the library. The workaround is to reset the app and linking the relevant folder again."
+          },
+          {
+            "note": "Shuffle and Repeat states currently is not presisting states between sessions."
+          },
+          {
+            "note": "Resync songs context menu option isn't working as intended."
+          },
+          {
+            "note": "Scrolling in a page when is a song is playing reduces smoothness of the app due excessive rendering."
+          }
+        ]
+      }
+    },
+    {
+      "version": "0.4.1-alpha",
+      "releaseDate": "2022 May 16",
+      "notes": {
+        "new": [
+          {
+            "note": "Migrated the song player to the root of the app to provide support for features such as mini-player (Experimental)."
+          },
+          {
+            "note": "Now Currently Playing Queue shows information about the current queue including playlist name, artwork etc (Experimental)."
+          }
+        ],
+        "fixed": [
+          {
+            "note": "Updated the readme file."
+          },
+          {
+            "note": "Improved the codebase."
+          }
+        ],
+        "knownIssues": []
+      }
+    },
+    {
+      "version": "0.4.0-alpha",
+      "releaseDate": "2022 May 14",
+      "notes": {
+        "new": [
+          {
+            "note": "Added song queuing. Now users can queue songs."
+          },
+          {
+            "note": "Started using useContext React api to reduce prop drilling."
+          },
+          {
+            "note": "Started using useReducer React api to avoid rendering issues occurred when using useState."
+          },
+          {
+            "note": "Adding a new song will now inform the user about the new song adding process."
+          },
+          {
+            "note": "Added a context menu option in the homepage to reset the app."
+          },
+          {
+            "note": "Now the app will inform the user if it couldn't find the lyrics."
+          },
+          {
+            "note": "Added a new event that fires when songs, artists, albums, playlists, or userData gets added."
+          },
+          {
+            "note": "Added a current queue page to view the current queue of songs."
+          },
+          {
+            "note": "Added a function to remove a song from the library."
+          },
+          {
+            "note": "Added a function to remove a linked media folder."
+          },
+          {
+            "note": "Added an experimental mini player."
+          },
+          {
+            "note": "Added the feature to remove playlists."
+          },
+          {
+            "note": "Added a function to send renderer process errors and logs to the main process and save them."
+          },
+          {
+            "note": "Added a function that shows main process messages in the renderer process."
+          },
+          {
+            "note": "Added a function that provides navigation previous pages. Now users can click backward button in the title bar to go to their previously visited page."
+          },
+          {
+            "note": "Added an ErrorPrompt to inform users about possible errors."
+          },
+          {
+            "note": "Now artists, albums and playlists show how much hours of songs they have."
+          },
+          {
+            "note": "Added the settings page to with options to update theme, music folders, and default page."
+          },
+          {
+            "note": "Now songsPage shows how many songs in the library."
+          }
+        ],
+        "fixed": [
+          {
+            "note": "Improved sorting of songs, artists, and albums. Now they work as intended."
+          },
+          {
+            "note": "Updated launch.json files in vscode to support debugging both main and renderer processes."
+          },
+          {
+            "note": "Improved user interface styling."
+          },
+          {
+            "note": "Improved the codebase."
+          },
+          {
+            "note": "Fixed some bugs related to paths in parseSong.ts"
+          },
+          {
+            "note": "Removed unnecessary comments."
+          },
+          {
+            "note": "Renamed DialogMenu menu to notification panel."
+          },
+          {
+            "note": "Removed unnecessary svg icons."
+          },
+          {
+            "note": "Improved detection of songs whose got added when the app is running and not running."
+          },
+          {
+            "note": "Fixed some bugs related to parsing songs."
+          }
+        ],
+        "knownIssues": []
+      }
+    },
+    {
+      "version": "0.3.1-alpha",
+      "releaseDate": "2022 May 07",
+      "notes": {
+        "new": [
+          {
+            "note": "Migration from FontAwesome icons to Google Material Icons."
+          },
+          {
+            "note": "Added nanoid to create unique ids for songs, artists and albums."
+          },
+          {
+            "note": "Added node-id3 to provide support for future id3 tag editing."
+          },
+          {
+            "note": "Added support for icons in the context menu."
+          },
+          {
+            "note": "Added a home page context menu item to resync songs."
+          }
+        ],
+        "fixed": [
+          {
+            "note": "Improved styles to support Google material icons functionality."
+          },
+          {
+            "note": "Offloaded creation and optimization of cover arts to Sharp package."
+          },
+          {
+            "note": "Improved sorting of songs, artists and albums."
+          }
+        ],
+        "knownIssues": []
+      }
+    },
+    {
+      "version": "0.3.0-alpha",
+      "releaseDate": "2022 May 02",
+      "notes": {
+        "new": [
+          {
+            "note": "Added function to sort songs, artists and albums."
+          },
+          {
+            "note": "Added a PlaylistsInfoPage to display information related to playlists."
+          }
+        ],
+        "fixed": [
+          {
+            "note": "Removed unnecessary react props to improve performance."
+          },
+          {
+            "note": "Fixed some typescript type errors."
+          }
+        ],
+        "knownIssues": []
+      }
+    },
+    {
+      "version": "0.2.0-alpha",
+      "releaseDate": "2022 April 29",
+      "notes": {
+        "new": [
+          {
+            "note": "Added new styles for AlbumInfoPage, ArtistInfoPage, and updated some styles on other componenets."
+          },
+          {
+            "note": "Now ArtistInfoPage shows information of the artists from Deezer and Last.fm apis."
+          },
+          {
+            "note": "Now songData, albumData and artistData are linked together in the database for easier access."
+          }
+        ],
+        "fixed": [
+          {
+            "note": "Fixed some bugs when parsing songs."
+          },
+          {
+            "note": "Fixed some typescript type errors."
+          },
+          {
+            "note": "Updated preload script to support typescript types."
+          },
+          {
+            "note": "Improved React support of the app."
+          }
+        ],
+        "knownIssues": []
+      }
+    },
+    {
+      "version": "0.1.1-alpha",
+      "releaseDate": "2022 April 01",
+      "notes": {
+        "new": [
+          {
+            "note": "Added a context menu option for songs to open them in the File Explorer."
+          }
+        ],
+        "fixed": [],
+        "knownIssues": []
+      }
+    },
+    {
+      "version": "0.1.0-alpha",
+      "releaseDate": "2022 April 01",
+      "notes": {
+        "new": [
+          {
+            "note": "Added a feature to monitor song listening patterns of the user for better shuffling."
+          },
+          {
+            "note": "Partial playlists support for the app. (Currently you can only add playlists.)"
+          },
+          {
+            "note": "Favorites playlist and History playlist added to the playlist pane."
+          },
+          {
+            "note": "Added a Dialog menu to display messages."
+          },
+          {
+            "note": "Added a prompt menu."
+          },
+          {
+            "note": "Favorites playlist and History playlist added to the playlist pane."
+          },
+          {
+            "note": "Context menu now supports individual element context items."
+          },
+          {
+            "note": "Added an experimental Song Info page."
+          }
+        ],
+        "fixed": [
+          {
+            "note": "Fixed bugs related to instant identification of newly added songs."
+          },
+          {
+            "note": "Fixed some bugs in the search feature."
+          },
+          {
+            "note": "Fixed context menu bugs."
+          },
+          {
+            "note": "Fixed some styling issues in the UI."
+          }
+        ],
+        "knownIssues": []
+      }
+    },
+    {
+      "version": "0.0.1-alpha",
+      "releaseDate": "2022 April 01",
+      "notes": {
+        "new": [
+          {
+            "note": "Initial alpha release."
+          },
+          {
+            "note": "Added a lyrics pane which shows lyrics according to the current song."
+          },
+          {
+            "note": "Instant identification of newly added songs."
+          }
+        ],
+        "fixed": [],
+        "knownIssues": []
+      }
+    }
+  ]
+}
