@@ -423,25 +423,6 @@ export default function App() {
     }, interval);
   }, []);
 
-  const toggleSongPlayback = React.useCallback(
-    (startPlay?: boolean) => {
-      if (typeof startPlay !== 'boolean' || startPlay === player.paused) {
-        if (player.paused) {
-          player.play().catch((err) => managePlaybackErrors(err));
-          return fadeInAudio();
-        }
-        if (player.ended) {
-          player.currentTime = 0;
-          player.play().catch((err) => managePlaybackErrors(err));
-          return fadeInAudio();
-        }
-        return fadeOutAudio();
-      }
-      return undefined;
-    },
-    [managePlaybackErrors, fadeOutAudio, fadeInAudio]
-  );
-
   const handleBeforeQuitEvent = React.useCallback(async () => {
     window.api.sendSongPosition(player.currentTime);
     await window.api.saveUserData(
@@ -652,6 +633,37 @@ export default function App() {
       }
     },
     [content.notificationPanelData]
+  );
+
+  const toggleSongPlayback = React.useCallback(
+    (startPlay?: boolean) => {
+      if (contentRef.current.currentSongData?.songId) {
+        if (typeof startPlay !== 'boolean' || startPlay === player.paused) {
+          if (player.paused) {
+            player.play().catch((err) => managePlaybackErrors(err));
+            return fadeInAudio();
+          }
+          if (player.ended) {
+            player.currentTime = 0;
+            player.play().catch((err) => managePlaybackErrors(err));
+            return fadeInAudio();
+          }
+          return fadeOutAudio();
+        }
+      } else
+        updateNotificationPanelData(
+          5000,
+          <span>Please select a song to play.</span>,
+          <span className="material-icons-round-outlined text-lg">error</span>
+        );
+      return undefined;
+    },
+    [
+      managePlaybackErrors,
+      updateNotificationPanelData,
+      fadeOutAudio,
+      fadeInAudio,
+    ]
   );
 
   const displayMessageFromMain = React.useCallback(

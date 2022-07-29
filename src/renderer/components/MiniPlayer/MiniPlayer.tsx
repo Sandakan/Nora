@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -7,6 +8,7 @@ import {
   AppUpdateContext,
   SongPositionContext,
 } from 'renderer/contexts/AppContext';
+import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
 
 export default function MiniPlayer() {
   const {
@@ -55,7 +57,11 @@ export default function MiniPlayer() {
     >
       <div className="background-cover-img-container overflow-hidden h-full">
         <img
-          src={`otomusic://localFiles/${currentSongData.artworkPath}`}
+          src={
+            currentSongData.artworkPath
+              ? `otomusic://localFiles/${currentSongData.artworkPath}`
+              : DefaultSongCover
+          }
           alt="Song Cover"
           className={`w-full h-full object-cover group-hover:blur-[2px] group-hover:brightness-75 group-focus:blur-[2px] group-focus:brightness-75 transition-[filter] duration-200 ease-in-out ${
             !isCurrentSongPlaying
@@ -170,9 +176,11 @@ export default function MiniPlayer() {
               ?.map((artist) => artist.name)
               .join(', ')}
           >
-            {currentSongData.artists
-              ? currentSongData.artists.map((artist) => artist.name).join(',')
-              : 'Unknown Artist'}
+            {currentSongData.songId
+              ? currentSongData.artists
+                ? currentSongData.artists.map((artist) => artist.name).join(',')
+                : 'Unknown Artist'
+              : ''}
           </div>
         </div>
         <input

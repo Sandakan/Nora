@@ -81,25 +81,27 @@ const SongControlsContainer = () => {
 
   const songArtists = React.useMemo(
     () =>
-      currentSongData.artists
-        ? Array.isArray(currentSongData.artists) &&
-          (currentSongData.artists.length > 0
-            ? currentSongData.artists.map((artist, index) => (
-                <span key={index}>
-                  <SongArtist
-                    key={index}
-                    artistId={artist.artistId}
-                    name={artist.name}
-                  />
-                  {currentSongData.artists &&
-                  currentSongData.artists.length - 1 !== index
-                    ? ', '
-                    : ''}
-                </span>
-              ))
-            : 'Unknown Artist')
-        : 'Unknown Artist',
-    [currentSongData.artists]
+      currentSongData.songId
+        ? currentSongData.artists
+          ? Array.isArray(currentSongData.artists) &&
+            (currentSongData.artists.length > 0
+              ? currentSongData.artists.map((artist, index) => (
+                  <span key={index}>
+                    <SongArtist
+                      key={index}
+                      artistId={artist.artistId}
+                      name={artist.name}
+                    />
+                    {currentSongData.artists &&
+                    currentSongData.artists.length - 1 !== index
+                      ? ', '
+                      : ''}
+                  </span>
+                ))
+              : 'Unknown Artist')
+          : 'Unknown Artist'
+        : '',
+    [currentSongData.artists, currentSongData.songId]
   );
 
   return (
