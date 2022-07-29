@@ -2,14 +2,13 @@
 /* eslint-disable react/no-unused-prop-types */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
-import { useContext } from 'react';
+import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
-import { SongsPage } from './SongsPage/SongsPage';
 import { HomePage } from './HomePage/homePage';
 import { ArtistPage } from './ArtistPage/ArtistPage';
 import { AlbumsPage } from './AlbumsPage/AlbumsPage';
 import { PlaylistsPage } from './PlaylistsPage/PlaylistsPage';
-import { SearchPage } from './SearchPage/SearchPage';
+import SearchPage from './SearchPage/SearchPage';
 import { SettingsPage } from './SettingsPage/SettingsPage';
 import { LyricsPage } from './LyricsPage/LyricsPage';
 import SongInfoPage from './SongInfoPage/SongInfoPage';
@@ -21,11 +20,12 @@ import AllSearchResultsPage from './SearchPage/AllSearchResultsPage';
 import GenresPage from './GenresPage/GenresPage';
 import GenreInfoPage from './GenreInfoPage/GenreInfoPage';
 import SongTagsEditingPage from './SongTagsEditingPage/SongTagsEditingPage';
+import { SongsPage } from './SongsPage/SongsPage';
 
-export const Body = () => {
+const Body = React.memo(() => {
   const { currentlyActivePage } = useContext(AppContext);
   return (
-    <div className="body">
+    <div className="body w-full h-full order-2 relative overflow-auto">
       {currentlyActivePage.pageTitle === 'Songs' && <SongsPage />}
       {currentlyActivePage.pageTitle === 'Home' && <HomePage />}
       {currentlyActivePage.pageTitle === 'Artists' && <ArtistPage />}
@@ -51,4 +51,7 @@ export const Body = () => {
       )}
     </div>
   );
-};
+});
+
+Body.displayName = 'Body';
+export default Body;

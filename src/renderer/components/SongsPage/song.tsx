@@ -11,10 +11,12 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
 import { calculateTime } from '../../utils/calculateTime';
+import AddSongToPlaylist from './AddSongToPlaylist';
 import DeleteSongFromSystemConfrimPrompt from './DeleteSongFromSystemConfrimPrompt';
 import RemoveSongFromLibraryConfirmPrompt from './RemoveSongFromLibraryConfirmPrompt';
+import SongArtist from './SongArtist';
 
 interface SongProp {
   songId: string;
@@ -25,27 +27,30 @@ interface SongProp {
   path: string;
   additionalContextMenuItems?: ContextMenuItem[];
   index?: number;
+  isAFavorite: boolean;
+  className?: string;
 }
 
 export const Song = (props: SongProp) => {
+  const { currentSongData, queue, isCurrentSongPlaying, userData } =
+    React.useContext(AppContext);
   const {
     playSong,
-    currentSongData,
     updateContextMenuData,
-    currentlyActivePage,
     changeCurrentActivePage,
     updateQueueData,
-    queue,
-    isCurrentSongPlaying,
     changePromptMenuData,
     updateNotificationPanelData,
-    userData,
-  } = React.useContext(AppContext);
+    toggleIsFavorite,
+  } = React.useContext(AppUpdateContext);
+
+  const [isAFavorite, setIsAFavorite] = React.useState(props.isAFavorite);
   const [isSongPlaying, setIsSongPlaying] = React.useState(
     currentSongData
       ? currentSongData.songId === props.songId && isCurrentSongPlaying
       : false
   );
+
   React.useEffect(() => {
     setIsSongPlaying(() => {
       if (currentSongData)
@@ -53,6 +58,21 @@ export const Song = (props: SongProp) => {
       else return false;
     });
   }, [currentSongData, isCurrentSongPlaying, props.songId]);
+
+  // React.useEffect(() => {
+  //   const manageDataUpdateEvents = (
+  //     _: unknown,
+  //     dataType: DataUpdateEventTypes,
+  //     id?: string
+  //   ) => {
+  //     if (dataType === 'songs/likes' && id === props.songId)
+  //       setIsAFavorite((prevData) => !prevData);
+  //   };
+  //   window.api.dataUpdateEvent(manageDataUpdateEvents);
+  //   return () => {
+  //     window.api.removeDataUpdateEventListener(manageDataUpdateEvents);
+  //   };
+  // }, [props.songId]);
 
   const handlePlayBtnClick = () => {
     playSong(props.songId);
@@ -103,6 +123,34 @@ export const Song = (props: SongProp) => {
       },
     },
     {
+      label: `${isAFavorite ? 'Unlike' : 'Like'} the song`,
+      iconName: `favorite`,
+      iconClassName: `${
+        isAFavorite
+          ? 'material-icons-round mr-4 text-xl'
+          : 'material-icons-round-outlined mr-4 text-xl'
+      }`,
+      handlerFunction: () => {
+        window.api
+          .toggleLikeSong(props.songId, !isAFavorite)
+          .then(() => {
+            if (currentSongData.songId === props.songId)
+              toggleIsFavorite(!currentSongData.isAFavorite);
+            return setIsAFavorite((prevData) => !prevData);
+          })
+          .catch((err) => console.error(err));
+      },
+    },
+    {
+      label: 'Add to a Playlist',
+      iconName: 'playlist_add',
+      handlerFunction: () =>
+        changePromptMenuData(
+          true,
+          <AddSongToPlaylist songId={props.songId} title={props.title} />
+        ),
+    },
+    {
       label: 'Hr',
       isContextMenuItemSeperator: true,
       handlerFunction: () => true,
@@ -116,7 +164,7 @@ export const Song = (props: SongProp) => {
     {
       label: 'Info',
       class: 'info',
-      iconName: 'info_outline',
+      iconName: 'info',
       handlerFunction: () =>
         changeCurrentActivePage('SongInfo', {
           songInfo: { songId: props.songId },
@@ -180,13 +228,47 @@ export const Song = (props: SongProp) => {
         ),
     },
   ];
+
   if (props.additionalContextMenuItems !== undefined)
     contextMenuItems.unshift(...props.additionalContextMenuItems);
 
+  const songArtists = React.useMemo(
+    () =>
+      Array.isArray(props.artists) ? (
+        props.artists
+          .map((artist, index) =>
+            (props.artists?.length ?? 1) - 1 === index ? (
+              <SongArtist
+                key={index}
+                artistId={artist.artistId}
+                name={artist.name}
+              />
+            ) : (
+              [
+                <SongArtist
+                  key={index}
+                  artistId={artist.artistId}
+                  name={artist.name}
+                />,
+                ', ',
+              ]
+            )
+          )
+          .flat()
+      ) : (
+        <span>Unknown Artist</span>
+      ),
+    [props.artists]
+  );
+
   return (
     <div
-      className={`song appear-from-bottom ${props.songId} ${
-        currentSongData.songId === props.songId && 'playing'
+      className={` appear-from-bottom ${
+        props.songId
+      } group h-[3.25rem] w-[98%] aspect-[2/1] overflow-hidden mr-4 mb-2 rounded-lg relative flex border-[0.2rem] border-background-color-2 dark:border-dark-background-color-2 transition-[border-color] ease-in-out shadow-xl hover:border-background-color-3 dark:hover:border-dark-background-color-3  ${
+        currentSongData.songId === props.songId
+          ? 'bg-background-color-3 dark:bg-dark-background-color-3 text-font-color-black'
+          : 'bg-background-color-2 dark:bg-dark-background-color-2'
       }`}
       onContextMenu={(e) => {
         e.preventDefault();
@@ -194,16 +276,20 @@ export const Song = (props: SongProp) => {
         updateContextMenuData(true, contextMenuItems, e.pageX, e.pageY);
       }}
     >
-      <div className="song-cover-and-play-btn-container">
+      <div className="song-cover-and-play-btn-container max-w-1/5 w-fit h-full relative flex items-center justify-center">
         {props.index !== undefined &&
           userData &&
           userData.preferences.songIndexing && (
-            <div className="song-index">{props.index}</div>
+            <div className="song-index px-3 mx-1 bg-background-color-1 dark:bg-dark-background-color-1 rounded-2xl text-background-color-3 dark:text-dark-background-color-3 h-fit relative">
+              {props.index + 1}
+            </div>
           )}
-        <div className="song-cover-container">
-          <div className="play-btn-container">
+        <div className="song-cover-container relative h-[90%] w-full flex flex-row items-center justify-center ml-2 mr-4 rounded-md overflow-hidden">
+          <div className="play-btn-container absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
             <span
-              className="material-icons-round icon"
+              className={`material-icons-round icon text-3xl text-opacity-0 text-font-color-white cursor-pointer ${
+                currentSongData.songId === props.songId && 'text-opacity-100'
+              } group-hover:text-opacity-100`}
               onClick={handlePlayBtnClick}
               style={isSongPlaying ? { color: `hsla(0,0%,100%,1)` } : {}}
             >
@@ -217,43 +303,54 @@ export const Song = (props: SongProp) => {
             )}`}
             loading="lazy"
             alt="Song cover"
+            className="max-h-full object-cover"
           />
         </div>
       </div>
-      <div className="song-info-container">
-        <div className="song-title" title={props.title}>
+      <div
+        className={`song-info-container w-[92.5%] flex flex-row items-center justify-between text-font-color-black dark:text-font-color-white  ${
+          currentSongData.songId === props.songId &&
+          'dark:text-font-color-black'
+        } `}
+      >
+        <div
+          className="song-title w-1/2 text-base font-normal transition-none text-ellipsis whitespace-nowrap overflow-hidden"
+          title={props.title}
+        >
           {props.title}
         </div>
-        <div className="song-artists">
-          {props.artists &&
-          props.artists.length > 0 &&
-          props.artists[0].name !== ''
-            ? props.artists.map((artist, index) => (
-                <span
-                  className="artist"
-                  key={index}
-                  title={artist.name}
-                  onClick={() =>
-                    currentlyActivePage.pageTitle === 'ArtistInfo' &&
-                    currentlyActivePage.data.artistName === artist
-                      ? changeCurrentActivePage('Home')
-                      : changeCurrentActivePage('ArtistInfo', {
-                          artistName: artist.name,
-                          artistId: artist.artistId,
-                        })
-                  }
-                >
-                  {artist.name}
-                  {props.artists
-                    ? index === props.artists.length - 1
-                      ? ''
-                      : ', '
-                    : ''}
-                </span>
-              ))
-            : 'Unknown Artist'}
+        <div className="song-artists w-1/3 transition-none text-xs font-normal">
+          {songArtists}
         </div>
-        <div className="song-duration">
+        <div className="song-duration w-[12.5%] text-center mr-1 flex items-center justify-between transition-none pr-4">
+          <span
+            className={`${
+              isAFavorite
+                ? 'material-icons-round'
+                : 'material-icons-round-outlined'
+            } icon text-xl cursor-pointer font-light md:hidden ${
+              isAFavorite
+                ? currentSongData.songId === props.songId
+                  ? 'text-font-color-black dark:text-font-color-black'
+                  : 'text-background-color-3 dark:text-dark-background-color-3'
+                : currentSongData.songId === props.songId
+                ? 'text-font-color-black dark:text-font-color-black'
+                : 'text-background-color-3 dark:text-dark-background-color-3'
+            }`}
+            title={`You ${isAFavorite ? 'liked' : "didn't like"} this song.`}
+            onClick={() => {
+              window.api
+                .toggleLikeSong(props.songId, !isAFavorite)
+                .then(() => {
+                  if (currentSongData.songId === props.songId)
+                    toggleIsFavorite(!currentSongData.isAFavorite);
+                  return setIsAFavorite((prevData) => !prevData);
+                })
+                .catch((err) => console.error(err));
+            }}
+          >
+            favorite
+          </span>
           {props.duration ? calculateTime(props.duration) : `-- : --`}
         </div>
       </div>

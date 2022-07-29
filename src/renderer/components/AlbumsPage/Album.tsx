@@ -7,27 +7,31 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
 
 export const Album = (props: Album) => {
+  const { currentlyActivePage, queue } = React.useContext(AppContext);
+
   const {
-    currentlyActivePage,
     changeCurrentActivePage,
     createQueue,
     updateContextMenuData,
-    queue,
     updateQueueData,
     updateNotificationPanelData,
-  } = React.useContext(AppContext);
+  } = React.useContext(AppUpdateContext);
 
-  const playAlbum = () => {
-    createQueue(
-      props.songs.map((song) => song.songId),
-      'album',
-      props.albumId,
-      true
-    );
-  };
+  const playAlbum = React.useCallback(
+    (isShuffle = false) => {
+      createQueue(
+        props.songs.map((song) => song.songId),
+        'album',
+        isShuffle,
+        props.albumId,
+        true
+      );
+    },
+    [createQueue, props.albumId, props.songs]
+  );
 
   const showAlbumInfoPage = () =>
     currentlyActivePage.pageTitle === 'AlbumInfo' &&
@@ -39,7 +43,7 @@ export const Album = (props: Album) => {
 
   return (
     <div
-      className="album appear-from-bottom"
+      className="album appear-from-bottom group h-60 overflow-hidden w-40 flex flex-col justify-between mr-14 mb-10"
       onContextMenu={(e) =>
         updateContextMenuData(
           true,
@@ -54,7 +58,7 @@ export const Album = (props: Album) => {
               iconName: 'queue',
               handlerFunction: () => {
                 queue.queue.push(...props.songs.map((song) => song.songId));
-                updateQueueData(undefined, queue.queue, false);
+                updateQueueData(undefined, queue.queue);
                 updateNotificationPanelData(
                   5000,
                   <span>
@@ -63,6 +67,11 @@ export const Album = (props: Album) => {
                   </span>
                 );
               },
+            },
+            {
+              label: 'Shuffle and Play',
+              iconName: 'shuffle',
+              handlerFunction: () => playAlbum(true),
             },
             {
               label: 'Info',
@@ -76,11 +85,11 @@ export const Album = (props: Album) => {
       }
     >
       <div
-        className="album-cover-and-play-btn-container"
+        className="album-cover-and-play-btn-container relative h-[70%] overflow-hidden cursor-pointer"
         onClick={showAlbumInfoPage}
       >
         <span
-          className="material-icons-round icon"
+          className="material-icons-round icon text-5xl text-font-color-white text-opacity-0 absolute bottom-[5%] right-[5%] cursor-pointer group-hover:text-opacity-100"
           onClick={(e) => {
             e.stopPropagation();
             playAlbum();
@@ -88,17 +97,18 @@ export const Album = (props: Album) => {
         >
           play_circle
         </span>
-        <div className="album-cover-container">
+        <div className="album-cover-container h-full overflow-hidden rounded-lg">
           <img
             src={`otomusic://localFiles/${props.artworkPath}`}
             loading="lazy"
             alt="Album Cover"
+            className="max-h-full h-full w-full object-center object-cover"
           />
         </div>
       </div>
-      <div className="album-info-container">
+      <div className="album-info-container h-fit w-full pl-2 text-font-color-black dark:text-font-color-white mt-2">
         <div
-          className="album-title"
+          className="album-title w-full overflow-hidden text-ellipsis whitespace-nowrap pointer text-xl hover:underline"
           title={props.title}
           onClick={showAlbumInfoPage}
         >
@@ -106,13 +116,13 @@ export const Album = (props: Album) => {
         </div>
         {props.artists && (
           <div
-            className="album-artists"
+            className="album-artists w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm hover:underline"
             title={props.artists.map((artist) => artist.name).join(', ')}
           >
             {props.artists.map((artist, index) => {
               return (
                 <span
-                  className="artist"
+                  className="artist w-fit h-[unset] inline m-0 cursor-pointer"
                   key={index}
                   onClick={() =>
                     currentlyActivePage.pageTitle === 'ArtistInfo' &&
@@ -136,9 +146,9 @@ export const Album = (props: Album) => {
             })}
           </div>
         )}
-        <div className="album-no-of-songs">{`${props.songs.length} song${
-          props.songs.length === 1 ? '' : 's'
-        }`}</div>
+        <div className="album-no-of-songs w-full overflow-hidden text-ellipsis whitespace-nowrap text-xs">{`${
+          props.songs.length
+        } song${props.songs.length === 1 ? '' : 's'}`}</div>
       </div>
     </div>
   );

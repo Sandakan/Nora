@@ -9,14 +9,18 @@
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable react/destructuring-assignment */
 import React, { useContext } from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
 import { calculateTime } from 'renderer/utils/calculateTime';
 import { valueRounder } from 'renderer/utils/valueRounder';
+import MainContainer from '../MainContainer';
+import SecondaryContainer from '../SecondaryContainer';
+import SongArtist from '../SongsPage/SongArtist';
 import SongStat from './SongStat';
 
-export default () => {
-  const { currentlyActivePage, changeCurrentActivePage } =
-    useContext(AppContext);
+const SongInfoPage = () => {
+  const { currentlyActivePage } = useContext(AppContext);
+  const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
+
   const x: unknown = undefined;
   const [songInfo, setSongInfo] = React.useState(x as SongData | undefined);
 
@@ -28,7 +32,7 @@ export default () => {
     else songDuration = `${minutes} minutes ${seconds} seconds`;
   }
 
-  React.useEffect(() => {
+  const fetchSongInfo = React.useCallback(() => {
     if (currentlyActivePage.data && currentlyActivePage.data.songInfo.songId) {
       window.api
         .getSongInfo([currentlyActivePage.data.songInfo.songId])
@@ -40,149 +44,185 @@ export default () => {
     }
   }, [currentlyActivePage.data]);
 
-  const calculateTotalListensOfTheYear = (arr: number[]) => {
+  React.useEffect(() => {
+    fetchSongInfo();
+    const manageSongInfoUpdates = (
+      _: unknown,
+      eventType: DataUpdateEventTypes
+    ) => {
+      if (
+        eventType === 'songs' ||
+        eventType === 'songs/noOfListens' ||
+        eventType === 'songs/likes'
+      )
+        fetchSongInfo();
+    };
+    window.api.dataUpdateEvent(manageSongInfoUpdates);
+    return () => {
+      window.api.removeDataUpdateEventListener(manageSongInfoUpdates);
+    };
+  }, [fetchSongInfo]);
+
+  const calculateTotalListensOfTheYear = React.useCallback((arr: number[]) => {
     let val = 0;
     arr.forEach((ele) => {
       val += ele;
     });
     return val;
-  };
+  }, []);
+
+  const songArtists = React.useMemo(
+    () =>
+      songInfo && songInfo.artists ? (
+        songInfo.artists.length > 0 ? (
+          songInfo.artists.map((artist, index) => (
+            <>
+              <SongArtist
+                artistId={artist.artistId}
+                name={artist.name}
+                key={index}
+              />
+
+              {songInfo.artists && songInfo.artists.length - 1 !== index
+                ? ', '
+                : ''}
+            </>
+          ))
+        ) : (
+          <span>&apos;Unknown Artist&apos;</span>
+        )
+      ) : (
+        'Unknown Artist'
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      currentlyActivePage.data.artistName,
+      currentlyActivePage.pageTitle,
+      songInfo?.artists,
+    ]
+  );
 
   return (
     <>
       {songInfo && (
-        <div className="main-container song-information-container">
-          <div className="container appear-from-bottom">
-            <div className="song-cover-container">
-              <img
-                src={`otomusic://localFiles/${songInfo.artworkPath}`}
-                alt={`${songInfo.title} cover`}
-              />
-            </div>
-            <div className="song-info">
-              <div className="title info-type-1" title={songInfo.title}>
-                {songInfo.title}
+        <MainContainer className="song-information-container">
+          <>
+            <div className="container appear-from-bottom flex">
+              <div className="song-cover-container mr-8 w-fit h-60 rounded-md overflow-hidden">
+                <img
+                  src={`otomusic://localFiles/${songInfo.artworkPath}`}
+                  alt={`${songInfo.title} cover`}
+                  className="h-full object-cover"
+                />
               </div>
-              <div className="song-artists info-type-2">
-                {songInfo.artists ? (
-                  Array.isArray(songInfo.artists) ? (
-                    songInfo.artists.length > 0 ? (
-                      songInfo.artists.map((artist, index) => (
-                        <>
-                          <span
-                            className="artist"
-                            key={artist.artistId}
-                            title={artist.name}
-                            onClick={() =>
-                              currentlyActivePage.pageTitle === 'ArtistInfo' &&
-                              currentlyActivePage.data.artistName ===
-                                artist.name
-                                ? changeCurrentActivePage('Home')
-                                : changeCurrentActivePage('ArtistInfo', {
-                                    artistName: artist.name,
-                                    artistId: artist.artistId,
-                                  })
-                            }
-                          >
-                            {artist.name}
-                          </span>
-                          {songInfo.artists &&
-                          songInfo.artists.length - 1 !== index
-                            ? ', '
-                            : ''}
-                        </>
-                      ))
-                    ) : (
-                      <span>&apos;Unknown Artist&apos;</span>
-                    )
-                  ) : (
-                    <span className="artist" title={songInfo.artists}>
-                      {songInfo.artists}
-                    </span>
-                  )
-                ) : (
-                  'Unknown Artist'
+              <div className="song-info max-w-[70%] text-font-color-black dark:text-font-color-white flex flex-col justify-center">
+                <div
+                  className="title info-type-1 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-[2.5rem] font-medium hover:underline"
+                  title={songInfo.title}
+                >
+                  {songInfo.title}
+                </div>
+                <div className="song-artists info-type-2 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-base flex items-center hover:underline">
+                  {songArtists}
+                </div>
+                <div
+                  className="info-type-2 mb-5 overflow-hidden text-ellipsis whitespace-nowrap hover:underline"
+                  title={songInfo.album ? songInfo.album.name : 'Unknown Album'}
+                  onClick={() => {
+                    if (songInfo.album) {
+                      return currentlyActivePage.pageTitle === 'AlbumInfo' &&
+                        currentlyActivePage.data.albumId === songInfo.album.name
+                        ? changeCurrentActivePage('Home')
+                        : changeCurrentActivePage('AlbumInfo', {
+                            albumId: songInfo.album.albumId,
+                          });
+                    }
+                    return undefined;
+                  }}
+                >
+                  {songInfo.album ? songInfo.album.name : 'Unknown Album'}
+                </div>
+                <div
+                  className="info-type-3 mb-1 overflow-hidden text-sm text-ellipsis whitespace-nowrap"
+                  title={songDuration}
+                >
+                  {songDuration}
+                </div>
+
+                {songInfo && songInfo.sampleRate && (
+                  <div className="info-type-3 mb-1 overflow-hidden text-sm text-ellipsis whitespace-nowrap">
+                    {songInfo.sampleRate / 1000} KHZ
+                  </div>
+                )}
+
+                {songInfo && songInfo.format && songInfo.format.bitrate && (
+                  <div className="info-type-3 mb-1 overflow-hidden text-sm text-ellipsis whitespace-nowrap">
+                    {Math.floor(songInfo.format.bitrate / 1000)} Kbps
+                  </div>
                 )}
               </div>
-              <div
-                className="info-type-2"
-                title={songInfo.album ? songInfo.album.name : 'Unknown Album'}
-                onClick={() => {
-                  if (songInfo.album) {
-                    return currentlyActivePage.pageTitle === 'AlbumInfo' &&
-                      currentlyActivePage.data.albumId === songInfo.album.name
-                      ? changeCurrentActivePage('Home')
-                      : changeCurrentActivePage('AlbumInfo', {
-                          albumId: songInfo.album.albumId,
-                        });
-                  }
-                  return undefined;
-                }}
-              >
-                {songInfo.album ? songInfo.album.name : 'Unknown Album'}
-              </div>
-              <div className="info-type-3" title={songDuration}>
-                {songDuration}
-              </div>
-
-              {songInfo && songInfo.sampleRate && (
-                <div className="info-type-3">
-                  {songInfo.sampleRate / 1000} KHZ
-                </div>
-              )}
-
-              {songInfo && songInfo.format && songInfo.format.bitrate && (
-                <div className="info-type-3">
-                  {Math.floor(songInfo.format.bitrate / 1000)} Kbps
-                </div>
-              )}
             </div>
-          </div>
-          {songInfo && songInfo.listeningRate && (
-            <div className="secondary-container song-stats-container">
-              <SongStat
-                title="All time Listens"
-                value={valueRounder(songInfo.listeningRate.allTime)}
-              />
-              <SongStat
-                title="Listens This Month"
-                value={valueRounder(
-                  songInfo.listeningRate.monthly.months[new Date().getMonth()]
-                )}
-              />
-              <SongStat
-                title="Listens This Year"
-                value={
-                  songInfo.listeningRate.monthly.year ===
-                  new Date().getFullYear()
-                    ? valueRounder(
-                        calculateTotalListensOfTheYear(
-                          songInfo.listeningRate.monthly.months
-                        )
-                      )
-                    : '0'
-                }
-              />
-              <SongStat
-                title={
-                  songInfo.isAFavorite
-                    ? 'You loved this song'
-                    : "You didn't like this song"
-                }
-                value={
-                  <span
-                    className={`material-icons-round icon ${
-                      songInfo.isAFavorite && 'liked'
-                    }`}
-                  >
-                    {songInfo.isAFavorite ? 'favorite' : 'favorite_border'}
-                  </span>
-                }
-              />
-            </div>
-          )}
-        </div>
+            {songInfo && songInfo.listeningRate && (
+              <SecondaryContainer className="secondary-container song-stats-container flex flex-wrap flex-row h-fit rounded-2xl p-2 mt-8">
+                <>
+                  <SongStat
+                    key={0}
+                    title="All time Listens"
+                    value={valueRounder(songInfo.listeningRate.allTime)}
+                  />
+                  <SongStat
+                    key={1}
+                    title="Listens This Month"
+                    value={valueRounder(
+                      songInfo.listeningRate.monthly.months[
+                        new Date().getMonth()
+                      ]
+                    )}
+                  />
+                  <SongStat
+                    key={2}
+                    title="Listens This Year"
+                    value={
+                      songInfo.listeningRate.monthly.year ===
+                      new Date().getFullYear()
+                        ? valueRounder(
+                            calculateTotalListensOfTheYear(
+                              songInfo.listeningRate.monthly.months
+                            )
+                          )
+                        : '0'
+                    }
+                  />
+                  <SongStat
+                    key={3}
+                    title={
+                      songInfo.isAFavorite
+                        ? 'You loved this song'
+                        : "You didn't like this song"
+                    }
+                    value={
+                      <span
+                        className={`${
+                          songInfo.isAFavorite
+                            ? 'material-icons-round'
+                            : 'material-icons-round-outlined'
+                        } icon ${
+                          songInfo.isAFavorite && 'liked'
+                        } text-[3.5rem] font-semibold`}
+                      >
+                        favorite
+                      </span>
+                    }
+                  />
+                </>
+              </SecondaryContainer>
+            )}
+          </>
+        </MainContainer>
       )}
     </>
   );
 };
+
+SongInfoPage.displayName = 'SongInfoPage';
+export default SongInfoPage;

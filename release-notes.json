@@ -1,10 +1,112 @@
 {
   "latestVersion": {
     "version": "0.7.0-alpha",
-    "releaseDate": "2022 June 23",
+    "releaseDate": "2022 June 29",
     "artwork": "/assets/other/release artworks/whats_new_0.7.0-alpha_artwork.png"
   },
   "versions": [
+    {
+      "version": "0.7.0-alpha",
+      "releaseDate": "2022 June 24",
+      "notes": {
+        "new": [
+          {
+            "note": "Now you can play .ogg and .wav files in the app. (Experimental)"
+          },
+          {
+            "note": "Added a new Release Notes Page to check for app updates and to see what the updates change in the app."
+          },
+          {
+            "note": "Rewrote the whole app's UI with TailwindCSS. This migration revamped the whole UI of the app and updated the components and pages to be responsive to different screen sizes. (Experimental)"
+          },
+          {
+            "note": "Option to view open source licenses used by the app."
+          },
+          {
+            "note": "Diamensions and positions of the windows will now be saved."
+          },
+          {
+            "note": "Updated the search functionality of the app. Now users can see their recent searches for content. Search will suggest keywords if you typed something wrong in the search bar. Now Search supports results from Genres."
+          },
+          {
+            "note": "Songs and artists you love most are now on your home page."
+          },
+          {
+            "note": "Updated notifications with improved UI and UX that supports buttons to provide additional functionality."
+          },
+          {
+            "note": "Added all-time most and least listened, monthly most and least listened and artist name as sort options for songs."
+          },
+          {
+            "note": "Now the app will be more responsive towards newtwork interruptions and act accordingly without giving you a headache."
+          },
+          {
+            "note": "Now pages are more responsive to data updates."
+          },
+          {
+            "note": "Now users can make the mini player stay on top of other windows."
+          },
+          {
+            "note": "Playlists with full functionality is here. Now users can create new playlists, add songs to them, remove songs inside them or delete playlists completely. This is huge success when compared to the previous version."
+          },
+          {
+            "note": "Users now can clear the song history from the app."
+          },
+          {
+            "note": "Now the way users sort content will be saved to provide easier access to content that they need most."
+          },
+          {
+            "note": "Added a new volume fade transition when the user toggles between play and pause of a song. (Experiemental)"
+          },
+          {
+            "note": "New prompt to verify links before directing users to the link."
+          }
+        ],
+        "fixed": [
+          {
+            "note": "Improved the algorithm used to shuffle the queue and playlists. Now songs in them should be more random."
+          },
+          {
+            "note": "Improved data updates detection."
+          },
+          {
+            "note": "Fixed some bugs related to parsing songs, blacklisting a song and restoring songs from the blacklist."
+          },
+          {
+            "note": "Fixed a bug where parsing a song after a read error would parse the song two times."
+          },
+          {
+            "note": "Fixed a bug related to resetting the app."
+          },
+          {
+            "note": "Improved the song parsing process of the app."
+          },
+          {
+            "note": "Fixed some bugs related to the player."
+          },
+          {
+            "note": "Fixed a bug where deleting a song from the library or deleting from the system wouldn't update the library."
+          },
+          {
+            "note": "Updated various components with improved UI and UX."
+          },
+          {
+            "note": "Updated the songs tags editing page and fixed some bugs related to editing the tags of the song."
+          }
+        ],
+        "knownIssues": [
+          {
+            "note": "Editing song tags could remove the artwork of the song."
+          },
+          {
+            "note": "Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song."
+          },
+          {
+            "note": "There is still a small amount of unwanted cpu consumption due to over-rendering of components."
+          }
+        ]
+      }
+    },
     {
       "version": "0.6.0-alpha",
       "releaseDate": "2022 June 24",

@@ -5,22 +5,18 @@
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
 import DefaultPlaylistCover from '../../../../assets/images/playlist_cover_default.png';
+import ConfirmDeletePlaylist from './ConfirmDeletePlaylist';
 
-interface PlaylistProp extends Playlist {
-  currentPlaylists?: Playlist[];
-  updatePlaylists?: (updatedPlaylists: Playlist[]) => void;
-}
-
-export const Playlist = (props: PlaylistProp) => {
+export const Playlist = (props: Playlist) => {
+  const { currentlyActivePage } = React.useContext(AppContext);
   const {
     updateContextMenuData,
-    currentlyActivePage,
     changeCurrentActivePage,
-    updateNotificationPanelData,
+    changePromptMenuData,
     createQueue,
-  } = React.useContext(AppContext);
+  } = React.useContext(AppUpdateContext);
 
   const openPlaylistInfoPage = () =>
     currentlyActivePage.pageTitle === 'ArtistInfo' &&
@@ -35,7 +31,7 @@ export const Playlist = (props: PlaylistProp) => {
       label: 'Play',
       iconName: 'play_arrow',
       handlerFunction: () =>
-        createQueue(props.songs, 'playlist', props.playlistId, true),
+        createQueue(props.songs, 'playlist', false, props.playlistId, true),
     },
     {
       label: 'Info',
@@ -46,35 +42,30 @@ export const Playlist = (props: PlaylistProp) => {
 
   return (
     <div
-      className={`playlist appear-from-bottom ${props.playlistId}`}
+      className={`playlist group appear-from-bottom ${props.playlistId} h-48 w-32 mb-12 mr-16 flex text-font-color-black dark:text-font-color-white flex-col justify-between`}
       data-playlist-id={props.playlistId}
       onContextMenu={(e) => {
         e.preventDefault();
+        e.stopPropagation();
         updateContextMenuData(
           true,
-          props.playlistId !== 'History' && props.playlistId !== 'Favorites'
+          currentlyActivePage.pageTitle === 'Playlists' &&
+            props.playlistId !== 'History' &&
+            props.playlistId !== 'Favorites'
             ? [
                 ...contextMenus,
                 {
                   label: 'Delete',
                   iconName: 'delete_outline',
                   handlerFunction: () =>
-                    window.api.removeAPlaylist(props.playlistId).then((res) => {
-                      if (res.success) {
-                        updateNotificationPanelData(
-                          5000,
-                          <span>{`Playlist '${props.name}' deleted.`}</span>
-                        );
-                        if (props.currentPlaylists && props.updatePlaylists)
-                          props.updatePlaylists(
-                            props.currentPlaylists.filter(
-                              (playlist) =>
-                                playlist.playlistId !== props.playlistId
-                            )
-                          );
-                      }
-                      return undefined;
-                    }),
+                    changePromptMenuData(
+                      true,
+                      <ConfirmDeletePlaylist
+                        playlistName={props.name}
+                        playlistId={props.playlistId}
+                        noOfSongs={props.songs.length}
+                      />
+                    ),
                 },
               ]
             : contextMenus,
@@ -83,10 +74,17 @@ export const Playlist = (props: PlaylistProp) => {
         );
       }}
     >
-      <div className="playlist-cover-and-play-btn-container">
-        <i className="fa-solid fa-circle-play"></i>
+      <div className="playlist-cover-and-play-btn-container relative h-[70%] overflow-hidden">
+        <span
+          className="material-icons-round icon absolute bottom-3 right-3 cursor-pointer text-font-color-white dark:text-font-color-white translate-y-10 opacity-0 text-4xl group-hover:opacity-100 group-hover:translate-y-0 transition-[opacity,transform] ease-in-out delay-100 duration-200"
+          onClick={() =>
+            createQueue(props.songs, 'playlist', false, props.playlistId, true)
+          }
+        >
+          play_circle
+        </span>
         <div
-          className="playlist-cover-container"
+          className="playlist-cover-container h-full rounded-2xl overflow-hidden cursor-pointer"
           onClick={openPlaylistInfoPage}
         >
           <img
@@ -97,26 +95,22 @@ export const Playlist = (props: PlaylistProp) => {
             }
             alt="Playlist Cover"
             loading="lazy"
+            className="h-full"
           />
         </div>
       </div>
       <div className="playlist-info-container">
         <div
-          className="title playlist-title"
+          className="title playlist-title text-xl cursor-pointer hover:underline"
           title={props.name}
           onClick={openPlaylistInfoPage}
         >
           {props.name}
         </div>
-        <div className="playlist-no-of-songs">{`${props.songs.length} song${
-          props.songs.length === 1 ? '' : 's'
-        }`}</div>
+        <div className="playlist-no-of-songs text-sm font-light hover:underline">{`${
+          props.songs.length
+        } song${props.songs.length === 1 ? '' : 's'}`}</div>
       </div>
     </div>
   );
-};
-
-Playlist.defaultProps = {
-  currentPlaylists: [],
-  updatePlaylists: () => true,
 };

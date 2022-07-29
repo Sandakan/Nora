@@ -7,7 +7,7 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable import/prefer-default-export */
 import React, { useContext } from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
 import { SideBarItem } from './SideBarItem';
 
 const linkData = [
@@ -42,58 +42,73 @@ const linkData = [
     content: 'Albums',
   },
   {
-    parentClassName: 'settings',
-    icon: 'settings',
-    content: 'Settings',
-  },
-  {
     parentClassName: 'genres',
     icon: 'track_changes',
     content: 'Genres',
   },
+  {
+    parentClassName: 'settings',
+    icon: 'settings',
+    content: 'Settings',
+  },
 ];
 
-export default React.memo(() => {
-  const { changeCurrentActivePage, currentlyActivePage } =
-    useContext(AppContext);
+const Sidebar = React.memo(() => {
+  const { currentlyActivePage } = useContext(AppContext);
+  const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
+
   const [data, setData] = React.useState(linkData);
 
-  const clickHandler = (id: string, pageData?: any) => {
-    const arr = data.map((link) => {
-      if (link.content === id) {
-        changeCurrentActivePage(link.content as PageTitles, pageData);
-        return link.parentClassName.includes('active')
-          ? link
-          : { ...link, parentClassName: `${link.parentClassName} active` };
-      } else {
-        return {
-          ...link,
-          parentClassName: link.parentClassName.replace('active', '').trim(),
-        };
-      }
-    });
-    setData(arr);
-  };
+  const clickHandler = React.useCallback(
+    (id: string, pageData?: any) => {
+      const arr = data.map((link) => {
+        if (link.content === id) {
+          changeCurrentActivePage(link.content as PageTitles, pageData);
+          return link.parentClassName.includes('active')
+            ? link
+            : {
+                ...link,
+                parentClassName: `${link.parentClassName} active`,
+              };
+        } else {
+          return {
+            ...link,
+            parentClassName: link.parentClassName.replace('active', '').trim(),
+          };
+        }
+      });
+      setData(arr);
+    },
+    [changeCurrentActivePage, data]
+  );
 
   React.useEffect(() => {
-    // if (linkData.some((x) => x.content === currentlyActivePage.pageTitle))
     clickHandler(currentlyActivePage.pageTitle, currentlyActivePage.data);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentlyActivePage.pageTitle]);
+  }, [currentlyActivePage]);
 
-  const sideBarItems = data.map((link, index) => (
-    <SideBarItem
-      key={index}
-      parentClassName={link.parentClassName}
-      icon={link.icon}
-      content={link.content}
-      handleClick={clickHandler}
-    ></SideBarItem>
-  ));
+  const sideBarItems = React.useMemo(
+    () =>
+      data.map((link, index) => (
+        <SideBarItem
+          key={index}
+          parentClassName={link.parentClassName}
+          icon={link.icon}
+          content={link.content}
+          handleClick={clickHandler}
+        ></SideBarItem>
+      )),
+    [data, clickHandler]
+  );
 
   return (
-    <nav className="side-bar">
-      <ul>{sideBarItems}</ul>
+    <nav className="side-bar flex-grow w-[30%] max-w-80 h-full bg-side-bar-background dark:bg-dark-background-color-2 pt-8 pb-2 rounded-tr-2xl lg:w-14 order-1">
+      <ul className="last:relative last:w-full last:h-full [&>.active]:bg-background-color-3 dark:[&>.active]:bg-dark-background-color-3 [&>.active]:text-font-color-black dark:[&>.active]:text-font-color-black [&>li.settings]:absolute [&>li.settings]:bottom-0">
+        {sideBarItems}
+      </ul>
     </nav>
   );
 });
+
+Sidebar.displayName = 'Sidebar';
+export default Sidebar;

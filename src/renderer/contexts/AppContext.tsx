@@ -1,61 +1,71 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/prefer-default-export */
 import { createContext, ReactElement } from 'react';
+import { ButtonProps } from 'renderer/components/Button';
 
-interface AppContextType {
+export interface AppStateContextType {
   // THEME
   isDarkMode: boolean;
-  toggleDarkMode: (theme?: 'dark' | 'light') => void;
   // CONTEXT MENU
   isContextMenuVisible: boolean;
   contextMenuItems: ContextMenuItem[];
   contextMenuPageX: number;
   contextMenuPageY: number;
-  updateContextMenuData: (
-    isVisible: boolean,
-    menuItems?: ContextMenuItem[],
-    pageX?: number,
-    pageY?: number
-  ) => void;
   // PROMPT MENU
   PromptMenuData: {
     content: any;
     isVisible: boolean;
     className: string;
   };
-  changePromptMenuData: (
-    isVisible: boolean,
-    content?: ReactElement<any, any>,
-    className?: string
-  ) => void;
   // NOTIFICATION PANEL
   notificationPanelData: NotificationPanelData;
-  updateNotificationPanelData: (
-    delay: number | undefined,
-    content: ReactElement<any, any>,
-    icon?: ReactElement<any, any>,
-    isLoading?: boolean
-  ) => void;
   // CURRENTLY ACTVIE PAGE AND NAVIGATION HISTORY
   currentlyActivePage: { pageTitle: PageTitles; data?: any };
   pageHistoryIndex: number;
-  changeCurrentActivePage: (pageTitle: PageTitles, data?: any) => void;
-  updatePageHistoryIndex: (
-    type: 'increment' | 'decrement',
-    index?: number
-  ) => void;
-  updateCurrentlyActivePageData: (data: any) => void;
   // AUDIO PLAYBACK
   currentSongData: AudioData;
   userData: UserData | undefined;
-  toggleReducedMotion: (state?: boolean) => void;
-  toggleSongIndexing: (state?: boolean) => void;
   isCurrentSongPlaying: boolean;
   // songPosition: number;
   volume: number;
   isMuted: boolean;
   isRepeating: RepeatTypes;
   isShuffling: boolean;
+  isPlaying: boolean;
+  queue: Queue;
+  // QUEUE
+  // MINI PLAYER
+  isMiniPlayer: boolean;
+}
+
+export interface AppUpdateContextType {
+  toggleDarkMode: (theme?: 'dark' | 'light') => void;
+  updateContextMenuData: (
+    isVisible: boolean,
+    menuItems?: ContextMenuItem[],
+    pageX?: number,
+    pageY?: number
+  ) => void;
+  changePromptMenuData: (
+    isVisible: boolean,
+    content?: ReactElement<any, any>,
+    className?: string
+  ) => void;
+  updateNotificationPanelData: (
+    delay: number | undefined,
+    content: ReactElement<any, any>,
+    icon?: ReactElement<any, any>,
+    buttons?: ButtonProps[],
+    isLoading?: boolean
+  ) => void;
+  changeCurrentActivePage: (pageTitle: PageTitles, data?: any) => void;
+  updatePageHistoryIndex: (
+    type: 'increment' | 'decrement',
+    index?: number
+  ) => void;
+  updateCurrentlyActivePageData: (data: any) => void;
+  toggleReducedMotion: (state?: boolean) => void;
+  toggleSongIndexing: (state?: boolean) => void;
   playSong: (songId: string, isStartPlay?: boolean) => void;
   updateCurrentSongPlaybackState: (isPlaying: boolean) => void;
   handleSkipBackwardClick: () => void;
@@ -67,30 +77,30 @@ interface AppContextType {
   toggleMutedState: (isMuted?: boolean) => void;
   updateVolume: (volume: number) => void;
   updateSongPosition: (position: number) => void;
-  isPlaying: boolean;
-  // QUEUE
-  queue: Queue;
   createQueue: (
     songIds: string[],
     queueType: QueueTypes,
+    isShuffleQueue?: boolean,
     queueId?: string,
     startPlaying?: boolean
   ) => void;
   updateQueueData: (
     currentSongIndex?: number,
     queue?: string[],
+    isShuffleQueue?: boolean,
     playCurrentSongIndex?: boolean
   ) => void;
   changeQueueCurrentSongIndex: (currentSongIndex: number) => void;
-  // MINI PLAYER
-  isMiniPlayer: boolean;
   updateMiniPlayerStatus: (isVisible: boolean) => void;
+  updatePageSortingOrder: (page: PageSortTypes, state: unknown) => void;
 }
 
-interface SongPositionContextType {
+export interface SongPositionContextType {
   songPosition: number;
 }
 
-export const AppContext = createContext({} as AppContextType);
+export const AppContext = createContext({} as AppStateContextType);
+
+export const AppUpdateContext = createContext({} as AppUpdateContextType);
 
 export const SongPositionContext = createContext({} as SongPositionContextType);

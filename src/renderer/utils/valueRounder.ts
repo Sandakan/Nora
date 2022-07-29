@@ -20,6 +20,7 @@ export const valueRounder = (val: number, precision = 2) => {
       return `${round(value / 1_000_000_000_000, precision)} T`;
     } else return 'unknown';
   } else {
+    // eslint-disable-next-line no-console
     console.error('Entered value is not a number. value :', val);
     return 'NaN';
   }

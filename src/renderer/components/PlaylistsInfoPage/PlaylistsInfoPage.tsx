@@ -1,3 +1,5 @@
+/* eslint-disable react/no-unescaped-entities */
+/* eslint-disable no-console */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-restricted-syntax */
@@ -6,25 +8,27 @@
 /* eslint-disable react/require-default-props */
 /* eslint-disable react/destructuring-assignment */
 import React, { useContext } from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
 import { calculateTime } from 'renderer/utils/calculateTime';
 import DefaultPlaylistCover from '../../../../assets/images/playlist_cover_default.png';
 import Button from '../Button';
 // import NoSongsImage from '../../../../assets/images/Beach_Monochromatic.svg';
 import { Song } from '../SongsPage/Song';
+import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';
 
-export default () => {
+const PlaylistInfoPage = () => {
+  const { currentlyActivePage, queue } = useContext(AppContext);
   const {
-    currentlyActivePage,
-    queue,
     updateQueueData,
+    changePromptMenuData,
     updateNotificationPanelData,
     createQueue,
-  } = useContext(AppContext);
+  } = React.useContext(AppUpdateContext);
+
   const [playlistData, setPlaylistData] = React.useState({} as Playlist);
   const [playlistSongs, setPlaylistSongs] = React.useState([] as SongData[]);
 
-  React.useEffect(() => {
+  const fetchPlaylistData = React.useCallback(() => {
     if (currentlyActivePage.data.playlistId) {
       window.api
         .getPlaylistData([currentlyActivePage.data.playlistId])
@@ -34,45 +38,119 @@ export default () => {
     }
   }, [currentlyActivePage.data]);
 
-  React.useEffect(() => {
+  const fetchPlaylistSongsData = React.useCallback(() => {
     if (playlistData.songs && playlistData.songs.length > 0) {
       window.api.getSongInfo(playlistData.songs).then((songsData) => {
-        if (songsData && songsData.length > 0) setPlaylistSongs(songsData);
+        if (songsData && songsData.length > 0)
+          setPlaylistSongs(songsData.reverse());
       });
     }
-  }, [currentlyActivePage.data, playlistData.songs]);
+  }, [playlistData.songs]);
 
-  const calculateTotalTime = () => {
+  React.useEffect(() => {
+    fetchPlaylistData();
+    const managePlaylistUpdates = (
+      _: unknown,
+      eventType: DataUpdateEventTypes
+    ) => {
+      if (eventType === 'playlists') fetchPlaylistData();
+    };
+    window.api.dataUpdateEvent(managePlaylistUpdates);
+    return () => {
+      window.api.removeDataUpdateEventListener(managePlaylistUpdates);
+    };
+  }, [fetchPlaylistData]);
+
+  React.useEffect(() => {
+    fetchPlaylistSongsData();
+    window.api.dataUpdateEvent((_, eventType) => {
+      if (eventType === 'albums') fetchPlaylistSongsData();
+    });
+  }, [fetchPlaylistSongsData]);
+
+  const calculateTotalTime = React.useCallback(() => {
     const val = calculateTime(
       playlistSongs.reduce((prev, current) => prev + current.duration, 0)
     );
     const duration = val.split(':');
+    const hours = Math.floor(Number(duration[0]) / 60);
+    const minutes = Math.floor(Number(duration[0]) % 60);
+    const seconds = Number(duration[1]);
     return `${
       Number(duration[0]) / 60 >= 1
-        ? `${Math.floor(Number(duration[0]) / 60)} hour${
-            Math.floor(Number(duration[0]) / 60) === 1 ? '' : 's'
-          } `
+        ? `${hours} hour${hours === 1 ? '' : 's'} `
         : ''
-    }${Math.floor(Number(duration[0]) % 60)} minute${
-      Math.floor(Number(duration[0]) % 60) === 1 ? '' : 's'
-    } ${duration[1]} second${Number(duration[1]) === 1 ? '' : 's'}`;
-  };
+    }${minutes} minute${minutes === 1 ? '' : 's'} ${seconds} second${
+      seconds === 1 ? '' : 's'
+    }`;
+  }, [playlistSongs]);
+
+  const songComponents = React.useMemo(
+    () =>
+      playlistSongs.length > 0
+        ? playlistSongs.map((song, index) => {
+            return (
+              <Song
+                key={index}
+                index={index}
+                title={song.title}
+                artists={song.artists}
+                duration={song.duration}
+                songId={song.songId}
+                artworkPath={song.artworkPath}
+                path={song.path}
+                isAFavorite={song.isAFavorite}
+                additionalContextMenuItems={[
+                  {
+                    label: 'Remove from this Playlist',
+                    iconName: 'playlist_remove',
+                    handlerFunction: () =>
+                      window.api
+                        .removeSongFromPlaylist(
+                          playlistData.playlistId,
+                          song.songId
+                        )
+                        .then(
+                          (res) =>
+                            res.success &&
+                            updateNotificationPanelData(
+                              5000,
+                              <span>
+                                '{song.title}' removed from '{playlistData.name}
+                                ' playlist successfully.
+                              </span>
+                            )
+                        )
+                        .catch((err) => console.error(err)),
+                  },
+                ]}
+              />
+            );
+          })
+        : [],
+    [playlistSongs, playlistData, updateNotificationPanelData]
+  );
 
   return (
-    <div className="main-container playlist-info-page-container">
+    <div className="main-container playlist-info-page-container p-8">
       {Object.keys(playlistData).length > 0 && (
-        <div className="playlist-img-and-info-container">
+        <div className="playlist-img-and-info-container appear-from-bottom flex flex-row items-center mb-8">
           <div className="playlist-cover-container">
             <img
-              src={`otomusic://localFiles/${
-                playlistData.artworkPath || DefaultPlaylistCover
-              }`}
+              src={
+                playlistData.artworkPath
+                  ? `otomusic://localFiles/${playlistData.artworkPath}`
+                  : DefaultPlaylistCover
+              }
+              className="w-60 rounded-2xl"
               alt="Playlist Cover"
             />
           </div>
-          <div className="playlist-info-container">
-            <div className="playlist-name">{playlistData.name}</div>
-            <div className="playlist-no-of-songs">
+          <div className="playlist-info-container text-font-color-black dark:text-font-color-white ml-8">
+            <div className="playlist-name text-5xl w-full overflow-hidden text-ellipsis whitespace-nowrap mb-2">
+              {playlistData.name}
+            </div>
+            <div className="playlist-no-of-songs text-base w-full overflow-hidden text-ellipsis whitespace-nowrap">
               {`${playlistData.songs.length} song${
                 playlistData.songs.length === 1 ? '' : 's'
               }`}
@@ -86,21 +164,30 @@ export default () => {
               {`Created on ${new Date(playlistData.createdDate).toUTCString()}`}
             </div>
             {playlistData.songs && playlistData.songs.length > 0 && (
-              <div className="playlist-buttons">
+              <div className="playlist-buttons mt-8 flex flex-wrap">
                 <Button
                   label="Play All"
                   iconName="play_arrow"
+                  className="mb-4"
                   clickHandler={() =>
-                    createQueue(playlistData.songs, 'songs', undefined, true)
+                    createQueue(
+                      playlistData.songs,
+                      'songs',
+                      undefined,
+                      undefined,
+                      true
+                    )
                   }
                 />
                 <Button
                   label="Shuffle and Play"
                   iconName="shuffle"
+                  className="mb-4"
                   clickHandler={() =>
                     createQueue(
                       playlistData.songs.sort(() => 0.5 - Math.random()),
                       'songs',
+                      undefined,
                       undefined,
                       true
                     )
@@ -109,12 +196,12 @@ export default () => {
                 <Button
                   label="Add to Queue"
                   iconName="add"
+                  className="mb-4"
                   clickHandler={() => {
-                    updateQueueData(
-                      undefined,
-                      [...queue.queue, ...playlistData.songs],
-                      false
-                    );
+                    updateQueueData(undefined, [
+                      ...queue.queue,
+                      ...playlistData.songs,
+                    ]);
                     updateNotificationPanelData(
                       5000,
                       <span>
@@ -125,6 +212,45 @@ export default () => {
                     );
                   }}
                 />
+                {playlistData.playlistId === 'History' && (
+                  <Button
+                    label="Clear History"
+                    iconName="clear"
+                    className="mb-4"
+                    clickHandler={() => {
+                      changePromptMenuData(
+                        true,
+                        <SensitiveActionConfirmPrompt
+                          title="Confrim the action to clear Song History"
+                          content={
+                            <div>
+                              You wouldn't be able to see what you have listened
+                              previously if you decide to continue this action.
+                            </div>
+                          }
+                          confirmButton={{
+                            label: 'Clear History',
+                            clickHandler: () => {
+                              window.api
+                                .clearSongHistory()
+                                .then(
+                                  (res) =>
+                                    res.success &&
+                                    updateNotificationPanelData(
+                                      5000,
+                                      <span>
+                                        Cleared the song history successfully.
+                                      </span>
+                                    )
+                                )
+                                .catch((err) => console.error(err));
+                            },
+                          }}
+                        />
+                      );
+                    }}
+                  />
+                )}
               </div>
             )}
           </div>
@@ -132,31 +258,20 @@ export default () => {
       )}
       {playlistSongs.length > 0 && (
         <div className="songs-list-container">
-          <div className="title-container">Songs</div>
-          <div className="songs-container">
-            {playlistSongs.map((song, index) => {
-              return (
-                <Song
-                  key={index}
-                  index={index}
-                  title={song.title}
-                  artists={song.artists}
-                  duration={song.duration}
-                  songId={song.songId}
-                  artworkPath={song.artworkPath}
-                  path={song.path}
-                />
-              );
-            })}
+          <div className="title-container mt-1 pr-4 flex items-center mb-4 text-font-color-black text-2xl dark:text-font-color-white">
+            Songs
           </div>
+          <div className="songs-container">{songComponents}</div>
         </div>
       )}
       {playlistSongs.length === 0 && (
-        <div className="no-songs-container">
-          {/* <img src={NoSongsImage} alt="" /> */}
+        <div className="no-songs-container h-full mt-12 w-full text-[#ccc] text-center flex flex-col items-center justify-center text-2xl relative inset-0">
           This playlist is empty.
         </div>
       )}
     </div>
   );
 };
+
+PlaylistInfoPage.displayName = 'PlaylistInfoPage';
+export default PlaylistInfoPage;

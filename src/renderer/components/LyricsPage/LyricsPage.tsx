@@ -7,15 +7,15 @@
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
 import React, { useContext } from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
 import { Lyric, NoLyrics, LyricsSource } from './Lyrics';
 import NoLyricsImage from '../../../../assets/images/Sun_Monochromatic.svg';
 import FetchingLyricsImage from '../../../../assets/images/Waiting_Monochromatic.svg';
 import NoInternetImage from '../../../../assets/images/Summer landscape_Monochromatic.svg';
 
 export const LyricsPage = () => {
-  const { currentSongData, updateNotificationPanelData } =
-    useContext(AppContext);
+  const { currentSongData } = useContext(AppContext);
+  const { updateNotificationPanelData } = React.useContext(AppUpdateContext);
 
   const [lyrics, setLyrics] = React.useState(null as Lyrics | undefined | null);
 
@@ -49,7 +49,9 @@ export const LyricsPage = () => {
 
   return (
     <div
-      className={`main-container lyrics-container ${lyrics && 'lyrics-found'}`}
+      className={`main-container lyrics-container flex flex-col items-center justify-center px-8 py-4 relative min-h-[90%] ${
+        lyrics && 'justify-start'
+      }`}
     >
       {lyricsComponents}
       {lyrics && lyrics.lyrics !== '' && (

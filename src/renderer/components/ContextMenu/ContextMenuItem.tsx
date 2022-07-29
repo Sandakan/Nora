@@ -4,32 +4,34 @@
 /* eslint-disable react/destructuring-assignment */
 // import react from 'react';
 
-interface ContextMenuItemProp {
-  label: string;
-  class?: string;
-  iconName?: string;
-  handlerFunction: () => void;
-  updateContextMenuData: (
-    isVisible: boolean,
-    menuItems: ContextMenuItem[],
-    pageX?: number,
-    pageY?: number
-  ) => void;
-}
+import React from 'react';
+import { AppUpdateContext } from 'renderer/contexts/AppContext';
 
-export default (props: ContextMenuItemProp) => {
+const ContextMenuItem = (props: ContextMenuItem) => {
+  const { updateContextMenuData } = React.useContext(AppUpdateContext);
   return (
     <div
-      className={`menu-item ${props.class || ''}`}
+      className={`menu-item ${
+        props.class || ''
+      } cursor-pointer px-4 py-1 flex flex-row items-center font-light text-font-color-black dark:text-font-color-white hover:bg-context-menu-list-hover dark:hover:bg-dark-context-menu-list-hover`}
       onClick={() => {
         props.handlerFunction();
-        props.updateContextMenuData(false, []);
+        updateContextMenuData(false, []);
       }}
     >
       {props.iconName && (
-        <span className="material-icons-round icon">{props.iconName}</span>
+        <span
+          className={
+            props.iconClassName || 'material-icons-round icon mr-4 text-xl'
+          }
+        >
+          {props.iconName}
+        </span>
       )}{' '}
       {props.label}
     </div>
   );
 };
+
+ContextMenuItem.displayName = 'ContextMenuItem';
+export default ContextMenuItem;

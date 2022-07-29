@@ -1,14 +1,86 @@
 <h1> Change Log</h1>
 
+<h3>The latest version (v0.7.0-alpha) contains a lot of new features and improvements. As always expect to see bugs in the app because this app is still in alpha phase.</h3>
+<br>
+
 <ul>
+<li class="version"> v0.7.0-alpha - ( 27<sup>th</sup> of July 2022 )
+    <ul>
+      <li>🎉 New Features and Updates
+      <ul>
+        <li>Support for .ogg and .wav file extensions as songs. Now you can play them in the player. (Experimental)</li>
+        <li>Added a Release Notes page to display information about the updates of the app. It will inform the user if he/she uses an outdated app.</li>
+        <li>Rewrote the whole UI styling with TailwindCSS.</li>
+        <li>Added the option to view licenses of the open source packages used in the app.</li>
+        <li>Window positions and diamensions will be saved when you move them around.</li>
+        <li>SearchPage will now show recent search queries of the user.</li>
+        <li>SearchPage will now suggest queries if the user enters a query that doesn't have results.</li>
+        <li>SearchPage will now show genres in the search results.</li>
+        <li>NotificationPanel now supports buttons to provide additional functionality.</li>
+        <li>Added all-time most listened, all-time least listened, monthly most listened, monthly least listened and artist name to songs sort options.</li>
+        <li>Added few app-specific error codes to identify errors in the app.</li>
+        <li>Added Material Symbols.</li>
+        <li>Now the app is responsive to network fluctuations.</li>
+        <li>Added song playback controls to the taskbar thumbnail toolbar of the app.</li>
+        <li>Ability to make the mini player always on top.</li>
+        <li>Now you can add new playlists, add new songs to them, remove songs inside them or remove the whole playlist.</li>
+        <li>Ability to clear the song history of the app.</li>
+        <li>Sorting options now you select will be saved in the app to provide easier access to what you always go for.</li>
+        <li>Added a new volume fade in and fade out transition for songs when toggling through pause and play.</li>
+        <li>Queue shuffling using Fisher Yates algorithm.</li>
+        <li>Now the sidebar will be folded if you reduce the size of the app beyond a specific boundary.</li>
+        <li>Added a Dropdown component and improved its UI, UX and functionality.</li>
+        <li>Added new MainContainer and SecondaryContainer components.</li>
+        <li>Added a prompt to verify before directing user to links from the app.</li>
+        <li>Added a new prompt to confirm sensitive actions of the app.</li>
+        <li>Now most of the pages will update themselves if they detect whether their data are updated.</li>
+        <li>Now you can sort genres.</li>
+        <li>Now you can see what songs you loved most and listened most and which artists you love most on the HomePage.</li>
+        <li>Added a new prompt to confirm before deleting a playlist.</li>
+      </ul>
+      </li>
+      <li>🔨 Fixes and Improvements
+        <ul>
+          <li>Now recently played songs will be fetched using the History playlist.</li>
+          <li>Removed some unused font files.</li>
+          <li>Fixed some bugs related to data caching inside the app.</li>
+          <li>Improved data updates detection.</li>
+          <li>Fixed some bugs related to parsing songs.</li>
+          <li>Fixed some bugs related to restoring a blacklisted song and sending a song to the blacklist.</li>
+          <li>Fixed a bug where parsing a song after a read error would parse the song two times.</li>
+          <li>Fixed a bug where deleting a song from the library or deleting from the system wouldn't update the library.</li>
+          <li>Fixed some bugs related to resetting the app.</li>
+          <li>Improved the song parsing process.</li>
+          <li>Added a Ref to store all the states in App.</li>
+          <li>Fixed some bugs related to the player.</li>
+          <li>Improved Button component UI, UX and functionality.</li>
+          <li>Improved Checkbox component UI, UX and functionality.</li>
+          <li>Improved ErrorPrompt component UI, UX and functionality.</li>
+          <li>Improved how notifications appear in the app.</li>
+          <li>Improved how the app searches content.</li>
+          <li>Updated the song tags editing page. (Experimental)</li>
+        </ul>
+      </li>
+      <li>🐜 Known Issues and Bugs
+        <ul>
+          <li>Editing song tags could remove the artwork of a song.</li>
+          <li>Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song.</li>
+          <li>There is still a small amount of unwanted cpu consumption due to over-rendering of components.</li>
+        </ul>
+      </li>
+    </ul>
+
+  </li>
+
+  <br/>
 <li class="version"> v0.6.0-alpha - ( 24<sup>th</sup> of June 2022 )
     <ul>
       <li>🎉 Features
       <ul>
-        <li>Added the support to edit song id3 tags. Right click on a song to go to the SongID3TagEditorPage. Currently changes to those data wouldn't be updated on the app. (Experimental)</li>
+        <li>Added the support to edit song id3 tags. Right click on a song and select Edit song tags to go to the SongID3TagEditorPage. Currently changes to those data wouldn't be updated on the app. (Experimental)</li>
         <li>Added the basement to provide support for m3u files to import and export playlists.</li>
         <li>Artist artworks will be updated when the user listens to their songs.</li>
-        <li>Added keyboard shortcuts for the basic functions of teh app.</li>
+        <li>Added keyboard shortcuts for the basic functions of the app.</li>
         <li>Added support for reduced motion. You can enable reduced motion in Settings > Accessibility.</li>
         <li>Added Genres to the app. You can view details related to the genre in GenreInfoPage by clicking on a genre.</li>
         <li>Now the app window will blur the title bar when the app loses focus.</li>
@@ -104,7 +176,7 @@
     <ul>
       <li>Migrated the song player to the root of the app to provide support for features such as mini-player (Experimental).</li>
       <li>Updated readme file.</li>
-      <li>Improved codebase to support building the app.</li>
+      <li>Improved the codebase.</li>
     </ul>
   </li>
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
 import blah from '../../../../assets/images/playlist_cover_default.png';
 
 interface GenreProp {
@@ -12,8 +12,8 @@ interface GenreProp {
 
 const Genre = (props: GenreProp) => {
   const { genreId, noOfSongs, title, artworkPath, backgroundColor } = props;
-  const { changeCurrentActivePage, currentlyActivePage } =
-    React.useContext(AppContext);
+  const { currentlyActivePage } = React.useContext(AppContext);
+  const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
 
   const goToGenreInfoTab = () =>
     currentlyActivePage.pageTitle === 'GenreInfo' &&
@@ -25,7 +25,7 @@ const Genre = (props: GenreProp) => {
 
   return (
     <div
-      className="genre appear-from-bottom"
+      className="genre appear-from-bottom relative w-72 h-36 mr-10 mb-6 p-4 text-background-color-2 dark:text-dark-background-color-2 flex items-center rounded-2xl cursor-pointer overflow-hidden"
       style={{
         backgroundColor: `rgb(${
           backgroundColor
@@ -38,15 +38,18 @@ const Genre = (props: GenreProp) => {
       role="button"
       tabIndex={0}
     >
-      <div className="genre-info-container">
-        <div className="genre-title">{title}</div>
-        <div className="genre-no-of-songs">{`${noOfSongs} song${
+      <div className="genre-info-container w-3/4">
+        <div className="genre-title text-2xl w-full text-ellipsis whitespace-nowrap overflow-hidden text-font-color-white dark:text-font-color-white">
+          {title}
+        </div>
+        <div className="genre-no-of-songs text-[#ccc] dark:text-[#ccc]">{`${noOfSongs} song${
           noOfSongs === 1 ? '' : 's'
         }`}</div>
       </div>
-      <div className="genre-artwork-container">
+      <div className="genre-artwork-container absolute -right-4 top-1/2 -translate-y-1/2">
         <img
           src={artworkPath ? `otomusic://localFiles/${artworkPath}` : blah}
+          className="w-24 rotate-12 rounded-md"
           alt="Artwork cover"
         />
       </div>

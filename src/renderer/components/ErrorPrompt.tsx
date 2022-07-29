@@ -1,26 +1,31 @@
 /* eslint-disable react/require-default-props */
-interface ErrorPromptProps {
-  isFatal?: boolean;
-}
+import { ReactElement } from 'react';
+import Button from './Button';
 
-export default ({ isFatal }: ErrorPromptProps) => {
+interface ErrorPromptProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  reason: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  message?: ReactElement<any, any>;
+}
+export default ({ reason, message }: ErrorPromptProps) => {
   return (
     <>
       <div className="alert-icon-container">
-        <span className="material-icons-round icon">warning</span>
+        <div className="title-container mt-1 mb-4 text-foreground-color-1 font-medium text-3xl uppercase dark:text-foreground-color-1 flex items-center">
+          <span className="material-icons-round icon mr-4 text-4xl">
+            warning
+          </span>{' '}
+          Error Ocurred
+        </div>
       </div>
-      <div>
-        An {isFatal ? 'fatal' : ''} error occurred. Lorem ipsum dolor sit amet,
-        consectetur adipisicing elit. Neque fugiat doloremque est, fugit veniam
-        ipsa sed earum possimus eum, dolor officiis blanditiis, saepe pariatur
-        reiciendis quia voluptates dignissimos placeat at? Lorem ipsum, dolor
-        sit amet consectetur adipisicing elit. Qui excepturi aspernatur tempora
-        vero, nemo error omnis expedita ipsa eos cumque quibusdam sapiente,
-        ratione dolores ut labore officiis nostrum perferendis quis.
-      </div>
-      <button className="restart-btn" type="button">
-        Restart App
-      </button>
+      {message && <div>{message}</div>}
+      <Button
+        label="Restart App"
+        iconName="sync"
+        className="!bg-background-color-3 dark:!bg-dark-background-color-3 text-font-color-black dark:text-font-color-black rounded-md w-fit float-right mt-6 hover:border-background-color-3 dark:hover:border-background-color-3"
+        clickHandler={() => window.api.restartRenderer(reason)}
+      />
     </>
   );
 };

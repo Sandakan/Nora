@@ -1,9 +1,21 @@
 {
   "description": "An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar.",
-  "version": "0.6.0-alpha",
-  "homepage": "https://github.com/Sandakan/Oto-Music-for-Desktop#readme",
+  "version": "0.7.0-alpha",
+  "appPreferences": {
+    "supportedMusicExtensions": [
+      "mp3",
+      "wav",
+      "ogg"
+    ]
+  },
+  "releaseNotes": {
+    "md": "https://raw.githubusercontent.com/Sandakan/Oto-Music-for-Desktop/master/changelog.md",
+    "json": "https://raw.githubusercontent.com/Sandakan/Oto-Music-for-Desktop/master/release-notes.json"
+  },
+  "homepage": "https://github.com/Sandakan/Oto-Music-for-Desktop",
   "bugs": {
-    "url": "https://github.com/Sandakan/Oto-Music-for-Desktop/issues"
+    "url": "https://github.com/Sandakan/Oto-Music-for-Desktop/issues",
+    "email": "sandakannipunajith@gmail.com"
   },
   "repository": {
     "type": "git",
@@ -114,7 +126,6 @@
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-router-dom": "^6.3.0",
-    "sharp": "^0.30.6",
     "simple-get": "^4.0.1",
     "songlyrics": "^2.3.2",
     "trash": "^7.2.0"
@@ -163,6 +174,7 @@
     "eslint-plugin-react": "^7.29.4",
     "eslint-plugin-react-hooks": "^4.5.0",
     "file-loader": "^6.2.0",
+    "file-type": "^16.5.4",
     "html-webpack-plugin": "^5.5.0",
     "husky": "^8.0.1",
     "identity-obj-proxy": "^3.0.0",
@@ -178,8 +190,11 @@
     "rimraf": "^3.0.2",
     "sass": "^1.51.0",
     "sass-loader": "^12.6.0",
+    "sharp": "^0.30.7",
     "style-loader": "^3.3.1",
-    "tailwindcss": "^3.1.3",
+    "tailwindcss": "^3.1.5",
+    "tailwindcss-group-variants": "^0.0.9",
+    "terser": "^5.14.2",
     "terser-webpack-plugin": "^5.3.1",
     "ts-jest": "^28.0.2",
     "ts-loader": "^9.3.0",
@@ -204,11 +219,14 @@
     ],
     "fileAssociations": [
       {
-        "ext": [
-          "mp3"
-        ]
+        "ext": "mp3",
+        "name": "mp3 File",
+        "role": "Editor"
       }
     ],
+    "nsis": {
+      "perMachine": true
+    },
     "icon": "./assets/images/logo_light_mode.ico",
     "afterSign": ".erb/scripts/notarize.js",
     "mac": {

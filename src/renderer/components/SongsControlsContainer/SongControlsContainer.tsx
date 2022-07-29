@@ -17,36 +17,44 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/self-closing-comp */
-import { useContext } from 'react';
-import { AppContext, SongPositionContext } from 'renderer/contexts/AppContext';
+import React, { useContext } from 'react';
+import {
+  AppContext,
+  AppUpdateContext,
+  SongPositionContext,
+} from 'renderer/contexts/AppContext';
 import { calculateTime } from '../../../main/calculateTime';
 import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
+import SongArtist from '../SongsPage/SongArtist';
 
-export default () => {
+const SongControlsContainer = () => {
   const {
     currentSongData,
-    changeCurrentActivePage,
     currentlyActivePage,
     queue,
-    updateQueueData,
-    updateMiniPlayerStatus,
     isMiniPlayer,
     isMuted,
+    volume,
+    isShuffling,
+    isRepeating,
+    isPlaying,
+  } = useContext(AppContext);
+  const {
+    changeCurrentActivePage,
+    updateQueueData,
+    updateMiniPlayerStatus,
     toggleMutedState,
     toggleIsFavorite,
-    volume,
     updateVolume,
-    isShuffling,
-    toggleShuffling,
-    isRepeating,
     toggleRepeat,
+    toggleShuffling,
     handleSkipForwardClick,
     handleSkipBackwardClick,
-    isPlaying,
     toggleSongPlayback,
     updateSongPosition,
     updateContextMenuData,
-  } = useContext(AppContext);
+  } = useContext(AppUpdateContext);
+
   const { songPosition } = useContext(SongPositionContext);
 
   const seekBarCssProperties: any = {};
@@ -57,23 +65,9 @@ export default () => {
   volumeBarCssProperties['--volume-before-width'] = `${volume}%`;
 
   const handleQueueShuffle = () => {
-    if (!isShuffling)
-      updateQueueData(
-        undefined,
-        queue.queue.sort(() => 0.5 - Math.random())
-      );
+    if (!isShuffling) updateQueueData(undefined, queue.queue, true);
     toggleShuffling();
   };
-
-  const showArtistInfoPage = (artistName: string, artistId: string) =>
-    currentSongData.artists &&
-    (currentlyActivePage.pageTitle === 'ArtistInfo' &&
-    currentlyActivePage.data.artistName === artistName
-      ? changeCurrentActivePage('Home')
-      : changeCurrentActivePage('ArtistInfo', {
-          artistName,
-          artistId,
-        }));
 
   const showSongInfoPage = () =>
     currentlyActivePage.pageTitle === 'SongInfo' &&
@@ -85,11 +79,38 @@ export default () => {
           songInfo: { songId: currentSongData.songId },
         });
 
+  const songArtists = React.useMemo(
+    () =>
+      currentSongData.artists
+        ? Array.isArray(currentSongData.artists) &&
+          (currentSongData.artists.length > 0
+            ? currentSongData.artists.map((artist, index) => (
+                <span key={index}>
+                  <SongArtist
+                    key={index}
+                    artistId={artist.artistId}
+                    name={artist.name}
+                  />
+                  {currentSongData.artists &&
+                  currentSongData.artists.length - 1 !== index
+                    ? ', '
+                    : ''}
+                </span>
+              ))
+            : 'Unknown Artist')
+        : 'Unknown Artist',
+    [currentSongData.artists]
+  );
+
   return (
-    <footer className="song-controls-container">
-      <div className="current-playing-song-info-container">
-        <div className="song-cover-container" id="currentSongCover">
+    <footer className="song-controls-container w-full h-[6rem] bg-background-color-1 dark:bg-dark-background-color-1 flex flex-row justify-between relative bottom-0 overflow-hidden shadow-[0px_-10px_25px_7px_rgba(0,0,0,0.2)] text-font-color-black dark:text-font-color-white">
+      <div className="current-playing-song-info-container w-1/4 flex items-center content-center relative">
+        <div
+          className="song-cover-container w-[30%] h-full overflow-hidden flex items-center justify-center relative p-2 mr-2 lg:hidden"
+          id="currentSongCover"
+        >
           <img
+            className="max-w-full object-cover rounded-lg"
             src={
               currentSongData.artworkPath
                 ? `otomusic://localFiles/${currentSongData.artworkPath}`
@@ -113,11 +134,11 @@ export default () => {
             }}
           />
         </div>
-        <div className="song-info-container">
+        <div className="song-info-container w-[65%] h-full flex flex-col items-start justify-center lg:ml-4">
           <div
-            className="song-title"
+            className="song-title w-full text-2xl font-medium overflow-hidden text-ellipsis whitespace-nowrap cursor-pointer hover:underline"
             id="currentSongTitle"
-            title={currentSongData.title ? currentSongData.title : ''}
+            title={currentSongData.title}
             onClick={showSongInfoPage}
             onContextMenu={(e) => {
               e.stopPropagation();
@@ -135,111 +156,41 @@ export default () => {
               );
             }}
           >
-            {currentSongData.title ? currentSongData.title : ''}
+            {currentSongData.title}
           </div>
-          <div className="song-artists" id="currentSongArtists">
-            {currentSongData.artists ? (
-              Array.isArray(currentSongData.artists) ? (
-                currentSongData.artists.length > 0 ? (
-                  currentSongData.artists.map((artist, index) => (
-                    <span key={index}>
-                      <span
-                        className="artist"
-                        key={artist.artistId}
-                        title={artist.name}
-                        onClick={() =>
-                          showArtistInfoPage(artist.name, artist.artistId)
-                        }
-                        onContextMenu={(e) => {
-                          e.stopPropagation();
-                          updateContextMenuData(
-                            true,
-                            [
-                              {
-                                label: 'Info',
-                                iconName: 'info',
-                                handlerFunction: () =>
-                                  showArtistInfoPage(
-                                    artist.name,
-                                    artist.artistId
-                                  ),
-                              },
-                            ],
-                            e.pageX,
-                            e.pageY
-                          );
-                        }}
-                      >
-                        {artist.name}
-                      </span>
-                      {currentSongData.artists &&
-                      currentSongData.artists.length - 1 !== index
-                        ? ', '
-                        : ''}
-                    </span>
-                  ))
-                ) : (
-                  'Unknown Artist'
-                )
-              ) : (
-                <span
-                  className="artist"
-                  title={currentSongData.artists[0]}
-                  onClick={() => {
-                    if (currentSongData.artists)
-                      showArtistInfoPage(
-                        currentSongData.artists[0].name,
-                        currentSongData.artists[0].artistId
-                      );
-                  }}
-                  onContextMenu={(e) => {
-                    e.stopPropagation();
-                    updateContextMenuData(
-                      true,
-                      [
-                        {
-                          label: 'Info',
-                          iconName: 'info',
-                          handlerFunction: () => {
-                            if (currentSongData.artists)
-                              showArtistInfoPage(
-                                currentSongData.artists[0].name,
-                                currentSongData.artists[0].artistId
-                              );
-                          },
-                        },
-                      ],
-                      e.pageX,
-                      e.pageY
-                    );
-                  }}
-                >
-                  {currentSongData.artists[0]}
-                </span>
-              )
-            ) : (
-              'Unknown Artist'
-            )}
+          <div
+            className="song-artists text-xs font-normal overflow-hidden text-ellipsis whitespace-nowrap w-[90%] cursor-pointer"
+            id="currentSongArtists"
+          >
+            {songArtists}
           </div>
         </div>
       </div>
-      <div className="song-controls-and-seekbar-container">
-        <div className="controls-container">
-          <div className="like-btn">
+      <div className="song-controls-and-seekbar-container w-[40%] flex flex-col items-center justify-between py-2">
+        <div className="controls-container w-[80%] flex items-center justify-around px-2 [&>div.active_span.icon]:text-foreground-color-1 dark:[&>div.active_span.icon]:text-foreground-color-1 [&>div.active_span.icon]:opacity-90">
+          <div
+            className={`like-btn flex ${
+              currentSongData.isAFavorite && 'active'
+            }`}
+          >
             <span
               title="Like (Ctrl + H)"
-              className={`material-icons-round icon ${
-                currentSongData.isAFavorite && 'liked'
-              }`}
+              className={`${
+                currentSongData.isAFavorite
+                  ? 'material-icons-round'
+                  : 'material-icons-round-outlined'
+              } icon cursor-pointer text-3xl text-font-color-black dark:text-font-color-white opacity-75 transition-opacity hover:opacity-100`}
               onClick={() => toggleIsFavorite(!currentSongData.isAFavorite)}
             >
-              {currentSongData.isAFavorite ? 'favorite' : 'favorite_border'}
+              favorite
             </span>
           </div>
-          <div className={`repeat-btn ${isRepeating !== 'false' && 'active'}`}>
+          <div
+            className={`repeat-btn flex ${isRepeating !== 'false' && 'active'}`}
+          >
             <span
               title="Repeat (Ctrl + T)"
-              className="material-icons-round icon"
+              className="material-icons-round icon cursor-pointer text-3xl text-font-color-black dark:text-font-color-white opacity-75 transition-opacity hover:opacity-100"
               onClick={() => toggleRepeat()}
             >
               {isRepeating === 'false' || isRepeating === 'repeat'
@@ -247,41 +198,41 @@ export default () => {
                 : 'repeat_one'}
             </span>
           </div>
-          <div className="skip-back-btn">
+          <div className="skip-back-btn flex">
             <span
               title="Previous Song (Ctrl + Left Arrow)"
-              className="material-icons-round icon"
+              className="material-icons-round icon cursor-pointer text-3xl text-font-color-black dark:text-font-color-white opacity-75 transition-opacity hover:opacity-100"
               onClick={handleSkipBackwardClick}
             >
               skip_previous
             </span>
           </div>
-          <div className="play-pause-btn">
+          <div className="play-pause-btn flex">
             <span
               title="Play/Pause (Space)"
-              className="material-icons-round icon"
+              className="material-icons-round icon cursor-pointer text-6xl text-font-color-black dark:text-font-color-white opacity-75 transition-opacity hover:opacity-100"
               onClick={toggleSongPlayback}
             >
               {isPlaying ? 'pause_circle' : 'play_circle'}
             </span>
           </div>
-          <div className="skip-forward-btn">
+          <div className="skip-forward-btn flex">
             <span
               title="Next Song (Ctrl + Right Arrow)"
-              className="material-icons-round icon"
+              className="material-icons-round icon cursor-pointer text-3xl text-font-color-black dark:text-font-color-white opacity-75 transition-opacity hover:opacity-100"
               onClick={handleSkipForwardClick}
             >
               skip_next
             </span>
           </div>
           <div
-            className={`lyrics-btn ${
+            className={`lyrics-btn flex ${
               currentlyActivePage.pageTitle === 'Lyrics' && 'active'
             }`}
           >
             <span
               title="Lyrics (Ctrl + L)"
-              className="material-icons-round icon"
+              className="material-icons-round icon cursor-pointer text-3xl text-font-color-black dark:text-font-color-white opacity-75 transition-opacity hover:opacity-100"
               onClick={() =>
                 currentlyActivePage.pageTitle === 'Lyrics'
                   ? changeCurrentActivePage('Home')
@@ -291,28 +242,28 @@ export default () => {
               notes
             </span>
           </div>
-          <div className={`shuffle-btn ${isShuffling && 'active'}`}>
+          <div className={`shuffle-btn flex ${isShuffling && 'active'}`}>
             <span
               title="Shuffle (Ctrl + S)"
-              className="material-icons-round icon"
+              className="material-icons-round icon cursor-pointer text-3xl text-font-color-black dark:text-font-color-white opacity-75 transition-opacity hover:opacity-100"
               onClick={handleQueueShuffle}
             >
               shuffle
             </span>
           </div>
         </div>
-        <div className="seekbar-and-song-durations-container">
-          <div className="current-song-duration">
+        <div className="seekbar-and-song-durations-container w-full h-1/3 flex flex-row items-center justify-between">
+          <div className="current-song-duration w-fit">
             {!Number.isNaN(songPosition)
               ? calculateTime(songPosition)
               : '--:--'}
           </div>
-          <div className="seek-bar">
+          <div className="seek-bar w-4/5 h-fit rounded-md relative flex items-center">
             <input
               type="range"
               name="seek-bar-slider"
               id="seek-bar-slider"
-              className="seek-bar-slider"
+              className="seek-bar-slider relative appearance-none w-full m-0 p-0 h-6 float-left outline-none bg-[transparent] rounded-lg before:absolute before:content-[''] before:top-1/2 before:left-0 before:w-[var(--seek-before-width)] before:h-1 before:bg-foreground-color-1 before:cursor-pointer before:rounded-3xl before:-translate-y-1/2"
               min="0"
               max={currentSongData.duration || 0}
               value={songPosition || 0}
@@ -323,27 +274,33 @@ export default () => {
               title={Math.round(songPosition).toString()}
             />
           </div>
-          <div className="full-song-duration">
+          <div className="full-song-duration w-fit">
             {currentSongData.duration
               ? calculateTime(currentSongData.duration)
               : '-:-'}
           </div>
         </div>
       </div>
-      <div className="other-controls-container">
-        <div className="other-settings-btn" style={{ display: 'none' }}>
-          <span title="Other Settings" className="material-icons-round icon">
+      <div className="other-controls-container w-1/4 flex items-center justify-end">
+        <div
+          className="other-settings-btn mr-8 cursor-pointer flex items-center justify-center text-font-color-black dark:text-font-color-white text-opacity-75"
+          style={{ display: 'none' }}
+        >
+          <span
+            title="Other Settings"
+            className="material-icons-round icon cursor-pointer text-xl text-font-color-black dark:text-font-color-white opacity-75 transition-opacity hover:opacity-100"
+          >
             more_horiz
           </span>
         </div>
         <div
-          className={`queue-btn ${
+          className={`queue-btn mr-8 cursor-pointer flex items-center justify-center text-font-color-black dark:text-font-color-white text-opacity-75 ${
             currentlyActivePage.pageTitle === 'CurrentQueue' && 'active'
           }`}
         >
           <span
             title="Current Queue (Ctrl + Q)"
-            className="material-icons-round icon"
+            className="material-icons-round icon cursor-pointer text-xl text-font-color-black dark:text-font-color-white opacity-75 transition-opacity hover:opacity-100"
             onClick={() =>
               currentlyActivePage.pageTitle === 'CurrentQueue'
                 ? changeCurrentActivePage('Home')
@@ -353,20 +310,20 @@ export default () => {
             segment
           </span>
         </div>
-        <div className="mini-player-btn">
+        <div className="mini-player-btn mr-8 cursor-pointer flex items-center justify-center text-font-color-black dark:text-font-color-white text-opacity-75">
           <span
             title="Open in Mini player (Ctrl + N)"
-            className="material-icons-round icon"
+            className="material-icons-round icon cursor-pointer text-xl text-font-color-black dark:text-font-color-white opacity-75 transition-opacity hover:opacity-100"
             onClick={() => updateMiniPlayerStatus(!isMiniPlayer)}
           >
             tab_unselected
           </span>
         </div>
-        <div className="volume-controller-container">
-          <div className="volume-btn">
+        <div className="volume-controller-container mr-8 flex items-center justify-center text-font-color-black dark:text-font-color-white text-opacity-75">
+          <div className="volume-btn cursor-pointer flex items-center justify-center mr-3">
             <span
               title="Mute/Unmute (Ctrl + M)"
-              className="material-icons-round icon"
+              className="material-icons-round icon cursor-pointer text-xl text-font-color-black dark:text-font-color-white opacity-75 transition-opacity hover:opacity-100"
               onClick={() => toggleMutedState()}
             >
               {isMuted ? 'volume_off' : 'volume_up'}
@@ -376,15 +333,11 @@ export default () => {
             <input
               type="range"
               id="volumeSlider"
+              className="relative appearance-none w-full m-0 p-0 h-6 float-left outline-none bg-[transparent] rounded-lg before:absolute before:content-[''] before:top-1/2 before:left-0 before:w-[var(--volume-before-width)] before:h-1 before:bg-foreground-color-1 before:cursor-pointer before:rounded-3xl before:-translate-y-1/2"
               min="0"
               max="100"
               value={volume}
-              onChange={(e) => {
-                const vol = Number(e.target.value);
-                window.api
-                  .saveUserData('volume.value', vol)
-                  .then(() => updateVolume(vol));
-              }}
+              onChange={(e) => updateVolume(Number(e.target.value))}
               aria-label="Volume slider"
               style={volumeBarCssProperties}
               title={Math.round(volume).toString()}
@@ -395,3 +348,6 @@ export default () => {
     </footer>
   );
 };
+
+SongControlsContainer.displayName = 'SongControlsContainer';
+export default SongControlsContainer;

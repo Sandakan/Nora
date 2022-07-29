@@ -1,13 +1,14 @@
 import React from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppUpdateContext } from 'renderer/contexts/AppContext';
+import Button from '../Button';
 
 /* eslint-disable no-console */
 export default (props: { folderName: string; absolutePath: string }) => {
-  const { changePromptMenuData } = React.useContext(AppContext);
+  const { changePromptMenuData } = React.useContext(AppUpdateContext);
   const { folderName, absolutePath } = props;
   return (
     <>
-      <div className="title-container">
+      <div className="title-container mt-1 mb-4 text-font-color-black text-3xl dark:text-font-color-white font-medium">
         Confirm Delete Folder &apos;{folderName}&apos;
       </div>
       <div className="description">
@@ -16,26 +17,16 @@ export default (props: { folderName: string; absolutePath: string }) => {
         songs data from the music library, but not the contents of the folder in
         your system.
       </div>
-      <button
-        type="button"
-        className="remove-folder-confirm-btn danger-btn"
-        disabled={false}
-        onClick={() => {
+      <Button
+        className="remove-folder-confirm-btn danger-btn w-48 h-10 mt-8 rounded-lg outline-none !bg-foreground-color-1 dark:!bg-foreground-color-1 text-font-color-white dark:text-font-color-white border-[transparent] float-right cursor-pointer hover:border-foreground-color-1 dark:hover:border-foreground-color-1 transition-[background] ease-in-out"
+        label="REMOVE"
+        clickHandler={() => {
           window.api
             .removeAMusicFolder(absolutePath)
-            .then((res) => {
-              if (res)
-                console.log(
-                  '🚀 ~ file: RemoveFolderConfirmationPrompt.tsx ~ line 26 ~ .then ~ res',
-                  res
-                );
-              return changePromptMenuData(false);
-            })
+            .then(() => changePromptMenuData(false))
             .catch((err) => console.error(err));
         }}
-      >
-        Delete Folder
-      </button>
+      />
     </>
   );
 };

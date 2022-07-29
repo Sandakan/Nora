@@ -1,42 +1,45 @@
+/* eslint-disable react/no-unescaped-entities */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppUpdateContext } from 'renderer/contexts/AppContext';
+import Button from '../Button';
 import Checkbox from '../Checkbox';
 
 export default (props: { songPath: string; title: string }) => {
   const { updateNotificationPanelData, changePromptMenuData } =
-    React.useContext(AppContext);
+    React.useContext(AppUpdateContext);
   const { songPath, title } = props;
-  const [isDontShowAgain, setIsDontShowAgain] = React.useState(false);
+  const [isDoNotShowAgain, setIsDoNotShowAgain] = React.useState(false);
   return (
     <>
-      <div className="title-container">
-        Confrim Removing &apos;{title}&apos; from the library
+      <div className="title-container mt-1 pr-4 flex items-center mb-8 text-font-color-black text-3xl font-medium dark:text-font-color-white">
+        Confrim Blacklisting &apos;{title}&apos; from the library
       </div>
       <div className="description">
-        Removing this song from the libary will blacklist it. But you can
-        restore it from the blacklist from the Settings Page. This song
+        Removing this song from the libary will blacklist it. You can restore it
+        again from the blacklist from the Settings Page. But you won't be able
+        to restore data related to this song managed by this app. This song
         won&apos;t be bothering you again.
       </div>
       <Checkbox
         id="doNotShowAgainCheckbox"
-        containerClassName="permanent-delete-checkbox-container"
+        className="permanent-delete-checkbox-container"
         labelContent="Do not show this message again."
-        isChecked={isDontShowAgain}
+        isChecked={isDoNotShowAgain}
         checkedStateUpdateFunction={(state) => {
-          setIsDontShowAgain(state);
+          setIsDoNotShowAgain(state);
         }}
       />
-      <button
-        type="button"
-        className="remove-song-from-library-confirm-btn danger-btn"
-        onClick={() =>
+      <Button
+        label="Blacklist Song"
+        className="remove-song-from-library-btn danger-btn  w-48 h-10 rounded-lg outline-none !bg-foreground-color-1 dark:!bg-foreground-color-1 text-font-color-white dark:text-font-color-white border-[transparent] float-right cursor-pointer hover:border-foreground-color-1 dark:hover:border-foreground-color-1 transition-[background] ease-in-out"
+        clickHandler={() =>
           window.api.removeSongFromLibrary(songPath).then(async (res) => {
             if (res.success) {
-              if (isDontShowAgain)
+              if (isDoNotShowAgain)
                 window.api.saveUserData(
                   'preferences.doNotShowRemoveSongFromLibraryConfirm',
-                  isDontShowAgain
+                  isDoNotShowAgain
                 );
               changePromptMenuData(false);
               updateNotificationPanelData(
@@ -50,9 +53,7 @@ export default (props: { songPath: string; title: string }) => {
             return undefined;
           })
         }
-      >
-        Delete Song
-      </button>
+      />
     </>
   );
 };

@@ -7,10 +7,11 @@
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
 import DefaultArtistCover from '../../../../assets/images/song_cover_default.png';
 
 interface ArtistProp {
+  className?: string;
   artistId: string;
   name: string;
   artworkPath?: string;
@@ -22,15 +23,14 @@ interface ArtistProp {
 }
 
 export const Artist = (props: ArtistProp) => {
+  const { currentlyActivePage, queue } = React.useContext(AppContext);
   const {
-    currentlyActivePage,
     changeCurrentActivePage,
     updateContextMenuData,
     createQueue,
-    queue,
     updateQueueData,
     updateNotificationPanelData,
-  } = React.useContext(AppContext);
+  } = React.useContext(AppUpdateContext);
 
   const showArtistInfoPage = () => {
     return currentlyActivePage.pageTitle === 'ArtistInfo' &&
@@ -41,50 +41,48 @@ export const Artist = (props: ArtistProp) => {
         });
   };
   const playArtistSongs = () =>
-    createQueue(props.songIds, 'artist', props.artistId, true);
+    createQueue(props.songIds, 'artist', false, props.artistId, true);
+
+  const artistContextMenus: ContextMenuItem[] = [
+    {
+      label: 'Play all Songs',
+      iconName: 'play_arrow',
+      handlerFunction: playArtistSongs,
+    },
+    {
+      label: 'Info',
+      iconName: 'info',
+      handlerFunction: showArtistInfoPage,
+    },
+    {
+      label: 'Add to queue',
+      iconName: 'queue',
+      handlerFunction: () => {
+        updateQueueData(
+          undefined,
+          [...queue.queue, ...props.songIds],
+          false,
+          false
+        );
+        updateNotificationPanelData(
+          5000,
+          <span>
+            Added {props.songIds.length} song
+            {props.songIds.length === 1 ? '' : 's'} to the queue.
+          </span>
+        );
+      },
+    },
+  ];
   return (
     <div
-      className="artist appear-from-bottom"
+      className={`artist appear-from-bottom w-40 h-40 overflow-hidden flex flex-col justify-between mr-6 rounded-lg cursor-pointer ${props.className}`}
       onContextMenu={(e) => {
         e.stopPropagation();
-        updateContextMenuData(
-          true,
-          [
-            {
-              label: 'Play all Songs',
-              iconName: 'play_arrow',
-              handlerFunction: playArtistSongs,
-            },
-            {
-              label: 'Info',
-              iconName: 'info',
-              handlerFunction: showArtistInfoPage,
-            },
-            {
-              label: 'Add to queue',
-              iconName: 'queue',
-              handlerFunction: () => {
-                updateQueueData(
-                  undefined,
-                  [...queue.queue, ...props.songIds],
-                  false
-                );
-                updateNotificationPanelData(
-                  5000,
-                  <span>
-                    Added {props.songIds.length} song
-                    {props.songIds.length === 1 ? '' : 's'} to the queue.
-                  </span>
-                );
-              },
-            },
-          ],
-          e.pageX,
-          e.pageY
-        );
+        updateContextMenuData(true, artistContextMenus, e.pageX, e.pageY);
       }}
     >
-      <div className="artist-img-container">
+      <div className="artist-img-container h-[75%] flex items-center justify-center">
         <img
           src={
             navigator.onLine && props.onlineArtworkPaths
@@ -93,12 +91,13 @@ export const Artist = (props: ArtistProp) => {
                 DefaultArtistCover
           }
           alt="Default song cover"
+          className="h-full aspect-square object-cover shadow-xl rounded-full"
           onClick={showArtistInfoPage}
         />
       </div>
-      <div className="artist-info-container">
+      <div className="artist-info-container max-h-1/5">
         <div
-          className="name-container"
+          className="name-container text-center text-xl text-text-font-color-black dark:text-font-color-white hover:underline w-full overflow-hidden text-ellipsis whitespace-nowrap cursor-pointer"
           title={props.name === '' ? 'Unknown Artist' : props.name}
           onClick={showArtistInfoPage}
         >
