@@ -16,7 +16,7 @@
 
 <br/>
 
-<img src="assets/other/frame 48.png">
+<img src="assets/other/Frame 48.png">
 
 <p align="center"> logo used in this project is taken from the <a href="https://play.google.com/store/apps/details?id=com.piyush.music&gl=us">Oto Music for Android</a> app.</p>
 
@@ -47,14 +47,14 @@
 
 <br>
 
-<img src="assets/other/frame 51.png">
-<img src="assets/other/frame 50.png">
-<img src="assets/other/frame 55.png">
-<img src="assets/other/frame 49.png">
-<img src="assets/other/frame 53.png">
-<img src="assets/other/frame 56.png">
-<img src="assets/other/frame 54.png">
-<img src="assets/other/frame 57.png">
+<img src="assets/other/Frame 51.png">
+<img src="assets/other/Frame 50.png">
+<img src="assets/other/Frame 55.png">
+<img src="assets/other/Frame 49.png">
+<img src="assets/other/Frame 53.png">
+<img src="assets/other/Frame 56.png">
+<img src="assets/other/Frame 54.png">
+<img src="assets/other/Frame 57.png">
 
 <br/>
 
