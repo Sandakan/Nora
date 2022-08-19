@@ -2,9 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/prefer-default-export */
 import { contextBridge, ipcRenderer } from 'electron';
-import NodeID3 from 'node-id3';
 import { TLyrics } from 'songlyrics';
-// import { FixedSizeList } from 'react-window';
 
 export const api = {
   /** Tells whether the app is is development or production. */
@@ -17,6 +15,34 @@ export const api = {
   minimizeApp: (): void => ipcRenderer.send('app/minimize'),
   /** toggle maximize the app */
   toggleMaximizeApp: (): void => ipcRenderer.send('app/toggleMaximize'),
+
+  /** Informs when the system theme change to dark mode. */
+  playSongFromUnknownSource: (
+    callback: (
+      _: unknown,
+      data: { audioData: AudioData; isKnownSource: boolean }
+    ) => void
+  ) => ipcRenderer.on('app/playSongFromUnknownSource', callback),
+
+  /** Tells the main process when the renderer completes its process. */
+  checkForStartUpSongs: (): Promise<{
+    audioData: AudioData;
+    isKnownSource: boolean;
+  }> => ipcRenderer.invoke('app/checkForStartUpSongs'),
+
+  /** Informs when the system theme change to dark mode. */
+  listenForSystemThemeChanges: (
+    callback: (e: any, isDarkMode: boolean, usingSystemTheme: boolean) => void
+  ) => ipcRenderer.on('app/systemThemeChange', callback),
+
+  /** Changes app theme. */
+  changeAppTheme: (theme?: AppTheme): void =>
+    ipcRenderer.send('app/changeAppTheme', theme),
+
+  /** removes the event that watches for system theme changes. */
+  StoplisteningForSystemThemeChanges: (
+    callback: (e: any, isDarkMode: boolean, usingSystemTheme: boolean) => void
+  ) => ipcRenderer.removeListener('app/systemThemeChange', callback),
 
   /** Tells the main process whether the player is currently playing a song. */
   songPlaybackStateChange: (isPlaying: boolean): void =>
@@ -44,9 +70,19 @@ export const api = {
   addMusicFolder: (sortType?: SongSortTypes): Promise<SongData[]> =>
     ipcRenderer.invoke('app/addMusicFolder', sortType),
 
+  // /** ADDS A NEW SONG INSTEAD OF ADDING THROUGH A FOLDER */
+  // addSongFromPath: (songPath:string): Promise<SongData[]> =>
+  //   ipcRenderer.invoke('app/addSongFromPath', songPath),
+
   /** GET SONG DATA */
   getSong: (songId: string, updateListeningRate = true): Promise<AudioData> =>
     ipcRenderer.invoke('app/getSong', songId, updateListeningRate),
+
+  /** GET SONG DATA FROM UNKNOWN SOURCE */
+  getSongFromUnknownSource: (
+    songPath: string
+  ): Promise<{ audioData: AudioData; isKnownSource: boolean }> =>
+    ipcRenderer.invoke('app/getSongFromUnknownSource', songPath),
 
   /** FETCHES ALL THE SONGS. SUPPORTS SORTING AND PAGINATION */
   getAllSongs: (
@@ -86,8 +122,12 @@ export const api = {
     ipcRenderer.send('app/incrementNoOfSongListens', songId),
 
   /** PROVIDES SEARCH RESULTS */
-  search: (filter: string, value: string): Promise<SearchResult> =>
-    ipcRenderer.invoke('app/search', filter, value),
+  search: (
+    filter: SearchFilters,
+    value: string,
+    updateSearchHistory?: boolean
+  ): Promise<SearchResult> =>
+    ipcRenderer.invoke('app/search', filter, value, updateSearchHistory),
 
   /** PROVIDES SONG LYRICS */
   getSongLyrics: (
@@ -111,7 +151,8 @@ export const api = {
     callback: (
       event: unknown,
       message: string,
-      messageCode?: MessageCodes
+      messageCode?: MessageCodes,
+      data?: object
     ) => void
   ) => ipcRenderer.on('app/sendMessageToRendererEvent', callback),
 
@@ -121,17 +162,12 @@ export const api = {
 
   /** SENDS MESSAGES FROM THE MAIN TO THE RENDERER */
   dataUpdateEvent: (
-    callback: (
-      event: unknown,
-      dataType: DataUpdateEventTypes,
-      id?: string,
-      message?: string
-    ) => void
+    callback: (e: unknown, dataEvents: DataUpdateEvent[]) => void
   ) => ipcRenderer.on('app/dataUpdateEvent', callback),
 
-  /**  Removes the specified listener from dataUpdateEvent */
-  removeDataUpdateEventListener: (callback: (...args: any[]) => void) =>
-    ipcRenderer.removeListener('app/dataUpdateEvent', callback),
+  /**  Removes the all the listeners from dataUpdateEvent */
+  removeDataUpdateEventListeners: () =>
+    ipcRenderer.removeAllListeners('app/dataUpdateEvent'),
 
   /**  Removes a listener from the specified channel */
   removeIpcEventListener: (
@@ -246,20 +282,17 @@ export const api = {
   /** Updates the ID3 tags of the song. */
   updateSongId3Tags: (
     songId: string,
-    tags: SongId3Tags
+    tags: SongTags
   ): Promise<boolean | undefined> =>
     ipcRenderer.invoke('app/updateSongId3Tags', songId, tags),
 
   /** Fetches the ID3 tags of the song. */
-  getSongId3Tags: (songPath: string): Promise<NodeID3.Tags | undefined> =>
+  getSongId3Tags: (songPath: string): Promise<SongTags> =>
     ipcRenderer.invoke('app/getSongId3Tags', songPath),
 
   /** Opens a prompt for the user to select an img from the system. Returns the filepath of the selected img. */
   getImgFileLocation: (): Promise<string> =>
     ipcRenderer.invoke('app/getImgFileLocation'),
-
-  // /** Sends a react-window list component */
-  // getReactWindowComponenet: (): typeof FixedSizeList => FixedSizeList,
 
   /** REVEAL SONG IN FILE EXPLORER */
   revealSongInFileExplorer: (songId: string): void =>

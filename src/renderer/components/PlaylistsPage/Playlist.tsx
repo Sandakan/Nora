@@ -6,10 +6,14 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
 import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
-import DefaultPlaylistCover from '../../../../assets/images/playlist_cover_default.png';
+import DefaultPlaylistCover from '../../../../assets/images/png/playlist_cover_default.png';
 import ConfirmDeletePlaylist from './ConfirmDeletePlaylist';
 
-export const Playlist = (props: Playlist) => {
+interface PlaylistProp extends Playlist {
+  index: number;
+}
+
+export const Playlist = (props: PlaylistProp) => {
   const { currentlyActivePage } = React.useContext(AppContext);
   const {
     updateContextMenuData,
@@ -42,7 +46,8 @@ export const Playlist = (props: Playlist) => {
 
   return (
     <div
-      className={`playlist group appear-from-bottom ${props.playlistId} h-48 w-32 mb-12 mr-16 flex text-font-color-black dark:text-font-color-white flex-col justify-between`}
+      style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
+      className={`playlist group appear-from-bottom ${props.playlistId} min-h-[12rem] h-fit max-h-52 w-32 mb-12 mr-16 flex text-font-color-black dark:text-font-color-white flex-col justify-between`}
       data-playlist-id={props.playlistId}
       onContextMenu={(e) => {
         e.preventDefault();
@@ -95,13 +100,13 @@ export const Playlist = (props: Playlist) => {
             }
             alt="Playlist Cover"
             loading="lazy"
-            className="h-full"
+            className="h-full w-full"
           />
         </div>
       </div>
       <div className="playlist-info-container">
         <div
-          className="title playlist-title text-xl cursor-pointer hover:underline"
+          className="title playlist-title w-full text-xl cursor-pointer hover:underline overflow-hidden overflow-ellipsis whitespace-nowrap"
           title={props.name}
           onClick={openPlaylistInfoPage}
         >

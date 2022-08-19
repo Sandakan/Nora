@@ -5,13 +5,14 @@
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
-import React from 'react';
+import React, { CSSProperties } from 'react';
+import useResizeObserver from 'renderer/hooks/useResizeObserver';
+import { FixedSizeGrid as Grid } from 'react-window';
 import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
-// import { AppContext } from 'renderer/contexts/AppContext';
 import sortAlbums from 'renderer/utils/sortAlbums';
 import { Album } from './Album';
-import FetchingDataImage from '../../../../assets/images/Cocktail _Monochromatic.svg';
-import NoAlbumsImage from '../../../../assets/images/Easter bunny_Monochromatic.svg';
+import FetchingDataImage from '../../../../assets/images/svg/Cocktail _Monochromatic.svg';
+import NoAlbumsImage from '../../../../assets/images/svg/Easter bunny_Monochromatic.svg';
 import MainContainer from '../MainContainer';
 import Dropdown from '../Dropdown';
 
@@ -59,6 +60,14 @@ export const AlbumsPage = () => {
         ? userData.sortingStates.albumsPage
         : 'aToZ',
   } as AlbumsPageReducer);
+  const containerRef = React.useRef(null as HTMLDivElement | null);
+  const { height, width } = useResizeObserver(containerRef);
+  const MIN_ITEM_WIDTH = 220;
+  const MIN_ITEM_HEIGHT = 280;
+  const noOfColumns = Math.floor(width / MIN_ITEM_WIDTH);
+  const noOfRows = Math.ceil(content.albums.length / noOfColumns);
+  const itemWidth =
+    MIN_ITEM_WIDTH + ((width % MIN_ITEM_WIDTH) - 10) / noOfColumns;
 
   const fetchAlbumData = React.useCallback(
     () =>
@@ -81,15 +90,22 @@ export const AlbumsPage = () => {
 
   React.useEffect(() => {
     fetchAlbumData();
-    const manageAlbumDataUpdates = (
-      _: unknown,
-      eventType: DataUpdateEventTypes
-    ) => {
-      if (eventType === 'albums') fetchAlbumData();
+    const manageDataUpdatesInAlbumsPage = (e: Event) => {
+      if ('detail' in e) {
+        const dataEvents = (e as DataEvent).detail;
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (event.dataType === 'albums/newAlbum') fetchAlbumData();
+          if (event.dataType === 'albums/deletedAlbum') fetchAlbumData();
+        }
+      }
     };
-    window.api.dataUpdateEvent(manageAlbumDataUpdates);
+    document.addEventListener('app/dataUpdates', manageDataUpdatesInAlbumsPage);
     return () => {
-      window.api.removeDataUpdateEventListener(manageAlbumDataUpdates);
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageDataUpdatesInAlbumsPage
+      );
     };
   }, [fetchAlbumData]);
 
@@ -98,24 +114,40 @@ export const AlbumsPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content.sortingOrder]);
 
-  const albumComponenets = React.useMemo(
-    () =>
-      content.albums.map((album) => (
-        <Album
-          key={album.albumId}
-          title={album.title}
-          artworkPath={album.artworkPath}
-          albumId={album.albumId}
-          artists={album.artists}
-          songs={album.songs}
-          year={album.year}
-        />
-      )),
-    [content.albums]
+  const row = React.useCallback(
+    (props: {
+      columnIndex: number;
+      rowIndex: number;
+      style: CSSProperties;
+    }) => {
+      const { columnIndex, rowIndex, style } = props;
+      const index = rowIndex * noOfColumns + columnIndex;
+      // eslint-disable-next-line no-console
+      console.log(index);
+      if (index < content.albums.length) {
+        const { albumId, year, artists, title, songs, artworkPath } =
+          content.albums[index];
+        return (
+          <div style={{ ...style, display: 'flex', justifyContent: 'center' }}>
+            <Album
+              index={index}
+              artworkPath={artworkPath}
+              albumId={albumId}
+              title={title}
+              year={year}
+              artists={artists}
+              songs={songs}
+            />
+          </div>
+        );
+      }
+      return <div style={style} />;
+    },
+    [content.albums, noOfColumns]
   );
 
   return (
-    <MainContainer className="main-container albums-list-container absolute">
+    <MainContainer className="main-container albums-list-container absolute !h-full !mb-0">
       <>
         <div className="title-container mt-1 pr-4 flex items-center mb-8 text-font-color-black text-3xl font-medium dark:text-font-color-white">
           <div className="container flex">
@@ -152,13 +184,23 @@ export const AlbumsPage = () => {
             />
           </div>
         </div>
-        {content.albums && content.albums.length > 0 && (
-          <div className="albums-container flex flex-wrap">
-            {albumComponenets}
-          </div>
-        )}
+        <div className="albums-container h-full flex-grow" ref={containerRef}>
+          {content.albums && content.albums.length > 0 && (
+            <Grid
+              columnCount={noOfColumns || 5}
+              columnWidth={itemWidth}
+              rowCount={noOfRows || 5}
+              rowHeight={MIN_ITEM_HEIGHT}
+              height={height || 300}
+              width={width || 500}
+              overscanRowCount={2}
+            >
+              {row}
+            </Grid>
+          )}
+        </div>
         {content.albums === null && (
-          <div className="no-songs-container  h-full w-full text-[#ccc] text-center flex flex-col items-center justify-center text-2xl">
+          <div className="no-songs-container  h-full w-full text-[#ccc] my-[10%] text-center flex flex-col items-center justify-center text-2xl">
             <img
               src={NoAlbumsImage}
               alt="No songs available."
@@ -168,7 +210,7 @@ export const AlbumsPage = () => {
           </div>
         )}
         {content.albums && content.albums.length === 0 && (
-          <div className="no-songs-container  h-full w-full text-[#ccc] text-center flex flex-col items-center justify-center text-2xl">
+          <div className="no-songs-container h-full w-full text-[#ccc] my-[10%] text-center flex flex-col items-center justify-center text-2xl">
             <img
               src={FetchingDataImage}
               alt="No songs available."

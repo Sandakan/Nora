@@ -9,7 +9,12 @@
 import React from 'react';
 import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
 
-export const Album = (props: Album) => {
+interface AlbumProp extends Album {
+  // eslint-disable-next-line react/no-unused-prop-types
+  index: number;
+}
+
+export const Album = (props: AlbumProp) => {
   const { currentlyActivePage, queue } = React.useContext(AppContext);
 
   const {
@@ -43,6 +48,7 @@ export const Album = (props: Album) => {
 
   return (
     <div
+      // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
       className="album appear-from-bottom group h-60 overflow-hidden w-40 flex flex-col justify-between mr-14 mb-10"
       onContextMenu={(e) =>
         updateContextMenuData(

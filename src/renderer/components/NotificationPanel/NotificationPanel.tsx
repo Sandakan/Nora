@@ -70,7 +70,7 @@ const NotificationPanel = () => {
       </div>
       <div className="close-button-container w-12 flex-col items-center justify-center hover:text-[crimson] dark:hover:text-[crimson] flex absolute invisible group-hover:relative group-hover:visible">
         <span
-          className="material-icons icon text-lg p-2"
+          className="material-icons-round icon text-lg p-2"
           onClick={() => updateNotificationPanelData(0, <></>, <></>)}
           role="button"
           tabIndex={0}

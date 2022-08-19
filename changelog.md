@@ -1,12 +1,64 @@
 <h1> Change Log</h1>
 
-<h3>The latest version (v0.7.0-alpha) contains a lot of new features and improvements. As always expect to see bugs in the app because this app is still in alpha phase.</h3>
+<h3>The latest version (v0.8.0-alpha) contains a lot of new features and improvements. As always expect to see bugs in the app because this app is still in alpha phase.</h3>
+
+<br>
+
+<img src="assets\other\release artworks\whats-new-v0.8.0-alpha.png">
+
 <br>
 
 <ul>
-<li class="version"> v0.7.0-alpha - ( 27<sup>th</sup> of July 2022 )
+  <li class="version"> <h3> v0.8.0-alpha - ( 19<sup>th</sup> of August 2022 )</h3>
     <ul>
-      <li>🎉 New Features and Updates
+      <li><h4>🎉 New Features and Updates</h4>
+      <ul>
+        <li>Now double-clicking on a supported song in the File Explorer would play it on the app. Be sure if you made Oto Music the default audio player for the respective audio file. (Experimental)</li>
+        <li>Now users can drag and drop a supported audio file to play it on the player. (Experimental)</li>
+        <li>Now users can edit song id3 tags. (Experimental)</li>
+        <li>Added windowing technique to improve app performance. Before this update, app would take considerable amount of time to render a huge song library but now it renders almost instantly. (Experimental)</li>
+        <li>App theme switching according the system theme.</li>
+        <li>Now user can select whether the song duration or the song remaining duration should be displayed.</li>
+        <li>Updated taskbar thumbnail buttons to support the system theme.</li>
+        <li>Now the app will check for updates every 15 minutes and inform the user to update.</li>
+      </ul>
+      </li>
+      <li> <h4>🔨 Fixes and Improvements</h4>
+        <ul>
+        <li>Data update events will be queued from this update to improve app performace. If more than 3 events occur around one second interval they will be queued so that all the events will be sent at the same time.</li>
+        <li>Updated the app installer and reduced file size of the installer by 13%.</li>
+        <li>Updated open_source_licenses.</li>
+        <li>Replaced trash package for the electron built in shell.trashItem.</li>
+        <li>Updated data update events dispatch process to improve performance.</li>
+        <li>Removed some unnecessary resources.</li>
+        <li>Cleaned up unnecessary styles.</li>
+        <li>Fixed a bug where editing song tags could remove the artwork of a song.</li>
+        <li>Fixed a bug where using search features on songs metadata editing page updates the search history.</li>
+        <li>Fixed a bug where adding a previously parsed folder would parse the same folder.</li>
+        <li>Removed some unnecessary npm packages.</li>
+        </ul>
+      </li>
+      <li> <h4>🐜 Known Issues and Bugs</h4>
+        <ul>
+          <li>Parsing a big music library could sometimes make the app unresponsive. Currently, the only solution is to wait some time until the parsing process finishes and the app regains responsiveness.</li>
+          <li>App theme will be changed when you change your system's theme even though you didn't select to use system theme in the app.</li>
+          <li>App theme will be changed when you change your system's theme even though you didn't select to use system theme in the app.</li>
+          <li>Lyrics on some songs aren't being read by the app. Still you will be able to see lyrics from the internet.</li>
+          <li>If a song is added next to the last song of the queue, the last song won't be played.</li>
+          <li>Trying to play corrupted songs will make the app player unusable. Workaround is to play the next song and restart the renderer using F5 button.</li>
+          <li>Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song.</li>
+          <li>There is still a small amount of unwanted cpu consumption due to over-rendering of components.</li>
+        </ul>
+      </li>
+    </ul>
+
+  </li>
+
+  <br/>
+
+  <li class="version"> v0.7.0-alpha - ( 27<sup>th</sup> of July 2022 )
+    <ul>
+      <li> <h4>🎉 New Features and Updates</h3>
       <ul>
         <li>Support for .ogg and .wav file extensions as songs. Now you can play them in the player. (Experimental)</li>
         <li>Added a Release Notes page to display information about the updates of the app. It will inform the user if he/she uses an outdated app.</li>
@@ -39,7 +91,7 @@
         <li>Added a new prompt to confirm before deleting a playlist.</li>
       </ul>
       </li>
-      <li>🔨 Fixes and Improvements
+      <li> <h4>🔨 Fixes and Improvements</h4>
         <ul>
           <li>Now recently played songs will be fetched using the History playlist.</li>
           <li>Removed some unused font files.</li>
@@ -61,7 +113,7 @@
           <li>Updated the song tags editing page. (Experimental)</li>
         </ul>
       </li>
-      <li>🐜 Known Issues and Bugs
+      <li> <h4>🐜 Known Issues and Bugs</h3>
         <ul>
           <li>Editing song tags could remove the artwork of a song.</li>
           <li>Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song.</li>
@@ -73,9 +125,10 @@
   </li>
 
   <br/>
+
 <li class="version"> v0.6.0-alpha - ( 24<sup>th</sup> of June 2022 )
     <ul>
-      <li>🎉 Features
+      <li> <h4>🎉 New Features and Features</h4>
       <ul>
         <li>Added the support to edit song id3 tags. Right click on a song and select Edit song tags to go to the SongID3TagEditorPage. Currently changes to those data wouldn't be updated on the app. (Experimental)</li>
         <li>Added the basement to provide support for m3u files to import and export playlists.</li>
@@ -97,7 +150,7 @@
         <li>Updated some functions to support pagination and sorting features to remove some burden off the renderer.</li>
       </ul>
       </li>
-      <li>🔨 Fixes
+      <li> <h4>🔨 Fixes and Improvements</h3>
         <ul>
           <li>Fixed a security vulnerability related to package 'sharp'.</li>
           <li>Removed unnecessary css styles and optimized the styling of the app.</li>
@@ -114,7 +167,7 @@
           <li>Fixed a bug where newly added songs won't be added to the library.</li>
         </ul>
       </li>
-      <li>🐜 Known Issues
+      <li> <h4>🐜 Known Issues and Bugs</h4>
         <ul>
           <li>There is still a small amount of unwanted cpu consumption due to over-rendering of components.</li>
           <li>Blacklisting or removing a song from the library isn't working as intended.</li>
@@ -125,9 +178,9 @@
 
   <br/>
 
-  <li class="version"> v0.5.0-alpha - ( 25<sup>th</sup> of May 2022 )
+  <li class="version"> <h3>v0.5.0-alpha - ( 25<sup>th</sup> of May 2022 )</h3>
     <ul>
-      <li>Features
+      <li> <h4>🎉New Features and Features</h3>
       <ul>
         <li>Now queues and some other features save their states between sessions (Experimental).</li>
         <li>Now Currently Playing Queue shows information about the current queue including playlist name, artwork etc (Experimental).</li>
@@ -147,7 +200,7 @@
         <li>Added new buttons in ArtistInfoPage, AlbumInfoPage, PlaylistInfoPage, CurrentQueuePage to provide functions like play all, shuffle and play, and add to queue etc.</li>
       </ul>
       </li>
-      <li>Fixes
+      <li> <h4>🔨 Fixes and Improvements</h4>
         <ul>
           <li>Fixed a bug related to npm packages.</li>
           <li>Updated parseSong to differentiate between currently added songs and new songs. Previously this problem will duplicate the data related to the song in the library.</li>
@@ -159,7 +212,7 @@
           <li>Applied useTransition hook to improve user input responsiveness in the app when a song is playing.</li>
         </ul>
       </li>
-      <li>Known Issues
+      <li><h4>🐜 Known Issues and Bugs</h4>
         <ul>
         <li>Sometimes newly added songs won't be added to the library. The workaround is to reset the app and linking the relevant folder again.</li>
         <li>Shuffle and Repeat states currently is not presisting states between sessions.</li>
@@ -172,7 +225,7 @@
 
   <br/>
 
-  <li class="version"> v0.4.1-alpha - ( 16<sup>th</sup> of May 2022 )
+  <li class="version"> <h3>v0.5.0-alpha - ( 25<sup>th</sup> of May 2022 )</h3>
     <ul>
       <li>Migrated the song player to the root of the app to provide support for features such as mini-player (Experimental).</li>
       <li>Updated readme file.</li>
@@ -180,9 +233,9 @@
     </ul>
   </li>
 
-    <br/>
+  <br/>
 
-  <li class="version"> v0.4.0-alpha - ( 14<sup>th</sup> of May 2022 )
+  <li class="version"> <h3>v0.4.0-alpha - ( 14<sup>th</sup> of May 2022 )</h3>
     <ul>
       <li> Added song queuing. Now users can queue songs.</li>
       <li> Started using useContext React api to reduce prop drilling.</li>
@@ -217,7 +270,7 @@
 
   <br/>
 
-  <li class="version"> v0.3.1-alpha - ( 07<sup>th</sup> of May 2022 )
+  <li class="version"> <h3>v0.3.1-alpha - ( 07<sup>th</sup> of May 2022 )</h3>
     <ul>
       <li> Migration from FontAwesome icons to Google Material Icons.</li>
       <li> Improved styles to support Google material icons functionality.</li>
@@ -232,7 +285,7 @@
 
   <br/>
 
-  <li class="version"> v0.3.0-alpha - ( 02<sup>nd</sup> of May 2022 )
+  <li class="version"> <h3>v0.3.0-alpha - ( 02<sup>nd</sup> of May 2022 )</h3>
     <ul>
       <li> Added function to sort songs, artists and albums.</li>
       <li> Added a PlaylistsInfoPage to display information related to playlists.</li>
@@ -243,7 +296,7 @@
 
   <br/>
 
-  <li class="version"> v0.2.0-alpha - ( 29<sup>th</sup> of April 2022 )
+  <li class="version"> <h3>v0.2.0-alpha - ( 29<sup>th</sup> of April 2022 )</h3>
     <ul>
       <li> Added new styles for AlbumInfoPage, ArtistInfoPage, and updated some styles on other componenets.</li>
       <li> Now ArtistInfoPage shows information of the artists from Deezer and Last.fm apis.</li>
@@ -256,7 +309,7 @@
 
   <br/>
 
-  <li class="version"> v0.1.1-alpha - ( 01<sup>st</sup> of April 2022 )
+  <li class="version"> <h3>v0.1.1-alpha - ( 01<sup>st</sup> of April 2022 )</h3>
     <ul>
       <li>Added a context menu option for songs to open them in the File Explorer.</li>
     </ul>
@@ -264,7 +317,7 @@
 
   <br/>
 
-  <li class="version"> v0.1.0-alpha - ( 23<sup>rd</sup> of March 2022 )
+  <li class="version"> <h3>v0.1.0-alpha - ( 23<sup>rd</sup> of March 2022 )</h3>
     <ul>
       <li> Fixed bugs related to instant identification of newly added songs.</li>
       <li> Added a feature to monitor song listening patterns of the user for better shuffling.</li>
@@ -282,7 +335,7 @@
 
   <br/>
 
-  <li class="version"> v0.0.1-alpha - ( 11<sup>th</sup> of March 2022 )
+  <li class="version"> <h3>v0.0.1-alpha - ( 11<sup>th</sup> of March 2022 )</h3>
     <ul>
       <li> Initial alpha release.</li>
       <li> Added a lyrics pane which shows lyrics according to the current song.</li>

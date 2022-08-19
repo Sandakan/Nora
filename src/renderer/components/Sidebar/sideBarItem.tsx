@@ -3,7 +3,6 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable import/prefer-default-export */
-// import React from 'react';
 
 interface SideBarItems {
   parentClassName: string;
@@ -15,7 +14,7 @@ interface SideBarItems {
 export const SideBarItem = (props: SideBarItems) => {
   return (
     <li
-      className={`${props.parentClassName} w-[95%] h-12 text-2xl pl-4 text-font-color-black dark:text-font-color-white mb-2 rounded-r-3xl flex items-center cursor-pointer bg-[transparent] transition-[background] lg:pl-0 lg:justify-center`}
+      className={`${props.parentClassName} w-[95%] h-12 text-2xl pl-4 text-font-color-black dark:text-font-color-white mb-2 rounded-r-3xl flex items-center cursor-pointer bg-[transparent] transition-[background] lg:pl-0 lg:justify-center hover:bg-background-color-1 dark:hover:bg-dark-background-color-1 duration-300`}
       onClick={() => props.handleClick(props.content)}
     >
       <span className="material-icons-round icon mr-5 lg:mr-0 text-3xl">

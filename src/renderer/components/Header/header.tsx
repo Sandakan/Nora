@@ -4,7 +4,7 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
-import LightModeLogo from '../../../../assets/images/logo_light_mode.png';
+import LightModeLogo from '../../../../assets/images/png/logo_light_mode.png';
 import { AppContext, AppUpdateContext } from '../../contexts/AppContext';
 
 const Header = React.memo(() => {
@@ -12,8 +12,7 @@ const Header = React.memo(() => {
   const minimize = () => window.api.minimizeApp();
   const maximize = () => window.api.toggleMaximizeApp();
   const { isDarkMode, pageHistoryIndex } = React.useContext(AppContext);
-  const { toggleDarkMode, updatePageHistoryIndex } =
-    React.useContext(AppUpdateContext);
+  const { updatePageHistoryIndex } = React.useContext(AppUpdateContext);
 
   return (
     <header
@@ -67,7 +66,7 @@ const Header = React.memo(() => {
           <span className="change-theme-btn h-full px-3 text-xl flex items-center justify-center text-center transition-[color] ease-in-out hover:text-background-color-3 dark:hover:text-dark-background-color-3">
             <i
               className="material-icons-round icon h-fit  text-xl flex items-center justify-center text-center transition-[background] ease-in-out cursor-pointer"
-              onClick={() => toggleDarkMode()}
+              onClick={() => window.api.changeAppTheme()}
             >
               {isDarkMode ? 'wb_sunny' : 'dark_mode'}
             </i>
@@ -78,7 +77,7 @@ const Header = React.memo(() => {
             className="minimize-btn h-full px-3 text-xl flex items-center justify-center text-center transition-[background] ease-in-out hover:bg-[hsla(0deg,0%,80%,0.5)]"
             onClick={minimize}
           >
-            <span className="material-icons-sharp icon h-fit  text-xl flex items-center justify-center text-center transition-[background] ease-in-out cursor-pointer">
+            <span className="material-icons-round icon h-fit !font-light text-xl flex items-center justify-center text-center transition-[background] ease-in-out cursor-pointer">
               minimize
             </span>
           </span>
@@ -86,7 +85,7 @@ const Header = React.memo(() => {
             className="maximize-btn h-full px-3 text-xl flex items-center justify-center text-center transition-[background] ease-in-out hover:bg-[hsla(0deg,0%,80%,0.5)]"
             onClick={maximize}
           >
-            <span className="material-icons-sharp icon h-fit  text-xl flex items-center justify-center text-center transition-[background] ease-in-out cursor-pointer">
+            <span className="material-icons-round-outlined icon h-fit !font-light text-lg flex items-center justify-center text-center transition-[background] ease-in-out cursor-pointer">
               crop_square
             </span>
           </span>
@@ -94,7 +93,7 @@ const Header = React.memo(() => {
             className="close-btn h-full px-3 text-xl flex items-center justify-center text-center transition-[background] ease-in-out hover:bg-foreground-color-1 hover:text-font-color-white"
             onClick={close}
           >
-            <span className="material-icons-sharp icon h-fit  text-xl flex items-center justify-center text-center transition-[background] ease-in-out cursor-pointer">
+            <span className="material-icons-round icon h-fit !font-light  text-xl flex items-center justify-center text-center transition-[background] ease-in-out cursor-pointer">
               close
             </span>{' '}
           </span>

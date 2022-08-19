@@ -24,7 +24,7 @@ import {
   SongPositionContext,
 } from 'renderer/contexts/AppContext';
 import { calculateTime } from '../../../main/calculateTime';
-import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
+import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
 import SongArtist from '../SongsPage/SongArtist';
 
 const SongControlsContainer = () => {
@@ -38,6 +38,7 @@ const SongControlsContainer = () => {
     isShuffling,
     isRepeating,
     isPlaying,
+    userData,
   } = useContext(AppContext);
   const {
     changeCurrentActivePage,
@@ -65,7 +66,24 @@ const SongControlsContainer = () => {
   volumeBarCssProperties['--volume-before-width'] = `${volume}%`;
 
   const handleQueueShuffle = () => {
-    if (!isShuffling) updateQueueData(undefined, queue.queue, true);
+    if (!isShuffling) {
+      const newQueue: string[] = [];
+      if (
+        Array.isArray(queue.queueBeforeShuffle) &&
+        queue.queueBeforeShuffle.length > 0
+      ) {
+        for (let i = 0; i < newQueue.length; i += 1) {
+          newQueue.push(queue.queue[queue.queueBeforeShuffle[i]]);
+        }
+      }
+      updateQueueData(
+        undefined,
+        newQueue.length > 0 ? newQueue : queue.queue,
+        true,
+        undefined,
+        true
+      );
+    }
     toggleShuffling();
   };
 
@@ -112,7 +130,7 @@ const SongControlsContainer = () => {
           id="currentSongCover"
         >
           <img
-            className="max-w-full object-cover rounded-lg"
+            className="max-w-full object-cover rounded-lg shadow-xl"
             src={
               currentSongData.artworkPath
                 ? `otomusic://localFiles/${currentSongData.artworkPath}`
@@ -129,6 +147,19 @@ const SongControlsContainer = () => {
                     iconName: 'info',
                     handlerFunction: showSongInfoPage,
                   },
+                  {
+                    label: 'Edit song tags',
+                    class: 'edit',
+                    iconName: 'edit',
+                    handlerFunction: () =>
+                      changeCurrentActivePage('SongTagsEditor', {
+                        songTagsEditor: {
+                          songId: currentSongData?.songId,
+                          songArtworkPath: currentSongData?.artworkPath,
+                          songPath: currentSongData?.path,
+                        },
+                      }),
+                  },
                 ],
                 e.pageX,
                 e.pageY
@@ -136,7 +167,7 @@ const SongControlsContainer = () => {
             }}
           />
         </div>
-        <div className="song-info-container w-[65%] h-full flex flex-col items-start justify-center lg:ml-4">
+        <div className="song-info-container w-[65%] h-full flex flex-col items-start justify-center lg:ml-4 drop-shadow-lg">
           <div
             className="song-title w-full text-2xl font-medium overflow-hidden text-ellipsis whitespace-nowrap cursor-pointer hover:underline"
             id="currentSongTitle"
@@ -151,6 +182,19 @@ const SongControlsContainer = () => {
                     label: 'Info',
                     iconName: 'info',
                     handlerFunction: showSongInfoPage,
+                  },
+                  {
+                    label: 'Edit song tags',
+                    class: 'edit',
+                    iconName: 'edit',
+                    handlerFunction: () =>
+                      changeCurrentActivePage('SongTagsEditor', {
+                        songTagsEditor: {
+                          songId: currentSongData?.songId,
+                          songArtworkPath: currentSongData?.artworkPath,
+                          songPath: currentSongData?.path,
+                        },
+                      }),
                   },
                 ],
                 e.pageX,
@@ -278,7 +322,11 @@ const SongControlsContainer = () => {
           </div>
           <div className="full-song-duration w-fit">
             {currentSongData.duration
-              ? calculateTime(currentSongData.duration)
+              ? userData && userData.preferences.showSongRemainingTime
+                ? `-${calculateTime(
+                    currentSongData.duration - Math.floor(songPosition)
+                  )}`
+                : calculateTime(currentSongData.duration)
               : '-:-'}
           </div>
         </div>

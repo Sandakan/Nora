@@ -12,14 +12,16 @@
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
+import { FixedSizeList as List } from 'react-window';
 import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
 import { Song } from './Song';
-import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
-import NoSongsImage from '../../../../assets/images/Empty Inbox _Monochromatic.svg';
-import DataFetchingImage from '../../../../assets/images/Road trip_Monochromatic.svg';
+import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
+import NoSongsImage from '../../../../assets/images/svg/Empty Inbox _Monochromatic.svg';
+import DataFetchingImage from '../../../../assets/images/svg/Road trip_Monochromatic.svg';
 import Button from '../Button';
 import MainContainer from '../MainContainer';
 import Dropdown from '../Dropdown';
+import useResizeObserver from '../../hooks/useResizeObserver';
 
 interface SongPageReducer {
   songsData: AudioInfo[];
@@ -48,8 +50,6 @@ const reducer = (
   }
 };
 
-// const row = ({ index, style }) => <div style={style}>Row {index}</div>;
-
 export const SongsPage = () => {
   const { currentlyActivePage, userData } = React.useContext(AppContext);
   const { createQueue, updateCurrentlyActivePageData, updatePageSortingOrder } =
@@ -66,7 +66,8 @@ export const SongsPage = () => {
         ? userData.sortingStates.songsPage
         : 'aToZ',
   });
-  // const List = React.useMemo(() => window.api.getReactWindowComponenet(), []);
+  const songsContainerRef = React.useRef(null as HTMLDivElement | null);
+  const { width, height } = useResizeObserver(songsContainerRef);
 
   const fetchSongsData = React.useCallback(
     () =>
@@ -90,16 +91,28 @@ export const SongsPage = () => {
 
   React.useEffect(() => {
     fetchSongsData();
-    const manageSongsDataUpdates = (
-      _: unknown,
-      eventType: DataUpdateEventTypes
-    ) => {
-      if (eventType === 'songs/deletedSong' || eventType === 'songs/newSong')
-        fetchSongsData();
+    const manageSongsDataUpdatesInSongsPage = (e: Event) => {
+      if ('detail' in e) {
+        const dataEvents = (e as DataEvent).detail;
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (
+            event.dataType === 'songs/deletedSong' ||
+            event.dataType === 'songs/newSong'
+          )
+            fetchSongsData();
+        }
+      }
     };
-    window.api.dataUpdateEvent(manageSongsDataUpdates);
+    document.addEventListener(
+      'app/dataUpdates',
+      manageSongsDataUpdatesInSongsPage
+    );
     return () => {
-      window.api.removeDataUpdateEventListener(manageSongsDataUpdates);
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageSongsDataUpdatesInSongsPage
+      );
     };
   }, [fetchSongsData]);
 
@@ -129,23 +142,40 @@ export const SongsPage = () => {
       .catch((err) => console.error(err));
   }, [content.sortingOrder]);
 
-  // const row = React.useCallback(({ index, style }) => {
-  //   const { songId, artists, duration, path, title, artworkPath } =
-  //     content.songsData[index];
-  //   return (
-  //     <div style={style}>
-  //       <Song
-  //         title={title}
-  //         duration={duration}
-  //         songId={songId}
-  //         path={path}
-  //         artists={artists}
-  //         artworkPath={artworkPath}
-  //         index={index}
-  //       />
-  //     </div>
-  //   );
-  // }, []);
+  const row = React.useCallback(
+    (props: { index: number; style: React.CSSProperties }) => {
+      const { index, style } = props;
+      const {
+        songId,
+        title,
+        artists,
+        duration,
+        isAFavorite,
+        artworkPath,
+        path,
+      } = content.songsData[index];
+      return (
+        <div style={style}>
+          <Song
+            key={index}
+            index={index}
+            isIndexingSongs={
+              userData !== undefined && userData.preferences.songIndexing
+            }
+            title={title}
+            songId={songId}
+            artists={artists}
+            artworkPath={artworkPath}
+            duration={duration}
+            path={path}
+            isAFavorite={isAFavorite}
+          />
+        </div>
+      );
+    },
+    [content.songsData, userData]
+  );
+
   const songs = React.useMemo(
     () =>
       content.songsData && content.songsData.length > 0
@@ -154,6 +184,9 @@ export const SongsPage = () => {
               <Song
                 key={song.songId}
                 index={index}
+                isIndexingSongs={
+                  userData !== undefined && userData.preferences.songIndexing
+                }
                 title={song.title}
                 artworkPath={song.artworkPath || DefaultSongCover}
                 duration={song.duration}
@@ -165,7 +198,7 @@ export const SongsPage = () => {
             );
           })
         : [],
-    [content.songsData]
+    [content.songsData, userData]
   );
 
   const dropdownOptions: { label: string; value: SongSortTypes }[] = [
@@ -205,7 +238,7 @@ export const SongsPage = () => {
   ];
 
   return (
-    <MainContainer className="main-container songs-list-container">
+    <MainContainer className="main-container songs-list-container !h-full !mb-0">
       <>
         <div className="title-container mt-1 pr-4 flex items-center mb-8 text-font-color-black text-3xl font-medium dark:text-font-color-white">
           <div className="container flex">
@@ -251,11 +284,21 @@ export const SongsPage = () => {
             />
           </div>
         </div>
-        {songs && songs.length > 0 && (
-          <div className="songs-container">{songs}</div>
-        )}
+        <div className="songs-container h-full flex-1" ref={songsContainerRef}>
+          {content.songsData && content.songsData.length > 0 && (
+            <List
+              itemCount={songs.length}
+              itemSize={60}
+              width={width || '100%'}
+              height={height || 450}
+              overscanCount={10}
+            >
+              {row}
+            </List>
+          )}
+        </div>
         {content.songsData === null && (
-          <div className="no-songs-container  h-full w-full text-[#ccc] text-center flex flex-col items-center justify-center text-2xl">
+          <div className="no-songs-container  h-full w-full text-[#ccc] my-[8%] text-center flex flex-col items-center justify-center text-2xl">
             <img
               src={NoSongsImage}
               alt="No songs available."
@@ -272,7 +315,7 @@ export const SongsPage = () => {
           </div>
         )}
         {content.songsData && content.songsData.length === 0 && (
-          <div className="no-songs-container h-full w-full text-[#ccc] text-center flex flex-col items-center justify-center text-2xl">
+          <div className="no-songs-container h-full w-full text-[#ccc] my-[10%] text-center flex flex-col items-center justify-center text-2xl">
             <img
               src={DataFetchingImage}
               alt="No songs available."

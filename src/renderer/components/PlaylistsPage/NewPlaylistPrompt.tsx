@@ -1,10 +1,11 @@
+/* eslint-disable jsx-a11y/no-autofocus */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
 import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppContext';
-import PlaylistDefaultCover from '../../../../assets/images/playlist_cover_default.png';
+import PlaylistDefaultCover from '../../../../assets/images/png/playlist_cover_default.png';
 import Button from '../Button';
 
 interface NewPlaylistPromptProp {
@@ -50,7 +51,6 @@ export default (props: NewPlaylistPromptProp) => {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => e.stopPropagation()}
-        // eslint-disable-next-line jsx-a11y/no-autofocus
         autoFocus
       />
       <Button

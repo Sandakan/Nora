@@ -8,7 +8,7 @@ import {
   AppUpdateContext,
   SongPositionContext,
 } from 'renderer/contexts/AppContext';
-import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
+import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
 
 export default function MiniPlayer() {
   const {

@@ -8,7 +8,7 @@ import MainContainer from '../MainContainer';
 import { Song } from '../SongsPage/Song';
 
 const AllSearchResultsPage = () => {
-  const { currentlyActivePage } = React.useContext(AppContext);
+  const { currentlyActivePage, userData } = React.useContext(AppContext);
   const data = currentlyActivePage.data as {
     allSearchResultsPage?: {
       searchQuery: string;
@@ -28,6 +28,9 @@ const AllSearchResultsPage = () => {
           <Song
             key={songData.songId}
             index={index}
+            isIndexingSongs={
+              userData !== undefined && userData.preferences.songIndexing
+            }
             songId={songData.songId}
             title={songData.title}
             duration={songData.duration}
@@ -40,17 +43,18 @@ const AllSearchResultsPage = () => {
       });
     }
     return [];
-  }, [data.allSearchResultsPage]);
+  }, [data.allSearchResultsPage, userData]);
 
   const allArtistResults = React.useMemo(() => {
     if (
       data.allSearchResultsPage &&
       data.allSearchResultsPage.searchFilter === 'Artists'
     ) {
-      return data.allSearchResultsPage.searchResults.map((result) => {
+      return data.allSearchResultsPage.searchResults.map((result, index) => {
         const artistData = result as Artist;
         return (
           <Artist
+            index={index}
             key={artistData.artistId}
             name={artistData.name}
             artistId={artistData.artistId}
@@ -74,6 +78,7 @@ const AllSearchResultsPage = () => {
         return (
           <Album
             key={index}
+            index={index}
             albumId={albumData.albumId}
             title={albumData.title}
             songs={albumData.songs}
@@ -97,6 +102,7 @@ const AllSearchResultsPage = () => {
         return (
           <Genre
             key={index}
+            index={index}
             genreId={genreData.genreId}
             title={genreData.name}
             noOfSongs={genreData.songs.length}

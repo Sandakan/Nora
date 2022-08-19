@@ -10,6 +10,7 @@ import OpenLinkConfirmPrompt from '../OpenLinkConfirmPrompt';
 
 interface LyricProp {
   lyric: string;
+  index: number;
 }
 
 interface NoLyricsProp {
@@ -19,7 +20,10 @@ interface NoLyricsProp {
 
 export const Lyric = (props: LyricProp) => {
   return (
-    <div className="appear-from-bottom font-['Poppins'] text-4xl text-center mb-5 text-font-color-black dark:text-font-color-white font-medium empty:mb-16">
+    <div
+      style={{ animationDelay: `${250 + 25 * (props.index + 1)}ms` }}
+      className="appear-from-bottom font-['Poppins'] text-4xl text-center mb-5 text-font-color-black dark:text-font-color-white font-medium empty:mb-16"
+    >
       {props.lyric}
     </div>
   );

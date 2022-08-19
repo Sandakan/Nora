@@ -10,7 +10,7 @@
 import React from 'react';
 import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
 
-interface MostRelevantResultProp {
+export interface MostRelevantResultProp {
   resultType: 'artist' | 'song' | 'album' | 'playlist' | 'genre';
   title: string;
   id: string;

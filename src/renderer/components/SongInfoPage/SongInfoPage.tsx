@@ -46,20 +46,29 @@ const SongInfoPage = () => {
 
   React.useEffect(() => {
     fetchSongInfo();
-    const manageSongInfoUpdates = (
-      _: unknown,
-      eventType: DataUpdateEventTypes
-    ) => {
-      if (
-        eventType === 'songs' ||
-        eventType === 'songs/noOfListens' ||
-        eventType === 'songs/likes'
-      )
-        fetchSongInfo();
+    const manageSongInfoUpdatesInSongInfoPage = (e: Event) => {
+      if ('detail' in e) {
+        const dataEvents = (e as DataEvent).detail;
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (
+            event.dataType === 'songs' ||
+            event.dataType === 'songs/noOfListens' ||
+            event.dataType === 'songs/likes'
+          )
+            fetchSongInfo();
+        }
+      }
     };
-    window.api.dataUpdateEvent(manageSongInfoUpdates);
+    document.addEventListener(
+      'app/dataUpdates',
+      manageSongInfoUpdatesInSongInfoPage
+    );
     return () => {
-      window.api.removeDataUpdateEventListener(manageSongInfoUpdates);
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageSongInfoUpdatesInSongInfoPage
+      );
     };
   }, [fetchSongInfo]);
 
@@ -80,7 +89,7 @@ const SongInfoPage = () => {
               <SongArtist
                 artistId={artist.artistId}
                 name={artist.name}
-                key={index}
+                key={artist.artistId}
               />
 
               {songInfo.artists && songInfo.artists.length - 1 !== index
@@ -122,7 +131,7 @@ const SongInfoPage = () => {
                 >
                   {songInfo.title}
                 </div>
-                <div className="song-artists info-type-2 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-base flex items-center hover:underline">
+                <div className="song-artists info-type-2 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-base flex items-center">
                   {songArtists}
                 </div>
                 <div

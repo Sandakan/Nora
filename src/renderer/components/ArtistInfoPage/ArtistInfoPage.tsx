@@ -12,7 +12,7 @@
 import React, { useContext } from 'react';
 import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
 import { calculateTime } from 'renderer/utils/calculateTime';
-import DefaultArtistCover from '../../../../assets/images/default_artist_cover.png';
+import DefaultArtistCover from '../../../../assets/images/png/default_artist_cover.png';
 import { Album } from '../AlbumsPage/Album';
 import { Song } from '../SongsPage/Song';
 import Button from '../Button';
@@ -87,57 +87,95 @@ export default () => {
 
   React.useEffect(() => {
     fetchArtistsData();
-    const manageArtistDataUpdates = (
-      _: unknown,
-      eventType: DataUpdateEventTypes
-    ) => {
-      if (eventType === 'artists') fetchArtistsData();
+    const manageArtistDataUpdatesInArtistInfoPage = (e: Event) => {
+      const dataEvents = (e as DataEvent).detail;
+      if ('detail' in e) {
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (event.dataType === 'artists') fetchArtistsData();
+        }
+      }
     };
-    window.api.dataUpdateEvent(manageArtistDataUpdates);
+    document.addEventListener(
+      'app/dataUpdates',
+      manageArtistDataUpdatesInArtistInfoPage
+    );
     return () => {
-      window.api.removeDataUpdateEventListener(manageArtistDataUpdates);
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageArtistDataUpdatesInArtistInfoPage
+      );
     };
   }, [fetchArtistsData]);
 
   React.useEffect(() => {
     fetchArtistArtworks();
-    const manageArtistArtworkUpdates = (
-      _: unknown,
-      eventType: DataUpdateEventTypes
-    ) => {
-      if (eventType === 'artists/artworks') fetchArtistArtworks();
+    const manageArtistArtworkUpdatesInArtistInfoPage = (e: Event) => {
+      const dataEvents = (e as DataEvent).detail;
+      if ('detail' in e) {
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (event.dataType === 'artists/artworks') fetchArtistArtworks();
+        }
+      }
     };
-    window.api.dataUpdateEvent(manageArtistArtworkUpdates);
+    document.addEventListener(
+      'app/dataUpdates',
+      manageArtistArtworkUpdatesInArtistInfoPage
+    );
     return () => {
-      window.api.removeDataUpdateEventListener(manageArtistArtworkUpdates);
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageArtistArtworkUpdatesInArtistInfoPage
+      );
     };
   }, [fetchArtistArtworks]);
 
   React.useEffect(() => {
     fetchSongsData();
-    const manageSongDataUpdates = (
-      _: unknown,
-      eventType: DataUpdateEventTypes
-    ) => {
-      if (eventType === 'songs') fetchSongsData();
+    const manageSongDataUpdatesInArtistInfoPage = (e: Event) => {
+      const dataEvents = (e as DataEvent).detail;
+      if ('detail' in e) {
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (event.dataType === 'albums/newAlbum') fetchSongsData();
+          if (event.dataType === 'albums/deletedAlbum') fetchSongsData();
+        }
+      }
     };
-    window.api.dataUpdateEvent(manageSongDataUpdates);
+    document.addEventListener(
+      'app/dataUpdates',
+      manageSongDataUpdatesInArtistInfoPage
+    );
     return () => {
-      window.api.removeDataUpdateEventListener(manageSongDataUpdates);
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageSongDataUpdatesInArtistInfoPage
+      );
     };
   }, [fetchSongsData]);
 
   React.useEffect(() => {
     fetchAlbumsData();
-    const manageAlbumDataUpdates = (
-      _: unknown,
-      eventType: DataUpdateEventTypes
-    ) => {
-      if (eventType === 'albums') fetchAlbumsData();
+    const manageAlbumDataUpdatesInArtistInfoPage = (e: Event) => {
+      const dataEvents = (e as DataEvent).detail;
+      if ('detail' in e) {
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (event.dataType === 'albums/newAlbum') fetchAlbumsData();
+          if (event.dataType === 'albums/deletedAlbum') fetchAlbumsData();
+        }
+      }
     };
-    window.api.dataUpdateEvent(manageAlbumDataUpdates);
+    document.addEventListener(
+      'app/dataUpdates',
+      manageAlbumDataUpdatesInArtistInfoPage
+    );
     return () => {
-      window.api.removeDataUpdateEventListener(manageAlbumDataUpdates);
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageAlbumDataUpdatesInArtistInfoPage
+      );
     };
   }, [fetchAlbumsData]);
 
@@ -166,7 +204,7 @@ export default () => {
         <>
           {artistData.artistBio.replace(/<a .*<\/a>/gm, '')}
           <span
-            className="link hover:underline cursor-pointer"
+            className="link underline cursor-pointer"
             onClick={() =>
               userData?.preferences.doNotVerifyWhenOpeningLinks
                 ? window.api.openInBrowser(
@@ -197,6 +235,7 @@ export default () => {
       albums.map((album, index) => {
         return (
           <Album
+            index={index}
             albumId={album.albumId}
             artists={album.artists}
             artworkPath={album.artworkPath}
@@ -217,6 +256,9 @@ export default () => {
           <Song
             key={song.songId}
             index={index}
+            isIndexingSongs={
+              userData !== undefined && userData.preferences.songIndexing
+            }
             title={song.title}
             artists={song.artists}
             duration={song.duration}
@@ -227,7 +269,7 @@ export default () => {
           />
         );
       }),
-    [songs]
+    [songs, userData]
   );
 
   return (

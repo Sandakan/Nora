@@ -18,6 +18,7 @@ import RemoveSongFromLibraryConfirmPrompt from './RemoveSongFromLibraryConfirmPr
 import SongArtist from './SongArtist';
 
 interface SongCardProp {
+  index: number;
   songId: string;
   artworkPath: string;
   path: string;
@@ -267,11 +268,12 @@ export const SongCard = (props: SongCardProp) => {
 
   return (
     <div
-      className={`song song-card appear=from-bottom ${props.songId} ${
+      style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
+      className={`song song-card appear-from-bottom ${props.songId} ${
         currentSongData.songId === props.songId && 'current-song'
       } ${
         isSongPlaying && 'playing'
-      } group inline-block aspect-[2/1] overflow-hidden mr-2 rounded-2xl relative border- border-background-color-2 dark:border-dark-background-color-2 transition-[border-color] ease-in-out w-[31%] max-h-40 max-w-[20rem] shadow-xl`}
+      } group inline-block aspect-[2/1] overflow-hidden mr-2 rounded-2xl relative border- border-background-color-2 dark:border-dark-background-color-2 transition-[border-color] ease-in-out w-full max-h-40 max-w-[20rem] shadow-xl`}
       data-song-id={props.songId}
       onContextMenu={(e) => {
         e.preventDefault();

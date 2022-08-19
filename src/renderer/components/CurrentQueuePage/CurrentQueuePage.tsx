@@ -4,14 +4,16 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable promise/catch-or-return */
 import React, { useContext } from 'react';
+import useResizeObserver from 'renderer/hooks/useResizeObserver';
+import { FixedSizeList, FixedSizeList as List } from 'react-window';
 import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
 import { Song } from '../SongsPage/Song';
 import Button from '../Button';
-import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
-import DefaultArtistCover from '../../../../assets/images/default_artist_cover.png';
-import DefaultAlbumCover from '../../../../assets/images/album-cover-default.png';
-import DefaultPlaylistCover from '../../../../assets/images/playlist_cover_default.png';
-import NoSongsImage from '../../../../assets/images/Sun_Monochromatic.svg';
+import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
+import DefaultArtistCover from '../../../../assets/images/png/default_artist_cover.png';
+import DefaultAlbumCover from '../../../../assets/images/png/album-cover-default.png';
+import DefaultPlaylistCover from '../../../../assets/images/png/playlist_cover_default.png';
+import NoSongsImage from '../../../../assets/images/svg/Sun_Monochromatic.svg';
 import { calculateTime } from '../../utils/calculateTime';
 import MainContainer from '../MainContainer';
 
@@ -22,7 +24,7 @@ interface QueueInfo {
 }
 
 export default () => {
-  const { queue, currentSongData } = useContext(AppContext);
+  const { queue, currentSongData, userData } = useContext(AppContext);
   const { updateQueueData, updateNotificationPanelData } =
     React.useContext(AppUpdateContext);
 
@@ -31,6 +33,9 @@ export default () => {
     artworkPath: DefaultSongCover,
     title: '',
   } as QueueInfo);
+  const containerRef = React.useRef(null as HTMLDivElement | null);
+  const { width, height } = useResizeObserver(containerRef);
+  const ListRef = React.useRef(null as FixedSizeList | null);
 
   const fetchAllSongsData = React.useCallback(
     () =>
@@ -53,13 +58,25 @@ export default () => {
 
   React.useEffect(() => {
     fetchAllSongsData();
-    const manageSongUpdates = (_: unknown, eventType: DataUpdateEventTypes) => {
-      if (eventType === 'songs' || eventType === 'userData/queue')
-        fetchAllSongsData();
+    const manageSongUpdatesInCurrentQueue = (e: Event) => {
+      if ('detail' in e) {
+        const dataEvents = (e as DataEvent).detail;
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (event.dataType === 'songs' || event.dataType === 'userData/queue')
+            fetchAllSongsData();
+        }
+      }
     };
-    window.api.dataUpdateEvent(manageSongUpdates);
+    document.addEventListener(
+      'app/dataUpdates',
+      manageSongUpdatesInCurrentQueue
+    );
     return () => {
-      window.api.removeDataUpdateEventListener(manageSongUpdates);
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageSongUpdatesInCurrentQueue
+      );
     };
   }, [fetchAllSongsData]);
 
@@ -129,34 +146,45 @@ export default () => {
 
   React.useLayoutEffect(() => {
     setTimeout(() => {
-      const currentlyPlaying = document.querySelector(
-        `.current-queue-container .songs-container .${currentSongData.songId}`
-      );
-      if (currentlyPlaying) {
-        currentlyPlaying.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-          inline: 'center',
-        });
+      const index = queue?.queue?.indexOf(currentSongData.songId);
+      if (index >= 0) {
+        if (ListRef.current) {
+          ListRef.current.scrollToItem(index, 'smart');
+        }
       }
-    }, 500);
+    }, 750);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const queuedSongComponents = React.useMemo(
-    () =>
-      queuedSongs.map((queuedSong, index) => {
-        return (
+  const row = React.useCallback(
+    (props: { index: number; style: React.CSSProperties }) => {
+      const { index, style } = props;
+      const {
+        songId,
+        title,
+        artists,
+        duration,
+        isAFavorite,
+        artworkPath,
+        path,
+      } = queuedSongs[index];
+      return (
+        <div style={style}>
           <Song
-            key={index}
+            key={songId}
+            // style={style}
+            isDraggable
             index={index}
-            title={queuedSong.title}
-            songId={queuedSong.songId}
-            artists={queuedSong.artists}
-            artworkPath={queuedSong.artworkPath}
-            duration={queuedSong.duration}
-            path={queuedSong.path}
-            isAFavorite={queuedSong.isAFavorite}
+            isIndexingSongs={
+              userData !== undefined && userData.preferences.songIndexing
+            }
+            title={title}
+            songId={songId}
+            artists={artists}
+            artworkPath={artworkPath}
+            duration={duration}
+            path={path}
+            isAFavorite={isAFavorite}
             additionalContextMenuItems={[
               {
                 label: 'Remove from Queue',
@@ -164,15 +192,15 @@ export default () => {
                 handlerFunction: () =>
                   updateQueueData(
                     undefined,
-                    queue.queue.filter((songId) => songId !== queuedSong.songId)
+                    queue.queue.filter((id) => id !== songId)
                   ),
               },
             ]}
           />
-        );
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [queue.queue, queuedSongs]
+        </div>
+      );
+    },
+    [queue.queue, queuedSongs, updateQueueData, userData]
   );
 
   const calculateTotalTime = React.useCallback(() => {
@@ -192,7 +220,7 @@ export default () => {
   }, [queuedSongs]);
 
   return (
-    <MainContainer className="main-container songs-list-container current-queue-container">
+    <MainContainer className="main-container songs-list-container current-queue-container !h-full !mb-0 relative">
       <>
         <div className="title-container mt-1 pr-4 flex items-center mb-8 text-font-color-black text-3xl font-medium dark:text-font-color-white">
           Currently Playing Queue
@@ -218,7 +246,7 @@ export default () => {
             </div>
             <div className="queue-info">
               <div className="queue-title text-5xl">{queueInfo.title}</div>
-              <div className="queue-no-of-songs">{`${queuedSongComponents.length} songs`}</div>
+              <div className="queue-no-of-songs">{`${queuedSongs.length} songs`}</div>
               <div className="queue-total-duration">{calculateTotalTime()}</div>
               <div className="queue-buttons flex mt-4">
                 <Button
@@ -251,11 +279,27 @@ export default () => {
             </div>
           </div>
         )}
-        {queuedSongs.length > 0 && (
-          <div className="songs-container">{queuedSongComponents}</div>
-        )}
+        <div
+          className={`songs-container ${
+            queuedSongs.length > 0 ? 'h-full' : 'h-0'
+          }`}
+          ref={containerRef}
+        >
+          {queuedSongs.length > 0 && (
+            <List
+              height={height}
+              itemCount={queuedSongs.length}
+              itemSize={60}
+              width={width}
+              overscanCount={15}
+              ref={ListRef}
+            >
+              {row}
+            </List>
+          )}
+        </div>
         {queue.queue.length === 0 && (
-          <div className="no-songs-container h-full w-full text-[#ccc] text-center flex flex-col items-center justify-center text-2xl mt-8">
+          <div className="no-songs-container h-full w-full text-[#ccc] text-center flex flex-col items-center justify-center text-2xl">
             <img src={NoSongsImage} className="w-60 mb-8" alt="" /> Queue is
             empty.
           </div>

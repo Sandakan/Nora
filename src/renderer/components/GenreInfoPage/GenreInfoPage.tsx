@@ -6,7 +6,7 @@ import MainContainer from '../MainContainer';
 import { Song } from '../SongsPage/Song';
 
 const GenreInfoPage = () => {
-  const { currentlyActivePage } = React.useContext(AppContext);
+  const { currentlyActivePage, userData } = React.useContext(AppContext);
   const [genreData, setGenreData] = React.useState({} as Genre);
   const [genreSongs, setGenreSongs] = React.useState([] as AudioInfo[]);
 
@@ -37,26 +37,47 @@ const GenreInfoPage = () => {
 
   React.useEffect(() => {
     fetchGenresData();
-    const manageGenreUpdates = (
-      _: unknown,
-      eventType: DataUpdateEventTypes
-    ) => {
-      if (eventType === 'genres') fetchGenresData();
+    const manageGenreUpdatesInGenresInfoPage = (e: Event) => {
+      if ('detail' in e) {
+        const dataEvents = (e as DataEvent).detail;
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (event.dataType === 'genres') fetchGenresData();
+        }
+      }
     };
-    window.api.dataUpdateEvent(manageGenreUpdates);
+    document.addEventListener(
+      'app/dataUpdates',
+      manageGenreUpdatesInGenresInfoPage
+    );
     return () => {
-      window.api.removeDataUpdateEventListener(manageGenreUpdates);
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageGenreUpdatesInGenresInfoPage
+      );
     };
   }, [fetchGenresData]);
 
   React.useEffect(() => {
     fetchSongsData();
-    const manageSongUpdates = (_: unknown, eventType: DataUpdateEventTypes) => {
-      if (eventType === 'songs') fetchSongsData();
+    const manageSongUpdatesInGenreInfoPage = (e: Event) => {
+      if ('detail' in e) {
+        const dataEvents = (e as DataEvent).detail;
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (event.dataType === 'songs') fetchSongsData();
+        }
+      }
     };
-    window.api.dataUpdateEvent(manageSongUpdates);
+    document.addEventListener(
+      'app/dataUpdates',
+      manageSongUpdatesInGenreInfoPage
+    );
     return () => {
-      window.api.removeDataUpdateEventListener(manageSongUpdates);
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageSongUpdatesInGenreInfoPage
+      );
     };
   }, [fetchSongsData]);
 
@@ -66,6 +87,9 @@ const GenreInfoPage = () => {
         <Song
           key={index}
           index={index}
+          isIndexingSongs={
+            userData !== undefined && userData.preferences.songIndexing
+          }
           songId={song.songId}
           title={song.title}
           artists={song.artists}
@@ -75,7 +99,7 @@ const GenreInfoPage = () => {
           isAFavorite={song.isAFavorite}
         />
       )),
-    [genreSongs]
+    [genreSongs, userData]
   );
 
   return (

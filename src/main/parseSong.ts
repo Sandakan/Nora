@@ -31,7 +31,7 @@ import { dataUpdateEvent, getAssetPath, sendMessageToRenderer } from './main';
 
 export const defaultSongCoverImgBuffer = async () =>
   await fs
-    .readFile(getAssetPath('images', 'song_cover_default.png'))
+    .readFile(getAssetPath('images', 'png', 'song_cover_default.png'))
     .then((res) => res)
     .catch((err) =>
       log(
@@ -70,10 +70,12 @@ export const parseSong = (
           : metadata.common.picture[0].data
         : await defaultSongCoverImgBuffer();
       const songCoverPath = metadata.common.picture
-        ? (await storeSongArtworks(metadata.common.picture, songId).catch(
-            (err) => reject(err)
-          )) || getAssetPath('images', 'song_cover_default.png')
-        : getAssetPath('images', 'song_cover_default.png');
+        ? (await storeSongArtworks(
+            songId,
+            metadata.common?.picture[0]?.data
+          ).catch((err) => reject(err))) ||
+          getAssetPath('images', 'png', 'song_cover_default.png')
+        : getAssetPath('images', 'png', 'song_cover_default.png');
       const palette = coverBuffer
         ? await nodeVibrant
             .from(coverBuffer)
@@ -258,7 +260,7 @@ export const manageArtists = (
   allArtists: Artist[],
   songTitle: string,
   songId: string,
-  songArtists?: { name: string; artistId: string }[],
+  songArtists?: { name: string; artistId?: string }[],
   songArtworkPath?: string,
   relevantAlbums = [] as Album[]
 ) => {
@@ -278,7 +280,7 @@ export const manageArtists = (
             });
             if (relevantAlbums.length > 0) {
               relevantAlbums.forEach((relevantAlbum) =>
-                artist.albums.push({
+                artist.albums?.push({
                   title: relevantAlbum.title,
                   albumId: relevantAlbum.albumId,
                 })

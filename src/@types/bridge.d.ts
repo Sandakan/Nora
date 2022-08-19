@@ -17,6 +17,7 @@ declare global {
     | 'app/toggleMaximize'
     | 'app/focused'
     | 'app/blurred'
+    | 'app/systemThemeChange'
     | 'app/getSongPosition'
     | 'app/incrementNoOfSongListens'
     | 'app/addMusicFolder'
@@ -148,7 +149,7 @@ declare global {
   interface Queue {
     currentSongIndex: number | null;
     queue: string[];
-    // queueBeforeShuffle: number[];
+    queueBeforeShuffle?: number[];
     queueId?: string;
     queueType: QueueTypes;
   }
@@ -166,6 +167,7 @@ declare global {
   interface UserData {
     theme: {
       isDarkMode: boolean;
+      useSystemTheme: boolean;
     };
     currentSong: {
       songId: string | null;
@@ -189,6 +191,7 @@ declare global {
       autoLaunchApp: boolean;
       isMiniPlayerAlwaysOnTop: boolean;
       doNotVerifyWhenOpeningLinks: boolean;
+      showSongRemainingTime: boolean;
     };
     windowPositions: {
       mainWindow?: WindowCordinates;
@@ -224,12 +227,12 @@ declare global {
 
   interface Playlist {
     name: string;
+    /** song ids of the songs in the playlist */
     songs: string[];
     createdDate: Date;
     playlistId: string;
     artworkPath?: string;
   }
-
   interface PlaylistDataTemplate {
     playlists: Playlist[];
   }
@@ -258,12 +261,12 @@ declare global {
       name: string;
       artistId: string;
     }[];
-    artworkPath: string | undefined;
+    artworkPath?: string;
     songs: {
       title: string;
       songId: string;
     }[];
-    year: number | undefined;
+    year?: number;
   }
 
   interface Artist {
@@ -272,7 +275,7 @@ declare global {
       title: string;
       songId: string;
     }[];
-    albums: {
+    albums?: {
       title: string;
       albumId: string;
     }[];
@@ -425,8 +428,10 @@ declare global {
     handlerFunction: () => void;
   }
 
+  type AppTheme = 'dark' | 'light' | 'system';
+
   type UserDataTypes =
-    | 'theme.isDarkMode'
+    | 'theme'
     | 'currentSong.songId'
     | 'currentSong.stoppedPosition'
     | 'volume.value'
@@ -447,6 +452,7 @@ declare global {
     | 'preferences.isMiniPlayerAlwaysOnTop'
     | 'preferences.doNotVerifyWhenOpeningLinks'
     | 'preferences.autoLaunchApp'
+    | 'preferences.showSongRemainingTime'
     | 'songBlacklist'
     | PageSortTypes;
 
@@ -523,22 +529,27 @@ declare global {
   type DataUpdateEventTypes =
     | 'songs'
     | 'songs/newSong'
+    | 'songs/updatedSong'
     | 'songs/deletedSong'
     | 'songs/artworks'
     | 'songs/noOfListens'
     | 'songs/likes'
     | 'artists'
     | 'artists/newArtist'
+    | 'artists/updatedArtist'
     | 'artists/deletedArtist'
     | 'artists/artworks'
     | 'albums'
     | 'albums/newAlbum'
+    | 'albums/updatedAlbum'
     | 'albums/deletedAlbum'
     | 'genres'
     | 'genres/newGenre'
+    | 'genres/updatedGenre'
     | 'genres/deletedGenre'
     | 'playlists'
     | 'playlists/newPlaylist'
+    | 'playlists/updatedPlaylist'
     | 'playlists/deletedPlaylist'
     | 'playlists/history'
     | 'playlists/favorites'
@@ -562,14 +573,39 @@ declare global {
 
   type ErrorCodes =
     | 'SONG_NOT_FOUND'
+    | 'ARTISTS_NOT_FOUND'
     | 'EMPTY_SONG_ARRAY'
-    | 'SONG_DATA_SEND_FAILED';
+    | 'EMPTY_USERDATA'
+    | 'DATA_FILE_ERROR'
+    | 'EMPTY_BLACKLIST'
+    | 'SONG_DATA_SEND_FAILED'
+    | 'NO_BLACKLISTED_SONG_IN_GIVEN_PATH'
+    | 'CREATE_TEMP_ARTWORK_FAILED'
+    | 'READING_MODIFICATIONS_FAILED'
+    | 'FOLDER_MODIFICATIONS_CHECK_FAILED'
+    | 'UNSUPPORTED_FILE_EXTENSION';
 
   type MessageCodes =
     | ErrorCodes
+    | 'PROMPT_CLOSED_BEFORE_INPUT'
     | 'PARSE_FAILED'
     | 'PARSE_SUCCESSFUL'
-    | 'SONG_DELETED';
+    | 'SONG_DELETED'
+    | 'NO_NETWORK_CONNECTION'
+    | 'NETWORK_DISCONNECTED'
+    | 'NETWORK_CONNECTED'
+    | 'APP_THEME_CHANGE'
+    | 'PLAYBACK_FROM_UNKNOWN_SOURCE'
+    | 'RESYNC_SUCCESSFUL';
+
+  interface DataUpdateEvent {
+    dataType: DataUpdateEventTypes;
+    eventData: { id?: string; message?: string }[];
+  }
+
+  interface DataEvent extends Event {
+    detail: DataUpdateEvent[];
+  }
 
   interface NodeVibrantPalette {
     DarkMuted: NodeVibrantPaletteSwatch;
@@ -688,26 +724,26 @@ declare global {
     logs: string[];
   }
 
-  interface SongId3Tags {
+  interface SongTags {
     title: string;
-    artist?: string;
-    artwork?: {
-      mimeType: string;
-      type: { id: number; name: string };
-      description: string;
-      imageBuffer: Buffer;
+    artists?: {
+      artistId?: string;
+      name: string;
+      artworkPath?: string;
+      onlineArtworkPaths?: OnlineArtistArtworks;
+    }[];
+    album?: {
+      title: string;
+      albumId?: string;
+      noOfSongs?: number;
+      artists?: string[];
+      artworkPath?: string;
     };
-    artworkPath?: string;
-    year?: string;
-    album?: string;
-    genres?: string;
-    unsynchronisedLyrics?: {
-      language: string;
-      shortText?: string;
-      text: string;
-    };
+    releasedYear?: number;
+    genres?: { genreId?: string; name: string; artworkPath?: string }[];
     composer?: string;
-    publisher?: string;
+    lyrics?: string;
+    artworkPath: string;
   }
 
   interface NodeID3Tags extends NodeID3.Tags {

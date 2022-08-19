@@ -25,25 +25,35 @@ export const PlaylistsPage = () => {
   );
 
   React.useEffect(() => {
-    const managePlaylistDataUpdates = (
-      _: unknown,
-      event: DataUpdateEventTypes
-    ) => {
-      if (event === 'playlists') fetchPlaylistData();
-    };
-    window.api.dataUpdateEvent(managePlaylistDataUpdates);
     fetchPlaylistData();
+    const managePlaylistDataUpdatesInPlaylistsPage = (e: Event) => {
+      if ('detail' in e) {
+        const dataEvents = (e as DataEvent).detail;
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (event.dataType === 'playlists') fetchPlaylistData();
+        }
+      }
+    };
+    document.addEventListener(
+      'app/dataUpdates',
+      managePlaylistDataUpdatesInPlaylistsPage
+    );
     return () => {
-      window.api.removeDataUpdateEventListener(managePlaylistDataUpdates);
+      document.removeEventListener(
+        'app/dataUpdates',
+        managePlaylistDataUpdatesInPlaylistsPage
+      );
     };
   }, [fetchPlaylistData]);
 
   const playlistComponents = React.useMemo(
     () =>
       playlists.length > 0
-        ? playlists.map((playlist) => {
+        ? playlists.map((playlist, index) => {
             return (
               <Playlist
+                index={index}
                 name={playlist.name}
                 createdDate={playlist.createdDate}
                 playlistId={playlist.playlistId}

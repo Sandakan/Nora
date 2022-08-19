@@ -1,17 +1,21 @@
 import React from 'react';
 import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
-import blah from '../../../../assets/images/playlist_cover_default.png';
+import PlaylistDefaultCover from '../../../../assets/images/png/playlist_cover_default.png';
 
 interface GenreProp {
+  // eslint-disable-next-line react/no-unused-prop-types
+  index: number;
   genreId: string;
   title: string;
   noOfSongs: number;
   artworkPath?: string;
   backgroundColor?: { rgb: unknown };
+  className?: string;
 }
 
 const Genre = (props: GenreProp) => {
-  const { genreId, noOfSongs, title, artworkPath, backgroundColor } = props;
+  const { genreId, noOfSongs, title, artworkPath, backgroundColor, className } =
+    props;
   const { currentlyActivePage } = React.useContext(AppContext);
   const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
 
@@ -25,13 +29,14 @@ const Genre = (props: GenreProp) => {
 
   return (
     <div
-      className="genre appear-from-bottom relative w-72 h-36 mr-10 mb-6 p-4 text-background-color-2 dark:text-dark-background-color-2 flex items-center rounded-2xl cursor-pointer overflow-hidden"
+      className={`genre appear-from-bottom relative w-72 h-36 mr-10 mb-6 p-4 text-background-color-2 dark:text-dark-background-color-2 flex items-center rounded-2xl cursor-pointer overflow-hidden ${className}`}
       style={{
         backgroundColor: `rgb(${
           backgroundColor
             ? (backgroundColor.rgb as [number, number, number]).join(',')
             : '23,23,23'
         })`,
+        // animationDelay: `${50 * (index + 1)}ms`,
       }}
       onClick={goToGenreInfoTab}
       onKeyUp={goToGenreInfoTab}
@@ -48,7 +53,11 @@ const Genre = (props: GenreProp) => {
       </div>
       <div className="genre-artwork-container absolute -right-4 top-1/2 -translate-y-1/2">
         <img
-          src={artworkPath ? `otomusic://localFiles/${artworkPath}` : blah}
+          src={
+            artworkPath
+              ? `otomusic://localFiles/${artworkPath}`
+              : PlaylistDefaultCover
+          }
           className="w-24 rotate-12 rounded-md"
           alt="Artwork cover"
         />
@@ -60,6 +69,7 @@ const Genre = (props: GenreProp) => {
 Genre.defaultProps = {
   artworkPath: '',
   backgroundColor: { rgb: [23, 23, 23] },
+  className: '',
 };
 
 export default Genre;

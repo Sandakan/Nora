@@ -20,6 +20,7 @@ import Dropdown from '../Dropdown';
 import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';
 import ReleaseNotesPrompt from './ReleaseNotesPrompt';
 import OpenLinkConfirmPrompt from '../OpenLinkConfirmPrompt';
+import AppIcon from '../../../../assets/images/png/logo_light_mode.png';
 
 interface SettingsReducer {
   userData: UserData;
@@ -69,11 +70,11 @@ const reducer = (
 export const SettingsPage = () => {
   const { userData } = useContext(AppContext);
   const {
-    toggleDarkMode,
     changePromptMenuData,
     updateNotificationPanelData,
     toggleReducedMotion,
     toggleSongIndexing,
+    toggleShowRemainingSongDuration,
   } = React.useContext(AppUpdateContext);
 
   const [content, dispatch] = React.useReducer(reducer, {
@@ -91,15 +92,24 @@ export const SettingsPage = () => {
 
   React.useEffect(() => {
     fetchUserData();
-    const manageUserDataUpdates = (
-      _: unknown,
-      eventType: DataUpdateEventTypes
-    ) => {
-      if (eventType === 'userData') fetchUserData();
+    const manageUserDataUpdatesInSettingsPage = (e: Event) => {
+      if ('detail' in e) {
+        const dataEvents = (e as DataEvent).detail;
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (event.dataType.includes('userData')) fetchUserData();
+        }
+      }
     };
-    window.api.dataUpdateEvent(manageUserDataUpdates);
+    document.addEventListener(
+      'app/dataUpdates',
+      manageUserDataUpdatesInSettingsPage
+    );
     return () => {
-      window.api.removeDataUpdateEventListener(manageUserDataUpdates);
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageUserDataUpdatesInSettingsPage
+      );
     };
   }, [fetchUserData]);
 
@@ -148,8 +158,11 @@ export const SettingsPage = () => {
                   className="hidden mr-4 peer"
                   value="lightTheme"
                   id="lightThemeRadioBtn"
-                  defaultChecked={!content.userData.theme.isDarkMode}
-                  onClick={() => toggleDarkMode('light')}
+                  defaultChecked={
+                    !content.userData.theme.useSystemTheme &&
+                    !content.userData.theme.isDarkMode
+                  }
+                  onClick={() => window.api.changeAppTheme('light')}
                 />
                 <label
                   className="cursor-pointer before:content-[''] before:inline-block before:align-middle before:w-4 before:h-4 before:mr-4 before:rounded-full before:border-solid before:border-[0.2rem] before:border-[#ccc]"
@@ -165,8 +178,11 @@ export const SettingsPage = () => {
                   className="hidden mr-4"
                   value="darkTheme"
                   id="darkThemeRadioBtn"
-                  defaultChecked={content.userData.theme.isDarkMode}
-                  onClick={() => toggleDarkMode('dark')}
+                  defaultChecked={
+                    !content.userData.theme.useSystemTheme &&
+                    content.userData.theme.isDarkMode
+                  }
+                  onClick={() => window.api.changeAppTheme('dark')}
                 />
                 <label
                   className="cursor-pointer before:content-[''] before:inline-block before:align-middle before:w-4 before:h-4 before:mr-4 before:rounded-full before:border-solid before:border-[0.2rem] before:border-[#ccc]"
@@ -175,7 +191,50 @@ export const SettingsPage = () => {
                   Dark Theme
                 </label>
               </div>
+              <div className="theme-change-radio-btn mb-2 text-lg">
+                <input
+                  type="radio"
+                  name="theme"
+                  className="hidden mr-4"
+                  value="systemTheme"
+                  id="systemThemeRadioBtn"
+                  defaultChecked={content.userData.theme.useSystemTheme}
+                  onClick={() => window.api.changeAppTheme('system')}
+                />
+                <label
+                  className="cursor-pointer before:content-[''] before:inline-block before:align-middle before:w-4 before:h-4 before:mr-4 before:rounded-full before:border-solid before:border-[0.2rem] before:border-[#ccc]"
+                  htmlFor="systemThemeRadioBtn"
+                >
+                  Use System Theme
+                </label>
+              </div>
             </div>
+          </div>
+
+          {/* ? AUDIO PLAYBACK SETTINGS */}
+          <div className="main-container audio-playback-settings-container mb-12">
+            <div className="title-container font-medium  mt-1 mb-4 text-font-color-black text-2xl dark:text-font-color-white">
+              Audio Playback
+            </div>
+            <ul className="list-disc marker:bg-background-color-3 dark:marker:bg-background-color-3 pl-4">
+              <li className="secondary-container show-remaining-song-duration mb-4">
+                <div className="description">
+                  Shows the remaining duration of the song instead of the
+                  default song duration.
+                </div>
+                <Checkbox
+                  id="toggleShowRemainingSongDuration"
+                  isChecked={
+                    userData !== undefined &&
+                    userData.preferences.showSongRemainingTime
+                  }
+                  checkedStateUpdateFunction={(state) =>
+                    toggleShowRemainingSongDuration(state)
+                  }
+                  labelContent="Show remaining song duration"
+                />
+              </li>
+            </ul>
           </div>
 
           {/* MUSIC FOLDERS SETTINGS */}
@@ -187,7 +246,7 @@ export const SettingsPage = () => {
               Tell us where to look for your songs to create you an amazing
               music library.
             </div>
-            <div className="music-folders pl-4 min-h-[5rem] mt-4 border-[3px] rounded-xl border-background-color-2 dark:border-dark-background-color-2 relative empty:after:content-['There_are_no_folders.'] empty:after:text-[#ccc] empty:after:absolute empty:after:top-1/2 empty:after:left-1/2 empty:after:-translate-x-1/2 empty:after:-translate-y-1/2">
+            <div className="music-folders px-4 py-2 min-h-[5rem] mt-4 border-[3px] rounded-xl border-background-color-2 dark:border-dark-background-color-2 relative empty:after:content-['There_are_no_folders.'] empty:after:text-[#ccc] empty:after:absolute empty:after:top-1/2 empty:after:left-1/2 empty:after:-translate-x-1/2 empty:after:-translate-y-1/2">
               {musicFolders}
             </div>
             <Button
@@ -208,7 +267,8 @@ export const SettingsPage = () => {
                 Blacklisted Songs
               </div>
               <div className="description">
-                Songs that have been removed from the library will appear here.
+                Songs that have been removed and blacklisted from the library
+                will appear here.
               </div>
               <div className="blacklisted-songs min-h-[5rem] my-4 mr-8 border-[0.2rem] border-background-color-2 dark:border-dark-background-color-2 rounded-2xl relative empty:after:content-['There_are_no_blacklisted_songs.'] empty:after:text-[#ccc] empty:after:absolute empty:after:top-1/2 empty:after:left-1/2 empty:after:-translate-x-1/2 empty:after:-translate-y-1/2">
                 {blacklistedSongComponents}
@@ -254,24 +314,27 @@ export const SettingsPage = () => {
             <div className="title-container font-medium  mt-1 mb-4 text-font-color-black text-2xl dark:text-font-color-white">
               Preferences
             </div>
-            <div className="checkboxes-container">
-              <div className="secondary-container toggle-song-indexing mb-4">
-                <div className="description">
-                  Enables indexing of songs in pages. This will help you to be
-                  in order.
+            <ul className="list-disc marker:bg-background-color-3 dark:marker:bg-background-color-3 pl-4">
+              <li className="checkboxes-container">
+                <div className="secondary-container toggle-song-indexing mb-4">
+                  <div className="description">
+                    Enables indexing of songs in pages. This will help you to be
+                    in order.
+                  </div>
+                  <Checkbox
+                    id="toggleSongIndexing"
+                    isChecked={
+                      userData !== undefined &&
+                      userData.preferences.songIndexing
+                    }
+                    checkedStateUpdateFunction={(state) =>
+                      toggleSongIndexing(state)
+                    }
+                    labelContent="Enable song indexing"
+                  />
                 </div>
-                <Checkbox
-                  id="toggleSongIndexing"
-                  isChecked={
-                    userData !== undefined && userData.preferences.songIndexing
-                  }
-                  checkedStateUpdateFunction={(state) =>
-                    toggleSongIndexing(state)
-                  }
-                  labelContent="Enable song indexing"
-                />
-              </div>
-            </div>
+              </li>
+            </ul>
           </div>
 
           {/* ? ACCESSIBILITY SETTINGS */}
@@ -279,8 +342,8 @@ export const SettingsPage = () => {
             <div className="title-container font-medium  mt-1 mb-4 text-font-color-black text-2xl dark:text-font-color-white">
               Accessibility
             </div>
-            <div className="checkbox-container">
-              <div className="secondary-container toggle-reduced-motion mb-4">
+            <ul className="list-disc marker:bg-background-color-3 dark:marker:bg-background-color-3 pl-4">
+              <li className="secondary-container toggle-reduced-motion mb-4">
                 <div className="description">
                   Removes every duration of the animations that happens in the
                   app. This will also reduce the smoothness of the app.
@@ -296,8 +359,8 @@ export const SettingsPage = () => {
                     toggleReducedMotion(state)
                   }
                 />
-              </div>
-            </div>
+              </li>
+            </ul>
           </div>
 
           {/* STARTUP SETTINGS */}
@@ -305,28 +368,30 @@ export const SettingsPage = () => {
             <div className="title-container font-medium  mt-1 mb-4 text-font-color-black text-2xl dark:text-font-color-white">
               Startup
             </div>
-            <div className="auto-launch-at-startup-checkbox-container">
-              <div className="description">
-                Enabling this setting will automatically launch this app when
-                you log in to your computer.
-              </div>
-              <Checkbox
-                id="toggleAppAutoLaunch"
-                isChecked={
-                  content && content.userData && content.userData.preferences
-                    ? content.userData.preferences.autoLaunchApp
-                    : false
-                }
-                checkedStateUpdateFunction={(state) =>
-                  window.api
-                    .toggleAutoLaunch(state)
-                    .then(() =>
-                      dispatch({ type: 'TOGGLE_AUTO_LAUNCH', data: state })
-                    )
-                }
-                labelContent="Auto launch at startup"
-              />
-            </div>
+            <ul className="list-disc marker:bg-background-color-3 dark:marker:bg-background-color-3 pl-4">
+              <li className="auto-launch-at-startup-checkbox-container">
+                <div className="description">
+                  Enabling this setting will automatically launch this app when
+                  you log in to your computer.
+                </div>
+                <Checkbox
+                  id="toggleAppAutoLaunch"
+                  isChecked={
+                    content && content.userData && content.userData.preferences
+                      ? content.userData.preferences.autoLaunchApp
+                      : false
+                  }
+                  checkedStateUpdateFunction={(state) =>
+                    window.api
+                      .toggleAutoLaunch(state)
+                      .then(() =>
+                        dispatch({ type: 'TOGGLE_AUTO_LAUNCH', data: state })
+                      )
+                  }
+                  labelContent="Auto launch at startup"
+                />
+              </li>
+            </ul>
           </div>
 
           {/* ABOUT SETTINGS */}
@@ -334,9 +399,12 @@ export const SettingsPage = () => {
             <div className="title-container font-medium mt-1 mb-4 text-font-color-black text-2xl dark:text-font-color-white">
               About
             </div>
-            <div className="mb-3 text-lg flex flex-col">
-              <span className="block">Oto Music for Desktop</span>
-              <span className="text-sm font-light">v{version}</span>
+            <div className="mb-3 ml-2 text-lg flex">
+              <img src={AppIcon} className="max-h-12 aspect-square" alt="" />
+              <div className="flex flex-col ml-4">
+                <span className="block">Oto Music for Desktop</span>
+                <span className="text-sm font-light">v{version}</span>
+              </div>
             </div>
             <span
               className="release-notes-prompt-btn about-link text-[#6c5ce7] dark:text-[#6c5ce7] cursor-pointer w-fit hover:underline block"
@@ -382,7 +450,7 @@ export const SettingsPage = () => {
                         link="https://github.com/Sandakan/Oto-Music-for-Desktop"
                         title="Oto Music for Desktop Github Repository"
                       />,
-                      'confirm-app-reset'
+                      'confirm-link-direct'
                     )
               }
             >
@@ -481,7 +549,25 @@ export const SettingsPage = () => {
                 <span className="heart text-foreground-color-1 dark:text-foreground-color-1">
                   &#10084;
                 </span>{' '}
-                by Sandakan Nipunajith. 🇱🇰
+                by{' '}
+                <span
+                  className="underline cursor-pointer"
+                  onClick={() =>
+                    userData?.preferences.doNotVerifyWhenOpeningLinks
+                      ? window.api.openInBrowser(`https://github.com/Sandakan`)
+                      : changePromptMenuData(
+                          true,
+                          <OpenLinkConfirmPrompt
+                            link="https://github.com/Sandakan"
+                            title="Sandakan's Github Profile"
+                          />,
+                          'confirm-link-direct'
+                        )
+                  }
+                >
+                  Sandakan Nipunajith
+                </span>
+                . 🇱🇰
               </div>
             </div>
           </div>

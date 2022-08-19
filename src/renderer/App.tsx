@@ -20,9 +20,11 @@ import {
 import MiniPlayer from './components/MiniPlayer/MiniPlayer';
 import ErrorPrompt from './components/ErrorPrompt';
 import Button, { ButtonProps } from './components/Button';
+import packageFile from '../../package.json';
+import ReleaseNotesPrompt from './components/SettingsPage/ReleaseNotesPrompt';
 
 interface AppReducer {
-  userData?: UserData;
+  userData: UserData;
   isDarkMode: boolean;
   currentSongData: AudioData;
   PromptMenuData: PromptMenuData;
@@ -40,7 +42,7 @@ interface AppReducer {
 type AppReducerStateActions =
   | 'USER_DATA_CHANGE'
   | 'START_PLAY_STATE_CHANGE'
-  | 'IS_DARK_MODE_CHANGE'
+  | 'APP_THEME_CHANGE'
   | 'CURRENT_SONG_DATA_CHANGE'
   | 'CURRENT_SONG_PLAYBACK_STATE'
   | 'PROMPT_MENU_DATA_CHANGE'
@@ -60,20 +62,25 @@ type AppReducerStateActions =
   | 'UPDATE_VOLUME_VALUE'
   | 'TOGGLE_REDUCED_MOTION'
   | 'TOGGLE_SONG_INDEXING'
-  | 'TOGGLE_SONG_INDEXING';
+  | 'TOGGLE_SHOW_SONG_REMAINING_DURATION';
 
 const reducer = (
   state: AppReducer,
   action: { type: AppReducerStateActions; data?: unknown }
 ): AppReducer => {
   switch (action.type) {
-    case 'IS_DARK_MODE_CHANGE':
+    case 'APP_THEME_CHANGE': {
+      const theme = (
+        typeof action.data === 'object'
+          ? action.data
+          : { isDarkMode: false, useSystemTheme: true }
+      ) as typeof state.userData.theme;
       return {
         ...state,
-        isDarkMode:
-          typeof action.data === 'boolean' &&
-          (action.data || !state.isDarkMode),
+        isDarkMode: theme.isDarkMode,
+        userData: { ...state.userData, theme },
       };
+    }
     case 'USER_DATA_CHANGE':
       return {
         ...state,
@@ -121,6 +128,27 @@ const reducer = (
                   ...(state.userData as UserData).preferences,
                   songIndexing: (state.userData as UserData).preferences
                     .songIndexing,
+                },
+              },
+      };
+    case 'TOGGLE_SHOW_SONG_REMAINING_DURATION':
+      return {
+        ...state,
+        userData:
+          typeof action.data === 'boolean'
+            ? {
+                ...(state.userData as UserData),
+                preferences: {
+                  ...(state.userData as UserData).preferences,
+                  showSongRemainingTime: action.data,
+                },
+              }
+            : {
+                ...(state.userData as UserData),
+                preferences: {
+                  ...(state.userData as UserData).preferences,
+                  showSongRemainingTime: (state.userData as UserData)
+                    .preferences.showSongRemainingTime,
                 },
               },
       };
@@ -281,10 +309,34 @@ updateNetworkStatus();
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
 
+const userDataTemplate: UserData = {
+  theme: { isDarkMode: false, useSystemTheme: true },
+  currentSong: { songId: null, stoppedPosition: 0 },
+  volume: { isMuted: false, value: 100 },
+  musicFolders: [],
+  songBlacklist: [],
+  defaultPage: 'Home',
+  isShuffling: false,
+  isRepeating: 'false',
+  preferences: {
+    doNotShowRemoveSongFromLibraryConfirm: false,
+    isReducedMotion: false,
+    songIndexing: false,
+    autoLaunchApp: false,
+    isMiniPlayerAlwaysOnTop: false,
+    doNotVerifyWhenOpeningLinks: false,
+    showSongRemainingTime: false,
+  },
+  windowPositions: {},
+  windowDiamensions: {},
+  sortingStates: {},
+  recentSearches: [],
+};
+
 const reducerData: AppReducer = {
   isDarkMode: false,
   isMiniPlayer: false,
-  userData: undefined,
+  userData: userDataTemplate,
   currentSongData: {} as AudioData,
   isCurrentSongPlaying: false,
   navigationHistory: {
@@ -323,6 +375,8 @@ export default function App() {
   const [content, dispatch] = React.useReducer(reducer, reducerData);
   const contentRef = React.useRef(reducerData);
 
+  const AppRef = React.useRef(null as HTMLDivElement | null);
+
   const [, startTransition] = React.useTransition();
   const refStartPlay = React.useRef(false);
   const refQueue = React.useRef({
@@ -331,6 +385,25 @@ export default function App() {
     queueBeforeShuffle: [],
     queueType: 'songs',
   } as Queue);
+
+  const addSongDropPlaceholder = React.useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.relatedTarget === null) AppRef.current?.classList.add('song-drop');
+    },
+    []
+  );
+
+  const removeSongDropPlaceholder = React.useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.relatedTarget === null)
+        AppRef.current?.classList.remove('song-drop');
+    },
+    []
+  );
 
   const changePromptMenuData = React.useCallback(
     (
@@ -354,73 +427,60 @@ export default function App() {
   const managePlaybackErrors = React.useCallback(
     (err: unknown) => {
       console.error(err);
-      if (isDevelopment)
-        window.api.restartRenderer(`Error occurred in the player. ${err}`);
-      else {
-        changePromptMenuData(
-          true,
-          <ErrorPrompt
-            reason="ERROR_IN_PLAYER"
-            message={
-              <>
-                An error ocurred in the player. The app will restart in 5
-                seconds.
-              </>
-            }
-          />
-        );
-        setTimeout(
-          () =>
-            window.api.restartRenderer(`Error occurred in the player. ${err}`),
-          5000
-        );
-      }
+      changePromptMenuData(
+        true,
+        <ErrorPrompt
+          reason="ERROR_IN_PLAYER"
+          message={<>An error ocurred in the player.</>}
+        />
+      );
+      // setTimeout(
+      //   () =>
+      //     window.api.restartRenderer(`Error occurred in the player. ${err}`),
+      //   5000
+      // );
     },
     [changePromptMenuData]
   );
 
   const fadeOutIntervalId = React.useRef(undefined as NodeJS.Timer | undefined);
   const fadeInIntervalId = React.useRef(undefined as NodeJS.Timer | undefined);
-
+  const audioFadeInterval = 100;
+  const audioFadeDuration = 300;
   const fadeOutAudio = React.useCallback(() => {
-    console.log('volume on fade out', contentRef.current.volume);
-
+    // console.log('volume on fade out', contentRef.current.volume);
     if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
     if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
-    const interval = 100;
-    const duration = 300;
     fadeOutIntervalId.current = setInterval(() => {
       if (player.volume > 0) {
         const rate =
-          contentRef.current.volume.value / (100 * (duration / interval));
+          contentRef.current.volume.value /
+          (100 * (audioFadeDuration / audioFadeInterval));
         if (player.volume - rate <= 0) player.volume = 0;
         else player.volume -= rate;
       } else {
         player.pause();
         if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
       }
-    }, interval);
+    }, audioFadeInterval);
   }, []);
 
   const fadeInAudio = React.useCallback(() => {
-    console.log('volume on fade in', contentRef.current.volume);
-
+    // console.log('volume on fade in', contentRef.current.volume);
     if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
     if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
-    const interval = 100;
-    const duration = 300;
     fadeInIntervalId.current = setInterval(() => {
       if (player.volume < contentRef.current.volume.value / 100) {
         const rate =
-          (contentRef.current.volume.value / 100 / interval) *
-          (duration / interval);
+          (contentRef.current.volume.value / 100 / audioFadeInterval) *
+          (audioFadeDuration / audioFadeInterval);
         if (player.volume + rate >= contentRef.current.volume.value / 100)
           player.volume = contentRef.current.volume.value / 100;
         else player.volume += rate;
       } else if (fadeInIntervalId.current) {
         clearInterval(fadeInIntervalId.current);
       }
-    }, interval);
+    }, audioFadeInterval);
   }, []);
 
   const handleBeforeQuitEvent = React.useCallback(async () => {
@@ -435,6 +495,84 @@ export default function App() {
     );
   }, []);
 
+  const checkForAppUpdates = React.useCallback(() => {
+    if (navigator.onLine) {
+      fetch(packageFile.releaseNotes.json)
+        .then((res) => res.json())
+        .then((res: Changelog) => {
+          const latestVersionId = Number(
+            res.latestVersion.version.replace(/\D/g, '')
+          );
+          const currentVersionId = Number(
+            packageFile.version.replace(/\D/g, '')
+          );
+          if (latestVersionId > currentVersionId) {
+            console.log('client has new updates');
+
+            changePromptMenuData(
+              true,
+              <ReleaseNotesPrompt />,
+              'release-notes px-8 py-4'
+            );
+          } else
+            console.log(
+              'client is up-to-date.',
+              'latest version',
+              latestVersionId,
+              'current version',
+              currentVersionId
+            );
+          return undefined;
+        })
+        .catch((err) => console.error(err));
+    } else
+      console.log(
+        `couldn't check for app updates. Check the network connection.`
+      );
+  }, [changePromptMenuData]);
+
+  React.useEffect(
+    () => {
+      // check for app updates on app startup after 5 seconds.
+      setTimeout(checkForAppUpdates, 5000);
+      // checks for app updates every 10 minutes.
+      const id = setInterval(checkForAppUpdates, 1000 * 60 * 10);
+      return () => {
+        clearInterval(id);
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  React.useEffect(() => {
+    const watchForSystemThemeChanges = (
+      _: unknown,
+      isDarkMode: boolean,
+      usingSystemTheme: boolean
+    ) => {
+      console.log(
+        'theme changed : isDarkMode',
+        isDarkMode,
+        'usingSystemTheme',
+        usingSystemTheme
+      );
+      const theme = {
+        isDarkMode,
+        useSystemTheme: usingSystemTheme,
+      };
+      dispatch({
+        type: 'APP_THEME_CHANGE',
+        data: theme,
+      });
+      contentRef.current.userData.theme = theme;
+    };
+    window.api.listenForSystemThemeChanges(watchForSystemThemeChanges);
+    return () => {
+      window.api.StoplisteningForSystemThemeChanges(watchForSystemThemeChanges);
+    };
+  }, []);
+
   React.useEffect(() => {
     const manageWindowBlurOrFocus = (state: 'blur' | 'focus') => {
       const appElement = document.querySelector('.App');
@@ -443,6 +581,7 @@ export default function App() {
         if (state === 'focus') appElement.classList.remove('blurred');
       }
     };
+
     player.addEventListener('error', (err) => managePlaybackErrors(err));
     player.addEventListener('play', () => {
       dispatch({
@@ -475,8 +614,7 @@ export default function App() {
       );
     };
     const playSongIfPlayable = () => {
-      if (refStartPlay.current)
-        player.play().catch((err) => managePlaybackErrors(err));
+      if (refStartPlay.current) toggleSongPlayback(true);
     };
     const manageSongPositionUpdate = () => {
       contentRef.current.songPosition = Math.floor(player.currentTime);
@@ -518,11 +656,10 @@ export default function App() {
   React.useEffect(() => {
     window.api
       .getUserData()
-      .then((res) => {
+      .then(async (res) => {
         if (!res) return;
         dispatch({ type: 'USER_DATA_CHANGE', data: res });
         contentRef.current.userData = res;
-        dispatch({ type: 'IS_DARK_MODE_CHANGE', data: res.theme.isDarkMode });
         contentRef.current.isDarkMode = res.theme.isDarkMode;
         dispatch({ type: 'UPDATE_VOLUME', data: res.volume });
         contentRef.current.volume = res.volume;
@@ -536,8 +673,16 @@ export default function App() {
             type: 'CURRENT_ACTIVE_PAGE_CHANGE',
             data: { pageTitle: res.defaultPage, data: undefined },
           });
-        if (res.currentSong.songId) playSong(res.currentSong.songId, false);
-        player.currentTime = Number(res.currentSong.stoppedPosition);
+        // eslint-disable-next-line promise/no-nesting
+        const startUpSongData = await window.api
+          .checkForStartUpSongs()
+          .catch((err) => console.error(err));
+        if (startUpSongData)
+          playSongDataFromUnknownSource(startUpSongData, true);
+        else {
+          if (res.currentSong.songId) playSong(res.currentSong.songId, false);
+          player.currentTime = Number(res.currentSong.stoppedPosition);
+        }
         // eslint-disable-next-line promise/always-return
         if (res.queue) {
           refQueue.current = {
@@ -565,22 +710,27 @@ export default function App() {
 
     const noticeDataUpdateEvents = (
       _: unknown,
-      dataType: DataUpdateEventTypes,
-      message = ''
-    ) => console.log('Data update event occurred.', dataType, message);
+      dataEvents: DataUpdateEvent[]
+    ) => {
+      const event = new CustomEvent('app/dataUpdates', { detail: dataEvents });
+      document.dispatchEvent(event);
+    };
 
     window.api.toggleSongPlaybackState(() => {
       console.log('Main requested song playback');
       toggleSongPlayback();
     });
+    window.api.playSongFromUnknownSource((_, data) => {
+      playSongDataFromUnknownSource(data, true);
+    });
     window.api.skipBackwardToPreviousSong(handleSkipBackwardClick);
     window.api.skipForwardToNextSong(handleSkipForwardClick);
-    window.api.dataUpdateEvent(noticeDataUpdateEvents);
+    if (isDevelopment) window.api.dataUpdateEvent(noticeDataUpdateEvents);
     return () => {
       window.api.removeTogglePlaybackStateEvent(toggleSongPlayback);
       window.api.removeSkipBackwardToPreviousSongEvent(handleSkipBackwardClick);
       window.api.removeSkipForwardToNextSongEvent(handleSkipForwardClick);
-      window.api.removeDataUpdateEventListener(noticeDataUpdateEvents);
+      window.api.removeDataUpdateEventListeners();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -667,30 +817,66 @@ export default function App() {
   );
 
   const displayMessageFromMain = React.useCallback(
-    (_: unknown, message: string, messageCode?: MessageCodes) => {
+    (
+      _: unknown,
+      message: string,
+      messageCode?: MessageCodes,
+      data?: object
+    ) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const buttons: ButtonProps[] = [];
+      const defaultButtonStyles =
+        '!bg-background-color-3 dark:!bg-dark-background-color-3 !text-font-color-black dark:!text-font-color-black !font-light';
       let duration = 5000;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-undef-init
       let icon: ReactElement<any, any> | undefined = undefined;
+      const showMessage = true;
       if (messageCode === 'PARSE_SUCCESSFUL')
         icon = (
-          <span className="material-icons-outline icon">file_download</span>
+          <span className="material-icons-round-outlined icon">
+            file_download
+          </span>
         );
+      if (messageCode === 'RESYNC_SUCCESSFUL') {
+        icon = (
+          <span className="material-icons-round-outlined icon">check</span>
+        );
+      }
       if (messageCode === 'PARSE_FAILED') {
-        duration = 10000;
+        duration = 15000;
         buttons.push({
           label: 'Resync Songs',
           iconClassName: 'sync',
+          className: defaultButtonStyles,
           clickHandler: () => window.api.resyncSongsLibrary(),
         });
       }
-      updateNotificationPanelData(
-        duration,
-        <div>{message}</div>,
-        icon,
-        buttons
-      );
+      if (
+        messageCode === 'PLAYBACK_FROM_UNKNOWN_SOURCE' &&
+        data &&
+        'path' in data
+      ) {
+        icon = (
+          <span className="material-icons-round-outlined icon">
+            playlist_add
+          </span>
+        );
+        duration = 15000;
+        // buttons.push({
+        //   label: 'Add to the library',
+        //   iconClassName: 'add',
+        //   className: defaultButtonStyles,
+        //   clickHandler: () => console.log(data),
+        // });
+      }
+
+      if (showMessage)
+        updateNotificationPanelData(
+          duration,
+          <div>{message}</div>,
+          icon,
+          buttons
+        );
     },
     [updateNotificationPanelData]
   );
@@ -882,6 +1068,88 @@ export default function App() {
     [toggleSongPlayback, updateNotificationPanelData, changePromptMenuData]
   );
 
+  const playSongDataFromUnknownSource = React.useCallback(
+    (
+      data: { audioData: AudioData; isKnownSource: boolean },
+      isStartPlay = true
+    ) => {
+      if (data) {
+        const { audioData, isKnownSource } = data;
+        if (isKnownSource) playSong(audioData.songId);
+        else {
+          console.log('playSong', audioData.path);
+          dispatch({
+            type: 'CURRENT_SONG_DATA_CHANGE',
+            data: audioData,
+          });
+          contentRef.current.currentSongData = audioData;
+          if (player.src !== `otoMusic://localFiles/${audioData.path}`)
+            player.src = `otoMusic://localFiles/${audioData.path}`;
+          refStartPlay.current = isStartPlay;
+          if (isStartPlay) toggleSongPlayback();
+        }
+        // if (refQueue.current.queue.length > 0) {
+        //   if (refQueue.current.queue.indexOf(songData.songPath) !== -1)
+        //     refQueue.current.currentSongIndex =
+        //       refQueue.current.queue.indexOf(songData.songPath);
+        //   else {
+        //     console.log(
+        //       `song ${songData.title} with id ${songData.songPath} is not present in the queue`
+        //     );
+        //     refQueue.current.queue.push(songData.songPath);
+        //     if (refQueue.current.currentSongIndex !== null)
+        //       refQueue.current.currentSongIndex += 1;
+        //     else refQueue.current.currentSongIndex = 0;
+        //   }
+        // } else if (refQueue.current.queue.length === 0)
+        //   refQueue.current.queue.push(songData.songPath);
+      }
+    },
+    [playSong, toggleSongPlayback]
+  );
+
+  const fetchSongFromUnknownSource = React.useCallback(
+    (songPath: string) => {
+      window.api
+        .getSongFromUnknownSource(songPath)
+        .then((res) => playSongDataFromUnknownSource(res, true))
+        .catch((err) => {
+          console.error(err);
+          updateNotificationPanelData(
+            10000,
+            <span>Seems like we can&apos;t play that song.</span>,
+            <span className="material-icons-round icon">error_outline</span>
+          );
+          changePromptMenuData(
+            true,
+            <div>
+              <div className="title-container mt-1 pr-4 flex items-center mb-8 text-font-color-black text-3xl font-medium dark:text-font-color-white">
+                Couldn't Play the Song
+              </div>
+              <div className="description">
+                Seems like we can't play that song. Please check whether the
+                selected song is available in your system and accessible by the
+                app.
+              </div>
+              <div className="mt-6">
+                ERROR: {err?.message.split(':').at(-1) ?? 'UNKNOWN'}
+              </div>
+              <Button
+                label="OK"
+                className="remove-song-from-library-btn !bg-background-color-3 dark:!bg-dark-background-color-3 text-font-color-black dark:text-font-color-black rounded-md w-[10rem] hover:border-background-color-3 dark:hover:border-background-color-3 float-right mt-2"
+                clickHandler={() => changePromptMenuData(false)}
+              />
+            </div>
+          );
+        });
+    },
+    [
+      playSongDataFromUnknownSource,
+      updateNotificationPanelData,
+      changePromptMenuData,
+    ]
+  );
+
   const changeQueueCurrentSongIndex = React.useCallback(
     (currentSongIndex: number) => {
       console.log('currentSongIndex', currentSongIndex);
@@ -894,10 +1162,6 @@ export default function App() {
   const handleSkipBackwardClick = React.useCallback(() => {
     const { currentSongIndex } = refQueue.current;
     if (player.currentTime > 5) {
-      // if (contentRef.current.currentSongData.songId)
-      //   window.api.incrementNoOfSongListens(
-      //     contentRef.current.currentSongData.songId
-      //   );
       player.currentTime = 0;
     } else if (typeof currentSongIndex === 'number') {
       if (currentSongIndex === 0)
@@ -926,7 +1190,7 @@ export default function App() {
 
   const createQueue = React.useCallback(
     (
-      songIds: string[],
+      newQueue: string[],
       queueType: QueueTypes,
       isShuffleQueue = false,
       queueId?: string,
@@ -934,13 +1198,15 @@ export default function App() {
     ) => {
       const queue = {
         currentSongIndex: 0,
-        queue: songIds.map((songId) => songId),
+        queue: newQueue.map((songId) => songId),
         queueId,
         queueType,
-      };
+      } as Queue;
       if (isShuffleQueue) {
-        const { shuffledQueue } = shuffleQueue(queue.queue);
+        const { shuffledQueue, positions } = shuffleQueue(queue.queue);
+
         queue.queue = shuffledQueue;
+        if (positions.length > 0) queue.queueBeforeShuffle = positions;
         queue.currentSongIndex = 0;
       }
       window.api
@@ -960,24 +1226,28 @@ export default function App() {
       currentSongIndex?: number,
       newQueue?: string[],
       isShuffleQueue = false,
-      playCurrentSongIndex = true
+      playCurrentSongIndex = true,
+      clearPreviousQueueData = false
     ) => {
       const queue: Queue = {
         ...refQueue.current,
         currentSongIndex: currentSongIndex ?? refQueue.current.currentSongIndex,
         queue: newQueue ?? refQueue.current.queue,
       };
+      if (clearPreviousQueueData) queue.queueBeforeShuffle = [];
       if (Array.isArray(newQueue) && newQueue.length > 1 && isShuffleQueue) {
-        const { shuffledQueue } = shuffleQueue(
+        const { shuffledQueue, positions } = shuffleQueue(
           queue.queue,
-          queue.currentSongIndex ?? undefined
+          queue.currentSongIndex ??
+            refQueue.current.currentSongIndex ??
+            undefined
         );
         queue.queue = shuffledQueue;
+        if (positions.length > 0) queue.queueBeforeShuffle = positions;
         queue.currentSongIndex = 0;
       }
       window.api.saveUserData('queue', queue);
-      refQueue.current.currentSongIndex = currentSongIndex ?? 0;
-      if (newQueue) refQueue.current.queue = newQueue;
+      refQueue.current = queue;
       if (playCurrentSongIndex && typeof currentSongIndex === 'number')
         playSong(refQueue.current.queue[currentSongIndex]);
     },
@@ -996,27 +1266,6 @@ export default function App() {
         dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: isPlaying });
     },
     [content.isCurrentSongPlaying]
-  );
-
-  const toggleDarkMode = React.useCallback(
-    (theme?: 'dark' | 'light') => {
-      if (theme) {
-        const isDarkMode = theme === 'dark';
-        if (isDarkMode !== content.isDarkMode)
-          window.api.saveUserData('theme.isDarkMode', isDarkMode);
-        dispatch({
-          type: 'IS_DARK_MODE_CHANGE',
-          data: isDarkMode,
-        });
-      } else {
-        window.api.saveUserData('theme.isDarkMode', !content.isDarkMode);
-        dispatch({
-          type: 'IS_DARK_MODE_CHANGE',
-          data: !content.isDarkMode,
-        });
-      }
-    },
-    [content.isDarkMode]
   );
 
   const updateContextMenuData = React.useCallback(
@@ -1144,10 +1393,10 @@ export default function App() {
 
   const toggleMutedState = React.useCallback(
     (isMuted?: boolean) => {
-      if (isMuted !== undefined)
+      if (isMuted !== undefined) {
         if (isMuted !== content.volume.isMuted)
           dispatch({ type: 'UPDATE_MUTED_STATE', data: isMuted });
-        else dispatch({ type: 'UPDATE_MUTED_STATE' });
+      } else dispatch({ type: 'UPDATE_MUTED_STATE' });
     },
     [content.volume.isMuted]
   );
@@ -1195,6 +1444,28 @@ export default function App() {
         .catch((err) => console.error(err));
     },
     [content.userData?.preferences.songIndexing]
+  );
+
+  const toggleShowRemainingSongDuration = React.useCallback(
+    (state?: boolean) => {
+      const data =
+        state !== undefined
+          ? state
+          : content.userData?.preferences.showSongRemainingTime || false;
+      window.api
+        .saveUserData('preferences.showSongRemainingTime', data)
+        .then(() => {
+          if (contentRef.current.userData)
+            contentRef.current.userData.preferences.showSongRemainingTime =
+              data;
+          return dispatch({
+            type: 'TOGGLE_SHOW_SONG_REMAINING_DURATION',
+            data: state,
+          });
+        })
+        .catch((err) => console.error(err));
+    },
+    [content.userData?.preferences.showSongRemainingTime]
   );
 
   const manageKeyboardShortcuts = React.useCallback(
@@ -1273,16 +1544,72 @@ export default function App() {
   );
 
   const shuffleQueue = (songIds: string[], currentSongIndex?: number) => {
-    const currentSongId = currentSongIndex
-      ? songIds.splice(currentSongIndex, 1)[0]
-      : undefined;
+    const positions: number[] = [];
+    const initialQueue = songIds.slice(0);
+    const currentSongId =
+      typeof currentSongIndex === 'number'
+        ? songIds.splice(currentSongIndex, 1)[0]
+        : undefined;
     for (let i = songIds.length - 1; i > 0; i -= 1) {
       const randomIndex = Math.floor(Math.random() * (i + 1));
       [songIds[i], songIds[randomIndex]] = [songIds[randomIndex], songIds[i]];
     }
     if (currentSongId) songIds.unshift(currentSongId);
-    return { shuffledQueue: songIds, positons: [] as number[] };
+    for (let i = 0; i < initialQueue.length; i += 1) {
+      positions.push(songIds.indexOf(initialQueue[i]));
+    }
+    return { shuffledQueue: songIds, positions };
   };
+
+  const displayUnsupportedFileMessage = React.useCallback(
+    (path: string) => {
+      changePromptMenuData(
+        true,
+        <>
+          <div>
+            <div className="title-container text-3xl font-medium mb-4">
+              Unsupported Audio File
+            </div>
+            <div className="description">
+              You are trying to open an{' '}
+              <span className="underline">
+                {path.split(/.*\.(\w{3,})$/gim)[1] ?? 'audio'}
+              </span>{' '}
+              file which is not supported by this app.
+              <br />
+              Currently we only support <span className="underline">
+                .mp3
+              </span>, <span className="underline">.ogg</span>, and{' '}
+              <span className="underline">.wav</span> songs.
+            </div>
+            <div className="buttons-container mt-12 flex justify-end">
+              <Button
+                label="OK"
+                className="ok-btn !bg-background-color-3 dark:!bg-dark-background-color-3 text-font-color-black dark:text-font-color-black rounded-md w-[10rem] hover:border-background-color-3 dark:hover:border-background-color-3"
+                clickHandler={() => {
+                  changePromptMenuData(false);
+                }}
+              />
+            </div>
+          </div>
+        </>
+      );
+    },
+    [changePromptMenuData]
+  );
+
+  const onSongDrop = React.useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      console.log(e.dataTransfer.files);
+      if (e.dataTransfer.files.length > 0) {
+        if (e.dataTransfer.files[0].type === 'audio/mpeg')
+          fetchSongFromUnknownSource(e.dataTransfer.files[0].path);
+        else displayUnsupportedFileMessage(e.dataTransfer.files[0].path);
+      }
+      if (AppRef.current) AppRef.current.classList.remove('song-drop');
+    },
+    [displayUnsupportedFileMessage, fetchSongFromUnknownSource]
+  );
 
   const appContextStateValues = {
     isDarkMode: content.isDarkMode,
@@ -1310,7 +1637,6 @@ export default function App() {
   };
 
   const appUpdateContextValues: AppUpdateContextType = {
-    toggleDarkMode,
     updateContextMenuData,
     changePromptMenuData,
     playSong,
@@ -1335,6 +1661,7 @@ export default function App() {
     toggleSongPlayback,
     updateQueueData,
     updatePageSortingOrder,
+    toggleShowRemainingSongDuration,
   };
 
   return (
@@ -1350,7 +1677,15 @@ export default function App() {
               content.userData && content.userData.preferences.isReducedMotion
                 ? 'reduced-motion transition-none animate-none'
                 : ''
-            } w-full h-screen flex flex-col items-center [&.blurred_#title-bar]:opacity-40`}
+            } w-full h-screen flex flex-col items-center [&.blurred_#title-bar]:opacity-40 after:content-["Drop_your_song_here"] after:absolute after:w-full after:h-full after:text-4xl after:text-font-color-white dark:after:text-font-color-white after:font-medium after:grid after:place-items-center after:bg-[rgba(0,0,0,0)] dark:after:bg-[rgba(0,0,0,0)] after:invisible after:-z-10 [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:z-10 [&.song-drop]:after:transition-[background,visibility,color] [&.song-drop]:after:border-4  [&.song-drop]:after:visible [&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:border-[#ccc] [&.song-drop]:after:border-dashed`}
+            ref={AppRef}
+            onDragEnter={addSongDropPlaceholder}
+            onDragLeave={removeSongDropPlaceholder}
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onDrop={onSongDrop}
           >
             <ContextMenu />
             <PromptMenu />

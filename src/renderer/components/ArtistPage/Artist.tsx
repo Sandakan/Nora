@@ -8,9 +8,11 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
 import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
-import DefaultArtistCover from '../../../../assets/images/song_cover_default.png';
+import DefaultArtistCover from '../../../../assets/images/png/song_cover_default.png';
 
 interface ArtistProp {
+  // eslint-disable-next-line react/no-unused-prop-types
+  index: number;
   className?: string;
   artistId: string;
   name: string;
@@ -76,6 +78,7 @@ export const Artist = (props: ArtistProp) => {
   ];
   return (
     <div
+      // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
       className={`artist appear-from-bottom w-40 h-40 overflow-hidden flex flex-col justify-between mr-6 rounded-lg cursor-pointer ${props.className}`}
       onContextMenu={(e) => {
         e.stopPropagation();

@@ -1,6 +1,8 @@
 {
+  "name": "oto-music-for-desktop",
   "description": "An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar.",
-  "version": "0.7.0-alpha",
+  "version": "0.8.0-alpha",
+  "license": "MIT",
   "appPreferences": {
     "supportedMusicExtensions": [
       "mp3",
@@ -26,7 +28,6 @@
     "email": "adsandakannipunajith2003@outlook.com",
     "url": "https://sandakan-nipunajith.netlify.app/"
   },
-  "license": "MIT",
   "keywords": [
     "music",
     "electron",
@@ -115,20 +116,16 @@
   "dependencies": {
     "auto-launch": "^5.0.5",
     "electron-debug": "^3.2.0",
-    "electron-log": "^4.4.7",
     "electron-store": "^8.0.1",
-    "electron-updater": "^5.0.1",
-    "lyrics-finder": "^21.7.0",
-    "m3u8-reader": "^1.1.0",
     "music-metadata": "^7.12.3",
     "node-id3": "^0.2.3",
     "node-vibrant": "^3.2.1-alpha.1",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-router-dom": "^6.3.0",
+    "react-window": "^1.8.7",
     "simple-get": "^4.0.1",
-    "songlyrics": "^2.3.2",
-    "trash": "^7.2.0"
+    "songlyrics": "^2.3.2"
   },
   "devDependencies": {
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.6",
@@ -141,6 +138,7 @@
     "@types/react": "^18.0.9",
     "@types/react-dom": "^18.0.4",
     "@types/react-test-renderer": "^18.0.0",
+    "@types/react-window": "^1.8.5",
     "@types/sharp": "^0.30.2",
     "@types/terser-webpack-plugin": "^5.0.4",
     "@types/webpack-bundle-analyzer": "^4.4.1",
@@ -209,6 +207,7 @@
   },
   "build": {
     "productName": "Oto Music For Desktop",
+    "copyright": "Copyright © 2022 Sandakan Nipunajith",
     "appId": "com.SandakanNipunajith.OtoMusicForDesktop",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
@@ -219,13 +218,22 @@
     ],
     "fileAssociations": [
       {
-        "ext": "mp3",
-        "name": "mp3 File",
-        "role": "Editor"
+        "ext": [
+          "mp3",
+          "wav",
+          "ogg"
+        ],
+        "role": "Editor",
+        "icon": "./assets/images/oto-music-associated-file-icon.ico"
       }
     ],
     "nsis": {
-      "perMachine": true
+      "perMachine": false,
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "installerSidebar": "./assets/installer_assets/sidebar.bmp",
+      "license": "./LICENSE.txt"
     },
     "icon": "./assets/images/logo_light_mode.ico",
     "afterSign": ".erb/scripts/notarize.js",
@@ -274,7 +282,11 @@
       "output": "release/build"
     },
     "extraResources": [
-      "./assets/**"
+      "./assets/**",
+      "!**/assets/images/other/*",
+      "!**/assets/installer_assets/*",
+      "!**/assets/other/*",
+      "!**/assets/*.ts"
     ],
     "publish": {
       "provider": "github",

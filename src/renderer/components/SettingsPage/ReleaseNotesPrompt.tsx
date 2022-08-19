@@ -20,8 +20,9 @@ interface VersionProp {
 
 const NoteComponent = (props: Note) => {
   const { note, artworkPath } = props;
+  const key = React.useId();
   return (
-    <li className="mb-1 last:mb-4">
+    <li className="mb-1 last:mb-4" key={key}>
       {note}
       {artworkPath && (
         <>
@@ -39,8 +40,9 @@ const NoteComponent = (props: Note) => {
 
 const Version = (props: VersionProp) => {
   const { version, releaseDate, isLatest, notes } = props;
+  const key = React.useId();
   return (
-    <div className="px-4 last:pb-8 group">
+    <div key={key} className="px-4 last:pb-8 group">
       <div className="version-info flex justify-between font-medium mb-4 text-lg">
         <span className="version">
           v{version} {version === app.version && '(Current)'}
@@ -121,7 +123,6 @@ const ReleaseNotesPrompt = () => {
       <div className="w-full h-[500px]">
         {releaseNotes && (
           <>
-            {' '}
             <h2 className="title-container text-center text-3xl font-medium mb-4">
               Changelog
               {navigator.onLine ? (

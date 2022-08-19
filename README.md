@@ -1,16 +1,24 @@
- <h1>
-   <img class="logo" src="assets/images/logo_light_mode.png" width="50px">
-   Oto Music for Desktop
+ <h1 align="center">
+   <img class="logo" src="assets/images/png/logo_light_mode.png" width="50px">
+   <p>Oto Music for Desktop</p>
  </h1>
+ <div align="center">
+  <img alt="GitHub all releases" src="https://img.shields.io/github/downloads/Sandakan/Oto-Music-for-Desktop/total?label=all%20time%20downloads&style=for-the-badge">
+  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/downloads/Sandakan/Oto-Music-for-Desktop/v0.6.0-alpha/total?style=for-the-badge">
+  <img alt="GitHub package.json version" src="https://img.shields.io/github/package-json/v/Sandakan/Oto-Music-for-Desktop?color=blue&label=latest%20version&style=for-the-badge">
+  <a href="https://github.com/Sandakan/Oto-Music-for-Desktop/blob/master/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/Sandakan/Oto-Music-for-Desktop?style=for-the-badge"></a>
+  <a href="https://github.com/Sandakan/Oto-Music-for-Desktop/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/Sandakan/Oto-Music-for-Desktop?style=for-the-badge"></a>
+ </div>
+ <br/>
 <p>
    Oto Music for Desktop is an elegant music player built using Electron and React. Inspired by <a href="https://play.google.com/store/apps/details?id=com.piyush.music&gl=us">Oto Music for Android</a> by Piyush Mamidwar.
 </p>
 
 <br/>
 
-<img src="assets/other/Screenshot (398).png">
+<img src="assets/other/frame 48.png">
 
-<br>
+<p align="center"> logo used in this project is taken from the <a href="https://play.google.com/store/apps/details?id=com.piyush.music&gl=us">Oto Music for Android</a> app.</p>
 
 <p>With the simplicity and design in mind, this app was made to overcome problems when using default music apps in platforms that lacks essentail features.</p>
 
@@ -21,13 +29,13 @@
    <ul>
       <li>Organize your songs, artists, albums. playlists with ease.</li>
       <li>Create playlists that meet your needs.</li>
-      <li>SIng with the song with the help of song lyrics.<sup>1</sup></li>
+      <li>Sing along with the help of song lyrics.<sup>1</sup></li>
       <li>Keep your favorites close to you.</li>
       <li>Read your favorite artist's bio.</li>
       <li>Personalized music shuffling.<sup>2</sup> (upcoming)</li>
       <li>Change between Light and Dark theme with ease.</li>
       <li>A Mini player to help focus on what matters at the moment.</li>
-      <li>Edit metadata of your songs (upcoming)</li>
+      <li>Edit metadata of your songs (New)</li>
       <li>Search through your library with the help of song filters.</li>
       <li>See what you recently played in the homepage and the history playlist.</li>
    </ul>
@@ -39,16 +47,14 @@
 
 <br>
 
-<h2>Screenshots</h2>
-
-<img src="assets/other/Screenshot (595).png">
-<img src="assets/other/Screenshot (395).png">
-<img src="assets/other/Screenshot (515).png">
-<img src="assets/other/Screenshot (393).png">
-<img src="assets/other/Screenshot (196).png">
-<img src="assets/other/Screenshot (390).png">
-<img src="assets/other/Screenshot (589).png">
-<img src="assets/other/Screenshot (590).png">
+<img src="assets/other/frame 51.png">
+<img src="assets/other/frame 50.png">
+<img src="assets/other/frame 55.png">
+<img src="assets/other/frame 49.png">
+<img src="assets/other/frame 53.png">
+<img src="assets/other/frame 56.png">
+<img src="assets/other/frame 54.png">
+<img src="assets/other/frame 57.png">
 
 <br/>
 
@@ -105,4 +111,4 @@ Run
 
 <div class="footnotes">* every asset used in this project are only used for demonstration purposes only.</div>
 
-<div class="footnotes">* every song, artist, album, song cover used in this demonstrationare not owned by myself but owned by their respective owners. They were used only for demonstration purposes only. I value all the copyrights of the owners of the above assets.</div>
+<div class="footnotes">* every song, artist, album, song cover used in this demonstration are not owned by myself but owned by their respective owners. They were used only for demonstration purposes only. I value all the copyrights of the owners of the above assets.</div>

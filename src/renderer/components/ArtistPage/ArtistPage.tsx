@@ -4,12 +4,14 @@
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable import/prefer-default-export */
-import React from 'react';
+import React, { CSSProperties } from 'react';
+import { FixedSizeGrid as Grid } from 'react-window';
+import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
 import sortArtists from 'renderer/utils/sortArtists';
 import { Artist } from './Artist';
-import NoArtistImage from '../../../../assets/images/Sun_Monochromatic.svg';
-import FetchingDataImage from '../../../../assets/images/Lemonade_Monochromatic.svg';
+import NoArtistImage from '../../../../assets/images/svg/Sun_Monochromatic.svg';
+import FetchingDataImage from '../../../../assets/images/svg/Lemonade_Monochromatic.svg';
 import Dropdown from '../Dropdown';
 import MainContainer from '../MainContainer';
 
@@ -56,6 +58,14 @@ export const ArtistPage = () => {
         ? userData.sortingStates.artistsPage
         : 'aToZ',
   } as ArtistPageReducer);
+  const containerRef = React.useRef(null as HTMLDivElement | null);
+  const { height, width } = useResizeObserver(containerRef);
+  const MIN_ITEM_WIDTH = 175;
+  const MIN_ITEM_HEIGHT = 200;
+  const noOfColumns = Math.floor(width / MIN_ITEM_WIDTH);
+  const noOfRows = Math.ceil(content.artists.length / noOfColumns);
+  const itemWidth =
+    MIN_ITEM_WIDTH + ((width % MIN_ITEM_WIDTH) - 10) / noOfColumns;
 
   const fetchArtistsData = React.useCallback(
     () =>
@@ -78,15 +88,24 @@ export const ArtistPage = () => {
 
   React.useEffect(() => {
     fetchArtistsData();
-    const manageArtistDataUpdates = (
-      _: unknown,
-      eventType: DataUpdateEventTypes
-    ) => {
-      if (eventType === 'artists') fetchArtistsData();
+    const manageArtistDataUpdatesInArtistsPage = (e: Event) => {
+      if ('detail' in e) {
+        const dataEvents = (e as DataEvent).detail;
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (event.dataType === 'artists') fetchArtistsData();
+        }
+      }
     };
-    window.api.dataUpdateEvent(manageArtistDataUpdates);
+    document.addEventListener(
+      'app/dataUpdates',
+      manageArtistDataUpdatesInArtistsPage
+    );
     return () => {
-      window.api.removeDataUpdateEventListener(manageArtistDataUpdates);
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageArtistDataUpdatesInArtistsPage
+      );
     };
   }, [fetchArtistsData]);
 
@@ -95,26 +114,41 @@ export const ArtistPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content.sortingOrder]);
 
-  const artistComponenets = React.useMemo(
-    () =>
-      content.artists &&
-      content.artists.length > 0 &&
-      content.artists.map((artist) => (
-        <Artist
-          key={artist.artistId}
-          className="mb-12"
-          artistId={artist.artistId}
-          name={artist.name}
-          artworkPath={artist.artworkPath}
-          onlineArtworkPaths={artist.onlineArtworkPaths}
-          songIds={artist.songs.map((song) => song.songId)}
-        />
-      )),
-    [content.artists]
+  const row = React.useCallback(
+    (props: {
+      columnIndex: number;
+      rowIndex: number;
+      style: CSSProperties;
+    }) => {
+      const { columnIndex, rowIndex, style } = props;
+      const index = rowIndex * noOfColumns + columnIndex;
+      // eslint-disable-next-line no-console
+      console.log(index);
+      if (index < content.artists.length) {
+        const { artistId, name, onlineArtworkPaths, songs, artworkPath } =
+          content.artists[index];
+        return (
+          <div style={{ ...style, display: 'flex', justifyContent: 'center' }}>
+            <Artist
+              index={index}
+              key={artistId}
+              className="mb-12"
+              artistId={artistId}
+              name={name}
+              artworkPath={artworkPath}
+              onlineArtworkPaths={onlineArtworkPaths}
+              songIds={songs.map((song) => song.songId)}
+            />
+          </div>
+        );
+      }
+      return <div style={style} />;
+    },
+    [content.artists, noOfColumns]
   );
 
   return (
-    <MainContainer className="main-container artists-list-container">
+    <MainContainer className="main-container artists-list-container !h-full !mb-0">
       <>
         <div className="title-container mt-1 pr-4 flex items-center mb-8 text-font-color-black text-3xl font-medium dark:text-font-color-white">
           <div className="container flex">
@@ -151,11 +185,26 @@ export const ArtistPage = () => {
             />
           </div>
         </div>
-        <div className="artists-container flex flex-wrap">
-          {artistComponenets}
+        <div
+          className="artists-container flex flex-wrap !h-full"
+          ref={containerRef}
+        >
+          {content.artists && content.artists.length > 0 && (
+            <Grid
+              columnCount={noOfColumns || 5}
+              columnWidth={itemWidth}
+              rowCount={noOfRows || 5}
+              rowHeight={MIN_ITEM_HEIGHT}
+              height={height || 300}
+              width={width || 500}
+              overscanRowCount={2}
+            >
+              {row}
+            </Grid>
+          )}
         </div>
         {content.artists === null && (
-          <div className="no-songs-container h-full w-full text-[#ccc] text-center flex flex-col items-center justify-center text-2xl">
+          <div className="no-songs-container h-full w-full text-[#ccc] my-[10%] text-center flex flex-col items-center justify-center text-2xl">
             <img
               src={NoArtistImage}
               alt="Sun in a desert"
@@ -165,7 +214,7 @@ export const ArtistPage = () => {
           </div>
         )}
         {content.artists && content.artists.length === 0 && (
-          <div className="no-songs-container h-full w-full text-[#ccc] text-center flex flex-col items-center justify-center text-2xl">
+          <div className="no-songs-container h-full w-full text-[#ccc] my-[10%] text-center flex flex-col items-center justify-center text-2xl">
             <img
               src={FetchingDataImage}
               alt="No songs available."

@@ -102,7 +102,7 @@ const Sidebar = React.memo(() => {
   );
 
   return (
-    <nav className="side-bar flex-grow w-[30%] max-w-80 h-full bg-side-bar-background dark:bg-dark-background-color-2 pt-8 pb-2 rounded-tr-2xl lg:w-14 order-1">
+    <nav className="side-bar flex-grow w-[30%] max-w-80 h-full bg-side-bar-background dark:bg-dark-background-color-2 pt-8 pb-2 rounded-tr-2xl lg:w-14 order-1 transition-[width]">
       <ul className="last:relative last:w-full last:h-full [&>.active]:bg-background-color-3 dark:[&>.active]:bg-dark-background-color-3 [&>.active]:text-font-color-black dark:[&>.active]:text-font-color-black [&>li.settings]:absolute [&>li.settings]:bottom-0">
         {sideBarItems}
       </ul>

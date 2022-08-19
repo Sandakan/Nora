@@ -42,7 +42,7 @@ export default (props: { songPath: string; title: string }) => {
                       ? `'${title}' song removed from the system.`
                       : `'${title}' song moved to the Recycle Bin.`}
                   </span>,
-                  <span className="material-icons-twotone">done_all</span>
+                  <span className="material-icons-round icon">done_all</span>
                 )
             );
         }}

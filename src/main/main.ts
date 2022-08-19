@@ -26,19 +26,19 @@ import {
   protocol,
   crashReporter,
   nativeImage,
-  // nativeTheme,
+  nativeTheme,
+  powerMonitor,
 } from 'electron';
 import path from 'path';
 import { rm, unlink } from 'fs/promises';
 import * as musicMetaData from 'music-metadata';
-// import { FixedSizeList } from 'react-window';
 import songLyrics, { TLyrics } from 'songlyrics';
 import httpsGet from 'simple-get';
 import nodeVibrant from 'node-vibrant';
 import AutoLaunch from 'auto-launch';
 import os from 'os';
+import { statSync } from 'fs';
 // import m3uReader from 'm3u8-reader';
-// import fs from 'fs';
 
 import log from './log';
 import {
@@ -56,6 +56,7 @@ import {
   deleteSongFromSystem,
   restoreBlacklistedSong,
   resetAppCache,
+  createTempArtwork,
 } from './filesystem';
 import { parseSong } from './parseSong';
 import { generateRandomId } from './randomId';
@@ -65,7 +66,7 @@ import { updateSongId3Tags, getSongId3Tags } from './updateSongId3Tags';
 import { version, appPreferences } from '../../package.json';
 import { search } from './search';
 
-// / / / / / / CONSTANTS / / / / / / / / / /
+// / / / / / / / CONSTANTS / / / / / / / / /
 const MAIN_WINDOW_MIN_SIZE_X = 700;
 const MAIN_WINDOW_MIN_SIZE_Y = 500;
 const MAIN_WINDOW_MAX_SIZE_X = 10000;
@@ -76,9 +77,14 @@ const MINI_PLAYER_MAX_SIZE_X = 350;
 const MINI_PLAYER_MAX_SIZE_Y = 350;
 const MAIN_WINDOW_DEFAULT_SIZE_X = 1280;
 const MAIN_WINDOW_DEFAULT_SIZE_Y = 720;
+
+// / / / / / / VARIABLES / / / / / / /
 let mainWindow: BrowserWindow;
 let isMiniPlayer = false;
 let isConnectedToInternet = false;
+let songsOnStartUp: string[] = [];
+
+// / / / / / / INITIALIZATION / / / / / / /
 const autoLauncher = new AutoLaunch({ name: 'Oto Music for Desktop' });
 
 const isDevelopment =
@@ -135,7 +141,6 @@ const createWindow = async () => {
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
-      devTools: isDevelopment,
     },
     visualEffectState: 'followWindow',
     roundedCorners: true,
@@ -144,9 +149,6 @@ const createWindow = async () => {
     icon: getAssetPath('images', 'logo_light_mode.ico'),
     titleBarStyle: 'hidden',
     show: false,
-  });
-  mainWindow.webContents.openDevTools({
-    mode: 'detach',
   });
   mainWindow.loadURL(resolveHtmlPath('index.html'));
   mainWindow.once('ready-to-show', () => {
@@ -159,162 +161,210 @@ const createWindow = async () => {
   });
 };
 
-app.setPath('crashDumps', path.join(app.getPath('userData'), 'crashDumps'));
-
-app.on('will-finish-launching', () => {
-  crashReporter.start({ uploadToServer: false });
-  console.log(process.argv);
-});
-
 app.whenReady().then(() => {
-  protocol.registerFileProtocol(
-    'otomusic',
-    (request: { url: string }, callback: (arg0: string) => any) => {
-      const url = decodeURI(request.url).replace('otomusic://localFiles/', '');
-      try {
-        return callback(url);
-      } catch (error) {
-        log(
-          `====== ERROR OCCURRED WHEN TRYING TO LOCATE A RESOURCE IN THE SYSTEM. =======\nREQUEST : ${url}\nERROR : ${error}`
+  // Behaviour on second instance for parent process
+  const gotSingleInstanceLock = app.requestSingleInstanceLock();
+  if (!gotSingleInstanceLock) app.quit();
+  else {
+    createWindow();
+    app.on('second-instance', async (_, argv) => {
+      log('User requested for a second instance of the app.');
+      if (app.hasSingleInstanceLock()) {
+        if (mainWindow?.isMinimized()) mainWindow?.restore();
+        mainWindow?.focus();
+        process.argv = argv;
+        mainWindow?.webContents.send(
+          'app/playSongFromUnknownSource',
+          await checkForStartUpSongs()
         );
-        return callback('404');
       }
-    }
-  );
-  createWindow();
-  mainWindow.webContents.once('did-finish-load', () => {
-    const userData = getUserData();
-    if (userData.windowPositions.mainWindow) {
-      const { x, y } = userData.windowPositions.mainWindow;
-      mainWindow.setPosition(x, y, true);
-    } else {
-      mainWindow.center();
-      const [x, y] = mainWindow.getPosition();
-      saveUserData('windowPositions.mainWindow', { x, y });
-    }
-    mainWindow.show();
-    log(`########## STARTING UP THE RENDERER. ##########`);
-    manageTaskbarPlaybackControls(true, false);
-    // nativeTheme.addListener('updated', () => {
-    //   sendMessageToRenderer(
-    //     `System theme changed to ${nativeTheme.themeSource}`
-    //   );
-    // });
-  });
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
+    });
 
-  app.on('before-quit', () => {
-    mainWindow.webContents.send('app/beforeQuitEvent');
-    log(
-      `########## QUITING OTO MUSIC FOR DESKTOP ########## \nUPTIME : ${Math.floor(
-        process.uptime()
-      )} seconds`
-    );
-  });
-
-  if (!app.requestSingleInstanceLock()) app.quit();
-
-  // Behaviour on second instance for parent process- Pretty much optional
-  app.on('second-instance', () => {
-    log('User requested for a second instance of the app.');
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) mainWindow.restore();
-      mainWindow.focus();
-    }
-  });
-
-  const manageAppMoveEvent = () => {
-    const [x, y] = mainWindow.getPosition();
-    log(
-      `User moved the ${
-        isMiniPlayer ? 'mini-player' : 'main window'
-      } to (x: ${x}, y: ${y}) coordinates.`
-    );
-    if (isMiniPlayer) saveUserData('windowPositions.miniPlayer', { x, y });
-    else saveUserData('windowPositions.mainWindow', { x, y });
-  };
-
-  mainWindow.on('moved', manageAppMoveEvent);
-
-  const manageAppResizeEvent = () => {
-    const [x, y] = mainWindow.getSize();
-    log(
-      `User resized the ${
-        isMiniPlayer ? 'mini-player' : 'main window'
-      } to (x: ${x}, y: ${y}) diamensions.`
-    );
-    if (isMiniPlayer) saveUserData('windowDiamensions.miniPlayer', { x, y });
-    else saveUserData('windowDiamensions.mainWindow', { x, y });
-  };
-
-  mainWindow.on('resized', () => {
-    manageAppMoveEvent();
-    manageAppResizeEvent();
-  });
-
-  const toggleMiniPlayerAlwaysOnTop = (isMiniPlayerAlwaysOnTop: boolean) => {
-    const userData = getUserData();
-    if (isMiniPlayer) {
-      mainWindow.setAlwaysOnTop(isMiniPlayerAlwaysOnTop);
-    }
-    userData.preferences.isMiniPlayerAlwaysOnTop = isMiniPlayerAlwaysOnTop;
-    saveUserData(
-      'preferences.isMiniPlayerAlwaysOnTop',
-      isMiniPlayerAlwaysOnTop
-    );
-  };
-
-  const toggleMiniPlayer = (isMiniPlayerActive: boolean) => {
-    log(
-      `Toggled the mini-player to be ${
-        isMiniPlayerActive ? 'enabled' : 'disabled'
-      }.`
-    );
-    isMiniPlayer = isMiniPlayerActive;
-    const { windowPositions, windowDiamensions, preferences } = getUserData();
-    if (isMiniPlayerActive) {
-      mainWindow.setMaximumSize(MINI_PLAYER_MAX_SIZE_X, MINI_PLAYER_MAX_SIZE_Y);
-      mainWindow.setMinimumSize(MINI_PLAYER_MIN_SIZE_X, MINI_PLAYER_MIN_SIZE_Y);
-      mainWindow.setAlwaysOnTop(preferences.isMiniPlayerAlwaysOnTop ?? false);
-      if (windowDiamensions.miniPlayer) {
-        const { x, y } = windowDiamensions.miniPlayer;
-        mainWindow.setSize(x, y, true);
-      } else
-        mainWindow.setSize(
-          MINI_PLAYER_MIN_SIZE_X,
-          MINI_PLAYER_MIN_SIZE_Y,
-          true
+    protocol.registerFileProtocol(
+      'otomusic',
+      (request: { url: string }, callback: (arg0: string) => any) => {
+        const url = decodeURI(request.url).replace(
+          'otomusic://localFiles/',
+          ''
         );
-      if (windowPositions.miniPlayer) {
-        const { x, y } = windowPositions.miniPlayer;
-        mainWindow.setPosition(x, y, true);
-      } else {
-        mainWindow.center();
-        const [x, y] = mainWindow.getPosition();
-        saveUserData('windowPositions.miniPlayer', { x, y });
+        try {
+          return callback(url);
+        } catch (error) {
+          log(
+            `====== ERROR OCCURRED WHEN TRYING TO LOCATE A RESOURCE IN THE SYSTEM. =======\nREQUEST : ${url}\nERROR : ${error}`
+          );
+          return callback('404');
+        }
       }
-    } else {
-      mainWindow.setMaximumSize(MAIN_WINDOW_MAX_SIZE_X, MAIN_WINDOW_MAX_SIZE_Y);
-      mainWindow.setMinimumSize(MAIN_WINDOW_MIN_SIZE_X, MAIN_WINDOW_MIN_SIZE_Y);
-      mainWindow.setAlwaysOnTop(false);
-      if (windowDiamensions.mainWindow) {
-        const { x, y } = windowDiamensions.mainWindow;
-        mainWindow.setSize(x, y, true);
-      } else
-        mainWindow.setSize(
-          MAIN_WINDOW_DEFAULT_SIZE_X,
-          MAIN_WINDOW_DEFAULT_SIZE_Y,
-          true
-        );
-      if (windowPositions.mainWindow) {
-        const { x, y } = windowPositions.mainWindow;
+    );
+
+    powerMonitor.addListener('shutdown', (e: any) => {
+      e.preventDefault();
+    });
+
+    mainWindow.webContents.once('did-finish-load', () => {
+      const userData = getUserData();
+      if (userData.windowPositions.mainWindow) {
+        const { x, y } = userData.windowPositions.mainWindow;
         mainWindow.setPosition(x, y, true);
       } else {
         mainWindow.center();
         const [x, y] = mainWindow.getPosition();
         saveUserData('windowPositions.mainWindow', { x, y });
+      }
+      mainWindow.show();
+      if (isDevelopment)
+        mainWindow.webContents.openDevTools({ mode: 'detach', activate: true });
+      log(`########## STARTING UP THE RENDERER. ##########`);
+      manageTaskbarPlaybackControls(true, false);
+      nativeTheme.addListener('updated', watchForSystemThemeChanges);
+    });
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    });
+
+    app.on('before-quit', () => {
+      mainWindow.webContents.send('app/beforeQuitEvent');
+      log(
+        `########## QUITING OTO MUSIC FOR DESKTOP ########## \nUPTIME : ${Math.floor(
+          process.uptime()
+        )} seconds`
+      );
+    });
+
+    const manageAppMoveEvent = () => {
+      const [x, y] = mainWindow.getPosition();
+      log(
+        `User moved the ${
+          isMiniPlayer ? 'mini-player' : 'main window'
+        } to (x: ${x}, y: ${y}) coordinates.`
+      );
+      if (isMiniPlayer) saveUserData('windowPositions.miniPlayer', { x, y });
+      else saveUserData('windowPositions.mainWindow', { x, y });
+    };
+
+    mainWindow.on('moved', manageAppMoveEvent);
+
+    const manageAppResizeEvent = () => {
+      const [x, y] = mainWindow.getSize();
+      log(
+        `User resized the ${
+          isMiniPlayer ? 'mini-player' : 'main window'
+        } to (x: ${x}, y: ${y}) diamensions.`
+      );
+      if (isMiniPlayer) saveUserData('windowDiamensions.miniPlayer', { x, y });
+      else saveUserData('windowDiamensions.mainWindow', { x, y });
+    };
+
+    mainWindow.on('resized', () => {
+      manageAppMoveEvent();
+      manageAppResizeEvent();
+    });
+  }
+
+  app.setPath('crashDumps', path.join(app.getPath('userData'), 'crashDumps'));
+
+  app.on('will-finish-launching', () => {
+    crashReporter.start({ uploadToServer: false });
+    log(
+      `APP STARTUP COMMAND LINE ARGUMENTS\nARGS : [ ${process.argv.join(
+        ', '
+      )} ]`
+    );
+  });
+
+  const toggleMiniPlayerAlwaysOnTop = (isMiniPlayerAlwaysOnTop: boolean) => {
+    if (mainWindow) {
+      const userData = getUserData();
+      if (isMiniPlayer) {
+        mainWindow.setAlwaysOnTop(isMiniPlayerAlwaysOnTop);
+      }
+      userData.preferences.isMiniPlayerAlwaysOnTop = isMiniPlayerAlwaysOnTop;
+      saveUserData(
+        'preferences.isMiniPlayerAlwaysOnTop',
+        isMiniPlayerAlwaysOnTop
+      );
+    }
+  };
+
+  function watchForSystemThemeChanges() {
+    if (isDevelopment)
+      sendMessageToRenderer(
+        `App theme changed to ${nativeTheme.themeSource}`,
+        'APP_THEME_CHANGE'
+      );
+    if (mainWindow.webContents) {
+      mainWindow.webContents.send(
+        'app/systemThemeChange',
+        nativeTheme.shouldUseDarkColors,
+        nativeTheme.themeSource === 'system'
+      );
+    }
+  }
+
+  const toggleMiniPlayer = (isMiniPlayerActive: boolean) => {
+    if (mainWindow) {
+      log(
+        `Toggled the mini-player to be ${
+          isMiniPlayerActive ? 'enabled' : 'disabled'
+        }.`
+      );
+      isMiniPlayer = isMiniPlayerActive;
+      const { windowPositions, windowDiamensions, preferences } = getUserData();
+      if (isMiniPlayerActive) {
+        mainWindow.setMaximumSize(
+          MINI_PLAYER_MAX_SIZE_X,
+          MINI_PLAYER_MAX_SIZE_Y
+        );
+        mainWindow.setMinimumSize(
+          MINI_PLAYER_MIN_SIZE_X,
+          MINI_PLAYER_MIN_SIZE_Y
+        );
+        mainWindow.setAlwaysOnTop(preferences.isMiniPlayerAlwaysOnTop ?? false);
+        if (windowDiamensions.miniPlayer) {
+          const { x, y } = windowDiamensions.miniPlayer;
+          mainWindow.setSize(x, y, true);
+        } else
+          mainWindow.setSize(
+            MINI_PLAYER_MIN_SIZE_X,
+            MINI_PLAYER_MIN_SIZE_Y,
+            true
+          );
+        if (windowPositions.miniPlayer) {
+          const { x, y } = windowPositions.miniPlayer;
+          mainWindow.setPosition(x, y, true);
+        } else {
+          mainWindow.center();
+          const [x, y] = mainWindow.getPosition();
+          saveUserData('windowPositions.miniPlayer', { x, y });
+        }
+      } else {
+        mainWindow.setMaximumSize(
+          MAIN_WINDOW_MAX_SIZE_X,
+          MAIN_WINDOW_MAX_SIZE_Y
+        );
+        mainWindow.setMinimumSize(
+          MAIN_WINDOW_MIN_SIZE_X,
+          MAIN_WINDOW_MIN_SIZE_Y
+        );
+        mainWindow.setAlwaysOnTop(false);
+        if (windowDiamensions.mainWindow) {
+          const { x, y } = windowDiamensions.mainWindow;
+          mainWindow.setSize(x, y, true);
+        } else
+          mainWindow.setSize(
+            MAIN_WINDOW_DEFAULT_SIZE_X,
+            MAIN_WINDOW_DEFAULT_SIZE_Y,
+            true
+          );
+        if (windowPositions.mainWindow) {
+          const { x, y } = windowPositions.mainWindow;
+          mainWindow.setPosition(x, y, true);
+        } else {
+          mainWindow.center();
+          const [x, y] = mainWindow.getPosition();
+          saveUserData('windowPositions.mainWindow', { x, y });
+        }
       }
     }
   };
@@ -329,314 +379,364 @@ app.whenReady().then(() => {
   };
 
   // ? / / / / / / / / /  IPC RENDERER EVENTS  / / / / / / / / / / / /
+  if (mainWindow) {
+    ipcMain.on('app/close', () => app.quit());
 
-  ipcMain.on('app/close', () => app.quit());
+    ipcMain.on('app/minimize', () => mainWindow.minimize());
 
-  ipcMain.on('app/minimize', () => mainWindow.minimize());
+    ipcMain.on('app/toggleMaximize', () =>
+      mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize()
+    );
 
-  ipcMain.on('app/toggleMaximize', () =>
-    mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize()
-  );
-
-  ipcMain.on(
-    'app/player/songPlaybackStateChange',
-    (_: unknown, isPlaying: boolean) => {
-      console.log(`Player playback status : ${isPlaying}`);
-      manageTaskbarPlaybackControls(true, isPlaying);
-    }
-  );
-  mainWindow.on('focus', () => {
-    mainWindow.webContents.send('app/focused');
-    mainWindow.flashFrame(false);
-  });
-  mainWindow.on('blur', () => mainWindow.webContents.send('app/blurred'));
-
-  ipcMain.on('app/getSongPosition', (_event: unknown, position: number) =>
-    saveUserData('currentSong.stoppedPosition', position)
-  );
-
-  ipcMain.on('app/incrementNoOfSongListens', (_: unknown, songId: string) =>
-    incrementNoOfSongListens(songId)
-  );
-
-  ipcMain.handle('app/addMusicFolder', (_, sortType: SongSortTypes) =>
-    addMusicFolder(sortType)
-  );
-
-  ipcMain.handle('app/getSong', (_event: unknown, id: string) =>
-    sendAudioData(id)
-  );
-
-  ipcMain.handle(
-    'app/toggleLikeSong',
-    (_e: unknown, songId: string, likeSong: boolean) =>
-      toggleLikeSong(songId, likeSong)
-  );
-
-  ipcMain.handle(
-    'app/getAllSongs',
-    (
-      _,
-      sortType?: SongSortTypes,
-      pageNo?: number,
-      maxResultsPerPage?: number
-    ) => getAllSongs(sortType, pageNo, maxResultsPerPage)
-  );
-
-  ipcMain.handle(
-    'app/saveUserData',
-    async (_event: unknown, dataType: UserDataTypes, data: string) =>
-      saveUserData(dataType, data)
-  );
-
-  ipcMain.handle('app/getUserData', () => getUserData());
-
-  ipcMain.handle(
-    'app/search',
-    (_, searchFilters: SearchFilters, value: string) =>
-      search(searchFilters, value)
-  );
-
-  ipcMain.handle(
-    'app/getSongLyrics',
-    async (_e: unknown, songTitle: string, songArtists?: string[]) =>
-      await sendSongLyrics(songTitle, songArtists)
-  );
-
-  ipcMain.handle(
-    'app/fetchSongLyricsFromNet',
-    (_e: unknown, songTitle: string, songArtists?: string[]) =>
-      songLyrics(`${songTitle} ${songArtists ? songArtists.join(', ') : ''}`)
-  );
-
-  ipcMain.handle(
-    'app/getSongInfo',
-    (
-      _e: unknown,
-      songIds: string[],
-      sortType?: SongSortTypes,
-      limit?: number
-    ) => getSongInfo(songIds, sortType, limit)
-  );
-
-  ipcMain.on(
-    'app/savePageSortState',
-    (_, pageType: PageSortTypes, state: unknown) => {
-      saveUserData(pageType, state);
-    }
-  );
-
-  ipcMain.on('app/openDevTools', () => {
-    log('USER REQUESTED FOR DEVTOOLS.');
-    mainWindow.webContents.openDevTools({ mode: 'detach', activate: true });
-  });
-
-  ipcMain.handle(
-    'app/getArtistArtworks',
-    async (_e: unknown, artistId: string) => getArtistInfoFromNet(artistId)
-  );
-
-  ipcMain.handle(
-    'app/fetchSongInfoFromNet',
-    async (_e: unknown, songTitle: string, songArtists: string[]) =>
-      fetchSongInfoFromLastFM(songTitle, songArtists)
-  );
-
-  ipcMain.handle(
-    'app/getArtistData',
-    async (_e: unknown, artistIdsOrNames?: string[]) =>
-      await getArtistData(artistIdsOrNames)
-  );
-
-  ipcMain.handle(
-    'app/getGenresData',
-    async (_e: unknown, genreIds?: string[]) => await getGenresData(genreIds)
-  );
-
-  ipcMain.handle(
-    'app/getAlbumData',
-    async (_e: unknown, albumIds?: string[]) => await getAlbumData(albumIds)
-  );
-
-  ipcMain.handle(
-    'app/getPlaylistData',
-    async (_e: unknown, playlistIds?: string[], onlyMutablePlaylists = false) =>
-      sendPlaylistData(playlistIds, onlyMutablePlaylists)
-  );
-
-  ipcMain.handle(
-    'app/addNewPlaylist',
-    async (_e: unknown, playlistName: string) => addNewPlaylist(playlistName)
-  );
-
-  ipcMain.handle(
-    'app/removeAPlaylist',
-    async (_e: unknown, playlistId: string) => await removeAPlaylist(playlistId)
-  );
-
-  ipcMain.handle(
-    'app/addSongToPlaylist',
-    async (_e: unknown, playlistId: string, songId: string) =>
-      await addSongToPlaylist(playlistId, songId)
-  );
-
-  ipcMain.handle(
-    'app/removeSongFromPlaylist',
-    async (_e: unknown, playlistId: string, songId: string) =>
-      await removeSongFromPlaylist(playlistId, songId)
-  );
-
-  ipcMain.handle('app/clearSongHistory', async () => await clearSongHistory());
-
-  ipcMain.handle(
-    'app/removeSongFromLibrary',
-    async (_e: unknown, absoluteFilePath: string) =>
-      await removeSongFromLibrary(
-        path.dirname(absoluteFilePath),
-        path.basename(absoluteFilePath)
-      )
-  );
-
-  ipcMain.handle(
-    'app/deleteSongFromSystem',
-    async (_e: unknown, absoluteFilePath: string, isPermanentDelete: boolean) =>
-      await deleteSongFromSystem(absoluteFilePath, isPermanentDelete)
-  );
-
-  ipcMain.handle('app/resyncSongsLibrary', async () => checkForNewSongs());
-
-  ipcMain.handle('app/restoreBlacklistedSong', (_, absolutePath: string) =>
-    restoreBlacklistedSong(absolutePath)
-  );
-
-  ipcMain.handle(
-    'app/updateSongId3Tags',
-    (_, songId: string, tags: SongId3Tags) => updateSongId3Tags(songId, tags)
-  );
-
-  ipcMain.handle('app/getImgFileLocation', () => {
-    return new Promise(async (resolve, reject) => {
-      const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
-        title: 'Select an Image',
-        buttonLabel: 'Select Image',
-        filters: [
-          { name: 'Images', extensions: ['jpg', 'jpeg', 'webp', 'png'] },
-        ],
-        properties: ['openFile'],
+    ipcMain.on('app/changeAppTheme', (_: unknown, theme?: AppTheme) => {
+      console.log(`Theme update requested : theme : ${theme}`);
+      if (theme) {
+        nativeTheme.themeSource = theme;
+      } else {
+        nativeTheme.themeSource = !nativeTheme.shouldUseDarkColors
+          ? 'dark'
+          : 'light';
+      }
+      saveUserData('theme', {
+        isDarkMode: nativeTheme.shouldUseDarkColors,
+        useSystemTheme: nativeTheme.themeSource === 'system',
       });
-      if (canceled) return reject('You cancelled the prompt');
-      return resolve(filePaths[0]);
     });
-  });
 
-  ipcMain.handle('app/getSongId3Tags', async (_, songPath: string) => {
-    log(`Requested song ID3 tags for the song on path '${songPath}'`);
-    const tags = await getSongId3Tags(songPath).catch((err) =>
-      log(
-        `====== ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA ======\nERROR : ${err}`
+    ipcMain.on(
+      'app/player/songPlaybackStateChange',
+      (_: unknown, isPlaying: boolean) => {
+        console.log(`Player playback status : ${isPlaying}`);
+        manageTaskbarPlaybackControls(true, isPlaying);
+      }
+    );
+
+    ipcMain.handle(
+      'app/checkForStartUpSongs',
+      async () => await checkForStartUpSongs()
+    );
+
+    mainWindow.on('focus', () => {
+      mainWindow.webContents.send('app/focused');
+      mainWindow.flashFrame(false);
+    });
+    mainWindow.on('blur', () => mainWindow.webContents.send('app/blurred'));
+
+    ipcMain.on('app/getSongPosition', (_event: unknown, position: number) =>
+      saveUserData('currentSong.stoppedPosition', position)
+    );
+
+    ipcMain.on('app/incrementNoOfSongListens', (_: unknown, songId: string) =>
+      incrementNoOfSongListens(songId)
+    );
+
+    ipcMain.handle('app/addMusicFolder', (_, sortType: SongSortTypes) =>
+      addMusicFolder(sortType)
+    );
+
+    ipcMain.handle('app/getSong', (_event: unknown, id: string) =>
+      sendAudioData(id)
+    );
+
+    ipcMain.handle(
+      'app/getSongFromUnknownSource',
+      (_event: unknown, songPath: string) => sendAudioDataFromPath(songPath)
+    );
+
+    ipcMain.handle(
+      'app/toggleLikeSong',
+      (_e: unknown, songId: string, likeSong: boolean) =>
+        toggleLikeSong(songId, likeSong)
+    );
+
+    ipcMain.handle(
+      'app/getAllSongs',
+      (
+        _,
+        sortType?: SongSortTypes,
+        pageNo?: number,
+        maxResultsPerPage?: number
+      ) => getAllSongs(sortType, pageNo, maxResultsPerPage)
+    );
+
+    ipcMain.handle(
+      'app/saveUserData',
+      async (_event: unknown, dataType: UserDataTypes, data: string) =>
+        saveUserData(dataType, data)
+    );
+
+    ipcMain.handle('app/getUserData', () => getUserData());
+
+    ipcMain.handle(
+      'app/search',
+      (
+        _,
+        searchFilters: SearchFilters,
+        value: string,
+        updateSearchHistory?: boolean
+      ) => search(searchFilters, value, updateSearchHistory)
+    );
+
+    ipcMain.handle(
+      'app/getSongLyrics',
+      async (_e: unknown, songTitle: string, songArtists?: string[]) =>
+        await sendSongLyrics(songTitle, songArtists)
+    );
+
+    ipcMain.handle(
+      'app/fetchSongLyricsFromNet',
+      (_e: unknown, songTitle: string, songArtists?: string[]) =>
+        songLyrics(`${songTitle} ${songArtists ? songArtists.join(', ') : ''}`)
+    );
+
+    ipcMain.handle(
+      'app/getSongInfo',
+      (
+        _e: unknown,
+        songIds: string[],
+        sortType?: SongSortTypes,
+        limit?: number
+      ) => getSongInfo(songIds, sortType, limit)
+    );
+
+    ipcMain.on(
+      'app/savePageSortState',
+      (_, pageType: PageSortTypes, state: unknown) => {
+        saveUserData(pageType, state);
+      }
+    );
+
+    ipcMain.on('app/openDevTools', () => {
+      log('USER REQUESTED FOR DEVTOOLS.');
+      mainWindow.webContents.openDevTools({ mode: 'detach', activate: true });
+    });
+
+    ipcMain.handle(
+      'app/getArtistArtworks',
+      async (_e: unknown, artistId: string) => getArtistInfoFromNet(artistId)
+    );
+
+    ipcMain.handle(
+      'app/fetchSongInfoFromNet',
+      async (_e: unknown, songTitle: string, songArtists: string[]) =>
+        fetchSongInfoFromLastFM(songTitle, songArtists)
+    );
+
+    ipcMain.handle(
+      'app/getArtistData',
+      async (_e: unknown, artistIdsOrNames?: string[]) =>
+        await getArtistData(artistIdsOrNames)
+    );
+
+    ipcMain.handle(
+      'app/getGenresData',
+      async (_e: unknown, genreIds?: string[]) => await getGenresData(genreIds)
+    );
+
+    ipcMain.handle(
+      'app/getAlbumData',
+      async (_e: unknown, albumIds?: string[]) => await getAlbumData(albumIds)
+    );
+
+    ipcMain.handle(
+      'app/getPlaylistData',
+      async (
+        _e: unknown,
+        playlistIds?: string[],
+        onlyMutablePlaylists = false
+      ) => sendPlaylistData(playlistIds, onlyMutablePlaylists)
+    );
+
+    ipcMain.handle(
+      'app/addNewPlaylist',
+      async (_e: unknown, playlistName: string) => addNewPlaylist(playlistName)
+    );
+
+    ipcMain.handle(
+      'app/removeAPlaylist',
+      async (_e: unknown, playlistId: string) =>
+        await removeAPlaylist(playlistId)
+    );
+
+    ipcMain.handle(
+      'app/addSongToPlaylist',
+      async (_e: unknown, playlistId: string, songId: string) =>
+        await addSongToPlaylist(playlistId, songId)
+    );
+
+    ipcMain.handle(
+      'app/removeSongFromPlaylist',
+      async (_e: unknown, playlistId: string, songId: string) =>
+        await removeSongFromPlaylist(playlistId, songId)
+    );
+
+    ipcMain.handle(
+      'app/clearSongHistory',
+      async () => await clearSongHistory()
+    );
+
+    ipcMain.handle(
+      'app/removeSongFromLibrary',
+      async (_e: unknown, absoluteFilePath: string) =>
+        await removeSongFromLibrary(
+          path.dirname(absoluteFilePath),
+          path.basename(absoluteFilePath)
+        )
+    );
+
+    ipcMain.handle(
+      'app/deleteSongFromSystem',
+      async (
+        _e: unknown,
+        absoluteFilePath: string,
+        isPermanentDelete: boolean
+      ) => await deleteSongFromSystem(absoluteFilePath, isPermanentDelete)
+    );
+
+    ipcMain.handle('app/resyncSongsLibrary', async () =>
+      checkForNewSongs().then(
+        (res) =>
+          res &&
+          sendMessageToRenderer(
+            'Library resync successfull.',
+            'RESYNC_SUCCESSFUL'
+          )
       )
     );
-    if (tags) return tags;
-    return undefined;
-  });
 
-  ipcMain.on('app/resetApp', async () => await resetApp());
-
-  ipcMain.on('app/openLogFile', () =>
-    shell.openPath(path.join(app.getPath('userData'), 'logs.txt'))
-  );
-
-  ipcMain.on(
-    'revealSongInFileExplorer',
-    async (_e: unknown, songId: string) => {
-      const data = getData();
-      const { songs } = data;
-      for (let x = 0; x < songs.length; x += 1) {
-        if (songs[x].songId === songId)
-          return shell.showItemInFolder(songs[x].path);
-      }
-    }
-  );
-  ipcMain.on('app/openInBrowser', async (_e: unknown, url: string) =>
-    shell.openExternal(url)
-  );
-
-  ipcMain.handle(
-    'app/getRendererLogs',
-    async (
-      _: unknown,
-      logs: string,
-      forceRestart = false,
-      forceMainRestart = false
-    ) => {
-      log(logs);
-      if (forceRestart) return mainWindow.reload();
-      if (forceMainRestart) {
-        app.relaunch();
-        return app.exit();
-      }
-    }
-  );
-
-  ipcMain.handle(
-    'app/removeAMusicFolder',
-    async (_: unknown, absolutePath: string) =>
-      await removeAMusicFolder(absolutePath).catch((err) => {
-        log(
-          `===== ERROR OCCURRED WHEN REMOVING A MUSIC FOLDER ======\n ERROR : ${err}`
-        );
-      })
-  );
-
-  ipcMain.handle(
-    'app/toggleMiniPlayer',
-    async (_e: unknown, isMiniPlayerActive: boolean) =>
-      toggleMiniPlayer(isMiniPlayerActive)
-  );
-
-  ipcMain.handle(
-    'app/toggleMiniPlayerAlwaysOnTop',
-    async (_e: unknown, isMiniPlayerAlwaysOnTop: boolean) =>
-      toggleMiniPlayerAlwaysOnTop(isMiniPlayerAlwaysOnTop)
-  );
-
-  ipcMain.handle(
-    'app/toggleAutoLaunch',
-    async (_e: unknown, autoLaunchState: boolean) =>
-      toggleAutoLaunch(autoLaunchState)
-  );
-
-  ipcMain.on('app/networkStatusChange', (_: unknown, isConnected: boolean) => {
-    log(
-      isConnected
-        ? `APP CONNECTED TO THE INTERNET SUCCESSFULLY`
-        : `APP DISCONNECTED FROM THE INTERNET`
+    ipcMain.handle('app/restoreBlacklistedSong', (_, absolutePath: string) =>
+      restoreBlacklistedSong(absolutePath)
     );
-    isConnectedToInternet = isConnected;
-  });
 
-  ipcMain.on('app/restartRenderer', (_: unknown, reason: string) => {
-    log(`RENDERER REQUESTED A RENDERER REFRESH.\nREASON : ${reason}`);
-    restartRenderer();
-  });
+    ipcMain.handle(
+      'app/updateSongId3Tags',
+      (_, songId: string, tags: SongTags) => updateSongId3Tags(songId, tags)
+    );
 
-  ipcMain.on('app/restartApp', (_: unknown, reason: string) => {
-    log(`RENDERER REQUESTED A FULL APP REFRESH.\nREASON : ${reason}`);
-    mainWindow.webContents.send('app/beforeQuitEvent');
-    app.relaunch({ args: process.argv.slice(1).concat(['--relaunch']) });
-    app.exit(0);
-  });
+    ipcMain.handle('app/getImgFileLocation', () => {
+      return new Promise(async (resolve, reject) => {
+        const { canceled, filePaths } = await dialog.showOpenDialog(
+          mainWindow,
+          {
+            title: 'Select an Image',
+            buttonLabel: 'Select Image',
+            filters: [
+              { name: 'Images', extensions: ['jpg', 'jpeg', 'webp', 'png'] },
+            ],
+            properties: ['openFile'],
+          }
+        );
+        if (canceled)
+          return reject('PROMPT_CLOSED_BEFORE_INPUT' as MessageCodes);
+        return resolve(filePaths[0]);
+      });
+    });
 
-  //  / / / / / / / / / / / GLOBAL SHORTCUTS / / / / / / / / / / / / / /
-  globalShortcut.register('F5', () => {
-    log('USER REQUESTED RENDERER REFRESH.');
-    restartRenderer();
-  });
+    ipcMain.handle('app/getSongId3Tags', async (_, songId: string) =>
+      sendSongID3Tags(songId)
+    );
 
-  globalShortcut.register('F12', () => {
-    log('USER REQUESTED FOR DEVTOOLS.');
-    mainWindow.webContents.openDevTools({ mode: 'detach', activate: true });
-  });
+    ipcMain.on('app/resetApp', async () => await resetApp());
+
+    ipcMain.on('app/openLogFile', () =>
+      shell.openPath(path.join(app.getPath('userData'), 'logs.txt'))
+    );
+
+    ipcMain.on(
+      'revealSongInFileExplorer',
+      async (_e: unknown, songId: string) => {
+        const data = getData();
+        const { songs } = data;
+        for (let x = 0; x < songs.length; x += 1) {
+          if (songs[x].songId === songId)
+            return shell.showItemInFolder(songs[x].path);
+        }
+      }
+    );
+    ipcMain.on('app/openInBrowser', async (_e: unknown, url: string) =>
+      shell.openExternal(url)
+    );
+
+    ipcMain.handle(
+      'app/getRendererLogs',
+      async (
+        _: unknown,
+        logs: string,
+        forceRestart = false,
+        forceMainRestart = false
+      ) => {
+        log(logs);
+        if (forceRestart) return mainWindow.reload();
+        if (forceMainRestart) {
+          app.relaunch();
+          return app.exit();
+        }
+      }
+    );
+
+    ipcMain.handle(
+      'app/removeAMusicFolder',
+      async (_: unknown, absolutePath: string) =>
+        await removeAMusicFolder(absolutePath).catch((err) => {
+          log(
+            `===== ERROR OCCURRED WHEN REMOVING A MUSIC FOLDER ======\n ERROR : ${err}`
+          );
+        })
+    );
+
+    ipcMain.handle(
+      'app/toggleMiniPlayer',
+      async (_e: unknown, isMiniPlayerActive: boolean) =>
+        toggleMiniPlayer(isMiniPlayerActive)
+    );
+
+    ipcMain.handle(
+      'app/toggleMiniPlayerAlwaysOnTop',
+      async (_e: unknown, isMiniPlayerAlwaysOnTop: boolean) =>
+        toggleMiniPlayerAlwaysOnTop(isMiniPlayerAlwaysOnTop)
+    );
+
+    ipcMain.handle(
+      'app/toggleAutoLaunch',
+      async (_e: unknown, autoLaunchState: boolean) =>
+        toggleAutoLaunch(autoLaunchState)
+    );
+
+    ipcMain.on(
+      'app/networkStatusChange',
+      (_: unknown, isConnected: boolean) => {
+        log(
+          isConnected
+            ? `APP CONNECTED TO THE INTERNET SUCCESSFULLY`
+            : `APP DISCONNECTED FROM THE INTERNET`
+        );
+        isConnectedToInternet = isConnected;
+      }
+    );
+
+    ipcMain.on('app/restartRenderer', (_: unknown, reason: string) => {
+      log(`RENDERER REQUESTED A RENDERER REFRESH.\nREASON : ${reason}`);
+      restartRenderer();
+    });
+
+    ipcMain.on('app/restartApp', (_: unknown, reason: string) => {
+      log(`RENDERER REQUESTED A FULL APP REFRESH.\nREASON : ${reason}`);
+      mainWindow.webContents.send('app/beforeQuitEvent');
+      app.relaunch({ args: process.argv.slice(1).concat(['--relaunch']) });
+      app.exit(0);
+    });
+
+    //  / / / / / / / / / / / GLOBAL SHORTCUTS / / / / / / / / / / / / / /
+    globalShortcut.register('F5', () => {
+      log('USER REQUESTED RENDERER REFRESH.');
+      restartRenderer();
+    });
+
+    globalShortcut.register('F12', () => {
+      log('USER REQUESTED FOR DEVTOOLS.');
+      mainWindow.webContents.openDevTools({ mode: 'detach', activate: true });
+    });
+  }
 });
 
 app.on('window-all-closed', () => {
@@ -644,35 +744,57 @@ app.on('window-all-closed', () => {
 });
 
 // / / / / / / / / / / / / / / / / / / / / / / / / / / / /
-const skipBackIcon = nativeImage.createFromPath(
+const skipBackLightIcon = nativeImage.createFromPath(
   getAssetPath(
     'images',
     'taskbar buttons',
     'baseline_skip_previous_white_24dp.png'
   )
 );
-const playIcon = nativeImage.createFromPath(
+const playLightIcon = nativeImage.createFromPath(
   getAssetPath(
     'images',
     'taskbar buttons',
     'baseline_play_arrow_white_24dp.png'
   )
 );
-const pauseIcon = nativeImage.createFromPath(
+const pauseLightIcon = nativeImage.createFromPath(
   getAssetPath('images', 'taskbar buttons', 'outline_pause_white_24dp.png')
 );
-const skipForwardIcon = nativeImage.createFromPath(
+const skipForwardLightIcon = nativeImage.createFromPath(
   getAssetPath('images', 'taskbar buttons', 'baseline_skip_next_white_24dp.png')
+);
+const skipBackDarkIcon = nativeImage.createFromPath(
+  getAssetPath(
+    'images',
+    'taskbar buttons',
+    'baseline_skip_previous_black_24dp.png'
+  )
+);
+const playDarkIcon = nativeImage.createFromPath(
+  getAssetPath(
+    'images',
+    'taskbar buttons',
+    'baseline_play_arrow_black_24dp.png'
+  )
+);
+const pauseDarkIcon = nativeImage.createFromPath(
+  getAssetPath('images', 'taskbar buttons', 'outline_pause_black_24dp.png')
+);
+const skipForwardDarkIcon = nativeImage.createFromPath(
+  getAssetPath('images', 'taskbar buttons', 'baseline_skip_next_black_24dp.png')
 );
 const manageTaskbarPlaybackControls = (
   isPlaybackSupported = true,
   isPlaying: boolean
 ) => {
-  if (mainWindow)
+  if (mainWindow) {
+    const { useSystemTheme } = getUserData().theme;
+    const isDarkMode = !useSystemTheme && nativeTheme.shouldUseDarkColors;
     mainWindow.setThumbarButtons([
       {
         tooltip: 'Skip Back',
-        icon: skipBackIcon,
+        icon: isDarkMode ? skipBackLightIcon : skipBackDarkIcon,
         flags: isPlaybackSupported ? undefined : ['disabled'],
         click() {
           console.log('Skip back button clicked');
@@ -681,7 +803,14 @@ const manageTaskbarPlaybackControls = (
       },
       {
         tooltip: isPlaying ? 'Pause' : 'Play',
-        icon: isPlaying ? pauseIcon : playIcon,
+        // eslint-disable-next-line no-nested-ternary
+        icon: isDarkMode
+          ? isPlaying
+            ? pauseLightIcon
+            : playLightIcon
+          : isPlaying
+          ? pauseDarkIcon
+          : playDarkIcon,
         flags: isPlaybackSupported ? undefined : ['disabled'],
         click: () => {
           console.log('Play button clicked');
@@ -690,7 +819,7 @@ const manageTaskbarPlaybackControls = (
       },
       {
         tooltip: 'Skip forward',
-        icon: skipForwardIcon,
+        icon: isDarkMode ? skipForwardLightIcon : skipForwardDarkIcon,
         flags: isPlaybackSupported ? undefined : ['disabled'],
         click() {
           console.log('Skip forward button clicked');
@@ -698,6 +827,50 @@ const manageTaskbarPlaybackControls = (
         },
       },
     ]);
+  }
+};
+
+const checkForStartUpSongs = async () => {
+  log('Started the startup song checking process.');
+  songsOnStartUp = [];
+  if (!isDevelopment) {
+    for (let i = 0; i < process.argv.length; i += 1) {
+      const argPath = process.argv[i];
+      if (
+        typeof argPath === 'string' &&
+        appPreferences.supportedMusicExtensions.some((ext) =>
+          path.extname(argPath).includes(ext)
+        )
+      ) {
+        try {
+          const stats = statSync(argPath);
+          if (stats.isFile()) {
+            process.argv = process.argv.filter((argv) => argv !== argPath);
+            songsOnStartUp.push(argPath);
+          }
+        } catch (error) {
+          log(
+            `ERROR OCCURRED WHEN VALIDATING PROCESS ARGUMENTS FOR STARTUP SONG PLAYBACK REQUESTS.\nERROR : ${error}`
+          );
+        }
+      }
+    }
+    log(
+      `User request ${songsOnStartUp.length} number of songs to be played on startup.\nsongsOnStartUp : [ ${songsOnStartUp} ]`
+    );
+    if (songsOnStartUp.length > 0) {
+      const audioData = await sendAudioDataFromPath(songsOnStartUp[0]).catch(
+        (err) =>
+          log(
+            `====== ERROR OCCURRED WHEN TRYING TO READ SONG DATA FROM PATH. =====\nPATH : ${songsOnStartUp[0]}\nERROR : ${err}`
+          )
+      );
+      if (audioData) {
+        return audioData;
+      }
+    }
+  }
+  return undefined;
 };
 
 const addMusicFolder = (
@@ -719,7 +892,7 @@ const addMusicFolder = (
       });
     if (canceled) {
       log('User cancelled the folder selection popup.');
-      return reject('You cancelled the prompt.');
+      return reject('PROMPT_CLOSED_BEFORE_INPUT' as MessageCodes);
     }
     log(`Added a new song folder to the app - ${musicFolderPath[0]}`);
     const songPaths = await getFiles(musicFolderPath[0]).catch((err) =>
@@ -802,8 +975,7 @@ const sendAudioData = (audioId: string): Promise<AudioData> => {
             if (metadata) {
               const artworkData = metadata.common.picture
                 ? metadata.common.picture[0].data
-                : // : await getDefaultSongCoverImg();
-                  '';
+                : '';
               await addToSongsHistory(song.songId);
               if (song.artists) {
                 for (let x = 0; x < song.artists.length; x += 1) {
@@ -861,6 +1033,108 @@ const sendAudioData = (audioId: string): Promise<AudioData> => {
     }
   });
 };
+
+const DefaultSongCoverPath = getAssetPath(
+  'images',
+  'png',
+  'song_cover_default.png'
+);
+
+const sendAudioDataFromPath = (
+  songPath: string
+): Promise<{ audioData: AudioData; isKnownSource: boolean }> =>
+  new Promise(async (resolve, reject) => {
+    log(`Parsing song data from song path -${songPath}-`);
+    if (
+      appPreferences.supportedMusicExtensions.some((ext) =>
+        path.extname(songPath).includes(ext)
+      )
+    ) {
+      const data = getData();
+      try {
+        const metadata = await musicMetaData
+          .parseFile(songPath)
+          .catch((err) => {
+            log(
+              `====== ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA ======\nERROR : ${err}`
+            );
+          });
+        if (data && Array.isArray(data.songs) && Array.isArray(data.artists)) {
+          const { songs } = data;
+          for (let x = 0; x < songs.length; x += 1) {
+            if (songs[x].path === songPath) {
+              const audioData = await sendAudioData(songs[x].songId).catch(
+                (err) => {
+                  throw err;
+                }
+              );
+              if (audioData) return resolve({ audioData, isKnownSource: true });
+            }
+          }
+          if (metadata) {
+            const artworkData = metadata.common.picture
+              ? metadata.common.picture[0].data
+              : '';
+            if (metadata.common.lyrics)
+              cachedLyrics = {
+                songTitle: metadata.common.title,
+                lyricsResponse: {
+                  source: {
+                    name: 'song_data',
+                    link: 'song_data',
+                    url: 'song_data',
+                  },
+                  lyrics: metadata.common.lyrics.join('\n'),
+                },
+              };
+            const tempArtworkPath = metadata.common.picture
+              ? (await createTempArtwork(metadata.common.picture[0].data).catch(
+                  (err) =>
+                    log(
+                      `Artwork creation failed for song from an unknown source.\nPATH : ${songPath}; ERROR : ${err}`
+                    )
+                )) ?? DefaultSongCoverPath
+              : DefaultSongCoverPath;
+            const data: AudioData = {
+              title: metadata.common.title || 'unknown title',
+              duration: metadata.format.duration ?? 0,
+              artwork: Buffer.from(artworkData).toString('base64') || undefined,
+              artworkPath: tempArtworkPath,
+              path: songPath,
+              songId: generateRandomId(),
+              isAFavorite: false,
+            };
+            sendMessageToRenderer(
+              'You are playing a song outside from your library.',
+              'PLAYBACK_FROM_UNKNOWN_SOURCE',
+              { path: songPath }
+            );
+            return resolve({ audioData: data, isKnownSource: false });
+          } else {
+            log(`No matching song for songId -${songPath}-`);
+            return reject('SONG_NOT_FOUND' as ErrorCodes);
+          }
+        } else {
+          log(
+            `====== ERROR OCCURRED WHEN READING data.json TO GET SONGS DATA. data.json SONGS ARRAY IS EMPTY. ======`
+          );
+          return reject('EMPTY_SONG_ARRAY' as ErrorCodes);
+        }
+      } catch (err) {
+        log(
+          `====== ERROR OCCURRED WHEN TRYING TO SEND SONGS DATA FROM AN UNPARSED SOURCE. ======\nERROR : ${err}`
+        );
+        return reject('SONG_DATA_SEND_FAILED' as ErrorCodes);
+      }
+    } else {
+      log(
+        `USER TRIED TO OPEN A FILE WITH AN UNSUPPORTED EXTENSION '${path.extname(
+          songPath
+        )}'.`
+      );
+      return reject('UNSUPPORTED_FILE_EXTENSION' as ErrorCodes);
+    }
+  });
 
 const getAllSongs = async (
   sortType = 'aToZ' as SongSortTypes,
@@ -954,20 +1228,62 @@ const toggleLikeSong = async (songId: string, likeSong: boolean) => {
   } else return result;
 };
 
-export const sendMessageToRenderer = (message: string, code?: MessageCodes) => {
-  mainWindow.webContents.send('app/sendMessageToRendererEvent', message, code);
+export const sendMessageToRenderer = (
+  message: string,
+  code?: MessageCodes,
+  data?: object
+) => {
+  mainWindow.webContents.send(
+    'app/sendMessageToRendererEvent',
+    message,
+    code,
+    data
+  );
 };
+
+let dataUpdateEventTimeOutId: NodeJS.Timer;
+let dataEventsCache: DataUpdateEvent[] = [];
 export const dataUpdateEvent = (
   dataType: DataUpdateEventTypes,
   id?: string,
   message?: string
 ) => {
+  if (dataUpdateEventTimeOutId) clearTimeout(dataUpdateEventTimeOutId);
   log(
     `Data update event fired with updated '${dataType}'.${
       id || message ? '\n' : ''
     }${id ? `ID : ${id}; ` : ''}${message ? `MESSAGE : ${id}; ` : ''}`
   );
-  mainWindow.webContents.send('app/dataUpdateEvent', dataType, id, message);
+  addEventsToCache(dataType, id, message);
+  dataUpdateEventTimeOutId = setTimeout(() => {
+    console.log(dataEventsCache);
+    mainWindow.webContents.send(
+      'app/dataUpdateEvent',
+      dataEventsCache,
+      id,
+      message
+    );
+    dataEventsCache = [];
+  }, 1000);
+};
+
+const addEventsToCache = (
+  dataType: DataUpdateEventTypes,
+  id?: string,
+  message?: string
+) => {
+  for (let i = 0; i < dataEventsCache.length; i += 1) {
+    if (dataEventsCache[i].dataType === dataType) {
+      if (id || message) {
+        return dataEventsCache[i].eventData.push({ id, message });
+      }
+      return undefined;
+    }
+  }
+  return dataEventsCache.push({
+    dataType,
+    eventData: id || message ? [{ id, message }] : [],
+  } as DataUpdateEvent);
 };
 
 const getArtistInfoFromNet = (
@@ -1040,13 +1356,13 @@ const getArtistInfoFromNet = (
         log(
           `ERROR OCCURRED WHEN SEARCHING FOR ARTISTS IN getArtistInfoFromNet FUNCTION. ARTISTS ARRAY IS EMPTY.`
         );
-        reject('no artists found.');
+        reject('NO_ARTISTS_FOUND' as MessageCodes);
       }
     } else {
       log(
         `ERROR OCCURRED WHEN SEARCHING FOR ARTISTS IN getArtistInfoFromNet FUNCTION. data.json FILE IS DELETED OR POSSIBLY EMPTY.`
       );
-      reject('no data found.');
+      reject('NO_ARTISTS_FOUND' as MessageCodes);
     }
   });
 };
@@ -1079,7 +1395,7 @@ const getArtistInfoFromDeezer = (
       log(
         `====== ERROR OCCURRED WHEN TRYING TO FETCH FROM DEEZER API ABOUT ARTISTS ARTWORKS. APP IS NOT CONNECTED TO THE INTERNET. ======\nERROR : ERR_CONNECTION_FAILED`
       );
-      return reject(new Error('App is not connected to the internet.'));
+      return reject('NO_NETWORK_CONNECTION' as MessageCodes);
     }
   });
 };
@@ -1122,7 +1438,7 @@ const getArtistInfoFromLastFM = (
       log(
         `====== ERROR OCCURRED WHEN TRYING TO FETCH FROM DEEZER API ABOUT ARTIST INFORMATION. APP IS NOT CONNECTED TO THE INTERNET. ======\nERROR : ERR_CONNECTION_FAILED`
       );
-      return reject(new Error('App is not connected to the internet.'));
+      return reject('NO_NETWORK_CONNECTION' as MessageCodes);
     }
   });
 };
@@ -1168,7 +1484,7 @@ const fetchSongInfoFromLastFM = (
       log(
         `====== ERROR OCCURRED WHEN TRYING TO FETCH FROM DEEZER API ABOUT ARTIST INFORMATION. APP IS NOT CONNECTED TO THE INTERNET. ======\nERROR : ERR_CONNECTION_FAILED`
       );
-      return reject(new Error('App is not connected to the internet.'));
+      return reject('NO_NETWORK_CONNECTION' as MessageCodes);
     }
   });
 };
@@ -1293,6 +1609,7 @@ const addToFavorites = (songId: string) => {
             __dirname,
             'public',
             'images',
+            'png',
             'favorites-playlist-icon.png'
           ),
         });
@@ -1398,6 +1715,7 @@ const addToSongsHistory = (songId: string) => {
             __dirname,
             'public',
             'images',
+            'png',
             'history-playlist-icon.png'
           ),
         });
@@ -1417,6 +1735,7 @@ const addToSongsHistory = (songId: string) => {
     }
   });
 };
+
 const addNewPlaylist = (
   name: string,
   songIds?: string[],
@@ -1424,6 +1743,7 @@ const addNewPlaylist = (
 ): Promise<{ success: boolean; message?: string; playlist?: Playlist }> => {
   const PlaylistArtworkPath = getAssetPath(
     'images',
+    'png',
     'playlist_cover_default.png'
   );
   return new Promise((resolve, reject) => {
@@ -1770,6 +2090,80 @@ const getGenresData = async (genreIds = [] as string[]) => {
     }`
   );
   return results;
+};
+
+const sendSongID3Tags = (songId: string): Promise<SongTags> => {
+  log(`Requested song ID3 tags for the song -${songId}-`);
+  return new Promise(async (resolve, reject) => {
+    const data = getData();
+    if (data && Array.isArray(data.songs)) {
+      const { songs, albums, artists, genres } = data;
+      for (let i = 0; i < songs.length; i += 1) {
+        if (songs[i].songId === songId) {
+          const song = songs[i];
+          const songAlbum = albums.find(
+            (val) => val.albumId === song.album?.albumId
+          );
+          const songArtists = song.artists
+            ? artists.filter((artist) =>
+                song.artists?.some((x) => x.artistId === artist.artistId)
+              )
+            : undefined;
+          const songGenres = song.genres
+            ? genres.filter((artist) =>
+                song.genres?.some((x) => x.genreId === artist.genreId)
+              )
+            : undefined;
+          const songTags = await getSongId3Tags(song.path).catch((err) => {
+            log(
+              `====== ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA ======\nERROR : ${err}`
+            );
+            reject(err);
+          });
+          if (songTags) {
+            const res: SongTags = {
+              title: song.title ?? songTags.title ?? 'Unknown Title',
+              artists:
+                songArtists ??
+                songTags.artist?.split(',').map((artist) => ({
+                  name: artist.trim(),
+                  artistId: undefined,
+                })),
+              // eslint-disable-next-line no-nested-ternary
+              album: songAlbum
+                ? {
+                    ...songAlbum,
+                    noOfSongs: songAlbum?.songs.length,
+                    artists: songAlbum?.artists?.map((x) => x.name),
+                  }
+                : // todo = This should be enabled after song data update trails are successful.
+                  // : songTags.album
+                  // ? {
+                  //     title: songTags.album ?? 'Unknown Album',
+                  //     albumId: undefined,
+                  //   }
+                  undefined,
+              genres:
+                songGenres ??
+                songTags.genre
+                  ?.split(',')
+                  .map((genre) => ({ genreId: undefined, name: genre.trim() })),
+              releasedYear: Number(songTags.year) || undefined,
+              composer: songTags.composer,
+              lyrics: songTags.unsynchronisedLyrics?.text,
+              artworkPath: song.artworkPath,
+            };
+            return resolve(res);
+          }
+        }
+      }
+    } else {
+      log(
+        `====== ERROR OCCURRED WHEN TRYING TO READ DATA FROM data.json. FILE IS INACCESSIBLE, CORRUPTED OR EMPTY. ======`
+      );
+      return reject('DATA_FILE_ERROR' as MessageCodes);
+    }
+  });
 };
 
 const toggleAutoLaunch = async (autoLaunchState: boolean) => {

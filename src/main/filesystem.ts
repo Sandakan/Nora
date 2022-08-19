@@ -18,17 +18,16 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-plusplus */
 import fs from 'fs/promises';
-import fsOther from 'fs';
+import fsSync from 'fs';
 import path from 'path';
-import { app } from 'electron';
+import { app, shell } from 'electron';
 import Store from 'electron-store';
-import trash from 'trash';
-import * as musicMetaData from 'music-metadata';
 import sharp from 'sharp';
 import { parseSong } from './parseSong';
 import log from './log';
 import { getAssetPath, dataUpdateEvent, sendMessageToRenderer } from './main';
 import { appPreferences } from '../../package.json';
+import { generateRandomId } from './randomId';
 
 const dataStore = new Store({
   name: 'data',
@@ -53,6 +52,7 @@ let cachedData: Data = dataStore.store as any;
 let cachedPlaylistsData: { playlists: Playlist[] } =
   playlistDataStore.store as any;
 let cachedUserData: UserData = userDataStore.store as any;
+
 const songDataTemplate: Data = {
   songs: [],
   albums: [],
@@ -61,7 +61,7 @@ const songDataTemplate: Data = {
 };
 
 const userDataTemplate: UserData = {
-  theme: { isDarkMode: false },
+  theme: { isDarkMode: false, useSystemTheme: true },
   currentSong: { songId: null, stoppedPosition: 0 },
   volume: { isMuted: false, value: 100 },
   musicFolders: [],
@@ -76,6 +76,7 @@ const userDataTemplate: UserData = {
     autoLaunchApp: false,
     isMiniPlayerAlwaysOnTop: false,
     doNotVerifyWhenOpeningLinks: false,
+    showSongRemainingTime: false,
   },
   windowPositions: {},
   windowDiamensions: {},
@@ -92,6 +93,7 @@ const playlistDataTemplate: PlaylistDataTemplate = {
       artworkPath: path.join(
         RESOURCES_PATH,
         'images',
+        'png',
         'history-playlist-icon.png'
       ),
     },
@@ -103,6 +105,7 @@ const playlistDataTemplate: PlaylistDataTemplate = {
       artworkPath: path.join(
         RESOURCES_PATH,
         'images',
+        'png',
         'favorites-playlist-icon.png'
       ),
     },
@@ -131,8 +134,8 @@ export const getUserData = () => {
 export const setUserData = (dataType: UserDataTypes, data: unknown) => {
   const userData = getUserData();
   if (userData) {
-    if (dataType === 'theme.isDarkMode' && typeof data === 'boolean')
-      userData.theme.isDarkMode = data;
+    if (dataType === 'theme' && typeof data === 'object')
+      userData.theme = data as typeof userData.theme;
     else if (
       dataType === 'currentSong.songId' &&
       (typeof data === 'string' || data === null)
@@ -214,6 +217,11 @@ export const setUserData = (dataType: UserDataTypes, data: unknown) => {
     ) {
       userData.preferences.doNotVerifyWhenOpeningLinks = data;
     } else if (
+      dataType === 'preferences.showSongRemainingTime' &&
+      typeof data === 'boolean'
+    ) {
+      userData.preferences.showSongRemainingTime = data;
+    } else if (
       dataType === 'sortingStates.songsPage' &&
       typeof data === 'string'
     ) {
@@ -288,8 +296,8 @@ export const setData = (newData: Data) => {
 };
 
 export const storeSongArtworks = (
-  artworks: musicMetaData.IPicture[],
-  artworkName: string
+  artworkName: string,
+  artwork?: Buffer | string
 ): Promise<string> => {
   return new Promise(async (resolve, reject) => {
     await fs
@@ -300,7 +308,7 @@ export const storeSongArtworks = (
         } else reject(err);
       })
       .finally(async () => {
-        if (artworks[0]) {
+        if (artwork) {
           const imgPath = path.join(
             app.getPath('userData'),
             'song_covers',
@@ -311,7 +319,7 @@ export const storeSongArtworks = (
             'song_covers',
             `${artworkName}-optimized.webp`
           );
-          await sharp(artworks[0].data)
+          await sharp(artwork)
             .webp()
             .toFile(imgPath)
             .then(() => resolve(imgPath))
@@ -321,7 +329,7 @@ export const storeSongArtworks = (
               );
               return reject(err);
             });
-          await sharp(artworks[0].data)
+          await sharp(artwork)
             .webp({ quality: 50, effort: 0 })
             .resize(50, 50)
             .toFile(optimizedImgPath)
@@ -332,8 +340,27 @@ export const storeSongArtworks = (
               return reject(err);
             });
         }
-        return resolve(getAssetPath('images', 'song_cover_default.png'));
+        return resolve(getAssetPath('images', 'png', 'song_cover_default.png'));
       });
+  });
+};
+
+export const removeSongArtwork = (songArtworkPath: string) => {
+  return new Promise((resolve, reject) => {
+    try {
+      fsSync.unlink(songArtworkPath, (err) => {
+        if (err) throw err;
+      });
+      fsSync.unlink(
+        songArtworkPath?.replace('.webp', '-optimized.webp'),
+        (err) => {
+          if (err) throw err;
+        }
+      );
+      resolve(true);
+    } catch (error) {
+      reject(error);
+    }
   });
 };
 
@@ -342,10 +369,10 @@ function flatten(lists: any[]) {
 }
 
 function getDirectories(srcpath: string) {
-  return fsOther
+  return fsSync
     .readdirSync(srcpath)
     .map((file) => path.join(srcpath, file))
-    .filter((path) => fsOther.statSync(path).isDirectory());
+    .filter((path) => fsSync.statSync(path).isDirectory());
 }
 
 function getDirectoriesRecursive(srcpath: string): string[] {
@@ -361,12 +388,12 @@ export const getFiles = async (dir: string) => {
   log(`${allFolders.length} directories found in the directory ${dir}`);
   const allFiles = allFolders
     .map((folder) => {
-      const x = fsOther.readdirSync(folder).map((y) => path.join(folder, y));
+      const x = fsSync.readdirSync(folder).map((y) => path.join(folder, y));
       return x;
     })
     .flat();
   log(`${allFiles.length} files found in the directory ${dir}`);
-  const foldersWithStatData = [];
+  let foldersWithStatData = [];
   for (const folderPath of allFolders) {
     try {
       const stats = await fs.stat(folderPath);
@@ -383,9 +410,12 @@ export const getFiles = async (dir: string) => {
       console.log(error);
     }
   }
-  foldersWithStatData.filter((path) =>
-    musicFolders.some((folderPath) => folderPath.path !== path.path)
-  );
+  foldersWithStatData = foldersWithStatData.filter((folderPath) => {
+    for (let i = 0; i < musicFolders.length; i++) {
+      if (musicFolders[i].path === folderPath.path) return false;
+    }
+    return true;
+  });
   if (foldersWithStatData.length > 0)
     setUserData('musicFolders', musicFolders.concat(foldersWithStatData));
   const allSongs = allFiles.filter((filePath) => {
@@ -432,14 +462,14 @@ export const checkForNewSongs = (): Promise<boolean> => {
             );
             reject(err);
           });
-        fsOther.watch(folder.path, (eventType, filename) => {
+        fsSync.watch(folder.path, (eventType, filename) => {
           if (filename) {
             if (
               eventType === 'rename' &&
               supportedMusicExtensions.includes(path.extname(filename))
             ) {
               try {
-                const modifiedDate = fsOther.statSync(folder.path).mtime;
+                const modifiedDate = fsSync.statSync(folder.path).mtime;
                 if (
                   modifiedDate &&
                   musicFolders[index].stats.lastModifiedDate !== modifiedDate
@@ -461,7 +491,9 @@ export const checkForNewSongs = (): Promise<boolean> => {
                     log(
                       `====== ERROR OCCURRED WHEN TRYING TO PARSE MODIFICATIONS IN '${filename}' ======\nERROR : ${err}`
                     );
-                    return reject(err);
+                    return reject(
+                      'FOLDER_MODIFICATIONS_CHECK_FAILED' as MessageCodes
+                    );
                   });
               } catch (error) {
                 log(
@@ -474,9 +506,7 @@ export const checkForNewSongs = (): Promise<boolean> => {
             log(
               '===== ERROR OCCURRED WHEN TRYING TO READ NEWLY ADDED SONGS. FILE WATCHER FUNCTION SENT A FILENAME OF undefined. ====='
             );
-            return reject(
-              new Error('error occurred when trying to read newly added songs.')
-            );
+            return reject('READING_MODIFICATIONS_FAILED' as MessageCodes);
           }
         });
 
@@ -536,6 +566,22 @@ const checkFolderForUnknownModifications = async (folderPath: string) => {
         }`
       );
     }
+    // Prioritises deleting songs before adding new songs to prevent data clashes.
+    if (deletedSongPaths.length > 0) {
+      // deleting songs from the library that got deleted before application launch
+      for (let x = 0; x < deletedSongPaths.length; x += 1) {
+        //  added await for testing
+        await removeSongFromLibrary(
+          folderPath,
+          path.basename(deletedSongPaths[x]),
+          false
+        ).catch((err) => {
+          log(
+            `====== ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA ======\nERROR : ${err}`
+          );
+        });
+      }
+    }
     if (newSongPaths.length > 0) {
       // parses new songs that added before application launch
       for (const newSongPath of newSongPaths) {
@@ -547,20 +593,6 @@ const checkFolderForUnknownModifications = async (folderPath: string) => {
         if (newSongData) {
           log(`${path.basename(newSongPath)} song added.`);
         }
-      }
-    }
-    if (deletedSongPaths.length > 0) {
-      // deleting songs from the library that got deleted before application launch
-      for (let x = 0; x < deletedSongPaths.length; x += 1) {
-        removeSongFromLibrary(
-          folderPath,
-          path.basename(deletedSongPaths[x]),
-          false
-        ).catch((err) => {
-          log(
-            `====== ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA ======\nERROR : ${err}`
-          );
-        });
       }
     }
   }
@@ -606,9 +638,9 @@ const checkFolderForModifications = (
             return resolve(true);
           } catch (error: any) {
             if (
-              error.code &&
-              error.code === 'EINVAL' &&
-              error.code === 'EBUSY' &&
+              // error.code &&
+              // error.code === 'EINVAL' &&
+              // error.code === 'EBUSY' &&
               errRetryCount < 10
             ) {
               // THIS ERROR OCCURRED WHEN THE APP STARTS READING DATA WHILE THE SONG IS STILL WRITING TO THE DISK. POSSIBLE SOLUTION IS TO SET A TIMEOUT AND REDO THE PROCESS.
@@ -661,10 +693,7 @@ export const removeSongFromLibrary = (
 ): Promise<{ success: boolean; message?: string }> => {
   return new Promise((resolve, reject) => {
     log(`Started the deletion process of the song '${filename}'`);
-    const songs: SongData[] = dataStore.get('songs') as any;
-    const artists: Artist[] = dataStore.get('artists') as any;
-    const albums: Album[] = dataStore.get('albums') as any;
-    const genres: Genre[] = dataStore.get('genres') as any;
+    const { albums, artists, genres, songs } = getData();
     const playlists = getPlaylistData();
     const userData = getUserData();
     let isArtistRemoved = false;
@@ -1003,7 +1032,8 @@ export const deleteSongFromSystem = (
       });
       if (res && res.success)
         if (!isPermanentDelete)
-          await trash(absoluteFilePath)
+          await shell
+            .trashItem(absoluteFilePath)
             .then(() => {
               log(
                 `'${path.basename(
@@ -1091,11 +1121,37 @@ export const restoreBlacklistedSong = (absolutePath: string) => {
         log(
           `AN UN-BLACKLISTED SONG IS REQUESTED TO RESTORE FROM THE BLACKLIST.\nSONG PATH : ${absolutePath}`
         );
-        return reject(
-          `There's no song with the given path in the song blacklist.`
-        );
+        return reject(`NO_BLACKLISTED_SONG_IN_GIVEN_PATH` as MessageCodes);
       }
-    } else return reject('Userdata empty or song blacklist is empty');
+    } else return reject('EMPTY_BLACKLIST' as MessageCodes);
+  });
+};
+console.log(app.getPath('temp'));
+
+export const createTempArtwork = (artwork: Buffer): Promise<string> => {
+  return new Promise(async (resolve, reject) => {
+    const tempFolder = path.join(app.getPath('userData'), 'temp_artworks');
+    await fs
+      .stat(tempFolder)
+      .catch(async (err) => {
+        if (err.code === 'ENOENT') {
+          await fs.mkdir(tempFolder);
+        } else reject(err);
+      })
+      .finally(() => {
+        const artworkPath = path.resolve(
+          tempFolder,
+          `${generateRandomId()}.webp`
+        );
+        sharp(artwork)
+          .resize(250, 250)
+          .toFile(artworkPath)
+          .then(() => resolve(artworkPath))
+          .catch((err) => {
+            log(`FAILED TO CREATE A TEMPORARY ARTWORK.\nERROR : ${err}`);
+            return reject(`CREATE_TEMP_ARTWORK_FAILED` as MessageCodes);
+          });
+      });
   });
 };
 

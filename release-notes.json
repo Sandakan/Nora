@@ -1,13 +1,82 @@
 {
   "latestVersion": {
-    "version": "0.7.0-alpha",
-    "releaseDate": "2022 June 29",
-    "artwork": "/assets/other/release artworks/whats_new_0.7.0-alpha_artwork.png"
+    "version": "0.8.0-alpha",
+    "releaseDate": "2022 August 19",
+    "artwork": "/assets/other/release artworks/whats-new-v0.8.0-alpha.png"
   },
   "versions": [
     {
+      "version": "0.8.0-alpha",
+      "releaseDate": "2022 August 19",
+      "notes": {
+        "new": [
+          {
+            "note": "Double-clicking on a supported song in the File Explorer would play it on the app. Be sure if you made Oto Music the default audio player for the respective audio file. (Experimental)"
+          },
+          {
+            "note": "Now users can drag and drop a supported audio file to play it on the player. (Experimental)"
+          },
+          {
+            "note": "Now users can edit song id3 tags. (Experimental)"
+          },
+          {
+            "note": "Greatly improved app performance when opening large audio libraries in pages."
+          },
+          {
+            "note": "Theme switching according the system theme."
+          },
+          {
+            "note": "Now users can select whether the song duration or the song remaining duration should be displayed."
+          },
+          {
+            "note": "Updated taskbar thumbnail buttons to support the system theme."
+          },
+          {
+            "note": "App now checks for updates every 15 minutes and inform the user if an update is available."
+          }
+        ],
+        "fixed": [
+          {
+            "note": "Updated the app installer and reduced the file size of the installer by 13%."
+          },
+          {
+            "note": "Fixed a bug where editing song tags could remove the artwork of a song."
+          },
+          {
+            "note": "Fixed a bug where using search features on songs metadata editing page updates the search history."
+          },
+          {
+            "note": "Fixed a bug where adding a previously parsed folder would parse the same folder."
+          }
+        ],
+        "knownIssues": [
+          {
+            "note": "Parsing a big music library could sometimes make the app unresponsive. Currently, the only solution is to wait some time until the parsing process finishes and the app regains responsiveness."
+          },
+          {
+            "note": "App theme will be changed when you change your system's theme even though you didn't select to use system theme in the app."
+          },
+          {
+            "note": "Lyrics on some songs aren't being read by the app. Still you will be able to see lyrics from the internet."
+          },
+          {
+            "note": "If a song is added next to the last song of the queue, the last song won't be played."
+          },
+          {
+            "note": "Trying to play corrupted songs will make the app player unusable. Workaround is to play the next song and restart the renderer using F5 button."
+          },
+          {
+            "note": "Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song."
+          },
+          {
+            "note": "Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song."
+          }
+        ]
+      }
+    },
+    {
       "version": "0.7.0-alpha",
-      "releaseDate": "2022 June 24",
+      "releaseDate": "2022 July 29",
       "notes": {
         "new": [
           {

@@ -81,7 +81,11 @@ const getGenreSearchResults = (
 let recentSearchesTimeoutId: NodeJS.Timer;
 
 // eslint-disable-next-line import/prefer-default-export
-export const search = (filter: SearchFilters, value: string): SearchResult => {
+export const search = (
+  filter: SearchFilters,
+  value: string,
+  updateSearchHistory = true
+): SearchResult => {
   const jsonData: Data = getData();
   const playlistData = getPlaylistData();
 
@@ -101,22 +105,24 @@ export const search = (filter: SearchFilters, value: string): SearchResult => {
     } playlists results and ${genres.length} genres results.`
   );
 
-  if (recentSearchesTimeoutId) clearTimeout(recentSearchesTimeoutId);
-  recentSearchesTimeoutId = setTimeout(() => {
-    const userData = getUserData();
-    if (userData) {
-      const { recentSearches } = userData;
-      if (Array.isArray(userData.recentSearches)) {
-        if (recentSearches.length > 10) recentSearches.pop();
-        if (recentSearches.includes(value))
-          recentSearches.splice(recentSearches.indexOf(value), 1);
-        recentSearches.unshift(value);
-      }
-      setUserData('recentSearches', recentSearches);
-    }
-  }, 2000);
-
   const availableResults: string[] = [];
+  if (updateSearchHistory) {
+    if (recentSearchesTimeoutId) clearTimeout(recentSearchesTimeoutId);
+    recentSearchesTimeoutId = setTimeout(() => {
+      const userData = getUserData();
+      if (userData) {
+        const { recentSearches } = userData;
+        if (Array.isArray(userData.recentSearches)) {
+          if (recentSearches.length > 10) recentSearches.pop();
+          if (recentSearches.includes(value))
+            recentSearches.splice(recentSearches.indexOf(value), 1);
+          recentSearches.unshift(value);
+        }
+        setUserData('recentSearches', recentSearches);
+      }
+    }, 2000);
+  }
+
   if (
     songs.length === 0 &&
     artists.length === 0 &&

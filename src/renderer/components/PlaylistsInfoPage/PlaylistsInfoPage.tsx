@@ -10,14 +10,13 @@
 import React, { useContext } from 'react';
 import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
 import { calculateTime } from 'renderer/utils/calculateTime';
-import DefaultPlaylistCover from '../../../../assets/images/playlist_cover_default.png';
+import DefaultPlaylistCover from '../../../../assets/images/png/playlist_cover_default.png';
 import Button from '../Button';
-// import NoSongsImage from '../../../../assets/images/Beach_Monochromatic.svg';
 import { Song } from '../SongsPage/Song';
 import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';
 
 const PlaylistInfoPage = () => {
-  const { currentlyActivePage, queue } = useContext(AppContext);
+  const { currentlyActivePage, queue, userData } = useContext(AppContext);
   const {
     updateQueueData,
     changePromptMenuData,
@@ -49,23 +48,50 @@ const PlaylistInfoPage = () => {
 
   React.useEffect(() => {
     fetchPlaylistData();
-    const managePlaylistUpdates = (
-      _: unknown,
-      eventType: DataUpdateEventTypes
-    ) => {
-      if (eventType === 'playlists') fetchPlaylistData();
+    const managePlaylistUpdatesInPlaylistsInfoPage = (e: Event) => {
+      if ('detail' in e) {
+        const dataEvents = (e as DataEvent).detail;
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (event.dataType === 'playlists') fetchPlaylistData();
+        }
+      }
     };
-    window.api.dataUpdateEvent(managePlaylistUpdates);
+    document.addEventListener(
+      'app/dataUpdates',
+      managePlaylistUpdatesInPlaylistsInfoPage
+    );
     return () => {
-      window.api.removeDataUpdateEventListener(managePlaylistUpdates);
+      document.removeEventListener(
+        'app/dataUpdates',
+        managePlaylistUpdatesInPlaylistsInfoPage
+      );
     };
   }, [fetchPlaylistData]);
 
   React.useEffect(() => {
     fetchPlaylistSongsData();
-    window.api.dataUpdateEvent((_, eventType) => {
-      if (eventType === 'albums') fetchPlaylistSongsData();
-    });
+    const managePlaylistSongUpdatesInPlaylistInfoPage = (e: Event) => {
+      if ('detail' in e) {
+        const dataEvents = (e as DataEvent).detail;
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (event.dataType === 'albums/newAlbum') fetchPlaylistSongsData();
+          if (event.dataType === 'albums/deletedAlbum')
+            fetchPlaylistSongsData();
+        }
+      }
+    };
+    document.addEventListener(
+      'app/dataUpdates',
+      managePlaylistSongUpdatesInPlaylistInfoPage
+    );
+    return () => {
+      document.removeEventListener(
+        'app/dataUpdates',
+        managePlaylistSongUpdatesInPlaylistInfoPage
+      );
+    };
   }, [fetchPlaylistSongsData]);
 
   const calculateTotalTime = React.useCallback(() => {
@@ -93,6 +119,9 @@ const PlaylistInfoPage = () => {
               <Song
                 key={index}
                 index={index}
+                isIndexingSongs={
+                  userData !== undefined && userData.preferences.songIndexing
+                }
                 title={song.title}
                 artists={song.artists}
                 duration={song.duration}
@@ -128,7 +157,7 @@ const PlaylistInfoPage = () => {
             );
           })
         : [],
-    [playlistSongs, playlistData, updateNotificationPanelData]
+    [playlistSongs, playlistData, updateNotificationPanelData, userData]
   );
 
   return (

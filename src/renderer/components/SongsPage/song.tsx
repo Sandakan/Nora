@@ -26,9 +26,12 @@ interface SongProp {
   duration: number;
   path: string;
   additionalContextMenuItems?: ContextMenuItem[];
-  index?: number;
+  index: number;
+  isIndexingSongs: boolean;
   isAFavorite: boolean;
   className?: string;
+  style?: React.CSSProperties;
+  isDraggable?: boolean;
 }
 
 export const Song = (props: SongProp) => {
@@ -263,7 +266,9 @@ export const Song = (props: SongProp) => {
 
   return (
     <div
-      className={` appear-from-bottom ${
+      style={props.style ? props.style : {}}
+      // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
+      className={`appear-from-bottom ${
         props.songId
       } group h-[3.25rem] w-[98%] aspect-[2/1] overflow-hidden mr-4 mb-2 rounded-lg relative flex border-[0.2rem] border-background-color-2 dark:border-dark-background-color-2 transition-[border-color] ease-in-out shadow-xl hover:border-background-color-3 dark:hover:border-dark-background-color-3  ${
         currentSongData.songId === props.songId
@@ -277,13 +282,11 @@ export const Song = (props: SongProp) => {
       }}
     >
       <div className="song-cover-and-play-btn-container max-w-1/5 w-fit h-full relative flex items-center justify-center">
-        {props.index !== undefined &&
-          userData &&
-          userData.preferences.songIndexing && (
-            <div className="song-index px-3 mx-1 bg-background-color-1 dark:bg-dark-background-color-1 rounded-2xl text-background-color-3 dark:text-dark-background-color-3 h-fit relative">
-              {props.index + 1}
-            </div>
-          )}
+        {props.isIndexingSongs && (
+          <div className="song-index px-3 mx-1 bg-background-color-1 dark:bg-dark-background-color-1 rounded-2xl text-background-color-3 dark:text-dark-background-color-3 h-fit relative">
+            {props.index + 1}
+          </div>
+        )}
         <div className="song-cover-container relative h-[90%] w-full flex flex-row items-center justify-center ml-2 mr-4 rounded-md overflow-hidden">
           <div className="play-btn-container absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
             <span

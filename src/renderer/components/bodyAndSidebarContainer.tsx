@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
-// import { ReactElement, useContext } from 'react';
 import Body from './body';
 import NotificationPanel from './NotificationPanel/NotificationPanel';
 import Sidebar from './Sidebar/Sidebar';

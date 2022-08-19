@@ -9,9 +9,9 @@
 import React, { useContext } from 'react';
 import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
 import { Lyric, NoLyrics, LyricsSource } from './Lyrics';
-import NoLyricsImage from '../../../../assets/images/Sun_Monochromatic.svg';
-import FetchingLyricsImage from '../../../../assets/images/Waiting_Monochromatic.svg';
-import NoInternetImage from '../../../../assets/images/Summer landscape_Monochromatic.svg';
+import NoLyricsImage from '../../../../assets/images/svg/Sun_Monochromatic.svg';
+import FetchingLyricsImage from '../../../../assets/images/svg/Waiting_Monochromatic.svg';
+import NoInternetImage from '../../../../assets/images/svg/Summer landscape_Monochromatic.svg';
 
 export const LyricsPage = () => {
   const { currentSongData } = useContext(AppContext);
@@ -44,7 +44,7 @@ export const LyricsPage = () => {
   if (typeof lyrics === 'object') {
     lyricsComponents = lyrics?.lyrics
       .split('\n')
-      .map((lyric, index) => <Lyric key={index} lyric={lyric} />);
+      .map((lyric, index) => <Lyric key={index} index={index} lyric={lyric} />);
   }
 
   return (

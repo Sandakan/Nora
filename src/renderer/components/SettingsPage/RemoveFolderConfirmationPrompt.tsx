@@ -18,7 +18,7 @@ export default (props: { folderName: string; absolutePath: string }) => {
         your system.
       </div>
       <Button
-        className="remove-folder-confirm-btn danger-btn w-48 h-10 mt-8 rounded-lg outline-none !bg-foreground-color-1 dark:!bg-foreground-color-1 text-font-color-white dark:text-font-color-white border-[transparent] float-right cursor-pointer hover:border-foreground-color-1 dark:hover:border-foreground-color-1 transition-[background] ease-in-out"
+        className="remove-folder-confirm-btn danger-btn w-48 h-10 mt-8 rounded-lg outline-none !bg-foreground-color-1 dark:!bg-foreground-color-1 text-font-color-white dark:text-font-color-white border-[transparent] float-right cursor-pointer hover:border-foreground-color-1 dark:hover:border-foreground-color-1 transition-[background,border] ease-in-out"
         label="REMOVE"
         clickHandler={() => {
           window.api

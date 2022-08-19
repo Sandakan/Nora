@@ -2,7 +2,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppContext';
-import DefaultPlaylistCover from '../../../../assets/images/playlist_cover_default.png';
+import DefaultPlaylistCover from '../../../../assets/images/png/playlist_cover_default.png';
 import Checkbox from '../Checkbox';
 import Button from '../Button';
 
@@ -59,7 +59,10 @@ const SelectablePlaylist = (props: SelectablePlaylistProp) => {
         </div>
       </div>
       <div className="playlist-info-container">
-        <div className="title playlist-title text-xl" title={name}>
+        <div
+          className="title playlist-title text-xl w-full overflow-hidden whitespace-nowrap overflow-ellipsis"
+          title={name}
+        >
           {name}
         </div>
         <div className="playlist-no-of-songs text-sm font-light">{`${

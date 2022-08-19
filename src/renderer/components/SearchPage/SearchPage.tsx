@@ -16,8 +16,8 @@ import { Album } from '../AlbumsPage/Album';
 import { Artist } from '../ArtistPage/Artist';
 import { MostRelevantResult } from './MostRelevantResult';
 import SearchResultsFilter from './SearchResultsFilter';
-import SearchSomethingImage from '../../../../assets/images/Flying kite_Monochromatic.svg';
-import NoResultsImage from '../../../../assets/images/Sad face_Monochromatic.svg';
+import SearchSomethingImage from '../../../../assets/images/svg/Flying kite_Monochromatic.svg';
+import NoResultsImage from '../../../../assets/images/svg/Sad face_Monochromatic.svg';
 import Button from '../Button';
 import { Playlist } from '../PlaylistsPage/Playlist';
 import Genre from '../GenresPage/Genre';
@@ -31,7 +31,7 @@ const filterTypes = 'All Songs Albums Artists Playlists Genres'.split(
 ) as SearchFilters[];
 
 const SearchPage = () => {
-  const { currentSongData, currentlyActivePage, queue } =
+  const { currentSongData, currentlyActivePage, queue, userData } =
     useContext(AppContext);
   const {
     playSong,
@@ -106,9 +106,9 @@ const SearchPage = () => {
   }, [activeFilter, deferredSearchInput, timeOutIdRef]);
 
   const fetchRecentSearchResults = React.useCallback(() => {
-    window.api.getUserData().then((userData) => {
-      if (userData && Array.isArray(userData.recentSearches))
-        return setRecentSearchResults(userData.recentSearches);
+    window.api.getUserData().then((data) => {
+      if (data && Array.isArray(data.recentSearches))
+        return setRecentSearchResults(data.recentSearches);
       return undefined;
     });
   }, []);
@@ -117,25 +117,35 @@ const SearchPage = () => {
 
   React.useEffect(() => {
     fetchSearchResults();
-    const manageSearchResultsUpdates = (
-      _: unknown,
-      eventType: DataUpdateEventTypes
-    ) => {
-      if (
-        eventType === 'songs' ||
-        eventType === 'artists' ||
-        eventType === 'albums' ||
-        eventType === 'playlists/newPlaylist' ||
-        eventType === 'playlists/deletedPlaylist' ||
-        eventType === 'genres/newGenre' ||
-        eventType === 'genres/deletedGenre'
-      )
-        fetchSearchResults();
-      if (eventType === 'userData/recentSearches') fetchRecentSearchResults();
+    const manageSearchResultsUpdatesInSearchPage = (e: Event) => {
+      if ('detail' in e) {
+        const dataEvents = (e as DataEvent).detail;
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (
+            event.dataType === 'songs' ||
+            event.dataType === 'artists' ||
+            event.dataType === 'albums' ||
+            event.dataType === 'playlists/newPlaylist' ||
+            event.dataType === 'playlists/deletedPlaylist' ||
+            event.dataType === 'genres/newGenre' ||
+            event.dataType === 'genres/deletedGenre'
+          )
+            fetchSearchResults();
+          if (event.dataType === 'userData/recentSearches')
+            fetchRecentSearchResults();
+        }
+      }
     };
-    window.api.dataUpdateEvent(manageSearchResultsUpdates);
+    document.addEventListener(
+      'app/dataUpdates',
+      manageSearchResultsUpdatesInSearchPage
+    );
     return () => {
-      window.api.removeDataUpdateEventListener(manageSearchResultsUpdates);
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageSearchResultsUpdatesInSearchPage
+      );
     };
   }, [fetchSearchResults, fetchRecentSearchResults]);
 
@@ -211,7 +221,7 @@ const SearchPage = () => {
           {
             label: 'Info',
             class: 'info',
-            iconName: 'info_outline',
+            iconName: 'info',
             handlerFunction: () =>
               changeCurrentActivePage('SongInfo', {
                 songInfo: { songId: firstResult.songId },
@@ -231,6 +241,10 @@ const SearchPage = () => {
                   <Song
                     key={`${song.songId}-${index}`}
                     index={index}
+                    isIndexingSongs={
+                      userData !== undefined &&
+                      userData.preferences.songIndexing
+                    }
                     title={song.title}
                     artists={song.artists}
                     artworkPath={song.artworkPath}
@@ -244,7 +258,7 @@ const SearchPage = () => {
             })
             .filter((song) => song !== undefined)
         : [],
-    [searchResults.songs]
+    [searchResults.songs, userData]
   );
   if (searchResults.artists.length > 0) {
     const firstResult = searchResults.artists[0];
@@ -309,6 +323,7 @@ const SearchPage = () => {
               if (index < 5)
                 return (
                   <Artist
+                    index={index}
                     key={`${artist.artistId}-${index}`}
                     name={artist.name}
                     artworkPath={artist.artworkPath}
@@ -383,6 +398,7 @@ const SearchPage = () => {
               if (index < 4)
                 return (
                   <Album
+                    index={index}
                     key={`${album.albumId}-${index}`}
                     albumId={album.albumId}
                     artists={album.artists}
@@ -437,6 +453,7 @@ const SearchPage = () => {
               if (index < 4)
                 return (
                   <Playlist
+                    index={index}
                     key={`${playlist.playlistId}-${index}`}
                     name={playlist.name}
                     playlistId={playlist.playlistId}
@@ -491,6 +508,7 @@ const SearchPage = () => {
                 return (
                   <Genre
                     key={`${genre.genreId}-${index}`}
+                    index={index}
                     title={genre.name}
                     genreId={genre.genreId}
                     noOfSongs={genre.songs.length}
@@ -578,9 +596,10 @@ const SearchPage = () => {
                 Most Relevant
               </div>
               <div
-                className={`results-container overflow-x-auto tranlate-y-8 opacity-0 invisible transition-[transform,opacity] ${
-                  MostRelevantResults.length > 0 &&
-                  'opacity-100 flex visible translate-y-0 pb-4 [&>div]:hidden [&>div.active]:flex'
+                className={`results-container overflow-x-auto transition-[transform,opacity] ${
+                  MostRelevantResults.length > 0
+                    ? 'opacity-100 flex visible translate-y-0 pb-4 [&>div]:hidden [&>div.active]:flex'
+                    : 'tranlate-y-8 opacity-0 invisible'
                 }`}
               >
                 {MostRelevantResults}
@@ -891,7 +910,7 @@ const SearchPage = () => {
               <div className="description text-2xl text-[#ccc] dark:text-[#ccc]">
                 Why thinking... Search something...
               </div>
-              <div className="recent-search-results-container flex flex-wrap items-center justify-center px-[15%]">
+              <div className="recent-search-results-container flex flex-wrap items-center justify-center px-[15%] mt-4">
                 {recentSearchResultComponents}
               </div>
             </div>

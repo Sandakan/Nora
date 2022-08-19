@@ -42,7 +42,7 @@ const reducer = (
 };
 
 export default () => {
-  const { currentlyActivePage, queue } = useContext(AppContext);
+  const { currentlyActivePage, queue, userData } = useContext(AppContext);
   const {
     changeCurrentActivePage,
     createQueue,
@@ -84,15 +84,24 @@ export default () => {
 
   React.useEffect(() => {
     fetchAlbumData();
-    const manageAlbumDataUpdates = (
-      _: unknown,
-      dataType: DataUpdateEventTypes
-    ) => {
-      if (dataType === 'albums') fetchAlbumData();
+    const manageDataUpdatesInAlbumsInfoPage = (e: Event) => {
+      if ('detail' in e) {
+        const dataEvents = (e as DataEvent).detail;
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (event.dataType === 'albums') fetchAlbumData();
+        }
+      }
     };
-    window.api.dataUpdateEvent(manageAlbumDataUpdates);
+    document.addEventListener(
+      'app/dataUpdates',
+      manageDataUpdatesInAlbumsInfoPage
+    );
     return () => {
-      window.api.removeDataUpdateEventListener(manageAlbumDataUpdates);
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageDataUpdatesInAlbumsInfoPage
+      );
     };
   }, [fetchAlbumData]);
 
@@ -108,6 +117,9 @@ export default () => {
               <Song
                 key={song.songId}
                 index={index}
+                isIndexingSongs={
+                  userData !== undefined && userData.preferences.songIndexing
+                }
                 title={song.title}
                 artists={song.artists}
                 artworkPath={song.artworkPath}
@@ -119,7 +131,7 @@ export default () => {
             );
           })
         : [],
-    [albumContent.songsData]
+    [albumContent.songsData, userData]
   );
 
   const calculateTotalTime = React.useCallback(() => {

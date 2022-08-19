@@ -39,7 +39,6 @@ export interface AppStateContextType {
 }
 
 export interface AppUpdateContextType {
-  toggleDarkMode: (theme?: 'dark' | 'light') => void;
   updateContextMenuData: (
     isVisible: boolean,
     menuItems?: ContextMenuItem[],
@@ -88,11 +87,13 @@ export interface AppUpdateContextType {
     currentSongIndex?: number,
     queue?: string[],
     isShuffleQueue?: boolean,
-    playCurrentSongIndex?: boolean
+    playCurrentSongIndex?: boolean,
+    clearPreviousQueueData?: boolean
   ) => void;
   changeQueueCurrentSongIndex: (currentSongIndex: number) => void;
   updateMiniPlayerStatus: (isVisible: boolean) => void;
   updatePageSortingOrder: (page: PageSortTypes, state: unknown) => void;
+  toggleShowRemainingSongDuration: (state?: boolean) => void;
 }
 
 export interface SongPositionContextType {

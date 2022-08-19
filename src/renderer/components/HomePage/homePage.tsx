@@ -1,3 +1,4 @@
+/* eslint-disable promise/no-nesting */
 /* eslint-disable no-console */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable no-restricted-syntax */
@@ -16,11 +17,9 @@ import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppContext';
 import { Artist } from '../ArtistPage/Artist';
 import { SongCard } from '../SongsPage/SongCard';
-import DefaultSongCover from '../../../../assets/images/song_cover_default.png';
-import NoSongsImage from '../../../../assets/images/Empty Inbox _Monochromatic.svg';
-import DataFetchingImage from '../../../../assets/images/Umbrella_Monochromatic.svg';
-// import PlaySomeSongsImage from '../../../../assets/images/Relaxing_Monochromatic.svg';
-// import ResetAppConfirmationPrompt from './ResetAppConfirmationPrompt';
+import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
+import NoSongsImage from '../../../../assets/images/svg/Empty Inbox _Monochromatic.svg';
+import DataFetchingImage from '../../../../assets/images/svg/Umbrella_Monochromatic.svg';
 import ErrorPrompt from '../ErrorPrompt';
 import MainContainer from '../MainContainer';
 import Button from '../Button';
@@ -91,7 +90,7 @@ export const HomePage = () => {
   });
 
   const fetchLatestSongs = React.useCallback(() => {
-    window.api.getAllSongs('dateAddedAscending', 1, 3).then((audioData) => {
+    window.api.getAllSongs('dateAddedAscending', 1, 5).then((audioData) => {
       if (!audioData || audioData.data.length === 0)
         return dispatch({ type: 'SONGS_DATA', data: [null] });
       else {
@@ -108,7 +107,11 @@ export const HomePage = () => {
     const recentSongs = await window.api
       .getPlaylistData(['History'])
       .catch((err) => console.error(err));
-    if (recentSongs)
+    if (
+      Array.isArray(recentSongs) &&
+      Array.isArray(recentSongs[0].songs) &&
+      recentSongs[0].songs.length > 0
+    )
       window.api
         .getSongInfo(recentSongs[0].songs.reverse(), undefined, 5)
         .then((res) => {
@@ -147,6 +150,7 @@ export const HomePage = () => {
     }
   }, [content.recentlyPlayedSongs]);
 
+  // ? Most loved songs are fetched after the user have made at least one favorite song from the library.
   const fetchMostLovedSongs = React.useCallback(() => {
     window.api
       .getPlaylistData(['Favorites'])
@@ -193,22 +197,34 @@ export const HomePage = () => {
     fetchLatestSongs();
     fetchRecentlyPlayedSongs();
     fetchMostLovedSongs();
-    const manageDataUpdateEvents = (
-      _: unknown,
-      dataType: DataUpdateEventTypes
-    ) => {
-      if (dataType === 'userData/recentlyPlayedSongs')
-        fetchRecentlyPlayedSongs();
-      if (dataType === 'songs/deletedSong' || dataType === 'songs/newSong') {
-        fetchLatestSongs();
-        fetchLatestSongs();
+    const manageDataUpdatesInHomePage = (e: Event) => {
+      if ('detail' in e) {
+        const dataEvents = (e as DataEvent).detail;
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (event.dataType === 'playlists/history')
+            fetchRecentlyPlayedSongs();
+          if (
+            event.dataType === 'songs/deletedSong' ||
+            event.dataType === 'songs/newSong'
+          ) {
+            fetchLatestSongs();
+          }
+          if (event.dataType === 'artists/artworks') fetchRecentArtistsData();
+          if (
+            event.dataType === 'songs/likes' ||
+            event.dataType === 'songs/noOfListens'
+          )
+            fetchMostLovedSongs();
+        }
       }
-      if (dataType === 'artists/artworks') fetchRecentArtistsData();
-      if (dataType === 'songs/likes') fetchMostLovedSongs();
     };
-    window.api.dataUpdateEvent(manageDataUpdateEvents);
+    document.addEventListener('app/dataUpdates', manageDataUpdatesInHomePage);
     return () => {
-      window.api.removeDataUpdateEventListener(manageDataUpdateEvents);
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageDataUpdatesInHomePage
+      );
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -244,11 +260,12 @@ export const HomePage = () => {
     () =>
       content.latestSongs.length > 0 && content.latestSongs[0] !== null
         ? content.latestSongs
-            .filter((_, index) => index < 3)
+            .filter((_, index) => index < 5)
             .map((song, index) => {
               const songData = song as AudioInfo;
               return (
                 <SongCard
+                  index={index}
                   key={`${songData.songId}-${index}`}
                   title={songData.title}
                   artworkPath={songData.artworkPath || DefaultSongCover}
@@ -272,6 +289,7 @@ export const HomePage = () => {
         .map((song, index) => {
           return (
             <SongCard
+              index={index}
               key={`${song.songId}-${index}`}
               title={song.title}
               artworkPath={song.artworkPath || DefaultSongCover}
@@ -295,6 +313,7 @@ export const HomePage = () => {
               if (val)
                 return (
                   <Artist
+                    index={index}
                     name={val.name}
                     key={`${val.artistId}-${index}`}
                     artworkPath={val.artworkPath}
@@ -318,6 +337,7 @@ export const HomePage = () => {
         .map((song, index) => {
           return (
             <SongCard
+              index={index}
               key={`${song.songId}-${index}`}
               title={song.title}
               artworkPath={song.artworkPath || DefaultSongCover}
@@ -341,6 +361,7 @@ export const HomePage = () => {
               if (val)
                 return (
                   <Artist
+                    index={index}
                     name={val.name}
                     key={`${val.artistId}-${index}`}
                     artworkPath={val.artworkPath}
@@ -396,6 +417,8 @@ export const HomePage = () => {
                     {
                       label: 'Button',
                       iconName: 'sync',
+                      className:
+                        '!bg-background-color-3 dark:!bg-dark-background-color-3 !text-font-color-black dark:!text-font-color-black !font-light',
                       clickHandler: () => true,
                     },
                   ]
@@ -416,13 +439,16 @@ export const HomePage = () => {
           updateContextMenuData(true, homePageContextMenus, e.pageX, e.pageY);
       }}
     >
+      {/* <div className="title-container text-4xl font-medium text-font-color-black dark:text-font-color-white pl-8 my-4">
+        Welcome, Sandakan.
+      </div> */}
       {content.latestSongs.length > 0 && content.latestSongs[0] !== null && (
         <MainContainer className="recently-added-songs-container appear-from-bottom h-fit">
           <>
             <div className="title-container mt-1 mb-4 text-font-color-black text-2xl dark:text-font-color-white">
               Recently Added Songs
             </div>
-            <div className="songs-container w-full flex justify-between pr-2 pb-4">
+            <div className="songs-container w-full grid grid-rows-1 grid-cols-3 gap-8 pr-2 pb-4">
               {latestSongComponents}
             </div>
           </>
@@ -434,7 +460,7 @@ export const HomePage = () => {
             <div className="title-container mt-1 mb-4 text-font-color-black text-2xl dark:text-font-color-white">
               Recently Played Songs
             </div>
-            <div className="songs-container flex justify-between pr-2">
+            <div className="songs-container grid grid-rows-1 grid-cols-3 gap-8 pr-2">
               {recentlyPlayedSongs}
             </div>
           </>
@@ -458,7 +484,7 @@ export const HomePage = () => {
             <div className="title-container mt-1 mb-4 text-font-color-black text-2xl dark:text-font-color-white">
               Most Loved Songs
             </div>
-            <div className="songs-container flex justify-between pr-2">
+            <div className="songs-container grid grid-rows-1 grid-cols-3 gap-8 pr-2">
               {mostLovedSongComponents}
             </div>
           </>
@@ -497,12 +523,14 @@ export const HomePage = () => {
           <span>Just hold on. We are readying everything for you...</span>
         </div>
       )}
-      {recentlyPlayedSongs.length === 0 && (
-        <div className="no-songs-container mt-12 w-full text-[#ccc] text-center flex flex-col items-center justify-center text-lg font-normal">
-          {/* <img src={PlaySomeSongsImage} className="w-60 mb-8" alt="Stay calm" /> */}
-          <span>Listen to some songs to show additional metrics.</span>
-        </div>
-      )}
+      {content.latestSongs.length > 0 &&
+        content.latestSongs[0] !== null &&
+        recentlyPlayedSongs.length === 0 && (
+          <div className="no-songs-container mt-12 w-full text-[#ccc] text-center flex flex-col items-center justify-center text-lg font-normal">
+            {/* <img src={PlaySomeSongsImage} className="w-60 mb-8" alt="Stay calm" /> */}
+            <span>Listen to some songs to show additional metrics.</span>
+          </div>
+        )}
     </div>
   );
 };
