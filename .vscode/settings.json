@@ -36,5 +36,6 @@
     "package-lock.json": true,
     "*.{css,sass,scss}.d.ts": true
   },
-  "cSpell.ignoreWords": ["asar", "edata", "prettierrc"]
+  "cSpell.ignoreWords": ["asar", "edata", "prettierrc"],
+  "rpc.enabled": true
 }

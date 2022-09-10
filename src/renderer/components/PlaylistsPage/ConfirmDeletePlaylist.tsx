@@ -10,7 +10,7 @@ interface ConfirmDeletePlaylistProp {
 }
 
 const ConfirmDeletePlaylist = (props: ConfirmDeletePlaylistProp) => {
-  const { updateNotificationPanelData, changePromptMenuData } =
+  const { addNewNotifications, changePromptMenuData } =
     React.useContext(AppUpdateContext);
   const { playlistName, playlistId, noOfSongs } = props;
   return (
@@ -38,10 +38,13 @@ const ConfirmDeletePlaylist = (props: ConfirmDeletePlaylistProp) => {
           window.api.removeAPlaylist(playlistId).then((res) => {
             if (res.success) {
               changePromptMenuData(false);
-              updateNotificationPanelData(
-                5000,
-                <span>{`Playlist '${playlistName}' deleted.`}</span>
-              );
+              addNewNotifications([
+                {
+                  id: `${playlistName}Deleted`,
+                  delay: 5000,
+                  content: <span>{`Playlist '${playlistName}' deleted.`}</span>,
+                },
+              ]);
             }
             return undefined;
           })

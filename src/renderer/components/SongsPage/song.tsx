@@ -43,7 +43,7 @@ export const Song = (props: SongProp) => {
     changeCurrentActivePage,
     updateQueueData,
     changePromptMenuData,
-    updateNotificationPanelData,
+    addNewNotifications,
     toggleIsFavorite,
   } = React.useContext(AppUpdateContext);
 
@@ -56,11 +56,19 @@ export const Song = (props: SongProp) => {
 
   React.useEffect(() => {
     setIsSongPlaying(() => {
-      if (currentSongData)
-        return currentSongData.songId === props.songId && isCurrentSongPlaying;
-      else return false;
+      return currentSongData?.songId === props.songId && isCurrentSongPlaying;
     });
-  }, [currentSongData, isCurrentSongPlaying, props.songId]);
+    setIsAFavorite(() => {
+      if (currentSongData?.songId === props.songId)
+        return currentSongData.isAFavorite;
+      return false;
+    });
+  }, [
+    currentSongData.songId,
+    currentSongData.isAFavorite,
+    isCurrentSongPlaying,
+    props.songId,
+  ]);
 
   // React.useEffect(() => {
   //   const manageDataUpdateEvents = (
@@ -100,11 +108,16 @@ export const Song = (props: SongProp) => {
           props.songId
         );
         updateQueueData(undefined, newQueue);
-        updateNotificationPanelData(
-          5000,
-          <span>&apos;{props.title}&apos; will be played next.</span>,
-          <span className="material-icons-round">shortcut</span>
-        );
+        addNewNotifications([
+          {
+            id: `${props.title}PlayNext`,
+            delay: 5000,
+            content: (
+              <span>&apos;{props.title}&apos; will be played next.</span>
+            ),
+            icon: <span className="material-icons-round">shortcut</span>,
+          },
+        ]);
       },
     },
     {
@@ -112,17 +125,22 @@ export const Song = (props: SongProp) => {
       iconName: 'queue',
       handlerFunction: () => {
         updateQueueData(undefined, [...queue.queue, props.songId], false);
-        updateNotificationPanelData(
-          5000,
-          <span>Added 1 song to the queue.</span>,
-          <img
-            src={`otoMusic://localFiles/${props.artworkPath?.replace(
-              '.webp',
-              '-optimized.webp'
-            )}`}
-            alt="Song Artwork"
-          />
-        );
+        addNewNotifications([
+          {
+            id: `${props.title}AddedToQueue`,
+            delay: 5000,
+            content: <span>Added 1 song to the queue.</span>,
+            icon: (
+              <img
+                src={`otoMusic://localFiles/${props.artworkPath?.replace(
+                  '.webp',
+                  '-optimized.webp'
+                )}`}
+                alt="Song Artwork"
+              />
+            ),
+          },
+        ]);
       },
     },
     {
@@ -196,20 +214,27 @@ export const Song = (props: SongProp) => {
       iconName: 'block',
       handlerFunction: () =>
         userData?.preferences.doNotShowRemoveSongFromLibraryConfirm
-          ? window.api
-              .removeSongFromLibrary(props.path)
-              .then(
-                (res) =>
-                  res.success &&
-                  updateNotificationPanelData(
-                    5000,
-                    <span>
-                      &apos;{props.title}&apos; blacklisted and removed from the
-                      library.
-                    </span>,
-                    <span className="material-icons-round">delete_outline</span>
-                  )
-              )
+          ? window.api.removeSongFromLibrary(props.path).then(
+              (res) =>
+                res.success &&
+                addNewNotifications([
+                  {
+                    id: `${props.title}Blacklisted`,
+                    delay: 5000,
+                    content: (
+                      <span>
+                        &apos;{props.title}&apos; blacklisted and removed from
+                        the library.
+                      </span>
+                    ),
+                    icon: (
+                      <span className="material-icons-round">
+                        delete_outline
+                      </span>
+                    ),
+                  },
+                ])
+            )
           : changePromptMenuData(
               true,
               <RemoveSongFromLibraryConfirmPrompt
@@ -322,7 +347,7 @@ export const Song = (props: SongProp) => {
         >
           {props.title}
         </div>
-        <div className="song-artists w-1/3 transition-none text-xs font-normal">
+        <div className="song-artists w-1/3 transition-none text-xs font-normal overflow-hidden whitespace-nowrap text-ellipsis">
           {songArtists}
         </div>
         <div className="song-duration w-[12.5%] text-center mr-1 flex items-center justify-between transition-none pr-4">
@@ -344,10 +369,14 @@ export const Song = (props: SongProp) => {
             onClick={() => {
               window.api
                 .toggleLikeSong(props.songId, !isAFavorite)
-                .then(() => {
-                  if (currentSongData.songId === props.songId)
-                    toggleIsFavorite(!currentSongData.isAFavorite);
-                  return setIsAFavorite((prevData) => !prevData);
+                .then((res) => {
+                  if (res?.success) {
+                    if (currentSongData.songId === props.songId)
+                      toggleIsFavorite(!currentSongData.isAFavorite);
+                    return setIsAFavorite((prevData) => !prevData);
+                  }
+                  setIsAFavorite((prevData) => !prevData);
+                  return console.error(res?.error);
                 })
                 .catch((err) => console.error(err));
             }}

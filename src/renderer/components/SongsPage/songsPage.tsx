@@ -251,20 +251,36 @@ export const SongsPage = () => {
           </div>
           <div className="other-controls-container flex">
             {songs && songs.length > 0 && (
-              <Button
-                label="Play All"
-                className="play-all-btn text-sm"
-                iconName="play_arrow"
-                clickHandler={() =>
-                  createQueue(
-                    content.songsData.map((song) => song.songId),
-                    'songs',
-                    false,
-                    undefined,
-                    true
-                  )
-                }
-              />
+              <>
+                <Button
+                  label="Play All"
+                  className="play-all-btn text-sm"
+                  iconName="play_arrow"
+                  clickHandler={() =>
+                    createQueue(
+                      content.songsData.map((song) => song.songId),
+                      'songs',
+                      false,
+                      undefined,
+                      true
+                    )
+                  }
+                />
+                <Button
+                  label="Shuffle and Play"
+                  className="shuffle-and-play-all-btn text-sm"
+                  iconName="shuffle"
+                  clickHandler={() =>
+                    createQueue(
+                      content.songsData.map((song) => song.songId),
+                      'songs',
+                      true,
+                      undefined,
+                      true
+                    )
+                  }
+                />
+              </>
             )}
             <Dropdown
               name="songsPageSortDropdown"
@@ -309,7 +325,7 @@ export const SongsPage = () => {
             </span>
             <Button
               label="Add Folder"
-              className="text-[#ccc] dark:text-[#ccc] rounded-md mt-4 px-8 text-lg"
+              className="mt-4 px-8 text-lg w-40 !bg-background-color-3 dark:!bg-dark-background-color-3 text-font-color-black dark:text-font-color-black rounded-md hover:border-background-color-3 dark:hover:border-background-color-3"
               clickHandler={addNewSongs}
             />
           </div>

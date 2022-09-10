@@ -47,7 +47,7 @@ export default () => {
     changeCurrentActivePage,
     createQueue,
     updateQueueData,
-    updateNotificationPanelData,
+    addNewNotifications,
   } = useContext(AppUpdateContext);
 
   const [albumContent, dispatch] = React.useReducer(reducer, {
@@ -257,14 +257,21 @@ export default () => {
                           false,
                           false
                         );
-                        updateNotificationPanelData(
-                          5000,
-                          <span>
-                            Added {albumContent.songsData.length} song
-                            {albumContent.songsData.length === 1 ? '' : 's'} to
-                            the queue.
-                          </span>
-                        );
+                        addNewNotifications([
+                          {
+                            id: albumContent.albumData.albumId,
+                            delay: 5000,
+                            content: (
+                              <span>
+                                Added {albumContent.songsData.length} song
+                                {albumContent.songsData.length === 1
+                                  ? ''
+                                  : 's'}{' '}
+                                to the queue.
+                              </span>
+                            ),
+                          },
+                        ]);
                       }}
                     />
                   </div>

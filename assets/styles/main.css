@@ -50,10 +50,13 @@
   --background-color-2: hsl(212, 48%, 94%);
   --background-color-3: hsl(213, 80%, 88%);
   --side-bar-background: hsl(212, 50%, 94%);
-  --song-background-color: var(--background-color-1) --text-color: #000;
-  --text-color-variant: #fff;
-  --text-color-black: #000;
+  --background-color-dimmed: hsla(0, 0%, 30%, 0.5);
+  --song-background-color: var(--background-color-1);
+  --text-color: #000;
+  --text-color-dimmed: hsl(0, 0%, 50%);
   --text-color-white: #fff;
+  --text-color-highlight: hsl(203, 39%, 44%);
+  --text-color-highlight-2: hsl(247, 74%, 63%);
   --context-menu-background: hsla(0, 0%, 100%, 0.9);
   --context-menu-list-hover: hsla(198, 18%, 89%, 0.75);
   --foreground-color-1: hsl(348, 83%, 47%);
@@ -152,7 +155,9 @@ body * {
   --song-background-color: var(--background-color-2);
   --side-bar-background: hsla(228, 7%, 20%, 100%);
   --text-color: hsl(0, 0%, 100%);
-  --text-color-variant: hsl(0, 0%, 0%);
+  --text-color-dimmed: hsl(0, 0%, 50%);
+  --text-color-highlight: hsl(213, 80%, 88%);
+  --text-color-highlight-2: hsl(244, 98%, 80%);
   --context-menu-background: hsla(228, 7%, 14%, 90%);
   --context-menu-list-hover: hsl(224, 8%, 28%);
 }
@@ -182,16 +187,6 @@ body * {
 .window-controls-container,
 .special-controls-container {
   -webkit-app-region: no-drag;
-}
-
-/* TODO: FEATURE FOR UPCOMING RELEASE TO SHOW ARTIST IMAGES BESIDES THEIR NAMES. */
-.main-container.song-information-container .container .song-info .info-type-2 .artist-img {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 5rem;
-  object-fit: cover;
-  object-position: center;
-  margin-right: 0.5rem;
 }
 
 /* ? SEEKBAR STYLING */
@@ -233,12 +228,12 @@ input[type="checkbox"]:checked~.checkmark .icon {
 
 /* ? THEME RADIO BUTTONS STYLES */
 .theme-change-radio-btns>.theme-change-radio-btn input[type="radio"]:checked+*::before {
-  background: radial-gradient(var(--background-color-3) 0%, var(--background-color-3) 40%, transparent 50%, transparent);
-  border-color: var(--background-color-3);
+  background: radial-gradient(var(--text-color-highlight) 0%, var(--text-color-highlight) 40%, transparent 50%, transparent);
+  border-color: var(--text-color-highlight);
 }
 
 .theme-change-radio-btns>.theme-change-radio-btn input[type="radio"]:checked+* {
-  color: var(--background-color-3);
+  color: var(--text-color-highlight);
 }
 
 /* ? MINI PLAYER STYLES */
@@ -272,14 +267,36 @@ input[type="checkbox"]:checked~.checkmark .icon {
   -webkit-animation: appearFromBottom var(--transition-duration-0_25s) ease forwards;
 }
 
+.disappear-to-bottom {
+  opacity: 1;
+  transform: translateY(0rem);
+  -webkit-transform: translateY(0rem);
+  -moz-transform: translateY(0rem);
+  -ms-transform: translateY(0rem);
+  -o-transform: translateY(0rem);
+  animation: disappearToBottom var(--transition-duration-0_25s) ease forwards;
+  -webkit-animation: disappearToBottom var(--transition-duration-0_25s) ease forwards;
+}
+
 @keyframes appearFromBottom {
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
-    -webkit-transform: translateY(0) scale(1);
-    -moz-transform: translateY(0) scale(1);
-    -ms-transform: translateY(0) scale(1);
-    -o-transform: translateY(0) scale(1);
+    transform: translateY(0);
+    -webkit-transform: translateY(0);
+    -moz-transform: translateY(0);
+    -ms-transform: translateY(0);
+    -o-transform: translateY(0);
+  }
+}
+
+@keyframes disappearToBottom {
+  to {
+    opacity: 0;
+    transform: translateY(2rem);
+    -webkit-transform: translateY(2rem);
+    -moz-transform: translateY(2rem);
+    -ms-transform: translateY(2rem);
+    -o-transform: translateY(2rem);
   }
 }
 

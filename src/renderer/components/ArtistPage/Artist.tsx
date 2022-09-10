@@ -31,7 +31,7 @@ export const Artist = (props: ArtistProp) => {
     updateContextMenuData,
     createQueue,
     updateQueueData,
-    updateNotificationPanelData,
+    addNewNotifications,
   } = React.useContext(AppUpdateContext);
 
   const showArtistInfoPage = () => {
@@ -66,13 +66,18 @@ export const Artist = (props: ArtistProp) => {
           false,
           false
         );
-        updateNotificationPanelData(
-          5000,
-          <span>
-            Added {props.songIds.length} song
-            {props.songIds.length === 1 ? '' : 's'} to the queue.
-          </span>
-        );
+        addNewNotifications([
+          {
+            id: 'addSongsToQueue',
+            delay: 5000,
+            content: (
+              <span>
+                Added {props.songIds.length} song
+                {props.songIds.length === 1 ? '' : 's'} to the queue.
+              </span>
+            ),
+          },
+        ]);
       },
     },
   ];

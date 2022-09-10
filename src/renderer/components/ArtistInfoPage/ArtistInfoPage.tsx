@@ -24,7 +24,7 @@ export default () => {
   const {
     createQueue,
     updateQueueData,
-    updateNotificationPanelData,
+    addNewNotifications,
     changePromptMenuData,
   } = React.useContext(AppUpdateContext);
   const [artistData, setArtistData] = React.useState({} as ArtistInfo);
@@ -327,9 +327,9 @@ export default () => {
                 clickHandler={() =>
                   createQueue(
                     artistData.songs.map((song) => song.songId),
-                    'songs',
+                    'artist',
                     false,
-                    undefined,
+                    artistData.artistId,
                     true
                   )
                 }
@@ -341,9 +341,9 @@ export default () => {
                 clickHandler={() =>
                   createQueue(
                     artistData.songs.map((song) => song.songId),
-                    'songs',
+                    'artist',
                     true,
-                    undefined,
+                    artistData.artistId,
                     true
                   )
                 }
@@ -359,13 +359,18 @@ export default () => {
                     false,
                     false
                   );
-                  updateNotificationPanelData(
-                    5000,
-                    <span>
-                      Added {songs.length} song
-                      {songs.length === 1 ? '' : 's'} to the queue.
-                    </span>
-                  );
+                  addNewNotifications([
+                    {
+                      id: 'addSongsToQueue',
+                      delay: 5000,
+                      content: (
+                        <span>
+                          Added {songs.length} song
+                          {songs.length === 1 ? '' : 's'} to the queue.
+                        </span>
+                      ),
+                    },
+                  ]);
                 }}
               />
             </div>

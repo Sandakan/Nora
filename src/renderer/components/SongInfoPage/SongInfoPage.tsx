@@ -89,7 +89,7 @@ const SongInfoPage = () => {
               <SongArtist
                 artistId={artist.artistId}
                 name={artist.name}
-                key={artist.artistId}
+                key={artist.artistId + index}
               />
 
               {songInfo.artists && songInfo.artists.length - 1 !== index
@@ -126,7 +126,7 @@ const SongInfoPage = () => {
               </div>
               <div className="song-info max-w-[70%] text-font-color-black dark:text-font-color-white flex flex-col justify-center">
                 <div
-                  className="title info-type-1 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-[2.5rem] font-medium hover:underline"
+                  className="title info-type-1 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-[2.5rem] font-medium"
                   title={songInfo.title}
                 >
                   {songInfo.title}

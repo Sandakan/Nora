@@ -21,6 +21,7 @@ import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';
 import ReleaseNotesPrompt from './ReleaseNotesPrompt';
 import OpenLinkConfirmPrompt from '../OpenLinkConfirmPrompt';
 import AppIcon from '../../../../assets/images/png/logo_light_mode.png';
+import SLFlag from '../../../../assets/images/png/sl-flag.png';
 
 interface SettingsReducer {
   userData: UserData;
@@ -71,10 +72,11 @@ export const SettingsPage = () => {
   const { userData } = useContext(AppContext);
   const {
     changePromptMenuData,
-    updateNotificationPanelData,
+    addNewNotifications,
     toggleReducedMotion,
     toggleSongIndexing,
     toggleShowRemainingSongDuration,
+    updateUserData,
   } = React.useContext(AppUpdateContext);
 
   const [content, dispatch] = React.useReducer(reducer, {
@@ -216,7 +218,7 @@ export const SettingsPage = () => {
             <div className="title-container font-medium  mt-1 mb-4 text-font-color-black text-2xl dark:text-font-color-white">
               Audio Playback
             </div>
-            <ul className="list-disc marker:bg-background-color-3 dark:marker:bg-background-color-3 pl-4">
+            <ul className="list-disc marker:bg-font-color-highlight dark:marker:bg-dark-font-color-highlight pl-4">
               <li className="secondary-container show-remaining-song-duration mb-4">
                 <div className="description">
                   Shows the remaining duration of the song instead of the
@@ -315,7 +317,7 @@ export const SettingsPage = () => {
               Preferences
             </div>
             <ul className="list-disc marker:bg-background-color-3 dark:marker:bg-background-color-3 pl-4">
-              <li className="checkboxes-container">
+              <li className="checkbox-container">
                 <div className="secondary-container toggle-song-indexing mb-4">
                   <div className="description">
                     Enables indexing of songs in pages. This will help you to be
@@ -331,6 +333,31 @@ export const SettingsPage = () => {
                       toggleSongIndexing(state)
                     }
                     labelContent="Enable song indexing"
+                  />
+                </div>
+              </li>
+              <li className="checkbox-container">
+                <div className="secondary-container show-artists-artwork-near-song-controls mb-4">
+                  <div className="description">
+                    Shows artist artworks next to the artist names near the
+                    title of the song on the song controls panel.
+                  </div>
+                  <Checkbox
+                    id="showArtistArtworkNearSongControls"
+                    isChecked={
+                      userData !== undefined &&
+                      userData.preferences.showArtistArtworkNearSongControls
+                    }
+                    checkedStateUpdateFunction={(state) =>
+                      updateUserData((prevData) => ({
+                        ...prevData,
+                        preferences: {
+                          ...prevData.preferences,
+                          showArtistArtworkNearSongControls: state,
+                        },
+                      }))
+                    }
+                    labelContent="Show artists artworks next to their names"
                   />
                 </div>
               </li>
@@ -407,7 +434,7 @@ export const SettingsPage = () => {
               </div>
             </div>
             <span
-              className="release-notes-prompt-btn about-link text-[#6c5ce7] dark:text-[#6c5ce7] cursor-pointer w-fit hover:underline block"
+              className="release-notes-prompt-btn about-link text-font-color-highlight-2 dark:text-dark-font-color-highlight-2 cursor-pointer w-fit hover:underline block"
               onClick={() =>
                 changePromptMenuData(
                   true,
@@ -419,7 +446,7 @@ export const SettingsPage = () => {
               Release notes
             </span>
             <span
-              className="open-source-licenses-btn about-link text-[#6c5ce7] dark:text-[#6c5ce7] cursor-pointer w-fit hover:underline block"
+              className="open-source-licenses-btn about-link text-font-color-highlight-2 dark:text-dark-font-color-highlight-2 cursor-pointer w-fit hover:underline block"
               onClick={() =>
                 changePromptMenuData(
                   true,
@@ -438,7 +465,7 @@ export const SettingsPage = () => {
               Open source licenses
             </span>
             <span
-              className="about-link text-[#6c5ce7] dark:text-[#6c5ce7] cursor-pointer w-fit hover:underline block"
+              className="about-link text-font-color-highlight-2 dark:text-dark-font-color-highlight-2 cursor-pointer w-fit hover:underline block"
               onClick={() =>
                 userData?.preferences.doNotVerifyWhenOpeningLinks
                   ? window.api.openInBrowser(
@@ -457,7 +484,7 @@ export const SettingsPage = () => {
               Github repository
             </span>
             <span
-              className="about-link text-[#6c5ce7] dark:text-[#6c5ce7] cursor-pointer w-fit hover:underline block"
+              className="about-link text-font-color-highlight-2 dark:text-dark-font-color-highlight-2 cursor-pointer w-fit hover:underline block"
               onClick={() => window.api.openLogFile()}
             >
               Open log file
@@ -509,12 +536,17 @@ export const SettingsPage = () => {
                             .clearSongHistory()
                             .then((res) => {
                               if (res.success) {
-                                updateNotificationPanelData(
-                                  5000,
-                                  <span>
-                                    Cleared the song history successfully.
-                                  </span>
-                                );
+                                addNewNotifications([
+                                  {
+                                    id: 'songHistoryCleared',
+                                    delay: 5000,
+                                    content: (
+                                      <span>
+                                        Cleared the song history successfully.
+                                      </span>
+                                    ),
+                                  },
+                                ]);
                               }
                               return changePromptMenuData(false);
                             })
@@ -532,7 +564,7 @@ export const SettingsPage = () => {
                 the app, please let me know through my email.
               </div>
               <span
-                className="about-link text-[#6c5ce7] dark:text-[#6c5ce7] cursor-pointer w-fit hover:underline block"
+                className="about-link text-font-color-highlight-2 dark:text-dark-font-color-highlight-2 cursor-pointer w-fit hover:underline block"
                 onClick={() =>
                   window.api.openInBrowser(
                     'mailto:sandakannipunajith@gmail.com?subject=Regarding Oto Music for Desktop&body=If you found a bug in the app, please try to attach the log file of the app with a detailed explanation of the bug. You can get to it by going to  Settings > About > Open Log File.'
@@ -565,9 +597,9 @@ export const SettingsPage = () => {
                         )
                   }
                 >
-                  Sandakan Nipunajith
+                  Sandakan Nipunajith.
                 </span>
-                . 🇱🇰
+                <img src={SLFlag} alt="" className="w-[24px] inline ml-1" />
               </div>
             </div>
           </div>

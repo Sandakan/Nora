@@ -193,7 +193,8 @@ export const parseSong = (
       if (newGenres.length > 0) dataUpdateEvent('genres/newGenre');
       sendMessageToRenderer(
         `'${songTitle}' song added to the library.`,
-        'PARSE_SUCCESSFUL'
+        'PARSE_SUCCESSFUL',
+        { songId }
       );
       return resolve(songInfo);
     }

@@ -77,6 +77,7 @@ const userDataTemplate: UserData = {
     isMiniPlayerAlwaysOnTop: false,
     doNotVerifyWhenOpeningLinks: false,
     showSongRemainingTime: false,
+    showArtistArtworkNearSongControls: false,
   },
   windowPositions: {},
   windowDiamensions: {},
@@ -216,6 +217,11 @@ export const setUserData = (dataType: UserDataTypes, data: unknown) => {
       typeof data === 'boolean'
     ) {
       userData.preferences.doNotVerifyWhenOpeningLinks = data;
+    } else if (
+      dataType === 'preferences.noUpdateNotificationForNewUpdate' &&
+      typeof data === 'string'
+    ) {
+      userData.preferences.noUpdateNotificationForNewUpdate = data;
     } else if (
       dataType === 'preferences.showSongRemainingTime' &&
       typeof data === 'boolean'
@@ -375,16 +381,26 @@ function getDirectories(srcpath: string) {
     .filter((path) => fsSync.statSync(path).isDirectory());
 }
 
-function getDirectoriesRecursive(srcpath: string): string[] {
-  return [
-    srcpath,
-    ...flatten(getDirectories(srcpath).map(getDirectoriesRecursive)),
-  ];
+function getDirectoriesRecursive(srcpath: string): Promise<string[]> {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const dirs = getDirectories(srcpath);
+      if (dirs)
+        return resolve([
+          srcpath,
+          ...flatten(await Promise.all(dirs.map(getDirectoriesRecursive))),
+        ]);
+    } catch (error) {
+      return reject(error);
+    }
+  });
 }
 
 export const getFiles = async (dir: string) => {
   const { musicFolders } = getUserData();
-  const allFolders = getDirectoriesRecursive(dir);
+  // TODO : Fix bugs that could appear here by correctly applying catch method.
+  const allFolders = await getDirectoriesRecursive(dir);
+  // .catch(err => log());
   log(`${allFolders.length} directories found in the directory ${dir}`);
   const allFiles = allFolders
     .map((folder) => {
@@ -425,12 +441,9 @@ export const getFiles = async (dir: string) => {
   log(`${allSongs.length} songs found in the directory ${dir}`);
   return allSongs;
 };
-
 export const checkForNewSongs = (): Promise<boolean> => {
   return new Promise((resolve, reject) => {
-    const musicFolders: MusicFolderData[] = userDataStore.get(
-      'musicFolders'
-    ) as any;
+    const { musicFolders } = getUserData();
     log(`${musicFolders.length} music folders found in user data.`);
     if (musicFolders) {
       musicFolders.forEach(async (folder, index) => {
@@ -462,55 +475,116 @@ export const checkForNewSongs = (): Promise<boolean> => {
             );
             reject(err);
           });
-        fsSync.watch(folder.path, (eventType, filename) => {
-          if (filename) {
-            if (
-              eventType === 'rename' &&
-              supportedMusicExtensions.includes(path.extname(filename))
-            ) {
-              try {
-                const modifiedDate = fsSync.statSync(folder.path).mtime;
-                if (
-                  modifiedDate &&
-                  musicFolders[index].stats.lastModifiedDate !== modifiedDate
-                ) {
-                  musicFolders[index].stats.lastModifiedDate = modifiedDate;
-                  userDataStore.set('musicFolders', musicFolders);
-                  log(`'${path.basename(folder.path)}' folder data updated.`);
-                } else
-                  log(
-                    `No need to update '${path.basename(
-                      folder.path
-                    )}' folder data`
-                  );
-                checkFolderForModifications(folder.path, filename)
-                  .then(() =>
-                    log(`Modification related to ${filename} finished.`)
-                  )
-                  .catch((err) => {
-                    log(
-                      `====== ERROR OCCURRED WHEN TRYING TO PARSE MODIFICATIONS IN '${filename}' ======\nERROR : ${err}`
+        try {
+          const abortController = new AbortController();
+          const watcher = fsSync.watch(
+            folder.path,
+            { signal: abortController.signal },
+            async (eventType, filename) => {
+              console.log(`folder event - '${eventType}' - ${filename}`);
+              if (filename) {
+                if (eventType === 'rename') {
+                  if (
+                    supportedMusicExtensions.includes(path.extname(filename))
+                  ) {
+                    try {
+                      const modifiedDate = fsSync.statSync(folder.path).mtime;
+                      if (
+                        modifiedDate &&
+                        musicFolders[index].stats.lastModifiedDate !==
+                          modifiedDate
+                      ) {
+                        musicFolders[index].stats.lastModifiedDate =
+                          modifiedDate;
+                        setUserData('musicFolders', musicFolders);
+                        log(
+                          `'${path.basename(folder.path)}' folder data updated.`
+                        );
+                      } else
+                        log(
+                          `No need to update '${path.basename(
+                            folder.path
+                          )}' folder data`
+                        );
+                      checkFolderForModifications(folder.path, filename)
+                        .then(() =>
+                          log(`Modification related to ${filename} finished.`)
+                        )
+                        .catch((err) => {
+                          log(
+                            `====== ERROR OCCURRED WHEN TRYING TO PARSE MODIFICATIONS IN '${filename}' ======\nERROR : ${err}`
+                          );
+                          return reject(
+                            'FOLDER_MODIFICATIONS_CHECK_FAILED' as MessageCodes
+                          );
+                        });
+                    } catch (error) {
+                      log(
+                        `====== ERROR OCCURRED WHEN CHECKING FOR NEW SONGS ======\nERROR : ${error}`
+                      );
+                      reject(error);
+                    }
+                  } else {
+                    // const base = path.basename(folder.path);
+                    const relatedFolders = musicFolders.filter(
+                      (x) =>
+                        x.path.includes(folder.path) && x.path !== folder.path
                     );
-                    return reject(
-                      'FOLDER_MODIFICATIONS_CHECK_FAILED' as MessageCodes
-                    );
-                  });
-              } catch (error) {
+                    if (relatedFolders.length > 0) {
+                      const data = getData();
+                      if (data?.songs.length > 0) {
+                        // const { songs } = data;
+                        for (let i = 0; i < relatedFolders.length; i += 1) {
+                          if (
+                            path.basename(relatedFolders[i].path) === filename
+                          ) {
+                            // Possible folder deletion.
+                            const folderPath = relatedFolders[i].path;
+                            log(
+                              `User deleted a music folder from the filesystem using the system file explorer.\nDIRECTORY : ${folderPath}`
+                            );
+                            sendMessageToRenderer(
+                              `${path.basename(
+                                folderPath
+                              )} got deleted from the system.`,
+                              'MUSIC_FOLDER_DELETED',
+                              { path: folderPath }
+                            );
+                            // const relatedSongs = songs.filter(
+                            //   (song) => path.basename(song.path) === folderPath
+                            // );
+                            // if (relatedSongs.length > 0) {
+                            //   for (let x = 0; x < relatedSongs.length; x++) {
+                            //     await removeSongFromLibrary(
+                            //       path.dirname(relatedSongs[x].path),
+                            //       path.basename(relatedSongs[x].path),
+                            //       false
+                            //     );
+                            //   }
+                            // }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              } else {
                 log(
-                  `====== ERROR OCCURRED WHEN CHECKING FOR NEW SONGS ======\nERROR : ${error}`
+                  '===== ERROR OCCURRED WHEN TRYING TO READ NEWLY ADDED SONGS. FILE WATCHER FUNCTION SENT A FILENAME OF undefined. ====='
                 );
-                reject(error);
+                return reject('READING_MODIFICATIONS_FAILED' as MessageCodes);
               }
             }
-          } else {
+          );
+          watcher.addListener('error', (e) =>
             log(
-              '===== ERROR OCCURRED WHEN TRYING TO READ NEWLY ADDED SONGS. FILE WATCHER FUNCTION SENT A FILENAME OF undefined. ====='
-            );
-            return reject('READING_MODIFICATIONS_FAILED' as MessageCodes);
-          }
-        });
-
-        return resolve(true);
+              `====== ERROR OCCURRED WHEN WATCHING A FOLDER. ======\nERROR : ${e};`
+            )
+          );
+          return resolve(true);
+        } catch (error) {
+          reject(error);
+        }
       });
       return resolve(true);
     } else
@@ -519,6 +593,7 @@ export const checkForNewSongs = (): Promise<boolean> => {
       );
   });
 };
+
 const checkFolderForUnknownModifications = async (folderPath: string) => {
   const songPaths =
     (dataStore.get('songs') as SongData[])?.map((song) => song.path) ?? [];
@@ -598,6 +673,7 @@ const checkFolderForUnknownModifications = async (folderPath: string) => {
   }
 };
 
+let pathsQueue: string[] = [];
 const checkFolderForModifications = (
   folderPath: string,
   filename: string
@@ -630,39 +706,40 @@ const checkFolderForModifications = (
         // new song added
         let errRetryCount = 0;
         let timeOutId: NodeJS.Timeout;
-        const tryParseSong = async (absolutePath: string): Promise<void> => {
-          try {
-            await parseSong(absolutePath);
-            log(`'${filename}' song added to the library.`);
-            dataUpdateEvent('songs/newSong');
-            return resolve(true);
-          } catch (error: any) {
-            if (
-              // error.code &&
-              // error.code === 'EINVAL' &&
-              // error.code === 'EBUSY' &&
-              errRetryCount < 10
-            ) {
-              // THIS ERROR OCCURRED WHEN THE APP STARTS READING DATA WHILE THE SONG IS STILL WRITING TO THE DISK. POSSIBLE SOLUTION IS TO SET A TIMEOUT AND REDO THE PROCESS.
-              if (timeOutId) clearTimeout(timeOutId);
-              log(
-                'ERROR OCCURRED WHEN TRYING TO PARSE DATA. RETRYING IN 5 SECONDS. (ERROR: READ ERROR)'
-              );
-              errRetryCount += 1;
-              setTimeout(async () => await tryParseSong(absolutePath), 5000);
-            } else {
-              log(
-                `====== ERROR OCCURRED WHEN PARSING A NEWLY ADDED SONG WHILE THE APP IS OPEN. FAILED 10 OF 10 RETRY EFFORTS. ======\nERROR : ${error}`
-              );
-              sendMessageToRenderer(
-                `'${filename}' failed when trying to add the song to the library. Go to settings to resync the library.`,
-                'PARSE_FAILED'
-              );
-              return reject(error);
+        const songPath = path.join(folderPath, filename);
+        // Here paths queue is used to prevent parsing the same song multiple times due to the event being fired multiple times for the same song even before they are parsed. So if the same is going to start the parsing process, it will stop the process if the song path is in the songPaths queue.
+        if (!pathsQueue.includes(songPath)) {
+          pathsQueue.push(songPath);
+          const tryParseSong = async (absolutePath: string): Promise<void> => {
+            try {
+              await parseSong(absolutePath);
+              log(`'${filename}' song added to the library.`);
+              dataUpdateEvent('songs/newSong');
+              pathsQueue = pathsQueue.filter((x) => x !== songPath);
+              return resolve(true);
+            } catch (error: any) {
+              if (errRetryCount < 10) {
+                // THIS ERROR OCCURRED WHEN THE APP STARTS READING DATA WHILE THE SONG IS STILL WRITING TO THE DISK. POSSIBLE SOLUTION IS TO SET A TIMEOUT AND REDO THE PROCESS.
+                if (timeOutId) clearTimeout(timeOutId);
+                log(
+                  'ERROR OCCURRED WHEN TRYING TO PARSE DATA. RETRYING IN 5 SECONDS. (ERROR: READ ERROR)'
+                );
+                errRetryCount += 1;
+                setTimeout(async () => await tryParseSong(absolutePath), 5000);
+              } else {
+                log(
+                  `====== ERROR OCCURRED WHEN PARSING A NEWLY ADDED SONG WHILE THE APP IS OPEN. FAILED 10 OF 10 RETRY EFFORTS. ======\nERROR : ${error}`
+                );
+                sendMessageToRenderer(
+                  `'${filename}' failed when trying to add the song to the library. Go to settings to resync the library.`,
+                  'PARSE_FAILED'
+                );
+                return reject(error);
+              }
             }
-          }
-        };
-        return tryParseSong(path.join(folderPath, filename));
+          };
+          return tryParseSong(songPath);
+        }
       } else if (
         songs.some(
           (song) =>
@@ -680,7 +757,9 @@ const checkFolderForModifications = (
           })
           .catch((err) => reject(err));
       } else
-        log(`${filename} got deleted which is not relevant to the library.`);
+        log(
+          `${filename} got deleted from the system which was not in the library.`
+        );
       return resolve(true);
     }
   });
@@ -888,7 +967,7 @@ export const removeSongFromLibrary = (
   });
 };
 
-export const removeAMusicFolder = (
+export const removeMusicFolder = (
   absolutePath: string
 ): Promise<boolean | undefined> => {
   return new Promise(async (resolve) => {
@@ -899,7 +978,7 @@ export const removeAMusicFolder = (
       musicFolders.length > 0 &&
       musicFolders.some((folder) => folder.path === absolutePath)
     ) {
-      const relatedFolders = getDirectoriesRecursive(absolutePath);
+      const relatedFolders = await getDirectoriesRecursive(absolutePath);
       if (relatedFolders.length > 1) {
         log(
           `${
@@ -1126,7 +1205,7 @@ export const restoreBlacklistedSong = (absolutePath: string) => {
     } else return reject('EMPTY_BLACKLIST' as MessageCodes);
   });
 };
-console.log(app.getPath('temp'));
+// console.log(app.getPath('temp'));
 
 export const createTempArtwork = (artwork: Buffer): Promise<string> => {
   return new Promise(async (resolve, reject) => {

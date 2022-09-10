@@ -51,7 +51,7 @@ export const SongCard = (props: SongCardProp) => {
     updateContextMenuData,
     changeCurrentActivePage,
     updateQueueData,
-    updateNotificationPanelData,
+    addNewNotifications,
     changePromptMenuData,
     toggleIsFavorite,
   } = React.useContext(AppUpdateContext);
@@ -126,11 +126,16 @@ export const SongCard = (props: SongCardProp) => {
           props.songId
         );
         updateQueueData(undefined, newQueue);
-        updateNotificationPanelData(
-          5000,
-          <span>&apos;{props.title}&apos; will be played next.</span>,
-          <span className="material-icons-round">shortcut</span>
-        );
+        addNewNotifications([
+          {
+            id: `${props.title}PlayNext`,
+            delay: 5000,
+            content: (
+              <span>&apos;{props.title}&apos; will be played next.</span>
+            ),
+            icon: <span className="material-icons-round">shortcut</span>,
+          },
+        ]);
       },
     },
     {
@@ -204,20 +209,27 @@ export const SongCard = (props: SongCardProp) => {
       iconName: 'block',
       handlerFunction: () =>
         userData?.preferences.doNotShowRemoveSongFromLibraryConfirm
-          ? window.api
-              .removeSongFromLibrary(props.path)
-              .then(
-                (res) =>
-                  res.success &&
-                  updateNotificationPanelData(
-                    5000,
-                    <span>
-                      &apos;{props.title}&apos; blacklisted and removed from the
-                      library.
-                    </span>,
-                    <span className="material-icons-round">delete_outline</span>
-                  )
-              )
+          ? window.api.removeSongFromLibrary(props.path).then(
+              (res) =>
+                res.success &&
+                addNewNotifications([
+                  {
+                    id: `${props.title}Blacklisted`,
+                    delay: 5000,
+                    content: (
+                      <span>
+                        &apos;{props.title}&apos; blacklisted and removed from
+                        the library.
+                      </span>
+                    ),
+                    icon: (
+                      <span className="material-icons-round">
+                        delete_outline
+                      </span>
+                    ),
+                  },
+                ])
+            )
           : changePromptMenuData(
               true,
               <RemoveSongFromLibraryConfirmPrompt

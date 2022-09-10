@@ -78,7 +78,7 @@ interface SelectPlaylist extends Playlist {
 }
 
 const AddSongToPlaylist = (props: AddSongToPlaylistProp) => {
-  const { changePromptMenuData, updateNotificationPanelData } =
+  const { changePromptMenuData, addNewNotifications } =
     React.useContext(AppUpdateContext);
   const { songId, title } = props;
   const [playlists, setPlaylists] = React.useState([] as SelectPlaylist[]);
@@ -118,34 +118,33 @@ const AddSongToPlaylist = (props: AddSongToPlaylistProp) => {
     Promise.all(promises)
       .then((res) => {
         console.log(res);
-        return updateNotificationPanelData(
-          5000,
-          <span>
-            Added '{title}' to{' '}
-            {selectedPlaylists.length > 3
-              ? `${selectedPlaylists
-                  .filter((_, index) => index <= 3)
-                  .map((playlist) => `'${playlist.name}'`)
-                  .join(', ')} and ${
-                  selectedPlaylists.length - 3
-                } other playlists.`
-              : `${selectedPlaylists
-                  .map((playlist) => `'${playlist.name}'`)
-                  .join(', ')} playlists.`}
-          </span>
-        );
+        return addNewNotifications([
+          {
+            id: 'songAddedtoPlaylists',
+            delay: 5000,
+            content: (
+              <span>
+                Added '{title}' to{' '}
+                {selectedPlaylists.length > 3
+                  ? `${selectedPlaylists
+                      .filter((_, index) => index <= 3)
+                      .map((playlist) => `'${playlist.name}'`)
+                      .join(', ')} and ${
+                      selectedPlaylists.length - 3
+                    } other playlists.`
+                  : `${selectedPlaylists
+                      .map((playlist) => `'${playlist.name}'`)
+                      .join(', ')} playlists.`}
+              </span>
+            ),
+          },
+        ]);
       })
       .catch((err) => console.error(err))
       .finally(() => {
         changePromptMenuData(false);
       });
-  }, [
-    playlists,
-    songId,
-    title,
-    changePromptMenuData,
-    updateNotificationPanelData,
-  ]);
+  }, [playlists, songId, title, changePromptMenuData, addNewNotifications]);
 
   const playlistComponents = React.useMemo(
     () =>

@@ -36,6 +36,7 @@ import songLyrics, { TLyrics } from 'songlyrics';
 import httpsGet from 'simple-get';
 import nodeVibrant from 'node-vibrant';
 import AutoLaunch from 'auto-launch';
+// import * as Sentry from '@sentry/electron';
 import os from 'os';
 import { statSync } from 'fs';
 // import m3uReader from 'm3u8-reader';
@@ -51,7 +52,7 @@ import {
   setPlaylistData,
   checkForNewSongs,
   updateSongListeningRate,
-  removeAMusicFolder,
+  removeMusicFolder,
   removeSongFromLibrary,
   deleteSongFromSystem,
   restoreBlacklistedSong,
@@ -85,6 +86,9 @@ let isConnectedToInternet = false;
 let songsOnStartUp: string[] = [];
 
 // / / / / / / INITIALIZATION / / / / / / /
+// Sentry.init({
+//   dsn: 'https://6f80028718cf4d97bb270f5c5e0d9398@o1402111.ingest.sentry.io/6733838',
+// });
 const autoLauncher = new AutoLaunch({ name: 'Oto Music for Desktop' });
 
 const isDevelopment =
@@ -610,7 +614,8 @@ app.whenReady().then(() => {
 
     ipcMain.handle(
       'app/updateSongId3Tags',
-      (_, songId: string, tags: SongTags) => updateSongId3Tags(songId, tags)
+      (_, songId: string, tags: SongTags, sendUpdatedData?: boolean) =>
+        updateSongId3Tags(songId, tags, sendUpdatedData)
     );
 
     ipcMain.handle('app/getImgFileLocation', () => {
@@ -677,7 +682,7 @@ app.whenReady().then(() => {
     ipcMain.handle(
       'app/removeAMusicFolder',
       async (_: unknown, absolutePath: string) =>
-        await removeAMusicFolder(absolutePath).catch((err) => {
+        await removeMusicFolder(absolutePath).catch((err) => {
           log(
             `===== ERROR OCCURRED WHEN REMOVING A MUSIC FOLDER ======\n ERROR : ${err}`
           );
@@ -955,7 +960,7 @@ const sendSongLyrics = async (
   }
 };
 
-const sendAudioData = (audioId: string): Promise<AudioData> => {
+const sendAudioData = (audioId: string): Promise<AudioPlayerData> => {
   return new Promise(async (resolve, reject) => {
     log(`Fetching song data for song id -${audioId}-`);
     try {
@@ -964,6 +969,7 @@ const sendAudioData = (audioId: string): Promise<AudioData> => {
         const { songs, artists } = jsonData;
         for (let x = 0; x < songs.length; x += 1) {
           const song = songs[x];
+          const songArtists = [];
           if (song.songId === audioId) {
             const metadata = await musicMetaData
               .parseFile(song.path)
@@ -980,11 +986,22 @@ const sendAudioData = (audioId: string): Promise<AudioData> => {
               if (song.artists) {
                 for (let x = 0; x < song.artists.length; x += 1) {
                   for (let y = 0; y < artists.length; y += 1) {
-                    if (
-                      artists[y].artistId === song.artists[x].artistId &&
-                      !artists[y].onlineArtworkPaths
-                    )
-                      getArtistInfoFromNet(artists[y].artistId);
+                    if (artists[y].artistId === song.artists[x].artistId) {
+                      if (!artists[y].onlineArtworkPaths)
+                        getArtistInfoFromNet(artists[y].artistId);
+                      const {
+                        artistId,
+                        name,
+                        artworkPath,
+                        onlineArtworkPaths,
+                      } = artists[y];
+                      songArtists.push({
+                        artistId,
+                        name,
+                        artworkPath,
+                        onlineArtworkPaths,
+                      });
+                    }
                   }
                 }
               }
@@ -992,6 +1009,7 @@ const sendAudioData = (audioId: string): Promise<AudioData> => {
                 cachedLyrics = {
                   songTitle: song.title,
                   lyricsResponse: {
+                    title: song.title,
                     source: {
                       name: 'song_data',
                       link: 'song_data',
@@ -1000,9 +1018,9 @@ const sendAudioData = (audioId: string): Promise<AudioData> => {
                     lyrics: metadata.common.lyrics.join('\n'),
                   },
                 };
-              const data: AudioData = {
+              const data: AudioPlayerData = {
                 title: song.title,
-                artists: song.artists,
+                artists: songArtists || song.artists,
                 duration: song.duration,
                 artwork:
                   Buffer.from(artworkData).toString('base64') || undefined,
@@ -1079,6 +1097,7 @@ const sendAudioDataFromPath = (
               cachedLyrics = {
                 songTitle: metadata.common.title,
                 lyricsResponse: {
+                  title: metadata.common.title || '',
                   source: {
                     name: 'song_data',
                     link: 'song_data',
@@ -2136,13 +2155,12 @@ const sendSongID3Tags = (songId: string): Promise<SongTags> => {
                     noOfSongs: songAlbum?.songs.length,
                     artists: songAlbum?.artists?.map((x) => x.name),
                   }
-                : // todo = This should be enabled after song data update trails are successful.
-                  // : songTags.album
-                  // ? {
-                  //     title: songTags.album ?? 'Unknown Album',
-                  //     albumId: undefined,
-                  //   }
-                  undefined,
+                : songTags.album
+                ? {
+                    title: songTags.album ?? 'Unknown Album',
+                    albumId: undefined,
+                  }
+                : undefined,
               genres:
                 songGenres ??
                 songTags.genre
@@ -2155,8 +2173,10 @@ const sendSongID3Tags = (songId: string): Promise<SongTags> => {
             };
             return resolve(res);
           }
+          return undefined;
         }
       }
+      return reject('SONG_NOT_FOUND' as MessageCodes);
     } else {
       log(
         `====== ERROR OCCURRED WHEN TRYING TO READ DATA FROM data.json. FILE IS INACCESSIBLE, CORRUPTED OR EMPTY. ======`

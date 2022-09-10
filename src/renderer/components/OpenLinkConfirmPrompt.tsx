@@ -25,7 +25,7 @@ const OpenLinkConfirmPrompt = (props: OpenLinkConfirmPromptProps) => {
       <div className="description">
         You are trying to open a link that will take you to{' '}
         <span
-          className="font-normal dark:text-[#a29bfe] text-[#6c5ce7] hover:underline cursor-pointer"
+          className="font-normal dark:text-dark-font-color-highlight-2 text-font-color-highlight-2 hover:underline cursor-pointer"
           onClick={() => {
             changePromptMenuData(false);
             window.api.openInBrowser(link);

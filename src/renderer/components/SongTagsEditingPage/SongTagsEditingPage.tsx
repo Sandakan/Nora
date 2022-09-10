@@ -13,8 +13,8 @@ import DefaultSongArtwork from '../../../../assets/images/png/song_cover_default
 import MainContainer from '../MainContainer';
 
 function SongTagsEditingPage() {
-  const { currentlyActivePage } = React.useContext(AppContext);
-  const { updateNotificationPanelData, changePromptMenuData } =
+  const { currentlyActivePage, currentSongData } = React.useContext(AppContext);
+  const { addNewNotifications, changePromptMenuData, updateCurrentSongData } =
     React.useContext(AppUpdateContext);
 
   const [songInfo, setSongInfo] = React.useState({
@@ -177,24 +177,16 @@ function SongTagsEditingPage() {
         const entry = entries[i];
         if (`${entry}` in oldObj) {
           if (typeof newObj[entry] === 'object') {
-            // if (Array.isArray(newObj[entry])) {
-            //   // todo = arrays are not being handled properly
-            //   const dataArr = (newObj[entry] as any[]).map(
-            //     (_, index: number) => {
-            //       return hasDataChanged(
-            //         oldObj[entry][`${index}`],
-            //         newObj[entry][`${index}`]
-            //       );
-            //     }
-            //   );
-            //   console.log(dataArr);
-            // }
-            const data = hasDataChanged(oldObj[entry], newObj[entry]);
-            comp[entry] = Object.values(data).every((x: boolean) => x);
-
-            // if (Array.isArray(newObj[entry])) {
-            // 	comp[entry] = Object.entries(data).map((x) => x[1]);
-            // } else comp[entry] = data;
+            if (Array.isArray(newObj[entry])) {
+              comp[entry] =
+                newObj[entry].length === oldObj[entry].length &&
+                (newObj[entry] as any[]).every(
+                  (value, index) => value === oldObj[entry][index]
+                );
+            } else {
+              const data = hasDataChanged(oldObj[entry], newObj[entry]);
+              comp[entry] = Object.values(data).every((x: boolean) => x);
+            }
           } else if (newObj[entry] === oldObj[entry]) {
             comp[entry] = true;
           } else comp[entry] = false;
@@ -292,8 +284,13 @@ function SongTagsEditingPage() {
                 value={songInfo.releasedYear}
                 onKeyDown={(e) => e.stopPropagation()}
                 onChange={(e) => {
-                  const year = e.currentTarget.value;
-                  setSongInfo((prevData) => ({ ...prevData, year }));
+                  const releasedYear = Number(e.currentTarget.value);
+                  setSongInfo(
+                    (prevData): SongTags => ({
+                      ...prevData,
+                      releasedYear: releasedYear ?? prevData.releasedYear,
+                    })
+                  );
                 }}
               />
             </div>
@@ -401,10 +398,32 @@ function SongTagsEditingPage() {
                         const artists = prevData.artists?.filter(
                           (artist) => artist.name !== artistKeyword
                         );
-                        artists?.push({
-                          name: artistKeyword,
-                          artistId: undefined,
-                        });
+                        if (
+                          artistsResults.some(
+                            (x) =>
+                              artistKeyword.toLowerCase() ===
+                              x.name.toLowerCase()
+                          )
+                        ) {
+                          for (let x = 0; x < artistsResults.length; x += 1) {
+                            const result = artistsResults[x];
+                            if (
+                              artistKeyword.toLowerCase() ===
+                              result.name.toLowerCase()
+                            )
+                              artists?.push({
+                                name: result.name,
+                                artistId: result.artistId,
+                                artworkPath: result.artworkPath,
+                                onlineArtworkPaths: result.onlineArtworkPaths,
+                              });
+                          }
+                        } else {
+                          artists?.push({
+                            name: artistKeyword,
+                            artistId: undefined,
+                          });
+                        }
                         return {
                           ...prevData,
                           artists,
@@ -510,14 +529,43 @@ function SongTagsEditingPage() {
                     className="!w-full mt-4 !bg-background-color-2 dark:!bg-dark-background-color-2 hover:!bg-background-color-3 hover:dark:!bg-dark-background-color-3 hover:text-font-color-black hover:dark:text-font-color-black"
                     clickHandler={() => {
                       setSongInfo((prevData) => {
-                        return {
-                          ...prevData,
-                          album: {
-                            title: albumKeyword,
-                            noOfSongs: 1,
-                            albumId: undefined,
-                          },
-                        };
+                        if (
+                          albumResults.some(
+                            (x) =>
+                              albumKeyword.toLowerCase() ===
+                              x.title.toLowerCase()
+                          )
+                        ) {
+                          for (let x = 0; x < albumResults.length; x += 1) {
+                            const result = albumResults[x];
+                            if (
+                              albumKeyword.toLowerCase() ===
+                              result.title.toLowerCase()
+                            ) {
+                              return {
+                                ...prevData,
+                                album: {
+                                  title: result.title,
+                                  albumId: result.albumId,
+                                  noOfSongs: result.noOfSongs
+                                    ? result.noOfSongs + 1
+                                    : 1,
+                                  artworkPath: result.artworkPath,
+                                },
+                              };
+                            }
+                          }
+                        } else {
+                          return {
+                            ...prevData,
+                            album: {
+                              title: albumKeyword,
+                              noOfSongs: 1,
+                              albumId: undefined,
+                            },
+                          };
+                        }
+                        return prevData;
                       });
                       setAlbumKeyword('');
                     }}
@@ -599,10 +647,31 @@ function SongTagsEditingPage() {
                         const genres = prevData.genres?.filter(
                           (genre) => genre.name !== genreKeyword
                         );
-                        genres?.push({
-                          name: genreKeyword,
-                          genreId: undefined,
-                        });
+                        if (
+                          genreResults.some(
+                            (x) =>
+                              genreKeyword.toLowerCase() ===
+                              x.name.toLowerCase()
+                          )
+                        ) {
+                          for (let x = 0; x < genreResults.length; x += 1) {
+                            const result = genreResults[x];
+                            if (
+                              genreKeyword.toLowerCase() ===
+                              result.name.toLowerCase()
+                            )
+                              genres?.push({
+                                name: result.name,
+                                genreId: result.genreId,
+                              });
+                          }
+                        } else {
+                          genres?.push({
+                            name: genreKeyword,
+                            genreId: undefined,
+                          });
+                        }
+
                         return {
                           ...prevData,
                           genres,
@@ -684,17 +753,32 @@ function SongTagsEditingPage() {
               clickHandler={() => {
                 console.log(songInfo);
                 window.api
-                  .updateSongId3Tags(songId, songInfo)
+                  .updateSongId3Tags(
+                    songId,
+                    songInfo,
+                    songId === currentSongData.songId
+                  )
                   .then((res) => {
-                    console.log(
-                      'successfully updated the song.',
-                      `result : ${res}`
-                    );
-                    return updateNotificationPanelData(
-                      5000,
-                      <span>Successfully updated the song.</span>,
-                      <span className="material-icons-round icon">done</span>
-                    );
+                    console.log('successfully updated the song.', res);
+                    if (res.updatedData && songId === currentSongData.songId) {
+                      const { updatedData } = res;
+                      updateCurrentSongData((prevData) => ({
+                        ...prevData,
+                        ...updatedData,
+                      }));
+                    }
+                    return addNewNotifications([
+                      {
+                        id: `songDataUpdated`,
+                        delay: 5000,
+                        content: <span>Successfully updated the song.</span>,
+                        icon: (
+                          <span className="material-icons-round icon">
+                            done
+                          </span>
+                        ),
+                      },
+                    ]);
                   })
                   .catch((err) => console.error(err));
               }}
@@ -753,10 +837,13 @@ function SongTagsEditingPage() {
                     </div>
                   );
                 } else {
-                  updateNotificationPanelData(
-                    5000,
-                    <span>You didn't change any song data.</span>
-                  );
+                  addNewNotifications([
+                    {
+                      id: 'songDataUnedited',
+                      delay: 5000,
+                      content: <span>You didn't change any song data.</span>,
+                    },
+                  ]);
                 }
               }}
             />

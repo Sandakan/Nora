@@ -75,7 +75,10 @@ export const api = {
   //   ipcRenderer.invoke('app/addSongFromPath', songPath),
 
   /** GET SONG DATA */
-  getSong: (songId: string, updateListeningRate = true): Promise<AudioData> =>
+  getSong: (
+    songId: string,
+    updateListeningRate = true
+  ): Promise<AudioPlayerData> =>
     ipcRenderer.invoke('app/getSong', songId, updateListeningRate),
 
   /** GET SONG DATA FROM UNKNOWN SOURCE */
@@ -152,7 +155,7 @@ export const api = {
       event: unknown,
       message: string,
       messageCode?: MessageCodes,
-      data?: object
+      data?: Record<string, unknown>
     ) => void
   ) => ipcRenderer.on('app/sendMessageToRendererEvent', callback),
 
@@ -282,9 +285,10 @@ export const api = {
   /** Updates the ID3 tags of the song. */
   updateSongId3Tags: (
     songId: string,
-    tags: SongTags
-  ): Promise<boolean | undefined> =>
-    ipcRenderer.invoke('app/updateSongId3Tags', songId, tags),
+    tags: SongTags,
+    sendUpdatedData: boolean
+  ): Promise<UpdateSongDataResult> =>
+    ipcRenderer.invoke('app/updateSongId3Tags', songId, tags, sendUpdatedData),
 
   /** Fetches the ID3 tags of the song. */
   getSongId3Tags: (songPath: string): Promise<SongTags> =>

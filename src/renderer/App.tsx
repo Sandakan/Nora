@@ -1,13 +1,16 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable import/no-named-as-default */
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { ReactElement } from 'react';
+// import * as Sentry from '@sentry/electron';
+// import { Howl } from 'howler';
 import 'tailwindcss/tailwind.css';
 import '../../assets/styles/main.css';
 import { BodyAndSideBarContainer } from './components/bodyAndSidebarContainer';
-import Header from './components/Header/header';
+import Header from './components/Header/Header';
 import SongControlsContainer from './components/SongsControlsContainer/SongControlsContainer';
 import { PromptMenu } from './components/PromptMenu/PromptMenu';
 import ContextMenu from './components/ContextMenu/ContextMenu';
@@ -23,10 +26,14 @@ import Button, { ButtonProps } from './components/Button';
 import packageFile from '../../package.json';
 import ReleaseNotesPrompt from './components/SettingsPage/ReleaseNotesPrompt';
 
+// Sentry.init({
+//   dsn: 'https://6f80028718cf4d97bb270f5c5e0d9398@o1402111.ingest.sentry.io/6733838',
+// });
+
 interface AppReducer {
   userData: UserData;
   isDarkMode: boolean;
-  currentSongData: AudioData;
+  currentSongData: AudioPlayerData;
   PromptMenuData: PromptMenuData;
   notificationPanelData: NotificationPanelData;
   contextMenuData: ContextMenuData;
@@ -46,7 +53,8 @@ type AppReducerStateActions =
   | 'CURRENT_SONG_DATA_CHANGE'
   | 'CURRENT_SONG_PLAYBACK_STATE'
   | 'PROMPT_MENU_DATA_CHANGE'
-  | 'NOTIFICATION_PANEL_DATA_CHANGE'
+  | 'ADD_NEW_NOTIFICATIONS'
+  | 'UPDATE_NOTIFICATIONS'
   | 'CONTEXT_MENU_DATA_CHANGE'
   | 'CONTEXT_MENU_VISIBILITY_CHANGE'
   | 'CURRENT_ACTIVE_PAGE_CHANGE'
@@ -157,11 +165,29 @@ const reducer = (
         ...state,
         PromptMenuData: (action.data as PromptMenuData) || state.PromptMenuData,
       };
-    case 'NOTIFICATION_PANEL_DATA_CHANGE':
+    case 'ADD_NEW_NOTIFICATIONS':
       return {
         ...state,
-        notificationPanelData:
-          (action.data as NotificationPanelData) || state.notificationPanelData,
+        notificationPanelData: {
+          ...state.notificationPanelData,
+          notifications:
+            (action.data as AppNotification[]) ||
+            state.notificationPanelData.notifications,
+          // [
+          //   ...(action.data as AppNotification[]),
+          //   ...state.notificationPanelData.notifications,
+          // ] || state.notificationPanelData.notifications,
+        } as NotificationPanelData,
+      };
+    case 'UPDATE_NOTIFICATIONS':
+      return {
+        ...state,
+        notificationPanelData: {
+          ...state.notificationPanelData,
+          notifications:
+            (action.data as AppNotification[]) ??
+            state.notificationPanelData.notifications,
+        } as NotificationPanelData,
       };
     case 'CONTEXT_MENU_DATA_CHANGE':
       return {
@@ -299,9 +325,23 @@ const reducer = (
   }
 };
 
-const { isDevelopment } = window.api;
-
 const player = new Audio();
+player.preload = 'auto';
+
+// interface HowlType extends Howl {
+//   changeSrc: () => void;
+// }
+
+// (Howl as HowlType).prototype.changeSrc = function (o) {
+//   const self = this;
+//   self.unload();
+//   self._duration = 0; // init duration
+//   self._sprite = {}; // init sprite
+//   self._src = typeof o.src !== 'string' ? o.src : [o.src];
+//   self._format = typeof o.format !== 'string' ? o.format : [o.format];
+//   self.load(); // => update duration, sprite(var timeout)
+// };
+// const howler = new Howl({ src: [] });
 
 const updateNetworkStatus = () =>
   window.api.networkStatusChange(navigator.onLine);
@@ -326,6 +366,7 @@ const userDataTemplate: UserData = {
     isMiniPlayerAlwaysOnTop: false,
     doNotVerifyWhenOpeningLinks: false,
     showSongRemainingTime: false,
+    showArtistArtworkNearSongControls: false,
   },
   windowPositions: {},
   windowDiamensions: {},
@@ -355,10 +396,7 @@ const reducerData: AppReducer = {
     pageY: 200,
   },
   notificationPanelData: {
-    isVisible: false,
-    icon: <></>,
-    content: <span />,
-    isLoading: false,
+    notifications: [],
   },
   PromptMenuData: {
     isVisible: false,
@@ -500,27 +538,32 @@ export default function App() {
       fetch(packageFile.releaseNotes.json)
         .then((res) => res.json())
         .then((res: Changelog) => {
-          const latestVersionId = Number(
-            res.latestVersion.version.replace(/\D/g, '')
-          );
-          const currentVersionId = Number(
-            packageFile.version.replace(/\D/g, '')
-          );
-          if (latestVersionId > currentVersionId) {
+          const [latestVersion] = res.latestVersion.version.split('-');
+          const [LvId1, LvId2, LvId3] = latestVersion.split('.');
+
+          const [currentVersion] = packageFile.version.split('-');
+          const [CvId1, CvId2, CvId3] = currentVersion.split('.');
+
+          if (LvId1 > CvId1 || LvId2 > CvId2 || LvId3 > CvId3) {
             console.log('client has new updates');
 
-            changePromptMenuData(
-              true,
-              <ReleaseNotesPrompt />,
-              'release-notes px-8 py-4'
-            );
+            if (
+              contentRef.current.userData.preferences
+                .noUpdateNotificationForNewUpdate !== res.latestVersion.version
+            ) {
+              changePromptMenuData(
+                true,
+                <ReleaseNotesPrompt />,
+                'release-notes px-8 py-4'
+              );
+            }
           } else
             console.log(
               'client is up-to-date.',
               'latest version',
-              latestVersionId,
+              latestVersion,
               'current version',
-              currentVersionId
+              currentVersion
             );
           return undefined;
         })
@@ -713,6 +756,11 @@ export default function App() {
       dataEvents: DataUpdateEvent[]
     ) => {
       const event = new CustomEvent('app/dataUpdates', { detail: dataEvents });
+      window.api.sendLogs(
+        `Renderer data update event dispatched. \nEVENTS : ${dataEvents
+          .map((x) => x.dataType)
+          .join(', ')};`
+      );
       document.dispatchEvent(event);
     };
 
@@ -725,7 +773,7 @@ export default function App() {
     });
     window.api.skipBackwardToPreviousSong(handleSkipBackwardClick);
     window.api.skipForwardToNextSong(handleSkipForwardClick);
-    if (isDevelopment) window.api.dataUpdateEvent(noticeDataUpdateEvents);
+    window.api.dataUpdateEvent(noticeDataUpdateEvents);
     return () => {
       window.api.removeTogglePlaybackStateEvent(toggleSongPlayback);
       window.api.removeSkipBackwardToPreviousSongEvent(handleSkipBackwardClick);
@@ -735,54 +783,49 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const notificationPanelTimeoutIdRef = React.useRef(
-    undefined as NodeJS.Timer | undefined
-  );
-  const updateNotificationPanelData = React.useCallback(
-    (
-      delay = 5000,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      contentData: ReactElement<any, any>,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      icon: ReactElement<any, any> = <></>,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      buttons: ButtonProps[] = [],
-      isLoading = false
-    ) => {
-      if (notificationPanelTimeoutIdRef.current)
-        clearTimeout(notificationPanelTimeoutIdRef.current);
-      if (delay === 0) {
-        dispatch({
-          type: 'NOTIFICATION_PANEL_DATA_CHANGE',
-          data: {
-            ...content.notificationPanelData,
-            isVisible: false,
-            icon: <></>,
-            buttons: [],
-            isLoading,
-          },
-        });
-      } else {
-        dispatch({
-          type: 'NOTIFICATION_PANEL_DATA_CHANGE',
-          data: { isVisible: true, content: contentData, icon, buttons },
-        });
-        notificationPanelTimeoutIdRef.current = setTimeout(
-          () =>
-            dispatch({
-              type: 'NOTIFICATION_PANEL_DATA_CHANGE',
-              data: {
-                ...content.notificationPanelData,
-                isVisible: false,
-                icon: <></>,
-                isLoading,
-              },
-            }),
-          delay
+  const addNewNotifications = React.useCallback(
+    (newNotifications: AppNotification[]) => {
+      if (newNotifications.length > 0) {
+        const maxNotifications = 4;
+        const currentNotifications =
+          contentRef.current.notificationPanelData.notifications;
+        const newNotificationIds = newNotifications.map((x) => x.id);
+        const resultNotifications = currentNotifications.filter(
+          (x, index) =>
+            !newNotificationIds.some((y) => y === x.id) &&
+            index < maxNotifications
         );
+        resultNotifications.unshift(...newNotifications);
+        contentRef.current.notificationPanelData.notifications =
+          resultNotifications;
+        dispatch({
+          type: 'ADD_NEW_NOTIFICATIONS',
+          data: resultNotifications,
+        });
       }
     },
-    [content.notificationPanelData]
+    []
+  );
+
+  const updateNotifications = React.useCallback(
+    (
+      callback: (currentNotifications: AppNotification[]) => AppNotification[]
+    ) => {
+      const currentNotifications = content.notificationPanelData.notifications;
+      const updatedNotifications = callback(currentNotifications);
+      // for (let i = 0; i < updatedNotifications.length; i += 1) {
+      //   for (let x = 0; x < currentNotifications.length; x += 1) {
+      //     if (updatedNotifications[i].id === currentNotifications[x].id) {
+      //       // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      //       currentNotifications[x] === updatedNotifications[i];
+      //     }
+      //   }
+      // }
+      contentRef.current.notificationPanelData.notifications =
+        updatedNotifications;
+      dispatch({ type: 'UPDATE_NOTIFICATIONS', data: updatedNotifications });
+    },
+    [content.notificationPanelData.notifications]
   );
 
   const toggleSongPlayback = React.useCallback(
@@ -801,19 +844,21 @@ export default function App() {
           return fadeOutAudio();
         }
       } else
-        updateNotificationPanelData(
-          5000,
-          <span>Please select a song to play.</span>,
-          <span className="material-icons-round-outlined text-lg">error</span>
-        );
+        addNewNotifications([
+          {
+            id: 'noSongToPlay',
+            delay: 5000,
+            content: <span>Please select a song to play.</span>,
+            icon: (
+              <span className="material-icons-round-outlined text-lg">
+                error
+              </span>
+            ),
+          },
+        ]);
       return undefined;
     },
-    [
-      managePlaybackErrors,
-      updateNotificationPanelData,
-      fadeOutAudio,
-      fadeInAudio,
-    ]
+    [managePlaybackErrors, addNewNotifications, fadeOutAudio, fadeInAudio]
   );
 
   const displayMessageFromMain = React.useCallback(
@@ -821,22 +866,25 @@ export default function App() {
       _: unknown,
       message: string,
       messageCode?: MessageCodes,
-      data?: object
+      data?: Record<string, unknown>
     ) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const buttons: ButtonProps[] = [];
+      let id: string = messageCode ?? 'mainProcessMessage';
       const defaultButtonStyles =
         '!bg-background-color-3 dark:!bg-dark-background-color-3 !text-font-color-black dark:!text-font-color-black !font-light';
       let duration = 5000;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-undef-init
       let icon: ReactElement<any, any> | undefined = undefined;
       const showMessage = true;
-      if (messageCode === 'PARSE_SUCCESSFUL')
+      if (messageCode === 'PARSE_SUCCESSFUL') {
         icon = (
           <span className="material-icons-round-outlined icon">
             file_download
           </span>
         );
+        id = (data?.songId as string) ?? messageCode;
+      }
       if (messageCode === 'RESYNC_SUCCESSFUL') {
         icon = (
           <span className="material-icons-round-outlined icon">check</span>
@@ -871,14 +919,17 @@ export default function App() {
       }
 
       if (showMessage)
-        updateNotificationPanelData(
-          duration,
-          <div>{message}</div>,
-          icon,
-          buttons
-        );
+        addNewNotifications([
+          {
+            id,
+            delay: duration,
+            content: <div>{message}</div>,
+            icon,
+            buttons,
+          },
+        ]);
     },
-    [updateNotificationPanelData]
+    [addNewNotifications]
   );
 
   React.useEffect(() => {
@@ -1016,11 +1067,18 @@ export default function App() {
           })
           .catch((err) => {
             console.error(err);
-            updateNotificationPanelData(
-              10000,
-              <span>Seems like we can&apos;t play that song.</span>,
-              <span className="material-icons-round icon">error_outline</span>
-            );
+            addNewNotifications([
+              {
+                id: 'unplayableSong',
+                delay: 10000,
+                content: <span>Seems like we can&apos;t play that song.</span>,
+                icon: (
+                  <span className="material-icons-round icon">
+                    error_outline
+                  </span>
+                ),
+              },
+            ]);
             changePromptMenuData(
               true,
               <div>
@@ -1044,11 +1102,16 @@ export default function App() {
             );
           });
       }
-      updateNotificationPanelData(
-        5000,
-        <span>Seems like we can&apos;t play that song.</span>,
-        <span className="material-icons-round icon">error_outline</span>
-      );
+      addNewNotifications([
+        {
+          id: 'unplayableSong',
+          delay: 10000,
+          content: <span>Seems like we can&apos;t play that song.</span>,
+          icon: (
+            <span className="material-icons-round icon">error_outline</span>
+          ),
+        },
+      ]);
       changePromptMenuData(
         true,
         <ErrorPrompt
@@ -1065,7 +1128,7 @@ export default function App() {
         `======= ERROR OCCURRED WHEN TRYING TO PLAY A S0NG. =======\nERROR : Song id is of unknown type; SONGIDTYPE : ${typeof songId}`
       );
     },
-    [toggleSongPlayback, updateNotificationPanelData, changePromptMenuData]
+    [toggleSongPlayback, addNewNotifications, changePromptMenuData]
   );
 
   const playSongDataFromUnknownSource = React.useCallback(
@@ -1115,11 +1178,16 @@ export default function App() {
         .then((res) => playSongDataFromUnknownSource(res, true))
         .catch((err) => {
           console.error(err);
-          updateNotificationPanelData(
-            10000,
-            <span>Seems like we can&apos;t play that song.</span>,
-            <span className="material-icons-round icon">error_outline</span>
-          );
+          addNewNotifications([
+            {
+              id: 'unplayableSong',
+              delay: 10000,
+              content: <span>Seems like we can&apos;t play that song.</span>,
+              icon: (
+                <span className="material-icons-round icon">error_outline</span>
+              ),
+            },
+          ]);
           changePromptMenuData(
             true,
             <div>
@@ -1143,11 +1211,7 @@ export default function App() {
           );
         });
     },
-    [
-      playSongDataFromUnknownSource,
-      updateNotificationPanelData,
-      changePromptMenuData,
-    ]
+    [playSongDataFromUnknownSource, addNewNotifications, changePromptMenuData]
   );
 
   const changeQueueCurrentSongIndex = React.useCallback(
@@ -1598,6 +1662,17 @@ export default function App() {
     [changePromptMenuData]
   );
 
+  const updateUserData = React.useCallback(
+    (callback: (prevState: UserData) => UserData) => {
+      const updatedUserData = callback(contentRef.current.userData);
+      if (typeof updatedUserData === 'object') {
+        dispatch({ type: 'USER_DATA_CHANGE', data: updatedUserData });
+        contentRef.current.userData = updatedUserData;
+      }
+    },
+    []
+  );
+
   const onSongDrop = React.useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
       console.log(e.dataTransfer.files);
@@ -1609,6 +1684,16 @@ export default function App() {
       if (AppRef.current) AppRef.current.classList.remove('song-drop');
     },
     [displayUnsupportedFileMessage, fetchSongFromUnknownSource]
+  );
+
+  const updateCurrentSongData = React.useCallback(
+    (callback: (prevData: AudioData) => AudioData) => {
+      const updatedData = callback(contentRef.current.currentSongData);
+      if (updatedData) {
+        dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: updatedData });
+      }
+    },
+    []
   );
 
   const appContextStateValues = {
@@ -1637,12 +1722,15 @@ export default function App() {
   };
 
   const appUpdateContextValues: AppUpdateContextType = {
+    updateUserData,
+    updateCurrentSongData,
     updateContextMenuData,
     changePromptMenuData,
     playSong,
     changeCurrentActivePage,
     updateCurrentlyActivePageData,
-    updateNotificationPanelData,
+    addNewNotifications,
+    updateNotifications,
     toggleReducedMotion,
     toggleSongIndexing,
     createQueue,

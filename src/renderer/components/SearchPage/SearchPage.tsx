@@ -39,7 +39,7 @@ const SearchPage = () => {
     updateCurrentlyActivePageData,
     updateQueueData,
     createQueue,
-    updateNotificationPanelData,
+    addNewNotifications,
   } = React.useContext(AppUpdateContext);
 
   const [searchInput, setSearchInput] = React.useState(
@@ -183,13 +183,18 @@ const SearchPage = () => {
                 firstResult.songId
               );
               updateQueueData(undefined, newQueue);
-              updateNotificationPanelData(
-                5000,
-                <span>
-                  &apos;{firstResult.title}&apos; will be played next.
-                </span>,
-                <span className="material-icons-round">shortcut</span>
-              );
+              addNewNotifications([
+                {
+                  id: `${firstResult.title}PlayNext`,
+                  delay: 5000,
+                  content: (
+                    <span>
+                      &apos;{firstResult.title}&apos; will be played next.
+                    </span>
+                  ),
+                  icon: <span className="material-icons-round">shortcut</span>,
+                },
+              ]);
             },
           },
           {
@@ -197,16 +202,23 @@ const SearchPage = () => {
             iconName: 'queue',
             handlerFunction: () => {
               updateQueueData(undefined, [...queue.queue, firstResult.songId]);
-              updateNotificationPanelData(
-                5000,
-                <span>Added 1 song to the queue.</span>,
-                <img
-                  src={`otoMusic://localFiles/${firstResult.artworkPath?.replace(
-                    '.webp',
-                    '-optimized.webp'
-                  )}`}
-                  alt="Song Artwork"
-                />
+              addNewNotifications(
+                [
+                  {
+                    id: `${firstResult.title}AddedToQueue`,
+                    delay: 5000,
+                    content: <span>Added 1 song to the queue.</span>,
+                    icon: (
+                      <img
+                        src={`otoMusic://localFiles/${firstResult.artworkPath?.replace(
+                          '.webp',
+                          '-optimized.webp'
+                        )}`}
+                        alt="Song Artwork"
+                      />
+                    ),
+                  },
+                ]
                 // <span className="material-icons-round icon">playlist_add</span>
               );
             },
@@ -376,13 +388,18 @@ const SearchPage = () => {
             handlerFunction: () => {
               queue.queue.push(...firstResult.songs.map((song) => song.songId));
               updateQueueData(undefined, queue.queue, false);
-              updateNotificationPanelData(
-                5000,
-                <span>
-                  Added {firstResult.songs.length} song
-                  {firstResult.songs.length === 1 ? '' : 's'} to the queue.
-                </span>
-              );
+              addNewNotifications([
+                {
+                  id: 'addedToQueue',
+                  delay: 5000,
+                  content: (
+                    <span>
+                      Added {firstResult.songs.length} song
+                      {firstResult.songs.length === 1 ? '' : 's'} to the queue.
+                    </span>
+                  ),
+                },
+              ]);
             },
           },
         ]}

@@ -1,6 +1,6 @@
 {
   "name": "oto-music-for-desktop",
-  "version": "0.8.0-alpha",
+  "version": "0.8.22091001-alpha",
   "description": "An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar.",
   "main": "./dist/main/main.js",
   "author": {

@@ -1,3 +1,4 @@
+import stringSimilarity, { ReturnTypeEnums } from 'didyoumean2';
 // eslint-disable-next-line import/no-cycle
 import {
   getData,
@@ -7,24 +8,77 @@ import {
 } from './filesystem';
 import log from './log';
 
+// function sortBySimilarity(keyword: string, arr: SongData[]): SongData[] {
+//   const key = keyword.split('');
+//   const results = arr.map((res) => {
+//     let score = 0;
+//     const value = res.title;
+//     const splitValue = value.split('');
+
+//     // full 100 marks if both are equal
+//     if (value === keyword) return { score: 100, res };
+
+//     // 10 marks if both lengths are equal.
+//     if (value.length === key.length) score += 20;
+
+//     // max of 40 marks. Scores avg out of value length if each letter of keyword found in value
+//     const avgMark1 = 40 / value.length;
+//     for (let i = 0; i < key.length; i += 1) {
+//       if (splitValue.some((x) => new RegExp(key[i], 'i').test(x)))
+//         score += avgMark1;
+//     }
+
+//     // max of 40 marks. Scores avg out of value length if each letter of keyword found in value
+//     const avgMark2 = 40 / keyword.length;
+//     let str = '';
+//     for (let i = 0; i < key.length; i += 1) {
+//       str += key[i];
+//       // eslint-disable-next-line @typescript-eslint/no-loop-func
+//       if (splitValue.some((x) => new RegExp(str, 'i').test(x)))
+//         score += avgMark2;
+//     }
+
+//     return { score, res };
+//   });
+//   return results
+//     .sort((a, b) =>
+//       // eslint-disable-next-line no-nested-ternary
+//       a.score !== b.score ? (a.score > b.score ? -1 : 1) : 0
+//     )
+//     .map((x) => x.res);
+// }
+
 const getSongSearchResults = (
   songs: SongData[],
   keyword: string,
   filter: SearchFilters
-) =>
-  Array.isArray(songs) &&
-  songs.length > 0 &&
-  (filter === 'Songs' || filter === 'All')
-    ? songs.filter(
-        (data: SongData) =>
-          new RegExp(keyword.replace(/[^w ]/, ''), 'gim').test(data.title) ||
-          (data.artists
-            ? new RegExp(keyword.replace(/[^w ]/, ''), 'gim').test(
-                data.artists.map((artist) => artist.name).join(' ')
-              )
-            : false)
-      )
-    : [];
+) => {
+  if (
+    Array.isArray(songs) &&
+    songs.length > 0 &&
+    (filter === 'Songs' || filter === 'All')
+  ) {
+    // const regex = new RegExp(keyword, 'gim');
+    // const results = songs.filter(
+    //   (data: SongData) =>
+    //     regex.test(data.title) ||
+    //     (data.artists
+    //       ? regex.test(data.artists.map((artist) => artist.name).join(' '))
+    //       : false)
+    // );
+    const returnValue = stringSimilarity(
+      keyword,
+      songs as unknown as Record<string, unknown>[],
+      {
+        caseSensitive: false,
+        matchPath: ['title'],
+        returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
+      }
+    );
+    return returnValue as unknown as SongData[];
+  }
+  return [];
+};
 
 const getArtistSearchResults = (
   artists: Artist[],
@@ -155,3 +209,39 @@ export const search = (
     availableResults,
   };
 };
+
+// const key = 'like';
+
+// const data =
+//   'What it feels like, Lush Life, Me, Dear God, Habit, Sleep, Lonely, Count My Blessings, Is that What You Like now'.split(
+//     ','
+//   );
+// console.time('t');
+// const keyVal = key.split('');
+// const results = data.map((res) => {
+//   let score = 0;
+//   const result = res.split('');
+//   if (res === key) return { score: 100, res };
+//   if (result.length === keyVal.length) score += 20;
+
+//   const avgMark1 = 40 / result.length;
+//   for (let i = 0; i < keyVal.length; i += 1) {
+//     if (result.some((x) => new RegExp(keyVal[i], 'i').test(x)))
+//       score += avgMark1;
+//   }
+
+//   const avgMark12 = 40 / key.length;
+//   let str = '';
+//   for (let i = 0; i < key.length; i += 1) {
+//     str += key[i];
+//     if (result.some((x) => new RegExp(str, 'i').test(x))) score += avgMark12;
+//   }
+//   return { score, res };
+// });
+// console.timeEnd('t');
+
+// console.log(
+//   results.sort((a, b) =>
+//     a.score !== b.score ? (a.score > b.score ? -1 : 1) : 0
+//   )
+// );

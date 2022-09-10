@@ -62,20 +62,40 @@ const Header = React.memo(() => {
         </div>
       </div>
       <div className="window-controls-and-special-controls-container h-full flex flex-row">
-        <div className="special-controls-container h-fll flex items-center justify-between">
-          <span className="change-theme-btn h-full px-3 text-xl flex items-center justify-center text-center transition-[color] ease-in-out hover:text-background-color-3 dark:hover:text-dark-background-color-3">
-            <i
-              className="material-icons-round icon h-fit  text-xl flex items-center justify-center text-center transition-[background] ease-in-out cursor-pointer"
-              onClick={() => window.api.changeAppTheme()}
+        <div className="special-controls-container h-fll flex items-center justify-between pt-2 [&>*]:mr-1 [&>*]:h-full [&>*]:px-3 [&>*]:transition-[color,visibility,opacity [&>*]:rounded-md [&>*]:cursor-pointer">
+          <span
+            className={`network-indicator flex items-center justify-center text-center hover:bg-background-color-2 dark:hover:bg-dark-background-color-2 transition-[background] ${
+              navigator.onLine &&
+              '!transition-[visibility] duration-150 delay-[2500ms] invisible'
+            }`}
+            title={`You are ${
+              navigator.onLine ? 'connected to' : 'disconnected from'
+            } the internet.`}
+          >
+            <span
+              className={`material-icons-round-outlined ${
+                navigator.onLine &&
+                'transition-[opacity,visibility] invisible opacity-0 duration-150 delay-[2500ms] text-background-color-3 dark:text-dark-background-color-3'
+              }`}
             >
+              {navigator.onLine ? 'wifi' : 'wifi_off'}
+            </span>
+          </span>
+          <span
+            className="change-theme-btn text-xl flex items-center justify-center text-center transition-[color,background] ease-in-out dark:hover:text-dark-background-color-3 hover:bg-background-color-2 dark:hover:bg-dark-background-color-2"
+            onClick={() => window.api.changeAppTheme()}
+            title="Change Theme"
+          >
+            <span className="material-icons-round icon h-fit text-xl flex items-center justify-center text-center transition-[background] ease-in-out">
               {isDarkMode ? 'wb_sunny' : 'dark_mode'}
-            </i>
+            </span>
           </span>
         </div>
         <div className="window-controls-container h-full flex items-center justify-between ml-8">
           <span
             className="minimize-btn h-full px-3 text-xl flex items-center justify-center text-center transition-[background] ease-in-out hover:bg-[hsla(0deg,0%,80%,0.5)]"
             onClick={minimize}
+            title="Minimize"
           >
             <span className="material-icons-round icon h-fit !font-light text-xl flex items-center justify-center text-center transition-[background] ease-in-out cursor-pointer">
               minimize
@@ -84,6 +104,7 @@ const Header = React.memo(() => {
           <span
             className="maximize-btn h-full px-3 text-xl flex items-center justify-center text-center transition-[background] ease-in-out hover:bg-[hsla(0deg,0%,80%,0.5)]"
             onClick={maximize}
+            title="Maximize"
           >
             <span className="material-icons-round-outlined icon h-fit !font-light text-lg flex items-center justify-center text-center transition-[background] ease-in-out cursor-pointer">
               crop_square
@@ -92,6 +113,7 @@ const Header = React.memo(() => {
           <span
             className="close-btn h-full px-3 text-xl flex items-center justify-center text-center transition-[background] ease-in-out hover:bg-foreground-color-1 hover:text-font-color-white"
             onClick={close}
+            title="Close"
           >
             <span className="material-icons-round icon h-fit !font-light  text-xl flex items-center justify-center text-center transition-[background] ease-in-out cursor-pointer">
               close

@@ -5,7 +5,7 @@ import Button from '../Button';
 import Checkbox from '../Checkbox';
 
 export default (props: { songPath: string; title: string }) => {
-  const { updateNotificationPanelData, changePromptMenuData } =
+  const { addNewNotifications, changePromptMenuData } =
     React.useContext(AppUpdateContext);
   const { songPath, title } = props;
   const [isPermanentDelete, setIsPermenanentDelete] = React.useState(false);
@@ -35,15 +35,24 @@ export default (props: { songPath: string; title: string }) => {
             .then(
               (res) =>
                 res.success &&
-                updateNotificationPanelData(
-                  5000,
-                  <span>
-                    {isPermanentDelete
-                      ? `'${title}' song removed from the system.`
-                      : `'${title}' song moved to the Recycle Bin.`}
-                  </span>,
-                  <span className="material-icons-round icon">done_all</span>
-                )
+                addNewNotifications([
+                  {
+                    id: `${title}Removed`,
+                    delay: 5000,
+                    content: (
+                      <span>
+                        {isPermanentDelete
+                          ? `'${title}' song removed from the system.`
+                          : `'${title}' song moved to the Recycle Bin.`}
+                      </span>
+                    ),
+                    icon: (
+                      <span className="material-icons-round icon">
+                        done_all
+                      </span>
+                    ),
+                  },
+                ])
             );
         }}
       />

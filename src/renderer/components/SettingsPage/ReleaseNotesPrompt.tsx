@@ -3,8 +3,10 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable react/require-default-props */
 import React from 'react';
+import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
 import app from '../../../../package.json';
 import localReleseNotes from '../../../../release-notes.json';
+import Checkbox from '../Checkbox';
 
 interface Note {
   note: string;
@@ -58,7 +60,7 @@ const Version = (props: VersionProp) => {
           <ul className="notes list-disc marker:text-background-color-3 dark:marker:text-dark-background-color-3 px-8 font-light text-[hsla(0,0%,0%,0.8)] dark:text-[hsla(0,0%,100%,0.8)]">
             {notes.new.map((note, index) => (
               <NoteComponent
-                key={index}
+                key={`feature-${index}`}
                 note={note.note}
                 artworkPath={note.artworkPath}
               />
@@ -72,7 +74,7 @@ const Version = (props: VersionProp) => {
           <ul className="notes list-disc marker:text-background-color-3 dark:marker:text-dark-background-color-3 px-8 font-light text-[hsla(0,0%,0%,0.8)] dark:text-[hsla(0,0%,100%,0.8)]">
             {notes.fixed.map((note, index) => (
               <NoteComponent
-                key={index}
+                key={`fix-${index}`}
                 note={note.note}
                 artworkPath={note.artworkPath}
               />
@@ -86,7 +88,7 @@ const Version = (props: VersionProp) => {
           <ul className="notes list-disc marker:text-background-color-3 dark:marker:text-dark-background-color-3 px-8 font-light text-[hsla(0,0%,0%,0.8)] dark:text-[hsla(0,0%,100%,0.8)]">
             {notes.knownIssues.map((note, index) => (
               <NoteComponent
-                key={index}
+                key={`issue-${index}`}
                 note={note.note}
                 artworkPath={note.artworkPath}
               />
@@ -100,8 +102,37 @@ const Version = (props: VersionProp) => {
 };
 
 const ReleaseNotesPrompt = () => {
+  const { userData } = React.useContext(AppContext);
+  const { updateUserData } = React.useContext(AppUpdateContext);
   const [releaseNotes, setReleaseNotes] = React.useState(
     localReleseNotes as Changelog
+  );
+  const [noNewUpdateInform, setNoNewUpdateInform] = React.useState(
+    userData?.preferences.noUpdateNotificationForNewUpdate ===
+      releaseNotes.latestVersion.version
+  );
+
+  const updateNoNewUpdateInform = React.useCallback(
+    (state: boolean) => {
+      const result = state ? releaseNotes.latestVersion.version : app.version;
+      window.api
+        .saveUserData('preferences.noUpdateNotificationForNewUpdate', result)
+        .then(() => {
+          updateUserData((prevUserData) => {
+            return {
+              ...prevUserData,
+              preferences: {
+                ...prevUserData.preferences,
+                noUpdateNotificationForNewUpdate: result,
+              },
+            };
+          });
+          return setNoNewUpdateInform(state);
+        })
+        // eslint-disable-next-line no-console
+        .catch((err) => console.error(err));
+    },
+    [releaseNotes.latestVersion.version, updateUserData]
   );
 
   React.useEffect(() => {
@@ -110,7 +141,7 @@ const ReleaseNotesPrompt = () => {
         .then((res) => res.json())
         .then((res) => {
           // eslint-disable-next-line no-console
-          console.log('fetched release notes from th server.', res);
+          console.log('fetched release notes from the server.', res);
           return setReleaseNotes(res);
         })
         // eslint-disable-next-line no-console
@@ -123,7 +154,7 @@ const ReleaseNotesPrompt = () => {
       <div className="w-full h-[500px]">
         {releaseNotes && (
           <>
-            <h2 className="title-container text-center text-3xl font-medium mb-4">
+            <h2 className="title-container text-center text-3xl font-medium mb-2">
               Changelog
               {navigator.onLine ? (
                 releaseNotes.latestVersion.version === app.version ? (
@@ -140,7 +171,7 @@ const ReleaseNotesPrompt = () => {
                       You do not have the latest version.
                     </span>{' '}
                     <span
-                      className="text-[#6c5ce7] text-sm font-base underline"
+                      className="text-font-color-highlight-2 dark:text-dark-font-color-highlight-2 text-sm font-base underline"
                       onClick={() =>
                         window.api.openInBrowser(
                           'https://github.com/Sandakan/Oto-Music-for-Desktop/releases'
@@ -169,6 +200,20 @@ const ReleaseNotesPrompt = () => {
                 </>
               )}
             </h2>
+            {navigator.onLine &&
+              app.version !== releaseNotes.latestVersion.version && (
+                <div className="grid place-items-center mb-2">
+                  <Checkbox
+                    id="noNewUpdateInformCheckbox"
+                    className="text-sm"
+                    isChecked={noNewUpdateInform}
+                    labelContent="Do not remind me again about this version of the app."
+                    checkedStateUpdateFunction={(state) =>
+                      updateNoNewUpdateInform(state)
+                    }
+                  />
+                </div>
+              )}
             {navigator.onLine && releaseNotes.latestVersion.artwork && (
               <div className="version-artwork-container p-4 mb-4">
                 <img

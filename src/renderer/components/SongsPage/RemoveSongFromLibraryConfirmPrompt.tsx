@@ -6,7 +6,7 @@ import Button from '../Button';
 import Checkbox from '../Checkbox';
 
 export default (props: { songPath: string; title: string }) => {
-  const { updateNotificationPanelData, changePromptMenuData } =
+  const { addNewNotifications, changePromptMenuData } =
     React.useContext(AppUpdateContext);
   const { songPath, title } = props;
   const [isDoNotShowAgain, setIsDoNotShowAgain] = React.useState(false);
@@ -42,13 +42,21 @@ export default (props: { songPath: string; title: string }) => {
                   isDoNotShowAgain
                 );
               changePromptMenuData(false);
-              updateNotificationPanelData(
-                5000,
-                <span>
-                  &apos;{title}&apos; blacklisted and removed from the library.
-                </span>,
-                <span className="material-icons-round">delete_outline</span>
-              );
+              addNewNotifications([
+                {
+                  id: `${title}Blacklisted`,
+                  delay: 5000,
+                  content: (
+                    <span>
+                      &apos;{title}&apos; blacklisted and removed from the
+                      library.
+                    </span>
+                  ),
+                  icon: (
+                    <span className="material-icons-round">delete_outline</span>
+                  ),
+                },
+              ]);
             }
             return undefined;
           })

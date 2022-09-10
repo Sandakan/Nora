@@ -27,10 +27,10 @@ const Checkbox = React.memo((props: CheckboxProp) => {
         onChange={(e) => checkedStateUpdateFunction(e.currentTarget.checked)}
       />
       <label
-        className="checkmark w-5 h-5 cursor-pointer bg-[transparent] border-2 border-background-color-3 dark:border-dark-background-color-3 flex items-center justify-center rounded-md peer-checked:bg-background-color-3 dark:peer-checked:bg-dark-background-color-3"
+        className="checkmark w-5 h-5 cursor-pointer bg-[transparent] border-2 border-font-color-highlight dark:border-dark-font-color-highlight flex items-center justify-center rounded-md peer-checked:bg-font-color-highlight dark:peer-checked:bg-dark-font-color-highlight"
         htmlFor={id}
       >
-        <span className="material-icons-round icon text-lg opacity-0 text-font-color-black dark:text-font-color-black">
+        <span className="material-icons-round icon text-lg opacity-0 text-font-color-white dark:text-font-color-black">
           check
         </span>
       </label>

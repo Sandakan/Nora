@@ -1,6 +1,7 @@
 /* eslint-disable import/no-cycle */
 import NodeID3 from 'node-id3';
 import nodeVibrant from 'node-vibrant';
+import sharp from 'sharp';
 import {
   getData,
   removeSongArtwork,
@@ -11,7 +12,11 @@ import log from './log';
 import { dataUpdateEvent } from './main';
 import { generateRandomId } from './randomId';
 
-export const updateSongId3Tags = (songId: string, tags: SongTags) => {
+export const updateSongId3Tags = (
+  songId: string,
+  tags: SongTags,
+  sendUpdatedData = false
+) => {
   // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
     const data = getData();
@@ -360,7 +365,32 @@ export const updateSongId3Tags = (songId: string, tags: SongTags) => {
           dataUpdateEvent('albums');
           dataUpdateEvent('genres');
 
-          resolve(true);
+          const result = { success: true } as UpdateSongDataResult;
+
+          if (sendUpdatedData) {
+            // eslint-disable-next-line no-await-in-loop
+            const artworkBuffer = await sharp(song.artworkPath)
+              .toBuffer()
+              .catch((err) =>
+                log(
+                  `ERROR OCCURRED WHEN TRYING TO GET BUFFER FROM SONG ARTWORK.\nERROR : ${err};`
+                )
+              );
+            result.updatedData = {
+              songId,
+              title: song.title,
+              artists: song.artists,
+              album: song.album,
+              artwork: artworkBuffer
+                ? Buffer.from(artworkBuffer).toString('base64')
+                : undefined,
+              artworkPath: song.artworkPath,
+              duration: song.duration,
+              isAFavorite: song.isAFavorite,
+              path: song.path,
+            } as AudioData;
+          }
+          resolve(result);
           log(`'${id3Tags.title}' song data update successfull.`);
           break;
         }

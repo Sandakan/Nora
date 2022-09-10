@@ -127,6 +127,15 @@ declare global {
     album?: { albumId: string; name: string };
   }
 
+  interface AudioPlayerData extends AudioData {
+    artists?: {
+      artistId: string;
+      name: string;
+      artworkPath?: string;
+      onlineArtworkPaths?: OnlineArtistArtworks;
+    }[];
+  }
+
   interface AudioInfo {
     title: string;
     artists?: { artistId: string; name: string }[];
@@ -192,6 +201,8 @@ declare global {
       isMiniPlayerAlwaysOnTop: boolean;
       doNotVerifyWhenOpeningLinks: boolean;
       showSongRemainingTime: boolean;
+      noUpdateNotificationForNewUpdate?: string;
+      showArtistArtworkNearSongControls: boolean;
     };
     windowPositions: {
       mainWindow?: WindowCordinates;
@@ -390,11 +401,17 @@ declare global {
     className: string;
   }
   interface NotificationPanelData {
-    isVisible: boolean;
+    notifications: AppNotification[];
+  }
+
+  interface AppNotification {
+    delay: number;
+    id: string;
+    order?: number;
     content: ReactElement<any, any>;
     icon?: ReactElement<any, any>;
     buttons?: ButtonProps[];
-    isLoading: boolean;
+    isLoading?: boolean;
   }
 
   interface AnyProp {
@@ -453,6 +470,7 @@ declare global {
     | 'preferences.doNotVerifyWhenOpeningLinks'
     | 'preferences.autoLaunchApp'
     | 'preferences.showSongRemainingTime'
+    | 'preferences.noUpdateNotificationForNewUpdate'
     | 'songBlacklist'
     | PageSortTypes;
 
@@ -591,6 +609,7 @@ declare global {
     | 'PARSE_FAILED'
     | 'PARSE_SUCCESSFUL'
     | 'SONG_DELETED'
+    | 'MUSIC_FOLDER_DELETED'
     | 'NO_NETWORK_CONNECTION'
     | 'NETWORK_DISCONNECTED'
     | 'NETWORK_CONNECTED'
@@ -757,6 +776,7 @@ declare global {
 
   export interface LatestAppVersion {
     version: string;
+    phase: string;
     releaseDate: string;
     artwork?: string;
   }
@@ -775,5 +795,10 @@ declare global {
 
   export interface Fixed {
     note: string;
+  }
+
+  interface UpdateSongDataResult {
+    success: boolean;
+    updatedData?: AudioData;
   }
 }

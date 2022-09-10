@@ -14,7 +14,7 @@ interface NewPlaylistPromptProp {
 }
 
 export default (props: NewPlaylistPromptProp) => {
-  const { changePromptMenuData, updateNotificationPanelData } =
+  const { changePromptMenuData, addNewNotifications } =
     React.useContext(AppUpdateContext);
   const [input, setInput] = React.useState('');
 
@@ -24,13 +24,31 @@ export default (props: NewPlaylistPromptProp) => {
         if (res && res.success && res.playlist) {
           changePromptMenuData(false, <></>);
           props.updatePlaylists([...props.currentPlaylists, res.playlist]);
-          updateNotificationPanelData(5000, <>Playlist added successfully.</>);
+          addNewNotifications([
+            {
+              id: 'playlistCreated',
+              delay: 5000,
+              content: <>Playlist added successfully.</>,
+            },
+          ]);
         } else {
-          updateNotificationPanelData(5000, <>{res.message}</>);
+          addNewNotifications([
+            {
+              id: 'playlistCreateFailed',
+              delay: 5000,
+              content: <>{res.message}</>,
+            },
+          ]);
         }
       });
     } else
-      updateNotificationPanelData(5000, <>Playlist name cannot be empty</>);
+      addNewNotifications([
+        {
+          id: 'EmptyPlaylistName',
+          delay: 5000,
+          content: <>Playlist name cannot be empty</>,
+        },
+      ]);
   };
 
   return (

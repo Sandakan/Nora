@@ -122,6 +122,35 @@ const SongControlsContainer = () => {
     [currentSongData.artists, currentSongData.songId]
   );
 
+  const songArtistsImages = React.useMemo(
+    () =>
+      currentSongData.songId
+        ? currentSongData.artists
+          ? Array.isArray(currentSongData.artists) &&
+            (currentSongData.artists.length > 0
+              ? currentSongData.artists
+                  .filter((artist) => artist.onlineArtworkPaths)
+                  .map((artist, index) => (
+                    <span key={`artist-image-${index}`} className="inline">
+                      <img
+                        src={
+                          navigator.onLine && artist.onlineArtworkPaths
+                            ? artist.onlineArtworkPaths?.picture_small
+                            : artist.artworkPath
+                        }
+                        className={`w-6 aspect-square rounded-full border-2 border-background-color-1 dark:border-dark-background-color-1 ${
+                          index === 0 ? 'z-2' : '-translate-x-2'
+                        }`}
+                        alt=""
+                      />
+                    </span>
+                  ))
+              : false)
+          : false
+        : false,
+    [currentSongData.artists, currentSongData.songId]
+  );
+
   return (
     <footer className="song-controls-container w-full h-[6rem] bg-background-color-1 dark:bg-dark-background-color-1 flex flex-row justify-between relative bottom-0 overflow-hidden shadow-[0px_-10px_25px_7px_rgba(0,0,0,0.2)] text-font-color-black dark:text-font-color-white">
       <div className="current-playing-song-info-container w-1/4 flex items-center content-center relative">
@@ -205,10 +234,18 @@ const SongControlsContainer = () => {
             {currentSongData.title}
           </div>
           <div
-            className="song-artists text-xs font-normal overflow-hidden text-ellipsis whitespace-nowrap w-[90%] cursor-pointer"
+            className="song-artists flex items-center text-xs font-normal overflow-hidden text-ellipsis whitespace-nowrap w-full cursor-pointer"
             id="currentSongArtists"
           >
-            {songArtists}
+            {userData &&
+              userData.preferences.showArtistArtworkNearSongControls &&
+              songArtistsImages &&
+              songArtistsImages.length > 0 && (
+                <span className="mr-2 flex w-fit max-w-[25%]">
+                  {songArtistsImages}
+                </span>
+              )}
+            <span className="w-3/4">{songArtists}</span>
           </div>
         </div>
       </div>

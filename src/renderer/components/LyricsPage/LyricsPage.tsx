@@ -15,17 +15,27 @@ import NoInternetImage from '../../../../assets/images/svg/Summer landscape_Mono
 
 export const LyricsPage = () => {
   const { currentSongData } = useContext(AppContext);
-  const { updateNotificationPanelData } = React.useContext(AppUpdateContext);
+  const { addNewNotifications } = React.useContext(AppUpdateContext);
 
   const [lyrics, setLyrics] = React.useState(null as Lyrics | undefined | null);
 
   React.useEffect(() => {
     if (navigator.onLine) {
       setLyrics(null);
-      updateNotificationPanelData(
-        5000,
-        <span>Fetching lyrics for &apos;{currentSongData.title}&apos;...</span>
-      );
+      addNewNotifications([
+        {
+          id: 'fetchLyrics',
+          delay: 5000,
+          content: (
+            <span>
+              Fetching lyrics for &apos;{currentSongData.title}&apos;...
+            </span>
+          ),
+          icon: (
+            <span className="material-icons-round-outlined !text-xl">mic</span>
+          ),
+        },
+      ]);
       window.api
         .getSongLyrics(
           currentSongData.title,

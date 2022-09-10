@@ -8,7 +8,7 @@ interface BlacklistedSongProp {
 }
 
 const BlacklistedSong = (props: BlacklistedSongProp) => {
-  const { updateNotificationPanelData } = React.useContext(AppUpdateContext);
+  const { addNewNotifications } = React.useContext(AppUpdateContext);
   const { songPath, index } = props;
   const songNameArray = (songPath.split('\\').at(-1) as string).split('.');
   songNameArray.pop();
@@ -32,15 +32,20 @@ const BlacklistedSong = (props: BlacklistedSongProp) => {
         className="blacklisted-song-restore-btn text-background-color-3 dark:text-dark-background-color-3 rounded-none border-none font-medium text-base mr-0"
         label="RESTORE"
         clickHandler={() =>
-          window.api
-            .restoreBlacklistedSong(songPath)
-            .then(() =>
-              updateNotificationPanelData(
-                5000,
-                <span>&apos;{songName}&apos; song restored successfully.</span>,
-                <span className="material-icons-round icon">check</span>
-              )
-            )
+          window.api.restoreBlacklistedSong(songPath).then(() =>
+            addNewNotifications([
+              {
+                id: `${songName}RestoreSuccess`,
+                delay: 5000,
+                content: (
+                  <span>
+                    &apos;{songName}&apos; song restored successfully.
+                  </span>
+                ),
+                icon: <span className="material-icons-round icon">check</span>,
+              },
+            ])
+          )
         }
       />
     </div>

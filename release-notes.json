@@ -1,6 +1,7 @@
 {
   "latestVersion": {
     "version": "0.8.0-alpha",
+    "phase": "alpha",
     "releaseDate": "2022 August 19",
     "artwork": "/assets/other/release artworks/whats-new-v0.8.0-alpha.png"
   },

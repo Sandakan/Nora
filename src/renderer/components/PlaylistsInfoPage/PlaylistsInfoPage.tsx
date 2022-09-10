@@ -20,7 +20,7 @@ const PlaylistInfoPage = () => {
   const {
     updateQueueData,
     changePromptMenuData,
-    updateNotificationPanelData,
+    addNewNotifications,
     createQueue,
   } = React.useContext(AppUpdateContext);
 
@@ -142,13 +142,18 @@ const PlaylistInfoPage = () => {
                         .then(
                           (res) =>
                             res.success &&
-                            updateNotificationPanelData(
-                              5000,
-                              <span>
-                                '{song.title}' removed from '{playlistData.name}
-                                ' playlist successfully.
-                              </span>
-                            )
+                            addNewNotifications([
+                              {
+                                id: `${song.songId}Removed`,
+                                delay: 5000,
+                                content: (
+                                  <span>
+                                    '{song.title}' removed from '
+                                    {playlistData.name}' playlist successfully.
+                                  </span>
+                                ),
+                              },
+                            ])
                         )
                         .catch((err) => console.error(err)),
                   },
@@ -157,7 +162,7 @@ const PlaylistInfoPage = () => {
             );
           })
         : [],
-    [playlistSongs, playlistData, updateNotificationPanelData, userData]
+    [playlistSongs, playlistData, addNewNotifications, userData]
   );
 
   return (
@@ -231,14 +236,19 @@ const PlaylistInfoPage = () => {
                       ...queue.queue,
                       ...playlistData.songs,
                     ]);
-                    updateNotificationPanelData(
-                      5000,
-                      <span>
-                        Added {playlistData.songs.length} song
-                        {playlistData.songs.length === 1 ? '' : 's'} to the
-                        queue.
-                      </span>
-                    );
+                    addNewNotifications([
+                      {
+                        id: `addedToQueue`,
+                        delay: 5000,
+                        content: (
+                          <span>
+                            Added {playlistData.songs.length} song
+                            {playlistData.songs.length === 1 ? '' : 's'} to the
+                            queue.
+                          </span>
+                        ),
+                      },
+                    ]);
                   }}
                 />
                 {playlistData.playlistId === 'History' && (
@@ -265,12 +275,18 @@ const PlaylistInfoPage = () => {
                                 .then(
                                   (res) =>
                                     res.success &&
-                                    updateNotificationPanelData(
-                                      5000,
-                                      <span>
-                                        Cleared the song history successfully.
-                                      </span>
-                                    )
+                                    addNewNotifications([
+                                      {
+                                        id: 'queueCleared',
+                                        delay: 5000,
+                                        content: (
+                                          <span>
+                                            Cleared the song history
+                                            successfully.
+                                          </span>
+                                        ),
+                                      },
+                                    ])
                                 )
                                 .catch((err) => console.error(err));
                             },

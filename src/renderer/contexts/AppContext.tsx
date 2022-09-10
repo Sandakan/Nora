@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/prefer-default-export */
 import { createContext, ReactElement } from 'react';
-import { ButtonProps } from 'renderer/components/Button';
 
 export interface AppStateContextType {
   // THEME
@@ -23,7 +22,7 @@ export interface AppStateContextType {
   currentlyActivePage: { pageTitle: PageTitles; data?: any };
   pageHistoryIndex: number;
   // AUDIO PLAYBACK
-  currentSongData: AudioData;
+  currentSongData: AudioPlayerData;
   userData: UserData | undefined;
   isCurrentSongPlaying: boolean;
   // songPosition: number;
@@ -39,6 +38,10 @@ export interface AppStateContextType {
 }
 
 export interface AppUpdateContextType {
+  updateUserData: (callback: (prevState: UserData) => UserData) => void;
+  updateCurrentSongData: (
+    callback: (prevState: AudioData) => AudioData
+  ) => void;
   updateContextMenuData: (
     isVisible: boolean,
     menuItems?: ContextMenuItem[],
@@ -50,12 +53,9 @@ export interface AppUpdateContextType {
     content?: ReactElement<any, any>,
     className?: string
   ) => void;
-  updateNotificationPanelData: (
-    delay: number | undefined,
-    content: ReactElement<any, any>,
-    icon?: ReactElement<any, any>,
-    buttons?: ButtonProps[],
-    isLoading?: boolean
+  addNewNotifications: (newNotifications: AppNotification[]) => void;
+  updateNotifications: (
+    callback: (currentNotifications: AppNotification[]) => AppNotification[]
   ) => void;
   changeCurrentActivePage: (pageTitle: PageTitles, data?: any) => void;
   updatePageHistoryIndex: (

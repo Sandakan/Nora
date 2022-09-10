@@ -65,9 +65,9 @@ export const LyricsSource = (props: LyricsSourceProp) => {
                 />
               )
         }
-        title={props.lyricsSource.link}
+        title={decodeURI(props.lyricsSource.link)}
       >
-        {props.lyricsSource.name}
+        {decodeURI(props.lyricsSource.name)}
       </span>{' '}
       using SongLyrics.
     </div>

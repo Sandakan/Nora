@@ -25,7 +25,7 @@ interface QueueInfo {
 
 export default () => {
   const { queue, currentSongData, userData } = useContext(AppContext);
-  const { updateQueueData, updateNotificationPanelData } =
+  const { updateQueueData, addNewNotifications } =
     React.useContext(AppUpdateContext);
 
   const [queuedSongs, setQueuedSongs] = React.useState([] as AudioInfo[]);
@@ -152,7 +152,7 @@ export default () => {
           ListRef.current.scrollToItem(index, 'smart');
         }
       }
-    }, 750);
+    }, 1000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -231,7 +231,7 @@ export default () => {
               <img
                 className={`w-40 h-40 rounded-xl ${
                   queue.queueType === 'artist'
-                    ? 'artist-img rounded-full'
+                    ? 'artist-img !rounded-full'
                     : `${queue.queueType}-img`
                 }`}
                 src={
@@ -255,11 +255,18 @@ export default () => {
                   iconName="shuffle"
                   clickHandler={() => {
                     updateQueueData(undefined, queue.queue, true);
-                    updateNotificationPanelData(
-                      5000,
-                      <span>Queue shuffled successfully.</span>,
-                      <span className="material-icons-round icon">shuffle</span>
-                    );
+                    addNewNotifications([
+                      {
+                        id: 'shuffleQueue',
+                        delay: 5000,
+                        content: <span>Queue shuffled successfully.</span>,
+                        icon: (
+                          <span className="material-icons-round icon">
+                            shuffle
+                          </span>
+                        ),
+                      },
+                    ]);
                   }}
                 />
                 <Button
@@ -268,11 +275,18 @@ export default () => {
                   iconName="clear"
                   clickHandler={() => {
                     updateQueueData(undefined, []);
-                    updateNotificationPanelData(
-                      5000,
-                      <span>Queue cleared.</span>,
-                      <span className="material-icons-round icon">check</span>
-                    );
+                    addNewNotifications([
+                      {
+                        id: 'clearQueue',
+                        delay: 5000,
+                        content: <span>Queue cleared.</span>,
+                        icon: (
+                          <span className="material-icons-round icon">
+                            check
+                          </span>
+                        ),
+                      },
+                    ]);
                   }}
                 />
               </div>

@@ -75,11 +75,8 @@ const reducer = (
 };
 
 export const HomePage = () => {
-  const {
-    updateContextMenuData,
-    changePromptMenuData,
-    updateNotificationPanelData,
-  } = React.useContext(AppUpdateContext);
+  const { updateContextMenuData, changePromptMenuData, addNewNotifications } =
+    React.useContext(AppUpdateContext);
 
   const [content, dispatch] = React.useReducer(reducer, {
     latestSongs: [],
@@ -407,26 +404,31 @@ export const HomePage = () => {
               label: 'Show Notification',
               iconName: 'notifications_active',
               handlerFunction: () =>
-                updateNotificationPanelData(
-                  60000,
-                  <>This is a notification with a very long text.</>,
-                  <span className="material-icons-round icon">
-                    notifications_active
-                  </span>,
-                  [
-                    {
-                      label: 'Button',
-                      iconName: 'sync',
-                      className:
-                        '!bg-background-color-3 dark:!bg-dark-background-color-3 !text-font-color-black dark:!text-font-color-black !font-light',
-                      clickHandler: () => true,
-                    },
-                  ]
-                ),
+                addNewNotifications([
+                  {
+                    id: 'testNotification',
+                    delay: 60000,
+                    content: <>This is a notification with a very long text.</>,
+                    icon: (
+                      <span className="material-icons-round icon">
+                        notifications_active
+                      </span>
+                    ),
+                    buttons: [
+                      {
+                        label: 'Button',
+                        iconName: 'sync',
+                        className:
+                          '!bg-background-color-3 dark:!bg-dark-background-color-3 !text-font-color-black dark:!text-font-color-black !font-light',
+                        clickHandler: () => true,
+                      },
+                    ],
+                  },
+                ]),
             },
           ]
         : [],
-    [changePromptMenuData, updateNotificationPanelData]
+    [changePromptMenuData, addNewNotifications]
   );
 
   return (
@@ -503,7 +505,7 @@ export const HomePage = () => {
         </MainContainer>
       )}
       {content.latestSongs[0] === null && (
-        <div className="no-songs-container h-full w-full text-[#ccc] text-center flex flex-col items-center justify-center text-2xl">
+        <div className="no-songs-container h-full w-full text-font-color-black dark:text-font-color-white text-center flex flex-col items-center justify-center text-2xl">
           <img
             src={NoSongsImage}
             className="w-60 mb-8"
@@ -512,7 +514,7 @@ export const HomePage = () => {
           <div>There&apos;s nothing here. Do you know where are they?</div>
           <Button
             label="Add Folder"
-            className="text-[#ccc] dark:text-[#ccc] rounded-md mt-4 px-8 text-lg"
+            className="mt-4 px-8 text-lg w-40 !bg-background-color-3 dark:!bg-dark-background-color-3 text-font-color-black dark:text-font-color-black rounded-md hover:border-background-color-3 dark:hover:border-background-color-3"
             clickHandler={addNewSongs}
           />
         </div>

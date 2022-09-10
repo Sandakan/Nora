@@ -22,7 +22,7 @@ export const Album = (props: AlbumProp) => {
     createQueue,
     updateContextMenuData,
     updateQueueData,
-    updateNotificationPanelData,
+    addNewNotifications,
   } = React.useContext(AppUpdateContext);
 
   const playAlbum = React.useCallback(
@@ -65,13 +65,18 @@ export const Album = (props: AlbumProp) => {
               handlerFunction: () => {
                 queue.queue.push(...props.songs.map((song) => song.songId));
                 updateQueueData(undefined, queue.queue);
-                updateNotificationPanelData(
-                  5000,
-                  <span>
-                    Added {props.songs.length} song
-                    {props.songs.length === 1 ? '' : 's'} to the queue.
-                  </span>
-                );
+                addNewNotifications([
+                  {
+                    id: 'newSongsToQueue',
+                    delay: 5000,
+                    content: (
+                      <span>
+                        Added {props.songs.length} song
+                        {props.songs.length === 1 ? '' : 's'} to the queue.
+                      </span>
+                    ),
+                  },
+                ]);
               },
             },
             {
