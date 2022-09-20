@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: Bug in Oto Music for Desktop
+title: Description of the bug in simple terms
 labels: bug, good first issue
 assignees: Sandakan
 
@@ -25,12 +25,11 @@ If applicable, add screenshots to help explain your problem.
 
 **Log File**
 Please attach the log file of the app to better understand what went wrong in the app.
-It is situated in *C:\Users\USER_NAME\AppData\Roaming\oto-music-for-desktop\logs.txt*
+It is situated in *C:\Users\USER_NAME\AppData\Roaming\oto-music-for-desktop\logs.txt* on Windows.
 
 **Desktop (please complete the following information):**
  - OS: [e.g. Windows 10]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+ - Affected App Version: [e.g.>=0.8.0-alpha]
 
 **Additional context**
 Add any other context about the problem here.
