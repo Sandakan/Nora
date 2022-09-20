@@ -27,7 +27,7 @@ If applicable, add screenshots to help explain your problem.
 Please attach the log file of the app to better understand what went wrong in the app.
 It is situated in *C:\Users\USER_NAME\AppData\Roaming\oto-music-for-desktop\logs.txt* on Windows.
 
-**Desktop (please complete the following information):**
+**System Information:**
  - OS: [e.g. Windows 10]
  - Affected App Version: [e.g.>=0.8.0-alpha]
 
