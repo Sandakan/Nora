@@ -10,6 +10,8 @@
   <a href="https://github.com/Sandakan/Oto-Music-for-Desktop/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/Sandakan/Oto-Music-for-Desktop?style=for-the-badge"></a>
  </div>
  <br/>
+<img class="logo" src="https://user-images.githubusercontent.com/45460443/194204486-4b580128-f2c4-4afa-acf6-d2a20fc5f324.png" alt="Notice !!! Oto Music for Desktop will be rebranded as Nora in an upcoming release.">
+ <br/>
 <p>
    Oto Music for Desktop is an elegant music player built using Electron and React. Inspired by <a href="https://play.google.com/store/apps/details?id=com.piyush.music&gl=us">Oto Music for Android</a> by Piyush Mamidwar.
 </p>
