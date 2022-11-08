@@ -159,7 +159,7 @@
     "electron-notarize": "^1.2.1",
     "electron-rebuild": "^3.2.7",
     "electronmon": "^2.0.2",
-    "eslint": "^8.15.0",
+    "eslint": "^8.27.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-erb": "^4.0.3",
     "eslint-import-resolver-typescript": "^2.7.1",
