@@ -1,0 +1,425 @@
+/* 
+  * App is mainly styled using Tailwind.css
+  * This css file is here to achieve some styling requirements that otherwise 
+  * wouldn't be able to achieve using Tailwind.css like Electron specific styles.
+
+  * This file previously had 3200+ lines.
+*/
+
+/* ? POPPINS FONT CONFIG */
+@font-face {
+  font-family: 'Poppins';
+  src: url('../../assets/fonts/Poppins-Light.ttf');
+  font-weight: 300;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('../../assets/fonts/Poppins-Regular.ttf');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('../../assets/fonts/Poppins-Medium.ttf');
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('../../assets/fonts/Poppins-SemiBold.ttf');
+  font-weight: 600;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('../../assets/fonts/Poppins-Bold.ttf');
+  font-weight: 700;
+}
+
+/* ? MATERIAL ICONS CONFIG */
+@font-face {
+  font-family: 'Material Icons Round';
+  font-style: normal;
+  src: url('../fonts/MaterialSymbolsRounded.ttf');
+}
+
+/* ? ROOT STYLES */
+:root {
+  --background-color-1: hsl(0, 0%, 100%);
+  --background-color-2: hsl(212, 48%, 94%);
+  --background-color-3: hsl(213, 80%, 88%);
+  --side-bar-background: hsl(212, 50%, 94%);
+  --background-color-dimmed: hsla(0, 0%, 30%, 0.5);
+  --song-background-color: var(--background-color-1);
+  --text-color: #000;
+  --text-color-dimmed: hsl(0, 0%, 50%);
+  --text-color-white: #fff;
+  --font-color-crimson: hsl(348, 83%, 47%);
+  --text-color-highlight: hsl(203, 39%, 44%);
+  --text-color-highlight-2: hsl(247, 74%, 63%);
+  --context-menu-background: hsla(0, 0%, 100%, 0.9);
+  --context-menu-list-hover: hsla(198, 18%, 89%, 0.75);
+  --foreground-color-1: hsl(247, 74%, 65%);
+  --transition-duration-0_2s: 0.2s;
+  --transition-duration-0_25s: 0.25s;
+  --transition-duration-0_3s: 0.3s;
+  --bg-image-brightness: 0.9;
+}
+
+/* ? BASIC STYLING */
+html {
+  scroll-behavior: smooth;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+*:focus {
+  outline: var(--text-color-highlight-2) !important;
+}
+
+/* ? DEFAULT SCROLL BAR STYLES */
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  background-color: var(--background-color-1);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 8px;
+  background-color: var(--background-color-1);
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: hsl(212, 48%, 94%);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--background-color-3);
+}
+
+/* ? MATERIAL SYMBOLS STYLES */
+.material-icons-round {
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'liga';
+  user-select: none;
+}
+
+.material-icons-round {
+  font-family: 'Material Icons Round';
+  font-variation-settings: 'FILL' 1;
+}
+
+.material-icons-round-outlined {
+  font-family: 'Material Icons Round';
+  font-variation-settings: 'FILL' 0;
+}
+
+/* ? BODY STYLES */
+body,
+#root {
+  width: 100%;
+  height: 100vh;
+  overflow-x: hidden;
+  background-color: var(--background-color-1);
+}
+
+body,
+body * {
+  transition: color var(--transition-duration-0_2s) linear, background-color var(--transition-duration-0_2s) linear;
+  -webkit-transition: color var(--transition-duration-0_2s) linear, background-color var(--transition-duration-0_2s) linear;
+  -moz-transition: color var(--transition-duration-0_2s) linear, background-color var(--transition-duration-0_2s) linear;
+  -ms-transition: color var(--transition-duration-0_2s) linear, background-color var(--transition-duration-0_2s) linear;
+  -o-transition: color var(--transition-duration-0_2s) linear, background-color var(--transition-duration-0_2s) linear;
+}
+
+/* ? APP DARK THEME STYLES */
+.App.dark {
+  --background-color-1: rgb(33, 34, 38);
+  --background-color-2: hsla(225, 8%, 20%, 100%);
+  --background-color-3: hsla(213, 80%, 88%, 100%);
+  --song-background-color: var(--background-color-2);
+  --side-bar-background: hsla(228, 7%, 20%, 100%);
+  --text-color: hsl(0, 0%, 100%);
+  --text-color-dimmed: hsl(0, 0%, 50%);
+  --text-color-highlight: hsl(213, 80%, 88%);
+  --text-color-highlight-2: hsl(244, 98%, 80%);
+  --context-menu-background: hsla(228, 7%, 14%, 90%);
+  --context-menu-list-hover: hsl(224, 8%, 28%);
+  --bg-image-brightness: 0.75;
+}
+
+/* ? APP REDUCED MOTION STYLES */
+:is(.App.reduced-motion,
+  .mini-player.reduced-motion) * {
+  animation-duration: 0ms !important;
+  transition-duration: 0ms !important;
+}
+
+/* ? TITLE BAR STYLES */
+#title-bar {
+  -webkit-app-region: drag;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+:is(.previousPageBtn, .forwardPageBtn, .goToHomePageBtn).available,
+.special-controls-container :is(.go-to-main-player-btn, .always-on-top-btn),
+.special-controls-and-indicators-container :is(.indicators-container, .special-controls-container),
+.window-controls-container :is(.minimize-btn, .maximize-btn, .close-btn) {
+  -webkit-app-region: no-drag;
+}
+
+/* 
+ ?  CONTEXT MENU STYLING 
+
+.context-menu::-webkit-scrollbar-track {
+  background-color: transparent;
+  box-shadow: transparent;
+  -webkit-box-shadow: transparent;
+}
+
+*/
+
+/* ? SEEKBAR STYLING */
+input[type='range']::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 0.25rem;
+  cursor: pointer;
+  background: rgba(204, 204, 204, 0.75);
+  border-radius: 5rem;
+}
+
+[type='range']::-webkit-slider-thumb {
+  position: relative;
+  -webkit-appearance: none;
+  box-sizing: content-box;
+  border: 0.15rem solid var(--foreground-color-1);
+  height: 0.75rem;
+  width: 0.75rem;
+  border-radius: 50%;
+  background-color: var(--foreground-color-1);
+  cursor: pointer;
+  margin: -7px 0 0 0;
+  opacity: 0;
+  transition-property: transform, opacity;
+  transition: 150ms ease-in-out;
+  -webkit-transition: 150ms ease-in-out;
+  -moz-transition: 150ms ease-in-out;
+  -ms-transition: 150ms ease-in-out;
+  -o-transition: 150ms ease-in-out;
+  transform: scale(0);
+  -webkit-transform: scale(0);
+  -moz-transform: scale(0);
+  -ms-transform: scale(0);
+  -o-transform: scale(0);
+}
+
+input[type='range']:hover::-webkit-slider-thumb {
+  opacity: 1;
+  transform: scale(1);
+  -webkit-transform: scale(1);
+  -moz-transform: scale(1);
+  -ms-transform: scale(1);
+  -o-transform: scale(1);
+}
+
+input[type='range']:active::-webkit-slider-thumb {
+  transform: scale(1.2);
+  background: var(--foreground-color-1);
+}
+
+/* ? CHECKBOX STYLING */
+input[type="checkbox"]:checked~.checkmark .icon {
+  opacity: 1;
+}
+
+/* ? THEME RADIO BUTTONS STYLES */
+.theme-change-radio-btns>.theme-change-radio-btn input[type="radio"]:checked+*::before {
+  background: radial-gradient(var(--text-color-highlight) 0%, var(--text-color-highlight) 40%, transparent 50%, transparent);
+  border-color: var(--text-color-highlight);
+}
+
+.theme-change-radio-btns>.theme-change-radio-btn input[type="radio"]:checked+* {
+  color: var(--text-color-highlight);
+}
+
+/* ? MINI PLAYER STYLES */
+.mini-player .container .title-bar {
+  -webkit-app-region: drag;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.mini-player .container .song-info-container {
+  background: linear-gradient(180deg, rgba(2, 0, 36, 0) 0%, rgba(33, 34, 38, 0.9) 100%);
+}
+
+.mini-player .container .seek-slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 0.25rem;
+  cursor: pointer;
+  background: transparent;
+  border-radius: 5rem;
+}
+
+/* ? / / / /  KEYFRAMES / / / / / / / */
+.appear-from-bottom {
+  opacity: 0;
+  transform: translateY(2rem);
+  -webkit-transform: translateY(2rem);
+  -moz-transform: translateY(2rem);
+  -ms-transform: translateY(2rem);
+  -o-transform: translateY(2rem);
+  animation: appearFromBottom var(--transition-duration-0_25s) ease forwards;
+  -webkit-animation: appearFromBottom var(--transition-duration-0_25s) ease forwards;
+}
+
+.disappear-to-bottom {
+  opacity: 1;
+  transform: translateY(0rem);
+  -webkit-transform: translateY(0rem);
+  -moz-transform: translateY(0rem);
+  -ms-transform: translateY(0rem);
+  -o-transform: translateY(0rem);
+  animation: disappearToBottom var(--transition-duration-0_25s) ease forwards;
+  -webkit-animation: disappearToBottom var(--transition-duration-0_25s) ease forwards;
+}
+
+@keyframes appearFromBottom {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    -webkit-transform: translateY(0);
+    -moz-transform: translateY(0);
+    -ms-transform: translateY(0);
+    -o-transform: translateY(0);
+  }
+}
+
+@keyframes disappearToBottom {
+  to {
+    opacity: 0;
+    transform: translateY(2rem);
+    -webkit-transform: translateY(2rem);
+    -moz-transform: translateY(2rem);
+    -ms-transform: translateY(2rem);
+    -o-transform: translateY(2rem);
+  }
+}
+
+@keyframes audioLoadingAnimation {
+  0% {
+    transform: translateX(-50%);
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+  }
+
+  50% {
+    transform: translateX(300%);
+    -webkit-transform: translateX(300%);
+    -moz-transform: translateX(300%);
+    -ms-transform: translateX(300%);
+    -o-transform: translateX(300%);
+  }
+
+  100% {
+    transform: translateX(-50%);
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+  }
+}
+
+@keyframes loading {
+  50% {
+    transform: translateX(var(--loading-bar-width));
+    -webkit-transform: translateX(var(--loading-bar-width));
+    -moz-transform: translateX(var(--loading-bar-width));
+    -ms-transform: translateX(var(--loading-bar-width));
+    -o-transform: translateX(var(--loading-bar-width));
+  }
+
+}
+
+@keyframes dialogAppear {
+  from {
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, -50%) scale(0.7);
+    -webkit-transform: translate(-50%, -50%) scale(0.7);
+    -moz-transform: translate(-50%, -50%) scale(0.7);
+    -ms-transform: translate(-50%, -50%) scale(0.7);
+    -o-transform: translate(-50%, -50%) scale(0.7);
+  }
+
+  to {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+    -webkit-transform: translate(-50%, -50%) scale(1);
+    -moz-transform: translate(-50%, -50%) scale(1);
+    -ms-transform: translate(-50%, -50%) scale(1);
+    -o-transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes dialogDisappear {
+  from {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+    -webkit-transform: translate(-50%, -50%) scale(1);
+    -moz-transform: translate(-50%, -50%) scale(1);
+    -ms-transform: translate(-50%, -50%) scale(1);
+    -o-transform: translate(-50%, -50%) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, -50%) scale(0.7);
+    -webkit-transform: translate(-50%, -50%) scale(0.7);
+    -moz-transform: translate(-50%, -50%) scale(0.7);
+    -ms-transform: translate(-50%, -50%) scale(0.7);
+    -o-transform: translate(-50%, -50%) scale(0.7);
+  }
+
+}
+
+@keyframes appearBackgroundImage {
+  from {
+    opacity: 0%;
+    filter: blur(0) brightness(0);
+  }
+
+  to {
+    opacity: 100%;
+    filter: blur(12px) brightness(var(--bg-image-brightness));
+  }
+
+}

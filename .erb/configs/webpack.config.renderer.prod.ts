@@ -108,6 +108,7 @@ const configuration: webpack.Configuration = {
     minimizer: [
       new TerserPlugin({
         parallel: true,
+        terserOptions: { compress: { drop_console: true } },
       }),
       new CssMinimizerPlugin(),
     ],

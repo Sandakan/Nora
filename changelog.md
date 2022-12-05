@@ -1,19 +1,76 @@
 <h1> Change Log</h1>
 
-<h3>The latest version (v0.8.0-alpha) contains a lot of new features and improvements. As always expect to see bugs in the app because this app is still in alpha phase.</h3>
+<h3>The latest version (v1.0.0-alpha) contains a lot of new features and improvements. As always expect to see bugs in the app because this app is still in alpha phase.</h3>
 
 <br>
 
-<img src="assets\other\release artworks\whats-new-v0.8.0-alpha.png">
+<img src="assets\other\release artworks\whats-new-v1.0.0-alpha.png">
 
 <br>
 
 <ul>
+  <li class="version"> <h3> v1.0.0-alpha - ( 30<sup>th</sup> of October 2022 )</h3>
+    <ul>
+      <li><h4>🎉 New Features and Updates</h4>
+      <ul>
+        <li>Oto Music for Desktop rebranded as Nora.</li>
+        <li>Now users can fetch song metadata from internet and update their songs. (Experimental)</li>
+        <li>Support for Synced Lyrics.</li>
+        <li>Lyrics from Musixmatch (Implementation from Fashni's <a href ="https://github.com/fashni/MxLRC">MxLRC package</a>). (Experimental)</li>
+        <li>Now users can go back and forward when going through different pages. (Experimental)</li>
+        <li>Now users can select multiple songs, artists etc and do specific tasks with them. (Experimental)</li>
+        <li>New background artworks when viewing ArtistsPage, SongInfoPage etc.</li>
+        <li>Now users can like/dislike artists.</li>
+        <li>Now users can add artworks to user-created playlists.</li>
+        <li>Now users can sort playlists.</li>
+        <li>Support for recording listening patterns. (Experimental)</li>
+        <li>New metrics about listening patterns of a song in SongInfoPage. (Experimental)</li>
+        <li>Now users can clear search history results.</li>
+        <li>Added nora protocol. Now you can open nora from the web browser using nora://.</li>
+        <li>Added React error boundaries to prevent app from crashing due to unexpected exceptions.</li>
+        <li>Now users can play songs in a specific genre directly from the GenreInfoPage.</li>
+      </ul>
+      </li>
+      <li> <h4>🔨 Fixes and Improvements</h4>
+        <ul>
+        <li>Updated some keyboard shortcuts of the app.</li>
+        <li>Fixed a bug where removing a music folder from the library will still look for updates on that folder.</li>
+        <li>Fixed a bug where adding a new music folder and adding songs to that folder wouldn't update the music library of the app.</li>
+        <li>Fixed a bug where deleting a music folder from the system wouldn't update the music library of the app.</li>
+        <li>Fixed a bug where always on top function of Mini Player is not working as expected.</li>
+        <li>Fixed a bug where context menus are not positioning as expected.</li>
+        <li>Fixed a bug where HomePage not showing the correct recently played songs.</li>
+        <li>Fixed a bug where checking for app updates is not working as expected.</li>
+        <li>Fixed a bug where Lyrics on some songs aren't being read by the app.</li>
+        <li>Removed some unnecessary resources and updated some existing resources.</li>
+        <li>Cleaned up unnecessary styles.</li>
+        <li>Updated open-source licenses.</li>
+        <li>Fixed some accessibility issues.</li>
+        <li>Updated some npm packages and fixed some security vulnerabilities of dependencies.</li>
+        </ul>
+      </li>
+      <li><h4>🐜 Known Issues and Bugs</h4>
+        <ul>
+          <li>Sometimes users can get unexpected search results when using Search.</li>
+          <li>Parsing a big music library could sometimes make the app unresponsive. Currently, the only solution is to wait some time until the parsing process finishes and the app regains responsiveness.</li>
+          <li>App theme will be changed when you change your system's theme even though you didn't select to use system theme in the app.</li>
+          <li>If a song is added next to the last song of the queue, the last song won't be played.</li>
+          <li>Trying to play corrupted songs will make the app player unusable.</li>
+          <li>Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song.</li>
+          <li>There is still a small amount of unwanted cpu consumption due to over-rendering of components.</li>
+        </ul>
+      </li>
+    </ul>
+
+  </li>
+
+  <br/>
+
   <li class="version"> <h3> v0.8.0-alpha - ( 19<sup>th</sup> of August 2022 )</h3>
     <ul>
       <li><h4>🎉 New Features and Updates</h4>
       <ul>
-        <li>Now double-clicking on a supported song in the File Explorer would play it on the app. Be sure if you made Oto Music the default audio player for the respective audio file. (Experimental)</li>
+        <li>Now double-clicking on a supported song in the File Explorer would play it on the app. Be sure if you made Nora the default audio player for the respective audio file. (Experimental)</li>
         <li>Now users can drag and drop a supported audio file to play it on the player. (Experimental)</li>
         <li>Now users can edit song id3 tags. (Experimental)</li>
         <li>Added windowing technique to improve app performance. Before this update, app would take considerable amount of time to render a huge song library but now it renders almost instantly. (Experimental)</li>
@@ -41,7 +98,6 @@
       <li> <h4>🐜 Known Issues and Bugs</h4>
         <ul>
           <li>Parsing a big music library could sometimes make the app unresponsive. Currently, the only solution is to wait some time until the parsing process finishes and the app regains responsiveness.</li>
-          <li>App theme will be changed when you change your system's theme even though you didn't select to use system theme in the app.</li>
           <li>App theme will be changed when you change your system's theme even though you didn't select to use system theme in the app.</li>
           <li>Lyrics on some songs aren't being read by the app. Still you will be able to see lyrics from the internet.</li>
           <li>If a song is added next to the last song of the queue, the last song won't be played.</li>

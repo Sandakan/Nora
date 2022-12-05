@@ -7,14 +7,11 @@
 import React from 'react';
 import ContextMenuItem from './ContextMenuItem';
 import { AppContext } from '../../contexts/AppContext';
+import ContextMenuDataItem from './ContextMenuDataItem';
 
 const ContextMenu = React.memo(() => {
-  const {
-    contextMenuPageX,
-    contextMenuPageY,
-    isContextMenuVisible,
-    contextMenuItems,
-  } = React.useContext(AppContext);
+  const { contextMenuData } = React.useContext(AppContext);
+  const { isVisible, menuItems, pageX, pageY, data } = contextMenuData;
 
   const contextMenuRef = React.useRef(null as null | HTMLDivElement);
   const [dimensions, setDimensions] = React.useState({
@@ -37,34 +34,38 @@ const ContextMenu = React.memo(() => {
       const viewportWidth = window.innerWidth;
       const menuHeight = contextMenuRef.current.clientHeight;
       const menuWidth = contextMenuRef.current.clientWidth;
+      // console.log('viewportHeight', viewportHeight, 'viewportWidth', viewportWidth, 'menuHeight', menuHeight, 'menuWidth', menuWidth, 'pageX', pageX, 'pageY', pageY);
+
       setDimensions({
         width: menuWidth,
         height: menuHeight,
         positionX:
-          contextMenuPageX + menuWidth > viewportWidth
-            ? contextMenuPageX - menuWidth
-            : contextMenuPageX,
+          pageX + menuWidth > viewportWidth ? pageX - menuWidth : pageX,
         positionY:
-          contextMenuPageY + menuHeight > viewportHeight
-            ? contextMenuPageY - menuHeight
-            : contextMenuPageY,
+          pageY + menuHeight > viewportHeight
+            ? pageY -
+              menuHeight +
+              // ? 40px get added to stop the context menu from reaching the title-bar.
+              // ? Height of the title bar is  60px (3.75rem).
+              (pageY - menuHeight > 60 ? 0 : 60)
+            : pageY,
         transformOrigin: `${
-          contextMenuPageY + menuHeight > viewportHeight ? 'bottom' : 'top'
-        } ${contextMenuPageX + menuWidth > viewportWidth ? 'right' : 'left'}`,
+          pageY + menuHeight > viewportHeight ? 'bottom' : 'top'
+        } ${pageX + menuWidth > viewportWidth ? 'right' : 'left'}`,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contextMenuItems]);
+  }, [contextMenuData]);
 
-  const menuItems = React.useMemo(
+  const contextMenuItems = React.useMemo(
     () =>
-      contextMenuItems.map((menuItem, index) => {
+      menuItems.map((menuItem, index) => {
         if (menuItem.isContextMenuItemSeperator)
           return (
             <div
               key={index}
               role="separator"
-              className="context-menu-item-seperator h-[2px] w-[95%] bg-[hsla(0deg,0%,57%,0.5)] my-2 float-right"
+              className="context-menu-item-seperator float-right my-2 h-[2px] w-[95%] bg-[hsla(0deg,0%,57%,0.5)]"
             />
           );
         return (
@@ -78,15 +79,15 @@ const ContextMenu = React.memo(() => {
         );
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [contextMenuItems]
+    [menuItems]
   );
   return (
     <div
       className={`context-menu ${
-        isContextMenuVisible
-          ? 'opacity-100 scale-100'
-          : 'opacity-0 invisible scale-75'
-      } bg-context-menu-background dark:bg-dark-context-menu-background backdrop-blur-sm h-fit w-fit  min-w-[13.75rem] fixed z-[5] py-2 rounded-lg text-font-color-black dark:text-font-color-white origin-top-left transition-[opacity,transform,visibility] shadow-[10px_0px_53px_0px_rgba(0,0,0,0.22)]`}
+        isVisible ? 'scale-100 opacity-100' : 'invisible scale-75 opacity-0'
+      } ${
+        !data && 'pt-2'
+      } absolute z-20 h-fit w-fit min-w-[13.75rem] origin-top-left overflow-hidden overflow-y-auto rounded-lg bg-context-menu-background pt-1 pb-1 text-font-color-black shadow-[10px_0px_53px_0px_rgba(0,0,0,0.22)] backdrop-blur-sm transition-[opacity,transform,visibility] dark:bg-dark-context-menu-background dark:text-font-color-white `}
       onClick={(e) => e.stopPropagation()}
       style={{
         top: dimensions.positionY,
@@ -95,7 +96,10 @@ const ContextMenu = React.memo(() => {
       }}
       ref={contextMenuRef}
     >
-      {menuItems}
+      <>
+        {data && <ContextMenuDataItem data={data} />}
+        {contextMenuItems}
+      </>
     </div>
   );
 });

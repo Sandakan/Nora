@@ -1,66 +1,25 @@
-/* eslint-disable prefer-promise-reject-errors */
-/* eslint-disable promise/no-nesting */
 /* eslint-disable consistent-return */
-/* eslint-disable promise/no-return-in-finally */
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable import/newline-after-import */
-/* eslint-disable import/no-cycle */
-/* eslint-disable @typescript-eslint/no-shadow */
-/* eslint-disable prefer-const */
-/* eslint-disable no-async-promise-executor */
-/* eslint-disable @typescript-eslint/return-await */
-/* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-await-in-loop */
-/* eslint-disable promise/always-return */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-else-return */
-/* eslint-disable no-param-reassign */
-/* eslint-disable no-plusplus */
 import fs from 'fs/promises';
 import fsSync from 'fs';
 import path from 'path';
-import { app, shell } from 'electron';
+import { app } from 'electron';
 import Store from 'electron-store';
-import sharp from 'sharp';
-import { parseSong } from './parseSong';
 import log from './log';
-import { getAssetPath, dataUpdateEvent, sendMessageToRenderer } from './main';
+import { dataUpdateEvent } from './main';
 import { appPreferences } from '../../package.json';
-import { generateRandomId } from './randomId';
 
-const dataStore = new Store({
-  name: 'data',
-});
-const userDataStore = new Store({
-  name: 'userData',
-});
+// const RESOURCES_PATH = app.isPackaged
+//   ? path.join(process.resourcesPath, 'assets')
+//   : path.join(__dirname, '../../assets');
 
-const playlistDataStore = new Store({
-  name: 'playlists',
-});
-
-const RESOURCES_PATH = app.isPackaged
-  ? path.join(process.resourcesPath, 'assets')
-  : path.join(__dirname, '../../assets');
-
-const supportedMusicExtensions = appPreferences.supportedMusicExtensions.map(
-  (x) => `.${x}`
+export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(
+  app.getPath('userData'),
+  'song_covers'
 );
+export const DEFAULT_FILE_URL = 'nora://localFiles/';
 
-let cachedData: Data = dataStore.store as any;
-let cachedPlaylistsData: { playlists: Playlist[] } =
-  playlistDataStore.store as any;
-let cachedUserData: UserData = userDataStore.store as any;
-
-const songDataTemplate: Data = {
-  songs: [],
-  albums: [],
-  artists: [],
-  genres: [],
-};
-
-const userDataTemplate: UserData = {
+const USER_DATA_TEMPLATE: UserData = {
   theme: { isDarkMode: false, useSystemTheme: true },
   currentSong: { songId: null, stoppedPosition: 0 },
   volume: { isMuted: false, value: 100 },
@@ -78,61 +37,222 @@ const userDataTemplate: UserData = {
     doNotVerifyWhenOpeningLinks: false,
     showSongRemainingTime: false,
     showArtistArtworkNearSongControls: false,
+    isMusixmatchLyricsEnabled: false,
+    disableBackgroundArtworks: false,
   },
   windowPositions: {},
   windowDiamensions: {},
   sortingStates: {},
   recentSearches: [],
 };
-const playlistDataTemplate: PlaylistDataTemplate = {
-  playlists: [
-    {
-      name: 'History',
-      playlistId: 'History',
-      createdDate: new Date(),
-      songs: [],
-      artworkPath: path.join(
-        RESOURCES_PATH,
-        'images',
-        'png',
-        'history-playlist-icon.png'
-      ),
-    },
-    {
-      name: 'Favorites',
-      playlistId: 'Favorites',
-      createdDate: new Date(),
-      songs: [],
-      artworkPath: path.join(
-        RESOURCES_PATH,
-        'images',
-        'png',
-        'favorites-playlist-icon.png'
-      ),
-    },
-  ],
+export const HISTORY_PLAYLIST_TEMPLATE: SavablePlaylist = {
+  name: 'History',
+  playlistId: 'History',
+  createdDate: new Date(),
+  songs: [],
+  isArtworkAvailable: true,
 };
+export const FAVORITES_PLAYLIST_TEMPLATE: SavablePlaylist = {
+  name: 'Favorites',
+  playlistId: 'Favorites',
+  createdDate: new Date(),
+  songs: [],
+  isArtworkAvailable: true,
+};
+const PLAYLIST_DATA_TEMPLATE: SavablePlaylist[] = [
+  HISTORY_PLAYLIST_TEMPLATE,
+  FAVORITES_PLAYLIST_TEMPLATE,
+];
 
-if (cachedData && Object.keys(cachedData).length === 0) {
-  dataStore.set({ ...songDataTemplate });
-  cachedData = songDataTemplate;
-}
-if (cachedUserData && Object.keys(cachedUserData).length === 0) {
-  userDataStore.set({ ...userDataTemplate });
-  cachedUserData = userDataTemplate;
-}
-if (cachedPlaylistsData && Object.keys(cachedPlaylistsData).length === 0) {
-  playlistDataStore.set({ ...playlistDataTemplate });
-  cachedPlaylistsData = playlistDataTemplate;
-}
+const songStore = new Store({
+  name: 'songs',
+  defaults: {
+    songs: [],
+  },
+  schema: {
+    songs: {
+      type: 'array',
+    },
+  },
+  beforeEachMigration: (_store, context) => {
+    log(
+      `Migrating songs.json from app versions ${context.fromVersion} → ${context.toVersion}`
+    );
+  },
+  migrations: {
+    '1.0.0-alpha': (store) => {
+      log('Starting the songs.json migration process.', {
+        version: '>=1.0.0-alpha;',
+      });
+      const songs = store.get('songs') as SavableSongData[];
+      if (Array.isArray(songs) && songs.length > 0) {
+        const updatedSongs: SavableSongData[] = songs.map((song) => {
+          return {
+            ...song,
+            addedDate:
+              typeof song.addedDate === 'string'
+                ? new Date(song.addedDate).getTime()
+                : song.addedDate,
+            modifiedDate:
+              typeof song.modifiedDate === 'string'
+                ? new Date(song.modifiedDate).getTime()
+                : song.modifiedDate,
+            createdDate:
+              typeof song.createdDate === 'string'
+                ? new Date(song.createdDate).getTime()
+                : song.createdDate,
+          };
+        });
+        store.set('songs', updatedSongs);
+      }
+    },
+  },
+});
+const artistStore = new Store({
+  name: 'artists',
+  defaults: {
+    artists: [],
+  },
+  schema: {
+    artists: {
+      type: 'array',
+    },
+  },
+  beforeEachMigration: (_store, context) => {
+    log(
+      `Migrating artists.json from app versions ${context.fromVersion} → ${context.toVersion}`
+    );
+  },
+  migrations: {
+    '0.8.0-alpha+2022091400': (store) => {
+      log(
+        'Starting the artists.json migration process.\nVERSION :>=0.8.0-alpha+2022091400;'
+      );
+      const artists = store.get('artists') as SavableArtist[];
+      if (Array.isArray(artists) && artists.length > 0) {
+        const updatedArtists: SavableArtist[] = artists.map((artist) => {
+          return {
+            ...artist,
+            isAFavorite: artist.isAFavorite ?? false,
+          };
+        });
+        store.set('artists', updatedArtists);
+      }
+    },
+  },
+});
+const genreStore = new Store({
+  name: 'genres',
+  defaults: {
+    genres: [],
+  },
+  schema: {
+    genres: {
+      type: 'array',
+    },
+  },
+  beforeEachMigration: (_store, context) => {
+    log(
+      `Migrating genres.json from app versions ${context.fromVersion} → ${context.toVersion}`
+    );
+  },
+});
+const albumStore = new Store({
+  name: 'albums',
+  defaults: {
+    albums: [],
+  },
+  schema: {
+    albums: {
+      type: 'array',
+    },
+  },
+  beforeEachMigration: (_store, context) => {
+    log(
+      `Migrating albums.json from app versions ${context.fromVersion} → ${context.toVersion}`
+    );
+  },
+});
+
+const playlistDataStore = new Store({
+  name: 'playlists',
+  defaults: {
+    playlists: PLAYLIST_DATA_TEMPLATE,
+  },
+  schema: {
+    playlists: {
+      type: 'array',
+    },
+  },
+  beforeEachMigration: (_store, context) => {
+    log(
+      `Migrating playlists.json from app versions ${context.fromVersion} → ${context.toVersion}`
+    );
+  },
+});
+
+const userDataStore = new Store({
+  name: 'userData',
+  defaults: {
+    userData: USER_DATA_TEMPLATE,
+  },
+  schema: {
+    userData: {
+      type: 'object',
+    },
+  },
+  beforeEachMigration: (_store, context) => {
+    log(
+      `Migrating userData.json from app versions ${context.fromVersion} → ${context.toVersion}`
+    );
+  },
+});
+
+const listeningDataStore = new Store({
+  name: 'listening_data',
+  clearInvalidConfig: true,
+  defaults: {
+    listeningData: [],
+  },
+  schema: {
+    listeningData: {
+      type: 'array',
+    },
+  },
+  beforeEachMigration: (_store, context) => {
+    log(
+      `Migrating listeningData.json from app versions ${context.fromVersion} → ${context.toVersion}`
+    );
+  },
+});
+
+export const supportedMusicExtensions =
+  appPreferences.supportedMusicExtensions.map((x) => `.${x}`);
+
+let cachedSongsData = songStore.get('songs', []) as SavableSongData[];
+let cachedArtistsData = artistStore.get('artists', []) as SavableArtist[];
+let cachedAlbumsData = albumStore.get('albums', []) as SavableAlbum[];
+let cachedGenresData = genreStore.get('genres', []) as SavableGenre[];
+let cachedPlaylistsData = playlistDataStore.get(
+  'playlists',
+  PLAYLIST_DATA_TEMPLATE
+) as SavablePlaylist[];
+let cachedUserData: UserData = userDataStore.get(
+  'userData',
+  USER_DATA_TEMPLATE
+) as UserData;
+let cachedListeningData = listeningDataStore.get(
+  'listeningData',
+  []
+) as SongListeningData[];
 
 export const getUserData = () => {
   if (cachedUserData && Object.keys(cachedUserData).length !== 0)
     return cachedUserData;
-  else return userDataStore.store as any as UserData;
+  return userDataStore.get('userData', USER_DATA_TEMPLATE) as UserData;
 };
 
-export const setUserData = (dataType: UserDataTypes, data: unknown) => {
+export function setUserData(dataType: UserDataTypes, data: unknown) {
   const userData = getUserData();
   if (userData) {
     if (dataType === 'theme' && typeof data === 'object')
@@ -211,7 +331,7 @@ export const setUserData = (dataType: UserDataTypes, data: unknown) => {
       dataType === 'preferences.isMiniPlayerAlwaysOnTop' &&
       typeof data === 'boolean'
     ) {
-      userData.preferences.autoLaunchApp = data;
+      userData.preferences.isMiniPlayerAlwaysOnTop = data;
     } else if (
       dataType === 'preferences.doNotVerifyWhenOpeningLinks' &&
       typeof data === 'boolean'
@@ -223,10 +343,25 @@ export const setUserData = (dataType: UserDataTypes, data: unknown) => {
     ) {
       userData.preferences.noUpdateNotificationForNewUpdate = data;
     } else if (
+      dataType === 'preferences.showArtistArtworkNearSongControls' &&
+      typeof data === 'boolean'
+    ) {
+      userData.preferences.showArtistArtworkNearSongControls = data;
+    } else if (
       dataType === 'preferences.showSongRemainingTime' &&
       typeof data === 'boolean'
     ) {
       userData.preferences.showSongRemainingTime = data;
+    } else if (
+      dataType === 'preferences.isMusixmatchLyricsEnabled' &&
+      typeof data === 'boolean'
+    ) {
+      userData.preferences.isMusixmatchLyricsEnabled = data;
+    } else if (
+      dataType === 'preferences.disableBackgroundArtworks' &&
+      typeof data === 'boolean'
+    ) {
+      userData.preferences.disableBackgroundArtworks = data;
     } else if (
       dataType === 'sortingStates.songsPage' &&
       typeof data === 'string'
@@ -253,7 +388,7 @@ export const setUserData = (dataType: UserDataTypes, data: unknown) => {
       );
 
     cachedUserData = userData;
-    userDataStore.store = { ...userData };
+    userDataStore.set('userData', userData);
 
     if (dataType === 'musicFolders') dataUpdateEvent('userData/musicFolder');
     else if (
@@ -283,963 +418,329 @@ export const setUserData = (dataType: UserDataTypes, data: unknown) => {
     else dataUpdateEvent('userData');
   } else {
     log(
-      `===== ERROR OCCURRED WHEN READING USER DATA. USER DATA ARRAY IS EMPTY.\nARRAY : ${userData}`
+      `ERROR OCCURRED WHEN READING USER DATA. USER DATA ARRAY IS EMPTY.`,
+      { userData },
+      'ERROR'
     );
   }
-};
+}
 
-export const getData = () => {
-  if (cachedData && Object.keys(cachedData).length !== 0) {
-    return cachedData;
-  } else {
-    return dataStore.store as any as Data;
+export const getSongsData = () => {
+  if (Array.isArray(cachedSongsData) && cachedSongsData.length !== 0) {
+    return cachedSongsData;
   }
+  return songStore.get('songs', []) as SavableSongData[];
 };
 
-export const setData = (newData: Data) => {
-  cachedData = newData;
-  dataStore.store = { ...newData };
+export const setSongsData = (updatedSongs: SavableSongData[]) => {
+  cachedSongsData = updatedSongs;
+  songStore.set('songs', updatedSongs);
 };
 
-export const storeSongArtworks = (
-  artworkName: string,
-  artwork?: Buffer | string
-): Promise<string> => {
-  return new Promise(async (resolve, reject) => {
-    await fs
-      .stat(path.join(app.getPath('userData'), 'song_covers'))
-      .catch(async (err) => {
-        if (err.code === 'ENOENT') {
-          await fs.mkdir(path.join(app.getPath('userData'), 'song_covers'));
-        } else reject(err);
-      })
-      .finally(async () => {
-        if (artwork) {
-          const imgPath = path.join(
-            app.getPath('userData'),
-            'song_covers',
-            `${artworkName}.webp`
-          );
-          const optimizedImgPath = path.join(
-            app.getPath('userData'),
-            'song_covers',
-            `${artworkName}-optimized.webp`
-          );
-          await sharp(artwork)
-            .webp()
-            .toFile(imgPath)
-            .then(() => resolve(imgPath))
-            .catch((err) => {
-              log(
-                `====== ERROR OCCURRED WHEN CREATING ARTWORK OF A SONG WITH SONGID -${artworkName}- IMAGE USING SHARP PACKAGE ======\nERROR : ${err}`
-              );
-              return reject(err);
-            });
-          await sharp(artwork)
-            .webp({ quality: 50, effort: 0 })
-            .resize(50, 50)
-            .toFile(optimizedImgPath)
-            .catch((err) => {
-              log(
-                `====== ERROR OCCURRED WHEN OPTIMIZING ARTWORK OF A SONG WITH SONGID -${artworkName}- IMAGE USING SHARP PACKAGE ======\nERROR : ${err}`
-              );
-              return reject(err);
-            });
-        }
-        return resolve(getAssetPath('images', 'png', 'song_cover_default.png'));
-      });
-  });
+export const getArtistsData = () => {
+  if (cachedArtistsData && cachedArtistsData.length !== 0) {
+    return cachedArtistsData;
+  }
+  return artistStore.get('artists', []) as SavableArtist[];
 };
 
-export const removeSongArtwork = (songArtworkPath: string) => {
-  return new Promise((resolve, reject) => {
-    try {
-      fsSync.unlink(songArtworkPath, (err) => {
-        if (err) throw err;
-      });
-      fsSync.unlink(
-        songArtworkPath?.replace('.webp', '-optimized.webp'),
-        (err) => {
-          if (err) throw err;
-        }
-      );
-      resolve(true);
-    } catch (error) {
-      reject(error);
-    }
-  });
+export const setArtistsData = (updatedArtists: SavableArtist[]) => {
+  cachedArtistsData = updatedArtists;
+  artistStore.set('artists', updatedArtists);
 };
 
-function flatten(lists: any[]) {
-  return lists.reduce((a, b) => a.concat(b), []);
-}
+export const getAlbumsData = () => {
+  if (cachedAlbumsData && cachedAlbumsData.length !== 0) {
+    return cachedAlbumsData;
+  }
+  return albumStore.get('albums', []) as SavableAlbum[];
+};
 
-function getDirectories(srcpath: string) {
-  return fsSync
-    .readdirSync(srcpath)
-    .map((file) => path.join(srcpath, file))
-    .filter((path) => fsSync.statSync(path).isDirectory());
-}
+export const setAlbumsData = (updatedAlbums: SavableAlbum[]) => {
+  cachedAlbumsData = updatedAlbums;
+  albumStore.set('albums', updatedAlbums);
+};
 
-function getDirectoriesRecursive(srcpath: string): Promise<string[]> {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const dirs = getDirectories(srcpath);
-      if (dirs)
-        return resolve([
-          srcpath,
-          ...flatten(await Promise.all(dirs.map(getDirectoriesRecursive))),
-        ]);
-    } catch (error) {
-      return reject(error);
-    }
-  });
-}
+export const getGenresData = () => {
+  if (cachedGenresData && cachedGenresData.length !== 0) {
+    return cachedGenresData;
+  }
+  return genreStore.get('genres', []) as SavableGenre[];
+};
 
-export const getFiles = async (dir: string) => {
-  const { musicFolders } = getUserData();
-  // TODO : Fix bugs that could appear here by correctly applying catch method.
-  const allFolders = await getDirectoriesRecursive(dir);
-  // .catch(err => log());
-  log(`${allFolders.length} directories found in the directory ${dir}`);
-  const allFiles = allFolders
-    .map((folder) => {
-      const x = fsSync.readdirSync(folder).map((y) => path.join(folder, y));
-      return x;
-    })
-    .flat();
-  log(`${allFiles.length} files found in the directory ${dir}`);
-  let foldersWithStatData = [];
-  for (const folderPath of allFolders) {
-    try {
-      const stats = await fs.stat(folderPath);
-      foldersWithStatData.push({
-        path: folderPath,
-        stats: {
-          lastModifiedDate: stats.mtime,
-          lastChangedDate: stats.ctime,
-          fileCreatedDate: stats.birthtime,
-          lastParsedDate: new Date(),
+export const setGenresData = (updatedGenres: SavableGenre[]) => {
+  cachedGenresData = updatedGenres;
+  genreStore.set('genres', updatedGenres);
+};
+
+export const getListeningData = (
+  songIds = [] as string[]
+): SongListeningData[] => {
+  const data =
+    cachedListeningData && cachedListeningData.length > 0
+      ? cachedListeningData
+      : (listeningDataStore.get('listeningData', []) as SongListeningData[]);
+
+  const results =
+    songIds.length === 0
+      ? data
+      : data.filter((x) => songIds.some((songId) => x.songId === songId));
+
+  if (results.length === 0) {
+    const defaultData: SongListeningData = {
+      songId: '',
+      listens: [
+        {
+          year: new Date().getFullYear(),
+          months: Array.from({ length: 12 }, () =>
+            Array.from({ length: 30 }, () => 0)
+          ),
         },
-      });
-    } catch (error) {
-      console.log(error);
-    }
+      ],
+    };
+
+    if (songIds.length === 0) return [];
+    const defaultOutputs: SongListeningData[] = songIds.map((id) => ({
+      ...defaultData,
+      songId: id,
+    }));
+    return defaultOutputs;
   }
-  foldersWithStatData = foldersWithStatData.filter((folderPath) => {
-    for (let i = 0; i < musicFolders.length; i++) {
-      if (musicFolders[i].path === folderPath.path) return false;
-    }
-    return true;
+  const listeningData: SongListeningData[] = results.map((x) => {
+    const { songId, skips, fullListens, inNoOfPlaylists, listens } = x;
+    // const updatedListens: YearlyListeningRate[] = listens.map((y) => {
+    //   const { year, months } = y;
+    //   const updatedMonths: number[][] = months.map((z) => {
+    //     const dailyListens = z.split('_').map((a) => parseInt(a, 10) || 0);
+
+    //     for (let i = 0; i < 12; i += 1) {
+    //       if (dailyListens[i] === undefined) dailyListens[i] = 0;
+    //     }
+    //     return dailyListens;
+    //   });
+    //   return {
+    //     year,
+    //     months: updatedMonths,
+    //   };
+    // });
+
+    return {
+      songId,
+      skips: skips ?? 0,
+      fullListens: fullListens ?? 0,
+      inNoOfPlaylists: inNoOfPlaylists ?? 0,
+      // listens: updatedListens,
+      listens,
+    };
   });
-  if (foldersWithStatData.length > 0)
-    setUserData('musicFolders', musicFolders.concat(foldersWithStatData));
-  const allSongs = allFiles.filter((filePath) => {
-    const fileExtension = path.extname(filePath);
-    return supportedMusicExtensions.includes(fileExtension);
-  });
-  log(`${allSongs.length} songs found in the directory ${dir}`);
-  return allSongs;
-};
-export const checkForNewSongs = (): Promise<boolean> => {
-  return new Promise((resolve, reject) => {
-    const { musicFolders } = getUserData();
-    log(`${musicFolders.length} music folders found in user data.`);
-    if (musicFolders) {
-      musicFolders.forEach(async (folder, index) => {
-        await fs
-          .stat(folder.path)
-          .then((stats) => {
-            if (
-              stats.mtime.toUTCString() ===
-              new Date(folder.stats.lastModifiedDate).toUTCString()
-            ) {
-              log(
-                `'${path.basename(folder.path)}' folder has no modifications.`
-              );
-            } else {
-              log(
-                `'${path.basename(
-                  folder.path
-                )}' folder has unknown modifications.`
-              );
-              checkFolderForUnknownModifications(folder.path);
-              musicFolders[index].stats.lastModifiedDate = stats.mtime;
-            }
-          })
-          .catch((err) => {
-            log(
-              `====== ERROR OCCURRED WHEN FETCHING STATS FOR '${path.basename(
-                folder.path
-              )}' FOLDER. ======\nERROR : ${err}`
-            );
-            reject(err);
-          });
-        try {
-          const abortController = new AbortController();
-          const watcher = fsSync.watch(
-            folder.path,
-            { signal: abortController.signal },
-            async (eventType, filename) => {
-              console.log(`folder event - '${eventType}' - ${filename}`);
-              if (filename) {
-                if (eventType === 'rename') {
-                  if (
-                    supportedMusicExtensions.includes(path.extname(filename))
-                  ) {
-                    try {
-                      const modifiedDate = fsSync.statSync(folder.path).mtime;
-                      if (
-                        modifiedDate &&
-                        musicFolders[index].stats.lastModifiedDate !==
-                          modifiedDate
-                      ) {
-                        musicFolders[index].stats.lastModifiedDate =
-                          modifiedDate;
-                        setUserData('musicFolders', musicFolders);
-                        log(
-                          `'${path.basename(folder.path)}' folder data updated.`
-                        );
-                      } else
-                        log(
-                          `No need to update '${path.basename(
-                            folder.path
-                          )}' folder data`
-                        );
-                      checkFolderForModifications(folder.path, filename)
-                        .then(() =>
-                          log(`Modification related to ${filename} finished.`)
-                        )
-                        .catch((err) => {
-                          log(
-                            `====== ERROR OCCURRED WHEN TRYING TO PARSE MODIFICATIONS IN '${filename}' ======\nERROR : ${err}`
-                          );
-                          return reject(
-                            'FOLDER_MODIFICATIONS_CHECK_FAILED' as MessageCodes
-                          );
-                        });
-                    } catch (error) {
-                      log(
-                        `====== ERROR OCCURRED WHEN CHECKING FOR NEW SONGS ======\nERROR : ${error}`
-                      );
-                      reject(error);
-                    }
-                  } else {
-                    // const base = path.basename(folder.path);
-                    const relatedFolders = musicFolders.filter(
-                      (x) =>
-                        x.path.includes(folder.path) && x.path !== folder.path
-                    );
-                    if (relatedFolders.length > 0) {
-                      const data = getData();
-                      if (data?.songs.length > 0) {
-                        // const { songs } = data;
-                        for (let i = 0; i < relatedFolders.length; i += 1) {
-                          if (
-                            path.basename(relatedFolders[i].path) === filename
-                          ) {
-                            // Possible folder deletion.
-                            const folderPath = relatedFolders[i].path;
-                            log(
-                              `User deleted a music folder from the filesystem using the system file explorer.\nDIRECTORY : ${folderPath}`
-                            );
-                            sendMessageToRenderer(
-                              `${path.basename(
-                                folderPath
-                              )} got deleted from the system.`,
-                              'MUSIC_FOLDER_DELETED',
-                              { path: folderPath }
-                            );
-                            // const relatedSongs = songs.filter(
-                            //   (song) => path.basename(song.path) === folderPath
-                            // );
-                            // if (relatedSongs.length > 0) {
-                            //   for (let x = 0; x < relatedSongs.length; x++) {
-                            //     await removeSongFromLibrary(
-                            //       path.dirname(relatedSongs[x].path),
-                            //       path.basename(relatedSongs[x].path),
-                            //       false
-                            //     );
-                            //   }
-                            // }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              } else {
-                log(
-                  '===== ERROR OCCURRED WHEN TRYING TO READ NEWLY ADDED SONGS. FILE WATCHER FUNCTION SENT A FILENAME OF undefined. ====='
-                );
-                return reject('READING_MODIFICATIONS_FAILED' as MessageCodes);
-              }
-            }
-          );
-          watcher.addListener('error', (e) =>
-            log(
-              `====== ERROR OCCURRED WHEN WATCHING A FOLDER. ======\nERROR : ${e};`
-            )
-          );
-          return resolve(true);
-        } catch (error) {
-          reject(error);
-        }
-      });
-      return resolve(true);
-    } else
-      log(
-        `===== ERROR OCCURRED WHEN TRYING TO READ MUSIC FOLDERS ARRAY IN USER DATA. IT WAS POSSIBLY EMPTY. ======`
-      );
-  });
+
+  return listeningData;
 };
 
-const checkFolderForUnknownModifications = async (folderPath: string) => {
-  const songPaths =
-    (dataStore.get('songs') as SongData[])?.map((song) => song.path) ?? [];
-  const blacklistedSongPaths = getUserData().songBlacklist ?? [];
-  const relevantFolderSongPaths = Array.isArray(songPaths)
-    ? songPaths
-        .concat(blacklistedSongPaths)
-        .filter((songPath) => path.dirname(songPath) === folderPath)
-    : [];
-  const newSongPaths: string[] = [];
-  const deletedSongPaths: string[] = [];
-  if (relevantFolderSongPaths.length > 0) {
-    const dirs = await fs
-      .readdir(folderPath)
-      .then((res) => {
-        return res
-          .filter((filePath) =>
-            supportedMusicExtensions.includes(path.extname(filePath))
-          )
-          .map((filepath) => path.join(folderPath, filepath));
-      })
-      .catch((err) =>
-        log(
-          `===== ERROR OCCURRED WHEN TRYING TO READ THE DIRECTORY.======\nERROR : ${err}`
-        )
-      );
-    if (dirs) {
-      for (const dir of dirs) {
-        // checks for newly added songs that got added before application launch
-        if (!relevantFolderSongPaths.some((songPath) => songPath === dir))
-          newSongPaths.push(dir);
-      }
-      for (const songPath of relevantFolderSongPaths) {
-        // checks for deleted songs that got deleted before application launch
-        if (!dirs.some((dir) => dir === songPath))
-          deletedSongPaths.push(songPath);
-      }
-      log(
-        `${newSongPaths.length} newly added songs found. ${
-          deletedSongPaths.length
-        } song deletions found.${
-          newSongPaths.length > 0 || deletedSongPaths.length > 0
-            ? `\nNewSongs : '${newSongPaths}';\n DeletedSongs : '${deletedSongPaths}';`
-            : ''
-        }`
-      );
+export const setListeningData = (data: SongListeningData) => {
+  const results =
+    cachedListeningData && cachedListeningData.length > 0
+      ? cachedListeningData
+      : (listeningDataStore.get('listeningData', []) as SongListeningData[]);
+
+  // const updatedListens: SavableYearlyListeningRate[] = data.listens.map(
+  //   ({ year, months }) => {
+  //     const updatedMonths = months.map((z) => {
+  //       const str = z.join(',').replaceAll('0', '');
+  //       return str;
+  //     });
+  //     return { year, months: updatedMonths };
+  //   }
+  // );
+  for (let i = 0; i < results.length; i += 1) {
+    if (results[i].songId === data.songId) {
+      results[i].skips = data.skips;
+      results[i].fullListens = data.fullListens;
+      results[i].inNoOfPlaylists = data.inNoOfPlaylists;
+      results[i].listens = data.listens;
+
+      cachedListeningData = results;
+      return listeningDataStore.set('listeningData', results);
     }
-    // Prioritises deleting songs before adding new songs to prevent data clashes.
-    if (deletedSongPaths.length > 0) {
-      // deleting songs from the library that got deleted before application launch
-      for (let x = 0; x < deletedSongPaths.length; x += 1) {
-        //  added await for testing
-        await removeSongFromLibrary(
-          folderPath,
-          path.basename(deletedSongPaths[x]),
-          false
-        ).catch((err) => {
-          log(
-            `====== ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA ======\nERROR : ${err}`
-          );
-        });
-      }
-    }
-    if (newSongPaths.length > 0) {
-      // parses new songs that added before application launch
-      for (const newSongPath of newSongPaths) {
-        const newSongData = await parseSong(newSongPath).catch((err) =>
-          log(
-            `====== ERROR OCCURRED WHEN PARSING SONGS ADDED BEFORE APPLICATION LAUNCH ======\nERROR : ${err}`
-          )
-        );
-        if (newSongData) {
-          log(`${path.basename(newSongPath)} song added.`);
+  }
+  // listening data of a song not in the store.
+  // const newListeningData: SavableSongListeningData = {
+  //   ...data,
+  //   listens: updatedListens,
+  // };
+  // results.push(newListeningData);
+  results.push(data);
+  cachedListeningData = results;
+  listeningDataStore.set('listeningData', results);
+  return dataUpdateEvent('songs/listeningData');
+};
+
+export const incrementNoOfSongListens = (songId: string) => {
+  const listeningData = getListeningData();
+  const date = new Date();
+  const currentYear = date.getFullYear();
+  const currentMonth = date.getMonth();
+  const currentDate = date.getDate();
+  if (listeningData.length > 0) {
+    for (let x = 0; x < listeningData.length; x += 1) {
+      if (listeningData[x].songId === songId) {
+        const data = listeningData[x];
+        if (data.listens.some((y) => y.year === currentYear)) {
+          for (let i = 0; i < data.listens.length; i += 1) {
+            if (data.listens[i].year === currentYear) {
+              if (
+                typeof data.listens[i].months[currentMonth - 1][
+                  currentDate - 1
+                ] === 'number'
+              )
+                data.listens[i].months[currentMonth - 1][currentDate - 1] += 1;
+              else if (data.listens[i].months[currentMonth - 1].length < 31)
+                data.listens[i].months[currentMonth - 1][currentDate - 1] = 1;
+            }
+          }
         }
+        dataUpdateEvent('songs/listeningData/listens', [songId]);
+        log(`Song listens incremented on '${listeningData[x].songId}'`);
+        return setListeningData(data);
       }
     }
   }
-};
 
-let pathsQueue: string[] = [];
-const checkFolderForModifications = (
-  folderPath: string,
-  filename: string
-): Promise<boolean> => {
-  return new Promise(async (resolve, reject) => {
-    log('Started checking folder for modifications.');
-    const dirs = await fs
-      .readdir(folderPath)
-      .then((dirs) =>
-        dirs.filter((dir) =>
-          supportedMusicExtensions.includes(path.extname(dir))
-        )
-      )
-      .catch((err) => {
-        log(
-          `====== ERROR OCCURRED WHEN READING DIRECTORY '${folderPath}'\nERROR : ${err}`
-        );
-        reject(err);
-      });
-    const songs: SongData[] = dataStore.get('songs') as any;
-    if (dirs && songs && Array.isArray(songs)) {
-      // checks whether the songs is newly added or deleted.
-      if (
-        dirs.some(
-          (dir) =>
-            dir === filename &&
-            supportedMusicExtensions.includes(path.extname(filename))
-        )
-      ) {
-        // new song added
-        let errRetryCount = 0;
-        let timeOutId: NodeJS.Timeout;
-        const songPath = path.join(folderPath, filename);
-        // Here paths queue is used to prevent parsing the same song multiple times due to the event being fired multiple times for the same song even before they are parsed. So if the same is going to start the parsing process, it will stop the process if the song path is in the songPaths queue.
-        if (!pathsQueue.includes(songPath)) {
-          pathsQueue.push(songPath);
-          const tryParseSong = async (absolutePath: string): Promise<void> => {
-            try {
-              await parseSong(absolutePath);
-              log(`'${filename}' song added to the library.`);
-              dataUpdateEvent('songs/newSong');
-              pathsQueue = pathsQueue.filter((x) => x !== songPath);
-              return resolve(true);
-            } catch (error: any) {
-              if (errRetryCount < 10) {
-                // THIS ERROR OCCURRED WHEN THE APP STARTS READING DATA WHILE THE SONG IS STILL WRITING TO THE DISK. POSSIBLE SOLUTION IS TO SET A TIMEOUT AND REDO THE PROCESS.
-                if (timeOutId) clearTimeout(timeOutId);
-                log(
-                  'ERROR OCCURRED WHEN TRYING TO PARSE DATA. RETRYING IN 5 SECONDS. (ERROR: READ ERROR)'
-                );
-                errRetryCount += 1;
-                setTimeout(async () => await tryParseSong(absolutePath), 5000);
-              } else {
-                log(
-                  `====== ERROR OCCURRED WHEN PARSING A NEWLY ADDED SONG WHILE THE APP IS OPEN. FAILED 10 OF 10 RETRY EFFORTS. ======\nERROR : ${error}`
-                );
-                sendMessageToRenderer(
-                  `'${filename}' failed when trying to add the song to the library. Go to settings to resync the library.`,
-                  'PARSE_FAILED'
-                );
-                return reject(error);
-              }
-            }
-          };
-          return tryParseSong(songPath);
-        }
-      } else if (
-        songs.some(
-          (song) =>
-            song.path === path.normalize(path.join(folderPath, filename))
-        )
-      ) {
-        // possible song deletion
-        removeSongFromLibrary(folderPath, filename, false)
-          .then(() => {
-            sendMessageToRenderer(
-              `'${filename}' song got deleted from the system.`,
-              'SONG_DELETED'
-            );
-            resolve(true);
-          })
-          .catch((err) => reject(err));
-      } else
-        log(
-          `${filename} got deleted from the system which was not in the library.`
-        );
-      return resolve(true);
-    }
-  });
-};
+  const months = Array.from({ length: 12 }, () =>
+    Array.from({ length: 30 }, () => 0)
+  );
 
-export const removeSongFromLibrary = (
-  folderPath: string,
-  filename: string,
-  isBlacklisted = true
-): Promise<{ success: boolean; message?: string }> => {
-  return new Promise((resolve, reject) => {
-    log(`Started the deletion process of the song '${filename}'`);
-    const { albums, artists, genres, songs } = getData();
-    const playlists = getPlaylistData();
-    const userData = getUserData();
-    let isArtistRemoved = false;
-    let isAlbumRemoved = false;
-    let isPlaylistRemoved = false;
-    let isGenreRemoved = false;
-    const updatedSongs = songs.filter((song) => {
-      if (song.path === path.normalize(path.join(folderPath, filename))) {
-        if (userData && Object.keys(userData).length > 0) {
-          if (userData.currentSong.songId === song.songId) {
-            setUserData('currentSong.songId', null);
-            log('Current song got removed from the library.');
-          }
-        }
-        if (
-          Array.isArray(artists) &&
-          artists.length > 0 &&
-          Array.isArray(song.artists) &&
-          song.artists.length > 0 &&
-          artists.some((artist) =>
-            song.artists
-              ? song.artists.some((x) => x.name === artist.name)
-              : false
-          )
-        ) {
-          song.artists.forEach((art) => {
-            for (let x = 0; x < artists.length; x++) {
-              if (artists[x].name === art.name) {
-                if (artists[x].songs.length > 1) {
-                  artists[x].songs = artists[x].songs.filter(
-                    (y) => y.songId !== song.songId
-                  );
-                  log(
-                    `Data related to '${song.title}' in artist '${artists[x].name}' removed.`
-                  );
-                } else {
-                  if (
-                    artists[x].songs.length === 1 &&
-                    artists[x].songs[0].songId === song.songId
-                  )
-                    log(
-                      `Artist '${artists[x].name}' related to '${song.title}' removed because of it doesn't contain any other songs.`
-                    );
-                  else
-                    log(
-                      `Artist '${artists[x].name}' removed because it doesn't have any songs.`
-                    );
-                  artists.splice(x, 1);
-                  isArtistRemoved = true;
-                }
-              }
-            }
-          });
-        }
-        if (
-          Array.isArray(albums) &&
-          albums.length > 0 &&
-          albums.some(
-            (album) => song.album && album.albumId === song.album.albumId
-          )
-        ) {
-          for (let x = 0; x < albums.length; x++) {
-            if (song.album && albums[x].albumId === song.album.albumId) {
-              if (albums[x].songs.length > 1) {
-                albums[x].songs = albums[x].songs.filter(
-                  (y) => y.songId !== song.songId
-                );
-                log(
-                  `Data related to '${song.title}' in album '${albums[x].title}' removed.`
-                );
-              } else {
-                if (
-                  albums[x].songs.length === 1 &&
-                  albums[x].songs[0].songId === song.songId
-                )
-                  log(
-                    `Album '${albums[x].title}' related to '${song.title}' removed because of it doesn't contain any other songs.`
-                  );
-                else
-                  log(
-                    `Album '${albums[x].title}' removed because it doesn't have any songs.`
-                  );
-                albums.splice(x, 1);
-                isAlbumRemoved = true;
-              }
-            }
-          }
-        }
-        if (
-          Array.isArray(playlists) &&
-          playlists.length > 0 &&
-          playlists.some((playlist) =>
-            playlist.songs.some((str) => str === song.songId)
-          )
-        ) {
-          for (let x = 0; x < playlists.length; x++) {
-            if (
-              playlists[x].songs.length > 0 &&
-              playlists[x].songs.some((y) => y === song.songId)
-            ) {
-              playlists[x].songs.splice(
-                playlists[x].songs.indexOf(song.songId),
-                1
-              );
-              log(
-                `Data related to '${song.title}' in playlist '${playlists[x].name}' removed.`
-              );
-            } else {
-              log(
-                `Playlist '${playlists[x].name}' removed because it doesn't have any songs.`
-              );
-              isPlaylistRemoved = true;
-            }
-          }
-        }
-        if (
-          Array.isArray(genres) &&
-          genres.length > 0 &&
-          song.genres &&
-          song.genres.length > 0 &&
-          genres.some((genre) =>
-            song.genres
-              ? song.genres.some(
-                  (songGenre) => songGenre.genreId === genre.genreId
-                )
-              : false
-          )
-        ) {
-          song.genres.forEach((songGenre) => {
-            for (let x = 0; x < genres.length; x++) {
-              if (genres[x].name === songGenre.name) {
-                if (genres[x].songs.length > 1) {
-                  genres[x].songs = genres[x].songs.filter(
-                    (y) => y.songId !== song.songId
-                  );
-                  log(
-                    `Data related to '${song.title}' in genre '${genres[x].name}' removed.`
-                  );
-                } else {
-                  if (
-                    genres[x].songs.length === 1 &&
-                    genres[x].songs[0].songId === song.songId
-                  )
-                    log(
-                      `Genre '${genres[x].name}' related to '${song.title}' removed because of it doesn't contain any other songs.`
-                    );
-                  else
-                    log(
-                      `Genre '${genres[x].name}' removed because it doesn't have any songs.`
-                    );
-                  genres.splice(x, 1);
-                  isGenreRemoved = true;
-                }
-              }
-            }
-          });
-        }
-        if (path.basename(song.artworkPath) !== 'song_cover_default.png') {
-          fs.unlink(song.artworkPath).catch((err) => reject(err));
-          fs.unlink(song.artworkPath.replace('.webp', '-optimized.webp')).catch(
-            (err) => reject(err)
-          );
-        }
-        return false;
-      }
-      return true;
-    });
-    if (updatedSongs && artists && albums) {
-      setData({ songs: updatedSongs, artists, albums, genres });
-      dataUpdateEvent('songs/deletedSong');
-    }
-    if (playlists) setPlaylistData(playlists);
-    if (userData && isBlacklisted) {
-      setUserData('songBlacklist', [
-        ...userData.songBlacklist,
-        path.join(folderPath, filename),
-      ]);
-      dataUpdateEvent('userData/blacklist');
-      log('Blacklist updated because a new song got blacklisted.');
-    }
-    dataUpdateEvent('artists');
-    dataUpdateEvent('albums');
-    if (isArtistRemoved) dataUpdateEvent('artists/deletedArtist');
-    if (isAlbumRemoved) dataUpdateEvent('albums/deletedAlbum');
-    if (isGenreRemoved) dataUpdateEvent('genres/deletedGenre');
-    if (isPlaylistRemoved) dataUpdateEvent('playlists/deletedPlaylist');
-    log(`'${filename}' song removed from the library.`);
-    return resolve({
-      success: true,
-      message: `song '${filename}' removed and artists, albums,playlists related to it updated.`,
-    });
-  });
-};
+  if (typeof months[currentMonth - 1][currentDate - 1] === 'number')
+    months[currentMonth - 1][currentDate - 1] += 1;
+  else if (months[currentMonth - 1].length < 31)
+    months[currentMonth - 1][currentDate - 1] = 1;
 
-export const removeMusicFolder = (
-  absolutePath: string
-): Promise<boolean | undefined> => {
-  return new Promise(async (resolve) => {
-    log(`STARTED THE PROCESS OF REMOVING '${absolutePath}' FROM THE SYSTEM.`);
-    const { musicFolders } = getUserData();
-    if (
-      Array.isArray(musicFolders) &&
-      musicFolders.length > 0 &&
-      musicFolders.some((folder) => folder.path === absolutePath)
-    ) {
-      const relatedFolders = await getDirectoriesRecursive(absolutePath);
-      if (relatedFolders.length > 1) {
-        log(
-          `${
-            relatedFolders.length
-          } sub-directories found inside the '${path.basename(
-            absolutePath
-          )}' directory. Files inside these directories will be deleted too.\n SUB DIRECTORIES : ${relatedFolders} `
-        );
-        const allFiles = await Promise.all(
-          relatedFolders.map((folderPath) => getFiles(folderPath))
-        )
-          .then((data) => data.flat())
-          .catch((err) => {
-            log(
-              `====== ERROR OCCURRED WHEN READING FILES RELATED TO THE '${path.basename(
-                absolutePath
-              )}' ======\nERROR : ${err}`
-            );
-          });
-        if (allFiles) {
-          for (let x = 0; x < allFiles.length; x++) {
-            await removeSongFromLibrary(
-              path.dirname(allFiles[x]),
-              path.basename(allFiles[x])
-            ).catch((err) => {
-              log(
-                `====== ERROR OCCURRED WHEN TRYING TO REMOVE '${path.basename(
-                  allFiles[x]
-                )}' SONG. ======\nERROR : ${err}`
-              );
-            });
-          }
-        }
-      } else {
-        const allFiles = await getFiles(absolutePath);
-        if (allFiles) {
-          for (let x = 0; x < allFiles.length; x++) {
-            await removeSongFromLibrary(
-              absolutePath,
-              path.basename(allFiles[x])
-            );
-          }
-        }
-      }
-      const updatedMusicFolders = musicFolders.filter(
-        (folder) => !relatedFolders.some((x) => x === folder.path)
-      );
-      setUserData('musicFolders', updatedMusicFolders);
-      // dataUpdateEvent('userData/musicFolder');
-      log(
-        `Deleted ${relatedFolders.length} directories.\n DATA : ${relatedFolders}`
-      );
-      resolve(true);
-    }
-  });
+  const newListeningData: SongListeningData = {
+    songId,
+    skips: 0,
+    fullListens: 0,
+    inNoOfPlaylists: 0,
+    listens: [{ year: currentYear, months }],
+  };
+  dataUpdateEvent('songs/listeningData/listens', [songId]);
+  return setListeningData(newListeningData);
 };
 
 export const getPlaylistData = (playlistIds = [] as string[]) => {
   log(`Requesting playlist data for ids '${playlistIds.join(',')}'`);
-  if (cachedPlaylistsData && Object.keys(cachedPlaylistsData).length !== 0) {
-    if (playlistIds && playlistIds.length === 0)
-      return cachedPlaylistsData.playlists;
-    else {
-      const results: Playlist[] = [];
-      for (let x = 0; x < cachedPlaylistsData.playlists.length; x++) {
-        for (let y = 0; y < playlistIds.length; y++) {
-          if (cachedPlaylistsData.playlists[x].playlistId === playlistIds[y])
-            results.push(cachedPlaylistsData.playlists[x]);
-        }
+  if (Array.isArray(cachedPlaylistsData) && cachedPlaylistsData.length !== 0) {
+    if (playlistIds && playlistIds.length === 0) return cachedPlaylistsData;
+    const results: SavablePlaylist[] = [];
+    for (let x = 0; x < cachedPlaylistsData.length; x += 1) {
+      for (let y = 0; y < playlistIds.length; y += 1) {
+        if (cachedPlaylistsData[x].playlistId === playlistIds[y])
+          results.push(cachedPlaylistsData[x]);
       }
-      return results;
     }
-  } else return playlistDataStore.store as any as Playlist[];
+    return results;
+  }
+  return playlistDataStore.get('playlists', []) as Playlist[];
 };
 
-export const setPlaylistData = (updatedPlaylists: Playlist[]) => {
+export const setPlaylistData = (updatedPlaylists: SavablePlaylist[]) => {
   log('Updating Playlist Data.');
   dataUpdateEvent('playlists');
-  cachedPlaylistsData = { playlists: updatedPlaylists };
-  playlistDataStore.store = { playlists: updatedPlaylists };
+  cachedPlaylistsData = updatedPlaylists;
+  playlistDataStore.set('playlists', updatedPlaylists);
 };
 
-export const updateSongListeningRate = (
-  songsData: SongData[],
-  songId: string
-) => {
-  if (Array.isArray(songsData) && songId) {
-    songsData = songsData.map((songInfo) => {
-      if (songInfo.songId === songId) {
-        songInfo.listeningRate.allTime++;
-        if (songInfo.listeningRate.monthly.year === new Date().getFullYear()) {
-          songInfo.listeningRate.monthly.months[new Date().getMonth()]++;
-        } else {
-          songInfo.listeningRate.monthly.months = [
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-          ];
-          songInfo.listeningRate.monthly.year = new Date().getFullYear();
-          songInfo.listeningRate.monthly.months[new Date().getMonth()]++;
-        }
-      }
-      return songInfo;
-    });
-    dataStore.set('songs', songsData);
-    dataUpdateEvent('songs/noOfListens');
+// $ AUDIO LIBRARY MANAGEMENT
+
+function flattenPathArrays<Type extends string[][]>(lists: Type) {
+  return lists.reduce((a, b) => a.concat(b), []);
+}
+
+function getDirectories(srcpath: string) {
+  try {
+    const dirs = fsSync.readdirSync(srcpath);
+    return dirs
+      .map((file) => path.join(srcpath, file))
+      .filter((filePath) => fsSync.statSync(filePath).isDirectory());
+  } catch (error) {
+    log(
+      'Error occurred when parsing directories of a path.',
+      { srcpath },
+      'ERROR'
+    );
+    throw error;
   }
-};
+}
 
-export const deleteSongFromSystem = (
-  absoluteFilePath: string,
-  isPermanentDelete = false
-) => {
-  return new Promise(async (resolve, reject) => {
-    log(
-      `Started the deletion process of '${path.basename(
-        absoluteFilePath
-      )}' song.`
-    );
-    if (supportedMusicExtensions.includes(path.extname(absoluteFilePath))) {
-      const res = await removeSongFromLibrary(
-        path.dirname(absoluteFilePath),
-        path.basename(absoluteFilePath),
-        false
-      ).catch((err) => {
-        log(
-          `====== ERROR OCCURRED WHEN TRYING TO REMOVE SONG DATA RELATED TO '${path.basename(
-            absoluteFilePath
-          )}' SONG FROM THE SYSTEM. =======\nERROR : ${err}`
-        );
-        return reject(err);
-      });
-      if (res && res.success)
-        if (!isPermanentDelete)
-          await shell
-            .trashItem(absoluteFilePath)
-            .then(() => {
-              log(
-                `'${path.basename(
-                  absoluteFilePath
-                )}' song moved to the recycled bin.`
-              );
-              resolve({
-                success: true,
-                message: `Moved '${path.basename(
-                  absoluteFilePath
-                )}'to the Recycle bin/Trash.`,
-              });
-            })
-            .catch((err) => {
-              log(
-                `====== ERROR OCCURRED WHEN TRYING TO DELETE '${path.basename(
-                  absoluteFilePath
-                )}' SONG FROM THE SYSTEM. =======\nERROR : ${err}`
-              );
-              return reject(err);
-            });
-        else
-          await fs
-            .unlink(absoluteFilePath)
-            .then(() => {
-              log(
-                `'${path.basename(
-                  absoluteFilePath
-                )}' song permanently removed from the system.`
-              );
-              resolve({
-                success: true,
-                message: `Removed '${path.basename(
-                  absoluteFilePath
-                )}' from the system.`,
-              });
-            })
-            .catch((err) => {
-              log(
-                `====== ERROR OCCURRED WHEN TRYING TO DELETE '${path.basename(
-                  absoluteFilePath
-                )}' SONG FROM THE SYSTEM. =======\nERROR : ${err}`
-              );
-              return reject(err);
-            });
-    } else {
-      log(
-        `TRIED TO DELETE A RESOURCE WHICH IS RECOGNIZED AS A SONG.\nPATH : ${absoluteFilePath}`
-      );
-      return resolve({
-        success: false,
-        message: `'${path.basename(absoluteFilePath)}' is not a song.`,
-      });
-    }
-  });
-};
-
-export const restoreBlacklistedSong = (absolutePath: string) => {
-  return new Promise((resolve, reject) => {
-    log(
-      `Started the blacklist song restoring process for '${path.basename(
-        absolutePath
-      )}'`
-    );
-    const userData = getUserData();
-    if (userData && userData.songBlacklist.length > 0) {
-      if (
-        userData.songBlacklist.some((songPath) => songPath === absolutePath)
-      ) {
-        userData.songBlacklist = userData.songBlacklist.filter(
-          (songPath) => songPath !== absolutePath
-        );
-        parseSong(absolutePath)
-          .then((res) => {
-            log(
-              `'${
-                res ? res.title : absolutePath
-              }' song restored successfully from the blacklist.`
-            );
-            setUserData('songBlacklist', userData.songBlacklist);
-            return resolve(true);
-          })
-          .catch((err) => reject(err));
-      } else {
-        log(
-          `AN UN-BLACKLISTED SONG IS REQUESTED TO RESTORE FROM THE BLACKLIST.\nSONG PATH : ${absolutePath}`
-        );
-        return reject(`NO_BLACKLISTED_SONG_IN_GIVEN_PATH` as MessageCodes);
-      }
-    } else return reject('EMPTY_BLACKLIST' as MessageCodes);
-  });
-};
-// console.log(app.getPath('temp'));
-
-export const createTempArtwork = (artwork: Buffer): Promise<string> => {
-  return new Promise(async (resolve, reject) => {
-    const tempFolder = path.join(app.getPath('userData'), 'temp_artworks');
-    await fs
-      .stat(tempFolder)
-      .catch(async (err) => {
-        if (err.code === 'ENOENT') {
-          await fs.mkdir(tempFolder);
-        } else reject(err);
-      })
-      .finally(() => {
-        const artworkPath = path.resolve(
-          tempFolder,
-          `${generateRandomId()}.webp`
-        );
-        sharp(artwork)
-          .resize(250, 250)
-          .toFile(artworkPath)
-          .then(() => resolve(artworkPath))
-          .catch((err) => {
-            log(`FAILED TO CREATE A TEMPORARY ARTWORK.\nERROR : ${err}`);
-            return reject(`CREATE_TEMP_ARTWORK_FAILED` as MessageCodes);
-          });
-      });
-  });
-};
+export async function getDirectoriesRecursive(
+  srcpath: string
+): Promise<string[]> {
+  try {
+    const dirs = getDirectories(srcpath);
+    if (dirs)
+      return [
+        srcpath,
+        ...flattenPathArrays(
+          await Promise.all(dirs.map(getDirectoriesRecursive))
+        ),
+      ];
+    return [];
+  } catch (error) {
+    log(`Error occurred when parsing directories.`, { error }, 'ERROR');
+    return [];
+  }
+}
 
 export const resetAppCache = () => {
-  cachedData = songDataTemplate;
-  cachedUserData = userDataTemplate;
-  cachedPlaylistsData = playlistDataTemplate;
-  dataStore.store = { ...songDataTemplate };
-  userDataStore.store = { ...userDataTemplate };
-  playlistDataStore.store = { ...playlistDataTemplate };
+  cachedSongsData = [];
+  cachedArtistsData = [];
+  cachedAlbumsData = [];
+  cachedGenresData = [];
+  cachedPlaylistsData = [...PLAYLIST_DATA_TEMPLATE];
+  cachedUserData = { ...USER_DATA_TEMPLATE };
+  songStore.store = { songs: [] };
+  artistStore.store = { artists: [] };
+  albumStore.store = { albums: [] };
+  genreStore.store = { genres: [] };
+  userDataStore.store = { userData: USER_DATA_TEMPLATE };
+  playlistDataStore.store = { playlists: PLAYLIST_DATA_TEMPLATE };
   log(`In-app cache cleared successfully.`);
+};
+
+export const resetAppData = async () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const manageErrors = (err: any) => {
+    if ('code' in err && err.code === 'ENOENT') {
+      return log(
+        `A RECOVERABLE ERROR OCURRED WHEN RESETTING APP DATA.\nERROR : ${err}`
+      );
+    }
+    throw err;
+  };
+  try {
+    const userDataPath = app.getPath('userData');
+    await fs.unlink(path.join(userDataPath, 'songs.json')).catch(manageErrors);
+    await fs
+      .unlink(path.join(userDataPath, 'artists.json'))
+      .catch(manageErrors);
+    await fs.unlink(path.join(userDataPath, 'albums.json')).catch(manageErrors);
+    await fs.unlink(path.join(userDataPath, 'genres.json')).catch(manageErrors);
+    await fs
+      .unlink(path.join(userDataPath, 'playlists.json'))
+      .catch(manageErrors);
+    await fs
+      .unlink(path.join(userDataPath, 'userData.json'))
+      .catch(manageErrors);
+    await fs
+      .rm(path.join(userDataPath, 'song_covers'), {
+        recursive: true,
+      })
+      .catch(manageErrors);
+  } catch (error) {
+    log(
+      `AN UNRECOVERABLE ERROR OCCURRED WHEN RESETTING THE APP.`,
+      { error },
+      'ERROR'
+    );
+    throw error;
+  }
 };

@@ -1,18 +1,114 @@
 {
   "latestVersion": {
-    "version": "0.8.0-alpha",
+    "version": "1.0.0-alpha.20221205",
     "phase": "alpha",
-    "releaseDate": "2022 August 19",
-    "artwork": "/assets/other/release artworks/whats-new-v0.8.0-alpha.png"
+    "releaseDate": "2022 October 30",
+    "artwork": "/assets/other/release artworks/whats-new-v1.0.0-alpha.png"
   },
   "versions": [
+    {
+      "version": "1.0.0-alpha.20221205",
+      "releaseDate": "2022 October 30",
+      "notes": {
+        "new": [
+          {
+            "note": "Oto Music for Desktop rebranded as Nora."
+          },
+          {
+            "note": "Now users can fetch song metadata from internet and update their songs. (Experimental)"
+          },
+          {
+            "note": "Support for Synced Lyrics."
+          },
+          {
+            "note": "Lyrics from Musixmatch (Experimental)."
+          },
+          {
+            "note": "Now users can select multiple songs, artists etc and do specific tasks with them. (Experimental)"
+          },
+          {
+            "note": "Now users can go back and forward when going through different pages. (Experimental)"
+          },
+          {
+            "note": "New background artworks when viewing ArtistsPage, SongInfoPage etc."
+          },
+          {
+            "note": "Now users can like/dislike artists."
+          },
+          {
+            "note": "Now users can add artworks to user-created playlists."
+          },
+          {
+            "note": "Now users can sort playlists."
+          },
+          {
+            "note": "New metrics about listening patterns of a song in SongInfoPage. (Experimental)"
+          },
+          {
+            "note": "Now users can clear search history results."
+          },
+          {
+            "note": "Now users can play songs in a specific genre directly from the GenreInfoPage."
+          }
+        ],
+        "fixed": [
+          {
+            "note": "Updated some keyboard shortcuts of the app."
+          },
+          {
+            "note": "Fixed a bug where adding a new music folder and adding songs to that folder wouldn't update the music library of the app."
+          },
+          {
+            "note": "Fixed a bug where deleting a music folder from the system wouldn't update the music library of the app."
+          },
+          {
+            "note": "Fixed a bug where always on top function of Mini Player is not working as expected."
+          },
+          {
+            "note": "Fixed a bug where HomePage not showing the correct recently played songs."
+          },
+          {
+            "note": "Fixed a bug where context menus are not positioning as expected."
+          },
+          {
+            "note": "Fixed a bug where checking for app updates is not working as expected."
+          },
+          {
+            "note": "Fixed a bug where Lyrics on some songs aren't being read by the app."
+          },
+          {
+            "note": "Fixed some accessibility issues."
+          }
+        ],
+        "knownIssues": [
+          {
+            "note": "Sometimes users can get unexpected search results when using Search."
+          },
+          {
+            "note": "Parsing a big music library could sometimes make the app unresponsive. Currently, the only solution is to wait some time until the parsing process finishes and the app regains responsiveness."
+          },
+          {
+            "note": "App theme will be changed when you change your system's theme even though you didn't select to use system theme in the app."
+          },
+          {
+            "note": "If a song is added next to the last song of the queue, the last song won't be played."
+          },
+          {
+            "note": "Trying to play corrupted songs will make the app player unusable. Workaround is to play the next song and restart the renderer using F5 button."
+          },
+          {
+            "note": "Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song."
+          }
+        ]
+      }
+    },
     {
       "version": "0.8.0-alpha",
       "releaseDate": "2022 August 19",
       "notes": {
         "new": [
           {
-            "note": "Double-clicking on a supported song in the File Explorer would play it on the app. Be sure if you made Oto Music the default audio player for the respective audio file. (Experimental)"
+            "note": "Double-clicking on a supported song in the File Explorer would play it on the app. Be sure if you made Nora the default audio player for the respective audio file. (Experimental)"
           },
           {
             "note": "Now users can drag and drop a supported audio file to play it on the player. (Experimental)"
@@ -65,9 +161,6 @@
           },
           {
             "note": "Trying to play corrupted songs will make the app player unusable. Workaround is to play the next song and restart the renderer using F5 button."
-          },
-          {
-            "note": "Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song."
           },
           {
             "note": "Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song."
@@ -266,13 +359,7 @@
             "note": "Now the context menu will appear relevant to the available width and height of the window."
           },
           {
-            "note": "Fixed an error where some functions are coded asynchronous but are actually synchronous."
-          },
-          {
-            "note": "Updated the logger to write logs more clearly on a txt file. Now it shows more relevant information in the logs."
-          },
-          {
-            "note": "Some functions now can send multiple results. This reduces number of requests to the api to fetch data."
+            "note": "Improved app functionality to reduce number of requests to apis to fetch data."
           },
           {
             "note": "Fixed a bug where newly added songs won't be added to the library."
@@ -344,7 +431,7 @@
         ],
         "fixed": [
           {
-            "note": "Fixed a bug related to npm packages."
+            "note": "Fixed a bug related to dependencies."
           },
           {
             "note": "Updated parseSong to differentiate between currently added songs and new songs. Previously this problem will duplicate the data related to the song in the library."
@@ -363,9 +450,6 @@
           },
           {
             "note": "Updated artist online information apis."
-          },
-          {
-            "note": "Applied useTransition hook to improve user input responsiveness in the app when a song is playing."
           }
         ],
         "knownIssues": [
@@ -390,20 +474,10 @@
       "notes": {
         "new": [
           {
-            "note": "Migrated the song player to the root of the app to provide support for features such as mini-player (Experimental)."
-          },
-          {
             "note": "Now Currently Playing Queue shows information about the current queue including playlist name, artwork etc (Experimental)."
           }
         ],
-        "fixed": [
-          {
-            "note": "Updated the readme file."
-          },
-          {
-            "note": "Improved the codebase."
-          }
-        ],
+        "fixed": [],
         "knownIssues": []
       }
     },
@@ -416,12 +490,6 @@
             "note": "Added song queuing. Now users can queue songs."
           },
           {
-            "note": "Started using useContext React api to reduce prop drilling."
-          },
-          {
-            "note": "Started using useReducer React api to avoid rendering issues occurred when using useState."
-          },
-          {
             "note": "Adding a new song will now inform the user about the new song adding process."
           },
           {
@@ -431,28 +499,19 @@
             "note": "Now the app will inform the user if it couldn't find the lyrics."
           },
           {
-            "note": "Added a new event that fires when songs, artists, albums, playlists, or userData gets added."
-          },
-          {
             "note": "Added a current queue page to view the current queue of songs."
           },
           {
-            "note": "Added a function to remove a song from the library."
+            "note": "Now you can remove a song from the library."
           },
           {
-            "note": "Added a function to remove a linked media folder."
+            "note": "Now you can remove a linked media folder."
           },
           {
             "note": "Added an experimental mini player."
           },
           {
-            "note": "Added the feature to remove playlists."
-          },
-          {
-            "note": "Added a function to send renderer process errors and logs to the main process and save them."
-          },
-          {
-            "note": "Added a function that shows main process messages in the renderer process."
+            "note": "Now you can remove playlists."
           },
           {
             "note": "Added a function that provides navigation previous pages. Now users can click backward button in the title bar to go to their previously visited page."
@@ -464,7 +523,7 @@
             "note": "Now artists, albums and playlists show how much hours of songs they have."
           },
           {
-            "note": "Added the settings page to with options to update theme, music folders, and default page."
+            "note": "Added the settings page with options to update theme, music folders, and default page."
           },
           {
             "note": "Now songsPage shows how many songs in the library."
@@ -475,28 +534,13 @@
             "note": "Improved sorting of songs, artists, and albums. Now they work as intended."
           },
           {
-            "note": "Updated launch.json files in vscode to support debugging both main and renderer processes."
-          },
-          {
-            "note": "Improved user interface styling."
-          },
-          {
-            "note": "Improved the codebase."
-          },
-          {
-            "note": "Fixed some bugs related to paths in parseSong.ts"
-          },
-          {
-            "note": "Removed unnecessary comments."
+            "note": "Improved user interface."
           },
           {
             "note": "Renamed DialogMenu menu to notification panel."
           },
           {
-            "note": "Removed unnecessary svg icons."
-          },
-          {
-            "note": "Improved detection of songs whose got added when the app is running and not running."
+            "note": "Improved detection of songs that got added while the app is running and not running."
           },
           {
             "note": "Fixed some bugs related to parsing songs."
@@ -528,10 +572,7 @@
         ],
         "fixed": [
           {
-            "note": "Improved styles to support Google material icons functionality."
-          },
-          {
-            "note": "Offloaded creation and optimization of cover arts to Sharp package."
+            "note": "Improved creation and optimization of cover arts."
           },
           {
             "note": "Improved sorting of songs, artists and albums."
@@ -552,14 +593,7 @@
             "note": "Added a PlaylistsInfoPage to display information related to playlists."
           }
         ],
-        "fixed": [
-          {
-            "note": "Removed unnecessary react props to improve performance."
-          },
-          {
-            "note": "Fixed some typescript type errors."
-          }
-        ],
+        "fixed": [],
         "knownIssues": []
       }
     },
@@ -572,24 +606,12 @@
             "note": "Added new styles for AlbumInfoPage, ArtistInfoPage, and updated some styles on other componenets."
           },
           {
-            "note": "Now ArtistInfoPage shows information of the artists from Deezer and Last.fm apis."
-          },
-          {
-            "note": "Now songData, albumData and artistData are linked together in the database for easier access."
+            "note": "Now ArtistInfoPage shows information of the artists from internet."
           }
         ],
         "fixed": [
           {
             "note": "Fixed some bugs when parsing songs."
-          },
-          {
-            "note": "Fixed some typescript type errors."
-          },
-          {
-            "note": "Updated preload script to support typescript types."
-          },
-          {
-            "note": "Improved React support of the app."
           }
         ],
         "knownIssues": []

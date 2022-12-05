@@ -16,21 +16,21 @@ const Checkbox = React.memo((props: CheckboxProp) => {
     props;
   return (
     <div
-      className={`checkbox-and-labels-container flex items-center mt-4 ml-2 ${className}`}
+      className={`checkbox-and-labels-container mt-4 ml-2 flex items-center ${className}`}
     >
       <input
         type="checkbox"
         name={id}
         id={id}
-        className="hidden peer"
+        className="peer hidden"
         checked={isChecked}
         onChange={(e) => checkedStateUpdateFunction(e.currentTarget.checked)}
       />
       <label
-        className="checkmark w-5 h-5 cursor-pointer bg-[transparent] border-2 border-font-color-highlight dark:border-dark-font-color-highlight flex items-center justify-center rounded-md peer-checked:bg-font-color-highlight dark:peer-checked:bg-dark-font-color-highlight"
+        className="checkmark flex h-5 w-5 cursor-pointer items-center justify-center rounded-md border-2 border-font-color-highlight bg-[transparent] shadow-lg peer-checked:bg-font-color-highlight dark:border-dark-font-color-highlight dark:peer-checked:bg-dark-font-color-highlight"
         htmlFor={id}
       >
-        <span className="material-icons-round icon text-lg opacity-0 text-font-color-white dark:text-font-color-black">
+        <span className="material-icons-round icon text-lg text-font-color-white opacity-0 dark:text-font-color-black">
           check
         </span>
       </label>

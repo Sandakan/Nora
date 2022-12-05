@@ -3,12 +3,11 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 import React from 'react';
-import {
-  AppContext,
-  AppUpdateContext,
-  SongPositionContext,
-} from 'renderer/contexts/AppContext';
+import { AppContext } from 'renderer/contexts/AppContext';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
 import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
+import Img from '../Img';
 
 export default function MiniPlayer() {
   const {
@@ -23,59 +22,90 @@ export default function MiniPlayer() {
     toggleSongPlayback,
     handleSkipBackwardClick,
     handleSkipForwardClick,
+    updateUserData,
+    updateSongPosition,
   } = React.useContext(AppUpdateContext);
 
   const { songPosition } = React.useContext(SongPositionContext);
-  const [localUserData, setLocalUserData] = React.useState(userData);
-  const localUserDataRef = React.useRef(localUserData);
+  const [songPos, setSongPos] = React.useState(0);
+  const isMouseDownRef = React.useRef(false);
+  const seekbarRef = React.useRef(null as HTMLInputElement | null);
 
   const seekBarCssProperties: any = {};
+
   seekBarCssProperties['--seek-before-width'] = `${
-    (songPosition / currentSongData.duration) * 100
+    (songPos / currentSongData.duration) * 100
   }%`;
 
-  const updateLocalUserData = (
-    callback: (prevData: UserData | undefined) => UserData
-  ) => {
-    setLocalUserData((data) => {
-      const updatedData = callback(data);
-      localUserDataRef.current = updatedData;
-      return updatedData;
-    });
-  };
+  React.useEffect(() => {
+    if (seekbarRef.current && !isMouseDownRef.current) {
+      setSongPos(songPosition);
+    }
+  }, [songPosition]);
+
+  React.useEffect(() => {
+    if (seekbarRef.current) {
+      const handleSeekbarMouseDown = () => {
+        isMouseDownRef.current = true;
+      };
+      const handleSeekbarMouseUp = () => {
+        isMouseDownRef.current = false;
+        updateSongPosition(seekbarRef.current?.valueAsNumber ?? 0);
+      };
+      seekbarRef.current.addEventListener('mousedown', () =>
+        handleSeekbarMouseDown()
+      );
+      seekbarRef.current.addEventListener('mouseup', () =>
+        handleSeekbarMouseUp()
+      );
+      return () => {
+        seekbarRef?.current?.removeEventListener(
+          'mouseup',
+          handleSeekbarMouseUp
+        );
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        seekbarRef?.current?.removeEventListener(
+          'mousedown',
+          handleSeekbarMouseDown
+        );
+      };
+    }
+    return undefined;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div
-      className={`mini-player h-full overflow-hidden group ${
+      className={`mini-player group h-full overflow-hidden ${
         !isCurrentSongPlaying && 'paused'
       } ${
-        localUserDataRef.current &&
-        localUserDataRef.current.preferences.isReducedMotion
-          ? 'reduced-motion'
-          : ''
+        userData && userData.preferences.isReducedMotion ? 'reduced-motion' : ''
       } [&:hover>.container>.song-controls-container]:visible [&:hover>.container>.song-controls-container]:opacity-100 [&:hover>.container>.song-controls-container>button]:translate-x-0 [&:hover>.container>.song-controls-container>button]:scale-100`}
     >
-      <div className="background-cover-img-container overflow-hidden h-full">
-        <img
+      <div className="background-cover-img-container h-full overflow-hidden">
+        <Img
           src={
             currentSongData.artworkPath
-              ? `otomusic://localFiles/${currentSongData.artworkPath}`
+              ? `nora://localFiles/${currentSongData.artworkPath}`
               : DefaultSongCover
           }
           alt="Song Cover"
-          className={`w-full h-full object-cover group-hover:blur-[2px] group-hover:brightness-75 group-focus:blur-[2px] group-focus:brightness-75 transition-[filter] duration-200 ease-in-out ${
+          className={`h-full w-full object-cover transition-[filter] duration-200 ease-in-out group-hover:blur-[2px] group-hover:brightness-75 group-focus:blur-[4px] group-focus:brightness-75 ${
             !isCurrentSongPlaying
               ? 'blur-[2px] brightness-75'
               : 'blur-0 brightness-100'
           }`}
         />
       </div>
-      <div className="container h-full absolute top-0 flex flex-col items-center justify-between overflow-hidden">
+      <div className="container absolute top-0 flex h-full flex-col items-center justify-between overflow-hidden">
         <div
-          className={`title-bar w-full h-[15%] flex justify-end z-10 select-none `}
+          className={`title-bar z-10 flex h-[15%] w-full select-none justify-end `}
         >
           <div className="special-controls-container flex">
-            <span className="go-to-main-player-btn text-font-color-white dark:text-font-color-white p-2 cursor-pointer">
+            <span
+              className="go-to-main-player-btn cursor-pointer p-2 text-font-color-white dark:text-font-color-white"
+              title="Go to Main Player"
+            >
               <span
                 className="material-icons-round text-xl"
                 onClick={() => updateMiniPlayerStatus(!isMiniPlayer)}
@@ -83,31 +113,38 @@ export default function MiniPlayer() {
                 launch
               </span>
             </span>
-            <span className="always-on-top-btn text-font-color-white dark:text-font-color-white p-2 cursor-pointer">
+            <span
+              className={`always-on-top-btn m-1 cursor-pointer rounded-md p-1 text-font-color-white dark:text-font-color-white ${
+                userData?.preferences.isMiniPlayerAlwaysOnTop
+                  ? 'bg-dark-background-color-2 dark:bg-dark-background-color-2'
+                  : ''
+              }`}
+              title={`Always on top : ${
+                userData?.preferences.isMiniPlayerAlwaysOnTop ? 'ON' : 'OFF'
+              }`}
+            >
               <span
                 className="material-icons-round text-xl"
                 onClick={() => {
-                  if (localUserDataRef.current) {
+                  if (userData) {
+                    const state =
+                      !userData?.preferences.isMiniPlayerAlwaysOnTop;
                     return window.api
-                      .toggleMiniPlayerAlwaysOnTop(
-                        !localUserDataRef.current?.preferences
-                          .isMiniPlayerAlwaysOnTop
-                      )
+                      .toggleMiniPlayerAlwaysOnTop(state)
                       .then(() =>
-                        updateLocalUserData((prevUserData) => {
-                          const data = prevUserData;
-                          if (data?.preferences)
-                            data.preferences.isMiniPlayerAlwaysOnTop =
-                              !data?.preferences.isMiniPlayerAlwaysOnTop;
-                          return data as UserData;
+                        updateUserData((prevUserData) => {
+                          if (prevUserData?.preferences)
+                            prevUserData.preferences.isMiniPlayerAlwaysOnTop =
+                              state;
+                          return prevUserData as UserData;
                         })
                       );
                   }
                   return undefined;
                 }}
               >
-                {localUserDataRef.current?.preferences &&
-                localUserDataRef.current.preferences.isMiniPlayerAlwaysOnTop
+                {userData?.preferences &&
+                userData.preferences.isMiniPlayerAlwaysOnTop
                   ? 'move_down'
                   : 'move_up'}
               </span>
@@ -115,21 +152,23 @@ export default function MiniPlayer() {
           </div>
           <div className="window-controls-container flex">
             <span
-              className="minimize-btn text-font-color-white dark:text-font-color-white p-2 flex items-center cursor-pointer hover:bg-dark-background-color-2 dark:hover:bg-dark-background-color-2"
+              className="minimize-btn flex cursor-pointer items-center p-2 text-font-color-white hover:bg-dark-background-color-2 dark:text-font-color-white dark:hover:bg-dark-background-color-2"
               onClick={() => window.api.minimizeApp()}
+              title="Minimize"
             >
               <span className="material-icons-round text-xl">minimize</span>
             </span>
             <span
-              className="close-btn text-font-color-white dark:text-font-color-white p-2 flex items-center cursor-pointer hover:bg-foreground-color-1 dark:hover:bg-foreground-color-1"
+              className="close-btn flex cursor-pointer items-center p-2 text-font-color-white hover:bg-font-color-crimson dark:text-font-color-white dark:hover:bg-font-color-crimson"
               onClick={() => window.api.closeApp()}
+              title="Close"
             >
               <span className="material-icons-round text-xl">close</span>{' '}
             </span>
           </div>
         </div>
         <div
-          className={`song-controls-container h-fit bg-[transparent] dark:bg-[transparent] shadow-none absolute top-[50%] left-1/2 -translate-x-1/2 -translate-y-1/2  flex items-center justify-center transition-[visibility,opacity] ${
+          className={`song-controls-container absolute top-[50%] left-1/2 flex h-fit -translate-x-1/2 -translate-y-1/2 items-center justify-center  bg-[transparent] shadow-none transition-[visibility,opacity] dark:bg-[transparent] ${
             !isCurrentSongPlaying
               ? 'visible opacity-100'
               : 'invisible opacity-0'
@@ -137,7 +176,7 @@ export default function MiniPlayer() {
         >
           <button
             type="button"
-            className="skip-backward-btn bg-[transparent] dark:bg-[transparent] h-fit text-font-color-white dark:text-font-color-white border-none cursor-pointer -translate-x-4 transition-transform"
+            className="skip-backward-btn h-fit -translate-x-4 cursor-pointer border-none bg-[transparent] text-font-color-white transition-transform dark:bg-[transparent] dark:text-font-color-white"
             onClick={handleSkipBackwardClick}
           >
             <span className="material-icons-round icon text-4xl">
@@ -146,7 +185,7 @@ export default function MiniPlayer() {
           </button>
           <button
             type="button"
-            className="play-pause-btn mx-4 bg-[transparent] dark:bg-[transparent] h-fit text-6xl text-font-color-white dark:text-font-color-white border-none cursor-pointer scale-90 transition-transform"
+            className="play-pause-btn mx-4 h-fit scale-90 cursor-pointer border-none bg-[transparent] text-6xl text-font-color-white transition-transform dark:bg-[transparent] dark:text-font-color-white"
             onClick={toggleSongPlayback}
           >
             <span className="material-icons-round icon">
@@ -155,7 +194,7 @@ export default function MiniPlayer() {
           </button>
           <button
             type="button"
-            className="skip-forward-btn  bg-[transparent] dark:bg-[transparent] h-fit text-font-color-white dark:text-font-color-white border-none cursor-pointer translate-x-4 transition-transform"
+            className="skip-forward-btn  h-fit translate-x-4 cursor-pointer border-none bg-[transparent] text-font-color-white transition-transform dark:bg-[transparent] dark:text-font-color-white"
             onClick={handleSkipForwardClick}
           >
             <span className="material-icons-round icon text-4xl">
@@ -163,9 +202,9 @@ export default function MiniPlayer() {
             </span>
           </button>
         </div>
-        <div className="song-info-container text-font-color-white w-full h-1/2 flex flex-col items-center justify-center px-4 text-center">
+        <div className="song-info-container flex h-1/2 w-full flex-col items-center justify-center px-4 text-center text-font-color-white">
           <div
-            className="song-title max-w-full overflow-hidden whitespace-nowrap text-ellipsis text-xl mt-2"
+            className="song-title mt-2 max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-xl"
             title={currentSongData.title}
           >
             {currentSongData.title}
@@ -187,12 +226,17 @@ export default function MiniPlayer() {
           type="range"
           name="seek-slider"
           id="seekSlider"
-          className="seek-slider absolute appearance-none w-full m-0 p-0 h-fit float-left outline-none bg-[transparent] rounded-lg before:absolute before:content-[''] before:top-1/2 before:left-0 before:w-[var(--seek-before-width)] before:h-1 before:bg-foreground-color-1 before:cursor-pointer before:rounded-3xl before:-translate-y-1/2 bottom-0 before:transition-[width] before:ease-in-out"
+          className="seek-slider absolute bottom-0 float-left m-0 h-fit w-full appearance-none rounded-lg bg-font-color-highlight-2/25 p-0 outline-none backdrop-blur-sm transition-[width,height,transform] ease-in-out before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-highlight-2 before:transition-[width,height,transform] before:ease-in-out before:content-[''] group-hover:-translate-y-3 group-hover:scale-x-95 group-hover:before:h-3"
           min={0}
           readOnly
-          max={currentSongData.duration}
-          value={songPosition}
+          max={currentSongData.duration || 0}
+          value={songPos || 0}
+          onChange={(e) => {
+            setSongPos(e.currentTarget.valueAsNumber ?? 0);
+          }}
+          ref={seekbarRef}
           style={seekBarCssProperties}
+          title={Math.round(songPosition).toString()}
         />
       </div>
     </div>

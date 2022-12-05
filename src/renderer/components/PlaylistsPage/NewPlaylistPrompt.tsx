@@ -4,9 +4,10 @@
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
 import React from 'react';
-import { AppUpdateContext } from 'renderer/contexts/AppContext';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import PlaylistDefaultCover from '../../../../assets/images/png/playlist_cover_default.png';
 import Button from '../Button';
+import Img from '../Img';
 
 interface NewPlaylistPromptProp {
   updatePlaylists: (updatedPlaylist: Playlist[]) => void;
@@ -17,30 +18,33 @@ export default (props: NewPlaylistPromptProp) => {
   const { changePromptMenuData, addNewNotifications } =
     React.useContext(AppUpdateContext);
   const [input, setInput] = React.useState('');
+  const [artworkPath, setArtworkPath] = React.useState('');
 
   const createNewPlaylist = (playlistName: string) => {
     if (playlistName !== '') {
-      window.api.addNewPlaylist(playlistName.trim()).then((res) => {
-        if (res && res.success && res.playlist) {
-          changePromptMenuData(false, <></>);
-          props.updatePlaylists([...props.currentPlaylists, res.playlist]);
-          addNewNotifications([
-            {
-              id: 'playlistCreated',
-              delay: 5000,
-              content: <>Playlist added successfully.</>,
-            },
-          ]);
-        } else {
-          addNewNotifications([
-            {
-              id: 'playlistCreateFailed',
-              delay: 5000,
-              content: <>{res.message}</>,
-            },
-          ]);
-        }
-      });
+      window.api
+        .addNewPlaylist(playlistName.trim(), undefined, artworkPath)
+        .then((res) => {
+          if (res && res.success && res.playlist) {
+            changePromptMenuData(false, <></>);
+            props.updatePlaylists([...props.currentPlaylists, res.playlist]);
+            addNewNotifications([
+              {
+                id: 'playlistCreated',
+                delay: 5000,
+                content: <>Playlist added successfully.</>,
+              },
+            ]);
+          } else {
+            addNewNotifications([
+              {
+                id: 'playlistCreateFailed',
+                delay: 5000,
+                content: <>{res.message}</>,
+              },
+            ]);
+          }
+        });
     } else
       addNewNotifications([
         {
@@ -52,19 +56,37 @@ export default (props: NewPlaylistPromptProp) => {
   };
 
   return (
-    <>
-      <img
-        src={PlaylistDefaultCover}
-        alt="Playlist default cover"
-        className="mb-8 max-w-[50%] rounded-xl"
-      />
-      <span className="text-2xl font-medium text-center mb-4">
+    <div className="flex flex-col items-center justify-center">
+      <div className="img-container relative mb-8 max-w-[50%] rounded-xl">
+        <Img
+          src={
+            artworkPath
+              ? `nora://localFiles/${artworkPath}`
+              : PlaylistDefaultCover
+          }
+          alt="Playlist default cover"
+          className="aspect-square w-full max-w-[15rem] rounded-xl shadow-lg"
+        />
+        <Button
+          className="artwork-update-btn absolute -bottom-4 -right-4 mr-0 aspect-square rounded-full border-none !bg-background-color-3 transition-[background] hover:!bg-font-color-highlight  dark:!bg-dark-background-color-2 dark:hover:!bg-dark-background-color-3 dark:hover:text-font-color-black"
+          iconName="edit"
+          iconClassName="group:hover:text-font-color-black dark:group:hover:text-font-color-black mr-0"
+          clickHandler={() =>
+            window.api
+              .getImgFileLocation()
+              .then((res) => setArtworkPath(res))
+              // eslint-disable-next-line no-console
+              .catch((err) => console.error(err))
+          }
+        />
+      </div>
+      <span className="mb-4 text-center text-2xl font-medium">
         Add new Playlist{' '}
       </span>
       <input
         type="text"
         name="playlistName"
-        className="playlist-name-input w-3/4 min-w-[400px] max-w-[90%] px-6 py-3 rounded-2xl text-lg !bg-background-color-2 dark:!bg-dark-background-color-2 border-[transparent] outline-none text-font-color-black dark:text-font-color-white"
+        className="playlist-name-input w-fit min-w-[400px] max-w-[75%] rounded-2xl border-[transparent] !bg-background-color-2 px-6 py-3 text-lg text-font-color-black outline-none dark:!bg-dark-background-color-2 dark:text-font-color-white"
         placeholder="Playlist Name"
         value={input}
         onChange={(e) => setInput(e.target.value)}
@@ -73,9 +95,9 @@ export default (props: NewPlaylistPromptProp) => {
       />
       <Button
         label="Add Playlist"
-        className="w-1/2 p-2 rounded-lg text-lg cursor-pointer text-font-color-black dark:text-font-color-black justify-center !bg-background-color-3 dark:!bg-dark-background-color-3 my-4"
+        className="my-4 !mr-0 w-1/4 cursor-pointer justify-center rounded-full !bg-background-color-3 p-2 text-lg text-font-color-black dark:!bg-dark-background-color-3 dark:text-font-color-black"
         clickHandler={() => createNewPlaylist(input)}
       />
-    </>
+    </div>
   );
 };

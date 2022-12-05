@@ -1,19 +1,27 @@
 {
   "cSpell.words": [
     "acoustid",
+    "apic",
     "Deezer",
+    "ecfg",
+    "Fashni",
+    "FXJOE",
     "horiz",
+    "isrc",
     "lastfm",
     "Mamidwar",
     "mbid",
     "nsis",
     "pmmmwh",
+    "pyong",
     "Resyncing",
     "RIELL",
     "unmaximize",
+    "unsynced",
     "webm",
     "xmark",
-    "Yosef"
+    "Yosef",
+    "YYYYMMDDNN"
   ],
   "files.associations": {
     ".eslintrc": "jsonc",
@@ -37,5 +45,6 @@
     "*.{css,sass,scss}.d.ts": true
   },
   "cSpell.ignoreWords": ["asar", "edata", "prettierrc"],
-  "rpc.enabled": true
+  "rpc.enabled": true,
+  "docwriter.hotkey.windows": "Alt + ."
 }

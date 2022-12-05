@@ -8,11 +8,14 @@
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable react/destructuring-assignment */
 import React, { useContext } from 'react';
-import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
-import { calculateTime } from 'renderer/utils/calculateTime';
+import { AppContext } from 'renderer/contexts/AppContext';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
 import Button from '../Button';
+import Img from '../Img';
 import MainContainer from '../MainContainer';
 import { Song } from '../SongsPage/Song';
+import SongArtist from '../SongsPage/SongArtist';
 
 interface AlbumContentReducer {
   albumData: Album;
@@ -43,12 +46,8 @@ const reducer = (
 
 export default () => {
   const { currentlyActivePage, queue, userData } = useContext(AppContext);
-  const {
-    changeCurrentActivePage,
-    createQueue,
-    updateQueueData,
-    addNewNotifications,
-  } = useContext(AppUpdateContext);
+  const { createQueue, updateQueueData, addNewNotifications } =
+    useContext(AppUpdateContext);
 
   const [albumContent, dispatch] = React.useReducer(reducer, {
     albumData: {} as Album,
@@ -86,7 +85,8 @@ export default () => {
     fetchAlbumData();
     const manageDataUpdatesInAlbumsInfoPage = (e: Event) => {
       if ('detail' in e) {
-        const dataEvents = (e as DataEvent).detail;
+        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>)
+          .detail;
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
           if (event.dataType === 'albums') fetchAlbumData();
@@ -122,7 +122,7 @@ export default () => {
                 }
                 title={song.title}
                 artists={song.artists}
-                artworkPath={song.artworkPath}
+                artworkPaths={song.artworkPaths}
                 duration={song.duration}
                 songId={song.songId}
                 path={song.path}
@@ -135,22 +135,17 @@ export default () => {
   );
 
   const calculateTotalTime = React.useCallback(() => {
-    const val = calculateTime(
+    const { hours, minutes, seconds } = calculateTimeFromSeconds(
       albumContent.songsData.reduce(
         (prev, current) => prev + current.duration,
         0
       )
     );
-    const duration = val.split(':');
     return `${
-      Number(duration[0]) / 60 >= 1
-        ? `${Math.floor(Number(duration[0]) / 60)} hour${
-            Math.floor(Number(duration[0]) / 60) === 1 ? '' : 's'
-          } `
-        : ''
-    }${Math.floor(Number(duration[0]) % 60)} minute${
-      Math.floor(Number(duration[0]) % 60) === 1 ? '' : 's'
-    } ${duration[1]} second${Number(duration[1]) === 1 ? '' : 's'}`;
+      hours >= 1 ? `${hours} hour${hours === 1 ? '' : 's'} ` : ''
+    }${minutes} minute${minutes === 1 ? '' : 's'} ${seconds} second${
+      seconds === 1 ? '' : 's'
+    }`;
   }, [albumContent.songsData]);
 
   return (
@@ -158,9 +153,9 @@ export default () => {
       <>
         <div className="album-img-and-info-container flex flex-row items-center">
           <div className="album-cover-container mr-8">
-            {albumContent.albumData.artworkPath && (
-              <img
-                src={`otomusic://localFiles/${albumContent.albumData.artworkPath}`}
+            {albumContent.albumData.artworkPaths && (
+              <Img
+                src={albumContent.albumData.artworkPaths.artworkPath}
                 className="w-60 rounded-2xl"
                 alt="Album Cover"
               />
@@ -170,33 +165,24 @@ export default () => {
             albumContent.albumData.artists &&
             albumContent.albumData.artists.length > 0 &&
             albumContent.albumData.songs.length > 0 && (
-              <div className="album-info-container text-font-color-black dark:text-font-color-white max-w-[70%]">
-                <div className="album-title text-5xl w-full overflow-hidden text-ellipsis whitespace-nowrap">
+              <div className="album-info-container max-w-[70%] text-font-color-black dark:text-font-color-white">
+                <div className="album-title w-full overflow-hidden text-ellipsis whitespace-nowrap text-5xl">
                   {albumContent.albumData.title}
                 </div>
-                <div className="album-artists text-xl h-[unset] inline m-0 cursor-pointer w-full overflow-hidden text-ellipsis whitespace-nowrap">
+                <div className="album-artists m-0 inline h-[unset] w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-xl">
                   {albumContent.albumData.artists.map((artist, index) => (
-                    <span
-                      className="artist w-fit h-[unset] inline m-0 pointer"
-                      title={artist.name}
-                      key={index}
-                      onClick={() =>
-                        currentlyActivePage.pageTitle === 'ArtistInfo' &&
-                        currentlyActivePage.data.artistName === artist
-                          ? changeCurrentActivePage('Home')
-                          : changeCurrentActivePage('ArtistInfo', {
-                              artistName: artist.name,
-                              artistId: artist.artistId,
-                            })
-                      }
-                    >
-                      {artist.name}
+                    <>
+                      <SongArtist
+                        key={artist.artistId}
+                        artistId={artist.artistId}
+                        name={artist.name}
+                      />
                       {albumContent.albumData.artists
                         ? index === albumContent.albumData.artists.length - 1
                           ? ''
                           : ', '
                         : ''}
-                    </span>
+                    </>
                   ))}
                 </div>
                 {albumContent.songsData.length > 0 && (
@@ -204,7 +190,7 @@ export default () => {
                     {calculateTotalTime()}
                   </div>
                 )}
-                <div className="album-no-of-songs text-base w-full overflow-hidden text-ellipsis whitespace-nowrap">{`${
+                <div className="album-no-of-songs w-full overflow-hidden text-ellipsis whitespace-nowrap text-base">{`${
                   albumContent.albumData.songs.length
                 } song${
                   albumContent.albumData.songs.length === 1 ? '' : 's'
@@ -224,7 +210,7 @@ export default () => {
                           albumContent.songsData.map((song) => song.songId),
                           'songs',
                           false,
-                          undefined,
+                          albumContent.albumData.albumId,
                           true
                         )
                       }
@@ -237,7 +223,7 @@ export default () => {
                           albumContent.songsData.map((song) => song.songId),
                           'songs',
                           true,
-                          undefined,
+                          albumContent.albumData.albumId,
                           true
                         )
                       }
@@ -279,11 +265,11 @@ export default () => {
               </div>
             )}
         </div>
-        <div className="album-songs-container secondary-container songs-list-container h-fit pb-4 mt-8">
-          <div className="title-container mt-1 pr-4 flex items-center mb-4 text-font-color-black text-2xl  dark:text-font-color-white">
+        <div className="album-songs-container secondary-container songs-list-container mt-8 h-fit pb-4">
+          <div className="title-container mt-1 mb-4 flex items-center pr-4 text-2xl text-font-color-black  dark:text-font-color-white">
             Songs
           </div>
-          <div className="songs-container flex flex-col relative">
+          <div className="songs-container relative flex flex-col">
             {songComponents}
           </div>
         </div>

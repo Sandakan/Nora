@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppUpdateContext } from 'renderer/contexts/AppContext';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
 import RemoveFolderConfirmationPrompt from './RemoveFolderConfirmationPrompt';
 
@@ -10,17 +10,17 @@ export default (props: { musicFolder: MusicFolderData }) => {
   const folderName = musicFolder.path.split('\\').at(-1);
   path.pop();
   return (
-    <div className="music-folder py-2 flex flex-row items-center justify-between p-1 border-b border-background-color-2 dark:border-dark-background-color-2 last:border-b-0">
-      <div className="flex items-center flex-grow">
+    <div className="music-folder flex flex-row items-center justify-between rounded-md border-b border-background-color-2 p-2 py-2 last:border-b-0 hover:bg-background-color-2 dark:border-dark-background-color-2 dark:hover:bg-dark-background-color-2">
+      <div className="flex flex-grow items-center">
         <span className="material-icons-round icon mr-4 text-3xl text-[hsla(39,97%,71%,1)] dark:text-[hsla(39,97%,71%,1)]">
           folder
         </span>
         <div className="music-folder-path-container flex flex-col">
-          <div className="music-folder-name text-xl text-ellipsis overflow-hidden whitespace-nowrap">
+          <div className="music-folder-name overflow-hidden text-ellipsis whitespace-nowrap text-xl">
             {folderName}
           </div>
           <div
-            className="music-folder-path text-sm text-ellipsis whitespace-nowrap overflow-hidden"
+            className="music-folder-path overflow-hidden text-ellipsis whitespace-nowrap text-sm"
             title={musicFolder.path}
           >
             {path.join('\\')}
@@ -28,8 +28,9 @@ export default (props: { musicFolder: MusicFolderData }) => {
         </div>
       </div>
       <Button
-        className="music-folder-delete-btn danger-btn !w-25 !h-fit mr-0 rounded-lg outline-none text-background-color-3 dark:text-dark-background-color-3 border-[transparent] float-right cursor-pointer font-medium border-none hover:text-foreground-color-1 hover:dark:text-foreground-color-1 ease-in-out"
+        className="music-folder-delete-btn danger-btn !w-25 dark:text-dark-hitext-font-color-highlight float-right mr-0 !h-fit cursor-pointer rounded-lg border-none border-[transparent] font-medium text-font-color-highlight outline-none ease-in-out hover:text-font-color-crimson dark:text-dark-font-color-highlight hover:dark:text-font-color-crimson"
         label="REMOVE"
+        tooltipLabel={`Remove '${folderName}' Folder`}
         clickHandler={() =>
           changePromptMenuData(
             true,

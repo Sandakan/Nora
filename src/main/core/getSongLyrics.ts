@@ -1,0 +1,205 @@
+import NodeID3 from 'node-id3';
+import songlyrics from 'songlyrics';
+
+import { getSongsData, getUserData } from '../filesystem';
+import log from '../log';
+import { checkIfConnectedToInternet, sendMessageToRenderer } from '../main';
+import fetchLyricsFromMusixmatch from '../utils/fetchLyricsFromMusixmatch';
+import parseLyrics from '../utils/parseLyrics';
+
+let cachedLyrics = undefined as SongLyrics | undefined;
+
+export const updateCachedLyrics = (
+  callback: (prevLyrics: typeof cachedLyrics) => SongLyrics | undefined
+) => {
+  const lyrics = callback(cachedLyrics);
+  if (lyrics) cachedLyrics = lyrics;
+};
+
+const fetchLyricsFromAudioSource = (songId: string, songTitle: string) => {
+  const songs = getSongsData();
+
+  if (Array.isArray(songs) && songs.length > 0) {
+    for (let i = 0; i < songs.length; i += 1) {
+      if (songs[i].songId === songId) {
+        const song = songs[i];
+        const songData = NodeID3.read(song.path);
+        const lyrics = songData.unsynchronisedLyrics;
+
+        // $ synchronisedLyrics tag skipped due to issues like incorrect timestamps. Could be an issue in the NodeID3.
+
+        // const syncedLyricsArr = songData.synchronisedLyrics;
+
+        // if (Array.isArray(syncedLyricsArr) && syncedLyricsArr.length > 0) {
+        //   const syncedLyricsData = syncedLyricsArr[0];
+        //   const parsedSyncedLyrics =
+        //     parseSyncedLyricsFromAudioDataSource(syncedLyricsData);
+
+        //   if (parsedSyncedLyrics) {
+        //     const { isSynced } = parsedSyncedLyrics;
+
+        //     const lyricsType: LyricsTypes = isSynced ? 'SYNCED' : 'UN_SYNCED';
+
+        //     cachedLyrics = {
+        //       title: songTitle,
+        //       source: 'in_song_lyrics',
+        //       lyricsType,
+        //       lyrics: parsedSyncedLyrics,
+        //     };
+        //     return cachedLyrics;
+        //   }
+        // }
+
+        if (lyrics) {
+          const parsedLyrics = parseLyrics(lyrics.text);
+          const lyricsType: LyricsTypes = parsedLyrics.isSynced
+            ? 'SYNCED'
+            : 'UN_SYNCED';
+
+          cachedLyrics = {
+            title: songTitle,
+            source: 'in_song_lyrics',
+            lyricsType,
+            lyrics: parsedLyrics,
+          };
+          return cachedLyrics;
+        }
+        // No lyrics found on the audio_source.
+        break;
+      }
+    }
+  }
+  return undefined;
+};
+
+const getLyricsFromMusixmatch = async (
+  songTitle: string,
+  songArtists: string[],
+  lyricsType?: LyricsRequestTypes,
+  abortControllerSignal?: AbortSignal
+) => {
+  const userData = getUserData();
+
+  const mxmUserToken = process.env.MUSIXMATCH_DEFAULT_USER_TOKEN;
+  if (mxmUserToken && userData?.preferences?.isMusixmatchLyricsEnabled) {
+    // Searching internet for lyrics because none present on audio source.
+    try {
+      const musixmatchLyrics = await fetchLyricsFromMusixmatch(
+        {
+          q_track: songTitle,
+          q_artist: songArtists.join(', '),
+        },
+        mxmUserToken,
+        lyricsType,
+        abortControllerSignal
+      );
+
+      if (musixmatchLyrics) {
+        const {
+          lyrics,
+          metadata,
+          lyricsType: lyricsSyncState,
+        } = musixmatchLyrics;
+        log(`found musixmatch lyrics for '${metadata.title}' song.`);
+
+        const parsedLyrics = parseLyrics(lyrics);
+
+        cachedLyrics = {
+          lyrics: parsedLyrics,
+          title: songTitle,
+          source: 'Musixmatch Lyrics',
+          lang: metadata.lang,
+          link: metadata.link,
+          lyricsType: lyricsSyncState,
+          copyright: metadata.copyright,
+        };
+        return cachedLyrics;
+      }
+    } catch (error) {
+      log(`Error occurred when trying to fetch lyrics from musixmatch.`, {
+        error,
+      });
+    }
+  }
+  return undefined;
+};
+
+const fetchUnsyncedLyrics = async (
+  songTitle: string,
+  songArtists: string[]
+) => {
+  const str = songArtists ? `${songTitle} ${songArtists.join(' ')}` : songTitle;
+  // no abort controller support for songLyrics.
+  const lyricsData = await songlyrics(str);
+  if (lyricsData) {
+    const { lyrics, source } = lyricsData;
+    log(`Found a lyrics result named '${lyricsData?.source.name}'.`);
+
+    const parsedLyrics = parseLyrics(lyrics);
+
+    cachedLyrics = {
+      title: songTitle,
+      lyrics: parsedLyrics,
+      source: source.name,
+      lyricsType: 'UN_SYNCED',
+      link: source.url,
+    };
+    return cachedLyrics;
+  }
+  log(`No lyrics found in the internet for the requested query.`);
+  sendMessageToRenderer(`We couldn't find lyrics for ${songTitle}`);
+  return undefined;
+};
+
+const getSongLyrics = async (
+  songTitle: string,
+  songArtists = [] as string[],
+  songId?: string,
+  lyricsType = 'ANY' as LyricsRequestTypes,
+  forceDownload = false,
+  abortControllerSignal?: AbortSignal
+): Promise<SongLyrics | undefined> => {
+  const isConnectedToInternet = checkIfConnectedToInternet();
+
+  log(`Fetching lyrics for '${songTitle} - ${songArtists.join(',')}'.`);
+  if (!forceDownload && cachedLyrics && cachedLyrics.title === songTitle) {
+    log('Serving cached lyrics.');
+    return cachedLyrics;
+  }
+  // No cached lyrics. Trying to fetch lyrics from audio_source.
+  if (songId && !forceDownload) {
+    const audioSourceLyrics = fetchLyricsFromAudioSource(songId, songTitle);
+    if (audioSourceLyrics) return audioSourceLyrics;
+  }
+
+  // No lyrics in the audio_source. Trying to fetch lyrics from the internet.
+  if (isConnectedToInternet) {
+    try {
+      const musixmatchLyrics = await getLyricsFromMusixmatch(
+        songTitle,
+        songArtists,
+        lyricsType,
+        abortControllerSignal
+      );
+
+      if (musixmatchLyrics) return musixmatchLyrics;
+
+      if (lyricsType !== 'SYNCED') {
+        const unsyncedLyrics = await fetchUnsyncedLyrics(
+          songTitle,
+          songArtists
+        );
+        return unsyncedLyrics;
+      }
+    } catch (error) {
+      log(
+        `No lyrics found in the internet for the requested query.\nERROR : ${error}`
+      );
+      sendMessageToRenderer(`We couldn't find lyrics for ${songTitle}`);
+      return undefined;
+    }
+  }
+  return undefined;
+};
+
+export default getSongLyrics;

@@ -10,7 +10,7 @@ interface SecondaryContainerProp {
 function SecondaryContainer(props: SecondaryContainerProp) {
   const { children, className } = props;
   return (
-    <div className={`secondary-container w-full h-fit mb-4 ${className}`}>
+    <div className={`secondary-container mb-4 h-fit w-full ${className}`}>
       {children}
     </div>
   );

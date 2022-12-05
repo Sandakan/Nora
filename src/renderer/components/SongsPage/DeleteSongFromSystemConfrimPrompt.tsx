@@ -1,17 +1,19 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
-import { AppUpdateContext } from 'renderer/contexts/AppContext';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppContext } from 'renderer/contexts/AppContext';
 import Button from '../Button';
 import Checkbox from '../Checkbox';
 
-export default (props: { songPath: string; title: string }) => {
-  const { addNewNotifications, changePromptMenuData } =
+export default (props: { songPath: string; title: string; songId: string }) => {
+  const { currentSongData } = React.useContext(AppContext);
+  const { addNewNotifications, changePromptMenuData, clearAudioPlayerData } =
     React.useContext(AppUpdateContext);
-  const { songPath, title } = props;
+  const { songPath, title, songId } = props;
   const [isPermanentDelete, setIsPermenanentDelete] = React.useState(false);
   return (
     <>
-      <div className="title-container mt-1 pr-4 flex items-center mb-8 text-font-color-black text-3xl font-medium dark:text-font-color-white">
+      <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
         Delete &apos;{title}&apos; from system
       </div>
       <div className="description">
@@ -27,14 +29,14 @@ export default (props: { songPath: string; title: string }) => {
       />
       <Button
         label="Delete Song"
-        className="delete-song-confirm-btn danger-btn w-48 h-10 rounded-lg outline-none !bg-foreground-color-1 dark:!bg-foreground-color-1 text-font-color-white dark:text-font-color-white border-[transparent] float-right cursor-pointer hover:border-foreground-color-1 dark:hover:border-foreground-color-1 transition-[background] ease-in-out"
+        className="delete-song-confirm-btn danger-btn float-right h-10 w-48 cursor-pointer rounded-lg border-[transparent] !bg-font-color-crimson text-font-color-white outline-none transition-[background] ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson"
         clickHandler={() => {
           changePromptMenuData(false);
           return window.api
             .deleteSongFromSystem(songPath, isPermanentDelete)
-            .then(
-              (res) =>
-                res.success &&
+            .then((res) => {
+              if (res.success) {
+                if (songId === currentSongData.songId) clearAudioPlayerData();
                 addNewNotifications([
                   {
                     id: `${title}Removed`,
@@ -52,8 +54,10 @@ export default (props: { songPath: string; title: string }) => {
                       </span>
                     ),
                   },
-                ])
-            );
+                ]);
+              }
+              return undefined;
+            });
         }}
       />
     </>

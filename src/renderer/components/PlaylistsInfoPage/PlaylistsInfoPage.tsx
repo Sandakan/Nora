@@ -8,12 +8,15 @@
 /* eslint-disable react/require-default-props */
 /* eslint-disable react/destructuring-assignment */
 import React, { useContext } from 'react';
-import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
-import { calculateTime } from 'renderer/utils/calculateTime';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppContext } from 'renderer/contexts/AppContext';
+import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
 import DefaultPlaylistCover from '../../../../assets/images/png/playlist_cover_default.png';
 import Button from '../Button';
 import { Song } from '../SongsPage/Song';
 import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';
+import Img from '../Img';
+import MainContainer from '../MainContainer';
 
 const PlaylistInfoPage = () => {
   const { currentlyActivePage, queue, userData } = useContext(AppContext);
@@ -39,18 +42,25 @@ const PlaylistInfoPage = () => {
 
   const fetchPlaylistSongsData = React.useCallback(() => {
     if (playlistData.songs && playlistData.songs.length > 0) {
-      window.api.getSongInfo(playlistData.songs).then((songsData) => {
-        if (songsData && songsData.length > 0)
-          setPlaylistSongs(songsData.reverse());
-      });
+      window.api
+        .getSongInfo(
+          playlistData.playlistId === 'History'
+            ? playlistData.songs.reverse()
+            : playlistData.songs
+        )
+        .then((songsData) => {
+          if (songsData && songsData.length > 0)
+            setPlaylistSongs(songsData.reverse());
+        });
     }
-  }, [playlistData.songs]);
+  }, [playlistData.songs, playlistData.playlistId]);
 
   React.useEffect(() => {
     fetchPlaylistData();
     const managePlaylistUpdatesInPlaylistsInfoPage = (e: Event) => {
       if ('detail' in e) {
-        const dataEvents = (e as DataEvent).detail;
+        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>)
+          .detail;
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
           if (event.dataType === 'playlists') fetchPlaylistData();
@@ -73,7 +83,8 @@ const PlaylistInfoPage = () => {
     fetchPlaylistSongsData();
     const managePlaylistSongUpdatesInPlaylistInfoPage = (e: Event) => {
       if ('detail' in e) {
-        const dataEvents = (e as DataEvent).detail;
+        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>)
+          .detail;
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
           if (event.dataType === 'albums/newAlbum') fetchPlaylistSongsData();
@@ -94,18 +105,12 @@ const PlaylistInfoPage = () => {
     };
   }, [fetchPlaylistSongsData]);
 
-  const calculateTotalTime = React.useCallback(() => {
-    const val = calculateTime(
+  const totalPlaylistDuration = React.useMemo(() => {
+    const { hours, minutes, seconds } = calculateTimeFromSeconds(
       playlistSongs.reduce((prev, current) => prev + current.duration, 0)
     );
-    const duration = val.split(':');
-    const hours = Math.floor(Number(duration[0]) / 60);
-    const minutes = Math.floor(Number(duration[0]) % 60);
-    const seconds = Number(duration[1]);
     return `${
-      Number(duration[0]) / 60 >= 1
-        ? `${hours} hour${hours === 1 ? '' : 's'} `
-        : ''
+      hours >= 1 ? `${hours} hour${hours === 1 ? '' : 's'} ` : ''
     }${minutes} minute${minutes === 1 ? '' : 's'} ${seconds} second${
       seconds === 1 ? '' : 's'
     }`;
@@ -126,7 +131,7 @@ const PlaylistInfoPage = () => {
                 artists={song.artists}
                 duration={song.duration}
                 songId={song.songId}
-                artworkPath={song.artworkPath}
+                artworkPaths={song.artworkPaths}
                 path={song.path}
                 isAFavorite={song.isAFavorite}
                 additionalContextMenuItems={[
@@ -166,155 +171,160 @@ const PlaylistInfoPage = () => {
   );
 
   return (
-    <div className="main-container playlist-info-page-container p-8">
-      {Object.keys(playlistData).length > 0 && (
-        <div className="playlist-img-and-info-container appear-from-bottom flex flex-row items-center mb-8">
-          <div className="playlist-cover-container">
-            <img
-              src={
-                playlistData.artworkPath
-                  ? `otomusic://localFiles/${playlistData.artworkPath}`
-                  : DefaultPlaylistCover
-              }
-              className="w-60 rounded-2xl"
-              alt="Playlist Cover"
-            />
-          </div>
-          <div className="playlist-info-container text-font-color-black dark:text-font-color-white ml-8">
-            <div className="playlist-name text-5xl w-full overflow-hidden text-ellipsis whitespace-nowrap mb-2">
-              {playlistData.name}
+    <MainContainer className="main-container playlist-info-page-container p-8 pr-4">
+      <>
+        {Object.keys(playlistData).length > 0 && (
+          <div className="playlist-img-and-info-container appear-from-bottom mb-8 flex flex-row items-start">
+            <div className="playlist-cover-container mt-2">
+              <Img
+                src={
+                  playlistData.artworkPaths
+                    ? playlistData.artworkPaths.artworkPath
+                    : DefaultPlaylistCover
+                }
+                className="w-60 rounded-2xl lg:w-48 md:w-40"
+                alt="Playlist Cover"
+              />
             </div>
-            <div className="playlist-no-of-songs text-base w-full overflow-hidden text-ellipsis whitespace-nowrap">
-              {`${playlistData.songs.length} song${
-                playlistData.songs.length === 1 ? '' : 's'
-              }`}
-            </div>
-            {playlistSongs.length > 0 && (
-              <div className="playlist-total-duration">
-                {calculateTotalTime()}
+            <div className="playlist-info-container ml-8 text-font-color-black dark:text-font-color-white">
+              <div className="playlist-name mb-2 w-full overflow-hidden text-ellipsis whitespace-nowrap text-5xl">
+                {playlistData.name}
               </div>
-            )}
-            <div className="playlist-created-date">
-              {`Created on ${new Date(playlistData.createdDate).toUTCString()}`}
-            </div>
-            {playlistData.songs && playlistData.songs.length > 0 && (
-              <div className="playlist-buttons mt-8 flex flex-wrap">
-                <Button
-                  label="Play All"
-                  iconName="play_arrow"
-                  className="mb-4"
-                  clickHandler={() =>
-                    createQueue(
-                      playlistData.songs,
-                      'songs',
-                      undefined,
-                      undefined,
-                      true
-                    )
-                  }
-                />
-                <Button
-                  label="Shuffle and Play"
-                  iconName="shuffle"
-                  className="mb-4"
-                  clickHandler={() =>
-                    createQueue(
-                      playlistData.songs.sort(() => 0.5 - Math.random()),
-                      'songs',
-                      undefined,
-                      undefined,
-                      true
-                    )
-                  }
-                />
-                <Button
-                  label="Add to Queue"
-                  iconName="add"
-                  className="mb-4"
-                  clickHandler={() => {
-                    updateQueueData(undefined, [
-                      ...queue.queue,
-                      ...playlistData.songs,
-                    ]);
-                    addNewNotifications([
-                      {
-                        id: `addedToQueue`,
-                        delay: 5000,
-                        content: (
-                          <span>
-                            Added {playlistData.songs.length} song
-                            {playlistData.songs.length === 1 ? '' : 's'} to the
-                            queue.
-                          </span>
-                        ),
-                      },
-                    ]);
-                  }}
-                />
-                {playlistData.playlistId === 'History' && (
+              <div className="playlist-no-of-songs w-full overflow-hidden text-ellipsis whitespace-nowrap text-base">
+                {`${playlistData.songs.length} song${
+                  playlistData.songs.length === 1 ? '' : 's'
+                }`}
+              </div>
+              {playlistSongs.length > 0 && (
+                <div className="playlist-total-duration">
+                  {totalPlaylistDuration}
+                </div>
+              )}
+              <div className="playlist-created-date">
+                {`Created on ${new Date(
+                  playlistData.createdDate
+                ).toUTCString()}`}
+              </div>
+              {playlistData.songs && playlistData.songs.length > 0 && (
+                <div className="playlist-buttons mt-8 flex flex-wrap">
                   <Button
-                    label="Clear History"
-                    iconName="clear"
+                    label="Play All"
+                    iconName="play_arrow"
+                    className="mb-4"
+                    clickHandler={() =>
+                      createQueue(
+                        playlistData.songs,
+                        'songs',
+                        false,
+                        playlistData.playlistId,
+                        true
+                      )
+                    }
+                  />
+                  <Button
+                    label="Shuffle and Play"
+                    iconName="shuffle"
+                    className="mb-4"
+                    clickHandler={() =>
+                      createQueue(
+                        playlistData.songs,
+                        'playlist',
+                        true,
+                        playlistData.playlistId,
+                        true
+                      )
+                    }
+                  />
+                  <Button
+                    label="Add to Queue"
+                    iconName="add"
                     className="mb-4"
                     clickHandler={() => {
-                      changePromptMenuData(
-                        true,
-                        <SensitiveActionConfirmPrompt
-                          title="Confrim the action to clear Song History"
-                          content={
-                            <div>
-                              You wouldn't be able to see what you have listened
-                              previously if you decide to continue this action.
-                            </div>
-                          }
-                          confirmButton={{
-                            label: 'Clear History',
-                            clickHandler: () => {
-                              window.api
-                                .clearSongHistory()
-                                .then(
-                                  (res) =>
-                                    res.success &&
-                                    addNewNotifications([
-                                      {
-                                        id: 'queueCleared',
-                                        delay: 5000,
-                                        content: (
-                                          <span>
-                                            Cleared the song history
-                                            successfully.
-                                          </span>
-                                        ),
-                                      },
-                                    ])
-                                )
-                                .catch((err) => console.error(err));
-                            },
-                          }}
-                        />
-                      );
+                      updateQueueData(undefined, [
+                        ...queue.queue,
+                        ...playlistData.songs,
+                      ]);
+                      addNewNotifications([
+                        {
+                          id: `addedToQueue`,
+                          delay: 5000,
+                          content: (
+                            <span>
+                              Added {playlistData.songs.length} song
+                              {playlistData.songs.length === 1 ? '' : 's'} to
+                              the queue.
+                            </span>
+                          ),
+                        },
+                      ]);
                     }}
                   />
-                )}
-              </div>
-            )}
+                  {playlistData.playlistId === 'History' && (
+                    <Button
+                      label="Clear History"
+                      iconName="clear"
+                      className="mb-4"
+                      clickHandler={() => {
+                        changePromptMenuData(
+                          true,
+                          <SensitiveActionConfirmPrompt
+                            title="Confrim the action to clear Song History"
+                            content={
+                              <div>
+                                You wouldn't be able to see what you have
+                                listened previously if you decide to continue
+                                this action.
+                              </div>
+                            }
+                            confirmButton={{
+                              label: 'Clear History',
+                              clickHandler: () => {
+                                window.api
+                                  .clearSongHistory()
+                                  .then(
+                                    (res) =>
+                                      res.success &&
+                                      addNewNotifications([
+                                        {
+                                          id: 'queueCleared',
+                                          delay: 5000,
+                                          content: (
+                                            <span>
+                                              Cleared the song history
+                                              successfully.
+                                            </span>
+                                          ),
+                                        },
+                                      ])
+                                  )
+                                  .catch((err) => console.error(err));
+                              },
+                            }}
+                          />
+                        );
+                      }}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
-      {playlistSongs.length > 0 && (
-        <div className="songs-list-container">
-          <div className="title-container mt-1 pr-4 flex items-center mb-4 text-font-color-black text-2xl dark:text-font-color-white">
-            Songs
+        )}
+        {playlistSongs.length > 0 && (
+          <div className="songs-list-container">
+            <div className="title-container mt-1 mb-4 flex items-center pr-4 text-2xl text-font-color-black dark:text-font-color-white">
+              Songs
+            </div>
+            <div className="songs-container">{songComponents}</div>
           </div>
-          <div className="songs-container">{songComponents}</div>
-        </div>
-      )}
-      {playlistSongs.length === 0 && (
-        <div className="no-songs-container h-full mt-12 w-full text-[#ccc] text-center flex flex-col items-center justify-center text-2xl relative inset-0">
-          This playlist is empty.
-        </div>
-      )}
-    </div>
+        )}
+        {playlistSongs.length === 0 && (
+          <div className="no-songs-container relative inset-0 mt-12 flex h-full w-full flex-col items-center justify-center text-center text-2xl text-[#ccc]">
+            This playlist is empty.
+          </div>
+        )}
+      </>
+    </MainContainer>
   );
 };
 

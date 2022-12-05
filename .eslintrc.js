@@ -7,9 +7,39 @@ module.exports = {
     // Since React 17 and typescript 4.1 you can safely disable the rule
     'react/react-in-jsx-scope': 'off',
     'prettier/prettier': [
-      'error',
+      'warn',
       {
         endOfLine: 'auto',
+      },
+    ],
+    // custom eslint rules
+    'react/require-default-props': [0],
+    'no-nested-ternary': 'off',
+    'import/no-cycle': 'off',
+    'import/no-named-as-default': 'off',
+    'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    'no-console': 'off',
+    'prefer-const': 'warn',
+    // '@typescript-eslint/naming-convention': [
+    //   'warn',
+    //   {
+    //     leadingUnderscore: 'allowSingleOrDouble',
+    //     trailingUnderscore: 'allowSingleOrDouble',
+    //   },
+    // ],
+    'react/no-unescaped-entities': [
+      'error',
+      {
+        forbid: [
+          {
+            char: '>',
+            alternatives: ['&gt;'],
+          },
+          {
+            char: '}',
+            alternatives: ['&#125;'],
+          },
+        ],
       },
     ],
   },

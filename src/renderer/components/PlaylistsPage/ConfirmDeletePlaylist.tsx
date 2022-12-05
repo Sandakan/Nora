@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react';
-import { AppUpdateContext } from 'renderer/contexts/AppContext';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
 
 interface ConfirmDeletePlaylistProp {
@@ -15,7 +15,7 @@ const ConfirmDeletePlaylist = (props: ConfirmDeletePlaylistProp) => {
   const { playlistName, playlistId, noOfSongs } = props;
   return (
     <>
-      <div className="title-container mt-1 pr-4 flex items-center mb-8 text-font-color-black text-3xl font-medium dark:text-font-color-white">
+      <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
         Confrim Deleting &apos;{playlistName}&apos; playlist
       </div>
       <div className="description">
@@ -33,9 +33,9 @@ const ConfirmDeletePlaylist = (props: ConfirmDeletePlaylistProp) => {
       </div>
       <Button
         label="Delete Playlist"
-        className="delete-playlist-btn danger-btn w-48 h-10 rounded-lg outline-none !bg-foreground-color-1 dark:!bg-foreground-color-1 text-font-color-white dark:text-font-color-white border-[transparent] float-right cursor-pointer hover:border-foreground-color-1 dark:hover:border-foreground-color-1 transition-[background] ease-in-out"
+        className="delete-playlist-btn danger-btn float-right h-10 w-48 cursor-pointer rounded-lg border-[transparent] !bg-font-color-crimson text-font-color-white outline-none transition-[background] ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson"
         clickHandler={() =>
-          window.api.removeAPlaylist(playlistId).then((res) => {
+          window.api.removePlaylist(playlistId).then((res) => {
             if (res.success) {
               changePromptMenuData(false);
               addNewNotifications([

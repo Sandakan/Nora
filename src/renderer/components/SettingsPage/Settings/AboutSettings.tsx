@@ -1,0 +1,249 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+import React from 'react';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+
+import calculateElapsedTime from 'renderer/utils/calculateElapsedTime';
+
+import { version, author, homepage, bugs } from '../../../../../package.json';
+import openSourceLicenses from '../../../../../open_source_licenses.txt';
+import localReleaseNotes from '../../../../../release-notes.json';
+
+import AppIcon from '../../../../../assets/images/png/logo_light_mode.png';
+import SLFlag from '../../../../../assets/images/png/sl-flag.png';
+import Img from '../../Img';
+import ReleaseNotesPrompt from '../ReleaseNotesPrompt';
+import Hyperlink from '../../Hyperlink';
+import Button from '../../Button';
+import ResetAppConfirmationPrompt from '../../HomePage/ResetAppConfirmationPrompt';
+import SensitiveActionConfirmPrompt from '../../SensitiveActionConfirmPrompt';
+
+const AboutSettings = () => {
+  const { changePromptMenuData, addNewNotifications } =
+    React.useContext(AppUpdateContext);
+
+  const currentVersionReleasedDate = React.useMemo(() => {
+    const { versions } = localReleaseNotes;
+
+    for (let i = 0; i < versions.length; i += 1) {
+      if (versions[i].version === version) {
+        return versions[i].releaseDate;
+      }
+    }
+    return undefined;
+  }, []);
+
+  const elapsed = React.useMemo(() => {
+    if (currentVersionReleasedDate) {
+      return calculateElapsedTime(currentVersionReleasedDate);
+    }
+    return undefined;
+  }, [currentVersionReleasedDate]);
+
+  return (
+    <>
+      <div className="title-container mt-1 mb-4 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <span className="material-icons-round-outlined mr-2">info</span>
+        About
+      </div>
+      <div className="pl-2">
+        {' '}
+        <div className="flex p-2 text-lg">
+          <Img
+            src={AppIcon}
+            className="aspect-square max-h-12 shadow-xl"
+            alt=""
+          />
+          <div className="ml-4 flex flex-col">
+            <span className="block">Nora</span>
+            <span className="text-sm font-light">
+              v{version}{' '}
+              {elapsed ? (
+                <>
+                  &bull;{' '}
+                  <span
+                    title={
+                      currentVersionReleasedDate
+                        ? `Released on ${currentVersionReleasedDate}`
+                        : undefined
+                    }
+                  >
+                    ({elapsed.elapsed} {elapsed.type}
+                    {elapsed.elapsed === 1 ? '' : 's'} ago)
+                  </span>
+                </>
+              ) : (
+                ''
+              )}
+            </span>
+          </div>
+        </div>
+        <span
+          className="release-notes-prompt-btn about-link block w-fit cursor-pointer text-font-color-highlight-2 hover:underline dark:text-dark-font-color-highlight-2"
+          onClick={() =>
+            changePromptMenuData(
+              true,
+              <ReleaseNotesPrompt />,
+              'release-notes px-8 py-4'
+            )
+          }
+        >
+          Release notes
+        </span>
+        <span
+          className="open-source-licenses-btn about-link block w-fit cursor-pointer text-font-color-highlight-2 hover:underline dark:text-dark-font-color-highlight-2"
+          onClick={() =>
+            changePromptMenuData(
+              true,
+              <>
+                <div className="mb-4 w-full text-center text-3xl font-medium">
+                  Open Source Licenses
+                </div>
+                <pre className="relative max-h-full w-full overflow-y-auto px-4">
+                  {openSourceLicenses}
+                </pre>
+              </>,
+              'flex flex-col'
+            )
+          }
+        >
+          Open source licenses
+        </span>
+        <Hyperlink
+          label="Github repository"
+          link={homepage}
+          linkTitle="Nora Github Repository"
+        />
+        <span
+          className="about-link block w-fit cursor-pointer text-font-color-highlight-2 hover:underline dark:text-dark-font-color-highlight-2"
+          onClick={() => window.api.openLogFile()}
+        >
+          Open log file
+        </span>
+        <div className="about-buttons-container mb-4 mt-6 flex flex-wrap">
+          <Button
+            label="Reset App"
+            iconName="auto_mode"
+            className="mb-4 rounded-2xl"
+            clickHandler={() =>
+              changePromptMenuData(
+                true,
+                <ResetAppConfirmationPrompt />,
+                'confirm-app-reset'
+              )
+            }
+          />
+          <Button
+            label="Open Devtools"
+            iconName="code"
+            className="mb-4 rounded-2xl"
+            clickHandler={() => window.api.openDevtools()}
+          />
+          <Button
+            label="Resync songs"
+            iconName="sync"
+            className="mb-4 rounded-2xl"
+            clickHandler={() => window.api.resyncSongsLibrary()}
+          />
+          <Button
+            label="Clear History"
+            iconName="clear"
+            className="mb-4 rounded-2xl"
+            clickHandler={() => {
+              changePromptMenuData(
+                true,
+                <SensitiveActionConfirmPrompt
+                  title="Confrim the action to clear Song History"
+                  content={
+                    <div>
+                      You wouldn't be able to see what you have listened
+                      previously if you decide to continue this action.
+                    </div>
+                  }
+                  confirmButton={{
+                    label: 'Clear History',
+                    clickHandler: () => {
+                      window.api
+                        .clearSongHistory()
+                        .then((res) => {
+                          if (res.success) {
+                            addNewNotifications([
+                              {
+                                id: 'songHistoryCleared',
+                                delay: 5000,
+                                content: (
+                                  <span>
+                                    Cleared the song history successfully.
+                                  </span>
+                                ),
+                              },
+                            ]);
+                          }
+                          return changePromptMenuData(false);
+                        })
+                        .catch((err) => console.error(err));
+                    },
+                  }}
+                />
+              );
+            }}
+          />
+        </div>
+        <div className="about-description mt-4">
+          <div>
+            If you have any feedback about bugs, feature requests etc. about the
+            app, please{' '}
+            <Hyperlink
+              label="add an issue"
+              link={`${bugs.url}/new/choose`}
+              linkTitle="Create An Issue On Nora's Github Repository"
+            />{' '}
+            to the Nora's Github Repository.
+          </div>
+          <br />
+          <Hyperlink
+            label="Contact me through my email."
+            link="mailto:sandakannipunajith@gmail.com?subject=Regarding Nora&body=If you found a bug in the app, please try to attach the log file of the app with a detailed explanation of the bug.%0d%0a%0d%0aYou can get to it by going to  Settings > About > Open Log File."
+            linkTitle="Email"
+            noValidityCheck
+          />
+          <br />
+          <div className="my-1">
+            This product is licensed under the MIT license.
+          </div>
+          <div className="mt-4 text-center text-sm font-light">
+            Made with{' '}
+            <span className="heart text-font-color-crimson dark:text-font-color-crimson">
+              &#10084;
+            </span>{' '}
+            by{' '}
+            <Hyperlink
+              label="Sandakan Nipunajith"
+              link={author.url}
+              linkTitle="Sandakan's Github Profile"
+              className="mr-1"
+            />
+            .
+            <br />
+            <Hyperlink
+              label={
+                <>
+                  #VisitSriLanka{' '}
+                  <Img
+                    src={SLFlag}
+                    alt=""
+                    className="ml-1 inline w-[24px] hover:underline"
+                  />
+                </>
+              }
+              link="https://www.google.com/search?q=beautiful+sri+lanka"
+              linkTitle="Beautiful Sri Lanka"
+            />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default AboutSettings;

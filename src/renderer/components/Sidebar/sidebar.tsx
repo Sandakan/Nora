@@ -7,83 +7,102 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable import/prefer-default-export */
 import React, { useContext } from 'react';
-import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
-import { SideBarItem } from './SideBarItem';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppContext } from 'renderer/contexts/AppContext';
+import ErrorBoundary from '../ErrorBoundary';
+import SideBarItem from './SideBarItem';
 
 const linkData = [
   {
     parentClassName: 'home active',
     icon: 'home',
     content: 'Home',
+    isActive: true,
   },
   {
     parentClassName: 'search',
     icon: 'search',
     content: 'Search',
+    isActive: false,
   },
   {
     parentClassName: 'songs',
     icon: 'music_note',
     content: 'Songs',
+    isActive: false,
   },
   {
     parentClassName: 'playlists',
     icon: 'queue_music',
     content: 'Playlists',
+    isActive: false,
   },
   {
     parentClassName: 'artists',
     icon: 'people',
     content: 'Artists',
+    isActive: false,
   },
   {
     parentClassName: 'albums',
     icon: 'album',
     content: 'Albums',
+    isActive: false,
   },
   {
     parentClassName: 'genres',
     icon: 'track_changes',
     content: 'Genres',
+    isActive: false,
   },
   {
     parentClassName: 'settings',
     icon: 'settings',
     content: 'Settings',
+    isActive: false,
   },
 ];
 
 const Sidebar = React.memo(() => {
-  const { currentlyActivePage } = useContext(AppContext);
+  const { currentlyActivePage, bodyBackgroundImage } = useContext(AppContext);
   const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
 
   const [data, setData] = React.useState(linkData);
 
-  const clickHandler = React.useCallback(
-    (id: string, pageData?: any) => {
+  const addActiveToSidebarItem = React.useCallback(
+    (id: string) => {
       const arr = data.map((link) => {
         if (link.content === id) {
-          changeCurrentActivePage(link.content as PageTitles, pageData);
           return link.parentClassName.includes('active')
             ? link
             : {
                 ...link,
+                isActive: true,
                 parentClassName: `${link.parentClassName} active`,
               };
         } else {
           return {
             ...link,
+            isActive: false,
             parentClassName: link.parentClassName.replace('active', '').trim(),
           };
         }
       });
       setData(arr);
     },
-    [changeCurrentActivePage, data]
+    [data]
+  );
+
+  const clickHandler = React.useCallback(
+    (id: string, pageData?: any) => {
+      changeCurrentActivePage(id as PageTitles, pageData);
+      addActiveToSidebarItem(id);
+    },
+    [addActiveToSidebarItem, changeCurrentActivePage]
   );
 
   React.useEffect(() => {
-    clickHandler(currentlyActivePage.pageTitle, currentlyActivePage.data);
+    addActiveToSidebarItem(currentlyActivePage.pageTitle);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentlyActivePage]);
 
@@ -96,16 +115,25 @@ const Sidebar = React.memo(() => {
           icon={link.icon}
           content={link.content}
           handleClick={clickHandler}
+          isActive={link.isActive}
         ></SideBarItem>
       )),
     [data, clickHandler]
   );
 
   return (
-    <nav className="side-bar flex-grow w-[30%] max-w-80 h-full bg-side-bar-background dark:bg-dark-background-color-2 pt-8 pb-2 rounded-tr-2xl lg:w-14 order-1 transition-[width]">
-      <ul className="last:relative last:w-full last:h-full [&>.active]:bg-background-color-3 dark:[&>.active]:bg-dark-background-color-3 [&>.active]:text-font-color-black dark:[&>.active]:text-font-color-black [&>li.settings]:absolute [&>li.settings]:bottom-0">
-        {sideBarItems}
-      </ul>
+    <nav
+      className={`side-bar max-w-80 order-1 h-full w-[30%] flex-grow rounded-tr-2xl transition-[width] ${
+        bodyBackgroundImage
+          ? 'bg-side-bar-background/50 backdrop-blur-md dark:bg-dark-background-color-2/50'
+          : 'bg-side-bar-background dark:bg-dark-background-color-2'
+      } delay-200 lg:absolute lg:w-14 lg:hover:w-[30%]`}
+    >
+      <ErrorBoundary>
+        <ul className="overflow-hidden pt-6 pb-2 last:relative last:h-full last:w-full [&>li.settings]:absolute [&>li.settings]:bottom-0">
+          {sideBarItems}
+        </ul>
+      </ErrorBoundary>
     </nav>
   );
 });

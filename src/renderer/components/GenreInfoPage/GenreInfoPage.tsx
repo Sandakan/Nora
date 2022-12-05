@@ -2,18 +2,23 @@
 /* eslint-disable no-console */
 import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
+import Button from '../Button';
 import MainContainer from '../MainContainer';
 import { Song } from '../SongsPage/Song';
 
 const GenreInfoPage = () => {
-  const { currentlyActivePage, userData } = React.useContext(AppContext);
+  const { currentlyActivePage, userData, queue } = React.useContext(AppContext);
+  const { createQueue, updateQueueData, addNewNotifications } =
+    React.useContext(AppUpdateContext);
   const [genreData, setGenreData] = React.useState({} as Genre);
   const [genreSongs, setGenreSongs] = React.useState([] as AudioInfo[]);
 
   const fetchGenresData = React.useCallback(() => {
-    if (currentlyActivePage.data && currentlyActivePage.data.genreInfoPage) {
+    if (currentlyActivePage.data) {
       window.api
-        .getGenresData([currentlyActivePage.data.genreInfoPage.genreId])
+        .getGenresData([currentlyActivePage.data.genreId])
         .then((res) => {
           if (res && res.length > 0 && res[0]) setGenreData(res[0]);
           return undefined;
@@ -39,7 +44,8 @@ const GenreInfoPage = () => {
     fetchGenresData();
     const manageGenreUpdatesInGenresInfoPage = (e: Event) => {
       if ('detail' in e) {
-        const dataEvents = (e as DataEvent).detail;
+        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>)
+          .detail;
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
           if (event.dataType === 'genres') fetchGenresData();
@@ -62,7 +68,8 @@ const GenreInfoPage = () => {
     fetchSongsData();
     const manageSongUpdatesInGenreInfoPage = (e: Event) => {
       if ('detail' in e) {
-        const dataEvents = (e as DataEvent).detail;
+        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>)
+          .detail;
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
           if (event.dataType === 'songs') fetchSongsData();
@@ -94,13 +101,24 @@ const GenreInfoPage = () => {
           title={song.title}
           artists={song.artists}
           duration={song.duration}
-          artworkPath={song.artworkPath}
+          artworkPaths={song.artworkPaths}
           path={song.path}
           isAFavorite={song.isAFavorite}
         />
       )),
     [genreSongs, userData]
   );
+
+  const totalGenreSongsDuration = React.useMemo(() => {
+    const { hours, minutes, seconds } = calculateTimeFromSeconds(
+      genreSongs.reduce((prev, current) => prev + current.duration, 0)
+    );
+    return `${
+      hours >= 1 ? `${hours} hour${hours === 1 ? '' : 's'} ` : ''
+    }${minutes} minute${minutes === 1 ? '' : 's'} ${seconds} second${
+      seconds === 1 ? '' : 's'
+    }`;
+  }, [genreSongs]);
 
   return (
     <MainContainer
@@ -118,12 +136,72 @@ const GenreInfoPage = () => {
       <>
         {genreData.genreId && (
           <div className="genre-info-container my-8 h-fit text-font-color-black dark:text-font-color-white">
-            <div className="genre-title h-fit text-6xl max-w-[80%] text-ellipsis whitespace-nowrap overflow-hidden py-2">
+            <div className="genre-title h-fit max-w-[80%] overflow-hidden text-ellipsis whitespace-nowrap py-2 text-6xl">
               {genreData.name}
             </div>
             <div className="genre-no-of-songs">{`${
               genreData.songs.length
             } song${genreData.songs.length !== 1 ? 's' : ''}`}</div>
+            <div className="genre-total-duration">
+              {totalGenreSongsDuration}
+            </div>
+            {genreSongs.length > 0 && (
+              <div className="album-buttons mt-4 flex">
+                <Button
+                  label="Play All"
+                  iconName="play_arrow"
+                  clickHandler={() =>
+                    createQueue(
+                      genreSongs.map((song) => song.songId),
+                      'genre',
+                      false,
+                      genreData.genreId,
+                      true
+                    )
+                  }
+                />
+                <Button
+                  label="Shuffle and Play"
+                  iconName="shuffle"
+                  clickHandler={() =>
+                    createQueue(
+                      genreSongs.map((song) => song.songId),
+                      'genre',
+                      true,
+                      genreData.genreId,
+                      true
+                    )
+                  }
+                />
+                <Button
+                  label="Add to Queue"
+                  iconName="add"
+                  clickHandler={() => {
+                    updateQueueData(
+                      undefined,
+                      [
+                        ...queue.queue,
+                        ...genreSongs.map((song) => song.songId),
+                      ],
+                      false,
+                      false
+                    );
+                    addNewNotifications([
+                      {
+                        id: genreData.genreId,
+                        delay: 5000,
+                        content: (
+                          <span>
+                            Added {genreSongs.length} song
+                            {genreSongs.length === 1 ? '' : 's'} to the queue.
+                          </span>
+                        ),
+                      },
+                    ]);
+                  }}
+                />
+              </div>
+            )}
           </div>
         )}
         {genreSongs.length > 0 && (
