@@ -1,3 +1,5 @@
+import Button from '../Button';
+
 export default () => {
   return (
     <>
@@ -8,15 +10,19 @@ export default () => {
         Resetting the app will remove all of your user data including data about
         songs, data about favorites, data about your preferences, applied
         settings data etc; but NOT the songs in this system. Keep in mind that
-        this process is IRREVERSIBLE.
+        this process is{' '}
+        <span className="font-semibold text-font-color-crimson">
+          IRREVERSIBLE
+        </span>
+        .
       </div>
-      <button
-        type="button"
-        className="confirm-app-reset-btn danger-btn float-right mt-6 h-10 w-48 cursor-pointer rounded-lg border-[transparent] !bg-font-color-crimson text-font-color-white outline-none transition-[background] ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson"
-        onClick={() => window.api.resetApp()}
-      >
-        Reset The App
-      </button>
+      <div className="buttons-container flex items-center justify-end">
+        <Button
+          label="Reset The App"
+          className="confirm-app-reset-btn danger-btn float-right mt-6 h-10 w-48 cursor-pointer rounded-lg !bg-font-color-crimson text-font-color-white outline-none ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson"
+          clickHandler={() => window.api.resetApp()}
+        />
+      </div>
     </>
   );
 };

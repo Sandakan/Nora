@@ -246,8 +246,9 @@ export const Artist = (props: ArtistProp) => {
           src={
             navigator.onLine && props.onlineArtworkPaths
               ? props.onlineArtworkPaths.picture_medium
-              : props.artworkPaths.artworkPath || DefaultArtistCover
+              : props.artworkPaths.artworkPath
           }
+          fallbackSrc={DefaultArtistCover}
           alt="Default song cover"
           className="aspect-square h-full rounded-full object-cover shadow-xl"
           onClick={() => {

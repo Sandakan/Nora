@@ -5,7 +5,8 @@
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
-import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
+import { AppContext } from 'renderer/contexts/AppContext';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 
@@ -219,7 +220,7 @@ export const Playlist = (props: PlaylistProp) => {
       }
     >
       <div
-        className="playlist-cover-and-play-btn-container relative h-[70%] cursor-pointer overflow-hidden before:invisible before:absolute before:h-full before:w-full before:bg-gradient-to-b before:from-[hsla(0,0%,0%,0%)] before:to-[hsla(0,0%,0%,40%)] before:opacity-0 before:transition-[visibility,opacity] before:duration-300 before:content-[''] group-hover:before:visible group-hover:before:opacity-100"
+        className="playlist-cover-and-play-btn-container relative h-[70%] cursor-pointer overflow-hidden rounded-xl before:invisible before:absolute before:h-full before:w-full before:bg-gradient-to-b before:from-[hsla(0,0%,0%,0%)] before:to-[hsla(0,0%,0%,40%)] before:opacity-0 before:transition-[visibility,opacity] before:duration-300 before:content-[''] group-hover:before:visible group-hover:before:opacity-100"
         onClick={() =>
           isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'playlist'
@@ -240,7 +241,7 @@ export const Playlist = (props: PlaylistProp) => {
           />
         ) : (
           <span
-            className="material-icons-round icon absolute bottom-3 right-3 translate-y-10 cursor-pointer text-4xl text-font-color-white opacity-0 transition-[opacity,transform] delay-100 duration-200 ease-in-out group-hover:translate-y-0 group-hover:opacity-100 dark:text-font-color-white "
+            className="material-icons-round icon absolute bottom-3 right-3 translate-y-10 cursor-pointer text-4xl text-font-color-white opacity-0 transition-[opacity,transform] delay-100 duration-200 ease-in-out group-hover:translate-y-0 group-hover:opacity-100 dark:text-font-color-white"
             onClick={() =>
               createQueue(
                 props.songs,
@@ -254,7 +255,7 @@ export const Playlist = (props: PlaylistProp) => {
             play_circle
           </span>
         )}
-        <div className="playlist-cover-container h-full cursor-pointer overflow-hidden rounded-xl">
+        <div className="playlist-cover-container h-full cursor-pointer overflow-hidden">
           <Img
             src={props.artworkPaths.artworkPath}
             alt="Playlist Cover"

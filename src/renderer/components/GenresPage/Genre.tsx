@@ -157,7 +157,7 @@ const Genre = (props: GenreProp) => {
               'genre',
               isAMultipleSelection ? 'remove' : 'add'
             )
-          : goToGenreInfoTab
+          : goToGenreInfoTab()
       }
       onKeyUp={() =>
         isMultipleSelectionEnabled &&
@@ -167,7 +167,7 @@ const Genre = (props: GenreProp) => {
               'genre',
               isAMultipleSelection ? 'remove' : 'add'
             )
-          : goToGenreInfoTab
+          : goToGenreInfoTab()
       }
       role="button"
       tabIndex={0}

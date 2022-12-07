@@ -18,12 +18,14 @@ const SensitiveActionConfirmPrompt = (
         {title}
       </div>
       <div className="description">{content}</div>
-      <Button
-        label={confirmButton.label}
-        iconName={confirmButton.iconName}
-        className={`remove-song-from-library-btn danger-btn float-right mt-8 h-10 w-48 cursor-pointer rounded-lg border-[transparent] !bg-font-color-crimson text-font-color-white outline-none transition-[background] ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson ${confirmButton.className}`}
-        clickHandler={confirmButton.clickHandler}
-      />
+      <div className="buttons-container flex items-center justify-end">
+        <Button
+          label={confirmButton.label}
+          iconName={confirmButton.iconName}
+          className={`remove-song-from-library-btn danger-btn float-right mt-8 h-10 w-48 cursor-pointer rounded-lg !bg-font-color-crimson text-font-color-white outline-none ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson ${confirmButton.className}`}
+          clickHandler={confirmButton.clickHandler}
+        />
+      </div>
     </>
   );
 };

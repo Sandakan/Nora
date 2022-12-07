@@ -27,39 +27,41 @@ export default (props: { songPath: string; title: string; songId: string }) => {
         checkedStateUpdateFunction={setIsPermenanentDelete}
         labelContent="Permanently delete from the system."
       />
-      <Button
-        label="Delete Song"
-        className="delete-song-confirm-btn danger-btn float-right h-10 w-48 cursor-pointer rounded-lg border-[transparent] !bg-font-color-crimson text-font-color-white outline-none transition-[background] ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson"
-        clickHandler={() => {
-          changePromptMenuData(false);
-          return window.api
-            .deleteSongFromSystem(songPath, isPermanentDelete)
-            .then((res) => {
-              if (res.success) {
-                if (songId === currentSongData.songId) clearAudioPlayerData();
-                addNewNotifications([
-                  {
-                    id: `${title}Removed`,
-                    delay: 5000,
-                    content: (
-                      <span>
-                        {isPermanentDelete
-                          ? `'${title}' song removed from the system.`
-                          : `'${title}' song moved to the Recycle Bin.`}
-                      </span>
-                    ),
-                    icon: (
-                      <span className="material-icons-round icon">
-                        done_all
-                      </span>
-                    ),
-                  },
-                ]);
-              }
-              return undefined;
-            });
-        }}
-      />
+      <div className="buttons-container flex items-center justify-end">
+        <Button
+          label="Delete Song"
+          className="delete-song-confirm-btn danger-btn float-right mt-6 h-10 w-48 cursor-pointer rounded-lg !bg-font-color-crimson font-medium text-font-color-white outline-none ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson"
+          clickHandler={() => {
+            changePromptMenuData(false);
+            return window.api
+              .deleteSongFromSystem(songPath, isPermanentDelete)
+              .then((res) => {
+                if (res.success) {
+                  if (songId === currentSongData.songId) clearAudioPlayerData();
+                  addNewNotifications([
+                    {
+                      id: `${title}Removed`,
+                      delay: 5000,
+                      content: (
+                        <span>
+                          {isPermanentDelete
+                            ? `'${title}' song removed from the system.`
+                            : `'${title}' song moved to the Recycle Bin.`}
+                        </span>
+                      ),
+                      icon: (
+                        <span className="material-icons-round icon">
+                          done_all
+                        </span>
+                      ),
+                    },
+                  ]);
+                }
+                return undefined;
+              });
+          }}
+        />
+      </div>
     </>
   );
 };

@@ -11,7 +11,7 @@ type Props = {
 const SongArtwork = (props: Props) => {
   const { artworkPath, updateSongInfo } = props;
   return (
-    <div className="song-artwork-container relative  mr-8 w-40 overflow-hidden">
+    <div className="song-artwork-container relative mr-8 h-40 w-40 overflow-hidden">
       <Img
         src={
           artworkPath

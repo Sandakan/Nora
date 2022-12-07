@@ -17,16 +17,18 @@ export default (props: { folderName: string; absolutePath: string }) => {
         songs data from the music library, but not the contents of the folder in
         your system.
       </div>
-      <Button
-        className="remove-folder-confirm-btn danger-btn float-right mt-8 h-10 w-48 cursor-pointer rounded-lg border-[transparent] !bg-font-color-crimson text-font-color-white outline-none transition-[background,border] ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson"
-        label="REMOVE"
-        clickHandler={() => {
-          window.api
-            .removeAMusicFolder(absolutePath)
-            .then(() => changePromptMenuData(false))
-            .catch((err) => console.error(err));
-        }}
-      />
+      <div className="buttons-container flex items-center justify-end">
+        <Button
+          className="remove-folder-confirm-btn danger-btn float-right mt-8 h-10 w-48 cursor-pointer rounded-lg !bg-font-color-crimson font-medium text-font-color-white outline-none ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson"
+          label="REMOVE"
+          clickHandler={() => {
+            window.api
+              .removeAMusicFolder(absolutePath)
+              .then(() => changePromptMenuData(false))
+              .catch((err) => console.error(err));
+          }}
+        />
+      </div>
     </>
   );
 };

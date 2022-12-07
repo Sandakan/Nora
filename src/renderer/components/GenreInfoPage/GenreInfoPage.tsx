@@ -135,7 +135,7 @@ const GenreInfoPage = () => {
     >
       <>
         {genreData.genreId && (
-          <div className="genre-info-container my-8 h-fit text-font-color-black dark:text-font-color-white">
+          <div className="genre-info-container my-8 h-fit text-font-color-white dark:text-font-color-white">
             <div className="genre-title h-fit max-w-[80%] overflow-hidden text-ellipsis whitespace-nowrap py-2 text-6xl">
               {genreData.name}
             </div>

@@ -18,7 +18,7 @@
 
 <br/>
 
-<img src="assets/other/Frame 48.png">
+<img src="assets/other/artwork 0.png">
 
 <br/>
 
@@ -49,14 +49,14 @@
 
 <br>
 
-<img src="assets/other/Frame 51.png">
-<img src="assets/other/Frame 50.png">
-<img src="assets/other/Frame 55.png">
-<img src="assets/other/Frame 49.png">
-<img src="assets/other/Frame 53.png">
-<img src="assets/other/Frame 56.png">
-<img src="assets/other/Frame 54.png">
-<img src="assets/other/Frame 57.png">
+<img src="assets/other/artwork 1.png"><br><br>
+<img src="assets/other/artwork 2.png"><br><br>
+<img src="assets/other/artwork 3.png"><br><br>
+<img src="assets/other/artwork 4.png"><br><br>
+<img src="assets/other/artwork 5.png"><br><br>
+<img src="assets/other/artwork 6.png"><br><br>
+<img src="assets/other/artwork 7.png"><br><br>
+<img src="assets/other/artwork 8.png"><br><br>
 
 <br/>
 
@@ -92,7 +92,8 @@ Run
 
 <br>
 
-<h2>Feedback</h2>
+## Feedback
+
 <p>If you have any feedback about bugs, feature requests etc. about the app, please let me know through my <a href="mailto:sandakannipunajith@gmail.com">email</a>.</p>
 
 <br>

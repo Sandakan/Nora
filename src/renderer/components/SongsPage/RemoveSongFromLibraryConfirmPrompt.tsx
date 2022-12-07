@@ -39,42 +39,46 @@ export default (props: { songIds: string[]; title?: string }) => {
           setIsDoNotShowAgain(state);
         }}
       />
-      <Button
-        label={`Blacklist Song${songIds.length !== 1 ? 's' : ''}`}
-        className="remove-song-from-library-btn danger-btn  float-right h-10 w-48 cursor-pointer rounded-lg border-[transparent] !bg-font-color-crimson text-font-color-white outline-none transition-[background] ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson"
-        clickHandler={() =>
-          window.api.removeSongsFromLibrary(songIds).then(async (res) => {
-            if (res.success) {
-              if (isDoNotShowAgain)
-                window.api.saveUserData(
-                  'preferences.doNotShowRemoveSongFromLibraryConfirm',
-                  isDoNotShowAgain
-                );
-              changePromptMenuData(false);
-              addNewNotifications([
-                {
-                  id: `${title}Blacklisted`,
-                  delay: 5000,
-                  content: (
-                    <span>
-                      {songIds.length === 1 && title ? (
-                        <>&apos;{title}&apos;</>
-                      ) : (
-                        `${songIds.length} songs`
-                      )}{' '}
-                      blacklisted and removed from the library.
-                    </span>
-                  ),
-                  icon: (
-                    <span className="material-icons-round">delete_outline</span>
-                  ),
-                },
-              ]);
-            }
-            return undefined;
-          })
-        }
-      />
+      <div className="buttons-container flex items-center justify-end">
+        <Button
+          label={`Blacklist Song${songIds.length !== 1 ? 's' : ''}`}
+          className="remove-song-from-library-btn danger-btn dark:border-g-font-color-crimson/50 float-right mt-6 h-10 w-48 cursor-pointer rounded-lg border-font-color-crimson/50 !bg-font-color-crimson text-font-color-white outline-none ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson"
+          clickHandler={() =>
+            window.api.removeSongsFromLibrary(songIds).then(async (res) => {
+              if (res.success) {
+                if (isDoNotShowAgain)
+                  window.api.saveUserData(
+                    'preferences.doNotShowRemoveSongFromLibraryConfirm',
+                    isDoNotShowAgain
+                  );
+                changePromptMenuData(false);
+                addNewNotifications([
+                  {
+                    id: `${title}Blacklisted`,
+                    delay: 5000,
+                    content: (
+                      <span>
+                        {songIds.length === 1 && title ? (
+                          <>&apos;{title}&apos;</>
+                        ) : (
+                          `${songIds.length} songs`
+                        )}{' '}
+                        blacklisted and removed from the library.
+                      </span>
+                    ),
+                    icon: (
+                      <span className="material-icons-round">
+                        delete_outline
+                      </span>
+                    ),
+                  },
+                ]);
+              }
+              return undefined;
+            })
+          }
+        />
+      </div>
     </>
   );
 };
