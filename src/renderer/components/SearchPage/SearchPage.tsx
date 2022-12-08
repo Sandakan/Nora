@@ -1,15 +1,5 @@
-/* eslint-disable import/no-unresolved */
 /* eslint-disable jsx-a11y/no-autofocus */
-/* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/no-array-index-key */
-/* eslint-disable no-else-return */
-/* eslint-disable consistent-return */
-/* eslint-disable array-callback-return */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable promise/catch-or-return */
-/* eslint-disable react/no-unescaped-entities */
-/* eslint-disable react/self-closing-comp */
-/* eslint-disable import/prefer-default-export */
 import React, { useContext } from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
@@ -77,7 +67,7 @@ const SearchPage = () => {
             .then((results) => {
               return setSearchResults(results);
             }),
-        200
+        250
       );
     } else
       setSearchResults({
@@ -132,7 +122,10 @@ const SearchPage = () => {
     <MainContainer>
       <>
         <div className="search-bar-container appear-from-bottom mb-4 flex w-1/2 items-center rounded-3xl bg-background-color-2 py-1 px-2 dark:bg-dark-background-color-2">
-          <span className="material-icons-round icon flex items-center justify-center p-2 text-2xl text-font-color-highlight dark:text-dark-font-color-highlight">
+          <span
+            className="material-icons-round icon flex cursor-help items-center justify-center p-2 text-2xl text-font-color-highlight dark:text-dark-font-color-highlight"
+            title={`Use ' ; ' to separate keywords in Search.`}
+          >
             search
           </span>
           {/* SEARCH INPUT */}

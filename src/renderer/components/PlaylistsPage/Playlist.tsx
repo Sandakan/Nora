@@ -229,7 +229,7 @@ export const Playlist = (props: PlaylistProp) => {
                 'playlist',
                 isAMultipleSelection ? 'remove' : 'add'
               )
-            : openPlaylistInfoPage
+            : openPlaylistInfoPage()
         }
       >
         {isMultipleSelectionEnabled &&
@@ -276,7 +276,7 @@ export const Playlist = (props: PlaylistProp) => {
                   'playlist',
                   isAMultipleSelection ? 'remove' : 'add'
                 )
-              : openPlaylistInfoPage
+              : openPlaylistInfoPage()
           }
         >
           {props.name}

@@ -3,7 +3,7 @@ import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 
-import ReleaseNotesPrompt from '../../SettingsPage/ReleaseNotesPrompt';
+import ReleaseNotesPrompt from '../../ReleaseNotesPrompt/ReleaseNotesPrompt';
 
 const NewUpdateIndicator = () => {
   const { appUpdatesState } = React.useContext(AppContext);

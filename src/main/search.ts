@@ -16,6 +16,7 @@ import {
   getSongArtworkPath,
 } from './fs/resolveFilePaths';
 import log from './log';
+import filterUniqueObjects from './utils/filterUniqueObjects';
 
 const getSongSearchResults = (
   songs: SavableSongData[],
@@ -195,9 +196,7 @@ const getGenreSearchResults = (
 };
 
 let recentSearchesTimeoutId: NodeJS.Timer;
-
-// eslint-disable-next-line import/prefer-default-export
-export const search = (
+const search = (
   filter: SearchFilters,
   value: string,
   updateSearchHistory = true
@@ -208,11 +207,39 @@ export const search = (
   const genresData = getGenresData();
   const playlistData = getPlaylistData();
 
-  const songs = getSongSearchResults(songsData, value, filter);
-  const artists = getArtistSearchResults(artistsData, value, filter);
-  const albums = getAlbumSearchResults(albumsData, value, filter);
-  const playlists = getPlaylistSearchResults(playlistData, value, filter);
-  const genres = getGenreSearchResults(genresData, value, filter);
+  const keywords = value.split(';');
+
+  let songs: SongData[] = [];
+  let artists: Artist[] = [];
+  let albums: Album[] = [];
+  let playlists: Playlist[] = [];
+  let genres: Genre[] = [];
+
+  for (let i = 0; i < keywords.length; i += 1) {
+    const keyword = keywords[i];
+
+    const songsResults = getSongSearchResults(songsData, keyword, filter);
+    const artistsResults = getArtistSearchResults(artistsData, keyword, filter);
+    const albumsResults = getAlbumSearchResults(albumsData, keyword, filter);
+    const playlistsResults = getPlaylistSearchResults(
+      playlistData,
+      keyword,
+      filter
+    );
+    const genresResults = getGenreSearchResults(genresData, keyword, filter);
+
+    songs.push(...songsResults);
+    artists.push(...artistsResults);
+    albums.push(...albumsResults);
+    playlists.push(...playlistsResults);
+    genres.push(...genresResults);
+  }
+
+  songs = filterUniqueObjects(songs, 'songId');
+  artists = filterUniqueObjects(artists, 'artistId');
+  albums = filterUniqueObjects(albums, 'albumId');
+  playlists = filterUniqueObjects(playlists, 'playlistId');
+  genres = filterUniqueObjects(genres, 'genreId');
 
   log(
     `Searching for results about '${value}' with ${filter} filter. Found ${
@@ -224,7 +251,6 @@ export const search = (
     } playlists results and ${genres.length} genres results.`
   );
 
-  const availableResults: string[] = [];
   if (updateSearchHistory) {
     if (recentSearchesTimeoutId) clearTimeout(recentSearchesTimeoutId);
     recentSearchesTimeoutId = setTimeout(() => {
@@ -242,6 +268,7 @@ export const search = (
     }, 2000);
   }
 
+  const availableResults: string[] = [];
   if (
     songs.length === 0 &&
     artists.length === 0 &&
@@ -274,6 +301,8 @@ export const search = (
     availableResults,
   };
 };
+
+export default search;
 
 // function sortBySimilarity(keyword: string, arr: SongData[]): SongData[] {
 //   const key = keyword.split('');

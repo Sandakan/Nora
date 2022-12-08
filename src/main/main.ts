@@ -29,7 +29,7 @@ import {
 import { resolveHtmlPath } from './utils/util';
 import { updateSongId3Tags } from './updateSongId3Tags';
 import { version } from '../../package.json';
-import { search } from './search';
+import search from './search';
 import {
   searchSongMetadataResultsInInternet,
   fetchSongMetadataFromInternet,

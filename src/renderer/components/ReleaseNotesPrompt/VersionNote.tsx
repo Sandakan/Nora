@@ -1,0 +1,30 @@
+import React from 'react';
+import Img from '../Img';
+
+export interface VersionNoteProps {
+  note: string;
+  artworkPath?: string;
+}
+
+const VersionNote = (props: VersionNoteProps) => {
+  const { note, artworkPath } = props;
+  const key = React.useId();
+  return (
+    <li className="mb-1 last:mb-4" key={key}>
+      {note}
+      {artworkPath && (
+        <>
+          <br />
+          <Img
+            src={artworkPath}
+            noFallbacks
+            className="my-4 mx-auto w-[80%] max-w-full"
+            alt=""
+          />
+        </>
+      )}
+    </li>
+  );
+};
+
+export default VersionNote;

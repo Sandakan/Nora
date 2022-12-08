@@ -20,9 +20,10 @@ import ContextMenu from './components/ContextMenu/ContextMenu';
 import MiniPlayer from './components/MiniPlayer/MiniPlayer';
 import ErrorPrompt from './components/ErrorPrompt';
 import Button, { ButtonProps } from './components/Button';
-import ReleaseNotesPrompt from './components/SettingsPage/ReleaseNotesPrompt';
+import ReleaseNotesPrompt from './components/ReleaseNotesPrompt/ReleaseNotesPrompt';
 import Img from './components/Img';
 import Preloader from './components/Preloader/Preloader';
+import isLatestVersion from './utils/isLatestVersion';
 
 interface AppReducer {
   userData: UserData;
@@ -606,58 +607,31 @@ export default function App() {
       updateAppUpdatesState('CHECKING');
 
       fetch(packageFile.releaseNotes.json)
-        .then((res) => res.json())
+        .then((res) => {
+          if (res.status === 200) return res.json();
+          throw new Error('response status is not 200');
+        })
         .then((res: Changelog) => {
-          // Learn more about semantic versioning on https://semver.org/
-          // Semantic version checking regex from https://regex101.com/r/vkijKf/1/
-          // Pre-release is in the form (alpha|beta)+YYYYMMDDNN where NN is a number in range 0 to 99.
-          const semVerRegex =
-            /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
-          // Lv - Latest Version
-          const latestVersion = res.latestVersion.version.match(semVerRegex);
-          // Cv - Current Version
-          const currentVersion = packageFile.version.match(semVerRegex);
+          const isThereAnAppUpdate = isLatestVersion(
+            res.latestVersion.version,
+            packageFile.version
+          );
 
-          if (latestVersion && currentVersion) {
-            const [, LvMajor, LvMinor, LvPatch, LvPreRelease] = latestVersion;
-            const [, CvMajor, CvMinor, CvPatch, CvPreRelease] = currentVersion;
+          updateAppUpdatesState(isThereAnAppUpdate ? 'OLD' : 'LATEST');
 
-            const isThereAnUpdate =
-              `${LvMajor}.${LvMinor}.${LvPatch}` >
-                `${CvMajor}.${CvMinor}.${CvPatch}` ||
-              LvPreRelease > CvPreRelease;
-
-            updateAppUpdatesState(isThereAnUpdate ? 'OLD' : 'LATEST');
-
-            if (isThereAnUpdate) {
-              console.log('client has new updates');
-              if (
-                contentRef.current.userData.preferences
-                  .noUpdateNotificationForNewUpdate !==
-                res.latestVersion.version
-              ) {
-                changePromptMenuData(
-                  true,
-                  <ReleaseNotesPrompt />,
-                  'release-notes px-8 py-4'
-                );
-              }
-            } else
-              console.log(
-                'client is up-to-date.',
-                'latest version',
-                latestVersion,
-                'current version',
-                currentVersion
+          if (isThereAnAppUpdate) {
+            console.log('client has new updates');
+            if (
+              contentRef.current.userData.preferences
+                .noUpdateNotificationForNewUpdate !== res.latestVersion.version
+            ) {
+              changePromptMenuData(
+                true,
+                <ReleaseNotesPrompt />,
+                'release-notes px-8 py-4'
               );
-          } else
-            console.log(
-              'client versioning error.',
-              'latest version',
-              latestVersion,
-              'current version',
-              currentVersion
-            );
+            }
+          } else console.log('client is up-to-date.');
 
           return undefined;
         })

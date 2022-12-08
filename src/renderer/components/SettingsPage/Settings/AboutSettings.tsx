@@ -12,7 +12,7 @@ import localReleaseNotes from '../../../../../release-notes.json';
 import AppIcon from '../../../../../assets/images/png/logo_light_mode.png';
 import SLFlag from '../../../../../assets/images/png/sl-flag.png';
 import Img from '../../Img';
-import ReleaseNotesPrompt from '../ReleaseNotesPrompt';
+import ReleaseNotesPrompt from '../../ReleaseNotesPrompt/ReleaseNotesPrompt';
 import Hyperlink from '../../Hyperlink';
 import Button from '../../Button';
 import ResetAppConfirmationPrompt from '../../HomePage/ResetAppConfirmationPrompt';
