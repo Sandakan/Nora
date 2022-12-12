@@ -104,7 +104,7 @@ export const addWatcherToFolder = async (folder: MusicFolderData) => {
   }
 };
 
-export const addWatchersToFolders = async () => {
+const addWatchersToFolders = async () => {
   const { musicFolders } = getUserData();
   log(`${musicFolders.length} music folders found in user data.`);
 
@@ -135,3 +135,5 @@ export const addWatchersToFolders = async () => {
     'ERROR'
   );
 };
+
+export default addWatchersToFolders;

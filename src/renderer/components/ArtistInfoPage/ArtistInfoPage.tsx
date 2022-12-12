@@ -15,7 +15,7 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
 import DefaultArtistCover from '../../../../assets/images/png/artist_cover_default.png';
 import { Album } from '../AlbumsPage/Album';
-import { Song } from '../SongsPage/Song';
+import Song from '../SongsPage/Song';
 import Button from '../Button';
 import MainContainer from '../MainContainer';
 import Hyperlink from '../Hyperlink';

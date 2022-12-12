@@ -9,12 +9,13 @@ import NewUpdateIndicator from './indicators/NewUpdateIndicator';
 import ChangeThemeBtn from './special_controls/ChangeThemeBtn';
 
 const TitleBar = React.memo(() => {
-  const close = () => window.api.closeApp();
-  const minimize = () => window.api.minimizeApp();
-  const maximize = () => window.api.toggleMaximizeApp();
   const { pageHistoryIndex, noOfPagesInHistory, bodyBackgroundImage } =
     React.useContext(AppContext);
   const { updatePageHistoryIndex } = React.useContext(AppUpdateContext);
+
+  const close = () => window.api.closeApp();
+  const minimize = () => window.api.minimizeApp();
+  const maximize = () => window.api.toggleMaximizeApp();
 
   return (
     <header
@@ -86,8 +87,8 @@ const TitleBar = React.memo(() => {
         </div>
       </div>
       <div className="window-controls-and-special-controls-and-indicators-container flex h-full flex-row">
-        <div className="special-controls-and-indicators-container flex items-center justify-between py-1">
-          <div className="indicators-container mr-2 flex flex-row">
+        <div className="special-controls-and-indicators-container mr-2 flex items-center justify-between py-1">
+          <div className="indicators-container flex flex-row">
             <NewUpdateIndicator />
             <NetworkIndicator />
           </div>
@@ -95,7 +96,10 @@ const TitleBar = React.memo(() => {
             <ChangeThemeBtn />
           </div>
         </div>
-        <div className="window-controls-container ml-8 flex h-full items-center justify-between">
+        <div
+          className="window-controls-container ml-6 flex h-full items-center justify-between"
+          id="window-controls-container"
+        >
           <span
             className="minimize-btn flex h-full items-center justify-center px-3 text-center text-xl transition-[background] ease-in-out hover:bg-[hsla(0deg,0%,80%,0.5)]"
             onClick={minimize}

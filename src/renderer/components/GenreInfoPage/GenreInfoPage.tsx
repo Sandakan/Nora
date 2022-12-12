@@ -6,7 +6,7 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
 import Button from '../Button';
 import MainContainer from '../MainContainer';
-import { Song } from '../SongsPage/Song';
+import Song from '../SongsPage/Song';
 
 const GenreInfoPage = () => {
   const { currentlyActivePage, userData, queue } = React.useContext(AppContext);

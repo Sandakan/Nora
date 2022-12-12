@@ -125,6 +125,12 @@ export const api = {
   onWindowBlur: (callback: (e: any) => void) =>
     ipcRenderer.on('app/blurred', callback),
 
+  // $ APP FULL-SCREEN EVENTS
+  onEnterFullscreen: (callback: (e: any) => void) =>
+    ipcRenderer.on('app/enteredFullscreen', callback),
+  onLeaveFullscreen: (callback: (e: any) => void) =>
+    ipcRenderer.on('app/leftFullscreen', callback),
+
   // $ APP SEARCH
   search: (
     filter: SearchFilters,

@@ -2,6 +2,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
 
@@ -12,6 +13,7 @@ interface LyricProp {
 }
 
 const Lyric = (props: LyricProp) => {
+  const { isMiniPlayer } = React.useContext(AppContext);
   const { songPosition } = React.useContext(SongPositionContext);
   const { updateSongPosition } = React.useContext(AppUpdateContext);
   const lyricsRef = React.useRef(null as HTMLDivElement | null);
@@ -43,7 +45,7 @@ const Lyric = (props: LyricProp) => {
                 : '!scale-75 !text-opacity-20'
             }`
           : ''
-      }`}
+      } ${isMiniPlayer && '!mb-2 !text-2xl !text-font-color-white'}`}
       ref={lyricsRef}
       onClick={() => syncLyrics && updateSongPosition(syncLyrics.start)}
     >

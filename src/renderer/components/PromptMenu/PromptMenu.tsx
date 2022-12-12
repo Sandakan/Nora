@@ -12,6 +12,14 @@ const PromptMenu = () => {
   const promptMenuRef =
     React.useRef() as React.MutableRefObject<HTMLDialogElement>;
 
+  const [isContentVisible, setIsContentVisible] = React.useState(
+    PromptMenuData.isVisible
+  );
+
+  React.useEffect(() => {
+    if (PromptMenuData.isVisible) setIsContentVisible(true);
+  }, [PromptMenuData.isVisible]);
+
   React.useEffect(() => {
     if (PromptMenuData && promptMenuRef.current) {
       const { isVisible } = PromptMenuData;
@@ -34,7 +42,10 @@ const PromptMenu = () => {
     };
 
     const manageDialogAnimationEnd = () => {
-      if (dialog && !PromptMenuData.isVisible) dialog.close();
+      if (dialog && !PromptMenuData.isVisible) {
+        dialog.close();
+        setIsContentVisible(false);
+      }
     };
 
     if (promptMenuRef.current) {
@@ -82,7 +93,7 @@ const PromptMenu = () => {
           PromptMenuData.className ?? ''
         }`}
       >
-        {PromptMenuData.content}
+        {isContentVisible && PromptMenuData.content}
       </MainContainer>
     </dialog>
   );

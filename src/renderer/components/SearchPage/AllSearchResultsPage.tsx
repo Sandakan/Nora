@@ -7,7 +7,7 @@ import { Artist } from '../ArtistPage/Artist';
 import Button from '../Button';
 import Genre from '../GenresPage/Genre';
 import MainContainer from '../MainContainer';
-import { Song } from '../SongsPage/Song';
+import Song from '../SongsPage/Song';
 
 const AllSearchResultsPage = () => {
   const { currentlyActivePage, userData, isMultipleSelectionEnabled } =

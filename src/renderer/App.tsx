@@ -542,8 +542,8 @@ export default function App() {
     [changePromptMenuData]
   );
 
-  const AUDIO_FADE_INTERVAL = 100;
-  const AUDIO_FADE_DURATION = 300;
+  const AUDIO_FADE_INTERVAL = 50;
+  const AUDIO_FADE_DURATION = 250;
   const fadeOutIntervalId = React.useRef(undefined as NodeJS.Timer | undefined);
   const fadeInIntervalId = React.useRef(undefined as NodeJS.Timer | undefined);
   const fadeOutAudio = React.useCallback(() => {
@@ -700,6 +700,19 @@ export default function App() {
     []
   );
 
+  const manageWindowFullscreen = React.useCallback(
+    (state: 'fullscreen' | 'windowed') => {
+      if (AppRef.current) {
+        if (state === 'fullscreen')
+          return AppRef.current.classList.add('fullscreen');
+        if (state === 'windowed')
+          return AppRef.current.classList.remove('fullscreen');
+      }
+      return undefined;
+    },
+    []
+  );
+
   React.useEffect(() => {
     player.addEventListener('error', (err) => managePlaybackErrors(err));
     player.addEventListener('play', () => {
@@ -717,12 +730,18 @@ export default function App() {
       window.api.songPlaybackStateChange(false);
     });
     window.api.beforeQuitEvent(handleBeforeQuitEvent);
+
     window.api.onWindowBlur(() => manageWindowBlurOrFocus('blur'));
     window.api.onWindowFocus(() => manageWindowBlurOrFocus('focus'));
+
+    window.api.onEnterFullscreen(() => manageWindowFullscreen('fullscreen'));
+    window.api.onLeaveFullscreen(() => manageWindowFullscreen('windowed'));
+
     return () => {
       window.api.removeBeforeQuitEventListener(handleBeforeQuitEvent);
     };
-  }, [managePlaybackErrors, handleBeforeQuitEvent, manageWindowBlurOrFocus]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   React.useEffect(() => {
     const displayDefaultTitleBar = () => {
@@ -2193,7 +2212,7 @@ export default function App() {
               content.userData && content.userData.preferences.isReducedMotion
                 ? 'reduced-motion animate-none transition-none'
                 : ''
-            } flex h-screen w-full flex-col items-center after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.song-drop]:after:visible [&.song-drop]:after:z-10 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc]  [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
+            } flex h-screen w-full flex-col items-center after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.song-drop]:after:visible [&.song-drop]:after:z-10 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc] [&.song-drop]:after:bg-[rgba(0,0,0,0.7)]  [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.fullscreen_#window-controls-container]:hidden`}
             ref={AppRef}
             onDragEnter={addSongDropPlaceholder}
             onDragLeave={removeSongDropPlaceholder}

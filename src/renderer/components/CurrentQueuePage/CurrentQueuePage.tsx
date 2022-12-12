@@ -15,7 +15,7 @@ import {
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { Song } from '../SongsPage/Song';
+import Song from '../SongsPage/Song';
 import Button from '../Button';
 import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
 import DefaultPlaylistCover from '../../../../assets/images/png/playlist_cover_default.png';
@@ -475,7 +475,7 @@ const CurrentQueuePage = () => {
                                 scrollTopOffset: data.scrollOffset,
                               })
                             ),
-                          1000
+                          500
                         );
                     }}
                   >

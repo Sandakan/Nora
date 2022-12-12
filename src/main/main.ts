@@ -38,7 +38,7 @@ import removeSongsFromLibrary from './removeSongsFromLibrary';
 import deleteSongFromSystem from './core/deleteSongFromSystem';
 import removeMusicFolder from './core/removeMusicFolder';
 import restoreBlacklistedSong from './core/restoreBlacklistedSong';
-import { addWatchersToFolders } from './fs/addWatchersToFolders';
+import addWatchersToFolders from './fs/addWatchersToFolders';
 import addMusicFolder from './core/addMusicFolder';
 import getArtistInfoFromNet from './core/getArtistInfoFromNet';
 import getSongLyrics from './core/getSongLyrics';
@@ -77,14 +77,14 @@ const MAIN_WINDOW_MAX_SIZE_X = 10000;
 const MAIN_WINDOW_MAX_SIZE_Y = 5000;
 const MAIN_WINDOW_ASPECT_RATIO = 0;
 
-const MINI_PLAYER_MIN_SIZE_X = 270;
-const MINI_PLAYER_MIN_SIZE_Y = 200;
-const MINI_PLAYER_MAX_SIZE_X = 850;
-const MINI_PLAYER_MAX_SIZE_Y = 500;
-const MINI_PLAYER_ASPECT_RATIO = 17 / 10;
-
 const MAIN_WINDOW_DEFAULT_SIZE_X = 1280;
 const MAIN_WINDOW_DEFAULT_SIZE_Y = 720;
+
+const MINI_PLAYER_MIN_SIZE_X = 270;
+const MINI_PLAYER_MIN_SIZE_Y = 200;
+const MINI_PLAYER_MAX_SIZE_X = 510;
+const MINI_PLAYER_MAX_SIZE_Y = 300;
+const MINI_PLAYER_ASPECT_RATIO = 17 / 10;
 
 // / / / / / / VARIABLES / / / / / / /
 let mainWindow: BrowserWindow;
@@ -248,6 +248,15 @@ app
         mainWindow.flashFrame(false);
       });
       mainWindow.on('blur', () => mainWindow.webContents.send('app/blurred'));
+
+      mainWindow.on('enter-full-screen', () => {
+        console.log('Entered full screen');
+        mainWindow.webContents.send('app/enteredFullscreen');
+      });
+      mainWindow.on('leave-full-screen', () => {
+        console.log('Left full screen');
+        mainWindow.webContents.send('app/leftFullscreen');
+      });
 
       ipcMain.on('app/getSongPosition', (_event: unknown, position: number) =>
         saveUserData('currentSong.stoppedPosition', position)
@@ -821,6 +830,8 @@ function toggleMiniPlayer(isActivateMiniPlayer: boolean) {
     isMiniPlayer = isActivateMiniPlayer;
     const { windowPositions, windowDiamensions, preferences } = getUserData();
     if (isActivateMiniPlayer) {
+      if (mainWindow.fullScreen) mainWindow.setFullScreen(false);
+
       mainWindow.setMaximumSize(MINI_PLAYER_MAX_SIZE_X, MINI_PLAYER_MAX_SIZE_Y);
       mainWindow.setMinimumSize(MINI_PLAYER_MIN_SIZE_X, MINI_PLAYER_MIN_SIZE_Y);
       mainWindow.setAlwaysOnTop(preferences.isMiniPlayerAlwaysOnTop ?? false);

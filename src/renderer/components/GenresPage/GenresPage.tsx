@@ -204,7 +204,7 @@ const GenresPage = () => {
                         ...currentPageData,
                         scrollTopOffset: data.scrollTop,
                       })),
-                    1000
+                    500
                   );
               }}
             >

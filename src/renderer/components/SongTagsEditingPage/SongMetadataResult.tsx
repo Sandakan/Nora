@@ -18,7 +18,8 @@ interface SongMetadataResultProp {
 }
 
 const SongMetadataResult = (props: SongMetadataResultProp) => {
-  const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { changePromptMenuData, updateContextMenuData } =
+    React.useContext(AppUpdateContext);
   const {
     title,
     artists,
@@ -30,6 +31,25 @@ const SongMetadataResult = (props: SongMetadataResultProp) => {
     updateSongInfo,
     updateMetadataKeywords,
   } = props;
+
+  const resultMoreOptions: ContextMenuItem[] = React.useMemo(
+    () => [
+      {
+        label: 'Update only the artwork',
+        iconName: 'image',
+        handlerFunction: () =>
+          updateSongInfo((prevData) => ({
+            ...prevData,
+            artworkPath,
+            album: prevData.album
+              ? { ...prevData?.album, artworkPath }
+              : undefined,
+          })),
+      },
+    ],
+    [artworkPath, updateSongInfo]
+  );
+
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events
     <div className="mb-2 flex h-32 min-h-[5rem] w-full cursor-pointer items-center justify-between rounded-md bg-background-color-2/70 p-1 backdrop-blur-md hover:bg-background-color-2 dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2">
@@ -65,30 +85,48 @@ const SongMetadataResult = (props: SongMetadataResultProp) => {
           </span>
         </div>
       </div>
-      <Button
-        label="Add to Metadata"
-        className="h-fit"
-        clickHandler={() => {
-          updateSongInfo((prevData) => {
-            changePromptMenuData(false, undefined, '');
-            return {
-              ...prevData,
-              title,
-              releasedYear,
-              lyrics,
-              artworkPath: artworkPath ?? prevData.artworkPath,
-              album: prevData.album
-                ? { ...prevData?.album, artworkPath }
-                : undefined,
-            } as SongTags;
-          });
-          updateMetadataKeywords({
-            albumKeyword: album,
-            artistKeyword: artists?.join(';'),
-            genreKeyword: genres?.join(';'),
-          });
-        }}
-      />
+      <div className="buttons-container flex items-center">
+        <Button
+          label="Add to Metadata"
+          className="h-fit dark:border-dark-background-color-1"
+          clickHandler={() => {
+            updateSongInfo((prevData) => {
+              changePromptMenuData(false, undefined, '');
+              return {
+                ...prevData,
+                title,
+                releasedYear,
+                lyrics,
+                artworkPath: artworkPath ?? prevData.artworkPath,
+                album: prevData.album
+                  ? { ...prevData?.album, artworkPath }
+                  : undefined,
+              } as SongTags;
+            });
+            updateMetadataKeywords({
+              albumKeyword: album,
+              artistKeyword: artists?.join(';'),
+              genreKeyword: genres?.join(';'),
+            });
+          }}
+        />
+        <Button
+          key={0}
+          className="more-options-btn text-sm dark:border-dark-background-color-1 md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+          iconName="more_horiz"
+          clickHandler={(e) => {
+            e.stopPropagation();
+            const button = e.currentTarget || e.target;
+            const { x, y } = button.getBoundingClientRect();
+            updateContextMenuData(true, resultMoreOptions, x + 10, y + 50);
+          }}
+          tooltipLabel="More Options"
+          onContextMenu={(e) => {
+            e.preventDefault();
+            updateContextMenuData(true, resultMoreOptions, e.pageX, e.pageY);
+          }}
+        />
+      </div>
     </div>
   );
 };

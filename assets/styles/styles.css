@@ -250,6 +250,15 @@ input[type='range']:active::-webkit-slider-thumb {
   background: var(--foreground-color-1);
 }
 
+/* 
+#miniPlayerSeekSlider::-webkit-slider-thumb {
+  display: none;
+} */
+
+#miniPlayerLyricsContainer::-webkit-scrollbar {
+  display: none !important;
+}
+
 /* ? CHECKBOX STYLING */
 input[type="checkbox"]:checked~.checkmark .icon {
   opacity: 1;

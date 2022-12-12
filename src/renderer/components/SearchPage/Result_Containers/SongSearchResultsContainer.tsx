@@ -1,7 +1,7 @@
 import React from 'react';
 import Button from 'renderer/components/Button';
 import SecondaryContainer from 'renderer/components/SecondaryContainer';
-import { Song } from 'renderer/components/SongsPage/Song';
+import Song from 'renderer/components/SongsPage/Song';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 

@@ -44,7 +44,7 @@ export const Artist = (props: ArtistProp) => {
     updateMultipleSelections,
   } = React.useContext(AppUpdateContext);
 
-  const showArtistInfoPage = React.useCallback(() => {
+  const goToArtistInfoPage = React.useCallback(() => {
     return currentlyActivePage.pageTitle === 'ArtistInfo' &&
       currentlyActivePage.data &&
       currentlyActivePage.data.artistName === props.name
@@ -141,7 +141,7 @@ export const Artist = (props: ArtistProp) => {
       {
         label: 'Info',
         iconName: 'info',
-        handlerFunction: showArtistInfoPage,
+        handlerFunction: goToArtistInfoPage,
       },
       {
         label: 'Add to queue',
@@ -195,7 +195,7 @@ export const Artist = (props: ArtistProp) => {
     props.artistId,
     props.songIds,
     queue.queue,
-    showArtistInfoPage,
+    goToArtistInfoPage,
     toggleMultipleSelections,
     updateMultipleSelections,
     updateQueueData,
@@ -252,7 +252,7 @@ export const Artist = (props: ArtistProp) => {
           alt="Default song cover"
           className="aspect-square h-full rounded-full object-cover shadow-xl"
           onClick={() => {
-            if (!isMultipleSelectionEnabled) showArtistInfoPage();
+            if (!isMultipleSelectionEnabled) goToArtistInfoPage();
           }}
         />
         {isMultipleSelectionEnabled &&
@@ -272,7 +272,7 @@ export const Artist = (props: ArtistProp) => {
           }`}
           title={props.name === '' ? 'Unknown Artist' : props.name}
           onClick={() => {
-            if (!isMultipleSelectionEnabled) showArtistInfoPage();
+            if (!isMultipleSelectionEnabled) goToArtistInfoPage();
           }}
         >
           {props.name === '' ? 'Unknown Artist' : props.name}

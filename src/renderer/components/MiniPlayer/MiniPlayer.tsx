@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
@@ -7,7 +8,9 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
 import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
+import Button from '../Button';
 import Img from '../Img';
+import Lyric from '../LyricsPage/Lyrics';
 
 export default function MiniPlayer() {
   const {
@@ -24,12 +27,39 @@ export default function MiniPlayer() {
     handleSkipForwardClick,
     updateUserData,
     updateSongPosition,
+    toggleIsFavorite,
   } = React.useContext(AppUpdateContext);
 
   const { songPosition } = React.useContext(SongPositionContext);
   const [songPos, setSongPos] = React.useState(0);
   const isMouseDownRef = React.useRef(false);
   const seekbarRef = React.useRef(null as HTMLInputElement | null);
+
+  const [isLyricsVisible, setIsLyricsVisible] = React.useState(false);
+  const [lyrics, setLyrics] = React.useState<SongLyrics | null | undefined>(
+    null
+  );
+
+  React.useEffect(() => {
+    if (isLyricsVisible) {
+      setLyrics(null);
+      window.api
+        .getSongLyrics(
+          currentSongData.title,
+          Array.isArray(currentSongData.artists)
+            ? currentSongData.artists.map((artist) => artist.name)
+            : [],
+          currentSongData.songId
+        )
+        .then((res) => setLyrics(res))
+        .catch((err) => console.error(err));
+    }
+  }, [
+    currentSongData.artists,
+    currentSongData.songId,
+    currentSongData.title,
+    isLyricsVisible,
+  ]);
 
   const seekBarCssProperties: any = {};
 
@@ -74,9 +104,35 @@ export default function MiniPlayer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const lyricsComponents = React.useMemo(() => {
+    if (lyrics && lyrics?.lyrics) {
+      const { isSynced, lyrics: unsyncedLyrics, syncedLyrics } = lyrics?.lyrics;
+
+      if (syncedLyrics) {
+        return syncedLyrics.map((lyric, index) => {
+          const { text, end, start } = lyric;
+          return (
+            <Lyric
+              key={index}
+              index={index}
+              lyric={text}
+              syncLyrics={{ start, end }}
+            />
+          );
+        });
+      }
+      if (!isSynced) {
+        return unsyncedLyrics.map((line, index) => {
+          return <Lyric key={index} index={index} lyric={line} />;
+        });
+      }
+    }
+    return [];
+  }, [lyrics]);
+
   return (
     <div
-      className={`mini-player group h-full overflow-hidden ${
+      className={`mini-player group h-full overflow-hidden delay-100 ${
         !isCurrentSongPlaying && 'paused'
       } ${
         userData && userData.preferences.isReducedMotion ? 'reduced-motion' : ''
@@ -90,18 +146,41 @@ export default function MiniPlayer() {
               : DefaultSongCover
           }
           alt="Song Cover"
-          className={`h-full w-full object-cover transition-[filter] duration-200 ease-in-out group-hover:blur-[2px] group-hover:brightness-75 group-focus:blur-[4px] group-focus:brightness-75 ${
+          className={`h-full w-full object-cover transition-[filter] delay-100 duration-200 ease-in-out group-hover:blur-[2px] group-hover:brightness-75 group-focus:blur-[4px] group-focus:brightness-75 ${
+            isLyricsVisible ? '!blur-[2px] !brightness-50' : ''
+          } ${
             !isCurrentSongPlaying
               ? 'blur-[2px] brightness-75'
               : 'blur-0 brightness-100'
           }`}
         />
       </div>
-      <div className="container absolute top-0 flex h-full flex-col items-center justify-between overflow-hidden">
+      <div
+        className={`mini-player-lyrics-container absolute top-0 flex h-full w-full select-none flex-col overflow-hidden py-12 px-2 transition-[filter] group-hover:blur-sm group-hover:brightness-50 ${
+          !isCurrentSongPlaying ? 'blur-sm brightness-50' : ''
+        }`}
+        id="miniPlayerLyricsContainer"
+      >
+        {isLyricsVisible && lyricsComponents.length > 0 && lyricsComponents}
+        {isLyricsVisible && lyrics === undefined && (
+          <div className="flex h-full w-full items-center justify-center text-font-color-white">
+            No Lyrics found.
+          </div>
+        )}
+      </div>
+      <div className="container absolute top-0 flex h-full flex-col items-center justify-between overflow-hidden ">
         <div
-          className={`title-bar z-10 flex h-[15%] w-full select-none justify-end `}
+          className={`title-bar z-10 flex h-[15%] max-h-[2.25rem] w-full select-none justify-end opacity-0 transition-[visibility,opacity] group-hover:visible group-hover:opacity-100 ${
+            !isCurrentSongPlaying ? 'visible opacity-100' : ''
+          }`}
         >
-          <div className="special-controls-container flex">
+          <div
+            className={`special-controls-container flex transition-[visibility,opacity] ${
+              isLyricsVisible
+                ? 'invisible opacity-0 group-hover:visible group-hover:opacity-100'
+                : ''
+            } ${!isCurrentSongPlaying ? '!visible !opacity-100' : ''}`}
+          >
             <span
               className="go-to-main-player-btn cursor-pointer p-2 text-font-color-white dark:text-font-color-white"
               title="Go to Main Player"
@@ -168,43 +247,69 @@ export default function MiniPlayer() {
           </div>
         </div>
         <div
-          className={`song-controls-container absolute top-[50%] left-1/2 flex h-fit -translate-x-1/2 -translate-y-1/2 items-center justify-center  bg-[transparent] shadow-none transition-[visibility,opacity] dark:bg-[transparent] ${
+          className={`song-controls-container delay-50 absolute top-[45%] left-1/2 flex h-fit -translate-x-1/2 -translate-y-1/2 items-center justify-center  bg-[transparent] shadow-none transition-[visibility,opacity] dark:bg-[transparent] ${
             !isCurrentSongPlaying
               ? 'visible opacity-100'
               : 'invisible opacity-0'
           }`}
         >
-          <button
-            type="button"
-            className="skip-backward-btn h-fit -translate-x-4 cursor-pointer border-none bg-[transparent] text-font-color-white transition-transform dark:bg-[transparent] dark:text-font-color-white"
-            onClick={handleSkipBackwardClick}
-          >
-            <span className="material-icons-round icon text-4xl">
-              skip_previous
-            </span>
-          </button>
-          <button
-            type="button"
-            className="play-pause-btn mx-4 h-fit scale-90 cursor-pointer border-none bg-[transparent] text-6xl text-font-color-white transition-transform dark:bg-[transparent] dark:text-font-color-white"
-            onClick={toggleSongPlayback}
-          >
-            <span className="material-icons-round icon">
-              {isPlaying ? 'pause_circle' : 'play_circle'}
-            </span>
-          </button>
-          <button
-            type="button"
-            className="skip-forward-btn  h-fit translate-x-4 cursor-pointer border-none bg-[transparent] text-font-color-white transition-transform dark:bg-[transparent] dark:text-font-color-white"
-            onClick={handleSkipForwardClick}
-          >
-            <span className="material-icons-round icon text-4xl">
-              skip_next
-            </span>
-          </button>
+          <Button
+            className="favorite-btn !m-0 h-fit -translate-x-4 cursor-pointer border-none bg-[transparent] !p-0 text-font-color-white transition-transform dark:bg-[transparent] dark:text-font-color-white"
+            iconClassName={`text-2xl ${
+              currentSongData.isAFavorite
+                ? 'meterial-icons-round !text-dark-font-color-highlight-2'
+                : 'material-icons-round-outlined'
+            }`}
+            isDisabled={!currentSongData.isKnownSource}
+            tooltipLabel={
+              currentSongData.isKnownSource
+                ? 'Like/Dislike (Ctrl + H)'
+                : `Liking/Disliking songs is disabled because current playing song is from an unknown source and it doesn't support likes.`
+            }
+            clickHandler={() =>
+              currentSongData.isKnownSource &&
+              toggleIsFavorite(!currentSongData.isAFavorite)
+            }
+            iconName="favorite"
+          />
+          <Button
+            className="skip-backward-btn ml-4 !mr-0 h-fit -translate-x-4 cursor-pointer border-none bg-[transparent] !p-0 text-font-color-white transition-transform dark:bg-[transparent] dark:text-font-color-white"
+            iconClassName="text-4xl"
+            clickHandler={handleSkipBackwardClick}
+            iconName="skip_previous"
+          />
+          <Button
+            className="play-pause-btn !mx-2 h-fit scale-90 cursor-pointer border-none bg-[transparent] !p-0 text-6xl text-font-color-white transition-transform dark:bg-[transparent] dark:text-font-color-white"
+            iconClassName="text-6xl"
+            clickHandler={toggleSongPlayback}
+            iconName={isPlaying ? 'pause_circle' : 'play_circle'}
+          />
+
+          <Button
+            className="skip-backward-btn !mr-4 h-fit translate-x-4 cursor-pointer border-none bg-[transparent] !p-0 text-font-color-white transition-transform dark:bg-[transparent] dark:text-font-color-white"
+            iconClassName="text-4xl"
+            clickHandler={handleSkipForwardClick}
+            iconName="skip_next"
+          />
+          <Button
+            className={`lyrics-btn !m-0 h-fit translate-x-4 cursor-pointer border-none bg-[transparent] !p-0 text-font-color-white transition-transform dark:bg-[transparent] dark:text-font-color-white ${
+              isLyricsVisible && 'text-dark-font-color-highlight-2'
+            }`}
+            iconClassName="text-2xl"
+            clickHandler={() => setIsLyricsVisible((prevState) => !prevState)}
+            iconName="notes"
+            tooltipLabel="Lyrics (Ctrl + L)"
+          />
         </div>
-        <div className="song-info-container flex h-1/2 w-full flex-col items-center justify-center px-4 text-center text-font-color-white">
+        <div
+          className={`song-info-container flex h-1/2 w-full flex-col items-center justify-center px-4 text-center text-font-color-white transition-[visibility,opacity] ${
+            isLyricsVisible
+              ? 'invisible opacity-0 group-hover:visible group-hover:opacity-100'
+              : ''
+          } ${!isCurrentSongPlaying ? '!visible !opacity-100' : ''}`}
+        >
           <div
-            className="song-title mt-2 max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-xl"
+            className="song-title max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-xl"
             title={currentSongData.title}
           >
             {currentSongData.title}
@@ -217,15 +322,17 @@ export default function MiniPlayer() {
           >
             {currentSongData.songId
               ? currentSongData.artists
-                ? currentSongData.artists.map((artist) => artist.name).join(',')
+                ? currentSongData.artists
+                    .map((artist) => artist.name)
+                    .join(', ')
                 : 'Unknown Artist'
               : ''}
           </div>
         </div>
         <input
           type="range"
-          name="seek-slider"
-          id="seekSlider"
+          name="mini-player-seek-slider"
+          id="miniPlayerSeekSlider"
           className="seek-slider absolute bottom-0 float-left m-0 h-fit w-full appearance-none rounded-lg bg-font-color-highlight-2/25 p-0 outline-none backdrop-blur-sm transition-[width,height,transform] ease-in-out before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-highlight-2 before:transition-[width,height,transform] before:ease-in-out before:content-[''] group-hover:-translate-y-3 group-hover:scale-x-95 group-hover:before:h-3"
           min={0}
           readOnly

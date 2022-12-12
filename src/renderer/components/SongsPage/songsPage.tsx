@@ -15,7 +15,7 @@ import React from 'react';
 import { FixedSizeList as List } from 'react-window';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
-import { Song } from './Song';
+import Song from './Song';
 import NoSongsImage from '../../../../assets/images/svg/Empty Inbox _Monochromatic.svg';
 import DataFetchingImage from '../../../../assets/images/svg/Road trip_Monochromatic.svg';
 import Button from '../Button';
@@ -396,7 +396,7 @@ export const SongsPage = () => {
                         ...currentPageData,
                         scrollTopOffset: data.scrollOffset,
                       })),
-                    1000
+                    500
                   );
               }}
             >

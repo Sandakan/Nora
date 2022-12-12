@@ -35,7 +35,7 @@ const Genre = (props: GenreProp) => {
     updateMultipleSelections,
   } = React.useContext(AppUpdateContext);
 
-  const goToGenreInfoTab = () =>
+  const goToGenreInfoPage = () =>
     currentlyActivePage.pageTitle === 'GenreInfo' &&
     currentlyActivePage.data.genreId === genreId
       ? changeCurrentActivePage('Home')
@@ -157,7 +157,7 @@ const Genre = (props: GenreProp) => {
               'genre',
               isAMultipleSelection ? 'remove' : 'add'
             )
-          : goToGenreInfoTab()
+          : goToGenreInfoPage()
       }
       onKeyUp={() =>
         isMultipleSelectionEnabled &&
@@ -167,7 +167,7 @@ const Genre = (props: GenreProp) => {
               'genre',
               isAMultipleSelection ? 'remove' : 'add'
             )
-          : goToGenreInfoTab()
+          : goToGenreInfoPage()
       }
       role="button"
       tabIndex={0}

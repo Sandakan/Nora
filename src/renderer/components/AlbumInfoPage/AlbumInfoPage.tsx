@@ -14,7 +14,7 @@ import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
 import Button from '../Button';
 import Img from '../Img';
 import MainContainer from '../MainContainer';
-import { Song } from '../SongsPage/Song';
+import Song from '../SongsPage/Song';
 import SongArtist from '../SongsPage/SongArtist';
 
 interface AlbumContentReducer {

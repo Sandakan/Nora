@@ -13,7 +13,7 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
 import DefaultPlaylistCover from '../../../../assets/images/png/playlist_cover_default.png';
 import Button from '../Button';
-import { Song } from '../SongsPage/Song';
+import Song from '../SongsPage/Song';
 import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';
 import Img from '../Img';
 import MainContainer from '../MainContainer';
