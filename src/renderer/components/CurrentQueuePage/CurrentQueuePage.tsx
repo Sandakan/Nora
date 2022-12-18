@@ -201,6 +201,7 @@ const CurrentQueuePage = () => {
         isAFavorite,
         artworkPaths,
         path,
+        year,
       } = queuedSongs[index];
       return (
         <Draggable draggableId={songId} index={index} key={songId}>
@@ -208,7 +209,7 @@ const CurrentQueuePage = () => {
             <div style={style}>
               <Song
                 provided={provided}
-                key={songId}
+                key={`${songId}-${index}`}
                 isDraggable
                 index={index}
                 ref={provided.innerRef}
@@ -221,6 +222,7 @@ const CurrentQueuePage = () => {
                 artworkPaths={artworkPaths}
                 duration={duration}
                 path={path}
+                year={year}
                 isAFavorite={isAFavorite}
                 additionalContextMenuItems={[
                   {
@@ -270,11 +272,9 @@ const CurrentQueuePage = () => {
   };
 
   const centerCurrentlyPlayingSong = React.useCallback(() => {
-    const songElement = document.querySelector(`.${currentSongData.songId}`);
-    if (songElement) {
-      songElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, [currentSongData.songId]);
+    const index = queue.queue.indexOf(currentSongData.songId);
+    if (ListRef && index >= 0) ListRef.current?.scrollToItem(index, 'center');
+  }, [currentSongData.songId, queue.queue]);
 
   return (
     <MainContainer className="main-container songs-list-container current-queue-container relative !h-full overflow-hidden !pb-0">

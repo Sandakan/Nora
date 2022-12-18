@@ -1,4 +1,4 @@
-import isLyricsSynced from './isLyricsSynced';
+import isLyricsSynced, { syncedLyricsRegex } from './isLyricsSynced';
 
 type Input = {
   language: string;
@@ -12,7 +12,7 @@ type Input = {
 };
 
 const getSecondsFromLyricsLine = (lyric: string) => {
-  const lyricsStartMatch = lyric.match(/^\[\d+:\d{1,2}\.\d{1,2}]/);
+  const lyricsStartMatch = lyric.match(syncedLyricsRegex);
   if (Array.isArray(lyricsStartMatch)) {
     const x = lyricsStartMatch[0].replaceAll(/[[\]]/gm, '').split(':');
     return parseInt(x[0], 10) * 60 + parseFloat(x[1]);
@@ -29,7 +29,8 @@ const getLyricEndTime = (lyricsArr: string[], index: number) => {
   return 0;
 };
 
-const isALyricsInfoLine = (line: string) => !/(^\[\w+:.{1,}\]$)/gm.test(line);
+const isALyricsMetadataLine = (line: string) =>
+  !/(^\[\w+:.{1,}\]$)/gm.test(line);
 
 // MAIN FUNCTIONS //
 const parseLyrics = (lyricsString: string): LyricsData => {
@@ -37,11 +38,11 @@ const parseLyrics = (lyricsString: string): LyricsData => {
 
   const lines = lyricsString.split('\n');
   const lyricsLines = lines.filter(
-    (line) => line.trim() !== '' && isALyricsInfoLine(line)
+    (line) => line.trim() !== '' && isALyricsMetadataLine(line)
   );
 
   const parsedUnsyncedLyricsLines = lyricsLines.map((line) =>
-    line.replaceAll(/^\[\d+:\d{1,2}\.\d{1,2}]/gm, '').trim()
+    line.replaceAll(syncedLyricsRegex, '').trim()
   );
 
   if (isSynced) {
@@ -50,9 +51,7 @@ const parseLyrics = (lyricsString: string): LyricsData => {
         const start = getSecondsFromLyricsLine(line);
         const end = getLyricEndTime(lyricsLinesArr, index);
 
-        const parsedLine = line
-          .replaceAll(/^\[\d+:\d{1,2}\.\d{1,2}]/gm, '')
-          .trim();
+        const parsedLine = line.replaceAll(syncedLyricsRegex, '').trim();
 
         return { text: parsedLine, start, end };
       }

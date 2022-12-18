@@ -145,6 +145,7 @@ declare global {
     songId: string;
     addedDate: number;
     isAFavorite: boolean;
+    year?: number;
     palette?: NodeVibrantPalette;
   }
 
@@ -626,6 +627,8 @@ declare global {
     | 'zToA'
     | 'dateAddedAscending'
     | 'dateAddedDescending'
+    | 'releasedYearAscending'
+    | 'releasedYearDescending'
     | 'artistNameAscending'
     | 'artistNameDescending'
     | 'allTimeMostListened'

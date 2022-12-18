@@ -70,6 +70,22 @@ function sortSongs<T extends (SongData | SavableSongData)[]>(
           return -1;
         return 0;
       });
+    if (sortType === 'releasedYearAscending')
+      return data.sort((a, b) => {
+        if (a.year && b.year) {
+          if (a.year > b.year) return 1;
+          if (a.year < b.year) return -1;
+        }
+        return 0;
+      });
+    if (sortType === 'releasedYearDescending')
+      return data.sort((a, b) => {
+        if (a.year && b.year) {
+          if (a.year < b.year) return 1;
+          if (a.year > b.year) return -1;
+        }
+        return 0;
+      });
     if (sortType === 'artistNameAscending')
       return data.sort((a, b) => {
         if (a.artists && b.artists) {

@@ -47,11 +47,10 @@ const AboutSettings = () => {
         About
       </div>
       <div className="pl-2">
-        {' '}
-        <div className="flex p-2 text-lg">
+        <div className="mb-2 flex p-2 text-lg">
           <Img
             src={AppIcon}
-            className="aspect-square max-h-12 shadow-xl"
+            className="aspect-square max-h-12 rounded-md shadow-md"
             alt=""
           />
           <div className="ml-4 flex flex-col">
@@ -78,21 +77,25 @@ const AboutSettings = () => {
             </span>
           </div>
         </div>
-        <span
-          className="release-notes-prompt-btn about-link block w-fit cursor-pointer text-font-color-highlight-2 hover:underline dark:text-dark-font-color-highlight-2"
-          onClick={() =>
+        <Button
+          className="release-notes-prompt-btn about-link block w-fit cursor-pointer !border-0 !p-0 text-font-color-highlight-2 no-underline hover:!underline dark:text-dark-font-color-highlight-2"
+          iconClassName="!no-underline"
+          iconName="upgrade"
+          label="Release Notes"
+          clickHandler={() =>
             changePromptMenuData(
               true,
               <ReleaseNotesPrompt />,
               'release-notes px-8 py-4'
             )
           }
-        >
-          Release notes
-        </span>
-        <span
-          className="open-source-licenses-btn about-link block w-fit cursor-pointer text-font-color-highlight-2 hover:underline dark:text-dark-font-color-highlight-2"
-          onClick={() =>
+        />
+        <Button
+          className="open-source-licenses-btn about-link block w-fit cursor-pointer !border-0 !p-0 text-font-color-highlight-2 hover:underline dark:text-dark-font-color-highlight-2"
+          iconClassName="material-icons-round-outlined !no-underline"
+          iconName="copyright"
+          label="Open source licences"
+          clickHandler={() =>
             changePromptMenuData(
               true,
               <>
@@ -106,20 +109,19 @@ const AboutSettings = () => {
               'flex flex-col'
             )
           }
-        >
-          Open source licenses
-        </span>
+        />
+        <Button
+          className="about-link block w-fit cursor-pointer !border-0 !p-0 text-font-color-highlight-2 hover:underline dark:text-dark-font-color-highlight-2"
+          label="Open Log file"
+          iconName="notes"
+          clickHandler={() => window.api.openLogFile()}
+        />
         <Hyperlink
           label="Github repository"
           link={homepage}
           linkTitle="Nora Github Repository"
         />
-        <span
-          className="about-link block w-fit cursor-pointer text-font-color-highlight-2 hover:underline dark:text-dark-font-color-highlight-2"
-          onClick={() => window.api.openLogFile()}
-        >
-          Open log file
-        </span>
+
         <div className="about-buttons-container mb-4 mt-6 flex flex-wrap">
           <Button
             label="Reset App"

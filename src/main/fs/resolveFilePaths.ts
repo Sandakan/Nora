@@ -4,27 +4,34 @@ import getAssetPath from '../utils/getAssetPath';
 
 export const getSongArtworkPath = (
   id: string,
-  isArtworkAvailable = true
+  isArtworkAvailable = true,
+  timestampAsQuery = false
 ): ArtworkPaths => {
+  const timestampStr = timestampAsQuery
+    ? `?timestamp=${new Date().getTime()}`
+    : '';
   if (isArtworkAvailable) {
     return {
       isDefaultArtwork: isArtworkAvailable,
-      artworkPath: path.join(
-        DEFAULT_FILE_URL,
-        DEFAULT_ARTWORK_SAVE_LOCATION,
-        `${id}.webp`
-      ),
-      optimizedArtworkPath: path.join(
-        DEFAULT_FILE_URL,
-        DEFAULT_ARTWORK_SAVE_LOCATION,
-        `${id}-optimized.webp`
-      ),
+      artworkPath:
+        path.join(
+          DEFAULT_FILE_URL,
+          DEFAULT_ARTWORK_SAVE_LOCATION,
+          `${id}.webp`
+        ) + timestampStr,
+      optimizedArtworkPath:
+        path.join(
+          DEFAULT_FILE_URL,
+          DEFAULT_ARTWORK_SAVE_LOCATION,
+          `${id}-optimized.webp`
+        ) + timestampStr,
     };
   }
-  const defaultPath = path.join(
-    DEFAULT_FILE_URL,
-    getAssetPath('images', 'png', 'song_cover_default.png')
-  );
+  const defaultPath =
+    path.join(
+      DEFAULT_FILE_URL,
+      getAssetPath('images', 'png', 'song_cover_default.png')
+    ) + timestampStr;
   return {
     isDefaultArtwork: isArtworkAvailable,
     artworkPath: defaultPath,

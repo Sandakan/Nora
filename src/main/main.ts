@@ -660,15 +660,17 @@ function registerFileProtocol(
   request: { url: string },
   callback: (arg: string) => void
 ) {
-  const url = decodeURI(request.url).replace(
+  const urlWithQueries = decodeURI(request.url).replace(
     /nora:[/\\]{1,2}localFiles[/\\]{1,2}/gm,
     ''
   );
+
   try {
+    const [url] = urlWithQueries.split('?');
     return callback(url);
   } catch (error) {
     log(
-      `====== ERROR OCCURRED WHEN TRYING TO LOCATE A RESOURCE IN THE SYSTEM. =======\nREQUEST : ${url}\nERROR : ${error}`
+      `====== ERROR OCCURRED WHEN TRYING TO LOCATE A RESOURCE IN THE SYSTEM. =======\nREQUEST : ${urlWithQueries}\nERROR : ${error}`
     );
     return callback('404');
   }

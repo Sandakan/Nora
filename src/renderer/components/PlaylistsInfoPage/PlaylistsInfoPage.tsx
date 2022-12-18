@@ -133,6 +133,7 @@ const PlaylistInfoPage = () => {
                 songId={song.songId}
                 artworkPaths={song.artworkPaths}
                 path={song.path}
+                year={song.year}
                 isAFavorite={song.isAFavorite}
                 additionalContextMenuItems={[
                   {
@@ -174,7 +175,7 @@ const PlaylistInfoPage = () => {
     <MainContainer className="main-container playlist-info-page-container p-8 pr-4">
       <>
         {Object.keys(playlistData).length > 0 && (
-          <div className="playlist-img-and-info-container appear-from-bottom mb-8 flex flex-row items-start">
+          <div className="playlist-img-and-info-container appear-from-bottom mb-8 flex flex-row items-center justify-start">
             <div className="playlist-cover-container mt-2">
               <Img
                 src={
@@ -319,7 +320,7 @@ const PlaylistInfoPage = () => {
           </div>
         )}
         {playlistSongs.length === 0 && (
-          <div className="no-songs-container relative inset-0 mt-12 flex h-full w-full flex-col items-center justify-center text-center text-2xl text-[#ccc]">
+          <div className="no-songs-container relative inset-0 mt-12 flex h-full w-full flex-col items-center justify-center text-center text-xl text-font-color-dimmed dark:text-dark-font-color-dimmed">
             This playlist is empty.
           </div>
         )}

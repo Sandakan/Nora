@@ -20,7 +20,7 @@ const SideBarItem = (props: SideBarItems) => {
       } mb-2 flex h-12 w-[95%] cursor-pointer items-center rounded-r-3xl bg-[transparent] pl-4 text-2xl text-font-color-black transition-[background] duration-300 hover:bg-background-color-1 dark:text-font-color-white dark:hover:bg-dark-background-color-1 ${
         props.isActive &&
         '!bg-background-color-3 !text-font-color-black dark:!bg-dark-background-color-3 dark:!text-font-color-black'
-      }`}
+      } last:absolute last:bottom-0`}
       onClick={() => props.handleClick(props.content)}
     >
       <span className="material-icons-round icon mr-5 text-3xl">

@@ -39,7 +39,7 @@ const MainContainer = React.forwardRef(
           className={`main-container ${
             noDefaultStyles
               ? ''
-              : 'flex h-fit max-h-full w-full flex-col pb-8 pl-8 '
+              : 'flex h-fit max-h-full w-full flex-col pb-8 pl-8'
           } ${className}`}
           style={style ?? {}}
           onContextMenu={onContextMenu}
@@ -55,4 +55,5 @@ const MainContainer = React.forwardRef(
   }
 );
 
+MainContainer.displayName = 'MainContainer';
 export default MainContainer;

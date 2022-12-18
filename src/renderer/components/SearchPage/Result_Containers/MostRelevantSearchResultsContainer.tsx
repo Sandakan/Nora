@@ -48,6 +48,8 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: 'Play Next',
             iconName: 'shortcut',
             handlerFunction: () => {
+              if (queue.currentSongIndex === queue.queue.length - 1)
+                queue.currentSongIndex -= 1;
               const newQueue = queue.queue.filter(
                 (songId) => songId !== firstResult.songId
               );

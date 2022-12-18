@@ -519,7 +519,8 @@ export const updateSongId3Tags = async (
         // / / / / / SONG FILE UPDATE PROCESS AND UPDATE FINALIZATION / / / / / /
         const artworkPaths = getSongArtworkPath(
           song.songId,
-          song.isArtworkAvailable
+          song.isArtworkAvailable,
+          true
         );
 
         const id3Tags: NodeID3.Tags = {

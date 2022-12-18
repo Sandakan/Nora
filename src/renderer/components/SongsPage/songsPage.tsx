@@ -163,6 +163,7 @@ export const SongsPage = () => {
         duration,
         isAFavorite,
         artworkPaths,
+        year,
         path,
       } = content.songsData[index];
       return (
@@ -178,6 +179,7 @@ export const SongsPage = () => {
             artists={artists}
             artworkPaths={artworkPaths}
             duration={duration}
+            year={year}
             path={path}
             isAFavorite={isAFavorite}
           />
@@ -217,6 +219,8 @@ export const SongsPage = () => {
     { label: 'Z to A', value: 'zToA' },
     { label: 'Newest', value: 'dateAddedAscending' },
     { label: 'Oldest', value: 'dateAddedDescending' },
+    { label: 'Released Year (Ascending)', value: 'releasedYearAscending' },
+    { label: 'Released Year (Descending)', value: 'releasedYearDescending' },
     {
       label: 'Most Listened (All Time)',
       value: 'allTimeMostListened',

@@ -70,6 +70,8 @@ const generateCoverBuffer = async (
   return await generateDefaultSongCoverImgBuffer();
 };
 
+let parseQueue: string[] = [];
+
 export const parseSong = async (
   absoluteFilePath: string
 ): Promise<SongData | undefined> => {
@@ -87,8 +89,11 @@ export const parseSong = async (
   if (
     Array.isArray(songs) &&
     metadata &&
-    !songs.some((song) => song.path === absoluteFilePath)
+    !songs.some((song) => song.path === absoluteFilePath) &&
+    !parseQueue.includes(absoluteFilePath)
   ) {
+    parseQueue.push(absoluteFilePath);
+
     const songTitle =
       metadata.common.title ||
       path.basename(absoluteFilePath).split('.')[0] ||
@@ -203,6 +208,9 @@ export const parseSong = async (
     setAlbumsData(updatedAlbums);
     setGenresData(allGenres);
     dataUpdateEvent('songs/newSong', [songId]);
+
+    parseQueue = parseQueue.filter((dir) => dir !== absoluteFilePath);
+
     if (newArtists.length > 0)
       dataUpdateEvent(
         'artists/newArtist',

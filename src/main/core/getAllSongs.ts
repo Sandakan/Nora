@@ -36,6 +36,7 @@ const getAllSongs = async (
             songInfo.isArtworkAvailable
           ),
           path: songInfo.path,
+          year: songInfo.year,
           songId: songInfo.songId,
           palette: songInfo.palette,
           addedDate: songInfo.addedDate,

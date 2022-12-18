@@ -95,7 +95,7 @@ export const parseMusicmatchDataFromLyrics = (
               time.seconds.toString().length > 1
                 ? time.seconds
                 : `0${time.seconds}`
-            }.${time.hundredths}]${text}\n`
+            }.${time.hundredths}]${text || '♪'}`
           );
         }
       }

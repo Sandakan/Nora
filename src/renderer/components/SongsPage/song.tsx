@@ -20,6 +20,7 @@ interface SongProp {
   title: string;
   artists?: { name: string; artistId: string }[];
   duration: number;
+  year?: number;
   path: string;
   additionalContextMenuItems?: ContextMenuItem[];
   index: number;
@@ -65,6 +66,7 @@ const Song = React.forwardRef(
       additionalContextMenuItems,
       artists,
       style,
+      year,
     } = props;
     const { provided = {} as any } = props;
 
@@ -295,13 +297,19 @@ const Song = React.forwardRef(
           label: 'Play Next',
           iconName: 'shortcut',
           handlerFunction: () => {
-            const newQueue = queue.queue.filter((id) => songId !== id);
+            const currentSongIndex = queue.currentSongIndex
+              ? queue.currentSongIndex === queue.queue.length - 1
+                ? queue.currentSongIndex - 1
+                : queue.currentSongIndex
+              : undefined;
+
+            const newQueue = queue.queue;
             newQueue.splice(
               queue.queue.indexOf(currentSongData.songId) + 1 || 0,
               0,
               songId
             );
-            updateQueueData(undefined, newQueue);
+            updateQueueData(currentSongIndex, newQueue);
             addNewNotifications([
               {
                 id: `${title}PlayNext`,
@@ -468,29 +476,29 @@ const Song = React.forwardRef(
 
       return items;
     }, [
-      addNewNotifications,
-      changeCurrentActivePage,
-      changePromptMenuData,
-      currentSongData.isAFavorite,
-      currentSongData.songId,
-      goToSongInfoPage,
+      multipleSelectionsData,
+      isAMultipleSelection,
       handlePlayBtnClick,
       isAFavorite,
-      isAMultipleSelection,
       isMultipleSelectionEnabled,
-      multipleSelectionsData,
+      goToSongInfoPage,
       additionalContextMenuItems,
-      artworkPaths.artworkPath,
-      artworkPaths.optimizedArtworkPath,
-      path,
+      updateQueueData,
+      queue,
+      addNewNotifications,
+      currentSongData.songId,
+      currentSongData.isAFavorite,
+      toggleMultipleSelections,
+      userData?.preferences.doNotShowRemoveSongFromLibraryConfirm,
+      changePromptMenuData,
+      updateMultipleSelections,
       songId,
       title,
-      queue.queue,
+      artworkPaths.optimizedArtworkPath,
+      artworkPaths.artworkPath,
       toggleIsFavorite,
-      toggleMultipleSelections,
-      updateMultipleSelections,
-      updateQueueData,
-      userData?.preferences.doNotShowRemoveSongFromLibraryConfirm,
+      changeCurrentActivePage,
+      path,
     ]);
 
     const contextMenuItemData =
@@ -511,14 +519,14 @@ const Song = React.forwardRef(
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...provided.dragHandleProps}
         // style={{ animationDelay: `${50 * (index + 1)}ms` }}
-        className={`appear-from-bottom ${songId} group relative mr-4 mb-2 flex aspect-[2/1] h-[3.25rem] w-[98%] overflow-hidden rounded-lg border-[0.2rem] shadow-xl transition-[border-color] ease-in-out hover:border-background-color-3 dark:hover:border-dark-background-color-3  ${
+        className={`appear-from-bottom ${songId} group relative mr-4 mb-2 flex aspect-[2/1] h-[3.25rem] w-[98%] overflow-hidden rounded-lg border-[0.2rem] shadow-lg transition-[border-color] ease-in-out hover:border-background-color-3 dark:hover:border-dark-background-color-3  ${
           currentSongData.songId === songId || isAMultipleSelection
             ? bodyBackgroundImage
               ? `border-[transparent] bg-background-color-3/70 text-font-color-black backdrop-blur-md dark:bg-dark-background-color-3/70`
               : 'border-background-color-2 bg-background-color-3 text-font-color-black dark:border-dark-background-color-2 dark:bg-dark-background-color-3'
             : bodyBackgroundImage
             ? `border-[transparent] bg-background-color-2/70 backdrop-blur-md dark:bg-dark-background-color-2/70`
-            : 'border-background-color-2 bg-background-color-2 dark:border-dark-background-color-2 dark:bg-dark-background-color-2'
+            : 'border-background-color-2 bg-background-color-2 even:bg-background-color-2/80 dark:border-dark-background-color-2 dark:bg-dark-background-color-2 dark:even:bg-dark-background-color-2/80'
         }`}
         onContextMenu={(e) => {
           e.preventDefault();
@@ -586,13 +594,16 @@ const Song = React.forwardRef(
           } `}
         >
           <div
-            className="song-title w-1/2 overflow-hidden text-ellipsis whitespace-nowrap text-base font-normal transition-none"
+            className="song-title w-1/2 overflow-hidden text-ellipsis whitespace-nowrap pr-4 text-base font-normal transition-none"
             title={title}
           >
             {title}
           </div>
           <div className="song-artists w-1/3 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal transition-none">
             {songArtists}
+          </div>
+          <div className="song-year mr-2 flex w-12 items-center justify-between text-center text-xs transition-none">
+            {year ?? '----'}
           </div>
           <div className="song-duration mr-1 flex w-[12.5%] items-center justify-between pr-4 text-center transition-none">
             <>
@@ -638,4 +649,6 @@ const Song = React.forwardRef(
     );
   }
 );
+
+Song.displayName = 'Song';
 export default Song;

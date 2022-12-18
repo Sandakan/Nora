@@ -19,7 +19,7 @@ const BlacklistedSong = (props: BlacklistedSongProp) => {
         className="blacklisted-song-name w-1/4 overflow-hidden text-ellipsis whitespace-nowrap"
         title={songName}
       >
-        <span className="mr-4">{index}.</span>
+        <span className="mr-4">{index + 1}.</span>
         <span>{songName}</span>
       </span>
       <span

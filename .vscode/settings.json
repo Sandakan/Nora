@@ -46,5 +46,12 @@
   },
   "cSpell.ignoreWords": ["asar", "edata", "prettierrc"],
   "rpc.enabled": true,
-  "docwriter.hotkey.windows": "Alt + ."
+  "docwriter.hotkey.windows": "Alt + .",
+  "tailwindCSS.emmetCompletions": true,
+  "tailwindCSS.classAttributes": [
+    "class",
+    "className",
+    "ngClass",
+    "iconClassName"
+  ]
 }

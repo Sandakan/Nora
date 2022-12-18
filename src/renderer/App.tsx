@@ -1285,7 +1285,7 @@ export default function App() {
   const recordRef = React.useRef<() => void>();
 
   const playSong = React.useCallback(
-    (songId: string, isStartPlay = true) => {
+    (songId: string, isStartPlay = true, playAsCurrentSongIndex = false) => {
       if (typeof songId === 'string') {
         if (contentRef.current.currentSongData.songId === songId)
           return toggleSongPlayback();
@@ -1323,23 +1323,32 @@ export default function App() {
               if (refQueue.current.queue.length > 0) {
                 // check if songId exists in the queue
                 if (refQueue.current.queue.indexOf(songData.songId) !== -1) {
-                  if (refQueue.current.currentSongIndex !== null) {
-                    const position = refQueue.current.currentSongIndex + 1;
-                    if (refQueue.current.queue[position] !== songData.songId) {
-                      refQueue.current.queue = refQueue.current.queue.filter(
-                        (id) => id !== songData.songId
-                      );
-                      refQueue.current.queue.splice(
-                        position,
-                        0,
-                        songData.songId
-                      );
-                    }
-                    refQueue.current.currentSongIndex = position;
+                  if (playAsCurrentSongIndex) {
+                    // if playAsCurrentSongIndex is enabled, songId will be removed from the position it previously was and put next to the currentSongIndex to avoid messing up the queue when playing arbitrary songs from different places in the queue, result in continuing playing from that position rather than playing from previous song's position.
+                    if (refQueue.current.currentSongIndex !== null) {
+                      // There is a currently playing song.
+                      const position = refQueue.current.currentSongIndex + 1;
+                      if (
+                        refQueue.current.queue[position] !== songData.songId
+                      ) {
+                        refQueue.current.queue = refQueue.current.queue.filter(
+                          (id) => id !== songData.songId
+                        );
+                        refQueue.current.queue.splice(
+                          position,
+                          0,
+                          songData.songId
+                        );
+                      }
+                      refQueue.current.currentSongIndex = position;
+                    } else
+                      refQueue.current.currentSongIndex =
+                        refQueue.current.queue.indexOf(songData.songId);
                   } else
                     refQueue.current.currentSongIndex =
                       refQueue.current.queue.indexOf(songData.songId);
                 } else {
+                  // songId not in the queue
                   console.log(
                     `song ${songData.title} with id ${songData.songId} is not present in the queue`
                   );

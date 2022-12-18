@@ -401,14 +401,14 @@ function SongTagsEditingPage() {
                 iconName="save"
                 iconClassName="material-icons-round-outlined"
                 isDisabled={areThereDataChanges}
-                className="update-song-tags-btn w-40 justify-around bg-background-color-3 text-font-color-black disabled:bg-background-color-1 disabled:text-font-color-white dark:bg-dark-background-color-3 dark:text-font-color-black dark:disabled:bg-[transparent] dark:disabled:text-font-color-white"
+                className="update-song-tags-btn w-40 justify-around"
                 clickHandler={saveTags}
               />
               <Button
                 key={1}
                 label="Reset to Defaults"
                 iconName="restart_alt"
-                className="update-song-tags-btn w-52 justify-around"
+                className="reset-song-tags-btn w-52 justify-around"
                 isDisabled={areThereDataChanges}
                 clickHandler={resetDataToDefaults}
               />

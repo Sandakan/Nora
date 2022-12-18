@@ -10,7 +10,7 @@ import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
 import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
 import Button from '../Button';
 import Img from '../Img';
-import Lyric from '../LyricsPage/Lyrics';
+import LyricLine from '../LyricsPage/LyricLine';
 
 export default function MiniPlayer() {
   const {
@@ -112,18 +112,18 @@ export default function MiniPlayer() {
         return syncedLyrics.map((lyric, index) => {
           const { text, end, start } = lyric;
           return (
-            <Lyric
+            <LyricLine
               key={index}
               index={index}
               lyric={text}
-              syncLyrics={{ start, end }}
+              syncedLyrics={{ start, end }}
             />
           );
         });
       }
       if (!isSynced) {
         return unsyncedLyrics.map((line, index) => {
-          return <Lyric key={index} index={index} lyric={line} />;
+          return <LyricLine key={index} index={index} lyric={line} />;
         });
       }
     }

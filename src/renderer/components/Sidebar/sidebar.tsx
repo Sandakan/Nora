@@ -116,21 +116,21 @@ const Sidebar = React.memo(() => {
           content={link.content}
           handleClick={clickHandler}
           isActive={link.isActive}
-        ></SideBarItem>
+        />
       )),
     [data, clickHandler]
   );
 
   return (
     <nav
-      className={`side-bar max-w-80 order-1 h-full w-[30%] flex-grow rounded-tr-2xl transition-[width] ${
+      className={`side-bar max-w-80 z-20 order-1 h-full w-[30%] flex-grow rounded-tr-2xl transition-[width] ${
         bodyBackgroundImage
           ? 'bg-side-bar-background/50 backdrop-blur-md dark:bg-dark-background-color-2/50'
           : 'bg-side-bar-background dark:bg-dark-background-color-2'
-      } delay-200 lg:absolute lg:w-14 lg:hover:w-[30%]`}
+      } delay-200 lg:absolute lg:w-14 lg:hover:w-[30%] lg:hover:shadow-2xl`}
     >
       <ErrorBoundary>
-        <ul className="overflow-hidden pt-6 pb-2 last:relative last:h-full last:w-full [&>li.settings]:absolute [&>li.settings]:bottom-0">
+        <ul className="relative overflow-x-hidden pt-6 pb-2 last:relative last:h-full last:w-full">
           {sideBarItems}
         </ul>
       </ErrorBoundary>

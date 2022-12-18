@@ -2,6 +2,7 @@
 import React from 'react';
 import Button from 'renderer/components/Button';
 import Hyperlink from 'renderer/components/Hyperlink';
+import { syncedLyricsRegex } from 'renderer/components/LyricsPage/LyricsPage';
 import { AppContext } from 'renderer/contexts/AppContext';
 
 type Props = {
@@ -22,7 +23,7 @@ const SongLyricsEditor = (props: Props) => {
 
   const { songId, songTitle, songArtists, songLyrics, updateSongInfo } = props;
   const isLyricsSynced = React.useMemo(
-    () => /^\[\d+:\d{1,2}\.\d{1,2}]/gm.test(songLyrics || ''),
+    () => syncedLyricsRegex.test(songLyrics || ''),
     [songLyrics]
   );
   return (

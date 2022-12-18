@@ -73,7 +73,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
           }),
     [
       changeCurrentActivePage,
-      currentlyActivePage.data.genreId,
+      currentlyActivePage?.data?.genreId,
       currentlyActivePage.pageTitle,
     ]
   );

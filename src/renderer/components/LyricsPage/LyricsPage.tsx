@@ -8,13 +8,16 @@
 import React, { useContext } from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
-import Lyric from './Lyrics';
+import LyricLine from './LyricLine';
 import NoLyricsImage from '../../../../assets/images/svg/Sun_Monochromatic.svg';
 import FetchingLyricsImage from '../../../../assets/images/svg/Waiting_Monochromatic.svg';
 import NoInternetImage from '../../../../assets/images/svg/Summer landscape_Monochromatic.svg';
 import LyricsSource from './LyricsSource';
 import NoLyrics from './NoLyrics';
 import MainContainer from '../MainContainer';
+import Button from '../Button';
+
+export const syncedLyricsRegex = /^\[\d+:\d{1,2}\.\d{1,3}]/gm;
 
 export const LyricsPage = () => {
   const { currentSongData } = useContext(AppContext);
@@ -23,6 +26,8 @@ export const LyricsPage = () => {
   const [lyrics, setLyrics] = React.useState(
     null as SongLyrics | undefined | null
   );
+
+  const lyricsLinesContainerRef = React.useRef<HTMLDivElement>(null);
 
   const copyright = React.useMemo(() => {
     if (lyrics?.copyright) return lyrics.copyright;
@@ -65,60 +70,120 @@ export const LyricsPage = () => {
     currentSongData.title,
   ]);
 
-  let lyricsComponents;
+  const lyricsComponents = React.useMemo(() => {
+    if (lyrics && lyrics?.lyrics) {
+      const { isSynced, lyrics: unsyncedLyrics, syncedLyrics } = lyrics?.lyrics;
 
-  if (lyrics && lyrics?.lyrics) {
-    const { isSynced, lyrics: unsyncedLyrics, syncedLyrics } = lyrics?.lyrics;
-
-    if (syncedLyrics) {
-      lyricsComponents = syncedLyrics.map((lyric, index) => {
-        const { text, end, start } = lyric;
-        return (
-          <Lyric
-            key={index}
-            index={index}
-            lyric={text}
-            syncLyrics={{ start, end }}
-          />
-        );
-      });
-    } else if (!isSynced) {
-      lyricsComponents = unsyncedLyrics.map((line, index) => {
-        return <Lyric key={index} index={index} lyric={line} />;
-      });
+      if (syncedLyrics) {
+        return syncedLyrics.map((lyric, index) => {
+          const { text, end, start } = lyric;
+          return (
+            <LyricLine
+              key={index}
+              index={index}
+              lyric={text}
+              syncedLyrics={{ start, end }}
+            />
+          );
+        });
+      }
+      if (!isSynced) {
+        return unsyncedLyrics.map((line, index) => {
+          return <LyricLine key={index} index={index} lyric={line} />;
+        });
+      }
     }
-  }
+    return [];
+  }, [lyrics]);
 
   return (
     <MainContainer
       noDefaultStyles
-      className={`lyrics-container relative flex min-h-[90%] flex-col items-center justify-center px-8 py-4 ${
-        lyrics && 'justify-start'
+      className={`lyrics-container relative flex h-full flex-col ${
+        lyrics ? 'justify-start' : 'items-center justify-center'
       }`}
-      onScroll={() => console.log('scrolling')}
     >
       <>
-        {lyricsComponents}
-        {lyrics && (
-          <LyricsSource
-            source={lyrics.source}
-            link={lyrics.link}
-            copyright={copyright}
-          />
-        )}
-        {lyrics === undefined && (
-          <NoLyrics
-            artworkPath={NoLyricsImage}
-            content="We couldn't find any lyrics for this song."
-          />
-        )}
-        {lyrics === null && navigator.onLine && (
-          <NoLyrics
-            artworkPath={FetchingLyricsImage}
-            content="Hang on... We are looking everywhere"
-          />
-        )}
-        {!navigator.onLine && (
+        {navigator.onLine ? (
+          lyrics ? (
+            <>
+              <div className="title-container flex w-full items-center justify-between py-2 pl-8 pr-4 text-2xl text-font-color-highlight dark:text-dark-font-color-highlight">
+                <div className="flex items-center">
+                  <span>
+                    {lyrics.source === 'in_song_lyrics' ? 'Offline' : 'Online'}{' '}
+                    Lyrics for '{currentSongData.title}'
+                  </span>
+                  .
+                  {lyrics.source !== 'in_song_lyrics' && (
+                    <span
+                      className="material-icons-round-outlined ml-4 cursor-pointer text-base"
+                      title="No offline lyrics found in the song."
+                    >
+                      help
+                    </span>
+                  )}
+                </div>
+                <div className="buttons-container flex">
+                  {lyrics && lyrics.source === 'in_song_lyrics' && (
+                    <Button
+                      key={3}
+                      label="Show online lyrics"
+                      pendingAnimationOnDisabled
+                      className="show-online-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                      iconName="language"
+                      clickHandler={(_, setIsDisabled) => {
+                        setIsDisabled(true);
+                        window.api
+                          .getSongLyrics(
+                            currentSongData.title,
+                            currentSongData.artists?.map(
+                              (artist) => artist.name
+                            ),
+                            currentSongData.songId,
+                            'ONLINE_ONLY',
+                            true
+                          )
+                          .then((res) => setLyrics(res))
+                          .finally(() => setIsDisabled(false));
+                      }}
+                    />
+                  )}
+                  {lyrics && lyrics.source !== 'in_song_lyrics' && (
+                    <Button
+                      key={3}
+                      label="Save lyrics"
+                      pendingAnimationOnDisabled
+                      className="save-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                      iconName="save"
+                      clickHandler={() => true}
+                    />
+                  )}
+                </div>
+              </div>
+              <div
+                className="lyrics-lines-container h-full flex-col items-center justify-center overflow-y-auto px-8 py-4"
+                ref={lyricsLinesContainerRef}
+              >
+                {lyricsComponents}
+                <LyricsSource
+                  source={lyrics.source}
+                  link={lyrics.link}
+                  copyright={copyright}
+                />
+              </div>
+            </>
+          ) : lyrics === undefined ? (
+            <NoLyrics
+              artworkPath={NoLyricsImage}
+              content="We couldn't find any lyrics for this song."
+            />
+          ) : (
+            <NoLyrics
+              artworkPath={FetchingLyricsImage}
+              content="Hang on... We are looking everywhere"
+            />
+          )
+        ) : (
           <NoLyrics
             artworkPath={NoInternetImage}
             content="You are not connected to the internet."
