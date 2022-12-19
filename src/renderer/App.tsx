@@ -1,3 +1,4 @@
+/* eslint-disable promise/no-nesting */
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable import/no-named-as-default */
@@ -497,8 +498,13 @@ export default function App() {
 
   const checkForAppUpdates = React.useCallback(() => {
     if (navigator.onLine) {
-      fetch(packageFile.releaseNotes.json)
-        .then((res) => res.json())
+      fetch(packageFile.releaseNotes.noraJson)
+        .then((res) => {
+          if (res.status === 200) return res.json();
+          return fetch(packageFile.releaseNotes.json).then((result) =>
+            result.json()
+          );
+        })
         .then((res: Changelog) => {
           const latestVersionId = Number(
             res.latestVersion.version.replace(/\D/g, '')
@@ -1024,7 +1030,7 @@ export default function App() {
             changePromptMenuData(
               true,
               <div>
-                <div className="title-container mt-1 pr-4 flex items-center mb-8 text-font-color-black text-3xl font-medium dark:text-font-color-white">
+                <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
                   Couldn't Play the Song
                 </div>
                 <div className="description">
@@ -1037,7 +1043,7 @@ export default function App() {
                 </div>
                 <Button
                   label="OK"
-                  className="remove-song-from-library-btn !bg-background-color-3 dark:!bg-dark-background-color-3 text-font-color-black dark:text-font-color-black rounded-md w-[10rem] hover:border-background-color-3 dark:hover:border-background-color-3 float-right mt-2"
+                  className="remove-song-from-library-btn float-right mt-2 w-[10rem] rounded-md !bg-background-color-3 text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
                   clickHandler={() => changePromptMenuData(false)}
                 />
               </div>
@@ -1123,7 +1129,7 @@ export default function App() {
           changePromptMenuData(
             true,
             <div>
-              <div className="title-container mt-1 pr-4 flex items-center mb-8 text-font-color-black text-3xl font-medium dark:text-font-color-white">
+              <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
                 Couldn't Play the Song
               </div>
               <div className="description">
@@ -1136,7 +1142,7 @@ export default function App() {
               </div>
               <Button
                 label="OK"
-                className="remove-song-from-library-btn !bg-background-color-3 dark:!bg-dark-background-color-3 text-font-color-black dark:text-font-color-black rounded-md w-[10rem] hover:border-background-color-3 dark:hover:border-background-color-3 float-right mt-2"
+                className="remove-song-from-library-btn float-right mt-2 w-[10rem] rounded-md !bg-background-color-3 text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
                 clickHandler={() => changePromptMenuData(false)}
               />
             </div>
@@ -1567,7 +1573,7 @@ export default function App() {
         true,
         <>
           <div>
-            <div className="title-container text-3xl font-medium mb-4">
+            <div className="title-container mb-4 text-3xl font-medium">
               Unsupported Audio File
             </div>
             <div className="description">
@@ -1585,7 +1591,7 @@ export default function App() {
             <div className="buttons-container mt-12 flex justify-end">
               <Button
                 label="OK"
-                className="ok-btn !bg-background-color-3 dark:!bg-dark-background-color-3 text-font-color-black dark:text-font-color-black rounded-md w-[10rem] hover:border-background-color-3 dark:hover:border-background-color-3"
+                className="ok-btn w-[10rem] rounded-md !bg-background-color-3 text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
                 clickHandler={() => {
                   changePromptMenuData(false);
                 }}
@@ -1675,9 +1681,9 @@ export default function App() {
                 : 'bg-background-color-1'
             } ${
               content.userData && content.userData.preferences.isReducedMotion
-                ? 'reduced-motion transition-none animate-none'
+                ? 'reduced-motion animate-none transition-none'
                 : ''
-            } w-full h-screen flex flex-col items-center [&.blurred_#title-bar]:opacity-40 after:content-["Drop_your_song_here"] after:absolute after:w-full after:h-full after:text-4xl after:text-font-color-white dark:after:text-font-color-white after:font-medium after:grid after:place-items-center after:bg-[rgba(0,0,0,0)] dark:after:bg-[rgba(0,0,0,0)] after:invisible after:-z-10 [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:z-10 [&.song-drop]:after:transition-[background,visibility,color] [&.song-drop]:after:border-4  [&.song-drop]:after:visible [&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:border-[#ccc] [&.song-drop]:after:border-dashed`}
+            } flex h-screen w-full flex-col items-center after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.song-drop]:after:visible [&.song-drop]:after:z-10 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc]  [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
             ref={AppRef}
             onDragEnter={addSongDropPlaceholder}
             onDragLeave={removeSongDropPlaceholder}

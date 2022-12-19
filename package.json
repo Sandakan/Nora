@@ -1,7 +1,7 @@
 {
   "name": "oto-music-for-desktop",
   "description": "An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar.",
-  "version": "0.8.0-alpha",
+  "version": "0.8.1-alpha",
   "license": "MIT",
   "appPreferences": {
     "supportedMusicExtensions": [
@@ -12,7 +12,8 @@
   },
   "releaseNotes": {
     "md": "https://raw.githubusercontent.com/Sandakan/Oto-Music-for-Desktop/master/changelog.md",
-    "json": "https://raw.githubusercontent.com/Sandakan/Oto-Music-for-Desktop/master/release-notes.json"
+    "json": "https://raw.githubusercontent.com/Sandakan/Oto-Music-for-Desktop/master/release-notes.json",
+    "noraJson": "https://raw.githubusercontent.com/Sandakan/Nora/master/release-notes.json"
   },
   "homepage": "https://github.com/Sandakan/Oto-Music-for-Desktop",
   "bugs": {

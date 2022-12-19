@@ -1,10 +1,26 @@
 {
   "latestVersion": {
-    "version": "0.8.0-alpha",
+    "version": "0.8.1-alpha",
     "releaseDate": "2022 August 19",
-    "artwork": "/assets/other/release artworks/whats-new-v0.8.0-alpha.png"
+    "artwork": "/assets/other/release artworks/oto_music_for_desktop_rebrand_notice.png"
   },
   "versions": [
+    {
+      "version": "0.8.1-alpha",
+      "releaseDate": "2022 October 19",
+      "notes": {
+        "new": [],
+        "fixed": [
+          {
+            "note": "Updated app to notify users about the upcoming rebrand."
+          },
+          {
+            "note": "Updated app updater to notify about the upcoming app update and direct users to it."
+          }
+        ],
+        "knownIssues": []
+      }
+    },
     {
       "version": "0.8.0-alpha",
       "releaseDate": "2022 August 19",

@@ -1,14 +1,26 @@
 <h1> Change Log</h1>
 
-<h3>The latest version (v0.8.0-alpha) contains a lot of new features and improvements. As always expect to see bugs in the app because this app is still in alpha phase.</h3>
+<img src="assets/other/release artworks/oto_music_for_desktop_rebrand_notice.png">
 
 <br>
 
-<img src="assets\other\release artworks\whats-new-v0.8.0-alpha.png">
+ <h2>* Oto Music for Desktop will be rebranded as Nora in an upcoming update.</h2>
 
 <br>
-
 <ul>
+  <li class="version"> <h3> v0.8.1-alpha - ( 19<sup>th</sup> of December 2022 )</h3>
+    <ul>
+      <li> <h4>🔨 Fixes and Improvements</h4>
+        <ul>
+        <li>Updated app to notify users about the upcoming rebrand.</li>
+        <li>Updated app updater to notify about the upcoming app update and direct users to it.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+
+  <br/>
+
   <li class="version"> <h3> v0.8.0-alpha - ( 19<sup>th</sup> of August 2022 )</h3>
     <ul>
       <li><h4>🎉 New Features and Updates</h4>
@@ -51,7 +63,6 @@
         </ul>
       </li>
     </ul>
-
   </li>
 
   <br/>
