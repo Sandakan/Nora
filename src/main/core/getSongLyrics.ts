@@ -87,7 +87,7 @@ const getLyricsFromMusixmatch = async (
       const musixmatchLyrics = await fetchLyricsFromMusixmatch(
         {
           q_track: songTitle,
-          q_artist: songArtists.join(', '),
+          q_artist: songArtists[0] || '',
         },
         mxmUserToken,
         lyricsType,

@@ -46,6 +46,7 @@ const AllSearchResultsPage = () => {
             path={songData.path}
             artworkPaths={songData.artworkPaths}
             isAFavorite={songData.isAFavorite}
+            year={songData.year}
           />
         );
       });

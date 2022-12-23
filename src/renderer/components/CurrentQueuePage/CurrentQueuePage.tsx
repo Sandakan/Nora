@@ -15,7 +15,6 @@ import {
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import Song from '../SongsPage/Song';
 import Button from '../Button';
 import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
 import DefaultPlaylistCover from '../../../../assets/images/png/playlist_cover_default.png';
@@ -23,6 +22,7 @@ import NoSongsImage from '../../../../assets/images/svg/Sun_Monochromatic.svg';
 import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
 import MainContainer from '../MainContainer';
 import Img from '../Img';
+import Song from '../SongsPage/Song';
 
 interface QueueInfo {
   artworkPath: string;
@@ -31,13 +31,19 @@ interface QueueInfo {
 }
 
 const CurrentQueuePage = () => {
-  const { queue, currentSongData, currentlyActivePage, userData } =
-    useContext(AppContext);
+  const {
+    queue,
+    currentSongData,
+    currentlyActivePage,
+    userData,
+    isMultipleSelectionEnabled,
+  } = useContext(AppContext);
   const {
     updateQueueData,
     addNewNotifications,
     updateCurrentlyActivePageData,
     updateContextMenuData,
+    toggleMultipleSelections,
   } = React.useContext(AppUpdateContext);
 
   const [queuedSongs, setQueuedSongs] = React.useState([] as AudioInfo[]);
@@ -321,9 +327,23 @@ const CurrentQueuePage = () => {
               }}
             />
             <Button
-              label="Shuffle"
+              key={1}
+              className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+              iconName={
+                isMultipleSelectionEnabled ? 'remove_done' : 'checklist'
+              }
+              clickHandler={() =>
+                toggleMultipleSelections(!isMultipleSelectionEnabled, 'songs')
+              }
+              tooltipLabel={
+                isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
+              }
+            />
+            <Button
+              key={2}
               className="shuffle-all-button text-sm"
               iconName="shuffle"
+              tooltipLabel="Shuffle Queue"
               isDisabled={queue.queue.length > 0 === false}
               clickHandler={() => {
                 updateQueueData(undefined, queue.queue, true);
@@ -340,6 +360,7 @@ const CurrentQueuePage = () => {
               }}
             />
             <Button
+              key={3}
               label="Clear Queue"
               className="clear-queue-button text-sm"
               iconName="clear"
@@ -425,6 +446,7 @@ const CurrentQueuePage = () => {
                       duration={data.duration}
                       path={data.path}
                       isAFavorite={data.isAFavorite}
+                      year={data.year}
                     />
                   );
                 }}
@@ -437,7 +459,7 @@ const CurrentQueuePage = () => {
                         ? queuedSongs.length
                         : queuedSongs.length + 1
                     }
-                    itemSize={60}
+                    itemSize={55}
                     width={width}
                     overscanCount={20}
                     outerRef={droppableProvided.innerRef}

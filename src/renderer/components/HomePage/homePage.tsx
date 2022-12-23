@@ -440,7 +440,7 @@ export const HomePage = () => {
 
   return (
     <MainContainer
-      className="home-page relative h-full overflow-y-auto !pl-0"
+      className="home-page relative !h-full overflow-y-auto !pl-0"
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -529,10 +529,10 @@ export const HomePage = () => {
         )}
         {recentlyPlayedSongs.length === 0 &&
           content.latestSongs.length === 0 && (
-            <div className="no-songs-container flex h-full w-full flex-col items-center justify-center text-center text-2xl text-[#ccc]">
+            <div className="no-songs-container flex h-full w-full flex-col items-center justify-center text-center text-xl text-font-color-dimmed dark:text-dark-font-color-dimmed">
               <Img
                 src={DataFetchingImage}
-                className="mb-8 w-60"
+                className="mb-8 w-48"
                 alt="Stay calm"
               />
               <span>Just hold on. We are readying everything for you...</span>
@@ -541,7 +541,7 @@ export const HomePage = () => {
         {content.latestSongs.length > 0 &&
           content.latestSongs[0] !== null &&
           recentlyPlayedSongs.length === 0 && (
-            <div className="no-songs-container mt-12 flex w-full flex-col items-center justify-center text-center text-lg font-normal text-[#ccc]">
+            <div className="no-songs-container mt-12 flex w-full flex-col items-center justify-center text-center text-xl font-normal text-font-color-dimmed dark:text-dark-font-color-dimmed">
               <span>Listen to some songs to show additional metrics.</span>
             </div>
           )}

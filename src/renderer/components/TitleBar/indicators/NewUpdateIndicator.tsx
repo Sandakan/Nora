@@ -10,10 +10,7 @@ const NewUpdateIndicator = () => {
   const { changePromptMenuData } = React.useContext(AppUpdateContext);
   return (
     <>
-      {!(
-        appUpdatesState === 'UNKNOWN' ||
-        appUpdatesState === 'NO_NETWORK_CONNECTION'
-      ) && (
+      {!(appUpdatesState === 'UNKNOWN') && (
         <div
           className={`new-update-indicator mr-1 flex cursor-pointer items-center justify-center rounded-md bg-background-color-2 px-3 py-1 text-center transition-[background] hover:text-font-color-highlight dark:bg-dark-background-color-2 dark:hover:text-dark-font-color-highlight ${
             appUpdatesState === 'LATEST' && 'hidden'
@@ -25,6 +22,8 @@ const NewUpdateIndicator = () => {
               ? 'Checking for app updates...'
               : appUpdatesState === 'ERROR'
               ? 'Error occurred when checking for app updates.'
+              : appUpdatesState === 'NO_NETWORK_CONNECTION'
+              ? 'Error occurred when checking for app updates. No internet connection found.'
               : undefined
           }
           onClick={() => changePromptMenuData(true, <ReleaseNotesPrompt />)}
@@ -42,9 +41,7 @@ const NewUpdateIndicator = () => {
               ? 'download_done'
               : appUpdatesState === 'CHECKING'
               ? 'sync'
-              : appUpdatesState === 'ERROR'
-              ? 'warning'
-              : ''}
+              : 'warning'}
           </span>
         </div>
       )}

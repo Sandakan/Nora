@@ -297,19 +297,27 @@ const Song = React.forwardRef(
           label: 'Play Next',
           iconName: 'shortcut',
           handlerFunction: () => {
-            const currentSongIndex = queue.currentSongIndex
-              ? queue.currentSongIndex === queue.queue.length - 1
-                ? queue.currentSongIndex - 1
-                : queue.currentSongIndex
-              : undefined;
+            // const currentSongIndex = queue.currentSongIndex
+            //   ? queue.currentSongIndex === queue.queue.length - 1
+            //     ? queue.currentSongIndex - 1
+            //     : queue.currentSongIndex
+            //   : undefined;
 
-            const newQueue = queue.queue;
+            // const newQueue = queue.queue;
+            // newQueue.splice(
+            //   queue.queue.indexOf(currentSongData.songId) + 1 || 0,
+            //   0,
+            //   songId
+            // );
+            // updateQueueData(currentSongIndex, newQueue);
+
+            const newQueue = queue.queue.filter((id) => id !== props.songId);
             newQueue.splice(
               queue.queue.indexOf(currentSongData.songId) + 1 || 0,
               0,
-              songId
+              props.songId
             );
-            updateQueueData(currentSongIndex, newQueue);
+            updateQueueData(undefined, newQueue);
             addNewNotifications([
               {
                 id: `${title}PlayNext`,
@@ -484,7 +492,7 @@ const Song = React.forwardRef(
       goToSongInfoPage,
       additionalContextMenuItems,
       updateQueueData,
-      queue,
+      queue.queue,
       addNewNotifications,
       currentSongData.songId,
       currentSongData.isAFavorite,
@@ -493,6 +501,7 @@ const Song = React.forwardRef(
       changePromptMenuData,
       updateMultipleSelections,
       songId,
+      props.songId,
       title,
       artworkPaths.optimizedArtworkPath,
       artworkPaths.artworkPath,
@@ -514,19 +523,24 @@ const Song = React.forwardRef(
     return (
       <div
         style={style}
+        data-index={index}
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...provided.draggableProps}
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...provided.dragHandleProps}
         // style={{ animationDelay: `${50 * (index + 1)}ms` }}
-        className={`appear-from-bottom ${songId} group relative mr-4 mb-2 flex aspect-[2/1] h-[3.25rem] w-[98%] overflow-hidden rounded-lg border-[0.2rem] shadow-lg transition-[border-color] ease-in-out hover:border-background-color-3 dark:hover:border-dark-background-color-3  ${
+        className={`appear-from-bottom ${songId} group relative mr-4 mb-1 flex aspect-[2/1] h-[3.25rem] w-[98%] overflow-hidden rounded-lg p-[0.2rem] transition-[background] ease-in-out ${
           currentSongData.songId === songId || isAMultipleSelection
             ? bodyBackgroundImage
-              ? `border-[transparent] bg-background-color-3/70 text-font-color-black backdrop-blur-md dark:bg-dark-background-color-3/70`
-              : 'border-background-color-2 bg-background-color-3 text-font-color-black dark:border-dark-background-color-2 dark:bg-dark-background-color-3'
+              ? `bg-background-color-3/70 text-font-color-black backdrop-blur-md dark:bg-dark-background-color-3/70`
+              : 'bg-background-color-3 text-font-color-black dark:bg-dark-background-color-3'
             : bodyBackgroundImage
-            ? `border-[transparent] bg-background-color-2/70 backdrop-blur-md dark:bg-dark-background-color-2/70`
-            : 'border-background-color-2 bg-background-color-2 even:bg-background-color-2/80 dark:border-dark-background-color-2 dark:bg-dark-background-color-2 dark:even:bg-dark-background-color-2/80'
+            ? `bg-background-color-2/70 backdrop-blur-md hover:!bg-background-color-2 dark:bg-dark-background-color-2/70 dark:hover:!bg-dark-background-color-2`
+            : `odd:bg-background-color-2/50 hover:!bg-background-color-2 dark:odd:bg-dark-background-color-2/50 dark:hover:!bg-dark-background-color-2 ${
+                (index + 1) % 2 === 1
+                  ? '!bg-background-color-2/50 dark:!bg-dark-background-color-2/50'
+                  : '!bg-background-color-1 dark:!bg-dark-background-color-1'
+              }`
         }`}
         onContextMenu={(e) => {
           e.preventDefault();
@@ -552,7 +566,7 @@ const Song = React.forwardRef(
         onDoubleClick={handlePlayBtnClick}
         ref={ref}
       >
-        <div className="song-cover-and-play-btn-container max-w-1/5 relative flex h-full w-fit items-center justify-center">
+        <div className="song-cover-and-play-btn-container relative flex h-full w-[12.5%] items-center justify-center">
           {isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'songs' ? (
             <div className="relative mx-1 flex h-fit items-center rounded-lg bg-background-color-1 p-1 text-font-color-highlight dark:bg-dark-background-color-1 dark:text-dark-background-color-3">
@@ -565,7 +579,7 @@ const Song = React.forwardRef(
           ) : (
             ''
           )}
-          <div className="song-cover-container relative ml-2 mr-4 flex h-[90%] w-full flex-row items-center justify-center overflow-hidden rounded-md">
+          <div className="song-cover-container relative ml-2 mr-4 flex h-[90%] flex-row items-center justify-center overflow-hidden rounded-md">
             <div className="play-btn-container absolute top-1/2 left-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
               <span
                 className={`material-icons-round icon cursor-pointer text-3xl text-font-color-white text-opacity-0 ${
@@ -581,20 +595,20 @@ const Song = React.forwardRef(
               src={artworkPaths.artworkPath}
               loading="lazy"
               alt="Song cover"
-              className={`max-h-full object-cover transition-[filter] duration-300 group-hover:brightness-50 ${
+              className={`max-h-full object-cover py-[0.1rem] transition-[filter] duration-300 group-hover:brightness-50 ${
                 isSongPlaying ? 'brightness-50' : ''
               }`}
             />
           </div>
         </div>
         <div
-          className={`song-info-container flex w-[92.5%] flex-row items-center justify-between text-font-color-black dark:text-font-color-white  ${
+          className={`song-info-container flex w-[87.5%] flex-row items-center justify-between text-font-color-black dark:text-font-color-white  ${
             (currentSongData.songId === songId || isAMultipleSelection) &&
             'dark:text-font-color-black'
           } `}
         >
           <div
-            className="song-title w-1/2 overflow-hidden text-ellipsis whitespace-nowrap pr-4 text-base font-normal transition-none"
+            className="song-title w-2/5 overflow-hidden text-ellipsis whitespace-nowrap pr-4 text-base font-normal transition-none"
             title={title}
           >
             {title}

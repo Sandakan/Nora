@@ -38,6 +38,12 @@ const linkData = [
     isActive: false,
   },
   {
+    parentClassName: 'folders',
+    icon: 'folder',
+    content: 'Folders',
+    isActive: false,
+  },
+  {
     parentClassName: 'artists',
     icon: 'people',
     content: 'Artists',

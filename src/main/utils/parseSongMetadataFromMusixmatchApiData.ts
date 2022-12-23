@@ -3,8 +3,12 @@ import {
   MusixmatchLyricsAPI,
   MusixmatchLyricsMetadata,
 } from '../../@types/musixmatch_lyrics_api';
+import fetchSongArtworksFromSpotify from './fetchSongArtworksFromSpotify';
 
-function parseSongMetadataFromMusixmatchApiData(data: MusixmatchLyricsAPI) {
+function parseSongMetadataFromMusixmatchApiData(
+  data: MusixmatchLyricsAPI,
+  spotifyArtworks = false
+) {
   if (
     data.message.body.macro_calls['matcher.track.get'].message.header
       .status_code === 200
@@ -36,6 +40,9 @@ function parseSongMetadataFromMusixmatchApiData(data: MusixmatchLyricsAPI) {
     if (trackData.track_share_url)
       // eslint-disable-next-line prefer-destructuring
       metadata.link = trackData.track_share_url.split(/[?#]/)[0];
+
+    if (spotifyArtworks && trackData.track_spotify_id)
+      fetchSongArtworksFromSpotify(trackData.track_spotify_id);
 
     return metadata;
   }

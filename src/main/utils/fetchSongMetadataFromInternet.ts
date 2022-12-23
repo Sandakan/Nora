@@ -53,7 +53,7 @@ async function fetchSongMetadataFromMusixmatch(
     });
     if (res.ok) {
       const data = (await res.json()) as MusixmatchLyricsAPI;
-      const metadata = parseSongMetadataFromMusixmatchApiData(data);
+      const metadata = parseSongMetadataFromMusixmatchApiData(data, true);
       const lyrics = parseMusicmatchDataFromLyrics(data, 'ANY');
 
       if (metadata) {

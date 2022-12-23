@@ -195,11 +195,11 @@ export const Playlist = (props: PlaylistProp) => {
   return (
     <div
       style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
-      className={`playlist appear-from-bottom group ${
+      className={`playlist appear-from-bottom group hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50  ${
         props.playlistId
       } mb-8 mr-12 flex h-fit max-h-52 min-h-[12rem] w-36 flex-col justify-between rounded-md p-4 text-font-color-black dark:text-font-color-white ${
         isAMultipleSelection
-          ? 'bg-background-color-3 text-font-color-black dark:bg-dark-background-color-3 dark:text-font-color-black'
+          ? '!bg-background-color-3 !text-font-color-black dark:!bg-dark-background-color-3 dark:!text-font-color-black'
           : ''
       }`}
       data-playlist-id={props.playlistId}

@@ -171,7 +171,7 @@ export const Album = (props: AlbumProp) => {
       } ${
         isAMultipleSelection
           ? 'bg-background-color-3 text-font-color-black dark:bg-dark-background-color-3 dark:text-font-color-black'
-          : ''
+          : 'hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50'
       }`}
       onContextMenu={(e) =>
         updateContextMenuData(

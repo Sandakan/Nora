@@ -61,7 +61,7 @@ const SettingsPage = () => {
   }, [fetchUserData]);
 
   return (
-    <MainContainer className="main-container settings-container appear-from-bottom !mb-0 pr-8 pb-8 text-font-color-black dark:text-font-color-white">
+    <MainContainer className="main-container settings-container appear-from-bottom !mb-0 !h-fit pr-8 pb-8 text-font-color-black dark:text-font-color-white">
       <>
         <div className="title-container mt-1 mb-4 flex items-center justify-between text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           Settings

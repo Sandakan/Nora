@@ -673,6 +673,7 @@ declare global {
     | 'Artists'
     | 'Albums'
     | 'Playlists'
+    | 'Folders'
     | 'Search'
     | 'Genres';
 

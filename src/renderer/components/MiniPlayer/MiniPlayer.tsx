@@ -132,7 +132,7 @@ export default function MiniPlayer() {
 
   return (
     <div
-      className={`mini-player group h-full overflow-hidden delay-100 ${
+      className={`mini-player group h-full select-none overflow-hidden delay-100 ${
         !isCurrentSongPlaying && 'paused'
       } ${
         userData && userData.preferences.isReducedMotion ? 'reduced-motion' : ''
@@ -156,7 +156,7 @@ export default function MiniPlayer() {
         />
       </div>
       <div
-        className={`mini-player-lyrics-container absolute top-0 flex h-full w-full select-none flex-col overflow-hidden py-12 px-2 transition-[filter] group-hover:blur-sm group-hover:brightness-50 ${
+        className={`mini-player-lyrics-container absolute top-0 flex h-full w-full select-none flex-col items-center overflow-hidden py-12 px-2 transition-[filter] group-hover:blur-sm group-hover:brightness-50 ${
           !isCurrentSongPlaying ? 'blur-sm brightness-50' : ''
         }`}
         id="miniPlayerLyricsContainer"

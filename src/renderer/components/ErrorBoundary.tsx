@@ -1,5 +1,9 @@
 /* eslint-disable react/destructuring-assignment */
 import React from 'react';
+import BugImg from '../../../assets/images/svg/Bug Fixed_Monochromatic.svg';
+import Button from './Button';
+
+const { isInDevelopment } = window.api;
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -32,15 +36,27 @@ class ErrorBoundary extends React.Component<
 
   render() {
     if (this.state.errorInfo) {
-      // Error path
+      // fallback ui
       return (
-        <div>
+        <div className="flex h-full w-full flex-col items-center justify-center overflow-x-hidden text-font-color-black dark:text-font-color-white">
+          <img src={BugImg} alt="App bug found." className="w-48" />
+          <br />
           <h2>Something went wrong.</h2>
-          <details style={{ whiteSpace: 'pre-wrap' }}>
-            {this.state.error && this.state.error.toString()}
-            <br />
-            {this.state.errorInfo.componentStack}
-          </details>
+          {isInDevelopment && (
+            <details style={{ whiteSpace: 'pre-wrap' }}>
+              {this.state.error && this.state.error.toString()}
+              <br />
+              {this.state.errorInfo.componentStack}
+            </details>
+          )}
+          <div className="buttons-container">
+            <Button
+              className="!mr-0 mt-4 !bg-background-color-3 text-sm text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
+              label="Restart App"
+              iconName="restart_alt"
+              clickHandler={() => window.api.restartRenderer('error')}
+            />
+          </div>
         </div>
       );
     }

@@ -272,6 +272,7 @@ export default () => {
             artworkPaths={song.artworkPaths}
             path={song.path}
             isAFavorite={song.isAFavorite}
+            year={song.year}
           />
         );
       }),
@@ -280,8 +281,7 @@ export default () => {
 
   return (
     <MainContainer
-      noDefaultStyles
-      className="artist-info-page-container relative overflow-hidden rounded-tl-lg bg-cover bg-no-repeat pt-8 pb-2 pl-2 pr-2"
+      className="artist-info-page-container relative overflow-y-auto rounded-tl-lg pt-8 pb-2 pl-2 pr-2"
       // style={
       //   artistData.artistPalette && {
       //     background: `linear-gradient(180deg, ${`rgb(${artistData.artistPalette.LightMuted.rgb[0]},${artistData.artistPalette.LightMuted.rgb[1]},${artistData.artistPalette.LightMuted.rgb[2]})`} 0%, var(--background-color-1) 90%)`,

@@ -67,6 +67,7 @@ import sendPlaylistData from './core/sendPlaylistData';
 import fetchAlbumData from './core/fetchAlbumData';
 import fetchArtistData from './core/fetchArtistData';
 import changeAppTheme from './core/changeAppTheme';
+import saveLyricsToSong from './saveLyricsToSong';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -336,6 +337,12 @@ app
             lyricsType,
             forceDownload
           )
+      );
+
+      ipcMain.handle(
+        'app/saveLyricsToSong',
+        (_, songId: string, lyrics: SongLyrics) =>
+          saveLyricsToSong(songId, lyrics)
       );
 
       ipcMain.handle(

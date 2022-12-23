@@ -11,7 +11,7 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import LyricLine from './LyricLine';
 import NoLyricsImage from '../../../../assets/images/svg/Sun_Monochromatic.svg';
 import FetchingLyricsImage from '../../../../assets/images/svg/Waiting_Monochromatic.svg';
-import NoInternetImage from '../../../../assets/images/svg/Summer landscape_Monochromatic.svg';
+import NoInternetImage from '../../../../assets/images/svg/Network _Monochromatic.svg';
 import LyricsSource from './LyricsSource';
 import NoLyrics from './NoLyrics';
 import MainContainer from '../MainContainer';
@@ -26,6 +26,7 @@ export const LyricsPage = () => {
   const [lyrics, setLyrics] = React.useState(
     null as SongLyrics | undefined | null
   );
+  const [isLyricsSaved, setIsLyricsSaved] = React.useState(false);
 
   const lyricsLinesContainerRef = React.useRef<HTMLDivElement>(null);
 
@@ -96,24 +97,78 @@ export const LyricsPage = () => {
     return [];
   }, [lyrics]);
 
+  const showOnlineLyrics = React.useCallback(
+    (_: unknown, setIsDisabled: (state: boolean) => void) => {
+      setIsDisabled(true);
+      window.api
+        .getSongLyrics(
+          currentSongData.title,
+          currentSongData.artists?.map((artist) => artist.name),
+          currentSongData.songId,
+          'ONLINE_ONLY',
+          true
+        )
+        .then((res) => setLyrics(res))
+        .finally(() => setIsDisabled(false));
+    },
+    [currentSongData.artists, currentSongData.songId, currentSongData.title]
+  );
+
+  const saveOnlineLyrics = React.useCallback(
+    (_: unknown, setIsDisabled: (state: boolean) => void) => {
+      if (lyrics) {
+        setIsDisabled(true);
+        window.api
+          .saveLyricsToSong(currentSongData.songId, lyrics)
+          .then(() => {
+            setLyrics((prevData) => {
+              if (prevData) {
+                setIsLyricsSaved(true);
+                return {
+                  ...prevData,
+                  source: 'in_song_lyrics',
+                } as SongLyrics;
+              }
+              return undefined;
+            });
+            addNewNotifications([
+              {
+                id: 'lyricsUpdateSuccessful',
+                delay: 5000,
+                content: <span>Lyrics successfully updated.</span>,
+                icon: (
+                  <span className="material-icons-round-outlined !text-xl">
+                    check
+                  </span>
+                ),
+              },
+            ]);
+          })
+          .finally(() => setIsDisabled(false));
+      }
+    },
+    [addNewNotifications, currentSongData.songId, lyrics]
+  );
+
   return (
     <MainContainer
       noDefaultStyles
       className={`lyrics-container relative flex h-full flex-col ${
-        lyrics ? 'justify-start' : 'items-center justify-center'
+        lyrics && navigator.onLine
+          ? 'justify-start'
+          : 'items-center justify-center'
       }`}
     >
       <>
         {navigator.onLine ? (
           lyrics ? (
             <>
-              <div className="title-container flex w-full items-center justify-between py-2 pl-8 pr-4 text-2xl text-font-color-highlight dark:text-dark-font-color-highlight">
-                <div className="flex items-center">
-                  <span>
+              <div className="title-container relative flex w-full items-center justify-between py-2 pl-8 pr-4 text-2xl text-font-color-highlight dark:text-dark-font-color-highlight">
+                <div className="flex max-w-[75%] items-center">
+                  <span className="overflow-hidden text-ellipsis whitespace-nowrap">
                     {lyrics.source === 'in_song_lyrics' ? 'Offline' : 'Online'}{' '}
                     Lyrics for '{currentSongData.title}'
                   </span>
-                  .
                   {lyrics.source !== 'in_song_lyrics' && (
                     <span
                       className="material-icons-round-outlined ml-4 cursor-pointer text-base"
@@ -124,44 +179,32 @@ export const LyricsPage = () => {
                   )}
                 </div>
                 <div className="buttons-container flex">
-                  {lyrics && lyrics.source === 'in_song_lyrics' && (
-                    <Button
-                      key={3}
-                      label="Show online lyrics"
-                      pendingAnimationOnDisabled
-                      className="show-online-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-                      iconName="language"
-                      clickHandler={(_, setIsDisabled) => {
-                        setIsDisabled(true);
-                        window.api
-                          .getSongLyrics(
-                            currentSongData.title,
-                            currentSongData.artists?.map(
-                              (artist) => artist.name
-                            ),
-                            currentSongData.songId,
-                            'ONLINE_ONLY',
-                            true
-                          )
-                          .then((res) => setLyrics(res))
-                          .finally(() => setIsDisabled(false));
-                      }}
-                    />
-                  )}
+                  {lyrics &&
+                    lyrics.source === 'in_song_lyrics' &&
+                    !isLyricsSaved && (
+                      <Button
+                        key={3}
+                        label="Show online lyrics"
+                        pendingAnimationOnDisabled
+                        className="show-online-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                        iconName="language"
+                        clickHandler={showOnlineLyrics}
+                      />
+                    )}
                   {lyrics && lyrics.source !== 'in_song_lyrics' && (
                     <Button
-                      key={3}
+                      key={4}
                       label="Save lyrics"
                       pendingAnimationOnDisabled
                       className="save-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                       iconName="save"
-                      clickHandler={() => true}
+                      clickHandler={saveOnlineLyrics}
                     />
                   )}
                 </div>
               </div>
               <div
-                className="lyrics-lines-container h-full flex-col items-center justify-center overflow-y-auto px-8 py-4"
+                className="lyrics-lines-container flex h-full flex-col items-center overflow-y-auto px-8 py-4"
                 ref={lyricsLinesContainerRef}
               >
                 {lyricsComponents}

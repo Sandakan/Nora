@@ -22,17 +22,19 @@ import GenreInfoPage from './GenreInfoPage/GenreInfoPage';
 import SongTagsEditingPage from './SongTagsEditingPage/SongTagsEditingPage';
 import { SongsPage } from './SongsPage/SongsPage';
 import ErrorBoundary from './ErrorBoundary';
+import MusicFoldersPage from './MusicFoldersPage/MusicFoldersPage';
 
 const Body = React.memo(() => {
   const { currentlyActivePage } = useContext(AppContext);
   return (
-    <div className="body relative order-2 h-full w-full overflow-auto overflow-x-hidden rounded-tl-lg lg:pl-14 [&>*]:overflow-x-hidden">
+    <div className="body relative order-2 h-full w-full overflow-hidden rounded-tl-lg lg:pl-14 [&>*]:overflow-x-hidden">
       <ErrorBoundary>
         {currentlyActivePage.pageTitle === 'Songs' && <SongsPage />}
         {currentlyActivePage.pageTitle === 'Home' && <HomePage />}
         {currentlyActivePage.pageTitle === 'Artists' && <ArtistPage />}
         {currentlyActivePage.pageTitle === 'Albums' && <AlbumsPage />}
         {currentlyActivePage.pageTitle === 'Playlists' && <PlaylistsPage />}
+        {currentlyActivePage.pageTitle === 'Folders' && <MusicFoldersPage />}
         {currentlyActivePage.pageTitle === 'Search' && <SearchPage />}
         {currentlyActivePage.pageTitle === 'Genres' && <GenresPage />}
         {currentlyActivePage.pageTitle === 'AllSearchResults' && (

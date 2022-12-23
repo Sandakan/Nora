@@ -383,7 +383,7 @@ export const SongsPage = () => {
           {content.songsData && content.songsData.length > 0 && (
             <List
               itemCount={songs.length}
-              itemSize={60}
+              itemSize={55}
               width={width || '100%'}
               height={height || 450}
               overscanCount={10}

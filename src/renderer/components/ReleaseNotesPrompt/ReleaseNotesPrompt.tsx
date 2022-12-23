@@ -141,7 +141,8 @@ const ReleaseNotesPrompt = () => {
   );
 
   React.useEffect(() => {
-    updateAppUpdatesState(isAppLatestVersion ? 'LATEST' : 'OLD');
+    if (navigator.onLine)
+      updateAppUpdatesState(isAppLatestVersion ? 'LATEST' : 'OLD');
   }, [isAppLatestVersion, updateAppUpdatesState]);
 
   const appVersionComponents = React.useMemo(

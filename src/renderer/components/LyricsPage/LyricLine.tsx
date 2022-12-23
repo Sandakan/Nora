@@ -38,12 +38,12 @@ const LyricLine = (props: LyricProp) => {
         animationDelay: `${250 + 25 * (index + 1)}ms`,
         // opacity: isSynced ? '0.5' : '1',
       }}
-      className={`appear-from-bottom highlight mb-5 select-text text-center font-['Poppins'] text-4xl font-medium text-font-color-black transition-[transform,color] duration-200 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
+      className={`appear-from-bottom highlight mb-5 w-fit select-text text-center font-['Poppins'] text-4xl font-medium text-font-color-black transition-[transform,color] duration-200 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
         syncedLyrics
           ? `cursor-pointer ${
               songPosition > syncedLyrics.start &&
               songPosition < syncedLyrics.end
-                ? '!scale-100 text-5xl !text-opacity-100'
+                ? '!scale-100 text-5xl !text-opacity-90'
                 : '!scale-75 !text-opacity-20 hover:!text-opacity-75'
             }`
           : ''

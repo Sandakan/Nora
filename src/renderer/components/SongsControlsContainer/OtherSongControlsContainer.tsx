@@ -27,7 +27,8 @@ const OtherSongControlsContainer = () => {
         [
           {
             label: 'Show Current Queue',
-            iconName: 'segment',
+            iconName: 'table_rows',
+            iconClassName: '!material-icons-round-outlined',
             handlerFunction: () =>
               currentlyActivePage.pageTitle === 'CurrentQueue'
                 ? changeCurrentActivePage('Home')
@@ -35,7 +36,8 @@ const OtherSongControlsContainer = () => {
           },
           {
             label: 'Open Mini Player',
-            iconName: 'tab_unselected',
+            iconName: 'tab',
+            iconClassName: '!material-icons-round-outlined',
             handlerFunction: () => updateMiniPlayerStatus(!isMiniPlayer),
           },
         ],
@@ -54,30 +56,29 @@ const OtherSongControlsContainer = () => {
 
   return (
     <div className="other-controls-container flex w-1/4 items-center justify-end">
-      <div
-        className={`queue-btn mr-6 flex cursor-pointer items-center justify-center text-font-color-black text-opacity-75 dark:text-font-color-white ${
-          currentlyActivePage.pageTitle === 'CurrentQueue' && 'active'
-        } lg:hidden`}
-      >
+      <div className="queue-btn mr-6 flex cursor-pointer items-center justify-center text-font-color-black text-opacity-75 dark:text-font-color-white lg:hidden">
         <span
           title="Current Queue (Ctrl + Q)"
-          className="material-icons-round icon cursor-pointer text-xl text-font-color-black opacity-75 transition-opacity hover:opacity-100 dark:text-font-color-white"
+          className={`material-icons-round-outlined icon cursor-pointer text-xl text-font-color-black opacity-75 transition-opacity hover:opacity-100 dark:text-font-color-white ${
+            currentlyActivePage.pageTitle === 'CurrentQueue' &&
+            '!text-foreground-color-1 !opacity-90 dark:!text-foreground-color-1'
+          } `}
           onClick={() =>
             currentlyActivePage.pageTitle === 'CurrentQueue'
               ? changeCurrentActivePage('Home')
               : changeCurrentActivePage('CurrentQueue')
           }
         >
-          segment
+          table_rows
         </span>
       </div>
       <div className="mini-player-btn mr-6 flex cursor-pointer items-center justify-center text-font-color-black text-opacity-75 dark:text-font-color-white lg:hidden">
         <span
           title="Open in Mini player (Ctrl + N)"
-          className="material-icons-round icon cursor-pointer text-xl text-font-color-black opacity-75 transition-opacity hover:opacity-100 dark:text-font-color-white"
+          className="material-icons-round-outlined icon cursor-pointer text-xl text-font-color-black opacity-75 transition-opacity hover:opacity-100 dark:text-font-color-white"
           onClick={() => updateMiniPlayerStatus(!isMiniPlayer)}
         >
-          tab_unselected
+          tab
         </span>
       </div>
 

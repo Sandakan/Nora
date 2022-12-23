@@ -1,8 +1,6 @@
 /** @type {import("tailwindcss").Config} */
 
 const colors = require('tailwindcss/colors');
-const plugin = require('tailwindcss/plugin');
-const groupVariants = require('tailwindcss-group-variants');
 
 module.exports = {
   content: ['./src/renderer/**/*.{js,jsx,ts,tsx,ejs}'],
@@ -67,16 +65,5 @@ module.exports = {
       },
     },
   },
-  groupVariants: {
-    'overlay-active': ['overlay', 'active', '.active'], // Note the custom name to avoid conflicts with existing pseudo variants like "active"
-    'accordion-open': ['accordion', 'open', '.open'],
-    // You could even do this insted:
-    // 'accordion-open': ['accordion', 'open', '[open="true"]',
-  },
-  plugins: [
-    plugin(({ addVariant }) => {
-      addVariant('is-active', '.is-active &');
-    }),
-    groupVariants,
-  ],
+  plugins: [],
 };

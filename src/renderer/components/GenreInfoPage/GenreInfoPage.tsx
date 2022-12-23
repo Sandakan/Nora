@@ -104,6 +104,7 @@ const GenreInfoPage = () => {
           artworkPaths={song.artworkPaths}
           path={song.path}
           isAFavorite={song.isAFavorite}
+          year={song.year}
         />
       )),
     [genreSongs, userData]

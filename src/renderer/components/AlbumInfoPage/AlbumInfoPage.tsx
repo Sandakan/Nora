@@ -127,6 +127,7 @@ export default () => {
                 songId={song.songId}
                 path={song.path}
                 isAFavorite={song.isAFavorite}
+                year={song.year}
               />
             );
           })

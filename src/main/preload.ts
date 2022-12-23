@@ -158,6 +158,9 @@ export const api = {
       forceDownload
     ),
 
+  saveLyricsToSong: (songId: string, lyrics: SongLyrics) =>
+    ipcRenderer.invoke('app/saveLyricsToSong', songId, lyrics),
+
   // $ APP MESSAGES
   getMessageFromMain: (
     callback: (
