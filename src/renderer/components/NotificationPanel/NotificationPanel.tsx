@@ -6,6 +6,7 @@
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import Notification from './Notification';
+import NotificationClearAllButton from './NotificationClearAllButton';
 
 const NotificationPanel = () => {
   const { notificationPanelData } = useContext(AppContext);
@@ -38,6 +39,7 @@ const NotificationPanel = () => {
       {Array.isArray(notifications) && notifications.length > 0 && (
         <div className="notifications-container absolute right-0 z-20 flex max-h-full flex-col items-end px-8">
           {notifications}
+          {notifications.length > 0 && <NotificationClearAllButton />}
         </div>
       )}
     </>

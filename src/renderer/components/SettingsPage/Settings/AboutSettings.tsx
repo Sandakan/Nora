@@ -7,6 +7,7 @@ import calculateElapsedTime from 'renderer/utils/calculateElapsedTime';
 
 import { version, author, homepage, bugs } from '../../../../../package.json';
 import openSourceLicenses from '../../../../../open_source_licenses.txt';
+import appLicense from '../../../../../LICENSE.txt';
 import localReleaseNotes from '../../../../../release-notes.json';
 
 import AppIcon from '../../../../../assets/images/png/logo_light_mode.png';
@@ -77,10 +78,22 @@ const AboutSettings = () => {
             </span>
           </div>
         </div>
+        <ul className="mb-4 list-disc pl-4 text-sm">
+          <li>
+            Nora is an elegant music player built using Electron and React.
+          </li>
+          <li>
+            Inspired by{' '}
+            <Hyperlink
+              label="Oto Music for Android"
+              linkTitle="Oto Music for Android on PlayStore"
+              link="https://play.google.com/store/apps/details?id=com.piyush.music&gl=us"
+            />{' '}
+            by Piyush Mamidwar.
+          </li>
+        </ul>
         <Button
-          className="release-notes-prompt-btn about-link block w-fit cursor-pointer !border-0 !p-0 text-font-color-highlight-2 no-underline hover:!underline dark:text-dark-font-color-highlight-2"
-          iconClassName="!no-underline"
-          iconName="upgrade"
+          className="release-notes-prompt-btn about-link block w-fit cursor-pointer !border-0 !p-0 text-base text-font-color-highlight-2 no-underline hover:!underline dark:text-dark-font-color-highlight-2"
           label="Release Notes"
           clickHandler={() =>
             changePromptMenuData(
@@ -91,9 +104,7 @@ const AboutSettings = () => {
           }
         />
         <Button
-          className="open-source-licenses-btn about-link block w-fit cursor-pointer !border-0 !p-0 text-font-color-highlight-2 hover:underline dark:text-dark-font-color-highlight-2"
-          iconClassName="material-icons-round-outlined !no-underline"
-          iconName="copyright"
+          className="open-source-licenses-btn about-link block w-fit cursor-pointer !border-0 !p-0 text-base text-font-color-highlight-2 hover:underline dark:text-dark-font-color-highlight-2"
           label="Open source licences"
           clickHandler={() =>
             changePromptMenuData(
@@ -111,9 +122,8 @@ const AboutSettings = () => {
           }
         />
         <Button
-          className="about-link block w-fit cursor-pointer !border-0 !p-0 text-font-color-highlight-2 hover:underline dark:text-dark-font-color-highlight-2"
+          className="about-link block w-fit cursor-pointer !border-0 !p-0 text-base text-font-color-highlight-2 hover:underline dark:text-dark-font-color-highlight-2"
           label="Open Log file"
-          iconName="notes"
           clickHandler={() => window.api.openLogFile()}
         />
         <Hyperlink
@@ -211,7 +221,25 @@ const AboutSettings = () => {
           />
           <br />
           <div className="my-1">
-            This product is licensed under the MIT license.
+            This product is licensed under the{' '}
+            <Button
+              className="show-app-licence-btn about-link !inline w-fit cursor-pointer !border-0 !p-0 text-base text-font-color-highlight-2 hover:underline dark:text-dark-font-color-highlight-2"
+              label="MIT licence."
+              clickHandler={() =>
+                changePromptMenuData(
+                  true,
+                  <>
+                    <div className="mb-4 w-full text-center text-3xl font-medium">
+                      App License
+                    </div>
+                    <pre className="relative max-h-full w-full overflow-y-auto px-4">
+                      {appLicense}
+                    </pre>
+                  </>,
+                  'flex flex-col'
+                )
+              }
+            />
           </div>
           <div className="mt-4 text-center text-sm font-light">
             Made with{' '}

@@ -253,7 +253,7 @@ export const SongsPage = () => {
   ];
 
   return (
-    <MainContainer className="main-container songs-list-container !h-full overflow-hidden !pb-0">
+    <MainContainer className="main-container appear-from-bottom songs-list-container !h-full overflow-hidden !pb-0">
       <>
         <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium  text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">
@@ -383,7 +383,7 @@ export const SongsPage = () => {
           {content.songsData && content.songsData.length > 0 && (
             <List
               itemCount={songs.length}
-              itemSize={55}
+              itemSize={60}
               width={width || '100%'}
               height={height || 450}
               overscanCount={10}

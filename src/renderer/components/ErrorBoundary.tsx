@@ -43,7 +43,10 @@ class ErrorBoundary extends React.Component<
           <br />
           <h2>Something went wrong.</h2>
           {isInDevelopment && (
-            <details style={{ whiteSpace: 'pre-wrap' }}>
+            <details
+              style={{ whiteSpace: 'pre-wrap' }}
+              className="text-sm font-light"
+            >
               {this.state.error && this.state.error.toString()}
               <br />
               {this.state.errorInfo.componentStack}

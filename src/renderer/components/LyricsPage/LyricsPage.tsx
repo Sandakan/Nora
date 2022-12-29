@@ -114,6 +114,23 @@ export const LyricsPage = () => {
     [currentSongData.artists, currentSongData.songId, currentSongData.title]
   );
 
+  // const showOfflineLyrics = React.useCallback(
+  //   (_: unknown, setIsDisabled: (state: boolean) => void) => {
+  //     setIsDisabled(true);
+  //     window.api
+  //       .getSongLyrics(
+  //         currentSongData.title,
+  //         currentSongData.artists?.map((artist) => artist.name),
+  //         currentSongData.songId,
+  //         'ANY',
+  //         false
+  //       )
+  //       .then((res) => setLyrics(res))
+  //       .finally(() => setIsDisabled(false));
+  //   },
+  //   [currentSongData.artists, currentSongData.songId, currentSongData.title]
+  // );
+
   const saveOnlineLyrics = React.useCallback(
     (_: unknown, setIsDisabled: (state: boolean) => void) => {
       if (lyrics) {
@@ -192,14 +209,24 @@ export const LyricsPage = () => {
                       />
                     )}
                   {lyrics && lyrics.source !== 'in_song_lyrics' && (
-                    <Button
-                      key={4}
-                      label="Save lyrics"
-                      pendingAnimationOnDisabled
-                      className="save-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-                      iconName="save"
-                      clickHandler={saveOnlineLyrics}
-                    />
+                    <>
+                      {/* <Button
+                        key={3}
+                        label="Show saved lyrics"
+                        pendingAnimationOnDisabled
+                        className="show-online-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                        iconName="visibility"
+                        clickHandler={showOfflineLyrics}
+                      /> */}
+                      <Button
+                        key={4}
+                        label="Save lyrics"
+                        pendingAnimationOnDisabled
+                        className="save-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                        iconName="save"
+                        clickHandler={saveOnlineLyrics}
+                      />
+                    </>
                   )}
                 </div>
               </div>

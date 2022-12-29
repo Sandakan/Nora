@@ -1125,10 +1125,10 @@ export default function App() {
         ],
       });
       navigator.mediaSession.setActionHandler('pause', () =>
-        toggleSongPlayback(true)
+        toggleSongPlayback(false)
       );
       navigator.mediaSession.setActionHandler('play', () =>
-        toggleSongPlayback(false)
+        toggleSongPlayback(true)
       );
       navigator.mediaSession.setActionHandler(
         'previoustrack',
@@ -2147,66 +2147,125 @@ export default function App() {
     []
   );
 
-  const appContextStateValues: AppStateContextType = {
-    isDarkMode: content.isDarkMode,
-    contextMenuData: content.contextMenuData,
-    PromptMenuData: content.PromptMenuData,
-    currentSongData: { ...content.currentSongData, duration: player.duration },
-    currentlyActivePage:
-      content.navigationHistory.history[
-        content.navigationHistory.pageHistoryIndex
-      ],
-    notificationPanelData: content.notificationPanelData,
-    userData: content.userData,
-    queue: refQueue.current,
-    isCurrentSongPlaying: content.player.isCurrentSongPlaying,
-    noOfPagesInHistory: content.navigationHistory.history.length - 1,
-    pageHistoryIndex: content.navigationHistory.pageHistoryIndex,
-    isMiniPlayer: content.player.isMiniPlayer,
-    volume: content.player.volume.value,
-    isMuted: content.player.volume.isMuted,
-    isRepeating: content.player.isRepeating,
-    isShuffling: content.player.isShuffling,
-    isPlaying: !player.paused,
-    isPlayerStalled: content.player.isPlayerStalled,
-    bodyBackgroundImage: content.bodyBackgroundImage,
-    isMultipleSelectionEnabled: content.multipleSelectionsData.isEnabled,
-    multipleSelectionsData: content.multipleSelectionsData,
-    appUpdatesState: content.appUpdatesState,
-  };
+  const appContextStateValues: AppStateContextType = React.useMemo(
+    () => ({
+      isDarkMode: content.isDarkMode,
+      contextMenuData: content.contextMenuData,
+      PromptMenuData: content.PromptMenuData,
+      currentSongData: {
+        ...content.currentSongData,
+        duration: player.duration,
+      },
+      currentlyActivePage:
+        content.navigationHistory.history[
+          content.navigationHistory.pageHistoryIndex
+        ],
+      notificationPanelData: content.notificationPanelData,
+      userData: content.userData,
+      queue: refQueue.current,
+      isCurrentSongPlaying: content.player.isCurrentSongPlaying,
+      noOfPagesInHistory: content.navigationHistory.history.length - 1,
+      pageHistoryIndex: content.navigationHistory.pageHistoryIndex,
+      isMiniPlayer: content.player.isMiniPlayer,
+      volume: content.player.volume.value,
+      isMuted: content.player.volume.isMuted,
+      isRepeating: content.player.isRepeating,
+      isShuffling: content.player.isShuffling,
+      isPlaying: !player.paused,
+      isPlayerStalled: content.player.isPlayerStalled,
+      bodyBackgroundImage: content.bodyBackgroundImage,
+      isMultipleSelectionEnabled: content.multipleSelectionsData.isEnabled,
+      multipleSelectionsData: content.multipleSelectionsData,
+      appUpdatesState: content.appUpdatesState,
+    }),
+    [
+      content.PromptMenuData,
+      content.appUpdatesState,
+      content.bodyBackgroundImage,
+      content.contextMenuData,
+      content.currentSongData,
+      content.isDarkMode,
+      content.multipleSelectionsData,
+      content.navigationHistory.history,
+      content.navigationHistory.pageHistoryIndex,
+      content.notificationPanelData,
+      content.player.isCurrentSongPlaying,
+      content.player.isMiniPlayer,
+      content.player.isPlayerStalled,
+      content.player.isRepeating,
+      content.player.isShuffling,
+      content.player.volume.isMuted,
+      content.player.volume.value,
+      content.userData,
+    ]
+  );
 
-  const appUpdateContextValues: AppUpdateContextType = {
-    updateUserData,
-    updateCurrentSongData,
-    updateContextMenuData,
-    changePromptMenuData,
-    playSong,
-    changeCurrentActivePage,
-    updateCurrentlyActivePageData,
-    addNewNotifications,
-    updateNotifications,
-    createQueue,
-    updatePageHistoryIndex,
-    changeQueueCurrentSongIndex,
-    updateCurrentSongPlaybackState,
-    updateMiniPlayerStatus,
-    handleSkipBackwardClick,
-    handleSkipForwardClick,
-    updateSongPosition,
-    updateVolume,
-    toggleMutedState,
-    toggleRepeat,
-    toggleShuffling,
-    toggleIsFavorite,
-    toggleSongPlayback,
-    updateQueueData,
-    updatePageSortingOrder,
-    clearAudioPlayerData,
-    updateBodyBackgroundImage,
-    updateMultipleSelections,
-    toggleMultipleSelections,
-    updateAppUpdatesState,
-  };
+  const appUpdateContextValues: AppUpdateContextType = React.useMemo(
+    () => ({
+      updateUserData,
+      updateCurrentSongData,
+      updateContextMenuData,
+      changePromptMenuData,
+      playSong,
+      changeCurrentActivePage,
+      updateCurrentlyActivePageData,
+      addNewNotifications,
+      updateNotifications,
+      createQueue,
+      updatePageHistoryIndex,
+      changeQueueCurrentSongIndex,
+      updateCurrentSongPlaybackState,
+      updateMiniPlayerStatus,
+      handleSkipBackwardClick,
+      handleSkipForwardClick,
+      updateSongPosition,
+      updateVolume,
+      toggleMutedState,
+      toggleRepeat,
+      toggleShuffling,
+      toggleIsFavorite,
+      toggleSongPlayback,
+      updateQueueData,
+      updatePageSortingOrder,
+      clearAudioPlayerData,
+      updateBodyBackgroundImage,
+      updateMultipleSelections,
+      toggleMultipleSelections,
+      updateAppUpdatesState,
+    }),
+    [
+      addNewNotifications,
+      changeCurrentActivePage,
+      changePromptMenuData,
+      changeQueueCurrentSongIndex,
+      clearAudioPlayerData,
+      createQueue,
+      handleSkipBackwardClick,
+      handleSkipForwardClick,
+      playSong,
+      toggleIsFavorite,
+      toggleMultipleSelections,
+      toggleMutedState,
+      toggleRepeat,
+      toggleShuffling,
+      toggleSongPlayback,
+      updateAppUpdatesState,
+      updateBodyBackgroundImage,
+      updateContextMenuData,
+      updateCurrentSongData,
+      updateCurrentSongPlaybackState,
+      updateCurrentlyActivePageData,
+      updateMiniPlayerStatus,
+      updateMultipleSelections,
+      updateNotifications,
+      updatePageHistoryIndex,
+      updatePageSortingOrder,
+      updateQueueData,
+      updateSongPosition,
+      updateUserData,
+      updateVolume,
+    ]
+  );
 
   return (
     <AppContext.Provider value={appContextStateValues}>

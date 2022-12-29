@@ -68,6 +68,7 @@ import fetchAlbumData from './core/fetchAlbumData';
 import fetchArtistData from './core/fetchArtistData';
 import changeAppTheme from './core/changeAppTheme';
 import saveLyricsToSong from './saveLyricsToSong';
+import getMusicFolderData from './core/getMusicFolderData';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -524,6 +525,10 @@ app
 
       ipcMain.handle('app/toggleAutoLaunch', (_, autoLaunchState: boolean) =>
         toggleAutoLaunch(autoLaunchState)
+      );
+
+      ipcMain.handle('app/getFolderData', (_, folderPaths?: string[]) =>
+        getMusicFolderData(folderPaths)
       );
 
       ipcMain.on(

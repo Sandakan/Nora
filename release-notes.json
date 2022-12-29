@@ -1,13 +1,13 @@
 {
   "latestVersion": {
-    "version": "1.0.0-alpha.20221223",
+    "version": "1.0.0-alpha.20221229",
     "phase": "alpha",
     "releaseDate": "2022 October 30",
     "artwork": "/assets/other/release artworks/whats-new-v1.0.0-alpha.png"
   },
   "versions": [
     {
-      "version": "1.0.0-alpha.20221223",
+      "version": "1.0.0-alpha.20221229",
       "releaseDate": "2022 October 30",
       "notes": {
         "new": [

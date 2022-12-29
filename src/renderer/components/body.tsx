@@ -23,6 +23,7 @@ import SongTagsEditingPage from './SongTagsEditingPage/SongTagsEditingPage';
 import { SongsPage } from './SongsPage/SongsPage';
 import ErrorBoundary from './ErrorBoundary';
 import MusicFoldersPage from './MusicFoldersPage/MusicFoldersPage';
+import MusicFolderInfoPage from './MusicFolderInfoPage/MusicFolderInfoPage';
 
 const Body = React.memo(() => {
   const { currentlyActivePage } = useContext(AppContext);
@@ -52,6 +53,8 @@ const Body = React.memo(() => {
         {currentlyActivePage.pageTitle === 'PlaylistInfo' &&
           currentlyActivePage.data !== '' && <PlaylistsInfoPage />}
         {currentlyActivePage.pageTitle === 'GenreInfo' && <GenreInfoPage />}
+        {currentlyActivePage.pageTitle === 'MusicFolderInfo' &&
+          currentlyActivePage.data !== '' && <MusicFolderInfoPage />}
         {currentlyActivePage.pageTitle === 'SongTagsEditor' && (
           <SongTagsEditingPage />
         )}

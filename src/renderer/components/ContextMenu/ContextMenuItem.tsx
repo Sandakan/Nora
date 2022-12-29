@@ -12,7 +12,7 @@ const ContextMenuItem = (props: ContextMenuItem) => {
     <div
       className={`menu-item ${
         props.class || ''
-      } flex cursor-pointer flex-row items-center px-4 py-1 font-light text-font-color-black hover:bg-context-menu-list-hover dark:text-font-color-white dark:hover:bg-dark-context-menu-list-hover`}
+      } flex cursor-pointer flex-row items-center px-4 py-1 text-sm font-light text-font-color-black hover:bg-context-menu-list-hover dark:text-font-color-white dark:hover:bg-dark-context-menu-list-hover`}
       onClick={() => {
         props.handlerFunction();
         updateContextMenuData(false, []);
@@ -21,7 +21,7 @@ const ContextMenuItem = (props: ContextMenuItem) => {
       {props.iconName && (
         <span
           className={
-            props.iconClassName || 'material-icons-round icon mr-4 text-xl'
+            props.iconClassName || 'material-icons-round icon mr-4 text-lg'
           }
         >
           {props.iconName}

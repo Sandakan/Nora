@@ -5,14 +5,14 @@ import MainContainer from '../MainContainer';
 import Folder from './Folder';
 
 const MusicFoldersPage = () => {
-  const [musicFolders, setMusicFolders] = React.useState<MusicFolderData[]>([]);
+  const [musicFolders, setMusicFolders] = React.useState<MusicFolder[]>([]);
 
   const fetchFoldersData = React.useCallback(
     () =>
       window.api
-        .getUserData()
+        .getFolderData([])
         .then((res) => {
-          if (res) return setMusicFolders(res.musicFolders);
+          if (Array.isArray(res) && res.length > 0) return setMusicFolders(res);
           return undefined;
         })
         .catch((err) => console.error(err)),
@@ -45,10 +45,14 @@ const MusicFoldersPage = () => {
 
   const musicFolderComponents = React.useMemo(() => {
     if (musicFolders.length > 0) {
-      return musicFolders.map((data, index) => {
-        const folderName = data.path.split('\\').at(-1);
-
-        return <Folder key={index} folderName={folderName ?? ''} />;
+      return musicFolders.map((folder, index) => {
+        return (
+          <Folder
+            key={index}
+            folderPath={folder.folderData.path}
+            songIds={folder.songIds}
+          />
+        );
       });
     }
     return [];
@@ -57,7 +61,7 @@ const MusicFoldersPage = () => {
   return (
     <MainContainer className="music-folders-page appear-from-bottom pr-4">
       <>
-        <div className="title-container mt-2 mb-4 flex items-center justify-between text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container mt-2 mb-8 flex items-center justify-between text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           Music Folders
           <div className="buttons-container text-sm">
             <Button

@@ -529,16 +529,16 @@ const Song = React.forwardRef(
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...provided.dragHandleProps}
         // style={{ animationDelay: `${50 * (index + 1)}ms` }}
-        className={`appear-from-bottom ${songId} group relative mr-4 mb-1 flex aspect-[2/1] h-[3.25rem] w-[98%] overflow-hidden rounded-lg p-[0.2rem] transition-[background] ease-in-out ${
+        className={`appear-from-bottom ${songId} group relative mr-4 mb-2 flex aspect-[2/1] h-[3.25rem] w-[98%] overflow-hidden rounded-lg p-[0.2rem] transition-[background] ease-in-out ${
           currentSongData.songId === songId || isAMultipleSelection
             ? bodyBackgroundImage
               ? `bg-background-color-3/70 text-font-color-black backdrop-blur-md dark:bg-dark-background-color-3/70`
               : 'bg-background-color-3 text-font-color-black dark:bg-dark-background-color-3'
             : bodyBackgroundImage
             ? `bg-background-color-2/70 backdrop-blur-md hover:!bg-background-color-2 dark:bg-dark-background-color-2/70 dark:hover:!bg-dark-background-color-2`
-            : `odd:bg-background-color-2/50 hover:!bg-background-color-2 dark:odd:bg-dark-background-color-2/50 dark:hover:!bg-dark-background-color-2 ${
+            : `odd:bg-background-color-2/70 hover:!bg-background-color-2 dark:odd:bg-dark-background-color-2/50 dark:hover:!bg-dark-background-color-2 ${
                 (index + 1) % 2 === 1
-                  ? '!bg-background-color-2/50 dark:!bg-dark-background-color-2/50'
+                  ? '!bg-background-color-2/70 dark:!bg-dark-background-color-2/50'
                   : '!bg-background-color-1 dark:!bg-dark-background-color-1'
               }`
         }`}
@@ -586,7 +586,7 @@ const Song = React.forwardRef(
                   currentSongData.songId === songId && 'text-opacity-100'
                 } group-hover:text-opacity-100`}
                 onClick={handlePlayBtnClick}
-                style={isSongPlaying ? { color: `hsla(0,0%,100%,1)` } : {}}
+                style={isSongPlaying ? { color: `hsla(0,0%,100%,0.75)` } : {}}
               >
                 {isSongPlaying ? 'pause_circle' : 'play_circle'}
               </span>

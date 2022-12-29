@@ -7,8 +7,8 @@ export default (props: { musicFolder: MusicFolderData }) => {
   const { changePromptMenuData } = React.useContext(AppUpdateContext);
   const { musicFolder } = props;
   const path = musicFolder.path.split('\\');
-  const folderName = musicFolder.path.split('\\').at(-1);
-  path.pop();
+  const folderName = path.pop();
+
   return (
     <div className="music-folder flex flex-row items-center justify-between rounded-md border-b border-background-color-2 p-2 py-2 last:border-b-0 hover:bg-background-color-2 dark:border-dark-background-color-2 dark:hover:bg-dark-background-color-2">
       <div className="flex flex-grow items-center">
@@ -20,7 +20,7 @@ export default (props: { musicFolder: MusicFolderData }) => {
             {folderName}
           </div>
           <div
-            className="music-folder-path overflow-hidden text-ellipsis whitespace-nowrap text-sm"
+            className="music-folder-path overflow-hidden text-ellipsis whitespace-nowrap text-sm opacity-75"
             title={musicFolder.path}
           >
             {path.join('\\')}

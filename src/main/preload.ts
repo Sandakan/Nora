@@ -230,6 +230,10 @@ export const api = {
   saveUserData: (dataType: UserDataTypes, data: any) =>
     ipcRenderer.invoke('app/saveUserData', dataType, data),
 
+  // $ APP USER DATA
+  getFolderData: (folderPaths: string[]): Promise<MusicFolder[]> =>
+    ipcRenderer.invoke('app/getFolderData', folderPaths),
+
   // $ ARTISTS DATA
   getArtistData: (
     artistIdsOrNames?: string[],

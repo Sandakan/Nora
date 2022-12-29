@@ -18,6 +18,7 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
 import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
 import DefaultPlaylistCover from '../../../../assets/images/png/playlist_cover_default.png';
+import FolderImg from '../../../../assets/images/png/empty-folder.png';
 import NoSongsImage from '../../../../assets/images/svg/Sun_Monochromatic.svg';
 import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
 import MainContainer from '../MainContainer';
@@ -185,6 +186,20 @@ const CurrentQueuePage = () => {
                   ...prevData,
                   artworkPath: res[0].artworkPaths.artworkPath,
                   title: res[0].name,
+                };
+              });
+            }
+          });
+        }
+        if (queue.queueType === 'folder') {
+          window.api.getFolderData([queue.queueId]).then((res) => {
+            if (res && res.length > 0 && res[0]) {
+              const folderName = res[0].folderData.path.split('\\').pop();
+              setQueueInfo((prevData) => {
+                return {
+                  ...prevData,
+                  artworkPath: FolderImg,
+                  title: `'${folderName || 'Unknown'}' Folder`,
                 };
               });
             }
@@ -459,7 +474,7 @@ const CurrentQueuePage = () => {
                         ? queuedSongs.length
                         : queuedSongs.length + 1
                     }
-                    itemSize={55}
+                    itemSize={60}
                     width={width}
                     overscanCount={20}
                     outerRef={droppableProvided.innerRef}

@@ -51,6 +51,7 @@ declare global {
     | 'app/dataUpdateEvent'
     | 'app/toggleMiniPlayer'
     | 'app/toggleAutoLaunch'
+    | 'app/getFolderData'
     | 'app/restartRenderer'
     | 'app/restartApp'
     | 'app/resetApp'
@@ -282,7 +283,13 @@ declare global {
     songId: string;
   }
 
-  type QueueTypes = 'album' | 'playlist' | 'artist' | 'songs' | 'genre';
+  type QueueTypes =
+    | 'album'
+    | 'playlist'
+    | 'artist'
+    | 'songs'
+    | 'genre'
+    | 'folder';
 
   // ? User data related types
 
@@ -392,6 +399,11 @@ declare global {
       fileCreatedDate: Date;
       lastParsedDate: Date;
     };
+  }
+
+  interface MusicFolder {
+    folderData: MusicFolderData;
+    songIds: string[];
   }
 
   // ? Playlists related types
@@ -686,6 +698,7 @@ declare global {
     | 'AlbumInfo'
     | 'PlaylistInfo'
     | 'GenreInfo'
+    | 'MusicFolderInfo'
     | 'CurrentQueue'
     | 'SongTagsEditor'
     | 'AllSearchResults';
