@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
 import Button from '../Button';
@@ -9,6 +10,7 @@ import SearchSomethingImage from '../../../../assets/images/svg/Flying kite_Mono
 type Props = {
   searchInput: string;
   searchResults: SearchResult;
+  // eslint-disable-next-line no-unused-vars
   updateSearchInput: (input: string) => void;
 };
 
@@ -85,7 +87,7 @@ const SearchStartPlaceholder = (props: Props) => {
               searchResults.albums.length === 0 &&
               searchResults.playlists.length === 0 &&
               searchResults.genres.length === 0 &&
-              searchInput === ''
+              searchInput.trim() === ''
                 ? 'mb-4 w-60 max-w-full'
                 : ''
             }

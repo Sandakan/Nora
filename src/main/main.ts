@@ -1,5 +1,6 @@
+/* eslint-disable default-param-last */
+/* eslint-disable no-use-before-define */
 /* eslint-disable global-require */
-/* eslint-disable @typescript-eslint/no-use-before-define */
 import {
   app,
   BrowserWindow,
@@ -12,7 +13,6 @@ import {
   nativeTheme,
 } from 'electron';
 import path from 'path';
-import AutoLaunch from 'auto-launch';
 import os from 'os';
 import * as dotenv from 'dotenv';
 
@@ -21,7 +21,6 @@ import {
   getSongsData,
   getUserData,
   setUserData as saveUserData,
-  incrementNoOfSongListens,
   resetAppCache,
   resetAppData,
   getListeningData,
@@ -94,8 +93,6 @@ let isMiniPlayer = false;
 let isConnectedToInternet = false;
 
 // / / / / / / INITIALIZATION / / / / / / /
-
-const autoLauncher = new AutoLaunch({ name: 'Nora' });
 
 export const IS_DEVELOPMENT =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
@@ -264,10 +261,6 @@ app
         saveUserData('currentSong.stoppedPosition', position)
       );
 
-      ipcMain.on('app/incrementNoOfSongListens', (_: unknown, songId: string) =>
-        incrementNoOfSongListens(songId)
-      );
-
       ipcMain.handle('app/addMusicFolder', (_, sortType: SongSortTypes) =>
         addMusicFolder(mainWindow, sortType)
       );
@@ -325,19 +318,10 @@ app
         'app/getSongLyrics',
         (
           _,
-          songTitle: string,
-          songArtists?: string[],
-          songId?: string,
-          lyricsType?: LyricsRequestTypes,
-          forceDownload = false
-        ) =>
-          getSongLyrics(
-            songTitle,
-            songArtists,
-            songId,
-            lyricsType,
-            forceDownload
-          )
+          trackInfo: LyricsRequestTrackInfo,
+          lyricsType?: LyricsTypes,
+          lyricsRequestType?: LyricsRequestTypes
+        ) => getSongLyrics(trackInfo, lyricsType, lyricsRequestType)
       );
 
       ipcMain.handle(
@@ -348,8 +332,13 @@ app
 
       ipcMain.handle(
         'app/getSongInfo',
-        (_, songIds: string[], sortType?: SongSortTypes, limit?: number) =>
-          getSongInfo(songIds, sortType, limit)
+        (
+          _,
+          songIds: string[],
+          sortType?: SongSortTypes,
+          limit?: number,
+          preserveIdOrder = false
+        ) => getSongInfo(songIds, sortType, limit, preserveIdOrder)
       );
 
       ipcMain.handle('app/getSongListeningData', (_, songIds: string[]) =>
@@ -527,8 +516,10 @@ app
         toggleAutoLaunch(autoLaunchState)
       );
 
-      ipcMain.handle('app/getFolderData', (_, folderPaths?: string[]) =>
-        getMusicFolderData(folderPaths)
+      ipcMain.handle(
+        'app/getFolderData',
+        (_, folderPaths?: string[], sortType?: FolderSortTypes) =>
+          getMusicFolderData(folderPaths, sortType)
       );
 
       ipcMain.on(
@@ -665,11 +656,12 @@ function addEventsToCache(
   return dataEventsCache.push({
     dataType,
     eventData: data.length > 0 || message ? [{ data, message }] : [],
-  } as DataUpdateEvent);
+  } satisfies DataUpdateEvent);
 }
 
 function registerFileProtocol(
   request: { url: string },
+  // eslint-disable-next-line no-unused-vars
   callback: (arg: string) => void
 ) {
   const urlWithQueries = decodeURI(request.url).replace(
@@ -894,9 +886,11 @@ function toggleMiniPlayer(isActivateMiniPlayer: boolean) {
 }
 
 async function toggleAutoLaunch(autoLaunchState: boolean) {
-  log(`AUTO LAUNCH STATE : ${autoLaunchState}`);
-  if (autoLaunchState) autoLauncher.enable();
-  else autoLauncher.disable();
+  const options = app.getLoginItemSettings();
+  log(`AUTO LAUNCH STATE : ${options.openAtLogin}`);
+
+  app.setLoginItemSettings({ openAtLogin: autoLaunchState, name: 'Nora' });
+
   saveUserData('preferences.autoLaunchApp', autoLaunchState);
 }
 

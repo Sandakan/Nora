@@ -14,14 +14,23 @@ type Props = {
     artworkPath?: string | undefined;
     onlineArtworkPaths?: OnlineArtistArtworks | undefined;
   }[];
+  duration: number;
   songLyrics?: string;
+  // eslint-disable-next-line no-unused-vars
   updateSongInfo: (callback: (prevSongInfo: SongTags) => SongTags) => void;
 };
 
 const SongLyricsEditor = (props: Props) => {
   const { userData } = React.useContext(AppContext);
 
-  const { songId, songTitle, songArtists, songLyrics, updateSongInfo } = props;
+  const {
+    songId,
+    songTitle,
+    songArtists,
+    songLyrics,
+    updateSongInfo,
+    duration,
+  } = props;
   const isLyricsSynced = React.useMemo(
     () => syncedLyricsRegex.test(songLyrics || ''),
     [songLyrics]
@@ -81,11 +90,14 @@ const SongLyricsEditor = (props: Props) => {
           clickHandler={() => {
             window.api
               .getSongLyrics(
-                songTitle,
-                songArtists?.map((artist) => artist.name),
-                songId,
+                {
+                  songTitle,
+                  songArtists: songArtists?.map((artist) => artist.name),
+                  duration,
+                  songId,
+                },
                 'UN_SYNCED',
-                true
+                'ONLINE_ONLY'
               )
               .then((res) => {
                 if (res)
@@ -107,11 +119,14 @@ const SongLyricsEditor = (props: Props) => {
           clickHandler={() => {
             window.api
               .getSongLyrics(
-                songTitle,
-                songArtists?.map((artist) => artist.name),
-                songId,
+                {
+                  songTitle,
+                  songArtists: songArtists?.map((artist) => artist.name),
+                  duration,
+                  songId,
+                },
                 'SYNCED',
-                true
+                'ONLINE_ONLY'
               )
               .then((res) => {
                 if (res)

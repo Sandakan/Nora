@@ -254,7 +254,7 @@ export interface MusixmatchLyricsMetadata {
   duration: number;
   copyright?: string;
   lang: string;
-  album_artwork_url: string;
+  album_artwork_urls: string[];
   link: string;
 }
 

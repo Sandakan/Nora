@@ -17,6 +17,24 @@ const monthNames = [
   'Dec',
 ];
 
+function getLastNoOfMonths<T>(
+  months: T[],
+  start: number,
+  requiredNoOfMonths = 6
+) {
+  const arr: T[] = [];
+  let count = 0;
+  let index = start - requiredNoOfMonths;
+
+  while (count < requiredNoOfMonths) {
+    count += 1;
+    index += 1;
+    const i = index < 0 ? index + months.length : index;
+    arr.push(months[i]);
+  }
+  return arr;
+}
+
 const ListeningActivityBarGraph = (props: Props) => {
   const { listeningData } = props;
 
@@ -39,14 +57,16 @@ const ListeningActivityBarGraph = (props: Props) => {
             )
           );
 
-          const lastSixMonths = months
-            .map((y, index) => ({
-              listens: y.reduce(
-                (prevValue, currValue) => prevValue + currValue
-              ),
-              month: monthNames[index],
-            }))
-            .slice(new Date().getMonth() - 6, new Date().getMonth() + 1);
+          const monthsWithNames = months.map((y, index) => ({
+            listens: y.reduce((prevValue, currValue) => prevValue + currValue),
+            month: monthNames[index],
+          }));
+
+          const lastSixMonths = getLastNoOfMonths(
+            monthsWithNames,
+            new Date().getMonth(),
+            7
+          );
 
           return lastSixMonths.map((month, index) => {
             return (

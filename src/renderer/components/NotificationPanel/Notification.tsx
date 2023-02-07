@@ -1,10 +1,12 @@
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
 
 const Notification = (props: AppNotification) => {
   const notificationData = props;
+  const { userData } = React.useContext(AppContext);
   const { updateNotifications } = React.useContext(AppUpdateContext);
 
   const notificationRef = React.useRef(null as HTMLDivElement | null);
@@ -21,7 +23,8 @@ const Notification = (props: AppNotification) => {
     if (notificationTimeoutIdRef.current)
       clearTimeout(notificationTimeoutIdRef.current);
     if (
-      notificationRef.current
+      notificationRef.current &&
+      !userData?.preferences?.isReducedMotion
       //  && !notificationRef.current.classList.contains('disappear-to-bottom')
     ) {
       notificationRef.current.classList.add('disappear-to-bottom');

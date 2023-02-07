@@ -2,7 +2,6 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/require-default-props */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
@@ -452,6 +451,7 @@ export const SongCard = (props: SongCardProp) => {
                 key={index}
                 artistId={artist.artistId}
                 name={artist.name}
+                style={{ color: fontColor }}
               />
             ) : (
               [
@@ -459,8 +459,9 @@ export const SongCard = (props: SongCardProp) => {
                   key={index}
                   artistId={artist.artistId}
                   name={artist.name}
+                  style={{ color: fontColor }}
                 />,
-                ', ',
+                <span className="mr-1">,</span>,
               ]
             )
           )
@@ -468,7 +469,7 @@ export const SongCard = (props: SongCardProp) => {
       ) : (
         <span>Unknown Artist</span>
       ),
-    [props.artists]
+    [fontColor, props.artists]
   );
 
   return (
@@ -560,7 +561,7 @@ export const SongCard = (props: SongCardProp) => {
             {props.title}
           </div>
           <div
-            className="song-artists w-2/3 overflow-hidden text-ellipsis whitespace-nowrap text-sm transition-none"
+            className="song-artists flex w-2/3 overflow-hidden text-ellipsis whitespace-nowrap text-sm transition-none"
             title={props.artists ? props.artists.join(', ') : 'Unknown Artist'}
             data-song-id={props.songId}
           >

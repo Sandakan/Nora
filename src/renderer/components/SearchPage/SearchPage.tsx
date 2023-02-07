@@ -58,7 +58,7 @@ const SearchPage = () => {
 
   const timeOutIdRef = React.useRef(undefined as NodeJS.Timer | undefined);
   const fetchSearchResults = React.useCallback(() => {
-    if (deferredSearchInput !== '') {
+    if (deferredSearchInput.trim() !== '') {
       if (timeOutIdRef.current) clearTimeout(timeOutIdRef.current);
       timeOutIdRef.current = setTimeout(
         () =>

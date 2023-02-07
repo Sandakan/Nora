@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
@@ -97,35 +96,6 @@ const Song = React.forwardRef(
       playSong(songId);
     }, [playSong, songId]);
 
-    const songArtists = React.useMemo(
-      () =>
-        Array.isArray(artists) ? (
-          artists
-            .map((artist, i) =>
-              (artists?.length ?? 1) - 1 === i ? (
-                <SongArtist
-                  key={i}
-                  artistId={artist.artistId}
-                  name={artist.name}
-                />
-              ) : (
-                [
-                  <SongArtist
-                    key={i}
-                    artistId={artist.artistId}
-                    name={artist.name}
-                  />,
-                  ', ',
-                ]
-              )
-            )
-            .flat()
-        ) : (
-          <span>Unknown Artist</span>
-        ),
-      [artists]
-    );
-
     const { minutes, seconds } = React.useMemo(() => {
       const addZero = (num: number) => {
         if (num < 10) return `0${num}`;
@@ -153,6 +123,45 @@ const Song = React.forwardRef(
         return true;
       return false;
     }, [multipleSelectionsData, songId]);
+
+    const songArtists = React.useMemo(
+      () =>
+        Array.isArray(artists) ? (
+          artists
+            .map((artist, i) =>
+              (artists?.length ?? 1) - 1 === i ? (
+                <SongArtist
+                  key={i}
+                  artistId={artist.artistId}
+                  name={artist.name}
+                  className={`${
+                    (currentSongData.songId === songId ||
+                      isAMultipleSelection) &&
+                    'dark:text-font-color-black'
+                  } `}
+                />
+              ) : (
+                [
+                  <SongArtist
+                    key={i}
+                    artistId={artist.artistId}
+                    name={artist.name}
+                    className={`${
+                      (currentSongData.songId === songId ||
+                        isAMultipleSelection) &&
+                      'dark:text-font-color-black'
+                    } `}
+                  />,
+                  <span className="mr-1">,</span>,
+                ]
+              )
+            )
+            .flat()
+        ) : (
+          <span>Unknown Artist</span>
+        ),
+      [artists, currentSongData.songId, isAMultipleSelection, songId]
+    );
 
     const goToSongInfoPage = React.useCallback(() => {
       if (
@@ -553,16 +562,25 @@ const Song = React.forwardRef(
             contextMenuItemData
           );
         }}
-        onClick={() =>
-          isMultipleSelectionEnabled &&
-          multipleSelectionsData.selectionType === 'songs'
-            ? updateMultipleSelections(
-                songId,
-                'songs',
-                isAMultipleSelection ? 'remove' : 'add'
-              )
-            : undefined
-        }
+        onClick={(e) => {
+          if (
+            isMultipleSelectionEnabled &&
+            multipleSelectionsData.selectionType === 'songs'
+          )
+            updateMultipleSelections(
+              songId,
+              'songs',
+              isAMultipleSelection ? 'remove' : 'add'
+            );
+          else if (e.getModifierState('Shift') === true) {
+            toggleMultipleSelections(!isMultipleSelectionEnabled, 'songs');
+            updateMultipleSelections(
+              songId,
+              'songs',
+              isAMultipleSelection ? 'remove' : 'add'
+            );
+          }
+        }}
         onDoubleClick={handlePlayBtnClick}
         ref={ref}
       >
@@ -573,7 +591,7 @@ const Song = React.forwardRef(
               <MultipleSelectionCheckbox id={songId} selectionType="songs" />
             </div>
           ) : isIndexingSongs ? (
-            <div className="relative mx-1 h-fit rounded-2xl bg-background-color-1 px-3 text-font-color-highlight dark:bg-dark-background-color-1 dark:text-dark-background-color-3">
+            <div className="relative mx-1 h-fit rounded-2xl bg-background-color-1 px-3 text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1">
               {index + 1}
             </div>
           ) : (
@@ -613,50 +631,46 @@ const Song = React.forwardRef(
           >
             {title}
           </div>
-          <div className="song-artists w-1/3 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal transition-none">
+          <div className="song-artists flex w-1/3 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal transition-none">
             {songArtists}
           </div>
           <div className="song-year mr-2 flex w-12 items-center justify-between text-center text-xs transition-none">
             {year ?? '----'}
           </div>
           <div className="song-duration mr-1 flex w-[12.5%] items-center justify-between pr-4 text-center transition-none">
-            <>
-              <span
-                className={`${
-                  isAFavorite
-                    ? 'material-icons-round'
-                    : 'material-icons-round-outlined'
-                } icon cursor-pointer text-xl font-light md:hidden ${
-                  isAFavorite
-                    ? currentSongData.songId === songId || isAMultipleSelection
-                      ? 'text-font-color-black dark:text-font-color-black'
-                      : 'text-font-color-highlight dark:text-dark-background-color-3'
-                    : currentSongData.songId === songId || isAMultipleSelection
+            <span
+              className={`${
+                isAFavorite
+                  ? 'material-icons-round'
+                  : 'material-icons-round-outlined'
+              } icon cursor-pointer text-xl font-light md:hidden ${
+                isAFavorite
+                  ? currentSongData.songId === songId || isAMultipleSelection
                     ? 'text-font-color-black dark:text-font-color-black'
                     : 'text-font-color-highlight dark:text-dark-background-color-3'
-                }`}
-                title={`You ${
-                  isAFavorite ? 'liked' : "didn't like"
-                } this song.`}
-                onClick={() => {
-                  window.api
-                    .toggleLikeSongs([songId], !isAFavorite)
-                    .then((res) => {
-                      if (res && res?.likes + res?.dislikes > 0) {
-                        if (currentSongData.songId === songId)
-                          toggleIsFavorite(!currentSongData.isAFavorite);
-                        return setIsAFavorite((prevData) => !prevData);
-                      }
-                      setIsAFavorite((prevData) => !prevData);
-                      return undefined;
-                    })
-                    .catch((err) => console.error(err));
-                }}
-              >
-                favorite
-              </span>
-              {minutes ?? '--'}:{seconds ?? '--'}
-            </>
+                  : currentSongData.songId === songId || isAMultipleSelection
+                  ? 'text-font-color-black dark:text-font-color-black'
+                  : 'text-font-color-highlight dark:text-dark-background-color-3'
+              }`}
+              title={`You ${isAFavorite ? 'liked' : "didn't like"} this song.`}
+              onClick={() => {
+                window.api
+                  .toggleLikeSongs([songId], !isAFavorite)
+                  .then((res) => {
+                    if (res && (res?.likes || 0) + (res?.dislikes || 0) > 0) {
+                      if (currentSongData.songId === songId)
+                        toggleIsFavorite(!currentSongData.isAFavorite);
+                      return setIsAFavorite((prevData) => !prevData);
+                    }
+                    setIsAFavorite((prevData) => !prevData);
+                    return undefined;
+                  })
+                  .catch((err) => console.error(err));
+              }}
+            >
+              favorite
+            </span>
+            {minutes ?? '--'}:{seconds ?? '--'}
           </div>
         </div>
       </div>

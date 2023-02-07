@@ -11,27 +11,38 @@ interface LyricProp {
   lyric: string;
   index: number;
   syncedLyrics?: { start: number; end: number };
+  isAutoScrolling?: boolean;
 }
+
+const lyricsScrollIntoViewEvent = new CustomEvent('lyrics/scrollIntoView', {
+  detail: 'scrollingUsingScrollIntoView',
+});
 
 const LyricLine = (props: LyricProp) => {
   const { isMiniPlayer } = React.useContext(AppContext);
   const { songPosition } = React.useContext(SongPositionContext);
   const { updateSongPosition } = React.useContext(AppUpdateContext);
   const lyricsRef = React.useRef(null as HTMLDivElement | null);
+  const isTheCurrnetLineRef = React.useRef(false);
 
-  const { index, lyric, syncedLyrics } = props;
+  const { index, lyric, syncedLyrics, isAutoScrolling = true } = props;
 
   React.useEffect(() => {
     if (lyricsRef.current && syncedLyrics) {
       const { start, end } = syncedLyrics;
       if (songPosition > start && songPosition < end) {
-        lyricsRef.current?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        });
-      }
+        if (!isTheCurrnetLineRef.current && isAutoScrolling) {
+          isTheCurrnetLineRef.current = true;
+          lyricsRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          });
+          document.dispatchEvent(lyricsScrollIntoViewEvent);
+        }
+      } else isTheCurrnetLineRef.current = false;
     }
-  }, [syncedLyrics, songPosition]);
+  }, [syncedLyrics, songPosition, isAutoScrolling]);
+
   return (
     <div
       style={{

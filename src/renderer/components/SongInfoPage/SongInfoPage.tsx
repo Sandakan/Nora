@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable no-console */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable react/no-array-index-key */
@@ -192,9 +193,9 @@ const SongInfoPage = () => {
                   className="h-full object-cover"
                 />
               </div>
-              <div className="song-info flex max-w-[70%] flex-col justify-center text-font-color-white dark:text-font-color-white">
+              <div className="song-info flex max-w-[70%] flex-col justify-center text-font-color-black dark:text-font-color-white">
                 <div
-                  className="title info-type-1 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-[2.5rem] font-medium"
+                  className="title info-type-1 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-5xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight"
                   title={songInfo.title}
                 >
                   {songInfo.title}

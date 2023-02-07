@@ -5,7 +5,7 @@ import {
 } from '../../@types/musixmatch_lyrics_api';
 import fetchSongArtworksFromSpotify from './fetchSongArtworksFromSpotify';
 
-function parseSongMetadataFromMusixmatchApiData(
+async function parseSongMetadataFromMusixmatchApiData(
   data: MusixmatchLyricsAPI,
   spotifyArtworks = false
 ) {
@@ -33,16 +33,20 @@ function parseSongMetadataFromMusixmatchApiData(
       metadata.duration = trackData.track_length;
     }
     // Track album cover art
+    metadata.album_artwork_urls = [];
     if (trackData.album_coverart_800x800)
-      metadata.album_artwork_url = trackData.album_coverart_800x800;
+      metadata.album_artwork_urls.push(trackData.album_coverart_800x800);
+    if (spotifyArtworks && trackData.track_spotify_id) {
+      const { highResArtworkUrl, lowResArtworkUrl } =
+        await fetchSongArtworksFromSpotify(trackData.track_spotify_id);
+
+      metadata.album_artwork_urls.push(lowResArtworkUrl, highResArtworkUrl);
+    }
 
     // Link to Track lyrics on Musixmatch
     if (trackData.track_share_url)
       // eslint-disable-next-line prefer-destructuring
       metadata.link = trackData.track_share_url.split(/[?#]/)[0];
-
-    if (spotifyArtworks && trackData.track_spotify_id)
-      fetchSongArtworksFromSpotify(trackData.track_spotify_id);
 
     return metadata;
   }

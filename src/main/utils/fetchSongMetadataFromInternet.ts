@@ -1,7 +1,8 @@
+/* eslint-disable camelcase */
 /* eslint-disable prefer-destructuring */
 /* eslint-disable no-async-promise-executor */
-/* eslint-disable @typescript-eslint/naming-convention */
 import fetch from 'node-fetch';
+import { AppleITunesMusicAPI } from '../../@types/apple_itunes_music_api.d';
 import log from '../log';
 import { LastFMHitCache, LastFMTrackInfoApi } from '../../@types/last_fm_api';
 
@@ -53,16 +54,16 @@ async function fetchSongMetadataFromMusixmatch(
     });
     if (res.ok) {
       const data = (await res.json()) as MusixmatchLyricsAPI;
-      const metadata = parseSongMetadataFromMusixmatchApiData(data, true);
-      const lyrics = parseMusicmatchDataFromLyrics(data, 'ANY');
+      const metadata = await parseSongMetadataFromMusixmatchApiData(data, true);
+      const lyrics = await parseMusicmatchDataFromLyrics(data, 'ANY');
 
       if (metadata) {
-        const { title, artist, duration, lang, album, album_artwork_url } =
+        const { title, artist, duration, lang, album, album_artwork_urls } =
           metadata;
         const result: SongMetadataResultFromInternet = {
           title,
           album,
-          artworkPaths: [album_artwork_url],
+          artworkPaths: album_artwork_urls,
           duration,
           artists: [artist],
           language: lang,
@@ -89,308 +90,346 @@ async function fetchSongMetadataFromMusixmatch(
   }
 }
 
-const LAST_FM_API_URL = 'http://ws.audioscrobbler.com/2.0/';
-const lastFMHitCache = { id: '' } as LastFMHitCache;
+const ITUNES_API_URL = 'https://itunes.apple.com/search';
+let itunesHitsCache: SongMetadataResultFromInternet[] = [];
 
-function fetchSongMetadataResultsFromLastFM(
+async function fetchSongMetadataResultsFromITunes(
   songTitle: string,
   songArtist?: string
 ): Promise<SongMetadataResultFromInternet[]> {
-  return new Promise(async (resolve, reject) => {
-    const LAST_FM_API_KEY = process.env.LAST_FM_API_KEY;
-    try {
-      if (typeof LAST_FM_API_KEY !== 'string') {
-        log('undefined LAST_FM_API_KEY.', { LAST_FM_API_KEY }, 'WARN');
-        throw new Error('undefined LAST_FM_API_KEY');
+  const res = await fetch(
+    encodeURI(`${ITUNES_API_URL}?media=music&term=${songTitle} ${songArtist}`),
+    { signal: resultsController.signal }
+  );
+
+  if (res.ok) {
+    itunesHitsCache = [];
+    const data = (await res.json()) as AppleITunesMusicAPI;
+    if (
+      !data?.errorMessage &&
+      data?.resultCount &&
+      data?.resultCount > 0 &&
+      data?.results
+    ) {
+      const { results } = data;
+      const outputResults: SongMetadataResultFromInternet[] = [];
+
+      for (let i = 0; i < results.length; i += 1) {
+        const result = results[i];
+
+        const metadata: SongMetadataResultFromInternet = {
+          title: result.trackName,
+          artists: [result.artistName],
+          artworkPaths: [result.artworkUrl100],
+          genres: [result.primaryGenreName],
+          duration: result.trackTimeMillis / 1000,
+          releasedYear: new Date(result.releaseDate).getFullYear(),
+          source: 'ITUNES',
+          sourceId: result.trackId.toString(),
+        };
+        const highResArtwork = result?.artworkUrl100?.replace(
+          /\d+x\d+\w*/,
+          '1000x1000bb'
+        );
+        if (highResArtwork) metadata.artworkPaths.push(highResArtwork);
+
+        outputResults.push(metadata);
       }
-      const res = await fetch(
-        encodeURI(
-          `${LAST_FM_API_URL}?method=track.getInfo&format=json&track=${songTitle}${
-            songArtist ? `&artist=${songArtist}` : ''
-          }&api_key=${LAST_FM_API_KEY}`
-        ),
-        { signal: resultsController.signal }
-      );
 
-      if (res.ok) {
-        const data = (await res.json()) as LastFMTrackInfoApi;
-        if (!data?.error && data?.track) {
-          const { track } = data;
-          const result: SongMetadataResultFromInternet = {
-            title: track.name,
-            artists: [track.artist.name],
-            artworkPaths: track?.album?.image.map((x) => x['#text']) ?? [],
-            album: track?.album?.title || 'Unknown Album Title',
-            genres: track?.toptags?.tag
-              ? track?.toptags?.tag.map((x) => x.name)
-              : [],
-            source: 'LAST_FM',
-            // LastFM api isn't working as expected to provide searching for multiple hits.
-            sourceId: track.name,
-          };
-
-          lastFMHitCache.id = track.name;
-          lastFMHitCache.data = result;
-
-          return resolve([result]);
-        }
-        log(`ERROR : ${data?.error} : ${data?.message}`, undefined, 'WARN');
-      }
-      const errStr = `Request to fetch song metadata results from LastFM failed.\nERR_CODE : ${res.status}`;
-      log(errStr, undefined, 'WARN');
-      return resolve([]);
-    } catch (error) {
-      return reject(error);
+      itunesHitsCache = outputResults;
+      return outputResults;
     }
-  });
+    log(`ERROR : ${data?.errorMessage}`, undefined, 'WARN');
+  }
+  const errStr = `Request to fetch song metadata results from LastFM failed.\nERR_CODE : ${res.status}`;
+  log(errStr, undefined, 'WARN');
+  return [];
+}
+
+const fetchSongMetadataFromItunes = (sourceId: string) => {
+  for (let i = 0; i < itunesHitsCache.length; i += 1) {
+    const hit = itunesHitsCache[i];
+    if (hit.sourceId === sourceId) return hit;
+  }
+  log(
+    `No hit found for the given sourceId '${sourceId}'.`,
+    { sourceId },
+    'WARN'
+  );
+  return undefined;
+};
+
+const LAST_FM_API_URL = 'http://ws.audioscrobbler.com/2.0/';
+const lastFMHitCache = { id: '' } as LastFMHitCache;
+
+async function fetchSongMetadataResultsFromLastFM(
+  songTitle: string,
+  songArtist?: string
+): Promise<SongMetadataResultFromInternet[]> {
+  const LAST_FM_API_KEY = process.env.LAST_FM_API_KEY;
+
+  if (typeof LAST_FM_API_KEY !== 'string') {
+    log('undefined LAST_FM_API_KEY.', { LAST_FM_API_KEY }, 'WARN');
+    throw new Error('undefined LAST_FM_API_KEY');
+  }
+  const res = await fetch(
+    encodeURI(
+      `${LAST_FM_API_URL}?method=track.getInfo&format=json&track=${songTitle}${
+        songArtist ? `&artist=${songArtist}` : ''
+      }&api_key=${LAST_FM_API_KEY}`
+    ),
+    { signal: resultsController.signal }
+  );
+
+  if (res.ok) {
+    const data = (await res.json()) as LastFMTrackInfoApi;
+    if (!data?.error && data?.track) {
+      const { track } = data;
+      const result: SongMetadataResultFromInternet = {
+        title: track.name,
+        artists: [track.artist.name],
+        artworkPaths: track?.album?.image.map((x) => x['#text']) ?? [],
+        album: track?.album?.title || 'Unknown Album Title',
+        genres: track?.toptags?.tag
+          ? track?.toptags?.tag.map((x) => x.name)
+          : [],
+        source: 'LAST_FM',
+        // LastFM api isn't working as expected to provide searching for multiple hits.
+        sourceId: track.name,
+      };
+
+      lastFMHitCache.id = track.name;
+      lastFMHitCache.data = result;
+
+      return [result];
+    }
+    log(`ERROR : ${data?.error} : ${data?.message}`, undefined, 'WARN');
+  }
+  const errStr = `Request to fetch song metadata results from LastFM failed.\nERR_CODE : ${res.status}`;
+  log(errStr, undefined, 'WARN');
+  return [];
 }
 
 const GENIUS_API_BASE_URL = 'https://api.genius.com';
 
-function searchSongMetadataResultsInGenius(
+async function searchSongMetadataResultsInGenius(
   songTitle: string,
   songArtists?: string
 ): Promise<SongMetadataResultFromInternet[]> {
-  return new Promise(async (resolve, reject) => {
-    const GENIUS_API_KEY = process.env.GENIUS_API_KEY;
-    try {
-      if (typeof GENIUS_API_KEY !== 'string') {
-        log('undefined GENIUS_API_KEY.', { GENIUS_API_KEY }, 'WARN');
-        throw new Error('undefined GENIUS_API_KEY.');
-      }
-      const res = await fetch(
-        encodeURI(
-          `${GENIUS_API_BASE_URL}/search?q=${songTitle}${
-            songArtists ? ` ${songArtists}` : ''
-          }`
-        ),
-        {
-          headers: {
-            Authorization: `Bearer ${GENIUS_API_KEY}`,
-          },
-          signal: resultsController.signal,
-        }
-      );
-      if (res.ok) {
-        const data = (await res.json()) as GeniusLyricsAPI;
-        if (data?.meta?.status === 200) {
-          const { hits } = data.response;
-          const results = [] as SongMetadataResultFromInternet[];
-          if (Array.isArray(hits) && hits.length > 0) {
-            for (let i = 0; i < hits.length; i += 1) {
-              if (hits[i].type === 'song') {
-                const {
-                  id,
-                  title,
-                  primary_artist,
-                  featured_artists,
-                  header_image_url,
-                  release_date_components,
-                  song_art_image_url,
-                  language,
-                } = hits[i].result;
-                results.push({
-                  title: title || 'Unknown Title',
-                  artists: [
-                    primary_artist.name,
-                    ...featured_artists.map((x) => x.name),
-                  ],
-                  artworkPaths: [
-                    header_image_url,
-                    song_art_image_url,
-                    primary_artist.image_url,
-                    ...featured_artists.map((x) => x.image_url),
-                  ],
-                  releasedYear: release_date_components?.year,
-                  language: language || undefined,
-                  source: 'GENIUS',
-                  sourceId: id.toString(),
-                });
-              }
-            }
-          }
-          return resolve(results);
-        }
-        log(
-          `Request to fetch song metadata results from Genius failed.\nERR_CODE : ${data?.meta?.status} => ${data.meta.message}`,
-          undefined,
-          'WARN'
-        );
-      }
-      return [];
-    } catch (error) {
-      return reject(error);
+  const GENIUS_API_KEY = process.env.GENIUS_API_KEY;
+  if (typeof GENIUS_API_KEY !== 'string') {
+    log('undefined GENIUS_API_KEY.', { GENIUS_API_KEY }, 'WARN');
+    throw new Error('undefined GENIUS_API_KEY.');
+  }
+  const res = await fetch(
+    encodeURI(
+      `${GENIUS_API_BASE_URL}/search?q=${songTitle}${
+        songArtists ? ` ${songArtists}` : ''
+      }`
+    ),
+    {
+      headers: {
+        Authorization: `Bearer ${GENIUS_API_KEY}`,
+      },
+      signal: resultsController.signal,
     }
-  });
+  );
+  if (res.ok) {
+    const data = (await res.json()) as GeniusLyricsAPI;
+    if (data?.meta?.status === 200) {
+      const { hits } = data.response;
+      const results = [] as SongMetadataResultFromInternet[];
+      if (Array.isArray(hits) && hits.length > 0) {
+        for (let i = 0; i < hits.length; i += 1) {
+          if (hits[i].type === 'song') {
+            const {
+              id,
+              title,
+              primary_artist,
+              featured_artists,
+              header_image_url,
+              release_date_components,
+              song_art_image_url,
+              language,
+            } = hits[i].result;
+            results.push({
+              title: title || 'Unknown Title',
+              artists: [
+                primary_artist.name,
+                ...featured_artists.map((x) => x.name),
+              ],
+              artworkPaths: [
+                header_image_url,
+                song_art_image_url,
+                primary_artist.image_url,
+                ...featured_artists.map((x) => x.image_url),
+              ],
+              releasedYear: release_date_components?.year,
+              language: language || undefined,
+              source: 'GENIUS',
+              sourceId: id.toString(),
+            });
+          }
+        }
+      }
+      return results;
+    }
+    log(
+      `Request to fetch song metadata results from Genius failed.\nERR_CODE : ${data?.meta?.status} => ${data.meta.message}`,
+      undefined,
+      'WARN'
+    );
+  }
+  return [];
 }
 
-function fetchSongMetadataFromGenius(
+async function fetchSongMetadataFromGenius(
   geniusSongId: string
-): Promise<SongMetadataResultFromInternet> {
-  return new Promise(async (resolve, reject) => {
-    const GENIUS_API_KEY = process.env.GENIUS_API_KEY;
+): Promise<SongMetadataResultFromInternet | undefined> {
+  const GENIUS_API_KEY = process.env.GENIUS_API_KEY;
 
-    try {
-      if (typeof GENIUS_API_KEY !== 'string') {
-        log('undefined GENIUS_API_KEY.', { GENIUS_API_KEY }, 'WARN');
-        throw new Error('undefined GENIUS_API_KEY.');
-      }
-      const res = await fetch(
-        encodeURI(`${GENIUS_API_BASE_URL}/songs?q=${geniusSongId}`),
-        {
-          headers: {
-            Authorization: `Bearer ${GENIUS_API_KEY}`,
-          },
-          signal: metadataController.signal,
-        }
-      );
-      if (res.ok) {
-        const data = (await res.json()) as GeniusSongMetadataResponse;
-        if (data?.meta?.status === 200) {
-          const { song } = data.response;
-
-          return resolve({
-            title: song.title || 'Unknown Title',
-            artists: [
-              song.primary_artist.name,
-              ...song.featured_artists.map((x) => x.name),
-            ],
-            artworkPaths: [
-              song.header_image_url,
-              song.song_art_image_url,
-              song.album.cover_art_url,
-            ],
-            album: song?.album?.name || 'Unknown Album Title',
-            releasedYear: song.release_date
-              ? new Date(song.release_date).getFullYear()
-              : undefined,
-            source: 'GENIUS',
-            sourceId: song.id.toString(),
-          });
-        }
-        reject(
-          new Error(`ERROR : ${data?.meta?.status} : ${data.meta.message}`)
-        );
-      }
-      return [];
-    } catch (error) {
-      return reject(error);
+  if (typeof GENIUS_API_KEY !== 'string') {
+    log('undefined GENIUS_API_KEY.', { GENIUS_API_KEY }, 'WARN');
+    throw new Error('undefined GENIUS_API_KEY.');
+  }
+  const res = await fetch(
+    encodeURI(`${GENIUS_API_BASE_URL}/songs?q=${geniusSongId}`),
+    {
+      headers: {
+        Authorization: `Bearer ${GENIUS_API_KEY}`,
+      },
+      signal: metadataController.signal,
     }
-  });
+  );
+  if (res.ok) {
+    const data = (await res.json()) as GeniusSongMetadataResponse;
+    if (data?.meta?.status === 200) {
+      const { song } = data.response;
+
+      return {
+        title: song.title || 'Unknown Title',
+        artists: [
+          song.primary_artist.name,
+          ...song.featured_artists.map((x) => x.name),
+        ],
+        artworkPaths: [
+          song.header_image_url,
+          song.song_art_image_url,
+          song.album.cover_art_url,
+        ],
+        album: song?.album?.name || 'Unknown Album Title',
+        releasedYear: song.release_date
+          ? new Date(song.release_date).getFullYear()
+          : undefined,
+        source: 'GENIUS',
+        sourceId: song.id.toString(),
+      };
+    }
+    throw new Error(`ERROR : ${data?.meta?.status} : ${data.meta.message}`);
+  }
+  return undefined;
 }
 
 const DEEZER_BASE_URL = 'https://api.deezer.com';
 
-function searchSongMetadataResultsInDeezer(
+async function searchSongMetadataResultsInDeezer(
   songTitle: string,
   songArtists?: string
 ): Promise<SongMetadataResultFromInternet[]> {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const res = await fetch(
-        encodeURI(
-          `${DEEZER_BASE_URL}/search?q=track:"${songTitle}"${
-            songArtists ? ` artist:"${songArtists}"` : ''
-          }`
-        ),
-        { signal: resultsController.signal }
-      );
-      if (res.ok) {
-        const data = (await res.json()) as DeezerTrackResultsAPI;
-        if (data.data.length > 0) {
-          const { data: hits } = data;
-          const results = [] as SongMetadataResultFromInternet[];
-          if (Array.isArray(hits) && hits.length > 0) {
-            for (let i = 0; i < hits.length; i += 1) {
-              if (hits[i].type === 'track') {
-                const { id, title, artist, album, duration } = hits[i];
-                results.push({
-                  title: title || 'Unknown Title',
-                  artists: artist ? [artist.name] : [],
-                  artworkPaths: [
-                    ...[
-                      album?.cover,
-                      album?.cover_big,
-                      album?.cover_medium,
-                      album?.cover_small,
-                      album?.cover_xl,
-                    ].filter((x) => x),
-                    ...[
-                      artist?.picture,
-                      artist?.picture_big,
-                      artist?.picture_medium,
-                      artist?.picture_small,
-                      artist?.picture_xl,
-                    ].filter((x) => x),
-                  ],
-                  duration,
-                  source: 'DEEZER',
-                  sourceId: id.toString(),
-                });
-              }
-            }
+  const res = await fetch(
+    encodeURI(
+      `${DEEZER_BASE_URL}/search?q=track:"${songTitle}"${
+        songArtists ? ` artist:"${songArtists}"` : ''
+      }`
+    ),
+    { signal: resultsController.signal }
+  );
+
+  if (res.ok) {
+    const data = (await res.json()) as DeezerTrackResultsAPI;
+    if (data.data.length > 0) {
+      const { data: hits } = data;
+      const results = [] as SongMetadataResultFromInternet[];
+      if (Array.isArray(hits) && hits.length > 0) {
+        for (let i = 0; i < hits.length; i += 1) {
+          if (hits[i].type === 'track') {
+            const { id, title, artist, album, duration } = hits[i];
+            results.push({
+              title: title || 'Unknown Title',
+              artists: artist ? [artist.name] : [],
+              artworkPaths: [
+                ...[
+                  album?.cover,
+                  album?.cover_big,
+                  album?.cover_medium,
+                  album?.cover_small,
+                  album?.cover_xl,
+                ].filter((x) => x),
+                ...[
+                  artist?.picture,
+                  artist?.picture_big,
+                  artist?.picture_medium,
+                  artist?.picture_small,
+                  artist?.picture_xl,
+                ].filter((x) => x),
+              ],
+              duration,
+              source: 'DEEZER',
+              sourceId: id.toString(),
+            });
           }
-          return resolve(results);
         }
-        reject(new Error(`No search results found for the query in Deezer.`));
       }
-      return [];
-    } catch (error) {
-      return reject(error);
+      return results;
     }
-  });
+    throw new Error(`No search results found for the query in Deezer.`);
+  }
+  return [];
 }
 
-function fetchSongMetadataFromDeezer(
+async function fetchSongMetadataFromDeezer(
   deezerSongId: string
-): Promise<SongMetadataResultFromInternet> {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const res = await fetch(
-        encodeURI(`${DEEZER_BASE_URL}/track/${deezerSongId}`),
-        { signal: metadataController.signal }
-      );
-      if (res.ok) {
-        const data = (await res.json()) as DeezerTrackDataAPI;
-        if (data) {
-          const { title, contributors, album, release_date, id } = data;
-          return resolve({
-            title: title || 'Unknown Title',
-            artists: contributors.map((x) => x.name).filter((x) => x),
-            artworkPaths: [
-              ...[
-                album?.cover,
-                album?.cover_big,
-                album?.cover_medium,
-                album?.cover_small,
-                album?.cover_xl,
-              ].filter((x) => x),
-              ...contributors
-                .map((contributor) => [
-                  contributor?.picture,
-                  contributor?.picture_big,
-                  contributor?.picture_medium,
-                  contributor?.picture_small,
-                  contributor?.picture_xl,
-                ])
-                .flat(5)
-                .filter((x) => x),
-            ],
-            album: album?.title || 'Unknown Album Title',
-            releasedYear: new Date(release_date).getFullYear() || undefined,
-            source: 'GENIUS',
-            sourceId: id.toString(),
-          });
-        }
-        reject(
-          new Error(`Error ocurred when fetching track meta data from Deezer.`)
-        );
-      }
-      return [];
-    } catch (error) {
-      return reject(error);
+): Promise<SongMetadataResultFromInternet | undefined> {
+  const res = await fetch(
+    encodeURI(`${DEEZER_BASE_URL}/track/${deezerSongId}`),
+    { signal: metadataController.signal }
+  );
+
+  if (res.ok) {
+    const data = (await res.json()) as DeezerTrackDataAPI;
+    if (data) {
+      const { title, contributors, album, release_date, id } = data;
+      return {
+        title: title || 'Unknown Title',
+        artists: contributors.map((x) => x.name).filter((x) => x),
+        artworkPaths: [
+          ...[
+            album?.cover,
+            album?.cover_big,
+            album?.cover_medium,
+            album?.cover_small,
+            album?.cover_xl,
+          ].filter((x) => x),
+          ...contributors
+            .map((contributor) => [
+              contributor?.picture,
+              contributor?.picture_big,
+              contributor?.picture_medium,
+              contributor?.picture_small,
+              contributor?.picture_xl,
+            ])
+            .flat(5)
+            .filter((x) => x),
+        ],
+        album: album?.title || 'Unknown Album Title',
+        releasedYear: new Date(release_date).getFullYear() || undefined,
+        source: 'GENIUS',
+        sourceId: id.toString(),
+      };
     }
-  });
+    throw new Error(`Error ocurred when fetching track meta data from Deezer.`);
+  }
+  return undefined;
 }
 
 export const searchSongMetadataResultsInInternet = async (
@@ -398,6 +437,16 @@ export const searchSongMetadataResultsInInternet = async (
   songArtsits = [] as string[]
 ) => {
   // resultsController.abort();
+  const itunesHits = fetchSongMetadataResultsFromITunes(
+    songTitle,
+    songArtsits ? songArtsits.join(' ') : undefined
+  ).catch((err) =>
+    log(
+      `Error ocurred when fetching song metadata hits from itunes api.`,
+      { err },
+      'WARN'
+    )
+  );
   const geniusHits = searchSongMetadataResultsInGenius(
     songTitle,
     songArtsits ? songArtsits.join(' ') : undefined
@@ -440,6 +489,7 @@ export const searchSongMetadataResultsInInternet = async (
   );
 
   const hits = await Promise.all([
+    itunesHits,
     geniusHits,
     deezerHits,
     lastFMHits,
@@ -462,6 +512,17 @@ export const fetchSongMetadataFromInternet = async (
 
   if (source === 'MUSIXMATCH' && musixmatchHitCache.id === sourceId)
     return musixmatchHitCache.data;
+
+  if (source === 'ITUNES') {
+    const metadata = fetchSongMetadataFromItunes(sourceId);
+    if (metadata) return metadata;
+    log(
+      `Error ocurred when fetching song metadata from itunes api hit cache.`,
+      undefined,
+      'WARN'
+    );
+    return undefined;
+  }
 
   if (source === 'GENIUS') {
     const metadata = await fetchSongMetadataFromGenius(sourceId).catch((err) =>

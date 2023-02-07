@@ -12,7 +12,7 @@ export const getSongArtworkPath = (
     : '';
   if (isArtworkAvailable) {
     return {
-      isDefaultArtwork: isArtworkAvailable,
+      isDefaultArtwork: !isArtworkAvailable,
       artworkPath:
         path.join(
           DEFAULT_FILE_URL,
@@ -152,6 +152,9 @@ export const getPlaylistArtworkPath = (
   };
 };
 
-export const removeDefaultFileUrlFromPath = (filePath: string) => {
-  return filePath.replace(/nora:[/\\]{1,2}localFiles[/\\]{1,2}/gm, '');
+export const removeDefaultAppProtocolFromFilePath = (filePath: string) => {
+  return filePath.replace(
+    /nora:[/\\]{1,2}localFiles[/\\]{1,2}|\?[\w+=\w+&?]+$/gm,
+    ''
+  );
 };

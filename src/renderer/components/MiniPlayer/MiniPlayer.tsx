@@ -1,6 +1,5 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable no-nested-ternary */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 import React from 'react';
@@ -44,22 +43,37 @@ export default function MiniPlayer() {
     if (isLyricsVisible) {
       setLyrics(null);
       window.api
-        .getSongLyrics(
-          currentSongData.title,
-          Array.isArray(currentSongData.artists)
+        .getSongLyrics({
+          songTitle: currentSongData.title,
+          songArtists: Array.isArray(currentSongData.artists)
             ? currentSongData.artists.map((artist) => artist.name)
             : [],
-          currentSongData.songId
-        )
+          songId: currentSongData.songId,
+          duration: currentSongData.duration,
+        })
         .then((res) => setLyrics(res))
         .catch((err) => console.error(err));
     }
   }, [
     currentSongData.artists,
+    currentSongData.duration,
     currentSongData.songId,
     currentSongData.title,
     isLyricsVisible,
   ]);
+
+  const manageKeyboardShortcuts = React.useCallback((e: KeyboardEvent) => {
+    if (e.ctrlKey && e.key === 'l')
+      setIsLyricsVisible((prevState) => !prevState);
+  }, []);
+
+  React.useEffect(() => {
+    window.addEventListener('keydown', manageKeyboardShortcuts);
+    return () => {
+      window.removeEventListener('keydown', manageKeyboardShortcuts);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const seekBarCssProperties: any = {};
 
@@ -106,7 +120,7 @@ export default function MiniPlayer() {
 
   const lyricsComponents = React.useMemo(() => {
     if (lyrics && lyrics?.lyrics) {
-      const { isSynced, lyrics: unsyncedLyrics, syncedLyrics } = lyrics?.lyrics;
+      const { isSynced, lyrics: unsyncedLyrics, syncedLyrics } = lyrics.lyrics;
 
       if (syncedLyrics) {
         return syncedLyrics.map((lyric, index) => {
@@ -147,7 +161,7 @@ export default function MiniPlayer() {
           }
           alt="Song Cover"
           className={`h-full w-full object-cover transition-[filter] delay-100 duration-200 ease-in-out group-hover:blur-[2px] group-hover:brightness-75 group-focus:blur-[4px] group-focus:brightness-75 ${
-            isLyricsVisible ? '!blur-[2px] !brightness-50' : ''
+            isLyricsVisible ? '!blur-[2px] !brightness-[.25]' : ''
           } ${
             !isCurrentSongPlaying
               ? 'blur-[2px] brightness-75'
@@ -168,7 +182,12 @@ export default function MiniPlayer() {
           </div>
         )}
       </div>
-      <div className="container absolute top-0 flex h-full flex-col items-center justify-between overflow-hidden ">
+      <div
+        className={`container absolute top-0 flex h-full flex-col items-center justify-between overflow-hidden ${
+          !isLyricsVisible &&
+          'bg-[linear-gradient(180deg,_rgba(2,_0,_36,_0)_0%,_rgba(33,_34,_38,_0.9)_90%)]'
+        }`}
+      >
         <div
           className={`title-bar z-10 flex h-[15%] max-h-[2.25rem] w-full select-none justify-end opacity-0 transition-[visibility,opacity] group-hover:visible group-hover:opacity-100 ${
             !isCurrentSongPlaying ? 'visible opacity-100' : ''
@@ -315,7 +334,7 @@ export default function MiniPlayer() {
             {currentSongData.title}
           </div>
           <div
-            className="song-artists text-sm"
+            className="song-artists text-sm text-font-color-white/80"
             title={currentSongData.artists
               ?.map((artist) => artist.name)
               .join(', ')}

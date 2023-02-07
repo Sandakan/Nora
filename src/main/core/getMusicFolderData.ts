@@ -1,6 +1,10 @@
+import sortFolders from '../utils/sortFolders';
 import { getSongsData, getUserData } from '../filesystem';
 
-const getMusicFolderData = (folderPaths: string[] = []) => {
+const getMusicFolderData = (
+  folderPaths: string[] = [],
+  sortType?: FolderSortTypes
+) => {
   const userData = getUserData();
   const songs = getSongsData();
 
@@ -26,6 +30,7 @@ const getMusicFolderData = (folderPaths: string[] = []) => {
         return { folderData, songIds };
       });
 
+      if (sortType) return sortFolders(folders, sortType);
       return folders;
     }
   }

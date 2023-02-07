@@ -5,7 +5,7 @@ import sharp from 'sharp';
 
 import { DEFAULT_ARTWORK_SAVE_LOCATION, DEFAULT_FILE_URL } from '../filesystem';
 import log from '../log';
-import { removeDefaultFileUrlFromPath } from '../fs/resolveFilePaths';
+import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
 import getAssetPath from '../utils/getAssetPath';
 import { generateRandomId } from '../utils/randomId';
 
@@ -79,7 +79,6 @@ const checkForDefaultArtworkSaveLocation = async () => {
   try {
     await fs.stat(DEFAULT_ARTWORK_SAVE_LOCATION);
   } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ('code' in (error as any) && (error as any).code === 'ENOENT') {
       await fs.mkdir(DEFAULT_ARTWORK_SAVE_LOCATION);
     } else throw error;
@@ -104,10 +103,12 @@ export const storeArtworks = async (
 export const removeSongArtwork = (artworkPaths: ArtworkPaths) => {
   return new Promise((resolve, reject) => {
     try {
-      fs.unlink(removeDefaultFileUrlFromPath(artworkPaths.artworkPath))
+      fs.unlink(removeDefaultAppProtocolFromFilePath(artworkPaths.artworkPath))
         .then(() =>
           fs.unlink(
-            removeDefaultFileUrlFromPath(artworkPaths.optimizedArtworkPath)
+            removeDefaultAppProtocolFromFilePath(
+              artworkPaths.optimizedArtworkPath
+            )
           )
         )
         .then(() => resolve(true))
@@ -123,7 +124,6 @@ const checkForTempFolder = async (folderPath: string) => {
     await fs.stat(folderPath);
     return true;
   } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ('code' in (error as any) && (error as any).code === 'ENOENT') {
       await fs.mkdir(folderPath);
       return true;

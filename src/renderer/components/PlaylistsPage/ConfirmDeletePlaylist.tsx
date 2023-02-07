@@ -36,20 +36,15 @@ const ConfirmDeletePlaylist = (props: ConfirmDeletePlaylistProp) => {
           label="Delete Playlist"
           className="delete-playlist-btn danger-btn float-right h-10 w-48 cursor-pointer rounded-lg border-[transparent] !bg-font-color-crimson text-font-color-white outline-none ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson"
           clickHandler={() =>
-            window.api.removePlaylist(playlistId).then((res) => {
-              if (res.success) {
-                changePromptMenuData(false);
-                addNewNotifications([
-                  {
-                    id: `${playlistName}Deleted`,
-                    delay: 5000,
-                    content: (
-                      <span>{`Playlist '${playlistName}' deleted.`}</span>
-                    ),
-                  },
-                ]);
-              }
-              return undefined;
+            window.api.removePlaylist(playlistId).then(() => {
+              changePromptMenuData(false);
+              addNewNotifications([
+                {
+                  id: `${playlistName}Deleted`,
+                  delay: 5000,
+                  content: <span>{`Playlist '${playlistName}' deleted.`}</span>,
+                },
+              ]);
             })
           }
         />

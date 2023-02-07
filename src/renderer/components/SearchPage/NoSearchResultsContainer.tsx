@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 import React from 'react';
 import Img from '../Img';
 
@@ -7,10 +8,11 @@ import RecentSearchResult from './RecentSearchResult';
 type Props = {
   searchResults: SearchResult;
   searchInput: string;
+  // eslint-disable-next-line no-unused-vars
   updateSearchInput: (input: string) => void;
 };
 
-const NoRearchResultsContainer = (props: Props) => {
+const NoSearchResultsContainer = (props: Props) => {
   const { searchInput, searchResults, updateSearchInput } = props;
   const { albums, artists, genres, playlists, songs } = searchResults;
 
@@ -38,7 +40,7 @@ const NoRearchResultsContainer = (props: Props) => {
         albums.length === 0 &&
         playlists.length === 0 &&
         genres.length === 0 &&
-        searchInput !== '' && (
+        searchInput.trim() !== '' && (
           <div className="no-search-results-container active appear-from-bottom relative mt-16 flex w-full flex-col items-center justify-center text-center">
             <Img
               src={NoResultsImage}
@@ -66,4 +68,4 @@ const NoRearchResultsContainer = (props: Props) => {
   );
 };
 
-export default NoRearchResultsContainer;
+export default NoSearchResultsContainer;

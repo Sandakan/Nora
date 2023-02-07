@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable default-param-last */
+/* eslint-disable no-use-before-define */
 /* eslint-disable promise/no-nesting */
-/* eslint-disable @typescript-eslint/no-use-before-define */
 import React, { ReactElement } from 'react';
 import 'tailwindcss/tailwind.css';
 import '../../assets/styles/styles.css';
@@ -162,7 +164,8 @@ const reducer = (
         PromptMenuData: action.data
           ? (action.data as PromptMenuData).isVisible
             ? (action.data as PromptMenuData)
-            : { ...(action.data as PromptMenuData), content: <></> }
+            : // eslint-disable-next-line react/jsx-no-useless-fragment
+              { ...(action.data as PromptMenuData), content: <></> }
           : state.PromptMenuData,
       };
     case 'ADD_NEW_NOTIFICATIONS':
@@ -505,7 +508,6 @@ export default function App() {
   const changePromptMenuData = React.useCallback(
     (
       isVisible = false,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       contentData?: ReactElement<any, any>,
       className = ''
     ) => {
@@ -523,21 +525,33 @@ export default function App() {
 
   const managePlaybackErrors = React.useCallback(
     (err: unknown) => {
-      console.error(err);
-      changePromptMenuData(
-        true,
-        <ErrorPrompt
-          reason="ERROR_IN_PLAYER"
-          message={
-            <>
-              An error ocurred in the player.
-              <br />
-              This could be a result of trying to play a corrupted song.
-            </>
-          }
-          showSendFeedbackBtn
-        />
+      const prevSongPosition = player.currentTime;
+      const playerErrorData = player.error;
+      console.error(err, playerErrorData);
+      window.api.sendLogs(
+        `Error occurred in the player.App error:${err}; Player error: ${playerErrorData};`
       );
+      if (player.src) {
+        player.load();
+        player.currentTime = prevSongPosition;
+      } else {
+        player.pause();
+        changePromptMenuData(
+          true,
+          <ErrorPrompt
+            reason="ERROR_IN_PLAYER"
+            message={
+              <>
+                An error ocurred in the player.
+                <br />
+                This could be a result of trying to play a corrupted song.
+                <details>{`${playerErrorData}`}</details>
+              </>
+            }
+            showSendFeedbackBtn
+          />
+        );
+      }
     },
     [changePromptMenuData]
   );
@@ -939,6 +953,7 @@ export default function App() {
 
   const updateNotifications = React.useCallback(
     (
+      // eslint-disable-next-line no-unused-vars
       callback: (currentNotifications: AppNotification[]) => AppNotification[]
     ) => {
       const currentNotifications = content.notificationPanelData.notifications;
@@ -1015,7 +1030,6 @@ export default function App() {
       const defaultButtonStyles =
         '!bg-background-color-3 dark:!bg-dark-background-color-3 !text-font-color-black dark:!text-font-color-black !font-light';
       let duration = 5000;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let icon: ReactElement<any, any> | undefined;
       const showMessage = true;
 
@@ -1232,7 +1246,7 @@ export default function App() {
 
       console.warn(
         songId,
-        'skip range',
+        'skip end range',
         (duration * 10) / 100,
         'full listen range',
         (duration * 90) / 100
@@ -1523,8 +1537,10 @@ export default function App() {
     if (contentRef.current.player.isRepeating === 'repeat-1') {
       player.currentTime = 0;
       toggleSongPlayback(true);
-      window.api.incrementNoOfSongListens(
-        contentRef.current.currentSongData.songId
+      window.api.updateSongListeningData(
+        contentRef.current.currentSongData.songId,
+        'listens',
+        'increment'
       );
     } else if (typeof currentSongIndex === 'number') {
       if (refQueue.current.queue.length > 0) {
@@ -2019,36 +2035,44 @@ export default function App() {
 
   const displayUnsupportedFileMessage = React.useCallback(
     (path: string) => {
+      const fileType = path.split('.').at(-1)?.replace('.', '') ?? path;
+      const isLetterAVowel = (letter: string) => /^[aeiou]/gm.test(letter);
+      const { supportedMusicExtensions } = packageFile.appPreferences;
+
+      const supportedExtensionComponents = supportedMusicExtensions.map(
+        (ext, index) => (
+          <>
+            <span className="underline">{ext}</span>
+            {index > 0 && index !== supportedMusicExtensions.length - 1 && (
+              <span className="mr-1">,</span>
+            )}
+          </>
+        )
+      );
+
       changePromptMenuData(
         true,
-        <>
-          <div>
-            <div className="title-container mb-4 text-3xl font-medium">
-              Unsupported Audio File
-            </div>
-            <div className="description">
-              You are trying to open an{' '}
-              <span className="underline">
-                {path.split('.').at(-1)?.replace('.', '') ?? path}
-              </span>{' '}
-              file which is not supported by this app.
-              <br />
-              Currently we only support <span className="underline">
-                .mp3
-              </span>, <span className="underline">.ogg</span>, and{' '}
-              <span className="underline">.wav</span> songs.
-            </div>
-            <div className="buttons-container mt-12 flex justify-end">
-              <Button
-                label="OK"
-                className="ok-btn w-[10rem] rounded-md !bg-background-color-3 text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
-                clickHandler={() => {
-                  changePromptMenuData(false);
-                }}
-              />
-            </div>
+        <div>
+          <div className="title-container mb-4 text-3xl font-medium">
+            Unsupported Audio File
           </div>
-        </>
+          <div className="description">
+            You are trying to open {isLetterAVowel(fileType[0]) ? 'an' : 'a'}{' '}
+            <span className="underline">{fileType}</span> file which is not
+            supported by this app.
+            <br />
+            Currently we only support {supportedExtensionComponents} songs.
+          </div>
+          <div className="buttons-container mt-12 flex justify-end">
+            <Button
+              label="OK"
+              className="ok-btn w-[10rem] rounded-md !bg-background-color-3 text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
+              clickHandler={() => {
+                changePromptMenuData(false);
+              }}
+            />
+          </div>
+        </div>
       );
     },
     [changePromptMenuData]
@@ -2103,6 +2127,7 @@ export default function App() {
   );
 
   const clearAudioPlayerData = React.useCallback(() => {
+    toggleSongPlayback(false);
     player.src = '';
     player.load();
     dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: {} });
@@ -2118,7 +2143,7 @@ export default function App() {
         ),
       },
     ]);
-  }, [addNewNotifications]);
+  }, [addNewNotifications, toggleSongPlayback]);
 
   const updateBodyBackgroundImage = React.useCallback(
     (isVisible: boolean, src?: string) => {
@@ -2267,6 +2292,13 @@ export default function App() {
     ]
   );
 
+  const songPositionContextValues = React.useMemo(
+    () => ({
+      songPosition: content.player.songPosition,
+    }),
+    [content.player.songPosition]
+  );
+
   return (
     <AppContext.Provider value={appContextStateValues}>
       <AppUpdateContext.Provider value={appUpdateContextValues}>
@@ -2278,9 +2310,9 @@ export default function App() {
                 : 'bg-background-color-1'
             } ${
               content.userData && content.userData.preferences.isReducedMotion
-                ? 'reduced-motion animate-none transition-none'
+                ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
                 : ''
-            } flex h-screen w-full flex-col items-center after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.song-drop]:after:visible [&.song-drop]:after:z-10 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc] [&.song-drop]:after:bg-[rgba(0,0,0,0.7)]  [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.fullscreen_#window-controls-container]:hidden`}
+            } flex h-screen w-full flex-col items-center after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc] [&.song-drop]:after:bg-[rgba(0,0,0,0.7)]  [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.fullscreen_#window-controls-container]:hidden`}
             ref={AppRef}
             onDragEnter={addSongDropPlaceholder}
             onDragLeave={removeSongDropPlaceholder}
@@ -2304,17 +2336,13 @@ export default function App() {
             <ContextMenu />
             <PromptMenu />
             <TitleBar />
-            <SongPositionContext.Provider
-              value={{ songPosition: player.currentTime }}
-            >
+            <SongPositionContext.Provider value={songPositionContextValues}>
               <BodyAndSideBarContainer />
               <SongControlsContainer />
             </SongPositionContext.Provider>
           </div>
         )}
-        <SongPositionContext.Provider
-          value={{ songPosition: player.currentTime }}
-        >
+        <SongPositionContext.Provider value={songPositionContextValues}>
           {content.player.isMiniPlayer && <MiniPlayer />}
         </SongPositionContext.Provider>
       </AppUpdateContext.Provider>

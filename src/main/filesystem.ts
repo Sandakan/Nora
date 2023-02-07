@@ -301,8 +301,6 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
       typeof data === 'object'
     ) {
       userData.windowDiamensions.miniPlayer = data as WindowCordinates;
-    } else if (dataType === 'queue' && typeof data === 'object') {
-      userData.queue = data as Queue;
     } else if (dataType === 'songBlacklist' && Array.isArray(data)) {
       userData.songBlacklist = data as string[];
     } else if (dataType === 'recentSearches' && Array.isArray(data)) {
@@ -382,6 +380,11 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
       typeof data === 'string'
     ) {
       userData.sortingStates.genresPage = data as GenreSortTypes;
+    } else if (
+      dataType === 'customMusixmatchUserToken' &&
+      typeof data === 'string'
+    ) {
+      userData.customMusixmatchUserToken = data;
     } else
       return log(
         'Error occurred in setUserData function due ot invalid dataType or data.'
@@ -473,6 +476,24 @@ export const setGenresData = (updatedGenres: SavableGenre[]) => {
   genreStore.set('genres', updatedGenres);
 };
 
+export const createNewListeningDataInstance = (songId: string) => {
+  const date = new Date();
+  const currentYear = date.getFullYear();
+
+  const months = Array.from({ length: 12 }, () =>
+    Array.from({ length: 30 }, () => 0)
+  );
+
+  const newListeningData: SongListeningData = {
+    songId,
+    skips: 0,
+    fullListens: 0,
+    inNoOfPlaylists: 0,
+    listens: [{ year: currentYear, months }],
+  };
+  return newListeningData;
+};
+
 export const getListeningData = (
   songIds = [] as string[]
 ): SongListeningData[] => {
@@ -487,25 +508,13 @@ export const getListeningData = (
       : data.filter((x) => songIds.some((songId) => x.songId === songId));
 
   if (results.length === 0) {
-    const defaultData: SongListeningData = {
-      songId: '',
-      listens: [
-        {
-          year: new Date().getFullYear(),
-          months: Array.from({ length: 12 }, () =>
-            Array.from({ length: 30 }, () => 0)
-          ),
-        },
-      ],
-    };
-
     if (songIds.length === 0) return [];
-    const defaultOutputs: SongListeningData[] = songIds.map((id) => ({
-      ...defaultData,
-      songId: id,
-    }));
+    const defaultOutputs: SongListeningData[] = songIds.map((id) =>
+      createNewListeningDataInstance(id)
+    );
     return defaultOutputs;
   }
+
   const listeningData: SongListeningData[] = results.map((x) => {
     const { songId, skips, fullListens, inNoOfPlaylists, listens } = x;
     // const updatedListens: YearlyListeningRate[] = listens.map((y) => {
@@ -529,7 +538,6 @@ export const getListeningData = (
       skips: skips ?? 0,
       fullListens: fullListens ?? 0,
       inNoOfPlaylists: inNoOfPlaylists ?? 0,
-      // listens: updatedListens,
       listens,
     };
   });
@@ -563,67 +571,11 @@ export const setListeningData = (data: SongListeningData) => {
       return listeningDataStore.set('listeningData', results);
     }
   }
-  // listening data of a song not in the store.
-  // const newListeningData: SavableSongListeningData = {
-  //   ...data,
-  //   listens: updatedListens,
-  // };
-  // results.push(newListeningData);
+
   results.push(data);
   cachedListeningData = results;
   listeningDataStore.set('listeningData', results);
   return dataUpdateEvent('songs/listeningData');
-};
-
-export const incrementNoOfSongListens = (songId: string) => {
-  const listeningData = getListeningData();
-  const date = new Date();
-  const currentYear = date.getFullYear();
-  const currentMonth = date.getMonth();
-  const currentDate = date.getDate();
-  if (listeningData.length > 0) {
-    for (let x = 0; x < listeningData.length; x += 1) {
-      if (listeningData[x].songId === songId) {
-        const data = listeningData[x];
-        if (data.listens.some((y) => y.year === currentYear)) {
-          for (let i = 0; i < data.listens.length; i += 1) {
-            if (data.listens[i].year === currentYear) {
-              if (
-                typeof data.listens[i].months[currentMonth - 1][
-                  currentDate - 1
-                ] === 'number'
-              )
-                data.listens[i].months[currentMonth - 1][currentDate - 1] += 1;
-              else if (data.listens[i].months[currentMonth - 1].length < 31)
-                data.listens[i].months[currentMonth - 1][currentDate - 1] = 1;
-            }
-          }
-        }
-        dataUpdateEvent('songs/listeningData/listens', [songId]);
-        log(`Song listens incremented on '${listeningData[x].songId}'`);
-        return setListeningData(data);
-      }
-    }
-  }
-
-  const months = Array.from({ length: 12 }, () =>
-    Array.from({ length: 30 }, () => 0)
-  );
-
-  if (typeof months[currentMonth - 1][currentDate - 1] === 'number')
-    months[currentMonth - 1][currentDate - 1] += 1;
-  else if (months[currentMonth - 1].length < 31)
-    months[currentMonth - 1][currentDate - 1] = 1;
-
-  const newListeningData: SongListeningData = {
-    songId,
-    skips: 0,
-    fullListens: 0,
-    inNoOfPlaylists: 0,
-    listens: [{ year: currentYear, months }],
-  };
-  dataUpdateEvent('songs/listeningData/listens', [songId]);
-  return setListeningData(newListeningData);
 };
 
 export const getPlaylistData = (playlistIds = [] as string[]) => {
@@ -707,7 +659,6 @@ export const resetAppCache = () => {
 };
 
 export const resetAppData = async () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const manageErrors = (err: any) => {
     if ('code' in err && err.code === 'ENOENT') {
       return log(

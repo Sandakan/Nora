@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable no-underscore-dangle */
@@ -20,8 +19,48 @@ import Button from '../Button';
 import MainContainer from '../MainContainer';
 import Hyperlink from '../Hyperlink';
 import Img from '../Img';
+import Dropdown from '../Dropdown';
 
-export default () => {
+const dropdownOptions: { label: string; value: SongSortTypes }[] = [
+  { label: 'Added Order', value: 'addedOrder' },
+  { label: 'A to Z', value: 'aToZ' },
+  { label: 'Z to A', value: 'zToA' },
+  { label: 'Newest', value: 'dateAddedAscending' },
+  { label: 'Oldest', value: 'dateAddedDescending' },
+  { label: 'Released Year (Ascending)', value: 'releasedYearAscending' },
+  { label: 'Released Year (Descending)', value: 'releasedYearDescending' },
+  {
+    label: 'Most Listened (All Time)',
+    value: 'allTimeMostListened',
+  },
+  {
+    label: 'Least Listened (All Time)',
+    value: 'allTimeLeastListened',
+  },
+  {
+    label: 'Most Listened (This Month)',
+    value: 'monthlyMostListened',
+  },
+  {
+    label: 'Least Listened (This Month)',
+    value: 'monthlyLeastListened',
+  },
+  {
+    label: 'Artist Name (A to Z)',
+    value: 'artistNameAscending',
+  },
+  {
+    label: 'Artist Name (Z to A)',
+    value: 'artistNameDescending',
+  },
+  { label: 'Album Name (A to Z)', value: 'albumNameAscending' },
+  {
+    label: 'Album Name (Z to A)',
+    value: 'albumNameDescending',
+  },
+];
+
+const ArtistInfoPage = () => {
   const {
     currentlyActivePage,
     queue,
@@ -34,10 +73,12 @@ export default () => {
     updateQueueData,
     addNewNotifications,
     updateBodyBackgroundImage,
+    updateCurrentlyActivePageData,
   } = React.useContext(AppUpdateContext);
   const [artistData, setArtistData] = React.useState({} as ArtistInfo);
   const [albums, setAlbums] = React.useState([] as Album[]);
   const [songs, setSongs] = React.useState([] as SongData[]);
+  const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>('aToZ');
 
   const fetchArtistsData = React.useCallback(() => {
     if (currentlyActivePage.data && currentlyActivePage.data.artistName) {
@@ -280,22 +321,8 @@ export default () => {
   );
 
   return (
-    <MainContainer
-      className="artist-info-page-container relative overflow-y-auto rounded-tl-lg pt-8 pb-2 pl-2 pr-2"
-      // style={
-      //   artistData.artistPalette && {
-      //     background: `linear-gradient(180deg, ${`rgb(${artistData.artistPalette.LightMuted.rgb[0]},${artistData.artistPalette.LightMuted.rgb[1]},${artistData.artistPalette.LightMuted.rgb[2]})`} 0%, var(--background-color-1) 90%)`,
-      //   }
-      // }
-    >
+    <MainContainer className="artist-info-page-container appear-from-bottom relative overflow-y-auto rounded-tl-lg pt-8 pb-2 pl-2 pr-2">
       <>
-        {/* <div className="artist-info-page-background absolute top-0 left-0 !z-0 h-full w-full">
-          <Img
-            src={artistData.onlineArtworkPaths?.picture_medium}
-            className="!z-0 h-full w-full object-cover blur-md brightness-75 transition-[filter] dark:blur-lg  dark:brightness-[0.5]"
-            alt=""
-          />
-        </div> */}
         <div className="artist-img-and-info-container relative mb-12 flex flex-row items-center pl-8 [&>*]:z-10">
           <div className="artist-img-container mr-10 max-h-60 lg:hidden">
             <Img
@@ -371,75 +398,6 @@ export default () => {
               </span>
               {/* {artistData.isAFavorite ? 'Unlike' : 'Like'} */}
             </div>
-            {artistData.songs && artistData.songs.length > 0 && (
-              <div className="artist-buttons mt-8 flex">
-                <Button
-                  label="Play All"
-                  iconName="play_arrow"
-                  className={
-                    bodyBackgroundImage
-                      ? '!text-font-color-white'
-                      : 'text-font-color-black dark:text-font-color-white'
-                  }
-                  clickHandler={() =>
-                    createQueue(
-                      artistData.songs.map((song) => song.songId),
-                      'artist',
-                      false,
-                      artistData.artistId,
-                      true
-                    )
-                  }
-                />
-                <Button
-                  label="Shuffle and Play"
-                  iconName="shuffle"
-                  className={
-                    bodyBackgroundImage
-                      ? '!text-font-color-white'
-                      : 'text-font-color-black dark:text-font-color-white'
-                  }
-                  clickHandler={() =>
-                    createQueue(
-                      artistData.songs.map((song) => song.songId),
-                      'artist',
-                      true,
-                      artistData.artistId,
-                      true
-                    )
-                  }
-                />
-                <Button
-                  label="Add to Queue"
-                  iconName="add"
-                  className={
-                    bodyBackgroundImage
-                      ? '!text-font-color-white'
-                      : 'text-font-color-black dark:text-font-color-white'
-                  }
-                  clickHandler={() => {
-                    updateQueueData(
-                      undefined,
-                      [...queue.queue, ...songs.map((song) => song.songId)],
-                      false,
-                      false
-                    );
-                    addNewNotifications([
-                      {
-                        id: 'addSongsToQueue',
-                        delay: 5000,
-                        content: (
-                          <span>
-                            Added {songs.length} song
-                            {songs.length === 1 ? '' : 's'} to the queue.
-                          </span>
-                        ),
-                      },
-                    ]);
-                  }}
-                />
-              </div>
-            )}
           </div>
         </div>
         {albums && albums.length > 0 && (
@@ -462,7 +420,7 @@ export default () => {
           </MainContainer>
         )}
         {songs && songs.length > 0 && (
-          <MainContainer className="main-container songs-list-container h-fut relative pb-4 [&>*]:z-10">
+          <MainContainer className="main-container songs-list-container relative h-full pb-4 [&>*]:z-10">
             <>
               <div
                 className={`title-container ${
@@ -470,9 +428,91 @@ export default () => {
                     ? 'text-font-color-white'
                     : 'text-font-color-black dark:text-font-color-white'
                 } mt-1 mb-4
-                  text-2xl`}
+                  flex items-center justify-between text-2xl`}
               >
                 Appears on songs
+                {artistData.songs && artistData.songs.length > 0 && (
+                  <div className="artist-buttons mr-4 flex">
+                    <Button
+                      label="Play All"
+                      iconName="play_arrow"
+                      className={
+                        bodyBackgroundImage
+                          ? '!text-font-color-white'
+                          : 'text-font-color-black dark:text-font-color-white'
+                      }
+                      clickHandler={() =>
+                        createQueue(
+                          artistData.songs.map((song) => song.songId),
+                          'artist',
+                          false,
+                          artistData.artistId,
+                          true
+                        )
+                      }
+                    />
+                    <Button
+                      tooltipLabel="Shuffle and Play"
+                      iconName="shuffle"
+                      className={
+                        bodyBackgroundImage
+                          ? '!text-font-color-white'
+                          : 'text-font-color-black dark:text-font-color-white'
+                      }
+                      clickHandler={() =>
+                        createQueue(
+                          artistData.songs.map((song) => song.songId),
+                          'artist',
+                          true,
+                          artistData.artistId,
+                          true
+                        )
+                      }
+                    />
+                    <Button
+                      tooltipLabel="Add to Queue"
+                      iconName="add"
+                      className={
+                        bodyBackgroundImage
+                          ? '!text-font-color-white'
+                          : 'text-font-color-black dark:text-font-color-white'
+                      }
+                      clickHandler={() => {
+                        updateQueueData(
+                          undefined,
+                          [...queue.queue, ...songs.map((song) => song.songId)],
+                          false,
+                          false
+                        );
+                        addNewNotifications([
+                          {
+                            id: 'addSongsToQueue',
+                            delay: 5000,
+                            content: (
+                              <span>
+                                Added {songs.length} song
+                                {songs.length === 1 ? '' : 's'} to the queue.
+                              </span>
+                            ),
+                          },
+                        ]);
+                      }}
+                    />
+                    <Dropdown
+                      name="SongsSortDropdown"
+                      value={sortingOrder}
+                      options={dropdownOptions}
+                      onChange={(e) => {
+                        const order = e.currentTarget.value as SongSortTypes;
+                        updateCurrentlyActivePageData((currentPageData) => ({
+                          ...currentPageData,
+                          sortingOrder: order,
+                        }));
+                        setSortingOrder(order);
+                      }}
+                    />
+                  </div>
+                )}
               </div>
               <div className="songs-container">{songComponenets}</div>
             </>
@@ -493,3 +533,5 @@ export default () => {
     </MainContainer>
   );
 };
+
+export default ArtistInfoPage;

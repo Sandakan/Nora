@@ -67,6 +67,7 @@ const sendSongID3Tags = async (songId: string): Promise<SongTags> => {
               song.songId,
               song.isArtworkAvailable
             ).artworkPath,
+            duration: song.duration,
           };
           return res;
         }

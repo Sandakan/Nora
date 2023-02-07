@@ -4,4 +4,6 @@ export interface SongPositionContextType {
   songPosition: number;
 }
 
-export const SongPositionContext = createContext({} as SongPositionContextType);
+export const SongPositionContext = createContext<SongPositionContextType>({
+  songPosition: 0,
+});

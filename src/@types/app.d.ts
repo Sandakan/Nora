@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-use-before-define */
+/* eslint-disable no-unused-vars */
 import NodeID3 from 'node-id3';
 import { ReactElement } from 'react';
 import { ButtonProps } from 'renderer/components/Button';
@@ -235,11 +236,18 @@ declare global {
     isPlayerStalled: boolean;
   }
 
-  type LyricsTypes = 'SYNCED' | 'UN_SYNCED' | 'UNKNOWN';
+  type LyricsTypes = 'SYNCED' | 'UN_SYNCED' | 'ANY';
 
-  type LyricsRequestTypes = LyricsTypes | 'ONLINE_ONLY' | 'ANY';
+  type LyricsRequestTypes = 'ONLINE_ONLY' | 'OFFLINE_ONLY' | 'ANY';
 
   type LyricsSource = 'in_song_lyrics' | string;
+
+  interface LyricsRequestTrackInfo {
+    songTitle: string;
+    songArtists?: string[];
+    songId?: string;
+    duration: number;
+  }
 
   interface SongLyrics {
     title: string;
@@ -262,7 +270,39 @@ declare global {
     lyrics: string[];
     syncedLyrics?: SyncedLyricLine[];
     unparsedLyrics: string;
+    copyright?: string;
   }
+
+  // node-id3 synchronisedLyrics types.
+  type synchronisedLyrics =
+    | Array<{
+        /**
+         * 3 letter ISO 639-2 language code, for example: eng
+         * @see {@link https://id3.org/ISO%20639-2 ISO 639-2}
+         */
+        language: string;
+        /**
+         * Absolute time unit:
+         * {@link TagConstants.TimeStampFormat}
+         */
+        timeStampFormat: number;
+        /**
+         * {@link TagConstants.SynchronisedLyrics.ContentType}
+         */
+        contentType: number;
+        /**
+         * Content descriptor
+         */
+        shortText?: string;
+        synchronisedText: Array<{
+          text: string;
+          /**
+           * Absolute time in unit according to `timeStampFormat`.
+           */
+          timeStamp: number;
+        }>;
+      }>
+    | undefined;
 
   // ? Song queue related types
 
@@ -323,6 +363,7 @@ declare global {
     | 'preferences.isMusixmatchLyricsEnabled'
     | 'preferences.disableBackgroundArtworks'
     | 'songBlacklist'
+    | 'customMusixmatchUserToken'
     | PageSortTypes;
 
   type AppUpdatesState =
@@ -379,6 +420,7 @@ declare global {
       genresPage?: GenreSortTypes;
     };
     recentSearches: string[];
+    customMusixmatchUserToken?: string;
   }
 
   interface AppThemeData {
@@ -637,6 +679,7 @@ declare global {
   type SongSortTypes =
     | 'aToZ'
     | 'zToA'
+    | 'addedOrder'
     | 'dateAddedAscending'
     | 'dateAddedDescending'
     | 'releasedYearAscending'
@@ -672,6 +715,12 @@ declare global {
     | 'noOfSongsDescending';
 
   type GenreSortTypes =
+    | 'aToZ'
+    | 'zToA'
+    | 'noOfSongsAscending'
+    | 'noOfSongsDescending';
+
+  type FolderSortTypes =
     | 'aToZ'
     | 'zToA'
     | 'noOfSongsAscending'
@@ -813,6 +862,7 @@ declare global {
     composer?: string;
     lyrics?: string;
     artworkPath?: string;
+    duration: number;
   }
 
   interface NodeID3Tags extends NodeID3.Tags {
@@ -860,6 +910,7 @@ declare global {
     | 'LAST_FM'
     | 'GENIUS'
     | 'DEEZER'
+    | 'ITUNES'
     | 'MUSIXMATCH';
 
   interface SongMetadataResultFromInternet {

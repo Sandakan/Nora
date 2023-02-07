@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable default-param-last */
 import NodeID3 from 'node-id3';
 import songlyrics from 'songlyrics';
 
@@ -5,7 +7,9 @@ import { getSongsData, getUserData } from '../filesystem';
 import log from '../log';
 import { checkIfConnectedToInternet, sendMessageToRenderer } from '../main';
 import fetchLyricsFromMusixmatch from '../utils/fetchLyricsFromMusixmatch';
-import parseLyrics from '../utils/parseLyrics';
+import parseLyrics, {
+  parseSyncedLyricsFromAudioDataSource,
+} from '../utils/parseLyrics';
 
 let cachedLyrics = undefined as SongLyrics | undefined;
 
@@ -28,27 +32,27 @@ const fetchLyricsFromAudioSource = (songId: string, songTitle: string) => {
 
         // $ synchronisedLyrics tag skipped due to issues like incorrect timestamps. Could be an issue in the NodeID3.
 
-        // const syncedLyricsArr = songData.synchronisedLyrics;
+        const syncedLyricsArr = songData.synchronisedLyrics;
 
-        // if (Array.isArray(syncedLyricsArr) && syncedLyricsArr.length > 0) {
-        //   const syncedLyricsData = syncedLyricsArr[0];
-        //   const parsedSyncedLyrics =
-        //     parseSyncedLyricsFromAudioDataSource(syncedLyricsData);
+        if (Array.isArray(syncedLyricsArr) && syncedLyricsArr.length > 0) {
+          const syncedLyricsData = syncedLyricsArr[0];
+          const parsedSyncedLyrics =
+            parseSyncedLyricsFromAudioDataSource(syncedLyricsData);
 
-        //   if (parsedSyncedLyrics) {
-        //     const { isSynced } = parsedSyncedLyrics;
+          if (parsedSyncedLyrics) {
+            const { isSynced } = parsedSyncedLyrics;
 
-        //     const lyricsType: LyricsTypes = isSynced ? 'SYNCED' : 'UN_SYNCED';
+            const lyricsType: LyricsTypes = isSynced ? 'SYNCED' : 'UN_SYNCED';
 
-        //     cachedLyrics = {
-        //       title: songTitle,
-        //       source: 'in_song_lyrics',
-        //       lyricsType,
-        //       lyrics: parsedSyncedLyrics,
-        //     };
-        //     return cachedLyrics;
-        //   }
-        // }
+            cachedLyrics = {
+              title: songTitle,
+              source: 'in_song_lyrics',
+              lyricsType,
+              lyrics: parsedSyncedLyrics,
+            };
+            return cachedLyrics;
+          }
+        }
 
         if (lyrics) {
           const parsedLyrics = parseLyrics(lyrics.text);
@@ -73,14 +77,17 @@ const fetchLyricsFromAudioSource = (songId: string, songTitle: string) => {
 };
 
 const getLyricsFromMusixmatch = async (
-  songTitle: string,
-  songArtists: string[],
-  lyricsType?: LyricsRequestTypes,
+  trackInfo: LyricsRequestTrackInfo,
+  lyricsType?: LyricsTypes,
   abortControllerSignal?: AbortSignal
 ) => {
+  const { songTitle, songArtists = [], duration } = trackInfo;
+
   const userData = getUserData();
 
-  const mxmUserToken = process.env.MUSIXMATCH_DEFAULT_USER_TOKEN;
+  const mxmUserToken =
+    userData?.customMusixmatchUserToken?.trim() ||
+    process.env.MUSIXMATCH_DEFAULT_USER_TOKEN;
   if (mxmUserToken && userData?.preferences?.isMusixmatchLyricsEnabled) {
     // Searching internet for lyrics because none present on audio source.
     try {
@@ -88,6 +95,8 @@ const getLyricsFromMusixmatch = async (
         {
           q_track: songTitle,
           q_artist: songArtists[0] || '',
+          q_artists: songArtists.join(' '),
+          q_duration: duration.toString(),
         },
         mxmUserToken,
         lyricsType,
@@ -152,32 +161,36 @@ const fetchUnsyncedLyrics = async (
 };
 
 const getSongLyrics = async (
-  songTitle: string,
-  songArtists = [] as string[],
-  songId?: string,
-  lyricsType = 'ANY' as LyricsRequestTypes,
-  forceDownload = false,
+  trackInfo: LyricsRequestTrackInfo,
+  lyricsType: LyricsTypes = 'ANY',
+  lyricsRequestType: LyricsRequestTypes = 'ANY',
   abortControllerSignal?: AbortSignal
 ): Promise<SongLyrics | undefined> => {
+  const { songTitle, songArtists = [], songId } = trackInfo;
   const isConnectedToInternet = checkIfConnectedToInternet();
 
   log(`Fetching lyrics for '${songTitle} - ${songArtists.join(',')}'.`);
-  if (!forceDownload && cachedLyrics && cachedLyrics.title === songTitle) {
-    log('Serving cached lyrics.');
-    return cachedLyrics;
-  }
-  // No cached lyrics. Trying to fetch lyrics from audio_source.
-  if (songId && !forceDownload) {
-    const audioSourceLyrics = fetchLyricsFromAudioSource(songId, songTitle);
-    if (audioSourceLyrics) return audioSourceLyrics;
+
+  if (lyricsRequestType !== 'ONLINE_ONLY') {
+    if (
+      lyricsRequestType !== 'OFFLINE_ONLY' &&
+      cachedLyrics &&
+      cachedLyrics.title === songTitle
+    ) {
+      log('Serving cached lyrics.');
+      return cachedLyrics;
+    }
+
+    if (songId) {
+      const audioSourceLyrics = fetchLyricsFromAudioSource(songId, songTitle);
+      if (audioSourceLyrics) return audioSourceLyrics;
+    }
   }
 
-  // No lyrics in the audio_source. Trying to fetch lyrics from the internet.
-  if (isConnectedToInternet) {
+  if (isConnectedToInternet && lyricsRequestType !== 'OFFLINE_ONLY') {
     try {
       const musixmatchLyrics = await getLyricsFromMusixmatch(
-        songTitle,
-        songArtists,
+        trackInfo,
         lyricsType,
         abortControllerSignal
       );

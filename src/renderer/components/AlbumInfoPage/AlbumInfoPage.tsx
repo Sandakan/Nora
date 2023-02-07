@@ -3,7 +3,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable no-restricted-syntax */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable react/destructuring-assignment */
@@ -12,6 +11,7 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
 import Button from '../Button';
+import Dropdown from '../Dropdown';
 import Img from '../Img';
 import MainContainer from '../MainContainer';
 import Song from '../SongsPage/Song';
@@ -20,9 +20,13 @@ import SongArtist from '../SongsPage/SongArtist';
 interface AlbumContentReducer {
   albumData: Album;
   songsData: SongData[];
+  sortingOrder: SongSortTypes;
 }
 
-type AlbumContentReducerActions = 'ALBUM_DATA_UPDATE' | 'SONGS_DATA_UPDATE';
+type AlbumContentReducerActions =
+  | 'ALBUM_DATA_UPDATE'
+  | 'SONGS_DATA_UPDATE'
+  | 'UPDATE_SORTING_ORDER';
 
 const reducer = (
   state: AlbumContentReducer,
@@ -33,25 +37,73 @@ const reducer = (
       return {
         ...state,
         albumData: action.data,
-      } as AlbumContentReducer;
+      };
     case 'SONGS_DATA_UPDATE':
       return {
         ...state,
         songsData: action.data,
-      } as AlbumContentReducer;
+      };
+    case 'UPDATE_SORTING_ORDER':
+      return {
+        ...state,
+        sortingOrder: action.data,
+      };
     default:
       return state;
   }
 };
 
+const dropdownOptions: { label: string; value: SongSortTypes }[] = [
+  { label: 'A to Z', value: 'aToZ' },
+  { label: 'Z to A', value: 'zToA' },
+  { label: 'Newest', value: 'dateAddedAscending' },
+  { label: 'Oldest', value: 'dateAddedDescending' },
+  { label: 'Released Year (Ascending)', value: 'releasedYearAscending' },
+  { label: 'Released Year (Descending)', value: 'releasedYearDescending' },
+  {
+    label: 'Most Listened (All Time)',
+    value: 'allTimeMostListened',
+  },
+  {
+    label: 'Least Listened (All Time)',
+    value: 'allTimeLeastListened',
+  },
+  {
+    label: 'Most Listened (This Month)',
+    value: 'monthlyMostListened',
+  },
+  {
+    label: 'Least Listened (This Month)',
+    value: 'monthlyLeastListened',
+  },
+  {
+    label: 'Artist Name (A to Z)',
+    value: 'artistNameAscending',
+  },
+  {
+    label: 'Artist Name (Z to A)',
+    value: 'artistNameDescending',
+  },
+  { label: 'Album Name (A to Z)', value: 'albumNameAscending' },
+  {
+    label: 'Album Name (Z to A)',
+    value: 'albumNameDescending',
+  },
+];
+
 export default () => {
   const { currentlyActivePage, queue, userData } = useContext(AppContext);
-  const { createQueue, updateQueueData, addNewNotifications } =
-    useContext(AppUpdateContext);
+  const {
+    createQueue,
+    updateQueueData,
+    addNewNotifications,
+    updateCurrentlyActivePageData,
+  } = useContext(AppUpdateContext);
 
   const [albumContent, dispatch] = React.useReducer(reducer, {
     albumData: {} as Album,
     songsData: [] as SongData[],
+    sortingOrder: 'aToZ',
   });
 
   const fetchAlbumData = React.useCallback(() => {
@@ -72,14 +124,17 @@ export default () => {
       albumContent.albumData.songs.length > 0
     ) {
       window.api
-        .getSongInfo(albumContent.albumData.songs.map((song) => song.songId))
+        .getSongInfo(
+          albumContent.albumData.songs.map((song) => song.songId),
+          albumContent.sortingOrder
+        )
         .then((res) => {
           if (res && res.length > 0) {
             dispatch({ type: 'SONGS_DATA_UPDATE', data: res });
           }
         });
     }
-  }, [albumContent.albumData]);
+  }, [albumContent.albumData, albumContent.sortingOrder]);
 
   React.useEffect(() => {
     fetchAlbumData();
@@ -150,14 +205,14 @@ export default () => {
   }, [albumContent.songsData]);
 
   return (
-    <MainContainer className="main-container album-info-page-container pt-8 pb-12 pl-8">
+    <MainContainer className="album-info-page-container pb-12 pl-8 pt-4">
       <>
         <div className="album-img-and-info-container flex flex-row items-center">
           <div className="album-cover-container mr-8">
             {albumContent.albumData.artworkPaths && (
               <Img
                 src={albumContent.albumData.artworkPaths.artworkPath}
-                className="w-60 rounded-2xl"
+                className="w-52 rounded-xl"
                 alt="Album Cover"
               />
             )}{' '}
@@ -167,7 +222,7 @@ export default () => {
             albumContent.albumData.artists.length > 0 &&
             albumContent.albumData.songs.length > 0 && (
               <div className="album-info-container max-w-[70%] text-font-color-black dark:text-font-color-white">
-                <div className="album-title w-full overflow-hidden text-ellipsis whitespace-nowrap text-5xl">
+                <div className="album-title h-fit w-full overflow-hidden text-ellipsis whitespace-nowrap py-2 text-5xl text-font-color-highlight dark:text-dark-font-color-highlight">
                   {albumContent.albumData.title}
                 </div>
                 <div className="album-artists m-0 inline h-[unset] w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-xl">
@@ -201,74 +256,87 @@ export default () => {
                     {albumContent.albumData.year}
                   </div>
                 )}
-                {albumContent.songsData.length > 0 && (
-                  <div className="album-buttons mt-4 flex">
-                    <Button
-                      label="Play All"
-                      iconName="play_arrow"
-                      clickHandler={() =>
-                        createQueue(
-                          albumContent.songsData.map((song) => song.songId),
-                          'songs',
-                          false,
-                          albumContent.albumData.albumId,
-                          true
-                        )
-                      }
-                    />
-                    <Button
-                      label="Shuffle and Play"
-                      iconName="shuffle"
-                      clickHandler={() =>
-                        createQueue(
-                          albumContent.songsData.map((song) => song.songId),
-                          'songs',
-                          true,
-                          albumContent.albumData.albumId,
-                          true
-                        )
-                      }
-                    />
-                    <Button
-                      label="Add to Queue"
-                      iconName="add"
-                      clickHandler={() => {
-                        updateQueueData(
-                          undefined,
-                          [
-                            ...queue.queue,
-                            ...albumContent.songsData.map(
-                              (song) => song.songId
-                            ),
-                          ],
-                          false,
-                          false
-                        );
-                        addNewNotifications([
-                          {
-                            id: albumContent.albumData.albumId,
-                            delay: 5000,
-                            content: (
-                              <span>
-                                Added {albumContent.songsData.length} song
-                                {albumContent.songsData.length === 1
-                                  ? ''
-                                  : 's'}{' '}
-                                to the queue.
-                              </span>
-                            ),
-                          },
-                        ]);
-                      }}
-                    />
-                  </div>
-                )}
               </div>
             )}
         </div>
         <div className="album-songs-container secondary-container songs-list-container mt-8 h-fit pb-4">
-          <div className="title-container mt-1 mb-4 flex items-center pr-4 text-2xl text-font-color-black  dark:text-font-color-white">
+          <div className="title-container ju mt-1 mb-4 flex items-center justify-between pr-4 text-2xl text-font-color-black  dark:text-font-color-white">
             Songs
+            <div className="other-controls-container flex">
+              {albumContent.songsData.length > 0 && (
+                <div className="album-buttons flex">
+                  <Button
+                    label="Play All"
+                    iconName="play_arrow"
+                    clickHandler={() =>
+                      createQueue(
+                        albumContent.songsData.map((song) => song.songId),
+                        'songs',
+                        false,
+                        albumContent.albumData.albumId,
+                        true
+                      )
+                    }
+                  />
+                  <Button
+                    tooltipLabel="Shuffle and Play"
+                    iconName="shuffle"
+                    clickHandler={() =>
+                      createQueue(
+                        albumContent.songsData.map((song) => song.songId),
+                        'songs',
+                        true,
+                        albumContent.albumData.albumId,
+                        true
+                      )
+                    }
+                  />
+                  <Button
+                    tooltipLabel="Add to Queue"
+                    iconName="add"
+                    clickHandler={() => {
+                      updateQueueData(
+                        undefined,
+                        [
+                          ...queue.queue,
+                          ...albumContent.songsData.map((song) => song.songId),
+                        ],
+                        false,
+                        false
+                      );
+                      addNewNotifications([
+                        {
+                          id: albumContent.albumData.albumId,
+                          delay: 5000,
+                          content: (
+                            <span>
+                              Added {albumContent.songsData.length} song
+                              {albumContent.songsData.length === 1
+                                ? ''
+                                : 's'}{' '}
+                              to the queue.
+                            </span>
+                          ),
+                        },
+                      ]);
+                    }}
+                  />
+                </div>
+              )}
+              <Dropdown
+                name="PlaylistPageSortDropdown"
+                value={albumContent.sortingOrder}
+                options={dropdownOptions}
+                onChange={(e) => {
+                  const order = e.currentTarget.value as SongSortTypes;
+                  updateCurrentlyActivePageData((currentPageData) => ({
+                    ...currentPageData,
+                    sortingOrder: order,
+                  }));
+                  dispatch({ type: 'UPDATE_SORTING_ORDER', data: order });
+                }}
+              />
+            </div>
           </div>
           <div className="songs-container relative flex flex-col">
             {songComponents}

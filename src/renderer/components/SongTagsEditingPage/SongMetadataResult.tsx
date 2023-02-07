@@ -1,4 +1,5 @@
 /* eslint-disable react/require-default-props */
+/* eslint-disable no-unused-vars */
 import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
@@ -17,7 +18,7 @@ interface SongMetadataResultProp {
   updateMetadataKeywords: (metadataKeywords: MetadataKeywords) => void;
 }
 
-const SongMetadataResult = (props: SongMetadataResultProp) => {
+function SongMetadataResult(props: SongMetadataResultProp) {
   const { changePromptMenuData, updateContextMenuData } =
     React.useContext(AppUpdateContext);
   const {
@@ -53,7 +54,7 @@ const SongMetadataResult = (props: SongMetadataResultProp) => {
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events
     <div className="mb-2 flex h-32 min-h-[5rem] w-full cursor-pointer items-center justify-between rounded-md bg-background-color-2/70 p-1 backdrop-blur-md hover:bg-background-color-2 dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2">
-      <div className="flex h-full">
+      <div className="flex h-full max-w-[70%]">
         <div className="img-container mr-4 overflow-hidden rounded-md">
           <Img
             src={artworkPath}
@@ -61,8 +62,10 @@ const SongMetadataResult = (props: SongMetadataResultProp) => {
             alt=""
           />
         </div>
-        <div className="song-result-info-container flex flex-col justify-center text-font-color-black dark:text-font-color-white">
-          <p className="song-result-title text-xl">{title}</p>
+        <div className="song-result-info-container flex max-w-[75%] flex-col justify-center text-font-color-black dark:text-font-color-white">
+          <p className="song-result-title relative w-full overflow-hidden text-ellipsis whitespace-nowrap text-xl">
+            {title}
+          </p>
           <p className="song-result-artists font-light text-opacity-75">
             {artists.join(', ')}
           </p>
@@ -129,5 +132,5 @@ const SongMetadataResult = (props: SongMetadataResultProp) => {
       </div>
     </div>
   );
-};
+}
 export default SongMetadataResult;

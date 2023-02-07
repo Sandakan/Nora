@@ -1,7 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable no-console */
 /* eslint-disable react/no-array-index-key */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
@@ -17,6 +16,46 @@ import Song from '../SongsPage/Song';
 import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';
 import Img from '../Img';
 import MainContainer from '../MainContainer';
+import Dropdown from '../Dropdown';
+
+const dropdownOptions: { label: string; value: SongSortTypes }[] = [
+  { label: 'Added Order', value: 'addedOrder' },
+  { label: 'A to Z', value: 'aToZ' },
+  { label: 'Z to A', value: 'zToA' },
+  { label: 'Newest', value: 'dateAddedAscending' },
+  { label: 'Oldest', value: 'dateAddedDescending' },
+  { label: 'Released Year (Ascending)', value: 'releasedYearAscending' },
+  { label: 'Released Year (Descending)', value: 'releasedYearDescending' },
+  {
+    label: 'Most Listened (All Time)',
+    value: 'allTimeMostListened',
+  },
+  {
+    label: 'Least Listened (All Time)',
+    value: 'allTimeLeastListened',
+  },
+  {
+    label: 'Most Listened (This Month)',
+    value: 'monthlyMostListened',
+  },
+  {
+    label: 'Least Listened (This Month)',
+    value: 'monthlyLeastListened',
+  },
+  {
+    label: 'Artist Name (A to Z)',
+    value: 'artistNameAscending',
+  },
+  {
+    label: 'Artist Name (Z to A)',
+    value: 'artistNameDescending',
+  },
+  { label: 'Album Name (A to Z)', value: 'albumNameAscending' },
+  {
+    label: 'Album Name (Z to A)',
+    value: 'albumNameDescending',
+  },
+];
 
 const PlaylistInfoPage = () => {
   const { currentlyActivePage, queue, userData } = useContext(AppContext);
@@ -25,10 +64,13 @@ const PlaylistInfoPage = () => {
     changePromptMenuData,
     addNewNotifications,
     createQueue,
+    updateCurrentlyActivePageData,
   } = React.useContext(AppUpdateContext);
 
   const [playlistData, setPlaylistData] = React.useState({} as Playlist);
   const [playlistSongs, setPlaylistSongs] = React.useState([] as SongData[]);
+  const [sortingOrder, setSortingOrder] =
+    React.useState<SongSortTypes>('addedOrder');
 
   const fetchPlaylistData = React.useCallback(() => {
     if (currentlyActivePage.data.playlistId) {
@@ -46,14 +88,17 @@ const PlaylistInfoPage = () => {
         .getSongInfo(
           playlistData.playlistId === 'History'
             ? playlistData.songs.reverse()
-            : playlistData.songs
+            : playlistData.songs,
+          sortingOrder,
+          undefined,
+          sortingOrder === 'addedOrder'
         )
         .then((songsData) => {
           if (songsData && songsData.length > 0)
             setPlaylistSongs(songsData.reverse());
         });
     }
-  }, [playlistData.songs, playlistData.playlistId]);
+  }, [playlistData.songs, playlistData.playlistId, sortingOrder]);
 
   React.useEffect(() => {
     fetchPlaylistData();
@@ -172,8 +217,130 @@ const PlaylistInfoPage = () => {
   );
 
   return (
-    <MainContainer className="main-container playlist-info-page-container p-8 pr-4">
+    <MainContainer className="main-container playlist-info-page-container px-8 pb-8 pt-4 pr-4">
       <>
+        {/* <div className="title-container mt-1 mb-4 flex items-center justify-between text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+          <div className="genre-title-container max-w-[40%] overflow-hidden text-ellipsis whitespace-nowrap">
+            {playlistData?.name}
+          </div>
+          <div className="other-controls-container flex">
+            {playlistData.songs && playlistData.songs.length > 0 && (
+              <div className="playlist-buttons flex">
+                {playlistData.playlistId === 'History' && (
+                  <Button
+                    label="Clear History"
+                    iconName="clear"
+                    className="mb-4"
+                    clickHandler={() => {
+                      changePromptMenuData(
+                        true,
+                        <SensitiveActionConfirmPrompt
+                          title="Confrim the action to clear Song History"
+                          content={
+                            <div>
+                              You wouldn't be able to see what you have listened
+                              previously if you decide to continue this action.
+                            </div>
+                          }
+                          confirmButton={{
+                            label: 'Clear History',
+                            clickHandler: () => {
+                              window.api
+                                .clearSongHistory()
+                                .then(
+                                  (res) =>
+                                    res.success &&
+                                    addNewNotifications([
+                                      {
+                                        id: 'queueCleared',
+                                        delay: 5000,
+                                        content: (
+                                          <span>
+                                            Cleared the song history
+                                            successfully.
+                                          </span>
+                                        ),
+                                      },
+                                    ])
+                                )
+                                .catch((err) => console.error(err));
+                            },
+                          }}
+                        />
+                      );
+                    }}
+                  />
+                )}
+                <Button
+                  label="Play All"
+                  iconName="play_arrow"
+                  className="mb-4"
+                  clickHandler={() =>
+                    createQueue(
+                      playlistData.songs,
+                      'songs',
+                      false,
+                      playlistData.playlistId,
+                      true
+                    )
+                  }
+                />
+                <Button
+                  tooltipLabel="Shuffle and Play"
+                  iconName="shuffle"
+                  className="mb-4"
+                  clickHandler={() =>
+                    createQueue(
+                      playlistData.songs,
+                      'playlist',
+                      true,
+                      playlistData.playlistId,
+                      true
+                    )
+                  }
+                />
+                <Button
+                  tooltipLabel="Add to Queue"
+                  iconName="add"
+                  className="mb-4"
+                  clickHandler={() => {
+                    updateQueueData(undefined, [
+                      ...queue.queue,
+                      ...playlistData.songs,
+                    ]);
+                    addNewNotifications([
+                      {
+                        id: `addedToQueue`,
+                        delay: 5000,
+                        content: (
+                          <span>
+                            Added {playlistData.songs.length} song
+                            {playlistData.songs.length === 1 ? '' : 's'} to the
+                            queue.
+                          </span>
+                        ),
+                      },
+                    ]);
+                  }}
+                />
+
+                <Dropdown
+                  name="PlaylistPageSortDropdown"
+                  value={sortingOrder}
+                  options={dropdownOptions}
+                  onChange={(e) => {
+                    const order = e.currentTarget.value as SongSortTypes;
+                    updateCurrentlyActivePageData((currentPageData) => ({
+                      ...currentPageData,
+                      sortingOrder: order,
+                    }));
+                    setSortingOrder(order);
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        </div> */}
         {Object.keys(playlistData).length > 0 && (
           <div className="playlist-img-and-info-container appear-from-bottom mb-8 flex flex-row items-center justify-start">
             <div className="playlist-cover-container mt-2">
@@ -183,12 +350,12 @@ const PlaylistInfoPage = () => {
                     ? playlistData.artworkPaths.artworkPath
                     : DefaultPlaylistCover
                 }
-                className="w-60 rounded-2xl lg:w-48 md:w-40"
+                className="w-52 rounded-xl lg:w-48"
                 alt="Playlist Cover"
               />
             </div>
             <div className="playlist-info-container ml-8 text-font-color-black dark:text-font-color-white">
-              <div className="playlist-name mb-2 w-full overflow-hidden text-ellipsis whitespace-nowrap text-5xl">
+              <div className="playlist-name mb-2 w-full overflow-hidden text-ellipsis whitespace-nowrap text-5xl text-font-color-highlight dark:text-dark-font-color-highlight">
                 {playlistData.name}
               </div>
               <div className="playlist-no-of-songs w-full overflow-hidden text-ellipsis whitespace-nowrap text-base">
@@ -206,115 +373,127 @@ const PlaylistInfoPage = () => {
                   playlistData.createdDate
                 ).toUTCString()}`}
               </div>
-              {playlistData.songs && playlistData.songs.length > 0 && (
-                <div className="playlist-buttons mt-8 flex flex-wrap">
-                  <Button
-                    label="Play All"
-                    iconName="play_arrow"
-                    className="mb-4"
-                    clickHandler={() =>
-                      createQueue(
-                        playlistData.songs,
-                        'songs',
-                        false,
-                        playlistData.playlistId,
-                        true
-                      )
-                    }
-                  />
-                  <Button
-                    label="Shuffle and Play"
-                    iconName="shuffle"
-                    className="mb-4"
-                    clickHandler={() =>
-                      createQueue(
-                        playlistData.songs,
-                        'playlist',
-                        true,
-                        playlistData.playlistId,
-                        true
-                      )
-                    }
-                  />
-                  <Button
-                    label="Add to Queue"
-                    iconName="add"
-                    className="mb-4"
-                    clickHandler={() => {
-                      updateQueueData(undefined, [
-                        ...queue.queue,
-                        ...playlistData.songs,
-                      ]);
-                      addNewNotifications([
-                        {
-                          id: `addedToQueue`,
-                          delay: 5000,
-                          content: (
-                            <span>
-                              Added {playlistData.songs.length} song
-                              {playlistData.songs.length === 1 ? '' : 's'} to
-                              the queue.
-                            </span>
-                          ),
-                        },
-                      ]);
-                    }}
-                  />
-                  {playlistData.playlistId === 'History' && (
-                    <Button
-                      label="Clear History"
-                      iconName="clear"
-                      className="mb-4"
-                      clickHandler={() => {
-                        changePromptMenuData(
-                          true,
-                          <SensitiveActionConfirmPrompt
-                            title="Confrim the action to clear Song History"
-                            content={
-                              <div>
-                                You wouldn't be able to see what you have
-                                listened previously if you decide to continue
-                                this action.
-                              </div>
-                            }
-                            confirmButton={{
-                              label: 'Clear History',
-                              clickHandler: () => {
-                                window.api
-                                  .clearSongHistory()
-                                  .then(
-                                    (res) =>
-                                      res.success &&
-                                      addNewNotifications([
-                                        {
-                                          id: 'queueCleared',
-                                          delay: 5000,
-                                          content: (
-                                            <span>
-                                              Cleared the song history
-                                              successfully.
-                                            </span>
-                                          ),
-                                        },
-                                      ])
-                                  )
-                                  .catch((err) => console.error(err));
-                              },
-                            }}
-                          />
-                        );
-                      }}
-                    />
-                  )}
-                </div>
-              )}
             </div>
           </div>
         )}
         {playlistSongs.length > 0 && (
           <div className="songs-list-container">
-            <div className="title-container mt-1 mb-4 flex items-center pr-4 text-2xl text-font-color-black dark:text-font-color-white">
+            <div className="title-container mt-1 mb-4 flex items-center justify-between pr-4 text-2xl text-font-color-black dark:text-font-color-white">
               Songs
+              <div className="other-controls-container flex">
+                {playlistData.songs && playlistData.songs.length > 0 && (
+                  <div className="playlist-buttons flex">
+                    {playlistData.playlistId === 'History' && (
+                      <Button
+                        label="Clear History"
+                        iconName="clear"
+                        clickHandler={() => {
+                          changePromptMenuData(
+                            true,
+                            <SensitiveActionConfirmPrompt
+                              title="Confrim the action to clear Song History"
+                              content={
+                                <div>
+                                  You wouldn't be able to see what you have
+                                  listened previously if you decide to continue
+                                  this action.
+                                </div>
+                              }
+                              confirmButton={{
+                                label: 'Clear History',
+                                clickHandler: () => {
+                                  window.api
+                                    .clearSongHistory()
+                                    .then(
+                                      (res) =>
+                                        res.success &&
+                                        addNewNotifications([
+                                          {
+                                            id: 'queueCleared',
+                                            delay: 5000,
+                                            content: (
+                                              <span>
+                                                Cleared the song history
+                                                successfully.
+                                              </span>
+                                            ),
+                                          },
+                                        ])
+                                    )
+                                    .catch((err) => console.error(err));
+                                },
+                              }}
+                            />
+                          );
+                        }}
+                      />
+                    )}
+                    <Button
+                      label="Play All"
+                      iconName="play_arrow"
+                      clickHandler={() =>
+                        createQueue(
+                          playlistData.songs,
+                          'songs',
+                          false,
+                          playlistData.playlistId,
+                          true
+                        )
+                      }
+                    />
+                    <Button
+                      tooltipLabel="Shuffle and Play"
+                      iconName="shuffle"
+                      clickHandler={() =>
+                        createQueue(
+                          playlistData.songs,
+                          'playlist',
+                          true,
+                          playlistData.playlistId,
+                          true
+                        )
+                      }
+                    />
+                    <Button
+                      tooltipLabel="Add to Queue"
+                      iconName="add"
+                      clickHandler={() => {
+                        updateQueueData(undefined, [
+                          ...queue.queue,
+                          ...playlistData.songs,
+                        ]);
+                        addNewNotifications([
+                          {
+                            id: `addedToQueue`,
+                            delay: 5000,
+                            content: (
+                              <span>
+                                Added {playlistData.songs.length} song
+                                {playlistData.songs.length === 1 ? '' : 's'} to
+                                the queue.
+                              </span>
+                            ),
+                          },
+                        ]);
+                      }}
+                    />
+
+                    <Dropdown
+                      name="PlaylistPageSortDropdown"
+                      value={sortingOrder}
+                      options={dropdownOptions}
+                      onChange={(e) => {
+                        const order = e.currentTarget.value as SongSortTypes;
+                        updateCurrentlyActivePageData((currentPageData) => ({
+                          ...currentPageData,
+                          sortingOrder: order,
+                        }));
+                        setSortingOrder(order);
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
             <div className="songs-container">{songComponents}</div>
           </div>

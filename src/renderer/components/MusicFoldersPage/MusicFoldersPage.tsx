@@ -1,22 +1,27 @@
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
+import Dropdown from '../Dropdown';
 import MainContainer from '../MainContainer';
 import Folder from './Folder';
 
 const MusicFoldersPage = () => {
+  const { updateCurrentlyActivePageData } = React.useContext(AppUpdateContext);
   const [musicFolders, setMusicFolders] = React.useState<MusicFolder[]>([]);
+  const [sortingOrder, setSortingOrder] =
+    React.useState<FolderSortTypes>('aToZ');
 
   const fetchFoldersData = React.useCallback(
     () =>
       window.api
-        .getFolderData([])
+        .getFolderData([], sortingOrder)
         .then((res) => {
           if (Array.isArray(res) && res.length > 0) return setMusicFolders(res);
           return undefined;
         })
         .catch((err) => console.error(err)),
-    []
+    [sortingOrder]
   );
 
   React.useEffect(() => {
@@ -63,7 +68,7 @@ const MusicFoldersPage = () => {
       <>
         <div className="title-container mt-2 mb-8 flex items-center justify-between text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           Music Folders
-          <div className="buttons-container text-sm">
+          <div className="other-controls-container flex text-sm">
             <Button
               label="Add new Folder"
               iconName="create_new_folder"
@@ -80,6 +85,23 @@ const MusicFoldersPage = () => {
                     isDisabled(false);
                     isPending(false);
                   });
+              }}
+            />
+            <Dropdown
+              name="genreSortDropdown"
+              value={sortingOrder}
+              options={[
+                { label: 'A to Z', value: 'aToZ' },
+                { label: 'Z to A', value: 'zToA' },
+                { label: 'High Song Count', value: 'noOfSongsDescending' },
+                { label: 'Low Song Count', value: 'noOfSongsAscending' },
+              ]}
+              onChange={(e) => {
+                updateCurrentlyActivePageData((currentData) => ({
+                  ...currentData,
+                  sortingOrder: e.currentTarget.value as ArtistSortTypes,
+                }));
+                setSortingOrder(e.currentTarget.value as GenreSortTypes);
               }}
             />
           </div>

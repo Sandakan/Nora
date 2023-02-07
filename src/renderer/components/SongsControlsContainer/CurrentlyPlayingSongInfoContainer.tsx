@@ -78,7 +78,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
     if (currentSongData.songId && Array.isArray(currentSongData.artists)) {
       if (currentSongData.artists.length > 0) {
         return currentSongData.artists.map((artist, index) => (
-          <span key={index}>
+          <span className="flex" key={index}>
             <SongArtist
               key={index}
               artistId={artist.artistId}
@@ -86,9 +86,11 @@ const CurrentlyPlayingSongInfoContainer = () => {
               isFromKnownSource={currentSongData.isKnownSource}
             />
             {currentSongData.artists &&
-            currentSongData.artists.length - 1 !== index
-              ? ', '
-              : ''}
+            currentSongData.artists.length - 1 !== index ? (
+              <span className="mr-1">,</span>
+            ) : (
+              ''
+            )}
           </span>
         ));
       }
@@ -102,9 +104,9 @@ const CurrentlyPlayingSongInfoContainer = () => {
   ]);
 
   return (
-    <div className="current-playing-song-info-container relative flex w-1/4 content-center items-center">
+    <div className="current-playing-song-info-container relative flex w-[30%] content-center items-center">
       <div
-        className={`song-cover-container relative mr-2 flex h-full w-[30%] items-center justify-center overflow-hidden p-2 lg:hidden 
+        className={`song-cover-container relative mr-2 flex h-full w-[25%] items-center justify-center overflow-hidden p-2 lg:hidden 
              
              `}
         id="currentSongCover"
@@ -203,7 +205,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
           </div>
         )}
         <div
-          className="song-artists flex w-full cursor-pointer items-center overflow-hidden text-ellipsis whitespace-nowrap text-xs font-normal"
+          className="song-artists flex w-full items-center overflow-hidden text-ellipsis whitespace-nowrap"
           id="currentSongArtists"
         >
           {userData &&
@@ -214,7 +216,9 @@ const CurrentlyPlayingSongInfoContainer = () => {
                 {songArtistsImages}
               </span>
             )}
-          <span className="w-3/4">{songArtists}</span>
+          <span className="flex w-3/4 text-xs text-font-color-black/90 dark:text-font-color-white/90">
+            {songArtists}
+          </span>
         </div>
       </div>
     </div>

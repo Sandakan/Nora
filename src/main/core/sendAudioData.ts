@@ -1,16 +1,13 @@
 /* eslint-disable no-await-in-loop */
+import { app } from 'electron';
 import * as musicMetaData from 'music-metadata';
 import path from 'path';
-import {
-  DEFAULT_FILE_URL,
-  getArtistsData,
-  getSongsData,
-  incrementNoOfSongListens,
-} from '../filesystem';
+import { DEFAULT_FILE_URL, getArtistsData, getSongsData } from '../filesystem';
 import { getSongArtworkPath } from '../fs/resolveFilePaths';
 import getArtistInfoFromNet from './getArtistInfoFromNet';
 import log from '../log';
 import addToSongsHistory from './addToSongsHistory';
+import updateSongListeningData from './updateSongListeningData';
 
 export const sendAudioData = async (
   audioId: string
@@ -73,7 +70,8 @@ export const sendAudioData = async (
               isKnownSource: true,
             };
 
-            incrementNoOfSongListens(song.songId);
+            updateSongListeningData(song.songId, 'listens', 'increment');
+            app.addRecentDocument(song.path);
             return data;
             // return log(`total : ${console.timeEnd('total')}`);
           }

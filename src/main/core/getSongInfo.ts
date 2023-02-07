@@ -6,7 +6,8 @@ import sortSongs from '../utils/sortSongs';
 const getSongInfo = (
   songIds: string[],
   sortType?: SongSortTypes,
-  limit = songIds.length
+  limit = songIds.length,
+  preserveIdOrder = false
 ): SongData[] => {
   log(
     `Fetching songs data from getSongInfo function about ${
@@ -18,11 +19,21 @@ const getSongInfo = (
     const listeningData = getListeningData();
     if (Array.isArray(songsData) && songsData.length > 0) {
       const results: SavableSongData[] = [];
-      for (let x = 0; x < songsData.length; x += 1) {
-        if (songIds.includes(songsData[x].songId)) {
-          results.push(songsData[x]);
+
+      if (preserveIdOrder)
+        for (let x = 0; x < songIds.length; x += 1) {
+          for (let y = 0; y < songsData.length; y += 1) {
+            if (songIds[x] === songsData[y].songId) {
+              results.push(songsData[y]);
+            }
+          }
         }
-      }
+      else
+        for (let x = 0; x < songsData.length; x += 1) {
+          if (songIds.includes(songsData[x].songId)) {
+            results.push(songsData[x]);
+          }
+        }
       if (results.length > 0) {
         const updatedResults = results.map((x) => ({
           ...x,

@@ -65,7 +65,7 @@ const PromptMenu = () => {
 
   return (
     <dialog
-      className={`dialog-menu relative top-1/2 left-1/2 max-h-[80%] min-h-[300px] w-[80%] min-w-[800px] -translate-x-1/2 -translate-y-1/2  rounded-lg bg-background-color-1 py-10 shadow-[rgba(100,100,111,0.2)_0px_7px_29px_0px] transition-[transform,visibility,opacity] backdrop:backdrop-blur-[2px] open:backdrop:transition-[background,backdrop-filter] dark:bg-dark-background-color-1  
+      className={`dialog-menu relative top-1/2 left-1/2 h-fit max-h-[80%] min-h-[300px] w-[80%] min-w-[800px] max-w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-background-color-1 py-10 shadow-[rgba(100,100,111,0.2)_0px_7px_29px_0px] transition-[transform,visibility,opacity] duration-200 ease-in-out backdrop:backdrop-blur-[2px] open:backdrop:transition-[background,backdrop-filter] dark:bg-dark-background-color-1 
       ${
         PromptMenuData.isVisible
           ? 'open:animate-dialog-appear-ease-in-out open:backdrop:bg-[hsla(228deg,7%,14%,0.75)] open:backdrop:dark:bg-[hsla(228deg,7%,14%,0.75)]'
@@ -89,7 +89,7 @@ const PromptMenu = () => {
         close
       </span>
       <MainContainer
-        className={`prompt-menu-inner relative max-h-full px-8 text-font-color-black dark:text-font-color-white ${
+        className={`prompt-menu-inner relative max-h-full px-8 pb-2 text-font-color-black dark:text-font-color-white ${
           PromptMenuData.className ?? ''
         }`}
       >

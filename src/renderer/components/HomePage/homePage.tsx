@@ -3,7 +3,6 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable react/no-unused-prop-types */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable consistent-return */
@@ -113,7 +112,7 @@ export const HomePage = () => {
       recentSongs[0].songs.length > 0
     )
       window.api
-        .getSongInfo(recentSongs[0].songs, undefined, 5)
+        .getSongInfo(recentSongs[0].songs, undefined, 5, true)
         .then((res) => {
           if (res)
             dispatch({
@@ -156,7 +155,12 @@ export const HomePage = () => {
       .getPlaylistData(['Favorites'])
       .then((res) => {
         if (Array.isArray(res) && res.length > 0) {
-          return window.api.getSongInfo(res[0].songs, 'allTimeMostListened', 5);
+          return window.api.getSongInfo(
+            res[0].songs,
+            'allTimeMostListened',
+            5,
+            true
+          );
         }
         return undefined;
       })

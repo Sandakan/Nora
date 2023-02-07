@@ -1,8 +1,9 @@
+/* eslint-disable no-loop-func */
 /* eslint-disable no-await-in-loop */
 import fetch from 'node-fetch';
 import NodeID3 from 'node-id3';
 import path from 'path';
-import sharp from 'sharp';
+import { readFile } from 'fs/promises';
 import {
   getAlbumsData,
   getArtistsData,
@@ -16,7 +17,7 @@ import {
 import {
   getArtistArtworkPath,
   getSongArtworkPath,
-  removeDefaultFileUrlFromPath,
+  removeDefaultAppProtocolFromFilePath,
 } from './fs/resolveFilePaths';
 import log from './log';
 import { dataUpdateEvent } from './main';
@@ -37,31 +38,33 @@ const fetchArtworkBufferFromURL = async (url: string) => {
   }
 };
 
-const generateArtworkBuffer = async (
-  artworkPath?: string,
-  isArtworkAWebURL?: boolean
-) => {
+const generateArtworkBuffer = async (artworkPath?: string) => {
   if (artworkPath) {
-    if (isArtworkAWebURL) {
-      const buffer = await fetchArtworkBufferFromURL(artworkPath).catch((err) =>
+    const isArtworkPathAWebURL =
+      /(^$|(http(s)?:\/\/)([\w-]+\.)+[\w-]+([\w- ;,./?%&=]*))/gm.test(
+        artworkPath || ''
+      );
+
+    if (isArtworkPathAWebURL) {
+      const onlineArtworkBuffer = await fetchArtworkBufferFromURL(
+        artworkPath
+      ).catch((err) =>
         log(
           `ERROR OCCURRED WHEN FETCHING ONLINE ARTWORK BUFFER, NEWLY ADDED TO THE SONG.`,
           { err },
           'ERROR'
         )
       );
-      return buffer;
+      return onlineArtworkBuffer;
     }
-    const buffer = await sharp(artworkPath)
-      .toBuffer()
-      .catch((err) =>
-        log(
-          `ERROR OCCURRED WHEN TRYING TO GENERATE BUFFER OF THE NEWLY ADDED SONG ARTWORK.`,
-          { err },
-          'ERROR'
-        )
-      );
-    return buffer;
+    const localArtworkBuffer = await readFile(artworkPath).catch((err) =>
+      log(
+        `ERROR OCCURRED WHEN TRYING TO GENERATE BUFFER OF THE SONG ARTWORK.`,
+        { err },
+        'ERROR'
+      )
+    );
+    return localArtworkBuffer;
   }
   return undefined;
 };
@@ -385,18 +388,10 @@ const manageArtworkUpdates = async (
 ) => {
   const { songId } = prevSongData;
   const artworkPath = newSongData.artworkPath
-    ? removeDefaultFileUrlFromPath(newSongData.artworkPath)
+    ? removeDefaultAppProtocolFromFilePath(newSongData.artworkPath)
     : undefined;
 
-  const isArtworkPathAWebURL =
-    /(^$|(http(s)?:\/\/)([\w-]+\.)+[\w-]+([\w- ;,./?%&=]*))/gm.test(
-      artworkPath || ''
-    );
-
-  const artworkBuffer = await generateArtworkBuffer(
-    artworkPath,
-    isArtworkPathAWebURL
-  );
+  const artworkBuffer = await generateArtworkBuffer(artworkPath);
 
   const songPrevArtworkPaths = getSongArtworkPath(
     prevSongData.songId,
@@ -500,21 +495,39 @@ export const updateSongId3Tags = async (
           : undefined;
 
         // $ synchronisedLyrics tag skipped due to incorrect timestamps related bugs.
-        // const synchronisedLyrics =
+        // const synchronisedLyrics: synchronisedLyrics =
         //   parsedLyrics && parsedLyrics.isSynced && parsedLyrics.syncedLyrics
-        //     ? [
+        //     ? ([
         //         {
-        //           contentType: 1,
-        //           language: 'ENG',
-        //           timeStampFormat: 2,
+        //           contentType:
+        //             TagConstants.SynchronisedLyrics.ContentType.LYRICS,
+        //           language: 'eng',
+        //           timeStampFormat: TagConstants.TimeStampFormat.MILLISECONDS,
         //           synchronisedText: parsedLyrics.syncedLyrics.map((line) => ({
         //             text: line.text,
         //             // to convert seconds to milliseconds
         //             timeStamp: line.start * 1000,
         //           })),
         //         },
-        //       ]
+        //       ] satisfies synchronisedLyrics)
         //     : undefined;
+
+        if (parsedLyrics) {
+          updateCachedLyrics((cachedLyrics) => {
+            if (cachedLyrics && tags.lyrics) {
+              const { title } = cachedLyrics;
+              if (title === tags.title || title === song.title) {
+                const { isSynced } = parsedLyrics;
+                const lyricsType: LyricsTypes = isSynced ? 'SYNCED' : 'ANY';
+
+                cachedLyrics.lyrics = parsedLyrics;
+                cachedLyrics.lyricsType = lyricsType;
+                return cachedLyrics;
+              }
+            }
+            return undefined;
+          });
+        }
 
         // / / / / / SONG FILE UPDATE PROCESS AND UPDATE FINALIZATION / / / / / /
         const artworkPaths = getSongArtworkPath(
@@ -530,7 +543,7 @@ export const updateSongId3Tags = async (
           genre: tags.genres?.map((genre) => genre.name).join(', '),
           composer: tags.composer,
           year: tags.releasedYear ? `${tags.releasedYear}` : undefined,
-          image: removeDefaultFileUrlFromPath(artworkPaths.artworkPath),
+          image: removeDefaultAppProtocolFromFilePath(artworkPaths.artworkPath),
           unsynchronisedLyrics,
           // synchronisedLyrics,
         };
@@ -540,23 +553,6 @@ export const updateSongId3Tags = async (
         setArtistsData(artists);
         setAlbumsData(albums);
         setGenresData(genres);
-
-        if (parsedLyrics) {
-          updateCachedLyrics((cachedLyrics) => {
-            if (cachedLyrics && tags.lyrics) {
-              const { title } = cachedLyrics;
-              if (title === tags.title || title === song.title) {
-                const { isSynced } = parsedLyrics;
-                const lyricsType: LyricsTypes = isSynced ? 'SYNCED' : 'UNKNOWN';
-
-                cachedLyrics.lyrics = parsedLyrics;
-                cachedLyrics.lyricsType = lyricsType;
-                return cachedLyrics;
-              }
-            }
-            return undefined;
-          });
-        }
 
         await NodeID3.Promise.update(id3Tags, song.path).catch((err) => {
           log(

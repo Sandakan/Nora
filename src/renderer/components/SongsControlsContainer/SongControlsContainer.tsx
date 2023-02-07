@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-console */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
@@ -32,7 +31,7 @@ const SongControlsContainer = () => {
 
   return (
     <footer
-      className={`song-controls-container relative bottom-0 flex h-[6rem] w-full flex-row justify-between overflow-hidden rounded-tl-md rounded-tr-md  text-font-color-black shadow-[0px_-10px_25px_7px_rgba(0,0,0,0.2)] dark:text-font-color-white ${
+      className={`song-controls-container relative bottom-0 z-20 flex h-[6rem] w-full flex-row justify-between overflow-hidden rounded-tl-md rounded-tr-md  text-font-color-black shadow-[0px_-10px_25px_7px_rgba(0,0,0,0.2)] dark:text-font-color-white ${
         bodyBackgroundImage
           ? 'bg-background-color-1/70 backdrop-blur-md dark:bg-dark-background-color-1/70'
           : 'bg-background-color-1 dark:bg-dark-background-color-1'

@@ -367,7 +367,7 @@ export const SongsPage = () => {
                   onChange={(e) => {
                     updateCurrentlyActivePageData((currentPageData) => ({
                       ...currentPageData,
-                      sortingOrder: e.currentTarget.value as ArtistSortTypes,
+                      sortingOrder: e.currentTarget.value as SongSortTypes,
                     }));
                     dispatch({
                       type: 'SORTING_ORDER',

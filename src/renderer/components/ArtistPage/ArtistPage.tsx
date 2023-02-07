@@ -125,7 +125,7 @@ export const ArtistPage = () => {
   );
 
   return (
-    <MainContainer className="main-container artists-list-container !h-full overflow-hidden !pb-0">
+    <MainContainer className="appear-from-bottom artists-list-container !h-full overflow-hidden !pb-0">
       <>
         <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">

@@ -41,7 +41,7 @@ const getAllSongs = async (
           palette: songInfo.palette,
           addedDate: songInfo.addedDate,
           isAFavorite: songInfo.isAFavorite,
-        } as AudioInfo;
+        } satisfies AudioInfo;
       }
     );
     const resultsStartIndex = (result.pageNo - 1) * result.maxResultsPerPage;

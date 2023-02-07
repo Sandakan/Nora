@@ -35,7 +35,6 @@ const SongControlsAndSeekbarContainer = () => {
   const isMouseDownRef = React.useRef(false);
   const seekbarRef = React.useRef(null as HTMLInputElement | null);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const seekBarCssProperties: any = {};
 
   seekBarCssProperties['--seek-before-width'] = `${
@@ -108,7 +107,7 @@ const SongControlsAndSeekbarContainer = () => {
 
   return (
     <div className="song-controls-and-seekbar-container flex w-[40%] min-w-[20rem] flex-col items-center justify-center py-2">
-      <div className="controls-container flex w-2/3 items-center justify-around px-2 lg:w-4/5 lg:p-0 [&>div.active_span.icon]:text-foreground-color-1 [&>div.active_span.icon]:opacity-90 dark:[&>div.active_span.icon]:text-foreground-color-1">
+      <div className="controls-container flex w-2/3 items-center justify-around px-2 lg:w-4/5 lg:p-0 [&>div.active_span.icon]:opacity-100">
         <div
           className={`like-btn flex h-8 w-8 items-center justify-center rounded-full ${
             currentSongData.isAFavorite && 'active'
@@ -124,7 +123,7 @@ const SongControlsAndSeekbarContainer = () => {
               currentSongData.isAFavorite
                 ? 'material-icons-round'
                 : 'material-icons-round-outlined'
-            } icon cursor-pointer text-2xl leading-none text-font-color-black opacity-75 transition-opacity hover:opacity-100 dark:text-font-color-white`}
+            } icon cursor-pointer text-2xl leading-none text-font-color-black opacity-60 transition-opacity hover:opacity-100 dark:text-font-color-white`}
             onClick={() =>
               currentSongData.isKnownSource &&
               toggleIsFavorite(!currentSongData.isAFavorite)
@@ -136,7 +135,7 @@ const SongControlsAndSeekbarContainer = () => {
         <div className={`shuffle-btn flex ${isShuffling && 'active'}`}>
           <span
             title="Shuffle (Ctrl + S)"
-            className="material-icons-round icon cursor-pointer text-2xl text-font-color-black opacity-75 transition-opacity hover:opacity-100 dark:text-font-color-white"
+            className="material-icons-round icon cursor-pointer text-2xl text-font-color-black opacity-60 transition-opacity hover:opacity-100 dark:text-font-color-white"
             onClick={handleQueueShuffle}
           >
             shuffle
@@ -145,7 +144,7 @@ const SongControlsAndSeekbarContainer = () => {
         <div className="skip-back-btn flex">
           <span
             title="Previous Song (Ctrl + Left Arrow)"
-            className="material-icons-round icon cursor-pointer text-2xl text-font-color-black opacity-75 transition-opacity hover:opacity-100 dark:text-font-color-white"
+            className="material-icons-round icon cursor-pointer text-2xl text-font-color-black opacity-60 transition-opacity hover:opacity-100 dark:text-font-color-white"
             onClick={handleSkipBackwardClick}
           >
             skip_previous
@@ -159,7 +158,7 @@ const SongControlsAndSeekbarContainer = () => {
         >
           <span
             title="Play/Pause (Space)"
-            className={`material-icons-round icon cursor-pointer text-5xl text-font-color-black opacity-75 transition-opacity hover:opacity-100 dark:text-font-color-white ${
+            className={`material-icons-round icon cursor-pointer text-5xl text-font-color-black opacity-80 transition-opacity hover:opacity-100 dark:text-font-color-white ${
               isPlayerStalled && '!opacity-10'
             }`}
             onClick={!isPlayerStalled ? toggleSongPlayback : undefined}
@@ -170,7 +169,7 @@ const SongControlsAndSeekbarContainer = () => {
         <div className="skip-forward-btn flex">
           <span
             title="Next Song (Ctrl + Right Arrow)"
-            className="material-icons-round icon cursor-pointer text-2xl text-font-color-black opacity-75 transition-opacity hover:opacity-100 dark:text-font-color-white"
+            className="material-icons-round icon cursor-pointer text-2xl text-font-color-black opacity-60 transition-opacity hover:opacity-100 dark:text-font-color-white"
             onClick={handleSkipForwardClick}
           >
             skip_next
@@ -181,7 +180,7 @@ const SongControlsAndSeekbarContainer = () => {
         >
           <span
             title="Repeat (Ctrl + T)"
-            className="material-icons-round icon cursor-pointer text-2xl text-font-color-black opacity-75 transition-opacity hover:opacity-100 dark:text-font-color-white"
+            className="material-icons-round icon cursor-pointer text-2xl text-font-color-black opacity-60 transition-opacity hover:opacity-100 dark:text-font-color-white"
             onClick={() => toggleRepeat()}
           >
             {isRepeating === 'false' || isRepeating === 'repeat'
@@ -196,7 +195,7 @@ const SongControlsAndSeekbarContainer = () => {
         >
           <span
             title="Lyrics (Ctrl + L)"
-            className="material-icons-round icon cursor-pointer text-2xl text-font-color-black opacity-75 transition-opacity hover:opacity-100 dark:text-font-color-white"
+            className="material-icons-round icon cursor-pointer text-2xl text-font-color-black opacity-60 transition-opacity hover:opacity-100 dark:text-font-color-white"
             onClick={() =>
               currentlyActivePage.pageTitle === 'Lyrics'
                 ? changeCurrentActivePage('Home')
@@ -216,7 +215,7 @@ const SongControlsAndSeekbarContainer = () => {
             type="range"
             name="seek-bar-slider"
             id="seek-bar-slider"
-            className="seek-bar-slider relative float-left m-0 h-6 w-full appearance-none rounded-lg bg-[transparent] p-0 outline-none before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-highlight-2 before:transition-[width] before:content-['']"
+            className="seek-bar-slider relative float-left m-0 h-6 w-full appearance-none rounded-lg bg-[transparent] p-0 outline-none before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width] before:content-[''] dark:before:bg-font-color-white/50"
             min={0}
             max={currentSongData.duration || 0}
             value={songPos || 0}

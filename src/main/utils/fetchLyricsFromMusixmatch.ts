@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable camelcase */
 import fetch from 'node-fetch';
 
 import {
@@ -8,20 +8,24 @@ import {
   MusixmatchLyricsMetadata,
 } from '../../@types/musixmatch_lyrics_api';
 import isLyricsSynced from './isLyricsSynced';
+import { repository, version } from '../../../package.json';
 import parseSongMetadataFromMusixmatchApiData from './parseSongMetadataFromMusixmatchApiData';
 
 interface TrackInfo {
   q_track: string;
   q_artist: string;
+  q_artists: string;
+  q_duration: string;
   // q_album?: string;
-  // q_duration?: number;
   // track_spotify_id?: string;
 }
 
-export const parseMusicmatchDataFromLyrics = (
+// $ [offset:+/- Overall timestamp adjustment in milliseconds, + shifts time up, - shifts down]
+
+export const parseMusicmatchDataFromLyrics = async (
   data: MusixmatchLyricsAPI,
-  lyricsType: LyricsRequestTypes
-): MusixmatchLyrics | undefined => {
+  lyricsType: LyricsTypes
+): Promise<MusixmatchLyrics | undefined> => {
   let metadata = {} as MusixmatchLyricsMetadata;
   const output: string[] = [];
 
@@ -45,15 +49,21 @@ export const parseMusicmatchDataFromLyrics = (
     if (lyricsType === 'SYNCED' && !hasSyncedLyrics)
       throw new Error('No synced lyrics on musixmatch for this song.');
 
-    const parsedMetadata = parseSongMetadataFromMusixmatchApiData(data);
+    // ? SONG METADATA IN LRC FORMAT
+    const parsedMetadata = await parseSongMetadataFromMusixmatchApiData(data);
 
     if (parsedMetadata) {
       metadata = parsedMetadata;
-      output.push(`[tr:${metadata.title}]`);
-      output.push(`[ar:${metadata.artist}]`);
+      // [ti:Lyrics (song) title]
+      // [ar:Lyrics artist]
+      output.push(`[ti:${metadata.title}]`, `[ar:${metadata.artist}]`);
+      // [al:Album where the song is from]
       if (metadata.album) output.push(`[al:${metadata.album}]`);
+      // [length:How long the song is]
       output.push(
-        `[al:${Math.floor(metadata.duration / 60)}:${metadata.duration % 60}]`
+        `[length:${Math.floor(metadata.duration / 60)}:${
+          metadata.duration % 60
+        }]`
       );
     }
 
@@ -76,7 +86,12 @@ export const parseMusicmatchDataFromLyrics = (
       if (restricted !== 1) {
         if (subtitle_language) output.push(`[lang:${subtitle_language}]`);
         if (lyrics_copyright) {
-          output.push(`[copyright:${lyrics_copyright.replaceAll('\n', '')}]`);
+          output.push(
+            `[copyright:Musixmatch Lyrics. ${lyrics_copyright.replaceAll(
+              '\n',
+              ''
+            )}]`
+          );
           metadata.copyright = lyrics_copyright;
         }
 
@@ -122,8 +137,13 @@ export const parseMusicmatchDataFromLyrics = (
         ].message.body.lyrics.lyrics_copyright;
     }
     if (output.length > 0)
+      // [by:Creator of the LRC file]
+      // [re:The player or editor that created the LRC file]
+      // [ve:version of program]
       output.unshift(
-        `[by:Implementation from Fashni's MxLRC (https://github.com/fashni/MxLRC)]`
+        `[by:Implementation from Fashni's MxLRC (https://github.com/fashni/MxLRC)]`,
+        `[re:Nora Player (${repository.url})]`,
+        `[ve:${version}]`
       );
 
     const lyrics = output.join('\n');
@@ -144,7 +164,8 @@ export const parseMusicmatchDataFromLyrics = (
 const fetchLyricsFromMusixmatch = async (
   trackInfo: TrackInfo,
   usertoken: string,
-  lyricsType = 'ANY' as LyricsRequestTypes,
+  // eslint-disable-next-line default-param-last
+  lyricsType: LyricsTypes = 'ANY',
   abortSignal?: AbortSignal
 ): Promise<MusixmatchLyrics | undefined> => {
   // if there is a pending request, abort it.

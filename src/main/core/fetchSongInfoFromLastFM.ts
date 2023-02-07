@@ -10,8 +10,11 @@ const fetchSongInfoFromLastFM = async (
 ): Promise<LastFMTrackInfoApi> => {
   if (checkIfConnectedToInternet()) {
     try {
+      const lastFMApiKey = process.env.LAST_FM_API_KEY;
+      if (!lastFMApiKey) throw new Error('LastFM api key not found.');
+
       const res = await fetch(
-        `http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=0aac0c7edaf4797bcc63bd8688b43b30&&artist=${encodeURIComponent(
+        `http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=${lastFMApiKey}&artist=${encodeURIComponent(
           artistNames[0].trim()
         )}&track=${encodeURIComponent(
           songTitle.trim()

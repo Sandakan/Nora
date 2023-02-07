@@ -5,15 +5,60 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
 import Button from '../Button';
+import Dropdown from '../Dropdown';
 import MainContainer from '../MainContainer';
 import Song from '../SongsPage/Song';
 
+const dropdownOptions: { label: string; value: SongSortTypes }[] = [
+  { label: 'A to Z', value: 'aToZ' },
+  { label: 'Z to A', value: 'zToA' },
+  { label: 'Newest', value: 'dateAddedAscending' },
+  { label: 'Oldest', value: 'dateAddedDescending' },
+  { label: 'Released Year (Ascending)', value: 'releasedYearAscending' },
+  { label: 'Released Year (Descending)', value: 'releasedYearDescending' },
+  {
+    label: 'Most Listened (All Time)',
+    value: 'allTimeMostListened',
+  },
+  {
+    label: 'Least Listened (All Time)',
+    value: 'allTimeLeastListened',
+  },
+  {
+    label: 'Most Listened (This Month)',
+    value: 'monthlyMostListened',
+  },
+  {
+    label: 'Least Listened (This Month)',
+    value: 'monthlyLeastListened',
+  },
+  {
+    label: 'Artist Name (A to Z)',
+    value: 'artistNameAscending',
+  },
+  {
+    label: 'Artist Name (Z to A)',
+    value: 'artistNameDescending',
+  },
+  { label: 'Album Name (A to Z)', value: 'albumNameAscending' },
+  {
+    label: 'Album Name (Z to A)',
+    value: 'albumNameDescending',
+  },
+];
+
 const GenreInfoPage = () => {
   const { currentlyActivePage, userData, queue } = React.useContext(AppContext);
-  const { createQueue, updateQueueData, addNewNotifications } =
-    React.useContext(AppUpdateContext);
-  const [genreData, setGenreData] = React.useState({} as Genre);
-  const [genreSongs, setGenreSongs] = React.useState([] as AudioInfo[]);
+  const {
+    createQueue,
+    updateQueueData,
+    addNewNotifications,
+    updateCurrentlyActivePageData,
+  } = React.useContext(AppUpdateContext);
+
+  const [genreData, setGenreData] = React.useState<Genre>();
+  const [genreSongs, setGenreSongs] = React.useState<AudioInfo[]>([]);
+  const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>('aToZ');
 
   const fetchGenresData = React.useCallback(() => {
     if (currentlyActivePage.data) {
@@ -30,7 +75,10 @@ const GenreInfoPage = () => {
   const fetchSongsData = React.useCallback(() => {
     if (genreData && genreData.songs && genreData.songs.length > 0) {
       window.api
-        .getSongInfo(genreData.songs.map((song) => song.songId))
+        .getSongInfo(
+          genreData.songs.map((song) => song.songId),
+          sortingOrder
+        )
         .then((res) => {
           if (res) return setGenreSongs(res);
           return undefined;
@@ -38,7 +86,7 @@ const GenreInfoPage = () => {
         .catch((err) => console.error(err));
     }
     return undefined;
-  }, [genreData]);
+  }, [genreData, sortingOrder]);
 
   React.useEffect(() => {
     fetchGenresData();
@@ -123,31 +171,25 @@ const GenreInfoPage = () => {
 
   return (
     <MainContainer
-      className="main-container songs-list-container genre-info-page-container !h-full"
-      style={
-        genreData.backgroundColor && {
-          background: `linear-gradient(180deg, ${`rgb(${
-            (genreData.backgroundColor.rgb as number[])[0]
-          },${(genreData.backgroundColor.rgb as number[])[1]},${
-            (genreData.backgroundColor.rgb as number[])[2]
-          })`} 0%, var(--background-color-1) 90%)`,
-        }
-      }
+      className="songs-list-container appear-from-bottom genre-info-page-container !h-full"
+      // style={
+      //   genreData.backgroundColor && {
+      //     background: `linear-gradient(180deg, ${`rgb(${
+      //       (genreData.backgroundColor.rgb as number[])[0]
+      //     },${(genreData.backgroundColor.rgb as number[])[1]},${
+      //       (genreData.backgroundColor.rgb as number[])[2]
+      //     })`} 0%, var(--background-color-1) 90%)`,
+      //   }
+      // }
     >
       <>
-        {genreData.genreId && (
-          <div className="genre-info-container my-8 h-fit text-font-color-white dark:text-font-color-white">
-            <div className="genre-title h-fit max-w-[80%] overflow-hidden text-ellipsis whitespace-nowrap py-2 text-6xl">
-              {genreData.name}
-            </div>
-            <div className="genre-no-of-songs">{`${
-              genreData.songs.length
-            } song${genreData.songs.length !== 1 ? 's' : ''}`}</div>
-            <div className="genre-total-duration">
-              {totalGenreSongsDuration}
-            </div>
-            {genreSongs.length > 0 && (
-              <div className="album-buttons mt-4 flex">
+        <div className="title-container mt-1 mb-4 flex items-center justify-between pr-4 text-3xl font-medium  text-font-color-highlight dark:text-dark-font-color-highlight">
+          <div className="genre-title-container max-w-[40%] overflow-hidden text-ellipsis whitespace-nowrap">
+            {genreData?.name}
+          </div>
+          <div className="other-controls-container flex">
+            {genreData && genreSongs.length > 0 && (
+              <>
                 <Button
                   label="Play All"
                   iconName="play_arrow"
@@ -162,7 +204,7 @@ const GenreInfoPage = () => {
                   }
                 />
                 <Button
-                  label="Shuffle and Play"
+                  // label="Shuffle and Play"
                   iconName="shuffle"
                   clickHandler={() =>
                     createQueue(
@@ -175,7 +217,7 @@ const GenreInfoPage = () => {
                   }
                 />
                 <Button
-                  label="Add to Queue"
+                  // label="Add to Queue"
                   iconName="add"
                   clickHandler={() => {
                     updateQueueData(
@@ -201,8 +243,34 @@ const GenreInfoPage = () => {
                     ]);
                   }}
                 />
-              </div>
+                <Dropdown
+                  name="songsPageSortDropdown"
+                  value={sortingOrder}
+                  options={dropdownOptions}
+                  onChange={(e) => {
+                    const order = e.currentTarget.value as SongSortTypes;
+                    updateCurrentlyActivePageData((currentPageData) => ({
+                      ...currentPageData,
+                      sortingOrder: order,
+                    }));
+                    setSortingOrder(order);
+                  }}
+                />
+              </>
             )}
+          </div>
+        </div>
+        {genreData && genreData.genreId && (
+          <div className="genre-info-container mb-4 h-fit text-font-color-black dark:text-font-color-white">
+            <div className="genre-title h-fit max-w-[80%] overflow-hidden text-ellipsis whitespace-nowrap py-2 text-6xl text-font-color-highlight dark:text-dark-font-color-highlight">
+              {genreData.name}
+            </div>
+            <div className="genre-no-of-songs">{`${
+              genreData.songs.length
+            } song${genreData.songs.length !== 1 ? 's' : ''}`}</div>
+            <div className="genre-total-duration">
+              {totalGenreSongsDuration}
+            </div>
           </div>
         )}
         {genreSongs.length > 0 && (

@@ -109,7 +109,7 @@ export const PlaylistsPage = () => {
 
   return (
     <MainContainer
-      className="main-container playlists-list-container mb-0 !h-full"
+      className="main-container appear-from-bottom playlists-list-container mb-0 !h-full"
       onContextMenu={(e) =>
         updateContextMenuData(
           true,

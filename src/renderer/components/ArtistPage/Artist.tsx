@@ -84,7 +84,7 @@ export const Artist = (props: ArtistProp) => {
     ) {
       return [
         {
-          label: 'Add to queue',
+          label: 'Add songs to queue',
           iconName: 'queue',
           handlerFunction: () => {
             const { multipleSelections: artistIds } = multipleSelectionsData;
@@ -230,16 +230,25 @@ export const Artist = (props: ArtistProp) => {
           contextMenuItemData
         );
       }}
-      onClick={() =>
-        isMultipleSelectionEnabled &&
-        multipleSelectionsData.selectionType === 'artist'
-          ? updateMultipleSelections(
-              props.artistId,
-              'artist',
-              isAMultipleSelection ? 'remove' : 'add'
-            )
-          : undefined
-      }
+      onClick={(e) => {
+        if (
+          isMultipleSelectionEnabled &&
+          multipleSelectionsData.selectionType === 'artist'
+        )
+          updateMultipleSelections(
+            props.artistId,
+            'artist',
+            isAMultipleSelection ? 'remove' : 'add'
+          );
+        else if (e.getModifierState('Shift') === true) {
+          toggleMultipleSelections(!isMultipleSelectionEnabled, 'artist');
+          updateMultipleSelections(
+            props.artistId,
+            'artist',
+            isAMultipleSelection ? 'remove' : 'add'
+          );
+        } else goToArtistInfoPage();
+      }}
     >
       <div className="artist-img-container relative flex h-3/4 items-center justify-center">
         <Img
@@ -251,9 +260,6 @@ export const Artist = (props: ArtistProp) => {
           fallbackSrc={DefaultArtistCover}
           alt="Default song cover"
           className="aspect-square h-full rounded-full object-cover shadow-xl"
-          onClick={() => {
-            if (!isMultipleSelectionEnabled) goToArtistInfoPage();
-          }}
         />
         {isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'artist' && (
@@ -271,9 +277,6 @@ export const Artist = (props: ArtistProp) => {
             'text-font-color-black dark:text-font-color-black'
           }`}
           title={props.name === '' ? 'Unknown Artist' : props.name}
-          onClick={() => {
-            if (!isMultipleSelectionEnabled) goToArtistInfoPage();
-          }}
         >
           {props.name === '' ? 'Unknown Artist' : props.name}
         </div>

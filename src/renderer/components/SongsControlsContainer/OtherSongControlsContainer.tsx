@@ -15,7 +15,6 @@ const OtherSongControlsContainer = () => {
     updateContextMenuData,
   } = useContext(AppUpdateContext);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const volumeBarCssProperties: any = {};
 
   volumeBarCssProperties['--volume-before-width'] = `${volume}%`;
@@ -55,13 +54,13 @@ const OtherSongControlsContainer = () => {
   );
 
   return (
-    <div className="other-controls-container flex w-1/4 items-center justify-end">
-      <div className="queue-btn mr-6 flex cursor-pointer items-center justify-center text-font-color-black text-opacity-75 dark:text-font-color-white lg:hidden">
+    <div className="other-controls-container flex w-[30%] items-center justify-end">
+      <div className="queue-btn mr-6 flex cursor-pointer items-center justify-center text-font-color-black text-opacity-60 dark:text-font-color-white lg:hidden">
         <span
           title="Current Queue (Ctrl + Q)"
-          className={`material-icons-round-outlined icon cursor-pointer text-xl text-font-color-black opacity-75 transition-opacity hover:opacity-100 dark:text-font-color-white ${
+          className={`material-icons-round-outlined icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-100 dark:text-font-color-white ${
             currentlyActivePage.pageTitle === 'CurrentQueue' &&
-            '!text-foreground-color-1 !opacity-90 dark:!text-foreground-color-1'
+            '!text-seekbar-background-color !opacity-90 dark:!text-seekbar-background-color'
           } `}
           onClick={() =>
             currentlyActivePage.pageTitle === 'CurrentQueue'
@@ -72,10 +71,10 @@ const OtherSongControlsContainer = () => {
           table_rows
         </span>
       </div>
-      <div className="mini-player-btn mr-6 flex cursor-pointer items-center justify-center text-font-color-black text-opacity-75 dark:text-font-color-white lg:hidden">
+      <div className="mini-player-btn mr-6 flex cursor-pointer items-center justify-center text-font-color-black text-opacity-60 dark:text-font-color-white lg:hidden">
         <span
           title="Open in Mini player (Ctrl + N)"
-          className="material-icons-round-outlined icon cursor-pointer text-xl text-font-color-black opacity-75 transition-opacity hover:opacity-100 dark:text-font-color-white"
+          className="material-icons-round-outlined icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-100 dark:text-font-color-white"
           onClick={() => updateMiniPlayerStatus(!isMiniPlayer)}
         >
           tab
@@ -85,7 +84,9 @@ const OtherSongControlsContainer = () => {
       <div className="volume-btn mr-2 flex cursor-pointer items-center justify-center">
         <span
           title="Mute/Unmute (Ctrl + M)"
-          className="material-icons-round icon cursor-pointer text-xl text-font-color-black opacity-75 transition-opacity hover:opacity-100 dark:text-font-color-white"
+          className={`material-icons-round icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-100 dark:text-font-color-white ${
+            isMuted && '!opacity-100'
+          }`}
           onClick={() => toggleMutedState()}
         >
           {isMuted ? 'volume_off' : 'volume_up'}
@@ -95,7 +96,7 @@ const OtherSongControlsContainer = () => {
         <input
           type="range"
           id="volumeSlider"
-          className="relative float-left m-0 h-6 w-full appearance-none rounded-lg bg-[transparent] p-0 outline-none before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--volume-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-foreground-color-1 before:transition-[width] before:content-['']"
+          className="relative float-left m-0 h-6 w-full appearance-none rounded-lg bg-[transparent] p-0 outline-none before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--volume-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width] before:content-[''] dark:before:bg-font-color-white/50"
           min="0"
           max="100"
           value={volume}
@@ -105,10 +106,10 @@ const OtherSongControlsContainer = () => {
           title={Math.round(volume).toString()}
         />
       </div>
-      <div className="other-settings-btn mr-3 hidden cursor-pointer items-center justify-center text-font-color-black text-opacity-75 dark:text-font-color-white lg:flex">
+      <div className="other-settings-btn mr-3 hidden cursor-pointer items-center justify-center text-font-color-black text-opacity-60 dark:text-font-color-white lg:flex">
         <span
           title="Other Settings"
-          className="material-icons-round icon cursor-pointer text-xl text-font-color-black opacity-75 transition-opacity hover:opacity-100 dark:text-font-color-white"
+          className="material-icons-round icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-100 dark:text-font-color-white"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();

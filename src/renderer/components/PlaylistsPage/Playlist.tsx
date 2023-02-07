@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/destructuring-assignment */
@@ -208,30 +207,27 @@ export const Playlist = (props: PlaylistProp) => {
         e.stopPropagation();
         updateContextMenuData(true, contextMenus, e.pageX, e.pageY);
       }}
-      onClick={() =>
-        isMultipleSelectionEnabled &&
-        multipleSelectionsData.selectionType === 'playlist'
-          ? updateMultipleSelections(
-              props.playlistId,
-              'playlist',
-              isAMultipleSelection ? 'remove' : 'add'
-            )
-          : undefined
-      }
-    >
-      <div
-        className="playlist-cover-and-play-btn-container relative h-[70%] cursor-pointer overflow-hidden rounded-xl before:invisible before:absolute before:h-full before:w-full before:bg-gradient-to-b before:from-[hsla(0,0%,0%,0%)] before:to-[hsla(0,0%,0%,40%)] before:opacity-0 before:transition-[visibility,opacity] before:duration-300 before:content-[''] group-hover:before:visible group-hover:before:opacity-100"
-        onClick={() =>
+      onClick={(e) => {
+        if (
           isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'playlist'
-            ? updateMultipleSelections(
-                props.playlistId,
-                'playlist',
-                isAMultipleSelection ? 'remove' : 'add'
-              )
-            : openPlaylistInfoPage()
-        }
-      >
+        )
+          updateMultipleSelections(
+            props.playlistId,
+            'playlist',
+            isAMultipleSelection ? 'remove' : 'add'
+          );
+        else if (e.getModifierState('Shift') === true) {
+          toggleMultipleSelections(!isMultipleSelectionEnabled, 'playlist');
+          updateMultipleSelections(
+            props.playlistId,
+            'playlist',
+            isAMultipleSelection ? 'remove' : 'add'
+          );
+        } else openPlaylistInfoPage();
+      }}
+    >
+      <div className="playlist-cover-and-play-btn-container relative h-[70%] cursor-pointer overflow-hidden rounded-xl before:invisible before:absolute before:h-full before:w-full before:bg-gradient-to-b before:from-[hsla(0,0%,0%,0%)] before:to-[hsla(0,0%,0%,40%)] before:opacity-0 before:transition-[visibility,opacity] before:duration-300 before:content-[''] group-hover:before:visible group-hover:before:opacity-100">
         {isMultipleSelectionEnabled &&
         multipleSelectionsData.selectionType === 'playlist' ? (
           <MultipleSelectionCheckbox
@@ -241,7 +237,7 @@ export const Playlist = (props: PlaylistProp) => {
           />
         ) : (
           <span
-            className="material-icons-round icon absolute bottom-3 right-3 translate-y-10 cursor-pointer text-4xl text-font-color-white opacity-0 transition-[opacity,transform] delay-100 duration-200 ease-in-out group-hover:translate-y-0 group-hover:opacity-100 dark:text-font-color-white"
+            className="material-icons-round icon absolute bottom-2 right-2 translate-y-10 scale-90 cursor-pointer text-4xl text-font-color-white opacity-0 transition-[opacity,transform] delay-100 duration-200 ease-in-out group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 dark:text-font-color-white"
             onClick={() =>
               createQueue(
                 props.songs,

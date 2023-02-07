@@ -36,6 +36,10 @@ const isALyricsMetadataLine = (line: string) =>
 const parseLyrics = (lyricsString: string): LyricsData => {
   const isSynced = isLyricsSynced(lyricsString);
 
+  const copyrightMatch = /^\[copyright:(?<copyright>.+)\]$/gm.exec(
+    lyricsString
+  );
+  const copyright = copyrightMatch?.groups?.copyright || undefined;
   const lines = lyricsString.split('\n');
   const lyricsLines = lines.filter(
     (line) => line.trim() !== '' && isALyricsMetadataLine(line)
@@ -62,6 +66,7 @@ const parseLyrics = (lyricsString: string): LyricsData => {
       lyrics: parsedUnsyncedLyricsLines,
       syncedLyrics,
       unparsedLyrics: lyricsString,
+      copyright,
     };
   }
 
@@ -69,6 +74,7 @@ const parseLyrics = (lyricsString: string): LyricsData => {
     isSynced,
     lyrics: parsedUnsyncedLyricsLines,
     unparsedLyrics: lyricsString,
+    copyright,
   };
 };
 

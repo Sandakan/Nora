@@ -1,5 +1,5 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable import/no-cycle */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/prefer-default-export */
 import { contextBridge, ipcRenderer } from 'electron';
 import { LastFMTrackInfoApi } from '../@types/last_fm_api';
@@ -35,8 +35,6 @@ export const api = {
     ipcRenderer.on('app/player/skipBackward', callback),
   sendSongPosition: (position: number): void =>
     ipcRenderer.send('app/getSongPosition', position),
-  incrementNoOfSongListens: (songId: string): void =>
-    ipcRenderer.send('app/incrementNoOfSongListens', songId),
   toggleLikeSongs: (
     songIds: string[],
     isLikeSong?: boolean
@@ -71,9 +69,16 @@ export const api = {
   getSongInfo: (
     songIds: string[],
     sortType?: SongSortTypes,
-    limit?: number
+    limit?: number,
+    preserveIdOrder = false
   ): Promise<SongData[] | undefined> =>
-    ipcRenderer.invoke('app/getSongInfo', songIds, sortType, limit),
+    ipcRenderer.invoke(
+      'app/getSongInfo',
+      songIds,
+      sortType,
+      limit,
+      preserveIdOrder
+    ),
   getSongListeningData: (songIds: string[]): Promise<SongListeningData[]> =>
     ipcRenderer.invoke('app/getSongListeningData', songIds),
   updateSongListeningData: (
@@ -143,19 +148,15 @@ export const api = {
 
   // $ SONG LYRICS
   getSongLyrics: (
-    songTitle: string,
-    songArtists?: string[],
-    songId?: string,
-    lyricsType?: LyricsRequestTypes,
-    forceDownload = false
+    songInfo: LyricsRequestTrackInfo,
+    lyricsType?: LyricsTypes,
+    lyricsRequestType?: LyricsRequestTypes
   ): Promise<SongLyrics | undefined> =>
     ipcRenderer.invoke(
       'app/getSongLyrics',
-      songTitle,
-      songArtists,
-      songId,
+      songInfo,
       lyricsType,
-      forceDownload
+      lyricsRequestType
     ),
 
   saveLyricsToSong: (songId: string, lyrics: SongLyrics) =>
@@ -227,12 +228,15 @@ export const api = {
 
   // $ APP USER DATA
   getUserData: (): Promise<UserData> => ipcRenderer.invoke('app/getUserData'),
-  saveUserData: (dataType: UserDataTypes, data: any) =>
+  saveUserData: (dataType: UserDataTypes, data: unknown) =>
     ipcRenderer.invoke('app/saveUserData', dataType, data),
 
   // $ APP USER DATA
-  getFolderData: (folderPaths: string[]): Promise<MusicFolder[]> =>
-    ipcRenderer.invoke('app/getFolderData', folderPaths),
+  getFolderData: (
+    folderPaths: string[],
+    sortType?: FolderSortTypes
+  ): Promise<MusicFolder[]> =>
+    ipcRenderer.invoke('app/getFolderData', folderPaths, sortType),
 
   // $ ARTISTS DATA
   getArtistData: (
@@ -301,7 +305,7 @@ export const api = {
     ipcRenderer.invoke('app/removeSongFromPlaylist', playlistId, songId),
   clearSongHistory: (): PromiseFunctionReturn =>
     ipcRenderer.invoke('app/clearSongHistory'),
-  removePlaylist: (playlistId: string): PromiseFunctionReturn =>
+  removePlaylist: (playlistId: string) =>
     ipcRenderer.invoke('app/removePlaylist', playlistId),
 
   // $ APP PAGES STATE

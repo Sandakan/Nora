@@ -91,6 +91,27 @@ const AboutSettings = () => {
             />{' '}
             by Piyush Mamidwar.
           </li>
+          <li>
+            This product is licensed under the{' '}
+            <Button
+              className="show-app-licence-btn about-link !inline w-fit cursor-pointer !border-0 !p-0 text-sm text-font-color-highlight-2 hover:underline dark:text-dark-font-color-highlight-2"
+              label="MIT licence."
+              clickHandler={() =>
+                changePromptMenuData(
+                  true,
+                  <>
+                    <div className="mb-4 w-full text-center text-3xl font-medium">
+                      App License
+                    </div>
+                    <pre className="relative max-h-full w-full overflow-y-auto px-4">
+                      {appLicense}
+                    </pre>
+                  </>,
+                  'flex flex-col'
+                )
+              }
+            />
+          </li>
         </ul>
         <Button
           className="release-notes-prompt-btn about-link block w-fit cursor-pointer !border-0 !p-0 text-base text-font-color-highlight-2 no-underline hover:!underline dark:text-dark-font-color-highlight-2"
@@ -212,7 +233,6 @@ const AboutSettings = () => {
             />{' '}
             to the Nora's Github Repository.
           </div>
-          <br />
           <Hyperlink
             label="Contact me through my email."
             link="mailto:sandakannipunajith@gmail.com?subject=Regarding Nora&body=If you found a bug in the app, please try to attach the log file of the app with a detailed explanation of the bug.%0d%0a%0d%0aYou can get to it by going to  Settings > About > Open Log File."
@@ -220,27 +240,6 @@ const AboutSettings = () => {
             noValidityCheck
           />
           <br />
-          <div className="my-1">
-            This product is licensed under the{' '}
-            <Button
-              className="show-app-licence-btn about-link !inline w-fit cursor-pointer !border-0 !p-0 text-base text-font-color-highlight-2 hover:underline dark:text-dark-font-color-highlight-2"
-              label="MIT licence."
-              clickHandler={() =>
-                changePromptMenuData(
-                  true,
-                  <>
-                    <div className="mb-4 w-full text-center text-3xl font-medium">
-                      App License
-                    </div>
-                    <pre className="relative max-h-full w-full overflow-y-auto px-4">
-                      {appLicense}
-                    </pre>
-                  </>,
-                  'flex flex-col'
-                )
-              }
-            />
-          </div>
           <div className="mt-4 text-center text-sm font-light">
             Made with{' '}
             <span className="heart text-font-color-crimson dark:text-font-color-crimson">

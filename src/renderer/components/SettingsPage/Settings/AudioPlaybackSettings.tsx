@@ -6,6 +6,7 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../../Button';
 import Checkbox from '../../Checkbox';
 import Hyperlink from '../../Hyperlink';
+import MusixmatchSettingsPrompt from '../MusixmatchSettingsPrompt';
 
 const AudioPlaybackSettings = () => {
   const { userData } = React.useContext(AppContext);
@@ -88,7 +89,7 @@ const AudioPlaybackSettings = () => {
                           If you have any complaints,{' '}
                           <Hyperlink
                             label="Contact me through my email."
-                            link="mailto:sandakannipunajith@gmail.com?subject=Regarding Nora&body=If you found a bug in the app, please try to attach the log file of the app with a detailed explanation of the bug.%0d%0a%0d%0aYou can get to it by going to  Settings > About > Open Log File."
+                            link="mailto:sandakannipunajith@gmail.com?subject=Regarding Nora"
                             linkTitle="Email"
                             noValidityCheck
                           />
@@ -104,35 +105,43 @@ const AudioPlaybackSettings = () => {
               .
             </div>
           </div>
-          <Button
-            label={
-              userData?.preferences.isMusixmatchLyricsEnabled
-                ? 'Musixmatch Lyrics is Enabled.'
-                : 'Enable Musixmatch Lyrics'
-            }
-            className="m4-6 mt-4"
-            clickHandler={() => {
-              const state = !userData?.preferences.isMusixmatchLyricsEnabled;
-              window.api.saveUserData(
-                'preferences.isMusixmatchLyricsEnabled',
-                state
-              );
-              updateUserData((prevData) => ({
-                ...prevData,
-                preferences: {
-                  ...prevData.preferences,
-                  isMusixmatchLyricsEnabled: state,
-                },
-              }));
-            }}
-            isDisabled={userData?.preferences.isMusixmatchLyricsEnabled}
-          />
-          {/* <input
-                  type="text"
-                  name="musixmatch_user_token"
-                  id="musixmatchUserToken"
-                  placeholder="Musixmatch user token"
-                /> */}
+          <div className="mt-4 flex">
+            {userData?.preferences.isMusixmatchLyricsEnabled && (
+              <Button
+                label="Edit Musixmatch Settings"
+                iconName="settings"
+                clickHandler={() =>
+                  changePromptMenuData(
+                    true,
+                    <MusixmatchSettingsPrompt />,
+                    'edit-musixmatch-settings'
+                  )
+                }
+              />
+            )}
+            <Button
+              label={
+                userData?.preferences.isMusixmatchLyricsEnabled
+                  ? 'Musixmatch Lyrics is Enabled.'
+                  : 'Enable Musixmatch Lyrics'
+              }
+              clickHandler={() => {
+                const state = !userData?.preferences.isMusixmatchLyricsEnabled;
+                window.api.saveUserData(
+                  'preferences.isMusixmatchLyricsEnabled',
+                  state
+                );
+                updateUserData((prevData) => ({
+                  ...prevData,
+                  preferences: {
+                    ...prevData.preferences,
+                    isMusixmatchLyricsEnabled: state,
+                  },
+                }));
+              }}
+              isDisabled={userData?.preferences.isMusixmatchLyricsEnabled}
+            />
+          </div>
         </li>
       </ul>
     </>

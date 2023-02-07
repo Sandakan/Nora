@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable react/no-unescaped-entities */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable no-nested-ternary */
@@ -390,6 +391,7 @@ function SongTagsEditingPage() {
                 songId={songId}
                 songTitle={songInfo.title}
                 songArtists={songInfo.artists}
+                duration={songInfo.duration}
                 songLyrics={songInfo.lyrics}
                 updateSongInfo={updateSongInfo}
               />

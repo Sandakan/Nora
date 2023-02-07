@@ -6,12 +6,12 @@ import sortAlbums from '../utils/sortAlbums';
 const fetchAlbumData = async (
   albumIds = [] as string[],
   sortType?: AlbumSortTypes
-) => {
+): Promise<Album[]> => {
   if (albumIds) {
     log(`Requested albums data for ids '${albumIds.join(',')}'`);
     const albums = getAlbumsData();
     if (albums.length > 0) {
-      let results = [];
+      let results: SavableAlbum[] = [];
       if (albumIds.length === 0) results = albums;
       else {
         for (let x = 0; x < albums.length; x += 1) {
@@ -21,15 +21,15 @@ const fetchAlbumData = async (
         }
       }
 
-      results = results.map(
+      const output = results.map(
         (x) =>
           ({
             ...x,
             artworkPaths: getAlbumArtworkPath(x.artworkName),
-          } as Album)
+          } satisfies Album)
       );
-      if (sortType) return sortAlbums(results, sortType);
-      return results;
+      if (sortType) return sortAlbums(output, sortType);
+      return output;
     }
   }
   return [];

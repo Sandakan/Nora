@@ -1,6 +1,5 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable react/no-array-index-key */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/self-closing-comp */
@@ -182,23 +181,27 @@ export const Album = (props: AlbumProp) => {
           contextMenuItemData
         )
       }
-      onClick={() =>
-        isMultipleSelectionEnabled &&
-        multipleSelectionsData.selectionType === 'album'
-          ? updateMultipleSelections(
-              props.albumId,
-              'album',
-              isAMultipleSelection ? 'remove' : 'add'
-            )
-          : showAlbumInfoPage
-      }
+      onClick={(e) => {
+        if (
+          isMultipleSelectionEnabled &&
+          multipleSelectionsData.selectionType === 'album'
+        )
+          updateMultipleSelections(
+            props.albumId,
+            'album',
+            isAMultipleSelection ? 'remove' : 'add'
+          );
+        else if (e.getModifierState('Shift') === true) {
+          toggleMultipleSelections(!isMultipleSelectionEnabled, 'album');
+          updateMultipleSelections(
+            props.albumId,
+            'album',
+            isAMultipleSelection ? 'remove' : 'add'
+          );
+        } else showAlbumInfoPage();
+      }}
     >
-      <div
-        className="album-cover-and-play-btn-container relative h-[70%] cursor-pointer overflow-hidden"
-        onClick={() => {
-          if (!isMultipleSelectionEnabled) showAlbumInfoPage();
-        }}
-      >
+      <div className="album-cover-and-play-btn-container relative h-[70%] cursor-pointer overflow-hidden">
         {isMultipleSelectionEnabled &&
         multipleSelectionsData.selectionType === 'album' ? (
           <MultipleSelectionCheckbox
@@ -208,7 +211,7 @@ export const Album = (props: AlbumProp) => {
           />
         ) : (
           <span
-            className="material-icons-round icon absolute bottom-[5%] right-[5%] z-[1] cursor-pointer text-5xl text-font-color-white text-opacity-0 group-hover:text-opacity-100"
+            className="material-icons-round icon absolute bottom-[5%] right-[5%] z-[1] cursor-pointer text-5xl text-font-color-white text-opacity-0 hover:!text-opacity-100 group-hover:text-opacity-75"
             onClick={(e) => {
               e.stopPropagation();
               playAlbum();
@@ -235,15 +238,12 @@ export const Album = (props: AlbumProp) => {
         <div
           className="album-title pointer w-full overflow-hidden text-ellipsis whitespace-nowrap text-xl hover:underline"
           title={props.title}
-          onClick={() => {
-            if (!isMultipleSelectionEnabled) showAlbumInfoPage();
-          }}
         >
           {props.title}
         </div>
         {props.artists && (
           <div
-            className="album-artists w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm hover:underline"
+            className="album-artists flex w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm hover:underline"
             title={props.artists.map((artist) => artist.name).join(', ')}
           >
             {props.artists.map((artist, index) => {
@@ -254,12 +254,16 @@ export const Album = (props: AlbumProp) => {
                     artistId={artist.artistId}
                     name={artist.name}
                   />
-                  {props.artists
-                    ? props.artists.length === 0 ||
-                      props.artists.length - 1 === index
-                      ? ''
-                      : ', '
-                    : ''}
+                  {props.artists ? (
+                    props.artists.length === 0 ||
+                    props.artists.length - 1 === index ? (
+                      ''
+                    ) : (
+                      <span className="mr-1">,</span>
+                    )
+                  ) : (
+                    ''
+                  )}
                 </>
               );
             })}

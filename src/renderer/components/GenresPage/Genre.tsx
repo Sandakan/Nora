@@ -149,26 +149,35 @@ const Genre = (props: GenreProp) => {
         })`,
         // animationDelay: `${50 * (index + 1)}ms`,
       }}
-      onClick={() =>
-        isMultipleSelectionEnabled &&
-        multipleSelectionsData.selectionType === 'genre'
-          ? updateMultipleSelections(
-              genreId,
-              'genre',
-              isAMultipleSelection ? 'remove' : 'add'
-            )
-          : goToGenreInfoPage()
-      }
-      onKeyUp={() =>
-        isMultipleSelectionEnabled &&
-        multipleSelectionsData.selectionType === 'genre'
-          ? updateMultipleSelections(
-              genreId,
-              'genre',
-              isAMultipleSelection ? 'remove' : 'add'
-            )
-          : goToGenreInfoPage()
-      }
+      onClick={(e) => {
+        if (
+          isMultipleSelectionEnabled &&
+          multipleSelectionsData.selectionType === 'genre'
+        )
+          updateMultipleSelections(
+            genreId,
+            'genre',
+            isAMultipleSelection ? 'remove' : 'add'
+          );
+        else if (e.getModifierState('Shift') === true) {
+          toggleMultipleSelections(!isMultipleSelectionEnabled, 'genre');
+          updateMultipleSelections(
+            genreId,
+            'genre',
+            isAMultipleSelection ? 'remove' : 'add'
+          );
+        } else goToGenreInfoPage();
+      }}
+      // onKeyUp={() =>
+      //   isMultipleSelectionEnabled &&
+      //   multipleSelectionsData.selectionType === 'genre'
+      //     ? updateMultipleSelections(
+      //         genreId,
+      //         'genre',
+      //         isAMultipleSelection ? 'remove' : 'add'
+      //       )
+      //     : goToGenreInfoPage()
+      // }
       role="button"
       tabIndex={0}
       onContextMenu={(e) =>

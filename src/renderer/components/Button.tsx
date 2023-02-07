@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React from 'react';
 
 export interface ButtonProps {
@@ -16,6 +17,7 @@ export interface ButtonProps {
   isDisabled?: boolean;
   tooltipLabel?: string;
   pendingAnimationOnDisabled?: boolean;
+  style?: React.CSSProperties;
   onContextMenu?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }
 
@@ -31,6 +33,7 @@ const Button = React.memo((props: ButtonProps) => {
     pendingAnimationOnDisabled = false,
     onContextMenu,
     isDisabled = false,
+    style,
   } = props;
 
   const [isButtonDisabled, setIsButtonDisabled] = React.useState(isDisabled);
@@ -70,7 +73,7 @@ const Button = React.memo((props: ButtonProps) => {
       type="button"
       className={`button group mr-4 flex cursor-pointer items-center justify-center rounded-3xl border-[3px] border-background-color-2 bg-[transparent] px-4 py-2 text-sm text-font-color-black transition-[border] ease-in-out hover:border-background-color-3 dark:border-dark-background-color-2 dark:bg-[transparent] dark:text-font-color-white dark:hover:border-dark-background-color-3 ${
         isButtonDisabled &&
-        `!cursor-not-allowed  !border-font-color-dimmed/20 !text-opacity-50 !brightness-50 !transition-none dark:!border-font-color-dimmed/50`
+        `!cursor-not-allowed  !border-font-color-dimmed/10 !text-opacity-50 !brightness-50 !transition-none dark:!border-font-color-dimmed/40`
       } ${className}`}
       onClick={(e) =>
         !isButtonDisabled && clickHandler(e, updateIsDisabled, updateIsPending)
@@ -79,6 +82,7 @@ const Button = React.memo((props: ButtonProps) => {
       title={tooltipLabel || label}
       disabled={isButtonDisabled}
       onContextMenu={onContextMenu}
+      style={style}
     >
       {isStatusPending && isButtonDisabled ? (
         <span

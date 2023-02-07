@@ -19,7 +19,10 @@ module.exports = {
     'import/no-named-as-default': 'off',
     'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
     'no-console': 'off',
+    'no-undef': 'off',
     'prefer-const': 'warn',
+    'import/extensions': ['off'],
+    'react/function-component-definition': ['off'],
     // '@typescript-eslint/naming-convention': [
     //   'warn',
     //   {
@@ -42,6 +45,7 @@ module.exports = {
         ],
       },
     ],
+    'react/jsx-filename-extension': 'off',
   },
   parserOptions: {
     ecmaVersion: 2020,
