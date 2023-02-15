@@ -13,39 +13,39 @@
 <img class="logo" src="https://user-images.githubusercontent.com/45460443/194204486-4b580128-f2c4-4afa-acf6-d2a20fc5f324.png" alt="Notice !!! Oto Music for Desktop will be rebranded as Nora in an upcoming release.">
  <br/>
 <p>
-   Oto Music for Desktop is an elegant music player built using Electron and React. Inspired by <a href="https://play.google.com/store/apps/details?id=com.piyush.music&gl=us">Oto Music for Android</a> by Piyush Mamidwar.
+   Oto Music for Desktop is an elegant music player built using Electron and React, inspired by <a href="https://play.google.com/store/apps/details?id=com.piyush.music&gl=us">Oto Music (Android)</a> by Piyush Mamidwar.
 </p>
 
 <br/>
 
 <img src="assets/other/Frame 48.png">
 
-<p align="center"> logo used in this project is taken from the <a href="https://play.google.com/store/apps/details?id=com.piyush.music&gl=us">Oto Music for Android</a> app.</p>
+<p align="center"> The logo used in this project is taken from the <a href="https://play.google.com/store/apps/details?id=com.piyush.music&gl=us">Oto Music (Android)</a> app.</p>
 
-<p>With the simplicity and design in mind, this app was made to overcome problems when using default music apps in platforms that lacks essentail features.</p>
+<p>With simplicity and design in mind, this app was made to overcome problems when using default music apps in platforms that lack essential features.</p>
 
 <br>
 
 <p>
-   It packs with a horizon of features including,
+   It packs with a horizon of features! You can:
    <ul>
-      <li>Organize your songs, artists, albums. playlists with ease.</li>
-      <li>Create playlists that meet your needs.</li>
+      <li>Organize your songs, artists, albums and playlists with ease.</li>
+      <li>Create playlists that meet <i>your</i> needs.</li>
       <li>Sing along with the help of song lyrics.<sup>1</sup></li>
-      <li>Keep your favorites close to you.</li>
-      <li>Read your favorite artist's bio.</li>
-      <li>Personalized music shuffling.<sup>2</sup> (upcoming)</li>
-      <li>Change between Light and Dark theme with ease.</li>
-      <li>A Mini player to help focus on what matters at the moment.</li>
-      <li>Edit metadata of your songs (New)</li>
-      <li>Search through your library with the help of song filters.</li>
-      <li>See what you recently played in the homepage and the history playlist.</li>
+      <li>Keep your favorite songs and artists close to you.</li>
+      <li>Read your favorite artist's biography.</li>
+      <li>Personalized music shuffling.<sup>2</sup> (Upcoming)</li>
+      <li>Change between our beautiful Light and Dark themes with ease.</li>
+      <li>Use a mini-player to help you focus on your work, or just for convenience.</li>
+      <li>Edit the metadata of your songs easily and conveniently. (New)</li>
+      <li>Search through your library with the help of handy filters.</li>
+      <li>See what you've recently listened to in the homepage and the history playlist.</li>
    </ul>
 </p>
 
 <br>
 
-<p>Visit <a href="/changelog.md">release notes</a> to see what's new on the latest release.</p>
+<p>Visit the <a href="/changelog.md">release notes</a> to see what's new on the latest release.</p>
 
 <br>
 
@@ -93,7 +93,7 @@ Run
 <br>
 
 <h2>Feedback</h2>
-<p>If you have any feedback about bugs, feature requests etc. about the app, please let me know through my <a href="mailto:sandakannipunajith@gmail.com">email</a>.</p>
+<p>If you have any feature requests, find bugs, feedback about the app, please let me know through my <a href="mailto:sandakannipunajith@gmail.com">email</a>.</p>
 
 <br>
 
@@ -111,6 +111,6 @@ Run
 
 <div class="footnotes">* <sup>2</sup> Personalized shuffles are by watching for your listening patterns recording the no. of listens per song in a certian time period and using that data to personalize the songs in the shuffled queue.</div>
 
-<div class="footnotes">* every asset used in this project are only used for demonstration purposes only.</div>
+<div class="footnotes">* Every asset used in this project are only used for demonstration purposes only.</div>
 
-<div class="footnotes">* every song, artist, album, song cover used in this demonstration are not owned by myself but owned by their respective owners. They were used only for demonstration purposes only. I value all the copyrights of the owners of the above assets.</div>
+<div class="footnotes">* Every song, artist, album, song cover used in this demonstration are not owned by myself but owned by their respective owners. They were used only for demonstration purposes only. I value all the copyrights of the owners of the above assets.</div>
