@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable import/prefer-default-export */
 import { createContext } from 'react';
 
@@ -27,7 +26,6 @@ export interface AppStateContextType {
   isMuted: boolean;
   isRepeating: RepeatTypes;
   isShuffling: boolean;
-  isPlaying: boolean;
   // QUEUE
   queue: Queue;
   // MULTIPLE SELECTIONS DATA

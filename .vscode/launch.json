@@ -16,20 +16,6 @@
       "smartStep": true
     },
     {
-      "type": "vscode-edge-devtools.debug",
-      "request": "attach",
-      "name": "Attach to Microsoft Edge and open the Edge DevTools",
-      "url": "http://localhost:9223",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
-      "name": "Attach to Edge",
-      "port": 9223,
-      "request": "attach",
-      "type": "msedge",
-      "webRoot": "${workspaceFolder}"
-    },
-    {
       "name": "Main",
       "port": 5858,
       "request": "attach",
@@ -42,30 +28,6 @@
       },
       "showAsyncStacks": true,
       "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"]
-    },
-    {
-      "name": "Launch Program",
-      "program": "C:\\Users\\Sandakan Nipunajith\\OneDrive\\Desktop\\Untitled-1.js",
-      "request": "launch",
-      "skipFiles": ["<node_internals>/**"],
-      "type": "node"
-    }
-  ],
-  "compounds": [
-    {
-      "name": "Main & Renderer",
-      "configurations": ["Main", "Renderer"]
-    },
-    {
-      "name": "Launch Edge Headless and attach DevTools",
-      "configurations": [
-        "Launch Microsoft Edge in headless mode",
-        "Open Edge DevTools"
-      ]
-    },
-    {
-      "name": "Launch Edge and attach DevTools",
-      "configurations": ["Launch Microsoft Edge", "Open Edge DevTools"]
     }
   ]
 }

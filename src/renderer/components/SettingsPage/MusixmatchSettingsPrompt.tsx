@@ -2,6 +2,7 @@ import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
+import Hyperlink from '../Hyperlink';
 
 const MusixmatchSettingsPrompt = () => {
   const { userData } = React.useContext(AppContext);
@@ -24,6 +25,15 @@ const MusixmatchSettingsPrompt = () => {
         </li>
         <li>
           Musixmatch requires a user token to provide its service properly.
+        </li>
+        <li>
+          Follow the guide from{' '}
+          <Hyperlink
+            label="Spicetify Wiki"
+            linkTitle="Spicetify WiKi"
+            link="https://spicetify.app/docs/faq#sometimes-popup-lyrics-andor-lyrics-plus-seem-to-not-work"
+          />{' '}
+          to get a new Musixmatch usertoken.
         </li>
       </ul>
 

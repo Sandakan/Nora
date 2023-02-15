@@ -125,6 +125,11 @@ const AudioPlaybackSettings = () => {
                   ? 'Musixmatch Lyrics is Enabled.'
                   : 'Enable Musixmatch Lyrics'
               }
+              iconName={
+                userData?.preferences.isMusixmatchLyricsEnabled
+                  ? 'done'
+                  : undefined
+              }
               clickHandler={() => {
                 const state = !userData?.preferences.isMusixmatchLyricsEnabled;
                 window.api.saveUserData(

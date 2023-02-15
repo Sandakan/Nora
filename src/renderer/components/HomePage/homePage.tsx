@@ -214,6 +214,7 @@ export const HomePage = () => {
             event.dataType === 'songs/newSong'
           ) {
             fetchLatestSongs();
+            fetchRecentlyPlayedSongs();
           }
           if (event.dataType === 'artists/artworks') fetchRecentArtistsData();
           if (

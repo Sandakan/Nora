@@ -18,12 +18,13 @@ import LyricsSource from './LyricsSource';
 import NoLyrics from './NoLyrics';
 import MainContainer from '../MainContainer';
 import Button from '../Button';
+import debounce from 'renderer/utils/debounce';
 
 export const syncedLyricsRegex = /^\[\d+:\d{1,2}\.\d{1,3}]/gm;
-
-// document.addEventListener('lyrics/scrollIntoView', () =>
-//   console.log('scroll into view')
-// );
+let isScrollingByCode = false;
+document.addEventListener('lyrics/scrollIntoView', () => {
+  isScrollingByCode = true;
+});
 
 export const LyricsPage = () => {
   const { currentSongData } = useContext(AppContext);
@@ -203,6 +204,33 @@ export const LyricsPage = () => {
     [addNewNotifications, currentSongData.songId, lyrics]
   );
 
+  const refreshOnlineLyrics = React.useCallback(
+    (_: unknown, setIsDisabled: (state: boolean) => void) => {
+      setIsDisabled(true);
+      window.api
+        .getSongLyrics(
+          {
+            songTitle: currentSongData.title,
+            songArtists: Array.isArray(currentSongData.artists)
+              ? currentSongData.artists.map((artist) => artist.name)
+              : [],
+            songId: currentSongData.songId,
+            duration: currentSongData.duration,
+          },
+          'ANY',
+          'ONLINE_ONLY'
+        )
+        .then((res) => setLyrics(res))
+        .finally(() => setIsDisabled(false));
+    },
+    [
+      currentSongData.artists,
+      currentSongData.duration,
+      currentSongData.songId,
+      currentSongData.title,
+    ]
+  );
+
   return (
     <MainContainer
       noDefaultStyles
@@ -217,7 +245,7 @@ export const LyricsPage = () => {
           lyrics ? (
             <>
               <div className="title-container relative flex w-full items-center justify-between py-2 pl-8 pr-2 text-2xl text-font-color-highlight dark:text-dark-font-color-highlight">
-                <div className="flex max-w-[50%] items-center">
+                <div className="flex max-w-[40%] items-center">
                   <span className="overflow-hidden text-ellipsis whitespace-nowrap">
                     {lyrics.source === 'in_song_lyrics' ? 'Offline' : 'Online'}{' '}
                     Lyrics for '{currentSongData.title}'
@@ -270,6 +298,14 @@ export const LyricsPage = () => {
                   {lyrics && lyrics.source !== 'in_song_lyrics' && (
                     <>
                       <Button
+                        key={5}
+                        tooltipLabel="Refresh Lyrics"
+                        pendingAnimationOnDisabled
+                        className="refresh-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                        iconName="refresh"
+                        clickHandler={refreshOnlineLyrics}
+                      />
+                      <Button
                         key={3}
                         label="Show saved lyrics"
                         pendingAnimationOnDisabled
@@ -292,7 +328,14 @@ export const LyricsPage = () => {
               <div
                 className="lyrics-lines-container flex h-full flex-col items-center overflow-y-auto px-8 py-4"
                 ref={lyricsLinesContainerRef}
-                // onScroll={(e) => console.log('scrolling', e)}
+                onScroll={() =>
+                  debounce(() => {
+                    if (isScrollingByCode) {
+                      isScrollingByCode = false;
+                      console.log('scrolling by code');
+                    } else console.log('user scrolling');
+                  }, 100)
+                }
               >
                 {lyricsComponents}
                 <LyricsSource

@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const filterUniqueObjects = <Result extends Record<string, any>>(
   results: Result[],
   uniqueFieldName: keyof Result

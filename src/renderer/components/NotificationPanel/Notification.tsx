@@ -81,7 +81,7 @@ const Notification = (props: AppNotification) => {
           <div className="icon-container mx-3 flex items-center justify-center [&>img]:aspect-square [&>img]:h-4 [&>span]:text-xl">
             {notificationData.icon}
           </div>
-          <div className="message-container overflow-hidden text-ellipsis py-1 text-justify">
+          <div className="message-container overflow-hidden text-ellipsis py-1">
             {notificationData.content}
           </div>
         </div>

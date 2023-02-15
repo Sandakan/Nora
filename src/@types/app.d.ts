@@ -236,6 +236,8 @@ declare global {
     isPlayerStalled: boolean;
   }
 
+  type SongSkipReason = 'USER_SKIP' | 'PLAYER_SKIP';
+
   type LyricsTypes = 'SYNCED' | 'UN_SYNCED' | 'ANY';
 
   type LyricsRequestTypes = 'ONLINE_ONLY' | 'OFFLINE_ONLY' | 'ANY';
@@ -362,6 +364,8 @@ declare global {
     | 'preferences.showArtistArtworkNearSongControls'
     | 'preferences.isMusixmatchLyricsEnabled'
     | 'preferences.disableBackgroundArtworks'
+    | 'preferences.hideWindowOnClose'
+    | 'preferences.openWindowAsHiddenOnSystemStart'
     | 'songBlacklist'
     | 'customMusixmatchUserToken'
     | PageSortTypes;
@@ -403,6 +407,8 @@ declare global {
       showArtistArtworkNearSongControls: boolean;
       isMusixmatchLyricsEnabled: boolean;
       disableBackgroundArtworks: boolean;
+      hideWindowOnClose: boolean;
+      openWindowAsHiddenOnSystemStart: boolean;
     };
     windowPositions: {
       mainWindow?: WindowCordinates;

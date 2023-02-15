@@ -218,8 +218,8 @@ async function searchSongMetadataResultsInGenius(
 ): Promise<SongMetadataResultFromInternet[]> {
   const GENIUS_API_KEY = process.env.GENIUS_API_KEY;
   if (typeof GENIUS_API_KEY !== 'string') {
-    log('undefined GENIUS_API_KEY.', { GENIUS_API_KEY }, 'WARN');
-    throw new Error('undefined GENIUS_API_KEY.');
+    log('unknown GENIUS_API_KEY.', { GENIUS_API_KEY }, 'WARN');
+    throw new Error('unknown GENIUS_API_KEY.');
   }
   const res = await fetch(
     encodeURI(

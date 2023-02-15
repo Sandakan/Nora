@@ -18,6 +18,7 @@ import Hyperlink from '../../Hyperlink';
 import Button from '../../Button';
 import ResetAppConfirmationPrompt from '../../HomePage/ResetAppConfirmationPrompt';
 import SensitiveActionConfirmPrompt from '../../SensitiveActionConfirmPrompt';
+import AppShortcutsPrompt from '../AppShortcutsPrompt';
 
 const AboutSettings = () => {
   const { changePromptMenuData, addNewNotifications } =
@@ -220,6 +221,15 @@ const AboutSettings = () => {
                 />
               );
             }}
+          />
+          <Button
+            label="App Shortcuts"
+            iconName="trail_length_short"
+            className="mb-4 rounded-2xl"
+            iconClassName="material-icons-round-outlined"
+            clickHandler={() =>
+              changePromptMenuData(true, <AppShortcutsPrompt />)
+            }
           />
         </div>
         <div className="about-description mt-4">

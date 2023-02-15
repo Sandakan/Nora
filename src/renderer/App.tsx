@@ -1,7 +1,7 @@
+/* eslint-disable promise/no-nesting */
 /* eslint-disable no-unused-vars */
 /* eslint-disable default-param-last */
 /* eslint-disable no-use-before-define */
-/* eslint-disable promise/no-nesting */
 import React, { ReactElement } from 'react';
 import 'tailwindcss/tailwind.css';
 import '../../assets/styles/styles.css';
@@ -26,6 +26,7 @@ import ReleaseNotesPrompt from './components/ReleaseNotesPrompt/ReleaseNotesProm
 import Img from './components/Img';
 import Preloader from './components/Preloader/Preloader';
 import isLatestVersion from './utils/isLatestVersion';
+import roundTo from './utils/roundTo';
 
 interface AppReducer {
   userData: UserData;
@@ -423,6 +424,8 @@ const userDataTemplate: UserData = {
     showArtistArtworkNearSongControls: false,
     isMusixmatchLyricsEnabled: false,
     disableBackgroundArtworks: false,
+    hideWindowOnClose: false,
+    openWindowAsHiddenOnSystemStart: false,
   },
   windowPositions: {},
   windowDiamensions: {},
@@ -469,6 +472,8 @@ const reducerData: AppReducer = {
   multipleSelectionsData: { isEnabled: false, multipleSelections: [] },
   appUpdatesState: 'UNKNOWN',
 };
+
+console.log('Command line args', window.api.commandLineArgs);
 
 export default function App() {
   const [content, dispatch] = React.useReducer(reducer, reducerData);
@@ -602,12 +607,12 @@ export default function App() {
   const handleBeforeQuitEvent = React.useCallback(async () => {
     window.api.sendSongPosition(player.currentTime);
     await window.api.saveUserData(
-      'isShuffling',
-      contentRef.current.player.isShuffling
-    );
-    await window.api.saveUserData(
       'isRepeating',
       contentRef.current.player.isRepeating
+    );
+    await window.api.saveUserData(
+      'isShuffling',
+      contentRef.current.player.isShuffling
     );
   }, []);
 
@@ -769,7 +774,7 @@ export default function App() {
       if (refStartPlay.current) toggleSongPlayback(true);
     };
     const manageSongPositionUpdate = () => {
-      contentRef.current.player.songPosition = Math.floor(player.currentTime);
+      contentRef.current.player.songPosition = roundTo(player.currentTime, 2);
     };
     const managePlayerStalledStatus = () => {
       dispatch({ type: 'PLAYER_WAITING_STATUS', data: true });
@@ -777,6 +782,10 @@ export default function App() {
     const managePlayerNotStalledStatus = () => {
       dispatch({ type: 'PLAYER_WAITING_STATUS', data: false });
     };
+
+    const handleSkipForwardClickWithParams = () =>
+      handleSkipForwardClick('PLAYER_SKIP');
+
     // player.addEventListener('seeking', managePlayerNotStalledStatus);
     player.addEventListener('canplay', managePlayerNotStalledStatus);
     player.addEventListener('canplaythrough', managePlayerNotStalledStatus);
@@ -786,15 +795,13 @@ export default function App() {
     player.addEventListener('stalled', managePlayerStalledStatus);
     player.addEventListener('waiting', managePlayerStalledStatus);
     player.addEventListener('canplay', playSongIfPlayable);
-    player.addEventListener('ended', handleSkipForwardClick);
+    player.addEventListener('ended', handleSkipForwardClickWithParams);
     player.addEventListener('play', addSongTitleToTitleBar);
     player.addEventListener('pause', displayDefaultTitleBar);
 
     const intervalId = setInterval(() => {
       if (!player.paused) {
-        const currentPosition = Math.floor(
-          contentRef.current.player.songPosition
-        );
+        const currentPosition = contentRef.current.player.songPosition;
 
         const playerPositionChange = new CustomEvent('player/positionChange', {
           detail: currentPosition,
@@ -831,7 +838,7 @@ export default function App() {
       player.removeEventListener('waiting', managePlayerStalledStatus);
       player.removeEventListener('timeupdate', manageSongPositionUpdate);
       player.removeEventListener('canplay', playSongIfPlayable);
-      player.removeEventListener('ended', handleSkipForwardClick);
+      player.removeEventListener('ended', handleSkipForwardClickWithParams);
       player.removeEventListener('play', addSongTitleToTitleBar);
       player.removeEventListener('pause', displayDefaultTitleBar);
     };
@@ -1138,6 +1145,9 @@ export default function App() {
           },
         ],
       });
+      const handleSkipForwardClickWithParams = () =>
+        handleSkipForwardClick('PLAYER_SKIP');
+
       navigator.mediaSession.setActionHandler('pause', () =>
         toggleSongPlayback(false)
       );
@@ -1150,7 +1160,7 @@ export default function App() {
       );
       navigator.mediaSession.setActionHandler(
         `nexttrack`,
-        handleSkipForwardClick
+        handleSkipForwardClickWithParams
       );
       navigator.mediaSession.playbackState = content.player.isCurrentSongPlaying
         ? 'playing'
@@ -1532,25 +1542,31 @@ export default function App() {
     } else changeQueueCurrentSongIndex(0);
   }, [changeQueueCurrentSongIndex]);
 
-  const handleSkipForwardClick = React.useCallback(() => {
-    const { currentSongIndex } = refQueue.current;
-    if (contentRef.current.player.isRepeating === 'repeat-1') {
-      player.currentTime = 0;
-      toggleSongPlayback(true);
-      window.api.updateSongListeningData(
-        contentRef.current.currentSongData.songId,
-        'listens',
-        'increment'
-      );
-    } else if (typeof currentSongIndex === 'number') {
-      if (refQueue.current.queue.length > 0) {
-        if (refQueue.current.queue.length - 1 === currentSongIndex) {
-          if (contentRef.current.player.isRepeating === 'repeat')
-            changeQueueCurrentSongIndex(0);
-        } else changeQueueCurrentSongIndex(currentSongIndex + 1);
-      } else console.log('Queue is empty.');
-    } else changeQueueCurrentSongIndex(0);
-  }, [toggleSongPlayback, changeQueueCurrentSongIndex]);
+  const handleSkipForwardClick = React.useCallback(
+    (reason: SongSkipReason = 'USER_SKIP') => {
+      const { currentSongIndex } = refQueue.current;
+      if (
+        contentRef.current.player.isRepeating === 'repeat-1' &&
+        reason !== 'USER_SKIP'
+      ) {
+        player.currentTime = 0;
+        toggleSongPlayback(true);
+        window.api.updateSongListeningData(
+          contentRef.current.currentSongData.songId,
+          'listens',
+          'increment'
+        );
+      } else if (typeof currentSongIndex === 'number') {
+        if (refQueue.current.queue.length > 0) {
+          if (refQueue.current.queue.length - 1 === currentSongIndex) {
+            if (contentRef.current.player.isRepeating === 'repeat')
+              changeQueueCurrentSongIndex(0);
+          } else changeQueueCurrentSongIndex(currentSongIndex + 1);
+        } else console.log('Queue is empty.');
+      } else changeQueueCurrentSongIndex(0);
+    },
+    [toggleSongPlayback, changeQueueCurrentSongIndex]
+  );
 
   const toggleShuffling = React.useCallback((isShuffling?: boolean) => {
     dispatch({ type: 'TOGGLE_SHUFFLE_STATE', data: isShuffling });
@@ -1876,8 +1892,10 @@ export default function App() {
 
   const updateMiniPlayerStatus = React.useCallback(
     (isVisible: boolean) => {
-      if (content.player.isMiniPlayer !== isVisible)
+      if (content.player.isMiniPlayer !== isVisible) {
         dispatch({ type: 'UPDATE_MINI_PLAYER_STATE', data: isVisible });
+        contentRef.current.player.isMiniPlayer = isVisible;
+      }
     },
     [content.player.isMiniPlayer]
   );
@@ -1925,11 +1943,17 @@ export default function App() {
   }, []);
 
   const toggleMutedState = React.useCallback(
-    (isMuted?: boolean) => {
-      if (isMuted !== undefined) {
-        if (isMuted !== content.player.volume.isMuted)
-          dispatch({ type: 'UPDATE_MUTED_STATE', data: isMuted });
-      } else dispatch({ type: 'UPDATE_MUTED_STATE' });
+    (isMute?: boolean) => {
+      if (isMute !== undefined) {
+        if (isMute !== content.player.volume.isMuted) {
+          dispatch({ type: 'UPDATE_MUTED_STATE', data: isMute });
+          contentRef.current.player.volume.isMuted = isMute;
+        }
+      } else {
+        dispatch({ type: 'UPDATE_MUTED_STATE' });
+        contentRef.current.player.volume.isMuted =
+          !contentRef.current.player.volume.isMuted;
+      }
     },
     [content.player.volume.isMuted]
   );
@@ -1962,7 +1986,8 @@ export default function App() {
         updateVolume(player.volume + 0.05 <= 1 ? player.volume * 100 + 5 : 100);
       else if (e.ctrlKey && e.key === 'ArrowDown')
         updateVolume(player.volume - 0.05 >= 0 ? player.volume * 100 - 5 : 0);
-      else if (e.ctrlKey && e.key === 'm') toggleMutedState(!player.muted);
+      else if (e.ctrlKey && e.key === 'm')
+        toggleMutedState(!contentRef.current.player.volume.isMuted);
       else if (e.ctrlKey && e.key === 'ArrowRight') handleSkipForwardClick();
       else if (e.ctrlKey && e.key === 'ArrowLeft') handleSkipBackwardClick();
       else if (e.ctrlKey && e.key === 's') toggleShuffling();
@@ -2128,8 +2153,8 @@ export default function App() {
 
   const clearAudioPlayerData = React.useCallback(() => {
     toggleSongPlayback(false);
-    player.src = '';
-    player.load();
+    player.currentTime = 0;
+    player.pause();
     dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: {} });
     contentRef.current.currentSongData = {} as AudioPlayerData;
     addNewNotifications([
@@ -2177,10 +2202,7 @@ export default function App() {
       isDarkMode: content.isDarkMode,
       contextMenuData: content.contextMenuData,
       PromptMenuData: content.PromptMenuData,
-      currentSongData: {
-        ...content.currentSongData,
-        duration: player.duration,
-      },
+      currentSongData: content.currentSongData,
       currentlyActivePage:
         content.navigationHistory.history[
           content.navigationHistory.pageHistoryIndex
@@ -2196,7 +2218,6 @@ export default function App() {
       isMuted: content.player.volume.isMuted,
       isRepeating: content.player.isRepeating,
       isShuffling: content.player.isShuffling,
-      isPlaying: !player.paused,
       isPlayerStalled: content.player.isPlayerStalled,
       bodyBackgroundImage: content.bodyBackgroundImage,
       isMultipleSelectionEnabled: content.multipleSelectionsData.isEnabled,

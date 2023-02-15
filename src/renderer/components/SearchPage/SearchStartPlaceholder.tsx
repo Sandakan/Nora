@@ -94,7 +94,7 @@ const SearchStartPlaceholder = (props: Props) => {
             alt="Flying kite"
           />
           <div className="description text-xl text-font-color-black dark:text-font-color-white">
-            Why thinking... Search something...
+            Search for anything in your library...
           </div>
           <div className="recent-search-results-container mt-4 flex flex-wrap items-center justify-center px-[15%]">
             {recentSearchResultComponents}

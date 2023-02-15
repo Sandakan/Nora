@@ -39,6 +39,8 @@ const USER_DATA_TEMPLATE: UserData = {
     showArtistArtworkNearSongControls: false,
     isMusixmatchLyricsEnabled: false,
     disableBackgroundArtworks: false,
+    hideWindowOnClose: false,
+    openWindowAsHiddenOnSystemStart: false,
   },
   windowPositions: {},
   windowDiamensions: {},
@@ -361,6 +363,16 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
     ) {
       userData.preferences.disableBackgroundArtworks = data;
     } else if (
+      dataType === 'preferences.hideWindowOnClose' &&
+      typeof data === 'boolean'
+    ) {
+      userData.preferences.hideWindowOnClose = data;
+    } else if (
+      dataType === 'preferences.openWindowAsHiddenOnSystemStart' &&
+      typeof data === 'boolean'
+    ) {
+      userData.preferences.openWindowAsHiddenOnSystemStart = data;
+    } else if (
       dataType === 'sortingStates.songsPage' &&
       typeof data === 'string'
     ) {
@@ -680,6 +692,9 @@ export const resetAppData = async () => {
       .catch(manageErrors);
     await fs
       .unlink(path.join(userDataPath, 'userData.json'))
+      .catch(manageErrors);
+    await fs
+      .unlink(path.join(userDataPath, 'listening_data.json'))
       .catch(manageErrors);
     await fs
       .rm(path.join(userDataPath, 'song_covers'), {

@@ -9,11 +9,19 @@ import NewUpdateIndicator from './indicators/NewUpdateIndicator';
 import ChangeThemeBtn from './special_controls/ChangeThemeBtn';
 
 const TitleBar = React.memo(() => {
-  const { pageHistoryIndex, noOfPagesInHistory, bodyBackgroundImage } =
-    React.useContext(AppContext);
+  const {
+    pageHistoryIndex,
+    noOfPagesInHistory,
+    bodyBackgroundImage,
+    userData,
+  } = React.useContext(AppContext);
   const { updatePageHistoryIndex } = React.useContext(AppUpdateContext);
 
-  const close = () => window.api.closeApp();
+  const close = () => {
+    if (userData && userData.preferences.hideWindowOnClose)
+      window.api.hideApp();
+    else window.api.closeApp();
+  };
   const minimize = () => window.api.minimizeApp();
   const maximize = () => window.api.toggleMaximizeApp();
 

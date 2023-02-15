@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
@@ -118,7 +119,7 @@ const AllSearchResultsPage = () => {
 
   return (
     <>
-      {data && data && (
+      {data && (
         <MainContainer className="main-container all-search-results-container">
           <>
             <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">

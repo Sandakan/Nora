@@ -159,7 +159,8 @@ body * {
 }
 
 /* ? APP DARK THEME STYLES */
-.App.dark {
+.App.dark,
+.mini-player.dark {
   --background-color-1: rgb(33, 34, 38);
   --background-color-2: hsla(225, 8%, 20%, 100%);
   --background-color-3: hsla(213, 80%, 88%, 100%);
@@ -245,6 +246,8 @@ input[type='range']::-webkit-slider-runnable-track {
 
 input[type='range']:hover::-webkit-slider-thumb {
   opacity: 1;
+  background: var(--text-color-highlight);
+  border-color: var(--text-color-highlight);
   transform: scale(1);
   -webkit-transform: scale(1);
   -moz-transform: scale(1);
@@ -254,13 +257,7 @@ input[type='range']:hover::-webkit-slider-thumb {
 
 input[type='range']:active::-webkit-slider-thumb {
   transform: scale(1.2);
-  background: var(--seekbar-background-color);
 }
-
-/* 
-#miniPlayerSeekSlider::-webkit-slider-thumb {
-  display: none;
-} */
 
 #miniPlayerLyricsContainer::-webkit-scrollbar {
   display: none !important;
@@ -287,10 +284,6 @@ input[type="checkbox"]:checked~.checkmark .icon {
   user-select: none;
   -webkit-user-select: none;
 }
-
-/* .mini-player .container {
-  background: linear-gradient(180deg, rgba(2, 0, 36, 0) 0%, rgba(33, 34, 38, 0.9) 90%);
-} */
 
 .mini-player .container .seek-slider::-webkit-slider-runnable-track {
   width: 100%;

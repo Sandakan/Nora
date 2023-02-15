@@ -11,6 +11,8 @@ import {
   protocol,
   crashReporter,
   nativeTheme,
+  Tray,
+  Menu,
 } from 'electron';
 import path from 'path';
 import os from 'os';
@@ -89,6 +91,7 @@ const MINI_PLAYER_ASPECT_RATIO = 17 / 10;
 
 // / / / / / / VARIABLES / / / / / / /
 let mainWindow: BrowserWindow;
+let tray: Tray;
 let isMiniPlayer = false;
 let isConnectedToInternet = false;
 
@@ -166,6 +169,7 @@ const createWindow = async () => {
     show: false,
   });
 
+  mainWindow.setAppDetails({ appId: 'Nora' });
   mainWindow.loadURL(resolveHtmlPath('index.html'));
   mainWindow.once('ready-to-show', () => {
     log('Started checking for new songs during the application start.');
@@ -191,6 +195,25 @@ app
     app.on('second-instance', handleSecondInstances);
 
     protocol.registerFileProtocol('nora', registerFileProtocol);
+
+    tray = new Tray(getAssetPath('icon.ico'));
+    const trayContextMenu = Menu.buildFromTemplate([
+      {
+        label: 'Show/Hide Nora',
+        type: 'normal',
+        click: () =>
+          mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show(),
+        role: 'hide',
+      },
+      { type: 'separator' },
+      { label: 'Exit', type: 'normal', click: () => app.quit(), role: 'close' },
+    ]);
+    tray.setContextMenu(trayContextMenu);
+    tray.setToolTip('Nora');
+    tray.addListener('double-click', () => {
+      if (mainWindow.isVisible()) mainWindow.hide();
+      else mainWindow.show();
+    });
 
     // powerMonitor.addListener('shutdown', (e) => e.preventDefault());
 
@@ -227,6 +250,10 @@ app
           ? mainWindow.unmaximize()
           : mainWindow.maximize()
       );
+
+      ipcMain.on('app/hide', () => mainWindow.hide());
+
+      ipcMain.on('app/show', () => mainWindow.show());
 
       ipcMain.on('app/changeAppTheme', (_, theme?: AppTheme) =>
         changeAppTheme(theme)
@@ -887,9 +914,17 @@ function toggleMiniPlayer(isActivateMiniPlayer: boolean) {
 
 async function toggleAutoLaunch(autoLaunchState: boolean) {
   const options = app.getLoginItemSettings();
+  const userData = getUserData();
+  const openAsHidden =
+    userData?.preferences?.openWindowAsHiddenOnSystemStart ?? false;
+
   log(`AUTO LAUNCH STATE : ${options.openAtLogin}`);
 
-  app.setLoginItemSettings({ openAtLogin: autoLaunchState, name: 'Nora' });
+  app.setLoginItemSettings({
+    openAtLogin: autoLaunchState,
+    name: 'Nora',
+    openAsHidden,
+  });
 
   saveUserData('preferences.autoLaunchApp', autoLaunchState);
 }

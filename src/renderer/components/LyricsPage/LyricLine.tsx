@@ -30,7 +30,8 @@ const LyricLine = (props: LyricProp) => {
   React.useEffect(() => {
     if (lyricsRef.current && syncedLyrics) {
       const { start, end } = syncedLyrics;
-      if (songPosition > start && songPosition < end) {
+      // substracted 250 milliseconds to keep lyrics in sync with the lyrics line animations.
+      if (songPosition > start - 0.25 && songPosition < end - 0.25) {
         if (!isTheCurrnetLineRef.current && isAutoScrolling) {
           isTheCurrnetLineRef.current = true;
           lyricsRef.current?.scrollIntoView({
@@ -49,11 +50,11 @@ const LyricLine = (props: LyricProp) => {
         animationDelay: `${250 + 25 * (index + 1)}ms`,
         // opacity: isSynced ? '0.5' : '1',
       }}
-      className={`appear-from-bottom highlight mb-5 w-fit select-text text-center font-['Poppins'] text-4xl font-medium text-font-color-black transition-[transform,color] duration-200 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
+      className={`appear-from-bottom highlight mb-5 w-fit select-text text-center font-['Poppins'] text-4xl font-medium text-font-color-black transition-[color,transform] duration-200 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
         syncedLyrics
           ? `cursor-pointer ${
-              songPosition > syncedLyrics.start &&
-              songPosition < syncedLyrics.end
+              songPosition > syncedLyrics.start - 0.25 &&
+              songPosition < syncedLyrics.end - 0.25
                 ? '!scale-100 text-5xl !text-opacity-90'
                 : '!scale-75 !text-opacity-20 hover:!text-opacity-75'
             }`

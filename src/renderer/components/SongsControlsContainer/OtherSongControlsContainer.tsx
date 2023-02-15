@@ -14,6 +14,7 @@ const OtherSongControlsContainer = () => {
     updateVolume,
     updateContextMenuData,
   } = useContext(AppUpdateContext);
+  const volumeSliderRef = React.useRef<HTMLInputElement>(null);
 
   const volumeBarCssProperties: any = {};
 
@@ -53,14 +54,18 @@ const OtherSongControlsContainer = () => {
     ]
   );
 
+  // const scrollOnVolume = React.useCallback(() => {
+  //   if (volumeSliderRef.current) updateVolume(window.scrollY);
+  // }, []);
+
   return (
     <div className="other-controls-container flex w-[30%] items-center justify-end">
       <div className="queue-btn mr-6 flex cursor-pointer items-center justify-center text-font-color-black text-opacity-60 dark:text-font-color-white lg:hidden">
         <span
           title="Current Queue (Ctrl + Q)"
-          className={`material-icons-round-outlined icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-100 dark:text-font-color-white ${
+          className={`material-icons-round-outlined icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white ${
             currentlyActivePage.pageTitle === 'CurrentQueue' &&
-            '!text-seekbar-background-color !opacity-90 dark:!text-seekbar-background-color'
+            '!text-font-color-highlight !opacity-90 dark:!text-dark-font-color-highlight'
           } `}
           onClick={() =>
             currentlyActivePage.pageTitle === 'CurrentQueue'
@@ -74,7 +79,7 @@ const OtherSongControlsContainer = () => {
       <div className="mini-player-btn mr-6 flex cursor-pointer items-center justify-center text-font-color-black text-opacity-60 dark:text-font-color-white lg:hidden">
         <span
           title="Open in Mini player (Ctrl + N)"
-          className="material-icons-round-outlined icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-100 dark:text-font-color-white"
+          className="material-icons-round-outlined icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"
           onClick={() => updateMiniPlayerStatus(!isMiniPlayer)}
         >
           tab
@@ -84,10 +89,11 @@ const OtherSongControlsContainer = () => {
       <div className="volume-btn mr-2 flex cursor-pointer items-center justify-center">
         <span
           title="Mute/Unmute (Ctrl + M)"
-          className={`material-icons-round icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-100 dark:text-font-color-white ${
-            isMuted && '!opacity-100'
+          className={`material-icons-round icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white ${
+            isMuted &&
+            '!text-font-color-highlight !opacity-100 dark:!text-dark-font-color-highlight'
           }`}
-          onClick={() => toggleMutedState()}
+          onClick={() => toggleMutedState(!isMuted)}
         >
           {isMuted ? 'volume_off' : 'volume_up'}
         </span>
@@ -96,7 +102,7 @@ const OtherSongControlsContainer = () => {
         <input
           type="range"
           id="volumeSlider"
-          className="relative float-left m-0 h-6 w-full appearance-none rounded-lg bg-[transparent] p-0 outline-none before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--volume-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width] before:content-[''] dark:before:bg-font-color-white/50"
+          className="relative float-left m-0 h-6 w-full appearance-none rounded-lg bg-[transparent] p-0 outline-none before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--volume-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
           min="0"
           max="100"
           value={volume}
@@ -104,12 +110,23 @@ const OtherSongControlsContainer = () => {
           aria-label="Volume slider"
           style={volumeBarCssProperties}
           title={Math.round(volume).toString()}
+          // onMouseOver={() =>
+          //   window.addEventListener('scroll', () => {
+          //     console.log(true);
+          //   })
+          // }
+          // onMouseOut={() =>
+          //   window.removeEventListener('scroll', () => {
+          //     console.log(true);
+          //   })
+          // }
+          ref={volumeSliderRef}
         />
       </div>
       <div className="other-settings-btn mr-3 hidden cursor-pointer items-center justify-center text-font-color-black text-opacity-60 dark:text-font-color-white lg:flex">
         <span
           title="Other Settings"
-          className="material-icons-round icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-100 dark:text-font-color-white"
+          className="material-icons-round icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();

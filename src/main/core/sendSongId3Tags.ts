@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import {
   getAlbumsData,
   getArtistsData,
@@ -31,7 +32,6 @@ const sendSongID3Tags = async (songId: string): Promise<SongTags> => {
               song.genres?.some((x) => x.genreId === artist.genreId)
             )
           : undefined;
-        // eslint-disable-next-line no-await-in-loop
         const songTags = await getSongId3Tags(song.path);
         if (songTags) {
           const res: SongTags = {
@@ -42,7 +42,6 @@ const sendSongID3Tags = async (songId: string): Promise<SongTags> => {
                 name: artist.trim(),
                 artistId: undefined,
               })),
-            // eslint-disable-next-line no-nested-ternary
             album: songAlbum
               ? {
                   ...songAlbum,

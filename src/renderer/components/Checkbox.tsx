@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/require-default-props */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 
@@ -9,14 +10,23 @@ interface CheckboxProp {
   isChecked: boolean;
   checkedStateUpdateFunction: (state: boolean) => void;
   labelContent?: string;
+  isDisabled?: boolean;
 }
 
 const Checkbox = React.memo((props: CheckboxProp) => {
-  const { id, checkedStateUpdateFunction, isChecked, labelContent, className } =
-    props;
+  const {
+    id,
+    checkedStateUpdateFunction,
+    isChecked,
+    labelContent,
+    className,
+    isDisabled = false,
+  } = props;
   return (
     <div
-      className={`checkbox-and-labels-container mt-4 ml-2 flex items-center ${className}`}
+      className={`checkbox-and-labels-container mt-4 ml-2 flex items-center transition-opacity ${
+        isDisabled && 'pointer-events-none !cursor-pointer opacity-50'
+      } ${className}`}
     >
       <input
         type="checkbox"

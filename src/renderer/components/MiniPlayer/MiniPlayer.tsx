@@ -12,13 +12,8 @@ import Img from '../Img';
 import LyricLine from '../LyricsPage/LyricLine';
 
 export default function MiniPlayer() {
-  const {
-    isMiniPlayer,
-    currentSongData,
-    isCurrentSongPlaying,
-    isPlaying,
-    userData,
-  } = React.useContext(AppContext);
+  const { isMiniPlayer, currentSongData, isCurrentSongPlaying, userData } =
+    React.useContext(AppContext);
   const {
     updateMiniPlayerStatus,
     toggleSongPlayback,
@@ -62,10 +57,15 @@ export default function MiniPlayer() {
     isLyricsVisible,
   ]);
 
-  const manageKeyboardShortcuts = React.useCallback((e: KeyboardEvent) => {
-    if (e.ctrlKey && e.key === 'l')
-      setIsLyricsVisible((prevState) => !prevState);
-  }, []);
+  const manageKeyboardShortcuts = React.useCallback(
+    (e: KeyboardEvent) => {
+      if (e.ctrlKey) {
+        if (e.key === 'l') setIsLyricsVisible((prevState) => !prevState);
+        if (e.key === 'n') updateMiniPlayerStatus(!isMiniPlayer);
+      }
+    },
+    [isMiniPlayer, updateMiniPlayerStatus]
+  );
 
   React.useEffect(() => {
     window.addEventListener('keydown', manageKeyboardShortcuts);
@@ -144,9 +144,14 @@ export default function MiniPlayer() {
     return [];
   }, [lyrics]);
 
+  const handleSkipForwardClickWithParams = React.useCallback(
+    () => handleSkipForwardClick('USER_SKIP'),
+    [handleSkipForwardClick]
+  );
+
   return (
     <div
-      className={`mini-player group h-full select-none overflow-hidden delay-100 ${
+      className={`mini-player dark group h-full select-none overflow-hidden delay-100 ${
         !isCurrentSongPlaying && 'paused'
       } ${
         userData && userData.preferences.isReducedMotion ? 'reduced-motion' : ''
@@ -276,7 +281,7 @@ export default function MiniPlayer() {
             className="favorite-btn !m-0 h-fit -translate-x-4 cursor-pointer border-none bg-[transparent] !p-0 text-font-color-white transition-transform dark:bg-[transparent] dark:text-font-color-white"
             iconClassName={`text-2xl ${
               currentSongData.isAFavorite
-                ? 'meterial-icons-round !text-dark-font-color-highlight-2'
+                ? 'meterial-icons-round !text-dark-background-color-3'
                 : 'material-icons-round-outlined'
             }`}
             isDisabled={!currentSongData.isKnownSource}
@@ -301,18 +306,18 @@ export default function MiniPlayer() {
             className="play-pause-btn !mx-2 h-fit scale-90 cursor-pointer border-none bg-[transparent] !p-0 text-6xl text-font-color-white transition-transform dark:bg-[transparent] dark:text-font-color-white"
             iconClassName="text-6xl"
             clickHandler={toggleSongPlayback}
-            iconName={isPlaying ? 'pause_circle' : 'play_circle'}
+            iconName={isCurrentSongPlaying ? 'pause_circle' : 'play_circle'}
           />
 
           <Button
             className="skip-backward-btn !mr-4 h-fit translate-x-4 cursor-pointer border-none bg-[transparent] !p-0 text-font-color-white transition-transform dark:bg-[transparent] dark:text-font-color-white"
             iconClassName="text-4xl"
-            clickHandler={handleSkipForwardClick}
+            clickHandler={handleSkipForwardClickWithParams}
             iconName="skip_next"
           />
           <Button
             className={`lyrics-btn !m-0 h-fit translate-x-4 cursor-pointer border-none bg-[transparent] !p-0 text-font-color-white transition-transform dark:bg-[transparent] dark:text-font-color-white ${
-              isLyricsVisible && 'text-dark-font-color-highlight-2'
+              isLyricsVisible && 'text-dark-background-color-3'
             }`}
             iconClassName="text-2xl"
             clickHandler={() => setIsLyricsVisible((prevState) => !prevState)}
@@ -352,7 +357,7 @@ export default function MiniPlayer() {
           type="range"
           name="mini-player-seek-slider"
           id="miniPlayerSeekSlider"
-          className="seek-slider absolute bottom-0 float-left m-0 h-fit w-full appearance-none rounded-lg bg-font-color-highlight-2/25 p-0 outline-none backdrop-blur-sm transition-[width,height,transform] ease-in-out before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-highlight-2 before:transition-[width,height,transform] before:ease-in-out before:content-[''] group-hover:-translate-y-3 group-hover:scale-x-95 group-hover:before:h-3"
+          className="seek-slider absolute bottom-0 float-left m-0 h-fit w-full appearance-none rounded-lg bg-background-color-3/25 p-0 outline-none backdrop-blur-sm transition-[width,height,transform] ease-in-out before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-background-color-3 before:transition-[width,height,transform] before:ease-in-out before:content-[''] group-hover:-translate-y-3 group-hover:scale-x-95 group-hover:before:h-3"
           min={0}
           readOnly
           max={currentSongData.duration || 0}

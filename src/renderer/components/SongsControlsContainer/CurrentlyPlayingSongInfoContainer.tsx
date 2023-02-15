@@ -196,7 +196,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
             </span>
             {!currentSongData.isKnownSource && (
               <span
-                className="material-icons-round-outlined ml-2 text-xl font-light text-font-color-highlight hover:underline dark:text-dark-font-color-highlight"
+                className="material-icons-round-outlined ml-2 cursor-pointer text-xl font-light text-font-color-highlight hover:underline dark:text-dark-font-color-highlight"
                 title="You are playing from an unknown source. Some features are disabled."
               >
                 error

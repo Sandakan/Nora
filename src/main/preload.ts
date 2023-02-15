@@ -8,11 +8,14 @@ export const api = {
   // $ APP PROPERTIES
   isInDevelopment:
     process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true',
+  commandLineArgs: process.argv,
 
   // $ APP WINDOW CONTROLS
   minimizeApp: (): void => ipcRenderer.send('app/minimize'),
   toggleMaximizeApp: (): void => ipcRenderer.send('app/toggleMaximize'),
   closeApp: (): void => ipcRenderer.send('app/close'),
+  hideApp: (): void => ipcRenderer.send('app/hide'),
+  showApp: (): void => ipcRenderer.send('app/show'),
 
   // $ APP THEME
   listenForSystemThemeChanges: (
