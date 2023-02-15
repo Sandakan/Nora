@@ -3,11 +3,11 @@
    <p>Oto Music for Desktop</p>
  </h1>
  <div align="center">
-  <img alt="GitHub all releases" src="https://img.shields.io/github/downloads/Sandakan/Oto-Music-for-Desktop/total?label=all%20time%20downloads&style=for-the-badge">
-  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/downloads/Sandakan/Oto-Music-for-Desktop/v0.8.1-alpha/total?style=for-the-badge">
-  <img alt="GitHub package.json version" src="https://img.shields.io/github/package-json/v/Sandakan/Oto-Music-for-Desktop?color=blue&label=latest%20version&style=for-the-badge">
-  <a href="https://github.com/Sandakan/Oto-Music-for-Desktop/blob/master/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/Sandakan/Oto-Music-for-Desktop?style=for-the-badge"></a>
-  <a href="https://github.com/Sandakan/Oto-Music-for-Desktop/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/Sandakan/Oto-Music-for-Desktop?style=for-the-badge"></a>
+  <img alt="GitHub all releases" src="https://img.shields.io/github/downloads/Sandakan/Nora/total?label=all%20time%20downloads&style=for-the-badge">
+  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/downloads/Sandakan/Nora/v0.8.1-alpha/total?style=for-the-badge">
+  <img alt="GitHub package.json version" src="https://img.shields.io/github/package-json/v/Sandakan/Nora?color=blue&label=latest%20version&style=for-the-badge">
+  <a href="https://github.com/Sandakan/Nora/blob/master/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/Sandakan/Nora?style=for-the-badge"></a>
+  <a href="https://github.com/Sandakan/Nora/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/Sandakan/Oto-Music-for-Desktop?style=for-the-badge"></a>
  </div>
  <br/>
 <img class="logo" src="https://user-images.githubusercontent.com/45460443/194204486-4b580128-f2c4-4afa-acf6-d2a20fc5f324.png" alt="Notice !!! Oto Music for Desktop will be rebranded as Nora in an upcoming release.">
