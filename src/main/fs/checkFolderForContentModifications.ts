@@ -71,11 +71,12 @@ const tryToParseNewlyAddedSong = (folderPath: string, filename: string) => {
 
 const tryToRemoveSongFromLibrary = async (
   folderPath: string,
-  filename: string
+  filename: string,
+  abortSignal: AbortSignal
 ) => {
   try {
     const fullPath = path.normalize(path.join(folderPath, filename));
-    await removeSongsFromLibrary([fullPath], false);
+    await removeSongsFromLibrary([fullPath], abortSignal, false);
     sendMessageToRenderer(
       `'${filename}' song got deleted from the system.`,
       'SONG_DELETED'
@@ -87,7 +88,8 @@ const tryToRemoveSongFromLibrary = async (
 
 const checkFolderForContentModifications = async (
   folderPath: string,
-  filename: string
+  filename: string,
+  abortSignal: AbortSignal
 ) => {
   log('Started checking folder for modifications.');
 
@@ -95,17 +97,16 @@ const checkFolderForContentModifications = async (
   const songs = getSongsData();
   if (Array.isArray(dirs) && songs && Array.isArray(songs)) {
     // checks whether the songs is newly added or deleted.
-    const isNewlyAddedSong = dirs.some(
-      (dir) =>
-        dir === filename &&
-        supportedMusicExtensions.includes(path.extname(filename))
-    );
+    const isNewlyAddedSong =
+      dirs.some((dir) => dir === filename) &&
+      supportedMusicExtensions.includes(path.extname(filename));
     const isADeletedSong = songs.some(
       (song) => song.path === path.normalize(path.join(folderPath, filename))
     );
 
     if (isNewlyAddedSong) return tryToParseNewlyAddedSong(folderPath, filename);
-    if (isADeletedSong) return tryToRemoveSongFromLibrary(folderPath, filename);
+    if (isADeletedSong)
+      return tryToRemoveSongFromLibrary(folderPath, filename, abortSignal);
   }
   return undefined;
 };

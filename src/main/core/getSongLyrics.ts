@@ -28,14 +28,15 @@ const fetchLyricsFromAudioSource = (songId: string, songTitle: string) => {
       if (songs[i].songId === songId) {
         const song = songs[i];
         const songData = NodeID3.read(song.path);
-        const lyrics = songData.unsynchronisedLyrics;
+        const { unsynchronisedLyrics, synchronisedLyrics } = songData;
 
         // $ synchronisedLyrics tag skipped due to issues like incorrect timestamps. Could be an issue in the NodeID3.
-
-        const syncedLyricsArr = songData.synchronisedLyrics;
-
-        if (Array.isArray(syncedLyricsArr) && syncedLyricsArr.length > 0) {
-          const syncedLyricsData = syncedLyricsArr[0];
+        if (
+          Array.isArray(synchronisedLyrics) &&
+          synchronisedLyrics.length > 0
+        ) {
+          const syncedLyricsData =
+            synchronisedLyrics[synchronisedLyrics.length - 1];
           const parsedSyncedLyrics =
             parseSyncedLyricsFromAudioDataSource(syncedLyricsData);
 
@@ -46,7 +47,7 @@ const fetchLyricsFromAudioSource = (songId: string, songTitle: string) => {
 
             cachedLyrics = {
               title: songTitle,
-              source: 'in_song_lyrics',
+              source: 'IN_SONG_LYRICS',
               lyricsType,
               lyrics: parsedSyncedLyrics,
             };
@@ -54,15 +55,15 @@ const fetchLyricsFromAudioSource = (songId: string, songTitle: string) => {
           }
         }
 
-        if (lyrics) {
-          const parsedLyrics = parseLyrics(lyrics.text);
+        if (unsynchronisedLyrics) {
+          const parsedLyrics = parseLyrics(unsynchronisedLyrics.text);
           const lyricsType: LyricsTypes = parsedLyrics.isSynced
             ? 'SYNCED'
             : 'UN_SYNCED';
 
           cachedLyrics = {
             title: songTitle,
-            source: 'in_song_lyrics',
+            source: 'IN_SONG_LYRICS',
             lyricsType,
             lyrics: parsedLyrics,
           };
@@ -116,7 +117,7 @@ const getLyricsFromMusixmatch = async (
         cachedLyrics = {
           lyrics: parsedLyrics,
           title: songTitle,
-          source: 'Musixmatch Lyrics',
+          source: 'MUSIXMATCH',
           lang: metadata.lang,
           link: metadata.link,
           lyricsType: lyricsSyncState,

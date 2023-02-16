@@ -2,7 +2,6 @@ import path from 'path';
 import { statSync } from 'fs';
 import log from '../log';
 import { appPreferences } from '../../../package.json';
-// import { IS_DEVELOPMENT } from '../main';
 import sendAudioDataFromPath from './sendAudioDataFromPath';
 
 let songsOnStartUp: string[] = [];

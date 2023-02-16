@@ -23,6 +23,7 @@ module.exports = {
     'prefer-const': 'warn',
     'import/extensions': ['off'],
     'react/function-component-definition': ['off'],
+    'default-param-last': ['off'],
     // '@typescript-eslint/naming-convention': [
     //   'warn',
     //   {

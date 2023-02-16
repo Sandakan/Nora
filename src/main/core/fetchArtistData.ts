@@ -4,7 +4,7 @@ import log from '../log';
 import sortArtists from '../utils/sortArtists';
 
 const fetchArtistData = async (
-  artistIdsOrNames = [] as string[],
+  artistIdsOrNames: string[] = [],
   sortType?: ArtistSortTypes
 ): Promise<Artist[]> => {
   if (artistIdsOrNames) {

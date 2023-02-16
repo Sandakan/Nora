@@ -1,3 +1,4 @@
+/* eslint-disable no-use-before-define */
 /* eslint-disable promise/no-nesting */
 /* eslint-disable no-console */
 /* eslint-disable no-nested-ternary */
@@ -5,10 +6,7 @@
 /* eslint-disable import/prefer-default-export */
 /* eslint-disable import/no-cycle */
 /* eslint-disable import/no-cycle */
-/* eslint-disable @typescript-eslint/no-shadow */
 /* eslint-disable prefer-const */
-/* eslint-disable @typescript-eslint/return-await */
-/* eslint-disable @typescript-eslint/no-use-before-define */
 /* eslint-disable no-await-in-loop */
 /* eslint-disable promise/always-return */
 /* eslint-disable no-restricted-syntax */
@@ -37,7 +35,7 @@ import generatePalette from './other/generatePalette';
 import getAssetPath from './utils/getAssetPath';
 
 export const generateDefaultSongCoverImgBuffer = async () =>
-  await fs
+  fs
     .readFile(getAssetPath('images', 'png', 'song_cover_default.png'))
     .then((res) => res)
     .catch((err) =>
@@ -62,12 +60,12 @@ const generateCoverBuffer = async (
           { error },
           'WARN'
         );
-        return await generateDefaultSongCoverImgBuffer();
+        return generateDefaultSongCoverImgBuffer();
       }
     }
     return coverData[0].data;
   }
-  return await generateDefaultSongCoverImgBuffer();
+  return generateDefaultSongCoverImgBuffer();
 };
 
 let parseQueue: string[] = [];
@@ -403,7 +401,7 @@ export const manageGenres = (
   ) {
     for (let x = 0; x < songGenres.length; x += 1) {
       const songGenre = songGenres[x];
-      if (genres.some((x) => x.name === songGenre)) {
+      if (genres.some((genre) => genre.name === songGenre)) {
         let y = genres.filter((genre) => genre.name === songGenre);
         y = y.map((z) => {
           z.artworkName =

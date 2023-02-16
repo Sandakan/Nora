@@ -105,7 +105,7 @@ const toggleLikeSongs = async (songIds: string[], isLikeSong?: boolean) => {
     });
 
     setSongsData(updatedSongs);
-    dataUpdateEvent('songs/likes', songIds.join(';'));
+    dataUpdateEvent('songs/likes', songIds);
     return result;
   }
   return result;

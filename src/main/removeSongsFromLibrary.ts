@@ -306,6 +306,7 @@ const removeSong = async (
 
 const removeSongsFromLibrary = async (
   songPaths: string[],
+  abortSignal: AbortSignal,
   isBlacklisted = true
 ): PromiseFunctionReturn => {
   const songs = getSongsData();
@@ -323,6 +324,15 @@ const removeSongsFromLibrary = async (
   const updatedSongs: SavableSongData[] = [];
   // We can't use array filter method here because it uses callbacks. Because we need to use promises, using async callbacks can give unexpected results.
   for (let i = 0; i < songs.length; i += 1) {
+    if (abortSignal?.aborted) {
+      log(
+        'Removing songs in the music folder aborted by an abortController signal.',
+        { reason: abortSignal?.reason },
+        'WARN'
+      );
+      break;
+    }
+
     const song = songs[i];
     const isThisTheSong = songPaths.some(
       (songPath) => song.path === path.normalize(songPath)

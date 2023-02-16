@@ -1,11 +1,22 @@
 import NodeID3 from 'node-id3';
+import convertParsedLyricsToNodeID3Format from './core/convertParsedLyricsToNodeID3Format';
 import { updateCachedLyrics } from './core/getSongLyrics';
 import { getSongsData } from './filesystem';
 import log from './log';
 
 const saveLyricsToSong = async (songId: string, lyrics: SongLyrics) => {
-  if (lyrics?.lyrics) {
-    const songLyrics = { language: 'ENG', text: lyrics.lyrics.unparsedLyrics };
+  if (lyrics && lyrics?.lyrics) {
+    const { isSynced } = lyrics.lyrics;
+    const unsynchronisedLyrics = !isSynced
+      ? {
+          language: 'ENG',
+          text: lyrics.lyrics.unparsedLyrics,
+        }
+      : undefined;
+
+    const synchronisedLyrics = isSynced
+      ? convertParsedLyricsToNodeID3Format(lyrics.lyrics)
+      : undefined;
 
     const songsData = getSongsData();
 
@@ -15,7 +26,7 @@ const saveLyricsToSong = async (songId: string, lyrics: SongLyrics) => {
         try {
           // eslint-disable-next-line no-await-in-loop
           await NodeID3.Promise.update(
-            { unsynchronisedLyrics: songLyrics },
+            { unsynchronisedLyrics, synchronisedLyrics },
             song.path
           );
           updateCachedLyrics((prevLyrics) => {

@@ -26,6 +26,7 @@ import { removeSongArtwork, storeArtworks } from './other/artworks';
 import generatePalette from './other/generatePalette';
 import { updateCachedLyrics } from './core/getSongLyrics';
 import parseLyrics from './utils/parseLyrics';
+import convertParsedLyricsToNodeID3Format from './core/convertParsedLyricsToNodeID3Format';
 
 const fetchArtworkBufferFromURL = async (url: string) => {
   try {
@@ -490,27 +491,14 @@ export const updateSongId3Tags = async (
 
         const parsedLyrics = tags.lyrics ? parseLyrics(tags.lyrics) : undefined;
 
-        const unsynchronisedLyrics = parsedLyrics
-          ? { language: 'ENG', text: parsedLyrics.unparsedLyrics }
-          : undefined;
+        const unsynchronisedLyrics =
+          parsedLyrics && !parsedLyrics.isSynced
+            ? { language: 'ENG', text: parsedLyrics.unparsedLyrics }
+            : undefined;
 
         // $ synchronisedLyrics tag skipped due to incorrect timestamps related bugs.
-        // const synchronisedLyrics: synchronisedLyrics =
-        //   parsedLyrics && parsedLyrics.isSynced && parsedLyrics.syncedLyrics
-        //     ? ([
-        //         {
-        //           contentType:
-        //             TagConstants.SynchronisedLyrics.ContentType.LYRICS,
-        //           language: 'eng',
-        //           timeStampFormat: TagConstants.TimeStampFormat.MILLISECONDS,
-        //           synchronisedText: parsedLyrics.syncedLyrics.map((line) => ({
-        //             text: line.text,
-        //             // to convert seconds to milliseconds
-        //             timeStamp: line.start * 1000,
-        //           })),
-        //         },
-        //       ] satisfies synchronisedLyrics)
-        //     : undefined;
+        const synchronisedLyrics: SynchronisedLyrics =
+          convertParsedLyricsToNodeID3Format(parsedLyrics);
 
         if (parsedLyrics) {
           updateCachedLyrics((cachedLyrics) => {
@@ -522,6 +510,7 @@ export const updateSongId3Tags = async (
 
                 cachedLyrics.lyrics = parsedLyrics;
                 cachedLyrics.lyricsType = lyricsType;
+                cachedLyrics.copyright = parsedLyrics.copyright;
                 return cachedLyrics;
               }
             }
@@ -545,7 +534,7 @@ export const updateSongId3Tags = async (
           year: tags.releasedYear ? `${tags.releasedYear}` : undefined,
           image: removeDefaultAppProtocolFromFilePath(artworkPaths.artworkPath),
           unsynchronisedLyrics,
-          // synchronisedLyrics,
+          synchronisedLyrics,
         };
 
         songs[x] = song;

@@ -70,6 +70,10 @@ import fetchArtistData from './core/fetchArtistData';
 import changeAppTheme from './core/changeAppTheme';
 import saveLyricsToSong from './saveLyricsToSong';
 import getMusicFolderData from './core/getMusicFolderData';
+import {
+  closeAllAbortControllers,
+  saveAbortController,
+} from './fs/controlAbortControllers';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -88,6 +92,7 @@ const MINI_PLAYER_MIN_SIZE_Y = 200;
 const MINI_PLAYER_MAX_SIZE_X = 510;
 const MINI_PLAYER_MAX_SIZE_Y = 300;
 const MINI_PLAYER_ASPECT_RATIO = 17 / 10;
+const abortController = new AbortController();
 
 // / / / / / / VARIABLES / / / / / / /
 let mainWindow: BrowserWindow;
@@ -101,6 +106,7 @@ export const IS_DEVELOPMENT =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
 dotenv.config({ debug: IS_DEVELOPMENT });
+saveAbortController('main', abortController);
 // ? / / / / / / / / / / / / / / / / / / / / / / /
 if (IS_DEVELOPMENT) require('electron-debug')();
 
@@ -464,7 +470,7 @@ app
       ipcMain.handle('app/clearSongHistory', () => clearSongHistory());
 
       ipcMain.handle('app/removeSongsFromLibrary', (_, songIds: string[]) =>
-        parseSongDataToRemoveSongs(songIds)
+        filterOutToBeRemovedSongs(songIds)
       );
 
       ipcMain.handle(
@@ -619,6 +625,7 @@ function manageWindowFinishLoad() {
 
 function handleBeforeQuit() {
   mainWindow.webContents.send('app/beforeQuitEvent');
+  closeAllAbortControllers();
   log(
     `QUITING NORA`,
     { uptime: `${Math.floor(process.uptime())} seconds` },
@@ -742,18 +749,19 @@ async function handleSecondInstances(_: unknown, argv: string[]) {
   );
 }
 
-async function parseSongDataToRemoveSongs(songIds: string[]) {
+async function filterOutToBeRemovedSongs(songIds: string[]) {
   const songs = getSongsData();
   const relevantSongs = songs.filter((song) =>
     songIds.some((id) => song.songId === id)
   );
   const relevantSongPaths = relevantSongs.map((song) => song.path);
-  return removeSongsFromLibrary(relevantSongPaths);
+  return removeSongsFromLibrary(relevantSongPaths, abortController.signal);
 }
 
 function restartApp(reason: string) {
   log(`RENDERER REQUESTED A FULL APP REFRESH.\nREASON : ${reason}`);
   mainWindow.webContents.send('app/beforeQuitEvent');
+  closeAllAbortControllers();
   app.relaunch({ args: process.argv.slice(1).concat(['--relaunch']) });
   app.exit(0);
 }

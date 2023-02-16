@@ -9,7 +9,7 @@ const getAllSongs = async (
   maxResultsPerPage = 0
 ) => {
   const result: GetAllSongsResult = {
-    data: [] as AudioInfo[],
+    data: [],
     pageNo: pageNo || 1,
     maxResultsPerPage,
     noOfPages: 1,

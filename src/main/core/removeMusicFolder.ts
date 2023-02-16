@@ -1,10 +1,16 @@
 /* eslint-disable no-await-in-loop */
 import path from 'path';
-import { closeWatcher } from '../fs/controlWatcherFunctions';
+import {
+  closeAbortController,
+  saveAbortController,
+} from '../fs/controlAbortControllers';
 import { getSongsData, getUserData, setUserData } from '../filesystem';
 import log from '../log';
 import { sendMessageToRenderer } from '../main';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
+
+const abortController = new AbortController();
+saveAbortController('removeMusicFolder', abortController);
 
 const getSongPathsRelatedToFolders = (folderPaths: string[]) => {
   const songs = getSongsData();
@@ -57,7 +63,10 @@ const removeMusicFolder = async (folderPath: string): Promise<boolean> => {
         );
 
         try {
-          await removeSongsFromLibrary(songPathsRelatedToFolders, false);
+          await removeSongsFromLibrary(
+            songPathsRelatedToFolders,
+            abortController.signal
+          );
         } catch (error) {
           log(
             `ERROR OCCURRED WHEN TRYING TO REMOVE SONG FROM A MUSIC FOLDER  `,
@@ -73,7 +82,7 @@ const removeMusicFolder = async (folderPath: string): Promise<boolean> => {
     );
 
     setUserData('musicFolders', updatedMusicFolders);
-    closeWatcher(folderPath);
+    closeAbortController(folderPath);
     log(`Deleted ${relatedFolderPaths.length} directories.`, {
       relatedFolders: relatedFolderPaths,
     });

@@ -8,6 +8,7 @@
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
 import React, { useContext } from 'react';
+import debounce from 'renderer/utils/debounce';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import LyricLine from './LyricLine';
@@ -18,7 +19,6 @@ import LyricsSource from './LyricsSource';
 import NoLyrics from './NoLyrics';
 import MainContainer from '../MainContainer';
 import Button from '../Button';
-import debounce from 'renderer/utils/debounce';
 
 export const syncedLyricsRegex = /^\[\d+:\d{1,2}\.\d{1,3}]/gm;
 let isScrollingByCode = false;
@@ -180,7 +180,7 @@ export const LyricsPage = () => {
               if (prevData) {
                 return {
                   ...prevData,
-                  source: 'in_song_lyrics',
+                  source: 'IN_SONG_LYRICS',
                 } as SongLyrics;
               }
               return undefined;
@@ -247,10 +247,10 @@ export const LyricsPage = () => {
               <div className="title-container relative flex w-full items-center justify-between py-2 pl-8 pr-2 text-2xl text-font-color-highlight dark:text-dark-font-color-highlight">
                 <div className="flex max-w-[40%] items-center">
                   <span className="overflow-hidden text-ellipsis whitespace-nowrap">
-                    {lyrics.source === 'in_song_lyrics' ? 'Offline' : 'Online'}{' '}
+                    {lyrics.source === 'IN_SONG_LYRICS' ? 'Offline' : 'Online'}{' '}
                     Lyrics for '{currentSongData.title}'
                   </span>
-                  {lyrics.source !== 'in_song_lyrics' && (
+                  {lyrics.source !== 'IN_SONG_LYRICS' && (
                     <span
                       className="material-icons-round-outlined ml-4 cursor-pointer text-base"
                       title="No offline lyrics found in the song."
@@ -264,14 +264,14 @@ export const LyricsPage = () => {
                     <Button
                       key={5}
                       label={
-                        lyrics && lyrics.source === 'in_song_lyrics'
+                        lyrics && lyrics.source === 'IN_SONG_LYRICS'
                           ? isAutoScrolling
                             ? 'Stop Auto Scrolling'
                             : 'Enable auto scrolling'
                           : undefined
                       }
                       tooltipLabel={
-                        lyrics && lyrics.source !== 'in_song_lyrics'
+                        lyrics && lyrics.source !== 'IN_SONG_LYRICS'
                           ? isAutoScrolling
                             ? 'Stop Auto Scrolling'
                             : 'Enable auto scrolling'
@@ -285,7 +285,7 @@ export const LyricsPage = () => {
                       }
                     />
                   )}
-                  {lyrics && lyrics.source === 'in_song_lyrics' && (
+                  {lyrics && lyrics.source === 'IN_SONG_LYRICS' && (
                     <Button
                       key={3}
                       label="Show online lyrics"
@@ -295,7 +295,7 @@ export const LyricsPage = () => {
                       clickHandler={showOnlineLyrics}
                     />
                   )}
-                  {lyrics && lyrics.source !== 'in_song_lyrics' && (
+                  {lyrics && lyrics.source !== 'IN_SONG_LYRICS' && (
                     <>
                       <Button
                         key={5}

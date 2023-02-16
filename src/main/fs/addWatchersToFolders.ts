@@ -12,7 +12,7 @@ import checkFolderForUnknownModifications from './checkFolderForUnknownContentMo
 import checkFolderForContentModifications from './checkFolderForContentModifications';
 import { dirExistsSync } from '../utils/dirExists';
 import checkForFolderModifications from './checkForFolderModifications';
-import { saveWatcherAbortController } from './controlWatcherFunctions';
+import { saveAbortController } from './controlAbortControllers';
 
 const updateMusicFolderData = (folderData: MusicFolderData) => {
   const { musicFolders } = getUserData();
@@ -53,7 +53,8 @@ const checkForFolderUpdates = async (folder: MusicFolderData) => {
 const folderWatcherFunction = async (
   eventType: WatchEventType,
   filename: string,
-  folder: MusicFolderData
+  folder: MusicFolderData,
+  abortSignal: AbortSignal
 ) => {
   // console.log(`folder event - '${eventType}' - ${filename}`);
   if (filename) {
@@ -64,7 +65,11 @@ const folderWatcherFunction = async (
 
       if (doesFilenameHasSongExtension) {
         // possible new song addition
-        await checkFolderForContentModifications(folder.path, filename);
+        await checkFolderForContentModifications(
+          folder.path,
+          filename,
+          abortSignal
+        );
       }
     }
   } else {
@@ -85,7 +90,12 @@ export const addWatcherToFolder = async (folder: MusicFolderData) => {
         signal: abortController.signal,
       },
       (eventType, filename) =>
-        folderWatcherFunction(eventType, filename, folder)
+        folderWatcherFunction(
+          eventType,
+          filename,
+          folder,
+          abortController.signal
+        )
     );
     watcher.addListener('error', (e) =>
       log(`ERROR OCCURRED WHEN WATCHING A FOLDER.`, { e }, 'ERROR')
@@ -97,7 +107,7 @@ export const addWatcherToFolder = async (folder: MusicFolderData) => {
         'WARN'
       )
     );
-    saveWatcherAbortController(folder.path, abortController);
+    saveAbortController(folder.path, abortController);
   } catch (error) {
     log(`ERROR OCCURRED WHEN WATCHING A FOLDER.`, { error }, 'ERROR');
     throw error;

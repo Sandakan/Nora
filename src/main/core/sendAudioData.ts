@@ -1,5 +1,4 @@
 /* eslint-disable no-await-in-loop */
-import { app } from 'electron';
 import * as musicMetaData from 'music-metadata';
 import path from 'path';
 import { DEFAULT_FILE_URL, getArtistsData, getSongsData } from '../filesystem';
@@ -13,17 +12,12 @@ export const sendAudioData = async (
   audioId: string
 ): Promise<AudioPlayerData> => {
   log(`Fetching song data for song id -${audioId}-`);
-  // console.time('total');
   try {
-    // console.time('fetchAndValidate');
     const songs = getSongsData();
     const artists = getArtistsData();
-    if (songs && artists) {
-      // log(`fetch and validate : ${console.timeEnd('fetchAndValidate')}`);
-      // console.time('findMatch');
-      for (let x = 0; x < songs.length; x += 1) {
-        // log(`find match : ${console.timeEnd('findMatch')}`);
 
+    if (songs && artists) {
+      for (let x = 0; x < songs.length; x += 1) {
         if (songs[x].songId === audioId) {
           const song = songs[x];
           const songArtists = [];
@@ -71,7 +65,6 @@ export const sendAudioData = async (
             };
 
             updateSongListeningData(song.songId, 'listens', 'increment');
-            app.addRecentDocument(song.path);
             return data;
             // return log(`total : ${console.timeEnd('total')}`);
           }

@@ -2,7 +2,7 @@
   "name": "nora",
   "productName": "Nora",
   "description": "An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar.",
-  "version": "1.0.0-alpha.20230215",
+  "version": "1.0.0-alpha.20230216",
   "license": "MIT",
   "appPreferences": {
     "removeReactStrictMode": false,
@@ -250,7 +250,7 @@
           "ogg"
         ],
         "role": "Editor",
-        "icon": "./assets/images/nora-associated-file-icon.ico"
+        "icon": "./assets/images/noraAssociatedFileIcon.ico"
       }
     ],
     "protocols": {

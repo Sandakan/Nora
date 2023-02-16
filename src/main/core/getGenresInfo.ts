@@ -4,7 +4,7 @@ import log from '../log';
 import sortGenres from '../utils/sortGenres';
 
 const getGenresInfo = async (
-  genreIds = [] as string[],
+  genreIds: string[] = [],
   sortType?: GenreSortTypes
 ): Promise<Genre[]> => {
   if (genreIds) {

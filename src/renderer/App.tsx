@@ -631,7 +631,7 @@ export default function App() {
           throw new Error('response status is not 200');
         })
         .then((res: Changelog) => {
-          const isThereAnAppUpdate = isLatestVersion(
+          const isThereAnAppUpdate = !isLatestVersion(
             res.latestVersion.version,
             packageFile.version
           );
@@ -876,7 +876,13 @@ export default function App() {
             else {
               if (res.currentSong.songId)
                 playSong(res.currentSong.songId, false);
-              player.currentTime = Number(res.currentSong.stoppedPosition);
+              const currSongPosition = Number(res.currentSong.stoppedPosition);
+              player.currentTime = currSongPosition;
+              contentRef.current.player.songPosition = currSongPosition;
+              dispatch({
+                type: 'UPDATE_SONG_POSITION',
+                data: currSongPosition,
+              });
             }
             return undefined;
           })

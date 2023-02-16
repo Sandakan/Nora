@@ -9,7 +9,8 @@ import { dataUpdateEvent } from '../main';
 
 const addMusicFolder = async (
   mainWindowInstance: BrowserWindow,
-  resultsSortType?: SongSortTypes
+  resultsSortType?: SongSortTypes,
+  abortSignal?: AbortSignal
 ): Promise<SongData[]> => {
   log('Started the process of adding a new song to the music library');
   const openDialogOptions: OpenDialogOptions = {
@@ -40,6 +41,15 @@ const addMusicFolder = async (
 
   if (songPaths) {
     for (let i = 0; i < songPaths.length; i += 1) {
+      if (abortSignal?.aborted) {
+        log(
+          'Parsing songs in the music folder aborted by an abortController signal.',
+          { reason: abortSignal?.reason },
+          'WARN'
+        );
+        break;
+      }
+
       const songPath = songPaths[i];
       try {
         // eslint-disable-next-line no-await-in-loop

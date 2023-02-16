@@ -242,7 +242,7 @@ declare global {
 
   type LyricsRequestTypes = 'ONLINE_ONLY' | 'OFFLINE_ONLY' | 'ANY';
 
-  type LyricsSource = 'in_song_lyrics' | string;
+  type LyricsSource = 'IN_SONG_LYRICS' | 'MUSIXMATCH' | string;
 
   interface LyricsRequestTrackInfo {
     songTitle: string;
@@ -276,7 +276,7 @@ declare global {
   }
 
   // node-id3 synchronisedLyrics types.
-  type synchronisedLyrics =
+  type SynchronisedLyrics =
     | Array<{
         /**
          * 3 letter ISO 639-2 language code, for example: eng
@@ -305,6 +305,10 @@ declare global {
         }>;
       }>
     | undefined;
+
+  interface LyricsMetadataFromShortText {
+    copyright?: string;
+  }
 
   // ? Song queue related types
 

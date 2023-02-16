@@ -1,3 +1,5 @@
+import { TagConstants } from 'node-id3';
+import log from '../log';
 import isLyricsSynced, { syncedLyricsRegex } from './isLyricsSynced';
 
 type Input = {
@@ -78,31 +80,49 @@ const parseLyrics = (lyricsString: string): LyricsData => {
   };
 };
 
+const parseMetadataFromShortText = (shortText?: string) => {
+  const metadata: LyricsMetadataFromShortText = { copyright: undefined };
+
+  if (shortText) {
+    try {
+      const metaFromShortText = JSON.parse(shortText);
+      if ('copyright' in metaFromShortText)
+        metadata.copyright = metaFromShortText.copyright;
+    } catch (error) {
+      log(
+        'Error occurred when parsing metadata from shortText attribute in NodeID3 format.',
+        { error },
+        'INFO'
+      );
+      return metadata;
+    }
+  }
+  return metadata;
+};
+
 export const parseSyncedLyricsFromAudioDataSource = (
   input: Input
 ): LyricsData | undefined => {
-  const { timeStampFormat, synchronisedText } = input;
-  /*
-    timeStampFormat
-        1: MPEG frames unit
-        2: milliseconds unit
- */
-  if (timeStampFormat === 2) {
+  const { timeStampFormat, synchronisedText, shortText } = input;
+
+  if (timeStampFormat === TagConstants.TimeStampFormat.MILLISECONDS) {
     const lyrics = synchronisedText.map((line) => line.text);
+    const metadata = parseMetadataFromShortText(shortText);
 
     const syncedLyrics: SyncedLyricLine[] = synchronisedText.map(
       (line, index, arr) => {
         // timeStamp = start of the line
         const { text, timeStamp } = line;
 
+        // divide by 1000 to convert from milliseconds to seconds.
         const end =
-          arr.length - 1 === index
+          (arr.length - 1 === index
             ? Infinity
             : arr[index + 1] !== undefined
             ? arr[index + 1].timeStamp
-            : 0;
+            : 0) / 1000;
 
-        return { text, start: timeStamp, end };
+        return { text, start: timeStamp / 1000, end };
       }
     );
 
@@ -121,7 +141,13 @@ export const parseSyncedLyricsFromAudioDataSource = (
       })
       .join('\n');
 
-    return { isSynced: true, lyrics, syncedLyrics, unparsedLyrics };
+    return {
+      isSynced: true,
+      copyright: metadata.copyright,
+      lyrics,
+      syncedLyrics,
+      unparsedLyrics,
+    };
   }
   return undefined;
 };

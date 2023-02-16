@@ -9,6 +9,13 @@ import {
 import log from '../log';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
 import { parseSong } from '../parseSong';
+import { saveAbortController } from './controlAbortControllers';
+
+const abortController = new AbortController();
+saveAbortController(
+  'checkFolderForUnknownContentModifications',
+  abortController
+);
 
 const getSongPathsRelativeToFolder = (folderPath: string) => {
   const songPaths = getSongsData()?.map((song) => song.path) ?? [];
@@ -44,9 +51,12 @@ const getFullPathsOfFolderDirs = async (folderPath: string) => {
   }
 };
 
-const removeDeletedSongsFromLibrary = async (deletedSongPaths: string[]) => {
+const removeDeletedSongsFromLibrary = async (
+  deletedSongPaths: string[],
+  abortSignal: AbortSignal
+) => {
   try {
-    await removeSongsFromLibrary(deletedSongPaths, false);
+    await removeSongsFromLibrary(deletedSongPaths, abortSignal, false);
   } catch (error) {
     log(
       `ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA`,
@@ -56,8 +66,20 @@ const removeDeletedSongsFromLibrary = async (deletedSongPaths: string[]) => {
   }
 };
 
-const addNewlyAddedSongsToLibrary = async (newlyAddedSongPaths: string[]) => {
+const addNewlyAddedSongsToLibrary = async (
+  newlyAddedSongPaths: string[],
+  abortSignal: AbortSignal
+) => {
   for (let i = 0; i < newlyAddedSongPaths.length; i += 1) {
+    if (abortSignal?.aborted) {
+      log(
+        'Parsing songs in the music folder aborted by an abortController signal.',
+        { reason: abortSignal?.reason },
+        'WARN'
+      );
+      break;
+    }
+
     const newlyAddedSongPath = newlyAddedSongPaths[i];
     try {
       await parseSong(newlyAddedSongPath);
@@ -101,12 +123,18 @@ const checkFolderForUnknownModifications = async (folderPath: string) => {
       // Prioritises deleting songs before adding new songs to prevent data clashes.
       if (deletedSongPaths.length > 0) {
         // deleting songs from the library that got deleted before application launch
-        await removeDeletedSongsFromLibrary(deletedSongPaths);
+        await removeDeletedSongsFromLibrary(
+          deletedSongPaths,
+          abortController.signal
+        );
       }
 
       if (newlyAddedSongPaths.length > 0) {
         // parses new songs that added before application launch
-        await addNewlyAddedSongsToLibrary(newlyAddedSongPaths);
+        await addNewlyAddedSongsToLibrary(
+          newlyAddedSongPaths,
+          abortController.signal
+        );
       }
     }
   }

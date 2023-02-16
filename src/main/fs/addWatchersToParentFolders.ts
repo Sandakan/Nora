@@ -4,6 +4,7 @@ import { getUserData } from '../filesystem';
 import log from '../log';
 import getParentFolderPaths from './getParentFolderPaths';
 import checkForFolderModifications from './checkForFolderModifications';
+import { saveAbortController } from './controlAbortControllers';
 
 const fileNameRegex = /^.{1,}\.\w{1,}$/;
 
@@ -44,6 +45,7 @@ const addWatcherToParentFolder = (folderPath: string) => {
     watcher.addListener('error', (e) =>
       log(`ERROR OCCURRED WHEN WATCHING A FOLDER.`, { e }, 'ERROR')
     );
+    saveAbortController(folderPath, abortController);
   } catch (error) {
     log(`ERROR OCCURRED WHEN WATCHING A FOLDER.`, { error }, 'ERROR');
     throw error;
