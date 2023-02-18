@@ -15,18 +15,16 @@
       "notes": {
         "new": [
           {
-            "note": "Now LyricsPage will show the copyright info of the lyrics at the bottom of the page."
+            "note": "Now Nora can read and write to audio files with synchronisedLyrics meta tag (Experimental)."
+          },
+          {
+            "note": "Lyrics from Musixmatch. (Experimental)"
           },
           {
             "note": "Metadata of Musixmatch for songs now include artworks from Spotify."
           },
           {
             "note": "Auto-scrolling of synced lyrics can be toggled now in the LyricsPage."
-          },
-          { "note": "Ability to sort songs relative to the released year." },
-          { "note": "Song component now displays the song released year." },
-          {
-            "note": "Now Nora can read and write to audio files with synchronisedLyrics meta tag (Experimental)."
           },
           {
             "note": "Added a new feature to allow users to select whether the app window should hide to system tray or close on clicking the close button."
@@ -39,6 +37,9 @@
           },
           {
             "note": "Added a new button to refresh lyrics so that if incorrect lyrics is shown it will re-fetch the correct lyrics."
+          },
+          {
+            "note": "Now LyricsPage will show the copyright info of the lyrics at the bottom of the page."
           },
           {
             "note": "Added a new button to show offline lyrics when after user have requested for the online lyrics."
@@ -83,9 +84,6 @@
           },
           { "note": "Support for Synced Lyrics." },
           {
-            "note": "Lyrics from Musixmatch. (Experimental)"
-          },
-          {
             "note": "Now users can go back and forward when going through different pages. (Experimental)"
           },
           {
@@ -104,7 +102,9 @@
           { "note": "Now users can clear search history results." },
           {
             "note": "Now users can play songs in a specific genre directly from the GenreInfoPage."
-          }
+          },
+          { "note": "Ability to sort songs relative to the released year." },
+          { "note": "Song component now displays the song released year." }
         ],
         "fixed": [
           {
