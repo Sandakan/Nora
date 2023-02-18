@@ -3,62 +3,60 @@
    <p>Nora Player</p>
  </h1>
  <div align="center">
-  <img alt="GitHub all time downloads" src="https://img.shields.io/github/downloads/Sandakan/Oto-Music-for-Desktop/total?label=all%20time%20downloads&style=for-the-badge">
-  <img alt="GitHub latest version downloads (latest by date)" src="https://img.shields.io/github/downloads/Sandakan/Oto-Music-for-Desktop/v1.0.0-stable/total?style=for-the-badge">
-  <img alt="GitHub latest released version" src="https://img.shields.io/github/package-json/v/Sandakan/Oto-Music-for-Desktop?color=blue&label=latest%20version&style=for-the-badge">
-  <a href="https://github.com/Sandakan/Oto-Music-for-Desktop/blob/master/LICENSE">
-  <img alt="GitHub license" src="https://img.shields.io/github/license/Sandakan/Oto-Music-for-Desktop?style=for-the-badge"></a>
-  <a href="https://github.com/Sandakan/Oto-Music-for-Desktop/issues">
-  <img alt="GitHub No. of issues" src="https://img.shields.io/github/issues/Sandakan/Oto-Music-for-Desktop?style=for-the-badge"></a>
+  <img alt="GitHub all releases" src="https://img.shields.io/github/downloads/Sandakan/Nora/total?label=all%20time%20downloads&style=for-the-badge">
+  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/downloads/Sandakan/Nora/v1.0.0-stable/total?style=for-the-badge">
+  <img alt="GitHub package.json version" src="https://img.shields.io/github/package-json/v/Sandakan/Nora?color=blue&label=latest%20version&style=for-the-badge">
+  <a href="https://github.com/Sandakan/Nora/blob/master/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/Sandakan/Nora?style=for-the-badge"></a>
+  <a href="https://github.com/Sandakan/Nora/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/Sandakan/Oto-Music-for-Desktop?style=for-the-badge"></a>
  </div>
 
  <br/>
 
 <p>
-   Nora is an elegant music player built using Electron and React. Inspired by <a href="https://play.google.com/store/apps/details?id=com.piyush.music&gl=us">Oto Music for Android</a> by Piyush Mamidwar.
+   Nora is an elegant music player built using Electron and React, inspired by <a href="https://play.google.com/store/apps/details?id=com.piyush.music&gl=us">Oto Music (Android)</a> by Piyush Mamidwar.
 </p>
 
 <br/>
 
-<img src="assets/other/artwork 0.png">
+<img src="assets/other/artwork 0.webp">
 
 <br/>
 
-<p>With the simplicity and design in mind, this app was made to overcome problems when using default music apps in platforms that lacks essentail features.</p>
+<p>With simplicity and design in mind, this app was made to overcome problems when using default music apps in platforms that lack essential features.</p>
 
 <br>
 
 <p>
    It packs with a horizon of features including,
    <ul>
-      <li>Organize your songs, artists, albums. playlists and genres with ease.</li>
+      <li>Organize your songs, artists, albums and playlists with ease.</li>
       <li>Create playlists that meet your needs.</li>
-      <li>Sing along with the help of synced lyrics.<sup>1</sup></li>
-      <li>Keep your favorites close to you.</li>
-      <li>Read your favorite artist's bio.</li>
-      <li>Personalized music shuffling.<sup>2</sup> (upcoming)</li>
+      <li>Sing along with song lyrics.<sup>1</sup></li>
+      <li>Support for synced lyrics.</li>
+      <li>Keep your favorite songs and artists close to you.</li>
+      <li>Read your favorite artist's biography.</li>
+      <li>Personalized music shuffling.<sup>2</sup> (Upcoming)</li>
       <li>Change between Light and Dark themes with ease.</li>
-      <li>A Mini player to help focus on what matters at the moment.</li>
-      <li>Edit metadata of your songs (New)</li>
+      <li>A mini player to help focus on what matters at the moment.</li>
+      <li>Edit the metadata of your songs easily and conveniently. (New)</li>
       <li>Search through your library with the help of song filters.</li>
-      <li>See what you recently played in the homepage and the history playlist.</li>
    </ul>
 </p>
 
 <br>
 
-<p>Visit <a href="/changelog.md">release notes</a> to see what's new on the latest release.</p>
+<p>Visit the <a href="/changelog.md">release notes</a> to see what's new on the latest release.</p>
 
 <br>
 
-<img src="assets/other/artwork 1.png"><br><br>
-<img src="assets/other/artwork 2.png"><br><br>
-<img src="assets/other/artwork 3.png"><br><br>
-<img src="assets/other/artwork 4.png"><br><br>
-<img src="assets/other/artwork 5.png"><br><br>
-<img src="assets/other/artwork 6.png"><br><br>
-<img src="assets/other/artwork 7.png"><br><br>
-<img src="assets/other/artwork 8.png"><br><br>
+<img src="assets/other/artwork 1.webp"><br><br>
+<img src="assets/other/artwork 2.webp"><br><br>
+<img src="assets/other/artwork 3.webp"><br><br>
+<img src="assets/other/artwork 4.webp"><br><br>
+<img src="assets/other/artwork 5.webp"><br><br>
+<img src="assets/other/artwork 6.webp"><br><br>
+<img src="assets/other/artwork 7.webp"><br><br>
+<img src="assets/other/artwork 8.webp"><br><br>
 
 <br/>
 
@@ -67,13 +65,13 @@
 Clone the project
 
 ```bash
-  git clone https://github.com/Sandakan/Oto-Music-for-Desktop
+  git clone https://github.com/Sandakan/Nora
 ```
 
 Go to the project directory
 
 ```bash
-  cd Oto-Music-for-Desktop
+  cd Nora
 ```
 
 Install dependencies
