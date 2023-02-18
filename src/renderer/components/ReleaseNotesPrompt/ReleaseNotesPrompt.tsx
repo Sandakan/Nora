@@ -17,6 +17,7 @@ import Img from '../Img';
 import packageFile from '../../../../package.json';
 import localReleseNotes from '../../../../release-notes.json';
 import WhatsNewImg from '../../../../assets/other/release artworks/whats-new-v0.8.0-alpha.png';
+import Hyperlink from '../Hyperlink';
 
 const ReleaseNotesAppUpdateInfo = (props: { state: AppUpdatesState }) => {
   const { state } = props;
@@ -37,19 +38,12 @@ const ReleaseNotesAppUpdateInfo = (props: { state: AppUpdatesState }) => {
         <span className="text-sm text-font-color-crimson">
           You do not have the latest version.
         </span>{' '}
-        <span
+        <Hyperlink
           className="font-base text-sm text-font-color-highlight-2 underline dark:text-dark-font-color-highlight-2"
-          onClick={() =>
-            window.api.openInBrowser(`${packageFile.repository}/releases`)
-          }
-          onKeyDown={() =>
-            window.api.openInBrowser(`${packageFile.repository}/releases`)
-          }
-          role="button"
-          tabIndex={0}
-        >
-          Update Now
-        </span>
+          label="Update Now"
+          link={`${packageFile.repository.url}/releases`}
+          linkTitle="Nora Releases"
+        />
       </>
     );
   }
