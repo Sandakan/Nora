@@ -1,27 +1,37 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable react/no-array-index-key */
 import React, { CSSProperties } from 'react';
 import { FixedSizeGrid as Grid } from 'react-window';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
-import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
-import sortGenres from 'renderer/utils/sortGenres';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppContext } from 'renderer/contexts/AppContext';
 import Dropdown from '../Dropdown';
 import MainContainer from '../MainContainer';
 import Genre from './Genre';
 import NoSongsImage from '../../../../assets/images/svg/Summer landscape_Monochromatic.svg';
+import Img from '../Img';
+import Button from '../Button';
 
 const GenresPage = () => {
-  const { currentlyActivePage, userData } = React.useContext(AppContext);
-  const { updateCurrentlyActivePageData, updatePageSortingOrder } =
-    React.useContext(AppUpdateContext);
+  const {
+    currentlyActivePage,
+    userData,
+    isMultipleSelectionEnabled,
+    multipleSelectionsData,
+  } = React.useContext(AppContext);
+  const {
+    updateCurrentlyActivePageData,
+    updatePageSortingOrder,
+    toggleMultipleSelections,
+  } = React.useContext(AppUpdateContext);
 
   const [genresData, setGenresData] = React.useState([] as Genre[] | null);
+  const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
   const [sortingOrder, setSortingOrder] = React.useState(
-    currentlyActivePage.data &&
-      currentlyActivePage.data.artistsPage &&
-      currentlyActivePage.data.artistsPage.sortingOrder
-      ? (currentlyActivePage.data.artistsPage.sortingOrder as GenreSortTypes)
+    currentlyActivePage.data && currentlyActivePage.data.sortingOrder
+      ? (currentlyActivePage.data.sortingOrder as GenreSortTypes)
       : userData && userData.sortingStates.genresPage
       ? userData.sortingStates.genresPage
       : ('aToZ' as GenreSortTypes)
@@ -39,10 +49,9 @@ const GenresPage = () => {
 
   const fetchGenresData = React.useCallback(() => {
     window.api
-      .getGenresData([])
+      .getGenresData([], sortingOrder)
       .then((genres) => {
-        if (genres && genres.length > 0)
-          return setGenresData(sortGenres(genres, sortingOrder));
+        if (genres && genres.length > 0) return setGenresData(genres);
         return setGenresData(null);
       })
       // eslint-disable-next-line no-console
@@ -53,7 +62,8 @@ const GenresPage = () => {
     fetchGenresData();
     const manageGenreDataUpdatesInGenresPage = (e: Event) => {
       if ('detail' in e) {
-        const dataEvents = (e as DataEvent).detail;
+        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>)
+          .detail;
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
           if (event.dataType === 'genres') fetchGenresData();
@@ -87,19 +97,18 @@ const GenresPage = () => {
       const { columnIndex, rowIndex, style } = props;
       const index = rowIndex * noOfColumns + columnIndex;
       // eslint-disable-next-line no-console
-      console.log(index);
       if (genresData && index < genresData.length) {
-        const { genreId, name, songs, backgroundColor, artworkPath } =
+        const { genreId, name, songs, backgroundColor, artworkPaths } =
           genresData[index];
         return (
           <div style={{ ...style, display: 'flex', justifyContent: 'center' }}>
             <Genre
               index={index}
-              artworkPath={artworkPath}
+              artworkPaths={artworkPaths}
               genreId={genreId}
               title={name}
               backgroundColor={backgroundColor}
-              noOfSongs={songs.length}
+              songIds={songs.map((song) => song.songId)}
             />
           </div>
         );
@@ -110,44 +119,70 @@ const GenresPage = () => {
   );
 
   return (
-    <MainContainer className="main-container genres-list-container appear-from=bottom text-font-color-black dark:text-font-color-white !h-full !mb-0">
+    <MainContainer className="genres-list-container appear-from-bottom !h-full overflow-hidden !pb-0 text-font-color-black dark:text-font-color-white">
       <>
-        <div className="title-container mt-1 pr-4 flex items-center mb-8 text-font-color-black text-3xl font-medium dark:text-font-color-white">
+        <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">
             Genres{' '}
-            <div className="other-stats-container text-xs ml-12 flex items-center">
-              {genresData && genresData.length > 0 && (
-                <div className="no-of-genres">{`${genresData.length} genre${
-                  genresData.length === 1 ? '' : 's'
-                }`}</div>
+            <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
+              {isMultipleSelectionEnabled ? (
+                <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
+                  {multipleSelectionsData.multipleSelections.length} selections
+                </div>
+              ) : (
+                genresData &&
+                genresData.length > 0 && (
+                  <div className="no-of-genres">{`${genresData.length} genre${
+                    genresData.length === 1 ? '' : 's'
+                  }`}</div>
+                )
               )}
             </div>
           </div>
-          <div className="other-controls-container">
-            {genresData && genresData.length > 0 && (
-              <Dropdown
-                name="genreSortDropdown"
-                value={sortingOrder}
-                options={[
-                  { label: 'A to Z', value: 'aToZ' },
-                  { label: 'Z to A', value: 'zToA' },
-                  { label: 'High Song Count', value: 'noOfSongsDescending' },
-                  { label: 'Low Song Count', value: 'noOfSongsAscending' },
-                ]}
-                onChange={(e) => {
-                  updateCurrentlyActivePageData({
-                    songsPage: {
+          {genresData && genresData.length > 0 && (
+            <div className="other-controls-container flex">
+              <>
+                <Button
+                  label={isMultipleSelectionEnabled ? 'Unselect All' : 'Select'}
+                  className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                  iconName={
+                    isMultipleSelectionEnabled ? 'remove_done' : 'checklist'
+                  }
+                  clickHandler={() =>
+                    toggleMultipleSelections(
+                      !isMultipleSelectionEnabled,
+                      'genre'
+                    )
+                  }
+                  tooltipLabel={
+                    isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
+                  }
+                />
+                <Dropdown
+                  name="genreSortDropdown"
+                  value={sortingOrder}
+                  options={[
+                    { label: 'A to Z', value: 'aToZ' },
+                    { label: 'Z to A', value: 'zToA' },
+                    { label: 'High Song Count', value: 'noOfSongsDescending' },
+                    { label: 'Low Song Count', value: 'noOfSongsAscending' },
+                  ]}
+                  onChange={(e) => {
+                    updateCurrentlyActivePageData((currentData) => ({
+                      ...currentData,
                       sortingOrder: e.currentTarget.value as ArtistSortTypes,
-                    },
-                  });
-                  setSortingOrder(e.currentTarget.value as GenreSortTypes);
-                }}
-              />
-            )}
-          </div>
+                    }));
+                    setSortingOrder(e.currentTarget.value as GenreSortTypes);
+                  }}
+                />
+              </>
+            </div>
+          )}
         </div>
         <div
-          className="genres-container flex flex-wrap h-full"
+          className={`genres-container flex h-full flex-wrap ${
+            !(genresData && genresData.length > 0) && 'hidden'
+          }`}
           ref={containerRef}
         >
           {genresData && genresData.length > 0 && (
@@ -156,20 +191,34 @@ const GenresPage = () => {
               columnWidth={itemWidth}
               rowCount={noOfRows || 3}
               rowHeight={MIN_ITEM_HEIGHT}
-              height={height - 10 || 300}
+              height={height || 300}
               width={width || 500}
               overscanRowCount={2}
+              initialScrollTop={currentlyActivePage.data?.scrollTopOffset ?? 0}
+              onScroll={(data) => {
+                if (scrollOffsetTimeoutIdRef.current)
+                  clearTimeout(scrollOffsetTimeoutIdRef.current);
+                if (!data.scrollUpdateWasRequested && data.scrollTop !== 0)
+                  scrollOffsetTimeoutIdRef.current = setTimeout(
+                    () =>
+                      updateCurrentlyActivePageData((currentPageData) => ({
+                        ...currentPageData,
+                        scrollTopOffset: data.scrollTop,
+                      })),
+                    500
+                  );
+              }}
             >
               {row}
             </Grid>
           )}
         </div>
         {genresData === null && (
-          <div className="no-songs-container my-[10%] h-full w-full text-[#ccc] text-center flex flex-col items-center justify-center text-2xl">
-            <img
+          <div className="no-songs-container my-[10%] flex h-full w-full flex-col items-center justify-center text-center text-xl text-font-color-black dark:text-font-color-white">
+            <Img
               src={NoSongsImage}
               alt="No songs available."
-              className="w-60 mb-8"
+              className="mb-8 w-60"
             />
             <span>Songs without genres. Yeah, we know it isn't ideal.</span>
           </div>

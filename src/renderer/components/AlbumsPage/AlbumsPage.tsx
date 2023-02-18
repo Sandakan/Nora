@@ -8,91 +8,65 @@
 import React, { CSSProperties } from 'react';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { FixedSizeGrid as Grid } from 'react-window';
-import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
-import sortAlbums from 'renderer/utils/sortAlbums';
+import { AppContext } from 'renderer/contexts/AppContext';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { Album } from './Album';
-import FetchingDataImage from '../../../../assets/images/svg/Cocktail _Monochromatic.svg';
+// import FetchingDataImage from '../../../../assets/images/svg/Cocktail _Monochromatic.svg';
 import NoAlbumsImage from '../../../../assets/images/svg/Easter bunny_Monochromatic.svg';
 import MainContainer from '../MainContainer';
 import Dropdown from '../Dropdown';
-
-interface AlbumsPageReducer {
-  albums: Album[];
-  sortingOrder: AlbumSortTypes;
-}
-
-type AlbumPageReducerActionTypes = 'ALBUM_DATA' | 'SORTING_ORDER';
-
-const reducer = (
-  state: AlbumsPageReducer,
-  action: { type: AlbumPageReducerActionTypes; data: any }
-): AlbumsPageReducer => {
-  switch (action.type) {
-    case 'ALBUM_DATA':
-      return {
-        ...state,
-        albums: action.data,
-      };
-    case 'SORTING_ORDER':
-      return {
-        ...state,
-        albums: sortAlbums(state.albums, action.data),
-        sortingOrder: action.data,
-      };
-    default:
-      return state;
-  }
-};
+import Img from '../Img';
+import Button from '../Button';
 
 export const AlbumsPage = () => {
-  const { currentlyActivePage, userData } = React.useContext(AppContext);
-  const { updateCurrentlyActivePageData, updatePageSortingOrder } =
-    React.useContext(AppUpdateContext);
+  const {
+    currentlyActivePage,
+    userData,
+    isMultipleSelectionEnabled,
+    multipleSelectionsData,
+  } = React.useContext(AppContext);
+  const {
+    updateCurrentlyActivePageData,
+    updatePageSortingOrder,
+    toggleMultipleSelections,
+  } = React.useContext(AppUpdateContext);
 
-  const [content, dispatch] = React.useReducer(reducer, {
-    albums: [],
-    sortingOrder:
-      currentlyActivePage.data &&
-      currentlyActivePage.data.albumsPage &&
-      currentlyActivePage.data.albumsPage.sortingOrder
-        ? currentlyActivePage.data.albumsPage.sortingOrder
-        : userData && userData.sortingStates.albumsPage
-        ? userData.sortingStates.albumsPage
-        : 'aToZ',
-  } as AlbumsPageReducer);
+  const [albumsData, setAlbumsData] = React.useState([] as Album[]);
+  const [sortingOrder, setSortingOrder] = React.useState(
+    (currentlyActivePage.data && currentlyActivePage.data.sortingOrder
+      ? currentlyActivePage.data.sortingOrder
+      : userData && userData.sortingStates.albumsPage
+      ? userData.sortingStates.albumsPage
+      : 'aToZ') as AlbumSortTypes
+  );
+
+  const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
   const containerRef = React.useRef(null as HTMLDivElement | null);
   const { height, width } = useResizeObserver(containerRef);
   const MIN_ITEM_WIDTH = 220;
   const MIN_ITEM_HEIGHT = 280;
   const noOfColumns = Math.floor(width / MIN_ITEM_WIDTH);
-  const noOfRows = Math.ceil(content.albums.length / noOfColumns);
+  const noOfRows = Math.ceil(albumsData?.length || 1 / noOfColumns);
   const itemWidth =
     MIN_ITEM_WIDTH + ((width % MIN_ITEM_WIDTH) - 10) / noOfColumns;
 
   const fetchAlbumData = React.useCallback(
     () =>
-      window.api.getAlbumData([]).then((res) => {
+      window.api.getAlbumData([], sortingOrder).then((res) => {
         if (res && Array.isArray(res)) {
-          if (res.length > 0)
-            dispatch({
-              type: 'ALBUM_DATA',
-              data: sortAlbums(res, content.sortingOrder),
-            });
-          else
-            dispatch({
-              type: 'ALBUM_DATA',
-              data: null,
-            });
+          if (res.length > 0) setAlbumsData(res);
+          else setAlbumsData([]);
         }
       }),
-    [content.sortingOrder]
+    [sortingOrder]
   );
 
   React.useEffect(() => {
     fetchAlbumData();
     const manageDataUpdatesInAlbumsPage = (e: Event) => {
       if ('detail' in e) {
-        const dataEvents = (e as DataEvent).detail;
+        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>)
+          .detail;
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
           if (event.dataType === 'albums/newAlbum') fetchAlbumData();
@@ -110,9 +84,9 @@ export const AlbumsPage = () => {
   }, [fetchAlbumData]);
 
   React.useEffect(() => {
-    updatePageSortingOrder('sortingStates.albumsPage', content.sortingOrder);
+    updatePageSortingOrder('sortingStates.albumsPage', sortingOrder);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content.sortingOrder]);
+  }, [sortingOrder]);
 
   const row = React.useCallback(
     (props: {
@@ -123,15 +97,14 @@ export const AlbumsPage = () => {
       const { columnIndex, rowIndex, style } = props;
       const index = rowIndex * noOfColumns + columnIndex;
       // eslint-disable-next-line no-console
-      console.log(index);
-      if (index < content.albums.length) {
-        const { albumId, year, artists, title, songs, artworkPath } =
-          content.albums[index];
+      if (index < albumsData.length) {
+        const { albumId, year, artists, title, songs, artworkPaths } =
+          albumsData[index];
         return (
           <div style={{ ...style, display: 'flex', justifyContent: 'center' }}>
             <Album
               index={index}
-              artworkPath={artworkPath}
+              artworkPaths={artworkPaths}
               albumId={albumId}
               title={title}
               year={year}
@@ -143,49 +116,75 @@ export const AlbumsPage = () => {
       }
       return <div style={style} />;
     },
-    [content.albums, noOfColumns]
+    [albumsData, noOfColumns]
   );
 
   return (
-    <MainContainer className="main-container albums-list-container absolute !h-full !mb-0">
+    <MainContainer className="appear-from-bottom albums-list-container !h-full overflow-hidden !pb-0">
       <>
-        <div className="title-container mt-1 pr-4 flex items-center mb-8 text-font-color-black text-3xl font-medium dark:text-font-color-white">
+        <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">
             Albums{' '}
-            <div className="other-stats-container text-xs ml-12 flex items-center">
-              {content.albums && (
-                <span className="no-of-albums">{`${
-                  content.albums.length
-                } album${content.albums.length === 1 ? '' : 's'}`}</span>
+            <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
+              {isMultipleSelectionEnabled ? (
+                <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
+                  {multipleSelectionsData.multipleSelections.length} selections
+                </div>
+              ) : (
+                albumsData.length > 0 && (
+                  <span className="no-of-albums">{`${albumsData.length} album${
+                    albumsData.length === 1 ? '' : 's'
+                  }`}</span>
+                )
               )}
             </div>
           </div>
-          <div className="other-controls-container">
-            <Dropdown
-              name="albumSortDropdown"
-              value={content.sortingOrder}
-              options={[
-                { label: 'A to Z', value: 'aToZ' },
-                { label: 'Z to A', value: 'zToA' },
-                { label: 'High Song Count', value: 'noOfSongsDescending' },
-                { label: 'Low Song Count', value: 'noOfSongsAscending' },
-              ]}
-              onChange={(e) => {
-                updateCurrentlyActivePageData({
-                  albumsPage: {
-                    sortingOrder: e.currentTarget.value as ArtistSortTypes,
-                  },
-                });
-                dispatch({
-                  type: 'SORTING_ORDER',
-                  data: e.currentTarget.value,
-                });
-              }}
-            />
-          </div>
+          {albumsData.length > 0 && (
+            <div className="other-controls-container flex">
+              <Button
+                label={isMultipleSelectionEnabled ? 'Unselect All' : 'Select'}
+                className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                iconName={
+                  isMultipleSelectionEnabled ? 'remove_done' : 'checklist'
+                }
+                clickHandler={() =>
+                  toggleMultipleSelections(!isMultipleSelectionEnabled, 'album')
+                }
+                tooltipLabel={
+                  isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
+                }
+              />
+              <Dropdown
+                name="albumSortDropdown"
+                value={sortingOrder}
+                options={
+                  [
+                    { label: 'A to Z', value: 'aToZ' },
+                    { label: 'Z to A', value: 'zToA' },
+                    { label: 'High Song Count', value: 'noOfSongsDescending' },
+                    { label: 'Low Song Count', value: 'noOfSongsAscending' },
+                  ] as { label: string; value: AlbumSortTypes }[]
+                }
+                onChange={(e) => {
+                  const albumSortTypes = e.currentTarget
+                    .value as AlbumSortTypes;
+                  updateCurrentlyActivePageData((currentData) => ({
+                    ...currentData,
+                    sortingOrder: albumSortTypes,
+                  }));
+                  setSortingOrder(albumSortTypes);
+                }}
+              />
+            </div>
+          )}
         </div>
-        <div className="albums-container h-full flex-grow" ref={containerRef}>
-          {content.albums && content.albums.length > 0 && (
+        <div
+          className={`albums-container h-full w-full flex-grow ${
+            !(albumsData && albumsData.length > 0) && 'hidden'
+          }`}
+          ref={containerRef}
+        >
+          {albumsData && albumsData.length > 0 && (
             <Grid
               columnCount={noOfColumns || 5}
               columnWidth={itemWidth}
@@ -194,29 +193,43 @@ export const AlbumsPage = () => {
               height={height || 300}
               width={width || 500}
               overscanRowCount={2}
+              initialScrollTop={currentlyActivePage.data?.scrollTopOffset ?? 0}
+              onScroll={(data) => {
+                if (scrollOffsetTimeoutIdRef.current)
+                  clearTimeout(scrollOffsetTimeoutIdRef.current);
+                if (!data.scrollUpdateWasRequested && data.scrollTop !== 0)
+                  scrollOffsetTimeoutIdRef.current = setTimeout(
+                    () =>
+                      updateCurrentlyActivePageData((currentPageData) => ({
+                        ...currentPageData,
+                        scrollTopOffset: data.scrollTop,
+                      })),
+                    500
+                  );
+              }}
             >
               {row}
             </Grid>
           )}
         </div>
-        {content.albums === null && (
-          <div className="no-songs-container  h-full w-full text-[#ccc] my-[10%] text-center flex flex-col items-center justify-center text-2xl">
-            <img
-              src={NoAlbumsImage}
-              alt="No songs available."
-              className="w-60 mb-8"
-            />
-            <div>Even the bunny can&apos;t find them. How can we ?</div>
-          </div>
-        )}
-        {content.albums && content.albums.length === 0 && (
-          <div className="no-songs-container h-full w-full text-[#ccc] my-[10%] text-center flex flex-col items-center justify-center text-2xl">
-            <img
+        {/* {albumsData && albumsData.length === 0 && (
+          <div className="no-songs-container my-[10%] flex h-full w-full flex-col items-center justify-center text-center text-2xl text-[#ccc]">
+            <Img
               src={FetchingDataImage}
               alt="No songs available."
-              className="w-60 mb-8"
+              className="mb-8 w-60"
             />
             <div>We&apos;re already there...</div>
+          </div>
+        )} */}
+        {albumsData && albumsData.length === 0 && (
+          <div className="no-songs-container my-[10%] flex h-full w-full flex-col items-center justify-center text-center text-xl text-font-color-black dark:text-font-color-white">
+            <Img
+              src={NoAlbumsImage}
+              alt="No songs available."
+              className="mb-8 w-60"
+            />
+            <div>Even the bunny can&apos;t find them. How can we ?</div>
           </div>
         )}
       </>

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react/require-default-props */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 
@@ -9,28 +10,37 @@ interface CheckboxProp {
   isChecked: boolean;
   checkedStateUpdateFunction: (state: boolean) => void;
   labelContent?: string;
+  isDisabled?: boolean;
 }
 
 const Checkbox = React.memo((props: CheckboxProp) => {
-  const { id, checkedStateUpdateFunction, isChecked, labelContent, className } =
-    props;
+  const {
+    id,
+    checkedStateUpdateFunction,
+    isChecked,
+    labelContent,
+    className,
+    isDisabled = false,
+  } = props;
   return (
     <div
-      className={`checkbox-and-labels-container flex items-center mt-4 ml-2 ${className}`}
+      className={`checkbox-and-labels-container mt-4 ml-2 flex items-center transition-opacity ${
+        isDisabled && 'pointer-events-none !cursor-pointer opacity-50'
+      } ${className}`}
     >
       <input
         type="checkbox"
         name={id}
         id={id}
-        className="hidden peer"
+        className="peer hidden"
         checked={isChecked}
         onChange={(e) => checkedStateUpdateFunction(e.currentTarget.checked)}
       />
       <label
-        className="checkmark w-5 h-5 cursor-pointer bg-[transparent] border-2 border-background-color-3 dark:border-dark-background-color-3 flex items-center justify-center rounded-md peer-checked:bg-background-color-3 dark:peer-checked:bg-dark-background-color-3"
+        className="checkmark flex h-5 w-5 cursor-pointer items-center justify-center rounded-md border-2 border-font-color-highlight bg-[transparent] shadow-lg peer-checked:bg-font-color-highlight dark:border-dark-font-color-highlight dark:peer-checked:bg-dark-font-color-highlight"
         htmlFor={id}
       >
-        <span className="material-icons-round icon text-lg opacity-0 text-font-color-black dark:text-font-color-black">
+        <span className="material-icons-round icon text-lg text-font-color-white opacity-0 dark:text-font-color-black">
           check
         </span>
       </label>

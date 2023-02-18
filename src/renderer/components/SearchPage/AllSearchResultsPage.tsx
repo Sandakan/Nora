@@ -1,28 +1,37 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { Album } from '../AlbumsPage/Album';
 import { Artist } from '../ArtistPage/Artist';
+import Button from '../Button';
 import Genre from '../GenresPage/Genre';
 import MainContainer from '../MainContainer';
-import { Song } from '../SongsPage/Song';
+import Song from '../SongsPage/Song';
 
 const AllSearchResultsPage = () => {
-  const { currentlyActivePage, userData } = React.useContext(AppContext);
+  const { currentlyActivePage, userData, isMultipleSelectionEnabled } =
+    React.useContext(AppContext);
+  const { toggleMultipleSelections } = React.useContext(AppUpdateContext);
   const data = currentlyActivePage.data as {
-    allSearchResultsPage?: {
-      searchQuery: string;
-      searchFilter: SearchFilters;
-      searchResults: (SongData | Artist | Album | Genre)[];
-    };
+    searchQuery: string;
+    searchFilter: SearchFilters;
+    searchResults: (SongData | Artist | Album | Genre)[];
   };
 
+  const selectType = React.useMemo((): QueueTypes | undefined => {
+    if (data.searchFilter === 'Songs') return 'songs';
+    if (data.searchFilter === 'Artists') return 'artist';
+    if (data.searchFilter === 'Playlists') return 'playlist';
+    if (data.searchFilter === 'Albums') return 'album';
+    if (data.searchFilter === 'Genres') return 'genre';
+    return undefined;
+  }, [data.searchFilter]);
+
   const allSongResults = React.useMemo(() => {
-    if (
-      data.allSearchResultsPage &&
-      data.allSearchResultsPage.searchFilter === 'Songs'
-    ) {
-      return data.allSearchResultsPage.searchResults.map((result, index) => {
+    if (data && data.searchFilter === 'Songs') {
+      return data.searchResults.map((result, index) => {
         const songData = result as SongData;
         return (
           <Song
@@ -36,21 +45,19 @@ const AllSearchResultsPage = () => {
             duration={songData.duration}
             artists={songData.artists}
             path={songData.path}
-            artworkPath={songData.artworkPath}
+            artworkPaths={songData.artworkPaths}
             isAFavorite={songData.isAFavorite}
+            year={songData.year}
           />
         );
       });
     }
     return [];
-  }, [data.allSearchResultsPage, userData]);
+  }, [data, userData]);
 
   const allArtistResults = React.useMemo(() => {
-    if (
-      data.allSearchResultsPage &&
-      data.allSearchResultsPage.searchFilter === 'Artists'
-    ) {
-      return data.allSearchResultsPage.searchResults.map((result, index) => {
+    if (data && data.searchFilter === 'Artists') {
+      return data.searchResults.map((result, index) => {
         const artistData = result as Artist;
         return (
           <Artist
@@ -59,21 +66,19 @@ const AllSearchResultsPage = () => {
             name={artistData.name}
             artistId={artistData.artistId}
             songIds={artistData.songs.map((song) => song.songId)}
-            artworkPath={artistData.artworkPath}
+            artworkPaths={artistData.artworkPaths}
             onlineArtworkPaths={artistData.onlineArtworkPaths}
+            className="mb-4 mr-4"
           />
         );
       });
     }
     return [];
-  }, [data.allSearchResultsPage]);
+  }, [data]);
 
   const allAlbumResults = React.useMemo(() => {
-    if (
-      data.allSearchResultsPage &&
-      data.allSearchResultsPage.searchFilter === 'Albums'
-    ) {
-      return data.allSearchResultsPage.searchResults.map((result, index) => {
+    if (data && data.searchFilter === 'Albums') {
+      return data.searchResults.map((result, index) => {
         const albumData = result as Album;
         return (
           <Album
@@ -82,7 +87,7 @@ const AllSearchResultsPage = () => {
             albumId={albumData.albumId}
             title={albumData.title}
             songs={albumData.songs}
-            artworkPath={albumData.artworkPath}
+            artworkPaths={albumData.artworkPaths}
             artists={albumData.artists}
             year={albumData.year}
           />
@@ -90,14 +95,11 @@ const AllSearchResultsPage = () => {
       });
     }
     return [];
-  }, [data.allSearchResultsPage]);
+  }, [data]);
 
   const allGenreResults = React.useMemo(() => {
-    if (
-      data.allSearchResultsPage &&
-      data.allSearchResultsPage.searchFilter === 'Genres'
-    ) {
-      return data.allSearchResultsPage.searchResults.map((result, index) => {
+    if (data && data.searchFilter === 'Genres') {
+      return data.searchResults.map((result, index) => {
         const genreData = result as Genre;
         return (
           <Genre
@@ -105,59 +107,79 @@ const AllSearchResultsPage = () => {
             index={index}
             genreId={genreData.genreId}
             title={genreData.name}
-            noOfSongs={genreData.songs.length}
-            artworkPath={genreData.artworkPath}
+            songIds={genreData.songs.map((song) => song.songId)}
+            artworkPaths={genreData.artworkPaths}
             backgroundColor={genreData.backgroundColor}
           />
         );
       });
     }
     return [];
-  }, [data.allSearchResultsPage]);
+  }, [data]);
 
   return (
     <>
-      {data && data.allSearchResultsPage && (
+      {data && (
         <MainContainer className="main-container all-search-results-container">
           <>
-            <div className="title-container mt-1 pr-4 flex items-center mb-8 text-font-color-black text-3xl font-medium dark:text-font-color-white">
+            <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
               <div className="container flex">
                 Showing results for{' '}
-                <span className="search-query text-background-color-3 dark:text-dark-background-color-3 mx-2">
+                <span className="search-query mx-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                   &apos;
-                  {data.allSearchResultsPage.searchQuery}
+                  {data.searchQuery}
                   &apos;
                 </span>{' '}
-                {(data.allSearchResultsPage.searchFilter as SearchFilters) !==
-                  'All' && (
+                {(data.searchFilter as SearchFilters) !== 'All' && (
                   <>
                     on{' '}
-                    <span className="search-filter text-background-color-3 dark:text-dark-background-color-3 mx-2">
-                      {data.allSearchResultsPage.searchFilter}
+                    <span className="search-filter mx-2 text-font-color-highlight dark:text-dark-font-color-highlight">
+                      {data.searchFilter}
                     </span>
                   </>
                 )}
               </div>
+              <div className="other-controls-container flex">
+                <Button
+                  label={isMultipleSelectionEnabled ? 'Unselect All' : 'Select'}
+                  className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                  iconName={
+                    isMultipleSelectionEnabled ? 'remove_done' : 'checklist'
+                  }
+                  clickHandler={() => {
+                    toggleMultipleSelections(
+                      !isMultipleSelectionEnabled,
+                      selectType
+                    );
+                  }}
+                  isDisabled={selectType === undefined}
+                  tooltipLabel={
+                    isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
+                  }
+                />
+              </div>
             </div>
 
-            {data.allSearchResultsPage.searchFilter === 'Songs' && (
+            {data.searchFilter === 'Songs' && (
               <div className="songs-list-container">
                 <div className="songs-container">{allSongResults}</div>
               </div>
             )}
-            {data.allSearchResultsPage.searchFilter === 'Artists' && (
+            {data.searchFilter === 'Artists' && (
               <div className="artists-list-container">
-                <div className="artists-container">{allArtistResults}</div>
+                <div className="artists-container flex flex-wrap">
+                  {allArtistResults}
+                </div>
               </div>
             )}
-            {data.allSearchResultsPage.searchFilter === 'Albums' && (
+            {data.searchFilter === 'Albums' && (
               <div className="albums-list-container">
                 <div className="albums-container flex flex-wrap">
                   {allAlbumResults}
                 </div>
               </div>
             )}
-            {data.allSearchResultsPage.searchFilter === 'Genres' && (
+            {data.searchFilter === 'Genres' && (
               <div className="genres-list-container text-font-color-black dark:text-font-color-white">
                 <div className="genres-container flex flex-wrap">
                   {allGenreResults}

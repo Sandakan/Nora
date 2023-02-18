@@ -1,43 +1,44 @@
 /* eslint-disable promise/no-nesting */
-/* eslint-disable react/no-unescaped-entities */
-/* eslint-disable no-nested-ternary */
-/* eslint-disable import/no-named-as-default */
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable no-unused-vars */
+/* eslint-disable default-param-last */
+/* eslint-disable no-use-before-define */
 import React, { ReactElement } from 'react';
 import 'tailwindcss/tailwind.css';
-import '../../assets/styles/main.css';
-import { BodyAndSideBarContainer } from './components/bodyAndSidebarContainer';
-import Header from './components/Header/header';
-import SongControlsContainer from './components/SongsControlsContainer/SongControlsContainer';
-import { PromptMenu } from './components/PromptMenu/PromptMenu';
-import ContextMenu from './components/ContextMenu/ContextMenu';
+import '../../assets/styles/styles.css';
+
+import { AppContext, AppStateContextType } from './contexts/AppContext';
 import {
-  AppContext,
   AppUpdateContext,
-  SongPositionContext,
   AppUpdateContextType,
-} from './contexts/AppContext';
+} from './contexts/AppUpdateContext';
+import { SongPositionContext } from './contexts/SongPositionContext';
+import packageFile from '../../package.json';
+import TitleBar from './components/TitleBar/TitleBar';
+import SongControlsContainer from './components/SongsControlsContainer/SongControlsContainer';
+import BodyAndSideBarContainer from './components/BodyAndSidebarContainer';
+import PromptMenu from './components/PromptMenu/PromptMenu';
+import ContextMenu from './components/ContextMenu/ContextMenu';
 import MiniPlayer from './components/MiniPlayer/MiniPlayer';
 import ErrorPrompt from './components/ErrorPrompt';
 import Button, { ButtonProps } from './components/Button';
-import packageFile from '../../package.json';
-import ReleaseNotesPrompt from './components/SettingsPage/ReleaseNotesPrompt';
+import ReleaseNotesPrompt from './components/ReleaseNotesPrompt/ReleaseNotesPrompt';
+import Img from './components/Img';
+import Preloader from './components/Preloader/Preloader';
+import isLatestVersion from './utils/isLatestVersion';
+import roundTo from './utils/roundTo';
 
 interface AppReducer {
   userData: UserData;
   isDarkMode: boolean;
-  currentSongData: AudioData;
+  currentSongData: AudioPlayerData;
   PromptMenuData: PromptMenuData;
   notificationPanelData: NotificationPanelData;
   contextMenuData: ContextMenuData;
   navigationHistory: NavigationHistoryData;
-  isCurrentSongPlaying: boolean;
-  isMiniPlayer: boolean;
-  volume: { isMuted: boolean; value: number };
-  isRepeating: RepeatTypes;
-  songPosition: number;
-  isShuffling: boolean;
+  player: Player;
+  bodyBackgroundImage?: string;
+  multipleSelectionsData: MultipleSelectionData;
+  appUpdatesState: AppUpdatesState;
 }
 
 type AppReducerStateActions =
@@ -47,12 +48,12 @@ type AppReducerStateActions =
   | 'CURRENT_SONG_DATA_CHANGE'
   | 'CURRENT_SONG_PLAYBACK_STATE'
   | 'PROMPT_MENU_DATA_CHANGE'
-  | 'NOTIFICATION_PANEL_DATA_CHANGE'
+  | 'ADD_NEW_NOTIFICATIONS'
+  | 'UPDATE_NOTIFICATIONS'
   | 'CONTEXT_MENU_DATA_CHANGE'
   | 'CONTEXT_MENU_VISIBILITY_CHANGE'
-  | 'CURRENT_ACTIVE_PAGE_CHANGE'
   | 'CURRENT_ACTIVE_PAGE_DATA_UPDATE'
-  | 'UPDATE_NAVIGATION_HISTORY_DATA'
+  | 'UPDATE_NAVIGATION_HISTORY'
   | 'UPDATE_MINI_PLAYER_STATE'
   | 'UPDATE_VOLUME'
   | 'UPDATE_MUTED_STATE'
@@ -63,6 +64,10 @@ type AppReducerStateActions =
   | 'UPDATE_VOLUME_VALUE'
   | 'TOGGLE_REDUCED_MOTION'
   | 'TOGGLE_SONG_INDEXING'
+  | 'PLAYER_WAITING_STATUS'
+  | 'UPDATE_BODY_BACKGROUND_IMAGE'
+  | 'UPDATE_MULTIPLE_SELECTIONS_DATA'
+  | 'CHANGE_APP_UPDATES_DATA'
   | 'TOGGLE_SHOW_SONG_REMAINING_DURATION';
 
 const reducer = (
@@ -156,13 +161,32 @@ const reducer = (
     case 'PROMPT_MENU_DATA_CHANGE':
       return {
         ...state,
-        PromptMenuData: (action.data as PromptMenuData) || state.PromptMenuData,
+        PromptMenuData: action.data
+          ? (action.data as PromptMenuData).isVisible
+            ? (action.data as PromptMenuData)
+            : // eslint-disable-next-line react/jsx-no-useless-fragment
+              { ...(action.data as PromptMenuData), content: <></> }
+          : state.PromptMenuData,
       };
-    case 'NOTIFICATION_PANEL_DATA_CHANGE':
+    case 'ADD_NEW_NOTIFICATIONS':
       return {
         ...state,
-        notificationPanelData:
-          (action.data as NotificationPanelData) || state.notificationPanelData,
+        notificationPanelData: {
+          ...state.notificationPanelData,
+          notifications:
+            (action.data as AppNotification[]) ||
+            state.notificationPanelData.notifications,
+        } as NotificationPanelData,
+      };
+    case 'UPDATE_NOTIFICATIONS':
+      return {
+        ...state,
+        notificationPanelData: {
+          ...state.notificationPanelData,
+          notifications:
+            (action.data as AppNotification[]) ??
+            state.notificationPanelData.notifications,
+        } as NotificationPanelData,
       };
     case 'CONTEXT_MENU_DATA_CHANGE':
       return {
@@ -181,30 +205,18 @@ const reducer = (
               : state.contextMenuData.isVisible,
         },
       };
-    case 'CURRENT_ACTIVE_PAGE_CHANGE':
-      return {
-        ...state,
-        navigationHistory: {
-          pageHistoryIndex: state.navigationHistory.pageHistoryIndex + 1,
-          history: action.data
-            ? [
-                ...state.navigationHistory.history,
-                action.data as NavigationHistory,
-              ]
-            : state.navigationHistory.history,
-        },
-      };
     case 'CURRENT_ACTIVE_PAGE_DATA_UPDATE':
       state.navigationHistory.history[
         state.navigationHistory.pageHistoryIndex
-      ].data = action.data;
+      ].data = action.data as PageData;
       return {
         ...state,
         navigationHistory: state.navigationHistory,
       };
-    case 'UPDATE_NAVIGATION_HISTORY_DATA':
+    case 'UPDATE_NAVIGATION_HISTORY':
       return {
         ...state,
+        bodyBackgroundImage: undefined,
         navigationHistory:
           typeof action.data === 'object'
             ? { ...state.navigationHistory, ...action.data }
@@ -215,39 +227,61 @@ const reducer = (
         ...state,
         currentSongData:
           typeof action.data === 'object'
-            ? { ...state.currentSongData, ...action.data }
+            ? (action.data as AudioPlayerData)
             : state.currentSongData,
       };
     case 'CURRENT_SONG_PLAYBACK_STATE':
       return {
         ...state,
-        isCurrentSongPlaying:
-          typeof action.data === 'boolean'
-            ? action.data
-            : !state.isCurrentSongPlaying,
+        player: {
+          ...state.player,
+          isCurrentSongPlaying:
+            typeof action.data === 'boolean'
+              ? action.data
+              : !state.player.isCurrentSongPlaying,
+          isPlayerStalled:
+            typeof action.data === 'boolean' && action.data
+              ? false
+              : state.player.isPlayerStalled,
+        },
       };
     case 'UPDATE_MINI_PLAYER_STATE':
       window.api.toggleMiniPlayer(
-        typeof action.data === 'boolean' ? action.data : state.isMiniPlayer
+        typeof action.data === 'boolean'
+          ? action.data
+          : state.player.isMiniPlayer
       );
       return {
         ...state,
-        isMiniPlayer:
-          typeof action.data === 'boolean' ? action.data : state.isMiniPlayer,
+        player: {
+          ...state.player,
+          isMiniPlayer:
+            typeof action.data === 'boolean'
+              ? action.data
+              : state.player.isMiniPlayer,
+        },
       };
     case 'UPDATE_SONG_POSITION':
       return {
         ...state,
-        songPosition:
-          typeof action.data === 'number' ? action.data : state.songPosition,
+        player: {
+          ...state.player,
+          songPosition:
+            typeof action.data === 'number'
+              ? action.data
+              : state.player.songPosition,
+        },
       };
     case 'UPDATE_IS_REPEATING_STATE':
       return {
         ...state,
-        isRepeating:
-          typeof action.data === 'string'
-            ? (action.data as RepeatTypes)
-            : state.isRepeating,
+        player: {
+          ...state.player,
+          isRepeating:
+            typeof action.data === 'string'
+              ? (action.data as RepeatTypes)
+              : state.player.isRepeating,
+        },
       };
     case 'TOGGLE_IS_FAVORITE_STATE':
       return {
@@ -263,36 +297,87 @@ const reducer = (
     case 'TOGGLE_SHUFFLE_STATE':
       return {
         ...state,
-        isShuffling:
-          typeof action.data === 'boolean' ? action.data : !state.isShuffling,
+        player: {
+          ...state.player,
+          isShuffling:
+            typeof action.data === 'boolean'
+              ? action.data
+              : !state.player.isShuffling,
+        },
       };
     case 'UPDATE_VOLUME':
       return {
         ...state,
-        volume:
-          typeof action.data === 'object'
-            ? { ...state.volume, ...action.data }
-            : state.volume,
+        player: {
+          ...state.player,
+          volume:
+            typeof action.data === 'object'
+              ? { ...state.player.volume, ...action.data }
+              : state.player.volume,
+        },
       };
     case 'UPDATE_VOLUME_VALUE':
       return {
         ...state,
-        volume: {
-          ...state.volume,
-          value:
-            typeof action.data === 'number' ? action.data : state.volume.value,
-          isMuted: typeof action.data === 'number' && action.data === 0,
+        player: {
+          ...state.player,
+          volume: {
+            ...state.player.volume,
+            value:
+              typeof action.data === 'number'
+                ? action.data
+                : state.player.volume.value,
+            isMuted: typeof action.data === 'number' && action.data === 0,
+          },
         },
       };
     case 'UPDATE_MUTED_STATE':
       return {
         ...state,
-        volume: {
-          ...state.volume,
-          isMuted:
+        player: {
+          ...state.player,
+          volume: {
+            ...state.player.volume,
+            isMuted:
+              typeof action.data === 'boolean'
+                ? action.data
+                : !state.player.volume.isMuted,
+          },
+        },
+      };
+    case 'UPDATE_BODY_BACKGROUND_IMAGE':
+      return {
+        ...state,
+        bodyBackgroundImage:
+          typeof action.data === 'string'
+            ? action.data
+            : state.bodyBackgroundImage,
+      };
+    case 'UPDATE_MULTIPLE_SELECTIONS_DATA':
+      return {
+        ...state,
+        multipleSelectionsData:
+          typeof action.data === 'object'
+            ? (action.data as MultipleSelectionData)
+            : state.multipleSelectionsData,
+      };
+    case 'CHANGE_APP_UPDATES_DATA':
+      return {
+        ...state,
+        appUpdatesState:
+          typeof action.data === 'string'
+            ? (action.data as AppUpdatesState)
+            : state.appUpdatesState,
+      };
+    case 'PLAYER_WAITING_STATUS':
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          isPlayerStalled:
             typeof action.data === 'boolean'
               ? action.data
-              : !state.volume.isMuted,
+              : state.player.isPlayerStalled,
         },
       };
     default:
@@ -300,12 +385,20 @@ const reducer = (
   }
 };
 
-const { isDevelopment } = window.api;
-
 const player = new Audio();
+player.preload = 'auto';
+
+player.addEventListener('player/trackchange', (e) => {
+  if ('detail' in e) {
+    console.log(
+      `player track changed to ${(e as DetailAvailableEvent<string>).detail}.`
+    );
+  }
+});
 
 const updateNetworkStatus = () =>
   window.api.networkStatusChange(navigator.onLine);
+
 updateNetworkStatus();
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
@@ -327,6 +420,11 @@ const userDataTemplate: UserData = {
     isMiniPlayerAlwaysOnTop: false,
     doNotVerifyWhenOpeningLinks: false,
     showSongRemainingTime: false,
+    showArtistArtworkNearSongControls: false,
+    isMusixmatchLyricsEnabled: false,
+    disableBackgroundArtworks: false,
+    hideWindowOnClose: false,
+    openWindowAsHiddenOnSystemStart: false,
   },
   windowPositions: {},
   windowDiamensions: {},
@@ -336,10 +434,17 @@ const userDataTemplate: UserData = {
 
 const reducerData: AppReducer = {
   isDarkMode: false,
-  isMiniPlayer: false,
+  player: {
+    isCurrentSongPlaying: false,
+    volume: { isMuted: false, value: 50 },
+    isRepeating: 'false',
+    isShuffling: false,
+    songPosition: 0,
+    isMiniPlayer: false,
+    isPlayerStalled: false,
+  },
   userData: userDataTemplate,
-  currentSongData: {} as AudioData,
-  isCurrentSongPlaying: false,
+  currentSongData: {} as AudioPlayerData,
   navigationHistory: {
     pageHistoryIndex: 0,
     history: [
@@ -356,24 +461,22 @@ const reducerData: AppReducer = {
     pageY: 200,
   },
   notificationPanelData: {
-    isVisible: false,
-    icon: <></>,
-    content: <span />,
-    isLoading: false,
+    notifications: [],
   },
   PromptMenuData: {
     isVisible: false,
     content: <span />,
     className: '',
   },
-  volume: { isMuted: false, value: 50 },
-  isRepeating: 'false',
-  isShuffling: false,
-  songPosition: 0,
+  multipleSelectionsData: { isEnabled: false, multipleSelections: [] },
+  appUpdatesState: 'UNKNOWN',
 };
+
+console.log('Command line args', window.api.commandLineArgs);
 
 export default function App() {
   const [content, dispatch] = React.useReducer(reducer, reducerData);
+  // Had to use a Ref in parallel with the Reducer to avoid an issue that happens when using content.* not giving the intended data in useCallback functions even though it was added as a dependency of that function.
   const contentRef = React.useRef(reducerData);
 
   const AppRef = React.useRef(null as HTMLDivElement | null);
@@ -409,7 +512,6 @@ export default function App() {
   const changePromptMenuData = React.useCallback(
     (
       isVisible = false,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       contentData?: ReactElement<any, any>,
       className = ''
     ) => {
@@ -427,27 +529,41 @@ export default function App() {
 
   const managePlaybackErrors = React.useCallback(
     (err: unknown) => {
-      console.error(err);
-      changePromptMenuData(
-        true,
-        <ErrorPrompt
-          reason="ERROR_IN_PLAYER"
-          message={<>An error ocurred in the player.</>}
-        />
+      const prevSongPosition = player.currentTime;
+      const playerErrorData = player.error;
+      console.error(err, playerErrorData);
+      window.api.sendLogs(
+        `Error occurred in the player.App error:${err}; Player error: ${playerErrorData};`
       );
-      // setTimeout(
-      //   () =>
-      //     window.api.restartRenderer(`Error occurred in the player. ${err}`),
-      //   5000
-      // );
+      if (player.src && playerErrorData) {
+        player.load();
+        player.currentTime = prevSongPosition;
+      } else {
+        player.pause();
+        changePromptMenuData(
+          true,
+          <ErrorPrompt
+            reason="ERROR_IN_PLAYER"
+            message={
+              <>
+                An error ocurred in the player.
+                <br />
+                This could be a result of trying to play a corrupted song.
+                <details>{`${playerErrorData}`}</details>
+              </>
+            }
+            showSendFeedbackBtn
+          />
+        );
+      }
     },
     [changePromptMenuData]
   );
 
+  const AUDIO_FADE_INTERVAL = 50;
+  const AUDIO_FADE_DURATION = 250;
   const fadeOutIntervalId = React.useRef(undefined as NodeJS.Timer | undefined);
   const fadeInIntervalId = React.useRef(undefined as NodeJS.Timer | undefined);
-  const audioFadeInterval = 100;
-  const audioFadeDuration = 300;
   const fadeOutAudio = React.useCallback(() => {
     // console.log('volume on fade out', contentRef.current.volume);
     if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
@@ -455,15 +571,15 @@ export default function App() {
     fadeOutIntervalId.current = setInterval(() => {
       if (player.volume > 0) {
         const rate =
-          contentRef.current.volume.value /
-          (100 * (audioFadeDuration / audioFadeInterval));
+          contentRef.current.player.volume.value /
+          (100 * (AUDIO_FADE_DURATION / AUDIO_FADE_INTERVAL));
         if (player.volume - rate <= 0) player.volume = 0;
         else player.volume -= rate;
       } else {
         player.pause();
         if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
       }
-    }, audioFadeInterval);
+    }, AUDIO_FADE_INTERVAL);
   }, []);
 
   const fadeInAudio = React.useCallback(() => {
@@ -471,78 +587,91 @@ export default function App() {
     if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
     if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
     fadeInIntervalId.current = setInterval(() => {
-      if (player.volume < contentRef.current.volume.value / 100) {
+      if (player.volume < contentRef.current.player.volume.value / 100) {
         const rate =
-          (contentRef.current.volume.value / 100 / audioFadeInterval) *
-          (audioFadeDuration / audioFadeInterval);
-        if (player.volume + rate >= contentRef.current.volume.value / 100)
-          player.volume = contentRef.current.volume.value / 100;
+          (contentRef.current.player.volume.value / 100 / AUDIO_FADE_INTERVAL) *
+          (AUDIO_FADE_DURATION / AUDIO_FADE_INTERVAL);
+        if (
+          player.volume + rate >=
+          contentRef.current.player.volume.value / 100
+        )
+          player.volume = contentRef.current.player.volume.value / 100;
         else player.volume += rate;
       } else if (fadeInIntervalId.current) {
         clearInterval(fadeInIntervalId.current);
       }
-    }, audioFadeInterval);
+    }, AUDIO_FADE_INTERVAL);
   }, []);
 
   const handleBeforeQuitEvent = React.useCallback(async () => {
     window.api.sendSongPosition(player.currentTime);
     await window.api.saveUserData(
-      'isShuffling',
-      contentRef.current.isShuffling
+      'isRepeating',
+      contentRef.current.player.isRepeating
     );
     await window.api.saveUserData(
-      'isRepeating',
-      contentRef.current.isRepeating
+      'isShuffling',
+      contentRef.current.player.isShuffling
     );
+  }, []);
+
+  const updateAppUpdatesState = React.useCallback((state: AppUpdatesState) => {
+    contentRef.current.appUpdatesState = state;
+    dispatch({ type: 'CHANGE_APP_UPDATES_DATA', data: state });
   }, []);
 
   const checkForAppUpdates = React.useCallback(() => {
     if (navigator.onLine) {
-      fetch(packageFile.releaseNotes.noraJson)
+      updateAppUpdatesState('CHECKING');
+
+      fetch(packageFile.releaseNotes.json)
         .then((res) => {
           if (res.status === 200) return res.json();
-          return fetch(packageFile.releaseNotes.json).then((result) =>
-            result.json()
-          );
+          throw new Error('response status is not 200');
         })
         .then((res: Changelog) => {
-          const latestVersionId = Number(
-            res.latestVersion.version.replace(/\D/g, '')
+          const isThereAnAppUpdate = !isLatestVersion(
+            res.latestVersion.version,
+            packageFile.version
           );
-          const currentVersionId = Number(
-            packageFile.version.replace(/\D/g, '')
-          );
-          if (latestVersionId > currentVersionId) {
-            console.log('client has new updates');
 
-            changePromptMenuData(
-              true,
-              <ReleaseNotesPrompt />,
-              'release-notes px-8 py-4'
-            );
-          } else
-            console.log(
-              'client is up-to-date.',
-              'latest version',
-              latestVersionId,
-              'current version',
-              currentVersionId
-            );
+          updateAppUpdatesState(isThereAnAppUpdate ? 'OLD' : 'LATEST');
+
+          if (isThereAnAppUpdate) {
+            console.log('client has new updates');
+            if (
+              contentRef.current.userData.preferences
+                .noUpdateNotificationForNewUpdate !== res.latestVersion.version
+            ) {
+              changePromptMenuData(
+                true,
+                <ReleaseNotesPrompt />,
+                'release-notes px-8 py-4'
+              );
+            }
+          } else console.log('client is up-to-date.');
+
           return undefined;
         })
-        .catch((err) => console.error(err));
-    } else
+        .catch((err) => {
+          console.error(err);
+          return updateAppUpdatesState('ERROR');
+        });
+    } else {
+      updateAppUpdatesState('NO_NETWORK_CONNECTION');
+
       console.log(
         `couldn't check for app updates. Check the network connection.`
       );
-  }, [changePromptMenuData]);
+    }
+  }, [changePromptMenuData, updateAppUpdatesState]);
 
   React.useEffect(
     () => {
       // check for app updates on app startup after 5 seconds.
       setTimeout(checkForAppUpdates, 5000);
       // checks for app updates every 10 minutes.
-      const id = setInterval(checkForAppUpdates, 1000 * 60 * 10);
+      const id = setInterval(checkForAppUpdates, 1000 * 60 * 15);
       return () => {
         clearInterval(id);
       };
@@ -579,15 +708,30 @@ export default function App() {
     };
   }, []);
 
-  React.useEffect(() => {
-    const manageWindowBlurOrFocus = (state: 'blur' | 'focus') => {
-      const appElement = document.querySelector('.App');
-      if (appElement) {
-        if (state === 'blur') appElement.classList.add('blurred');
-        if (state === 'focus') appElement.classList.remove('blurred');
+  const manageWindowBlurOrFocus = React.useCallback(
+    (state: 'blur' | 'focus') => {
+      if (AppRef.current) {
+        if (state === 'blur') AppRef.current.classList.add('blurred');
+        if (state === 'focus') AppRef.current.classList.remove('blurred');
       }
-    };
+    },
+    []
+  );
 
+  const manageWindowFullscreen = React.useCallback(
+    (state: 'fullscreen' | 'windowed') => {
+      if (AppRef.current) {
+        if (state === 'fullscreen')
+          return AppRef.current.classList.add('fullscreen');
+        if (state === 'windowed')
+          return AppRef.current.classList.remove('fullscreen');
+      }
+      return undefined;
+    },
+    []
+  );
+
+  React.useEffect(() => {
     player.addEventListener('error', (err) => managePlaybackErrors(err));
     player.addEventListener('play', () => {
       dispatch({
@@ -604,16 +748,22 @@ export default function App() {
       window.api.songPlaybackStateChange(false);
     });
     window.api.beforeQuitEvent(handleBeforeQuitEvent);
+
     window.api.onWindowBlur(() => manageWindowBlurOrFocus('blur'));
     window.api.onWindowFocus(() => manageWindowBlurOrFocus('focus'));
+
+    window.api.onEnterFullscreen(() => manageWindowFullscreen('fullscreen'));
+    window.api.onLeaveFullscreen(() => manageWindowFullscreen('windowed'));
+
     return () => {
       window.api.removeBeforeQuitEventListener(handleBeforeQuitEvent);
     };
-  }, [managePlaybackErrors, handleBeforeQuitEvent]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   React.useEffect(() => {
     const displayDefaultTitleBar = () => {
-      document.title = `Oto Music For Desktop`;
+      document.title = `Nora`;
       window.api.saveUserData(
         'currentSong.stoppedPosition',
         player.currentTime
@@ -623,30 +773,71 @@ export default function App() {
       if (refStartPlay.current) toggleSongPlayback(true);
     };
     const manageSongPositionUpdate = () => {
-      contentRef.current.songPosition = Math.floor(player.currentTime);
+      contentRef.current.player.songPosition = roundTo(player.currentTime, 2);
     };
+    const managePlayerStalledStatus = () => {
+      dispatch({ type: 'PLAYER_WAITING_STATUS', data: true });
+    };
+    const managePlayerNotStalledStatus = () => {
+      dispatch({ type: 'PLAYER_WAITING_STATUS', data: false });
+    };
+
+    const handleSkipForwardClickWithParams = () =>
+      handleSkipForwardClick('PLAYER_SKIP');
+
+    // player.addEventListener('seeking', managePlayerNotStalledStatus);
+    player.addEventListener('canplay', managePlayerNotStalledStatus);
+    player.addEventListener('canplaythrough', managePlayerNotStalledStatus);
+    player.addEventListener('loadeddata', managePlayerNotStalledStatus);
+    player.addEventListener('loadedmetadata', managePlayerNotStalledStatus);
+    player.addEventListener('suspend', managePlayerStalledStatus);
+    player.addEventListener('stalled', managePlayerStalledStatus);
+    player.addEventListener('waiting', managePlayerStalledStatus);
     player.addEventListener('canplay', playSongIfPlayable);
-    player.addEventListener('ended', handleSkipForwardClick);
+    player.addEventListener('ended', handleSkipForwardClickWithParams);
     player.addEventListener('play', addSongTitleToTitleBar);
     player.addEventListener('pause', displayDefaultTitleBar);
 
     const intervalId = setInterval(() => {
-      if (!player.paused)
+      if (!player.paused) {
+        const currentPosition = contentRef.current.player.songPosition;
+
+        const playerPositionChange = new CustomEvent('player/positionChange', {
+          detail: currentPosition,
+        });
+        player.dispatchEvent(playerPositionChange);
+
         startTransition(() =>
           dispatch({
             type: 'UPDATE_SONG_POSITION',
-            data: Math.floor(contentRef.current.songPosition),
+            data: currentPosition,
           })
         );
-    }, 1000);
+      }
+    }, 1000 / 3);
 
     player.addEventListener('timeupdate', manageSongPositionUpdate);
 
     return () => {
+      toggleSongPlayback(false);
       clearInterval(intervalId);
+      // player.removeEventListener('seeking', managePlayerNotStalledStatus);
+      player.removeEventListener('canplay', managePlayerNotStalledStatus);
+      player.removeEventListener(
+        'canplaythrough',
+        managePlayerNotStalledStatus
+      );
+      player.removeEventListener('loadeddata', managePlayerNotStalledStatus);
+      player.removeEventListener(
+        'loadedmetadata',
+        managePlayerNotStalledStatus
+      );
+      player.removeEventListener('suspend', managePlayerStalledStatus);
+      player.removeEventListener('stalled', managePlayerStalledStatus);
+      player.removeEventListener('waiting', managePlayerStalledStatus);
       player.removeEventListener('timeupdate', manageSongPositionUpdate);
       player.removeEventListener('canplay', playSongIfPlayable);
-      player.removeEventListener('ended', handleSkipForwardClick);
+      player.removeEventListener('ended', handleSkipForwardClickWithParams);
       player.removeEventListener('play', addSongTitleToTitleBar);
       player.removeEventListener('pause', displayDefaultTitleBar);
     };
@@ -655,40 +846,47 @@ export default function App() {
 
   // VOLUME RELATED SETTINGS
   React.useEffect(() => {
-    player.volume = content.volume.value / 100;
-    player.muted = content.volume.isMuted;
-  }, [content.volume]);
+    player.volume = content.player.volume.value / 100;
+    player.muted = content.player.volume.isMuted;
+  }, [content.player.volume]);
 
   React.useEffect(() => {
     window.api
       .getUserData()
-      .then(async (res) => {
+      .then((res) => {
         if (!res) return;
         dispatch({ type: 'USER_DATA_CHANGE', data: res });
         contentRef.current.userData = res;
-        contentRef.current.isDarkMode = res.theme.isDarkMode;
+        dispatch({ type: 'APP_THEME_CHANGE', data: res.theme });
         dispatch({ type: 'UPDATE_VOLUME', data: res.volume });
-        contentRef.current.volume = res.volume;
+        contentRef.current.player.volume = res.volume;
         toggleShuffling(res.isShuffling);
         toggleRepeat(res.isRepeating);
         if (
           content.navigationHistory.history.at(-1)?.pageTitle !==
           res.defaultPage
         )
-          dispatch({
-            type: 'CURRENT_ACTIVE_PAGE_CHANGE',
-            data: { pageTitle: res.defaultPage, data: undefined },
-          });
-        // eslint-disable-next-line promise/no-nesting
-        const startUpSongData = await window.api
+          changeCurrentActivePage(res.defaultPage);
+        window.api
           .checkForStartUpSongs()
+          .then((startUpSongData) => {
+            if (startUpSongData)
+              playSongFromUnknownSource(startUpSongData, true);
+            else {
+              if (res.currentSong.songId)
+                playSong(res.currentSong.songId, false);
+              const currSongPosition = Number(res.currentSong.stoppedPosition);
+              player.currentTime = currSongPosition;
+              contentRef.current.player.songPosition = currSongPosition;
+              dispatch({
+                type: 'UPDATE_SONG_POSITION',
+                data: currSongPosition,
+              });
+            }
+            return undefined;
+          })
           .catch((err) => console.error(err));
-        if (startUpSongData)
-          playSongDataFromUnknownSource(startUpSongData, true);
-        else {
-          if (res.currentSong.songId) playSong(res.currentSong.songId, false);
-          player.currentTime = Number(res.currentSong.stoppedPosition);
-        }
+
         // eslint-disable-next-line promise/always-return
         if (res.queue) {
           refQueue.current = {
@@ -722,16 +920,16 @@ export default function App() {
       document.dispatchEvent(event);
     };
 
-    window.api.toggleSongPlaybackState(() => {
+    window.api.toggleSongPlayback(() => {
       console.log('Main requested song playback');
       toggleSongPlayback();
     });
     window.api.playSongFromUnknownSource((_, data) => {
-      playSongDataFromUnknownSource(data, true);
+      playSongFromUnknownSource(data, true);
     });
     window.api.skipBackwardToPreviousSong(handleSkipBackwardClick);
     window.api.skipForwardToNextSong(handleSkipForwardClick);
-    if (isDevelopment) window.api.dataUpdateEvent(noticeDataUpdateEvents);
+    window.api.dataUpdateEvent(noticeDataUpdateEvents);
     return () => {
       window.api.removeTogglePlaybackStateEvent(toggleSongPlayback);
       window.api.removeSkipBackwardToPreviousSongEvent(handleSkipBackwardClick);
@@ -741,85 +939,95 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const notificationPanelTimeoutIdRef = React.useRef(
-    undefined as NodeJS.Timer | undefined
-  );
-  const updateNotificationPanelData = React.useCallback(
-    (
-      delay = 5000,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      contentData: ReactElement<any, any>,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      icon: ReactElement<any, any> = <></>,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      buttons: ButtonProps[] = [],
-      isLoading = false
-    ) => {
-      if (notificationPanelTimeoutIdRef.current)
-        clearTimeout(notificationPanelTimeoutIdRef.current);
-      if (delay === 0) {
-        dispatch({
-          type: 'NOTIFICATION_PANEL_DATA_CHANGE',
-          data: {
-            ...content.notificationPanelData,
-            isVisible: false,
-            icon: <></>,
-            buttons: [],
-            isLoading,
-          },
-        });
-      } else {
-        dispatch({
-          type: 'NOTIFICATION_PANEL_DATA_CHANGE',
-          data: { isVisible: true, content: contentData, icon, buttons },
-        });
-        notificationPanelTimeoutIdRef.current = setTimeout(
-          () =>
-            dispatch({
-              type: 'NOTIFICATION_PANEL_DATA_CHANGE',
-              data: {
-                ...content.notificationPanelData,
-                isVisible: false,
-                icon: <></>,
-                isLoading,
-              },
-            }),
-          delay
+  const addNewNotifications = React.useCallback(
+    (newNotifications: AppNotification[]) => {
+      if (newNotifications.length > 0) {
+        const maxNotifications = 4;
+        const currentNotifications =
+          contentRef.current.notificationPanelData.notifications;
+        const newNotificationIds = newNotifications.map((x) => x.id);
+        const resultNotifications = currentNotifications.filter(
+          (x, index) =>
+            !newNotificationIds.some((y) => y === x.id) &&
+            index < maxNotifications
         );
+        resultNotifications.unshift(...newNotifications);
+        contentRef.current.notificationPanelData.notifications =
+          resultNotifications;
+        dispatch({
+          type: 'ADD_NEW_NOTIFICATIONS',
+          data: resultNotifications,
+        });
       }
     },
-    [content.notificationPanelData]
+    []
+  );
+
+  const updateNotifications = React.useCallback(
+    (
+      // eslint-disable-next-line no-unused-vars
+      callback: (currentNotifications: AppNotification[]) => AppNotification[]
+    ) => {
+      const currentNotifications = content.notificationPanelData.notifications;
+      const updatedNotifications = callback(currentNotifications);
+      contentRef.current.notificationPanelData.notifications =
+        updatedNotifications;
+      dispatch({ type: 'UPDATE_NOTIFICATIONS', data: updatedNotifications });
+    },
+    [content.notificationPanelData.notifications]
   );
 
   const toggleSongPlayback = React.useCallback(
     (startPlay?: boolean) => {
       if (contentRef.current.currentSongData?.songId) {
         if (typeof startPlay !== 'boolean' || startPlay === player.paused) {
-          if (player.paused) {
-            player.play().catch((err) => managePlaybackErrors(err));
-            return fadeInAudio();
+          if (player.readyState > 0) {
+            if (player.paused) {
+              player
+                .play()
+                .then(() => {
+                  const playbackChange = new CustomEvent(
+                    'player/playbackChange'
+                  );
+                  return player.dispatchEvent(playbackChange);
+                })
+                .catch((err) => managePlaybackErrors(err));
+              return fadeInAudio();
+            }
+            if (player.ended) {
+              player.currentTime = 0;
+              player
+                .play()
+                .then(() => {
+                  const playbackChange = new CustomEvent(
+                    'player/playbackChange'
+                  );
+                  return player.dispatchEvent(playbackChange);
+                })
+                .catch((err) => managePlaybackErrors(err));
+              return fadeInAudio();
+            }
+            const playbackChange = new CustomEvent('player/playbackChange');
+            player.dispatchEvent(playbackChange);
+            return fadeOutAudio();
           }
-          if (player.ended) {
-            player.currentTime = 0;
-            player.play().catch((err) => managePlaybackErrors(err));
-            return fadeInAudio();
-          }
-          return fadeOutAudio();
         }
       } else
-        updateNotificationPanelData(
-          5000,
-          <span>Please select a song to play.</span>,
-          <span className="material-icons-round-outlined text-lg">error</span>
-        );
+        addNewNotifications([
+          {
+            id: 'noSongToPlay',
+            delay: 5000,
+            content: <span>Please select a song to play.</span>,
+            icon: (
+              <span className="material-icons-round-outlined text-lg">
+                error
+              </span>
+            ),
+          },
+        ]);
       return undefined;
     },
-    [
-      managePlaybackErrors,
-      updateNotificationPanelData,
-      fadeOutAudio,
-      fadeInAudio,
-    ]
+    [managePlaybackErrors, addNewNotifications, fadeOutAudio, fadeInAudio]
   );
 
   const displayMessageFromMain = React.useCallback(
@@ -827,22 +1035,26 @@ export default function App() {
       _: unknown,
       message: string,
       messageCode?: MessageCodes,
-      data?: object
+      data?: Record<string, unknown>
     ) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const buttons: ButtonProps[] = [];
+      let id: string = messageCode ?? 'mainProcessMessage';
       const defaultButtonStyles =
         '!bg-background-color-3 dark:!bg-dark-background-color-3 !text-font-color-black dark:!text-font-color-black !font-light';
       let duration = 5000;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-undef-init
-      let icon: ReactElement<any, any> | undefined = undefined;
+      let icon: ReactElement<any, any> | undefined;
       const showMessage = true;
-      if (messageCode === 'PARSE_SUCCESSFUL')
+
+      if (messageCode === 'APP_THEME_CHANGE')
+        icon = <span className="material-icons-round">brightness_4</span>;
+      if (messageCode === 'PARSE_SUCCESSFUL') {
         icon = (
           <span className="material-icons-round-outlined icon">
             file_download
           </span>
         );
+        id = (data?.songId as string) ?? messageCode;
+      }
       if (messageCode === 'RESYNC_SUCCESSFUL') {
         icon = (
           <span className="material-icons-round-outlined icon">check</span>
@@ -863,9 +1075,7 @@ export default function App() {
         'path' in data
       ) {
         icon = (
-          <span className="material-icons-round-outlined icon">
-            playlist_add
-          </span>
+          <span className="material-icons-round-outlined icon">error</span>
         );
         duration = 15000;
         // buttons.push({
@@ -875,16 +1085,42 @@ export default function App() {
         //   clickHandler: () => console.log(data),
         // });
       }
+      if (
+        (messageCode === 'SONG_LIKE' || messageCode === 'SONG_DISLIKE') &&
+        data &&
+        'artworkPath' in data
+      ) {
+        icon = (
+          <div className="relative h-8 w-8">
+            <Img
+              className="aspect-square h-full w-full rounded-sm"
+              src={`nora://localFiles/${data.artworkPath as string}`}
+              alt="song artwork"
+            />
+            <span
+              className={`material-icons-round${
+                messageCode === 'SONG_DISLIKE' ? '-outlined' : ''
+              } icon absolute -bottom-1 -right-1 text-font-color-crimson dark:text-font-color-crimson`}
+            >
+              favorite
+            </span>
+          </div>
+        );
+        // duration = 60000;
+      }
 
       if (showMessage)
-        updateNotificationPanelData(
-          duration,
-          <div>{message}</div>,
-          icon,
-          buttons
-        );
+        addNewNotifications([
+          {
+            id,
+            delay: duration,
+            content: <div>{message}</div>,
+            icon,
+            buttons,
+          },
+        ]);
     },
-    [updateNotificationPanelData]
+    [addNewNotifications]
   );
 
   React.useEffect(() => {
@@ -914,11 +1150,14 @@ export default function App() {
           },
         ],
       });
+      const handleSkipForwardClickWithParams = () =>
+        handleSkipForwardClick('PLAYER_SKIP');
+
       navigator.mediaSession.setActionHandler('pause', () =>
-        toggleSongPlayback(true)
+        toggleSongPlayback(false)
       );
       navigator.mediaSession.setActionHandler('play', () =>
-        toggleSongPlayback(false)
+        toggleSongPlayback(true)
       );
       navigator.mediaSession.setActionHandler(
         'previoustrack',
@@ -926,14 +1165,14 @@ export default function App() {
       );
       navigator.mediaSession.setActionHandler(
         `nexttrack`,
-        handleSkipForwardClick
+        handleSkipForwardClickWithParams
       );
-      navigator.mediaSession.playbackState = content.isCurrentSongPlaying
+      navigator.mediaSession.playbackState = content.player.isCurrentSongPlaying
         ? 'playing'
         : 'paused';
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content.currentSongData, content.isCurrentSongPlaying]);
+  }, [content.currentSongData, content.player.isCurrentSongPlaying]);
 
   const handleContextMenuVisibilityUpdate = React.useCallback(() => {
     if (contentRef.current.contextMenuData.isVisible) {
@@ -965,7 +1204,6 @@ export default function App() {
         contentRef.current.currentSongData.artists
           .map((artist) => artist.name)
           .join(', ')
-        // : contentRef.current.currentSongData.artists.name
       }`;
   }, []);
 
@@ -973,44 +1211,178 @@ export default function App() {
     const repeatState =
       newState ||
       // eslint-disable-next-line no-nested-ternary
-      (contentRef.current.isRepeating === 'false'
+      (contentRef.current.player.isRepeating === 'false'
         ? 'repeat'
-        : contentRef.current.isRepeating === 'repeat'
+        : contentRef.current.player.isRepeating === 'repeat'
         ? 'repeat-1'
         : 'false');
-    contentRef.current.isRepeating = repeatState;
+    contentRef.current.player.isRepeating = repeatState;
     dispatch({
       type: 'UPDATE_IS_REPEATING_STATE',
       data: repeatState,
     });
   }, []);
 
+  const recordListeningData = React.useCallback(
+    (songId: string, duration: number) => {
+      console.warn(
+        `started recording full listens and skips of ${songId}`,
+        'duration',
+        duration
+      );
+
+      const abortController = new AbortController();
+      let isPaused = false;
+      let passedSkipRange = false;
+      let passedFullListenRange = false;
+      let seconds = 0;
+
+      player.addEventListener(
+        'pause',
+        () => {
+          isPaused = true;
+        },
+        { signal: abortController.signal }
+      );
+      player.addEventListener(
+        'play',
+        () => {
+          isPaused = false;
+        },
+        { signal: abortController.signal }
+      );
+      // player.addEventListener(
+      //   'ended',
+      //   () => {
+      //     stopRecording(true);
+      //   },
+      //   { signal: abortController.signal }
+      // );
+
+      console.warn(
+        songId,
+        'skip end range',
+        (duration * 10) / 100,
+        'full listen range',
+        (duration * 90) / 100
+      );
+
+      const intervalId = window.setInterval(() => {
+        //  listen for song skips
+        if (!passedSkipRange && seconds > (duration * 10) / 100) {
+          passedSkipRange = true;
+          console.warn(`user didn't skip ${songId} before 10% completion.`);
+        }
+        // listen for full song listens
+        if (!passedFullListenRange && seconds > (duration * 90) / 100) {
+          passedFullListenRange = true;
+          console.warn(`user listened to 90% of ${songId}`);
+          window.api.updateSongListeningData(
+            songId,
+            'fullListens',
+            'increment'
+          );
+          stopRecording();
+        }
+
+        if (!isPaused) {
+          seconds += 1;
+        }
+      }, 1000);
+
+      const stopRecording = (isSongEnded = false) => {
+        try {
+          if (!isSongEnded && !passedFullListenRange)
+            console.warn(`user skipped ${songId} before 90% completion.`);
+          if (!passedSkipRange) {
+            console.warn(`user skipped ${songId}. before 10% completion.`);
+            window.api.updateSongListeningData(songId, 'skips', 'increment');
+          }
+          abortController.abort();
+          clearInterval(intervalId);
+          console.warn(`stopping listening data recording of ${songId}`);
+        } catch (error) {
+          console.error(error);
+        }
+      };
+
+      return stopRecording;
+    },
+    []
+  );
+
+  const recordRef = React.useRef<() => void>();
+
   const playSong = React.useCallback(
-    (songId: string, isStartPlay = true) => {
+    (songId: string, isStartPlay = true, playAsCurrentSongIndex = false) => {
       if (typeof songId === 'string') {
         if (contentRef.current.currentSongData.songId === songId)
           return toggleSongPlayback();
+        console.time('timeForSongFetch');
+
         return window.api
           .getSong(songId)
           .then((songData) => {
+            console.timeEnd('timeForSongFetch');
             if (songData) {
               console.log('playSong', songId, songData.path);
+
               dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: songData });
               contentRef.current.currentSongData = songData;
-              if (player.src !== `otoMusic://localFiles/${songData.path}`)
-                player.src = `otoMusic://localFiles/${songData.path}`;
+
               window.api.saveUserData('currentSong.songId', songData.songId);
+
+              player.src = songData.path;
+
+              const trackChangeEvent = new CustomEvent('player/trackchange', {
+                detail: songId,
+              });
+              player.dispatchEvent(trackChangeEvent);
+
               refStartPlay.current = isStartPlay;
+
               if (isStartPlay) toggleSongPlayback();
+
+              if (recordRef.current) recordRef.current();
+              recordRef.current = recordListeningData(
+                songId,
+                songData.duration
+              );
+
               if (refQueue.current.queue.length > 0) {
-                if (refQueue.current.queue.indexOf(songData.songId) !== -1)
-                  refQueue.current.currentSongIndex =
-                    refQueue.current.queue.indexOf(songData.songId);
-                else {
+                // check if songId exists in the queue
+                if (refQueue.current.queue.indexOf(songData.songId) !== -1) {
+                  if (playAsCurrentSongIndex) {
+                    // if playAsCurrentSongIndex is enabled, songId will be removed from the position it previously was and put next to the currentSongIndex to avoid messing up the queue when playing arbitrary songs from different places in the queue, result in continuing playing from that position rather than playing from previous song's position.
+                    if (refQueue.current.currentSongIndex !== null) {
+                      // There is a currently playing song.
+                      const position = refQueue.current.currentSongIndex + 1;
+                      if (
+                        refQueue.current.queue[position] !== songData.songId
+                      ) {
+                        refQueue.current.queue = refQueue.current.queue.filter(
+                          (id) => id !== songData.songId
+                        );
+                        refQueue.current.queue.splice(
+                          position,
+                          0,
+                          songData.songId
+                        );
+                      }
+                      refQueue.current.currentSongIndex = position;
+                    } else
+                      refQueue.current.currentSongIndex =
+                        refQueue.current.queue.indexOf(songData.songId);
+                  } else
+                    refQueue.current.currentSongIndex =
+                      refQueue.current.queue.indexOf(songData.songId);
+                } else {
+                  // songId not in the queue
                   console.log(
                     `song ${songData.title} with id ${songData.songId} is not present in the queue`
                   );
                   refQueue.current.queue.push(songData.songId);
+
                   if (refQueue.current.currentSongIndex !== null)
                     refQueue.current.currentSongIndex += 1;
                   else refQueue.current.currentSongIndex = 0;
@@ -1022,11 +1394,18 @@ export default function App() {
           })
           .catch((err) => {
             console.error(err);
-            updateNotificationPanelData(
-              10000,
-              <span>Seems like we can&apos;t play that song.</span>,
-              <span className="material-icons-round icon">error_outline</span>
-            );
+            addNewNotifications([
+              {
+                id: 'unplayableSong',
+                delay: 10000,
+                content: <span>Seems like we can&apos;t play that song.</span>,
+                icon: (
+                  <span className="material-icons-round icon">
+                    error_outline
+                  </span>
+                ),
+              },
+            ]);
             changePromptMenuData(
               true,
               <div>
@@ -1050,11 +1429,16 @@ export default function App() {
             );
           });
       }
-      updateNotificationPanelData(
-        5000,
-        <span>Seems like we can&apos;t play that song.</span>,
-        <span className="material-icons-round icon">error_outline</span>
-      );
+      addNewNotifications([
+        {
+          id: 'unplayableSong',
+          delay: 10000,
+          content: <span>Seems like we can&apos;t play that song.</span>,
+          icon: (
+            <span className="material-icons-round icon">error_outline</span>
+          ),
+        },
+      ]);
       changePromptMenuData(
         true,
         <ErrorPrompt
@@ -1071,44 +1455,30 @@ export default function App() {
         `======= ERROR OCCURRED WHEN TRYING TO PLAY A S0NG. =======\nERROR : Song id is of unknown type; SONGIDTYPE : ${typeof songId}`
       );
     },
-    [toggleSongPlayback, updateNotificationPanelData, changePromptMenuData]
+    [
+      addNewNotifications,
+      changePromptMenuData,
+      toggleSongPlayback,
+      recordListeningData,
+    ]
   );
 
-  const playSongDataFromUnknownSource = React.useCallback(
-    (
-      data: { audioData: AudioData; isKnownSource: boolean },
-      isStartPlay = true
-    ) => {
-      if (data) {
-        const { audioData, isKnownSource } = data;
-        if (isKnownSource) playSong(audioData.songId);
+  const playSongFromUnknownSource = React.useCallback(
+    (audioPlayerData: AudioPlayerData, isStartPlay = true) => {
+      if (audioPlayerData) {
+        const { isKnownSource } = audioPlayerData;
+        if (isKnownSource) playSong(audioPlayerData.songId);
         else {
-          console.log('playSong', audioData.path);
+          console.log('playSong', audioPlayerData.path);
           dispatch({
             type: 'CURRENT_SONG_DATA_CHANGE',
-            data: audioData,
+            data: audioPlayerData,
           });
-          contentRef.current.currentSongData = audioData;
-          if (player.src !== `otoMusic://localFiles/${audioData.path}`)
-            player.src = `otoMusic://localFiles/${audioData.path}`;
+          contentRef.current.currentSongData = audioPlayerData;
+          player.src = audioPlayerData.path;
           refStartPlay.current = isStartPlay;
           if (isStartPlay) toggleSongPlayback();
         }
-        // if (refQueue.current.queue.length > 0) {
-        //   if (refQueue.current.queue.indexOf(songData.songPath) !== -1)
-        //     refQueue.current.currentSongIndex =
-        //       refQueue.current.queue.indexOf(songData.songPath);
-        //   else {
-        //     console.log(
-        //       `song ${songData.title} with id ${songData.songPath} is not present in the queue`
-        //     );
-        //     refQueue.current.queue.push(songData.songPath);
-        //     if (refQueue.current.currentSongIndex !== null)
-        //       refQueue.current.currentSongIndex += 1;
-        //     else refQueue.current.currentSongIndex = 0;
-        //   }
-        // } else if (refQueue.current.queue.length === 0)
-        //   refQueue.current.queue.push(songData.songPath);
       }
     },
     [playSong, toggleSongPlayback]
@@ -1118,14 +1488,19 @@ export default function App() {
     (songPath: string) => {
       window.api
         .getSongFromUnknownSource(songPath)
-        .then((res) => playSongDataFromUnknownSource(res, true))
+        .then((res) => playSongFromUnknownSource(res, true))
         .catch((err) => {
           console.error(err);
-          updateNotificationPanelData(
-            10000,
-            <span>Seems like we can&apos;t play that song.</span>,
-            <span className="material-icons-round icon">error_outline</span>
-          );
+          addNewNotifications([
+            {
+              id: 'unplayableSong',
+              delay: 10000,
+              content: <span>Seems like we can&apos;t play that song.</span>,
+              icon: (
+                <span className="material-icons-round icon">error_outline</span>
+              ),
+            },
+          ]);
           changePromptMenuData(
             true,
             <div>
@@ -1149,11 +1524,7 @@ export default function App() {
           );
         });
     },
-    [
-      playSongDataFromUnknownSource,
-      updateNotificationPanelData,
-      changePromptMenuData,
-    ]
+    [playSongFromUnknownSource, addNewNotifications, changePromptMenuData]
   );
 
   const changeQueueCurrentSongIndex = React.useCallback(
@@ -1176,23 +1547,62 @@ export default function App() {
     } else changeQueueCurrentSongIndex(0);
   }, [changeQueueCurrentSongIndex]);
 
-  const handleSkipForwardClick = React.useCallback(() => {
-    const { currentSongIndex } = refQueue.current;
-    if (contentRef.current.isRepeating === 'repeat-1') {
-      player.currentTime = 0;
-      toggleSongPlayback(true);
-      window.api.incrementNoOfSongListens(
-        contentRef.current.currentSongData.songId
-      );
-    } else if (typeof currentSongIndex === 'number') {
-      if (refQueue.current.queue.length > 0) {
-        if (refQueue.current.queue.length - 1 === currentSongIndex) {
-          if (contentRef.current.isRepeating === 'repeat')
-            changeQueueCurrentSongIndex(0);
-        } else changeQueueCurrentSongIndex(currentSongIndex + 1);
-      } else console.log('Queue is empty.');
-    } else changeQueueCurrentSongIndex(0);
-  }, [toggleSongPlayback, changeQueueCurrentSongIndex]);
+  const handleSkipForwardClick = React.useCallback(
+    (reason: SongSkipReason = 'USER_SKIP') => {
+      const { currentSongIndex } = refQueue.current;
+      if (
+        contentRef.current.player.isRepeating === 'repeat-1' &&
+        reason !== 'USER_SKIP'
+      ) {
+        player.currentTime = 0;
+        toggleSongPlayback(true);
+        window.api.updateSongListeningData(
+          contentRef.current.currentSongData.songId,
+          'listens',
+          'increment'
+        );
+      } else if (typeof currentSongIndex === 'number') {
+        if (refQueue.current.queue.length > 0) {
+          if (refQueue.current.queue.length - 1 === currentSongIndex) {
+            if (contentRef.current.player.isRepeating === 'repeat')
+              changeQueueCurrentSongIndex(0);
+          } else changeQueueCurrentSongIndex(currentSongIndex + 1);
+        } else console.log('Queue is empty.');
+      } else changeQueueCurrentSongIndex(0);
+    },
+    [toggleSongPlayback, changeQueueCurrentSongIndex]
+  );
+
+  const toggleShuffling = React.useCallback((isShuffling?: boolean) => {
+    dispatch({ type: 'TOGGLE_SHUFFLE_STATE', data: isShuffling });
+    if (isShuffling !== undefined)
+      contentRef.current.player.isShuffling = isShuffling;
+    else
+      contentRef.current.player.isShuffling =
+        !contentRef.current.player.isShuffling;
+  }, []);
+
+  const shuffleQueue = React.useCallback(
+    (songIds: string[], currentSongIndex?: number) => {
+      const positions: number[] = [];
+      const initialQueue = songIds.slice(0);
+      const currentSongId =
+        typeof currentSongIndex === 'number'
+          ? songIds.splice(currentSongIndex, 1)[0]
+          : undefined;
+      for (let i = songIds.length - 1; i > 0; i -= 1) {
+        const randomIndex = Math.floor(Math.random() * (i + 1));
+        [songIds[i], songIds[randomIndex]] = [songIds[randomIndex], songIds[i]];
+      }
+      if (currentSongId) songIds.unshift(currentSongId);
+      for (let i = 0; i < initialQueue.length; i += 1) {
+        positions.push(songIds.indexOf(initialQueue[i]));
+      }
+      toggleShuffling(true);
+      return { shuffledQueue: songIds, positions };
+    },
+    [toggleShuffling]
+  );
 
   const createQueue = React.useCallback(
     (
@@ -1214,7 +1624,7 @@ export default function App() {
         queue.queue = shuffledQueue;
         if (positions.length > 0) queue.queueBeforeShuffle = positions;
         queue.currentSongIndex = 0;
-      }
+      } else toggleShuffling(false);
       window.api
         .saveUserData('queue', queue)
         .then(() => {
@@ -1224,7 +1634,7 @@ export default function App() {
         })
         .catch((err: Error) => console.error(err));
     },
-    [changeQueueCurrentSongIndex]
+    [changeQueueCurrentSongIndex, shuffleQueue, toggleShuffling]
   );
 
   const updateQueueData = React.useCallback(
@@ -1257,21 +1667,15 @@ export default function App() {
       if (playCurrentSongIndex && typeof currentSongIndex === 'number')
         playSong(refQueue.current.queue[currentSongIndex]);
     },
-    [playSong]
+    [playSong, shuffleQueue]
   );
-
-  const toggleShuffling = React.useCallback((isShuffling?: boolean) => {
-    dispatch({ type: 'TOGGLE_SHUFFLE_STATE', data: isShuffling });
-    if (isShuffling !== undefined) contentRef.current.isShuffling = isShuffling;
-    else contentRef.current.isShuffling = !contentRef.current.isShuffling;
-  }, []);
 
   const updateCurrentSongPlaybackState = React.useCallback(
     (isPlaying: boolean) => {
-      if (isPlaying !== content.isCurrentSongPlaying)
+      if (isPlaying !== content.player.isCurrentSongPlaying)
         dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: isPlaying });
     },
-    [content.isCurrentSongPlaying]
+    [content.player.isCurrentSongPlaying]
   );
 
   const updateContextMenuData = React.useCallback(
@@ -1279,12 +1683,15 @@ export default function App() {
       isVisible: boolean,
       menuItems: ContextMenuItem[] = [],
       pageX?: number,
-      pageY?: number
+      pageY?: number,
+      contextMenuData?: ContextMenuItemData
     ) => {
+      // console.log('pageX', pageX, 'pageY', pageY);
       dispatch({
         type: 'CONTEXT_MENU_DATA_CHANGE',
         data: {
           isVisible,
+          data: contextMenuData,
           menuItems:
             menuItems.length > 0
               ? menuItems
@@ -1297,10 +1704,11 @@ export default function App() {
             pageY !== undefined
               ? pageY
               : contentRef.current.contextMenuData.pageY,
-        },
+        } as ContextMenuData,
       });
       contentRef.current.contextMenuData = {
         isVisible,
+        data: contextMenuData,
         menuItems:
           menuItems.length > 0
             ? menuItems
@@ -1318,47 +1726,183 @@ export default function App() {
     []
   );
 
-  const changeCurrentActivePage = React.useCallback(
-    (pageClass: PageTitles, data?: object) =>
-      (content.navigationHistory.history.at(-1)?.pageTitle !== pageClass ||
-        content.navigationHistory.history.at(-1)?.data !== data) &&
+  const updateCurrentlyActivePageData = React.useCallback(
+    (callback: (currentPageData: PageData) => PageData) => {
+      const { navigationHistory } = contentRef.current;
+      const updatedData = callback(
+        navigationHistory.history[navigationHistory.pageHistoryIndex].data ?? {
+          scrollTopOffset: 0,
+        }
+      );
+      contentRef.current.navigationHistory.history[
+        contentRef.current.navigationHistory.pageHistoryIndex
+      ].data = updatedData;
       dispatch({
-        type: 'CURRENT_ACTIVE_PAGE_CHANGE',
-        data: {
-          pageTitle: pageClass,
-          data,
-        },
-      }),
-    [content.navigationHistory.history]
+        type: 'CURRENT_ACTIVE_PAGE_DATA_UPDATE',
+        data: updatedData,
+      });
+    },
+    []
   );
 
   const updatePageHistoryIndex = React.useCallback(
-    (type: 'increment' | 'decrement', index?: number) => {
-      if (type === 'decrement') {
-        const { history } = content.navigationHistory;
-        history.pop();
+    (type: 'increment' | 'decrement' | 'home') => {
+      const { history, pageHistoryIndex } =
+        contentRef.current.navigationHistory;
+      if (type === 'decrement' && pageHistoryIndex - 1 >= 0) {
+        const newPageHistoryIndex = pageHistoryIndex - 1;
+        const data = {
+          pageHistoryIndex: newPageHistoryIndex,
+          history,
+        } as NavigationHistoryData;
+        contentRef.current.navigationHistory = data;
+        contentRef.current.bodyBackgroundImage = undefined;
         dispatch({
-          type: 'UPDATE_NAVIGATION_HISTORY_DATA',
-          data: {
-            pageHistoryIndex:
-              index !== undefined &&
-              index < content.navigationHistory.pageHistoryIndex
-                ? content.navigationHistory.pageHistoryIndex - index
-                : content.navigationHistory.pageHistoryIndex - 1,
-            history,
-          } as NavigationHistoryData,
+          type: 'UPDATE_NAVIGATION_HISTORY',
+          data,
+        });
+        return;
+      }
+      if (type === 'increment' && pageHistoryIndex + 1 < history.length) {
+        const newPageHistoryIndex = pageHistoryIndex + 1;
+        const data = {
+          pageHistoryIndex: newPageHistoryIndex,
+          history,
+        } as NavigationHistoryData;
+        contentRef.current.navigationHistory = data;
+        contentRef.current.bodyBackgroundImage = undefined;
+        dispatch({
+          type: 'UPDATE_NAVIGATION_HISTORY',
+          data,
+        });
+        return;
+      }
+      if (type === 'home') {
+        const data: NavigationHistoryData = {
+          history: [{ pageTitle: 'Home' }],
+          pageHistoryIndex: 0,
+        };
+        contentRef.current.navigationHistory = data;
+        contentRef.current.bodyBackgroundImage = undefined;
+        dispatch({
+          type: 'UPDATE_NAVIGATION_HISTORY',
+          data,
         });
       }
     },
-    [content.navigationHistory]
+    []
+  );
+
+  const updateMultipleSelections = React.useCallback(
+    (id: string, selectionType: QueueTypes, type: 'add' | 'remove') => {
+      if (
+        contentRef.current.multipleSelectionsData.selectionType &&
+        selectionType !==
+          contentRef.current.multipleSelectionsData.selectionType
+      )
+        return;
+      let { multipleSelections } = contentRef.current.multipleSelectionsData;
+      if (type === 'add') {
+        if (multipleSelections.includes(id)) return;
+        multipleSelections.push(id);
+      } else if (type === 'remove') {
+        if (!multipleSelections.includes(id)) return;
+        multipleSelections = multipleSelections.filter(
+          (selection) => selection !== id
+        );
+      }
+
+      contentRef.current.multipleSelectionsData.multipleSelections =
+        multipleSelections;
+      contentRef.current.multipleSelectionsData.selectionType = selectionType;
+      dispatch({
+        type: 'UPDATE_MULTIPLE_SELECTIONS_DATA',
+        data: {
+          ...contentRef.current.multipleSelectionsData,
+          selectionType,
+          multipleSelections,
+        } as MultipleSelectionData,
+      });
+    },
+    []
+  );
+
+  const toggleMultipleSelections = React.useCallback(
+    (
+      isEnabled?: boolean,
+      selectionType?: QueueTypes,
+      addSelections?: string[]
+    ) => {
+      if (typeof isEnabled === 'boolean') {
+        contentRef.current.multipleSelectionsData.selectionType = selectionType;
+        if (Array.isArray(addSelections) && isEnabled === true)
+          contentRef.current.multipleSelectionsData.multipleSelections.push(
+            ...addSelections
+          );
+        if (isEnabled === false) {
+          contentRef.current.multipleSelectionsData.multipleSelections = [];
+          contentRef.current.multipleSelectionsData.selectionType = undefined;
+        }
+        contentRef.current.multipleSelectionsData.isEnabled = isEnabled;
+        dispatch({
+          type: 'UPDATE_MULTIPLE_SELECTIONS_DATA',
+          data: {
+            ...contentRef.current.multipleSelectionsData,
+          } as MultipleSelectionData,
+        });
+      }
+    },
+    []
+  );
+
+  const changeCurrentActivePage = React.useCallback(
+    (pageClass: PageTitles, data?: PageData) => {
+      const { navigationHistory } = contentRef.current;
+      if (
+        navigationHistory.history[navigationHistory.pageHistoryIndex]
+          .pageTitle === pageClass
+      ) {
+        if (
+          navigationHistory.history[navigationHistory.pageHistoryIndex].data !==
+          data
+        ) {
+          updateCurrentlyActivePageData((currentData) => ({
+            ...currentData,
+            ...data,
+          }));
+        }
+        // else updatePageHistoryIndex('increment');
+      } else {
+        const pageData = {
+          pageTitle: pageClass,
+          data,
+        };
+        navigationHistory.history = navigationHistory.history.slice(
+          0,
+          navigationHistory.pageHistoryIndex + 1
+        );
+        navigationHistory.history.push(pageData);
+        navigationHistory.pageHistoryIndex += 1;
+        contentRef.current.navigationHistory = navigationHistory;
+        contentRef.current.bodyBackgroundImage = undefined;
+        toggleMultipleSelections(false);
+        dispatch({
+          type: 'UPDATE_NAVIGATION_HISTORY',
+          data: navigationHistory,
+        });
+      }
+    },
+    [toggleMultipleSelections, updateCurrentlyActivePageData]
   );
 
   const updateMiniPlayerStatus = React.useCallback(
     (isVisible: boolean) => {
-      if (content.isMiniPlayer !== isVisible)
+      if (content.player.isMiniPlayer !== isVisible) {
         dispatch({ type: 'UPDATE_MINI_PLAYER_STATE', data: isVisible });
+        contentRef.current.player.isMiniPlayer = isVisible;
+      }
     },
-    [content.isMiniPlayer]
+    [content.player.isMiniPlayer]
   );
 
   const toggleIsFavorite = React.useCallback((isFavorite?: boolean) => {
@@ -1366,13 +1910,19 @@ export default function App() {
       isFavorite ?? !contentRef.current.currentSongData.isAFavorite;
     if (contentRef.current.currentSongData.isAFavorite !== newFavorite)
       window.api
-        .toggleLikeSong(contentRef.current.currentSongData.songId, newFavorite)
-        .then(() => {
-          contentRef.current.currentSongData.isAFavorite = newFavorite;
-          return dispatch({
-            type: 'TOGGLE_IS_FAVORITE_STATE',
-            data: newFavorite,
-          });
+        .toggleLikeSongs(
+          [contentRef.current.currentSongData.songId],
+          newFavorite
+        )
+        .then((res) => {
+          if (res && res.likes + res.dislikes > 0) {
+            contentRef.current.currentSongData.isAFavorite = newFavorite;
+            return dispatch({
+              type: 'TOGGLE_IS_FAVORITE_STATE',
+              data: newFavorite,
+            });
+          }
+          return undefined;
         })
         .catch((err) => console.error(err));
   }, []);
@@ -1383,7 +1933,7 @@ export default function App() {
     window.api
       .saveUserData('volume.value', volume)
       .then(() => {
-        contentRef.current.volume.value = volume;
+        contentRef.current.player.volume.value = volume;
         return dispatch({
           type: 'UPDATE_VOLUME_VALUE',
           data: volume,
@@ -1398,90 +1948,51 @@ export default function App() {
   }, []);
 
   const toggleMutedState = React.useCallback(
-    (isMuted?: boolean) => {
-      if (isMuted !== undefined) {
-        if (isMuted !== content.volume.isMuted)
-          dispatch({ type: 'UPDATE_MUTED_STATE', data: isMuted });
-      } else dispatch({ type: 'UPDATE_MUTED_STATE' });
+    (isMute?: boolean) => {
+      if (isMute !== undefined) {
+        if (isMute !== content.player.volume.isMuted) {
+          dispatch({ type: 'UPDATE_MUTED_STATE', data: isMute });
+          contentRef.current.player.volume.isMuted = isMute;
+        }
+      } else {
+        dispatch({ type: 'UPDATE_MUTED_STATE' });
+        contentRef.current.player.volume.isMuted =
+          !contentRef.current.player.volume.isMuted;
+      }
     },
-    [content.volume.isMuted]
-  );
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateCurrentlyActivePageData = React.useCallback((data: any) => {
-    dispatch({ type: 'CURRENT_ACTIVE_PAGE_DATA_UPDATE', data });
-  }, []);
-
-  const toggleReducedMotion = React.useCallback(
-    (state?: boolean) => {
-      window.api
-        .saveUserData(
-          'preferences.isReducedMotion',
-          state !== undefined
-            ? state
-            : content.userData?.preferences.isReducedMotion || false
-        )
-        .then(() =>
-          dispatch({
-            type: 'TOGGLE_REDUCED_MOTION',
-            data: state,
-          })
-        )
-        .catch((err) => console.error(err));
-    },
-    [content.userData?.preferences.isReducedMotion]
-  );
-
-  const toggleSongIndexing = React.useCallback(
-    (state?: boolean) => {
-      window.api
-        .saveUserData(
-          'preferences.songIndexing',
-          state !== undefined
-            ? state
-            : content.userData?.preferences.songIndexing || false
-        )
-        .then(() =>
-          dispatch({
-            type: 'TOGGLE_SONG_INDEXING',
-            data: state,
-          })
-        )
-        .catch((err) => console.error(err));
-    },
-    [content.userData?.preferences.songIndexing]
-  );
-
-  const toggleShowRemainingSongDuration = React.useCallback(
-    (state?: boolean) => {
-      const data =
-        state !== undefined
-          ? state
-          : content.userData?.preferences.showSongRemainingTime || false;
-      window.api
-        .saveUserData('preferences.showSongRemainingTime', data)
-        .then(() => {
-          if (contentRef.current.userData)
-            contentRef.current.userData.preferences.showSongRemainingTime =
-              data;
-          return dispatch({
-            type: 'TOGGLE_SHOW_SONG_REMAINING_DURATION',
-            data: state,
-          });
-        })
-        .catch((err) => console.error(err));
-    },
-    [content.userData?.preferences.showSongRemainingTime]
+    [content.player.volume.isMuted]
   );
 
   const manageKeyboardShortcuts = React.useCallback(
     (e: KeyboardEvent) => {
-      e.preventDefault();
+      const ctrlCombinations = [
+        'ArrowUp',
+        'ArrowDown',
+        'ArrowRight',
+        'ArrowLeft',
+        'm',
+        's',
+        't',
+        'h',
+        'l',
+        'n',
+        'q',
+      ];
+      const shiftCombinations = ['ArrowRight', 'ArrowLeft'];
+      if (
+        (e.ctrlKey && ctrlCombinations.some((x) => e.key === x)) ||
+        (e.shiftKey && shiftCombinations.some((x) => e.key === x)) ||
+        e.code === 'Space'
+      )
+        e.preventDefault();
+
+      // ctrl combinations
       if (e.ctrlKey && e.key === 'ArrowUp')
         updateVolume(player.volume + 0.05 <= 1 ? player.volume * 100 + 5 : 100);
       else if (e.ctrlKey && e.key === 'ArrowDown')
         updateVolume(player.volume - 0.05 >= 0 ? player.volume * 100 - 5 : 0);
-      else if (e.ctrlKey && e.key === 'm') toggleMutedState(!player.muted);
+      else if (e.ctrlKey && e.key === 'm')
+        toggleMutedState(!contentRef.current.player.volume.isMuted);
       else if (e.ctrlKey && e.key === 'ArrowRight') handleSkipForwardClick();
       else if (e.ctrlKey && e.key === 'ArrowLeft') handleSkipBackwardClick();
       else if (e.ctrlKey && e.key === 's') toggleShuffling();
@@ -1496,7 +2007,7 @@ export default function App() {
           changeCurrentActivePage('Home');
         else changeCurrentActivePage('Lyrics');
       } else if (e.ctrlKey && e.key === 'n')
-        updateMiniPlayerStatus(!content.isMiniPlayer);
+        updateMiniPlayerStatus(!content.player.isMiniPlayer);
       else if (e.ctrlKey && e.key === 'q') {
         const currentlyActivePage =
           content.navigationHistory.history[
@@ -1505,17 +2016,20 @@ export default function App() {
         if (currentlyActivePage.pageTitle === 'CurrentQueue')
           changeCurrentActivePage('Home');
         else changeCurrentActivePage('CurrentQueue');
-      } else if (e.code === 'Space') toggleSongPlayback();
-      else if (e.key === 'ArrowLeft') {
+      }
+      // default combinations
+      else if (e.code === 'Space') toggleSongPlayback();
+      // shift combinations
+      else if (e.shiftKey && e.key === 'ArrowLeft') {
         if (player.currentTime - 10 >= 0) player.currentTime -= 10;
         else player.currentTime = 0;
-      } else if (e.key === 'ArrowRight') {
+      } else if (e.shiftKey && e.key === 'ArrowRight') {
         if (player.currentTime + 10 < player.duration) player.currentTime += 10;
       }
     },
     [
       changeCurrentActivePage,
-      content.isMiniPlayer,
+      content.player.isMiniPlayer,
       content.navigationHistory.history,
       content.navigationHistory.pageHistoryIndex,
       handleSkipBackwardClick,
@@ -1549,141 +2063,285 @@ export default function App() {
     [content.userData]
   );
 
-  const shuffleQueue = (songIds: string[], currentSongIndex?: number) => {
-    const positions: number[] = [];
-    const initialQueue = songIds.slice(0);
-    const currentSongId =
-      typeof currentSongIndex === 'number'
-        ? songIds.splice(currentSongIndex, 1)[0]
-        : undefined;
-    for (let i = songIds.length - 1; i > 0; i -= 1) {
-      const randomIndex = Math.floor(Math.random() * (i + 1));
-      [songIds[i], songIds[randomIndex]] = [songIds[randomIndex], songIds[i]];
-    }
-    if (currentSongId) songIds.unshift(currentSongId);
-    for (let i = 0; i < initialQueue.length; i += 1) {
-      positions.push(songIds.indexOf(initialQueue[i]));
-    }
-    return { shuffledQueue: songIds, positions };
-  };
-
   const displayUnsupportedFileMessage = React.useCallback(
     (path: string) => {
+      const fileType = path.split('.').at(-1)?.replace('.', '') ?? path;
+      const isLetterAVowel = (letter: string) => /^[aeiou]/gm.test(letter);
+      const { supportedMusicExtensions } = packageFile.appPreferences;
+
+      const supportedExtensionComponents = supportedMusicExtensions.map(
+        (ext, index) => (
+          <>
+            <span className="underline">{ext}</span>
+            {index > 0 && index !== supportedMusicExtensions.length - 1 && (
+              <span className="mr-1">,</span>
+            )}
+          </>
+        )
+      );
+
       changePromptMenuData(
         true,
-        <>
-          <div>
-            <div className="title-container mb-4 text-3xl font-medium">
-              Unsupported Audio File
-            </div>
-            <div className="description">
-              You are trying to open an{' '}
-              <span className="underline">
-                {path.split(/.*\.(\w{3,})$/gim)[1] ?? 'audio'}
-              </span>{' '}
-              file which is not supported by this app.
-              <br />
-              Currently we only support <span className="underline">
-                .mp3
-              </span>, <span className="underline">.ogg</span>, and{' '}
-              <span className="underline">.wav</span> songs.
-            </div>
-            <div className="buttons-container mt-12 flex justify-end">
-              <Button
-                label="OK"
-                className="ok-btn w-[10rem] rounded-md !bg-background-color-3 text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
-                clickHandler={() => {
-                  changePromptMenuData(false);
-                }}
-              />
-            </div>
+        <div>
+          <div className="title-container mb-4 text-3xl font-medium">
+            Unsupported Audio File
           </div>
-        </>
+          <div className="description">
+            You are trying to open {isLetterAVowel(fileType[0]) ? 'an' : 'a'}{' '}
+            <span className="underline">{fileType}</span> file which is not
+            supported by this app.
+            <br />
+            Currently we only support {supportedExtensionComponents} songs.
+          </div>
+          <div className="buttons-container mt-12 flex justify-end">
+            <Button
+              label="OK"
+              className="ok-btn w-[10rem] rounded-md !bg-background-color-3 text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
+              clickHandler={() => {
+                changePromptMenuData(false);
+              }}
+            />
+          </div>
+        </div>
       );
     },
     [changePromptMenuData]
+  );
+
+  const updateUserData = React.useCallback(
+    async (
+      callback: (prevState: UserData) => UserData | Promise<UserData> | void
+    ) => {
+      try {
+        const updatedUserData = await callback(contentRef.current.userData);
+        if (typeof updatedUserData === 'object') {
+          dispatch({ type: 'USER_DATA_CHANGE', data: updatedUserData });
+          contentRef.current.userData = updatedUserData;
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    []
   );
 
   const onSongDrop = React.useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
       console.log(e.dataTransfer.files);
       if (e.dataTransfer.files.length > 0) {
-        if (e.dataTransfer.files[0].type === 'audio/mpeg')
+        if (
+          packageFile.appPreferences.supportedMusicExtensions.some((type) =>
+            e.dataTransfer.files[0].path.endsWith(type)
+          )
+        )
           fetchSongFromUnknownSource(e.dataTransfer.files[0].path);
-        else displayUnsupportedFileMessage(e.dataTransfer.files[0].path);
+        else
+          displayUnsupportedFileMessage(
+            e.dataTransfer.files[0].path || e.dataTransfer.files[0].name
+          );
       }
       if (AppRef.current) AppRef.current.classList.remove('song-drop');
     },
     [displayUnsupportedFileMessage, fetchSongFromUnknownSource]
   );
 
-  const appContextStateValues = {
-    isDarkMode: content.isDarkMode,
-    isContextMenuVisible: contentRef.current.contextMenuData.isVisible,
-    contextMenuItems: contentRef.current.contextMenuData.menuItems,
-    contextMenuPageX: contentRef.current.contextMenuData.pageX,
-    contextMenuPageY: contentRef.current.contextMenuData.pageY,
-    PromptMenuData: content.PromptMenuData,
-    currentSongData: contentRef.current.currentSongData,
-    currentlyActivePage:
-      content.navigationHistory.history[
-        content.navigationHistory.pageHistoryIndex
-      ],
-    notificationPanelData: content.notificationPanelData,
-    userData: content.userData,
-    queue: refQueue.current,
-    isCurrentSongPlaying: content.isCurrentSongPlaying,
-    pageHistoryIndex: content.navigationHistory.pageHistoryIndex,
-    isMiniPlayer: content.isMiniPlayer,
-    volume: content.volume.value,
-    isMuted: content.volume.isMuted,
-    isRepeating: contentRef.current.isRepeating,
-    isShuffling: content.isShuffling,
-    isPlaying: !player.paused,
-  };
+  const updateCurrentSongData = React.useCallback(
+    (callback: (prevData: AudioPlayerData) => AudioPlayerData) => {
+      const updatedData = callback(contentRef.current.currentSongData);
+      if (updatedData) {
+        contentRef.current.currentSongData = updatedData;
+        dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: updatedData });
+      }
+    },
+    []
+  );
 
-  const appUpdateContextValues: AppUpdateContextType = {
-    updateContextMenuData,
-    changePromptMenuData,
-    playSong,
-    changeCurrentActivePage,
-    updateCurrentlyActivePageData,
-    updateNotificationPanelData,
-    toggleReducedMotion,
-    toggleSongIndexing,
-    createQueue,
-    updatePageHistoryIndex,
-    changeQueueCurrentSongIndex,
-    updateCurrentSongPlaybackState,
-    updateMiniPlayerStatus,
-    handleSkipBackwardClick,
-    handleSkipForwardClick,
-    updateSongPosition,
-    updateVolume,
-    toggleMutedState,
-    toggleRepeat,
-    toggleShuffling,
-    toggleIsFavorite,
-    toggleSongPlayback,
-    updateQueueData,
-    updatePageSortingOrder,
-    toggleShowRemainingSongDuration,
-  };
+  const clearAudioPlayerData = React.useCallback(() => {
+    toggleSongPlayback(false);
+    player.currentTime = 0;
+    player.pause();
+    dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: {} });
+    contentRef.current.currentSongData = {} as AudioPlayerData;
+    addNewNotifications([
+      {
+        id: 'songPausedOnDelete',
+        delay: 7500,
+        content: (
+          <span>
+            Current song playback paused because the song was deleted.
+          </span>
+        ),
+      },
+    ]);
+  }, [addNewNotifications, toggleSongPlayback]);
+
+  const updateBodyBackgroundImage = React.useCallback(
+    (isVisible: boolean, src?: string) => {
+      if (!contentRef.current.userData.preferences.disableBackgroundArtworks) {
+        if (isVisible)
+          if (src) {
+            contentRef.current.bodyBackgroundImage = src;
+            return dispatch({
+              type: 'UPDATE_BODY_BACKGROUND_IMAGE',
+              data: src,
+            });
+          } else {
+            contentRef.current.bodyBackgroundImage = undefined;
+            return dispatch({
+              type: 'UPDATE_BODY_BACKGROUND_IMAGE',
+              data: undefined,
+            });
+          }
+      }
+      contentRef.current.bodyBackgroundImage = undefined;
+      return dispatch({
+        type: 'UPDATE_BODY_BACKGROUND_IMAGE',
+        data: undefined,
+      });
+    },
+    []
+  );
+
+  const appContextStateValues: AppStateContextType = React.useMemo(
+    () => ({
+      isDarkMode: content.isDarkMode,
+      contextMenuData: content.contextMenuData,
+      PromptMenuData: content.PromptMenuData,
+      currentSongData: {
+        ...content.currentSongData,
+        duration: player.duration || content.currentSongData.duration,
+      },
+      currentlyActivePage:
+        contentRef.current.navigationHistory.history[
+          content.navigationHistory.pageHistoryIndex
+        ],
+      notificationPanelData: content.notificationPanelData,
+      userData: content.userData,
+      queue: refQueue.current,
+      isCurrentSongPlaying: content.player.isCurrentSongPlaying,
+      noOfPagesInHistory: content.navigationHistory.history.length - 1,
+      pageHistoryIndex: content.navigationHistory.pageHistoryIndex,
+      isMiniPlayer: content.player.isMiniPlayer,
+      volume: content.player.volume.value,
+      isMuted: content.player.volume.isMuted,
+      isRepeating: content.player.isRepeating,
+      isShuffling: content.player.isShuffling,
+      isPlayerStalled: content.player.isPlayerStalled,
+      bodyBackgroundImage: content.bodyBackgroundImage,
+      isMultipleSelectionEnabled: content.multipleSelectionsData.isEnabled,
+      multipleSelectionsData: content.multipleSelectionsData,
+      appUpdatesState: content.appUpdatesState,
+    }),
+    [
+      content.PromptMenuData,
+      content.appUpdatesState,
+      content.bodyBackgroundImage,
+      content.contextMenuData,
+      content.currentSongData,
+      content.isDarkMode,
+      content.multipleSelectionsData,
+      content.navigationHistory.history,
+      content.navigationHistory.pageHistoryIndex,
+      content.notificationPanelData,
+      content.player.isCurrentSongPlaying,
+      content.player.isMiniPlayer,
+      content.player.isPlayerStalled,
+      content.player.isRepeating,
+      content.player.isShuffling,
+      content.player.volume.isMuted,
+      content.player.volume.value,
+      content.userData,
+    ]
+  );
+
+  const appUpdateContextValues: AppUpdateContextType = React.useMemo(
+    () => ({
+      updateUserData,
+      updateCurrentSongData,
+      updateContextMenuData,
+      changePromptMenuData,
+      playSong,
+      changeCurrentActivePage,
+      updateCurrentlyActivePageData,
+      addNewNotifications,
+      updateNotifications,
+      createQueue,
+      updatePageHistoryIndex,
+      changeQueueCurrentSongIndex,
+      updateCurrentSongPlaybackState,
+      updateMiniPlayerStatus,
+      handleSkipBackwardClick,
+      handleSkipForwardClick,
+      updateSongPosition,
+      updateVolume,
+      toggleMutedState,
+      toggleRepeat,
+      toggleShuffling,
+      toggleIsFavorite,
+      toggleSongPlayback,
+      updateQueueData,
+      updatePageSortingOrder,
+      clearAudioPlayerData,
+      updateBodyBackgroundImage,
+      updateMultipleSelections,
+      toggleMultipleSelections,
+      updateAppUpdatesState,
+    }),
+    [
+      addNewNotifications,
+      changeCurrentActivePage,
+      changePromptMenuData,
+      changeQueueCurrentSongIndex,
+      clearAudioPlayerData,
+      createQueue,
+      handleSkipBackwardClick,
+      handleSkipForwardClick,
+      playSong,
+      toggleIsFavorite,
+      toggleMultipleSelections,
+      toggleMutedState,
+      toggleRepeat,
+      toggleShuffling,
+      toggleSongPlayback,
+      updateAppUpdatesState,
+      updateBodyBackgroundImage,
+      updateContextMenuData,
+      updateCurrentSongData,
+      updateCurrentSongPlaybackState,
+      updateCurrentlyActivePageData,
+      updateMiniPlayerStatus,
+      updateMultipleSelections,
+      updateNotifications,
+      updatePageHistoryIndex,
+      updatePageSortingOrder,
+      updateQueueData,
+      updateSongPosition,
+      updateUserData,
+      updateVolume,
+    ]
+  );
+
+  const songPositionContextValues = React.useMemo(
+    () => ({
+      songPosition: content.player.songPosition,
+    }),
+    [content.player.songPosition]
+  );
 
   return (
     <AppContext.Provider value={appContextStateValues}>
       <AppUpdateContext.Provider value={appUpdateContextValues}>
-        {!content.isMiniPlayer && (
+        {!content.player.isMiniPlayer && (
           <div
-            className={`App ${
+            className={`App select-none ${
               content.isDarkMode
                 ? 'dark bg-dark-background-color-1'
                 : 'bg-background-color-1'
             } ${
               content.userData && content.userData.preferences.isReducedMotion
-                ? 'reduced-motion animate-none transition-none'
+                ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
                 : ''
-            } flex h-screen w-full flex-col items-center after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.song-drop]:after:visible [&.song-drop]:after:z-10 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc]  [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
+            } flex h-screen w-full flex-col items-center after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc]  [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
             ref={AppRef}
             onDragEnter={addSongDropPlaceholder}
             onDragLeave={removeSongDropPlaceholder}
@@ -1693,21 +2351,28 @@ export default function App() {
             }}
             onDrop={onSongDrop}
           >
+            <Preloader />
+
+            {contentRef.current.bodyBackgroundImage && (
+              <div className="body-background-image-container absolute h-full w-full animate-bg-image-appear overflow-hidden bg-center transition-[filter] duration-500">
+                <Img
+                  className="w-full bg-cover"
+                  src={contentRef.current.bodyBackgroundImage}
+                  alt=""
+                />
+              </div>
+            )}
             <ContextMenu />
             <PromptMenu />
-            <Header />
-            <BodyAndSideBarContainer />
-            <SongPositionContext.Provider
-              value={{ songPosition: player.currentTime }}
-            >
+            <TitleBar />
+            <SongPositionContext.Provider value={songPositionContextValues}>
+              <BodyAndSideBarContainer />
               <SongControlsContainer />
             </SongPositionContext.Provider>
           </div>
         )}
-        <SongPositionContext.Provider
-          value={{ songPosition: player.currentTime }}
-        >
-          {content.isMiniPlayer && <MiniPlayer />}
+        <SongPositionContext.Provider value={songPositionContextValues}>
+          {content.player.isMiniPlayer && <MiniPlayer />}
         </SongPositionContext.Provider>
       </AppUpdateContext.Provider>
     </AppContext.Provider>

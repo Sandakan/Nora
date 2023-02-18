@@ -15,7 +15,11 @@ function Dropdown(props: DropdownProp) {
   const optionComponents = React.useMemo(
     () =>
       options.map((option) => (
-        <option key={option.value} value={option.value}>
+        <option
+          key={option.value}
+          value={option.value}
+          className="!bg-context-menu-background !text-font-color-black dark:!bg-dark-context-menu-background dark:!text-font-color-white"
+        >
           {option.label}
         </option>
       )),
@@ -25,7 +29,7 @@ function Dropdown(props: DropdownProp) {
   return (
     <select
       name={name}
-      className={`dropdown appearance-none bg-context-menu-background dark:bg-dark-context-menu-background backdrop-blur-sm text-sm text-font-color-black dark:text-font-color-white w-60 h-10 border-[3px] border-background-color-2 dark:border-dark-background-color-2 rounded-lg px-3 outline-none cursor-pointer transition-[border-color] ease-in-out hover:border-background-color-3 dark:hover:border-dark-background-color-3 ${className}`}
+      className={`dropdown h-10 w-60 cursor-pointer appearance-none rounded-lg border-[3px] border-background-color-2 bg-[transparent] px-3 text-sm text-font-color-black outline-none backdrop-blur-sm transition-[border-color] ease-in-out hover:border-background-color-3 focus:border-background-color-3 active:border-background-color-3 dark:border-dark-background-color-2 dark:text-font-color-white dark:hover:border-dark-background-color-3 dark:focus:border-dark-background-color-3 dark:active:border-dark-background-color-3 ${className}`}
       value={value}
       onChange={onChange}
     >

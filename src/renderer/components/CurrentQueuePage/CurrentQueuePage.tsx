@@ -1,21 +1,29 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable react/no-array-index-key */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable promise/always-return */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable promise/catch-or-return */
 import React, { useContext } from 'react';
-import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { FixedSizeList, FixedSizeList as List } from 'react-window';
-import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
-import { Song } from '../SongsPage/Song';
+import {
+  Draggable,
+  // ResponderProvided,
+  DropResult,
+  Droppable,
+  DragDropContext,
+} from 'react-beautiful-dnd';
+import useResizeObserver from 'renderer/hooks/useResizeObserver';
+import { AppContext } from 'renderer/contexts/AppContext';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
 import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
-import DefaultArtistCover from '../../../../assets/images/png/default_artist_cover.png';
-import DefaultAlbumCover from '../../../../assets/images/png/album-cover-default.png';
 import DefaultPlaylistCover from '../../../../assets/images/png/playlist_cover_default.png';
+import FolderImg from '../../../../assets/images/png/empty-folder.png';
 import NoSongsImage from '../../../../assets/images/svg/Sun_Monochromatic.svg';
-import { calculateTime } from '../../utils/calculateTime';
+import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
 import MainContainer from '../MainContainer';
+import Img from '../Img';
+import Song from '../SongsPage/Song';
 
 interface QueueInfo {
   artworkPath: string;
@@ -23,12 +31,24 @@ interface QueueInfo {
   title: string;
 }
 
-export default () => {
-  const { queue, currentSongData, userData } = useContext(AppContext);
-  const { updateQueueData, updateNotificationPanelData } =
-    React.useContext(AppUpdateContext);
+const CurrentQueuePage = () => {
+  const {
+    queue,
+    currentSongData,
+    currentlyActivePage,
+    userData,
+    isMultipleSelectionEnabled,
+  } = useContext(AppContext);
+  const {
+    updateQueueData,
+    addNewNotifications,
+    updateCurrentlyActivePageData,
+    updateContextMenuData,
+    toggleMultipleSelections,
+  } = React.useContext(AppUpdateContext);
 
   const [queuedSongs, setQueuedSongs] = React.useState([] as AudioInfo[]);
+  const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
   const [queueInfo, setQueueInfo] = React.useState({
     artworkPath: DefaultSongCover,
     title: '',
@@ -36,9 +56,29 @@ export default () => {
   const containerRef = React.useRef(null as HTMLDivElement | null);
   const { width, height } = useResizeObserver(containerRef);
   const ListRef = React.useRef(null as FixedSizeList | null);
+  const isFirstRenderFinishedRef = React.useRef(false);
 
-  const fetchAllSongsData = React.useCallback(
-    () =>
+  const fetchAllSongsData = React.useCallback(() => {
+    const isTheSameQueue = () => {
+      const prevSongIds = queuedSongs.map((song) => song.songId);
+      const newSongIds = queue.queue;
+
+      return prevSongIds.every((id) => newSongIds.includes(id));
+    };
+
+    if (isTheSameQueue() && queuedSongs.length > 0) {
+      setQueuedSongs((prevQueuedSongs) => {
+        const newQueuedSongs = queue.queue.map((id) => {
+          for (let i = 0; i < prevQueuedSongs.length; i += 1) {
+            const prevQueuedSong = prevQueuedSongs[i];
+            if (prevQueuedSong.songId === id) return prevQueuedSong;
+          }
+          return undefined;
+        });
+        const arr = newQueuedSongs.filter((x) => x) as AudioInfo[];
+        return arr;
+      });
+    } else {
       window.api.getAllSongs().then((res) => {
         if (res) {
           const x = queue.queue
@@ -52,15 +92,17 @@ export default () => {
             .filter((y) => y !== undefined) as AudioInfo[];
           setQueuedSongs(x);
         }
-      }),
-    [queue.queue]
-  );
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queue.queue]);
 
   React.useEffect(() => {
     fetchAllSongsData();
     const manageSongUpdatesInCurrentQueue = (e: Event) => {
       if ('detail' in e) {
-        const dataEvents = (e as DataEvent).detail;
+        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>)
+          .detail;
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
           if (event.dataType === 'songs' || event.dataType === 'userData/queue')
@@ -86,7 +128,7 @@ export default () => {
         setQueueInfo((prevData) => {
           return {
             ...prevData,
-            artworkPath: DefaultSongCover,
+            artworkPath: currentSongData.artworkPath || DefaultSongCover,
             title: 'All Songs',
           };
         });
@@ -98,9 +140,7 @@ export default () => {
               setQueueInfo((prevData) => {
                 return {
                   ...prevData,
-                  artworkPath: res[0].artworkPath
-                    ? `otomusic://localFiles/${res[0].artworkPath}`
-                    : DefaultArtistCover,
+                  artworkPath: res[0].artworkPaths.artworkPath,
                   onlineArtworkPath: res[0].onlineArtworkPaths
                     ? res[0].onlineArtworkPaths.picture_medium
                     : undefined,
@@ -116,9 +156,7 @@ export default () => {
               setQueueInfo((prevData) => {
                 return {
                   ...prevData,
-                  artworkPath: res[0].artworkPath
-                    ? `otomusic://localFiles/${res[0].artworkPath}`
-                    : DefaultAlbumCover,
+                  artworkPath: res[0].artworkPaths.artworkPath,
                   title: res[0].title,
                 };
               });
@@ -131,8 +169,8 @@ export default () => {
               setQueueInfo((prevData) => {
                 return {
                   ...prevData,
-                  artworkPath: res[0].artworkPath
-                    ? `otomusic://localFiles/${res[0].artworkPath}`
+                  artworkPath: res[0].artworkPaths
+                    ? res[0].artworkPaths.artworkPath
                     : DefaultPlaylistCover,
                   title: res[0].name,
                 };
@@ -140,167 +178,349 @@ export default () => {
             }
           });
         }
-      }
-    }
-  }, [queue.queueId, queue.queueType]);
-
-  React.useLayoutEffect(() => {
-    setTimeout(() => {
-      const index = queue?.queue?.indexOf(currentSongData.songId);
-      if (index >= 0) {
-        if (ListRef.current) {
-          ListRef.current.scrollToItem(index, 'smart');
+        if (queue.queueType === 'genre') {
+          window.api.getGenresData([queue.queueId]).then((res) => {
+            if (res && res.length > 0 && res[0]) {
+              setQueueInfo((prevData) => {
+                return {
+                  ...prevData,
+                  artworkPath: res[0].artworkPaths.artworkPath,
+                  title: res[0].name,
+                };
+              });
+            }
+          });
+        }
+        if (queue.queueType === 'folder') {
+          window.api.getFolderData([queue.queueId]).then((res) => {
+            if (res && res.length > 0 && res[0]) {
+              const folderName = res[0].folderData.path.split('\\').pop();
+              setQueueInfo((prevData) => {
+                return {
+                  ...prevData,
+                  artworkPath: FolderImg,
+                  title: `'${folderName || 'Unknown'}' Folder`,
+                };
+              });
+            }
+          });
         }
       }
-    }, 750);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    }
+  }, [currentSongData.artworkPath, queue.queueId, queue.queueType]);
 
   const row = React.useCallback(
     (props: { index: number; style: React.CSSProperties }) => {
       const { index, style } = props;
+      if (queuedSongs[index] === undefined) return <></>;
+
       const {
         songId,
         title,
         artists,
         duration,
         isAFavorite,
-        artworkPath,
+        artworkPaths,
         path,
+        year,
       } = queuedSongs[index];
       return (
-        <div style={style}>
-          <Song
-            key={songId}
-            // style={style}
-            isDraggable
-            index={index}
-            isIndexingSongs={
-              userData !== undefined && userData.preferences.songIndexing
-            }
-            title={title}
-            songId={songId}
-            artists={artists}
-            artworkPath={artworkPath}
-            duration={duration}
-            path={path}
-            isAFavorite={isAFavorite}
-            additionalContextMenuItems={[
-              {
-                label: 'Remove from Queue',
-                iconName: 'remove_circle_outline',
-                handlerFunction: () =>
-                  updateQueueData(
-                    undefined,
-                    queue.queue.filter((id) => id !== songId)
-                  ),
-              },
-            ]}
-          />
-        </div>
+        <Draggable draggableId={songId} index={index} key={songId}>
+          {(provided) => (
+            <div style={style}>
+              <Song
+                provided={provided}
+                key={`${songId}-${index}`}
+                isDraggable
+                index={index}
+                ref={provided.innerRef}
+                isIndexingSongs={
+                  userData !== undefined && userData.preferences.songIndexing
+                }
+                title={title}
+                songId={songId}
+                artists={artists}
+                artworkPaths={artworkPaths}
+                duration={duration}
+                path={path}
+                year={year}
+                isAFavorite={isAFavorite}
+                additionalContextMenuItems={[
+                  {
+                    label: 'Remove from Queue',
+                    iconName: 'remove_circle_outline',
+                    handlerFunction: () =>
+                      updateQueueData(
+                        undefined,
+                        queue.queue.filter((id) => id !== songId)
+                      ),
+                  },
+                  {
+                    label: 'seperator',
+                    handlerFunction: () => true,
+                    isContextMenuItemSeperator: true,
+                  },
+                ]}
+              />
+            </div>
+          )}
+        </Draggable>
       );
     },
     [queue.queue, queuedSongs, updateQueueData, userData]
   );
 
   const calculateTotalTime = React.useCallback(() => {
-    const val = calculateTime(
+    const { hours, minutes, seconds } = calculateTimeFromSeconds(
       queuedSongs.reduce((prev, current) => prev + current.duration, 0)
     );
-    const duration = val.split(':');
     return `${
-      Number(duration[0]) / 60 >= 1
-        ? `${Math.floor(Number(duration[0]) / 60)} hour${
-            Math.floor(Number(duration[0]) / 60) === 1 ? '' : 's'
-          } `
-        : ''
-    }${Math.floor(Number(duration[0]) % 60)} minute${
-      Math.floor(Number(duration[0]) % 60) === 1 ? '' : 's'
-    } ${duration[1]} second${Number(duration[1]) === 1 ? '' : 's'}`;
+      hours >= 1 ? `${hours} hour${hours === 1 ? '' : 's'} ` : ''
+    }${minutes} minute${minutes === 1 ? '' : 's'} ${seconds} second${
+      seconds === 1 ? '' : 's'
+    }`;
   }, [queuedSongs]);
 
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return undefined;
+    const updatedQueue = Array.from(queue.queue);
+    const [item] = updatedQueue.splice(result.source.index, 1);
+    updatedQueue.splice(result.destination.index, 0, item);
+
+    updateQueueData(undefined, updatedQueue, undefined, undefined, true);
+
+    return updateQueueData();
+  };
+
+  const centerCurrentlyPlayingSong = React.useCallback(() => {
+    const index = queue.queue.indexOf(currentSongData.songId);
+    if (ListRef && index >= 0) ListRef.current?.scrollToItem(index, 'center');
+  }, [currentSongData.songId, queue.queue]);
+
   return (
-    <MainContainer className="main-container songs-list-container current-queue-container !h-full !mb-0 relative">
+    <MainContainer className="main-container songs-list-container current-queue-container relative !h-full overflow-hidden !pb-0">
       <>
-        <div className="title-container mt-1 pr-4 flex items-center mb-8 text-font-color-black text-3xl font-medium dark:text-font-color-white">
+        <div className="title-container mt-2 mb-4 flex items-center justify-between pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           Currently Playing Queue
+          <div className="other-controls-container float-right flex">
+            <Button
+              key={0}
+              className="more-options-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+              iconName="more_horiz"
+              clickHandler={(e) => {
+                e.stopPropagation();
+                const button = e.currentTarget || e.target;
+                const { x, y } = button.getBoundingClientRect();
+                updateContextMenuData(
+                  true,
+                  [
+                    {
+                      label: 'Scroll to currently playing song',
+                      iconName: 'vertical_align_center',
+                      handlerFunction: centerCurrentlyPlayingSong,
+                    },
+                  ],
+                  x + 10,
+                  y + 50
+                );
+              }}
+              tooltipLabel="More Options"
+              onContextMenu={(e) => {
+                e.preventDefault();
+                updateContextMenuData(
+                  true,
+                  [
+                    {
+                      label: 'Scroll to currently playing song',
+                      iconName: 'vertical_align_center',
+                      handlerFunction: centerCurrentlyPlayingSong,
+                    },
+                  ],
+                  e.pageX,
+                  e.pageY
+                );
+              }}
+            />
+            <Button
+              key={1}
+              className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+              iconName={
+                isMultipleSelectionEnabled ? 'remove_done' : 'checklist'
+              }
+              clickHandler={() =>
+                toggleMultipleSelections(!isMultipleSelectionEnabled, 'songs')
+              }
+              tooltipLabel={
+                isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
+              }
+            />
+            <Button
+              key={2}
+              className="shuffle-all-button text-sm"
+              iconName="shuffle"
+              tooltipLabel="Shuffle Queue"
+              isDisabled={queue.queue.length > 0 === false}
+              clickHandler={() => {
+                updateQueueData(undefined, queue.queue, true);
+                addNewNotifications([
+                  {
+                    id: 'shuffleQueue',
+                    delay: 5000,
+                    content: <span>Queue shuffled successfully.</span>,
+                    icon: (
+                      <span className="material-icons-round icon">shuffle</span>
+                    ),
+                  },
+                ]);
+              }}
+            />
+            <Button
+              key={3}
+              label="Clear Queue"
+              className="clear-queue-button text-sm"
+              iconName="clear"
+              isDisabled={queue.queue.length > 0 === false}
+              clickHandler={() => {
+                updateQueueData(undefined, []);
+                addNewNotifications([
+                  {
+                    id: 'clearQueue',
+                    delay: 5000,
+                    content: <span>Queue cleared.</span>,
+                    icon: (
+                      <span className="material-icons-round icon">check</span>
+                    ),
+                  },
+                ]);
+              }}
+            />
+          </div>
         </div>
         {queue.queue.length > 0 && (
-          <div className="queue-info-container flex items-center text-font-color-black dark:text-font-color-white mb-8 ml-8">
+          <div className="queue-info-container mb-6 ml-8 flex items-center text-font-color-black dark:text-font-color-white">
             <div className="cover-img-container mr-8">
-              <img
-                className={`w-40 h-40 rounded-xl ${
+              <Img
+                className={`h-20 w-20 rounded-md shadow-lg ${
                   queue.queueType === 'artist'
-                    ? 'artist-img rounded-full'
+                    ? 'artist-img !rounded-full'
                     : `${queue.queueType}-img`
                 }`}
-                src={
-                  queue.queueType === 'artist' &&
-                  navigator.onLine &&
-                  queueInfo.onlineArtworkPath
-                    ? queueInfo.onlineArtworkPath
-                    : queueInfo.artworkPath
-                }
+                src={queueInfo.onlineArtworkPath}
+                fallbackSrc={queueInfo.artworkPath}
                 alt="Current Playing Queue Cover"
               />
             </div>
             <div className="queue-info">
-              <div className="queue-title text-5xl">{queueInfo.title}</div>
-              <div className="queue-no-of-songs">{`${queuedSongs.length} songs`}</div>
-              <div className="queue-total-duration">{calculateTotalTime()}</div>
-              <div className="queue-buttons flex mt-4">
-                <Button
-                  label="Shuffle All"
-                  className="shuffle-all-button"
-                  iconName="shuffle"
-                  clickHandler={() => {
-                    updateQueueData(undefined, queue.queue, true);
-                    updateNotificationPanelData(
-                      5000,
-                      <span>Queue shuffled successfully.</span>,
-                      <span className="material-icons-round icon">shuffle</span>
-                    );
-                  }}
-                />
-                <Button
-                  label="Clear Queue"
-                  className="clear-queue-button"
-                  iconName="clear"
-                  clickHandler={() => {
-                    updateQueueData(undefined, []);
-                    updateNotificationPanelData(
-                      5000,
-                      <span>Queue cleared.</span>,
-                      <span className="material-icons-round icon">check</span>
-                    );
-                  }}
-                />
+              <div className="queue-title text-3xl">{queueInfo.title}</div>
+              <div className="other-info flex text-sm font-light">
+                <div className="queue-no-of-songs">{`${queuedSongs.length} songs`}</div>
+                <span className="mx-1">&bull;</span>
+                <div className="queue-total-duration">
+                  {calculateTotalTime()}
+                </div>
               </div>
+              {/* <div className="queue-buttons mt-4 flex"></div> */}
             </div>
           </div>
         )}
         <div
-          className={`songs-container ${
+          className={`songs-container overflow-auto ${
             queuedSongs.length > 0 ? 'h-full' : 'h-0'
           }`}
           ref={containerRef}
         >
           {queuedSongs.length > 0 && (
-            <List
-              height={height}
-              itemCount={queuedSongs.length}
-              itemSize={60}
-              width={width}
-              overscanCount={15}
-              ref={ListRef}
-            >
-              {row}
-            </List>
+            // $ Enabling React.StrictMode throws an error in the CurrentQueuePage when using react-beautiful-dnd for drag and drop.
+
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Droppable
+                droppableId="droppable"
+                mode="virtual"
+                renderClone={(provided, _, rubric) => {
+                  const data = queuedSongs[rubric.source.index];
+                  return (
+                    <Song
+                      provided={provided}
+                      key={data.songId}
+                      isDraggable
+                      index={rubric.source.index}
+                      ref={provided.innerRef}
+                      isIndexingSongs={
+                        userData !== undefined &&
+                        userData.preferences.songIndexing
+                      }
+                      title={data.title}
+                      songId={data.songId}
+                      artists={data.artists}
+                      artworkPaths={data.artworkPaths}
+                      duration={data.duration}
+                      path={data.path}
+                      isAFavorite={data.isAFavorite}
+                      year={data.year}
+                    />
+                  );
+                }}
+              >
+                {(droppableProvided, snapshot) => (
+                  <List
+                    height={height}
+                    itemCount={
+                      snapshot.isUsingPlaceholder
+                        ? queuedSongs.length
+                        : queuedSongs.length + 1
+                    }
+                    itemSize={60}
+                    width={width}
+                    overscanCount={20}
+                    outerRef={droppableProvided.innerRef}
+                    ref={ListRef}
+                    onItemsRendered={() => {
+                      if (!isFirstRenderFinishedRef.current) {
+                        setTimeout(() => {
+                          const index = queue?.queue?.indexOf(
+                            currentSongData.songId
+                          );
+                          if (index >= 0) {
+                            if (ListRef.current) {
+                              ListRef.current.scrollToItem(index, 'smart');
+                            }
+                          }
+                        }, 500);
+                      }
+                      isFirstRenderFinishedRef.current = true;
+                    }}
+                    initialScrollOffset={
+                      currentlyActivePage.data?.scrollTopOffset ?? 0
+                    }
+                    onScroll={(data) => {
+                      if (scrollOffsetTimeoutIdRef.current)
+                        clearTimeout(scrollOffsetTimeoutIdRef.current);
+                      if (
+                        !data.scrollUpdateWasRequested &&
+                        data.scrollOffset !== 0
+                      )
+                        scrollOffsetTimeoutIdRef.current = setTimeout(
+                          () =>
+                            updateCurrentlyActivePageData(
+                              (currentPageData) => ({
+                                ...currentPageData,
+                                scrollTopOffset: data.scrollOffset,
+                              })
+                            ),
+                          500
+                        );
+                    }}
+                  >
+                    {row}
+                  </List>
+                )}
+              </Droppable>
+            </DragDropContext>
           )}
         </div>
         {queue.queue.length === 0 && (
-          <div className="no-songs-container h-full w-full text-[#ccc] text-center flex flex-col items-center justify-center text-2xl">
-            <img src={NoSongsImage} className="w-60 mb-8" alt="" /> Queue is
+          <div className="no-songs-container flex h-full w-full flex-col items-center justify-center text-center text-2xl text-[#ccc]">
+            <Img src={NoSongsImage} className="mb-8 w-60" alt="" /> Queue is
             empty.
           </div>
         )}
@@ -308,3 +528,5 @@ export default () => {
     </MainContainer>
   );
 };
+CurrentQueuePage.displayName = 'CurrentQueuePage';
+export default CurrentQueuePage;

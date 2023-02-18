@@ -14,16 +14,18 @@ const SensitiveActionConfirmPrompt = (
   const { title, confirmButton, content } = props;
   return (
     <>
-      <div className="title-container mt-1 pr-4 flex items-center mb-8 text-font-color-black text-3xl font-medium dark:text-font-color-white">
+      <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
         {title}
       </div>
       <div className="description">{content}</div>
-      <Button
-        label={confirmButton.label}
-        iconName={confirmButton.iconName}
-        className={`remove-song-from-library-btn danger-btn w-48 h-10 mt-8 rounded-lg outline-none !bg-foreground-color-1 dark:!bg-foreground-color-1 text-font-color-white dark:text-font-color-white border-[transparent] float-right cursor-pointer hover:border-foreground-color-1 dark:hover:border-foreground-color-1 transition-[background] ease-in-out ${confirmButton.className}`}
-        clickHandler={confirmButton.clickHandler}
-      />
+      <div className="buttons-container flex items-center justify-end">
+        <Button
+          label={confirmButton.label}
+          iconName={confirmButton.iconName}
+          className={`remove-song-from-library-btn danger-btn float-right mt-8 h-10 w-48 cursor-pointer rounded-lg !bg-font-color-crimson text-font-color-white outline-none ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson ${confirmButton.className}`}
+          clickHandler={confirmButton.clickHandler}
+        />
+      </div>
     </>
   );
 };

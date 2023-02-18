@@ -8,19 +8,27 @@ interface SideBarItems {
   parentClassName: string;
   icon: string;
   content: string;
+  isActive: boolean;
   handleClick: (id: string) => any;
 }
 
-export const SideBarItem = (props: SideBarItems) => {
+const SideBarItem = (props: SideBarItems) => {
   return (
     <li
-      className={`${props.parentClassName} w-[95%] h-12 text-2xl pl-4 text-font-color-black dark:text-font-color-white mb-2 rounded-r-3xl flex items-center cursor-pointer bg-[transparent] transition-[background] lg:pl-0 lg:justify-center hover:bg-background-color-1 dark:hover:bg-dark-background-color-1 duration-300`}
+      className={`${
+        props.parentClassName
+      } mb-2 flex h-12 w-[95%] cursor-pointer items-center rounded-r-3xl bg-[transparent] pl-4 text-2xl text-font-color-black transition-[background] duration-300 hover:bg-background-color-1 dark:text-font-color-white dark:hover:bg-dark-background-color-1 ${
+        props.isActive &&
+        '!bg-background-color-3 !text-font-color-black dark:!bg-dark-background-color-3 dark:!text-font-color-black'
+      } last:absolute last:bottom-0`}
       onClick={() => props.handleClick(props.content)}
     >
-      <span className="material-icons-round icon mr-5 lg:mr-0 text-3xl">
+      <span className="material-icons-round icon mr-5 text-3xl">
         {props.icon}
       </span>
-      <span className="lg:hidden">{props.content}</span>
+      <span>{props.content}</span>
     </li>
   );
 };
+
+export default SideBarItem;

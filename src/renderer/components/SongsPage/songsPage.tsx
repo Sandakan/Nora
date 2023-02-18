@@ -13,15 +13,16 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
 import { FixedSizeList as List } from 'react-window';
-import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
-import { Song } from './Song';
-import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppContext } from 'renderer/contexts/AppContext';
+import Song from './Song';
 import NoSongsImage from '../../../../assets/images/svg/Empty Inbox _Monochromatic.svg';
 import DataFetchingImage from '../../../../assets/images/svg/Road trip_Monochromatic.svg';
 import Button from '../Button';
 import MainContainer from '../MainContainer';
 import Dropdown from '../Dropdown';
 import useResizeObserver from '../../hooks/useResizeObserver';
+import Img from '../Img';
 
 interface SongPageReducer {
   songsData: AudioInfo[];
@@ -51,17 +52,26 @@ const reducer = (
 };
 
 export const SongsPage = () => {
-  const { currentlyActivePage, userData } = React.useContext(AppContext);
-  const { createQueue, updateCurrentlyActivePageData, updatePageSortingOrder } =
-    React.useContext(AppUpdateContext);
+  const {
+    currentlyActivePage,
+    userData,
+    isMultipleSelectionEnabled,
+    multipleSelectionsData,
+  } = React.useContext(AppContext);
+  const {
+    createQueue,
+    updateCurrentlyActivePageData,
+    updatePageSortingOrder,
+    toggleMultipleSelections,
+    updateContextMenuData,
+  } = React.useContext(AppUpdateContext);
 
+  const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
   const [content, dispatch] = React.useReducer(reducer, {
     songsData: [],
     sortingOrder:
-      currentlyActivePage.data &&
-      currentlyActivePage.data.songsPage &&
-      currentlyActivePage.data.songsPage.sortingOrder
-        ? currentlyActivePage.data.songsPage.sortingOrder
+      currentlyActivePage.data && currentlyActivePage.data.sortingOrder
+        ? currentlyActivePage.data.sortingOrder
         : userData && userData.sortingStates.songsPage
         ? userData.sortingStates.songsPage
         : 'aToZ',
@@ -93,7 +103,8 @@ export const SongsPage = () => {
     fetchSongsData();
     const manageSongsDataUpdatesInSongsPage = (e: Event) => {
       if ('detail' in e) {
-        const dataEvents = (e as DataEvent).detail;
+        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>)
+          .detail;
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
           if (
@@ -132,7 +143,7 @@ export const SongsPage = () => {
             duration: song.duration,
             palette: song.palette,
             path: song.path,
-            artworkPath: song.artworkPath,
+            artworkPaths: song.artworkPaths,
             addedDate: song.addedDate,
             isAFavorite: song.isAFavorite,
           };
@@ -151,7 +162,8 @@ export const SongsPage = () => {
         artists,
         duration,
         isAFavorite,
-        artworkPath,
+        artworkPaths,
+        year,
         path,
       } = content.songsData[index];
       return (
@@ -165,8 +177,9 @@ export const SongsPage = () => {
             title={title}
             songId={songId}
             artists={artists}
-            artworkPath={artworkPath}
+            artworkPaths={artworkPaths}
             duration={duration}
+            year={year}
             path={path}
             isAFavorite={isAFavorite}
           />
@@ -188,7 +201,7 @@ export const SongsPage = () => {
                   userData !== undefined && userData.preferences.songIndexing
                 }
                 title={song.title}
-                artworkPath={song.artworkPath || DefaultSongCover}
+                artworkPaths={song.artworkPaths}
                 duration={song.duration}
                 songId={song.songId}
                 artists={song.artists}
@@ -206,6 +219,8 @@ export const SongsPage = () => {
     { label: 'Z to A', value: 'zToA' },
     { label: 'Newest', value: 'dateAddedAscending' },
     { label: 'Oldest', value: 'dateAddedDescending' },
+    { label: 'Released Year (Ascending)', value: 'releasedYearAscending' },
+    { label: 'Released Year (Descending)', value: 'releasedYearDescending' },
     {
       label: 'Most Listened (All Time)',
       value: 'allTimeMostListened',
@@ -238,50 +253,130 @@ export const SongsPage = () => {
   ];
 
   return (
-    <MainContainer className="main-container songs-list-container !h-full !mb-0">
+    <MainContainer className="main-container appear-from-bottom songs-list-container !h-full overflow-hidden !pb-0">
       <>
-        <div className="title-container mt-1 pr-4 flex items-center mb-8 text-font-color-black text-3xl font-medium dark:text-font-color-white">
+        <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium  text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">
             Songs{' '}
-            <div className="other-stats-container text-xs ml-12 flex items-center">
-              {songs && songs.length > 0 && (
-                <span className="no-of-songs">{songs.length} songs</span>
+            <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
+              {isMultipleSelectionEnabled ? (
+                <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
+                  {multipleSelectionsData.multipleSelections.length} selections
+                </div>
+              ) : (
+                songs &&
+                songs.length > 0 && (
+                  <span className="no-of-songs">{songs.length} songs</span>
+                )
               )}
             </div>
           </div>
           <div className="other-controls-container flex">
             {songs && songs.length > 0 && (
-              <Button
-                label="Play All"
-                className="play-all-btn text-sm"
-                iconName="play_arrow"
-                clickHandler={() =>
-                  createQueue(
-                    content.songsData.map((song) => song.songId),
-                    'songs',
-                    false,
-                    undefined,
-                    true
-                  )
-                }
-              />
+              <>
+                <Button
+                  key={0}
+                  className="more-options-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                  iconName="more_horiz"
+                  clickHandler={(e) => {
+                    e.stopPropagation();
+                    const button = e.currentTarget || e.target;
+                    const { x, y } = button.getBoundingClientRect();
+                    updateContextMenuData(
+                      true,
+                      [
+                        {
+                          label: 'Resync library',
+                          iconName: 'sync',
+                          handlerFunction: () =>
+                            window.api.resyncSongsLibrary(),
+                        },
+                      ],
+                      x + 10,
+                      y + 50
+                    );
+                  }}
+                  tooltipLabel="More Options"
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    updateContextMenuData(
+                      true,
+                      [
+                        {
+                          label: 'Resync library',
+                          iconName: 'sync',
+                          handlerFunction: () =>
+                            window.api.resyncSongsLibrary(),
+                        },
+                      ],
+                      e.pageX,
+                      e.pageY
+                    );
+                  }}
+                />
+                <Button
+                  key={1}
+                  className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                  iconName={
+                    isMultipleSelectionEnabled ? 'remove_done' : 'checklist'
+                  }
+                  clickHandler={() =>
+                    toggleMultipleSelections(
+                      !isMultipleSelectionEnabled,
+                      'songs'
+                    )
+                  }
+                  tooltipLabel={
+                    isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
+                  }
+                />
+                <Button
+                  key={2}
+                  tooltipLabel="Play All"
+                  className="play-all-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                  iconName="play_arrow"
+                  clickHandler={() =>
+                    createQueue(
+                      content.songsData.map((song) => song.songId),
+                      'songs',
+                      false,
+                      undefined,
+                      true
+                    )
+                  }
+                />
+                <Button
+                  key={3}
+                  label="Shuffle and Play"
+                  className="shuffle-and-play-all-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                  iconName="shuffle"
+                  clickHandler={() =>
+                    createQueue(
+                      content.songsData.map((song) => song.songId),
+                      'songs',
+                      true,
+                      undefined,
+                      true
+                    )
+                  }
+                />
+                <Dropdown
+                  name="songsPageSortDropdown"
+                  value={content.sortingOrder}
+                  options={dropdownOptions}
+                  onChange={(e) => {
+                    updateCurrentlyActivePageData((currentPageData) => ({
+                      ...currentPageData,
+                      sortingOrder: e.currentTarget.value as SongSortTypes,
+                    }));
+                    dispatch({
+                      type: 'SORTING_ORDER',
+                      data: e.currentTarget.value,
+                    });
+                  }}
+                />
+              </>
             )}
-            <Dropdown
-              name="songsPageSortDropdown"
-              value={content.sortingOrder}
-              options={dropdownOptions}
-              onChange={(e) => {
-                updateCurrentlyActivePageData({
-                  songsPage: {
-                    sortingOrder: e.currentTarget.value as ArtistSortTypes,
-                  },
-                });
-                dispatch({
-                  type: 'SORTING_ORDER',
-                  data: e.currentTarget.value,
-                });
-              }}
-            />
           </div>
         </div>
         <div className="songs-container h-full flex-1" ref={songsContainerRef}>
@@ -292,38 +387,54 @@ export const SongsPage = () => {
               width={width || '100%'}
               height={height || 450}
               overscanCount={10}
+              initialScrollOffset={
+                currentlyActivePage.data?.scrollTopOffset ?? 0
+              }
+              onScroll={(data) => {
+                if (scrollOffsetTimeoutIdRef.current)
+                  clearTimeout(scrollOffsetTimeoutIdRef.current);
+                if (!data.scrollUpdateWasRequested && data.scrollOffset !== 0)
+                  scrollOffsetTimeoutIdRef.current = setTimeout(
+                    () =>
+                      updateCurrentlyActivePageData((currentPageData) => ({
+                        ...currentPageData,
+                        scrollTopOffset: data.scrollOffset,
+                      })),
+                    500
+                  );
+              }}
             >
               {row}
             </List>
           )}
         </div>
+        {content.songsData && content.songsData.length === 0 && (
+          <div className="no-songs-container my-[10%] flex h-full w-full flex-col items-center justify-center text-center text-xl text-font-color-black dark:text-font-color-white">
+            <Img
+              src={DataFetchingImage}
+              alt="No songs available."
+              className="mb-8 w-60"
+            />
+            <span>
+              Like road trips? Just asking. It wouldn't take that long...
+            </span>
+          </div>
+        )}
         {content.songsData === null && (
-          <div className="no-songs-container  h-full w-full text-[#ccc] my-[8%] text-center flex flex-col items-center justify-center text-2xl">
-            <img
+          <div className="no-songs-container my-[8%] flex h-full w-full flex-col items-center justify-center text-center text-xl text-font-color-black dark:text-font-color-white">
+            <Img
               src={NoSongsImage}
               alt="No songs available."
-              className="w-60 mb-8"
+              className="mb-8 w-60"
             />
             <span>
               What&apos;s a world without music. So let&apos;s find them...
             </span>
             <Button
               label="Add Folder"
-              className="text-[#ccc] dark:text-[#ccc] rounded-md mt-4 px-8 text-lg"
+              className="mt-4 w-40 rounded-md !bg-background-color-3 px-8 text-lg text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
               clickHandler={addNewSongs}
             />
-          </div>
-        )}
-        {content.songsData && content.songsData.length === 0 && (
-          <div className="no-songs-container h-full w-full text-[#ccc] my-[10%] text-center flex flex-col items-center justify-center text-2xl">
-            <img
-              src={DataFetchingImage}
-              alt="No songs available."
-              className="w-60 mb-8"
-            />
-            <span>
-              Like road trips? Just asking. It wouldn't take that long...
-            </span>
           </div>
         )}
       </>

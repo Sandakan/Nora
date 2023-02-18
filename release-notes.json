@@ -1,24 +1,266 @@
 {
   "latestVersion": {
-    "version": "0.8.1-alpha",
-    "releaseDate": "2022 August 19",
-    "artwork": "/assets/other/release artworks/oto_music_for_desktop_rebrand_notice.png"
+    "version": "1.0.0-stable",
+    "phase": "alpha",
+    "releaseDate": "2023 February 17",
+    "artwork": "/assets/other/release artworks/whats-new-v1.0.0-stable.webp",
+    "importantNotes": [
+      "This update requires a full media library refresh to reduce the storage usage and to improve performance when accessing the library."
+    ]
   },
   "versions": [
     {
-      "version": "0.8.1-alpha",
-      "releaseDate": "2022 October 19",
+      "version": "1.0.0-stable",
+      "releaseDate": "2023 February 17",
       "notes": {
-        "new": [],
-        "fixed": [
+        "new": [
           {
-            "note": "Updated app to notify users about the upcoming rebrand."
+            "note": "Now Nora can read and write to audio files with synchronisedLyrics meta tag (Experimental)."
           },
           {
-            "note": "Updated app updater to notify about the upcoming app update and direct users to it."
+            "note": "Lyrics from Musixmatch. (Experimental)"
+          },
+          {
+            "note": "Metadata of Musixmatch for songs now include artworks from Spotify."
+          },
+          {
+            "note": "Auto-scrolling of synced lyrics can be toggled now in the LyricsPage."
+          },
+          {
+            "note": "Added a new feature to allow users to select whether the app window should hide to system tray or close on clicking the close button."
+          },
+          {
+            "note": "Added a new feature to allow users to determine whether the app should start as hidden during when on at startup is enabled."
+          },
+          {
+            "note": "Added an entry to the system tray with some controls of the app such as show/hide and exit."
+          },
+          {
+            "note": "Added a new button to refresh lyrics so that if incorrect lyrics is shown it will re-fetch the correct lyrics."
+          },
+          {
+            "note": "Now LyricsPage will show the copyright info of the lyrics at the bottom of the page."
+          },
+          {
+            "note": "Added a new button to show offline lyrics when after user have requested for the online lyrics."
+          },
+          { "note": "Added a new AppShortcutsPrompt that show app shortcuts." },
+          { "note": "Added a setting to change Musixmatch token." },
+          { "note": "Added support to get metadata for songs from iTunes." },
+          {
+            "note": "Added the functionality to start selecting multiple items by holding shift key and selecting an item."
+          },
+          {
+            "note": "Added support for sorting on pages such as AlbumsPage, FoldersPage, AlbumsInfoPage etc."
+          },
+          { "note": "Added new FoldersPage to side bar of the app." },
+          { "note": "Added new MusicFolderInfoPage for songs in folders." },
+          { "note": "Added a Clear All button for notification panel." },
+          {
+            "note": "Added new button to save online lyrics to song from LyricsPage."
+          },
+          {
+            "note": "Added a new title bar for the LyricsPage that shows new buttons that provides features such as Save online lyrics etc."
+          },
+          { "note": "Added Synced Lyrics to Mini Player." },
+          {
+            "note": "Added support for experimental feature that allows users to search multiple keywords in SearchPage."
+          },
+          { "note": "Now users can toggle artists as favorites." },
+          { "note": "Added a new default artwork for albums." },
+          { "note": "Improved search functionality" },
+          {
+            "note": "Added the feature to disable new update alerts."
+          },
+          {
+            "note": "Added a new feature where artists artworks can be showed on the audio-controls panel."
+          },
+          {
+            "note": "Now most relevant results in SearchPage will be more relevant to the search query."
+          },
+          { "note": "Added a network connection indicator on the TitleBar." },
+          {
+            "note": "Now users can fetch song metadata from internet and update their songs. (Experimental)"
+          },
+          { "note": "Support for Synced Lyrics." },
+          {
+            "note": "Now users can go back and forward when going through different pages. (Experimental)"
+          },
+          {
+            "note": "Now users can select multiple songs, artists etc and do specific tasks with them. (Experimental)"
+          },
+          {
+            "note": "New background artworks when viewing ArtistsPage, SongInfoPage etc."
+          },
+          { "note": "Now users can add artworks to user-created playlists." },
+          {
+            "note": "Support for recording listening patterns. (Experimental)"
+          },
+          {
+            "note": "New metrics about listening patterns of a song in SongInfoPage. (Experimental)"
+          },
+          { "note": "Now users can clear search history results." },
+          {
+            "note": "Now users can play songs in a specific genre directly from the GenreInfoPage."
+          },
+          { "note": "Ability to sort songs relative to the released year." },
+          { "note": "Song component now displays the song released year." }
+        ],
+        "fixed": [
+          {
+            "note": "Improved musixmatch lyrics matching which helps to send correct lyrics for songs."
+          },
+          { "note": "Reduced font size on context menu items." },
+          { "note": "Updated the UI of some components of the app." },
+          {
+            "note": "Updated app dependencies, removed unnecessary dependencies and fixed some dependency vulnerabilities."
+          },
+          { "note": "Updated styles of some components." },
+          {
+            "note": "Updated the maximum dimensions that can be achieved by the Mini Player."
+          },
+          { "note": "Improved app updates functionality." },
+          {
+            "note": "Fixed a styling issue where material symbols show icon text instead of icon until it loads its resources."
+          },
+          {
+            "note": "Fixed a bug where resetting the app while parsing the library wouldn't stop the parsing process."
+          },
+          {
+            "note": "Fixed a bug where the app opens the ReleaseNotesPrompt even though there is no new update to the app."
+          },
+          {
+            "note": "Fixed a bug where the app won't start with the previously played song position after an app restart."
+          },
+          {
+            "note": "Fixed a bug where resetting the app doesn't remove the listening_data.json file."
+          },
+          {
+            "note": "Fixed a bug where shuffle state is not saved when the app is closing."
+          },
+          {
+            "note": "Fixed a bug where toggling mute state doesn't work when using the keyboard shortcuts."
+          },
+          {
+            "note": "Fixed a bug where deleting a currently playing song puts the app in an infinite loop of errors."
+          },
+          {
+            "note": "Fixed a bug where HomePage isn't getting updated when a recently played song got deleted."
+          },
+          { "note": "Fixed a bug where lyrics are shown with a small delay." },
+          {
+            "note": "Fixed a bug where song controls show incorrect metrics such as showing that the song is paused even though the song is playing."
+          },
+          {
+            "note": "Fixed a bug where song listening data is not getting recorded."
+          },
+          {
+            "note": "Fixed a bug where resources are not being loaded due to resource urls having query parameters."
+          },
+          {
+            "note": "Fixed a bug where app shows the error prompt when a user deletes a song."
+          },
+          {
+            "note": "Fixed a styling issue where 'drop song here' message prompt not positioned correctly."
+          },
+          {
+            "note": "Fixed a bug where components re-render (flicker) even though they didn't get any new data."
+          },
+          {
+            "note": "Fixed a bug where some keyboard shortcuts not working when in MiniPlayer."
+          },
+          {
+            "note": "Fixed a bug where notifications doesn't get removed when reduced motion is enabled."
+          },
+          {
+            "note": "Fixed a bug where app is looking for search results with empty strings or strings with only spaces."
+          },
+          {
+            "note": "Fixed a bug where listening data metrics graph in SongInfoPage not displaying metrics."
+          },
+          {
+            "note": "Fixed a bug where mediaSession controls are not working as intended."
+          },
+          { "note": "Fixed some styling issues in Song and SongsPage." },
+          {
+            "note": "Fixed a bug where song component in some pages not showing song year."
+          },
+          {
+            "note": "Fixed a bug where lyrics in MiniPlayer not positioning to the center."
+          },
+          {
+            "note": "Fixed a bug where ReleaseNotesPrompt shows that the app is in latest version even though there is no network connection."
+          },
+          { "note": "Fixed an overflowing issue on some pages." },
+          {
+            "note": "Fixed a bug where updating an artwork on a song wouldn't show it on the app instantly due to image caching."
+          },
+          {
+            "note": "Fixed a bug where lyrics not showing instrumental gaps of a song in lyrics."
+          },
+          {
+            "note": "Fixed a bug where lyrics are not being identified as synced."
+          },
+          {
+            "note": "Fixed a bug on CurrentQueuePage where current playing song is not positioned correctly."
+          },
+          { "note": "Fixed some text styling issues on PlaylistInfoPage." },
+          {
+            "note": "Fixed a bug on ConfirmDeletePlaylist prompt not positioning elements correctly."
+          },
+          {
+            "note": "Fixed a bug where blacklisted song showing an incorrect index."
+          },
+          {
+            "note": "Fixed a bug on render process where, memory leak occurs due to subscribing for max no. of preload's event listeners."
+          },
+          {
+            "note": "Fixed a bug where clicking on Artist doesn't direct to ArtistsInfoPage."
+          },
+          {
+            "note": "Fixed a bug where clicking on Genre doesn't direct to GenresInfoPage."
+          },
+          {
+            "note": "Fixed a bug on PromptMenu where it doesn't wait for the fade out animation to end to clear content on the PromptMenu."
+          },
+          {
+            "note": "Fixed a bug on MostRelevantResult where clicking on it doesn't direct to the specified info page."
+          },
+          {
+            "note": "Fixed a bug on PromptMenu where prompt menus opened in full-screen or in maximized windows will make its content appear blurred."
+          },
+          { "note": "Fixed Artist component showing wrong default artwork." },
+          { "note": "Fixed some contrast issues on GenreInfoPage." },
+          {
+            "note": "Fixed a bug where Prompts are not positioning Button components correctly."
+          },
+          {
+            "note": "Fixed a styling issue on Playlist component where when hovered, shows an overflowed gradient."
+          },
+          {
+            "note": "Fixed SongArtwork component on SongTagsEditingPage not positioning its buttons correctly."
+          },
+          {
+            "note": "Fixed NetworkIndicator not updating its state as intended."
+          },
+          {
+            "note": "Fixed a bug in Playlist where clicking on it wouldn't direct to the PlaylistInfoPage."
           }
         ],
-        "knownIssues": []
+        "knownIssues": [
+          {
+            "note": "Sometimes users can get unexpected search results when using Search."
+          },
+          {
+            "note": "App theme will be changed when you change your system's theme even though you didn't select to use system theme in the app."
+          },
+          {
+            "note": "If a song is added next to the last song of the queue, the last song won't be played."
+          },
+          {
+            "note": "Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song."
+          }
+        ]
       }
     },
     {
@@ -27,7 +269,7 @@
       "notes": {
         "new": [
           {
-            "note": "Double-clicking on a supported song in the File Explorer would play it on the app. Be sure if you made Oto Music the default audio player for the respective audio file. (Experimental)"
+            "note": "Double-clicking on a supported song in the File Explorer would play it on the app. Be sure if you made Nora the default audio player for the respective audio file. (Experimental)"
           },
           {
             "note": "Now users can drag and drop a supported audio file to play it on the player. (Experimental)"
@@ -80,9 +322,6 @@
           },
           {
             "note": "Trying to play corrupted songs will make the app player unusable. Workaround is to play the next song and restart the renderer using F5 button."
-          },
-          {
-            "note": "Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song."
           },
           {
             "note": "Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song."
@@ -284,12 +523,6 @@
             "note": "Fixed an error where some functions are coded asynchronous but are actually synchronous."
           },
           {
-            "note": "Updated the logger to write logs more clearly on a txt file. Now it shows more relevant information in the logs."
-          },
-          {
-            "note": "Some functions now can send multiple results. This reduces number of requests to the api to fetch data."
-          },
-          {
             "note": "Fixed a bug where newly added songs won't be added to the library."
           }
         ],
@@ -359,7 +592,7 @@
         ],
         "fixed": [
           {
-            "note": "Fixed a bug related to npm packages."
+            "note": "Fixed a bug related to dependencies."
           },
           {
             "note": "Updated parseSong to differentiate between currently added songs and new songs. Previously this problem will duplicate the data related to the song in the library."
@@ -378,9 +611,6 @@
           },
           {
             "note": "Updated artist online information apis."
-          },
-          {
-            "note": "Applied useTransition hook to improve user input responsiveness in the app when a song is playing."
           }
         ],
         "knownIssues": [
@@ -405,20 +635,10 @@
       "notes": {
         "new": [
           {
-            "note": "Migrated the song player to the root of the app to provide support for features such as mini-player (Experimental)."
-          },
-          {
             "note": "Now Currently Playing Queue shows information about the current queue including playlist name, artwork etc (Experimental)."
           }
         ],
-        "fixed": [
-          {
-            "note": "Updated the readme file."
-          },
-          {
-            "note": "Improved the codebase."
-          }
-        ],
+        "fixed": [],
         "knownIssues": []
       }
     },
@@ -431,12 +651,6 @@
             "note": "Added song queuing. Now users can queue songs."
           },
           {
-            "note": "Started using useContext React api to reduce prop drilling."
-          },
-          {
-            "note": "Started using useReducer React api to avoid rendering issues occurred when using useState."
-          },
-          {
             "note": "Adding a new song will now inform the user about the new song adding process."
           },
           {
@@ -446,28 +660,19 @@
             "note": "Now the app will inform the user if it couldn't find the lyrics."
           },
           {
-            "note": "Added a new event that fires when songs, artists, albums, playlists, or userData gets added."
-          },
-          {
             "note": "Added a current queue page to view the current queue of songs."
           },
           {
-            "note": "Added a function to remove a song from the library."
+            "note": "Now you can remove a song from the library."
           },
           {
-            "note": "Added a function to remove a linked media folder."
+            "note": "Now you can remove a linked media folder."
           },
           {
             "note": "Added an experimental mini player."
           },
           {
             "note": "Added the feature to remove playlists."
-          },
-          {
-            "note": "Added a function to send renderer process errors and logs to the main process and save them."
-          },
-          {
-            "note": "Added a function that shows main process messages in the renderer process."
           },
           {
             "note": "Added a function that provides navigation previous pages. Now users can click backward button in the title bar to go to their previously visited page."
@@ -479,7 +684,7 @@
             "note": "Now artists, albums and playlists show how much hours of songs they have."
           },
           {
-            "note": "Added the settings page to with options to update theme, music folders, and default page."
+            "note": "Added the settings page with options to update theme, music folders, and default page."
           },
           {
             "note": "Now songsPage shows how many songs in the library."
@@ -493,25 +698,10 @@
             "note": "Updated launch.json files in vscode to support debugging both main and renderer processes."
           },
           {
-            "note": "Improved user interface styling."
-          },
-          {
-            "note": "Improved the codebase."
-          },
-          {
-            "note": "Fixed some bugs related to paths in parseSong.ts"
-          },
-          {
-            "note": "Removed unnecessary comments."
-          },
-          {
             "note": "Renamed DialogMenu menu to notification panel."
           },
           {
             "note": "Removed unnecessary svg icons."
-          },
-          {
-            "note": "Improved detection of songs whose got added when the app is running and not running."
           },
           {
             "note": "Fixed some bugs related to parsing songs."
@@ -546,9 +736,6 @@
             "note": "Improved styles to support Google material icons functionality."
           },
           {
-            "note": "Offloaded creation and optimization of cover arts to Sharp package."
-          },
-          {
             "note": "Improved sorting of songs, artists and albums."
           }
         ],
@@ -567,14 +754,7 @@
             "note": "Added a PlaylistsInfoPage to display information related to playlists."
           }
         ],
-        "fixed": [
-          {
-            "note": "Removed unnecessary react props to improve performance."
-          },
-          {
-            "note": "Fixed some typescript type errors."
-          }
-        ],
+        "fixed": [],
         "knownIssues": []
       }
     },
@@ -587,24 +767,12 @@
             "note": "Added new styles for AlbumInfoPage, ArtistInfoPage, and updated some styles on other componenets."
           },
           {
-            "note": "Now ArtistInfoPage shows information of the artists from Deezer and Last.fm apis."
-          },
-          {
-            "note": "Now songData, albumData and artistData are linked together in the database for easier access."
+            "note": "Now ArtistInfoPage shows information of the artists from internet."
           }
         ],
         "fixed": [
           {
             "note": "Fixed some bugs when parsing songs."
-          },
-          {
-            "note": "Fixed some typescript type errors."
-          },
-          {
-            "note": "Updated preload script to support typescript types."
-          },
-          {
-            "note": "Improved React support of the app."
           }
         ],
         "knownIssues": []

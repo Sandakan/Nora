@@ -7,7 +7,7 @@ export default function useResizeObserver(
 
   const observer = React.useRef(
     new ResizeObserver((entries) => {
-      // Only care about the first element, we expect one element ot be watched
+      // Only care about the first element, we expect one element to be watched
       const { width, height } = entries[0].contentRect;
       setBreakSize({ width, height });
     })

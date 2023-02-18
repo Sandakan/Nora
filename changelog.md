@@ -1,22 +1,139 @@
 <h1> Change Log</h1>
 
-<img src="assets/other/release artworks/oto_music_for_desktop_rebrand_notice.png">
+<h3>The latest version (v1.0.0-stable) contains a lot of new features and improvements. As always expect some bugs in the app.</h3>
 
 <br>
 
- <h2>* Oto Music for Desktop will be rebranded as Nora in an upcoming update.</h2>
+<img src="assets\other\release artworks\whats-new-v1.0.0-stable.webp">
 
 <br>
 <ul>
-  <li class="version"> <h3> v0.8.1-alpha - ( 19<sup>th</sup> of December 2022 )</h3>
+  <li class="version"> <h3> v1.0.0-stable - ( 17<sup>th</sup> of February 2023 )</h3>
     <ul>
-      <li> <h4>🔨 Fixes and Improvements</h4>
+      <li><h4>🎉 New Features and Updates</h4>
+      <ul>
+        <li> Now LyricsPage will show the copyright info of the lyrics at the bottom of the page.</li>
+        <li> Metadata of Musixmatch for songs now include artworks from Spotify.</li>
+        <li> Auto-scrolling of synced lyrics can be toggled now in the LyricsPage.</li>
+        <li> Ability to sort songs relative to the released year.</li>
+        <li> Song component now displays the song released year.</li>
+        <li> Now Nora can read and write to audio files with synchronisedLyrics meta tag.</li>
+        <li> Added abort controller support for most resource intensive functions to stop them in case of an emergency.</li>
+        <li> Added a new feature to allow users to select whether the app window should hide to system tray or close on clicking the close button.</li>
+        <li> Added a new feature to allow users to determine whether the app should start as hidden during when on at startup is enabled.</li>
+        <li> Added an entry to the system tray with some controls of the app such as show/hide and exit.</li>
+        <li> Added the feature to disable Checkbox component.</li>
+        <li> Added a new button to refresh lyrics so that if incorrect lyrics is shown it will re-fetch the correct lyrics.</li>
+        <li> Added a new button to show offline lyrics when after user have requested for the online lyrics.</li>
+        <li> Added a new placeholder image for MusicFoldersPage when there are no any folders.</li>
+        <li> Added a new AppShortcutsPrompt that show app shortcuts.</li>
+        <li> Added a setting to change Musixmatch token.</li>
+        <li> Added support to get metadata for songs from iTunes.</li>
+        <li> Added the functionality to start selecting multiple items by holding shift key and selecting an item.</li>
+        <li> Added support for sorting on lot of pages including AlbumsPage, FoldersPage, AlbumsInfoPage etc.</li>
+        <li> Added new FoldersPage to side bar of the app.</li>
+        <li> Added new MusicFolderInfoPage for songs in folders.</li>
+        <li> Added a Clear All button for notification panel.</li>
+        <li> Added a Spotify artwork fetching script for song metadata.</li>
+        <li> Added new button to save online lyrics to song while watching it on LyricsPage.</li>
+        <li> Added a queue for parseSong to prevent songs from being parsed twice.</li>
+        <li> Added a new title bar for the LyricsPage that shows new buttons that provides features such as Save online lyrics etc.</li>
+        <li> Added Lyrics to Mini Player.</li>
+        <li> Added support for experimental for multiple search keywords in Search.</li>
+        <li> Ability to toggle artists as favorites.</li>
+        <li> Added a new default artwork for albums.</li>
+        <li> Refactored code into smaller modules for easier readability.</li>
+        <li> Improved search functionality</li>
+        <li> Added error boundaries to catch errors on app.</li>
+        <li> Ability to disable new update alerts for the current version.</li>
+        <li> Added a new feature where artists artworks can be showed on the audio-controls panel.</li>
+        <li> Now most relevant results in SearchPage will be more relevant to the search query.</li>
+        <li> New network connection indicator on the header.</li>
+        <li> Now users can fetch song metadata from internet and update their songs. (Experimental)</li>
+        <li> Support for Synced Lyrics.</li>
+        <li> Lyrics from Musixmatch (Implementation from Fashni's <a href ="https://github.com/fashni/MxLRC">MxLRC package</a>). (Experimental)</li>
+        <li> Now users can go back and forward when going through different pages. (Experimental)</li>
+        <li> Now users can select multiple songs, artists etc and do specific tasks with them. (Experimental)</li>
+        <li> New background artworks when viewing ArtistsPage, SongInfoPage etc.</li>
+        <li> Now users can add artworks to user-created playlists.</li>
+        <li> Support for recording listening patterns. (Experimental)</li>
+        <li> New metrics about listening patterns of a song in SongInfoPage. (Experimental)</li>
+        <li> Now users can clear search history results.</li>
+        <li> Now users can play songs in a specific genre directly from the GenreInfoPage.</li>
+      </ul>
+      </li>
+      <li><h4>🔨 Fixes and Improvements</h4>
         <ul>
-        <li>Updated app to notify users about the upcoming rebrand.</li>
-        <li>Updated app updater to notify about the upcoming app update and direct users to it.</li>
+          <li>Improved musixmatch lyrics matching which helps to send correct lyrics for songs.</li>
+          <li>Reduced font size on context menu items.</li>
+          <li>Updated the UI of some components of the app.</li>
+          <li>Updated musixmatchSettingsPrompt with a link to how to generate a new user token.</li>
+          <li>Updated app dependencies, removed unnecessary dependencies and fixed some dependency vulnerabilities.</li>
+          <li>Updated the maximum dimensions that can be achieved by the Mini Player.</li>
+          <li>Updated AUDIO_FADE_INTERVAL and AUDIO_FADE_DURATION.</li>
+          <li>Resolved some path issues on Playlist component.</li>
+          <li>Improved app updates functionality.</li>
+          <li>Fixed a styling issue where material symbols show icon text instead of icon until it loads its resources.</li>
+          <li>Fixed a bug where resetting the app while parsing the library wouldn't stop the parsing process.</li>
+          <li>Fixed a bug where the app opens the ReleaseNotesPrompt even though there is no new update to the app.</li>
+          <li>Fixed a bug where the app won't start with the previously played song position after an app restart.</li>
+          <li>Fixed a bug where resetting the app doesn't remove the listening_data.json file.</li>
+          <li>Fixed a bug where shuffle state is not saved when the app is closing.</li>
+          <li>Fixed a bug where toggling mute state doesn't work when using the keyboard shortcuts.</li>
+          <li>Fixed a bug where deleting a currently playing song puts the app in an infinite loop of errors.</li>
+          <li>Fixed a bug where HomePage isn't getting updated when a recently played song got deleted.</li>
+          <li>Fixed a bug where lyrics are shown with a small delay.</li>
+          <li>Fixed a bug where song controls show incorrect metrics such as showing that the song is paused even though the song is playing.</li>
+          <li>Fixed a bug where lyrics are fetched without obeying provided filters.</li>
+          <li>Fixed a bug where song listening data is not getting recorded.</li>
+          <li>Fixed a bug where resources are not being loaded due to resource urls having query parameters.</li>
+          <li>Fixed a bug where app shows the error prompt when a user deletes a song.</li>
+          <li>Fixed a styling issue where 'drop song here' message prompt not positioned correctly.</li>
+          <li>Fixed components re-rendering even though they didn't get any new data.</li>
+          <li>Fixed a bug where some keyboard shortcuts not working when in MiniPlayer.</li>
+          <li>Fixed a bug where notifications doesn't get removed when reduced motion is enabled.</li>
+          <li>Fixed a bug where app is looking for search results with empty strings or strings with only spaces.</li>
+          <li>Fixed a bug where ListeningActivityBarGraph not showing listening data metrics.</li>
+          <li>Fixed some styling issues appeared on SongArtist component.</li>
+          <li>Fixed a bug where mediaSession controls are not working as intended.</li>
+          <li>Fixed some error boundary fallback ui styles.</li>
+          <li>Fixed some styling issues in Song and SongsPage.</li>
+          <li>Fixed a bug where song component in some pages not showing song year.</li>
+          <li>Fixed mini player lyrics not positioning to the center.</li>
+          <li>Fixed a bug where ReleaseNotesPrompt showing that the app is in latest version even though there is no network connection.</li>
+          <li>Fixed an overflowing issue on some pages.</li>
+          <li>Fixed a bug where updating an artwork on a song wouldn't show it on the app instantly due to image caching.</li>
+          <li>Fixed a bug where lyrics not showing instrumental gaps of a song in lyrics.</li>
+          <li>Fixed a bug where lyrics are not being identified as synced.</li>
+          <li>Fixed a bug on CurrentQueuePage where current playing song is not positioned correctly.</li>
+          <li>Fixed some text styling issues on PlaylistInfoPage.</li>
+          <li>Fixed a bug on ConfirmDeletePlaylist prompt not positioning elements correctly.</li>
+          <li>Fixed a bug where blacklisted song showing an incorrect index.</li>
+          <li>Fixed a bug on render process where, memory leak occurs due to subscribing for max no. of preload's event listeners.</li>
+          <li>Fixed a bug where clicking on Artist not directing to ArtistsInfoPage.</li>
+          <li>Fixed a bug where clicking on Genre not directing to GenresInfoPage.</li>
+          <li>Fixed a bug on PromptMenu where it doesn't wait for the fade out animation to end to clear content on the PromptMenu.</li>
+          <li>Fixed a bug on MostRelevantResult where clicking on it doesn't direct to the specified info page.</li>
+          <li>Fixed a bug on PromptMenu where prompt menus opened in full-screen or in maximized windows will make its content appear blurred.</li>
+          <li>Fixed Artist component showing wrong default artwork.</li>
+          <li>Fixed some contrast issues on GenreInfoPage.</li>
+          <li>Fixed a bug where Prompts are not positioning Button components correctly.</li>
+          <li>Fixed a styling issue on Playlist component where when hovered, shows an overflowed gradient.</li>
+          <li>Fixed SongArtwork component on SongTagsEditingPage not positioning its buttons correctly.</li>
+          <li>Fixed NetworkIndicator not updating its state as intended.</li>
+          <li>Fixed a bug in Playlist where clicking on it wouldn't direct to the PlaylistInfoPage.</li>
+        </ul>
+      </li>
+      <li><h4>🐜 Known Issues and Bugs</h4>
+        <ul>
+          <li>Sometimes users can get unexpected search results when using Search.</li>
+          <li>App theme will be changed when you change your system's theme even though you didn't select to use system theme in the app.</li>
+          <li>If a song is added next to the last song of the queue, the last song won't be played.</li>
+          <li>Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song.</li>
         </ul>
       </li>
     </ul>
+
   </li>
 
   <br/>
@@ -25,7 +142,7 @@
     <ul>
       <li><h4>🎉 New Features and Updates</h4>
       <ul>
-        <li>Now double-clicking on a supported song in the File Explorer would play it on the app. Be sure if you made Oto Music the default audio player for the respective audio file. (Experimental)</li>
+        <li>Now double-clicking on a supported song in the File Explorer would play it on the app. Be sure if you made Nora the default audio player for the respective audio file. (Experimental)</li>
         <li>Now users can drag and drop a supported audio file to play it on the player. (Experimental)</li>
         <li>Now users can edit song id3 tags. (Experimental)</li>
         <li>Added windowing technique to improve app performance. Before this update, app would take considerable amount of time to render a huge song library but now it renders almost instantly. (Experimental)</li>
@@ -53,7 +170,6 @@
       <li> <h4>🐜 Known Issues and Bugs</h4>
         <ul>
           <li>Parsing a big music library could sometimes make the app unresponsive. Currently, the only solution is to wait some time until the parsing process finishes and the app regains responsiveness.</li>
-          <li>App theme will be changed when you change your system's theme even though you didn't select to use system theme in the app.</li>
           <li>App theme will be changed when you change your system's theme even though you didn't select to use system theme in the app.</li>
           <li>Lyrics on some songs aren't being read by the app. Still you will be able to see lyrics from the internet.</li>
           <li>If a song is added next to the last song of the queue, the last song won't be played.</li>

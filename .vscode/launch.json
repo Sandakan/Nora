@@ -5,25 +5,29 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Main",
+      "port": 5858,
+      "request": "attach",
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "type": "node",
+      "timeout": 15000,
+      "restart": {
+        "delay": 1000,
+        "maxAttempts": 10
+      },
+      "showAsyncStacks": true,
+      "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"]
+    },
+    {
       "name": "Renderer",
       "type": "chrome",
       "request": "attach",
       "port": 9223,
       "webRoot": "${workspaceFolder}",
-      "timeout": 15000
-    },
-    {
-      "name": "Main",
-      "port": 5858,
-      "request": "attach",
-      "skipFiles": ["<node_internals>/**"],
-      "type": "node"
-    }
-  ],
-  "compounds": [
-    {
-      "name": "Main & Renderer",
-      "configurations": ["Main", "Renderer"]
+      "timeout": 15000,
+      "restart": true,
+      "showAsyncStacks": true,
+      "smartStep": true
     }
   ]
 }

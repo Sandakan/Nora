@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable no-underscore-dangle */
@@ -10,85 +9,142 @@
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
 import React, { useContext } from 'react';
-import { AppContext, AppUpdateContext } from 'renderer/contexts/AppContext';
-import { calculateTime } from 'renderer/utils/calculateTime';
-import DefaultArtistCover from '../../../../assets/images/png/default_artist_cover.png';
+import { AppContext } from 'renderer/contexts/AppContext';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
+import DefaultArtistCover from '../../../../assets/images/png/artist_cover_default.png';
 import { Album } from '../AlbumsPage/Album';
-import { Song } from '../SongsPage/Song';
+import Song from '../SongsPage/Song';
 import Button from '../Button';
 import MainContainer from '../MainContainer';
-import OpenLinkConfirmPrompt from '../OpenLinkConfirmPrompt';
+import Hyperlink from '../Hyperlink';
+import Img from '../Img';
+import Dropdown from '../Dropdown';
 
-export default () => {
-  const { currentlyActivePage, queue, userData } = useContext(AppContext);
+const dropdownOptions: { label: string; value: SongSortTypes }[] = [
+  { label: 'Added Order', value: 'addedOrder' },
+  { label: 'A to Z', value: 'aToZ' },
+  { label: 'Z to A', value: 'zToA' },
+  { label: 'Newest', value: 'dateAddedAscending' },
+  { label: 'Oldest', value: 'dateAddedDescending' },
+  { label: 'Released Year (Ascending)', value: 'releasedYearAscending' },
+  { label: 'Released Year (Descending)', value: 'releasedYearDescending' },
+  {
+    label: 'Most Listened (All Time)',
+    value: 'allTimeMostListened',
+  },
+  {
+    label: 'Least Listened (All Time)',
+    value: 'allTimeLeastListened',
+  },
+  {
+    label: 'Most Listened (This Month)',
+    value: 'monthlyMostListened',
+  },
+  {
+    label: 'Least Listened (This Month)',
+    value: 'monthlyLeastListened',
+  },
+  {
+    label: 'Artist Name (A to Z)',
+    value: 'artistNameAscending',
+  },
+  {
+    label: 'Artist Name (Z to A)',
+    value: 'artistNameDescending',
+  },
+  { label: 'Album Name (A to Z)', value: 'albumNameAscending' },
+  {
+    label: 'Album Name (Z to A)',
+    value: 'albumNameDescending',
+  },
+];
+
+const ArtistInfoPage = () => {
+  const {
+    currentlyActivePage,
+    queue,
+    userData,
+    isDarkMode,
+    bodyBackgroundImage,
+  } = useContext(AppContext);
   const {
     createQueue,
     updateQueueData,
-    updateNotificationPanelData,
-    changePromptMenuData,
+    addNewNotifications,
+    updateBodyBackgroundImage,
+    updateCurrentlyActivePageData,
   } = React.useContext(AppUpdateContext);
-  const [artistData, setArtistData] = React.useState({} as ArtistInfo);
-  const [albums, setAlbums] = React.useState([] as Album[]);
-  const [songs, setSongs] = React.useState([] as SongData[]);
+
+  const [artistData, setArtistData] = React.useState<ArtistInfo>();
+  const [albums, setAlbums] = React.useState<Album[]>([]);
+  const [songs, setSongs] = React.useState<SongData[]>([]);
+  const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>('aToZ');
 
   const fetchArtistsData = React.useCallback(() => {
-    if (currentlyActivePage.data && currentlyActivePage.data.artistName) {
+    if (currentlyActivePage?.data?.artistId) {
       window.api
-        .getArtistData([currentlyActivePage.data.artistName])
+        .getArtistData([currentlyActivePage.data.artistId])
         .then((res) => {
           if (res && res.length > 0) {
-            setArtistData({ ...res[0], artworkPath: DefaultArtistCover });
+            if (res[0].onlineArtworkPaths?.picture_medium)
+              updateBodyBackgroundImage(
+                true,
+                res[0].onlineArtworkPaths?.picture_medium
+              );
+            setArtistData(res[0]);
           }
         });
     }
-  }, [currentlyActivePage.data]);
+  }, [currentlyActivePage.data, updateBodyBackgroundImage]);
 
   const fetchArtistArtworks = React.useCallback(() => {
-    if (artistData.artistId && navigator.onLine) {
+    if (artistData?.artistId) {
       window.api
         .getArtistArtworks(artistData.artistId)
         .then((x) => {
           if (x)
             setArtistData((prevData) => {
-              return {
-                ...prevData,
-                artworkPath:
-                  x.artistArtworks?.picture_medium || prevData.artworkPath,
-                artistPalette: x.artistPalette || prevData.artistPalette,
-                artistBio: x.artistBio || prevData.artistBio,
-              };
+              if (prevData)
+                return {
+                  ...prevData,
+                  onlineArtworkPaths: x.artistArtworks,
+                  artistPalette: x.artistPalette || prevData.artistPalette,
+                  artistBio: x.artistBio || prevData.artistBio,
+                };
+              return undefined;
             });
         })
         .catch((err) => {
           console.error(err);
         });
     }
-  }, [artistData.artistId]);
+  }, [artistData?.artistId]);
 
   const fetchSongsData = React.useCallback(() => {
-    if (artistData.songs && artistData.songs.length > 0) {
+    if (artistData?.songs && artistData.songs.length > 0) {
       window.api
         .getSongInfo(artistData.songs.map((song) => song.songId))
         .then((songsData) => {
           if (songsData && songsData.length > 0) setSongs(songsData);
         });
     }
-  }, [artistData.songs]);
+  }, [artistData?.songs]);
 
   const fetchAlbumsData = React.useCallback(() => {
-    if (artistData.albums && artistData.albums.length > 0) {
+    if (artistData?.albums && artistData.albums.length > 0) {
       window.api
         .getAlbumData(artistData.albums.map((album) => album.albumId))
         .then((res) => {
           if (res && res.length > 0) setAlbums(res);
         });
     }
-  }, [artistData.albums]);
+  }, [artistData?.albums]);
 
   React.useEffect(() => {
     fetchArtistsData();
     const manageArtistDataUpdatesInArtistInfoPage = (e: Event) => {
-      const dataEvents = (e as DataEvent).detail;
+      const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
       if ('detail' in e) {
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
@@ -111,7 +167,7 @@ export default () => {
   React.useEffect(() => {
     fetchArtistArtworks();
     const manageArtistArtworkUpdatesInArtistInfoPage = (e: Event) => {
-      const dataEvents = (e as DataEvent).detail;
+      const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
       if ('detail' in e) {
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
@@ -134,7 +190,7 @@ export default () => {
   React.useEffect(() => {
     fetchSongsData();
     const manageSongDataUpdatesInArtistInfoPage = (e: Event) => {
-      const dataEvents = (e as DataEvent).detail;
+      const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
       if ('detail' in e) {
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
@@ -158,7 +214,7 @@ export default () => {
   React.useEffect(() => {
     fetchAlbumsData();
     const manageAlbumDataUpdatesInArtistInfoPage = (e: Event) => {
-      const dataEvents = (e as DataEvent).detail;
+      const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
       if ('detail' in e) {
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
@@ -180,55 +236,36 @@ export default () => {
   }, [fetchAlbumsData]);
 
   const calculateTotalTime = React.useCallback(() => {
-    const val = calculateTime(
+    const { hours, minutes, seconds } = calculateTimeFromSeconds(
       songs.reduce((prev, current) => prev + current.duration, 0)
     );
-    const duration = val.split(':');
     return `${
-      Number(duration[0]) / 60 >= 1
-        ? `${Math.floor(Number(duration[0]) / 60)} hour${
-            Math.floor(Number(duration[0]) / 60) === 1 ? '' : 's'
-          } `
-        : ''
-    }${Math.floor(Number(duration[0]) % 60)} minute${
-      Math.floor(Number(duration[0]) % 60) === 1 ? '' : 's'
-    } ${duration[1]} second${Number(duration[1]) === 1 ? '' : 's'}`;
+      hours >= 1 ? `${hours} hour${hours === 1 ? '' : 's'} ` : ''
+    }${minutes} minute${minutes === 1 ? '' : 's'} ${seconds} second${
+      seconds === 1 ? '' : 's'
+    }`;
   }, [songs]);
 
   const sanitizeArtistBio = React.useCallback(() => {
-    if (artistData.artistBio) {
+    if (artistData?.artistBio) {
       const x = artistData.artistBio.match(/<a .*<\/a>/gm);
       const y = x ? x[0].match(/".*"/gm) : [''];
       const link = y ? y[0].replace(/"/gm, '') : '';
       return (
         <>
-          {artistData.artistBio.replace(/<a .*<\/a>/gm, '')}
-          <span
-            className="link underline cursor-pointer"
-            onClick={() =>
-              userData?.preferences.doNotVerifyWhenOpeningLinks
-                ? window.api.openInBrowser(
-                    `https://github.com/Sandakan/Oto-Music-for-Desktop`
-                  )
-                : changePromptMenuData(
-                    true,
-                    <OpenLinkConfirmPrompt
-                      link={link}
-                      title={`Read more about '${artistData.name}'`}
-                    />
-                  )
-            }
-            role="link"
-            tabIndex={0}
-            title={link}
-          >
-            Read more...
+          <span className="artist-bio z-10">
+            {artistData.artistBio.replace(/<a .*<\/a>/gm, '')}
           </span>
+          <Hyperlink
+            label="Read more..."
+            linkTitle={`Read more about '${artistData.name}'`}
+            link={link}
+          />
         </>
       );
     }
     return '';
-  }, [artistData, changePromptMenuData, userData]);
+  }, [artistData]);
 
   const albumComponents = React.useMemo(
     () =>
@@ -238,15 +275,20 @@ export default () => {
             index={index}
             albumId={album.albumId}
             artists={album.artists}
-            artworkPath={album.artworkPath}
+            artworkPaths={album.artworkPaths}
             songs={album.songs}
             title={album.title}
             year={album.year}
             key={index}
+            className={
+              bodyBackgroundImage
+                ? '[&_:not(.icon)]:!text-font-color-white'
+                : ''
+            }
           />
         );
       }),
-    [albums]
+    [albums, bodyBackgroundImage]
   );
 
   const songComponenets = React.useMemo(
@@ -263,9 +305,10 @@ export default () => {
             artists={song.artists}
             duration={song.duration}
             songId={song.songId}
-            artworkPath={song.artworkPath}
+            artworkPaths={song.artworkPaths}
             path={song.path}
             isAFavorite={song.isAFavorite}
+            year={song.year}
           />
         );
       }),
@@ -273,132 +316,233 @@ export default () => {
   );
 
   return (
-    <div
-      className="artist-info-page-container bg-no-repeat bg-cover pt-8 pb-2 pl-2 pr-2 rounded-tl-lg"
-      style={
-        artistData.artistPalette && {
-          background: `linear-gradient(180deg, ${`rgb(${artistData.artistPalette.LightMuted._rgb[0]},${artistData.artistPalette.LightMuted._rgb[1]},${artistData.artistPalette.LightMuted._rgb[2]})`} 0%, var(--background-color-1) 90%)`,
-        }
-      }
-    >
-      <div className="artist-img-and-info-container flex flex-row items-center pl-8 mb-12">
-        <div className="artist-img-container mr-10">
-          <img
-            src={artistData.artworkPath}
-            className="rounded-full"
-            alt="Album Cover"
-          />
-        </div>
-        <div className="artist-info-container text-font-color-black dark:text-font-color-white">
-          <div
-            className="artist-name text-5xl text-background-color-3 dark:text-background-color-3 mb-2"
-            style={
-              artistData.artistPalette && {
-                color: `rgb(${artistData.artistPalette.DarkMuted._rgb[0]},${artistData.artistPalette.DarkMuted._rgb[1]},${artistData.artistPalette.DarkMuted._rgb[2]})`,
+    <MainContainer className="artist-info-page-container appear-from-bottom relative overflow-y-auto rounded-tl-lg pt-8 pb-2 pl-2 pr-2">
+      <>
+        <div className="artist-img-and-info-container relative mb-12 flex flex-row items-center pl-8 [&>*]:z-10">
+          <div className="artist-img-container mr-10 max-h-60 lg:hidden">
+            <Img
+              src={
+                artistData?.onlineArtworkPaths?.picture_medium ||
+                artistData?.artworkPaths?.artworkPath
               }
-            }
-          >
-            {artistData.name}
+              fallbackSrc={
+                artistData?.artworkPaths?.artworkPath || DefaultArtistCover
+              }
+              className="aspect-square max-h-60 rounded-full"
+              alt="Album Cover"
+            />
           </div>
-          {artistData.songs && (
-            <div className="artist-no-of-songs">
-              {artistData.albums && artistData.albums.length > 0
-                ? `${artistData.albums.length} album${
-                    artistData.albums.length === 1 ? '' : 's'
-                  } `
-                : '0 albums '}
-              &bull;
-              {` ${artistData.songs.length} song${
-                artistData.songs.length === 1 ? '' : 's'
-              } `}
-            </div>
-          )}
-          {songs.length > 0 && (
-            <div className="artist-total-songs-duration">
-              {calculateTotalTime()}
-            </div>
-          )}
-          {artistData.songs && artistData.songs.length > 0 && (
-            <div className="artist-buttons mt-8 flex">
-              <Button
-                label="Play All"
-                iconName="play_arrow"
-                className="!border-[hsla(0,0%,0%,0.3)] dark:!border-[hsla(0,0%,0%,0.3)] hover:!border-[hsla(0,0%,0%,0.6)] dark:hover:!border-[hsla(0,0%,0%,0.6)]"
-                clickHandler={() =>
-                  createQueue(
-                    artistData.songs.map((song) => song.songId),
-                    'songs',
-                    false,
-                    undefined,
-                    true
-                  )
+          <div
+            className={`artist-info-container relative ${
+              bodyBackgroundImage
+                ? 'text-font-color-white'
+                : 'text-font-color-black dark:text-font-color-white'
+            } [&>*]:z-10`}
+          >
+            <div
+              className="artist-name mb-2 text-5xl text-background-color-3 dark:text-background-color-3"
+              style={
+                artistData?.artistPalette?.LightVibrant && {
+                  color: `${
+                    isDarkMode
+                      ? `rgb(${artistData.artistPalette?.LightVibrant.rgb[0]},${artistData.artistPalette?.LightVibrant.rgb[1]},${artistData.artistPalette?.LightVibrant.rgb[2]})`
+                      : `rgb(${artistData.artistPalette?.LightVibrant.rgb[0]},${artistData.artistPalette?.LightVibrant.rgb[1]},${artistData.artistPalette?.LightVibrant.rgb[2]})`
+                  }`,
                 }
-              />
-              <Button
-                label="Shuffle and Play"
-                iconName="shuffle"
-                className="!border-[hsla(0,0%,0%,0.3)] dark:!border-[hsla(0,0%,0%,0.3)] hover:!border-[hsla(0,0%,0%,0.6)] dark:hover:!border-[hsla(0,0%,0%,0.6)]"
-                clickHandler={() =>
-                  createQueue(
-                    artistData.songs.map((song) => song.songId),
-                    'songs',
-                    true,
-                    undefined,
-                    true
-                  )
-                }
-              />
-              <Button
-                label="Add to Queue"
-                iconName="add"
-                className="!border-[hsla(0,0%,0%,0.3)] dark:!border-[hsla(0,0%,0%,0.3)] hover:!border-[hsla(0,0%,0%,0.6)] dark:hover:!border-[hsla(0,0%,0%,0.6)]"
-                clickHandler={() => {
-                  updateQueueData(
-                    undefined,
-                    [...queue.queue, ...songs.map((song) => song.songId)],
-                    false,
-                    false
-                  );
-                  updateNotificationPanelData(
-                    5000,
-                    <span>
-                      Added {songs.length} song
-                      {songs.length === 1 ? '' : 's'} to the queue.
-                    </span>
-                  );
+              }
+            >
+              {artistData?.name}
+            </div>
+            {artistData?.songs && (
+              <div className="artist-no-of-songs">
+                {artistData.albums && artistData.albums.length > 0
+                  ? `${artistData.albums.length} album${
+                      artistData.albums.length === 1 ? '' : 's'
+                    } `
+                  : '0 albums '}
+                &bull;
+                {` ${artistData.songs.length} song${
+                  artistData.songs.length === 1 ? '' : 's'
+                } `}
+              </div>
+            )}
+            {songs.length > 0 && (
+              <div className="artist-total-songs-duration">
+                {calculateTotalTime()}
+              </div>
+            )}
+            <div className="artist-like-btn-container">
+              <span
+                className={`material-icons-round${
+                  !artistData?.isAFavorite ? '-outlined' : ''
+                } mr-2 cursor-pointer !text-xl`}
+                onClick={() => {
+                  if (artistData)
+                    window.api
+                      .toggleLikeArtist(
+                        artistData.artistId,
+                        !artistData.isAFavorite
+                      )
+                      .then(
+                        (res) =>
+                          res &&
+                          setArtistData((prevData) =>
+                            prevData
+                              ? {
+                                  ...prevData,
+                                  isAFavorite: !prevData.isAFavorite,
+                                }
+                              : undefined
+                          )
+                      )
+                      .catch((err) => console.error(err));
                 }}
-              />
+                role="button"
+                tabIndex={0}
+              >
+                favorite
+              </span>
+              {/* {artistData.isAFavorite ? 'Unlike' : 'Like'} */}
             </div>
-          )}
+          </div>
         </div>
-      </div>
-      {albums && albums.length > 0 && (
-        <MainContainer className="main-container albums-list-container">
-          <>
-            <div className="title-container mt-1 mb-4 text-font-color-black text-2xl dark:text-font-color-white">
-              Appears On Albums
-            </div>
-            <div className="albums-container flex flex-wrap">
-              {albumComponents}
-            </div>
-          </>
-        </MainContainer>
-      )}
-      {songs && songs.length > 0 && (
-        <MainContainer className="main-container songs-list-container h-fut pb-4">
-          <>
-            <div className="title-container mt-1 mb-4 text-font-color-black text-2xl dark:text-font-color-white">
-              Appears on songs
-            </div>
-            <div className="songs-container">{songComponenets}</div>
-          </>
-        </MainContainer>
-      )}
-      {artistData.artistBio && (
-        <div className="artist-bio-container m-4 p-4 rounded-lg text-font-color-black dark:text-font-color-white bg-background-color-2 dark:bg-dark-background-color-2">
-          {sanitizeArtistBio()}
-        </div>
-      )}
-    </div>
+        {albums && albums.length > 0 && (
+          <MainContainer className="main-container albums-list-container relative [&>*]:z-10">
+            <>
+              <div
+                className={`title-container ${
+                  bodyBackgroundImage
+                    ? 'text-font-color-white'
+                    : 'text-font-color-black dark:text-font-color-white'
+                } mt-1 mb-4
+                  text-2xl`}
+              >
+                Appears On Albums
+              </div>
+              <div className="albums-container flex flex-wrap">
+                {albumComponents}
+              </div>
+            </>
+          </MainContainer>
+        )}
+        {songs && songs.length > 0 && (
+          <MainContainer className="main-container songs-list-container relative h-full pb-4 [&>*]:z-10">
+            <>
+              <div
+                className={`title-container ${
+                  bodyBackgroundImage
+                    ? 'text-font-color-white'
+                    : 'text-font-color-black dark:text-font-color-white'
+                } mt-1 mb-4
+                  flex items-center justify-between text-2xl`}
+              >
+                Appears on songs
+                {artistData?.songs && artistData.songs.length > 0 && (
+                  <div className="artist-buttons mr-4 flex">
+                    <Button
+                      label="Play All"
+                      iconName="play_arrow"
+                      className={
+                        bodyBackgroundImage
+                          ? '!border-background-color-2/50 !text-font-color-white hover:!border-background-color-3 dark:!border-dark-background-color-2/50 dark:hover:!border-dark-background-color-3'
+                          : 'text-font-color-black dark:text-font-color-white'
+                      }
+                      clickHandler={() =>
+                        createQueue(
+                          artistData.songs.map((song) => song.songId),
+                          'artist',
+                          false,
+                          artistData.artistId,
+                          true
+                        )
+                      }
+                    />
+                    <Button
+                      tooltipLabel="Shuffle and Play"
+                      iconName="shuffle"
+                      className={
+                        bodyBackgroundImage
+                          ? '!border-background-color-2/50 !text-font-color-white hover:!border-background-color-3 dark:!border-dark-background-color-2/50 dark:hover:!border-dark-background-color-3'
+                          : 'text-font-color-black dark:text-font-color-white'
+                      }
+                      clickHandler={() =>
+                        createQueue(
+                          artistData.songs.map((song) => song.songId),
+                          'artist',
+                          true,
+                          artistData.artistId,
+                          true
+                        )
+                      }
+                    />
+                    <Button
+                      tooltipLabel="Add to Queue"
+                      iconName="add"
+                      className={
+                        bodyBackgroundImage
+                          ? '!border-background-color-2/50 !text-font-color-white hover:!border-background-color-3 dark:!border-dark-background-color-2/50 dark:hover:!border-dark-background-color-3'
+                          : 'text-font-color-black dark:text-font-color-white'
+                      }
+                      clickHandler={() => {
+                        updateQueueData(
+                          undefined,
+                          [...queue.queue, ...songs.map((song) => song.songId)],
+                          false,
+                          false
+                        );
+                        addNewNotifications([
+                          {
+                            id: 'addSongsToQueue',
+                            delay: 5000,
+                            content: (
+                              <span>
+                                Added {songs.length} song
+                                {songs.length === 1 ? '' : 's'} to the queue.
+                              </span>
+                            ),
+                          },
+                        ]);
+                      }}
+                    />
+                    <Dropdown
+                      name="SongsSortDropdown"
+                      className={
+                        bodyBackgroundImage
+                          ? '!border-background-color-2/50 !text-font-color-white hover:!border-background-color-3 active:!border-dark-background-color-3 dark:!border-dark-background-color-2/50 dark:hover:!border-dark-background-color-3 dark:active:!border-dark-background-color-3'
+                          : 'text-font-color-black dark:text-font-color-white'
+                      }
+                      value={sortingOrder}
+                      options={dropdownOptions}
+                      onChange={(e) => {
+                        const order = e.currentTarget.value as SongSortTypes;
+                        updateCurrentlyActivePageData((currentPageData) => ({
+                          ...currentPageData,
+                          sortingOrder: order,
+                        }));
+                        setSortingOrder(order);
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="songs-container">{songComponenets}</div>
+            </>
+          </MainContainer>
+        )}
+        {artistData?.artistBio && (
+          <div
+            className={`"artist-bio-container relative z-10 m-4 rounded-lg p-4 text-font-color-black  dark:text-font-color-white ${
+              bodyBackgroundImage
+                ? `bg-background-color-2/70 backdrop-blur-md dark:bg-dark-background-color-2/70`
+                : `bg-background-color-2 dark:bg-dark-background-color-2`
+            }`}
+          >
+            {sanitizeArtistBio()}
+          </div>
+        )}
+      </>
+    </MainContainer>
   );
 };
+
+export default ArtistInfoPage;
