@@ -1,8 +1,8 @@
-import fetch from 'node-fetch';
-
 import log from '../log';
 import { checkIfConnectedToInternet } from '../main';
 import { LastFMTrackInfoApi } from '../../@types/last_fm_api';
+
+const LAST_FM_BASE_URL = 'http://ws.audioscrobbler.com/2.0/';
 
 const fetchSongInfoFromLastFM = async (
   songTitle: string,
@@ -10,16 +10,19 @@ const fetchSongInfoFromLastFM = async (
 ): Promise<LastFMTrackInfoApi> => {
   if (checkIfConnectedToInternet()) {
     try {
-      const lastFMApiKey = process.env.LAST_FM_API_KEY;
-      if (!lastFMApiKey) throw new Error('LastFM api key not found.');
+      // eslint-disable-next-line prefer-destructuring
+      const LAST_FM_API_KEY = process.env.LAST_FM_API_KEY;
+      if (!LAST_FM_API_KEY) throw new Error('LastFM api key not found.');
 
-      const res = await fetch(
-        `http://ws.audioscrobbler.com/2.0/?method=track.getInfo&api_key=${lastFMApiKey}&artist=${encodeURIComponent(
-          artistNames[0].trim()
-        )}&track=${encodeURIComponent(
-          songTitle.trim()
-        )}&format=json&autocorrect=1`
-      );
+      const url = new URL(LAST_FM_BASE_URL);
+      url.searchParams.set('method', 'track.getInfo');
+      url.searchParams.set('format', 'json');
+      url.searchParams.set('autocorrect', '1');
+      url.searchParams.set('api_key', LAST_FM_API_KEY);
+      url.searchParams.set('track', songTitle.trim());
+      url.searchParams.set('artist', artistNames[0].trim());
+
+      const res = await fetch(url);
       if (res.ok) {
         const data = (await res.json()) as LastFMTrackInfoApi;
         if (data.error) {

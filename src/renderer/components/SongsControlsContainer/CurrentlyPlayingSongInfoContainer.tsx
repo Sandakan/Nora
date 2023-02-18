@@ -14,53 +14,44 @@ const CurrentlyPlayingSongInfoContainer = () => {
   const { changeCurrentActivePage, updateContextMenuData } =
     React.useContext(AppUpdateContext);
 
-  const songArtistsImages = React.useMemo(
-    () =>
-      navigator.onLine && currentSongData.songId
-        ? currentSongData.artists
-          ? Array.isArray(currentSongData.artists) &&
-            (currentSongData.artists.length > 0
-              ? currentSongData.artists
-                  .filter(
-                    (artist, index) => artist.onlineArtworkPaths && index < 2
-                  )
-                  .map((artist, index) => (
-                    <Img
-                      src={
-                        navigator.onLine && artist.onlineArtworkPaths
-                          ? artist.onlineArtworkPaths?.picture_small
-                          : artist.artworkPath
-                      }
-                      key={artist.artistId}
-                      className={`relative aspect-square w-6 rounded-full border-2 border-background-color-1 dark:border-dark-background-color-1 ${
-                        index === 0 ? 'z-2' : '-translate-x-2'
-                      }`}
-                      onClick={() => {
-                        if (
-                          currentSongData.artists &&
-                          currentlyActivePage.pageTitle === 'ArtistInfo' &&
-                          currentlyActivePage.data.artistName === artist.name
-                        )
-                          return changeCurrentActivePage('Home');
-
-                        return changeCurrentActivePage('ArtistInfo', {
-                          artistName: artist.name,
-                          artistId: artist.artistId,
-                        });
-                      }}
-                      alt=""
-                    />
-                  ))
-              : false)
-          : false
-        : false,
-    [
-      currentlyActivePage,
-      changeCurrentActivePage,
-      currentSongData.artists,
-      currentSongData.songId,
-    ]
-  );
+  const songArtistsImages = React.useMemo(() => {
+    if (
+      currentSongData.songId &&
+      Array.isArray(currentSongData.artists) &&
+      currentSongData.artists.length > 0
+    )
+      return currentSongData.artists
+        .filter((artist, index) => artist.onlineArtworkPaths && index < 2)
+        .map((artist, index) => (
+          <Img
+            src={artist.onlineArtworkPaths?.picture_small}
+            fallbackSrc={artist.artworkPath}
+            key={artist.artistId}
+            className={`relative aspect-square w-6 rounded-full border-2 border-background-color-1 dark:border-dark-background-color-1 ${
+              index === 0 ? 'z-2' : '-translate-x-2'
+            }`}
+            onClick={() => {
+              if (
+                currentSongData.artists &&
+                currentlyActivePage.pageTitle === 'ArtistInfo' &&
+                currentlyActivePage.data.artistName === artist.name
+              )
+                return changeCurrentActivePage('Home');
+              return changeCurrentActivePage('ArtistInfo', {
+                artistName: artist.name,
+                artistId: artist.artistId,
+              });
+            }}
+            alt=""
+          />
+        ));
+    return undefined;
+  }, [
+    currentlyActivePage,
+    changeCurrentActivePage,
+    currentSongData.artists,
+    currentSongData.songId,
+  ]);
 
   const showSongInfoPage = () =>
     currentSongData.isKnownSource
@@ -117,8 +108,9 @@ const CurrentlyPlayingSongInfoContainer = () => {
              } */}
         {/* {currentSongData.artworkPath && ( */}
         <Img
-          className="max-w-full rounded-lg object-cover shadow-xl"
-          src={currentSongData.artworkPath || DefaultSongCover}
+          className="h-full max-w-full rounded-lg object-fill shadow-xl"
+          src={currentSongData.artworkPath}
+          fallbackSrc={DefaultSongCover}
           alt="Default song cover"
           onContextMenu={(e) => {
             e.stopPropagation();

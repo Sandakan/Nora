@@ -13,7 +13,6 @@ import {
 } from './contexts/AppUpdateContext';
 import { SongPositionContext } from './contexts/SongPositionContext';
 import packageFile from '../../package.json';
-
 import TitleBar from './components/TitleBar/TitleBar';
 import SongControlsContainer from './components/SongsControlsContainer/SongControlsContainer';
 import BodyAndSideBarContainer from './components/BodyAndSidebarContainer';
@@ -536,7 +535,7 @@ export default function App() {
       window.api.sendLogs(
         `Error occurred in the player.App error:${err}; Player error: ${playerErrorData};`
       );
-      if (player.src) {
+      if (player.src && playerErrorData) {
         player.load();
         player.currentTime = prevSongPosition;
       } else {
@@ -2208,9 +2207,12 @@ export default function App() {
       isDarkMode: content.isDarkMode,
       contextMenuData: content.contextMenuData,
       PromptMenuData: content.PromptMenuData,
-      currentSongData: content.currentSongData,
+      currentSongData: {
+        ...content.currentSongData,
+        duration: player.duration || content.currentSongData.duration,
+      },
       currentlyActivePage:
-        content.navigationHistory.history[
+        contentRef.current.navigationHistory.history[
           content.navigationHistory.pageHistoryIndex
         ],
       notificationPanelData: content.notificationPanelData,
@@ -2339,7 +2341,7 @@ export default function App() {
               content.userData && content.userData.preferences.isReducedMotion
                 ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
                 : ''
-            } flex h-screen w-full flex-col items-center after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc] [&.song-drop]:after:bg-[rgba(0,0,0,0.7)]  [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.fullscreen_#window-controls-container]:hidden`}
+            } flex h-screen w-full flex-col items-center after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc]  [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
             ref={AppRef}
             onDragEnter={addSongDropPlaceholder}
             onDragLeave={removeSongDropPlaceholder}

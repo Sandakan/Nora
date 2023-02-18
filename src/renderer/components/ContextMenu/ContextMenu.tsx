@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable prettier/prettier */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -22,7 +23,6 @@ const ContextMenu = React.memo(() => {
     transformOrigin: 'top left',
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const contextMenuStyles: any = {};
   contextMenuStyles['--position-x'] = `${dimensions.positionX}px`;
   contextMenuStyles['--position-y'] = `${dimensions.positionY}px`;

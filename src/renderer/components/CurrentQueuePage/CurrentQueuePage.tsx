@@ -1,5 +1,5 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable react/no-array-index-key */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable promise/always-return */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable promise/catch-or-return */
@@ -405,13 +405,8 @@ const CurrentQueuePage = () => {
                     ? 'artist-img !rounded-full'
                     : `${queue.queueType}-img`
                 }`}
-                src={
-                  queue.queueType === 'artist' &&
-                  navigator.onLine &&
-                  queueInfo.onlineArtworkPath
-                    ? queueInfo.onlineArtworkPath
-                    : queueInfo.artworkPath
-                }
+                src={queueInfo.onlineArtworkPath}
+                fallbackSrc={queueInfo.artworkPath}
                 alt="Current Playing Queue Cover"
               />
             </div>

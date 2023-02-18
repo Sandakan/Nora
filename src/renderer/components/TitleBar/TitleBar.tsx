@@ -3,6 +3,7 @@ import React from 'react';
 import LightModeLogo from '../../../../assets/images/logo_light_mode.png';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { version } from '../../../../package.json';
 import Img from '../Img';
 import NetworkIndicator from './indicators/NetworkIndicator';
 import NewUpdateIndicator from './indicators/NewUpdateIndicator';
@@ -45,8 +46,11 @@ const TitleBar = React.memo(() => {
           <span className="app-name-container">
             <span>
               Nora
-              <sup className="app-version ml-1 text-[0.6rem] font-semibold text-font-color-highlight dark:text-dark-font-color-highlight">
-                ALPHA
+              <sup
+                className="app-version ml-1 text-[0.6rem] font-semibold uppercase text-font-color-highlight dark:text-dark-font-color-highlight"
+                title={version}
+              >
+                stable
               </sup>
             </span>
           </span>

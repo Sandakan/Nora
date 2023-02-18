@@ -137,8 +137,8 @@ const Song = React.forwardRef(
                   className={`${
                     (currentSongData.songId === songId ||
                       isAMultipleSelection) &&
-                    'dark:text-font-color-black'
-                  } `}
+                    'dark:!text-font-color-black'
+                  }`}
                 />
               ) : (
                 [
@@ -149,7 +149,7 @@ const Song = React.forwardRef(
                     className={`${
                       (currentSongData.songId === songId ||
                         isAMultipleSelection) &&
-                      'dark:text-font-color-black'
+                      'dark:!text-font-color-black'
                     } `}
                   />,
                   <span className="mr-1">,</span>,
@@ -165,7 +165,7 @@ const Song = React.forwardRef(
 
     const goToSongInfoPage = React.useCallback(() => {
       if (
-        currentlyActivePage.pageTitle !== 'ArtistInfo' &&
+        currentlyActivePage.pageTitle !== 'SongInfo' &&
         currentlyActivePage?.data?.songId !== songId
       )
         changeCurrentActivePage('SongInfo', {
@@ -620,10 +620,10 @@ const Song = React.forwardRef(
           </div>
         </div>
         <div
-          className={`song-info-container flex w-[87.5%] flex-row items-center justify-between text-font-color-black dark:text-font-color-white  ${
+          className={`song-info-container flex w-[87.5%] flex-row items-center justify-between text-font-color-black dark:text-font-color-white ${
             (currentSongData.songId === songId || isAMultipleSelection) &&
-            'dark:text-font-color-black'
-          } `}
+            'dark:!text-font-color-black'
+          }`}
         >
           <div
             className="song-title w-2/5 overflow-hidden text-ellipsis whitespace-nowrap pr-4 text-base font-normal transition-none"

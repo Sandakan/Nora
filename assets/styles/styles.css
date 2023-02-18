@@ -195,7 +195,8 @@ body * {
 :is(.previousPageBtn, .forwardPageBtn, .goToHomePageBtn).available,
 .special-controls-container :is(.go-to-main-player-btn, .always-on-top-btn),
 .special-controls-and-indicators-container :is(.indicators-container, .special-controls-container),
-.window-controls-container :is(.minimize-btn, .maximize-btn, .close-btn) {
+.window-controls-container :is(.minimize-btn, .maximize-btn, .close-btn),
+.app-version {
   -webkit-app-region: no-drag;
 }
 

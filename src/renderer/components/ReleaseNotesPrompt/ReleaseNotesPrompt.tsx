@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable no-nested-ternary */
@@ -5,6 +6,7 @@
 import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
 
 import isLatestVersion from 'renderer/utils/isLatestVersion';
 
@@ -14,6 +16,7 @@ import Img from '../Img';
 
 import packageFile from '../../../../package.json';
 import localReleseNotes from '../../../../release-notes.json';
+import WhatsNewImg from '../../../../assets/other/release artworks/whats-new-v0.8.0-alpha.png';
 
 const ReleaseNotesAppUpdateInfo = (props: { state: AppUpdatesState }) => {
   const { state } = props;
@@ -21,7 +24,7 @@ const ReleaseNotesAppUpdateInfo = (props: { state: AppUpdatesState }) => {
     return (
       <>
         <br />
-        <span className="text-sm text-background-color-3">
+        <span className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
           You have the latest version.
         </span>
       </>
@@ -78,9 +81,10 @@ const ReleaseNotesPrompt = () => {
   const { userData, appUpdatesState } = React.useContext(AppContext);
   const { updateUserData, updateAppUpdatesState } =
     React.useContext(AppUpdateContext);
-  const [releaseNotes, setReleaseNotes] = React.useState(
-    localReleseNotes as Changelog
-  );
+
+  const { isOnline } = useNetworkConnectivity();
+  const [releaseNotes, setReleaseNotes] =
+    React.useState<Changelog>(localReleseNotes);
   const [noNewUpdateInform, setNoNewUpdateInform] = React.useState(
     userData?.preferences.noUpdateNotificationForNewUpdate ===
       releaseNotes.latestVersion.version
@@ -112,7 +116,7 @@ const ReleaseNotesPrompt = () => {
   );
 
   React.useEffect(() => {
-    if (navigator.onLine) {
+    if (isOnline) {
       updateAppUpdatesState('CHECKING');
 
       fetch(packageFile.releaseNotes.json)
@@ -132,7 +136,7 @@ const ReleaseNotesPrompt = () => {
         });
     } else updateAppUpdatesState('NO_NETWORK_CONNECTION');
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isOnline]);
 
   const isAppLatestVersion = React.useMemo(
     () =>
@@ -141,9 +145,8 @@ const ReleaseNotesPrompt = () => {
   );
 
   React.useEffect(() => {
-    if (navigator.onLine)
-      updateAppUpdatesState(isAppLatestVersion ? 'LATEST' : 'OLD');
-  }, [isAppLatestVersion, updateAppUpdatesState]);
+    if (isOnline) updateAppUpdatesState(isAppLatestVersion ? 'LATEST' : 'OLD');
+  }, [isAppLatestVersion, isOnline, updateAppUpdatesState]);
 
   const appVersionComponents = React.useMemo(
     () =>
@@ -159,6 +162,25 @@ const ReleaseNotesPrompt = () => {
     [releaseNotes]
   );
 
+  const latestVersionImportantNotes = React.useMemo(() => {
+    if (releaseNotes.latestVersion.importantNotes) {
+      const notes = releaseNotes.latestVersion.importantNotes.map((note) => {
+        return (
+          <li className="latest-version-important-note max-w-[90%] font-medium">
+            {note}
+          </li>
+        );
+      });
+
+      return (
+        <ul className="my-8 flex list-disc items-center justify-center marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight">
+          {notes}
+        </ul>
+      );
+    }
+    return undefined;
+  }, [releaseNotes.latestVersion.importantNotes]);
+
   return (
     <>
       <div className="h-full w-full">
@@ -168,7 +190,7 @@ const ReleaseNotesPrompt = () => {
               Changelog
               <ReleaseNotesAppUpdateInfo state={appUpdatesState} />
             </h2>
-            {navigator.onLine && !isAppLatestVersion && (
+            {isOnline && !isAppLatestVersion && (
               <div className="mb-2 grid place-items-center">
                 <Checkbox
                   id="noNewUpdateInformCheckbox"
@@ -181,16 +203,17 @@ const ReleaseNotesPrompt = () => {
                 />
               </div>
             )}
-            {navigator.onLine && releaseNotes.latestVersion.artwork && (
+            {isOnline && releaseNotes.latestVersion.artwork && (
               <div className="version-artwork-container mb-4 p-4">
                 <Img
                   src={`${packageFile.urls.raw_repository_url}master${releaseNotes.latestVersion.artwork}`}
-                  noFallbacks
+                  fallbackSrc={WhatsNewImg}
                   className="rounded-lg"
                   alt=""
                 />
               </div>
             )}
+            {latestVersionImportantNotes}
             {appVersionComponents}
           </>
         )}

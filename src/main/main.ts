@@ -28,7 +28,7 @@ import {
   getListeningData,
 } from './filesystem';
 import { resolveHtmlPath } from './utils/util';
-import { updateSongId3Tags } from './updateSongId3Tags';
+import updateSongId3Tags from './updateSongId3Tags';
 import { version } from '../../package.json';
 import search from './search';
 import {

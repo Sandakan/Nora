@@ -6,6 +6,10 @@ import log from './log';
 
 const saveLyricsToSong = async (songId: string, lyrics: SongLyrics) => {
   if (lyrics && lyrics?.lyrics) {
+    // console.log(
+    //   'newly sent synchronised lyrics',
+    //   JSON.stringify(lyrics.lyrics)
+    // );
     const { isSynced } = lyrics.lyrics;
     const unsynchronisedLyrics = !isSynced
       ? {
@@ -24,6 +28,10 @@ const saveLyricsToSong = async (songId: string, lyrics: SongLyrics) => {
       const song = songsData[i];
       if (song.songId === songId) {
         try {
+          // console.log(
+          //   'saving synchronised lyrics',
+          //   JSON.stringify(synchronisedLyrics)
+          // );
           // eslint-disable-next-line no-await-in-loop
           await NodeID3.Promise.update(
             { unsynchronisedLyrics, synchronisedLyrics },
@@ -33,7 +41,7 @@ const saveLyricsToSong = async (songId: string, lyrics: SongLyrics) => {
             if (prevLyrics)
               return {
                 ...prevLyrics,
-                source: 'in_song_lyrics',
+                source: 'IN_SONG_LYRICS',
               };
             return undefined;
           });

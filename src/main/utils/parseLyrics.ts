@@ -130,14 +130,13 @@ export const parseSyncedLyricsFromAudioDataSource = (
       .map((line) => {
         const { text, start } = line;
         const secs = Math.floor(start % 60);
+        const secsStr = secs.toString().length > 1 ? secs : `0${secs}`;
         const mins = Math.floor(start / 60);
+        const minsStr = mins.toString().length > 1 ? mins : `0${mins}`;
         const hundredths = start.toString().includes('.')
           ? parseInt(start.toString().split('.').at(-1) || '0', 10)
           : 0;
-        return `[
-        ${mins.toString().length > 1 ? mins : `0${mins}`}
-        .${secs.toString().length > 1 ? secs : `0${secs}`}
-        .${hundredths}] ${text}`;
+        return `[${minsStr}:${secsStr}.${hundredths}] ${text}`;
       })
       .join('\n');
 

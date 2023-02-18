@@ -891,6 +891,7 @@ declare global {
     phase: string;
     releaseDate: string;
     artwork?: string;
+    importantNotes?: string[];
   }
 
   export interface AppVersion {

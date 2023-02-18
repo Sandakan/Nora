@@ -60,7 +60,12 @@ const OtherSongControlsContainer = () => {
 
   return (
     <div className="other-controls-container flex w-[30%] items-center justify-end">
-      <div className="queue-btn mr-6 flex cursor-pointer items-center justify-center text-font-color-black text-opacity-60 dark:text-font-color-white lg:hidden">
+      <div
+        className={`queue-btn mr-6 flex cursor-pointer items-center justify-center text-font-color-black text-opacity-60 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity dark:text-font-color-white dark:after:bg-dark-font-color-highlight lg:hidden ${
+          currentlyActivePage.pageTitle === 'CurrentQueue' &&
+          'after:opacity-100'
+        }`}
+      >
         <span
           title="Current Queue (Ctrl + Q)"
           className={`material-icons-round-outlined icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white ${
@@ -86,7 +91,11 @@ const OtherSongControlsContainer = () => {
         </span>
       </div>
 
-      <div className="volume-btn mr-2 flex cursor-pointer items-center justify-center">
+      <div
+        className={`volume-btn mr-2 flex cursor-pointer items-center justify-center after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity dark:after:bg-dark-font-color-highlight ${
+          isMuted && 'after:opacity-100'
+        }`}
+      >
         <span
           title="Mute/Unmute (Ctrl + M)"
           className={`material-icons-round icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white ${

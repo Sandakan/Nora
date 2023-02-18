@@ -31,11 +31,7 @@ const NewUpdateIndicator = () => {
           role="button"
           tabIndex={0}
         >
-          <span
-            className={`material-icons-round-outlined py-[1px] text-lg leading-none ${
-              navigator.onLine && ''
-            }`}
-          >
+          <span className="material-icons-round-outlined py-[1px] text-lg leading-none">
             {appUpdatesState === 'OLD'
               ? 'download'
               : appUpdatesState === 'LATEST'

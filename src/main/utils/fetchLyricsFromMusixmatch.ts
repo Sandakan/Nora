@@ -1,5 +1,4 @@
 /* eslint-disable camelcase */
-import fetch from 'node-fetch';
 
 import {
   MusixmatchLyrics,
@@ -16,8 +15,8 @@ interface TrackInfo {
   q_artist: string;
   q_artists: string;
   q_duration: string;
-  // q_album?: string;
-  // track_spotify_id?: string;
+  q_album?: string;
+  track_spotify_id?: string;
 }
 
 // $ [offset:+/- Overall timestamp adjustment in milliseconds, + shifts time up, - shifts down]
@@ -161,6 +160,8 @@ export const parseMusicmatchDataFromLyrics = async (
   throw new Error('no lyrics found on Musixmatch for current query');
 };
 
+const MUSIXMATCH_BASE_URL = 'https://apic-desktop.musixmatch.com/';
+
 const fetchLyricsFromMusixmatch = async (
   trackInfo: TrackInfo,
   usertoken: string,
@@ -168,21 +169,25 @@ const fetchLyricsFromMusixmatch = async (
   lyricsType: LyricsTypes = 'ANY',
   abortSignal?: AbortSignal
 ): Promise<MusixmatchLyrics | undefined> => {
-  // if there is a pending request, abort it.
-  const baseUrl =
-    'https://apic-desktop.musixmatch.com/ws/1.1/macro.subtitles.get?format=json&namespace=lyrics_richsynched&subtitle_format=mxm&app_id=web-desktop-app-v1.0&';
   const headers = {
     authority: 'apic-desktop.musixmatch.com',
     cookie: 'x-mxm-token-guid=',
   };
 
-  const query = new URLSearchParams({ ...trackInfo, usertoken });
+  const url = new URL('/ws/1.1/macro.subtitles.get', MUSIXMATCH_BASE_URL);
+  url.searchParams.set('namespace', 'lyrics_richsynched');
+  url.searchParams.set('app_id', 'web-desktop-app-v1.0');
+  url.searchParams.set('subtitle_format', 'mxm');
+  url.searchParams.set('format', 'json');
+  url.searchParams.set('usertoken', usertoken);
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const [key, value] of Object.entries(trackInfo)) {
+    if (typeof value === 'string') url.searchParams.set(key, value);
+  }
 
   try {
-    const res = await fetch(baseUrl + query.toString(), {
-      headers,
-      signal: abortSignal,
-    });
+    const res = await fetch(url, { headers, signal: abortSignal });
     if (res.ok) {
       const data = (await res.json()) as MusixmatchLyricsAPI;
       const lyrics = parseMusicmatchDataFromLyrics(data, lyricsType);

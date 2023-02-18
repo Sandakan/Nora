@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import DefaultImage from '../../../assets/images/png/song_cover_default.png';
 
 type Props = {
@@ -6,9 +8,9 @@ type Props = {
   alt?: string;
   noFallbacks?: boolean;
   className?: string;
-  onClick?: (e: React.MouseEvent<HTMLImageElement, MouseEvent>) => void;
+  onClick?: (_e: React.MouseEvent<HTMLImageElement, MouseEvent>) => void;
   loading?: 'eager' | 'lazy';
-  onContextMenu?: (e: React.MouseEvent<HTMLImageElement, MouseEvent>) => void;
+  onContextMenu?: (_e: React.MouseEvent<HTMLImageElement, MouseEvent>) => void;
 };
 
 const Img = (props: Props) => {
@@ -24,7 +26,6 @@ const Img = (props: Props) => {
   } = props;
 
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions
     <img
       src={src || fallbackSrc}
       alt={alt}

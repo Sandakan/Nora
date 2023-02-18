@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import stringSimilarity, { ReturnTypeEnums } from 'didyoumean2';
-import fetch from 'node-fetch';
+
 import { DeezerArtistInfo, DeezerArtistInfoApi } from '../../@types/deezer_api';
 import { getArtistsData, setArtistsData } from '../filesystem';
 import log from '../log';
@@ -8,17 +8,18 @@ import { LastFMArtistDataApi } from '../../@types/last_fm_api';
 import generatePalette from '../other/generatePalette';
 import { checkIfConnectedToInternet, dataUpdateEvent } from '../main';
 
+const DEEZER_BASE_URL = 'https://api.deezer.com/';
+
 const getArtistInfoFromDeezer = async (
   artistName: string
 ): Promise<DeezerArtistInfo[]> => {
   const isConnectedToInternet = checkIfConnectedToInternet();
   if (isConnectedToInternet) {
     try {
-      const res = await fetch(
-        `https://api.deezer.com/search/artist?q=${encodeURIComponent(
-          artistName.trim()
-        )}`
-      );
+      const url = new URL('/search/artist', DEEZER_BASE_URL);
+      url.searchParams.set('q', encodeURIComponent(artistName.trim()));
+
+      const res = await fetch(url);
       if (res.ok) {
         const data = (await res.json()) as DeezerArtistInfoApi;
         if (data.total > 0) return data.data;
@@ -43,6 +44,8 @@ const getArtistInfoFromDeezer = async (
   }
 };
 
+const LAST_FM_BASE_URL = 'http://ws.audioscrobbler.com/2.0/';
+
 const getArtistInfoFromLastFM = async (
   artistName: string
 ): Promise<LastFMArtistDataApi> => {
@@ -55,11 +58,14 @@ const getArtistInfoFromLastFM = async (
         log('undefined LAST_FM_API_KEY.', { LAST_FM_API_KEY }, 'WARN');
         throw new Error('undefined LAST_FM_API_KEY');
       }
-      const res = await fetch(
-        `http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=${encodeURIComponent(
-          artistName.trim()
-        )}&api_key=${LAST_FM_API_KEY}&format=json`
-      );
+
+      const url = new URL(LAST_FM_BASE_URL);
+      url.searchParams.set('method', 'artist.getinfo');
+      url.searchParams.set('format', 'json');
+      url.searchParams.set('artist', artistName.trim());
+      url.searchParams.set('api_key', LAST_FM_API_KEY);
+
+      const res = await fetch(url);
       if (res.ok) {
         const data = (await res.json()) as LastFMArtistDataApi;
         if (data.error) {
@@ -91,6 +97,42 @@ const getArtistInfoFromLastFM = async (
   }
 };
 
+const getArtistArtworksFromNet = async (artist: SavableArtist) => {
+  if (artist.onlineArtworkPaths) return artist.onlineArtworkPaths;
+  const isConnectedToInternet = checkIfConnectedToInternet();
+
+  if (isConnectedToInternet) {
+    const info = await getArtistInfoFromDeezer(artist.name);
+    if (info.length > 0) {
+      const closestResult = stringSimilarity(
+        artist.name,
+        info as unknown as Record<string, unknown>[],
+        {
+          caseSensitive: false,
+          matchPath: ['name'],
+          returnType: ReturnTypeEnums.FIRST_CLOSEST_MATCH,
+        }
+      ) as DeezerArtistInfo | null;
+
+      if (closestResult) {
+        return {
+          picture_small:
+            closestResult?.picture_small ||
+            closestResult?.picture_medium ||
+            closestResult.picture_big ||
+            closestResult.picture_xl,
+          picture_medium:
+            closestResult?.picture_medium ||
+            closestResult.picture_big ||
+            closestResult.picture_xl ||
+            closestResult?.picture_small,
+        };
+      }
+    }
+  }
+  return undefined;
+};
+
 const getArtistInfoFromNet = async (
   artistId: string
 ): Promise<ArtistInfoFromNet> => {
@@ -102,36 +144,7 @@ const getArtistInfoFromNet = async (
     for (let x = 0; x < artists.length; x += 1) {
       if (artists[x].artistId === artistId) {
         const artist = artists[x];
-        const artistArtworks =
-          artist.onlineArtworkPaths ??
-          (await getArtistInfoFromDeezer(artist.name).then((res) => {
-            if (res.length > 0) {
-              const closestResult = stringSimilarity(
-                artist.name,
-                res as unknown as Record<string, unknown>[],
-                {
-                  caseSensitive: false,
-                  matchPath: ['name'],
-                  returnType: ReturnTypeEnums.FIRST_CLOSEST_MATCH,
-                }
-              ) as DeezerArtistInfo | null;
-              if (closestResult) {
-                return {
-                  picture_small:
-                    closestResult?.picture_small ||
-                    closestResult?.picture_medium ||
-                    closestResult.picture_big ||
-                    closestResult.picture_xl,
-                  picture_medium:
-                    closestResult?.picture_medium ||
-                    closestResult.picture_big ||
-                    closestResult.picture_xl ||
-                    closestResult?.picture_small,
-                };
-              }
-            }
-            return undefined;
-          }));
+        const artistArtworks = await getArtistArtworksFromNet(artist);
         const artistInfo = await getArtistInfoFromLastFM(artist.name);
         if (artistArtworks && artistInfo) {
           const artistPalette = await generatePalette(

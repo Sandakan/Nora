@@ -1,5 +1,4 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/require-default-props */
@@ -51,11 +50,13 @@ export const Artist = (props: ArtistProp) => {
       ? changeCurrentActivePage('Home')
       : changeCurrentActivePage('ArtistInfo', {
           artistName: props.name,
+          artistId: props.artistId,
         });
   }, [
     changeCurrentActivePage,
     currentlyActivePage.data,
     currentlyActivePage.pageTitle,
+    props.artistId,
     props.name,
   ]);
   const playArtistSongs = React.useCallback(
@@ -252,12 +253,8 @@ export const Artist = (props: ArtistProp) => {
     >
       <div className="artist-img-container relative flex h-3/4 items-center justify-center">
         <Img
-          src={
-            navigator.onLine && props.onlineArtworkPaths
-              ? props.onlineArtworkPaths.picture_medium
-              : props.artworkPaths.artworkPath
-          }
-          fallbackSrc={DefaultArtistCover}
+          src={props?.onlineArtworkPaths?.picture_medium}
+          fallbackSrc={props.artworkPaths.artworkPath || DefaultArtistCover}
           alt="Default song cover"
           className="aspect-square h-full rounded-full object-cover shadow-xl"
         />

@@ -155,7 +155,7 @@ export default function MiniPlayer() {
         !isCurrentSongPlaying && 'paused'
       } ${
         userData && userData.preferences.isReducedMotion ? 'reduced-motion' : ''
-      } [&:hover>.container>.song-controls-container]:visible [&:hover>.container>.song-controls-container]:opacity-100 [&:hover>.container>.song-controls-container>button]:translate-x-0 [&:hover>.container>.song-controls-container>button]:scale-100`}
+      } [&:hover>.container>.song-controls-container>button]:translate-x-0 [&:hover>.container>.song-controls-container>button]:scale-100 [&:hover>.container>.song-controls-container]:visible [&:hover>.container>.song-controls-container]:opacity-100`}
     >
       <div className="background-cover-img-container h-full overflow-hidden">
         <Img
@@ -279,7 +279,7 @@ export default function MiniPlayer() {
         >
           <Button
             className="favorite-btn !m-0 h-fit -translate-x-4 cursor-pointer border-none bg-[transparent] !p-0 text-font-color-white transition-transform dark:bg-[transparent] dark:text-font-color-white"
-            iconClassName={`text-2xl ${
+            iconClassName={`!text-2xl ${
               currentSongData.isAFavorite
                 ? 'meterial-icons-round !text-dark-background-color-3'
                 : 'material-icons-round-outlined'
@@ -298,28 +298,28 @@ export default function MiniPlayer() {
           />
           <Button
             className="skip-backward-btn ml-4 !mr-0 h-fit -translate-x-4 cursor-pointer border-none bg-[transparent] !p-0 text-font-color-white transition-transform dark:bg-[transparent] dark:text-font-color-white"
-            iconClassName="text-4xl"
+            iconClassName="!text-4xl"
             clickHandler={handleSkipBackwardClick}
             iconName="skip_previous"
           />
           <Button
             className="play-pause-btn !mx-2 h-fit scale-90 cursor-pointer border-none bg-[transparent] !p-0 text-6xl text-font-color-white transition-transform dark:bg-[transparent] dark:text-font-color-white"
-            iconClassName="text-6xl"
+            iconClassName="!text-6xl"
             clickHandler={toggleSongPlayback}
             iconName={isCurrentSongPlaying ? 'pause_circle' : 'play_circle'}
           />
 
           <Button
             className="skip-backward-btn !mr-4 h-fit translate-x-4 cursor-pointer border-none bg-[transparent] !p-0 text-font-color-white transition-transform dark:bg-[transparent] dark:text-font-color-white"
-            iconClassName="text-4xl"
+            iconClassName="!text-4xl"
             clickHandler={handleSkipForwardClickWithParams}
             iconName="skip_next"
           />
           <Button
             className={`lyrics-btn !m-0 h-fit translate-x-4 cursor-pointer border-none bg-[transparent] !p-0 text-font-color-white transition-transform dark:bg-[transparent] dark:text-font-color-white ${
-              isLyricsVisible && 'text-dark-background-color-3'
+              isLyricsVisible && '!text-dark-background-color-3'
             }`}
-            iconClassName="text-2xl"
+            iconClassName="!text-2xl"
             clickHandler={() => setIsLyricsVisible((prevState) => !prevState)}
             iconName="notes"
             tooltipLabel="Lyrics (Ctrl + L)"
@@ -344,8 +344,8 @@ export default function MiniPlayer() {
               ?.map((artist) => artist.name)
               .join(', ')}
           >
-            {currentSongData.songId
-              ? currentSongData.artists
+            {currentSongData.songId && Array.isArray(currentSongData.artists)
+              ? currentSongData.artists?.length > 0
                 ? currentSongData.artists
                     .map((artist) => artist.name)
                     .join(', ')

@@ -1,9 +1,9 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import Button from 'renderer/components/Button';
 import Img from 'renderer/components/Img';
-import DefaultArtistCover from '../../../../../assets/images/png/artist_cover_default.png';
 
 type Props = {
   songArtists?: {
@@ -60,13 +60,8 @@ const SongArtistsInput = (props: Props) => {
                   close
                 </span>
                 <Img
-                  src={
-                    navigator.onLine && artist.onlineArtworkPaths
-                      ? artist.onlineArtworkPaths.picture_small
-                      : artist.artworkPath
-                      ? `nora://localFiles/${artist.artworkPath}`
-                      : DefaultArtistCover
-                  }
+                  src={artist.onlineArtworkPaths?.picture_small}
+                  fallbackSrc={artist.artworkPath}
                   className="mr-2 aspect-square w-6 rounded-full group-hover:invisible group-hover:absolute"
                   alt=""
                 />{' '}
@@ -112,13 +107,8 @@ const SongArtistsInput = (props: Props) => {
                 }}
               >
                 <Img
-                  src={
-                    navigator.onLine && x.onlineArtworkPaths
-                      ? x.onlineArtworkPaths.picture_small
-                      : x.artworkPath
-                      ? `nora://localFiles/${x.artworkPath}`
-                      : DefaultArtistCover
-                  }
+                  src={x.onlineArtworkPaths?.picture_small}
+                  fallbackSrc={x.artworkPath}
                   className="mr-4 aspect-square w-6 rounded-full"
                   alt=""
                 />

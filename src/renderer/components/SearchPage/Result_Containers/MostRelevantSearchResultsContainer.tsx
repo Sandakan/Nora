@@ -156,6 +156,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
                 ? changeCurrentActivePage('Home')
                 : changeCurrentActivePage('ArtistInfo', {
                     artistName: firstResult.name,
+                    artistId: firstResult.artistId,
                   }),
           },
           {
@@ -309,7 +310,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
               : 'overscroll-auto'
           } transition-[transform,opacity] ${
             MostRelevantResults.length > 0
-              ? 'visible flex translate-y-0 pb-4 opacity-100 [&>div]:hidden [&>div.active]:flex'
+              ? 'visible flex translate-y-0 pb-4 opacity-100 [&>div.active]:flex [&>div]:hidden'
               : 'tranlate-y-8 invisible opacity-0'
           }`}
           ref={mostRelevantResultContainerRef}

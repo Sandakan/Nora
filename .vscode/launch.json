@@ -5,17 +5,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Renderer",
-      "type": "chrome",
-      "request": "attach",
-      "port": 9223,
-      "webRoot": "${workspaceFolder}",
-      "timeout": 15000,
-      "restart": true,
-      "showAsyncStacks": true,
-      "smartStep": true
-    },
-    {
       "name": "Main",
       "port": 5858,
       "request": "attach",
@@ -28,6 +17,17 @@
       },
       "showAsyncStacks": true,
       "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"]
+    },
+    {
+      "name": "Renderer",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9223,
+      "webRoot": "${workspaceFolder}",
+      "timeout": 15000,
+      "restart": true,
+      "showAsyncStacks": true,
+      "smartStep": true
     }
   ]
 }

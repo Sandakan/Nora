@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 // ? SPOTIFY ARTWORKS URL BREAKDOWN
 // ? /// COMMON URL /// | /// UNKNOWN VARIABLE ID /// | /// QUALITY /// | //// IMG ID /////
 // https://i.scdn.co/image/ | ab67616d0000 | 1e02 | 3bd8eaea54f3e7f41d6a4990
@@ -7,8 +8,6 @@
 // https://i.scdn.co/image/ ab6761610000 f17800fd80d5a04958c6164785bf
 
 // https://i.scdn.co/image/ ab6761670000 ecd483b611804e9de647b18110be
-
-import fetch from 'node-fetch';
 
 import { SpotifyEmbedApi } from '../../@types/spotify_embed_api';
 
@@ -21,11 +20,10 @@ const HIGH_RES = 'b273';
 const spotifyImageIdRegex = /(?<=1e02|b273)(\w{24})/gm;
 const spotifyReqVarIdRegex = /(?<=\/image\/)(\w{12})(?=1e02|b273)/gm;
 
-const fetchSongArtworksFromSpotify = async (spotify_song_id: string) => {
+const fetchSongArtworksFromSpotify = async (spotifySongId: string) => {
   try {
-    const res = await fetch(SPOTIFY_EMBED_BASE_URL + spotify_song_id);
+    const res = await fetch(SPOTIFY_EMBED_BASE_URL + spotifySongId);
     if (res.ok) {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { thumbnail_url } = (await res.json()) as SpotifyEmbedApi;
 
       const spotifyImgIds = thumbnail_url.match(spotifyImageIdRegex);

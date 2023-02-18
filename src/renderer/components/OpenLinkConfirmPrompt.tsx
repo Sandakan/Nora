@@ -55,14 +55,14 @@ const OpenLinkConfirmPrompt = (props: OpenLinkConfirmPromptProps) => {
       <div className="buttons-container mt-12 flex justify-end">
         <Button
           label="Cancel"
-          className={`remove-song-from-library-btn w-[10rem] rounded-md text-font-color-black hover:border-background-color-3 dark:text-font-color-white dark:hover:border-background-color-3 ${buttonClassName}`}
+          className={`remove-song-from-library-btn w-[10rem] text-font-color-black hover:border-background-color-3 dark:text-font-color-white dark:hover:border-background-color-3 ${buttonClassName}`}
           clickHandler={() => {
             changePromptMenuData(false);
           }}
         />
         <Button
           label="Open Link"
-          className={`remove-song-from-library-btn w-[10rem] rounded-md !bg-background-color-3 text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3 ${buttonClassName}`}
+          className={`remove-song-from-library-btn w-[10rem] !bg-background-color-3 text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3 ${buttonClassName}`}
           clickHandler={() => {
             window.api.saveUserData(
               'preferences.doNotVerifyWhenOpeningLinks',

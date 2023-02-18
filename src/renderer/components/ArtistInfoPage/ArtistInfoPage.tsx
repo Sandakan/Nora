@@ -75,15 +75,16 @@ const ArtistInfoPage = () => {
     updateBodyBackgroundImage,
     updateCurrentlyActivePageData,
   } = React.useContext(AppUpdateContext);
-  const [artistData, setArtistData] = React.useState({} as ArtistInfo);
-  const [albums, setAlbums] = React.useState([] as Album[]);
-  const [songs, setSongs] = React.useState([] as SongData[]);
+
+  const [artistData, setArtistData] = React.useState<ArtistInfo>();
+  const [albums, setAlbums] = React.useState<Album[]>([]);
+  const [songs, setSongs] = React.useState<SongData[]>([]);
   const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>('aToZ');
 
   const fetchArtistsData = React.useCallback(() => {
-    if (currentlyActivePage.data && currentlyActivePage.data.artistName) {
+    if (currentlyActivePage?.data?.artistId) {
       window.api
-        .getArtistData([currentlyActivePage.data.artistName])
+        .getArtistData([currentlyActivePage.data.artistId])
         .then((res) => {
           if (res && res.length > 0) {
             if (res[0].onlineArtworkPaths?.picture_medium)
@@ -98,53 +99,47 @@ const ArtistInfoPage = () => {
   }, [currentlyActivePage.data, updateBodyBackgroundImage]);
 
   const fetchArtistArtworks = React.useCallback(() => {
-    if (artistData.artistId && navigator.onLine) {
+    if (artistData?.artistId) {
       window.api
         .getArtistArtworks(artistData.artistId)
         .then((x) => {
           if (x)
             setArtistData((prevData) => {
-              return {
-                ...prevData,
-                artworkPaths: {
-                  isDefaultArtwork: false,
-                  artworkPath:
-                    x.artistArtworks?.picture_medium ||
-                    prevData.artworkPaths.artworkPath,
-                  optimizedArtworkPath:
-                    x.artistArtworks?.picture_medium ||
-                    prevData.artworkPaths.optimizedArtworkPath,
-                },
-                artistPalette: x.artistPalette || prevData.artistPalette,
-                artistBio: x.artistBio || prevData.artistBio,
-              };
+              if (prevData)
+                return {
+                  ...prevData,
+                  onlineArtworkPaths: x.artistArtworks,
+                  artistPalette: x.artistPalette || prevData.artistPalette,
+                  artistBio: x.artistBio || prevData.artistBio,
+                };
+              return undefined;
             });
         })
         .catch((err) => {
           console.error(err);
         });
     }
-  }, [artistData.artistId]);
+  }, [artistData?.artistId]);
 
   const fetchSongsData = React.useCallback(() => {
-    if (artistData.songs && artistData.songs.length > 0) {
+    if (artistData?.songs && artistData.songs.length > 0) {
       window.api
         .getSongInfo(artistData.songs.map((song) => song.songId))
         .then((songsData) => {
           if (songsData && songsData.length > 0) setSongs(songsData);
         });
     }
-  }, [artistData.songs]);
+  }, [artistData?.songs]);
 
   const fetchAlbumsData = React.useCallback(() => {
-    if (artistData.albums && artistData.albums.length > 0) {
+    if (artistData?.albums && artistData.albums.length > 0) {
       window.api
         .getAlbumData(artistData.albums.map((album) => album.albumId))
         .then((res) => {
           if (res && res.length > 0) setAlbums(res);
         });
     }
-  }, [artistData.albums]);
+  }, [artistData?.albums]);
 
   React.useEffect(() => {
     fetchArtistsData();
@@ -252,7 +247,7 @@ const ArtistInfoPage = () => {
   }, [songs]);
 
   const sanitizeArtistBio = React.useCallback(() => {
-    if (artistData.artistBio) {
+    if (artistData?.artistBio) {
       const x = artistData.artistBio.match(/<a .*<\/a>/gm);
       const y = x ? x[0].match(/".*"/gm) : [''];
       const link = y ? y[0].replace(/"/gm, '') : '';
@@ -326,7 +321,13 @@ const ArtistInfoPage = () => {
         <div className="artist-img-and-info-container relative mb-12 flex flex-row items-center pl-8 [&>*]:z-10">
           <div className="artist-img-container mr-10 max-h-60 lg:hidden">
             <Img
-              src={artistData?.artworkPaths?.artworkPath || DefaultArtistCover}
+              src={
+                artistData?.onlineArtworkPaths?.picture_medium ||
+                artistData?.artworkPaths?.artworkPath
+              }
+              fallbackSrc={
+                artistData?.artworkPaths?.artworkPath || DefaultArtistCover
+              }
               className="aspect-square max-h-60 rounded-full"
               alt="Album Cover"
             />
@@ -341,7 +342,7 @@ const ArtistInfoPage = () => {
             <div
               className="artist-name mb-2 text-5xl text-background-color-3 dark:text-background-color-3"
               style={
-                artistData.artistPalette?.LightVibrant && {
+                artistData?.artistPalette?.LightVibrant && {
                   color: `${
                     isDarkMode
                       ? `rgb(${artistData.artistPalette?.LightVibrant.rgb[0]},${artistData.artistPalette?.LightVibrant.rgb[1]},${artistData.artistPalette?.LightVibrant.rgb[2]})`
@@ -350,9 +351,9 @@ const ArtistInfoPage = () => {
                 }
               }
             >
-              {artistData.name}
+              {artistData?.name}
             </div>
-            {artistData.songs && (
+            {artistData?.songs && (
               <div className="artist-no-of-songs">
                 {artistData.albums && artistData.albums.length > 0
                   ? `${artistData.albums.length} album${
@@ -373,24 +374,29 @@ const ArtistInfoPage = () => {
             <div className="artist-like-btn-container">
               <span
                 className={`material-icons-round${
-                  !artistData.isAFavorite ? '-outlined' : ''
+                  !artistData?.isAFavorite ? '-outlined' : ''
                 } mr-2 cursor-pointer !text-xl`}
-                onClick={() =>
-                  window.api
-                    .toggleLikeArtist(
-                      artistData.artistId,
-                      !artistData.isAFavorite
-                    )
-                    .then(
-                      (res) =>
-                        res &&
-                        setArtistData((prevData) => ({
-                          ...prevData,
-                          isAFavorite: !prevData.isAFavorite,
-                        }))
-                    )
-                    .catch((err) => console.error(err))
-                }
+                onClick={() => {
+                  if (artistData)
+                    window.api
+                      .toggleLikeArtist(
+                        artistData.artistId,
+                        !artistData.isAFavorite
+                      )
+                      .then(
+                        (res) =>
+                          res &&
+                          setArtistData((prevData) =>
+                            prevData
+                              ? {
+                                  ...prevData,
+                                  isAFavorite: !prevData.isAFavorite,
+                                }
+                              : undefined
+                          )
+                      )
+                      .catch((err) => console.error(err));
+                }}
                 role="button"
                 tabIndex={0}
               >
@@ -431,14 +437,14 @@ const ArtistInfoPage = () => {
                   flex items-center justify-between text-2xl`}
               >
                 Appears on songs
-                {artistData.songs && artistData.songs.length > 0 && (
+                {artistData?.songs && artistData.songs.length > 0 && (
                   <div className="artist-buttons mr-4 flex">
                     <Button
                       label="Play All"
                       iconName="play_arrow"
                       className={
                         bodyBackgroundImage
-                          ? '!text-font-color-white'
+                          ? '!border-background-color-2/50 !text-font-color-white hover:!border-background-color-3 dark:!border-dark-background-color-2/50 dark:hover:!border-dark-background-color-3'
                           : 'text-font-color-black dark:text-font-color-white'
                       }
                       clickHandler={() =>
@@ -456,7 +462,7 @@ const ArtistInfoPage = () => {
                       iconName="shuffle"
                       className={
                         bodyBackgroundImage
-                          ? '!text-font-color-white'
+                          ? '!border-background-color-2/50 !text-font-color-white hover:!border-background-color-3 dark:!border-dark-background-color-2/50 dark:hover:!border-dark-background-color-3'
                           : 'text-font-color-black dark:text-font-color-white'
                       }
                       clickHandler={() =>
@@ -474,7 +480,7 @@ const ArtistInfoPage = () => {
                       iconName="add"
                       className={
                         bodyBackgroundImage
-                          ? '!text-font-color-white'
+                          ? '!border-background-color-2/50 !text-font-color-white hover:!border-background-color-3 dark:!border-dark-background-color-2/50 dark:hover:!border-dark-background-color-3'
                           : 'text-font-color-black dark:text-font-color-white'
                       }
                       clickHandler={() => {
@@ -500,6 +506,11 @@ const ArtistInfoPage = () => {
                     />
                     <Dropdown
                       name="SongsSortDropdown"
+                      className={
+                        bodyBackgroundImage
+                          ? '!border-background-color-2/50 !text-font-color-white hover:!border-background-color-3 active:!border-dark-background-color-3 dark:!border-dark-background-color-2/50 dark:hover:!border-dark-background-color-3 dark:active:!border-dark-background-color-3'
+                          : 'text-font-color-black dark:text-font-color-white'
+                      }
                       value={sortingOrder}
                       options={dropdownOptions}
                       onChange={(e) => {
@@ -518,7 +529,7 @@ const ArtistInfoPage = () => {
             </>
           </MainContainer>
         )}
-        {artistData.artistBio && (
+        {artistData?.artistBio && (
           <div
             className={`"artist-bio-container relative z-10 m-4 rounded-lg p-4 text-font-color-black  dark:text-font-color-white ${
               bodyBackgroundImage

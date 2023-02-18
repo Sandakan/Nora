@@ -18,7 +18,7 @@ function Dropdown(props: DropdownProp) {
         <option
           key={option.value}
           value={option.value}
-          className="bg-context-menu-background dark:bg-dark-context-menu-background"
+          className="!bg-context-menu-background !text-font-color-black dark:!bg-dark-context-menu-background dark:!text-font-color-white"
         >
           {option.label}
         </option>

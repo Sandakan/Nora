@@ -23,15 +23,23 @@ function SongArtist(props: SongArtistProp) {
     style,
   } = props;
 
-  const showArtistInfoPage = (artistName: string, id: string) =>
-    currentSongData.artists &&
-    (currentlyActivePage.pageTitle === 'ArtistInfo' &&
-    currentlyActivePage.data.artistName === artistName
-      ? changeCurrentActivePage('Home')
-      : changeCurrentActivePage('ArtistInfo', {
-          artistName,
-          artistId: id,
-        }));
+  const showArtistInfoPage = React.useCallback(
+    (artistName: string, id: string) =>
+      currentSongData.artists &&
+      (currentlyActivePage.pageTitle === 'ArtistInfo' &&
+      currentlyActivePage.data?.artistName === artistName
+        ? changeCurrentActivePage('Home')
+        : changeCurrentActivePage('ArtistInfo', {
+            artistName,
+            artistId: id,
+          })),
+    [
+      changeCurrentActivePage,
+      currentSongData.artists,
+      currentlyActivePage.data,
+      currentlyActivePage.pageTitle,
+    ]
+  );
 
   return (
     <Button

@@ -38,7 +38,11 @@ const SongControlsAndSeekbarContainer = () => {
   const seekBarCssProperties: any = {};
 
   seekBarCssProperties['--seek-before-width'] = `${
-    (songPos / currentSongData.duration) * 100
+    (songPos /
+      ((currentSongData.duration || 0) >= songPos
+        ? currentSongData.duration || 0
+        : songPos)) *
+    100
   }%`;
 
   React.useEffect(() => {
@@ -102,15 +106,17 @@ const SongControlsAndSeekbarContainer = () => {
   const currentSongPosition = calculateTime(songPosition);
   const songDuration =
     userData && userData.preferences.showSongRemainingTime
-      ? calculateTime(currentSongData.duration - Math.floor(songPosition))
+      ? currentSongData.duration - Math.floor(songPosition) >= 0
+        ? calculateTime(currentSongData.duration - Math.floor(songPosition))
+        : calculateTime(0)
       : calculateTime(currentSongData.duration);
 
   return (
     <div className="song-controls-and-seekbar-container flex w-[40%] min-w-[20rem] flex-col items-center justify-center py-2">
       <div className="controls-container flex w-2/3 items-center justify-around px-2 lg:w-4/5 lg:p-0 [&>div.active_span.icon]:text-font-color-highlight [&>div.active_span.icon]:opacity-100 dark:[&>div.active_span.icon]:text-dark-font-color-highlight">
         <div
-          className={`like-btn flex h-8 w-8 items-center justify-center rounded-full ${
-            currentSongData.isAFavorite && 'active'
+          className={`like-btn flex h-8 w-8 items-center justify-center rounded-full after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity dark:after:bg-dark-font-color-highlight ${
+            currentSongData.isAFavorite && 'active after:opacity-100'
           } ${!currentSongData.isKnownSource && '!cursor-none brightness-50'}`}
         >
           <span
@@ -132,7 +138,11 @@ const SongControlsAndSeekbarContainer = () => {
             favorite
           </span>
         </div>
-        <div className={`shuffle-btn flex ${isShuffling && 'active'}`}>
+        <div
+          className={`shuffle-btn flex items-center justify-center after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity dark:after:bg-dark-font-color-highlight ${
+            isShuffling && 'active after:opacity-100'
+          }`}
+        >
           <span
             title="Shuffle (Ctrl + S)"
             className="material-icons-round icon cursor-pointer text-2xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"
@@ -176,7 +186,9 @@ const SongControlsAndSeekbarContainer = () => {
           </span>
         </div>
         <div
-          className={`repeat-btn flex ${isRepeating !== 'false' && 'active'}`}
+          className={`repeat-btn flex items-center justify-center after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity dark:after:bg-dark-font-color-highlight ${
+            isRepeating !== 'false' && 'active after:opacity-100'
+          }`}
         >
           <span
             title="Repeat (Ctrl + T)"
@@ -189,8 +201,9 @@ const SongControlsAndSeekbarContainer = () => {
           </span>
         </div>
         <div
-          className={`lyrics-btn flex ${
-            currentlyActivePage.pageTitle === 'Lyrics' && 'active'
+          className={`lyrics-btn flex items-center justify-center after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity dark:after:bg-dark-font-color-highlight ${
+            currentlyActivePage.pageTitle === 'Lyrics' &&
+            'active after:opacity-100'
           }`}
         >
           <span
@@ -217,7 +230,11 @@ const SongControlsAndSeekbarContainer = () => {
             id="seek-bar-slider"
             className="seek-bar-slider relative float-left m-0 h-6 w-full appearance-none rounded-lg bg-[transparent] p-0 outline-none before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
             min={0}
-            max={currentSongData.duration || 0}
+            max={
+              (currentSongData.duration || 0) >= songPos
+                ? currentSongData.duration || 0
+                : songPos
+            }
             value={songPos || 0}
             onChange={(e) => {
               setSongPos(e.currentTarget.valueAsNumber ?? 0);

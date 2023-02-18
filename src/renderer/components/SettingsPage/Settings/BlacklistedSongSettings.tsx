@@ -26,7 +26,7 @@ const BlacklistedSongSettings = (props: Props) => {
         Songs that have been removed and blacklisted from the library will
         appear here.
       </div>
-      <div className="blacklisted-songs relative my-4 mr-8 rounded-xl border-[0.2rem] border-background-color-2 p-2 empty:min-h-[7rem] empty:after:absolute empty:after:top-1/2 empty:after:left-1/2 empty:after:-translate-x-1/2 empty:after:-translate-y-1/2 empty:after:text-[#ccc] empty:after:content-['There_are_no_blacklisted_songs.'] dark:border-dark-background-color-2">
+      <div className="blacklisted-songs relative my-4 mr-8 max-h-60 overflow-y-auto rounded-xl border-[0.2rem] border-background-color-2 p-2 empty:min-h-[7rem] empty:after:absolute empty:after:top-1/2 empty:after:left-1/2 empty:after:-translate-x-1/2 empty:after:-translate-y-1/2 empty:after:text-[#ccc] empty:after:content-['There_are_no_blacklisted_songs.'] dark:border-dark-background-color-2">
         {blacklistedSongComponents}
       </div>
     </div>

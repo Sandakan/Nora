@@ -95,7 +95,7 @@ const AboutSettings = () => {
           <li>
             This product is licensed under the{' '}
             <Button
-              className="show-app-licence-btn about-link !inline w-fit cursor-pointer !border-0 !p-0 text-sm text-font-color-highlight-2 hover:underline dark:text-dark-font-color-highlight-2"
+              className="show-app-licence-btn about-link !inline w-fit cursor-pointer !border-0 !p-0 text-sm text-font-color-highlight-2 hover:underline dark:!text-dark-font-color-highlight-2"
               label="MIT licence."
               clickHandler={() =>
                 changePromptMenuData(
@@ -114,45 +114,47 @@ const AboutSettings = () => {
             />
           </li>
         </ul>
-        <Button
-          className="release-notes-prompt-btn about-link block w-fit cursor-pointer !border-0 !p-0 text-base text-font-color-highlight-2 no-underline hover:!underline dark:text-dark-font-color-highlight-2"
-          label="Release Notes"
-          clickHandler={() =>
-            changePromptMenuData(
-              true,
-              <ReleaseNotesPrompt />,
-              'release-notes px-8 py-4'
-            )
-          }
-        />
-        <Button
-          className="open-source-licenses-btn about-link block w-fit cursor-pointer !border-0 !p-0 text-base text-font-color-highlight-2 hover:underline dark:text-dark-font-color-highlight-2"
-          label="Open source licences"
-          clickHandler={() =>
-            changePromptMenuData(
-              true,
-              <>
-                <div className="mb-4 w-full text-center text-3xl font-medium">
-                  Open Source Licenses
-                </div>
-                <pre className="relative max-h-full w-full overflow-y-auto px-4">
-                  {openSourceLicenses}
-                </pre>
-              </>,
-              'flex flex-col'
-            )
-          }
-        />
-        <Button
-          className="about-link block w-fit cursor-pointer !border-0 !p-0 text-base text-font-color-highlight-2 hover:underline dark:text-dark-font-color-highlight-2"
-          label="Open Log file"
-          clickHandler={() => window.api.openLogFile()}
-        />
-        <Hyperlink
-          label="Github repository"
-          link={homepage}
-          linkTitle="Nora Github Repository"
-        />
+        <div>
+          <Button
+            className="release-notes-prompt-btn about-link block w-fit cursor-pointer !border-0 !p-0 !text-base text-font-color-highlight-2 no-underline hover:!underline dark:!text-dark-font-color-highlight-2"
+            label="Release Notes"
+            clickHandler={() =>
+              changePromptMenuData(
+                true,
+                <ReleaseNotesPrompt />,
+                'release-notes px-8 py-4'
+              )
+            }
+          />
+          <Button
+            className="open-source-licenses-btn about-link block w-fit cursor-pointer !border-0 !p-0 !text-base text-font-color-highlight-2 hover:underline dark:!text-dark-font-color-highlight-2"
+            label="Open source licences"
+            clickHandler={() =>
+              changePromptMenuData(
+                true,
+                <>
+                  <div className="mb-4 w-full text-center text-3xl font-medium">
+                    Open Source Licenses
+                  </div>
+                  <pre className="relative max-h-full w-full overflow-y-auto px-4">
+                    {openSourceLicenses}
+                  </pre>
+                </>,
+                'flex flex-col'
+              )
+            }
+          />
+          <Button
+            className="about-link block w-fit cursor-pointer !border-0 !p-0 !text-base text-font-color-highlight-2 hover:underline dark:!text-dark-font-color-highlight-2"
+            label="Open Log file"
+            clickHandler={() => window.api.openLogFile()}
+          />
+          <Hyperlink
+            label="Github repository"
+            link={homepage}
+            linkTitle="Nora Github Repository"
+          />
+        </div>
 
         <div className="about-buttons-container mb-4 mt-6 flex flex-wrap">
           <Button
@@ -174,7 +176,7 @@ const AboutSettings = () => {
             clickHandler={() => window.api.openDevtools()}
           />
           <Button
-            label="Resync songs"
+            label="Resync Library"
             iconName="sync"
             className="mb-4 rounded-2xl"
             clickHandler={() => window.api.resyncSongsLibrary()}
@@ -260,7 +262,7 @@ const AboutSettings = () => {
               label="Sandakan Nipunajith"
               link={author.url}
               linkTitle="Sandakan's Github Profile"
-              className="mr-1"
+              className="mr-1 font-normal"
             />
             .
             <br />
@@ -275,6 +277,7 @@ const AboutSettings = () => {
                   />
                 </>
               }
+              className="font-normal"
               link="https://www.google.com/search?q=beautiful+sri+lanka"
               linkTitle="Beautiful Sri Lanka"
             />

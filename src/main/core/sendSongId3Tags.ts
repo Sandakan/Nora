@@ -1,4 +1,6 @@
 /* eslint-disable no-await-in-loop */
+import NodeID3 from 'node-id3';
+import { parseSyncedLyricsFromAudioDataSource } from '../utils/parseLyrics';
 import {
   getAlbumsData,
   getArtistsData,
@@ -7,7 +9,31 @@ import {
 } from '../filesystem';
 import { getSongArtworkPath } from '../fs/resolveFilePaths';
 import log from '../log';
-import { getSongId3Tags } from '../updateSongId3Tags';
+
+const getSongId3Tags = (songPath: string) =>
+  NodeID3.Promise.read(songPath, { noRaw: true });
+
+const getLyricsFromSongID3Tags = (songID3Tags: NodeID3.Tags) => {
+  const { unsynchronisedLyrics, synchronisedLyrics } = songID3Tags;
+
+  if (Array.isArray(synchronisedLyrics) && synchronisedLyrics.length > 0) {
+    const syncedLyricsData = synchronisedLyrics[synchronisedLyrics.length - 1];
+    // console.log(
+    //   'unparsed synchronised lyrics',
+    //   JSON.stringify(syncedLyricsData)
+    // );
+
+    const parsedSyncedLyrics =
+      parseSyncedLyricsFromAudioDataSource(syncedLyricsData);
+    // console.log(
+    //   'parsed synchronised lyrics',
+    //   JSON.stringify(parsedSyncedLyrics)
+    // );
+    return parsedSyncedLyrics?.unparsedLyrics;
+  }
+  if (unsynchronisedLyrics) return unsynchronisedLyrics.text;
+  return undefined;
+};
 
 const sendSongID3Tags = async (songId: string): Promise<SongTags> => {
   log(`Requested song ID3 tags for the song -${songId}-`);
@@ -34,14 +60,22 @@ const sendSongID3Tags = async (songId: string): Promise<SongTags> => {
           : undefined;
         const songTags = await getSongId3Tags(song.path);
         if (songTags) {
+          const title = song.title ?? songTags.title ?? 'Unknown Title';
+          const tagArtists =
+            songArtists ??
+            songTags.artist?.split(',').map((artist) => ({
+              name: artist.trim(),
+              artistId: undefined,
+            }));
+          const tagGenres =
+            songGenres ??
+            songTags.genre
+              ?.split(',')
+              .map((genre) => ({ genreId: undefined, name: genre.trim() }));
+
           const res: SongTags = {
-            title: song.title ?? songTags.title ?? 'Unknown Title',
-            artists:
-              songArtists ??
-              songTags.artist?.split(',').map((artist) => ({
-                name: artist.trim(),
-                artistId: undefined,
-              })),
+            title,
+            artists: tagArtists,
             album: songAlbum
               ? {
                   ...songAlbum,
@@ -54,14 +88,10 @@ const sendSongID3Tags = async (songId: string): Promise<SongTags> => {
                   albumId: undefined,
                 }
               : undefined,
-            genres:
-              songGenres ??
-              songTags.genre
-                ?.split(',')
-                .map((genre) => ({ genreId: undefined, name: genre.trim() })),
+            genres: tagGenres,
             releasedYear: Number(songTags.year) || undefined,
             composer: songTags.composer,
-            lyrics: songTags.unsynchronisedLyrics?.text,
+            lyrics: getLyricsFromSongID3Tags(songTags),
             artworkPath: getSongArtworkPath(
               song.songId,
               song.isArtworkAvailable

@@ -1,6 +1,5 @@
 /* eslint-disable no-loop-func */
 /* eslint-disable no-await-in-loop */
-import fetch from 'node-fetch';
 import NodeID3 from 'node-id3';
 import path from 'path';
 import { readFile } from 'fs/promises';
@@ -31,7 +30,7 @@ import convertParsedLyricsToNodeID3Format from './core/convertParsedLyricsToNode
 const fetchArtworkBufferFromURL = async (url: string) => {
   try {
     const res = await fetch(url);
-    return res.status === 200 && res.body
+    return res.ok && res.body
       ? Buffer.from(await res.arrayBuffer())
       : undefined;
   } catch (error) {
@@ -433,7 +432,7 @@ const manageArtworkUpdates = async (
   return { songPrevArtworkPaths, artworkBuffer, updatedSongData: prevSongData };
 };
 
-export const updateSongId3Tags = async (
+const updateSongId3Tags = async (
   songId: string,
   tags: SongTags,
   sendUpdatedData = false
@@ -496,8 +495,7 @@ export const updateSongId3Tags = async (
             ? { language: 'ENG', text: parsedLyrics.unparsedLyrics }
             : undefined;
 
-        // $ synchronisedLyrics tag skipped due to incorrect timestamps related bugs.
-        const synchronisedLyrics: SynchronisedLyrics =
+        const synchronisedLyrics =
           convertParsedLyricsToNodeID3Format(parsedLyrics);
 
         if (parsedLyrics) {
@@ -597,5 +595,4 @@ export const updateSongId3Tags = async (
   );
 };
 
-export const getSongId3Tags = (songPath: string) =>
-  NodeID3.Promise.read(songPath, { noRaw: true });
+export default updateSongId3Tags;

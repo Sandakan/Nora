@@ -11,6 +11,7 @@ import React, { useContext } from 'react';
 import debounce from 'renderer/utils/debounce';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
 import LyricLine from './LyricLine';
 import NoLyricsImage from '../../../../assets/images/svg/Sun_Monochromatic.svg';
 import FetchingLyricsImage from '../../../../assets/images/svg/Waiting_Monochromatic.svg';
@@ -36,6 +37,7 @@ export const LyricsPage = () => {
 
   const lyricsLinesContainerRef = React.useRef<HTMLDivElement>(null);
   const [isAutoScrolling, setIsAutoScrolling] = React.useState(true);
+  const { isOnline } = useNetworkConnectivity();
 
   const copyright = React.useMemo(() => {
     if (lyrics?.copyright) return lyrics.copyright;
@@ -44,35 +46,33 @@ export const LyricsPage = () => {
   }, [lyrics]);
 
   React.useEffect(() => {
-    if (navigator.onLine) {
-      setLyrics(null);
-      addNewNotifications([
-        {
-          id: 'fetchLyrics',
-          delay: 5000,
-          content: (
-            <span>
-              Fetching lyrics for &apos;{currentSongData.title}&apos;...
-            </span>
-          ),
-          icon: (
-            <span className="material-icons-round-outlined !text-xl">mic</span>
-          ),
-        },
-      ]);
-      window.api
-        .getSongLyrics({
-          songTitle: currentSongData.title,
-          songArtists: Array.isArray(currentSongData.artists)
-            ? currentSongData.artists.map((artist) => artist.name)
-            : [],
-          songId: currentSongData.songId,
-          duration: currentSongData.duration,
-        })
-        .then((res) => {
-          setLyrics(res);
-        });
-    }
+    setLyrics(null);
+    addNewNotifications([
+      {
+        id: 'fetchLyrics',
+        delay: 5000,
+        content: (
+          <span>
+            Fetching lyrics for &apos;{currentSongData.title}&apos;...
+          </span>
+        ),
+        icon: (
+          <span className="material-icons-round-outlined !text-xl">mic</span>
+        ),
+      },
+    ]);
+    window.api
+      .getSongLyrics({
+        songTitle: currentSongData.title,
+        songArtists: Array.isArray(currentSongData.artists)
+          ? currentSongData.artists.map((artist) => artist.name)
+          : [],
+        songId: currentSongData.songId,
+        duration: currentSongData.duration,
+      })
+      .then((res) => {
+        setLyrics(res);
+      });
   }, [
     addNewNotifications,
     currentSongData.artists,
@@ -235,13 +235,11 @@ export const LyricsPage = () => {
     <MainContainer
       noDefaultStyles
       className={`lyrics-container relative flex h-full flex-col ${
-        lyrics && navigator.onLine
-          ? 'justify-start'
-          : 'items-center justify-center'
+        lyrics && isOnline ? 'justify-start' : 'items-center justify-center'
       }`}
     >
       <>
-        {navigator.onLine ? (
+        {isOnline || lyrics ? (
           lyrics ? (
             <>
               <div className="title-container relative flex w-full items-center justify-between py-2 pl-8 pr-2 text-2xl text-font-color-highlight dark:text-dark-font-color-highlight">
@@ -289,9 +287,15 @@ export const LyricsPage = () => {
                     <Button
                       key={3}
                       label="Show online lyrics"
-                      pendingAnimationOnDisabled
                       className="show-online-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                       iconName="language"
+                      pendingAnimationOnDisabled={isOnline}
+                      isDisabled={!isOnline}
+                      tooltipLabel={
+                        isOnline
+                          ? undefined
+                          : 'You are not connected to internet.'
+                      }
                       clickHandler={showOnlineLyrics}
                     />
                   )}
@@ -359,7 +363,7 @@ export const LyricsPage = () => {
         ) : (
           <NoLyrics
             artworkPath={NoInternetImage}
-            content="You are not connected to the internet."
+            content="There are no offline lyrics for this song. You need an internet connection to check for online lyrics."
           />
         )}
       </>

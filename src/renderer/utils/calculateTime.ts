@@ -1,6 +1,6 @@
+/* eslint-disable no-param-reassign */
 const calculateTime = (secs: number) => {
-  // eslint-disable-next-line no-param-reassign
-  if (Number.isNaN(secs)) secs = 0;
+  if (Number.isNaN(secs) || secs < 0) secs = 0;
 
   const minutes = Math.floor(secs / 60);
   const seconds = Math.floor(secs % 60);

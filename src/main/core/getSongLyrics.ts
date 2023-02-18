@@ -30,7 +30,6 @@ const fetchLyricsFromAudioSource = (songId: string, songTitle: string) => {
         const songData = NodeID3.read(song.path);
         const { unsynchronisedLyrics, synchronisedLyrics } = songData;
 
-        // $ synchronisedLyrics tag skipped due to issues like incorrect timestamps. Could be an issue in the NodeID3.
         if (
           Array.isArray(synchronisedLyrics) &&
           synchronisedLyrics.length > 0

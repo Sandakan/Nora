@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 /* eslint-disable prefer-destructuring */
 /* eslint-disable no-async-promise-executor */
-import fetch from 'node-fetch';
+
 import { AppleITunesMusicAPI } from '../../@types/apple_itunes_music_api.d';
 import log from '../log';
 import { LastFMHitCache, LastFMTrackInfoApi } from '../../@types/last_fm_api';
@@ -26,6 +26,8 @@ const metadataController = new AbortController();
 
 const musixmatchHitCache = { id: '' } as MusixmatchHitCache;
 
+const MUSIXMATCH_BASE_URL = 'https://apic-desktop.musixmatch.com/';
+
 async function fetchSongMetadataFromMusixmatch(
   songTitle: string,
   songArtist?: string
@@ -36,22 +38,22 @@ async function fetchSongMetadataFromMusixmatch(
     throw new Error('undefined MUSIXMATCH_USER_TOKEN');
   }
 
-  const baseUrl =
-    'https://apic-desktop.musixmatch.com/ws/1.1/macro.subtitles.get?format=json&namespace=lyrics_richsynched&subtitle_format=mxm&app_id=web-desktop-app-v1.0&';
   const headers = {
     authority: 'apic-desktop.musixmatch.com',
     cookie: 'x-mxm-token-guid=',
   };
-  const query = new URLSearchParams({
-    q_track: songTitle,
-    q_artist: songArtist ?? '',
-    usertoken: MUSIXMATCH_USER_TOKEN,
-  });
+
+  const url = new URL('/ws/1.1/macro.subtitles.get', MUSIXMATCH_BASE_URL);
+  url.searchParams.set('namespace', 'lyrics_richsynched');
+  url.searchParams.set('app_id', 'web-desktop-app-v1.0');
+  url.searchParams.set('subtitle_format', 'mxm');
+  url.searchParams.set('format', 'json');
+  url.searchParams.set('usertoken', MUSIXMATCH_USER_TOKEN);
+  url.searchParams.set('q_track', songTitle);
+  if (songArtist) url.searchParams.set('q_artist', songArtist);
+
   try {
-    const res = await fetch(baseUrl + query.toString(), {
-      headers,
-      signal: resultsController.signal,
-    });
+    const res = await fetch(url, { headers, signal: resultsController.signal });
     if (res.ok) {
       const data = (await res.json()) as MusixmatchLyricsAPI;
       const metadata = await parseSongMetadataFromMusixmatchApiData(data, true);
@@ -90,17 +92,18 @@ async function fetchSongMetadataFromMusixmatch(
   }
 }
 
-const ITUNES_API_URL = 'https://itunes.apple.com/search';
+const ITUNES_API_URL = 'https://itunes.apple.com/';
 let itunesHitsCache: SongMetadataResultFromInternet[] = [];
 
 async function fetchSongMetadataResultsFromITunes(
   songTitle: string,
   songArtist?: string
 ): Promise<SongMetadataResultFromInternet[]> {
-  const res = await fetch(
-    encodeURI(`${ITUNES_API_URL}?media=music&term=${songTitle} ${songArtist}`),
-    { signal: resultsController.signal }
-  );
+  const url = new URL('/search', ITUNES_API_URL);
+  url.searchParams.set('media', 'music');
+  url.searchParams.set('term', `${songTitle} ${songArtist}`);
+
+  const res = await fetch(url, { signal: resultsController.signal });
 
   if (res.ok) {
     itunesHitsCache = [];
@@ -172,14 +175,15 @@ async function fetchSongMetadataResultsFromLastFM(
     log('undefined LAST_FM_API_KEY.', { LAST_FM_API_KEY }, 'WARN');
     throw new Error('undefined LAST_FM_API_KEY');
   }
-  const res = await fetch(
-    encodeURI(
-      `${LAST_FM_API_URL}?method=track.getInfo&format=json&track=${songTitle}${
-        songArtist ? `&artist=${songArtist}` : ''
-      }&api_key=${LAST_FM_API_KEY}`
-    ),
-    { signal: resultsController.signal }
-  );
+
+  const url = new URL(LAST_FM_API_URL);
+  url.searchParams.set('method', 'track.getInfo');
+  url.searchParams.set('format', 'json');
+  url.searchParams.set('api_key', LAST_FM_API_KEY);
+  url.searchParams.set('track', songTitle);
+  if (songArtist) url.searchParams.set('artist', songArtist);
+
+  const res = await fetch(url, { signal: resultsController.signal });
 
   if (res.ok) {
     const data = (await res.json()) as LastFMTrackInfoApi;
@@ -210,7 +214,7 @@ async function fetchSongMetadataResultsFromLastFM(
   return [];
 }
 
-const GENIUS_API_BASE_URL = 'https://api.genius.com';
+const GENIUS_API_BASE_URL = 'https://api.genius.com/';
 
 async function searchSongMetadataResultsInGenius(
   songTitle: string,
@@ -221,19 +225,19 @@ async function searchSongMetadataResultsInGenius(
     log('unknown GENIUS_API_KEY.', { GENIUS_API_KEY }, 'WARN');
     throw new Error('unknown GENIUS_API_KEY.');
   }
-  const res = await fetch(
-    encodeURI(
-      `${GENIUS_API_BASE_URL}/search?q=${songTitle}${
-        songArtists ? ` ${songArtists}` : ''
-      }`
-    ),
-    {
-      headers: {
-        Authorization: `Bearer ${GENIUS_API_KEY}`,
-      },
-      signal: resultsController.signal,
-    }
-  );
+
+  const query = `${songTitle}${songArtists ? ` ${songArtists}` : ''}`;
+
+  const url = new URL('/search', GENIUS_API_BASE_URL);
+  url.searchParams.set('q', query);
+
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${GENIUS_API_KEY}`,
+    },
+    signal: resultsController.signal,
+  });
+
   if (res.ok) {
     const data = (await res.json()) as GeniusLyricsAPI;
     if (data?.meta?.status === 200) {
@@ -292,15 +296,17 @@ async function fetchSongMetadataFromGenius(
     log('undefined GENIUS_API_KEY.', { GENIUS_API_KEY }, 'WARN');
     throw new Error('undefined GENIUS_API_KEY.');
   }
-  const res = await fetch(
-    encodeURI(`${GENIUS_API_BASE_URL}/songs?q=${geniusSongId}`),
-    {
-      headers: {
-        Authorization: `Bearer ${GENIUS_API_KEY}`,
-      },
-      signal: metadataController.signal,
-    }
-  );
+
+  const url = new URL('/songs', GENIUS_API_BASE_URL);
+  url.searchParams.set('q', geniusSongId);
+
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${GENIUS_API_KEY}`,
+    },
+    signal: metadataController.signal,
+  });
+
   if (res.ok) {
     const data = (await res.json()) as GeniusSongMetadataResponse;
     if (data?.meta?.status === 200) {
@@ -336,14 +342,14 @@ async function searchSongMetadataResultsInDeezer(
   songTitle: string,
   songArtists?: string
 ): Promise<SongMetadataResultFromInternet[]> {
-  const res = await fetch(
-    encodeURI(
-      `${DEEZER_BASE_URL}/search?q=track:"${songTitle}"${
-        songArtists ? ` artist:"${songArtists}"` : ''
-      }`
-    ),
-    { signal: resultsController.signal }
-  );
+  const query = `track:"${songTitle}"${
+    songArtists ? ` artist:"${songArtists}"` : ''
+  }`;
+
+  const url = new URL('/search', DEEZER_BASE_URL);
+  url.searchParams.set('q', query);
+
+  const res = await fetch(url, { signal: resultsController.signal });
 
   if (res.ok) {
     const data = (await res.json()) as DeezerTrackResultsAPI;
@@ -390,10 +396,9 @@ async function searchSongMetadataResultsInDeezer(
 async function fetchSongMetadataFromDeezer(
   deezerSongId: string
 ): Promise<SongMetadataResultFromInternet | undefined> {
-  const res = await fetch(
-    encodeURI(`${DEEZER_BASE_URL}/track/${deezerSongId}`),
-    { signal: metadataController.signal }
-  );
+  const url = new URL(`/track/${deezerSongId}`, DEEZER_BASE_URL);
+
+  const res = await fetch(url, { signal: metadataController.signal });
 
   if (res.ok) {
     const data = (await res.json()) as DeezerTrackDataAPI;

@@ -34,7 +34,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
 
   const goToSongInfoPage = React.useCallback(
     (songId: string) =>
-      currentlyActivePage.pageTitle === 'ArtistInfo' &&
+      currentlyActivePage.pageTitle === 'SongInfo' &&
       currentlyActivePage?.data?.songId === songId
         ? changeCurrentActivePage('Home')
         : changeCurrentActivePage('SongInfo', {
@@ -48,12 +48,13 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
   );
 
   const goToArtistInfoPage = React.useCallback(
-    (artistName: string) => {
+    (artistName: string, artistId: string) => {
       return currentlyActivePage.pageTitle === 'ArtistInfo' &&
         currentlyActivePage?.data?.artistName === artistName
         ? changeCurrentActivePage('Home')
         : changeCurrentActivePage('ArtistInfo', {
             artistName,
+            artistId,
           });
     },
     [
@@ -88,7 +89,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
       }}
       onClick={() => {
         if (resultType === 'song') return goToSongInfoPage(id);
-        if (resultType === 'artist') return goToArtistInfoPage(title);
+        if (resultType === 'artist') return goToArtistInfoPage(title, id);
         if (resultType === 'genre') return goToGenreInfoPage(id);
 
         return undefined;
@@ -105,11 +106,8 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
           </span>
         )}
         <Img
-          src={
-            navigator.onLine && onlineArtworkPath
-              ? onlineArtworkPath
-              : artworkPaths.artworkPath
-          }
+          src={onlineArtworkPath}
+          fallbackSrc={artworkPaths.artworkPath}
           loading="lazy"
           alt="Most Relevant Result Cover"
           className={`max-h-full ${

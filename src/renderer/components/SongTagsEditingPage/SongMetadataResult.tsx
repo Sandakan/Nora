@@ -55,7 +55,7 @@ function SongMetadataResult(props: SongMetadataResultProp) {
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events
     <div className="mb-2 flex h-32 min-h-[5rem] w-full cursor-pointer items-center justify-between rounded-md bg-background-color-2/70 p-1 backdrop-blur-md hover:bg-background-color-2 dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2">
       <div className="flex h-full max-w-[70%]">
-        <div className="img-container mr-4 overflow-hidden rounded-md">
+        <div className="img-container m-1 mr-4 overflow-hidden rounded-md">
           <Img
             src={artworkPath}
             className="aspect-square h-full max-w-full object-cover"
@@ -91,7 +91,7 @@ function SongMetadataResult(props: SongMetadataResultProp) {
       <div className="buttons-container flex items-center">
         <Button
           label="Add to Metadata"
-          className="h-fit dark:border-dark-background-color-1"
+          className="h-fit !bg-background-color-3 px-8 text-lg text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
           clickHandler={() => {
             updateSongInfo((prevData) => {
               changePromptMenuData(false, undefined, '');
@@ -113,7 +113,7 @@ function SongMetadataResult(props: SongMetadataResultProp) {
             });
           }}
         />
-        <Button
+        {/* <Button
           key={0}
           className="more-options-btn text-sm dark:border-dark-background-color-1 md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
           iconName="more_horiz"
@@ -128,7 +128,7 @@ function SongMetadataResult(props: SongMetadataResultProp) {
             e.preventDefault();
             updateContextMenuData(true, resultMoreOptions, e.pageX, e.pageY);
           }}
-        />
+        /> */}
       </div>
     </div>
   );
