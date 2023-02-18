@@ -814,7 +814,7 @@ export default function App() {
           })
         );
       }
-    }, 500);
+    }, 1000 / 3);
 
     player.addEventListener('timeupdate', manageSongPositionUpdate);
 

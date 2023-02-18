@@ -194,7 +194,7 @@ export default function MiniPlayer() {
         }`}
       >
         <div
-          className={`title-bar z-10 flex h-[15%] max-h-[2.25rem] w-full select-none justify-end opacity-0 transition-[visibility,opacity] group-hover:visible group-hover:opacity-100 ${
+          className={`mini-player-title-bar z-10 flex h-[15%] max-h-[2.25rem] w-full select-none justify-end opacity-0 transition-[visibility,opacity] group-hover:visible group-hover:opacity-100 ${
             !isCurrentSongPlaying ? 'visible opacity-100' : ''
           }`}
         >
