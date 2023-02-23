@@ -153,6 +153,7 @@ const GenreInfoPage = () => {
           path={song.path}
           isAFavorite={song.isAFavorite}
           year={song.year}
+          isBlacklisted={song.isBlacklisted}
         />
       )),
     [genreSongs, userData]
@@ -195,7 +196,9 @@ const GenreInfoPage = () => {
                   iconName="play_arrow"
                   clickHandler={() =>
                     createQueue(
-                      genreSongs.map((song) => song.songId),
+                      genreSongs
+                        .filter((song) => !song.isBlacklisted)
+                        .map((song) => song.songId),
                       'genre',
                       false,
                       genreData.genreId,
@@ -208,7 +211,9 @@ const GenreInfoPage = () => {
                   iconName="shuffle"
                   clickHandler={() =>
                     createQueue(
-                      genreSongs.map((song) => song.songId),
+                      genreSongs
+                        .filter((song) => !song.isBlacklisted)
+                        .map((song) => song.songId),
                       'genre',
                       true,
                       genreData.genreId,

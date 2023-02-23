@@ -15,7 +15,7 @@
 import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { Artist } from '../ArtistPage/Artist';
-import { SongCard } from '../SongsPage/SongCard';
+import SongCard from '../SongsPage/SongCard';
 import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
 import NoSongsImage from '../../../../assets/images/svg/Empty Inbox _Monochromatic.svg';
 import DataFetchingImage from '../../../../assets/images/svg/Umbrella_Monochromatic.svg';
@@ -75,7 +75,7 @@ const reducer = (
   }
 };
 
-export const HomePage = () => {
+const HomePage = () => {
   const { updateContextMenuData, changePromptMenuData, addNewNotifications } =
     React.useContext(AppUpdateContext);
 
@@ -211,10 +211,12 @@ export const HomePage = () => {
             fetchRecentlyPlayedSongs();
           if (
             event.dataType === 'songs/deletedSong' ||
-            event.dataType === 'songs/newSong'
+            event.dataType === 'songs/newSong' ||
+            event.dataType === 'blacklist/songBlacklist'
           ) {
             fetchLatestSongs();
             fetchRecentlyPlayedSongs();
+            fetchMostLovedSongs();
           }
           if (event.dataType === 'artists/artworks') fetchRecentArtistsData();
           if (
@@ -254,6 +256,7 @@ export const HomePage = () => {
             artworkPaths: song.artworkPaths,
             addedDate: song.addedDate,
             isAFavorite: song.isAFavorite,
+            isBlacklisted: song.isBlacklisted,
           };
         });
         dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
@@ -272,17 +275,17 @@ export const HomePage = () => {
               return (
                 <SongCard
                   index={index}
-                  key={`${songData.songId}-${index}`}
+                  key={songData.songId}
                   title={songData.title}
                   artworkPath={
                     songData.artworkPaths?.artworkPath || DefaultSongCover
                   }
                   path={songData.path}
-                  duration={songData.duration}
                   songId={songData.songId}
                   artists={songData.artists}
                   palette={songData.palette}
                   isAFavorite={songData.isAFavorite}
+                  isBlacklisted={songData.isBlacklisted}
                 />
               );
             })
@@ -298,15 +301,15 @@ export const HomePage = () => {
           return (
             <SongCard
               index={index}
-              key={`${song.songId}-${index}`}
+              key={song.songId}
               title={song.title}
               artworkPath={song.artworkPaths?.artworkPath || DefaultSongCover}
               path={song.path}
-              duration={song.duration}
               songId={song.songId}
               artists={song.artists}
               palette={song.palette}
               isAFavorite={song.isAFavorite}
+              isBlacklisted={song.isBlacklisted}
             />
           );
         }),
@@ -323,7 +326,7 @@ export const HomePage = () => {
                   <Artist
                     index={index}
                     name={val.name}
-                    key={`${val.artistId}-${index}`}
+                    key={val.artistId}
                     artworkPaths={val.artworkPaths}
                     artistId={val.artistId}
                     songIds={val.songs.map((song) => song.songId)}
@@ -346,15 +349,15 @@ export const HomePage = () => {
           return (
             <SongCard
               index={index}
-              key={`${song.songId}-${index}`}
+              key={song.songId}
               title={song.title}
               artworkPath={song.artworkPaths?.artworkPath || DefaultSongCover}
               path={song.path}
-              duration={song.duration}
               songId={song.songId}
               artists={song.artists}
               palette={song.palette}
               isAFavorite={song.isAFavorite}
+              isBlacklisted={song.isBlacklisted}
             />
           );
         }),
@@ -371,7 +374,7 @@ export const HomePage = () => {
                   <Artist
                     index={index}
                     name={val.name}
-                    key={`${val.artistId}-${index}`}
+                    key={val.artistId}
                     artworkPaths={val.artworkPaths}
                     artistId={val.artistId}
                     songIds={val.songs.map((song) => song.songId)}
@@ -527,7 +530,7 @@ export const HomePage = () => {
             <div>There&apos;s nothing here. Do you know where are they?</div>
             <Button
               label="Add Folder"
-              className="mt-4 w-40 rounded-md !bg-background-color-3 px-8 text-lg text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
+              className="mt-4 w-40 !bg-background-color-3 px-8 text-lg text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
               clickHandler={addNewSongs}
             />
           </div>
@@ -554,3 +557,5 @@ export const HomePage = () => {
     </MainContainer>
   );
 };
+
+export default HomePage;

@@ -1,7 +1,3 @@
-const date = new Date();
-const currentYear = date.getFullYear();
-const currentMonth = date.getMonth();
-
 const getListeningDataOfASong = (
   songId: string,
   listeningData: SongListeningData[]
@@ -17,6 +13,10 @@ const getListeningDataOfASong = (
 };
 
 const parseListeningData = (listeningData?: SongListeningData) => {
+  const date = new Date();
+  const currentYear = date.getFullYear();
+  const currentMonth = date.getMonth();
+
   let allTime = 0;
   let thisYearNoofListens = 0;
   let thisMonthNoOfListens = 0;

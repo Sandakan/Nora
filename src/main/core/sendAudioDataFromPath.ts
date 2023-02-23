@@ -4,12 +4,12 @@ import { appPreferences } from '../../../package.json';
 import { createTempArtwork } from '../other/artworks';
 import { DEFAULT_FILE_URL, getSongsData } from '../filesystem';
 import log from '../log';
-import { sendMessageToRenderer } from '../main';
+import { sendMessageToRenderer, addToSongsOutsideLibraryData } from '../main';
 import { generateRandomId } from '../utils/randomId';
 import getAssetPath from '../utils/getAssetPath';
 import sendAudioData from './sendAudioData';
 
-const DefaultSongCoverPath = getAssetPath(
+const defaultSongCoverPath = getAssetPath(
   'images',
   'png',
   'song_cover_default.png'
@@ -54,8 +54,8 @@ const sendAudioDataFromPath = async (
                     log(
                       `Artwork creation failed for song from an unknown source.\nPATH : ${songPath}; ERROR : ${err}`
                     )
-                )) ?? DefaultSongCoverPath
-              : DefaultSongCoverPath
+                )) ?? defaultSongCoverPath
+              : defaultSongCoverPath
           );
           const data: AudioPlayerData = {
             title: metadata.common.title || 'unknown title',
@@ -71,6 +71,15 @@ const sendAudioDataFromPath = async (
             isAFavorite: false,
             isKnownSource: false,
           };
+
+          addToSongsOutsideLibraryData({
+            title: data.title,
+            songId: data.songId,
+            artworkPath: data.artworkPath,
+            duration: data.duration,
+            path: data.path,
+          });
+
           sendMessageToRenderer(
             'You are playing a song outside from your library.',
             'PLAYBACK_FROM_UNKNOWN_SOURCE',

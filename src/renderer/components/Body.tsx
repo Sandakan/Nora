@@ -3,7 +3,7 @@
 /* eslint-disable import/prefer-default-export */
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
-import { HomePage } from './HomePage/HomePage';
+import HomePage from './HomePage/HomePage';
 import { ArtistPage } from './ArtistPage/ArtistPage';
 import { AlbumsPage } from './AlbumsPage/AlbumsPage';
 import { PlaylistsPage } from './PlaylistsPage/PlaylistsPage';

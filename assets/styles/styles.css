@@ -135,7 +135,8 @@ html {
   font-variation-settings: 'FILL' 1;
 }
 
-.material-icons-round-outlined {
+.material-icons-round-outlined,
+.material-icons-round.material-icons-round-outlined {
   font-family: 'Material Icons Round';
   font-variation-settings: 'FILL' 0;
 }

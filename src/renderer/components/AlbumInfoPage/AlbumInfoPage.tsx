@@ -164,6 +164,14 @@ export default () => {
     fetchAlbumSongs();
   }, [fetchAlbumSongs]);
 
+  // const updateSongs = React.useCallback(
+  //   (callback: (_prevSongsData: SongData[]) => SongData[]) => {
+  //     const updatedSongsData = callback(albumContent.songsData);
+  //     dispatch({ type: 'SONGS_DATA_UPDATE', data: updatedSongsData });
+  //   },
+  //   [albumContent.songsData]
+  // );
+
   const songComponents = React.useMemo(
     () =>
       albumContent.songsData.length > 0
@@ -183,6 +191,8 @@ export default () => {
                 path={song.path}
                 isAFavorite={song.isAFavorite}
                 year={song.year}
+                isBlacklisted={song.isBlacklisted}
+                // updateSongs={updateSongs}
               />
             );
           })
@@ -270,7 +280,9 @@ export default () => {
                     iconName="play_arrow"
                     clickHandler={() =>
                       createQueue(
-                        albumContent.songsData.map((song) => song.songId),
+                        albumContent.songsData
+                          .filter((song) => !song.isBlacklisted)
+                          .map((song) => song.songId),
                         'songs',
                         false,
                         albumContent.albumData.albumId,
@@ -283,7 +295,9 @@ export default () => {
                     iconName="shuffle"
                     clickHandler={() =>
                       createQueue(
-                        albumContent.songsData.map((song) => song.songId),
+                        albumContent.songsData
+                          .filter((song) => !song.isBlacklisted)
+                          .map((song) => song.songId),
                         'songs',
                         true,
                         albumContent.albumData.albumId,

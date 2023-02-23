@@ -81,6 +81,11 @@ async function fetchSongMetadataFromMusixmatch(
         return [result];
       }
     }
+    log(
+      `Error occurred when fetching song metadata from Musixmatch.\nHTTP Error Code : ${res.status} - ${res.statusText}`,
+      undefined,
+      'WARN'
+    );
     return [];
   } catch (error) {
     log(
@@ -144,7 +149,7 @@ async function fetchSongMetadataResultsFromITunes(
     }
     log(`ERROR : ${data?.errorMessage}`, undefined, 'WARN');
   }
-  const errStr = `Request to fetch song metadata results from LastFM failed.\nERR_CODE : ${res.status}`;
+  const errStr = `Request to fetch song metadata results from LastFM failed.\nHTTP Error Code : ${res.status} - ${res.statusText}`;
   log(errStr, undefined, 'WARN');
   return [];
 }
@@ -209,7 +214,7 @@ async function fetchSongMetadataResultsFromLastFM(
     }
     log(`ERROR : ${data?.error} : ${data?.message}`, undefined, 'WARN');
   }
-  const errStr = `Request to fetch song metadata results from LastFM failed.\nERR_CODE : ${res.status}`;
+  const errStr = `Request to fetch song metadata results from LastFM failed.\nHTTP Error Code : ${res.status} - ${res.statusText}`;
   log(errStr, undefined, 'WARN');
   return [];
 }
@@ -284,6 +289,11 @@ async function searchSongMetadataResultsInGenius(
       'WARN'
     );
   }
+  log(
+    `Request to fetch song metadata results from Genius failed.\nHTTP Error Code : ${res.status} - ${res.statusText}`,
+    undefined,
+    'WARN'
+  );
   return [];
 }
 
@@ -333,6 +343,11 @@ async function fetchSongMetadataFromGenius(
     }
     throw new Error(`ERROR : ${data?.meta?.status} : ${data.meta.message}`);
   }
+  log(
+    `Error occurred when fetching song metadata from Genius.\nHTTP Error Code : ${res.status} - ${res.statusText}`,
+    undefined,
+    'ERROR'
+  );
   return undefined;
 }
 
@@ -390,6 +405,11 @@ async function searchSongMetadataResultsInDeezer(
     }
     throw new Error(`No search results found for the query in Deezer.`);
   }
+  log(
+    `Error occurred when fetching song metadata results from Deezer.\nHTTP Error Code : ${res.status} - ${res.statusText}`,
+    undefined,
+    'WARN'
+  );
   return [];
 }
 
@@ -434,6 +454,11 @@ async function fetchSongMetadataFromDeezer(
     }
     throw new Error(`Error ocurred when fetching track meta data from Deezer.`);
   }
+  log(
+    `Error occurred when fetching song metadata from Deezer.\nHTTP Error Code : ${res.status} - ${res.statusText}`,
+    undefined,
+    'WARN'
+  );
   return undefined;
 }
 
@@ -447,7 +472,7 @@ export const searchSongMetadataResultsInInternet = async (
     songArtsits ? songArtsits.join(' ') : undefined
   ).catch((err) =>
     log(
-      `Error ocurred when fetching song metadata hits from itunes api.`,
+      `Error ocurred when fetching song metadata hits from iTunes API.`,
       { err },
       'WARN'
     )
@@ -457,7 +482,7 @@ export const searchSongMetadataResultsInInternet = async (
     songArtsits ? songArtsits.join(' ') : undefined
   ).catch((err) =>
     log(
-      `Error ocurred when fetching song metadata hits from genius api.`,
+      `Error ocurred when fetching song metadata hits from Genius API.`,
       { err },
       'WARN'
     )
@@ -467,7 +492,7 @@ export const searchSongMetadataResultsInInternet = async (
     songArtsits ? songArtsits.join(' ') : undefined
   ).catch((err) =>
     log(
-      `Error ocurred when fetching song metadata hits from genius api.`,
+      `Error ocurred when fetching song metadata hits from LastFM API.`,
       { err },
       'WARN'
     )
@@ -477,7 +502,7 @@ export const searchSongMetadataResultsInInternet = async (
     songArtsits ? songArtsits.join(' ') : undefined
   ).catch((err) =>
     log(
-      `Error ocurred when fetching song metadata hits from genius api.`,
+      `Error ocurred when fetching song metadata hits from Musixmatch API.`,
       { err },
       'WARN'
     )
@@ -487,7 +512,7 @@ export const searchSongMetadataResultsInInternet = async (
     songArtsits ? songArtsits.join(' ') : undefined
   ).catch((err) =>
     log(
-      `Error ocurred when fetching song metadata hits from genius api.;`,
+      `Error ocurred when fetching song metadata hits from Deezer API.;`,
       { err },
       'WARN'
     )
@@ -532,7 +557,7 @@ export const fetchSongMetadataFromInternet = async (
   if (source === 'GENIUS') {
     const metadata = await fetchSongMetadataFromGenius(sourceId).catch((err) =>
       log(
-        `Error ocurred when fetching song metadata from genius api.`,
+        `Error ocurred when fetching song metadata from Genius API.`,
         { err },
         'WARN'
       )
@@ -544,7 +569,7 @@ export const fetchSongMetadataFromInternet = async (
   if (source === 'DEEZER') {
     const metadata = await fetchSongMetadataFromDeezer(sourceId).catch((err) =>
       log(
-        `Error ocurred when fetching song metadata from deezer api.`,
+        `Error ocurred when fetching song metadata from Deezer API.`,
         { err },
         'WARN'
       )

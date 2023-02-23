@@ -50,8 +50,8 @@ const dislikeTheSong = (song: SavableSongData) => {
 const toggleLikeSongs = async (songIds: string[], isLikeSong?: boolean) => {
   const songs = getSongsData();
   const result: ToggleLikeSongReturnValue = {
-    likes: 0,
-    dislikes: 0,
+    likes: [],
+    dislikes: [],
   };
   log(
     `Requested to ${
@@ -65,23 +65,21 @@ const toggleLikeSongs = async (songIds: string[], isLikeSong?: boolean) => {
   );
   if (songs.length > 0) {
     const updatedSongs = songs.map((song) => {
-      const isSongIdAvailable = songIds.some(
-        (songId) => songId === song.songId
-      );
+      const isSongIdAvailable = songIds.includes(song.songId);
 
       if (isSongIdAvailable) {
         if (isLikeSong === undefined) {
           if (song.isAFavorite) {
             const dislikedSongData = dislikeTheSong(song);
             if (dislikedSongData) {
-              result.dislikes += 1;
+              result.dislikes.push(song.songId);
               return dislikedSongData;
             }
             return song;
           }
           const likedSongData = likeTheSong(song);
           if (likedSongData) {
-            result.likes += 1;
+            result.likes.push(song.songId);
             return likedSongData;
           }
           return song;
@@ -89,14 +87,14 @@ const toggleLikeSongs = async (songIds: string[], isLikeSong?: boolean) => {
         if (isLikeSong) {
           const likedSongData = likeTheSong(song);
           if (likedSongData) {
-            result.likes += 1;
+            result.likes.push(song.songId);
             return likedSongData;
           }
           return song;
         }
         const dislikedSongData = dislikeTheSong(song);
         if (dislikedSongData) {
-          result.dislikes += 1;
+          result.dislikes.push(song.songId);
           return dislikedSongData;
         }
         return song;

@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
@@ -45,7 +46,21 @@ const Genre = (props: GenreProp) => {
 
   const playGenre = React.useCallback(
     (isShuffle = false) => {
-      createQueue(songIds, 'genre', isShuffle, genreId, true);
+      return window.api
+        .getSongInfo(songIds, undefined, undefined, true)
+        .then((songs) => {
+          if (Array.isArray(songs))
+            return createQueue(
+              songs
+                .filter((song) => !song.isBlacklisted)
+                .map((song) => song.songId),
+              'genre',
+              isShuffle,
+              genreId,
+              true
+            );
+          return undefined;
+        });
     },
     [createQueue, genreId, songIds]
   );

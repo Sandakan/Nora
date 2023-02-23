@@ -40,13 +40,26 @@ export const Album = (props: AlbumProp) => {
 
   const playAlbum = React.useCallback(
     (isShuffle = false) => {
-      createQueue(
-        props.songs.map((song) => song.songId),
-        'album',
-        isShuffle,
-        props.albumId,
-        true
-      );
+      return window.api
+        .getSongInfo(
+          props.songs.map((song) => song.songId),
+          undefined,
+          undefined,
+          true
+        )
+        .then((songs) => {
+          if (Array.isArray(songs))
+            return createQueue(
+              songs
+                .filter((song) => !song.isBlacklisted)
+                .map((song) => song.songId),
+              'album',
+              isShuffle,
+              props.albumId,
+              true
+            );
+          return undefined;
+        });
     },
     [createQueue, props.albumId, props.songs]
   );

@@ -4,6 +4,7 @@ import Button from 'renderer/components/Button';
 import Hyperlink from 'renderer/components/Hyperlink';
 import { syncedLyricsRegex } from 'renderer/components/LyricsPage/LyricsPage';
 import { AppContext } from 'renderer/contexts/AppContext';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 
 type Props = {
   songId: string;
@@ -22,6 +23,7 @@ type Props = {
 
 const SongLyricsEditor = (props: Props) => {
   const { userData } = React.useContext(AppContext);
+  const { addNewNotifications } = React.useContext(AppUpdateContext);
 
   const {
     songId,
@@ -87,7 +89,9 @@ const SongLyricsEditor = (props: Props) => {
           iconName="download"
           iconClassName="mr-2"
           className="download-lyrics-btn"
-          clickHandler={() => {
+          clickHandler={(_, setIsDisabled, setIsPending) => {
+            setIsDisabled(true);
+            setIsPending(true);
             window.api
               .getSongLyrics(
                 {
@@ -100,14 +104,30 @@ const SongLyricsEditor = (props: Props) => {
                 'ONLINE_ONLY'
               )
               .then((res) => {
-                if (res)
+                if (res) {
                   updateSongInfo((prevData) => ({
                     ...prevData,
                     lyrics: res.lyrics.unparsedLyrics,
                   }));
+                  setIsDisabled(false);
+                  setIsPending(false);
+                }
                 return undefined;
               })
-              .catch((err) => console.error(err));
+              .catch((err) => {
+                addNewNotifications([
+                  {
+                    id: `fetchUnsyncedLyricsFailed`,
+                    delay: 5000,
+                    content: <span>Failed to fetch un-synced lyrics.</span>,
+                    icon: (
+                      <span className="material-icons-round icon">warning</span>
+                    ),
+                  },
+                ]);
+                setIsPending(false);
+                console.error(err);
+              });
           }}
         />
         <Button
@@ -116,7 +136,9 @@ const SongLyricsEditor = (props: Props) => {
           iconName="download"
           className="download-synced-lyrics-btn mt-4"
           iconClassName="mr-2"
-          clickHandler={() => {
+          clickHandler={(_, setIsDisabled, setIsPending) => {
+            setIsDisabled(true);
+            setIsPending(true);
             window.api
               .getSongLyrics(
                 {
@@ -129,14 +151,30 @@ const SongLyricsEditor = (props: Props) => {
                 'ONLINE_ONLY'
               )
               .then((res) => {
-                if (res)
+                if (res) {
                   updateSongInfo((prevData) => ({
                     ...prevData,
                     lyrics: res.lyrics.unparsedLyrics,
                   }));
+                  setIsDisabled(false);
+                  setIsPending(false);
+                }
                 return undefined;
               })
-              .catch((err) => console.error(err));
+              .catch((err) => {
+                addNewNotifications([
+                  {
+                    id: `fetchSyncedLyricsFailed`,
+                    delay: 5000,
+                    content: <span>Failed to fetch synced lyrics.</span>,
+                    icon: (
+                      <span className="material-icons-round icon">warning</span>
+                    ),
+                  },
+                ]);
+                setIsPending(false);
+                console.error(err);
+              });
           }}
           isDisabled={!userData?.preferences.isMusixmatchLyricsEnabled}
           tooltipLabel={

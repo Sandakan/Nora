@@ -320,10 +320,13 @@ export const LyricsPage = () => {
                       <Button
                         key={4}
                         label="Save lyrics"
-                        pendingAnimationOnDisabled
+                        pendingAnimationOnDisabled={
+                          currentSongData.isKnownSource
+                        }
                         className="save-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                         iconName="save"
                         clickHandler={saveOnlineLyrics}
+                        isDisabled={!currentSongData.isKnownSource}
                       />
                     </>
                   )}

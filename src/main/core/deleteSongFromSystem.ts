@@ -7,8 +7,16 @@ import removeSongsFromLibrary from '../removeSongsFromLibrary';
 
 const deleteSongFromSystem = async (
   absoluteFilePath: string,
+  abortSignal: AbortSignal,
   isPermanentDelete = false
 ) => {
+  if (abortSignal.aborted) {
+    log(`Song deletion process aborted because abort event triggered.`);
+    throw new Error(
+      'Song deletion process aborted because abort event triggered.'
+    );
+  }
+
   const pathBaseName = path.basename(absoluteFilePath);
   const pathExtension = path.extname(absoluteFilePath);
 
@@ -20,14 +28,11 @@ const deleteSongFromSystem = async (
       { path: absoluteFilePath },
       'WARN'
     );
-    return {
-      success: false,
-      message: `'${pathBaseName}' is not a song.`,
-    };
+    throw new Error(`'${pathBaseName}' is not a song.`);
   }
 
   try {
-    const res = await removeSongsFromLibrary([absoluteFilePath], false);
+    const res = await removeSongsFromLibrary([absoluteFilePath], abortSignal);
 
     if (res && res.success) {
       if (!isPermanentDelete) await shell.trashItem(absoluteFilePath);
@@ -49,7 +54,7 @@ const deleteSongFromSystem = async (
       'ERROR'
     );
     log(error as Error, undefined, 'ERROR');
-    return { success: false };
+    throw error;
   }
 };
 

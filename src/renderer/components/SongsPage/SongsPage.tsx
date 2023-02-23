@@ -4,7 +4,6 @@
 /* eslint-disable promise/always-return */
 /* eslint-disable consistent-return */
 /* eslint-disable no-nested-ternary */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/no-unused-prop-types */
@@ -109,7 +108,8 @@ export const SongsPage = () => {
           const event = dataEvents[i];
           if (
             event.dataType === 'songs/deletedSong' ||
-            event.dataType === 'songs/newSong'
+            event.dataType === 'songs/newSong' ||
+            event.dataType === 'blacklist/songBlacklist'
           )
             fetchSongsData();
         }
@@ -146,6 +146,7 @@ export const SongsPage = () => {
             artworkPaths: song.artworkPaths,
             addedDate: song.addedDate,
             isAFavorite: song.isAFavorite,
+            isBlacklisted: song.isBlacklisted,
           };
         });
         dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
@@ -165,6 +166,7 @@ export const SongsPage = () => {
         artworkPaths,
         year,
         path,
+        isBlacklisted,
       } = content.songsData[index];
       return (
         <div style={style}>
@@ -182,6 +184,7 @@ export const SongsPage = () => {
             year={year}
             path={path}
             isAFavorite={isAFavorite}
+            isBlacklisted={isBlacklisted}
           />
         </div>
       );
@@ -207,6 +210,7 @@ export const SongsPage = () => {
                 artists={song.artists}
                 path={song.path}
                 isAFavorite={song.isAFavorite}
+                isBlacklisted={song.isBlacklisted}
               />
             );
           })
@@ -337,7 +341,9 @@ export const SongsPage = () => {
                   iconName="play_arrow"
                   clickHandler={() =>
                     createQueue(
-                      content.songsData.map((song) => song.songId),
+                      content.songsData
+                        .filter((song) => !song.isBlacklisted)
+                        .map((song) => song.songId),
                       'songs',
                       false,
                       undefined,
@@ -352,7 +358,9 @@ export const SongsPage = () => {
                   iconName="shuffle"
                   clickHandler={() =>
                     createQueue(
-                      content.songsData.map((song) => song.songId),
+                      content.songsData
+                        .filter((song) => !song.isBlacklisted)
+                        .map((song) => song.songId),
                       'songs',
                       true,
                       undefined,

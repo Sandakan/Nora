@@ -408,12 +408,11 @@ const userDataTemplate: UserData = {
   currentSong: { songId: null, stoppedPosition: 0 },
   volume: { isMuted: false, value: 100 },
   musicFolders: [],
-  songBlacklist: [],
   defaultPage: 'Home',
   isShuffling: false,
   isRepeating: 'false',
   preferences: {
-    doNotShowRemoveSongFromLibraryConfirm: false,
+    doNotShowBlacklistSongConfirm: false,
     isReducedMotion: false,
     songIndexing: false,
     autoLaunchApp: false,
@@ -1684,7 +1683,7 @@ export default function App() {
       menuItems: ContextMenuItem[] = [],
       pageX?: number,
       pageY?: number,
-      contextMenuData?: ContextMenuItemData
+      contextMenuData?: ContextMenuAdditionalData
     ) => {
       // console.log('pageX', pageX, 'pageY', pageY);
       dispatch({
@@ -1915,7 +1914,7 @@ export default function App() {
           newFavorite
         )
         .then((res) => {
-          if (res && res.likes + res.dislikes > 0) {
+          if (res && res.likes.length + res.dislikes.length > 0) {
             contentRef.current.currentSongData.isAFavorite = newFavorite;
             return dispatch({
               type: 'TOGGLE_IS_FAVORITE_STATE',

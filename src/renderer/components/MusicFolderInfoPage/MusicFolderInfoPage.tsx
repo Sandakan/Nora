@@ -156,6 +156,7 @@ const MusicFolderInfoPage = () => {
         artworkPaths,
         year,
         path,
+        isBlacklisted,
       } = folderSongs[index];
       return (
         <div style={style}>
@@ -171,6 +172,7 @@ const MusicFolderInfoPage = () => {
             year={year}
             path={path}
             isAFavorite={isAFavorite}
+            isBlacklisted={isBlacklisted}
           />
         </div>
       );
@@ -242,7 +244,9 @@ const MusicFolderInfoPage = () => {
                 iconName="play_arrow"
                 clickHandler={() =>
                   createQueue(
-                    folderInfo?.songIds,
+                    folderSongs
+                      .filter((song) => !song.isBlacklisted)
+                      .map((song) => song.songId),
                     'folder',
                     false,
                     folderInfo.folderData.path,
@@ -257,7 +261,9 @@ const MusicFolderInfoPage = () => {
                 iconName="shuffle"
                 clickHandler={() =>
                   createQueue(
-                    folderInfo?.songIds,
+                    folderSongs
+                      .filter((song) => !song.isBlacklisted)
+                      .map((song) => song.songId),
                     'folder',
                     true,
                     folderInfo.folderData.path,

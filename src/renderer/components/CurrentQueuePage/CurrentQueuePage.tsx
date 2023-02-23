@@ -105,7 +105,11 @@ const CurrentQueuePage = () => {
           .detail;
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
-          if (event.dataType === 'songs' || event.dataType === 'userData/queue')
+          if (
+            event.dataType.includes('songs') ||
+            event.dataType === 'userData/queue' ||
+            event.dataType === 'blacklist/songBlacklist'
+          )
             fetchAllSongsData();
         }
       }
@@ -223,6 +227,7 @@ const CurrentQueuePage = () => {
         artworkPaths,
         path,
         year,
+        isBlacklisted,
       } = queuedSongs[index];
       return (
         <Draggable draggableId={songId} index={index} key={songId}>
@@ -244,6 +249,7 @@ const CurrentQueuePage = () => {
                 duration={duration}
                 path={path}
                 year={year}
+                isBlacklisted={isBlacklisted}
                 isAFavorite={isAFavorite}
                 additionalContextMenuItems={[
                   {
@@ -297,6 +303,17 @@ const CurrentQueuePage = () => {
     if (ListRef && index >= 0) ListRef.current?.scrollToItem(index, 'center');
   }, [currentSongData.songId, queue.queue]);
 
+  const moreOptionsContextMenuItems = React.useMemo(
+    () => [
+      {
+        label: 'Scroll to currently playing song',
+        iconName: 'vertical_align_center',
+        handlerFunction: centerCurrentlyPlayingSong,
+      },
+    ],
+    [centerCurrentlyPlayingSong]
+  );
+
   return (
     <MainContainer className="main-container songs-list-container current-queue-container relative !h-full overflow-hidden !pb-0">
       <>
@@ -307,19 +324,14 @@ const CurrentQueuePage = () => {
               key={0}
               className="more-options-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
               iconName="more_horiz"
+              isDisabled={queue.queue.length > 0 === false}
               clickHandler={(e) => {
                 e.stopPropagation();
                 const button = e.currentTarget || e.target;
                 const { x, y } = button.getBoundingClientRect();
                 updateContextMenuData(
                   true,
-                  [
-                    {
-                      label: 'Scroll to currently playing song',
-                      iconName: 'vertical_align_center',
-                      handlerFunction: centerCurrentlyPlayingSong,
-                    },
-                  ],
+                  moreOptionsContextMenuItems,
                   x + 10,
                   y + 50
                 );
@@ -329,13 +341,7 @@ const CurrentQueuePage = () => {
                 e.preventDefault();
                 updateContextMenuData(
                   true,
-                  [
-                    {
-                      label: 'Scroll to currently playing song',
-                      iconName: 'vertical_align_center',
-                      handlerFunction: centerCurrentlyPlayingSong,
-                    },
-                  ],
+                  moreOptionsContextMenuItems,
                   e.pageX,
                   e.pageY
                 );
@@ -350,6 +356,7 @@ const CurrentQueuePage = () => {
               clickHandler={() =>
                 toggleMultipleSelections(!isMultipleSelectionEnabled, 'songs')
               }
+              isDisabled={queue.queue.length > 0 === false}
               tooltipLabel={
                 isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
               }
@@ -457,6 +464,7 @@ const CurrentQueuePage = () => {
                       path={data.path}
                       isAFavorite={data.isAFavorite}
                       year={data.year}
+                      isBlacklisted={data.isBlacklisted}
                     />
                   );
                 }}

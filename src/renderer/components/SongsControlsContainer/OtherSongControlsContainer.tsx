@@ -28,7 +28,7 @@ const OtherSongControlsContainer = () => {
           {
             label: 'Show Current Queue',
             iconName: 'table_rows',
-            iconClassName: '!material-icons-round-outlined',
+            iconClassName: 'material-icons-round-outlined mr-2',
             handlerFunction: () =>
               currentlyActivePage.pageTitle === 'CurrentQueue'
                 ? changeCurrentActivePage('Home')
@@ -37,7 +37,7 @@ const OtherSongControlsContainer = () => {
           {
             label: 'Open Mini Player',
             iconName: 'tab',
-            iconClassName: '!material-icons-round-outlined',
+            iconClassName: 'material-icons-round-outlined mr-2',
             handlerFunction: () => updateMiniPlayerStatus(!isMiniPlayer),
           },
         ],
@@ -53,10 +53,6 @@ const OtherSongControlsContainer = () => {
       updateMiniPlayerStatus,
     ]
   );
-
-  // const scrollOnVolume = React.useCallback(() => {
-  //   if (volumeSliderRef.current) updateVolume(window.scrollY);
-  // }, []);
 
   return (
     <div className="other-controls-container flex w-[30%] items-center justify-end">
@@ -119,16 +115,15 @@ const OtherSongControlsContainer = () => {
           aria-label="Volume slider"
           style={volumeBarCssProperties}
           title={Math.round(volume).toString()}
-          // onMouseOver={() =>
-          //   window.addEventListener('scroll', () => {
-          //     console.log(true);
-          //   })
-          // }
-          // onMouseOut={() =>
-          //   window.removeEventListener('scroll', () => {
-          //     console.log(true);
-          //   })
-          // }
+          onWheel={(e) => {
+            e.preventDefault();
+            const incrementValue = e.deltaY > 0 ? -5 : 5;
+            let value = volume + incrementValue;
+
+            if (value > 100) value = 100;
+            if (value < 0) value = 0;
+            updateVolume(value);
+          }}
           ref={volumeSliderRef}
         />
       </div>

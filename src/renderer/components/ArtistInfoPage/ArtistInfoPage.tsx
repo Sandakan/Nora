@@ -291,6 +291,14 @@ const ArtistInfoPage = () => {
     [albums, bodyBackgroundImage]
   );
 
+  // const updateSongs = React.useCallback(
+  //   (callback: (_prevSongsData: SongData[]) => SongData[]) => {
+  //     const updatedSongsData = callback(albumContent.songsData);
+  //     dispatch({ type: 'SONGS_DATA_UPDATE', data: updatedSongsData });
+  //   },
+  //   [albumContent.songsData]
+  // );
+
   const songComponenets = React.useMemo(
     () =>
       songs.map((song, index) => {
@@ -309,6 +317,8 @@ const ArtistInfoPage = () => {
             path={song.path}
             isAFavorite={song.isAFavorite}
             year={song.year}
+            isBlacklisted={song.isBlacklisted}
+            // updateSongs={updateSongs}
           />
         );
       }),
@@ -449,7 +459,9 @@ const ArtistInfoPage = () => {
                       }
                       clickHandler={() =>
                         createQueue(
-                          artistData.songs.map((song) => song.songId),
+                          songs
+                            .filter((song) => !song.isBlacklisted)
+                            .map((song) => song.songId),
                           'artist',
                           false,
                           artistData.artistId,
@@ -467,7 +479,9 @@ const ArtistInfoPage = () => {
                       }
                       clickHandler={() =>
                         createQueue(
-                          artistData.songs.map((song) => song.songId),
+                          songs
+                            .filter((song) => !song.isBlacklisted)
+                            .map((song) => song.songId),
                           'artist',
                           true,
                           artistData.artistId,

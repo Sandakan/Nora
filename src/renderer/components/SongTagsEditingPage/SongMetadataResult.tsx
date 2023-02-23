@@ -4,6 +4,8 @@ import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
 import Img from '../Img';
+import CustomizeSelectedMetadataPrompt from './CustomizeSelectedMetadataPrompt';
+import DefaultSongImage from '../../../../assets/images/png/song_cover_default.png';
 import { MetadataKeywords } from './SongTagsEditingPage';
 
 interface SongMetadataResultProp {
@@ -13,19 +15,18 @@ interface SongMetadataResultProp {
   album?: string;
   releasedYear?: number;
   lyrics?: string;
-  artworkPath?: string;
+  artworkPaths?: string[];
   updateSongInfo: (callback: (prevData: SongTags) => SongTags) => void;
   updateMetadataKeywords: (metadataKeywords: MetadataKeywords) => void;
 }
 
 function SongMetadataResult(props: SongMetadataResultProp) {
-  const { changePromptMenuData, updateContextMenuData } =
-    React.useContext(AppUpdateContext);
+  const { changePromptMenuData } = React.useContext(AppUpdateContext);
   const {
     title,
     artists,
     genres,
-    artworkPath,
+    artworkPaths,
     album,
     lyrics,
     releasedYear,
@@ -33,31 +34,14 @@ function SongMetadataResult(props: SongMetadataResultProp) {
     updateMetadataKeywords,
   } = props;
 
-  const resultMoreOptions: ContextMenuItem[] = React.useMemo(
-    () => [
-      {
-        label: 'Update only the artwork',
-        iconName: 'image',
-        handlerFunction: () =>
-          updateSongInfo((prevData) => ({
-            ...prevData,
-            artworkPath,
-            album: prevData.album
-              ? { ...prevData?.album, artworkPath }
-              : undefined,
-          })),
-      },
-    ],
-    [artworkPath, updateSongInfo]
-  );
-
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events
     <div className="mb-2 flex h-32 min-h-[5rem] w-full cursor-pointer items-center justify-between rounded-md bg-background-color-2/70 p-1 backdrop-blur-md hover:bg-background-color-2 dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2">
       <div className="flex h-full max-w-[70%]">
         <div className="img-container m-1 mr-4 overflow-hidden rounded-md">
           <Img
-            src={artworkPath}
+            src={artworkPaths?.at(-1)}
+            fallbackSrc={DefaultSongImage}
             className="aspect-square h-full max-w-full object-cover"
             alt=""
           />
@@ -97,12 +81,15 @@ function SongMetadataResult(props: SongMetadataResultProp) {
               changePromptMenuData(false, undefined, '');
               return {
                 ...prevData,
-                title,
-                releasedYear,
-                lyrics,
-                artworkPath: artworkPath ?? prevData.artworkPath,
+                title: title || prevData.title,
+                releasedYear: releasedYear || prevData.releasedYear,
+                lyrics: lyrics || prevData.lyrics,
+                artworkPath:
+                  Array.isArray(artworkPaths) && artworkPaths.length > 0
+                    ? artworkPaths.at(-1) || artworkPaths[0]
+                    : prevData.artworkPath,
                 album: prevData.album
-                  ? { ...prevData?.album, artworkPath }
+                  ? { ...prevData?.album, artworkPaths }
                   : undefined,
               } as SongTags;
             });
@@ -113,22 +100,28 @@ function SongMetadataResult(props: SongMetadataResultProp) {
             });
           }}
         />
-        {/* <Button
+        <Button
           key={0}
           className="more-options-btn text-sm dark:border-dark-background-color-1 md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-          iconName="more_horiz"
-          clickHandler={(e) => {
-            e.stopPropagation();
-            const button = e.currentTarget || e.target;
-            const { x, y } = button.getBoundingClientRect();
-            updateContextMenuData(true, resultMoreOptions, x + 10, y + 50);
+          iconName="tune"
+          clickHandler={() => {
+            changePromptMenuData(
+              true,
+              <CustomizeSelectedMetadataPrompt
+                title={title}
+                artists={artists}
+                album={album}
+                artworkPaths={artworkPaths}
+                genres={genres}
+                lyrics={lyrics}
+                releasedYear={releasedYear}
+                updateSongInfo={updateSongInfo}
+                updateMetadataKeywords={updateMetadataKeywords}
+              />
+            );
           }}
-          tooltipLabel="More Options"
-          onContextMenu={(e) => {
-            e.preventDefault();
-            updateContextMenuData(true, resultMoreOptions, e.pageX, e.pageY);
-          }}
-        /> */}
+          tooltipLabel="Customize Metadata"
+        />
       </div>
     </div>
   );

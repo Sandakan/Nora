@@ -247,6 +247,8 @@ export const parseSong = async (
     return {
       ...songInfo,
       artworkPaths: songArtworkPaths,
+      // a newly parsed song cannot be blacklisted
+      isBlacklisted: false,
     };
   }
   return undefined;

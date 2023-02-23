@@ -119,13 +119,21 @@ export const Playlist = (props: PlaylistProp) => {
               label: 'Play',
               iconName: 'play_arrow',
               handlerFunction: () =>
-                createQueue(
-                  props.songs,
-                  'playlist',
-                  false,
-                  props.playlistId,
-                  true
-                ),
+                window.api
+                  .getSongInfo(props.songs, undefined, undefined, true)
+                  .then((songs) => {
+                    if (Array.isArray(songs))
+                      return createQueue(
+                        songs
+                          .filter((song) => !song.isBlacklisted)
+                          .map((song) => song.songId),
+                        'playlist',
+                        false,
+                        props.playlistId,
+                        true
+                      );
+                    return undefined;
+                  }),
             },
             {
               label: isMultipleSelectionEnabled ? 'Unselect' : 'Select',
@@ -239,13 +247,21 @@ export const Playlist = (props: PlaylistProp) => {
           <span
             className="material-icons-round icon absolute bottom-2 right-2 translate-y-10 scale-90 cursor-pointer text-4xl text-font-color-white opacity-0 transition-[opacity,transform] delay-100 duration-200 ease-in-out group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 dark:text-font-color-white"
             onClick={() =>
-              createQueue(
-                props.songs,
-                'playlist',
-                false,
-                props.playlistId,
-                true
-              )
+              window.api
+                .getSongInfo(props.songs, undefined, undefined, true)
+                .then((songs) => {
+                  if (Array.isArray(songs))
+                    return createQueue(
+                      songs
+                        .filter((song) => !song.isBlacklisted)
+                        .map((song) => song.songId),
+                      'playlist',
+                      false,
+                      props.playlistId,
+                      true
+                    );
+                  return undefined;
+                })
             }
           >
             play_circle

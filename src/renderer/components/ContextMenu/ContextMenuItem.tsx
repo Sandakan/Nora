@@ -20,9 +20,7 @@ const ContextMenuItem = (props: ContextMenuItem) => {
     >
       {props.iconName && (
         <span
-          className={
-            props.iconClassName || 'material-icons-round icon mr-4 text-lg'
-          }
+          className={`material-icons-round icon mr-4 text-lg ${props.iconClassName}`}
         >
           {props.iconName}
         </span>

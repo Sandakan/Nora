@@ -13,7 +13,7 @@ export interface AppUpdateContextType {
     menuItems?: ContextMenuItem[],
     pageX?: number,
     pageY?: number,
-    contextMenuData?: ContextMenuItemData
+    contextMenuData?: ContextMenuAdditionalData
   ) => void;
   changePromptMenuData: (
     isVisible: boolean,

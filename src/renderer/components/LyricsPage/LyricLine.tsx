@@ -5,6 +5,7 @@ import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
+import roundTo from 'renderer/utils/roundTo';
 import { syncedLyricsRegex } from './LyricsPage';
 
 interface LyricProp {
@@ -27,11 +28,13 @@ const LyricLine = (props: LyricProp) => {
 
   const { index, lyric, syncedLyrics, isAutoScrolling = true } = props;
 
+  // substracted 350 milliseconds to keep lyrics in sync with the lyrics line animations.
+  const delay = 0.35;
+
   React.useEffect(() => {
     if (lyricsRef.current && syncedLyrics) {
       const { start, end } = syncedLyrics;
-      // substracted 250 milliseconds to keep lyrics in sync with the lyrics line animations.
-      if (songPosition > start - 0.25 && songPosition < end - 0.25) {
+      if (songPosition > start - delay && songPosition < end - delay) {
         if (!isTheCurrnetLineRef.current && isAutoScrolling) {
           isTheCurrnetLineRef.current = true;
           lyricsRef.current?.scrollIntoView({
@@ -44,17 +47,29 @@ const LyricLine = (props: LyricProp) => {
     }
   }, [syncedLyrics, songPosition, isAutoScrolling]);
 
+  const lyricString = React.useMemo(
+    () => lyric.replaceAll(syncedLyricsRegex, '').trim(),
+    [lyric]
+  );
+
   return (
     <div
       style={{
         animationDelay: `${250 + 25 * (index + 1)}ms`,
-        // opacity: isSynced ? '0.5' : '1',
       }}
+      title={
+        syncedLyrics
+          ? `${lyricString} - ${roundTo(
+              syncedLyrics.start - delay,
+              2
+            )} to ${roundTo(syncedLyrics.end - delay, 2)}`
+          : undefined
+      }
       className={`appear-from-bottom highlight mb-5 w-fit select-text text-center font-['Poppins'] text-4xl font-medium text-font-color-black transition-[color,transform] duration-200 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
         syncedLyrics
           ? `cursor-pointer ${
-              songPosition > syncedLyrics.start - 0.25 &&
-              songPosition < syncedLyrics.end - 0.25
+              songPosition > syncedLyrics.start - delay &&
+              songPosition < syncedLyrics.end - delay
                 ? '!scale-100 text-5xl !text-opacity-90'
                 : '!scale-75 !text-opacity-20 hover:!text-opacity-75'
             }`
@@ -63,7 +78,7 @@ const LyricLine = (props: LyricProp) => {
       ref={lyricsRef}
       onClick={() => syncedLyrics && updateSongPosition(syncedLyrics.start)}
     >
-      {lyric.replaceAll(syncedLyricsRegex, '').trim()}
+      {lyricString}
     </div>
   );
 };

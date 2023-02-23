@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
@@ -9,7 +10,7 @@ import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import AddSongsToPlaylists from './AddSongsToPlaylists';
 import DeleteSongFromSystemConfrimPrompt from './DeleteSongFromSystemConfrimPrompt';
-import RemoveSongFromLibraryConfirmPrompt from './RemoveSongFromLibraryConfirmPrompt';
+import BlacklistSongConfrimPrompt from './BlacklistSongConfirmPrompt';
 import SongArtist from './SongArtist';
 import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
 
@@ -21,6 +22,7 @@ interface SongProp {
   duration: number;
   year?: number;
   path: string;
+  isBlacklisted?: boolean;
   additionalContextMenuItems?: ContextMenuItem[];
   index: number;
   isIndexingSongs: boolean;
@@ -29,6 +31,7 @@ interface SongProp {
   style?: React.CSSProperties;
   isDraggable?: boolean;
   provided?: DraggableProvided;
+  // updateSongs: (_callback: (_prevSongsData: SongData[]) => SongData[]) => void;
 }
 
 const Song = React.forwardRef(
@@ -53,6 +56,7 @@ const Song = React.forwardRef(
       toggleIsFavorite,
       toggleMultipleSelections,
       updateMultipleSelections,
+      createQueue,
     } = React.useContext(AppUpdateContext);
     const {
       index,
@@ -60,12 +64,14 @@ const Song = React.forwardRef(
       duration,
       artworkPaths,
       isIndexingSongs,
+      isBlacklisted = false,
       path,
       title,
       additionalContextMenuItems,
       artists,
       style,
       year,
+      // updateSongs,
     } = props;
     const { provided = {} as any } = props;
 
@@ -179,17 +185,80 @@ const Song = React.forwardRef(
     ]);
 
     const contextMenuItems: ContextMenuItem[] = React.useMemo(() => {
-      if (
+      const isMultipleSelectionsEnabled =
         multipleSelectionsData.selectionType === 'songs' &&
         multipleSelectionsData.multipleSelections.length !== 1 &&
-        isAMultipleSelection
-      ) {
-        const { multipleSelections: songIds } = multipleSelectionsData;
-        return [
-          {
-            label: 'Add to queue',
-            iconName: 'queue',
-            handlerFunction: () => {
+        isAMultipleSelection;
+
+      const { multipleSelections: songIds } = multipleSelectionsData;
+
+      const items: ContextMenuItem[] = [
+        {
+          label: 'Play',
+          handlerFunction: handlePlayBtnClick,
+          iconName: 'play_arrow',
+          isDisabled: isMultipleSelectionsEnabled,
+        },
+        {
+          label: 'Create A Queue',
+          handlerFunction: () =>
+            createQueue(songIds, 'songs', false, undefined, true),
+          iconName: 'queue_music',
+          isDisabled: !isMultipleSelectionsEnabled,
+        },
+        {
+          label: isMultipleSelectionsEnabled
+            ? 'Add all to Play Next'
+            : 'Play Next',
+          iconName: 'shortcut',
+          handlerFunction: () => {
+            if (isMultipleSelectionsEnabled) {
+              const newQueue = queue.queue.filter(
+                (id) => !songIds.includes(id)
+              );
+              newQueue.splice(
+                queue.queue.indexOf(currentSongData.songId) + 1 || 0,
+                0,
+                ...songIds
+              );
+              updateQueueData(undefined, newQueue);
+              addNewNotifications([
+                {
+                  id: `${title}PlayNext`,
+                  delay: 5000,
+                  content: (
+                    <span>{songIds.length} songs will be played next.</span>
+                  ),
+                  icon: <span className="material-icons-round">shortcut</span>,
+                },
+              ]);
+              toggleMultipleSelections(false);
+            } else {
+              const newQueue = queue.queue.filter((id) => id !== songId);
+              newQueue.splice(
+                queue.queue.indexOf(currentSongData.songId) + 1 || 0,
+                0,
+                songId
+              );
+              updateQueueData(undefined, newQueue);
+              addNewNotifications([
+                {
+                  id: `${title}PlayNext`,
+                  delay: 5000,
+                  content: (
+                    <span>&apos;{title}&apos; will be played next.</span>
+                  ),
+                  icon: <span className="material-icons-round">shortcut</span>,
+                },
+              ]);
+            }
+          },
+        },
+        {
+          label: 'Add to queue',
+          iconName: 'queue',
+          handlerFunction: () => {
+            if (isMultipleSelectionsEnabled) {
               updateQueueData(undefined, [...queue.queue, ...songIds], false);
               addNewNotifications([
                 {
@@ -200,176 +269,41 @@ const Song = React.forwardRef(
                   ),
                 },
               ]);
-            },
-          },
-          {
-            label: 'Add All to Play Next',
-            iconName: 'shortcut',
-            handlerFunction: () => {
-              const newQueue = queue.queue.filter((id) =>
-                songIds.some((x) => id !== x)
-              );
-              newQueue.splice(
-                queue.queue.indexOf(currentSongData.songId) + 1 || 0,
-                0,
-                ...songIds
-              );
-              updateQueueData(undefined, newQueue);
+            } else {
+              updateQueueData(undefined, [...queue.queue, songId], false);
               addNewNotifications([
                 {
-                  id: `${songIds.join(';')}PlayAllNext`,
+                  id: `${title}AddedToQueue`,
                   delay: 5000,
-                  content: (
-                    <span>{songIds.length} songs will be played next.</span>
+                  content: <span>Added 1 song to the queue.</span>,
+                  icon: (
+                    <Img
+                      src={artworkPaths.optimizedArtworkPath}
+                      alt="Song Artwork"
+                    />
                   ),
-                  icon: <span className="material-icons-round">shortcut</span>,
                 },
               ]);
-              toggleMultipleSelections(false);
-            },
-          },
-          // {
-          //   label: `Toggle like/dislike songs`,
-          //   iconName: `favorite`,
-          //   iconClassName: 'material-icons-round-outlined mr-4 text-xl',
-          //   handlerFunction: () => {
-          //     window.api
-          //       .toggleLikeSongs(songIds)
-          //       .then((res) => {
-          //         if (res && res.likes + res.dislikes > 0) {
-          //           for (let i = 0; i < songIds.length; i += 1) {
-          //             const songId = songIds[i];
-          //             if (currentSongData.songId === songId)
-          //               toggleIsFavorite(!currentSongData.isAFavorite);
-          //             if (songId === songId)
-          //               setIsAFavorite((prevState) => !prevState);
-          //           }
-          //         }
-          //         return undefined;
-          //       })
-          //       .catch((err) => console.error(err));
-          //     toggleMultipleSelections(false);
-          //   },
-          // },
-          {
-            label: 'Remove from Library',
-            iconName: 'block',
-            handlerFunction: () => {
-              if (userData?.preferences.doNotShowRemoveSongFromLibraryConfirm)
-                return window.api.removeSongsFromLibrary(songIds).then(
-                  (res) =>
-                    res.success &&
-                    addNewNotifications([
-                      {
-                        id: `${songIds.join(';')}Blacklisted`,
-                        delay: 5000,
-                        content: (
-                          <span>
-                            {songIds.length} songs blacklisted and removed from
-                            the library.
-                          </span>
-                        ),
-                        icon: (
-                          <span className="material-icons-round">
-                            delete_outline
-                          </span>
-                        ),
-                      },
-                    ])
-                );
-              changePromptMenuData(
-                true,
-                <RemoveSongFromLibraryConfirmPrompt songIds={songIds} />
-              );
-              return toggleMultipleSelections(false);
-            },
-          },
-          {
-            label: 'Unselect',
-            iconName: 'checklist',
-            handlerFunction: () =>
-              updateMultipleSelections(
-                songId,
-                'songs',
-                isAMultipleSelection ? 'remove' : 'add'
-              ),
-          },
-        ];
-      }
-      const items: ContextMenuItem[] = [
-        {
-          label: 'Play',
-          handlerFunction: handlePlayBtnClick,
-          iconName: 'play_arrow',
-        },
-        {
-          label: 'Play Next',
-          iconName: 'shortcut',
-          handlerFunction: () => {
-            // const currentSongIndex = queue.currentSongIndex
-            //   ? queue.currentSongIndex === queue.queue.length - 1
-            //     ? queue.currentSongIndex - 1
-            //     : queue.currentSongIndex
-            //   : undefined;
-
-            // const newQueue = queue.queue;
-            // newQueue.splice(
-            //   queue.queue.indexOf(currentSongData.songId) + 1 || 0,
-            //   0,
-            //   songId
-            // );
-            // updateQueueData(currentSongIndex, newQueue);
-
-            const newQueue = queue.queue.filter((id) => id !== props.songId);
-            newQueue.splice(
-              queue.queue.indexOf(currentSongData.songId) + 1 || 0,
-              0,
-              props.songId
-            );
-            updateQueueData(undefined, newQueue);
-            addNewNotifications([
-              {
-                id: `${title}PlayNext`,
-                delay: 5000,
-                content: <span>&apos;{title}&apos; will be played next.</span>,
-                icon: <span className="material-icons-round">shortcut</span>,
-              },
-            ]);
+            }
           },
         },
         {
-          label: 'Add to queue',
-          iconName: 'queue',
-          handlerFunction: () => {
-            updateQueueData(undefined, [...queue.queue, songId], false);
-            addNewNotifications([
-              {
-                id: `${title}AddedToQueue`,
-                delay: 5000,
-                content: <span>Added 1 song to the queue.</span>,
-                icon: (
-                  <Img
-                    src={artworkPaths.optimizedArtworkPath}
-                    alt="Song Artwork"
-                  />
-                ),
-              },
-            ]);
-          },
-        },
-        {
-          label: `${isAFavorite ? 'Unlike' : 'Like'} the song`,
+          label: isMultipleSelectionsEnabled
+            ? 'Toggle Like/Dislike Songs'
+            : `${isAFavorite ? 'Unlike' : 'Like'} the song`,
           iconName: `favorite`,
-          iconClassName: `${
-            isAFavorite
-              ? 'material-icons-round mr-4 text-xl'
-              : 'material-icons-round-outlined mr-4 text-xl'
-          }`,
+          iconClassName: isMultipleSelectionsEnabled
+            ? 'material-icons-round-outlined mr-4 text-xl'
+            : isAFavorite
+            ? 'material-icons-round mr-4 text-xl'
+            : 'material-icons-round-outlined mr-4 text-xl',
           handlerFunction: () => {
             window.api
-              .toggleLikeSongs([songId], !isAFavorite)
+              .toggleLikeSongs(
+                isMultipleSelectionsEnabled ? [...songIds] : [songId]
+              )
               .then((res) => {
-                if (res && res.likes + res.dislikes > 0) {
+                if (res && res.likes.length + res.dislikes.length > 0) {
                   if (currentSongData.songId === songId)
                     toggleIsFavorite(!currentSongData.isAFavorite);
                   return setIsAFavorite((prevData) => !prevData);
@@ -377,6 +311,7 @@ const Song = React.forwardRef(
                 return undefined;
               })
               .catch((err) => console.error(err));
+            toggleMultipleSelections(false);
           },
         },
         {
@@ -385,8 +320,12 @@ const Song = React.forwardRef(
           handlerFunction: () =>
             changePromptMenuData(
               true,
-              <AddSongsToPlaylists songId={songId} title={title} />
+              <AddSongsToPlaylists
+                songIds={isAMultipleSelection ? songIds : [songId]}
+                title={title}
+              />
             ),
+          isDisabled: isMultipleSelectionsEnabled,
         },
         {
           label: isMultipleSelectionEnabled ? 'Unselect' : 'Select',
@@ -410,18 +349,21 @@ const Song = React.forwardRef(
           label: 'Hr',
           isContextMenuItemSeperator: true,
           handlerFunction: () => true,
+          isDisabled: isMultipleSelectionsEnabled,
         },
         {
           label: 'Reveal in File Explorer',
           class: 'reveal-file-explorer',
           iconName: 'folder_open',
           handlerFunction: () => window.api.revealSongInFileExplorer(songId),
+          isDisabled: isMultipleSelectionsEnabled,
         },
         {
           label: 'Info',
           class: 'info',
           iconName: 'info',
           handlerFunction: goToSongInfoPage,
+          isDisabled: isMultipleSelectionsEnabled,
         },
         {
           label: 'Edit song tags',
@@ -433,45 +375,56 @@ const Song = React.forwardRef(
               songArtworkPath: artworkPaths.artworkPath,
               songPath: path,
             }),
+          isDisabled: isMultipleSelectionsEnabled,
         },
         {
           label: 'Hr',
           isContextMenuItemSeperator: true,
           handlerFunction: () => true,
+          isDisabled: isMultipleSelectionsEnabled,
         },
         {
-          label: 'Remove from Library',
-          iconName: 'block',
+          label: isBlacklisted ? 'Restore from Blacklist' : 'Blacklist Song',
+          iconName: isBlacklisted ? 'settings_backup_restore' : 'block',
           handlerFunction: () =>
-            userData?.preferences.doNotShowRemoveSongFromLibraryConfirm
-              ? window.api.removeSongsFromLibrary([songId]).then(
-                  (res) =>
-                    res.success &&
-                    addNewNotifications([
-                      {
-                        id: `${title}Blacklisted`,
-                        delay: 5000,
-                        content: (
-                          <span>
-                            &apos;{title}&apos; blacklisted and removed from the
-                            library.
-                          </span>
-                        ),
-                        icon: (
-                          <span className="material-icons-round">
-                            delete_outline
-                          </span>
-                        ),
-                      },
-                    ])
+            isBlacklisted
+              ? window.api.restoreBlacklistedSongs([songId]).then(() =>
+                  addNewNotifications([
+                    {
+                      id: `${title}RestoredFromBlacklisted`,
+                      delay: 5000,
+                      content: (
+                        <span>
+                          &apos;{title}&apos; restored from the blacklist.
+                        </span>
+                      ),
+                      icon: (
+                        <span className="material-icons-round">
+                          settings_backup_restore
+                        </span>
+                      ),
+                    },
+                  ])
+                )
+              : userData?.preferences.doNotShowBlacklistSongConfirm
+              ? window.api.blacklistSongs([songId]).then(() =>
+                  addNewNotifications([
+                    {
+                      id: `${title}Blacklisted`,
+                      delay: 5000,
+                      content: <span>&apos;{title}&apos; blacklisted.</span>,
+                      icon: <span className="material-icons-round">block</span>,
+                    },
+                  ])
                 )
               : changePromptMenuData(
                   true,
-                  <RemoveSongFromLibraryConfirmPrompt
+                  <BlacklistSongConfrimPrompt
                     title={title}
                     songIds={[songId]}
                   />
                 ),
+          isDisabled: isMultipleSelectionsEnabled,
         },
         {
           label: 'Delete from System',
@@ -485,6 +438,7 @@ const Song = React.forwardRef(
                 songId={songId}
               />
             ),
+          isDisabled: isMultipleSelectionsEnabled,
         },
       ];
 
@@ -499,24 +453,25 @@ const Song = React.forwardRef(
       isAFavorite,
       isMultipleSelectionEnabled,
       goToSongInfoPage,
+      isBlacklisted,
       additionalContextMenuItems,
-      updateQueueData,
+      createQueue,
       queue.queue,
-      addNewNotifications,
       currentSongData.songId,
       currentSongData.isAFavorite,
-      toggleMultipleSelections,
-      userData?.preferences.doNotShowRemoveSongFromLibraryConfirm,
-      changePromptMenuData,
-      updateMultipleSelections,
-      songId,
-      props.songId,
+      updateQueueData,
+      addNewNotifications,
       title,
+      toggleMultipleSelections,
+      songId,
       artworkPaths.optimizedArtworkPath,
       artworkPaths.artworkPath,
       toggleIsFavorite,
+      changePromptMenuData,
+      updateMultipleSelections,
       changeCurrentActivePage,
       path,
+      userData?.preferences.doNotShowBlacklistSongConfirm,
     ]);
 
     const contextMenuItemData =
@@ -533,16 +488,13 @@ const Song = React.forwardRef(
       <div
         style={style}
         data-index={index}
-        // eslint-disable-next-line react/jsx-props-no-spreading
         {...provided.draggableProps}
-        // eslint-disable-next-line react/jsx-props-no-spreading
         {...provided.dragHandleProps}
-        // style={{ animationDelay: `${50 * (index + 1)}ms` }}
-        className={`appear-from-bottom ${songId} group relative mr-4 mb-2 flex aspect-[2/1] h-[3.25rem] w-[98%] overflow-hidden rounded-lg p-[0.2rem] transition-[background] ease-in-out ${
+        className={`appear-from-bottom ${songId} group relative mr-4 mb-2 flex aspect-[2/1] h-[3.25rem] w-[98%] overflow-hidden rounded-lg p-[0.2rem] transition-[background,opacity] ease-in-out ${
           currentSongData.songId === songId || isAMultipleSelection
             ? bodyBackgroundImage
-              ? `bg-background-color-3/70 text-font-color-black backdrop-blur-md dark:bg-dark-background-color-3/70`
-              : 'bg-background-color-3 text-font-color-black dark:bg-dark-background-color-3'
+              ? `bg-background-color-3/70 text-font-color-black shadow-lg backdrop-blur-md dark:bg-dark-background-color-3/70`
+              : 'bg-background-color-3 text-font-color-black shadow-lg dark:bg-dark-background-color-3'
             : bodyBackgroundImage
             ? `bg-background-color-2/70 backdrop-blur-md hover:!bg-background-color-2 dark:bg-dark-background-color-2/70 dark:hover:!bg-dark-background-color-2`
             : `odd:bg-background-color-2/70 hover:!bg-background-color-2 dark:odd:bg-dark-background-color-2/50 dark:hover:!bg-dark-background-color-2 ${
@@ -550,7 +502,7 @@ const Song = React.forwardRef(
                   ? '!bg-background-color-2/70 dark:!bg-dark-background-color-2/50'
                   : '!bg-background-color-1 dark:!bg-dark-background-color-1'
               }`
-        }`}
+        } ${!isAMultipleSelection && isBlacklisted && '!opacity-30'}`}
         onContextMenu={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -589,6 +541,20 @@ const Song = React.forwardRef(
           multipleSelectionsData.selectionType === 'songs' ? (
             <div className="relative mx-1 flex h-fit items-center rounded-lg bg-background-color-1 p-1 text-font-color-highlight dark:bg-dark-background-color-1 dark:text-dark-background-color-3">
               <MultipleSelectionCheckbox id={songId} selectionType="songs" />
+            </div>
+          ) : isBlacklisted ? (
+            <div
+              className="relative flex h-full items-center justify-center"
+              title={`'${title}' is blacklisted.`}
+            >
+              <span
+                className={`material-icons-round text-2xl text-font-color-black dark:text-font-color-white ${
+                  currentSongData.songId === songId &&
+                  'dark:!text-font-color-black'
+                } `}
+              >
+                block
+              </span>
             </div>
           ) : isIndexingSongs ? (
             <div className="relative mx-1 h-fit rounded-2xl bg-background-color-1 px-3 text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1">
@@ -657,7 +623,7 @@ const Song = React.forwardRef(
                 window.api
                   .toggleLikeSongs([songId], !isAFavorite)
                   .then((res) => {
-                    if (res && (res?.likes || 0) + (res?.dislikes || 0) > 0) {
+                    if (res && res.likes.length + res.dislikes.length > 0) {
                       if (currentSongData.songId === songId)
                         toggleIsFavorite(!currentSongData.isAFavorite);
                       return setIsAFavorite((prevData) => !prevData);

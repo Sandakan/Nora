@@ -48,6 +48,7 @@ const AllSearchResultsPage = () => {
             artworkPaths={songData.artworkPaths}
             isAFavorite={songData.isAFavorite}
             year={songData.year}
+            isBlacklisted={songData.isBlacklisted}
           />
         );
       });

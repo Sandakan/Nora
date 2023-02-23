@@ -47,8 +47,8 @@ const TitleBar = React.memo(() => {
             <span>
               Nora
               <sup
-                className="app-version ml-1 text-[0.6rem] font-semibold uppercase text-font-color-highlight dark:text-dark-font-color-highlight"
-                title={version}
+                className="app-version ml-1 cursor-pointer text-[0.6rem] font-semibold uppercase text-font-color-highlight dark:text-dark-font-color-highlight"
+                title={`v${version}`}
               >
                 stable
               </sup>
@@ -77,7 +77,7 @@ const TitleBar = React.memo(() => {
                 : 'invisible scale-50 opacity-0'
             }`}
             onClick={() => updatePageHistoryIndex('home')}
-            title="Go forward"
+            title="Go to Home"
           >
             <span className="material-icons-round-outlined text-xl leading-none">
               home

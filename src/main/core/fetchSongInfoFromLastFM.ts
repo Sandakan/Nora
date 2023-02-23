@@ -37,7 +37,7 @@ const fetchSongInfoFromLastFM = async (
         }
         return data;
       }
-      const errStr = `Request to fetch song info from LastFM failed.\nERR_CODE : ${res.status}`;
+      const errStr = `Request to fetch song info from LastFM failed.\nERR_CODE : ${res.status} - ${res.statusText}`;
       log(errStr);
       throw new Error(errStr);
     } catch (error) {

@@ -139,13 +139,26 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: 'Play all Songs',
             iconName: 'play_arrow',
             handlerFunction: () =>
-              createQueue(
-                firstResult.songs.map((song) => song.songId),
-                'artist',
-                false,
-                firstResult.artistId,
-                true
-              ),
+              window.api
+                .getSongInfo(
+                  firstResult.songs.map((song) => song.songId),
+                  undefined,
+                  undefined,
+                  true
+                )
+                .then((songs) => {
+                  if (Array.isArray(songs))
+                    return createQueue(
+                      songs
+                        .filter((song) => !song.isBlacklisted)
+                        .map((song) => song.songId),
+                      'artist',
+                      false,
+                      firstResult.artistId,
+                      true
+                    );
+                  return undefined;
+                }),
           },
           {
             label: 'Info',
@@ -196,13 +209,26 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: 'Play',
             iconName: 'play_arrow',
             handlerFunction: () =>
-              createQueue(
-                firstResult.songs.map((song) => song.songId),
-                'album',
-                false,
-                firstResult.albumId,
-                true
-              ),
+              window.api
+                .getSongInfo(
+                  firstResult.songs.map((song) => song.songId),
+                  undefined,
+                  undefined,
+                  true
+                )
+                .then((songs) => {
+                  if (Array.isArray(songs))
+                    return createQueue(
+                      songs
+                        .filter((song) => !song.isBlacklisted)
+                        .map((song) => song.songId),
+                      'album',
+                      false,
+                      firstResult.albumId,
+                      true
+                    );
+                  return undefined;
+                }),
           },
           {
             label: 'Add to queue',
@@ -246,13 +272,21 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: 'Play',
             iconName: 'play_arrow',
             handlerFunction: () =>
-              createQueue(
-                firstResult.songs,
-                'playlist',
-                false,
-                firstResult.playlistId,
-                true
-              ),
+              window.api
+                .getSongInfo(firstResult.songs, undefined, undefined, true)
+                .then((songs) => {
+                  if (Array.isArray(songs))
+                    return createQueue(
+                      songs
+                        .filter((song) => !song.isBlacklisted)
+                        .map((song) => song.songId),
+                      'playlist',
+                      false,
+                      firstResult.playlistId,
+                      true
+                    );
+                  return undefined;
+                }),
           },
         ]}
       />
@@ -276,13 +310,26 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: 'Play',
             iconName: 'play_arrow',
             handlerFunction: () =>
-              createQueue(
-                firstResult.songs.map((song) => song.songId),
-                'playlist',
-                false,
-                firstResult.genreId,
-                true
-              ),
+              window.api
+                .getSongInfo(
+                  firstResult.songs.map((song) => song.songId),
+                  undefined,
+                  undefined,
+                  true
+                )
+                .then((songs) => {
+                  if (Array.isArray(songs))
+                    return createQueue(
+                      songs
+                        .filter((song) => !song.isBlacklisted)
+                        .map((song) => song.songId),
+                      'playlist',
+                      false,
+                      firstResult.genreId,
+                      true
+                    );
+                  return undefined;
+                }),
           },
         ]}
       />

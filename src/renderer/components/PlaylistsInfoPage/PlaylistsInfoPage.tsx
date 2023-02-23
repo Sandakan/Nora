@@ -132,8 +132,11 @@ const PlaylistInfoPage = () => {
           .detail;
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
-          if (event.dataType === 'albums/newAlbum') fetchPlaylistSongsData();
-          if (event.dataType === 'albums/deletedAlbum')
+          if (
+            event.dataType === 'playlists/newSong' ||
+            event.dataType === 'playlists/deletedSong' ||
+            event.dataType === 'blacklist/songBlacklist'
+          )
             fetchPlaylistSongsData();
         }
       }
@@ -180,6 +183,7 @@ const PlaylistInfoPage = () => {
                 path={song.path}
                 year={song.year}
                 isAFavorite={song.isAFavorite}
+                isBlacklisted={song.isBlacklisted}
                 additionalContextMenuItems={[
                   {
                     label: 'Remove from this Playlist',
@@ -219,128 +223,6 @@ const PlaylistInfoPage = () => {
   return (
     <MainContainer className="main-container playlist-info-page-container px-8 pb-8 pt-4 pr-4">
       <>
-        {/* <div className="title-container mt-1 mb-4 flex items-center justify-between text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-          <div className="genre-title-container max-w-[40%] overflow-hidden text-ellipsis whitespace-nowrap">
-            {playlistData?.name}
-          </div>
-          <div className="other-controls-container flex">
-            {playlistData.songs && playlistData.songs.length > 0 && (
-              <div className="playlist-buttons flex">
-                {playlistData.playlistId === 'History' && (
-                  <Button
-                    label="Clear History"
-                    iconName="clear"
-                    className="mb-4"
-                    clickHandler={() => {
-                      changePromptMenuData(
-                        true,
-                        <SensitiveActionConfirmPrompt
-                          title="Confrim the action to clear Song History"
-                          content={
-                            <div>
-                              You wouldn't be able to see what you have listened
-                              previously if you decide to continue this action.
-                            </div>
-                          }
-                          confirmButton={{
-                            label: 'Clear History',
-                            clickHandler: () => {
-                              window.api
-                                .clearSongHistory()
-                                .then(
-                                  (res) =>
-                                    res.success &&
-                                    addNewNotifications([
-                                      {
-                                        id: 'queueCleared',
-                                        delay: 5000,
-                                        content: (
-                                          <span>
-                                            Cleared the song history
-                                            successfully.
-                                          </span>
-                                        ),
-                                      },
-                                    ])
-                                )
-                                .catch((err) => console.error(err));
-                            },
-                          }}
-                        />
-                      );
-                    }}
-                  />
-                )}
-                <Button
-                  label="Play All"
-                  iconName="play_arrow"
-                  className="mb-4"
-                  clickHandler={() =>
-                    createQueue(
-                      playlistData.songs,
-                      'songs',
-                      false,
-                      playlistData.playlistId,
-                      true
-                    )
-                  }
-                />
-                <Button
-                  tooltipLabel="Shuffle and Play"
-                  iconName="shuffle"
-                  className="mb-4"
-                  clickHandler={() =>
-                    createQueue(
-                      playlistData.songs,
-                      'playlist',
-                      true,
-                      playlistData.playlistId,
-                      true
-                    )
-                  }
-                />
-                <Button
-                  tooltipLabel="Add to Queue"
-                  iconName="add"
-                  className="mb-4"
-                  clickHandler={() => {
-                    updateQueueData(undefined, [
-                      ...queue.queue,
-                      ...playlistData.songs,
-                    ]);
-                    addNewNotifications([
-                      {
-                        id: `addedToQueue`,
-                        delay: 5000,
-                        content: (
-                          <span>
-                            Added {playlistData.songs.length} song
-                            {playlistData.songs.length === 1 ? '' : 's'} to the
-                            queue.
-                          </span>
-                        ),
-                      },
-                    ]);
-                  }}
-                />
-
-                <Dropdown
-                  name="PlaylistPageSortDropdown"
-                  value={sortingOrder}
-                  options={dropdownOptions}
-                  onChange={(e) => {
-                    const order = e.currentTarget.value as SongSortTypes;
-                    updateCurrentlyActivePageData((currentPageData) => ({
-                      ...currentPageData,
-                      sortingOrder: order,
-                    }));
-                    setSortingOrder(order);
-                  }}
-                />
-              </div>
-            )}
-          </div>
-        </div> */}
         {Object.keys(playlistData).length > 0 && (
           <div className="playlist-img-and-info-container appear-from-bottom mb-8 flex flex-row items-center justify-start">
             <div className="playlist-cover-container mt-2">
@@ -433,7 +315,9 @@ const PlaylistInfoPage = () => {
                       iconName="play_arrow"
                       clickHandler={() =>
                         createQueue(
-                          playlistData.songs,
+                          playlistSongs
+                            .filter((song) => !song.isBlacklisted)
+                            .map((song) => song.songId),
                           'songs',
                           false,
                           playlistData.playlistId,
@@ -446,7 +330,9 @@ const PlaylistInfoPage = () => {
                       iconName="shuffle"
                       clickHandler={() =>
                         createQueue(
-                          playlistData.songs,
+                          playlistSongs
+                            .filter((song) => !song.isBlacklisted)
+                            .map((song) => song.songId),
                           'playlist',
                           true,
                           playlistData.playlistId,
@@ -458,9 +344,12 @@ const PlaylistInfoPage = () => {
                       tooltipLabel="Add to Queue"
                       iconName="add"
                       clickHandler={() => {
+                        const validSongIds = playlistSongs
+                          .filter((song) => !song.isBlacklisted)
+                          .map((song) => song.songId);
                         updateQueueData(undefined, [
                           ...queue.queue,
-                          ...playlistData.songs,
+                          ...validSongIds,
                         ]);
                         addNewNotifications([
                           {
@@ -468,9 +357,9 @@ const PlaylistInfoPage = () => {
                             delay: 5000,
                             content: (
                               <span>
-                                Added {playlistData.songs.length} song
-                                {playlistData.songs.length === 1 ? '' : 's'} to
-                                the queue.
+                                Added {validSongIds.length} song
+                                {validSongIds.length === 1 ? '' : 's'} to the
+                                queue.
                               </span>
                             ),
                           },

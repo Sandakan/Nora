@@ -306,8 +306,7 @@ const removeSong = async (
 
 const removeSongsFromLibrary = async (
   songPaths: string[],
-  abortSignal: AbortSignal,
-  isBlacklisted = true
+  abortSignal: AbortSignal
 ): PromiseFunctionReturn => {
   const songs = getSongsData();
   let artists = getArtistsData();
@@ -369,11 +368,7 @@ const removeSongsFromLibrary = async (
     dataUpdateEvent('songs/deletedSong');
   }
   if (playlists) setPlaylistData(playlists);
-  if (userData && isBlacklisted) {
-    setUserData('songBlacklist', [...userData.songBlacklist, ...songPaths]);
-    dataUpdateEvent('userData/blacklist');
-    log('Blacklist updated because a new song got blacklisted.');
-  }
+
   dataUpdateEvent('artists');
   dataUpdateEvent('albums');
   if (isArtistRemoved) dataUpdateEvent('artists/deletedArtist');

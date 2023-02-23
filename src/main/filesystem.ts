@@ -1,6 +1,3 @@
-/* eslint-disable consistent-return */
-/* eslint-disable no-await-in-loop */
-import fs from 'fs/promises';
 import fsSync from 'fs';
 import path from 'path';
 import { app } from 'electron';
@@ -8,10 +5,6 @@ import Store from 'electron-store';
 import log from './log';
 import { dataUpdateEvent } from './main';
 import { appPreferences } from '../../package.json';
-
-// const RESOURCES_PATH = app.isPackaged
-//   ? path.join(process.resourcesPath, 'assets')
-//   : path.join(__dirname, '../../assets');
 
 export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(
   app.getPath('userData'),
@@ -24,12 +17,11 @@ const USER_DATA_TEMPLATE: UserData = {
   currentSong: { songId: null, stoppedPosition: 0 },
   volume: { isMuted: false, value: 100 },
   musicFolders: [],
-  songBlacklist: [],
   defaultPage: 'Home',
   isShuffling: false,
   isRepeating: 'false',
   preferences: {
-    doNotShowRemoveSongFromLibraryConfirm: false,
+    doNotShowBlacklistSongConfirm: false,
     isReducedMotion: false,
     songIndexing: false,
     autoLaunchApp: false,
@@ -65,6 +57,11 @@ const PLAYLIST_DATA_TEMPLATE: SavablePlaylist[] = [
   HISTORY_PLAYLIST_TEMPLATE,
   FAVORITES_PLAYLIST_TEMPLATE,
 ];
+
+const BLACKLIST_TEMPLATE: Blacklist = {
+  songBlacklist: [],
+  folderBlacklist: [],
+};
 
 const songStore = new Store({
   name: 'songs',
@@ -228,6 +225,30 @@ const listeningDataStore = new Store({
   },
 });
 
+const blacklistStore = new Store({
+  name: 'blacklist',
+  clearInvalidConfig: true,
+  defaults: { blacklist: BLACKLIST_TEMPLATE },
+  schema: {
+    blacklist: {
+      type: 'object',
+      properties: {
+        songBlacklist: {
+          type: 'array',
+        },
+        folderBlacklist: {
+          type: 'array',
+        },
+      },
+    },
+  },
+  beforeEachMigration: (_store, context) => {
+    log(
+      `Migrating blacklist.json from app versions ${context.fromVersion} → ${context.toVersion}`
+    );
+  },
+});
+
 export const supportedMusicExtensions =
   appPreferences.supportedMusicExtensions.map((x) => `.${x}`);
 
@@ -247,6 +268,12 @@ let cachedListeningData = listeningDataStore.get(
   'listeningData',
   []
 ) as SongListeningData[];
+let cachedBlacklist = blacklistStore.get(
+  'blacklist',
+  BLACKLIST_TEMPLATE
+) as Blacklist;
+
+// ? USER DATA GETTERS AND SETTERS
 
 export const getUserData = () => {
   if (cachedUserData && Object.keys(cachedUserData).length !== 0)
@@ -303,15 +330,13 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
       typeof data === 'object'
     ) {
       userData.windowDiamensions.miniPlayer = data as WindowCordinates;
-    } else if (dataType === 'songBlacklist' && Array.isArray(data)) {
-      userData.songBlacklist = data as string[];
     } else if (dataType === 'recentSearches' && Array.isArray(data)) {
       userData.recentSearches = data as string[];
     } else if (
-      dataType === 'preferences.doNotShowRemoveSongFromLibraryConfirm' &&
+      dataType === 'preferences.doNotShowBlacklistSongConfirm' &&
       typeof data === 'boolean'
     ) {
-      userData.preferences.doNotShowRemoveSongFromLibraryConfirm = data;
+      userData.preferences.doNotShowBlacklistSongConfirm = data;
     } else if (
       dataType === 'preferences.isReducedMotion' &&
       typeof data === 'boolean'
@@ -438,7 +463,10 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
       'ERROR'
     );
   }
+  return undefined;
 }
+
+// ? SONG DATA GETTERS AND SETTERS
 
 export const getSongsData = () => {
   if (Array.isArray(cachedSongsData) && cachedSongsData.length !== 0) {
@@ -452,6 +480,8 @@ export const setSongsData = (updatedSongs: SavableSongData[]) => {
   songStore.set('songs', updatedSongs);
 };
 
+// ? ARTIST DATA GETTERS AND SETTERS
+
 export const getArtistsData = () => {
   if (cachedArtistsData && cachedArtistsData.length !== 0) {
     return cachedArtistsData;
@@ -463,6 +493,8 @@ export const setArtistsData = (updatedArtists: SavableArtist[]) => {
   cachedArtistsData = updatedArtists;
   artistStore.set('artists', updatedArtists);
 };
+
+// ? ALBUM DATA GETTERS AND SETTERS
 
 export const getAlbumsData = () => {
   if (cachedAlbumsData && cachedAlbumsData.length !== 0) {
@@ -476,6 +508,8 @@ export const setAlbumsData = (updatedAlbums: SavableAlbum[]) => {
   albumStore.set('albums', updatedAlbums);
 };
 
+// ? GENRE DATA GETTERS AND SETTERS
+
 export const getGenresData = () => {
   if (cachedGenresData && cachedGenresData.length !== 0) {
     return cachedGenresData;
@@ -487,6 +521,8 @@ export const setGenresData = (updatedGenres: SavableGenre[]) => {
   cachedGenresData = updatedGenres;
   genreStore.set('genres', updatedGenres);
 };
+
+// ? SONG LISTENING DATA GETTERS AND SETTERS
 
 export const createNewListeningDataInstance = (songId: string) => {
   const date = new Date();
@@ -590,6 +626,8 @@ export const setListeningData = (data: SongListeningData) => {
   return dataUpdateEvent('songs/listeningData');
 };
 
+// ? PLAYLIST DATA GETTERS AND SETTERS
+
 export const getPlaylistData = (playlistIds = [] as string[]) => {
   log(`Requesting playlist data for ids '${playlistIds.join(',')}'`);
   if (Array.isArray(cachedPlaylistsData) && cachedPlaylistsData.length !== 0) {
@@ -611,6 +649,52 @@ export const setPlaylistData = (updatedPlaylists: SavablePlaylist[]) => {
   dataUpdateEvent('playlists');
   cachedPlaylistsData = updatedPlaylists;
   playlistDataStore.set('playlists', updatedPlaylists);
+};
+
+// ? BLACKLIST DATA GETTERS AND SETTERS
+export const getBlacklistData = (): Blacklist => {
+  if (
+    cachedBlacklist &&
+    'songBlacklist' in cachedBlacklist &&
+    'folderBlacklist' in cachedBlacklist
+  ) {
+    return cachedBlacklist;
+  }
+  return blacklistStore.get('blacklist') as Blacklist;
+};
+
+export const addToBlacklist = (
+  str: string,
+  blacklistType: 'SONG_BLACKLIST' | 'FOLDER_BLACKLIST'
+) => {
+  switch (blacklistType) {
+    case 'SONG_BLACKLIST':
+      cachedBlacklist.songBlacklist.push(str);
+      dataUpdateEvent('blacklist/songBlacklist');
+      break;
+
+    case 'FOLDER_BLACKLIST':
+      cachedBlacklist.folderBlacklist.push(str);
+      dataUpdateEvent('blacklist/folderBlacklist');
+      break;
+
+    default:
+      throw new Error('unknown blacklist type');
+  }
+  blacklistStore.set('blacklist', cachedBlacklist);
+};
+
+export const updateBlacklist = (
+  callback: (_prevBlacklist: Blacklist) => Blacklist
+) => {
+  const updatedBlacklist = callback(cachedBlacklist);
+  cachedBlacklist = updatedBlacklist;
+  blacklistStore.set('blacklist', updatedBlacklist);
+};
+
+export const setBlacklist = (updatedBlacklist: Blacklist) => {
+  cachedBlacklist = updatedBlacklist;
+  blacklistStore.set('blacklist', updatedBlacklist);
 };
 
 // $ AUDIO LIBRARY MANAGEMENT
@@ -668,45 +752,4 @@ export const resetAppCache = () => {
   userDataStore.store = { userData: USER_DATA_TEMPLATE };
   playlistDataStore.store = { playlists: PLAYLIST_DATA_TEMPLATE };
   log(`In-app cache cleared successfully.`);
-};
-
-export const resetAppData = async () => {
-  const manageErrors = (err: any) => {
-    if ('code' in err && err.code === 'ENOENT') {
-      return log(
-        `A RECOVERABLE ERROR OCURRED WHEN RESETTING APP DATA.\nERROR : ${err}`
-      );
-    }
-    throw err;
-  };
-  try {
-    const userDataPath = app.getPath('userData');
-    await fs.unlink(path.join(userDataPath, 'songs.json')).catch(manageErrors);
-    await fs
-      .unlink(path.join(userDataPath, 'artists.json'))
-      .catch(manageErrors);
-    await fs.unlink(path.join(userDataPath, 'albums.json')).catch(manageErrors);
-    await fs.unlink(path.join(userDataPath, 'genres.json')).catch(manageErrors);
-    await fs
-      .unlink(path.join(userDataPath, 'playlists.json'))
-      .catch(manageErrors);
-    await fs
-      .unlink(path.join(userDataPath, 'userData.json'))
-      .catch(manageErrors);
-    await fs
-      .unlink(path.join(userDataPath, 'listening_data.json'))
-      .catch(manageErrors);
-    await fs
-      .rm(path.join(userDataPath, 'song_covers'), {
-        recursive: true,
-      })
-      .catch(manageErrors);
-  } catch (error) {
-    log(
-      `AN UNRECOVERABLE ERROR OCCURRED WHEN RESETTING THE APP.`,
-      { error },
-      'ERROR'
-    );
-    throw error;
-  }
 };

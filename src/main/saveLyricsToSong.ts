@@ -34,7 +34,10 @@ const saveLyricsToSong = async (songId: string, lyrics: SongLyrics) => {
           // );
           // eslint-disable-next-line no-await-in-loop
           await NodeID3.Promise.update(
-            { unsynchronisedLyrics, synchronisedLyrics },
+            {
+              unsynchronisedLyrics,
+              synchronisedLyrics: synchronisedLyrics || [],
+            },
             song.path
           );
           updateCachedLyrics((prevLyrics) => {

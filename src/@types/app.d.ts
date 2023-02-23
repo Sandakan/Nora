@@ -80,7 +80,6 @@ declare global {
     albumArtist?: string;
     bitrate?: number;
     noOfChannels?: number;
-    // track?: { no: number | null; of: number | null };
     year?: number;
     sampleRate?: number;
     palette?: NodeVibrantPalette;
@@ -100,6 +99,7 @@ declare global {
 
   interface SongData extends SavableSongData {
     artworkPaths: ArtworkPaths;
+    isBlacklisted: boolean;
   }
 
   interface NodeVibrantPalette {
@@ -149,6 +149,7 @@ declare global {
     isAFavorite: boolean;
     year?: number;
     palette?: NodeVibrantPalette;
+    isBlacklisted: boolean;
   }
 
   interface GetAllSongsResult {
@@ -160,8 +161,8 @@ declare global {
   }
 
   interface ToggleLikeSongReturnValue {
-    likes: number;
-    dislikes: number;
+    likes: string[];
+    dislikes: string[];
   }
 
   // ? Song listening data related types
@@ -357,7 +358,7 @@ declare global {
     | 'windowDiamensions.mainWindow'
     | 'windowDiamensions.miniPlayer'
     | 'recentSearches'
-    | 'preferences.doNotShowRemoveSongFromLibraryConfirm'
+    | 'preferences.doNotShowBlacklistSongConfirm'
     | 'preferences.isReducedMotion'
     | 'preferences.songIndexing'
     | 'preferences.isMiniPlayerAlwaysOnTop'
@@ -370,7 +371,6 @@ declare global {
     | 'preferences.disableBackgroundArtworks'
     | 'preferences.hideWindowOnClose'
     | 'preferences.openWindowAsHiddenOnSystemStart'
-    | 'songBlacklist'
     | 'customMusixmatchUserToken'
     | PageSortTypes;
 
@@ -381,6 +381,11 @@ declare global {
     | 'OLD'
     | 'ERROR'
     | 'NO_NETWORK_CONNECTION';
+
+  interface Blacklist {
+    songBlacklist: string[];
+    folderBlacklist: string[];
+  }
 
   interface UserData {
     theme: AppThemeData;
@@ -398,9 +403,8 @@ declare global {
     isRepeating: RepeatTypes;
     musicFolders: MusicFolderData[];
     defaultPage: DefaultPages;
-    songBlacklist: string[];
     preferences: {
-      doNotShowRemoveSongFromLibraryConfirm: boolean;
+      doNotShowBlacklistSongConfirm: boolean;
       isReducedMotion: boolean;
       songIndexing: boolean;
       autoLaunchApp: boolean;
@@ -456,6 +460,7 @@ declare global {
   interface MusicFolder {
     folderData: MusicFolderData;
     songIds: string[];
+    isBlacklisted: boolean;
   }
 
   // ? Playlists related types
@@ -650,9 +655,10 @@ declare global {
 
   // ? Context menu related related types
 
-  interface ContextMenuItemData {
+  interface ContextMenuAdditionalData {
     title: string;
     artworkPath: string;
+    artworkClassName?: string;
     subTitle?: string;
     subTitle2?: string;
     button?: ReactElement;
@@ -660,7 +666,7 @@ declare global {
 
   interface ContextMenuData {
     isVisible: boolean;
-    data?: ContextMenuItemData;
+    data?: ContextMenuAdditionalData;
     menuItems: ContextMenuItem[];
     pageX: number;
     pageY: number;
@@ -674,6 +680,7 @@ declare global {
     isContextMenuItemSeperator?: boolean;
     innerContextMenus?: ContextMenuItem[];
     handlerFunction: () => void;
+    isDisabled?: boolean;
   }
 
   // ? Data sorting related types
@@ -807,13 +814,15 @@ declare global {
     | 'userData/recentlyPlayedSongs'
     | 'userData/volume'
     | 'userData/queue'
-    | 'userData/blacklist'
     | 'userData/musicFolder'
     | 'userData/windowPosition'
     | 'userData/windowDiamension'
     | 'userData/recentSearches'
     | 'userData/sortingStates'
-    | 'settings/preferences';
+    | 'settings/preferences'
+    | 'blacklist'
+    | 'blacklist/songBlacklist'
+    | 'blacklist/folderBlacklist';
 
   interface DataUpdateEvent {
     dataType: DataUpdateEventTypes;
@@ -875,6 +884,14 @@ declare global {
     duration: number;
   }
 
+  interface SongOutsideLibraryData {
+    title: string;
+    songId: string;
+    duration: number;
+    path: string;
+    artworkPath?: string;
+  }
+
   interface NodeID3Tags extends NodeID3.Tags {
     image: string;
   }
@@ -912,6 +929,7 @@ declare global {
 
   interface UpdateSongDataResult {
     success: boolean;
+    reason?: string;
     updatedData?: AudioPlayerData;
   }
 

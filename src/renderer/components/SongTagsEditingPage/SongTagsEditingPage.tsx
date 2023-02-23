@@ -1,3 +1,4 @@
+/* eslint-disable promise/catch-or-return */
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable react/no-unescaped-entities */
@@ -14,7 +15,7 @@ import hasDataChanged from 'renderer/utils/hasDataChanged';
 
 import Button from '../Button';
 import MainContainer from '../MainContainer';
-import SongMetadataResultsSelectPage from './SongMetadataResultsSelectPage';
+import SongMetadataResultsSelectPage from './SongMetadataResultsSelectPrompt';
 import SongArtwork from './SongArtwork';
 import SongNameInput from './input_containers/SongNameInput';
 import SongYearInput from './input_containers/SongYearInput';
@@ -38,8 +39,13 @@ function SongTagsEditingPage() {
   const [songInfo, setSongInfo] = React.useState({
     title: '',
   } as SongTags);
-  const songId = React.useMemo(
-    () => currentlyActivePage.data.songId as string,
+  const { songId, songPath, isKnownSource } = React.useMemo(
+    () => ({
+      songId: currentlyActivePage.data.songId as string,
+      songPath: currentlyActivePage.data.songPath as string,
+      isKnownSource:
+        (currentlyActivePage.data.isKnownSource as boolean) ?? true,
+    }),
     [currentlyActivePage.data]
   );
   const defaultValuesRef = React.useRef({} as SongTags);
@@ -47,7 +53,7 @@ function SongTagsEditingPage() {
   React.useEffect(() => {
     if (songId)
       window.api
-        .getSongId3Tags(songId)
+        .getSongId3Tags(isKnownSource ? songId : songPath, isKnownSource)
         .then((res) => {
           if (res) {
             console.log(res);
@@ -61,7 +67,7 @@ function SongTagsEditingPage() {
           return undefined;
         })
         .catch((err) => console.error(err));
-  }, [songId]);
+  }, [isKnownSource, songId, songPath]);
 
   const [artistKeyword, setArtistKeyword] = React.useState('');
   const [artistResults, setArtistResults] = React.useState(
@@ -221,35 +227,60 @@ function SongTagsEditingPage() {
     setIsPending(true);
     console.log(songInfo);
     window.api
-      .updateSongId3Tags(songId, songInfo, songId === currentSongData.songId)
+      .updateSongId3Tags(
+        isKnownSource ? songId : songPath,
+        songInfo,
+        songId === currentSongData.songId,
+        isKnownSource
+      )
       .then((res) => {
-        console.log('successfully updated the song.', res);
-        if (res.updatedData && songId === currentSongData.songId) {
-          const { updatedData } = res;
-          updateCurrentSongData((prevData) => ({
-            ...prevData,
-            ...updatedData,
-          }));
+        if (res.success) {
+          console.log('successfully updated the song.', res);
+          if (res.updatedData && songId === currentSongData.songId) {
+            const { updatedData } = res;
+            updateCurrentSongData((prevData) => ({
+              ...prevData,
+              ...updatedData,
+            }));
+          }
+          addNewNotifications([
+            {
+              id: `songDataUpdated`,
+              delay: 5000,
+              content: <span>Successfully updated the song.</span>,
+              icon: <span className="material-icons-round icon">done</span>,
+            },
+          ]);
+          return window.api.getSongId3Tags(
+            isKnownSource ? songId : songPath,
+            isKnownSource
+          );
         }
-        addNewNotifications([
-          {
-            id: `songDataUpdated`,
-            delay: 5000,
-            content: <span>Successfully updated the song.</span>,
-            icon: <span className="material-icons-round icon">done</span>,
-          },
-        ]);
-        return window.api.getSongId3Tags(songId);
+        throw new Error('Error ocurred when updating song ID3 tags.');
       })
       .then((res) => {
         defaultValuesRef.current = res;
         return undefined;
       })
+      .catch((err) => {
+        addNewNotifications([
+          {
+            id: `songDataUpdateFailed`,
+            delay: 5000,
+            content: <span>Song data update failed.</span>,
+            icon: (
+              <span className="material-icons-round-outlined icon">
+                warning
+              </span>
+            ),
+          },
+        ]);
+        console.error(err);
+      })
       .finally(() => {
         setIsDisabled(false);
         setIsPending(true);
-      })
-      .catch((err) => console.error(err));
+      });
   };
 
   const resetDataToDefaults = () => {
@@ -284,7 +315,7 @@ function SongTagsEditingPage() {
             />
             <Button
               label="Reset to Default"
-              className="w-[12rem] rounded-md !bg-background-color-3 text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
+              className="w-[12rem] !bg-background-color-3 !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
               clickHandler={() => {
                 changePromptMenuData(false);
                 setSongInfo(defaultValuesRef.current);
@@ -319,8 +350,16 @@ function SongTagsEditingPage() {
       <>
         {songId && (
           <>
-            <div className="title-container mt-1 mb-8 pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-              Song Metadata Editor
+            <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+              Song Metadata Editor{' '}
+              {!isKnownSource && (
+                <span
+                  className="material-icons-round-outlined ml-6 cursor-help text-xl hover:underline"
+                  title="You are editing a song outside the library."
+                >
+                  error
+                </span>
+              )}
             </div>
             <div className="song-information-container bl-4 mb-12 flex text-font-color-black dark:text-font-color-white">
               <SongArtwork
@@ -330,6 +369,14 @@ function SongTagsEditingPage() {
               <div className="song-info-container flex w-[70%] flex-col justify-center">
                 <div className="song-title mb-2 text-4xl">
                   {songInfo.title || 'Unknown Title'}
+                  {!isKnownSource && (
+                    <span
+                      className="material-icons-round-outlined ml-6 cursor-help text-2xl text-font-color-highlight hover:underline dark:text-dark-font-color-highlight"
+                      title="You are editing a song outside the library."
+                    >
+                      error
+                    </span>
+                  )}
                 </div>
                 <div className="song-artists">
                   {songInfo.artists && songInfo.artists.length > 0

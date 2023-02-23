@@ -1,5 +1,6 @@
 import { app } from 'electron';
 import fs from 'fs/promises';
+import fsExtra from 'fs-extra';
 import path from 'path';
 import sharp from 'sharp';
 
@@ -100,26 +101,43 @@ export const storeArtworks = async (
   }
 };
 
-export const removeSongArtwork = (artworkPaths: ArtworkPaths) => {
-  return new Promise((resolve, reject) => {
-    try {
-      fs.unlink(removeDefaultAppProtocolFromFilePath(artworkPaths.artworkPath))
-        .then(() =>
-          fs.unlink(
-            removeDefaultAppProtocolFromFilePath(
-              artworkPaths.optimizedArtworkPath
-            )
-          )
-        )
-        .then(() => resolve(true))
-        .catch((err) => reject(err));
-    } catch (error) {
-      reject(error);
-    }
-  });
+export const removeSongArtwork = async (artworkPaths: ArtworkPaths) => {
+  try {
+    await fs.unlink(
+      removeDefaultAppProtocolFromFilePath(artworkPaths.artworkPath)
+    );
+    await fs.unlink(
+      removeDefaultAppProtocolFromFilePath(artworkPaths.optimizedArtworkPath)
+    );
+  } catch (error) {
+    log(
+      'Error occurred when removing a song artwork.',
+      { error, artworkPaths },
+      'ERROR'
+    );
+    throw new Error('Error occurred when removing a song artwork.');
+  }
 };
 
-const checkForTempFolder = async (folderPath: string) => {
+export const removeSongArtworkFromUnknownSource = async (
+  artworkPath: string
+) => {
+  try {
+    await fs.unlink(removeDefaultAppProtocolFromFilePath(artworkPath));
+    return true;
+  } catch (error) {
+    log(
+      'Error occurred when removing artwork of a song from an unknown source.',
+      { artworkPath },
+      'ERROR'
+    );
+    throw new Error(
+      'Error occurred when removing artwork of a song from an unknown source.'
+    );
+  }
+};
+
+const createTempFolder = async (folderPath: string) => {
   try {
     await fs.stat(folderPath);
     return true;
@@ -132,16 +150,37 @@ const checkForTempFolder = async (folderPath: string) => {
   }
 };
 
-export const createTempArtwork = async (artwork: Buffer): Promise<string> => {
+export const createTempArtwork = async (
+  artwork: Buffer | string
+): Promise<string> => {
   try {
     const tempFolder = path.join(app.getPath('userData'), 'temp_artworks');
-    await checkForTempFolder(tempFolder);
+    await createTempFolder(tempFolder);
 
     const artworkPath = path.resolve(tempFolder, `${generateRandomId()}.webp`);
-    await sharp(artwork).resize(250, 250).toFile(artworkPath);
+    await sharp(artwork).toFile(artworkPath);
     return artworkPath;
   } catch (error) {
     log(`FAILED TO CREATE A TEMPORARY ARTWORK.`, { error }, 'ERROR');
     throw new Error(`CREATE_TEMP_ARTWORK_FAILED` as MessageCodes);
+  }
+};
+
+export const clearTempArtworkFolder = () => {
+  const tempFolder = path.join(app.getPath('userData'), 'temp_artworks');
+
+  try {
+    if (fsExtra.pathExistsSync(tempFolder)) {
+      fsExtra.emptyDirSync(tempFolder);
+      return log('Successfully cleared the contents in the temp_folder.');
+    }
+    return undefined;
+  } catch (error) {
+    log(
+      'Error occurred when trying to clear contents in the temp_artwork folder.',
+      { error },
+      'ERROR'
+    );
+    return undefined;
   }
 };

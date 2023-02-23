@@ -60,7 +60,22 @@ export const Artist = (props: ArtistProp) => {
     props.name,
   ]);
   const playArtistSongs = React.useCallback(
-    () => createQueue(props.songIds, 'artist', false, props.artistId, true),
+    () =>
+      window.api
+        .getSongInfo(props.songIds, undefined, undefined, true)
+        .then((songs) => {
+          if (Array.isArray(songs))
+            return createQueue(
+              songs
+                .filter((song) => !song.isBlacklisted)
+                .map((song) => song.songId),
+              'artist',
+              false,
+              props.artistId,
+              true
+            );
+          return undefined;
+        }),
     [createQueue, props.artistId, props.songIds]
   );
 

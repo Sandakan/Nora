@@ -1,5 +1,5 @@
 import sortFolders from '../utils/sortFolders';
-import { getSongsData, getUserData } from '../filesystem';
+import { getBlacklistData, getSongsData, getUserData } from '../filesystem';
 
 const getMusicFolderData = (
   folderPaths: string[] = [],
@@ -10,6 +10,7 @@ const getMusicFolderData = (
 
   if (userData) {
     const { musicFolders } = userData;
+    const { folderBlacklist } = getBlacklistData();
     const isSongsAvailable = songs.length > 0;
 
     if (Array.isArray(musicFolders) && musicFolders?.length > 0) {
@@ -27,7 +28,11 @@ const getMusicFolderData = (
             if (song.path.includes(folderData.path)) songIds.push(song.songId);
           }
         }
-        return { folderData, songIds };
+        return {
+          folderData,
+          songIds,
+          isBlacklisted: folderBlacklist.includes(folderData.path),
+        };
       });
 
       if (sortType) return sortFolders(folders, sortType);

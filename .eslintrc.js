@@ -5,12 +5,7 @@ module.exports = {
     'import/no-extraneous-dependencies': 'off',
     // Since React 17 and typescript 4.1 you can safely disable the rule
     'react/react-in-jsx-scope': 'off',
-    'prettier/prettier': [
-      'warn',
-      {
-        endOfLine: 'auto',
-      },
-    ],
+    'prettier/prettier': 'off',
     // custom eslint rules
     'react/require-default-props': [0],
     'no-nested-ternary': 'off',
@@ -24,6 +19,7 @@ module.exports = {
     'react/function-component-definition': ['off'],
     'default-param-last': ['off'],
     'import/no-unresolved': [2, { caseSensitive: false }],
+    radix: ['warn', 'as-needed'],
     // '@typescript-eslint/naming-convention': [
     //   'warn',
     //   {
@@ -47,6 +43,8 @@ module.exports = {
       },
     ],
     'react/jsx-filename-extension': 'off',
+    'no-restricted-syntax': 'off',
+    'import/named': 'off',
   },
   parserOptions: {
     ecmaVersion: 2020,

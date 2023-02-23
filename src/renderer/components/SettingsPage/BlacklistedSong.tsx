@@ -3,24 +3,24 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
 
 interface BlacklistedSongProp {
-  songPath: string;
+  songId: string;
+  title: string;
   index: number;
+  songPath: string;
 }
 
 const BlacklistedSong = (props: BlacklistedSongProp) => {
   const { addNewNotifications } = React.useContext(AppUpdateContext);
-  const { songPath, index } = props;
-  const songNameArray = (songPath.split('\\').at(-1) as string).split('.');
-  songNameArray.pop();
-  const songName = songNameArray.join('.');
+  const { title, index, songId, songPath } = props;
+
   return (
     <div className="blacklisted-song mb-2 flex w-full items-center justify-between rounded-md px-4 py-2 last:mb-0 only:mb-0 hover:bg-background-color-2 dark:hover:bg-dark-background-color-2 ">
       <span
         className="blacklisted-song-name w-1/4 overflow-hidden text-ellipsis whitespace-nowrap"
-        title={songName}
+        title={title}
       >
         <span className="mr-4">{index + 1}.</span>
-        <span>{songName}</span>
+        <span>{title}</span>
       </span>
       <span
         className="blacklisted-song-path w-1/2 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-light"
@@ -29,18 +29,16 @@ const BlacklistedSong = (props: BlacklistedSongProp) => {
         {songPath}
       </span>
       <Button
-        className="blacklisted-song-restore-btn mr-0 rounded-none border-none text-base font-medium text-background-color-3 dark:text-dark-background-color-3"
+        className="blacklisted-song-restore-btn mr-0 rounded-none border-none text-base font-medium hover:!text-font-color-highlight dark:hover:!text-dark-font-color-highlight"
         label="RESTORE"
         clickHandler={() =>
-          window.api.restoreBlacklistedSong(songPath).then(() =>
+          window.api.restoreBlacklistedSongs([songId]).then(() =>
             addNewNotifications([
               {
-                id: `${songName}RestoreSuccess`,
+                id: `${title}RestoreSuccess`,
                 delay: 5000,
                 content: (
-                  <span>
-                    &apos;{songName}&apos; song restored successfully.
-                  </span>
+                  <span>&apos;{title}&apos; song restored successfully.</span>
                 ),
                 icon: <span className="material-icons-round icon">check</span>,
               },
