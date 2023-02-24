@@ -911,14 +911,6 @@ export default function App() {
       })
       .catch((err) => console.error(err));
 
-    const noticeDataUpdateEvents = (
-      _: unknown,
-      dataEvents: DataUpdateEvent[]
-    ) => {
-      const event = new CustomEvent('app/dataUpdates', { detail: dataEvents });
-      document.dispatchEvent(event);
-    };
-
     window.api.toggleSongPlayback(() => {
       console.log('Main requested song playback');
       toggleSongPlayback();
@@ -928,7 +920,6 @@ export default function App() {
     });
     window.api.skipBackwardToPreviousSong(handleSkipBackwardClick);
     window.api.skipForwardToNextSong(handleSkipForwardClick);
-    window.api.dataUpdateEvent(noticeDataUpdateEvents);
     return () => {
       window.api.removeTogglePlaybackStateEvent(toggleSongPlayback);
       window.api.removeSkipBackwardToPreviousSongEvent(handleSkipBackwardClick);
@@ -936,6 +927,22 @@ export default function App() {
       window.api.removeDataUpdateEventListeners();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  React.useEffect(() => {
+    const noticeDataUpdateEvents = (
+      _: unknown,
+      dataEvents: DataUpdateEvent[]
+    ) => {
+      const event = new CustomEvent('app/dataUpdates', { detail: dataEvents });
+      document.dispatchEvent(event);
+    };
+
+    window.api.dataUpdateEvent(noticeDataUpdateEvents);
+
+    return () => {
+      window.api.removeDataUpdateEventListeners();
+    };
   }, []);
 
   const addNewNotifications = React.useCallback(
@@ -1904,27 +1911,42 @@ export default function App() {
     [content.player.isMiniPlayer]
   );
 
-  const toggleIsFavorite = React.useCallback((isFavorite?: boolean) => {
-    const newFavorite =
-      isFavorite ?? !contentRef.current.currentSongData.isAFavorite;
-    if (contentRef.current.currentSongData.isAFavorite !== newFavorite)
-      window.api
-        .toggleLikeSongs(
-          [contentRef.current.currentSongData.songId],
-          newFavorite
-        )
-        .then((res) => {
-          if (res && res.likes.length + res.dislikes.length > 0) {
-            contentRef.current.currentSongData.isAFavorite = newFavorite;
-            return dispatch({
-              type: 'TOGGLE_IS_FAVORITE_STATE',
-              data: newFavorite,
-            });
-          }
-          return undefined;
-        })
-        .catch((err) => console.error(err));
-  }, []);
+  const toggleIsFavorite = React.useCallback(
+    (isFavorite?: boolean, onlyChangeCurrentSongData = false) => {
+      const newFavorite =
+        isFavorite ?? !contentRef.current.currentSongData.isAFavorite;
+      if (
+        contentRef.current.currentSongData.isAFavorite !== newFavorite &&
+        !onlyChangeCurrentSongData
+      ) {
+        window.api
+          .toggleLikeSongs(
+            [contentRef.current.currentSongData.songId],
+            newFavorite
+          )
+          .then((res) => {
+            if (res && res.likes.length + res.dislikes.length > 0) {
+              contentRef.current.currentSongData.isAFavorite = newFavorite;
+              return dispatch({
+                type: 'TOGGLE_IS_FAVORITE_STATE',
+                data: newFavorite,
+              });
+            }
+            return undefined;
+          })
+          .catch((err) => console.error(err));
+      }
+      if (typeof isFavorite === 'boolean') {
+        contentRef.current.currentSongData.isAFavorite = isFavorite;
+        return dispatch({
+          type: 'TOGGLE_IS_FAVORITE_STATE',
+          data: isFavorite,
+        });
+      }
+      return undefined;
+    },
+    []
+  );
 
   const updateVolume = React.useCallback((volume: number) => {
     if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);

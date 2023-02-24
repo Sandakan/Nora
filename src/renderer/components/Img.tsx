@@ -41,7 +41,8 @@ const Img = (props: Props) => {
       alt={alt}
       className={`${className}`}
       onError={(e) => {
-        if (!noFallbacks) e.currentTarget.src = fallbackSrc;
+        if (!noFallbacks && e.currentTarget.src !== fallbackSrc)
+          e.currentTarget.src = fallbackSrc;
       }}
       onClick={onClick}
       title={

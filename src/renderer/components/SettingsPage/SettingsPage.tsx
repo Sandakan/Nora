@@ -8,13 +8,11 @@
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 
+import MainContainer from '../MainContainer';
+
 import AppearanceSettings from './Settings/AppearanceSettings';
 import AudioPlaybackSettings from './Settings/AudioPlaybackSettings';
 import MusicFoldersSettings from './Settings/MusicFoldersSettings';
-import BlacklistedSongSettings from './Settings/BlacklistedSongSettings';
-
-import MainContainer from '../MainContainer';
-
 import DefaultPageSettings from './Settings/DefaultPageSettings';
 import PreferencesSettings from './Settings/PreferencesSettings';
 import AccessibilitySettings from './Settings/AccessibilitySettings';
@@ -87,15 +85,6 @@ const SettingsPage = () => {
               musicFoldersData={settingsUserData?.musicFolders ?? []}
             />
           </li>
-
-          {/* BLACKLISTED SONGS SETTINGS */}
-          {settingsUserData && settingsUserData.songBlacklist && (
-            <li className="main-container blacklisted-songs-container mb-16">
-              <BlacklistedSongSettings
-                songBlacklist={settingsUserData.songBlacklist}
-              />
-            </li>
-          )}
 
           {/* DEFAULT PAGE SETTINGS */}
           <li className="main-container mb-16">

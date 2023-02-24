@@ -709,7 +709,9 @@ declare global {
     | 'monthlyLeastListened'
     | 'artistNameDescending'
     | 'albumNameAscending'
-    | 'albumNameDescending';
+    | 'albumNameDescending'
+    | 'blacklistedSongs'
+    | 'whitelistedSongs';
 
   type ArtistSortTypes =
     | 'aToZ'
@@ -741,7 +743,9 @@ declare global {
     | 'aToZ'
     | 'zToA'
     | 'noOfSongsAscending'
-    | 'noOfSongsDescending';
+    | 'noOfSongsDescending'
+    | 'blacklistedFolders'
+    | 'whitelistedFolders';
 
   // ? App pages related types
 

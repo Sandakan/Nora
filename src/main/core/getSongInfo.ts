@@ -1,20 +1,8 @@
-import path from 'path';
-import {
-  getBlacklistData,
-  getListeningData,
-  getSongsData,
-} from '../filesystem';
+import isSongBlacklisted from '../utils/isSongBlacklisted';
+import { getListeningData, getSongsData } from '../filesystem';
 import { getSongArtworkPath } from '../fs/resolveFilePaths';
 import log from '../log';
 import sortSongs from '../utils/sortSongs';
-
-const checkIfSongFolderIsBlacklisted = (songPath: string) => {
-  const { folderBlacklist } = getBlacklistData();
-
-  return folderBlacklist.some((folderPath) =>
-    path.normalize(songPath).includes(path.normalize(folderPath))
-  );
-};
 
 const getSongInfo = (
   songIds: string[],
@@ -31,7 +19,6 @@ const getSongInfo = (
   if (songIds.length > 0) {
     const songsData = getSongsData();
     const listeningData = getListeningData();
-    const { songBlacklist } = getBlacklistData();
 
     if (Array.isArray(songsData) && songsData.length > 0) {
       const results: SavableSongData[] = [];
@@ -52,12 +39,7 @@ const getSongInfo = (
         }
       if (results.length > 0) {
         let updatedResults: SongData[] = results.map((x) => {
-          const isSongFolderBlacklisted = checkIfSongFolderIsBlacklisted(
-            x.path
-          );
-
-          const isBlacklisted =
-            songBlacklist.includes(x.songId) || isSongFolderBlacklisted;
+          const isBlacklisted = isSongBlacklisted(x.songId, x.path);
 
           return {
             ...x,

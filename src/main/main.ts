@@ -25,6 +25,7 @@ import {
   setUserData as saveUserData,
   resetAppCache,
   getListeningData,
+  getBlacklistData,
 } from './filesystem';
 import { resolveHtmlPath } from './utils/util';
 import updateSongId3Tags from './updateSongId3Tags';
@@ -489,6 +490,8 @@ app
           'RESYNC_SUCCESSFUL'
         );
       });
+
+      ipcMain.handle('app/getBlacklistData', getBlacklistData);
 
       ipcMain.handle('app/blacklistSongs', (_, songIds: string[]) =>
         blacklistSongs(songIds)

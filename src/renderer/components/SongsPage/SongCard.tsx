@@ -76,6 +76,11 @@ const SongCard = (props: SongCardProp) => {
         return currentSongData.songId === songId && isCurrentSongPlaying;
       return false;
     });
+    setIsSongAFavorite((prevState) => {
+      if (currentSongData?.songId === songId)
+        return currentSongData.isAFavorite;
+      return prevState;
+    });
   }, [currentSongData, isCurrentSongPlaying, songId]);
 
   const [r, g, b] = React.useMemo(
@@ -139,7 +144,7 @@ const SongCard = (props: SongCardProp) => {
       .then((res) => {
         if (res && res.likes.length + res.dislikes.length > 0) {
           if (currentSongData.songId === songId)
-            toggleIsFavorite(!currentSongData.isAFavorite);
+            toggleIsFavorite(!currentSongData.isAFavorite, true);
           return setIsSongAFavorite((prevData) => !prevData);
         }
         return undefined;

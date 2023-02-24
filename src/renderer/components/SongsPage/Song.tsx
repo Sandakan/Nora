@@ -102,6 +102,27 @@ const Song = React.forwardRef(
       playSong(songId);
     }, [playSong, songId]);
 
+    const handleLikeButtonClick = React.useCallback(() => {
+      window.api
+        .toggleLikeSongs([songId], !isAFavorite)
+        .then((res) => {
+          if (res && res.likes.length + res.dislikes.length > 0) {
+            if (currentSongData.songId === songId)
+              toggleIsFavorite(!currentSongData.isAFavorite, true);
+            return setIsAFavorite((prevData) => !prevData);
+          }
+          setIsAFavorite((prevData) => !prevData);
+          return undefined;
+        })
+        .catch((err) => console.error(err));
+    }, [
+      currentSongData.isAFavorite,
+      currentSongData.songId,
+      isAFavorite,
+      songId,
+      toggleIsFavorite,
+    ]);
+
     const { minutes, seconds } = React.useMemo(() => {
       const addZero = (num: number) => {
         if (num < 10) return `0${num}`;
@@ -619,20 +640,7 @@ const Song = React.forwardRef(
                   : 'text-font-color-highlight dark:text-dark-background-color-3'
               }`}
               title={`You ${isAFavorite ? 'liked' : "didn't like"} this song.`}
-              onClick={() => {
-                window.api
-                  .toggleLikeSongs([songId], !isAFavorite)
-                  .then((res) => {
-                    if (res && res.likes.length + res.dislikes.length > 0) {
-                      if (currentSongData.songId === songId)
-                        toggleIsFavorite(!currentSongData.isAFavorite);
-                      return setIsAFavorite((prevData) => !prevData);
-                    }
-                    setIsAFavorite((prevData) => !prevData);
-                    return undefined;
-                  })
-                  .catch((err) => console.error(err));
-              }}
+              onClick={handleLikeButtonClick}
             >
               favorite
             </span>

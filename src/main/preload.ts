@@ -100,6 +100,8 @@ export const api = {
 
   removeAMusicFolder: (absolutePath: string): Promise<void> =>
     ipcRenderer.invoke('app/removeAMusicFolder', absolutePath),
+  getBlacklistData: (): Promise<Blacklist> =>
+    ipcRenderer.invoke('app/getBlacklistData'),
   blacklistSongs: (songIds: string[]): Promise<void> =>
     ipcRenderer.invoke('app/blacklistSongs', songIds),
   restoreBlacklistedSongs: (songIds: string[]): Promise<void> =>

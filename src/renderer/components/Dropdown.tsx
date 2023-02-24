@@ -1,12 +1,17 @@
 /* eslint-disable react/require-default-props */
 import React from 'react';
 
+export interface DropdownOption<T> {
+  label: string;
+  value: T;
+}
+
 interface DropdownProp {
   name: string;
   className?: string;
-  options: { label: string; value: string }[];
+  options: DropdownOption<string>[];
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onChange: (_e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
 function Dropdown(props: DropdownProp) {

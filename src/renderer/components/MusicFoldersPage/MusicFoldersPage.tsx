@@ -4,12 +4,21 @@ import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
-import Dropdown from '../Dropdown';
+import Dropdown, { DropdownOption } from '../Dropdown';
 import Img from '../Img';
 import MainContainer from '../MainContainer';
 import Folder from './Folder';
 
 import NoFoldersImage from '../../../../assets/images/svg/Empty Inbox _Monochromatic.svg';
+
+const folderDropdownOptions: DropdownOption<FolderSortTypes>[] = [
+  { label: 'A to Z', value: 'aToZ' },
+  { label: 'Z to A', value: 'zToA' },
+  { label: 'High Song Count', value: 'noOfSongsDescending' },
+  { label: 'Low Song Count', value: 'noOfSongsAscending' },
+  { label: 'Blacklisted Folders', value: 'blacklistedFolders' },
+  { label: 'Whitelisted Folders', value: 'whitelistedFolders' },
+];
 
 const MusicFoldersPage = () => {
   const { isMultipleSelectionEnabled, multipleSelectionsData } =
@@ -42,7 +51,9 @@ const MusicFoldersPage = () => {
           const event = dataEvents[i];
           if (
             event.dataType === 'userData/musicFolder' ||
-            event.dataType === 'blacklist/folderBlacklist'
+            event.dataType === 'blacklist/folderBlacklist' ||
+            event.dataType === 'songs/deletedSong' ||
+            event.dataType === 'songs/newSong'
           )
             fetchFoldersData();
         }
@@ -155,12 +166,7 @@ const MusicFoldersPage = () => {
               <Dropdown
                 name="genreSortDropdown"
                 value={sortingOrder}
-                options={[
-                  { label: 'A to Z', value: 'aToZ' },
-                  { label: 'Z to A', value: 'zToA' },
-                  { label: 'High Song Count', value: 'noOfSongsDescending' },
-                  { label: 'Low Song Count', value: 'noOfSongsAscending' },
-                ]}
+                options={folderDropdownOptions}
                 onChange={(e) => {
                   updateCurrentlyActivePageData((currentData) => ({
                     ...currentData,

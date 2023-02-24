@@ -300,19 +300,6 @@ const MusicFolderInfoPage = () => {
               initialScrollOffset={
                 currentlyActivePage.data?.scrollTopOffset ?? 0
               }
-              //   onScroll={(data) => {
-              //     if (scrollOffsetTimeoutIdRef.current)
-              //       clearTimeout(scrollOffsetTimeoutIdRef.current);
-              //     if (!data.scrollUpdateWasRequested && data.scrollOffset !== 0)
-              //       scrollOffsetTimeoutIdRef.current = setTimeout(
-              //         () =>
-              //           updateCurrentlyActivePageData((currentPageData) => ({
-              //             ...currentPageData,
-              //             scrollTopOffset: data.scrollOffset,
-              //           })),
-              //         500
-              //       );
-              //   }}
             >
               {row}
             </List>

@@ -30,6 +30,49 @@ interface SongPageReducer {
 
 type SongPageReducerActionTypes = 'SONGS_DATA' | 'SORTING_ORDER';
 
+const dropdownOptions: { label: string; value: SongSortTypes }[] = [
+  { label: 'A to Z', value: 'aToZ' },
+  { label: 'Z to A', value: 'zToA' },
+  { label: 'Newest', value: 'dateAddedAscending' },
+  { label: 'Oldest', value: 'dateAddedDescending' },
+  { label: 'Released Year (Ascending)', value: 'releasedYearAscending' },
+  { label: 'Released Year (Descending)', value: 'releasedYearDescending' },
+  {
+    label: 'Most Listened (All Time)',
+    value: 'allTimeMostListened',
+  },
+  {
+    label: 'Least Listened (All Time)',
+    value: 'allTimeLeastListened',
+  },
+  {
+    label: 'Most Listened (This Month)',
+    value: 'monthlyMostListened',
+  },
+  {
+    label: 'Least Listened (This Month)',
+    value: 'monthlyLeastListened',
+  },
+  {
+    label: 'Artist Name (A to Z)',
+    value: 'artistNameAscending',
+  },
+  {
+    label: 'Artist Name (Z to A)',
+    value: 'artistNameDescending',
+  },
+  { label: 'Album Name (A to Z)', value: 'albumNameAscending' },
+  {
+    label: 'Album Name (Z to A)',
+    value: 'albumNameDescending',
+  },
+  { label: 'Blacklisted Songs', value: 'blacklistedSongs' },
+  {
+    label: 'Whitelisted Songs',
+    value: 'whitelistedSongs',
+  },
+];
+
 const reducer = (
   state: SongPageReducer,
   action: { type: SongPageReducerActionTypes; data: any }
@@ -217,44 +260,6 @@ export const SongsPage = () => {
         : [],
     [content.songsData, userData]
   );
-
-  const dropdownOptions: { label: string; value: SongSortTypes }[] = [
-    { label: 'A to Z', value: 'aToZ' },
-    { label: 'Z to A', value: 'zToA' },
-    { label: 'Newest', value: 'dateAddedAscending' },
-    { label: 'Oldest', value: 'dateAddedDescending' },
-    { label: 'Released Year (Ascending)', value: 'releasedYearAscending' },
-    { label: 'Released Year (Descending)', value: 'releasedYearDescending' },
-    {
-      label: 'Most Listened (All Time)',
-      value: 'allTimeMostListened',
-    },
-    {
-      label: 'Least Listened (All Time)',
-      value: 'allTimeLeastListened',
-    },
-    {
-      label: 'Most Listened (This Month)',
-      value: 'monthlyMostListened',
-    },
-    {
-      label: 'Least Listened (This Month)',
-      value: 'monthlyLeastListened',
-    },
-    {
-      label: 'Artist Name (A to Z)',
-      value: 'artistNameAscending',
-    },
-    {
-      label: 'Artist Name (Z to A)',
-      value: 'artistNameDescending',
-    },
-    { label: 'Album Name (A to Z)', value: 'albumNameAscending' },
-    {
-      label: 'Album Name (Z to A)',
-      value: 'albumNameDescending',
-    },
-  ];
 
   return (
     <MainContainer className="main-container appear-from-bottom songs-list-container !h-full overflow-hidden !pb-0">

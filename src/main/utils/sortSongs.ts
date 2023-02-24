@@ -1,3 +1,5 @@
+import isSongBlacklisted from './isSongBlacklisted';
+
 const getListeningDataOfASong = (
   songId: string,
   listeningData: SongListeningData[]
@@ -50,11 +52,11 @@ const parseListeningData = (listeningData?: SongListeningData) => {
   };
 };
 
-function sortSongs<T extends (SongData | SavableSongData)[]>(
+function sortSongs<T extends (SavableSongData | SongData)[]>(
   data: T,
   sortType: SongSortTypes,
   listeningData?: SongListeningData[]
-) {
+): T {
   if (data && data.length > 0) {
     if (sortType === 'aToZ')
       return data.sort((a, b) => {
@@ -268,6 +270,24 @@ function sortSongs<T extends (SongData | SavableSongData)[]>(
           }
           return 0;
         });
+    if (sortType === 'blacklistedSongs')
+      return (
+        data.filter((song) => isSongBlacklisted(song.songId, song.path)) as T
+      ).sort((a, b) => {
+        if (a.title.replace(/\W/gi, '') > b.title.replace(/\W/gi, '')) return 1;
+        if (a.title.replace(/\W/gi, '') < b.title.replace(/\W/gi, ''))
+          return -1;
+        return 0;
+      });
+    if (sortType === 'whitelistedSongs')
+      return (
+        data.filter((song) => !isSongBlacklisted(song.songId, song.path)) as T
+      ).sort((a, b) => {
+        if (a.title.replace(/\W/gi, '') > b.title.replace(/\W/gi, '')) return 1;
+        if (a.title.replace(/\W/gi, '') < b.title.replace(/\W/gi, ''))
+          return -1;
+        return 0;
+      });
   }
   return data;
 }

@@ -268,8 +268,11 @@ export const Artist = (props: ArtistProp) => {
     >
       <div className="artist-img-container relative flex h-3/4 items-center justify-center">
         <Img
-          src={props?.onlineArtworkPaths?.picture_medium}
-          fallbackSrc={props.artworkPaths.artworkPath || DefaultArtistCover}
+          src={
+            props?.onlineArtworkPaths?.picture_medium ||
+            props.artworkPaths.artworkPath
+          }
+          fallbackSrc={DefaultArtistCover}
           alt="Default song cover"
           className="aspect-square h-full rounded-full object-cover shadow-xl"
         />

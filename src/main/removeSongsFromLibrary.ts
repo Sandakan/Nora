@@ -371,6 +371,9 @@ const removeSongsFromLibrary = async (
 
   dataUpdateEvent('artists');
   dataUpdateEvent('albums');
+  dataUpdateEvent('playlists');
+  dataUpdateEvent('genres');
+
   if (isArtistRemoved) dataUpdateEvent('artists/deletedArtist');
   if (isAlbumRemoved) dataUpdateEvent('albums/deletedAlbum');
   if (isGenreRemoved) dataUpdateEvent('genres/deletedGenre');

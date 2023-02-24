@@ -39,7 +39,10 @@ export interface AppUpdateContextType {
   toggleShuffling: (isShuffling?: boolean) => void;
   toggleSongPlayback: () => void;
   toggleRepeat: () => void;
-  toggleIsFavorite: (isFavorite: boolean) => void;
+  toggleIsFavorite: (
+    isFavorite: boolean,
+    onlyChangeCurrentSongData?: boolean
+  ) => void;
   toggleMutedState: (isMuted?: boolean) => void;
   updateVolume: (volume: number) => void;
   updateSongPosition: (position: number) => void;

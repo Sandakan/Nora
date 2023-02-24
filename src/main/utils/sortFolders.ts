@@ -1,5 +1,17 @@
 /* eslint-disable no-nested-ternary */
-export default <T extends MusicFolder[]>(data: T, sortType: GenreSortTypes) => {
+
+import { getBlacklistData } from '../filesystem';
+
+const isFolderBlacklisted = (folderPath: string) => {
+  const { folderBlacklist } = getBlacklistData();
+
+  return folderBlacklist.includes(folderPath);
+};
+
+export default <T extends MusicFolder[]>(
+  data: T,
+  sortType: FolderSortTypes
+) => {
   if (data.length > 0) {
     if (sortType === 'aToZ')
       return data.sort((a, b) =>
@@ -46,6 +58,26 @@ export default <T extends MusicFolder[]>(data: T, sortType: GenreSortTypes) => {
           a.songIds.length > b.songIds.length
             ? 1
             : a.songIds.length < b.songIds.length
+            ? -1
+            : 0
+        );
+    if (sortType === 'blacklistedFolders')
+      return data
+        .filter((folder) => isFolderBlacklisted(folder.folderData.path))
+        .sort((a, b) =>
+          a.folderData.path > b.folderData.path
+            ? 1
+            : a.folderData.path < b.folderData.path
+            ? -1
+            : 0
+        );
+    if (sortType === 'whitelistedFolders')
+      return data
+        .filter((folder) => !isFolderBlacklisted(folder.folderData.path))
+        .sort((a, b) =>
+          a.folderData.path > b.folderData.path
+            ? 1
+            : a.folderData.path < b.folderData.path
             ? -1
             : 0
         );
