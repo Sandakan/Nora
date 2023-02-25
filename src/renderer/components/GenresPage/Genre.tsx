@@ -3,7 +3,7 @@ import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Img from '../Img';
-import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
+import DefaultGenreCover from '../../../../assets/images/webp/genre-cover-default.webp';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 
 interface GenreProp {
@@ -36,15 +36,23 @@ const Genre = (props: GenreProp) => {
     updateMultipleSelections,
   } = React.useContext(AppUpdateContext);
 
-  const goToGenreInfoPage = () =>
-    currentlyActivePage.pageTitle === 'GenreInfo' &&
-    currentlyActivePage.data.genreId === genreId
-      ? changeCurrentActivePage('Home')
-      : changeCurrentActivePage('GenreInfo', {
-          genreId,
-        });
+  const goToGenreInfoPage = React.useCallback(
+    () =>
+      currentlyActivePage.pageTitle === 'GenreInfo' &&
+      currentlyActivePage?.data?.genreId === genreId
+        ? changeCurrentActivePage('Home')
+        : changeCurrentActivePage('GenreInfo', {
+            genreId,
+          }),
+    [
+      changeCurrentActivePage,
+      currentlyActivePage?.data?.genreId,
+      currentlyActivePage.pageTitle,
+      genreId,
+    ]
+  );
 
-  const playGenre = React.useCallback(
+  const playGenreSongs = React.useCallback(
     (isShuffle = false) => {
       return window.api
         .getSongInfo(songIds, undefined, undefined, true)
@@ -65,6 +73,89 @@ const Genre = (props: GenreProp) => {
     [createQueue, genreId, songIds]
   );
 
+  const playGenreSongsForMultipleSelections = React.useCallback(
+    (isShuffle = false) => {
+      const { multipleSelections: genreIds } = multipleSelectionsData;
+      window.api
+        .getGenresData(genreIds)
+        .then((genres) => {
+          if (Array.isArray(genres) && genres.length > 0) {
+            const genreSongIds = genres
+              .map((genre) => genre.songs.map((song) => song.songId))
+              .flat();
+
+            return window.api.getSongInfo(
+              genreSongIds,
+              undefined,
+              undefined,
+              true
+            );
+          }
+          return undefined;
+        })
+        .then((songs) => {
+          if (Array.isArray(songs))
+            return createQueue(
+              songs
+                .filter((song) => !song.isBlacklisted)
+                .map((song) => song.songId),
+              'songs',
+              isShuffle,
+              undefined,
+              true
+            );
+          return undefined;
+        })
+        .catch((err) => console.error(err));
+    },
+    [createQueue, multipleSelectionsData]
+  );
+
+  const addToQueueForMultipleSelections = React.useCallback(() => {
+    const { multipleSelections: genreIds } = multipleSelectionsData;
+    window.api
+      .getGenresData(genreIds)
+      .then((genres) => {
+        if (Array.isArray(genres) && genres.length > 0) {
+          const genreSongIds = genres
+            .map((genre) => genre.songs.map((song) => song.songId))
+            .flat();
+
+          return window.api.getSongInfo(
+            genreSongIds,
+            undefined,
+            undefined,
+            true
+          );
+        }
+        return undefined;
+      })
+      .then((songs) => {
+        if (Array.isArray(songs)) {
+          queue.queue.push(
+            ...songs
+              .filter((song) => !song.isBlacklisted)
+              .map((song) => song.songId)
+          );
+          updateQueueData(undefined, queue.queue);
+          addNewNotifications([
+            {
+              id: 'newSongsToQueue',
+              delay: 5000,
+              content: <span>Added {songs.length} songs to the queue.</span>,
+            },
+          ]);
+        }
+        return undefined;
+      })
+      .catch((err) => console.error(err));
+  }, [
+    addNewNotifications,
+    multipleSelectionsData,
+    queue.queue,
+    updateQueueData,
+  ]);
+
   const isAMultipleSelection = React.useMemo(() => {
     if (!multipleSelectionsData.isEnabled) return false;
     if (multipleSelectionsData.selectionType !== 'genre') return false;
@@ -78,37 +169,60 @@ const Genre = (props: GenreProp) => {
     return false;
   }, [multipleSelectionsData, genreId]);
 
-  const contextMenuItems: ContextMenuItem[] = React.useMemo(
-    () => [
+  const contextMenuItems: ContextMenuItem[] = React.useMemo(() => {
+    const isMultipleSelectionsEnabled =
+      multipleSelectionsData.selectionType === 'genre' &&
+      multipleSelectionsData.multipleSelections.length !== 1 &&
+      isAMultipleSelection;
+
+    return [
       {
-        label: 'Play',
+        label: isMultipleSelectionsEnabled ? 'Play All' : 'Play',
         iconName: 'play_arrow',
-        handlerFunction: playGenre,
+        handlerFunction: () => {
+          if (isMultipleSelectionsEnabled)
+            playGenreSongsForMultipleSelections();
+          else playGenreSongs();
+          toggleMultipleSelections(false);
+        },
+      },
+      {
+        label: isMultipleSelectionsEnabled
+          ? 'Shuffle and Play All'
+          : 'Shuffle and Play',
+        iconName: 'shuffle',
+        handlerFunction: () => {
+          if (isMultipleSelectionsEnabled)
+            playGenreSongsForMultipleSelections(true);
+          else playGenreSongs(true);
+          toggleMultipleSelections(false);
+        },
       },
       {
         label: 'Add to queue',
         iconName: 'queue',
         handlerFunction: () => {
-          queue.queue.push(...songIds);
-          updateQueueData(undefined, queue.queue);
-          addNewNotifications([
-            {
-              id: 'newSongsToQueue',
-              delay: 5000,
-              content: (
-                <span>
-                  Added {songIds.length} song
-                  {songIds.length === 1 ? '' : 's'} to the queue.
-                </span>
-              ),
-            },
-          ]);
+          if (isMultipleSelectionsEnabled) addToQueueForMultipleSelections();
+          else {
+            queue.queue.push(...songIds);
+            updateQueueData(undefined, queue.queue);
+            addNewNotifications([
+              {
+                id: 'newSongsToQueue',
+                delay: 5000,
+                content: (
+                  <span>Added {songIds.length} songs to the queue.</span>
+                ),
+              },
+            ]);
+          }
+          toggleMultipleSelections(false);
         },
       },
       {
-        label: 'Shuffle and Play',
-        iconName: 'shuffle',
-        handlerFunction: () => playGenre(true),
+        label: 'Hr',
+        isContextMenuItemSeperator: true,
+        handlerFunction: () => true,
       },
       {
         label: isMultipleSelectionEnabled ? 'Unselect' : 'Select',
@@ -128,20 +242,31 @@ const Genre = (props: GenreProp) => {
           );
         },
       },
-    ],
-    [
-      addNewNotifications,
-      isAMultipleSelection,
-      isMultipleSelectionEnabled,
-      playGenre,
-      genreId,
-      queue.queue,
-      songIds,
-      toggleMultipleSelections,
-      updateMultipleSelections,
-      updateQueueData,
-    ]
-  );
+      {
+        label: 'Info',
+        iconName: 'info',
+        iconClassName: 'material-icons-round-outlined',
+        handlerFunction: goToGenreInfoPage,
+        isDisabled: isMultipleSelectionsEnabled,
+      },
+    ];
+  }, [
+    multipleSelectionsData.selectionType,
+    multipleSelectionsData.multipleSelections.length,
+    isAMultipleSelection,
+    isMultipleSelectionEnabled,
+    goToGenreInfoPage,
+    playGenreSongsForMultipleSelections,
+    playGenreSongs,
+    toggleMultipleSelections,
+    addToQueueForMultipleSelections,
+    queue.queue,
+    songIds,
+    updateQueueData,
+    addNewNotifications,
+    genreId,
+    updateMultipleSelections,
+  ]);
 
   const contextMenuItemData =
     isMultipleSelectionEnabled &&
@@ -149,13 +274,20 @@ const Genre = (props: GenreProp) => {
     isAMultipleSelection
       ? {
           title: `${multipleSelectionsData.multipleSelections.length} selected genres`,
-          artworkPath: DefaultSongCover,
+          artworkPath: DefaultGenreCover,
         }
       : undefined;
 
   return (
     <div
-      className={`genre appear-from-bottom relative mr-10 mb-6 flex h-36 w-72 cursor-pointer items-center overflow-hidden rounded-2xl p-4 text-background-color-2 dark:text-dark-background-color-2 ${className}`}
+      className={`genre appear-from-bottom relative mr-10 mb-6 flex h-36 w-72 cursor-pointer items-center overflow-hidden rounded-2xl p-4 text-background-color-2 transition-[border,border-color] dark:text-dark-background-color-2 ${className} ${
+        isMultipleSelectionEnabled &&
+        multipleSelectionsData.selectionType === 'genre' &&
+        'border-4'
+      } ${
+        isAMultipleSelection &&
+        'border-font-color-highlight dark:border-dark-font-color-highlight'
+      }`}
       style={{
         backgroundColor: `rgb(${
           backgroundColor
@@ -183,16 +315,6 @@ const Genre = (props: GenreProp) => {
           );
         } else goToGenreInfoPage();
       }}
-      // onKeyUp={() =>
-      //   isMultipleSelectionEnabled &&
-      //   multipleSelectionsData.selectionType === 'genre'
-      //     ? updateMultipleSelections(
-      //         genreId,
-      //         'genre',
-      //         isAMultipleSelection ? 'remove' : 'add'
-      //       )
-      //     : goToGenreInfoPage()
-      // }
       role="button"
       tabIndex={0}
       onContextMenu={(e) =>

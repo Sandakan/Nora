@@ -85,10 +85,10 @@ const MusicFolderInfoPage = () => {
           const event = dataEvents[i];
           if (
             event.dataType === 'songs/artworks' ||
-            event.dataType === 'songs/likes' ||
             event.dataType === 'songs/deletedSong' ||
             event.dataType === 'songs/newSong' ||
-            event.dataType === 'songs/updatedSong'
+            event.dataType === 'songs/updatedSong' ||
+            (event.dataType === 'songs/likes' && event.eventData.length > 1)
           )
             fetchFolderSongs();
         }

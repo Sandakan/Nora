@@ -2047,21 +2047,28 @@ export default function App() {
       } else if (e.shiftKey && e.key === 'ArrowRight') {
         if (player.currentTime + 10 < player.duration) player.currentTime += 10;
       }
+      // alt combinations
+      else if (e.altKey && e.key === 'Home') updatePageHistoryIndex('home');
+      else if (e.altKey && e.key === 'ArrowLeft')
+        updatePageHistoryIndex('decrement');
+      else if (e.altKey && e.key === 'ArrowRight')
+        updatePageHistoryIndex('increment');
     },
     [
-      changeCurrentActivePage,
+      updateVolume,
+      toggleMutedState,
+      handleSkipForwardClick,
+      handleSkipBackwardClick,
+      toggleShuffling,
+      toggleRepeat,
+      toggleIsFavorite,
+      updateMiniPlayerStatus,
       content.player.isMiniPlayer,
       content.navigationHistory.history,
       content.navigationHistory.pageHistoryIndex,
-      handleSkipBackwardClick,
-      handleSkipForwardClick,
-      toggleIsFavorite,
-      toggleMutedState,
-      toggleRepeat,
-      toggleShuffling,
       toggleSongPlayback,
-      updateMiniPlayerStatus,
-      updateVolume,
+      updatePageHistoryIndex,
+      changeCurrentActivePage,
     ]
   );
 

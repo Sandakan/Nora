@@ -11,7 +11,7 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import SongArtist from '../SongsPage/SongArtist';
-import DefaultAlbumCover from '../../../../assets/images/png/album_cover_default.png';
+import DefaultAlbumCover from '../../../../assets/images/webp/album_cover_default.webp';
 
 interface AlbumProp extends Album {
   // eslint-disable-next-line react/no-unused-prop-types
@@ -38,7 +38,7 @@ export const Album = (props: AlbumProp) => {
     toggleMultipleSelections,
   } = React.useContext(AppUpdateContext);
 
-  const playAlbum = React.useCallback(
+  const playAlbumSongs = React.useCallback(
     (isShuffle = false) => {
       return window.api
         .getSongInfo(
@@ -63,6 +63,90 @@ export const Album = (props: AlbumProp) => {
     },
     [createQueue, props.albumId, props.songs]
   );
+
+  const playAlbumSongsForMultipleSelections = React.useCallback(
+    (isShuffle = false) => {
+      const { multipleSelections: albumIds } = multipleSelectionsData;
+
+      window.api
+        .getAlbumData(albumIds)
+        .then((albums) => {
+          if (Array.isArray(albums) && albums.length > 0) {
+            const albumSongIds = albums
+              .map((album) => album.songs.map((song) => song.songId))
+              .flat();
+
+            return window.api.getSongInfo(
+              albumSongIds,
+              undefined,
+              undefined,
+              true
+            );
+          }
+          return undefined;
+        })
+        .then((songs) => {
+          if (Array.isArray(songs))
+            return createQueue(
+              songs
+                .filter((song) => !song.isBlacklisted)
+                .map((song) => song.songId),
+              'songs',
+              isShuffle,
+              undefined,
+              true
+            );
+          return undefined;
+        })
+        .catch((err) => console.error(err));
+    },
+    [createQueue, multipleSelectionsData]
+  );
+
+  const addToQueueForMultipleSelections = React.useCallback(() => {
+    const { multipleSelections: albumIds } = multipleSelectionsData;
+    window.api
+      .getGenresData(albumIds)
+      .then((albums) => {
+        if (Array.isArray(albums) && albums.length > 0) {
+          const albumSongIds = albums
+            .map((album) => album.songs.map((song) => song.songId))
+            .flat();
+
+          return window.api.getSongInfo(
+            albumSongIds,
+            undefined,
+            undefined,
+            true
+          );
+        }
+        return undefined;
+      })
+      .then((songs) => {
+        if (Array.isArray(songs)) {
+          queue.queue.push(
+            ...songs
+              .filter((song) => !song.isBlacklisted)
+              .map((song) => song.songId)
+          );
+          updateQueueData(undefined, queue.queue);
+          addNewNotifications([
+            {
+              id: 'newSongsToQueue',
+              delay: 5000,
+              content: <span>Added {songs.length} songs to the queue.</span>,
+            },
+          ]);
+        }
+        return undefined;
+      })
+      .catch((err) => console.error(err));
+  }, [
+    addNewNotifications,
+    multipleSelectionsData,
+    queue.queue,
+    updateQueueData,
+  ]);
 
   const showAlbumInfoPage = React.useCallback(
     () =>
@@ -94,37 +178,62 @@ export const Album = (props: AlbumProp) => {
     return false;
   }, [multipleSelectionsData, props.albumId]);
 
-  const contextMenuItems = React.useMemo(
-    () => [
+  const contextMenuItems = React.useMemo(() => {
+    const isMultipleSelectionsEnabled =
+      multipleSelectionsData.selectionType === 'album' &&
+      multipleSelectionsData.multipleSelections.length !== 1 &&
+      isAMultipleSelection;
+    return [
       {
-        label: 'Play',
+        label: isMultipleSelectionsEnabled ? 'Play All' : 'Play',
         iconName: 'play_arrow',
-        handlerFunction: playAlbum,
+        handlerFunction: () => {
+          if (isMultipleSelectionsEnabled)
+            playAlbumSongsForMultipleSelections();
+          else playAlbumSongs();
+          toggleMultipleSelections(false);
+        },
+      },
+      {
+        label: isMultipleSelectionsEnabled
+          ? 'Shuffle and Play All'
+          : 'Shuffle and Play',
+        iconName: 'shuffle',
+        handlerFunction: () => {
+          if (isMultipleSelectionsEnabled)
+            playAlbumSongsForMultipleSelections(true);
+          else playAlbumSongs(true);
+          toggleMultipleSelections(false);
+        },
       },
       {
         label: 'Add to queue',
         iconName: 'queue',
         handlerFunction: () => {
-          queue.queue.push(...props.songs.map((song) => song.songId));
-          updateQueueData(undefined, queue.queue);
-          addNewNotifications([
-            {
-              id: 'newSongsToQueue',
-              delay: 5000,
-              content: (
-                <span>
-                  Added {props.songs.length} song
-                  {props.songs.length === 1 ? '' : 's'} to the queue.
-                </span>
-              ),
-            },
-          ]);
+          if (isMultipleSelectionsEnabled) addToQueueForMultipleSelections();
+          else {
+            queue.queue.push(...props.songs.map((song) => song.songId));
+            updateQueueData(undefined, queue.queue);
+            addNewNotifications([
+              {
+                id: 'newSongsToQueue',
+                delay: 5000,
+                content: (
+                  <span>
+                    Added {props.songs.length} song
+                    {props.songs.length === 1 ? '' : 's'} to the queue.
+                  </span>
+                ),
+              },
+            ]);
+          }
+          toggleMultipleSelections(false);
         },
       },
       {
-        label: 'Shuffle and Play',
-        iconName: 'shuffle',
-        handlerFunction: () => playAlbum(true),
+        label: 'Hr',
+        isContextMenuItemSeperator: true,
+        handlerFunction: () => true,
       },
       {
         label: 'Info',
@@ -149,21 +258,23 @@ export const Album = (props: AlbumProp) => {
           );
         },
       },
-    ],
-    [
-      addNewNotifications,
-      isAMultipleSelection,
-      isMultipleSelectionEnabled,
-      playAlbum,
-      props.albumId,
-      props.songs,
-      queue.queue,
-      showAlbumInfoPage,
-      toggleMultipleSelections,
-      updateMultipleSelections,
-      updateQueueData,
-    ]
-  );
+    ];
+  }, [
+    addNewNotifications,
+    addToQueueForMultipleSelections,
+    isAMultipleSelection,
+    isMultipleSelectionEnabled,
+    multipleSelectionsData,
+    playAlbumSongs,
+    playAlbumSongsForMultipleSelections,
+    props.albumId,
+    props.songs,
+    queue.queue,
+    showAlbumInfoPage,
+    toggleMultipleSelections,
+    updateMultipleSelections,
+    updateQueueData,
+  ]);
 
   const contextMenuItemData =
     isMultipleSelectionEnabled &&
@@ -182,7 +293,7 @@ export const Album = (props: AlbumProp) => {
         props.className ?? ''
       } ${
         isAMultipleSelection
-          ? 'bg-background-color-3 text-font-color-black dark:bg-dark-background-color-3 dark:text-font-color-black'
+          ? 'bg-background-color-3 !text-font-color-black dark:bg-dark-background-color-3 dark:!text-font-color-black'
           : 'hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50'
       }`}
       onContextMenu={(e) =>
@@ -227,7 +338,7 @@ export const Album = (props: AlbumProp) => {
             className="material-icons-round icon absolute bottom-[5%] right-[5%] z-[1] cursor-pointer text-5xl text-font-color-white text-opacity-0 hover:!text-opacity-100 group-hover:text-opacity-75"
             onClick={(e) => {
               e.stopPropagation();
-              playAlbum();
+              playAlbumSongs();
             }}
           >
             play_circle
@@ -245,7 +356,7 @@ export const Album = (props: AlbumProp) => {
       <div
         className={`album-info-container mt-2 h-fit w-full pl-2 text-font-color-black dark:text-font-color-white ${
           isAMultipleSelection &&
-          'text-font-color-black dark:text-font-color-black'
+          '!text-font-color-black dark:!text-font-color-black'
         }`}
       >
         <div
@@ -266,6 +377,11 @@ export const Album = (props: AlbumProp) => {
                     key={artist.artistId}
                     artistId={artist.artistId}
                     name={artist.name}
+                    className={
+                      isAMultipleSelection
+                        ? '!text-font-color-black dark:!text-font-color-black'
+                        : ''
+                    }
                   />
                   {props.artists ? (
                     props.artists.length === 0 ||

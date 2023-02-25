@@ -12,7 +12,6 @@ import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
-import DefaultArtistCover from '../../../../assets/images/png/artist_cover_default.png';
 import { Album } from '../AlbumsPage/Album';
 import Song from '../SongsPage/Song';
 import Button from '../Button';
@@ -194,8 +193,13 @@ const ArtistInfoPage = () => {
       if ('detail' in e) {
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
-          if (event.dataType === 'albums/newAlbum') fetchSongsData();
-          if (event.dataType === 'albums/deletedAlbum') fetchSongsData();
+          if (
+            event.dataType === 'songs/deletedSong' ||
+            event.dataType === 'songs/newSong' ||
+            event.dataType === 'blacklist/songBlacklist' ||
+            (event.dataType === 'songs/likes' && event.eventData.length > 1)
+          )
+            fetchSongsData();
         }
       }
     };
@@ -329,17 +333,47 @@ const ArtistInfoPage = () => {
     <MainContainer className="artist-info-page-container appear-from-bottom relative overflow-y-auto rounded-tl-lg pt-8 pb-2 pl-2 pr-2">
       <>
         <div className="artist-img-and-info-container relative mb-12 flex flex-row items-center pl-8 [&>*]:z-10">
-          <div className="artist-img-container mr-10 max-h-60 lg:hidden">
+          <div className="artist-img-container relative mr-10 max-h-60 lg:hidden">
             <Img
-              src={
-                artistData?.onlineArtworkPaths?.picture_medium ||
-                artistData?.artworkPaths?.artworkPath
-              }
-              fallbackSrc={
-                artistData?.artworkPaths?.artworkPath || DefaultArtistCover
-              }
+              src={artistData?.onlineArtworkPaths?.picture_medium}
+              fallbackSrc={artistData?.artworkPaths?.artworkPath}
               className="aspect-square max-h-60 rounded-full"
               alt="Album Cover"
+            />
+            <Button
+              className="absolute right-2 bottom-4 !m-0 flex rounded-full !border-0 bg-background-color-1 !p-3 shadow-xl dark:bg-dark-background-color-2"
+              tooltipLabel={
+                artistData?.isAFavorite
+                  ? `Dislike '${artistData?.name}'`
+                  : `Like '${artistData?.name}'`
+              }
+              iconName="favorite"
+              iconClassName={`!text-3xl !leading-none ${
+                artistData?.isAFavorite
+                  ? 'material-icons-round text-font-color-crimson'
+                  : 'material-icons-round material-icons-round-outlined !font-medium text-font-color-black/60 dark:text-font-color-white/60'
+              }`}
+              clickHandler={() => {
+                if (artistData)
+                  window.api
+                    .toggleLikeArtists(
+                      [artistData.artistId],
+                      !artistData.isAFavorite
+                    )
+                    .then(
+                      (res) =>
+                        res &&
+                        setArtistData((prevData) =>
+                          prevData
+                            ? {
+                                ...prevData,
+                                isAFavorite: !prevData.isAFavorite,
+                              }
+                            : undefined
+                        )
+                    )
+                    .catch((err) => console.error(err));
+              }}
             />
           </div>
           <div
@@ -361,7 +395,7 @@ const ArtistInfoPage = () => {
                 }
               }
             >
-              {artistData?.name}
+              {artistData?.name || 'Unknown Artist'}
             </div>
             {artistData?.songs && (
               <div className="artist-no-of-songs">
@@ -381,39 +415,6 @@ const ArtistInfoPage = () => {
                 {calculateTotalTime()}
               </div>
             )}
-            <div className="artist-like-btn-container">
-              <span
-                className={`material-icons-round${
-                  !artistData?.isAFavorite ? '-outlined' : ''
-                } mr-2 cursor-pointer !text-xl`}
-                onClick={() => {
-                  if (artistData)
-                    window.api
-                      .toggleLikeArtist(
-                        artistData.artistId,
-                        !artistData.isAFavorite
-                      )
-                      .then(
-                        (res) =>
-                          res &&
-                          setArtistData((prevData) =>
-                            prevData
-                              ? {
-                                  ...prevData,
-                                  isAFavorite: !prevData.isAFavorite,
-                                }
-                              : undefined
-                          )
-                      )
-                      .catch((err) => console.error(err));
-                }}
-                role="button"
-                tabIndex={0}
-              >
-                favorite
-              </span>
-              {/* {artistData.isAFavorite ? 'Unlike' : 'Like'} */}
-            </div>
           </div>
         </div>
         {albums && albums.length > 0 && (

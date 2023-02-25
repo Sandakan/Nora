@@ -34,6 +34,7 @@ const ArtistsSearchResultsContainer = (props: Props) => {
                     songIds={artist.songs.map((song) => song.songId)}
                     onlineArtworkPaths={artist.onlineArtworkPaths}
                     className="mb-4"
+                    isAFavorite={artist.isAFavorite}
                   />
                 );
               return undefined;

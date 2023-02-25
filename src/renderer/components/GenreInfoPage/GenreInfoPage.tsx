@@ -120,7 +120,13 @@ const GenreInfoPage = () => {
           .detail;
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
-          if (event.dataType === 'songs') fetchSongsData();
+          if (
+            event.dataType === 'songs/deletedSong' ||
+            event.dataType === 'songs/newSong' ||
+            event.dataType === 'blacklist/songBlacklist' ||
+            (event.dataType === 'songs/likes' && event.eventData.length > 1)
+          )
+            fetchSongsData();
         }
       }
     };

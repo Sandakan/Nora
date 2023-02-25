@@ -35,7 +35,7 @@ import {
   searchSongMetadataResultsInInternet,
   fetchSongMetadataFromInternet,
 } from './utils/fetchSongMetadataFromInternet';
-import deleteSongFromSystem from './core/deleteSongFromSystem';
+import deleteSongsFromSystem from './core/deleteSongsFromSystem';
 import removeMusicFolder from './core/removeMusicFolder';
 import restoreBlacklistedSongs from './core/restoreBlacklistedSongs';
 import addWatchersToFolders from './fs/addWatchersToFolders';
@@ -53,10 +53,10 @@ import toggleLikeSongs from './core/toggleLikeSongs';
 import sendSongID3Tags from './core/sendSongId3Tags';
 import removeSongFromPlaylist from './core/removeSongFromPlaylist';
 import addSongsToPlaylist from './core/addSongsToPlaylist';
-import removePlaylist from './core/removePlaylist';
+import removePlaylists from './core/removePlaylists';
 import addNewPlaylist from './core/addNewPlaylist';
 import getAllSongs from './core/getAllSongs';
-import toggleLikeArtist from './core/toggleLikeArtist';
+import toggleLikeArtists from './core/toggleLikeArtists';
 import fetchSongInfoFromLastFM from './core/fetchSongInfoFromLastFM';
 import clearSongHistory from './core/clearSongHistory';
 import clearSearchHistoryResults from './core/clearSeachHistoryResults';
@@ -318,9 +318,9 @@ app
       );
 
       ipcMain.handle(
-        'app/toggleLikeArtist',
-        (_, artistId: string, likeArtist: boolean) =>
-          toggleLikeArtist(artistId, likeArtist)
+        'app/toggleLikeArtists',
+        (_, artistIds: string[], likeArtist?: boolean) =>
+          toggleLikeArtists(artistIds, likeArtist)
       );
 
       ipcMain.handle(
@@ -455,8 +455,8 @@ app
           addNewPlaylist(playlistName, songIds, artworkPath)
       );
 
-      ipcMain.handle('app/removePlaylist', (_, playlistId: string) =>
-        removePlaylist(playlistId)
+      ipcMain.handle('app/removePlaylists', (_, playlistIds: string[]) =>
+        removePlaylists(playlistIds)
       );
 
       ipcMain.handle(
@@ -474,10 +474,10 @@ app
       ipcMain.handle('app/clearSongHistory', () => clearSongHistory());
 
       ipcMain.handle(
-        'app/deleteSongFromSystem',
-        (_, absoluteFilePath: string, isPermanentDelete: boolean) =>
-          deleteSongFromSystem(
-            absoluteFilePath,
+        'app/deleteSongsFromSystem',
+        (_, absoluteFilePaths: string[], isPermanentDelete: boolean) =>
+          deleteSongsFromSystem(
+            absoluteFilePaths,
             abortController.signal,
             isPermanentDelete
           )

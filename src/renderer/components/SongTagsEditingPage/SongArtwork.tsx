@@ -2,7 +2,7 @@
 import Button from '../Button';
 import Img from '../Img';
 
-import DefaultSongArtwork from '../../../../assets/images/png/song_cover_default.png';
+import DefaultSongArtwork from '../../../../assets/images/webp/song_cover_default.webp';
 
 type Props = {
   artworkPath?: string;

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/no-unused-prop-types */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable no-else-return */

@@ -36,11 +36,11 @@ import getAssetPath from './utils/getAssetPath';
 
 export const generateDefaultSongCoverImgBuffer = async () =>
   fs
-    .readFile(getAssetPath('images', 'png', 'song_cover_default.png'))
+    .readFile(getAssetPath('images', 'webp', 'song_cover_default.webp'))
     .then((res) => res)
     .catch((err) =>
       log(
-        `ERROR OCCURRED WHEN READING A FILE OF NAME 'song_cover_default.png'.`,
+        `ERROR OCCURRED WHEN READING A FILE OF NAME 'song_cover_default.webp'.`,
         { err },
         'ERROR'
       )

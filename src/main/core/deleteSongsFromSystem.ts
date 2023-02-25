@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import { shell } from 'electron';
 import path from 'path';
 import fs from 'fs/promises';
@@ -6,7 +7,7 @@ import log from '../log';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
 
 const deleteSongFromSystem = async (
-  absoluteFilePath: string,
+  absoluteFilePaths: string[],
   abortSignal: AbortSignal,
   isPermanentDelete = false
 ) => {
@@ -17,34 +18,40 @@ const deleteSongFromSystem = async (
     );
   }
 
-  const pathBaseName = path.basename(absoluteFilePath);
-  const pathExtension = path.extname(absoluteFilePath);
+  log(`Started the deletion process of '${absoluteFilePaths.length}' songs.`, {
+    absoluteFilePaths,
+  });
 
-  log(`Started the deletion process of '${pathBaseName}' song.`);
+  const isEveryPathASong = absoluteFilePaths.every((filePath) => {
+    const ext = path.extname(filePath);
+    return supportedMusicExtensions.includes(ext);
+  });
 
-  if (!supportedMusicExtensions.includes(pathExtension)) {
+  if (!isEveryPathASong) {
     log(
       `Tried to delete a resource which is recognized as a song.`,
-      { path: absoluteFilePath },
+      { path: absoluteFilePaths },
       'WARN'
     );
-    throw new Error(`'${pathBaseName}' is not a song.`);
+    throw new Error(`Prevented deleting files which are not songs.`);
   }
 
   try {
-    const res = await removeSongsFromLibrary([absoluteFilePath], abortSignal);
+    const res = await removeSongsFromLibrary(absoluteFilePaths, abortSignal);
 
     if (res && res.success) {
-      if (!isPermanentDelete) await shell.trashItem(absoluteFilePath);
-      else await fs.unlink(absoluteFilePath);
+      for (const filePath of absoluteFilePaths) {
+        if (!isPermanentDelete) await shell.trashItem(filePath);
+        else await fs.unlink(filePath);
+      }
     }
 
     return {
       success: true,
-      message: `'${pathBaseName}' successfully ${
+      message: `Successfully ${
         isPermanentDelete
-          ? 'deleted from the system'
-          : 'moved to the recycle bin'
+          ? `deleted ${absoluteFilePaths.length} songs from the system`
+          : `moved ${absoluteFilePaths.length} songs to the recycle bin`
       }.`,
     };
   } catch (error) {

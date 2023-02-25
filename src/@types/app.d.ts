@@ -36,7 +36,7 @@ declare global {
     | 'app/getAlbumData'
     | 'app/getPlaylistData'
     | 'app/addNewPlaylist'
-    | 'app/removePlaylist'
+    | 'app/removePlaylists'
     | 'app/addSongToPlaylist'
     | 'app/removeSongsFromLibrary'
     | 'app/deleteSongFromSystem'

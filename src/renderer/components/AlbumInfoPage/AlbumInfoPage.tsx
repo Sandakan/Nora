@@ -162,15 +162,32 @@ export default () => {
 
   React.useEffect(() => {
     fetchAlbumSongs();
+    const manageAlbumSongUpdatesInAlbumInfoPage = (e: Event) => {
+      const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
+      if ('detail' in e) {
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (
+            event.dataType === 'songs/deletedSong' ||
+            event.dataType === 'songs/newSong' ||
+            event.dataType === 'blacklist/songBlacklist' ||
+            (event.dataType === 'songs/likes' && event.eventData.length > 1)
+          )
+            fetchAlbumSongs();
+        }
+      }
+    };
+    document.addEventListener(
+      'app/dataUpdates',
+      manageAlbumSongUpdatesInAlbumInfoPage
+    );
+    return () => {
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageAlbumSongUpdatesInAlbumInfoPage
+      );
+    };
   }, [fetchAlbumSongs]);
-
-  // const updateSongs = React.useCallback(
-  //   (callback: (_prevSongsData: SongData[]) => SongData[]) => {
-  //     const updatedSongsData = callback(albumContent.songsData);
-  //     dispatch({ type: 'SONGS_DATA_UPDATE', data: updatedSongsData });
-  //   },
-  //   [albumContent.songsData]
-  // );
 
   const songComponents = React.useMemo(
     () =>
@@ -192,7 +209,6 @@ export default () => {
                 isAFavorite={song.isAFavorite}
                 year={song.year}
                 isBlacklisted={song.isBlacklisted}
-                // updateSongs={updateSongs}
               />
             );
           })
@@ -235,19 +251,24 @@ export default () => {
                 <div className="album-title h-fit w-full overflow-hidden text-ellipsis whitespace-nowrap py-2 text-5xl text-font-color-highlight dark:text-dark-font-color-highlight">
                   {albumContent.albumData.title}
                 </div>
-                <div className="album-artists m-0 inline h-[unset] w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-xl">
+                <div className="album-artists m-0 flex h-[unset] w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-xl">
                   {albumContent.albumData.artists.map((artist, index) => (
                     <>
                       <SongArtist
                         key={artist.artistId}
                         artistId={artist.artistId}
                         name={artist.name}
+                        className="!text-lg"
                       />
-                      {albumContent.albumData.artists
-                        ? index === albumContent.albumData.artists.length - 1
-                          ? ''
-                          : ', '
-                        : ''}
+                      {albumContent.albumData.artists ? (
+                        index === albumContent.albumData.artists.length - 1 ? (
+                          ''
+                        ) : (
+                          <span className="mr-1">,</span>
+                        )
+                      ) : (
+                        ''
+                      )}
                     </>
                   ))}
                 </div>

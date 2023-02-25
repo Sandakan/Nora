@@ -8,8 +8,8 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
-
-import ConfirmDeletePlaylist from './ConfirmDeletePlaylist';
+import ConfirmDeletePlaylists from './ConfirmDeletePlaylists';
+import DefaultPlaylistCover from '../../../../assets/images/webp/playlist_cover_default.webp';
 
 interface PlaylistProp extends Playlist {
   index: number;
@@ -23,13 +23,13 @@ export const Playlist = (props: PlaylistProp) => {
     isMultipleSelectionEnabled,
   } = React.useContext(AppContext);
   const {
+    updateQueueData,
     updateContextMenuData,
     changeCurrentActivePage,
     changePromptMenuData,
     createQueue,
     toggleMultipleSelections,
     updateMultipleSelections,
-    updateQueueData,
     addNewNotifications,
   } = React.useContext(AppUpdateContext);
 
@@ -58,138 +58,217 @@ export const Playlist = (props: PlaylistProp) => {
     return false;
   }, [multipleSelectionsData, props.playlistId]);
 
-  const contextMenus: ContextMenuItem[] = React.useMemo(() => {
+  const playAllSongs = React.useCallback(
+    (isShuffling = false) => {
+      window.api
+        .getSongInfo(props.songs, undefined, undefined, true)
+        .then((songs) => {
+          if (Array.isArray(songs))
+            return createQueue(
+              songs
+                .filter((song) => !song.isBlacklisted)
+                .map((song) => song.songId),
+              'playlist',
+              isShuffling,
+              props.playlistId,
+              true
+            );
+          return undefined;
+        })
+        .catch((err) => console.error(err));
+    },
+    [createQueue, props.playlistId, props.songs]
+  );
+
+  const playAllSongsForMultipleSelections = React.useCallback(
+    (isShuffling = false) => {
+      const { multipleSelections: playlistIds } = multipleSelectionsData;
+      window.api
+        .getPlaylistData(playlistIds)
+        .then((playlists) => {
+          const ids = playlists.map((playlist) => playlist.songs).flat();
+
+          return window.api.getSongInfo(ids, undefined, undefined, true);
+        })
+        .then((songs) => {
+          if (Array.isArray(songs)) {
+            const songIds = songs
+              .filter((song) => !song.isBlacklisted)
+              .map((song) => song.songId);
+            createQueue(songIds, 'songs', isShuffling);
+            return addNewNotifications([
+              {
+                id: `${songIds.length}AddedToQueueFromMultiSelection`,
+                delay: 5000,
+                content: (
+                  <span>Added {songIds.length} songs to the queue.</span>
+                ),
+              },
+            ]);
+          }
+          return undefined;
+        })
+        .catch((err) => console.error(err));
+    },
+    [addNewNotifications, createQueue, multipleSelectionsData]
+  );
+
+  const addToQueueForMultipleSelections = React.useCallback(() => {
     const { multipleSelections: playlistIds } = multipleSelectionsData;
-    const commonMenus: ContextMenuItem[] =
-      multipleSelectionsData.selectionType === 'playlist' &&
-      multipleSelectionsData.multipleSelections.length !== 1 &&
-      isAMultipleSelection
-        ? [
+    window.api
+      .getPlaylistData(playlistIds)
+      .then((playlists) => {
+        if (Array.isArray(playlists) && playlists.length > 0) {
+          const playlistSongIds = playlists
+            .map((playlist) => playlist.songs)
+            .flat();
+
+          return window.api.getSongInfo(
+            playlistSongIds,
+            undefined,
+            undefined,
+            true
+          );
+        }
+        return undefined;
+      })
+      .then((songs) => {
+        if (Array.isArray(songs)) {
+          queue.queue.push(
+            ...songs
+              .filter((song) => !song.isBlacklisted)
+              .map((song) => song.songId)
+          );
+          updateQueueData(undefined, queue.queue);
+          addNewNotifications([
             {
-              label: 'Add to queue',
-              iconName: 'queue',
-              handlerFunction: () => {
-                return window.api
-                  .getPlaylistData(playlistIds)
-                  .then((playlists) => {
-                    const songIds = playlists
-                      .map((playlist) => playlist.songs)
-                      .flat();
-                    const uniqueSongIds = [...new Set(songIds)];
-                    updateQueueData(
-                      undefined,
-                      [...queue.queue, ...uniqueSongIds],
-                      false
-                    );
-                    return addNewNotifications([
-                      {
-                        id: `${uniqueSongIds.length}AddedToQueueFromMultiSelection`,
-                        delay: 5000,
-                        content: (
-                          <span>
-                            Added {uniqueSongIds.length} songs to the queue.
-                          </span>
-                        ),
-                      },
-                    ]);
-                  });
-              },
+              id: 'newSongsToQueue',
+              delay: 5000,
+              content: <span>Added {songs.length} songs to the queue.</span>,
             },
-            {
-              label: isMultipleSelectionEnabled ? 'Unselect' : 'Select',
-              iconName: 'checklist',
-              handlerFunction: () => {
-                if (isMultipleSelectionEnabled) {
-                  return updateMultipleSelections(
-                    props.playlistId,
-                    'playlist',
-                    isAMultipleSelection ? 'remove' : 'add'
-                  );
-                }
-                return toggleMultipleSelections(
-                  !isMultipleSelectionEnabled,
-                  'playlist',
-                  [props.playlistId]
-                );
-              },
-            },
-          ]
-        : [
-            {
-              label: 'Play',
-              iconName: 'play_arrow',
-              handlerFunction: () =>
-                window.api
-                  .getSongInfo(props.songs, undefined, undefined, true)
-                  .then((songs) => {
-                    if (Array.isArray(songs))
-                      return createQueue(
-                        songs
-                          .filter((song) => !song.isBlacklisted)
-                          .map((song) => song.songId),
-                        'playlist',
-                        false,
-                        props.playlistId,
-                        true
-                      );
-                    return undefined;
-                  }),
-            },
-            {
-              label: isMultipleSelectionEnabled ? 'Unselect' : 'Select',
-              iconName: 'checklist',
-              handlerFunction: () => {
-                if (isMultipleSelectionEnabled) {
-                  return updateMultipleSelections(
-                    props.playlistId,
-                    'playlist',
-                    isAMultipleSelection ? 'remove' : 'add'
-                  );
-                }
-                return toggleMultipleSelections(
-                  !isMultipleSelectionEnabled,
-                  'playlist',
-                  [props.playlistId]
-                );
-              },
-            },
-            {
-              label: 'Info',
-              iconName: 'info',
-              handlerFunction: openPlaylistInfoPage,
-            },
-          ];
-    if (
-      currentlyActivePage.pageTitle === 'Playlists' &&
-      props.playlistId !== 'History' &&
-      props.playlistId !== 'Favorites'
-    )
-      return [
-        ...commonMenus,
-        {
-          label: 'Delete',
-          iconName: 'delete_outline',
-          handlerFunction: () =>
-            changePromptMenuData(
-              true,
-              <ConfirmDeletePlaylist
-                playlistName={props.name}
-                playlistId={props.playlistId}
-                noOfSongs={props.songs.length}
-              />
-            ),
-        },
-      ];
-    return commonMenus;
+          ]);
+        }
+        return undefined;
+      })
+      .catch((err) => console.error(err));
   }, [
     addNewNotifications,
+    multipleSelectionsData,
+    queue.queue,
+    updateQueueData,
+  ]);
+
+  const contextMenus: ContextMenuItem[] = React.useMemo(() => {
+    const { multipleSelections: playlistIds } = multipleSelectionsData;
+    const isMultipleSelectionsEnabled =
+      multipleSelectionsData.selectionType === 'playlist' &&
+      multipleSelectionsData.multipleSelections.length !== 1 &&
+      isAMultipleSelection;
+
+    return [
+      {
+        label: isMultipleSelectionsEnabled ? 'Play All' : 'Play',
+        iconName: 'play_arrow',
+        handlerFunction: () => {
+          if (isMultipleSelectionEnabled) playAllSongsForMultipleSelections();
+          else playAllSongs();
+          toggleMultipleSelections(false);
+        },
+      },
+      {
+        label: isMultipleSelectionsEnabled
+          ? 'Shuffle and Play All'
+          : 'Shuffle and Play',
+        iconName: 'shuffle',
+        handlerFunction: () => {
+          if (isMultipleSelectionEnabled)
+            playAllSongsForMultipleSelections(true);
+          else playAllSongs(true);
+          toggleMultipleSelections(false);
+        },
+      },
+      {
+        label: 'Add to Queue',
+        iconName: 'queue',
+        handlerFunction: () => {
+          if (isMultipleSelectionsEnabled) addToQueueForMultipleSelections();
+          else {
+            queue.queue.push(...props.songs);
+            updateQueueData(undefined, queue.queue);
+            addNewNotifications([
+              {
+                id: 'newSongsToQueue',
+                delay: 5000,
+                content: (
+                  <span>Added {props.songs.length} songs to the queue.</span>
+                ),
+              },
+            ]);
+          }
+          toggleMultipleSelections(false);
+        },
+      },
+      {
+        label: 'Hr',
+        isContextMenuItemSeperator: true,
+        handlerFunction: () => true,
+      },
+      {
+        label: isMultipleSelectionEnabled ? 'Unselect' : 'Select',
+        iconName: 'checklist',
+        handlerFunction: () => {
+          if (isMultipleSelectionEnabled) {
+            updateMultipleSelections(
+              props.playlistId,
+              'playlist',
+              isAMultipleSelection ? 'remove' : 'add'
+            );
+          } else
+            toggleMultipleSelections(!isMultipleSelectionEnabled, 'playlist', [
+              props.playlistId,
+            ]);
+        },
+      },
+      {
+        label: 'Info',
+        iconName: 'info',
+        handlerFunction: openPlaylistInfoPage,
+        isDisabled: isMultipleSelectionsEnabled,
+      },
+      {
+        label: 'Hr',
+        isContextMenuItemSeperator: true,
+        handlerFunction: () => true,
+      },
+      {
+        label: isMultipleSelectionsEnabled
+          ? 'Delete Selected Playlists'
+          : 'Delete Playlist',
+        iconName: 'delete_outline',
+        handlerFunction: () => {
+          changePromptMenuData(
+            true,
+            <ConfirmDeletePlaylists
+              playlistIds={
+                isMultipleSelectionsEnabled ? playlistIds : [props.playlistId]
+              }
+              playlistName={props.name}
+            />
+          );
+          toggleMultipleSelections(false);
+        },
+      },
+    ];
+  }, [
+    addNewNotifications,
+    addToQueueForMultipleSelections,
     changePromptMenuData,
-    createQueue,
-    currentlyActivePage.pageTitle,
     isAMultipleSelection,
     isMultipleSelectionEnabled,
     multipleSelectionsData,
     openPlaylistInfoPage,
+    playAllSongs,
+    playAllSongsForMultipleSelections,
     props.name,
     props.playlistId,
     props.songs,
@@ -198,6 +277,24 @@ export const Playlist = (props: PlaylistProp) => {
     updateMultipleSelections,
     updateQueueData,
   ]);
+
+  const contextMenuItemData = React.useMemo(
+    () =>
+      isMultipleSelectionEnabled &&
+      multipleSelectionsData.selectionType === 'playlist' &&
+      isAMultipleSelection
+        ? {
+            title: `${multipleSelectionsData.multipleSelections.length} selected playlists`,
+            artworkPath: DefaultPlaylistCover,
+          }
+        : undefined,
+    [
+      isAMultipleSelection,
+      isMultipleSelectionEnabled,
+      multipleSelectionsData.multipleSelections.length,
+      multipleSelectionsData.selectionType,
+    ]
+  );
 
   return (
     <div
@@ -213,7 +310,13 @@ export const Playlist = (props: PlaylistProp) => {
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        updateContextMenuData(true, contextMenus, e.pageX, e.pageY);
+        updateContextMenuData(
+          true,
+          contextMenus,
+          e.pageX,
+          e.pageY,
+          contextMenuItemData
+        );
       }}
       onClick={(e) => {
         if (
@@ -246,23 +349,7 @@ export const Playlist = (props: PlaylistProp) => {
         ) : (
           <span
             className="material-icons-round icon absolute bottom-2 right-2 translate-y-10 scale-90 cursor-pointer text-4xl text-font-color-white opacity-0 transition-[opacity,transform] delay-100 duration-200 ease-in-out group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 dark:text-font-color-white"
-            onClick={() =>
-              window.api
-                .getSongInfo(props.songs, undefined, undefined, true)
-                .then((songs) => {
-                  if (Array.isArray(songs))
-                    return createQueue(
-                      songs
-                        .filter((song) => !song.isBlacklisted)
-                        .map((song) => song.songId),
-                      'playlist',
-                      false,
-                      props.playlistId,
-                      true
-                    );
-                  return undefined;
-                })
-            }
+            onClick={() => playAllSongs()}
           >
             play_circle
           </span>

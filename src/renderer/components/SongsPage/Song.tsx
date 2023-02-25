@@ -9,10 +9,10 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import AddSongsToPlaylists from './AddSongsToPlaylists';
-import DeleteSongFromSystemConfrimPrompt from './DeleteSongFromSystemConfrimPrompt';
 import BlacklistSongConfrimPrompt from './BlacklistSongConfirmPrompt';
 import SongArtist from './SongArtist';
-import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
+import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
+import DeleteSongsFromSystemConfrimPrompt from './DeleteSongsFromSystemConfrimPrompt';
 
 interface SongProp {
   songId: string;
@@ -215,15 +215,26 @@ const Song = React.forwardRef(
 
       const items: ContextMenuItem[] = [
         {
+          label: 'Hr',
+          isContextMenuItemSeperator: true,
+          handlerFunction: () => true,
+          isDisabled: additionalContextMenuItems === undefined,
+        },
+        {
           label: 'Play',
-          handlerFunction: handlePlayBtnClick,
+          handlerFunction: () => {
+            handlePlayBtnClick();
+            toggleMultipleSelections(false);
+          },
           iconName: 'play_arrow',
           isDisabled: isMultipleSelectionsEnabled,
         },
         {
           label: 'Create A Queue',
-          handlerFunction: () =>
-            createQueue(songIds, 'songs', false, undefined, true),
+          handlerFunction: () => {
+            createQueue(songIds, 'songs', false, undefined, true);
+            toggleMultipleSelections(false);
+          },
           iconName: 'queue_music',
           isDisabled: !isMultipleSelectionsEnabled,
         },
@@ -253,7 +264,6 @@ const Song = React.forwardRef(
                   icon: <span className="material-icons-round">shortcut</span>,
                 },
               ]);
-              toggleMultipleSelections(false);
             } else {
               const newQueue = queue.queue.filter((id) => id !== songId);
               newQueue.splice(
@@ -273,6 +283,7 @@ const Song = React.forwardRef(
                 },
               ]);
             }
+            toggleMultipleSelections(false);
           },
         },
         {
@@ -306,6 +317,7 @@ const Song = React.forwardRef(
                 },
               ]);
             }
+            toggleMultipleSelections(false);
           },
         },
         {
@@ -336,34 +348,34 @@ const Song = React.forwardRef(
           },
         },
         {
-          label: 'Add to a Playlist',
+          label: 'Add to a Playlists',
           iconName: 'playlist_add',
-          handlerFunction: () =>
+          handlerFunction: () => {
             changePromptMenuData(
               true,
               <AddSongsToPlaylists
                 songIds={isAMultipleSelection ? songIds : [songId]}
                 title={title}
               />
-            ),
-          isDisabled: isMultipleSelectionsEnabled,
+            );
+            toggleMultipleSelections(false);
+          },
         },
         {
           label: isMultipleSelectionEnabled ? 'Unselect' : 'Select',
           iconName: 'checklist',
           handlerFunction: () => {
             if (isMultipleSelectionEnabled) {
-              return updateMultipleSelections(
+              updateMultipleSelections(
                 songId,
                 'songs',
                 isAMultipleSelection ? 'remove' : 'add'
               );
-            }
-            return toggleMultipleSelections(
-              !isMultipleSelectionEnabled,
-              'songs',
-              [songId]
-            );
+            } else
+              toggleMultipleSelections(!isMultipleSelectionEnabled, 'songs', [
+                songId,
+              ]);
+            toggleMultipleSelections(false);
           },
         },
         {
@@ -407,9 +419,11 @@ const Song = React.forwardRef(
         {
           label: isBlacklisted ? 'Restore from Blacklist' : 'Blacklist Song',
           iconName: isBlacklisted ? 'settings_backup_restore' : 'block',
-          handlerFunction: () =>
-            isBlacklisted
-              ? window.api.restoreBlacklistedSongs([songId]).then(() =>
+          handlerFunction: () => {
+            if (isBlacklisted)
+              window.api
+                .restoreBlacklistedSongs([songId])
+                .then(() =>
                   addNewNotifications([
                     {
                       id: `${title}RestoredFromBlacklisted`,
@@ -427,8 +441,11 @@ const Song = React.forwardRef(
                     },
                   ])
                 )
-              : userData?.preferences.doNotShowBlacklistSongConfirm
-              ? window.api.blacklistSongs([songId]).then(() =>
+                .catch((err) => console.error(err));
+            else if (userData?.preferences.doNotShowBlacklistSongConfirm)
+              window.api
+                .blacklistSongs([songId])
+                .then(() =>
                   addNewNotifications([
                     {
                       id: `${title}Blacklisted`,
@@ -438,28 +455,28 @@ const Song = React.forwardRef(
                     },
                   ])
                 )
-              : changePromptMenuData(
-                  true,
-                  <BlacklistSongConfrimPrompt
-                    title={title}
-                    songIds={[songId]}
-                  />
-                ),
+                .catch((err) => console.error(err));
+            else
+              changePromptMenuData(
+                true,
+                <BlacklistSongConfrimPrompt title={title} songIds={[songId]} />
+              );
+            return toggleMultipleSelections(false);
+          },
           isDisabled: isMultipleSelectionsEnabled,
         },
         {
           label: 'Delete from System',
           iconName: 'delete',
-          handlerFunction: () =>
+          handlerFunction: () => {
             changePromptMenuData(
               true,
-              <DeleteSongFromSystemConfrimPrompt
-                songPath={path}
-                title={title}
-                songId={songId}
+              <DeleteSongsFromSystemConfrimPrompt
+                songIds={isMultipleSelectionsEnabled ? songIds : [songId]}
               />
-            ),
-          isDisabled: isMultipleSelectionsEnabled,
+            );
+            toggleMultipleSelections(false);
+          },
         },
       ];
 

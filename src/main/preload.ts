@@ -106,13 +106,13 @@ export const api = {
     ipcRenderer.invoke('app/blacklistSongs', songIds),
   restoreBlacklistedSongs: (songIds: string[]): Promise<void> =>
     ipcRenderer.invoke('app/restoreBlacklistedSongs', songIds),
-  deleteSongFromSystem: (
-    absoluteFilePath: string,
+  deleteSongsFromSystem: (
+    absoluteFilePaths: string[],
     isPermanentDelete: boolean
   ): PromiseFunctionReturn =>
     ipcRenderer.invoke(
-      'app/deleteSongFromSystem',
-      absoluteFilePath,
+      'app/deleteSongsFromSystem',
+      absoluteFilePaths,
       isPermanentDelete
     ),
 
@@ -263,11 +263,11 @@ export const api = {
     sortType?: ArtistSortTypes
   ): Promise<Artist[]> =>
     ipcRenderer.invoke('app/getArtistData', artistIdsOrNames, sortType),
-  toggleLikeArtist: (
-    artistId: string,
-    likeArtist: boolean
+  toggleLikeArtists: (
+    artistIds: string[],
+    likeArtist?: boolean
   ): Promise<ToggleLikeSongReturnValue | undefined> =>
-    ipcRenderer.invoke('app/toggleLikeArtist', artistId, likeArtist),
+    ipcRenderer.invoke('app/toggleLikeArtists', artistIds, likeArtist),
   getArtistArtworks: (
     artistId: string
   ): Promise<ArtistInfoFromNet | undefined> =>
@@ -324,8 +324,8 @@ export const api = {
     ipcRenderer.invoke('app/removeSongFromPlaylist', playlistId, songId),
   clearSongHistory: (): PromiseFunctionReturn =>
     ipcRenderer.invoke('app/clearSongHistory'),
-  removePlaylist: (playlistId: string) =>
-    ipcRenderer.invoke('app/removePlaylist', playlistId),
+  removePlaylists: (playlistIds: string[]) =>
+    ipcRenderer.invoke('app/removePlaylists', playlistIds),
 
   // $ APP PAGES STATE
   savePageSortingState: (pageType: PageSortTypes, state: unknown): void =>

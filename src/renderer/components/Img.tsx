@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
-import DefaultImage from '../../../assets/images/png/song_cover_default.png';
+import DefaultImage from '../../../assets/images/webp/song_cover_default.webp';
 
 type Props = {
   src?: string;
@@ -43,6 +43,7 @@ const Img = (props: Props) => {
       onError={(e) => {
         if (!noFallbacks && e.currentTarget.src !== fallbackSrc)
           e.currentTarget.src = fallbackSrc;
+        else e.currentTarget.src = DefaultImage;
       }}
       onClick={onClick}
       title={

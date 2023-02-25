@@ -1,6 +1,6 @@
 <h1> Change Log</h1>
 
-<h3>The latest version (v1.0.0-stable) contains a lot of new features and improvements. As always expect some bugs in the app.</h3>
+<h3>The latest version (v1.1.0-stable) contains a lot of new features and improvements. As always expect some bugs in the app.</h3>
 
 <br>
 

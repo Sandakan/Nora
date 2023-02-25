@@ -4,7 +4,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import Button from 'renderer/components/Button';
 import Img from 'renderer/components/Img';
-import DefaultSongArtwork from '../../../../../assets/images/png/song_cover_default.png';
+import DefaultSongArtwork from '../../../../../assets/images/webp/song_cover_default.webp';
 
 type Props = {
   songAlbum?: {

@@ -30,7 +30,7 @@ export const getSongArtworkPath = (
   const defaultPath =
     path.join(
       DEFAULT_FILE_URL,
-      getAssetPath('images', 'png', 'song_cover_default.png')
+      getAssetPath('images', 'webp', 'song_cover_default.webp')
     ) + timestampStr;
   return {
     isDefaultArtwork: isArtworkAvailable,
@@ -42,7 +42,7 @@ export const getSongArtworkPath = (
 export const getArtistArtworkPath = (artworkName?: string): ArtworkPaths => {
   if (artworkName) {
     return {
-      isDefaultArtwork: !!artworkName,
+      isDefaultArtwork: !artworkName,
       artworkPath: path.join(
         DEFAULT_FILE_URL,
         DEFAULT_ARTWORK_SAVE_LOCATION,
@@ -57,10 +57,10 @@ export const getArtistArtworkPath = (artworkName?: string): ArtworkPaths => {
   }
   const defaultPath = path.join(
     DEFAULT_FILE_URL,
-    getAssetPath('images', 'png', 'artist_cover_default.png')
+    getAssetPath('images', 'webp', 'artist_cover_default.webp')
   );
   return {
-    isDefaultArtwork: !!artworkName,
+    isDefaultArtwork: !artworkName,
     artworkPath: defaultPath,
     optimizedArtworkPath: defaultPath,
   };
@@ -69,7 +69,7 @@ export const getArtistArtworkPath = (artworkName?: string): ArtworkPaths => {
 export const getAlbumArtworkPath = (artworkName?: string): ArtworkPaths => {
   if (artworkName) {
     return {
-      isDefaultArtwork: !!artworkName,
+      isDefaultArtwork: !artworkName,
       artworkPath: path.join(
         DEFAULT_FILE_URL,
         DEFAULT_ARTWORK_SAVE_LOCATION,
@@ -84,10 +84,10 @@ export const getAlbumArtworkPath = (artworkName?: string): ArtworkPaths => {
   }
   const defaultPath = path.join(
     DEFAULT_FILE_URL,
-    getAssetPath('images', 'png', 'album_cover_default.png')
+    getAssetPath('images', 'webp', 'album_cover_default.webp')
   );
   return {
-    isDefaultArtwork: !!artworkName,
+    isDefaultArtwork: !artworkName,
     artworkPath: defaultPath,
     optimizedArtworkPath: defaultPath,
   };
@@ -96,7 +96,7 @@ export const getAlbumArtworkPath = (artworkName?: string): ArtworkPaths => {
 export const getGenreArtworkPath = (artworkName?: string): ArtworkPaths => {
   if (artworkName) {
     return {
-      isDefaultArtwork: !!artworkName,
+      isDefaultArtwork: !artworkName,
       artworkPath: path.join(
         DEFAULT_FILE_URL,
         DEFAULT_ARTWORK_SAVE_LOCATION,
@@ -111,10 +111,10 @@ export const getGenreArtworkPath = (artworkName?: string): ArtworkPaths => {
   }
   const defaultPath = path.join(
     DEFAULT_FILE_URL,
-    getAssetPath('images', 'png', 'song_cover_default.png')
+    getAssetPath('images', 'webp', 'song_cover_default.webp')
   );
   return {
-    isDefaultArtwork: !!artworkName,
+    isDefaultArtwork: !artworkName,
     artworkPath: defaultPath,
     optimizedArtworkPath: defaultPath,
   };
@@ -128,12 +128,12 @@ export const getPlaylistArtworkPath = (
     playlistId === 'History'
       ? path.join(
           DEFAULT_FILE_URL,
-          getAssetPath('images', 'png', 'history-playlist-icon.png')
+          getAssetPath('images', 'webp', 'history-playlist-icon.webp')
         )
       : playlistId === 'Favorites'
       ? path.join(
           DEFAULT_FILE_URL,
-          getAssetPath('images', 'png', 'favorites-playlist-icon.png')
+          getAssetPath('images', 'webp', 'favorites-playlist-icon.webp')
         )
       : isArtworkAvailable
       ? path.join(
@@ -143,7 +143,7 @@ export const getPlaylistArtworkPath = (
         )
       : path.join(
           DEFAULT_FILE_URL,
-          getAssetPath('images', 'png', 'playlist_cover_default.png')
+          getAssetPath('images', 'webp', 'playlist_cover_default.webp')
         );
   return {
     isDefaultArtwork: !isArtworkAvailable,

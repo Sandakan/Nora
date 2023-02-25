@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
-import LightModeLogo from '../../../../assets/images/logo_light_mode.png';
+import LightModeLogo from '../../../../assets/images/webp/logo_light_mode.webp';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { version } from '../../../../package.json';

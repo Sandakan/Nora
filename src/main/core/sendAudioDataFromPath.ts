@@ -11,8 +11,8 @@ import sendAudioData from './sendAudioData';
 
 const defaultSongCoverPath = getAssetPath(
   'images',
-  'png',
-  'song_cover_default.png'
+  'webp',
+  'song_cover_default.webp'
 );
 
 const sendAudioDataFromPath = async (

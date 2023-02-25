@@ -16,7 +16,7 @@ import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { Artist } from '../ArtistPage/Artist';
 import SongCard from '../SongsPage/SongCard';
-import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
+import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 import NoSongsImage from '../../../../assets/images/svg/Empty Inbox _Monochromatic.svg';
 import DataFetchingImage from '../../../../assets/images/svg/Umbrella_Monochromatic.svg';
 import ErrorPrompt from '../ErrorPrompt';
@@ -209,17 +209,25 @@ const HomePage = () => {
           const event = dataEvents[i];
           if (event.dataType === 'playlists/history')
             fetchRecentlyPlayedSongs();
-          if (
+          else if (
             event.dataType === 'songs/deletedSong' ||
             event.dataType === 'songs/newSong' ||
-            event.dataType === 'blacklist/songBlacklist'
+            event.dataType === 'blacklist/songBlacklist' ||
+            (event.dataType === 'songs/likes' && event.eventData.length > 1)
           ) {
             fetchLatestSongs();
             fetchRecentlyPlayedSongs();
             fetchMostLovedSongs();
-          }
-          if (event.dataType === 'artists/artworks') fetchRecentArtistsData();
-          if (
+          } else if (
+            event.dataType === 'artists/artworks' ||
+            event.dataType === 'artists/deletedArtist' ||
+            event.dataType === 'artists/updatedArtist' ||
+            event.dataType === 'artists/newArtist' ||
+            (event.dataType === 'artists/likes' && event.eventData.length > 1)
+          ) {
+            fetchRecentArtistsData();
+            fetchMostLovedArtists();
+          } else if (
             event.dataType === 'songs/likes' ||
             event.dataType === 'songs/listeningData/listens'
           )
@@ -332,6 +340,7 @@ const HomePage = () => {
                     songIds={val.songs.map((song) => song.songId)}
                     onlineArtworkPaths={val.onlineArtworkPaths}
                     className="mb-4"
+                    isAFavorite={val.isAFavorite}
                   />
                 );
               else return undefined;
@@ -380,6 +389,7 @@ const HomePage = () => {
                     songIds={val.songs.map((song) => song.songId)}
                     onlineArtworkPaths={val.onlineArtworkPaths}
                     className="mb-4"
+                    isAFavorite={val.isAFavorite}
                   />
                 );
               else return undefined;
@@ -457,9 +467,6 @@ const HomePage = () => {
       }}
     >
       <>
-        {/* <div className="title-container text-4xl font-medium text-font-color-black dark:text-font-color-white pl-8 my-4">
-         Welcome, Sandakan.
-       </div> */}
         {content.latestSongs.length > 0 && content.latestSongs[0] !== null && (
           <SecondaryContainer className="recently-added-songs-container appear-from-bottom h-fit max-h-full flex-col pb-8 pl-8">
             <>

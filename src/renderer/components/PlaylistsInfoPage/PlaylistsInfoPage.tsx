@@ -10,7 +10,7 @@ import React, { useContext } from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
-import DefaultPlaylistCover from '../../../../assets/images/png/playlist_cover_default.png';
+import DefaultPlaylistCover from '../../../../assets/images/webp/playlist_cover_default.webp';
 import Button from '../Button';
 import Song from '../SongsPage/Song';
 import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';
@@ -135,7 +135,8 @@ const PlaylistInfoPage = () => {
           if (
             event.dataType === 'playlists/newSong' ||
             event.dataType === 'playlists/deletedSong' ||
-            event.dataType === 'blacklist/songBlacklist'
+            event.dataType === 'blacklist/songBlacklist' ||
+            (event.dataType === 'songs/likes' && event.eventData.length > 1)
           )
             fetchPlaylistSongsData();
         }

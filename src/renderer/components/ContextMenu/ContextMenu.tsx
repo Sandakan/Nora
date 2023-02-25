@@ -67,7 +67,7 @@ const ContextMenu = React.memo(() => {
               <div
                 key={index}
                 role="separator"
-                className="context-menu-item-seperator float-right my-2 h-[2px] w-[95%] bg-[hsla(0deg,0%,57%,0.5)]"
+                className="context-menu-item-seperator float-right my-2 h-[1px] w-[95%] bg-[hsla(0deg,0%,57%,0.5)]"
               />
             );
           return (

@@ -19,12 +19,12 @@ const createArtworks = async (
     DEFAULT_FILE_URL,
     getAssetPath(
       'images',
-      'png',
+      'webp',
       artworkType === 'playlist'
-        ? 'playlist_cover_default.png'
+        ? 'playlist_cover_default.webp'
         : artworkType === 'album'
-        ? 'album_cover_default.png'
-        : 'song_cover_default.png'
+        ? 'album_cover_default.webp'
+        : 'song_cover_default.webp'
     )
   );
   const defaultArtworkPaths = {

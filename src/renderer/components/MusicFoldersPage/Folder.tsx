@@ -6,7 +6,7 @@ import { AppContext } from 'renderer/contexts/AppContext';
 
 import Img from '../Img';
 
-import FolderImg from '../../../../assets/images/png/empty-folder.png';
+import FolderImg from '../../../../assets/images/webp/empty-folder.webp';
 import RemoveFolderConfirmationPrompt from '../SettingsPage/RemoveFolderConfirmationPrompt';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import BlacklistFolderConfrimPrompt from './BlacklistFolderConfirmPrompt';

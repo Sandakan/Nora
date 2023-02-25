@@ -47,6 +47,11 @@ const StartupSettings = () => {
             !userData.preferences?.autoLaunchApp &&
             'cursor-not-allowed opacity-50'
           }`}
+          title={
+            userData && !userData?.preferences?.autoLaunchApp
+              ? `'Auto Launch at Startup' should be enabled to configure these settings.`
+              : undefined
+          }
         >
           <div className="description">
             Configure how the window should behave when you log in to your

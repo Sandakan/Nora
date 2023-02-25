@@ -70,6 +70,7 @@ const AllSearchResultsPage = () => {
             artworkPaths={artistData.artworkPaths}
             onlineArtworkPaths={artistData.onlineArtworkPaths}
             className="mb-4 mr-4"
+            isAFavorite={artistData.isAFavorite}
           />
         );
       });

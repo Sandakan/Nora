@@ -86,9 +86,12 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
         if (res.length > 0) {
           setPlaylists(() =>
             res.map((playlist) => {
-              if (playlist.songs.some((id) => songIds.includes(id)))
-                return { ...playlist, isSelected: true };
-              return { ...playlist, isSelected: false };
+              return {
+                ...playlist,
+                isSelected:
+                  songIds.length === 1 &&
+                  playlist.songs.some((id) => songIds.includes(id)),
+              };
             })
           );
         }
@@ -118,19 +121,14 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
           {
             id: 'songAddedtoPlaylists',
             delay: 5000,
+            icon: <span className="material-icons-round">playlist_add</span>,
             content: (
               <span>
-                Added '{title}' to{' '}
-                {selectedPlaylists.length > 3
-                  ? `${selectedPlaylists
-                      .filter((_, index) => index <= 3)
-                      .map((playlist) => `'${playlist.name}'`)
-                      .join(', ')} and ${
-                      selectedPlaylists.length - 3
-                    } other playlists.`
-                  : `${selectedPlaylists
-                      .map((playlist) => `'${playlist.name}'`)
-                      .join(', ')} playlists.`}
+                Added{' '}
+                {selectedPlaylists.length > 1
+                  ? `${selectedPlaylists.length} songs`
+                  : `'${title}'`}{' '}
+                to {`${selectedPlaylists.length} playlists.`}
               </span>
             ),
           },
@@ -172,22 +170,46 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
     [playlists]
   );
 
+  const noOfSelectedPlaylists = React.useMemo(
+    () => playlists.filter((playlist) => playlist.isSelected).length,
+    [playlists]
+  );
+
   return (
     <>
-      <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
+      <div className="title-container mt-1 mb-4 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
         Select playlists to add{' '}
         {songIds.length > 1 ? `${songIds.length} songs` : `'${title}' song`}
       </div>
+      {songIds.length > 1 && (
+        <p>
+          &bull; When adding multiple songs to playlists, songs that are already
+          in selected playlists will be ignored.
+        </p>
+      )}
       {playlistComponents.length > 0 && (
-        <div className="playlists-container flex h-full flex-wrap">
+        <div className="playlists-container mt-4 flex h-full flex-wrap">
           {playlistComponents}
         </div>
       )}
-      <Button
-        label="Add to Playlist(s)"
-        clickHandler={addSongsToPlaylists}
-        className="float-right mb-4 rounded-lg !bg-background-color-3  px-12  text-font-color-black dark:!bg-dark-background-color-3 dark:!text-font-color-black"
-      />
+      <div className="buttons-and-other-info-container flex items-center justify-end">
+        <span className="mr-12 text-font-color-highlight dark:text-dark-font-color-highlight">
+          {noOfSelectedPlaylists} selected
+        </span>
+        <div className="buttons-container flex">
+          <Button
+            label="Cancel"
+            iconName="close"
+            clickHandler={() => changePromptMenuData(false)}
+          />
+          <Button
+            label="Add to Playlist(s)"
+            iconName="playlist_add"
+            clickHandler={addSongsToPlaylists}
+            className="!bg-background-color-3 px-6  text-font-color-black dark:!bg-dark-background-color-3 dark:!text-font-color-black"
+          />
+        </div>
+      </div>
     </>
   );
 };

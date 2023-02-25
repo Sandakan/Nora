@@ -450,14 +450,14 @@ function SongTagsEditingPage() {
                 iconName="save"
                 iconClassName="material-icons-round-outlined"
                 isDisabled={areThereDataChanges}
-                className="update-song-tags-btn w-40 justify-around"
+                className="update-song-tags-btn"
                 clickHandler={saveTags}
               />
               <Button
                 key={1}
                 label="Reset to Defaults"
                 iconName="restart_alt"
-                className="reset-song-tags-btn w-52 justify-around"
+                className="reset-song-tags-btn"
                 isDisabled={areThereDataChanges}
                 clickHandler={resetDataToDefaults}
               />

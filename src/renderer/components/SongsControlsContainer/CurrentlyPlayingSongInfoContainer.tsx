@@ -6,7 +6,7 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Img from '../Img';
 import SongArtist from '../SongsPage/SongArtist';
-import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
+import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 
 const CurrentlyPlayingSongInfoContainer = () => {
   const { currentSongData, currentlyActivePage, userData } =

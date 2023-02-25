@@ -8,8 +8,8 @@ import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import AddSongsToPlaylists from './AddSongsToPlaylists';
 import BlacklistSongConfrimPrompt from './BlacklistSongConfirmPrompt';
 import SongArtist from './SongArtist';
-import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
-import DeleteSongFromSystemConfrimPrompt from './DeleteSongFromSystemConfrimPrompt';
+import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
+import DeleteSongsFromSystemConfrimPrompt from './DeleteSongsFromSystemConfrimPrompt';
 
 interface SongCardProp {
   index: number;
@@ -169,14 +169,19 @@ const SongCard = (props: SongCardProp) => {
     const items: ContextMenuItem[] = [
       {
         label: 'Play',
-        handlerFunction: handlePlayBtnClick,
+        handlerFunction: () => {
+          handlePlayBtnClick();
+          toggleMultipleSelections(false);
+        },
         iconName: 'play_arrow',
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
         label: 'Create A Queue',
-        handlerFunction: () =>
-          createQueue(songIds, 'songs', false, undefined, true),
+        handlerFunction: () => {
+          createQueue(songIds, 'songs', false, undefined, true);
+          toggleMultipleSelections(false);
+        },
         iconName: 'queue_music',
         isDisabled: !isMultipleSelectionsEnabled,
       },
@@ -205,7 +210,6 @@ const SongCard = (props: SongCardProp) => {
                 icon: <span className="material-icons-round">shortcut</span>,
               },
             ]);
-            toggleMultipleSelections(false);
           } else {
             const newQueue = queue.queue.filter((id) => id !== songId);
             newQueue.splice(
@@ -223,6 +227,7 @@ const SongCard = (props: SongCardProp) => {
               },
             ]);
           }
+          toggleMultipleSelections(false);
         },
       },
       {
@@ -251,6 +256,7 @@ const SongCard = (props: SongCardProp) => {
               },
             ]);
           }
+          toggleMultipleSelections(false);
         },
       },
       {
@@ -291,17 +297,18 @@ const SongCard = (props: SongCardProp) => {
         },
       },
       {
-        label: 'Add to a Playlist',
+        label: 'Add to a Playlists',
         iconName: 'playlist_add',
-        handlerFunction: () =>
+        handlerFunction: () => {
           changePromptMenuData(
             true,
             <AddSongsToPlaylists
               songIds={isAMultipleSelection ? songIds : [songId]}
               title={title}
             />
-          ),
-        isDisabled: isMultipleSelectionsEnabled,
+          );
+          toggleMultipleSelections(false);
+        },
       },
       {
         label:
@@ -369,9 +376,11 @@ const SongCard = (props: SongCardProp) => {
       {
         label: isBlacklisted ? 'Restore from Blacklist' : 'Blacklist Song',
         iconName: isBlacklisted ? 'settings_backup_restore' : 'block',
-        handlerFunction: () =>
-          isBlacklisted
-            ? window.api.restoreBlacklistedSongs([songId]).then(() =>
+        handlerFunction: () => {
+          if (isBlacklisted)
+            window.api
+              .restoreBlacklistedSongs([songId])
+              .then(() =>
                 addNewNotifications([
                   {
                     id: `${title}RestoredFromBlacklisted`,
@@ -389,8 +398,11 @@ const SongCard = (props: SongCardProp) => {
                   },
                 ])
               )
-            : userData?.preferences.doNotShowBlacklistSongConfirm
-            ? window.api.blacklistSongs([songId]).then(() =>
+              .catch((err) => console.error(err));
+          else if (userData?.preferences.doNotShowBlacklistSongConfirm)
+            window.api
+              .blacklistSongs([songId])
+              .then(() =>
                 addNewNotifications([
                   {
                     id: `${title}Blacklisted`,
@@ -400,25 +412,28 @@ const SongCard = (props: SongCardProp) => {
                   },
                 ])
               )
-            : changePromptMenuData(
-                true,
-                <BlacklistSongConfrimPrompt title={title} songIds={[songId]} />
-              ),
+              .catch((err) => console.error(err));
+          else
+            changePromptMenuData(
+              true,
+              <BlacklistSongConfrimPrompt title={title} songIds={[songId]} />
+            );
+          return toggleMultipleSelections(false);
+        },
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
         label: 'Delete from System',
         iconName: 'delete',
-        handlerFunction: () =>
+        handlerFunction: () => {
           changePromptMenuData(
             true,
-            <DeleteSongFromSystemConfrimPrompt
-              songPath={path}
-              title={title}
-              songId={songId}
+            <DeleteSongsFromSystemConfrimPrompt
+              songIds={isMultipleSelectionsEnabled ? songIds : [songId]}
             />
-          ),
-        isDisabled: isMultipleSelectionsEnabled,
+          );
+          toggleMultipleSelections(false);
+        },
       },
     ];
     return items;
@@ -490,7 +505,9 @@ const SongCard = (props: SongCardProp) => {
       } group relative mr-2 mb-2 aspect-[2/1] max-w-md overflow-hidden rounded-2xl border-[transparent] border-background-color-2 shadow-xl transition-[border-color] ease-in-out dark:border-dark-background-color-2 ${
         className || ''
       } ${isBlacklisted && '!opacity-30'} ${
-        isMultipleSelectionEnabled && 'border-4'
+        isMultipleSelectionEnabled &&
+        multipleSelectionsData.selectionType === 'songs' &&
+        'border-4'
       } ${
         isAMultipleSelection &&
         '!border-font-color-highlight dark:!border-dark-font-color-highlight'
@@ -508,16 +525,25 @@ const SongCard = (props: SongCardProp) => {
           contextMenuItemData
         );
       }}
-      onClick={() =>
-        isMultipleSelectionEnabled &&
-        multipleSelectionsData.selectionType === 'songs'
-          ? updateMultipleSelections(
-              songId,
-              'songs',
-              isAMultipleSelection ? 'remove' : 'add'
-            )
-          : undefined
-      }
+      onClick={(e) => {
+        if (
+          isMultipleSelectionEnabled &&
+          multipleSelectionsData.selectionType === 'songs'
+        )
+          updateMultipleSelections(
+            songId,
+            'songs',
+            isAMultipleSelection ? 'remove' : 'add'
+          );
+        else if (e.getModifierState('Shift') === true) {
+          toggleMultipleSelections(!isMultipleSelectionEnabled, 'songs');
+          updateMultipleSelections(
+            songId,
+            'songs',
+            isAMultipleSelection ? 'remove' : 'add'
+          );
+        }
+      }}
     >
       <div className="song-cover-container mr-4 flex h-full w-full flex-row items-center justify-end">
         <Img
@@ -576,7 +602,10 @@ const SongCard = (props: SongCardProp) => {
                 </span>
               )}
             </div>
-            <MultipleSelectionCheckbox id={songId} selectionType="songs" />
+            {isMultipleSelectionEnabled &&
+              multipleSelectionsData.selectionType === 'songs' && (
+                <MultipleSelectionCheckbox id={songId} selectionType="songs" />
+              )}
           </div>
         </div>
         <div className="play-btn-container absolute top-1/2 left-3/4 -translate-x-1/2 -translate-y-1/2">

@@ -5,7 +5,7 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
 import Img from '../Img';
 import CustomizeSelectedMetadataPrompt from './CustomizeSelectedMetadataPrompt';
-import DefaultSongImage from '../../../../assets/images/png/song_cover_default.png';
+import DefaultSongImage from '../../../../assets/images/webp/song_cover_default.webp';
 import { MetadataKeywords } from './SongTagsEditingPage';
 
 interface SongMetadataResultProp {

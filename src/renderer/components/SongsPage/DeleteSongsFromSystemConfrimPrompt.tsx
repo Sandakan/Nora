@@ -5,21 +5,51 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import Button from '../Button';
 import Checkbox from '../Checkbox';
 
-export default (props: { songPath: string; title: string; songId: string }) => {
+export default (props: { songIds: string[] }) => {
   const { currentSongData } = React.useContext(AppContext);
   const { addNewNotifications, changePromptMenuData, clearAudioPlayerData } =
     React.useContext(AppUpdateContext);
-  const { songPath, title, songId } = props;
+  const { songIds } = props;
+
+  const [songsData, setSongsData] = React.useState<SongData[]>([]);
   const [isPermanentDelete, setIsPermenanentDelete] = React.useState(false);
+
+  React.useEffect(() => {
+    if (songIds.length > 0) {
+      window.api
+        .getSongInfo(songIds)
+        .then((res) => {
+          if (Array.isArray(res) && res.length > 0) {
+            return setSongsData(res);
+          }
+          return undefined;
+        })
+        .catch((err) => console.error(err));
+    }
+  }, [songIds]);
+
   return (
     <>
       <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
-        Delete &apos;{title}&apos; from system
+        Delete{' '}
+        {songsData.length === 1
+          ? `'${songsData[0].title}'`
+          : `${songsData.length} songs`}{' '}
+        from system
       </div>
       <div className="description">
-        You will lose this song from your system and may not be able to recover
-        it again if you select &apos;Permanently delete from system&apos;
-        option.
+        You will lose {songsData.length === 1 ? `this song` : `these songs`}{' '}
+        from your system and may not be able to recover{' '}
+        {songsData.length === 1 ? `it` : `them`} again if you select
+        &apos;Permanently delete from system&apos; option.
+      </div>
+      <div className="info-about-affecting-files-container mt-4">
+        <p>Proceeding this action affects these files :</p>
+        <ul className="ml-4 list-inside list-disc">
+          {songsData.map((song) => (
+            <li className="text-sm font-light">{song.path}</li>
+          ))}
+        </ul>
       </div>
       <Checkbox
         id="permanentDelete"
@@ -34,19 +64,27 @@ export default (props: { songPath: string; title: string; songId: string }) => {
           clickHandler={() => {
             changePromptMenuData(false);
             return window.api
-              .deleteSongFromSystem(songPath, isPermanentDelete)
+              .deleteSongsFromSystem(
+                songsData.map((song) => song.path),
+                isPermanentDelete
+              )
               .then((res) => {
                 if (res.success) {
-                  if (songId === currentSongData.songId) clearAudioPlayerData();
+                  if (
+                    songsData
+                      .map((song) => song.path)
+                      .includes(currentSongData.songId)
+                  )
+                    clearAudioPlayerData();
                   addNewNotifications([
                     {
-                      id: `${title}Removed`,
+                      id: `songRemoved`,
                       delay: 5000,
                       content: (
                         <span>
                           {isPermanentDelete
-                            ? `'${title}' song removed from the system.`
-                            : `'${title}' song moved to the Recycle Bin.`}
+                            ? `${songsData.length} songs removed from the system.`
+                            : `${songsData.length} songs moved to the Recycle Bin.`}
                         </span>
                       ),
                       icon: (

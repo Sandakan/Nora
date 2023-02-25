@@ -6,7 +6,7 @@ import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
-import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
+import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 import Button from '../Button';
 import Img from '../Img';
 import LyricLine from '../LyricsPage/LyricLine';

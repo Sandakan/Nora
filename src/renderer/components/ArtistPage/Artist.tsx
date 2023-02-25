@@ -1,14 +1,11 @@
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable react/require-default-props */
 /* eslint-disable react/destructuring-assignment */
-/* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import DefaultArtistCover from '../../../../assets/images/png/artist_cover_default.png';
+import DefaultArtistCover from '../../../../assets/images/webp/artist_cover_default.webp';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 
@@ -24,6 +21,7 @@ interface ArtistProp {
     picture_small: string;
     picture_medium: string;
   };
+  isAFavorite: boolean;
 }
 
 export const Artist = (props: ArtistProp) => {
@@ -43,6 +41,8 @@ export const Artist = (props: ArtistProp) => {
     updateMultipleSelections,
   } = React.useContext(AppUpdateContext);
 
+  const [isAFavorite, setIsAFavorite] = React.useState(props.isAFavorite);
+
   const goToArtistInfoPage = React.useCallback(() => {
     return currentlyActivePage.pageTitle === 'ArtistInfo' &&
       currentlyActivePage.data &&
@@ -60,7 +60,7 @@ export const Artist = (props: ArtistProp) => {
     props.name,
   ]);
   const playArtistSongs = React.useCallback(
-    () =>
+    (isShuffle = false) =>
       window.api
         .getSongInfo(props.songIds, undefined, undefined, true)
         .then((songs) => {
@@ -70,13 +70,46 @@ export const Artist = (props: ArtistProp) => {
                 .filter((song) => !song.isBlacklisted)
                 .map((song) => song.songId),
               'artist',
-              false,
+              isShuffle,
               props.artistId,
               true
             );
           return undefined;
         }),
     [createQueue, props.artistId, props.songIds]
+  );
+
+  const playArtistSongsForMultipleSelections = React.useCallback(
+    (isShuffling = false) => {
+      const { multipleSelections: artistIds } = multipleSelectionsData;
+
+      return window.api
+        .getArtistData(artistIds)
+        .then((res) => {
+          if (Array.isArray(res) && res.length > 0) {
+            const songIds = res
+              .map((artist) => artist.songs.map((song) => song.songId))
+              .flat();
+            return window.api.getSongInfo(songIds);
+          }
+          return undefined;
+        })
+        .then((songsData) => {
+          if (Array.isArray(songsData) && songsData.length > 0) {
+            return createQueue(
+              songsData
+                .filter((song) => !song.isBlacklisted)
+                .map((song) => song.songId),
+              'artist',
+              isShuffling,
+              props.artistId,
+              true
+            );
+          }
+          return undefined;
+        });
+    },
+    [createQueue, multipleSelectionsData, props.artistId]
   );
 
   const isAMultipleSelection = React.useMemo(() => {
@@ -93,16 +126,39 @@ export const Artist = (props: ArtistProp) => {
   }, [multipleSelectionsData, props.artistId]);
 
   const artistContextMenus: ContextMenuItem[] = React.useMemo(() => {
-    if (
+    const isMultipleSelectionsEnabled =
       multipleSelectionsData.selectionType === 'artist' &&
       multipleSelectionsData.multipleSelections.length !== 1 &&
-      isAMultipleSelection
-    ) {
-      return [
-        {
-          label: 'Add songs to queue',
-          iconName: 'queue',
-          handlerFunction: () => {
+      isAMultipleSelection;
+
+    return [
+      {
+        label: isMultipleSelectionsEnabled ? 'Play all Songs' : 'Play All',
+        iconName: 'play_arrow',
+        handlerFunction: () => {
+          if (isMultipleSelectionsEnabled)
+            return playArtistSongsForMultipleSelections();
+          return playArtistSongs();
+        },
+      },
+      {
+        label: isMultipleSelectionsEnabled
+          ? 'Shuffle and Play All'
+          : 'Shuffle and Play',
+        iconName: 'shuffle',
+        handlerFunction: () => {
+          if (isMultipleSelectionsEnabled)
+            return playArtistSongsForMultipleSelections(true);
+          return playArtistSongs(true);
+        },
+      },
+      {
+        label: isMultipleSelectionsEnabled
+          ? 'Add songs to Queue'
+          : 'Add to Queue',
+        iconName: 'queue',
+        handlerFunction: () => {
+          if (isMultipleSelectionsEnabled) {
             const { multipleSelections: artistIds } = multipleSelectionsData;
             return window.api.getArtistData(artistIds).then((artists) => {
               const songIds = artists
@@ -126,50 +182,14 @@ export const Artist = (props: ArtistProp) => {
                 },
               ]);
             });
-          },
-        },
-        {
-          label: isMultipleSelectionEnabled ? 'Unselect' : 'Select',
-          iconName: 'checklist',
-          handlerFunction: () => {
-            if (isMultipleSelectionEnabled) {
-              return updateMultipleSelections(
-                props.artistId,
-                'artist',
-                isAMultipleSelection ? 'remove' : 'add'
-              );
-            }
-            return toggleMultipleSelections(
-              !isMultipleSelectionEnabled,
-              'artist',
-              [props.artistId]
-            );
-          },
-        },
-      ];
-    }
-    return [
-      {
-        label: 'Play all Songs',
-        iconName: 'play_arrow',
-        handlerFunction: playArtistSongs,
-      },
-      {
-        label: 'Info',
-        iconName: 'info',
-        handlerFunction: goToArtistInfoPage,
-      },
-      {
-        label: 'Add to queue',
-        iconName: 'queue',
-        handlerFunction: () => {
+          }
           updateQueueData(
             undefined,
             [...queue.queue, ...props.songIds],
             false,
             false
           );
-          addNewNotifications([
+          return addNewNotifications([
             {
               id: 'addSongsToQueue',
               delay: 5000,
@@ -182,6 +202,52 @@ export const Artist = (props: ArtistProp) => {
             },
           ]);
         },
+      },
+      {
+        label: 'Hr',
+        isContextMenuItemSeperator: true,
+        handlerFunction: () => true,
+        isDisabled: isMultipleSelectionsEnabled,
+      },
+      {
+        label: isMultipleSelectionEnabled
+          ? 'Toggle Like Artists'
+          : isAFavorite
+          ? 'Dislike Artist'
+          : 'Like Artist',
+        iconName: 'favorite',
+        iconClassName: isMultipleSelectionsEnabled
+          ? 'material-icons-round-outlined mr-4 text-xl'
+          : isAFavorite
+          ? 'material-icons-round mr-4 text-xl'
+          : 'material-icons-round-outlined mr-4 text-xl',
+        handlerFunction: () => {
+          const { multipleSelections: artistIds } = multipleSelectionsData;
+
+          return window.api
+            .toggleLikeArtists(
+              isMultipleSelectionsEnabled ? artistIds : [props.artistId]
+            )
+            .then((res) => {
+              if (res && res.likes.length + res.dislikes.length > 0) {
+                return setIsAFavorite((prevState) => {
+                  const isLiked = res.likes.includes(props.artistId);
+                  const isDisliked = res.dislikes.includes(props.artistId);
+
+                  return isLiked ? true : isDisliked ? false : prevState;
+                });
+              }
+              return undefined;
+            })
+            .catch((err) => console.error(err));
+        },
+      },
+      {
+        label: 'Info',
+        iconName: 'info',
+        iconClassName: 'material-icons-round-outlined',
+        handlerFunction: goToArtistInfoPage,
+        isDisabled: isMultipleSelectionsEnabled,
       },
       {
         label: isMultipleSelectionEnabled ? 'Unselect' : 'Select',
@@ -201,31 +267,41 @@ export const Artist = (props: ArtistProp) => {
           );
         },
       },
-    ];
+    ] satisfies ContextMenuItem[];
   }, [
-    addNewNotifications,
+    multipleSelectionsData,
     isAMultipleSelection,
     isMultipleSelectionEnabled,
-    multipleSelectionsData,
-    playArtistSongs,
-    props.artistId,
-    props.songIds,
-    queue.queue,
+    isAFavorite,
     goToArtistInfoPage,
+    playArtistSongsForMultipleSelections,
+    playArtistSongs,
+    updateQueueData,
+    queue.queue,
+    props.songIds,
+    props.artistId,
+    addNewNotifications,
     toggleMultipleSelections,
     updateMultipleSelections,
-    updateQueueData,
   ]);
 
-  const contextMenuItemData =
-    isMultipleSelectionEnabled &&
-    multipleSelectionsData.selectionType === 'artist' &&
-    isAMultipleSelection
-      ? {
-          title: `${multipleSelectionsData.multipleSelections.length} selected artists`,
-          artworkPath: DefaultArtistCover,
-        }
-      : undefined;
+  const contextMenuItemData = React.useMemo(
+    () =>
+      isMultipleSelectionEnabled &&
+      multipleSelectionsData.selectionType === 'artist' &&
+      isAMultipleSelection
+        ? {
+            title: `${multipleSelectionsData.multipleSelections.length} selected artists`,
+            artworkPath: DefaultArtistCover,
+          }
+        : undefined,
+    [
+      isAMultipleSelection,
+      isMultipleSelectionEnabled,
+      multipleSelectionsData.multipleSelections.length,
+      multipleSelectionsData.selectionType,
+    ]
+  );
 
   return (
     <div
@@ -238,6 +314,7 @@ export const Artist = (props: ArtistProp) => {
           : ''
       }`}
       onContextMenu={(e) => {
+        e.stopPropagation();
         updateContextMenuData(
           true,
           artistContextMenus,
@@ -267,14 +344,21 @@ export const Artist = (props: ArtistProp) => {
       }}
     >
       <div className="artist-img-container relative flex h-3/4 items-center justify-center">
+        {isAFavorite && (
+          <span
+            className={`material-icons-round absolute left-2 -bottom-1 flex rounded-full bg-background-color-1 p-2 text-2xl !text-font-color-crimson shadow-lg dark:bg-dark-background-color-2 ${
+              isAMultipleSelection &&
+              '!bg-background-color-3 dark:!bg-dark-background-color-3'
+            }`}
+          >
+            favorite
+          </span>
+        )}
         <Img
-          src={
-            props?.onlineArtworkPaths?.picture_medium ||
-            props.artworkPaths.artworkPath
-          }
-          fallbackSrc={DefaultArtistCover}
+          src={props?.onlineArtworkPaths?.picture_medium}
+          fallbackSrc={props.artworkPaths.artworkPath}
           alt="Default song cover"
-          className="aspect-square h-full rounded-full object-cover shadow-xl"
+          className="aspect-square h-full rounded-full object-cover"
         />
         {isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'artist' && (
@@ -289,7 +373,7 @@ export const Artist = (props: ArtistProp) => {
         <div
           className={`name-container w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-center text-xl text-font-color-black hover:underline dark:text-font-color-white lg:text-base ${
             isAMultipleSelection &&
-            'text-font-color-black dark:text-font-color-black'
+            '!text-font-color-black dark:!text-font-color-black'
           }`}
           title={props.name === '' ? 'Unknown Artist' : props.name}
         >

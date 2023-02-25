@@ -152,7 +152,8 @@ export const SongsPage = () => {
           if (
             event.dataType === 'songs/deletedSong' ||
             event.dataType === 'songs/newSong' ||
-            event.dataType === 'blacklist/songBlacklist'
+            event.dataType === 'blacklist/songBlacklist' ||
+            (event.dataType === 'songs/likes' && event.eventData.length > 1)
           )
             fetchSongsData();
         }

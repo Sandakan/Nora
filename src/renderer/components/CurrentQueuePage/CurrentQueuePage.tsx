@@ -16,9 +16,9 @@ import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
-import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
-import DefaultPlaylistCover from '../../../../assets/images/png/playlist_cover_default.png';
-import FolderImg from '../../../../assets/images/png/empty-folder.png';
+import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
+import DefaultPlaylistCover from '../../../../assets/images/webp/playlist_cover_default.webp';
+import FolderImg from '../../../../assets/images/webp/empty-folder.webp';
 import NoSongsImage from '../../../../assets/images/svg/Sun_Monochromatic.svg';
 import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
 import MainContainer from '../MainContainer';
@@ -38,6 +38,7 @@ const CurrentQueuePage = () => {
     currentlyActivePage,
     userData,
     isMultipleSelectionEnabled,
+    multipleSelectionsData,
   } = useContext(AppContext);
   const {
     updateQueueData,
@@ -108,7 +109,8 @@ const CurrentQueuePage = () => {
           if (
             event.dataType.includes('songs') ||
             event.dataType === 'userData/queue' ||
-            event.dataType === 'blacklist/songBlacklist'
+            event.dataType === 'blacklist/songBlacklist' ||
+            (event.dataType === 'songs/likes' && event.eventData.length > 1)
           )
             fetchAllSongsData();
         }
@@ -231,49 +233,64 @@ const CurrentQueuePage = () => {
       } = queuedSongs[index];
       return (
         <Draggable draggableId={songId} index={index} key={songId}>
-          {(provided) => (
-            <div style={style}>
-              <Song
-                provided={provided}
-                key={`${songId}-${index}`}
-                isDraggable
-                index={index}
-                ref={provided.innerRef}
-                isIndexingSongs={
-                  userData !== undefined && userData.preferences.songIndexing
-                }
-                title={title}
-                songId={songId}
-                artists={artists}
-                artworkPaths={artworkPaths}
-                duration={duration}
-                path={path}
-                year={year}
-                isBlacklisted={isBlacklisted}
-                isAFavorite={isAFavorite}
-                additionalContextMenuItems={[
-                  {
-                    label: 'Remove from Queue',
-                    iconName: 'remove_circle_outline',
-                    handlerFunction: () =>
-                      updateQueueData(
-                        undefined,
-                        queue.queue.filter((id) => id !== songId)
-                      ),
-                  },
-                  {
-                    label: 'seperator',
-                    handlerFunction: () => true,
-                    isContextMenuItemSeperator: true,
-                  },
-                ]}
-              />
-            </div>
-          )}
+          {(provided) => {
+            const { multipleSelections: songIds } = multipleSelectionsData;
+            const isMultipleSelectionsEnabled =
+              multipleSelectionsData.selectionType === 'songs' &&
+              multipleSelectionsData.multipleSelections.length !== 1;
+
+            return (
+              <div style={style}>
+                <Song
+                  provided={provided}
+                  key={`${songId}-${index}`}
+                  isDraggable
+                  index={index}
+                  ref={provided.innerRef}
+                  isIndexingSongs={
+                    userData !== undefined && userData.preferences.songIndexing
+                  }
+                  title={title}
+                  songId={songId}
+                  artists={artists}
+                  artworkPaths={artworkPaths}
+                  duration={duration}
+                  path={path}
+                  year={year}
+                  isBlacklisted={isBlacklisted}
+                  isAFavorite={isAFavorite}
+                  additionalContextMenuItems={[
+                    {
+                      label: 'Remove from Queue',
+                      iconName: 'remove_circle_outline',
+                      handlerFunction: () => {
+                        updateQueueData(
+                          undefined,
+                          queue.queue.filter((id) =>
+                            isMultipleSelectionsEnabled
+                              ? !songIds.includes(id)
+                              : id !== songId
+                          )
+                        );
+                        toggleMultipleSelections(false);
+                      },
+                    },
+                  ]}
+                />
+              </div>
+            );
+          }}
         </Draggable>
       );
     },
-    [queue.queue, queuedSongs, updateQueueData, userData]
+    [
+      multipleSelectionsData,
+      queue.queue,
+      queuedSongs,
+      toggleMultipleSelections,
+      updateQueueData,
+      userData,
+    ]
   );
 
   const calculateTotalTime = React.useCallback(() => {

@@ -1,5 +1,4 @@
 /* eslint-disable no-nested-ternary */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
@@ -70,6 +69,8 @@ export const ArtistPage = () => {
           .detail;
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
+          if (event.dataType === 'artists/likes' && event.dataType.length > 1)
+            fetchArtistsData();
           if (event.dataType === 'artists') fetchArtistsData();
         }
       }
@@ -102,8 +103,14 @@ export const ArtistPage = () => {
       // eslint-disable-next-line no-console
       // console.log(index);
       if (index < artistsData.length) {
-        const { artistId, name, onlineArtworkPaths, songs, artworkPaths } =
-          artistsData[index];
+        const {
+          artistId,
+          name,
+          onlineArtworkPaths,
+          songs,
+          artworkPaths,
+          isAFavorite,
+        } = artistsData[index];
         return (
           <div style={{ ...style, display: 'flex', justifyContent: 'center' }}>
             <Artist
@@ -115,6 +122,7 @@ export const ArtistPage = () => {
               artworkPaths={artworkPaths}
               onlineArtworkPaths={onlineArtworkPaths}
               songIds={songs.map((song) => song.songId)}
+              isAFavorite={isAFavorite}
             />
           </div>
         );
