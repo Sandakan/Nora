@@ -120,7 +120,13 @@ const GenreInfoPage = () => {
           .detail;
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
-          if (event.dataType === 'songs') fetchSongsData();
+          if (
+            event.dataType === 'songs/deletedSong' ||
+            event.dataType === 'songs/newSong' ||
+            event.dataType === 'blacklist/songBlacklist' ||
+            (event.dataType === 'songs/likes' && event.eventData.length > 1)
+          )
+            fetchSongsData();
         }
       }
     };
@@ -153,6 +159,7 @@ const GenreInfoPage = () => {
           path={song.path}
           isAFavorite={song.isAFavorite}
           year={song.year}
+          isBlacklisted={song.isBlacklisted}
         />
       )),
     [genreSongs, userData]
@@ -195,7 +202,9 @@ const GenreInfoPage = () => {
                   iconName="play_arrow"
                   clickHandler={() =>
                     createQueue(
-                      genreSongs.map((song) => song.songId),
+                      genreSongs
+                        .filter((song) => !song.isBlacklisted)
+                        .map((song) => song.songId),
                       'genre',
                       false,
                       genreData.genreId,
@@ -208,7 +217,9 @@ const GenreInfoPage = () => {
                   iconName="shuffle"
                   clickHandler={() =>
                     createQueue(
-                      genreSongs.map((song) => song.songId),
+                      genreSongs
+                        .filter((song) => !song.isBlacklisted)
+                        .map((song) => song.songId),
                       'genre',
                       true,
                       genreData.genreId,

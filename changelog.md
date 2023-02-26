@@ -1,13 +1,62 @@
-<h1> Change Log</h1>
+<h1 align="center"> Change Log</h1>
 
-<h3>The latest version (v1.0.0-stable) contains a lot of new features and improvements. As always expect some bugs in the app.</h3>
+<h3>The latest version (v1.1.0-stable) contains a lot of new features and improvements. As always expect some bugs in the app.</h3>
 
 <br>
 
-<img src="assets\other\release artworks\whats-new-v1.0.0-stable.webp">
+<img src="assets\other\release artworks\whats-new-v1.1.0-stable.webp">
 
 <br>
 <ul>
+  <li class="version">  <h3> v1.1.0-stable - ( 26<sup>th</sup> of February 2023 )</h3>
+    <ul>
+      <li> <h4>🎉 New Features and Features</h4>
+      <ul>
+        <li>Support for editing audio files outside the library.</li>
+        <li>Support for further customizations when downloading song metadata from the internet.</li>
+        <li>Support for folder blacklisting and improvements for song blacklisting.</li>
+        <li>Added an indicator to show whether an artist is liked or not.</li>
+        <li>Added new keyboard shortcuts to go to forward and backward pages and to change app theme.</li>
+        <li>New BlacklistFolderConfirmPrompt and improvements for BlacklistSongConfirmPrompt.</li>
+        <li>Support for audio seeking or changing the volume through mouse scrolling by hovering over the seek bar and the volume bar.</li>
+        <li>Support for caching song data played from outside the library to improve performance when playing them again in the same session.</li>
+      </ul>
+      </li>
+      <li> <h4>🔨 Fixes and Improvements</h3>
+        <ul>
+          <li>Improvements for error handling related to network requests.</li>
+          <li>Removed Backlisted Songs section in the Settings Page.</li>
+          <li>Fixed a bug where Mini Player show un-scrollable unsynchronized lyrics.</li>
+          <li>Fixed a bug where artworks without 1:1 aspect ratio breaks the alignment of how the songs are displayed.</li>
+          <li>Added a new sort option for SongsPage and FoldersPage to sort blacklisted and whitelisted folders and songs.</li>
+          <li>Fixed a bug where  temp artworks aren't getting cleaned up after the app closes.</li>
+          <li>Fixed a bug where artists aren't being sorted properly.</li>
+          <li>Fixed some bugs where some pages not updating its contents according to data events.</li>
+          <li>Fixed a bug where removing a song doesn't trigger 'playlists' and 'genres' data events.</li>
+          <li>Fixed a bug where some artist sort options aren't working as expected.</li>
+          <li>Fixed a bug where toggling 'like song' in Song or SongCard doesn't get updated in the currentSongData and vice versa.</li>
+          <li>Fixed a bug where Artist not showing default artist cover when there is no artwork for an artist.</li>
+          <li>Fixed a bug where FoldersPage doesn't get updated when song gets deleted or added.</li>
+          <li>Fixed a bug where online lyrics is not being saved to the audio file.</li>
+          <li>Fixed a bug where some pages like HomePage, CurrentQueuePage not updating songs when a song gets blacklisted.</li>
+          <li>Reduced image file sizes by using them in webp format.</li>
+          <li>Removed change theme button on the title bar for production builds.</li>
+          <li>Updated Musixmatch Lyrics Disclaimer.</li>
+        </ul>
+      </li>
+      <li> <h4>🐜 Known Issues and Bugs</h4>
+        <ul>
+          <li>Sometimes users can get unexpected search results when using Search.</li>
+          <li>App theme will be changed when you change your system's theme even though you didn't select to use system theme in the app.</li>
+          <li>If a song is added next to the last song of the queue, the last song won't be played.</li>
+          <li>Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+
+  <br>
+
   <li class="version"> <h3> v1.0.0-stable - ( 17<sup>th</sup> of February 2023 )</h3>
     <ul>
       <li><h4>🎉 New Features and Updates</h4>
@@ -253,7 +302,7 @@
 
   <br/>
 
-<li class="version"> v0.6.0-alpha - ( 24<sup>th</sup> of June 2022 )
+  <li class="version"> v0.6.0-alpha - ( 24<sup>th</sup> of June 2022 )
     <ul>
       <li> <h4>🎉 New Features and Features</h4>
       <ul>

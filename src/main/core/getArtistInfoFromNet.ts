@@ -78,7 +78,7 @@ const getArtistInfoFromLastFM = async (
         }
         return data;
       }
-      const errStr = `Request to fetch artist data from LastFM failed.\nERR_CODE : ${res.status}`;
+      const errStr = `Request to fetch artist data from LastFM failed.\nERR_CODE : ${res.status} - ${res.statusText}`;
       log(errStr);
       throw new Error(errStr);
     } catch (error) {

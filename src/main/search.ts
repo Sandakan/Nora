@@ -8,6 +8,7 @@ import {
   getPlaylistData,
   getUserData,
   setUserData,
+  getBlacklistData,
 } from './filesystem';
 import {
   getAlbumArtworkPath,
@@ -28,6 +29,7 @@ const getSongSearchResults = (
     songs.length > 0 &&
     (filter === 'Songs' || filter === 'All')
   ) {
+    const { songBlacklist } = getBlacklistData();
     let returnValue = stringSimilarity(
       keyword,
       songs as unknown as Record<string, unknown>[],
@@ -51,10 +53,14 @@ const getSongSearchResults = (
 
       returnValue = results;
     }
-    return returnValue.map((x) => ({
-      ...x,
-      artworkPaths: getSongArtworkPath(x.songId, x.isArtworkAvailable),
-    }));
+    return returnValue.map((x) => {
+      const isBlacklisted = songBlacklist?.includes(x.songId);
+      return {
+        ...x,
+        artworkPaths: getSongArtworkPath(x.songId, x.isArtworkAvailable),
+        isBlacklisted,
+      };
+    });
   }
   return [];
 };

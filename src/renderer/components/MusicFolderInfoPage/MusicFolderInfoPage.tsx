@@ -85,10 +85,10 @@ const MusicFolderInfoPage = () => {
           const event = dataEvents[i];
           if (
             event.dataType === 'songs/artworks' ||
-            event.dataType === 'songs/likes' ||
             event.dataType === 'songs/deletedSong' ||
             event.dataType === 'songs/newSong' ||
-            event.dataType === 'songs/updatedSong'
+            event.dataType === 'songs/updatedSong' ||
+            (event.dataType === 'songs/likes' && event.eventData.length > 1)
           )
             fetchFolderSongs();
         }
@@ -156,6 +156,7 @@ const MusicFolderInfoPage = () => {
         artworkPaths,
         year,
         path,
+        isBlacklisted,
       } = folderSongs[index];
       return (
         <div style={style}>
@@ -171,6 +172,7 @@ const MusicFolderInfoPage = () => {
             year={year}
             path={path}
             isAFavorite={isAFavorite}
+            isBlacklisted={isBlacklisted}
           />
         </div>
       );
@@ -242,7 +244,9 @@ const MusicFolderInfoPage = () => {
                 iconName="play_arrow"
                 clickHandler={() =>
                   createQueue(
-                    folderInfo?.songIds,
+                    folderSongs
+                      .filter((song) => !song.isBlacklisted)
+                      .map((song) => song.songId),
                     'folder',
                     false,
                     folderInfo.folderData.path,
@@ -257,7 +261,9 @@ const MusicFolderInfoPage = () => {
                 iconName="shuffle"
                 clickHandler={() =>
                   createQueue(
-                    folderInfo?.songIds,
+                    folderSongs
+                      .filter((song) => !song.isBlacklisted)
+                      .map((song) => song.songId),
                     'folder',
                     true,
                     folderInfo.folderData.path,
@@ -294,19 +300,6 @@ const MusicFolderInfoPage = () => {
               initialScrollOffset={
                 currentlyActivePage.data?.scrollTopOffset ?? 0
               }
-              //   onScroll={(data) => {
-              //     if (scrollOffsetTimeoutIdRef.current)
-              //       clearTimeout(scrollOffsetTimeoutIdRef.current);
-              //     if (!data.scrollUpdateWasRequested && data.scrollOffset !== 0)
-              //       scrollOffsetTimeoutIdRef.current = setTimeout(
-              //         () =>
-              //           updateCurrentlyActivePageData((currentPageData) => ({
-              //             ...currentPageData,
-              //             scrollTopOffset: data.scrollOffset,
-              //           })),
-              //         500
-              //       );
-              //   }}
             >
               {row}
             </List>

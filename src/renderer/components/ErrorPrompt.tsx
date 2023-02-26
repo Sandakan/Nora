@@ -1,12 +1,11 @@
 /* eslint-disable react/require-default-props */
 import { ReactElement } from 'react';
+import packageFile from '../../../package.json';
 import Button from './Button';
 import Hyperlink from './Hyperlink';
 
 interface ErrorPromptProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   reason: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   message?: ReactElement<any, any>;
   showSendFeedbackBtn?: boolean;
 }
@@ -27,23 +26,32 @@ export default (props: ErrorPromptProps) => {
         <>
           <br />
           <div>
-            Please send us a{' '}
+            Please send us{' '}
             <Hyperlink
               label="feedback"
               linkTitle=""
               noValidityCheck
               link="mailto:sandakannipunajith@gmail.com?subject=Regarding Nora&body=If you found a bug in the app, please try to attach the log file of the app with a detailed explanation of the bug.%0d%0a%0d%0aYou can get to it by going to  Settings > About > Open Log File."
             />{' '}
-            to improve the app.
+            to improve the app or{' '}
+            <Hyperlink
+              label="create an issue"
+              noValidityCheck
+              linkTitle=""
+              link={packageFile.bugs.url}
+            />{' '}
+            on Github.
           </div>
         </>
       )}
-      <Button
-        label="Restart App"
-        iconName="sync"
-        className="float-right mt-6 w-fit rounded-md !bg-background-color-3 text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
-        clickHandler={() => window.api.restartRenderer(reason)}
-      />
+      <div className="buttons-container flex items-center justify-end">
+        <Button
+          label="Restart App"
+          iconName="sync"
+          className="mt-6 w-fit !bg-background-color-3 !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
+          clickHandler={() => window.api.restartRenderer(reason)}
+        />
+      </div>
     </>
   );
 };

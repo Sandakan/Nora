@@ -9,6 +9,7 @@
 
 // https://i.scdn.co/image/ ab6761670000 ecd483b611804e9de647b18110be
 
+import log from '../log';
 import { SpotifyEmbedApi } from '../../@types/spotify_embed_api';
 
 const SPOTIFY_EMBED_BASE_URL =
@@ -46,12 +47,13 @@ const fetchSongArtworksFromSpotify = async (spotifySongId: string) => {
         return { highResArtworkUrl, lowResArtworkUrl };
       }
     }
+    throw new Error(
+      `Error occurred when fetching artwork from url.\nHTTP Error code ${res.status} - ${res.statusText}`
+    );
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('error ocurred', error);
+    log(`Error occurred when fetching artwork from url.`, { error }, 'ERROR');
     throw error;
   }
-  throw new Error('Error occurred');
 };
 
 export default fetchSongArtworksFromSpotify;

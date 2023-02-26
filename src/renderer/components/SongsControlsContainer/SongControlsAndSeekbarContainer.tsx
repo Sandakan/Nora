@@ -6,6 +6,7 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
 import calculateTime from 'renderer/utils/calculateTime';
+import debounce from 'renderer/utils/debounce';
 
 const SongControlsAndSeekbarContainer = () => {
   const {
@@ -33,6 +34,7 @@ const SongControlsAndSeekbarContainer = () => {
 
   const [songPos, setSongPos] = React.useState(0);
   const isMouseDownRef = React.useRef(false);
+  const isMouseScrollRef = React.useRef(false);
   const seekbarRef = React.useRef(null as HTMLInputElement | null);
 
   const seekBarCssProperties: any = {};
@@ -46,7 +48,11 @@ const SongControlsAndSeekbarContainer = () => {
   }%`;
 
   React.useEffect(() => {
-    if (seekbarRef.current && !isMouseDownRef.current) {
+    if (
+      seekbarRef.current &&
+      !isMouseDownRef.current &&
+      !isMouseScrollRef.current
+    ) {
       setSongPos(songPosition);
     }
   }, [songPosition]);
@@ -238,6 +244,24 @@ const SongControlsAndSeekbarContainer = () => {
             value={songPos || 0}
             onChange={(e) => {
               setSongPos(e.currentTarget.valueAsNumber ?? 0);
+            }}
+            onWheel={(e) => {
+              e.preventDefault();
+
+              isMouseScrollRef.current = true;
+
+              const max = parseInt(e.currentTarget.max);
+              const incrementValue = e.deltaY > 0 ? -5 : 5;
+              let value = (songPos || 0) + incrementValue;
+
+              if (value > max) value = max;
+              if (value < 0) value = 0;
+              setSongPos(value);
+
+              debounce(() => {
+                isMouseScrollRef.current = false;
+                updateSongPosition(value ?? 0);
+              }, 250);
             }}
             ref={seekbarRef}
             style={seekBarCssProperties}

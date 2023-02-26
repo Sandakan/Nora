@@ -10,9 +10,10 @@ const MusicFoldersSettings = (props: Props) => {
   const musicFolders = React.useMemo(
     () =>
       musicFoldersData
-        ? musicFoldersData.map((musicFolder, index) => {
-            // eslint-disable-next-line react/no-array-index-key
-            return <MusicFolder key={index} musicFolder={musicFolder} />;
+        ? musicFoldersData.map((musicFolder) => {
+            return (
+              <MusicFolder key={musicFolder.path} musicFolder={musicFolder} />
+            );
           })
         : [],
     [musicFoldersData]

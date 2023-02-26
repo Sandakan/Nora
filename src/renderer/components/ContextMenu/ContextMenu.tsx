@@ -59,25 +59,27 @@ const ContextMenu = React.memo(() => {
 
   const contextMenuItems = React.useMemo(
     () =>
-      menuItems.map((menuItem, index) => {
-        if (menuItem.isContextMenuItemSeperator)
+      menuItems
+        .filter((menuItem) => !menuItem.isDisabled)
+        .map((menuItem, index) => {
+          if (menuItem.isContextMenuItemSeperator)
+            return (
+              <div
+                key={index}
+                role="separator"
+                className="context-menu-item-seperator float-right my-2 h-[1px] w-[95%] bg-[hsla(0deg,0%,57%,0.5)]"
+              />
+            );
           return (
-            <div
+            <ContextMenuItem
               key={index}
-              role="separator"
-              className="context-menu-item-seperator float-right my-2 h-[2px] w-[95%] bg-[hsla(0deg,0%,57%,0.5)]"
+              label={menuItem.label}
+              iconName={menuItem.iconName}
+              iconClassName={menuItem.iconClassName}
+              handlerFunction={menuItem.handlerFunction}
             />
           );
-        return (
-          <ContextMenuItem
-            key={index}
-            label={menuItem.label}
-            iconName={menuItem.iconName}
-            iconClassName={menuItem.iconClassName}
-            handlerFunction={menuItem.handlerFunction}
-          />
-        );
-      }),
+        }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [menuItems]
   );

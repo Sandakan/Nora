@@ -48,6 +48,7 @@ const AllSearchResultsPage = () => {
             artworkPaths={songData.artworkPaths}
             isAFavorite={songData.isAFavorite}
             year={songData.year}
+            isBlacklisted={songData.isBlacklisted}
           />
         );
       });
@@ -69,6 +70,7 @@ const AllSearchResultsPage = () => {
             artworkPaths={artistData.artworkPaths}
             onlineArtworkPaths={artistData.onlineArtworkPaths}
             className="mb-4 mr-4"
+            isAFavorite={artistData.isAFavorite}
           />
         );
       });

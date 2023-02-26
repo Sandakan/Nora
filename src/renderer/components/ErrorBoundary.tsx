@@ -54,7 +54,7 @@ class ErrorBoundary extends React.Component<
           )}
           <div className="buttons-container">
             <Button
-              className="!mr-0 mt-4 !bg-background-color-3 text-sm text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
+              className="!mr-0 mt-4 !bg-background-color-3 text-sm text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
               label="Restart App"
               iconName="restart_alt"
               clickHandler={() => window.api.restartRenderer('error')}

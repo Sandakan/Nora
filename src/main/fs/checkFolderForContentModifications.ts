@@ -76,7 +76,7 @@ const tryToRemoveSongFromLibrary = async (
 ) => {
   try {
     const fullPath = path.normalize(path.join(folderPath, filename));
-    await removeSongsFromLibrary([fullPath], abortSignal, false);
+    await removeSongsFromLibrary([fullPath], abortSignal);
     sendMessageToRenderer(
       `'${filename}' song got deleted from the system.`,
       'SONG_DELETED'

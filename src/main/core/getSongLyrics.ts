@@ -54,7 +54,7 @@ const fetchLyricsFromAudioSource = (songId: string, songTitle: string) => {
           }
         }
 
-        if (unsynchronisedLyrics) {
+        if (unsynchronisedLyrics?.text) {
           const parsedLyrics = parseLyrics(unsynchronisedLyrics.text);
           const lyricsType: LyricsTypes = parsedLyrics.isSynced
             ? 'SYNCED'

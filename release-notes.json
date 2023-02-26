@@ -1,14 +1,102 @@
 {
   "latestVersion": {
-    "version": "1.0.0-stable",
-    "phase": "alpha",
-    "releaseDate": "2023 February 17",
-    "artwork": "/assets/other/release artworks/whats-new-v1.0.0-stable.webp",
+    "version": "1.1.0-stable",
+    "phase": "stable",
+    "releaseDate": "2023 February 26",
+    "artwork": "/assets/other/release artworks/whats-new-v1.1.0-stable.webp",
     "importantNotes": [
-      "This update requires a full media library refresh to reduce the storage usage and to improve performance when accessing the library."
+      "This update can put your blacklisted songs again into your library. Sorry for the inconvenience.",
+      "Updated the Musixmatch Disclaimer Notice. Please read it before using the service."
     ]
   },
   "versions": [
+    {
+      "version": "1.1.0-stable",
+      "releaseDate": "2023 February 26",
+      "notes": {
+        "new": [
+          { "note": "Support for editing audio files outside the library." },
+          {
+            "note": "Support for further customizations when downloading song metadata from the internet."
+          },
+          {
+            "note": "Support for folder blacklisting and improvements for song blacklisting."
+          },
+          {
+            "note": "Added an indicator to show whether an artist is liked or not."
+          },
+          {
+            "note": "Added new keyboard shortcuts to go to forward and backward pages and to change app theme."
+          },
+          {
+            "note": "New BlacklistFolderConfirmPrompt and improvements for BlacklistSongConfirmPrompt."
+          },
+          {
+            "note": "Support for audio seeking or changing the volume through mouse scrolling by hovering over the seek bar and the volume bar."
+          }
+        ],
+        "fixed": [
+          {
+            "note": "Improvements for error handling related to network requests."
+          },
+          { "note": "Removed Backlisted Songs section in the Settings Page." },
+          {
+            "note": "Fixed a bug where Mini Player show un-scrollable unsynchronized lyrics."
+          },
+          {
+            "note": "Fixed a bug where artworks without 1:1 aspect ratio breaks the alignment of how the songs are displayed."
+          },
+          {
+            "note": "Added a new sort option for SongsPage and FoldersPage to sort blacklisted and whitelisted folders and songs."
+          },
+          {
+            "note": "Fixed a bug where temp artworks aren't getting cleaned up after the app closes."
+          },
+          { "note": "Fixed a bug where artists aren't being sorted properly." },
+          {
+            "note": "Fixed some bugs where some pages not updating its contents according to data events."
+          },
+          {
+            "note": "Fixed a bug where removing a song doesn't trigger 'playlists' and 'genres' data events."
+          },
+          {
+            "note": "Fixed a bug where some artist sort options aren't working as expected."
+          },
+          {
+            "note": "Fixed a bug where toggling 'like song' in Song or SongCard doesn't get updated in the currentSongData and vice versa."
+          },
+          {
+            "note": "Fixed a bug where Artist not showing default artist cover when there is no artwork for an artist."
+          },
+          {
+            "note": "Fixed a bug where FoldersPage doesn't get updated when song gets deleted or added."
+          },
+          {
+            "note": "Fixed a bug where online lyrics is not being saved to the audio file."
+          },
+          {
+            "note": "Fixed a bug where some pages like HomePage, CurrentQueuePage not updating songs when a song gets blacklisted."
+          },
+          { "note": "Reduced image file sizes by using them in webp format." },
+          { "note": "Removed change theme button on the title bar." },
+          { "note": "Updated Musixmatch Lyrics Disclaimer." }
+        ],
+        "knownIssues": [
+          {
+            "note": "Sometimes users can get unexpected search results when using Search."
+          },
+          {
+            "note": "App theme will be changed when you change your system's theme even though you didn't select to use system theme in the app."
+          },
+          {
+            "note": "If a song is added next to the last song of the queue, the last song won't be played."
+          },
+          {
+            "note": "Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song."
+          }
+        ]
+      }
+    },
     {
       "version": "1.0.0-stable",
       "releaseDate": "2023 February 17",

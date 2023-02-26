@@ -26,8 +26,7 @@ const SongSearchResultsContainer = (props: Props) => {
               if (index < 5)
                 return (
                   <Song
-                    // eslint-disable-next-line react/no-array-index-key
-                    key={`${song.songId}-${index}`}
+                    key={song.songId}
                     index={index}
                     isIndexingSongs={
                       userData !== undefined &&
@@ -41,6 +40,7 @@ const SongSearchResultsContainer = (props: Props) => {
                     path={song.path}
                     isAFavorite={song.isAFavorite}
                     year={song.year}
+                    isBlacklisted={song.isBlacklisted}
                   />
                 );
               return undefined;

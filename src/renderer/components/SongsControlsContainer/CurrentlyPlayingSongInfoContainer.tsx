@@ -6,7 +6,7 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Img from '../Img';
 import SongArtist from '../SongsPage/SongArtist';
-import DefaultSongCover from '../../../../assets/images/png/song_cover_default.png';
+import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 
 const CurrentlyPlayingSongInfoContainer = () => {
   const { currentSongData, currentlyActivePage, userData } =
@@ -53,17 +53,26 @@ const CurrentlyPlayingSongInfoContainer = () => {
     currentSongData.songId,
   ]);
 
-  const showSongInfoPage = () =>
-    currentSongData.isKnownSource
-      ? currentlyActivePage.pageTitle === 'SongInfo' &&
-        currentlyActivePage.data &&
-        currentlyActivePage.data.songInfo &&
-        currentlyActivePage.data.songInfo.songId === currentSongData.songId
-        ? changeCurrentActivePage('Home')
-        : changeCurrentActivePage('SongInfo', {
-            songId: currentSongData.songId,
-          })
-      : undefined;
+  const showSongInfoPage = React.useCallback(
+    () =>
+      currentSongData.isKnownSource
+        ? currentlyActivePage.pageTitle === 'SongInfo' &&
+          currentlyActivePage.data &&
+          currentlyActivePage.data.songInfo &&
+          currentlyActivePage.data.songInfo.songId === currentSongData.songId
+          ? changeCurrentActivePage('Home')
+          : changeCurrentActivePage('SongInfo', {
+              songId: currentSongData.songId,
+            })
+        : undefined,
+    [
+      changeCurrentActivePage,
+      currentSongData.isKnownSource,
+      currentSongData.songId,
+      currentlyActivePage.data,
+      currentlyActivePage.pageTitle,
+    ]
+  );
 
   const songArtists = React.useMemo(() => {
     if (currentSongData.songId && Array.isArray(currentSongData.artists)) {
@@ -94,6 +103,37 @@ const CurrentlyPlayingSongInfoContainer = () => {
     currentSongData.isKnownSource,
   ]);
 
+  const contextMenuItems = React.useMemo(
+    () => [
+      {
+        label: 'Info',
+        iconName: 'info',
+        handlerFunction: showSongInfoPage,
+        isDisabled: !currentSongData.isKnownSource,
+      },
+      {
+        label: 'Edit song tags',
+        class: 'edit',
+        iconName: 'edit',
+        handlerFunction: () =>
+          changeCurrentActivePage('SongTagsEditor', {
+            songId: currentSongData?.songId,
+            songArtworkPath: currentSongData?.artworkPath,
+            songPath: currentSongData?.path,
+            isKnownSource: currentSongData?.isKnownSource,
+          }),
+      },
+    ],
+    [
+      changeCurrentActivePage,
+      currentSongData?.artworkPath,
+      currentSongData.isKnownSource,
+      currentSongData?.path,
+      currentSongData?.songId,
+      showSongInfoPage,
+    ]
+  );
+
   return (
     <div className="current-playing-song-info-container relative flex w-[30%] content-center items-center">
       <div
@@ -114,34 +154,9 @@ const CurrentlyPlayingSongInfoContainer = () => {
           alt="Default song cover"
           onContextMenu={(e) => {
             e.stopPropagation();
-            if (currentSongData.isKnownSource) {
-              updateContextMenuData(
-                true,
-                [
-                  {
-                    label: 'Info',
-                    iconName: 'info',
-                    handlerFunction: showSongInfoPage,
-                  },
-                  {
-                    label: 'Edit song tags',
-                    class: 'edit',
-                    iconName: 'edit',
-                    handlerFunction: () =>
-                      changeCurrentActivePage('SongTagsEditor', {
-                        songId: currentSongData?.songId,
-                        songArtworkPath: currentSongData?.artworkPath,
-                        songPath: currentSongData?.path,
-                      }),
-                  },
-                ],
-                e.pageX,
-                e.pageY
-              );
-            }
+            updateContextMenuData(true, contextMenuItems, e.pageX, e.pageY);
           }}
         />
-        {/* )} */}
       </div>
       <div className="song-info-container flex h-full w-[65%] flex-col items-start justify-center drop-shadow-lg lg:ml-4 lg:w-full">
         {currentSongData.title && (
@@ -152,31 +167,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
             onClick={showSongInfoPage}
             onContextMenu={(e) => {
               e.stopPropagation();
-              if (currentSongData.isKnownSource) {
-                updateContextMenuData(
-                  true,
-                  [
-                    {
-                      label: 'Info',
-                      iconName: 'info',
-                      handlerFunction: showSongInfoPage,
-                    },
-                    {
-                      label: 'Edit song tags',
-                      class: 'edit',
-                      iconName: 'edit',
-                      handlerFunction: () =>
-                        changeCurrentActivePage('SongTagsEditor', {
-                          songId: currentSongData?.songId,
-                          songArtworkPath: currentSongData?.artworkPath,
-                          songPath: currentSongData?.path,
-                        }),
-                    },
-                  ],
-                  e.pageX,
-                  e.pageY
-                );
-              }
+              updateContextMenuData(true, contextMenuItems, e.pageX, e.pageY);
             }}
           >
             <span

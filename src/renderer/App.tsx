@@ -408,12 +408,11 @@ const userDataTemplate: UserData = {
   currentSong: { songId: null, stoppedPosition: 0 },
   volume: { isMuted: false, value: 100 },
   musicFolders: [],
-  songBlacklist: [],
   defaultPage: 'Home',
   isShuffling: false,
   isRepeating: 'false',
   preferences: {
-    doNotShowRemoveSongFromLibraryConfirm: false,
+    doNotShowBlacklistSongConfirm: false,
     isReducedMotion: false,
     songIndexing: false,
     autoLaunchApp: false,
@@ -912,14 +911,6 @@ export default function App() {
       })
       .catch((err) => console.error(err));
 
-    const noticeDataUpdateEvents = (
-      _: unknown,
-      dataEvents: DataUpdateEvent[]
-    ) => {
-      const event = new CustomEvent('app/dataUpdates', { detail: dataEvents });
-      document.dispatchEvent(event);
-    };
-
     window.api.toggleSongPlayback(() => {
       console.log('Main requested song playback');
       toggleSongPlayback();
@@ -929,7 +920,6 @@ export default function App() {
     });
     window.api.skipBackwardToPreviousSong(handleSkipBackwardClick);
     window.api.skipForwardToNextSong(handleSkipForwardClick);
-    window.api.dataUpdateEvent(noticeDataUpdateEvents);
     return () => {
       window.api.removeTogglePlaybackStateEvent(toggleSongPlayback);
       window.api.removeSkipBackwardToPreviousSongEvent(handleSkipBackwardClick);
@@ -937,6 +927,22 @@ export default function App() {
       window.api.removeDataUpdateEventListeners();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  React.useEffect(() => {
+    const noticeDataUpdateEvents = (
+      _: unknown,
+      dataEvents: DataUpdateEvent[]
+    ) => {
+      const event = new CustomEvent('app/dataUpdates', { detail: dataEvents });
+      document.dispatchEvent(event);
+    };
+
+    window.api.dataUpdateEvent(noticeDataUpdateEvents);
+
+    return () => {
+      window.api.removeDataUpdateEventListeners();
+    };
   }, []);
 
   const addNewNotifications = React.useCallback(
@@ -1684,7 +1690,7 @@ export default function App() {
       menuItems: ContextMenuItem[] = [],
       pageX?: number,
       pageY?: number,
-      contextMenuData?: ContextMenuItemData
+      contextMenuData?: ContextMenuAdditionalData
     ) => {
       // console.log('pageX', pageX, 'pageY', pageY);
       dispatch({
@@ -1905,27 +1911,42 @@ export default function App() {
     [content.player.isMiniPlayer]
   );
 
-  const toggleIsFavorite = React.useCallback((isFavorite?: boolean) => {
-    const newFavorite =
-      isFavorite ?? !contentRef.current.currentSongData.isAFavorite;
-    if (contentRef.current.currentSongData.isAFavorite !== newFavorite)
-      window.api
-        .toggleLikeSongs(
-          [contentRef.current.currentSongData.songId],
-          newFavorite
-        )
-        .then((res) => {
-          if (res && res.likes + res.dislikes > 0) {
-            contentRef.current.currentSongData.isAFavorite = newFavorite;
-            return dispatch({
-              type: 'TOGGLE_IS_FAVORITE_STATE',
-              data: newFavorite,
-            });
-          }
-          return undefined;
-        })
-        .catch((err) => console.error(err));
-  }, []);
+  const toggleIsFavorite = React.useCallback(
+    (isFavorite?: boolean, onlyChangeCurrentSongData = false) => {
+      const newFavorite =
+        isFavorite ?? !contentRef.current.currentSongData.isAFavorite;
+      if (
+        contentRef.current.currentSongData.isAFavorite !== newFavorite &&
+        !onlyChangeCurrentSongData
+      ) {
+        window.api
+          .toggleLikeSongs(
+            [contentRef.current.currentSongData.songId],
+            newFavorite
+          )
+          .then((res) => {
+            if (res && res.likes.length + res.dislikes.length > 0) {
+              contentRef.current.currentSongData.isAFavorite = newFavorite;
+              return dispatch({
+                type: 'TOGGLE_IS_FAVORITE_STATE',
+                data: newFavorite,
+              });
+            }
+            return undefined;
+          })
+          .catch((err) => console.error(err));
+      }
+      if (typeof isFavorite === 'boolean') {
+        contentRef.current.currentSongData.isAFavorite = isFavorite;
+        return dispatch({
+          type: 'TOGGLE_IS_FAVORITE_STATE',
+          data: isFavorite,
+        });
+      }
+      return undefined;
+    },
+    []
+  );
 
   const updateVolume = React.useCallback((volume: number) => {
     if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
@@ -1998,6 +2019,7 @@ export default function App() {
       else if (e.ctrlKey && e.key === 's') toggleShuffling();
       else if (e.ctrlKey && e.key === 't') toggleRepeat();
       else if (e.ctrlKey && e.key === 'h') toggleIsFavorite();
+      else if (e.ctrlKey && e.key === 'y') window.api.changeAppTheme();
       else if (e.ctrlKey && e.key === 'l') {
         const currentlyActivePage =
           content.navigationHistory.history[
@@ -2026,21 +2048,28 @@ export default function App() {
       } else if (e.shiftKey && e.key === 'ArrowRight') {
         if (player.currentTime + 10 < player.duration) player.currentTime += 10;
       }
+      // alt combinations
+      else if (e.altKey && e.key === 'Home') updatePageHistoryIndex('home');
+      else if (e.altKey && e.key === 'ArrowLeft')
+        updatePageHistoryIndex('decrement');
+      else if (e.altKey && e.key === 'ArrowRight')
+        updatePageHistoryIndex('increment');
     },
     [
-      changeCurrentActivePage,
+      updateVolume,
+      toggleMutedState,
+      handleSkipForwardClick,
+      handleSkipBackwardClick,
+      toggleShuffling,
+      toggleRepeat,
+      toggleIsFavorite,
+      updateMiniPlayerStatus,
       content.player.isMiniPlayer,
       content.navigationHistory.history,
       content.navigationHistory.pageHistoryIndex,
-      handleSkipBackwardClick,
-      handleSkipForwardClick,
-      toggleIsFavorite,
-      toggleMutedState,
-      toggleRepeat,
-      toggleShuffling,
       toggleSongPlayback,
-      updateMiniPlayerStatus,
-      updateVolume,
+      updatePageHistoryIndex,
+      changeCurrentActivePage,
     ]
   );
 

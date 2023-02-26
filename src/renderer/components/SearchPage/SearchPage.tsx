@@ -95,7 +95,8 @@ const SearchPage = () => {
             event.dataType === 'playlists/newPlaylist' ||
             event.dataType === 'playlists/deletedPlaylist' ||
             event.dataType === 'genres/newGenre' ||
-            event.dataType === 'genres/deletedGenre'
+            event.dataType === 'genres/deletedGenre' ||
+            event.dataType === 'blacklist/songBlacklist'
           )
             fetchSearchResults();
         }

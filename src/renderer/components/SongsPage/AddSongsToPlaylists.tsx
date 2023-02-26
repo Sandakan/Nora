@@ -7,13 +7,13 @@ import Button from '../Button';
 import Img from '../Img';
 
 interface AddSongsToPlaylistProp {
-  songId: string;
-  title: string;
+  songIds: string[];
+  title?: string;
 }
 
 interface SelectablePlaylistProp extends Playlist {
   isChecked: boolean;
-  playlistCheckedStateUpdateFunc: (state: boolean) => void;
+  playlistCheckedStateUpdateFunc: (_state: boolean) => void;
 }
 
 const SelectablePlaylist = (props: SelectablePlaylistProp) => {
@@ -30,7 +30,7 @@ const SelectablePlaylist = (props: SelectablePlaylistProp) => {
     <div
       className={`playlist appear-from-bottom group ${playlistId} mb-6 mr-4 flex h-52 w-[9.5rem] flex-col justify-between rounded-xl p-4 text-font-color-black dark:text-font-color-white ${
         isChecked
-          ? 'bg-background-color-3 text-font-color-black dark:bg-dark-background-color-3 dark:text-font-color-black'
+          ? 'bg-background-color-3 !text-font-color-black dark:bg-dark-background-color-3 dark:!text-font-color-black'
           : 'hover:bg-background-color-2 hover:dark:bg-dark-background-color-2'
       }`}
       onClick={() => playlistCheckedStateUpdateFunc(!isChecked)}
@@ -76,7 +76,7 @@ interface SelectPlaylist extends Playlist {
 const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
   const { changePromptMenuData, addNewNotifications } =
     React.useContext(AppUpdateContext);
-  const { songId, title } = props;
+  const { songIds, title } = props;
   const [playlists, setPlaylists] = React.useState([] as SelectPlaylist[]);
 
   React.useEffect(() => {
@@ -86,16 +86,19 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
         if (res.length > 0) {
           setPlaylists(() =>
             res.map((playlist) => {
-              if (playlist.songs.some((id) => id === songId))
-                return { ...playlist, isSelected: true };
-              return { ...playlist, isSelected: false };
+              return {
+                ...playlist,
+                isSelected:
+                  songIds.length === 1 &&
+                  playlist.songs.some((id) => songIds.includes(id)),
+              };
             })
           );
         }
         return undefined;
       })
       .catch((err) => console.error(err));
-  }, [songId]);
+  }, [songIds]);
 
   const addSongsToPlaylists = React.useCallback(() => {
     const selectedPlaylists = playlists.filter(
@@ -104,10 +107,10 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
     const promises = selectedPlaylists.map(async (playlist) => {
       if (playlist.playlistId === 'Favorites')
         return window.api
-          .toggleLikeSongs([songId], true)
+          .toggleLikeSongs(songIds, true)
           .catch((err) => console.error(err));
       return window.api
-        .addSongToPlaylist(playlist.playlistId, songId)
+        .addSongsToPlaylist(playlist.playlistId, songIds)
         .catch((err) => console.error(err));
     });
     // eslint-disable-next-line promise/catch-or-return
@@ -118,19 +121,14 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
           {
             id: 'songAddedtoPlaylists',
             delay: 5000,
+            icon: <span className="material-icons-round">playlist_add</span>,
             content: (
               <span>
-                Added '{title}' to{' '}
-                {selectedPlaylists.length > 3
-                  ? `${selectedPlaylists
-                      .filter((_, index) => index <= 3)
-                      .map((playlist) => `'${playlist.name}'`)
-                      .join(', ')} and ${
-                      selectedPlaylists.length - 3
-                    } other playlists.`
-                  : `${selectedPlaylists
-                      .map((playlist) => `'${playlist.name}'`)
-                      .join(', ')} playlists.`}
+                Added{' '}
+                {selectedPlaylists.length > 1
+                  ? `${selectedPlaylists.length} songs`
+                  : `'${title}'`}{' '}
+                to {`${selectedPlaylists.length} playlists.`}
               </span>
             ),
           },
@@ -140,7 +138,7 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
       .finally(() => {
         changePromptMenuData(false);
       });
-  }, [playlists, songId, title, changePromptMenuData, addNewNotifications]);
+  }, [playlists, songIds, title, changePromptMenuData, addNewNotifications]);
 
   const playlistComponents = React.useMemo(
     () =>
@@ -172,21 +170,46 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
     [playlists]
   );
 
+  const noOfSelectedPlaylists = React.useMemo(
+    () => playlists.filter((playlist) => playlist.isSelected).length,
+    [playlists]
+  );
+
   return (
     <>
-      <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
-        Select playlists to add '{title}' song
+      <div className="title-container mt-1 mb-4 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
+        Select playlists to add{' '}
+        {songIds.length > 1 ? `${songIds.length} songs` : `'${title}' song`}
       </div>
+      {songIds.length > 1 && (
+        <p>
+          &bull; When adding multiple songs to playlists, songs that are already
+          in selected playlists will be ignored.
+        </p>
+      )}
       {playlistComponents.length > 0 && (
-        <div className="playlists-container flex h-full flex-wrap">
+        <div className="playlists-container mt-4 flex h-full flex-wrap">
           {playlistComponents}
         </div>
       )}
-      <Button
-        label="Add to Playlist"
-        clickHandler={addSongsToPlaylists}
-        className="float-right mb-4 rounded-lg !bg-background-color-3  px-12  text-font-color-black dark:!bg-dark-background-color-3 dark:text-font-color-black"
-      />
+      <div className="buttons-and-other-info-container flex items-center justify-end">
+        <span className="mr-12 text-font-color-highlight dark:text-dark-font-color-highlight">
+          {noOfSelectedPlaylists} selected
+        </span>
+        <div className="buttons-container flex">
+          <Button
+            label="Cancel"
+            iconName="close"
+            clickHandler={() => changePromptMenuData(false)}
+          />
+          <Button
+            label="Add to Playlist(s)"
+            iconName="playlist_add"
+            clickHandler={addSongsToPlaylists}
+            className="!bg-background-color-3 px-6  text-font-color-black dark:!bg-dark-background-color-3 dark:!text-font-color-black"
+          />
+        </div>
+      </div>
     </>
   );
 };

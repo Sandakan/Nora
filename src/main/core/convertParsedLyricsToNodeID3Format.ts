@@ -33,9 +33,9 @@ const convertParsedLyricsToNodeID3Format = (
       { error },
       'WARN'
     );
-    return undefined;
+    return [];
   }
-  return undefined;
+  return [];
 };
 
 export default convertParsedLyricsToNodeID3Format;

@@ -3,7 +3,7 @@ import React from 'react';
 
 import Img from '../Img';
 
-import AppIcon from '../../../../assets/images/png/logo_light_mode.png';
+import AppIcon from '../../../../assets/images/webp/logo_light_mode.webp';
 
 const contentLoadStart = window.performance.now();
 

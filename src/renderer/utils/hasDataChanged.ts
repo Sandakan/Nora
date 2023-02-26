@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 const hasArrayChanged = (oldArr: unknown[], newArr: unknown[]) => {
   const isLengthEqual = newArr.length === oldArr.length;
   const arePropertiesEqual = newArr.every(

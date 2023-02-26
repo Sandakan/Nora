@@ -1,15 +1,16 @@
+/* eslint-disable react/destructuring-assignment */
 // import React from 'react';
 
 import Img from '../Img';
 
-const ContextMenuDataItem = (props: { data: ContextMenuItemData }) => {
-  // eslint-disable-next-line react/destructuring-assignment
-  const { title, artworkPath, subTitle, subTitle2, button } = props.data;
+const ContextMenuDataItem = (props: { data: ContextMenuAdditionalData }) => {
+  const { title, artworkPath, subTitle, subTitle2, button, artworkClassName } =
+    props.data;
   return (
     <div className="context-menu-data-item flex max-w-full flex-row items-center justify-between border-b-[1px] border-b-font-color-dimmed/50 px-3  py-2 font-light text-font-color-black dark:text-font-color-white">
       <div className="flex">
         <Img
-          className="mr-2 aspect-square w-8 rounded-sm"
+          className={`mr-2 aspect-square w-8 rounded-sm ${artworkClassName}`}
           src={artworkPath}
           alt="Context menu data item artwork path"
         />

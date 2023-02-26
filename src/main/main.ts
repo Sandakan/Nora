@@ -24,8 +24,8 @@ import {
   getUserData,
   setUserData as saveUserData,
   resetAppCache,
-  resetAppData,
   getListeningData,
+  getBlacklistData,
 } from './filesystem';
 import { resolveHtmlPath } from './utils/util';
 import updateSongId3Tags from './updateSongId3Tags';
@@ -35,10 +35,9 @@ import {
   searchSongMetadataResultsInInternet,
   fetchSongMetadataFromInternet,
 } from './utils/fetchSongMetadataFromInternet';
-import removeSongsFromLibrary from './removeSongsFromLibrary';
-import deleteSongFromSystem from './core/deleteSongFromSystem';
+import deleteSongsFromSystem from './core/deleteSongsFromSystem';
 import removeMusicFolder from './core/removeMusicFolder';
-import restoreBlacklistedSong from './core/restoreBlacklistedSong';
+import restoreBlacklistedSongs from './core/restoreBlacklistedSongs';
 import addWatchersToFolders from './fs/addWatchersToFolders';
 import addMusicFolder from './core/addMusicFolder';
 import getArtistInfoFromNet from './core/getArtistInfoFromNet';
@@ -53,11 +52,11 @@ import sendAudioData from './core/sendAudioData';
 import toggleLikeSongs from './core/toggleLikeSongs';
 import sendSongID3Tags from './core/sendSongId3Tags';
 import removeSongFromPlaylist from './core/removeSongFromPlaylist';
-import addSongToPlaylist from './core/addSongToPlaylist';
-import removePlaylist from './core/removePlaylist';
+import addSongsToPlaylist from './core/addSongsToPlaylist';
+import removePlaylists from './core/removePlaylists';
 import addNewPlaylist from './core/addNewPlaylist';
 import getAllSongs from './core/getAllSongs';
-import toggleLikeArtist from './core/toggleLikeArtist';
+import toggleLikeArtists from './core/toggleLikeArtists';
 import fetchSongInfoFromLastFM from './core/fetchSongInfoFromLastFM';
 import clearSongHistory from './core/clearSongHistory';
 import clearSearchHistoryResults from './core/clearSeachHistoryResults';
@@ -74,6 +73,11 @@ import {
   closeAllAbortControllers,
   saveAbortController,
 } from './fs/controlAbortControllers';
+import blacklistSongs from './core/blacklistSongs';
+import resetAppData from './resetAppData';
+import { clearTempArtworkFolder } from './other/artworks';
+import blacklistFolders from './core/blacklistFolders';
+import restoreBlacklistedFolders from './core/restoreBlacklistedFolder';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -214,8 +218,11 @@ app
       { type: 'separator' },
       { label: 'Exit', type: 'normal', click: () => app.quit(), role: 'close' },
     ]);
+
     tray.setContextMenu(trayContextMenu);
     tray.setToolTip('Nora');
+
+    tray.addListener('click', () => tray.popUpContextMenu(trayContextMenu));
     tray.addListener('double-click', () => {
       if (mainWindow.isVisible()) mainWindow.hide();
       else mainWindow.show();
@@ -314,9 +321,9 @@ app
       );
 
       ipcMain.handle(
-        'app/toggleLikeArtist',
-        (_, artistId: string, likeArtist: boolean) =>
-          toggleLikeArtist(artistId, likeArtist)
+        'app/toggleLikeArtists',
+        (_, artistIds: string[], likeArtist?: boolean) =>
+          toggleLikeArtists(artistIds, likeArtist)
       );
 
       ipcMain.handle(
@@ -451,14 +458,14 @@ app
           addNewPlaylist(playlistName, songIds, artworkPath)
       );
 
-      ipcMain.handle('app/removePlaylist', (_, playlistId: string) =>
-        removePlaylist(playlistId)
+      ipcMain.handle('app/removePlaylists', (_, playlistIds: string[]) =>
+        removePlaylists(playlistIds)
       );
 
       ipcMain.handle(
-        'app/addSongToPlaylist',
-        (_, playlistId: string, songId: string) =>
-          addSongToPlaylist(playlistId, songId)
+        'app/addSongsToPlaylist',
+        (_, playlistId: string, songIds: string[]) =>
+          addSongsToPlaylist(playlistId, songIds)
       );
 
       ipcMain.handle(
@@ -469,14 +476,14 @@ app
 
       ipcMain.handle('app/clearSongHistory', () => clearSongHistory());
 
-      ipcMain.handle('app/removeSongsFromLibrary', (_, songIds: string[]) =>
-        filterOutToBeRemovedSongs(songIds)
-      );
-
       ipcMain.handle(
-        'app/deleteSongFromSystem',
-        (_, absoluteFilePath: string, isPermanentDelete: boolean) =>
-          deleteSongFromSystem(absoluteFilePath, isPermanentDelete)
+        'app/deleteSongsFromSystem',
+        (_, absoluteFilePaths: string[], isPermanentDelete: boolean) =>
+          deleteSongsFromSystem(
+            absoluteFilePaths,
+            abortController.signal,
+            isPermanentDelete
+          )
       );
 
       ipcMain.handle('app/resyncSongsLibrary', async () => {
@@ -487,20 +494,34 @@ app
         );
       });
 
-      ipcMain.handle('app/restoreBlacklistedSong', (_, absolutePath: string) =>
-        restoreBlacklistedSong(absolutePath)
+      ipcMain.handle('app/getBlacklistData', getBlacklistData);
+
+      ipcMain.handle('app/blacklistSongs', (_, songIds: string[]) =>
+        blacklistSongs(songIds)
+      );
+
+      ipcMain.handle('app/restoreBlacklistedSongs', (_, songIds: string[]) =>
+        restoreBlacklistedSongs(songIds)
       );
 
       ipcMain.handle(
         'app/updateSongId3Tags',
-        (_, songId: string, tags: SongTags, sendUpdatedData?: boolean) =>
-          updateSongId3Tags(songId, tags, sendUpdatedData)
+        (
+          _,
+          songIdOrPath: string,
+          tags: SongTags,
+          sendUpdatedData?: boolean,
+          isKnownSource = true
+        ) =>
+          updateSongId3Tags(songIdOrPath, tags, sendUpdatedData, isKnownSource)
       );
 
       ipcMain.handle('app/getImgFileLocation', getImagefileLocation);
 
-      ipcMain.handle('app/getSongId3Tags', (_, songId: string) =>
-        sendSongID3Tags(songId)
+      ipcMain.handle(
+        'app/getSongId3Tags',
+        (_, songId: string, isKnownSource = true) =>
+          sendSongID3Tags(songId, isKnownSource)
       );
 
       ipcMain.handle('app/clearSearchHistory', (_, searchText?: string[]) =>
@@ -553,6 +574,15 @@ app
         'app/getFolderData',
         (_, folderPaths?: string[], sortType?: FolderSortTypes) =>
           getMusicFolderData(folderPaths, sortType)
+      );
+
+      ipcMain.handle('app/blacklistFolders', (_, folderPaths: string[]) =>
+        blacklistFolders(folderPaths)
+      );
+
+      ipcMain.handle(
+        'app/restoreBlacklistedFolders',
+        (_, folderPaths: string[]) => restoreBlacklistedFolders(folderPaths)
       );
 
       ipcMain.on(
@@ -626,6 +656,7 @@ function manageWindowFinishLoad() {
 function handleBeforeQuit() {
   mainWindow.webContents.send('app/beforeQuitEvent');
   closeAllAbortControllers();
+  clearTempArtworkFolder();
   log(
     `QUITING NORA`,
     { uptime: `${Math.floor(process.uptime())} seconds` },
@@ -749,15 +780,6 @@ async function handleSecondInstances(_: unknown, argv: string[]) {
   );
 }
 
-async function filterOutToBeRemovedSongs(songIds: string[]) {
-  const songs = getSongsData();
-  const relevantSongs = songs.filter((song) =>
-    songIds.some((id) => song.songId === id)
-  );
-  const relevantSongPaths = relevantSongs.map((song) => song.path);
-  return removeSongsFromLibrary(relevantSongPaths, abortController.signal);
-}
-
 function restartApp(reason: string) {
   log(`RENDERER REQUESTED A FULL APP REFRESH.\nREASON : ${reason}`);
   mainWindow.webContents.send('app/beforeQuitEvent');
@@ -779,6 +801,36 @@ async function revealSongInFileExplorer(songId: string) {
     'WARN'
   );
 }
+
+const songsOutsideLibraryData: SongOutsideLibraryData[] = [];
+
+export const getSongsOutsideLibraryData = () => songsOutsideLibraryData;
+
+export const addToSongsOutsideLibraryData = (data: SongOutsideLibraryData) =>
+  songsOutsideLibraryData.push(data);
+
+export const updateSongsOutsideLibraryData = (
+  songidOrPath: string,
+  data: SongOutsideLibraryData
+) => {
+  for (let i = 0; i < songsOutsideLibraryData.length; i += 1) {
+    if (
+      songsOutsideLibraryData[i].path === songidOrPath ||
+      songsOutsideLibraryData[i].songId === songidOrPath
+    ) {
+      songsOutsideLibraryData[i] = data;
+      return undefined;
+    }
+  }
+  log(
+    `songIdOrPath ${songidOrPath} does't exist on songsOutsideLibraryData.`,
+    undefined,
+    'ERROR'
+  );
+  throw new Error(
+    `songIdOrPath ${songidOrPath} does't exist on songsOutsideLibraryData.`
+  );
+};
 
 async function getImagefileLocation() {
   const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {

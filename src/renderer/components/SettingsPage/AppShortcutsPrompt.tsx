@@ -1,12 +1,13 @@
 import React from 'react';
 
-interface ShortcutCategory {
-  shortcutCategoryTitle: string;
-  shortcuts: Shortcut[];
-}
 interface Shortcut {
   label: string;
   keys: string[];
+}
+
+interface ShortcutCategory {
+  shortcutCategoryTitle: string;
+  shortcuts: Shortcut[];
 }
 
 const shortcutData: ShortcutCategory[] = [
@@ -29,6 +30,9 @@ const shortcutData: ShortcutCategory[] = [
   {
     shortcutCategoryTitle: 'Navigation',
     shortcuts: [
+      { label: 'Go to Home', keys: ['Alt', 'Home'] },
+      { label: 'Go Back', keys: ['Alt', 'Left Arrow'] },
+      { label: 'Go Forward', keys: ['Alt', 'Right Arrow'] },
       { label: 'Open Mini Player', keys: ['Ctrl', 'N'] },
       { label: 'Go to Lyrics', keys: ['Ctrl', 'L'] },
       { label: 'Go to Current Queue', keys: ['Ctrl', 'Q'] },
@@ -43,6 +47,7 @@ const shortcutData: ShortcutCategory[] = [
   {
     shortcutCategoryTitle: 'Other Shortcuts',
     shortcuts: [
+      { label: 'Toggle App Theme', keys: ['Ctrl', 'Y'] },
       { label: 'Reload', keys: ['F5'] },
       { label: 'Open Devtools', keys: ['F12'] },
     ],

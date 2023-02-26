@@ -100,17 +100,19 @@ export const api = {
 
   removeAMusicFolder: (absolutePath: string): Promise<void> =>
     ipcRenderer.invoke('app/removeAMusicFolder', absolutePath),
-  restoreBlacklistedSong: (absolutePath: string): Promise<void> =>
-    ipcRenderer.invoke('app/restoreBlacklistedSong', absolutePath),
-  removeSongsFromLibrary: (songIds: string[]): PromiseFunctionReturn =>
-    ipcRenderer.invoke('app/removeSongsFromLibrary', songIds),
-  deleteSongFromSystem: (
-    absoluteFilePath: string,
+  getBlacklistData: (): Promise<Blacklist> =>
+    ipcRenderer.invoke('app/getBlacklistData'),
+  blacklistSongs: (songIds: string[]): Promise<void> =>
+    ipcRenderer.invoke('app/blacklistSongs', songIds),
+  restoreBlacklistedSongs: (songIds: string[]): Promise<void> =>
+    ipcRenderer.invoke('app/restoreBlacklistedSongs', songIds),
+  deleteSongsFromSystem: (
+    absoluteFilePaths: string[],
     isPermanentDelete: boolean
   ): PromiseFunctionReturn =>
     ipcRenderer.invoke(
-      'app/deleteSongFromSystem',
-      absoluteFilePath,
+      'app/deleteSongsFromSystem',
+      absoluteFilePaths,
       isPermanentDelete
     ),
 
@@ -192,13 +194,23 @@ export const api = {
 
   // $  UPDATE SONG DATA
   updateSongId3Tags: (
-    songId: string,
+    songIdOrPath: string,
     tags: SongTags,
-    sendUpdatedData: boolean
+    sendUpdatedData: boolean,
+    isKnownSource: boolean
   ): Promise<UpdateSongDataResult> =>
-    ipcRenderer.invoke('app/updateSongId3Tags', songId, tags, sendUpdatedData),
-  getSongId3Tags: (songPath: string): Promise<SongTags> =>
-    ipcRenderer.invoke('app/getSongId3Tags', songPath),
+    ipcRenderer.invoke(
+      'app/updateSongId3Tags',
+      songIdOrPath,
+      tags,
+      sendUpdatedData,
+      isKnownSource
+    ),
+  getSongId3Tags: (
+    songIdOrPath: string,
+    isKnownSource: boolean
+  ): Promise<SongTags> =>
+    ipcRenderer.invoke('app/getSongId3Tags', songIdOrPath, isKnownSource),
   getImgFileLocation: (): Promise<string> =>
     ipcRenderer.invoke('app/getImgFileLocation'),
   revealSongInFileExplorer: (songId: string): void =>
@@ -234,12 +246,16 @@ export const api = {
   saveUserData: (dataType: UserDataTypes, data: unknown) =>
     ipcRenderer.invoke('app/saveUserData', dataType, data),
 
-  // $ APP USER DATA
+  // $ FOLDER DATA
   getFolderData: (
     folderPaths: string[],
     sortType?: FolderSortTypes
   ): Promise<MusicFolder[]> =>
     ipcRenderer.invoke('app/getFolderData', folderPaths, sortType),
+  blacklistFolders: (folderPaths: string[]): Promise<void> =>
+    ipcRenderer.invoke('app/blacklistFolders', folderPaths),
+  restoreBlacklistedFolders: (folderPaths: string[]): Promise<void> =>
+    ipcRenderer.invoke('app/restoreBlacklistedFolders', folderPaths),
 
   // $ ARTISTS DATA
   getArtistData: (
@@ -247,11 +263,11 @@ export const api = {
     sortType?: ArtistSortTypes
   ): Promise<Artist[]> =>
     ipcRenderer.invoke('app/getArtistData', artistIdsOrNames, sortType),
-  toggleLikeArtist: (
-    artistId: string,
-    likeArtist: boolean
+  toggleLikeArtists: (
+    artistIds: string[],
+    likeArtist?: boolean
   ): Promise<ToggleLikeSongReturnValue | undefined> =>
-    ipcRenderer.invoke('app/toggleLikeArtist', artistId, likeArtist),
+    ipcRenderer.invoke('app/toggleLikeArtists', artistIds, likeArtist),
   getArtistArtworks: (
     artistId: string
   ): Promise<ArtistInfoFromNet | undefined> =>
@@ -294,11 +310,11 @@ export const api = {
       songIds,
       artworkPath
     ),
-  addSongToPlaylist: (
+  addSongsToPlaylist: (
     playlistId: string,
-    songId: string
+    songIds: string[]
   ): PromiseFunctionReturn =>
-    ipcRenderer.invoke('app/addSongToPlaylist', playlistId, songId),
+    ipcRenderer.invoke('app/addSongsToPlaylist', playlistId, songIds),
 
   // $ APP PLAYLISTS DATA UPDATE
   removeSongFromPlaylist: (
@@ -308,8 +324,8 @@ export const api = {
     ipcRenderer.invoke('app/removeSongFromPlaylist', playlistId, songId),
   clearSongHistory: (): PromiseFunctionReturn =>
     ipcRenderer.invoke('app/clearSongHistory'),
-  removePlaylist: (playlistId: string) =>
-    ipcRenderer.invoke('app/removePlaylist', playlistId),
+  removePlaylists: (playlistIds: string[]) =>
+    ipcRenderer.invoke('app/removePlaylists', playlistIds),
 
   // $ APP PAGES STATE
   savePageSortingState: (pageType: PageSortTypes, state: unknown): void =>

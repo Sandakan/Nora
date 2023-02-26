@@ -10,8 +10,8 @@ import openSourceLicenses from '../../../../../open_source_licenses.txt';
 import appLicense from '../../../../../LICENSE.txt';
 import localReleaseNotes from '../../../../../release-notes.json';
 
-import AppIcon from '../../../../../assets/images/png/logo_light_mode.png';
-import SLFlag from '../../../../../assets/images/png/sl-flag.png';
+import AppIcon from '../../../../../assets/images/webp/logo_light_mode.webp';
+import SLFlag from '../../../../../assets/images/webp/sl-flag.webp';
 import Img from '../../Img';
 import ReleaseNotesPrompt from '../../ReleaseNotesPrompt/ReleaseNotesPrompt';
 import Hyperlink from '../../Hyperlink';

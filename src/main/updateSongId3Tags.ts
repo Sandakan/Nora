@@ -4,6 +4,7 @@ import NodeID3 from 'node-id3';
 import path from 'path';
 import { readFile } from 'fs/promises';
 import {
+  DEFAULT_FILE_URL,
   getAlbumsData,
   getArtistsData,
   getGenresData,
@@ -19,21 +20,37 @@ import {
   removeDefaultAppProtocolFromFilePath,
 } from './fs/resolveFilePaths';
 import log from './log';
-import { dataUpdateEvent } from './main';
+import {
+  dataUpdateEvent,
+  getSongsOutsideLibraryData,
+  // eslint-disable-next-line import/named
+  updateSongsOutsideLibraryData,
+} from './main';
 import { generateRandomId } from './utils/randomId';
-import { removeSongArtwork, storeArtworks } from './other/artworks';
+import {
+  createTempArtwork,
+  removeSongArtwork,
+  storeArtworks,
+} from './other/artworks';
 import generatePalette from './other/generatePalette';
 import { updateCachedLyrics } from './core/getSongLyrics';
 import parseLyrics from './utils/parseLyrics';
 import convertParsedLyricsToNodeID3Format from './core/convertParsedLyricsToNodeID3Format';
+import sendSongID3Tags from './core/sendSongId3Tags';
 
 const fetchArtworkBufferFromURL = async (url: string) => {
   try {
     const res = await fetch(url);
-    return res.ok && res.body
-      ? Buffer.from(await res.arrayBuffer())
-      : undefined;
+    if (res.ok && res.body) return Buffer.from(await res.arrayBuffer());
+
+    log(
+      `Error occurred when fetching artwork from url. HTTP Error Code:${res.status} - ${res.statusText}`,
+      undefined,
+      'ERROR'
+    );
+    return undefined;
   } catch (error) {
+    log('Error occurred when fetching artwork from url', { error }, 'ERROR');
     return undefined;
   }
 };
@@ -432,10 +449,179 @@ const manageArtworkUpdates = async (
   return { songPrevArtworkPaths, artworkBuffer, updatedSongData: prevSongData };
 };
 
-const updateSongId3Tags = async (
-  songId: string,
+const manageArtworkUpdatesOfSongsFromUnknownSource = async (
+  prevSongTags: SongTags,
+  newSongTags: SongTags
+) => {
+  const oldArtworkPath = prevSongTags.artworkPath
+    ? removeDefaultAppProtocolFromFilePath(prevSongTags.artworkPath)
+    : undefined;
+  const newArtworkPath = newSongTags.artworkPath
+    ? removeDefaultAppProtocolFromFilePath(newSongTags.artworkPath)
+    : undefined;
+
+  if (oldArtworkPath && newArtworkPath) {
+    if (oldArtworkPath === newArtworkPath) {
+      // artwork didn't change
+      return { artworkPath: newArtworkPath };
+    }
+    // song previously had an artwork and user changed it with a new artwork
+    const artworkBuffer = await generateArtworkBuffer(newArtworkPath);
+    const artworkPath = artworkBuffer
+      ? await createTempArtwork(artworkBuffer)
+      : undefined;
+
+    return { artworkPath, artworkBuffer };
+  }
+  if (typeof oldArtworkPath === 'string' && newArtworkPath === undefined) {
+    // user removed the song artwork
+    return { artworkPath: undefined };
+  }
+  if (typeof newArtworkPath === 'string' && oldArtworkPath === undefined) {
+    // song didn't have an artwork but user added a new song artwork
+    const artworkBuffer = await generateArtworkBuffer(newArtworkPath);
+    const artworkPath = artworkBuffer
+      ? await createTempArtwork(artworkBuffer)
+      : undefined;
+
+    return { artworkPath, artworkBuffer };
+  }
+
+  return { artworkPath: undefined };
+};
+
+const manageLyricsUpdates = (
   tags: SongTags,
-  sendUpdatedData = false
+  prevSongData?: SavableSongData
+) => {
+  const parsedLyrics = tags.lyrics ? parseLyrics(tags.lyrics) : undefined;
+
+  const unsynchronisedLyrics =
+    parsedLyrics && !parsedLyrics.isSynced
+      ? { language: 'ENG', text: parsedLyrics.unparsedLyrics }
+      : undefined;
+
+  const synchronisedLyrics = convertParsedLyricsToNodeID3Format(parsedLyrics);
+
+  if (parsedLyrics) {
+    updateCachedLyrics((cachedLyrics) => {
+      if (cachedLyrics && tags.lyrics) {
+        const { title } = cachedLyrics;
+        if (title === tags.title || title === prevSongData?.title) {
+          const { isSynced } = parsedLyrics;
+          const lyricsType: LyricsTypes = isSynced ? 'SYNCED' : 'ANY';
+
+          cachedLyrics.lyrics = parsedLyrics;
+          cachedLyrics.lyricsType = lyricsType;
+          cachedLyrics.copyright = parsedLyrics.copyright;
+          cachedLyrics.source = 'IN_SONG_LYRICS';
+          return cachedLyrics;
+        }
+      }
+      return undefined;
+    });
+  }
+
+  return { parsedLyrics, unsynchronisedLyrics, synchronisedLyrics };
+};
+
+const updateSongId3TagsOfUnknownSource = async (
+  songPath: string,
+  newSongTags: SongTags,
+  sendUpdatedData: boolean
+) => {
+  const songsOutsideLibraryData = getSongsOutsideLibraryData();
+
+  for (const songOutsideLibraryData of songsOutsideLibraryData) {
+    if (songOutsideLibraryData.path === songPath) {
+      const songPathWithoutDefaultUrl =
+        removeDefaultAppProtocolFromFilePath(songPath);
+
+      const oldSongTags = await sendSongID3Tags(songPath, false);
+
+      // ?  /////////// ARTWORK DATA FOR SONGS FROM UNKNOWN SOURCES /////////////////
+
+      const { artworkPath, artworkBuffer } =
+        await manageArtworkUpdatesOfSongsFromUnknownSource(
+          oldSongTags,
+          newSongTags
+        );
+      songOutsideLibraryData.artworkPath = artworkPath;
+
+      updateSongsOutsideLibraryData(
+        songOutsideLibraryData.songId,
+        songOutsideLibraryData
+      );
+
+      // ?  /////////// LYRICS DATA FOR SONGS FROM UNKNOWN SOURCES /////////////////
+      const { synchronisedLyrics, unsynchronisedLyrics } =
+        manageLyricsUpdates(newSongTags);
+
+      const id3Tags: NodeID3.Tags = {
+        title: newSongTags.title,
+        artist: newSongTags.artists?.map((artist) => artist.name).join(', '),
+        album: newSongTags.album?.title,
+        genre: newSongTags.genres?.map((genre) => genre.name).join(', '),
+        composer: newSongTags.composer,
+        year: newSongTags.releasedYear
+          ? `${newSongTags.releasedYear}`
+          : undefined,
+        image: artworkPath
+          ? removeDefaultAppProtocolFromFilePath(artworkPath)
+          : undefined,
+        synchronisedLyrics: synchronisedLyrics || [],
+        unsynchronisedLyrics,
+      };
+
+      await NodeID3.Promise.update(id3Tags, songPathWithoutDefaultUrl).catch(
+        (err) => {
+          log(
+            `FAILED TO UPDATE THE SONG FILE WITH THE NEW UPDATES. `,
+            { err },
+            'ERROR'
+          );
+          throw err;
+        }
+      );
+
+      if (sendUpdatedData) {
+        const updatedData: AudioPlayerData = {
+          songId: songOutsideLibraryData.songId,
+          title: newSongTags.title,
+          artists: newSongTags.artists?.map((artist) => ({
+            ...artist,
+            artistId: '',
+          })),
+          album: newSongTags.album
+            ? {
+                albumId: newSongTags.album?.albumId || '',
+                name: newSongTags.album.title,
+              }
+            : undefined,
+          artwork: artworkBuffer
+            ? Buffer.from(artworkBuffer).toString('base64')
+            : undefined,
+          artworkPath: artworkPath
+            ? path.join(DEFAULT_FILE_URL, artworkPath)
+            : undefined,
+          duration: newSongTags.duration,
+          isAFavorite: false,
+          path: songOutsideLibraryData.path,
+          isKnownSource: false,
+        };
+
+        return updatedData;
+      }
+    }
+  }
+  return undefined;
+};
+
+const updateSongId3Tags = async (
+  songIdOrPath: string,
+  tags: SongTags,
+  sendUpdatedData = false,
+  isKnownSource = true
 ) => {
   const songs = getSongsData();
   let artists = getArtistsData();
@@ -444,7 +630,29 @@ const updateSongId3Tags = async (
 
   const result: UpdateSongDataResult = { success: false };
 
+  if (!isKnownSource) {
+    try {
+      const data = await updateSongId3TagsOfUnknownSource(
+        songIdOrPath,
+        tags,
+        sendUpdatedData
+      );
+      if (data) result.updatedData = data;
+      result.success = true;
+
+      return result;
+    } catch (error) {
+      log(
+        'Error occurred when updating song id3 tags of a song from unknown source.',
+        { error, songIdOrPath },
+        'ERROR'
+      );
+      return result;
+    }
+  }
+
   if (Array.isArray(songs) && songs.length > 0) {
+    const songId = songIdOrPath;
     for (let x = 0; x < songs.length; x += 1) {
       if (songs[x].songId === songId) {
         log(`Started the song data updating procees of the song '${songId}'`);
@@ -487,34 +695,8 @@ const updateSongId3Tags = async (
         song = updatedGenreData.updatedSongData;
 
         // / / / / / / / SONG LYRICS / / / / / / /
-
-        const parsedLyrics = tags.lyrics ? parseLyrics(tags.lyrics) : undefined;
-
-        const unsynchronisedLyrics =
-          parsedLyrics && !parsedLyrics.isSynced
-            ? { language: 'ENG', text: parsedLyrics.unparsedLyrics }
-            : undefined;
-
-        const synchronisedLyrics =
-          convertParsedLyricsToNodeID3Format(parsedLyrics);
-
-        if (parsedLyrics) {
-          updateCachedLyrics((cachedLyrics) => {
-            if (cachedLyrics && tags.lyrics) {
-              const { title } = cachedLyrics;
-              if (title === tags.title || title === song.title) {
-                const { isSynced } = parsedLyrics;
-                const lyricsType: LyricsTypes = isSynced ? 'SYNCED' : 'ANY';
-
-                cachedLyrics.lyrics = parsedLyrics;
-                cachedLyrics.lyricsType = lyricsType;
-                cachedLyrics.copyright = parsedLyrics.copyright;
-                return cachedLyrics;
-              }
-            }
-            return undefined;
-          });
-        }
+        const { synchronisedLyrics, unsynchronisedLyrics } =
+          manageLyricsUpdates(tags, song);
 
         // / / / / / SONG FILE UPDATE PROCESS AND UPDATE FINALIZATION / / / / / /
         const artworkPaths = getSongArtworkPath(
@@ -532,7 +714,7 @@ const updateSongId3Tags = async (
           year: tags.releasedYear ? `${tags.releasedYear}` : undefined,
           image: removeDefaultAppProtocolFromFilePath(artworkPaths.artworkPath),
           unsynchronisedLyrics,
-          synchronisedLyrics,
+          synchronisedLyrics: synchronisedLyrics || [],
         };
 
         songs[x] = song;

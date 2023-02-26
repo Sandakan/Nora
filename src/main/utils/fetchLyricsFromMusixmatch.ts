@@ -6,6 +6,7 @@ import {
   MusixmatchLyricsLine,
   MusixmatchLyricsMetadata,
 } from '../../@types/musixmatch_lyrics_api';
+import log from '../log';
 import isLyricsSynced from './isLyricsSynced';
 import { repository, version } from '../../../package.json';
 import parseSongMetadataFromMusixmatchApiData from './parseSongMetadataFromMusixmatchApiData';
@@ -194,12 +195,13 @@ const fetchLyricsFromMusixmatch = async (
 
       return lyrics;
     }
+    throw new Error(
+      `Error occurred when fetching lyrics.\nHTTP Error Code : ${res.status} - ${res.statusText}`
+    );
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('error ocurred', error);
+    log('Error ocurred when fetching lyrics', { error }, 'ERROR');
     throw error;
   }
-  throw new Error('Error occurred');
 };
 
 export default fetchLyricsFromMusixmatch;

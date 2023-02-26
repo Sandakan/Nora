@@ -1,4 +1,3 @@
-/* eslint-disable react/no-array-index-key */
 import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
@@ -15,18 +14,13 @@ const Notification = (props: AppNotification) => {
   );
   const [dimensions, setDimensions] = React.useState({ width: 0, height: 0 });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const notificationPanelStyles: any = {};
   notificationPanelStyles['--loading-bar-width'] = `${dimensions.width - 35}px`;
 
   const removeNotification = React.useCallback(() => {
     if (notificationTimeoutIdRef.current)
       clearTimeout(notificationTimeoutIdRef.current);
-    if (
-      notificationRef.current &&
-      !userData?.preferences?.isReducedMotion
-      //  && !notificationRef.current.classList.contains('disappear-to-bottom')
-    ) {
+    if (notificationRef.current && !userData?.preferences?.isReducedMotion) {
       notificationRef.current.classList.add('disappear-to-bottom');
       notificationRef.current.addEventListener('animationend', () =>
         updateNotifications((currNotifications) =>
@@ -37,7 +31,11 @@ const Notification = (props: AppNotification) => {
       updateNotifications((currNotifications) =>
         currNotifications.filter((x) => x.id !== notificationData.id)
       );
-  }, [notificationData.id, updateNotifications]);
+  }, [
+    notificationData.id,
+    updateNotifications,
+    userData?.preferences?.isReducedMotion,
+  ]);
 
   React.useLayoutEffect(() => {
     if (notificationRef.current) {
@@ -88,9 +86,9 @@ const Notification = (props: AppNotification) => {
         {Array.isArray(notificationData.buttons) &&
           notificationData.buttons.length > 0 && (
             <div className="buttons-container flex justify-end">
-              {notificationData.buttons.map((button, index) => (
+              {notificationData.buttons.map((button) => (
                 <Button
-                  key={`notification-panel-button-${index}`}
+                  key={`notificationPanelButton-${button.label}`}
                   label={button.label}
                   iconName={button.iconName}
                   iconClassName={button.iconClassName}

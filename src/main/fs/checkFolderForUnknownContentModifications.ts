@@ -2,8 +2,8 @@
 import path from 'path';
 import fs from 'fs/promises';
 import {
+  getBlacklistData,
   getSongsData,
-  getUserData,
   supportedMusicExtensions,
 } from '../filesystem';
 import log from '../log';
@@ -20,7 +20,7 @@ saveAbortController(
 const getSongPathsRelativeToFolder = (folderPath: string) => {
   const songPaths = getSongsData()?.map((song) => song.path) ?? [];
 
-  const blacklistedSongPaths = getUserData().songBlacklist ?? [];
+  const blacklistedSongPaths = getBlacklistData().songBlacklist ?? [];
   if (Array.isArray(songPaths)) {
     const allSongPaths = songPaths.concat(blacklistedSongPaths);
     const relevantSongPaths = allSongPaths.filter(
@@ -56,7 +56,7 @@ const removeDeletedSongsFromLibrary = async (
   abortSignal: AbortSignal
 ) => {
   try {
-    await removeSongsFromLibrary(deletedSongPaths, abortSignal, false);
+    await removeSongsFromLibrary(deletedSongPaths, abortSignal);
   } catch (error) {
     log(
       `ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA`,

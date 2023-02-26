@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
-import LightModeLogo from '../../../../assets/images/logo_light_mode.png';
+import LightModeLogo from '../../../../assets/images/webp/logo_light_mode.webp';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { version } from '../../../../package.json';
@@ -47,8 +47,8 @@ const TitleBar = React.memo(() => {
             <span>
               Nora
               <sup
-                className="app-version ml-1 text-[0.6rem] font-semibold uppercase text-font-color-highlight dark:text-dark-font-color-highlight"
-                title={version}
+                className="app-version ml-1 cursor-pointer text-[0.6rem] font-semibold uppercase text-font-color-highlight dark:text-dark-font-color-highlight"
+                title={`v${version}`}
               >
                 stable
               </sup>
@@ -77,7 +77,7 @@ const TitleBar = React.memo(() => {
                 : 'invisible scale-50 opacity-0'
             }`}
             onClick={() => updatePageHistoryIndex('home')}
-            title="Go forward"
+            title="Go to Home"
           >
             <span className="material-icons-round-outlined text-xl leading-none">
               home
@@ -105,7 +105,7 @@ const TitleBar = React.memo(() => {
             <NetworkIndicator />
           </div>
           <div className="special-controls-container">
-            <ChangeThemeBtn />
+            {window.api.isInDevelopment && <ChangeThemeBtn />}
           </div>
         </div>
         <div
