@@ -105,7 +105,7 @@ const TitleBar = React.memo(() => {
             <NetworkIndicator />
           </div>
           <div className="special-controls-container">
-            <ChangeThemeBtn />
+            {window.api.isInDevelopment && <ChangeThemeBtn />}
           </div>
         </div>
         <div

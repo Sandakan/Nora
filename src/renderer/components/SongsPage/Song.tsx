@@ -586,7 +586,7 @@ const Song = React.forwardRef(
               title={`'${title}' is blacklisted.`}
             >
               <span
-                className={`material-icons-round text-2xl text-font-color-black dark:text-font-color-white ${
+                className={`material-icons-round mx-2 text-2xl text-font-color-black dark:text-font-color-white ${
                   currentSongData.songId === songId &&
                   'dark:!text-font-color-black'
                 } `}
@@ -617,7 +617,7 @@ const Song = React.forwardRef(
               src={artworkPaths.artworkPath}
               loading="lazy"
               alt="Song cover"
-              className={`max-h-full object-cover py-[0.1rem] transition-[filter] duration-300 group-hover:brightness-50 ${
+              className={`aspect-square max-h-full object-contain py-[0.1rem] transition-[filter] duration-300 group-hover:brightness-50 ${
                 isSongPlaying ? 'brightness-50' : ''
               }`}
             />

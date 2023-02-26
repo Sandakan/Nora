@@ -2019,6 +2019,7 @@ export default function App() {
       else if (e.ctrlKey && e.key === 's') toggleShuffling();
       else if (e.ctrlKey && e.key === 't') toggleRepeat();
       else if (e.ctrlKey && e.key === 'h') toggleIsFavorite();
+      else if (e.ctrlKey && e.key === 'y') window.api.changeAppTheme();
       else if (e.ctrlKey && e.key === 'l') {
         const currentlyActivePage =
           content.navigationHistory.history[

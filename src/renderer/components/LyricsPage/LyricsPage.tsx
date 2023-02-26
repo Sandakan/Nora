@@ -37,6 +37,8 @@ export const LyricsPage = () => {
 
   const lyricsLinesContainerRef = React.useRef<HTMLDivElement>(null);
   const [isAutoScrolling, setIsAutoScrolling] = React.useState(true);
+  // const [isOfflineLyricAvailable, setIsOfflineLyricsAvailable] =
+  React.useState(false);
   const { isOnline } = useNetworkConnectivity();
 
   const copyright = React.useMemo(() => {
@@ -71,6 +73,7 @@ export const LyricsPage = () => {
         duration: currentSongData.duration,
       })
       .then((res) => {
+        // if (res) setIsOfflineLyricsAvailable(true);
         setLyrics(res);
       });
   }, [
@@ -316,6 +319,7 @@ export const LyricsPage = () => {
                         className="show-online-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                         iconName="visibility"
                         clickHandler={showOfflineLyrics}
+                        // isDisabled={!isOfflineLyricAvailable}
                       />
                       <Button
                         key={4}

@@ -260,6 +260,7 @@ declare global {
     lyrics: LyricsData;
     lang?: string;
     copyright?: string;
+    // isOfflineLyricsAvailable: boolean;
   }
 
   interface SyncedLyricLine {

@@ -6,6 +6,7 @@ import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
+import debounce from 'renderer/utils/debounce';
 import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 import Button from '../Button';
 import Img from '../Img';
@@ -27,6 +28,7 @@ export default function MiniPlayer() {
   const { songPosition } = React.useContext(SongPositionContext);
   const [songPos, setSongPos] = React.useState(0);
   const isMouseDownRef = React.useRef(false);
+  const isMouseScrollRef = React.useRef(false);
   const seekbarRef = React.useRef(null as HTMLInputElement | null);
 
   const [isLyricsVisible, setIsLyricsVisible] = React.useState(false);
@@ -82,7 +84,11 @@ export default function MiniPlayer() {
   }%`;
 
   React.useEffect(() => {
-    if (seekbarRef.current && !isMouseDownRef.current) {
+    if (
+      seekbarRef.current &&
+      !isMouseDownRef.current &&
+      !isMouseScrollRef.current
+    ) {
       setSongPos(songPosition);
     }
   }, [songPosition]);
@@ -180,7 +186,16 @@ export default function MiniPlayer() {
         }`}
         id="miniPlayerLyricsContainer"
       >
-        {isLyricsVisible && lyricsComponents.length > 0 && lyricsComponents}
+        {isLyricsVisible &&
+          lyricsComponents.length > 0 &&
+          lyrics &&
+          lyrics.lyrics.isSynced &&
+          lyricsComponents}
+        {lyrics && !lyrics.lyrics.isSynced && (
+          <div className="flex h-full w-full items-center justify-center text-font-color-white">
+            No Synced Lyrics found.
+          </div>
+        )}
         {isLyricsVisible && lyrics === undefined && (
           <div className="flex h-full w-full items-center justify-center text-font-color-white">
             No Lyrics found.
@@ -368,6 +383,24 @@ export default function MiniPlayer() {
           ref={seekbarRef}
           style={seekBarCssProperties}
           title={Math.round(songPosition).toString()}
+          onWheel={(e) => {
+            e.preventDefault();
+
+            isMouseScrollRef.current = true;
+
+            const max = parseInt(e.currentTarget.max);
+            const incrementValue = e.deltaY > 0 ? -5 : 5;
+            let value = (songPos || 0) + incrementValue;
+
+            if (value > max) value = max;
+            if (value < 0) value = 0;
+            setSongPos(value);
+
+            debounce(() => {
+              isMouseScrollRef.current = false;
+              updateSongPosition(value ?? 0);
+            }, 250);
+          }}
         />
       </div>
     </div>

@@ -218,8 +218,11 @@ app
       { type: 'separator' },
       { label: 'Exit', type: 'normal', click: () => app.quit(), role: 'close' },
     ]);
+
     tray.setContextMenu(trayContextMenu);
     tray.setToolTip('Nora');
+
+    tray.addListener('click', () => tray.popUpContextMenu(trayContextMenu));
     tray.addListener('double-click', () => {
       if (mainWindow.isVisible()) mainWindow.hide();
       else mainWindow.show();
