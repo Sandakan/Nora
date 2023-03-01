@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
@@ -9,7 +8,7 @@ interface SideBarItems {
   icon: string;
   content: string;
   isActive: boolean;
-  handleClick: (id: string) => any;
+  handleClick: (_id: string) => any;
 }
 
 const SideBarItem = (props: SideBarItems) => {

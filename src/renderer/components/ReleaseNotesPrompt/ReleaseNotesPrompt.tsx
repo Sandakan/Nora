@@ -108,14 +108,14 @@ const ReleaseNotesPrompt = () => {
     if (releaseNotes.latestVersion.importantNotes) {
       const notes = releaseNotes.latestVersion.importantNotes.map((note) => {
         return (
-          <li className="latest-version-important-note max-w-[90%] font-medium">
+          <li className="latest-version-important-note mb-2 max-w-[90%] font-medium">
             {note}
           </li>
         );
       });
 
       return (
-        <ul className="my-8 flex list-disc items-center justify-center marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight">
+        <ul className="mt-8 mb-12 flex list-disc flex-col justify-center px-8 marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight">
           {notes}
         </ul>
       );

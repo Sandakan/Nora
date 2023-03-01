@@ -57,8 +57,14 @@ const sendAudioDataFromPath = async (
                 )) ?? defaultSongCoverPath
               : defaultSongCoverPath
           );
+
+          const title =
+            metadata.common.title ||
+            path.basename(songPath).split('.')[0] ||
+            'Unknown Title';
+
           const data: AudioPlayerData = {
-            title: metadata.common.title || 'unknown title',
+            title,
             artists: metadata.common.artists?.map((artistName) => ({
               artistId: '',
               name: artistName,

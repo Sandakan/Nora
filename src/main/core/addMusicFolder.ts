@@ -12,7 +12,7 @@ const addMusicFolder = async (
   resultsSortType?: SongSortTypes,
   abortSignal?: AbortSignal
 ): Promise<SongData[]> => {
-  log('Started the process of adding a new song to the music library');
+  log('Started the process of linking a music folder to the library.');
   const openDialogOptions: OpenDialogOptions = {
     title: 'Add a Music Folder',
     buttonLabel: 'Add folder',

@@ -7,7 +7,6 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 
 type Props = {
-  songId: string;
   songTitle: string;
   songArtists?: {
     artistId?: string | undefined;
@@ -15,6 +14,7 @@ type Props = {
     artworkPath?: string | undefined;
     onlineArtworkPaths?: OnlineArtistArtworks | undefined;
   }[];
+  songPath: string;
   duration: number;
   songLyrics?: string;
   // eslint-disable-next-line no-unused-vars
@@ -26,12 +26,12 @@ const SongLyricsEditor = (props: Props) => {
   const { addNewNotifications } = React.useContext(AppUpdateContext);
 
   const {
-    songId,
     songTitle,
     songArtists,
     songLyrics,
     updateSongInfo,
     duration,
+    songPath,
   } = props;
   const isLyricsSynced = React.useMemo(
     () => syncedLyricsRegex.test(songLyrics || ''),
@@ -98,7 +98,7 @@ const SongLyricsEditor = (props: Props) => {
                   songTitle,
                   songArtists: songArtists?.map((artist) => artist.name),
                   duration,
-                  songId,
+                  songPath,
                 },
                 'UN_SYNCED',
                 'ONLINE_ONLY'
@@ -145,7 +145,7 @@ const SongLyricsEditor = (props: Props) => {
                   songTitle,
                   songArtists: songArtists?.map((artist) => artist.name),
                   duration,
-                  songId,
+                  songPath,
                 },
                 'SYNCED',
                 'ONLINE_ONLY'

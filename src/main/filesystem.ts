@@ -706,9 +706,22 @@ function flattenPathArrays<Type extends string[][]>(lists: Type) {
 function getDirectories(srcpath: string) {
   try {
     const dirs = fsSync.readdirSync(srcpath);
-    return dirs
-      .map((file) => path.join(srcpath, file))
-      .filter((filePath) => fsSync.statSync(filePath).isDirectory());
+    const dirsWithFullPaths = dirs.map((file) => path.join(srcpath, file));
+    const filteredDirs = dirsWithFullPaths.filter((filePath) => {
+      try {
+        const isADirectory = fsSync.statSync(filePath).isDirectory();
+        return isADirectory;
+      } catch (error) {
+        log(
+          'Error occurred when reading a file path to detect whether its a directory.',
+          { filePath },
+          'ERROR'
+        );
+        return false;
+      }
+    });
+
+    return filteredDirs;
   } catch (error) {
     log(
       'Error occurred when parsing directories of a path.',

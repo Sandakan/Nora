@@ -45,7 +45,7 @@ export default function MiniPlayer() {
           songArtists: Array.isArray(currentSongData.artists)
             ? currentSongData.artists.map((artist) => artist.name)
             : [],
-          songId: currentSongData.songId,
+          songPath: currentSongData.path,
           duration: currentSongData.duration,
         })
         .then((res) => setLyrics(res))
@@ -54,6 +54,7 @@ export default function MiniPlayer() {
   }, [
     currentSongData.artists,
     currentSongData.duration,
+    currentSongData.path,
     currentSongData.songId,
     currentSongData.title,
     isLyricsVisible,
@@ -278,7 +279,11 @@ export default function MiniPlayer() {
             </span>
             <span
               className="close-btn flex cursor-pointer items-center p-2 text-font-color-white hover:bg-font-color-crimson dark:text-font-color-white dark:hover:bg-font-color-crimson"
-              onClick={() => window.api.closeApp()}
+              onClick={() => {
+                if (userData && userData.preferences.hideWindowOnClose)
+                  window.api.hideApp();
+                else window.api.closeApp();
+              }}
               title="Close"
             >
               <span className="material-icons-round text-xl">close</span>{' '}

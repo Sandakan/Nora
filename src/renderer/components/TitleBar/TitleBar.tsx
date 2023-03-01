@@ -115,7 +115,6 @@ const TitleBar = React.memo(() => {
           <span
             className="minimize-btn flex h-full items-center justify-center px-3 text-center text-xl transition-[background] ease-in-out hover:bg-[hsla(0deg,0%,80%,0.5)]"
             onClick={minimize}
-            // onKeyDown={minimize}
             role="button"
             tabIndex={0}
             title="Minimize"
@@ -127,7 +126,6 @@ const TitleBar = React.memo(() => {
           <span
             className="maximize-btn flex h-full items-center justify-center px-3 text-center text-xl transition-[background] ease-in-out hover:bg-[hsla(0deg,0%,80%,0.5)]"
             onClick={maximize}
-            // onKeyDown={maximize}
             role="button"
             tabIndex={0}
             title="Maximize"
@@ -139,7 +137,6 @@ const TitleBar = React.memo(() => {
           <span
             className="close-btn flex h-full items-center justify-center px-3 text-center text-xl transition-[background] ease-in-out hover:bg-font-color-crimson hover:text-font-color-white"
             onClick={close}
-            // onKeyDown={close}
             role="button"
             tabIndex={0}
             title="Close"

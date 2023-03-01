@@ -39,7 +39,7 @@ const Folder = (props: Props) => {
   const { folderName, prevDir } = React.useMemo(() => {
     if (folderPath) {
       const path = folderPath.split('\\');
-      const name = path.pop() || 'Unknown Folder Name';
+      const name = path.pop() || folderPath;
 
       return { prevDir: path.join('\\'), folderName: name };
     }

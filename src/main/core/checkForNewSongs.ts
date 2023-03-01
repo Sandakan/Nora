@@ -6,7 +6,6 @@ import log from '../log';
 const checkForNewSongs = async () => {
   const { musicFolders } = getUserData();
   const songs = getSongsData();
-  log(`${musicFolders.length} music folders found in user data.`);
 
   if (Array.isArray(musicFolders) && Array.isArray(songs)) {
     for (let i = 0; i < musicFolders.length; i += 1) {

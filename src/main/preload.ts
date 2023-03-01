@@ -164,8 +164,8 @@ export const api = {
       lyricsRequestType
     ),
 
-  saveLyricsToSong: (songId: string, lyrics: SongLyrics) =>
-    ipcRenderer.invoke('app/saveLyricsToSong', songId, lyrics),
+  saveLyricsToSong: (songPath: string, lyrics: SongLyrics) =>
+    ipcRenderer.invoke('app/saveLyricsToSong', songPath, lyrics),
 
   // $ APP MESSAGES
   getMessageFromMain: (

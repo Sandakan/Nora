@@ -2054,6 +2054,12 @@ export default function App() {
         updatePageHistoryIndex('decrement');
       else if (e.altKey && e.key === 'ArrowRight')
         updatePageHistoryIndex('increment');
+      // function key combinations
+      else if (e.key === 'F5') {
+        e.preventDefault();
+        window.api.restartRenderer(`User request through F5.`);
+      } else if (e.key === 'F12' && !window.api.isInDevelopment)
+        window.api.openDevtools();
     },
     [
       updateVolume,
@@ -2099,13 +2105,10 @@ export default function App() {
       const { supportedMusicExtensions } = packageFile.appPreferences;
 
       const supportedExtensionComponents = supportedMusicExtensions.map(
-        (ext, index) => (
-          <>
-            <span className="underline">{ext}</span>
-            {index > 0 && index !== supportedMusicExtensions.length - 1 && (
-              <span className="mr-1">,</span>
-            )}
-          </>
+        (ext) => (
+          <span className="mx-2">
+            &bull; <span className="hover:underline">{ext}</span>
+          </span>
         )
       );
 
@@ -2120,12 +2123,13 @@ export default function App() {
             <span className="underline">{fileType}</span> file which is not
             supported by this app.
             <br />
-            Currently we only support {supportedExtensionComponents} songs.
+            Currently we only support following audio formats.
+            <div className="mt-1">{supportedExtensionComponents}</div>
           </div>
           <div className="buttons-container mt-12 flex justify-end">
             <Button
               label="OK"
-              className="ok-btn w-[10rem] rounded-md !bg-background-color-3 text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
+              className="ok-btn w-[10rem] rounded-md !bg-background-color-3 !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
               clickHandler={() => {
                 changePromptMenuData(false);
               }}

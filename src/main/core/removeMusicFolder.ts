@@ -48,12 +48,10 @@ const removeMusicFolder = async (folderPath: string): Promise<boolean> => {
 
       if (songPathsRelatedToFolders) {
         log(
-          `User deleted ${path.basename(
-            folderPath
-          )} folder from the filesystem.\nDIRECTORY : ${folderPath}`
+          `User deleted ${pathBaseName} folder from the filesystem.\nDIRECTORY : ${folderPath}`
         );
         sendMessageToRenderer(
-          `'${path.basename(folderPath)}' folder got deleted from the system. ${
+          `'${pathBaseName}' folder got deleted from the system. ${
             songPathsRelatedToFolders.length > 0
               ? `${songPathsRelatedToFolders.length} songs related to that folder will be removed from the library.`
               : 'No songs found related to the folder. Library will be unaffected.'

@@ -248,7 +248,7 @@ declare global {
   interface LyricsRequestTrackInfo {
     songTitle: string;
     songArtists?: string[];
-    songId?: string;
+    songPath: string;
     duration: number;
   }
 
@@ -260,7 +260,7 @@ declare global {
     lyrics: LyricsData;
     lang?: string;
     copyright?: string;
-    // isOfflineLyricsAvailable: boolean;
+    isOfflineLyricsAvailable: boolean;
   }
 
   interface SyncedLyricLine {

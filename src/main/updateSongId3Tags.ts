@@ -515,6 +515,8 @@ const manageLyricsUpdates = (
           cachedLyrics.lyricsType = lyricsType;
           cachedLyrics.copyright = parsedLyrics.copyright;
           cachedLyrics.source = 'IN_SONG_LYRICS';
+          cachedLyrics.isOfflineLyricsAvailable = true;
+
           return cachedLyrics;
         }
       }

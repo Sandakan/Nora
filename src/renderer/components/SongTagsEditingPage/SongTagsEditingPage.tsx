@@ -59,7 +59,7 @@ function SongTagsEditingPage() {
             console.log(res);
             const data = {
               ...res,
-              title: res.title ?? 'unknown title',
+              title: res.title,
             };
             defaultValuesRef.current = data;
             setSongInfo(data);
@@ -345,6 +345,14 @@ function SongTagsEditingPage() {
     hasDataChanged(defaultValuesRef.current, songInfo)
   ).every((x: boolean) => x);
 
+  const songNameFromPath = React.useMemo(() => {
+    if (songPath) {
+      const fileName = songPath.split('\\').at(-1);
+      if (fileName) return fileName?.replace(/\.\w{3,5}$/gm, '');
+    }
+    return 'Unknown Title';
+  }, [songPath]);
+
   return (
     <MainContainer className="main-container appear-from-bottom id3-tags-updater-container">
       <>
@@ -368,7 +376,7 @@ function SongTagsEditingPage() {
               />
               <div className="song-info-container flex w-[70%] flex-col justify-center">
                 <div className="song-title mb-2 text-4xl">
-                  {songInfo.title || 'Unknown Title'}
+                  {songInfo.title || songNameFromPath}
                   {!isKnownSource && (
                     <span
                       className="material-icons-round-outlined ml-6 cursor-help text-2xl text-font-color-highlight hover:underline dark:text-dark-font-color-highlight"
@@ -435,9 +443,9 @@ function SongTagsEditingPage() {
               <hr className="horizontal-rule my-8 h-[0.1rem] w-[95%] border-0 bg-background-color-2 dark:bg-dark-background-color-2" />
               {/* SONG LYRICS EDITOR */}
               <SongLyricsEditor
-                songId={songId}
                 songTitle={songInfo.title}
                 songArtists={songInfo.artists}
+                songPath={songPath}
                 duration={songInfo.duration}
                 songLyrics={songInfo.lyrics}
                 updateSongInfo={updateSongInfo}

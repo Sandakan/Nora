@@ -69,11 +69,12 @@ const PlaylistInfoPage = () => {
 
   const [playlistData, setPlaylistData] = React.useState({} as Playlist);
   const [playlistSongs, setPlaylistSongs] = React.useState([] as SongData[]);
-  const [sortingOrder, setSortingOrder] =
-    React.useState<SongSortTypes>('addedOrder');
+  const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>(
+    currentlyActivePage?.data?.sortingOrder || 'addedOrder'
+  );
 
   const fetchPlaylistData = React.useCallback(() => {
-    if (currentlyActivePage.data.playlistId) {
+    if (currentlyActivePage.data?.playlistId) {
       window.api
         .getPlaylistData([currentlyActivePage.data.playlistId])
         .then((res) => {

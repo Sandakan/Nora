@@ -76,8 +76,12 @@ const reducer = (
 };
 
 const HomePage = () => {
-  const { updateContextMenuData, changePromptMenuData, addNewNotifications } =
-    React.useContext(AppUpdateContext);
+  const {
+    updateContextMenuData,
+    changeCurrentActivePage,
+    changePromptMenuData,
+    addNewNotifications,
+  } = React.useContext(AppUpdateContext);
 
   const [content, dispatch] = React.useReducer(reducer, {
     latestSongs: [],
@@ -470,8 +474,19 @@ const HomePage = () => {
         {content.latestSongs.length > 0 && content.latestSongs[0] !== null && (
           <SecondaryContainer className="recently-added-songs-container appear-from-bottom h-fit max-h-full flex-col pb-8 pl-8">
             <>
-              <div className="title-container mt-1 mb-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+              <div className="title-container my-4 flex items-center justify-between text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
                 Recently Added Songs
+                <Button
+                  label="Show All"
+                  tooltipLabel="Opens 'Songs' with 'Newest' sort option."
+                  iconName="apps"
+                  className="show-all-btn text-sm font-normal"
+                  clickHandler={() =>
+                    changeCurrentActivePage('Songs', {
+                      sortingOrder: 'dateAddedAscending',
+                    })
+                  }
+                />
               </div>
               <div className="songs-container grid grid-cols-3 grid-rows-1 gap-2 pr-2">
                 {latestSongComponents}
@@ -482,8 +497,20 @@ const HomePage = () => {
         {recentlyPlayedSongs.length > 0 && (
           <SecondaryContainer className="recently-played-songs-container appear-from-bottom flex h-fit max-h-full flex-col pb-8 pl-8">
             <>
-              <div className="title-container mt-1 mb-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+              <div className="title-container mt-1 mb-4 flex items-center justify-between text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
                 Recently Played Songs
+                <Button
+                  label="Show All"
+                  tooltipLabel="Opens 'Songs' with 'Newest' sort option."
+                  iconName="apps"
+                  className="show-all-btn text-sm font-normal"
+                  clickHandler={() =>
+                    changeCurrentActivePage('PlaylistInfo', {
+                      playlistId: 'History',
+                      sortingOrder: 'addedOrder',
+                    })
+                  }
+                />
               </div>
               <div className="songs-container grid grid-cols-3 grid-rows-1 gap-2 pr-2">
                 {recentlyPlayedSongs}

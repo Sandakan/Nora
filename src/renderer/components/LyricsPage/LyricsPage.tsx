@@ -69,7 +69,7 @@ export const LyricsPage = () => {
         songArtists: Array.isArray(currentSongData.artists)
           ? currentSongData.artists.map((artist) => artist.name)
           : [],
-        songId: currentSongData.songId,
+        songPath: currentSongData.path,
         duration: currentSongData.duration,
       })
       .then((res) => {
@@ -80,6 +80,7 @@ export const LyricsPage = () => {
     addNewNotifications,
     currentSongData.artists,
     currentSongData.duration,
+    currentSongData.path,
     currentSongData.songId,
     currentSongData.title,
   ]);
@@ -128,7 +129,7 @@ export const LyricsPage = () => {
             songArtists: Array.isArray(currentSongData.artists)
               ? currentSongData.artists.map((artist) => artist.name)
               : [],
-            songId: currentSongData.songId,
+            songPath: currentSongData.path,
             duration: currentSongData.duration,
           },
           'ANY',
@@ -140,7 +141,7 @@ export const LyricsPage = () => {
     [
       currentSongData.artists,
       currentSongData.duration,
-      currentSongData.songId,
+      currentSongData.path,
       currentSongData.title,
     ]
   );
@@ -155,7 +156,7 @@ export const LyricsPage = () => {
             songArtists: Array.isArray(currentSongData.artists)
               ? currentSongData.artists.map((artist) => artist.name)
               : [],
-            songId: currentSongData.songId,
+            songPath: currentSongData.path,
             duration: currentSongData.duration,
           },
           'ANY',
@@ -167,7 +168,7 @@ export const LyricsPage = () => {
     [
       currentSongData.artists,
       currentSongData.duration,
-      currentSongData.songId,
+      currentSongData.path,
       currentSongData.title,
     ]
   );
@@ -177,13 +178,14 @@ export const LyricsPage = () => {
       if (lyrics) {
         setIsDisabled(true);
         window.api
-          .saveLyricsToSong(currentSongData.songId, lyrics)
+          .saveLyricsToSong(currentSongData.path, lyrics)
           .then(() => {
             setLyrics((prevData) => {
               if (prevData) {
                 return {
                   ...prevData,
                   source: 'IN_SONG_LYRICS',
+                  isOfflineLyricsAvailable: true,
                 } as SongLyrics;
               }
               return undefined;
@@ -204,7 +206,7 @@ export const LyricsPage = () => {
           .finally(() => setIsDisabled(false));
       }
     },
-    [addNewNotifications, currentSongData.songId, lyrics]
+    [addNewNotifications, currentSongData.path, lyrics]
   );
 
   const refreshOnlineLyrics = React.useCallback(
@@ -217,7 +219,7 @@ export const LyricsPage = () => {
             songArtists: Array.isArray(currentSongData.artists)
               ? currentSongData.artists.map((artist) => artist.name)
               : [],
-            songId: currentSongData.songId,
+            songPath: currentSongData.path,
             duration: currentSongData.duration,
           },
           'ANY',
@@ -229,7 +231,7 @@ export const LyricsPage = () => {
     [
       currentSongData.artists,
       currentSongData.duration,
-      currentSongData.songId,
+      currentSongData.path,
       currentSongData.title,
     ]
   );
@@ -251,7 +253,7 @@ export const LyricsPage = () => {
                     {lyrics.source === 'IN_SONG_LYRICS' ? 'Offline' : 'Online'}{' '}
                     Lyrics for '{currentSongData.title}'
                   </span>
-                  {lyrics.source !== 'IN_SONG_LYRICS' && (
+                  {!lyrics.isOfflineLyricsAvailable && (
                     <span
                       className="material-icons-round-outlined ml-4 cursor-pointer text-base"
                       title="No offline lyrics found in the song."
@@ -306,7 +308,7 @@ export const LyricsPage = () => {
                     <>
                       <Button
                         key={5}
-                        tooltipLabel="Refresh Lyrics"
+                        tooltipLabel="Refresh Online Lyrics"
                         pendingAnimationOnDisabled
                         className="refresh-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                         iconName="refresh"
@@ -315,22 +317,18 @@ export const LyricsPage = () => {
                       <Button
                         key={3}
                         label="Show saved lyrics"
-                        pendingAnimationOnDisabled
                         className="show-online-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                         iconName="visibility"
                         clickHandler={showOfflineLyrics}
-                        // isDisabled={!isOfflineLyricAvailable}
+                        isDisabled={!lyrics.isOfflineLyricsAvailable}
                       />
                       <Button
                         key={4}
                         label="Save lyrics"
-                        pendingAnimationOnDisabled={
-                          currentSongData.isKnownSource
-                        }
+                        pendingAnimationOnDisabled
                         className="save-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                         iconName="save"
                         clickHandler={saveOnlineLyrics}
-                        isDisabled={!currentSongData.isKnownSource}
                       />
                     </>
                   )}
