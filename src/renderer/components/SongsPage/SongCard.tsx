@@ -380,24 +380,6 @@ const SongCard = (props: SongCardProp) => {
           if (isBlacklisted)
             window.api
               .restoreBlacklistedSongs([songId])
-              .then(() =>
-                addNewNotifications([
-                  {
-                    id: `${title}RestoredFromBlacklisted`,
-                    delay: 5000,
-                    content: (
-                      <span>
-                        &apos;{title}&apos; restored from the blacklist.
-                      </span>
-                    ),
-                    icon: (
-                      <span className="material-icons-round">
-                        settings_backup_restore
-                      </span>
-                    ),
-                  },
-                ])
-              )
               .catch((err) => console.error(err));
           else if (userData?.preferences.doNotShowBlacklistSongConfirm)
             window.api

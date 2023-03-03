@@ -256,6 +256,15 @@ export const api = {
     ipcRenderer.invoke('app/blacklistFolders', folderPaths),
   restoreBlacklistedFolders: (folderPaths: string[]): Promise<void> =>
     ipcRenderer.invoke('app/restoreBlacklistedFolders', folderPaths),
+  toggleBlacklistedFolders: (
+    folderPaths: string[],
+    isBlacklistFolder?: boolean
+  ): Promise<void> =>
+    ipcRenderer.invoke(
+      'app/toggleBlacklistedFolders',
+      folderPaths,
+      isBlacklistFolder
+    ),
 
   // $ ARTISTS DATA
   getArtistData: (

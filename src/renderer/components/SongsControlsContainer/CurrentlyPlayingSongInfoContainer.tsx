@@ -135,7 +135,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
   );
 
   return (
-    <div className="current-playing-song-info-container relative flex w-[30%] content-center items-center">
+    <div className="current-playing-song-info-container relative flex w-[30%] items-center">
       <div
         className={`song-cover-container relative mr-2 flex h-full w-[25%] items-center justify-center overflow-hidden p-2 lg:hidden 
              

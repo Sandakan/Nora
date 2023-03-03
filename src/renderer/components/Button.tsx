@@ -78,7 +78,6 @@ const Button = React.memo((props: ButtonProps) => {
       onClick={(e) =>
         !isButtonDisabled && clickHandler(e, updateIsDisabled, updateIsPending)
       }
-      tabIndex={0}
       title={tooltipLabel || label}
       disabled={isButtonDisabled}
       onContextMenu={onContextMenu}

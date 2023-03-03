@@ -322,6 +322,7 @@ const removeSongsFromLibrary = async (
 
   const updatedSongs: SavableSongData[] = [];
   // We can't use array filter method here because it uses callbacks. Because we need to use promises, using async callbacks can give unexpected results.
+  let index = 0;
   for (let i = 0; i < songs.length; i += 1) {
     if (abortSignal?.aborted) {
       log(
@@ -339,7 +340,8 @@ const removeSongsFromLibrary = async (
     if (!isThisTheSong) {
       updatedSongs.push(song);
       continue;
-    }
+    } else index += 1;
+
     const data = await removeSong(
       song,
       userData,
@@ -358,6 +360,12 @@ const removeSongsFromLibrary = async (
     isArtistRemoved = data.isArtistRemoved;
     isPlaylistRemoved = data.isPlaylistRemoved;
     isGenreRemoved = data.isGenreRemoved;
+
+    sendMessageToRenderer(
+      `Removed ${index} out of ${songPaths.length} songs.`,
+      'SONG_REMOVE_PROCESS_UPDATE',
+      { max: songPaths.length, value: index }
+    );
   }
 
   if (updatedSongs && artists && albums) {

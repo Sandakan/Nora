@@ -436,22 +436,14 @@ const HomePage = () => {
                 addNewNotifications([
                   {
                     id: 'testNotification',
-                    delay: 60000,
+                    delay: 5 * 60 * 1000,
                     content: <>This is a notification with a very long text.</>,
                     icon: (
                       <span className="material-icons-round icon">
                         notifications_active
                       </span>
                     ),
-                    buttons: [
-                      {
-                        label: 'Button',
-                        iconName: 'sync',
-                        className:
-                          '!bg-background-color-3 dark:!bg-dark-background-color-3 !text-font-color-black dark:!text-font-color-black !font-light',
-                        clickHandler: () => true,
-                      },
-                    ],
+                    type: 'WITH_PROGRESS_BAR',
                   },
                 ]),
             },

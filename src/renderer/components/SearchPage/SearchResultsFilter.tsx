@@ -7,7 +7,7 @@ import React from 'react';
 interface SearchResultsFilterProp {
   filterType: SearchFilters;
   isCurrentActiveFilter: boolean;
-  changeActiveFilter: (filterType: SearchFilters) => void;
+  changeActiveFilter: (_filterType: SearchFilters) => void;
 }
 
 const SearchResultsFilter = React.memo((props: SearchResultsFilterProp) => {
@@ -31,7 +31,7 @@ const SearchResultsFilter = React.memo((props: SearchResultsFilterProp) => {
   }, [props.filterType]);
   return (
     <li
-      className={`appear-from-bottom mr-3 flex w-fit cursor-pointer list-none items-center rounded-3xl py-1 px-4 text-font-color-black transition-[width] duration-200 ${
+      className={`appear-from-bottom mr-3 flex w-fit cursor-pointer list-none items-center rounded-3xl py-1 px-4 text-font-color-black transition-[width,background,color] duration-200 ${
         props.isCurrentActiveFilter
           ? 'active bg-background-color-3 dark:bg-dark-background-color-3 dark:text-font-color-black'
           : 'bg-background-color-2 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:hover:text-font-color-black'

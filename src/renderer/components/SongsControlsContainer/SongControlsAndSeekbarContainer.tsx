@@ -7,6 +7,12 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
 import calculateTime from 'renderer/utils/calculateTime';
 import debounce from 'renderer/utils/debounce';
+import { getItem } from 'renderer/utils/localStorage';
+
+let scrollIncrement = getItem('seekbarScrollInterval');
+document.addEventListener('localStorage', () => {
+  scrollIncrement = getItem('seekbarScrollInterval');
+});
 
 const SongControlsAndSeekbarContainer = () => {
   const {
@@ -246,12 +252,11 @@ const SongControlsAndSeekbarContainer = () => {
               setSongPos(e.currentTarget.valueAsNumber ?? 0);
             }}
             onWheel={(e) => {
-              e.preventDefault();
-
               isMouseScrollRef.current = true;
 
               const max = parseInt(e.currentTarget.max);
-              const incrementValue = e.deltaY > 0 ? -5 : 5;
+              const incrementValue =
+                e.deltaY > 0 ? -scrollIncrement : scrollIncrement;
               let value = (songPos || 0) + incrementValue;
 
               if (value > max) value = max;

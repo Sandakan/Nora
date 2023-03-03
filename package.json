@@ -248,17 +248,6 @@
       "node_modules",
       "package.json"
     ],
-    "fileAssociations": [
-      {
-        "ext": [
-          "mp3",
-          "wav",
-          "ogg"
-        ],
-        "role": "Editor",
-        "icon": "./assets/images/noraAssociatedFileIcon.ico"
-      }
-    ],
     "protocols": {
       "name": "nora-protocol",
       "schemes": [
@@ -313,6 +302,17 @@
     "win": {
       "target": [
         "nsis"
+      ],
+      "fileAssociations": [
+        {
+          "ext": [
+            "mp3",
+            "wav",
+            "ogg"
+          ],
+          "role": "Editor",
+          "icon": "./assets/images/noraAssociatedFileIcon.ico"
+        }
       ]
     },
     "linux": {

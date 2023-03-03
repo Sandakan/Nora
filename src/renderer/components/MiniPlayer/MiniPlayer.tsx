@@ -7,14 +7,26 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
 import debounce from 'renderer/utils/debounce';
+import { getItem } from 'renderer/utils/localStorage';
 import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 import Button from '../Button';
 import Img from '../Img';
 import LyricLine from '../LyricsPage/LyricLine';
 
+let scrollIncrement = getItem('seekbarScrollInterval');
+document.addEventListener('localStorage', () => {
+  scrollIncrement = getItem('seekbarScrollInterval');
+});
+
 export default function MiniPlayer() {
-  const { isMiniPlayer, currentSongData, isCurrentSongPlaying, userData } =
-    React.useContext(AppContext);
+  const {
+    isMiniPlayer,
+    currentSongData,
+    isCurrentSongPlaying,
+    userData,
+    isMuted,
+    volume,
+  } = React.useContext(AppContext);
   const {
     updateMiniPlayerStatus,
     toggleSongPlayback,
@@ -23,6 +35,8 @@ export default function MiniPlayer() {
     updateUserData,
     updateSongPosition,
     toggleIsFavorite,
+    toggleMutedState,
+    updateVolume,
   } = React.useContext(AppUpdateContext);
 
   const { songPosition } = React.useContext(SongPositionContext);
@@ -35,6 +49,11 @@ export default function MiniPlayer() {
   const [lyrics, setLyrics] = React.useState<SongLyrics | null | undefined>(
     null
   );
+
+  const volumeSliderRef = React.useRef<HTMLInputElement>(null);
+
+  const volumeBarCssProperties: any = {};
+  volumeBarCssProperties['--volume-before-width'] = `${volume}%`;
 
   React.useEffect(() => {
     if (isLyricsVisible) {
@@ -346,31 +365,67 @@ export default function MiniPlayer() {
           />
         </div>
         <div
-          className={`song-info-container flex h-1/2 w-full flex-col items-center justify-center px-4 text-center text-font-color-white transition-[visibility,opacity] ${
+          className={`song-info-container group/info flex h-1/2 w-full flex-col items-center justify-center px-4 text-center text-font-color-white transition-[visibility,opacity] ${
             isLyricsVisible
               ? 'invisible opacity-0 group-hover:visible group-hover:opacity-100'
               : ''
           } ${!isCurrentSongPlaying ? '!visible !opacity-100' : ''}`}
         >
-          <div
-            className="song-title max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-xl"
-            title={currentSongData.title}
-          >
-            {currentSongData.title}
+          <div className="relative flex w-full flex-col items-center justify-center transition-[filter,opacity] group-hover/info:pointer-events-none group-hover/info:opacity-50 group-hover/info:blur-sm">
+            <div
+              className="song-title max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-xl"
+              title={currentSongData.title}
+            >
+              {currentSongData.title}
+            </div>
+            <div
+              className="song-artists text-sm text-font-color-white/80"
+              title={currentSongData.artists
+                ?.map((artist) => artist.name)
+                .join(', ')}
+            >
+              {currentSongData.songId && Array.isArray(currentSongData.artists)
+                ? currentSongData.artists?.length > 0
+                  ? currentSongData.artists
+                      .map((artist) => artist.name)
+                      .join(', ')
+                  : 'Unknown Artist'
+                : ''}
+            </div>
           </div>
-          <div
-            className="song-artists text-sm text-font-color-white/80"
-            title={currentSongData.artists
-              ?.map((artist) => artist.name)
-              .join(', ')}
-          >
-            {currentSongData.songId && Array.isArray(currentSongData.artists)
-              ? currentSongData.artists?.length > 0
-                ? currentSongData.artists
-                    .map((artist) => artist.name)
-                    .join(', ')
-                : 'Unknown Artist'
-              : ''}
+          <div className="pointer-events-none absolute flex items-center opacity-0 transition-opacity group-hover/info:pointer-events-auto group-hover/info:opacity-100">
+            <span
+              title="Mute/Unmute (Ctrl + M)"
+              className={`material-icons-round icon mr-4 cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white ${
+                isMuted &&
+                '!text-font-color-highlight !opacity-100 dark:!text-dark-font-color-highlight'
+              }`}
+              onClick={() => toggleMutedState(!isMuted)}
+            >
+              {isMuted ? 'volume_off' : 'volume_up'}
+            </span>
+            <input
+              type="range"
+              id="volumeSlider"
+              className="relative float-left m-0 h-6 w-full appearance-none rounded-lg bg-[transparent] p-0 outline-none before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--volume-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
+              min="0"
+              max="100"
+              value={volume}
+              onChange={(e) => updateVolume(Number(e.target.value))}
+              aria-label="Volume slider"
+              style={volumeBarCssProperties}
+              title={Math.round(volume).toString()}
+              onWheel={(e) => {
+                const incrementValue =
+                  e.deltaY > 0 ? -scrollIncrement : scrollIncrement;
+                let value = volume + incrementValue;
+
+                if (value > 100) value = 100;
+                if (value < 0) value = 0;
+                updateVolume(value);
+              }}
+              ref={volumeSliderRef}
+            />
           </div>
         </div>
         <input
@@ -389,12 +444,11 @@ export default function MiniPlayer() {
           style={seekBarCssProperties}
           title={Math.round(songPosition).toString()}
           onWheel={(e) => {
-            e.preventDefault();
-
             isMouseScrollRef.current = true;
 
             const max = parseInt(e.currentTarget.max);
-            const incrementValue = e.deltaY > 0 ? -5 : 5;
+            const incrementValue =
+              e.deltaY > 0 ? -scrollIncrement : scrollIncrement;
             let value = (songPos || 0) + incrementValue;
 
             if (value > max) value = max;

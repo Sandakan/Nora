@@ -20,12 +20,13 @@ import PromptMenu from './components/PromptMenu/PromptMenu';
 import ContextMenu from './components/ContextMenu/ContextMenu';
 import MiniPlayer from './components/MiniPlayer/MiniPlayer';
 import ErrorPrompt from './components/ErrorPrompt';
-import Button, { ButtonProps } from './components/Button';
+import Button from './components/Button';
 import ReleaseNotesPrompt from './components/ReleaseNotesPrompt/ReleaseNotesPrompt';
 import Img from './components/Img';
 import Preloader from './components/Preloader/Preloader';
 import isLatestVersion from './utils/isLatestVersion';
 import roundTo from './utils/roundTo';
+import { checkLocalStorage } from './utils/localStorage';
 
 interface AppReducer {
   userData: UserData;
@@ -402,6 +403,11 @@ const updateNetworkStatus = () =>
 updateNetworkStatus();
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
+
+checkLocalStorage();
+document.addEventListener('localStorage', () =>
+  console.log('local storage updated')
+);
 
 const userDataTemplate: UserData = {
   theme: { isDarkMode: false, useSystemTheme: true },
@@ -1043,32 +1049,37 @@ export default function App() {
       messageCode?: MessageCodes,
       data?: Record<string, unknown>
     ) => {
-      const buttons: ButtonProps[] = [];
-      let id: string = messageCode ?? 'mainProcessMessage';
+      const notificationData: AppNotification = {
+        buttons: [],
+        content: <div>{message}</div>,
+        delay: 5000,
+        id: messageCode || 'mainProcessMessage',
+        type: 'DEFAULT',
+      };
       const defaultButtonStyles =
         '!bg-background-color-3 dark:!bg-dark-background-color-3 !text-font-color-black dark:!text-font-color-black !font-light';
-      let duration = 5000;
-      let icon: ReactElement<any, any> | undefined;
       const showMessage = true;
 
       if (messageCode === 'APP_THEME_CHANGE')
-        icon = <span className="material-icons-round">brightness_4</span>;
+        notificationData.icon = (
+          <span className="material-icons-round">brightness_4</span>
+        );
       if (messageCode === 'PARSE_SUCCESSFUL') {
-        icon = (
+        notificationData.icon = (
           <span className="material-icons-round-outlined icon">
             file_download
           </span>
         );
-        id = (data?.songId as string) ?? messageCode;
+        notificationData.id = (data?.songId as string) ?? messageCode;
       }
       if (messageCode === 'RESYNC_SUCCESSFUL') {
-        icon = (
+        notificationData.icon = (
           <span className="material-icons-round-outlined icon">check</span>
         );
       }
       if (messageCode === 'PARSE_FAILED') {
-        duration = 15000;
-        buttons.push({
+        notificationData.delay = 15000;
+        notificationData.buttons?.push({
           label: 'Resync Songs',
           iconClassName: 'sync',
           className: defaultButtonStyles,
@@ -1080,11 +1091,11 @@ export default function App() {
         data &&
         'path' in data
       ) {
-        icon = (
+        notificationData.icon = (
           <span className="material-icons-round-outlined icon">error</span>
         );
-        duration = 15000;
-        // buttons.push({
+        notificationData.delay = 15000;
+        // info.buttons?.push({
         //   label: 'Add to the library',
         //   iconClassName: 'add',
         //   className: defaultButtonStyles,
@@ -1096,7 +1107,7 @@ export default function App() {
         data &&
         'artworkPath' in data
       ) {
-        icon = (
+        notificationData.icon = (
           <div className="relative h-8 w-8">
             <Img
               className="aspect-square h-full w-full rounded-sm"
@@ -1112,19 +1123,29 @@ export default function App() {
             </span>
           </div>
         );
-        // duration = 60000;
+        // info.delay = 60000;
+      }
+      if (
+        (messageCode === 'SONG_REMOVE_PROCESS_UPDATE' ||
+          messageCode === 'AUDIO_PARSING_PROCESS_UPDATE') &&
+        data &&
+        'max' in data &&
+        'value' in data
+      ) {
+        notificationData.delay = 10000;
+        notificationData.type = 'WITH_PROGRESS_BAR';
+        notificationData.progressBarData = {
+          max: (data?.max as number) || 0,
+          value: (data?.value as number) || 0,
+        };
+        notificationData.icon = (
+          <span className="material-icons-round-outlined icon">
+            {messageCode === 'AUDIO_PARSING_PROCESS_UPDATE' ? 'add' : 'delete'}
+          </span>
+        );
       }
 
-      if (showMessage)
-        addNewNotifications([
-          {
-            id,
-            delay: duration,
-            content: <div>{message}</div>,
-            icon,
-            buttons,
-          },
-        ]);
+      if (showMessage) addNewNotifications([notificationData]);
     },
     [addNewNotifications]
   );

@@ -80,6 +80,7 @@ import resetAppData from './resetAppData';
 import { clearTempArtworkFolder } from './other/artworks';
 import blacklistFolders from './core/blacklistFolders';
 import restoreBlacklistedFolders from './core/restoreBlacklistedFolder';
+import toggleBlacklistFolders from './core/toggleBlacklistFolders';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -268,6 +269,10 @@ app
         )} ]`
       );
     });
+
+    mainWindow.webContents.addListener('zoom-changed', (_, dir) =>
+      log(`Renderer zoomed ${dir}. ${mainWindow.webContents.getZoomLevel()}`)
+    );
 
     // ? / / / / / / / / /  IPC RENDERER EVENTS  / / / / / / / / / / / /
     if (mainWindow) {
@@ -600,6 +605,12 @@ app
       ipcMain.handle(
         'app/restoreBlacklistedFolders',
         (_, folderPaths: string[]) => restoreBlacklistedFolders(folderPaths)
+      );
+
+      ipcMain.handle(
+        'app/toggleBlacklistedFolders',
+        (_, folderPaths: string[], isBlacklistFolder?: boolean) =>
+          toggleBlacklistFolders(folderPaths, isBlacklistFolder)
       );
 
       ipcMain.on(

@@ -17,16 +17,27 @@ const NotificationPanel = () => {
       notificationPanelData.notifications.length > 0
     ) {
       return notificationPanelData.notifications.map((data) => {
+        const {
+          content,
+          delay,
+          id,
+          buttons,
+          icon,
+          order,
+          progressBarData,
+          type,
+        } = data;
         return (
           <Notification
-            key={data.id}
-            id={data.id}
-            isLoading={data.isLoading}
-            content={data.content}
-            buttons={data.buttons}
-            icon={data.icon}
-            delay={data.delay}
-            order={data.order}
+            key={id}
+            id={id}
+            content={content}
+            buttons={buttons}
+            icon={icon}
+            delay={delay}
+            order={order}
+            type={type}
+            progressBarData={progressBarData}
           />
         );
       });

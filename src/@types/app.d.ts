@@ -614,11 +614,19 @@ declare global {
     | 'NETWORK_CONNECTED'
     | 'APP_THEME_CHANGE'
     | 'PLAYBACK_FROM_UNKNOWN_SOURCE'
+    | 'AUDIO_PARSING_PROCESS_UPDATE'
+    | 'SONG_REMOVE_PROCESS_UPDATE'
+    | 'SONG_BLACKLISTED'
+    | 'SONG_WHITELISTED'
+    | 'FOLDER_BLACKLISTED'
+    | 'FOLDER_WHITELISTED'
     | 'RESYNC_SUCCESSFUL';
 
   interface NotificationPanelData {
     notifications: AppNotification[];
   }
+
+  type NotificationTypes = 'DEFAULT' | 'WITH_PROGRESS_BAR';
 
   interface AppNotification {
     delay: number;
@@ -627,7 +635,11 @@ declare global {
     content: ReactElement<any, any>;
     icon?: ReactElement<any, any>;
     buttons?: ButtonProps[];
-    isLoading?: boolean;
+    type?: NotificationTypes;
+    progressBarData?: {
+      max: number;
+      value: number;
+    };
   }
 
   // ? Navigation History related data

@@ -122,7 +122,7 @@ const SearchPage = () => {
   return (
     <MainContainer>
       <>
-        <div className="search-bar-container appear-from-bottom mb-4 flex w-1/2 items-center rounded-3xl bg-background-color-2 py-1 px-2 dark:bg-dark-background-color-2">
+        <div className="search-bar-container appear-from-bottom mb-4 flex w-1/2 items-center rounded-3xl bg-background-color-2 py-1 px-2 shadow-md dark:bg-dark-background-color-2">
           <span
             className="material-icons-round icon flex cursor-help items-center justify-center p-2 text-2xl text-font-color-highlight dark:text-dark-font-color-highlight"
             title={`Use ' ; ' to separate keywords in Search.`}

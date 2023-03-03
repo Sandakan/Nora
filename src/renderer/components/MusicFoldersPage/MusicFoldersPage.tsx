@@ -1,8 +1,10 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
+import { FixedSizeList as List } from 'react-window';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import Button from '../Button';
 import Dropdown, { DropdownOption } from '../Dropdown';
 import Img from '../Img';
@@ -21,13 +23,21 @@ const folderDropdownOptions: DropdownOption<FolderSortTypes>[] = [
 ];
 
 const MusicFoldersPage = () => {
-  const { isMultipleSelectionEnabled, multipleSelectionsData } =
-    React.useContext(AppContext);
+  const {
+    isMultipleSelectionEnabled,
+    currentlyActivePage,
+    multipleSelectionsData,
+  } = React.useContext(AppContext);
   const { updateCurrentlyActivePageData, toggleMultipleSelections } =
     React.useContext(AppUpdateContext);
   const [musicFolders, setMusicFolders] = React.useState<MusicFolder[]>([]);
   const [sortingOrder, setSortingOrder] =
     React.useState<FolderSortTypes>('aToZ');
+
+  const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
+
+  const foldersContainerRef = React.useRef(null as HTMLDivElement | null);
+  const { width, height } = useResizeObserver(foldersContainerRef);
 
   const fetchFoldersData = React.useCallback(
     () =>
@@ -71,23 +81,6 @@ const MusicFoldersPage = () => {
     };
   }, [fetchFoldersData]);
 
-  const musicFolderComponents = React.useMemo(() => {
-    if (musicFolders.length > 0) {
-      return musicFolders.map((folder, index) => {
-        return (
-          <Folder
-            key={index}
-            folderPath={folder.folderData.path}
-            songIds={folder.songIds}
-            index={index}
-            isBlacklisted={folder.isBlacklisted}
-          />
-        );
-      });
-    }
-    return [];
-  }, [musicFolders]);
-
   const addNewFolder = React.useCallback(
     (
       _: unknown,
@@ -108,8 +101,27 @@ const MusicFoldersPage = () => {
     []
   );
 
+  const folders = React.useCallback(
+    (props: { index: number; style: React.CSSProperties }) => {
+      const { index, style } = props;
+      const folder = musicFolders[index];
+      return (
+        <div style={style} key={index}>
+          <Folder
+            key={index}
+            folderPath={folder.folderData.path}
+            songIds={folder.songIds}
+            index={index}
+            isBlacklisted={folder.isBlacklisted}
+          />
+        </div>
+      );
+    },
+    [musicFolders]
+  );
+
   return (
-    <MainContainer className="music-folders-page appear-from-bottom !h-full pr-4">
+    <MainContainer className="music-folders-page appear-from-bottom !h-full pr-4 !pb-0">
       <>
         <div className="title-container mt-2 mb-8 flex items-center justify-between text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">
@@ -179,7 +191,35 @@ const MusicFoldersPage = () => {
           )}
         </div>
 
-        <div className="folders-container">{musicFolderComponents}</div>
+        <div className="folders-container h-full" ref={foldersContainerRef}>
+          {musicFolders && musicFolders.length > 0 && (
+            <List
+              itemCount={musicFolders.length}
+              itemSize={75}
+              width={width || '100%'}
+              height={height || 450}
+              overscanCount={10}
+              initialScrollOffset={
+                currentlyActivePage.data?.scrollTopOffset ?? 0
+              }
+              onScroll={(data) => {
+                if (scrollOffsetTimeoutIdRef.current)
+                  clearTimeout(scrollOffsetTimeoutIdRef.current);
+                if (!data.scrollUpdateWasRequested && data.scrollOffset !== 0)
+                  scrollOffsetTimeoutIdRef.current = setTimeout(
+                    () =>
+                      updateCurrentlyActivePageData((currentPageData) => ({
+                        ...currentPageData,
+                        scrollTopOffset: data.scrollOffset,
+                      })),
+                    500
+                  );
+              }}
+            >
+              {folders}
+            </List>
+          )}
+        </div>
 
         {musicFolders.length === 0 && (
           <div className="no-folders-container flex h-full flex-col items-center justify-center text-lg">

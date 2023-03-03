@@ -1,6 +1,11 @@
 import log from '../log';
-import { getBlacklistData } from '../filesystem';
+import { getBlacklistData, setBlacklist } from '../filesystem';
 import { dataUpdateEvent } from '../main';
+
+interface toggleBlacklistFoldersReturnValue {
+  blacklists: string[];
+  whitelists: string[];
+}
 
 const toggleBlacklistFolders = async (
   folderPaths: string[],
@@ -8,6 +13,10 @@ const toggleBlacklistFolders = async (
 ) => {
   const blacklist = getBlacklistData();
 
+  const result: toggleBlacklistFoldersReturnValue = {
+    blacklists: [],
+    whitelists: [],
+  };
   log(
     `Requested to ${
       isBlacklistFolder !== undefined
@@ -19,44 +28,45 @@ const toggleBlacklistFolders = async (
     { folderPaths }
   );
 
-  const updatedSongs = folderPaths.map((folderPath) => {
+  for (const folderPath of folderPaths) {
     const isFolderBlacklisted = blacklist.folderBlacklist.includes(folderPath);
 
     if (isBlacklistFolder === undefined) {
       if (isFolderBlacklisted) {
-        const dislikedSongData = dislikeTheSong(song);
-        if (dislikedSongData) {
-          result.dislikes.push(song.songId);
-          return dislikedSongData;
-        }
-        return song;
+        blacklist.folderBlacklist = blacklist.folderBlacklist.filter(
+          (blacklistedFolderPath) => blacklistedFolderPath !== folderPath
+        );
+        result.whitelists.push(folderPath);
+      } else {
+        blacklist.folderBlacklist.push(folderPath);
+        result.blacklists.push(folderPath);
       }
-      const likedSongData = likeTheSong(song);
-      if (likedSongData) {
-        result.likes.push(song.songId);
-        return likedSongData;
-      }
-      return song;
-    }
-    if (isBlacklistFolder) {
-      const likedSongData = likeTheSong(song);
-      if (likedSongData) {
-        result.likes.push(song.songId);
-        return likedSongData;
-      }
-      return song;
-    }
-    const dislikedSongData = dislikeTheSong(song);
-    if (dislikedSongData) {
-      result.dislikes.push(song.songId);
-      return dislikedSongData;
-    }
-    return song;
-  });
+    } else if (isBlacklistFolder) {
+      if (!isFolderBlacklisted) {
+        blacklist.folderBlacklist.push(folderPath);
+        result.blacklists.push(folderPath);
+      } else
+        log(
+          `Request to blacklist a folder but it is already blacklisted.`,
+          { folderPath, isFolderBlacklisted, isBlacklistFolder },
+          'ERROR'
+        );
+    } else if (isFolderBlacklisted) {
+      blacklist.folderBlacklist = blacklist.folderBlacklist.filter(
+        (blacklistedFolderPath) => blacklistedFolderPath !== folderPath
+      );
+      result.whitelists.push(folderPath);
+    } else
+      log(
+        `Request to whitelist a folder but it is already whitelisted.`,
+        { folderPath, isFolderBlacklisted, isBlacklistFolder },
+        'ERROR'
+      );
+  }
 
-  setSongsData(updatedSongs);
-  dataUpdateEvent('songs/likes', [...result.likes, ...result.dislikes]);
-  return undefined;
+  setBlacklist(blacklist);
+  dataUpdateEvent('songs/likes', [...result.blacklists, ...result.whitelists]);
+  return result;
 };
 
 export default toggleBlacklistFolders;

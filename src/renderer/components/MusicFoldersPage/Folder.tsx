@@ -27,7 +27,6 @@ const Folder = (props: Props) => {
   const {
     changeCurrentActivePage,
     updateContextMenuData,
-    addNewNotifications,
     changePromptMenuData,
     updateMultipleSelections,
     toggleMultipleSelections,
@@ -121,28 +120,6 @@ const Folder = (props: Props) => {
               .restoreBlacklistedFolders(
                 isMultipleSelectionEnabled ? folderPaths : [folderPath]
               )
-              .then(() =>
-                addNewNotifications([
-                  {
-                    id: `${folderName}RestoredFromBlacklisted`,
-                    delay: 5000,
-                    content: (
-                      <span>
-                        &apos;
-                        {isMultipleSelectionEnabled
-                          ? `${folderPaths.length} folders`
-                          : folderName}
-                        &apos; restored from the blacklist.
-                      </span>
-                    ),
-                    icon: (
-                      <span className="material-icons-round">
-                        settings_backup_restore
-                      </span>
-                    ),
-                  },
-                ])
-              )
               .catch((err) => console.error(err));
           else
             changePromptMenuData(
@@ -175,7 +152,6 @@ const Folder = (props: Props) => {
       },
     ];
   }, [
-    addNewNotifications,
     changePromptMenuData,
     folderName,
     folderPath,
@@ -199,10 +175,14 @@ const Folder = (props: Props) => {
 
   return (
     <div
-      className={`group mb-2 flex h-16 w-full cursor-pointer items-center justify-between rounded-md px-4 py-2 odd:bg-background-color-2/50 hover:bg-background-color-2 dark:text-font-color-white dark:odd:bg-dark-background-color-2/30 dark:hover:bg-dark-background-color-2 ${
+      className={`group mb-2 flex h-16 w-full cursor-pointer items-center justify-between rounded-md px-4 py-2 hover:!bg-background-color-2 dark:text-font-color-white dark:hover:!bg-dark-background-color-2 ${
         isAMultipleSelection &&
         '!bg-background-color-3/90 !text-font-color-black dark:!bg-dark-background-color-3/90 dark:!text-font-color-black'
-      } ${isBlacklisted && '!opacity-50'}`}
+      } ${isBlacklisted && '!opacity-50'} ${
+        (index + 1) % 2 === 1
+          ? 'bg-background-color-2/50 dark:bg-dark-background-color-2/30'
+          : '!bg-background-color-1 dark:!bg-dark-background-color-1'
+      }`}
       onClick={openMusicFolderInfoPage}
       title={isBlacklisted ? `'${folderName}' is blacklisted.` : undefined}
       onContextMenu={(e) =>

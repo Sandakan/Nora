@@ -19,6 +19,7 @@ import Button from '../../Button';
 import ResetAppConfirmationPrompt from '../../HomePage/ResetAppConfirmationPrompt';
 import SensitiveActionConfirmPrompt from '../../SensitiveActionConfirmPrompt';
 import AppShortcutsPrompt from '../AppShortcutsPrompt';
+import AppStats from './AppStats';
 
 const AboutSettings = () => {
   const { changePromptMenuData, addNewNotifications } =
@@ -156,7 +157,9 @@ const AboutSettings = () => {
           />
         </div>
 
-        <div className="about-buttons-container mb-4 mt-6 flex flex-wrap">
+        <AppStats />
+
+        <div className="about-buttons-container mb-4 flex flex-wrap justify-center">
           <Button
             label="Reset App"
             iconName="auto_mode"
@@ -239,11 +242,11 @@ const AboutSettings = () => {
             If you have any feedback about bugs, feature requests etc. about the
             app, please{' '}
             <Hyperlink
-              label="add an issue"
+              label="create an issue"
               link={`${bugs.url}/new/choose`}
               linkTitle="Create An Issue On Nora's Github Repository"
             />{' '}
-            to the Nora's Github Repository.
+            on Nora's Github Repository.
           </div>
           <Hyperlink
             label="Contact me through my email."
