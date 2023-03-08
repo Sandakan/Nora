@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
@@ -5,6 +6,7 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Img from '../Img';
 import DefaultGenreCover from '../../../../assets/images/webp/genre-cover-default.webp';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
+import Button from '../Button';
 
 interface GenreProp {
   // eslint-disable-next-line react/no-unused-prop-types
@@ -280,7 +282,7 @@ const Genre = (props: GenreProp) => {
 
   return (
     <div
-      className={`genre appear-from-bottom relative mr-10 mb-6 flex h-36 w-72 cursor-pointer items-center overflow-hidden rounded-2xl p-4 text-background-color-2 transition-[border,border-color] dark:text-dark-background-color-2 ${className} ${
+      className={`genre appear-from-bottom group relative mr-10 mb-6 flex h-36 w-72 cursor-pointer items-center overflow-hidden rounded-2xl p-4 text-background-color-2 transition-[border,border-color] dark:text-dark-background-color-2 ${className} ${
         isMultipleSelectionEnabled &&
         multipleSelectionsData.selectionType === 'genre' &&
         'border-4'
@@ -315,8 +317,6 @@ const Genre = (props: GenreProp) => {
           );
         } else goToGenreInfoPage();
       }}
-      role="button"
-      tabIndex={0}
       onContextMenu={(e) =>
         updateContextMenuData(
           true,
@@ -328,9 +328,11 @@ const Genre = (props: GenreProp) => {
       }
     >
       <div className="genre-info-container w-3/4">
-        <div className="genre-title w-full overflow-hidden text-ellipsis whitespace-nowrap text-2xl text-font-color-white dark:text-font-color-white">
-          {title}
-        </div>
+        <Button
+          className="genre-title !m-0 !block w-full truncate !rounded-none !border-0 !p-0 !text-left !text-2xl text-font-color-white outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white"
+          label={title}
+          clickHandler={goToGenreInfoPage}
+        />
         <div className="genre-no-of-songs text-[#ccc] dark:text-[#ccc]">{`${
           songIds.length
         } song${songIds.length === 1 ? '' : 's'}`}</div>

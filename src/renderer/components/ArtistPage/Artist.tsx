@@ -6,6 +6,7 @@ import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import DefaultArtistCover from '../../../../assets/images/webp/artist_cover_default.webp';
+import Button from '../Button';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 
@@ -369,16 +370,15 @@ export const Artist = (props: ArtistProp) => {
             />
           )}
       </div>
-      <div className="artist-info-container max-h-1/5">
-        <div
-          className={`name-container w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-center text-xl text-font-color-black hover:underline dark:text-font-color-white lg:text-base ${
+      <div className="artist-info-container max-h-1/5 relative">
+        <Button
+          className={`name-container !m-0 !block !w-full !max-w-full truncate !rounded-none !border-0 !p-0 text-center !text-xl outline-1 outline-offset-1 hover:underline focus-visible:!outline lg:text-base ${
             isAMultipleSelection &&
             '!text-font-color-black dark:!text-font-color-black'
           }`}
-          title={props.name === '' ? 'Unknown Artist' : props.name}
-        >
-          {props.name === '' ? 'Unknown Artist' : props.name}
-        </div>
+          label={props.name === '' ? 'Unknown Artist' : props.name}
+          clickHandler={goToArtistInfoPage}
+        />
       </div>
     </div>
   );

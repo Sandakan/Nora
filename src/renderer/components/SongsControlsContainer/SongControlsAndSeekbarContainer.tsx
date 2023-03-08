@@ -8,6 +8,7 @@ import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
 import calculateTime from 'renderer/utils/calculateTime';
 import debounce from 'renderer/utils/debounce';
 import { getItem } from 'renderer/utils/localStorage';
+import Button from '../Button';
 
 let scrollIncrement = getItem('seekbarScrollInterval');
 document.addEventListener('localStorage', () => {
@@ -125,113 +126,106 @@ const SongControlsAndSeekbarContainer = () => {
 
   return (
     <div className="song-controls-and-seekbar-container flex w-[40%] min-w-[20rem] flex-col items-center justify-center py-2">
-      <div className="controls-container flex w-2/3 items-center justify-around px-2 lg:w-4/5 lg:p-0 [&>div.active_span.icon]:text-font-color-highlight [&>div.active_span.icon]:opacity-100 dark:[&>div.active_span.icon]:text-dark-font-color-highlight">
-        <div
-          className={`like-btn flex h-8 w-8 items-center justify-center rounded-full after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity dark:after:bg-dark-font-color-highlight ${
+      <div className="controls-container flex w-2/3 max-w-sm items-center justify-around px-2 lg:w-4/5 lg:p-0 [&>div.active_span.icon]:!text-font-color-highlight [&>div.active_span.icon]:opacity-100 dark:[&>div.active_span.icon]:!text-dark-font-color-highlight">
+        <Button
+          className={`like-btn !mr-0 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:after:bg-dark-font-color-highlight ${
             currentSongData.isAFavorite && 'active after:opacity-100'
           } ${!currentSongData.isKnownSource && '!cursor-none brightness-50'}`}
-        >
-          <span
-            title={
-              currentSongData.isKnownSource
-                ? 'Like/Dislike (Ctrl + H)'
-                : `Liking/Disliking songs is disabled because current playing song is from an unknown source and it doesn't support likes.`
-            }
-            className={`${
-              currentSongData.isAFavorite
-                ? 'material-icons-round'
-                : 'material-icons-round-outlined'
-            } icon cursor-pointer text-2xl leading-none text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white`}
-            onClick={() =>
-              currentSongData.isKnownSource &&
-              toggleIsFavorite(!currentSongData.isAFavorite)
-            }
-          >
-            favorite
-          </span>
-        </div>
-        <div
-          className={`shuffle-btn flex items-center justify-center after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity dark:after:bg-dark-font-color-highlight ${
+          tooltipLabel={
+            currentSongData.isKnownSource
+              ? 'Like/Dislike (Ctrl + H)'
+              : `Liking/Disliking songs is disabled because current playing song is from an unknown source and it doesn't support likes.`
+          }
+          iconName="favorite"
+          iconClassName={`${
+            currentSongData.isAFavorite
+              ? 'material-icons-round !text-font-color-highlight dark:!text-dark-font-color-highlight !opacity-100'
+              : 'material-icons-round-outlined'
+          } icon cursor-pointer !text-2xl leading-none text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white`}
+          clickHandler={() =>
+            currentSongData.isKnownSource &&
+            toggleIsFavorite(!currentSongData.isAFavorite)
+          }
+        />
+
+        <Button
+          className={`shuffle-btn !m-0 flex items-center justify-center !rounded-none !border-0 !p-0 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:after:bg-dark-font-color-highlight ${
             isShuffling && 'active after:opacity-100'
           }`}
-        >
-          <span
-            title="Shuffle (Ctrl + S)"
-            className="material-icons-round icon cursor-pointer text-2xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"
-            onClick={handleQueueShuffle}
-          >
-            shuffle
-          </span>
-        </div>
-        <div className="skip-back-btn flex">
-          <span
-            title="Previous Song (Ctrl + Left Arrow)"
-            className="material-icons-round icon cursor-pointer text-2xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"
-            onClick={handleSkipBackwardClick}
-          >
-            skip_previous
-          </span>
-        </div>
-        <div
-          className={`play-pause-btn relative flex items-center justify-center ${
+          tooltipLabel="Shuffle (Ctrl + S)"
+          iconName="shuffle"
+          iconClassName={`material-icons-round icon !text-2xl opacity-60 transition-opacity hover:opacity-80 ${
+            isShuffling &&
+            '!text-font-color-highlight dark:!text-dark-font-color-highlight !opacity-100'
+          }`}
+          clickHandler={handleQueueShuffle}
+        />
+
+        <Button
+          className="skip-back-btn !m-0 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 focus-visible:!outline"
+          tooltipLabel="Previous Song (Ctrl + Left Arrow)"
+          iconName="skip_previous"
+          iconClassName="material-icons-round !text-2xl opacity-60 transition-opacity hover:opacity-80"
+          clickHandler={handleSkipBackwardClick}
+        />
+
+        <Button
+          className={`play-pause-btn relative !m-0 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 focus-visible:!outline ${
             isPlayerStalled &&
             `after:absolute after:h-5 after:w-5 after:animate-spin-ease after:rounded-full after:border-2 after:border-[transparent] after:border-t-font-color-black after:content-[''] dark:after:border-t-font-color-white`
           }`}
-        >
-          <span
-            title="Play/Pause (Space)"
-            className={`material-icons-round icon cursor-pointer text-5xl text-font-color-black opacity-80 transition-opacity hover:opacity-80 dark:text-font-color-white ${
-              isPlayerStalled && '!opacity-10'
-            }`}
-            onClick={!isPlayerStalled ? toggleSongPlayback : undefined}
-          >
-            {isCurrentSongPlaying ? 'pause_circle' : 'play_circle'}
-          </span>
-        </div>
-        <div className="skip-forward-btn flex">
-          <span
-            title="Next Song (Ctrl + Right Arrow)"
-            className="material-icons-round icon cursor-pointer text-2xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"
-            onClick={() => handleSkipForwardClick('USER_SKIP')}
-          >
-            skip_next
-          </span>
-        </div>
-        <div
-          className={`repeat-btn flex items-center justify-center after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity dark:after:bg-dark-font-color-highlight ${
+          tooltipLabel="Play/Pause (Space)"
+          iconName={isCurrentSongPlaying ? 'pause_circle' : 'play_circle'}
+          iconClassName={`material-icons-round !text-5xl opacity-80 transition-opacity hover:opacity-80 ${
+            isPlayerStalled && '!opacity-10'
+          }`}
+          clickHandler={() => !isPlayerStalled && toggleSongPlayback()}
+        />
+
+        <Button
+          className="skip-forward-btn !m-0 flex !rounded-none !border-0 !p-0 outline-1 outline-offset-1 focus-visible:!outline"
+          tooltipLabel="Next Song (Ctrl + Right Arrow)"
+          iconName="skip_next"
+          iconClassName="material-icons-round !text-2xl opacity-60 transition-opacity hover:opacity-80"
+          clickHandler={() => handleSkipForwardClick('USER_SKIP')}
+        />
+
+        <Button
+          className={`repeat-btn !m-0 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:after:bg-dark-font-color-highlight ${
             isRepeating !== 'false' && 'active after:opacity-100'
           }`}
-        >
-          <span
-            title="Repeat (Ctrl + T)"
-            className="material-icons-round icon cursor-pointer text-2xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"
-            onClick={() => toggleRepeat()}
-          >
-            {isRepeating === 'false' || isRepeating === 'repeat'
+          tooltipLabel="Repeat (Ctrl + T)"
+          iconName={
+            isRepeating === 'false' || isRepeating === 'repeat'
               ? 'repeat'
-              : 'repeat_one'}
-          </span>
-        </div>
-        <div
-          className={`lyrics-btn flex items-center justify-center after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity dark:after:bg-dark-font-color-highlight ${
+              : 'repeat_one'
+          }
+          iconClassName={`material-icons-round !text-2xl opacity-60 transition-opacity hover:opacity-80 ${
+            isRepeating !== 'false' &&
+            '!text-font-color-highlight dark:!text-dark-font-color-highlight !opacity-100'
+          }`}
+          clickHandler={() => toggleRepeat()}
+        />
+
+        <Button
+          className={`lyrics-btn !m-0 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:after:bg-dark-font-color-highlight ${
             currentlyActivePage.pageTitle === 'Lyrics' &&
             'active after:opacity-100'
           }`}
-        >
-          <span
-            title="Lyrics (Ctrl + L)"
-            className="material-icons-round icon cursor-pointer text-2xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"
-            onClick={() =>
-              currentlyActivePage.pageTitle === 'Lyrics'
-                ? changeCurrentActivePage('Home')
-                : changeCurrentActivePage('Lyrics')
-            }
-          >
-            notes
-          </span>
-        </div>
+          tooltipLabel="Lyrics (Ctrl + L)"
+          iconName="notes"
+          iconClassName={`material-icons-round !text-2xl opacity-60 transition-opacity hover:opacity-80 ${
+            currentlyActivePage.pageTitle === 'Lyrics' &&
+            '!text-font-color-highlight dark:!text-dark-font-color-highlight !opacity-100'
+          }`}
+          clickHandler={() =>
+            currentlyActivePage.pageTitle === 'Lyrics'
+              ? changeCurrentActivePage('Home')
+              : changeCurrentActivePage('Lyrics')
+          }
+        />
       </div>
-      <div className="seekbar-and-song-durations-container flex h-1/3 w-full flex-row items-center justify-between text-sm">
+      <div className="seekbar-and-song-durations-container flex h-1/3 w-full max-w-xl flex-row items-center justify-between text-sm">
         <div className="current-song-duration w-16 text-center font-light">
           {currentSongPosition.minutes}:{currentSongPosition.seconds}
         </div>
@@ -240,7 +234,7 @@ const SongControlsAndSeekbarContainer = () => {
             type="range"
             name="seek-bar-slider"
             id="seek-bar-slider"
-            className="seek-bar-slider relative float-left m-0 h-6 w-full appearance-none rounded-lg bg-[transparent] p-0 outline-none before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
+            className="seek-bar-slider relative float-left m-0 h-6 w-full appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
             min={0}
             max={
               (currentSongData.duration || 0) >= songPos

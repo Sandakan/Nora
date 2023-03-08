@@ -2,15 +2,19 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppContext } from 'renderer/contexts/AppContext';
 
 import calculateElapsedTime from 'renderer/utils/calculateElapsedTime';
 
+import OpenLinkConfirmPrompt from 'renderer/components/OpenLinkConfirmPrompt';
 import { version, author, homepage, bugs } from '../../../../../package.json';
 import openSourceLicenses from '../../../../../open_source_licenses.txt';
 import appLicense from '../../../../../LICENSE.txt';
 import localReleaseNotes from '../../../../../release-notes.json';
 
 import AppIcon from '../../../../../assets/images/webp/logo_light_mode.webp';
+import GithubDarkIcon from '../../../../../assets/images/svg/github.svg';
+import GithubLightIcon from '../../../../../assets/images/svg/github-white.svg';
 import SLFlag from '../../../../../assets/images/webp/sl-flag.webp';
 import Img from '../../Img';
 import ReleaseNotesPrompt from '../../ReleaseNotesPrompt/ReleaseNotesPrompt';
@@ -22,6 +26,7 @@ import AppShortcutsPrompt from '../AppShortcutsPrompt';
 import AppStats from './AppStats';
 
 const AboutSettings = () => {
+  const { isDarkMode } = React.useContext(AppContext);
   const { changePromptMenuData, addNewNotifications } =
     React.useContext(AppUpdateContext);
 
@@ -50,34 +55,62 @@ const AboutSettings = () => {
         About
       </div>
       <div className="pl-2">
-        <div className="mb-2 flex p-2 text-lg">
-          <Img
-            src={AppIcon}
-            className="aspect-square max-h-12 rounded-md shadow-md"
-            alt=""
-          />
-          <div className="ml-4 flex flex-col">
-            <span className="block">Nora</span>
-            <span className="text-sm font-light">
-              v{version}{' '}
-              {elapsed ? (
-                <>
-                  &bull;{' '}
-                  <span
-                    title={
-                      currentVersionReleasedDate
-                        ? `Released on ${currentVersionReleasedDate}`
-                        : undefined
-                    }
-                  >
-                    ({elapsed.elapsed} {elapsed.type}
-                    {elapsed.elapsed === 1 ? '' : 's'} ago)
-                  </span>
-                </>
-              ) : (
-                ''
-              )}
-            </span>
+        <div className="mb-2 flex items-center justify-between p-2 text-lg">
+          <div className="flex items-center">
+            <Img
+              src={AppIcon}
+              className="aspect-square max-h-12 rounded-md shadow-md"
+              alt=""
+            />
+            <div className="ml-4 flex flex-col">
+              <span className="block">Nora</span>
+              <span className="text-sm font-light">
+                v{version}{' '}
+                {elapsed ? (
+                  <>
+                    &bull;{' '}
+                    <span
+                      title={
+                        currentVersionReleasedDate
+                          ? `Released on ${currentVersionReleasedDate}`
+                          : undefined
+                      }
+                    >
+                      ({elapsed.elapsed} {elapsed.type}
+                      {elapsed.elapsed === 1 ? '' : 's'} ago)
+                    </span>
+                  </>
+                ) : (
+                  ''
+                )}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center">
+            <Button
+              className="about-link !mr-8 block w-fit cursor-pointer !rounded-none !border-0 !p-0 outline-1 outline-offset-2 focus:!outline"
+              iconName="language"
+              iconClassName="!text-2xl"
+              tooltipLabel="Nora's Website"
+              clickHandler={() => window.api.openInBrowser('nora:')}
+              isDisabled
+            />
+            <Img
+              src={isDarkMode ? GithubLightIcon : GithubDarkIcon}
+              className="w-6 cursor-pointer opacity-80 transition-opacity hover:opacity-100"
+              alt="Nora's Github Repository"
+              onClick={() =>
+                changePromptMenuData(
+                  true,
+                  <OpenLinkConfirmPrompt
+                    link={homepage}
+                    title="Nora's Github Repository"
+                  />,
+                  'flex flex-col'
+                )
+              }
+              tabIndex={0}
+            />
           </div>
         </div>
         <ul className="mb-4 list-disc pl-4 text-sm">
@@ -96,7 +129,7 @@ const AboutSettings = () => {
           <li>
             This product is licensed under the{' '}
             <Button
-              className="show-app-licence-btn about-link !inline w-fit cursor-pointer !border-0 !p-0 text-sm text-font-color-highlight-2 hover:underline dark:!text-dark-font-color-highlight-2"
+              className="show-app-licence-btn about-link !inline w-fit cursor-pointer !rounded-none !border-0 !p-0 text-sm text-font-color-highlight-2 !outline-1 outline-offset-1 hover:underline focus:!outline dark:!text-dark-font-color-highlight-2"
               label="MIT licence."
               clickHandler={() =>
                 changePromptMenuData(
@@ -115,9 +148,11 @@ const AboutSettings = () => {
             />
           </li>
         </ul>
-        <div>
+        <div className="mt-12 flex items-center justify-center">
           <Button
-            className="release-notes-prompt-btn about-link block w-fit cursor-pointer !border-0 !p-0 !text-base text-font-color-highlight-2 no-underline hover:!underline dark:!text-dark-font-color-highlight-2"
+            iconName="new_releases"
+            iconClassName="material-icons-round-outlined"
+            className="release-notes-prompt-btn"
             label="Release Notes"
             clickHandler={() =>
               changePromptMenuData(
@@ -128,7 +163,8 @@ const AboutSettings = () => {
             }
           />
           <Button
-            className="open-source-licenses-btn about-link block w-fit cursor-pointer !border-0 !p-0 !text-base text-font-color-highlight-2 hover:underline dark:!text-dark-font-color-highlight-2"
+            iconName="receipt_long"
+            className="open-source-licenses-btn"
             label="Open source licences"
             clickHandler={() =>
               changePromptMenuData(
@@ -146,14 +182,11 @@ const AboutSettings = () => {
             }
           />
           <Button
-            className="about-link block w-fit cursor-pointer !border-0 !p-0 !text-base text-font-color-highlight-2 hover:underline dark:!text-dark-font-color-highlight-2"
+            iconName="description"
+            iconClassName="material-icons-round-outlined"
+            className="about-link block w-fit cursor-pointer"
             label="Open Log file"
             clickHandler={() => window.api.openLogFile()}
-          />
-          <Hyperlink
-            label="Github repository"
-            link={homepage}
-            linkTitle="Nora Github Repository"
           />
         </div>
 
@@ -237,7 +270,7 @@ const AboutSettings = () => {
             }
           />
         </div>
-        <div className="about-description mt-4">
+        <div className="about-description mt-4 text-sm font-light">
           <div>
             If you have any feedback about bugs, feature requests etc. about the
             app, please{' '}
@@ -255,7 +288,7 @@ const AboutSettings = () => {
             noValidityCheck
           />
           <br />
-          <div className="mt-4 text-center text-sm font-light">
+          <div className="mt-6 text-sm">
             Made with{' '}
             <span className="heart text-font-color-crimson dark:text-font-color-crimson">
               &#10084;

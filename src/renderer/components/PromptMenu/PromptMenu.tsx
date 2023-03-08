@@ -4,6 +4,7 @@
 import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
+import Button from '../Button';
 import MainContainer from '../MainContainer';
 
 const PromptMenu = () => {
@@ -78,16 +79,15 @@ const PromptMenu = () => {
       }}
       ref={promptMenuRef}
     >
-      <span
-        className="material-icons-round prompt-menu-close-btn absolute top-4 right-4 cursor-pointer text-xl text-font-color-black dark:text-font-color-white"
-        id="promptMenuCloseBtn"
-        onClick={(e) => {
+      <Button
+        className="prompt-menu-close-btn absolute top-4 right-4 !m-0 !rounded-none !border-0 !p-0 text-font-color-black outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white"
+        iconName="close"
+        iconClassName="!leading-none !text-xl"
+        clickHandler={(e) => {
           e.stopPropagation();
           changePromptMenuData(false, undefined, '');
         }}
-      >
-        close
-      </span>
+      />
       <MainContainer
         className={`prompt-menu-inner relative max-h-full px-8 pb-2 text-font-color-black dark:text-font-color-white ${
           PromptMenuData.className ?? ''

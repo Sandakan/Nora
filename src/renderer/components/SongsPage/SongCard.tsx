@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
@@ -10,6 +11,7 @@ import BlacklistSongConfrimPrompt from './BlacklistSongConfirmPrompt';
 import SongArtist from './SongArtist';
 import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 import DeleteSongsFromSystemConfrimPrompt from './DeleteSongsFromSystemConfrimPrompt';
+import Button from '../Button';
 
 interface SongCardProp {
   index: number;
@@ -545,12 +547,14 @@ const SongCard = (props: SongCardProp) => {
           style={{ color: fontColor }}
         >
           <div
-            className="song-title w-2/3 cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-2xl font-normal transition-none hover:underline"
+            className="song-title w-2/3 cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-2xl font-normal outline-1 outline-offset-1 transition-none hover:underline focus-visible:!outline"
             title={title}
             onClick={(e) => {
               e.stopPropagation();
               showSongInfoPage();
             }}
+            onKeyDown={(e) => e.key === 'Enter' && showSongInfoPage()}
+            tabIndex={0}
           >
             {title}
           </div>
@@ -562,19 +566,23 @@ const SongCard = (props: SongCardProp) => {
             {songArtistComponents}
           </div>
           <div className="song-states-container">
-            <div>
-              <span
-                className={`material-icons-${
-                  isSongAFavorite ? 'round' : 'round-outlined'
-                } mt-1 cursor-pointer text-lg`}
-                title={isSongAFavorite ? 'You liked this song' : undefined}
-                onClick={(e) => {
+            <div className="flex">
+              <Button
+                className="mt-1 !mr-0 !rounded-none !border-0 !p-0 !text-inherit outline-1 outline-offset-1 focus-visible:!outline"
+                iconName="favorite"
+                iconClassName={`${
+                  isSongAFavorite
+                    ? 'material-icons-round'
+                    : 'material-icons-round-outlined'
+                } !text-lg !leading-none`}
+                tooltipLabel={
+                  isSongAFavorite ? 'You liked this song' : undefined
+                }
+                clickHandler={(e) => {
                   e.stopPropagation();
                   handleLikeButtonClick();
                 }}
-              >
-                favorite
-              </span>
+              />
               {isBlacklisted && (
                 <span
                   className="material-icons-round mt-1 ml-2 cursor-pointer text-lg"
@@ -591,17 +599,17 @@ const SongCard = (props: SongCardProp) => {
           </div>
         </div>
         <div className="play-btn-container absolute top-1/2 left-3/4 -translate-x-1/2 -translate-y-1/2">
-          <span
-            className={`material-icons-round icon cursor-pointer text-4xl text-font-color-white text-opacity-0 ${
+          <Button
+            className="!m-0 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 focus-visible:!outline"
+            iconName={isSongPlaying ? 'pause_circle' : 'play_circle'}
+            iconClassName={`!text-4xl !leading-none text-font-color-white text-opacity-0 ${
               currentSongData.songId === songId && 'text-opacity-100'
-            } group-hover:text-opacity-100`}
-            onClick={(e) => {
+            } group-hover:text-opacity-100 group-focus-within:text-opacity-100`}
+            clickHandler={(e) => {
               e.stopPropagation();
               handlePlayBtnClick();
             }}
-          >
-            {isSongPlaying ? 'pause_circle' : 'play_circle'}
-          </span>
+          />
         </div>
       </div>
     </div>

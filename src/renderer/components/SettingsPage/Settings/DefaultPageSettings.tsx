@@ -12,38 +12,34 @@ const DefaultPageSettings = () => {
         <span className="material-icons-round-outlined mr-2">home</span>
         Default Page
       </div>
-      <ul className="list-disc pl-6 marker:bg-font-color-highlight dark:marker:bg-dark-font-color-highlight">
-        <li className="">
-          <div className="description">
-            Change the default page you want to see when you open the app.
-          </div>
+      <div className="description">
+        Change the default page you want to see when you open the app.
+      </div>
 
-          <div className="default-page-dropdown-container">
-            <Dropdown
-              name="defaultPageDropdown"
-              className="mt-4"
-              value={userData?.defaultPage || ('Home' as DefaultPages)}
-              options={[
-                { label: 'Home', value: 'Home' },
-                { label: 'Search', value: 'Search' },
-                { label: 'Songs', value: 'Songs' },
-                { label: 'Artists', value: 'Artists' },
-                { label: 'Albums', value: 'Albums' },
-                { label: 'Playlists', value: 'Playlists' },
-              ]}
-              onChange={(e) => {
-                window.api.saveUserData('defaultPage', e.target.value);
-                updateUserData((prevUserData) => {
-                  return {
-                    ...prevUserData,
-                    defaultPage: e.currentTarget.value as DefaultPages,
-                  };
-                });
-              }}
-            />
-          </div>
-        </li>
-      </ul>
+      <div className="default-page-dropdown-container">
+        <Dropdown
+          name="defaultPageDropdown"
+          className="mt-4"
+          value={userData?.defaultPage || ('Home' as DefaultPages)}
+          options={[
+            { label: 'Home', value: 'Home' },
+            { label: 'Search', value: 'Search' },
+            { label: 'Songs', value: 'Songs' },
+            { label: 'Artists', value: 'Artists' },
+            { label: 'Albums', value: 'Albums' },
+            { label: 'Playlists', value: 'Playlists' },
+          ]}
+          onChange={(e) => {
+            window.api.saveUserData('defaultPage', e.target.value);
+            updateUserData((prevUserData) => {
+              return {
+                ...prevUserData,
+                defaultPage: e.currentTarget.value as DefaultPages,
+              };
+            });
+          }}
+        />
+      </div>
     </>
   );
 };

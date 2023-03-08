@@ -10,6 +10,7 @@ import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import ConfirmDeletePlaylists from './ConfirmDeletePlaylists';
 import DefaultPlaylistCover from '../../../../assets/images/webp/playlist_cover_default.webp';
+import Button from '../Button';
 
 interface PlaylistProp extends Playlist {
   index: number;
@@ -239,6 +240,9 @@ export const Playlist = (props: PlaylistProp) => {
         label: 'Hr',
         isContextMenuItemSeperator: true,
         handlerFunction: () => true,
+        isDisabled: isMultipleSelectionsEnabled
+          ? false
+          : props.playlistId === 'History' || props.playlistId === 'Favorites',
       },
       {
         label: isMultipleSelectionsEnabled
@@ -257,6 +261,9 @@ export const Playlist = (props: PlaylistProp) => {
           );
           toggleMultipleSelections(false);
         },
+        isDisabled: isMultipleSelectionsEnabled
+          ? false
+          : props.playlistId === 'History' || props.playlistId === 'Favorites',
       },
     ];
   }, [
@@ -338,7 +345,7 @@ export const Playlist = (props: PlaylistProp) => {
         } else openPlaylistInfoPage();
       }}
     >
-      <div className="playlist-cover-and-play-btn-container relative h-[70%] cursor-pointer overflow-hidden rounded-xl before:invisible before:absolute before:h-full before:w-full before:bg-gradient-to-b before:from-[hsla(0,0%,0%,0%)] before:to-[hsla(0,0%,0%,40%)] before:opacity-0 before:transition-[visibility,opacity] before:duration-300 before:content-[''] group-hover:before:visible group-hover:before:opacity-100">
+      <div className="playlist-cover-and-play-btn-container relative h-[70%] cursor-pointer overflow-hidden rounded-xl before:invisible before:absolute before:h-full before:w-full before:bg-gradient-to-b before:from-[hsla(0,0%,0%,0%)] before:to-[hsla(0,0%,0%,40%)] before:opacity-0 before:transition-[visibility,opacity] before:duration-300 before:content-[''] group-focus-within:before:visible group-focus-within:before:opacity-100 group-hover:before:visible group-hover:before:opacity-100">
         {isMultipleSelectionEnabled &&
         multipleSelectionsData.selectionType === 'playlist' ? (
           <MultipleSelectionCheckbox
@@ -347,12 +354,12 @@ export const Playlist = (props: PlaylistProp) => {
             className="absolute bottom-3 right-3"
           />
         ) : (
-          <span
-            className="material-icons-round icon absolute bottom-2 right-2 translate-y-10 scale-90 cursor-pointer text-4xl text-font-color-white opacity-0 transition-[opacity,transform] delay-100 duration-200 ease-in-out group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 dark:text-font-color-white"
-            onClick={() => playAllSongs()}
-          >
-            play_circle
-          </span>
+          <Button
+            className="absolute bottom-2 right-2 !m-0 translate-y-10 scale-90 !rounded-none !border-0 !p-0 text-font-color-white opacity-0 outline-1 outline-offset-1 transition-[opacity,transform] delay-100 duration-200 ease-in-out focus-visible:!outline group-focus-within:translate-y-0 group-focus-within:scale-100 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 dark:!text-font-color-white"
+            clickHandler={() => playAllSongs()}
+            iconName="play_circle"
+            iconClassName="!text-4xl !leading-none !text-inherit"
+          />
         )}
         <div className="playlist-cover-container h-full cursor-pointer overflow-hidden">
           <Img
@@ -364,10 +371,10 @@ export const Playlist = (props: PlaylistProp) => {
         </div>
       </div>
       <div className="playlist-info-container mt-2">
-        <div
-          className="title playlist-title w-full cursor-pointer overflow-hidden overflow-ellipsis whitespace-nowrap text-xl hover:underline"
-          title={props.name}
-          onClick={() =>
+        <Button
+          className="playlist-title !m-0 !block w-full truncate !rounded-none !border-0 !p-0 !text-left !text-xl outline-1 outline-offset-1 hover:underline focus-visible:!outline"
+          tooltipLabel={props.name}
+          clickHandler={() =>
             isMultipleSelectionEnabled &&
             multipleSelectionsData.selectionType === 'playlist'
               ? updateMultipleSelections(
@@ -377,9 +384,8 @@ export const Playlist = (props: PlaylistProp) => {
                 )
               : openPlaylistInfoPage()
           }
-        >
-          {props.name}
-        </div>
+          label={props.name}
+        />
         <div className="playlist-no-of-songs text-sm font-light">{`${
           props.songs.length
         } song${props.songs.length === 1 ? '' : 's'}`}</div>

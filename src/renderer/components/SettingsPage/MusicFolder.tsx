@@ -28,7 +28,7 @@ export default (props: { musicFolder: MusicFolderData }) => {
         </div>
       </div>
       <Button
-        className="music-folder-delete-btn danger-btn !w-25 dark:text-dark-hitext-font-color-highlight float-right mr-0 !h-fit cursor-pointer rounded-lg border-none border-[transparent] font-medium text-font-color-highlight outline-none ease-in-out hover:text-font-color-crimson dark:text-dark-font-color-highlight hover:dark:text-font-color-crimson"
+        className="music-folder-delete-btn danger-btn !w-25 dark:text-dark-hitext-font-color-highlight float-right mr-0 !h-fit cursor-pointer rounded-lg border-none border-[transparent] font-medium text-font-color-highlight outline-none outline-1 outline-offset-1 ease-in-out hover:text-font-color-crimson focus:!outline dark:text-dark-font-color-highlight hover:dark:text-font-color-crimson"
         label="REMOVE"
         tooltipLabel={`Remove '${folderName}' Folder`}
         clickHandler={() =>

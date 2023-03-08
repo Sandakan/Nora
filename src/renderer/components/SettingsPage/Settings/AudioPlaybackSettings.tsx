@@ -91,7 +91,7 @@ const AudioPlaybackSettings = () => {
         Audio Playback
       </div>
       <ul className="list-disc pl-6 marker:bg-font-color-highlight dark:marker:bg-dark-font-color-highlight">
-        <li className="show-remaining-song-duration mb-4">
+        <li className="secondary-container show-remaining-song-duration mb-4">
           <div className="description">
             Shows the remaining duration of the song instead of the default song
             duration.
@@ -121,20 +121,19 @@ const AudioPlaybackSettings = () => {
           />
         </li>
 
-        <li className="enable-musixmatch-lyrics mb-4">
+        <li className="secondary-container enable-musixmatch-lyrics mb-4">
           <div className="description">
             Enable Musixmatch Lyrics that provides synced and unsynced lyrics
             for your playlist on-demand.
             <div className="mt-1 ml-2 text-sm font-light">
               Enabling and using this feature means you have accepted the{' '}
-              <span
-                className="cursor-pointer text-font-color-highlight hover:underline dark:text-dark-font-color-highlight-2"
-                onClick={() => {
+              <Button
+                className="!m-0 !inline !rounded-none !border-0 !p-0 !text-font-color-highlight-2 outline-1 outline-offset-1 hover:underline focus-visible:!outline dark:!text-dark-font-color-highlight-2"
+                clickHandler={() => {
                   changePromptMenuData(true, <MusixmatchDisclaimerPrompt />);
                 }}
-              >
-                Musixmatch Lyrics Disclaimer
-              </span>
+                label="Musixmatch Lyrics Disclaimer"
+              />
               .
             </div>
           </div>

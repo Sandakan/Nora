@@ -2,9 +2,9 @@
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
 import { FixedSizeList as List } from 'react-window';
+import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import Button from '../Button';
 import Dropdown, { DropdownOption } from '../Dropdown';
 import Img from '../Img';
@@ -35,7 +35,6 @@ const MusicFoldersPage = () => {
     React.useState<FolderSortTypes>('aToZ');
 
   const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
-
   const foldersContainerRef = React.useRef(null as HTMLDivElement | null);
   const { width, height } = useResizeObserver(foldersContainerRef);
 
@@ -81,6 +80,25 @@ const MusicFoldersPage = () => {
     };
   }, [fetchFoldersData]);
 
+  const folders = React.useCallback(
+    (props: { index: number; style: React.CSSProperties }) => {
+      const { index, style } = props;
+      const { folderData, songIds, isBlacklisted } = musicFolders[index];
+      return (
+        <div style={style}>
+          <Folder
+            folderPath={folderData.path}
+            index={index}
+            isBlacklisted={isBlacklisted}
+            songIds={songIds}
+            key={folderData.path}
+          />
+        </div>
+      );
+    },
+    [musicFolders]
+  );
+
   const addNewFolder = React.useCallback(
     (
       _: unknown,
@@ -101,27 +119,8 @@ const MusicFoldersPage = () => {
     []
   );
 
-  const folders = React.useCallback(
-    (props: { index: number; style: React.CSSProperties }) => {
-      const { index, style } = props;
-      const folder = musicFolders[index];
-      return (
-        <div style={style} key={index}>
-          <Folder
-            key={index}
-            folderPath={folder.folderData.path}
-            songIds={folder.songIds}
-            index={index}
-            isBlacklisted={folder.isBlacklisted}
-          />
-        </div>
-      );
-    },
-    [musicFolders]
-  );
-
   return (
-    <MainContainer className="music-folders-page appear-from-bottom !h-full pr-4 !pb-0">
+    <MainContainer className="music-folders-page appear-from-bottom !h-full !pb-0 pr-4">
       <>
         <div className="title-container mt-2 mb-8 flex items-center justify-between text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">
@@ -191,11 +190,11 @@ const MusicFoldersPage = () => {
           )}
         </div>
 
-        <div className="folders-container h-full" ref={foldersContainerRef}>
+        <div className="folders-container h-full">
           {musicFolders && musicFolders.length > 0 && (
             <List
               itemCount={musicFolders.length}
-              itemSize={75}
+              itemSize={70}
               width={width || '100%'}
               height={height || 450}
               overscanCount={10}
@@ -222,13 +221,13 @@ const MusicFoldersPage = () => {
         </div>
 
         {musicFolders.length === 0 && (
-          <div className="no-folders-container flex h-full flex-col items-center justify-center text-lg">
+          <div className="no-folders-container flex h-full flex-col items-center justify-center text-lg text-font-color-black dark:text-font-color-white">
             <Img src={NoFoldersImage} className="w-60" />
             <br />
             <p>No Folders added to the library.</p>
             <Button
               label="Add new Folder"
-              className="mt-4 rounded-md !bg-background-color-3 px-8 text-lg text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
+              className="mt-4 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
               iconName="create_new_folder"
               pendingAnimationOnDisabled
               iconClassName="material-icons-round-outlined"

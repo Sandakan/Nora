@@ -19,7 +19,7 @@ const RecentSearchResult = React.memo((props: RecentSearchResultProp) => {
 
   return (
     <Button
-      className="!mt-3 !mr-2 !border-0 !bg-background-color-2 !px-4 !py-2 hover:text-font-color-highlight-2 dark:!bg-dark-background-color-2/75 dark:hover:text-dark-font-color-highlight-2"
+      className="!mt-3 !mr-2 !border-0 !bg-background-color-2 !px-4 !py-2 outline-1 outline-offset-0 hover:text-font-color-highlight-2 focus-visible:!outline dark:!bg-dark-background-color-2/75 dark:hover:text-dark-font-color-highlight-2"
       label={
         props.result.length > 20
           ? props.result.substring(0, 20).concat('...')

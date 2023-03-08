@@ -71,7 +71,7 @@ const Button = React.memo((props: ButtonProps) => {
   return (
     <button
       type="button"
-      className={`button group mr-4 flex cursor-pointer items-center justify-center rounded-3xl border-[3px] border-background-color-2 bg-[transparent] px-4 py-2 text-sm text-font-color-black transition-[border] ease-in-out hover:border-background-color-3 dark:border-dark-background-color-2 dark:bg-[transparent] dark:text-font-color-white dark:hover:border-dark-background-color-3 ${
+      className={`button group mr-4 flex cursor-pointer items-center justify-center rounded-3xl border-[3px] border-background-color-2 bg-[transparent] px-4 py-2 text-sm text-font-color-black transition-[border] ease-in-out hover:border-background-color-3 focus-visible:!border-font-color-highlight-2 dark:border-dark-background-color-2 dark:bg-[transparent] dark:text-font-color-white dark:hover:border-dark-background-color-3 dark:focus-visible:!border-dark-font-color-highlight-2 ${
         isButtonDisabled &&
         `!cursor-not-allowed  !border-font-color-dimmed/10 !text-opacity-50 !brightness-50 !transition-none dark:!border-font-color-dimmed/40`
       } ${className}`}

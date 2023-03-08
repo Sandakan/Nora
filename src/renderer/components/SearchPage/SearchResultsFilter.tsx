@@ -3,6 +3,7 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
+import Button from '../Button';
 
 interface SearchResultsFilterProp {
   filterType: SearchFilters;
@@ -30,26 +31,18 @@ const SearchResultsFilter = React.memo((props: SearchResultsFilterProp) => {
     }
   }, [props.filterType]);
   return (
-    <li
-      className={`appear-from-bottom mr-3 flex w-fit cursor-pointer list-none items-center rounded-3xl py-1 px-4 text-font-color-black transition-[width,background,color] duration-200 ${
+    <Button
+      className={`appear-from-bottom mr-3 flex w-fit cursor-pointer list-none items-center !border-0 py-1 px-4 text-font-color-black outline-1 outline-offset-1 transition-[width,background,color] duration-200 focus-visible:!outline ${
         props.isCurrentActiveFilter
-          ? 'active bg-background-color-3 dark:bg-dark-background-color-3 dark:text-font-color-black'
-          : 'bg-background-color-2 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:hover:text-font-color-black'
+          ? 'active bg-background-color-3 dark:bg-dark-background-color-3 dark:!text-font-color-black'
+          : 'bg-background-color-2 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:hover:!text-font-color-black'
       }`}
-      onClick={() =>
+      clickHandler={() =>
         props.changeActiveFilter(props.filterType as SearchFilters)
       }
-    >
-      <div
-        className={`material-icons-round icon transition-transform ${
-          props.isCurrentActiveFilter ? 'mr-2 scale-100' : '!hidden scale-50'
-        }`}
-      >
-        {icon}
-      </div>
-
-      {props.filterType}
-    </li>
+      label={props.filterType}
+      iconName={icon}
+    />
   );
 });
 

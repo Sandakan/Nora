@@ -1,6 +1,6 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable react/require-default-props */
 /* eslint-disable jsx-a11y/label-has-associated-control */
+/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
 import React from 'react';
 
@@ -8,7 +8,7 @@ interface CheckboxProp {
   id: string;
   className?: string;
   isChecked: boolean;
-  checkedStateUpdateFunction: (state: boolean) => void;
+  checkedStateUpdateFunction: (_state: boolean) => void;
   labelContent?: string;
   isDisabled?: boolean;
 }
@@ -22,11 +22,27 @@ const Checkbox = React.memo((props: CheckboxProp) => {
     className,
     isDisabled = false,
   } = props;
+
+  const focusInput = React.useCallback(
+    (e: React.KeyboardEvent<HTMLLabelElement>) => {
+      if (e.key === 'Enter') {
+        e.stopPropagation();
+        const inputId = e.currentTarget.htmlFor;
+        const inputElement = document.getElementById(inputId);
+        inputElement?.click();
+      }
+    },
+    []
+  );
+
   return (
-    <div
-      className={`checkbox-and-labels-container mt-4 ml-2 flex items-center transition-opacity ${
+    <label
+      htmlFor={id}
+      className={`checkbox-and-labels-container mt-4 ml-2 flex !w-fit items-center outline-1 outline-offset-1 transition-opacity focus-visible:!outline ${
         isDisabled && 'pointer-events-none !cursor-pointer opacity-50'
       } ${className}`}
+      tabIndex={isDisabled ? -1 : 0}
+      onKeyDown={focusInput}
     >
       <input
         type="checkbox"
@@ -49,7 +65,7 @@ const Checkbox = React.memo((props: CheckboxProp) => {
           {labelContent}
         </label>
       )}
-    </div>
+    </label>
   );
 });
 

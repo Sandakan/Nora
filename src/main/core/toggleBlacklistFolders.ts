@@ -65,7 +65,10 @@ const toggleBlacklistFolders = async (
   }
 
   setBlacklist(blacklist);
-  dataUpdateEvent('songs/likes', [...result.blacklists, ...result.whitelists]);
+  dataUpdateEvent('blacklist/folderBlacklist', [
+    ...result.blacklists,
+    ...result.whitelists,
+  ]);
   return result;
 };
 

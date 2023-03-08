@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/no-array-index-key */
@@ -137,7 +138,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
   return (
     <div className="current-playing-song-info-container relative flex w-[30%] items-center">
       <div
-        className={`song-cover-container relative mr-2 flex h-full w-[25%] items-center justify-center overflow-hidden p-2 lg:hidden 
+        className={`song-cover-container relative mr-2 flex h-full w-[25%] max-w-[6rem] items-center justify-center overflow-hidden p-2 lg:hidden 
              
              `}
         id="currentSongCover"
@@ -160,23 +161,23 @@ const CurrentlyPlayingSongInfoContainer = () => {
       </div>
       <div className="song-info-container flex h-full w-[65%] flex-col items-start justify-center drop-shadow-lg lg:ml-4 lg:w-full">
         {currentSongData.title && (
-          <div
-            className="song-title flex w-full items-center"
-            id="currentSongTitle"
-            title={currentSongData.title}
-            onClick={showSongInfoPage}
-            onContextMenu={(e) => {
-              e.stopPropagation();
-              updateContextMenuData(true, contextMenuItems, e.pageX, e.pageY);
-            }}
-          >
-            <span
-              className={`w-fit max-w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-2xl font-medium ${
+          <div className="song-title flex w-full items-center">
+            <div
+              className={`w-fit max-w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-2xl font-medium outline-1 outline-offset-1 focus-visible:!outline ${
                 currentSongData.isKnownSource && 'hover:underline'
               }`}
+              id="currentSongTitle"
+              title={currentSongData.title}
+              onClick={showSongInfoPage}
+              onKeyDown={(e) => e.key === 'Enter' && showSongInfoPage()}
+              onContextMenu={(e) => {
+                e.stopPropagation();
+                updateContextMenuData(true, contextMenuItems, e.pageX, e.pageY);
+              }}
+              tabIndex={0}
             >
               {currentSongData.title}
-            </span>
+            </div>
             {!currentSongData.isKnownSource && (
               <span
                 className="material-icons-round-outlined ml-2 cursor-pointer text-xl font-light text-font-color-highlight hover:underline dark:text-dark-font-color-highlight"

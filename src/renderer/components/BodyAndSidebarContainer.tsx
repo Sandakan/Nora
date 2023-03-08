@@ -10,8 +10,8 @@ const BodyAndSideBarContainer = () => {
     <div className="body-and-side-bar-container relative flex h-[calc(100%-8.5rem)] w-full overflow-hidden">
       <ErrorBoundary>
         <NotificationPanel />
-        <Body />
         <Sidebar />
+        <Body />
       </ErrorBoundary>
     </div>
   );

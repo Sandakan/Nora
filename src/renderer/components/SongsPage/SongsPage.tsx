@@ -212,7 +212,6 @@ export const SongsPage = () => {
         path,
         isBlacklisted,
       } = content.songsData[index];
-
       return (
         <div style={style}>
           <Song
@@ -423,7 +422,7 @@ export const SongsPage = () => {
             </span>
             <Button
               label="Add Folder"
-              className="mt-4 w-40 rounded-md !bg-background-color-3 px-8 text-lg text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
+              className="mt-4 w-40 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
               clickHandler={addNewSongs}
             />
           </div>

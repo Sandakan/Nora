@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -13,6 +14,7 @@ import BlacklistSongConfrimPrompt from './BlacklistSongConfirmPrompt';
 import SongArtist from './SongArtist';
 import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 import DeleteSongsFromSystemConfrimPrompt from './DeleteSongsFromSystemConfrimPrompt';
+import Button from '../Button';
 
 interface SongProp {
   songId: string;
@@ -585,21 +587,22 @@ const Song = React.forwardRef(
           )}
           <div className="song-cover-container relative ml-2 mr-4 flex h-[90%] flex-row items-center justify-center overflow-hidden rounded-md">
             <div className="play-btn-container absolute top-1/2 left-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
-              <span
-                className={`material-icons-round icon cursor-pointer text-3xl text-font-color-white text-opacity-0 ${
+              <Button
+                className="!m-0 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 focus-visible:!outline"
+                iconClassName={`!text-3xl text-font-color-white text-opacity-0 !leading-none ${
                   currentSongData.songId === songId && 'text-opacity-100'
-                } group-hover:text-opacity-100`}
-                onClick={handlePlayBtnClick}
-                style={isSongPlaying ? { color: `hsla(0,0%,100%,0.75)` } : {}}
-              >
-                {isSongPlaying ? 'pause_circle' : 'play_circle'}
-              </span>
+                } group-focus-within:text-opacity-100 group-hover:text-opacity-100 ${
+                  isSongPlaying && '!text-font-color-white/75'
+                }`}
+                clickHandler={handlePlayBtnClick}
+                iconName={isSongPlaying ? 'pause_circle' : 'play_circle'}
+              />
             </div>
             <Img
               src={artworkPaths.artworkPath}
               loading="lazy"
               alt="Song cover"
-              className={`aspect-square max-h-full object-contain py-[0.1rem] transition-[filter] duration-300 group-hover:brightness-50 ${
+              className={`aspect-square max-h-full object-contain py-[0.1rem] transition-[filter] duration-300 group-focus-within:brightness-50 group-hover:brightness-50 ${
                 isSongPlaying ? 'brightness-50' : ''
               }`}
             />
@@ -612,7 +615,9 @@ const Song = React.forwardRef(
           }`}
         >
           <div
-            className="song-title w-2/5 overflow-hidden text-ellipsis whitespace-nowrap pr-4 text-base font-normal transition-none"
+            className="song-title w-2/5 overflow-hidden text-ellipsis whitespace-nowrap pr-4 text-base font-normal outline-1 outline-offset-1 transition-none focus-visible:!outline"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && goToSongInfoPage()}
             title={title}
           >
             {title}
@@ -624,25 +629,30 @@ const Song = React.forwardRef(
             {year ?? '----'}
           </div>
           <div className="song-duration mr-1 flex w-[12.5%] items-center justify-between pr-4 text-center transition-none">
-            <span
-              className={`${
+            <Button
+              className="mt-1 !mr-0 !rounded-none !border-0 !p-0 !text-inherit outline-1 outline-offset-1 focus-visible:!outline"
+              iconName="favorite"
+              iconClassName={`${
                 isAFavorite
                   ? 'material-icons-round'
                   : 'material-icons-round-outlined'
-              } icon cursor-pointer text-xl font-light md:hidden ${
+              } !leading-none !text-xl !font-light md:hidden ${
                 isAFavorite
                   ? currentSongData.songId === songId || isAMultipleSelection
-                    ? 'text-font-color-black dark:text-font-color-black'
-                    : 'text-font-color-highlight dark:text-dark-background-color-3'
+                    ? '!text-font-color-black dark:!text-font-color-black'
+                    : '!text-font-color-highlight dark:!text-dark-background-color-3'
                   : currentSongData.songId === songId || isAMultipleSelection
-                  ? 'text-font-color-black dark:text-font-color-black'
-                  : 'text-font-color-highlight dark:text-dark-background-color-3'
+                  ? '!text-font-color-black dark:!text-font-color-black'
+                  : '!text-font-color-highlight dark:!text-dark-background-color-3'
               }`}
-              title={`You ${isAFavorite ? 'liked' : "didn't like"} this song.`}
-              onClick={handleLikeButtonClick}
-            >
-              favorite
-            </span>
+              tooltipLabel={`You ${
+                isAFavorite ? 'liked' : "didn't like"
+              } this song.`}
+              clickHandler={(e) => {
+                e.stopPropagation();
+                handleLikeButtonClick();
+              }}
+            />
             {minutes ?? '--'}:{seconds ?? '--'}
           </div>
         </div>
