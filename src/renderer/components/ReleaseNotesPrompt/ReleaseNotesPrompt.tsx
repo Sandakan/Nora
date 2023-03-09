@@ -16,7 +16,6 @@ import Img from '../Img';
 
 import packageFile from '../../../../package.json';
 import localReleseNotes from '../../../../release-notes.json';
-import WhatsNewImg from '../../../../assets/other/release artworks/whats-new-v0.8.0-alpha.png';
 import ReleaseNotesAppUpdateInfo from './ReleaseNotesAppUpdateInfo';
 
 const ReleaseNotesPrompt = () => {
@@ -149,7 +148,7 @@ const ReleaseNotesPrompt = () => {
               <div className="version-artwork-container mb-4 p-4">
                 <Img
                   src={`${packageFile.urls.raw_repository_url}master${releaseNotes.latestVersion.artwork}`}
-                  fallbackSrc={WhatsNewImg}
+                  fallbackSrc={releaseNotes.latestVersion.artwork}
                   className="rounded-lg"
                   alt=""
                 />

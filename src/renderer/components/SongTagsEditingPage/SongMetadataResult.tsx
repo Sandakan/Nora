@@ -75,6 +75,7 @@ function SongMetadataResult(props: SongMetadataResultProp) {
       <div className="buttons-container flex items-center">
         <Button
           label="Add to Metadata"
+          iconName="add"
           className="h-fit !bg-background-color-3 px-8 text-lg text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
           clickHandler={() => {
             updateSongInfo((prevData) => {
@@ -102,7 +103,7 @@ function SongMetadataResult(props: SongMetadataResultProp) {
         />
         <Button
           key={0}
-          className="more-options-btn text-sm dark:border-dark-background-color-1 md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+          className="more-options-btn text-sm hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3 md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
           iconName="tune"
           clickHandler={() => {
             changePromptMenuData(

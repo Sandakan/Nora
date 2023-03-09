@@ -66,7 +66,7 @@ const AboutSettings = () => {
               <span className="block">Nora</span>
               <span className="text-sm font-light">
                 v{version}{' '}
-                {elapsed ? (
+                {elapsed && (
                   <>
                     &bull;{' '}
                     <span
@@ -80,8 +80,6 @@ const AboutSettings = () => {
                       {elapsed.elapsed === 1 ? '' : 's'} ago)
                     </span>
                   </>
-                ) : (
-                  ''
                 )}
               </span>
             </div>
@@ -91,7 +89,7 @@ const AboutSettings = () => {
               className="about-link !mr-8 block w-fit cursor-pointer !rounded-none !border-0 !p-0 outline-1 outline-offset-2 focus:!outline"
               iconName="language"
               iconClassName="!text-2xl"
-              tooltipLabel="Nora's Website"
+              tooltipLabel="Nora's Website (Under Development)"
               clickHandler={() => window.api.openInBrowser('nora:')}
               isDisabled
             />
@@ -173,9 +171,9 @@ const AboutSettings = () => {
                   <div className="mb-4 w-full text-center text-3xl font-medium">
                     Open Source Licenses
                   </div>
-                  <pre className="relative max-h-full w-full overflow-y-auto px-4">
+                  <div className="relative max-h-full w-full overflow-y-auto whitespace-pre-wrap px-4">
                     {openSourceLicenses}
-                  </pre>
+                  </div>
                 </>,
                 'flex flex-col'
               )
