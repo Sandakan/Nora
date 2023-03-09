@@ -69,7 +69,8 @@
             "note": "Improved the functionality when restoring blacklisted songs."
           },
           { "note": "Improved accessibility features of the app." },
-          { "note": "Updated the UI in Genre Info Page and Album Info Page." }
+          { "note": "Updated the UI in Genre Info Page and Album Info Page." },
+          { "note": "Updated app dependencies." }
         ],
         "knownIssues": [
           {

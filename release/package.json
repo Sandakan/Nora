@@ -7,7 +7,7 @@
   "author": {
     "name": "Sandakan Nipunajith",
     "email": "adsandakannipunajith2003@outlook.com",
-    "url": "https://github.com/Sandakan/Oto-Music-for-Desktop"
+    "url": "https://github.com/Sandakan/Nora"
   },
   "scripts": {
     "electron-rebuild": "node -r ts-node/register ../../.erb/scripts/electron-rebuild.js",

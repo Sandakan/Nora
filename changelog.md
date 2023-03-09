@@ -36,6 +36,7 @@
     - Improved the functionality when restoring blacklisted songs.
     - Improved accessibility features of the app.
     - Updated the UI in GenreInfoPage and AlbumInfoPage.
+    - Updated app dependencies.
   - ### 🐜 Known Issues and Bugs
     - Sometimes users can get unexpected search results when using Search.
     - App theme will be changed when you change your system's theme even though you didn't select to use system theme in the app.
