@@ -127,7 +127,7 @@ const sendSongID3Tags = async (
           const songTags = await getSongId3Tags(songPath);
 
           const res: SongTags = {
-            title: songTags.title || 'Unknown Title',
+            title: songTags.title || '',
             artists: songTags.artist ? [{ name: songTags.artist }] : undefined,
             album: songTags.album
               ? {

@@ -28,15 +28,12 @@ export default (
   logOptions?: LogOptions
 ) => {
   let mes: string;
-  // const isMessageAnErrorInstance =
-  //   Object.prototype.toString.call(message) === '[object Error]';
 
   if (message instanceof Error) mes = message.message;
   else mes = message.replaceAll('\n', '\n\t');
 
   const options: LogOptions = { ...defaultLogOptions, ...logOptions };
   const seperator =
-    // eslint-disable-next-line no-nested-ternary
     messageType === 'ERROR' ? '======' : messageType === 'WARN' ? '######' : '';
 
   if (messageType !== 'INFO') mes = mes.toUpperCase();
@@ -47,6 +44,5 @@ export default (
     encoding: 'utf-8',
   });
 
-  // eslint-disable-next-line no-console
   if (!options.preventLoggingToConsole) console.log(str);
 };

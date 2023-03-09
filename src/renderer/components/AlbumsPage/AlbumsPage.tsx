@@ -45,7 +45,7 @@ export const AlbumsPage = () => {
   const MIN_ITEM_WIDTH = 220;
   const MIN_ITEM_HEIGHT = 280;
   const noOfColumns = Math.floor(width / MIN_ITEM_WIDTH);
-  const noOfRows = Math.ceil(albumsData?.length || 1 / noOfColumns);
+  const noOfRows = Math.ceil(albumsData.length / noOfColumns);
   const itemWidth =
     MIN_ITEM_WIDTH + ((width % MIN_ITEM_WIDTH) - 10) / noOfColumns;
 

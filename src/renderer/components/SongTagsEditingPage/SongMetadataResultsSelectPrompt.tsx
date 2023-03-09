@@ -84,7 +84,10 @@ const SongMetadataResultsSelectPage = (
   return (
     <div className={`relative `}>
       <div className="title-container mb-4 w-full text-2xl font-medium">
-        Results related to &quot;{songTitle}&quot;
+        Results related to{' '}
+        <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
+          "{songTitle}"
+        </span>
       </div>
       <div className="query-editing-inputs-container my-2 flex items-center justify-between">
         <div>

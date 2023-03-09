@@ -164,8 +164,8 @@ export const api = {
       lyricsRequestType
     ),
 
-  saveLyricsToSong: (songId: string, lyrics: SongLyrics) =>
-    ipcRenderer.invoke('app/saveLyricsToSong', songId, lyrics),
+  saveLyricsToSong: (songPath: string, lyrics: SongLyrics) =>
+    ipcRenderer.invoke('app/saveLyricsToSong', songPath, lyrics),
 
   // $ APP MESSAGES
   getMessageFromMain: (
@@ -256,6 +256,15 @@ export const api = {
     ipcRenderer.invoke('app/blacklistFolders', folderPaths),
   restoreBlacklistedFolders: (folderPaths: string[]): Promise<void> =>
     ipcRenderer.invoke('app/restoreBlacklistedFolders', folderPaths),
+  toggleBlacklistedFolders: (
+    folderPaths: string[],
+    isBlacklistFolder?: boolean
+  ): Promise<void> =>
+    ipcRenderer.invoke(
+      'app/toggleBlacklistedFolders',
+      folderPaths,
+      isBlacklistFolder
+    ),
 
   // $ ARTISTS DATA
   getArtistData: (

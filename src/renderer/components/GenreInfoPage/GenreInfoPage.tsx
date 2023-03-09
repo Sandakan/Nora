@@ -6,6 +6,7 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
 import Button from '../Button';
 import Dropdown from '../Dropdown';
+import Img from '../Img';
 import MainContainer from '../MainContainer';
 import Song from '../SongsPage/Song';
 
@@ -190,102 +191,108 @@ const GenreInfoPage = () => {
       // }
     >
       <>
-        <div className="title-container mt-1 mb-4 flex items-center justify-between pr-4 text-3xl font-medium  text-font-color-highlight dark:text-dark-font-color-highlight">
-          <div className="genre-title-container max-w-[40%] overflow-hidden text-ellipsis whitespace-nowrap">
-            {genreData?.name}
-          </div>
-          <div className="other-controls-container flex">
-            {genreData && genreSongs.length > 0 && (
-              <>
-                <Button
-                  label="Play All"
-                  iconName="play_arrow"
-                  clickHandler={() =>
-                    createQueue(
-                      genreSongs
-                        .filter((song) => !song.isBlacklisted)
-                        .map((song) => song.songId),
-                      'genre',
-                      false,
-                      genreData.genreId,
-                      true
-                    )
-                  }
-                />
-                <Button
-                  // label="Shuffle and Play"
-                  iconName="shuffle"
-                  clickHandler={() =>
-                    createQueue(
-                      genreSongs
-                        .filter((song) => !song.isBlacklisted)
-                        .map((song) => song.songId),
-                      'genre',
-                      true,
-                      genreData.genreId,
-                      true
-                    )
-                  }
-                />
-                <Button
-                  // label="Add to Queue"
-                  iconName="add"
-                  clickHandler={() => {
-                    updateQueueData(
-                      undefined,
-                      [
-                        ...queue.queue,
-                        ...genreSongs.map((song) => song.songId),
-                      ],
-                      false,
-                      false
-                    );
-                    addNewNotifications([
-                      {
-                        id: genreData.genreId,
-                        delay: 5000,
-                        content: (
-                          <span>
-                            Added {genreSongs.length} song
-                            {genreSongs.length === 1 ? '' : 's'} to the queue.
-                          </span>
-                        ),
-                      },
-                    ]);
-                  }}
-                />
-                <Dropdown
-                  name="songsPageSortDropdown"
-                  value={sortingOrder}
-                  options={dropdownOptions}
-                  onChange={(e) => {
-                    const order = e.currentTarget.value as SongSortTypes;
-                    updateCurrentlyActivePageData((currentPageData) => ({
-                      ...currentPageData,
-                      sortingOrder: order,
-                    }));
-                    setSortingOrder(order);
-                  }}
-                />
-              </>
-            )}
-          </div>
-        </div>
         {genreData && genreData.genreId && (
-          <div className="genre-info-container mb-4 h-fit text-font-color-black dark:text-font-color-white">
-            <div className="genre-title h-fit max-w-[80%] overflow-hidden text-ellipsis whitespace-nowrap py-2 text-6xl text-font-color-highlight dark:text-dark-font-color-highlight">
-              {genreData.name}
-            </div>
-            <div className="genre-no-of-songs">{`${
-              genreData.songs.length
-            } song${genreData.songs.length !== 1 ? 's' : ''}`}</div>
-            <div className="genre-total-duration">
-              {totalGenreSongsDuration}
+          <div className="genre-img-and-info-container my-4 flex h-fit items-center text-font-color-black dark:text-font-color-white">
+            <Img
+              src={genreData.artworkPaths.artworkPath}
+              className="mr-8 aspect-square max-w-[14rem] rounded-lg"
+            />
+            <div className="genre-info-container flex-grow">
+              <div className="font-semibold tracking-wider opacity-50">
+                GENRE
+              </div>
+              <div className="genre-title h-fit max-w-[80%] overflow-hidden text-ellipsis whitespace-nowrap pb-2 text-6xl text-font-color-highlight dark:text-dark-font-color-highlight">
+                {genreData.name}
+              </div>
+              <div className="genre-no-of-songs">{`${
+                genreData.songs.length
+              } song${genreData.songs.length !== 1 ? 's' : ''}`}</div>
+              <div className="genre-total-duration">
+                {totalGenreSongsDuration}
+              </div>
             </div>
           </div>
         )}
         {genreSongs.length > 0 && (
-          <div className="songs-container">{songComponents}</div>
+          <>
+            <div className="other-controls-container mb-4 flex justify-end px-6">
+              {genreData && genreSongs.length > 0 && (
+                <>
+                  <Button
+                    label="Play All"
+                    iconName="play_arrow"
+                    clickHandler={() =>
+                      createQueue(
+                        genreSongs
+                          .filter((song) => !song.isBlacklisted)
+                          .map((song) => song.songId),
+                        'genre',
+                        false,
+                        genreData.genreId,
+                        true
+                      )
+                    }
+                  />
+                  <Button
+                    // label="Shuffle and Play"
+                    iconName="shuffle"
+                    clickHandler={() =>
+                      createQueue(
+                        genreSongs
+                          .filter((song) => !song.isBlacklisted)
+                          .map((song) => song.songId),
+                        'genre',
+                        true,
+                        genreData.genreId,
+                        true
+                      )
+                    }
+                  />
+                  <Button
+                    // label="Add to Queue"
+                    iconName="add"
+                    clickHandler={() => {
+                      updateQueueData(
+                        undefined,
+                        [
+                          ...queue.queue,
+                          ...genreSongs.map((song) => song.songId),
+                        ],
+                        false,
+                        false
+                      );
+                      addNewNotifications([
+                        {
+                          id: genreData.genreId,
+                          delay: 5000,
+                          content: (
+                            <span>
+                              Added {genreSongs.length} song
+                              {genreSongs.length === 1 ? '' : 's'} to the queue.
+                            </span>
+                          ),
+                        },
+                      ]);
+                    }}
+                  />
+                  <Dropdown
+                    name="songsPageSortDropdown"
+                    value={sortingOrder}
+                    options={dropdownOptions}
+                    onChange={(e) => {
+                      const order = e.currentTarget.value as SongSortTypes;
+                      updateCurrentlyActivePageData((currentPageData) => ({
+                        ...currentPageData,
+                        sortingOrder: order,
+                      }));
+                      setSortingOrder(order);
+                    }}
+                  />
+                </>
+              )}
+            </div>
+            <div className="songs-container">{songComponents}</div>
+          </>
         )}
       </>
     </MainContainer>

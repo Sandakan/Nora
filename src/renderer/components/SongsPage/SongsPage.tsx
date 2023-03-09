@@ -198,7 +198,7 @@ export const SongsPage = () => {
       .catch((err) => console.error(err));
   }, [content.sortingOrder]);
 
-  const row = React.useCallback(
+  const songs = React.useCallback(
     (props: { index: number; style: React.CSSProperties }) => {
       const { index, style } = props;
       const {
@@ -236,32 +236,6 @@ export const SongsPage = () => {
     [content.songsData, userData]
   );
 
-  const songs = React.useMemo(
-    () =>
-      content.songsData && content.songsData.length > 0
-        ? content.songsData.map((song, index) => {
-            return (
-              <Song
-                key={song.songId}
-                index={index}
-                isIndexingSongs={
-                  userData !== undefined && userData.preferences.songIndexing
-                }
-                title={song.title}
-                artworkPaths={song.artworkPaths}
-                duration={song.duration}
-                songId={song.songId}
-                artists={song.artists}
-                path={song.path}
-                isAFavorite={song.isAFavorite}
-                isBlacklisted={song.isBlacklisted}
-              />
-            );
-          })
-        : [],
-    [content.songsData, userData]
-  );
-
   return (
     <MainContainer className="main-container appear-from-bottom songs-list-container !h-full overflow-hidden !pb-0">
       <>
@@ -274,15 +248,17 @@ export const SongsPage = () => {
                   {multipleSelectionsData.multipleSelections.length} selections
                 </div>
               ) : (
-                songs &&
-                songs.length > 0 && (
-                  <span className="no-of-songs">{songs.length} songs</span>
+                content.songsData &&
+                content.songsData.length > 0 && (
+                  <span className="no-of-songs">
+                    {content.songsData.length} songs
+                  </span>
                 )
               )}
             </div>
           </div>
           <div className="other-controls-container flex">
-            {songs && songs.length > 0 && (
+            {content.songsData && content.songsData.length > 0 && (
               <>
                 <Button
                   key={0}
@@ -396,7 +372,7 @@ export const SongsPage = () => {
         <div className="songs-container h-full flex-1" ref={songsContainerRef}>
           {content.songsData && content.songsData.length > 0 && (
             <List
-              itemCount={songs.length}
+              itemCount={content.songsData.length}
               itemSize={60}
               width={width || '100%'}
               height={height || 450}
@@ -418,7 +394,7 @@ export const SongsPage = () => {
                   );
               }}
             >
-              {row}
+              {songs}
             </List>
           )}
         </div>
@@ -446,7 +422,7 @@ export const SongsPage = () => {
             </span>
             <Button
               label="Add Folder"
-              className="mt-4 w-40 rounded-md !bg-background-color-3 px-8 text-lg text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
+              className="mt-4 w-40 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
               clickHandler={addNewSongs}
             />
           </div>

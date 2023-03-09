@@ -43,7 +43,7 @@ function SongArtist(props: SongArtistProp) {
 
   return (
     <Button
-      className={`!m-0 inline !border-0 !p-0 text-xs font-normal ${
+      className={`!m-0 inline !rounded-none !border-0 !p-0 text-xs font-normal outline-1 -outline-offset-1 focus-visible:!outline ${
         isFromKnownSource && 'hover:underline'
       } ${className}`}
       key={artistId}

@@ -183,7 +183,7 @@ const MusicFolderInfoPage = () => {
   const { folderName } = React.useMemo(() => {
     if (folderInfo) {
       const { path } = folderInfo.folderData;
-      const name = path.split('\\').pop() || 'Unknown Folder Name';
+      const name = path.split('\\').pop() || path;
 
       return { folderPath: path, folderName: name };
     }

@@ -3,7 +3,8 @@
 import NodeID3 from 'node-id3';
 import songlyrics from 'songlyrics';
 
-import { getSongsData, getUserData } from '../filesystem';
+import { getUserData } from '../filesystem';
+import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
 import log from '../log';
 import { checkIfConnectedToInternet, sendMessageToRenderer } from '../main';
 import fetchLyricsFromMusixmatch from '../utils/fetchLyricsFromMusixmatch';
@@ -20,59 +21,23 @@ export const updateCachedLyrics = (
   if (lyrics) cachedLyrics = lyrics;
 };
 
-const fetchLyricsFromAudioSource = (songId: string, songTitle: string) => {
-  const songs = getSongsData();
+const fetchLyricsFromAudioSource = (songPath: string) => {
+  const songData = NodeID3.read(songPath);
+  const { unsynchronisedLyrics, synchronisedLyrics } = songData;
 
-  if (Array.isArray(songs) && songs.length > 0) {
-    for (let i = 0; i < songs.length; i += 1) {
-      if (songs[i].songId === songId) {
-        const song = songs[i];
-        const songData = NodeID3.read(song.path);
-        const { unsynchronisedLyrics, synchronisedLyrics } = songData;
+  if (Array.isArray(synchronisedLyrics) && synchronisedLyrics.length > 0) {
+    const syncedLyricsData = synchronisedLyrics[synchronisedLyrics.length - 1];
+    const parsedSyncedLyrics =
+      parseSyncedLyricsFromAudioDataSource(syncedLyricsData);
 
-        if (
-          Array.isArray(synchronisedLyrics) &&
-          synchronisedLyrics.length > 0
-        ) {
-          const syncedLyricsData =
-            synchronisedLyrics[synchronisedLyrics.length - 1];
-          const parsedSyncedLyrics =
-            parseSyncedLyricsFromAudioDataSource(syncedLyricsData);
-
-          if (parsedSyncedLyrics) {
-            const { isSynced } = parsedSyncedLyrics;
-
-            const lyricsType: LyricsTypes = isSynced ? 'SYNCED' : 'UN_SYNCED';
-
-            cachedLyrics = {
-              title: songTitle,
-              source: 'IN_SONG_LYRICS',
-              lyricsType,
-              lyrics: parsedSyncedLyrics,
-            };
-            return cachedLyrics;
-          }
-        }
-
-        if (unsynchronisedLyrics?.text) {
-          const parsedLyrics = parseLyrics(unsynchronisedLyrics.text);
-          const lyricsType: LyricsTypes = parsedLyrics.isSynced
-            ? 'SYNCED'
-            : 'UN_SYNCED';
-
-          cachedLyrics = {
-            title: songTitle,
-            source: 'IN_SONG_LYRICS',
-            lyricsType,
-            lyrics: parsedLyrics,
-          };
-          return cachedLyrics;
-        }
-        // No lyrics found on the audio_source.
-        break;
-      }
-    }
+    if (parsedSyncedLyrics) return parsedSyncedLyrics;
   }
+
+  if (unsynchronisedLyrics?.text) {
+    const parsedLyrics = parseLyrics(unsynchronisedLyrics.text);
+    if (parsedLyrics) return parsedLyrics;
+  }
+  // No lyrics found on the audio_source.
   return undefined;
 };
 
@@ -113,7 +78,7 @@ const getLyricsFromMusixmatch = async (
 
         const parsedLyrics = parseLyrics(lyrics);
 
-        cachedLyrics = {
+        return {
           lyrics: parsedLyrics,
           title: songTitle,
           source: 'MUSIXMATCH',
@@ -122,7 +87,6 @@ const getLyricsFromMusixmatch = async (
           lyricsType: lyricsSyncState,
           copyright: metadata.copyright,
         };
-        return cachedLyrics;
       }
     } catch (error) {
       log(`Error occurred when trying to fetch lyrics from musixmatch.`, {
@@ -146,14 +110,13 @@ const fetchUnsyncedLyrics = async (
 
     const parsedLyrics = parseLyrics(lyrics);
 
-    cachedLyrics = {
+    return {
       title: songTitle,
       lyrics: parsedLyrics,
       source: source.name,
-      lyricsType: 'UN_SYNCED',
+      lyricsType: 'UN_SYNCED' as LyricsTypes,
       link: source.url,
     };
-    return cachedLyrics;
   }
   log(`No lyrics found in the internet for the requested query.`);
   sendMessageToRenderer(`We couldn't find lyrics for ${songTitle}`);
@@ -166,10 +129,20 @@ const getSongLyrics = async (
   lyricsRequestType: LyricsRequestTypes = 'ANY',
   abortControllerSignal?: AbortSignal
 ): Promise<SongLyrics | undefined> => {
-  const { songTitle, songArtists = [], songId } = trackInfo;
+  const {
+    songTitle,
+    songArtists = [],
+    songPath: songPathWithProtocol,
+  } = trackInfo;
+
+  const songPath = removeDefaultAppProtocolFromFilePath(songPathWithProtocol);
   const isConnectedToInternet = checkIfConnectedToInternet();
+  let isOfflineLyricsAvailable = false;
 
   log(`Fetching lyrics for '${songTitle} - ${songArtists.join(',')}'.`);
+
+  const audioSourceLyrics = fetchLyricsFromAudioSource(songPath);
+  if (audioSourceLyrics) isOfflineLyricsAvailable = true;
 
   if (lyricsRequestType !== 'ONLINE_ONLY') {
     if (
@@ -181,9 +154,18 @@ const getSongLyrics = async (
       return cachedLyrics;
     }
 
-    if (songId) {
-      const audioSourceLyrics = fetchLyricsFromAudioSource(songId, songTitle);
-      if (audioSourceLyrics) return audioSourceLyrics;
+    if (audioSourceLyrics) {
+      const { isSynced } = audioSourceLyrics;
+      const type: LyricsTypes = isSynced ? 'SYNCED' : 'UN_SYNCED';
+
+      cachedLyrics = {
+        title: songTitle,
+        source: 'IN_SONG_LYRICS',
+        lyricsType: type,
+        lyrics: audioSourceLyrics,
+        isOfflineLyricsAvailable,
+      };
+      return cachedLyrics;
     }
   }
 
@@ -195,14 +177,23 @@ const getSongLyrics = async (
         abortControllerSignal
       );
 
-      if (musixmatchLyrics) return musixmatchLyrics;
+      if (musixmatchLyrics) {
+        cachedLyrics = {
+          ...musixmatchLyrics,
+          isOfflineLyricsAvailable,
+        };
+        return cachedLyrics;
+      }
 
       if (lyricsType !== 'SYNCED') {
         const unsyncedLyrics = await fetchUnsyncedLyrics(
           songTitle,
           songArtists
         );
-        return unsyncedLyrics;
+        if (unsyncedLyrics) {
+          cachedLyrics = { ...unsyncedLyrics, isOfflineLyricsAvailable };
+          return cachedLyrics;
+        }
       }
     } catch (error) {
       log(

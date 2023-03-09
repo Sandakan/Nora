@@ -4,7 +4,9 @@
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable react/button-has-type */
 /* eslint-disable import/prefer-default-export */
-import React, { useContext } from 'react';
+import React, { CSSProperties, useContext } from 'react';
+import { FixedSizeGrid as Grid } from 'react-window';
+import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { Playlist } from './Playlist';
@@ -36,6 +38,16 @@ export const PlaylistsPage = () => {
       ? userData.sortingStates.playlistsPage
       : 'aToZ') as PlaylistSortTypes
   );
+
+  const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
+  const containerRef = React.useRef(null as HTMLDivElement | null);
+  const { height, width } = useResizeObserver(containerRef);
+  const MIN_ITEM_WIDTH = 175;
+  const MIN_ITEM_HEIGHT = 220;
+  const noOfColumns = Math.floor(width / MIN_ITEM_WIDTH);
+  const noOfRows = Math.ceil(playlists.length / noOfColumns);
+  const itemWidth =
+    MIN_ITEM_WIDTH + ((width % MIN_ITEM_WIDTH) - 10) / noOfColumns;
 
   const fetchPlaylistData = React.useCallback(
     () =>
@@ -74,25 +86,34 @@ export const PlaylistsPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortingOrder]);
 
-  const playlistComponents = React.useMemo(
-    () =>
-      playlists.length > 0
-        ? playlists.map((playlist, index) => {
-            return (
-              <Playlist
-                index={index}
-                name={playlist.name}
-                createdDate={playlist.createdDate}
-                playlistId={playlist.playlistId}
-                songs={playlist.songs}
-                isArtworkAvailable={playlist.isArtworkAvailable}
-                artworkPaths={playlist.artworkPaths}
-                key={playlist.playlistId}
-              />
-            );
-          })
-        : [],
-    [playlists]
+  const row = React.useCallback(
+    (props: {
+      columnIndex: number;
+      rowIndex: number;
+      style: CSSProperties;
+    }) => {
+      const { columnIndex, rowIndex, style } = props;
+      const index = rowIndex * noOfColumns + columnIndex;
+      if (index < playlists.length) {
+        const playlist = playlists[index];
+        return (
+          <div style={{ ...style, display: 'flex', justifyContent: 'center' }}>
+            <Playlist
+              index={index}
+              name={playlist.name}
+              createdDate={playlist.createdDate}
+              playlistId={playlist.playlistId}
+              songs={playlist.songs}
+              isArtworkAvailable={playlist.isArtworkAvailable}
+              artworkPaths={playlist.artworkPaths}
+              key={playlist.playlistId}
+            />
+          </div>
+        );
+      }
+      return <div style={style} />;
+    },
+    [noOfColumns, playlists]
   );
 
   const createNewPlaylist = React.useCallback(
@@ -109,7 +130,7 @@ export const PlaylistsPage = () => {
 
   return (
     <MainContainer
-      className="main-container appear-from-bottom playlists-list-container mb-0 !h-full"
+      className="main-container appear-from-bottom playlists-list-container mb-0 !h-full !pb-0"
       onContextMenu={(e) =>
         updateContextMenuData(
           true,
@@ -190,15 +211,39 @@ export const PlaylistsPage = () => {
             </div>
           )}
         </div>
-        {playlists.length > 1 ? (
-          <div className="playlists-container flex h-full flex-wrap">
-            {playlistComponents}
-          </div>
-        ) : (
-          <div className="no-playlists-container p-20 text-center text-font-color-black dark:text-font-color-white">
-            No playlists found.
-          </div>
-        )}
+
+        <div
+          className="playlists-container flex h-full flex-wrap"
+          ref={containerRef}
+        >
+          {playlists && playlists.length > 0 && (
+            <Grid
+              columnCount={noOfColumns || 5}
+              columnWidth={itemWidth}
+              rowCount={noOfRows || 5}
+              rowHeight={MIN_ITEM_HEIGHT}
+              height={height || 300}
+              width={width || 500}
+              overscanRowCount={2}
+              initialScrollTop={currentlyActivePage.data?.scrollTopOffset ?? 0}
+              onScroll={(data) => {
+                if (scrollOffsetTimeoutIdRef.current)
+                  clearTimeout(scrollOffsetTimeoutIdRef.current);
+                if (!data.scrollUpdateWasRequested && data.scrollTop !== 0)
+                  scrollOffsetTimeoutIdRef.current = setTimeout(
+                    () =>
+                      updateCurrentlyActivePageData((currentPageData) => ({
+                        ...currentPageData,
+                        scrollTopOffset: data.scrollTop,
+                      })),
+                    500
+                  );
+              }}
+            >
+              {row}
+            </Grid>
+          )}
+        </div>
       </>
     </MainContainer>
   );

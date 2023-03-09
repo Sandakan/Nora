@@ -16,7 +16,6 @@ import Img from '../Img';
 
 import packageFile from '../../../../package.json';
 import localReleseNotes from '../../../../release-notes.json';
-import WhatsNewImg from '../../../../assets/other/release artworks/whats-new-v0.8.0-alpha.png';
 import ReleaseNotesAppUpdateInfo from './ReleaseNotesAppUpdateInfo';
 
 const ReleaseNotesPrompt = () => {
@@ -108,14 +107,14 @@ const ReleaseNotesPrompt = () => {
     if (releaseNotes.latestVersion.importantNotes) {
       const notes = releaseNotes.latestVersion.importantNotes.map((note) => {
         return (
-          <li className="latest-version-important-note max-w-[90%] font-medium">
+          <li className="latest-version-important-note mb-2 max-w-[90%] font-medium">
             {note}
           </li>
         );
       });
 
       return (
-        <ul className="my-8 flex list-disc items-center justify-center marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight">
+        <ul className="mt-8 mb-12 flex list-disc flex-col justify-center px-8 marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight">
           {notes}
         </ul>
       );
@@ -149,7 +148,7 @@ const ReleaseNotesPrompt = () => {
               <div className="version-artwork-container mb-4 p-4">
                 <Img
                   src={`${packageFile.urls.raw_repository_url}master${releaseNotes.latestVersion.artwork}`}
-                  fallbackSrc={WhatsNewImg}
+                  fallbackSrc={releaseNotes.latestVersion.artwork}
                   className="rounded-lg"
                   alt=""
                 />

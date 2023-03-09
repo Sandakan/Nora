@@ -48,7 +48,7 @@ const shortcutData: ShortcutCategory[] = [
     shortcutCategoryTitle: 'Other Shortcuts',
     shortcuts: [
       { label: 'Toggle App Theme', keys: ['Ctrl', 'Y'] },
-      { label: 'Reload', keys: ['F5'] },
+      { label: 'Reload', keys: ['Ctrl', 'R'] },
       { label: 'Open Devtools', keys: ['F12'] },
     ],
   },

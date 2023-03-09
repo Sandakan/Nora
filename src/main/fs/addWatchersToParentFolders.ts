@@ -54,7 +54,6 @@ const addWatcherToParentFolder = (folderPath: string) => {
 
 const addWatchersToParentFolders = async () => {
   const { musicFolders } = getUserData();
-  log(`${musicFolders.length} music folders found in user data.`);
 
   const musicFolderPaths = musicFolders.map((folder) => folder.path);
   const parentFolderPaths = getParentFolderPaths(musicFolderPaths);

@@ -69,11 +69,12 @@ const PlaylistInfoPage = () => {
 
   const [playlistData, setPlaylistData] = React.useState({} as Playlist);
   const [playlistSongs, setPlaylistSongs] = React.useState([] as SongData[]);
-  const [sortingOrder, setSortingOrder] =
-    React.useState<SongSortTypes>('addedOrder');
+  const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>(
+    currentlyActivePage?.data?.sortingOrder || 'addedOrder'
+  );
 
   const fetchPlaylistData = React.useCallback(() => {
-    if (currentlyActivePage.data.playlistId) {
+    if (currentlyActivePage.data?.playlistId) {
       window.api
         .getPlaylistData([currentlyActivePage.data.playlistId])
         .then((res) => {
@@ -238,6 +239,9 @@ const PlaylistInfoPage = () => {
               />
             </div>
             <div className="playlist-info-container ml-8 text-font-color-black dark:text-font-color-white">
+              <div className="font-semibold tracking-wider opacity-50">
+                PLAYLIST
+              </div>
               <div className="playlist-name mb-2 w-full overflow-hidden text-ellipsis whitespace-nowrap text-5xl text-font-color-highlight dark:text-dark-font-color-highlight">
                 {playlistData.name}
               </div>

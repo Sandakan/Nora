@@ -100,7 +100,7 @@ const PlaylistSearchResultsContainer = (props: Props) => {
                     ? changeCurrentActivePage('Home')
                     : changeCurrentActivePage('AllSearchResults', {
                         searchQuery: searchInput,
-                        searchFilter: 'Albums' as SearchFilters,
+                        searchFilter: 'Playlists' as SearchFilters,
                         searchResults: playlists,
                       })
                 }

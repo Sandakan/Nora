@@ -1,8 +1,5 @@
-/* eslint-disable no-nested-ternary */
-/* eslint-disable react/no-array-index-key */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable react/self-closing-comp */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
@@ -12,6 +9,7 @@ import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import SongArtist from '../SongsPage/SongArtist';
 import DefaultAlbumCover from '../../../../assets/images/webp/album_cover_default.webp';
+import Button from '../Button';
 
 interface AlbumProp extends Album {
   // eslint-disable-next-line react/no-unused-prop-types
@@ -334,17 +332,17 @@ export const Album = (props: AlbumProp) => {
             className="absolute bottom-3 right-3 z-10"
           />
         ) : (
-          <span
-            className="material-icons-round icon absolute bottom-[5%] right-[5%] z-[1] cursor-pointer text-5xl text-font-color-white text-opacity-0 hover:!text-opacity-100 group-hover:text-opacity-75"
-            onClick={(e) => {
+          <Button
+            className="absolute bottom-[5%] right-[5%] z-[1] !m-0 !rounded-none !border-0 !p-0 !text-font-color-white opacity-0 outline-1 outline-offset-1 transition-opacity hover:!opacity-100 focus-visible:!opacity-100 focus-visible:!outline group-focus-within:opacity-75 group-hover:opacity-75"
+            iconName="play_circle"
+            iconClassName="!text-5xl !leading-none"
+            clickHandler={(e) => {
               e.stopPropagation();
               playAlbumSongs();
             }}
-          >
-            play_circle
-          </span>
+          />
         )}
-        <div className="album-cover-container relative h-full overflow-hidden rounded-lg before:invisible before:absolute before:h-full before:w-full before:bg-gradient-to-b before:from-[hsla(0,0%,0%,0%)] before:to-[hsla(0,0%,0%,50%)] before:opacity-0 before:transition-[visibility,opacity] before:duration-300 before:content-[''] group-hover:before:visible group-hover:before:opacity-100">
+        <div className="album-cover-container relative h-full overflow-hidden rounded-lg before:invisible before:absolute before:h-full before:w-full before:bg-gradient-to-b before:from-[hsla(0,0%,0%,0%)] before:to-[hsla(0,0%,0%,50%)] before:opacity-0 before:transition-[visibility,opacity] before:duration-300 before:content-[''] group-focus-within:before:visible group-focus-within:before:opacity-100 group-hover:before:visible group-hover:before:opacity-100">
           <Img
             src={props.artworkPaths.artworkPath}
             loading="lazy"
@@ -359,15 +357,14 @@ export const Album = (props: AlbumProp) => {
           '!text-font-color-black dark:!text-font-color-black'
         }`}
       >
-        <div
-          className="album-title pointer w-full overflow-hidden text-ellipsis whitespace-nowrap text-xl hover:underline"
-          title={props.title}
-        >
-          {props.title}
-        </div>
+        <Button
+          className="album-title pointer !m-0 !block w-full truncate !rounded-none !border-0 !p-0 !text-left text-xl outline-1 outline-offset-1 hover:underline focus-visible:!outline"
+          label={props.title}
+          clickHandler={showAlbumInfoPage}
+        />
         {props.artists && (
           <div
-            className="album-artists flex w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm hover:underline"
+            className="album-artists flex w-full truncate text-sm hover:underline"
             title={props.artists.map((artist) => artist.name).join(', ')}
           >
             {props.artists.map((artist, index) => {

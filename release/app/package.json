@@ -1,13 +1,13 @@
 {
   "name": "nora",
   "productName": "Nora",
-  "version": "1.1.0-stable",
+  "version": "1.2.0-stable",
   "description": "An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar.",
   "main": "./dist/main/main.js",
   "author": {
     "name": "Sandakan Nipunajith",
     "email": "adsandakannipunajith2003@outlook.com",
-    "url": "https://github.com/Sandakan/Oto-Music-for-Desktop"
+    "url": "https://github.com/Sandakan/Nora"
   },
   "scripts": {
     "electron-rebuild": "node -r ts-node/register ../../.erb/scripts/electron-rebuild.js",

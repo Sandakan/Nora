@@ -34,11 +34,18 @@ const checkForFolderUpdates = async (folder: MusicFolderData) => {
       new Date(folder.stats.lastModifiedDate).toUTCString();
 
     if (hasFolderModifications) {
-      log(`'${path.basename(folder.path)}' folder has unknown modifications.`);
+      log(
+        `'${
+          path.basename(folder.path) || path
+        }' folder has unknown modifications.`
+      );
       folder.stats.lastModifiedDate = folderStats.mtime;
       updateMusicFolderData(folder);
       checkFolderForUnknownModifications(folder.path);
-    } else log(`'${path.basename(folder.path)}' folder has no modifications.`);
+    } else
+      log(
+        `'${path.basename(folder.path) || path}' folder has no modifications.`
+      );
   } catch (error) {
     log(
       `ERROR OCCURRED WHEN FETCHING STATS FOR '${path.basename(

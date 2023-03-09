@@ -1,4 +1,4 @@
-import isSongBlacklisted from './isSongBlacklisted';
+import { isSongBlacklisted } from './isBlacklisted';
 
 const getListeningDataOfASong = (
   songId: string,

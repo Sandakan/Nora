@@ -36,6 +36,7 @@ const GenresPage = () => {
       ? userData.sortingStates.genresPage
       : ('aToZ' as GenreSortTypes)
   );
+
   const containerRef = React.useRef(null as HTMLDivElement | null);
   const { height, width } = useResizeObserver(containerRef);
   const MIN_ITEM_WIDTH = 320;

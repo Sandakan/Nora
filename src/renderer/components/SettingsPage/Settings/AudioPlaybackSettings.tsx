@@ -1,8 +1,10 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
+import Dropdown, { DropdownOption } from 'renderer/components/Dropdown';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { getItem, setItem } from 'renderer/utils/localStorage';
 import Button from '../../Button';
 import Checkbox from '../../Checkbox';
 import Hyperlink from '../../Hyperlink';
@@ -59,10 +61,26 @@ const MusixmatchDisclaimerPrompt = () => {
   );
 };
 
+const seekbarScrollIntervals: DropdownOption<string>[] = [
+  { label: '1 second', value: '1' },
+  { label: '2.5 seconds', value: '2.5' },
+  { label: '5 seconds', value: '5' },
+  { label: '10 seconds', value: '10' },
+  { label: '15 seconds', value: '15' },
+  { label: '20 seconds', value: '20' },
+];
+
 const AudioPlaybackSettings = () => {
   const { userData } = React.useContext(AppContext);
   const { updateUserData, changePromptMenuData } =
     React.useContext(AppUpdateContext);
+
+  const [seekbarScrollInterval, setSeekbarScrollInterval] = React.useState('5');
+
+  React.useEffect(() => {
+    const interval = getItem('seekbarScrollInterval');
+    setSeekbarScrollInterval(interval.toString());
+  }, []);
 
   return (
     <>
@@ -109,14 +127,13 @@ const AudioPlaybackSettings = () => {
             for your playlist on-demand.
             <div className="mt-1 ml-2 text-sm font-light">
               Enabling and using this feature means you have accepted the{' '}
-              <span
-                className="cursor-pointer text-font-color-highlight hover:underline dark:text-dark-font-color-highlight-2"
-                onClick={() => {
+              <Button
+                className="!m-0 !inline !rounded-none !border-0 !p-0 !text-font-color-highlight-2 outline-1 outline-offset-1 hover:underline focus-visible:!outline dark:!text-dark-font-color-highlight-2"
+                clickHandler={() => {
                   changePromptMenuData(true, <MusixmatchDisclaimerPrompt />);
                 }}
-              >
-                Musixmatch Lyrics Disclaimer
-              </span>
+                label="Musixmatch Lyrics Disclaimer"
+              />
               .
             </div>
           </div>
@@ -162,6 +179,24 @@ const AudioPlaybackSettings = () => {
               isDisabled={userData?.preferences.isMusixmatchLyricsEnabled}
             />
           </div>
+        </li>
+
+        <li className="seekbar-scroll-interval mb-4">
+          <div className="description">
+            Change the increment amount when scrolled over audio seek bar and
+            volume seek bar.
+          </div>
+          <Dropdown
+            className="mt-4"
+            name="seekbarScrollInterval"
+            value={seekbarScrollInterval.toString()}
+            options={seekbarScrollIntervals}
+            onChange={(e) => {
+              const val = e.currentTarget.value;
+              setSeekbarScrollInterval(val);
+              setItem('seekbarScrollInterval', parseFloat(val));
+            }}
+          />
         </li>
       </ul>
     </>

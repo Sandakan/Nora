@@ -5,14 +5,14 @@ import log from '../log';
 import parseFolderForSongPaths from '../fs/parseFolderForSongPaths';
 import { parseSong } from '../parseSong';
 import sortSongs from '../utils/sortSongs';
-import { dataUpdateEvent } from '../main';
+import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 
 const addMusicFolder = async (
   mainWindowInstance: BrowserWindow,
   resultsSortType?: SongSortTypes,
   abortSignal?: AbortSignal
 ): Promise<SongData[]> => {
-  log('Started the process of adding a new song to the music library');
+  log('Started the process of linking a music folder to the library.');
   const openDialogOptions: OpenDialogOptions = {
     title: 'Add a Music Folder',
     buttonLabel: 'Add folder',
@@ -54,6 +54,11 @@ const addMusicFolder = async (
       try {
         // eslint-disable-next-line no-await-in-loop
         const data = await parseSong(songPath);
+        sendMessageToRenderer(
+          `${i + 1} completed out of ${songPaths.length} songs.`,
+          'AUDIO_PARSING_PROCESS_UPDATE',
+          { max: songPaths.length, value: i + 1 }
+        );
         if (data) songs.push(data);
       } catch (error) {
         log(

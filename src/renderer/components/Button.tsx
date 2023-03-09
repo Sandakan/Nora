@@ -71,14 +71,13 @@ const Button = React.memo((props: ButtonProps) => {
   return (
     <button
       type="button"
-      className={`button group mr-4 flex cursor-pointer items-center justify-center rounded-3xl border-[3px] border-background-color-2 bg-[transparent] px-4 py-2 text-sm text-font-color-black transition-[border] ease-in-out hover:border-background-color-3 dark:border-dark-background-color-2 dark:bg-[transparent] dark:text-font-color-white dark:hover:border-dark-background-color-3 ${
+      className={`button group mr-4 flex cursor-pointer items-center justify-center rounded-3xl border-[3px] border-background-color-2 bg-[transparent] px-4 py-2 text-sm text-font-color-black transition-[border] ease-in-out hover:border-background-color-3 focus-visible:!border-font-color-highlight-2 dark:border-dark-background-color-2 dark:bg-[transparent] dark:text-font-color-white dark:hover:border-dark-background-color-3 dark:focus-visible:!border-dark-font-color-highlight-2 ${
         isButtonDisabled &&
         `!cursor-not-allowed  !border-font-color-dimmed/10 !text-opacity-50 !brightness-50 !transition-none dark:!border-font-color-dimmed/40`
       } ${className}`}
       onClick={(e) =>
         !isButtonDisabled && clickHandler(e, updateIsDisabled, updateIsPending)
       }
-      tabIndex={0}
       title={tooltipLabel || label}
       disabled={isButtonDisabled}
       onContextMenu={onContextMenu}
@@ -86,7 +85,7 @@ const Button = React.memo((props: ButtonProps) => {
     >
       {isStatusPending && isButtonDisabled ? (
         <span
-          className={`material-icons-round icon relative mr-2 flex h-4 w-4 items-center justify-center text-lg !no-underline after:absolute after:mx-auto after:block after:h-4 after:w-4 after:animate-spin-ease after:items-center after:justify-center after:rounded-full after:border-2 after:border-[transparent] after:border-t-font-color-black after:content-[''] dark:after:border-t-font-color-white
+          className={`material-icons-round icon relative mr-2 flex h-4 w-4 items-center justify-center text-lg after:absolute after:mx-auto after:block after:h-4 after:w-4 after:animate-spin-ease after:items-center after:justify-center after:rounded-full after:border-2 after:border-[transparent] after:border-t-font-color-black after:content-[''] dark:after:border-t-font-color-white
          ${pendingClassName}`}
         >
           {isStatusPending ? '' : iconName}

@@ -5,6 +5,11 @@ import Store from 'electron-store';
 import log from './log';
 import { dataUpdateEvent } from './main';
 import { appPreferences } from '../../package.json';
+import {
+  artistMigrations,
+  generateMigrationMessage,
+  songMigrations,
+} from './migrations';
 
 export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(
   app.getPath('userData'),
@@ -73,40 +78,11 @@ const songStore = new Store({
       type: 'array',
     },
   },
-  beforeEachMigration: (_store, context) => {
-    log(
-      `Migrating songs.json from app versions ${context.fromVersion} → ${context.toVersion}`
-    );
-  },
-  migrations: {
-    '1.0.0-alpha': (store) => {
-      log('Starting the songs.json migration process.', {
-        version: '>=1.0.0-alpha;',
-      });
-      const songs = store.get('songs') as SavableSongData[];
-      if (Array.isArray(songs) && songs.length > 0) {
-        const updatedSongs: SavableSongData[] = songs.map((song) => {
-          return {
-            ...song,
-            addedDate:
-              typeof song.addedDate === 'string'
-                ? new Date(song.addedDate).getTime()
-                : song.addedDate,
-            modifiedDate:
-              typeof song.modifiedDate === 'string'
-                ? new Date(song.modifiedDate).getTime()
-                : song.modifiedDate,
-            createdDate:
-              typeof song.createdDate === 'string'
-                ? new Date(song.createdDate).getTime()
-                : song.createdDate,
-          };
-        });
-        store.set('songs', updatedSongs);
-      }
-    },
-  },
+  beforeEachMigration: (_, context) =>
+    generateMigrationMessage('songs.json', context),
+  migrations: songMigrations,
 });
+
 const artistStore = new Store({
   name: 'artists',
   defaults: {
@@ -117,29 +93,11 @@ const artistStore = new Store({
       type: 'array',
     },
   },
-  beforeEachMigration: (_store, context) => {
-    log(
-      `Migrating artists.json from app versions ${context.fromVersion} → ${context.toVersion}`
-    );
-  },
-  migrations: {
-    '0.8.0-alpha+2022091400': (store) => {
-      log(
-        'Starting the artists.json migration process.\nVERSION :>=0.8.0-alpha+2022091400;'
-      );
-      const artists = store.get('artists') as SavableArtist[];
-      if (Array.isArray(artists) && artists.length > 0) {
-        const updatedArtists: SavableArtist[] = artists.map((artist) => {
-          return {
-            ...artist,
-            isAFavorite: artist.isAFavorite ?? false,
-          };
-        });
-        store.set('artists', updatedArtists);
-      }
-    },
-  },
+  beforeEachMigration: (_, context) =>
+    generateMigrationMessage('artists.json', context),
+  migrations: artistMigrations,
 });
+
 const genreStore = new Store({
   name: 'genres',
   defaults: {
@@ -150,12 +108,10 @@ const genreStore = new Store({
       type: 'array',
     },
   },
-  beforeEachMigration: (_store, context) => {
-    log(
-      `Migrating genres.json from app versions ${context.fromVersion} → ${context.toVersion}`
-    );
-  },
+  beforeEachMigration: (_, context) =>
+    generateMigrationMessage('genres.json', context),
 });
+
 const albumStore = new Store({
   name: 'albums',
   defaults: {
@@ -166,11 +122,8 @@ const albumStore = new Store({
       type: 'array',
     },
   },
-  beforeEachMigration: (_store, context) => {
-    log(
-      `Migrating albums.json from app versions ${context.fromVersion} → ${context.toVersion}`
-    );
-  },
+  beforeEachMigration: (_, context) =>
+    generateMigrationMessage('albums.json', context),
 });
 
 const playlistDataStore = new Store({
@@ -183,11 +136,8 @@ const playlistDataStore = new Store({
       type: 'array',
     },
   },
-  beforeEachMigration: (_store, context) => {
-    log(
-      `Migrating playlists.json from app versions ${context.fromVersion} → ${context.toVersion}`
-    );
-  },
+  beforeEachMigration: (_, context) =>
+    generateMigrationMessage('playlists.json', context),
 });
 
 const userDataStore = new Store({
@@ -200,11 +150,8 @@ const userDataStore = new Store({
       type: 'object',
     },
   },
-  beforeEachMigration: (_store, context) => {
-    log(
-      `Migrating userData.json from app versions ${context.fromVersion} → ${context.toVersion}`
-    );
-  },
+  beforeEachMigration: (_, context) =>
+    generateMigrationMessage('userData.json', context),
 });
 
 const listeningDataStore = new Store({
@@ -218,11 +165,8 @@ const listeningDataStore = new Store({
       type: 'array',
     },
   },
-  beforeEachMigration: (_store, context) => {
-    log(
-      `Migrating listeningData.json from app versions ${context.fromVersion} → ${context.toVersion}`
-    );
-  },
+  beforeEachMigration: (_, context) =>
+    generateMigrationMessage('listening_data.json', context),
 });
 
 const blacklistStore = new Store({
@@ -242,11 +186,8 @@ const blacklistStore = new Store({
       },
     },
   },
-  beforeEachMigration: (_store, context) => {
-    log(
-      `Migrating blacklist.json from app versions ${context.fromVersion} → ${context.toVersion}`
-    );
-  },
+  beforeEachMigration: (_, context) =>
+    generateMigrationMessage('blacklist.json', context),
 });
 
 export const supportedMusicExtensions =
@@ -565,21 +506,6 @@ export const getListeningData = (
 
   const listeningData: SongListeningData[] = results.map((x) => {
     const { songId, skips, fullListens, inNoOfPlaylists, listens } = x;
-    // const updatedListens: YearlyListeningRate[] = listens.map((y) => {
-    //   const { year, months } = y;
-    //   const updatedMonths: number[][] = months.map((z) => {
-    //     const dailyListens = z.split('_').map((a) => parseInt(a, 10) || 0);
-
-    //     for (let i = 0; i < 12; i += 1) {
-    //       if (dailyListens[i] === undefined) dailyListens[i] = 0;
-    //     }
-    //     return dailyListens;
-    //   });
-    //   return {
-    //     year,
-    //     months: updatedMonths,
-    //   };
-    // });
 
     return {
       songId,
@@ -599,15 +525,6 @@ export const setListeningData = (data: SongListeningData) => {
       ? cachedListeningData
       : (listeningDataStore.get('listeningData', []) as SongListeningData[]);
 
-  // const updatedListens: SavableYearlyListeningRate[] = data.listens.map(
-  //   ({ year, months }) => {
-  //     const updatedMonths = months.map((z) => {
-  //       const str = z.join(',').replaceAll('0', '');
-  //       return str;
-  //     });
-  //     return { year, months: updatedMonths };
-  //   }
-  // );
   for (let i = 0; i < results.length; i += 1) {
     if (results[i].songId === data.songId) {
       results[i].skips = data.skips;
@@ -706,9 +623,22 @@ function flattenPathArrays<Type extends string[][]>(lists: Type) {
 function getDirectories(srcpath: string) {
   try {
     const dirs = fsSync.readdirSync(srcpath);
-    return dirs
-      .map((file) => path.join(srcpath, file))
-      .filter((filePath) => fsSync.statSync(filePath).isDirectory());
+    const dirsWithFullPaths = dirs.map((file) => path.join(srcpath, file));
+    const filteredDirs = dirsWithFullPaths.filter((filePath) => {
+      try {
+        const isADirectory = fsSync.statSync(filePath).isDirectory();
+        return isADirectory;
+      } catch (error) {
+        log(
+          'Error occurred when reading a file path to detect whether its a directory.',
+          { filePath },
+          'ERROR'
+        );
+        return false;
+      }
+    });
+
+    return filteredDirs;
   } catch (error) {
     log(
       'Error occurred when parsing directories of a path.',

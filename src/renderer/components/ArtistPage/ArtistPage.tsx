@@ -10,7 +10,6 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { Artist } from './Artist';
 import NoArtistImage from '../../../../assets/images/svg/Sun_Monochromatic.svg';
-// import FetchingDataImage from '../../../../assets/images/svg/Lemonade_Monochromatic.svg';
 import Dropdown from '../Dropdown';
 import MainContainer from '../MainContainer';
 import Img from '../Img';

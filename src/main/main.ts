@@ -13,10 +13,12 @@ import {
   nativeTheme,
   Tray,
   Menu,
+  nativeImage,
 } from 'electron';
 import path from 'path';
 import os from 'os';
 import * as dotenv from 'dotenv';
+// import * as Sentry from '@sentry/electron';
 
 import log from './log';
 import {
@@ -78,6 +80,7 @@ import resetAppData from './resetAppData';
 import { clearTempArtworkFolder } from './other/artworks';
 import blacklistFolders from './core/blacklistFolders';
 import restoreBlacklistedFolders from './core/restoreBlacklistedFolder';
+import toggleBlacklistFolders from './core/toggleBlacklistFolders';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -109,8 +112,16 @@ let isConnectedToInternet = false;
 export const IS_DEVELOPMENT =
   process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
 
+const appIcon = nativeImage.createFromPath(
+  getAssetPath('images', 'logo_light_mode.png')
+);
+
 dotenv.config({ debug: IS_DEVELOPMENT });
 saveAbortController('main', abortController);
+
+// Sentry.init({
+//   dsn: 'https://c3f3263c53334e51849caaa8a4d677e2@o1402111.ingest.sentry.io/4504757172764672',
+// });
 // ? / / / / / / / / / / / / / / / / / / / / / / /
 if (IS_DEVELOPMENT) require('electron-debug')();
 
@@ -146,15 +157,6 @@ const installExtensions = async () => {
       )
     );
 };
-// ? Use the second-instance event to detect app opens using nora protocol
-if (!app.isDefaultProtocolClient(DEFAULT_APP_PROTOCOL)) {
-  log(
-    'No default protocol registered. Starting the default protocol registration process.'
-  );
-  const res = app.setAsDefaultProtocolClient(DEFAULT_APP_PROTOCOL);
-  if (res) log('Default protocol registered successfully.');
-  else log('Default protocol registration failed.');
-}
 
 const createWindow = async () => {
   if (IS_DEVELOPMENT) installExtensions();
@@ -174,18 +176,19 @@ const createWindow = async () => {
     roundedCorners: true,
     frame: false,
     backgroundColor: '#212226',
-    icon: getAssetPath('icon.ico'),
+    icon: appIcon,
     titleBarStyle: 'hidden',
     show: false,
   });
 
-  mainWindow.setAppDetails({ appId: 'Nora' });
   mainWindow.loadURL(resolveHtmlPath('index.html'));
   mainWindow.once('ready-to-show', () => {
-    log('Started checking for new songs during the application start.');
-    checkForNewSongs();
-    addWatchersToFolders();
-    addWatchersToParentFolders();
+    if (app.hasSingleInstanceLock()) {
+      log('Started checking for new songs during the application start.');
+      checkForNewSongs();
+      addWatchersToFolders();
+      addWatchersToParentFolders();
+    }
   });
   mainWindow.webContents.setWindowOpenHandler((edata: { url: string }) => {
     shell.openExternal(edata.url);
@@ -197,16 +200,31 @@ app
   .whenReady()
   .then(() => {
     // Behaviour on second instance for parent process
-    const gotSingleInstanceLock = app.requestSingleInstanceLock();
-    if (!gotSingleInstanceLock) return app.quit();
-
+    const hasSingleInstanceLock = app.requestSingleInstanceLock();
+    if (!hasSingleInstanceLock) {
+      log(
+        'Another app instance is currently active. Quitting this instance.',
+        undefined,
+        'WARN'
+      );
+      return app.quit();
+    }
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
 
     app.on('second-instance', handleSecondInstances);
 
+    if (!app.isDefaultProtocolClient(DEFAULT_APP_PROTOCOL)) {
+      log(
+        'No default protocol registered. Starting the default protocol registration process.'
+      );
+      const res = app.setAsDefaultProtocolClient(DEFAULT_APP_PROTOCOL);
+      if (res) log('Default protocol registered successfully.');
+      else log('Default protocol registration failed.');
+    }
+
     protocol.registerFileProtocol('nora', registerFileProtocol);
 
-    tray = new Tray(getAssetPath('icon.ico'));
+    tray = new Tray(appIcon);
     const trayContextMenu = Menu.buildFromTemplate([
       {
         label: 'Show/Hide Nora',
@@ -251,6 +269,10 @@ app
         )} ]`
       );
     });
+
+    mainWindow.webContents.addListener('zoom-changed', (_, dir) =>
+      log(`Renderer zoomed ${dir}. ${mainWindow.webContents.getZoomLevel()}`)
+    );
 
     // ? / / / / / / / / /  IPC RENDERER EVENTS  / / / / / / / / / / / /
     if (mainWindow) {
@@ -366,8 +388,8 @@ app
 
       ipcMain.handle(
         'app/saveLyricsToSong',
-        (_, songId: string, lyrics: SongLyrics) =>
-          saveLyricsToSong(songId, lyrics)
+        (_, songPath: string, lyrics: SongLyrics) =>
+          saveLyricsToSong(songPath, lyrics)
       );
 
       ipcMain.handle(
@@ -585,6 +607,12 @@ app
         (_, folderPaths: string[]) => restoreBlacklistedFolders(folderPaths)
       );
 
+      ipcMain.handle(
+        'app/toggleBlacklistedFolders',
+        (_, folderPaths: string[], isBlacklistFolder?: boolean) =>
+          toggleBlacklistFolders(folderPaths, isBlacklistFolder)
+      );
+
       ipcMain.on(
         'app/networkStatusChange',
         (_: unknown, isConnected: boolean) => {
@@ -613,13 +641,18 @@ app
 
       //  / / / / / / / / / / / GLOBAL SHORTCUTS / / / / / / / / / / / / / /
       globalShortcut.register('F5', () => {
-        log('USER REQUESTED RENDERER REFRESH.');
-        restartRenderer();
+        const isFocused = mainWindow.isFocused();
+        log('USER REQUESTED RENDERER REFRESH USING GLOBAL SHORTCUT.', {
+          isFocused,
+        });
+        if (isFocused) restartRenderer();
       });
 
       globalShortcut.register('F12', () => {
-        log('USER REQUESTED FOR DEVTOOLS.');
-        mainWindow.webContents.openDevTools({ mode: 'detach', activate: true });
+        log(
+          'USER REQUESTED FOR DEVTOOLS USING GLOBAL SHORTCUT. - REQUEST WONT BE SERVED.'
+        );
+        // mainWindow.webContents.openDevTools({ mode: 'detach', activate: true });
       });
     }
     return undefined;

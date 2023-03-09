@@ -1,4 +1,4 @@
-import isSongBlacklisted from '../utils/isSongBlacklisted';
+import { isSongBlacklisted } from '../utils/isBlacklisted';
 import { getListeningData, getSongsData } from '../filesystem';
 import { getSongArtworkPath } from '../fs/resolveFilePaths';
 import log from '../log';

@@ -1,15 +1,93 @@
 {
   "latestVersion": {
-    "version": "1.1.0-stable",
+    "version": "1.2.0-stable",
     "phase": "stable",
-    "releaseDate": "2023 February 26",
-    "artwork": "/assets/other/release artworks/whats-new-v1.1.0-stable.webp",
+    "releaseDate": "2023 March 09",
+    "artwork": "/assets/other/release artworks/whats-new-v1.2.0-stable.webp",
     "importantNotes": [
-      "This update can put your blacklisted songs again into your library. Sorry for the inconvenience.",
-      "Updated the Musixmatch Disclaimer Notice. Please read it before using the service."
+      "This release provides accessibility improvements throughout Nora."
     ]
   },
   "versions": [
+    {
+      "version": "1.2.0-stable",
+      "releaseDate": "2023 March 09",
+      "notes": {
+        "new": [
+          {
+            "note": "Added a new App Stats section to the About section of the Settings Page."
+          },
+          {
+            "note": "Added a new notification type that shows the progression of the song parsing process and song deletion process."
+          },
+          {
+            "note": "Added a 'See All' button for Recently Added Songs and Recently Played Songs sections in Home Page."
+          },
+          {
+            "note": "Added the functionality to change the increment interval of the scroll event when hovered over audio and volume seek bars."
+          },
+          {
+            "note": "Added a volume seek bar to the Mini-Player."
+          },
+          { "note": "Revamped some settings in the Settings Page." },
+          {
+            "note": "Improved performance in pages when loading with bigger libaries."
+          }
+        ],
+        "fixed": [
+          {
+            "note": "Fixed a bug where Lyrics Page shows the button to 'show saved lyrics' when there aren't any in the audio file."
+          },
+          {
+            "note": "Fixed a bug where user can't save lyrics for songs outside the library."
+          },
+          {
+            "note": "Fixed a bug where songs outside the library shows 'unknown title' without showing the audio file name when the title tag is empty."
+          },
+          {
+            "note": "Fixed a bug where folders with higher privileges such as 'System Volume Information' prevent adding them to the app."
+          },
+          {
+            "note": "Fixed a bug where pressing F5 reloads the app even though the window isn't focused."
+          },
+          {
+            "note": "Fixed a bug where clicking the close button in Mini-player closes the app even though 'Close to system tray' is enabled."
+          },
+          {
+            "note": "Fixed a bug where Folders Page shows 'unknown folder name' without showing the folder path when an external drive is added as a folder."
+          },
+          {
+            "note": "Fixed a bug where Release Notes Prompt's important notes aren't positioned properly inside the container."
+          },
+          {
+            "note": "Fixed a bug where Albums Page shows more than required album columns."
+          },
+          {
+            "note": "Improved performance of the app when opening songs from the file explorer."
+          },
+          {
+            "note": "Improved the functionality when restoring blacklisted songs."
+          },
+          { "note": "Improved accessibility features of the app." },
+          { "note": "Updated the UI in Genre Info Page and Album Info Page." },
+          { "note": "Updated app dependencies." }
+        ],
+        "knownIssues": [
+          {
+            "note": "Sometimes users can get unexpected search results when using Search."
+          },
+          {
+            "note": "App theme will be changed when you change your system's theme even though you didn't select to use system theme in the app."
+          },
+          {
+            "note": "If a song is added next to the last song of the queue, the last song won't be played."
+          },
+          {
+            "note": "Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song."
+          }
+        ]
+      }
+    },
     {
       "version": "1.1.0-stable",
       "releaseDate": "2023 February 26",

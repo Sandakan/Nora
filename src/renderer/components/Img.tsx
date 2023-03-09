@@ -13,6 +13,7 @@ type Props = {
   loading?: 'eager' | 'lazy';
   onContextMenu?: (_e: React.MouseEvent<HTMLImageElement, MouseEvent>) => void;
   showImgPropsOnTooltip?: boolean;
+  tabIndex?: number;
 };
 
 interface ImgProps {
@@ -31,6 +32,7 @@ const Img = (props: Props) => {
     loading = 'eager',
     onContextMenu,
     showImgPropsOnTooltip = false,
+    tabIndex = -1,
   } = props;
 
   const imgPropsRef = React.useRef<ImgProps>();
@@ -39,7 +41,7 @@ const Img = (props: Props) => {
     <img
       src={src || fallbackSrc}
       alt={alt}
-      className={`${className}`}
+      className={`outline-1 outline-offset-4 focus-visible:!outline ${className}`}
       onError={(e) => {
         if (!noFallbacks && e.currentTarget.src !== fallbackSrc)
           e.currentTarget.src = fallbackSrc;
@@ -59,7 +61,7 @@ const Img = (props: Props) => {
             }\nImage width : ${imgPropsRef.current?.width}px\nImage height : ${
               imgPropsRef.current?.height
             }px`
-          : undefined
+          : alt
       }
       loading={loading}
       onContextMenu={onContextMenu}
@@ -75,6 +77,7 @@ const Img = (props: Props) => {
           img.src = e.currentTarget.src;
         }
       }}
+      tabIndex={tabIndex}
     />
   );
 };

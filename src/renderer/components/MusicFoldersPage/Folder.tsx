@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
@@ -21,13 +22,12 @@ type Props = {
 const Folder = (props: Props) => {
   const {
     currentlyActivePage,
-    isMultipleSelectionEnabled,
+    isMultipleSelectionEnabled: isMoreThanOneSelection,
     multipleSelectionsData,
   } = React.useContext(AppContext);
   const {
     changeCurrentActivePage,
     updateContextMenuData,
-    addNewNotifications,
     changePromptMenuData,
     updateMultipleSelections,
     toggleMultipleSelections,
@@ -39,7 +39,7 @@ const Folder = (props: Props) => {
   const { folderName, prevDir } = React.useMemo(() => {
     if (folderPath) {
       const path = folderPath.split('\\');
-      const name = path.pop() || 'Unknown Folder Name';
+      const name = path.pop() || folderPath;
 
       return { prevDir: path.join('\\'), folderName: name };
     }
@@ -60,10 +60,14 @@ const Folder = (props: Props) => {
   }, [multipleSelectionsData, folderPath]);
 
   const openMusicFolderInfoPage = React.useCallback(
-    (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    (
+      e:
+        | React.MouseEvent<HTMLDivElement, MouseEvent>
+        | React.KeyboardEvent<HTMLDivElement>
+    ) => {
       if (folderPath) {
         if (
-          isMultipleSelectionEnabled &&
+          isMoreThanOneSelection &&
           multipleSelectionsData.selectionType === 'folder'
         )
           return updateMultipleSelections(
@@ -71,8 +75,8 @@ const Folder = (props: Props) => {
             'folder',
             isAMultipleSelection ? 'remove' : 'add'
           );
-        if (e.getModifierState('Shift') === true) {
-          toggleMultipleSelections(!isMultipleSelectionEnabled, 'folder');
+        if (e?.getModifierState('Shift') === true) {
+          toggleMultipleSelections(!isMoreThanOneSelection, 'folder');
           return updateMultipleSelections(
             folderPath,
             'folder',
@@ -94,7 +98,7 @@ const Folder = (props: Props) => {
       currentlyActivePage.pageTitle,
       folderPath,
       isAMultipleSelection,
-      isMultipleSelectionEnabled,
+      isMoreThanOneSelection,
       multipleSelectionsData.selectionType,
       toggleMultipleSelections,
       updateMultipleSelections,
@@ -105,53 +109,31 @@ const Folder = (props: Props) => {
     const { multipleSelections: folderPaths } = multipleSelectionsData;
     return [
       {
-        label: isAMultipleSelection
+        label: isMoreThanOneSelection
           ? 'Toggle blacklist Folder'
           : isBlacklisted
           ? 'Restore from Blacklist'
           : 'Blacklist Folder',
-        iconName: isAMultipleSelection
+        iconName: isMoreThanOneSelection
           ? 'settings_backup_restore'
           : isBlacklisted
           ? 'settings_backup_restore'
           : 'block',
         handlerFunction: () => {
-          if (isBlacklisted)
+          if (isMoreThanOneSelection) {
             window.api
-              .restoreBlacklistedFolders(
-                isMultipleSelectionEnabled ? folderPaths : [folderPath]
-              )
-              .then(() =>
-                addNewNotifications([
-                  {
-                    id: `${folderName}RestoredFromBlacklisted`,
-                    delay: 5000,
-                    content: (
-                      <span>
-                        &apos;
-                        {isMultipleSelectionEnabled
-                          ? `${folderPaths.length} folders`
-                          : folderName}
-                        &apos; restored from the blacklist.
-                      </span>
-                    ),
-                    icon: (
-                      <span className="material-icons-round">
-                        settings_backup_restore
-                      </span>
-                    ),
-                  },
-                ])
-              )
+              .toggleBlacklistedFolders(folderPaths)
+              .catch((err) => console.error(err));
+          } else if (isBlacklisted)
+            window.api
+              .restoreBlacklistedFolders([folderPath])
               .catch((err) => console.error(err));
           else
             changePromptMenuData(
               true,
               <BlacklistFolderConfrimPrompt
                 folderName={folderName}
-                folderPaths={
-                  isMultipleSelectionEnabled ? folderPaths : [folderPath]
-                }
+                folderPaths={[folderPath]}
               />
             );
 
@@ -171,23 +153,21 @@ const Folder = (props: Props) => {
             />,
             'delete-folder-confirmation-prompt'
           ),
-        isDisabled: isMultipleSelectionEnabled,
+        isDisabled: isMoreThanOneSelection,
       },
     ];
   }, [
-    addNewNotifications,
     changePromptMenuData,
     folderName,
     folderPath,
-    isAMultipleSelection,
     isBlacklisted,
-    isMultipleSelectionEnabled,
+    isMoreThanOneSelection,
     multipleSelectionsData,
     toggleMultipleSelections,
   ]);
 
   const contextMenuItemData: ContextMenuAdditionalData | undefined =
-    isMultipleSelectionEnabled &&
+    isMoreThanOneSelection &&
     multipleSelectionsData.selectionType === 'folder' &&
     isAMultipleSelection
       ? {
@@ -199,11 +179,17 @@ const Folder = (props: Props) => {
 
   return (
     <div
-      className={`group mb-2 flex h-16 w-full cursor-pointer items-center justify-between rounded-md px-4 py-2 odd:bg-background-color-2/50 hover:bg-background-color-2 dark:text-font-color-white dark:odd:bg-dark-background-color-2/30 dark:hover:bg-dark-background-color-2 ${
+      className={`group mb-2 flex h-16 w-full cursor-pointer items-center justify-between rounded-md px-4 py-2 outline-1 -outline-offset-2 hover:!bg-background-color-2 focus-visible:!outline dark:text-font-color-white dark:hover:!bg-dark-background-color-2 ${
         isAMultipleSelection &&
         '!bg-background-color-3/90 !text-font-color-black dark:!bg-dark-background-color-3/90 dark:!text-font-color-black'
-      } ${isBlacklisted && '!opacity-50'}`}
+      } ${isBlacklisted && '!opacity-50'} ${
+        (index + 1) % 2 === 1
+          ? 'bg-background-color-2/50 dark:bg-dark-background-color-2/30'
+          : '!bg-background-color-1 dark:!bg-dark-background-color-1'
+      }`}
       onClick={openMusicFolderInfoPage}
+      onKeyDown={(e) => e.key === 'Enter' && openMusicFolderInfoPage(e)}
+      tabIndex={0}
       title={isBlacklisted ? `'${folderName}' is blacklisted.` : undefined}
       onContextMenu={(e) =>
         updateContextMenuData(
