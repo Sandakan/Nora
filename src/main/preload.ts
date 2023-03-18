@@ -115,6 +115,8 @@ export const api = {
       absoluteFilePaths,
       isPermanentDelete
     ),
+  generatePalettes: (): Promise<void> =>
+    ipcRenderer.invoke('app/generatePalettes'),
 
   // $ APP PLAYER UNKNOWN SONGS FETCHING APIS
   playSongFromUnknownSource: (
@@ -245,6 +247,10 @@ export const api = {
   getUserData: (): Promise<UserData> => ipcRenderer.invoke('app/getUserData'),
   saveUserData: (dataType: UserDataTypes, data: unknown) =>
     ipcRenderer.invoke('app/saveUserData', dataType, data),
+
+  // $ STORAGE DATA
+  getStorageUsage: (forceRefresh?: boolean): Promise<StorageMetrics> =>
+    ipcRenderer.invoke('app/getStorageUsage', forceRefresh),
 
   // $ FOLDER DATA
   getFolderData: (

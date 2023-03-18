@@ -707,6 +707,7 @@ export default function App() {
       });
       contentRef.current.userData.theme = theme;
     };
+
     window.api.listenForSystemThemeChanges(watchForSystemThemeChanges);
     return () => {
       window.api.StoplisteningForSystemThemeChanges(watchForSystemThemeChanges);
@@ -795,9 +796,12 @@ export default function App() {
     player.addEventListener('canplaythrough', managePlayerNotStalledStatus);
     player.addEventListener('loadeddata', managePlayerNotStalledStatus);
     player.addEventListener('loadedmetadata', managePlayerNotStalledStatus);
+
     player.addEventListener('suspend', managePlayerStalledStatus);
     player.addEventListener('stalled', managePlayerStalledStatus);
     player.addEventListener('waiting', managePlayerStalledStatus);
+    player.addEventListener('progress', managePlayerStalledStatus);
+
     player.addEventListener('canplay', playSongIfPlayable);
     player.addEventListener('ended', handleSkipForwardClickWithParams);
     player.addEventListener('play', addSongTitleToTitleBar);
@@ -840,6 +844,7 @@ export default function App() {
       player.removeEventListener('suspend', managePlayerStalledStatus);
       player.removeEventListener('stalled', managePlayerStalledStatus);
       player.removeEventListener('waiting', managePlayerStalledStatus);
+      player.removeEventListener('progress', managePlayerStalledStatus);
       player.removeEventListener('timeupdate', manageSongPositionUpdate);
       player.removeEventListener('canplay', playSongIfPlayable);
       player.removeEventListener('ended', handleSkipForwardClickWithParams);
@@ -1141,6 +1146,25 @@ export default function App() {
         notificationData.icon = (
           <span className="material-icons-round-outlined icon">
             {messageCode === 'AUDIO_PARSING_PROCESS_UPDATE' ? 'add' : 'delete'}
+          </span>
+        );
+      }
+      if (
+        messageCode === 'SONG_PALETTE_GENERAING_PROCESS_UPDATE' ||
+        (messageCode === 'GENRE_PALETTE_GENERAING_PROCESS_UPDATE' &&
+          data &&
+          'max' in data &&
+          'value' in data)
+      ) {
+        notificationData.delay = 10000;
+        notificationData.type = 'WITH_PROGRESS_BAR';
+        notificationData.progressBarData = {
+          max: (data?.max as number) || 0,
+          value: (data?.value as number) || 0,
+        };
+        notificationData.icon = (
+          <span className="material-icons-round-outlined icon">
+            magic_button
           </span>
         );
       }
@@ -1887,19 +1911,10 @@ export default function App() {
       const { navigationHistory } = contentRef.current;
       if (
         navigationHistory.history[navigationHistory.pageHistoryIndex]
-          .pageTitle === pageClass
-      ) {
-        if (
-          navigationHistory.history[navigationHistory.pageHistoryIndex].data !==
+          .pageTitle !== pageClass ||
+        navigationHistory.history[navigationHistory.pageHistoryIndex].data !==
           data
-        ) {
-          updateCurrentlyActivePageData((currentData) => ({
-            ...currentData,
-            ...data,
-          }));
-        }
-        // else updatePageHistoryIndex('increment');
-      } else {
+      ) {
         const pageData = {
           pageTitle: pageClass,
           data,
@@ -1919,7 +1934,7 @@ export default function App() {
         });
       }
     },
-    [toggleMultipleSelections, updateCurrentlyActivePageData]
+    [toggleMultipleSelections]
   );
 
   const updateMiniPlayerStatus = React.useCallback(
@@ -2395,7 +2410,7 @@ export default function App() {
               content.userData && content.userData.preferences.isReducedMotion
                 ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
                 : ''
-            } flex h-screen w-full flex-col items-center after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc]  [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
+            } flex h-screen w-full flex-col items-center overflow-y-hidden after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc]  [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
             ref={AppRef}
             onDragEnter={addSongDropPlaceholder}
             onDragLeave={removeSongDropPlaceholder}

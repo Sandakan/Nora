@@ -39,6 +39,10 @@ function SongTagsEditingPage() {
   const [songInfo, setSongInfo] = React.useState({
     title: '',
   } as SongTags);
+  const [defaultValues, setDefaultValues] = React.useState({
+    title: '',
+  } as SongTags);
+
   const { songId, songPath, isKnownSource } = React.useMemo(
     () => ({
       songId: currentlyActivePage.data.songId as string,
@@ -48,7 +52,6 @@ function SongTagsEditingPage() {
     }),
     [currentlyActivePage.data]
   );
-  const defaultValuesRef = React.useRef({} as SongTags);
 
   React.useEffect(() => {
     if (songId)
@@ -61,7 +64,8 @@ function SongTagsEditingPage() {
               ...res,
               title: res.title,
             };
-            defaultValuesRef.current = data;
+
+            setDefaultValues(data);
             setSongInfo(data);
           }
           return undefined;
@@ -259,7 +263,8 @@ function SongTagsEditingPage() {
         throw new Error('Error ocurred when updating song ID3 tags.');
       })
       .then((res) => {
-        defaultValuesRef.current = res;
+        setSongInfo(res);
+        setDefaultValues(res);
         return undefined;
       })
       .catch((err) => {
@@ -279,12 +284,12 @@ function SongTagsEditingPage() {
       })
       .finally(() => {
         setIsDisabled(false);
-        setIsPending(true);
+        setIsPending(false);
       });
   };
 
   const resetDataToDefaults = () => {
-    const data = hasDataChanged(defaultValuesRef.current, songInfo);
+    const data = hasDataChanged(defaultValues, songInfo);
     const entries = Object.entries(data);
     if (!Object.values(data).every((x: boolean) => x)) {
       changePromptMenuData(
@@ -318,7 +323,7 @@ function SongTagsEditingPage() {
               className="w-[12rem] !bg-background-color-3 !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
               clickHandler={() => {
                 changePromptMenuData(false);
-                setSongInfo(defaultValuesRef.current);
+                setSongInfo(defaultValues);
                 setAlbumKeyword('');
                 setAlbumResults([]);
                 setArtistKeyword('');
@@ -341,9 +346,13 @@ function SongTagsEditingPage() {
     }
   };
 
-  const areThereDataChanges = Object.values(
-    hasDataChanged(defaultValuesRef.current, songInfo)
-  ).every((x: boolean) => x);
+  const areThereDataChanges = React.useMemo(
+    () =>
+      Object.values(hasDataChanged(defaultValues, songInfo)).every(
+        (x: boolean) => x
+      ),
+    [defaultValues, songInfo]
+  );
 
   const songNameFromPath = React.useMemo(() => {
     if (songPath) {

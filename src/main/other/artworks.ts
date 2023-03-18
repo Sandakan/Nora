@@ -9,6 +9,7 @@ import log from '../log';
 import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
 import getAssetPath from '../utils/getAssetPath';
 import { generateRandomId } from '../utils/randomId';
+import { timeEnd, timeStart } from '../utils/measureTimeUsage';
 
 const createArtworks = async (
   id: string,
@@ -32,6 +33,7 @@ const createArtworks = async (
     artworkPath: defaultPath,
     optimizedArtworkPath: defaultPath,
   };
+  const start = timeStart();
   if (artwork) {
     const imgPath = path.join(DEFAULT_ARTWORK_SAVE_LOCATION, `${id}.webp`);
     const optimizedImgPath = path.join(
@@ -41,17 +43,6 @@ const createArtworks = async (
 
     try {
       await sharp(artwork)
-        .webp()
-        .toFile(imgPath)
-        .catch((err) => {
-          log(
-            `ERROR OCCURRED WHEN CREATING ARTWORK OF A SONG WITH SONGID -${id}- IMAGE USING SHARP PACKAGE.`,
-            { err },
-            'ERROR'
-          );
-          throw err;
-        });
-      sharp(artwork)
         .webp({ quality: 50, effort: 0 })
         .resize(50, 50)
         .toFile(optimizedImgPath)
@@ -63,6 +54,22 @@ const createArtworks = async (
           );
           throw err;
         });
+
+      const start1 = timeEnd(start, 'Time to save optimized artwork.');
+
+      sharp(artwork)
+        .webp()
+        .toFile(imgPath)
+        .then(() => timeEnd(start1, 'Time to save full-resolution artwork.'))
+        .catch((err) => {
+          log(
+            `ERROR OCCURRED WHEN CREATING ARTWORK OF A SONG WITH SONGID -${id}- IMAGE USING SHARP PACKAGE.`,
+            { err },
+            'ERROR'
+          );
+          throw err;
+        });
+
       return {
         isDefaultArtwork: false,
         artworkPath: path.join(DEFAULT_FILE_URL, imgPath),
@@ -92,8 +99,16 @@ export const storeArtworks = async (
   artwork?: Buffer | string
 ): Promise<ArtworkPaths> => {
   try {
+    const start = timeStart();
+
     await checkForDefaultArtworkSaveLocation();
+
+    const start1 = timeEnd(start, 'Time to check for default artwork location');
+
     const result = await createArtworks(id, artworkType, artwork);
+
+    timeEnd(start, 'Time to create artwork');
+    timeEnd(start1, 'Total time to finish artwork storing process');
     return result;
   } catch (error) {
     log(`Error occurred when storing artwork.`, { error }, 'ERROR');

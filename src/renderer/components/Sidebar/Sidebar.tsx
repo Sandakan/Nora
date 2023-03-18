@@ -128,14 +128,14 @@ const Sidebar = React.memo(() => {
 
   return (
     <nav
-      className={`side-bar z-20 order-1 h-full w-[30%] !max-w-sm flex-grow rounded-tr-2xl transition-[width] ${
+      className={`side-bar relative z-20 order-1 !h-full w-[30%] !max-w-sm flex-grow rounded-tr-2xl transition-[width] ${
         bodyBackgroundImage
           ? 'bg-side-bar-background/50 backdrop-blur-md dark:bg-dark-background-color-2/50'
           : 'bg-side-bar-background dark:bg-dark-background-color-2'
       } delay-200 lg:absolute lg:w-14 lg:hover:w-[30%] lg:hover:shadow-2xl`}
     >
       <ErrorBoundary>
-        <ul className="relative overflow-x-hidden pt-6 pb-2 last:relative last:h-full last:w-full">
+        <ul className="relative flex !h-full flex-col overflow-x-hidden pt-6 pb-2">
           {sideBarItems}
         </ul>
       </ErrorBoundary>

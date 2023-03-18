@@ -1,5 +1,4 @@
 import { BrowserWindow, nativeImage, nativeTheme } from 'electron';
-import { getUserData } from '../filesystem';
 import getAssetPath from '../utils/getAssetPath';
 
 const skipBackLightIcon = nativeImage.createFromPath(
@@ -48,8 +47,7 @@ const manageTaskbarPlaybackButtonControls = (
   isPlaying: boolean
 ) => {
   if (mainWindow) {
-    const { useSystemTheme } = getUserData().theme;
-    const isDarkMode = !useSystemTheme && nativeTheme.shouldUseDarkColors;
+    const isDarkMode = nativeTheme.shouldUseDarkColors;
     mainWindow.setThumbarButtons([
       {
         tooltip: 'Skip Back',

@@ -48,6 +48,7 @@ const getAllSongs = async (
         } satisfies AudioInfo;
       }
     );
+
     const resultsStartIndex = (result.pageNo - 1) * result.maxResultsPerPage;
     const resultsEndIndex = result.pageNo * result.maxResultsPerPage;
     result.data =

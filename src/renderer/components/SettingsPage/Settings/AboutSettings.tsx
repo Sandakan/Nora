@@ -76,8 +76,7 @@ const AboutSettings = () => {
                           : undefined
                       }
                     >
-                      ({elapsed.elapsed} {elapsed.type}
-                      {elapsed.elapsed === 1 ? '' : 's'} ago)
+                      ({elapsed.elapsedString})
                     </span>
                   </>
                 )}
@@ -86,7 +85,7 @@ const AboutSettings = () => {
           </div>
           <div className="flex items-center">
             <Button
-              className="about-link !mr-8 block w-fit cursor-pointer !rounded-none !border-0 !p-0 outline-1 outline-offset-2 focus:!outline"
+              className="about-link !mr-8 block w-fit cursor-pointer !rounded-none !border-0 !p-0 outline-1 outline-offset-2 focus-visible:!outline"
               iconName="language"
               iconClassName="!text-2xl"
               tooltipLabel="Nora's Website (Under Development)"
@@ -120,7 +119,7 @@ const AboutSettings = () => {
             <Hyperlink
               label="Oto Music for Android"
               linkTitle="Oto Music for Android on PlayStore"
-              link="https://play.google.com/store/apps/details?id=com.piyush.music&gl=us"
+              link="https://play.google.com/store/apps/details?id=com.piyush.music"
             />{' '}
             by Piyush Mamidwar.
           </li>
@@ -214,6 +213,12 @@ const AboutSettings = () => {
             iconName="sync"
             className="mb-4 rounded-2xl"
             clickHandler={() => window.api.resyncSongsLibrary()}
+          />
+          <Button
+            label="Generate Palettes"
+            iconName="temp_preferences_custom"
+            className="mb-4 rounded-2xl"
+            clickHandler={() => window.api.generatePalettes()}
           />
           <Button
             label="Clear History"

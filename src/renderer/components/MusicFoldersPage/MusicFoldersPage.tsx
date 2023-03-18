@@ -120,77 +120,84 @@ const MusicFoldersPage = () => {
   );
 
   return (
-    <MainContainer className="music-folders-page appear-from-bottom !h-full !pb-0 pr-4">
+    <MainContainer className="music-folders-page appear-from-bottom relative !h-full !pb-0 pr-4">
       <>
-        <div className="title-container mt-2 mb-8 flex items-center justify-between text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-          <div className="container flex">
-            Music Folders{' '}
-            <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
-              {isMultipleSelectionEnabled ? (
-                <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
-                  {multipleSelectionsData.multipleSelections.length} selections
-                </div>
-              ) : (
-                musicFolders.length > 0 && (
-                  <span className="no-of-folders">{`${
-                    musicFolders.length
-                  } folder${musicFolders.length === 1 ? '' : 's'}`}</span>
-                )
-              )}
-            </div>
-          </div>
-          {musicFolders.length > 0 && (
-            <div className="other-controls-container flex text-sm">
-              <Button
-                className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-                iconName={
-                  isMultipleSelectionEnabled ? 'remove_done' : 'checklist'
-                }
-                clickHandler={() =>
-                  toggleMultipleSelections(
-                    !isMultipleSelectionEnabled,
-                    'folder'
+        {musicFolders && musicFolders.length > 0 && (
+          <div className="title-container mt-2 mb-8 flex items-center justify-between text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+            <div className="container flex">
+              Music Folders{' '}
+              <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
+                {isMultipleSelectionEnabled ? (
+                  <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
+                    {multipleSelectionsData.multipleSelections.length}{' '}
+                    selections
+                  </div>
+                ) : (
+                  musicFolders.length > 0 && (
+                    <span className="no-of-folders">{`${
+                      musicFolders.length
+                    } folder${musicFolders.length === 1 ? '' : 's'}`}</span>
                   )
-                }
-                tooltipLabel={
-                  isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
-                }
-              />
-              <Button
-                label="Add new Folder"
-                iconName="create_new_folder"
-                pendingAnimationOnDisabled
-                iconClassName="material-icons-round-outlined"
-                clickHandler={(_, isDisabled, isPending) => {
-                  isDisabled(true);
-                  isPending(true);
-                  return window.api
-                    .addMusicFolder()
-                    .then((res) => console.log(res))
-                    .catch((err) => console.error(err))
-                    .finally(() => {
-                      isDisabled(false);
-                      isPending(false);
-                    });
-                }}
-              />
-              <Dropdown
-                name="genreSortDropdown"
-                value={sortingOrder}
-                options={folderDropdownOptions}
-                onChange={(e) => {
-                  updateCurrentlyActivePageData((currentData) => ({
-                    ...currentData,
-                    sortingOrder: e.currentTarget.value as ArtistSortTypes,
-                  }));
-                  setSortingOrder(e.currentTarget.value as GenreSortTypes);
-                }}
-              />
+                )}
+              </div>
             </div>
-          )}
-        </div>
+            {musicFolders.length > 0 && (
+              <div className="other-controls-container flex text-sm">
+                <Button
+                  className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                  iconName={
+                    isMultipleSelectionEnabled ? 'remove_done' : 'checklist'
+                  }
+                  clickHandler={() =>
+                    toggleMultipleSelections(
+                      !isMultipleSelectionEnabled,
+                      'folder'
+                    )
+                  }
+                  tooltipLabel={
+                    isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
+                  }
+                />
+                <Button
+                  label="Add new Folder"
+                  iconName="create_new_folder"
+                  pendingAnimationOnDisabled
+                  iconClassName="material-icons-round-outlined"
+                  clickHandler={(_, isDisabled, isPending) => {
+                    isDisabled(true);
+                    isPending(true);
+                    return window.api
+                      .addMusicFolder()
+                      .then((res) => console.log(res))
+                      .catch((err) => console.error(err))
+                      .finally(() => {
+                        isDisabled(false);
+                        isPending(false);
+                      });
+                  }}
+                />
+                <Dropdown
+                  name="genreSortDropdown"
+                  value={sortingOrder}
+                  options={folderDropdownOptions}
+                  onChange={(e) => {
+                    updateCurrentlyActivePageData((currentData) => ({
+                      ...currentData,
+                      sortingOrder: e.currentTarget.value as ArtistSortTypes,
+                    }));
+                    setSortingOrder(e.currentTarget.value as GenreSortTypes);
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        )}
 
-        <div className="folders-container h-full">
+        <div
+          className={`folders-container ${
+            musicFolders && musicFolders.length > 0 && 'h-full'
+          }`}
+        >
           {musicFolders && musicFolders.length > 0 && (
             <List
               itemCount={musicFolders.length}

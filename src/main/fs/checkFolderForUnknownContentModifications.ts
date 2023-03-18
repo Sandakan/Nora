@@ -10,6 +10,7 @@ import log from '../log';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
 import { parseSong } from '../parseSong';
 import { saveAbortController } from './controlAbortControllers';
+import { generatePalettes } from '../other/generatePalette';
 
 const abortController = new AbortController();
 saveAbortController(
@@ -92,6 +93,7 @@ const addNewlyAddedSongsToLibrary = async (
       );
     }
   }
+  if (newlyAddedSongPaths.length > 0) setTimeout(generatePalettes, 1500);
 };
 
 const checkFolderForUnknownModifications = async (folderPath: string) => {

@@ -341,7 +341,9 @@ declare global {
 
   // ? User data related types
 
-  type AppTheme = 'dark' | 'light' | 'system';
+  type AppThemeWithoutSystem = 'dark' | 'light';
+
+  type AppTheme = AppThemeWithoutSystem | 'system';
 
   type UserDataTypes =
     | 'theme'
@@ -373,6 +375,7 @@ declare global {
     | 'preferences.hideWindowOnClose'
     | 'preferences.openWindowAsHiddenOnSystemStart'
     | 'customMusixmatchUserToken'
+    | 'storageMetrics'
     | PageSortTypes;
 
   type AppUpdatesState =
@@ -436,6 +439,7 @@ declare global {
     };
     recentSearches: string[];
     customMusixmatchUserToken?: string;
+    storageMetrics?: StorageMetrics;
   }
 
   interface AppThemeData {
@@ -555,6 +559,34 @@ declare global {
     picture_medium: string;
   }
 
+  //  ? Storage related types
+
+  interface AppDataStorageMetrics {
+    appDataSize: number;
+    artworkCacheSize: number;
+    tempArtworkCacheSize: number;
+    totalArtworkCacheSize: number;
+    logSize: number;
+    songDataSize: number;
+    artistDataSize: number;
+    albumDataSize: number;
+    genreDataSize: number;
+    playlistDataSize: number;
+    userDataSize: number;
+    librarySize: number;
+    totalKnownItemsSize: number;
+    otherSize: number;
+  }
+
+  interface StorageMetrics {
+    // rootSize: number;
+    // remainingSize: number;
+    appFolderSize: number;
+    appDataSizes: AppDataStorageMetrics;
+    totalSize: number;
+    generatedDate: string;
+  }
+
   // ? Search related types
 
   type SearchFilters =
@@ -615,6 +647,8 @@ declare global {
     | 'APP_THEME_CHANGE'
     | 'PLAYBACK_FROM_UNKNOWN_SOURCE'
     | 'AUDIO_PARSING_PROCESS_UPDATE'
+    | 'SONG_PALETTE_GENERAING_PROCESS_UPDATE'
+    | 'GENRE_PALETTE_GENERAING_PROCESS_UPDATE'
     | 'SONG_REMOVE_PROCESS_UPDATE'
     | 'SONG_BLACKLISTED'
     | 'SONG_WHITELISTED'
@@ -796,6 +830,7 @@ declare global {
     | 'songs/updatedSong'
     | 'songs/deletedSong'
     | 'songs/artworks'
+    | 'songs/palette'
     | 'songs/listeningData'
     | 'songs/listeningData/fullSongListens'
     | 'songs/listeningData/skips'
@@ -817,6 +852,7 @@ declare global {
     | 'genres/newGenre'
     | 'genres/updatedGenre'
     | 'genres/deletedGenre'
+    | 'genres/backgroundColor'
     | 'playlists'
     | 'playlists/newPlaylist'
     | 'playlists/updatedPlaylist'

@@ -7,7 +7,7 @@ const resetAppData = async () => {
   const manageErrors = (err: any) => {
     if ('code' in err && err.code === 'ENOENT') {
       return log(
-        `A RECOVERABLE ERROR OCURRED WHEN RESETTING APP DATA.\nERROR : ${err}`
+        `A RECOVERABLE ERROR OCURRED WHEN RESETTING AN APP DATA MODULE.\nERROR : ${err}`
       );
     }
     throw err;

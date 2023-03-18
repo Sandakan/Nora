@@ -1,6 +1,7 @@
 /** @type {import("tailwindcss").Config} */
 
 const colors = require('tailwindcss/colors');
+const plugin = require('tailwindcss/plugin');
 
 module.exports = {
   content: ['./src/renderer/**/*.{js,jsx,ts,tsx,ejs}'],
@@ -67,5 +68,36 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    plugin(({ matchVariant }) => {
+      matchVariant(
+        'nth',
+        (value) => {
+          return `&:nth-child(${value})`;
+        },
+        {
+          values: {
+            1: '1',
+            2: '2',
+            3: '3',
+          },
+        }
+      );
+    }),
+    plugin(({ matchVariant }) => {
+      matchVariant(
+        'nth-last',
+        (value) => {
+          return `&:nth-last-child(${value})`;
+        },
+        {
+          values: {
+            1: '1',
+            2: '2',
+            3: '3',
+          },
+        }
+      );
+    }),
+  ],
 };

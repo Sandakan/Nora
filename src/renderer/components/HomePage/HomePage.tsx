@@ -129,21 +129,18 @@ const HomePage = () => {
 
   const fetchRecentArtistsData = React.useCallback(() => {
     if (content.recentlyPlayedSongs.length > 0) {
-      window.api
-        .getArtistData(
-          [
-            ...new Set(
-              content.recentlyPlayedSongs
-                .map((song) =>
-                  song.artists
-                    ? song.artists.map((artist) => artist.artistId)
-                    : []
-                )
-                .flat()
-            ),
-          ].filter((_, index) => index < 5)
-        )
-        .then((res) => {
+      const artistIds = [
+        ...new Set(
+          content.recentlyPlayedSongs
+            .map((song) =>
+              song.artists ? song.artists.map((artist) => artist.artistId) : []
+            )
+            .flat()
+        ),
+      ].filter((_, index) => index < 5);
+
+      if (artistIds.length > 0)
+        window.api.getArtistData(artistIds).then((res) => {
           if (res && Array.isArray(res))
             dispatch({
               type: 'RECENT_SONGS_ARTISTS',
@@ -216,6 +213,7 @@ const HomePage = () => {
           else if (
             event.dataType === 'songs/deletedSong' ||
             event.dataType === 'songs/newSong' ||
+            event.dataType === 'songs/palette' ||
             event.dataType === 'blacklist/songBlacklist' ||
             (event.dataType === 'songs/likes' && event.eventData.length > 1)
           ) {
@@ -575,7 +573,10 @@ const HomePage = () => {
         {content.latestSongs.length > 0 &&
           content.latestSongs[0] !== null &&
           recentlyPlayedSongs.length === 0 && (
-            <div className="no-songs-container mt-12 flex w-full flex-col items-center justify-center text-center text-xl font-normal text-font-color-dimmed dark:text-dark-font-color-dimmed">
+            <div className="no-songs-container flex h-full w-full flex-col items-center justify-center text-center text-lg font-normal text-black/60 dark:text-white/60">
+              <span className="material-icons-round-outlined mb-1 text-4xl">
+                headphones
+              </span>{' '}
               <span>Listen to some songs to show additional metrics.</span>
             </div>
           )}

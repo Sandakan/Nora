@@ -5,6 +5,7 @@ import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import { parseSong } from '../parseSong';
 import { getSongsData, supportedMusicExtensions } from '../filesystem';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
+import { generatePalettes } from '../other/generatePalette';
 
 let pathsQueue: string[] = [];
 
@@ -37,6 +38,8 @@ const tryToParseNewlyAddedSong = (folderPath: string, filename: string) => {
       try {
         await parseSong(absolutePath);
         log(`'${filename}' song added to the library.`);
+        setTimeout(generatePalettes, 1500);
+
         dataUpdateEvent('songs/newSong');
         pathsQueue = pathsQueue.filter((x) => x !== songPath);
         return;

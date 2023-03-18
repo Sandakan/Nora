@@ -14,7 +14,7 @@ const restoreBlacklistedSongs = async (blacklistedSongIds: string[]) => {
   );
 
   if (filteredIds.length > 0) {
-    const songsData = getSongInfo(filteredIds);
+    const songsData = await getSongInfo(filteredIds);
     for (const songData of songsData) {
       if (songData.isBlacklisted)
         sendMessageToRenderer(

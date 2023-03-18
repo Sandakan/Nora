@@ -16,8 +16,8 @@ type Input = {
 const getSecondsFromLyricsLine = (lyric: string) => {
   const lyricsStartMatch = lyric.match(syncedLyricsRegex);
   if (Array.isArray(lyricsStartMatch)) {
-    const x = lyricsStartMatch[0].replaceAll(/[[\]]/gm, '').split(':');
-    return parseInt(x[0], 10) * 60 + parseFloat(x[1]);
+    const [sec, ms] = lyricsStartMatch[0].replaceAll(/[[\]]/gm, '').split(':');
+    return parseInt(sec) * 60 + parseFloat(ms);
   }
   return 0;
 };
@@ -31,8 +31,31 @@ const getLyricEndTime = (lyricsArr: string[], index: number) => {
   return 0;
 };
 
-const isALyricsMetadataLine = (line: string) =>
-  !/(^\[\w+:.{1,}\]$)/gm.test(line);
+const isNotALyricsMetadataLine = (line: string) =>
+  !/^\[\w+:.{1,}\]$/gm.test(line);
+
+// const fetchDataFromLyricsString = (lyricsString: string) => {
+//   const lyrics: { time: string; lyrics: string[]; lang?: string }[] = [];
+
+//   for (const match of lyricsString.matchAll(syncedLyricsRegex)) {
+//     if (
+//       match?.groups &&
+//       'timestamp' in match.groups &&
+//       'lyric' in match.groups
+//     ) {
+//       const { timestamp, lyric, lang } = match.groups;
+//       const isAvailable = !lyrics.some((y) => y.time === timestamp);
+//       if (isAvailable)
+//         lyrics.push({ time: timestamp, lyrics: [lyric.trim()], lang });
+//       else
+//         for (let y = 0; y < lyrics.length; y += 1) {
+//           if (lyrics[y].time === timestamp) lyrics[y].lyrics.push(lyric.trim());
+//         }
+//     }
+//   }
+
+//   return lyrics;
+// };
 
 // MAIN FUNCTIONS //
 const parseLyrics = (lyricsString: string): LyricsData => {
@@ -44,7 +67,7 @@ const parseLyrics = (lyricsString: string): LyricsData => {
   const copyright = copyrightMatch?.groups?.copyright || undefined;
   const lines = lyricsString.split('\n');
   const lyricsLines = lines.filter(
-    (line) => line.trim() !== '' && isALyricsMetadataLine(line)
+    (line) => line.trim() !== '' && isNotALyricsMetadataLine(line)
   );
 
   const parsedUnsyncedLyricsLines = lyricsLines.map((line) =>
@@ -134,8 +157,9 @@ export const parseSyncedLyricsFromAudioDataSource = (
         const mins = Math.floor(start / 60);
         const minsStr = mins.toString().length > 1 ? mins : `0${mins}`;
         const hundredths = start.toString().includes('.')
-          ? parseInt(start.toString().split('.').at(-1) || '0', 10)
+          ? parseInt(start.toString().split('.').at(-1) || '0')
           : 0;
+
         return `[${minsStr}:${secsStr}.${hundredths}] ${text}`;
       })
       .join('\n');

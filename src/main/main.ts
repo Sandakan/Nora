@@ -68,7 +68,7 @@ import getGenresInfo from './core/getGenresInfo';
 import sendPlaylistData from './core/sendPlaylistData';
 import fetchAlbumData from './core/fetchAlbumData';
 import fetchArtistData from './core/fetchArtistData';
-import changeAppTheme from './core/changeAppTheme';
+import { changeAppTheme } from './core/changeAppTheme';
 import saveLyricsToSong from './saveLyricsToSong';
 import getMusicFolderData from './core/getMusicFolderData';
 import {
@@ -81,6 +81,8 @@ import { clearTempArtworkFolder } from './other/artworks';
 import blacklistFolders from './core/blacklistFolders';
 import restoreBlacklistedFolders from './core/restoreBlacklistedFolder';
 import toggleBlacklistFolders from './core/toggleBlacklistFolders';
+import getStorageUsage from './core/getStorageUsage';
+import { generatePalettes } from './other/generatePalette';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -102,10 +104,12 @@ const MINI_PLAYER_ASPECT_RATIO = 17 / 10;
 const abortController = new AbortController();
 
 // / / / / / / VARIABLES / / / / / / /
-let mainWindow: BrowserWindow;
+// eslint-disable-next-line import/no-mutable-exports
+export let mainWindow: BrowserWindow;
 let tray: Tray;
 let isMiniPlayer = false;
 let isConnectedToInternet = false;
+let isAudioPlaying = false;
 
 // / / / / / / INITIALIZATION / / / / / / /
 
@@ -171,6 +175,7 @@ const createWindow = async () => {
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
+      nodeIntegrationInWorker: true,
     },
     visualEffectState: 'followWindow',
     roundedCorners: true,
@@ -298,6 +303,7 @@ app
         'app/player/songPlaybackStateChange',
         (_: unknown, isPlaying: boolean) => {
           console.log(`Player playback status : ${isPlaying}`);
+          isAudioPlaying = isPlaying;
           manageTaskbarPlaybackButtonControls(mainWindow, true, isPlaying);
         }
       );
@@ -319,7 +325,7 @@ app
         mainWindow.webContents.send('app/leftFullscreen');
       });
 
-      ipcMain.on('app/getSongPosition', (_event: unknown, position: number) =>
+      ipcMain.on('app/getSongPosition', (_, position: number) =>
         saveUserData('currentSong.stoppedPosition', position)
       );
 
@@ -327,13 +333,10 @@ app
         addMusicFolder(mainWindow, sortType)
       );
 
-      ipcMain.handle('app/getSong', (_event: unknown, id: string) =>
-        sendAudioData(id)
-      );
+      ipcMain.handle('app/getSong', (_, id: string) => sendAudioData(id));
 
-      ipcMain.handle(
-        'app/getSongFromUnknownSource',
-        (_event: unknown, songPath: string) => sendAudioDataFromPath(songPath)
+      ipcMain.handle('app/getSongFromUnknownSource', (_, songPath: string) =>
+        sendAudioDataFromPath(songPath)
       );
 
       ipcMain.handle(
@@ -360,8 +363,12 @@ app
 
       ipcMain.handle(
         'app/saveUserData',
-        (_event: unknown, dataType: UserDataTypes, data: string) =>
+        (_, dataType: UserDataTypes, data: string) =>
           saveUserData(dataType, data)
+      );
+
+      ipcMain.handle('app/getStorageUsage', (_, forceRefresh?: boolean) =>
+        getStorageUsage(forceRefresh)
       );
 
       ipcMain.handle('app/getUserData', () => getUserData());
@@ -416,6 +423,8 @@ app
           dataUpdateType: ListeningDataUpdateTypes
         ) => updateSongListeningData(songId, dataType, dataUpdateType)
       );
+
+      ipcMain.handle('app/generatePalettes', generatePalettes);
 
       ipcMain.on(
         'app/savePageSortState',
@@ -683,7 +692,10 @@ function manageWindowFinishLoad() {
 
   manageTaskbarPlaybackButtonControls(mainWindow, true, false);
 
-  nativeTheme.addListener('updated', watchForSystemThemeChanges);
+  nativeTheme.addListener('updated', () => {
+    watchForSystemThemeChanges();
+    manageTaskbarPlaybackButtonControls(mainWindow, true, isAudioPlaying);
+  });
 }
 
 function handleBeforeQuit() {
@@ -932,18 +944,19 @@ function restartRenderer() {
 }
 
 function watchForSystemThemeChanges() {
-  if (IS_DEVELOPMENT)
+  // This event only occurs when system theme changes
+  const userData = getUserData();
+  const { useSystemTheme } = userData.theme;
+
+  const theme = nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
+  if (IS_DEVELOPMENT && useSystemTheme)
     sendMessageToRenderer(
-      `App theme changed to ${nativeTheme.themeSource}`,
+      `System theme changed to ${theme}`,
       'APP_THEME_CHANGE'
     );
-  if (mainWindow.webContents) {
-    mainWindow.webContents.send(
-      'app/systemThemeChange',
-      nativeTheme.shouldUseDarkColors,
-      nativeTheme.themeSource === 'system'
-    );
-  }
+
+  if (useSystemTheme) changeAppTheme('system');
+  else log(`System theme changed to ${theme}`);
 }
 
 function toggleMiniPlayer(isActivateMiniPlayer: boolean) {

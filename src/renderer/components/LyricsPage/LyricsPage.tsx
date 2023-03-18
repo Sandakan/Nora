@@ -1,12 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/jsx-no-useless-fragment */
-/* eslint-disable promise/always-return */
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable promise/catch-or-return */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable react/no-unused-prop-types */
-/* eslint-disable react/self-closing-comp */
-/* eslint-disable import/prefer-default-export */
 import React, { useContext } from 'react';
 import debounce from 'renderer/utils/debounce';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
@@ -72,10 +67,7 @@ export const LyricsPage = () => {
         songPath: currentSongData.path,
         duration: currentSongData.duration,
       })
-      .then((res) => {
-        // if (res) setIsOfflineLyricsAvailable(true);
-        setLyrics(res);
-      });
+      .then((res) => setLyrics(res));
   }, [
     addNewNotifications,
     currentSongData.artists,
@@ -120,8 +112,13 @@ export const LyricsPage = () => {
   }, [isAutoScrolling, lyrics]);
 
   const showOnlineLyrics = React.useCallback(
-    (_: unknown, setIsDisabled: (state: boolean) => void) => {
+    (
+      _: unknown,
+      setIsDisabled: (state: boolean) => void,
+      setIsPending: (state: boolean) => void
+    ) => {
       setIsDisabled(true);
+      setIsPending(true);
       window.api
         .getSongLyrics(
           {
@@ -136,7 +133,10 @@ export const LyricsPage = () => {
           'ONLINE_ONLY'
         )
         .then((res) => setLyrics(res))
-        .finally(() => setIsDisabled(false));
+        .finally(() => {
+          setIsDisabled(false);
+          setIsPending(false);
+        });
     },
     [
       currentSongData.artists,
@@ -190,7 +190,7 @@ export const LyricsPage = () => {
               }
               return undefined;
             });
-            addNewNotifications([
+            return addNewNotifications([
               {
                 id: 'lyricsUpdateSuccessful',
                 delay: 5000,
@@ -294,7 +294,6 @@ export const LyricsPage = () => {
                       label="Show online lyrics"
                       className="show-online-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                       iconName="language"
-                      pendingAnimationOnDisabled={isOnline}
                       isDisabled={!isOnline}
                       tooltipLabel={
                         isOnline
@@ -335,7 +334,7 @@ export const LyricsPage = () => {
                 </div>
               </div>
               <div
-                className="lyrics-lines-container flex h-full flex-col items-center overflow-y-auto px-8 py-4"
+                className="lyrics-lines-container flex h-full !w-full flex-col items-center overflow-y-auto px-8 py-4"
                 ref={lyricsLinesContainerRef}
                 onScroll={() =>
                   debounce(() => {

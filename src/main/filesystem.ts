@@ -363,6 +363,8 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
       typeof data === 'string'
     ) {
       userData.customMusixmatchUserToken = data;
+    } else if (dataType === 'storageMetrics' && typeof data === 'object') {
+      userData.storageMetrics = data as StorageMetrics;
     } else
       return log(
         'Error occurred in setUserData function due ot invalid dataType or data.'

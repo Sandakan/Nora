@@ -35,7 +35,7 @@ const SongArtistsInput = (props: Props) => {
     <div className="tag-input mb-6 flex w-[45%] min-w-[10rem] flex-col">
       <label htmlFor="song-artists-id3-tag">Song Artists</label>
       <div className="mt-2 w-[90%] rounded-xl border-2 border-background-color-2 p-2 dark:border-dark-background-color-2">
-        <div className="artists-container flex flex-wrap p-2 empty:py-2 empty:after:h-full empty:after:w-full empty:after:text-center empty:after:text-[#ccc] empty:after:content-['No_artists_for_this_song.'] dark:empty:after:text-[#ccc]">
+        <div className="artists-container flex flex-wrap p-2 empty:py-2 empty:after:h-full empty:after:w-full empty:after:text-center empty:after:text-[#ccc] empty:after:content-['No_artists_selected_for_this_song.'] dark:empty:after:text-[#ccc]">
           {songArtists &&
             songArtists.map((artist) => (
               <span

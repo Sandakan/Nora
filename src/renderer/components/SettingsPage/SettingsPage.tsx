@@ -1,23 +1,15 @@
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-/* eslint-disable react/no-unescaped-entities */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable no-console */
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 
 import MainContainer from '../MainContainer';
-
 import AppearanceSettings from './Settings/AppearanceSettings';
 import AudioPlaybackSettings from './Settings/AudioPlaybackSettings';
-import MusicFoldersSettings from './Settings/MusicFoldersSettings';
 import DefaultPageSettings from './Settings/DefaultPageSettings';
 import PreferencesSettings from './Settings/PreferencesSettings';
 import AccessibilitySettings from './Settings/AccessibilitySettings';
 import StartupSettings from './Settings/StartupSettings';
 import AboutSettings from './Settings/AboutSettings';
+import StorageSettings from './Settings/StorageSettings';
 
 const SettingsPage = () => {
   const { userData } = useContext(AppContext);
@@ -62,10 +54,6 @@ const SettingsPage = () => {
       <>
         <div className="title-container mt-1 mb-4 flex items-center justify-between text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           Settings
-          {/* <div className="other-controls-container flex text-sm font-normal">
-            <span className="material-icons-round-outlined mr-2">warning</span>{' '}
-            App Updates Failed
-          </div> */}
         </div>
 
         <ul className="pl-4">
@@ -79,12 +67,12 @@ const SettingsPage = () => {
             <AudioPlaybackSettings />
           </li>
 
-          {/* MUSIC FOLDERS SETTINGS */}
+          {/* MUSIC FOLDERS SETTINGS
           <li className="main-container mb-16 mr-8">
             <MusicFoldersSettings
               musicFoldersData={settingsUserData?.musicFolders ?? []}
             />
-          </li>
+          </li> */}
 
           {/* DEFAULT PAGE SETTINGS */}
           <li className="main-container mb-16">
@@ -104,6 +92,11 @@ const SettingsPage = () => {
           {/* STARTUP SETTINGS */}
           <li className="main-container startup-settings-container mb-16">
             <StartupSettings />
+          </li>
+
+          {/* STARTUP SETTINGS */}
+          <li className="main-container storage-settings-container mb-16">
+            <StorageSettings />
           </li>
 
           {/* ABOUT SETTINGS */}
