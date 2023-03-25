@@ -1,4 +1,5 @@
 /* eslint-disable no-await-in-loop */
+import path from 'path';
 import NodeID3 from 'node-id3';
 import { parseSyncedLyricsFromAudioDataSource } from '../utils/parseLyrics';
 import {
@@ -13,6 +14,10 @@ import {
 } from '../fs/resolveFilePaths';
 import log from '../log';
 import { getSongsOutsideLibraryData } from '../main';
+
+import { appPreferences } from '../../../package.json';
+
+const { metadataEditingSupportedExtensions } = appPreferences;
 
 const getSongId3Tags = (songPath: string) =>
   NodeID3.Promise.read(songPath, { noRaw: true });
@@ -40,6 +45,7 @@ const sendSongID3Tags = async (
       isKnownSource ? 'from the library' : 'outside the library'
     }.`
   );
+
   if (isKnownSource) {
     const songId = songIdOrPath;
 
@@ -51,6 +57,16 @@ const sendSongID3Tags = async (
       for (let i = 0; i < songs.length; i += 1) {
         if (songs[i].songId === songId) {
           const song = songs[i];
+
+          const pathExt = path.extname(song.path).replace(/\W/, '');
+          const isASupporedFormat =
+            metadataEditingSupportedExtensions.includes(pathExt);
+
+          if (!isASupporedFormat)
+            throw new Error(
+              `No support for editing song metadata in '${pathExt}' format.`
+            );
+
           const songAlbum = albums.find(
             (val) => val.albumId === song.album?.albumId
           );
@@ -119,6 +135,15 @@ const sendSongID3Tags = async (
   } else {
     const songPathWithDefaultUrl = songIdOrPath;
     const songPath = removeDefaultAppProtocolFromFilePath(songIdOrPath);
+
+    const pathExt = path.extname(songPath).replace(/\W/, '');
+    const isASupportedFormat =
+      metadataEditingSupportedExtensions.includes(pathExt);
+
+    if (!isASupportedFormat)
+      throw new Error(
+        `No support for editing song metadata in '${pathExt}' format.`
+      );
 
     try {
       const songsOutsideLibraryData = getSongsOutsideLibraryData();

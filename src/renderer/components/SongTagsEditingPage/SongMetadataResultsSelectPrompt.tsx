@@ -82,7 +82,7 @@ const SongMetadataResultsSelectPage = (
   }, [songResults, updateSongInfo, updateMetadataKeywords]);
 
   return (
-    <div className={`relative `}>
+    <div className="relative">
       <div className="title-container mb-4 w-full text-2xl font-medium">
         Results related to{' '}
         <span className="text-font-color-highlight dark:text-dark-font-color-highlight">

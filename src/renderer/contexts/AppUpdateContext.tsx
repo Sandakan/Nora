@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { createContext, ReactElement } from 'react';
+import { createContext, ReactNode } from 'react';
 
 export interface AppUpdateContextType {
   updateUserData: (
@@ -17,7 +17,7 @@ export interface AppUpdateContextType {
   ) => void;
   changePromptMenuData: (
     isVisible: boolean,
-    content?: ReactElement<any, any>,
+    content?: ReactNode,
     className?: string
   ) => void;
   addNewNotifications: (newNotifications: AppNotification[]) => void;

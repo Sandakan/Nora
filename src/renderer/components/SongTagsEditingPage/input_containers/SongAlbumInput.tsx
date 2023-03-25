@@ -69,9 +69,11 @@ const SongAlbumInput = (props: Props) => {
                   } songs (including current song)`}</span>
                 </div>
               </div>
-              <span
-                className="material-icons-round float-right mr-2 cursor-pointer"
-                onClick={() => {
+              <Button
+                iconName="close"
+                iconClassName="leading-none dark:!text-font-color-black"
+                className="float-right !mr-0 !border-0 !p-1 outline-1 outline-offset-1 focus-visible:!outline"
+                clickHandler={() => {
                   updateSongInfo((prevData) => {
                     return {
                       ...prevData,
@@ -79,17 +81,13 @@ const SongAlbumInput = (props: Props) => {
                     };
                   });
                 }}
-                role="button"
-                tabIndex={0}
-              >
-                close
-              </span>
+              />
             </div>
           )}
         </div>
         <input
           type="search"
-          className="mt-4 w-full rounded-xl bg-background-color-2 p-2 dark:bg-dark-background-color-2"
+          className="mt-4 w-full rounded-xl border-2 border-transparent bg-background-color-2 p-2 transition-colors focus:border-font-color-highlight dark:bg-dark-background-color-2 dark:focus:border-dark-font-color-highlight"
           placeholder="Search for albums here."
           value={albumKeyword}
           onChange={(e) => {

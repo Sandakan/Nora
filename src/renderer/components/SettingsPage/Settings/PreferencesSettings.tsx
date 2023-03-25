@@ -1,11 +1,10 @@
 import React from 'react';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import storage from 'renderer/utils/localStorage';
 import Checkbox from '../../Checkbox';
 
 const PreferencesSettings = () => {
-  const { userData } = React.useContext(AppContext);
-  const { updateUserData } = React.useContext(AppUpdateContext);
+  const { userData, localStorageData } = React.useContext(AppContext);
 
   return (
     <>
@@ -22,24 +21,16 @@ const PreferencesSettings = () => {
               order.
             </div>
             <Checkbox
-              id="toggleSongIndexing"
+              id="isSongIndexingEnabled"
               isChecked={
-                userData !== undefined && userData.preferences.songIndexing
+                localStorageData !== undefined &&
+                localStorageData.preferences.isSongIndexingEnabled
               }
               checkedStateUpdateFunction={(state) =>
-                updateUserData(async (prevUserData) => {
-                  await window.api.saveUserData(
-                    'preferences.songIndexing',
-                    state
-                  );
-                  return {
-                    ...prevUserData,
-                    preferences: {
-                      ...prevUserData.preferences,
-                      songIndexing: state,
-                    },
-                  };
-                })
+                storage.preferences.setPreferences(
+                  'isSongIndexingEnabled',
+                  state
+                )
               }
               labelContent="Enable song indexing"
             />
@@ -55,21 +46,14 @@ const PreferencesSettings = () => {
               id="showArtistArtworkNearSongControls"
               isChecked={
                 userData !== undefined &&
-                userData.preferences.showArtistArtworkNearSongControls
+                localStorageData.preferences.showArtistArtworkNearSongControls
               }
-              checkedStateUpdateFunction={(state) => {
-                window.api.saveUserData(
-                  'preferences.showArtistArtworkNearSongControls',
+              checkedStateUpdateFunction={(state) =>
+                storage.preferences.setPreferences(
+                  'showArtistArtworkNearSongControls',
                   state
-                );
-                updateUserData((prevData) => ({
-                  ...prevData,
-                  preferences: {
-                    ...prevData.preferences,
-                    showArtistArtworkNearSongControls: state,
-                  },
-                }));
-              }}
+                )
+              }
               labelContent="Show artists artworks next to their names"
             />
           </div>
@@ -83,22 +67,15 @@ const PreferencesSettings = () => {
             <Checkbox
               id="disableBackgroundArtwork"
               isChecked={
-                userData !== undefined &&
-                userData.preferences.disableBackgroundArtworks
+                localStorageData !== undefined &&
+                localStorageData.preferences.disableBackgroundArtworks
               }
-              checkedStateUpdateFunction={(state) => {
-                window.api.saveUserData(
-                  'preferences.disableBackgroundArtworks',
+              checkedStateUpdateFunction={(state) =>
+                storage.preferences.setPreferences(
+                  'disableBackgroundArtworks',
                   state
-                );
-                updateUserData((prevData) => ({
-                  ...prevData,
-                  preferences: {
-                    ...prevData.preferences,
-                    disableBackgroundArtworks: state,
-                  },
-                }));
-              }}
+                )
+              }
               labelContent="Disable background artworks"
             />
           </div>

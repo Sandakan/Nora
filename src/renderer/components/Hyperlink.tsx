@@ -12,12 +12,15 @@ interface HyperlinkProp {
 }
 
 const Hyperlink = (props: HyperlinkProp) => {
-  const { userData } = React.useContext(AppContext);
+  const { localStorageData } = React.useContext(AppContext);
   const { changePromptMenuData } = React.useContext(AppUpdateContext);
   const { link, linkTitle, label, className, noValidityCheck } = props;
 
   const openLinkConfirmPrompt = React.useCallback(() => {
-    if (noValidityCheck || userData?.preferences.doNotVerifyWhenOpeningLinks) {
+    if (
+      noValidityCheck ||
+      localStorageData?.preferences.doNotVerifyWhenOpeningLinks
+    ) {
       window.api.openInBrowser(link);
     } else
       changePromptMenuData(
@@ -29,8 +32,8 @@ const Hyperlink = (props: HyperlinkProp) => {
     changePromptMenuData,
     link,
     linkTitle,
+    localStorageData?.preferences.doNotVerifyWhenOpeningLinks,
     noValidityCheck,
-    userData?.preferences.doNotVerifyWhenOpeningLinks,
   ]);
 
   return (

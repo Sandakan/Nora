@@ -8,6 +8,8 @@ import { FixedSizeGrid as Grid } from 'react-window';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import debounce from 'renderer/utils/debounce';
+
 import { Artist } from './Artist';
 import NoArtistImage from '../../../../assets/images/svg/Sun_Monochromatic.svg';
 import Dropdown from '../Dropdown';
@@ -37,7 +39,6 @@ export const ArtistPage = () => {
       : 'aToZ') as ArtistSortTypes
   );
 
-  const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
   const containerRef = React.useRef(null as HTMLDivElement | null);
   const { height, width } = useResizeObserver(containerRef);
   const MIN_ITEM_WIDTH = 175;
@@ -211,20 +212,18 @@ export const ArtistPage = () => {
               height={height || 300}
               width={width || 500}
               overscanRowCount={2}
-              initialScrollTop={currentlyActivePage.data?.scrollTopOffset ?? 0}
-              onScroll={(data) => {
-                if (scrollOffsetTimeoutIdRef.current)
-                  clearTimeout(scrollOffsetTimeoutIdRef.current);
-                if (!data.scrollUpdateWasRequested && data.scrollTop !== 0)
-                  scrollOffsetTimeoutIdRef.current = setTimeout(
-                    () =>
-                      updateCurrentlyActivePageData((currentPageData) => ({
-                        ...currentPageData,
-                        scrollTopOffset: data.scrollTop,
-                      })),
-                    500
-                  );
-              }}
+              initialScrollTop={currentlyActivePage?.data?.scrollTopOffset}
+              onScroll={(data) =>
+                debounce(
+                  () =>
+                    data.scrollTop !== 0 &&
+                    updateCurrentlyActivePageData((currentPageData) => ({
+                      ...currentPageData,
+                      scrollTopOffset: data.scrollTop,
+                    })),
+                  500
+                )
+              }
             >
               {row}
             </Grid>

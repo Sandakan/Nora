@@ -26,8 +26,7 @@ const AlbumSearchResultsContainer = (props: Props) => {
                 return (
                   <Album
                     index={index}
-                    // eslint-disable-next-line react/no-array-index-key
-                    key={`${album.albumId}-${index}`}
+                    key={album.albumId}
                     albumId={album.albumId}
                     artists={album.artists}
                     artworkPaths={album.artworkPaths}

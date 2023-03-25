@@ -28,7 +28,8 @@ const StorageSettings = () => {
 
   const appStorageBarWidths = React.useMemo(() => {
     if (storageMetrics) {
-      const { appDataSizes, totalSize, appFolderSize } = storageMetrics;
+      const { appDataSizes, totalSize, appFolderSize, rootSizes } =
+        storageMetrics;
       const {
         // appDataSize,
         artworkCacheSize,
@@ -45,16 +46,21 @@ const StorageSettings = () => {
         // otherSize,
       } = appDataSizes;
       return {
-        artworkCacheSizeWidth: (artworkCacheSize / totalSize) * 100,
-        tempArtworkCacheSizeWidth: (tempArtworkCacheSize / totalSize) * 100,
-        logSizeWidth: (logSize / totalSize) * 100,
-        songDataSizeWidth: (songDataSize / totalSize) * 100,
-        artistDataSizeWidth: (artistDataSize / totalSize) * 100,
-        albumDataSizeWidth: (albumDataSize / totalSize) * 100,
-        genreDataSizeWidth: (genreDataSize / totalSize) * 100,
-        playlistDataSizeWidth: (playlistDataSize / totalSize) * 100,
-        userDataSizeWidth: (userDataSize / totalSize) * 100,
-        appFolderSizeWidth: (appFolderSize / totalSize) * 100,
+        artworkCacheSizeWidth: (artworkCacheSize / rootSizes.size) * 100,
+        tempArtworkCacheSizeWidth:
+          (tempArtworkCacheSize / rootSizes.size) * 100,
+        logSizeWidth: (logSize / rootSizes.size) * 100,
+        songDataSizeWidth: (songDataSize / rootSizes.size) * 100,
+        artistDataSizeWidth: (artistDataSize / rootSizes.size) * 100,
+        albumDataSizeWidth: (albumDataSize / rootSizes.size) * 100,
+        genreDataSizeWidth: (genreDataSize / rootSizes.size) * 100,
+        playlistDataSizeWidth: (playlistDataSize / rootSizes.size) * 100,
+        userDataSizeWidth: (userDataSize / rootSizes.size) * 100,
+        appFolderSizeWidth: (appFolderSize / rootSizes.size) * 100,
+        otherApplicationSizesWidth:
+          ((rootSizes.size - rootSizes.freeSpace - totalSize) /
+            rootSizes.size) *
+          100,
       };
     }
     return undefined;
@@ -86,6 +92,9 @@ const StorageSettings = () => {
   const appStorageBarCssProperties: any = {};
   const appDataStorageBarCssProperties: any = {};
 
+  appStorageBarCssProperties[
+    '--other-applications-size-storage-bar-width'
+  ] = `${appStorageBarWidths?.otherApplicationSizesWidth || 0}%`;
   appStorageBarCssProperties['--app-folder-size-storage-bar-width'] = `${
     appStorageBarWidths?.appFolderSizeWidth || 0
   }%`;
@@ -146,14 +155,21 @@ const StorageSettings = () => {
           <div className="mx-auto mt-6 w-4/5">
             <div className="flex items-center justify-between text-sm uppercase opacity-50">
               <span>Full storage Usage</span>{' '}
-              <span>{parseByteSizes(storageMetrics?.totalSize)?.size}</span>
+              <span>
+                {parseByteSizes(storageMetrics?.totalSize)?.size} out of{' '}
+                {parseByteSizes(storageMetrics?.rootSizes.size)?.size}
+              </span>
             </div>
 
             <div
               className="mt-2 flex h-4 overflow-hidden rounded-md bg-background-color-2 dark:bg-dark-background-color-2/75"
               style={appStorageBarCssProperties}
-              title="Total Size"
+              title="Free space"
             >
+              <div
+                className="!h-full w-[var(--other-applications-size-storage-bar-width)] cursor-pointer bg-[#ffbe76] opacity-75 transition-opacity hover:opacity-100"
+                title="Other Applications"
+              />
               <div
                 className="!h-full w-[var(--artwork-cache-size-storage-bar-width)] cursor-pointer bg-[#55efc4] opacity-75 transition-opacity hover:opacity-100"
                 title="Artwork Cache"
@@ -191,7 +207,7 @@ const StorageSettings = () => {
                 title="User Data"
               />
               <div
-                className="!h-full w-[var(--app-folder-size-storage-bar-width)] cursor-pointer bg-[#30336b] opacity-75 transition-opacity hover:opacity-100"
+                className="!h-full w-[var(--app-folder-size-storage-bar-width)] cursor-pointer bg-[#4834d4] opacity-75 transition-opacity hover:opacity-100"
                 title="Internal App Files"
               />
             </div>
@@ -234,7 +250,20 @@ const StorageSettings = () => {
 
           <ul className="mt-10 flex flex-wrap items-center justify-center px-8">
             <li className="mr-8 mb-4 flex items-center">
-              <div className="mr-4 h-4 w-4 rounded-full bg-[#30336b]" />{' '}
+              <div className="mr-4 h-4 w-4 rounded-full bg-[#ffbe76]" /> Other
+              Applications Files :{' '}
+              <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
+                {
+                  parseByteSizes(
+                    storageMetrics.rootSizes.size -
+                      storageMetrics.rootSizes.freeSpace -
+                      storageMetrics.totalSize
+                  )?.size
+                }
+              </span>
+            </li>
+            <li className="mr-8 mb-4 flex items-center">
+              <div className="mr-4 h-4 w-4 rounded-full bg-[#4834d4]" />{' '}
               Internal App Files :{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                 {parseByteSizes(storageMetrics?.appFolderSize)?.size}

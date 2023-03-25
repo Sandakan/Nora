@@ -36,9 +36,9 @@ const CurrentQueuePage = () => {
     queue,
     currentSongData,
     currentlyActivePage,
-    userData,
     isMultipleSelectionEnabled,
     multipleSelectionsData,
+    localStorageData,
   } = useContext(AppContext);
   const {
     updateQueueData,
@@ -248,7 +248,7 @@ const CurrentQueuePage = () => {
                   index={index}
                   ref={provided.innerRef}
                   isIndexingSongs={
-                    userData !== undefined && userData.preferences.songIndexing
+                    localStorageData?.preferences?.isSongIndexingEnabled
                   }
                   title={title}
                   songId={songId}
@@ -284,12 +284,12 @@ const CurrentQueuePage = () => {
       );
     },
     [
+      localStorageData?.preferences?.isSongIndexingEnabled,
       multipleSelectionsData,
       queue.queue,
       queuedSongs,
       toggleMultipleSelections,
       updateQueueData,
-      userData,
     ]
   );
 
@@ -332,7 +332,7 @@ const CurrentQueuePage = () => {
   );
 
   return (
-    <MainContainer className="main-container songs-list-container current-queue-container relative !h-full overflow-hidden !pb-0">
+    <MainContainer className="current-queue-container appear-from-bottom relative !h-full overflow-hidden !pb-0">
       <>
         <div className="title-container mt-2 mb-4 flex items-center justify-between pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           Currently Playing Queue
@@ -470,8 +470,7 @@ const CurrentQueuePage = () => {
                       index={rubric.source.index}
                       ref={provided.innerRef}
                       isIndexingSongs={
-                        userData !== undefined &&
-                        userData.preferences.songIndexing
+                        localStorageData?.preferences?.isSongIndexingEnabled
                       }
                       title={data.title}
                       songId={data.songId}

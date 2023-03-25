@@ -1,11 +1,11 @@
 import React from 'react';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import storage from 'renderer/utils/localStorage';
 import Checkbox from '../../Checkbox';
 
 const AccessibilitySettings = () => {
-  const { userData } = React.useContext(AppContext);
-  const { updateUserData } = React.useContext(AppUpdateContext);
+  const { localStorageData } = React.useContext(AppContext);
+
   return (
     <>
       <div className="title-container mt-1 mb-4 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
@@ -24,22 +24,11 @@ const AccessibilitySettings = () => {
             id="enableReducedMotion"
             labelContent="Enable reduced motion"
             isChecked={
-              userData !== undefined && userData.preferences.isReducedMotion
+              localStorageData !== undefined &&
+              localStorageData.preferences.isReducedMotion
             }
             checkedStateUpdateFunction={(state) =>
-              updateUserData(async (prevUserData) => {
-                await window.api.saveUserData(
-                  'preferences.isReducedMotion',
-                  state
-                );
-                return {
-                  ...prevUserData,
-                  preferences: {
-                    ...prevUserData.preferences,
-                    isReducedMotion: state,
-                  },
-                };
-              })
+              storage.preferences.setPreferences('isReducedMotion', state)
             }
           />
         </li>

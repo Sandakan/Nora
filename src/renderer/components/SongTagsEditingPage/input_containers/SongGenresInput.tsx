@@ -33,29 +33,30 @@ const SongGenresInput = (props: Props) => {
               <span
                 key={genre.name}
                 className="mr-2 mb-2 flex w-fit items-center rounded-2xl bg-background-color-3 px-3 py-1 text-center text-font-color-black dark:bg-dark-background-color-3 dark:text-font-color-black"
-                onClick={() => {
-                  updateSongInfo((prevData) => {
-                    return {
-                      ...prevData,
-                      genres:
-                        prevData.genres?.filter((x) => x.name !== genre.name) ??
-                        [],
-                    };
-                  });
-                }}
-                role="button"
-                tabIndex={0}
               >
-                <span className="material-icons-round mr-2 cursor-pointer">
-                  close
-                </span>{' '}
+                <Button
+                  iconName="close"
+                  className="material-icons-round !mr-[.375rem] !border-0 !p-[.125rem] outline-1 outline-offset-1 transition-[visibility,opacity] focus-visible:!outline"
+                  iconClassName="leading-none dark:!text-font-color-black"
+                  clickHandler={() => {
+                    updateSongInfo((prevData) => {
+                      return {
+                        ...prevData,
+                        genres:
+                          prevData.genres?.filter(
+                            (x) => x.name !== genre.name
+                          ) ?? [],
+                      };
+                    });
+                  }}
+                />
                 {genre.name}
               </span>
             ))}
         </div>
         <input
           type="search"
-          className="mt-4 w-full rounded-xl bg-background-color-2 p-2 dark:bg-dark-background-color-2"
+          className="mt-4 w-full rounded-xl border-2 border-transparent bg-background-color-2 p-2 transition-colors focus:border-font-color-highlight dark:bg-dark-background-color-2 dark:focus:border-dark-font-color-highlight"
           placeholder="Search for genres here."
           value={genreKeyword}
           onChange={(e) => {

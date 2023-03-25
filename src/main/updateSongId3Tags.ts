@@ -23,7 +23,6 @@ import log from './log';
 import {
   dataUpdateEvent,
   getSongsOutsideLibraryData,
-  // eslint-disable-next-line import/named
   updateSongsOutsideLibraryData,
 } from './main';
 import { generateRandomId } from './utils/randomId';
@@ -348,7 +347,20 @@ const manageAlbumDataUpdates = (
             );
           }
           if (albums[c].albumId === newSongData.album.albumId) {
-            albums[c].artists = prevSongData.artists;
+            if (prevSongData.artists && albums[c].artists) {
+              albums[c].artists = albums[c].artists?.filter(
+                (d) =>
+                  !prevSongData.artists?.some((e) => e.artistId === d.artistId)
+              );
+            }
+            if (newSongData.artists) {
+              albums[c].artists?.push(
+                ...newSongData.artists.map((x) => ({
+                  name: x.name,
+                  artistId: x.artistId as string,
+                }))
+              );
+            }
             albums[c].songs.push({ title: prevSongData.title, songId });
             prevSongData.album = {
               name: albums[c].title,

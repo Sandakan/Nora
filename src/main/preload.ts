@@ -2,6 +2,7 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable import/prefer-default-export */
 import { contextBridge, ipcRenderer } from 'electron';
+import path from 'path';
 import { LastFMTrackInfoApi } from '../@types/last_fm_api';
 
 export const api = {
@@ -117,6 +118,20 @@ export const api = {
     ),
   generatePalettes: (): Promise<void> =>
     ipcRenderer.invoke('app/generatePalettes'),
+
+  // $ SUGGESTIONS RELATED APIS
+  getArtistDuplicates: (artistName: string): Promise<Artist[]> =>
+    ipcRenderer.invoke('app/getArtistDuplicates', artistName),
+
+  resolveArtistDuplicates: (
+    selectedArtistId: string,
+    duplicateIds: string[]
+  ): Promise<void> =>
+    ipcRenderer.invoke(
+      'app/resolveArtistDuplicates',
+      selectedArtistId,
+      duplicateIds
+    ),
 
   // $ APP PLAYER UNKNOWN SONGS FETCHING APIS
   playSongFromUnknownSource: (
@@ -388,6 +403,24 @@ export const api = {
   resetApp: (): void => {
     ipcRenderer.removeAllListeners('app/beforeQuitEvent');
     ipcRenderer.send('app/resetApp');
+  },
+
+  // $ OTHER
+  getFolderInfo: (): Promise<FolderStructure> =>
+    ipcRenderer.invoke('app/getFolderInfo'),
+  getExtension: (dir: string) => {
+    const ext = path.extname(dir);
+    return ext.replace(/\W/, '');
+  },
+  getBaseName: (dir: string) => {
+    const base = path.basename(dir);
+    return base;
+  },
+  removeDefaultAppProtocolFromFilePath: (filePath: string) => {
+    return filePath.replace(
+      /nora:[/\\]{1,2}localFiles[/\\]{1,2}|\?[\w+=\w+&?]+$/gm,
+      ''
+    );
   },
 };
 

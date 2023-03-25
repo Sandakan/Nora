@@ -13,7 +13,7 @@ const SongSearchResultsContainer = (props: Props) => {
     isMultipleSelectionEnabled,
     multipleSelectionsData,
     currentlyActivePage,
-    userData,
+    localStorageData,
   } = React.useContext(AppContext);
   const { toggleMultipleSelections, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
@@ -29,8 +29,7 @@ const SongSearchResultsContainer = (props: Props) => {
                     key={song.songId}
                     index={index}
                     isIndexingSongs={
-                      userData !== undefined &&
-                      userData.preferences.songIndexing
+                      localStorageData?.preferences?.isSongIndexingEnabled
                     }
                     title={song.title}
                     artists={song.artists}
@@ -47,7 +46,7 @@ const SongSearchResultsContainer = (props: Props) => {
             })
             .filter((song) => song !== undefined)
         : [],
-    [songs, userData]
+    [localStorageData?.preferences?.isSongIndexingEnabled, songs]
   );
 
   return (

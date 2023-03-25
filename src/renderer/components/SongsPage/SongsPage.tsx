@@ -97,6 +97,7 @@ export const SongsPage = () => {
   const {
     currentlyActivePage,
     userData,
+    localStorageData,
     isMultipleSelectionEnabled,
     multipleSelectionsData,
   } = React.useContext(AppContext);
@@ -218,7 +219,7 @@ export const SongsPage = () => {
             key={index}
             index={index}
             isIndexingSongs={
-              userData !== undefined && userData.preferences.songIndexing
+              localStorageData?.preferences.isSongIndexingEnabled
             }
             title={title}
             songId={songId}

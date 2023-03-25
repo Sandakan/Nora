@@ -8,7 +8,8 @@ import Song from 'renderer/components/SongsPage/Song';
 type Props = { songData: SongData[] };
 
 const AllSongResults = (prop: Props) => {
-  const { currentlyActivePage, userData } = React.useContext(AppContext);
+  const { currentlyActivePage, localStorageData } =
+    React.useContext(AppContext);
   const { updateCurrentlyActivePageData } = React.useContext(AppUpdateContext);
 
   const { songData } = prop;
@@ -36,7 +37,7 @@ const AllSongResults = (prop: Props) => {
             key={index}
             index={index}
             isIndexingSongs={
-              userData !== undefined && userData.preferences.songIndexing
+              localStorageData?.preferences?.isSongIndexingEnabled
             }
             title={title}
             songId={songId}
@@ -51,7 +52,7 @@ const AllSongResults = (prop: Props) => {
         </div>
       );
     },
-    [songData, userData]
+    [localStorageData?.preferences?.isSongIndexingEnabled, songData]
   );
 
   return (

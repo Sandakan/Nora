@@ -9,6 +9,7 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
 
 import isLatestVersion from 'renderer/utils/isLatestVersion';
+import storage from 'renderer/utils/localStorage';
 
 import Version from './Version';
 import Checkbox from '../Checkbox';
@@ -19,16 +20,21 @@ import localReleseNotes from '../../../../release-notes.json';
 import ReleaseNotesAppUpdateInfo from './ReleaseNotesAppUpdateInfo';
 
 const ReleaseNotesPrompt = () => {
-  const { userData, appUpdatesState } = React.useContext(AppContext);
-  const { updateUserData, updateAppUpdatesState } =
-    React.useContext(AppUpdateContext);
+  const { appUpdatesState, localStorageData } = React.useContext(AppContext);
+  const { updateAppUpdatesState } = React.useContext(AppUpdateContext);
 
   const { isOnline } = useNetworkConnectivity();
   const [releaseNotes, setReleaseNotes] =
     React.useState<Changelog>(localReleseNotes);
-  const [noNewUpdateInform, setNoNewUpdateInform] = React.useState(
-    userData?.preferences.noUpdateNotificationForNewUpdate ===
-      releaseNotes.latestVersion.version
+
+  const noNewUpdateInform = React.useMemo(
+    () =>
+      localStorageData?.preferences?.noUpdateNotificationForNewUpdate ===
+      releaseNotes.latestVersion.version,
+    [
+      localStorageData?.preferences?.noUpdateNotificationForNewUpdate,
+      releaseNotes.latestVersion.version,
+    ]
   );
 
   const updateNoNewUpdateInform = React.useCallback(
@@ -36,24 +42,12 @@ const ReleaseNotesPrompt = () => {
       const result = state
         ? releaseNotes.latestVersion.version
         : packageFile.version;
-      window.api
-        .saveUserData('preferences.noUpdateNotificationForNewUpdate', result)
-        .then(() => {
-          updateUserData((prevUserData) => {
-            return {
-              ...prevUserData,
-              preferences: {
-                ...prevUserData.preferences,
-                noUpdateNotificationForNewUpdate: result,
-              },
-            };
-          });
-          return setNoNewUpdateInform(state);
-        })
-        // eslint-disable-next-line no-console
-        .catch((err) => console.error(err));
+      storage.preferences.setPreferences(
+        'noUpdateNotificationForNewUpdate',
+        result
+      );
     },
-    [releaseNotes.latestVersion.version, updateUserData]
+    [releaseNotes.latestVersion.version]
   );
 
   React.useEffect(() => {

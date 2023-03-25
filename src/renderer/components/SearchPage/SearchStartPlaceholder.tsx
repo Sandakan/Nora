@@ -1,6 +1,8 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+
 import Button from '../Button';
 import Img from '../Img';
 import RecentSearchResult from './RecentSearchResult';
@@ -15,6 +17,7 @@ type Props = {
 };
 
 const SearchStartPlaceholder = (props: Props) => {
+  const { updateCurrentlyActivePageData } = React.useContext(AppUpdateContext);
   const { searchResults, searchInput, updateSearchInput } = props;
 
   const [recentSearchResults, setRecentSearchResults] = React.useState(
@@ -68,11 +71,15 @@ const SearchStartPlaceholder = (props: Props) => {
               result={result}
               clickHandler={() => {
                 updateSearchInput(result);
+                updateCurrentlyActivePageData((currentData) => ({
+                  ...currentData,
+                  keyword: result,
+                }));
               }}
             />
           ))
         : [],
-    [recentSearchResults, updateSearchInput]
+    [recentSearchResults, updateCurrentlyActivePageData, updateSearchInput]
   );
 
   return (

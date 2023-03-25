@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable default-param-last */
 /* eslint-disable no-use-before-define */
-import React, { ReactElement } from 'react';
+import React, { ReactNode } from 'react';
 import 'tailwindcss/tailwind.css';
 import '../../assets/styles/styles.css';
 
@@ -26,11 +26,13 @@ import Img from './components/Img';
 import Preloader from './components/Preloader/Preloader';
 import isLatestVersion from './utils/isLatestVersion';
 import roundTo from './utils/roundTo';
-import { checkLocalStorage } from './utils/localStorage';
+import storage, { LOCAL_STORAGE_DEFAULT_TEMPLATE } from './utils/localStorage';
+import useNetworkConnectivity from './hooks/useNetworkConnectivity';
 
 interface AppReducer {
   userData: UserData;
   isDarkMode: boolean;
+  localStorage: LocalStorage;
   currentSongData: AudioPlayerData;
   PromptMenuData: PromptMenuData;
   notificationPanelData: NotificationPanelData;
@@ -69,6 +71,7 @@ type AppReducerStateActions =
   | 'UPDATE_BODY_BACKGROUND_IMAGE'
   | 'UPDATE_MULTIPLE_SELECTIONS_DATA'
   | 'CHANGE_APP_UPDATES_DATA'
+  | 'UPDATE_LOCAL_STORAGE'
   | 'TOGGLE_SHOW_SONG_REMAINING_DURATION';
 
 const reducer = (
@@ -99,62 +102,62 @@ const reducer = (
     case 'TOGGLE_REDUCED_MOTION':
       return {
         ...state,
-        userData:
+        localStorage:
           typeof action.data === 'boolean'
             ? {
-                ...(state.userData as UserData),
+                ...(state.localStorage as LocalStorage),
                 preferences: {
-                  ...(state.userData as UserData).preferences,
+                  ...(state.localStorage as LocalStorage).preferences,
                   isReducedMotion: action.data,
                 },
               }
             : {
-                ...(state.userData as UserData),
+                ...(state.localStorage as LocalStorage),
                 preferences: {
-                  ...(state.userData as UserData).preferences,
-                  isReducedMotion: (state.userData as UserData).preferences
-                    .isReducedMotion,
+                  ...(state.localStorage as LocalStorage).preferences,
+                  isReducedMotion: (state.localStorage as LocalStorage)
+                    .preferences.isReducedMotion,
                 },
               },
       };
     case 'TOGGLE_SONG_INDEXING':
       return {
         ...state,
-        userData:
+        localStorage:
           typeof action.data === 'boolean'
             ? {
-                ...(state.userData as UserData),
+                ...(state.localStorage as LocalStorage),
                 preferences: {
-                  ...(state.userData as UserData).preferences,
-                  songIndexing: action.data,
+                  ...(state.localStorage as LocalStorage).preferences,
+                  isSongIndexingEnabled: action.data,
                 },
               }
             : {
-                ...(state.userData as UserData),
+                ...(state.localStorage as LocalStorage),
                 preferences: {
-                  ...(state.userData as UserData).preferences,
-                  songIndexing: (state.userData as UserData).preferences
-                    .songIndexing,
+                  ...(state.localStorage as LocalStorage).preferences,
+                  isSongIndexingEnabled: (state.localStorage as LocalStorage)
+                    .preferences.isSongIndexingEnabled,
                 },
               },
       };
     case 'TOGGLE_SHOW_SONG_REMAINING_DURATION':
       return {
         ...state,
-        userData:
+        localStorage:
           typeof action.data === 'boolean'
             ? {
-                ...(state.userData as UserData),
+                ...(state.localStorage as LocalStorage),
                 preferences: {
-                  ...(state.userData as UserData).preferences,
+                  ...(state.localStorage as LocalStorage).preferences,
                   showSongRemainingTime: action.data,
                 },
               }
             : {
-                ...(state.userData as UserData),
+                ...(state.localStorage as LocalStorage),
                 preferences: {
-                  ...(state.userData as UserData).preferences,
-                  showSongRemainingTime: (state.userData as UserData)
+                  ...(state.localStorage as LocalStorage).preferences,
+                  showSongRemainingTime: (state.localStorage as LocalStorage)
                     .preferences.showSongRemainingTime,
                 },
               },
@@ -381,6 +384,14 @@ const reducer = (
               : state.player.isPlayerStalled,
         },
       };
+    case 'UPDATE_LOCAL_STORAGE':
+      return {
+        ...state,
+        localStorage:
+          typeof action.data === 'object'
+            ? (action.data as LocalStorage)
+            : state.localStorage,
+      };
     default:
       return state;
   }
@@ -404,30 +415,15 @@ updateNetworkStatus();
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
 
-checkLocalStorage();
-document.addEventListener('localStorage', () =>
-  console.log('local storage updated')
-);
+storage.checkLocalStorage();
 
 const userDataTemplate: UserData = {
   theme: { isDarkMode: false, useSystemTheme: true },
-  currentSong: { songId: null, stoppedPosition: 0 },
-  volume: { isMuted: false, value: 100 },
   musicFolders: [],
-  defaultPage: 'Home',
-  isShuffling: false,
-  isRepeating: 'false',
   preferences: {
-    doNotShowBlacklistSongConfirm: false,
-    isReducedMotion: false,
-    songIndexing: false,
     autoLaunchApp: false,
     isMiniPlayerAlwaysOnTop: false,
-    doNotVerifyWhenOpeningLinks: false,
-    showSongRemainingTime: false,
-    showArtistArtworkNearSongControls: false,
     isMusixmatchLyricsEnabled: false,
-    disableBackgroundArtworks: false,
     hideWindowOnClose: false,
     openWindowAsHiddenOnSystemStart: false,
   },
@@ -450,6 +446,7 @@ const reducerData: AppReducer = {
   },
   userData: userDataTemplate,
   currentSongData: {} as AudioPlayerData,
+  localStorage: LOCAL_STORAGE_DEFAULT_TEMPLATE,
   navigationHistory: {
     pageHistoryIndex: 0,
     history: [
@@ -495,6 +492,8 @@ export default function App() {
     queueType: 'songs',
   } as Queue);
 
+  const { isOnline } = useNetworkConnectivity();
+
   const addSongDropPlaceholder = React.useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
@@ -515,11 +514,7 @@ export default function App() {
   );
 
   const changePromptMenuData = React.useCallback(
-    (
-      isVisible = false,
-      contentData?: ReactElement<any, any>,
-      className = ''
-    ) => {
+    (isVisible = false, contentData?: ReactNode, className = '') => {
       dispatch({
         type: 'PROMPT_MENU_DATA_CHANGE',
         data: {
@@ -609,12 +604,15 @@ export default function App() {
   }, []);
 
   const handleBeforeQuitEvent = React.useCallback(async () => {
-    window.api.sendSongPosition(player.currentTime);
-    await window.api.saveUserData(
+    storage.playback.setCurrentSongOptions(
+      'stoppedPosition',
+      player.currentTime
+    );
+    storage.playback.setPlaybackOptions(
       'isRepeating',
       contentRef.current.player.isRepeating
     );
-    await window.api.saveUserData(
+    storage.playback.setPlaybackOptions(
       'isShuffling',
       contentRef.current.player.isShuffling
     );
@@ -644,9 +642,12 @@ export default function App() {
 
           if (isThereAnAppUpdate) {
             console.log('client has new updates');
+            const noUpdateNotificationForNewUpdate =
+              storage.preferences.getPreferences(
+                'noUpdateNotificationForNewUpdate'
+              );
             if (
-              contentRef.current.userData.preferences
-                .noUpdateNotificationForNewUpdate !== res.latestVersion.version
+              noUpdateNotificationForNewUpdate !== res.latestVersion.version
             ) {
               changePromptMenuData(
                 true,
@@ -682,7 +683,7 @@ export default function App() {
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [isOnline]
   );
 
   React.useEffect(() => {
@@ -770,8 +771,8 @@ export default function App() {
   React.useEffect(() => {
     const displayDefaultTitleBar = () => {
       document.title = `Nora`;
-      window.api.saveUserData(
-        'currentSong.stoppedPosition',
+      storage.playback.setCurrentSongOptions(
+        'stoppedPosition',
         player.currentTime
       );
     };
@@ -861,64 +862,89 @@ export default function App() {
   }, [content.player.volume]);
 
   React.useEffect(() => {
+    // LOCAL STORAGE
+    const { playback, preferences, queue } = storage.getAllItems();
+
+    const syncLocalStorage = () => {
+      const allItems = storage.getAllItems();
+      dispatch({ type: 'UPDATE_LOCAL_STORAGE', data: allItems });
+      console.log('local storage updated');
+    };
+
+    document.addEventListener('localStorage', syncLocalStorage);
+
+    if (playback?.volume) {
+      dispatch({ type: 'UPDATE_VOLUME', data: playback.volume });
+      contentRef.current.player.volume = playback.volume;
+    }
+
+    if (
+      content.navigationHistory.history.at(-1)?.pageTitle !==
+      preferences?.defaultPageOnStartUp
+    )
+      changeCurrentActivePage(preferences?.defaultPageOnStartUp);
+
+    toggleShuffling(playback?.isShuffling);
+    toggleRepeat(playback?.isRepeating);
+
+    window.api
+      .checkForStartUpSongs()
+      .then((startUpSongData) => {
+        if (startUpSongData) playSongFromUnknownSource(startUpSongData, true);
+        else if (playback?.currentSong.songId) {
+          playSong(playback?.currentSong.songId, false);
+
+          const currSongPosition = Number(
+            playback?.currentSong.stoppedPosition
+          );
+          player.currentTime = currSongPosition;
+          contentRef.current.player.songPosition = currSongPosition;
+          dispatch({
+            type: 'UPDATE_SONG_POSITION',
+            data: currSongPosition,
+          });
+        }
+        return undefined;
+      })
+      .catch((err) => console.error(err));
+
+    if (queue)
+      refQueue.current = {
+        ...refQueue.current,
+        queue: queue.queue || [],
+        queueType: queue.queueType,
+        queueId: queue.queueId,
+      };
+    else {
+      window.api
+        .getAllSongs()
+        .then((audioData) => {
+          if (!audioData) return undefined;
+          createQueue(
+            audioData.data.map((song) => song.songId),
+            'songs'
+          );
+          return undefined;
+        })
+        .catch((err) => console.error(err));
+    }
+
+    return () => {
+      document.removeEventListener('localStorage', syncLocalStorage);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  React.useEffect(() => {
     window.api
       .getUserData()
       .then((res) => {
-        if (!res) return;
+        if (!res) return undefined;
+
         dispatch({ type: 'USER_DATA_CHANGE', data: res });
         contentRef.current.userData = res;
         dispatch({ type: 'APP_THEME_CHANGE', data: res.theme });
-        dispatch({ type: 'UPDATE_VOLUME', data: res.volume });
-        contentRef.current.player.volume = res.volume;
-        toggleShuffling(res.isShuffling);
-        toggleRepeat(res.isRepeating);
-        if (
-          content.navigationHistory.history.at(-1)?.pageTitle !==
-          res.defaultPage
-        )
-          changeCurrentActivePage(res.defaultPage);
-        window.api
-          .checkForStartUpSongs()
-          .then((startUpSongData) => {
-            if (startUpSongData)
-              playSongFromUnknownSource(startUpSongData, true);
-            else {
-              if (res.currentSong.songId)
-                playSong(res.currentSong.songId, false);
-              const currSongPosition = Number(res.currentSong.stoppedPosition);
-              player.currentTime = currSongPosition;
-              contentRef.current.player.songPosition = currSongPosition;
-              dispatch({
-                type: 'UPDATE_SONG_POSITION',
-                data: currSongPosition,
-              });
-            }
-            return undefined;
-          })
-          .catch((err) => console.error(err));
-
-        // eslint-disable-next-line promise/always-return
-        if (res.queue) {
-          refQueue.current = {
-            ...refQueue.current,
-            queue: res.queue.queue || [],
-            queueType: res.queue.queueType,
-            queueId: res.queue.queueId,
-          };
-        } else {
-          // eslint-disable-next-line promise/no-nesting
-          window.api
-            .getAllSongs()
-            .then((audioData) => {
-              if (!audioData) return undefined;
-              createQueue(
-                audioData.data.map((song) => song.songId),
-                'songs'
-              );
-              return undefined;
-            })
-            .catch((err) => console.error(err));
-        }
+        return undefined;
       })
       .catch((err) => console.error(err));
 
@@ -1381,7 +1407,7 @@ export default function App() {
               dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: songData });
               contentRef.current.currentSongData = songData;
 
-              window.api.saveUserData('currentSong.songId', songData.songId);
+              storage.playback.setCurrentSongOptions('songId', songData.songId);
 
               player.src = songData.path;
 
@@ -1676,14 +1702,10 @@ export default function App() {
         if (positions.length > 0) queue.queueBeforeShuffle = positions;
         queue.currentSongIndex = 0;
       } else toggleShuffling(false);
-      window.api
-        .saveUserData('queue', queue)
-        .then(() => {
-          refQueue.current = queue;
-          if (startPlaying) return changeQueueCurrentSongIndex(0);
-          return undefined;
-        })
-        .catch((err: Error) => console.error(err));
+
+      storage.queue.setQueue(queue);
+      refQueue.current = queue;
+      if (startPlaying) changeQueueCurrentSongIndex(0);
     },
     [changeQueueCurrentSongIndex, shuffleQueue, toggleShuffling]
   );
@@ -1713,7 +1735,7 @@ export default function App() {
         if (positions.length > 0) queue.queueBeforeShuffle = positions;
         queue.currentSongIndex = 0;
       }
-      window.api.saveUserData('queue', queue);
+      storage.queue.setQueue(queue);
       refQueue.current = queue;
       if (playCurrentSongIndex && typeof currentSongIndex === 'number')
         playSong(refQueue.current.queue[currentSongIndex]);
@@ -1987,16 +2009,13 @@ export default function App() {
   const updateVolume = React.useCallback((volume: number) => {
     if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
     if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
-    window.api
-      .saveUserData('volume.value', volume)
-      .then(() => {
-        contentRef.current.player.volume.value = volume;
-        return dispatch({
-          type: 'UPDATE_VOLUME_VALUE',
-          data: volume,
-        });
-      })
-      .catch((err) => console.error(err));
+
+    storage.playback.setVolumeOptions('value', volume);
+    contentRef.current.player.volume.value = volume;
+    dispatch({
+      type: 'UPDATE_VOLUME_VALUE',
+      data: volume,
+    });
   }, []);
 
   const updateSongPosition = React.useCallback((position: number) => {
@@ -2246,7 +2265,11 @@ export default function App() {
 
   const updateBodyBackgroundImage = React.useCallback(
     (isVisible: boolean, src?: string) => {
-      if (!contentRef.current.userData.preferences.disableBackgroundArtworks) {
+      const disableBackgroundArtworks = storage.preferences.getPreferences(
+        'disableBackgroundArtworks'
+      );
+
+      if (!disableBackgroundArtworks) {
         if (isVisible)
           if (src) {
             contentRef.current.bodyBackgroundImage = src;
@@ -2286,6 +2309,7 @@ export default function App() {
         ],
       notificationPanelData: content.notificationPanelData,
       userData: content.userData,
+      localStorageData: content.localStorage,
       queue: refQueue.current,
       isCurrentSongPlaying: content.player.isCurrentSongPlaying,
       noOfPagesInHistory: content.navigationHistory.history.length - 1,
@@ -2308,8 +2332,9 @@ export default function App() {
       content.contextMenuData,
       content.currentSongData,
       content.isDarkMode,
+      content.localStorage,
       content.multipleSelectionsData,
-      content.navigationHistory.history,
+      content.navigationHistory.history.length,
       content.navigationHistory.pageHistoryIndex,
       content.notificationPanelData,
       content.player.isCurrentSongPlaying,
@@ -2407,7 +2432,8 @@ export default function App() {
                 ? 'dark bg-dark-background-color-1'
                 : 'bg-background-color-1'
             } ${
-              content.userData && content.userData.preferences.isReducedMotion
+              content.userData &&
+              content.localStorage.preferences.isReducedMotion
                 ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
                 : ''
             } flex h-screen w-full flex-col items-center overflow-y-hidden after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc]  [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}

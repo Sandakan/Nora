@@ -58,7 +58,8 @@ const dropdownOptions: { label: string; value: SongSortTypes }[] = [
 ];
 
 const PlaylistInfoPage = () => {
-  const { currentlyActivePage, queue, userData } = useContext(AppContext);
+  const { currentlyActivePage, queue, localStorageData } =
+    useContext(AppContext);
   const {
     updateQueueData,
     changePromptMenuData,
@@ -175,7 +176,7 @@ const PlaylistInfoPage = () => {
                 key={index}
                 index={index}
                 isIndexingSongs={
-                  userData !== undefined && userData.preferences.songIndexing
+                  localStorageData?.preferences?.isSongIndexingEnabled
                 }
                 title={song.title}
                 artists={song.artists}
@@ -219,7 +220,13 @@ const PlaylistInfoPage = () => {
             );
           })
         : [],
-    [playlistSongs, playlistData, addNewNotifications, userData]
+    [
+      playlistSongs,
+      localStorageData?.preferences?.isSongIndexingEnabled,
+      playlistData.playlistId,
+      playlistData.name,
+      addNewNotifications,
+    ]
   );
 
   return (

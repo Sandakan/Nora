@@ -92,7 +92,8 @@ const dropdownOptions: { label: string; value: SongSortTypes }[] = [
 ];
 
 export default () => {
-  const { currentlyActivePage, queue, userData } = useContext(AppContext);
+  const { currentlyActivePage, queue, localStorageData } =
+    useContext(AppContext);
   const {
     createQueue,
     updateQueueData,
@@ -198,7 +199,7 @@ export default () => {
                 key={song.songId}
                 index={index}
                 isIndexingSongs={
-                  userData !== undefined && userData.preferences.songIndexing
+                  localStorageData?.preferences?.isSongIndexingEnabled
                 }
                 title={song.title}
                 artists={song.artists}
@@ -213,7 +214,10 @@ export default () => {
             );
           })
         : [],
-    [albumContent.songsData, userData]
+    [
+      albumContent.songsData,
+      localStorageData?.preferences?.isSongIndexingEnabled,
+    ]
   );
 
   const calculateTotalTime = React.useCallback(() => {
@@ -231,7 +235,7 @@ export default () => {
   }, [albumContent.songsData]);
 
   return (
-    <MainContainer className="album-info-page-container pb-12 pl-8 pt-4">
+    <MainContainer className="album-info-page-container appear-from-bottom pb-12 pl-8 pt-4">
       <>
         <div className="album-img-and-info-container flex flex-row items-center">
           <div className="album-cover-container mr-8">

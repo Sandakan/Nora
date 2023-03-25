@@ -32,7 +32,7 @@ const SongCard = (props: SongCardProp) => {
     currentlyActivePage,
     queue,
     isCurrentSongPlaying,
-    userData,
+    localStorageData,
     isMultipleSelectionEnabled,
     multipleSelectionsData,
   } = React.useContext(AppContext);
@@ -383,7 +383,7 @@ const SongCard = (props: SongCardProp) => {
             window.api
               .restoreBlacklistedSongs([songId])
               .catch((err) => console.error(err));
-          else if (userData?.preferences.doNotShowBlacklistSongConfirm)
+          else if (localStorageData?.preferences.doNotShowBlacklistSongConfirm)
             window.api
               .blacklistSongs([songId])
               .then(() =>
@@ -443,7 +443,7 @@ const SongCard = (props: SongCardProp) => {
     updateMultipleSelections,
     changeCurrentActivePage,
     path,
-    userData?.preferences.doNotShowBlacklistSongConfirm,
+    localStorageData?.preferences.doNotShowBlacklistSongConfirm,
   ]);
 
   const songArtistComponents = React.useMemo(

@@ -10,7 +10,7 @@ import SongArtist from '../SongsPage/SongArtist';
 import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 
 const CurrentlyPlayingSongInfoContainer = () => {
-  const { currentSongData, currentlyActivePage, userData } =
+  const { currentSongData, currentlyActivePage, localStorageData } =
     React.useContext(AppContext);
   const { changeCurrentActivePage, updateContextMenuData } =
     React.useContext(AppUpdateContext);
@@ -75,6 +75,26 @@ const CurrentlyPlayingSongInfoContainer = () => {
     ]
   );
 
+  const gotToSongAlbumPage = React.useCallback(
+    () =>
+      currentSongData.isKnownSource && currentSongData.album
+        ? currentlyActivePage.pageTitle === 'AlbumInfo' &&
+          currentlyActivePage?.data?.albumInfo?.albumId ===
+            currentSongData.album.albumId
+          ? changeCurrentActivePage('Home')
+          : changeCurrentActivePage('AlbumInfo', {
+              albumId: currentSongData.album.albumId,
+            })
+        : undefined,
+    [
+      changeCurrentActivePage,
+      currentSongData.album,
+      currentSongData.isKnownSource,
+      currentlyActivePage?.data?.albumInfo?.albumId,
+      currentlyActivePage.pageTitle,
+    ]
+  );
+
   const songArtists = React.useMemo(() => {
     if (currentSongData.songId && Array.isArray(currentSongData.artists)) {
       if (currentSongData.artists.length > 0) {
@@ -105,12 +125,18 @@ const CurrentlyPlayingSongInfoContainer = () => {
   ]);
 
   const contextMenuItems = React.useMemo(
-    () => [
+    (): ContextMenuItem[] => [
       {
         label: 'Info',
         iconName: 'info',
         handlerFunction: showSongInfoPage,
         isDisabled: !currentSongData.isKnownSource,
+      },
+      {
+        label: 'Go to Album',
+        iconName: 'album',
+        handlerFunction: gotToSongAlbumPage,
+        isDisabled: !currentSongData.isKnownSource || !currentSongData?.album,
       },
       {
         label: 'Edit song tags',
@@ -127,10 +153,12 @@ const CurrentlyPlayingSongInfoContainer = () => {
     ],
     [
       changeCurrentActivePage,
+      currentSongData.album,
       currentSongData?.artworkPath,
       currentSongData.isKnownSource,
       currentSongData?.path,
       currentSongData?.songId,
+      gotToSongAlbumPage,
       showSongInfoPage,
     ]
   );
@@ -192,8 +220,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
           className="song-artists flex w-full items-center overflow-hidden text-ellipsis whitespace-nowrap"
           id="currentSongArtists"
         >
-          {userData &&
-            userData.preferences.showArtistArtworkNearSongControls &&
+          {localStorageData?.preferences.showArtistArtworkNearSongControls &&
             songArtistsImages &&
             songArtistsImages.length > 0 && (
               <span className="relative mr-2 flex min-w-[1.5rem] items-center lg:hidden">

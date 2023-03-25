@@ -9,7 +9,7 @@ import MainContainer from '../MainContainer';
 import Song from '../SongsPage/Song';
 
 const MusicFolderInfoPage = () => {
-  const { currentlyActivePage, isMultipleSelectionEnabled, userData } =
+  const { currentlyActivePage, isMultipleSelectionEnabled, localStorageData } =
     React.useContext(AppContext);
   const {
     updateCurrentlyActivePageData,
@@ -163,7 +163,9 @@ const MusicFolderInfoPage = () => {
           <Song
             key={index}
             index={index}
-            isIndexingSongs={userData?.preferences?.songIndexing ?? false}
+            isIndexingSongs={
+              localStorageData?.preferences?.isSongIndexingEnabled
+            }
             title={title}
             songId={songId}
             artists={artists}
@@ -177,7 +179,7 @@ const MusicFolderInfoPage = () => {
         </div>
       );
     },
-    [folderSongs, userData?.preferences?.songIndexing]
+    [folderSongs, localStorageData?.preferences?.isSongIndexingEnabled]
   );
 
   const { folderName } = React.useMemo(() => {

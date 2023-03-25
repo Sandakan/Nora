@@ -1,12 +1,11 @@
-const { parentPort } = require('worker_threads');
-const fs = require('fs/promises');
-const path = require('path');
+import fs from 'fs/promises';
+import path from 'path';
 
-const getDirSize = async (dir) => {
+const getDirSize = async (dir: string) => {
   try {
     const files = await fs.readdir(dir, { withFileTypes: true });
 
-    const paths = files.map(async (file) => {
+    const paths = files.map(async (file): Promise<number> => {
       try {
         const filepath = path.join(dir, file.name);
 
@@ -38,11 +37,4 @@ const getDirSize = async (dir) => {
   return 0;
 };
 
-if (parentPort) {
-  parentPort.on('message', async (dir) => {
-    if (typeof dir === 'string') {
-      const dirSize = await getDirSize(dir);
-      parentPort?.postMessage(dirSize);
-    }
-  });
-}
+export default getDirSize;

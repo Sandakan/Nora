@@ -7,16 +7,10 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
 import debounce from 'renderer/utils/debounce';
-import { getItem } from 'renderer/utils/localStorage';
 import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 import Button from '../Button';
 import Img from '../Img';
 import LyricLine from '../LyricsPage/LyricLine';
-
-let scrollIncrement = getItem('seekbarScrollInterval');
-document.addEventListener('localStorage', () => {
-  scrollIncrement = getItem('seekbarScrollInterval');
-});
 
 export default function MiniPlayer() {
   const {
@@ -26,6 +20,7 @@ export default function MiniPlayer() {
     userData,
     isMuted,
     volume,
+    localStorageData,
   } = React.useContext(AppContext);
   const {
     updateMiniPlayerStatus,
@@ -194,7 +189,7 @@ export default function MiniPlayer() {
       className={`mini-player dark group h-full select-none overflow-hidden delay-100 ${
         !isCurrentSongPlaying && 'paused'
       } ${
-        userData && userData.preferences.isReducedMotion ? 'reduced-motion' : ''
+        localStorageData?.preferences?.isReducedMotion ? 'reduced-motion' : ''
       } [&:focus-within>.container>.song-controls-container>button]:translate-x-0 [&:focus-within>.container>.song-controls-container>button]:scale-100 [&:focus-within>.container>.song-controls-container]:visible [&:focus-within>.container>.song-controls-container]:opacity-100 [&:hover>.container>.song-controls-container>button]:translate-x-0 [&:hover>.container>.song-controls-container>button]:scale-100 [&:hover>.container>.song-controls-container]:visible [&:hover>.container>.song-controls-container]:opacity-100`}
     >
       <div className="background-cover-img-container h-full overflow-hidden">
@@ -222,7 +217,7 @@ export default function MiniPlayer() {
           lyrics &&
           lyrics.lyrics.isSynced &&
           lyricsComponents}
-        {lyrics && !lyrics.lyrics.isSynced && (
+        {isLyricsVisible && lyrics && !lyrics.lyrics.isSynced && (
           <div className="flex h-full w-full items-center justify-center text-font-color-white">
             No Synced Lyrics found.
           </div>
@@ -257,6 +252,7 @@ export default function MiniPlayer() {
               iconName="launch"
               iconClassName="!text-xl"
               clickHandler={() => updateMiniPlayerStatus(!isMiniPlayer)}
+              removeFocusOnClick
             />
             <Button
               className={`always-on-top-btn !mt-1 !mr-0 !rounded-md !border-0 !p-2 text-font-color-white outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white ${
@@ -274,6 +270,7 @@ export default function MiniPlayer() {
               tooltipLabel={`Always on top : ${
                 userData?.preferences.isMiniPlayerAlwaysOnTop ? 'ON' : 'OFF'
               }`}
+              removeFocusOnClick
               clickHandler={toggleAlwaysOnTop}
             />
           </div>
@@ -284,6 +281,7 @@ export default function MiniPlayer() {
               tooltipLabel="Minimize"
               iconName="minimize"
               iconClassName="material-icons-round icon flex h-fit cursor-pointer items-center justify-center text-center text-xl !font-light transition-[background] ease-in-out"
+              removeFocusOnClick
             />
             <Button
               className="close-btn !m-0 flex h-full items-center justify-center !rounded-none !border-0 !px-2 text-center text-xl outline-1 -outline-offset-2 transition-[background] ease-in-out hover:!bg-font-color-crimson hover:!text-font-color-white focus-visible:!outline"
@@ -295,6 +293,7 @@ export default function MiniPlayer() {
               tooltipLabel="Close"
               iconName="close"
               iconClassName="material-icons-round icon flex h-fit  cursor-pointer items-center justify-center text-center text-xl !font-light transition-[background] ease-in-out"
+              removeFocusOnClick
             />
           </div>
         </div>
@@ -323,18 +322,21 @@ export default function MiniPlayer() {
               toggleIsFavorite(!currentSongData.isAFavorite)
             }
             iconName="favorite"
+            removeFocusOnClick
           />
           <Button
             className="skip-backward-btn ml-4 !mr-0 h-fit -translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
             iconClassName="!text-4xl"
             clickHandler={handleSkipBackwardClick}
             iconName="skip_previous"
+            removeFocusOnClick
           />
           <Button
             className="play-pause-btn !mx-2 h-fit scale-90 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-6xl text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
             iconClassName="!text-6xl"
             clickHandler={toggleSongPlayback}
             iconName={isCurrentSongPlaying ? 'pause_circle' : 'play_circle'}
+            removeFocusOnClick
           />
 
           <Button
@@ -342,6 +344,7 @@ export default function MiniPlayer() {
             iconClassName="!text-4xl"
             clickHandler={handleSkipForwardClickWithParams}
             iconName="skip_next"
+            removeFocusOnClick
           />
           <Button
             className={`lyrics-btn !m-0 h-fit translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white ${
@@ -351,6 +354,7 @@ export default function MiniPlayer() {
             clickHandler={() => setIsLyricsVisible((prevState) => !prevState)}
             iconName="notes"
             tooltipLabel="Lyrics (Ctrl + L)"
+            removeFocusOnClick
           />
         </div>
         <div
@@ -394,6 +398,7 @@ export default function MiniPlayer() {
                 '!text-font-color-highlight !opacity-100 dark:!text-dark-font-color-highlight'
               }`}
               clickHandler={() => toggleMutedState(!isMuted)}
+              removeFocusOnClick
             />
             <input
               type="range"
@@ -407,6 +412,8 @@ export default function MiniPlayer() {
               style={volumeBarCssProperties}
               title={Math.round(volume).toString()}
               onWheel={(e) => {
+                const scrollIncrement =
+                  localStorageData.preferences.seekbarScrollInterval;
                 const incrementValue =
                   e.deltaY > 0 ? -scrollIncrement : scrollIncrement;
                 let value = volume + incrementValue;
@@ -438,6 +445,9 @@ export default function MiniPlayer() {
             isMouseScrollRef.current = true;
 
             const max = parseInt(e.currentTarget.max);
+            const scrollIncrement =
+              localStorageData.preferences.seekbarScrollInterval;
+
             const incrementValue =
               e.deltaY > 0 ? -scrollIncrement : scrollIncrement;
             let value = (songPos || 0) + incrementValue;

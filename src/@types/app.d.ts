@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 /* eslint-disable no-unused-vars */
 import NodeID3 from 'node-id3';
-import { ReactElement } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { ButtonProps } from 'renderer/components/Button';
 import { api } from '../main/preload';
 
@@ -361,17 +361,9 @@ declare global {
     | 'windowDiamensions.mainWindow'
     | 'windowDiamensions.miniPlayer'
     | 'recentSearches'
-    | 'preferences.doNotShowBlacklistSongConfirm'
-    | 'preferences.isReducedMotion'
-    | 'preferences.songIndexing'
     | 'preferences.isMiniPlayerAlwaysOnTop'
-    | 'preferences.doNotVerifyWhenOpeningLinks'
     | 'preferences.autoLaunchApp'
-    | 'preferences.showSongRemainingTime'
-    | 'preferences.noUpdateNotificationForNewUpdate'
-    | 'preferences.showArtistArtworkNearSongControls'
     | 'preferences.isMusixmatchLyricsEnabled'
-    | 'preferences.disableBackgroundArtworks'
     | 'preferences.hideWindowOnClose'
     | 'preferences.openWindowAsHiddenOnSystemStart'
     | 'customMusixmatchUserToken'
@@ -393,34 +385,13 @@ declare global {
 
   interface UserData {
     theme: AppThemeData;
-    currentSong: {
-      songId: string | null;
-      stoppedPosition: number;
-      playlistId?: string;
-    };
-    volume: {
-      isMuted: boolean;
-      value: number;
-    };
-    queue?: Queue;
-    isShuffling: boolean;
-    isRepeating: RepeatTypes;
     musicFolders: MusicFolderData[];
-    defaultPage: DefaultPages;
     preferences: {
-      doNotShowBlacklistSongConfirm: boolean;
-      isReducedMotion: boolean;
-      songIndexing: boolean;
       autoLaunchApp: boolean;
-      isMiniPlayerAlwaysOnTop: boolean;
-      doNotVerifyWhenOpeningLinks: boolean;
-      showSongRemainingTime: boolean;
-      noUpdateNotificationForNewUpdate?: string;
-      showArtistArtworkNearSongControls: boolean;
-      isMusixmatchLyricsEnabled: boolean;
-      disableBackgroundArtworks: boolean;
-      hideWindowOnClose: boolean;
       openWindowAsHiddenOnSystemStart: boolean;
+      isMiniPlayerAlwaysOnTop: boolean;
+      isMusixmatchLyricsEnabled: boolean;
+      hideWindowOnClose: boolean;
     };
     windowPositions: {
       mainWindow?: WindowCordinates;
@@ -462,10 +433,61 @@ declare global {
     };
   }
 
+  interface FolderStructure extends MusicFolderData {
+    subFolders: FolderStructure[];
+  }
+
   interface MusicFolder {
     folderData: MusicFolderData;
     songIds: string[];
     isBlacklisted: boolean;
+  }
+
+  // ? LocalStorage related types
+
+  interface Preferences {
+    seekbarScrollInterval: number;
+    isSongIndexingEnabled: boolean;
+    doNotShowBlacklistSongConfirm: boolean;
+    isReducedMotion: boolean;
+    doNotVerifyWhenOpeningLinks: boolean;
+    showSongRemainingTime: boolean;
+    showArtistArtworkNearSongControls: boolean;
+    disableBackgroundArtworks: boolean;
+    noUpdateNotificationForNewUpdate: string;
+    defaultPageOnStartUp: DefaultPages;
+  }
+
+  interface CurrentSong {
+    songId: string | null;
+    stoppedPosition: number;
+    playlistId?: string;
+  }
+
+  interface Volume {
+    isMuted: boolean;
+    value: number;
+  }
+
+  interface Playback {
+    isShuffling: boolean;
+    isRepeating: RepeatTypes;
+    currentSong: CurrentSong;
+    volume: Volume;
+  }
+
+  interface IgnoredDuplicates {
+    artists: string[][];
+    albums: string[][];
+    genres: string[][];
+  }
+
+  interface LocalStorage {
+    preferences: Preferences;
+    playback: Playback;
+    queue: Queue;
+    ignoredSeparateArtists: string[];
+    ignoredDuplicates: IgnoredDuplicates;
   }
 
   // ? Playlists related types
@@ -579,8 +601,8 @@ declare global {
   }
 
   interface StorageMetrics {
-    // rootSize: number;
-    // remainingSize: number;
+    rootSizes: { freeSpace: number; size: number };
+    remainingSize: number;
     appFolderSize: number;
     appDataSizes: AppDataStorageMetrics;
     totalSize: number;
@@ -666,7 +688,7 @@ declare global {
     delay: number;
     id: string;
     order?: number;
-    content: ReactElement<any, any>;
+    content: ReactNode;
     icon?: ReactElement<any, any>;
     buttons?: ButtonProps[];
     type?: NotificationTypes;

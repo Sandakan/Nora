@@ -19,6 +19,8 @@ import MainContainer from '../MainContainer';
 import Hyperlink from '../Hyperlink';
 import Img from '../Img';
 import Dropdown from '../Dropdown';
+import SeparateArtistsSuggestion from './SeparateArtistsSuggestion';
+import DuplicateArtistsSuggestion from './DuplicateArtistsSuggestion';
 
 const dropdownOptions: { label: string; value: SongSortTypes }[] = [
   { label: 'Added Order', value: 'addedOrder' },
@@ -63,9 +65,9 @@ const ArtistInfoPage = () => {
   const {
     currentlyActivePage,
     queue,
-    userData,
     isDarkMode,
     bodyBackgroundImage,
+    localStorageData,
   } = useContext(AppContext);
   const {
     createQueue,
@@ -311,7 +313,7 @@ const ArtistInfoPage = () => {
             key={song.songId}
             index={index}
             isIndexingSongs={
-              userData !== undefined && userData.preferences.songIndexing
+              localStorageData?.preferences?.isSongIndexingEnabled
             }
             title={song.title}
             artists={song.artists}
@@ -326,7 +328,7 @@ const ArtistInfoPage = () => {
           />
         );
       }),
-    [songs, userData]
+    [localStorageData?.preferences?.isSongIndexingEnabled, songs]
   );
 
   return (
@@ -341,7 +343,7 @@ const ArtistInfoPage = () => {
               alt="Album Cover"
             />
             <Button
-              className="absolute right-2 bottom-4 !m-0 flex rounded-full !border-0 bg-background-color-1 !p-3 shadow-xl dark:bg-dark-background-color-2"
+              className="absolute right-2 bottom-4 !m-0 flex rounded-full !border-0 bg-background-color-1 !p-3 shadow-xl outline-1 -outline-offset-[6px] focus-visible:!outline dark:bg-dark-background-color-2"
               tooltipLabel={
                 artistData?.isAFavorite
                   ? `Dislike '${artistData?.name}'`
@@ -417,6 +419,17 @@ const ArtistInfoPage = () => {
             )}
           </div>
         </div>
+
+        <SeparateArtistsSuggestion
+          name={artistData?.name}
+          artistId={artistData?.artistId}
+        />
+
+        <DuplicateArtistsSuggestion
+          name={artistData?.name}
+          artistId={artistData?.artistId}
+        />
+
         {albums && albums.length > 0 && (
           <MainContainer className="main-container albums-list-container relative [&>*]:z-10">
             <>
@@ -546,13 +559,16 @@ const ArtistInfoPage = () => {
         )}
         {artistData?.artistBio && (
           <div
-            className={`"artist-bio-container relative z-10 m-4 rounded-lg p-4 text-font-color-black  dark:text-font-color-white ${
+            className={`"artist-bio-container relative z-10 m-4 rounded-lg p-4 text-font-color-black shadow-md  dark:text-font-color-white ${
               bodyBackgroundImage
                 ? `bg-background-color-2/70 backdrop-blur-md dark:bg-dark-background-color-2/70`
                 : `bg-background-color-2 dark:bg-dark-background-color-2`
             }`}
           >
-            {sanitizeArtistBio()}
+            <h3 className="mb-2 font-medium uppercase text-font-color-highlight dark:text-dark-font-color-highlight">
+              About {artistData.name}
+            </h3>
+            <div>{sanitizeArtistBio()}</div>
           </div>
         )}
       </>

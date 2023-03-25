@@ -75,7 +75,6 @@ const configuration: webpack.Configuration = {
               importLoaders: 1,
             },
           },
-          'sass-loader',
           {
             loader: 'postcss-loader',
             options: {
@@ -92,7 +91,6 @@ const configuration: webpack.Configuration = {
         use: [
           'style-loader',
           'css-loader',
-          'sass-loader',
           {
             loader: 'postcss-loader',
             options: {

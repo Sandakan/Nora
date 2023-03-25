@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable default-param-last */
+import path from 'path';
 import NodeID3 from 'node-id3';
 import songlyrics from 'songlyrics';
 
@@ -8,9 +9,12 @@ import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
 import log from '../log';
 import { checkIfConnectedToInternet, sendMessageToRenderer } from '../main';
 import fetchLyricsFromMusixmatch from '../utils/fetchLyricsFromMusixmatch';
+import { appPreferences } from '../../../package.json';
 import parseLyrics, {
   parseSyncedLyricsFromAudioDataSource,
 } from '../utils/parseLyrics';
+
+const { metadataEditingSupportedExtensions } = appPreferences;
 
 let cachedLyrics = undefined as SongLyrics | undefined;
 
@@ -22,21 +26,32 @@ export const updateCachedLyrics = (
 };
 
 const fetchLyricsFromAudioSource = (songPath: string) => {
-  const songData = NodeID3.read(songPath);
-  const { unsynchronisedLyrics, synchronisedLyrics } = songData;
+  const songExt = path.extname(songPath).replace('.', '');
+  const isSupported = metadataEditingSupportedExtensions.includes(songExt);
 
-  if (Array.isArray(synchronisedLyrics) && synchronisedLyrics.length > 0) {
-    const syncedLyricsData = synchronisedLyrics[synchronisedLyrics.length - 1];
-    const parsedSyncedLyrics =
-      parseSyncedLyricsFromAudioDataSource(syncedLyricsData);
+  if (isSupported) {
+    const songData = NodeID3.read(songPath);
+    const { unsynchronisedLyrics, synchronisedLyrics } = songData;
 
-    if (parsedSyncedLyrics) return parsedSyncedLyrics;
-  }
+    if (Array.isArray(synchronisedLyrics) && synchronisedLyrics.length > 0) {
+      const syncedLyricsData =
+        synchronisedLyrics[synchronisedLyrics.length - 1];
+      const parsedSyncedLyrics =
+        parseSyncedLyricsFromAudioDataSource(syncedLyricsData);
 
-  if (unsynchronisedLyrics?.text) {
-    const parsedLyrics = parseLyrics(unsynchronisedLyrics.text);
-    if (parsedLyrics) return parsedLyrics;
-  }
+      if (parsedSyncedLyrics) return parsedSyncedLyrics;
+    }
+
+    if (unsynchronisedLyrics?.text) {
+      const parsedLyrics = parseLyrics(unsynchronisedLyrics.text);
+      if (parsedLyrics) return parsedLyrics;
+    }
+  } else
+    log(
+      `Nora doesn't support reading lyrics metadata from songs in ${songExt} format.`,
+      { songPath },
+      'ERROR'
+    );
   // No lyrics found on the audio_source.
   return undefined;
 };

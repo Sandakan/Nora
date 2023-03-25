@@ -1,20 +1,20 @@
 /* eslint-disable react/require-default-props */
 import React from 'react';
 
-export interface DropdownOption<T> {
+export interface DropdownOption<T extends string> {
   label: string;
   value: T;
 }
 
-interface DropdownProp {
+interface DropdownProp<T extends string> {
   name: string;
   className?: string;
-  options: DropdownOption<string>[];
-  value: string;
+  options: DropdownOption<T>[];
+  value: T;
   onChange: (_e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
-function Dropdown(props: DropdownProp) {
+function Dropdown<T extends string>(props: DropdownProp<T>) {
   const { className, name, value, onChange, options } = props;
 
   const optionComponents = React.useMemo(

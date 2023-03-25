@@ -49,7 +49,8 @@ const dropdownOptions: { label: string; value: SongSortTypes }[] = [
 ];
 
 const GenreInfoPage = () => {
-  const { currentlyActivePage, userData, queue } = React.useContext(AppContext);
+  const { currentlyActivePage, queue, localStorageData } =
+    React.useContext(AppContext);
   const {
     createQueue,
     updateQueueData,
@@ -149,9 +150,7 @@ const GenreInfoPage = () => {
         <Song
           key={index}
           index={index}
-          isIndexingSongs={
-            userData !== undefined && userData.preferences.songIndexing
-          }
+          isIndexingSongs={localStorageData?.preferences?.isSongIndexingEnabled}
           songId={song.songId}
           title={song.title}
           artists={song.artists}
@@ -163,7 +162,7 @@ const GenreInfoPage = () => {
           isBlacklisted={song.isBlacklisted}
         />
       )),
-    [genreSongs, userData]
+    [genreSongs, localStorageData?.preferences?.isSongIndexingEnabled]
   );
 
   const totalGenreSongsDuration = React.useMemo(() => {

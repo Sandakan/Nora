@@ -3,6 +3,8 @@
 import React, { useContext } from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import debounce from 'renderer/utils/debounce';
+
 import SearchResultsFilter from './SearchResultsFilter';
 import MainContainer from '../MainContainer';
 import GenreSearchResultsContainer from './Result_Containers/GenreSearchResultsContainer';
@@ -139,10 +141,14 @@ const SearchPage = () => {
             placeholder="Search for anything"
             value={searchInput}
             onChange={(e) => {
-              updateCurrentlyActivePageData((currentData) => ({
-                ...currentData,
-                keyword: e.target.value,
-              }));
+              debounce(
+                () =>
+                  updateCurrentlyActivePageData((currentData) => ({
+                    ...currentData,
+                    keyword: e.target.value,
+                  })),
+                500
+              );
               setSearchInput(e.target.value);
             }}
             onKeyDown={(e) => e.stopPropagation()}

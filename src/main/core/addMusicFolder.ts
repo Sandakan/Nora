@@ -8,23 +8,24 @@ import sortSongs from '../utils/sortSongs';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import { generatePalettes } from '../other/generatePalette';
 
+const openDialogOptions: OpenDialogOptions = {
+  title: 'Add a Music Folder',
+  buttonLabel: 'Add folder',
+  filters: [
+    {
+      name: 'Audio Files',
+      extensions: appPreferences.supportedMusicExtensions,
+    },
+  ],
+  properties: ['openFile', 'openDirectory'],
+};
+
 const addMusicFolder = async (
   mainWindowInstance: BrowserWindow,
   resultsSortType?: SongSortTypes,
   abortSignal?: AbortSignal
 ): Promise<SongData[]> => {
   log('Started the process of linking a music folder to the library.');
-  const openDialogOptions: OpenDialogOptions = {
-    title: 'Add a Music Folder',
-    buttonLabel: 'Add folder',
-    filters: [
-      {
-        name: 'Audio Files',
-        extensions: appPreferences.supportedMusicExtensions,
-      },
-    ],
-    properties: ['openFile', 'openDirectory'],
-  };
   const { canceled, filePaths: musicFolderPath } = await dialog.showOpenDialog(
     mainWindowInstance,
     openDialogOptions

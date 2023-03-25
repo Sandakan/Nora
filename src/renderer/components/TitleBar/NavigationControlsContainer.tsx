@@ -17,7 +17,7 @@ const NavigationControlsContainer = () => {
             : 'invisible -translate-x-8 opacity-0'
         }`}
         clickHandler={() => updatePageHistoryIndex('decrement')}
-        tooltipLabel="Go Back"
+        tooltipLabel="Go Back (Alt + Left Arrow)"
       />
 
       <Button
@@ -29,7 +29,7 @@ const NavigationControlsContainer = () => {
             : 'invisible scale-50 opacity-0'
         }`}
         clickHandler={() => updatePageHistoryIndex('home')}
-        tooltipLabel="Go to Home"
+        tooltipLabel="Go to Home (Alt + Home)"
       />
 
       <Button
@@ -41,7 +41,7 @@ const NavigationControlsContainer = () => {
             : 'invisible translate-x-8 opacity-0'
         }`}
         clickHandler={() => updatePageHistoryIndex('increment')}
-        tooltipLabel="Go forward"
+        tooltipLabel="Go forward (Alt + Right Arrow)"
       />
     </div>
   );

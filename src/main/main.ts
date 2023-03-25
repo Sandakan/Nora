@@ -83,6 +83,9 @@ import restoreBlacklistedFolders from './core/restoreBlacklistedFolder';
 import toggleBlacklistFolders from './core/toggleBlacklistFolders';
 import getStorageUsage from './core/getStorageUsage';
 import { generatePalettes } from './other/generatePalette';
+import { getFolderInfo } from './core/getFolderInfo';
+import { getArtistDuplicates } from './core/getDuplicates';
+import { resolveArtistDuplicates } from './core/resolveDuplicates';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -483,6 +486,16 @@ app
         ) => sendPlaylistData(playlistIds, sortType, onlyMutablePlaylists)
       );
 
+      ipcMain.handle('app/getArtistDuplicates', (_, artistName: string) =>
+        getArtistDuplicates(artistName)
+      );
+
+      ipcMain.handle(
+        'app/resolveArtistDuplicates',
+        (_, selectedArtistId: string, duplicateIds: string[]) =>
+          resolveArtistDuplicates(selectedArtistId, duplicateIds)
+      );
+
       ipcMain.handle(
         'app/addNewPlaylist',
         (_, playlistName: string, songIds?: string[], artworkPath?: string) =>
@@ -558,6 +571,8 @@ app
       ipcMain.handle('app/clearSearchHistory', (_, searchText?: string[]) =>
         clearSearchHistoryResults(searchText)
       );
+
+      ipcMain.handle('app/getFolderInfo', () => getFolderInfo(mainWindow));
 
       ipcMain.on('app/resetApp', () => resetApp());
 

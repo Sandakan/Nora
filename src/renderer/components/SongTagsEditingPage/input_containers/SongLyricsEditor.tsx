@@ -43,7 +43,7 @@ const SongLyricsEditor = (props: Props) => {
         <label htmlFor="song-lyrics-id3-tag">Lyrics</label>
         <textarea
           id="song-lyrics-id3-tag"
-          className="mt-4 max-h-80 min-h-[12rem] rounded-2xl border-[0.15rem] border-background-color-2 bg-background-color-1 p-4 dark:border-dark-background-color-2 dark:bg-dark-background-color-1"
+          className="mt-4 max-h-80 min-h-[12rem] rounded-2xl border-[0.15rem] border-background-color-2 bg-background-color-1 p-4 transition-colors focus:border-font-color-highlight dark:border-dark-background-color-2 dark:bg-dark-background-color-1 dark:focus:border-dark-font-color-highlight"
           name="lyrics"
           placeholder="Lyrics"
           value={songLyrics ?? ''}

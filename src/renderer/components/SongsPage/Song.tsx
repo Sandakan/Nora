@@ -42,7 +42,7 @@ const Song = React.forwardRef(
       currentSongData,
       queue,
       isCurrentSongPlaying,
-      userData,
+      localStorageData,
       bodyBackgroundImage,
       isMultipleSelectionEnabled,
       multipleSelectionsData,
@@ -426,7 +426,9 @@ const Song = React.forwardRef(
               window.api
                 .restoreBlacklistedSongs([songId])
                 .catch((err) => console.error(err));
-            else if (userData?.preferences.doNotShowBlacklistSongConfirm)
+            else if (
+              localStorageData?.preferences.doNotShowBlacklistSongConfirm
+            )
               window.api
                 .blacklistSongs([songId])
                 .then(() =>
@@ -493,7 +495,7 @@ const Song = React.forwardRef(
       updateMultipleSelections,
       changeCurrentActivePage,
       path,
-      userData?.preferences.doNotShowBlacklistSongConfirm,
+      localStorageData?.preferences.doNotShowBlacklistSongConfirm,
     ]);
 
     const contextMenuItemData =

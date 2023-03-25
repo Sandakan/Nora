@@ -42,9 +42,11 @@ const SongArtistsInput = (props: Props) => {
                 key={artist.name}
                 className="group mr-2 mb-2 flex w-fit items-center rounded-2xl bg-background-color-3 px-3 py-1 text-center text-font-color-black dark:bg-dark-background-color-3 dark:text-font-color-black"
               >
-                <span
-                  className="material-icons-round mr-2 !hidden cursor-pointer px-1 group-hover:!inline-block"
-                  onClick={() => {
+                <Button
+                  iconName="close"
+                  className="material-icons-round mr-2 !border-0 !p-[.125rem] opacity-0 outline-1 outline-offset-1 transition-[visibility,opacity] focus-visible:!outline group-focus-within:opacity-100 group-hover:opacity-100"
+                  iconClassName="leading-none dark:!text-font-color-black"
+                  clickHandler={() => {
                     updateSongInfo((prevData) => {
                       return {
                         ...prevData,
@@ -54,15 +56,11 @@ const SongArtistsInput = (props: Props) => {
                       };
                     });
                   }}
-                  role="button"
-                  tabIndex={0}
-                >
-                  close
-                </span>
+                />
                 <Img
                   src={artist.onlineArtworkPaths?.picture_small}
                   fallbackSrc={artist.artworkPath}
-                  className="mr-2 aspect-square w-6 rounded-full group-hover:invisible group-hover:absolute"
+                  className="absolute mr-2 aspect-square w-6 rounded-full opacity-100 transition-[visibility,opacity]  group-focus-within:invisible group-focus-within:opacity-0 group-hover:invisible group-hover:opacity-0"
                   alt=""
                 />{' '}
                 {artist.name}
@@ -71,7 +69,7 @@ const SongArtistsInput = (props: Props) => {
         </div>
         <input
           type="search"
-          className="mt-4 w-full rounded-xl bg-background-color-2 p-2 dark:bg-dark-background-color-2"
+          className="mt-4 w-full rounded-xl border-2 border-transparent bg-background-color-2 p-2 transition-colors focus:border-font-color-highlight dark:bg-dark-background-color-2 dark:focus:border-dark-font-color-highlight"
           placeholder="Search for artists here."
           value={artistKeyword}
           onChange={(e) => {

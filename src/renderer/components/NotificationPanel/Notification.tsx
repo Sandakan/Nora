@@ -13,7 +13,7 @@ const Notification = (props: AppNotification) => {
     type = 'DEFAULT',
     progressBarData = { max: 100, value: 50 },
   } = props;
-  const { userData } = React.useContext(AppContext);
+  const { localStorageData } = React.useContext(AppContext);
   const { updateNotifications } = React.useContext(AppUpdateContext);
 
   const notificationRef = React.useRef(null as HTMLDivElement | null);
@@ -31,7 +31,10 @@ const Notification = (props: AppNotification) => {
   const removeNotification = React.useCallback(() => {
     if (notificationTimeoutIdRef.current)
       clearTimeout(notificationTimeoutIdRef.current);
-    if (notificationRef.current && !userData?.preferences?.isReducedMotion) {
+    if (
+      notificationRef.current &&
+      !localStorageData?.preferences?.isReducedMotion
+    ) {
       notificationRef.current.classList.add('disappear-to-bottom');
       notificationRef.current.addEventListener('animationend', () =>
         updateNotifications((currNotifications) =>
@@ -42,7 +45,7 @@ const Notification = (props: AppNotification) => {
       updateNotifications((currNotifications) =>
         currNotifications.filter((x) => x.id !== id)
       );
-  }, [id, updateNotifications, userData?.preferences?.isReducedMotion]);
+  }, [id, localStorageData?.preferences?.isReducedMotion, updateNotifications]);
 
   React.useLayoutEffect(() => {
     if (notificationRef.current) {

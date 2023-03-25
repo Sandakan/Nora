@@ -1,4 +1,4 @@
-import fsSync from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import { app } from 'electron';
 import Store from 'electron-store';
@@ -19,23 +19,11 @@ export const DEFAULT_FILE_URL = 'nora://localFiles/';
 
 const USER_DATA_TEMPLATE: UserData = {
   theme: { isDarkMode: false, useSystemTheme: true },
-  currentSong: { songId: null, stoppedPosition: 0 },
-  volume: { isMuted: false, value: 100 },
   musicFolders: [],
-  defaultPage: 'Home',
-  isShuffling: false,
-  isRepeating: 'false',
   preferences: {
-    doNotShowBlacklistSongConfirm: false,
-    isReducedMotion: false,
-    songIndexing: false,
     autoLaunchApp: false,
     isMiniPlayerAlwaysOnTop: false,
-    doNotVerifyWhenOpeningLinks: false,
-    showSongRemainingTime: false,
-    showArtistArtworkNearSongControls: false,
     isMusixmatchLyricsEnabled: false,
-    disableBackgroundArtworks: false,
     hideWindowOnClose: false,
     openWindowAsHiddenOnSystemStart: false,
   },
@@ -227,30 +215,8 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
   if (userData) {
     if (dataType === 'theme' && typeof data === 'object')
       userData.theme = data as typeof userData.theme;
-    else if (
-      dataType === 'currentSong.songId' &&
-      (typeof data === 'string' || data === null)
-    )
-      userData.currentSong.songId = data;
-    else if (
-      dataType === 'currentSong.stoppedPosition' &&
-      typeof data === 'number'
-    )
-      userData.currentSong.stoppedPosition = data;
-    else if (dataType === 'volume.value' && typeof data === 'number')
-      userData.volume.value = data;
-    else if (dataType === 'volume.isMuted' && typeof data === 'boolean')
-      userData.volume.isMuted = data;
     else if (dataType === 'musicFolders' && Array.isArray(data)) {
       userData.musicFolders = data;
-    } else if (dataType === 'defaultPage' && typeof data === 'string') {
-      userData.defaultPage = data as DefaultPages;
-    } else if (dataType === 'isRepeating' && typeof data === 'string') {
-      userData.isRepeating = data as RepeatTypes;
-    } else if (dataType === 'isShuffling' && typeof data === 'boolean') {
-      userData.isShuffling = data;
-    } else if (dataType === 'queue' && typeof data === 'object') {
-      userData.queue = data as Queue;
     } else if (
       dataType === 'windowPositions.mainWindow' &&
       typeof data === 'object'
@@ -274,21 +240,6 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
     } else if (dataType === 'recentSearches' && Array.isArray(data)) {
       userData.recentSearches = data as string[];
     } else if (
-      dataType === 'preferences.doNotShowBlacklistSongConfirm' &&
-      typeof data === 'boolean'
-    ) {
-      userData.preferences.doNotShowBlacklistSongConfirm = data;
-    } else if (
-      dataType === 'preferences.isReducedMotion' &&
-      typeof data === 'boolean'
-    ) {
-      userData.preferences.isReducedMotion = data;
-    } else if (
-      dataType === 'preferences.songIndexing' &&
-      typeof data === 'boolean'
-    ) {
-      userData.preferences.songIndexing = data;
-    } else if (
       dataType === 'preferences.autoLaunchApp' &&
       typeof data === 'boolean'
     ) {
@@ -298,36 +249,6 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
       typeof data === 'boolean'
     ) {
       userData.preferences.isMiniPlayerAlwaysOnTop = data;
-    } else if (
-      dataType === 'preferences.doNotVerifyWhenOpeningLinks' &&
-      typeof data === 'boolean'
-    ) {
-      userData.preferences.doNotVerifyWhenOpeningLinks = data;
-    } else if (
-      dataType === 'preferences.noUpdateNotificationForNewUpdate' &&
-      typeof data === 'string'
-    ) {
-      userData.preferences.noUpdateNotificationForNewUpdate = data;
-    } else if (
-      dataType === 'preferences.showArtistArtworkNearSongControls' &&
-      typeof data === 'boolean'
-    ) {
-      userData.preferences.showArtistArtworkNearSongControls = data;
-    } else if (
-      dataType === 'preferences.showSongRemainingTime' &&
-      typeof data === 'boolean'
-    ) {
-      userData.preferences.showSongRemainingTime = data;
-    } else if (
-      dataType === 'preferences.isMusixmatchLyricsEnabled' &&
-      typeof data === 'boolean'
-    ) {
-      userData.preferences.isMusixmatchLyricsEnabled = data;
-    } else if (
-      dataType === 'preferences.disableBackgroundArtworks' &&
-      typeof data === 'boolean'
-    ) {
-      userData.preferences.disableBackgroundArtworks = data;
     } else if (
       dataType === 'preferences.hideWindowOnClose' &&
       typeof data === 'boolean'
@@ -374,14 +295,6 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
     userDataStore.set('userData', userData);
 
     if (dataType === 'musicFolders') dataUpdateEvent('userData/musicFolder');
-    else if (
-      dataType === 'currentSong.songId' ||
-      dataType === 'currentSong.stoppedPosition'
-    )
-      dataUpdateEvent('userData/currentSong');
-    else if (dataType === 'queue') dataUpdateEvent('userData/queue');
-    else if (dataType === 'volume.isMuted' || dataType === 'volume.value')
-      dataUpdateEvent('userData/volume');
     else if (
       dataType === 'windowDiamensions.mainWindow' ||
       dataType === 'windowDiamensions.miniPlayer'
@@ -622,25 +535,15 @@ function flattenPathArrays<Type extends string[][]>(lists: Type) {
   return lists.reduce((a, b) => a.concat(b), []);
 }
 
-function getDirectories(srcpath: string) {
+export const getDirectories = async (srcpath: string) => {
   try {
-    const dirs = fsSync.readdirSync(srcpath);
-    const dirsWithFullPaths = dirs.map((file) => path.join(srcpath, file));
-    const filteredDirs = dirsWithFullPaths.filter((filePath) => {
-      try {
-        const isADirectory = fsSync.statSync(filePath).isDirectory();
-        return isADirectory;
-      } catch (error) {
-        log(
-          'Error occurred when reading a file path to detect whether its a directory.',
-          { filePath },
-          'ERROR'
-        );
-        return false;
-      }
-    });
+    const dirs = await fs.readdir(srcpath, { withFileTypes: true });
+    const filteredDirs = dirs.filter((dir) => dir.isDirectory());
+    const dirsWithFullPaths = filteredDirs.map((dir) =>
+      path.join(srcpath, dir.name)
+    );
 
-    return filteredDirs;
+    return dirsWithFullPaths;
   } catch (error) {
     log(
       'Error occurred when parsing directories of a path.',
@@ -649,13 +552,13 @@ function getDirectories(srcpath: string) {
     );
     throw error;
   }
-}
+};
 
 export async function getDirectoriesRecursive(
   srcpath: string
 ): Promise<string[]> {
   try {
-    const dirs = getDirectories(srcpath);
+    const dirs = await getDirectories(srcpath);
     if (dirs)
       return [
         srcpath,

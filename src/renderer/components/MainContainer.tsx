@@ -1,8 +1,5 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/interactive-supports-focus */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react/require-default-props */
 import React, { ForwardedRef, MouseEvent, ReactElement } from 'react';
 import ErrorBoundary from './ErrorBoundary';
 
@@ -12,12 +9,12 @@ interface MainContainerProp {
   noDefaultStyles?: boolean;
   style?: React.CSSProperties;
   onContextMenu?: (
-    e: MouseEvent<HTMLDivElement, globalThis.MouseEvent>
+    _e: MouseEvent<HTMLDivElement, globalThis.MouseEvent>
   ) => void;
   onClick?: (
-    e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>
+    _e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>
   ) => void;
-  onScroll?: (e: React.UIEvent<HTMLDivElement, UIEvent>) => void;
+  onScroll?: (_e: React.UIEvent<HTMLDivElement, UIEvent>) => void;
   role?: React.AriaRole;
 }
 

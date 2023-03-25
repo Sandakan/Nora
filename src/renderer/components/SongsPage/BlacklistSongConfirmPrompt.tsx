@@ -2,6 +2,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import storage from 'renderer/utils/localStorage';
 import Button from '../Button';
 import Checkbox from '../Checkbox';
 
@@ -9,7 +10,7 @@ const BlacklistSongConfrimPrompt = (props: {
   songIds: string[];
   title?: string;
 }) => {
-  const { addNewNotifications, changePromptMenuData, updateUserData } =
+  const { addNewNotifications, changePromptMenuData } =
     React.useContext(AppUpdateContext);
   const { songIds, title } = props;
   const [isDoNotShowAgain, setIsDoNotShowAgain] = React.useState(false);
@@ -83,19 +84,11 @@ const BlacklistSongConfrimPrompt = (props: {
             window.api
               .blacklistSongs(songIds)
               .then(() => {
-                if (isDoNotShowAgain) {
-                  updateUserData((prevUserData) => ({
-                    ...prevUserData,
-                    preferences: {
-                      ...prevUserData.preferences,
-                      doNotShowBlacklistSongConfirm: isDoNotShowAgain,
-                    },
-                  }));
-                  window.api.saveUserData(
-                    'preferences.doNotShowBlacklistSongConfirm',
+                if (isDoNotShowAgain)
+                  storage.preferences.setPreferences(
+                    'isSongIndexingEnabled',
                     isDoNotShowAgain
                   );
-                }
                 changePromptMenuData(false);
                 return addNewNotifications([
                   {

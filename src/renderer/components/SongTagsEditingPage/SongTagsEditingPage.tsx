@@ -11,6 +11,7 @@ import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 
+import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
 import hasDataChanged from 'renderer/utils/hasDataChanged';
 
 import Button from '../Button';
@@ -25,16 +26,26 @@ import SongGenresInput from './input_containers/SongGenresInput';
 import SongComposerInput from './input_containers/SongComposerInput';
 import SongLyricsEditor from './input_containers/SongLyricsEditor';
 
+import { appPreferences } from '../../../../package.json';
+
 export interface MetadataKeywords {
   albumKeyword?: string;
   artistKeyword?: string;
   genreKeyword?: string;
 }
 
+const { metadataEditingSupportedExtensions } = appPreferences;
+
 function SongTagsEditingPage() {
   const { currentlyActivePage, currentSongData } = React.useContext(AppContext);
-  const { addNewNotifications, changePromptMenuData, updateCurrentSongData } =
-    React.useContext(AppUpdateContext);
+  const {
+    addNewNotifications,
+    changePromptMenuData,
+    updateCurrentSongData,
+    updatePageHistoryIndex,
+  } = React.useContext(AppUpdateContext);
+
+  const { isOnline } = useNetworkConnectivity();
 
   const [songInfo, setSongInfo] = React.useState({
     title: '',
@@ -52,6 +63,18 @@ function SongTagsEditingPage() {
     }),
     [currentlyActivePage.data]
   );
+
+  const pathExt = React.useMemo(
+    () => window.api.getExtension(songPath),
+    [songPath]
+  );
+
+  const isMetadataEditingSupported = React.useMemo(() => {
+    const isASupportedFormat =
+      metadataEditingSupportedExtensions.includes(pathExt);
+
+    return isASupportedFormat;
+  }, [pathExt]);
 
   React.useEffect(() => {
     if (songId)
@@ -363,9 +386,9 @@ function SongTagsEditingPage() {
   }, [songPath]);
 
   return (
-    <MainContainer className="main-container appear-from-bottom id3-tags-updater-container">
+    <MainContainer className="main-container appear-from-bottom id3-tags-updater-container h-full">
       <>
-        {songId && (
+        {(songId || songPath) && isMetadataEditingSupported && (
           <>
             <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
               Song Metadata Editor{' '}
@@ -407,6 +430,12 @@ function SongTagsEditingPage() {
                   iconClassName="mr-2"
                   className="download-data-from-lastfm-btn mt-4 w-fit"
                   clickHandler={fetchSongDataFromNet}
+                  tooltipLabel={
+                    isOnline
+                      ? undefined
+                      : 'You are not connected to the internet.'
+                  }
+                  isDisabled={!isOnline}
                 />
               </div>
             </div>
@@ -480,6 +509,41 @@ function SongTagsEditingPage() {
               />
             </div>
           </>
+        )}
+
+        {!isMetadataEditingSupported && (
+          <div className="flex !h-full flex-col items-center justify-center dark:text-white/80">
+            <span className="material-icons-round-outlined text-6xl">
+              campaign
+            </span>
+            <p className="mt-2 text-2xl">No Support</p>
+            <p
+              className="mt-4 cursor-pointer text-xs font-light opacity-50"
+              title={window.api.removeDefaultAppProtocolFromFilePath(songPath)}
+            >
+              {window.api.getBaseName(songPath)}
+            </p>
+            <p className="mt-2 px-8 font-light">
+              Nora currently doesn't support editing song metadata in{' '}
+              <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
+                {pathExt}
+              </span>{' '}
+              format.
+            </p>
+            <p className="px-8 font-light">
+              Currently only{' '}
+              <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
+                mp3
+              </span>{' '}
+              format is supported.
+            </p>
+            <Button
+              label="Go Back"
+              iconName="arrow_back"
+              className="mt-4"
+              clickHandler={() => updatePageHistoryIndex('decrement')}
+            />
+          </div>
         )}
       </>
     </MainContainer>

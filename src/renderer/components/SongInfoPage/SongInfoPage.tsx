@@ -1,19 +1,13 @@
 /* eslint-disable react/jsx-no-useless-fragment */
-/* eslint-disable no-console */
-/* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable react/no-array-index-key */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable no-nested-ternary */
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
-/* eslint-disable react/self-closing-comp */
-/* eslint-disable react/destructuring-assignment */
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
 import { valueRounder } from 'renderer/utils/valueRounder';
+import Button from '../Button';
 import Img from '../Img';
 import MainContainer from '../MainContainer';
 import SecondaryContainer from '../SecondaryContainer';
@@ -109,7 +103,7 @@ const SongInfoPage = () => {
                 artistId={artist.artistId}
                 name={artist.name}
                 key={artist.artistId + index}
-                className="ml-1"
+                className="ml-1 !text-base !text-white"
               />
 
               {songInfo.artists && songInfo.artists.length - 1 !== index
@@ -193,9 +187,9 @@ const SongInfoPage = () => {
                   className="h-full object-cover"
                 />
               </div>
-              <div className="song-info flex max-w-[70%] flex-col justify-center text-font-color-black dark:text-font-color-white">
+              <div className="song-info flex max-w-[70%] flex-col justify-center text-white dark:text-font-color-white">
                 <div
-                  className="title info-type-1 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-5xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight"
+                  className="title info-type-1 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-5xl font-medium text-dark-font-color-highlight"
                   title={songInfo.title}
                 >
                   {songInfo.title}
@@ -203,10 +197,13 @@ const SongInfoPage = () => {
                 <div className="song-artists info-type-2 mb-1 flex items-center overflow-hidden text-ellipsis whitespace-nowrap text-base">
                   {songArtists}
                 </div>
-                <div
-                  className="info-type-2 mb-5 overflow-hidden text-ellipsis whitespace-nowrap hover:underline"
-                  title={songInfo.album ? songInfo.album.name : 'Unknown Album'}
-                  onClick={() => {
+                <Button
+                  className="info-type-2 !mr-0 mb-5 !w-fit truncate !border-0 !p-0 !text-white hover:underline"
+                  label={songInfo.album ? songInfo.album.name : 'Unknown Album'}
+                  tooltipLabel={
+                    songInfo.album ? songInfo.album.name : 'Unknown Album'
+                  }
+                  clickHandler={() => {
                     if (songInfo.album) {
                       return currentlyActivePage.pageTitle === 'AlbumInfo' &&
                         currentlyActivePage.data.albumId === songInfo.album.name
@@ -217,9 +214,7 @@ const SongInfoPage = () => {
                     }
                     return undefined;
                   }}
-                >
-                  {songInfo.album ? songInfo.album.name : 'Unknown Album'}
-                </div>
+                />
                 <div
                   className="info-type-3 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm"
                   title={songDuration}

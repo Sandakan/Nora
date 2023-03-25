@@ -4,7 +4,7 @@ import React from 'react';
 import Dropdown, { DropdownOption } from 'renderer/components/Dropdown';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { getItem, setItem } from 'renderer/utils/localStorage';
+import storage from 'renderer/utils/localStorage';
 import Button from '../../Button';
 import Checkbox from '../../Checkbox';
 import Hyperlink from '../../Hyperlink';
@@ -71,14 +71,16 @@ const seekbarScrollIntervals: DropdownOption<string>[] = [
 ];
 
 const AudioPlaybackSettings = () => {
-  const { userData } = React.useContext(AppContext);
+  const { userData, localStorageData } = React.useContext(AppContext);
   const { updateUserData, changePromptMenuData } =
     React.useContext(AppUpdateContext);
 
   const [seekbarScrollInterval, setSeekbarScrollInterval] = React.useState('5');
 
   React.useEffect(() => {
-    const interval = getItem('seekbarScrollInterval');
+    const interval = storage.preferences.getPreferences(
+      'seekbarScrollInterval'
+    );
     setSeekbarScrollInterval(interval.toString());
   }, []);
 
@@ -99,23 +101,11 @@ const AudioPlaybackSettings = () => {
           <Checkbox
             id="toggleShowRemainingSongDuration"
             isChecked={
-              userData !== undefined &&
-              userData.preferences.showSongRemainingTime
+              localStorageData !== undefined &&
+              localStorageData.preferences.showSongRemainingTime
             }
             checkedStateUpdateFunction={(state) =>
-              updateUserData(async (prevUserData) => {
-                await window.api.saveUserData(
-                  'preferences.showSongRemainingTime',
-                  state
-                );
-                return {
-                  ...prevUserData,
-                  preferences: {
-                    ...prevUserData.preferences,
-                    showSongRemainingTime: state,
-                  },
-                };
-              })
+              storage.preferences.setPreferences('showSongRemainingTime', state)
             }
             labelContent="Show remaining song duration"
           />
@@ -194,7 +184,10 @@ const AudioPlaybackSettings = () => {
             onChange={(e) => {
               const val = e.currentTarget.value;
               setSeekbarScrollInterval(val);
-              setItem('seekbarScrollInterval', parseFloat(val));
+              storage.preferences.setPreferences(
+                'seekbarScrollInterval',
+                parseFloat(val)
+              );
             }}
           />
         </li>

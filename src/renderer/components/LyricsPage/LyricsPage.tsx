@@ -16,6 +16,10 @@ import NoLyrics from './NoLyrics';
 import MainContainer from '../MainContainer';
 import Button from '../Button';
 
+import { appPreferences } from '../../../../package.json';
+
+const { metadataEditingSupportedExtensions } = appPreferences;
+
 export const syncedLyricsRegex = /^\[\d+:\d{1,2}\.\d{1,3}]/gm;
 let isScrollingByCode = false;
 document.addEventListener('lyrics/scrollIntoView', () => {
@@ -146,6 +150,11 @@ export const LyricsPage = () => {
     ]
   );
 
+  const pathExt = React.useMemo(
+    () => window.api.getExtension(currentSongData.path),
+    [currentSongData.path]
+  );
+
   const showOfflineLyrics = React.useCallback(
     (_: unknown, setIsDisabled: (state: boolean) => void) => {
       setIsDisabled(true);
@@ -174,9 +183,15 @@ export const LyricsPage = () => {
   );
 
   const saveOnlineLyrics = React.useCallback(
-    (_: unknown, setIsDisabled: (state: boolean) => void) => {
+    (
+      _: unknown,
+      setIsDisabled: (state: boolean) => void,
+      setIsPending: (state: boolean) => void
+    ) => {
       if (lyrics) {
         setIsDisabled(true);
+        setIsPending(true);
+
         window.api
           .saveLyricsToSong(currentSongData.path, lyrics)
           .then(() => {
@@ -203,7 +218,10 @@ export const LyricsPage = () => {
               },
             ]);
           })
-          .finally(() => setIsDisabled(false));
+          .finally(() => {
+            setIsPending(false);
+            setIsDisabled(false);
+          });
       }
     },
     [addNewNotifications, currentSongData.path, lyrics]
@@ -234,6 +252,11 @@ export const LyricsPage = () => {
       currentSongData.path,
       currentSongData.title,
     ]
+  );
+
+  const isSaveLyricsBtnDisabled = React.useMemo(
+    () => !metadataEditingSupportedExtensions.includes(pathExt),
+    [pathExt]
   );
 
   return (
@@ -320,13 +343,23 @@ export const LyricsPage = () => {
                         iconName="visibility"
                         clickHandler={showOfflineLyrics}
                         isDisabled={!lyrics.isOfflineLyricsAvailable}
+                        tooltipLabel={
+                          !lyrics.isOfflineLyricsAvailable
+                            ? 'No saved lyrics found.'
+                            : undefined
+                        }
                       />
                       <Button
                         key={4}
                         label="Save lyrics"
-                        pendingAnimationOnDisabled
                         className="save-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                         iconName="save"
+                        isDisabled={isSaveLyricsBtnDisabled}
+                        tooltipLabel={
+                          isSaveLyricsBtnDisabled
+                            ? `Nora currently doesn't support saving lyrics to songs in '${pathExt}' audio format.`
+                            : undefined
+                        }
                         clickHandler={saveOnlineLyrics}
                       />
                     </>

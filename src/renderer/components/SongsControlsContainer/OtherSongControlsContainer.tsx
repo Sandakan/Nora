@@ -3,17 +3,16 @@
 import React, { useContext } from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
-import { getItem } from 'renderer/utils/localStorage';
 import Button from '../Button';
 
-let scrollIncrement = getItem('seekbarScrollInterval');
-document.addEventListener('localStorage', () => {
-  scrollIncrement = getItem('seekbarScrollInterval');
-});
-
 const OtherSongControlsContainer = () => {
-  const { currentlyActivePage, isMiniPlayer, isMuted, volume } =
-    useContext(AppContext);
+  const {
+    currentlyActivePage,
+    isMiniPlayer,
+    isMuted,
+    volume,
+    localStorageData,
+  } = useContext(AppContext);
   const {
     changeCurrentActivePage,
     updateMiniPlayerStatus,
@@ -115,6 +114,8 @@ const OtherSongControlsContainer = () => {
           style={volumeBarCssProperties}
           title={Math.round(volume).toString()}
           onWheel={(e) => {
+            const scrollIncrement =
+              localStorageData?.preferences?.seekbarScrollInterval;
             const incrementValue =
               e.deltaY > 0 ? -scrollIncrement : scrollIncrement;
             let value = volume + incrementValue;
