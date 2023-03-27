@@ -3,6 +3,8 @@ import { FixedSizeList as List } from 'react-window';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+
 import Button from '../Button';
 import Dropdown from '../Dropdown';
 import MainContainer from '../MainContainer';
@@ -22,7 +24,6 @@ const MusicFolderInfoPage = () => {
   const [folderSongs, setFolderSongs] = React.useState<SongData[]>([]);
   const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>('aToZ');
 
-  //   const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
   const songsContainerRef = React.useRef(null as HTMLDivElement | null);
   const { width, height } = useResizeObserver(songsContainerRef);
 
@@ -144,6 +145,8 @@ const MusicFolderInfoPage = () => {
     },
   ];
 
+  const selectAllHandler = useSelectAllHandler(folderSongs, 'songs', 'songId');
+
   const row = React.useCallback(
     (props: { index: number; style: React.CSSProperties }) => {
       const { index, style } = props;
@@ -175,11 +178,16 @@ const MusicFolderInfoPage = () => {
             path={path}
             isAFavorite={isAFavorite}
             isBlacklisted={isBlacklisted}
+            selectAllHandler={selectAllHandler}
           />
         </div>
       );
     },
-    [folderSongs, localStorageData?.preferences?.isSongIndexingEnabled]
+    [
+      folderSongs,
+      localStorageData?.preferences?.isSongIndexingEnabled,
+      selectAllHandler,
+    ]
   );
 
   const { folderName } = React.useMemo(() => {
@@ -204,7 +212,16 @@ const MusicFolderInfoPage = () => {
   );
 
   return (
-    <MainContainer className="appear-from-bottom !h-full !pb-0">
+    <MainContainer
+      className="appear-from-bottom !h-full !pb-0"
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
+    >
       <>
         <div className="title-container mt-2 mb-8 flex items-center justify-between pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           '{folderName}' Folder

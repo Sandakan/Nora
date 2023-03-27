@@ -15,6 +15,8 @@ import {
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+
 import Button from '../Button';
 import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 import DefaultPlaylistCover from '../../../../assets/images/webp/playlist_cover_default.webp';
@@ -215,6 +217,8 @@ const CurrentQueuePage = () => {
     }
   }, [currentSongData.artworkPath, queue.queueId, queue.queueType]);
 
+  const selectAllHandler = useSelectAllHandler(queuedSongs, 'songs', 'songId');
+
   const row = React.useCallback(
     (props: { index: number; style: React.CSSProperties }) => {
       const { index, style } = props;
@@ -259,6 +263,7 @@ const CurrentQueuePage = () => {
                   year={year}
                   isBlacklisted={isBlacklisted}
                   isAFavorite={isAFavorite}
+                  selectAllHandler={selectAllHandler}
                   additionalContextMenuItems={[
                     {
                       label: 'Remove from Queue',
@@ -288,6 +293,7 @@ const CurrentQueuePage = () => {
       multipleSelectionsData,
       queue.queue,
       queuedSongs,
+      selectAllHandler,
       toggleMultipleSelections,
       updateQueueData,
     ]
@@ -332,7 +338,16 @@ const CurrentQueuePage = () => {
   );
 
   return (
-    <MainContainer className="current-queue-container appear-from-bottom relative !h-full overflow-hidden !pb-0">
+    <MainContainer
+      className="current-queue-container appear-from-bottom relative !h-full overflow-hidden !pb-0"
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
+    >
       <>
         <div className="title-container mt-2 mb-4 flex items-center justify-between pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           Currently Playing Queue

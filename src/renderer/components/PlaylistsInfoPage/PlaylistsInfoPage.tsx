@@ -10,13 +10,16 @@ import React, { useContext } from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
-import DefaultPlaylistCover from '../../../../assets/images/webp/playlist_cover_default.webp';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+
 import Button from '../Button';
 import Song from '../SongsPage/Song';
 import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';
 import Img from '../Img';
 import MainContainer from '../MainContainer';
 import Dropdown from '../Dropdown';
+
+import DefaultPlaylistCover from '../../../../assets/images/webp/playlist_cover_default.webp';
 
 const dropdownOptions: { label: string; value: SongSortTypes }[] = [
   { label: 'Added Order', value: 'addedOrder' },
@@ -167,6 +170,11 @@ const PlaylistInfoPage = () => {
     }`;
   }, [playlistSongs]);
 
+  const selectAllHandler = useSelectAllHandler(
+    playlistSongs,
+    'songs',
+    'songId'
+  );
   const songComponents = React.useMemo(
     () =>
       playlistSongs.length > 0
@@ -216,6 +224,7 @@ const PlaylistInfoPage = () => {
                         .catch((err) => console.error(err)),
                   },
                 ]}
+                selectAllHandler={selectAllHandler}
               />
             );
           })
@@ -223,6 +232,7 @@ const PlaylistInfoPage = () => {
     [
       playlistSongs,
       localStorageData?.preferences?.isSongIndexingEnabled,
+      selectAllHandler,
       playlistData.playlistId,
       playlistData.name,
       addNewNotifications,
@@ -230,7 +240,16 @@ const PlaylistInfoPage = () => {
   );
 
   return (
-    <MainContainer className="main-container playlist-info-page-container px-8 pb-8 pt-4 pr-4">
+    <MainContainer
+      className="main-container playlist-info-page-container px-8 pb-8 pt-4 pr-4"
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
+    >
       <>
         {Object.keys(playlistData).length > 0 && (
           <div className="playlist-img-and-info-container appear-from-bottom mb-8 flex flex-row items-center justify-start">

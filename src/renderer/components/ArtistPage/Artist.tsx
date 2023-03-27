@@ -23,6 +23,7 @@ interface ArtistProp {
     picture_medium: string;
   };
   isAFavorite: boolean;
+  selectAllHandler?: (_upToId?: string) => void;
 }
 
 export const Artist = (props: ArtistProp) => {
@@ -251,7 +252,7 @@ export const Artist = (props: ArtistProp) => {
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
-        label: isMultipleSelectionEnabled ? 'Unselect' : 'Select',
+        label: isAMultipleSelection ? 'Unselect' : 'Select',
         iconName: 'checklist',
         handlerFunction: () => {
           if (isMultipleSelectionEnabled) {
@@ -261,13 +262,18 @@ export const Artist = (props: ArtistProp) => {
               isAMultipleSelection ? 'remove' : 'add'
             );
           }
-          return toggleMultipleSelections(
-            !isMultipleSelectionEnabled,
-            'artist',
-            [props.artistId]
-          );
+          return toggleMultipleSelections(!isAMultipleSelection, 'artist', [
+            props.artistId,
+          ]);
         },
       },
+      // {
+      //   label: 'Select/Unselect All',
+      //   iconName: 'checklist',
+      //   isDisabled: !props.selectAllHandler,
+      //   handlerFunction: () =>
+      //     props.selectAllHandler && props.selectAllHandler(),
+      // },
     ] satisfies ContextMenuItem[];
   }, [
     multipleSelectionsData,
@@ -275,12 +281,11 @@ export const Artist = (props: ArtistProp) => {
     isMultipleSelectionEnabled,
     isAFavorite,
     goToArtistInfoPage,
+    props,
     playArtistSongsForMultipleSelections,
     playArtistSongs,
     updateQueueData,
     queue.queue,
-    props.songIds,
-    props.artistId,
     addNewNotifications,
     toggleMultipleSelections,
     updateMultipleSelections,
@@ -325,7 +330,9 @@ export const Artist = (props: ArtistProp) => {
         );
       }}
       onClick={(e) => {
-        if (
+        if (e.getModifierState('Shift') === true && props.selectAllHandler)
+          props.selectAllHandler(props.artistId);
+        else if (
           isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'artist'
         )
@@ -334,14 +341,7 @@ export const Artist = (props: ArtistProp) => {
             'artist',
             isAMultipleSelection ? 'remove' : 'add'
           );
-        else if (e.getModifierState('Shift') === true) {
-          toggleMultipleSelections(!isMultipleSelectionEnabled, 'artist');
-          updateMultipleSelections(
-            props.artistId,
-            'artist',
-            isAMultipleSelection ? 'remove' : 'add'
-          );
-        } else goToArtistInfoPage();
+        else goToArtistInfoPage();
       }}
     >
       <div className="artist-img-container relative flex h-3/4 items-center justify-center">

@@ -6,9 +6,12 @@
 /* eslint-disable import/prefer-default-export */
 import React, { CSSProperties, useContext } from 'react';
 import { FixedSizeGrid as Grid } from 'react-window';
+
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+
 import { Playlist } from './Playlist';
 import NewPlaylistPrompt from './NewPlaylistPrompt';
 import Button from '../Button';
@@ -86,6 +89,12 @@ export const PlaylistsPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortingOrder]);
 
+  const selectAllHandler = useSelectAllHandler(
+    playlists,
+    'playlist',
+    'playlistId'
+  );
+
   const row = React.useCallback(
     (props: {
       columnIndex: number;
@@ -107,13 +116,14 @@ export const PlaylistsPage = () => {
               isArtworkAvailable={playlist.isArtworkAvailable}
               artworkPaths={playlist.artworkPaths}
               key={playlist.playlistId}
+              selectAllHandler={selectAllHandler}
             />
           </div>
         );
       }
       return <div style={style} />;
     },
-    [noOfColumns, playlists]
+    [noOfColumns, playlists, selectAllHandler]
   );
 
   const createNewPlaylist = React.useCallback(
@@ -145,6 +155,13 @@ export const PlaylistsPage = () => {
           e.pageY
         )
       }
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
     >
       <>
         <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">

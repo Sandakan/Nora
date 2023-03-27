@@ -1,7 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/destructuring-assignment */
-/* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
@@ -14,6 +13,7 @@ import Button from '../Button';
 
 interface PlaylistProp extends Playlist {
   index: number;
+  selectAllHandler?: (_upToId?: string) => void;
 }
 
 export const Playlist = (props: PlaylistProp) => {
@@ -215,7 +215,7 @@ export const Playlist = (props: PlaylistProp) => {
         handlerFunction: () => true,
       },
       {
-        label: isMultipleSelectionEnabled ? 'Unselect' : 'Select',
+        label: isAMultipleSelection ? 'Unselect' : 'Select',
         iconName: 'checklist',
         handlerFunction: () => {
           if (isMultipleSelectionEnabled) {
@@ -225,11 +225,18 @@ export const Playlist = (props: PlaylistProp) => {
               isAMultipleSelection ? 'remove' : 'add'
             );
           } else
-            toggleMultipleSelections(!isMultipleSelectionEnabled, 'playlist', [
+            toggleMultipleSelections(!isAMultipleSelection, 'playlist', [
               props.playlistId,
             ]);
         },
       },
+      // {
+      //   label: 'Select/Unselect All',
+      //   iconName: 'checklist',
+      //   isDisabled: !props.selectAllHandler,
+      //   handlerFunction: () =>
+      //     props.selectAllHandler && props.selectAllHandler(),
+      // },
       {
         label: 'Info',
         iconName: 'info',
@@ -276,9 +283,7 @@ export const Playlist = (props: PlaylistProp) => {
     openPlaylistInfoPage,
     playAllSongs,
     playAllSongsForMultipleSelections,
-    props.name,
-    props.playlistId,
-    props.songs,
+    props,
     queue.queue,
     toggleMultipleSelections,
     updateMultipleSelections,
@@ -305,7 +310,7 @@ export const Playlist = (props: PlaylistProp) => {
 
   return (
     <div
-      style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
+      style={{ animationDelay: `${25 * (props.index + 1)}ms` }}
       className={`playlist appear-from-bottom group hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50  ${
         props.playlistId
       } mb-8 mr-12 flex h-fit max-h-52 min-h-[12rem] w-36 flex-col justify-between rounded-md p-4 text-font-color-black dark:text-font-color-white ${
@@ -326,7 +331,9 @@ export const Playlist = (props: PlaylistProp) => {
         );
       }}
       onClick={(e) => {
-        if (
+        if (e.getModifierState('Shift') === true && props.selectAllHandler)
+          props.selectAllHandler(props.playlistId);
+        else if (
           isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'playlist'
         )
@@ -335,14 +342,7 @@ export const Playlist = (props: PlaylistProp) => {
             'playlist',
             isAMultipleSelection ? 'remove' : 'add'
           );
-        else if (e.getModifierState('Shift') === true) {
-          toggleMultipleSelections(!isMultipleSelectionEnabled, 'playlist');
-          updateMultipleSelections(
-            props.playlistId,
-            'playlist',
-            isAMultipleSelection ? 'remove' : 'add'
-          );
-        } else openPlaylistInfoPage();
+        else openPlaylistInfoPage();
       }}
     >
       <div className="playlist-cover-and-play-btn-container relative h-[70%] cursor-pointer overflow-hidden rounded-xl before:invisible before:absolute before:h-full before:w-full before:bg-gradient-to-b before:from-[hsla(0,0%,0%,0%)] before:to-[hsla(0,0%,0%,40%)] before:opacity-0 before:transition-[visibility,opacity] before:duration-300 before:content-[''] group-focus-within:before:visible group-focus-within:before:opacity-100 group-hover:before:visible group-hover:before:opacity-100">
@@ -372,7 +372,10 @@ export const Playlist = (props: PlaylistProp) => {
       </div>
       <div className="playlist-info-container mt-2">
         <Button
-          className="playlist-title !m-0 !block w-full truncate !rounded-none !border-0 !p-0 !text-left !text-xl outline-1 outline-offset-1 hover:underline focus-visible:!outline"
+          className={`playlist-title !m-0 !block w-full truncate !rounded-none !border-0 !p-0 !text-left !text-xl outline-1 outline-offset-1 hover:underline focus-visible:!outline ${
+            isAMultipleSelection &&
+            '!text-font-color-black dark:!text-font-color-black'
+          }`}
           tooltipLabel={props.name}
           clickHandler={() =>
             isMultipleSelectionEnabled &&

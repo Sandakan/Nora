@@ -748,7 +748,7 @@ declare global {
     iconClassName?: string;
     isContextMenuItemSeperator?: boolean;
     innerContextMenus?: ContextMenuItem[];
-    handlerFunction: () => void;
+    handlerFunction: null | (() => void);
     isDisabled?: boolean;
   }
 

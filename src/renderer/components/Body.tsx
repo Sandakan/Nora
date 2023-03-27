@@ -4,7 +4,7 @@
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import HomePage from './HomePage/HomePage';
-import { ArtistPage } from './ArtistPage/ArtistPage';
+import ArtistPage from './ArtistPage/ArtistPage';
 import { AlbumsPage } from './AlbumsPage/AlbumsPage';
 import { PlaylistsPage } from './PlaylistsPage/PlaylistsPage';
 import SearchPage from './SearchPage/SearchPage';

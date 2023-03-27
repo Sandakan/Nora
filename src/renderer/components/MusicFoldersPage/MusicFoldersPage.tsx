@@ -5,6 +5,8 @@ import { FixedSizeList as List } from 'react-window';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+
 import Button from '../Button';
 import Dropdown, { DropdownOption } from '../Dropdown';
 import Img from '../Img';
@@ -80,6 +82,17 @@ const MusicFoldersPage = () => {
     };
   }, [fetchFoldersData]);
 
+  const musicFoldersWithPaths = React.useMemo(
+    () => musicFolders.map((x) => ({ ...x, folderPath: x.folderData.path })),
+    [musicFolders]
+  );
+
+  const selectAllHandler = useSelectAllHandler(
+    musicFoldersWithPaths,
+    'folder',
+    'folderPath'
+  );
+
   const folders = React.useCallback(
     (props: { index: number; style: React.CSSProperties }) => {
       const { index, style } = props;
@@ -92,11 +105,12 @@ const MusicFoldersPage = () => {
             isBlacklisted={isBlacklisted}
             songIds={songIds}
             key={folderData.path}
+            selectAllHandler={selectAllHandler}
           />
         </div>
       );
     },
-    [musicFolders]
+    [musicFolders, selectAllHandler]
   );
 
   const addNewFolder = React.useCallback(
@@ -120,7 +134,16 @@ const MusicFoldersPage = () => {
   );
 
   return (
-    <MainContainer className="music-folders-page appear-from-bottom relative !h-full !pb-0 pr-4">
+    <MainContainer
+      className="music-folders-page appear-from-bottom relative !h-full !pb-0 pr-4"
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
+    >
       <>
         {musicFolders && musicFolders.length > 0 && (
           <div className="title-container mt-2 mb-8 flex items-center justify-between text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">

@@ -1,21 +1,19 @@
-/* eslint-disable no-nested-ternary */
 /* eslint-disable react/destructuring-assignment */
-/* eslint-disable promise/always-return */
-/* eslint-disable promise/catch-or-return */
-/* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
 import React, { CSSProperties } from 'react';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { FixedSizeGrid as Grid } from 'react-window';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+
 import { Album } from './Album';
-// import FetchingDataImage from '../../../../assets/images/svg/Cocktail _Monochromatic.svg';
-import NoAlbumsImage from '../../../../assets/images/svg/Easter bunny_Monochromatic.svg';
 import MainContainer from '../MainContainer';
 import Dropdown from '../Dropdown';
 import Img from '../Img';
 import Button from '../Button';
+
+import NoAlbumsImage from '../../../../assets/images/svg/Easter bunny_Monochromatic.svg';
 
 export const AlbumsPage = () => {
   const {
@@ -56,6 +54,7 @@ export const AlbumsPage = () => {
           if (res.length > 0) setAlbumsData(res);
           else setAlbumsData([]);
         }
+        return undefined;
       }),
     [sortingOrder]
   );
@@ -87,6 +86,8 @@ export const AlbumsPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortingOrder]);
 
+  const selectAllHandler = useSelectAllHandler(albumsData, 'album', 'albumId');
+
   const row = React.useCallback(
     (props: {
       columnIndex: number;
@@ -109,17 +110,27 @@ export const AlbumsPage = () => {
               year={year}
               artists={artists}
               songs={songs}
+              selectAllHandler={selectAllHandler}
             />
           </div>
         );
       }
       return <div style={style} />;
     },
-    [albumsData, noOfColumns]
+    [albumsData, noOfColumns, selectAllHandler]
   );
 
   return (
-    <MainContainer className="appear-from-bottom albums-list-container !h-full overflow-hidden !pb-0">
+    <MainContainer
+      className="appear-from-bottom albums-list-container !h-full overflow-hidden !pb-0"
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
+    >
       <>
         <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">

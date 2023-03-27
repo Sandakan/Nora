@@ -33,7 +33,7 @@ interface SongProp {
   style?: React.CSSProperties;
   isDraggable?: boolean;
   provided?: DraggableProvided;
-  // updateSongs: (_callback: (_prevSongsData: SongData[]) => SongData[]) => void;
+  selectAllHandler?: (_upToId?: string) => void;
 }
 
 const Song = React.forwardRef(
@@ -73,7 +73,7 @@ const Song = React.forwardRef(
       artists,
       style,
       year,
-      // updateSongs,
+      selectAllHandler,
     } = props;
     const { provided = {} as any } = props;
 
@@ -83,6 +83,7 @@ const Song = React.forwardRef(
         ? currentSongData.songId === songId && isCurrentSongPlaying
         : false
     );
+    const clickTimeoutRef = React.useRef<NodeJS.Timeout>();
 
     React.useEffect(() => {
       setIsSongPlaying(() => {
@@ -364,7 +365,7 @@ const Song = React.forwardRef(
           },
         },
         {
-          label: isMultipleSelectionEnabled ? 'Unselect' : 'Select',
+          label: isAMultipleSelection ? 'Unselect' : 'Select',
           iconName: 'checklist',
           handlerFunction: () => {
             if (isMultipleSelectionEnabled) {
@@ -374,12 +375,17 @@ const Song = React.forwardRef(
                 isAMultipleSelection ? 'remove' : 'add'
               );
             } else
-              toggleMultipleSelections(!isMultipleSelectionEnabled, 'songs', [
+              toggleMultipleSelections(!isAMultipleSelection, 'songs', [
                 songId,
               ]);
-            toggleMultipleSelections(false);
           },
         },
+        // {
+        //   label: 'Select/Unselect All',
+        //   iconName: 'checklist',
+        //   isDisabled: !selectAllHandler,
+        //   handlerFunction: () => selectAllHandler && selectAllHandler(),
+        // },
         {
           label: 'Hr',
           isContextMenuItemSeperator: true,
@@ -473,12 +479,12 @@ const Song = React.forwardRef(
     }, [
       multipleSelectionsData,
       isAMultipleSelection,
-      handlePlayBtnClick,
+      additionalContextMenuItems,
       isAFavorite,
-      isMultipleSelectionEnabled,
       goToSongInfoPage,
       isBlacklisted,
-      additionalContextMenuItems,
+      handlePlayBtnClick,
+      toggleMultipleSelections,
       createQueue,
       queue.queue,
       currentSongData.songId,
@@ -486,12 +492,12 @@ const Song = React.forwardRef(
       updateQueueData,
       addNewNotifications,
       title,
-      toggleMultipleSelections,
       songId,
       artworkPaths.optimizedArtworkPath,
       artworkPaths.artworkPath,
       toggleIsFavorite,
       changePromptMenuData,
+      isMultipleSelectionEnabled,
       updateMultipleSelections,
       changeCurrentActivePage,
       path,
@@ -514,7 +520,7 @@ const Song = React.forwardRef(
         data-index={index}
         {...provided.draggableProps}
         {...provided.dragHandleProps}
-        className={`appear-from-bottom ${songId} group relative mr-4 mb-2 flex aspect-[2/1] h-[3.25rem] w-[98%] overflow-hidden rounded-lg p-[0.2rem] transition-[background,opacity] ease-in-out ${
+        className={`appear-from-bottom ${songId} group relative mr-4 mb-2 flex aspect-[2/1] h-[3.25rem] w-[98%] overflow-hidden rounded-lg p-[0.2rem] outline-1 -outline-offset-2 transition-[background,opacity] ease-in-out focus-visible:!outline ${
           currentSongData.songId === songId || isAMultipleSelection
             ? bodyBackgroundImage
               ? `bg-background-color-3/70 text-font-color-black shadow-lg backdrop-blur-md dark:bg-dark-background-color-3/70`
@@ -539,25 +545,25 @@ const Song = React.forwardRef(
           );
         }}
         onClick={(e) => {
-          if (
-            isMultipleSelectionEnabled &&
-            multipleSelectionsData.selectionType === 'songs'
-          )
-            updateMultipleSelections(
-              songId,
-              'songs',
-              isAMultipleSelection ? 'remove' : 'add'
-            );
-          else if (e.getModifierState('Shift') === true) {
-            toggleMultipleSelections(!isMultipleSelectionEnabled, 'songs');
-            updateMultipleSelections(
-              songId,
-              'songs',
-              isAMultipleSelection ? 'remove' : 'add'
-            );
-          }
+          clickTimeoutRef.current = setTimeout(() => {
+            if (e.getModifierState('Shift') === true && selectAllHandler)
+              selectAllHandler(songId);
+            else if (
+              isMultipleSelectionEnabled &&
+              multipleSelectionsData.selectionType === 'songs'
+            )
+              updateMultipleSelections(
+                songId,
+                'songs',
+                isAMultipleSelection ? 'remove' : 'add'
+              );
+          }, 100);
         }}
-        onDoubleClick={handlePlayBtnClick}
+        onDoubleClick={() => {
+          if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+          handlePlayBtnClick();
+        }}
+        tabIndex={0}
         ref={ref}
       >
         <div className="song-cover-and-play-btn-container relative flex h-full w-[12.5%] items-center justify-center">

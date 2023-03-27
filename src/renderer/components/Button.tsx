@@ -93,8 +93,8 @@ const Button = React.memo((props: ButtonProps) => {
     >
       {isStatusPending && isButtonDisabled ? (
         <span
-          className={`material-icons-round icon relative mr-2 flex h-4 w-4 items-center justify-center text-lg after:absolute after:mx-auto after:block after:h-4 after:w-4 after:animate-spin-ease after:items-center after:justify-center after:rounded-full after:border-2 after:border-[transparent] after:border-t-font-color-black after:content-[''] dark:after:border-t-font-color-white
-         ${pendingClassName}`}
+          className={`material-icons-round icon relative flex h-4 w-4 items-center justify-center text-lg after:absolute after:mx-auto after:block after:h-4 after:w-4 after:animate-spin-ease after:items-center after:justify-center after:rounded-full after:border-2 after:border-[transparent] after:border-t-font-color-black after:content-[''] dark:after:border-t-font-color-white
+         ${(!isStatusPending || label) && 'mr-2'} ${pendingClassName}`}
         >
           {isStatusPending ? '' : iconName}
         </span>

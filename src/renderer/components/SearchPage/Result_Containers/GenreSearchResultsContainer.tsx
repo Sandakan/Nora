@@ -5,6 +5,7 @@ import Genre from 'renderer/components/GenresPage/Genre';
 import SecondaryContainer from 'renderer/components/SecondaryContainer';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 
 type Props = { genres: Genre[]; searchInput: string };
 
@@ -17,6 +18,9 @@ const GenreSearchResultsContainer = (props: Props) => {
   const { toggleMultipleSelections, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
   const { genres, searchInput } = props;
+
+  const selectAllHandler = useSelectAllHandler(genres, 'genre', 'genreId');
+
   const genreResults = React.useMemo(
     () =>
       genres.length > 0
@@ -32,13 +36,14 @@ const GenreSearchResultsContainer = (props: Props) => {
                     songIds={genre.songs.map((song) => song.songId)}
                     artworkPaths={genre.artworkPaths}
                     backgroundColor={genre.backgroundColor}
+                    selectAllHandler={selectAllHandler}
                   />
                 );
               return undefined;
             })
             .filter((x) => x !== undefined)
         : [],
-    [genres]
+    [genres, selectAllHandler]
   );
 
   return (
@@ -46,6 +51,13 @@ const GenreSearchResultsContainer = (props: Props) => {
       className={`secondary-container genres-list-container appear-from=bottom mt-4 text-font-color-black dark:text-font-color-white ${
         genreResults.length > 0 ? 'active relative' : 'invisible absolute'
       }`}
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
     >
       <>
         <div className="title-container mt-1 mb-8 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">

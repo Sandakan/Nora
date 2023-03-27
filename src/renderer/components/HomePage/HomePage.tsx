@@ -14,16 +14,17 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { Artist } from '../ArtistPage/Artist';
-import SongCard from '../SongsPage/SongCard';
-import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 import NoSongsImage from '../../../../assets/images/svg/Empty Inbox _Monochromatic.svg';
 import DataFetchingImage from '../../../../assets/images/svg/Umbrella_Monochromatic.svg';
 import ErrorPrompt from '../ErrorPrompt';
 import MainContainer from '../MainContainer';
-import SecondaryContainer from '../SecondaryContainer';
 import Button from '../Button';
 import Img from '../Img';
+import RecentlyAddedSongs from './RecentlyAddedSongs';
+import RecentlyPlayedSongs from './RecentlyPlayedSongs';
+import RecentlyPlayedArtists from './RecentlyPlayedArtists';
+import MostLovedSongs from './MostLovedSongs';
+import MostLovedArtists from './MostLovedArtists';
 
 interface HomePageReducer {
   latestSongs: (AudioInfo | null)[];
@@ -76,12 +77,8 @@ const reducer = (
 };
 
 const HomePage = () => {
-  const {
-    updateContextMenuData,
-    changeCurrentActivePage,
-    changePromptMenuData,
-    addNewNotifications,
-  } = React.useContext(AppUpdateContext);
+  const { updateContextMenuData, changePromptMenuData, addNewNotifications } =
+    React.useContext(AppUpdateContext);
 
   const [content, dispatch] = React.useReducer(reducer, {
     latestSongs: [],
@@ -275,132 +272,6 @@ const HomePage = () => {
       .catch(() => dispatch({ type: 'SONGS_DATA', data: [null] }));
   };
 
-  const latestSongComponents = React.useMemo(
-    () =>
-      content.latestSongs.length > 0 && content.latestSongs[0] !== null
-        ? content.latestSongs
-            .filter((_, index) => index < 5)
-            .map((song, index) => {
-              const songData = song as AudioInfo;
-              return (
-                <SongCard
-                  index={index}
-                  key={songData.songId}
-                  title={songData.title}
-                  artworkPath={
-                    songData.artworkPaths?.artworkPath || DefaultSongCover
-                  }
-                  path={songData.path}
-                  songId={songData.songId}
-                  artists={songData.artists}
-                  palette={songData.palette}
-                  isAFavorite={songData.isAFavorite}
-                  isBlacklisted={songData.isBlacklisted}
-                />
-              );
-            })
-        : [],
-    [content.latestSongs]
-  );
-
-  const recentlyPlayedSongs = React.useMemo(
-    () =>
-      content.recentlyPlayedSongs
-        .filter((_, index) => index < 3)
-        .map((song, index) => {
-          return (
-            <SongCard
-              index={index}
-              key={song.songId}
-              title={song.title}
-              artworkPath={song.artworkPaths?.artworkPath || DefaultSongCover}
-              path={song.path}
-              songId={song.songId}
-              artists={song.artists}
-              palette={song.palette}
-              isAFavorite={song.isAFavorite}
-              isBlacklisted={song.isBlacklisted}
-            />
-          );
-        }),
-    [content.recentlyPlayedSongs]
-  );
-
-  const recentlyPlayedSongArtists = React.useMemo(
-    () =>
-      content.recentlyPlayedSongs.length > 0
-        ? content.recentSongArtists
-            .map((val, index) => {
-              if (val)
-                return (
-                  <Artist
-                    index={index}
-                    name={val.name}
-                    key={val.artistId}
-                    artworkPaths={val.artworkPaths}
-                    artistId={val.artistId}
-                    songIds={val.songs.map((song) => song.songId)}
-                    onlineArtworkPaths={val.onlineArtworkPaths}
-                    className="mb-4"
-                    isAFavorite={val.isAFavorite}
-                  />
-                );
-              else return undefined;
-            })
-            .filter((x) => x !== undefined)
-        : [],
-    [content.recentSongArtists, content.recentlyPlayedSongs.length]
-  );
-
-  const mostLovedSongComponents = React.useMemo(
-    () =>
-      content.mostLovedSongs
-        .filter((_, index) => index < 3)
-        .map((song, index) => {
-          return (
-            <SongCard
-              index={index}
-              key={song.songId}
-              title={song.title}
-              artworkPath={song.artworkPaths?.artworkPath || DefaultSongCover}
-              path={song.path}
-              songId={song.songId}
-              artists={song.artists}
-              palette={song.palette}
-              isAFavorite={song.isAFavorite}
-              isBlacklisted={song.isBlacklisted}
-            />
-          );
-        }),
-    [content.mostLovedSongs]
-  );
-
-  const mostLovedArtistComponents = React.useMemo(
-    () =>
-      content.mostLovedSongs.length > 0
-        ? content.mostLovedArtists
-            .map((val, index) => {
-              if (val)
-                return (
-                  <Artist
-                    index={index}
-                    name={val.name}
-                    key={val.artistId}
-                    artworkPaths={val.artworkPaths}
-                    artistId={val.artistId}
-                    songIds={val.songs.map((song) => song.songId)}
-                    onlineArtworkPaths={val.onlineArtworkPaths}
-                    className="mb-4"
-                    isAFavorite={val.isAFavorite}
-                  />
-                );
-              else return undefined;
-            })
-            .filter((x) => x !== undefined)
-        : [],
-    [content.mostLovedArtists, content.mostLovedSongs.length]
-  );
-
   const homePageContextMenus: ContextMenuItem[] = React.useMemo(
     () =>
       window.api.isInDevelopment
@@ -461,89 +332,24 @@ const HomePage = () => {
       }}
     >
       <>
-        {content.latestSongs.length > 0 && content.latestSongs[0] !== null && (
-          <SecondaryContainer className="recently-added-songs-container appear-from-bottom h-fit max-h-full flex-col pb-8 pl-8">
-            <>
-              <div className="title-container my-4 flex items-center justify-between text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-                Recently Added Songs
-                <Button
-                  label="Show All"
-                  tooltipLabel="Opens 'Songs' with 'Newest' sort option."
-                  iconName="apps"
-                  className="show-all-btn text-sm font-normal"
-                  clickHandler={() =>
-                    changeCurrentActivePage('Songs', {
-                      sortingOrder: 'dateAddedAscending',
-                    })
-                  }
-                />
-              </div>
-              <div className="songs-container grid grid-cols-3 grid-rows-1 gap-2 pr-2">
-                {latestSongComponents}
-              </div>
-            </>
-          </SecondaryContainer>
+        {content.latestSongs[0] !== null && (
+          <RecentlyAddedSongs
+            latestSongs={content.latestSongs as AudioInfo[]}
+          />
         )}
-        {recentlyPlayedSongs.length > 0 && (
-          <SecondaryContainer className="recently-played-songs-container appear-from-bottom flex h-fit max-h-full flex-col pb-8 pl-8">
-            <>
-              <div className="title-container mt-1 mb-4 flex items-center justify-between text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-                Recently Played Songs
-                <Button
-                  label="Show All"
-                  tooltipLabel="Opens 'Songs' with 'Newest' sort option."
-                  iconName="apps"
-                  className="show-all-btn text-sm font-normal"
-                  clickHandler={() =>
-                    changeCurrentActivePage('PlaylistInfo', {
-                      playlistId: 'History',
-                      sortingOrder: 'addedOrder',
-                    })
-                  }
-                />
-              </div>
-              <div className="songs-container grid grid-cols-3 grid-rows-1 gap-2 pr-2">
-                {recentlyPlayedSongs}
-              </div>
-            </>
-          </SecondaryContainer>
-        )}
-        {recentlyPlayedSongArtists.length > 0 && (
-          <SecondaryContainer className="artists-list-container appear-from-bottom max-h-full flex-col pb-8 pl-8">
-            <>
-              <div className="title-container mt-1 mb-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-                Recent Artists
-              </div>
-              <div className="artists-container flex flex-wrap">
-                {recentlyPlayedSongArtists}
-              </div>
-            </>
-          </SecondaryContainer>
-        )}
-        {mostLovedSongComponents.length > 0 && (
-          <SecondaryContainer className="recently-played-songs-container appear-from-bottom flex h-fit max-h-full flex-col pb-8 pl-8">
-            <>
-              <div className="title-container mt-1 mb-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-                Most Loved Songs
-              </div>
-              <div className="songs-container grid grid-cols-3 grid-rows-1 gap-2 pr-2">
-                {mostLovedSongComponents}
-              </div>
-            </>
-          </SecondaryContainer>
-        )}
-        {mostLovedArtistComponents.length > 0 && (
-          <SecondaryContainer className="artists-list-container appear-from-bottom max-h-full flex-col pb-8 pl-8">
-            <>
-              <div className="title-container mt-1 mb-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-                Most Loved Artists
-              </div>
-              <div className="artists-container flex flex-wrap">
-                {mostLovedArtistComponents}
-              </div>
-            </>
-          </SecondaryContainer>
-        )}
+
+        <RecentlyPlayedSongs
+          recentlyPlayedSongs={content.recentlyPlayedSongs}
+        />
+
+        <RecentlyPlayedArtists
+          recentlyPlayedSongArtists={content.recentSongArtists}
+        />
+
+        <MostLovedSongs mostLovedSongs={content.mostLovedSongs} />
+
+        <MostLovedArtists mostLovedArtists={content.mostLovedArtists} />
+
         {content.latestSongs[0] === null && (
           <div className="no-songs-container appear-from-bottom flex h-full w-full flex-col items-center justify-center text-center text-xl text-font-color-black dark:text-font-color-white">
             <Img
@@ -559,7 +365,7 @@ const HomePage = () => {
             />
           </div>
         )}
-        {recentlyPlayedSongs.length === 0 &&
+        {content.recentlyPlayedSongs.length === 0 &&
           content.latestSongs.length === 0 && (
             <div className="no-songs-container flex h-full w-full flex-col items-center justify-center text-center text-xl text-font-color-dimmed dark:text-dark-font-color-dimmed">
               <Img
@@ -572,7 +378,7 @@ const HomePage = () => {
           )}
         {content.latestSongs.length > 0 &&
           content.latestSongs[0] !== null &&
-          recentlyPlayedSongs.length === 0 && (
+          content.recentlyPlayedSongs.length === 0 && (
             <div className="no-songs-container flex h-full w-full flex-col items-center justify-center text-center text-lg font-normal text-black/60 dark:text-white/60">
               <span className="material-icons-round-outlined mb-1 text-4xl">
                 headphones

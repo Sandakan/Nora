@@ -73,7 +73,8 @@ export interface AppUpdateContextType {
   toggleMultipleSelections: (
     isEnabled?: boolean,
     selectionType?: QueueTypes,
-    addSelections?: string[]
+    addSelections?: string[],
+    replaceSelections?: boolean
   ) => void;
   updateAppUpdatesState: (state: AppUpdatesState) => void;
 }

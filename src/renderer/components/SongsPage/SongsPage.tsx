@@ -1,19 +1,10 @@
-/* eslint-disable react/no-unescaped-entities */
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-console */
-/* eslint-disable promise/always-return */
-/* eslint-disable consistent-return */
-/* eslint-disable no-nested-ternary */
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable react/no-unused-prop-types */
-/* eslint-disable no-else-return */
-/* eslint-disable promise/catch-or-return */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
 import { FixedSizeList as List } from 'react-window';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+
 import Song from './Song';
 import NoSongsImage from '../../../../assets/images/svg/Empty Inbox _Monochromatic.svg';
 import DataFetchingImage from '../../../../assets/images/svg/Road trip_Monochromatic.svg';
@@ -127,16 +118,19 @@ export const SongsPage = () => {
       window.api
         .getAllSongs(content.sortingOrder)
         .then((audioInfoArray) => {
-          if (audioInfoArray)
-            return audioInfoArray.data.length === 0
-              ? dispatch({
-                  type: 'SONGS_DATA',
-                  data: null,
-                })
-              : dispatch({
-                  type: 'SONGS_DATA',
-                  data: audioInfoArray.data,
-                });
+          if (audioInfoArray) {
+            if (audioInfoArray.data.length === 0)
+              dispatch({
+                type: 'SONGS_DATA',
+                data: null,
+              });
+            else
+              dispatch({
+                type: 'SONGS_DATA',
+                data: audioInfoArray.data,
+              });
+          }
+          return undefined;
         })
         .catch((err) => console.error(err)),
     [content.sortingOrder]
@@ -174,7 +168,7 @@ export const SongsPage = () => {
 
   React.useEffect(() => {
     updatePageSortingOrder('sortingStates.songsPage', content.sortingOrder);
-  }, [content.sortingOrder]);
+  }, [content.sortingOrder, updatePageSortingOrder]);
 
   const addNewSongs = React.useCallback(() => {
     window.api
@@ -194,10 +188,16 @@ export const SongsPage = () => {
             isBlacklisted: song.isBlacklisted,
           };
         });
-        dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
+        return dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
       })
       .catch((err) => console.error(err));
   }, [content.sortingOrder]);
+
+  const selectAllHandler = useSelectAllHandler(
+    content.songsData,
+    'songs',
+    'songId'
+  );
 
   const songs = React.useCallback(
     (props: { index: number; style: React.CSSProperties }) => {
@@ -230,15 +230,29 @@ export const SongsPage = () => {
             path={path}
             isAFavorite={isAFavorite}
             isBlacklisted={isBlacklisted}
+            selectAllHandler={selectAllHandler}
           />
         </div>
       );
     },
-    [content.songsData, userData]
+    [
+      content.songsData,
+      localStorageData?.preferences.isSongIndexingEnabled,
+      selectAllHandler,
+    ]
   );
 
   return (
-    <MainContainer className="main-container appear-from-bottom songs-list-container !h-full overflow-hidden !pb-0">
+    <MainContainer
+      className="main-container appear-from-bottom songs-list-container !h-full overflow-hidden !pb-0"
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
+    >
       <>
         <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium  text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">

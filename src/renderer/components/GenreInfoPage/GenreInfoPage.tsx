@@ -3,7 +3,9 @@
 import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
+
 import Button from '../Button';
 import Dropdown from '../Dropdown';
 import Img from '../Img';
@@ -144,6 +146,8 @@ const GenreInfoPage = () => {
     };
   }, [fetchSongsData]);
 
+  const selectAllHandler = useSelectAllHandler(genreSongs, 'songs', 'songId');
+
   const songComponents = React.useMemo(
     () =>
       genreSongs.map((song, index) => (
@@ -160,9 +164,14 @@ const GenreInfoPage = () => {
           isAFavorite={song.isAFavorite}
           year={song.year}
           isBlacklisted={song.isBlacklisted}
+          selectAllHandler={selectAllHandler}
         />
       )),
-    [genreSongs, localStorageData?.preferences?.isSongIndexingEnabled]
+    [
+      genreSongs,
+      localStorageData?.preferences?.isSongIndexingEnabled,
+      selectAllHandler,
+    ]
   );
 
   const totalGenreSongsDuration = React.useMemo(() => {
@@ -179,6 +188,13 @@ const GenreInfoPage = () => {
   return (
     <MainContainer
       className="songs-list-container appear-from-bottom genre-info-page-container !h-full"
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
       // style={
       //   genreData.backgroundColor && {
       //     background: `linear-gradient(180deg, ${`rgb(${
@@ -233,7 +249,6 @@ const GenreInfoPage = () => {
                     }
                   />
                   <Button
-                    // label="Shuffle and Play"
                     iconName="shuffle"
                     clickHandler={() =>
                       createQueue(
@@ -248,7 +263,6 @@ const GenreInfoPage = () => {
                     }
                   />
                   <Button
-                    // label="Add to Queue"
                     iconName="add"
                     clickHandler={() => {
                       updateQueueData(

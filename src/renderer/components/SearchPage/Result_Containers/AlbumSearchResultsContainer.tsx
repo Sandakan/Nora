@@ -4,6 +4,7 @@ import Button from 'renderer/components/Button';
 import SecondaryContainer from 'renderer/components/SecondaryContainer';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 
 type Props = { albums: Album[]; searchInput: string };
 
@@ -16,6 +17,8 @@ const AlbumSearchResultsContainer = (props: Props) => {
   } = React.useContext(AppContext);
   const { toggleMultipleSelections, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
+
+  const selectAllHandler = useSelectAllHandler(albums, 'album', 'albumId');
 
   const albumResults = React.useMemo(
     () =>
@@ -33,13 +36,14 @@ const AlbumSearchResultsContainer = (props: Props) => {
                     songs={album.songs}
                     title={album.title}
                     year={album.year}
+                    selectAllHandler={selectAllHandler}
                   />
                 );
               return undefined;
             })
             .filter((album) => album !== undefined)
         : [],
-    [albums]
+    [albums, selectAllHandler]
   );
 
   return (
@@ -49,6 +53,13 @@ const AlbumSearchResultsContainer = (props: Props) => {
           ? 'active relative'
           : 'invisible absolute opacity-0'
       }`}
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
     >
       <>
         <div className="title-container mt-1 mb-8 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">

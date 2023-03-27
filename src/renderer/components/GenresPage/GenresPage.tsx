@@ -7,12 +7,15 @@ import { FixedSizeGrid as Grid } from 'react-window';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+
 import Dropdown from '../Dropdown';
 import MainContainer from '../MainContainer';
 import Genre from './Genre';
-import NoSongsImage from '../../../../assets/images/svg/Summer landscape_Monochromatic.svg';
 import Img from '../Img';
 import Button from '../Button';
+
+import NoSongsImage from '../../../../assets/images/svg/Summer landscape_Monochromatic.svg';
 
 const GenresPage = () => {
   const {
@@ -89,6 +92,12 @@ const GenresPage = () => {
     [sortingOrder]
   );
 
+  const selectAllHandler = useSelectAllHandler(
+    genresData as Genre[],
+    'genre',
+    'genreId'
+  );
+
   const row = React.useCallback(
     (props: {
       columnIndex: number;
@@ -97,7 +106,6 @@ const GenresPage = () => {
     }) => {
       const { columnIndex, rowIndex, style } = props;
       const index = rowIndex * noOfColumns + columnIndex;
-      // eslint-disable-next-line no-console
       if (genresData && index < genresData.length) {
         const { genreId, name, songs, backgroundColor, artworkPaths } =
           genresData[index];
@@ -110,17 +118,27 @@ const GenresPage = () => {
               title={name}
               backgroundColor={backgroundColor}
               songIds={songs.map((song) => song.songId)}
+              selectAllHandler={selectAllHandler}
             />
           </div>
         );
       }
       return <div style={style} />;
     },
-    [genresData, noOfColumns]
+    [genresData, noOfColumns, selectAllHandler]
   );
 
   return (
-    <MainContainer className="genres-list-container appear-from-bottom !h-full overflow-hidden !pb-0 text-font-color-black dark:text-font-color-white">
+    <MainContainer
+      className="genres-list-container appear-from-bottom !h-full overflow-hidden !pb-0 text-font-color-black dark:text-font-color-white"
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
+    >
       <>
         <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">

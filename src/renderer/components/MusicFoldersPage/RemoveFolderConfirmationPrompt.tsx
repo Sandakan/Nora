@@ -2,8 +2,10 @@ import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
 
-/* eslint-disable no-console */
-export default (props: { folderName: string; absolutePath: string }) => {
+const RemoveFolderConfrimationPrompt = (props: {
+  folderName: string;
+  absolutePath: string;
+}) => {
   const { changePromptMenuData } = React.useContext(AppUpdateContext);
   const { folderName, absolutePath } = props;
   return (
@@ -32,3 +34,5 @@ export default (props: { folderName: string; absolutePath: string }) => {
     </>
   );
 };
+
+export default RemoveFolderConfrimationPrompt;

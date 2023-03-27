@@ -4,6 +4,8 @@ import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { Artist } from 'renderer/components/ArtistPage/Artist';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import SecondaryContainer from 'renderer/components/SecondaryContainer';
 
 type Props = { artistData: Artist[] };
 
@@ -23,6 +25,12 @@ const AllArtistResults = (prop: Props) => {
   const itemWidth =
     MIN_ITEM_WIDTH + ((width % MIN_ITEM_WIDTH) - 10) / noOfColumns;
 
+  const selectAllHandler = useSelectAllHandler(
+    artistData,
+    'artist',
+    'artistId'
+  );
+
   const row = React.useCallback(
     (props: {
       columnIndex: number;
@@ -31,8 +39,7 @@ const AllArtistResults = (prop: Props) => {
     }) => {
       const { columnIndex, rowIndex, style } = props;
       const index = rowIndex * noOfColumns + columnIndex;
-      // eslint-disable-next-line no-console
-      // console.log(index);
+
       if (index < artistData.length) {
         const {
           artistId,
@@ -54,19 +61,27 @@ const AllArtistResults = (prop: Props) => {
               onlineArtworkPaths={onlineArtworkPaths}
               songIds={songs.map((song) => song.songId)}
               isAFavorite={isAFavorite}
+              selectAllHandler={selectAllHandler}
             />
           </div>
         );
       }
       return <div style={style} />;
     },
-    [artistData, noOfColumns]
+    [artistData, noOfColumns, selectAllHandler]
   );
 
   return (
-    <div
+    <SecondaryContainer
       className="artists-container flex !h-full flex-wrap"
       ref={containerRef}
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
     >
       {artistData && artistData.length > 0 && (
         <Grid
@@ -95,7 +110,7 @@ const AllArtistResults = (prop: Props) => {
           {row}
         </Grid>
       )}
-    </div>
+    </SecondaryContainer>
   );
 };
 

@@ -4,6 +4,8 @@ import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { Album } from 'renderer/components/AlbumsPage/Album';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import MainContainer from 'renderer/components/MainContainer';
 
 type Props = { albumData: Album[] };
 
@@ -21,6 +23,8 @@ const AllAlbumResults = (prop: Props) => {
   const noOfRows = Math.ceil(albumData.length / noOfColumns);
   const itemWidth =
     MIN_ITEM_WIDTH + ((width % MIN_ITEM_WIDTH) - 10) / noOfColumns;
+
+  const selectAllHandler = useSelectAllHandler(albumData, 'album', 'albumId');
 
   const row = React.useCallback(
     (props: {
@@ -43,17 +47,18 @@ const AllAlbumResults = (prop: Props) => {
               year={year}
               artists={artists}
               songs={songs}
+              selectAllHandler={selectAllHandler}
             />
           </div>
         );
       }
       return <div style={style} />;
     },
-    [albumData, noOfColumns]
+    [albumData, noOfColumns, selectAllHandler]
   );
 
   return (
-    <div
+    <MainContainer
       className="albums-container h-full w-full flex-grow"
       ref={containerRef}
     >
@@ -84,7 +89,7 @@ const AllAlbumResults = (prop: Props) => {
           {row}
         </Grid>
       )}
-    </div>
+    </MainContainer>
   );
 };
 

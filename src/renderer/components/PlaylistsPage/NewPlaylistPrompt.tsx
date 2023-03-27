@@ -90,7 +90,10 @@ export default (props: NewPlaylistPromptProp) => {
         placeholder="Playlist Name"
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          e.stopPropagation();
+          if (e.key === 'Enter') createNewPlaylist(e.currentTarget.value);
+        }}
         autoFocus
       />
       <Button

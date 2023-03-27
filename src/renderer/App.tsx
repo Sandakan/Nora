@@ -1904,14 +1904,19 @@ export default function App() {
     (
       isEnabled?: boolean,
       selectionType?: QueueTypes,
-      addSelections?: string[]
+      addSelections?: string[],
+      replaceSelections = false
     ) => {
       if (typeof isEnabled === 'boolean') {
         contentRef.current.multipleSelectionsData.selectionType = selectionType;
         if (Array.isArray(addSelections) && isEnabled === true)
-          contentRef.current.multipleSelectionsData.multipleSelections.push(
-            ...addSelections
-          );
+          if (replaceSelections) {
+            contentRef.current.multipleSelectionsData.multipleSelections =
+              addSelections;
+          } else
+            contentRef.current.multipleSelectionsData.multipleSelections.push(
+              ...addSelections
+            );
         if (isEnabled === false) {
           contentRef.current.multipleSelectionsData.multipleSelections = [];
           contentRef.current.multipleSelectionsData.selectionType = undefined;

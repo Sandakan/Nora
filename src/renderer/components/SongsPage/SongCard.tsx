@@ -24,6 +24,7 @@ interface SongCardProp {
   isAFavorite: boolean;
   className?: string;
   isBlacklisted: boolean;
+  selectAllHandler?: (_upToId?: string) => void;
 }
 
 const SongCard = (props: SongCardProp) => {
@@ -60,6 +61,7 @@ const SongCard = (props: SongCardProp) => {
     className,
     isBlacklisted,
     palette,
+    selectAllHandler,
   } = props;
 
   const [isSongAFavorite, setIsSongAFavorite] = React.useState(
@@ -313,11 +315,7 @@ const SongCard = (props: SongCardProp) => {
         },
       },
       {
-        label:
-          isMultipleSelectionEnabled &&
-          multipleSelectionsData.multipleSelections.includes(songId)
-            ? 'Unselect'
-            : 'Select',
+        label: isAMultipleSelection ? 'Unselect' : 'Select',
         iconName: 'checklist',
         handlerFunction: () => {
           if (isMultipleSelectionEnabled) {
@@ -327,13 +325,17 @@ const SongCard = (props: SongCardProp) => {
               isAMultipleSelection ? 'remove' : 'add'
             );
           }
-          return toggleMultipleSelections(
-            !isMultipleSelectionEnabled,
-            'songs',
-            [songId]
-          );
+          return toggleMultipleSelections(!isAMultipleSelection, 'songs', [
+            songId,
+          ]);
         },
       },
+      // {
+      //   label: 'Select/Unselect All',
+      //   iconName: 'checklist',
+      //   isDisabled: !selectAllHandler,
+      //   handlerFunction: () => selectAllHandler && selectAllHandler(),
+      // },
       {
         label: 'Hr',
         isContextMenuItemSeperator: true,
@@ -424,11 +426,10 @@ const SongCard = (props: SongCardProp) => {
   }, [
     multipleSelectionsData,
     isAMultipleSelection,
-    handlePlayBtnClick,
     isSongAFavorite,
-    isMultipleSelectionEnabled,
-    songId,
     isBlacklisted,
+    handlePlayBtnClick,
+    toggleMultipleSelections,
     createQueue,
     queue.queue,
     currentSongData.songId,
@@ -436,10 +437,11 @@ const SongCard = (props: SongCardProp) => {
     updateQueueData,
     addNewNotifications,
     title,
-    toggleMultipleSelections,
+    songId,
     artworkPath,
     toggleIsFavorite,
     changePromptMenuData,
+    isMultipleSelectionEnabled,
     updateMultipleSelections,
     changeCurrentActivePage,
     path,
@@ -510,7 +512,9 @@ const SongCard = (props: SongCardProp) => {
         );
       }}
       onClick={(e) => {
-        if (
+        if (e.getModifierState('Shift') === true && selectAllHandler)
+          selectAllHandler(songId);
+        else if (
           isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'songs'
         )
@@ -519,14 +523,6 @@ const SongCard = (props: SongCardProp) => {
             'songs',
             isAMultipleSelection ? 'remove' : 'add'
           );
-        else if (e.getModifierState('Shift') === true) {
-          toggleMultipleSelections(!isMultipleSelectionEnabled, 'songs');
-          updateMultipleSelections(
-            songId,
-            'songs',
-            isAMultipleSelection ? 'remove' : 'add'
-          );
-        }
       }}
     >
       <div className="song-cover-container mr-4 flex h-full w-full flex-row items-center justify-end">

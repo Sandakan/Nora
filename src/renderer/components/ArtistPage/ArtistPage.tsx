@@ -1,14 +1,10 @@
-/* eslint-disable no-nested-ternary */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable promise/always-return */
-/* eslint-disable promise/catch-or-return */
-/* eslint-disable import/prefer-default-export */
 import React, { CSSProperties } from 'react';
 import { FixedSizeGrid as Grid } from 'react-window';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import debounce from 'renderer/utils/debounce';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 
 import { Artist } from './Artist';
 import NoArtistImage from '../../../../assets/images/svg/Sun_Monochromatic.svg';
@@ -17,7 +13,7 @@ import MainContainer from '../MainContainer';
 import Img from '../Img';
 import Button from '../Button';
 
-export const ArtistPage = () => {
+const ArtistPage = () => {
   const {
     currentlyActivePage,
     userData,
@@ -53,7 +49,6 @@ export const ArtistPage = () => {
       window.api.getArtistData([], sortingOrder).then((res) => {
         if (res && Array.isArray(res)) {
           if (res.length > 0) return setArtistsData(res);
-          // if (res.length === 0) return setArtistsData(null);
           return setArtistsData([]);
         }
         return undefined;
@@ -92,6 +87,12 @@ export const ArtistPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortingOrder]);
 
+  const selectAllHandler = useSelectAllHandler(
+    artistsData,
+    'artist',
+    'artistId'
+  );
+
   const row = React.useCallback(
     (props: {
       columnIndex: number;
@@ -123,17 +124,27 @@ export const ArtistPage = () => {
               onlineArtworkPaths={onlineArtworkPaths}
               songIds={songs.map((song) => song.songId)}
               isAFavorite={isAFavorite}
+              selectAllHandler={selectAllHandler}
             />
           </div>
         );
       }
       return <div style={style} />;
     },
-    [artistsData, noOfColumns]
+    [artistsData, noOfColumns, selectAllHandler]
   );
 
   return (
-    <MainContainer className="appear-from-bottom artists-list-container !h-full overflow-hidden !pb-0">
+    <MainContainer
+      className="appear-from-bottom artists-list-container !h-full overflow-hidden !pb-0"
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
+    >
       <>
         <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">
@@ -253,3 +264,5 @@ export const ArtistPage = () => {
     </MainContainer>
   );
 };
+
+export default ArtistPage;

@@ -4,6 +4,7 @@ import Button from 'renderer/components/Button';
 import SecondaryContainer from 'renderer/components/SecondaryContainer';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 
 type Props = { artists: Artist[]; searchInput: string };
 
@@ -17,6 +18,8 @@ const ArtistsSearchResultsContainer = (props: Props) => {
   const { toggleMultipleSelections, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
 
+  const selectAllHandler = useSelectAllHandler(artists, 'artist', 'artistId');
+
   const artistResults = React.useMemo(
     () =>
       artists.length > 0
@@ -26,8 +29,7 @@ const ArtistsSearchResultsContainer = (props: Props) => {
                 return (
                   <Artist
                     index={index}
-                    // eslint-disable-next-line react/no-array-index-key
-                    key={`${artist.artistId}-${index}`}
+                    key={`${artist.artistId}-${artist.name}`}
                     name={artist.name}
                     artworkPaths={artist.artworkPaths}
                     artistId={artist.artistId}
@@ -35,13 +37,14 @@ const ArtistsSearchResultsContainer = (props: Props) => {
                     onlineArtworkPaths={artist.onlineArtworkPaths}
                     className="mb-4"
                     isAFavorite={artist.isAFavorite}
+                    selectAllHandler={selectAllHandler}
                   />
                 );
               return undefined;
             })
             .filter((artist) => artist !== undefined)
         : [],
-    [artists]
+    [artists, selectAllHandler]
   );
 
   return (
@@ -51,6 +54,13 @@ const ArtistsSearchResultsContainer = (props: Props) => {
           ? 'active relative'
           : 'invisible absolute opacity-0'
       }`}
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
     >
       <>
         <div

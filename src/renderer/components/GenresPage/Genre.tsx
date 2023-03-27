@@ -17,11 +17,19 @@ interface GenreProp {
   artworkPaths: ArtworkPaths;
   backgroundColor?: { rgb: unknown };
   className?: string;
+  selectAllHandler?: (_upToId?: string) => void;
 }
 
 const Genre = (props: GenreProp) => {
-  const { genreId, songIds, title, artworkPaths, backgroundColor, className } =
-    props;
+  const {
+    genreId,
+    songIds,
+    title,
+    artworkPaths,
+    backgroundColor,
+    className,
+    selectAllHandler,
+  } = props;
   const {
     currentlyActivePage,
     queue,
@@ -227,7 +235,7 @@ const Genre = (props: GenreProp) => {
         handlerFunction: () => true,
       },
       {
-        label: isMultipleSelectionEnabled ? 'Unselect' : 'Select',
+        label: isAMultipleSelection ? 'Unselect' : 'Select',
         iconName: 'checklist',
         handlerFunction: () => {
           if (isMultipleSelectionEnabled) {
@@ -237,13 +245,17 @@ const Genre = (props: GenreProp) => {
               isAMultipleSelection ? 'remove' : 'add'
             );
           }
-          return toggleMultipleSelections(
-            !isMultipleSelectionEnabled,
-            'genre',
-            [genreId]
-          );
+          return toggleMultipleSelections(!isAMultipleSelection, 'genre', [
+            genreId,
+          ]);
         },
       },
+      // {
+      //   label: 'Select/Unselect All',
+      //   iconName: 'checklist',
+      //   isDisabled: !selectAllHandler,
+      //   handlerFunction: () => selectAllHandler && selectAllHandler(),
+      // },
       {
         label: 'Info',
         iconName: 'info',
@@ -256,7 +268,6 @@ const Genre = (props: GenreProp) => {
     multipleSelectionsData.selectionType,
     multipleSelectionsData.multipleSelections.length,
     isAMultipleSelection,
-    isMultipleSelectionEnabled,
     goToGenreInfoPage,
     playGenreSongsForMultipleSelections,
     playGenreSongs,
@@ -266,6 +277,7 @@ const Genre = (props: GenreProp) => {
     songIds,
     updateQueueData,
     addNewNotifications,
+    isMultipleSelectionEnabled,
     genreId,
     updateMultipleSelections,
   ]);
@@ -285,10 +297,10 @@ const Genre = (props: GenreProp) => {
       className={`genre appear-from-bottom group relative mr-10 mb-6 flex h-36 w-72 cursor-pointer items-center overflow-hidden rounded-2xl p-4 text-background-color-2 transition-[border,border-color] dark:text-dark-background-color-2 ${className} ${
         isMultipleSelectionEnabled &&
         multipleSelectionsData.selectionType === 'genre' &&
-        'border-4'
+        'border-4 border-transparent'
       } ${
         isAMultipleSelection &&
-        'border-font-color-highlight dark:border-dark-font-color-highlight'
+        '!border-font-color-highlight dark:!border-dark-font-color-highlight'
       }`}
       style={{
         backgroundColor: `rgb(${
@@ -296,10 +308,11 @@ const Genre = (props: GenreProp) => {
             ? (backgroundColor.rgb as [number, number, number]).join(',')
             : '23,23,23'
         })`,
-        // animationDelay: `${50 * (index + 1)}ms`,
       }}
       onClick={(e) => {
-        if (
+        if (e.getModifierState('Shift') === true && selectAllHandler)
+          selectAllHandler(genreId);
+        else if (
           isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'genre'
         )
@@ -308,14 +321,7 @@ const Genre = (props: GenreProp) => {
             'genre',
             isAMultipleSelection ? 'remove' : 'add'
           );
-        else if (e.getModifierState('Shift') === true) {
-          toggleMultipleSelections(!isMultipleSelectionEnabled, 'genre');
-          updateMultipleSelections(
-            genreId,
-            'genre',
-            isAMultipleSelection ? 'remove' : 'add'
-          );
-        } else goToGenreInfoPage();
+        else goToGenreInfoPage();
       }}
       onContextMenu={(e) =>
         updateContextMenuData(

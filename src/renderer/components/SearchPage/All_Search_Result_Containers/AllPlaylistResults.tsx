@@ -4,6 +4,8 @@ import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { Playlist } from 'renderer/components/PlaylistsPage/Playlist';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import MainContainer from 'renderer/components/MainContainer';
 
 type Props = { playlistData: Playlist[] };
 
@@ -22,6 +24,11 @@ const AllPlaylistResults = (prop: Props) => {
   const itemWidth =
     MIN_ITEM_WIDTH + ((width % MIN_ITEM_WIDTH) - 10) / noOfColumns;
 
+  const selectAllHandler = useSelectAllHandler(
+    playlistData,
+    'playlist',
+    'playlistId'
+  );
   const row = React.useCallback(
     (props: {
       columnIndex: number;
@@ -43,19 +50,27 @@ const AllPlaylistResults = (prop: Props) => {
               isArtworkAvailable={playlist.isArtworkAvailable}
               artworkPaths={playlist.artworkPaths}
               key={playlist.playlistId}
+              selectAllHandler={selectAllHandler}
             />
           </div>
         );
       }
       return <div style={style} />;
     },
-    [noOfColumns, playlistData]
+    [noOfColumns, playlistData, selectAllHandler]
   );
 
   return (
-    <div
+    <MainContainer
       className="playlists-container flex h-full flex-wrap"
       ref={containerRef}
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
     >
       {playlistData && playlistData.length > 0 && (
         <Grid
@@ -84,7 +99,7 @@ const AllPlaylistResults = (prop: Props) => {
           {row}
         </Grid>
       )}
-    </div>
+    </MainContainer>
   );
 };
 
