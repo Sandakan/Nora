@@ -520,7 +520,7 @@ const Song = React.forwardRef(
         data-index={index}
         {...provided.draggableProps}
         {...provided.dragHandleProps}
-        className={`appear-from-bottom ${songId} group relative mr-4 mb-2 flex aspect-[2/1] h-[3.25rem] w-[98%] overflow-hidden rounded-lg p-[0.2rem] outline-1 -outline-offset-2 transition-[background,opacity] ease-in-out focus-visible:!outline ${
+        className={`${songId} group relative mr-4 mb-2 flex aspect-[2/1] h-[3.25rem] w-[98%] overflow-hidden rounded-lg p-[0.2rem] outline-1 -outline-offset-2 transition-[background,color,opacity] ease-in-out focus-visible:!outline ${
           currentSongData.songId === songId || isAMultipleSelection
             ? bodyBackgroundImage
               ? `bg-background-color-3/70 text-font-color-black shadow-lg backdrop-blur-md dark:bg-dark-background-color-3/70`
@@ -563,7 +563,6 @@ const Song = React.forwardRef(
           if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
           handlePlayBtnClick();
         }}
-        tabIndex={0}
         ref={ref}
       >
         <div className="song-cover-and-play-btn-container relative flex h-full w-[12.5%] items-center justify-center">

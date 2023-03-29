@@ -456,6 +456,8 @@ declare global {
     disableBackgroundArtworks: boolean;
     noUpdateNotificationForNewUpdate: string;
     defaultPageOnStartUp: DefaultPages;
+    enableArtworkFromSongCovers: boolean;
+    shuffleArtworkFromSongCovers: boolean;
   }
 
   interface CurrentSong {

@@ -206,6 +206,7 @@ const GenresPage = () => {
         >
           {genresData && genresData.length > 0 && (
             <Grid
+              className="appear-from-bottom delay-100"
               columnCount={noOfColumns || 3}
               columnWidth={itemWidth}
               rowCount={noOfRows || 3}

@@ -230,11 +230,12 @@ export const PlaylistsPage = () => {
         </div>
 
         <div
-          className="playlists-container flex h-full flex-wrap"
+          className="playlists-container appear-from-bottom flex h-full flex-wrap delay-100"
           ref={containerRef}
         >
           {playlists && playlists.length > 0 && (
             <Grid
+              className="appear-from-bottom delay-100"
               columnCount={noOfColumns || 5}
               columnWidth={itemWidth}
               rowCount={noOfRows || 5}

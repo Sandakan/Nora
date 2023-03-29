@@ -79,6 +79,7 @@ const AppStats = () => {
           <span
             className="flex flex-col items-center border-[3px] border-t-0 border-b-0 border-r-0 border-background-color-2 py-4 text-lg first:border-l-0 dark:border-dark-background-color-2"
             title={`${value} ${key}`}
+            key={`${value}-${key}`}
           >
             <span className="text-xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
               {valueRounder(value)}

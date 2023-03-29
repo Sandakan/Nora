@@ -28,7 +28,7 @@ import {
 import { generateRandomId } from './utils/randomId';
 import {
   createTempArtwork,
-  removeSongArtwork,
+  removeArtwork,
   storeArtworks,
 } from './other/artworks';
 import generatePalette from './other/generatePalette';
@@ -434,7 +434,7 @@ const manageArtworkUpdates = async (
       // had an artwork before
       prevSongData.isArtworkAvailable = false;
 
-      await removeSongArtwork(songPrevArtworkPaths).catch((err) =>
+      await removeArtwork(songPrevArtworkPaths).catch((err) =>
         log(
           `ERROR OCCURRED WHEN TRYING TO REMOVE SONG ARTWORK OF '${songId}'.`,
           { err },

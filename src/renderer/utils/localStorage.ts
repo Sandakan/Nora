@@ -12,6 +12,8 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     showSongRemainingTime: false,
     noUpdateNotificationForNewUpdate: '',
     defaultPageOnStartUp: 'Home',
+    enableArtworkFromSongCovers: false,
+    shuffleArtworkFromSongCovers: false,
   },
   playback: {
     currentSong: {

@@ -398,6 +398,7 @@ const reducer = (
 };
 
 const player = new Audio();
+let repetitivePlaybackErrorsCount = 0;
 player.preload = 'auto';
 
 player.addEventListener('player/trackchange', (e) => {
@@ -529,6 +530,9 @@ export default function App() {
 
   const managePlaybackErrors = React.useCallback(
     (err: unknown) => {
+      if (repetitivePlaybackErrorsCount > 5)
+        return console.error('Playback errors exceeded the 5 errors limit.');
+      repetitivePlaybackErrorsCount += 1;
       const prevSongPosition = player.currentTime;
       const playerErrorData = player.error;
       console.error(err, playerErrorData);
@@ -556,6 +560,7 @@ export default function App() {
           />
         );
       }
+      return undefined;
     },
     [changePromptMenuData]
   );

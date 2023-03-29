@@ -384,7 +384,10 @@ export const SongsPage = () => {
             )}
           </div>
         </div>
-        <div className="songs-container h-full flex-1" ref={songsContainerRef}>
+        <div
+          className="songs-container appear-from-bottom h-full flex-1 delay-100"
+          ref={songsContainerRef}
+        >
           {content.songsData && content.songsData.length > 0 && (
             <List
               itemCount={content.songsData.length}
@@ -392,6 +395,7 @@ export const SongsPage = () => {
               width={width || '100%'}
               height={height || 450}
               overscanCount={10}
+              className="appear-from-bottom delay-100"
               initialScrollOffset={
                 currentlyActivePage.data?.scrollTopOffset ?? 0
               }

@@ -20,6 +20,7 @@ import MainContainer from '../MainContainer';
 import Dropdown from '../Dropdown';
 
 import DefaultPlaylistCover from '../../../../assets/images/webp/playlist_cover_default.webp';
+import MultipleArtworksCover from '../PlaylistsPage/MultipleArtworksCover';
 
 const dropdownOptions: { label: string; value: SongSortTypes }[] = [
   { label: 'Added Order', value: 'addedOrder' },
@@ -241,7 +242,7 @@ const PlaylistInfoPage = () => {
 
   return (
     <MainContainer
-      className="main-container playlist-info-page-container px-8 pb-8 pt-4 pr-4"
+      className="main-container playlist-info-page-container !h-full px-8 pb-8 pt-4 pr-4"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {
@@ -254,15 +255,32 @@ const PlaylistInfoPage = () => {
         {Object.keys(playlistData).length > 0 && (
           <div className="playlist-img-and-info-container appear-from-bottom mb-8 flex flex-row items-center justify-start">
             <div className="playlist-cover-container mt-2">
-              <Img
-                src={
-                  playlistData.artworkPaths
-                    ? playlistData.artworkPaths.artworkPath
-                    : DefaultPlaylistCover
-                }
-                className="w-52 rounded-xl lg:w-48"
-                alt="Playlist Cover"
-              />
+              {localStorageData?.preferences.enableArtworkFromSongCovers &&
+              playlistData.songs.length > 1 ? (
+                <div className="relative h-60 w-60">
+                  <MultipleArtworksCover
+                    songIds={playlistData.songs}
+                    className="h-60 w-60"
+                    type={1}
+                  />
+                  <Img
+                    src={playlistData.artworkPaths.artworkPath}
+                    alt="Playlist Cover"
+                    loading="lazy"
+                    className="absolute bottom-2 right-2 h-16 w-16 !rounded-lg"
+                  />
+                </div>
+              ) : (
+                <Img
+                  src={
+                    playlistData.artworkPaths
+                      ? playlistData.artworkPaths.artworkPath
+                      : DefaultPlaylistCover
+                  }
+                  className="w-52 rounded-xl lg:w-48"
+                  alt="Playlist Cover"
+                />
+              )}
             </div>
             <div className="playlist-info-container ml-8 text-font-color-black dark:text-font-color-white">
               <div className="font-semibold tracking-wider opacity-50">
@@ -419,8 +437,11 @@ const PlaylistInfoPage = () => {
           </div>
         )}
         {playlistSongs.length === 0 && (
-          <div className="no-songs-container relative inset-0 mt-12 flex h-full w-full flex-col items-center justify-center text-center text-xl text-font-color-dimmed dark:text-dark-font-color-dimmed">
-            This playlist is empty.
+          <div className="no-songs-container appear-from-bottom relative flex h-full flex-grow flex-col items-center justify-center text-center text-lg font-light text-font-color-black !opacity-80 dark:text-font-color-white">
+            <span className="material-icons-round-outlined mb-4 text-5xl">
+              brightness_empty
+            </span>
+            Seems like this playlist is empty.
           </div>
         )}
       </>

@@ -2,7 +2,7 @@
 /* eslint-disable no-continue */
 /* eslint-disable import/no-cycle */
 import path from 'path';
-import { removeSongArtwork } from './other/artworks';
+import { removeArtwork } from './other/artworks';
 import {
   getAlbumsData,
   getArtistsData,
@@ -198,7 +198,7 @@ const manageSongArtworkUpdates = async (song: SavableSongData) => {
       song.isArtworkAvailable
     );
     try {
-      await removeSongArtwork(artworkPaths);
+      await removeArtwork(artworkPaths);
     } catch (error) {
       log(
         `Error occurred when removing artworks of a song marked for removal from the library.`,

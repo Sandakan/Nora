@@ -223,6 +223,7 @@ const MusicFoldersPage = () => {
         >
           {musicFolders && musicFolders.length > 0 && (
             <List
+              className="appear-from-bottom delay-100"
               itemCount={musicFolders.length}
               itemSize={70}
               width={width || '100%'}

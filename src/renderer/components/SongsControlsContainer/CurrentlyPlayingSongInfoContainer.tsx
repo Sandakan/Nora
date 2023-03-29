@@ -28,8 +28,8 @@ const CurrentlyPlayingSongInfoContainer = () => {
             src={artist.onlineArtworkPaths?.picture_small}
             fallbackSrc={artist.artworkPath}
             key={artist.artistId}
-            className={`relative aspect-square w-6 rounded-full border-2 border-background-color-1 dark:border-dark-background-color-1 ${
-              index === 0 ? 'z-2' : '-translate-x-2'
+            className={`absolute aspect-square w-6 rounded-full border-2 border-background-color-1 dark:border-dark-background-color-1 ${
+              index === 0 ? 'z-2' : 'translate-x-4'
             }`}
             onClick={() => {
               if (
@@ -223,7 +223,11 @@ const CurrentlyPlayingSongInfoContainer = () => {
           {localStorageData?.preferences.showArtistArtworkNearSongControls &&
             songArtistsImages &&
             songArtistsImages.length > 0 && (
-              <span className="relative mr-2 flex min-w-[1.5rem] items-center lg:hidden">
+              <span
+                className={`relative mr-2 flex h-6 items-center lg:hidden ${
+                  songArtistsImages.length === 1 ? 'w-6' : 'w-10'
+                } `}
+              >
                 {songArtistsImages}
               </span>
             )}

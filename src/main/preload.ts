@@ -345,6 +345,11 @@ export const api = {
     songIds: string[]
   ): PromiseFunctionReturn =>
     ipcRenderer.invoke('app/addSongsToPlaylist', playlistId, songIds),
+  addArtworkToAPlaylist: (
+    playlistId: string,
+    artworkPath: string
+  ): Promise<ArtworkPaths | undefined> =>
+    ipcRenderer.invoke('app/addArtworkToAPlaylist', playlistId, artworkPath),
 
   // $ APP PLAYLISTS DATA UPDATE
   removeSongFromPlaylist: (
@@ -405,7 +410,14 @@ export const api = {
     ipcRenderer.send('app/resetApp');
   },
 
+  // $ PATH FOR RENDERER
+  path: {
+    join: (...args: string[]) => path.join(...args),
+  },
+
   // $ OTHER
+  getArtworksForMultipleArtworksCover: (songIds: string[]): Promise<string[]> =>
+    ipcRenderer.invoke('app/getArtworksForMultipleArtworksCover', songIds),
   getFolderInfo: (): Promise<FolderStructure> =>
     ipcRenderer.invoke('app/getFolderInfo'),
   getExtension: (dir: string) => {

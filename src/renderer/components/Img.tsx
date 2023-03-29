@@ -14,6 +14,7 @@ type Props = {
   onContextMenu?: (_e: React.MouseEvent<HTMLImageElement, MouseEvent>) => void;
   showImgPropsOnTooltip?: boolean;
   tabIndex?: number;
+  showAltAsTooltipLabel?: boolean;
 };
 
 interface ImgProps {
@@ -33,6 +34,7 @@ const Img = (props: Props) => {
     onContextMenu,
     showImgPropsOnTooltip = false,
     tabIndex = -1,
+    showAltAsTooltipLabel = false,
   } = props;
 
   const imgPropsRef = React.useRef<ImgProps>();
@@ -61,7 +63,9 @@ const Img = (props: Props) => {
             }\nImage width : ${imgPropsRef.current?.width}px\nImage height : ${
               imgPropsRef.current?.height
             }px`
-          : alt
+          : showAltAsTooltipLabel
+          ? alt
+          : undefined
       }
       loading={loading}
       onContextMenu={onContextMenu}

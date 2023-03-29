@@ -103,6 +103,7 @@ export const AlbumsPage = () => {
         return (
           <div style={{ ...style, display: 'flex', justifyContent: 'center' }}>
             <Album
+              key={`${albumId}-${title}`}
               index={index}
               artworkPaths={artworkPaths}
               albumId={albumId}
@@ -196,6 +197,7 @@ export const AlbumsPage = () => {
         >
           {albumsData && albumsData.length > 0 && (
             <Grid
+              className="appear-from-bottom delay-100"
               columnCount={noOfColumns || 5}
               columnWidth={itemWidth}
               rowCount={noOfRows || 5}

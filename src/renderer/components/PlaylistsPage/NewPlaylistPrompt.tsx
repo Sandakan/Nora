@@ -68,7 +68,7 @@ export default (props: NewPlaylistPromptProp) => {
           className="aspect-square w-full max-w-[15rem] rounded-xl shadow-lg"
         />
         <Button
-          className="artwork-update-btn absolute -bottom-4 -right-8 mr-0 aspect-square rounded-full border-none !bg-background-color-3 transition-[background] hover:!bg-font-color-highlight  dark:!bg-dark-background-color-2 dark:hover:!bg-dark-background-color-3 dark:hover:text-font-color-black"
+          className="artwork-update-btn absolute -bottom-4 -right-8 mr-0 aspect-square rounded-full border-none !bg-background-color-3 outline-1 outline-offset-1 transition-[background] hover:!bg-font-color-highlight focus-visible:!outline dark:!bg-dark-background-color-2 dark:hover:!bg-dark-background-color-3 dark:hover:text-font-color-black"
           iconName="edit"
           iconClassName="group:hover:text-font-color-black dark:group:hover:text-font-color-black mr-0"
           clickHandler={() =>

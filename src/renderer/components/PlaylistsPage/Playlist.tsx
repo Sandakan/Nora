@@ -10,8 +10,10 @@ import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import ConfirmDeletePlaylists from './ConfirmDeletePlaylists';
 import DefaultPlaylistCover from '../../../../assets/images/webp/playlist_cover_default.webp';
 import Button from '../Button';
+import MultipleArtworksCover from './MultipleArtworksCover';
 
 interface PlaylistProp extends Playlist {
+  // eslint-disable-next-line react/no-unused-prop-types
   index: number;
   selectAllHandler?: (_upToId?: string) => void;
 }
@@ -22,6 +24,7 @@ export const Playlist = (props: PlaylistProp) => {
     currentlyActivePage,
     multipleSelectionsData,
     isMultipleSelectionEnabled,
+    localStorageData,
   } = React.useContext(AppContext);
   const {
     updateQueueData,
@@ -215,6 +218,37 @@ export const Playlist = (props: PlaylistProp) => {
         handlerFunction: () => true,
       },
       {
+        label: 'Add artwork',
+        iconName: 'photo_camera',
+        handlerFunction: () => {
+          window.api
+            .getImgFileLocation()
+            .then((artworkPath) => {
+              if (artworkPath) {
+                return window.api.addArtworkToAPlaylist(
+                  props.playlistId,
+                  artworkPath
+                );
+              }
+              return undefined;
+            })
+            .then(() => {
+              return addNewNotifications([
+                {
+                  content: 'Updated playlist artwork successfully.',
+                  icon: <span className="material-icons-round">done</span>,
+                  delay: 5000,
+                  id: 'PlaylistArtworkUpdateSuccessful',
+                },
+              ]);
+            })
+            .catch((err) => console.error(err));
+        },
+        isDisabled: isMultipleSelectionsEnabled
+          ? false
+          : props.playlistId === 'History' || props.playlistId === 'Favorites',
+      },
+      {
         label: isAMultipleSelection ? 'Unselect' : 'Select',
         iconName: 'checklist',
         handlerFunction: () => {
@@ -310,8 +344,7 @@ export const Playlist = (props: PlaylistProp) => {
 
   return (
     <div
-      style={{ animationDelay: `${25 * (props.index + 1)}ms` }}
-      className={`playlist appear-from-bottom group hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50  ${
+      className={`playlist group hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50  ${
         props.playlistId
       } mb-8 mr-12 flex h-fit max-h-52 min-h-[12rem] w-36 flex-col justify-between rounded-md p-4 text-font-color-black dark:text-font-color-white ${
         isAMultipleSelection
@@ -345,29 +378,45 @@ export const Playlist = (props: PlaylistProp) => {
         else openPlaylistInfoPage();
       }}
     >
-      <div className="playlist-cover-and-play-btn-container relative h-[70%] cursor-pointer overflow-hidden rounded-xl before:invisible before:absolute before:h-full before:w-full before:bg-gradient-to-b before:from-[hsla(0,0%,0%,0%)] before:to-[hsla(0,0%,0%,40%)] before:opacity-0 before:transition-[visibility,opacity] before:duration-300 before:content-[''] group-focus-within:before:visible group-focus-within:before:opacity-100 group-hover:before:visible group-hover:before:opacity-100">
+      <div className="playlist-cover-and-play-btn-container relative h-[70%] cursor-pointer overflow-hidden rounded-xl before:invisible before:absolute before:z-10 before:h-full before:w-full before:bg-gradient-to-b before:from-[hsla(0,0%,0%,0%)] before:to-[hsla(0,0%,0%,40%)] before:opacity-0 before:transition-[visibility,opacity] before:duration-300 before:content-[''] group-focus-within:before:visible group-focus-within:before:opacity-100 group-hover:before:visible group-hover:before:opacity-100">
         {isMultipleSelectionEnabled &&
         multipleSelectionsData.selectionType === 'playlist' ? (
           <MultipleSelectionCheckbox
             id={props.playlistId}
             selectionType="playlist"
-            className="absolute bottom-3 right-3"
+            className="absolute bottom-3 right-3 z-10"
           />
         ) : (
           <Button
-            className="absolute bottom-2 right-2 !m-0 translate-y-10 scale-90 !rounded-none !border-0 !p-0 text-font-color-white opacity-0 outline-1 outline-offset-1 transition-[opacity,transform] delay-100 duration-200 ease-in-out focus-visible:!outline group-focus-within:translate-y-0 group-focus-within:scale-100 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 dark:!text-font-color-white"
+            className="absolute bottom-2 right-2 z-10 !m-0 translate-y-10 scale-90 !rounded-none !border-0 !p-0 text-font-color-white opacity-0 outline-1 outline-offset-1 transition-[opacity,transform] delay-100 duration-200 ease-in-out focus-visible:!outline group-focus-within:translate-y-0 group-focus-within:scale-100 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 dark:!text-font-color-white"
             clickHandler={() => playAllSongs()}
             iconName="play_circle"
             iconClassName="!text-4xl !leading-none !text-inherit"
           />
         )}
         <div className="playlist-cover-container h-full cursor-pointer overflow-hidden">
-          <Img
-            src={props.artworkPaths.artworkPath}
-            alt="Playlist Cover"
-            loading="lazy"
-            className="h-full w-full"
-          />
+          {localStorageData?.preferences.enableArtworkFromSongCovers &&
+          props.songs.length > 2 ? (
+            <div className="relative h-full w-full">
+              <MultipleArtworksCover
+                songIds={props.songs}
+                className="aspect-square w-full"
+              />
+              <Img
+                src={props.artworkPaths.artworkPath}
+                alt="Playlist Cover"
+                loading="lazy"
+                className="absolute bottom-2 left-2 h-8 w-8 !rounded-md"
+              />
+            </div>
+          ) : (
+            <Img
+              src={props.artworkPaths.artworkPath}
+              alt="Playlist Cover"
+              loading="lazy"
+              className="h-full w-full"
+            />
+          )}
         </div>
       </div>
       <div className="playlist-info-container mt-2">

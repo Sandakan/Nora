@@ -86,6 +86,8 @@ import { generatePalettes } from './other/generatePalette';
 import { getFolderInfo } from './core/getFolderInfo';
 import { getArtistDuplicates } from './core/getDuplicates';
 import { resolveArtistDuplicates } from './core/resolveDuplicates';
+import addArtworkToAPlaylist from './core/addArtworkToAPlaylist';
+import getArtworksForMultipleArtworksCover from './core/getArtworksForMultipleArtworksCover';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -518,6 +520,12 @@ app
           removeSongFromPlaylist(playlistId, songId)
       );
 
+      ipcMain.handle(
+        'app/addArtworkToAPlaylist',
+        (_, playlistId: string, artworkPath: string) =>
+          addArtworkToAPlaylist(playlistId, artworkPath)
+      );
+
       ipcMain.handle('app/clearSongHistory', () => clearSongHistory());
 
       ipcMain.handle(
@@ -647,6 +655,11 @@ app
           );
           isConnectedToInternet = isConnected;
         }
+      );
+
+      ipcMain.handle(
+        'app/getArtworksForMultipleArtworksCover',
+        (_, songIds: string[]) => getArtworksForMultipleArtworksCover(songIds)
       );
 
       ipcMain.on('app/openDevTools', () => {

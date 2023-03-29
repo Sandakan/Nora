@@ -116,21 +116,31 @@ export const storeArtworks = async (
   }
 };
 
-export const removeSongArtwork = async (artworkPaths: ArtworkPaths) => {
+const manageArtworkRemovalErrors = (err: Error) => {
+  if ('code' in err && err.code === 'ENOENT') return log(err);
+  throw err;
+};
+
+export const removeArtwork = async (
+  artworkPaths: ArtworkPaths,
+  type: QueueTypes = 'songs'
+) => {
   try {
-    await fs.unlink(
-      removeDefaultAppProtocolFromFilePath(artworkPaths.artworkPath)
-    );
-    await fs.unlink(
-      removeDefaultAppProtocolFromFilePath(artworkPaths.optimizedArtworkPath)
-    );
+    await fs
+      .unlink(removeDefaultAppProtocolFromFilePath(artworkPaths.artworkPath))
+      .catch(manageArtworkRemovalErrors);
+    await fs
+      .unlink(
+        removeDefaultAppProtocolFromFilePath(artworkPaths.optimizedArtworkPath)
+      )
+      .catch(manageArtworkRemovalErrors);
   } catch (error) {
     log(
-      'Error occurred when removing a song artwork.',
+      `Error occurred when removing a ${type} artwork.`,
       { error, artworkPaths },
       'ERROR'
     );
-    throw new Error('Error occurred when removing a song artwork.');
+    throw new Error(`Error occurred when removing a ${type} artwork.`);
   }
 };
 

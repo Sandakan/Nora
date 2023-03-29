@@ -502,6 +502,7 @@ const CurrentQueuePage = () => {
               >
                 {(droppableProvided, snapshot) => (
                   <List
+                    className="appear-from-bottom delay-100"
                     height={height}
                     itemCount={
                       snapshot.isUsingPlaceholder

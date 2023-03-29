@@ -311,6 +311,7 @@ const MusicFolderInfoPage = () => {
         >
           {folderSongs && folderSongs.length > 0 && (
             <List
+              className="appear-from-bottom delay-100"
               itemCount={folderSongs.length}
               itemSize={60}
               width={width || '100%'}
