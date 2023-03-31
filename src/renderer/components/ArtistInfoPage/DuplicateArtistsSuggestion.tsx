@@ -12,7 +12,8 @@ type Props = {
 };
 
 const DuplicateArtistsSuggestion = (props: Props) => {
-  const { bodyBackgroundImage } = React.useContext(AppContext);
+  const { bodyBackgroundImage, currentlyActivePage } =
+    React.useContext(AppContext);
   const { addNewNotifications, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
   const { name = '', artistId = '' } = props;
@@ -90,6 +91,8 @@ const DuplicateArtistsSuggestion = (props: Props) => {
         .resolveArtistDuplicates(selectedId, duplicateIds)
         .then(() => {
           setIsVisible(false);
+          if (duplicateIds.includes(currentlyActivePage.data?.artistId))
+            changeCurrentActivePage('Home');
           return addNewNotifications([
             {
               content: 'Artist conflict resolved successfully.',
@@ -104,7 +107,12 @@ const DuplicateArtistsSuggestion = (props: Props) => {
         })
         .catch((err) => console.error(err));
     },
-    [addNewNotifications, duplicateArtists]
+    [
+      addNewNotifications,
+      changeCurrentActivePage,
+      currentlyActivePage.data?.artistId,
+      duplicateArtists,
+    ]
   );
 
   return (
@@ -149,7 +157,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
                   artist, or you can ignore this suggestion.
                 </p>
               </div>
-              <div className="mt-3 flex">
+              <div className="mt-3 flex items-center">
                 {duplicateArtists.map((artist) => (
                   <Button
                     key={artist.name}
@@ -186,6 +194,12 @@ const DuplicateArtistsSuggestion = (props: Props) => {
                     ]);
                   }}
                 />
+                <span
+                  className="material-icons-round-outlined ml-4 cursor-pointer text-xl opacity-80 transition-opacity hover:opacity-100"
+                  title="Keep in mind that linking artists will update the library as well as metadata in songs linked these artists."
+                >
+                  info
+                </span>
               </div>
             </div>
           )}

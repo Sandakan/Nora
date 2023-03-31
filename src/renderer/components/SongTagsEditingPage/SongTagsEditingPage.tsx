@@ -160,7 +160,7 @@ function SongTagsEditingPage() {
                   title: album.title,
                   albumId: album.albumId,
                   noOfSongs: album.songs.length,
-                  artworkPaths: album.artworkPaths,
+                  artworkPath: album?.artworkPaths?.artworkPath,
                 }))
             );
           else setAlbumResults([]);
@@ -213,17 +213,18 @@ function SongTagsEditingPage() {
     (keyword: string) => setGenreKeyword(keyword),
     []
   );
-  const updateMetadataKeywords = React.useCallback(
-    (metadataKeywords: MetadataKeywords) => {
-      if (metadataKeywords.albumKeyword)
-        setAlbumKeyword(metadataKeywords.albumKeyword);
-      if (metadataKeywords.artistKeyword)
-        setArtistKeyword(metadataKeywords.artistKeyword);
-      if (metadataKeywords.genreKeyword)
-        setGenreKeyword(metadataKeywords.genreKeyword);
-    },
-    []
-  );
+
+  // const updateMetadataKeywords = React.useCallback(
+  //   (metadataKeywords: MetadataKeywords) => {
+  //     if (metadataKeywords.albumKeyword)
+  //       setAlbumKeyword(metadataKeywords.albumKeyword);
+  //     if (metadataKeywords.artistKeyword)
+  //       setArtistKeyword(metadataKeywords.artistKeyword);
+  //     if (metadataKeywords.genreKeyword)
+  //       setGenreKeyword(metadataKeywords.genreKeyword);
+  //   },
+  //   []
+  // );
 
   const fetchSongDataFromNet = React.useCallback(() => {
     if (songInfo.title) {
@@ -233,17 +234,10 @@ function SongTagsEditingPage() {
           songTitle={songInfo.title}
           songArtists={songInfo.artists?.map((x) => x.name) ?? []}
           updateSongInfo={updateSongInfo}
-          updateMetadataKeywords={updateMetadataKeywords}
         />
       );
     }
-  }, [
-    songInfo.title,
-    songInfo.artists,
-    changePromptMenuData,
-    updateSongInfo,
-    updateMetadataKeywords,
-  ]);
+  }, [songInfo.title, songInfo.artists, changePromptMenuData, updateSongInfo]);
 
   const saveTags = (
     _: unknown,
@@ -460,7 +454,6 @@ function SongTagsEditingPage() {
               <SongAlbumInput
                 albumKeyword={albumKeyword}
                 albumResults={albumResults}
-                songArtworkPath={songInfo.artworkPath}
                 updateAlbumKeyword={updateAlbumKeyword}
                 updateSongInfo={updateSongInfo}
                 songAlbum={songInfo.album}

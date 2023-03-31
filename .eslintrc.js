@@ -11,7 +11,7 @@ module.exports = {
     'no-nested-ternary': 'off',
     'import/no-cycle': 'off',
     'import/no-named-as-default': 'off',
-    'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    'no-unused-vars': 'off',
     'no-console': 'off',
     'no-undef': 'off',
     'prefer-const': 'warn',

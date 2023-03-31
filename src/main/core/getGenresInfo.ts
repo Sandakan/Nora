@@ -4,26 +4,32 @@ import log from '../log';
 import sortGenres from '../utils/sortGenres';
 
 const getGenresInfo = async (
-  genreIds: string[] = [],
+  genreNamesOrIds: string[] = [],
   sortType?: GenreSortTypes
 ): Promise<Genre[]> => {
-  if (genreIds) {
+  if (genreNamesOrIds) {
     const genres = getGenresData();
     let results: SavableGenre[] = [];
     if (Array.isArray(genres) && genres.length > 0) {
-      if (genreIds.length === 0) results = genres;
+      if (genreNamesOrIds.length === 0) results = genres;
       else {
         for (let x = 0; x < genres.length; x += 1) {
-          for (let y = 0; y < genreIds.length; y += 1) {
-            if (genres[x].genreId === genreIds[y]) results.push(genres[x]);
+          for (let y = 0; y < genreNamesOrIds.length; y += 1) {
+            if (
+              genres[x].genreId === genreNamesOrIds[y] ||
+              genres[x].name === genreNamesOrIds[y]
+            )
+              results.push(genres[x]);
           }
         }
       }
     }
     log(
-      `Fetching genres data for genres with ids '${genreIds.join(',')}'.${
-        genreIds.length > 0
-          ? ` Found ${results.length} out of ${genreIds.length} results.`
+      `Fetching genres data for genres with ids '${genreNamesOrIds.join(
+        ','
+      )}'.${
+        genreNamesOrIds.length > 0
+          ? ` Found ${results.length} out of ${genreNamesOrIds.length} results.`
           : ` Found ${results.length} results.`
       }`
     );

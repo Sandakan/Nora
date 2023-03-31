@@ -13,7 +13,8 @@ type Props = {
 
 const SeparateArtistsSuggestion = (props: Props) => {
   const { bodyBackgroundImage } = React.useContext(AppContext);
-  const { addNewNotifications } = React.useContext(AppUpdateContext);
+  const { addNewNotifications, changeCurrentActivePage } =
+    React.useContext(AppUpdateContext);
   const { name = '', artistId = '' } = props;
 
   const [isIgnored, setIsIgnored] = React.useState(false);
@@ -29,8 +30,8 @@ const SeparateArtistsSuggestion = (props: Props) => {
       setIsIgnored(ignoredArtists.includes(artistId));
   }, [artistId, ignoredArtists]);
 
-  const separateArtists = React.useMemo(() => {
-    const artists = name.split(/( and )|&|,|;|·|\||\/|\\/gm);
+  const separatedArtistsNames = React.useMemo(() => {
+    const artists = name.split(/ and |&|,|;|·|\||\/|\\/gm);
     const filterArtists = artists.filter(
       (x) => x !== undefined && x.trim() !== ''
     );
@@ -40,8 +41,8 @@ const SeparateArtistsSuggestion = (props: Props) => {
   }, [name]);
 
   const artistComponents = React.useMemo(() => {
-    if (separateArtists.length > 0) {
-      const artists = separateArtists.map((artist, i, arr) => {
+    if (separatedArtistsNames.length > 0) {
+      const artists = separatedArtistsNames.map((artist, i, arr) => {
         return (
           <>
             <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
@@ -57,11 +58,47 @@ const SeparateArtistsSuggestion = (props: Props) => {
       return artists;
     }
     return [];
-  }, [separateArtists]);
+  }, [separatedArtistsNames]);
+
+  const separateArtists = React.useCallback(
+    (
+      setIsDisabled: (_state: boolean) => void,
+      setIsPending: (_state: boolean) => void
+    ) => {
+      setIsDisabled(true);
+      setIsPending(true);
+
+      window.api
+        .resolveSeparateArtists(artistId, separatedArtistsNames)
+        .then(() => {
+          setIsIgnored(true);
+          changeCurrentActivePage('Home');
+
+          return addNewNotifications([
+            {
+              content: 'Artist conflict resolved successfully.',
+              delay: 5000,
+              id: 'ArtistDuplicateSuggestion',
+            },
+          ]);
+        })
+        .finally(() => {
+          setIsDisabled(false);
+          setIsPending(false);
+        })
+        .catch((err) => console.error(err));
+    },
+    [
+      addNewNotifications,
+      artistId,
+      changeCurrentActivePage,
+      separatedArtistsNames,
+    ]
+  );
 
   return (
     <>
-      {separateArtists.length > 1 && !isIgnored && (
+      {separatedArtistsNames.length > 1 && !isIgnored && (
         <div
           className={`appear-from-bottom mx-auto mb-6 w-[90%] rounded-lg p-4 text-black shadow-md transition-[height] dark:text-white ${
             bodyBackgroundImage
@@ -94,7 +131,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
             <div>
               <div>
                 <p className="mt-2 text-sm">
-                  Are {artistComponents} {separateArtists.length} separate
+                  Are {artistComponents} {separatedArtistsNames.length} separate
                   artists?
                 </p>
                 <p className="mt-2 text-sm">
@@ -102,13 +139,15 @@ const SeparateArtistsSuggestion = (props: Props) => {
                   separate artists, or you can ignore this suggestion.
                 </p>
               </div>
-              <div className="mt-3 flex">
+              <div className="mt-3 flex items-center">
                 <Button
                   className="!border-0 bg-background-color-1/50 !px-4 !py-2 outline-1 transition-colors hover:bg-background-color-1 hover:!text-font-color-highlight focus-visible:!outline dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:!text-dark-font-color-highlight"
                   iconName="verified"
                   iconClassName="material-icons-round-outlined"
-                  label={`Separate as ${separateArtists.length} artists`}
-                  clickHandler={() => true}
+                  label={`Separate as ${separatedArtistsNames.length} artists`}
+                  clickHandler={(_, setIsDisabled, setIsPending) =>
+                    separateArtists(setIsDisabled, setIsPending)
+                  }
                 />
                 {/* <Button
                   className="!border-0 bg-background-color-1/50 !px-4 !py-2 transition-colors hover:bg-background-color-1 hover:!text-font-color-highlight dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:!text-dark-font-color-highlight outline-1 focus-visible:!outline"
@@ -141,6 +180,12 @@ const SeparateArtistsSuggestion = (props: Props) => {
                     ]);
                   }}
                 />
+                <span
+                  className="material-icons-round-outlined ml-4 cursor-pointer text-xl opacity-80 transition-opacity hover:opacity-100"
+                  title="Keep in mind that seperating artists will update the library as well as metadata in songs linked these artists."
+                >
+                  info
+                </span>
               </div>
             </div>
           )}

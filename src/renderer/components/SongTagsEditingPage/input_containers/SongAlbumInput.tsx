@@ -5,6 +5,7 @@
 import Button from 'renderer/components/Button';
 import Img from 'renderer/components/Img';
 import DefaultSongArtwork from '../../../../../assets/images/webp/song_cover_default.webp';
+import SongAlbumInputResult from './SongAlbumInputResult';
 
 type Props = {
   songAlbum?: {
@@ -22,7 +23,6 @@ type Props = {
     artists?: string[];
     artworkPath?: string;
   }[];
-  songArtworkPath?: string;
   updateSongInfo: (callback: (prevSongInfo: SongTags) => SongTags) => void;
   updateAlbumKeyword: (keyword: string) => void;
 };
@@ -32,7 +32,6 @@ const SongAlbumInput = (props: Props) => {
     albumKeyword,
     albumResults,
     songAlbum,
-    songArtworkPath,
     updateAlbumKeyword,
     updateSongInfo,
   } = props;
@@ -49,12 +48,12 @@ const SongAlbumInput = (props: Props) => {
               <div className="flex items-center">
                 <Img
                   src={
-                    songArtworkPath
+                    songAlbum.artworkPath
                       ? /(^$|(http(s)?:\/\/)([\w-]+\.)+[\w-]+([\w- ;,./?%&=]*))/gm.test(
-                          songArtworkPath
+                          songAlbum.artworkPath
                         )
-                        ? songArtworkPath
-                        : `nora://localFiles/${songArtworkPath}`
+                        ? songAlbum.artworkPath
+                        : `nora://localFiles/${songAlbum.artworkPath}`
                       : DefaultSongArtwork
                     // : songArtworkPath
                     // ? `nora://localFiles/${songArtworkPath}`
@@ -97,30 +96,15 @@ const SongAlbumInput = (props: Props) => {
           onKeyDown={(e) => e.stopPropagation()}
         />
         {albumResults.length > 0 && (
-          <ol className="album-results-container mt-4 rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2 ">
+          <div className="album-results-container mt-4 rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2 ">
             {albumResults.map((x) => (
-              <li
-                key={x.albumId ?? x.title}
-                className="box-content cursor-pointer border-b-[1px] border-background-color-2 py-2 pr-4 pl-6 font-light last:border-b-0 only:border-b-0 hover:bg-background-color-2 dark:border-dark-background-color-2 dark:hover:bg-dark-background-color-2"
-                onClick={() => {
-                  updateSongInfo((prevData) => {
-                    return {
-                      ...prevData,
-                      album: {
-                        title: x.title,
-                        albumId: x.albumId,
-                        noOfSongs: x.noOfSongs ? x.noOfSongs + 1 : 1,
-                        artworkPath: x.artworkPath,
-                      },
-                    };
-                  });
-                  updateAlbumKeyword('');
-                }}
-              >
-                {x.title}
-              </li>
+              <SongAlbumInputResult
+                albumData={x}
+                updateAlbumKeyword={updateAlbumKeyword}
+                updateSongInfo={updateSongInfo}
+              />
             ))}
-          </ol>
+          </div>
         )}
         {albumKeyword.trim() && (
           <Button

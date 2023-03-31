@@ -4,13 +4,11 @@
 import React from 'react';
 import Button from '../Button';
 import SongMetadataResult from './SongMetadataResult';
-import { MetadataKeywords } from './SongTagsEditingPage';
 
 interface SongMetadataResultsSelectPageProp {
   songTitle: string;
   songArtists: string[];
   updateSongInfo: (callback: (prevData: SongTags) => SongTags) => void;
-  updateMetadataKeywords: (metadataKeywords: MetadataKeywords) => void;
 }
 
 type DataLoadingStates =
@@ -23,8 +21,7 @@ type DataLoadingStates =
 const SongMetadataResultsSelectPage = (
   props: SongMetadataResultsSelectPageProp
 ) => {
-  const { songTitle, songArtists, updateSongInfo, updateMetadataKeywords } =
-    props;
+  const { songTitle, songArtists, updateSongInfo } = props;
   const [songData, setSongData] = React.useState({
     songTitle: '',
     songArtists: '',
@@ -63,10 +60,9 @@ const SongMetadataResultsSelectPage = (
 
   const songResultComponents = React.useMemo(() => {
     return songResults.length > 0
-      ? songResults.map((x, index) => (
+      ? songResults.map((x) => (
           <SongMetadataResult
-            // eslint-disable-next-line react/no-array-index-key
-            key={index}
+            key={`${x.title}-${x.sourceId}`}
             title={x.title}
             artists={x.artists}
             genres={x.genres}
@@ -75,11 +71,10 @@ const SongMetadataResultsSelectPage = (
             lyrics={x.lyrics}
             releasedYear={x.releasedYear}
             updateSongInfo={updateSongInfo}
-            updateMetadataKeywords={updateMetadataKeywords}
           />
         ))
       : [];
-  }, [songResults, updateSongInfo, updateMetadataKeywords]);
+  }, [songResults, updateSongInfo]);
 
   return (
     <div className="relative">

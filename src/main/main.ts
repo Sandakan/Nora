@@ -88,6 +88,7 @@ import { getArtistDuplicates } from './core/getDuplicates';
 import { resolveArtistDuplicates } from './core/resolveDuplicates';
 import addArtworkToAPlaylist from './core/addArtworkToAPlaylist';
 import getArtworksForMultipleArtworksCover from './core/getArtworksForMultipleArtworksCover';
+import { resolveSeparateArtists } from './core/resolveSeparateArtists';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -468,14 +469,14 @@ app
 
       ipcMain.handle(
         'app/getGenresData',
-        (_, genreIds?: string[], sortType?: GenreSortTypes) =>
-          getGenresInfo(genreIds, sortType)
+        (_, genreNamesOrIds?: string[], sortType?: GenreSortTypes) =>
+          getGenresInfo(genreNamesOrIds, sortType)
       );
 
       ipcMain.handle(
         'app/getAlbumData',
-        (_, albumIds?: string[], sortType?: AlbumSortTypes) =>
-          fetchAlbumData(albumIds, sortType)
+        (_, albumTitlesOrIds?: string[], sortType?: AlbumSortTypes) =>
+          fetchAlbumData(albumTitlesOrIds, sortType)
       );
 
       ipcMain.handle(
@@ -496,6 +497,12 @@ app
         'app/resolveArtistDuplicates',
         (_, selectedArtistId: string, duplicateIds: string[]) =>
           resolveArtistDuplicates(selectedArtistId, duplicateIds)
+      );
+
+      ipcMain.handle(
+        'app/resolveSeparateArtists',
+        (_, separateArtistId: string, separateArtistNames: string[]) =>
+          resolveSeparateArtists(separateArtistId, separateArtistNames)
       );
 
       ipcMain.handle(

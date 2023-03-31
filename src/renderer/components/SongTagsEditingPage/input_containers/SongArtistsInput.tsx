@@ -2,8 +2,10 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/label-has-associated-control */
+import React from 'react';
 import Button from 'renderer/components/Button';
 import Img from 'renderer/components/Img';
+import SongArtistInputResult from './SongArtistInputResult';
 
 type Props = {
   songArtists?: {
@@ -31,6 +33,20 @@ const SongArtistsInput = (props: Props) => {
     artistResults,
     updateArtistKeyword,
   } = props;
+
+  const artistResultComponents = React.useMemo(() => {
+    if (artistResults.length > 0)
+      return artistResults.map((x) => (
+        <SongArtistInputResult
+          key={x.name}
+          artistData={x}
+          updateArtistKeyword={updateArtistKeyword}
+          updateSongInfo={updateSongInfo}
+        />
+      ));
+    return [];
+  }, [artistResults, updateArtistKeyword, updateSongInfo]);
+
   return (
     <div className="tag-input mb-6 flex w-[45%] min-w-[10rem] flex-col">
       <label htmlFor="song-artists-id3-tag">Song Artists</label>
@@ -79,41 +95,9 @@ const SongArtistsInput = (props: Props) => {
           onKeyDown={(e) => e.stopPropagation()}
         />
         {artistResults.length > 0 && (
-          <ol className="artists-results-container mt-4 rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2 ">
-            {artistResults.map((x) => (
-              <li
-                key={x.artistId ?? x.name}
-                className="box-content flex cursor-pointer border-b-[1px] border-background-color-2 px-4 py-2 font-light last:border-b-0 only:border-b-0 hover:bg-background-color-2 dark:border-dark-background-color-2 dark:hover:bg-dark-background-color-2"
-                onClick={() => {
-                  updateSongInfo((prevData) => {
-                    const artists =
-                      prevData.artists?.filter(
-                        (artist) => artist.name !== x.name
-                      ) ?? [];
-                    artists?.push({
-                      name: x.name,
-                      artistId: x.artistId,
-                      artworkPath: x.artworkPath,
-                      onlineArtworkPaths: x.onlineArtworkPaths,
-                    });
-                    return {
-                      ...prevData,
-                      artists,
-                    };
-                  });
-                  updateArtistKeyword('');
-                }}
-              >
-                <Img
-                  src={x.onlineArtworkPaths?.picture_small}
-                  fallbackSrc={x.artworkPath}
-                  className="mr-4 aspect-square w-6 rounded-full"
-                  alt=""
-                />
-                {x.name}
-              </li>
-            ))}
-          </ol>
+          <div className="artists-results-container mt-4 rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2">
+            {artistResultComponents}
+          </div>
         )}
         {artistKeyword.trim() && (
           <Button

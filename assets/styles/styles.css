@@ -9,32 +9,37 @@
 /* ? POPPINS FONT CONFIG */
 @font-face {
   font-family: 'Poppins';
-  src: url('../../assets/fonts/Poppins-Light.ttf');
+  src: url('../../assets/fonts/Poppins-Light.woff2');
   font-weight: 300;
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'Poppins';
-  src: url('../../assets/fonts/Poppins-Regular.ttf');
+  src: url('../../assets/fonts/Poppins-Regular.woff2');
   font-weight: 400;
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'Poppins';
-  src: url('../../assets/fonts/Poppins-Medium.ttf');
+  src: url('../../assets/fonts/Poppins-Medium.woff2');
   font-weight: 500;
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'Poppins';
-  src: url('../../assets/fonts/Poppins-SemiBold.ttf');
+  src: url('../../assets/fonts/Poppins-SemiBold.woff2');
   font-weight: 600;
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'Poppins';
-  src: url('../../assets/fonts/Poppins-Bold.ttf');
+  src: url('../../assets/fonts/Poppins-Bold.woff2');
   font-weight: 700;
+  font-display: swap;
 }
 
 /* ? MATERIAL ICONS CONFIG */
@@ -42,7 +47,7 @@
   font-family: 'Material Icons Round';
   font-style: normal;
   font-display: block;
-  src: url('../fonts/MaterialSymbolsRounded.ttf');
+  src: url('../fonts/MaterialSymbolsRounded.woff2');
 }
 
 /* ? ROOT STYLES */
@@ -117,7 +122,7 @@ html {
   font-weight: normal;
   font-style: normal;
   display: inline-block;
-  line-height: 1;
+  line-height: 1 !important;
   text-transform: none;
   letter-spacing: normal;
   word-wrap: normal;

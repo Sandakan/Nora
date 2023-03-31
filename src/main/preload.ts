@@ -133,6 +133,16 @@ export const api = {
       duplicateIds
     ),
 
+  resolveSeparateArtists: (
+    separateArtistId: string,
+    separateArtistNames: string[]
+  ): Promise<void> =>
+    ipcRenderer.invoke(
+      'app/resolveSeparateArtists',
+      separateArtistId,
+      separateArtistNames
+    ),
+
   // $ APP PLAYER UNKNOWN SONGS FETCHING APIS
   playSongFromUnknownSource: (
     callback: (_: unknown, audioPlayerData: AudioPlayerData) => void
@@ -305,17 +315,17 @@ export const api = {
 
   // $ GENRES DATA
   getGenresData: (
-    genreIds?: string[],
+    genreNamesOrIds?: string[],
     sortType?: GenreSortTypes
   ): Promise<Genre[]> =>
-    ipcRenderer.invoke('app/getGenresData', genreIds, sortType),
+    ipcRenderer.invoke('app/getGenresData', genreNamesOrIds, sortType),
 
   // $ ALBUMS DATA
   getAlbumData: (
-    albumIds?: string[],
+    albumTitlesOrIds?: string[],
     sortType?: AlbumSortTypes
   ): Promise<Album[]> =>
-    ipcRenderer.invoke('app/getAlbumData', albumIds, sortType),
+    ipcRenderer.invoke('app/getAlbumData', albumTitlesOrIds, sortType),
 
   // $ PLAYLIST DATA AND CONTROLS
   getPlaylistData: (

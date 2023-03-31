@@ -9,6 +9,7 @@ import {
   getSongsData,
 } from '../filesystem';
 import {
+  getAlbumArtworkPath,
   getSongArtworkPath,
   removeDefaultAppProtocolFromFilePath,
 } from '../fs/resolveFilePaths';
@@ -103,6 +104,8 @@ const sendSongID3Tags = async (
                     ...songAlbum,
                     noOfSongs: songAlbum?.songs.length,
                     artists: songAlbum?.artists?.map((x) => x.name),
+                    artworkPath: getAlbumArtworkPath(songAlbum.artworkName)
+                      .artworkPath,
                   }
                 : songTags.album
                 ? {

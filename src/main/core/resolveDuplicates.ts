@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable import/prefer-default-export */
+import updateSongId3Tags from '../updateSongId3Tags';
 import {
   getAlbumsData,
   getArtistsData,
@@ -9,7 +10,7 @@ import {
 } from '../filesystem';
 import sendSongID3Tags from './sendSongId3Tags';
 
-const getSelectedArtist = (artistId: string) => {
+export const getSelectedArtist = (artistId: string) => {
   const artists = getArtistsData();
 
   for (const artist of artists) {
@@ -80,6 +81,8 @@ export const resolveArtistDuplicates = async (
             songTags.artists?.push({
               ...selectedArtist,
             });
+
+            await updateSongId3Tags(songs[x].songId, songTags, false, true);
           }
         }
       }

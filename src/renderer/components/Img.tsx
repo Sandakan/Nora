@@ -22,6 +22,52 @@ interface ImgProps {
   height: number;
 }
 
+/* <picture
+  className={`outline-1 outline-offset-4 focus-visible:!outline ${className}`}
+  tabIndex={tabIndex}
+>
+  <source srcSet={src} />
+  {fallbackSrc && <source srcSet={fallbackSrc} />}
+  <img
+    onContextMenu={onContextMenu}
+    onClick={onClick}
+    src={DefaultImage}
+    alt="Default placeholder artwork"
+    loading={loading}
+    className={className}
+    onLoad={(e) => {
+      if (showImgPropsOnTooltip) {
+        const img = new Image();
+        img.onload = () => {
+          if (img?.width && img?.height)
+            imgPropsRef.current = {
+              width: img.width,
+              height: img.height,
+            };
+        };
+        img.src = e.currentTarget.src;
+      }
+    }}
+    title={
+      showImgPropsOnTooltip && imgPropsRef.current
+        ? `Quality : ${
+            imgPropsRef.current?.width >= 1000 ||
+            imgPropsRef.current?.height >= 1000
+              ? 'HIGH QUALITY'
+              : imgPropsRef.current?.width >= 500 ||
+                imgPropsRef.current?.height >= 500
+              ? 'MEDIUM QUALITY'
+              : 'LOW QUALITY'
+          }\nImage width : ${imgPropsRef.current?.width}px\nImage height : ${
+            imgPropsRef.current?.height
+          }px`
+        : showAltAsTooltipLabel
+        ? alt
+        : undefined
+    }
+  />
+</picture>; */
+
 const Img = (props: Props) => {
   const {
     src,

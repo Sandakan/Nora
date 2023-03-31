@@ -256,7 +256,9 @@ const SongCard = (props: SongCardProp) => {
                 id: `${title}AddedToQueue`,
                 delay: 5000,
                 content: <span>Added 1 song to the queue.</span>,
-                icon: <Img src={artworkPath} alt="Song Artwork" />,
+                icon: (
+                  <Img src={artworkPath} loading="lazy" alt="Song Artwork" />
+                ),
               },
             ]);
           }
@@ -528,7 +530,7 @@ const SongCard = (props: SongCardProp) => {
       <div className="song-cover-container mr-4 flex h-full w-full flex-row items-center justify-end">
         <Img
           src={artworkPath}
-          loading="lazy"
+          loading="eager"
           alt="Song cover"
           className="aspect-square h-full max-h-full object-cover"
         />
