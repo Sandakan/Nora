@@ -38,9 +38,13 @@ const AddMusicFolderPrompt = () => {
   const updateFolders = React.useCallback(
     (
       callback: (
-        _data: SelectableFolderStructure[]
+        data: SelectableFolderStructure[]
       ) => SelectableFolderStructure[]
-    ) => setFolders((data) => callback(data)),
+    ) =>
+      setFolders((data) => {
+        const updatedFolders = callback(data);
+        return updatedFolders;
+      }),
     []
   );
 

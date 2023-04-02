@@ -16,27 +16,24 @@ interface Props {
 
 const updateFolderSelectedState = (
   folders: SelectableFolderStructure[],
-  folder: SelectableFolderStructure,
-  state: boolean
+  state: boolean,
+  folder?: SelectableFolderStructure
 ) => {
   for (let i = 0; i < folders.length; i += 1) {
-    if (folders[i].path === folder.path) {
+    if (folder === undefined || folders[i].path === folder.path) {
       folders[i].isSelected = state ?? !folders[i].isSelected;
 
       if (folders[i].subFolders.length > 0) {
         folders[i].subFolders = updateFolderSelectedState(
           folders[i].subFolders,
-          folder,
-          state ?? !folders[i].isSelected
+          state
         );
       }
-      break;
-    }
-    if (folders[i].subFolders.length > 0) {
+    } else if (folders[i].subFolders.length > 0) {
       folders[i].subFolders = updateFolderSelectedState(
         folders[i].subFolders,
-        folder,
-        state
+        state,
+        folder
       );
     }
   }
@@ -53,10 +50,14 @@ const FolderStructure = (props: Props) => {
 
   const subFoldersComponents = React.useMemo(
     () =>
-      subFolders.map((x) => (
-        <FolderStructure structure={x} updateFolders={updateFolders} />
+      structure.subFolders.map((x) => (
+        <FolderStructure
+          key={x.path}
+          structure={x}
+          updateFolders={updateFolders}
+        />
       )),
-    [subFolders, updateFolders]
+    [structure.subFolders, updateFolders]
   );
 
   return (
@@ -64,13 +65,14 @@ const FolderStructure = (props: Props) => {
       <div className="mb-2 flex cursor-pointer items-center justify-between rounded-md bg-background-color-2 px-2 py-4 dark:bg-dark-background-color-2/50">
         <div className="flex items-center">
           <Checkbox
-            className="!my-0 !mx-2"
+            className="!mx-2 !my-0"
             id={structure.path}
             isChecked={structure.isSelected}
             checkedStateUpdateFunction={(state) =>
-              updateFolders((data) =>
-                updateFolderSelectedState(data, structure, state)
-              )
+              updateFolders((data) => {
+                const arr = updateFolderSelectedState(data, state, structure);
+                return arr;
+              })
             }
           />
           <Img src={FolderImg} className="ml-2 h-8 w-8" />
@@ -91,7 +93,7 @@ const FolderStructure = (props: Props) => {
         )}
       </div>
       {subFolders.length > 0 && isSubFoldersVisible && (
-        <div className="mt-1 ml-4 border-l-[3px] border-background-color-2 pl-4 dark:border-dark-background-color-2/50">
+        <div className="ml-4 mt-1 border-l-[3px] border-background-color-2 pl-4 dark:border-dark-background-color-2/50">
           {subFoldersComponents}
         </div>
       )}

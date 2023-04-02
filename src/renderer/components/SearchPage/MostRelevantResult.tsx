@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { AppContext } from 'renderer/contexts/AppContext';
+
 import Img from '../Img';
 
 export interface MostRelevantResultProp {
@@ -17,7 +17,6 @@ export interface MostRelevantResultProp {
 }
 
 export const MostRelevantResult = (props: MostRelevantResultProp) => {
-  const { currentlyActivePage } = React.useContext(AppContext);
   const { playSong, updateContextMenuData, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
 
@@ -34,54 +33,40 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
 
   const goToSongInfoPage = React.useCallback(
     (songId: string) =>
-      currentlyActivePage.pageTitle === 'SongInfo' &&
-      currentlyActivePage?.data?.songId === songId
-        ? changeCurrentActivePage('Home')
-        : changeCurrentActivePage('SongInfo', {
-            songId,
-          }),
-    [
-      changeCurrentActivePage,
-      currentlyActivePage?.data?.songId,
-      currentlyActivePage.pageTitle,
-    ]
+      changeCurrentActivePage('SongInfo', {
+        songId,
+      }),
+    [changeCurrentActivePage]
   );
 
   const goToArtistInfoPage = React.useCallback(
-    (artistName: string, artistId: string) => {
-      return currentlyActivePage.pageTitle === 'ArtistInfo' &&
-        currentlyActivePage?.data?.artistName === artistName
-        ? changeCurrentActivePage('Home')
-        : changeCurrentActivePage('ArtistInfo', {
-            artistName,
-            artistId,
-          });
-    },
-    [
-      changeCurrentActivePage,
-      currentlyActivePage?.data?.artistName,
-      currentlyActivePage.pageTitle,
-    ]
+    (artistName: string, artistId: string) =>
+      changeCurrentActivePage('ArtistInfo', {
+        artistName,
+        artistId,
+      }),
+    [changeCurrentActivePage]
+  );
+
+  const goToAlbumInfoPage = React.useCallback(
+    (albumId: string) =>
+      changeCurrentActivePage('AlbumInfo', {
+        albumId,
+      }),
+    [changeCurrentActivePage]
   );
 
   const goToGenreInfoPage = React.useCallback(
     (genreId: string) =>
-      currentlyActivePage.pageTitle === 'GenreInfo' &&
-      currentlyActivePage?.data?.genreId === genreId
-        ? changeCurrentActivePage('Home')
-        : changeCurrentActivePage('GenreInfo', {
-            genreId,
-          }),
-    [
-      changeCurrentActivePage,
-      currentlyActivePage?.data?.genreId,
-      currentlyActivePage.pageTitle,
-    ]
+      changeCurrentActivePage('GenreInfo', {
+        genreId,
+      }),
+    [changeCurrentActivePage]
   );
 
   return (
     <div
-      className={`result appear-from-bottom group most-relevant-${resultType.toLowerCase()} active mr-4 flex h-40 w-fit min-w-[20rem] max-w-sm cursor-pointer items-center rounded-lg bg-background-color-2 py-3 pr-4 pl-3 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:hover:bg-dark-background-color-3`}
+      className={`result appear-from-bottom group most-relevant-${resultType.toLowerCase()} active mr-4 flex h-40 w-fit min-w-[20rem] max-w-sm cursor-pointer items-center rounded-lg bg-background-color-2 py-3 pl-3 pr-4 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:hover:bg-dark-background-color-3`}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -90,6 +75,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
       onClick={() => {
         if (resultType === 'song') return goToSongInfoPage(id);
         if (resultType === 'artist') return goToArtistInfoPage(title, id);
+        if (resultType === 'album') return goToAlbumInfoPage(id);
         if (resultType === 'genre') return goToGenreInfoPage(id);
 
         return undefined;
@@ -99,7 +85,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
         {resultType.toLowerCase() !== 'artist' && (
           <span
             title="Play Song"
-            className="material-icons-round icon absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer text-4xl text-font-color-white text-opacity-0 group-hover:text-font-color-white group-hover:text-opacity-100 dark:group-hover:text-font-color-white"
+            className="material-icons-round icon absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer text-4xl text-font-color-white text-opacity-0 group-hover:text-font-color-white group-hover:text-opacity-100 dark:group-hover:text-font-color-white"
             onClick={() => playSong(id)}
           >
             play_circle
@@ -129,7 +115,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
             {infoType2}
           </div>
         )}
-        <div className="result-type mt-3 w-fit -translate-x-1 overflow-hidden text-ellipsis whitespace-nowrap rounded-2xl bg-background-color-3 py-1 px-3 font-medium uppercase text-font-color-black group-hover:bg-background-color-1 group-hover:text-font-color-black dark:bg-dark-background-color-3 dark:text-font-color-black dark:group-hover:bg-dark-background-color-1 dark:group-hover:text-font-color-white">
+        <div className="result-type mt-3 w-fit -translate-x-1 overflow-hidden text-ellipsis whitespace-nowrap rounded-2xl bg-background-color-3 px-3 py-1 font-medium uppercase text-font-color-black group-hover:bg-background-color-1 group-hover:text-font-color-black dark:bg-dark-background-color-3 dark:text-font-color-black dark:group-hover:bg-dark-background-color-1 dark:group-hover:text-font-color-white">
           {resultType.toUpperCase()}
         </div>
       </div>

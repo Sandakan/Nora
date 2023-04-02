@@ -13,9 +13,7 @@ const PromptMenu = () => {
   const promptMenuRef =
     React.useRef() as React.MutableRefObject<HTMLDialogElement>;
 
-  const [isContentVisible, setIsContentVisible] = React.useState(
-    PromptMenuData.isVisible
-  );
+  const [isContentVisible, setIsContentVisible] = React.useState(false);
 
   React.useEffect(() => {
     if (PromptMenuData.isVisible) setIsContentVisible(true);
@@ -66,7 +64,7 @@ const PromptMenu = () => {
 
   return (
     <dialog
-      className={`dialog-menu relative top-1/2 left-1/2 h-fit max-h-[80%] min-h-[300px] w-[80%] min-w-[800px] max-w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-background-color-1 py-10 shadow-[rgba(100,100,111,0.2)_0px_7px_29px_0px] transition-[transform,visibility,opacity] duration-200 ease-in-out backdrop:backdrop-blur-[2px] open:backdrop:transition-[background,backdrop-filter] dark:bg-dark-background-color-1 
+      className={`dialog-menu relative left-1/2 top-1/2 h-fit max-h-[80%] min-h-[300px] w-[80%] min-w-[800px] max-w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-background-color-1 py-10 shadow-[rgba(100,100,111,0.2)_0px_7px_29px_0px] transition-[transform,visibility,opacity] ease-in-out open:backdrop:transition-[background,backdrop-filter] dark:bg-dark-background-color-1 
       ${
         PromptMenuData.isVisible
           ? 'open:animate-dialog-appear-ease-in-out open:backdrop:bg-[hsla(228deg,7%,14%,0.75)] open:backdrop:dark:bg-[hsla(228deg,7%,14%,0.75)]'
@@ -80,7 +78,7 @@ const PromptMenu = () => {
       ref={promptMenuRef}
     >
       <Button
-        className="prompt-menu-close-btn absolute top-4 right-4 !m-0 !rounded-none !border-0 !p-0 text-font-color-black outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white"
+        className="prompt-menu-close-btn absolute right-4 top-4 !m-0 !rounded-none !border-0 !p-0 text-font-color-black outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white"
         iconName="close"
         iconClassName="!leading-none !text-xl"
         clickHandler={(e) => {

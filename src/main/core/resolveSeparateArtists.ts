@@ -19,83 +19,110 @@ export const resolveSeparateArtists = async (
   separateArtistId: string,
   separateArtistNames: string[]
 ) => {
-  let artistData = getArtistsData();
-  const songData = getSongsData();
-  const albumData = getAlbumsData();
+  let artistsData = getArtistsData();
+  const songsData = getSongsData();
+  const albumsData = getAlbumsData();
 
-  const selectedArtist = getSelectedArtist(separateArtistId);
-  const selectedArtistSongIds = selectedArtist?.songs.map((x) => x.songId);
+  const selectedArtistData = getSelectedArtist(separateArtistId);
+  const selectedArtistSongIds = selectedArtistData?.artist?.songs.map(
+    (x) => x.songId
+  );
 
-  if (selectedArtist) {
-    const newArtists = separateArtistNames.map((artistName): SavableArtist => {
-      return {
-        artistId: generateRandomId(),
-        isAFavorite: false,
-        name: artistName,
-        songs: selectedArtist?.songs,
-        artworkName: selectedArtist.artworkName,
-        albums: selectedArtist.albums,
-      };
-    });
+  if (selectedArtistData) {
+    const selectedArtist = selectedArtistData.artist;
 
-    artistData = artistData.filter(
+    const availArtists: SavableArtist[] = [];
+    const newArtists: SavableArtist[] = [];
+
+    // ARTISTS
+    for (const artistName of separateArtistNames) {
+      const artistData = getSelectedArtist(artistName);
+
+      if (artistData && artistsData[artistData.index]) {
+        artistsData[artistData.index].songs.push(...selectedArtist.songs);
+        availArtists.push(artistsData[artistData.index]);
+      } else
+        newArtists.push({
+          artistId: generateRandomId(),
+          isAFavorite: false,
+          name: artistName,
+          songs: selectedArtist?.songs,
+          artworkName: selectedArtist.artworkName,
+          albums: selectedArtist.albums,
+        });
+    }
+
+    artistsData = artistsData.filter(
       (x) => x.artistId !== selectedArtist.artistId
     );
-    artistData.push(...newArtists);
 
-    for (let i = 0; i < songData.length; i += 1) {
-      if (selectedArtistSongIds?.includes(songData[i].songId)) {
-        if (songData[i].artists) {
-          const songTags = await sendSongID3Tags(songData[i].songId, true);
+    artistsData.push(...newArtists);
 
-          songData[i].artists = songData[i].artists!.filter(
-            (x) => x.artistId !== selectedArtist.artistId
-          );
+    // ALBUMS
+    for (const album of albumsData) {
+      if (album?.artists?.some((x) => x.artistId === selectedArtist.artistId)) {
+        album.artists = album.artists!.filter((x) => {
+          if (x.artistId === selectedArtist.artistId) return false;
+          if (availArtists.some((y) => y.artistId === x.artistId)) return false;
+          return true;
+        });
+
+        album.artists!.push(
+          ...newArtists
+            .concat(availArtists)
+            .map((x) => ({ artistId: x.artistId, name: x.name }))
+        );
+      }
+    }
+
+    // SONGS
+    for (const song of songsData) {
+      if (selectedArtistSongIds?.includes(song.songId)) {
+        if (song.artists) {
+          const songTags = await sendSongID3Tags(song.songId, true);
+
+          song.artists = song.artists!.filter((x) => {
+            if (x.artistId === selectedArtist.artistId) return false;
+            if (availArtists.some((y) => y.artistId === x.artistId))
+              return false;
+            return true;
+          });
 
           if (songTags.artists) {
-            songTags.artists = songTags.artists.filter(
-              (x) => x.artistId !== selectedArtist.artistId
-            );
+            songTags.artists = songTags.artists.filter((x) => {
+              if (x.artistId === selectedArtist.artistId) return false;
+              if (availArtists.some((y) => y.artistId === x.artistId))
+                return false;
+              return true;
+            });
 
             songTags.artists.push(
-              ...(newArtists.map((x) => {
+              ...(newArtists.concat(availArtists).map((x) => {
                 return {
                   name: x.name,
                   artistId: x.artistId,
                   artworkPath: getArtistArtworkPath(x.artworkName).artworkPath,
                   onlineArtworkPaths: x.onlineArtworkPaths,
                 };
-              }) as typeof songTags.artists)
+              }) satisfies typeof songTags.artists)
             );
           }
 
-          songData[i].artists!.push(
-            ...newArtists.map((x) => ({ artistId: x.artistId, name: x.name }))
+          song.artists!.push(
+            ...newArtists.concat(availArtists).map((x) => ({
+              artistId: x.artistId,
+              name: x.name,
+            }))
           );
 
-          await updateSongId3Tags(songData[i].songId, songTags, false, true);
+          await updateSongId3Tags(song.songId, songTags, false, true);
         }
       }
     }
 
-    for (let i = 0; i < albumData.length; i += 1) {
-      if (
-        albumData[i]?.artists?.some(
-          (x) => x.artistId === selectedArtist.artistId
-        )
-      ) {
-        albumData[i].artists = albumData[i].artists!.filter(
-          (x) => x.artistId !== selectedArtist.artistId
-        );
-        albumData[i].artists!.push(
-          ...newArtists.map((x) => ({ artistId: x.artistId, name: x.name }))
-        );
-      }
-    }
-
-    setArtistsData(artistData);
-    setSongsData(songData);
-    setAlbumsData(albumData);
+    setArtistsData(artistsData);
+    setSongsData(songsData);
+    setAlbumsData(albumsData);
 
     log(`Resolved suggestion to separate artist ${selectedArtist.name}`);
   }

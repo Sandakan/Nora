@@ -168,8 +168,10 @@ const reducer = (
         PromptMenuData: action.data
           ? (action.data as PromptMenuData).isVisible
             ? (action.data as PromptMenuData)
-            : // eslint-disable-next-line react/jsx-no-useless-fragment
-              { ...(action.data as PromptMenuData), content: <></> }
+            : {
+                ...(action.data as PromptMenuData),
+                content: state.PromptMenuData.content,
+              }
           : state.PromptMenuData,
       };
     case 'ADD_NEW_NOTIFICATIONS':
@@ -520,7 +522,9 @@ export default function App() {
         type: 'PROMPT_MENU_DATA_CHANGE',
         data: {
           isVisible,
-          content: contentData ?? content.PromptMenuData.content,
+          content: isVisible
+            ? contentData ?? content.PromptMenuData.content
+            : content.PromptMenuData.content,
           className: className ?? content.PromptMenuData.className,
         },
       });
@@ -1064,7 +1068,6 @@ export default function App() {
         addNewNotifications([
           {
             id: 'noSongToPlay',
-            delay: 5000,
             content: <span>Please select a song to play.</span>,
             icon: (
               <span className="material-icons-round-outlined text-lg">
@@ -1088,7 +1091,6 @@ export default function App() {
       const notificationData: AppNotification = {
         buttons: [],
         content: <div>{message}</div>,
-        delay: 5000,
         id: messageCode || 'mainProcessMessage',
         type: 'DEFAULT',
       };
@@ -1168,7 +1170,6 @@ export default function App() {
         'max' in data &&
         'value' in data
       ) {
-        notificationData.delay = 10000;
         notificationData.type = 'WITH_PROGRESS_BAR';
         notificationData.progressBarData = {
           max: (data?.max as number) || 0,
@@ -1187,7 +1188,6 @@ export default function App() {
           'max' in data &&
           'value' in data)
       ) {
-        notificationData.delay = 10000;
         notificationData.type = 'WITH_PROGRESS_BAR';
         notificationData.progressBarData = {
           max: (data?.max as number) || 0,
@@ -1491,7 +1491,7 @@ export default function App() {
             changePromptMenuData(
               true,
               <div>
-                <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
+                <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
                   Couldn't Play the Song
                 </div>
                 <div className="description">
@@ -1586,7 +1586,7 @@ export default function App() {
           changePromptMenuData(
             true,
             <div>
-              <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
+              <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
                 Couldn't Play the Song
               </div>
               <div className="description">

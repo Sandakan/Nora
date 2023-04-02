@@ -687,7 +687,7 @@ declare global {
   type NotificationTypes = 'DEFAULT' | 'WITH_PROGRESS_BAR';
 
   interface AppNotification {
-    delay: number;
+    delay?: number;
     id: string;
     order?: number;
     content: ReactNode;

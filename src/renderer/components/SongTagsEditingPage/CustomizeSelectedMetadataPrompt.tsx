@@ -129,11 +129,13 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
             : prevData?.releasedYear,
         lyrics: isLyricsSelected && lyrics ? lyrics : prevData?.lyrics,
         artworkPath: selectedArtwork || prevData?.artworkPath,
-        album: albumData ? manageAlbumData(albumData, album) : undefined,
+        album: albumData ? manageAlbumData(albumData, album) : prevData.album,
         artists: artistData
           ? manageArtistsData(artistData, artists)
-          : undefined,
-        genres: genreData ? manageGenresData(genreData, genres) : undefined,
+          : prevData.artists,
+        genres: genreData
+          ? manageGenresData(genreData, genres)
+          : prevData.genres,
       };
     });
     // updateMetadataKeywords({
@@ -228,7 +230,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
 
   return (
     <div>
-      <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         Customize Downloaded Metadata for '{title}'
       </div>
       <div className="artworks-container">

@@ -106,9 +106,11 @@ const SongInfoPage = () => {
                 className="ml-1 !text-base !text-white"
               />
 
-              {songInfo.artists && songInfo.artists.length - 1 !== index
-                ? ', '
-                : ''}
+              {songInfo.artists && songInfo.artists.length - 1 !== index ? (
+                <span className="mr-1">,</span>
+              ) : (
+                ''
+              )}
             </>
           ))
         ) : (
@@ -205,12 +207,9 @@ const SongInfoPage = () => {
                   }
                   clickHandler={() => {
                     if (songInfo.album) {
-                      return currentlyActivePage.pageTitle === 'AlbumInfo' &&
-                        currentlyActivePage.data.albumId === songInfo.album.name
-                        ? changeCurrentActivePage('Home')
-                        : changeCurrentActivePage('AlbumInfo', {
-                            albumId: songInfo.album.albumId,
-                          });
+                      return changeCurrentActivePage('AlbumInfo', {
+                        albumId: songInfo.album.albumId,
+                      });
                     }
                     return undefined;
                   }}

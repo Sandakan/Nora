@@ -10,11 +10,14 @@ import {
 } from '../filesystem';
 import sendSongID3Tags from './sendSongId3Tags';
 
-export const getSelectedArtist = (artistId: string) => {
+export const getSelectedArtist = (artistIdOrName: string) => {
   const artists = getArtistsData();
 
-  for (const artist of artists) {
-    if (artist.artistId === artistId) return artist;
+  for (let index = 0; index < artists.length; index += 1) {
+    const artist = artists[index];
+
+    if (artist.artistId === artistIdOrName || artist.name === artistIdOrName)
+      return { artist, index };
   }
   return undefined;
 };
@@ -27,7 +30,7 @@ export const resolveArtistDuplicates = async (
   const songs = getSongsData();
   const albums = getAlbumsData();
 
-  const selectedArtist = getSelectedArtist(selectedArtistId);
+  const selectedArtist = getSelectedArtist(selectedArtistId)?.artist;
 
   if (selectedArtist) {
     for (const artist of artists) {
@@ -41,20 +44,20 @@ export const resolveArtistDuplicates = async (
         const artistAlbums = artist.albums || [];
 
         // loop through albums
-        for (let x = 0; x < albums.length; x += 1) {
+        for (const album of albums) {
           // check if the albums are linked to the duplicate artist
           if (
             artistAlbums.some(
-              (artistAlbum) => artistAlbum.albumId === albums[x].albumId
+              (artistAlbum) => artistAlbum.albumId === album.albumId
             )
           ) {
-            if (albums[x].artists) {
-              albums[x].artists = albums[x].artists!.filter(
+            if (album.artists) {
+              album.artists = album.artists!.filter(
                 (songArtist) => songArtist.artistId !== artist.artistId
               );
-            } else albums[x].artists = [];
+            } else album.artists = [];
 
-            albums[x].artists?.push({
+            album.artists?.push({
               artistId: selectedArtist.artistId,
               name: selectedArtist.name,
             });
@@ -62,15 +65,13 @@ export const resolveArtistDuplicates = async (
         }
 
         // loop through songs
-        for (let x = 0; x < songs.length; x += 1) {
+        for (const song of songs) {
           // check if the songs are linked to a duplicate artist
           if (
-            artistSongs.some(
-              (artistSong) => artistSong.songId === songs[x].songId
-            )
+            artistSongs.some((artistSong) => artistSong.songId === song.songId)
           ) {
             // get song tags
-            const songTags = await sendSongID3Tags(songs[x].songId, true);
+            const songTags = await sendSongID3Tags(song.songId, true);
 
             if (songTags.artists) {
               songTags.artists = songTags.artists.filter(
@@ -82,7 +83,7 @@ export const resolveArtistDuplicates = async (
               ...selectedArtist,
             });
 
-            await updateSongId3Tags(songs[x].songId, songTags, false, true);
+            await updateSongId3Tags(song.songId, songTags, false, true);
           }
         }
       }

@@ -135,16 +135,26 @@ const DuplicateArtistsSuggestion = (props: Props) => {
               </span>{' '}
               Suggestion
             </div>
-            <Button
-              id="toggleSuggestionBox"
-              className="!m-0 !border-0 !p-0 outline-1 outline-offset-1 hover:bg-background-color-1/50 focus-visible:!outline hover:dark:bg-dark-background-color-1/50"
-              iconClassName="!leading-none !text-3xl"
-              iconName={isMessageVisible ? 'arrow_drop_up' : 'arrow_drop_down'}
-              tooltipLabel={
-                isMessageVisible ? 'Hide suggestion' : 'Show suggestion'
-              }
-              clickHandler={() => setIsMessageVisible((state) => !state)}
-            />
+            <div className="flex items-center">
+              <span
+                className="material-icons-round-outlined mr-4 text-xl"
+                title="This feature is still in the experimental state."
+              >
+                science
+              </span>
+              <Button
+                id="toggleSuggestionBox"
+                className="!m-0 !border-0 !p-0 outline-1 outline-offset-1 hover:bg-background-color-1/50 focus-visible:!outline hover:dark:bg-dark-background-color-1/50"
+                iconClassName="!leading-none !text-3xl"
+                iconName={
+                  isMessageVisible ? 'arrow_drop_up' : 'arrow_drop_down'
+                }
+                tooltipLabel={
+                  isMessageVisible ? 'Hide suggestion' : 'Show suggestion'
+                }
+                clickHandler={() => setIsMessageVisible((state) => !state)}
+              />
+            </div>
           </label>
           {isMessageVisible && (
             <div>

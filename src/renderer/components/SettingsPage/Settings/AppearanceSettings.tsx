@@ -27,7 +27,7 @@ const ThemeSettings = (props: Props) => {
 
   return theme ? (
     <>
-      <div className="title-container mt-1 mb-4 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         <span className="material-icons-round-outlined mr-2">dark_mode</span>
         Appearance
       </div>
@@ -37,7 +37,7 @@ const ThemeSettings = (props: Props) => {
             Change the of the application as you need. We don&apos;t judge you
             for it.
           </div>
-          <div className="theme-change-radio-btns flex max-w-3xl items-center justify-between pt-4 pl-4">
+          <div className="theme-change-radio-btns flex max-w-3xl items-center justify-between pl-4 pt-4">
             <label
               htmlFor="lightThemeRadioBtn"
               tabIndex={0}
@@ -57,7 +57,11 @@ const ThemeSettings = (props: Props) => {
                 defaultChecked={!theme.useSystemTheme && !theme.isDarkMode}
                 onClick={() => window.api.changeAppTheme('light')}
               />
-              <Img src={HomeImgLight} className="w-40 shadow-md" />
+              <Img
+                loading="eager"
+                src={HomeImgLight}
+                className="w-40 shadow-md"
+              />
               <span className="mt-4 peer-checked:!text-font-color-black dark:peer-checked:!text-font-color-black">
                 Light Theme
               </span>
@@ -82,7 +86,11 @@ const ThemeSettings = (props: Props) => {
                 defaultChecked={!theme.useSystemTheme && theme.isDarkMode}
                 onClick={() => window.api.changeAppTheme('dark')}
               />
-              <Img src={HomeImgDark} className="w-40 shadow-md" />
+              <Img
+                loading="eager"
+                src={HomeImgDark}
+                className="w-40 shadow-md"
+              />
               <span className="mt-4 peer-checked:!text-font-color-black dark:peer-checked:!text-font-color-black">
                 Dark Theme
               </span>
@@ -106,7 +114,11 @@ const ThemeSettings = (props: Props) => {
                 defaultChecked={theme.useSystemTheme}
                 onClick={() => window.api.changeAppTheme('system')}
               />
-              <Img src={HomeImgLightDark} className="w-40 shadow-md" />
+              <Img
+                loading="eager"
+                src={HomeImgLightDark}
+                className="w-40 shadow-md"
+              />
               <span className="mt-4 peer-checked:!text-font-color-black dark:peer-checked:!text-font-color-black">
                 System Theme
               </span>

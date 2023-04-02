@@ -51,7 +51,7 @@ const AboutSettings = () => {
 
   return (
     <>
-      <div className="title-container mt-1 mb-4 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         <span className="material-icons-round-outlined mr-2">info</span>
         About
       </div>
@@ -229,7 +229,7 @@ const AboutSettings = () => {
               changePromptMenuData(
                 true,
                 <SensitiveActionConfirmPrompt
-                  title="Confrim the action to clear Song History"
+                  title="Confirm the action to clear Song History"
                   content={
                     <div>
                       You wouldn't be able to see what you have listened
