@@ -4,6 +4,7 @@ import React from 'react';
 export interface DropdownOption<T extends string> {
   label: string;
   value: T;
+  isDisabled?: boolean;
 }
 
 interface DropdownProp<T extends string> {
@@ -23,6 +24,7 @@ function Dropdown<T extends string>(props: DropdownProp<T>) {
         <option
           key={option.value}
           value={option.value}
+          disabled={option.isDisabled}
           className="!bg-context-menu-background !text-font-color-black dark:!bg-dark-context-menu-background dark:!text-font-color-white"
         >
           {option.label}

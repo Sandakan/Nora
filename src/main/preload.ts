@@ -2,7 +2,6 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable import/prefer-default-export */
 import { contextBridge, ipcRenderer } from 'electron';
-import path from 'path';
 import { LastFMTrackInfoApi } from '../@types/last_fm_api';
 
 export const api = {
@@ -422,7 +421,7 @@ export const api = {
 
   // $ PATH FOR RENDERER
   path: {
-    join: (...args: string[]) => path.join(...args),
+    join: (...args: string[]) => args.join('/'),
   },
 
   // $ OTHER
@@ -431,11 +430,15 @@ export const api = {
   getFolderInfo: (): Promise<FolderStructure> =>
     ipcRenderer.invoke('app/getFolderInfo'),
   getExtension: (dir: string) => {
-    const ext = path.extname(dir);
-    return ext.replace(/\W/, '');
+    const ext = dir.split('.').at(-1) || '';
+    return ext;
   },
   getBaseName: (dir: string) => {
-    const base = path.basename(dir);
+    const base =
+      dir
+        .split('/')
+        .filter((x) => x)
+        .at(-1) || '';
     return base;
   },
   removeDefaultAppProtocolFromFilePath: (filePath: string) => {

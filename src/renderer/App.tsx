@@ -1,6 +1,3 @@
-/* eslint-disable promise/no-nesting */
-/* eslint-disable no-unused-vars */
-/* eslint-disable default-param-last */
 /* eslint-disable no-use-before-define */
 import React, { ReactNode } from 'react';
 import 'tailwindcss/tailwind.css';
@@ -42,6 +39,7 @@ interface AppReducer {
   bodyBackgroundImage?: string;
   multipleSelectionsData: MultipleSelectionData;
   appUpdatesState: AppUpdatesState;
+  equalizerOptions: Equalizer;
 }
 
 type AppReducerStateActions =
@@ -72,6 +70,7 @@ type AppReducerStateActions =
   | 'UPDATE_MULTIPLE_SELECTIONS_DATA'
   | 'CHANGE_APP_UPDATES_DATA'
   | 'UPDATE_LOCAL_STORAGE'
+  | 'UPDATE_EQUALIZER_SETTINGS'
   | 'TOGGLE_SHOW_SONG_REMAINING_DURATION';
 
 const reducer = (
@@ -394,6 +393,14 @@ const reducer = (
             ? (action.data as LocalStorage)
             : state.localStorage,
       };
+    case 'UPDATE_EQUALIZER_SETTINGS':
+      return {
+        ...state,
+        equalizerOptions:
+          typeof action.data === 'object'
+            ? (action.data as Equalizer)
+            : state.equalizerOptions,
+      };
     default:
       return state;
   }
@@ -402,6 +409,53 @@ const reducer = (
 const player = new Audio();
 let repetitivePlaybackErrorsCount = 0;
 player.preload = 'auto';
+
+const context = new window.AudioContext();
+const source = context.createMediaElementSource(player);
+const sixtyHertzFilter = context.createBiquadFilter();
+const hundredFiftyHertzFilter = context.createBiquadFilter();
+const fourHundredHertzFilter = context.createBiquadFilter();
+const thousandHertzFilter = context.createBiquadFilter();
+const twoThousandHertzFilter = context.createBiquadFilter();
+const fifteenThousandHertzFilter = context.createBiquadFilter();
+
+source.connect(sixtyHertzFilter);
+sixtyHertzFilter.connect(hundredFiftyHertzFilter);
+hundredFiftyHertzFilter.connect(fourHundredHertzFilter);
+fourHundredHertzFilter.connect(thousandHertzFilter);
+thousandHertzFilter.connect(twoThousandHertzFilter);
+twoThousandHertzFilter.connect(fifteenThousandHertzFilter);
+fifteenThousandHertzFilter.connect(context.destination);
+
+sixtyHertzFilter.type = 'peaking';
+sixtyHertzFilter.frequency.value = 60;
+sixtyHertzFilter.Q.value = 1;
+sixtyHertzFilter.gain.value = 0;
+
+hundredFiftyHertzFilter.type = 'peaking';
+hundredFiftyHertzFilter.frequency.value = 150;
+hundredFiftyHertzFilter.Q.value = 1;
+hundredFiftyHertzFilter.gain.value = 0;
+
+fourHundredHertzFilter.type = 'peaking';
+fourHundredHertzFilter.frequency.value = 400;
+fourHundredHertzFilter.Q.value = 1;
+fourHundredHertzFilter.gain.value = 0;
+
+thousandHertzFilter.type = 'peaking';
+thousandHertzFilter.frequency.value = 1000;
+thousandHertzFilter.Q.value = 1;
+thousandHertzFilter.gain.value = 0;
+
+twoThousandHertzFilter.type = 'peaking';
+twoThousandHertzFilter.frequency.value = 2400;
+twoThousandHertzFilter.Q.value = 1;
+twoThousandHertzFilter.gain.value = 0;
+
+fifteenThousandHertzFilter.type = 'peaking';
+fifteenThousandHertzFilter.frequency.value = 15000;
+fifteenThousandHertzFilter.Q.value = 1;
+fifteenThousandHertzFilter.gain.value = 0;
 
 player.addEventListener('player/trackchange', (e) => {
   if ('detail' in e) {
@@ -475,6 +529,14 @@ const reducerData: AppReducer = {
   },
   multipleSelectionsData: { isEnabled: false, multipleSelections: [] },
   appUpdatesState: 'UNKNOWN',
+  equalizerOptions: {
+    sixtyHertz: 0,
+    hundredFiftyHertz: 0,
+    fourHundredHertz: 0,
+    oneKiloHertz: 0,
+    twoPointFourKiloHertz: 0,
+    fifteenKiloHertz: 0,
+  },
 };
 
 console.log('Command line args', window.api.commandLineArgs);
@@ -723,6 +785,26 @@ export default function App() {
       window.api.StoplisteningForSystemThemeChanges(watchForSystemThemeChanges);
     };
   }, []);
+
+  React.useEffect(() => {
+    if (content.equalizerOptions) {
+      const {
+        fifteenKiloHertz,
+        fourHundredHertz,
+        hundredFiftyHertz,
+        oneKiloHertz,
+        sixtyHertz,
+        twoPointFourKiloHertz,
+      } = content.equalizerOptions;
+
+      sixtyHertzFilter.gain.value = sixtyHertz;
+      hundredFiftyHertzFilter.gain.value = hundredFiftyHertz;
+      fourHundredHertzFilter.gain.value = fourHundredHertz;
+      thousandHertzFilter.gain.value = oneKiloHertz;
+      twoThousandHertzFilter.gain.value = twoPointFourKiloHertz;
+      fifteenThousandHertzFilter.gain.value = fifteenKiloHertz;
+    }
+  }, [content.equalizerOptions]);
 
   const manageWindowBlurOrFocus = React.useCallback(
     (state: 'blur' | 'focus') => {
@@ -2304,6 +2386,10 @@ export default function App() {
     []
   );
 
+  const updateEqualizerOptions = React.useCallback((options: Equalizer) => {
+    dispatch({ type: 'UPDATE_EQUALIZER_SETTINGS', data: options });
+  }, []);
+
   const appContextStateValues: AppStateContextType = React.useMemo(
     () => ({
       isDarkMode: content.isDarkMode,
@@ -2334,6 +2420,7 @@ export default function App() {
       isMultipleSelectionEnabled: content.multipleSelectionsData.isEnabled,
       multipleSelectionsData: content.multipleSelectionsData,
       appUpdatesState: content.appUpdatesState,
+      equalizerOptions: content.equalizerOptions,
     }),
     [
       content.PromptMenuData,
@@ -2341,6 +2428,7 @@ export default function App() {
       content.bodyBackgroundImage,
       content.contextMenuData,
       content.currentSongData,
+      content.equalizerOptions,
       content.isDarkMode,
       content.localStorage,
       content.multipleSelectionsData,
@@ -2390,6 +2478,7 @@ export default function App() {
       updateMultipleSelections,
       toggleMultipleSelections,
       updateAppUpdatesState,
+      updateEqualizerOptions,
     }),
     [
       addNewNotifications,
@@ -2413,6 +2502,7 @@ export default function App() {
       updateCurrentSongData,
       updateCurrentSongPlaybackState,
       updateCurrentlyActivePageData,
+      updateEqualizerOptions,
       updateMiniPlayerStatus,
       updateMultipleSelections,
       updateNotifications,

@@ -478,6 +478,15 @@ declare global {
     volume: Volume;
   }
 
+  interface Equalizer {
+    sixtyHertz: number;
+    hundredFiftyHertz: number;
+    fourHundredHertz: number;
+    oneKiloHertz: number;
+    twoPointFourKiloHertz: number;
+    fifteenKiloHertz: number;
+  }
+
   interface IgnoredDuplicates {
     artists: string[][];
     albums: string[][];

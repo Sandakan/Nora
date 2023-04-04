@@ -85,8 +85,8 @@ const AudioPlaybackSettings = () => {
   }, []);
 
   return (
-    <>
-      <div className="title-container mt-1 mb-4 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+    <li className="main-container audio-playback-settings-container mb-16">
+      <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         <span className="material-icons-round-outlined mr-2">
           slow_motion_video
         </span>
@@ -115,7 +115,7 @@ const AudioPlaybackSettings = () => {
           <div className="description">
             Enable Musixmatch Lyrics that provides synced and unsynced lyrics
             for your playlist on-demand.
-            <div className="mt-1 ml-2 text-sm font-light">
+            <div className="ml-2 mt-1 text-sm font-light">
               Enabling and using this feature means you have accepted the{' '}
               <Button
                 className="!m-0 !inline !rounded-none !border-0 !p-0 !text-font-color-highlight-2 outline-1 outline-offset-1 hover:underline focus-visible:!outline dark:!text-dark-font-color-highlight-2"
@@ -192,7 +192,7 @@ const AudioPlaybackSettings = () => {
           />
         </li>
       </ul>
-    </>
+    </li>
   );
 };
 

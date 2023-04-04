@@ -11,6 +11,7 @@ out/
 *.m3u
 .env
 thunder-tests
+lint_results.txt
 # OSX
 .DS_Store
 

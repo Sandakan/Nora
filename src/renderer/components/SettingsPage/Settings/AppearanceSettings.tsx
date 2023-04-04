@@ -2,6 +2,7 @@
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 
 import Img from 'renderer/components/Img';
 
@@ -9,10 +10,43 @@ import HomeImgLight from '../../../../../assets/images/webp/home-skeleton-light.
 import HomeImgDark from '../../../../../assets/images/webp/home-skeleton-dark.webp';
 import HomeImgLightDark from '../../../../../assets/images/webp/home-skeleton-light-dark.webp';
 
-type Props = { themeData?: AppThemeData };
+const ThemeSettings = () => {
+  const { userData } = React.useContext(AppContext);
 
-const ThemeSettings = (props: Props) => {
-  const { themeData: theme } = props;
+  const [theme, setTheme] = React.useState(userData?.theme);
+
+  const fetchUserData = React.useCallback(
+    () =>
+      window.api
+        .getUserData()
+        .then((res) => setTheme(res?.theme))
+        .catch((err) => console.error(err)),
+    []
+  );
+
+  React.useEffect(() => {
+    fetchUserData();
+    const manageUserDataUpdatesInSettingsPage = (e: Event) => {
+      if ('detail' in e) {
+        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>)
+          .detail;
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (event.dataType.includes('userData')) fetchUserData();
+        }
+      }
+    };
+    document.addEventListener(
+      'app/dataUpdates',
+      manageUserDataUpdatesInSettingsPage
+    );
+    return () => {
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageUserDataUpdatesInSettingsPage
+      );
+    };
+  }, [fetchUserData]);
 
   const focusInput = React.useCallback(
     (e: React.KeyboardEvent<HTMLLabelElement>) => {
@@ -26,7 +60,7 @@ const ThemeSettings = (props: Props) => {
   );
 
   return theme ? (
-    <>
+    <li className="main-container appearance-settings-container mb-16">
       <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         <span className="material-icons-round-outlined mr-2">dark_mode</span>
         Appearance
@@ -126,7 +160,7 @@ const ThemeSettings = (props: Props) => {
           </div>
         </li>
       </ul>
-    </>
+    </li>
   ) : null;
 };
 

@@ -181,7 +181,6 @@ const createWindow = async () => {
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
-      nodeIntegrationInWorker: true,
     },
     visualEffectState: 'followWindow',
     roundedCorners: true,

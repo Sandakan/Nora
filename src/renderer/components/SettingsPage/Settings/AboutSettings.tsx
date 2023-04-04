@@ -50,7 +50,7 @@ const AboutSettings = () => {
   }, [currentVersionReleasedDate]);
 
   return (
-    <>
+    <li className="main-container about-container">
       <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         <span className="material-icons-round-outlined mr-2">info</span>
         About
@@ -333,7 +333,7 @@ const AboutSettings = () => {
           </div>
         </div>
       </div>
-    </>
+    </li>
   );
 };
 
