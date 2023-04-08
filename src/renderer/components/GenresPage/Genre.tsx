@@ -294,7 +294,7 @@ const Genre = (props: GenreProp) => {
 
   return (
     <div
-      className={`genre appear-from-bottom group relative mr-10 mb-6 flex h-36 w-72 cursor-pointer items-center overflow-hidden rounded-2xl p-4 text-background-color-2 transition-[border,border-color] dark:text-dark-background-color-2 ${className} ${
+      className={`genre appear-from-bottom group relative mb-6 mr-10 flex h-36 w-72 cursor-pointer items-center overflow-hidden rounded-2xl p-4 text-background-color-2 transition-[border,border-color] dark:text-dark-background-color-2 ${className} ${
         isMultipleSelectionEnabled &&
         multipleSelectionsData.selectionType === 'genre' &&
         'border-4 border-transparent'
@@ -354,7 +354,7 @@ const Genre = (props: GenreProp) => {
       <div className="genre-artwork-container absolute -right-4 top-1/2 -translate-y-1/2">
         <Img
           src={artworkPaths.artworkPath}
-          className="w-24 rotate-12 rounded-md"
+          className="w-24 rotate-12 rounded-md shadow-2xl"
           alt="Artwork cover"
         />
       </div>

@@ -11,16 +11,19 @@ import FolderImg from '../../../../assets/images/webp/empty-folder.webp';
 import RemoveFolderConfirmationPrompt from './RemoveFolderConfirmationPrompt';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import BlacklistFolderConfrimPrompt from './BlacklistFolderConfirmPrompt';
+import Button from '../Button';
 
-type Props = {
+type FolderProps = {
   folderPath: string;
   songIds: string[];
+  subFolders?: MusicFolder[];
   isBlacklisted: boolean;
+  className?: string;
   index: number;
   selectAllHandler?: (_upToId?: string) => void;
 };
 
-const Folder = (props: Props) => {
+const Folder = (props: FolderProps) => {
   const { isMultipleSelectionEnabled, multipleSelectionsData } =
     React.useContext(AppContext);
   const {
@@ -37,8 +40,13 @@ const Folder = (props: Props) => {
     index,
     isBlacklisted = true,
     selectAllHandler,
+    className,
+    subFolders = [],
   } = props;
+
   const { length: noOfSongs } = songIds;
+
+  const [isSubFoldersVisible, setIsSubFoldersVisible] = React.useState(false);
 
   const { folderName, prevDir } = React.useMemo(() => {
     if (folderPath) {
@@ -49,6 +57,23 @@ const Folder = (props: Props) => {
     }
     return { prevDir: undefined, folderName: undefined };
   }, [folderPath]);
+
+  const subFoldersComponents = React.useMemo(() => {
+    if (Array.isArray(subFolders) && subFolders.length > 0) {
+      return subFolders.map((subFolder, i) => (
+        <Folder
+          index={i}
+          key={subFolder.path}
+          folderPath={subFolder.path}
+          subFolders={subFolder.subFolders}
+          isBlacklisted={subFolder.isBlacklisted}
+          songIds={subFolder.songIds}
+          className={`!w-full ${className}`}
+        />
+      ));
+    }
+    return [];
+  }, [className, subFolders]);
 
   const isAMultipleSelection = React.useMemo(() => {
     if (!multipleSelectionsData.isEnabled) return false;
@@ -181,16 +206,9 @@ const Folder = (props: Props) => {
 
   return (
     <div
-      className={`group mb-2 flex h-16 w-full cursor-pointer items-center justify-between rounded-md px-4 py-2 outline-1 -outline-offset-2 transition-colors focus-visible:!outline dark:text-font-color-white ${
-        isAMultipleSelection
-          ? '!bg-background-color-3/90 !text-font-color-black dark:!bg-dark-background-color-3/90 dark:!text-font-color-black'
-          : 'hover:!bg-background-color-2 dark:hover:!bg-dark-background-color-2'
-      } ${isBlacklisted && '!opacity-50'} ${
-        (index + 1) % 2 === 1
-          ? 'bg-background-color-2/50 dark:bg-dark-background-color-2/30'
-          : '!bg-background-color-1 dark:!bg-dark-background-color-1'
-      }`}
+      className={`group mb-2 flex w-[98%] cursor-pointer flex-col justify-between ${className}`}
       onClick={(e) => {
+        e.stopPropagation();
         if (e.getModifierState('Shift') === true && selectAllHandler)
           selectAllHandler(folderPath);
         else if (
@@ -217,42 +235,75 @@ const Folder = (props: Props) => {
         )
       }
     >
-      <div className="folder-img-and-info-container flex items-center">
-        {multipleSelectionsData.selectionType === 'folder' ? (
-          <div className="relative ml-1 mr-4 flex h-fit items-center rounded-lg bg-background-color-1 p-1 text-font-color-highlight dark:bg-dark-background-color-1 dark:text-dark-background-color-3">
-            <MultipleSelectionCheckbox id={folderPath} selectionType="folder" />
-          </div>
-        ) : (
-          <div className="relative ml-1 mr-4 h-fit rounded-2xl bg-background-color-1 px-3 text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1">
-            {index + 1}
-          </div>
-        )}
-        <Img src={FolderImg} className="w-8 self-center" />
-        <div className="folder-info ml-6 flex flex-col">
-          <span className="folder-name" title={`${prevDir}\\${folderName}`}>
-            {folderName}
-          </span>
-          <div className="flex items-center opacity-75">
-            <span className="no-of-songs mr-2 text-xs font-thin">
-              {noOfSongs} song{noOfSongs === 1 ? '' : 's'}
+      <div
+        className={`flex w-full items-center justify-between rounded-md px-4 py-2 outline-1 -outline-offset-2 transition-colors focus-visible:!outline dark:text-font-color-white ${
+          isAMultipleSelection
+            ? '!bg-background-color-3/90 !text-font-color-black dark:!bg-dark-background-color-3/90 dark:!text-font-color-black'
+            : 'hover:!bg-background-color-2 dark:hover:!bg-dark-background-color-2'
+        } ${isBlacklisted && '!opacity-50'} ${
+          (index + 1) % 2 === 1
+            ? 'bg-background-color-2/50 dark:bg-dark-background-color-2/30'
+            : '!bg-background-color-1 dark:!bg-dark-background-color-1'
+        }`}
+      >
+        <div className="folder-img-and-info-container flex items-center">
+          {multipleSelectionsData.selectionType === 'folder' ? (
+            <div className="relative ml-1 mr-4 flex h-fit items-center rounded-lg bg-background-color-1 p-1 text-font-color-highlight dark:bg-dark-background-color-1 dark:text-dark-background-color-3">
+              <MultipleSelectionCheckbox
+                id={folderPath}
+                selectionType="folder"
+              />
+            </div>
+          ) : (
+            <div className="relative ml-1 mr-4 h-fit rounded-2xl bg-background-color-1 px-3 text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1">
+              {index + 1}
+            </div>
+          )}
+          <Img src={FolderImg} className="w-8 self-center" />
+          <div className="folder-info ml-6 flex flex-col">
+            <span className="folder-name" title={`${prevDir}\${folderName}`}>
+              {folderName}
             </span>
-            <span className="invisible text-xs font-thin opacity-0 transition-[visibility,opacity] group-hover:visible group-hover:opacity-100">
-              &bull;
-              <span className="folder-path ml-2">{prevDir}</span>
-            </span>
+            <div className="flex items-center opacity-75">
+              <span className="no-of-songs mr-2 text-xs font-thin">
+                {noOfSongs} song{noOfSongs === 1 ? '' : 's'}
+              </span>
+              <span className="invisible text-xs font-thin opacity-0 transition-[visibility,opacity] group-hover:visible group-hover:opacity-100">
+                &bull;
+                <span className="folder-path ml-2">{prevDir}</span>
+              </span>
+            </div>
           </div>
         </div>
+        <div className="folder-states-container">
+          {isBlacklisted && (
+            <span
+              className="material-icons-round-outlined text-2xl"
+              title="This folder is blacklisted."
+            >
+              block
+            </span>
+          )}
+          {subFolders.length > 0 && (
+            <Button
+              className="!rounded-full !border-none !p-1 group-hover:bg-background-color-1 dark:group-hover:bg-dark-background-color-1"
+              iconClassName="!text-2xl !leading-none"
+              iconName={
+                isSubFoldersVisible ? 'arrow_drop_up' : 'arrow_drop_down'
+              }
+              clickHandler={(e) => {
+                e.stopPropagation();
+                setIsSubFoldersVisible((state) => !state);
+              }}
+            />
+          )}
+        </div>
       </div>
-      <div className="folder-states-container">
-        {isBlacklisted && (
-          <span
-            className="material-icons-round-outlined text-2xl"
-            title="This folder is blacklisted."
-          >
-            block
-          </span>
-        )}
-      </div>
+      {subFolders.length > 0 && isSubFoldersVisible && (
+        <div className="ml-4 mt-4 border-l-[3px] border-background-color-2 pl-4 dark:border-dark-background-color-2/50">
+          {subFoldersComponents}
+        </div>
+      )}
     </div>
   );
 };

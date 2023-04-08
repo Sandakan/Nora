@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
-import { FixedSizeList as List } from 'react-window';
-import useResizeObserver from 'renderer/hooks/useResizeObserver';
+// import { FixedSizeList as List } from 'react-window';
+// import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
@@ -11,6 +11,7 @@ import Button from '../Button';
 import Dropdown, { DropdownOption } from '../Dropdown';
 import Img from '../Img';
 import MainContainer from '../MainContainer';
+import AddMusicFoldersPrompt from './AddMusicFoldersPrompt';
 import Folder from './Folder';
 
 import NoFoldersImage from '../../../../assets/images/svg/Empty Inbox _Monochromatic.svg';
@@ -27,18 +28,21 @@ const folderDropdownOptions: DropdownOption<FolderSortTypes>[] = [
 const MusicFoldersPage = () => {
   const {
     isMultipleSelectionEnabled,
-    currentlyActivePage,
+    // currentlyActivePage,
     multipleSelectionsData,
   } = React.useContext(AppContext);
-  const { updateCurrentlyActivePageData, toggleMultipleSelections } =
-    React.useContext(AppUpdateContext);
+  const {
+    updateCurrentlyActivePageData,
+    toggleMultipleSelections,
+    changePromptMenuData,
+  } = React.useContext(AppUpdateContext);
   const [musicFolders, setMusicFolders] = React.useState<MusicFolder[]>([]);
   const [sortingOrder, setSortingOrder] =
     React.useState<FolderSortTypes>('aToZ');
 
-  const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
+  // const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
   const foldersContainerRef = React.useRef(null as HTMLDivElement | null);
-  const { width, height } = useResizeObserver(foldersContainerRef);
+  // const { width, height } = useResizeObserver(foldersContainerRef);
 
   const fetchFoldersData = React.useCallback(
     () =>
@@ -83,7 +87,7 @@ const MusicFoldersPage = () => {
   }, [fetchFoldersData]);
 
   const musicFoldersWithPaths = React.useMemo(
-    () => musicFolders.map((x) => ({ ...x, folderPath: x.folderData.path })),
+    () => musicFolders.map((x) => ({ ...x, folderPath: x.path })),
     [musicFolders]
   );
 
@@ -93,49 +97,55 @@ const MusicFoldersPage = () => {
     'folderPath'
   );
 
-  const folders = React.useCallback(
-    (props: { index: number; style: React.CSSProperties }) => {
-      const { index, style } = props;
-      const { folderData, songIds, isBlacklisted } = musicFolders[index];
-      return (
-        <div style={style}>
-          <Folder
-            folderPath={folderData.path}
-            index={index}
-            isBlacklisted={isBlacklisted}
-            songIds={songIds}
-            key={folderData.path}
-            selectAllHandler={selectAllHandler}
-          />
-        </div>
-      );
-    },
-    [musicFolders, selectAllHandler]
-  );
+  // const folders = React.useCallback(
+  //   (props: { index: number; style: React.CSSProperties }) => {
+  //     const { index, style } = props;
+  //     const { path, songIds, isBlacklisted, subFolders } = musicFolders[index];
 
-  const addNewFolder = React.useCallback(
-    (
-      _: unknown,
-      isDisabled: (state: boolean) => void,
-      isPending: (state: boolean) => void
-    ) => {
-      isDisabled(true);
-      isPending(true);
-      return window.api
-        .addMusicFolder()
-        .then((res) => console.log(res))
-        .catch((err) => console.error(err))
-        .finally(() => {
-          isDisabled(false);
-          isPending(false);
-        });
-    },
-    []
-  );
+  // return (
+  //   <div style={style}>
+  //     <Folder
+  //       key={path}
+  //       folderPath={path}
+  //       subFolders={subFolders}
+  //       index={index}
+  //       isBlacklisted={isBlacklisted}
+  //       songIds={songIds}
+  //       selectAllHandler={selectAllHandler}
+  //     />
+  //   </div>
+  // );
+  //   },
+  //   [musicFolders, selectAllHandler]
+  // );
+
+  const folderComponents = React.useMemo(() => {
+    return musicFolders.map((musicFolder, index) => {
+      const { path, songIds, isBlacklisted, subFolders } = musicFolder;
+      return (
+        <Folder
+          key={path}
+          folderPath={path}
+          subFolders={subFolders}
+          index={index}
+          isBlacklisted={isBlacklisted}
+          songIds={songIds}
+          selectAllHandler={selectAllHandler}
+        />
+      );
+    });
+  }, [musicFolders, selectAllHandler]);
+
+  const addNewFolder = React.useCallback(() => {
+    changePromptMenuData(
+      true,
+      <AddMusicFoldersPrompt onFailure={(err) => console.error(err)} />
+    );
+  }, [changePromptMenuData]);
 
   return (
     <MainContainer
-      className="music-folders-page appear-from-bottom relative !h-full !pb-0 pr-4"
+      className="music-folders-page appear-from-bottom relative !h-full !pb-0 !pr-4"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {
@@ -146,9 +156,9 @@ const MusicFoldersPage = () => {
     >
       <>
         {musicFolders && musicFolders.length > 0 && (
-          <div className="title-container mt-2 mb-8 flex items-center justify-between text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+          <div className="title-container mb-8 mt-2 flex items-center justify-between text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
             <div className="container flex">
-              Music Folders{' '}
+              Music Folders
               <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
                 {isMultipleSelectionEnabled ? (
                   <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
@@ -186,18 +196,7 @@ const MusicFoldersPage = () => {
                   iconName="create_new_folder"
                   pendingAnimationOnDisabled
                   iconClassName="material-icons-round-outlined"
-                  clickHandler={(_, isDisabled, isPending) => {
-                    isDisabled(true);
-                    isPending(true);
-                    return window.api
-                      .addMusicFolder()
-                      .then((res) => console.log(res))
-                      .catch((err) => console.error(err))
-                      .finally(() => {
-                        isDisabled(false);
-                        isPending(false);
-                      });
-                  }}
+                  clickHandler={addNewFolder}
                 />
                 <Dropdown
                   name="genreSortDropdown"
@@ -220,10 +219,12 @@ const MusicFoldersPage = () => {
           className={`folders-container ${
             musicFolders && musicFolders.length > 0 && 'h-full'
           }`}
+          ref={foldersContainerRef}
         >
-          {musicFolders && musicFolders.length > 0 && (
+          {folderComponents}
+          {/* {musicFolders && musicFolders.length > 0 && (
             <List
-              className="appear-from-bottom delay-100"
+              className="appear-from-bottom h-full delay-100"
               itemCount={musicFolders.length}
               itemSize={70}
               width={width || '100%'}
@@ -248,7 +249,7 @@ const MusicFoldersPage = () => {
             >
               {folders}
             </List>
-          )}
+          )} */}
         </div>
 
         {musicFolders.length === 0 && (

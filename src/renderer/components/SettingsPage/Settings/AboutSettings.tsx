@@ -24,7 +24,7 @@ import ResetAppConfirmationPrompt from '../../HomePage/ResetAppConfirmationPromp
 import SensitiveActionConfirmPrompt from '../../SensitiveActionConfirmPrompt';
 import AppShortcutsPrompt from '../AppShortcutsPrompt';
 import AppStats from './AppStats';
-import AddMusicFolderPrompt from '../../MusicFoldersPage/AddMusicFolderPrompt';
+import AddMusicFoldersPrompt from '../../MusicFoldersPage/AddMusicFoldersPrompt';
 
 const AboutSettings = () => {
   const { isDarkMode } = React.useContext(AppContext);
@@ -271,15 +271,6 @@ const AboutSettings = () => {
             iconClassName="material-icons-round-outlined"
             clickHandler={() =>
               changePromptMenuData(true, <AppShortcutsPrompt />)
-            }
-          />
-          <Button
-            label="Get Folder Info"
-            iconName="folder"
-            className="mb-4 rounded-2xl"
-            iconClassName="material-icons-round-outlined"
-            clickHandler={() =>
-              changePromptMenuData(true, <AddMusicFolderPrompt />)
             }
           />
         </div>

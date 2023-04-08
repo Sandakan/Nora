@@ -6,6 +6,7 @@ import { FixedSizeGrid as Grid } from 'react-window';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import storage from 'renderer/utils/localStorage';
 
 import { Album } from './Album';
 import MainContainer from '../MainContainer';
@@ -18,23 +19,18 @@ import NoAlbumsImage from '../../../../assets/images/svg/Easter bunny_Monochroma
 export const AlbumsPage = () => {
   const {
     currentlyActivePage,
-    userData,
+    localStorageData,
     isMultipleSelectionEnabled,
     multipleSelectionsData,
   } = React.useContext(AppContext);
-  const {
-    updateCurrentlyActivePageData,
-    updatePageSortingOrder,
-    toggleMultipleSelections,
-  } = React.useContext(AppUpdateContext);
+  const { updateCurrentlyActivePageData, toggleMultipleSelections } =
+    React.useContext(AppUpdateContext);
 
   const [albumsData, setAlbumsData] = React.useState([] as Album[]);
-  const [sortingOrder, setSortingOrder] = React.useState(
-    (currentlyActivePage.data && currentlyActivePage.data.sortingOrder
-      ? currentlyActivePage.data.sortingOrder
-      : userData && userData.sortingStates.albumsPage
-      ? userData.sortingStates.albumsPage
-      : 'aToZ') as AlbumSortTypes
+  const [sortingOrder, setSortingOrder] = React.useState<AlbumSortTypes>(
+    currentlyActivePage?.data?.sortingOrder ||
+      localStorageData?.sortingStates?.albumsPage ||
+      'aToZ'
   );
 
   const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
@@ -82,7 +78,7 @@ export const AlbumsPage = () => {
   }, [fetchAlbumData]);
 
   React.useEffect(() => {
-    updatePageSortingOrder('sortingStates.albumsPage', sortingOrder);
+    storage.sortingStates.setSortingStates('albumsPage', sortingOrder);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortingOrder]);
 
@@ -133,7 +129,7 @@ export const AlbumsPage = () => {
       }}
     >
       <>
-        <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">
             Albums{' '}
             <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">

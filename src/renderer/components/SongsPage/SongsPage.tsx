@@ -4,15 +4,18 @@ import { FixedSizeList as List } from 'react-window';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import storage from 'renderer/utils/localStorage';
 
 import Song from './Song';
-import NoSongsImage from '../../../../assets/images/svg/Empty Inbox _Monochromatic.svg';
-import DataFetchingImage from '../../../../assets/images/svg/Road trip_Monochromatic.svg';
 import Button from '../Button';
 import MainContainer from '../MainContainer';
 import Dropdown from '../Dropdown';
 import useResizeObserver from '../../hooks/useResizeObserver';
 import Img from '../Img';
+
+import NoSongsImage from '../../../../assets/images/svg/Empty Inbox _Monochromatic.svg';
+import DataFetchingImage from '../../../../assets/images/svg/Road trip_Monochromatic.svg';
+import AddMusicFoldersPrompt from '../MusicFoldersPage/AddMusicFoldersPrompt';
 
 interface SongPageReducer {
   songsData: AudioInfo[];
@@ -87,7 +90,6 @@ const reducer = (
 export const SongsPage = () => {
   const {
     currentlyActivePage,
-    userData,
     localStorageData,
     isMultipleSelectionEnabled,
     multipleSelectionsData,
@@ -95,20 +97,18 @@ export const SongsPage = () => {
   const {
     createQueue,
     updateCurrentlyActivePageData,
-    updatePageSortingOrder,
     toggleMultipleSelections,
     updateContextMenuData,
+    changePromptMenuData,
   } = React.useContext(AppUpdateContext);
 
   const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
   const [content, dispatch] = React.useReducer(reducer, {
     songsData: [],
     sortingOrder:
-      currentlyActivePage.data && currentlyActivePage.data.sortingOrder
-        ? currentlyActivePage.data.sortingOrder
-        : userData && userData.sortingStates.songsPage
-        ? userData.sortingStates.songsPage
-        : 'aToZ',
+      currentlyActivePage?.data?.sortingOrder ||
+      localStorageData?.sortingStates?.songsPage ||
+      'aToZ',
   });
   const songsContainerRef = React.useRef(null as HTMLDivElement | null);
   const { width, height } = useResizeObserver(songsContainerRef);
@@ -167,31 +167,34 @@ export const SongsPage = () => {
   }, [fetchSongsData]);
 
   React.useEffect(() => {
-    updatePageSortingOrder('sortingStates.songsPage', content.sortingOrder);
-  }, [content.sortingOrder, updatePageSortingOrder]);
+    storage.sortingStates.setSortingStates('songsPage', content.sortingOrder);
+  }, [content.sortingOrder]);
 
   const addNewSongs = React.useCallback(() => {
-    window.api
-      .addMusicFolder(content.sortingOrder)
-      .then((songs) => {
-        const relevantSongsData: AudioInfo[] = songs.map((song) => {
-          return {
-            title: song.title,
-            songId: song.songId,
-            artists: song.artists,
-            duration: song.duration,
-            palette: song.palette,
-            path: song.path,
-            artworkPaths: song.artworkPaths,
-            addedDate: song.addedDate,
-            isAFavorite: song.isAFavorite,
-            isBlacklisted: song.isBlacklisted,
-          };
-        });
-        return dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
-      })
-      .catch((err) => console.error(err));
-  }, [content.sortingOrder]);
+    changePromptMenuData(
+      true,
+      <AddMusicFoldersPrompt
+        onSuccess={(songs) => {
+          const relevantSongsData: AudioInfo[] = songs.map((song) => {
+            return {
+              title: song.title,
+              songId: song.songId,
+              artists: song.artists,
+              duration: song.duration,
+              palette: song.palette,
+              path: song.path,
+              artworkPaths: song.artworkPaths,
+              addedDate: song.addedDate,
+              isAFavorite: song.isAFavorite,
+              isBlacklisted: song.isBlacklisted,
+            };
+          });
+          return dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
+        }}
+        onFailure={(err) => console.error(err)}
+      />
+    );
+  }, [changePromptMenuData]);
 
   const selectAllHandler = useSelectAllHandler(
     content.songsData,
@@ -254,7 +257,7 @@ export const SongsPage = () => {
       }}
     >
       <>
-        <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium  text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium  text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">
             Songs{' '}
             <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">

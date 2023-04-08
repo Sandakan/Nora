@@ -29,7 +29,6 @@ const USER_DATA_TEMPLATE: UserData = {
   },
   windowPositions: {},
   windowDiamensions: {},
-  sortingStates: {},
   recentSearches: [],
 };
 export const HISTORY_PLAYLIST_TEMPLATE: SavablePlaylist = {
@@ -245,6 +244,11 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
     ) {
       userData.preferences.autoLaunchApp = data;
     } else if (
+      dataType === 'preferences.isMusixmatchLyricsEnabled' &&
+      typeof data === 'boolean'
+    ) {
+      userData.preferences.isMusixmatchLyricsEnabled = data;
+    } else if (
       dataType === 'preferences.isMiniPlayerAlwaysOnTop' &&
       typeof data === 'boolean'
     ) {
@@ -259,26 +263,6 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
       typeof data === 'boolean'
     ) {
       userData.preferences.openWindowAsHiddenOnSystemStart = data;
-    } else if (
-      dataType === 'sortingStates.songsPage' &&
-      typeof data === 'string'
-    ) {
-      userData.sortingStates.songsPage = data as SongSortTypes;
-    } else if (
-      dataType === 'sortingStates.artistsPage' &&
-      typeof data === 'string'
-    ) {
-      userData.sortingStates.artistsPage = data as ArtistSortTypes;
-    } else if (
-      dataType === 'sortingStates.albumsPage' &&
-      typeof data === 'string'
-    ) {
-      userData.sortingStates.albumsPage = data as AlbumSortTypes;
-    } else if (
-      dataType === 'sortingStates.genresPage' &&
-      typeof data === 'string'
-    ) {
-      userData.sortingStates.genresPage = data as GenreSortTypes;
     } else if (
       dataType === 'customMusixmatchUserToken' &&
       typeof data === 'string'

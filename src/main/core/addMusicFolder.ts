@@ -1,43 +1,22 @@
 import path from 'path';
-import { BrowserWindow, dialog, OpenDialogOptions } from 'electron';
-import { appPreferences } from '../../../package.json';
 import log from '../log';
-import parseFolderForSongPaths from '../fs/parseFolderForSongPaths';
+import parseFolderStructuresForSongPaths from '../fs/parseFolderForSongPaths';
 import { parseSong } from '../parseSong';
 import sortSongs from '../utils/sortSongs';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import { generatePalettes } from '../other/generatePalette';
 
-const openDialogOptions: OpenDialogOptions = {
-  title: 'Add a Music Folder',
-  buttonLabel: 'Add folder',
-  filters: [
-    {
-      name: 'Audio Files',
-      extensions: appPreferences.supportedMusicExtensions,
-    },
-  ],
-  properties: ['openFile', 'openDirectory'],
-};
-
-const addMusicFolder = async (
-  mainWindowInstance: BrowserWindow,
+const addMusicFromFolderStructures = async (
+  structures: FolderStructure[],
   resultsSortType?: SongSortTypes,
   abortSignal?: AbortSignal
 ): Promise<SongData[]> => {
-  log('Started the process of linking a music folder to the library.');
-  const { canceled, filePaths: musicFolderPath } = await dialog.showOpenDialog(
-    mainWindowInstance,
-    openDialogOptions
-  );
+  log('Started the process of linking a music folders to the library.');
 
-  if (canceled) {
-    log('User cancelled the folder selection popup.');
-    throw new Error('PROMPT_CLOSED_BEFORE_INPUT' as MessageCodes);
-  }
-
-  log(`Added a new song folder to the app - ${musicFolderPath[0]}`);
-  const songPaths = await parseFolderForSongPaths(musicFolderPath[0]);
+  log(`Added new song folders to the app.`, {
+    folderPaths: structures.map((x) => x.path),
+  });
+  const songPaths = await parseFolderStructuresForSongPaths(structures);
   console.time('parseTime');
   let songs: SongData[] = [];
 
@@ -45,7 +24,7 @@ const addMusicFolder = async (
     for (let i = 0; i < songPaths.length; i += 1) {
       if (abortSignal?.aborted) {
         log(
-          'Parsing songs in the music folder aborted by an abortController signal.',
+          'Parsing songs in music folders aborted by an abortController signal.',
           { reason: abortSignal?.reason },
           'WARN'
         );
@@ -71,17 +50,19 @@ const addMusicFolder = async (
       }
     }
     setTimeout(generatePalettes, 1500);
-  } else throw new Error('Failed to get song paths from the folder.');
+  } else throw new Error('Failed to get song paths from music folders.');
 
   if (resultsSortType) songs = sortSongs(songs, resultsSortType);
 
   log(
-    `Successfully parsed ${songs.length} songs from '${
-      musicFolderPath[0]
-    }' directory.\nTIME_ELAPSED : ${console.timeEnd('parseTime')}`
+    `Successfully parsed ${songs.length} songs from the selcted music folders.`,
+    {
+      folderPaths: structures.map((x) => x.path),
+      timeElapsed: console.timeEnd('parseTime'),
+    }
   );
   dataUpdateEvent('userData/musicFolder');
   return songs;
 };
 
-export default addMusicFolder;
+export default addMusicFromFolderStructures;

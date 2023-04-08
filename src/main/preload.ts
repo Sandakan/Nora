@@ -54,10 +54,16 @@ export const api = {
   // $ AUDIO LIBRARY CONTROLS
   checkForStartUpSongs: (): Promise<AudioPlayerData | undefined> =>
     ipcRenderer.invoke('app/checkForStartUpSongs'),
-  addMusicFolder: (sortType?: SongSortTypes): Promise<SongData[]> =>
-    ipcRenderer.invoke('app/addMusicFolder', sortType),
-  // addSongFromPath: (songPath:string): Promise<SongData[]> =>
-  //   ipcRenderer.invoke('app/addSongFromPath', songPath),
+  addSongsFromFolderStructures: (
+    structures: FolderStructure[],
+    sortType?: SongSortTypes
+  ): Promise<SongData[]> =>
+    ipcRenderer.invoke(
+      'app/addSongsFromFolderStructures',
+      structures,
+      sortType
+    ),
+
   getSong: (
     songId: string,
     updateListeningRate = true
@@ -427,8 +433,8 @@ export const api = {
   // $ OTHER
   getArtworksForMultipleArtworksCover: (songIds: string[]): Promise<string[]> =>
     ipcRenderer.invoke('app/getArtworksForMultipleArtworksCover', songIds),
-  getFolderInfo: (): Promise<FolderStructure> =>
-    ipcRenderer.invoke('app/getFolderInfo'),
+  getFolderStructures: (): Promise<FolderStructure[]> =>
+    ipcRenderer.invoke('app/getFolderStructures'),
   getExtension: (dir: string) => {
     const ext = dir.split('.').at(-1) || '';
     return ext;
@@ -436,7 +442,7 @@ export const api = {
   getBaseName: (dir: string) => {
     const base =
       dir
-        .split('/')
+        .split(/[/\\]/)
         .filter((x) => x)
         .at(-1) || '';
     return base;

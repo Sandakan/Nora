@@ -486,7 +486,6 @@ const userDataTemplate: UserData = {
   },
   windowPositions: {},
   windowDiamensions: {},
-  sortingStates: {},
   recentSearches: [],
 };
 
@@ -2226,25 +2225,6 @@ export default function App() {
     ]
   );
 
-  const updatePageSortingOrder = React.useCallback(
-    (page: PageSortTypes, state: unknown) => {
-      if (content.userData) {
-        const updatedUserData = content.userData;
-        if (page === 'sortingStates.songsPage')
-          updatedUserData.sortingStates.songsPage = state as SongSortTypes;
-        if (page === 'sortingStates.artistsPage')
-          updatedUserData.sortingStates.artistsPage = state as ArtistSortTypes;
-        if (page === 'sortingStates.albumsPage')
-          updatedUserData.sortingStates.albumsPage = state as AlbumSortTypes;
-        if (page === 'sortingStates.genresPage')
-          updatedUserData.sortingStates.genresPage = state as GenreSortTypes;
-        window.api.savePageSortingState(page, state);
-        dispatch({ type: 'USER_DATA_CHANGE', data: updatedUserData });
-      }
-    },
-    [content.userData]
-  );
-
   const displayUnsupportedFileMessage = React.useCallback(
     (path: string) => {
       const fileType = path.split('.').at(-1)?.replace('.', '') ?? path;
@@ -2472,7 +2452,6 @@ export default function App() {
       toggleIsFavorite,
       toggleSongPlayback,
       updateQueueData,
-      updatePageSortingOrder,
       clearAudioPlayerData,
       updateBodyBackgroundImage,
       updateMultipleSelections,
@@ -2507,7 +2486,6 @@ export default function App() {
       updateMultipleSelections,
       updateNotifications,
       updatePageHistoryIndex,
-      updatePageSortingOrder,
       updateQueueData,
       updateSongPosition,
       updateUserData,

@@ -1,6 +1,6 @@
 import React from 'react';
 import Img from '../Img';
-import { SelectableFolderStructure } from './AddMusicFolderPrompt';
+import { SelectableFolderStructure } from './AddMusicFoldersPrompt';
 import FolderImg from '../../../../assets/images/webp/empty-folder.webp';
 import Button from '../Button';
 import Checkbox from '../Checkbox';
@@ -40,7 +40,7 @@ const updateFolderSelectedState = (
   return folders;
 };
 
-const FolderStructure = (props: Props) => {
+const SelectableFolder = (props: Props) => {
   const { structure, updateFolders } = props;
   const { isSelected, path, subFolders } = structure;
 
@@ -51,7 +51,7 @@ const FolderStructure = (props: Props) => {
   const subFoldersComponents = React.useMemo(
     () =>
       structure.subFolders.map((x) => (
-        <FolderStructure
+        <SelectableFolder
           key={x.path}
           structure={x}
           updateFolders={updateFolders}
@@ -61,8 +61,8 @@ const FolderStructure = (props: Props) => {
   );
 
   return (
-    <div className={`${!isSelected && 'opacity-30'}`}>
-      <div className="mb-2 flex cursor-pointer items-center justify-between rounded-md bg-background-color-2 px-2 py-4 dark:bg-dark-background-color-2/50">
+    <div className={`group ${!isSelected && 'opacity-30'}`}>
+      <div className="mb-2 flex cursor-pointer items-center justify-between rounded-md bg-background-color-2 px-2 py-4 dark:bg-dark-background-color-2/50 dark:text-font-color-white">
         <div className="flex items-center">
           <Checkbox
             className="!mx-2 !my-0"
@@ -85,7 +85,7 @@ const FolderStructure = (props: Props) => {
         </div>
         {subFolders.length > 0 && (
           <Button
-            className="!rounded-full !border-none bg-background-color-1 !p-1 dark:bg-dark-background-color-1"
+            className="!rounded-full !border-none !p-1 group-hover:bg-background-color-1 dark:group-hover:bg-dark-background-color-1"
             iconClassName="!text-2xl !leading-none"
             iconName={isSubFoldersVisible ? 'arrow_drop_up' : 'arrow_drop_down'}
             clickHandler={() => setIsSubFoldersVisible((state) => !state)}
@@ -101,4 +101,4 @@ const FolderStructure = (props: Props) => {
   );
 };
 
-export default FolderStructure;
+export default SelectableFolder;

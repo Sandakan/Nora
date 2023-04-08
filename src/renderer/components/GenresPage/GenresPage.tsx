@@ -8,6 +8,7 @@ import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import storage from 'renderer/utils/localStorage';
 
 import Dropdown from '../Dropdown';
 import MainContainer from '../MainContainer';
@@ -20,24 +21,19 @@ import NoSongsImage from '../../../../assets/images/svg/Summer landscape_Monochr
 const GenresPage = () => {
   const {
     currentlyActivePage,
-    userData,
+    localStorageData,
     isMultipleSelectionEnabled,
     multipleSelectionsData,
   } = React.useContext(AppContext);
-  const {
-    updateCurrentlyActivePageData,
-    updatePageSortingOrder,
-    toggleMultipleSelections,
-  } = React.useContext(AppUpdateContext);
+  const { updateCurrentlyActivePageData, toggleMultipleSelections } =
+    React.useContext(AppUpdateContext);
 
   const [genresData, setGenresData] = React.useState([] as Genre[] | null);
   const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
-  const [sortingOrder, setSortingOrder] = React.useState(
-    currentlyActivePage.data && currentlyActivePage.data.sortingOrder
-      ? (currentlyActivePage.data.sortingOrder as GenreSortTypes)
-      : userData && userData.sortingStates.genresPage
-      ? userData.sortingStates.genresPage
-      : ('aToZ' as GenreSortTypes)
+  const [sortingOrder, setSortingOrder] = React.useState<GenreSortTypes>(
+    currentlyActivePage?.data?.sortingOrder ||
+      localStorageData?.sortingStates?.genresPage ||
+      'aToZ'
   );
 
   const containerRef = React.useRef(null as HTMLDivElement | null);
@@ -87,8 +83,7 @@ const GenresPage = () => {
   }, [fetchGenresData]);
 
   React.useEffect(
-    () => updatePageSortingOrder('sortingStates.genresPage', sortingOrder),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    () => storage.sortingStates.setSortingStates('genresPage', sortingOrder),
     [sortingOrder]
   );
 
@@ -140,7 +135,7 @@ const GenresPage = () => {
       }}
     >
       <>
-        <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">
             Genres{' '}
             <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">

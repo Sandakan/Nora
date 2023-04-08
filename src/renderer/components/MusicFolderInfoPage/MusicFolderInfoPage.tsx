@@ -192,7 +192,7 @@ const MusicFolderInfoPage = () => {
 
   const { folderName } = React.useMemo(() => {
     if (folderInfo) {
-      const { path } = folderInfo.folderData;
+      const { path } = folderInfo;
       const name = path.split('\\').pop() || path;
 
       return { folderPath: path, folderName: name };
@@ -223,7 +223,7 @@ const MusicFolderInfoPage = () => {
       }}
     >
       <>
-        <div className="title-container mt-2 mb-8 flex items-center justify-between pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container mb-8 mt-2 flex items-center justify-between pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           '{folderName}' Folder
           {folderInfo && (
             <div className="buttons-container flex text-sm">
@@ -268,7 +268,7 @@ const MusicFolderInfoPage = () => {
                       .map((song) => song.songId),
                     'folder',
                     false,
-                    folderInfo.folderData.path,
+                    folderInfo.path,
                     true
                   )
                 }
@@ -285,7 +285,7 @@ const MusicFolderInfoPage = () => {
                       .map((song) => song.songId),
                     'folder',
                     true,
-                    folderInfo.folderData.path,
+                    folderInfo.path,
                     true
                   )
                 }

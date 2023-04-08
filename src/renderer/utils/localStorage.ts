@@ -34,6 +34,13 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     artists: [],
     genres: [],
   },
+  sortingStates: {
+    albumsPage: 'aToZ',
+    artistsPage: 'aToZ',
+    genresPage: 'aToZ',
+    playlistsPage: 'aToZ',
+    songsPage: 'aToZ',
+  },
 };
 
 const resetLocalStorage = () => {
@@ -132,6 +139,15 @@ const getItem = <
   if (itemType in storage && type in storage[itemType])
     return storage[itemType][type];
 
+  if (
+    itemType in LOCAL_STORAGE_DEFAULT_TEMPLATE &&
+    type in LOCAL_STORAGE_DEFAULT_TEMPLATE[itemType]
+  ) {
+    storage[itemType][type] = LOCAL_STORAGE_DEFAULT_TEMPLATE[itemType][type];
+    setAllItems(storage);
+    return LOCAL_STORAGE_DEFAULT_TEMPLATE[itemType][type];
+  }
+
   throw new Error(
     `requested item type '${itemType}' or type '${String(
       type
@@ -227,6 +243,21 @@ const getIgnoredDuplicates = <Type extends keyof IgnoredDuplicates>(
 
 // / / / / / / / / / /
 
+// SORTING STATES
+
+const setSortingStates = <
+  Type extends keyof SortingStates,
+  Data extends SortingStates[Type]
+>(
+  type: Type,
+  data: Data
+) => setItem('sortingStates', type, data);
+
+const getSortingStates = <Type extends keyof SortingStates>(type: Type) =>
+  getItem('sortingStates', type);
+
+// / / / / / / / / / /
+
 export default {
   preferences: { setPreferences, getPreferences },
   playback: {
@@ -241,6 +272,7 @@ export default {
     getIgnoredSeparateArtists,
   },
   ignoredDuplicates: { setIgnoredDuplicates, getIgnoredDuplicates },
+  sortingStates: { setSortingStates, getSortingStates },
   checkLocalStorage,
   resetLocalStorage,
   getAllItems,

@@ -14,6 +14,7 @@ import {
   Tray,
   Menu,
   nativeImage,
+  OpenDialogOptions,
 } from 'electron';
 import path from 'path';
 import os from 'os';
@@ -31,7 +32,7 @@ import {
 } from './filesystem';
 import { resolveHtmlPath } from './utils/util';
 import updateSongId3Tags from './updateSongId3Tags';
-import { version } from '../../package.json';
+import { version, appPreferences } from '../../package.json';
 import search from './search';
 import {
   searchSongMetadataResultsInInternet,
@@ -41,7 +42,7 @@ import deleteSongsFromSystem from './core/deleteSongsFromSystem';
 import removeMusicFolder from './core/removeMusicFolder';
 import restoreBlacklistedSongs from './core/restoreBlacklistedSongs';
 import addWatchersToFolders from './fs/addWatchersToFolders';
-import addMusicFolder from './core/addMusicFolder';
+import addSongsFromFolderStructures from './core/addMusicFolder';
 import getArtistInfoFromNet from './core/getArtistInfoFromNet';
 import getSongLyrics from './core/getSongLyrics';
 import sendAudioDataFromPath from './core/sendAudioDataFromPath';
@@ -83,7 +84,7 @@ import restoreBlacklistedFolders from './core/restoreBlacklistedFolder';
 import toggleBlacklistFolders from './core/toggleBlacklistFolders';
 import getStorageUsage from './core/getStorageUsage';
 import { generatePalettes } from './other/generatePalette';
-import { getFolderInfo } from './core/getFolderInfo';
+import { getFolderStructures } from './core/getFolderStructures';
 import { getArtistDuplicates } from './core/getDuplicates';
 import { resolveArtistDuplicates } from './core/resolveDuplicates';
 import addArtworkToAPlaylist from './core/addArtworkToAPlaylist';
@@ -108,6 +109,17 @@ const MINI_PLAYER_MAX_SIZE_X = 510;
 const MINI_PLAYER_MAX_SIZE_Y = 300;
 const MINI_PLAYER_ASPECT_RATIO = 17 / 10;
 const abortController = new AbortController();
+const DEFAULT_OPEN_DIALOG_OPTIONS: OpenDialogOptions = {
+  title: 'Select a Music Folder',
+  buttonLabel: 'Add folder',
+  filters: [
+    {
+      name: 'Audio Files',
+      extensions: appPreferences.supportedMusicExtensions,
+    },
+  ],
+  properties: ['openDirectory', 'multiSelections'],
+};
 
 // / / / / / / VARIABLES / / / / / / /
 // eslint-disable-next-line import/no-mutable-exports
@@ -334,8 +346,10 @@ app
         saveUserData('currentSong.stoppedPosition', position)
       );
 
-      ipcMain.handle('app/addMusicFolder', (_, sortType: SongSortTypes) =>
-        addMusicFolder(mainWindow, sortType)
+      ipcMain.handle(
+        'app/addSongsFromFolderStructures',
+        (_, structures: FolderStructure[], sortType: SongSortTypes) =>
+          addSongsFromFolderStructures(structures, sortType)
       );
 
       ipcMain.handle('app/getSong', (_, id: string) => sendAudioData(id));
@@ -586,7 +600,7 @@ app
         clearSearchHistoryResults(searchText)
       );
 
-      ipcMain.handle('app/getFolderInfo', () => getFolderInfo(mainWindow));
+      ipcMain.handle('app/getFolderStructures', () => getFolderStructures());
 
       ipcMain.on('app/resetApp', () => resetApp());
 
@@ -683,13 +697,13 @@ app
       );
 
       //  / / / / / / / / / / / GLOBAL SHORTCUTS / / / / / / / / / / / / / /
-      globalShortcut.register('F5', () => {
-        const isFocused = mainWindow.isFocused();
-        log('USER REQUESTED RENDERER REFRESH USING GLOBAL SHORTCUT.', {
-          isFocused,
-        });
-        if (isFocused) restartRenderer();
-      });
+      // globalShortcut.register('F5', () => {
+      //   const isFocused = mainWindow.isFocused();
+      //   log('USER REQUESTED RENDERER REFRESH USING GLOBAL SHORTCUT.', {
+      //     isFocused,
+      //   });
+      //   if (isFocused) restartRenderer();
+      // });
 
       globalShortcut.register('F12', () => {
         log(
@@ -824,6 +838,21 @@ function registerFileProtocol(
   }
 }
 
+export async function showOpenDialog(
+  openDialogOptions = DEFAULT_OPEN_DIALOG_OPTIONS
+) {
+  const { canceled, filePaths } = await dialog.showOpenDialog(
+    mainWindow,
+    openDialogOptions
+  );
+
+  if (canceled) {
+    log('User cancelled the folder selection popup.');
+    throw new Error('PROMPT_CLOSED_BEFORE_INPUT' as MessageCodes);
+  }
+  return filePaths;
+}
+
 function manageAppMoveEvent() {
   const [x, y] = mainWindow.getPosition();
   log(
@@ -925,6 +954,7 @@ async function getImagefileLocation() {
 async function resetApp() {
   log('!-!-!-!-!-!  STARTED THE RESETTING PROCESS OF THE APP.  !-!-!-!-!-!');
   try {
+    await mainWindow.webContents.session.clearStorageData();
     resetAppCache();
     await resetAppData();
     log(

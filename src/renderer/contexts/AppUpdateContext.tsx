@@ -63,7 +63,6 @@ export interface AppUpdateContextType {
   ) => void;
   changeQueueCurrentSongIndex: (currentSongIndex: number) => void;
   updateMiniPlayerStatus: (isVisible: boolean) => void;
-  updatePageSortingOrder: (page: PageSortTypes, state: unknown) => void;
   clearAudioPlayerData: () => void;
   updateBodyBackgroundImage: (isVisible: boolean, src?: string) => void;
   updateMultipleSelections: (

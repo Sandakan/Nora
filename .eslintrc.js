@@ -4,7 +4,7 @@ module.exports = {
     // A temporary hack related to IDE not resolving correct package.json
     'import/no-extraneous-dependencies': 'off',
     // Since React 17 and typescript 4.1 you can safely disable the rule
-    // 'react/react-in-jsx-scope': 'off',
+    'react/react-in-jsx-scope': 'off',
     'prettier/prettier': 'off',
     // custom eslint rules
     'react/require-default-props': 'off',

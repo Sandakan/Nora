@@ -154,17 +154,18 @@ const AudioPlaybackSettings = () => {
               }
               clickHandler={() => {
                 const state = !userData?.preferences.isMusixmatchLyricsEnabled;
-                window.api.saveUserData(
-                  'preferences.isMusixmatchLyricsEnabled',
-                  state
-                );
-                updateUserData((prevData) => ({
-                  ...prevData,
-                  preferences: {
-                    ...prevData.preferences,
-                    isMusixmatchLyricsEnabled: state,
-                  },
-                }));
+                window.api
+                  .saveUserData('preferences.isMusixmatchLyricsEnabled', state)
+                  .then(() =>
+                    updateUserData((prevData) => ({
+                      ...prevData,
+                      preferences: {
+                        ...prevData.preferences,
+                        isMusixmatchLyricsEnabled: state,
+                      },
+                    }))
+                  )
+                  .catch((err) => console.error(err));
               }}
               isDisabled={userData?.preferences.isMusixmatchLyricsEnabled}
             />

@@ -17,11 +17,16 @@ export const closeAbortController = (pathOrId?: string) => {
 };
 
 export const closeAllAbortControllers = () => {
+  const abortControllerIds = watcherInstances.map((instance) => instance.id);
   for (let i = 0; i < watcherInstances.length; i += 1) {
     const watcherInstance = watcherInstances[i];
     watcherInstance.controller.abort();
   }
-  return log(`Closed all abort controllers successfully.`, undefined, 'WARN');
+  return log(
+    `Closed all abort controllers successfully.`,
+    { closedAbortControllerIds: abortControllerIds },
+    'WARN'
+  );
 };
 
 export const saveAbortController = (

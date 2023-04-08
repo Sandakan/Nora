@@ -1,38 +1,36 @@
 import React, { CSSProperties } from 'react';
 import { FixedSizeGrid as Grid } from 'react-window';
+
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import debounce from 'renderer/utils/debounce';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import storage from 'renderer/utils/localStorage';
 
 import { Artist } from './Artist';
-import NoArtistImage from '../../../../assets/images/svg/Sun_Monochromatic.svg';
 import Dropdown from '../Dropdown';
 import MainContainer from '../MainContainer';
 import Img from '../Img';
 import Button from '../Button';
 
+import NoArtistImage from '../../../../assets/images/svg/Sun_Monochromatic.svg';
+
 const ArtistPage = () => {
   const {
     currentlyActivePage,
-    userData,
+    localStorageData,
     isMultipleSelectionEnabled,
     multipleSelectionsData,
   } = React.useContext(AppContext);
-  const {
-    updateCurrentlyActivePageData,
-    updatePageSortingOrder,
-    toggleMultipleSelections,
-  } = React.useContext(AppUpdateContext);
+  const { updateCurrentlyActivePageData, toggleMultipleSelections } =
+    React.useContext(AppUpdateContext);
 
   const [artistsData, setArtistsData] = React.useState([] as Artist[]);
-  const [sortingOrder, setSortingOrder] = React.useState(
-    (currentlyActivePage.data && currentlyActivePage.data.sortingOrder
-      ? currentlyActivePage.data.sortingOrder
-      : userData && userData.sortingStates.artistsPage
-      ? userData.sortingStates.artistsPage
-      : 'aToZ') as ArtistSortTypes
+  const [sortingOrder, setSortingOrder] = React.useState<ArtistSortTypes>(
+    currentlyActivePage?.data?.sortingOrder ||
+      localStorageData?.sortingStates?.artistsPage ||
+      'aToZ'
   );
 
   const containerRef = React.useRef(null as HTMLDivElement | null);
@@ -83,8 +81,7 @@ const ArtistPage = () => {
   }, [fetchArtistsData]);
 
   React.useEffect(() => {
-    updatePageSortingOrder('sortingStates.artistsPage', sortingOrder);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    storage.sortingStates.setSortingStates('artistsPage', sortingOrder);
   }, [sortingOrder]);
 
   const selectAllHandler = useSelectAllHandler(
@@ -146,7 +143,7 @@ const ArtistPage = () => {
       }}
     >
       <>
-        <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">
             Artists{' '}
             <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">

@@ -385,7 +385,7 @@ declare global {
 
   interface UserData {
     theme: AppThemeData;
-    musicFolders: MusicFolderData[];
+    musicFolders: FolderStructure[];
     preferences: {
       autoLaunchApp: boolean;
       openWindowAsHiddenOnSystemStart: boolean;
@@ -400,13 +400,6 @@ declare global {
     windowDiamensions: {
       mainWindow?: WindowCordinates;
       miniPlayer?: WindowCordinates;
-    };
-    sortingStates: {
-      songsPage?: SongSortTypes;
-      artistsPage?: ArtistSortTypes;
-      playlistsPage?: PlaylistSortTypes;
-      albumsPage?: AlbumSortTypes;
-      genresPage?: GenreSortTypes;
     };
     recentSearches: string[];
     customMusixmatchUserToken?: string;
@@ -437,10 +430,10 @@ declare global {
     subFolders: FolderStructure[];
   }
 
-  interface MusicFolder {
-    folderData: MusicFolderData;
+  interface MusicFolder extends FolderStructure {
     songIds: string[];
     isBlacklisted: boolean;
+    subFolders: MusicFolder[];
   }
 
   // ? LocalStorage related types
@@ -493,12 +486,21 @@ declare global {
     genres: string[][];
   }
 
+  interface SortingStates {
+    songsPage?: SongSortTypes;
+    artistsPage?: ArtistSortTypes;
+    playlistsPage?: PlaylistSortTypes;
+    albumsPage?: AlbumSortTypes;
+    genresPage?: GenreSortTypes;
+  }
+
   interface LocalStorage {
     preferences: Preferences;
     playback: Playback;
     queue: Queue;
     ignoredSeparateArtists: string[];
     ignoredDuplicates: IgnoredDuplicates;
+    sortingStates: SortingStates;
   }
 
   // ? Playlists related types

@@ -25,6 +25,7 @@ import RecentlyPlayedSongs from './RecentlyPlayedSongs';
 import RecentlyPlayedArtists from './RecentlyPlayedArtists';
 import MostLovedSongs from './MostLovedSongs';
 import MostLovedArtists from './MostLovedArtists';
+import AddMusicFoldersPrompt from '../MusicFoldersPage/AddMusicFoldersPrompt';
 
 interface HomePageReducer {
   latestSongs: (AudioInfo | null)[];
@@ -248,28 +249,29 @@ const HomePage = () => {
   React.useEffect(() => fetchMostLovedArtists(), [fetchMostLovedArtists]);
 
   const addNewSongs = () => {
-    dispatch({ type: 'SONGS_DATA', data: [] });
-    window.api
-      .addMusicFolder()
-      .then((songs) => {
-        const relevantSongsData: AudioInfo[] = songs.map((song) => {
-          return {
-            title: song.title,
-            songId: song.songId,
-            artists: song.artists,
-            duration: song.duration,
-            palette: song.palette,
-            path: song.path,
-            artworkPaths: song.artworkPaths,
-            addedDate: song.addedDate,
-            isAFavorite: song.isAFavorite,
-            isBlacklisted: song.isBlacklisted,
-          };
-        });
-        dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
-      })
-      // eslint-disable-next-line no-console
-      .catch(() => dispatch({ type: 'SONGS_DATA', data: [null] }));
+    changePromptMenuData(
+      true,
+      <AddMusicFoldersPrompt
+        onSuccess={(songs) => {
+          const relevantSongsData: AudioInfo[] = songs.map((song) => {
+            return {
+              title: song.title,
+              songId: song.songId,
+              artists: song.artists,
+              duration: song.duration,
+              palette: song.palette,
+              path: song.path,
+              artworkPaths: song.artworkPaths,
+              addedDate: song.addedDate,
+              isAFavorite: song.isAFavorite,
+              isBlacklisted: song.isBlacklisted,
+            };
+          });
+          dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
+        }}
+        onFailure={() => dispatch({ type: 'SONGS_DATA', data: [null] })}
+      />
+    );
   };
 
   const homePageContextMenus: ContextMenuItem[] = React.useMemo(
@@ -383,7 +385,9 @@ const HomePage = () => {
               <span className="material-icons-round-outlined mb-1 text-4xl">
                 headphones
               </span>{' '}
-              <span>Listen to some songs to show additional metrics.</span>
+              <p className="text-sm">
+                Listen to some songs to show additional metrics.
+              </p>
             </div>
           )}
       </>
