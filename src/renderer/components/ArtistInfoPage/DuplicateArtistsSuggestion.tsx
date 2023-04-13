@@ -12,10 +12,14 @@ type Props = {
 };
 
 const DuplicateArtistsSuggestion = (props: Props) => {
-  const { bodyBackgroundImage, currentlyActivePage } =
+  const { bodyBackgroundImage, currentlyActivePage, currentSongData } =
     React.useContext(AppContext);
-  const { addNewNotifications, changeCurrentActivePage } =
-    React.useContext(AppUpdateContext);
+  const {
+    addNewNotifications,
+    changeCurrentActivePage,
+    updateCurrentSongData,
+  } = React.useContext(AppUpdateContext);
+
   const { name = '', artistId = '' } = props;
 
   const [isVisible, setIsVisible] = React.useState(true);
@@ -89,7 +93,16 @@ const DuplicateArtistsSuggestion = (props: Props) => {
 
       window.api
         .resolveArtistDuplicates(selectedId, duplicateIds)
-        .then(() => {
+        .then((res) => {
+          if (
+            res?.updatedData &&
+            currentSongData.songId === res.updatedData.songId
+          ) {
+            updateCurrentSongData((prevData) => ({
+              ...prevData,
+              ...res.updatedData,
+            }));
+          }
           setIsVisible(false);
           if (duplicateIds.includes(currentlyActivePage.data?.artistId))
             changeCurrentActivePage('Home');

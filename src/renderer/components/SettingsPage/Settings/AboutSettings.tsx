@@ -24,7 +24,6 @@ import ResetAppConfirmationPrompt from '../../HomePage/ResetAppConfirmationPromp
 import SensitiveActionConfirmPrompt from '../../SensitiveActionConfirmPrompt';
 import AppShortcutsPrompt from '../AppShortcutsPrompt';
 import AppStats from './AppStats';
-import AddMusicFoldersPrompt from '../../MusicFoldersPage/AddMusicFoldersPrompt';
 
 const AboutSettings = () => {
   const { isDarkMode } = React.useContext(AppContext);
@@ -171,7 +170,7 @@ const AboutSettings = () => {
                   <div className="mb-4 w-full text-center text-3xl font-medium">
                     Open Source Licenses
                   </div>
-                  <div className="relative max-h-full w-full overflow-y-auto whitespace-pre-wrap px-4">
+                  <div className="relative max-h-full w-full overflow-y-auto whitespace-pre-wrap px-4 text-center text-sm">
                     {openSourceLicenses}
                   </div>
                 </>,

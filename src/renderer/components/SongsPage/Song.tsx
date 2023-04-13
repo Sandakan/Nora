@@ -248,15 +248,30 @@ const Song = React.forwardRef(
           iconName: 'shortcut',
           handlerFunction: () => {
             if (isMultipleSelectionsEnabled) {
-              const newQueue = queue.queue.filter(
-                (id) => !songIds.includes(id)
-              );
-              newQueue.splice(
-                queue.queue.indexOf(currentSongData.songId) + 1 || 0,
-                0,
-                ...songIds
-              );
-              updateQueueData(undefined, newQueue);
+              let currentSongIndex =
+                queue.currentSongIndex ??
+                queue.queue.indexOf(currentSongData.songId);
+              const duplicateIds: string[] = [];
+
+              const newQueue = queue.queue.filter((id) => {
+                const isADuplicate = songIds.includes(id);
+                if (isADuplicate) duplicateIds.push(id);
+
+                return !isADuplicate;
+              });
+
+              for (const duplicateId of duplicateIds) {
+                const duplicateIdPosition = queue.queue.indexOf(duplicateId);
+
+                if (
+                  duplicateIdPosition !== -1 &&
+                  duplicateIdPosition < currentSongIndex &&
+                  currentSongIndex - 1 >= 0
+                )
+                  currentSongIndex -= 1;
+              }
+              newQueue.splice(currentSongIndex + 1, 0, ...songIds);
+              updateQueueData(currentSongIndex, newQueue, undefined, false);
               addNewNotifications([
                 {
                   id: `${title}PlayNext`,
@@ -269,12 +284,21 @@ const Song = React.forwardRef(
               ]);
             } else {
               const newQueue = queue.queue.filter((id) => id !== songId);
+              const duplicateSongIndex = queue.queue.indexOf(songId);
+
+              const currentSongIndex =
+                queue.currentSongIndex &&
+                duplicateSongIndex !== -1 &&
+                duplicateSongIndex < queue.currentSongIndex
+                  ? queue.currentSongIndex - 1
+                  : undefined;
+
               newQueue.splice(
                 queue.queue.indexOf(currentSongData.songId) + 1 || 0,
                 0,
                 songId
               );
-              updateQueueData(undefined, newQueue);
+              updateQueueData(currentSongIndex, newQueue, undefined, false);
               addNewNotifications([
                 {
                   id: `${title}PlayNext`,
@@ -520,7 +544,7 @@ const Song = React.forwardRef(
         data-index={index}
         {...provided.draggableProps}
         {...provided.dragHandleProps}
-        className={`${songId} group relative mr-4 mb-2 flex aspect-[2/1] h-[3.25rem] w-[98%] overflow-hidden rounded-lg p-[0.2rem] outline-1 -outline-offset-2 transition-[background,color,opacity] ease-in-out focus-visible:!outline ${
+        className={`${songId} group relative mb-2 mr-4 flex aspect-[2/1] h-[3.25rem] w-[98%] overflow-hidden rounded-lg p-[0.2rem] outline-1 -outline-offset-2 transition-[background,color,opacity] ease-in-out focus-visible:!outline ${
           currentSongData.songId === songId || isAMultipleSelection
             ? bodyBackgroundImage
               ? `bg-background-color-3/70 text-font-color-black shadow-lg backdrop-blur-md dark:bg-dark-background-color-3/70`
@@ -593,7 +617,7 @@ const Song = React.forwardRef(
             ''
           )}
           <div className="song-cover-container relative ml-2 mr-4 flex h-[90%] flex-row items-center justify-center overflow-hidden rounded-md">
-            <div className="play-btn-container absolute top-1/2 left-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
+            <div className="play-btn-container absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
               <Button
                 className="!m-0 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 focus-visible:!outline"
                 iconClassName={`!text-3xl text-font-color-white text-opacity-0 !leading-none ${
@@ -637,7 +661,7 @@ const Song = React.forwardRef(
           </div>
           <div className="song-duration mr-1 flex w-[12.5%] items-center justify-between pr-4 text-center transition-none">
             <Button
-              className="mt-1 !mr-0 !rounded-none !border-0 !p-0 !text-inherit outline-1 outline-offset-1 focus-visible:!outline"
+              className="!mr-0 mt-1 !rounded-none !border-0 !p-0 !text-inherit outline-1 outline-offset-1 focus-visible:!outline"
               iconName="favorite"
               iconClassName={`${
                 isAFavorite

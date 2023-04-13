@@ -167,7 +167,7 @@ declare global {
 
   // ? Song listening data related types
 
-  interface SavableSongListeningData {
+  interface SongListeningData {
     /** song id of the relevant song */
     songId: string;
     /** no of song skips.
@@ -180,39 +180,12 @@ declare global {
      * Incremented if the user added the song to any playlist. */
     inNoOfPlaylists?: number;
     /** an array of listening records for each year. */
-    listens: SavableYearlyListeningRate[];
-  }
-
-  interface SongListeningData {
-    songId: string;
-    skips?: number;
-    fullListens?: number;
-    inNoOfPlaylists?: number;
     listens: YearlyListeningRate[];
   }
 
-  interface SavableYearlyListeningRate {
-    year: number;
-    /**
-     * An array with strings holding no of listens of the song in each day of each month of an year.
-     *
-     * * Array can have maximum of 12 strings each representing a month.
-     *
-     * * If the array has ["2_0","","1_3"], it means that user has listened to this song 2 times January, 0 times in February, and total of 4 times in March. In this example, other 9 months is considered as if the user didn't listen to this song.
-     *
-     * * String contains no of listens of each of a month seperated by an underscore(_).
-     *
-     * * Empty string says that user didn't listen to this song in that relevant month.
-     *
-     * * if the string contains "2_0_3", that means user listened to this song 2 times on 1st, 0 times on 2nd and 3 times on 3rd day in that month.
-     */
-    months: string[];
-  }
-  type MonthlyListens = number[];
-
   interface YearlyListeningRate {
     year: number;
-    months: MonthlyListens[];
+    listens: [number, number][];
   }
 
   type ListeningDataTypes =
@@ -235,6 +208,7 @@ declare global {
     isShuffling: boolean;
     isMiniPlayer: boolean;
     isPlayerStalled: boolean;
+    playbackRate: number;
   }
 
   type SongSkipReason = 'USER_SKIP' | 'PLAYER_SKIP';
@@ -451,6 +425,7 @@ declare global {
     defaultPageOnStartUp: DefaultPages;
     enableArtworkFromSongCovers: boolean;
     shuffleArtworkFromSongCovers: boolean;
+    removeAnimationsOnBatteryPower: boolean;
   }
 
   interface CurrentSong {
@@ -469,6 +444,7 @@ declare global {
     isRepeating: RepeatTypes;
     currentSong: CurrentSong;
     volume: Volume;
+    playbackRate: number;
   }
 
   interface Equalizer {
@@ -501,6 +477,7 @@ declare global {
     ignoredSeparateArtists: string[];
     ignoredDuplicates: IgnoredDuplicates;
     sortingStates: SortingStates;
+    equalizerPreset: Equalizer;
   }
 
   // ? Playlists related types

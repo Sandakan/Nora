@@ -70,17 +70,32 @@ const seekbarScrollIntervals: DropdownOption<string>[] = [
   { label: '20 seconds', value: '20' },
 ];
 
+const playbackRateIntervals: DropdownOption<string>[] = [
+  { label: '0.25x', value: '0.25' },
+  { label: '0.5x', value: '0.5' },
+  { label: '0.75x', value: '0.75' },
+  { label: '1x', value: '1' },
+  { label: '2x', value: '2' },
+  { label: '2.5x', value: '2.5' },
+  { label: '3x', value: '3' },
+  { label: '4x', value: '4' },
+];
+
 const AudioPlaybackSettings = () => {
   const { userData, localStorageData } = React.useContext(AppContext);
   const { updateUserData, changePromptMenuData } =
     React.useContext(AppUpdateContext);
 
   const [seekbarScrollInterval, setSeekbarScrollInterval] = React.useState('5');
+  const [playbackRateInterval, setPlaybackRateInterval] = React.useState('1');
 
   React.useEffect(() => {
     const interval = storage.preferences.getPreferences(
       'seekbarScrollInterval'
     );
+    const playbackRate = storage.playback.getPlaybackOptions('playbackRate');
+
+    setPlaybackRateInterval(playbackRate.toString());
     setSeekbarScrollInterval(interval.toString());
   }, []);
 
@@ -108,6 +123,26 @@ const AudioPlaybackSettings = () => {
               storage.preferences.setPreferences('showSongRemainingTime', state)
             }
             labelContent="Show remaining song duration"
+          />
+        </li>
+
+        <li className="playback-rate mb-4">
+          <div className="description">
+            Change the playback rate of the player.
+          </div>
+          <Dropdown
+            className="mt-4"
+            name="playbackRateInterval"
+            value={playbackRateInterval.toString()}
+            options={playbackRateIntervals}
+            onChange={(e) => {
+              const val = e.currentTarget.value;
+              setPlaybackRateInterval(val);
+              storage.playback.setPlaybackOptions(
+                'playbackRate',
+                parseFloat(val)
+              );
+            }}
           />
         </li>
 

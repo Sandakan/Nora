@@ -85,7 +85,7 @@ const PreferencesSettings = () => {
         <li className="checkbox-container">
           <div className="secondary-container enable-artwork-from-song-covers mb-4">
             <div className="description">
-              Configure settings related to the artwork made from song covers.
+              Configure settings related to artworks made from song covers.
             </div>
             <Checkbox
               id="enableArtworkFromSongCovers"

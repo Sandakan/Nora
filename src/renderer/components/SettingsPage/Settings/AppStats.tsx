@@ -77,7 +77,7 @@ const AppStats = () => {
       Object.entries(stats).map(([key, value]) => {
         return (
           <span
-            className="flex flex-col items-center border-[3px] border-t-0 border-b-0 border-r-0 border-background-color-2 py-4 text-lg first:border-l-0 dark:border-dark-background-color-2"
+            className="flex flex-col items-center border-[3px] border-b-0 border-r-0 border-t-0 border-background-color-2 py-4 text-lg first:border-l-0 dark:border-dark-background-color-2"
             title={`${value} ${key}`}
             key={`${value}-${key}`}
           >
@@ -92,7 +92,7 @@ const AppStats = () => {
   );
 
   return (
-    <div className="my-8 grid grid-cols-5 rounded-lg border-[3px] border-background-color-2 dark:border-dark-background-color-2">
+    <div className="mx-auto my-8 grid max-w-4xl grid-cols-5 rounded-lg border-[3px] border-background-color-2 dark:border-dark-background-color-2">
       {statComponents}
     </div>
   );

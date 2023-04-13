@@ -14,8 +14,8 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import NoSongsImage from '../../../../assets/images/svg/Empty Inbox _Monochromatic.svg';
-import DataFetchingImage from '../../../../assets/images/svg/Umbrella_Monochromatic.svg';
+import useResizeObserver from 'renderer/hooks/useResizeObserver';
+
 import ErrorPrompt from '../ErrorPrompt';
 import MainContainer from '../MainContainer';
 import Button from '../Button';
@@ -26,6 +26,9 @@ import RecentlyPlayedArtists from './RecentlyPlayedArtists';
 import MostLovedSongs from './MostLovedSongs';
 import MostLovedArtists from './MostLovedArtists';
 import AddMusicFoldersPrompt from '../MusicFoldersPage/AddMusicFoldersPrompt';
+
+import NoSongsImage from '../../../../assets/images/svg/Empty Inbox _Monochromatic.svg';
+import DataFetchingImage from '../../../../assets/images/svg/Umbrella_Monochromatic.svg';
 
 interface HomePageReducer {
   latestSongs: (AudioInfo | null)[];
@@ -89,19 +92,44 @@ const HomePage = () => {
     mostLovedArtists: [],
   });
 
+  const SONG_CARD_WIDTH = 320;
+  const ARTIST_WIDTH = 175;
+
+  const recentlyAddedSongsContainerRef = React.useRef<HTMLDivElement>(null);
+  const recentlyAddedSongsContainerDiamensions = useResizeObserver(
+    recentlyAddedSongsContainerRef,
+    250
+  );
+  const {
+    noOfRecentlyAddedSongCards,
+    noOfRecentandLovedArtists,
+    noOfRecentandLovedSongCards,
+  } = React.useMemo(() => {
+    const { width } = recentlyAddedSongsContainerDiamensions;
+    // const containerPaddingLeft = 32;
+
+    return {
+      noOfRecentlyAddedSongCards: Math.floor(width / SONG_CARD_WIDTH) * 2 || 5,
+      noOfRecentandLovedSongCards: Math.floor(width / SONG_CARD_WIDTH) || 3,
+      noOfRecentandLovedArtists: Math.floor(width / ARTIST_WIDTH) || 5,
+    };
+  }, [recentlyAddedSongsContainerDiamensions]);
+
   const fetchLatestSongs = React.useCallback(() => {
-    window.api.getAllSongs('dateAddedAscending', 1, 5).then((audioData) => {
-      if (!audioData || audioData.data.length === 0)
-        return dispatch({ type: 'SONGS_DATA', data: [null] });
-      else {
-        dispatch({
-          type: 'SONGS_DATA',
-          data: audioData.data,
-        });
-        return undefined;
-      }
-    });
-  }, []);
+    window.api
+      .getAllSongs('dateAddedAscending', 1, noOfRecentlyAddedSongCards)
+      .then((audioData) => {
+        if (!audioData || audioData.data.length === 0)
+          return dispatch({ type: 'SONGS_DATA', data: [null] });
+        else {
+          dispatch({
+            type: 'SONGS_DATA',
+            data: audioData.data,
+          });
+          return undefined;
+        }
+      });
+  }, [noOfRecentlyAddedSongCards]);
 
   const fetchRecentlyPlayedSongs = React.useCallback(async () => {
     const recentSongs = await window.api
@@ -114,7 +142,12 @@ const HomePage = () => {
       recentSongs[0].songs.length > 0
     )
       window.api
-        .getSongInfo(recentSongs[0].songs, undefined, 5, true)
+        .getSongInfo(
+          recentSongs[0].songs,
+          undefined,
+          noOfRecentandLovedSongCards + 5,
+          true
+        )
         .then((res) => {
           if (res)
             dispatch({
@@ -123,7 +156,7 @@ const HomePage = () => {
             });
         })
         .catch((err) => console.error(err));
-  }, []);
+  }, [noOfRecentandLovedSongCards]);
 
   const fetchRecentArtistsData = React.useCallback(() => {
     if (content.recentlyPlayedSongs.length > 0) {
@@ -135,18 +168,20 @@ const HomePage = () => {
             )
             .flat()
         ),
-      ].filter((_, index) => index < 5);
+      ];
 
       if (artistIds.length > 0)
-        window.api.getArtistData(artistIds).then((res) => {
-          if (res && Array.isArray(res))
-            dispatch({
-              type: 'RECENT_SONGS_ARTISTS',
-              data: res,
-            });
-        });
+        window.api
+          .getArtistData(artistIds, undefined, noOfRecentandLovedArtists)
+          .then((res) => {
+            if (res && Array.isArray(res))
+              dispatch({
+                type: 'RECENT_SONGS_ARTISTS',
+                data: res,
+              });
+          });
     }
-  }, [content.recentlyPlayedSongs]);
+  }, [content.recentlyPlayedSongs, noOfRecentandLovedArtists]);
 
   // ? Most loved songs are fetched after the user have made at least one favorite song from the library.
   const fetchMostLovedSongs = React.useCallback(() => {
@@ -157,7 +192,7 @@ const HomePage = () => {
           return window.api.getSongInfo(
             res[0].songs,
             'allTimeMostListened',
-            5,
+            noOfRecentandLovedSongCards + 5,
             true
           );
         }
@@ -168,24 +203,21 @@ const HomePage = () => {
           dispatch({ type: 'MOST_LOVED_SONGS', data: lovedSongs });
       })
       .catch((err) => console.error(err));
-  }, []);
+  }, [noOfRecentandLovedSongCards]);
 
   const fetchMostLovedArtists = React.useCallback(() => {
     if (content.mostLovedSongs.length > 0) {
+      const artistIds = [
+        ...new Set(
+          content.mostLovedSongs
+            .map((song) =>
+              song.artists ? song.artists.map((artist) => artist.artistId) : []
+            )
+            .flat()
+        ),
+      ];
       window.api
-        .getArtistData(
-          [
-            ...new Set(
-              content.mostLovedSongs
-                .map((song) =>
-                  song.artists
-                    ? song.artists.map((artist) => artist.artistId)
-                    : []
-                )
-                .flat()
-            ),
-          ].filter((_, index) => index < 5)
-        )
+        .getArtistData(artistIds, undefined, noOfRecentandLovedArtists)
         .then((res) => {
           if (res && Array.isArray(res))
             dispatch({
@@ -194,12 +226,15 @@ const HomePage = () => {
             });
         });
     }
-  }, [content.mostLovedSongs]);
+  }, [content.mostLovedSongs, noOfRecentandLovedArtists]);
 
   React.useEffect(() => {
     fetchLatestSongs();
     fetchRecentlyPlayedSongs();
     fetchMostLovedSongs();
+  }, [fetchLatestSongs, fetchMostLovedSongs, fetchRecentlyPlayedSongs]);
+
+  React.useEffect(() => {
     const manageDataUpdatesInHomePage = (e: Event) => {
       if ('detail' in e) {
         const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>)
@@ -332,6 +367,7 @@ const HomePage = () => {
         if (homePageContextMenus.length > 0)
           updateContextMenuData(true, homePageContextMenus, e.pageX, e.pageY);
       }}
+      ref={recentlyAddedSongsContainerRef}
     >
       <>
         {content.latestSongs[0] !== null && (
@@ -341,14 +377,22 @@ const HomePage = () => {
         )}
 
         <RecentlyPlayedSongs
-          recentlyPlayedSongs={content.recentlyPlayedSongs}
+          recentlyPlayedSongs={content.recentlyPlayedSongs.slice(
+            0,
+            noOfRecentandLovedSongCards
+          )}
         />
 
         <RecentlyPlayedArtists
           recentlyPlayedSongArtists={content.recentSongArtists}
         />
 
-        <MostLovedSongs mostLovedSongs={content.mostLovedSongs} />
+        <MostLovedSongs
+          mostLovedSongs={content.mostLovedSongs.slice(
+            0,
+            noOfRecentandLovedSongCards
+          )}
+        />
 
         <MostLovedArtists mostLovedArtists={content.mostLovedArtists} />
 

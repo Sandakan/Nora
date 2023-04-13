@@ -39,7 +39,7 @@ interface AppReducer {
   bodyBackgroundImage?: string;
   multipleSelectionsData: MultipleSelectionData;
   appUpdatesState: AppUpdatesState;
-  equalizerOptions: Equalizer;
+  isOnBatteryPower: boolean;
 }
 
 type AppReducerStateActions =
@@ -70,7 +70,7 @@ type AppReducerStateActions =
   | 'UPDATE_MULTIPLE_SELECTIONS_DATA'
   | 'CHANGE_APP_UPDATES_DATA'
   | 'UPDATE_LOCAL_STORAGE'
-  | 'UPDATE_EQUALIZER_SETTINGS'
+  | 'UPDATE_BATTERY_POWER_STATE'
   | 'TOGGLE_SHOW_SONG_REMAINING_DURATION';
 
 const reducer = (
@@ -393,13 +393,13 @@ const reducer = (
             ? (action.data as LocalStorage)
             : state.localStorage,
       };
-    case 'UPDATE_EQUALIZER_SETTINGS':
+    case 'UPDATE_BATTERY_POWER_STATE':
       return {
         ...state,
-        equalizerOptions:
-          typeof action.data === 'object'
-            ? (action.data as Equalizer)
-            : state.equalizerOptions,
+        isOnBatteryPower:
+          typeof action.data === 'boolean'
+            ? (action.data as boolean)
+            : state.isOnBatteryPower,
       };
     default:
       return state;
@@ -408,7 +408,6 @@ const reducer = (
 
 const player = new Audio();
 let repetitivePlaybackErrorsCount = 0;
-player.preload = 'auto';
 
 const context = new window.AudioContext();
 const source = context.createMediaElementSource(player);
@@ -426,6 +425,10 @@ fourHundredHertzFilter.connect(thousandHertzFilter);
 thousandHertzFilter.connect(twoThousandHertzFilter);
 twoThousandHertzFilter.connect(fifteenThousandHertzFilter);
 fifteenThousandHertzFilter.connect(context.destination);
+
+// ? / / / / / / /  PLAYER DEFAULT OPTIONS / / / / / / / / / / / / / /
+player.preload = 'auto';
+player.defaultPlaybackRate = 1.0;
 
 sixtyHertzFilter.type = 'peaking';
 sixtyHertzFilter.frequency.value = 60;
@@ -464,6 +467,7 @@ player.addEventListener('player/trackchange', (e) => {
     );
   }
 });
+// / / / / / / / /
 
 const updateNetworkStatus = () =>
   window.api.networkStatusChange(navigator.onLine);
@@ -499,6 +503,7 @@ const reducerData: AppReducer = {
     songPosition: 0,
     isMiniPlayer: false,
     isPlayerStalled: false,
+    playbackRate: 1.0,
   },
   userData: userDataTemplate,
   currentSongData: {} as AudioPlayerData,
@@ -528,14 +533,7 @@ const reducerData: AppReducer = {
   },
   multipleSelectionsData: { isEnabled: false, multipleSelections: [] },
   appUpdatesState: 'UNKNOWN',
-  equalizerOptions: {
-    sixtyHertz: 0,
-    hundredFiftyHertz: 0,
-    fourHundredHertz: 0,
-    oneKiloHertz: 0,
-    twoPointFourKiloHertz: 0,
-    fifteenKiloHertz: 0,
-  },
+  isOnBatteryPower: false,
 };
 
 console.log('Command line args', window.api.commandLineArgs);
@@ -779,14 +777,20 @@ export default function App() {
       contentRef.current.userData.theme = theme;
     };
 
+    const watchPowerChanges = (_: unknown, isOnBatteryPower: boolean) => {
+      dispatch({ type: 'UPDATE_BATTERY_POWER_STATE', data: isOnBatteryPower });
+    };
+
     window.api.listenForSystemThemeChanges(watchForSystemThemeChanges);
+    window.api.listenForBatteryPowerStateChanges(watchPowerChanges);
     return () => {
-      window.api.StoplisteningForSystemThemeChanges(watchForSystemThemeChanges);
+      window.api.stoplisteningForSystemThemeChanges(watchForSystemThemeChanges);
+      window.api.stopListeningForBatteryPowerStateChanges(watchPowerChanges);
     };
   }, []);
 
   React.useEffect(() => {
-    if (content.equalizerOptions) {
+    if (content.localStorage.equalizerPreset) {
       const {
         fifteenKiloHertz,
         fourHundredHertz,
@@ -794,7 +798,7 @@ export default function App() {
         oneKiloHertz,
         sixtyHertz,
         twoPointFourKiloHertz,
-      } = content.equalizerOptions;
+      } = content.localStorage.equalizerPreset;
 
       sixtyHertzFilter.gain.value = sixtyHertz;
       hundredFiftyHertzFilter.gain.value = hundredFiftyHertz;
@@ -803,7 +807,7 @@ export default function App() {
       twoThousandHertzFilter.gain.value = twoPointFourKiloHertz;
       fifteenThousandHertzFilter.gain.value = fifteenKiloHertz;
     }
-  }, [content.equalizerOptions]);
+  }, [content.localStorage.equalizerPreset]);
 
   const manageWindowBlurOrFocus = React.useCallback(
     (state: 'blur' | 'focus') => {
@@ -958,6 +962,10 @@ export default function App() {
     const syncLocalStorage = () => {
       const allItems = storage.getAllItems();
       dispatch({ type: 'UPDATE_LOCAL_STORAGE', data: allItems });
+
+      if (player.playbackRate !== allItems.playback.playbackRate)
+        player.playbackRate = allItems.playback.playbackRate;
+
       console.log('local storage updated');
     };
 
@@ -1691,10 +1699,10 @@ export default function App() {
   );
 
   const changeQueueCurrentSongIndex = React.useCallback(
-    (currentSongIndex: number) => {
+    (currentSongIndex: number, isPlaySong = true) => {
       console.log('currentSongIndex', currentSongIndex);
       refQueue.current.currentSongIndex = currentSongIndex;
-      playSong(refQueue.current.queue[currentSongIndex]);
+      if (isPlaySong) playSong(refQueue.current.queue[currentSongIndex]);
     },
     [playSong]
   );
@@ -2367,7 +2375,7 @@ export default function App() {
   );
 
   const updateEqualizerOptions = React.useCallback((options: Equalizer) => {
-    dispatch({ type: 'UPDATE_EQUALIZER_SETTINGS', data: options });
+    storage.equalizerPreset.setEqualizerPreset(options);
   }, []);
 
   const appContextStateValues: AppStateContextType = React.useMemo(
@@ -2400,7 +2408,7 @@ export default function App() {
       isMultipleSelectionEnabled: content.multipleSelectionsData.isEnabled,
       multipleSelectionsData: content.multipleSelectionsData,
       appUpdatesState: content.appUpdatesState,
-      equalizerOptions: content.equalizerOptions,
+      equalizerOptions: content.localStorage.equalizerPreset,
     }),
     [
       content.PromptMenuData,
@@ -2408,7 +2416,6 @@ export default function App() {
       content.bodyBackgroundImage,
       content.contextMenuData,
       content.currentSongData,
-      content.equalizerOptions,
       content.isDarkMode,
       content.localStorage,
       content.multipleSelectionsData,
@@ -2500,6 +2507,11 @@ export default function App() {
     [content.player.songPosition]
   );
 
+  const isReducedMotion =
+    content.localStorage.preferences.isReducedMotion ||
+    (content.isOnBatteryPower &&
+      content.localStorage.preferences.removeAnimationsOnBatteryPower);
+
   return (
     <AppContext.Provider value={appContextStateValues}>
       <AppUpdateContext.Provider value={appUpdateContextValues}>
@@ -2510,8 +2522,7 @@ export default function App() {
                 ? 'dark bg-dark-background-color-1'
                 : 'bg-background-color-1'
             } ${
-              content.userData &&
-              content.localStorage.preferences.isReducedMotion
+              isReducedMotion
                 ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
                 : ''
             } flex h-screen w-full flex-col items-center overflow-y-hidden after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc]  [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
@@ -2545,7 +2556,15 @@ export default function App() {
           </div>
         )}
         <SongPositionContext.Provider value={songPositionContextValues}>
-          {content.player.isMiniPlayer && <MiniPlayer />}
+          {content.player.isMiniPlayer && (
+            <MiniPlayer
+              className={`${
+                isReducedMotion
+                  ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
+                  : ''
+              }`}
+            />
+          )}
         </SongPositionContext.Provider>
       </AppUpdateContext.Provider>
     </AppContext.Provider>

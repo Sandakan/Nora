@@ -202,7 +202,7 @@ const CurrentQueuePage = () => {
         if (queue.queueType === 'folder') {
           window.api.getFolderData([queue.queueId]).then((res) => {
             if (res && res.length > 0 && res[0]) {
-              const folderName = res[0].folderData.path.split('\\').pop();
+              const folderName = res[0].path.split('\\').pop();
               setQueueInfo((prevData) => {
                 return {
                   ...prevData,
@@ -349,7 +349,7 @@ const CurrentQueuePage = () => {
       }}
     >
       <>
-        <div className="title-container mt-2 mb-4 flex items-center justify-between pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container mb-4 mt-2 flex items-center justify-between pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           Currently Playing Queue
           <div className="other-controls-container float-right flex">
             <Button
@@ -450,9 +450,14 @@ const CurrentQueuePage = () => {
               />
             </div>
             <div className="queue-info">
+              <div className="queue-type text-sm font-semibold uppercase opacity-50 dark:font-medium">
+                {queue.queueType}
+              </div>
               <div className="queue-title text-3xl">{queueInfo.title}</div>
               <div className="other-info flex text-sm font-light">
-                <div className="queue-no-of-songs">{`${queuedSongs.length} songs`}</div>
+                <div className="queue-no-of-songs">{`${
+                  queuedSongs.length
+                } song${queuedSongs.length !== 1 ? 's' : ''}`}</div>
                 <span className="mx-1">&bull;</span>
                 <div className="queue-total-duration">
                   {calculateTotalTime()}

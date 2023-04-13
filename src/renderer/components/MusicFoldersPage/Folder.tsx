@@ -206,37 +206,10 @@ const Folder = (props: FolderProps) => {
 
   return (
     <div
-      className={`group mb-2 flex w-[98%] cursor-pointer flex-col justify-between ${className}`}
-      onClick={(e) => {
-        e.stopPropagation();
-        if (e.getModifierState('Shift') === true && selectAllHandler)
-          selectAllHandler(folderPath);
-        else if (
-          isMultipleSelectionEnabled &&
-          multipleSelectionsData.selectionType === 'folder'
-        )
-          updateMultipleSelections(
-            folderPath,
-            'folder',
-            isAMultipleSelection ? 'remove' : 'add'
-          );
-        else openMusicFolderInfoPage();
-      }}
-      onKeyDown={(e) => e.key === 'Enter' && openMusicFolderInfoPage()}
-      tabIndex={0}
-      title={isBlacklisted ? `'${folderName}' is blacklisted.` : undefined}
-      onContextMenu={(e) =>
-        updateContextMenuData(
-          true,
-          contextMenuItems,
-          e.pageX,
-          e.pageY,
-          contextMenuItemData
-        )
-      }
+      className={`group mb-2 flex w-full flex-col justify-between ${className}`}
     >
       <div
-        className={`flex w-full items-center justify-between rounded-md px-4 py-2 outline-1 -outline-offset-2 transition-colors focus-visible:!outline dark:text-font-color-white ${
+        className={`flex w-full cursor-pointer items-center justify-between rounded-md px-4 py-2 outline-1 -outline-offset-2 transition-colors focus-visible:!outline dark:text-font-color-white ${
           isAMultipleSelection
             ? '!bg-background-color-3/90 !text-font-color-black dark:!bg-dark-background-color-3/90 dark:!text-font-color-black'
             : 'hover:!bg-background-color-2 dark:hover:!bg-dark-background-color-2'
@@ -245,6 +218,33 @@ const Folder = (props: FolderProps) => {
             ? 'bg-background-color-2/50 dark:bg-dark-background-color-2/30'
             : '!bg-background-color-1 dark:!bg-dark-background-color-1'
         }`}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (e.getModifierState('Shift') === true && selectAllHandler)
+            selectAllHandler(folderPath);
+          else if (
+            isMultipleSelectionEnabled &&
+            multipleSelectionsData.selectionType === 'folder'
+          )
+            updateMultipleSelections(
+              folderPath,
+              'folder',
+              isAMultipleSelection ? 'remove' : 'add'
+            );
+          else openMusicFolderInfoPage();
+        }}
+        onKeyDown={(e) => e.key === 'Enter' && openMusicFolderInfoPage()}
+        tabIndex={0}
+        title={isBlacklisted ? `'${folderName}' is blacklisted.` : undefined}
+        onContextMenu={(e) =>
+          updateContextMenuData(
+            true,
+            contextMenuItems,
+            e.pageX,
+            e.pageY,
+            contextMenuItemData
+          )
+        }
       >
         <div className="folder-img-and-info-container flex items-center">
           {multipleSelectionsData.selectionType === 'folder' ? (

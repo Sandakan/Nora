@@ -312,7 +312,7 @@ function SongTagsEditingPage() {
       changePromptMenuData(
         true,
         <div>
-          <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
+          <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
             Confrim Before Resetting Song Data to Default
           </div>
           <div className="description">
@@ -384,7 +384,7 @@ function SongTagsEditingPage() {
       <>
         {(songId || songPath) && isMetadataEditingSupported && (
           <>
-            <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+            <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
               Song Metadata Editor{' '}
               {!isKnownSource && (
                 <span
@@ -518,14 +518,14 @@ function SongTagsEditingPage() {
             </p>
             <p className="mt-2 px-8 font-light">
               Nora currently doesn't support editing song metadata in{' '}
-              <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
+              <span className="font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
                 {pathExt}
               </span>{' '}
               format.
             </p>
             <p className="px-8 font-light">
               Currently only{' '}
-              <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
+              <span className="font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
                 mp3
               </span>{' '}
               format is supported.

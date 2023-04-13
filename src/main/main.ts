@@ -15,6 +15,7 @@ import {
   Menu,
   nativeImage,
   OpenDialogOptions,
+  powerMonitor,
 } from 'electron';
 import path from 'path';
 import os from 'os';
@@ -128,6 +129,7 @@ let tray: Tray;
 let isMiniPlayer = false;
 let isConnectedToInternet = false;
 let isAudioPlaying = false;
+let isOnBatteryPower = false;
 
 // / / / / / / INITIALIZATION / / / / / / /
 
@@ -142,7 +144,7 @@ dotenv.config({ debug: IS_DEVELOPMENT });
 saveAbortController('main', abortController);
 
 // Sentry.init({
-//   dsn: 'https://c3f3263c53334e51849caaa8a4d677e2@o1402111.ingest.sentry.io/4504757172764672',
+//   dsn: process.env.SENTRY_DSN,
 // });
 // ? / / / / / / / / / / / / / / / / / / / / / / /
 if (IS_DEVELOPMENT) require('electron-debug')();
@@ -341,6 +343,8 @@ app
         console.log('Left full screen');
         mainWindow.webContents.send('app/leftFullscreen');
       });
+      powerMonitor.addListener('on-ac', toggleonBatteryPower);
+      powerMonitor.addListener('on-battery', toggleonBatteryPower);
 
       ipcMain.on('app/getSongPosition', (_, position: number) =>
         saveUserData('currentSong.stoppedPosition', position)
@@ -476,8 +480,12 @@ app
 
       ipcMain.handle(
         'app/getArtistData',
-        (_, artistIdsOrNames?: string[], sortType?: ArtistSortTypes) =>
-          fetchArtistData(artistIdsOrNames, sortType)
+        (
+          _,
+          artistIdsOrNames?: string[],
+          sortType?: ArtistSortTypes,
+          limit?: number
+        ) => fetchArtistData(artistIdsOrNames, sortType, limit)
       );
 
       ipcMain.handle(
@@ -757,6 +765,11 @@ function handleBeforeQuit() {
   );
 }
 
+function toggleonBatteryPower() {
+  isOnBatteryPower = powerMonitor.isOnBatteryPower();
+  mainWindow.webContents.send('app/isOnBatteryPower', isOnBatteryPower);
+}
+
 export function sendMessageToRenderer(
   message: string,
   code?: MessageCodes,
@@ -951,7 +964,7 @@ async function getImagefileLocation() {
   return filePaths[0];
 }
 
-async function resetApp() {
+async function resetApp(restartApp = false) {
   log('!-!-!-!-!-!  STARTED THE RESETTING PROCESS OF THE APP.  !-!-!-!-!-!');
   try {
     await mainWindow.webContents.session.clearStorageData();
@@ -969,8 +982,11 @@ async function resetApp() {
       `====== ERROR OCCURRED WHEN RESETTING THE APP. RELOADING THE APP NOW.  ======\nERROR : ${error}`
     );
   } finally {
-    mainWindow.webContents.reload();
-    log(`====== RELOADING THE RENDERER ======`);
+    log(`====== RELOADING THE ${restartApp ? 'APP' : 'RENDERER'} ======`);
+    if (restartApp) {
+      app.relaunch();
+      app.quit();
+    } else mainWindow.webContents.reload();
   }
 }
 

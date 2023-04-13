@@ -47,20 +47,24 @@ const ListeningActivityBarGraph = (props: Props) => {
 
   const lastSixMonthsListeningActivity = React.useMemo(() => {
     if (listeningData) {
-      const { listens } = listeningData;
-      for (let i = 0; i < listens.length; i += 1) {
-        if (listens[i].year === currentYear) {
-          const { months } = listens[i];
-          const max = Math.max(
-            ...months.map((x) =>
-              x.reduce((prevValue, currValue) => prevValue + currValue)
-            )
-          );
+      for (const listen of listeningData.listens) {
+        if (listen.year === currentYear) {
+          const max = Math.max(...listen.listens.map((x) => x[1]));
 
-          const monthsWithNames = months.map((y, index) => ({
-            listens: y.reduce((prevValue, currValue) => prevValue + currValue),
-            month: monthNames[index],
-          }));
+          const monthsWithNames: { listens: number; month: string }[] = [];
+
+          for (let i = 0; i < monthNames.length; i += 1) {
+            const listens = listen.listens
+              .map((x) => {
+                const [now, noOfListens] = x;
+                const month = new Date(now).getMonth() - 1;
+
+                if (i === month) return noOfListens;
+                return 0;
+              })
+              .reduce((prevValue, currValue) => prevValue + currValue);
+            monthsWithNames.push({ listens, month: monthNames[i] });
+          }
 
           const lastSixMonths = getLastNoOfMonths(
             monthsWithNames,
@@ -100,7 +104,7 @@ const ListeningActivityBarGraph = (props: Props) => {
 
   return (
     <div
-      className="appear-from-bottom mr-4 flex h-full w-[70%] flex-col rounded-md bg-background-color-2/70 pt-2 pb-2 text-center backdrop-blur-md dark:bg-dark-background-color-2/70"
+      className="appear-from-bottom mr-4 flex h-full w-[70%] flex-col rounded-md bg-background-color-2/70 pb-2 pt-2 text-center backdrop-blur-md dark:bg-dark-background-color-2/70"
       title="Bar graph about no of listens per day"
     >
       <div className="pb-1 font-thin text-font-color dark:text-font-color-white">

@@ -29,6 +29,7 @@ const SongInfoPage = () => {
       currentDate,
       currentYear: currentDate.getFullYear(),
       currentMonth: currentDate.getMonth(),
+      currentDay: currentDate.getDate(),
     };
   }, []);
 
@@ -137,23 +138,29 @@ const SongInfoPage = () => {
 
         allTime =
           listens
-            .map((x) => x.months)
-            .flat(2)
+            .map((x) => x.listens)
+            .map((x) => x.map((y) => y[1]))
+            .flat(5)
             .reduce((prevValue, currValue) => prevValue + (currValue || 0)) ||
           0;
 
         for (let i = 0; i < listens.length; i += 1) {
           if (listens[i].year === currentYear) {
             thisYearNoofListens =
-              listens[i].months
-                .flat(2)
+              listens[i].listens
+                .map((x) => x[1])
+                .flat(5)
                 .reduce(
                   (prevValue, currValue) => prevValue + (currValue || 0)
                 ) || 0;
 
-            thisMonthNoOfListens = listens[i].months[currentMonth].reduce(
-              (prevValue, currValue) => prevValue + (currValue || 0)
-            );
+            for (const listen of listens[i].listens) {
+              const [songDateNow, songListens] = listen;
+
+              const songMonth = new Date(songDateNow).getMonth();
+              if (songMonth === currentMonth)
+                thisMonthNoOfListens += songListens;
+            }
             console.log('thisMonth', thisMonthNoOfListens);
           }
         }

@@ -197,13 +197,32 @@ const SongCard = (props: SongCardProp) => {
         iconName: 'shortcut',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) {
-            const newQueue = queue.queue.filter((id) => !songIds.includes(id));
-            newQueue.splice(
-              queue.queue.indexOf(currentSongData.songId) + 1 || 0,
-              0,
-              ...songIds
-            );
-            updateQueueData(undefined, newQueue);
+            let currentSongIndex =
+              queue.currentSongIndex ??
+              queue.queue.indexOf(currentSongData.songId);
+            const duplicateIds: string[] = [];
+
+            const newQueue = queue.queue.filter((id) => {
+              const isADuplicate = songIds.includes(id);
+              if (isADuplicate) duplicateIds.push(id);
+
+              return !isADuplicate;
+            });
+
+            for (const duplicateId of duplicateIds) {
+              const duplicateIdPosition = queue.queue.indexOf(duplicateId);
+
+              if (
+                duplicateIdPosition !== -1 &&
+                duplicateIdPosition < currentSongIndex &&
+                currentSongIndex - 1 >= 0
+              )
+                currentSongIndex -= 1;
+            }
+
+            newQueue.splice(currentSongIndex + 1, 0, ...songIds);
+
+            updateQueueData(currentSongIndex, newQueue, undefined, false);
             addNewNotifications([
               {
                 id: `${title}PlayNext`,
@@ -221,7 +240,17 @@ const SongCard = (props: SongCardProp) => {
               0,
               songId
             );
-            updateQueueData(undefined, newQueue);
+
+            const duplicateSongIndex = queue.queue.indexOf(songId);
+
+            const currentSongIndex =
+              queue.currentSongIndex &&
+              duplicateSongIndex !== -1 &&
+              duplicateSongIndex < queue.currentSongIndex
+                ? queue.currentSongIndex - 1
+                : undefined;
+
+            updateQueueData(currentSongIndex, newQueue, undefined, false);
             addNewNotifications([
               {
                 id: `${title}PlayNext`,
@@ -490,7 +519,7 @@ const SongCard = (props: SongCardProp) => {
         currentSongData.songId === songId && 'current-song'
       } ${
         isSongPlaying && 'playing'
-      } group relative mr-2 mb-2 aspect-[2/1] max-w-md overflow-hidden rounded-2xl border-[transparent] border-background-color-2 shadow-xl transition-[border-color] ease-in-out dark:border-dark-background-color-2 ${
+      } group relative mb-2 mr-2 aspect-[2/1] min-w-[10rem] max-w-[24rem] overflow-hidden rounded-2xl border-[transparent] border-background-color-2 shadow-xl transition-[border-color] ease-in-out dark:border-dark-background-color-2 ${
         className || ''
       } ${isBlacklisted && '!opacity-30'} ${
         isMultipleSelectionEnabled &&
@@ -566,7 +595,7 @@ const SongCard = (props: SongCardProp) => {
           <div className="song-states-container">
             <div className="flex">
               <Button
-                className="mt-1 !mr-0 !rounded-none !border-0 !p-0 !text-inherit outline-1 outline-offset-1 focus-visible:!outline"
+                className="!mr-0 mt-1 !rounded-none !border-0 !p-0 !text-inherit outline-1 outline-offset-1 focus-visible:!outline"
                 iconName="favorite"
                 iconClassName={`${
                   isSongAFavorite
@@ -583,7 +612,7 @@ const SongCard = (props: SongCardProp) => {
               />
               {isBlacklisted && (
                 <span
-                  className="material-icons-round mt-1 ml-2 cursor-pointer text-lg"
+                  className="material-icons-round ml-2 mt-1 cursor-pointer text-lg"
                   title={`'${title}' is blacklisted.`}
                 >
                   block
@@ -596,7 +625,7 @@ const SongCard = (props: SongCardProp) => {
               )}
           </div>
         </div>
-        <div className="play-btn-container absolute top-1/2 left-3/4 -translate-x-1/2 -translate-y-1/2">
+        <div className="play-btn-container absolute left-3/4 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <Button
             className="!m-0 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 focus-visible:!outline"
             iconName={isSongPlaying ? 'pause_circle' : 'play_circle'}

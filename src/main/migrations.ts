@@ -1,5 +1,6 @@
 import type Conf from 'conf/dist/source/index';
 import log from './log';
+// import { version } from '../../package.json';
 
 type StoreNames =
   | 'songs.json'
@@ -21,7 +22,9 @@ export const generateMigrationMessage = (
 };
 
 export const songMigrations = {
-  '1.0.0-alpha': (store: Conf<{ songs: unknown }>) => {
+  '1.0.0-alpha': (
+    store: Conf<{ version?: string; songs: SavableSongData[] }>
+  ) => {
     log('Starting the songs.json migration process.', {
       version: '>=1.0.0-alpha;',
     });
@@ -50,7 +53,9 @@ export const songMigrations = {
 };
 
 export const artistMigrations = {
-  '0.8.0-alpha+2022091400': (store: Conf<{ artists: unknown }>) => {
+  '0.8.0-alpha+2022091400': (
+    store: Conf<{ version?: string; artists: SavableArtist[] }>
+  ) => {
     log(
       'Starting the artists.json migration process.\nVERSION :>=0.8.0-alpha+2022091400;'
     );

@@ -54,10 +54,10 @@ const MostLovedArtists = (props: Props) => {
           }}
         >
           <>
-            <div className="title-container mt-1 mb-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+            <div className="title-container mb-4 mt-1 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
               Most Loved Artists
             </div>
-            <div className="artists-container flex flex-wrap">
+            <div className="artists-container grid grid-flow-col justify-items-center">
               {mostLovedArtistComponents}
             </div>
           </>

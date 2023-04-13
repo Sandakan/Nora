@@ -416,7 +416,6 @@ const EqualizerSettings = () => {
               for (const preset of equalizerPresets) {
                 if (preset.value === presetValue && preset.preset) {
                   dispatch({ data: preset.preset });
-                  // updateEqualizerOptions(preset.preset);
                 }
               }
             }}
@@ -426,14 +425,16 @@ const EqualizerSettings = () => {
             iconName="restart_alt"
             isDisabled={isTheDefaultPreset}
             clickHandler={() => {
-              setSelectedPreset('flat');
-              if (equalizerPresets[0].preset)
-                dispatch({ data: equalizerPresets[0].preset });
+              const defaultPreset = equalizerPresets[1].preset;
+              if (defaultPreset) {
+                dispatch({ data: defaultPreset });
+              }
             }}
           />
         </div>
 
         <div
+          id="equalizer"
           className="equalizer relative mt-4 flex items-center justify-center"
           style={equalizerSliderWidths}
         >

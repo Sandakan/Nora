@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-no-useless-fragment */
-import React from 'react';
+import React, { ForwardedRef } from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 import SongCard from '../SongsPage/SongCard';
@@ -9,19 +9,22 @@ import Button from '../Button';
 
 type Props = { latestSongs: AudioInfo[] };
 
-const RecentlyAddedSongs = (props: Props) => {
-  const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
+const RecentlyAddedSongs = React.forwardRef(
+  (props: Props, ref: ForwardedRef<HTMLDivElement>) => {
+    const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
 
-  const { latestSongs } = props;
+    const { latestSongs } = props;
 
-  const selectAllHandler = useSelectAllHandler(latestSongs, 'songs', 'songId');
+    const selectAllHandler = useSelectAllHandler(
+      latestSongs,
+      'songs',
+      'songId'
+    );
 
-  const latestSongComponents = React.useMemo(
-    () =>
-      latestSongs.length > 0 && latestSongs[0] !== null
-        ? latestSongs
-            .filter((_, index) => index < 5)
-            .map((song, index) => {
+    const latestSongComponents = React.useMemo(
+      () =>
+        latestSongs.length > 0 && latestSongs[0] !== null
+          ? latestSongs.map((song, index) => {
               const songData = song as AudioInfo;
               return (
                 <SongCard
@@ -41,23 +44,23 @@ const RecentlyAddedSongs = (props: Props) => {
                 />
               );
             })
-        : [],
-    [latestSongs, selectAllHandler]
-  );
+          : [],
+      [latestSongs, selectAllHandler]
+    );
 
-  return (
-    <>
-      {latestSongs.length > 0 && latestSongs[0] !== null && (
-        <SecondaryContainer
-          className="recently-added-songs-container appear-from-bottom h-fit max-h-full flex-col pb-8 pl-8"
-          focusable
-          onKeyDown={(e) => {
-            if (e.ctrlKey && e.key === 'a') {
-              e.stopPropagation();
-              selectAllHandler();
-            }
-          }}
-        >
+    return (
+      <SecondaryContainer
+        className="recently-added-songs-container appear-from-bottom h-fit max-h-full flex-col pb-8 pl-8"
+        focusable
+        onKeyDown={(e) => {
+          if (e.ctrlKey && e.key === 'a') {
+            e.stopPropagation();
+            selectAllHandler();
+          }
+        }}
+        ref={ref}
+      >
+        {latestSongs.length > 0 && latestSongs[0] !== null && (
           <>
             <div className="title-container my-4 flex items-center justify-between text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
               Recently Added Songs
@@ -73,14 +76,15 @@ const RecentlyAddedSongs = (props: Props) => {
                 }
               />
             </div>
-            <div className="songs-container grid grid-cols-3 grid-rows-1 gap-2 pr-2">
+            <div className="songs-container grid grid-flow-col grid-rows-2 items-center justify-items-center gap-2 pr-2">
               {latestSongComponents}
             </div>
           </>
-        </SecondaryContainer>
-      )}
-    </>
-  );
-};
+        )}
+      </SecondaryContainer>
+    );
+  }
+);
 
+RecentlyAddedSongs.displayName = 'RecentlyAddedSongs';
 export default RecentlyAddedSongs;

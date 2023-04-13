@@ -4,7 +4,7 @@ import { app } from 'electron';
 import Store from 'electron-store';
 import log from './log';
 import { dataUpdateEvent } from './main';
-import { appPreferences } from '../../package.json';
+import { appPreferences, version } from '../../package.json';
 import {
   artistMigrations,
   generateMigrationMessage,
@@ -58,9 +58,11 @@ const BLACKLIST_TEMPLATE: Blacklist = {
 const songStore = new Store({
   name: 'songs',
   defaults: {
+    version,
     songs: [],
   },
   schema: {
+    version: { type: ['string', 'null'] },
     songs: {
       type: 'array',
     },
@@ -73,9 +75,11 @@ const songStore = new Store({
 const artistStore = new Store({
   name: 'artists',
   defaults: {
+    version,
     artists: [],
   },
   schema: {
+    version: { type: ['string', 'null'] },
     artists: {
       type: 'array',
     },
@@ -88,9 +92,11 @@ const artistStore = new Store({
 const genreStore = new Store({
   name: 'genres',
   defaults: {
+    version,
     genres: [],
   },
   schema: {
+    version: { type: ['string', 'null'] },
     genres: {
       type: 'array',
     },
@@ -102,9 +108,11 @@ const genreStore = new Store({
 const albumStore = new Store({
   name: 'albums',
   defaults: {
+    version,
     albums: [],
   },
   schema: {
+    version: { type: ['string', 'null'] },
     albums: {
       type: 'array',
     },
@@ -116,9 +124,11 @@ const albumStore = new Store({
 const playlistDataStore = new Store({
   name: 'playlists',
   defaults: {
+    version,
     playlists: PLAYLIST_DATA_TEMPLATE,
   },
   schema: {
+    version: { type: ['string', 'null'] },
     playlists: {
       type: 'array',
     },
@@ -130,9 +140,11 @@ const playlistDataStore = new Store({
 const userDataStore = new Store({
   name: 'userData',
   defaults: {
+    version,
     userData: USER_DATA_TEMPLATE,
   },
   schema: {
+    version: { type: ['string', 'null'] },
     userData: {
       type: 'object',
     },
@@ -145,9 +157,11 @@ const listeningDataStore = new Store({
   name: 'listening_data',
   clearInvalidConfig: true,
   defaults: {
+    version,
     listeningData: [],
   },
   schema: {
+    version: { type: ['string', 'null'] },
     listeningData: {
       type: 'array',
     },
@@ -159,8 +173,12 @@ const listeningDataStore = new Store({
 const blacklistStore = new Store({
   name: 'blacklist',
   clearInvalidConfig: true,
-  defaults: { blacklist: BLACKLIST_TEMPLATE },
+  defaults: {
+    version,
+    blacklist: BLACKLIST_TEMPLATE,
+  },
   schema: {
+    version: { type: ['string', 'null'] },
     blacklist: {
       type: 'object',
       properties: {
@@ -176,6 +194,9 @@ const blacklistStore = new Store({
   beforeEachMigration: (_, context) =>
     generateMigrationMessage('blacklist.json', context),
 });
+
+const songStoreVersion = songStore.get('version');
+log('song store version', { songStoreVersion }, 'WARN');
 
 export const supportedMusicExtensions =
   appPreferences.supportedMusicExtensions.map((x) => `.${x}`);
@@ -368,16 +389,12 @@ export const createNewListeningDataInstance = (songId: string) => {
   const date = new Date();
   const currentYear = date.getFullYear();
 
-  const months = Array.from({ length: 12 }, () =>
-    Array.from({ length: 30 }, () => 0)
-  );
-
   const newListeningData: SongListeningData = {
     songId,
     skips: 0,
     fullListens: 0,
     inNoOfPlaylists: 0,
-    listens: [{ year: currentYear, months }],
+    listens: [{ year: currentYear, listens: [] }],
   };
   return newListeningData;
 };
@@ -564,11 +581,11 @@ export const resetAppCache = () => {
   cachedGenresData = [];
   cachedPlaylistsData = [...PLAYLIST_DATA_TEMPLATE];
   cachedUserData = { ...USER_DATA_TEMPLATE };
-  songStore.store = { songs: [] };
-  artistStore.store = { artists: [] };
-  albumStore.store = { albums: [] };
-  genreStore.store = { genres: [] };
-  userDataStore.store = { userData: USER_DATA_TEMPLATE };
-  playlistDataStore.store = { playlists: PLAYLIST_DATA_TEMPLATE };
+  songStore.store = { version, songs: [] };
+  artistStore.store = { version, artists: [] };
+  albumStore.store = { version, albums: [] };
+  genreStore.store = { version, genres: [] };
+  userDataStore.store = { version, userData: USER_DATA_TEMPLATE };
+  playlistDataStore.store = { version, playlists: PLAYLIST_DATA_TEMPLATE };
   log(`In-app cache cleared successfully.`);
 };

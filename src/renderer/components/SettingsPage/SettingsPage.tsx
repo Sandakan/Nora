@@ -8,6 +8,7 @@ import StartupSettings from './Settings/StartupSettings';
 import AboutSettings from './Settings/AboutSettings';
 import StorageSettings from './Settings/StorageSettings';
 import EqualizerSettings from './Settings/EqualizerSettings';
+import PerformanceSettings from './Settings/PerformanceSettings';
 
 const SettingsPage = () => {
   return (
@@ -35,6 +36,9 @@ const SettingsPage = () => {
 
           {/* ? ACCESSIBILITY SETTINGS */}
           <AccessibilitySettings />
+
+          {/* PERFORMANCE SETTINGS */}
+          <PerformanceSettings />
 
           {/* STARTUP SETTINGS */}
           <StartupSettings />

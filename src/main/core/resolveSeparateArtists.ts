@@ -19,6 +19,8 @@ export const resolveSeparateArtists = async (
   separateArtistId: string,
   separateArtistNames: string[]
 ) => {
+  let updatedData: UpdateSongDataResult | undefined = undefined;
+
   let artistsData = getArtistsData();
   const songsData = getSongsData();
   const albumsData = getAlbumsData();
@@ -115,7 +117,12 @@ export const resolveSeparateArtists = async (
             }))
           );
 
-          await updateSongId3Tags(song.songId, songTags, false, true);
+          updatedData = await updateSongId3Tags(
+            song.songId,
+            songTags,
+            true,
+            true
+          );
         }
       }
     }
@@ -126,4 +133,5 @@ export const resolveSeparateArtists = async (
 
     log(`Resolved suggestion to separate artist ${selectedArtist.name}`);
   }
+  return updatedData;
 };

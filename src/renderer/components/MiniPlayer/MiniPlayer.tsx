@@ -12,7 +12,11 @@ import Button from '../Button';
 import Img from '../Img';
 import LyricLine from '../LyricsPage/LyricLine';
 
-export default function MiniPlayer() {
+type MiniPlayerProps = {
+  className?: string;
+};
+
+export default function MiniPlayer(props: MiniPlayerProps) {
   const {
     isMiniPlayer,
     currentSongData,
@@ -33,6 +37,8 @@ export default function MiniPlayer() {
     toggleMutedState,
     updateVolume,
   } = React.useContext(AppUpdateContext);
+
+  const { className } = props;
 
   const { songPosition } = React.useContext(SongPositionContext);
   const [songPos, setSongPos] = React.useState(0);
@@ -190,7 +196,7 @@ export default function MiniPlayer() {
         !isCurrentSongPlaying && 'paused'
       } ${
         localStorageData?.preferences?.isReducedMotion ? 'reduced-motion' : ''
-      } [&:focus-within>.container>.song-controls-container>button]:translate-x-0 [&:focus-within>.container>.song-controls-container>button]:scale-100 [&:focus-within>.container>.song-controls-container]:visible [&:focus-within>.container>.song-controls-container]:opacity-100 [&:hover>.container>.song-controls-container>button]:translate-x-0 [&:hover>.container>.song-controls-container>button]:scale-100 [&:hover>.container>.song-controls-container]:visible [&:hover>.container>.song-controls-container]:opacity-100`}
+      } [&:focus-within>.container>.song-controls-container>button]:translate-x-0 [&:focus-within>.container>.song-controls-container>button]:scale-100 [&:focus-within>.container>.song-controls-container]:visible [&:focus-within>.container>.song-controls-container]:opacity-100 [&:hover>.container>.song-controls-container>button]:translate-x-0 [&:hover>.container>.song-controls-container>button]:scale-100 [&:hover>.container>.song-controls-container]:visible [&:hover>.container>.song-controls-container]:opacity-100 ${className}`}
     >
       <div className="background-cover-img-container h-full overflow-hidden">
         <Img
@@ -207,7 +213,7 @@ export default function MiniPlayer() {
         />
       </div>
       <div
-        className={`mini-player-lyrics-container absolute top-0 flex h-full w-full select-none flex-col items-center overflow-hidden py-12 px-2 transition-[filter] group-focus-within:blur-sm group-focus-within:brightness-50 group-hover:blur-sm group-hover:brightness-50 ${
+        className={`mini-player-lyrics-container absolute top-0 flex h-full w-full select-none flex-col items-center overflow-hidden px-2 py-12 transition-[filter] group-focus-within:blur-sm group-focus-within:brightness-50 group-hover:blur-sm group-hover:brightness-50 ${
           !isCurrentSongPlaying ? 'blur-sm brightness-50' : ''
         }`}
         id="miniPlayerLyricsContainer"
@@ -247,7 +253,7 @@ export default function MiniPlayer() {
             } ${!isCurrentSongPlaying ? '!visible !opacity-100' : ''}`}
           >
             <Button
-              className="go-to-main-player-btn !mt-1 !mr-0 !rounded-md !border-0 !p-2 text-font-color-white outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white"
+              className="go-to-main-player-btn !mr-0 !mt-1 !rounded-md !border-0 !p-2 text-font-color-white outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white"
               tooltipLabel="Go to Main Player"
               iconName="launch"
               iconClassName="!text-xl"
@@ -255,7 +261,7 @@ export default function MiniPlayer() {
               removeFocusOnClick
             />
             <Button
-              className={`always-on-top-btn !mt-1 !mr-0 !rounded-md !border-0 !p-2 text-font-color-white outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white ${
+              className={`always-on-top-btn !mr-0 !mt-1 !rounded-md !border-0 !p-2 text-font-color-white outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white ${
                 userData?.preferences.isMiniPlayerAlwaysOnTop
                   ? 'bg-dark-background-color-2 dark:bg-dark-background-color-2'
                   : ''
@@ -298,7 +304,7 @@ export default function MiniPlayer() {
           </div>
         </div>
         <div
-          className={`song-controls-container delay-50 absolute top-[45%] left-1/2 flex h-fit -translate-x-1/2 -translate-y-1/2 items-center justify-center  bg-[transparent] shadow-none transition-[visibility,opacity] dark:bg-[transparent] ${
+          className={`song-controls-container delay-50 absolute left-1/2 top-[45%] flex h-fit -translate-x-1/2 -translate-y-1/2 items-center justify-center  bg-[transparent] shadow-none transition-[visibility,opacity] dark:bg-[transparent] ${
             !isCurrentSongPlaying
               ? 'visible opacity-100'
               : 'invisible opacity-0'
@@ -325,7 +331,8 @@ export default function MiniPlayer() {
             removeFocusOnClick
           />
           <Button
-            className="skip-backward-btn ml-4 !mr-0 h-fit -translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
+            className="skip-backward-btn !mr-0 ml-4 h-fit -translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
+            tooltipLabel="Previous Song (Ctrl + Left Arrow)"
             iconClassName="!text-4xl"
             clickHandler={handleSkipBackwardClick}
             iconName="skip_previous"
@@ -333,6 +340,7 @@ export default function MiniPlayer() {
           />
           <Button
             className="play-pause-btn !mx-2 h-fit scale-90 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-6xl text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
+            tooltipLabel="Play/Pause (Space)"
             iconClassName="!text-6xl"
             clickHandler={toggleSongPlayback}
             iconName={isCurrentSongPlaying ? 'pause_circle' : 'play_circle'}
@@ -341,6 +349,7 @@ export default function MiniPlayer() {
 
           <Button
             className="skip-backward-btn !mr-4 h-fit translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
+            tooltipLabel="Next Song (Ctrl + Right Arrow)"
             iconClassName="!text-4xl"
             clickHandler={handleSkipForwardClickWithParams}
             iconName="skip_next"
@@ -403,7 +412,7 @@ export default function MiniPlayer() {
             <input
               type="range"
               id="volumeSlider"
-              className="relative float-left m-0 h-6 w-full appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--volume-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
+              className="relative float-left m-0 h-6 w-full appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--volume-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
               min="0"
               max="100"
               value={volume}
@@ -430,7 +439,7 @@ export default function MiniPlayer() {
           type="range"
           name="mini-player-seek-slider"
           id="miniPlayerSeekSlider"
-          className="seek-slider absolute bottom-0 float-left m-0 h-fit w-full appearance-none bg-background-color-3/25 p-0 outline-none outline-1 outline-offset-1 backdrop-blur-sm transition-[width,height,transform] ease-in-out before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-background-color-3 before:transition-[width,height,transform] before:ease-in-out before:content-[''] focus-visible:!outline group-focus-within:-translate-y-3 group-focus-within:scale-x-95 group-focus-within:before:h-3 group-hover:-translate-y-3 group-hover:scale-x-95 group-hover:before:h-3"
+          className="seek-slider absolute bottom-0 float-left m-0 h-fit w-full appearance-none bg-background-color-3/25 p-0 outline-none outline-1 outline-offset-1 backdrop-blur-sm transition-[width,height,transform] ease-in-out before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-background-color-3 before:transition-[width,height,transform] before:ease-in-out before:content-[''] focus-visible:!outline group-focus-within:-translate-y-3 group-focus-within:scale-x-95 group-focus-within:before:h-3 group-hover:-translate-y-3 group-hover:scale-x-95 group-hover:before:h-3"
           min={0}
           readOnly
           max={currentSongData.duration || 0}

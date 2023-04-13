@@ -23,7 +23,7 @@ export const api = {
   ) => ipcRenderer.on('app/systemThemeChange', callback),
   changeAppTheme: (theme?: AppTheme): void =>
     ipcRenderer.send('app/changeAppTheme', theme),
-  StoplisteningForSystemThemeChanges: (
+  stoplisteningForSystemThemeChanges: (
     callback: (e: any, isDarkMode: boolean, usingSystemTheme: boolean) => void
   ) => ipcRenderer.removeListener('app/systemThemeChange', callback),
 
@@ -131,7 +131,7 @@ export const api = {
   resolveArtistDuplicates: (
     selectedArtistId: string,
     duplicateIds: string[]
-  ): Promise<void> =>
+  ): Promise<UpdateSongDataResult | undefined> =>
     ipcRenderer.invoke(
       'app/resolveArtistDuplicates',
       selectedArtistId,
@@ -141,7 +141,7 @@ export const api = {
   resolveSeparateArtists: (
     separateArtistId: string,
     separateArtistNames: string[]
-  ): Promise<void> =>
+  ): Promise<UpdateSongDataResult | undefined> =>
     ipcRenderer.invoke(
       'app/resolveSeparateArtists',
       separateArtistId,
@@ -166,6 +166,14 @@ export const api = {
     ipcRenderer.on('app/focused', callback),
   onWindowBlur: (callback: (e: any) => void) =>
     ipcRenderer.on('app/blurred', callback),
+
+  // $ APP FULL-SCREEN EVENTS
+  listenForBatteryPowerStateChanges: (
+    callback: (_: any, isOnBatteryPower: boolean) => void
+  ) => ipcRenderer.on('app/isOnBatteryPower', callback),
+  stopListeningForBatteryPowerStateChanges: (
+    callback: (_: any, isOnBatteryPower: boolean) => void
+  ) => ipcRenderer.removeListener('app/isOnBatteryPower', callback),
 
   // $ APP FULL-SCREEN EVENTS
   onEnterFullscreen: (callback: (e: any) => void) =>
@@ -305,9 +313,10 @@ export const api = {
   // $ ARTISTS DATA
   getArtistData: (
     artistIdsOrNames?: string[],
-    sortType?: ArtistSortTypes
+    sortType?: ArtistSortTypes,
+    limit?: number
   ): Promise<Artist[]> =>
-    ipcRenderer.invoke('app/getArtistData', artistIdsOrNames, sortType),
+    ipcRenderer.invoke('app/getArtistData', artistIdsOrNames, sortType, limit),
   toggleLikeArtists: (
     artistIds: string[],
     likeArtist?: boolean

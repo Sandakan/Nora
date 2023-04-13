@@ -12,9 +12,13 @@ type Props = {
 };
 
 const SeparateArtistsSuggestion = (props: Props) => {
-  const { bodyBackgroundImage } = React.useContext(AppContext);
-  const { addNewNotifications, changeCurrentActivePage } =
-    React.useContext(AppUpdateContext);
+  const { bodyBackgroundImage, currentSongData } = React.useContext(AppContext);
+  const {
+    addNewNotifications,
+    changeCurrentActivePage,
+    updateCurrentSongData,
+  } = React.useContext(AppUpdateContext);
+
   const { name = '', artistId = '' } = props;
 
   const [isIgnored, setIsIgnored] = React.useState(false);
@@ -70,7 +74,16 @@ const SeparateArtistsSuggestion = (props: Props) => {
 
       window.api
         .resolveSeparateArtists(artistId, separatedArtistsNames)
-        .then(() => {
+        .then((res) => {
+          if (
+            res?.updatedData &&
+            currentSongData.songId === res.updatedData.songId
+          ) {
+            updateCurrentSongData((prevData) => ({
+              ...prevData,
+              ...res.updatedData,
+            }));
+          }
           setIsIgnored(true);
           changeCurrentActivePage('Home');
 

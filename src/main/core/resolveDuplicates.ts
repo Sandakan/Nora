@@ -26,6 +26,8 @@ export const resolveArtistDuplicates = async (
   selectedArtistId: string,
   duplicateIds: string[]
 ) => {
+  let updatedData: UpdateSongDataResult | undefined = undefined;
+
   const artists = getArtistsData();
   const songs = getSongsData();
   const albums = getAlbumsData();
@@ -61,6 +63,13 @@ export const resolveArtistDuplicates = async (
               artistId: selectedArtist.artistId,
               name: selectedArtist.name,
             });
+
+            if (selectedArtist.albums === undefined) selectedArtist.albums = [];
+
+            selectedArtist.albums?.push({
+              albumId: album.albumId,
+              title: album.title,
+            });
           }
         }
 
@@ -83,7 +92,12 @@ export const resolveArtistDuplicates = async (
               ...selectedArtist,
             });
 
-            await updateSongId3Tags(song.songId, songTags, false, true);
+            updatedData = await updateSongId3Tags(
+              song.songId,
+              songTags,
+              true,
+              true
+            );
           }
         }
       }
@@ -91,5 +105,7 @@ export const resolveArtistDuplicates = async (
 
     setSongsData(songs);
     setAlbumsData(albums);
+    return updatedData;
   }
+  return undefined;
 };
