@@ -10,11 +10,8 @@ type Props = { albums: Album[]; searchInput: string };
 
 const AlbumSearchResultsContainer = (props: Props) => {
   const { albums, searchInput } = props;
-  const {
-    isMultipleSelectionEnabled,
-    multipleSelectionsData,
-    currentlyActivePage,
-  } = React.useContext(AppContext);
+  const { isMultipleSelectionEnabled, multipleSelectionsData } =
+    React.useContext(AppContext);
   const { toggleMultipleSelections, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
 
@@ -62,7 +59,7 @@ const AlbumSearchResultsContainer = (props: Props) => {
       }}
     >
       <>
-        <div className="title-container mt-1 mb-8 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">
             Albums{' '}
             <div className="other-stats-container ml-12 flex items-center text-xs">
@@ -103,15 +100,11 @@ const AlbumSearchResultsContainer = (props: Props) => {
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>
-                  currentlyActivePage.pageTitle === 'AllSearchResults' &&
-                  currentlyActivePage.data.allSearchResultsPage.searchQuery ===
-                    searchInput
-                    ? changeCurrentActivePage('Home')
-                    : changeCurrentActivePage('AllSearchResults', {
-                        searchQuery: searchInput,
-                        searchFilter: 'Albums' as SearchFilters,
-                        searchResults: albums,
-                      })
+                  changeCurrentActivePage('AllSearchResults', {
+                    searchQuery: searchInput,
+                    searchFilter: 'Albums' as SearchFilters,
+                    searchResults: albums,
+                  })
                 }
               />
             )}

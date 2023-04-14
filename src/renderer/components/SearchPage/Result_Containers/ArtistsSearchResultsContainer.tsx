@@ -10,11 +10,8 @@ type Props = { artists: Artist[]; searchInput: string };
 
 const ArtistsSearchResultsContainer = (props: Props) => {
   const { artists, searchInput } = props;
-  const {
-    isMultipleSelectionEnabled,
-    multipleSelectionsData,
-    currentlyActivePage,
-  } = React.useContext(AppContext);
+  const { isMultipleSelectionEnabled, multipleSelectionsData } =
+    React.useContext(AppContext);
   const { toggleMultipleSelections, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
 
@@ -64,7 +61,7 @@ const ArtistsSearchResultsContainer = (props: Props) => {
     >
       <>
         <div
-          className={`title-container mt-1 mb-8 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight ${
+          className={`title-container mb-8 mt-1 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight ${
             artistResults.length > 0 && 'visible opacity-100'
           }`}
         >
@@ -108,15 +105,11 @@ const ArtistsSearchResultsContainer = (props: Props) => {
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>
-                  currentlyActivePage.pageTitle === 'AllSearchResults' &&
-                  currentlyActivePage.data.allSearchResultsPage.searchQuery ===
-                    searchInput
-                    ? changeCurrentActivePage('Home')
-                    : changeCurrentActivePage('AllSearchResults', {
-                        searchQuery: searchInput,
-                        searchFilter: 'Artists' as SearchFilters,
-                        searchResults: artists,
-                      })
+                  changeCurrentActivePage('AllSearchResults', {
+                    searchQuery: searchInput,
+                    searchFilter: 'Artists' as SearchFilters,
+                    searchResults: artists,
+                  })
                 }
               />
             )}

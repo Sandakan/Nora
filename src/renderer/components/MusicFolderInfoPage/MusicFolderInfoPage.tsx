@@ -11,8 +11,12 @@ import MainContainer from '../MainContainer';
 import Song from '../SongsPage/Song';
 
 const MusicFolderInfoPage = () => {
-  const { currentlyActivePage, isMultipleSelectionEnabled, localStorageData } =
-    React.useContext(AppContext);
+  const {
+    currentlyActivePage,
+    multipleSelectionsData,
+    isMultipleSelectionEnabled,
+    localStorageData,
+  } = React.useContext(AppContext);
   const {
     updateCurrentlyActivePageData,
     createQueue,
@@ -225,6 +229,18 @@ const MusicFolderInfoPage = () => {
       <>
         <div className="title-container mb-8 mt-2 flex items-center justify-between pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           '{folderName}' Folder
+          <div className="other-stats-container flex items-center text-xs text-font-color-black dark:text-font-color-white">
+            {isMultipleSelectionEnabled ? (
+              <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
+                {multipleSelectionsData.multipleSelections.length} selections
+              </div>
+            ) : (
+              folderSongs &&
+              folderSongs.length > 0 && (
+                <span className="no-of-songs">{folderSongs.length} songs</span>
+              )
+            )}
+          </div>
           {folderInfo && (
             <div className="buttons-container flex text-sm">
               <Button

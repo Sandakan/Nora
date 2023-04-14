@@ -212,11 +212,7 @@ const SongControlsAndSeekbarContainer = () => {
             currentlyActivePage.pageTitle === 'Lyrics' &&
             '!text-font-color-highlight dark:!text-dark-font-color-highlight !opacity-100'
           }`}
-          clickHandler={() =>
-            currentlyActivePage.pageTitle === 'Lyrics'
-              ? changeCurrentActivePage('Home')
-              : changeCurrentActivePage('Lyrics')
-          }
+          clickHandler={() => changeCurrentActivePage('Lyrics')}
         />
       </div>
       <div className="seekbar-and-song-durations-container flex h-1/3 w-full max-w-xl flex-row items-center justify-between text-sm">
@@ -228,7 +224,7 @@ const SongControlsAndSeekbarContainer = () => {
             type="range"
             name="seek-bar-slider"
             id="seek-bar-slider"
-            className="seek-bar-slider relative float-left m-0 h-6 w-full appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
+            className="seek-bar-slider relative float-left m-0 h-6 w-full appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
             min={0}
             max={
               (currentSongData.duration || 0) >= songPos

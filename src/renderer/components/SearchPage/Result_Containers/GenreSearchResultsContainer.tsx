@@ -10,11 +10,8 @@ import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 type Props = { genres: Genre[]; searchInput: string };
 
 const GenreSearchResultsContainer = (props: Props) => {
-  const {
-    isMultipleSelectionEnabled,
-    multipleSelectionsData,
-    currentlyActivePage,
-  } = React.useContext(AppContext);
+  const { isMultipleSelectionEnabled, multipleSelectionsData } =
+    React.useContext(AppContext);
   const { toggleMultipleSelections, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
   const { genres, searchInput } = props;
@@ -60,7 +57,7 @@ const GenreSearchResultsContainer = (props: Props) => {
       }}
     >
       <>
-        <div className="title-container mt-1 mb-8 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">
             Genres
             <div className="other-stats-container ml-12 flex items-center text-xs">
@@ -103,15 +100,11 @@ const GenreSearchResultsContainer = (props: Props) => {
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>
-                  currentlyActivePage.pageTitle === 'AllSearchResults' &&
-                  currentlyActivePage.data?.allSearchResultsPage.searchQuery ===
-                    searchInput
-                    ? changeCurrentActivePage('Home')
-                    : changeCurrentActivePage('AllSearchResults', {
-                        searchQuery: searchInput,
-                        searchFilter: 'Genres' as SearchFilters,
-                        searchResults: genres,
-                      })
+                  changeCurrentActivePage('AllSearchResults', {
+                    searchQuery: searchInput,
+                    searchFilter: 'Genres' as SearchFilters,
+                    searchResults: genres,
+                  })
                 }
               />
             )}

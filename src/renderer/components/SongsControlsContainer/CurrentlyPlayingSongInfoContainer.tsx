@@ -10,8 +10,7 @@ import SongArtist from '../SongsPage/SongArtist';
 import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 
 const CurrentlyPlayingSongInfoContainer = () => {
-  const { currentSongData, currentlyActivePage, localStorageData } =
-    React.useContext(AppContext);
+  const { currentSongData, localStorageData } = React.useContext(AppContext);
   const { changeCurrentActivePage, updateContextMenuData } =
     React.useContext(AppUpdateContext);
 
@@ -32,13 +31,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
               index === 0 ? 'z-2' : 'translate-x-4'
             }`}
             onClick={() => {
-              if (
-                currentSongData.artists &&
-                currentlyActivePage.pageTitle === 'ArtistInfo' &&
-                currentlyActivePage.data.artistName === artist.name
-              )
-                return changeCurrentActivePage('Home');
-              return changeCurrentActivePage('ArtistInfo', {
+              changeCurrentActivePage('ArtistInfo', {
                 artistName: artist.name,
                 artistId: artist.artistId,
               });
@@ -48,7 +41,6 @@ const CurrentlyPlayingSongInfoContainer = () => {
         ));
     return undefined;
   }, [
-    currentlyActivePage,
     changeCurrentActivePage,
     currentSongData.artists,
     currentSongData.songId,
@@ -57,41 +49,28 @@ const CurrentlyPlayingSongInfoContainer = () => {
   const showSongInfoPage = React.useCallback(
     () =>
       currentSongData.isKnownSource
-        ? currentlyActivePage.pageTitle === 'SongInfo' &&
-          currentlyActivePage.data &&
-          currentlyActivePage.data.songInfo &&
-          currentlyActivePage.data.songInfo.songId === currentSongData.songId
-          ? changeCurrentActivePage('Home')
-          : changeCurrentActivePage('SongInfo', {
-              songId: currentSongData.songId,
-            })
+        ? changeCurrentActivePage('SongInfo', {
+            songId: currentSongData.songId,
+          })
         : undefined,
     [
       changeCurrentActivePage,
       currentSongData.isKnownSource,
       currentSongData.songId,
-      currentlyActivePage.data,
-      currentlyActivePage.pageTitle,
     ]
   );
 
   const gotToSongAlbumPage = React.useCallback(
     () =>
       currentSongData.isKnownSource && currentSongData.album
-        ? currentlyActivePage.pageTitle === 'AlbumInfo' &&
-          currentlyActivePage?.data?.albumInfo?.albumId ===
-            currentSongData.album.albumId
-          ? changeCurrentActivePage('Home')
-          : changeCurrentActivePage('AlbumInfo', {
-              albumId: currentSongData.album.albumId,
-            })
+        ? changeCurrentActivePage('AlbumInfo', {
+            albumId: currentSongData.album.albumId,
+          })
         : undefined,
     [
       changeCurrentActivePage,
       currentSongData.album,
       currentSongData.isKnownSource,
-      currentlyActivePage?.data?.albumInfo?.albumId,
-      currentlyActivePage.pageTitle,
     ]
   );
 

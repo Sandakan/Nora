@@ -105,7 +105,9 @@ const SeparateArtistsSuggestion = (props: Props) => {
       addNewNotifications,
       artistId,
       changeCurrentActivePage,
+      currentSongData.songId,
       separatedArtistsNames,
+      updateCurrentSongData,
     ]
   );
 

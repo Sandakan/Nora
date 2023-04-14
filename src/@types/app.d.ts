@@ -426,6 +426,7 @@ declare global {
     enableArtworkFromSongCovers: boolean;
     shuffleArtworkFromSongCovers: boolean;
     removeAnimationsOnBatteryPower: boolean;
+    isPredictiveSearchEnabled: boolean;
   }
 
   interface CurrentSong {

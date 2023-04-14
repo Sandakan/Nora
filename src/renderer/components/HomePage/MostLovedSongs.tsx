@@ -7,10 +7,10 @@ import SongCard from '../SongsPage/SongCard';
 
 import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 
-type Props = { mostLovedSongs: AudioInfo[] };
+type Props = { mostLovedSongs: AudioInfo[]; noOfVisibleSongs: number };
 
 const MostLovedSongs = (props: Props) => {
-  const { mostLovedSongs } = props;
+  const { mostLovedSongs, noOfVisibleSongs = 3 } = props;
 
   const selectAllHandler = useSelectAllHandler(
     mostLovedSongs,
@@ -56,7 +56,14 @@ const MostLovedSongs = (props: Props) => {
             <div className="title-container mb-4 mt-1 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
               Most Loved Songs
             </div>
-            <div className="songs-container grid grid-flow-col gap-2 pr-2">
+            <div
+              style={{
+                gridTemplateColumns: `repeat(${
+                  noOfVisibleSongs < 3 ? 3 : noOfVisibleSongs
+                },1fr)`,
+              }}
+              className="songs-container grid gap-2 pr-2"
+            >
               {mostLovedSongComponents}
             </div>
           </>

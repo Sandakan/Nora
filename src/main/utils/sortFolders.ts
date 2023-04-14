@@ -15,29 +15,15 @@ export default <T extends MusicFolder[]>(
   if (data.length > 0) {
     if (sortType === 'aToZ')
       return data.sort((a, b) =>
-        a.folderData.path > b.folderData.path
-          ? 1
-          : a.folderData.path < b.folderData.path
-          ? -1
-          : 0
+        a.path > b.path ? 1 : a.path < b.path ? -1 : 0
       );
     if (sortType === 'zToA')
       return data.sort((a, b) =>
-        a.folderData.path < b.folderData.path
-          ? 1
-          : a.folderData.path > b.folderData.path
-          ? -1
-          : 0
+        a.path < b.path ? 1 : a.path > b.path ? -1 : 0
       );
     if (sortType === 'noOfSongsDescending')
       return data
-        .sort((a, b) =>
-          a.folderData.path > b.folderData.path
-            ? 1
-            : a.folderData.path < b.folderData.path
-            ? -1
-            : 0
-        )
+        .sort((a, b) => (a.path > b.path ? 1 : a.path < b.path ? -1 : 0))
         .sort((a, b) =>
           a.songIds.length < b.songIds.length
             ? 1
@@ -47,13 +33,7 @@ export default <T extends MusicFolder[]>(
         );
     if (sortType === 'noOfSongsAscending')
       return data
-        .sort((a, b) =>
-          a.folderData.path > b.folderData.path
-            ? 1
-            : a.folderData.path < b.folderData.path
-            ? -1
-            : 0
-        )
+        .sort((a, b) => (a.path > b.path ? 1 : a.path < b.path ? -1 : 0))
         .sort((a, b) =>
           a.songIds.length > b.songIds.length
             ? 1
@@ -63,24 +43,12 @@ export default <T extends MusicFolder[]>(
         );
     if (sortType === 'blacklistedFolders')
       return data
-        .filter((folder) => isFolderBlacklisted(folder.folderData.path))
-        .sort((a, b) =>
-          a.folderData.path > b.folderData.path
-            ? 1
-            : a.folderData.path < b.folderData.path
-            ? -1
-            : 0
-        );
+        .filter((folder) => isFolderBlacklisted(folder.path))
+        .sort((a, b) => (a.path > b.path ? 1 : a.path < b.path ? -1 : 0));
     if (sortType === 'whitelistedFolders')
       return data
-        .filter((folder) => !isFolderBlacklisted(folder.folderData.path))
-        .sort((a, b) =>
-          a.folderData.path > b.folderData.path
-            ? 1
-            : a.folderData.path < b.folderData.path
-            ? -1
-            : 0
-        );
+        .filter((folder) => !isFolderBlacklisted(folder.path))
+        .sort((a, b) => (a.path > b.path ? 1 : a.path < b.path ? -1 : 0));
   }
   return data;
 };

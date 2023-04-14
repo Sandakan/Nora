@@ -18,6 +18,7 @@ module.exports = {
     'import/extensions': 'off',
     'react/function-component-definition': 'off',
     'default-param-last': 'off',
+    'import/prefer-default-export': 'off',
     'import/no-unresolved': [2, { caseSensitive: false }],
     radix: ['warn', 'as-needed'],
     'react/no-unescaped-entities': [

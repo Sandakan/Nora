@@ -12,7 +12,7 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 
 import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
-import hasDataChanged from 'renderer/utils/hasDataChanged';
+import hasDataChanged, { isDataChanged } from 'renderer/utils/hasDataChanged';
 
 import Button from '../Button';
 import MainContainer from '../MainContainer';
@@ -308,7 +308,7 @@ function SongTagsEditingPage() {
   const resetDataToDefaults = () => {
     const data = hasDataChanged(defaultValues, songInfo);
     const entries = Object.entries(data);
-    if (!Object.values(data).every((x: boolean) => x)) {
+    if (!Object.values(data).every((x: boolean) => !x)) {
       changePromptMenuData(
         true,
         <div>
@@ -320,7 +320,7 @@ function SongTagsEditingPage() {
             you edited on this screen.
           </div>
           <div className="mt-4 pl-4">
-            {(entries.filter((x) => !x[1]) ?? []).map(([x]) => (
+            {(entries.filter((x) => x[1]) ?? []).map(([x]) => (
               <div>
                 {x.toUpperCase()} :
                 <span className="ml-2 font-medium text-font-color-crimson">
@@ -364,10 +364,7 @@ function SongTagsEditingPage() {
   };
 
   const areThereDataChanges = React.useMemo(
-    () =>
-      Object.values(hasDataChanged(defaultValues, songInfo)).every(
-        (x: boolean) => x
-      ),
+    () => isDataChanged(defaultValues, songInfo),
     [defaultValues, songInfo]
   );
 
@@ -488,7 +485,7 @@ function SongTagsEditingPage() {
                 label="Save Tags"
                 iconName="save"
                 iconClassName="material-icons-round-outlined"
-                isDisabled={areThereDataChanges}
+                isDisabled={!areThereDataChanges}
                 className="update-song-tags-btn"
                 clickHandler={saveTags}
               />
@@ -497,7 +494,7 @@ function SongTagsEditingPage() {
                 label="Reset to Defaults"
                 iconName="restart_alt"
                 className="reset-song-tags-btn"
-                isDisabled={areThereDataChanges}
+                isDisabled={!areThereDataChanges}
                 clickHandler={resetDataToDefaults}
               />
             </div>

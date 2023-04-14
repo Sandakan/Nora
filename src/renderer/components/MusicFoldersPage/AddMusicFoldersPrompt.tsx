@@ -32,6 +32,48 @@ const makeStructureSelectable = (
   return selectableStructure;
 };
 
+const removeUnselectedFolders = (
+  selectableFolders: SelectableFolderStructure[]
+) => {
+  const validFolders: SelectableFolderStructure[] = [];
+  for (const folder of selectableFolders) {
+    if (folder.isSelected) {
+      if (folder.subFolders.length > 0) {
+        const subFolders = removeUnselectedFolders(folder.subFolders);
+        folder.subFolders = subFolders;
+      }
+      validFolders.push(folder);
+    }
+  }
+  return validFolders;
+};
+
+const updateFolderSelectedState = (
+  folders: SelectableFolderStructure[],
+  state: boolean,
+  folder?: SelectableFolderStructure
+) => {
+  for (let i = 0; i < folders.length; i += 1) {
+    if (folder === undefined || folders[i].path === folder.path) {
+      folders[i].isSelected = state ?? !folders[i].isSelected;
+
+      // if (folders[i].subFolders.length > 0) {
+      //   folders[i].subFolders = updateFolderSelectedState(
+      //     folders[i].subFolders,
+      //     state
+      //   );
+      // }
+    } else if (folders[i].subFolders.length > 0) {
+      folders[i].subFolders = updateFolderSelectedState(
+        folders[i].subFolders,
+        state,
+        folder
+      );
+    }
+  }
+  return folders;
+};
+
 const AddMusicFoldersPrompt = (props: Props) => {
   const { changePromptMenuData } = React.useContext(AppUpdateContext);
 
@@ -63,13 +105,13 @@ const AddMusicFoldersPrompt = (props: Props) => {
   };
 
   const updateFolders = React.useCallback(
-    (
-      callback: (
-        data: SelectableFolderStructure[]
-      ) => SelectableFolderStructure[]
-    ) =>
+    (state: boolean, structure: SelectableFolderStructure) =>
       setFolders((data) => {
-        const updatedFolders = callback(data);
+        const updatedFolders = updateFolderSelectedState(
+          data,
+          state,
+          structure
+        );
         return updatedFolders;
       }),
     []
@@ -136,10 +178,14 @@ const AddMusicFoldersPrompt = (props: Props) => {
             iconName="done"
             className="!bg-background-color-3 !text-font-color-black"
             clickHandler={(_, setIsDisabled, setIsPending) => {
+              const validFolders = removeUnselectedFolders(folders);
+
               setIsDisabled(true);
               setIsPending(true);
+              console.log(validFolders);
+
               window.api
-                .addSongsFromFolderStructures(folders, sortType)
+                .addSongsFromFolderStructures(validFolders, sortType)
                 .then(onSuccess)
                 .finally(() => {
                   if (onFinally) onFinally();

@@ -402,8 +402,15 @@ app
           _,
           searchFilters: SearchFilters,
           value: string,
-          updateSearchHistory?: boolean
-        ) => search(searchFilters, value, updateSearchHistory)
+          updateSearchHistory?: boolean,
+          isPredictiveSearchEnabled?: boolean
+        ) =>
+          search(
+            searchFilters,
+            value,
+            updateSearchHistory,
+            isPredictiveSearchEnabled
+          )
       );
 
       ipcMain.handle(

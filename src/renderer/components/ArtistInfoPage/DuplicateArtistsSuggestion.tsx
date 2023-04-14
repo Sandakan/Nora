@@ -123,8 +123,10 @@ const DuplicateArtistsSuggestion = (props: Props) => {
     [
       addNewNotifications,
       changeCurrentActivePage,
+      currentSongData.songId,
       currentlyActivePage.data?.artistId,
       duplicateArtists,
+      updateCurrentSongData,
     ]
   );
 

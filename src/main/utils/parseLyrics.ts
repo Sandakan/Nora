@@ -123,6 +123,25 @@ const parseMetadataFromShortText = (shortText?: string) => {
   return metadata;
 };
 
+const getNextTimestamp = (
+  arr: {
+    text: string;
+    timeStamp: number;
+  }[],
+  start: number,
+  index: number
+) => {
+  if (arr.length - 1 === index) return Infinity;
+
+  for (let i = 0; i < arr.length - index; i += 1) {
+    if (arr[index + i]) {
+      const { timeStamp } = arr[index + i];
+      if (timeStamp !== start) return timeStamp;
+    }
+  }
+  return 0;
+};
+
 export const parseSyncedLyricsFromAudioDataSource = (
   input: Input
 ): LyricsData | undefined => {
@@ -137,15 +156,10 @@ export const parseSyncedLyricsFromAudioDataSource = (
         // timeStamp = start of the line
         const { text, timeStamp } = line;
 
-        // divide by 1000 to convert from milliseconds to seconds.
-        const end =
-          (arr.length - 1 === index
-            ? Infinity
-            : arr[index + 1] !== undefined
-            ? arr[index + 1].timeStamp
-            : 0) / 1000;
+        const end = getNextTimestamp(arr, timeStamp, index);
 
-        return { text, start: timeStamp / 1000, end };
+        // divide by 1000 to convert from milliseconds to seconds.
+        return { text, start: timeStamp / 1000, end: end / 1000 };
       }
     );
 

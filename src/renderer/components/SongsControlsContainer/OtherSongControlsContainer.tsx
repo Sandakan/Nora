@@ -68,7 +68,6 @@ const OtherSongControlsContainer = () => {
     },
     [
       changeCurrentActivePage,
-      currentlyActivePage.pageTitle,
       isMiniPlayer,
       updateContextMenuData,
       updateMiniPlayerStatus,
@@ -88,11 +87,7 @@ const OtherSongControlsContainer = () => {
           currentlyActivePage.pageTitle === 'CurrentQueue' &&
           '!text-font-color-highlight !opacity-90 dark:!text-dark-font-color-highlight'
         } `}
-        clickHandler={() =>
-          currentlyActivePage.pageTitle === 'CurrentQueue'
-            ? changeCurrentActivePage('Home')
-            : changeCurrentActivePage('CurrentQueue')
-        }
+        clickHandler={() => changeCurrentActivePage('CurrentQueue')}
       />
 
       <Button

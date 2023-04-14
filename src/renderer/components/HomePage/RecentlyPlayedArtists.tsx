@@ -5,10 +5,13 @@ import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 import { Artist } from '../ArtistPage/Artist';
 import SecondaryContainer from '../SecondaryContainer';
 
-type Props = { recentlyPlayedSongArtists: Artist[] };
+type Props = {
+  recentlyPlayedSongArtists: Artist[];
+  noOfVisibleArtists: number;
+};
 
 const RecentlyPlayedArtists = (props: Props) => {
-  const { recentlyPlayedSongArtists } = props;
+  const { recentlyPlayedSongArtists, noOfVisibleArtists = 5 } = props;
 
   const selectAllHandler = useSelectAllHandler(
     recentlyPlayedSongArtists,
@@ -58,7 +61,12 @@ const RecentlyPlayedArtists = (props: Props) => {
             <div className="title-container mb-4 mt-1 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
               Recent Artists
             </div>
-            <div className="artists-container grid grid-flow-col justify-items-center">
+            <div
+              style={{
+                gridTemplateColumns: `repeat(${noOfVisibleArtists},1fr)`,
+              }}
+              className="artists-container grid justify-items-center"
+            >
               {recentlyPlayedSongArtistsComponents}
             </div>
           </>

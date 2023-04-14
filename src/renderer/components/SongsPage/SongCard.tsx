@@ -30,7 +30,6 @@ interface SongCardProp {
 const SongCard = (props: SongCardProp) => {
   const {
     currentSongData,
-    currentlyActivePage,
     queue,
     isCurrentSongPlaying,
     localStorageData,
@@ -133,14 +132,9 @@ const SongCard = (props: SongCardProp) => {
       : undefined;
 
   const showSongInfoPage = () =>
-    currentlyActivePage.pageTitle === 'SongInfo' &&
-    currentlyActivePage.data &&
-    currentlyActivePage.data.songInfo &&
-    currentlyActivePage.data.songInfo.songId === songId
-      ? changeCurrentActivePage('Home')
-      : changeCurrentActivePage('SongInfo', {
-          songId,
-        });
+    changeCurrentActivePage('SongInfo', {
+      songId,
+    });
 
   const handleLikeButtonClick = React.useCallback(() => {
     window.api
@@ -462,6 +456,7 @@ const SongCard = (props: SongCardProp) => {
     handlePlayBtnClick,
     toggleMultipleSelections,
     createQueue,
+    queue.currentSongIndex,
     queue.queue,
     currentSongData.songId,
     currentSongData.isAFavorite,

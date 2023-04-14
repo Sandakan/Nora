@@ -43,22 +43,27 @@ const createFolderData = (
   return foldersData;
 };
 
-const selectStructures = (
-  folderPaths: string[],
-  selectedFolders?: FolderStructure[]
-) => {
-  const musicFolders = selectedFolders ?? getUserData().musicFolders;
+const selectStructure = (
+  folderPath: string,
+  folders: FolderStructure[]
+): FolderStructure | undefined => {
+  for (const folder of folders) {
+    if (folder.path === folderPath) return folder;
+    if (folder.subFolders.length > 0) {
+      const selectedSubFolder = selectStructure(folderPath, folder.subFolders);
+      if (selectedSubFolder) return selectedSubFolder;
+    }
+  }
+  return undefined;
+};
+
+const selectStructures = (folderPaths: string[]) => {
+  const musicFolders = getUserData().musicFolders;
   const output: FolderStructure[] = [];
 
-  for (const folder of musicFolders) {
-    const subFoldersOutput =
-      folder.subFolders.length > 0
-        ? selectStructures(folderPaths, folder.subFolders)
-        : [];
-
-    if (folderPaths.includes(folder.path)) {
-      output.push({ ...folder, subFolders: subFoldersOutput });
-    }
+  for (const folderPath of folderPaths) {
+    const selectedFolder = selectStructure(folderPath, musicFolders);
+    if (selectedFolder) output.push(selectedFolder);
   }
 
   return output;

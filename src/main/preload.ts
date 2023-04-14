@@ -185,9 +185,16 @@ export const api = {
   search: (
     filter: SearchFilters,
     value: string,
-    updateSearchHistory?: boolean
+    updateSearchHistory?: boolean,
+    isPredictiveSearchEnabled?: boolean
   ): Promise<SearchResult> =>
-    ipcRenderer.invoke('app/search', filter, value, updateSearchHistory),
+    ipcRenderer.invoke(
+      'app/search',
+      filter,
+      value,
+      updateSearchHistory,
+      isPredictiveSearchEnabled
+    ),
   clearSearchHistory: (searchText?: string[]): Promise<boolean> =>
     ipcRenderer.invoke('app/clearSearchHistory', searchText),
 

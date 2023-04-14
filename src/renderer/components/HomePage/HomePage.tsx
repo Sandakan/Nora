@@ -97,8 +97,7 @@ const HomePage = () => {
 
   const recentlyAddedSongsContainerRef = React.useRef<HTMLDivElement>(null);
   const recentlyAddedSongsContainerDiamensions = useResizeObserver(
-    recentlyAddedSongsContainerRef,
-    250
+    recentlyAddedSongsContainerRef
   );
   const {
     noOfRecentlyAddedSongCards,
@@ -106,7 +105,6 @@ const HomePage = () => {
     noOfRecentandLovedSongCards,
   } = React.useMemo(() => {
     const { width } = recentlyAddedSongsContainerDiamensions;
-    // const containerPaddingLeft = 32;
 
     return {
       noOfRecentlyAddedSongCards: Math.floor(width / SONG_CARD_WIDTH) * 2 || 5,
@@ -370,31 +368,38 @@ const HomePage = () => {
       ref={recentlyAddedSongsContainerRef}
     >
       <>
-        {content.latestSongs[0] !== null && (
-          <RecentlyAddedSongs
-            latestSongs={content.latestSongs as AudioInfo[]}
-          />
+        {recentlyAddedSongsContainerRef.current && (
+          <>
+            {content.latestSongs[0] !== null && (
+              <RecentlyAddedSongs
+                latestSongs={content.latestSongs as AudioInfo[]}
+                noOfVisibleSongs={noOfRecentlyAddedSongCards}
+              />
+            )}
+            <RecentlyPlayedSongs
+              recentlyPlayedSongs={content.recentlyPlayedSongs.slice(
+                0,
+                noOfRecentandLovedSongCards
+              )}
+              noOfVisibleSongs={noOfRecentandLovedSongCards}
+            />
+            <RecentlyPlayedArtists
+              recentlyPlayedSongArtists={content.recentSongArtists}
+              noOfVisibleArtists={noOfRecentandLovedArtists}
+            />
+            <MostLovedSongs
+              mostLovedSongs={content.mostLovedSongs.slice(
+                0,
+                noOfRecentandLovedSongCards
+              )}
+              noOfVisibleSongs={noOfRecentandLovedSongCards}
+            />
+            <MostLovedArtists
+              mostLovedArtists={content.mostLovedArtists}
+              noOfVisibleArtists={noOfRecentandLovedArtists}
+            />
+          </>
         )}
-
-        <RecentlyPlayedSongs
-          recentlyPlayedSongs={content.recentlyPlayedSongs.slice(
-            0,
-            noOfRecentandLovedSongCards
-          )}
-        />
-
-        <RecentlyPlayedArtists
-          recentlyPlayedSongArtists={content.recentSongArtists}
-        />
-
-        <MostLovedSongs
-          mostLovedSongs={content.mostLovedSongs.slice(
-            0,
-            noOfRecentandLovedSongCards
-          )}
-        />
-
-        <MostLovedArtists mostLovedArtists={content.mostLovedArtists} />
 
         {content.latestSongs[0] === null && (
           <div className="no-songs-container appear-from-bottom flex h-full w-full flex-col items-center justify-center text-center text-xl text-font-color-black dark:text-font-color-white">

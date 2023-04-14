@@ -56,6 +56,8 @@ const CurrentQueuePage = () => {
     artworkPath: DefaultSongCover,
     title: '',
   } as QueueInfo);
+  const [isAutoScrolling, setIsAutoScrolling] = React.useState(false);
+
   const containerRef = React.useRef(null as HTMLDivElement | null);
   const { width, height } = useResizeObserver(containerRef);
   const ListRef = React.useRef(null as FixedSizeList | null);
@@ -326,15 +328,26 @@ const CurrentQueuePage = () => {
     if (ListRef && index >= 0) ListRef.current?.scrollToItem(index, 'center');
   }, [currentSongData.songId, queue.queue]);
 
+  React.useEffect(() => {
+    if (isAutoScrolling) centerCurrentlyPlayingSong();
+  }, [centerCurrentlyPlayingSong, isAutoScrolling]);
+
   const moreOptionsContextMenuItems = React.useMemo(
     () => [
+      {
+        label: `${
+          isAutoScrolling ? 'Disable' : 'Enable'
+        } Auto scroll to currently playing song`,
+        iconName: isAutoScrolling ? 'flash_off' : 'flash_on',
+        handlerFunction: () => setIsAutoScrolling((state) => !state),
+      },
       {
         label: 'Scroll to currently playing song',
         iconName: 'vertical_align_center',
         handlerFunction: centerCurrentlyPlayingSong,
       },
     ],
-    [centerCurrentlyPlayingSong]
+    [centerCurrentlyPlayingSong, isAutoScrolling]
   );
 
   return (

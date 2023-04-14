@@ -14,7 +14,7 @@ interface SongArtistProp {
 function SongArtist(props: SongArtistProp) {
   const { updateContextMenuData, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
-  const { currentlyActivePage, currentSongData } = React.useContext(AppContext);
+  const { currentSongData } = React.useContext(AppContext);
   const {
     artistId,
     name,
@@ -26,19 +26,11 @@ function SongArtist(props: SongArtistProp) {
   const showArtistInfoPage = React.useCallback(
     (artistName: string, id: string) =>
       currentSongData.artists &&
-      (currentlyActivePage.pageTitle === 'ArtistInfo' &&
-      currentlyActivePage.data?.artistName === artistName
-        ? changeCurrentActivePage('Home')
-        : changeCurrentActivePage('ArtistInfo', {
-            artistName,
-            artistId: id,
-          })),
-    [
-      changeCurrentActivePage,
-      currentSongData.artists,
-      currentlyActivePage.data,
-      currentlyActivePage.pageTitle,
-    ]
+      changeCurrentActivePage('ArtistInfo', {
+        artistName,
+        artistId: id,
+      }),
+    [changeCurrentActivePage, currentSongData.artists]
   );
 
   return (

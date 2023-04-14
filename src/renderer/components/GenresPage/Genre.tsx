@@ -30,12 +30,8 @@ const Genre = (props: GenreProp) => {
     className,
     selectAllHandler,
   } = props;
-  const {
-    currentlyActivePage,
-    queue,
-    isMultipleSelectionEnabled,
-    multipleSelectionsData,
-  } = React.useContext(AppContext);
+  const { queue, isMultipleSelectionEnabled, multipleSelectionsData } =
+    React.useContext(AppContext);
   const {
     changeCurrentActivePage,
     createQueue,
@@ -48,18 +44,10 @@ const Genre = (props: GenreProp) => {
 
   const goToGenreInfoPage = React.useCallback(
     () =>
-      currentlyActivePage.pageTitle === 'GenreInfo' &&
-      currentlyActivePage?.data?.genreId === genreId
-        ? changeCurrentActivePage('Home')
-        : changeCurrentActivePage('GenreInfo', {
-            genreId,
-          }),
-    [
-      changeCurrentActivePage,
-      currentlyActivePage?.data?.genreId,
-      currentlyActivePage.pageTitle,
-      genreId,
-    ]
+      changeCurrentActivePage('GenreInfo', {
+        genreId,
+      }),
+    [changeCurrentActivePage, genreId]
   );
 
   const playGenreSongs = React.useCallback(

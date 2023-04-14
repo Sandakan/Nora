@@ -9,12 +9,12 @@ import SongCard from '../SongsPage/SongCard';
 
 import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 
-type Props = { recentlyPlayedSongs: SongData[] };
+type Props = { recentlyPlayedSongs: SongData[]; noOfVisibleSongs: number };
 
 const RecentlyPlayedSongs = (props: Props) => {
   const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
 
-  const { recentlyPlayedSongs } = props;
+  const { recentlyPlayedSongs, noOfVisibleSongs = 3 } = props;
 
   const selectAllHandler = useSelectAllHandler(
     recentlyPlayedSongs,
@@ -72,7 +72,14 @@ const RecentlyPlayedSongs = (props: Props) => {
                 }
               />
             </div>
-            <div className="songs-container grid grid-flow-col gap-2 pr-2">
+            <div
+              style={{
+                gridTemplateColumns: `repeat(${
+                  noOfVisibleSongs < 3 ? 3 : noOfVisibleSongs
+                },1fr)`,
+              }}
+              className="songs-container grid gap-2 pr-2"
+            >
               {recentlyPlayedSongComponents}
             </div>
           </>

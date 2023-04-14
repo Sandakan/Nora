@@ -25,6 +25,7 @@ import isLatestVersion from './utils/isLatestVersion';
 import roundTo from './utils/roundTo';
 import storage, { LOCAL_STORAGE_DEFAULT_TEMPLATE } from './utils/localStorage';
 import useNetworkConnectivity from './hooks/useNetworkConnectivity';
+import { isDataChanged } from './utils/hasDataChanged';
 
 interface AppReducer {
   userData: UserData;
@@ -2030,11 +2031,14 @@ export default function App() {
   const changeCurrentActivePage = React.useCallback(
     (pageClass: PageTitles, data?: PageData) => {
       const { navigationHistory } = contentRef.current;
+      const { pageTitle } =
+        navigationHistory.history[navigationHistory.pageHistoryIndex];
+
+      const currentPageData =
+        navigationHistory.history[navigationHistory.pageHistoryIndex].data;
       if (
-        navigationHistory.history[navigationHistory.pageHistoryIndex]
-          .pageTitle !== pageClass ||
-        navigationHistory.history[navigationHistory.pageHistoryIndex].data !==
-          data
+        pageTitle !== pageClass ||
+        (currentPageData && data && isDataChanged(currentPageData, data))
       ) {
         const pageData = {
           pageTitle: pageClass,
@@ -2053,9 +2057,16 @@ export default function App() {
           type: 'UPDATE_NAVIGATION_HISTORY',
           data: navigationHistory,
         });
-      }
+      } else
+        addNewNotifications([
+          {
+            content: 'You are already in the current page.',
+            id: 'alreadyInCurrentPage',
+            delay: 2500,
+          },
+        ]);
     },
-    [toggleMultipleSelections]
+    [addNewNotifications, toggleMultipleSelections]
   );
 
   const updateMiniPlayerStatus = React.useCallback(

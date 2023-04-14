@@ -21,7 +21,6 @@ interface PlaylistProp extends Playlist {
 export const Playlist = (props: PlaylistProp) => {
   const {
     queue,
-    currentlyActivePage,
     multipleSelectionsData,
     isMultipleSelectionEnabled,
     localStorageData,
@@ -39,14 +38,10 @@ export const Playlist = (props: PlaylistProp) => {
 
   const openPlaylistInfoPage = React.useCallback(
     () =>
-      currentlyActivePage.pageTitle === 'PlaylistInfo' &&
-      currentlyActivePage.data &&
-      currentlyActivePage.data.playlistId === props.playlistId
-        ? changeCurrentActivePage('Home')
-        : changeCurrentActivePage('PlaylistInfo', {
-            playlistId: props.playlistId,
-          }),
-    [changeCurrentActivePage, currentlyActivePage, props.playlistId]
+      changeCurrentActivePage('PlaylistInfo', {
+        playlistId: props.playlistId,
+      }),
+    [changeCurrentActivePage, props.playlistId]
   );
 
   const isAMultipleSelection = React.useMemo(() => {

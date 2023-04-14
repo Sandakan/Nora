@@ -7,13 +7,13 @@ import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.
 import SecondaryContainer from '../SecondaryContainer';
 import Button from '../Button';
 
-type Props = { latestSongs: AudioInfo[] };
+type Props = { latestSongs: AudioInfo[]; noOfVisibleSongs: number };
 
 const RecentlyAddedSongs = React.forwardRef(
   (props: Props, ref: ForwardedRef<HTMLDivElement>) => {
     const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
 
-    const { latestSongs } = props;
+    const { latestSongs, noOfVisibleSongs = 6 } = props;
 
     const selectAllHandler = useSelectAllHandler(
       latestSongs,
@@ -76,7 +76,14 @@ const RecentlyAddedSongs = React.forwardRef(
                 }
               />
             </div>
-            <div className="songs-container grid grid-flow-col grid-rows-2 items-center justify-items-center gap-2 pr-2">
+            <div
+              style={{
+                gridTemplateColumns: `repeat(${Math.floor(
+                  (noOfVisibleSongs < 6 ? 6 : noOfVisibleSongs) / 2
+                )},1fr)`,
+              }}
+              className="songs-container grid grid-rows-2 items-center justify-items-center gap-2 pr-2"
+            >
               {latestSongComponents}
             </div>
           </>

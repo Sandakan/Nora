@@ -7,38 +7,8 @@ import Checkbox from '../Checkbox';
 
 interface Props {
   structure: SelectableFolderStructure;
-  updateFolders: (
-    _callback: (
-      _data: SelectableFolderStructure[]
-    ) => SelectableFolderStructure[]
-  ) => void;
+  updateFolders: (state: boolean, structure: SelectableFolderStructure) => void;
 }
-
-const updateFolderSelectedState = (
-  folders: SelectableFolderStructure[],
-  state: boolean,
-  folder?: SelectableFolderStructure
-) => {
-  for (let i = 0; i < folders.length; i += 1) {
-    if (folder === undefined || folders[i].path === folder.path) {
-      folders[i].isSelected = state ?? !folders[i].isSelected;
-
-      if (folders[i].subFolders.length > 0) {
-        folders[i].subFolders = updateFolderSelectedState(
-          folders[i].subFolders,
-          state
-        );
-      }
-    } else if (folders[i].subFolders.length > 0) {
-      folders[i].subFolders = updateFolderSelectedState(
-        folders[i].subFolders,
-        state,
-        folder
-      );
-    }
-  }
-  return folders;
-};
 
 const SelectableFolder = (props: Props) => {
   const { structure, updateFolders } = props;
@@ -62,17 +32,17 @@ const SelectableFolder = (props: Props) => {
 
   return (
     <div className={`group ${!isSelected && 'opacity-30'}`}>
-      <div className="mb-2 flex cursor-pointer items-center justify-between rounded-md bg-background-color-2 px-2 py-4 dark:bg-dark-background-color-2/50 dark:text-font-color-white">
+      <label
+        htmlFor={`${structure.path}RevealBtn`}
+        className="mb-2 flex cursor-pointer items-center justify-between rounded-md bg-background-color-2 px-2 py-4 dark:bg-dark-background-color-2/50 dark:text-font-color-white"
+      >
         <div className="flex items-center">
           <Checkbox
             className="!mx-2 !my-0"
             id={structure.path}
             isChecked={structure.isSelected}
             checkedStateUpdateFunction={(state) =>
-              updateFolders((data) => {
-                const arr = updateFolderSelectedState(data, state, structure);
-                return arr;
-              })
+              updateFolders(state, structure)
             }
           />
           <Img src={FolderImg} className="ml-2 h-8 w-8" />
@@ -87,11 +57,12 @@ const SelectableFolder = (props: Props) => {
           <Button
             className="!rounded-full !border-none !p-1 group-hover:bg-background-color-1 dark:group-hover:bg-dark-background-color-1"
             iconClassName="!text-2xl !leading-none"
+            id={`${structure.path}RevealBtn`}
             iconName={isSubFoldersVisible ? 'arrow_drop_up' : 'arrow_drop_down'}
             clickHandler={() => setIsSubFoldersVisible((state) => !state)}
           />
         )}
-      </div>
+      </label>
       {subFolders.length > 0 && isSubFoldersVisible && (
         <div className="ml-4 mt-1 border-l-[3px] border-background-color-2 pl-4 dark:border-dark-background-color-2/50">
           {subFoldersComponents}
