@@ -99,7 +99,7 @@ export default (props: NewPlaylistPromptProp) => {
       <Button
         label="Add Playlist"
         iconName="add"
-        className="!mr-0 mt-6 cursor-pointer justify-center !bg-background-color-3 p-2 !py-3 !px-8 text-lg !text-font-color-black dark:!bg-dark-background-color-3 dark:text-font-color-black"
+        className="!mr-0 mt-6 cursor-pointer justify-center !bg-background-color-3 p-2 !px-8 !py-3 text-lg !text-font-color-black dark:!bg-dark-background-color-3 dark:text-font-color-black"
         clickHandler={() => createNewPlaylist(input)}
       />
     </div>

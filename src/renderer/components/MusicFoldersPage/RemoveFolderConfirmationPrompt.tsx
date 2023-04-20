@@ -10,7 +10,7 @@ const RemoveFolderConfrimationPrompt = (props: {
   const { folderName, absolutePath } = props;
   return (
     <>
-      <div className="title-container mt-1 mb-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
+      <div className="title-container mb-4 mt-1 text-3xl font-medium text-font-color-black dark:text-font-color-white">
         Confirm To Remove &apos;{folderName}&apos; Folder
       </div>
       <div className="description">

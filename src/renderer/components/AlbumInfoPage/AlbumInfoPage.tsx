@@ -313,7 +313,7 @@ export default () => {
             )}
         </div>
         <div className="album-songs-container secondary-container songs-list-container mt-8 h-fit pb-4">
-          <div className="title-container ju mt-1 mb-4 flex items-center justify-between pr-4 text-2xl text-font-color-black  dark:text-font-color-white">
+          <div className="title-container ju mb-4 mt-1 flex items-center justify-between pr-4 text-2xl text-font-color-black  dark:text-font-color-white">
             Songs
             <div className="other-controls-container flex">
               {albumContent.songsData.length > 0 && (

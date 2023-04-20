@@ -28,7 +28,7 @@ const SongArtwork = (props: Props) => {
         alt="Song Artwork"
         className="song-artwork aspect-square w-full rounded-xl object-cover object-center"
       />
-      <div className="absolute top-1/2 left-1/2 flex w-full -translate-x-1/2 -translate-y-1/2 justify-around px-4">
+      <div className="absolute left-1/2 top-1/2 flex w-full -translate-x-1/2 -translate-y-1/2 justify-around px-4">
         <Button
           key={0}
           tooltipLabel="Edit Artwork"

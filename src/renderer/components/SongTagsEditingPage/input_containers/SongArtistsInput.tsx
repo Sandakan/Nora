@@ -56,7 +56,7 @@ const SongArtistsInput = (props: Props) => {
             songArtists.map((artist) => (
               <span
                 key={artist.name}
-                className="group mr-2 mb-2 flex w-fit items-center rounded-2xl bg-background-color-3 px-3 py-1 text-center text-font-color-black dark:bg-dark-background-color-3 dark:text-font-color-black"
+                className="group mb-2 mr-2 flex w-fit items-center rounded-2xl bg-background-color-3 px-3 py-1 text-center text-font-color-black dark:bg-dark-background-color-3 dark:text-font-color-black"
               >
                 <Button
                   iconName="close"

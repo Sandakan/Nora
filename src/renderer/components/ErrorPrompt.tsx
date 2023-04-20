@@ -14,7 +14,7 @@ export default (props: ErrorPromptProps) => {
   return (
     <>
       <div className="alert-icon-container">
-        <div className="title-container mt-1 mb-4 flex items-center text-3xl font-medium uppercase text-font-color-crimson dark:text-font-color-crimson">
+        <div className="title-container mb-4 mt-1 flex items-center text-3xl font-medium uppercase text-font-color-crimson dark:text-font-color-crimson">
           <span className="material-icons-round icon mr-4 text-4xl">
             warning
           </span>

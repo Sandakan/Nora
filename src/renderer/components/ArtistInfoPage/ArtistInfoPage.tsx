@@ -342,7 +342,7 @@ const ArtistInfoPage = () => {
   );
 
   return (
-    <MainContainer className="artist-info-page-container appear-from-bottom relative overflow-y-auto rounded-tl-lg pt-8 pb-2 pl-2 pr-2">
+    <MainContainer className="artist-info-page-container appear-from-bottom relative overflow-y-auto rounded-tl-lg pb-2 pl-2 pr-2 pt-8">
       <>
         <div className="artist-img-and-info-container relative mb-12 flex flex-row items-center pl-8 [&>*]:z-10">
           <div className="artist-img-container relative mr-10 max-h-60 lg:hidden">
@@ -353,7 +353,7 @@ const ArtistInfoPage = () => {
               alt="Album Cover"
             />
             <Button
-              className="absolute right-2 bottom-4 !m-0 flex rounded-full !border-0 bg-background-color-1 !p-3 shadow-xl outline-1 -outline-offset-[6px] focus-visible:!outline dark:bg-dark-background-color-2"
+              className="absolute bottom-4 right-2 !m-0 flex rounded-full !border-0 bg-background-color-1 !p-3 shadow-xl outline-1 -outline-offset-[6px] focus-visible:!outline dark:bg-dark-background-color-2"
               tooltipLabel={
                 artistData?.isAFavorite
                   ? `Dislike '${artistData?.name}'`
@@ -457,7 +457,7 @@ const ArtistInfoPage = () => {
                   bodyBackgroundImage
                     ? 'text-font-color-white'
                     : 'text-font-color-black dark:text-font-color-white'
-                } mt-1 mb-4
+                } mb-4 mt-1
                   text-2xl`}
               >
                 Appears On Albums
@@ -485,7 +485,7 @@ const ArtistInfoPage = () => {
                   bodyBackgroundImage
                     ? 'text-font-color-white'
                     : 'text-font-color-black dark:text-font-color-white'
-                } mt-1 mb-4
+                } mb-4 mt-1
                   flex items-center justify-between text-2xl`}
               >
                 Appears on songs

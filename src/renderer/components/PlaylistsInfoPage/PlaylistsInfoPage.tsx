@@ -242,7 +242,7 @@ const PlaylistInfoPage = () => {
 
   return (
     <MainContainer
-      className="main-container playlist-info-page-container !h-full px-8 pb-8 pt-4 pr-4"
+      className="main-container playlist-info-page-container !h-full px-8 pb-8 pr-4 pt-4"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {
@@ -309,7 +309,7 @@ const PlaylistInfoPage = () => {
         )}
         {playlistSongs.length > 0 && (
           <div className="songs-list-container">
-            <div className="title-container mt-1 mb-4 flex items-center justify-between pr-4 text-2xl text-font-color-black dark:text-font-color-white">
+            <div className="title-container mb-4 mt-1 flex items-center justify-between pr-4 text-2xl text-font-color-black dark:text-font-color-white">
               Songs
               <div className="other-controls-container flex">
                 {playlistData.songs && playlistData.songs.length > 0 && (

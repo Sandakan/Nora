@@ -56,6 +56,8 @@
     "build:renderer": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
     "postinstall": "ts-node .erb/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.dev.dll.ts",
     "lint": "cross-env NODE_ENV=development eslint . --ext .ts,.tsx",
+    "prettier-check": "prettier --check .",
+    "prettier-write": "prettier --write .",
     "lint-save-results": "cross-env NODE_ENV=development eslint . --ext .ts,.tsx -o ./lint_results.txt",
     "package": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --publish never",
     "package-linux": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --linux --publish never",
@@ -82,20 +84,6 @@
     ]
   },
   "browserslist": [],
-  "prettier": {
-    "singleQuote": true,
-    "overrides": [
-      {
-        "files": [
-          ".prettierrc",
-          ".eslintrc"
-        ],
-        "options": {
-          "parser": "json"
-        }
-      }
-    ]
-  },
   "jest": {
     "moduleDirectories": [
       "node_modules",

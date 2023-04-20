@@ -16,7 +16,7 @@ const TitleBar = React.memo(() => {
   return (
     <header
       id="title-bar"
-      className={`bg-transparent relative top-0 z-40 flex h-10 w-full items-center justify-between overflow-hidden text-font-color-black transition-opacity dark:text-font-color-white ${
+      className={`relative top-0 z-40 flex h-10 w-full items-center justify-between overflow-hidden bg-transparent text-font-color-black transition-opacity dark:text-font-color-white ${
         bodyBackgroundImage &&
         'bg-background-color-1/50 backdrop-blur-md dark:bg-dark-background-color-1/70'
       }`}

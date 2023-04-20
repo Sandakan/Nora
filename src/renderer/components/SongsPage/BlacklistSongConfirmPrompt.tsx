@@ -16,7 +16,7 @@ const BlacklistSongConfrimPrompt = (props: {
   const [isDoNotShowAgain, setIsDoNotShowAgain] = React.useState(false);
   return (
     <>
-      <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         Confirm Blacklisting{' '}
         {songIds.length === 1 && title ? (
           <>&apos;{title}&apos;</>
