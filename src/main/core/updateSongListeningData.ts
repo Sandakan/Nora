@@ -142,7 +142,7 @@ const updateSongListeningData = (
     }
     return log('Listening data array empty');
   } catch (error) {
-    log(
+    return log(
       `Error occurred when trying to update song listening data for the song with id ${songId}`,
       { error },
       'ERROR'

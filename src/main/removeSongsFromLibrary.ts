@@ -1,6 +1,5 @@
-/* eslint-disable no-await-in-loop */
 /* eslint-disable no-continue */
-/* eslint-disable import/no-cycle */
+/* eslint-disable no-await-in-loop */
 import path from 'path';
 import { removeArtwork } from './other/artworks';
 import {
@@ -10,13 +9,11 @@ import {
   getListeningData,
   getPlaylistData,
   getSongsData,
-  getUserData,
   setAlbumsData,
   setArtistsData,
   setGenresData,
   setPlaylistData,
   setSongsData,
-  setUserData,
 } from './filesystem';
 import log from './log';
 import { dataUpdateEvent, sendMessageToRenderer } from './main';
@@ -224,7 +221,6 @@ const manageListeningDataUpdates = (
 
 const removeSong = async (
   song: SavableSongData,
-  userData: UserData,
   artistsData: SavableArtist[],
   albumsData: SavableAlbum[],
   playlistsData: SavablePlaylist[],
@@ -242,16 +238,6 @@ const removeSong = async (
   let isGenreRemoved = false;
 
   log(`Started the deletion process of the song '${path.basename(song.path)}'`);
-
-  if (userData && Object.keys(userData).length > 0) {
-    if (userData.currentSong.songId === song.songId) {
-      setUserData('currentSong.songId', null);
-      log('Current song got removed from the library.');
-      sendMessageToRenderer(
-        'Current playing song got removed from the library.'
-      );
-    }
-  }
 
   //   ARTIST DATA UPDATES
   const updatedArtistData = manageArtistDataUpdates(artists, song);
@@ -314,7 +300,6 @@ const removeSongsFromLibrary = async (
   let albums = getAlbumsData();
   let playlists = getPlaylistData();
   let listeningData = getListeningData();
-  const userData = getUserData();
   let isArtistRemoved = false;
   let isAlbumRemoved = false;
   let isPlaylistRemoved = false;
@@ -344,7 +329,6 @@ const removeSongsFromLibrary = async (
 
     const data = await removeSong(
       song,
-      userData,
       artists,
       albums,
       playlists,

@@ -582,7 +582,9 @@ const SongCard = (props: SongCardProp) => {
           </div>
           <div
             className="song-artists flex w-2/3 overflow-hidden text-ellipsis whitespace-nowrap text-sm transition-none"
-            title={artists ? artists.join(', ') : 'Unknown Artist'}
+            title={
+              artists ? artists.map((x) => x.name).join(', ') : 'Unknown Artist'
+            }
             data-song-id={songId}
           >
             {songArtistComponents}

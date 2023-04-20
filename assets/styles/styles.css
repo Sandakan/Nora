@@ -307,33 +307,37 @@ input[type="checkbox"]:checked~.checkmark .icon {
 .appear-from-bottom {
   opacity: 0;
   transform: translateY(2rem);
-  -webkit-transform: translateY(2rem);
-  -moz-transform: translateY(2rem);
-  -ms-transform: translateY(2rem);
-  -o-transform: translateY(2rem);
   animation: appearFromBottom var(--transition-duration-0_25s) ease forwards;
-  -webkit-animation: appearFromBottom var(--transition-duration-0_25s) ease forwards;
 }
 
 .disappear-to-bottom {
   opacity: 1;
   transform: translateY(0rem);
-  -webkit-transform: translateY(0rem);
-  -moz-transform: translateY(0rem);
-  -ms-transform: translateY(0rem);
-  -o-transform: translateY(0rem);
   animation: disappearToBottom var(--transition-duration-0_25s) ease forwards;
-  -webkit-animation: disappearToBottom var(--transition-duration-0_25s) ease forwards;
+}
+
+.appear-from-top-and-dissappear {
+  opacity: 0;
+  transform: translateY(-2rem);
+  animation: appearFromTopAndDissappear 5000ms ease forwards;
+}
+
+.appear-from-top {
+  opacity: 0;
+  transform: translateY(-2rem);
+  animation: appearFromTop var(--transition-duration-0_25s) ease forwards;
+}
+
+.disappear-to-top {
+  opacity: 1;
+  transform: translateY(0rem);
+  animation: disappearToTop var(--transition-duration-0_25s) ease forwards;
 }
 
 @keyframes appearFromBottom {
   to {
     opacity: 1;
     transform: translateY(0);
-    -webkit-transform: translateY(0);
-    -moz-transform: translateY(0);
-    -ms-transform: translateY(0);
-    -o-transform: translateY(0);
   }
 }
 
@@ -341,46 +345,58 @@ input[type="checkbox"]:checked~.checkmark .icon {
   to {
     opacity: 0;
     transform: translateY(2rem);
-    -webkit-transform: translateY(2rem);
-    -moz-transform: translateY(2rem);
-    -ms-transform: translateY(2rem);
-    -o-transform: translateY(2rem);
+  }
+}
+
+@keyframes appearFromTopAndDissappear {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  50% {
+    opacity: 0;
+    transform: translateY(-2rem);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-2rem);
+    display: none;
+  }
+}
+
+@keyframes appearFromTop {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes disappearToTop {
+  to {
+    opacity: 0;
+    transform: translateY(-2rem);
   }
 }
 
 @keyframes audioLoadingAnimation {
   0% {
     transform: translateX(-50%);
-    -webkit-transform: translateX(-50%);
-    -moz-transform: translateX(-50%);
-    -ms-transform: translateX(-50%);
-    -o-transform: translateX(-50%);
   }
 
   50% {
     transform: translateX(300%);
-    -webkit-transform: translateX(300%);
-    -moz-transform: translateX(300%);
-    -ms-transform: translateX(300%);
-    -o-transform: translateX(300%);
   }
 
   100% {
     transform: translateX(-50%);
-    -webkit-transform: translateX(-50%);
-    -moz-transform: translateX(-50%);
-    -ms-transform: translateX(-50%);
-    -o-transform: translateX(-50%);
   }
 }
 
 @keyframes loading {
   50% {
     transform: translateX(var(--loading-bar-width));
-    -webkit-transform: translateX(var(--loading-bar-width));
-    -moz-transform: translateX(var(--loading-bar-width));
-    -ms-transform: translateX(var(--loading-bar-width));
-    -o-transform: translateX(var(--loading-bar-width));
   }
 
 }

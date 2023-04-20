@@ -31,10 +31,12 @@ const SelectableFolder = (props: Props) => {
   );
 
   return (
-    <div className={`group ${!isSelected && 'opacity-30'}`}>
+    <div className="group">
       <label
         htmlFor={`${structure.path}RevealBtn`}
-        className="mb-2 flex cursor-pointer items-center justify-between rounded-md bg-background-color-2 px-2 py-4 dark:bg-dark-background-color-2/50 dark:text-font-color-white"
+        className={`mb-2 flex cursor-pointer items-center justify-between rounded-md bg-background-color-2 px-2 py-4 transition-opacity dark:bg-dark-background-color-2/50 dark:text-font-color-white ${
+          !isSelected && 'opacity-30'
+        }`}
       >
         <div className="flex items-center">
           <Checkbox

@@ -9,6 +9,7 @@ import {
 import log from '../log';
 import { closeAbortController } from './controlAbortControllers';
 import addWatchersToFolders from './addWatchersToFolders';
+import { sendMessageToRenderer } from '../main';
 
 export const getAllFoldersFromFolderStructures = (
   folderStructures: FolderStructure[]
@@ -71,7 +72,7 @@ const getAllFilesFromFolderStructures = (
 //   return foldersWithStatData;
 // };
 
-const doesFolderExistInFolderStructure = (
+export const doesFolderExistInFolderStructure = (
   dir: string,
   folders?: FolderStructure[]
 ) => {
@@ -155,8 +156,11 @@ const parseFolderStructuresForSongPaths = async (
   const foldersWithStatData =
     getAllFoldersFromFolderStructures(folderStructures);
 
+  sendMessageToRenderer(
+    `${foldersWithStatData.length} directories found in ${folderStructures.length} selected folders.`
+  );
   log(
-    `${foldersWithStatData.length} directories found in the directories ${folderStructures.length}`
+    `${foldersWithStatData.length} directories found in ${folderStructures.length} selected folders.`
   );
 
   const allFiles = getAllFilesFromFolderStructures(folderStructures);

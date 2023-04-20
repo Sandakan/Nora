@@ -1581,20 +1581,23 @@ export default function App() {
             changePromptMenuData(
               true,
               <div>
-                <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
+                <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+                  <span className="material-icons-round-outlined mr-4">
+                    play_disabled
+                  </span>
                   Couldn't Play the Song
                 </div>
-                <div className="description">
+                <p>
                   Seems like we can't play that song. Please check whether the
                   selected song is available in your system and accessible by
                   the app.
-                </div>
+                </p>
                 <div className="mt-6">
                   ERROR: {err?.message.split(':').at(-1) ?? 'UNKNOWN'}
                 </div>
                 <Button
                   label="OK"
-                  className="remove-song-from-library-btn float-right mt-2 w-[10rem] rounded-md !bg-background-color-3 text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
+                  className="remove-song-from-library-btn float-right mt-2 w-[10rem] !bg-background-color-3 text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
                   clickHandler={() => changePromptMenuData(false)}
                 />
               </div>
@@ -2337,10 +2340,15 @@ export default function App() {
 
   const clearAudioPlayerData = React.useCallback(() => {
     toggleSongPlayback(false);
+
     player.currentTime = 0;
     player.pause();
+
     dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: {} });
     contentRef.current.currentSongData = {} as AudioPlayerData;
+
+    storage.queue.setCurrentSongIndex(null);
+
     addNewNotifications([
       {
         id: 'songPausedOnDelete',

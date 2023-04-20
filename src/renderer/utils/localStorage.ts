@@ -1,5 +1,7 @@
 import debounce from './debounce';
 
+import { version } from '../../../package.json';
+
 export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
   preferences: {
     seekbarScrollInterval: 5,
@@ -58,6 +60,7 @@ const resetLocalStorage = () => {
   try {
     localStorage.clear();
     const template = JSON.stringify(LOCAL_STORAGE_DEFAULT_TEMPLATE);
+    localStorage.setItem('version', version);
     localStorage.setItem('localStorage', template);
 
     debounce(() => {
@@ -71,18 +74,24 @@ const resetLocalStorage = () => {
 
 const checkLocalStorage = () => {
   const store = localStorage.getItem('localStorage');
-  if (!store) {
+  const isASupportedStoreVersion = localStorage.getItem('version') !== null;
+  const isAValidStore = store && isASupportedStoreVersion;
+
+  if (!isAValidStore) {
     try {
+      localStorage.setItem('version', version);
       localStorage.setItem(
         'localStorage',
         JSON.stringify(LOCAL_STORAGE_DEFAULT_TEMPLATE)
       );
-      return console.log(
-        `local storage data didn't exist. Replaced local storage with default items.`
+      return window.api.sendLogs(
+        'Inavalid or outdated local storage found. Resetting the local storage to defualt properties.',
+        'warn'
       );
     } catch (error) {
       window.api.sendLogs(
-        'Error occurred when trying to save default templated for local storage.'
+        'Error occurred when trying to save default templated for local storage.',
+        'warn'
       );
       throw error;
     }
@@ -271,6 +280,9 @@ const setQueue = (queue: Queue) => {
 
 const getQueue = () => getAllItems().queue;
 
+const setCurrentSongIndex = (index: number | null) =>
+  setItem('queue', 'currentSongIndex', index);
+
 // IGNORED SEPARATE ARTISTS
 
 const setIgnoredSeparateArtists = (artists: string[]) => {
@@ -327,7 +339,7 @@ export default {
     setCurrentSongOptions,
     setVolumeOptions,
   },
-  queue: { setQueue, getQueue },
+  queue: { setQueue, getQueue, setCurrentSongIndex },
   ignoredSeparateArtists: {
     setIgnoredSeparateArtists,
     getIgnoredSeparateArtists,

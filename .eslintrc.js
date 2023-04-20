@@ -40,6 +40,14 @@ module.exports = {
     'no-restricted-syntax': 'off',
     'import/named': 'off',
   },
+  overrides: [
+    {
+      files: ['**/*.d.ts'],
+      rules: {
+        'no-use-before-define': 'off',
+      },
+    },
+  ],
   parserOptions: {
     ecmaVersion: 2020,
     sourceType: 'module',

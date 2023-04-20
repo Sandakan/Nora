@@ -399,16 +399,19 @@ export const api = {
 
   // $ APP LOGS
   sendLogs: (
-    logs: string,
+    log: string,
+    logToConsoleType: 'log' | 'warn' | 'error' = 'log',
     forceWindowRestart = false,
     forceMainRestart = false
-  ): Promise<undefined> =>
-    ipcRenderer.invoke(
+  ): Promise<any> => {
+    if (logToConsoleType) console[logToConsoleType](log);
+    return ipcRenderer.invoke(
       'app/getRendererLogs',
-      logs,
+      log,
       forceWindowRestart,
       forceMainRestart
-    ),
+    );
+  },
 
   // $ APP MINI PLAYER CONTROLS
   toggleMiniPlayer: (isMiniPlayerActive: boolean): Promise<void> =>

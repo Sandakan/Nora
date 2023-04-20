@@ -58,7 +58,7 @@ const Button = React.memo((props: ButtonProps) => {
       return iconNames.map((name, index) => {
         return (
           <span
-            className={`material-icons-round icon relative flex items-center justify-center text-lg ${
+            className={`material-icons-round icon relative flex items-center justify-center text-lg !leading-none ${
               label && iconNames.length - 1 === index && 'mr-3'
             } ${iconClassName} ${
               isStatusPending && isButtonDisabled && `h-4 w-4 `

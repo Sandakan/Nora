@@ -26,7 +26,7 @@ export const resolveArtistDuplicates = async (
   selectedArtistId: string,
   duplicateIds: string[]
 ) => {
-  let updatedData: UpdateSongDataResult | undefined = undefined;
+  let updatedData: UpdateSongDataResult | undefined;
 
   const artists = getArtistsData();
   const songs = getSongsData();

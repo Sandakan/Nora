@@ -212,7 +212,11 @@ const SongControlsAndSeekbarContainer = () => {
             currentlyActivePage.pageTitle === 'Lyrics' &&
             '!text-font-color-highlight dark:!text-dark-font-color-highlight !opacity-100'
           }`}
-          clickHandler={() => changeCurrentActivePage('Lyrics')}
+          clickHandler={() =>
+            currentlyActivePage.pageTitle === 'Lyrics'
+              ? changeCurrentActivePage('Home')
+              : changeCurrentActivePage('Lyrics')
+          }
         />
       </div>
       <div className="seekbar-and-song-durations-container flex h-1/3 w-full max-w-xl flex-row items-center justify-between text-sm">

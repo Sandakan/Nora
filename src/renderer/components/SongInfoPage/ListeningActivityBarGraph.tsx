@@ -57,22 +57,23 @@ const ListeningActivityBarGraph = (props: Props) => {
             const listens = listen.listens
               .map((x) => {
                 const [now, noOfListens] = x;
-                const month = new Date(now).getMonth() - 1;
+                const month = new Date(now).getMonth();
 
                 if (i === month) return noOfListens;
                 return 0;
               })
-              .reduce((prevValue, currValue) => prevValue + currValue);
+              .reduce((prevValue, currValue) => prevValue + currValue, 0);
+
             monthsWithNames.push({ listens, month: monthNames[i] });
           }
 
-          const lastSixMonths = getLastNoOfMonths(
+          const lastMonths = getLastNoOfMonths(
             monthsWithNames,
             new Date().getMonth(),
             7
           );
 
-          return lastSixMonths.map((month, index) => {
+          return lastMonths.map((month, index) => {
             return (
               <div className=" relative flex h-full flex-col items-center justify-end">
                 <div className="flex h-full items-end rounded-2xl bg-background-color-1/50 dark:bg-dark-background-color-1/50">

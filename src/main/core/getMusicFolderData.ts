@@ -58,7 +58,7 @@ const selectStructure = (
 };
 
 const selectStructures = (folderPaths: string[]) => {
-  const musicFolders = getUserData().musicFolders;
+  const { musicFolders } = getUserData();
   const output: FolderStructure[] = [];
 
   for (const folderPath of folderPaths) {

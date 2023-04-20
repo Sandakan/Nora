@@ -6,9 +6,15 @@ import log from './log';
 import { dataUpdateEvent } from './main';
 import { appPreferences, version } from '../../package.json';
 import {
+  albumMigrations,
   artistMigrations,
+  blacklistMigrations,
   generateMigrationMessage,
+  genreMigrations,
+  listeningDataMigrations,
+  playlistMigrations,
   songMigrations,
+  userDataMigrations,
 } from './migrations';
 
 export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(
@@ -17,7 +23,7 @@ export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(
 );
 export const DEFAULT_FILE_URL = 'nora://localFiles/';
 
-const USER_DATA_TEMPLATE: UserData = {
+export const USER_DATA_TEMPLATE: UserData = {
   theme: { isDarkMode: false, useSystemTheme: true },
   musicFolders: [],
   preferences: {
@@ -45,12 +51,12 @@ export const FAVORITES_PLAYLIST_TEMPLATE: SavablePlaylist = {
   songs: [],
   isArtworkAvailable: true,
 };
-const PLAYLIST_DATA_TEMPLATE: SavablePlaylist[] = [
+export const PLAYLIST_DATA_TEMPLATE: SavablePlaylist[] = [
   HISTORY_PLAYLIST_TEMPLATE,
   FAVORITES_PLAYLIST_TEMPLATE,
 ];
 
-const BLACKLIST_TEMPLATE: Blacklist = {
+export const BLACKLIST_TEMPLATE: Blacklist = {
   songBlacklist: [],
   folderBlacklist: [],
 };
@@ -103,6 +109,7 @@ const genreStore = new Store({
   },
   beforeEachMigration: (_, context) =>
     generateMigrationMessage('genres.json', context),
+  migrations: genreMigrations,
 });
 
 const albumStore = new Store({
@@ -119,6 +126,7 @@ const albumStore = new Store({
   },
   beforeEachMigration: (_, context) =>
     generateMigrationMessage('albums.json', context),
+  migrations: albumMigrations,
 });
 
 const playlistDataStore = new Store({
@@ -135,6 +143,7 @@ const playlistDataStore = new Store({
   },
   beforeEachMigration: (_, context) =>
     generateMigrationMessage('playlists.json', context),
+  migrations: playlistMigrations,
 });
 
 const userDataStore = new Store({
@@ -151,6 +160,7 @@ const userDataStore = new Store({
   },
   beforeEachMigration: (_, context) =>
     generateMigrationMessage('userData.json', context),
+  migrations: userDataMigrations,
 });
 
 const listeningDataStore = new Store({
@@ -168,6 +178,7 @@ const listeningDataStore = new Store({
   },
   beforeEachMigration: (_, context) =>
     generateMigrationMessage('listening_data.json', context),
+  migrations: listeningDataMigrations,
 });
 
 const blacklistStore = new Store({
@@ -193,6 +204,7 @@ const blacklistStore = new Store({
   },
   beforeEachMigration: (_, context) =>
     generateMigrationMessage('blacklist.json', context),
+  migrations: blacklistMigrations,
 });
 
 const songStoreVersion = songStore.get('version');

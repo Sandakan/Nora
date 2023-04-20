@@ -25,19 +25,16 @@ const parseListeningData = (listeningData?: SongListeningData) => {
   if (listeningData) {
     const { listens } = listeningData;
 
-    allTime =
-      listens
-        .map((x) => x.listens.map((y) => y[1]))
-        .flat(2)
-        .reduce((prevValue, currValue) => prevValue + (currValue || 0)) || 0;
+    allTime = listens
+      .map((x) => x.listens.map((y) => y[1]))
+      .flat(2)
+      .reduce((prevValue, currValue) => prevValue + (currValue || 0), 0);
 
     for (let i = 0; i < listens.length; i += 1) {
       if (listens[i].year === currentYear) {
-        thisYearNoofListens =
-          listens[i].listens
-            .map((x) => x[1])
-            .reduce((prevValue, currValue) => prevValue + (currValue || 0)) ||
-          0;
+        thisYearNoofListens = listens[i].listens
+          .map((x) => x[1])
+          .reduce((prevValue, currValue) => prevValue + (currValue || 0), 0);
 
         for (const listen of listens[i].listens) {
           const [now, noOfListens] = listen;

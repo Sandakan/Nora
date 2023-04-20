@@ -7,7 +7,6 @@ import React, { useContext } from 'react';
 import { FixedSizeList, FixedSizeList as List } from 'react-window';
 import {
   Draggable,
-  // ResponderProvided,
   DropResult,
   Droppable,
   DragDropContext,
@@ -329,15 +328,20 @@ const CurrentQueuePage = () => {
   }, [currentSongData.songId, queue.queue]);
 
   React.useEffect(() => {
-    if (isAutoScrolling) centerCurrentlyPlayingSong();
+    let timeOutId: NodeJS.Timeout;
+    if (isAutoScrolling) {
+      timeOutId = setTimeout(() => centerCurrentlyPlayingSong(), 1000);
+    }
+
+    return () => {
+      if (timeOutId) clearTimeout(timeOutId);
+    };
   }, [centerCurrentlyPlayingSong, isAutoScrolling]);
 
   const moreOptionsContextMenuItems = React.useMemo(
     () => [
       {
-        label: `${
-          isAutoScrolling ? 'Disable' : 'Enable'
-        } Auto scroll to currently playing song`,
+        label: `${isAutoScrolling ? 'Disable' : 'Enable'} Auto Scrolling`,
         iconName: isAutoScrolling ? 'flash_off' : 'flash_on',
         handlerFunction: () => setIsAutoScrolling((state) => !state),
       },

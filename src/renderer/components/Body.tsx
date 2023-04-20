@@ -47,6 +47,7 @@ const Body = React.memo(() => {
           `Element with id ${scrollToId} didn't exist to scroll into view.`
         );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentlyActivePage.data?.scrollToId]);
 
   return (

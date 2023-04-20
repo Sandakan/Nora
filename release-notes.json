@@ -11,7 +11,11 @@
   "versions": [
     {
       "version": "1.2.0-stable",
+      "artwork": "/assets/other/release artworks/whats-new-v1.2.0-stable.webp",
       "releaseDate": "2023 March 09",
+      "importantNotes": [
+        "This release provides accessibility improvements throughout Nora."
+      ],
       "notes": {
         "new": [
           {
@@ -91,6 +95,7 @@
     {
       "version": "1.1.0-stable",
       "releaseDate": "2023 February 26",
+      "artwork": "/assets/other/release artworks/whats-new-v1.1.0-stable.webp",
       "notes": {
         "new": [
           { "note": "Support for editing audio files outside the library." },
@@ -178,6 +183,7 @@
     {
       "version": "1.0.0-stable",
       "releaseDate": "2023 February 17",
+      "artwork": "/assets/other/release artworks/whats-new-v1.0.0-stable.webp",
       "notes": {
         "new": [
           {
@@ -431,6 +437,7 @@
     },
     {
       "version": "0.8.0-alpha",
+      "artwork": "/assets/other/release artworks/whats-new-v0.8.0-alpha.webp",
       "releaseDate": "2022 August 19",
       "notes": {
         "new": [
@@ -497,6 +504,7 @@
     },
     {
       "version": "0.7.0-alpha",
+      "artwork": "/assets/other/release artworks/whats-new-v0.7.0-alpha.webp",
       "releaseDate": "2022 July 29",
       "notes": {
         "new": [

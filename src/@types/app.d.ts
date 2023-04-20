@@ -980,6 +980,8 @@ declare global {
   export interface AppVersion {
     version: string;
     releaseDate: string;
+    importantNotes?: string[];
+    artwork?: string;
     notes: Notes;
   }
 

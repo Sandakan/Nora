@@ -18,6 +18,7 @@ const MostLovedArtists = (props: Props) => {
   const mostLovedArtistComponents = React.useMemo(
     () =>
       mostLovedArtists
+        .filter((_, i) => i < noOfVisibleArtists)
         .map((val, index) => {
           if (val)
             return (
@@ -37,7 +38,7 @@ const MostLovedArtists = (props: Props) => {
           return undefined;
         })
         .filter((x) => x !== undefined),
-    [mostLovedArtists, selectAllHandler]
+    [mostLovedArtists, noOfVisibleArtists, selectAllHandler]
   );
 
   return (

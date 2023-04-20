@@ -87,7 +87,11 @@ const OtherSongControlsContainer = () => {
           currentlyActivePage.pageTitle === 'CurrentQueue' &&
           '!text-font-color-highlight !opacity-90 dark:!text-dark-font-color-highlight'
         } `}
-        clickHandler={() => changeCurrentActivePage('CurrentQueue')}
+        clickHandler={() =>
+          currentlyActivePage.pageTitle === 'CurrentQueue'
+            ? changeCurrentActivePage('Home')
+            : changeCurrentActivePage('CurrentQueue')
+        }
       />
 
       <Button

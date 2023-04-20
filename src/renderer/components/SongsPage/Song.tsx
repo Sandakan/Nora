@@ -510,6 +510,7 @@ const Song = React.forwardRef(
       handlePlayBtnClick,
       toggleMultipleSelections,
       createQueue,
+      queue.currentSongIndex,
       queue.queue,
       currentSongData.songId,
       currentSongData.isAFavorite,

@@ -11,6 +11,7 @@ type Props = { mostLovedSongs: AudioInfo[]; noOfVisibleSongs: number };
 
 const MostLovedSongs = (props: Props) => {
   const { mostLovedSongs, noOfVisibleSongs = 3 } = props;
+  const MAX_SONG_LIMIT = 15;
 
   const selectAllHandler = useSelectAllHandler(
     mostLovedSongs,
@@ -19,24 +20,26 @@ const MostLovedSongs = (props: Props) => {
   );
   const mostLovedSongComponents = React.useMemo(
     () =>
-      mostLovedSongs.map((song, index) => {
-        return (
-          <SongCard
-            index={index}
-            key={song.songId}
-            title={song.title}
-            artworkPath={song.artworkPaths?.artworkPath || DefaultSongCover}
-            path={song.path}
-            songId={song.songId}
-            artists={song.artists}
-            palette={song.palette}
-            isAFavorite={song.isAFavorite}
-            isBlacklisted={song.isBlacklisted}
-            selectAllHandler={selectAllHandler}
-          />
-        );
-      }),
-    [mostLovedSongs, selectAllHandler]
+      mostLovedSongs
+        .filter((_, i) => i < (noOfVisibleSongs || MAX_SONG_LIMIT))
+        .map((song, index) => {
+          return (
+            <SongCard
+              index={index}
+              key={song.songId}
+              title={song.title}
+              artworkPath={song.artworkPaths?.artworkPath || DefaultSongCover}
+              path={song.path}
+              songId={song.songId}
+              artists={song.artists}
+              palette={song.palette}
+              isAFavorite={song.isAFavorite}
+              isBlacklisted={song.isBlacklisted}
+              selectAllHandler={selectAllHandler}
+            />
+          );
+        }),
+    [mostLovedSongs, noOfVisibleSongs, selectAllHandler]
   );
 
   return (

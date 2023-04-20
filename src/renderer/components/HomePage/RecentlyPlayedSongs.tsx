@@ -15,6 +15,7 @@ const RecentlyPlayedSongs = (props: Props) => {
   const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
 
   const { recentlyPlayedSongs, noOfVisibleSongs = 3 } = props;
+  const MAX_SONG_LIMIT = 15;
 
   const selectAllHandler = useSelectAllHandler(
     recentlyPlayedSongs,
@@ -23,24 +24,26 @@ const RecentlyPlayedSongs = (props: Props) => {
   );
   const recentlyPlayedSongComponents = React.useMemo(
     () =>
-      recentlyPlayedSongs.map((song, index) => {
-        return (
-          <SongCard
-            index={index}
-            key={song.songId}
-            title={song.title}
-            artworkPath={song.artworkPaths?.artworkPath || DefaultSongCover}
-            path={song.path}
-            songId={song.songId}
-            artists={song.artists}
-            palette={song.palette}
-            isAFavorite={song.isAFavorite}
-            isBlacklisted={song.isBlacklisted}
-            selectAllHandler={selectAllHandler}
-          />
-        );
-      }),
-    [recentlyPlayedSongs, selectAllHandler]
+      recentlyPlayedSongs
+        .filter((_, i) => i < (noOfVisibleSongs || MAX_SONG_LIMIT))
+        .map((song, index) => {
+          return (
+            <SongCard
+              index={index}
+              key={song.songId}
+              title={song.title}
+              artworkPath={song.artworkPaths?.artworkPath || DefaultSongCover}
+              path={song.path}
+              songId={song.songId}
+              artists={song.artists}
+              palette={song.palette}
+              isAFavorite={song.isAFavorite}
+              isBlacklisted={song.isBlacklisted}
+              selectAllHandler={selectAllHandler}
+            />
+          );
+        }),
+    [noOfVisibleSongs, recentlyPlayedSongs, selectAllHandler]
   );
 
   return (
@@ -75,7 +78,11 @@ const RecentlyPlayedSongs = (props: Props) => {
             <div
               style={{
                 gridTemplateColumns: `repeat(${
-                  noOfVisibleSongs < 3 ? 3 : noOfVisibleSongs
+                  noOfVisibleSongs < 3
+                    ? 3
+                    : noOfVisibleSongs < MAX_SONG_LIMIT
+                    ? noOfVisibleSongs
+                    : MAX_SONG_LIMIT
                 },1fr)`,
               }}
               className="songs-container grid gap-2 pr-2"

@@ -22,6 +22,7 @@ const RecentlyPlayedArtists = (props: Props) => {
   const recentlyPlayedSongArtistsComponents = React.useMemo(
     () =>
       recentlyPlayedSongArtists
+        .filter((_, i) => i < (noOfVisibleArtists || 5))
         .map((val, index) => {
           if (val)
             return (
@@ -41,7 +42,7 @@ const RecentlyPlayedArtists = (props: Props) => {
           return undefined;
         })
         .filter((x) => x !== undefined),
-    [recentlyPlayedSongArtists, selectAllHandler]
+    [noOfVisibleArtists, recentlyPlayedSongArtists, selectAllHandler]
   );
 
   return (

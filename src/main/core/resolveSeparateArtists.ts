@@ -19,7 +19,7 @@ export const resolveSeparateArtists = async (
   separateArtistId: string,
   separateArtistNames: string[]
 ) => {
-  let updatedData: UpdateSongDataResult | undefined = undefined;
+  let updatedData: UpdateSongDataResult | undefined;
 
   let artistsData = getArtistsData();
   const songsData = getSongsData();

@@ -145,11 +145,11 @@ const AboutSettings = () => {
             />
           </li>
         </ul>
-        <div className="mt-12 flex items-center justify-center">
+        <div className="mt-12 flex flex-wrap items-center justify-center px-8">
           <Button
             iconName="new_releases"
             iconClassName="material-icons-round-outlined"
-            className="release-notes-prompt-btn"
+            className="release-notes-prompt-btn mb-4"
             label="Release Notes"
             clickHandler={() =>
               changePromptMenuData(
@@ -161,7 +161,7 @@ const AboutSettings = () => {
           />
           <Button
             iconName="receipt_long"
-            className="open-source-licenses-btn"
+            className="open-source-licenses-btn mb-4"
             label="Open source licences"
             clickHandler={() =>
               changePromptMenuData(
@@ -181,26 +181,9 @@ const AboutSettings = () => {
           <Button
             iconName="description"
             iconClassName="material-icons-round-outlined"
-            className="about-link block w-fit cursor-pointer"
+            className="about-link mb-4 block w-fit cursor-pointer"
             label="Open Log file"
             clickHandler={() => window.api.openLogFile()}
-          />
-        </div>
-
-        <AppStats />
-
-        <div className="about-buttons-container mb-4 flex flex-wrap justify-center">
-          <Button
-            label="Reset App"
-            iconName="auto_mode"
-            className="mb-4 rounded-2xl"
-            clickHandler={() =>
-              changePromptMenuData(
-                true,
-                <ResetAppConfirmationPrompt />,
-                'confirm-app-reset'
-              )
-            }
           />
           <Button
             label="Open Devtools"
@@ -220,6 +203,33 @@ const AboutSettings = () => {
             className="mb-4 rounded-2xl"
             clickHandler={() => window.api.generatePalettes()}
           />
+          <Button
+            label="App Shortcuts"
+            iconName="trail_length_short"
+            className="mb-4 rounded-2xl"
+            iconClassName="material-icons-round-outlined"
+            clickHandler={() =>
+              changePromptMenuData(true, <AppShortcutsPrompt />)
+            }
+          />
+        </div>
+
+        <AppStats />
+
+        <div className="about-buttons-container mb-4 flex flex-wrap justify-center">
+          <Button
+            label="Reset App"
+            iconName="auto_mode"
+            className="mb-4 rounded-2xl"
+            clickHandler={() =>
+              changePromptMenuData(
+                true,
+                <ResetAppConfirmationPrompt />,
+                'confirm-app-reset'
+              )
+            }
+          />
+
           <Button
             label="Clear History"
             iconName="clear"
@@ -262,15 +272,6 @@ const AboutSettings = () => {
                 />
               );
             }}
-          />
-          <Button
-            label="App Shortcuts"
-            iconName="trail_length_short"
-            className="mb-4 rounded-2xl"
-            iconClassName="material-icons-round-outlined"
-            clickHandler={() =>
-              changePromptMenuData(true, <AppShortcutsPrompt />)
-            }
           />
         </div>
         <div className="about-description mt-4 text-sm font-light">

@@ -14,6 +14,7 @@ const RecentlyAddedSongs = React.forwardRef(
     const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
 
     const { latestSongs, noOfVisibleSongs = 6 } = props;
+    const MAX_SONG_LIMIT = 30;
 
     const selectAllHandler = useSelectAllHandler(
       latestSongs,
@@ -24,28 +25,30 @@ const RecentlyAddedSongs = React.forwardRef(
     const latestSongComponents = React.useMemo(
       () =>
         latestSongs.length > 0 && latestSongs[0] !== null
-          ? latestSongs.map((song, index) => {
-              const songData = song as AudioInfo;
-              return (
-                <SongCard
-                  index={index}
-                  key={songData.songId}
-                  title={songData.title}
-                  artworkPath={
-                    songData.artworkPaths?.artworkPath || DefaultSongCover
-                  }
-                  path={songData.path}
-                  songId={songData.songId}
-                  artists={songData.artists}
-                  palette={songData.palette}
-                  isAFavorite={songData.isAFavorite}
-                  isBlacklisted={songData.isBlacklisted}
-                  selectAllHandler={selectAllHandler}
-                />
-              );
-            })
+          ? latestSongs
+              .filter((_, i) => i < (noOfVisibleSongs || MAX_SONG_LIMIT))
+              .map((song, index) => {
+                const songData = song as AudioInfo;
+                return (
+                  <SongCard
+                    index={index}
+                    key={songData.songId}
+                    title={songData.title}
+                    artworkPath={
+                      songData.artworkPaths?.artworkPath || DefaultSongCover
+                    }
+                    path={songData.path}
+                    songId={songData.songId}
+                    artists={songData.artists}
+                    palette={songData.palette}
+                    isAFavorite={songData.isAFavorite}
+                    isBlacklisted={songData.isBlacklisted}
+                    selectAllHandler={selectAllHandler}
+                  />
+                );
+              })
           : [],
-      [latestSongs, selectAllHandler]
+      [latestSongs, noOfVisibleSongs, selectAllHandler]
     );
 
     return (
@@ -79,10 +82,14 @@ const RecentlyAddedSongs = React.forwardRef(
             <div
               style={{
                 gridTemplateColumns: `repeat(${Math.floor(
-                  (noOfVisibleSongs < 6 ? 6 : noOfVisibleSongs) / 2
+                  (noOfVisibleSongs < 6
+                    ? 6
+                    : noOfVisibleSongs < MAX_SONG_LIMIT
+                    ? noOfVisibleSongs
+                    : MAX_SONG_LIMIT) / 2
                 )},1fr)`,
               }}
-              className="songs-container grid grid-rows-2 items-center justify-items-center gap-2 pr-2"
+              className="songs-container grid grid-rows-2 gap-2 pr-2"
             >
               {latestSongComponents}
             </div>

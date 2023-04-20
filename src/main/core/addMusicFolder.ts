@@ -1,10 +1,34 @@
 import path from 'path';
 import log from '../log';
-import parseFolderStructuresForSongPaths from '../fs/parseFolderForSongPaths';
+import parseFolderStructuresForSongPaths, {
+  doesFolderExistInFolderStructure,
+} from '../fs/parseFolderForSongPaths';
 import { parseSong } from '../parseSong';
 import sortSongs from '../utils/sortSongs';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import { generatePalettes } from '../other/generatePalette';
+
+const removeAlreadyAvailableStrucutres = (structures: FolderStructure[]) => {
+  const parents: FolderStructure[] = [];
+  for (const structure of structures) {
+    const doesParentStructureExist = doesFolderExistInFolderStructure(
+      structure.path
+    );
+
+    if (doesParentStructureExist) {
+      if (structure.subFolders.length > 0) {
+        const subFolders = removeAlreadyAvailableStrucutres(
+          structure.subFolders
+        );
+        parents.push(...subFolders);
+      }
+    } else {
+      const subFolders = removeAlreadyAvailableStrucutres(structure.subFolders);
+      parents.push({ ...structure, subFolders });
+    }
+  }
+  return parents;
+};
 
 const addMusicFromFolderStructures = async (
   structures: FolderStructure[],
@@ -16,8 +40,12 @@ const addMusicFromFolderStructures = async (
   log(`Added new song folders to the app.`, {
     folderPaths: structures.map((x) => x.path),
   });
-  const songPaths = await parseFolderStructuresForSongPaths(structures);
+
+  const eligableStructures = removeAlreadyAvailableStrucutres(structures);
+  const songPaths = await parseFolderStructuresForSongPaths(eligableStructures);
+
   console.time('parseTime');
+
   let songs: SongData[] = [];
 
   if (songPaths) {
@@ -57,7 +85,7 @@ const addMusicFromFolderStructures = async (
   log(
     `Successfully parsed ${songs.length} songs from the selcted music folders.`,
     {
-      folderPaths: structures.map((x) => x.path),
+      folderPaths: eligableStructures.map((x) => x.path),
       timeElapsed: console.timeEnd('parseTime'),
     }
   );

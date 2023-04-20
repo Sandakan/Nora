@@ -16,7 +16,7 @@ import ListeningActivityBarGraph from './ListeningActivityBarGraph';
 import SongStat from './SongStat';
 
 const SongInfoPage = () => {
-  const { currentlyActivePage } = useContext(AppContext);
+  const { currentlyActivePage, bodyBackgroundImage } = useContext(AppContext);
   const { changeCurrentActivePage, updateBodyBackgroundImage } =
     React.useContext(AppUpdateContext);
 
@@ -104,7 +104,9 @@ const SongInfoPage = () => {
                 artistId={artist.artistId}
                 name={artist.name}
                 key={artist.artistId + index}
-                className="ml-1 !text-base !text-white"
+                className={`ml-1 !text-base ${
+                  bodyBackgroundImage && '!text-white'
+                }`}
               />
 
               {songInfo.artists && songInfo.artists.length - 1 !== index ? (
@@ -125,6 +127,7 @@ const SongInfoPage = () => {
       currentlyActivePage.data.artistName,
       currentlyActivePage.pageTitle,
       songInfo?.artists,
+      bodyBackgroundImage,
     ]
   );
 
@@ -136,23 +139,21 @@ const SongInfoPage = () => {
       if (listeningData) {
         const { listens } = listeningData;
 
-        allTime =
-          listens
-            .map((x) => x.listens)
-            .map((x) => x.map((y) => y[1]))
-            .flat(5)
-            .reduce((prevValue, currValue) => prevValue + (currValue || 0)) ||
-          0;
+        allTime = listens
+          .map((x) => x.listens)
+          .map((x) => x.map((y) => y[1]))
+          .flat(5)
+          .reduce((prevValue, currValue) => prevValue + (currValue || 0), 0);
 
         for (let i = 0; i < listens.length; i += 1) {
           if (listens[i].year === currentYear) {
-            thisYearNoofListens =
-              listens[i].listens
-                .map((x) => x[1])
-                .flat(5)
-                .reduce(
-                  (prevValue, currValue) => prevValue + (currValue || 0)
-                ) || 0;
+            thisYearNoofListens = listens[i].listens
+              .map((x) => x[1])
+              .flat(5)
+              .reduce(
+                (prevValue, currValue) => prevValue + (currValue || 0),
+                0
+              );
 
             for (const listen of listens[i].listens) {
               const [songDateNow, songListens] = listen;
@@ -196,9 +197,20 @@ const SongInfoPage = () => {
                   className="h-full object-cover"
                 />
               </div>
-              <div className="song-info flex max-w-[70%] flex-col justify-center text-white dark:text-font-color-white">
+              <div
+                className={`song-info flex max-w-[70%] flex-col justify-center ${
+                  bodyBackgroundImage
+                    ? '!text-font-color-white dark:!text-font-color-white'
+                    : 'text-font-color-black dark:text-font-color-white'
+                }`}
+              >
+                <div className="font-semibold opacity-50 dark:font-medium">
+                  SONG
+                </div>
                 <div
-                  className="title info-type-1 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-5xl font-medium text-dark-font-color-highlight"
+                  className={`title info-type-1 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-5xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight ${
+                    bodyBackgroundImage && '!text-dark-font-color-highlight'
+                  }`}
                   title={songInfo.title}
                 >
                   {songInfo.title}
@@ -207,7 +219,9 @@ const SongInfoPage = () => {
                   {songArtists}
                 </div>
                 <Button
-                  className="info-type-2 !mr-0 mb-5 !w-fit truncate !border-0 !p-0 !text-white hover:underline"
+                  className={`info-type-2 !mr-0 mb-5 !w-fit truncate !border-0 !p-0 ${
+                    songInfo.album && 'hover:underline'
+                  } ${bodyBackgroundImage && '!text-white'}`}
                   label={songInfo.album ? songInfo.album.name : 'Unknown Album'}
                   tooltipLabel={
                     songInfo.album ? songInfo.album.name : 'Unknown Album'

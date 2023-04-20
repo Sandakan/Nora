@@ -4,6 +4,7 @@ import React, { useContext } from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import debounce from 'renderer/utils/debounce';
+import storage from 'renderer/utils/localStorage';
 
 import SearchResultsFilter from './SearchResultsFilter';
 import MainContainer from '../MainContainer';
@@ -16,7 +17,6 @@ import ArtistsSearchResultsContainer from './Result_Containers/ArtistsSearchResu
 import NoSearchResultsContainer from './NoSearchResultsContainer';
 import SearchStartPlaceholder from './SearchStartPlaceholder';
 import Button from '../Button';
-import storage from 'renderer/utils/localStorage';
 
 const filterTypes = 'All Songs Albums Artists Playlists Genres'.split(
   ' '

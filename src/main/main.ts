@@ -971,7 +971,7 @@ async function getImagefileLocation() {
   return filePaths[0];
 }
 
-async function resetApp(restartApp = false) {
+async function resetApp(isRestartApp = false) {
   log('!-!-!-!-!-!  STARTED THE RESETTING PROCESS OF THE APP.  !-!-!-!-!-!');
   try {
     await mainWindow.webContents.session.clearStorageData();
@@ -989,8 +989,8 @@ async function resetApp(restartApp = false) {
       `====== ERROR OCCURRED WHEN RESETTING THE APP. RELOADING THE APP NOW.  ======\nERROR : ${error}`
     );
   } finally {
-    log(`====== RELOADING THE ${restartApp ? 'APP' : 'RENDERER'} ======`);
-    if (restartApp) {
+    log(`====== RELOADING THE ${isRestartApp ? 'APP' : 'RENDERER'} ======`);
+    if (isRestartApp) {
       app.relaunch();
       app.quit();
     } else mainWindow.webContents.reload();
