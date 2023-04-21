@@ -2,7 +2,7 @@ import path from 'path';
 import log from '../log';
 import parseFolderStructuresForSongPaths, {
   doesFolderExistInFolderStructure,
-} from '../fs/parseFolderForSongPaths';
+} from '../fs/parseFolderStructuresForSongPaths';
 import { parseSong } from '../parseSong';
 import sortSongs from '../utils/sortSongs';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';

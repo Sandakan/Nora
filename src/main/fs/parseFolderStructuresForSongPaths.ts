@@ -48,30 +48,6 @@ const getAllFilesFromFolderStructures = (
   return allFiles;
 };
 
-// const getFoldersStatData = async (allFolders: string[]) => {
-//   const foldersWithStatData: MusicFolderData[] = [];
-
-//   for (let x = 0; x < allFolders.length; x += 1) {
-//     const folderPath = allFolders[x];
-//     try {
-//       const stats = await fs.stat(folderPath);
-//       foldersWithStatData.push({
-//         path: folderPath,
-//         stats: {
-//           lastModifiedDate: stats.mtime,
-//           lastChangedDate: stats.ctime,
-//           fileCreatedDate: stats.birthtime,
-//           lastParsedDate: new Date(),
-//         },
-//       });
-//     } catch (error) {
-//       log(error as Error, undefined, 'ERROR');
-//     }
-//   }
-
-//   return foldersWithStatData;
-// };
-
 export const doesFolderExistInFolderStructure = (
   dir: string,
   folders?: FolderStructure[]
@@ -96,15 +72,19 @@ export const doesFolderExistInFolderStructure = (
 const updateStructure = (
   structure: FolderStructure,
   musicFolders: FolderStructure[]
-) => {
+): FolderStructure[] => {
   let isFound = false;
 
   for (const folder of musicFolders) {
     if (folder.path === structure.path) {
       folder.stats = structure.stats;
-      // TODO - Fix folder structure conflicts.
+
       folder.subFolders = folder.subFolders.filter(
-        (x) => !structure.subFolders.some((y) => y.path === x.path)
+        (folderSubFolder) =>
+          !structure.subFolders.some(
+            (structureSubFolder) =>
+              structureSubFolder.path === folderSubFolder.path
+          )
       );
 
       folder.subFolders.push(...structure.subFolders);
@@ -137,7 +117,7 @@ export const saveFolderStructures = async (
   structures: FolderStructure[],
   resetWatchers = false
 ) => {
-  let { musicFolders } = getUserData();
+  let musicFolders = [...getUserData().musicFolders];
 
   for (const structure of structures) {
     musicFolders = updateStructure(structure, musicFolders);

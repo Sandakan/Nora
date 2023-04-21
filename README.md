@@ -56,7 +56,7 @@ It packs a horizon of features including,
 
 <div align="center"> 
   <div>
-    <h3><i>" Just found the most beautiful music player for windows: Nora "</i></h3>
+    <h3><i>" Just found the most beautiful music player for Windows: Nora "</i></h3>
     <a href="https://www.reddit.com/r/windowsapps/comments/11xgg99/just_found_the_most_beautiful_music_player_for/"><i>r/windowapps &bull; Reddit</i></a>
   </div> 
 </div>
@@ -95,7 +95,7 @@ Clone the project
   git clone https://github.com/Sandakan/Nora
 ```
 
-Go to the project's directory
+Go to the project's folder
 
 ```bash
   cd Nora

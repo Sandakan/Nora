@@ -115,7 +115,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
     <>
       {separatedArtistsNames.length > 1 && !isIgnored && (
         <div
-          className={`appear-from-bottom mx-auto mb-6 w-[90%] rounded-lg p-4 text-black shadow-md transition-[height] dark:text-white ${
+          className={`appear-from-bottom mx-auto mb-6 w-[90%] rounded-lg p-4 text-black shadow-md transition-[width,height] dark:text-white ${
             bodyBackgroundImage
               ? 'bg-background-color-2/75 backdrop-blur-sm dark:bg-dark-background-color-2/75'
               : 'bg-background-color-2 dark:bg-dark-background-color-2'

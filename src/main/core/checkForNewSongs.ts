@@ -2,7 +2,7 @@ import path from 'path';
 import checkFolderForUnknownModifications from '../fs/checkFolderForUnknownContentModifications';
 import { getSongsData, getUserData } from '../filesystem';
 import log from '../log';
-import { getAllFoldersFromFolderStructures } from '../fs/parseFolderForSongPaths';
+import { getAllFoldersFromFolderStructures } from '../fs/parseFolderStructuresForSongPaths';
 
 const checkForNewSongs = async () => {
   const { musicFolders } = getUserData();

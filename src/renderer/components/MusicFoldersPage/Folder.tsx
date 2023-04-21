@@ -215,7 +215,7 @@ const Folder = (props: FolderProps) => {
             : 'hover:!bg-background-color-2 dark:hover:!bg-dark-background-color-2'
         } ${isBlacklisted && '!opacity-50'} ${
           (index + 1) % 2 === 1
-            ? 'bg-background-color-2/50 dark:bg-dark-background-color-2/30'
+            ? 'bg-background-color-2/50 dark:bg-dark-background-color-2/40'
             : '!bg-background-color-1 dark:!bg-dark-background-color-1'
         }`}
         onClick={(e) => {
@@ -275,7 +275,7 @@ const Folder = (props: FolderProps) => {
             </div>
           </div>
         </div>
-        <div className="folder-states-container">
+        <div className="folder-states-container flex">
           {isBlacklisted && (
             <span
               className="material-icons-round-outlined text-2xl"
@@ -286,7 +286,7 @@ const Folder = (props: FolderProps) => {
           )}
           {subFolders.length > 0 && (
             <Button
-              className="!rounded-full !border-none !p-1 group-hover:bg-background-color-1 dark:group-hover:bg-dark-background-color-1"
+              className="ml-4 !rounded-full !border-none !p-1 group-hover:bg-background-color-1 dark:group-hover:bg-dark-background-color-1"
               iconClassName="!text-2xl !leading-none"
               iconName={
                 isSubFoldersVisible ? 'arrow_drop_up' : 'arrow_drop_down'

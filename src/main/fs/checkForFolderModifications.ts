@@ -3,7 +3,7 @@ import { getUserData } from '../filesystem';
 import removeMusicFolder from '../core/removeMusicFolder';
 import { dirExistsSync } from '../utils/dirExists';
 import log from '../log';
-import { getAllFoldersFromFolderStructures } from './parseFolderForSongPaths';
+import { getAllFoldersFromFolderStructures } from './parseFolderStructuresForSongPaths';
 
 const checkForFolderModifications = (foldername: string) => {
   const { musicFolders } = getUserData();

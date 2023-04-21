@@ -5,7 +5,7 @@ import SelectableFolder from './SelectableFolder';
 import Button from '../Button';
 
 export interface SelectableFolderStructure extends FolderStructure {
-  isSelected: boolean;
+  isSelected?: boolean;
   subFolders: SelectableFolderStructure[];
 }
 
@@ -35,7 +35,7 @@ const makeStructureSelectable = (
 const removeUnselectedFolders = (
   selectableFolders: SelectableFolderStructure[]
 ) => {
-  const validFolders: SelectableFolderStructure[] = [];
+  const validFolders: FolderStructure[] = [];
   for (const folder of selectableFolders) {
     if (folder.isSelected) {
       if (folder.subFolders.length > 0) {
@@ -44,6 +44,8 @@ const removeUnselectedFolders = (
       }
       validFolders.push(folder);
     }
+
+    delete folder.isSelected;
   }
   return validFolders;
 };

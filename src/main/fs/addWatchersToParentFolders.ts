@@ -64,6 +64,7 @@ const addWatcherToParentFolder = (parentFolderPath: string) => {
   }
 };
 
+/* Parent folder watchers only watch for folder modifications (not file modifications) inside the parent folder. */
 const addWatchersToParentFolders = async () => {
   const { musicFolders } = getUserData();
 

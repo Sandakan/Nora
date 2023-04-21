@@ -9,7 +9,7 @@ import checkFolderForContentModifications from './checkFolderForContentModificat
 import { dirExistsSync } from '../utils/dirExists';
 import checkForFolderModifications from './checkForFolderModifications';
 import { saveAbortController } from './controlAbortControllers';
-import { saveFolderStructures } from './parseFolderForSongPaths';
+import { saveFolderStructures } from './parseFolderStructuresForSongPaths';
 
 const checkForFolderUpdates = async (folder: FolderStructure) => {
   try {

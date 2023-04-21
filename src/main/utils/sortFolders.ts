@@ -8,21 +8,27 @@ const isFolderBlacklisted = (folderPath: string) => {
   return folderBlacklist.includes(folderPath);
 };
 
-export default <T extends MusicFolder[]>(
-  data: T,
+const sortFolders = <T extends MusicFolder[]>(
+  musicFolders: T,
   sortType: FolderSortTypes
 ) => {
-  if (data.length > 0) {
+  if (musicFolders.length > 0) {
+    for (const musicFolder of musicFolders) {
+      if (musicFolder.subFolders.length > 0) {
+        musicFolder.subFolders = sortFolders(musicFolder.subFolders, sortType);
+      }
+    }
+
     if (sortType === 'aToZ')
-      return data.sort((a, b) =>
+      return musicFolders.sort((a, b) =>
         a.path > b.path ? 1 : a.path < b.path ? -1 : 0
       );
     if (sortType === 'zToA')
-      return data.sort((a, b) =>
+      return musicFolders.sort((a, b) =>
         a.path < b.path ? 1 : a.path > b.path ? -1 : 0
       );
     if (sortType === 'noOfSongsDescending')
-      return data
+      return musicFolders
         .sort((a, b) => (a.path > b.path ? 1 : a.path < b.path ? -1 : 0))
         .sort((a, b) =>
           a.songIds.length < b.songIds.length
@@ -32,7 +38,7 @@ export default <T extends MusicFolder[]>(
             : 0
         );
     if (sortType === 'noOfSongsAscending')
-      return data
+      return musicFolders
         .sort((a, b) => (a.path > b.path ? 1 : a.path < b.path ? -1 : 0))
         .sort((a, b) =>
           a.songIds.length > b.songIds.length
@@ -42,13 +48,15 @@ export default <T extends MusicFolder[]>(
             : 0
         );
     if (sortType === 'blacklistedFolders')
-      return data
+      return musicFolders
         .filter((folder) => isFolderBlacklisted(folder.path))
         .sort((a, b) => (a.path > b.path ? 1 : a.path < b.path ? -1 : 0));
     if (sortType === 'whitelistedFolders')
-      return data
+      return musicFolders
         .filter((folder) => !isFolderBlacklisted(folder.path))
         .sort((a, b) => (a.path > b.path ? 1 : a.path < b.path ? -1 : 0));
   }
-  return data;
+  return musicFolders;
 };
+
+export default sortFolders;
