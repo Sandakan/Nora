@@ -1,19 +1,13 @@
 /* eslint-disable react/jsx-no-useless-fragment */
-/* eslint-disable no-console */
-/* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable react/no-array-index-key */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable no-nested-ternary */
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
-/* eslint-disable react/self-closing-comp */
-/* eslint-disable react/destructuring-assignment */
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
 import { valueRounder } from 'renderer/utils/valueRounder';
+import Button from '../Button';
 import Img from '../Img';
 import MainContainer from '../MainContainer';
 import SecondaryContainer from '../SecondaryContainer';
@@ -22,7 +16,7 @@ import ListeningActivityBarGraph from './ListeningActivityBarGraph';
 import SongStat from './SongStat';
 
 const SongInfoPage = () => {
-  const { currentlyActivePage } = useContext(AppContext);
+  const { currentlyActivePage, bodyBackgroundImage } = useContext(AppContext);
   const { changeCurrentActivePage, updateBodyBackgroundImage } =
     React.useContext(AppUpdateContext);
 
@@ -35,6 +29,7 @@ const SongInfoPage = () => {
       currentDate,
       currentYear: currentDate.getFullYear(),
       currentMonth: currentDate.getMonth(),
+      currentDay: currentDate.getDate(),
     };
   }, []);
 
@@ -109,12 +104,16 @@ const SongInfoPage = () => {
                 artistId={artist.artistId}
                 name={artist.name}
                 key={artist.artistId + index}
-                className="ml-1"
+                className={`ml-1 !text-base ${
+                  bodyBackgroundImage && '!text-white'
+                }`}
               />
 
-              {songInfo.artists && songInfo.artists.length - 1 !== index
-                ? ', '
-                : ''}
+              {songInfo.artists && songInfo.artists.length - 1 !== index ? (
+                <span className="mr-1">,</span>
+              ) : (
+                ''
+              )}
             </>
           ))
         ) : (
@@ -128,6 +127,7 @@ const SongInfoPage = () => {
       currentlyActivePage.data.artistName,
       currentlyActivePage.pageTitle,
       songInfo?.artists,
+      bodyBackgroundImage,
     ]
   );
 
@@ -139,25 +139,29 @@ const SongInfoPage = () => {
       if (listeningData) {
         const { listens } = listeningData;
 
-        allTime =
-          listens
-            .map((x) => x.months)
-            .flat(2)
-            .reduce((prevValue, currValue) => prevValue + (currValue || 0)) ||
-          0;
+        allTime = listens
+          .map((x) => x.listens)
+          .map((x) => x.map((y) => y[1]))
+          .flat(5)
+          .reduce((prevValue, currValue) => prevValue + (currValue || 0), 0);
 
         for (let i = 0; i < listens.length; i += 1) {
           if (listens[i].year === currentYear) {
-            thisYearNoofListens =
-              listens[i].months
-                .flat(2)
-                .reduce(
-                  (prevValue, currValue) => prevValue + (currValue || 0)
-                ) || 0;
+            thisYearNoofListens = listens[i].listens
+              .map((x) => x[1])
+              .flat(5)
+              .reduce(
+                (prevValue, currValue) => prevValue + (currValue || 0),
+                0
+              );
 
-            thisMonthNoOfListens = listens[i].months[currentMonth].reduce(
-              (prevValue, currValue) => prevValue + (currValue || 0)
-            );
+            for (const listen of listens[i].listens) {
+              const [songDateNow, songListens] = listen;
+
+              const songMonth = new Date(songDateNow).getMonth();
+              if (songMonth === currentMonth)
+                thisMonthNoOfListens += songListens;
+            }
             console.log('thisMonth', thisMonthNoOfListens);
           }
         }
@@ -193,9 +197,20 @@ const SongInfoPage = () => {
                   className="h-full object-cover"
                 />
               </div>
-              <div className="song-info flex max-w-[70%] flex-col justify-center text-font-color-black dark:text-font-color-white">
+              <div
+                className={`song-info flex max-w-[70%] flex-col justify-center ${
+                  bodyBackgroundImage
+                    ? '!text-font-color-white dark:!text-font-color-white'
+                    : 'text-font-color-black dark:text-font-color-white'
+                }`}
+              >
+                <div className="font-semibold opacity-50 dark:font-medium">
+                  SONG
+                </div>
                 <div
-                  className="title info-type-1 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-5xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight"
+                  className={`title info-type-1 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-5xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight ${
+                    bodyBackgroundImage && '!text-dark-font-color-highlight'
+                  }`}
                   title={songInfo.title}
                 >
                   {songInfo.title}
@@ -203,23 +218,23 @@ const SongInfoPage = () => {
                 <div className="song-artists info-type-2 mb-1 flex items-center overflow-hidden text-ellipsis whitespace-nowrap text-base">
                   {songArtists}
                 </div>
-                <div
-                  className="info-type-2 mb-5 overflow-hidden text-ellipsis whitespace-nowrap hover:underline"
-                  title={songInfo.album ? songInfo.album.name : 'Unknown Album'}
-                  onClick={() => {
+                <Button
+                  className={`info-type-2 !mr-0 mb-5 !w-fit truncate !border-0 !p-0 ${
+                    songInfo.album && 'hover:underline'
+                  } ${bodyBackgroundImage && '!text-white'}`}
+                  label={songInfo.album ? songInfo.album.name : 'Unknown Album'}
+                  tooltipLabel={
+                    songInfo.album ? songInfo.album.name : 'Unknown Album'
+                  }
+                  clickHandler={() => {
                     if (songInfo.album) {
-                      return currentlyActivePage.pageTitle === 'AlbumInfo' &&
-                        currentlyActivePage.data.albumId === songInfo.album.name
-                        ? changeCurrentActivePage('Home')
-                        : changeCurrentActivePage('AlbumInfo', {
-                            albumId: songInfo.album.albumId,
-                          });
+                      return changeCurrentActivePage('AlbumInfo', {
+                        albumId: songInfo.album.albumId,
+                      });
                     }
                     return undefined;
                   }}
-                >
-                  {songInfo.album ? songInfo.album.name : 'Unknown Album'}
-                </div>
+                />
                 <div
                   className="info-type-3 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm"
                   title={songDuration}

@@ -1,7 +1,5 @@
-/* eslint-disable no-use-before-define */
-/* eslint-disable no-unused-vars */
 import NodeID3 from 'node-id3';
-import { ReactElement } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import { ButtonProps } from 'renderer/components/Button';
 import { api } from '../main/preload';
 
@@ -167,7 +165,7 @@ declare global {
 
   // ? Song listening data related types
 
-  interface SavableSongListeningData {
+  interface SongListeningData {
     /** song id of the relevant song */
     songId: string;
     /** no of song skips.
@@ -180,39 +178,12 @@ declare global {
      * Incremented if the user added the song to any playlist. */
     inNoOfPlaylists?: number;
     /** an array of listening records for each year. */
-    listens: SavableYearlyListeningRate[];
-  }
-
-  interface SongListeningData {
-    songId: string;
-    skips?: number;
-    fullListens?: number;
-    inNoOfPlaylists?: number;
     listens: YearlyListeningRate[];
   }
 
-  interface SavableYearlyListeningRate {
-    year: number;
-    /**
-     * An array with strings holding no of listens of the song in each day of each month of an year.
-     *
-     * * Array can have maximum of 12 strings each representing a month.
-     *
-     * * If the array has ["2_0","","1_3"], it means that user has listened to this song 2 times January, 0 times in February, and total of 4 times in March. In this example, other 9 months is considered as if the user didn't listen to this song.
-     *
-     * * String contains no of listens of each of a month seperated by an underscore(_).
-     *
-     * * Empty string says that user didn't listen to this song in that relevant month.
-     *
-     * * if the string contains "2_0_3", that means user listened to this song 2 times on 1st, 0 times on 2nd and 3 times on 3rd day in that month.
-     */
-    months: string[];
-  }
-  type MonthlyListens = number[];
-
   interface YearlyListeningRate {
     year: number;
-    months: MonthlyListens[];
+    listens: [number, number][];
   }
 
   type ListeningDataTypes =
@@ -235,6 +206,7 @@ declare global {
     isShuffling: boolean;
     isMiniPlayer: boolean;
     isPlayerStalled: boolean;
+    playbackRate: number;
   }
 
   type SongSkipReason = 'USER_SKIP' | 'PLAYER_SKIP';
@@ -341,7 +313,9 @@ declare global {
 
   // ? User data related types
 
-  type AppTheme = 'dark' | 'light' | 'system';
+  type AppThemeWithoutSystem = 'dark' | 'light';
+
+  type AppTheme = AppThemeWithoutSystem | 'system';
 
   type UserDataTypes =
     | 'theme'
@@ -359,20 +333,13 @@ declare global {
     | 'windowDiamensions.mainWindow'
     | 'windowDiamensions.miniPlayer'
     | 'recentSearches'
-    | 'preferences.doNotShowBlacklistSongConfirm'
-    | 'preferences.isReducedMotion'
-    | 'preferences.songIndexing'
     | 'preferences.isMiniPlayerAlwaysOnTop'
-    | 'preferences.doNotVerifyWhenOpeningLinks'
     | 'preferences.autoLaunchApp'
-    | 'preferences.showSongRemainingTime'
-    | 'preferences.noUpdateNotificationForNewUpdate'
-    | 'preferences.showArtistArtworkNearSongControls'
     | 'preferences.isMusixmatchLyricsEnabled'
-    | 'preferences.disableBackgroundArtworks'
     | 'preferences.hideWindowOnClose'
     | 'preferences.openWindowAsHiddenOnSystemStart'
     | 'customMusixmatchUserToken'
+    | 'storageMetrics'
     | PageSortTypes;
 
   type AppUpdatesState =
@@ -390,34 +357,13 @@ declare global {
 
   interface UserData {
     theme: AppThemeData;
-    currentSong: {
-      songId: string | null;
-      stoppedPosition: number;
-      playlistId?: string;
-    };
-    volume: {
-      isMuted: boolean;
-      value: number;
-    };
-    queue?: Queue;
-    isShuffling: boolean;
-    isRepeating: RepeatTypes;
-    musicFolders: MusicFolderData[];
-    defaultPage: DefaultPages;
+    musicFolders: FolderStructure[];
     preferences: {
-      doNotShowBlacklistSongConfirm: boolean;
-      isReducedMotion: boolean;
-      songIndexing: boolean;
       autoLaunchApp: boolean;
-      isMiniPlayerAlwaysOnTop: boolean;
-      doNotVerifyWhenOpeningLinks: boolean;
-      showSongRemainingTime: boolean;
-      noUpdateNotificationForNewUpdate?: string;
-      showArtistArtworkNearSongControls: boolean;
-      isMusixmatchLyricsEnabled: boolean;
-      disableBackgroundArtworks: boolean;
-      hideWindowOnClose: boolean;
       openWindowAsHiddenOnSystemStart: boolean;
+      isMiniPlayerAlwaysOnTop: boolean;
+      isMusixmatchLyricsEnabled: boolean;
+      hideWindowOnClose: boolean;
     };
     windowPositions: {
       mainWindow?: WindowCordinates;
@@ -427,15 +373,9 @@ declare global {
       mainWindow?: WindowCordinates;
       miniPlayer?: WindowCordinates;
     };
-    sortingStates: {
-      songsPage?: SongSortTypes;
-      artistsPage?: ArtistSortTypes;
-      playlistsPage?: PlaylistSortTypes;
-      albumsPage?: AlbumSortTypes;
-      genresPage?: GenreSortTypes;
-    };
     recentSearches: string[];
     customMusixmatchUserToken?: string;
+    storageMetrics?: StorageMetrics;
   }
 
   interface AppThemeData {
@@ -458,10 +398,86 @@ declare global {
     };
   }
 
-  interface MusicFolder {
-    folderData: MusicFolderData;
+  interface FolderStructure extends MusicFolderData {
+    subFolders: FolderStructure[];
+    noOfSongs?: number;
+  }
+
+  interface MusicFolder extends FolderStructure {
     songIds: string[];
     isBlacklisted: boolean;
+    subFolders: MusicFolder[];
+  }
+
+  // ? LocalStorage related types
+
+  interface Preferences {
+    seekbarScrollInterval: number;
+    isSongIndexingEnabled: boolean;
+    doNotShowBlacklistSongConfirm: boolean;
+    isReducedMotion: boolean;
+    doNotVerifyWhenOpeningLinks: boolean;
+    showSongRemainingTime: boolean;
+    showArtistArtworkNearSongControls: boolean;
+    disableBackgroundArtworks: boolean;
+    noUpdateNotificationForNewUpdate: string;
+    defaultPageOnStartUp: DefaultPages;
+    enableArtworkFromSongCovers: boolean;
+    shuffleArtworkFromSongCovers: boolean;
+    removeAnimationsOnBatteryPower: boolean;
+    isPredictiveSearchEnabled: boolean;
+  }
+
+  interface CurrentSong {
+    songId: string | null;
+    stoppedPosition: number;
+    playlistId?: string;
+  }
+
+  interface Volume {
+    isMuted: boolean;
+    value: number;
+  }
+
+  interface Playback {
+    isShuffling: boolean;
+    isRepeating: RepeatTypes;
+    currentSong: CurrentSong;
+    volume: Volume;
+    playbackRate: number;
+  }
+
+  interface Equalizer {
+    sixtyHertz: number;
+    hundredFiftyHertz: number;
+    fourHundredHertz: number;
+    oneKiloHertz: number;
+    twoPointFourKiloHertz: number;
+    fifteenKiloHertz: number;
+  }
+
+  interface IgnoredDuplicates {
+    artists: string[][];
+    albums: string[][];
+    genres: string[][];
+  }
+
+  interface SortingStates {
+    songsPage?: SongSortTypes;
+    artistsPage?: ArtistSortTypes;
+    playlistsPage?: PlaylistSortTypes;
+    albumsPage?: AlbumSortTypes;
+    genresPage?: GenreSortTypes;
+  }
+
+  interface LocalStorage {
+    preferences: Preferences;
+    playback: Playback;
+    queue: Queue;
+    ignoredSeparateArtists: string[];
+    ignoredDuplicates: IgnoredDuplicates;
+    sortingStates: SortingStates;
+    equalizerPreset: Equalizer;
   }
 
   // ? Playlists related types
@@ -555,6 +571,34 @@ declare global {
     picture_medium: string;
   }
 
+  //  ? Storage related types
+
+  interface AppDataStorageMetrics {
+    appDataSize: number;
+    artworkCacheSize: number;
+    tempArtworkCacheSize: number;
+    totalArtworkCacheSize: number;
+    logSize: number;
+    songDataSize: number;
+    artistDataSize: number;
+    albumDataSize: number;
+    genreDataSize: number;
+    playlistDataSize: number;
+    userDataSize: number;
+    librarySize: number;
+    totalKnownItemsSize: number;
+    otherSize: number;
+  }
+
+  interface StorageMetrics {
+    rootSizes: { freeSpace: number; size: number };
+    remainingSize: number;
+    appFolderSize: number;
+    appDataSizes: AppDataStorageMetrics;
+    totalSize: number;
+    generatedDate: string;
+  }
+
   // ? Search related types
 
   type SearchFilters =
@@ -615,6 +659,8 @@ declare global {
     | 'APP_THEME_CHANGE'
     | 'PLAYBACK_FROM_UNKNOWN_SOURCE'
     | 'AUDIO_PARSING_PROCESS_UPDATE'
+    | 'SONG_PALETTE_GENERAING_PROCESS_UPDATE'
+    | 'GENRE_PALETTE_GENERAING_PROCESS_UPDATE'
     | 'SONG_REMOVE_PROCESS_UPDATE'
     | 'SONG_BLACKLISTED'
     | 'SONG_WHITELISTED'
@@ -629,10 +675,10 @@ declare global {
   type NotificationTypes = 'DEFAULT' | 'WITH_PROGRESS_BAR';
 
   interface AppNotification {
-    delay: number;
+    delay?: number;
     id: string;
     order?: number;
-    content: ReactElement<any, any>;
+    content: ReactNode;
     icon?: ReactElement<any, any>;
     buttons?: ButtonProps[];
     type?: NotificationTypes;
@@ -692,7 +738,7 @@ declare global {
     iconClassName?: string;
     isContextMenuItemSeperator?: boolean;
     innerContextMenus?: ContextMenuItem[];
-    handlerFunction: () => void;
+    handlerFunction: null | (() => void);
     isDisabled?: boolean;
   }
 
@@ -796,6 +842,7 @@ declare global {
     | 'songs/updatedSong'
     | 'songs/deletedSong'
     | 'songs/artworks'
+    | 'songs/palette'
     | 'songs/listeningData'
     | 'songs/listeningData/fullSongListens'
     | 'songs/listeningData/skips'
@@ -817,6 +864,7 @@ declare global {
     | 'genres/newGenre'
     | 'genres/updatedGenre'
     | 'genres/deletedGenre'
+    | 'genres/backgroundColor'
     | 'playlists'
     | 'playlists/newPlaylist'
     | 'playlists/updatedPlaylist'
@@ -931,6 +979,8 @@ declare global {
   export interface AppVersion {
     version: string;
     releaseDate: string;
+    importantNotes?: string[];
+    artwork?: string;
     notes: Notes;
   }
 

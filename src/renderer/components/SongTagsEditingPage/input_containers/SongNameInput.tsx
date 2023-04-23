@@ -2,7 +2,7 @@
 
 type Props = {
   songTitle: string;
-  updateSongInfo: (callback: (prevSongInfo: SongTags) => SongTags) => void;
+  updateSongInfo: (_callback: (_prevSongInfo: SongTags) => SongTags) => void;
 };
 
 const SongNameInput = (props: Props) => {
@@ -13,7 +13,7 @@ const SongNameInput = (props: Props) => {
       <input
         type="text"
         id="song-name-id3-tag"
-        className="mt-2 mr-2 w-[90%] rounded-3xl border-[.15rem] border-background-color-2 bg-background-color-1 py-3 px-4 text-font-color-black dark:border-dark-background-color-2 dark:bg-dark-background-color-1 dark:text-font-color-white"
+        className="mr-2 mt-2 w-[90%] rounded-3xl border-[.15rem] border-background-color-2 bg-background-color-1 px-4 py-3 text-font-color-black transition-colors focus:border-font-color-highlight dark:border-dark-background-color-2 dark:bg-dark-background-color-1 dark:text-font-color-white dark:focus:border-dark-font-color-highlight"
         name="song-name"
         placeholder="Song Name"
         value={songTitle}

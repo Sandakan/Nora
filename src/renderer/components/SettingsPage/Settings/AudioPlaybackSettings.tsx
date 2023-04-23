@@ -4,7 +4,7 @@ import React from 'react';
 import Dropdown, { DropdownOption } from 'renderer/components/Dropdown';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { getItem, setItem } from 'renderer/utils/localStorage';
+import storage from 'renderer/utils/localStorage';
 import Button from '../../Button';
 import Checkbox from '../../Checkbox';
 import Hyperlink from '../../Hyperlink';
@@ -70,21 +70,38 @@ const seekbarScrollIntervals: DropdownOption<string>[] = [
   { label: '20 seconds', value: '20' },
 ];
 
+const playbackRateIntervals: DropdownOption<string>[] = [
+  { label: '0.25x', value: '0.25' },
+  { label: '0.5x', value: '0.5' },
+  { label: '0.75x', value: '0.75' },
+  { label: '1x', value: '1' },
+  { label: '2x', value: '2' },
+  { label: '2.5x', value: '2.5' },
+  { label: '3x', value: '3' },
+  { label: '4x', value: '4' },
+];
+
 const AudioPlaybackSettings = () => {
-  const { userData } = React.useContext(AppContext);
+  const { userData, localStorageData } = React.useContext(AppContext);
   const { updateUserData, changePromptMenuData } =
     React.useContext(AppUpdateContext);
 
   const [seekbarScrollInterval, setSeekbarScrollInterval] = React.useState('5');
+  const [playbackRateInterval, setPlaybackRateInterval] = React.useState('1');
 
   React.useEffect(() => {
-    const interval = getItem('seekbarScrollInterval');
+    const interval = storage.preferences.getPreferences(
+      'seekbarScrollInterval'
+    );
+    const playbackRate = storage.playback.getPlaybackOptions('playbackRate');
+
+    setPlaybackRateInterval(playbackRate.toString());
     setSeekbarScrollInterval(interval.toString());
   }, []);
 
   return (
-    <>
-      <div className="title-container mt-1 mb-4 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+    <li className="main-container audio-playback-settings-container mb-16">
+      <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         <span className="material-icons-round-outlined mr-2">
           slow_motion_video
         </span>
@@ -99,25 +116,33 @@ const AudioPlaybackSettings = () => {
           <Checkbox
             id="toggleShowRemainingSongDuration"
             isChecked={
-              userData !== undefined &&
-              userData.preferences.showSongRemainingTime
+              localStorageData !== undefined &&
+              localStorageData.preferences.showSongRemainingTime
             }
             checkedStateUpdateFunction={(state) =>
-              updateUserData(async (prevUserData) => {
-                await window.api.saveUserData(
-                  'preferences.showSongRemainingTime',
-                  state
-                );
-                return {
-                  ...prevUserData,
-                  preferences: {
-                    ...prevUserData.preferences,
-                    showSongRemainingTime: state,
-                  },
-                };
-              })
+              storage.preferences.setPreferences('showSongRemainingTime', state)
             }
             labelContent="Show remaining song duration"
+          />
+        </li>
+
+        <li className="playback-rate mb-4">
+          <div className="description">
+            Change the playback rate of the player.
+          </div>
+          <Dropdown
+            className="mt-4"
+            name="playbackRateInterval"
+            value={playbackRateInterval.toString()}
+            options={playbackRateIntervals}
+            onChange={(e) => {
+              const val = e.currentTarget.value;
+              setPlaybackRateInterval(val);
+              storage.playback.setPlaybackOptions(
+                'playbackRate',
+                parseFloat(val)
+              );
+            }}
           />
         </li>
 
@@ -125,7 +150,7 @@ const AudioPlaybackSettings = () => {
           <div className="description">
             Enable Musixmatch Lyrics that provides synced and unsynced lyrics
             for your playlist on-demand.
-            <div className="mt-1 ml-2 text-sm font-light">
+            <div className="ml-2 mt-1 text-sm font-light">
               Enabling and using this feature means you have accepted the{' '}
               <Button
                 className="!m-0 !inline !rounded-none !border-0 !p-0 !text-font-color-highlight-2 outline-1 outline-offset-1 hover:underline focus-visible:!outline dark:!text-dark-font-color-highlight-2"
@@ -164,17 +189,18 @@ const AudioPlaybackSettings = () => {
               }
               clickHandler={() => {
                 const state = !userData?.preferences.isMusixmatchLyricsEnabled;
-                window.api.saveUserData(
-                  'preferences.isMusixmatchLyricsEnabled',
-                  state
-                );
-                updateUserData((prevData) => ({
-                  ...prevData,
-                  preferences: {
-                    ...prevData.preferences,
-                    isMusixmatchLyricsEnabled: state,
-                  },
-                }));
+                window.api
+                  .saveUserData('preferences.isMusixmatchLyricsEnabled', state)
+                  .then(() =>
+                    updateUserData((prevData) => ({
+                      ...prevData,
+                      preferences: {
+                        ...prevData.preferences,
+                        isMusixmatchLyricsEnabled: state,
+                      },
+                    }))
+                  )
+                  .catch((err) => console.error(err));
               }}
               isDisabled={userData?.preferences.isMusixmatchLyricsEnabled}
             />
@@ -194,12 +220,15 @@ const AudioPlaybackSettings = () => {
             onChange={(e) => {
               const val = e.currentTarget.value;
               setSeekbarScrollInterval(val);
-              setItem('seekbarScrollInterval', parseFloat(val));
+              storage.preferences.setPreferences(
+                'seekbarScrollInterval',
+                parseFloat(val)
+              );
             }}
           />
         </li>
       </ul>
-    </>
+    </li>
   );
 };
 

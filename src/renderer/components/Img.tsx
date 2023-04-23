@@ -14,12 +14,59 @@ type Props = {
   onContextMenu?: (_e: React.MouseEvent<HTMLImageElement, MouseEvent>) => void;
   showImgPropsOnTooltip?: boolean;
   tabIndex?: number;
+  showAltAsTooltipLabel?: boolean;
 };
 
 interface ImgProps {
   width: number;
   height: number;
 }
+
+/* <picture
+  className={`outline-1 outline-offset-4 focus-visible:!outline ${className}`}
+  tabIndex={tabIndex}
+>
+  <source srcSet={src} />
+  {fallbackSrc && <source srcSet={fallbackSrc} />}
+  <img
+    onContextMenu={onContextMenu}
+    onClick={onClick}
+    src={DefaultImage}
+    alt="Default placeholder artwork"
+    loading={loading}
+    className={className}
+    onLoad={(e) => {
+      if (showImgPropsOnTooltip) {
+        const img = new Image();
+        img.onload = () => {
+          if (img?.width && img?.height)
+            imgPropsRef.current = {
+              width: img.width,
+              height: img.height,
+            };
+        };
+        img.src = e.currentTarget.src;
+      }
+    }}
+    title={
+      showImgPropsOnTooltip && imgPropsRef.current
+        ? `Quality : ${
+            imgPropsRef.current?.width >= 1000 ||
+            imgPropsRef.current?.height >= 1000
+              ? 'HIGH QUALITY'
+              : imgPropsRef.current?.width >= 500 ||
+                imgPropsRef.current?.height >= 500
+              ? 'MEDIUM QUALITY'
+              : 'LOW QUALITY'
+          }\nImage width : ${imgPropsRef.current?.width}px\nImage height : ${
+            imgPropsRef.current?.height
+          }px`
+        : showAltAsTooltipLabel
+        ? alt
+        : undefined
+    }
+  />
+</picture>; */
 
 const Img = (props: Props) => {
   const {
@@ -33,9 +80,11 @@ const Img = (props: Props) => {
     onContextMenu,
     showImgPropsOnTooltip = false,
     tabIndex = -1,
+    showAltAsTooltipLabel = false,
   } = props;
 
   const imgPropsRef = React.useRef<ImgProps>();
+  const errorCountRef = React.useRef(0);
 
   return (
     <img
@@ -43,9 +92,14 @@ const Img = (props: Props) => {
       alt={alt}
       className={`outline-1 outline-offset-4 focus-visible:!outline ${className}`}
       onError={(e) => {
-        if (!noFallbacks && e.currentTarget.src !== fallbackSrc)
-          e.currentTarget.src = fallbackSrc;
-        else e.currentTarget.src = DefaultImage;
+        if (errorCountRef.current < 3) {
+          errorCountRef.current += 1;
+
+          if (!noFallbacks && e.currentTarget.src !== fallbackSrc)
+            e.currentTarget.src = fallbackSrc;
+          else e.currentTarget.src = DefaultImage;
+        } else
+          window.api.sendLogs('maximum img fetch error count reached.', 'warn');
       }}
       onClick={onClick}
       title={
@@ -61,7 +115,9 @@ const Img = (props: Props) => {
             }\nImage width : ${imgPropsRef.current?.width}px\nImage height : ${
               imgPropsRef.current?.height
             }px`
-          : alt
+          : showAltAsTooltipLabel
+          ? alt
+          : undefined
       }
       loading={loading}
       onContextMenu={onContextMenu}

@@ -3,6 +3,9 @@
 import React, { useContext } from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import debounce from 'renderer/utils/debounce';
+import storage from 'renderer/utils/localStorage';
+
 import SearchResultsFilter from './SearchResultsFilter';
 import MainContainer from '../MainContainer';
 import GenreSearchResultsContainer from './Result_Containers/GenreSearchResultsContainer';
@@ -13,13 +16,14 @@ import MostRelevantSearchResultsContainer from './Result_Containers/MostRelevant
 import ArtistsSearchResultsContainer from './Result_Containers/ArtistsSearchResultsContainer';
 import NoSearchResultsContainer from './NoSearchResultsContainer';
 import SearchStartPlaceholder from './SearchStartPlaceholder';
+import Button from '../Button';
 
 const filterTypes = 'All Songs Albums Artists Playlists Genres'.split(
   ' '
 ) as SearchFilters[];
 
 const SearchPage = () => {
-  const { currentlyActivePage } = useContext(AppContext);
+  const { currentlyActivePage, localStorageData } = useContext(AppContext);
   const { updateCurrentlyActivePageData } = React.useContext(AppUpdateContext);
 
   const [searchInput, setSearchInput] = React.useState(
@@ -27,6 +31,11 @@ const SearchPage = () => {
       ? (currentlyActivePage.data.keyword as string)
       : ''
   );
+  const [isPredictiveSearchEnabled, setIsPredictiveSearchEnabled] =
+    React.useState(
+      localStorageData?.preferences?.isPredictiveSearchEnabled ?? true
+    );
+
   const deferredSearchInput = React.useDeferredValue(searchInput);
   const [searchResults, setSearchResults] = React.useState({
     albums: [],
@@ -63,7 +72,12 @@ const SearchPage = () => {
       timeOutIdRef.current = setTimeout(
         () =>
           window.api
-            .search(activeFilter, deferredSearchInput)
+            .search(
+              activeFilter,
+              deferredSearchInput,
+              true,
+              isPredictiveSearchEnabled
+            )
             .then((results) => {
               return setSearchResults(results);
             }),
@@ -78,7 +92,12 @@ const SearchPage = () => {
         genres: [],
         availableResults: [],
       });
-  }, [activeFilter, deferredSearchInput, timeOutIdRef]);
+  }, [
+    activeFilter,
+    deferredSearchInput,
+    timeOutIdRef,
+    isPredictiveSearchEnabled,
+  ]);
 
   React.useEffect(() => {
     fetchSearchResults();
@@ -122,31 +141,54 @@ const SearchPage = () => {
   return (
     <MainContainer className="!h-full !pb-0">
       <>
-        <div className="search-bar-container appear-from-bottom mb-4 flex w-1/2 items-center rounded-3xl bg-background-color-2 py-1 px-2 shadow-md dark:bg-dark-background-color-2">
-          <span
-            className="material-icons-round icon flex cursor-help items-center justify-center p-2 text-2xl text-font-color-highlight dark:text-dark-font-color-highlight"
-            title={`Use ' ; ' to separate keywords in Search.`}
-          >
-            search
-          </span>
-          {/* SEARCH INPUT */}
-          <input
-            type="search"
-            name="search"
-            id="searchBar"
-            className="h-full w-full border-2 border-[transparent] bg-[transparent] text-font-color-black outline-none placeholder:text-font-color-highlight dark:text-font-color-white dark:placeholder:text-dark-font-color-highlight"
-            aria-label="Search"
-            placeholder="Search for anything"
-            value={searchInput}
-            onChange={(e) => {
-              updateCurrentlyActivePageData((currentData) => ({
-                ...currentData,
-                keyword: e.target.value,
-              }));
-              setSearchInput(e.target.value);
-            }}
-            onKeyDown={(e) => e.stopPropagation()}
-            autoFocus
+        <div className="appear-from-bottom mb-4 flex items-center">
+          <div className="search-bar-container flex w-1/2 items-center rounded-3xl bg-background-color-2 px-2 py-1 shadow-md dark:bg-dark-background-color-2">
+            <span
+              className="material-icons-round icon flex cursor-help items-center justify-center p-2 text-2xl text-font-color-highlight dark:text-dark-font-color-highlight"
+              title={`Use ' ; ' to separate keywords in Search.`}
+            >
+              search
+            </span>
+            {/* SEARCH INPUT */}
+            <input
+              type="search"
+              name="search"
+              id="searchBar"
+              className="h-full w-full border-2 border-[transparent] bg-[transparent] text-font-color-black outline-none placeholder:text-font-color-highlight dark:text-font-color-white dark:placeholder:text-dark-font-color-highlight"
+              aria-label="Search"
+              placeholder="Search for anything"
+              value={searchInput}
+              onChange={(e) => {
+                debounce(
+                  () =>
+                    updateCurrentlyActivePageData((currentData) => ({
+                      ...currentData,
+                      keyword: e.target.value,
+                    })),
+                  500
+                );
+                setSearchInput(e.target.value);
+              }}
+              onKeyDown={(e) => e.stopPropagation()}
+              autoFocus
+            />
+          </div>
+          <Button
+            className="!mr-0 ml-2 !border-none !p-2 outline-1 outline-offset-1 hover:bg-background-color-2/80 focus-visible:!outline dark:hover:bg-dark-background-color-2/80"
+            iconName={isPredictiveSearchEnabled ? 'auto_fix' : 'auto_fix_off'}
+            tooltipLabel={`${
+              isPredictiveSearchEnabled ? 'Disable' : 'Enable'
+            } predictive search`}
+            iconClassName="material-icons-round-outlined"
+            clickHandler={() =>
+              setIsPredictiveSearchEnabled((state) => {
+                storage.preferences.setPreferences(
+                  'isPredictiveSearchEnabled',
+                  !state
+                );
+                return !state;
+              })
+            }
           />
         </div>
         {/* SEARCH FILTERS */}

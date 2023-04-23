@@ -11,8 +11,8 @@ type Props = {
   }[];
   genreResults: { genreId?: string; name: string; artworkPath?: string }[];
   genreKeyword: string;
-  updateSongInfo: (callback: (prevSongInfo: SongTags) => SongTags) => void;
-  updateGenreKeyword: (keyword: string) => void;
+  updateSongInfo: (_callback: (_prevSongInfo: SongTags) => SongTags) => void;
+  updateGenreKeyword: (_keyword: string) => void;
 };
 
 const SongGenresInput = (props: Props) => {
@@ -27,35 +27,36 @@ const SongGenresInput = (props: Props) => {
     <div className="tag-input mb-6 flex w-[45%] min-w-[10rem] flex-col">
       <label htmlFor="song-genres-id3-tag">Genres</label>
       <div className="mt-2 w-[90%] rounded-xl border-2 border-background-color-2 p-2 dark:border-dark-background-color-2">
-        <div className="genres-container flex flex-wrap p-2 empty:py-2 empty:after:h-full empty:after:w-full empty:after:text-center empty:after:text-[#ccc] empty:after:content-['No_genres_for_this_song.'] dark:empty:after:text-[#ccc]">
+        <div className="genres-container flex flex-wrap p-2 empty:py-2 empty:after:h-full empty:after:w-full empty:after:text-center empty:after:text-[#ccc] empty:after:content-['No_genres_selected_for_this_song.'] dark:empty:after:text-[#ccc]">
           {songGenres &&
             songGenres.map((genre) => (
               <span
                 key={genre.name}
-                className="mr-2 mb-2 flex w-fit items-center rounded-2xl bg-background-color-3 px-3 py-1 text-center text-font-color-black dark:bg-dark-background-color-3 dark:text-font-color-black"
-                onClick={() => {
-                  updateSongInfo((prevData) => {
-                    return {
-                      ...prevData,
-                      genres:
-                        prevData.genres?.filter((x) => x.name !== genre.name) ??
-                        [],
-                    };
-                  });
-                }}
-                role="button"
-                tabIndex={0}
+                className="mb-2 mr-2 flex w-fit items-center rounded-2xl bg-background-color-3 px-3 py-1 text-center text-font-color-black dark:bg-dark-background-color-3 dark:text-font-color-black"
               >
-                <span className="material-icons-round mr-2 cursor-pointer">
-                  close
-                </span>{' '}
+                <Button
+                  iconName="close"
+                  className="material-icons-round !mr-[.375rem] !border-0 !p-[.125rem] outline-1 outline-offset-1 transition-[visibility,opacity] focus-visible:!outline"
+                  iconClassName="leading-none dark:!text-font-color-black"
+                  clickHandler={() => {
+                    updateSongInfo((prevData) => {
+                      return {
+                        ...prevData,
+                        genres:
+                          prevData.genres?.filter(
+                            (x) => x.name !== genre.name
+                          ) ?? [],
+                      };
+                    });
+                  }}
+                />
                 {genre.name}
               </span>
             ))}
         </div>
         <input
           type="search"
-          className="mt-4 w-full rounded-xl bg-background-color-2 p-2 dark:bg-dark-background-color-2"
+          className="mt-4 w-full rounded-xl border-2 border-transparent bg-background-color-2 p-2 transition-colors focus:border-font-color-highlight dark:bg-dark-background-color-2 dark:focus:border-dark-font-color-highlight"
           placeholder="Search for genres here."
           value={genreKeyword}
           onChange={(e) => {
@@ -69,7 +70,7 @@ const SongGenresInput = (props: Props) => {
             {genreResults.map((x) => (
               <li
                 key={x.genreId ?? x.name}
-                className="box-content cursor-pointer border-b-[1px] border-background-color-2 py-2 pr-4 pl-6 font-light last:border-b-0 only:border-b-0 hover:bg-background-color-2 dark:border-dark-background-color-2 dark:hover:bg-dark-background-color-2"
+                className="box-content cursor-pointer border-b-[1px] border-background-color-2 py-2 pl-6 pr-4 font-light last:border-b-0 only:border-b-0 hover:bg-background-color-2 dark:border-dark-background-color-2 dark:hover:bg-dark-background-color-2"
                 onClick={() => {
                   updateSongInfo((prevData) => {
                     const genres =

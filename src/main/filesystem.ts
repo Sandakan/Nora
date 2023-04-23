@@ -1,14 +1,20 @@
-import fsSync from 'fs';
+import fs from 'fs/promises';
 import path from 'path';
 import { app } from 'electron';
 import Store from 'electron-store';
 import log from './log';
 import { dataUpdateEvent } from './main';
-import { appPreferences } from '../../package.json';
+import { appPreferences, version } from '../../package.json';
 import {
+  albumMigrations,
   artistMigrations,
+  blacklistMigrations,
   generateMigrationMessage,
+  genreMigrations,
+  listeningDataMigrations,
+  playlistMigrations,
   songMigrations,
+  userDataMigrations,
 } from './migrations';
 
 export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(
@@ -17,31 +23,18 @@ export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(
 );
 export const DEFAULT_FILE_URL = 'nora://localFiles/';
 
-const USER_DATA_TEMPLATE: UserData = {
+export const USER_DATA_TEMPLATE: UserData = {
   theme: { isDarkMode: false, useSystemTheme: true },
-  currentSong: { songId: null, stoppedPosition: 0 },
-  volume: { isMuted: false, value: 100 },
   musicFolders: [],
-  defaultPage: 'Home',
-  isShuffling: false,
-  isRepeating: 'false',
   preferences: {
-    doNotShowBlacklistSongConfirm: false,
-    isReducedMotion: false,
-    songIndexing: false,
     autoLaunchApp: false,
     isMiniPlayerAlwaysOnTop: false,
-    doNotVerifyWhenOpeningLinks: false,
-    showSongRemainingTime: false,
-    showArtistArtworkNearSongControls: false,
     isMusixmatchLyricsEnabled: false,
-    disableBackgroundArtworks: false,
     hideWindowOnClose: false,
     openWindowAsHiddenOnSystemStart: false,
   },
   windowPositions: {},
   windowDiamensions: {},
-  sortingStates: {},
   recentSearches: [],
 };
 export const HISTORY_PLAYLIST_TEMPLATE: SavablePlaylist = {
@@ -58,12 +51,12 @@ export const FAVORITES_PLAYLIST_TEMPLATE: SavablePlaylist = {
   songs: [],
   isArtworkAvailable: true,
 };
-const PLAYLIST_DATA_TEMPLATE: SavablePlaylist[] = [
+export const PLAYLIST_DATA_TEMPLATE: SavablePlaylist[] = [
   HISTORY_PLAYLIST_TEMPLATE,
   FAVORITES_PLAYLIST_TEMPLATE,
 ];
 
-const BLACKLIST_TEMPLATE: Blacklist = {
+export const BLACKLIST_TEMPLATE: Blacklist = {
   songBlacklist: [],
   folderBlacklist: [],
 };
@@ -71,9 +64,11 @@ const BLACKLIST_TEMPLATE: Blacklist = {
 const songStore = new Store({
   name: 'songs',
   defaults: {
+    version,
     songs: [],
   },
   schema: {
+    version: { type: ['string', 'null'] },
     songs: {
       type: 'array',
     },
@@ -86,9 +81,11 @@ const songStore = new Store({
 const artistStore = new Store({
   name: 'artists',
   defaults: {
+    version,
     artists: [],
   },
   schema: {
+    version: { type: ['string', 'null'] },
     artists: {
       type: 'array',
     },
@@ -101,79 +98,98 @@ const artistStore = new Store({
 const genreStore = new Store({
   name: 'genres',
   defaults: {
+    version,
     genres: [],
   },
   schema: {
+    version: { type: ['string', 'null'] },
     genres: {
       type: 'array',
     },
   },
   beforeEachMigration: (_, context) =>
     generateMigrationMessage('genres.json', context),
+  migrations: genreMigrations,
 });
 
 const albumStore = new Store({
   name: 'albums',
   defaults: {
+    version,
     albums: [],
   },
   schema: {
+    version: { type: ['string', 'null'] },
     albums: {
       type: 'array',
     },
   },
   beforeEachMigration: (_, context) =>
     generateMigrationMessage('albums.json', context),
+  migrations: albumMigrations,
 });
 
 const playlistDataStore = new Store({
   name: 'playlists',
   defaults: {
+    version,
     playlists: PLAYLIST_DATA_TEMPLATE,
   },
   schema: {
+    version: { type: ['string', 'null'] },
     playlists: {
       type: 'array',
     },
   },
   beforeEachMigration: (_, context) =>
     generateMigrationMessage('playlists.json', context),
+  migrations: playlistMigrations,
 });
 
 const userDataStore = new Store({
   name: 'userData',
   defaults: {
+    version,
     userData: USER_DATA_TEMPLATE,
   },
   schema: {
+    version: { type: ['string', 'null'] },
     userData: {
       type: 'object',
     },
   },
   beforeEachMigration: (_, context) =>
     generateMigrationMessage('userData.json', context),
+  migrations: userDataMigrations,
 });
 
 const listeningDataStore = new Store({
   name: 'listening_data',
   clearInvalidConfig: true,
   defaults: {
+    version,
     listeningData: [],
   },
   schema: {
+    version: { type: ['string', 'null'] },
     listeningData: {
       type: 'array',
     },
   },
   beforeEachMigration: (_, context) =>
     generateMigrationMessage('listening_data.json', context),
+  migrations: listeningDataMigrations,
 });
 
 const blacklistStore = new Store({
   name: 'blacklist',
   clearInvalidConfig: true,
-  defaults: { blacklist: BLACKLIST_TEMPLATE },
+  defaults: {
+    version,
+    blacklist: BLACKLIST_TEMPLATE,
+  },
   schema: {
+    version: { type: ['string', 'null'] },
     blacklist: {
       type: 'object',
       properties: {
@@ -188,7 +204,11 @@ const blacklistStore = new Store({
   },
   beforeEachMigration: (_, context) =>
     generateMigrationMessage('blacklist.json', context),
+  migrations: blacklistMigrations,
 });
+
+const songStoreVersion = songStore.get('version');
+log('song store version', { songStoreVersion }, 'WARN');
 
 export const supportedMusicExtensions =
   appPreferences.supportedMusicExtensions.map((x) => `.${x}`);
@@ -227,30 +247,8 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
   if (userData) {
     if (dataType === 'theme' && typeof data === 'object')
       userData.theme = data as typeof userData.theme;
-    else if (
-      dataType === 'currentSong.songId' &&
-      (typeof data === 'string' || data === null)
-    )
-      userData.currentSong.songId = data;
-    else if (
-      dataType === 'currentSong.stoppedPosition' &&
-      typeof data === 'number'
-    )
-      userData.currentSong.stoppedPosition = data;
-    else if (dataType === 'volume.value' && typeof data === 'number')
-      userData.volume.value = data;
-    else if (dataType === 'volume.isMuted' && typeof data === 'boolean')
-      userData.volume.isMuted = data;
     else if (dataType === 'musicFolders' && Array.isArray(data)) {
       userData.musicFolders = data;
-    } else if (dataType === 'defaultPage' && typeof data === 'string') {
-      userData.defaultPage = data as DefaultPages;
-    } else if (dataType === 'isRepeating' && typeof data === 'string') {
-      userData.isRepeating = data as RepeatTypes;
-    } else if (dataType === 'isShuffling' && typeof data === 'boolean') {
-      userData.isShuffling = data;
-    } else if (dataType === 'queue' && typeof data === 'object') {
-      userData.queue = data as Queue;
     } else if (
       dataType === 'windowPositions.mainWindow' &&
       typeof data === 'object'
@@ -274,60 +272,20 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
     } else if (dataType === 'recentSearches' && Array.isArray(data)) {
       userData.recentSearches = data as string[];
     } else if (
-      dataType === 'preferences.doNotShowBlacklistSongConfirm' &&
-      typeof data === 'boolean'
-    ) {
-      userData.preferences.doNotShowBlacklistSongConfirm = data;
-    } else if (
-      dataType === 'preferences.isReducedMotion' &&
-      typeof data === 'boolean'
-    ) {
-      userData.preferences.isReducedMotion = data;
-    } else if (
-      dataType === 'preferences.songIndexing' &&
-      typeof data === 'boolean'
-    ) {
-      userData.preferences.songIndexing = data;
-    } else if (
       dataType === 'preferences.autoLaunchApp' &&
       typeof data === 'boolean'
     ) {
       userData.preferences.autoLaunchApp = data;
-    } else if (
-      dataType === 'preferences.isMiniPlayerAlwaysOnTop' &&
-      typeof data === 'boolean'
-    ) {
-      userData.preferences.isMiniPlayerAlwaysOnTop = data;
-    } else if (
-      dataType === 'preferences.doNotVerifyWhenOpeningLinks' &&
-      typeof data === 'boolean'
-    ) {
-      userData.preferences.doNotVerifyWhenOpeningLinks = data;
-    } else if (
-      dataType === 'preferences.noUpdateNotificationForNewUpdate' &&
-      typeof data === 'string'
-    ) {
-      userData.preferences.noUpdateNotificationForNewUpdate = data;
-    } else if (
-      dataType === 'preferences.showArtistArtworkNearSongControls' &&
-      typeof data === 'boolean'
-    ) {
-      userData.preferences.showArtistArtworkNearSongControls = data;
-    } else if (
-      dataType === 'preferences.showSongRemainingTime' &&
-      typeof data === 'boolean'
-    ) {
-      userData.preferences.showSongRemainingTime = data;
     } else if (
       dataType === 'preferences.isMusixmatchLyricsEnabled' &&
       typeof data === 'boolean'
     ) {
       userData.preferences.isMusixmatchLyricsEnabled = data;
     } else if (
-      dataType === 'preferences.disableBackgroundArtworks' &&
+      dataType === 'preferences.isMiniPlayerAlwaysOnTop' &&
       typeof data === 'boolean'
     ) {
-      userData.preferences.disableBackgroundArtworks = data;
+      userData.preferences.isMiniPlayerAlwaysOnTop = data;
     } else if (
       dataType === 'preferences.hideWindowOnClose' &&
       typeof data === 'boolean'
@@ -339,30 +297,12 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
     ) {
       userData.preferences.openWindowAsHiddenOnSystemStart = data;
     } else if (
-      dataType === 'sortingStates.songsPage' &&
-      typeof data === 'string'
-    ) {
-      userData.sortingStates.songsPage = data as SongSortTypes;
-    } else if (
-      dataType === 'sortingStates.artistsPage' &&
-      typeof data === 'string'
-    ) {
-      userData.sortingStates.artistsPage = data as ArtistSortTypes;
-    } else if (
-      dataType === 'sortingStates.albumsPage' &&
-      typeof data === 'string'
-    ) {
-      userData.sortingStates.albumsPage = data as AlbumSortTypes;
-    } else if (
-      dataType === 'sortingStates.genresPage' &&
-      typeof data === 'string'
-    ) {
-      userData.sortingStates.genresPage = data as GenreSortTypes;
-    } else if (
       dataType === 'customMusixmatchUserToken' &&
       typeof data === 'string'
     ) {
       userData.customMusixmatchUserToken = data;
+    } else if (dataType === 'storageMetrics' && typeof data === 'object') {
+      userData.storageMetrics = data as StorageMetrics;
     } else
       return log(
         'Error occurred in setUserData function due ot invalid dataType or data.'
@@ -372,14 +312,6 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
     userDataStore.set('userData', userData);
 
     if (dataType === 'musicFolders') dataUpdateEvent('userData/musicFolder');
-    else if (
-      dataType === 'currentSong.songId' ||
-      dataType === 'currentSong.stoppedPosition'
-    )
-      dataUpdateEvent('userData/currentSong');
-    else if (dataType === 'queue') dataUpdateEvent('userData/queue');
-    else if (dataType === 'volume.isMuted' || dataType === 'volume.value')
-      dataUpdateEvent('userData/volume');
     else if (
       dataType === 'windowDiamensions.mainWindow' ||
       dataType === 'windowDiamensions.miniPlayer'
@@ -469,16 +401,12 @@ export const createNewListeningDataInstance = (songId: string) => {
   const date = new Date();
   const currentYear = date.getFullYear();
 
-  const months = Array.from({ length: 12 }, () =>
-    Array.from({ length: 30 }, () => 0)
-  );
-
   const newListeningData: SongListeningData = {
     songId,
     skips: 0,
     fullListens: 0,
     inNoOfPlaylists: 0,
-    listens: [{ year: currentYear, months }],
+    listens: [{ year: currentYear, listens: [] }],
   };
   return newListeningData;
 };
@@ -620,25 +548,15 @@ function flattenPathArrays<Type extends string[][]>(lists: Type) {
   return lists.reduce((a, b) => a.concat(b), []);
 }
 
-function getDirectories(srcpath: string) {
+export const getDirectories = async (srcpath: string) => {
   try {
-    const dirs = fsSync.readdirSync(srcpath);
-    const dirsWithFullPaths = dirs.map((file) => path.join(srcpath, file));
-    const filteredDirs = dirsWithFullPaths.filter((filePath) => {
-      try {
-        const isADirectory = fsSync.statSync(filePath).isDirectory();
-        return isADirectory;
-      } catch (error) {
-        log(
-          'Error occurred when reading a file path to detect whether its a directory.',
-          { filePath },
-          'ERROR'
-        );
-        return false;
-      }
-    });
+    const dirs = await fs.readdir(srcpath, { withFileTypes: true });
+    const filteredDirs = dirs.filter((dir) => dir.isDirectory());
+    const dirsWithFullPaths = filteredDirs.map((dir) =>
+      path.join(srcpath, dir.name)
+    );
 
-    return filteredDirs;
+    return dirsWithFullPaths;
   } catch (error) {
     log(
       'Error occurred when parsing directories of a path.',
@@ -647,13 +565,13 @@ function getDirectories(srcpath: string) {
     );
     throw error;
   }
-}
+};
 
 export async function getDirectoriesRecursive(
   srcpath: string
 ): Promise<string[]> {
   try {
-    const dirs = getDirectories(srcpath);
+    const dirs = await getDirectories(srcpath);
     if (dirs)
       return [
         srcpath,
@@ -675,11 +593,11 @@ export const resetAppCache = () => {
   cachedGenresData = [];
   cachedPlaylistsData = [...PLAYLIST_DATA_TEMPLATE];
   cachedUserData = { ...USER_DATA_TEMPLATE };
-  songStore.store = { songs: [] };
-  artistStore.store = { artists: [] };
-  albumStore.store = { albums: [] };
-  genreStore.store = { genres: [] };
-  userDataStore.store = { userData: USER_DATA_TEMPLATE };
-  playlistDataStore.store = { playlists: PLAYLIST_DATA_TEMPLATE };
+  songStore.store = { version, songs: [] };
+  artistStore.store = { version, artists: [] };
+  albumStore.store = { version, albums: [] };
+  genreStore.store = { version, genres: [] };
+  userDataStore.store = { version, userData: USER_DATA_TEMPLATE };
+  playlistDataStore.store = { version, playlists: PLAYLIST_DATA_TEMPLATE };
   log(`In-app cache cleared successfully.`);
 };

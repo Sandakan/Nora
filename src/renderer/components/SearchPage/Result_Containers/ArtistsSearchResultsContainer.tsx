@@ -4,18 +4,18 @@ import Button from 'renderer/components/Button';
 import SecondaryContainer from 'renderer/components/SecondaryContainer';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 
 type Props = { artists: Artist[]; searchInput: string };
 
 const ArtistsSearchResultsContainer = (props: Props) => {
   const { artists, searchInput } = props;
-  const {
-    isMultipleSelectionEnabled,
-    multipleSelectionsData,
-    currentlyActivePage,
-  } = React.useContext(AppContext);
+  const { isMultipleSelectionEnabled, multipleSelectionsData } =
+    React.useContext(AppContext);
   const { toggleMultipleSelections, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
+
+  const selectAllHandler = useSelectAllHandler(artists, 'artist', 'artistId');
 
   const artistResults = React.useMemo(
     () =>
@@ -26,8 +26,7 @@ const ArtistsSearchResultsContainer = (props: Props) => {
                 return (
                   <Artist
                     index={index}
-                    // eslint-disable-next-line react/no-array-index-key
-                    key={`${artist.artistId}-${index}`}
+                    key={`${artist.artistId}-${artist.name}`}
                     name={artist.name}
                     artworkPaths={artist.artworkPaths}
                     artistId={artist.artistId}
@@ -35,13 +34,14 @@ const ArtistsSearchResultsContainer = (props: Props) => {
                     onlineArtworkPaths={artist.onlineArtworkPaths}
                     className="mb-4"
                     isAFavorite={artist.isAFavorite}
+                    selectAllHandler={selectAllHandler}
                   />
                 );
               return undefined;
             })
             .filter((artist) => artist !== undefined)
         : [],
-    [artists]
+    [artists, selectAllHandler]
   );
 
   return (
@@ -51,10 +51,17 @@ const ArtistsSearchResultsContainer = (props: Props) => {
           ? 'active relative'
           : 'invisible absolute opacity-0'
       }`}
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
     >
       <>
         <div
-          className={`title-container mt-1 mb-8 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight ${
+          className={`title-container mb-8 mt-1 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight ${
             artistResults.length > 0 && 'visible opacity-100'
           }`}
         >
@@ -98,15 +105,11 @@ const ArtistsSearchResultsContainer = (props: Props) => {
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>
-                  currentlyActivePage.pageTitle === 'AllSearchResults' &&
-                  currentlyActivePage.data.allSearchResultsPage.searchQuery ===
-                    searchInput
-                    ? changeCurrentActivePage('Home')
-                    : changeCurrentActivePage('AllSearchResults', {
-                        searchQuery: searchInput,
-                        searchFilter: 'Artists' as SearchFilters,
-                        searchResults: artists,
-                      })
+                  changeCurrentActivePage('AllSearchResults', {
+                    searchQuery: searchInput,
+                    searchFilter: 'Artists' as SearchFilters,
+                    searchResults: artists,
+                  })
                 }
               />
             )}

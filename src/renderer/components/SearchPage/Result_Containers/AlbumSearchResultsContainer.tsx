@@ -4,18 +4,18 @@ import Button from 'renderer/components/Button';
 import SecondaryContainer from 'renderer/components/SecondaryContainer';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 
 type Props = { albums: Album[]; searchInput: string };
 
 const AlbumSearchResultsContainer = (props: Props) => {
   const { albums, searchInput } = props;
-  const {
-    isMultipleSelectionEnabled,
-    multipleSelectionsData,
-    currentlyActivePage,
-  } = React.useContext(AppContext);
+  const { isMultipleSelectionEnabled, multipleSelectionsData } =
+    React.useContext(AppContext);
   const { toggleMultipleSelections, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
+
+  const selectAllHandler = useSelectAllHandler(albums, 'album', 'albumId');
 
   const albumResults = React.useMemo(
     () =>
@@ -26,21 +26,21 @@ const AlbumSearchResultsContainer = (props: Props) => {
                 return (
                   <Album
                     index={index}
-                    // eslint-disable-next-line react/no-array-index-key
-                    key={`${album.albumId}-${index}`}
+                    key={album.albumId}
                     albumId={album.albumId}
                     artists={album.artists}
                     artworkPaths={album.artworkPaths}
                     songs={album.songs}
                     title={album.title}
                     year={album.year}
+                    selectAllHandler={selectAllHandler}
                   />
                 );
               return undefined;
             })
             .filter((album) => album !== undefined)
         : [],
-    [albums]
+    [albums, selectAllHandler]
   );
 
   return (
@@ -50,9 +50,16 @@ const AlbumSearchResultsContainer = (props: Props) => {
           ? 'active relative'
           : 'invisible absolute opacity-0'
       }`}
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
     >
       <>
-        <div className="title-container mt-1 mb-8 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">
             Albums{' '}
             <div className="other-stats-container ml-12 flex items-center text-xs">
@@ -93,15 +100,11 @@ const AlbumSearchResultsContainer = (props: Props) => {
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>
-                  currentlyActivePage.pageTitle === 'AllSearchResults' &&
-                  currentlyActivePage.data.allSearchResultsPage.searchQuery ===
-                    searchInput
-                    ? changeCurrentActivePage('Home')
-                    : changeCurrentActivePage('AllSearchResults', {
-                        searchQuery: searchInput,
-                        searchFilter: 'Albums' as SearchFilters,
-                        searchResults: albums,
-                      })
+                  changeCurrentActivePage('AllSearchResults', {
+                    searchQuery: searchInput,
+                    searchFilter: 'Albums' as SearchFilters,
+                    searchResults: albums,
+                  })
                 }
               />
             )}

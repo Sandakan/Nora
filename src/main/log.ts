@@ -14,6 +14,13 @@ type LogMessageTypes = 'INFO' | 'WARN' | 'ERROR';
 
 const objectToString = (obj?: Record<string, unknown>) => {
   if (obj) {
+    for (const x of Object.keys(obj)) {
+      const property = obj[x];
+      if (property instanceof Error) {
+        obj[x] = `${property.message}\r${property.stack}`;
+      }
+    }
+
     const str = JSON.stringify(obj);
     return str;
   }

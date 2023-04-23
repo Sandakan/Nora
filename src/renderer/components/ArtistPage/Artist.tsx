@@ -23,15 +23,12 @@ interface ArtistProp {
     picture_medium: string;
   };
   isAFavorite: boolean;
+  selectAllHandler?: (_upToId?: string) => void;
 }
 
 export const Artist = (props: ArtistProp) => {
-  const {
-    currentlyActivePage,
-    queue,
-    isMultipleSelectionEnabled,
-    multipleSelectionsData,
-  } = React.useContext(AppContext);
+  const { queue, isMultipleSelectionEnabled, multipleSelectionsData } =
+    React.useContext(AppContext);
   const {
     changeCurrentActivePage,
     updateContextMenuData,
@@ -45,21 +42,12 @@ export const Artist = (props: ArtistProp) => {
   const [isAFavorite, setIsAFavorite] = React.useState(props.isAFavorite);
 
   const goToArtistInfoPage = React.useCallback(() => {
-    return currentlyActivePage.pageTitle === 'ArtistInfo' &&
-      currentlyActivePage.data &&
-      currentlyActivePage.data.artistName === props.name
-      ? changeCurrentActivePage('Home')
-      : changeCurrentActivePage('ArtistInfo', {
-          artistName: props.name,
-          artistId: props.artistId,
-        });
-  }, [
-    changeCurrentActivePage,
-    currentlyActivePage.data,
-    currentlyActivePage.pageTitle,
-    props.artistId,
-    props.name,
-  ]);
+    changeCurrentActivePage('ArtistInfo', {
+      artistName: props.name,
+      artistId: props.artistId,
+    });
+  }, [changeCurrentActivePage, props.artistId, props.name]);
+
   const playArtistSongs = React.useCallback(
     (isShuffle = false) =>
       window.api
@@ -251,7 +239,7 @@ export const Artist = (props: ArtistProp) => {
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
-        label: isMultipleSelectionEnabled ? 'Unselect' : 'Select',
+        label: isAMultipleSelection ? 'Unselect' : 'Select',
         iconName: 'checklist',
         handlerFunction: () => {
           if (isMultipleSelectionEnabled) {
@@ -261,13 +249,18 @@ export const Artist = (props: ArtistProp) => {
               isAMultipleSelection ? 'remove' : 'add'
             );
           }
-          return toggleMultipleSelections(
-            !isMultipleSelectionEnabled,
-            'artist',
-            [props.artistId]
-          );
+          return toggleMultipleSelections(!isAMultipleSelection, 'artist', [
+            props.artistId,
+          ]);
         },
       },
+      // {
+      //   label: 'Select/Unselect All',
+      //   iconName: 'checklist',
+      //   isDisabled: !props.selectAllHandler,
+      //   handlerFunction: () =>
+      //     props.selectAllHandler && props.selectAllHandler(),
+      // },
     ] satisfies ContextMenuItem[];
   }, [
     multipleSelectionsData,
@@ -275,12 +268,11 @@ export const Artist = (props: ArtistProp) => {
     isMultipleSelectionEnabled,
     isAFavorite,
     goToArtistInfoPage,
+    props,
     playArtistSongsForMultipleSelections,
     playArtistSongs,
     updateQueueData,
     queue.queue,
-    props.songIds,
-    props.artistId,
     addNewNotifications,
     toggleMultipleSelections,
     updateMultipleSelections,
@@ -325,7 +317,9 @@ export const Artist = (props: ArtistProp) => {
         );
       }}
       onClick={(e) => {
-        if (
+        if (e.getModifierState('Shift') === true && props.selectAllHandler)
+          props.selectAllHandler(props.artistId);
+        else if (
           isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'artist'
         )
@@ -334,20 +328,13 @@ export const Artist = (props: ArtistProp) => {
             'artist',
             isAMultipleSelection ? 'remove' : 'add'
           );
-        else if (e.getModifierState('Shift') === true) {
-          toggleMultipleSelections(!isMultipleSelectionEnabled, 'artist');
-          updateMultipleSelections(
-            props.artistId,
-            'artist',
-            isAMultipleSelection ? 'remove' : 'add'
-          );
-        } else goToArtistInfoPage();
+        else goToArtistInfoPage();
       }}
     >
       <div className="artist-img-container relative flex h-3/4 items-center justify-center">
         {isAFavorite && (
           <span
-            className={`material-icons-round absolute left-2 -bottom-1 flex rounded-full bg-background-color-1 p-2 text-2xl !text-font-color-crimson shadow-lg dark:bg-dark-background-color-2 ${
+            className={`material-icons-round absolute -bottom-1 left-2 flex rounded-full bg-background-color-1 p-2 text-2xl !text-font-color-crimson shadow-lg dark:bg-dark-background-color-2 ${
               isAMultipleSelection &&
               '!bg-background-color-3 dark:!bg-dark-background-color-3'
             }`}

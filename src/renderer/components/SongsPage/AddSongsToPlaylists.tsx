@@ -177,7 +177,7 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
 
   return (
     <>
-      <div className="title-container mt-1 mb-4 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
+      <div className="title-container mb-4 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
         Select playlists to add{' '}
         {songIds.length > 1 ? `${songIds.length} songs` : `'${title}' song`}
       </div>

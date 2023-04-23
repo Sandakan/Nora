@@ -1,12 +1,5 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable react/jsx-no-useless-fragment */
-/* eslint-disable promise/always-return */
 /* eslint-disable react/no-array-index-key */
-/* eslint-disable promise/catch-or-return */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable react/no-unused-prop-types */
-/* eslint-disable react/self-closing-comp */
-/* eslint-disable import/prefer-default-export */
 import React, { useContext } from 'react';
 import debounce from 'renderer/utils/debounce';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
@@ -20,6 +13,10 @@ import LyricsSource from './LyricsSource';
 import NoLyrics from './NoLyrics';
 import MainContainer from '../MainContainer';
 import Button from '../Button';
+
+import { appPreferences } from '../../../../package.json';
+
+const { metadataEditingSupportedExtensions } = appPreferences;
 
 export const syncedLyricsRegex = /^\[\d+:\d{1,2}\.\d{1,3}]/gm;
 let isScrollingByCode = false;
@@ -72,10 +69,8 @@ export const LyricsPage = () => {
         songPath: currentSongData.path,
         duration: currentSongData.duration,
       })
-      .then((res) => {
-        // if (res) setIsOfflineLyricsAvailable(true);
-        setLyrics(res);
-      });
+      .then((res) => setLyrics(res))
+      .catch((err) => console.error(err));
   }, [
     addNewNotifications,
     currentSongData.artists,
@@ -120,8 +115,13 @@ export const LyricsPage = () => {
   }, [isAutoScrolling, lyrics]);
 
   const showOnlineLyrics = React.useCallback(
-    (_: unknown, setIsDisabled: (state: boolean) => void) => {
+    (
+      _: unknown,
+      setIsDisabled: (state: boolean) => void,
+      setIsPending: (state: boolean) => void
+    ) => {
       setIsDisabled(true);
+      setIsPending(true);
       window.api
         .getSongLyrics(
           {
@@ -136,7 +136,11 @@ export const LyricsPage = () => {
           'ONLINE_ONLY'
         )
         .then((res) => setLyrics(res))
-        .finally(() => setIsDisabled(false));
+        .finally(() => {
+          setIsDisabled(false);
+          setIsPending(false);
+        })
+        .catch((err) => console.error(err));
     },
     [
       currentSongData.artists,
@@ -144,6 +148,11 @@ export const LyricsPage = () => {
       currentSongData.path,
       currentSongData.title,
     ]
+  );
+
+  const pathExt = React.useMemo(
+    () => window.api.getExtension(currentSongData.path),
+    [currentSongData.path]
   );
 
   const showOfflineLyrics = React.useCallback(
@@ -163,7 +172,8 @@ export const LyricsPage = () => {
           'OFFLINE_ONLY'
         )
         .then((res) => setLyrics(res))
-        .finally(() => setIsDisabled(false));
+        .finally(() => setIsDisabled(false))
+        .catch((err) => console.error(err));
     },
     [
       currentSongData.artists,
@@ -174,9 +184,15 @@ export const LyricsPage = () => {
   );
 
   const saveOnlineLyrics = React.useCallback(
-    (_: unknown, setIsDisabled: (state: boolean) => void) => {
+    (
+      _: unknown,
+      setIsDisabled: (state: boolean) => void,
+      setIsPending: (state: boolean) => void
+    ) => {
       if (lyrics) {
         setIsDisabled(true);
+        setIsPending(true);
+
         window.api
           .saveLyricsToSong(currentSongData.path, lyrics)
           .then(() => {
@@ -190,7 +206,7 @@ export const LyricsPage = () => {
               }
               return undefined;
             });
-            addNewNotifications([
+            return addNewNotifications([
               {
                 id: 'lyricsUpdateSuccessful',
                 delay: 5000,
@@ -203,7 +219,11 @@ export const LyricsPage = () => {
               },
             ]);
           })
-          .finally(() => setIsDisabled(false));
+          .finally(() => {
+            setIsPending(false);
+            setIsDisabled(false);
+          })
+          .catch((err) => console.error(err));
       }
     },
     [addNewNotifications, currentSongData.path, lyrics]
@@ -226,7 +246,8 @@ export const LyricsPage = () => {
           'ONLINE_ONLY'
         )
         .then((res) => setLyrics(res))
-        .finally(() => setIsDisabled(false));
+        .finally(() => setIsDisabled(false))
+        .catch((err) => console.error(err));
     },
     [
       currentSongData.artists,
@@ -234,6 +255,11 @@ export const LyricsPage = () => {
       currentSongData.path,
       currentSongData.title,
     ]
+  );
+
+  const isSaveLyricsBtnDisabled = React.useMemo(
+    () => !metadataEditingSupportedExtensions.includes(pathExt),
+    [pathExt]
   );
 
   return (
@@ -294,7 +320,6 @@ export const LyricsPage = () => {
                       label="Show online lyrics"
                       className="show-online-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                       iconName="language"
-                      pendingAnimationOnDisabled={isOnline}
                       isDisabled={!isOnline}
                       tooltipLabel={
                         isOnline
@@ -321,13 +346,23 @@ export const LyricsPage = () => {
                         iconName="visibility"
                         clickHandler={showOfflineLyrics}
                         isDisabled={!lyrics.isOfflineLyricsAvailable}
+                        tooltipLabel={
+                          !lyrics.isOfflineLyricsAvailable
+                            ? 'No saved lyrics found.'
+                            : undefined
+                        }
                       />
                       <Button
                         key={4}
                         label="Save lyrics"
-                        pendingAnimationOnDisabled
                         className="save-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                         iconName="save"
+                        isDisabled={isSaveLyricsBtnDisabled}
+                        tooltipLabel={
+                          isSaveLyricsBtnDisabled
+                            ? `Nora currently doesn't support saving lyrics to songs in '${pathExt}' audio format.`
+                            : undefined
+                        }
                         clickHandler={saveOnlineLyrics}
                       />
                     </>
@@ -335,7 +370,7 @@ export const LyricsPage = () => {
                 </div>
               </div>
               <div
-                className="lyrics-lines-container flex h-full flex-col items-center overflow-y-auto px-8 py-4"
+                className="lyrics-lines-container flex h-full !w-full flex-col items-center overflow-y-auto px-8 py-4"
                 ref={lyricsLinesContainerRef}
                 onScroll={() =>
                   debounce(() => {

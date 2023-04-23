@@ -9,8 +9,7 @@ type Props = { searchResults: SearchResult };
 
 const MostRelevantSearchResultsContainer = (props: Props) => {
   const { searchResults } = props;
-  const { currentSongData, currentlyActivePage, queue } =
-    React.useContext(AppContext);
+  const { currentSongData, queue } = React.useContext(AppContext);
   const {
     playSong,
     changeCurrentActivePage,
@@ -164,13 +163,10 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: 'Info',
             iconName: 'info',
             handlerFunction: () =>
-              currentlyActivePage.pageTitle === 'ArtistInfo' &&
-              currentlyActivePage.data.artistName === firstResult.name
-                ? changeCurrentActivePage('Home')
-                : changeCurrentActivePage('ArtistInfo', {
-                    artistName: firstResult.name,
-                    artistId: firstResult.artistId,
-                  }),
+              changeCurrentActivePage('ArtistInfo', {
+                artistName: firstResult.name,
+                artistId: firstResult.artistId,
+              }),
           },
           {
             label: 'Add to queue',
@@ -345,7 +341,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
       }`}
     >
       <>
-        <div className="title-container mt-1 mb-8 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           Most Relevant
         </div>
         <div

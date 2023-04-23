@@ -48,6 +48,7 @@ const shortcutData: ShortcutCategory[] = [
     shortcutCategoryTitle: 'Other Shortcuts',
     shortcuts: [
       { label: 'Toggle App Theme', keys: ['Ctrl', 'Y'] },
+      // { label: 'Toggle Mini Player Always On Top', keys: ['Ctrl', 'O'] },
       { label: 'Reload', keys: ['Ctrl', 'R'] },
       { label: 'Open Devtools', keys: ['F12'] },
     ],

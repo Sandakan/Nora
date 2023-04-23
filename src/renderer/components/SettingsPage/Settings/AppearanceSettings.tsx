@@ -2,6 +2,7 @@
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
 
 import Img from 'renderer/components/Img';
 
@@ -9,10 +10,43 @@ import HomeImgLight from '../../../../../assets/images/webp/home-skeleton-light.
 import HomeImgDark from '../../../../../assets/images/webp/home-skeleton-dark.webp';
 import HomeImgLightDark from '../../../../../assets/images/webp/home-skeleton-light-dark.webp';
 
-type Props = { themeData?: AppThemeData };
+const ThemeSettings = () => {
+  const { userData } = React.useContext(AppContext);
 
-const ThemeSettings = (props: Props) => {
-  const { themeData: theme } = props;
+  const [theme, setTheme] = React.useState(userData?.theme);
+
+  const fetchUserData = React.useCallback(
+    () =>
+      window.api
+        .getUserData()
+        .then((res) => setTheme(res?.theme))
+        .catch((err) => console.error(err)),
+    []
+  );
+
+  React.useEffect(() => {
+    fetchUserData();
+    const manageUserDataUpdatesInSettingsPage = (e: Event) => {
+      if ('detail' in e) {
+        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>)
+          .detail;
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (event.dataType.includes('userData')) fetchUserData();
+        }
+      }
+    };
+    document.addEventListener(
+      'app/dataUpdates',
+      manageUserDataUpdatesInSettingsPage
+    );
+    return () => {
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageUserDataUpdatesInSettingsPage
+      );
+    };
+  }, [fetchUserData]);
 
   const focusInput = React.useCallback(
     (e: React.KeyboardEvent<HTMLLabelElement>) => {
@@ -26,8 +60,8 @@ const ThemeSettings = (props: Props) => {
   );
 
   return theme ? (
-    <>
-      <div className="title-container mt-1 mb-4 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+    <li className="main-container appearance-settings-container mb-16">
+      <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         <span className="material-icons-round-outlined mr-2">dark_mode</span>
         Appearance
       </div>
@@ -37,7 +71,7 @@ const ThemeSettings = (props: Props) => {
             Change the of the application as you need. We don&apos;t judge you
             for it.
           </div>
-          <div className="theme-change-radio-btns flex max-w-3xl items-center justify-between pt-4 pl-4">
+          <div className="theme-change-radio-btns flex max-w-3xl items-center justify-between pl-4 pt-4">
             <label
               htmlFor="lightThemeRadioBtn"
               tabIndex={0}
@@ -57,7 +91,11 @@ const ThemeSettings = (props: Props) => {
                 defaultChecked={!theme.useSystemTheme && !theme.isDarkMode}
                 onClick={() => window.api.changeAppTheme('light')}
               />
-              <Img src={HomeImgLight} className="w-40 shadow-md" />
+              <Img
+                loading="eager"
+                src={HomeImgLight}
+                className="w-40 shadow-md"
+              />
               <span className="mt-4 peer-checked:!text-font-color-black dark:peer-checked:!text-font-color-black">
                 Light Theme
               </span>
@@ -82,7 +120,11 @@ const ThemeSettings = (props: Props) => {
                 defaultChecked={!theme.useSystemTheme && theme.isDarkMode}
                 onClick={() => window.api.changeAppTheme('dark')}
               />
-              <Img src={HomeImgDark} className="w-40 shadow-md" />
+              <Img
+                loading="eager"
+                src={HomeImgDark}
+                className="w-40 shadow-md"
+              />
               <span className="mt-4 peer-checked:!text-font-color-black dark:peer-checked:!text-font-color-black">
                 Dark Theme
               </span>
@@ -106,7 +148,11 @@ const ThemeSettings = (props: Props) => {
                 defaultChecked={theme.useSystemTheme}
                 onClick={() => window.api.changeAppTheme('system')}
               />
-              <Img src={HomeImgLightDark} className="w-40 shadow-md" />
+              <Img
+                loading="eager"
+                src={HomeImgLightDark}
+                className="w-40 shadow-md"
+              />
               <span className="mt-4 peer-checked:!text-font-color-black dark:peer-checked:!text-font-color-black">
                 System Theme
               </span>
@@ -114,7 +160,7 @@ const ThemeSettings = (props: Props) => {
           </div>
         </li>
       </ul>
-    </>
+    </li>
   ) : null;
 };
 

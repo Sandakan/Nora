@@ -2,6 +2,7 @@
 import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import storage from 'renderer/utils/localStorage';
 
 import Button from './Button';
 import Checkbox from './Checkbox';
@@ -14,10 +15,12 @@ interface OpenLinkConfirmPromptProps {
 
 const OpenLinkConfirmPrompt = (props: OpenLinkConfirmPromptProps) => {
   const { title, link, buttonClassName } = props;
-  const { userData } = React.useContext(AppContext);
+  const { localStorageData } = React.useContext(AppContext);
   const { changePromptMenuData } = React.useContext(AppUpdateContext);
   const [checkboxState, setCheckboxState] = React.useState(
-    (userData && userData.preferences.doNotVerifyWhenOpeningLinks) ?? false
+    (localStorageData &&
+      localStorageData.preferences.doNotVerifyWhenOpeningLinks) ??
+      false
   );
 
   return (
@@ -64,8 +67,8 @@ const OpenLinkConfirmPrompt = (props: OpenLinkConfirmPromptProps) => {
           label="Open Link"
           className={`remove-song-from-library-btn w-[10rem] !bg-background-color-3 text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3 ${buttonClassName}`}
           clickHandler={() => {
-            window.api.saveUserData(
-              'preferences.doNotVerifyWhenOpeningLinks',
+            storage.preferences.setPreferences(
+              'doNotVerifyWhenOpeningLinks',
               checkboxState
             );
             window.api.openInBrowser(link);

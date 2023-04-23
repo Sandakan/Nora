@@ -1,6 +1,7 @@
 /** @type {import("tailwindcss").Config} */
 
 const colors = require('tailwindcss/colors');
+const plugin = require('tailwindcss/plugin');
 
 module.exports = {
   content: ['./src/renderer/**/*.{js,jsx,ts,tsx,ejs}'],
@@ -61,11 +62,42 @@ module.exports = {
       },
       animation: {
         'spin-ease': 'spin 1000ms ease-in-out infinite',
-        'dialog-appear-ease-in-out': 'dialogAppear 200ms ease',
-        'dialog-dissappear-ease-in-out': 'dialogDisappear 200ms ease',
+        'dialog-appear-ease-in-out': 'dialogAppear 100ms ease-out',
+        'dialog-dissappear-ease-in-out': 'dialogDisappear 100ms ease-in',
         'bg-image-appear': 'appearBackgroundImage 500ms ease forwards',
       },
     },
   },
-  plugins: [],
+  plugins: [
+    plugin(({ matchVariant }) => {
+      matchVariant(
+        'nth',
+        (value) => {
+          return `&:nth-child(${value})`;
+        },
+        {
+          values: {
+            1: '1',
+            2: '2',
+            3: '3',
+          },
+        }
+      );
+    }),
+    plugin(({ matchVariant }) => {
+      matchVariant(
+        'nth-last',
+        (value) => {
+          return `&:nth-last-child(${value})`;
+        },
+        {
+          values: {
+            1: '1',
+            2: '2',
+            3: '3',
+          },
+        }
+      );
+    }),
+  ],
 };

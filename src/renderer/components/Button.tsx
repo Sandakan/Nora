@@ -1,7 +1,7 @@
-/* eslint-disable no-unused-vars */
 import React from 'react';
 
 export interface ButtonProps {
+  id?: string;
   label?: string;
   iconName?: string;
   className?: string;
@@ -19,10 +19,12 @@ export interface ButtonProps {
   pendingAnimationOnDisabled?: boolean;
   style?: React.CSSProperties;
   onContextMenu?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  removeFocusOnClick?: boolean;
 }
 
 const Button = React.memo((props: ButtonProps) => {
   const {
+    id,
     className,
     iconName,
     iconClassName,
@@ -34,6 +36,7 @@ const Button = React.memo((props: ButtonProps) => {
     onContextMenu,
     isDisabled = false,
     style,
+    removeFocusOnClick = true,
   } = props;
 
   const [isButtonDisabled, setIsButtonDisabled] = React.useState(isDisabled);
@@ -54,7 +57,7 @@ const Button = React.memo((props: ButtonProps) => {
       return iconNames.map((name, index) => {
         return (
           <span
-            className={`material-icons-round icon relative flex items-center justify-center text-lg ${
+            className={`material-icons-round icon relative flex items-center justify-center text-lg !leading-none ${
               label && iconNames.length - 1 === index && 'mr-3'
             } ${iconClassName} ${
               isStatusPending && isButtonDisabled && `h-4 w-4 `
@@ -71,13 +74,17 @@ const Button = React.memo((props: ButtonProps) => {
   return (
     <button
       type="button"
-      className={`button group mr-4 flex cursor-pointer items-center justify-center rounded-3xl border-[3px] border-background-color-2 bg-[transparent] px-4 py-2 text-sm text-font-color-black transition-[border] ease-in-out hover:border-background-color-3 focus-visible:!border-font-color-highlight-2 dark:border-dark-background-color-2 dark:bg-[transparent] dark:text-font-color-white dark:hover:border-dark-background-color-3 dark:focus-visible:!border-dark-font-color-highlight-2 ${
+      id={id}
+      className={`button group mr-4 flex cursor-pointer items-center justify-center rounded-3xl border-[3px] border-background-color-2 bg-[transparent] px-4 py-2 text-sm text-font-color-black transition-[border,background,color] ease-in-out hover:border-background-color-3 focus-visible:!border-font-color-highlight-2 dark:border-dark-background-color-2 dark:bg-[transparent] dark:text-font-color-white dark:hover:border-dark-background-color-3 dark:focus-visible:!border-dark-font-color-highlight-2 ${
         isButtonDisabled &&
         `!cursor-not-allowed  !border-font-color-dimmed/10 !text-opacity-50 !brightness-50 !transition-none dark:!border-font-color-dimmed/40`
       } ${className}`}
-      onClick={(e) =>
-        !isButtonDisabled && clickHandler(e, updateIsDisabled, updateIsPending)
-      }
+      onClick={(e) => {
+        if (!isButtonDisabled) {
+          if (removeFocusOnClick) e.currentTarget.blur();
+          clickHandler(e, updateIsDisabled, updateIsPending);
+        }
+      }}
       title={tooltipLabel || label}
       disabled={isButtonDisabled}
       onContextMenu={onContextMenu}
@@ -85,8 +92,8 @@ const Button = React.memo((props: ButtonProps) => {
     >
       {isStatusPending && isButtonDisabled ? (
         <span
-          className={`material-icons-round icon relative mr-2 flex h-4 w-4 items-center justify-center text-lg after:absolute after:mx-auto after:block after:h-4 after:w-4 after:animate-spin-ease after:items-center after:justify-center after:rounded-full after:border-2 after:border-[transparent] after:border-t-font-color-black after:content-[''] dark:after:border-t-font-color-white
-         ${pendingClassName}`}
+          className={`material-icons-round icon relative flex h-4 w-4 items-center justify-center text-lg after:absolute after:mx-auto after:block after:h-4 after:w-4 after:animate-spin-ease after:items-center after:justify-center after:rounded-full after:border-2 after:border-[transparent] after:border-t-font-color-black after:content-[''] dark:after:border-t-font-color-white
+         ${(!isStatusPending || label) && 'mr-2'} ${pendingClassName}`}
         >
           {isStatusPending ? '' : iconName}
         </span>

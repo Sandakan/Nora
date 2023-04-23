@@ -18,7 +18,7 @@ const VersionNote = (props: VersionNoteProps) => {
           <Img
             src={artworkPath}
             noFallbacks
-            className="my-4 mx-auto w-[80%] max-w-full"
+            className="mx-auto my-4 w-[80%] max-w-full"
             alt=""
           />
         </>

@@ -4,7 +4,9 @@ const hasArrayChanged = (oldArr: unknown[], newArr: unknown[]) => {
     (value, index) => value === oldArr[index]
   );
 
-  return isLengthEqual && arePropertiesEqual;
+  const isArrayDataChanged = !(isLengthEqual && arePropertiesEqual);
+
+  return isArrayDataChanged;
 };
 
 const isAnObject = (obj: unknown): obj is Record<string, unknown> =>
@@ -19,13 +21,16 @@ const isAnArray = (obj: unknown): obj is [] => Array.isArray(obj);
 
 const hasDataChanged = (
   oldObj: Record<string, any>,
-  newObj: Record<string, any>
+  newObj: Record<string, any>,
+  returnBoolean = false
 ) => {
   try {
     const oldObjEntries = Object.keys(oldObj);
     const newObjEntries = Object.keys(newObj);
     const entries = [...new Set([...oldObjEntries, ...newObjEntries])];
     const comp: Record<string, unknown> = {};
+    let isDataChanged = false;
+
     for (let i = 0; i < entries.length; i += 1) {
       const entry = entries[i];
       if (entry in oldObj && entry in newObj) {
@@ -37,22 +42,49 @@ const hasDataChanged = (
             // newObj is an array
             const newArr = newObjEntry;
             const oldArr = oldObjEntry;
-            comp[entry] = hasArrayChanged(oldArr, newArr);
+            const isArrayDataChanged = hasArrayChanged(oldArr, newArr);
+
+            if (isArrayDataChanged) isDataChanged = true;
+            comp[entry] = isArrayDataChanged;
           } else {
             // newObj is an object but not an array
             const data = hasDataChanged(oldObjEntry, newObjEntry);
-            comp[entry] = Object.values(data).every((x: boolean) => x);
+            const isObjDataChanged = Object.values(data).every(
+              (bool: boolean) => !bool
+            );
+
+            if (isObjDataChanged) isDataChanged = true;
+            comp[entry] = isObjDataChanged;
           }
         } else if (newObj[entry] === oldObj[entry]) {
+          comp[entry] = false;
+        } else {
+          isDataChanged = true;
           comp[entry] = true;
-        } else comp[entry] = false;
-      } else comp[entry] = false;
+        }
+      } else {
+        isDataChanged = true;
+        comp[entry] = true;
+      }
     }
+
+    if (returnBoolean) return isDataChanged;
     return comp;
   } catch (error) {
     console.error(error);
     return false;
   }
+};
+
+export const isDataChanged = (
+  oldObj: Record<string, any>,
+  newObj: Record<string, any>
+) => {
+  const isChanged = hasDataChanged(oldObj, newObj, true);
+  if (typeof isChanged === 'boolean') return isChanged;
+  throw new Error(
+    'hasDataChanged retuned a non boolean output eventhough returnBoolean is true.'
+  );
 };
 
 export default hasDataChanged;

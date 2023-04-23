@@ -1,17 +1,10 @@
-/* eslint-disable no-console */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable promise/no-nesting */
-/* eslint-disable react/require-default-props */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable promise/always-return */
-/* eslint-disable promise/catch-or-return */
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+
 import { Album } from '../AlbumsPage/Album';
 import Song from '../SongsPage/Song';
 import Button from '../Button';
@@ -19,6 +12,9 @@ import MainContainer from '../MainContainer';
 import Hyperlink from '../Hyperlink';
 import Img from '../Img';
 import Dropdown from '../Dropdown';
+
+import SeparateArtistsSuggestion from './SeparateArtistsSuggestion';
+import DuplicateArtistsSuggestion from './DuplicateArtistsSuggestion';
 
 const dropdownOptions: { label: string; value: SongSortTypes }[] = [
   { label: 'Added Order', value: 'addedOrder' },
@@ -63,9 +59,9 @@ const ArtistInfoPage = () => {
   const {
     currentlyActivePage,
     queue,
-    userData,
     isDarkMode,
     bodyBackgroundImage,
+    localStorageData,
   } = useContext(AppContext);
   const {
     createQueue,
@@ -93,7 +89,9 @@ const ArtistInfoPage = () => {
               );
             setArtistData(res[0]);
           }
-        });
+          return undefined;
+        })
+        .catch((err) => console.error(err));
     }
   }, [currentlyActivePage.data, updateBodyBackgroundImage]);
 
@@ -113,6 +111,7 @@ const ArtistInfoPage = () => {
                 };
               return undefined;
             });
+          return undefined;
         })
         .catch((err) => {
           console.error(err);
@@ -126,7 +125,9 @@ const ArtistInfoPage = () => {
         .getSongInfo(artistData.songs.map((song) => song.songId))
         .then((songsData) => {
           if (songsData && songsData.length > 0) setSongs(songsData);
-        });
+          return undefined;
+        })
+        .catch((err) => console.error(err));
     }
   }, [artistData?.songs]);
 
@@ -136,7 +137,9 @@ const ArtistInfoPage = () => {
         .getAlbumData(artistData.albums.map((album) => album.albumId))
         .then((res) => {
           if (res && res.length > 0) setAlbums(res);
-        });
+          return undefined;
+        })
+        .catch((err) => console.error(err));
     }
   }, [artistData?.albums]);
 
@@ -271,37 +274,42 @@ const ArtistInfoPage = () => {
     return '';
   }, [artistData]);
 
+  const selectAllHandlerForAlbums = useSelectAllHandler(
+    albums,
+    'album',
+    'albumId'
+  );
+
   const albumComponents = React.useMemo(
     () =>
       albums.map((album, index) => {
         return (
           <Album
             index={index}
+            key={`${album.albumId}-${album.title}`}
             albumId={album.albumId}
             artists={album.artists}
             artworkPaths={album.artworkPaths}
             songs={album.songs}
             title={album.title}
             year={album.year}
-            key={index}
             className={
               bodyBackgroundImage
                 ? '[&_:not(.icon)]:!text-font-color-white'
                 : ''
             }
+            selectAllHandler={selectAllHandlerForAlbums}
           />
         );
       }),
-    [albums, bodyBackgroundImage]
+    [albums, bodyBackgroundImage, selectAllHandlerForAlbums]
   );
 
-  // const updateSongs = React.useCallback(
-  //   (callback: (_prevSongsData: SongData[]) => SongData[]) => {
-  //     const updatedSongsData = callback(albumContent.songsData);
-  //     dispatch({ type: 'SONGS_DATA_UPDATE', data: updatedSongsData });
-  //   },
-  //   [albumContent.songsData]
-  // );
+  const selectAllHandlerForSongs = useSelectAllHandler(
+    songs,
+    'songs',
+    'songId'
+  );
 
   const songComponenets = React.useMemo(
     () =>
@@ -311,7 +319,7 @@ const ArtistInfoPage = () => {
             key={song.songId}
             index={index}
             isIndexingSongs={
-              userData !== undefined && userData.preferences.songIndexing
+              localStorageData?.preferences?.isSongIndexingEnabled
             }
             title={song.title}
             artists={song.artists}
@@ -322,15 +330,19 @@ const ArtistInfoPage = () => {
             isAFavorite={song.isAFavorite}
             year={song.year}
             isBlacklisted={song.isBlacklisted}
-            // updateSongs={updateSongs}
+            selectAllHandler={selectAllHandlerForSongs}
           />
         );
       }),
-    [songs, userData]
+    [
+      localStorageData?.preferences?.isSongIndexingEnabled,
+      selectAllHandlerForSongs,
+      songs,
+    ]
   );
 
   return (
-    <MainContainer className="artist-info-page-container appear-from-bottom relative overflow-y-auto rounded-tl-lg pt-8 pb-2 pl-2 pr-2">
+    <MainContainer className="artist-info-page-container appear-from-bottom relative overflow-y-auto rounded-tl-lg pb-2 pl-2 pr-2 pt-8">
       <>
         <div className="artist-img-and-info-container relative mb-12 flex flex-row items-center pl-8 [&>*]:z-10">
           <div className="artist-img-container relative mr-10 max-h-60 lg:hidden">
@@ -341,7 +353,7 @@ const ArtistInfoPage = () => {
               alt="Album Cover"
             />
             <Button
-              className="absolute right-2 bottom-4 !m-0 flex rounded-full !border-0 bg-background-color-1 !p-3 shadow-xl dark:bg-dark-background-color-2"
+              className="absolute bottom-4 right-2 !m-0 flex rounded-full !border-0 bg-background-color-1 !p-3 shadow-xl outline-1 -outline-offset-[6px] focus-visible:!outline dark:bg-dark-background-color-2"
               tooltipLabel={
                 artistData?.isAFavorite
                   ? `Dislike '${artistData?.name}'`
@@ -417,15 +429,35 @@ const ArtistInfoPage = () => {
             )}
           </div>
         </div>
+
+        <SeparateArtistsSuggestion
+          name={artistData?.name}
+          artistId={artistData?.artistId}
+        />
+
+        <DuplicateArtistsSuggestion
+          name={artistData?.name}
+          artistId={artistData?.artistId}
+        />
+
         {albums && albums.length > 0 && (
-          <MainContainer className="main-container albums-list-container relative [&>*]:z-10">
+          <MainContainer
+            className="main-container albums-list-container relative [&>*]:z-10"
+            focusable
+            onKeyDown={(e) => {
+              if (e.ctrlKey && e.key === 'a') {
+                e.stopPropagation();
+                selectAllHandlerForAlbums();
+              }
+            }}
+          >
             <>
               <div
                 className={`title-container ${
                   bodyBackgroundImage
                     ? 'text-font-color-white'
                     : 'text-font-color-black dark:text-font-color-white'
-                } mt-1 mb-4
+                } mb-4 mt-1
                   text-2xl`}
               >
                 Appears On Albums
@@ -437,14 +469,23 @@ const ArtistInfoPage = () => {
           </MainContainer>
         )}
         {songs && songs.length > 0 && (
-          <MainContainer className="main-container songs-list-container relative h-full pb-4 [&>*]:z-10">
+          <MainContainer
+            className="main-container songs-list-container relative h-full pb-4 [&>*]:z-10"
+            focusable
+            onKeyDown={(e) => {
+              if (e.ctrlKey && e.key === 'a') {
+                e.stopPropagation();
+                selectAllHandlerForSongs();
+              }
+            }}
+          >
             <>
               <div
                 className={`title-container ${
                   bodyBackgroundImage
                     ? 'text-font-color-white'
                     : 'text-font-color-black dark:text-font-color-white'
-                } mt-1 mb-4
+                } mb-4 mt-1
                   flex items-center justify-between text-2xl`}
               >
                 Appears on songs
@@ -546,13 +587,16 @@ const ArtistInfoPage = () => {
         )}
         {artistData?.artistBio && (
           <div
-            className={`"artist-bio-container relative z-10 m-4 rounded-lg p-4 text-font-color-black  dark:text-font-color-white ${
+            className={`"artist-bio-container appear-from-bottom relative z-10 m-4 rounded-lg p-4 text-font-color-black shadow-md  dark:text-font-color-white ${
               bodyBackgroundImage
                 ? `bg-background-color-2/70 backdrop-blur-md dark:bg-dark-background-color-2/70`
                 : `bg-background-color-2 dark:bg-dark-background-color-2`
             }`}
           >
-            {sanitizeArtistBio()}
+            <h3 className="mb-2 font-medium uppercase text-font-color-highlight dark:text-dark-font-color-highlight">
+              About {artistData.name}
+            </h3>
+            <div>{sanitizeArtistBio()}</div>
           </div>
         )}
       </>

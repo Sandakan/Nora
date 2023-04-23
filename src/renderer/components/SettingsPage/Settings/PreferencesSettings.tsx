@@ -1,16 +1,14 @@
 import React from 'react';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import storage from 'renderer/utils/localStorage';
 import Checkbox from '../../Checkbox';
 
 const PreferencesSettings = () => {
-  const { userData } = React.useContext(AppContext);
-  const { updateUserData } = React.useContext(AppUpdateContext);
+  const { userData, localStorageData } = React.useContext(AppContext);
 
   return (
-    <>
-      {' '}
-      <div className="title-container mt-1 mb-4 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+    <li className="main-container preferences-settings-container mb-16">
+      <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         <span className="material-icons-round-outlined mr-2">tune</span>
         Preferences
       </div>
@@ -22,29 +20,22 @@ const PreferencesSettings = () => {
               order.
             </div>
             <Checkbox
-              id="toggleSongIndexing"
+              id="isSongIndexingEnabled"
               isChecked={
-                userData !== undefined && userData.preferences.songIndexing
+                localStorageData !== undefined &&
+                localStorageData.preferences.isSongIndexingEnabled
               }
               checkedStateUpdateFunction={(state) =>
-                updateUserData(async (prevUserData) => {
-                  await window.api.saveUserData(
-                    'preferences.songIndexing',
-                    state
-                  );
-                  return {
-                    ...prevUserData,
-                    preferences: {
-                      ...prevUserData.preferences,
-                      songIndexing: state,
-                    },
-                  };
-                })
+                storage.preferences.setPreferences(
+                  'isSongIndexingEnabled',
+                  state
+                )
               }
               labelContent="Enable song indexing"
             />
           </div>
         </li>
+
         <li className="checkbox-container">
           <div className="secondary-container show-artists-artwork-near-song-controls mb-4">
             <div className="description">
@@ -55,25 +46,19 @@ const PreferencesSettings = () => {
               id="showArtistArtworkNearSongControls"
               isChecked={
                 userData !== undefined &&
-                userData.preferences.showArtistArtworkNearSongControls
+                localStorageData.preferences.showArtistArtworkNearSongControls
               }
-              checkedStateUpdateFunction={(state) => {
-                window.api.saveUserData(
-                  'preferences.showArtistArtworkNearSongControls',
+              checkedStateUpdateFunction={(state) =>
+                storage.preferences.setPreferences(
+                  'showArtistArtworkNearSongControls',
                   state
-                );
-                updateUserData((prevData) => ({
-                  ...prevData,
-                  preferences: {
-                    ...prevData.preferences,
-                    showArtistArtworkNearSongControls: state,
-                  },
-                }));
-              }}
+                )
+              }
               labelContent="Show artists artworks next to their names"
             />
           </div>
         </li>
+
         <li className="checkbox-container">
           <div className="secondary-container disable-background-artworks mb-4">
             <div className="description">
@@ -83,28 +68,64 @@ const PreferencesSettings = () => {
             <Checkbox
               id="disableBackgroundArtwork"
               isChecked={
-                userData !== undefined &&
-                userData.preferences.disableBackgroundArtworks
+                localStorageData !== undefined &&
+                localStorageData.preferences.disableBackgroundArtworks
               }
-              checkedStateUpdateFunction={(state) => {
-                window.api.saveUserData(
-                  'preferences.disableBackgroundArtworks',
+              checkedStateUpdateFunction={(state) =>
+                storage.preferences.setPreferences(
+                  'disableBackgroundArtworks',
                   state
-                );
-                updateUserData((prevData) => ({
-                  ...prevData,
-                  preferences: {
-                    ...prevData.preferences,
-                    disableBackgroundArtworks: state,
-                  },
-                }));
-              }}
+                )
+              }
               labelContent="Disable background artworks"
             />
           </div>
         </li>
+
+        <li className="checkbox-container">
+          <div className="secondary-container enable-artwork-from-song-covers mb-4">
+            <div className="description">
+              Configure settings related to artworks made from song covers.
+            </div>
+            <Checkbox
+              id="enableArtworkFromSongCovers"
+              className="mb-2"
+              isChecked={
+                localStorageData !== undefined &&
+                localStorageData.preferences.enableArtworkFromSongCovers
+              }
+              checkedStateUpdateFunction={(state) =>
+                storage.preferences.setPreferences(
+                  'enableArtworkFromSongCovers',
+                  state
+                )
+              }
+              labelContent="Enable artwork made from song covers on Playlists"
+            />
+            <Checkbox
+              id="shuffleArtworkFromSongCovers"
+              isDisabled={
+                !(
+                  localStorageData !== undefined &&
+                  localStorageData.preferences.enableArtworkFromSongCovers
+                )
+              }
+              isChecked={
+                localStorageData !== undefined &&
+                localStorageData.preferences.shuffleArtworkFromSongCovers
+              }
+              checkedStateUpdateFunction={(state) =>
+                storage.preferences.setPreferences(
+                  'shuffleArtworkFromSongCovers',
+                  state
+                )
+              }
+              labelContent="Enable shuffling the artwork made from song covers"
+            />
+          </div>
+        </li>
       </ul>
-    </>
+    </li>
   );
 };
 

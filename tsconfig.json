@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es2021",
-    "module": "commonjs",
+    "module": "CommonJS",
     "lib": ["dom", "es2021"],
     "declaration": true,
     "declarationMap": true,

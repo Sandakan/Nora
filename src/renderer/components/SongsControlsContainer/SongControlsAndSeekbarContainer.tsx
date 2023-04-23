@@ -7,13 +7,7 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
 import calculateTime from 'renderer/utils/calculateTime';
 import debounce from 'renderer/utils/debounce';
-import { getItem } from 'renderer/utils/localStorage';
 import Button from '../Button';
-
-let scrollIncrement = getItem('seekbarScrollInterval');
-document.addEventListener('localStorage', () => {
-  scrollIncrement = getItem('seekbarScrollInterval');
-});
 
 const SongControlsAndSeekbarContainer = () => {
   const {
@@ -22,9 +16,9 @@ const SongControlsAndSeekbarContainer = () => {
     queue,
     isShuffling,
     isRepeating,
-    userData,
     isCurrentSongPlaying,
     isPlayerStalled,
+    localStorageData,
   } = useContext(AppContext);
   const {
     changeCurrentActivePage,
@@ -118,7 +112,7 @@ const SongControlsAndSeekbarContainer = () => {
 
   const currentSongPosition = calculateTime(songPosition);
   const songDuration =
-    userData && userData.preferences.showSongRemainingTime
+    localStorageData && localStorageData.preferences.showSongRemainingTime
       ? currentSongData.duration - Math.floor(songPosition) >= 0
         ? calculateTime(currentSongData.duration - Math.floor(songPosition))
         : calculateTime(0)
@@ -234,7 +228,7 @@ const SongControlsAndSeekbarContainer = () => {
             type="range"
             name="seek-bar-slider"
             id="seek-bar-slider"
-            className="seek-bar-slider relative float-left m-0 h-6 w-full appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
+            className="seek-bar-slider relative float-left m-0 h-6 w-full appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
             min={0}
             max={
               (currentSongData.duration || 0) >= songPos
@@ -249,6 +243,9 @@ const SongControlsAndSeekbarContainer = () => {
               isMouseScrollRef.current = true;
 
               const max = parseInt(e.currentTarget.max);
+              const scrollIncrement =
+                localStorageData.preferences.seekbarScrollInterval;
+
               const incrementValue =
                 e.deltaY > 0 ? -scrollIncrement : scrollIncrement;
               let value = (songPos || 0) + incrementValue;
@@ -264,11 +261,14 @@ const SongControlsAndSeekbarContainer = () => {
             }}
             ref={seekbarRef}
             style={seekBarCssProperties}
-            title={Math.round(songPosition).toString()}
+            title={`${currentSongPosition.minutes}:${currentSongPosition.seconds}`}
           />
         </div>
         <div className="full-song-duration w-16 text-center text-sm font-light">
-          {userData && userData.preferences.showSongRemainingTime ? '-' : ''}
+          {localStorageData &&
+          localStorageData.preferences.showSongRemainingTime
+            ? '-'
+            : ''}
           {songDuration.minutes}:{songDuration.seconds}
         </div>
       </div>

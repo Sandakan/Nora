@@ -24,15 +24,15 @@ interface SongCardProp {
   isAFavorite: boolean;
   className?: string;
   isBlacklisted: boolean;
+  selectAllHandler?: (_upToId?: string) => void;
 }
 
 const SongCard = (props: SongCardProp) => {
   const {
     currentSongData,
-    currentlyActivePage,
     queue,
     isCurrentSongPlaying,
-    userData,
+    localStorageData,
     isMultipleSelectionEnabled,
     multipleSelectionsData,
   } = React.useContext(AppContext);
@@ -60,6 +60,7 @@ const SongCard = (props: SongCardProp) => {
     className,
     isBlacklisted,
     palette,
+    selectAllHandler,
   } = props;
 
   const [isSongAFavorite, setIsSongAFavorite] = React.useState(
@@ -131,14 +132,9 @@ const SongCard = (props: SongCardProp) => {
       : undefined;
 
   const showSongInfoPage = () =>
-    currentlyActivePage.pageTitle === 'SongInfo' &&
-    currentlyActivePage.data &&
-    currentlyActivePage.data.songInfo &&
-    currentlyActivePage.data.songInfo.songId === songId
-      ? changeCurrentActivePage('Home')
-      : changeCurrentActivePage('SongInfo', {
-          songId,
-        });
+    changeCurrentActivePage('SongInfo', {
+      songId,
+    });
 
   const handleLikeButtonClick = React.useCallback(() => {
     window.api
@@ -195,13 +191,32 @@ const SongCard = (props: SongCardProp) => {
         iconName: 'shortcut',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) {
-            const newQueue = queue.queue.filter((id) => !songIds.includes(id));
-            newQueue.splice(
-              queue.queue.indexOf(currentSongData.songId) + 1 || 0,
-              0,
-              ...songIds
-            );
-            updateQueueData(undefined, newQueue);
+            let currentSongIndex =
+              queue.currentSongIndex ??
+              queue.queue.indexOf(currentSongData.songId);
+            const duplicateIds: string[] = [];
+
+            const newQueue = queue.queue.filter((id) => {
+              const isADuplicate = songIds.includes(id);
+              if (isADuplicate) duplicateIds.push(id);
+
+              return !isADuplicate;
+            });
+
+            for (const duplicateId of duplicateIds) {
+              const duplicateIdPosition = queue.queue.indexOf(duplicateId);
+
+              if (
+                duplicateIdPosition !== -1 &&
+                duplicateIdPosition < currentSongIndex &&
+                currentSongIndex - 1 >= 0
+              )
+                currentSongIndex -= 1;
+            }
+
+            newQueue.splice(currentSongIndex + 1, 0, ...songIds);
+
+            updateQueueData(currentSongIndex, newQueue, undefined, false);
             addNewNotifications([
               {
                 id: `${title}PlayNext`,
@@ -219,7 +234,17 @@ const SongCard = (props: SongCardProp) => {
               0,
               songId
             );
-            updateQueueData(undefined, newQueue);
+
+            const duplicateSongIndex = queue.queue.indexOf(songId);
+
+            const currentSongIndex =
+              queue.currentSongIndex &&
+              duplicateSongIndex !== -1 &&
+              duplicateSongIndex < queue.currentSongIndex
+                ? queue.currentSongIndex - 1
+                : undefined;
+
+            updateQueueData(currentSongIndex, newQueue, undefined, false);
             addNewNotifications([
               {
                 id: `${title}PlayNext`,
@@ -254,7 +279,9 @@ const SongCard = (props: SongCardProp) => {
                 id: `${title}AddedToQueue`,
                 delay: 5000,
                 content: <span>Added 1 song to the queue.</span>,
-                icon: <Img src={artworkPath} alt="Song Artwork" />,
+                icon: (
+                  <Img src={artworkPath} loading="lazy" alt="Song Artwork" />
+                ),
               },
             ]);
           }
@@ -313,11 +340,7 @@ const SongCard = (props: SongCardProp) => {
         },
       },
       {
-        label:
-          isMultipleSelectionEnabled &&
-          multipleSelectionsData.multipleSelections.includes(songId)
-            ? 'Unselect'
-            : 'Select',
+        label: isAMultipleSelection ? 'Unselect' : 'Select',
         iconName: 'checklist',
         handlerFunction: () => {
           if (isMultipleSelectionEnabled) {
@@ -327,13 +350,17 @@ const SongCard = (props: SongCardProp) => {
               isAMultipleSelection ? 'remove' : 'add'
             );
           }
-          return toggleMultipleSelections(
-            !isMultipleSelectionEnabled,
-            'songs',
-            [songId]
-          );
+          return toggleMultipleSelections(!isAMultipleSelection, 'songs', [
+            songId,
+          ]);
         },
       },
+      // {
+      //   label: 'Select/Unselect All',
+      //   iconName: 'checklist',
+      //   isDisabled: !selectAllHandler,
+      //   handlerFunction: () => selectAllHandler && selectAllHandler(),
+      // },
       {
         label: 'Hr',
         isContextMenuItemSeperator: true,
@@ -383,7 +410,7 @@ const SongCard = (props: SongCardProp) => {
             window.api
               .restoreBlacklistedSongs([songId])
               .catch((err) => console.error(err));
-          else if (userData?.preferences.doNotShowBlacklistSongConfirm)
+          else if (localStorageData?.preferences.doNotShowBlacklistSongConfirm)
             window.api
               .blacklistSongs([songId])
               .then(() =>
@@ -424,26 +451,27 @@ const SongCard = (props: SongCardProp) => {
   }, [
     multipleSelectionsData,
     isAMultipleSelection,
-    handlePlayBtnClick,
     isSongAFavorite,
-    isMultipleSelectionEnabled,
-    songId,
     isBlacklisted,
+    handlePlayBtnClick,
+    toggleMultipleSelections,
     createQueue,
+    queue.currentSongIndex,
     queue.queue,
     currentSongData.songId,
     currentSongData.isAFavorite,
     updateQueueData,
     addNewNotifications,
     title,
-    toggleMultipleSelections,
+    songId,
     artworkPath,
     toggleIsFavorite,
     changePromptMenuData,
+    isMultipleSelectionEnabled,
     updateMultipleSelections,
     changeCurrentActivePage,
     path,
-    userData?.preferences.doNotShowBlacklistSongConfirm,
+    localStorageData?.preferences.doNotShowBlacklistSongConfirm,
   ]);
 
   const songArtistComponents = React.useMemo(
@@ -486,7 +514,7 @@ const SongCard = (props: SongCardProp) => {
         currentSongData.songId === songId && 'current-song'
       } ${
         isSongPlaying && 'playing'
-      } group relative mr-2 mb-2 aspect-[2/1] max-w-md overflow-hidden rounded-2xl border-[transparent] border-background-color-2 shadow-xl transition-[border-color] ease-in-out dark:border-dark-background-color-2 ${
+      } group relative mb-2 mr-2 aspect-[2/1] min-w-[10rem] max-w-[24rem] overflow-hidden rounded-2xl border-[transparent] border-background-color-2 shadow-xl transition-[border-color] ease-in-out dark:border-dark-background-color-2 ${
         className || ''
       } ${isBlacklisted && '!opacity-30'} ${
         isMultipleSelectionEnabled &&
@@ -510,7 +538,9 @@ const SongCard = (props: SongCardProp) => {
         );
       }}
       onClick={(e) => {
-        if (
+        if (e.getModifierState('Shift') === true && selectAllHandler)
+          selectAllHandler(songId);
+        else if (
           isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'songs'
         )
@@ -519,20 +549,12 @@ const SongCard = (props: SongCardProp) => {
             'songs',
             isAMultipleSelection ? 'remove' : 'add'
           );
-        else if (e.getModifierState('Shift') === true) {
-          toggleMultipleSelections(!isMultipleSelectionEnabled, 'songs');
-          updateMultipleSelections(
-            songId,
-            'songs',
-            isAMultipleSelection ? 'remove' : 'add'
-          );
-        }
       }}
     >
       <div className="song-cover-container mr-4 flex h-full w-full flex-row items-center justify-end">
         <Img
           src={artworkPath}
-          loading="lazy"
+          loading="eager"
           alt="Song cover"
           className="aspect-square h-full max-h-full object-cover"
         />
@@ -560,7 +582,9 @@ const SongCard = (props: SongCardProp) => {
           </div>
           <div
             className="song-artists flex w-2/3 overflow-hidden text-ellipsis whitespace-nowrap text-sm transition-none"
-            title={artists ? artists.join(', ') : 'Unknown Artist'}
+            title={
+              artists ? artists.map((x) => x.name).join(', ') : 'Unknown Artist'
+            }
             data-song-id={songId}
           >
             {songArtistComponents}
@@ -568,7 +592,7 @@ const SongCard = (props: SongCardProp) => {
           <div className="song-states-container">
             <div className="flex">
               <Button
-                className="mt-1 !mr-0 !rounded-none !border-0 !p-0 !text-inherit outline-1 outline-offset-1 focus-visible:!outline"
+                className="!mr-0 mt-1 !rounded-none !border-0 !p-0 !text-inherit outline-1 outline-offset-1 focus-visible:!outline"
                 iconName="favorite"
                 iconClassName={`${
                   isSongAFavorite
@@ -585,7 +609,7 @@ const SongCard = (props: SongCardProp) => {
               />
               {isBlacklisted && (
                 <span
-                  className="material-icons-round mt-1 ml-2 cursor-pointer text-lg"
+                  className="material-icons-round ml-2 mt-1 cursor-pointer text-lg"
                   title={`'${title}' is blacklisted.`}
                 >
                   block
@@ -598,7 +622,7 @@ const SongCard = (props: SongCardProp) => {
               )}
           </div>
         </div>
-        <div className="play-btn-container absolute top-1/2 left-3/4 -translate-x-1/2 -translate-y-1/2">
+        <div className="play-btn-container absolute left-3/4 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <Button
             className="!m-0 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 focus-visible:!outline"
             iconName={isSongPlaying ? 'pause_circle' : 'play_circle'}

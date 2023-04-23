@@ -3,18 +3,24 @@ import { FixedSizeList as List } from 'react-window';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+
 import Song from 'renderer/components/SongsPage/Song';
+import MainContainer from 'renderer/components/MainContainer';
 
 type Props = { songData: SongData[] };
 
 const AllSongResults = (prop: Props) => {
-  const { currentlyActivePage, userData } = React.useContext(AppContext);
+  const { currentlyActivePage, localStorageData } =
+    React.useContext(AppContext);
   const { updateCurrentlyActivePageData } = React.useContext(AppUpdateContext);
 
   const { songData } = prop;
   const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
   const songsContainerRef = React.useRef(null as HTMLDivElement | null);
   const { width, height } = useResizeObserver(songsContainerRef);
+
+  const selectAllHandler = useSelectAllHandler(songData, 'songs', 'songId');
 
   const songs = React.useCallback(
     (props: { index: number; style: React.CSSProperties }) => {
@@ -36,7 +42,7 @@ const AllSongResults = (prop: Props) => {
             key={index}
             index={index}
             isIndexingSongs={
-              userData !== undefined && userData.preferences.songIndexing
+              localStorageData?.preferences?.isSongIndexingEnabled
             }
             title={title}
             songId={songId}
@@ -47,17 +53,33 @@ const AllSongResults = (prop: Props) => {
             path={path}
             isAFavorite={isAFavorite}
             isBlacklisted={isBlacklisted}
+            selectAllHandler={selectAllHandler}
           />
         </div>
       );
     },
-    [songData, userData]
+    [
+      localStorageData?.preferences?.isSongIndexingEnabled,
+      selectAllHandler,
+      songData,
+    ]
   );
 
   return (
-    <div className="songs-container h-full flex-1" ref={songsContainerRef}>
+    <MainContainer
+      className="songs-container h-full flex-1"
+      ref={songsContainerRef}
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
+    >
       {songData && songData.length > 0 && (
         <List
+          className="appear-from-bottom delay-100"
           itemCount={songData.length}
           itemSize={60}
           width={width || '100%'}
@@ -81,7 +103,7 @@ const AllSongResults = (prop: Props) => {
           {songs}
         </List>
       )}
-    </div>
+    </MainContainer>
   );
 };
 

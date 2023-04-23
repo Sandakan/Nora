@@ -4,7 +4,7 @@
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import HomePage from './HomePage/HomePage';
-import { ArtistPage } from './ArtistPage/ArtistPage';
+import ArtistPage from './ArtistPage/ArtistPage';
 import { AlbumsPage } from './AlbumsPage/AlbumsPage';
 import { PlaylistsPage } from './PlaylistsPage/PlaylistsPage';
 import SearchPage from './SearchPage/SearchPage';
@@ -26,8 +26,35 @@ import MusicFolderInfoPage from './MusicFolderInfoPage/MusicFolderInfoPage';
 
 const Body = React.memo(() => {
   const { currentlyActivePage } = useContext(AppContext);
+  const bodyRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (typeof currentlyActivePage.data?.scrollToId === 'string') {
+      const { scrollToId } = currentlyActivePage.data;
+      const element = document.querySelector(scrollToId as string);
+
+      if (element && bodyRef.current?.contains(element))
+        setTimeout(
+          () =>
+            element.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+            }),
+          250
+        );
+      else
+        console.warn(
+          `Element with id ${scrollToId} didn't exist to scroll into view.`
+        );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentlyActivePage.data?.scrollToId]);
+
   return (
-    <div className="body relative order-2 h-full w-full overflow-hidden rounded-tl-lg lg:pl-14 [&>*]:overflow-x-hidden">
+    <div
+      className="body relative order-2 h-full w-full overflow-hidden rounded-tl-lg lg:pl-14 [&>*]:overflow-x-hidden"
+      ref={bodyRef}
+    >
       <ErrorBoundary>
         {currentlyActivePage.pageTitle === 'Songs' && <SongsPage />}
         {currentlyActivePage.pageTitle === 'Home' && <HomePage />}

@@ -1,9 +1,11 @@
 import React, { CSSProperties } from 'react';
 import { FixedSizeGrid as Grid } from 'react-window';
 import Genre from 'renderer/components/GenresPage/Genre';
+import MainContainer from 'renderer/components/MainContainer';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 
 type Props = { genreData: Genre[] };
 
@@ -21,6 +23,8 @@ const AllGenreResults = (prop: Props) => {
   const noOfRows = Math.ceil((genreData ? genreData.length : 1) / noOfColumns);
   const itemWidth =
     MIN_ITEM_WIDTH + ((width % MIN_ITEM_WIDTH) - 10) / noOfColumns;
+
+  const selectAllHandler = useSelectAllHandler(genreData, 'genre', 'genreId');
 
   const row = React.useCallback(
     (props: {
@@ -43,24 +47,33 @@ const AllGenreResults = (prop: Props) => {
               title={name}
               backgroundColor={backgroundColor}
               songIds={songs.map((song) => song.songId)}
+              selectAllHandler={selectAllHandler}
             />
           </div>
         );
       }
       return <div style={style} />;
     },
-    [genreData, noOfColumns]
+    [genreData, noOfColumns, selectAllHandler]
   );
 
   return (
-    <div
+    <MainContainer
       className={`genres-container flex h-full flex-wrap ${
         !(genreData && genreData.length > 0) && 'hidden'
       }`}
       ref={containerRef}
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
     >
       {genreData && genreData.length > 0 && (
         <Grid
+          className="appear-from-bottom delay-100"
           columnCount={noOfColumns || 3}
           columnWidth={itemWidth}
           rowCount={noOfRows || 3}
@@ -86,7 +99,7 @@ const AllGenreResults = (prop: Props) => {
           {row}
         </Grid>
       )}
-    </div>
+    </MainContainer>
   );
 };
 

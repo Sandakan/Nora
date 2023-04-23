@@ -26,6 +26,9 @@ export interface AppStateContextType {
   isMuted: boolean;
   isRepeating: RepeatTypes;
   isShuffling: boolean;
+  equalizerOptions: Equalizer;
+  // LOCAL STORAGE
+  localStorageData: LocalStorage;
   // QUEUE
   queue: Queue;
   // MULTIPLE SELECTIONS DATA

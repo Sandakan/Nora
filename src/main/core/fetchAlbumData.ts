@@ -4,19 +4,24 @@ import log from '../log';
 import sortAlbums from '../utils/sortAlbums';
 
 const fetchAlbumData = async (
-  albumIds: string[] = [],
+  albumTitlesOrIds: string[] = [],
   sortType?: AlbumSortTypes
 ): Promise<Album[]> => {
-  if (albumIds) {
-    log(`Requested albums data for ids '${albumIds.join(',')}'`);
+  if (albumTitlesOrIds) {
+    log(`Requested albums data for ids '${albumTitlesOrIds.join(',')}'`);
     const albums = getAlbumsData();
+
     if (albums.length > 0) {
       let results: SavableAlbum[] = [];
-      if (albumIds.length === 0) results = albums;
+      if (albumTitlesOrIds.length === 0) results = albums;
       else {
         for (let x = 0; x < albums.length; x += 1) {
-          for (let y = 0; y < albumIds.length; y += 1) {
-            if (albums[x].albumId === albumIds[y]) results.push(albums[x]);
+          for (let y = 0; y < albumTitlesOrIds.length; y += 1) {
+            if (
+              albums[x].albumId === albumTitlesOrIds[y] ||
+              albums[x].title === albumTitlesOrIds[y]
+            )
+              results.push(albums[x]);
           }
         }
       }

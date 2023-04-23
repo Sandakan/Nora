@@ -2,6 +2,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import storage from 'renderer/utils/localStorage';
 import Button from '../Button';
 import Checkbox from '../Checkbox';
 
@@ -9,13 +10,13 @@ const BlacklistSongConfrimPrompt = (props: {
   songIds: string[];
   title?: string;
 }) => {
-  const { addNewNotifications, changePromptMenuData, updateUserData } =
+  const { addNewNotifications, changePromptMenuData } =
     React.useContext(AppUpdateContext);
   const { songIds, title } = props;
   const [isDoNotShowAgain, setIsDoNotShowAgain] = React.useState(false);
   return (
     <>
-      <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         Confirm Blacklisting{' '}
         {songIds.length === 1 && title ? (
           <>&apos;{title}&apos;</>
@@ -83,19 +84,11 @@ const BlacklistSongConfrimPrompt = (props: {
             window.api
               .blacklistSongs(songIds)
               .then(() => {
-                if (isDoNotShowAgain) {
-                  updateUserData((prevUserData) => ({
-                    ...prevUserData,
-                    preferences: {
-                      ...prevUserData.preferences,
-                      doNotShowBlacklistSongConfirm: isDoNotShowAgain,
-                    },
-                  }));
-                  window.api.saveUserData(
-                    'preferences.doNotShowBlacklistSongConfirm',
+                if (isDoNotShowAgain)
+                  storage.preferences.setPreferences(
+                    'isSongIndexingEnabled',
                     isDoNotShowAgain
                   );
-                }
                 changePromptMenuData(false);
                 return addNewNotifications([
                   {

@@ -3,14 +3,20 @@ import { FixedSizeList as List } from 'react-window';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+
 import Button from '../Button';
 import Dropdown from '../Dropdown';
 import MainContainer from '../MainContainer';
 import Song from '../SongsPage/Song';
 
 const MusicFolderInfoPage = () => {
-  const { currentlyActivePage, isMultipleSelectionEnabled, userData } =
-    React.useContext(AppContext);
+  const {
+    currentlyActivePage,
+    multipleSelectionsData,
+    isMultipleSelectionEnabled,
+    localStorageData,
+  } = React.useContext(AppContext);
   const {
     updateCurrentlyActivePageData,
     createQueue,
@@ -22,7 +28,6 @@ const MusicFolderInfoPage = () => {
   const [folderSongs, setFolderSongs] = React.useState<SongData[]>([]);
   const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>('aToZ');
 
-  //   const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
   const songsContainerRef = React.useRef(null as HTMLDivElement | null);
   const { width, height } = useResizeObserver(songsContainerRef);
 
@@ -144,6 +149,8 @@ const MusicFolderInfoPage = () => {
     },
   ];
 
+  const selectAllHandler = useSelectAllHandler(folderSongs, 'songs', 'songId');
+
   const row = React.useCallback(
     (props: { index: number; style: React.CSSProperties }) => {
       const { index, style } = props;
@@ -163,7 +170,9 @@ const MusicFolderInfoPage = () => {
           <Song
             key={index}
             index={index}
-            isIndexingSongs={userData?.preferences?.songIndexing ?? false}
+            isIndexingSongs={
+              localStorageData?.preferences?.isSongIndexingEnabled
+            }
             title={title}
             songId={songId}
             artists={artists}
@@ -173,16 +182,21 @@ const MusicFolderInfoPage = () => {
             path={path}
             isAFavorite={isAFavorite}
             isBlacklisted={isBlacklisted}
+            selectAllHandler={selectAllHandler}
           />
         </div>
       );
     },
-    [folderSongs, userData?.preferences?.songIndexing]
+    [
+      folderSongs,
+      localStorageData?.preferences?.isSongIndexingEnabled,
+      selectAllHandler,
+    ]
   );
 
   const { folderName } = React.useMemo(() => {
     if (folderInfo) {
-      const { path } = folderInfo.folderData;
+      const { path } = folderInfo;
       const name = path.split('\\').pop() || path;
 
       return { folderPath: path, folderName: name };
@@ -202,10 +216,31 @@ const MusicFolderInfoPage = () => {
   );
 
   return (
-    <MainContainer className="appear-from-bottom !h-full !pb-0">
+    <MainContainer
+      className="appear-from-bottom !h-full !pb-0"
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
+    >
       <>
-        <div className="title-container mt-2 mb-8 flex items-center justify-between pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container mb-8 mt-2 flex items-center justify-between pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           '{folderName}' Folder
+          <div className="other-stats-container flex items-center text-xs text-font-color-black dark:text-font-color-white">
+            {isMultipleSelectionEnabled ? (
+              <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
+                {multipleSelectionsData.multipleSelections.length} selections
+              </div>
+            ) : (
+              folderSongs &&
+              folderSongs.length > 0 && (
+                <span className="no-of-songs">{folderSongs.length} songs</span>
+              )
+            )}
+          </div>
           {folderInfo && (
             <div className="buttons-container flex text-sm">
               <Button
@@ -249,7 +284,7 @@ const MusicFolderInfoPage = () => {
                       .map((song) => song.songId),
                     'folder',
                     false,
-                    folderInfo.folderData.path,
+                    folderInfo.path,
                     true
                   )
                 }
@@ -266,7 +301,7 @@ const MusicFolderInfoPage = () => {
                       .map((song) => song.songId),
                     'folder',
                     true,
-                    folderInfo.folderData.path,
+                    folderInfo.path,
                     true
                   )
                 }
@@ -292,6 +327,7 @@ const MusicFolderInfoPage = () => {
         >
           {folderSongs && folderSongs.length > 0 && (
             <List
+              className="appear-from-bottom delay-100"
               itemCount={folderSongs.length}
               itemSize={60}
               width={width || '100%'}

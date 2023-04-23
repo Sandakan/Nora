@@ -49,8 +49,8 @@ const AboutSettings = () => {
   }, [currentVersionReleasedDate]);
 
   return (
-    <>
-      <div className="title-container mt-1 mb-4 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+    <li className="main-container about-container">
+      <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         <span className="material-icons-round-outlined mr-2">info</span>
         About
       </div>
@@ -76,8 +76,7 @@ const AboutSettings = () => {
                           : undefined
                       }
                     >
-                      ({elapsed.elapsed} {elapsed.type}
-                      {elapsed.elapsed === 1 ? '' : 's'} ago)
+                      ({elapsed.elapsedString})
                     </span>
                   </>
                 )}
@@ -86,7 +85,7 @@ const AboutSettings = () => {
           </div>
           <div className="flex items-center">
             <Button
-              className="about-link !mr-8 block w-fit cursor-pointer !rounded-none !border-0 !p-0 outline-1 outline-offset-2 focus:!outline"
+              className="about-link !mr-8 block w-fit cursor-pointer !rounded-none !border-0 !p-0 outline-1 outline-offset-2 focus-visible:!outline"
               iconName="language"
               iconClassName="!text-2xl"
               tooltipLabel="Nora's Website (Under Development)"
@@ -120,7 +119,7 @@ const AboutSettings = () => {
             <Hyperlink
               label="Oto Music for Android"
               linkTitle="Oto Music for Android on PlayStore"
-              link="https://play.google.com/store/apps/details?id=com.piyush.music&gl=us"
+              link="https://play.google.com/store/apps/details?id=com.piyush.music"
             />{' '}
             by Piyush Mamidwar.
           </li>
@@ -146,11 +145,11 @@ const AboutSettings = () => {
             />
           </li>
         </ul>
-        <div className="mt-12 flex items-center justify-center">
+        <div className="mt-12 flex flex-wrap items-center justify-center px-8">
           <Button
             iconName="new_releases"
             iconClassName="material-icons-round-outlined"
-            className="release-notes-prompt-btn"
+            className="release-notes-prompt-btn mb-4"
             label="Release Notes"
             clickHandler={() =>
               changePromptMenuData(
@@ -162,7 +161,7 @@ const AboutSettings = () => {
           />
           <Button
             iconName="receipt_long"
-            className="open-source-licenses-btn"
+            className="open-source-licenses-btn mb-4"
             label="Open source licences"
             clickHandler={() =>
               changePromptMenuData(
@@ -171,7 +170,7 @@ const AboutSettings = () => {
                   <div className="mb-4 w-full text-center text-3xl font-medium">
                     Open Source Licenses
                   </div>
-                  <div className="relative max-h-full w-full overflow-y-auto whitespace-pre-wrap px-4">
+                  <div className="relative max-h-full w-full overflow-y-auto whitespace-pre-wrap px-4 text-center text-sm">
                     {openSourceLicenses}
                   </div>
                 </>,
@@ -182,9 +181,36 @@ const AboutSettings = () => {
           <Button
             iconName="description"
             iconClassName="material-icons-round-outlined"
-            className="about-link block w-fit cursor-pointer"
+            className="about-link mb-4 block w-fit cursor-pointer"
             label="Open Log file"
             clickHandler={() => window.api.openLogFile()}
+          />
+          <Button
+            label="Open Devtools"
+            iconName="code"
+            className="mb-4 rounded-2xl"
+            clickHandler={() => window.api.openDevtools()}
+          />
+          <Button
+            label="Resync Library"
+            iconName="sync"
+            className="mb-4 rounded-2xl"
+            clickHandler={() => window.api.resyncSongsLibrary()}
+          />
+          <Button
+            label="Generate Palettes"
+            iconName="temp_preferences_custom"
+            className="mb-4 rounded-2xl"
+            clickHandler={() => window.api.generatePalettes()}
+          />
+          <Button
+            label="App Shortcuts"
+            iconName="trail_length_short"
+            className="mb-4 rounded-2xl"
+            iconClassName="material-icons-round-outlined"
+            clickHandler={() =>
+              changePromptMenuData(true, <AppShortcutsPrompt />)
+            }
           />
         </div>
 
@@ -203,18 +229,7 @@ const AboutSettings = () => {
               )
             }
           />
-          <Button
-            label="Open Devtools"
-            iconName="code"
-            className="mb-4 rounded-2xl"
-            clickHandler={() => window.api.openDevtools()}
-          />
-          <Button
-            label="Resync Library"
-            iconName="sync"
-            className="mb-4 rounded-2xl"
-            clickHandler={() => window.api.resyncSongsLibrary()}
-          />
+
           <Button
             label="Clear History"
             iconName="clear"
@@ -223,7 +238,7 @@ const AboutSettings = () => {
               changePromptMenuData(
                 true,
                 <SensitiveActionConfirmPrompt
-                  title="Confrim the action to clear Song History"
+                  title="Confirm the action to clear Song History"
                   content={
                     <div>
                       You wouldn't be able to see what you have listened
@@ -257,15 +272,6 @@ const AboutSettings = () => {
                 />
               );
             }}
-          />
-          <Button
-            label="App Shortcuts"
-            iconName="trail_length_short"
-            className="mb-4 rounded-2xl"
-            iconClassName="material-icons-round-outlined"
-            clickHandler={() =>
-              changePromptMenuData(true, <AppShortcutsPrompt />)
-            }
           />
         </div>
         <div className="about-description mt-4 text-sm font-light">
@@ -318,7 +324,7 @@ const AboutSettings = () => {
           </div>
         </div>
       </div>
-    </>
+    </li>
   );
 };
 

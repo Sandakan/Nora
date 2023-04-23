@@ -1,27 +1,21 @@
-/* eslint-disable react/no-unescaped-entities */
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-console */
-/* eslint-disable promise/always-return */
-/* eslint-disable consistent-return */
-/* eslint-disable no-nested-ternary */
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable react/no-unused-prop-types */
-/* eslint-disable no-else-return */
-/* eslint-disable promise/catch-or-return */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
 import { FixedSizeList as List } from 'react-window';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import storage from 'renderer/utils/localStorage';
+
 import Song from './Song';
-import NoSongsImage from '../../../../assets/images/svg/Empty Inbox _Monochromatic.svg';
-import DataFetchingImage from '../../../../assets/images/svg/Road trip_Monochromatic.svg';
 import Button from '../Button';
 import MainContainer from '../MainContainer';
 import Dropdown from '../Dropdown';
 import useResizeObserver from '../../hooks/useResizeObserver';
 import Img from '../Img';
+
+import NoSongsImage from '../../../../assets/images/svg/Empty Inbox _Monochromatic.svg';
+import DataFetchingImage from '../../../../assets/images/svg/Road trip_Monochromatic.svg';
+import AddMusicFoldersPrompt from '../MusicFoldersPage/AddMusicFoldersPrompt';
 
 interface SongPageReducer {
   songsData: AudioInfo[];
@@ -96,27 +90,25 @@ const reducer = (
 export const SongsPage = () => {
   const {
     currentlyActivePage,
-    userData,
+    localStorageData,
     isMultipleSelectionEnabled,
     multipleSelectionsData,
   } = React.useContext(AppContext);
   const {
     createQueue,
     updateCurrentlyActivePageData,
-    updatePageSortingOrder,
     toggleMultipleSelections,
     updateContextMenuData,
+    changePromptMenuData,
   } = React.useContext(AppUpdateContext);
 
   const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
   const [content, dispatch] = React.useReducer(reducer, {
     songsData: [],
     sortingOrder:
-      currentlyActivePage.data && currentlyActivePage.data.sortingOrder
-        ? currentlyActivePage.data.sortingOrder
-        : userData && userData.sortingStates.songsPage
-        ? userData.sortingStates.songsPage
-        : 'aToZ',
+      currentlyActivePage?.data?.sortingOrder ||
+      localStorageData?.sortingStates?.songsPage ||
+      'aToZ',
   });
   const songsContainerRef = React.useRef(null as HTMLDivElement | null);
   const { width, height } = useResizeObserver(songsContainerRef);
@@ -126,16 +118,19 @@ export const SongsPage = () => {
       window.api
         .getAllSongs(content.sortingOrder)
         .then((audioInfoArray) => {
-          if (audioInfoArray)
-            return audioInfoArray.data.length === 0
-              ? dispatch({
-                  type: 'SONGS_DATA',
-                  data: null,
-                })
-              : dispatch({
-                  type: 'SONGS_DATA',
-                  data: audioInfoArray.data,
-                });
+          if (audioInfoArray) {
+            if (audioInfoArray.data.length === 0)
+              dispatch({
+                type: 'SONGS_DATA',
+                data: null,
+              });
+            else
+              dispatch({
+                type: 'SONGS_DATA',
+                data: audioInfoArray.data,
+              });
+          }
+          return undefined;
         })
         .catch((err) => console.error(err)),
     [content.sortingOrder]
@@ -172,31 +167,40 @@ export const SongsPage = () => {
   }, [fetchSongsData]);
 
   React.useEffect(() => {
-    updatePageSortingOrder('sortingStates.songsPage', content.sortingOrder);
+    storage.sortingStates.setSortingStates('songsPage', content.sortingOrder);
   }, [content.sortingOrder]);
 
   const addNewSongs = React.useCallback(() => {
-    window.api
-      .addMusicFolder(content.sortingOrder)
-      .then((songs) => {
-        const relevantSongsData: AudioInfo[] = songs.map((song) => {
-          return {
-            title: song.title,
-            songId: song.songId,
-            artists: song.artists,
-            duration: song.duration,
-            palette: song.palette,
-            path: song.path,
-            artworkPaths: song.artworkPaths,
-            addedDate: song.addedDate,
-            isAFavorite: song.isAFavorite,
-            isBlacklisted: song.isBlacklisted,
-          };
-        });
-        dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
-      })
-      .catch((err) => console.error(err));
-  }, [content.sortingOrder]);
+    changePromptMenuData(
+      true,
+      <AddMusicFoldersPrompt
+        onSuccess={(songs) => {
+          const relevantSongsData: AudioInfo[] = songs.map((song) => {
+            return {
+              title: song.title,
+              songId: song.songId,
+              artists: song.artists,
+              duration: song.duration,
+              palette: song.palette,
+              path: song.path,
+              artworkPaths: song.artworkPaths,
+              addedDate: song.addedDate,
+              isAFavorite: song.isAFavorite,
+              isBlacklisted: song.isBlacklisted,
+            };
+          });
+          return dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
+        }}
+        onFailure={(err) => console.error(err)}
+      />
+    );
+  }, [changePromptMenuData]);
+
+  const selectAllHandler = useSelectAllHandler(
+    content.songsData,
+    'songs',
+    'songId'
+  );
 
   const songs = React.useCallback(
     (props: { index: number; style: React.CSSProperties }) => {
@@ -218,7 +222,7 @@ export const SongsPage = () => {
             key={index}
             index={index}
             isIndexingSongs={
-              userData !== undefined && userData.preferences.songIndexing
+              localStorageData?.preferences.isSongIndexingEnabled
             }
             title={title}
             songId={songId}
@@ -229,17 +233,31 @@ export const SongsPage = () => {
             path={path}
             isAFavorite={isAFavorite}
             isBlacklisted={isBlacklisted}
+            selectAllHandler={selectAllHandler}
           />
         </div>
       );
     },
-    [content.songsData, userData]
+    [
+      content.songsData,
+      localStorageData?.preferences.isSongIndexingEnabled,
+      selectAllHandler,
+    ]
   );
 
   return (
-    <MainContainer className="main-container appear-from-bottom songs-list-container !h-full overflow-hidden !pb-0">
+    <MainContainer
+      className="main-container appear-from-bottom songs-list-container !h-full overflow-hidden !pb-0"
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
+    >
       <>
-        <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium  text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium  text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">
             Songs{' '}
             <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
@@ -369,7 +387,10 @@ export const SongsPage = () => {
             )}
           </div>
         </div>
-        <div className="songs-container h-full flex-1" ref={songsContainerRef}>
+        <div
+          className="songs-container appear-from-bottom h-full flex-1 delay-100"
+          ref={songsContainerRef}
+        >
           {content.songsData && content.songsData.length > 0 && (
             <List
               itemCount={content.songsData.length}
@@ -377,6 +398,7 @@ export const SongsPage = () => {
               width={width || '100%'}
               height={height || 450}
               overscanCount={10}
+              className="appear-from-bottom delay-100"
               initialScrollOffset={
                 currentlyActivePage.data?.scrollTopOffset ?? 0
               }

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ReactElement } from 'react';
 import Button, { ButtonProps } from './Button';
 
@@ -14,7 +13,7 @@ const SensitiveActionConfirmPrompt = (
   const { title, confirmButton, content } = props;
   return (
     <>
-      <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
+      <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
         {title}
       </div>
       <div className="description">{content}</div>

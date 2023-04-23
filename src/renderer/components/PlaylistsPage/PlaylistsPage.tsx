@@ -6,9 +6,13 @@
 /* eslint-disable import/prefer-default-export */
 import React, { CSSProperties, useContext } from 'react';
 import { FixedSizeGrid as Grid } from 'react-window';
+
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import storage from 'renderer/utils/localStorage';
+
 import { Playlist } from './Playlist';
 import NewPlaylistPrompt from './NewPlaylistPrompt';
 import Button from '../Button';
@@ -18,25 +22,21 @@ import Dropdown from '../Dropdown';
 export const PlaylistsPage = () => {
   const {
     currentlyActivePage,
-    userData,
+    localStorageData,
     isMultipleSelectionEnabled,
     multipleSelectionsData,
   } = useContext(AppContext);
   const {
     changePromptMenuData,
     updateContextMenuData,
-    updatePageSortingOrder,
     updateCurrentlyActivePageData,
     toggleMultipleSelections,
   } = useContext(AppUpdateContext);
   const [playlists, setPlaylists] = React.useState([] as Playlist[]);
-  const [sortingOrder, setSortingOrder] = React.useState(
-    // eslint-disable-next-line no-nested-ternary
-    (currentlyActivePage.data && currentlyActivePage.data.sortingOrder
-      ? currentlyActivePage.data.sortingOrder
-      : userData && userData.sortingStates.playlistsPage
-      ? userData.sortingStates.playlistsPage
-      : 'aToZ') as PlaylistSortTypes
+  const [sortingOrder, setSortingOrder] = React.useState<PlaylistSortTypes>(
+    currentlyActivePage?.data?.sortingOrder ||
+      localStorageData?.sortingStates?.playlistsPage ||
+      'aToZ'
   );
 
   const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
@@ -82,9 +82,14 @@ export const PlaylistsPage = () => {
   }, [fetchPlaylistData]);
 
   React.useEffect(() => {
-    updatePageSortingOrder('sortingStates.playlistsPage', sortingOrder);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    storage.sortingStates.setSortingStates('playlistsPage', sortingOrder);
   }, [sortingOrder]);
+
+  const selectAllHandler = useSelectAllHandler(
+    playlists,
+    'playlist',
+    'playlistId'
+  );
 
   const row = React.useCallback(
     (props: {
@@ -107,13 +112,14 @@ export const PlaylistsPage = () => {
               isArtworkAvailable={playlist.isArtworkAvailable}
               artworkPaths={playlist.artworkPaths}
               key={playlist.playlistId}
+              selectAllHandler={selectAllHandler}
             />
           </div>
         );
       }
       return <div style={style} />;
     },
-    [noOfColumns, playlists]
+    [noOfColumns, playlists, selectAllHandler]
   );
 
   const createNewPlaylist = React.useCallback(
@@ -145,9 +151,16 @@ export const PlaylistsPage = () => {
           e.pageY
         )
       }
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
     >
       <>
-        <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">
             Playlists{' '}
             <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
@@ -213,11 +226,12 @@ export const PlaylistsPage = () => {
         </div>
 
         <div
-          className="playlists-container flex h-full flex-wrap"
+          className="playlists-container appear-from-bottom flex h-full flex-wrap delay-100"
           ref={containerRef}
         >
           {playlists && playlists.length > 0 && (
             <Grid
+              className="appear-from-bottom delay-100"
               columnCount={noOfColumns || 5}
               columnWidth={itemWidth}
               rowCount={noOfRows || 5}

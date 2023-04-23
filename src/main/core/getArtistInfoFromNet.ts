@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* eslint-disable no-await-in-loop */
 import stringSimilarity, { ReturnTypeEnums } from 'didyoumean2';
 
@@ -97,6 +98,15 @@ const getArtistInfoFromLastFM = async (
   }
 };
 
+const validDeezerArtistImageUrlRegex = /\/artist\/\w+\//;
+
+const getAValidDeezerArtistImage = (imageUrl: string) => {
+  const isValid = validDeezerArtistImageUrlRegex.test(imageUrl);
+
+  if (isValid) return imageUrl;
+  return undefined;
+};
+
 const getArtistArtworksFromNet = async (artist: SavableArtist) => {
   if (artist.onlineArtworkPaths) return artist.onlineArtworkPaths;
   const isConnectedToInternet = checkIfConnectedToInternet();
@@ -115,18 +125,35 @@ const getArtistArtworksFromNet = async (artist: SavableArtist) => {
       ) as DeezerArtistInfo | null;
 
       if (closestResult) {
-        return {
-          picture_small:
-            closestResult?.picture_small ||
+        const picture_small = getAValidDeezerArtistImage(
+          closestResult?.picture_small ||
             closestResult?.picture_medium ||
-            closestResult.picture_big ||
-            closestResult.picture_xl,
-          picture_medium:
-            closestResult?.picture_medium ||
-            closestResult.picture_big ||
-            closestResult.picture_xl ||
-            closestResult?.picture_small,
-        };
+            closestResult?.picture_big ||
+            closestResult?.picture_xl
+        );
+        const picture_medium = getAValidDeezerArtistImage(
+          closestResult?.picture_medium ||
+            closestResult?.picture_big ||
+            closestResult?.picture_xl ||
+            closestResult?.picture_small
+        );
+
+        if (picture_small && picture_medium)
+          return {
+            picture_small,
+            picture_medium,
+          };
+        log(
+          `Artist artwork for ${artist.artistId} from deezer is a placeholder image.`,
+          {
+            images: [
+              closestResult?.picture_small,
+              closestResult?.picture_medium,
+              closestResult?.picture_big,
+              closestResult?.picture_xl,
+            ],
+          }
+        );
       }
     }
   }
@@ -165,10 +192,10 @@ const getArtistInfoFromNet = async (
           } as ArtistInfoFromNet;
         }
         log(
-          `====== ERROR OCCURRED WHEN FETCHING ARTIST ARTWORKS FORM DEEZER NETWORK OR FETCHING ARTIST INFO FROM LAST_FM NETWORK. ======`
+          `ERROR OCCURRED WHEN FETCHING ARTIST ARTWORKS FROM DEEZER NETWORK OR FETCHING ARTIST INFO FROM LAST_FM NETWORK.`
         );
         throw new Error(
-          'ERROR OCCURRED WHEN FETCHING ARTIST ARTWORKS FORM DEEZER NETWORK OR FETCHING ARTIST INFO FROM LAST_FM NETWORK.'
+          'ERROR OCCURRED WHEN FETCHING ARTIST ARTWORKS FROM DEEZER NETWORK OR FETCHING ARTIST INFO FROM LAST_FM NETWORK.'
         );
       }
     }

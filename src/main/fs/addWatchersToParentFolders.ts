@@ -31,27 +31,40 @@ const parentFolderWatcherFunction = async (
   }
 };
 
-const addWatcherToParentFolder = (folderPath: string) => {
+const addWatcherToParentFolder = (parentFolderPath: string) => {
   try {
     const abortController = new AbortController();
     const watcher = fsSync.watch(
-      folderPath,
+      parentFolderPath,
       {
         signal: abortController.signal,
         recursive: true,
       },
       (eventType, filename) => parentFolderWatcherFunction(eventType, filename)
     );
+    log(
+      'Added watcher to a parent folder successfully.',
+      { parentFolderPath },
+      'WARN'
+    );
     watcher.addListener('error', (e) =>
       log(`ERROR OCCURRED WHEN WATCHING A FOLDER.`, { e }, 'ERROR')
     );
-    saveAbortController(folderPath, abortController);
+    watcher.addListener('close', () =>
+      log(
+        `Successfully closed the parent folder watcher.`,
+        { parentFolderPath },
+        'WARN'
+      )
+    );
+    saveAbortController(parentFolderPath, abortController);
   } catch (error) {
     log(`ERROR OCCURRED WHEN WATCHING A FOLDER.`, { error }, 'ERROR');
     throw error;
   }
 };
 
+/* Parent folder watchers only watch for folder modifications (not file modifications) inside the parent folder. */
 const addWatchersToParentFolders = async () => {
   const { musicFolders } = getUserData();
 
@@ -60,13 +73,13 @@ const addWatchersToParentFolders = async () => {
   log(`${parentFolderPaths.length} parent folders of music folders found.`);
 
   if (Array.isArray(parentFolderPaths) && parentFolderPaths.length > 0) {
-    for (let i = 0; i < parentFolderPaths.length; i += 1) {
+    for (const parentFolderPath of parentFolderPaths) {
       try {
-        addWatcherToParentFolder(parentFolderPaths[i]);
+        addWatcherToParentFolder(parentFolderPath);
       } catch (error) {
         log(
           `ERROR OCCURRED WHEN ADDING WATCHER TO '${path.basename(
-            parentFolderPaths[i]
+            parentFolderPath
           )}' PARENT FOLDER.`,
           { error },
           'ERROR'

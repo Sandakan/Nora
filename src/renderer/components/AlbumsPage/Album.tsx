@@ -14,8 +14,8 @@ import Button from '../Button';
 interface AlbumProp extends Album {
   // eslint-disable-next-line react/no-unused-prop-types
   index: number;
-  // eslint-disable-next-line react/require-default-props
   className?: string;
+  selectAllHandler?: (_upToId?: string) => void;
 }
 
 export const Album = (props: AlbumProp) => {
@@ -148,19 +148,11 @@ export const Album = (props: AlbumProp) => {
 
   const showAlbumInfoPage = React.useCallback(
     () =>
-      currentlyActivePage.pageTitle === 'AlbumInfo' &&
-      currentlyActivePage.data &&
-      currentlyActivePage.data.albumId === props.albumId
-        ? changeCurrentActivePage('Home')
-        : changeCurrentActivePage('AlbumInfo', {
-            albumId: props.albumId,
-          }),
-    [
-      changeCurrentActivePage,
-      currentlyActivePage.data,
-      currentlyActivePage.pageTitle,
-      props.albumId,
-    ]
+      currentlyActivePage?.data?.albumId !== props.albumId &&
+      changeCurrentActivePage('AlbumInfo', {
+        albumId: props.albumId,
+      }),
+    [changeCurrentActivePage, currentlyActivePage?.data, props.albumId]
   );
 
   const isAMultipleSelection = React.useMemo(() => {
@@ -231,7 +223,7 @@ export const Album = (props: AlbumProp) => {
       {
         label: 'Hr',
         isContextMenuItemSeperator: true,
-        handlerFunction: () => true,
+        handlerFunction: null,
       },
       {
         label: 'Info',
@@ -239,7 +231,7 @@ export const Album = (props: AlbumProp) => {
         handlerFunction: showAlbumInfoPage,
       },
       {
-        label: isMultipleSelectionEnabled ? 'Unselect' : 'Select',
+        label: isAMultipleSelection ? 'Unselect' : 'Select',
         iconName: 'checklist',
         handlerFunction: () => {
           if (isMultipleSelectionEnabled) {
@@ -249,24 +241,29 @@ export const Album = (props: AlbumProp) => {
               isAMultipleSelection ? 'remove' : 'add'
             );
           }
-          return toggleMultipleSelections(
-            !isMultipleSelectionEnabled,
-            'album',
-            [props.albumId]
-          );
+          return toggleMultipleSelections(!isAMultipleSelection, 'album', [
+            props.albumId,
+          ]);
         },
       },
+      // {
+      //   label: 'Select/Unselect All',
+      //   iconName: 'checklist',
+      //   isDisabled: !props.selectAllHandler,
+      //   handlerFunction: () =>
+      //     props.selectAllHandler && props.selectAllHandler(),
+      // },
     ];
   }, [
     addNewNotifications,
     addToQueueForMultipleSelections,
     isAMultipleSelection,
     isMultipleSelectionEnabled,
-    multipleSelectionsData,
+    multipleSelectionsData.multipleSelections.length,
+    multipleSelectionsData.selectionType,
     playAlbumSongs,
     playAlbumSongsForMultipleSelections,
-    props.albumId,
-    props.songs,
+    props,
     queue.queue,
     showAlbumInfoPage,
     toggleMultipleSelections,
@@ -287,7 +284,7 @@ export const Album = (props: AlbumProp) => {
   return (
     <div
       // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
-      className={`album appear-from-bottom h-68 group mr-6 mb-2 flex w-48 flex-col justify-between overflow-hidden rounded-md p-4 ${
+      className={`album appear-from-bottom h-68 group mb-2 mr-6 flex w-48 flex-col justify-between overflow-hidden rounded-md p-4 ${
         props.className ?? ''
       } ${
         isAMultipleSelection
@@ -304,7 +301,9 @@ export const Album = (props: AlbumProp) => {
         )
       }
       onClick={(e) => {
-        if (
+        if (e.getModifierState('Shift') === true && props.selectAllHandler)
+          props.selectAllHandler(props.albumId);
+        else if (
           isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'album'
         )
@@ -313,14 +312,7 @@ export const Album = (props: AlbumProp) => {
             'album',
             isAMultipleSelection ? 'remove' : 'add'
           );
-        else if (e.getModifierState('Shift') === true) {
-          toggleMultipleSelections(!isMultipleSelectionEnabled, 'album');
-          updateMultipleSelections(
-            props.albumId,
-            'album',
-            isAMultipleSelection ? 'remove' : 'add'
-          );
-        } else showAlbumInfoPage();
+        else showAlbumInfoPage();
       }}
     >
       <div className="album-cover-and-play-btn-container relative h-[70%] cursor-pointer overflow-hidden">
@@ -358,7 +350,11 @@ export const Album = (props: AlbumProp) => {
         }`}
       >
         <Button
-          className="album-title pointer !m-0 !block w-full truncate !rounded-none !border-0 !p-0 !text-left text-xl outline-1 outline-offset-1 hover:underline focus-visible:!outline"
+          className={`album-title pointer !m-0 !block w-full truncate !rounded-none !border-0 !p-0 !text-left text-xl outline-1 outline-offset-1 hover:underline focus-visible:!outline ${
+            isAMultipleSelection
+              ? '!text-font-color-black dark:!text-font-color-black'
+              : ''
+          }`}
           label={props.title}
           clickHandler={showAlbumInfoPage}
         />

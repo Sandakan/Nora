@@ -68,7 +68,7 @@ export default (props: NewPlaylistPromptProp) => {
           className="aspect-square w-full max-w-[15rem] rounded-xl shadow-lg"
         />
         <Button
-          className="artwork-update-btn absolute -bottom-4 -right-8 mr-0 aspect-square rounded-full border-none !bg-background-color-3 transition-[background] hover:!bg-font-color-highlight  dark:!bg-dark-background-color-2 dark:hover:!bg-dark-background-color-3 dark:hover:text-font-color-black"
+          className="artwork-update-btn absolute -bottom-4 -right-8 mr-0 aspect-square rounded-full border-none !bg-background-color-3 outline-1 outline-offset-1 transition-[background] hover:!bg-font-color-highlight focus-visible:!outline dark:!bg-dark-background-color-2 dark:hover:!bg-dark-background-color-3 dark:hover:text-font-color-black"
           iconName="edit"
           iconClassName="group:hover:text-font-color-black dark:group:hover:text-font-color-black mr-0"
           clickHandler={() =>
@@ -90,13 +90,16 @@ export default (props: NewPlaylistPromptProp) => {
         placeholder="Playlist Name"
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => e.stopPropagation()}
+        onKeyDown={(e) => {
+          e.stopPropagation();
+          if (e.key === 'Enter') createNewPlaylist(e.currentTarget.value);
+        }}
         autoFocus
       />
       <Button
         label="Add Playlist"
         iconName="add"
-        className="!mr-0 mt-6 cursor-pointer justify-center !bg-background-color-3 p-2 !py-3 !px-8 text-lg !text-font-color-black dark:!bg-dark-background-color-3 dark:text-font-color-black"
+        className="!mr-0 mt-6 cursor-pointer justify-center !bg-background-color-3 p-2 !px-8 !py-3 text-lg !text-font-color-black dark:!bg-dark-background-color-3 dark:text-font-color-black"
         clickHandler={() => createNewPlaylist(input)}
       />
     </div>

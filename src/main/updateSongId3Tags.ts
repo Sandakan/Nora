@@ -23,13 +23,12 @@ import log from './log';
 import {
   dataUpdateEvent,
   getSongsOutsideLibraryData,
-  // eslint-disable-next-line import/named
   updateSongsOutsideLibraryData,
 } from './main';
 import { generateRandomId } from './utils/randomId';
 import {
   createTempArtwork,
-  removeSongArtwork,
+  removeArtwork,
   storeArtworks,
 } from './other/artworks';
 import generatePalette from './other/generatePalette';
@@ -208,8 +207,10 @@ const manageArtistDataUpdates = (
       })
     );
   }
+
+  const updatedArtists = artists.filter((artist) => artist.songs.length > 0);
   return {
-    updatedArtists: artists,
+    updatedArtists,
     artistsWithIds,
     artistsWithoutIds,
     unlinkedArtists,
@@ -317,8 +318,10 @@ const manageGenreDataUpdates = (
       })
     );
   }
+
+  const updatedGenres = genres.filter((genre) => genre.songs.length > 0);
   return {
-    updatedGenres: genres,
+    updatedGenres,
     updatedSongData: prevSongData,
     genresWithIds,
     genresWithoutIds,
@@ -341,18 +344,31 @@ const manageAlbumDataUpdates = (
       // album in the song is available in the library.
       if (prevSongData.album?.albumId !== newSongData.album.albumId) {
         // song album changed to some other album in the library.
-        for (let c = 0; c < albums.length; c += 1) {
-          if (albums[c].albumId === prevSongData.album?.albumId) {
-            albums[c].songs = albums[c].songs.filter(
+        for (let i = 0; i < albums.length; i += 1) {
+          if (albums[i].albumId === prevSongData.album?.albumId) {
+            albums[i].songs = albums[i].songs.filter(
               (z) => z.songId !== songId
             );
           }
-          if (albums[c].albumId === newSongData.album.albumId) {
-            albums[c].artists = prevSongData.artists;
-            albums[c].songs.push({ title: prevSongData.title, songId });
+          if (albums[i].albumId === newSongData.album.albumId) {
+            if (prevSongData.artists && albums[i].artists) {
+              albums[i].artists = albums[i].artists?.filter(
+                (d) =>
+                  !prevSongData.artists?.some((e) => e.artistId === d.artistId)
+              );
+            }
+            if (newSongData.artists) {
+              albums[i].artists?.push(
+                ...newSongData.artists.map((x) => ({
+                  name: x.name,
+                  artistId: x.artistId as string,
+                }))
+              );
+            }
+            albums[i].songs.push({ title: prevSongData.title, songId });
             prevSongData.album = {
-              name: albums[c].title,
-              albumId: albums[c].albumId,
+              name: albums[i].title,
+              albumId: albums[i].albumId,
             };
           }
         }
@@ -396,7 +412,8 @@ const manageAlbumDataUpdates = (
     }
   }
   // song didn't have any album before
-  return { updatedAlbums: albums, updatedSongData: prevSongData };
+  const updatedAlbums = albums.filter((album) => album.songs.length > 0);
+  return { updatedAlbums, updatedSongData: prevSongData };
 };
 
 const manageArtworkUpdates = async (
@@ -422,7 +439,7 @@ const manageArtworkUpdates = async (
       // had an artwork before
       prevSongData.isArtworkAvailable = false;
 
-      await removeSongArtwork(songPrevArtworkPaths).catch((err) =>
+      await removeArtwork(songPrevArtworkPaths).catch((err) =>
         log(
           `ERROR OCCURRED WHEN TRYING TO REMOVE SONG ARTWORK OF '${songId}'.`,
           { err },

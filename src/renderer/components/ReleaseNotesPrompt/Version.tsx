@@ -43,10 +43,10 @@ const Version = (props: VersionProp) => {
         <>
           {' '}
           <h3 className="mb-2 px-4 text-lg">New Features and Updates</h3>
-          <ul className="notes list-disc px-8 font-light text-[hsla(0,0%,0%,0.8)] marker:text-background-color-3 dark:text-[hsla(0,0%,100%,0.8)] dark:marker:text-dark-background-color-3">
+          <ul className="notes list-disc px-8 font-light text-[hsla(0,0%,0%,0.8)] marker:text-font-color-highlight dark:text-[hsla(0,0%,100%,0.8)] dark:marker:text-dark-font-color-highlight">
             {notes.new.map((note, index) => (
               <VersionNote
-                key={`feature-${index}`}
+                key={`${version}-feature-${index}`}
                 note={note.note}
                 artworkPath={note.artworkPath}
               />
@@ -57,10 +57,10 @@ const Version = (props: VersionProp) => {
       {Array.isArray(notes.fixed) && notes.fixed.length > 0 && (
         <>
           <h3 className="mb-2 px-4 text-lg">Fixes and Improvements</h3>
-          <ul className="notes list-disc px-8 font-light text-[hsla(0,0%,0%,0.8)] marker:text-background-color-3 dark:text-[hsla(0,0%,100%,0.8)] dark:marker:text-dark-background-color-3">
+          <ul className="notes list-disc px-8 font-light text-[hsla(0,0%,0%,0.8)] marker:text-font-color-highlight dark:text-[hsla(0,0%,100%,0.8)] dark:marker:text-dark-font-color-highlight">
             {notes.fixed.map((note, index) => (
               <VersionNote
-                key={`fix-${index}`}
+                key={`${version}-fix-${index}`}
                 note={note.note}
                 artworkPath={note.artworkPath}
               />
@@ -71,10 +71,10 @@ const Version = (props: VersionProp) => {
       {Array.isArray(notes.knownIssues) && notes.knownIssues.length > 0 && (
         <>
           <h3 className="mb-2 px-4 text-lg">Known Issues and Bugs</h3>
-          <ul className="notes list-disc px-8 font-light text-[hsla(0,0%,0%,0.8)] marker:text-background-color-3 dark:text-[hsla(0,0%,100%,0.8)] dark:marker:text-dark-background-color-3">
+          <ul className="notes list-disc px-8 font-light text-[hsla(0,0%,0%,0.8)] marker:text-font-color-highlight dark:text-[hsla(0,0%,100%,0.8)] dark:marker:text-dark-font-color-highlight">
             {notes.knownIssues.map((note, index) => (
               <VersionNote
-                key={`issue-${index}`}
+                key={`${version}-issue-${index}`}
                 note={note.note}
                 artworkPath={note.artworkPath}
               />
@@ -82,7 +82,7 @@ const Version = (props: VersionProp) => {
           </ul>
         </>
       )}
-      <div className="mt-8 mb-4 h-[2px] w-full bg-[hsla(0,0%,80%,0.25)] group-last:invisible" />
+      <div className="mb-4 mt-8 h-[2px] w-full bg-[hsla(0,0%,80%,0.25)] group-last:invisible" />
     </div>
   );
 };

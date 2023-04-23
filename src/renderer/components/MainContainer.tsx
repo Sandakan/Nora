@@ -1,24 +1,29 @@
+/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/interactive-supports-focus */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react/require-default-props */
-import React, { ForwardedRef, MouseEvent, ReactElement } from 'react';
+import React, {
+  ForwardedRef,
+  MouseEvent,
+  ReactElement,
+  ReactNode,
+} from 'react';
 import ErrorBoundary from './ErrorBoundary';
 
 interface MainContainerProp {
-  children: ReactElement<any, any>;
+  children: ReactNode;
   className?: string;
   noDefaultStyles?: boolean;
   style?: React.CSSProperties;
   onContextMenu?: (
-    e: MouseEvent<HTMLDivElement, globalThis.MouseEvent>
+    _e: MouseEvent<HTMLDivElement, globalThis.MouseEvent>
   ) => void;
   onClick?: (
-    e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>
+    _e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>
   ) => void;
-  onScroll?: (e: React.UIEvent<HTMLDivElement, UIEvent>) => void;
+  onScroll?: (_e: React.UIEvent<HTMLDivElement, UIEvent>) => void;
   role?: React.AriaRole;
+  onKeyDown?: (_e: React.KeyboardEvent<HTMLDivElement>) => void;
+  focusable?: boolean;
 }
 
 const MainContainer = React.forwardRef(
@@ -29,9 +34,11 @@ const MainContainer = React.forwardRef(
       onContextMenu,
       style,
       onClick,
+      onKeyDown,
       role,
       onScroll,
       noDefaultStyles = false,
+      focusable = false,
     } = props;
     return (
       <ErrorBoundary>
@@ -44,9 +51,11 @@ const MainContainer = React.forwardRef(
           style={style ?? {}}
           onContextMenu={onContextMenu}
           onClick={onClick}
+          onKeyDown={onKeyDown}
           onScroll={onScroll}
-          role={role}
+          role={role ?? focusable ? 'none' : undefined}
           ref={ref}
+          tabIndex={focusable ? 1 : undefined}
         >
           {children}
         </div>

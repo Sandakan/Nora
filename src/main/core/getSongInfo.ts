@@ -4,13 +4,13 @@ import { getSongArtworkPath } from '../fs/resolveFilePaths';
 import log from '../log';
 import sortSongs from '../utils/sortSongs';
 
-const getSongInfo = (
+const getSongInfo = async (
   songIds: string[],
   sortType?: SongSortTypes,
   limit = songIds.length,
   preserveIdOrder = false,
   noBlacklistedSongs = false
-): SongData[] => {
+): Promise<SongData[]> => {
   log(
     `Fetching songs data from getSongInfo function about ${
       limit || songIds.length

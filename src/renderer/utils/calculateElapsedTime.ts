@@ -4,7 +4,11 @@ interface DateRounderResult {
   elapsed: number;
   type: ElapsedDateTypes;
   isFuture: boolean;
+  elapsedString: string;
 }
+
+const generateElapsedString = (elapsed: number, type: ElapsedDateTypes) =>
+  `${elapsed} ${type}${elapsed === 1 ? '' : 's'} ago`;
 
 const calculateElapsed = (
   currentDateInMs: number,
@@ -24,17 +28,47 @@ const calculateElapsed = (
     );
 
     if (elapsedSeconds < 60)
-      return { elapsed: elapsedSeconds, type: 'second', isFuture };
+      return {
+        elapsed: elapsedSeconds,
+        type: 'second',
+        isFuture,
+        elapsedString: generateElapsedString(elapsedSeconds, 'second'),
+      };
     if (elapsedMinutes < 60)
-      return { elapsed: elapsedMinutes, type: 'minute', isFuture };
+      return {
+        elapsed: elapsedMinutes,
+        type: 'minute',
+        isFuture,
+        elapsedString: generateElapsedString(elapsedMinutes, 'minute'),
+      };
     if (elapsedHours < 24)
-      return { elapsed: elapsedHours, type: 'hour', isFuture };
+      return {
+        elapsed: elapsedHours,
+        type: 'hour',
+        isFuture,
+        elapsedString: generateElapsedString(elapsedHours, 'hour'),
+      };
     if (elapsedDays < 30)
-      return { elapsed: elapsedDays, type: 'day', isFuture };
+      return {
+        elapsed: elapsedDays,
+        type: 'day',
+        isFuture,
+        elapsedString: generateElapsedString(elapsedDays, 'day'),
+      };
     if (elapsedMonths < 12)
-      return { elapsed: elapsedMonths, type: 'month', isFuture };
+      return {
+        elapsed: elapsedMonths,
+        type: 'month',
+        isFuture,
+        elapsedString: generateElapsedString(elapsedMonths, 'month'),
+      };
     if (elapsedYears > 0)
-      return { elapsed: elapsedYears, type: 'year', isFuture };
+      return {
+        elapsed: elapsedYears,
+        type: 'year',
+        isFuture,
+        elapsedString: generateElapsedString(elapsedYears, 'year'),
+      };
   }
   return undefined;
 };

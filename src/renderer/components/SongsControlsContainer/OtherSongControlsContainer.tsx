@@ -3,17 +3,16 @@
 import React, { useContext } from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
-import { getItem } from 'renderer/utils/localStorage';
 import Button from '../Button';
 
-let scrollIncrement = getItem('seekbarScrollInterval');
-document.addEventListener('localStorage', () => {
-  scrollIncrement = getItem('seekbarScrollInterval');
-});
-
 const OtherSongControlsContainer = () => {
-  const { currentlyActivePage, isMiniPlayer, isMuted, volume } =
-    useContext(AppContext);
+  const {
+    currentlyActivePage,
+    isMiniPlayer,
+    isMuted,
+    volume,
+    localStorageData,
+  } = useContext(AppContext);
   const {
     changeCurrentActivePage,
     updateMiniPlayerStatus,
@@ -33,13 +32,28 @@ const OtherSongControlsContainer = () => {
         true,
         [
           {
+            label: 'Equalizer',
+            iconName: 'graphic_eq',
+            iconClassName: 'material-icons-round-outlined mr-2',
+            handlerFunction: () =>
+              changeCurrentActivePage('Settings', {
+                scrollToId: '#equalizer',
+              }),
+          },
+          {
+            label: 'Adjust Playback Speed',
+            iconName: 'avg_pace',
+            iconClassName: 'material-icons-round-outlined mr-2',
+            handlerFunction: () =>
+              changeCurrentActivePage('Settings', {
+                scrollToId: '#playbackRateInterval',
+              }),
+          },
+          {
             label: 'Show Current Queue',
             iconName: 'table_rows',
             iconClassName: 'material-icons-round-outlined mr-2',
-            handlerFunction: () =>
-              currentlyActivePage.pageTitle === 'CurrentQueue'
-                ? changeCurrentActivePage('Home')
-                : changeCurrentActivePage('CurrentQueue'),
+            handlerFunction: () => changeCurrentActivePage('CurrentQueue'),
           },
           {
             label: 'Open Mini Player',
@@ -54,7 +68,6 @@ const OtherSongControlsContainer = () => {
     },
     [
       changeCurrentActivePage,
-      currentlyActivePage.pageTitle,
       isMiniPlayer,
       updateContextMenuData,
       updateMiniPlayerStatus,
@@ -102,11 +115,11 @@ const OtherSongControlsContainer = () => {
         clickHandler={() => toggleMutedState(!isMuted)}
       />
 
-      <div className="volume-slider-container mr-6 min-w-[4rem] max-w-[6rem] lg:mr-4">
+      <div className="volume-slider-container mr-4 min-w-[4rem] max-w-[6rem] lg:mr-4">
         <input
           type="range"
           id="volumeSlider"
-          className="relative float-left m-0 h-6 w-full appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:top-1/2 before:left-0 before:h-1 before:w-[var(--volume-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
+          className="relative float-left m-0 h-6 w-full appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--volume-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
           min="0"
           max="100"
           value={volume}
@@ -115,6 +128,8 @@ const OtherSongControlsContainer = () => {
           style={volumeBarCssProperties}
           title={Math.round(volume).toString()}
           onWheel={(e) => {
+            const scrollIncrement =
+              localStorageData?.preferences?.seekbarScrollInterval;
             const incrementValue =
               e.deltaY > 0 ? -scrollIncrement : scrollIncrement;
             let value = volume + incrementValue;
@@ -126,7 +141,7 @@ const OtherSongControlsContainer = () => {
           ref={volumeSliderRef}
         />
       </div>
-      <div className="other-settings-btn mr-3 hidden cursor-pointer items-center justify-center text-font-color-black text-opacity-60 dark:text-font-color-white lg:flex">
+      <div className="other-settings-btn mr-4 flex cursor-pointer items-center justify-center text-font-color-black text-opacity-60 dark:text-font-color-white">
         <span
           title="Other Settings"
           className="material-icons-round icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"

@@ -7,26 +7,20 @@ module.exports = {
     'react/react-in-jsx-scope': 'off',
     'prettier/prettier': 'off',
     // custom eslint rules
-    'react/require-default-props': [0],
+    'react/require-default-props': 'off',
     'no-nested-ternary': 'off',
     'import/no-cycle': 'off',
     'import/no-named-as-default': 'off',
-    'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+    'no-unused-vars': 'off',
     'no-console': 'off',
     'no-undef': 'off',
     'prefer-const': 'warn',
-    'import/extensions': ['off'],
-    'react/function-component-definition': ['off'],
-    'default-param-last': ['off'],
+    'import/extensions': 'off',
+    'react/function-component-definition': 'off',
+    'default-param-last': 'off',
+    'import/prefer-default-export': 'off',
     'import/no-unresolved': [2, { caseSensitive: false }],
     radix: ['warn', 'as-needed'],
-    // '@typescript-eslint/naming-convention': [
-    //   'warn',
-    //   {
-    //     leadingUnderscore: 'allowSingleOrDouble',
-    //     trailingUnderscore: 'allowSingleOrDouble',
-    //   },
-    // ],
     'react/no-unescaped-entities': [
       'error',
       {
@@ -46,6 +40,14 @@ module.exports = {
     'no-restricted-syntax': 'off',
     'import/named': 'off',
   },
+  overrides: [
+    {
+      files: ['**/*.d.ts'],
+      rules: {
+        'no-use-before-define': 'off',
+      },
+    },
+  ],
   parserOptions: {
     ecmaVersion: 2020,
     sourceType: 'module',

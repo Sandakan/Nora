@@ -1,5 +1,4 @@
 import stringSimilarity, { ReturnTypeEnums } from 'didyoumean2';
-// eslint-disable-next-line import/no-cycle
 import {
   getAlbumsData,
   getArtistsData,
@@ -22,7 +21,8 @@ import filterUniqueObjects from './utils/filterUniqueObjects';
 const getSongSearchResults = (
   songs: SavableSongData[],
   keyword: string,
-  filter: SearchFilters
+  filter: SearchFilters,
+  isPredictiveSearchEnabled = true
 ): SongData[] => {
   if (
     Array.isArray(songs) &&
@@ -30,15 +30,18 @@ const getSongSearchResults = (
     (filter === 'Songs' || filter === 'All')
   ) {
     const { songBlacklist } = getBlacklistData();
-    let returnValue = stringSimilarity(
-      keyword,
-      songs as unknown as Record<string, unknown>[],
-      {
-        caseSensitive: false,
-        matchPath: ['title'],
-        returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
-      }
-    ) as unknown as SavableSongData[];
+    let returnValue: SavableSongData[] = [];
+
+    if (isPredictiveSearchEnabled)
+      returnValue = stringSimilarity(
+        keyword,
+        songs as unknown as Record<string, unknown>[],
+        {
+          caseSensitive: false,
+          matchPath: ['title'],
+          returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
+        }
+      ) as unknown as SavableSongData[];
 
     if (returnValue.length === 0) {
       const regex = new RegExp(keyword, 'gim');
@@ -68,22 +71,26 @@ const getSongSearchResults = (
 const getArtistSearchResults = (
   artists: SavableArtist[],
   keyword: string,
-  filter: SearchFilters
+  filter: SearchFilters,
+  isPredictiveSearchEnabled = true
 ): Artist[] => {
   if (
     Array.isArray(artists) &&
     artists.length > 0 &&
     (filter === 'Artists' || filter === 'All')
   ) {
-    let returnValue = stringSimilarity(
-      keyword,
-      artists as unknown as Record<string, unknown>[],
-      {
-        caseSensitive: false,
-        matchPath: ['name'],
-        returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
-      }
-    ) as unknown as SavableArtist[];
+    let returnValue: SavableArtist[] = [];
+
+    if (isPredictiveSearchEnabled)
+      returnValue = stringSimilarity(
+        keyword,
+        artists as unknown as Record<string, unknown>[],
+        {
+          caseSensitive: false,
+          matchPath: ['name'],
+          returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
+        }
+      ) as unknown as SavableArtist[];
 
     if (returnValue.length === 0) {
       returnValue = artists.filter((artist) =>
@@ -102,22 +109,26 @@ const getArtistSearchResults = (
 const getAlbumSearchResults = (
   albums: SavableAlbum[],
   keyword: string,
-  filter: SearchFilters
+  filter: SearchFilters,
+  isPredictiveSearchEnabled = true
 ): Album[] => {
   if (
     Array.isArray(albums) &&
     albums.length > 0 &&
     (filter === 'Albums' || filter === 'All')
   ) {
-    let returnValue = stringSimilarity(
-      keyword,
-      albums as unknown as Record<string, unknown>[],
-      {
-        caseSensitive: false,
-        matchPath: ['title'],
-        returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
-      }
-    ) as unknown as SavableAlbum[];
+    let returnValue: SavableAlbum[] = [];
+
+    if (isPredictiveSearchEnabled)
+      returnValue = stringSimilarity(
+        keyword,
+        albums as unknown as Record<string, unknown>[],
+        {
+          caseSensitive: false,
+          matchPath: ['title'],
+          returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
+        }
+      ) as unknown as SavableAlbum[];
 
     if (returnValue.length === 0) {
       returnValue = albums.filter((album) =>
@@ -136,22 +147,26 @@ const getAlbumSearchResults = (
 const getPlaylistSearchResults = (
   playlists: SavablePlaylist[],
   keyword: string,
-  filter: SearchFilters
+  filter: SearchFilters,
+  isPredictiveSearchEnabled = true
 ): Playlist[] => {
   if (
     Array.isArray(playlists) &&
     playlists.length > 0 &&
     (filter === 'Playlists' || filter === 'All')
   ) {
-    let returnValue = stringSimilarity(
-      keyword,
-      playlists as unknown as Record<string, unknown>[],
-      {
-        caseSensitive: false,
-        matchPath: ['name'],
-        returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
-      }
-    ) as unknown as SavablePlaylist[];
+    let returnValue: SavablePlaylist[] = [];
+
+    if (isPredictiveSearchEnabled)
+      returnValue = stringSimilarity(
+        keyword,
+        playlists as unknown as Record<string, unknown>[],
+        {
+          caseSensitive: false,
+          matchPath: ['name'],
+          returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
+        }
+      ) as unknown as SavablePlaylist[];
 
     if (returnValue.length === 0) {
       returnValue = playlists.filter((playlist) =>
@@ -170,22 +185,26 @@ const getPlaylistSearchResults = (
 const getGenreSearchResults = (
   genres: SavableGenre[],
   keyword: string,
-  filter: SearchFilters
+  filter: SearchFilters,
+  isPredictiveSearchEnabled = true
 ): Genre[] => {
   if (
     Array.isArray(genres) &&
     genres.length > 0 &&
     (filter === 'Genres' || filter === 'All')
   ) {
-    let returnValue = stringSimilarity(
-      keyword,
-      genres as unknown as Record<string, unknown>[],
-      {
-        caseSensitive: false,
-        matchPath: ['name'],
-        returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
-      }
-    ) as unknown as SavableGenre[];
+    let returnValue: SavableGenre[] = [];
+
+    if (isPredictiveSearchEnabled)
+      returnValue = stringSimilarity(
+        keyword,
+        genres as unknown as Record<string, unknown>[],
+        {
+          caseSensitive: false,
+          matchPath: ['name'],
+          returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
+        }
+      ) as unknown as SavableGenre[];
 
     if (returnValue.length === 0) {
       returnValue = genres.filter((genre) =>
@@ -205,7 +224,8 @@ let recentSearchesTimeoutId: NodeJS.Timer;
 const search = (
   filter: SearchFilters,
   value: string,
-  updateSearchHistory = true
+  updateSearchHistory = true,
+  isIsPredictiveSearchEnabled = true
 ): SearchResult => {
   const songsData = getSongsData();
   const artistsData = getArtistsData();
@@ -224,15 +244,36 @@ const search = (
   for (let i = 0; i < keywords.length; i += 1) {
     const keyword = keywords[i];
 
-    const songsResults = getSongSearchResults(songsData, keyword, filter);
-    const artistsResults = getArtistSearchResults(artistsData, keyword, filter);
-    const albumsResults = getAlbumSearchResults(albumsData, keyword, filter);
+    const songsResults = getSongSearchResults(
+      songsData,
+      keyword,
+      filter,
+      isIsPredictiveSearchEnabled
+    );
+    const artistsResults = getArtistSearchResults(
+      artistsData,
+      keyword,
+      filter,
+      isIsPredictiveSearchEnabled
+    );
+    const albumsResults = getAlbumSearchResults(
+      albumsData,
+      keyword,
+      filter,
+      isIsPredictiveSearchEnabled
+    );
     const playlistsResults = getPlaylistSearchResults(
       playlistData,
       keyword,
-      filter
+      filter,
+      isIsPredictiveSearchEnabled
     );
-    const genresResults = getGenreSearchResults(genresData, keyword, filter);
+    const genresResults = getGenreSearchResults(
+      genresData,
+      keyword,
+      filter,
+      isIsPredictiveSearchEnabled
+    );
 
     songs.push(...songsResults);
     artists.push(...artistsResults);
@@ -248,7 +289,9 @@ const search = (
   genres = filterUniqueObjects(genres, 'genreId');
 
   log(
-    `Searching for results about '${value}' with ${filter} filter. Found ${
+    `Searching for results about '${value}' with ${filter} filter with Predictive Search ${
+      isIsPredictiveSearchEnabled ? 'enabled' : 'disabled'
+    }. Found ${
       songs.length + artists.length + albums.length + playlists.length
     } total results, ${songs.length} songs results, ${
       artists.length
@@ -309,81 +352,3 @@ const search = (
 };
 
 export default search;
-
-// function sortBySimilarity(keyword: string, arr: SongData[]): SongData[] {
-//   const key = keyword.split('');
-//   const results = arr.map((res) => {
-//     let score = 0;
-//     const value = res.title;
-//     const splitValue = value.split('');
-
-//     // full 100 marks if both are equal
-//     if (value === keyword) return { score: 100, res };
-
-//     // 10 marks if both lengths are equal.
-//     if (value.length === key.length) score += 20;
-
-//     // max of 40 marks. Scores avg out of value length if each letter of keyword found in value
-//     const avgMark1 = 40 / value.length;
-//     for (let i = 0; i < key.length; i += 1) {
-//       if (splitValue.some((x) => new RegExp(key[i], 'i').test(x)))
-//         score += avgMark1;
-//     }
-
-//     // max of 40 marks. Scores avg out of value length if each letter of keyword found in value
-//     const avgMark2 = 40 / keyword.length;
-//     let str = '';
-//     for (let i = 0; i < key.length; i += 1) {
-//       str += key[i];
-//       // eslint-disable-next-line @typescript-eslint/no-loop-func
-//       if (splitValue.some((x) => new RegExp(str, 'i').test(x)))
-//         score += avgMark2;
-//     }
-
-//     return { score, res };
-//   });
-//   return results
-//     .sort((a, b) =>
-//       // eslint-disable-next-line no-nested-ternary
-//       a.score !== b.score ? (a.score > b.score ? -1 : 1) : 0
-//     )
-//     .map((x) => x.res);
-// }
-
-// / / / / / / /  / / / / /
-
-// const key = 'like';
-
-// const data =
-//   'What it feels like, Lush Life, Me, Dear God, Habit, Sleep, Lonely, Count My Blessings, Is that What You Like now'.split(
-//     ','
-//   );
-// console.time('t');
-// const keyVal = key.split('');
-// const results = data.map((res) => {
-//   let score = 0;
-//   const result = res.split('');
-//   if (res === key) return { score: 100, res };
-//   if (result.length === keyVal.length) score += 20;
-
-//   const avgMark1 = 40 / result.length;
-//   for (let i = 0; i < keyVal.length; i += 1) {
-//     if (result.some((x) => new RegExp(keyVal[i], 'i').test(x)))
-//       score += avgMark1;
-//   }
-
-//   const avgMark12 = 40 / key.length;
-//   let str = '';
-//   for (let i = 0; i < key.length; i += 1) {
-//     str += key[i];
-//     if (result.some((x) => new RegExp(str, 'i').test(x))) score += avgMark12;
-//   }
-//   return { score, res };
-// });
-// console.timeEnd('t');
-
-// console.log(
-//   results.sort((a, b) =>
-//     a.score !== b.score ? (a.score > b.score ? -1 : 1) : 0
-//   )
-// );

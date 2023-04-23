@@ -2,31 +2,16 @@
 import path from 'path';
 import fs from 'fs/promises';
 import fsSync, { WatchEventType } from 'fs';
-import {
-  getUserData,
-  setUserData,
-  supportedMusicExtensions,
-} from '../filesystem';
+import { getUserData, supportedMusicExtensions } from '../filesystem';
 import log from '../log';
 import checkFolderForUnknownModifications from './checkFolderForUnknownContentModifications';
 import checkFolderForContentModifications from './checkFolderForContentModifications';
 import { dirExistsSync } from '../utils/dirExists';
 import checkForFolderModifications from './checkForFolderModifications';
 import { saveAbortController } from './controlAbortControllers';
+import { saveFolderStructures } from './parseFolderStructuresForSongPaths';
 
-const updateMusicFolderData = (folderData: MusicFolderData) => {
-  const { musicFolders } = getUserData();
-
-  for (let i = 0; i < musicFolders.length; i += 1) {
-    if (musicFolders[i].path === folderData.path) {
-      musicFolders[i] = folderData;
-      break;
-    }
-  }
-  setUserData('musicFolders', musicFolders);
-};
-
-const checkForFolderUpdates = async (folder: MusicFolderData) => {
+const checkForFolderUpdates = async (folder: FolderStructure) => {
   try {
     const folderStats = await fs.stat(folder.path);
     const hasFolderModifications =
@@ -39,8 +24,10 @@ const checkForFolderUpdates = async (folder: MusicFolderData) => {
           path.basename(folder.path) || path
         }' folder has unknown modifications.`
       );
+
       folder.stats.lastModifiedDate = folderStats.mtime;
-      updateMusicFolderData(folder);
+
+      saveFolderStructures([folder]);
       checkFolderForUnknownModifications(folder.path);
     } else
       log(
@@ -104,6 +91,11 @@ export const addWatcherToFolder = async (folder: MusicFolderData) => {
           abortController.signal
         )
     );
+    log(
+      'Added watcher to a folder successfully.',
+      { folderPath: folder.path },
+      'WARN'
+    );
     watcher.addListener('error', (e) =>
       log(`ERROR OCCURRED WHEN WATCHING A FOLDER.`, { e }, 'ERROR')
     );
@@ -121,19 +113,24 @@ export const addWatcherToFolder = async (folder: MusicFolderData) => {
   }
 };
 
-const addWatchersToFolders = async () => {
-  const { musicFolders } = getUserData();
-  log(`${musicFolders.length} music folders found in user data.`);
+const addWatchersToFolders = async (folders?: FolderStructure[]) => {
+  const musicFolders = folders ?? getUserData().musicFolders;
 
-  if (musicFolders) {
-    for (let i = 0; i < musicFolders.length; i += 1) {
-      const musicFolder = musicFolders[i];
+  if (folders === undefined)
+    log(`${musicFolders.length} music folders found in user data.`);
+
+  if (Array.isArray(musicFolders)) {
+    for (const musicFolder of musicFolders) {
       try {
         const doesFolderExist = dirExistsSync(musicFolder.path);
+
         if (doesFolderExist) {
           await checkForFolderUpdates(musicFolder);
           await addWatcherToFolder(musicFolder);
         } else checkForFolderModifications(path.basename(musicFolder.path));
+
+        if (musicFolder.subFolders.length > 0)
+          addWatchersToFolders(musicFolder.subFolders);
       } catch (error) {
         log(
           `ERROR OCCURRED WHEN ADDING WATCHER TO '${path.basename(

@@ -1,16 +1,4 @@
 /* eslint-disable no-use-before-define */
-/* eslint-disable promise/no-nesting */
-/* eslint-disable no-console */
-/* eslint-disable no-nested-ternary */
-/* eslint-disable consistent-return */
-/* eslint-disable import/prefer-default-export */
-/* eslint-disable import/no-cycle */
-/* eslint-disable import/no-cycle */
-/* eslint-disable prefer-const */
-/* eslint-disable no-await-in-loop */
-/* eslint-disable promise/always-return */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-param-reassign */
 import * as musicMetaData from 'music-metadata';
 
 import path from 'path';
@@ -20,6 +8,7 @@ import sharp from 'sharp';
 import { generateRandomId } from './utils/randomId';
 import log from './log';
 import {
+  DEFAULT_ARTWORK_SAVE_LOCATION,
   getAlbumsData,
   getArtistsData,
   getGenresData,
@@ -31,28 +20,66 @@ import {
 } from './filesystem';
 import { dataUpdateEvent, sendMessageToRenderer } from './main';
 import { storeArtworks } from './other/artworks';
-import generatePalette from './other/generatePalette';
 import getAssetPath from './utils/getAssetPath';
+// import { timeEnd, timeStart } from './utils/measureTimeUsage';
 
-export const generateDefaultSongCoverImgBuffer = async () =>
-  fs
-    .readFile(getAssetPath('images', 'webp', 'song_cover_default.webp'))
-    .then((res) => res)
-    .catch((err) =>
-      log(
-        `ERROR OCCURRED WHEN READING A FILE OF NAME 'song_cover_default.webp'.`,
-        { err },
-        'ERROR'
-      )
+let defaultSongCoverImgBuffer: Buffer;
+
+export const getDefaultSongCoverImgBuffer = async () => {
+  if (defaultSongCoverImgBuffer) return defaultSongCoverImgBuffer;
+
+  try {
+    const buffer = await sharp(
+      getAssetPath('images', 'webp', 'song_cover_default.webp')
+    )
+      .png()
+      .toBuffer();
+    defaultSongCoverImgBuffer = buffer;
+    return buffer;
+  } catch (error) {
+    log(
+      `ERROR OCCURRED WHEN READING A FILE OF NAME 'song_cover_default.webp'.`,
+      { error },
+      'ERROR'
     );
+    return undefined;
+  }
+};
 
-const generateCoverBuffer = async (
-  coverData: musicMetaData.IPicture[] | undefined
+export const generateCoverBuffer = async (
+  cover?: musicMetaData.IPicture[] | string,
+  noDefaultOnUndefined = false
 ) => {
-  if (coverData) {
-    if (coverData[0].format === 'image/webp') {
+  if (
+    (cover === undefined ||
+      (typeof cover !== 'string' && cover[0].data === undefined)) &&
+    noDefaultOnUndefined
+  )
+    return undefined;
+  if (cover) {
+    if (typeof cover === 'string') {
       try {
-        const buffer = await sharp(coverData[0].data).png().toBuffer();
+        const imgPath = path.join(DEFAULT_ARTWORK_SAVE_LOCATION, cover);
+        const isWebp = path.extname(imgPath) === '.webp';
+
+        const buffer = isWebp
+          ? await sharp(imgPath).png().toBuffer()
+          : await fs.readFile(imgPath);
+
+        return buffer;
+      } catch (error) {
+        log(
+          `ERROR OCCURRED WHEN TRYING TO GENERATE ARTWORK BUFFER.`,
+          { error },
+          'ERROR'
+        );
+        return getDefaultSongCoverImgBuffer();
+      }
+    }
+
+    if (cover[0].format === 'image/webp') {
+      try {
+        const buffer = await sharp(cover[0].data).png().toBuffer();
         return buffer;
       } catch (error) {
         log(
@@ -60,19 +87,24 @@ const generateCoverBuffer = async (
           { error },
           'WARN'
         );
-        return generateDefaultSongCoverImgBuffer();
+        return getDefaultSongCoverImgBuffer();
       }
     }
-    return coverData[0].data;
+
+    return cover[0].data;
   }
-  return generateDefaultSongCoverImgBuffer();
+
+  return getDefaultSongCoverImgBuffer();
 };
 
 let parseQueue: string[] = [];
 
 export const parseSong = async (
-  absoluteFilePath: string
+  absoluteFilePath: string,
+  noRendererMessages = false
 ): Promise<SongData | undefined> => {
+  // const start = timeStart();
+
   log(
     `Starting the parsing process of song '${path.basename(absoluteFilePath)}'.`
   );
@@ -81,8 +113,12 @@ export const parseSong = async (
   const albums = getAlbumsData();
   const genres = getGenresData();
 
+  // const start1 = timeEnd(start, 'Time to fetch songs,artists,albums,genres');
+
   const stats = await fs.stat(absoluteFilePath);
   const metadata = await musicMetaData.parseFile(absoluteFilePath);
+
+  // const start2 = timeEnd(start1, 'Time to fetch stats and parse metadata');
 
   if (
     Array.isArray(songs) &&
@@ -92,13 +128,20 @@ export const parseSong = async (
   ) {
     parseQueue.push(absoluteFilePath);
 
+    // timeEnd(start2, 'Time to start organizing metadata');
+
     const songTitle =
       metadata.common.title ||
       path.basename(absoluteFilePath).split('.')[0] ||
       'Unknown Title';
+
+    // const start3 = timeStart();
+
     const songId = generateRandomId();
 
-    const coverBuffer = await generateCoverBuffer(metadata.common.picture);
+    // const start4 = timeEnd(start3, 'Time to generate random id');
+
+    // const coverBuffer = await generateCoverBuffer(metadata.common.picture);
 
     const songArtworkPaths = await storeArtworks(
       songId,
@@ -106,12 +149,14 @@ export const parseSong = async (
       metadata.common?.picture?.at(0)?.data
     );
 
-    const palette = coverBuffer
-      ? await generatePalette(coverBuffer, false)
-      : undefined;
+    // const start6 = timeEnd(start4, 'Time to generate store artwork');
 
-    if (metadata.common.lyrics)
-      console.log(metadata.common.title, metadata.common.lyrics);
+    // const palette = await generatePalette(coverBuffer, false);
+
+    // const start7 = timeEnd(start6, 'Time to generate palette');
+
+    // if (metadata.common.lyrics)
+    //   console.log(metadata.common.title, metadata.common.lyrics);
 
     const songInfo: SavableSongData = {
       songId,
@@ -131,13 +176,13 @@ export const parseSong = async (
       genres: [],
       // albumArtist: metadata.common.albumartist || undefined,
       year: metadata.common?.year,
-      palette:
-        palette && palette.DarkVibrant && palette.LightVibrant
-          ? {
-              DarkVibrant: palette.DarkVibrant,
-              LightVibrant: palette.LightVibrant,
-            }
-          : undefined,
+      // palette:
+      //   palette && palette.DarkVibrant && palette.LightVibrant
+      //     ? {
+      //         DarkVibrant: palette.DarkVibrant,
+      //         LightVibrant: palette.LightVibrant,
+      //       }
+      //     : undefined,
       isAFavorite: false,
       isArtworkAvailable: !songArtworkPaths.isDefaultArtwork,
       path: absoluteFilePath,
@@ -149,6 +194,8 @@ export const parseSong = async (
       modifiedDate: stats ? stats.mtime.getTime() : undefined,
     };
 
+    // const start8 = timeEnd(start6, 'Time to create songInfo basic object');
+
     const { updatedAlbums, relevantAlbums, newAlbums } = manageAlbums(
       albums,
       songInfo.title,
@@ -159,11 +206,18 @@ export const parseSong = async (
       songInfo.year
     );
 
+    // const start9 = timeEnd(start8, 'Time to manage albums');
+
     if (songInfo.album)
       songInfo.album = {
         name: relevantAlbums[0].title,
         albumId: relevantAlbums[0].albumId,
       };
+
+    // const start10 = timeEnd(
+    //   start9,
+    //   'Time to update album data in songInfo object'
+    // );
 
     const { allArtists, relevantArtists, newArtists } = manageArtists(
       artists,
@@ -174,6 +228,8 @@ export const parseSong = async (
       relevantAlbums
     );
 
+    // const start11 = timeEnd(start10, 'Time to manage artists');
+
     if (songInfo.artists) {
       for (let x = 0; x < relevantArtists.length; x += 1) {
         for (let y = 0; y < songInfo.artists.length; y += 1) {
@@ -182,6 +238,11 @@ export const parseSong = async (
         }
       }
     }
+
+    // const start12 = timeEnd(
+    //   start11,
+    //   'Time to update artist data in songInfo object'
+    // );
 
     const { allGenres, relevantGenres, newGenres } = manageGenres(
       genres,
@@ -192,9 +253,16 @@ export const parseSong = async (
       songInfo.palette?.DarkVibrant
     );
 
+    // const start13 = timeEnd(start12, 'Time to manage genres');
+
     songInfo.genres = relevantGenres.map((genre) => {
       return { name: genre.name, genreId: genre.genreId };
     });
+
+    // const start14 = timeEnd(
+    //   start13,
+    //   'Time to update genre data in songInfo object'
+    // );
 
     songs.push(songInfo);
     log(
@@ -208,6 +276,10 @@ export const parseSong = async (
     dataUpdateEvent('songs/newSong', [songId]);
 
     parseQueue = parseQueue.filter((dir) => dir !== absoluteFilePath);
+
+    // timeEnd(start14, 'Time to reach end of the parsing process.');
+
+    // const start15 = timeEnd(start, 'Time to finish the parsing process.');
 
     if (newArtists.length > 0)
       dataUpdateEvent(
@@ -239,11 +311,21 @@ export const parseSong = async (
         'genres',
         relevantGenres.map((x) => x.genreId)
       );
-    sendMessageToRenderer(
-      `'${songTitle}' song added to the library.`,
-      'PARSE_SUCCESSFUL',
-      { songId }
-    );
+
+    if (!noRendererMessages)
+      sendMessageToRenderer(
+        `'${songTitle}' song added to the library.`,
+        'PARSE_SUCCESSFUL',
+        { songId }
+      );
+
+    // timeEnd(
+    //   start15,
+    //   'Time to finalize the data events of the parsing process.'
+    // );
+
+    // timeEnd(start, 'Total time taken for the parsing process.');
+
     return {
       ...songInfo,
       artworkPaths: songArtworkPaths,
