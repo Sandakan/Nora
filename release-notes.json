@@ -1,14 +1,259 @@
 {
   "latestVersion": {
-    "version": "1.2.0-stable",
+    "version": "2.0.0-stable",
     "phase": "stable",
-    "releaseDate": "2023 March 09",
-    "artwork": "/assets/other/release artworks/whats-new-v1.2.0-stable.webp",
+    "releaseDate": "2023 April 23",
+    "artwork": "/assets/other/release artworks/whats-new-v2.0.0-stable.webp",
     "importantNotes": [
-      "This release provides accessibility improvements throughout Nora."
+      "Installing this update would RESET the app to provide support for new features."
     ]
   },
   "versions": [
+    {
+      "version": "2.0.0-stable",
+      "artwork": "/assets/other/release artworks/whats-new-v2.0.0-stable.webp",
+      "releaseDate": "2023 April 23",
+      "importantNotes": [
+        "Installing this update would RESET the app to provide support for new features."
+      ],
+      "notes": {
+        "new": [
+          {
+            "note": "Added playback-only experimental support for audio formats like FLAC, AAC, and M4R."
+          },
+          {
+            "note": "Added support for viewing storage usage by the app."
+          },
+          {
+            "note": "Added experimental support for an improved folder structure."
+          },
+          {
+            "note": "Added experimental support for suggestions for duplicate artists and artists identified as single artists."
+          },
+          {
+            "note": "Added a new context option for the currently playing song artwork to the currently playing song's album."
+          },
+          {
+            "note": "Added a new banner to the SongTagsEditingPage when trying to edit song formats that are supported for playback only."
+          },
+          {
+            "note": "Added experimental support to generate a playlist cover automatically from the songs inside with the support to randomize the artworks as an additional feature."
+          },
+          {
+            "note": "Added new options to configure the automatically generated playlist cover in the Preferences section of Settings."
+          },
+          {
+            "note": "Added experimental support for an Audio Equalizer to the app."
+          },
+          {
+            "note": "Added a new prompt for the user to customize chosen folders before parsing them."
+          },
+          {
+            "note": "Added a new feature to reduce animations when the system is on battery power."
+          },
+          {
+            "note": "Added the 'Generate Palettes' button to the About section of the Settings to generate palettes on demand."
+          },
+          {
+            "note": "Added a new feature to change the playback speed of the player."
+          },
+          {
+            "note": "Added a new button to the right side of the app's footer for advanced playback options."
+          },
+          {
+            "note": "Added a new smooth scrolling feature to pages that directs users to specific parts of the page."
+          },
+          {
+            "note": "Added a new title next to the artwork in the queue to show the queue type."
+          },
+          {
+            "note": "Added support for responsive song cards in the Home."
+          },
+          {
+            "note": "Add a new transition effect for some icons."
+          },
+          {
+            "note": "Added support to toggle between predictive search and normal search."
+          },
+          {
+            "note": "Added support for highlighting more than one lyrics line at a time."
+          },
+          {
+            "note": "Added a new artwork filter for Deezer artist artworks to prevent showing artwork placeholders."
+          },
+          {
+            "note": "Added a new auto-scrolling feature for the Queue page to scroll to the currently playing song on song skip."
+          },
+          {
+            "note": "Added a new feature to show some info about the song to be played next in the currently playing song info container periodically."
+          }
+        ],
+        "fixed": [
+          {
+            "note": "Reduced the parsing time of a newly created library by around 30%."
+          },
+          {
+            "note": "Fixed a bug where the app theme will change when changing the system's theme even though the user didn't select to use the system theme in the app."
+          },
+          {
+            "note": "Fixed a bug where the theme of the taskbar playback control buttons changed with the app theme instead of the system theme."
+          },
+          {
+            "note": "Fixed a bug where users can't go to the same page with different data. For example, the user can't go to another artist's info page while staying on another artist's info page."
+          },
+          {
+            "note": "Migrated the Music Folders section from Settings to the Music Folders page in the sidebar."
+          },
+          {
+            "note": "Fixed a bug where Sidebar becomes cluttered in smaller resolutions."
+          },
+          {
+            "note": "Updated some texts in the SongTagsEditingPage."
+          },
+          {
+            "note": "Fixed a bug where users can save the same song tags again and again in the SongTagsEditingPage."
+          },
+          {
+            "note": "Improved directory handling by the app."
+          },
+          {
+            "note": "Reduced the brightness of background artwork."
+          },
+          {
+            "note": "Fixed a bug where error messages and stack traces aren't being added to the log file."
+          },
+          {
+            "note": "Fixed a bug where updating song id3 tags doesn't update album metadata."
+          },
+          {
+            "note": "Fixed a bug where the app doesn't check for updates right after the connection was established."
+          },
+          {
+            "note": "Fixed a bug where the focus state of a button persists even after the button is clicked."
+          },
+          {
+            "note": "Fixed a bug where SongTagsEditingPage allows checking for song online results even though the app isn't connected to the internet."
+          },
+          {
+            "note": "Fixed a bug where disabled buttons show a loading animation."
+          },
+          {
+            "note": "Fixed a bug where clicking the recent search results and clicking another element to go to another page and come back doesn't persist the clicked recent search result in the search page."
+          },
+          {
+            "note": "Fixed a bug where the user can't update the artwork of a playlist after creating it."
+          },
+          {
+            "note": "Fixed a bug where images aren't being shown on the app after they were updated due to caching."
+          },
+          {
+            "note": "Fixed a bug where the app could go into an infinite error loop if there were any playback errors that the app couldn't handle."
+          },
+          {
+            "note": "Fixed a bug where removing a song from an album with only one song doesn't remove the album."
+          },
+          {
+            "note": "Fixed some bugs related to sorting folders."
+          },
+          {
+            "note": "Fixed flickering issues on some components when they were being updated."
+          },
+          {
+            "note": "Fixed a bug where images show the alt text when hovered."
+          },
+          {
+            "note": "Increased the font weight of the text in the sidebar."
+          },
+          {
+            "note": "Fixed a bug where artist images shown next to the currently playing song cover aren't positioned correctly."
+          },
+          {
+            "note": "Fixed a bug in Metadata Editing Page where the album cover is always the current song cover."
+          },
+          {
+            "note": "Fixed a bug where selecting 'Add Selected' or 'Add All' when choosing song metadata results from the internet doesn't update the artists, albums, and genres I the editing page."
+          },
+          {
+            "note": "Improved accessibility in the Song Metadata Editor."
+          },
+          { "note": "Improved transitions in prompt menus." },
+          {
+            "note": "Fixed a bug where closing the prompt menu will flicker the menu."
+          },
+          {
+            "note": "Fixed a bug where clicking the Most Relevant Album doesn't open the relevant Album page."
+          },
+          {
+            "note": "Fixed a bug where artist names on the Song Info page aren't positioned properly."
+          },
+          {
+            "note": "Fixed some bugs related to customizing selected metadata prompt."
+          },
+          {
+            "note": "Fixed a bug where hovering over seek bars show an incorrect value."
+          },
+          {
+            "note": "Fixed a bug where the message 'No Synced Lyrics Found' persists after disabling the lyrics."
+          },
+          {
+            "note": "Added support for selecting multiple items by Shift + Click and select all by clicking Ctrl + A."
+          },
+          {
+            "note": "Fixed a bug where the loading element in a button isn't positioned correctly."
+          },
+          {
+            "note": "Improved accessibility in SongTagsEditingPage."
+          },
+          {
+            "note": "Fixed a bug where the F5 shortcut to reload doesn't work for other programs when Nora is opened."
+          },
+          {
+            "note": "Fixed a bug where resetting the app doesn't clear local storage data."
+          },
+          {
+            "note": "Reduced the space required to save listening data information by around 90%."
+          },
+          {
+            "note": "Fixed a bug where resetting the app doesn't remove the data related to blacklists."
+          },
+          {
+            "note": "Fixed a bug where Mini-player doesn't follow reduced motion."
+          },
+          {
+            "note": "Fixed a bug where adding a song to play next to the last song of the queue will not be played."
+          },
+          {
+            "note": "Fixed a bug where users can go to the same page repeatedly."
+          },
+          {
+            "note": "Fixed a bug where clicking a button to go to a specific page twice would direct users to Home."
+          },
+          {
+            "note": "Fixed a bug where folder modifications are not recognized in folder structures."
+          },
+          { "note": "Updated some styles in prompts." },
+          {
+            "note": "Updated some styles in the Release Notes prompt and open_source_licenses prompt."
+          },
+          {
+            "note": "Reordered buttons in the About section of Settings."
+          },
+          {
+            "note": "Fixed some security vulnerabilities in the app."
+          },
+          {
+            "note": "Added no of songs in a folder when selecting folders to be added to the library."
+          },
+          {
+            "note": "Fixed a bug where Img component try to fetch 404 requests repeatedly."
+          },
+          {
+            "note": "Fixed a bug where users can download lyrics in the lyrics editor even though the app is not connected to the internet."
+          }
+        ],
+        "knownIssues": []
+      }
+    },
     {
       "version": "1.2.0-stable",
       "artwork": "/assets/other/release artworks/whats-new-v1.2.0-stable.webp",

@@ -1,5 +1,3 @@
-/* eslint-disable no-use-before-define */
-/* eslint-disable no-unused-vars */
 import NodeID3 from 'node-id3';
 import { ReactElement, ReactNode } from 'react';
 import { ButtonProps } from 'renderer/components/Button';
@@ -402,6 +400,7 @@ declare global {
 
   interface FolderStructure extends MusicFolderData {
     subFolders: FolderStructure[];
+    noOfSongs?: number;
   }
 
   interface MusicFolder extends FolderStructure {

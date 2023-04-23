@@ -37,7 +37,6 @@ const Hyperlink = (props: HyperlinkProp) => {
   ]);
 
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
     <span
       className={`about-link w-fit cursor-pointer text-font-color-highlight-2 outline-1 outline-offset-1 hover:underline focus:!outline dark:text-dark-font-color-highlight-2 ${className}`}
       title={link}

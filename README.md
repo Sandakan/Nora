@@ -63,6 +63,10 @@ It packs a horizon of features including,
 
 <br><br>
 
+<br>
+
+![Latest Version Artwork](/assets/other/release%20artworks/whats-new-v2.0.0-stable.webp)
+
 Visit the [release notes](/changelog.md) to see what's new on the latest release.</p>
 
 <br>

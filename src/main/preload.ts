@@ -1,6 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable import/no-cycle */
-/* eslint-disable import/prefer-default-export */
 import { contextBridge, ipcRenderer } from 'electron';
 import { LastFMTrackInfoApi } from '../@types/last_fm_api';
 

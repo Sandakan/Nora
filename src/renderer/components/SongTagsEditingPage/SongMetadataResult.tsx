@@ -1,5 +1,3 @@
-/* eslint-disable react/require-default-props */
-/* eslint-disable no-unused-vars */
 import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';

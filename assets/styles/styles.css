@@ -133,6 +133,7 @@ html {
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: 'liga';
   user-select: none;
+  transition: font-variation-settings 0.15s ease-in-out;
 }
 
 .material-icons-round {

@@ -1,12 +1,4 @@
 /* eslint-disable promise/catch-or-return */
-/* eslint-disable no-unused-vars */
-/* eslint-disable react/jsx-no-useless-fragment */
-/* eslint-disable react/no-unescaped-entities */
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable no-nested-ternary */
-/* eslint-disable no-console */
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';

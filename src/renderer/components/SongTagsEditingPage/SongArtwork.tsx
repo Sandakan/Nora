@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import Button from '../Button';
 import Img from '../Img';
 

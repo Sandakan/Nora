@@ -84,6 +84,7 @@ const Img = (props: Props) => {
   } = props;
 
   const imgPropsRef = React.useRef<ImgProps>();
+  const errorCountRef = React.useRef(0);
 
   return (
     <img
@@ -91,9 +92,14 @@ const Img = (props: Props) => {
       alt={alt}
       className={`outline-1 outline-offset-4 focus-visible:!outline ${className}`}
       onError={(e) => {
-        if (!noFallbacks && e.currentTarget.src !== fallbackSrc)
-          e.currentTarget.src = fallbackSrc;
-        else e.currentTarget.src = DefaultImage;
+        if (errorCountRef.current < 3) {
+          errorCountRef.current += 1;
+
+          if (!noFallbacks && e.currentTarget.src !== fallbackSrc)
+            e.currentTarget.src = fallbackSrc;
+          else e.currentTarget.src = DefaultImage;
+        } else
+          window.api.sendLogs('maximum img fetch error count reached.', 'warn');
       }}
       onClick={onClick}
       title={

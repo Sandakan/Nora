@@ -31,18 +31,32 @@ export const getAllFoldersFromFolderStructures = (
   return folderData;
 };
 
-const getAllFilesFromFolderStructures = (
+export const getAllFilePathsFromFolder = (folderPath: string) => {
+  try {
+    const baseNames = fsSync.readdirSync(folderPath);
+    const filePaths = baseNames
+      .filter((baseName) => path.extname(baseName))
+      .map((baseName) => path.join(folderPath, baseName));
+
+    return filePaths;
+  } catch (error) {
+    log(
+      `Error occurred when getting file paths from '${path.basename(
+        folderPath
+      )}' folder`,
+      { error },
+      'ERROR'
+    );
+    return [];
+  }
+};
+
+export const getAllFilesFromFolderStructures = (
   folderStructures: FolderStructure[]
 ) => {
   const allFolders = getAllFoldersFromFolderStructures(folderStructures);
   const allFiles = allFolders
-    .map((folder) => {
-      const baseNames = fsSync.readdirSync(folder.path);
-      const filePaths = baseNames
-        .filter((baseName) => path.extname(baseName))
-        .map((baseName) => path.join(folder.path, baseName));
-      return filePaths;
-    })
+    .map((folder) => getAllFilePathsFromFolder(folder.path))
     .flat();
 
   return allFiles;

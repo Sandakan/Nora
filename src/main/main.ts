@@ -839,7 +839,6 @@ function addEventsToCache(
 
 function registerFileProtocol(
   request: { url: string },
-  // eslint-disable-next-line no-unused-vars
   callback: (arg: string) => void
 ) {
   const urlWithQueries = decodeURI(request.url).replace(

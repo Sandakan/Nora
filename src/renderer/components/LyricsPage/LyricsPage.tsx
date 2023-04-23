@@ -1,7 +1,5 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable react/no-array-index-key */
-/* eslint-disable promise/catch-or-return */
 import React, { useContext } from 'react';
 import debounce from 'renderer/utils/debounce';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
@@ -71,7 +69,8 @@ export const LyricsPage = () => {
         songPath: currentSongData.path,
         duration: currentSongData.duration,
       })
-      .then((res) => setLyrics(res));
+      .then((res) => setLyrics(res))
+      .catch((err) => console.error(err));
   }, [
     addNewNotifications,
     currentSongData.artists,
@@ -140,7 +139,8 @@ export const LyricsPage = () => {
         .finally(() => {
           setIsDisabled(false);
           setIsPending(false);
-        });
+        })
+        .catch((err) => console.error(err));
     },
     [
       currentSongData.artists,
@@ -172,7 +172,8 @@ export const LyricsPage = () => {
           'OFFLINE_ONLY'
         )
         .then((res) => setLyrics(res))
-        .finally(() => setIsDisabled(false));
+        .finally(() => setIsDisabled(false))
+        .catch((err) => console.error(err));
     },
     [
       currentSongData.artists,
@@ -221,7 +222,8 @@ export const LyricsPage = () => {
           .finally(() => {
             setIsPending(false);
             setIsDisabled(false);
-          });
+          })
+          .catch((err) => console.error(err));
       }
     },
     [addNewNotifications, currentSongData.path, lyrics]
@@ -244,7 +246,8 @@ export const LyricsPage = () => {
           'ONLINE_ONLY'
         )
         .then((res) => setLyrics(res))
-        .finally(() => setIsDisabled(false));
+        .finally(() => setIsDisabled(false))
+        .catch((err) => console.error(err));
     },
     [
       currentSongData.artists,

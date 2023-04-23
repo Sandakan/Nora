@@ -1,5 +1,6 @@
 import sortFolders from '../utils/sortFolders';
-import { getBlacklistData, getSongsData, getUserData } from '../filesystem';
+import { getSongsData, getUserData } from '../filesystem';
+import { isFolderBlacklisted } from '../utils/isBlacklisted';
 
 const getRelevantSongsofFolders = (folderPath: string) => {
   const songs = getSongsData();
@@ -19,8 +20,6 @@ const getRelevantSongsofFolders = (folderPath: string) => {
 const createFolderData = (
   folderStructures: FolderStructure[]
 ): MusicFolder[] => {
-  const { folderBlacklist } = getBlacklistData();
-
   const foldersData: MusicFolder[] = [];
 
   for (const structure of folderStructures) {
@@ -29,7 +28,7 @@ const createFolderData = (
       ...structure,
       subFolders: createFolderData(structure.subFolders),
       songIds,
-      isBlacklisted: folderBlacklist.includes(structure.path),
+      isBlacklisted: isFolderBlacklisted(structure.path),
     };
 
     if (structure.subFolders.length > 0) {

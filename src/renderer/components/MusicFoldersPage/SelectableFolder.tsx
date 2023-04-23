@@ -42,7 +42,7 @@ const SelectableFolder = (props: Props) => {
           <Checkbox
             className="!mx-2 !my-0"
             id={structure.path}
-            isChecked={structure.isSelected}
+            isChecked={structure.isSelected ?? false}
             checkedStateUpdateFunction={(state) =>
               updateFolders(state, structure)
             }
@@ -51,7 +51,8 @@ const SelectableFolder = (props: Props) => {
           <div className="ml-4">
             <p className="">{folderName}</p>
             <p className=" text-xs opacity-50">
-              {subFolders.length} sub-folders
+              {subFolders.length} sub-folders &bull; {structure.noOfSongs ?? 0}{' '}
+              songs
             </p>
           </div>
         </div>

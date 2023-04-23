@@ -155,7 +155,7 @@ const ReleaseNotesPrompt = () => {
               </div>
             )}
             {isOnline && latestUpdatedInfo.artwork && (
-              <div className="version-artwork-container mb-4 p-4">
+              <div className="version-artwork-container mb-4 p-4 empty:mb-0 empty:p-0">
                 <Img
                   src={`${packageFile.urls.raw_repository_url}master${latestUpdatedInfo.artwork}`}
                   fallbackSrc={latestUpdatedInfo.artwork}

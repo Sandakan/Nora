@@ -8,7 +8,7 @@
 
 <br>
 
-- ### **v2.0.0-stable - ( 20<sup>th</sup> of April 2023 )**
+- ### **v2.0.0-stable - ( 23<sup>th</sup> of April 2023 )**
 
   - ### 🎉 New Features and Features
 
@@ -32,6 +32,7 @@
     - Added a new button to the right side of the app's footer for advanced playback options.
     - Added a new smooth scrolling feature to pages that directs users to specific parts of the page.
     - Added a new title next to the artwork in the queue to show the queue type.
+    - Add a new transition effect for some icons.
     - Added support for responsive song cards in the Home.
     - Added support to toggle between predictive search and normal search.
     - Added support for highlighting more than one lyrics line at a time. Fixes #135.
@@ -104,6 +105,8 @@
     - Updated some styles in the Release Notes prompt and open_source_licenses prompt.
     - Reordered buttons in the About section of Settings.
     - Fixed some security vulnerabilities in the app.
+    - Fixed a bug where Img component try to fetch 404 requests repeatedly.
+    - Fixed a bug where users can download lyrics in the lyrics editor even though the app is not connected to the internet.
 
   <!-- - ### 🐜 Known Issues and Bugs -->
 

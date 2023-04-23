@@ -634,7 +634,6 @@ export default function App() {
   const fadeOutIntervalId = React.useRef(undefined as NodeJS.Timer | undefined);
   const fadeInIntervalId = React.useRef(undefined as NodeJS.Timer | undefined);
   const fadeOutAudio = React.useCallback(() => {
-    // console.log('volume on fade out', contentRef.current.volume);
     if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
     if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
     fadeOutIntervalId.current = setInterval(() => {
@@ -652,7 +651,6 @@ export default function App() {
   }, []);
 
   const fadeInAudio = React.useCallback(() => {
-    // console.log('volume on fade in', contentRef.current.volume);
     if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
     if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
     fadeInIntervalId.current = setInterval(() => {
@@ -887,7 +885,6 @@ export default function App() {
     const handleSkipForwardClickWithParams = () =>
       handleSkipForwardClick('PLAYER_SKIP');
 
-    // player.addEventListener('seeking', managePlayerNotStalledStatus);
     player.addEventListener('canplay', managePlayerNotStalledStatus);
     player.addEventListener('canplaythrough', managePlayerNotStalledStatus);
     player.addEventListener('loadeddata', managePlayerNotStalledStatus);
@@ -926,7 +923,6 @@ export default function App() {
     return () => {
       toggleSongPlayback(false);
       clearInterval(intervalId);
-      // player.removeEventListener('seeking', managePlayerNotStalledStatus);
       player.removeEventListener('canplay', managePlayerNotStalledStatus);
       player.removeEventListener(
         'canplaythrough',
@@ -1107,7 +1103,6 @@ export default function App() {
 
   const updateNotifications = React.useCallback(
     (
-      // eslint-disable-next-line no-unused-vars
       callback: (currentNotifications: AppNotification[]) => AppNotification[]
     ) => {
       const currentNotifications = content.notificationPanelData.notifications;
@@ -1251,7 +1246,6 @@ export default function App() {
             </span>
           </div>
         );
-        // info.delay = 60000;
       }
       if (
         (messageCode === 'SONG_REMOVE_PROCESS_UPDATE' ||
@@ -1857,7 +1851,6 @@ export default function App() {
       pageY?: number,
       contextMenuData?: ContextMenuAdditionalData
     ) => {
-      // console.log('pageX', pageX, 'pageY', pageY);
       dispatch({
         type: 'CONTEXT_MENU_DATA_CHANGE',
         data: {

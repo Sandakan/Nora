@@ -1,6 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import Button from 'renderer/components/Button';
 import Img from 'renderer/components/Img';
@@ -37,7 +34,7 @@ const SongAlbumInput = (props: Props) => {
   } = props;
   return (
     <div className="tag-input mb-6 flex w-[45%] min-w-[10rem] flex-col">
-      <label htmlFor="song-album-name-id3-tag">Album Name</label>
+      <label htmlFor="songAlbumNameId3Tag">Album Name</label>
       <div className="mt-2 w-[90%] rounded-xl border-2 border-background-color-2 p-2 dark:border-dark-background-color-2">
         <div className="album-names-container p-2 empty:py-2 empty:after:block empty:after:w-full empty:after:text-center  empty:after:text-[#ccc] empty:after:content-['No_album_selected_for_this_song.'] dark:empty:after:text-[#ccc]">
           {songAlbum && (
@@ -86,6 +83,7 @@ const SongAlbumInput = (props: Props) => {
         </div>
         <input
           type="search"
+          id="songAlbumNameId3Tag"
           className="mt-4 w-full rounded-xl border-2 border-transparent bg-background-color-2 p-2 transition-colors focus:border-font-color-highlight dark:bg-dark-background-color-2 dark:focus:border-dark-font-color-highlight"
           placeholder="Search for albums here."
           value={albumKeyword}
