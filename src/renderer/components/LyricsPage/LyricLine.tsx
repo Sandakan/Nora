@@ -55,7 +55,7 @@ const LyricLine = (props: LyricProp) => {
   return (
     <div
       style={{
-        animationDelay: `${250 + 25 * (index + 1)}ms`,
+        animationDelay: `${100 + 20 * (index + 1)}ms`,
       }}
       title={
         syncedLyrics

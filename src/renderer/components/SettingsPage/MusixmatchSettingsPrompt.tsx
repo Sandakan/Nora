@@ -84,7 +84,7 @@ const MusixmatchSettingsPrompt = () => {
         />
       </div>
 
-      <ul className="mt-4 ml-4 list-inside list-disc text-sm font-medium text-font-color-crimson">
+      <ul className="ml-4 mt-4 list-inside list-disc text-sm font-medium text-font-color-crimson">
         {token.trim().length !== 54 && token.trim().length !== 0 && (
           <li>
             user token should be a string with{' '}

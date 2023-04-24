@@ -24,7 +24,6 @@ import ResetAppConfirmationPrompt from '../../HomePage/ResetAppConfirmationPromp
 import SensitiveActionConfirmPrompt from '../../SensitiveActionConfirmPrompt';
 import AppShortcutsPrompt from '../AppShortcutsPrompt';
 import AppStats from './AppStats';
-import AddMusicFolderPrompt from '../../MusicFoldersPage/AddMusicFolderPrompt';
 
 const AboutSettings = () => {
   const { isDarkMode } = React.useContext(AppContext);
@@ -50,8 +49,8 @@ const AboutSettings = () => {
   }, [currentVersionReleasedDate]);
 
   return (
-    <>
-      <div className="title-container mt-1 mb-4 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+    <li className="main-container about-container">
+      <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         <span className="material-icons-round-outlined mr-2">info</span>
         About
       </div>
@@ -146,11 +145,11 @@ const AboutSettings = () => {
             />
           </li>
         </ul>
-        <div className="mt-12 flex items-center justify-center">
+        <div className="mt-12 flex flex-wrap items-center justify-center px-8">
           <Button
             iconName="new_releases"
             iconClassName="material-icons-round-outlined"
-            className="release-notes-prompt-btn"
+            className="release-notes-prompt-btn mb-4"
             label="Release Notes"
             clickHandler={() =>
               changePromptMenuData(
@@ -162,7 +161,7 @@ const AboutSettings = () => {
           />
           <Button
             iconName="receipt_long"
-            className="open-source-licenses-btn"
+            className="open-source-licenses-btn mb-4"
             label="Open source licences"
             clickHandler={() =>
               changePromptMenuData(
@@ -171,7 +170,7 @@ const AboutSettings = () => {
                   <div className="mb-4 w-full text-center text-3xl font-medium">
                     Open Source Licenses
                   </div>
-                  <div className="relative max-h-full w-full overflow-y-auto whitespace-pre-wrap px-4">
+                  <div className="relative max-h-full w-full overflow-y-auto whitespace-pre-wrap px-4 text-center text-sm">
                     {openSourceLicenses}
                   </div>
                 </>,
@@ -182,26 +181,9 @@ const AboutSettings = () => {
           <Button
             iconName="description"
             iconClassName="material-icons-round-outlined"
-            className="about-link block w-fit cursor-pointer"
+            className="about-link mb-4 block w-fit cursor-pointer"
             label="Open Log file"
             clickHandler={() => window.api.openLogFile()}
-          />
-        </div>
-
-        <AppStats />
-
-        <div className="about-buttons-container mb-4 flex flex-wrap justify-center">
-          <Button
-            label="Reset App"
-            iconName="auto_mode"
-            className="mb-4 rounded-2xl"
-            clickHandler={() =>
-              changePromptMenuData(
-                true,
-                <ResetAppConfirmationPrompt />,
-                'confirm-app-reset'
-              )
-            }
           />
           <Button
             label="Open Devtools"
@@ -222,6 +204,33 @@ const AboutSettings = () => {
             clickHandler={() => window.api.generatePalettes()}
           />
           <Button
+            label="App Shortcuts"
+            iconName="trail_length_short"
+            className="mb-4 rounded-2xl"
+            iconClassName="material-icons-round-outlined"
+            clickHandler={() =>
+              changePromptMenuData(true, <AppShortcutsPrompt />)
+            }
+          />
+        </div>
+
+        <AppStats />
+
+        <div className="about-buttons-container mb-4 flex flex-wrap justify-center">
+          <Button
+            label="Reset App"
+            iconName="auto_mode"
+            className="mb-4 rounded-2xl"
+            clickHandler={() =>
+              changePromptMenuData(
+                true,
+                <ResetAppConfirmationPrompt />,
+                'confirm-app-reset'
+              )
+            }
+          />
+
+          <Button
             label="Clear History"
             iconName="clear"
             className="mb-4 rounded-2xl"
@@ -229,7 +238,7 @@ const AboutSettings = () => {
               changePromptMenuData(
                 true,
                 <SensitiveActionConfirmPrompt
-                  title="Confrim the action to clear Song History"
+                  title="Confirm the action to clear Song History"
                   content={
                     <div>
                       You wouldn't be able to see what you have listened
@@ -263,24 +272,6 @@ const AboutSettings = () => {
                 />
               );
             }}
-          />
-          <Button
-            label="App Shortcuts"
-            iconName="trail_length_short"
-            className="mb-4 rounded-2xl"
-            iconClassName="material-icons-round-outlined"
-            clickHandler={() =>
-              changePromptMenuData(true, <AppShortcutsPrompt />)
-            }
-          />
-          <Button
-            label="Get Folder Info"
-            iconName="folder"
-            className="mb-4 rounded-2xl"
-            iconClassName="material-icons-round-outlined"
-            clickHandler={() =>
-              changePromptMenuData(true, <AddMusicFolderPrompt />)
-            }
           />
         </div>
         <div className="about-description mt-4 text-sm font-light">
@@ -333,7 +324,7 @@ const AboutSettings = () => {
           </div>
         </div>
       </div>
-    </>
+    </li>
   );
 };
 

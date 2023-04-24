@@ -32,7 +32,7 @@ const SongGenresInput = (props: Props) => {
             songGenres.map((genre) => (
               <span
                 key={genre.name}
-                className="mr-2 mb-2 flex w-fit items-center rounded-2xl bg-background-color-3 px-3 py-1 text-center text-font-color-black dark:bg-dark-background-color-3 dark:text-font-color-black"
+                className="mb-2 mr-2 flex w-fit items-center rounded-2xl bg-background-color-3 px-3 py-1 text-center text-font-color-black dark:bg-dark-background-color-3 dark:text-font-color-black"
               >
                 <Button
                   iconName="close"
@@ -70,7 +70,7 @@ const SongGenresInput = (props: Props) => {
             {genreResults.map((x) => (
               <li
                 key={x.genreId ?? x.name}
-                className="box-content cursor-pointer border-b-[1px] border-background-color-2 py-2 pr-4 pl-6 font-light last:border-b-0 only:border-b-0 hover:bg-background-color-2 dark:border-dark-background-color-2 dark:hover:bg-dark-background-color-2"
+                className="box-content cursor-pointer border-b-[1px] border-background-color-2 py-2 pl-6 pr-4 font-light last:border-b-0 only:border-b-0 hover:bg-background-color-2 dark:border-dark-background-color-2 dark:hover:bg-dark-background-color-2"
                 onClick={() => {
                   updateSongInfo((prevData) => {
                     const genres =

@@ -98,7 +98,7 @@ const Notification = (props: AppNotification) => {
                 label={button.label}
                 iconName={button.iconName}
                 iconClassName={button.iconClassName}
-                className={`mt-2 mb-1 mr-0 ml-4 border-2 px-2 py-1 font-medium text-background-color-3 dark:border-background-color-2 dark:text-background-color-2 ${button.className}`}
+                className={`mb-1 ml-4 mr-0 mt-2 border-2 px-2 py-1 font-medium text-background-color-3 dark:border-background-color-2 dark:text-background-color-2 ${button.className}`}
                 clickHandler={(e, setIsDisabled, setIsPending) => {
                   removeNotification();
                   button.clickHandler(e, setIsDisabled, setIsPending);
@@ -108,7 +108,7 @@ const Notification = (props: AppNotification) => {
           </div>
         )}
         {type === 'WITH_PROGRESS_BAR' && progressBarData && (
-          <div className="notification-loading-bar relative mt-2 ml-4 h-1 w-[97%] flex-grow overflow-hidden rounded-sm bg-font-color-highlight/10 before:absolute before:h-1 before:w-[var(--loading-bar-progress)] before:rounded-sm before:bg-font-color-highlight/50 before:content-[''] dark:bg-dark-font-color-highlight/20 dark:before:bg-dark-font-color-highlight" />
+          <div className="notification-loading-bar relative ml-4 mt-2 h-1 w-[97%] flex-grow overflow-hidden rounded-sm bg-font-color-highlight/10 before:absolute before:h-1 before:w-[var(--loading-bar-progress)] before:rounded-sm before:bg-font-color-highlight/50 before:content-[''] dark:bg-dark-font-color-highlight/20 dark:before:bg-dark-font-color-highlight" />
         )}
       </div>
       <div className="close-button-container relative flex w-0 flex-col items-center justify-center overflow-hidden transition-[width] delay-200 group-hover:w-12 ">

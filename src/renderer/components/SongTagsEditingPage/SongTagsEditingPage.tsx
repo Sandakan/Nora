@@ -1,18 +1,10 @@
 /* eslint-disable promise/catch-or-return */
-/* eslint-disable no-unused-vars */
-/* eslint-disable react/jsx-no-useless-fragment */
-/* eslint-disable react/no-unescaped-entities */
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable no-nested-ternary */
-/* eslint-disable no-console */
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 
 import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
-import hasDataChanged from 'renderer/utils/hasDataChanged';
+import hasDataChanged, { isDataChanged } from 'renderer/utils/hasDataChanged';
 
 import Button from '../Button';
 import MainContainer from '../MainContainer';
@@ -160,7 +152,7 @@ function SongTagsEditingPage() {
                   title: album.title,
                   albumId: album.albumId,
                   noOfSongs: album.songs.length,
-                  artworkPaths: album.artworkPaths,
+                  artworkPath: album?.artworkPaths?.artworkPath,
                 }))
             );
           else setAlbumResults([]);
@@ -213,17 +205,18 @@ function SongTagsEditingPage() {
     (keyword: string) => setGenreKeyword(keyword),
     []
   );
-  const updateMetadataKeywords = React.useCallback(
-    (metadataKeywords: MetadataKeywords) => {
-      if (metadataKeywords.albumKeyword)
-        setAlbumKeyword(metadataKeywords.albumKeyword);
-      if (metadataKeywords.artistKeyword)
-        setArtistKeyword(metadataKeywords.artistKeyword);
-      if (metadataKeywords.genreKeyword)
-        setGenreKeyword(metadataKeywords.genreKeyword);
-    },
-    []
-  );
+
+  // const updateMetadataKeywords = React.useCallback(
+  //   (metadataKeywords: MetadataKeywords) => {
+  //     if (metadataKeywords.albumKeyword)
+  //       setAlbumKeyword(metadataKeywords.albumKeyword);
+  //     if (metadataKeywords.artistKeyword)
+  //       setArtistKeyword(metadataKeywords.artistKeyword);
+  //     if (metadataKeywords.genreKeyword)
+  //       setGenreKeyword(metadataKeywords.genreKeyword);
+  //   },
+  //   []
+  // );
 
   const fetchSongDataFromNet = React.useCallback(() => {
     if (songInfo.title) {
@@ -233,17 +226,10 @@ function SongTagsEditingPage() {
           songTitle={songInfo.title}
           songArtists={songInfo.artists?.map((x) => x.name) ?? []}
           updateSongInfo={updateSongInfo}
-          updateMetadataKeywords={updateMetadataKeywords}
         />
       );
     }
-  }, [
-    songInfo.title,
-    songInfo.artists,
-    changePromptMenuData,
-    updateSongInfo,
-    updateMetadataKeywords,
-  ]);
+  }, [songInfo.title, songInfo.artists, changePromptMenuData, updateSongInfo]);
 
   const saveTags = (
     _: unknown,
@@ -314,11 +300,11 @@ function SongTagsEditingPage() {
   const resetDataToDefaults = () => {
     const data = hasDataChanged(defaultValues, songInfo);
     const entries = Object.entries(data);
-    if (!Object.values(data).every((x: boolean) => x)) {
+    if (!Object.values(data).every((x: boolean) => !x)) {
       changePromptMenuData(
         true,
         <div>
-          <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
+          <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
             Confrim Before Resetting Song Data to Default
           </div>
           <div className="description">
@@ -326,7 +312,7 @@ function SongTagsEditingPage() {
             you edited on this screen.
           </div>
           <div className="mt-4 pl-4">
-            {(entries.filter((x) => !x[1]) ?? []).map(([x]) => (
+            {(entries.filter((x) => x[1]) ?? []).map(([x]) => (
               <div>
                 {x.toUpperCase()} :
                 <span className="ml-2 font-medium text-font-color-crimson">
@@ -370,10 +356,7 @@ function SongTagsEditingPage() {
   };
 
   const areThereDataChanges = React.useMemo(
-    () =>
-      Object.values(hasDataChanged(defaultValues, songInfo)).every(
-        (x: boolean) => x
-      ),
+    () => isDataChanged(defaultValues, songInfo),
     [defaultValues, songInfo]
   );
 
@@ -390,7 +373,7 @@ function SongTagsEditingPage() {
       <>
         {(songId || songPath) && isMetadataEditingSupported && (
           <>
-            <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+            <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
               Song Metadata Editor{' '}
               {!isKnownSource && (
                 <span
@@ -460,7 +443,6 @@ function SongTagsEditingPage() {
               <SongAlbumInput
                 albumKeyword={albumKeyword}
                 albumResults={albumResults}
-                songArtworkPath={songInfo.artworkPath}
                 updateAlbumKeyword={updateAlbumKeyword}
                 updateSongInfo={updateSongInfo}
                 songAlbum={songInfo.album}
@@ -495,7 +477,7 @@ function SongTagsEditingPage() {
                 label="Save Tags"
                 iconName="save"
                 iconClassName="material-icons-round-outlined"
-                isDisabled={areThereDataChanges}
+                isDisabled={!areThereDataChanges}
                 className="update-song-tags-btn"
                 clickHandler={saveTags}
               />
@@ -504,7 +486,7 @@ function SongTagsEditingPage() {
                 label="Reset to Defaults"
                 iconName="restart_alt"
                 className="reset-song-tags-btn"
-                isDisabled={areThereDataChanges}
+                isDisabled={!areThereDataChanges}
                 clickHandler={resetDataToDefaults}
               />
             </div>
@@ -525,14 +507,14 @@ function SongTagsEditingPage() {
             </p>
             <p className="mt-2 px-8 font-light">
               Nora currently doesn't support editing song metadata in{' '}
-              <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
+              <span className="font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
                 {pathExt}
               </span>{' '}
               format.
             </p>
             <p className="px-8 font-light">
               Currently only{' '}
-              <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
+              <span className="font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
                 mp3
               </span>{' '}
               format is supported.

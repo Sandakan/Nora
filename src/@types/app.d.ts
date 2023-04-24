@@ -1,5 +1,3 @@
-/* eslint-disable no-use-before-define */
-/* eslint-disable no-unused-vars */
 import NodeID3 from 'node-id3';
 import { ReactElement, ReactNode } from 'react';
 import { ButtonProps } from 'renderer/components/Button';
@@ -167,7 +165,7 @@ declare global {
 
   // ? Song listening data related types
 
-  interface SavableSongListeningData {
+  interface SongListeningData {
     /** song id of the relevant song */
     songId: string;
     /** no of song skips.
@@ -180,39 +178,12 @@ declare global {
      * Incremented if the user added the song to any playlist. */
     inNoOfPlaylists?: number;
     /** an array of listening records for each year. */
-    listens: SavableYearlyListeningRate[];
-  }
-
-  interface SongListeningData {
-    songId: string;
-    skips?: number;
-    fullListens?: number;
-    inNoOfPlaylists?: number;
     listens: YearlyListeningRate[];
   }
 
-  interface SavableYearlyListeningRate {
-    year: number;
-    /**
-     * An array with strings holding no of listens of the song in each day of each month of an year.
-     *
-     * * Array can have maximum of 12 strings each representing a month.
-     *
-     * * If the array has ["2_0","","1_3"], it means that user has listened to this song 2 times January, 0 times in February, and total of 4 times in March. In this example, other 9 months is considered as if the user didn't listen to this song.
-     *
-     * * String contains no of listens of each of a month seperated by an underscore(_).
-     *
-     * * Empty string says that user didn't listen to this song in that relevant month.
-     *
-     * * if the string contains "2_0_3", that means user listened to this song 2 times on 1st, 0 times on 2nd and 3 times on 3rd day in that month.
-     */
-    months: string[];
-  }
-  type MonthlyListens = number[];
-
   interface YearlyListeningRate {
     year: number;
-    months: MonthlyListens[];
+    listens: [number, number][];
   }
 
   type ListeningDataTypes =
@@ -235,6 +206,7 @@ declare global {
     isShuffling: boolean;
     isMiniPlayer: boolean;
     isPlayerStalled: boolean;
+    playbackRate: number;
   }
 
   type SongSkipReason = 'USER_SKIP' | 'PLAYER_SKIP';
@@ -385,7 +357,7 @@ declare global {
 
   interface UserData {
     theme: AppThemeData;
-    musicFolders: MusicFolderData[];
+    musicFolders: FolderStructure[];
     preferences: {
       autoLaunchApp: boolean;
       openWindowAsHiddenOnSystemStart: boolean;
@@ -400,13 +372,6 @@ declare global {
     windowDiamensions: {
       mainWindow?: WindowCordinates;
       miniPlayer?: WindowCordinates;
-    };
-    sortingStates: {
-      songsPage?: SongSortTypes;
-      artistsPage?: ArtistSortTypes;
-      playlistsPage?: PlaylistSortTypes;
-      albumsPage?: AlbumSortTypes;
-      genresPage?: GenreSortTypes;
     };
     recentSearches: string[];
     customMusixmatchUserToken?: string;
@@ -435,12 +400,13 @@ declare global {
 
   interface FolderStructure extends MusicFolderData {
     subFolders: FolderStructure[];
+    noOfSongs?: number;
   }
 
-  interface MusicFolder {
-    folderData: MusicFolderData;
+  interface MusicFolder extends FolderStructure {
     songIds: string[];
     isBlacklisted: boolean;
+    subFolders: MusicFolder[];
   }
 
   // ? LocalStorage related types
@@ -456,6 +422,10 @@ declare global {
     disableBackgroundArtworks: boolean;
     noUpdateNotificationForNewUpdate: string;
     defaultPageOnStartUp: DefaultPages;
+    enableArtworkFromSongCovers: boolean;
+    shuffleArtworkFromSongCovers: boolean;
+    removeAnimationsOnBatteryPower: boolean;
+    isPredictiveSearchEnabled: boolean;
   }
 
   interface CurrentSong {
@@ -474,6 +444,16 @@ declare global {
     isRepeating: RepeatTypes;
     currentSong: CurrentSong;
     volume: Volume;
+    playbackRate: number;
+  }
+
+  interface Equalizer {
+    sixtyHertz: number;
+    hundredFiftyHertz: number;
+    fourHundredHertz: number;
+    oneKiloHertz: number;
+    twoPointFourKiloHertz: number;
+    fifteenKiloHertz: number;
   }
 
   interface IgnoredDuplicates {
@@ -482,12 +462,22 @@ declare global {
     genres: string[][];
   }
 
+  interface SortingStates {
+    songsPage?: SongSortTypes;
+    artistsPage?: ArtistSortTypes;
+    playlistsPage?: PlaylistSortTypes;
+    albumsPage?: AlbumSortTypes;
+    genresPage?: GenreSortTypes;
+  }
+
   interface LocalStorage {
     preferences: Preferences;
     playback: Playback;
     queue: Queue;
     ignoredSeparateArtists: string[];
     ignoredDuplicates: IgnoredDuplicates;
+    sortingStates: SortingStates;
+    equalizerPreset: Equalizer;
   }
 
   // ? Playlists related types
@@ -685,7 +675,7 @@ declare global {
   type NotificationTypes = 'DEFAULT' | 'WITH_PROGRESS_BAR';
 
   interface AppNotification {
-    delay: number;
+    delay?: number;
     id: string;
     order?: number;
     content: ReactNode;
@@ -748,7 +738,7 @@ declare global {
     iconClassName?: string;
     isContextMenuItemSeperator?: boolean;
     innerContextMenus?: ContextMenuItem[];
-    handlerFunction: () => void;
+    handlerFunction: null | (() => void);
     isDisabled?: boolean;
   }
 
@@ -989,6 +979,8 @@ declare global {
   export interface AppVersion {
     version: string;
     releaseDate: string;
+    importantNotes?: string[];
+    artwork?: string;
     notes: Notes;
   }
 

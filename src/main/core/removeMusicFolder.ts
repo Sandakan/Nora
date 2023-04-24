@@ -8,6 +8,7 @@ import { getSongsData, getUserData, setUserData } from '../filesystem';
 import log from '../log';
 import { sendMessageToRenderer } from '../main';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
+import { getAllFoldersFromFolderStructures } from '../fs/parseFolderStructuresForSongPaths';
 
 const abortController = new AbortController();
 saveAbortController('removeMusicFolder', abortController);
@@ -21,6 +22,47 @@ const getSongPathsRelatedToFolders = (folderPaths: string[]) => {
   return songPathsRelatedToFolders;
 };
 
+const removeFolderFromStructure = (
+  folderPath: string,
+  removeSubDirs = false,
+  musicFolders: FolderStructure[]
+) => {
+  const updatedMusicFolders = musicFolders.filter((folder) => {
+    if (folder.path === folderPath) {
+      if (!removeSubDirs) musicFolders.push(...folder.subFolders);
+      return false;
+    }
+    if (folderPath.includes(folder.path)) {
+      const updatedSubFolders = removeFolderFromStructure(
+        folderPath,
+        removeSubDirs,
+        folder.subFolders
+      );
+      folder.subFolders = updatedSubFolders;
+    }
+    return true;
+  });
+
+  return updatedMusicFolders;
+};
+
+const removeFoldersFromStructure = (folderPaths: string[]) => {
+  let musicFolders = [...getUserData().musicFolders];
+
+  for (const folderPath of folderPaths) {
+    musicFolders = removeFolderFromStructure(
+      folderPath,
+      undefined,
+      musicFolders
+    );
+    log(`Folder ${path.basename(folderPath)} removed successfully.`, {
+      folderPath,
+    });
+  }
+
+  return musicFolders;
+};
+
 const removeMusicFolder = async (folderPath: string): Promise<boolean> => {
   log(
     `STARTED THE PROCESS OF REMOVING '${folderPath}' FROM THE SYSTEM.`,
@@ -29,12 +71,13 @@ const removeMusicFolder = async (folderPath: string): Promise<boolean> => {
   );
   const pathBaseName = path.basename(folderPath);
   const { musicFolders } = getUserData();
-  if (
-    Array.isArray(musicFolders) &&
-    musicFolders.length > 0 &&
-    musicFolders.some((folder) => folder.path === folderPath)
-  ) {
-    const folderPaths = musicFolders.map((folder) => folder.path);
+  const folders = getAllFoldersFromFolderStructures(musicFolders);
+  const isFolderAvialable = folders.some(
+    (folder) => folder.path === folderPath
+  );
+
+  if (Array.isArray(folders) && folders.length > 0 && isFolderAvialable) {
+    const folderPaths = folders.map((folder) => folder.path);
     const relatedFolderPaths = folderPaths.filter((relatedFolderPath) =>
       relatedFolderPath.includes(folderPath)
     );
@@ -47,23 +90,22 @@ const removeMusicFolder = async (folderPath: string): Promise<boolean> => {
       );
 
       if (songPathsRelatedToFolders) {
-        log(
-          `User deleted ${pathBaseName} folder from the filesystem.\nDIRECTORY : ${folderPath}`
-        );
-        sendMessageToRenderer(
-          `'${pathBaseName}' folder got deleted from the system. ${
-            songPathsRelatedToFolders.length > 0
-              ? `${songPathsRelatedToFolders.length} songs related to that folder will be removed from the library.`
-              : 'No songs found related to the folder. Library will be unaffected.'
-          }`,
-          'MUSIC_FOLDER_DELETED',
-          { path: folderPath }
-        );
-
         try {
           await removeSongsFromLibrary(
             songPathsRelatedToFolders,
             abortController.signal
+          );
+          log(
+            `Deleted ${pathBaseName} folder from the filesystem.\nDIRECTORY : ${folderPath}`
+          );
+          sendMessageToRenderer(
+            `'${pathBaseName}' folder got deleted from the system. ${
+              songPathsRelatedToFolders.length > 0
+                ? `${songPathsRelatedToFolders.length} songs related to that folder will be removed from the library.`
+                : 'No songs found related to the folder. Library will be unaffected.'
+            }`,
+            'MUSIC_FOLDER_DELETED',
+            { path: folderPath }
           );
         } catch (error) {
           log(
@@ -75,12 +117,11 @@ const removeMusicFolder = async (folderPath: string): Promise<boolean> => {
       }
     }
 
-    const updatedMusicFolders = musicFolders.filter(
-      (folder) => !relatedFolderPaths.some((x) => x === folder.path)
-    );
+    const updatedMusicFolders = removeFoldersFromStructure(relatedFolderPaths);
 
     setUserData('musicFolders', updatedMusicFolders);
     closeAbortController(folderPath);
+
     log(`Deleted ${relatedFolderPaths.length} directories.`, {
       relatedFolders: relatedFolderPaths,
     });

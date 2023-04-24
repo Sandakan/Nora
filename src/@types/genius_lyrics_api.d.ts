@@ -151,7 +151,6 @@ interface PurpleInteractions {
   following: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface IqByAction {}
 
 interface CustomPerformance {
@@ -340,12 +339,6 @@ interface SongElement {
   url: string;
   featured_artists: GeniusArtist[];
   primary_artist: GeniusArtist;
-}
-
-interface ReleaseDateComponents {
-  year: number;
-  month: number;
-  day: number;
 }
 
 interface PurpleStats {

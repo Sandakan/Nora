@@ -7,8 +7,8 @@ const StartupSettings = () => {
   const { userData } = React.useContext(AppContext);
   const { updateUserData } = React.useContext(AppUpdateContext);
   return (
-    <>
-      <div className="title-container mt-1 mb-4 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+    <li className="main-container startup-settings-container mb-16">
+      <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         <span className="material-icons-round-outlined mr-2">restart_alt</span>
         Startup and Window Customization
       </div>
@@ -116,7 +116,7 @@ const StartupSettings = () => {
           />
         </li>
       </ul>
-    </>
+    </li>
   );
 };
 

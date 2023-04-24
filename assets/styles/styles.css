@@ -9,32 +9,37 @@
 /* ? POPPINS FONT CONFIG */
 @font-face {
   font-family: 'Poppins';
-  src: url('../../assets/fonts/Poppins-Light.ttf');
+  src: url('../../assets/fonts/Poppins-Light.woff2');
   font-weight: 300;
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'Poppins';
-  src: url('../../assets/fonts/Poppins-Regular.ttf');
+  src: url('../../assets/fonts/Poppins-Regular.woff2');
   font-weight: 400;
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'Poppins';
-  src: url('../../assets/fonts/Poppins-Medium.ttf');
+  src: url('../../assets/fonts/Poppins-Medium.woff2');
   font-weight: 500;
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'Poppins';
-  src: url('../../assets/fonts/Poppins-SemiBold.ttf');
+  src: url('../../assets/fonts/Poppins-SemiBold.woff2');
   font-weight: 600;
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'Poppins';
-  src: url('../../assets/fonts/Poppins-Bold.ttf');
+  src: url('../../assets/fonts/Poppins-Bold.woff2');
   font-weight: 700;
+  font-display: swap;
 }
 
 /* ? MATERIAL ICONS CONFIG */
@@ -42,7 +47,7 @@
   font-family: 'Material Icons Round';
   font-style: normal;
   font-display: block;
-  src: url('../fonts/MaterialSymbolsRounded.ttf');
+  src: url('../fonts/MaterialSymbolsRounded.woff2');
 }
 
 /* ? ROOT STYLES */
@@ -117,7 +122,7 @@ html {
   font-weight: normal;
   font-style: normal;
   display: inline-block;
-  line-height: 1;
+  line-height: 1 !important;
   text-transform: none;
   letter-spacing: normal;
   word-wrap: normal;
@@ -128,6 +133,7 @@ html {
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: 'liga';
   user-select: none;
+  transition: font-variation-settings 0.15s ease-in-out;
 }
 
 .material-icons-round {
@@ -152,11 +158,16 @@ body,
 
 body,
 body * {
-  transition: color var(--transition-duration-0_2s) linear, background-color var(--transition-duration-0_2s) linear;
-  -webkit-transition: color var(--transition-duration-0_2s) linear, background-color var(--transition-duration-0_2s) linear;
-  -moz-transition: color var(--transition-duration-0_2s) linear, background-color var(--transition-duration-0_2s) linear;
-  -ms-transition: color var(--transition-duration-0_2s) linear, background-color var(--transition-duration-0_2s) linear;
-  -o-transition: color var(--transition-duration-0_2s) linear, background-color var(--transition-duration-0_2s) linear;
+  transition: color var(--transition-duration-0_2s) linear,
+    background-color var(--transition-duration-0_2s) linear;
+  -webkit-transition: color var(--transition-duration-0_2s) linear,
+    background-color var(--transition-duration-0_2s) linear;
+  -moz-transition: color var(--transition-duration-0_2s) linear,
+    background-color var(--transition-duration-0_2s) linear;
+  -ms-transition: color var(--transition-duration-0_2s) linear,
+    background-color var(--transition-duration-0_2s) linear;
+  -o-transition: color var(--transition-duration-0_2s) linear,
+    background-color var(--transition-duration-0_2s) linear;
 }
 
 /* ? APP DARK THEME STYLES */
@@ -179,8 +190,7 @@ body * {
 }
 
 /* ? APP REDUCED MOTION STYLES */
-:is(.App.reduced-motion,
-  .mini-player.reduced-motion) * {
+:is(.App.reduced-motion, .mini-player.reduced-motion) * {
   animation-duration: 0ms !important;
   transition-duration: 0ms !important;
   backdrop-filter: 0 !important;
@@ -195,7 +205,8 @@ body * {
 
 :is(.previousPageBtn, .forwardPageBtn, .goToHomePageBtn).available,
 .mini-player-title-bar .special-controls-container,
-.special-controls-and-indicators-container :is(.indicators-container, .special-controls-container),
+.special-controls-and-indicators-container
+  :is(.indicators-container, .special-controls-container),
 .window-controls-container :is(.minimize-btn, .maximize-btn, .close-btn),
 .app-version {
   -webkit-app-region: no-drag;
@@ -221,6 +232,11 @@ input[type='range']::-webkit-slider-runnable-track {
   border-radius: 5rem;
 }
 
+input[type='range'].vertical::-webkit-slider-runnable-track {
+  height: 0.375rem;
+  cursor: row-resize;
+}
+
 [type='range']::-webkit-slider-thumb {
   position: relative;
   -webkit-appearance: none;
@@ -235,15 +251,15 @@ input[type='range']::-webkit-slider-runnable-track {
   opacity: 0;
   transition-property: transform, opacity;
   transition: 150ms ease-in-out;
-  -webkit-transition: 150ms ease-in-out;
-  -moz-transition: 150ms ease-in-out;
-  -ms-transition: 150ms ease-in-out;
-  -o-transition: 150ms ease-in-out;
   transform: scale(0);
-  -webkit-transform: scale(0);
-  -moz-transform: scale(0);
-  -ms-transform: scale(0);
-  -o-transform: scale(0);
+}
+
+[type='range'].vertical::-webkit-slider-thumb {
+  height: 0.875rem;
+  width: 0.875rem;
+  cursor: row-resize;
+  opacity: 1;
+  transform: scale(0.75);
 }
 
 input[type='range']:hover::-webkit-slider-thumb {
@@ -266,17 +282,28 @@ input[type='range']:active::-webkit-slider-thumb {
 }
 
 /* ? CHECKBOX STYLING */
-input[type="checkbox"]:checked~.checkmark .icon {
+input[type='checkbox']:checked ~ .checkmark .icon {
   opacity: 1;
 }
 
 /* ? THEME RADIO BUTTONS STYLES */
-.theme-change-radio-btns>.theme-change-radio-btn input[type="radio"]:checked+*::before {
-  background: radial-gradient(var(--text-color-highlight) 0%, var(--text-color-highlight) 40%, transparent 50%, transparent);
+.theme-change-radio-btns
+  > .theme-change-radio-btn
+  input[type='radio']:checked
+  + *::before {
+  background: radial-gradient(
+    var(--text-color-highlight) 0%,
+    var(--text-color-highlight) 40%,
+    transparent 50%,
+    transparent
+  );
   border-color: var(--text-color-highlight);
 }
 
-.theme-change-radio-btns>.theme-change-radio-btn input[type="radio"]:checked+* {
+.theme-change-radio-btns
+  > .theme-change-radio-btn
+  input[type='radio']:checked
+  + * {
   color: var(--text-color-highlight);
 }
 
@@ -297,33 +324,37 @@ input[type="checkbox"]:checked~.checkmark .icon {
 .appear-from-bottom {
   opacity: 0;
   transform: translateY(2rem);
-  -webkit-transform: translateY(2rem);
-  -moz-transform: translateY(2rem);
-  -ms-transform: translateY(2rem);
-  -o-transform: translateY(2rem);
   animation: appearFromBottom var(--transition-duration-0_25s) ease forwards;
-  -webkit-animation: appearFromBottom var(--transition-duration-0_25s) ease forwards;
 }
 
 .disappear-to-bottom {
   opacity: 1;
   transform: translateY(0rem);
-  -webkit-transform: translateY(0rem);
-  -moz-transform: translateY(0rem);
-  -ms-transform: translateY(0rem);
-  -o-transform: translateY(0rem);
   animation: disappearToBottom var(--transition-duration-0_25s) ease forwards;
-  -webkit-animation: disappearToBottom var(--transition-duration-0_25s) ease forwards;
+}
+
+.appear-from-top-and-dissappear {
+  opacity: 0;
+  transform: translateY(-2rem);
+  animation: appearFromTopAndDissappear 5000ms ease forwards;
+}
+
+.appear-from-top {
+  opacity: 0;
+  transform: translateY(-2rem);
+  animation: appearFromTop var(--transition-duration-0_25s) ease forwards;
+}
+
+.disappear-to-top {
+  opacity: 1;
+  transform: translateY(0rem);
+  animation: disappearToTop var(--transition-duration-0_25s) ease forwards;
 }
 
 @keyframes appearFromBottom {
   to {
     opacity: 1;
     transform: translateY(0);
-    -webkit-transform: translateY(0);
-    -moz-transform: translateY(0);
-    -ms-transform: translateY(0);
-    -o-transform: translateY(0);
   }
 }
 
@@ -331,69 +362,72 @@ input[type="checkbox"]:checked~.checkmark .icon {
   to {
     opacity: 0;
     transform: translateY(2rem);
-    -webkit-transform: translateY(2rem);
-    -moz-transform: translateY(2rem);
-    -ms-transform: translateY(2rem);
-    -o-transform: translateY(2rem);
+  }
+}
+
+@keyframes appearFromTopAndDissappear {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  50% {
+    opacity: 0;
+    transform: translateY(-2rem);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-2rem);
+    display: none;
+  }
+}
+
+@keyframes appearFromTop {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes disappearToTop {
+  to {
+    opacity: 0;
+    transform: translateY(-2rem);
   }
 }
 
 @keyframes audioLoadingAnimation {
   0% {
     transform: translateX(-50%);
-    -webkit-transform: translateX(-50%);
-    -moz-transform: translateX(-50%);
-    -ms-transform: translateX(-50%);
-    -o-transform: translateX(-50%);
   }
 
   50% {
     transform: translateX(300%);
-    -webkit-transform: translateX(300%);
-    -moz-transform: translateX(300%);
-    -ms-transform: translateX(300%);
-    -o-transform: translateX(300%);
   }
 
   100% {
     transform: translateX(-50%);
-    -webkit-transform: translateX(-50%);
-    -moz-transform: translateX(-50%);
-    -ms-transform: translateX(-50%);
-    -o-transform: translateX(-50%);
   }
 }
 
 @keyframes loading {
   50% {
     transform: translateX(var(--loading-bar-width));
-    -webkit-transform: translateX(var(--loading-bar-width));
-    -moz-transform: translateX(var(--loading-bar-width));
-    -ms-transform: translateX(var(--loading-bar-width));
-    -o-transform: translateX(var(--loading-bar-width));
   }
-
 }
 
 @keyframes dialogAppear {
   from {
     opacity: 0;
     visibility: hidden;
-    transform: translate(-50%, -50%) scale(0.7);
-    -webkit-transform: translate(-50%, -50%) scale(0.7);
-    -moz-transform: translate(-50%, -50%) scale(0.7);
-    -ms-transform: translate(-50%, -50%) scale(0.7);
-    -o-transform: translate(-50%, -50%) scale(0.7);
+    transform: translate(-50%, -50%) scale(1.1);
   }
 
   to {
     opacity: 1;
     visibility: visible;
     transform: translate(-50%, -50%) scale(1);
-    -webkit-transform: translate(-50%, -50%) scale(1);
-    -moz-transform: translate(-50%, -50%) scale(1);
-    -ms-transform: translate(-50%, -50%) scale(1);
-    -o-transform: translate(-50%, -50%) scale(1);
   }
 }
 
@@ -402,22 +436,13 @@ input[type="checkbox"]:checked~.checkmark .icon {
     opacity: 1;
     visibility: visible;
     transform: translate(-50%, -50%) scale(1);
-    -webkit-transform: translate(-50%, -50%) scale(1);
-    -moz-transform: translate(-50%, -50%) scale(1);
-    -ms-transform: translate(-50%, -50%) scale(1);
-    -o-transform: translate(-50%, -50%) scale(1);
   }
 
   to {
     opacity: 0;
     visibility: hidden;
-    transform: translate(-50%, -50%) scale(0.7);
-    -webkit-transform: translate(-50%, -50%) scale(0.7);
-    -moz-transform: translate(-50%, -50%) scale(0.7);
-    -ms-transform: translate(-50%, -50%) scale(0.7);
-    -o-transform: translate(-50%, -50%) scale(0.7);
+    transform: translate(-50%, -50%) scale(1.1);
   }
-
 }
 
 @keyframes appearBackgroundImage {
@@ -430,5 +455,4 @@ input[type="checkbox"]:checked~.checkmark .icon {
     opacity: 100%;
     filter: blur(12px) brightness(var(--bg-image-brightness));
   }
-
 }

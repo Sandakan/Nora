@@ -14,6 +14,8 @@ import {
   Tray,
   Menu,
   nativeImage,
+  OpenDialogOptions,
+  powerMonitor,
 } from 'electron';
 import path from 'path';
 import os from 'os';
@@ -31,7 +33,7 @@ import {
 } from './filesystem';
 import { resolveHtmlPath } from './utils/util';
 import updateSongId3Tags from './updateSongId3Tags';
-import { version } from '../../package.json';
+import { version, appPreferences } from '../../package.json';
 import search from './search';
 import {
   searchSongMetadataResultsInInternet,
@@ -41,7 +43,7 @@ import deleteSongsFromSystem from './core/deleteSongsFromSystem';
 import removeMusicFolder from './core/removeMusicFolder';
 import restoreBlacklistedSongs from './core/restoreBlacklistedSongs';
 import addWatchersToFolders from './fs/addWatchersToFolders';
-import addMusicFolder from './core/addMusicFolder';
+import addSongsFromFolderStructures from './core/addMusicFolder';
 import getArtistInfoFromNet from './core/getArtistInfoFromNet';
 import getSongLyrics from './core/getSongLyrics';
 import sendAudioDataFromPath from './core/sendAudioDataFromPath';
@@ -83,9 +85,12 @@ import restoreBlacklistedFolders from './core/restoreBlacklistedFolder';
 import toggleBlacklistFolders from './core/toggleBlacklistFolders';
 import getStorageUsage from './core/getStorageUsage';
 import { generatePalettes } from './other/generatePalette';
-import { getFolderInfo } from './core/getFolderInfo';
+import { getFolderStructures } from './core/getFolderStructures';
 import { getArtistDuplicates } from './core/getDuplicates';
 import { resolveArtistDuplicates } from './core/resolveDuplicates';
+import addArtworkToAPlaylist from './core/addArtworkToAPlaylist';
+import getArtworksForMultipleArtworksCover from './core/getArtworksForMultipleArtworksCover';
+import { resolveSeparateArtists } from './core/resolveSeparateArtists';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -105,6 +110,17 @@ const MINI_PLAYER_MAX_SIZE_X = 510;
 const MINI_PLAYER_MAX_SIZE_Y = 300;
 const MINI_PLAYER_ASPECT_RATIO = 17 / 10;
 const abortController = new AbortController();
+const DEFAULT_OPEN_DIALOG_OPTIONS: OpenDialogOptions = {
+  title: 'Select a Music Folder',
+  buttonLabel: 'Add folder',
+  filters: [
+    {
+      name: 'Audio Files',
+      extensions: appPreferences.supportedMusicExtensions,
+    },
+  ],
+  properties: ['openDirectory', 'multiSelections'],
+};
 
 // / / / / / / VARIABLES / / / / / / /
 // eslint-disable-next-line import/no-mutable-exports
@@ -113,6 +129,7 @@ let tray: Tray;
 let isMiniPlayer = false;
 let isConnectedToInternet = false;
 let isAudioPlaying = false;
+let isOnBatteryPower = false;
 
 // / / / / / / INITIALIZATION / / / / / / /
 
@@ -127,7 +144,7 @@ dotenv.config({ debug: IS_DEVELOPMENT });
 saveAbortController('main', abortController);
 
 // Sentry.init({
-//   dsn: 'https://c3f3263c53334e51849caaa8a4d677e2@o1402111.ingest.sentry.io/4504757172764672',
+//   dsn: process.env.SENTRY_DSN,
 // });
 // ? / / / / / / / / / / / / / / / / / / / / / / /
 if (IS_DEVELOPMENT) require('electron-debug')();
@@ -178,7 +195,6 @@ const createWindow = async () => {
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
         : path.join(__dirname, '../../.erb/dll/preload.js'),
-      nodeIntegrationInWorker: true,
     },
     visualEffectState: 'followWindow',
     roundedCorners: true,
@@ -327,13 +343,17 @@ app
         console.log('Left full screen');
         mainWindow.webContents.send('app/leftFullscreen');
       });
+      powerMonitor.addListener('on-ac', toggleonBatteryPower);
+      powerMonitor.addListener('on-battery', toggleonBatteryPower);
 
       ipcMain.on('app/getSongPosition', (_, position: number) =>
         saveUserData('currentSong.stoppedPosition', position)
       );
 
-      ipcMain.handle('app/addMusicFolder', (_, sortType: SongSortTypes) =>
-        addMusicFolder(mainWindow, sortType)
+      ipcMain.handle(
+        'app/addSongsFromFolderStructures',
+        (_, structures: FolderStructure[], sortType: SongSortTypes) =>
+          addSongsFromFolderStructures(structures, sortType)
       );
 
       ipcMain.handle('app/getSong', (_, id: string) => sendAudioData(id));
@@ -382,8 +402,15 @@ app
           _,
           searchFilters: SearchFilters,
           value: string,
-          updateSearchHistory?: boolean
-        ) => search(searchFilters, value, updateSearchHistory)
+          updateSearchHistory?: boolean,
+          isPredictiveSearchEnabled?: boolean
+        ) =>
+          search(
+            searchFilters,
+            value,
+            updateSearchHistory,
+            isPredictiveSearchEnabled
+          )
       );
 
       ipcMain.handle(
@@ -460,20 +487,24 @@ app
 
       ipcMain.handle(
         'app/getArtistData',
-        (_, artistIdsOrNames?: string[], sortType?: ArtistSortTypes) =>
-          fetchArtistData(artistIdsOrNames, sortType)
+        (
+          _,
+          artistIdsOrNames?: string[],
+          sortType?: ArtistSortTypes,
+          limit?: number
+        ) => fetchArtistData(artistIdsOrNames, sortType, limit)
       );
 
       ipcMain.handle(
         'app/getGenresData',
-        (_, genreIds?: string[], sortType?: GenreSortTypes) =>
-          getGenresInfo(genreIds, sortType)
+        (_, genreNamesOrIds?: string[], sortType?: GenreSortTypes) =>
+          getGenresInfo(genreNamesOrIds, sortType)
       );
 
       ipcMain.handle(
         'app/getAlbumData',
-        (_, albumIds?: string[], sortType?: AlbumSortTypes) =>
-          fetchAlbumData(albumIds, sortType)
+        (_, albumTitlesOrIds?: string[], sortType?: AlbumSortTypes) =>
+          fetchAlbumData(albumTitlesOrIds, sortType)
       );
 
       ipcMain.handle(
@@ -497,6 +528,12 @@ app
       );
 
       ipcMain.handle(
+        'app/resolveSeparateArtists',
+        (_, separateArtistId: string, separateArtistNames: string[]) =>
+          resolveSeparateArtists(separateArtistId, separateArtistNames)
+      );
+
+      ipcMain.handle(
         'app/addNewPlaylist',
         (_, playlistName: string, songIds?: string[], artworkPath?: string) =>
           addNewPlaylist(playlistName, songIds, artworkPath)
@@ -516,6 +553,12 @@ app
         'app/removeSongFromPlaylist',
         (_, playlistId: string, songId: string) =>
           removeSongFromPlaylist(playlistId, songId)
+      );
+
+      ipcMain.handle(
+        'app/addArtworkToAPlaylist',
+        (_, playlistId: string, artworkPath: string) =>
+          addArtworkToAPlaylist(playlistId, artworkPath)
       );
 
       ipcMain.handle('app/clearSongHistory', () => clearSongHistory());
@@ -572,7 +615,7 @@ app
         clearSearchHistoryResults(searchText)
       );
 
-      ipcMain.handle('app/getFolderInfo', () => getFolderInfo(mainWindow));
+      ipcMain.handle('app/getFolderStructures', () => getFolderStructures());
 
       ipcMain.on('app/resetApp', () => resetApp());
 
@@ -649,6 +692,11 @@ app
         }
       );
 
+      ipcMain.handle(
+        'app/getArtworksForMultipleArtworksCover',
+        (_, songIds: string[]) => getArtworksForMultipleArtworksCover(songIds)
+      );
+
       ipcMain.on('app/openDevTools', () => {
         log('USER REQUESTED FOR DEVTOOLS.');
         mainWindow.webContents.openDevTools({ mode: 'detach', activate: true });
@@ -664,13 +712,13 @@ app
       );
 
       //  / / / / / / / / / / / GLOBAL SHORTCUTS / / / / / / / / / / / / / /
-      globalShortcut.register('F5', () => {
-        const isFocused = mainWindow.isFocused();
-        log('USER REQUESTED RENDERER REFRESH USING GLOBAL SHORTCUT.', {
-          isFocused,
-        });
-        if (isFocused) restartRenderer();
-      });
+      // globalShortcut.register('F5', () => {
+      //   const isFocused = mainWindow.isFocused();
+      //   log('USER REQUESTED RENDERER REFRESH USING GLOBAL SHORTCUT.', {
+      //     isFocused,
+      //   });
+      //   if (isFocused) restartRenderer();
+      // });
 
       globalShortcut.register('F12', () => {
         log(
@@ -722,6 +770,11 @@ function handleBeforeQuit() {
     { uptime: `${Math.floor(process.uptime())} seconds` },
     'WARN'
   );
+}
+
+function toggleonBatteryPower() {
+  isOnBatteryPower = powerMonitor.isOnBatteryPower();
+  mainWindow.webContents.send('app/isOnBatteryPower', isOnBatteryPower);
 }
 
 export function sendMessageToRenderer(
@@ -786,7 +839,6 @@ function addEventsToCache(
 
 function registerFileProtocol(
   request: { url: string },
-  // eslint-disable-next-line no-unused-vars
   callback: (arg: string) => void
 ) {
   const urlWithQueries = decodeURI(request.url).replace(
@@ -803,6 +855,21 @@ function registerFileProtocol(
     );
     return callback('404');
   }
+}
+
+export async function showOpenDialog(
+  openDialogOptions = DEFAULT_OPEN_DIALOG_OPTIONS
+) {
+  const { canceled, filePaths } = await dialog.showOpenDialog(
+    mainWindow,
+    openDialogOptions
+  );
+
+  if (canceled) {
+    log('User cancelled the folder selection popup.');
+    throw new Error('PROMPT_CLOSED_BEFORE_INPUT' as MessageCodes);
+  }
+  return filePaths;
 }
 
 function manageAppMoveEvent() {
@@ -903,9 +970,10 @@ async function getImagefileLocation() {
   return filePaths[0];
 }
 
-async function resetApp() {
+async function resetApp(isRestartApp = false) {
   log('!-!-!-!-!-!  STARTED THE RESETTING PROCESS OF THE APP.  !-!-!-!-!-!');
   try {
+    await mainWindow.webContents.session.clearStorageData();
     resetAppCache();
     await resetAppData();
     log(
@@ -920,8 +988,11 @@ async function resetApp() {
       `====== ERROR OCCURRED WHEN RESETTING THE APP. RELOADING THE APP NOW.  ======\nERROR : ${error}`
     );
   } finally {
-    mainWindow.webContents.reload();
-    log(`====== RELOADING THE RENDERER ======`);
+    log(`====== RELOADING THE ${isRestartApp ? 'APP' : 'RENDERER'} ======`);
+    if (isRestartApp) {
+      app.relaunch();
+      app.quit();
+    } else mainWindow.webContents.reload();
   }
 }
 

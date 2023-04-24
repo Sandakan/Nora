@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable default-param-last */
 import path from 'path';
 import NodeID3 from 'node-id3';
 import songlyrics from 'songlyrics';

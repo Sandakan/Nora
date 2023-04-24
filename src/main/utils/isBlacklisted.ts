@@ -1,10 +1,24 @@
 import path from 'path';
 import { getBlacklistData } from '../filesystem';
 
+export const isParentFolderBlacklisted = (folderPath: string) => {
+  const { folderBlacklist } = getBlacklistData();
+
+  const isParentBlacklisted = folderBlacklist.some(
+    (blacklistedFolderPath) =>
+      path.dirname(folderPath) === blacklistedFolderPath
+  );
+
+  return isParentBlacklisted;
+};
+
 export const isFolderBlacklisted = (folderPath: string) => {
   const { folderBlacklist } = getBlacklistData();
 
-  return folderBlacklist.includes(path.normalize(folderPath));
+  const isBlacklsited = folderBlacklist.includes(path.normalize(folderPath));
+  const isParentBlacklisted = isParentFolderBlacklisted(folderPath);
+
+  return isBlacklsited || isParentBlacklisted;
 };
 
 export const isSongBlacklisted = (songId: string, songPath: string) => {

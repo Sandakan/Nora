@@ -1,6 +1,3 @@
-/* eslint-disable promise/no-nesting */
-/* eslint-disable no-unused-vars */
-/* eslint-disable default-param-last */
 /* eslint-disable no-use-before-define */
 import React, { ReactNode } from 'react';
 import 'tailwindcss/tailwind.css';
@@ -28,6 +25,7 @@ import isLatestVersion from './utils/isLatestVersion';
 import roundTo from './utils/roundTo';
 import storage, { LOCAL_STORAGE_DEFAULT_TEMPLATE } from './utils/localStorage';
 import useNetworkConnectivity from './hooks/useNetworkConnectivity';
+import { isDataChanged } from './utils/hasDataChanged';
 
 interface AppReducer {
   userData: UserData;
@@ -42,6 +40,7 @@ interface AppReducer {
   bodyBackgroundImage?: string;
   multipleSelectionsData: MultipleSelectionData;
   appUpdatesState: AppUpdatesState;
+  isOnBatteryPower: boolean;
 }
 
 type AppReducerStateActions =
@@ -72,6 +71,7 @@ type AppReducerStateActions =
   | 'UPDATE_MULTIPLE_SELECTIONS_DATA'
   | 'CHANGE_APP_UPDATES_DATA'
   | 'UPDATE_LOCAL_STORAGE'
+  | 'UPDATE_BATTERY_POWER_STATE'
   | 'TOGGLE_SHOW_SONG_REMAINING_DURATION';
 
 const reducer = (
@@ -168,8 +168,10 @@ const reducer = (
         PromptMenuData: action.data
           ? (action.data as PromptMenuData).isVisible
             ? (action.data as PromptMenuData)
-            : // eslint-disable-next-line react/jsx-no-useless-fragment
-              { ...(action.data as PromptMenuData), content: <></> }
+            : {
+                ...(action.data as PromptMenuData),
+                content: state.PromptMenuData.content,
+              }
           : state.PromptMenuData,
       };
     case 'ADD_NEW_NOTIFICATIONS':
@@ -392,13 +394,72 @@ const reducer = (
             ? (action.data as LocalStorage)
             : state.localStorage,
       };
+    case 'UPDATE_BATTERY_POWER_STATE':
+      return {
+        ...state,
+        isOnBatteryPower:
+          typeof action.data === 'boolean'
+            ? (action.data as boolean)
+            : state.isOnBatteryPower,
+      };
     default:
       return state;
   }
 };
 
 const player = new Audio();
+let repetitivePlaybackErrorsCount = 0;
+
+const context = new window.AudioContext();
+const source = context.createMediaElementSource(player);
+const sixtyHertzFilter = context.createBiquadFilter();
+const hundredFiftyHertzFilter = context.createBiquadFilter();
+const fourHundredHertzFilter = context.createBiquadFilter();
+const thousandHertzFilter = context.createBiquadFilter();
+const twoThousandHertzFilter = context.createBiquadFilter();
+const fifteenThousandHertzFilter = context.createBiquadFilter();
+
+source.connect(sixtyHertzFilter);
+sixtyHertzFilter.connect(hundredFiftyHertzFilter);
+hundredFiftyHertzFilter.connect(fourHundredHertzFilter);
+fourHundredHertzFilter.connect(thousandHertzFilter);
+thousandHertzFilter.connect(twoThousandHertzFilter);
+twoThousandHertzFilter.connect(fifteenThousandHertzFilter);
+fifteenThousandHertzFilter.connect(context.destination);
+
+// ? / / / / / / /  PLAYER DEFAULT OPTIONS / / / / / / / / / / / / / /
 player.preload = 'auto';
+player.defaultPlaybackRate = 1.0;
+
+sixtyHertzFilter.type = 'peaking';
+sixtyHertzFilter.frequency.value = 60;
+sixtyHertzFilter.Q.value = 1;
+sixtyHertzFilter.gain.value = 0;
+
+hundredFiftyHertzFilter.type = 'peaking';
+hundredFiftyHertzFilter.frequency.value = 150;
+hundredFiftyHertzFilter.Q.value = 1;
+hundredFiftyHertzFilter.gain.value = 0;
+
+fourHundredHertzFilter.type = 'peaking';
+fourHundredHertzFilter.frequency.value = 400;
+fourHundredHertzFilter.Q.value = 1;
+fourHundredHertzFilter.gain.value = 0;
+
+thousandHertzFilter.type = 'peaking';
+thousandHertzFilter.frequency.value = 1000;
+thousandHertzFilter.Q.value = 1;
+thousandHertzFilter.gain.value = 0;
+
+twoThousandHertzFilter.type = 'peaking';
+twoThousandHertzFilter.frequency.value = 2400;
+twoThousandHertzFilter.Q.value = 1;
+twoThousandHertzFilter.gain.value = 0;
+
+fifteenThousandHertzFilter.type = 'peaking';
+fifteenThousandHertzFilter.frequency.value = 15000;
+fifteenThousandHertzFilter.Q.value = 1;
+fifteenThousandHertzFilter.gain.value = 0;
 
 player.addEventListener('player/trackchange', (e) => {
   if ('detail' in e) {
@@ -407,6 +468,7 @@ player.addEventListener('player/trackchange', (e) => {
     );
   }
 });
+// / / / / / / / /
 
 const updateNetworkStatus = () =>
   window.api.networkStatusChange(navigator.onLine);
@@ -429,7 +491,6 @@ const userDataTemplate: UserData = {
   },
   windowPositions: {},
   windowDiamensions: {},
-  sortingStates: {},
   recentSearches: [],
 };
 
@@ -443,6 +504,7 @@ const reducerData: AppReducer = {
     songPosition: 0,
     isMiniPlayer: false,
     isPlayerStalled: false,
+    playbackRate: 1.0,
   },
   userData: userDataTemplate,
   currentSongData: {} as AudioPlayerData,
@@ -472,6 +534,7 @@ const reducerData: AppReducer = {
   },
   multipleSelectionsData: { isEnabled: false, multipleSelections: [] },
   appUpdatesState: 'UNKNOWN',
+  isOnBatteryPower: false,
 };
 
 console.log('Command line args', window.api.commandLineArgs);
@@ -519,7 +582,9 @@ export default function App() {
         type: 'PROMPT_MENU_DATA_CHANGE',
         data: {
           isVisible,
-          content: contentData ?? content.PromptMenuData.content,
+          content: isVisible
+            ? contentData ?? content.PromptMenuData.content
+            : content.PromptMenuData.content,
           className: className ?? content.PromptMenuData.className,
         },
       });
@@ -529,6 +594,9 @@ export default function App() {
 
   const managePlaybackErrors = React.useCallback(
     (err: unknown) => {
+      if (repetitivePlaybackErrorsCount > 5)
+        return console.error('Playback errors exceeded the 5 errors limit.');
+      repetitivePlaybackErrorsCount += 1;
       const prevSongPosition = player.currentTime;
       const playerErrorData = player.error;
       console.error(err, playerErrorData);
@@ -556,6 +624,7 @@ export default function App() {
           />
         );
       }
+      return undefined;
     },
     [changePromptMenuData]
   );
@@ -565,7 +634,6 @@ export default function App() {
   const fadeOutIntervalId = React.useRef(undefined as NodeJS.Timer | undefined);
   const fadeInIntervalId = React.useRef(undefined as NodeJS.Timer | undefined);
   const fadeOutAudio = React.useCallback(() => {
-    // console.log('volume on fade out', contentRef.current.volume);
     if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
     if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
     fadeOutIntervalId.current = setInterval(() => {
@@ -583,7 +651,6 @@ export default function App() {
   }, []);
 
   const fadeInAudio = React.useCallback(() => {
-    // console.log('volume on fade in', contentRef.current.volume);
     if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
     if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
     fadeInIntervalId.current = setInterval(() => {
@@ -709,11 +776,37 @@ export default function App() {
       contentRef.current.userData.theme = theme;
     };
 
+    const watchPowerChanges = (_: unknown, isOnBatteryPower: boolean) => {
+      dispatch({ type: 'UPDATE_BATTERY_POWER_STATE', data: isOnBatteryPower });
+    };
+
     window.api.listenForSystemThemeChanges(watchForSystemThemeChanges);
+    window.api.listenForBatteryPowerStateChanges(watchPowerChanges);
     return () => {
-      window.api.StoplisteningForSystemThemeChanges(watchForSystemThemeChanges);
+      window.api.stoplisteningForSystemThemeChanges(watchForSystemThemeChanges);
+      window.api.stopListeningForBatteryPowerStateChanges(watchPowerChanges);
     };
   }, []);
+
+  React.useEffect(() => {
+    if (content.localStorage.equalizerPreset) {
+      const {
+        fifteenKiloHertz,
+        fourHundredHertz,
+        hundredFiftyHertz,
+        oneKiloHertz,
+        sixtyHertz,
+        twoPointFourKiloHertz,
+      } = content.localStorage.equalizerPreset;
+
+      sixtyHertzFilter.gain.value = sixtyHertz;
+      hundredFiftyHertzFilter.gain.value = hundredFiftyHertz;
+      fourHundredHertzFilter.gain.value = fourHundredHertz;
+      thousandHertzFilter.gain.value = oneKiloHertz;
+      twoThousandHertzFilter.gain.value = twoPointFourKiloHertz;
+      fifteenThousandHertzFilter.gain.value = fifteenKiloHertz;
+    }
+  }, [content.localStorage.equalizerPreset]);
 
   const manageWindowBlurOrFocus = React.useCallback(
     (state: 'blur' | 'focus') => {
@@ -792,7 +885,6 @@ export default function App() {
     const handleSkipForwardClickWithParams = () =>
       handleSkipForwardClick('PLAYER_SKIP');
 
-    // player.addEventListener('seeking', managePlayerNotStalledStatus);
     player.addEventListener('canplay', managePlayerNotStalledStatus);
     player.addEventListener('canplaythrough', managePlayerNotStalledStatus);
     player.addEventListener('loadeddata', managePlayerNotStalledStatus);
@@ -831,7 +923,6 @@ export default function App() {
     return () => {
       toggleSongPlayback(false);
       clearInterval(intervalId);
-      // player.removeEventListener('seeking', managePlayerNotStalledStatus);
       player.removeEventListener('canplay', managePlayerNotStalledStatus);
       player.removeEventListener(
         'canplaythrough',
@@ -868,6 +959,10 @@ export default function App() {
     const syncLocalStorage = () => {
       const allItems = storage.getAllItems();
       dispatch({ type: 'UPDATE_LOCAL_STORAGE', data: allItems });
+
+      if (player.playbackRate !== allItems.playback.playbackRate)
+        player.playbackRate = allItems.playback.playbackRate;
+
       console.log('local storage updated');
     };
 
@@ -1008,7 +1103,6 @@ export default function App() {
 
   const updateNotifications = React.useCallback(
     (
-      // eslint-disable-next-line no-unused-vars
       callback: (currentNotifications: AppNotification[]) => AppNotification[]
     ) => {
       const currentNotifications = content.notificationPanelData.notifications;
@@ -1059,7 +1153,6 @@ export default function App() {
         addNewNotifications([
           {
             id: 'noSongToPlay',
-            delay: 5000,
             content: <span>Please select a song to play.</span>,
             icon: (
               <span className="material-icons-round-outlined text-lg">
@@ -1083,7 +1176,6 @@ export default function App() {
       const notificationData: AppNotification = {
         buttons: [],
         content: <div>{message}</div>,
-        delay: 5000,
         id: messageCode || 'mainProcessMessage',
         type: 'DEFAULT',
       };
@@ -1154,7 +1246,6 @@ export default function App() {
             </span>
           </div>
         );
-        // info.delay = 60000;
       }
       if (
         (messageCode === 'SONG_REMOVE_PROCESS_UPDATE' ||
@@ -1163,7 +1254,6 @@ export default function App() {
         'max' in data &&
         'value' in data
       ) {
-        notificationData.delay = 10000;
         notificationData.type = 'WITH_PROGRESS_BAR';
         notificationData.progressBarData = {
           max: (data?.max as number) || 0,
@@ -1182,7 +1272,6 @@ export default function App() {
           'max' in data &&
           'value' in data)
       ) {
-        notificationData.delay = 10000;
         notificationData.type = 'WITH_PROGRESS_BAR';
         notificationData.progressBarData = {
           max: (data?.max as number) || 0,
@@ -1486,20 +1575,23 @@ export default function App() {
             changePromptMenuData(
               true,
               <div>
-                <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
+                <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+                  <span className="material-icons-round-outlined mr-4">
+                    play_disabled
+                  </span>
                   Couldn't Play the Song
                 </div>
-                <div className="description">
+                <p>
                   Seems like we can't play that song. Please check whether the
                   selected song is available in your system and accessible by
                   the app.
-                </div>
+                </p>
                 <div className="mt-6">
                   ERROR: {err?.message.split(':').at(-1) ?? 'UNKNOWN'}
                 </div>
                 <Button
                   label="OK"
-                  className="remove-song-from-library-btn float-right mt-2 w-[10rem] rounded-md !bg-background-color-3 text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
+                  className="remove-song-from-library-btn float-right mt-2 w-[10rem] !bg-background-color-3 text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
                   clickHandler={() => changePromptMenuData(false)}
                 />
               </div>
@@ -1581,7 +1673,7 @@ export default function App() {
           changePromptMenuData(
             true,
             <div>
-              <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
+              <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
                 Couldn't Play the Song
               </div>
               <div className="description">
@@ -1605,10 +1697,10 @@ export default function App() {
   );
 
   const changeQueueCurrentSongIndex = React.useCallback(
-    (currentSongIndex: number) => {
+    (currentSongIndex: number, isPlaySong = true) => {
       console.log('currentSongIndex', currentSongIndex);
       refQueue.current.currentSongIndex = currentSongIndex;
-      playSong(refQueue.current.queue[currentSongIndex]);
+      if (isPlaySong) playSong(refQueue.current.queue[currentSongIndex]);
     },
     [playSong]
   );
@@ -1759,7 +1851,6 @@ export default function App() {
       pageY?: number,
       contextMenuData?: ContextMenuAdditionalData
     ) => {
-      // console.log('pageX', pageX, 'pageY', pageY);
       dispatch({
         type: 'CONTEXT_MENU_DATA_CHANGE',
         data: {
@@ -1904,14 +1995,19 @@ export default function App() {
     (
       isEnabled?: boolean,
       selectionType?: QueueTypes,
-      addSelections?: string[]
+      addSelections?: string[],
+      replaceSelections = false
     ) => {
       if (typeof isEnabled === 'boolean') {
         contentRef.current.multipleSelectionsData.selectionType = selectionType;
         if (Array.isArray(addSelections) && isEnabled === true)
-          contentRef.current.multipleSelectionsData.multipleSelections.push(
-            ...addSelections
-          );
+          if (replaceSelections) {
+            contentRef.current.multipleSelectionsData.multipleSelections =
+              addSelections;
+          } else
+            contentRef.current.multipleSelectionsData.multipleSelections.push(
+              ...addSelections
+            );
         if (isEnabled === false) {
           contentRef.current.multipleSelectionsData.multipleSelections = [];
           contentRef.current.multipleSelectionsData.selectionType = undefined;
@@ -1931,11 +2027,14 @@ export default function App() {
   const changeCurrentActivePage = React.useCallback(
     (pageClass: PageTitles, data?: PageData) => {
       const { navigationHistory } = contentRef.current;
+      const { pageTitle } =
+        navigationHistory.history[navigationHistory.pageHistoryIndex];
+
+      const currentPageData =
+        navigationHistory.history[navigationHistory.pageHistoryIndex].data;
       if (
-        navigationHistory.history[navigationHistory.pageHistoryIndex]
-          .pageTitle !== pageClass ||
-        navigationHistory.history[navigationHistory.pageHistoryIndex].data !==
-          data
+        pageTitle !== pageClass ||
+        (currentPageData && data && isDataChanged(currentPageData, data))
       ) {
         const pageData = {
           pageTitle: pageClass,
@@ -1954,9 +2053,16 @@ export default function App() {
           type: 'UPDATE_NAVIGATION_HISTORY',
           data: navigationHistory,
         });
-      }
+      } else
+        addNewNotifications([
+          {
+            content: 'You are already in the current page.',
+            id: 'alreadyInCurrentPage',
+            delay: 2500,
+          },
+        ]);
     },
-    [toggleMultipleSelections]
+    [addNewNotifications, toggleMultipleSelections]
   );
 
   const updateMiniPlayerStatus = React.useCallback(
@@ -2134,25 +2240,6 @@ export default function App() {
     ]
   );
 
-  const updatePageSortingOrder = React.useCallback(
-    (page: PageSortTypes, state: unknown) => {
-      if (content.userData) {
-        const updatedUserData = content.userData;
-        if (page === 'sortingStates.songsPage')
-          updatedUserData.sortingStates.songsPage = state as SongSortTypes;
-        if (page === 'sortingStates.artistsPage')
-          updatedUserData.sortingStates.artistsPage = state as ArtistSortTypes;
-        if (page === 'sortingStates.albumsPage')
-          updatedUserData.sortingStates.albumsPage = state as AlbumSortTypes;
-        if (page === 'sortingStates.genresPage')
-          updatedUserData.sortingStates.genresPage = state as GenreSortTypes;
-        window.api.savePageSortingState(page, state);
-        dispatch({ type: 'USER_DATA_CHANGE', data: updatedUserData });
-      }
-    },
-    [content.userData]
-  );
-
   const displayUnsupportedFileMessage = React.useCallback(
     (path: string) => {
       const fileType = path.split('.').at(-1)?.replace('.', '') ?? path;
@@ -2246,10 +2333,15 @@ export default function App() {
 
   const clearAudioPlayerData = React.useCallback(() => {
     toggleSongPlayback(false);
+
     player.currentTime = 0;
     player.pause();
+
     dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: {} });
     contentRef.current.currentSongData = {} as AudioPlayerData;
+
+    storage.queue.setCurrentSongIndex(null);
+
     addNewNotifications([
       {
         id: 'songPausedOnDelete',
@@ -2294,6 +2386,10 @@ export default function App() {
     []
   );
 
+  const updateEqualizerOptions = React.useCallback((options: Equalizer) => {
+    storage.equalizerPreset.setEqualizerPreset(options);
+  }, []);
+
   const appContextStateValues: AppStateContextType = React.useMemo(
     () => ({
       isDarkMode: content.isDarkMode,
@@ -2324,6 +2420,7 @@ export default function App() {
       isMultipleSelectionEnabled: content.multipleSelectionsData.isEnabled,
       multipleSelectionsData: content.multipleSelectionsData,
       appUpdatesState: content.appUpdatesState,
+      equalizerOptions: content.localStorage.equalizerPreset,
     }),
     [
       content.PromptMenuData,
@@ -2374,12 +2471,12 @@ export default function App() {
       toggleIsFavorite,
       toggleSongPlayback,
       updateQueueData,
-      updatePageSortingOrder,
       clearAudioPlayerData,
       updateBodyBackgroundImage,
       updateMultipleSelections,
       toggleMultipleSelections,
       updateAppUpdatesState,
+      updateEqualizerOptions,
     }),
     [
       addNewNotifications,
@@ -2403,11 +2500,11 @@ export default function App() {
       updateCurrentSongData,
       updateCurrentSongPlaybackState,
       updateCurrentlyActivePageData,
+      updateEqualizerOptions,
       updateMiniPlayerStatus,
       updateMultipleSelections,
       updateNotifications,
       updatePageHistoryIndex,
-      updatePageSortingOrder,
       updateQueueData,
       updateSongPosition,
       updateUserData,
@@ -2422,6 +2519,11 @@ export default function App() {
     [content.player.songPosition]
   );
 
+  const isReducedMotion =
+    content.localStorage.preferences.isReducedMotion ||
+    (content.isOnBatteryPower &&
+      content.localStorage.preferences.removeAnimationsOnBatteryPower);
+
   return (
     <AppContext.Provider value={appContextStateValues}>
       <AppUpdateContext.Provider value={appUpdateContextValues}>
@@ -2432,8 +2534,7 @@ export default function App() {
                 ? 'dark bg-dark-background-color-1'
                 : 'bg-background-color-1'
             } ${
-              content.userData &&
-              content.localStorage.preferences.isReducedMotion
+              isReducedMotion
                 ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
                 : ''
             } flex h-screen w-full flex-col items-center overflow-y-hidden after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc]  [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
@@ -2467,7 +2568,15 @@ export default function App() {
           </div>
         )}
         <SongPositionContext.Provider value={songPositionContextValues}>
-          {content.player.isMiniPlayer && <MiniPlayer />}
+          {content.player.isMiniPlayer && (
+            <MiniPlayer
+              className={`${
+                isReducedMotion
+                  ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
+                  : ''
+              }`}
+            />
+          )}
         </SongPositionContext.Provider>
       </AppUpdateContext.Provider>
     </AppContext.Provider>

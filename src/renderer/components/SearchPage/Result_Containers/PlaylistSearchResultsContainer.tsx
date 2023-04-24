@@ -4,18 +4,22 @@ import { Playlist } from 'renderer/components/PlaylistsPage/Playlist';
 import SecondaryContainer from 'renderer/components/SecondaryContainer';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 
 type Props = { playlists: Playlist[]; searchInput: string };
 
 const PlaylistSearchResultsContainer = (props: Props) => {
   const { playlists, searchInput } = props;
-  const {
-    isMultipleSelectionEnabled,
-    multipleSelectionsData,
-    currentlyActivePage,
-  } = React.useContext(AppContext);
+  const { isMultipleSelectionEnabled, multipleSelectionsData } =
+    React.useContext(AppContext);
   const { toggleMultipleSelections, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
+
+  const selectAllHandler = useSelectAllHandler(
+    playlists,
+    'playlist',
+    'playlistId'
+  );
 
   const playlistResults = React.useMemo(
     () =>
@@ -26,21 +30,21 @@ const PlaylistSearchResultsContainer = (props: Props) => {
                 return (
                   <Playlist
                     index={index}
-                    // eslint-disable-next-line react/no-array-index-key
-                    key={`${playlist.playlistId}-${index}`}
+                    key={`${playlist.playlistId}-${playlist.name}`}
                     name={playlist.name}
                     playlistId={playlist.playlistId}
                     createdDate={playlist.createdDate}
                     songs={playlist.songs}
                     isArtworkAvailable={playlist.isArtworkAvailable}
                     artworkPaths={playlist.artworkPaths}
+                    selectAllHandler={selectAllHandler}
                   />
                 );
               return undefined;
             })
             .filter((x) => x !== undefined)
         : [],
-    [playlists]
+    [playlists, selectAllHandler]
   );
 
   return (
@@ -48,9 +52,16 @@ const PlaylistSearchResultsContainer = (props: Props) => {
       className={`secondary-container playlists-list-container mt-4 ${
         playlistResults.length > 0 ? 'active relative' : 'invisible absolute'
       }`}
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
     >
       <>
-        <div className="title-container mt-1 mb-8 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">
             Playlists{' '}
             <div className="other-stats-container ml-12 flex items-center text-xs">
@@ -94,15 +105,11 @@ const PlaylistSearchResultsContainer = (props: Props) => {
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>
-                  currentlyActivePage.pageTitle === 'AllSearchResults' &&
-                  currentlyActivePage.data.allSearchResultsPage.searchQuery ===
-                    searchInput
-                    ? changeCurrentActivePage('Home')
-                    : changeCurrentActivePage('AllSearchResults', {
-                        searchQuery: searchInput,
-                        searchFilter: 'Playlists' as SearchFilters,
-                        searchResults: playlists,
-                      })
+                  changeCurrentActivePage('AllSearchResults', {
+                    searchQuery: searchInput,
+                    searchFilter: 'Playlists' as SearchFilters,
+                    searchResults: playlists,
+                  })
                 }
               />
             )}

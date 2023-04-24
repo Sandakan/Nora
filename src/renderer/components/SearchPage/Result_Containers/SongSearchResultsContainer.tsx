@@ -12,7 +12,6 @@ const SongSearchResultsContainer = (props: Props) => {
   const {
     isMultipleSelectionEnabled,
     multipleSelectionsData,
-    currentlyActivePage,
     localStorageData,
   } = React.useContext(AppContext);
   const { toggleMultipleSelections, changeCurrentActivePage } =
@@ -57,7 +56,7 @@ const SongSearchResultsContainer = (props: Props) => {
     >
       <>
         <div
-          className={`title-container mt-1 mb-8 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight ${
+          className={`title-container mb-8 mt-1 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight ${
             songResults.length > 0
               ? 'visible opacity-100'
               : 'invisible opacity-0'
@@ -103,15 +102,11 @@ const SongSearchResultsContainer = (props: Props) => {
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>
-                  currentlyActivePage.pageTitle === 'AllSearchResults' &&
-                  currentlyActivePage.data.allSearchResultsPage.searchQuery ===
-                    searchInput
-                    ? changeCurrentActivePage('Home')
-                    : changeCurrentActivePage('AllSearchResults', {
-                        searchQuery: searchInput,
-                        searchFilter: 'Songs' as SearchFilters,
-                        searchResults: songs,
-                      })
+                  changeCurrentActivePage('AllSearchResults', {
+                    searchQuery: searchInput,
+                    searchFilter: 'Songs' as SearchFilters,
+                    searchResults: songs,
+                  })
                 }
               />
             )}

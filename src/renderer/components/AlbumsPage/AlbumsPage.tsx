@@ -1,42 +1,36 @@
-/* eslint-disable no-nested-ternary */
 /* eslint-disable react/destructuring-assignment */
-/* eslint-disable promise/always-return */
-/* eslint-disable promise/catch-or-return */
-/* eslint-disable react/self-closing-comp */
 /* eslint-disable import/prefer-default-export */
 import React, { CSSProperties } from 'react';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { FixedSizeGrid as Grid } from 'react-window';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import storage from 'renderer/utils/localStorage';
+
 import { Album } from './Album';
-// import FetchingDataImage from '../../../../assets/images/svg/Cocktail _Monochromatic.svg';
-import NoAlbumsImage from '../../../../assets/images/svg/Easter bunny_Monochromatic.svg';
 import MainContainer from '../MainContainer';
 import Dropdown from '../Dropdown';
 import Img from '../Img';
 import Button from '../Button';
 
+import NoAlbumsImage from '../../../../assets/images/svg/Easter bunny_Monochromatic.svg';
+
 export const AlbumsPage = () => {
   const {
     currentlyActivePage,
-    userData,
+    localStorageData,
     isMultipleSelectionEnabled,
     multipleSelectionsData,
   } = React.useContext(AppContext);
-  const {
-    updateCurrentlyActivePageData,
-    updatePageSortingOrder,
-    toggleMultipleSelections,
-  } = React.useContext(AppUpdateContext);
+  const { updateCurrentlyActivePageData, toggleMultipleSelections } =
+    React.useContext(AppUpdateContext);
 
   const [albumsData, setAlbumsData] = React.useState([] as Album[]);
-  const [sortingOrder, setSortingOrder] = React.useState(
-    (currentlyActivePage.data && currentlyActivePage.data.sortingOrder
-      ? currentlyActivePage.data.sortingOrder
-      : userData && userData.sortingStates.albumsPage
-      ? userData.sortingStates.albumsPage
-      : 'aToZ') as AlbumSortTypes
+  const [sortingOrder, setSortingOrder] = React.useState<AlbumSortTypes>(
+    currentlyActivePage?.data?.sortingOrder ||
+      localStorageData?.sortingStates?.albumsPage ||
+      'aToZ'
   );
 
   const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
@@ -56,6 +50,7 @@ export const AlbumsPage = () => {
           if (res.length > 0) setAlbumsData(res);
           else setAlbumsData([]);
         }
+        return undefined;
       }),
     [sortingOrder]
   );
@@ -83,9 +78,11 @@ export const AlbumsPage = () => {
   }, [fetchAlbumData]);
 
   React.useEffect(() => {
-    updatePageSortingOrder('sortingStates.albumsPage', sortingOrder);
+    storage.sortingStates.setSortingStates('albumsPage', sortingOrder);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortingOrder]);
+
+  const selectAllHandler = useSelectAllHandler(albumsData, 'album', 'albumId');
 
   const row = React.useCallback(
     (props: {
@@ -102,6 +99,7 @@ export const AlbumsPage = () => {
         return (
           <div style={{ ...style, display: 'flex', justifyContent: 'center' }}>
             <Album
+              key={`${albumId}-${title}`}
               index={index}
               artworkPaths={artworkPaths}
               albumId={albumId}
@@ -109,19 +107,29 @@ export const AlbumsPage = () => {
               year={year}
               artists={artists}
               songs={songs}
+              selectAllHandler={selectAllHandler}
             />
           </div>
         );
       }
       return <div style={style} />;
     },
-    [albumsData, noOfColumns]
+    [albumsData, noOfColumns, selectAllHandler]
   );
 
   return (
-    <MainContainer className="appear-from-bottom albums-list-container !h-full overflow-hidden !pb-0">
+    <MainContainer
+      className="appear-from-bottom albums-list-container !h-full overflow-hidden !pb-0"
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
+    >
       <>
-        <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">
             Albums{' '}
             <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
@@ -185,6 +193,7 @@ export const AlbumsPage = () => {
         >
           {albumsData && albumsData.length > 0 && (
             <Grid
+              className="appear-from-bottom delay-100"
               columnCount={noOfColumns || 5}
               columnWidth={itemWidth}
               rowCount={noOfRows || 5}

@@ -4,11 +4,17 @@ import { app } from 'electron';
 import Store from 'electron-store';
 import log from './log';
 import { dataUpdateEvent } from './main';
-import { appPreferences } from '../../package.json';
+import { appPreferences, version } from '../../package.json';
 import {
+  albumMigrations,
   artistMigrations,
+  blacklistMigrations,
   generateMigrationMessage,
+  genreMigrations,
+  listeningDataMigrations,
+  playlistMigrations,
   songMigrations,
+  userDataMigrations,
 } from './migrations';
 
 export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(
@@ -17,7 +23,7 @@ export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(
 );
 export const DEFAULT_FILE_URL = 'nora://localFiles/';
 
-const USER_DATA_TEMPLATE: UserData = {
+export const USER_DATA_TEMPLATE: UserData = {
   theme: { isDarkMode: false, useSystemTheme: true },
   musicFolders: [],
   preferences: {
@@ -29,7 +35,6 @@ const USER_DATA_TEMPLATE: UserData = {
   },
   windowPositions: {},
   windowDiamensions: {},
-  sortingStates: {},
   recentSearches: [],
 };
 export const HISTORY_PLAYLIST_TEMPLATE: SavablePlaylist = {
@@ -46,12 +51,12 @@ export const FAVORITES_PLAYLIST_TEMPLATE: SavablePlaylist = {
   songs: [],
   isArtworkAvailable: true,
 };
-const PLAYLIST_DATA_TEMPLATE: SavablePlaylist[] = [
+export const PLAYLIST_DATA_TEMPLATE: SavablePlaylist[] = [
   HISTORY_PLAYLIST_TEMPLATE,
   FAVORITES_PLAYLIST_TEMPLATE,
 ];
 
-const BLACKLIST_TEMPLATE: Blacklist = {
+export const BLACKLIST_TEMPLATE: Blacklist = {
   songBlacklist: [],
   folderBlacklist: [],
 };
@@ -59,9 +64,11 @@ const BLACKLIST_TEMPLATE: Blacklist = {
 const songStore = new Store({
   name: 'songs',
   defaults: {
+    version,
     songs: [],
   },
   schema: {
+    version: { type: ['string', 'null'] },
     songs: {
       type: 'array',
     },
@@ -74,9 +81,11 @@ const songStore = new Store({
 const artistStore = new Store({
   name: 'artists',
   defaults: {
+    version,
     artists: [],
   },
   schema: {
+    version: { type: ['string', 'null'] },
     artists: {
       type: 'array',
     },
@@ -89,79 +98,98 @@ const artistStore = new Store({
 const genreStore = new Store({
   name: 'genres',
   defaults: {
+    version,
     genres: [],
   },
   schema: {
+    version: { type: ['string', 'null'] },
     genres: {
       type: 'array',
     },
   },
   beforeEachMigration: (_, context) =>
     generateMigrationMessage('genres.json', context),
+  migrations: genreMigrations,
 });
 
 const albumStore = new Store({
   name: 'albums',
   defaults: {
+    version,
     albums: [],
   },
   schema: {
+    version: { type: ['string', 'null'] },
     albums: {
       type: 'array',
     },
   },
   beforeEachMigration: (_, context) =>
     generateMigrationMessage('albums.json', context),
+  migrations: albumMigrations,
 });
 
 const playlistDataStore = new Store({
   name: 'playlists',
   defaults: {
+    version,
     playlists: PLAYLIST_DATA_TEMPLATE,
   },
   schema: {
+    version: { type: ['string', 'null'] },
     playlists: {
       type: 'array',
     },
   },
   beforeEachMigration: (_, context) =>
     generateMigrationMessage('playlists.json', context),
+  migrations: playlistMigrations,
 });
 
 const userDataStore = new Store({
   name: 'userData',
   defaults: {
+    version,
     userData: USER_DATA_TEMPLATE,
   },
   schema: {
+    version: { type: ['string', 'null'] },
     userData: {
       type: 'object',
     },
   },
   beforeEachMigration: (_, context) =>
     generateMigrationMessage('userData.json', context),
+  migrations: userDataMigrations,
 });
 
 const listeningDataStore = new Store({
   name: 'listening_data',
   clearInvalidConfig: true,
   defaults: {
+    version,
     listeningData: [],
   },
   schema: {
+    version: { type: ['string', 'null'] },
     listeningData: {
       type: 'array',
     },
   },
   beforeEachMigration: (_, context) =>
     generateMigrationMessage('listening_data.json', context),
+  migrations: listeningDataMigrations,
 });
 
 const blacklistStore = new Store({
   name: 'blacklist',
   clearInvalidConfig: true,
-  defaults: { blacklist: BLACKLIST_TEMPLATE },
+  defaults: {
+    version,
+    blacklist: BLACKLIST_TEMPLATE,
+  },
   schema: {
+    version: { type: ['string', 'null'] },
     blacklist: {
       type: 'object',
       properties: {
@@ -176,7 +204,11 @@ const blacklistStore = new Store({
   },
   beforeEachMigration: (_, context) =>
     generateMigrationMessage('blacklist.json', context),
+  migrations: blacklistMigrations,
 });
+
+const songStoreVersion = songStore.get('version');
+log('song store version', { songStoreVersion }, 'WARN');
 
 export const supportedMusicExtensions =
   appPreferences.supportedMusicExtensions.map((x) => `.${x}`);
@@ -245,6 +277,11 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
     ) {
       userData.preferences.autoLaunchApp = data;
     } else if (
+      dataType === 'preferences.isMusixmatchLyricsEnabled' &&
+      typeof data === 'boolean'
+    ) {
+      userData.preferences.isMusixmatchLyricsEnabled = data;
+    } else if (
       dataType === 'preferences.isMiniPlayerAlwaysOnTop' &&
       typeof data === 'boolean'
     ) {
@@ -259,26 +296,6 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
       typeof data === 'boolean'
     ) {
       userData.preferences.openWindowAsHiddenOnSystemStart = data;
-    } else if (
-      dataType === 'sortingStates.songsPage' &&
-      typeof data === 'string'
-    ) {
-      userData.sortingStates.songsPage = data as SongSortTypes;
-    } else if (
-      dataType === 'sortingStates.artistsPage' &&
-      typeof data === 'string'
-    ) {
-      userData.sortingStates.artistsPage = data as ArtistSortTypes;
-    } else if (
-      dataType === 'sortingStates.albumsPage' &&
-      typeof data === 'string'
-    ) {
-      userData.sortingStates.albumsPage = data as AlbumSortTypes;
-    } else if (
-      dataType === 'sortingStates.genresPage' &&
-      typeof data === 'string'
-    ) {
-      userData.sortingStates.genresPage = data as GenreSortTypes;
     } else if (
       dataType === 'customMusixmatchUserToken' &&
       typeof data === 'string'
@@ -384,16 +401,12 @@ export const createNewListeningDataInstance = (songId: string) => {
   const date = new Date();
   const currentYear = date.getFullYear();
 
-  const months = Array.from({ length: 12 }, () =>
-    Array.from({ length: 30 }, () => 0)
-  );
-
   const newListeningData: SongListeningData = {
     songId,
     skips: 0,
     fullListens: 0,
     inNoOfPlaylists: 0,
-    listens: [{ year: currentYear, months }],
+    listens: [{ year: currentYear, listens: [] }],
   };
   return newListeningData;
 };
@@ -580,11 +593,11 @@ export const resetAppCache = () => {
   cachedGenresData = [];
   cachedPlaylistsData = [...PLAYLIST_DATA_TEMPLATE];
   cachedUserData = { ...USER_DATA_TEMPLATE };
-  songStore.store = { songs: [] };
-  artistStore.store = { artists: [] };
-  albumStore.store = { albums: [] };
-  genreStore.store = { genres: [] };
-  userDataStore.store = { userData: USER_DATA_TEMPLATE };
-  playlistDataStore.store = { playlists: PLAYLIST_DATA_TEMPLATE };
+  songStore.store = { version, songs: [] };
+  artistStore.store = { version, artists: [] };
+  albumStore.store = { version, albums: [] };
+  genreStore.store = { version, genres: [] };
+  userDataStore.store = { version, userData: USER_DATA_TEMPLATE };
+  playlistDataStore.store = { version, playlists: PLAYLIST_DATA_TEMPLATE };
   log(`In-app cache cleared successfully.`);
 };

@@ -5,6 +5,7 @@ import Hyperlink from 'renderer/components/Hyperlink';
 import { syncedLyricsRegex } from 'renderer/components/LyricsPage/LyricsPage';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
 
 type Props = {
   songTitle: string;
@@ -24,6 +25,8 @@ type Props = {
 const SongLyricsEditor = (props: Props) => {
   const { userData } = React.useContext(AppContext);
   const { addNewNotifications } = React.useContext(AppUpdateContext);
+
+  const { isOnline } = useNetworkConnectivity();
 
   const {
     songTitle,
@@ -129,6 +132,10 @@ const SongLyricsEditor = (props: Props) => {
                 console.error(err);
               });
           }}
+          tooltipLabel={
+            isOnline ? undefined : 'You are not connected to the internet.'
+          }
+          isDisabled={!isOnline}
         />
         <Button
           key={1}
@@ -176,11 +183,15 @@ const SongLyricsEditor = (props: Props) => {
                 console.error(err);
               });
           }}
-          isDisabled={!userData?.preferences.isMusixmatchLyricsEnabled}
+          isDisabled={
+            !(isOnline && userData?.preferences.isMusixmatchLyricsEnabled)
+          }
           tooltipLabel={
-            !userData?.preferences.isMusixmatchLyricsEnabled
-              ? 'You have to enable Musixmatch Lyrics from Settings to use this feature.'
-              : undefined
+            isOnline
+              ? !userData?.preferences.isMusixmatchLyricsEnabled
+                ? undefined
+                : 'You have to enable Musixmatch Lyrics from Settings to use this feature.'
+              : 'You are not connected to the internet.'
           }
         />
       </div>

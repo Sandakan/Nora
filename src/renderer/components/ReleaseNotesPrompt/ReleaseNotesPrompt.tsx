@@ -1,8 +1,4 @@
 /* eslint-disable react/jsx-no-useless-fragment */
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable react/no-unescaped-entities */
-/* eslint-disable no-nested-ternary */
-/* eslint-disable react/require-default-props */
 import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
@@ -27,27 +23,50 @@ const ReleaseNotesPrompt = () => {
   const [releaseNotes, setReleaseNotes] =
     React.useState<Changelog>(localReleseNotes);
 
+  const latestUpdatedInfo = React.useMemo(() => {
+    const sortedReleaseNotes = releaseNotes.versions.sort(
+      (versionA, versionB) => {
+        const dateNowOfA = new Date(versionA.releaseDate).getTime();
+        const dateNowOfB = new Date(versionB.releaseDate).getTime();
+
+        if (dateNowOfA === dateNowOfB) return 0;
+        if (dateNowOfA > dateNowOfB) return -1;
+        return 1;
+      }
+    );
+
+    const latestVersion = sortedReleaseNotes[0];
+
+    // / / / / TO BE DEPRECATED CODE / / /
+    if (releaseNotes.latestVersion) {
+      latestVersion.artwork ||= releaseNotes.latestVersion.artwork;
+      latestVersion.importantNotes ??=
+        releaseNotes.latestVersion.importantNotes;
+    }
+    // / / / / /
+
+    return latestVersion;
+  }, [releaseNotes.latestVersion, releaseNotes.versions]);
+
   const noNewUpdateInform = React.useMemo(
     () =>
       localStorageData?.preferences?.noUpdateNotificationForNewUpdate ===
-      releaseNotes.latestVersion.version,
+      latestUpdatedInfo.version,
     [
+      latestUpdatedInfo.version,
       localStorageData?.preferences?.noUpdateNotificationForNewUpdate,
-      releaseNotes.latestVersion.version,
     ]
   );
 
   const updateNoNewUpdateInform = React.useCallback(
     (state: boolean) => {
-      const result = state
-        ? releaseNotes.latestVersion.version
-        : packageFile.version;
+      const result = state ? latestUpdatedInfo.version : packageFile.version;
       storage.preferences.setPreferences(
         'noUpdateNotificationForNewUpdate',
         result
       );
     },
-    [releaseNotes.latestVersion.version]
+    [latestUpdatedInfo.version]
   );
 
   React.useEffect(() => {
@@ -59,12 +78,10 @@ const ReleaseNotesPrompt = () => {
           if (res.status === 200) return res.json();
           throw new Error('response status is not 200');
         })
-        .then((res) => {
-          // eslint-disable-next-line no-console
+        .then((res: Changelog) => {
           console.log('fetched release notes from the server.', res);
           return setReleaseNotes(res);
         })
-        // eslint-disable-next-line no-console
         .catch((err) => {
           updateAppUpdatesState('ERROR');
           console.error(err);
@@ -74,9 +91,8 @@ const ReleaseNotesPrompt = () => {
   }, [isOnline]);
 
   const isAppLatestVersion = React.useMemo(
-    () =>
-      isLatestVersion(releaseNotes.latestVersion.version, packageFile.version),
-    [releaseNotes.latestVersion.version]
+    () => isLatestVersion(latestUpdatedInfo.version, packageFile.version),
+    [latestUpdatedInfo.version]
   );
 
   React.useEffect(() => {
@@ -91,15 +107,15 @@ const ReleaseNotesPrompt = () => {
           version={version.version}
           releaseDate={version.releaseDate}
           notes={version.notes}
-          isLatest={releaseNotes.latestVersion.version === version.version}
+          isLatest={latestUpdatedInfo.version === version.version}
         />
       )),
-    [releaseNotes]
+    [latestUpdatedInfo.version, releaseNotes.versions]
   );
 
   const latestVersionImportantNotes = React.useMemo(() => {
-    if (releaseNotes.latestVersion.importantNotes) {
-      const notes = releaseNotes.latestVersion.importantNotes.map((note) => {
+    if (latestUpdatedInfo.importantNotes) {
+      const notes = latestUpdatedInfo.importantNotes.map((note) => {
         return (
           <li className="latest-version-important-note mb-2 max-w-[90%] font-medium">
             {note}
@@ -108,13 +124,13 @@ const ReleaseNotesPrompt = () => {
       });
 
       return (
-        <ul className="mt-8 mb-12 flex list-disc flex-col justify-center px-8 marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight">
+        <ul className="mb-12 mt-8 flex list-disc flex-col justify-center px-8 marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight">
           {notes}
         </ul>
       );
     }
     return undefined;
-  }, [releaseNotes.latestVersion.importantNotes]);
+  }, [latestUpdatedInfo.importantNotes]);
 
   return (
     <>
@@ -138,11 +154,11 @@ const ReleaseNotesPrompt = () => {
                 />
               </div>
             )}
-            {isOnline && releaseNotes.latestVersion.artwork && (
-              <div className="version-artwork-container mb-4 p-4">
+            {isOnline && latestUpdatedInfo.artwork && (
+              <div className="version-artwork-container mb-4 p-4 empty:mb-0 empty:p-0">
                 <Img
-                  src={`${packageFile.urls.raw_repository_url}master${releaseNotes.latestVersion.artwork}`}
-                  fallbackSrc={releaseNotes.latestVersion.artwork}
+                  src={`${packageFile.urls.raw_repository_url}master${latestUpdatedInfo.artwork}`}
+                  fallbackSrc={latestUpdatedInfo.artwork}
                   className="rounded-lg"
                   alt=""
                 />

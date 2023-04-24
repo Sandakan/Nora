@@ -17,31 +17,44 @@ const incrementListeningDataProperties = (
 
 const updateSongListensArray = (
   updateType: ListeningDataUpdateTypes,
-  listens: YearlyListeningRate[]
+  yearlyListens: YearlyListeningRate[]
 ) => {
-  const date = new Date();
-  const currentYear = date.getFullYear();
-  const currentMonth = date.getMonth();
-  const currentDate = date.getDate();
+  const currentDate = new Date();
+  const currentNow = currentDate.getTime();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth();
+  const currentDay = currentDate.getDate();
 
   const updateValue = updateType === 'increment' ? 1 : -1;
 
-  if (listens.some((y) => y.year === currentYear)) {
-    for (let i = 0; i < listens.length; i += 1) {
-      if (
-        listens[i].year === currentYear &&
-        listens[i].months[currentMonth] !== undefined
-      ) {
-        if (
-          typeof listens[i].months[currentMonth][currentDate - 1] === 'number'
-        )
-          listens[i].months[currentMonth][currentDate - 1] += updateValue;
-        else if (listens[i].months[currentMonth].length < 31)
-          listens[i].months[currentMonth][currentDate - 1] = 1;
+  for (const yearlyListen of yearlyListens) {
+    if (yearlyListen.year === currentYear) {
+      for (const listenData of yearlyListen.listens) {
+        const date = listenData[0];
+
+        if (typeof date === 'number' && typeof listenData[1] === 'number') {
+          const songDate = new Date(date);
+          const songMonth = songDate.getMonth();
+          const songDay = songDate.getDate();
+
+          if (currentMonth === songMonth && currentDay === songDay) {
+            if (listenData[1] > 0) listenData[1] += updateValue;
+            return yearlyListens;
+          }
+        }
       }
+      yearlyListen.listens.push([
+        currentNow,
+        updateType === 'increment' ? 1 : 0,
+      ]);
+      return yearlyListens;
     }
   }
-  return listens;
+  yearlyListens.push({
+    year: currentYear,
+    listens: [[currentNow, updateType === 'increment' ? 1 : 0]],
+  });
+  return yearlyListens;
 };
 
 const updateListeningData = (
@@ -98,35 +111,43 @@ const updateSongListeningData = (
   dataType: ListeningDataTypes,
   updateType: ListeningDataUpdateTypes
 ) => {
-  log(
-    `Requested to ${updateType} ${dataType} of the '${songId}' song's listening data.`
-  );
-  const listeningData = getListeningData([songId]);
-
-  if (listeningData.length > 0) {
-    for (let i = 0; i < listeningData.length; i += 1) {
-      if (listeningData[i].songId === songId) {
-        const updatedListeningData = updateListeningData(
-          dataType,
-          listeningData[i],
-          updateType
-        );
-        return setListeningData(updatedListeningData);
-      }
-    }
-
+  try {
     log(
-      `No listening data found for songId ${songId}. Creating a new listening data instance.`
+      `Requested to ${updateType} ${dataType} of the '${songId}' song's listening data.`
     );
-    const newListeningData = createNewListeningDataInstance(songId);
-    const updatedListeningData = updateListeningData(
-      dataType,
-      newListeningData,
-      updateType
+    const listeningData = getListeningData([songId]);
+
+    if (listeningData.length > 0) {
+      for (let i = 0; i < listeningData.length; i += 1) {
+        if (listeningData[i].songId === songId) {
+          const updatedListeningData = updateListeningData(
+            dataType,
+            listeningData[i],
+            updateType
+          );
+          return setListeningData(updatedListeningData);
+        }
+      }
+
+      log(
+        `No listening data found for songId ${songId}. Creating a new listening data instance.`
+      );
+      const newListeningData = createNewListeningDataInstance(songId);
+      const updatedListeningData = updateListeningData(
+        dataType,
+        newListeningData,
+        updateType
+      );
+      return setListeningData(updatedListeningData);
+    }
+    return log('Listening data array empty');
+  } catch (error) {
+    return log(
+      `Error occurred when trying to update song listening data for the song with id ${songId}`,
+      { error },
+      'ERROR'
     );
-    return setListeningData(updatedListeningData);
   }
-  return log('Listening data array empty');
 };
 
 export default updateSongListeningData;

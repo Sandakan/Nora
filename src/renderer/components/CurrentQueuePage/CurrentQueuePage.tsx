@@ -7,7 +7,6 @@ import React, { useContext } from 'react';
 import { FixedSizeList, FixedSizeList as List } from 'react-window';
 import {
   Draggable,
-  // ResponderProvided,
   DropResult,
   Droppable,
   DragDropContext,
@@ -15,6 +14,8 @@ import {
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+
 import Button from '../Button';
 import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 import DefaultPlaylistCover from '../../../../assets/images/webp/playlist_cover_default.webp';
@@ -54,6 +55,8 @@ const CurrentQueuePage = () => {
     artworkPath: DefaultSongCover,
     title: '',
   } as QueueInfo);
+  const [isAutoScrolling, setIsAutoScrolling] = React.useState(false);
+
   const containerRef = React.useRef(null as HTMLDivElement | null);
   const { width, height } = useResizeObserver(containerRef);
   const ListRef = React.useRef(null as FixedSizeList | null);
@@ -200,7 +203,7 @@ const CurrentQueuePage = () => {
         if (queue.queueType === 'folder') {
           window.api.getFolderData([queue.queueId]).then((res) => {
             if (res && res.length > 0 && res[0]) {
-              const folderName = res[0].folderData.path.split('\\').pop();
+              const folderName = res[0].path.split('\\').pop();
               setQueueInfo((prevData) => {
                 return {
                   ...prevData,
@@ -214,6 +217,8 @@ const CurrentQueuePage = () => {
       }
     }
   }, [currentSongData.artworkPath, queue.queueId, queue.queueType]);
+
+  const selectAllHandler = useSelectAllHandler(queuedSongs, 'songs', 'songId');
 
   const row = React.useCallback(
     (props: { index: number; style: React.CSSProperties }) => {
@@ -259,6 +264,7 @@ const CurrentQueuePage = () => {
                   year={year}
                   isBlacklisted={isBlacklisted}
                   isAFavorite={isAFavorite}
+                  selectAllHandler={selectAllHandler}
                   additionalContextMenuItems={[
                     {
                       label: 'Remove from Queue',
@@ -288,6 +294,7 @@ const CurrentQueuePage = () => {
       multipleSelectionsData,
       queue.queue,
       queuedSongs,
+      selectAllHandler,
       toggleMultipleSelections,
       updateQueueData,
     ]
@@ -320,21 +327,46 @@ const CurrentQueuePage = () => {
     if (ListRef && index >= 0) ListRef.current?.scrollToItem(index, 'center');
   }, [currentSongData.songId, queue.queue]);
 
+  React.useEffect(() => {
+    let timeOutId: NodeJS.Timeout;
+    if (isAutoScrolling) {
+      timeOutId = setTimeout(() => centerCurrentlyPlayingSong(), 1000);
+    }
+
+    return () => {
+      if (timeOutId) clearTimeout(timeOutId);
+    };
+  }, [centerCurrentlyPlayingSong, isAutoScrolling]);
+
   const moreOptionsContextMenuItems = React.useMemo(
     () => [
+      {
+        label: `${isAutoScrolling ? 'Disable' : 'Enable'} Auto Scrolling`,
+        iconName: isAutoScrolling ? 'flash_off' : 'flash_on',
+        handlerFunction: () => setIsAutoScrolling((state) => !state),
+      },
       {
         label: 'Scroll to currently playing song',
         iconName: 'vertical_align_center',
         handlerFunction: centerCurrentlyPlayingSong,
       },
     ],
-    [centerCurrentlyPlayingSong]
+    [centerCurrentlyPlayingSong, isAutoScrolling]
   );
 
   return (
-    <MainContainer className="current-queue-container appear-from-bottom relative !h-full overflow-hidden !pb-0">
+    <MainContainer
+      className="current-queue-container appear-from-bottom relative !h-full overflow-hidden !pb-0"
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
+    >
       <>
-        <div className="title-container mt-2 mb-4 flex items-center justify-between pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container mb-4 mt-2 flex items-center justify-between pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           Currently Playing Queue
           <div className="other-controls-container float-right flex">
             <Button
@@ -435,9 +467,14 @@ const CurrentQueuePage = () => {
               />
             </div>
             <div className="queue-info">
+              <div className="queue-type text-sm font-semibold uppercase opacity-50 dark:font-medium">
+                {queue.queueType}
+              </div>
               <div className="queue-title text-3xl">{queueInfo.title}</div>
               <div className="other-info flex text-sm font-light">
-                <div className="queue-no-of-songs">{`${queuedSongs.length} songs`}</div>
+                <div className="queue-no-of-songs">{`${
+                  queuedSongs.length
+                } song${queuedSongs.length !== 1 ? 's' : ''}`}</div>
                 <span className="mx-1">&bull;</span>
                 <div className="queue-total-duration">
                   {calculateTotalTime()}
@@ -487,6 +524,7 @@ const CurrentQueuePage = () => {
               >
                 {(droppableProvided, snapshot) => (
                   <List
+                    className="appear-from-bottom delay-100"
                     height={height}
                     itemCount={
                       snapshot.isUsingPlaceholder

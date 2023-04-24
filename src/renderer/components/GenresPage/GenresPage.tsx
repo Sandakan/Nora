@@ -7,34 +7,33 @@ import { FixedSizeGrid as Grid } from 'react-window';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import storage from 'renderer/utils/localStorage';
+
 import Dropdown from '../Dropdown';
 import MainContainer from '../MainContainer';
 import Genre from './Genre';
-import NoSongsImage from '../../../../assets/images/svg/Summer landscape_Monochromatic.svg';
 import Img from '../Img';
 import Button from '../Button';
+
+import NoSongsImage from '../../../../assets/images/svg/Summer landscape_Monochromatic.svg';
 
 const GenresPage = () => {
   const {
     currentlyActivePage,
-    userData,
+    localStorageData,
     isMultipleSelectionEnabled,
     multipleSelectionsData,
   } = React.useContext(AppContext);
-  const {
-    updateCurrentlyActivePageData,
-    updatePageSortingOrder,
-    toggleMultipleSelections,
-  } = React.useContext(AppUpdateContext);
+  const { updateCurrentlyActivePageData, toggleMultipleSelections } =
+    React.useContext(AppUpdateContext);
 
   const [genresData, setGenresData] = React.useState([] as Genre[] | null);
   const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
-  const [sortingOrder, setSortingOrder] = React.useState(
-    currentlyActivePage.data && currentlyActivePage.data.sortingOrder
-      ? (currentlyActivePage.data.sortingOrder as GenreSortTypes)
-      : userData && userData.sortingStates.genresPage
-      ? userData.sortingStates.genresPage
-      : ('aToZ' as GenreSortTypes)
+  const [sortingOrder, setSortingOrder] = React.useState<GenreSortTypes>(
+    currentlyActivePage?.data?.sortingOrder ||
+      localStorageData?.sortingStates?.genresPage ||
+      'aToZ'
   );
 
   const containerRef = React.useRef(null as HTMLDivElement | null);
@@ -84,9 +83,14 @@ const GenresPage = () => {
   }, [fetchGenresData]);
 
   React.useEffect(
-    () => updatePageSortingOrder('sortingStates.genresPage', sortingOrder),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    () => storage.sortingStates.setSortingStates('genresPage', sortingOrder),
     [sortingOrder]
+  );
+
+  const selectAllHandler = useSelectAllHandler(
+    genresData as Genre[],
+    'genre',
+    'genreId'
   );
 
   const row = React.useCallback(
@@ -97,7 +101,6 @@ const GenresPage = () => {
     }) => {
       const { columnIndex, rowIndex, style } = props;
       const index = rowIndex * noOfColumns + columnIndex;
-      // eslint-disable-next-line no-console
       if (genresData && index < genresData.length) {
         const { genreId, name, songs, backgroundColor, artworkPaths } =
           genresData[index];
@@ -110,19 +113,29 @@ const GenresPage = () => {
               title={name}
               backgroundColor={backgroundColor}
               songIds={songs.map((song) => song.songId)}
+              selectAllHandler={selectAllHandler}
             />
           </div>
         );
       }
       return <div style={style} />;
     },
-    [genresData, noOfColumns]
+    [genresData, noOfColumns, selectAllHandler]
   );
 
   return (
-    <MainContainer className="genres-list-container appear-from-bottom !h-full overflow-hidden !pb-0 text-font-color-black dark:text-font-color-white">
+    <MainContainer
+      className="genres-list-container appear-from-bottom !h-full overflow-hidden !pb-0 text-font-color-black dark:text-font-color-white"
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
+    >
       <>
-        <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">
             Genres{' '}
             <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
@@ -188,6 +201,7 @@ const GenresPage = () => {
         >
           {genresData && genresData.length > 0 && (
             <Grid
+              className="appear-from-bottom delay-100"
               columnCount={noOfColumns || 3}
               columnWidth={itemWidth}
               rowCount={noOfRows || 3}

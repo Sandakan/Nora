@@ -3,12 +3,15 @@ import { getUserData } from '../filesystem';
 import removeMusicFolder from '../core/removeMusicFolder';
 import { dirExistsSync } from '../utils/dirExists';
 import log from '../log';
+import { getAllFoldersFromFolderStructures } from './parseFolderStructuresForSongPaths';
 
 const checkForFolderModifications = (foldername: string) => {
   const { musicFolders } = getUserData();
-  const musicFolderPaths = musicFolders.map((folder) => folder.path);
+
+  const folders = getAllFoldersFromFolderStructures(musicFolders);
+  const musicFolderPaths = folders.map((folder) => folder.path);
   const foldersWithDeletedFolderName = musicFolderPaths.filter(
-    (dir) => path.basename(dir) === foldername
+    (dir) => path.basename(dir) === path.basename(foldername)
   );
   if (foldersWithDeletedFolderName.length > 0) {
     for (let i = 0; i < foldersWithDeletedFolderName.length; i += 1) {

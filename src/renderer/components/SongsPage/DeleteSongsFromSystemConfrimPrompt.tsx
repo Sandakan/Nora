@@ -30,7 +30,7 @@ export default (props: { songIds: string[] }) => {
 
   return (
     <>
-      <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
+      <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
         Delete{' '}
         {songsData.length === 1
           ? `'${songsData[0].title}'`
@@ -74,8 +74,9 @@ export default (props: { songIds: string[] }) => {
                     songsData
                       .map((song) => song.path)
                       .includes(currentSongData.songId)
-                  )
+                  ) {
                     clearAudioPlayerData();
+                  }
                   addNewNotifications([
                     {
                       id: `songRemoved`,

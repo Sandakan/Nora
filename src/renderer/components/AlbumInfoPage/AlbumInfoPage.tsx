@@ -1,14 +1,9 @@
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable no-nested-ternary */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable promise/always-return */
-/* eslint-disable promise/catch-or-return */
-/* eslint-disable react/destructuring-assignment */
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
 import Button from '../Button';
 import Dropdown from '../Dropdown';
@@ -115,7 +110,9 @@ export default () => {
           if (res && res.length > 0 && res[0]) {
             dispatch({ type: 'ALBUM_DATA_UPDATE', data: res[0] });
           }
-        });
+          return undefined;
+        })
+        .catch((err) => console.error(err));
     }
   }, [currentlyActivePage.data.albumId]);
 
@@ -133,7 +130,9 @@ export default () => {
           if (res && res.length > 0) {
             dispatch({ type: 'SONGS_DATA_UPDATE', data: res });
           }
-        });
+          return undefined;
+        })
+        .catch((err) => console.error(err));
     }
   }, [albumContent.albumData, albumContent.sortingOrder]);
 
@@ -190,6 +189,11 @@ export default () => {
     };
   }, [fetchAlbumSongs]);
 
+  const selectAllHandler = useSelectAllHandler(
+    albumContent.songsData,
+    'songs',
+    'songId'
+  );
   const songComponents = React.useMemo(
     () =>
       albumContent.songsData.length > 0
@@ -210,6 +214,7 @@ export default () => {
                 isAFavorite={song.isAFavorite}
                 year={song.year}
                 isBlacklisted={song.isBlacklisted}
+                selectAllHandler={selectAllHandler}
               />
             );
           })
@@ -217,6 +222,7 @@ export default () => {
     [
       albumContent.songsData,
       localStorageData?.preferences?.isSongIndexingEnabled,
+      selectAllHandler,
     ]
   );
 
@@ -235,7 +241,16 @@ export default () => {
   }, [albumContent.songsData]);
 
   return (
-    <MainContainer className="album-info-page-container appear-from-bottom pb-12 pl-8 pt-4">
+    <MainContainer
+      className="album-info-page-container appear-from-bottom pb-12 pl-8 pt-4"
+      focusable
+      onKeyDown={(e) => {
+        if (e.ctrlKey && e.key === 'a') {
+          e.stopPropagation();
+          selectAllHandler();
+        }
+      }}
+    >
       <>
         <div className="album-img-and-info-container flex flex-row items-center">
           <div className="album-cover-container mr-8">
@@ -298,7 +313,7 @@ export default () => {
             )}
         </div>
         <div className="album-songs-container secondary-container songs-list-container mt-8 h-fit pb-4">
-          <div className="title-container ju mt-1 mb-4 flex items-center justify-between pr-4 text-2xl text-font-color-black  dark:text-font-color-white">
+          <div className="title-container ju mb-4 mt-1 flex items-center justify-between pr-4 text-2xl text-font-color-black  dark:text-font-color-white">
             Songs
             <div className="other-controls-container flex">
               {albumContent.songsData.length > 0 && (

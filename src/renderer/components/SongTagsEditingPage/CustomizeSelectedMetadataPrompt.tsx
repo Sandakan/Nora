@@ -6,7 +6,11 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
 import Checkbox from '../Checkbox';
 import Img from '../Img';
-import { MetadataKeywords } from './SongTagsEditingPage';
+import {
+  manageAlbumData,
+  manageArtistsData,
+  manageGenresData,
+} from './SongMetadataResult';
 
 interface SongMetadataResultProp {
   title: string;
@@ -17,7 +21,6 @@ interface SongMetadataResultProp {
   lyrics?: string;
   artworkPaths?: string[];
   updateSongInfo: (_callback: (_prevData: SongTags) => SongTags) => void;
-  updateMetadataKeywords: (_metadataKeywords: MetadataKeywords) => void;
 }
 
 const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
@@ -31,7 +34,6 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
     lyrics,
     releasedYear,
     updateSongInfo,
-    updateMetadataKeywords,
   } = props;
 
   const [selectedArtwork, setSelectedArtwork] = React.useState(
@@ -91,8 +93,9 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
     [lyrics]
   );
 
-  const updateSelectedMetadata = React.useCallback(() => {
+  const updateSelectedMetadata = React.useCallback(async () => {
     changePromptMenuData(false, undefined, '');
+
     const {
       isTitleSelected,
       isAlbumSelected,
@@ -101,31 +104,45 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
       isLyricsSelected,
       isReleasedYearSelected,
     } = selectedMetadata;
-    updateSongInfo((prevData) => {
+
+    const albumData = isAlbumSelected
+      ? album
+        ? await window.api.getAlbumData([album])
+        : []
+      : undefined;
+    const artistData = isArtistsSelected
+      ? await window.api.getArtistData(artists)
+      : undefined;
+    const genreData = isGenresSelected
+      ? genres
+        ? await window.api.getGenresData(genres)
+        : []
+      : undefined;
+
+    updateSongInfo((prevData): SongTags => {
       return {
         ...prevData,
-        title: isTitleSelected && title ? title : prevData.title || undefined,
+        title: isTitleSelected && title ? title : prevData?.title,
         releasedYear:
           isReleasedYearSelected && typeof releasedYear === 'number'
             ? releasedYear
-            : prevData.releasedYear || undefined,
-        lyrics:
-          isLyricsSelected && lyrics ? lyrics : prevData.lyrics || undefined,
-        artworkPath: selectedArtwork || prevData.artworkPath || undefined,
-        album:
-          prevData.album && selectedArtwork
-            ? {
-                ...prevData?.album,
-                artworkPath: selectedArtwork || prevData.artworkPath,
-              }
-            : prevData.album || undefined,
-      } as SongTags;
+            : prevData?.releasedYear,
+        lyrics: isLyricsSelected && lyrics ? lyrics : prevData?.lyrics,
+        artworkPath: selectedArtwork || prevData?.artworkPath,
+        album: albumData ? manageAlbumData(albumData, album) : prevData.album,
+        artists: artistData
+          ? manageArtistsData(artistData, artists)
+          : prevData.artists,
+        genres: genreData
+          ? manageGenresData(genreData, genres)
+          : prevData.genres,
+      };
     });
-    updateMetadataKeywords({
-      albumKeyword: isAlbumSelected ? album : undefined,
-      artistKeyword: isArtistsSelected ? artists?.join(';') : undefined,
-      genreKeyword: isGenresSelected ? genres?.join(';') : undefined,
-    });
+    // updateMetadataKeywords({
+    //   albumKeyword: isAlbumSelected ? album : undefined,
+    //   artistKeyword: isArtistsSelected ? artists?.join(';') : undefined,
+    //   genreKeyword: isGenresSelected ? genres?.join(';') : undefined,
+    // });
   }, [
     album,
     artists,
@@ -136,32 +153,33 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
     selectedArtwork,
     selectedMetadata,
     title,
-    updateMetadataKeywords,
     updateSongInfo,
   ]);
 
-  const updateAllMetadata = React.useCallback(() => {
+  const updateAllMetadata = React.useCallback(async () => {
     changePromptMenuData(false, undefined, '');
+
+    const albumData = album ? await window.api.getAlbumData([album]) : [];
+    const artistData = await window.api.getArtistData(artists);
+    const genreData = genres ? await window.api.getGenresData(genres) : [];
+
     updateSongInfo((prevData) => {
       return {
         ...prevData,
-        title: title || prevData.title || undefined,
-        releasedYear: releasedYear ?? prevData.releasedYear ?? undefined,
-        lyrics: lyrics || prevData.lyrics || undefined,
-        artworkPath: selectedArtwork || prevData.artworkPath || undefined,
-        album: prevData.album
-          ? {
-              ...prevData?.album,
-              artworkPath: selectedArtwork || prevData.artworkPath || undefined,
-            }
-          : undefined,
+        title: title || prevData?.title,
+        releasedYear: releasedYear ?? prevData?.releasedYear,
+        lyrics: lyrics || prevData?.lyrics,
+        artworkPath: selectedArtwork || prevData?.artworkPath,
+        artists: manageArtistsData(artistData, artists),
+        album: manageAlbumData(albumData, album),
+        genres: manageGenresData(genreData, genres),
       } as SongTags;
     });
-    updateMetadataKeywords({
-      albumKeyword: album || undefined,
-      artistKeyword: Array.isArray(artists) ? artists?.join(';') : undefined,
-      genreKeyword: Array.isArray(genres) ? genres?.join(';') : undefined,
-    });
+    // updateMetadataKeywords({
+    //   albumKeyword: album || undefined,
+    //   artistKeyword: Array.isArray(artists) ? artists?.join(';') : undefined,
+    //   genreKeyword: Array.isArray(genres) ? genres?.join(';') : undefined,
+    // });
   }, [
     album,
     artists,
@@ -171,7 +189,6 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
     releasedYear,
     selectedArtwork,
     title,
-    updateMetadataKeywords,
     updateSongInfo,
   ]);
 
@@ -213,14 +230,25 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
 
   return (
     <div>
-      <div className="title-container mt-1 mb-8 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         Customize Downloaded Metadata for '{title}'
       </div>
       <div className="artworks-container">
         <div className="title-container mb-4 text-xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           Select an artwork
         </div>
-        <div className="artworks flex">{artworkComponents}</div>
+        <div className="artworks flex">
+          {artworkComponents && artworkComponents.length > 0 ? (
+            artworkComponents
+          ) : (
+            <div className="flex w-full flex-col items-center justify-center py-4 opacity-80">
+              <span className="material-icons-round-outlined mb-2 text-3xl">
+                macro_off
+              </span>
+              No artworks found
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="other-info-container mt-10">
@@ -268,7 +296,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
               </div>
             </div>
           )}
-          {artists && (
+          {artists && artists.length > 0 && (
             <div className="other-info mb-4 flex items-center rounded-lg p-2 odd:bg-background-color-2/50 odd:dark:bg-dark-background-color-2/50">
               <Checkbox
                 isChecked={selectedMetadata.isArtistsSelected}
@@ -318,7 +346,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
               </div>
             </div>
           )}
-          {genres && (
+          {genres && genres?.length > 0 && (
             <div className="other-info mb-4 flex items-center rounded-lg p-2 odd:bg-background-color-2/50 odd:dark:bg-dark-background-color-2/50">
               <Checkbox
                 isChecked={selectedMetadata.isGenresSelected}

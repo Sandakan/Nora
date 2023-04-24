@@ -3,20 +3,24 @@ import { getArtistArtworkPath } from '../fs/resolveFilePaths';
 import { getArtistsData } from '../filesystem';
 
 const withoutAccents = (str: string) => {
-  const noAccents = str.normalize('NFD').replace(/\p{Diacritic}/gu, '');
+  const noAccents = str
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .trim();
 
   return noAccents;
 };
 
 export const getArtistDuplicates = (artistName: string) => {
   const artists = getArtistsData();
-  const regex = new RegExp(artistName, 'gi');
 
   const duplicates: SavableArtist[] = [];
 
   for (const artist of artists) {
     const noAccentsName = withoutAccents(artist.name);
-    const isADuplicate = regex.test(noAccentsName);
+    const noAccentsArtistName = withoutAccents(artistName);
+    const isADuplicate = noAccentsName === noAccentsArtistName;
 
     if (isADuplicate) duplicates.push(artist);
   }

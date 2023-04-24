@@ -17,17 +17,21 @@ interface GenreProp {
   artworkPaths: ArtworkPaths;
   backgroundColor?: { rgb: unknown };
   className?: string;
+  selectAllHandler?: (_upToId?: string) => void;
 }
 
 const Genre = (props: GenreProp) => {
-  const { genreId, songIds, title, artworkPaths, backgroundColor, className } =
-    props;
   const {
-    currentlyActivePage,
-    queue,
-    isMultipleSelectionEnabled,
-    multipleSelectionsData,
-  } = React.useContext(AppContext);
+    genreId,
+    songIds,
+    title,
+    artworkPaths,
+    backgroundColor,
+    className,
+    selectAllHandler,
+  } = props;
+  const { queue, isMultipleSelectionEnabled, multipleSelectionsData } =
+    React.useContext(AppContext);
   const {
     changeCurrentActivePage,
     createQueue,
@@ -40,18 +44,10 @@ const Genre = (props: GenreProp) => {
 
   const goToGenreInfoPage = React.useCallback(
     () =>
-      currentlyActivePage.pageTitle === 'GenreInfo' &&
-      currentlyActivePage?.data?.genreId === genreId
-        ? changeCurrentActivePage('Home')
-        : changeCurrentActivePage('GenreInfo', {
-            genreId,
-          }),
-    [
-      changeCurrentActivePage,
-      currentlyActivePage?.data?.genreId,
-      currentlyActivePage.pageTitle,
-      genreId,
-    ]
+      changeCurrentActivePage('GenreInfo', {
+        genreId,
+      }),
+    [changeCurrentActivePage, genreId]
   );
 
   const playGenreSongs = React.useCallback(
@@ -227,7 +223,7 @@ const Genre = (props: GenreProp) => {
         handlerFunction: () => true,
       },
       {
-        label: isMultipleSelectionEnabled ? 'Unselect' : 'Select',
+        label: isAMultipleSelection ? 'Unselect' : 'Select',
         iconName: 'checklist',
         handlerFunction: () => {
           if (isMultipleSelectionEnabled) {
@@ -237,13 +233,17 @@ const Genre = (props: GenreProp) => {
               isAMultipleSelection ? 'remove' : 'add'
             );
           }
-          return toggleMultipleSelections(
-            !isMultipleSelectionEnabled,
-            'genre',
-            [genreId]
-          );
+          return toggleMultipleSelections(!isAMultipleSelection, 'genre', [
+            genreId,
+          ]);
         },
       },
+      // {
+      //   label: 'Select/Unselect All',
+      //   iconName: 'checklist',
+      //   isDisabled: !selectAllHandler,
+      //   handlerFunction: () => selectAllHandler && selectAllHandler(),
+      // },
       {
         label: 'Info',
         iconName: 'info',
@@ -256,7 +256,6 @@ const Genre = (props: GenreProp) => {
     multipleSelectionsData.selectionType,
     multipleSelectionsData.multipleSelections.length,
     isAMultipleSelection,
-    isMultipleSelectionEnabled,
     goToGenreInfoPage,
     playGenreSongsForMultipleSelections,
     playGenreSongs,
@@ -266,6 +265,7 @@ const Genre = (props: GenreProp) => {
     songIds,
     updateQueueData,
     addNewNotifications,
+    isMultipleSelectionEnabled,
     genreId,
     updateMultipleSelections,
   ]);
@@ -282,13 +282,13 @@ const Genre = (props: GenreProp) => {
 
   return (
     <div
-      className={`genre appear-from-bottom group relative mr-10 mb-6 flex h-36 w-72 cursor-pointer items-center overflow-hidden rounded-2xl p-4 text-background-color-2 transition-[border,border-color] dark:text-dark-background-color-2 ${className} ${
+      className={`genre appear-from-bottom group relative mb-6 mr-10 flex h-36 w-72 cursor-pointer items-center overflow-hidden rounded-2xl p-4 text-background-color-2 transition-[border,border-color] dark:text-dark-background-color-2 ${className} ${
         isMultipleSelectionEnabled &&
         multipleSelectionsData.selectionType === 'genre' &&
-        'border-4'
+        'border-4 border-transparent'
       } ${
         isAMultipleSelection &&
-        'border-font-color-highlight dark:border-dark-font-color-highlight'
+        '!border-font-color-highlight dark:!border-dark-font-color-highlight'
       }`}
       style={{
         backgroundColor: `rgb(${
@@ -296,10 +296,11 @@ const Genre = (props: GenreProp) => {
             ? (backgroundColor.rgb as [number, number, number]).join(',')
             : '23,23,23'
         })`,
-        // animationDelay: `${50 * (index + 1)}ms`,
       }}
       onClick={(e) => {
-        if (
+        if (e.getModifierState('Shift') === true && selectAllHandler)
+          selectAllHandler(genreId);
+        else if (
           isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'genre'
         )
@@ -308,14 +309,7 @@ const Genre = (props: GenreProp) => {
             'genre',
             isAMultipleSelection ? 'remove' : 'add'
           );
-        else if (e.getModifierState('Shift') === true) {
-          toggleMultipleSelections(!isMultipleSelectionEnabled, 'genre');
-          updateMultipleSelections(
-            genreId,
-            'genre',
-            isAMultipleSelection ? 'remove' : 'add'
-          );
-        } else goToGenreInfoPage();
+        else goToGenreInfoPage();
       }}
       onContextMenu={(e) =>
         updateContextMenuData(
@@ -348,7 +342,7 @@ const Genre = (props: GenreProp) => {
       <div className="genre-artwork-container absolute -right-4 top-1/2 -translate-y-1/2">
         <Img
           src={artworkPaths.artworkPath}
-          className="w-24 rotate-12 rounded-md"
+          className="w-24 rotate-12 rounded-md shadow-2xl"
           alt="Artwork cover"
         />
       </div>

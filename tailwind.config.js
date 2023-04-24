@@ -62,8 +62,8 @@ module.exports = {
       },
       animation: {
         'spin-ease': 'spin 1000ms ease-in-out infinite',
-        'dialog-appear-ease-in-out': 'dialogAppear 200ms ease',
-        'dialog-dissappear-ease-in-out': 'dialogDisappear 200ms ease',
+        'dialog-appear-ease-in-out': 'dialogAppear 100ms ease-out',
+        'dialog-dissappear-ease-in-out': 'dialogDisappear 100ms ease-in',
         'bg-image-appear': 'appearBackgroundImage 500ms ease forwards',
       },
     },

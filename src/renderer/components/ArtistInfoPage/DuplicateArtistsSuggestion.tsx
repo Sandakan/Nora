@@ -12,9 +12,14 @@ type Props = {
 };
 
 const DuplicateArtistsSuggestion = (props: Props) => {
-  const { bodyBackgroundImage } = React.useContext(AppContext);
-  const { addNewNotifications, changeCurrentActivePage } =
-    React.useContext(AppUpdateContext);
+  const { bodyBackgroundImage, currentlyActivePage, currentSongData } =
+    React.useContext(AppContext);
+  const {
+    addNewNotifications,
+    changeCurrentActivePage,
+    updateCurrentSongData,
+  } = React.useContext(AppUpdateContext);
+
   const { name = '', artistId = '' } = props;
 
   const [isVisible, setIsVisible] = React.useState(true);
@@ -88,8 +93,19 @@ const DuplicateArtistsSuggestion = (props: Props) => {
 
       window.api
         .resolveArtistDuplicates(selectedId, duplicateIds)
-        .then(() => {
+        .then((res) => {
+          if (
+            res?.updatedData &&
+            currentSongData.songId === res.updatedData.songId
+          ) {
+            updateCurrentSongData((prevData) => ({
+              ...prevData,
+              ...res.updatedData,
+            }));
+          }
           setIsVisible(false);
+          if (duplicateIds.includes(currentlyActivePage.data?.artistId))
+            changeCurrentActivePage('Home');
           return addNewNotifications([
             {
               content: 'Artist conflict resolved successfully.',
@@ -104,7 +120,14 @@ const DuplicateArtistsSuggestion = (props: Props) => {
         })
         .catch((err) => console.error(err));
     },
-    [addNewNotifications, duplicateArtists]
+    [
+      addNewNotifications,
+      changeCurrentActivePage,
+      currentSongData.songId,
+      currentlyActivePage.data?.artistId,
+      duplicateArtists,
+      updateCurrentSongData,
+    ]
   );
 
   return (
@@ -127,16 +150,26 @@ const DuplicateArtistsSuggestion = (props: Props) => {
               </span>{' '}
               Suggestion
             </div>
-            <Button
-              id="toggleSuggestionBox"
-              className="!m-0 !border-0 !p-0 outline-1 outline-offset-1 hover:bg-background-color-1/50 focus-visible:!outline hover:dark:bg-dark-background-color-1/50"
-              iconClassName="!leading-none !text-3xl"
-              iconName={isMessageVisible ? 'arrow_drop_up' : 'arrow_drop_down'}
-              tooltipLabel={
-                isMessageVisible ? 'Hide suggestion' : 'Show suggestion'
-              }
-              clickHandler={() => setIsMessageVisible((state) => !state)}
-            />
+            <div className="flex items-center">
+              <span
+                className="material-icons-round-outlined mr-4 text-xl"
+                title="This feature is still in the experimental state."
+              >
+                science
+              </span>
+              <Button
+                id="toggleSuggestionBox"
+                className="!m-0 !border-0 !p-0 outline-1 outline-offset-1 hover:bg-background-color-1/50 focus-visible:!outline hover:dark:bg-dark-background-color-1/50"
+                iconClassName="!leading-none !text-3xl"
+                iconName={
+                  isMessageVisible ? 'arrow_drop_up' : 'arrow_drop_down'
+                }
+                tooltipLabel={
+                  isMessageVisible ? 'Hide suggestion' : 'Show suggestion'
+                }
+                clickHandler={() => setIsMessageVisible((state) => !state)}
+              />
+            </div>
           </label>
           {isMessageVisible && (
             <div>
@@ -149,7 +182,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
                   artist, or you can ignore this suggestion.
                 </p>
               </div>
-              <div className="mt-3 flex">
+              <div className="mt-3 flex items-center">
                 {duplicateArtists.map((artist) => (
                   <Button
                     key={artist.name}
@@ -186,6 +219,12 @@ const DuplicateArtistsSuggestion = (props: Props) => {
                     ]);
                   }}
                 />
+                <span
+                  className="material-icons-round-outlined ml-4 cursor-pointer text-xl opacity-80 transition-opacity hover:opacity-100"
+                  title="Keep in mind that linking artists will update the library as well as metadata in songs linked these artists."
+                >
+                  info
+                </span>
               </div>
             </div>
           )}

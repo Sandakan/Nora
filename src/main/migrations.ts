@@ -1,5 +1,10 @@
 import type Conf from 'conf/dist/source/index';
 import log from './log';
+import {
+  BLACKLIST_TEMPLATE,
+  PLAYLIST_DATA_TEMPLATE,
+  USER_DATA_TEMPLATE,
+} from './filesystem';
 
 type StoreNames =
   | 'songs.json'
@@ -21,7 +26,17 @@ export const generateMigrationMessage = (
 };
 
 export const songMigrations = {
-  '1.0.0-alpha': (store: Conf<{ songs: unknown }>) => {
+  '2.0.0-stable': (
+    store: Conf<{ version?: string; songs: SavableSongData[] }>
+  ) => {
+    log('Starting the songs.json migration process.', {
+      version: '2.0.0-stable;',
+    });
+    store.set('songs', []);
+  },
+  '1.0.0-alpha': (
+    store: Conf<{ version?: string; songs: SavableSongData[] }>
+  ) => {
     log('Starting the songs.json migration process.', {
       version: '>=1.0.0-alpha;',
     });
@@ -50,7 +65,17 @@ export const songMigrations = {
 };
 
 export const artistMigrations = {
-  '0.8.0-alpha+2022091400': (store: Conf<{ artists: unknown }>) => {
+  '2.0.0-stable': (
+    store: Conf<{ version?: string; artists: SavableArtist[] }>
+  ) => {
+    log('Starting the artists.json migration process.', {
+      version: '2.0.0-stable;',
+    });
+    store.set('artists', []);
+  },
+  '0.8.0-alpha+2022091400': (
+    store: Conf<{ version?: string; artists: SavableArtist[] }>
+  ) => {
     log(
       'Starting the artists.json migration process.\nVERSION :>=0.8.0-alpha+2022091400;'
     );
@@ -64,5 +89,67 @@ export const artistMigrations = {
       });
       store.set('artists', updatedArtists);
     }
+  },
+};
+
+export const albumMigrations = {
+  '2.0.0-stable': (
+    store: Conf<{ version?: string; albums: SavableAlbum[] }>
+  ) => {
+    log('Starting the albums.json migration process.', {
+      version: '2.0.0-stable;',
+    });
+    store.set('albums', []);
+  },
+};
+
+export const playlistMigrations = {
+  '2.0.0-stable': (
+    store: Conf<{ version?: string; playlists: SavablePlaylist[] }>
+  ) => {
+    log('Starting the playlists.json migration process.', {
+      version: '2.0.0-stable;',
+    });
+    store.set('playlists', PLAYLIST_DATA_TEMPLATE);
+  },
+};
+
+export const genreMigrations = {
+  '2.0.0-stable': (
+    store: Conf<{ version?: string; genres: SavableGenre[] }>
+  ) => {
+    log('Starting the genres.json migration process.', {
+      version: '2.0.0-stable;',
+    });
+    store.set('genres', []);
+  },
+};
+
+export const userDataMigrations = {
+  '2.0.0-stable': (store: Conf<{ version?: string; userData: UserData }>) => {
+    log('Starting the userData.json migration process.', {
+      version: '2.0.0-stable;',
+    });
+    store.set('userData', USER_DATA_TEMPLATE);
+  },
+};
+
+export const listeningDataMigrations = {
+  '2.0.0-stable': (
+    store: Conf<{ version?: string; listeningData: SongListeningData[] }>
+  ) => {
+    log('Starting the listeningData.json migration process.', {
+      version: '2.0.0-stable;',
+    });
+    store.set('listeningData', []);
+  },
+};
+
+export const blacklistMigrations = {
+  '2.0.0-stable': (store: Conf<{ version?: string; blacklist: Blacklist }>) => {
+    log('Starting the blacklist.json migration process.', {
+      version: '2.0.0-stable;',
+    });
+    store.set('blacklist', BLACKLIST_TEMPLATE);
   },
 };

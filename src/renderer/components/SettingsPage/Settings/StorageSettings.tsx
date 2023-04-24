@@ -143,8 +143,8 @@ const StorageSettings = () => {
   }%`;
 
   return (
-    <>
-      <div className="title-container mt-1 mb-4 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+    <li className="main-container storage-settings-container mb-16">
+      <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         <span className="material-icons-round-outlined mr-2">hard_drive</span>
         Storage
       </div>
@@ -249,7 +249,7 @@ const StorageSettings = () => {
           </div>
 
           <ul className="mt-10 flex flex-wrap items-center justify-center px-8">
-            <li className="mr-8 mb-4 flex items-center">
+            <li className="mb-4 mr-8 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#ffbe76]" /> Other
               Applications Files :{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
@@ -262,14 +262,14 @@ const StorageSettings = () => {
                 }
               </span>
             </li>
-            <li className="mr-8 mb-4 flex items-center">
+            <li className="mb-4 mr-8 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#4834d4]" />{' '}
               Internal App Files :{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                 {parseByteSizes(storageMetrics?.appFolderSize)?.size}
               </span>
             </li>
-            <li className="mr-8 mb-4 flex items-center">
+            <li className="mb-4 mr-8 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#55efc4]" /> Artwork
               Cache :{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
@@ -279,7 +279,7 @@ const StorageSettings = () => {
                 }
               </span>
             </li>
-            <li className="mr-8 mb-4 flex items-center">
+            <li className="mb-4 mr-8 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#00b894]" /> Temp
               Artwork Cache :{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
@@ -290,7 +290,7 @@ const StorageSettings = () => {
                 }
               </span>
             </li>
-            <li className="mr-8 mb-4 flex items-center">
+            <li className="mb-4 mr-8 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#00cec9]" /> Songs
               Data :{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
@@ -300,7 +300,7 @@ const StorageSettings = () => {
                 }
               </span>
             </li>
-            <li className="mr-8 mb-4 flex items-center">
+            <li className="mb-4 mr-8 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#0984e3]" /> Artists
               Data :{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
@@ -310,7 +310,7 @@ const StorageSettings = () => {
                 }
               </span>
             </li>
-            <li className="mr-8 mb-4 flex items-center">
+            <li className="mb-4 mr-8 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#6c5ce7]" /> Albums
               Data :{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
@@ -320,7 +320,7 @@ const StorageSettings = () => {
                 }
               </span>
             </li>
-            <li className="mr-8 mb-4 flex items-center">
+            <li className="mb-4 mr-8 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#fdcb6e]" />{' '}
               Playlists Data :{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
@@ -330,7 +330,7 @@ const StorageSettings = () => {
                 }
               </span>
             </li>
-            <li className="mr-8 mb-4 flex items-center">
+            <li className="mb-4 mr-8 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#e17055]" /> Genres
               Data :{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
@@ -340,7 +340,7 @@ const StorageSettings = () => {
                 }
               </span>
             </li>
-            <li className="mr-8 mb-4 flex items-center">
+            <li className="mb-4 mr-8 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#d63031]" /> User
               Data :{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
@@ -350,7 +350,7 @@ const StorageSettings = () => {
                 }
               </span>
             </li>
-            <li className="mr-8 mb-4 flex items-center">
+            <li className="mb-4 mr-8 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#e84393]" /> App
               Logs :{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
@@ -441,7 +441,7 @@ const StorageSettings = () => {
           />
         </div>
       )}
-    </>
+    </li>
   );
 };
 

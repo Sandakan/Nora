@@ -135,7 +135,7 @@ const Sidebar = React.memo(() => {
       } delay-200 lg:absolute lg:w-14 lg:hover:w-[30%] lg:hover:shadow-2xl`}
     >
       <ErrorBoundary>
-        <ul className="relative flex !h-full flex-col overflow-x-hidden pt-6 pb-2">
+        <ul className="relative flex !h-full flex-col overflow-x-hidden pb-2 pt-6">
           {sideBarItems}
         </ul>
       </ErrorBoundary>

@@ -13,7 +13,7 @@ const SongComposerInput = (props: Props) => {
       <input
         type="text"
         id="song-composer-id3-tag"
-        className="mt-2 mr-2 w-[90%] rounded-3xl border-[.15rem] border-background-color-2 bg-background-color-1 py-3 px-4 text-font-color-black transition-colors focus:border-font-color-highlight dark:border-dark-background-color-2 dark:bg-dark-background-color-1 dark:text-font-color-white dark:focus:border-dark-font-color-highlight"
+        className="mr-2 mt-2 w-[90%] rounded-3xl border-[.15rem] border-background-color-2 bg-background-color-1 px-4 py-3 text-font-color-black transition-colors focus:border-font-color-highlight dark:border-dark-background-color-2 dark:bg-dark-background-color-1 dark:text-font-color-white dark:focus:border-dark-font-color-highlight"
         name="song-composer"
         placeholder="Composer"
         value={songComposer ?? ''}

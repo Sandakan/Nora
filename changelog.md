@@ -1,10 +1,114 @@
 # Change Log
 
-> ### The latest version (v1.2.0-stable) contains a lot of new features and improvements. As always expect some bugs in the app.
+> ### The latest version, **( v2.0.0-stable )** contains a lot of new features and improvements. As always expect some bugs in the app.
 
 <br>
 
-![Nora v1.2.0-stable version artwork](assets/other/release%20artworks/whats-new-v1.2.0-stable.webp)
+![Nora v2.0.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.0.0-stable.webp)
+
+<br>
+
+- ### **v2.0.0-stable - ( 23<sup>th</sup> of April 2023 )**
+
+  - ### 🎉 New Features and Features
+
+    - Added the 'Generate Palettes' button to the About section of the Settings to generate palettes on demand.
+    - Added playback-only experimental support for audio formats like FLAC, AAC, and M4R. Fixes
+      https://github.com/Sandakan/Nora/issues/148 , https://github.com/Sandakan/Nora/issues/142, #154 .
+    - Added support for viewing storage usage by the app.
+    - Added experimental support for an improved folder structure. Fixes #134.
+    - Added experimental support for suggestions for duplicate artists and artists identified as single artists. Fixes
+      #140.
+    - Added a new context option for the currently playing song artwork to the currently playing song's album. Fixes
+      https://github.com/Sandakan/Nora/issues/149.
+    - Added a new banner to the SongTagsEditingPage when trying to edit song formats that are supported for playback only.
+    - Added experimental support to generate a playlist cover automatically from the songs inside with the support to
+      randomize the artworks as an additional feature. Fixes https://github.com/Sandakan/Nora/issues/145.
+    - Added new options to configure the automatically generated playlist cover in the Preferences section of Settings.
+    - Added experimental support for an Audio Equalizer to the app. Fixes #151.
+    - Added a new prompt for the user to customize chosen folders before parsing them. Fixes #134.
+    - Added a new feature to reduce animations when the system is on battery power.
+    - Added a new feature to change the playback speed of the player.
+    - Added a new button to the right side of the app's footer for advanced playback options.
+    - Added a new smooth scrolling feature to pages that directs users to specific parts of the page.
+    - Added a new title next to the artwork in the queue to show the queue type.
+    - Add a new transition effect for some icons.
+    - Added support for responsive song cards in the Home.
+    - Added support to toggle between predictive search and normal search.
+    - Added support for highlighting more than one lyrics line at a time. Fixes #135.
+    - Added a new artwork filter for Deezer artist artworks to prevent showing artwork placeholders.
+    - Added a new auto-scrolling feature for the Queue page to scroll to the currently playing song on song skip.
+    - Added a new feature to show some info about the song to be played next in the currently playing song info container
+      periodically.
+
+  - ### 🔨 Fixes and Improvements
+
+    - Reduced the parsing time of a newly created library by around 30%.
+    - Fixed a bug where the app theme will change when changing the system's theme even though the user didn't select to
+      use the system theme in the app.
+    - Fixed a bug where the theme of the taskbar playback control buttons changed with the app theme instead of the system
+      theme.
+    - Fixed a bug where users can't go to the same page with different data. For example, the user can't go to another
+      artist's info page while staying on another artist's info page.
+    - Migrated the Music Folders section from Settings to the Music Folders page in the sidebar.
+    - Fixed a bug where Sidebar becomes cluttered in smaller resolutions. Fixes
+      https://github.com/Sandakan/Nora/issues/136.
+    - Updated some texts in the SongTagsEditingPage.
+    - Fixed a bug where users can save the same song tags again and again in the SongTagsEditingPage.
+    - Improved directory handling by the app.
+    - Reduced the brightness of background artwork.
+    - Fixed a bug where error messages and stack traces aren't being added to the log file.
+    - Fixed a bug where updating song id3 tags doesn't update album metadata.
+    - Fixed a bug where the app doesn't check for updates right after the connection was established.
+    - Fixed a bug where the focus state of a button persists even after the button is clicked.
+    - Fixed a bug where SongTagsEditingPage allows checking for song online results even though the app isn't connected to
+      the internet.
+    - Fixed a bug where disabled buttons show a loading animation. Fixes https://github.com/Sandakan/Nora/issues/139.
+    - Fixed a bug where clicking the recent search results and clicking another element to go to another page and come
+      back doesn't persist the clicked recent search result in the search page.
+    - Fixed a bug where the user can't update the artwork of a playlist after creating it.
+    - Fixed a bug where images aren't being shown on the app after they were updated due to caching.
+    - Fixed a bug where the app could go into an infinite error loop if there were any playback errors that the app
+      couldn't handle.
+    - Fixed a bug where removing a song from an album with only one song doesn't remove the album.
+    - Fixed some bugs related to sorting folders.
+    - Fixed flickering issues on some components when they were being updated.
+    - Fixed a bug where images show the alt text when hovered.
+    - Increased the font weight of the text in the sidebar.
+    - Fixed a bug where artist images shown next to the currently playing song cover aren't positioned correctly.
+    - Fixed a bug in Metadata Editing Page where the album cover is always the current song cover.
+    - Fixed a bug where selecting 'Add Selected' or 'Add All' when choosing song metadata results from the internet
+      doesn't update the artists, albums, and genres I the editing page. Fixes
+      https://github.com/Sandakan/Nora/issues/138.
+    - Improved accessibility in the Song Metadata Editor.
+    - Improved transitions in prompt menus.
+    - Fixed a bug where closing the prompt menu will flicker the menu.
+    - Fixed a bug where clicking the Most Relevant Album doesn't open the relevant Album page.
+    - Fixed a bug where artist names on the Song Info page aren't positioned properly.
+    - Fixed some bugs related to customizing selected metadata prompt.
+    - Fixed a bug where hovering over seek bars show an incorrect value.
+    - Fixed a bug where the message 'No Synced Lyrics Found' persists after disabling the lyrics.
+    - Added support for selecting multiple items by Shift + Click and select all by clicking Ctrl + A. Fixes
+      https://github.com/Sandakan/Nora/issues/143.
+    - Fixed a bug where the loading element in a button isn't positioned correctly.
+    - Improved accessibility in SongTagsEditingPage.
+    - Fixed a bug where the F5 shortcut to reload doesn't work for other programs when Nora is opened. Fixes #155.
+    - Fixed a bug where resetting the app doesn't clear local storage data.
+    - Reduced the space required to save listening data information by around 90%.
+    - Fixed a bug where resetting the app doesn't remove the data related to blacklists.
+    - Fixed a bug where Mini-player doesn't follow reduced motion.
+    - Fixed a bug where adding a song to play next to the last song of the queue will not be played.
+    - Fixed a bug where users can go to the same page repeatedly.
+    - Fixed a bug where clicking a button to go to a specific page twice would direct users to Home.
+    - Fixed a bug where folder modifications are not recognized in folder structures.
+    - Updated some styles in prompts.
+    - Updated some styles in the Release Notes prompt and open_source_licenses prompt.
+    - Reordered buttons in the About section of Settings.
+    - Fixed some security vulnerabilities in the app.
+    - Fixed a bug where Img component try to fetch 404 requests repeatedly.
+    - Fixed a bug where users can download lyrics in the lyrics editor even though the app is not connected to the internet.
+
+  <!-- - ### 🐜 Known Issues and Bugs -->
 
 <br>
 

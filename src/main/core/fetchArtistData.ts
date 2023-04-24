@@ -5,7 +5,8 @@ import sortArtists from '../utils/sortArtists';
 
 const fetchArtistData = async (
   artistIdsOrNames: string[] = [],
-  sortType?: ArtistSortTypes
+  sortType?: ArtistSortTypes,
+  limit = 0
 ): Promise<Artist[]> => {
   if (artistIdsOrNames) {
     log(`Requested artists data for ids '${artistIdsOrNames.join(',')}'`);
@@ -24,11 +25,17 @@ const fetchArtistData = async (
           }
         }
       }
+
       if (sortType) sortArtists(results, sortType);
-      return results.map((x) => ({
-        ...x,
-        artworkPaths: getArtistArtworkPath(x.artworkName),
-      }));
+
+      const maxResults = limit || results.length;
+
+      return results
+        .filter((_, index) => index < maxResults)
+        .map((x) => ({
+          ...x,
+          artworkPaths: getArtistArtworkPath(x.artworkName),
+        }));
     }
   }
   return [];

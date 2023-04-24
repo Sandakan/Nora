@@ -79,11 +79,11 @@ const getStorageUsage = async (forceRefresh = false) => {
 
   try {
     const appPath = app.getAppPath();
-    const { dir: appFolderPath, root: appPathRoot } = path.parse(appPath);
+    const { dir: appFolderPath } = path.parse(appPath);
 
     log(`appPath to be used to generate storage usage - ${appPath}`);
 
-    const rootSizes = await getRootSize(appPathRoot);
+    const rootSizes = await getRootSize(appPath);
 
     console.time('appFolder');
     const appFolderSize = await getDirSize(appFolderPath);
