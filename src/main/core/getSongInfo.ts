@@ -12,9 +12,12 @@ const getSongInfo = async (
   noBlacklistedSongs = false
 ): Promise<SongData[]> => {
   log(
-    `Fetching songs data from getSongInfo function about ${
-      limit || songIds.length
-    } songs.`
+    `Fetching data related to ${
+      limit ?? songIds.length
+    } songs from getSongInfo ${
+      sortType ? `with ${sortType}` : 'without'
+    } sorting.`,
+    { sortType, limit, preserveIdOrder, noBlacklistedSongs }
   );
   if (songIds.length > 0) {
     const songsData = getSongsData();

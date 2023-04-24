@@ -239,6 +239,7 @@ const SongControlsAndSeekbarContainer = () => {
             onChange={(e) => {
               setSongPos(e.currentTarget.valueAsNumber ?? 0);
             }}
+            onContextMenu={(e) => e.preventDefault()}
             onWheel={(e) => {
               isMouseScrollRef.current = true;
 

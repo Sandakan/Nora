@@ -47,17 +47,26 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: 'Play Next',
             iconName: 'shortcut',
             handlerFunction: () => {
-              if (queue.currentSongIndex === queue.queue.length - 1)
-                queue.currentSongIndex -= 1;
               const newQueue = queue.queue.filter(
-                (songId) => songId !== firstResult.songId
+                (id) => id !== firstResult.songId
               );
+              const duplicateSongIndex = queue.queue.indexOf(
+                firstResult.songId
+              );
+
+              const currentSongIndex =
+                queue.currentSongIndex &&
+                duplicateSongIndex !== -1 &&
+                duplicateSongIndex < queue.currentSongIndex
+                  ? queue.currentSongIndex - 1
+                  : undefined;
+
               newQueue.splice(
-                queue.queue.indexOf(currentSongData.songId) + 1 || 0,
+                newQueue.indexOf(currentSongData.songId) + 1 || 0,
                 0,
                 firstResult.songId
               );
-              updateQueueData(undefined, newQueue);
+              updateQueueData(currentSongIndex, newQueue, undefined, false);
               addNewNotifications([
                 {
                   id: `${firstResult.title}PlayNext`,

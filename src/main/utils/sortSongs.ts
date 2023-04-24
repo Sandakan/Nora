@@ -59,15 +59,29 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
   if (data && data.length > 0) {
     if (sortType === 'aToZ')
       return data.sort((a, b) => {
-        if (a.title.replace(/\W/gi, '') > b.title.replace(/\W/gi, '')) return 1;
-        if (a.title.replace(/\W/gi, '') < b.title.replace(/\W/gi, ''))
+        if (
+          a.title.toLowerCase().replace(/\W/gi, '') >
+          b.title.toLowerCase().replace(/\W/gi, '')
+        )
+          return 1;
+        if (
+          a.title.toLowerCase().replace(/\W/gi, '') <
+          b.title.toLowerCase().replace(/\W/gi, '')
+        )
           return -1;
         return 0;
       });
     if (sortType === 'zToA')
       return data.sort((a, b) => {
-        if (a.title.replace(/\W/gi, '') < b.title.replace(/\W/gi, '')) return 1;
-        if (a.title.replace(/\W/gi, '') > b.title.replace(/\W/gi, ''))
+        if (
+          a.title.toLowerCase().replace(/\W/gi, '') <
+          b.title.toLowerCase().replace(/\W/gi, '')
+        )
+          return 1;
+        if (
+          a.title.toLowerCase().replace(/\W/gi, '') >
+          b.title.toLowerCase().replace(/\W/gi, '')
+        )
           return -1;
         return 0;
       });
@@ -91,13 +105,25 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
       return data.sort((a, b) => {
         if (a.artists && b.artists) {
           if (
-            a.artists.map((artist) => artist.name).join(',') >
-            b.artists.map((artist) => artist.name).join(',')
+            a.artists
+              .map((artist) => artist.name)
+              .join(',')
+              .toLowerCase() >
+            b.artists
+              .map((artist) => artist.name)
+              .join(',')
+              .toLowerCase()
           )
             return 1;
           if (
-            a.artists.map((artist) => artist.name).join(',') <
-            b.artists.map((artist) => artist.name).join(',')
+            a.artists
+              .map((artist) => artist.name)
+              .join(',')
+              .toLowerCase() <
+            b.artists
+              .map((artist) => artist.name)
+              .join(',')
+              .toLowerCase()
           )
             return -1;
         }
@@ -107,13 +133,25 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
       return data.sort((a, b) => {
         if (a.artists && b.artists) {
           if (
-            a.artists.map((artist) => artist.name).join(',') <
-            b.artists.map((artist) => artist.name).join(',')
+            a.artists
+              .map((artist) => artist.name)
+              .join(',')
+              .toLowerCase() <
+            b.artists
+              .map((artist) => artist.name)
+              .join(',')
+              .toLowerCase()
           )
             return 1;
           if (
-            a.artists.map((artist) => artist.name).join(',') >
-            b.artists.map((artist) => artist.name).join(',')
+            a.artists
+              .map((artist) => artist.name)
+              .join(',')
+              .toLowerCase() >
+            b.artists
+              .map((artist) => artist.name)
+              .join(',')
+              .toLowerCase()
           )
             return -1;
         }
@@ -122,16 +160,18 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
     if (sortType === 'albumNameAscending')
       return data.sort((a, b) => {
         if (a.album && b.album) {
-          if (a.album.name > b.album.name) return 1;
-          if (a.album.name < b.album.name) return -1;
+          if (a.album.name.toLowerCase() > b.album.name.toLowerCase()) return 1;
+          if (a.album.name.toLowerCase() < b.album.name.toLowerCase())
+            return -1;
         }
         return 0;
       });
     if (sortType === 'albumNameDescending')
       return data.sort((a, b) => {
         if (a.album && b.album) {
-          if (a.album.name < b.album.name) return 1;
-          if (a.album.name > b.album.name) return -1;
+          if (a.album.name.toLowerCase() < b.album.name.toLowerCase()) return 1;
+          if (a.album.name.toLowerCase() > b.album.name.toLowerCase())
+            return -1;
         }
         return 0;
       });
@@ -236,9 +276,15 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
     if (sortType === 'dateAddedAscending')
       return data
         .sort((a, b) => {
-          if (a.title.replace(/\W/gi, '') > b.title.replace(/\W/gi, ''))
+          if (
+            a.title.toLowerCase().replace(/\W/gi, '') >
+            b.title.toLowerCase().replace(/\W/gi, '')
+          )
             return 1;
-          if (a.title.replace(/\W/gi, '') < b.title.replace(/\W/gi, ''))
+          if (
+            a.title.toLowerCase().replace(/\W/gi, '') <
+            b.title.toLowerCase().replace(/\W/gi, '')
+          )
             return -1;
           return 0;
         })
@@ -254,9 +300,15 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
     if (sortType === 'dateAddedDescending')
       return data
         .sort((a, b) => {
-          if (a.title.replace(/\W/gi, '') > b.title.replace(/\W/gi, ''))
+          if (
+            a.title.toLowerCase().replace(/\W/gi, '') >
+            b.title.toLowerCase().replace(/\W/gi, '')
+          )
             return 1;
-          if (a.title.replace(/\W/gi, '') < b.title.replace(/\W/gi, ''))
+          if (
+            a.title.toLowerCase().replace(/\W/gi, '') <
+            b.title.toLowerCase().replace(/\W/gi, '')
+          )
             return -1;
           return 0;
         })
@@ -273,8 +325,15 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
       return (
         data.filter((song) => isSongBlacklisted(song.songId, song.path)) as T
       ).sort((a, b) => {
-        if (a.title.replace(/\W/gi, '') > b.title.replace(/\W/gi, '')) return 1;
-        if (a.title.replace(/\W/gi, '') < b.title.replace(/\W/gi, ''))
+        if (
+          a.title.toLowerCase().replace(/\W/gi, '') >
+          b.title.toLowerCase().replace(/\W/gi, '')
+        )
+          return 1;
+        if (
+          a.title.toLowerCase().replace(/\W/gi, '') <
+          b.title.toLowerCase().replace(/\W/gi, '')
+        )
           return -1;
         return 0;
       });
@@ -282,8 +341,15 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
       return (
         data.filter((song) => !isSongBlacklisted(song.songId, song.path)) as T
       ).sort((a, b) => {
-        if (a.title.replace(/\W/gi, '') > b.title.replace(/\W/gi, '')) return 1;
-        if (a.title.replace(/\W/gi, '') < b.title.replace(/\W/gi, ''))
+        if (
+          a.title.toLowerCase().replace(/\W/gi, '') >
+          b.title.toLowerCase().replace(/\W/gi, '')
+        )
+          return 1;
+        if (
+          a.title.toLowerCase().replace(/\W/gi, '') <
+          b.title.toLowerCase().replace(/\W/gi, '')
+        )
           return -1;
         return 0;
       });

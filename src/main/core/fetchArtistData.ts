@@ -9,7 +9,12 @@ const fetchArtistData = async (
   limit = 0
 ): Promise<Artist[]> => {
   if (artistIdsOrNames) {
-    log(`Requested artists data for ids '${artistIdsOrNames.join(',')}'`);
+    log(
+      `Requested artists data for ${artistIdsOrNames.length} ids ${
+        sortType ? `with ${sortType}` : 'without'
+      } sorting.`,
+      { sortType, limit }
+    );
     const artists = getArtistsData();
     if (artists.length > 0) {
       let results: SavableArtist[] = [];

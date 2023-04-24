@@ -230,7 +230,7 @@ const SongCard = (props: SongCardProp) => {
           } else {
             const newQueue = queue.queue.filter((id) => id !== songId);
             newQueue.splice(
-              queue.queue.indexOf(currentSongData.songId) + 1 || 0,
+              newQueue.indexOf(currentSongData.songId) + 1 || 0,
               0,
               songId
             );
