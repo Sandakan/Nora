@@ -323,6 +323,7 @@ const ArtistInfoPage = () => {
             }
             title={song.title}
             artists={song.artists}
+            album={song.album}
             duration={song.duration}
             songId={song.songId}
             artworkPaths={song.artworkPaths}

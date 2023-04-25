@@ -158,6 +158,7 @@ const MusicFolderInfoPage = () => {
         songId,
         title,
         artists,
+        album,
         duration,
         isAFavorite,
         artworkPaths,
@@ -176,6 +177,7 @@ const MusicFolderInfoPage = () => {
             title={title}
             songId={songId}
             artists={artists}
+            album={album}
             artworkPaths={artworkPaths}
             duration={duration}
             year={year}

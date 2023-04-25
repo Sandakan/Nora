@@ -158,6 +158,7 @@ const GenreInfoPage = () => {
           songId={song.songId}
           title={song.title}
           artists={song.artists}
+          album={song.album}
           duration={song.duration}
           artworkPaths={song.artworkPaths}
           path={song.path}

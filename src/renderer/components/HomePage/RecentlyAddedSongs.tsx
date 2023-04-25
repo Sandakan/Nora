@@ -40,6 +40,7 @@ const RecentlyAddedSongs = React.forwardRef(
                     path={songData.path}
                     songId={songData.songId}
                     artists={songData.artists}
+                    album={songData.album}
                     palette={songData.palette}
                     isAFavorite={songData.isAFavorite}
                     isBlacklisted={songData.isBlacklisted}

@@ -229,6 +229,7 @@ const CurrentQueuePage = () => {
         songId,
         title,
         artists,
+        album,
         duration,
         isAFavorite,
         artworkPaths,
@@ -258,6 +259,7 @@ const CurrentQueuePage = () => {
                   title={title}
                   songId={songId}
                   artists={artists}
+                  album={album}
                   artworkPaths={artworkPaths}
                   duration={duration}
                   path={path}
@@ -512,6 +514,7 @@ const CurrentQueuePage = () => {
                       title={data.title}
                       songId={data.songId}
                       artists={data.artists}
+                      album={data.album}
                       artworkPaths={data.artworkPaths}
                       duration={data.duration}
                       path={data.path}

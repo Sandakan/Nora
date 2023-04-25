@@ -21,6 +21,7 @@ interface SongProp {
   artworkPaths: ArtworkPaths;
   title: string;
   artists?: { name: string; artistId: string }[];
+  album?: { name: string; albumId: string };
   duration: number;
   year?: number;
   path: string;
@@ -71,6 +72,7 @@ const Song = React.forwardRef(
       title,
       additionalContextMenuItems,
       artists,
+      album,
       style,
       year,
       selectAllHandler,
@@ -375,7 +377,7 @@ const Song = React.forwardRef(
           },
         },
         {
-          label: 'Add to a Playlists',
+          label: 'Add to Playlists',
           iconName: 'playlist_add',
           handlerFunction: () => {
             changePromptMenuData(
@@ -429,6 +431,16 @@ const Song = React.forwardRef(
           iconName: 'info',
           handlerFunction: goToSongInfoPage,
           isDisabled: isMultipleSelectionsEnabled,
+        },
+        {
+          label: 'Go to Album',
+          iconName: 'album',
+          handlerFunction: () =>
+            album &&
+            changeCurrentActivePage('AlbumInfo', {
+              albumId: album?.albumId,
+            }),
+          isDisabled: !album,
         },
         {
           label: 'Edit song tags',
@@ -506,6 +518,7 @@ const Song = React.forwardRef(
       additionalContextMenuItems,
       isAFavorite,
       goToSongInfoPage,
+      album,
       isBlacklisted,
       handlePlayBtnClick,
       toggleMultipleSelections,

@@ -32,6 +32,7 @@ const SongSearchResultsContainer = (props: Props) => {
                     }
                     title={song.title}
                     artists={song.artists}
+                    album={song.album}
                     artworkPaths={song.artworkPaths}
                     duration={song.duration}
                     songId={song.songId}

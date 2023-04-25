@@ -134,11 +134,13 @@ declare global {
     album?: { albumId: string; name: string };
     palette?: NodeVibrantPalette;
     isKnownSource: boolean;
+    isBlacklisted: boolean;
   }
 
   interface AudioInfo {
     title: string;
     artists?: { artistId: string; name: string }[];
+    album?: { albumId: string; name: string };
     duration: number;
     artworkPaths: ArtworkPaths;
     path: string;

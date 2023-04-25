@@ -32,6 +32,7 @@ const MostLovedSongs = (props: Props) => {
               path={song.path}
               songId={song.songId}
               artists={song.artists}
+              album={song.album}
               palette={song.palette}
               isAFavorite={song.isAFavorite}
               isBlacklisted={song.isBlacklisted}

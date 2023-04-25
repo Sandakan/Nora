@@ -13,7 +13,21 @@
 
  <br/>
 
-Nora is an elegant music player built using Electron and React, inspired by [Oto Music (Android)](https://play.google.com/store/apps/details?id=com.piyush.music&gl=us) by Piyush Mamidwar.
+<div align="center">
+Nora is an elegant music player built using Electron and React. 
+<br>
+Inspired by <a href="https://play.google.com/store/apps/details?id=com.piyush.music&gl=us">Oto Music (Android)</a> by Piyush Mamidwar.
+</div>
+
+<br/>
+
+<div align="center">
+  <a href="#app-features">Features</a> &bull;
+  <a href="#build-this-project-on-your-system">Build on your system</a> &bull;
+  <a href="#user-feedback">User feedback</a> &bull;
+  <a href="/changelog.md">Changelog</a> &bull;
+  <a href="https://github.com/Sandakan/Nora/releases">Download</a>
+</div>
 
 <br/>
 
@@ -24,6 +38,8 @@ Nora is an elegant music player built using Electron and React, inspired by [Oto
 With simplicity and design in mind, this app was made to overcome problems when using default music apps on platforms that lack essential features.
 
 <br>
+
+## App features
 
 It packs a horizon of features including,
 
@@ -38,30 +54,6 @@ It packs a horizon of features including,
 - A mini-player to help focus on what matters at the moment.
 - Edit the metadata of your songs easily and conveniently [^3].
 - Search through your library with the help of song filters.
-
-<br>
-
-<div align="center"> 
-  <div>
-    <h3><i>" The application interface adopts rounded corners in a large area, the fonts and icons are round and cute, and the visual effect is very comfortable. "</i></h3>
-    <a href="https://sspai.com/post/78669"><i>Apps Worth Watching in the Near Future &bull; SSPAI</i></a>
-  </div> 
-</div>
-
-<br>
-
-<div align="center"> &bull; &bull; &bull; </div>
-
-<br>
-
-<div align="center"> 
-  <div>
-    <h3><i>" Just found the most beautiful music player for Windows: Nora "</i></h3>
-    <a href="https://www.reddit.com/r/windowsapps/comments/11xgg99/just_found_the_most_beautiful_music_player_for/"><i>r/windowapps &bull; Reddit</i></a>
-  </div> 
-</div>
-
-<br><br>
 
 <br>
 
@@ -88,6 +80,32 @@ Visit the [release notes](/changelog.md) to see what's new on the latest release
 ![Listen with the mini player Artwork](/assets/other/artwork%208.webp)
 
 <br/>
+
+## User Feedback
+
+<br>
+
+<div align="center"> 
+  <div>
+    <h3><i>" The application interface adopts rounded corners in a large area, the fonts and icons are round and cute, and the visual effect is very comfortable. "</i></h3>
+    <a href="https://sspai.com/post/78669"><i>Apps Worth Watching in the Near Future &bull; SSPAI</i></a>
+  </div> 
+</div>
+
+<br>
+
+<div align="center"> &bull; &bull; &bull; </div>
+
+<br>
+
+<div align="center"> 
+  <div>
+    <h3><i>" Just found the most beautiful music player for Windows: Nora "</i></h3>
+    <a href="https://www.reddit.com/r/windowsapps/comments/11xgg99/just_found_the_most_beautiful_music_player_for/"><i>r/windowapps &bull; Reddit</i></a>
+  </div> 
+</div>
+
+<br><br>
 
 ## Build this project on your system
 

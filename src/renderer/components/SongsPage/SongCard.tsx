@@ -20,6 +20,7 @@ interface SongCardProp {
   path: string;
   title: string;
   artists?: { name: string; artistId: string }[];
+  album?: { name: string; albumId: string };
   palette?: NodeVibrantPalette;
   isAFavorite: boolean;
   className?: string;
@@ -57,6 +58,7 @@ const SongCard = (props: SongCardProp) => {
     path,
     songId,
     artists,
+    album,
     className,
     isBlacklisted,
     palette,
@@ -385,6 +387,16 @@ const SongCard = (props: SongCardProp) => {
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
+        label: 'Go to Album',
+        iconName: 'album',
+        handlerFunction: () =>
+          album &&
+          changeCurrentActivePage('AlbumInfo', {
+            albumId: album?.albumId,
+          }),
+        isDisabled: !album,
+      },
+      {
         label: 'Edit song tags',
         class: 'edit',
         iconName: 'edit',
@@ -452,6 +464,7 @@ const SongCard = (props: SongCardProp) => {
     multipleSelectionsData,
     isAMultipleSelection,
     isSongAFavorite,
+    album,
     isBlacklisted,
     handlePlayBtnClick,
     toggleMultipleSelections,

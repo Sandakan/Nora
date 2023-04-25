@@ -11,12 +11,20 @@ import SongArtist from '../SongsPage/SongArtist';
 
 import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 import Button from '../Button';
+import AddSongsToPlaylists from '../SongsPage/AddSongsToPlaylists';
+import BlacklistSongConfrimPrompt from '../SongsPage/BlacklistSongConfirmPrompt';
+import DeleteSongsFromSystemConfrimPrompt from '../SongsPage/DeleteSongsFromSystemConfrimPrompt';
 
 const CurrentlyPlayingSongInfoContainer = () => {
   const { currentSongData, queue, localStorageData } =
     React.useContext(AppContext);
-  const { changeCurrentActivePage, updateContextMenuData } =
-    React.useContext(AppUpdateContext);
+  const {
+    changeCurrentActivePage,
+    updateContextMenuData,
+    changePromptMenuData,
+    toggleMultipleSelections,
+    addNewNotifications,
+  } = React.useContext(AppUpdateContext);
 
   const [upNextSongData, setUpNextSongData] = React.useState<SongData>();
   const upNextSongDataCache = React.useRef<SongData>();
@@ -144,19 +152,63 @@ const CurrentlyPlayingSongInfoContainer = () => {
     currentSongData.isKnownSource,
   ]);
 
-  const contextMenuItems = React.useMemo(
-    (): ContextMenuItem[] => [
+  const contextMenuCurrrentSongData =
+    React.useMemo((): ContextMenuAdditionalData => {
+      const { title, artworkPath, artists } = currentSongData;
+      return {
+        title,
+        artworkPath: artworkPath ?? DefaultSongCover,
+        subTitle:
+          artists?.map((artist) => artist.name).join(', ') ?? 'Unknonwn artist',
+        // subTitle2: album?.name,
+      };
+    }, [currentSongData]);
+
+  const contextMenuItems = React.useMemo((): ContextMenuItem[] => {
+    const {
+      title,
+      songId,
+      album,
+      artworkPath,
+      isBlacklisted,
+      isKnownSource,
+      path,
+    } = currentSongData;
+
+    return [
+      {
+        label: 'Add to Playlists',
+        iconName: 'playlist_add',
+        handlerFunction: () => {
+          changePromptMenuData(
+            true,
+            <AddSongsToPlaylists songIds={[songId]} title={title} />
+          );
+          toggleMultipleSelections(false);
+        },
+      },
+      {
+        label: 'Hr',
+        isContextMenuItemSeperator: true,
+        handlerFunction: () => true,
+      },
+      {
+        label: 'Reveal in File Explorer',
+        class: 'reveal-file-explorer',
+        iconName: 'folder_open',
+        handlerFunction: () => window.api.revealSongInFileExplorer(songId),
+      },
       {
         label: 'Info',
         iconName: 'info',
-        handlerFunction: () => showSongInfoPage(currentSongData.songId),
-        isDisabled: !currentSongData.isKnownSource,
+        handlerFunction: () => showSongInfoPage(songId),
+        isDisabled: !isKnownSource,
       },
       {
         label: 'Go to Album',
         iconName: 'album',
         handlerFunction: gotToSongAlbumPage,
-        isDisabled: !currentSongData.isKnownSource || !currentSongData?.album,
+        isDisabled: !isKnownSource || !album,
       },
       {
         label: 'Edit song tags',
@@ -164,24 +216,69 @@ const CurrentlyPlayingSongInfoContainer = () => {
         iconName: 'edit',
         handlerFunction: () =>
           changeCurrentActivePage('SongTagsEditor', {
-            songId: currentSongData?.songId,
-            songArtworkPath: currentSongData?.artworkPath,
-            songPath: currentSongData?.path,
-            isKnownSource: currentSongData?.isKnownSource,
+            songId,
+            songArtworkPath: artworkPath,
+            songPath: path,
+            isKnownSource,
           }),
       },
-    ],
-    [
-      changeCurrentActivePage,
-      currentSongData.album,
-      currentSongData?.artworkPath,
-      currentSongData.isKnownSource,
-      currentSongData?.path,
-      currentSongData?.songId,
-      gotToSongAlbumPage,
-      showSongInfoPage,
-    ]
-  );
+      {
+        label: 'Hr',
+        isContextMenuItemSeperator: true,
+        handlerFunction: () => true,
+      },
+      {
+        label: isBlacklisted ? 'Restore from Blacklist' : 'Blacklist Song',
+        iconName: isBlacklisted ? 'settings_backup_restore' : 'block',
+        handlerFunction: () => {
+          if (isBlacklisted)
+            window.api
+              .restoreBlacklistedSongs([songId])
+              .catch((err) => console.error(err));
+          else if (localStorageData?.preferences.doNotShowBlacklistSongConfirm)
+            window.api
+              .blacklistSongs([songId])
+              .then(() =>
+                addNewNotifications([
+                  {
+                    id: `${title}Blacklisted`,
+                    delay: 5000,
+                    content: <span>&apos;{title}&apos; blacklisted.</span>,
+                    icon: <span className="material-icons-round">block</span>,
+                  },
+                ])
+              )
+              .catch((err) => console.error(err));
+          else
+            changePromptMenuData(
+              true,
+              <BlacklistSongConfrimPrompt title={title} songIds={[songId]} />
+            );
+          return toggleMultipleSelections(false);
+        },
+      },
+      {
+        label: 'Delete from System',
+        iconName: 'delete',
+        handlerFunction: () => {
+          changePromptMenuData(
+            true,
+            <DeleteSongsFromSystemConfrimPrompt songIds={[songId]} />
+          );
+          toggleMultipleSelections(false);
+        },
+      },
+    ];
+  }, [
+    addNewNotifications,
+    changeCurrentActivePage,
+    changePromptMenuData,
+    currentSongData,
+    gotToSongAlbumPage,
+    localStorageData?.preferences.doNotShowBlacklistSongConfirm,
+    showSongInfoPage,
+    toggleMultipleSelections,
+  ]);
 
   return (
     <div className="current-playing-song-info-container relative flex w-[30%] items-center">
@@ -200,7 +297,13 @@ const CurrentlyPlayingSongInfoContainer = () => {
           alt="Default song cover"
           onContextMenu={(e) => {
             e.stopPropagation();
-            updateContextMenuData(true, contextMenuItems, e.pageX, e.pageY);
+            updateContextMenuData(
+              true,
+              contextMenuItems,
+              e.pageX,
+              e.pageY,
+              contextMenuCurrrentSongData
+            );
           }}
         />
       </div>
@@ -219,7 +322,13 @@ const CurrentlyPlayingSongInfoContainer = () => {
               }
               onContextMenu={(e) => {
                 e.stopPropagation();
-                updateContextMenuData(true, contextMenuItems, e.pageX, e.pageY);
+                updateContextMenuData(
+                  true,
+                  contextMenuItems,
+                  e.pageX,
+                  e.pageY,
+                  contextMenuCurrrentSongData
+                );
               }}
               tabIndex={0}
             >

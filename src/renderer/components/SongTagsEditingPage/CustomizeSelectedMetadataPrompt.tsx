@@ -138,11 +138,6 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
           : prevData.genres,
       };
     });
-    // updateMetadataKeywords({
-    //   albumKeyword: isAlbumSelected ? album : undefined,
-    //   artistKeyword: isArtistsSelected ? artists?.join(';') : undefined,
-    //   genreKeyword: isGenresSelected ? genres?.join(';') : undefined,
-    // });
   }, [
     album,
     artists,
@@ -175,11 +170,6 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
         genres: manageGenresData(genreData, genres),
       } as SongTags;
     });
-    // updateMetadataKeywords({
-    //   albumKeyword: album || undefined,
-    //   artistKeyword: Array.isArray(artists) ? artists?.join(';') : undefined,
-    //   genreKeyword: Array.isArray(genres) ? genres?.join(';') : undefined,
-    // });
   }, [
     album,
     artists,

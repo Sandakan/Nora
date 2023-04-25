@@ -209,6 +209,7 @@ export const SongsPage = () => {
         songId,
         title,
         artists,
+        album,
         duration,
         isAFavorite,
         artworkPaths,
@@ -227,6 +228,7 @@ export const SongsPage = () => {
             title={title}
             songId={songId}
             artists={artists}
+            album={album}
             artworkPaths={artworkPaths}
             duration={duration}
             year={year}
