@@ -1,9 +1,11 @@
 import { app } from 'electron';
 import { appendFileSync } from 'fs';
 import path from 'path';
+import { sendMessageToRenderer } from './main';
 
 interface LogOptions {
-  preventLoggingToConsole: boolean;
+  preventLoggingToConsole?: boolean;
+  sendToRenderer?: boolean;
 }
 
 const defaultLogOptions: LogOptions = {
@@ -51,5 +53,6 @@ export default (
     encoding: 'utf-8',
   });
 
-  if (!options.preventLoggingToConsole) console.log(str);
+  if (!options?.preventLoggingToConsole) console.log(str);
+  if (options.sendToRenderer) sendMessageToRenderer(str);
 };

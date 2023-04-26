@@ -72,7 +72,7 @@ export default (props: { songIds: string[] }) => {
                 if (res.success) {
                   if (
                     songsData
-                      .map((song) => song.path)
+                      .map((song) => song.songId)
                       .includes(currentSongData.songId)
                   ) {
                     clearAudioPlayerData();

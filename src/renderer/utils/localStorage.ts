@@ -1,6 +1,7 @@
 import debounce from './debounce';
 
 import { version } from '../../../package.json';
+import log from './log';
 
 export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
   preferences: {
@@ -84,12 +85,12 @@ const checkLocalStorage = () => {
         'localStorage',
         JSON.stringify(LOCAL_STORAGE_DEFAULT_TEMPLATE)
       );
-      return window.api.sendLogs(
+      return log(
         'Inavalid or outdated local storage found. Resetting the local storage to defualt properties.',
         'warn'
       );
     } catch (error) {
-      window.api.sendLogs(
+      log(
         'Error occurred when trying to save default templated for local storage.',
         'warn'
       );

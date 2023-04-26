@@ -131,7 +131,13 @@ const SongCard = (props: SongCardProp) => {
           title: `${multipleSelectionsData.multipleSelections.length} selected songs`,
           artworkPath: DefaultSongCover,
         }
-      : undefined;
+      : {
+          title: title || 'Unknown title',
+          subTitle:
+            artists?.map((artist) => artist.name).join(', ') ??
+            'Unknown artist',
+          artworkPath,
+        };
 
   const showSongInfoPage = () =>
     changeCurrentActivePage('SongInfo', {

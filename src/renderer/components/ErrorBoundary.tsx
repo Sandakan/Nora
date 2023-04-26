@@ -1,5 +1,6 @@
 /* eslint-disable react/destructuring-assignment */
 import React from 'react';
+import log from 'renderer/utils/log';
 import BugImg from '../../../assets/images/svg/Bug Fixed_Monochromatic.svg';
 import Button from './Button';
 
@@ -31,7 +32,7 @@ class ErrorBoundary extends React.Component<
       errorInfo,
     });
     // You can also log error messages to an error reporting service here
-    window.api.sendLogs(error.message);
+    log(error);
   }
 
   render() {

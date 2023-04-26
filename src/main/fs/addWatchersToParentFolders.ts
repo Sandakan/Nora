@@ -38,6 +38,7 @@ const addWatcherToParentFolder = (parentFolderPath: string) => {
       parentFolderPath,
       {
         signal: abortController.signal,
+        // ! TODO - recursive mode won't work on linux
         recursive: true,
       },
       (eventType, filename) => parentFolderWatcherFunction(eventType, filename)

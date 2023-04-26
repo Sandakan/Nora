@@ -7,7 +7,7 @@ import ErrorBoundary from './ErrorBoundary';
 
 const BodyAndSideBarContainer = () => {
   return (
-    <div className="body-and-side-bar-container relative flex h-[calc(100%-8.5rem)] w-full overflow-hidden">
+    <div className="body-and-side-bar-container relative flex h-full w-full overflow-hidden">
       <ErrorBoundary>
         <NotificationPanel />
         <Sidebar />

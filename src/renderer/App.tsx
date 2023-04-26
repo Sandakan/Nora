@@ -26,6 +26,7 @@ import roundTo from './utils/roundTo';
 import storage, { LOCAL_STORAGE_DEFAULT_TEMPLATE } from './utils/localStorage';
 import useNetworkConnectivity from './hooks/useNetworkConnectivity';
 import { isDataChanged } from './utils/hasDataChanged';
+import log from './utils/log';
 
 interface AppReducer {
   userData: UserData;
@@ -600,7 +601,7 @@ export default function App() {
       const prevSongPosition = player.currentTime;
       const playerErrorData = player.error;
       console.error(err, playerErrorData);
-      window.api.sendLogs(
+      log(
         `Error occurred in the player.App error:${err}; Player error: ${playerErrorData};`
       );
       if (player.src && playerErrorData) {
@@ -1620,7 +1621,7 @@ export default function App() {
           }
         />
       );
-      return window.api.sendLogs(
+      return log(
         `======= ERROR OCCURRED WHEN TRYING TO PLAY A S0NG. =======\nERROR : Song id is of unknown type; SONGIDTYPE : ${typeof songId}`
       );
     },
@@ -1804,7 +1805,7 @@ export default function App() {
 
   const updateQueueData = React.useCallback(
     (
-      currentSongIndex?: number,
+      currentSongIndex?: number | null,
       newQueue?: string[],
       isShuffleQueue = false,
       playCurrentSongIndex = true,
@@ -1812,7 +1813,10 @@ export default function App() {
     ) => {
       const queue: Queue = {
         ...refQueue.current,
-        currentSongIndex: currentSongIndex ?? refQueue.current.currentSongIndex,
+        currentSongIndex:
+          typeof currentSongIndex === 'number' || currentSongIndex === null
+            ? currentSongIndex
+            : refQueue.current.currentSongIndex,
         queue: newQueue ?? refQueue.current.queue,
       };
       if (clearPreviousQueueData) queue.queueBeforeShuffle = [];
@@ -2337,10 +2341,13 @@ export default function App() {
     player.currentTime = 0;
     player.pause();
 
+    const updatedQueue = refQueue.current.queue.filter(
+      (songId) => songId !== content.currentSongData.songId
+    );
+    updateQueueData(null, updatedQueue);
+
     dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: {} });
     contentRef.current.currentSongData = {} as AudioPlayerData;
-
-    storage.queue.setCurrentSongIndex(null);
 
     addNewNotifications([
       {
@@ -2353,7 +2360,12 @@ export default function App() {
         ),
       },
     ]);
-  }, [addNewNotifications, toggleSongPlayback]);
+  }, [
+    addNewNotifications,
+    content.currentSongData.songId,
+    toggleSongPlayback,
+    updateQueueData,
+  ]);
 
   const updateBodyBackgroundImage = React.useCallback(
     (isVisible: boolean, src?: string) => {
@@ -2537,7 +2549,7 @@ export default function App() {
               isReducedMotion
                 ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
                 : ''
-            } flex h-screen w-full flex-col items-center overflow-y-hidden after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc]  [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
+            } grid h-screen w-full grid-flow-row items-center overflow-y-hidden after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc]  [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
             ref={AppRef}
             onDragEnter={addSongDropPlaceholder}
             onDragLeave={removeSongDropPlaceholder}

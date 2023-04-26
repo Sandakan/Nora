@@ -542,7 +542,7 @@ const Song = React.forwardRef(
       localStorageData?.preferences.doNotShowBlacklistSongConfirm,
     ]);
 
-    const contextMenuItemData =
+    const contextMenuItemData: ContextMenuAdditionalData =
       isMultipleSelectionEnabled &&
       multipleSelectionsData.selectionType === 'songs' &&
       isAMultipleSelection
@@ -550,7 +550,13 @@ const Song = React.forwardRef(
             title: `${multipleSelectionsData.multipleSelections.length} selected songs`,
             artworkPath: DefaultSongCover,
           }
-        : undefined;
+        : {
+            title: title || 'Unknown title',
+            subTitle:
+              artists?.map((artist) => artist.name).join(', ') ??
+              'Unknown artist',
+            artworkPath: artworkPaths.artworkPath,
+          };
 
     return (
       <div

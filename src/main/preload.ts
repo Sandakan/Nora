@@ -401,10 +401,10 @@ export const api = {
     forceWindowRestart = false,
     forceMainRestart = false
   ): Promise<any> => {
-    if (logToConsoleType) console[logToConsoleType](log);
     return ipcRenderer.invoke(
       'app/getRendererLogs',
       log,
+      logToConsoleType,
       forceWindowRestart,
       forceMainRestart
     );

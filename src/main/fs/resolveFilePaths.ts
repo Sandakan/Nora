@@ -1,4 +1,6 @@
 import path from 'path';
+import { platform } from 'process';
+
 import { DEFAULT_ARTWORK_SAVE_LOCATION, DEFAULT_FILE_URL } from '../filesystem';
 import getAssetPath from '../utils/getAssetPath';
 
@@ -208,8 +210,11 @@ export const getPlaylistArtworkPath = (
 };
 
 export const removeDefaultAppProtocolFromFilePath = (filePath: string) => {
-  return filePath.replace(
+  const strippedPath = filePath.replace(
     /nora:[/\\]{1,2}localFiles[/\\]{1,2}|\?[\w+=\w+&?]+$/gm,
     ''
   );
+
+  if (platform === 'linux') return `/${strippedPath}`;
+  return strippedPath;
 };

@@ -2,7 +2,7 @@
   "name": "nora",
   "productName": "Nora",
   "description": "An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar.",
-  "version": "2.1.0-stable.20230425",
+  "version": "2.1.0-stable.20230426",
   "license": "MIT",
   "appPreferences": {
     "removeReactStrictMode": false,
@@ -23,7 +23,8 @@
     "json": "https://raw.githubusercontent.com/Sandakan/Nora/master/release-notes.json"
   },
   "urls": {
-    "raw_repository_url": "https://raw.githubusercontent.com/Sandakan/Nora/"
+    "raw_repository_url": "https://raw.githubusercontent.com/Sandakan/Nora/",
+    "discord_invite_url": "https://discord.gg/CQSSzrrzjs"
   },
   "homepage": "https://github.com/Sandakan/Nora",
   "bugs": {
@@ -217,7 +218,8 @@
     "minimatch": "^3.0.5",
     "loader-utils": "^1.4.2",
     "json5": "^2.2.2",
-    "xml2js": "^0.5.0"
+    "xml2js": "^0.5.0",
+    "yaml": ">=2.2.2"
   },
   "build": {
     "productName": "Nora",

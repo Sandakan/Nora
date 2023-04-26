@@ -1,17 +1,3 @@
-/* eslint-disable promise/no-nesting */
-/* eslint-disable no-console */
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable react/no-unused-prop-types */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable react/no-unescaped-entities */
-/* eslint-disable consistent-return */
-/* eslint-disable no-else-return */
-/* eslint-disable promise/always-return */
-/* eslint-disable promise/catch-or-return */
-/* eslint-disable react-hooks/rules-of-hooks */
-/* eslint-disable react/self-closing-comp */
-/* eslint-disable import/prefer-default-export */
 import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
@@ -119,14 +105,14 @@ const HomePage = () => {
       .then((audioData) => {
         if (!audioData || audioData.data.length === 0)
           return dispatch({ type: 'SONGS_DATA', data: [null] });
-        else {
-          dispatch({
-            type: 'SONGS_DATA',
-            data: audioData.data,
-          });
-          return undefined;
-        }
-      });
+
+        dispatch({
+          type: 'SONGS_DATA',
+          data: audioData.data,
+        });
+        return undefined;
+      })
+      .catch((err) => console.error(err));
   }, [noOfRecentlyAddedSongCards]);
 
   const fetchRecentlyPlayedSongs = React.useCallback(async () => {
@@ -146,13 +132,14 @@ const HomePage = () => {
           noOfRecentandLovedSongCards + 5,
           true
         )
-        .then((res) => {
-          if (res)
+        .then(
+          (res) =>
+            Array.isArray(res) &&
             dispatch({
               type: 'RECENTLY_PLAYED_SONGS_DATA',
               data: res,
-            });
-        })
+            })
+        )
         .catch((err) => console.error(err));
   }, [noOfRecentandLovedSongCards]);
 
@@ -171,13 +158,15 @@ const HomePage = () => {
       if (artistIds.length > 0)
         window.api
           .getArtistData(artistIds, undefined, noOfRecentandLovedArtists)
-          .then((res) => {
-            if (res && Array.isArray(res))
+          .then(
+            (res) =>
+              Array.isArray(res) &&
               dispatch({
                 type: 'RECENT_SONGS_ARTISTS',
                 data: res,
-              });
-          });
+              })
+          )
+          .catch((err) => console.error(err));
     }
   }, [content.recentlyPlayedSongs, noOfRecentandLovedArtists]);
 
@@ -196,10 +185,12 @@ const HomePage = () => {
         }
         return undefined;
       })
-      .then((lovedSongs) => {
-        if (Array.isArray(lovedSongs) && lovedSongs.length > 0)
-          dispatch({ type: 'MOST_LOVED_SONGS', data: lovedSongs });
-      })
+      .then(
+        (lovedSongs) =>
+          Array.isArray(lovedSongs) &&
+          lovedSongs.length > 0 &&
+          dispatch({ type: 'MOST_LOVED_SONGS', data: lovedSongs })
+      )
       .catch((err) => console.error(err));
   }, [noOfRecentandLovedSongCards]);
 
@@ -216,13 +207,15 @@ const HomePage = () => {
       ];
       window.api
         .getArtistData(artistIds, undefined, noOfRecentandLovedArtists)
-        .then((res) => {
-          if (res && Array.isArray(res))
+        .then(
+          (res) =>
+            Array.isArray(res) &&
             dispatch({
               type: 'MOST_LOVED_ARTISTS',
               data: res,
-            });
-        });
+            })
+        )
+        .catch((err) => console.error(err));
     }
   }, [content.mostLovedSongs, noOfRecentandLovedArtists]);
 

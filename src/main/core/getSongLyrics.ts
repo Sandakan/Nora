@@ -24,34 +24,43 @@ export const updateCachedLyrics = (
 };
 
 const fetchLyricsFromAudioSource = (songPath: string) => {
-  const songExt = path.extname(songPath).replace('.', '');
-  const isSupported = metadataEditingSupportedExtensions.includes(songExt);
+  try {
+    const songExt = path.extname(songPath).replace('.', '');
+    const isSupported = metadataEditingSupportedExtensions.includes(songExt);
 
-  if (isSupported) {
-    const songData = NodeID3.read(songPath);
-    const { unsynchronisedLyrics, synchronisedLyrics } = songData;
+    if (isSupported) {
+      const songData = NodeID3.read(songPath);
+      const { unsynchronisedLyrics, synchronisedLyrics } = songData;
 
-    if (Array.isArray(synchronisedLyrics) && synchronisedLyrics.length > 0) {
-      const syncedLyricsData =
-        synchronisedLyrics[synchronisedLyrics.length - 1];
-      const parsedSyncedLyrics =
-        parseSyncedLyricsFromAudioDataSource(syncedLyricsData);
+      if (Array.isArray(synchronisedLyrics) && synchronisedLyrics.length > 0) {
+        const syncedLyricsData =
+          synchronisedLyrics[synchronisedLyrics.length - 1];
+        const parsedSyncedLyrics =
+          parseSyncedLyricsFromAudioDataSource(syncedLyricsData);
 
-      if (parsedSyncedLyrics) return parsedSyncedLyrics;
-    }
+        if (parsedSyncedLyrics) return parsedSyncedLyrics;
+      }
 
-    if (unsynchronisedLyrics?.text) {
-      const parsedLyrics = parseLyrics(unsynchronisedLyrics.text);
-      if (parsedLyrics) return parsedLyrics;
-    }
-  } else
+      if (unsynchronisedLyrics?.text) {
+        const parsedLyrics = parseLyrics(unsynchronisedLyrics.text);
+        if (parsedLyrics) return parsedLyrics;
+      }
+    } else
+      log(
+        `Nora doesn't support reading lyrics metadata from songs in ${songExt} format.`,
+        { songPath },
+        'ERROR'
+      );
+    // No lyrics found on the audio_source.
+    return undefined;
+  } catch (error) {
     log(
-      `Nora doesn't support reading lyrics metadata from songs in ${songExt} format.`,
-      { songPath },
+      'Error occurred when trying to fetch lyrics from the audio source.',
+      { songPath, error },
       'ERROR'
     );
-  // No lyrics found on the audio_source.
-  return undefined;
+    return undefined;
+  }
 };
 
 const getLyricsFromMusixmatch = async (

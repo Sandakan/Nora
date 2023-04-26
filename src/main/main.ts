@@ -925,7 +925,8 @@ async function revealSongInFileExplorer(songId: string) {
   return log(
     `Revealing song file in explorer failed because song couldn't be found in the library.`,
     undefined,
-    'WARN'
+    'WARN',
+    { sendToRenderer: true }
   );
 }
 
@@ -1008,10 +1009,19 @@ function toggleMiniPlayerAlwaysOnTop(isMiniPlayerAlwaysOnTop: boolean) {
 
 async function getRendererLogs(
   logs: string,
+  logToConsoleType: 'log' | 'warn' | 'error' = 'log',
   forceRestart = false,
   forceMainRestart = false
 ) {
-  log(logs);
+  const messageType =
+    logToConsoleType === 'log'
+      ? 'INFO'
+      : logToConsoleType === 'warn'
+      ? 'WARN'
+      : 'ERROR';
+
+  log(logs, undefined, messageType);
+
   if (forceRestart) return mainWindow.reload();
   if (forceMainRestart) {
     app.relaunch();
