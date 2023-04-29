@@ -123,6 +123,12 @@ This project is built using [Electron React Boilerplate](https://github.com/elec
 
 <br>
 
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Sandakan/Nora&type=Date)](https://star-history.com/#Sandakan/Nora&Date)
+
+
 ## Feedback
 
 If you have any feedback about bugs, feature requests, etc. about the app, please let me know through my [email](mailto:sandakannipunajith@gmail.com).
