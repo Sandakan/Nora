@@ -117,7 +117,7 @@ function SongTagsEditingPage() {
   React.useEffect(() => {
     if (artistKeyword.trim()) {
       window.api
-        .search('Artists', artistKeyword, false)
+        .search('Artists', artistKeyword, false, false)
         .then((res) => {
           console.log(res);
           if (res.artists.length > 0)
@@ -141,7 +141,7 @@ function SongTagsEditingPage() {
   React.useEffect(() => {
     if (albumKeyword.trim()) {
       window.api
-        .search('Albums', albumKeyword, false)
+        .search('Albums', albumKeyword, false, false)
         .then((res) => {
           console.log(res);
           if (res.albums.length > 0)
@@ -165,7 +165,7 @@ function SongTagsEditingPage() {
   React.useEffect(() => {
     if (genreKeyword.trim()) {
       window.api
-        .search('Genres', genreKeyword, false)
+        .search('Genres', genreKeyword, false, false)
         .then((res) => {
           console.log(res);
           if (res.genres.length > 0)

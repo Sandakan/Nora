@@ -1297,50 +1297,6 @@ export default function App() {
     };
   }, [displayMessageFromMain]);
 
-  React.useEffect(() => {
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: contentRef.current.currentSongData.title,
-        artist: Array.isArray(contentRef.current.currentSongData.artists)
-          ? contentRef.current.currentSongData.artists
-              .map((artist) => artist.name)
-              .join(', ')
-          : `Unknown Artist`,
-        album: contentRef.current.currentSongData.album
-          ? contentRef.current.currentSongData.album.name || 'Unknown Album'
-          : 'Unknown Album',
-        artwork: [
-          {
-            src: `data:;base64,${contentRef.current.currentSongData.artwork}`,
-            sizes: '300x300',
-            type: 'image/webp',
-          },
-        ],
-      });
-      const handleSkipForwardClickWithParams = () =>
-        handleSkipForwardClick('PLAYER_SKIP');
-
-      navigator.mediaSession.setActionHandler('pause', () =>
-        toggleSongPlayback(false)
-      );
-      navigator.mediaSession.setActionHandler('play', () =>
-        toggleSongPlayback(true)
-      );
-      navigator.mediaSession.setActionHandler(
-        'previoustrack',
-        handleSkipBackwardClick
-      );
-      navigator.mediaSession.setActionHandler(
-        `nexttrack`,
-        handleSkipForwardClickWithParams
-      );
-      navigator.mediaSession.playbackState = content.player.isCurrentSongPlaying
-        ? 'playing'
-        : 'paused';
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content.currentSongData, content.player.isCurrentSongPlaying]);
-
   const handleContextMenuVisibilityUpdate = React.useCallback(() => {
     if (contentRef.current.contextMenuData.isVisible) {
       dispatch({
@@ -1742,6 +1698,63 @@ export default function App() {
     },
     [toggleSongPlayback, changeQueueCurrentSongIndex]
   );
+
+  React.useEffect(() => {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: contentRef.current.currentSongData.title,
+      artist: Array.isArray(contentRef.current.currentSongData.artists)
+        ? contentRef.current.currentSongData.artists
+            .map((artist) => artist.name)
+            .join(', ')
+        : `Unknown Artist`,
+      album: contentRef.current.currentSongData.album
+        ? contentRef.current.currentSongData.album.name || 'Unknown Album'
+        : 'Unknown Album',
+      artwork: [
+        {
+          src: `data:;base64,${contentRef.current.currentSongData.artwork}`,
+          sizes: '300x300',
+          type: 'image/webp',
+        },
+      ],
+    });
+    const handleSkipForwardClickWithParams = () =>
+      handleSkipForwardClick('PLAYER_SKIP');
+
+    navigator.mediaSession.setActionHandler('pause', () =>
+      toggleSongPlayback(false)
+    );
+    navigator.mediaSession.setActionHandler('play', () =>
+      toggleSongPlayback(true)
+    );
+    navigator.mediaSession.setActionHandler(
+      'previoustrack',
+      handleSkipBackwardClick
+    );
+    navigator.mediaSession.setActionHandler(
+      `nexttrack`,
+      handleSkipForwardClickWithParams
+    );
+    navigator.mediaSession.playbackState = content.player.isCurrentSongPlaying
+      ? 'playing'
+      : 'paused';
+    return () => {
+      navigator.mediaSession.metadata = null;
+      navigator.mediaSession.playbackState = 'none';
+      navigator.mediaSession.setActionHandler('play', null);
+      navigator.mediaSession.setActionHandler('pause', null);
+      navigator.mediaSession.setActionHandler('seekbackward', null);
+      navigator.mediaSession.setActionHandler('seekforward', null);
+      navigator.mediaSession.setActionHandler('previoustrack', null);
+      navigator.mediaSession.setActionHandler('nexttrack', null);
+    };
+  }, [
+    content.currentSongData,
+    content.player.isCurrentSongPlaying,
+    handleSkipBackwardClick,
+    handleSkipForwardClick,
+    toggleSongPlayback,
+  ]);
 
   const toggleShuffling = React.useCallback((isShuffling?: boolean) => {
     dispatch({ type: 'TOGGLE_SHUFFLE_STATE', data: isShuffling });

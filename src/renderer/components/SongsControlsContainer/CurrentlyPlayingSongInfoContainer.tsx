@@ -152,14 +152,14 @@ const CurrentlyPlayingSongInfoContainer = () => {
     currentSongData.isKnownSource,
   ]);
 
-  const contextMenuCurrrentSongData =
+  const contextMenuCurrentSongData =
     React.useMemo((): ContextMenuAdditionalData => {
       const { title, artworkPath, artists } = currentSongData;
       return {
         title,
         artworkPath: artworkPath ?? DefaultSongCover,
         subTitle:
-          artists?.map((artist) => artist.name).join(', ') ?? 'Unknonwn artist',
+          artists?.map((artist) => artist.name).join(', ') || 'Unknown artist',
         // subTitle2: album?.name,
       };
     }, [currentSongData]);
@@ -302,7 +302,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
               contextMenuItems,
               e.pageX,
               e.pageY,
-              contextMenuCurrrentSongData
+              contextMenuCurrentSongData
             );
           }}
         />
@@ -327,7 +327,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
                   contextMenuItems,
                   e.pageX,
                   e.pageY,
-                  contextMenuCurrrentSongData
+                  contextMenuCurrentSongData
                 );
               }}
               tabIndex={0}
