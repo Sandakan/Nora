@@ -271,15 +271,30 @@ export const Album = (props: AlbumProp) => {
     updateQueueData,
   ]);
 
-  const contextMenuItemData =
-    isMultipleSelectionEnabled &&
-    multipleSelectionsData.selectionType === 'album' &&
-    isAMultipleSelection
-      ? {
-          title: `${multipleSelectionsData.multipleSelections.length} selected albums`,
-          artworkPath: DefaultAlbumCover,
-        }
-      : undefined;
+  const contextMenuItemData = React.useMemo(
+    () =>
+      isMultipleSelectionEnabled &&
+      multipleSelectionsData.selectionType === 'album' &&
+      isAMultipleSelection
+        ? {
+            title: `${multipleSelectionsData.multipleSelections.length} selected albums`,
+            artworkPath: DefaultAlbumCover,
+          }
+        : {
+            title: props.title,
+            artworkPath: props?.artworkPaths?.optimizedArtworkPath,
+            subTitle: `${props.songs.length} songs`,
+          },
+    [
+      isAMultipleSelection,
+      isMultipleSelectionEnabled,
+      multipleSelectionsData.multipleSelections.length,
+      multipleSelectionsData.selectionType,
+      props?.artworkPaths?.optimizedArtworkPath,
+      props.songs.length,
+      props.title,
+    ]
+  );
 
   return (
     <div

@@ -1,12 +1,10 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable promise/always-return */
-/* eslint-disable promise/catch-or-return */
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
+import log from 'renderer/utils/log';
 import { valueRounder } from 'renderer/utils/valueRounder';
+
 import Button from '../Button';
 import Img from '../Img';
 import MainContainer from '../MainContainer';
@@ -44,20 +42,27 @@ const SongInfoPage = () => {
   const fetchSongInfo = React.useCallback(() => {
     if (currentlyActivePage.data && currentlyActivePage.data.songId) {
       console.time('fetchTime');
-      window.api.getSongInfo([currentlyActivePage.data.songId]).then((res) => {
-        console.log(`Time end : ${console.timeEnd('fetchTime')}`);
-        if (res && res.length > 0) {
-          if (res[0].isArtworkAvailable)
-            updateBodyBackgroundImage(true, res[0].artworkPaths?.artworkPath);
-          setSongInfo(res[0]);
-        }
-      });
+
+      window.api
+        .getSongInfo([currentlyActivePage.data.songId])
+        .then((res) => {
+          console.log(`Time end : ${console.timeEnd('fetchTime')}`);
+          if (res && res.length > 0) {
+            if (res[0].isArtworkAvailable)
+              updateBodyBackgroundImage(true, res[0].artworkPaths?.artworkPath);
+            setSongInfo(res[0]);
+          }
+          return undefined;
+        })
+        .catch((err) => log(err));
 
       window.api
         .getSongListeningData([currentlyActivePage.data.songId])
         .then((res) => {
           if (res && res.length > 0) setListeningData(res[0]);
-        });
+          return undefined;
+        })
+        .catch((err) => log(err));
     }
   }, [currentlyActivePage.data, updateBodyBackgroundImage]);
 
@@ -101,9 +106,9 @@ const SongInfoPage = () => {
           songInfo.artists.map((artist, index) => (
             <>
               <SongArtist
+                key={artist.artistId}
                 artistId={artist.artistId}
                 name={artist.name}
-                key={artist.artistId + index}
                 className={`ml-1 !text-base ${
                   bodyBackgroundImage && '!text-white'
                 }`}
@@ -122,13 +127,7 @@ const SongInfoPage = () => {
       ) : (
         'Unknown Artist'
       ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      currentlyActivePage.data.artistName,
-      currentlyActivePage.pageTitle,
-      songInfo?.artists,
-      bodyBackgroundImage,
-    ]
+    [songInfo, bodyBackgroundImage]
   );
 
   const { allTimeListens, thisYearListens, thisMonthListens } =
@@ -184,137 +183,133 @@ const SongInfoPage = () => {
     return { totalSongFullListens: 0, totalSongSkips: 0 };
   }, [listeningData]);
 
-  return (
-    <>
-      {songInfo && (
-        <MainContainer className="song-information-container pt-8">
-          <>
-            <div className="appear-from-bottom container flex">
-              <div className="song-cover-container mr-8 h-60 w-fit overflow-hidden rounded-md">
-                <Img
-                  src={songInfo.artworkPaths?.artworkPath}
-                  alt={`${songInfo.title} cover`}
-                  className="h-full object-cover"
-                />
+  return songInfo ? (
+    <MainContainer className="song-information-container pt-8">
+      <>
+        <div className="appear-from-bottom container flex">
+          <div className="song-cover-container mr-8 h-60 w-fit overflow-hidden rounded-md">
+            <Img
+              src={songInfo.artworkPaths?.artworkPath}
+              alt={`${songInfo.title} cover`}
+              className="h-full object-cover"
+            />
+          </div>
+          <div
+            className={`song-info flex max-w-[70%] flex-col justify-center ${
+              bodyBackgroundImage
+                ? '!text-font-color-white dark:!text-font-color-white'
+                : 'text-font-color-black dark:text-font-color-white'
+            }`}
+          >
+            <div className="font-semibold opacity-50 dark:font-medium">
+              SONG
+            </div>
+            <div
+              className={`title info-type-1 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-5xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight ${
+                bodyBackgroundImage && '!text-dark-font-color-highlight'
+              }`}
+              title={songInfo.title}
+            >
+              {songInfo.title}
+            </div>
+            <div className="song-artists info-type-2 mb-1 flex items-center overflow-hidden text-ellipsis whitespace-nowrap text-base">
+              {songArtists}
+            </div>
+            <Button
+              className={`info-type-2 !mr-0 mb-5 !w-fit truncate !border-0 !p-0 ${
+                songInfo.album && 'hover:underline'
+              } ${bodyBackgroundImage && '!text-white'}`}
+              label={songInfo.album ? songInfo.album.name : 'Unknown Album'}
+              tooltipLabel={
+                songInfo.album ? songInfo.album.name : 'Unknown Album'
+              }
+              clickHandler={() => {
+                if (songInfo.album) {
+                  return changeCurrentActivePage('AlbumInfo', {
+                    albumId: songInfo.album.albumId,
+                  });
+                }
+                return undefined;
+              }}
+            />
+            <div
+              className="info-type-3 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm"
+              title={songDuration}
+            >
+              {songDuration}
+            </div>
+
+            {songInfo && songInfo.sampleRate && (
+              <div className="info-type-3 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm">
+                {songInfo.sampleRate / 1000} KHZ
               </div>
-              <div
-                className={`song-info flex max-w-[70%] flex-col justify-center ${
-                  bodyBackgroundImage
-                    ? '!text-font-color-white dark:!text-font-color-white'
-                    : 'text-font-color-black dark:text-font-color-white'
-                }`}
-              >
-                <div className="font-semibold opacity-50 dark:font-medium">
-                  SONG
-                </div>
-                <div
-                  className={`title info-type-1 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-5xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight ${
-                    bodyBackgroundImage && '!text-dark-font-color-highlight'
-                  }`}
-                  title={songInfo.title}
-                >
-                  {songInfo.title}
-                </div>
-                <div className="song-artists info-type-2 mb-1 flex items-center overflow-hidden text-ellipsis whitespace-nowrap text-base">
-                  {songArtists}
-                </div>
-                <Button
-                  className={`info-type-2 !mr-0 mb-5 !w-fit truncate !border-0 !p-0 ${
-                    songInfo.album && 'hover:underline'
-                  } ${bodyBackgroundImage && '!text-white'}`}
-                  label={songInfo.album ? songInfo.album.name : 'Unknown Album'}
-                  tooltipLabel={
-                    songInfo.album ? songInfo.album.name : 'Unknown Album'
-                  }
-                  clickHandler={() => {
-                    if (songInfo.album) {
-                      return changeCurrentActivePage('AlbumInfo', {
-                        albumId: songInfo.album.albumId,
-                      });
-                    }
-                    return undefined;
-                  }}
+            )}
+
+            {songInfo && songInfo.bitrate && (
+              <div className="info-type-3 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm">
+                {Math.floor(songInfo.bitrate / 1000)} Kbps
+              </div>
+            )}
+          </div>
+        </div>
+        {listeningData && (
+          <SecondaryContainer className="secondary-container song-stats-container mt-8 flex h-fit flex-row flex-wrap rounded-2xl p-2">
+            <div className="flex items-center justify-between py-4">
+              <ListeningActivityBarGraph listeningData={listeningData} />
+              <div className="flex w-fit flex-wrap">
+                <SongStat
+                  key={0}
+                  title="All time Listens"
+                  value={valueRounder(allTimeListens)}
                 />
-                <div
-                  className="info-type-3 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm"
-                  title={songDuration}
-                >
-                  {songDuration}
-                </div>
-
-                {songInfo && songInfo.sampleRate && (
-                  <div className="info-type-3 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm">
-                    {songInfo.sampleRate / 1000} KHZ
-                  </div>
-                )}
-
-                {songInfo && songInfo.bitrate && (
-                  <div className="info-type-3 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm">
-                    {Math.floor(songInfo.bitrate / 1000)} Kbps
-                  </div>
-                )}
+                <SongStat
+                  key={1}
+                  title="Listens This Month"
+                  value={valueRounder(thisMonthListens)}
+                />
+                <SongStat
+                  key={2}
+                  title="Listens This Year"
+                  value={valueRounder(thisYearListens)}
+                />
+                <SongStat
+                  key={3}
+                  title={
+                    songInfo.isAFavorite
+                      ? 'You loved this song'
+                      : "You didn't like this song"
+                  }
+                  value={
+                    <span
+                      className={`${
+                        songInfo.isAFavorite
+                          ? 'material-icons-round'
+                          : 'material-icons-round-outlined'
+                      } icon ${
+                        songInfo.isAFavorite && 'liked'
+                      } text-[3.5rem] font-semibold`}
+                    >
+                      favorite
+                    </span>
+                  }
+                />
+                <SongStat
+                  key={4}
+                  title="Total Song Skips"
+                  value={totalSongSkips}
+                />
+                <SongStat
+                  key={5}
+                  title="Full Song Listens"
+                  value={totalSongFullListens}
+                />
               </div>
             </div>
-            {listeningData && (
-              <SecondaryContainer className="secondary-container song-stats-container mt-8 flex h-fit flex-row flex-wrap rounded-2xl p-2">
-                <div className="flex items-center justify-between py-4">
-                  <ListeningActivityBarGraph listeningData={listeningData} />
-                  <div className="flex w-fit flex-wrap">
-                    <SongStat
-                      key={0}
-                      title="All time Listens"
-                      value={valueRounder(allTimeListens)}
-                    />
-                    <SongStat
-                      key={1}
-                      title="Listens This Month"
-                      value={valueRounder(thisMonthListens)}
-                    />
-                    <SongStat
-                      key={2}
-                      title="Listens This Year"
-                      value={valueRounder(thisYearListens)}
-                    />
-                    <SongStat
-                      key={3}
-                      title={
-                        songInfo.isAFavorite
-                          ? 'You loved this song'
-                          : "You didn't like this song"
-                      }
-                      value={
-                        <span
-                          className={`${
-                            songInfo.isAFavorite
-                              ? 'material-icons-round'
-                              : 'material-icons-round-outlined'
-                          } icon ${
-                            songInfo.isAFavorite && 'liked'
-                          } text-[3.5rem] font-semibold`}
-                        >
-                          favorite
-                        </span>
-                      }
-                    />
-                    <SongStat
-                      key={4}
-                      title="Total Song Skips"
-                      value={totalSongSkips}
-                    />
-                    <SongStat
-                      key={5}
-                      title="Full Song Listens"
-                      value={totalSongFullListens}
-                    />
-                  </div>
-                </div>
-              </SecondaryContainer>
-            )}
-          </>
-        </MainContainer>
-      )}
-    </>
-  );
+          </SecondaryContainer>
+        )}
+      </>
+    </MainContainer>
+  ) : null;
 };
 
 SongInfoPage.displayName = 'SongInfoPage';

@@ -563,6 +563,7 @@ const SongCard = (props: SongCardProp) => {
             isAMultipleSelection ? 'remove' : 'add'
           );
       }}
+      title={isBlacklisted ? `'${title}' is blacklisted.` : undefined}
     >
       <div className="h-full w-full">
         <Img
@@ -577,29 +578,46 @@ const SongCard = (props: SongCardProp) => {
         data-song-id={songId}
         style={{ background }}
       >
-        <div className="song-states-container flex items-center justify-end">
-          <Button
-            className="!m-0 !rounded-none !border-0 !p-1 !text-inherit opacity-50 outline-1 outline-offset-1 transition-opacity focus-visible:!outline group-focus-within/songCard:opacity-100 group-hover/songCard:opacity-100"
-            iconName="favorite"
-            iconClassName={`${
-              isSongAFavorite
-                ? 'material-icons-round'
-                : 'material-icons-round-outlined'
-            } !text-2xl !text-font-color-white !leading-none`}
-            tooltipLabel={isSongAFavorite ? 'You liked this song' : undefined}
-            clickHandler={(e) => {
-              e.stopPropagation();
-              handleLikeButtonClick();
-            }}
-          />
-          {isBlacklisted && (
-            <span
-              className="material-icons-round cursor-pointer p-1 text-2xl dark:text-font-color-white"
-              title={`'${title}' is blacklisted.`}
-            >
-              block
-            </span>
-          )}
+        <div className="song-states-container flex items-center justify-between">
+          <div className="state-info">
+            {typeof queue.currentSongIndex === 'number' &&
+              Array.isArray(queue.queue) &&
+              queue.queue.length > 0 &&
+              queue?.queue?.at(queue.currentSongIndex + 1) === songId && (
+                <span className="font-semibold uppercase !text-font-color-white opacity-50 transition-opacity group-hover/songCard:opacity-90">
+                  PLAYING NEXT
+                </span>
+              )}
+            {currentSongData.songId === songId && (
+              <span className="font-semibold uppercase !text-font-color-white opacity-50 transition-opacity group-hover/songCard:opacity-90">
+                PLAYING NOW
+              </span>
+            )}
+          </div>
+          <div className="state-icons">
+            <Button
+              className="!m-0 !rounded-none !border-0 !p-1 !text-inherit opacity-50 outline-1 outline-offset-1 transition-opacity focus-visible:!outline group-focus-within/songCard:opacity-100 group-hover/songCard:opacity-100"
+              iconName="favorite"
+              iconClassName={`${
+                isSongAFavorite
+                  ? 'material-icons-round'
+                  : 'material-icons-round-outlined'
+              } !text-2xl !text-font-color-white !leading-none`}
+              tooltipLabel={isSongAFavorite ? 'You liked this song' : undefined}
+              clickHandler={(e) => {
+                e.stopPropagation();
+                handleLikeButtonClick();
+              }}
+            />
+            {isBlacklisted && (
+              <span
+                className="material-icons-round cursor-pointer p-1 text-2xl dark:text-font-color-white"
+                title={`'${title}' is blacklisted.`}
+              >
+                block
+              </span>
+            )}
+          </div>
         </div>
         <div className="song-info-and-play-btn-container flex w-full items-center justify-between">
           <div className="song-info-container max-w-[75%] text-font-color-white dark:text-font-color-white">

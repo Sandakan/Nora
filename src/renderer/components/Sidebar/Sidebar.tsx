@@ -74,9 +74,9 @@ const Sidebar = React.memo(() => {
 
   const [data, setData] = React.useState(linkData);
 
-  const addActiveToSidebarItem = React.useCallback(
-    (id: string) => {
-      const arr = data.map((link) => {
+  const addActiveToSidebarItem = React.useCallback((id: string) => {
+    setData((prevData) => {
+      return prevData.map((link) => {
         if (link.content === id) {
           return link.parentClassName.includes('active')
             ? link
@@ -93,10 +93,8 @@ const Sidebar = React.memo(() => {
           };
         }
       });
-      setData(arr);
-    },
-    [data]
-  );
+    });
+  }, []);
 
   const clickHandler = React.useCallback(
     (id: string, pageData?: any) => {
@@ -108,8 +106,7 @@ const Sidebar = React.memo(() => {
 
   React.useEffect(() => {
     addActiveToSidebarItem(currentlyActivePage.pageTitle);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentlyActivePage]);
+  }, [addActiveToSidebarItem, currentlyActivePage]);
 
   const sideBarItems = React.useMemo(
     () =>

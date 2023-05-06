@@ -1,6 +1,3 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
@@ -59,6 +56,8 @@ const SongControlsAndSeekbarContainer = () => {
   }, [songPosition]);
 
   React.useEffect(() => {
+    const seekBar = seekbarRef.current;
+
     if (seekbarRef.current) {
       const handleSeekbarMouseDown = () => {
         isMouseDownRef.current = true;
@@ -74,19 +73,12 @@ const SongControlsAndSeekbarContainer = () => {
         handleSeekbarMouseUp()
       );
       return () => {
-        seekbarRef?.current?.removeEventListener(
-          'mouseup',
-          handleSeekbarMouseUp
-        );
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        seekbarRef?.current?.removeEventListener(
-          'mousedown',
-          handleSeekbarMouseDown
-        );
+        seekBar?.removeEventListener('mouseup', handleSeekbarMouseUp);
+        seekBar?.removeEventListener('mousedown', handleSeekbarMouseDown);
       };
     }
     return undefined;
-  }, []);
+  }, [updateSongPosition]);
 
   const handleQueueShuffle = () => {
     if (isShuffling) {

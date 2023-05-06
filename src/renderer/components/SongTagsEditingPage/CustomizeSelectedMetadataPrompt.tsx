@@ -129,7 +129,13 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
             : prevData?.releasedYear,
         lyrics: isLyricsSelected && lyrics ? lyrics : prevData?.lyrics,
         artworkPath: selectedArtwork || prevData?.artworkPath,
-        album: albumData ? manageAlbumData(albumData, album) : prevData.album,
+        album: albumData
+          ? manageAlbumData(
+              albumData,
+              album,
+              selectedArtwork || prevData?.artworkPath
+            )
+          : prevData.album,
         artists: artistData
           ? manageArtistsData(artistData, artists)
           : prevData.artists,
@@ -159,14 +165,15 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
     const genreData = genres ? await window.api.getGenresData(genres) : [];
 
     updateSongInfo((prevData) => {
+      const artworkPath = selectedArtwork || prevData?.artworkPath;
       return {
         ...prevData,
         title: title || prevData?.title,
         releasedYear: releasedYear ?? prevData?.releasedYear,
         lyrics: lyrics || prevData?.lyrics,
-        artworkPath: selectedArtwork || prevData?.artworkPath,
+        artworkPath,
         artists: manageArtistsData(artistData, artists),
-        album: manageAlbumData(albumData, album),
+        album: manageAlbumData(albumData, album, artworkPath),
         genres: manageGenresData(genreData, genres),
       } as SongTags;
     });

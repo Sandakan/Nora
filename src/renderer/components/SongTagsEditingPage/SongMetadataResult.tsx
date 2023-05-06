@@ -18,16 +18,9 @@ interface SongMetadataResultProp {
 
 export const manageAlbumData = (
   albumData: Album[],
-  album?: string
-):
-  | {
-      title: string;
-      albumId?: string | undefined;
-      noOfSongs?: number | undefined;
-      artists?: string[] | undefined;
-      artworkPath?: string | undefined;
-    }
-  | undefined => {
+  album?: string,
+  songArtwork?: string
+): SongTagsAlbumData | undefined => {
   if (albumData.length > 0)
     return {
       title: albumData[0].title,
@@ -37,7 +30,7 @@ export const manageAlbumData = (
       noOfSongs: albumData[0].songs.length,
     };
 
-  if (album) return { title: album };
+  if (album) return { title: album, artworkPath: songArtwork, noOfSongs: 1 };
   return undefined;
 };
 
@@ -123,22 +116,19 @@ function SongMetadataResult(props: SongMetadataResultProp) {
 
     updateSongInfo((prevData): SongTags => {
       changePromptMenuData(false, undefined, '');
+
+      const artworkPath = manageArtworks(prevData, artworkPaths);
       return {
         ...prevData,
         title: title || prevData.title,
         releasedYear: releasedYear || prevData.releasedYear,
         lyrics: lyrics || prevData.lyrics,
-        artworkPath: manageArtworks(prevData, artworkPaths),
-        album: manageAlbumData(albumData, album),
+        artworkPath,
+        album: manageAlbumData(albumData, album, artworkPath),
         artists: manageArtistsData(artistData, artists),
         genres: manageGenresData(genreData, genres),
       };
     });
-    // updateMetadataKeywords({
-    //   albumKeyword: album,
-    //   artistKeyword: artists?.join(';'),
-    //   genreKeyword: genres?.join(';'),
-    // });
   }, [
     album,
     artists,

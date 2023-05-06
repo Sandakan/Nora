@@ -350,7 +350,7 @@ const ArtistInfoPage = () => {
             <Img
               src={artistData?.onlineArtworkPaths?.picture_medium}
               fallbackSrc={artistData?.artworkPaths?.artworkPath}
-              className="aspect-square max-h-60 rounded-full"
+              className="!aspect-square max-h-60 max-w-[15rem] rounded-full object-cover"
               alt="Album Cover"
             />
             <Button

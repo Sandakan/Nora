@@ -1307,16 +1307,6 @@ export default function App() {
     }
   }, []);
 
-  React.useEffect(() => {
-    window.addEventListener('click', handleContextMenuVisibilityUpdate);
-    window.addEventListener('keydown', manageKeyboardShortcuts);
-    return () => {
-      window.removeEventListener('click', handleContextMenuVisibilityUpdate);
-      window.removeEventListener('keydown', manageKeyboardShortcuts);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const addSongTitleToTitleBar = React.useCallback(() => {
     if (
       contentRef.current.currentSongData.title &&
@@ -2256,6 +2246,15 @@ export default function App() {
       changeCurrentActivePage,
     ]
   );
+
+  React.useEffect(() => {
+    window.addEventListener('click', handleContextMenuVisibilityUpdate);
+    window.addEventListener('keydown', manageKeyboardShortcuts);
+    return () => {
+      window.removeEventListener('click', handleContextMenuVisibilityUpdate);
+      window.removeEventListener('keydown', manageKeyboardShortcuts);
+    };
+  }, [handleContextMenuVisibilityUpdate, manageKeyboardShortcuts]);
 
   const displayUnsupportedFileMessage = React.useCallback(
     (path: string) => {

@@ -927,6 +927,13 @@ declare global {
   }
 
   // ? SongTags related types
+  type SongTagsAlbumData = {
+    title: string;
+    albumId?: string;
+    noOfSongs?: number;
+    artists?: string[];
+    artworkPath?: string;
+  };
 
   interface SongTags {
     title: string;
@@ -936,13 +943,7 @@ declare global {
       artworkPath?: string;
       onlineArtworkPaths?: OnlineArtistArtworks;
     }[];
-    album?: {
-      title: string;
-      albumId?: string;
-      noOfSongs?: number;
-      artists?: string[];
-      artworkPath?: string;
-    };
+    album?: SongTagsAlbumData;
     releasedYear?: number;
     genres?: { genreId?: string; name: string; artworkPath?: string }[];
     composer?: string;

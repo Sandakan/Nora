@@ -98,8 +98,7 @@ const CurrentQueuePage = () => {
         }
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queue.queue]);
+  }, [queue.queue, queuedSongs]);
 
   React.useEffect(() => {
     fetchAllSongsData();

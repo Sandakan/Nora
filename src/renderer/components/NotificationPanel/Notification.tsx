@@ -48,10 +48,11 @@ const Notification = (props: AppNotification) => {
   }, [id, localStorageData?.preferences?.isReducedMotion, updateNotifications]);
 
   React.useLayoutEffect(() => {
-    if (notificationRef.current) {
+    const notification = notificationRef.current;
+    if (notification) {
       setDimensions({
-        width: notificationRef.current.offsetWidth,
-        height: notificationRef.current.offsetHeight,
+        width: notification.offsetWidth,
+        height: notification.offsetHeight,
       });
       notificationTimeoutIdRef.current = setTimeout(
         removeNotification,
@@ -61,8 +62,7 @@ const Notification = (props: AppNotification) => {
     return () => {
       if (notificationTimeoutIdRef.current)
         clearTimeout(notificationTimeoutIdRef.current);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      if (notificationRef?.current?.classList.contains('disappear-to-bottom')) {
+      if (notification?.classList.contains('disappear-to-bottom')) {
         clearTimeout(notificationTimeoutIdRef.current);
         updateNotifications((currNotifications) =>
           currNotifications.filter((x) => x.id !== id)
@@ -122,9 +122,6 @@ const Notification = (props: AppNotification) => {
           close
         </span>
       </div>
-      {/* {type === 'WITH_PROGRESS_BAR' && progressBarData && (
-        <div className="progress-indicator relative bottom-0 h-2 w-full rounded-sm bg-font-color-highlight dark:bg-dark-font-color-highlight" />
-      )} */}
     </div>
   );
 };

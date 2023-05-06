@@ -133,6 +133,11 @@ const Folder = (props: FolderProps) => {
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
+        label: 'Hr',
+        isContextMenuItemSeperator: true,
+        handlerFunction: null,
+      },
+      {
         label: isMultipleSelectionEnabled
           ? 'Toggle blacklist Folder'
           : isBlacklisted
@@ -193,16 +198,31 @@ const Folder = (props: FolderProps) => {
     updateMultipleSelections,
   ]);
 
-  const contextMenuItemData: ContextMenuAdditionalData | undefined =
-    isMultipleSelectionEnabled &&
-    multipleSelectionsData.selectionType === 'folder' &&
-    isAMultipleSelection
-      ? {
-          title: `${multipleSelectionsData.multipleSelections.length} selected folders`,
-          artworkClassName: '!w-6',
-          artworkPath: FolderImg,
-        }
-      : undefined;
+  const contextMenuItemData = React.useMemo(
+    (): ContextMenuAdditionalData =>
+      isMultipleSelectionEnabled &&
+      multipleSelectionsData.selectionType === 'folder' &&
+      isAMultipleSelection
+        ? {
+            title: `${multipleSelectionsData.multipleSelections.length} selected folders`,
+            artworkClassName: '!w-6',
+            artworkPath: FolderImg,
+          }
+        : {
+            title: folderName || 'Unknown Folder',
+            artworkPath: FolderImg,
+            artworkClassName: '!w-6',
+            subTitle: `${songIds.length} songs`,
+          },
+    [
+      folderName,
+      isAMultipleSelection,
+      isMultipleSelectionEnabled,
+      multipleSelectionsData.multipleSelections.length,
+      multipleSelectionsData.selectionType,
+      songIds.length,
+    ]
+  );
 
   return (
     <div

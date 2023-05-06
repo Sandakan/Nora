@@ -320,7 +320,7 @@ export const Playlist = (props: PlaylistProp) => {
   ]);
 
   const contextMenuItemData = React.useMemo(
-    () =>
+    (): ContextMenuAdditionalData =>
       isMultipleSelectionEnabled &&
       multipleSelectionsData.selectionType === 'playlist' &&
       isAMultipleSelection
@@ -328,12 +328,19 @@ export const Playlist = (props: PlaylistProp) => {
             title: `${multipleSelectionsData.multipleSelections.length} selected playlists`,
             artworkPath: DefaultPlaylistCover,
           }
-        : undefined,
+        : {
+            title: props.name,
+            artworkPath: props?.artworkPaths?.optimizedArtworkPath,
+            subTitle: `${props.songs.length} songs`,
+          },
     [
       isAMultipleSelection,
       isMultipleSelectionEnabled,
       multipleSelectionsData.multipleSelections.length,
       multipleSelectionsData.selectionType,
+      props?.artworkPaths?.optimizedArtworkPath,
+      props.name,
+      props.songs.length,
     ]
   );
 

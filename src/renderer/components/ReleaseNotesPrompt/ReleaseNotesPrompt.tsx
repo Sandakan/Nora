@@ -37,13 +37,13 @@ const ReleaseNotesPrompt = () => {
 
     const latestVersion = sortedReleaseNotes[0];
 
-    // / / / / TO BE DEPRECATED CODE / / /
+    // ! / / / / TO BE DEPRECATED CODE / / /
     if (releaseNotes.latestVersion) {
       latestVersion.artwork ||= releaseNotes.latestVersion.artwork;
       latestVersion.importantNotes ??=
         releaseNotes.latestVersion.importantNotes;
     }
-    // / / / / /
+    //! / / / / /
 
     return latestVersion;
   }, [releaseNotes.latestVersion, releaseNotes.versions]);
@@ -87,8 +87,7 @@ const ReleaseNotesPrompt = () => {
           console.error(err);
         });
     } else updateAppUpdatesState('NO_NETWORK_CONNECTION');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOnline]);
+  }, [isOnline, updateAppUpdatesState]);
 
   const isAppLatestVersion = React.useMemo(
     () => isLatestVersion(latestUpdatedInfo.version, packageFile.version),

@@ -230,8 +230,7 @@ const HomePage = () => {
       if ('detail' in e) {
         const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>)
           .detail;
-        for (let i = 0; i < dataEvents.length; i += 1) {
-          const event = dataEvents[i];
+        for (const event of dataEvents) {
           if (event.dataType === 'playlists/history')
             fetchRecentlyPlayedSongs();
           else if (
@@ -261,6 +260,7 @@ const HomePage = () => {
         }
       }
     };
+
     document.addEventListener('app/dataUpdates', manageDataUpdatesInHomePage);
     return () => {
       document.removeEventListener(
@@ -268,8 +268,13 @@ const HomePage = () => {
         manageDataUpdatesInHomePage
       );
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [
+    fetchLatestSongs,
+    fetchMostLovedArtists,
+    fetchMostLovedSongs,
+    fetchRecentArtistsData,
+    fetchRecentlyPlayedSongs,
+  ]);
 
   React.useEffect(() => fetchRecentArtistsData(), [fetchRecentArtistsData]);
   React.useEffect(() => fetchMostLovedArtists(), [fetchMostLovedArtists]);

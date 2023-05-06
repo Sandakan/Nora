@@ -95,8 +95,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
     return () => {
       window.removeEventListener('keydown', manageKeyboardShortcuts);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [manageKeyboardShortcuts]);
 
   const seekBarCssProperties: any = {};
 
@@ -115,35 +114,24 @@ export default function MiniPlayer(props: MiniPlayerProps) {
   }, [songPosition]);
 
   React.useEffect(() => {
-    if (seekbarRef.current) {
+    const seekBar = seekbarRef?.current;
+    if (seekBar) {
       const handleSeekbarMouseDown = () => {
         isMouseDownRef.current = true;
       };
       const handleSeekbarMouseUp = () => {
         isMouseDownRef.current = false;
-        updateSongPosition(seekbarRef.current?.valueAsNumber ?? 0);
+        updateSongPosition(seekBar?.valueAsNumber ?? 0);
       };
-      seekbarRef.current.addEventListener('mousedown', () =>
-        handleSeekbarMouseDown()
-      );
-      seekbarRef.current.addEventListener('mouseup', () =>
-        handleSeekbarMouseUp()
-      );
+      seekBar.addEventListener('mousedown', () => handleSeekbarMouseDown());
+      seekBar.addEventListener('mouseup', () => handleSeekbarMouseUp());
       return () => {
-        seekbarRef?.current?.removeEventListener(
-          'mouseup',
-          handleSeekbarMouseUp
-        );
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        seekbarRef?.current?.removeEventListener(
-          'mousedown',
-          handleSeekbarMouseDown
-        );
+        seekBar?.removeEventListener('mouseup', handleSeekbarMouseUp);
+        seekBar?.removeEventListener('mousedown', handleSeekbarMouseDown);
       };
     }
     return undefined;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [updateSongPosition]);
 
   const lyricsComponents = React.useMemo(() => {
     if (lyrics && lyrics?.lyrics) {

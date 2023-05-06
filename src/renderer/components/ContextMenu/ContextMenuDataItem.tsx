@@ -17,11 +17,11 @@ const ContextMenuDataItem = (props: { data: ContextMenuAdditionalData }) => {
         <p className="title-container truncate text-sm font-medium">{title}</p>
         {(subTitle || subTitle2) && (
           <div className="sub-titles-container flex opacity-80">
-            <span className="sub-title truncate text-[0.6rem] font-light leading-none">
+            <span className="sub-title truncate text-[0.6rem] font-light">
               {subTitle}
             </span>
             {subTitle && subTitle2 && <span className="mx-1">&bull;</span>}
-            <span className="sub-title truncate text-[0.6rem] font-light leading-none">
+            <span className="sub-title truncate text-[0.6rem] font-light">
               {subTitle2}
             </span>
           </div>

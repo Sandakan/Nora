@@ -1,6 +1,3 @@
-/* eslint-disable react/no-unused-prop-types */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable import/prefer-default-export */
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import HomePage from './HomePage/HomePage';

@@ -270,19 +270,34 @@ const Genre = (props: GenreProp) => {
     updateMultipleSelections,
   ]);
 
-  const contextMenuItemData =
-    isMultipleSelectionEnabled &&
-    multipleSelectionsData.selectionType === 'genre' &&
-    isAMultipleSelection
-      ? {
-          title: `${multipleSelectionsData.multipleSelections.length} selected genres`,
-          artworkPath: DefaultGenreCover,
-        }
-      : undefined;
+  const contextMenuItemData = React.useMemo(
+    () =>
+      isMultipleSelectionEnabled &&
+      multipleSelectionsData.selectionType === 'genre' &&
+      isAMultipleSelection
+        ? {
+            title: `${multipleSelectionsData.multipleSelections.length} selected genres`,
+            artworkPath: DefaultGenreCover,
+          }
+        : {
+            title,
+            artworkPath: artworkPaths?.optimizedArtworkPath,
+            subTitle: `${songIds.length} songs`,
+          },
+    [
+      artworkPaths?.optimizedArtworkPath,
+      isAMultipleSelection,
+      isMultipleSelectionEnabled,
+      multipleSelectionsData.multipleSelections.length,
+      multipleSelectionsData.selectionType,
+      songIds.length,
+      title,
+    ]
+  );
 
   return (
     <div
-      className={`genre appear-from-bottom group relative mb-6 mr-10 flex h-36 w-72 cursor-pointer items-center overflow-hidden rounded-2xl p-4 text-background-color-2 transition-[border,border-color] dark:text-dark-background-color-2 ${className} ${
+      className={`genre group relative mb-6 mr-10 flex h-36 w-72 cursor-pointer items-center gap-4 overflow-hidden rounded-2xl p-4 text-background-color-2 transition-[border,border-color] dark:text-dark-background-color-2 ${className} ${
         isMultipleSelectionEnabled &&
         multipleSelectionsData.selectionType === 'genre' &&
         'border-4 border-transparent'
@@ -321,13 +336,20 @@ const Genre = (props: GenreProp) => {
         )
       }
     >
-      <div className="genre-info-container w-3/4">
+      <div className="genre-artwork-container w-2/5 max-w-[100px]">
+        <Img
+          src={artworkPaths.artworkPath}
+          className="aspect-square rounded-md shadow-2xl"
+          alt="Artwork cover"
+        />
+      </div>
+      <div className="genre-info-container w-3/5 flex-grow-0">
         <Button
           className="genre-title !m-0 !block w-full truncate !rounded-none !border-0 !p-0 !text-left !text-2xl text-font-color-white outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white"
           label={title}
           clickHandler={goToGenreInfoPage}
         />
-        <div className="genre-no-of-songs text-[#ccc] dark:text-[#ccc]">{`${
+        <div className="genre-no-of-songs text-sm text-font-color-white/75 dark:text-font-color-white/75">{`${
           songIds.length
         } song${songIds.length === 1 ? '' : 's'}`}</div>
         {isMultipleSelectionEnabled &&
@@ -339,20 +361,8 @@ const Genre = (props: GenreProp) => {
             />
           )}
       </div>
-      <div className="genre-artwork-container absolute -right-4 top-1/2 -translate-y-1/2">
-        <Img
-          src={artworkPaths.artworkPath}
-          className="w-24 rotate-12 rounded-md shadow-2xl"
-          alt="Artwork cover"
-        />
-      </div>
     </div>
   );
-};
-
-Genre.defaultProps = {
-  backgroundColor: { rgb: [23, 23, 23] },
-  className: '',
 };
 
 export default Genre;

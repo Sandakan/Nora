@@ -79,7 +79,6 @@ export const AlbumsPage = () => {
 
   React.useEffect(() => {
     storage.sortingStates.setSortingStates('albumsPage', sortingOrder);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortingOrder]);
 
   const selectAllHandler = useSelectAllHandler(albumsData, 'album', 'albumId');

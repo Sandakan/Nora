@@ -1,7 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-console */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import ErrorBoundary from '../ErrorBoundary';
@@ -11,23 +7,6 @@ import SongControlsAndSeekbarContainer from './SongControlsAndSeekbarContainer';
 
 const SongControlsContainer = () => {
   const { bodyBackgroundImage } = useContext(AppContext);
-
-  // const paletteColors = React.useMemo(() => {
-  //   const { palette } = currentSongData;
-  //   if (palette && palette.DarkVibrant && palette.LightVibrant) {
-  //     const [dr, dg, db] = palette.DarkVibrant.rgb;
-  //     const [lr, lg, lb] = palette.LightVibrant.rgb;
-  //     return {
-  //       darkVibrant: `rgb(${dr},${dg},${db})`,
-  //       lightVibrant: `rgb(${lr},${lg},${lb})`,
-  //     };
-  //   }
-  //   return { darkVibrant: 'unset', lightVibrant: 'unset' };
-  // }, [currentSongData]);
-
-  // const songControlsCssProperties: any = {};
-  // songControlsCssProperties['--seek-bar-background-color'] =
-  //   paletteColors.darkVibrant;
 
   return (
     <footer

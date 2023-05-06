@@ -279,7 +279,7 @@ export const Artist = (props: ArtistProp) => {
   ]);
 
   const contextMenuItemData = React.useMemo(
-    () =>
+    (): ContextMenuAdditionalData =>
       isMultipleSelectionEnabled &&
       multipleSelectionsData.selectionType === 'artist' &&
       isAMultipleSelection
@@ -287,12 +287,23 @@ export const Artist = (props: ArtistProp) => {
             title: `${multipleSelectionsData.multipleSelections.length} selected artists`,
             artworkPath: DefaultArtistCover,
           }
-        : undefined,
+        : {
+            title: props.name,
+            artworkPath:
+              props?.onlineArtworkPaths?.picture_small ||
+              props?.artworkPaths?.optimizedArtworkPath,
+            artworkClassName: '!rounded-full',
+            subTitle: `${props.songIds.length} songs`,
+          },
     [
       isAMultipleSelection,
       isMultipleSelectionEnabled,
       multipleSelectionsData.multipleSelections.length,
       multipleSelectionsData.selectionType,
+      props?.artworkPaths?.optimizedArtworkPath,
+      props.name,
+      props?.onlineArtworkPaths?.picture_small,
+      props.songIds.length,
     ]
   );
 
