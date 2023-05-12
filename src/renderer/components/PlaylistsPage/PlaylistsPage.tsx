@@ -19,7 +19,7 @@ import Button from '../Button';
 import MainContainer from '../MainContainer';
 import Dropdown from '../Dropdown';
 
-export const PlaylistsPage = () => {
+const PlaylistsPage = () => {
   const {
     currentlyActivePage,
     localStorageData,
@@ -262,3 +262,5 @@ export const PlaylistsPage = () => {
     </MainContainer>
   );
 };
+
+export default PlaylistsPage;

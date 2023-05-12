@@ -70,24 +70,13 @@ const seekbarScrollIntervals: DropdownOption<string>[] = [
   { label: '20 seconds', value: '20' },
 ];
 
-const playbackRateIntervals: DropdownOption<string>[] = [
-  { label: '0.25x', value: '0.25' },
-  { label: '0.5x', value: '0.5' },
-  { label: '0.75x', value: '0.75' },
-  { label: '1x', value: '1' },
-  { label: '2x', value: '2' },
-  { label: '2.5x', value: '2.5' },
-  { label: '3x', value: '3' },
-  { label: '4x', value: '4' },
-];
-
 const AudioPlaybackSettings = () => {
   const { userData, localStorageData } = React.useContext(AppContext);
   const { updateUserData, changePromptMenuData } =
     React.useContext(AppUpdateContext);
 
   const [seekbarScrollInterval, setSeekbarScrollInterval] = React.useState('5');
-  const [playbackRateInterval, setPlaybackRateInterval] = React.useState('1');
+  const [playbackRateInterval, setPlaybackRateInterval] = React.useState(1);
 
   React.useEffect(() => {
     const interval = storage.preferences.getPreferences(
@@ -95,9 +84,15 @@ const AudioPlaybackSettings = () => {
     );
     const playbackRate = storage.playback.getPlaybackOptions('playbackRate');
 
-    setPlaybackRateInterval(playbackRate.toString());
+    setPlaybackRateInterval(playbackRate);
     setSeekbarScrollInterval(interval.toString());
   }, []);
+
+  const playbackRateSeekBarCssProperties: any = {};
+
+  playbackRateSeekBarCssProperties['--seek-before-width'] = `${
+    ((playbackRateInterval - 0.25) / (4 - 0.25)) * 100
+  }%`;
 
   return (
     <li className="main-container audio-playback-settings-container mb-16">
@@ -126,24 +121,48 @@ const AudioPlaybackSettings = () => {
           />
         </li>
 
-        <li className="playback-rate mb-4">
+        <li className="playback-rate mb-6">
           <div className="description">
-            Change the playback rate of the player.
+            Change the default playback rate of the player.
           </div>
-          <Dropdown
-            className="mt-4"
-            name="playbackRateInterval"
-            value={playbackRateInterval.toString()}
-            options={playbackRateIntervals}
-            onChange={(e) => {
-              const val = e.currentTarget.value;
-              setPlaybackRateInterval(val);
-              storage.playback.setPlaybackOptions(
-                'playbackRate',
-                parseFloat(val)
-              );
-            }}
-          />
+          <div className="mt-6 flex items-center">
+            <div className="flex w-1/2 min-w-[120px] flex-col items-center justify-center">
+              <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
+                Playback Rate : {playbackRateInterval} x
+              </span>
+              <div className="flex w-full items-center pl-2">
+                <span className="text-sm">0.25x</span>
+                <input
+                  type="range"
+                  name="seek-bar-slider"
+                  id="seek-bar-slider"
+                  className="seek-bar-slider thumb-visible relative float-left mx-4 h-6 w-full appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
+                  min={0.25}
+                  step={0.05}
+                  max={4.0}
+                  value={playbackRateInterval || 1}
+                  onChange={(e) => {
+                    const val = e.currentTarget.valueAsNumber;
+                    setPlaybackRateInterval(val);
+                    storage.playback.setPlaybackOptions('playbackRate', val);
+                  }}
+                  style={playbackRateSeekBarCssProperties}
+                  title={`${playbackRateInterval}x`}
+                />
+                <span className="text-sm">4x</span>
+              </div>
+            </div>
+            <Button
+              label="Reset to 1x"
+              iconName="restart_alt"
+              className="ml-6"
+              isDisabled={playbackRateInterval === 1}
+              clickHandler={() => {
+                setPlaybackRateInterval(1);
+                storage.playback.setPlaybackOptions('playbackRate', 1);
+              }}
+            />
+          </div>
         </li>
 
         <li className="secondary-container enable-musixmatch-lyrics mb-4">
@@ -215,7 +234,7 @@ const AudioPlaybackSettings = () => {
           <Dropdown
             className="mt-4"
             name="seekbarScrollInterval"
-            value={seekbarScrollInterval.toString()}
+            value={seekbarScrollInterval?.toString()}
             options={seekbarScrollIntervals}
             onChange={(e) => {
               const val = e.currentTarget.value;

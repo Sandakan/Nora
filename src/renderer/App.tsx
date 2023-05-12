@@ -2166,11 +2166,18 @@ export default function App() {
         'l',
         'n',
         'q',
+        '[',
+        ']',
+        '\\',
       ];
       const shiftCombinations = ['ArrowRight', 'ArrowLeft'];
+      const altCombinations = ['ArrowRight', 'ArrowLeft', 'Home'];
+      const functionCombinations = ['F12', 'F5'];
       if (
         (e.ctrlKey && ctrlCombinations.some((x) => e.key === x)) ||
         (e.shiftKey && shiftCombinations.some((x) => e.key === x)) ||
+        (e.altKey && altCombinations.some((x) => e.key === x)) ||
+        functionCombinations.some((x) => e.key === x) ||
         e.code === 'Space'
       )
         e.preventDefault();
@@ -2206,6 +2213,45 @@ export default function App() {
         if (currentlyActivePage.pageTitle === 'CurrentQueue')
           changeCurrentActivePage('Home');
         else changeCurrentActivePage('CurrentQueue');
+      } else if (e.ctrlKey && e.key === ']') {
+        let updatedPlaybackRate =
+          content.localStorage.playback.playbackRate || 1;
+
+        if (updatedPlaybackRate + 0.05 > 4) updatedPlaybackRate = 4;
+        else updatedPlaybackRate += 0.05;
+
+        storage.setItem('playback', 'playbackRate', updatedPlaybackRate);
+        addNewNotifications([
+          {
+            id: 'playbackRate',
+            icon: <span className="material-icons-round">avg_pace</span>,
+            content: `Playback Rate Changed to ${updatedPlaybackRate} x`,
+          },
+        ]);
+      } else if (e.ctrlKey && e.key === '[') {
+        let updatedPlaybackRate =
+          content.localStorage.playback.playbackRate || 1;
+
+        if (updatedPlaybackRate - 0.05 < 0.25) updatedPlaybackRate = 0.25;
+        else updatedPlaybackRate -= 0.05;
+
+        storage.setItem('playback', 'playbackRate', updatedPlaybackRate);
+        addNewNotifications([
+          {
+            id: 'playbackRate',
+            icon: <span className="material-icons-round">avg_pace</span>,
+            content: `Playback Rate Changed to ${updatedPlaybackRate} x`,
+          },
+        ]);
+      } else if (e.ctrlKey && e.key === '\\') {
+        storage.setItem('playback', 'playbackRate', 1);
+        addNewNotifications([
+          {
+            id: 'playbackRate',
+            icon: <span className="material-icons-round">avg_pace</span>,
+            content: `Playback Rate Resetted to 1x`,
+          },
+        ]);
       }
       // default combinations
       else if (e.code === 'Space') toggleSongPlayback();
@@ -2241,9 +2287,11 @@ export default function App() {
       content.player.isMiniPlayer,
       content.navigationHistory.history,
       content.navigationHistory.pageHistoryIndex,
+      content.localStorage.playback.playbackRate,
       toggleSongPlayback,
       updatePageHistoryIndex,
       changeCurrentActivePage,
+      addNewNotifications,
     ]
   );
 
@@ -2561,7 +2609,7 @@ export default function App() {
               isReducedMotion
                 ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
                 : ''
-            } grid h-screen w-full grid-flow-row items-center overflow-y-hidden after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc]  [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
+            } grid !h-screen w-full grid-rows-[auto_1fr_auto] items-center overflow-y-hidden after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc]  [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
             ref={AppRef}
             onDragEnter={addSongDropPlaceholder}
             onDragLeave={removeSongDropPlaceholder}

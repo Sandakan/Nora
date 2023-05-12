@@ -91,6 +91,7 @@ import { resolveArtistDuplicates } from './core/resolveDuplicates';
 import addArtworkToAPlaylist from './core/addArtworkToAPlaylist';
 import getArtworksForMultipleArtworksCover from './core/getArtworksForMultipleArtworksCover';
 import { resolveSeparateArtists } from './core/resolveSeparateArtists';
+import resolveFeaturingArtists from './core/resolveFeaturingArtists';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -531,6 +532,21 @@ app
         'app/resolveSeparateArtists',
         (_, separateArtistId: string, separateArtistNames: string[]) =>
           resolveSeparateArtists(separateArtistId, separateArtistNames)
+      );
+
+      ipcMain.handle(
+        'app/resolveFeaturingArtists',
+        (
+          _,
+          songId: string,
+          featArtistNames: string[],
+          removeFeatInfoInTitle?: boolean
+        ) =>
+          resolveFeaturingArtists(
+            songId,
+            featArtistNames,
+            removeFeatInfoInTitle
+          )
       );
 
       ipcMain.handle(

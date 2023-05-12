@@ -429,7 +429,9 @@ const PlaylistInfoPage = () => {
                 )}
               </div>
             </div>
-            <div className="songs-container">{songComponents}</div>
+            <div className="songs-container appear-from-bottom">
+              {songComponents}
+            </div>
           </div>
         )}
         {playlistSongs.length === 0 && (

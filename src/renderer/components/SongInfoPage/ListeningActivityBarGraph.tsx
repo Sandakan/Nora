@@ -49,8 +49,6 @@ const ListeningActivityBarGraph = (props: Props) => {
     if (listeningData) {
       for (const listen of listeningData.listens) {
         if (listen.year === currentYear) {
-          const max = Math.max(...listen.listens.map((x) => x[1]));
-
           const monthsWithNames: { listens: number; month: string }[] = [];
 
           for (let i = 0; i < monthNames.length; i += 1) {
@@ -73,6 +71,8 @@ const ListeningActivityBarGraph = (props: Props) => {
             7
           );
 
+          const max = Math.max(...lastMonths.map((x) => x.listens));
+
           return lastMonths.map((month, index) => {
             return (
               <div className=" relative flex h-full flex-col items-center justify-end">
@@ -83,7 +83,7 @@ const ListeningActivityBarGraph = (props: Props) => {
                       height: `${
                         month.listens === 0
                           ? '10px'
-                          : `${(month.listens / max) * 75}%`
+                          : `${(month.listens / max) * 90}%`
                       }`,
                       transitionDelay: `${index * 50 + 500}`,
                     }}

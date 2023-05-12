@@ -46,7 +46,7 @@ class ErrorBoundary extends React.Component<
           {isInDevelopment && (
             <details
               style={{ whiteSpace: 'pre-wrap' }}
-              className="text-sm font-light"
+              className="mx-auto max-w-[90%] text-sm font-light"
             >
               {this.state.error && this.state.error.toString()}
               <br />

@@ -129,7 +129,7 @@ const Sidebar = React.memo(() => {
         bodyBackgroundImage
           ? 'bg-side-bar-background/50 backdrop-blur-md dark:bg-dark-background-color-2/50'
           : 'bg-side-bar-background dark:bg-dark-background-color-2'
-      } delay-200 lg:absolute lg:w-14 lg:hover:w-[30%] lg:hover:shadow-2xl`}
+      } delay-200 lg:absolute lg:w-14 lg:hover:w-[30%] lg:hover:shadow-2xl md:hover:w-60`}
     >
       <ErrorBoundary>
         <ul className="relative flex !h-full flex-col overflow-x-hidden pb-2 pt-6">

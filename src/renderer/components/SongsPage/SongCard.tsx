@@ -326,7 +326,7 @@ const SongCard = (props: SongCardProp) => {
         },
       },
       {
-        label: 'Add to a Playlists',
+        label: 'Add to Playlists',
         iconName: 'playlist_add',
         handlerFunction: () => {
           changePromptMenuData(
@@ -485,38 +485,28 @@ const SongCard = (props: SongCardProp) => {
     localStorageData?.preferences.doNotShowBlacklistSongConfirm,
   ]);
 
-  const songArtistComponents = React.useMemo(
-    () =>
-      Array.isArray(artists) ? (
-        artists
-          .map((artist, i) =>
-            (artists?.length ?? 1) - 1 === i ? (
-              <SongArtist
-                key={artist.artistId}
-                artistId={artist.artistId}
-                name={artist.name}
-                className="!text-font-color-white/80 dark:!text-font-color-white/80"
-              />
-            ) : (
-              [
-                <SongArtist
-                  key={artist.artistId}
-                  artistId={artist.artistId}
-                  name={artist.name}
-                  className="!text-font-color-white/80 dark:!text-font-color-white/80"
-                />,
-                <span className="mr-1 !text-font-color-white/80 dark:!text-font-color-white/80">
-                  ,
-                </span>,
-              ]
-            )
-          )
-          .flat()
-      ) : (
-        <span>Unknown Artist</span>
-      ),
-    [artists]
-  );
+  const songArtistComponents = React.useMemo(() => {
+    if (Array.isArray(artists)) {
+      return artists
+        .map((artist, i) => {
+          const arr = [
+            <SongArtist
+              key={artist.artistId}
+              artistId={artist.artistId}
+              name={artist.name}
+              className="!text-font-color-white/80 dark:!text-font-color-white/80"
+            />,
+          ];
+
+          if ((artists?.length ?? 1) - 1 !== i)
+            arr.push(<span className="mr-1">,</span>);
+
+          return arr;
+        })
+        .flat();
+    }
+    return <span>Unknown Artist</span>;
+  }, [artists]);
 
   return (
     <div
@@ -527,7 +517,7 @@ const SongCard = (props: SongCardProp) => {
         currentSongData.songId === songId && 'current-song'
       } ${
         isSongPlaying && 'playing'
-      } group/songCard relative mb-2 mr-2 aspect-[2/1] min-w-[10rem] max-w-[24rem] overflow-hidden rounded-2xl border-[transparent] border-background-color-2 shadow-xl transition-[border-color] ease-in-out dark:border-dark-background-color-2 ${
+      } group/songCard relative mb-2 mr-2 aspect-[2/1] min-w-[15rem] max-w-[24rem] overflow-hidden rounded-2xl border-[transparent] border-background-color-2 shadow-xl transition-[border-color] ease-in-out dark:border-dark-background-color-2 ${
         className || ''
       } ${isBlacklisted && '!opacity-90 !brightness-50 dark:!opacity-75'} ${
         isMultipleSelectionEnabled &&

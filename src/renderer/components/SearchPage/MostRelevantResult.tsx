@@ -4,6 +4,7 @@ import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 
 import Img from '../Img';
+import Button from '../Button';
 
 export interface MostRelevantResultProp {
   resultType: 'artist' | 'song' | 'album' | 'playlist' | 'genre';
@@ -83,13 +84,15 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
     >
       <div className="result-img-container relative mr-4 flex h-full w-fit items-center justify-center overflow-hidden">
         {resultType.toLowerCase() !== 'artist' && (
-          <span
-            title="Play Song"
-            className="material-icons-round icon absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer text-4xl text-font-color-white text-opacity-0 group-hover:text-font-color-white group-hover:text-opacity-100 dark:group-hover:text-font-color-white"
-            onClick={() => playSong(id)}
-          >
-            play_circle
-          </span>
+          <Button
+            className="absolute !m-0 !rounded-none !border-0 !p-0 opacity-75 outline-1 outline-offset-1 transition-opacity hover:opacity-100 focus-visible:!outline group-hover:opacity-100"
+            iconName="play_circle"
+            iconClassName="!text-4xl !leading-none text-font-color-white"
+            clickHandler={(e) => {
+              e.stopPropagation();
+              playSong(id);
+            }}
+          />
         )}
         <Img
           src={onlineArtworkPath}

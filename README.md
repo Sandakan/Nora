@@ -16,7 +16,7 @@
 <div align="center">
 Nora is an elegant music player built using Electron and React. 
 <br>
-Inspired by <a href="https://play.google.com/store/apps/details?id=com.piyush.music&gl=us">Oto Music (Android)</a> by Piyush Mamidwar.
+Inspired from <a href="https://play.google.com/store/apps/details?id=com.piyush.music&gl=us">Oto Music (Android)</a> by Piyush Mamidwar.
 </div>
 
 <br/>

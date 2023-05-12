@@ -55,6 +55,8 @@ const dropdownOptions: { label: string; value: SongSortTypes }[] = [
   { label: 'Oldest', value: 'dateAddedDescending' },
   { label: 'Released Year (Ascending)', value: 'releasedYearAscending' },
   { label: 'Released Year (Descending)', value: 'releasedYearDescending' },
+  { label: 'Track Number (Ascending)', value: 'trackNoAscending' },
+  { label: 'Track Number (Descending)', value: 'trackNoDescending' },
   {
     label: 'Most Listened (All Time)',
     value: 'allTimeMostListened',
@@ -226,6 +228,29 @@ export default () => {
     ]
   );
 
+  const albumArtistComponents = React.useMemo(() => {
+    const { artists } = albumContent.albumData;
+    if (artists)
+      return artists
+        .map((artist, i) => {
+          const arr = [
+            <SongArtist
+              key={artist.artistId}
+              artistId={artist.artistId}
+              name={artist.name}
+              className="!text-lg"
+            />,
+          ];
+
+          if ((artists?.length ?? 1) - 1 !== i)
+            arr.push(<span className="mr-1">,</span>);
+
+          return arr;
+        })
+        .flat();
+    return <span>Unknown Artist</span>;
+  }, [albumContent.albumData]);
+
   const calculateTotalTime = React.useCallback(() => {
     const { hours, minutes, seconds } = calculateTimeFromSeconds(
       albumContent.songsData.reduce(
@@ -274,25 +299,7 @@ export default () => {
                   {albumContent.albumData.title}
                 </div>
                 <div className="album-artists m-0 flex h-[unset] w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-xl">
-                  {albumContent.albumData.artists.map((artist, index) => (
-                    <>
-                      <SongArtist
-                        key={artist.artistId}
-                        artistId={artist.artistId}
-                        name={artist.name}
-                        className="!text-lg"
-                      />
-                      {albumContent.albumData.artists ? (
-                        index === albumContent.albumData.artists.length - 1 ? (
-                          ''
-                        ) : (
-                          <span className="mr-1">,</span>
-                        )
-                      ) : (
-                        ''
-                      )}
-                    </>
-                  ))}
+                  {albumArtistComponents}
                 </div>
                 {albumContent.songsData.length > 0 && (
                   <div className="album-songs-total-duration">

@@ -87,7 +87,7 @@ const reducer = (
   }
 };
 
-export const SongsPage = () => {
+const SongsPage = () => {
   const {
     currentlyActivePage,
     localStorageData,
@@ -455,3 +455,5 @@ export const SongsPage = () => {
     </MainContainer>
   );
 };
+
+export default SongsPage;

@@ -6,10 +6,14 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 
-type Props = { albums: Album[]; searchInput: string };
+type Props = {
+  albums: Album[];
+  searchInput: string;
+  noOfVisibleAlbums?: number;
+};
 
 const AlbumSearchResultsContainer = (props: Props) => {
-  const { albums, searchInput } = props;
+  const { albums, searchInput, noOfVisibleAlbums = 4 } = props;
   const { isMultipleSelectionEnabled, multipleSelectionsData } =
     React.useContext(AppContext);
   const { toggleMultipleSelections, changeCurrentActivePage } =
@@ -22,7 +26,7 @@ const AlbumSearchResultsContainer = (props: Props) => {
       albums.length > 0
         ? albums
             .map((album, index) => {
-              if (index < 4)
+              if (index < noOfVisibleAlbums)
                 return (
                   <Album
                     index={index}
@@ -40,7 +44,7 @@ const AlbumSearchResultsContainer = (props: Props) => {
             })
             .filter((album) => album !== undefined)
         : [],
-    [albums, selectAllHandler]
+    [albums, noOfVisibleAlbums, selectAllHandler]
   );
 
   return (
@@ -94,7 +98,7 @@ const AlbumSearchResultsContainer = (props: Props) => {
                 isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
               }
             />
-            {albums.length > 4 && (
+            {albums.length > noOfVisibleAlbums && (
               <Button
                 label="Show All"
                 iconName="apps"

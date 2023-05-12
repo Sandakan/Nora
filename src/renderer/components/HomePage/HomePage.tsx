@@ -78,7 +78,7 @@ const HomePage = () => {
     mostLovedArtists: [],
   });
 
-  const SONG_CARD_WIDTH = 320;
+  const SONG_CARD_MIN_WIDTH = 280;
   const ARTIST_WIDTH = 175;
 
   const recentlyAddedSongsContainerRef = React.useRef<HTMLDivElement>(null);
@@ -93,8 +93,9 @@ const HomePage = () => {
     const { width } = recentlyAddedSongsContainerDiamensions;
 
     return {
-      noOfRecentlyAddedSongCards: Math.floor(width / SONG_CARD_WIDTH) * 2 || 5,
-      noOfRecentandLovedSongCards: Math.floor(width / SONG_CARD_WIDTH) || 3,
+      noOfRecentlyAddedSongCards:
+        Math.floor(width / SONG_CARD_MIN_WIDTH) * 2 || 5,
+      noOfRecentandLovedSongCards: Math.floor(width / SONG_CARD_MIN_WIDTH) || 3,
       noOfRecentandLovedArtists: Math.floor(width / ARTIST_WIDTH) || 5,
     };
   }, [recentlyAddedSongsContainerDiamensions]);

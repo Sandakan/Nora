@@ -2,7 +2,7 @@
   "name": "nora",
   "productName": "Nora",
   "description": "An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar.",
-  "version": "2.1.0-stable.20230506",
+  "version": "2.1.0-stable.20230512",
   "license": "MIT",
   "appPreferences": {
     "removeReactStrictMode": false,
@@ -289,15 +289,45 @@
       "fileAssociations": [
         {
           "ext": [
-            "mp3",
-            "wav",
-            "ogg",
-            "aac",
-            "m4r",
+            "mp3"
+          ],
+          "role": "Editor",
+          "icon": "./assets/installer_assets/file_associated_icons/mp3.ico"
+        },
+        {
+          "ext": [
+            "wav"
+          ],
+          "role": "Editor",
+          "icon": "./assets/installer_assets/file_associated_icons/wav.ico"
+        },
+        {
+          "ext": [
+            "ogg"
+          ],
+          "role": "Editor",
+          "icon": "./assets/installer_assets/file_associated_icons/ogg.ico"
+        },
+        {
+          "ext": [
+            "aac"
+          ],
+          "role": "Editor",
+          "icon": "./assets/installer_assets/file_associated_icons/aac.ico"
+        },
+        {
+          "ext": [
+            "m4r"
+          ],
+          "role": "Editor",
+          "icon": "./assets/installer_assets/file_associated_icons/m4r.ico"
+        },
+        {
+          "ext": [
             "flac"
           ],
           "role": "Editor",
-          "icon": "./assets/images/noraAssociatedFileIcon.ico"
+          "icon": "./assets/installer_assets/file_associated_icons/flac.ico"
         }
       ]
     },

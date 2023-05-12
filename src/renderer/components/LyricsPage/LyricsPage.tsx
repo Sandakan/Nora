@@ -24,7 +24,7 @@ document.addEventListener('lyrics/scrollIntoView', () => {
   isScrollingByCode = true;
 });
 
-export const LyricsPage = () => {
+const LyricsPage = () => {
   const { currentSongData } = useContext(AppContext);
   const { addNewNotifications } = React.useContext(AppUpdateContext);
 
@@ -85,7 +85,7 @@ export const LyricsPage = () => {
       const { isSynced, lyrics: unsyncedLyrics, syncedLyrics } = lyrics.lyrics;
 
       if (syncedLyrics) {
-        return syncedLyrics.map((lyric, index) => {
+        const syncedLyricsLines = syncedLyrics.map((lyric, index) => {
           const { text, end, start } = lyric;
           return (
             <LyricLine
@@ -97,6 +97,19 @@ export const LyricsPage = () => {
             />
           );
         });
+
+        const firstLine = (
+          <LyricLine
+            key="..."
+            index={0}
+            lyric="•••"
+            syncedLyrics={{ start: 0, end: syncedLyrics[0].start }}
+            isAutoScrolling={isAutoScrolling}
+          />
+        );
+
+        if (syncedLyrics[0].start !== 0) syncedLyricsLines.unshift(firstLine);
+        return syncedLyricsLines;
       }
       if (!isSynced) {
         return unsyncedLyrics.map((line, index) => {
@@ -410,3 +423,5 @@ export const LyricsPage = () => {
     </MainContainer>
   );
 };
+
+export default LyricsPage;

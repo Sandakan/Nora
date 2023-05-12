@@ -35,6 +35,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
   },
   queue: { currentSongIndex: null, queue: [], queueType: 'songs' },
   ignoredSeparateArtists: [],
+  ignoredSongsWithFeatArtists: [],
   ignoredDuplicates: {
     albums: [],
     artists: [],
@@ -294,7 +295,23 @@ const setIgnoredSeparateArtists = (artists: string[]) => {
   });
 };
 
-const getIgnoredSeparateArtists = () => getAllItems().ignoredSeparateArtists;
+const getIgnoredSeparateArtists = () => getFullItem('ignoredSeparateArtists');
+
+// IGNORED SONGS WITH FEATURING ARTISTS
+
+const setIgnoredSongsWithFeatArtists = (artists: string[]) => {
+  const allItems = getAllItems();
+  setAllItems({
+    ...allItems,
+    ignoredSongsWithFeatArtists: [
+      ...allItems.ignoredSongsWithFeatArtists,
+      ...artists,
+    ],
+  });
+};
+
+const getIgnoredSongsWithFeatArtists = () =>
+  getFullItem('ignoredSongsWithFeatArtists');
 
 // IGNORED DUPLICATES
 
@@ -344,6 +361,10 @@ export default {
   ignoredSeparateArtists: {
     setIgnoredSeparateArtists,
     getIgnoredSeparateArtists,
+  },
+  ignoredSongsWithFeatArtists: {
+    setIgnoredSongsWithFeatArtists,
+    getIgnoredSongsWithFeatArtists,
   },
   ignoredDuplicates: { setIgnoredDuplicates, getIgnoredDuplicates },
   sortingStates: { setSortingStates, getSortingStates },

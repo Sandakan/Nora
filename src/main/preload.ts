@@ -145,6 +145,18 @@ export const api = {
       separateArtistNames
     ),
 
+  resolveFeaturingArtists: (
+    songId: string,
+    featArtistNames: string[],
+    removeFeatInfoInTitle?: boolean
+  ): Promise<UpdateSongDataResult | undefined> =>
+    ipcRenderer.invoke(
+      'app/resolveFeaturingArtists',
+      songId,
+      featArtistNames,
+      removeFeatInfoInTitle
+    ),
+
   // $ APP PLAYER UNKNOWN SONGS FETCHING APIS
   playSongFromUnknownSource: (
     callback: (_: unknown, audioPlayerData: AudioPlayerData) => void

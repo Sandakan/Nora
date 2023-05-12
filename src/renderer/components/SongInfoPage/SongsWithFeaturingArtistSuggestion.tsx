@@ -5,14 +5,19 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import storage from 'renderer/utils/localStorage';
 
 import Button from '../Button';
+import Checkbox from '../Checkbox';
+import { separateArtistsRegex } from '../ArtistInfoPage/SeparateArtistsSuggestion';
 
 type Props = {
-  name?: string;
-  artistId?: string;
+  songTitle?: string;
+  songId?: string;
+  artistNames: string[];
+  path: string;
+  updateSongInfo: (callback: (prevData: SongData) => SongData) => void;
 };
-export const separateArtistsRegex = / and |&|,|;|·| ?\| | ?\/ | ?\\ /gm;
+const featArtistsRegex = /\(? ?feat.? (?<featArtists>[^\n\t()]+)\)?/gm;
 
-const SeparateArtistsSuggestion = (props: Props) => {
+const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
   const { bodyBackgroundImage, currentSongData } = React.useContext(AppContext);
   const {
     addNewNotifications,
@@ -20,50 +25,76 @@ const SeparateArtistsSuggestion = (props: Props) => {
     updateCurrentSongData,
   } = React.useContext(AppUpdateContext);
 
-  const { name = '', artistId = '' } = props;
+  const {
+    songTitle = '',
+    songId = '',
+    artistNames,
+    path,
+    updateSongInfo,
+  } = props;
 
   const [isIgnored, setIsIgnored] = React.useState(false);
+  const [isRemovingFeatInfoFromTitle, setIsRemovingFeatInfoFromTitle] =
+    React.useState(true);
   const [isMessageVisible, setIsMessageVisible] = React.useState(true);
+  const [separatedFeatArtistsNames, setSeparatedFeatArtistsNames] =
+    React.useState<string[]>([]);
 
-  const ignoredArtists = React.useMemo(
-    () => storage.ignoredSeparateArtists.getIgnoredSeparateArtists(),
+  const ignoredSongs = React.useMemo(
+    () => storage.ignoredSongsWithFeatArtists.getIgnoredSongsWithFeatArtists(),
     []
   );
 
   React.useEffect(() => {
-    if (ignoredArtists.length > 0)
-      setIsIgnored(ignoredArtists.includes(artistId));
-  }, [artistId, ignoredArtists]);
+    if (isIgnored === false && ignoredSongs.length > 0)
+      setIsIgnored(ignoredSongs.includes(songId));
+  }, [songId, ignoredSongs, songTitle, isIgnored]);
 
-  const separatedArtistsNames = React.useMemo(() => {
-    const artists = name.split(separateArtistsRegex);
-    const filterArtists = artists.filter(
-      (x) => x !== undefined && x.trim() !== ''
-    );
-    const trimmedArtists = filterArtists.map((x) => x.trim());
+  React.useEffect(() => {
+    const featArtistsExec = featArtistsRegex.exec(songTitle);
+    featArtistsRegex.lastIndex = 0;
 
-    return [...new Set(trimmedArtists)];
-  }, [name]);
+    if (featArtistsExec && featArtistsExec.groups?.featArtists) {
+      const { featArtists: featArtistsStr } = featArtistsExec.groups;
+
+      const featArtists = featArtistsStr.split(separateArtistsRegex);
+      const filteredFeatArtists = featArtists.filter((featArtistName) => {
+        const isArtistAvailable = artistNames.some(
+          (name) =>
+            name.toLowerCase().trim() === featArtistName.toLowerCase().trim()
+        );
+
+        return (
+          featArtistName !== undefined &&
+          featArtistName.trim() !== '' &&
+          !isArtistAvailable
+        );
+      });
+      const trimmedFeatArtists = filteredFeatArtists.map((x) => x.trim());
+
+      setSeparatedFeatArtistsNames([...new Set(trimmedFeatArtists)]);
+    } else setSeparatedFeatArtistsNames([]);
+  }, [artistNames, songTitle]);
 
   const artistComponents = React.useMemo(() => {
-    if (separatedArtistsNames.length > 0) {
-      const artists = separatedArtistsNames.map((artist, i, arr) => {
+    if (separatedFeatArtistsNames.length > 0) {
+      const artists = separatedFeatArtistsNames.map((artist, i, arr) => {
         return (
-          <>
+          <span key={artist}>
             <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
               {artist}
             </span>
             {i !== arr.length - 1 && (
               <span>{i === arr.length - 2 ? ' and ' : ', '}</span>
             )}
-          </>
+          </span>
         );
       });
 
       return artists;
     }
     return [];
-  }, [separatedArtistsNames]);
+  }, [separatedFeatArtistsNames]);
 
   const separateArtists = React.useCallback(
     (
@@ -74,25 +105,38 @@ const SeparateArtistsSuggestion = (props: Props) => {
       setIsPending(true);
 
       window.api
-        .resolveSeparateArtists(artistId, separatedArtistsNames)
+        .resolveFeaturingArtists(
+          songId,
+          separatedFeatArtistsNames,
+          isRemovingFeatInfoFromTitle
+        )
         .then((res) => {
-          if (
-            res?.updatedData &&
-            currentSongData.songId === res.updatedData.songId
-          ) {
-            updateCurrentSongData((prevData) => ({
-              ...prevData,
-              ...res.updatedData,
-            }));
+          if (res?.updatedData) {
+            updateSongInfo((prevData) => {
+              const updatedArtists: typeof prevData.artists =
+                res?.updatedData?.artists?.map((artist) => ({
+                  name: artist.name,
+                  artistId: artist.artistId,
+                }));
+
+              prevData.title = res.updatedData?.title || prevData.title;
+              prevData.artists = updatedArtists;
+
+              return prevData;
+            });
+            if (currentSongData.songId === res.updatedData.songId)
+              updateCurrentSongData((prevData) => ({
+                ...prevData,
+                ...res.updatedData,
+              }));
           }
           setIsIgnored(true);
-          changeCurrentActivePage('Home');
 
           return addNewNotifications([
             {
-              content: 'Artist conflict resolved successfully.',
+              content: 'Featuring artists suggestion resolved successfully.',
               delay: 5000,
-              id: 'ArtistDuplicateSuggestion',
+              id: 'FeatArtistsSuggestion',
             },
           ]);
         })
@@ -103,20 +147,21 @@ const SeparateArtistsSuggestion = (props: Props) => {
         .catch((err) => console.error(err));
     },
     [
+      songId,
+      separatedFeatArtistsNames,
+      isRemovingFeatInfoFromTitle,
       addNewNotifications,
-      artistId,
-      changeCurrentActivePage,
+      updateSongInfo,
       currentSongData.songId,
-      separatedArtistsNames,
       updateCurrentSongData,
     ]
   );
 
   return (
     <>
-      {separatedArtistsNames.length > 1 && !isIgnored && (
+      {separatedFeatArtistsNames.length > 0 && !isIgnored && (
         <div
-          className={`appear-from-bottom mx-auto mb-6 w-[90%] rounded-lg p-4 text-black shadow-md transition-[width,height] dark:text-white ${
+          className={`appear-from-bottom mx-auto mt-8 w-[90%] rounded-lg p-4 text-black shadow-md transition-[width,height] dark:text-white ${
             bodyBackgroundImage
               ? 'bg-background-color-2/75 backdrop-blur-sm dark:bg-dark-background-color-2/75'
               : 'bg-background-color-2 dark:bg-dark-background-color-2'
@@ -157,22 +202,51 @@ const SeparateArtistsSuggestion = (props: Props) => {
             <div>
               <div>
                 <p className="mt-2 text-sm">
-                  Are {artistComponents} {separatedArtistsNames.length} separate
-                  artists?
+                  {separatedFeatArtistsNames.length === 1 ? 'Is' : 'Are'}{' '}
+                  {artistComponents}{' '}
+                  {separatedFeatArtistsNames.length === 1
+                    ? 'an artist'
+                    : `${separatedFeatArtistsNames.length} artists`}{' '}
+                  featuring in this song?
                 </p>
                 <p className="mt-2 text-sm">
-                  If they are, you can organize them by selecting them as
-                  separate artists, or you can ignore this suggestion.
+                  If so, you can add{' '}
+                  {separatedFeatArtistsNames.length === 1
+                    ? 'that artist as an artist'
+                    : 'those artists as artists'}{' '}
+                  of the song, or you can ignore this suggestion.
                 </p>
+                <Checkbox
+                  id="featArtistsTitleReset"
+                  labelContent="Remove information related to featuring artists in the song title"
+                  className="my-4 !text-sm"
+                  isChecked={isRemovingFeatInfoFromTitle}
+                  checkedStateUpdateFunction={(state) =>
+                    setIsRemovingFeatInfoFromTitle(state)
+                  }
+                />
               </div>
               <div className="mt-3 flex items-center">
                 <Button
                   className="!border-0 bg-background-color-1/50 !px-4 !py-2 outline-1 transition-colors hover:bg-background-color-1 hover:!text-font-color-highlight focus-visible:!outline dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:!text-dark-font-color-highlight"
                   iconName="verified"
                   iconClassName="material-icons-round-outlined"
-                  label={`Separate as ${separatedArtistsNames.length} artists`}
+                  label={`Add ${separatedFeatArtistsNames.length} artists to the song`}
                   clickHandler={(_, setIsDisabled, setIsPending) =>
                     separateArtists(setIsDisabled, setIsPending)
+                  }
+                />
+                <Button
+                  className="!border-0 bg-background-color-1/50 !px-4 !py-2 outline-1 transition-colors hover:bg-background-color-1 hover:!text-font-color-highlight focus-visible:!outline dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:!text-dark-font-color-highlight"
+                  iconName="edit"
+                  iconClassName="material-icons-round-outlined"
+                  label="Edit in Metadata Editing Page"
+                  clickHandler={() =>
+                    changeCurrentActivePage('SongTagsEditor', {
+                      songId,
+                      songPath: path,
+                      isKnownSource: true,
+                    })
                   }
                 />
                 <Button
@@ -182,7 +256,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
                   label="Ignore"
                   clickHandler={() => {
                     storage.ignoredSeparateArtists.setIgnoredSeparateArtists([
-                      artistId,
+                      songId,
                     ]);
                     setIsIgnored(true);
                     addNewNotifications([
@@ -201,7 +275,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
                 />
                 <span
                   className="material-icons-round-outlined ml-4 cursor-pointer text-xl opacity-80 transition-opacity hover:opacity-100"
-                  title="Keep in mind that seperating artists will update the library as well as metadata in songs linked these artists."
+                  title="Keep in mind that adding featuring artists to the song will update the song data in the library as well as the song metadata."
                 >
                   info
                 </span>
@@ -214,4 +288,4 @@ const SeparateArtistsSuggestion = (props: Props) => {
   );
 };
 
-export default SeparateArtistsSuggestion;
+export default SongsWithFeaturingArtistsSuggestion;

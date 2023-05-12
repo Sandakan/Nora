@@ -101,6 +101,22 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
         }
         return 0;
       });
+    if (sortType === 'trackNoAscending')
+      return data.sort((a, b) => {
+        if (a.trackNo && b.trackNo) {
+          if (a.trackNo > b.trackNo) return 1;
+          if (a.trackNo < b.trackNo) return -1;
+        }
+        return 0;
+      });
+    if (sortType === 'trackNoDescending')
+      return data.sort((a, b) => {
+        if (a.trackNo && b.trackNo) {
+          if (a.trackNo < b.trackNo) return 1;
+          if (a.trackNo > b.trackNo) return -1;
+        }
+        return 0;
+      });
     if (sortType === 'artistNameAscending')
       return data.sort((a, b) => {
         if (a.artists && b.artists) {

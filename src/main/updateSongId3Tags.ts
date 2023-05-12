@@ -36,6 +36,7 @@ import { updateCachedLyrics } from './core/getSongLyrics';
 import parseLyrics from './utils/parseLyrics';
 import convertParsedLyricsToNodeID3Format from './core/convertParsedLyricsToNodeID3Format';
 import sendSongID3Tags from './core/sendSongId3Tags';
+import { isSongBlacklisted } from './utils/isBlacklisted';
 
 const fetchArtworkBufferFromURL = async (url: string) => {
   try {
@@ -627,6 +628,10 @@ const updateSongId3TagsOfUnknownSource = async (
           isAFavorite: false,
           path: songOutsideLibraryData.path,
           isKnownSource: false,
+          isBlacklisted: isSongBlacklisted(
+            songOutsideLibraryData.songId,
+            songOutsideLibraryData.path
+          ),
         };
 
         return updatedData;
@@ -768,6 +773,7 @@ const updateSongId3Tags = async (
               artworkPath: getArtistArtworkPath(z.artworkName).artworkPath,
               onlineArtworkPaths: z.onlineArtworkPaths,
             }));
+
           const data: AudioPlayerData = {
             songId,
             title: song.title,
@@ -779,6 +785,7 @@ const updateSongId3Tags = async (
             artworkPath: artworkPaths.artworkPath,
             duration: song.duration,
             isAFavorite: song.isAFavorite,
+            isBlacklisted: isSongBlacklisted(song.songId, song.path),
             path: song.path,
             isKnownSource: true,
           };

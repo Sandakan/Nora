@@ -33,12 +33,14 @@ const fetchLyricsFromAudioSource = (songPath: string) => {
       const { unsynchronisedLyrics, synchronisedLyrics } = songData;
 
       if (Array.isArray(synchronisedLyrics) && synchronisedLyrics.length > 0) {
-        const syncedLyricsData =
-          synchronisedLyrics[synchronisedLyrics.length - 1];
-        const parsedSyncedLyrics =
-          parseSyncedLyricsFromAudioDataSource(syncedLyricsData);
+        const reversedForLatestLyricsStore = synchronisedLyrics.reverse();
 
-        if (parsedSyncedLyrics) return parsedSyncedLyrics;
+        for (const syncedLyricsData of reversedForLatestLyricsStore) {
+          const parsedSyncedLyrics =
+            parseSyncedLyricsFromAudioDataSource(syncedLyricsData);
+
+          if (parsedSyncedLyrics) return parsedSyncedLyrics;
+        }
       }
 
       if (unsynchronisedLyrics?.text) {

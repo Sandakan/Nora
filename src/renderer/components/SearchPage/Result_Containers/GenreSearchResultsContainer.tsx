@@ -7,14 +7,18 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 
-type Props = { genres: Genre[]; searchInput: string };
+type Props = {
+  genres: Genre[];
+  searchInput: string;
+  noOfVisibleGenres?: number;
+};
 
 const GenreSearchResultsContainer = (props: Props) => {
   const { isMultipleSelectionEnabled, multipleSelectionsData } =
     React.useContext(AppContext);
   const { toggleMultipleSelections, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
-  const { genres, searchInput } = props;
+  const { genres, searchInput, noOfVisibleGenres = 3 } = props;
 
   const selectAllHandler = useSelectAllHandler(genres, 'genre', 'genreId');
 
@@ -23,7 +27,7 @@ const GenreSearchResultsContainer = (props: Props) => {
       genres.length > 0
         ? genres
             .map((genre, index) => {
-              if (index < 3)
+              if (index < noOfVisibleGenres)
                 return (
                   <Genre
                     key={`${genre.genreId}-${index}`}
@@ -40,7 +44,7 @@ const GenreSearchResultsContainer = (props: Props) => {
             })
             .filter((x) => x !== undefined)
         : [],
-    [genres, selectAllHandler]
+    [genres, noOfVisibleGenres, selectAllHandler]
   );
 
   return (
@@ -94,7 +98,7 @@ const GenreSearchResultsContainer = (props: Props) => {
                 isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
               }
             />
-            {genres.length > 4 && (
+            {genres.length > noOfVisibleGenres && (
               <Button
                 label="Show All"
                 iconName="apps"

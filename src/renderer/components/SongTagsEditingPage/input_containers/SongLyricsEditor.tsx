@@ -166,7 +166,7 @@ const SongLyricsEditor = (props: Props) => {
                   setIsDisabled(false);
                   setIsPending(false);
                 }
-                return undefined;
+                throw new Error('download synced lyrics failed.');
               })
               .catch((err) => {
                 addNewNotifications([
@@ -175,7 +175,9 @@ const SongLyricsEditor = (props: Props) => {
                     delay: 5000,
                     content: <span>Failed to fetch synced lyrics.</span>,
                     icon: (
-                      <span className="material-icons-round icon">warning</span>
+                      <span className="material-icons-round-outlined icon">
+                        warning
+                      </span>
                     ),
                   },
                 ]);
@@ -188,7 +190,7 @@ const SongLyricsEditor = (props: Props) => {
           }
           tooltipLabel={
             isOnline
-              ? !userData?.preferences.isMusixmatchLyricsEnabled
+              ? userData?.preferences.isMusixmatchLyricsEnabled
                 ? undefined
                 : 'You have to enable Musixmatch Lyrics from Settings to use this feature.'
               : 'You are not connected to the internet.'

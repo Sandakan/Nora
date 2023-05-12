@@ -126,24 +126,25 @@ const CurrentlyPlayingSongInfoContainer = () => {
   const songArtists = React.useMemo(() => {
     if (currentSongData.songId && Array.isArray(currentSongData.artists)) {
       if (currentSongData.artists.length > 0) {
-        return currentSongData.artists.map((artist, index) => (
-          <span className="flex" key={index}>
-            <SongArtist
-              key={index}
-              artistId={artist.artistId}
-              name={artist.name}
-              isFromKnownSource={currentSongData.isKnownSource}
-            />
-            {currentSongData.artists &&
-            currentSongData.artists.length - 1 !== index ? (
-              <span className="mr-1">,</span>
-            ) : (
-              ''
-            )}
-          </span>
-        ));
+        return currentSongData.artists
+          .map((artist, i) => {
+            const arr = [
+              <SongArtist
+                key={artist.artistId}
+                artistId={artist.artistId}
+                name={artist.name}
+                isFromKnownSource={currentSongData.isKnownSource}
+              />,
+            ];
+
+            if ((currentSongData.artists?.length ?? 1) - 1 !== i)
+              arr.push(<span className="mr-1">,</span>);
+
+            return arr;
+          })
+          .flat();
       }
-      return 'Unknown Artist';
+      return <span>Unknown Artist</span>;
     }
     return '';
   }, [
@@ -281,9 +282,9 @@ const CurrentlyPlayingSongInfoContainer = () => {
   ]);
 
   return (
-    <div className="current-playing-song-info-container relative flex w-[30%] items-center">
+    <div className="current-playing-song-info-container grid w-full max-w-full grid-cols-[6rem_minmax(0,1fr)] items-center gap-2 lg:grid-cols-[minmax(0,1fr)]">
       <div
-        className="song-cover-container relative mr-2 flex h-full w-[25%] max-w-[6rem] items-center justify-center overflow-hidden p-2 lg:hidden"
+        className="song-cover-container relativeflex aspect-square h-full items-center justify-center overflow-hidden p-2 lg:hidden"
         id="currentSongCover"
       >
         {/* ${
@@ -307,7 +308,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
           }}
         />
       </div>
-      <div className="song-info-container flex h-full w-[65%] flex-col items-start justify-center drop-shadow-lg lg:ml-4 lg:w-full">
+      <div className="song-info-container relative flex h-full w-full flex-col items-start justify-center drop-shadow-lg lg:ml-4 lg:w-full">
         {currentSongData.title && (
           <div className="song-title flex w-full items-center">
             <div
@@ -346,7 +347,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
         )}
         {!upNextSongData && (
           <div
-            className="song-artists appear-from-bottom flex w-full items-center overflow-hidden text-ellipsis whitespace-nowrap"
+            className="song-artists appear-from-bottom flex w-full items-center truncate"
             id="currentSongArtists"
           >
             {localStorageData?.preferences.showArtistArtworkNearSongControls &&
@@ -360,7 +361,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
                   {songArtistsImages}
                 </span>
               )}
-            <span className="flex w-3/4 text-xs text-font-color-black/90 dark:text-font-color-white/90">
+            <span className="w-3/4 grow-0 text-xs text-font-color-black/90 dark:text-font-color-white/90">
               {songArtists}
             </span>
           </div>

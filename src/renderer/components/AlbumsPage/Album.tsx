@@ -168,6 +168,34 @@ export const Album = (props: AlbumProp) => {
     return false;
   }, [multipleSelectionsData, props.albumId]);
 
+  const albumArtists = React.useMemo(() => {
+    const { artists } = props;
+    if (Array.isArray(artists)) {
+      return artists
+        .map((artist, i) => {
+          const arr = [
+            <SongArtist
+              key={artist.artistId}
+              artistId={artist.artistId}
+              name={artist.name}
+              className={
+                isAMultipleSelection
+                  ? '!text-font-color-black dark:!text-font-color-black'
+                  : ''
+              }
+            />,
+          ];
+
+          if ((artists?.length ?? 1) - 1 !== i)
+            arr.push(<span className="mr-1">,</span>);
+
+          return arr;
+        })
+        .flat();
+    }
+    return <span>Unknown Artist</span>;
+  }, [isAMultipleSelection, props]);
+
   const contextMenuItems = React.useMemo(() => {
     const isMultipleSelectionsEnabled =
       multipleSelectionsData.selectionType === 'album' &&
@@ -378,32 +406,7 @@ export const Album = (props: AlbumProp) => {
             className="album-artists flex w-full truncate text-sm hover:underline"
             title={props.artists.map((artist) => artist.name).join(', ')}
           >
-            {props.artists.map((artist, index) => {
-              return (
-                <>
-                  <SongArtist
-                    key={artist.artistId}
-                    artistId={artist.artistId}
-                    name={artist.name}
-                    className={
-                      isAMultipleSelection
-                        ? '!text-font-color-black dark:!text-font-color-black'
-                        : ''
-                    }
-                  />
-                  {props.artists ? (
-                    props.artists.length === 0 ||
-                    props.artists.length - 1 === index ? (
-                      ''
-                    ) : (
-                      <span className="mr-1">,</span>
-                    )
-                  ) : (
-                    ''
-                  )}
-                </>
-              );
-            })}
+            {albumArtists}
           </div>
         )}
         <div className="album-no-of-songs w-full overflow-hidden text-ellipsis whitespace-nowrap text-xs">{`${

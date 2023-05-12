@@ -1,12 +1,7 @@
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, {
-  ForwardedRef,
-  MouseEvent,
-  ReactElement,
-  ReactNode,
-} from 'react';
+import React, { ForwardedRef, MouseEvent, ReactNode } from 'react';
 import ErrorBoundary from './ErrorBoundary';
 
 interface MainContainerProp {

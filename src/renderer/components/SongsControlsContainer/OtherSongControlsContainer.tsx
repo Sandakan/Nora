@@ -75,7 +75,7 @@ const OtherSongControlsContainer = () => {
   );
 
   return (
-    <div className="other-controls-container flex w-[30%] items-center justify-end">
+    <div className="other-controls-container flex items-center justify-end">
       <Button
         className={`queue-btn !mr-6 !rounded-none !border-0 !p-0 text-font-color-black text-opacity-60 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:text-font-color-white dark:after:bg-dark-font-color-highlight lg:hidden ${
           currentlyActivePage.pageTitle === 'CurrentQueue' &&

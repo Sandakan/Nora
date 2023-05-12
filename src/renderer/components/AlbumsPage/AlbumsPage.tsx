@@ -16,7 +16,7 @@ import Button from '../Button';
 
 import NoAlbumsImage from '../../../../assets/images/svg/Easter bunny_Monochromatic.svg';
 
-export const AlbumsPage = () => {
+const AlbumsPage = () => {
   const {
     currentlyActivePage,
     localStorageData,
@@ -243,3 +243,5 @@ export const AlbumsPage = () => {
     </MainContainer>
   );
 };
+
+export default AlbumsPage;

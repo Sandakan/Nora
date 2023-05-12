@@ -12,6 +12,7 @@ import SecondaryContainer from '../SecondaryContainer';
 import SongArtist from '../SongsPage/SongArtist';
 import ListeningActivityBarGraph from './ListeningActivityBarGraph';
 import SongStat from './SongStat';
+import SongsWithFeaturingArtistsSuggestion from './SongsWithFeaturingArtistSuggestion';
 
 const SongInfoPage = () => {
   const { currentlyActivePage, bodyBackgroundImage } = useContext(AppContext);
@@ -38,6 +39,19 @@ const SongInfoPage = () => {
     if (minutes === 0) songDuration = `${seconds} seconds`;
     else songDuration = `${minutes} minutes ${seconds} seconds`;
   }
+
+  const updateSongInfo = React.useCallback(
+    (callback: (prevData: SongData) => SongData) => {
+      setSongInfo((prevData) => {
+        if (prevData) {
+          const updatedSongData = callback(prevData);
+          return updatedSongData;
+        }
+        return prevData;
+      });
+    },
+    []
+  );
 
   const fetchSongInfo = React.useCallback(() => {
     if (currentlyActivePage.data && currentlyActivePage.data.songId) {
@@ -98,37 +112,31 @@ const SongInfoPage = () => {
       );
     };
   }, [fetchSongInfo]);
+  const songArtists = React.useMemo(() => {
+    const artists = songInfo?.artists;
+    if (Array.isArray(artists)) {
+      return artists
+        .map((artist, i) => {
+          const arr = [
+            <SongArtist
+              key={artist.artistId}
+              artistId={artist.artistId}
+              name={artist.name}
+              className={`ml-1 !text-base ${
+                bodyBackgroundImage && '!text-white'
+              }`}
+            />,
+          ];
 
-  const songArtists = React.useMemo(
-    () =>
-      songInfo && songInfo.artists ? (
-        songInfo.artists.length > 0 ? (
-          songInfo.artists.map((artist, index) => (
-            <>
-              <SongArtist
-                key={artist.artistId}
-                artistId={artist.artistId}
-                name={artist.name}
-                className={`ml-1 !text-base ${
-                  bodyBackgroundImage && '!text-white'
-                }`}
-              />
+          if ((artists?.length ?? 1) - 1 !== i)
+            arr.push(<span className="mr-1">,</span>);
 
-              {songInfo.artists && songInfo.artists.length - 1 !== index ? (
-                <span className="mr-1">,</span>
-              ) : (
-                ''
-              )}
-            </>
-          ))
-        ) : (
-          <span>&apos;Unknown Artist&apos;</span>
-        )
-      ) : (
-        'Unknown Artist'
-      ),
-    [songInfo, bodyBackgroundImage]
-  );
+          return arr;
+        })
+        .flat();
+    }
+    return <span>Unknown Artist</span>;
+  }, [bodyBackgroundImage, songInfo?.artists]);
 
   const { allTimeListens, thisYearListens, thisMonthListens } =
     React.useMemo(() => {
@@ -252,6 +260,15 @@ const SongInfoPage = () => {
             )}
           </div>
         </div>
+
+        <SongsWithFeaturingArtistsSuggestion
+          songId={songInfo.songId}
+          songTitle={songInfo.title}
+          artistNames={songInfo.artists?.map((x) => x.name) || []}
+          path={songInfo.path}
+          updateSongInfo={updateSongInfo}
+        />
+
         {listeningData && (
           <SecondaryContainer className="secondary-container song-stats-container mt-8 flex h-fit flex-row flex-wrap rounded-2xl p-2">
             <div className="flex items-center justify-between py-4">
