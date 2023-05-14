@@ -147,7 +147,7 @@ This project is built using [Electron React Boilerplate](https://github.com/elec
 
 ## Feedback
 
-If you have any feedback about bugs, feature requests, etc. about the app, please let me know through my [email](mailto:sandakannipunajith@gmail.com).
+If you have any feedback about bugs, feature requests, etc. about the app, please let me know through the official [Nora Discord server](https://discord.gg/c5rGKnBs4y), or my [email](mailto:sandakannipunajith@gmail.com).
 
 <br>
 
