@@ -33,6 +33,7 @@ const getAllSongs = async (
         return {
           title: songInfo.title,
           artists: songInfo.artists,
+          album: songInfo.album,
           duration: songInfo.duration,
           artworkPaths: getSongArtworkPath(
             songInfo.songId,

@@ -74,9 +74,9 @@ const Sidebar = React.memo(() => {
 
   const [data, setData] = React.useState(linkData);
 
-  const addActiveToSidebarItem = React.useCallback(
-    (id: string) => {
-      const arr = data.map((link) => {
+  const addActiveToSidebarItem = React.useCallback((id: string) => {
+    setData((prevData) => {
+      return prevData.map((link) => {
         if (link.content === id) {
           return link.parentClassName.includes('active')
             ? link
@@ -93,10 +93,8 @@ const Sidebar = React.memo(() => {
           };
         }
       });
-      setData(arr);
-    },
-    [data]
-  );
+    });
+  }, []);
 
   const clickHandler = React.useCallback(
     (id: string, pageData?: any) => {
@@ -108,8 +106,7 @@ const Sidebar = React.memo(() => {
 
   React.useEffect(() => {
     addActiveToSidebarItem(currentlyActivePage.pageTitle);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentlyActivePage]);
+  }, [addActiveToSidebarItem, currentlyActivePage]);
 
   const sideBarItems = React.useMemo(
     () =>
@@ -132,7 +129,7 @@ const Sidebar = React.memo(() => {
         bodyBackgroundImage
           ? 'bg-side-bar-background/50 backdrop-blur-md dark:bg-dark-background-color-2/50'
           : 'bg-side-bar-background dark:bg-dark-background-color-2'
-      } delay-200 lg:absolute lg:w-14 lg:hover:w-[30%] lg:hover:shadow-2xl`}
+      } delay-200 lg:absolute lg:w-14 lg:hover:w-[30%] lg:hover:shadow-2xl md:hover:w-60`}
     >
       <ErrorBoundary>
         <ul className="relative flex !h-full flex-col overflow-x-hidden pb-2 pt-6">

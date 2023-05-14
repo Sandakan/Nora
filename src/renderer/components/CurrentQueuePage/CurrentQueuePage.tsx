@@ -83,7 +83,7 @@ const CurrentQueuePage = () => {
         return arr;
       });
     } else {
-      window.api.getAllSongs().then((res) => {
+      window.api.audioLibraryControls.getAllSongs().then((res) => {
         if (res) {
           const x = queue.queue
             .map((songId) => {
@@ -144,7 +144,7 @@ const CurrentQueuePage = () => {
       }
       if (queue.queueId) {
         if (queue.queueType === 'artist') {
-          window.api.getArtistData([queue.queueId]).then((res) => {
+          window.api.artistsData.getArtistData([queue.queueId]).then((res) => {
             if (res && Array.isArray(res) && res[0]) {
               setQueueInfo((prevData) => {
                 return {
@@ -160,7 +160,7 @@ const CurrentQueuePage = () => {
           });
         }
         if (queue.queueType === 'album') {
-          window.api.getAlbumData([queue.queueId]).then((res) => {
+          window.api.albumsData.getAlbumData([queue.queueId]).then((res) => {
             if (res && res.length > 0 && res[0]) {
               setQueueInfo((prevData) => {
                 return {
@@ -173,22 +173,24 @@ const CurrentQueuePage = () => {
           });
         }
         if (queue.queueType === 'playlist') {
-          window.api.getPlaylistData([queue.queueId]).then((res) => {
-            if (res && res.length > 0 && res[0]) {
-              setQueueInfo((prevData) => {
-                return {
-                  ...prevData,
-                  artworkPath: res[0].artworkPaths
-                    ? res[0].artworkPaths.artworkPath
-                    : DefaultPlaylistCover,
-                  title: res[0].name,
-                };
-              });
-            }
-          });
+          window.api.playlistsData
+            .getPlaylistData([queue.queueId])
+            .then((res) => {
+              if (res && res.length > 0 && res[0]) {
+                setQueueInfo((prevData) => {
+                  return {
+                    ...prevData,
+                    artworkPath: res[0].artworkPaths
+                      ? res[0].artworkPaths.artworkPath
+                      : DefaultPlaylistCover,
+                    title: res[0].name,
+                  };
+                });
+              }
+            });
         }
         if (queue.queueType === 'genre') {
-          window.api.getGenresData([queue.queueId]).then((res) => {
+          window.api.genresData.getGenresData([queue.queueId]).then((res) => {
             if (res && res.length > 0 && res[0]) {
               setQueueInfo((prevData) => {
                 return {
@@ -201,7 +203,7 @@ const CurrentQueuePage = () => {
           });
         }
         if (queue.queueType === 'folder') {
-          window.api.getFolderData([queue.queueId]).then((res) => {
+          window.api.folderData.getFolderData([queue.queueId]).then((res) => {
             if (res && res.length > 0 && res[0]) {
               const folderName = res[0].path.split('\\').pop();
               setQueueInfo((prevData) => {
@@ -229,6 +231,7 @@ const CurrentQueuePage = () => {
         songId,
         title,
         artists,
+        album,
         duration,
         isAFavorite,
         artworkPaths,
@@ -258,6 +261,7 @@ const CurrentQueuePage = () => {
                   title={title}
                   songId={songId}
                   artists={artists}
+                  album={album}
                   artworkPaths={artworkPaths}
                   duration={duration}
                   path={path}
@@ -512,6 +516,7 @@ const CurrentQueuePage = () => {
                       title={data.title}
                       songId={data.songId}
                       artists={data.artists}
+                      album={data.album}
                       artworkPaths={data.artworkPaths}
                       duration={data.duration}
                       path={data.path}

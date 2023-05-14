@@ -19,7 +19,7 @@ import Button from '../Button';
 import MainContainer from '../MainContainer';
 import Dropdown from '../Dropdown';
 
-export const PlaylistsPage = () => {
+const PlaylistsPage = () => {
   const {
     currentlyActivePage,
     localStorageData,
@@ -51,7 +51,7 @@ export const PlaylistsPage = () => {
 
   const fetchPlaylistData = React.useCallback(
     () =>
-      window.api.getPlaylistData([], sortingOrder).then((res) => {
+      window.api.playlistsData.getPlaylistData([], sortingOrder).then((res) => {
         if (res && res.length > 0) setPlaylists(res);
       }),
     [sortingOrder]
@@ -262,3 +262,5 @@ export const PlaylistsPage = () => {
     </MainContainer>
   );
 };
+
+export default PlaylistsPage;

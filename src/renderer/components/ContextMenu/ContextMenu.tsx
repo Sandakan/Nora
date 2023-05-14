@@ -1,10 +1,4 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable prettier/prettier */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable import/prefer-default-export */
 import React from 'react';
 import ContextMenuItem from './ContextMenuItem';
 import { AppContext } from '../../contexts/AppContext';
@@ -12,7 +6,7 @@ import ContextMenuDataItem from './ContextMenuDataItem';
 
 const ContextMenu = React.memo(() => {
   const { contextMenuData } = React.useContext(AppContext);
-  const { isVisible, menuItems, pageX, pageY, data } = contextMenuData;
+  const { isVisible, menuItems, data } = contextMenuData;
 
   const contextMenuRef = React.useRef(null as null | HTMLDivElement);
   const [dimensions, setDimensions] = React.useState({
@@ -29,6 +23,8 @@ const ContextMenu = React.memo(() => {
   contextMenuStyles['--transform-origin'] = `${dimensions.transformOrigin}`;
 
   React.useLayoutEffect(() => {
+    const { pageX, pageY } = contextMenuData;
+
     if (contextMenuRef.current) {
       const viewportHeight = window.innerHeight;
       const viewportWidth = window.innerWidth;
@@ -46,15 +42,14 @@ const ContextMenu = React.memo(() => {
             ? pageY -
               menuHeight +
               // ? 40px get added to stop the context menu from reaching the title-bar.
-              // ? Height of the title bar is  60px (3.75rem).
-              (pageY - menuHeight > 60 ? 0 : 60)
+              // ? Height of the title bar is  40px (2.5rem).
+              (pageY - menuHeight > 40 ? 0 : Math.abs(pageY - menuHeight) + 40)
             : pageY,
         transformOrigin: `${
           pageY + menuHeight > viewportHeight ? 'bottom' : 'top'
         } ${pageX + menuWidth > viewportWidth ? 'right' : 'left'}`,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contextMenuData]);
 
   const contextMenuItems = React.useMemo(
@@ -65,6 +60,7 @@ const ContextMenu = React.memo(() => {
           if (menuItem.isContextMenuItemSeperator)
             return (
               <div
+                // eslint-disable-next-line react/no-array-index-key
                 key={index}
                 role="separator"
                 className="context-menu-item-seperator float-right my-2 h-[1px] w-[95%] bg-[hsla(0deg,0%,57%,0.5)]"
@@ -72,7 +68,7 @@ const ContextMenu = React.memo(() => {
             );
           return (
             <ContextMenuItem
-              key={index}
+              key={menuItem.label}
               label={menuItem.label}
               iconName={menuItem.iconName}
               iconClassName={menuItem.iconClassName}
@@ -80,7 +76,6 @@ const ContextMenu = React.memo(() => {
             />
           );
         }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [menuItems]
   );
   return (
@@ -97,11 +92,11 @@ const ContextMenu = React.memo(() => {
         transformOrigin: dimensions.transformOrigin,
       }}
       ref={contextMenuRef}
+      tabIndex={isVisible ? 0 : -1}
+      role="menu"
     >
-      <>
-        {data && <ContextMenuDataItem data={data} />}
-        {contextMenuItems}
-      </>
+      {data && <ContextMenuDataItem data={data} />}
+      {contextMenuItems}
     </div>
   );
 });

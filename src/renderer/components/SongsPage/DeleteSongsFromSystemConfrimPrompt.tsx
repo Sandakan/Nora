@@ -16,7 +16,7 @@ export default (props: { songIds: string[] }) => {
 
   React.useEffect(() => {
     if (songIds.length > 0) {
-      window.api
+      window.api.audioLibraryControls
         .getSongInfo(songIds)
         .then((res) => {
           if (Array.isArray(res) && res.length > 0) {
@@ -63,7 +63,7 @@ export default (props: { songIds: string[] }) => {
           className="delete-song-confirm-btn danger-btn float-right mt-6 h-10 w-48 cursor-pointer rounded-lg !bg-font-color-crimson font-medium text-font-color-white outline-none ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson"
           clickHandler={() => {
             changePromptMenuData(false);
-            return window.api
+            return window.api.audioLibraryControls
               .deleteSongsFromSystem(
                 songsData.map((song) => song.path),
                 isPermanentDelete
@@ -72,7 +72,7 @@ export default (props: { songIds: string[] }) => {
                 if (res.success) {
                   if (
                     songsData
-                      .map((song) => song.path)
+                      .map((song) => song.songId)
                       .includes(currentSongData.songId)
                   ) {
                     clearAudioPlayerData();

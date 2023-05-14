@@ -20,6 +20,7 @@ interface SongCardProp {
   path: string;
   title: string;
   artists?: { name: string; artistId: string }[];
+  album?: { name: string; albumId: string };
   palette?: NodeVibrantPalette;
   isAFavorite: boolean;
   className?: string;
@@ -57,6 +58,7 @@ const SongCard = (props: SongCardProp) => {
     path,
     songId,
     artists,
+    album,
     className,
     isBlacklisted,
     palette,
@@ -93,16 +95,8 @@ const SongCard = (props: SongCardProp) => {
         : [47, 49, 55],
     [palette]
   );
-  const [fr, fg, fb] = React.useMemo(
-    () =>
-      palette && palette.LightVibrant && palette.DarkVibrant
-        ? palette.DarkVibrant.rgb
-        : [222, 220, 217],
-    [palette]
-  );
 
-  const background = `linear-gradient(90deg,rgba(${r},${g},${b},1) 0%,rgba(${r},${g},${b},1) 50%,rgba(${r},${g},${b},0.6) 70%,rgba(${r},${g},${b},0) 100%)`;
-  const fontColor = `rgba(${fr},${fg},${fb},1)`;
+  const background = `linear-gradient(to top,rgba(${r},${g},${b},0.3) 0%,rgba(${r},${g},${b},0.15) 40%), linear-gradient(to top,rgba(0,0,0,0.8)0%,rgba(0,0,0,0.1) 60%)`;
 
   const handlePlayBtnClick = React.useCallback(() => {
     playSong(songId);
@@ -129,7 +123,13 @@ const SongCard = (props: SongCardProp) => {
           title: `${multipleSelectionsData.multipleSelections.length} selected songs`,
           artworkPath: DefaultSongCover,
         }
-      : undefined;
+      : {
+          title: title || 'Unknown title',
+          subTitle:
+            artists?.map((artist) => artist.name).join(', ') ??
+            'Unknown artist',
+          artworkPath,
+        };
 
   const showSongInfoPage = () =>
     changeCurrentActivePage('SongInfo', {
@@ -137,7 +137,7 @@ const SongCard = (props: SongCardProp) => {
     });
 
   const handleLikeButtonClick = React.useCallback(() => {
-    window.api
+    window.api.playerControls
       .toggleLikeSongs([songId], !isSongAFavorite)
       .then((res) => {
         if (res && res.likes.length + res.dislikes.length > 0) {
@@ -230,7 +230,7 @@ const SongCard = (props: SongCardProp) => {
           } else {
             const newQueue = queue.queue.filter((id) => id !== songId);
             newQueue.splice(
-              queue.queue.indexOf(currentSongData.songId) + 1 || 0,
+              newQueue.indexOf(currentSongData.songId) + 1 || 0,
               0,
               songId
             );
@@ -299,7 +299,7 @@ const SongCard = (props: SongCardProp) => {
           ? 'material-icons-round mr-4 text-xl'
           : 'material-icons-round-outlined mr-4 text-xl',
         handlerFunction: () => {
-          window.api
+          window.api.playerControls
             .toggleLikeSongs(
               isMultipleSelectionsEnabled ? [...songIds] : [songId]
             )
@@ -326,7 +326,7 @@ const SongCard = (props: SongCardProp) => {
         },
       },
       {
-        label: 'Add to a Playlists',
+        label: 'Add to Playlists',
         iconName: 'playlist_add',
         handlerFunction: () => {
           changePromptMenuData(
@@ -371,7 +371,8 @@ const SongCard = (props: SongCardProp) => {
         label: 'Reveal in File Explorer',
         class: 'reveal-file-explorer',
         iconName: 'folder_open',
-        handlerFunction: () => window.api.revealSongInFileExplorer(songId),
+        handlerFunction: () =>
+          window.api.songUpdates.revealSongInFileExplorer(songId),
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
@@ -383,6 +384,16 @@ const SongCard = (props: SongCardProp) => {
             songId,
           }),
         isDisabled: isMultipleSelectionsEnabled,
+      },
+      {
+        label: 'Go to Album',
+        iconName: 'album',
+        handlerFunction: () =>
+          album &&
+          changeCurrentActivePage('AlbumInfo', {
+            albumId: album?.albumId,
+          }),
+        isDisabled: !album,
       },
       {
         label: 'Edit song tags',
@@ -407,11 +418,11 @@ const SongCard = (props: SongCardProp) => {
         iconName: isBlacklisted ? 'settings_backup_restore' : 'block',
         handlerFunction: () => {
           if (isBlacklisted)
-            window.api
+            window.api.audioLibraryControls
               .restoreBlacklistedSongs([songId])
               .catch((err) => console.error(err));
           else if (localStorageData?.preferences.doNotShowBlacklistSongConfirm)
-            window.api
+            window.api.audioLibraryControls
               .blacklistSongs([songId])
               .then(() =>
                 addNewNotifications([
@@ -452,6 +463,7 @@ const SongCard = (props: SongCardProp) => {
     multipleSelectionsData,
     isAMultipleSelection,
     isSongAFavorite,
+    album,
     isBlacklisted,
     handlePlayBtnClick,
     toggleMultipleSelections,
@@ -474,36 +486,35 @@ const SongCard = (props: SongCardProp) => {
     localStorageData?.preferences.doNotShowBlacklistSongConfirm,
   ]);
 
-  const songArtistComponents = React.useMemo(
-    () =>
-      Array.isArray(artists) ? (
-        artists
-          .map((artist, i) =>
-            (artists?.length ?? 1) - 1 === i ? (
-              <SongArtist
-                key={artist.artistId}
-                artistId={artist.artistId}
-                name={artist.name}
-                style={{ color: fontColor }}
-              />
-            ) : (
-              [
-                <SongArtist
-                  key={artist.artistId}
-                  artistId={artist.artistId}
-                  name={artist.name}
-                  style={{ color: fontColor }}
-                />,
-                <span className="mr-1">,</span>,
-              ]
-            )
-          )
-          .flat()
-      ) : (
-        <span>Unknown Artist</span>
-      ),
-    [fontColor, artists]
-  );
+  const songArtistComponents = React.useMemo(() => {
+    if (Array.isArray(artists)) {
+      return artists
+        .map((artist, i) => {
+          const arr = [
+            <SongArtist
+              key={artist.artistId}
+              artistId={artist.artistId}
+              name={artist.name}
+              className="!text-font-color-white/80 dark:!text-font-color-white/80"
+            />,
+          ];
+
+          if ((artists?.length ?? 1) - 1 !== i)
+            arr.push(
+              <span
+                className="mr-1"
+                key={`${artists[i].name}=>${artists[i + 1].name}`}
+              >
+                ,
+              </span>
+            );
+
+          return arr;
+        })
+        .flat();
+    }
+    return <span>Unknown Artist</span>;
+  }, [artists]);
 
   return (
     <div
@@ -514,9 +525,9 @@ const SongCard = (props: SongCardProp) => {
         currentSongData.songId === songId && 'current-song'
       } ${
         isSongPlaying && 'playing'
-      } group relative mb-2 mr-2 aspect-[2/1] min-w-[10rem] max-w-[24rem] overflow-hidden rounded-2xl border-[transparent] border-background-color-2 shadow-xl transition-[border-color] ease-in-out dark:border-dark-background-color-2 ${
+      } group/songCard relative mb-2 mr-2 aspect-[2/1] min-w-[15rem] max-w-[24rem] overflow-hidden rounded-2xl border-[transparent] border-background-color-2 shadow-xl transition-[border-color] ease-in-out dark:border-dark-background-color-2 ${
         className || ''
-      } ${isBlacklisted && '!opacity-30'} ${
+      } ${isBlacklisted && '!opacity-90 !brightness-50 dark:!opacity-75'} ${
         isMultipleSelectionEnabled &&
         multipleSelectionsData.selectionType === 'songs' &&
         'border-4'
@@ -550,90 +561,111 @@ const SongCard = (props: SongCardProp) => {
             isAMultipleSelection ? 'remove' : 'add'
           );
       }}
+      title={isBlacklisted ? `'${title}' is blacklisted.` : undefined}
     >
-      <div className="song-cover-container mr-4 flex h-full w-full flex-row items-center justify-end">
+      <div className="h-full w-full">
         <Img
           src={artworkPath}
           loading="eager"
           alt="Song cover"
-          className="aspect-square h-full max-h-full object-cover"
+          className="h-full w-full object-cover object-center brightness-90 dark:brightness-90"
         />
       </div>
       <div
-        className="song-info-and-play-btn-container absolute top-0 h-full w-full pl-4"
+        className="song-info-and-controls-container absolute top-0 flex h-full w-full flex-col justify-between px-4 py-4"
         data-song-id={songId}
         style={{ background }}
       >
-        <div
-          className="song-info-container flex h-full translate-y-1 flex-col justify-center"
-          style={{ color: fontColor }}
-        >
-          <div
-            className="song-title w-2/3 cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-2xl font-normal outline-1 outline-offset-1 transition-none hover:underline focus-visible:!outline"
-            title={title}
-            onClick={(e) => {
-              e.stopPropagation();
-              showSongInfoPage();
-            }}
-            onKeyDown={(e) => e.key === 'Enter' && showSongInfoPage()}
-            tabIndex={0}
-          >
-            {title}
-          </div>
-          <div
-            className="song-artists flex w-2/3 overflow-hidden text-ellipsis whitespace-nowrap text-sm transition-none"
-            title={
-              artists ? artists.map((x) => x.name).join(', ') : 'Unknown Artist'
-            }
-            data-song-id={songId}
-          >
-            {songArtistComponents}
-          </div>
-          <div className="song-states-container">
-            <div className="flex">
-              <Button
-                className="!mr-0 mt-1 !rounded-none !border-0 !p-0 !text-inherit outline-1 outline-offset-1 focus-visible:!outline"
-                iconName="favorite"
-                iconClassName={`${
-                  isSongAFavorite
-                    ? 'material-icons-round'
-                    : 'material-icons-round-outlined'
-                } !text-lg !leading-none`}
-                tooltipLabel={
-                  isSongAFavorite ? 'You liked this song' : undefined
-                }
-                clickHandler={(e) => {
-                  e.stopPropagation();
-                  handleLikeButtonClick();
-                }}
-              />
-              {isBlacklisted && (
-                <span
-                  className="material-icons-round ml-2 mt-1 cursor-pointer text-lg"
-                  title={`'${title}' is blacklisted.`}
-                >
-                  block
+        <div className="song-states-container flex items-center justify-between">
+          <div className="state-info">
+            {typeof queue.currentSongIndex === 'number' &&
+              Array.isArray(queue.queue) &&
+              queue.queue.length > 0 &&
+              queue?.queue?.at(queue.currentSongIndex + 1) === songId && (
+                <span className="font-semibold uppercase !text-font-color-white opacity-50 transition-opacity group-hover/songCard:opacity-90">
+                  PLAYING NEXT
                 </span>
               )}
-            </div>
-            {isMultipleSelectionEnabled &&
-              multipleSelectionsData.selectionType === 'songs' && (
-                <MultipleSelectionCheckbox id={songId} selectionType="songs" />
-              )}
+            {currentSongData.songId === songId && (
+              <span className="font-semibold uppercase !text-font-color-white opacity-50 transition-opacity group-hover/songCard:opacity-90">
+                PLAYING NOW
+              </span>
+            )}
+          </div>
+          <div className="state-icons">
+            <Button
+              className="!m-0 !rounded-none !border-0 !p-1 !text-inherit opacity-50 outline-1 outline-offset-1 transition-opacity focus-visible:!outline group-focus-within/songCard:opacity-100 group-hover/songCard:opacity-100"
+              iconName="favorite"
+              iconClassName={`${
+                isSongAFavorite
+                  ? 'material-icons-round'
+                  : 'material-icons-round-outlined'
+              } !text-2xl !text-font-color-white !leading-none`}
+              tooltipLabel={isSongAFavorite ? 'You liked this song' : undefined}
+              clickHandler={(e) => {
+                e.stopPropagation();
+                handleLikeButtonClick();
+              }}
+            />
+            {isBlacklisted && (
+              <span
+                className="material-icons-round cursor-pointer p-1 text-2xl dark:text-font-color-white"
+                title={`'${title}' is blacklisted.`}
+              >
+                block
+              </span>
+            )}
           </div>
         </div>
-        <div className="play-btn-container absolute left-3/4 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <Button
-            className="!m-0 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 focus-visible:!outline"
-            iconName={isSongPlaying ? 'pause_circle' : 'play_circle'}
-            iconClassName={`!text-4xl !leading-none text-font-color-white text-opacity-0 ${
-              currentSongData.songId === songId && 'text-opacity-100'
-            } group-hover:text-opacity-100 group-focus-within:text-opacity-100`}
-            clickHandler={(e) => {
-              e.stopPropagation();
-              handlePlayBtnClick();
-            }}
-          />
+        <div className="song-info-and-play-btn-container flex w-full items-center justify-between">
+          <div className="song-info-container max-w-[75%] text-font-color-white dark:text-font-color-white">
+            <div
+              className="song-title cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-xl font-normal outline-1 outline-offset-1 transition-none hover:underline focus-visible:!outline"
+              title={title}
+              onClick={(e) => {
+                e.stopPropagation();
+                showSongInfoPage();
+              }}
+              onKeyDown={(e) => e.key === 'Enter' && showSongInfoPage()}
+              tabIndex={0}
+            >
+              {title}
+            </div>
+            <div
+              className="song-artists w-full max-w-full truncate text-sm transition-none"
+              title={
+                artists
+                  ? artists.map((x) => x.name).join(', ')
+                  : 'Unknown Artist'
+              }
+              data-song-id={songId}
+            >
+              {songArtistComponents}
+            </div>
+          </div>
+          <div className="play-btn-and-multiple-selection-checkbox-container">
+            {isMultipleSelectionEnabled ? (
+              multipleSelectionsData.selectionType === 'songs' && (
+                <MultipleSelectionCheckbox
+                  id={songId}
+                  selectionType="songs"
+                  className="!mr-1"
+                />
+              )
+            ) : (
+              <Button
+                className={`!m-0 !rounded-none !border-0 !p-0 opacity-60 outline-1 outline-offset-1 transition-opacity focus-visible:!outline ${
+                  currentSongData.songId === songId && '!opacity-100'
+                } group-focus-within/songCard:opacity-100 group-hover/songCard:opacity-100`}
+                iconName={isSongPlaying ? 'pause_circle' : 'play_circle'}
+                iconClassName="!text-4xl !leading-none text-font-color-white transition-opacity"
+                clickHandler={(e) => {
+                  e.stopPropagation();
+                  handlePlayBtnClick();
+                }}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>

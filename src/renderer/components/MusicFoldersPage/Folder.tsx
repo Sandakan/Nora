@@ -133,6 +133,18 @@ const Folder = (props: FolderProps) => {
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
+        label: 'Reveal in File Explorer',
+        class: 'reveal-file-explorer',
+        iconName: 'folder_open',
+        handlerFunction: () =>
+          window.api.folderData.revealFolderInFileExplorer(folderPath),
+      },
+      {
+        label: 'Hr',
+        isContextMenuItemSeperator: true,
+        handlerFunction: null,
+      },
+      {
         label: isMultipleSelectionEnabled
           ? 'Toggle blacklist Folder'
           : isBlacklisted
@@ -145,11 +157,11 @@ const Folder = (props: FolderProps) => {
           : 'block',
         handlerFunction: () => {
           if (isMultipleSelectionEnabled) {
-            window.api
+            window.api.folderData
               .toggleBlacklistedFolders(folderPaths)
               .catch((err) => console.error(err));
           } else if (isBlacklisted)
-            window.api
+            window.api.folderData
               .restoreBlacklistedFolders([folderPath])
               .catch((err) => console.error(err));
           else
@@ -193,16 +205,31 @@ const Folder = (props: FolderProps) => {
     updateMultipleSelections,
   ]);
 
-  const contextMenuItemData: ContextMenuAdditionalData | undefined =
-    isMultipleSelectionEnabled &&
-    multipleSelectionsData.selectionType === 'folder' &&
-    isAMultipleSelection
-      ? {
-          title: `${multipleSelectionsData.multipleSelections.length} selected folders`,
-          artworkClassName: '!w-6',
-          artworkPath: FolderImg,
-        }
-      : undefined;
+  const contextMenuItemData = React.useMemo(
+    (): ContextMenuAdditionalData =>
+      isMultipleSelectionEnabled &&
+      multipleSelectionsData.selectionType === 'folder' &&
+      isAMultipleSelection
+        ? {
+            title: `${multipleSelectionsData.multipleSelections.length} selected folders`,
+            artworkClassName: '!w-6',
+            artworkPath: FolderImg,
+          }
+        : {
+            title: folderName || 'Unknown Folder',
+            artworkPath: FolderImg,
+            artworkClassName: '!w-6',
+            subTitle: `${songIds.length} songs`,
+          },
+    [
+      folderName,
+      isAMultipleSelection,
+      isMultipleSelectionEnabled,
+      multipleSelectionsData.multipleSelections.length,
+      multipleSelectionsData.selectionType,
+      songIds.length,
+    ]
+  );
 
   return (
     <div

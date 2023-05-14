@@ -6,7 +6,7 @@ import { supportedMusicExtensions } from '../filesystem';
 import log from '../log';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
 
-const deleteSongFromSystem = async (
+const deleteSongsFromSystem = async (
   absoluteFilePaths: string[],
   abortSignal: AbortSignal,
   isPermanentDelete = false
@@ -39,10 +39,10 @@ const deleteSongFromSystem = async (
   try {
     const res = await removeSongsFromLibrary(absoluteFilePaths, abortSignal);
 
-    if (res && res.success) {
+    if (res?.success) {
       for (const filePath of absoluteFilePaths) {
-        if (!isPermanentDelete) await shell.trashItem(filePath);
-        else await fs.unlink(filePath);
+        if (isPermanentDelete) await fs.unlink(filePath);
+        else await shell.trashItem(filePath);
       }
     }
 
@@ -65,4 +65,4 @@ const deleteSongFromSystem = async (
   }
 };
 
-export default deleteSongFromSystem;
+export default deleteSongsFromSystem;

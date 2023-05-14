@@ -47,17 +47,26 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: 'Play Next',
             iconName: 'shortcut',
             handlerFunction: () => {
-              if (queue.currentSongIndex === queue.queue.length - 1)
-                queue.currentSongIndex -= 1;
               const newQueue = queue.queue.filter(
-                (songId) => songId !== firstResult.songId
+                (id) => id !== firstResult.songId
               );
+              const duplicateSongIndex = queue.queue.indexOf(
+                firstResult.songId
+              );
+
+              const currentSongIndex =
+                queue.currentSongIndex &&
+                duplicateSongIndex !== -1 &&
+                duplicateSongIndex < queue.currentSongIndex
+                  ? queue.currentSongIndex - 1
+                  : undefined;
+
               newQueue.splice(
-                queue.queue.indexOf(currentSongData.songId) + 1 || 0,
+                newQueue.indexOf(currentSongData.songId) + 1 || 0,
                 0,
                 firstResult.songId
               );
-              updateQueueData(undefined, newQueue);
+              updateQueueData(currentSongIndex, newQueue, undefined, false);
               addNewNotifications([
                 {
                   id: `${firstResult.title}PlayNext`,
@@ -100,7 +109,9 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             class: 'reveal-file-explorer',
             iconName: 'folder_open',
             handlerFunction: () =>
-              window.api.revealSongInFileExplorer(firstResult.songId),
+              window.api.songUpdates.revealSongInFileExplorer(
+                firstResult.songId
+              ),
           },
           {
             label: 'Info',
@@ -138,7 +149,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: 'Play all Songs',
             iconName: 'play_arrow',
             handlerFunction: () =>
-              window.api
+              window.api.audioLibraryControls
                 .getSongInfo(
                   firstResult.songs.map((song) => song.songId),
                   undefined,
@@ -205,7 +216,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: 'Play',
             iconName: 'play_arrow',
             handlerFunction: () =>
-              window.api
+              window.api.audioLibraryControls
                 .getSongInfo(
                   firstResult.songs.map((song) => song.songId),
                   undefined,
@@ -268,7 +279,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: 'Play',
             iconName: 'play_arrow',
             handlerFunction: () =>
-              window.api
+              window.api.audioLibraryControls
                 .getSongInfo(firstResult.songs, undefined, undefined, true)
                 .then((songs) => {
                   if (Array.isArray(songs))
@@ -306,7 +317,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: 'Play',
             iconName: 'play_arrow',
             handlerFunction: () =>
-              window.api
+              window.api.audioLibraryControls
                 .getSongInfo(
                   firstResult.songs.map((song) => song.songId),
                   undefined,

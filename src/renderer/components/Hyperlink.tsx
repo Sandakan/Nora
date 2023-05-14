@@ -21,7 +21,7 @@ const Hyperlink = (props: HyperlinkProp) => {
       noValidityCheck ||
       localStorageData?.preferences.doNotVerifyWhenOpeningLinks
     ) {
-      window.api.openInBrowser(link);
+      window.api.settingsHelpers.openInBrowser(link);
     } else
       changePromptMenuData(
         true,

@@ -26,6 +26,7 @@ import roundTo from './utils/roundTo';
 import storage, { LOCAL_STORAGE_DEFAULT_TEMPLATE } from './utils/localStorage';
 import useNetworkConnectivity from './hooks/useNetworkConnectivity';
 import { isDataChanged } from './utils/hasDataChanged';
+import log from './utils/log';
 
 interface AppReducer {
   userData: UserData;
@@ -252,7 +253,7 @@ const reducer = (
         },
       };
     case 'UPDATE_MINI_PLAYER_STATE':
-      window.api.toggleMiniPlayer(
+      window.api.miniPlayer.toggleMiniPlayer(
         typeof action.data === 'boolean'
           ? action.data
           : state.player.isMiniPlayer
@@ -471,7 +472,7 @@ player.addEventListener('player/trackchange', (e) => {
 // / / / / / / / /
 
 const updateNetworkStatus = () =>
-  window.api.networkStatusChange(navigator.onLine);
+  window.api.settingsHelpers.networkStatusChange(navigator.onLine);
 
 updateNetworkStatus();
 window.addEventListener('online', updateNetworkStatus);
@@ -537,7 +538,7 @@ const reducerData: AppReducer = {
   isOnBatteryPower: false,
 };
 
-console.log('Command line args', window.api.commandLineArgs);
+console.log('Command line args', window.api.properties.commandLineArgs);
 
 export default function App() {
   const [content, dispatch] = React.useReducer(reducer, reducerData);
@@ -600,7 +601,7 @@ export default function App() {
       const prevSongPosition = player.currentTime;
       const playerErrorData = player.error;
       console.error(err, playerErrorData);
-      window.api.sendLogs(
+      log(
         `Error occurred in the player.App error:${err}; Player error: ${playerErrorData};`
       );
       if (player.src && playerErrorData) {
@@ -780,11 +781,15 @@ export default function App() {
       dispatch({ type: 'UPDATE_BATTERY_POWER_STATE', data: isOnBatteryPower });
     };
 
-    window.api.listenForSystemThemeChanges(watchForSystemThemeChanges);
-    window.api.listenForBatteryPowerStateChanges(watchPowerChanges);
+    window.api.theme.listenForSystemThemeChanges(watchForSystemThemeChanges);
+    window.api.battery.listenForBatteryPowerStateChanges(watchPowerChanges);
     return () => {
-      window.api.stoplisteningForSystemThemeChanges(watchForSystemThemeChanges);
-      window.api.stopListeningForBatteryPowerStateChanges(watchPowerChanges);
+      window.api.theme.stoplisteningForSystemThemeChanges(
+        watchForSystemThemeChanges
+      );
+      window.api.battery.stopListeningForBatteryPowerStateChanges(
+        watchPowerChanges
+      );
     };
   }, []);
 
@@ -838,25 +843,33 @@ export default function App() {
         type: 'CURRENT_SONG_PLAYBACK_STATE',
         data: true,
       });
-      window.api.songPlaybackStateChange(true);
+      window.api.playerControls.songPlaybackStateChange(true);
     });
     player.addEventListener('pause', () => {
       dispatch({
         type: 'CURRENT_SONG_PLAYBACK_STATE',
         data: false,
       });
-      window.api.songPlaybackStateChange(false);
+      window.api.playerControls.songPlaybackStateChange(false);
     });
-    window.api.beforeQuitEvent(handleBeforeQuitEvent);
+    window.api.quitEvent.beforeQuitEvent(handleBeforeQuitEvent);
 
-    window.api.onWindowBlur(() => manageWindowBlurOrFocus('blur'));
-    window.api.onWindowFocus(() => manageWindowBlurOrFocus('focus'));
+    window.api.windowControls.onWindowBlur(() =>
+      manageWindowBlurOrFocus('blur')
+    );
+    window.api.windowControls.onWindowFocus(() =>
+      manageWindowBlurOrFocus('focus')
+    );
 
-    window.api.onEnterFullscreen(() => manageWindowFullscreen('fullscreen'));
-    window.api.onLeaveFullscreen(() => manageWindowFullscreen('windowed'));
+    window.api.fullscreen.onEnterFullscreen(() =>
+      manageWindowFullscreen('fullscreen')
+    );
+    window.api.fullscreen.onLeaveFullscreen(() =>
+      manageWindowFullscreen('windowed')
+    );
 
     return () => {
-      window.api.removeBeforeQuitEventListener(handleBeforeQuitEvent);
+      window.api.quitEvent.removeBeforeQuitEventListener(handleBeforeQuitEvent);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -982,7 +995,7 @@ export default function App() {
     toggleShuffling(playback?.isShuffling);
     toggleRepeat(playback?.isRepeating);
 
-    window.api
+    window.api.audioLibraryControls
       .checkForStartUpSongs()
       .then((startUpSongData) => {
         if (startUpSongData) playSongFromUnknownSource(startUpSongData, true);
@@ -1011,7 +1024,7 @@ export default function App() {
         queueId: queue.queueId,
       };
     else {
-      window.api
+      window.api.audioLibraryControls
         .getAllSongs()
         .then((audioData) => {
           if (!audioData) return undefined;
@@ -1031,7 +1044,7 @@ export default function App() {
   }, []);
 
   React.useEffect(() => {
-    window.api
+    window.api.userData
       .getUserData()
       .then((res) => {
         if (!res) return undefined;
@@ -1043,20 +1056,28 @@ export default function App() {
       })
       .catch((err) => console.error(err));
 
-    window.api.toggleSongPlayback(() => {
+    window.api.playerControls.toggleSongPlayback(() => {
       console.log('Main requested song playback');
       toggleSongPlayback();
     });
-    window.api.playSongFromUnknownSource((_, data) => {
+    window.api.unknownSource.playSongFromUnknownSource((_, data) => {
       playSongFromUnknownSource(data, true);
     });
-    window.api.skipBackwardToPreviousSong(handleSkipBackwardClick);
-    window.api.skipForwardToNextSong(handleSkipForwardClick);
+    window.api.playerControls.skipBackwardToPreviousSong(
+      handleSkipBackwardClick
+    );
+    window.api.playerControls.skipForwardToNextSong(handleSkipForwardClick);
     return () => {
-      window.api.removeTogglePlaybackStateEvent(toggleSongPlayback);
-      window.api.removeSkipBackwardToPreviousSongEvent(handleSkipBackwardClick);
-      window.api.removeSkipForwardToNextSongEvent(handleSkipForwardClick);
-      window.api.removeDataUpdateEventListeners();
+      window.api.playerControls.removeTogglePlaybackStateEvent(
+        toggleSongPlayback
+      );
+      window.api.playerControls.removeSkipBackwardToPreviousSongEvent(
+        handleSkipBackwardClick
+      );
+      window.api.playerControls.removeSkipForwardToNextSongEvent(
+        handleSkipForwardClick
+      );
+      window.api.dataUpdates.removeDataUpdateEventListeners();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -1070,10 +1091,10 @@ export default function App() {
       document.dispatchEvent(event);
     };
 
-    window.api.dataUpdateEvent(noticeDataUpdateEvents);
+    window.api.dataUpdates.dataUpdateEvent(noticeDataUpdateEvents);
 
     return () => {
-      window.api.removeDataUpdateEventListeners();
+      window.api.dataUpdates.removeDataUpdateEventListeners();
     };
   }, []);
 
@@ -1206,7 +1227,8 @@ export default function App() {
           label: 'Resync Songs',
           iconClassName: 'sync',
           className: defaultButtonStyles,
-          clickHandler: () => window.api.resyncSongsLibrary(),
+          clickHandler: () =>
+            window.api.audioLibraryControls.resyncSongsLibrary(),
         });
       }
       if (
@@ -1290,55 +1312,13 @@ export default function App() {
   );
 
   React.useEffect(() => {
-    window.api.getMessageFromMain(displayMessageFromMain);
+    window.api.messages.getMessageFromMain(displayMessageFromMain);
     return () => {
-      window.api.removeMessageToRendererEventListener(displayMessageFromMain);
+      window.api.messages.removeMessageToRendererEventListener(
+        displayMessageFromMain
+      );
     };
   }, [displayMessageFromMain]);
-
-  React.useEffect(() => {
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: contentRef.current.currentSongData.title,
-        artist: Array.isArray(contentRef.current.currentSongData.artists)
-          ? contentRef.current.currentSongData.artists
-              .map((artist) => artist.name)
-              .join(', ')
-          : `Unknown Artist`,
-        album: contentRef.current.currentSongData.album
-          ? contentRef.current.currentSongData.album.name || 'Unknown Album'
-          : 'Unknown Album',
-        artwork: [
-          {
-            src: `data:;base64,${contentRef.current.currentSongData.artwork}`,
-            sizes: '300x300',
-            type: 'image/webp',
-          },
-        ],
-      });
-      const handleSkipForwardClickWithParams = () =>
-        handleSkipForwardClick('PLAYER_SKIP');
-
-      navigator.mediaSession.setActionHandler('pause', () =>
-        toggleSongPlayback(false)
-      );
-      navigator.mediaSession.setActionHandler('play', () =>
-        toggleSongPlayback(true)
-      );
-      navigator.mediaSession.setActionHandler(
-        'previoustrack',
-        handleSkipBackwardClick
-      );
-      navigator.mediaSession.setActionHandler(
-        `nexttrack`,
-        handleSkipForwardClickWithParams
-      );
-      navigator.mediaSession.playbackState = content.player.isCurrentSongPlaying
-        ? 'playing'
-        : 'paused';
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content.currentSongData, content.player.isCurrentSongPlaying]);
 
   const handleContextMenuVisibilityUpdate = React.useCallback(() => {
     if (contentRef.current.contextMenuData.isVisible) {
@@ -1348,16 +1328,6 @@ export default function App() {
       });
       contentRef.current.contextMenuData.isVisible = false;
     }
-  }, []);
-
-  React.useEffect(() => {
-    window.addEventListener('click', handleContextMenuVisibilityUpdate);
-    window.addEventListener('keydown', manageKeyboardShortcuts);
-    return () => {
-      window.removeEventListener('click', handleContextMenuVisibilityUpdate);
-      window.removeEventListener('keydown', manageKeyboardShortcuts);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addSongTitleToTitleBar = React.useCallback(() => {
@@ -1443,7 +1413,7 @@ export default function App() {
         if (!passedFullListenRange && seconds > (duration * 90) / 100) {
           passedFullListenRange = true;
           console.warn(`user listened to 90% of ${songId}`);
-          window.api.updateSongListeningData(
+          window.api.audioLibraryControls.updateSongListeningData(
             songId,
             'fullListens',
             'increment'
@@ -1462,7 +1432,11 @@ export default function App() {
             console.warn(`user skipped ${songId} before 90% completion.`);
           if (!passedSkipRange) {
             console.warn(`user skipped ${songId}. before 10% completion.`);
-            window.api.updateSongListeningData(songId, 'skips', 'increment');
+            window.api.audioLibraryControls.updateSongListeningData(
+              songId,
+              'skips',
+              'increment'
+            );
           }
           abortController.abort();
           clearInterval(intervalId);
@@ -1486,7 +1460,7 @@ export default function App() {
           return toggleSongPlayback();
         console.time('timeForSongFetch');
 
-        return window.api
+        return window.api.audioLibraryControls
           .getSong(songId)
           .then((songData) => {
             console.timeEnd('timeForSongFetch');
@@ -1620,7 +1594,7 @@ export default function App() {
           }
         />
       );
-      return window.api.sendLogs(
+      return log(
         `======= ERROR OCCURRED WHEN TRYING TO PLAY A S0NG. =======\nERROR : Song id is of unknown type; SONGIDTYPE : ${typeof songId}`
       );
     },
@@ -1655,7 +1629,7 @@ export default function App() {
 
   const fetchSongFromUnknownSource = React.useCallback(
     (songPath: string) => {
-      window.api
+      window.api.unknownSource
         .getSongFromUnknownSource(songPath)
         .then((res) => playSongFromUnknownSource(res, true))
         .catch((err) => {
@@ -1725,7 +1699,7 @@ export default function App() {
       ) {
         player.currentTime = 0;
         toggleSongPlayback(true);
-        window.api.updateSongListeningData(
+        window.api.audioLibraryControls.updateSongListeningData(
           contentRef.current.currentSongData.songId,
           'listens',
           'increment'
@@ -1741,6 +1715,63 @@ export default function App() {
     },
     [toggleSongPlayback, changeQueueCurrentSongIndex]
   );
+
+  React.useEffect(() => {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: contentRef.current.currentSongData.title,
+      artist: Array.isArray(contentRef.current.currentSongData.artists)
+        ? contentRef.current.currentSongData.artists
+            .map((artist) => artist.name)
+            .join(', ')
+        : `Unknown Artist`,
+      album: contentRef.current.currentSongData.album
+        ? contentRef.current.currentSongData.album.name || 'Unknown Album'
+        : 'Unknown Album',
+      artwork: [
+        {
+          src: `data:;base64,${contentRef.current.currentSongData.artwork}`,
+          sizes: '300x300',
+          type: 'image/webp',
+        },
+      ],
+    });
+    const handleSkipForwardClickWithParams = () =>
+      handleSkipForwardClick('PLAYER_SKIP');
+
+    navigator.mediaSession.setActionHandler('pause', () =>
+      toggleSongPlayback(false)
+    );
+    navigator.mediaSession.setActionHandler('play', () =>
+      toggleSongPlayback(true)
+    );
+    navigator.mediaSession.setActionHandler(
+      'previoustrack',
+      handleSkipBackwardClick
+    );
+    navigator.mediaSession.setActionHandler(
+      `nexttrack`,
+      handleSkipForwardClickWithParams
+    );
+    navigator.mediaSession.playbackState = content.player.isCurrentSongPlaying
+      ? 'playing'
+      : 'paused';
+    return () => {
+      navigator.mediaSession.metadata = null;
+      navigator.mediaSession.playbackState = 'none';
+      navigator.mediaSession.setActionHandler('play', null);
+      navigator.mediaSession.setActionHandler('pause', null);
+      navigator.mediaSession.setActionHandler('seekbackward', null);
+      navigator.mediaSession.setActionHandler('seekforward', null);
+      navigator.mediaSession.setActionHandler('previoustrack', null);
+      navigator.mediaSession.setActionHandler('nexttrack', null);
+    };
+  }, [
+    content.currentSongData,
+    content.player.isCurrentSongPlaying,
+    handleSkipBackwardClick,
+    handleSkipForwardClick,
+    toggleSongPlayback,
+  ]);
 
   const toggleShuffling = React.useCallback((isShuffling?: boolean) => {
     dispatch({ type: 'TOGGLE_SHUFFLE_STATE', data: isShuffling });
@@ -1804,7 +1835,7 @@ export default function App() {
 
   const updateQueueData = React.useCallback(
     (
-      currentSongIndex?: number,
+      currentSongIndex?: number | null,
       newQueue?: string[],
       isShuffleQueue = false,
       playCurrentSongIndex = true,
@@ -1812,7 +1843,10 @@ export default function App() {
     ) => {
       const queue: Queue = {
         ...refQueue.current,
-        currentSongIndex: currentSongIndex ?? refQueue.current.currentSongIndex,
+        currentSongIndex:
+          typeof currentSongIndex === 'number' || currentSongIndex === null
+            ? currentSongIndex
+            : refQueue.current.currentSongIndex,
         queue: newQueue ?? refQueue.current.queue,
       };
       if (clearPreviousQueueData) queue.queueBeforeShuffle = [];
@@ -2083,7 +2117,7 @@ export default function App() {
         contentRef.current.currentSongData.isAFavorite !== newFavorite &&
         !onlyChangeCurrentSongData
       ) {
-        window.api
+        window.api.playerControls
           .toggleLikeSongs(
             [contentRef.current.currentSongData.songId],
             newFavorite
@@ -2159,11 +2193,18 @@ export default function App() {
         'l',
         'n',
         'q',
+        '[',
+        ']',
+        '\\',
       ];
       const shiftCombinations = ['ArrowRight', 'ArrowLeft'];
+      const altCombinations = ['ArrowRight', 'ArrowLeft', 'Home'];
+      const functionCombinations = ['F12', 'F5'];
       if (
         (e.ctrlKey && ctrlCombinations.some((x) => e.key === x)) ||
         (e.shiftKey && shiftCombinations.some((x) => e.key === x)) ||
+        (e.altKey && altCombinations.some((x) => e.key === x)) ||
+        functionCombinations.some((x) => e.key === x) ||
         e.code === 'Space'
       )
         e.preventDefault();
@@ -2180,7 +2221,7 @@ export default function App() {
       else if (e.ctrlKey && e.key === 's') toggleShuffling();
       else if (e.ctrlKey && e.key === 't') toggleRepeat();
       else if (e.ctrlKey && e.key === 'h') toggleIsFavorite();
-      else if (e.ctrlKey && e.key === 'y') window.api.changeAppTheme();
+      else if (e.ctrlKey && e.key === 'y') window.api.theme.changeAppTheme();
       else if (e.ctrlKey && e.key === 'l') {
         const currentlyActivePage =
           content.navigationHistory.history[
@@ -2199,6 +2240,45 @@ export default function App() {
         if (currentlyActivePage.pageTitle === 'CurrentQueue')
           changeCurrentActivePage('Home');
         else changeCurrentActivePage('CurrentQueue');
+      } else if (e.ctrlKey && e.key === ']') {
+        let updatedPlaybackRate =
+          content.localStorage.playback.playbackRate || 1;
+
+        if (updatedPlaybackRate + 0.05 > 4) updatedPlaybackRate = 4;
+        else updatedPlaybackRate += 0.05;
+
+        storage.setItem('playback', 'playbackRate', updatedPlaybackRate);
+        addNewNotifications([
+          {
+            id: 'playbackRate',
+            icon: <span className="material-icons-round">avg_pace</span>,
+            content: `Playback Rate Changed to ${updatedPlaybackRate} x`,
+          },
+        ]);
+      } else if (e.ctrlKey && e.key === '[') {
+        let updatedPlaybackRate =
+          content.localStorage.playback.playbackRate || 1;
+
+        if (updatedPlaybackRate - 0.05 < 0.25) updatedPlaybackRate = 0.25;
+        else updatedPlaybackRate -= 0.05;
+
+        storage.setItem('playback', 'playbackRate', updatedPlaybackRate);
+        addNewNotifications([
+          {
+            id: 'playbackRate',
+            icon: <span className="material-icons-round">avg_pace</span>,
+            content: `Playback Rate Changed to ${updatedPlaybackRate} x`,
+          },
+        ]);
+      } else if (e.ctrlKey && e.key === '\\') {
+        storage.setItem('playback', 'playbackRate', 1);
+        addNewNotifications([
+          {
+            id: 'playbackRate',
+            icon: <span className="material-icons-round">avg_pace</span>,
+            content: `Playback Rate Resetted to 1x`,
+          },
+        ]);
       }
       // default combinations
       else if (e.code === 'Space') toggleSongPlayback();
@@ -2218,9 +2298,9 @@ export default function App() {
       // function key combinations
       else if (e.key === 'F5') {
         e.preventDefault();
-        window.api.restartRenderer(`User request through F5.`);
-      } else if (e.key === 'F12' && !window.api.isInDevelopment)
-        window.api.openDevtools();
+        window.api.appControls.restartRenderer(`User request through F5.`);
+      } else if (e.key === 'F12' && !window.api.properties.isInDevelopment)
+        window.api.settingsHelpers.openDevtools();
     },
     [
       updateVolume,
@@ -2234,11 +2314,22 @@ export default function App() {
       content.player.isMiniPlayer,
       content.navigationHistory.history,
       content.navigationHistory.pageHistoryIndex,
+      content.localStorage.playback.playbackRate,
       toggleSongPlayback,
       updatePageHistoryIndex,
       changeCurrentActivePage,
+      addNewNotifications,
     ]
   );
+
+  React.useEffect(() => {
+    window.addEventListener('click', handleContextMenuVisibilityUpdate);
+    window.addEventListener('keydown', manageKeyboardShortcuts);
+    return () => {
+      window.removeEventListener('click', handleContextMenuVisibilityUpdate);
+      window.removeEventListener('keydown', manageKeyboardShortcuts);
+    };
+  }, [handleContextMenuVisibilityUpdate, manageKeyboardShortcuts]);
 
   const displayUnsupportedFileMessage = React.useCallback(
     (path: string) => {
@@ -2337,10 +2428,13 @@ export default function App() {
     player.currentTime = 0;
     player.pause();
 
+    const updatedQueue = refQueue.current.queue.filter(
+      (songId) => songId !== content.currentSongData.songId
+    );
+    updateQueueData(null, updatedQueue);
+
     dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: {} });
     contentRef.current.currentSongData = {} as AudioPlayerData;
-
-    storage.queue.setCurrentSongIndex(null);
 
     addNewNotifications([
       {
@@ -2353,7 +2447,12 @@ export default function App() {
         ),
       },
     ]);
-  }, [addNewNotifications, toggleSongPlayback]);
+  }, [
+    addNewNotifications,
+    content.currentSongData.songId,
+    toggleSongPlayback,
+    updateQueueData,
+  ]);
 
   const updateBodyBackgroundImage = React.useCallback(
     (isVisible: boolean, src?: string) => {
@@ -2537,7 +2636,7 @@ export default function App() {
               isReducedMotion
                 ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
                 : ''
-            } flex h-screen w-full flex-col items-center overflow-y-hidden after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc]  [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
+            } grid !h-screen w-full grid-rows-[auto_1fr_auto] items-center overflow-y-hidden after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc]  [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
             ref={AppRef}
             onDragEnter={addSongDropPlaceholder}
             onDragLeave={removeSongDropPlaceholder}

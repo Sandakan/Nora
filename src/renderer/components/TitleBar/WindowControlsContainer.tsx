@@ -7,12 +7,18 @@ const WindowControlsContainer = () => {
 
   const close = React.useCallback(() => {
     if (userData && userData.preferences.hideWindowOnClose)
-      window.api.hideApp();
-    else window.api.closeApp();
+      window.api.windowControls.hideApp();
+    else window.api.windowControls.closeApp();
   }, [userData]);
 
-  const minimize = React.useCallback(() => window.api.minimizeApp(), []);
-  const maximize = React.useCallback(() => window.api.toggleMaximizeApp(), []);
+  const minimize = React.useCallback(
+    () => window.api.windowControls.minimizeApp(),
+    []
+  );
+  const maximize = React.useCallback(
+    () => window.api.windowControls.toggleMaximizeApp(),
+    []
+  );
 
   return (
     <div

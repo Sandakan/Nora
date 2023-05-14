@@ -1,6 +1,3 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
@@ -59,6 +56,8 @@ const SongControlsAndSeekbarContainer = () => {
   }, [songPosition]);
 
   React.useEffect(() => {
+    const seekBar = seekbarRef.current;
+
     if (seekbarRef.current) {
       const handleSeekbarMouseDown = () => {
         isMouseDownRef.current = true;
@@ -74,19 +73,12 @@ const SongControlsAndSeekbarContainer = () => {
         handleSeekbarMouseUp()
       );
       return () => {
-        seekbarRef?.current?.removeEventListener(
-          'mouseup',
-          handleSeekbarMouseUp
-        );
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        seekbarRef?.current?.removeEventListener(
-          'mousedown',
-          handleSeekbarMouseDown
-        );
+        seekBar?.removeEventListener('mouseup', handleSeekbarMouseUp);
+        seekBar?.removeEventListener('mousedown', handleSeekbarMouseDown);
       };
     }
     return undefined;
-  }, []);
+  }, [updateSongPosition]);
 
   const handleQueueShuffle = () => {
     if (isShuffling) {
@@ -119,7 +111,7 @@ const SongControlsAndSeekbarContainer = () => {
       : calculateTime(currentSongData.duration);
 
   return (
-    <div className="song-controls-and-seekbar-container flex w-[40%] min-w-[20rem] flex-col items-center justify-center py-2">
+    <div className="song-controls-and-seekbar-container flex flex-col items-center justify-center py-2">
       <div className="controls-container flex w-2/3 max-w-sm items-center justify-around px-2 lg:w-4/5 lg:p-0 [&>div.active_span.icon]:!text-font-color-highlight [&>div.active_span.icon]:opacity-100 dark:[&>div.active_span.icon]:!text-dark-font-color-highlight">
         <Button
           className={`like-btn !mr-0 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:after:bg-dark-font-color-highlight ${

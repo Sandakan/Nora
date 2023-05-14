@@ -8,6 +8,27 @@ const isFolderBlacklisted = (folderPath: string) => {
   return folderBlacklist.includes(folderPath);
 };
 
+const sortAtoZ = <T extends MusicFolder[]>(arr: T) =>
+  arr.sort((a, b) =>
+    a.path.toLowerCase().replace(/\W/gi, '') >
+    b.path.toLowerCase().replace(/\W/gi, '')
+      ? 1
+      : a.path.toLowerCase().replace(/\W/gi, '') <
+        b.path.toLowerCase().replace(/\W/gi, '')
+      ? -1
+      : 0
+  );
+const sortZtoA = <T extends MusicFolder[]>(arr: T) =>
+  arr.sort((a, b) =>
+    a.path.toLowerCase().replace(/\W/gi, '') <
+    b.path.toLowerCase().replace(/\W/gi, '')
+      ? 1
+      : a.path.toLowerCase().replace(/\W/gi, '') >
+        b.path.toLowerCase().replace(/\W/gi, '')
+      ? -1
+      : 0
+  );
+
 const sortFolders = <T extends MusicFolder[]>(
   musicFolders: T,
   sortType: FolderSortTypes
@@ -19,42 +40,33 @@ const sortFolders = <T extends MusicFolder[]>(
       }
     }
 
-    if (sortType === 'aToZ')
-      return musicFolders.sort((a, b) =>
-        a.path > b.path ? 1 : a.path < b.path ? -1 : 0
-      );
-    if (sortType === 'zToA')
-      return musicFolders.sort((a, b) =>
-        a.path < b.path ? 1 : a.path > b.path ? -1 : 0
-      );
+    if (sortType === 'aToZ') return sortAtoZ(musicFolders);
+    if (sortType === 'zToA') return sortZtoA(musicFolders);
     if (sortType === 'noOfSongsDescending')
-      return musicFolders
-        .sort((a, b) => (a.path > b.path ? 1 : a.path < b.path ? -1 : 0))
-        .sort((a, b) =>
-          a.songIds.length < b.songIds.length
-            ? 1
-            : a.songIds.length > b.songIds.length
-            ? -1
-            : 0
-        );
+      return sortAtoZ(musicFolders).sort((a, b) =>
+        a.songIds.length < b.songIds.length
+          ? 1
+          : a.songIds.length > b.songIds.length
+          ? -1
+          : 0
+      );
     if (sortType === 'noOfSongsAscending')
-      return musicFolders
-        .sort((a, b) => (a.path > b.path ? 1 : a.path < b.path ? -1 : 0))
-        .sort((a, b) =>
-          a.songIds.length > b.songIds.length
-            ? 1
-            : a.songIds.length < b.songIds.length
-            ? -1
-            : 0
-        );
+      return sortAtoZ(musicFolders).sort((a, b) =>
+        a.songIds.length > b.songIds.length
+          ? 1
+          : a.songIds.length < b.songIds.length
+          ? -1
+          : 0
+      );
     if (sortType === 'blacklistedFolders')
-      return musicFolders
-        .filter((folder) => isFolderBlacklisted(folder.path))
-        .sort((a, b) => (a.path > b.path ? 1 : a.path < b.path ? -1 : 0));
+      return sortAtoZ(
+        musicFolders.filter((folder) => isFolderBlacklisted(folder.path))
+      );
+
     if (sortType === 'whitelistedFolders')
-      return musicFolders
-        .filter((folder) => !isFolderBlacklisted(folder.path))
-        .sort((a, b) => (a.path > b.path ? 1 : a.path < b.path ? -1 : 0));
+      return sortAtoZ(
+        musicFolders.filter((folder) => !isFolderBlacklisted(folder.path))
+      );
   }
   return musicFolders;
 };

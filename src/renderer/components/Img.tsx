@@ -1,7 +1,14 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
+import log from 'renderer/utils/log';
 import DefaultImage from '../../../assets/images/webp/song_cover_default.webp';
+
+interface ImgProps {
+  width: number;
+  height: number;
+  quality: string;
+}
 
 type Props = {
   src?: string;
@@ -16,11 +23,6 @@ type Props = {
   tabIndex?: number;
   showAltAsTooltipLabel?: boolean;
 };
-
-interface ImgProps {
-  width: number;
-  height: number;
-}
 
 /* <picture
   className={`outline-1 outline-offset-4 focus-visible:!outline ${className}`}
@@ -83,6 +85,7 @@ const Img = (props: Props) => {
     showAltAsTooltipLabel = false,
   } = props;
 
+  const imgRef = React.useRef<HTMLImageElement>(null);
   const imgPropsRef = React.useRef<ImgProps>();
   const errorCountRef = React.useRef(0);
 
@@ -90,7 +93,8 @@ const Img = (props: Props) => {
     <img
       src={src || fallbackSrc}
       alt={alt}
-      className={`outline-1 outline-offset-4 focus-visible:!outline ${className}`}
+      ref={imgRef}
+      className={`relative outline-1 outline-offset-4 focus-visible:!outline ${className}`}
       onError={(e) => {
         if (errorCountRef.current < 3) {
           errorCountRef.current += 1;
@@ -98,23 +102,15 @@ const Img = (props: Props) => {
           if (!noFallbacks && e.currentTarget.src !== fallbackSrc)
             e.currentTarget.src = fallbackSrc;
           else e.currentTarget.src = DefaultImage;
-        } else
-          window.api.sendLogs('maximum img fetch error count reached.', 'warn');
+        } else {
+          log('maximum img fetch error count reached.', 'warn');
+          e.currentTarget.src = DefaultImage;
+        }
       }}
       onClick={onClick}
       title={
         showImgPropsOnTooltip && imgPropsRef.current
-          ? `Quality : ${
-              imgPropsRef.current?.width >= 1000 ||
-              imgPropsRef.current?.height >= 1000
-                ? 'HIGH QUALITY'
-                : imgPropsRef.current?.width >= 500 ||
-                  imgPropsRef.current?.height >= 500
-                ? 'MEDIUM QUALITY'
-                : 'LOW QUALITY'
-            }\nImage width : ${imgPropsRef.current?.width}px\nImage height : ${
-              imgPropsRef.current?.height
-            }px`
+          ? `Quality : ${imgPropsRef.current.quality}\nImage width : ${imgPropsRef.current?.width}px\nImage height : ${imgPropsRef.current?.height}px`
           : showAltAsTooltipLabel
           ? alt
           : undefined
@@ -125,10 +121,26 @@ const Img = (props: Props) => {
         if (showImgPropsOnTooltip) {
           const img = new Image();
           img.onload = () => {
-            imgPropsRef.current = {
-              width: img?.width,
-              height: img?.height,
+            const width = img?.width;
+            const height = img?.height;
+            const imgProp: ImgProps = {
+              width,
+              height,
+              quality:
+                width >= 1000 || height >= 1000
+                  ? 'HIGH QUALITY'
+                  : width >= 500 || height >= 500
+                  ? 'MEDIUM QUALITY'
+                  : 'LOW QUALITY',
             };
+            imgPropsRef.current = imgProp;
+
+            if (imgRef.current !== null && 'dataset' in imgRef.current) {
+              const { dataset } = imgRef.current;
+              dataset.width = imgProp.width.toString();
+              dataset.height = imgProp.height.toString();
+              dataset.quality = imgProp.quality;
+            }
           };
           img.src = e.currentTarget.src;
         }

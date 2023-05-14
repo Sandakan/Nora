@@ -17,7 +17,7 @@ const ThemeSettings = () => {
 
   const fetchUserData = React.useCallback(
     () =>
-      window.api
+      window.api.userData
         .getUserData()
         .then((res) => setTheme(res?.theme))
         .catch((err) => console.error(err)),
@@ -89,7 +89,7 @@ const ThemeSettings = () => {
                 value="lightTheme"
                 id="lightThemeRadioBtn"
                 defaultChecked={!theme.useSystemTheme && !theme.isDarkMode}
-                onClick={() => window.api.changeAppTheme('light')}
+                onClick={() => window.api.theme.changeAppTheme('light')}
               />
               <Img
                 loading="eager"
@@ -118,7 +118,7 @@ const ThemeSettings = () => {
                 value="darkTheme"
                 id="darkThemeRadioBtn"
                 defaultChecked={!theme.useSystemTheme && theme.isDarkMode}
-                onClick={() => window.api.changeAppTheme('dark')}
+                onClick={() => window.api.theme.changeAppTheme('dark')}
               />
               <Img
                 loading="eager"
@@ -146,7 +146,7 @@ const ThemeSettings = () => {
                 value="systemTheme"
                 id="systemThemeRadioBtn"
                 defaultChecked={theme.useSystemTheme}
-                onClick={() => window.api.changeAppTheme('system')}
+                onClick={() => window.api.theme.changeAppTheme('system')}
               />
               <Img
                 loading="eager"

@@ -32,6 +32,7 @@ const MostLovedSongs = (props: Props) => {
               path={song.path}
               songId={song.songId}
               artists={song.artists}
+              album={song.album}
               palette={song.palette}
               isAFavorite={song.isAFavorite}
               isBlacklisted={song.isBlacklisted}
@@ -61,9 +62,7 @@ const MostLovedSongs = (props: Props) => {
             </div>
             <div
               style={{
-                gridTemplateColumns: `repeat(${
-                  noOfVisibleSongs < 3 ? 3 : noOfVisibleSongs
-                },1fr)`,
+                gridTemplateColumns: `repeat(${noOfVisibleSongs},1fr)`,
               }}
               className="songs-container grid gap-2 pr-2"
             >

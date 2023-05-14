@@ -25,6 +25,9 @@ const shortcutData: ShortcutCategory[] = [
       { label: 'Toggle Queue Shuffle', keys: ['Ctrl', 'S'] },
       { label: 'Toggle Queue Repeat', keys: ['Ctrl', 'T'] },
       { label: 'Toggle Favorite', keys: ['Ctrl', 'H'] },
+      { label: 'Increase Playback Rate By 0.05x', keys: ['Ctrl', ']'] },
+      { label: 'Decrease Playback Rate By 0.05x', keys: ['Ctrl', '['] },
+      { label: 'Reset Playback Rate to 1x', keys: ['Ctrl', '\\'] },
     ],
   },
   {

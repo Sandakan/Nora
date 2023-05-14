@@ -11,7 +11,7 @@ const AppStats = () => {
   });
 
   React.useEffect(() => {
-    window.api
+    window.api.audioLibraryControls
       .getAllSongs()
       .then((res) => {
         if (res && Array.isArray(res.data))
@@ -23,7 +23,7 @@ const AppStats = () => {
       })
       .catch((err) => console.error(err));
 
-    window.api
+    window.api.artistsData
       .getArtistData()
       .then((artists) => {
         if (Array.isArray(artists))
@@ -35,7 +35,7 @@ const AppStats = () => {
       })
       .catch((err) => console.error(err));
 
-    window.api
+    window.api.albumsData
       .getAlbumData()
       .then((albums) => {
         if (Array.isArray(albums))
@@ -47,7 +47,7 @@ const AppStats = () => {
       })
       .catch((err) => console.error(err));
 
-    window.api
+    window.api.genresData
       .getGenresData()
       .then((genres) => {
         if (Array.isArray(genres))
@@ -59,7 +59,7 @@ const AppStats = () => {
       })
       .catch((err) => console.error(err));
 
-    window.api
+    window.api.playlistsData
       .getPlaylistData()
       .then((playlists) => {
         if (Array.isArray(playlists))

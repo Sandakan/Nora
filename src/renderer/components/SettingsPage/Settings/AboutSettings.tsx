@@ -7,7 +7,13 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import calculateElapsedTime from 'renderer/utils/calculateElapsedTime';
 
 import OpenLinkConfirmPrompt from 'renderer/components/OpenLinkConfirmPrompt';
-import { version, author, homepage, bugs } from '../../../../../package.json';
+import {
+  version,
+  author,
+  homepage,
+  bugs,
+  urls,
+} from '../../../../../package.json';
 import openSourceLicenses from '../../../../../open_source_licenses.txt';
 import appLicense from '../../../../../LICENSE.txt';
 import localReleaseNotes from '../../../../../release-notes.json';
@@ -15,6 +21,8 @@ import localReleaseNotes from '../../../../../release-notes.json';
 import AppIcon from '../../../../../assets/images/webp/logo_light_mode.webp';
 import GithubDarkIcon from '../../../../../assets/images/svg/github.svg';
 import GithubLightIcon from '../../../../../assets/images/svg/github-white.svg';
+import DiscordDarkIcon from '../../../../../assets/images/svg/discord_light_mode.svg';
+import DiscordLightIcon from '../../../../../assets/images/svg/discord_dark_mode.svg';
 import SLFlag from '../../../../../assets/images/webp/sl-flag.webp';
 import Img from '../../Img';
 import ReleaseNotesPrompt from '../../ReleaseNotesPrompt/ReleaseNotesPrompt';
@@ -85,17 +93,37 @@ const AboutSettings = () => {
           </div>
           <div className="flex items-center">
             <Button
-              className="about-link !mr-8 block w-fit cursor-pointer !rounded-none !border-0 !p-0 outline-1 outline-offset-2 focus-visible:!outline"
+              className="about-link !mr-6 block w-fit cursor-pointer !rounded-none !border-0 !p-0 outline-1 outline-offset-2 focus-visible:!outline"
               iconName="language"
               iconClassName="!text-2xl"
               tooltipLabel="Nora's Website (Under Development)"
-              clickHandler={() => window.api.openInBrowser('nora:')}
+              clickHandler={() =>
+                window.api.settingsHelpers.openInBrowser('nora:')
+              }
               isDisabled
+            />
+            <Img
+              src={isDarkMode ? DiscordLightIcon : DiscordDarkIcon}
+              className="mr-6 w-6 cursor-pointer opacity-80 transition-opacity hover:opacity-100"
+              alt="Nora's Official Discord Server"
+              showAltAsTooltipLabel
+              onClick={() =>
+                changePromptMenuData(
+                  true,
+                  <OpenLinkConfirmPrompt
+                    link={urls.discord_invite_url}
+                    title="Nora's Official Discord Server"
+                  />,
+                  'flex flex-col'
+                )
+              }
+              tabIndex={0}
             />
             <Img
               src={isDarkMode ? GithubLightIcon : GithubDarkIcon}
               className="w-6 cursor-pointer opacity-80 transition-opacity hover:opacity-100"
               alt="Nora's Github Repository"
+              showAltAsTooltipLabel
               onClick={() =>
                 changePromptMenuData(
                   true,
@@ -183,25 +211,29 @@ const AboutSettings = () => {
             iconClassName="material-icons-round-outlined"
             className="about-link mb-4 block w-fit cursor-pointer"
             label="Open Log file"
-            clickHandler={() => window.api.openLogFile()}
+            clickHandler={() => window.api.log.openLogFile()}
           />
           <Button
             label="Open Devtools"
             iconName="code"
             className="mb-4 rounded-2xl"
-            clickHandler={() => window.api.openDevtools()}
+            clickHandler={() => window.api.settingsHelpers.openDevtools()}
           />
           <Button
             label="Resync Library"
             iconName="sync"
             className="mb-4 rounded-2xl"
-            clickHandler={() => window.api.resyncSongsLibrary()}
+            clickHandler={() =>
+              window.api.audioLibraryControls.resyncSongsLibrary()
+            }
           />
           <Button
             label="Generate Palettes"
             iconName="temp_preferences_custom"
             className="mb-4 rounded-2xl"
-            clickHandler={() => window.api.generatePalettes()}
+            clickHandler={() =>
+              window.api.audioLibraryControls.generatePalettes()
+            }
           />
           <Button
             label="App Shortcuts"
@@ -248,7 +280,7 @@ const AboutSettings = () => {
                   confirmButton={{
                     label: 'Clear History',
                     clickHandler: () => {
-                      window.api
+                      window.api.audioLibraryControls
                         .clearSongHistory()
                         .then((res) => {
                           if (res.success) {

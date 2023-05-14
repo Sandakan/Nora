@@ -1,10 +1,12 @@
 /* eslint-disable no-await-in-loop */
 import * as musicMetaData from 'music-metadata';
 import path from 'path';
+
+import { isSongBlacklisted } from '../utils/isBlacklisted';
 import { DEFAULT_FILE_URL, getArtistsData, getSongsData } from '../filesystem';
 import { getSongArtworkPath } from '../fs/resolveFilePaths';
-import getArtistInfoFromNet from './getArtistInfoFromNet';
 import log from '../log';
+import getArtistInfoFromNet from './getArtistInfoFromNet';
 import addToSongsHistory from './addToSongsHistory';
 import updateSongListeningData from './updateSongListeningData';
 
@@ -62,6 +64,7 @@ export const sendAudioData = async (
               album: song.album,
               palette: song.palette,
               isKnownSource: true,
+              isBlacklisted: isSongBlacklisted(song.songId, song.path),
             };
 
             updateSongListeningData(song.songId, 'listens', 'increment');

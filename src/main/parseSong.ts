@@ -189,6 +189,7 @@ export const parseSong = async (
       sampleRate: metadata.format.sampleRate,
       bitrate: metadata?.format?.bitrate,
       noOfChannels: metadata?.format?.numberOfChannels,
+      trackNo: metadata?.common?.track?.no ?? undefined,
       addedDate: new Date().getTime(),
       createdDate: stats ? stats.birthtime.getTime() : undefined,
       modifiedDate: stats ? stats.mtime.getTime() : undefined,

@@ -17,7 +17,7 @@ const ConfirmDeletePlaylists = (props: ConfirmDeletePlaylistProp) => {
 
   React.useEffect(() => {
     if (playlistIds.length > 0) {
-      window.api
+      window.api.playlistsData
         .getPlaylistData(playlistIds)
         .then((res) => {
           if (Array.isArray(res) && res.length > 0) {
@@ -38,7 +38,7 @@ const ConfirmDeletePlaylists = (props: ConfirmDeletePlaylistProp) => {
   }, [playlistIds]);
 
   const removePlaylists = React.useCallback(() => {
-    window.api
+    window.api.playlistsData
       .removePlaylists(playlistIds)
       .then(() => {
         changePromptMenuData(false);

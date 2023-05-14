@@ -13,6 +13,9 @@ type Input = {
   }[];
 };
 
+const copyrightMatchRegex = /^\[copyright:(?<copyright>.+)\]$/gm;
+const lyricsOffsetRegex = /^\[offset:(?<lyricsOffset>[+-]?\d+)\]$/gm;
+
 const getSecondsFromLyricsLine = (lyric: string) => {
   const lyricsStartMatch = lyric.match(syncedLyricsRegex);
   if (Array.isArray(lyricsStartMatch)) {
@@ -34,37 +37,18 @@ const getLyricEndTime = (lyricsArr: string[], index: number) => {
 const isNotALyricsMetadataLine = (line: string) =>
   !/^\[\w+:.{1,}\]$/gm.test(line);
 
-// const fetchDataFromLyricsString = (lyricsString: string) => {
-//   const lyrics: { time: string; lyrics: string[]; lang?: string }[] = [];
-
-//   for (const match of lyricsString.matchAll(syncedLyricsRegex)) {
-//     if (
-//       match?.groups &&
-//       'timestamp' in match.groups &&
-//       'lyric' in match.groups
-//     ) {
-//       const { timestamp, lyric, lang } = match.groups;
-//       const isAvailable = !lyrics.some((y) => y.time === timestamp);
-//       if (isAvailable)
-//         lyrics.push({ time: timestamp, lyrics: [lyric.trim()], lang });
-//       else
-//         for (let y = 0; y < lyrics.length; y += 1) {
-//           if (lyrics[y].time === timestamp) lyrics[y].lyrics.push(lyric.trim());
-//         }
-//     }
-//   }
-
-//   return lyrics;
-// };
-
 // MAIN FUNCTIONS //
 const parseLyrics = (lyricsString: string): LyricsData => {
   const isSynced = isLyricsSynced(lyricsString);
 
-  const copyrightMatch = /^\[copyright:(?<copyright>.+)\]$/gm.exec(
-    lyricsString
-  );
+  const copyrightMatch = copyrightMatchRegex.exec(lyricsString);
+  copyrightMatchRegex.lastIndex = 0;
+
+  const lyricsOffsetMatch = lyricsOffsetRegex.exec(lyricsString);
+  lyricsOffsetRegex.lastIndex = 0;
+
   const copyright = copyrightMatch?.groups?.copyright || undefined;
+  const offset = Number(lyricsOffsetMatch?.groups?.lyricsOffset) || undefined;
   const lines = lyricsString.split('\n');
   const lyricsLines = lines.filter(
     (line) => line.trim() !== '' && isNotALyricsMetadataLine(line)
@@ -91,6 +75,7 @@ const parseLyrics = (lyricsString: string): LyricsData => {
       lyrics: parsedUnsyncedLyricsLines,
       syncedLyrics,
       unparsedLyrics: lyricsString,
+      offset,
       copyright,
     };
   }

@@ -1,9 +1,10 @@
 /* eslint-disable react/destructuring-assignment */
 import React from 'react';
+import log from 'renderer/utils/log';
 import BugImg from '../../../assets/images/svg/Bug Fixed_Monochromatic.svg';
 import Button from './Button';
 
-const { isInDevelopment } = window.api;
+const { isInDevelopment } = window.api.properties;
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -31,7 +32,7 @@ class ErrorBoundary extends React.Component<
       errorInfo,
     });
     // You can also log error messages to an error reporting service here
-    window.api.sendLogs(error.message);
+    log(error);
   }
 
   render() {
@@ -45,11 +46,14 @@ class ErrorBoundary extends React.Component<
           {isInDevelopment && (
             <details
               style={{ whiteSpace: 'pre-wrap' }}
-              className="text-sm font-light"
+              className="mx-auto max-w-[80%] text-sm font-light"
             >
-              {this.state.error && this.state.error.toString()}
-              <br />
-              {this.state.errorInfo.componentStack}
+              <summary className="cursor-pointer">Details</summary>
+              <p>
+                {this.state.error && this.state.error.toString()}
+                <br />
+                {this.state.errorInfo.componentStack}
+              </p>
             </details>
           )}
           <div className="buttons-container">
@@ -57,7 +61,9 @@ class ErrorBoundary extends React.Component<
               className="!mr-0 mt-4 !bg-background-color-3 text-sm text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
               label="Restart App"
               iconName="restart_alt"
-              clickHandler={() => window.api.restartRenderer('error')}
+              clickHandler={() =>
+                window.api.appControls.restartRenderer('error')
+              }
             />
           </div>
         </div>

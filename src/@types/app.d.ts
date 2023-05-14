@@ -77,6 +77,7 @@ declare global {
     genres?: { genreId: string; name: string }[];
     albumArtist?: string;
     bitrate?: number;
+    trackNo?: number;
     noOfChannels?: number;
     year?: number;
     sampleRate?: number;
@@ -134,11 +135,13 @@ declare global {
     album?: { albumId: string; name: string };
     palette?: NodeVibrantPalette;
     isKnownSource: boolean;
+    isBlacklisted: boolean;
   }
 
   interface AudioInfo {
     title: string;
     artists?: { artistId: string; name: string }[];
+    album?: { albumId: string; name: string };
     duration: number;
     artworkPaths: ArtworkPaths;
     path: string;
@@ -183,6 +186,7 @@ declare global {
 
   interface YearlyListeningRate {
     year: number;
+    /** [Date in milliseconds, No of listens in that day] [] */
     listens: [number, number][];
   }
 
@@ -247,6 +251,7 @@ declare global {
     syncedLyrics?: SyncedLyricLine[];
     unparsedLyrics: string;
     copyright?: string;
+    offset?: number;
   }
 
   // node-id3 synchronisedLyrics types.
@@ -475,6 +480,7 @@ declare global {
     playback: Playback;
     queue: Queue;
     ignoredSeparateArtists: string[];
+    ignoredSongsWithFeatArtists: string[];
     ignoredDuplicates: IgnoredDuplicates;
     sortingStates: SortingStates;
     equalizerPreset: Equalizer;
@@ -760,6 +766,8 @@ declare global {
     | 'dateAddedDescending'
     | 'releasedYearAscending'
     | 'releasedYearDescending'
+    | 'trackNoAscending'
+    | 'trackNoDescending'
     | 'artistNameAscending'
     | 'artistNameDescending'
     | 'allTimeMostListened'
@@ -925,22 +933,25 @@ declare global {
   }
 
   // ? SongTags related types
+  type SongTagsAlbumData = {
+    title: string;
+    albumId?: string;
+    noOfSongs?: number;
+    artists?: string[];
+    artworkPath?: string;
+  };
+
+  type SongTagsArtistData = {
+    artistId?: string;
+    name: string;
+    artworkPath?: string;
+    onlineArtworkPaths?: OnlineArtistArtworks;
+  };
 
   interface SongTags {
     title: string;
-    artists?: {
-      artistId?: string;
-      name: string;
-      artworkPath?: string;
-      onlineArtworkPaths?: OnlineArtistArtworks;
-    }[];
-    album?: {
-      title: string;
-      albumId?: string;
-      noOfSongs?: number;
-      artists?: string[];
-      artworkPath?: string;
-    };
+    artists?: SongTagsArtistData[];
+    album?: SongTagsAlbumData;
     releasedYear?: number;
     genres?: { genreId?: string; name: string; artworkPath?: string }[];
     composer?: string;

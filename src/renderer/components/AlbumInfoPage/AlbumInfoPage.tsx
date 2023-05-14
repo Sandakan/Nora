@@ -55,6 +55,8 @@ const dropdownOptions: { label: string; value: SongSortTypes }[] = [
   { label: 'Oldest', value: 'dateAddedDescending' },
   { label: 'Released Year (Ascending)', value: 'releasedYearAscending' },
   { label: 'Released Year (Descending)', value: 'releasedYearDescending' },
+  { label: 'Track Number (Ascending)', value: 'trackNoAscending' },
+  { label: 'Track Number (Descending)', value: 'trackNoDescending' },
   {
     label: 'Most Listened (All Time)',
     value: 'allTimeMostListened',
@@ -86,7 +88,7 @@ const dropdownOptions: { label: string; value: SongSortTypes }[] = [
   },
 ];
 
-export default () => {
+const AlbumInfoPage = () => {
   const { currentlyActivePage, queue, localStorageData } =
     useContext(AppContext);
   const {
@@ -99,12 +101,12 @@ export default () => {
   const [albumContent, dispatch] = React.useReducer(reducer, {
     albumData: {} as Album,
     songsData: [] as SongData[],
-    sortingOrder: 'aToZ',
+    sortingOrder: 'trackNoAscending' as SongSortTypes,
   });
 
   const fetchAlbumData = React.useCallback(() => {
     if (currentlyActivePage.data.albumId) {
-      window.api
+      window.api.albumsData
         .getAlbumData([currentlyActivePage.data.albumId as string])
         .then((res) => {
           if (res && res.length > 0 && res[0]) {
@@ -121,7 +123,7 @@ export default () => {
       albumContent.albumData.songs &&
       albumContent.albumData.songs.length > 0
     ) {
-      window.api
+      window.api.audioLibraryControls
         .getSongInfo(
           albumContent.albumData.songs.map((song) => song.songId),
           albumContent.sortingOrder
@@ -226,6 +228,29 @@ export default () => {
     ]
   );
 
+  const albumArtistComponents = React.useMemo(() => {
+    const { artists } = albumContent.albumData;
+    if (artists)
+      return artists
+        .map((artist, i) => {
+          const arr = [
+            <SongArtist
+              key={artist.artistId}
+              artistId={artist.artistId}
+              name={artist.name}
+              className="!text-lg"
+            />,
+          ];
+
+          if ((artists?.length ?? 1) - 1 !== i)
+            arr.push(<span className="mr-1">,</span>);
+
+          return arr;
+        })
+        .flat();
+    return <span>Unknown Artist</span>;
+  }, [albumContent.albumData]);
+
   const calculateTotalTime = React.useCallback(() => {
     const { hours, minutes, seconds } = calculateTimeFromSeconds(
       albumContent.songsData.reduce(
@@ -274,25 +299,7 @@ export default () => {
                   {albumContent.albumData.title}
                 </div>
                 <div className="album-artists m-0 flex h-[unset] w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-xl">
-                  {albumContent.albumData.artists.map((artist, index) => (
-                    <>
-                      <SongArtist
-                        key={artist.artistId}
-                        artistId={artist.artistId}
-                        name={artist.name}
-                        className="!text-lg"
-                      />
-                      {albumContent.albumData.artists ? (
-                        index === albumContent.albumData.artists.length - 1 ? (
-                          ''
-                        ) : (
-                          <span className="mr-1">,</span>
-                        )
-                      ) : (
-                        ''
-                      )}
-                    </>
-                  ))}
+                  {albumArtistComponents}
                 </div>
                 {albumContent.songsData.length > 0 && (
                   <div className="album-songs-total-duration">
@@ -403,3 +410,5 @@ export default () => {
     </MainContainer>
   );
 };
+
+export default AlbumInfoPage;

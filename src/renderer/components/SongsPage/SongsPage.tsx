@@ -87,7 +87,7 @@ const reducer = (
   }
 };
 
-export const SongsPage = () => {
+const SongsPage = () => {
   const {
     currentlyActivePage,
     localStorageData,
@@ -115,7 +115,7 @@ export const SongsPage = () => {
 
   const fetchSongsData = React.useCallback(
     () =>
-      window.api
+      window.api.audioLibraryControls
         .getAllSongs(content.sortingOrder)
         .then((audioInfoArray) => {
           if (audioInfoArray) {
@@ -209,6 +209,7 @@ export const SongsPage = () => {
         songId,
         title,
         artists,
+        album,
         duration,
         isAFavorite,
         artworkPaths,
@@ -227,6 +228,7 @@ export const SongsPage = () => {
             title={title}
             songId={songId}
             artists={artists}
+            album={album}
             artworkPaths={artworkPaths}
             duration={duration}
             year={year}
@@ -293,7 +295,7 @@ export const SongsPage = () => {
                           label: 'Resync library',
                           iconName: 'sync',
                           handlerFunction: () =>
-                            window.api.resyncSongsLibrary(),
+                            window.api.audioLibraryControls.resyncSongsLibrary(),
                         },
                       ],
                       x + 10,
@@ -310,7 +312,7 @@ export const SongsPage = () => {
                           label: 'Resync library',
                           iconName: 'sync',
                           handlerFunction: () =>
-                            window.api.resyncSongsLibrary(),
+                            window.api.audioLibraryControls.resyncSongsLibrary(),
                         },
                       ],
                       e.pageX,
@@ -453,3 +455,5 @@ export const SongsPage = () => {
     </MainContainer>
   );
 };
+
+export default SongsPage;

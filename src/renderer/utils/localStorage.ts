@@ -1,6 +1,7 @@
 import debounce from './debounce';
 
 import { version } from '../../../package.json';
+import log from './log';
 
 export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
   preferences: {
@@ -34,6 +35,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
   },
   queue: { currentSongIndex: null, queue: [], queueType: 'songs' },
   ignoredSeparateArtists: [],
+  ignoredSongsWithFeatArtists: [],
   ignoredDuplicates: {
     albums: [],
     artists: [],
@@ -84,12 +86,12 @@ const checkLocalStorage = () => {
         'localStorage',
         JSON.stringify(LOCAL_STORAGE_DEFAULT_TEMPLATE)
       );
-      return window.api.sendLogs(
-        'Inavalid or outdated local storage found. Resetting the local storage to defualt properties.',
+      return log(
+        'Inavalid or outdated local storage found. Resetting the local storage to default properties.',
         'warn'
       );
     } catch (error) {
-      window.api.sendLogs(
+      log(
         'Error occurred when trying to save default templated for local storage.',
         'warn'
       );
@@ -293,7 +295,23 @@ const setIgnoredSeparateArtists = (artists: string[]) => {
   });
 };
 
-const getIgnoredSeparateArtists = () => getAllItems().ignoredSeparateArtists;
+const getIgnoredSeparateArtists = () => getFullItem('ignoredSeparateArtists');
+
+// IGNORED SONGS WITH FEATURING ARTISTS
+
+const setIgnoredSongsWithFeatArtists = (artists: string[]) => {
+  const allItems = getAllItems();
+  setAllItems({
+    ...allItems,
+    ignoredSongsWithFeatArtists: [
+      ...allItems.ignoredSongsWithFeatArtists,
+      ...artists,
+    ],
+  });
+};
+
+const getIgnoredSongsWithFeatArtists = () =>
+  getFullItem('ignoredSongsWithFeatArtists');
 
 // IGNORED DUPLICATES
 
@@ -343,6 +361,10 @@ export default {
   ignoredSeparateArtists: {
     setIgnoredSeparateArtists,
     getIgnoredSeparateArtists,
+  },
+  ignoredSongsWithFeatArtists: {
+    setIgnoredSongsWithFeatArtists,
+    getIgnoredSongsWithFeatArtists,
   },
   ignoredDuplicates: { setIgnoredDuplicates, getIgnoredDuplicates },
   sortingStates: { setSortingStates, getSortingStates },

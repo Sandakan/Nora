@@ -24,7 +24,7 @@ const RemoveFolderConfrimationPrompt = (props: {
           className="remove-folder-confirm-btn danger-btn float-right mt-8 h-10 w-48 cursor-pointer rounded-lg !bg-font-color-crimson font-medium text-font-color-white outline-none ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson"
           label="Remove Folder"
           clickHandler={() => {
-            window.api
+            window.api.folderData
               .removeAMusicFolder(absolutePath)
               .then(() => changePromptMenuData(false))
               .catch((err) => console.error(err));

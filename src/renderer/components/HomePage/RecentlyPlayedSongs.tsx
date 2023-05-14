@@ -36,6 +36,7 @@ const RecentlyPlayedSongs = (props: Props) => {
               path={song.path}
               songId={song.songId}
               artists={song.artists}
+              album={song.album}
               palette={song.palette}
               isAFavorite={song.isAFavorite}
               isBlacklisted={song.isBlacklisted}
@@ -77,13 +78,7 @@ const RecentlyPlayedSongs = (props: Props) => {
             </div>
             <div
               style={{
-                gridTemplateColumns: `repeat(${
-                  noOfVisibleSongs < 3
-                    ? 3
-                    : noOfVisibleSongs < MAX_SONG_LIMIT
-                    ? noOfVisibleSongs
-                    : MAX_SONG_LIMIT
-                },1fr)`,
+                gridTemplateColumns: `repeat(${noOfVisibleSongs},1fr)`,
               }}
               className="songs-container grid gap-2 pr-2"
             >

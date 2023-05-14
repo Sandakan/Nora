@@ -107,15 +107,15 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
 
     const albumData = isAlbumSelected
       ? album
-        ? await window.api.getAlbumData([album])
+        ? await window.api.albumsData.getAlbumData([album])
         : []
       : undefined;
     const artistData = isArtistsSelected
-      ? await window.api.getArtistData(artists)
+      ? await window.api.artistsData.getArtistData(artists)
       : undefined;
     const genreData = isGenresSelected
       ? genres
-        ? await window.api.getGenresData(genres)
+        ? await window.api.genresData.getGenresData(genres)
         : []
       : undefined;
 
@@ -129,7 +129,13 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
             : prevData?.releasedYear,
         lyrics: isLyricsSelected && lyrics ? lyrics : prevData?.lyrics,
         artworkPath: selectedArtwork || prevData?.artworkPath,
-        album: albumData ? manageAlbumData(albumData, album) : prevData.album,
+        album: albumData
+          ? manageAlbumData(
+              albumData,
+              album,
+              selectedArtwork || prevData?.artworkPath
+            )
+          : prevData.album,
         artists: artistData
           ? manageArtistsData(artistData, artists)
           : prevData.artists,
@@ -138,11 +144,6 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
           : prevData.genres,
       };
     });
-    // updateMetadataKeywords({
-    //   albumKeyword: isAlbumSelected ? album : undefined,
-    //   artistKeyword: isArtistsSelected ? artists?.join(';') : undefined,
-    //   genreKeyword: isGenresSelected ? genres?.join(';') : undefined,
-    // });
   }, [
     album,
     artists,
@@ -159,27 +160,27 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
   const updateAllMetadata = React.useCallback(async () => {
     changePromptMenuData(false, undefined, '');
 
-    const albumData = album ? await window.api.getAlbumData([album]) : [];
-    const artistData = await window.api.getArtistData(artists);
-    const genreData = genres ? await window.api.getGenresData(genres) : [];
+    const albumData = album
+      ? await window.api.albumsData.getAlbumData([album])
+      : [];
+    const artistData = await window.api.artistsData.getArtistData(artists);
+    const genreData = genres
+      ? await window.api.genresData.getGenresData(genres)
+      : [];
 
     updateSongInfo((prevData) => {
+      const artworkPath = selectedArtwork || prevData?.artworkPath;
       return {
         ...prevData,
         title: title || prevData?.title,
         releasedYear: releasedYear ?? prevData?.releasedYear,
         lyrics: lyrics || prevData?.lyrics,
-        artworkPath: selectedArtwork || prevData?.artworkPath,
+        artworkPath,
         artists: manageArtistsData(artistData, artists),
-        album: manageAlbumData(albumData, album),
+        album: manageAlbumData(albumData, album, artworkPath),
         genres: manageGenresData(genreData, genres),
       } as SongTags;
     });
-    // updateMetadataKeywords({
-    //   albumKeyword: album || undefined,
-    //   artistKeyword: Array.isArray(artists) ? artists?.join(';') : undefined,
-    //   genreKeyword: Array.isArray(genres) ? genres?.join(';') : undefined,
-    // });
   }, [
     album,
     artists,

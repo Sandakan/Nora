@@ -6,10 +6,20 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 
-type Props = { artists: Artist[]; searchInput: string };
+type Props = {
+  artists: Artist[];
+  searchInput: string;
+  isPredictiveSearchEnabled: boolean;
+  noOfVisibleArtists?: number;
+};
 
 const ArtistsSearchResultsContainer = (props: Props) => {
-  const { artists, searchInput } = props;
+  const {
+    artists,
+    searchInput,
+    noOfVisibleArtists = 5,
+    isPredictiveSearchEnabled,
+  } = props;
   const { isMultipleSelectionEnabled, multipleSelectionsData } =
     React.useContext(AppContext);
   const { toggleMultipleSelections, changeCurrentActivePage } =
@@ -22,7 +32,7 @@ const ArtistsSearchResultsContainer = (props: Props) => {
       artists.length > 0
         ? artists
             .map((artist, index) => {
-              if (index < 5)
+              if (index < noOfVisibleArtists)
                 return (
                   <Artist
                     index={index}
@@ -41,7 +51,7 @@ const ArtistsSearchResultsContainer = (props: Props) => {
             })
             .filter((artist) => artist !== undefined)
         : [],
-    [artists, selectAllHandler]
+    [artists, noOfVisibleArtists, selectAllHandler]
   );
 
   return (
@@ -99,7 +109,7 @@ const ArtistsSearchResultsContainer = (props: Props) => {
                 isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
               }
             />
-            {artists.length > 5 && (
+            {artists.length > noOfVisibleArtists && (
               <Button
                 label="Show All"
                 iconName="apps"
@@ -109,6 +119,7 @@ const ArtistsSearchResultsContainer = (props: Props) => {
                     searchQuery: searchInput,
                     searchFilter: 'Artists' as SearchFilters,
                     searchResults: artists,
+                    isPredictiveSearchEnabled,
                   })
                 }
               />

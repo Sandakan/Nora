@@ -1,11 +1,4 @@
-/* eslint-disable react/no-unescaped-entities */
-/* eslint-disable no-console */
 /* eslint-disable react/no-array-index-key */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable promise/always-return */
-/* eslint-disable promise/catch-or-return */
-/* eslint-disable react/require-default-props */
-/* eslint-disable react/destructuring-assignment */
 import React, { useContext } from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
@@ -80,31 +73,33 @@ const PlaylistInfoPage = () => {
 
   const fetchPlaylistData = React.useCallback(() => {
     if (currentlyActivePage.data?.playlistId) {
-      window.api
+      window.api.playlistsData
         .getPlaylistData([currentlyActivePage.data.playlistId])
         .then((res) => {
           if (res && res.length > 0 && res[0]) setPlaylistData(res[0]);
-        });
+          return undefined;
+        })
+        .catch((err) => console.error(err));
     }
   }, [currentlyActivePage.data]);
 
   const fetchPlaylistSongsData = React.useCallback(() => {
+    const preserveAddedOrder = sortingOrder === 'addedOrder';
     if (playlistData.songs && playlistData.songs.length > 0) {
-      window.api
+      window.api.audioLibraryControls
         .getSongInfo(
-          playlistData.playlistId === 'History'
-            ? playlistData.songs.reverse()
-            : playlistData.songs,
+          playlistData.songs,
           sortingOrder,
           undefined,
-          sortingOrder === 'addedOrder'
+          preserveAddedOrder
         )
         .then((songsData) => {
-          if (songsData && songsData.length > 0)
-            setPlaylistSongs(songsData.reverse());
-        });
+          if (songsData && songsData.length > 0) setPlaylistSongs(songsData);
+          return undefined;
+        })
+        .catch((err) => console.error(err));
     }
-  }, [playlistData.songs, playlistData.playlistId, sortingOrder]);
+  }, [playlistData.songs, sortingOrder]);
 
   React.useEffect(() => {
     fetchPlaylistData();
@@ -189,6 +184,7 @@ const PlaylistInfoPage = () => {
                 }
                 title={song.title}
                 artists={song.artists}
+                album={song.album}
                 duration={song.duration}
                 songId={song.songId}
                 artworkPaths={song.artworkPaths}
@@ -201,7 +197,7 @@ const PlaylistInfoPage = () => {
                     label: 'Remove from this Playlist',
                     iconName: 'playlist_remove',
                     handlerFunction: () =>
-                      window.api
+                      window.api.playlistsData
                         .removeSongFromPlaylist(
                           playlistData.playlistId,
                           song.songId
@@ -333,7 +329,7 @@ const PlaylistInfoPage = () => {
                               confirmButton={{
                                 label: 'Clear History',
                                 clickHandler: () => {
-                                  window.api
+                                  window.api.audioLibraryControls
                                     .clearSongHistory()
                                     .then(
                                       (res) =>
@@ -433,7 +429,9 @@ const PlaylistInfoPage = () => {
                 )}
               </div>
             </div>
-            <div className="songs-container">{songComponents}</div>
+            <div className="songs-container appear-from-bottom">
+              {songComponents}
+            </div>
           </div>
         )}
         {playlistSongs.length === 0 && (

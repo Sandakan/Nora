@@ -91,6 +91,7 @@ import { resolveArtistDuplicates } from './core/resolveDuplicates';
 import addArtworkToAPlaylist from './core/addArtworkToAPlaylist';
 import getArtworksForMultipleArtworksCover from './core/getArtworksForMultipleArtworksCover';
 import { resolveSeparateArtists } from './core/resolveSeparateArtists';
+import resolveFeaturingArtists from './core/resolveFeaturingArtists';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -343,8 +344,8 @@ app
         console.log('Left full screen');
         mainWindow.webContents.send('app/leftFullscreen');
       });
-      powerMonitor.addListener('on-ac', toggleonBatteryPower);
-      powerMonitor.addListener('on-battery', toggleonBatteryPower);
+      powerMonitor.addListener('on-ac', toggleOnBatteryPower);
+      powerMonitor.addListener('on-battery', toggleOnBatteryPower);
 
       ipcMain.on('app/getSongPosition', (_, position: number) =>
         saveUserData('currentSong.stoppedPosition', position)
@@ -456,13 +457,6 @@ app
 
       ipcMain.handle('app/generatePalettes', generatePalettes);
 
-      ipcMain.on(
-        'app/savePageSortState',
-        (_, pageType: PageSortTypes, state: unknown) => {
-          saveUserData(pageType, state);
-        }
-      );
-
       ipcMain.handle('app/getArtistArtworks', (_, artistId: string) =>
         getArtistInfoFromNet(artistId)
       );
@@ -531,6 +525,21 @@ app
         'app/resolveSeparateArtists',
         (_, separateArtistId: string, separateArtistNames: string[]) =>
           resolveSeparateArtists(separateArtistId, separateArtistNames)
+      );
+
+      ipcMain.handle(
+        'app/resolveFeaturingArtists',
+        (
+          _,
+          songId: string,
+          featArtistNames: string[],
+          removeFeatInfoInTitle?: boolean
+        ) =>
+          resolveFeaturingArtists(
+            songId,
+            featArtistNames,
+            removeFeatInfoInTitle
+          )
       );
 
       ipcMain.handle(
@@ -625,6 +634,10 @@ app
 
       ipcMain.on('revealSongInFileExplorer', (_, songId: string) =>
         revealSongInFileExplorer(songId)
+      );
+
+      ipcMain.on('revealFolderInFileExplorer', (_, folderPath: string) =>
+        shell.showItemInFolder(folderPath)
       );
 
       ipcMain.on('app/openInBrowser', (_, url: string) =>
@@ -772,7 +785,7 @@ function handleBeforeQuit() {
   );
 }
 
-function toggleonBatteryPower() {
+function toggleOnBatteryPower() {
   isOnBatteryPower = powerMonitor.isOnBatteryPower();
   mainWindow.webContents.send('app/isOnBatteryPower', isOnBatteryPower);
 }
@@ -925,7 +938,8 @@ async function revealSongInFileExplorer(songId: string) {
   return log(
     `Revealing song file in explorer failed because song couldn't be found in the library.`,
     undefined,
-    'WARN'
+    'WARN',
+    { sendToRenderer: true }
   );
 }
 
@@ -1008,10 +1022,19 @@ function toggleMiniPlayerAlwaysOnTop(isMiniPlayerAlwaysOnTop: boolean) {
 
 async function getRendererLogs(
   logs: string,
+  logToConsoleType: 'log' | 'warn' | 'error' = 'log',
   forceRestart = false,
   forceMainRestart = false
 ) {
-  log(logs);
+  const messageType =
+    logToConsoleType === 'log'
+      ? 'INFO'
+      : logToConsoleType === 'warn'
+      ? 'WARN'
+      : 'ERROR';
+
+  log(logs, undefined, messageType);
+
   if (forceRestart) return mainWindow.reload();
   if (forceMainRestart) {
     app.relaunch();

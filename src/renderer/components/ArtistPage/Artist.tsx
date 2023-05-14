@@ -50,7 +50,7 @@ export const Artist = (props: ArtistProp) => {
 
   const playArtistSongs = React.useCallback(
     (isShuffle = false) =>
-      window.api
+      window.api.audioLibraryControls
         .getSongInfo(props.songIds, undefined, undefined, true)
         .then((songs) => {
           if (Array.isArray(songs))
@@ -72,14 +72,14 @@ export const Artist = (props: ArtistProp) => {
     (isShuffling = false) => {
       const { multipleSelections: artistIds } = multipleSelectionsData;
 
-      return window.api
+      return window.api.artistsData
         .getArtistData(artistIds)
         .then((res) => {
           if (Array.isArray(res) && res.length > 0) {
             const songIds = res
               .map((artist) => artist.songs.map((song) => song.songId))
               .flat();
-            return window.api.getSongInfo(songIds);
+            return window.api.audioLibraryControls.getSongInfo(songIds);
           }
           return undefined;
         })
@@ -149,28 +149,30 @@ export const Artist = (props: ArtistProp) => {
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) {
             const { multipleSelections: artistIds } = multipleSelectionsData;
-            return window.api.getArtistData(artistIds).then((artists) => {
-              const songIds = artists
-                .map((artist) => artist.songs.map((song) => song.songId))
-                .flat();
-              const uniqueSongIds = [...new Set(songIds)];
-              updateQueueData(
-                undefined,
-                [...queue.queue, ...uniqueSongIds],
-                false
-              );
-              return addNewNotifications([
-                {
-                  id: `${uniqueSongIds.length}AddedToQueueFromMultiSelection`,
-                  delay: 5000,
-                  content: (
-                    <span>
-                      Added {uniqueSongIds.length} songs to the queue.
-                    </span>
-                  ),
-                },
-              ]);
-            });
+            return window.api.artistsData
+              .getArtistData(artistIds)
+              .then((artists) => {
+                const songIds = artists
+                  .map((artist) => artist.songs.map((song) => song.songId))
+                  .flat();
+                const uniqueSongIds = [...new Set(songIds)];
+                updateQueueData(
+                  undefined,
+                  [...queue.queue, ...uniqueSongIds],
+                  false
+                );
+                return addNewNotifications([
+                  {
+                    id: `${uniqueSongIds.length}AddedToQueueFromMultiSelection`,
+                    delay: 5000,
+                    content: (
+                      <span>
+                        Added {uniqueSongIds.length} songs to the queue.
+                      </span>
+                    ),
+                  },
+                ]);
+              });
           }
           updateQueueData(
             undefined,
@@ -213,7 +215,7 @@ export const Artist = (props: ArtistProp) => {
         handlerFunction: () => {
           const { multipleSelections: artistIds } = multipleSelectionsData;
 
-          return window.api
+          return window.api.artistsData
             .toggleLikeArtists(
               isMultipleSelectionsEnabled ? artistIds : [props.artistId]
             )
@@ -279,7 +281,7 @@ export const Artist = (props: ArtistProp) => {
   ]);
 
   const contextMenuItemData = React.useMemo(
-    () =>
+    (): ContextMenuAdditionalData =>
       isMultipleSelectionEnabled &&
       multipleSelectionsData.selectionType === 'artist' &&
       isAMultipleSelection
@@ -287,12 +289,23 @@ export const Artist = (props: ArtistProp) => {
             title: `${multipleSelectionsData.multipleSelections.length} selected artists`,
             artworkPath: DefaultArtistCover,
           }
-        : undefined,
+        : {
+            title: props.name,
+            artworkPath:
+              props?.onlineArtworkPaths?.picture_small ||
+              props?.artworkPaths?.optimizedArtworkPath,
+            artworkClassName: '!rounded-full',
+            subTitle: `${props.songIds.length} songs`,
+          },
     [
       isAMultipleSelection,
       isMultipleSelectionEnabled,
       multipleSelectionsData.multipleSelections.length,
       multipleSelectionsData.selectionType,
+      props?.artworkPaths?.optimizedArtworkPath,
+      props.name,
+      props?.onlineArtworkPaths?.picture_small,
+      props.songIds.length,
     ]
   );
 
