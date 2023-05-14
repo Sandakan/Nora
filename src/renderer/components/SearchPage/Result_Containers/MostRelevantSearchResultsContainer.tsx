@@ -109,7 +109,9 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             class: 'reveal-file-explorer',
             iconName: 'folder_open',
             handlerFunction: () =>
-              window.api.revealSongInFileExplorer(firstResult.songId),
+              window.api.songUpdates.revealSongInFileExplorer(
+                firstResult.songId
+              ),
           },
           {
             label: 'Info',
@@ -147,7 +149,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: 'Play all Songs',
             iconName: 'play_arrow',
             handlerFunction: () =>
-              window.api
+              window.api.audioLibraryControls
                 .getSongInfo(
                   firstResult.songs.map((song) => song.songId),
                   undefined,
@@ -214,7 +216,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: 'Play',
             iconName: 'play_arrow',
             handlerFunction: () =>
-              window.api
+              window.api.audioLibraryControls
                 .getSongInfo(
                   firstResult.songs.map((song) => song.songId),
                   undefined,
@@ -277,7 +279,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: 'Play',
             iconName: 'play_arrow',
             handlerFunction: () =>
-              window.api
+              window.api.audioLibraryControls
                 .getSongInfo(firstResult.songs, undefined, undefined, true)
                 .then((songs) => {
                   if (Array.isArray(songs))
@@ -315,7 +317,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: 'Play',
             iconName: 'play_arrow',
             handlerFunction: () =>
-              window.api
+              window.api.audioLibraryControls
                 .getSongInfo(
                   firstResult.songs.map((song) => song.songId),
                   undefined,

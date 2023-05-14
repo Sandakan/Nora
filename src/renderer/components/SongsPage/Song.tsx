@@ -104,7 +104,7 @@ const Song = React.forwardRef(
     }, [playSong, songId]);
 
     const handleLikeButtonClick = React.useCallback(() => {
-      window.api
+      window.api.playerControls
         .toggleLikeSongs([songId], !isAFavorite)
         .then((res) => {
           if (res && res.likes.length + res.dislikes.length > 0) {
@@ -353,7 +353,7 @@ const Song = React.forwardRef(
             ? 'material-icons-round mr-4 text-xl'
             : 'material-icons-round-outlined mr-4 text-xl',
           handlerFunction: () => {
-            window.api
+            window.api.playerControls
               .toggleLikeSongs(
                 isMultipleSelectionsEnabled ? [...songIds] : [songId]
               )
@@ -415,7 +415,8 @@ const Song = React.forwardRef(
           label: 'Reveal in File Explorer',
           class: 'reveal-file-explorer',
           iconName: 'folder_open',
-          handlerFunction: () => window.api.revealSongInFileExplorer(songId),
+          handlerFunction: () =>
+            window.api.songUpdates.revealSongInFileExplorer(songId),
           isDisabled: isMultipleSelectionsEnabled,
         },
         {
@@ -458,13 +459,13 @@ const Song = React.forwardRef(
           iconName: isBlacklisted ? 'settings_backup_restore' : 'block',
           handlerFunction: () => {
             if (isBlacklisted)
-              window.api
+              window.api.audioLibraryControls
                 .restoreBlacklistedSongs([songId])
                 .catch((err) => console.error(err));
             else if (
               localStorageData?.preferences.doNotShowBlacklistSongConfirm
             )
-              window.api
+              window.api.audioLibraryControls
                 .blacklistSongs([songId])
                 .then(() =>
                   addNewNotifications([

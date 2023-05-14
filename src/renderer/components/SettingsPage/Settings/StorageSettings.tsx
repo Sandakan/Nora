@@ -9,7 +9,7 @@ const StorageSettings = () => {
   >();
 
   const fetchStorageUsageData = React.useCallback((forceRefresh = false) => {
-    return window.api
+    return window.api.storageData
       .getStorageUsage(forceRefresh)
       .then((res) => {
         console.log(res);

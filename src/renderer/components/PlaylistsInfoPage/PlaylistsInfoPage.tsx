@@ -73,7 +73,7 @@ const PlaylistInfoPage = () => {
 
   const fetchPlaylistData = React.useCallback(() => {
     if (currentlyActivePage.data?.playlistId) {
-      window.api
+      window.api.playlistsData
         .getPlaylistData([currentlyActivePage.data.playlistId])
         .then((res) => {
           if (res && res.length > 0 && res[0]) setPlaylistData(res[0]);
@@ -86,7 +86,7 @@ const PlaylistInfoPage = () => {
   const fetchPlaylistSongsData = React.useCallback(() => {
     const preserveAddedOrder = sortingOrder === 'addedOrder';
     if (playlistData.songs && playlistData.songs.length > 0) {
-      window.api
+      window.api.audioLibraryControls
         .getSongInfo(
           playlistData.songs,
           sortingOrder,
@@ -197,7 +197,7 @@ const PlaylistInfoPage = () => {
                     label: 'Remove from this Playlist',
                     iconName: 'playlist_remove',
                     handlerFunction: () =>
-                      window.api
+                      window.api.playlistsData
                         .removeSongFromPlaylist(
                           playlistData.playlistId,
                           song.songId
@@ -329,7 +329,7 @@ const PlaylistInfoPage = () => {
                               confirmButton={{
                                 label: 'Clear History',
                                 clickHandler: () => {
-                                  window.api
+                                  window.api.audioLibraryControls
                                     .clearSongHistory()
                                     .then(
                                       (res) =>

@@ -16,7 +16,7 @@ const SelectableFolder = (props: Props) => {
 
   const [isSubFoldersVisible, setIsSubFoldersVisible] = React.useState(false);
 
-  const folderName = window.api.getBaseName(path);
+  const folderName = window.api.utils.getBaseName(path);
 
   const subFoldersComponents = React.useMemo(
     () =>

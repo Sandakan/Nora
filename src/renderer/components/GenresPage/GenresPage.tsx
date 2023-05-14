@@ -48,7 +48,7 @@ const GenresPage = () => {
     MIN_ITEM_WIDTH + ((width % MIN_ITEM_WIDTH) - 10) / noOfColumns;
 
   const fetchGenresData = React.useCallback(() => {
-    window.api
+    window.api.genresData
       .getGenresData([], sortingOrder)
       .then((genres) => {
         if (genres && genres.length > 0) return setGenresData(genres);

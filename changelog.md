@@ -1,10 +1,62 @@
 # Change Log
 
-> ### The latest version, **( v2.0.0-stable )** contains a lot of new features and improvements. As always expect some bugs in the app.
+> ### The latest version, **( v2.1.0-stable )** contains a lot of new features and improvements. As always expect some bugs in the app.
 
 <br>
 
-![Nora v2.0.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.0.0-stable.webp)
+![Nora v2.1.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.1.0-stable.webp)
+
+<br>
+
+- ### **v2.1.0-stable - ( 13<sup>th</sup> of May 2023 )**
+
+  - ### 🎉 New Features and Features
+
+    - Added a new design for the song cards on the Home page. Thanks to [**@Shapalapa** for the design inspiration](https://discord.com/channels/727373643935645727/1096107720358248571/1096107720358248571).
+    - Now songs show their album name next to their artist names.
+    - Added support for a new suggestion in the SongInfoPage that gets triggered when there are names of featured artists in the title of a song asking to add them to the song artists.
+    - Added the 'go to album' option to the context menu of songs.
+    - Added a feature to show the details of the song when right-clicking to get the context menu.
+    - Linked the new Nora Official Discord server with the app.
+    - Now, the SearchPage won't limit the no of results you can see to 5 on some components.
+    - Added experimental support for the offset tag in synced lyrics.
+    - Added a new hotkey to change the playback speed. Fixes #168.
+    - Added support for a range of playback speeds instead of a predefined list.
+    - Added experimental feature as the default sorting option for songs in an album according to their track number. Fixes #169.
+    - Added a new context menu option for folders to show the relevant folder on the Windows Explorer.
+
+  - ### 🔨 Fixes and Improvements
+
+    - Fixed some bugs related to draggable songs in the queue. Fixes #63.
+    - Fixed some bugs related to sorting content in the app. Fixes https://github.com/Sandakan/Nora/issues/156.
+    - Fixed a bug where clicking `Play next` would add the song next to the next song.
+    - Updated the context menu options by right-clicking the current song info container in the footer. Fixes #160 and #158.
+    - Fixed a bug where deleting the current playing song wouldn't remove it from the current queue.
+    - Fixed some bugs related to lyrics not being read from the audio source.
+    - Fixed a bug where app UI goes out of bounds. Fixes #157.
+    - Fixed a possible bug where media control buttons don't work as expected. Fixes [#166](https://github.com/Sandakan/Nora/issues/166).
+    - Removed predictive search when searching for artists, albums, and genres in the SongTagsEditingPage.
+    - Updated components to show information about the content when right-clicking a component.
+    - Fixed some image scaling issues in ArtistInfoPage.
+    - Fixed a bug where adding song metadata from the internet with new album data doesn't count the song artwork to the album artwork.
+    - Improved the app's responsiveness to various screen sizes. Fixes #128.
+    - Updated the file association icons to show the relevant file type.
+    - Fixed a bug related to synced lyrics saved in audio files.
+    - Fixed a bug where sometimes users can't see the artist name when in ArtistInfoPage due to contrast issues between light and dark modes.
+    - Improved the artist detection algorithm of the SeparateArtistsSuggestion.
+    - Improved app performance by loading only necessary components to display.
+    - Fixed a bug where the context menu overflows out of the visible part of the app's window.
+    - Fixed some bugs related to how SongCards display in the HomePage when different screen sizes.
+    - Added a new line with "•••" as the first line of synced lyrics.
+    - Fixed a bug where metrics in ListeningActivityBarGraph overflow out of its container.
+    - Fixed a bug where the `Download Synced Lyrics` button in the metadata editing page keeps spinning even though fetching lyrics failed.
+    - Improved the app version detection algorithm of the app.
+    - Updated Musixmatch Settings to show a message about the token updating process.
+    - Fixed a bug where library updates don't reflect on the AllSearchResultsPage.
+
+  - ### 🐜 Known Issues and Bugs
+    - Sometimes updating song artwork may need an app restart to show on the app #162.
+    - The app may crash in mini-player mode when trying to use window snap feature #163.
 
 <br>
 

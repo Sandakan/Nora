@@ -80,7 +80,7 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
   const [playlists, setPlaylists] = React.useState([] as SelectPlaylist[]);
 
   React.useEffect(() => {
-    window.api
+    window.api.playlistsData
       .getPlaylistData([], undefined, true)
       .then((res) => {
         if (res.length > 0) {
@@ -106,10 +106,10 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
     );
     const promises = selectedPlaylists.map(async (playlist) => {
       if (playlist.playlistId === 'Favorites')
-        return window.api
+        return window.api.playerControls
           .toggleLikeSongs(songIds, true)
           .catch((err) => console.error(err));
-      return window.api
+      return window.api.playlistsData
         .addSongsToPlaylist(playlist.playlistId, songIds)
         .catch((err) => console.error(err));
     });

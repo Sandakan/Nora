@@ -59,7 +59,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
   React.useEffect(() => {
     if (isLyricsVisible) {
       setLyrics(null);
-      window.api
+      window.api.lyrics
         .getSongLyrics({
           songTitle: currentSongData.title,
           songArtists: Array.isArray(currentSongData.artists)
@@ -167,7 +167,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
   const toggleAlwaysOnTop = React.useCallback(() => {
     if (userData) {
       const state = !userData?.preferences.isMiniPlayerAlwaysOnTop;
-      return window.api.toggleMiniPlayerAlwaysOnTop(state).then(() =>
+      return window.api.miniPlayer.toggleMiniPlayerAlwaysOnTop(state).then(() =>
         updateUserData((prevUserData) => {
           if (prevUserData?.preferences)
             prevUserData.preferences.isMiniPlayerAlwaysOnTop = state;
@@ -271,7 +271,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           <div className="window-controls-container flex">
             <Button
               className="minimize-btn !m-0 flex h-full items-center justify-center !rounded-none !border-0 !px-2 text-center text-xl outline-1 -outline-offset-2 transition-[background] ease-in-out hover:!bg-[hsla(0deg,0%,80%,0.5)] focus-visible:!outline"
-              clickHandler={() => window.api.minimizeApp()}
+              clickHandler={() => window.api.windowControls.minimizeApp()}
               tooltipLabel="Minimize"
               iconName="minimize"
               iconClassName="material-icons-round icon flex h-fit cursor-pointer items-center justify-center text-center text-xl !font-light transition-[background] ease-in-out"
@@ -281,8 +281,8 @@ export default function MiniPlayer(props: MiniPlayerProps) {
               className="close-btn !m-0 flex h-full items-center justify-center !rounded-none !border-0 !px-2 text-center text-xl outline-1 -outline-offset-2 transition-[background] ease-in-out hover:!bg-font-color-crimson hover:!text-font-color-white focus-visible:!outline"
               clickHandler={() => {
                 if (userData && userData.preferences.hideWindowOnClose)
-                  window.api.hideApp();
-                else window.api.closeApp();
+                  window.api.windowControls.hideApp();
+                else window.api.windowControls.closeApp();
               }}
               tooltipLabel="Close"
               iconName="close"
@@ -361,7 +361,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
               : ''
           } ${!isCurrentSongPlaying ? '!visible !opacity-100' : ''}`}
         >
-          <div className="relative flex w-full flex-col items-center justify-center transition-[filter,opacity] group-focus-within/info:pointer-events-none group-focus-within/info:opacity-50 group-focus-within/info:blur-sm group-hover/info:pointer-events-none group-hover/info:opacity-50 group-hover/info:blur-sm">
+          <div className="relative flex w-full flex-col items-center justify-center transition-[filter,opacity] delay-200 group-focus-within/info:pointer-events-none group-focus-within/info:opacity-50 group-focus-within/info:blur-sm group-focus-within/info:delay-0 group-hover/info:pointer-events-none group-hover/info:opacity-50 group-hover/info:blur-sm">
             <div
               className="song-title max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-xl"
               title={currentSongData.title}
@@ -383,7 +383,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
                 : ''}
             </div>
           </div>
-          <div className="pointer-events-none absolute flex items-center opacity-0 transition-opacity group-focus-within/info:pointer-events-auto group-focus-within/info:opacity-100 group-hover/info:pointer-events-auto group-hover/info:opacity-100">
+          <div className="pointer-events-none absolute flex items-center opacity-0 transition-opacity delay-200 group-focus-within/info:pointer-events-auto group-focus-within/info:opacity-100 group-focus-within/info:delay-0 group-hover/info:pointer-events-auto group-hover/info:opacity-100">
             <Button
               className={`volume-btn !mr-2 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:after:bg-dark-font-color-highlight ${
                 isMuted && 'after:opacity-100'

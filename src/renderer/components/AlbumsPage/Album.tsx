@@ -38,7 +38,7 @@ export const Album = (props: AlbumProp) => {
 
   const playAlbumSongs = React.useCallback(
     (isShuffle = false) => {
-      return window.api
+      return window.api.audioLibraryControls
         .getSongInfo(
           props.songs.map((song) => song.songId),
           undefined,
@@ -66,7 +66,7 @@ export const Album = (props: AlbumProp) => {
     (isShuffle = false) => {
       const { multipleSelections: albumIds } = multipleSelectionsData;
 
-      window.api
+      window.api.albumsData
         .getAlbumData(albumIds)
         .then((albums) => {
           if (Array.isArray(albums) && albums.length > 0) {
@@ -74,7 +74,7 @@ export const Album = (props: AlbumProp) => {
               .map((album) => album.songs.map((song) => song.songId))
               .flat();
 
-            return window.api.getSongInfo(
+            return window.api.audioLibraryControls.getSongInfo(
               albumSongIds,
               undefined,
               undefined,
@@ -103,7 +103,7 @@ export const Album = (props: AlbumProp) => {
 
   const addToQueueForMultipleSelections = React.useCallback(() => {
     const { multipleSelections: albumIds } = multipleSelectionsData;
-    window.api
+    window.api.genresData
       .getGenresData(albumIds)
       .then((albums) => {
         if (Array.isArray(albums) && albums.length > 0) {
@@ -111,7 +111,7 @@ export const Album = (props: AlbumProp) => {
             .map((album) => album.songs.map((song) => song.songId))
             .flat();
 
-          return window.api.getSongInfo(
+          return window.api.audioLibraryControls.getSongInfo(
             albumSongIds,
             undefined,
             undefined,
@@ -187,7 +187,14 @@ export const Album = (props: AlbumProp) => {
           ];
 
           if ((artists?.length ?? 1) - 1 !== i)
-            arr.push(<span className="mr-1">,</span>);
+            arr.push(
+              <span
+                key={`${artists[i].name},${artists[i + 1].name}`}
+                className="mr-1"
+              >
+                ,
+              </span>
+            );
 
           return arr;
         })
@@ -300,7 +307,7 @@ export const Album = (props: AlbumProp) => {
   ]);
 
   const contextMenuItemData = React.useMemo(
-    () =>
+    (): ContextMenuAdditionalData =>
       isMultipleSelectionEnabled &&
       multipleSelectionsData.selectionType === 'album' &&
       isAMultipleSelection
@@ -312,12 +319,16 @@ export const Album = (props: AlbumProp) => {
             title: props.title,
             artworkPath: props?.artworkPaths?.optimizedArtworkPath,
             subTitle: `${props.songs.length} songs`,
+            subTitle2:
+              props.artists?.map((artist) => artist.name).join(', ') ||
+              'Unknown artist',
           },
     [
       isAMultipleSelection,
       isMultipleSelectionEnabled,
       multipleSelectionsData.multipleSelections.length,
       multipleSelectionsData.selectionType,
+      props.artists,
       props?.artworkPaths?.optimizedArtworkPath,
       props.songs.length,
       props.title,

@@ -57,7 +57,7 @@ const SongInfoPage = () => {
     if (currentlyActivePage.data && currentlyActivePage.data.songId) {
       console.time('fetchTime');
 
-      window.api
+      window.api.audioLibraryControls
         .getSongInfo([currentlyActivePage.data.songId])
         .then((res) => {
           console.log(`Time end : ${console.timeEnd('fetchTime')}`);
@@ -70,7 +70,7 @@ const SongInfoPage = () => {
         })
         .catch((err) => log(err));
 
-      window.api
+      window.api.audioLibraryControls
         .getSongListeningData([currentlyActivePage.data.songId])
         .then((res) => {
           if (res && res.length > 0) setListeningData(res[0]);
@@ -116,7 +116,7 @@ const SongInfoPage = () => {
     const artists = songInfo?.artists;
     if (Array.isArray(artists)) {
       return artists
-        .map((artist, i) => {
+        .map((artist, i, artistArr) => {
           const arr = [
             <SongArtist
               key={artist.artistId}
@@ -129,7 +129,14 @@ const SongInfoPage = () => {
           ];
 
           if ((artists?.length ?? 1) - 1 !== i)
-            arr.push(<span className="mr-1">,</span>);
+            arr.push(
+              <span
+                className="mr-1"
+                key={`${artistArr[i]}=>${artistArr[i + 1]}`}
+              >
+                ,
+              </span>
+            );
 
           return arr;
         })
@@ -271,9 +278,12 @@ const SongInfoPage = () => {
 
         {listeningData && (
           <SecondaryContainer className="secondary-container song-stats-container mt-8 flex h-fit flex-row flex-wrap rounded-2xl p-2">
-            <div className="flex items-center justify-between py-4">
-              <ListeningActivityBarGraph listeningData={listeningData} />
-              <div className="flex w-fit flex-wrap">
+            <div className="flex items-center justify-between py-4 xl:flex-col">
+              <ListeningActivityBarGraph
+                listeningData={listeningData}
+                className="xl:order-2"
+              />
+              <div className="stat-cards flex w-fit flex-wrap xl:order-1 xl:mt-4 xl:items-center xl:justify-center">
                 <SongStat
                   key={0}
                   title="All time Listens"

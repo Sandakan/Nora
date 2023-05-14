@@ -39,7 +39,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
       if (nextSongIndex) {
         timeoutId = setTimeout(
           () =>
-            window.api
+            window.api.audioLibraryControls
               .getSongInfo([nextSongIndex])
               .then((res) => {
                 if (res && res[0]) {
@@ -81,7 +81,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
             fallbackSrc={artist.artworkPath}
             key={artist.artistId}
             className={`absolute aspect-square w-6 rounded-full border-2 border-background-color-1 dark:border-dark-background-color-1 ${
-              index === 0 ? 'z-2' : 'translate-x-4'
+              index === 0 ? 'z-2' : '-translate-x-2'
             }`}
             onClick={() => {
               changeCurrentActivePage('ArtistInfo', {
@@ -127,7 +127,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
     if (currentSongData.songId && Array.isArray(currentSongData.artists)) {
       if (currentSongData.artists.length > 0) {
         return currentSongData.artists
-          .map((artist, i) => {
+          .map((artist, i, artistArr) => {
             const arr = [
               <SongArtist
                 key={artist.artistId}
@@ -138,7 +138,14 @@ const CurrentlyPlayingSongInfoContainer = () => {
             ];
 
             if ((currentSongData.artists?.length ?? 1) - 1 !== i)
-              arr.push(<span className="mr-1">,</span>);
+              arr.push(
+                <span
+                  key={`${artistArr[i].name},${artistArr[i + 1].name}`}
+                  className="mr-1"
+                >
+                  ,
+                </span>
+              );
 
             return arr;
           })
@@ -155,13 +162,13 @@ const CurrentlyPlayingSongInfoContainer = () => {
 
   const contextMenuCurrentSongData =
     React.useMemo((): ContextMenuAdditionalData => {
-      const { title, artworkPath, artists } = currentSongData;
+      const { title, artworkPath, artists, album } = currentSongData;
       return {
         title,
         artworkPath: artworkPath ?? DefaultSongCover,
         subTitle:
           artists?.map((artist) => artist.name).join(', ') || 'Unknown artist',
-        // subTitle2: album?.name,
+        subTitle2: album?.name,
       };
     }, [currentSongData]);
 
@@ -197,7 +204,8 @@ const CurrentlyPlayingSongInfoContainer = () => {
         label: 'Reveal in File Explorer',
         class: 'reveal-file-explorer',
         iconName: 'folder_open',
-        handlerFunction: () => window.api.revealSongInFileExplorer(songId),
+        handlerFunction: () =>
+          window.api.songUpdates.revealSongInFileExplorer(songId),
       },
       {
         label: 'Info',
@@ -233,11 +241,11 @@ const CurrentlyPlayingSongInfoContainer = () => {
         iconName: isBlacklisted ? 'settings_backup_restore' : 'block',
         handlerFunction: () => {
           if (isBlacklisted)
-            window.api
+            window.api.audioLibraryControls
               .restoreBlacklistedSongs([songId])
               .catch((err) => console.error(err));
           else if (localStorageData?.preferences.doNotShowBlacklistSongConfirm)
-            window.api
+            window.api.audioLibraryControls
               .blacklistSongs([songId])
               .then(() =>
                 addNewNotifications([
@@ -361,7 +369,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
                   {songArtistsImages}
                 </span>
               )}
-            <span className="w-3/4 grow-0 text-xs text-font-color-black/90 dark:text-font-color-white/90">
+            <span className="flex w-3/4 grow-0 text-xs text-font-color-black/90 dark:text-font-color-white/90">
               {songArtists}
             </span>
           </div>

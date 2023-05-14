@@ -50,11 +50,16 @@ const SeparateArtistsSuggestion = (props: Props) => {
       const artists = separatedArtistsNames.map((artist, i, arr) => {
         return (
           <>
-            <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
+            <span
+              className="text-font-color-highlight dark:text-dark-font-color-highlight"
+              key={artist}
+            >
               {artist}
             </span>
             {i !== arr.length - 1 && (
-              <span>{i === arr.length - 2 ? ' and ' : ', '}</span>
+              <span key={`${arr[i]}=>${arr[i + 1]}`}>
+                {i === arr.length - 2 ? ' and ' : ', '}
+              </span>
             )}
           </>
         );
@@ -73,7 +78,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
       setIsDisabled(true);
       setIsPending(true);
 
-      window.api
+      window.api.suggestions
         .resolveSeparateArtists(artistId, separatedArtistsNames)
         .then((res) => {
           if (

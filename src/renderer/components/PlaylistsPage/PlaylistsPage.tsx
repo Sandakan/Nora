@@ -51,7 +51,7 @@ const PlaylistsPage = () => {
 
   const fetchPlaylistData = React.useCallback(
     () =>
-      window.api.getPlaylistData([], sortingOrder).then((res) => {
+      window.api.playlistsData.getPlaylistData([], sortingOrder).then((res) => {
         if (res && res.length > 0) setPlaylists(res);
       }),
     [sortingOrder]

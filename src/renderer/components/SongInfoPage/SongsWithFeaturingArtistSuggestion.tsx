@@ -104,7 +104,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
       setIsDisabled(true);
       setIsPending(true);
 
-      window.api
+      window.api.suggestions
         .resolveFeaturingArtists(
           songId,
           separatedFeatArtistsNames,

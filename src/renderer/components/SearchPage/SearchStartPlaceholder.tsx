@@ -25,7 +25,7 @@ const SearchStartPlaceholder = (props: Props) => {
   );
 
   const fetchRecentSearchResults = React.useCallback(() => {
-    window.api
+    window.api.userData
       .getUserData()
       .then((data) => {
         if (data && Array.isArray(data.recentSearches))
@@ -112,7 +112,7 @@ const SearchStartPlaceholder = (props: Props) => {
               className="!m-0 !mt-4 !rounded-none !border-0 !p-0 !text-font-color-highlight outline-1 outline-offset-1 hover:underline focus-visible:!outline dark:!text-dark-font-color-highlight/75"
               clickHandler={(_, setIsDisabled) => {
                 setIsDisabled(true);
-                window.api.clearSearchHistory().catch((err) => {
+                window.api.search.clearSearchHistory().catch((err) => {
                   setIsDisabled(false);
                   console.warn(err);
                 });

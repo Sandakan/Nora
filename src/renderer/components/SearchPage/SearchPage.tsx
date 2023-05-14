@@ -93,7 +93,7 @@ const SearchPage = () => {
       if (timeOutIdRef.current) clearTimeout(timeOutIdRef.current);
       timeOutIdRef.current = setTimeout(
         () =>
-          window.api
+          window.api.search
             .search(
               activeFilter,
               deferredSearchInput,
@@ -223,30 +223,35 @@ const SearchPage = () => {
         <SongSearchResultsContainer
           songs={searchResults.songs}
           searchInput={searchInput}
+          isPredictiveSearchEnabled={isPredictiveSearchEnabled}
         />
         {/* ARTIST SEARCH RESULTS */}
         <ArtistsSearchResultsContainer
           artists={searchResults.artists}
           searchInput={searchInput}
           noOfVisibleArtists={noOfArtists}
+          isPredictiveSearchEnabled={isPredictiveSearchEnabled}
         />
         {/* ALBUM SEARCH RESULTS */}
         <AlbumSearchResultsContainer
           albums={searchResults.albums}
           searchInput={searchInput}
           noOfVisibleAlbums={noOfAlbums}
+          isPredictiveSearchEnabled={isPredictiveSearchEnabled}
         />
         {/* PLAYLIST SEARCH RESULTS */}
         <PlaylistSearchResultsContainer
           playlists={searchResults.playlists}
           searchInput={searchInput}
           noOfVisiblePlaylists={noOfPlaylists}
+          isPredictiveSearchEnabled={isPredictiveSearchEnabled}
         />
         {/* GENRE SEARCH RESULTS */}
         <GenreSearchResultsContainer
           genres={searchResults.genres}
           searchInput={searchInput}
           noOfVisibleGenres={noOfGenres}
+          isPredictiveSearchEnabled={isPredictiveSearchEnabled}
         />
         {/* NO SEARCH RESULTS PLACEHOLDER */}
         <NoSearchResultsContainer

@@ -60,7 +60,7 @@ const LyricsPage = () => {
         ),
       },
     ]);
-    window.api
+    window.api.lyrics
       .getSongLyrics({
         songTitle: currentSongData.title,
         songArtists: Array.isArray(currentSongData.artists)
@@ -82,7 +82,12 @@ const LyricsPage = () => {
 
   const lyricsComponents = React.useMemo(() => {
     if (lyrics && lyrics?.lyrics) {
-      const { isSynced, lyrics: unsyncedLyrics, syncedLyrics } = lyrics.lyrics;
+      const {
+        isSynced,
+        lyrics: unsyncedLyrics,
+        syncedLyrics,
+        offset = 0,
+      } = lyrics.lyrics;
 
       if (syncedLyrics) {
         const syncedLyricsLines = syncedLyrics.map((lyric, index) => {
@@ -92,7 +97,7 @@ const LyricsPage = () => {
               key={index}
               index={index}
               lyric={text}
-              syncedLyrics={{ start, end }}
+              syncedLyrics={{ start: start + offset, end: end + offset }}
               isAutoScrolling={isAutoScrolling}
             />
           );
@@ -103,7 +108,7 @@ const LyricsPage = () => {
             key="..."
             index={0}
             lyric="•••"
-            syncedLyrics={{ start: 0, end: syncedLyrics[0].start }}
+            syncedLyrics={{ start: 0, end: syncedLyrics[0].start + offset }}
             isAutoScrolling={isAutoScrolling}
           />
         );
@@ -135,7 +140,7 @@ const LyricsPage = () => {
     ) => {
       setIsDisabled(true);
       setIsPending(true);
-      window.api
+      window.api.lyrics
         .getSongLyrics(
           {
             songTitle: currentSongData.title,
@@ -164,14 +169,14 @@ const LyricsPage = () => {
   );
 
   const pathExt = React.useMemo(
-    () => window.api.getExtension(currentSongData.path),
+    () => window.api.utils.getExtension(currentSongData.path),
     [currentSongData.path]
   );
 
   const showOfflineLyrics = React.useCallback(
     (_: unknown, setIsDisabled: (state: boolean) => void) => {
       setIsDisabled(true);
-      window.api
+      window.api.lyrics
         .getSongLyrics(
           {
             songTitle: currentSongData.title,
@@ -206,7 +211,7 @@ const LyricsPage = () => {
         setIsDisabled(true);
         setIsPending(true);
 
-        window.api
+        window.api.lyrics
           .saveLyricsToSong(currentSongData.path, lyrics)
           .then(() => {
             setLyrics((prevData) => {
@@ -245,7 +250,7 @@ const LyricsPage = () => {
   const refreshOnlineLyrics = React.useCallback(
     (_: unknown, setIsDisabled: (state: boolean) => void) => {
       setIsDisabled(true);
-      window.api
+      window.api.lyrics
         .getSongLyrics(
           {
             songTitle: currentSongData.title,

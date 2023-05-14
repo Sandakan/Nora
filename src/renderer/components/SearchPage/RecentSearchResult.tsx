@@ -12,7 +12,8 @@ const RecentSearchResult = React.memo((props: RecentSearchResultProp) => {
   const recentSearchContextItems: ContextMenuItem[] = [
     {
       label: 'Remove from Search History',
-      handlerFunction: () => window.api.clearSearchHistory([props.result]),
+      handlerFunction: () =>
+        window.api.search.clearSearchHistory([props.result]),
       iconName: 'delete',
     },
   ];

@@ -137,7 +137,7 @@ const SongCard = (props: SongCardProp) => {
     });
 
   const handleLikeButtonClick = React.useCallback(() => {
-    window.api
+    window.api.playerControls
       .toggleLikeSongs([songId], !isSongAFavorite)
       .then((res) => {
         if (res && res.likes.length + res.dislikes.length > 0) {
@@ -299,7 +299,7 @@ const SongCard = (props: SongCardProp) => {
           ? 'material-icons-round mr-4 text-xl'
           : 'material-icons-round-outlined mr-4 text-xl',
         handlerFunction: () => {
-          window.api
+          window.api.playerControls
             .toggleLikeSongs(
               isMultipleSelectionsEnabled ? [...songIds] : [songId]
             )
@@ -371,7 +371,8 @@ const SongCard = (props: SongCardProp) => {
         label: 'Reveal in File Explorer',
         class: 'reveal-file-explorer',
         iconName: 'folder_open',
-        handlerFunction: () => window.api.revealSongInFileExplorer(songId),
+        handlerFunction: () =>
+          window.api.songUpdates.revealSongInFileExplorer(songId),
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
@@ -417,11 +418,11 @@ const SongCard = (props: SongCardProp) => {
         iconName: isBlacklisted ? 'settings_backup_restore' : 'block',
         handlerFunction: () => {
           if (isBlacklisted)
-            window.api
+            window.api.audioLibraryControls
               .restoreBlacklistedSongs([songId])
               .catch((err) => console.error(err));
           else if (localStorageData?.preferences.doNotShowBlacklistSongConfirm)
-            window.api
+            window.api.audioLibraryControls
               .blacklistSongs([songId])
               .then(() =>
                 addNewNotifications([
@@ -499,7 +500,14 @@ const SongCard = (props: SongCardProp) => {
           ];
 
           if ((artists?.length ?? 1) - 1 !== i)
-            arr.push(<span className="mr-1">,</span>);
+            arr.push(
+              <span
+                className="mr-1"
+                key={`${artists[i].name}=>${artists[i + 1].name}`}
+              >
+                ,
+              </span>
+            );
 
           return arr;
         })
@@ -624,7 +632,7 @@ const SongCard = (props: SongCardProp) => {
               {title}
             </div>
             <div
-              className="song-artists flex w-full max-w-full truncate text-sm transition-none"
+              className="song-artists w-full max-w-full truncate text-sm transition-none"
               title={
                 artists
                   ? artists.map((x) => x.name).join(', ')

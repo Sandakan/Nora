@@ -59,7 +59,7 @@ export const Playlist = (props: PlaylistProp) => {
 
   const playAllSongs = React.useCallback(
     (isShuffling = false) => {
-      window.api
+      window.api.audioLibraryControls
         .getSongInfo(props.songs, undefined, undefined, true)
         .then((songs) => {
           if (Array.isArray(songs))
@@ -82,12 +82,17 @@ export const Playlist = (props: PlaylistProp) => {
   const playAllSongsForMultipleSelections = React.useCallback(
     (isShuffling = false) => {
       const { multipleSelections: playlistIds } = multipleSelectionsData;
-      window.api
+      window.api.playlistsData
         .getPlaylistData(playlistIds)
         .then((playlists) => {
           const ids = playlists.map((playlist) => playlist.songs).flat();
 
-          return window.api.getSongInfo(ids, undefined, undefined, true);
+          return window.api.audioLibraryControls.getSongInfo(
+            ids,
+            undefined,
+            undefined,
+            true
+          );
         })
         .then((songs) => {
           if (Array.isArray(songs)) {
@@ -114,7 +119,7 @@ export const Playlist = (props: PlaylistProp) => {
 
   const addToQueueForMultipleSelections = React.useCallback(() => {
     const { multipleSelections: playlistIds } = multipleSelectionsData;
-    window.api
+    window.api.playlistsData
       .getPlaylistData(playlistIds)
       .then((playlists) => {
         if (Array.isArray(playlists) && playlists.length > 0) {
@@ -122,7 +127,7 @@ export const Playlist = (props: PlaylistProp) => {
             .map((playlist) => playlist.songs)
             .flat();
 
-          return window.api.getSongInfo(
+          return window.api.audioLibraryControls.getSongInfo(
             playlistSongIds,
             undefined,
             undefined,
@@ -216,11 +221,11 @@ export const Playlist = (props: PlaylistProp) => {
         label: 'Add artwork',
         iconName: 'photo_camera',
         handlerFunction: () => {
-          window.api
+          window.api.songUpdates
             .getImgFileLocation()
             .then((artworkPath) => {
               if (artworkPath) {
-                return window.api.addArtworkToAPlaylist(
+                return window.api.playlistsData.addArtworkToAPlaylist(
                   props.playlistId,
                   artworkPath
                 );

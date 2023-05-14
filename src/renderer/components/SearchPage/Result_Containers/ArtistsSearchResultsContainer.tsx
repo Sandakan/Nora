@@ -9,11 +9,17 @@ import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 type Props = {
   artists: Artist[];
   searchInput: string;
+  isPredictiveSearchEnabled: boolean;
   noOfVisibleArtists?: number;
 };
 
 const ArtistsSearchResultsContainer = (props: Props) => {
-  const { artists, searchInput, noOfVisibleArtists = 5 } = props;
+  const {
+    artists,
+    searchInput,
+    noOfVisibleArtists = 5,
+    isPredictiveSearchEnabled,
+  } = props;
   const { isMultipleSelectionEnabled, multipleSelectionsData } =
     React.useContext(AppContext);
   const { toggleMultipleSelections, changeCurrentActivePage } =
@@ -113,6 +119,7 @@ const ArtistsSearchResultsContainer = (props: Props) => {
                     searchQuery: searchInput,
                     searchFilter: 'Artists' as SearchFilters,
                     searchResults: artists,
+                    isPredictiveSearchEnabled,
                   })
                 }
               />

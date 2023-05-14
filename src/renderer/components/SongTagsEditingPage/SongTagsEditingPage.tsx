@@ -57,7 +57,7 @@ function SongTagsEditingPage() {
   );
 
   const pathExt = React.useMemo(
-    () => window.api.getExtension(songPath),
+    () => window.api.utils.getExtension(songPath),
     [songPath]
   );
 
@@ -70,7 +70,7 @@ function SongTagsEditingPage() {
 
   React.useEffect(() => {
     if (songId)
-      window.api
+      window.api.songUpdates
         .getSongId3Tags(isKnownSource ? songId : songPath, isKnownSource)
         .then((res) => {
           if (res) {
@@ -116,7 +116,7 @@ function SongTagsEditingPage() {
 
   React.useEffect(() => {
     if (artistKeyword.trim()) {
-      window.api
+      window.api.search
         .search('Artists', artistKeyword, false, false)
         .then((res) => {
           console.log(res);
@@ -140,7 +140,7 @@ function SongTagsEditingPage() {
 
   React.useEffect(() => {
     if (albumKeyword.trim()) {
-      window.api
+      window.api.search
         .search('Albums', albumKeyword, false, false)
         .then((res) => {
           console.log(res);
@@ -164,7 +164,7 @@ function SongTagsEditingPage() {
 
   React.useEffect(() => {
     if (genreKeyword.trim()) {
-      window.api
+      window.api.search
         .search('Genres', genreKeyword, false, false)
         .then((res) => {
           console.log(res);
@@ -239,7 +239,7 @@ function SongTagsEditingPage() {
     setIsDisabled(true);
     setIsPending(true);
     console.log(songInfo);
-    window.api
+    window.api.songUpdates
       .updateSongId3Tags(
         isKnownSource ? songId : songPath,
         songInfo,
@@ -264,7 +264,7 @@ function SongTagsEditingPage() {
               icon: <span className="material-icons-round icon">done</span>,
             },
           ]);
-          return window.api.getSongId3Tags(
+          return window.api.songUpdates.getSongId3Tags(
             isKnownSource ? songId : songPath,
             isKnownSource
           );
@@ -501,9 +501,11 @@ function SongTagsEditingPage() {
             <p className="mt-2 text-2xl">No Support</p>
             <p
               className="mt-4 cursor-pointer text-xs font-light opacity-50"
-              title={window.api.removeDefaultAppProtocolFromFilePath(songPath)}
+              title={window.api.utils.removeDefaultAppProtocolFromFilePath(
+                songPath
+              )}
             >
-              {window.api.getBaseName(songPath)}
+              {window.api.utils.getBaseName(songPath)}
             </p>
             <p className="mt-2 px-8 font-light">
               Nora currently doesn't support editing song metadata in{' '}

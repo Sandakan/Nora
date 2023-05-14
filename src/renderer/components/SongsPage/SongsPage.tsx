@@ -115,7 +115,7 @@ const SongsPage = () => {
 
   const fetchSongsData = React.useCallback(
     () =>
-      window.api
+      window.api.audioLibraryControls
         .getAllSongs(content.sortingOrder)
         .then((audioInfoArray) => {
           if (audioInfoArray) {
@@ -295,7 +295,7 @@ const SongsPage = () => {
                           label: 'Resync library',
                           iconName: 'sync',
                           handlerFunction: () =>
-                            window.api.resyncSongsLibrary(),
+                            window.api.audioLibraryControls.resyncSongsLibrary(),
                         },
                       ],
                       x + 10,
@@ -312,7 +312,7 @@ const SongsPage = () => {
                           label: 'Resync library',
                           iconName: 'sync',
                           handlerFunction: () =>
-                            window.api.resyncSongsLibrary(),
+                            window.api.audioLibraryControls.resyncSongsLibrary(),
                         },
                       ],
                       e.pageX,

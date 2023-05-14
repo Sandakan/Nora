@@ -78,7 +78,7 @@ const ArtistInfoPage = () => {
 
   const fetchArtistsData = React.useCallback(() => {
     if (currentlyActivePage?.data?.artistId) {
-      window.api
+      window.api.artistsData
         .getArtistData([currentlyActivePage.data.artistId])
         .then((res) => {
           if (res && res.length > 0) {
@@ -97,7 +97,7 @@ const ArtistInfoPage = () => {
 
   const fetchArtistArtworks = React.useCallback(() => {
     if (artistData?.artistId) {
-      window.api
+      window.api.artistsData
         .getArtistArtworks(artistData.artistId)
         .then((x) => {
           if (x)
@@ -121,19 +121,22 @@ const ArtistInfoPage = () => {
 
   const fetchSongsData = React.useCallback(() => {
     if (artistData?.songs && artistData.songs.length > 0) {
-      window.api
-        .getSongInfo(artistData.songs.map((song) => song.songId))
+      window.api.audioLibraryControls
+        .getSongInfo(
+          artistData.songs.map((song) => song.songId),
+          sortingOrder
+        )
         .then((songsData) => {
           if (songsData && songsData.length > 0) setSongs(songsData);
           return undefined;
         })
         .catch((err) => console.error(err));
     }
-  }, [artistData?.songs]);
+  }, [artistData?.songs, sortingOrder]);
 
   const fetchAlbumsData = React.useCallback(() => {
     if (artistData?.albums && artistData.albums.length > 0) {
-      window.api
+      window.api.albumsData
         .getAlbumData(artistData.albums.map((album) => album.albumId))
         .then((res) => {
           if (res && res.length > 0) setAlbums(res);
@@ -381,7 +384,7 @@ const ArtistInfoPage = () => {
             }`}
             clickHandler={() => {
               if (artistData)
-                window.api
+                window.api.artistsData
                   .toggleLikeArtists(
                     [artistData.artistId],
                     !artistData.isAFavorite

@@ -87,7 +87,7 @@ const checkLocalStorage = () => {
         JSON.stringify(LOCAL_STORAGE_DEFAULT_TEMPLATE)
       );
       return log(
-        'Inavalid or outdated local storage found. Resetting the local storage to defualt properties.',
+        'Inavalid or outdated local storage found. Resetting the local storage to default properties.',
         'warn'
       );
     } catch (error) {

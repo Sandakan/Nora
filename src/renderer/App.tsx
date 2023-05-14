@@ -253,7 +253,7 @@ const reducer = (
         },
       };
     case 'UPDATE_MINI_PLAYER_STATE':
-      window.api.toggleMiniPlayer(
+      window.api.miniPlayer.toggleMiniPlayer(
         typeof action.data === 'boolean'
           ? action.data
           : state.player.isMiniPlayer
@@ -472,7 +472,7 @@ player.addEventListener('player/trackchange', (e) => {
 // / / / / / / / /
 
 const updateNetworkStatus = () =>
-  window.api.networkStatusChange(navigator.onLine);
+  window.api.settingsHelpers.networkStatusChange(navigator.onLine);
 
 updateNetworkStatus();
 window.addEventListener('online', updateNetworkStatus);
@@ -538,7 +538,7 @@ const reducerData: AppReducer = {
   isOnBatteryPower: false,
 };
 
-console.log('Command line args', window.api.commandLineArgs);
+console.log('Command line args', window.api.properties.commandLineArgs);
 
 export default function App() {
   const [content, dispatch] = React.useReducer(reducer, reducerData);
@@ -781,11 +781,15 @@ export default function App() {
       dispatch({ type: 'UPDATE_BATTERY_POWER_STATE', data: isOnBatteryPower });
     };
 
-    window.api.listenForSystemThemeChanges(watchForSystemThemeChanges);
-    window.api.listenForBatteryPowerStateChanges(watchPowerChanges);
+    window.api.theme.listenForSystemThemeChanges(watchForSystemThemeChanges);
+    window.api.battery.listenForBatteryPowerStateChanges(watchPowerChanges);
     return () => {
-      window.api.stoplisteningForSystemThemeChanges(watchForSystemThemeChanges);
-      window.api.stopListeningForBatteryPowerStateChanges(watchPowerChanges);
+      window.api.theme.stoplisteningForSystemThemeChanges(
+        watchForSystemThemeChanges
+      );
+      window.api.battery.stopListeningForBatteryPowerStateChanges(
+        watchPowerChanges
+      );
     };
   }, []);
 
@@ -839,25 +843,33 @@ export default function App() {
         type: 'CURRENT_SONG_PLAYBACK_STATE',
         data: true,
       });
-      window.api.songPlaybackStateChange(true);
+      window.api.playerControls.songPlaybackStateChange(true);
     });
     player.addEventListener('pause', () => {
       dispatch({
         type: 'CURRENT_SONG_PLAYBACK_STATE',
         data: false,
       });
-      window.api.songPlaybackStateChange(false);
+      window.api.playerControls.songPlaybackStateChange(false);
     });
-    window.api.beforeQuitEvent(handleBeforeQuitEvent);
+    window.api.quitEvent.beforeQuitEvent(handleBeforeQuitEvent);
 
-    window.api.onWindowBlur(() => manageWindowBlurOrFocus('blur'));
-    window.api.onWindowFocus(() => manageWindowBlurOrFocus('focus'));
+    window.api.windowControls.onWindowBlur(() =>
+      manageWindowBlurOrFocus('blur')
+    );
+    window.api.windowControls.onWindowFocus(() =>
+      manageWindowBlurOrFocus('focus')
+    );
 
-    window.api.onEnterFullscreen(() => manageWindowFullscreen('fullscreen'));
-    window.api.onLeaveFullscreen(() => manageWindowFullscreen('windowed'));
+    window.api.fullscreen.onEnterFullscreen(() =>
+      manageWindowFullscreen('fullscreen')
+    );
+    window.api.fullscreen.onLeaveFullscreen(() =>
+      manageWindowFullscreen('windowed')
+    );
 
     return () => {
-      window.api.removeBeforeQuitEventListener(handleBeforeQuitEvent);
+      window.api.quitEvent.removeBeforeQuitEventListener(handleBeforeQuitEvent);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -983,7 +995,7 @@ export default function App() {
     toggleShuffling(playback?.isShuffling);
     toggleRepeat(playback?.isRepeating);
 
-    window.api
+    window.api.audioLibraryControls
       .checkForStartUpSongs()
       .then((startUpSongData) => {
         if (startUpSongData) playSongFromUnknownSource(startUpSongData, true);
@@ -1012,7 +1024,7 @@ export default function App() {
         queueId: queue.queueId,
       };
     else {
-      window.api
+      window.api.audioLibraryControls
         .getAllSongs()
         .then((audioData) => {
           if (!audioData) return undefined;
@@ -1032,7 +1044,7 @@ export default function App() {
   }, []);
 
   React.useEffect(() => {
-    window.api
+    window.api.userData
       .getUserData()
       .then((res) => {
         if (!res) return undefined;
@@ -1044,20 +1056,28 @@ export default function App() {
       })
       .catch((err) => console.error(err));
 
-    window.api.toggleSongPlayback(() => {
+    window.api.playerControls.toggleSongPlayback(() => {
       console.log('Main requested song playback');
       toggleSongPlayback();
     });
-    window.api.playSongFromUnknownSource((_, data) => {
+    window.api.unknownSource.playSongFromUnknownSource((_, data) => {
       playSongFromUnknownSource(data, true);
     });
-    window.api.skipBackwardToPreviousSong(handleSkipBackwardClick);
-    window.api.skipForwardToNextSong(handleSkipForwardClick);
+    window.api.playerControls.skipBackwardToPreviousSong(
+      handleSkipBackwardClick
+    );
+    window.api.playerControls.skipForwardToNextSong(handleSkipForwardClick);
     return () => {
-      window.api.removeTogglePlaybackStateEvent(toggleSongPlayback);
-      window.api.removeSkipBackwardToPreviousSongEvent(handleSkipBackwardClick);
-      window.api.removeSkipForwardToNextSongEvent(handleSkipForwardClick);
-      window.api.removeDataUpdateEventListeners();
+      window.api.playerControls.removeTogglePlaybackStateEvent(
+        toggleSongPlayback
+      );
+      window.api.playerControls.removeSkipBackwardToPreviousSongEvent(
+        handleSkipBackwardClick
+      );
+      window.api.playerControls.removeSkipForwardToNextSongEvent(
+        handleSkipForwardClick
+      );
+      window.api.dataUpdates.removeDataUpdateEventListeners();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -1071,10 +1091,10 @@ export default function App() {
       document.dispatchEvent(event);
     };
 
-    window.api.dataUpdateEvent(noticeDataUpdateEvents);
+    window.api.dataUpdates.dataUpdateEvent(noticeDataUpdateEvents);
 
     return () => {
-      window.api.removeDataUpdateEventListeners();
+      window.api.dataUpdates.removeDataUpdateEventListeners();
     };
   }, []);
 
@@ -1207,7 +1227,8 @@ export default function App() {
           label: 'Resync Songs',
           iconClassName: 'sync',
           className: defaultButtonStyles,
-          clickHandler: () => window.api.resyncSongsLibrary(),
+          clickHandler: () =>
+            window.api.audioLibraryControls.resyncSongsLibrary(),
         });
       }
       if (
@@ -1291,9 +1312,11 @@ export default function App() {
   );
 
   React.useEffect(() => {
-    window.api.getMessageFromMain(displayMessageFromMain);
+    window.api.messages.getMessageFromMain(displayMessageFromMain);
     return () => {
-      window.api.removeMessageToRendererEventListener(displayMessageFromMain);
+      window.api.messages.removeMessageToRendererEventListener(
+        displayMessageFromMain
+      );
     };
   }, [displayMessageFromMain]);
 
@@ -1390,7 +1413,7 @@ export default function App() {
         if (!passedFullListenRange && seconds > (duration * 90) / 100) {
           passedFullListenRange = true;
           console.warn(`user listened to 90% of ${songId}`);
-          window.api.updateSongListeningData(
+          window.api.audioLibraryControls.updateSongListeningData(
             songId,
             'fullListens',
             'increment'
@@ -1409,7 +1432,11 @@ export default function App() {
             console.warn(`user skipped ${songId} before 90% completion.`);
           if (!passedSkipRange) {
             console.warn(`user skipped ${songId}. before 10% completion.`);
-            window.api.updateSongListeningData(songId, 'skips', 'increment');
+            window.api.audioLibraryControls.updateSongListeningData(
+              songId,
+              'skips',
+              'increment'
+            );
           }
           abortController.abort();
           clearInterval(intervalId);
@@ -1433,7 +1460,7 @@ export default function App() {
           return toggleSongPlayback();
         console.time('timeForSongFetch');
 
-        return window.api
+        return window.api.audioLibraryControls
           .getSong(songId)
           .then((songData) => {
             console.timeEnd('timeForSongFetch');
@@ -1602,7 +1629,7 @@ export default function App() {
 
   const fetchSongFromUnknownSource = React.useCallback(
     (songPath: string) => {
-      window.api
+      window.api.unknownSource
         .getSongFromUnknownSource(songPath)
         .then((res) => playSongFromUnknownSource(res, true))
         .catch((err) => {
@@ -1672,7 +1699,7 @@ export default function App() {
       ) {
         player.currentTime = 0;
         toggleSongPlayback(true);
-        window.api.updateSongListeningData(
+        window.api.audioLibraryControls.updateSongListeningData(
           contentRef.current.currentSongData.songId,
           'listens',
           'increment'
@@ -2090,7 +2117,7 @@ export default function App() {
         contentRef.current.currentSongData.isAFavorite !== newFavorite &&
         !onlyChangeCurrentSongData
       ) {
-        window.api
+        window.api.playerControls
           .toggleLikeSongs(
             [contentRef.current.currentSongData.songId],
             newFavorite
@@ -2194,7 +2221,7 @@ export default function App() {
       else if (e.ctrlKey && e.key === 's') toggleShuffling();
       else if (e.ctrlKey && e.key === 't') toggleRepeat();
       else if (e.ctrlKey && e.key === 'h') toggleIsFavorite();
-      else if (e.ctrlKey && e.key === 'y') window.api.changeAppTheme();
+      else if (e.ctrlKey && e.key === 'y') window.api.theme.changeAppTheme();
       else if (e.ctrlKey && e.key === 'l') {
         const currentlyActivePage =
           content.navigationHistory.history[
@@ -2271,9 +2298,9 @@ export default function App() {
       // function key combinations
       else if (e.key === 'F5') {
         e.preventDefault();
-        window.api.restartRenderer(`User request through F5.`);
-      } else if (e.key === 'F12' && !window.api.isInDevelopment)
-        window.api.openDevtools();
+        window.api.appControls.restartRenderer(`User request through F5.`);
+      } else if (e.key === 'F12' && !window.api.properties.isInDevelopment)
+        window.api.settingsHelpers.openDevtools();
     },
     [
       updateVolume,

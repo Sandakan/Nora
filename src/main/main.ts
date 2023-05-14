@@ -344,8 +344,8 @@ app
         console.log('Left full screen');
         mainWindow.webContents.send('app/leftFullscreen');
       });
-      powerMonitor.addListener('on-ac', toggleonBatteryPower);
-      powerMonitor.addListener('on-battery', toggleonBatteryPower);
+      powerMonitor.addListener('on-ac', toggleOnBatteryPower);
+      powerMonitor.addListener('on-battery', toggleOnBatteryPower);
 
       ipcMain.on('app/getSongPosition', (_, position: number) =>
         saveUserData('currentSong.stoppedPosition', position)
@@ -456,13 +456,6 @@ app
       );
 
       ipcMain.handle('app/generatePalettes', generatePalettes);
-
-      ipcMain.on(
-        'app/savePageSortState',
-        (_, pageType: PageSortTypes, state: unknown) => {
-          saveUserData(pageType, state);
-        }
-      );
 
       ipcMain.handle('app/getArtistArtworks', (_, artistId: string) =>
         getArtistInfoFromNet(artistId)
@@ -643,6 +636,10 @@ app
         revealSongInFileExplorer(songId)
       );
 
+      ipcMain.on('revealFolderInFileExplorer', (_, folderPath: string) =>
+        shell.showItemInFolder(folderPath)
+      );
+
       ipcMain.on('app/openInBrowser', (_, url: string) =>
         shell.openExternal(url)
       );
@@ -788,7 +785,7 @@ function handleBeforeQuit() {
   );
 }
 
-function toggleonBatteryPower() {
+function toggleOnBatteryPower() {
   isOnBatteryPower = powerMonitor.isOnBatteryPower();
   mainWindow.webContents.send('app/isOnBatteryPower', isOnBatteryPower);
 }

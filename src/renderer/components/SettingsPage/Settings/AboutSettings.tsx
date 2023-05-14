@@ -97,7 +97,9 @@ const AboutSettings = () => {
               iconName="language"
               iconClassName="!text-2xl"
               tooltipLabel="Nora's Website (Under Development)"
-              clickHandler={() => window.api.openInBrowser('nora:')}
+              clickHandler={() =>
+                window.api.settingsHelpers.openInBrowser('nora:')
+              }
               isDisabled
             />
             <Img
@@ -209,25 +211,29 @@ const AboutSettings = () => {
             iconClassName="material-icons-round-outlined"
             className="about-link mb-4 block w-fit cursor-pointer"
             label="Open Log file"
-            clickHandler={() => window.api.openLogFile()}
+            clickHandler={() => window.api.log.openLogFile()}
           />
           <Button
             label="Open Devtools"
             iconName="code"
             className="mb-4 rounded-2xl"
-            clickHandler={() => window.api.openDevtools()}
+            clickHandler={() => window.api.settingsHelpers.openDevtools()}
           />
           <Button
             label="Resync Library"
             iconName="sync"
             className="mb-4 rounded-2xl"
-            clickHandler={() => window.api.resyncSongsLibrary()}
+            clickHandler={() =>
+              window.api.audioLibraryControls.resyncSongsLibrary()
+            }
           />
           <Button
             label="Generate Palettes"
             iconName="temp_preferences_custom"
             className="mb-4 rounded-2xl"
-            clickHandler={() => window.api.generatePalettes()}
+            clickHandler={() =>
+              window.api.audioLibraryControls.generatePalettes()
+            }
           />
           <Button
             label="App Shortcuts"
@@ -274,7 +280,7 @@ const AboutSettings = () => {
                   confirmButton={{
                     label: 'Clear History',
                     clickHandler: () => {
-                      window.api
+                      window.api.audioLibraryControls
                         .clearSongHistory()
                         .then((res) => {
                           if (res.success) {

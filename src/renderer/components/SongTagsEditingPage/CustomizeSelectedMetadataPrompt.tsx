@@ -107,15 +107,15 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
 
     const albumData = isAlbumSelected
       ? album
-        ? await window.api.getAlbumData([album])
+        ? await window.api.albumsData.getAlbumData([album])
         : []
       : undefined;
     const artistData = isArtistsSelected
-      ? await window.api.getArtistData(artists)
+      ? await window.api.artistsData.getArtistData(artists)
       : undefined;
     const genreData = isGenresSelected
       ? genres
-        ? await window.api.getGenresData(genres)
+        ? await window.api.genresData.getGenresData(genres)
         : []
       : undefined;
 
@@ -160,9 +160,13 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
   const updateAllMetadata = React.useCallback(async () => {
     changePromptMenuData(false, undefined, '');
 
-    const albumData = album ? await window.api.getAlbumData([album]) : [];
-    const artistData = await window.api.getArtistData(artists);
-    const genreData = genres ? await window.api.getGenresData(genres) : [];
+    const albumData = album
+      ? await window.api.albumsData.getAlbumData([album])
+      : [];
+    const artistData = await window.api.artistsData.getArtistData(artists);
+    const genreData = genres
+      ? await window.api.genresData.getGenresData(genres)
+      : [];
 
     updateSongInfo((prevData) => {
       const artworkPath = selectedArtwork || prevData?.artworkPath;

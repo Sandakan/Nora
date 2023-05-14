@@ -95,7 +95,7 @@ const SongLyricsEditor = (props: Props) => {
           clickHandler={(_, setIsDisabled, setIsPending) => {
             setIsDisabled(true);
             setIsPending(true);
-            window.api
+            window.api.lyrics
               .getSongLyrics(
                 {
                   songTitle,
@@ -146,7 +146,7 @@ const SongLyricsEditor = (props: Props) => {
           clickHandler={(_, setIsDisabled, setIsPending) => {
             setIsDisabled(true);
             setIsPending(true);
-            window.api
+            window.api.lyrics
               .getSongLyrics(
                 {
                   songTitle,

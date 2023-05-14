@@ -10,10 +10,16 @@ type Props = {
   albums: Album[];
   searchInput: string;
   noOfVisibleAlbums?: number;
+  isPredictiveSearchEnabled: boolean;
 };
 
 const AlbumSearchResultsContainer = (props: Props) => {
-  const { albums, searchInput, noOfVisibleAlbums = 4 } = props;
+  const {
+    albums,
+    searchInput,
+    noOfVisibleAlbums = 4,
+    isPredictiveSearchEnabled,
+  } = props;
   const { isMultipleSelectionEnabled, multipleSelectionsData } =
     React.useContext(AppContext);
   const { toggleMultipleSelections, changeCurrentActivePage } =
@@ -108,6 +114,7 @@ const AlbumSearchResultsContainer = (props: Props) => {
                     searchQuery: searchInput,
                     searchFilter: 'Albums' as SearchFilters,
                     searchResults: albums,
+                    isPredictiveSearchEnabled,
                   })
                 }
               />

@@ -32,18 +32,22 @@ const BlacklistedSong = (props: BlacklistedSongProp) => {
         className="blacklisted-song-restore-btn mr-0 rounded-none border-none text-base font-medium hover:!text-font-color-highlight dark:hover:!text-dark-font-color-highlight"
         label="RESTORE"
         clickHandler={() =>
-          window.api.restoreBlacklistedSongs([songId]).then(() =>
-            addNewNotifications([
-              {
-                id: `${title}RestoreSuccess`,
-                delay: 5000,
-                content: (
-                  <span>&apos;{title}&apos; song restored successfully.</span>
-                ),
-                icon: <span className="material-icons-round icon">check</span>,
-              },
-            ])
-          )
+          window.api.audioLibraryControls
+            .restoreBlacklistedSongs([songId])
+            .then(() =>
+              addNewNotifications([
+                {
+                  id: `${title}RestoreSuccess`,
+                  delay: 5000,
+                  content: (
+                    <span>&apos;{title}&apos; song restored successfully.</span>
+                  ),
+                  icon: (
+                    <span className="material-icons-round icon">check</span>
+                  ),
+                },
+              ])
+            )
         }
       />
     </div>

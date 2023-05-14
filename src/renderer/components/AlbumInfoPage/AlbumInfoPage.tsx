@@ -88,7 +88,7 @@ const dropdownOptions: { label: string; value: SongSortTypes }[] = [
   },
 ];
 
-export default () => {
+const AlbumInfoPage = () => {
   const { currentlyActivePage, queue, localStorageData } =
     useContext(AppContext);
   const {
@@ -101,12 +101,12 @@ export default () => {
   const [albumContent, dispatch] = React.useReducer(reducer, {
     albumData: {} as Album,
     songsData: [] as SongData[],
-    sortingOrder: 'aToZ',
+    sortingOrder: 'trackNoAscending' as SongSortTypes,
   });
 
   const fetchAlbumData = React.useCallback(() => {
     if (currentlyActivePage.data.albumId) {
-      window.api
+      window.api.albumsData
         .getAlbumData([currentlyActivePage.data.albumId as string])
         .then((res) => {
           if (res && res.length > 0 && res[0]) {
@@ -123,7 +123,7 @@ export default () => {
       albumContent.albumData.songs &&
       albumContent.albumData.songs.length > 0
     ) {
-      window.api
+      window.api.audioLibraryControls
         .getSongInfo(
           albumContent.albumData.songs.map((song) => song.songId),
           albumContent.sortingOrder
@@ -410,3 +410,5 @@ export default () => {
     </MainContainer>
   );
 };
+
+export default AlbumInfoPage;

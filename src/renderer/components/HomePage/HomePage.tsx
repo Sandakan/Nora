@@ -101,7 +101,7 @@ const HomePage = () => {
   }, [recentlyAddedSongsContainerDiamensions]);
 
   const fetchLatestSongs = React.useCallback(() => {
-    window.api
+    window.api.audioLibraryControls
       .getAllSongs('dateAddedAscending', 1, noOfRecentlyAddedSongCards)
       .then((audioData) => {
         if (!audioData || audioData.data.length === 0)
@@ -117,7 +117,7 @@ const HomePage = () => {
   }, [noOfRecentlyAddedSongCards]);
 
   const fetchRecentlyPlayedSongs = React.useCallback(async () => {
-    const recentSongs = await window.api
+    const recentSongs = await window.api.playlistsData
       .getPlaylistData(['History'])
       .catch((err) => console.error(err));
     if (
@@ -126,7 +126,7 @@ const HomePage = () => {
       Array.isArray(recentSongs[0].songs) &&
       recentSongs[0].songs.length > 0
     )
-      window.api
+      window.api.audioLibraryControls
         .getSongInfo(
           recentSongs[0].songs,
           undefined,
@@ -157,7 +157,7 @@ const HomePage = () => {
       ];
 
       if (artistIds.length > 0)
-        window.api
+        window.api.artistsData
           .getArtistData(artistIds, undefined, noOfRecentandLovedArtists)
           .then(
             (res) =>
@@ -173,11 +173,11 @@ const HomePage = () => {
 
   // ? Most loved songs are fetched after the user have made at least one favorite song from the library.
   const fetchMostLovedSongs = React.useCallback(() => {
-    window.api
+    window.api.playlistsData
       .getPlaylistData(['Favorites'])
       .then((res) => {
         if (Array.isArray(res) && res.length > 0) {
-          return window.api.getSongInfo(
+          return window.api.audioLibraryControls.getSongInfo(
             res[0].songs,
             'allTimeMostListened',
             noOfRecentandLovedSongCards + 5,
@@ -206,7 +206,7 @@ const HomePage = () => {
             .flat()
         ),
       ];
-      window.api
+      window.api.artistsData
         .getArtistData(artistIds, undefined, noOfRecentandLovedArtists)
         .then(
           (res) =>
@@ -308,7 +308,7 @@ const HomePage = () => {
 
   const homePageContextMenus: ContextMenuItem[] = React.useMemo(
     () =>
-      window.api.isInDevelopment
+      window.api.properties.isInDevelopment
         ? [
             {
               label: 'Alert Error',

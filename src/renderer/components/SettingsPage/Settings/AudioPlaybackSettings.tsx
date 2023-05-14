@@ -208,7 +208,7 @@ const AudioPlaybackSettings = () => {
               }
               clickHandler={() => {
                 const state = !userData?.preferences.isMusixmatchLyricsEnabled;
-                window.api
+                window.api.userData
                   .saveUserData('preferences.isMusixmatchLyricsEnabled', state)
                   .then(() =>
                     updateUserData((prevData) => ({
