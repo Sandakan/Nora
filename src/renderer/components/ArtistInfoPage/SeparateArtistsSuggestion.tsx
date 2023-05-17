@@ -10,7 +10,8 @@ type Props = {
   name?: string;
   artistId?: string;
 };
-export const separateArtistsRegex = / and |&|,|;|·| ?\| | ?\/ | ?\\ /gm;
+export const separateArtistsRegex =
+  / and | [Ff](?:ea)?t\. |&|,|;|·| ?\| | ?\/ | ?\\ /gm;
 
 const SeparateArtistsSuggestion = (props: Props) => {
   const { bodyBackgroundImage, currentSongData } = React.useContext(AppContext);

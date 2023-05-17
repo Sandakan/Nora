@@ -575,6 +575,7 @@ declare global {
   interface OnlineArtistArtworks {
     picture_small: string;
     picture_medium: string;
+    picture_xl?: string;
   }
 
   //  ? Storage related types

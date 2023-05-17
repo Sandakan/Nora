@@ -2,7 +2,7 @@
   "name": "nora",
   "productName": "Nora",
   "description": "An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar.",
-  "version": "2.1.0-stable",
+  "version": "2.2.0-stable.20230516",
   "license": "MIT",
   "appPreferences": {
     "removeReactStrictMode": false,
@@ -68,7 +68,7 @@
     "start:main": "cross-env NODE_ENV=development electronmon --inspect=5858 --remote-debugging-port=9223 --trace-warnings -r ts-node/register/transpile-only .",
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
-    "test": "jest --coverage"
+    "test": "jest"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

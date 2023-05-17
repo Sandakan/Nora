@@ -39,6 +39,7 @@ const shortcutData: ShortcutCategory[] = [
       { label: 'Open Mini Player', keys: ['Ctrl', 'N'] },
       { label: 'Go to Lyrics', keys: ['Ctrl', 'L'] },
       { label: 'Go to Current Queue', keys: ['Ctrl', 'Q'] },
+      { label: 'Go to Search', keys: ['Ctrl', 'F'] },
     ],
   },
   {

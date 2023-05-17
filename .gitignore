@@ -8,6 +8,7 @@ public/images/artist_covers
 temp/song_covers/*
 temp/*.json
 out/
+coverage/
 *.m3u
 .env
 thunder-tests

@@ -3,6 +3,8 @@
 import NodeID3 from 'node-id3';
 import path from 'path';
 import { readFile } from 'fs/promises';
+import sharp from 'sharp';
+
 import {
   DEFAULT_FILE_URL,
   getAlbumsData,
@@ -23,6 +25,7 @@ import log from './log';
 import {
   dataUpdateEvent,
   getSongsOutsideLibraryData,
+  sendMessageToRenderer,
   updateSongsOutsideLibraryData,
 } from './main';
 import { generateRandomId } from './utils/randomId';
@@ -37,8 +40,9 @@ import parseLyrics from './utils/parseLyrics';
 import convertParsedLyricsToNodeID3Format from './core/convertParsedLyricsToNodeID3Format';
 import sendSongID3Tags from './core/sendSongId3Tags';
 import { isSongBlacklisted } from './utils/isBlacklisted';
+import isPathAWebURL from './utils/isPathAWebUrl';
 
-const fetchArtworkBufferFromURL = async (url: string) => {
+export const fetchArtworkBufferFromURL = async (url: string) => {
   try {
     const res = await fetch(url);
     if (res.ok && res.body) return Buffer.from(await res.arrayBuffer());
@@ -55,12 +59,19 @@ const fetchArtworkBufferFromURL = async (url: string) => {
   }
 };
 
+export const generateLocalArtworkBuffer = (filePath: string) =>
+  readFile(filePath).catch((err) => {
+    log(
+      `ERROR OCCURRED WHEN TRYING TO GENERATE BUFFER OF THE SONG ARTWORK.`,
+      { err },
+      'ERROR'
+    );
+    return undefined;
+  });
+
 const generateArtworkBuffer = async (artworkPath?: string) => {
   if (artworkPath) {
-    const isArtworkPathAWebURL =
-      /(^$|(http(s)?:\/\/)([\w-]+\.)+[\w-]+([\w- ;,./?%&=]*))/gm.test(
-        artworkPath || ''
-      );
+    const isArtworkPathAWebURL = isPathAWebURL(artworkPath || '');
 
     if (isArtworkPathAWebURL) {
       const onlineArtworkBuffer = await fetchArtworkBufferFromURL(
@@ -74,13 +85,7 @@ const generateArtworkBuffer = async (artworkPath?: string) => {
       );
       return onlineArtworkBuffer;
     }
-    const localArtworkBuffer = await readFile(artworkPath).catch((err) =>
-      log(
-        `ERROR OCCURRED WHEN TRYING TO GENERATE BUFFER OF THE SONG ARTWORK.`,
-        { err },
-        'ERROR'
-      )
-    );
+    const localArtworkBuffer = await generateLocalArtworkBuffer(artworkPath);
     return localArtworkBuffer;
   }
   return undefined;
@@ -422,31 +427,34 @@ const manageArtworkUpdates = async (
   newSongData: SongTags
 ) => {
   const { songId } = prevSongData;
-  const artworkPath = newSongData.artworkPath
+  const newArtworkPath = newSongData.artworkPath
     ? removeDefaultAppProtocolFromFilePath(newSongData.artworkPath)
     : undefined;
 
-  const artworkBuffer = await generateArtworkBuffer(artworkPath);
+  const artworkBuffer = await generateArtworkBuffer(newArtworkPath);
 
   const songPrevArtworkPaths = getSongArtworkPath(
     prevSongData.songId,
-    prevSongData.isArtworkAvailable
+    prevSongData.isArtworkAvailable,
+    false,
+    true
   );
 
-  if (songPrevArtworkPaths.artworkPath !== newSongData.artworkPath) {
+  if (songPrevArtworkPaths.artworkPath !== newArtworkPath) {
     log(`User changed the artwork of the song '${songId}'`);
     // check whether song had an artwork before
     if (prevSongData.isArtworkAvailable) {
       // had an artwork before
       prevSongData.isArtworkAvailable = false;
 
-      await removeArtwork(songPrevArtworkPaths).catch((err) =>
+      await removeArtwork(songPrevArtworkPaths).catch((err) => {
         log(
           `ERROR OCCURRED WHEN TRYING TO REMOVE SONG ARTWORK OF '${songId}'.`,
           { err },
           'ERROR'
-        )
-      );
+        );
+        throw err;
+      });
     }
     if (artworkBuffer) {
       const palette = await generatePalette(artworkBuffer);
@@ -679,120 +687,166 @@ const updateSongId3Tags = async (
     const songId = songIdOrPath;
     for (let x = 0; x < songs.length; x += 1) {
       if (songs[x].songId === songId) {
-        log(`Started the song data updating procees of the song '${songId}'`);
-        let song = songs[x];
+        try {
+          log(`Started the song data updating procees of the song '${songId}'`);
+          let song = songs[x];
 
-        // / / / / / SONG TITLE / / / / / / /
-        song.title = tags.title;
+          // / / / / / SONG TITLE / / / / / / /
+          song.title = tags.title;
 
-        // / / / / / SONG YEAR / / / / / / /
-        song.year = tags.releasedYear;
+          // / / / / / SONG YEAR / / / / / / /
+          song.year = tags.releasedYear;
 
-        // / / / / / SONG ARTWORK / / / / / / /
-        const updatedArtworkData = await manageArtworkUpdates(song, tags);
-        const { artworkBuffer, songPrevArtworkPaths } = updatedArtworkData;
-        song = updatedArtworkData.updatedSongData;
+          // / / / / / SONG ARTWORK / / / / / / /
+          const updatedArtworkData = await manageArtworkUpdates(song, tags);
+          const { artworkBuffer, songPrevArtworkPaths } = updatedArtworkData;
+          song = updatedArtworkData.updatedSongData;
 
-        // / / / / / SONG ARTISTS / / / / / / /
-        const { updatedArtists } = manageArtistDataUpdates(artists, tags, song);
-        artists = updatedArtists;
-
-        // / / / / / SONG ALBUM / / / / / /
-        const updatedAlbumData = manageAlbumDataUpdates(
-          albums,
-          song,
-          tags,
-          songPrevArtworkPaths
-        );
-        albums = updatedAlbumData.updatedAlbums;
-        song = updatedAlbumData.updatedSongData;
-
-        // / / / / / / / SONG GENRES / / / / / / /
-
-        const updatedGenreData = manageGenreDataUpdates(
-          genres,
-          song,
-          tags,
-          songPrevArtworkPaths
-        );
-        genres = updatedGenreData.updatedGenres;
-        song = updatedGenreData.updatedSongData;
-
-        // / / / / / / / SONG LYRICS / / / / / / /
-        const { synchronisedLyrics, unsynchronisedLyrics } =
-          manageLyricsUpdates(tags, song);
-
-        // / / / / / SONG FILE UPDATE PROCESS AND UPDATE FINALIZATION / / / / / /
-        const artworkPaths = getSongArtworkPath(
-          song.songId,
-          song.isArtworkAvailable,
-          true
-        );
-
-        const id3Tags: NodeID3.Tags = {
-          title: tags.title,
-          artist: tags.artists?.map((artist) => artist.name).join(', '),
-          album: tags.album?.title,
-          genre: tags.genres?.map((genre) => genre.name).join(', '),
-          composer: tags.composer,
-          year: tags.releasedYear ? `${tags.releasedYear}` : undefined,
-          image: removeDefaultAppProtocolFromFilePath(artworkPaths.artworkPath),
-          unsynchronisedLyrics,
-          synchronisedLyrics: synchronisedLyrics || [],
-        };
-
-        songs[x] = song;
-        setSongsData(songs);
-        setArtistsData(artists);
-        setAlbumsData(albums);
-        setGenresData(genres);
-
-        await NodeID3.Promise.update(id3Tags, song.path).catch((err) => {
-          log(
-            `FAILED TO UPDATE THE SONG FILE WITH THE NEW UPDATES. `,
-            { err },
-            'ERROR'
+          // / / / / / SONG ARTISTS / / / / / / /
+          const { updatedArtists } = manageArtistDataUpdates(
+            artists,
+            tags,
+            song
           );
-          throw err;
-        });
+          artists = updatedArtists;
 
-        dataUpdateEvent('songs/artworks', [songId]);
-        dataUpdateEvent('songs/updatedSong', [songId]);
-        dataUpdateEvent('artists');
-        dataUpdateEvent('albums');
-        dataUpdateEvent('genres');
+          // / / / / / SONG ALBUM / / / / / /
+          const updatedAlbumData = manageAlbumDataUpdates(
+            albums,
+            song,
+            tags,
+            songPrevArtworkPaths
+          );
+          albums = updatedAlbumData.updatedAlbums;
+          song = updatedAlbumData.updatedSongData;
 
-        result.success = true;
+          // / / / / / / / SONG GENRES / / / / / / /
 
-        if (sendUpdatedData) {
-          const songArtists = artists
-            .filter((z) => song.artists?.some((y) => y.artistId === z.artistId))
-            .map((z) => ({
-              artistId: z.artistId,
-              name: z.name,
-              artworkPath: getArtistArtworkPath(z.artworkName).artworkPath,
-              onlineArtworkPaths: z.onlineArtworkPaths,
-            }));
+          const updatedGenreData = manageGenreDataUpdates(
+            genres,
+            song,
+            tags,
+            songPrevArtworkPaths
+          );
+          genres = updatedGenreData.updatedGenres;
+          song = updatedGenreData.updatedSongData;
 
-          const data: AudioPlayerData = {
-            songId,
-            title: song.title,
-            artists: songArtists,
-            album: song.album,
-            artwork: artworkBuffer
-              ? Buffer.from(artworkBuffer).toString('base64')
-              : undefined,
-            artworkPath: artworkPaths.artworkPath,
-            duration: song.duration,
-            isAFavorite: song.isAFavorite,
-            isBlacklisted: isSongBlacklisted(song.songId, song.path),
-            path: song.path,
-            isKnownSource: true,
+          // / / / / / / / SONG LYRICS / / / / / / /
+          const { synchronisedLyrics, unsynchronisedLyrics } =
+            manageLyricsUpdates(tags, song);
+
+          // / / / / / SONG FILE UPDATE PROCESS AND UPDATE FINALIZATION / / / / / /
+          const artworkPaths = getSongArtworkPath(
+            song.songId,
+            song.isArtworkAvailable,
+            true
+          );
+
+          const parseImgDataForNodeID3 = async (): Promise<
+            | {
+                mime: string;
+                type: {
+                  id: number;
+                  name?: string | undefined;
+                };
+                description: string;
+                imageBuffer: Buffer;
+              }
+            | undefined
+          > => {
+            if (artworkPaths.isDefaultArtwork) return undefined;
+
+            if (artworkBuffer) {
+              const pngBuffer = await sharp(artworkBuffer)
+                .toFormat('png')
+                .toBuffer();
+
+              if (pngBuffer) {
+                return {
+                  type: { id: 1 },
+                  mime: 'image/png',
+                  description: 'artwork',
+                  imageBuffer: pngBuffer,
+                };
+              }
+            }
+            return undefined;
           };
-          result.updatedData = data;
+
+          const id3Tags: NodeID3.Tags = {
+            title: tags.title,
+            artist: tags.artists?.map((artist) => artist.name).join(', '),
+            album: tags.album?.title,
+            genre: tags.genres?.map((genre) => genre.name).join(', '),
+            composer: tags.composer,
+            year: tags.releasedYear ? `${tags.releasedYear}` : undefined,
+            image: await parseImgDataForNodeID3(),
+            unsynchronisedLyrics,
+            synchronisedLyrics: synchronisedLyrics || [],
+          };
+
+          songs[x] = song;
+          setSongsData(songs);
+          setArtistsData(artists);
+          setAlbumsData(albums);
+          setGenresData(genres);
+
+          await NodeID3.Promise.update(id3Tags, song.path).catch((err) => {
+            log(
+              `FAILED TO UPDATE THE SONG FILE WITH THE NEW UPDATES. `,
+              { err },
+              'ERROR'
+            );
+            throw err;
+          });
+
+          dataUpdateEvent('songs/artworks', [songId]);
+          dataUpdateEvent('songs/updatedSong', [songId]);
+          dataUpdateEvent('artists');
+          dataUpdateEvent('albums');
+          dataUpdateEvent('genres');
+
+          result.success = true;
+
+          if (sendUpdatedData) {
+            const songArtists = artists
+              .filter((z) =>
+                song.artists?.some((y) => y.artistId === z.artistId)
+              )
+              .map((z) => ({
+                artistId: z.artistId,
+                name: z.name,
+                artworkPath: getArtistArtworkPath(z.artworkName).artworkPath,
+                onlineArtworkPaths: z.onlineArtworkPaths,
+              }));
+
+            const data: AudioPlayerData = {
+              songId,
+              title: song.title,
+              artists: songArtists,
+              album: song.album,
+              artwork: artworkBuffer
+                ? Buffer.from(artworkBuffer).toString('base64')
+                : undefined,
+              artworkPath: artworkPaths.artworkPath,
+              duration: song.duration,
+              isAFavorite: song.isAFavorite,
+              isBlacklisted: isSongBlacklisted(song.songId, song.path),
+              path: song.path,
+              isKnownSource: true,
+            };
+            result.updatedData = data;
+          }
+          log(`'${id3Tags.title}' song data update successfull.`);
+          return result;
+        } catch (err: any) {
+          if ('message' in err) {
+            result.reason = err.message;
+            sendMessageToRenderer(`Metadata update Failed. ${err.message}`);
+          }
+          log('Song metadata update failed.', { err }, 'ERROR');
+          return result;
         }
-        log(`'${id3Tags.title}' song data update successfull.`);
-        return result;
       }
     }
     return result;

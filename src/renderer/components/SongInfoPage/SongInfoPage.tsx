@@ -16,8 +16,11 @@ import SongsWithFeaturingArtistsSuggestion from './SongsWithFeaturingArtistSugge
 
 const SongInfoPage = () => {
   const { currentlyActivePage, bodyBackgroundImage } = useContext(AppContext);
-  const { changeCurrentActivePage, updateBodyBackgroundImage } =
-    React.useContext(AppUpdateContext);
+  const {
+    changeCurrentActivePage,
+    updateBodyBackgroundImage,
+    updateContextMenuData,
+  } = React.useContext(AppUpdateContext);
 
   const [songInfo, setSongInfo] = React.useState<SongData>();
   const [listeningData, setListeningData] = React.useState<SongListeningData>();
@@ -207,6 +210,26 @@ const SongInfoPage = () => {
               src={songInfo.artworkPaths?.artworkPath}
               alt={`${songInfo.title} cover`}
               className="h-full object-cover"
+              onContextMenu={(e) =>
+                !songInfo.artworkPaths.isDefaultArtwork &&
+                updateContextMenuData(
+                  true,
+                  [
+                    {
+                      label: 'Save Song Artwork',
+                      class: 'edit',
+                      iconName: 'image',
+                      iconClassName: 'material-icons-round-outlined',
+                      handlerFunction: () =>
+                        window.api.songUpdates.saveArtworkToSystem(
+                          songInfo.artworkPaths.artworkPath
+                        ),
+                    },
+                  ],
+                  e.pageX,
+                  e.pageY
+                )
+              }
             />
           </div>
           <div

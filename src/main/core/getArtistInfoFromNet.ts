@@ -33,13 +33,17 @@ const getArtistInfoFromDeezer = async (
       throw new Error(errStr);
     } catch (error) {
       log(
-        `====== ERROR OCCURRED PARSING JSON DATA FETCHED FROM DEEZER API ABOUT ARTISTS ARTWORKS. ======\nERROR : ${error}`
+        `ERROR OCCURRED PARSING JSON DATA FETCHED FROM DEEZER API ABOUT ARTISTS ARTWORKS.`,
+        { error },
+        'ERROR'
       );
       throw new Error(error as string);
     }
   } else {
     log(
-      `====== ERROR OCCURRED WHEN TRYING TO FETCH FROM DEEZER API ABOUT ARTISTS ARTWORKS. APP IS NOT CONNECTED TO THE INTERNET. ======\nERROR : ERR_CONNECTION_FAILED`
+      `ERROR OCCURRED WHEN TRYING TO FETCH FROM DEEZER API ABOUT ARTISTS ARTWORKS. APP IS NOT CONNECTED TO THE INTERNET.`,
+      undefined,
+      'ERROR'
     );
     throw new Error('NO_NETWORK_CONNECTION' as MessageCodes);
   }
@@ -84,7 +88,9 @@ const getArtistInfoFromLastFM = async (
       throw new Error(errStr);
     } catch (error) {
       log(
-        `====== ERROR OCCURRED PARSING FETCHED DATA FROM LAST_FM API ABOUT ARTISTS INFORMATION. ======\nERROR : ${error}`
+        `ERROR OCCURRED PARSING FETCHED DATA FROM LAST_FM API ABOUT ARTISTS INFORMATION.`,
+        { error },
+        'ERROR'
       );
       throw new Error(
         `An error occurred when parsing fetched data. error : ${error}`
@@ -92,7 +98,9 @@ const getArtistInfoFromLastFM = async (
     }
   } else {
     log(
-      `====== ERROR OCCURRED WHEN TRYING TO FETCH FROM DEEZER API ABOUT ARTIST INFORMATION. APP IS NOT CONNECTED TO THE INTERNET. ======\nERROR : ERR_CONNECTION_FAILED`
+      `ERROR OCCURRED WHEN TRYING TO FETCH FROM DEEZER API ABOUT ARTIST INFORMATION. APP IS NOT CONNECTED TO THE INTERNET.`,
+      undefined,
+      'ERROR'
     );
     throw new Error('NO_NETWORK_CONNECTION' as MessageCodes);
   }
@@ -125,6 +133,9 @@ const getArtistArtworksFromNet = async (artist: SavableArtist) => {
       ) as DeezerArtistInfo | null;
 
       if (closestResult) {
+        const picture_xl = getAValidDeezerArtistImage(
+          closestResult?.picture_xl
+        );
         const picture_small = getAValidDeezerArtistImage(
           closestResult?.picture_small ||
             closestResult?.picture_medium ||
@@ -142,6 +153,7 @@ const getArtistArtworksFromNet = async (artist: SavableArtist) => {
           return {
             picture_small,
             picture_medium,
+            picture_xl,
           };
         log(
           `Artist artwork for ${artist.artistId} from deezer is a placeholder image.`,
@@ -178,10 +190,7 @@ const getArtistInfoFromNet = async (
             artistArtworks.picture_medium
           );
           if (!artist.onlineArtworkPaths) {
-            artists[x].onlineArtworkPaths = {
-              picture_medium: artistArtworks.picture_medium,
-              picture_small: artistArtworks.picture_small,
-            };
+            artists[x].onlineArtworkPaths = artistArtworks;
             setArtistsData(artists);
             dataUpdateEvent('artists/artworks');
           }

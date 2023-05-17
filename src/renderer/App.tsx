@@ -2193,6 +2193,7 @@ export default function App() {
         'l',
         'n',
         'q',
+        'f',
         '[',
         ']',
         '\\',
@@ -2240,7 +2241,8 @@ export default function App() {
         if (currentlyActivePage.pageTitle === 'CurrentQueue')
           changeCurrentActivePage('Home');
         else changeCurrentActivePage('CurrentQueue');
-      } else if (e.ctrlKey && e.key === ']') {
+      } else if (e.ctrlKey && e.key === 'f') changeCurrentActivePage('Search');
+      else if (e.ctrlKey && e.key === ']') {
         let updatedPlaybackRate =
           content.localStorage.playback.playbackRate || 1;
 
