@@ -2,7 +2,7 @@
 /* eslint-disable no-await-in-loop */
 import NodeID3 from 'node-id3';
 import path from 'path';
-import { readFile } from 'fs/promises';
+import { readFile, stat } from 'fs/promises';
 import sharp from 'sharp';
 
 import {
@@ -785,12 +785,6 @@ const updateSongId3Tags = async (
             synchronisedLyrics: synchronisedLyrics || [],
           };
 
-          songs[x] = song;
-          setSongsData(songs);
-          setArtistsData(artists);
-          setAlbumsData(albums);
-          setGenresData(genres);
-
           await NodeID3.Promise.update(id3Tags, song.path).catch((err) => {
             log(
               `FAILED TO UPDATE THE SONG FILE WITH THE NEW UPDATES. `,
@@ -799,6 +793,22 @@ const updateSongId3Tags = async (
             );
             throw err;
           });
+
+          const stats = await stat(song.path).catch((err) => {
+            log(
+              `FAILED TO GET SONG STATS AFTER UPDATING THE SONG WITH NEWER METADATA.`,
+              { err },
+              'ERROR'
+            );
+            throw err;
+          });
+          if (stats?.mtime) song.modifiedDate = stats.mtime.getTime();
+
+          songs[x] = song;
+          setSongsData(songs);
+          setArtistsData(artists);
+          setAlbumsData(albums);
+          setGenresData(genres);
 
           dataUpdateEvent('songs/artworks', [songId]);
           dataUpdateEvent('songs/updatedSong', [songId]);

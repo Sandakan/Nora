@@ -102,7 +102,7 @@ const SongControlsAndSeekbarContainer = () => {
     toggleShuffling();
   };
 
-  const currentSongPosition = calculateTime(songPosition);
+  const currentSongPosition = calculateTime(songPos);
   const songDuration =
     localStorageData && localStorageData.preferences.showSongRemainingTime
       ? currentSongData.duration - Math.floor(songPosition) >= 0
