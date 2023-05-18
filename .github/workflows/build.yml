@@ -8,6 +8,11 @@ on:
     branches:
       - master
 
+env:
+  MUSIXMATCH_DEFAULT_USER_TOKEN: ${{ secrets.MUSIXMATCH_DEFAULT_USER_TOKEN }}
+  LAST_FM_API_KEY: ${{ secrets.LAST_FM_API_KEY }}
+  GENIUS_API_KEY: ${{ secrets.GENIUS_API_KEY }}
+
 jobs:
   release:
     runs-on: ${{ matrix.os }}
@@ -26,8 +31,8 @@ jobs:
           node-version: 18
           check-latest: true
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Print environment variables
+        run: node -e "console.log(process.env)"
 
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1
