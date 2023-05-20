@@ -1,10 +1,37 @@
 # Change Log
 
-> ### The latest version, **( v2.1.0-stable )** contains a lot of new features and improvements. As always expect some bugs in the app.
+> ### The latest version, **( v2.2.0-stable )** contains a lot of new features and improvements. As always expect some bugs in the app.
 
 <br>
 
-![Nora v2.1.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.1.0-stable.webp)
+![Nora v2.2.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.2.0-stable.webp)
+
+<br>
+
+- ### **v2.2.0-stable - ( 20<sup>th</sup> of May 2023 )**
+
+  - ### 🎉 New Features and Features
+
+    - Added the feature to save some images that appear in the app.
+    - Added an experimental fix for the bug where other music players like Groove Music don't recognize artworks edited by
+      Nora.
+    - Added a new keyboard shortcut to quickly navigate to Search. Fixes #173.
+
+  - ### 🔨 Fixes and Improvements
+
+    - Improved the artists' splitting algorithm of suggestions.
+    - Fixed a bug where images and lyrics lines are draggable.
+    - Fixed a bug where playlist images aren't positioned correctly when the "artworks made from song covers" feature is
+      enabled.
+    - Fixed a bug in which the app doesn't inform the user if the metadata update process fails.
+    - Improved the app version matching algorithm and fixed a bug where the app informs the user about a new update even
+      though app the is in the latest version.
+    - Fixed a test contrast issue on the Artist Info page. Fixes #174.
+    - In Search page, the "Most Relevant" list (side-scroll) doesn't prevent you from scrolling down when hovering over them.
+
+  - ### 🐜 Known Issues and Bugs
+    - Sometimes updating song artwork may need an app restart to show on the app #162.
+    - The app may crash in mini-player mode when trying to use window snap feature #163.
 
 <br>
 

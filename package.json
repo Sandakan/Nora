@@ -2,7 +2,7 @@
   "name": "nora",
   "productName": "Nora",
   "description": "An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar.",
-  "version": "2.2.0-stable.20230517",
+  "version": "2.2.0-stable",
   "license": "MIT",
   "appPreferences": {
     "removeReactStrictMode": false,
@@ -119,24 +119,24 @@
     "@types/sharp": "^0.32.0",
     "@types/terser-webpack-plugin": "^5.2.0",
     "@types/webpack-bundle-analyzer": "^4.6.0",
-    "@typescript-eslint/eslint-plugin": "^5.59.5",
-    "@typescript-eslint/parser": "^5.59.5",
+    "@typescript-eslint/eslint-plugin": "^5.59.6",
+    "@typescript-eslint/parser": "^5.59.6",
     "autoprefixer": "^10.4.14",
     "browserslist-config-erb": "^0.0.3",
     "chalk": "^4.1.2",
     "concurrently": "^8.0.1",
     "cross-env": "^7.0.3",
-    "css-loader": "^6.7.3",
+    "css-loader": "^6.7.4",
     "css-minimizer-webpack-plugin": "^5.0.0",
     "detect-port": "^1.5.1",
     "dotenv": "^16.0.3",
     "dotenv-webpack": "^8.0.1",
-    "electron": "^24.3.0",
+    "electron": "^24.3.1",
     "electron-builder": "^23.6.0",
     "electron-debug": "^3.2.0",
     "electron-devtools-installer": "^3.2.0",
     "electronmon": "^2.0.2",
-    "eslint": "^8.40.0",
+    "eslint": "^8.41.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-erb": "^4.0.6",
     "eslint-import-resolver-typescript": "^3.5.5",
@@ -155,22 +155,22 @@
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.5.0",
     "jest-environment-jsdom": "^29.5.0",
-    "mini-css-extract-plugin": "^2.7.5",
+    "mini-css-extract-plugin": "^2.7.6",
     "postcss": "^8.4.23",
     "postcss-loader": "^7.3.0",
     "prettier": "^2.8.8",
-    "prettier-plugin-tailwindcss": "^0.2.8",
+    "prettier-plugin-tailwindcss": "^0.3.0",
     "react-refresh": "^0.14.0",
     "rimraf": "^3.0.2",
-    "style-loader": "^3.3.2",
+    "style-loader": "^3.3.3",
     "tailwindcss": "^3.3.2",
-    "terser-webpack-plugin": "^5.3.8",
+    "terser-webpack-plugin": "^5.3.9",
     "ts-jest": "^29.1.0",
     "ts-loader": "^9.4.2",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4",
     "url-loader": "^4.1.1",
-    "webpack": "^5.82.1",
+    "webpack": "^5.83.1",
     "webpack-bundle-analyzer": "^4.8.0",
     "webpack-cli": "^5.1.1",
     "webpack-dev-server": "^4.15.0",
@@ -198,7 +198,8 @@
   "build": {
     "productName": "Nora",
     "copyright": "Copyright © 2023 Sandakan Nipunajith",
-    "appId": "com.SandakanNipunajith.Nora",
+    "appId": "com.sandakannipunajith.nora",
+    "artifactName": "${productName} Setup ${version}-${os}-${arch}.${ext}",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [
@@ -210,9 +211,58 @@
       "name": "nora-protocol",
       "schemes": [
         "nora"
-      ],
-      "role": "Viewer"
+      ]
     },
+    "fileAssociations": [
+      {
+        "mimeType": "audio/mpeg",
+        "ext": [
+          "mp3"
+        ],
+        "role": "Editor",
+        "icon": "./assets/installer_assets/file_associated_icons/mp3.ico"
+      },
+      {
+        "mimeType": "audio/wav",
+        "ext": [
+          "wav"
+        ],
+        "role": "Editor",
+        "icon": "./assets/installer_assets/file_associated_icons/wav.ico"
+      },
+      {
+        "mimeType": "audio/ogg",
+        "ext": [
+          "ogg"
+        ],
+        "role": "Editor",
+        "icon": "./assets/installer_assets/file_associated_icons/ogg.ico"
+      },
+      {
+        "mimeType": "audio/aac",
+        "ext": [
+          "aac"
+        ],
+        "role": "Editor",
+        "icon": "./assets/installer_assets/file_associated_icons/aac.ico"
+      },
+      {
+        "mimeType": "audio/x-m4r",
+        "ext": [
+          "m4r"
+        ],
+        "role": "Editor",
+        "icon": "./assets/installer_assets/file_associated_icons/m4r.ico"
+      },
+      {
+        "mimeType": "audio/flac",
+        "ext": [
+          "flac"
+        ],
+        "role": "Editor",
+        "icon": "./assets/installer_assets/file_associated_icons/flac.ico"
+      }
+    ],
     "nsis": {
       "perMachine": false,
       "oneClick": false,
@@ -260,50 +310,6 @@
     "win": {
       "target": [
         "nsis"
-      ],
-      "fileAssociations": [
-        {
-          "ext": [
-            "mp3"
-          ],
-          "role": "Editor",
-          "icon": "./assets/installer_assets/file_associated_icons/mp3.ico"
-        },
-        {
-          "ext": [
-            "wav"
-          ],
-          "role": "Editor",
-          "icon": "./assets/installer_assets/file_associated_icons/wav.ico"
-        },
-        {
-          "ext": [
-            "ogg"
-          ],
-          "role": "Editor",
-          "icon": "./assets/installer_assets/file_associated_icons/ogg.ico"
-        },
-        {
-          "ext": [
-            "aac"
-          ],
-          "role": "Editor",
-          "icon": "./assets/installer_assets/file_associated_icons/aac.ico"
-        },
-        {
-          "ext": [
-            "m4r"
-          ],
-          "role": "Editor",
-          "icon": "./assets/installer_assets/file_associated_icons/m4r.ico"
-        },
-        {
-          "ext": [
-            "flac"
-          ],
-          "role": "Editor",
-          "icon": "./assets/installer_assets/file_associated_icons/flac.ico"
-        }
       ]
     },
     "linux": {
@@ -311,7 +317,8 @@
         "AppImage",
         "deb"
       ],
-      "category": "Audio"
+      "category": "AudioVideo",
+      "synopsis": "An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar."
     },
     "directories": {
       "app": "release/app",

@@ -20,7 +20,28 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
 
   const MostRelevantResults = [];
 
+  const [isOverScrolling, setIsOverScrolling] = React.useState(true);
   const mostRelevantResultContainerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const { albums, artists, genres, playlists, songs } = searchResults;
+    const totalResults =
+      albums.length +
+      artists.length +
+      genres.length +
+      playlists.length +
+      songs.length;
+
+    if (totalResults > 0 && mostRelevantResultContainerRef.current) {
+      const { scrollWidth, clientWidth } =
+        mostRelevantResultContainerRef.current;
+
+      console.log({ scrollWidth, clientWidth });
+      const isScrollable = scrollWidth > clientWidth;
+
+      setIsOverScrolling(isScrollable);
+    }
+  }, [searchResults]);
 
   if (searchResults.songs.length > 0) {
     const firstResult = searchResults.songs[0];
@@ -357,11 +378,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
         </div>
         <div
           className={`results-container overflow-x-auto ${
-            mostRelevantResultContainerRef.current &&
-            mostRelevantResultContainerRef.current.scrollWidth >
-              mostRelevantResultContainerRef.current.clientWidth
-              ? 'overscroll-contain'
-              : 'overscroll-auto'
+            isOverScrolling ? 'overscroll-contain' : 'overscroll-auto'
           } transition-[transform,opacity] ${
             MostRelevantResults.length > 0
               ? 'visible flex translate-y-0 pb-4 opacity-100 [&>div.active]:flex [&>div]:hidden'
