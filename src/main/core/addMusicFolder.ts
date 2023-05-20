@@ -8,7 +8,7 @@ import sortSongs from '../utils/sortSongs';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import { generatePalettes } from '../other/generatePalette';
 
-const removeAlreadyAvailableStrucutres = (structures: FolderStructure[]) => {
+const removeAlreadyAvailableStructures = (structures: FolderStructure[]) => {
   const parents: FolderStructure[] = [];
   for (const structure of structures) {
     const doesParentStructureExist = doesFolderExistInFolderStructure(
@@ -17,13 +17,13 @@ const removeAlreadyAvailableStrucutres = (structures: FolderStructure[]) => {
 
     if (doesParentStructureExist) {
       if (structure.subFolders.length > 0) {
-        const subFolders = removeAlreadyAvailableStrucutres(
+        const subFolders = removeAlreadyAvailableStructures(
           structure.subFolders
         );
         parents.push(...subFolders);
       }
     } else {
-      const subFolders = removeAlreadyAvailableStrucutres(structure.subFolders);
+      const subFolders = removeAlreadyAvailableStructures(structure.subFolders);
       parents.push({ ...structure, subFolders });
     }
   }
@@ -41,7 +41,7 @@ const addMusicFromFolderStructures = async (
     folderPaths: structures.map((x) => x.path),
   });
 
-  const eligableStructures = removeAlreadyAvailableStrucutres(structures);
+  const eligableStructures = removeAlreadyAvailableStructures(structures);
   const songPaths = await parseFolderStructuresForSongPaths(eligableStructures);
 
   console.time('parseTime');
@@ -83,7 +83,7 @@ const addMusicFromFolderStructures = async (
   if (resultsSortType) songs = sortSongs(songs, resultsSortType);
 
   log(
-    `Successfully parsed ${songs.length} songs from the selcted music folders.`,
+    `Successfully parsed ${songs.length} songs from the selected music folders.`,
     {
       folderPaths: eligableStructures.map((x) => x.path),
       timeElapsed: console.timeEnd('parseTime'),

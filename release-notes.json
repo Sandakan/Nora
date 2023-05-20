@@ -1,15 +1,68 @@
 {
   "latestVersion": {
-    "version": "2.1.0-stable",
+    "version": "2.2.0-stable",
     "phase": "stable",
-    "releaseDate": "2023 May 14",
-    "artwork": "/assets/other/release artworks/whats-new-v2.1.0-stable.webp",
+    "releaseDate": "2023-05-20T06:56:34.692Z",
+    "artwork": "/assets/other/release artworks/whats-new-v2.2.0-stable.webp",
     "importantNotes": [
-      "This update includes fixes for app responsiveness no different screen sizes.",
-      "Welcome to a new design for Song Cards in Home page."
+      "This update fixes the new update notification bug.",
+      "From this update onwards, I will add Linux installers for Nora. Keep in mind that even though Nora is stable on Windows, it may not be stable on Linux. Since I won't be able to test Linux builds on my machine, I will be relying on user feedback for Linux build improvements."
     ]
   },
   "versions": [
+    {
+      "version": "2.2.0-stable",
+      "artwork": "/assets/other/release artworks/whats-new-v2.2.0-stable.webp",
+      "releaseDate": "2023-05-20T06:56:34.692Z",
+      "importantNotes": [
+        "This update fixes the new update notification bug.",
+        "From this update onwards, I will add Linux installers for Nora. Keep in mind that even though Nora is stable on Windows, it may not be stable on Linux. Since I won't be able to test Linux builds on my machine, I will be relying on user feedback for Linux build improvements."
+      ],
+      "notes": {
+        "new": [
+          {
+            "note": "Added the feature to save some images that appear in the app."
+          },
+          {
+            "note": "Added an experimental fix for the bug where other music players like Groove Music don't recognize artworks edited by Nora."
+          },
+          {
+            "note": "Added a new keyboard shortcut to quickly navigate to Search. Fixes #173."
+          }
+        ],
+        "fixed": [
+          {
+            "note": "Improved the artists' splitting algorithm of suggestions."
+          },
+          {
+            "note": "Fixed a bug where images and lyrics lines are draggable."
+          },
+          {
+            "note": "Fixed a bug where playlist images aren't positioned correctly when the 'artworks made from song covers' feature is enabled."
+          },
+          {
+            "note": "Fixed a bug in which the app doesn't inform the user if the metadata update process fails."
+          },
+          {
+            "note": "Improved the app version matching algorithm and fixed a bug where the app informs the user about a new update even though app the is in the latest version."
+          },
+          {
+            "note": "Fixed a test contrast issue on the Artist Info page. Fixes #174."
+          },
+          {
+            "note": "In Search page, the 'Most Relevant' list (side-scroll) doesn't prevent you from scrolling down when hovering over them."
+          }
+        ],
+        "knownIssues": [
+          {
+            "note": "Sometimes updating song artwork may need an app restart to show on the app."
+          },
+          {
+            "note": "The app may crash in mini-player mode when trying to use window snap feature."
+          }
+        ]
+      }
+    },
     {
       "version": "2.1.0-stable",
       "artwork": "/assets/other/release artworks/whats-new-v2.1.0-stable.webp",

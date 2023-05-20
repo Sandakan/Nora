@@ -69,6 +69,7 @@ const ArtistInfoPage = () => {
     addNewNotifications,
     updateBodyBackgroundImage,
     updateCurrentlyActivePageData,
+    updateContextMenuData,
   } = React.useContext(AppUpdateContext);
 
   const [artistData, setArtistData] = React.useState<ArtistInfo>();
@@ -368,6 +369,31 @@ const ArtistInfoPage = () => {
             fallbackSrc={artistData?.artworkPaths?.artworkPath}
             className="!aspect-square max-h-60 max-w-[15rem] rounded-full object-cover"
             alt="Album Cover"
+            onContextMenu={(e) =>
+              (artistData?.onlineArtworkPaths?.picture_xl ||
+                artistData?.onlineArtworkPaths?.picture_medium) &&
+              updateContextMenuData(
+                true,
+                [
+                  {
+                    label: 'Save Artwork',
+                    class: 'save',
+                    iconName: 'image',
+                    iconClassName: 'material-icons-round-outlined',
+                    handlerFunction: () => {
+                      const artworkPath =
+                        artistData?.onlineArtworkPaths?.picture_xl ||
+                        artistData?.onlineArtworkPaths?.picture_medium;
+
+                      if (artworkPath)
+                        window.api.songUpdates.saveArtworkToSystem(artworkPath);
+                    },
+                  },
+                ],
+                e.pageX,
+                e.pageY
+              )
+            }
           />
           <Button
             className="absolute bottom-4 right-2 !m-0 flex rounded-full !border-0 bg-background-color-1 !p-3 shadow-xl outline-1 -outline-offset-[6px] focus-visible:!outline dark:bg-dark-background-color-2"
@@ -413,7 +439,7 @@ const ArtistInfoPage = () => {
           } [&>*]:z-10`}
         >
           <div
-            className="artist-name mb-2 text-5xl text-background-color-3 dark:text-background-color-3"
+            className="artist-name mb-2 text-5xl text-font-color-highlight dark:text-dark-font-color-highlight"
             style={
               fontColor
                 ? {

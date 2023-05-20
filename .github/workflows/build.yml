@@ -1,0 +1,43 @@
+name: Build/release
+
+on:
+  push:
+    branches: ['master']
+
+env:
+  MUSIXMATCH_DEFAULT_USER_TOKEN: ${{ secrets.MUSIXMATCH_DEFAULT_USER_TOKEN }}
+  LAST_FM_API_KEY: ${{ secrets.LAST_FM_API_KEY }}
+  GENIUS_API_KEY: ${{ secrets.GENIUS_API_KEY }}
+
+jobs:
+  release:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          check-latest: true
+
+      - name: Print environment variables
+        run: node -e "console.log(process.env)"
+
+      - name: Build/release Electron app
+        uses: samuelmeuli/action-electron-builder@v1
+        with:
+          # GitHub token, automatically provided to the action
+          # (No need to define this secret in the repo settings)
+          github_token: ${{ secrets.github_token }}
+
+          # If the commit is tagged with a version (e.g. "v1.0.0"),
+          # release the app after building
+          # release: ${{ startsWith(github.ref, 'refs/heads/master') }}
+          release: ${{ startsWith(github.ref, 'refs/tags/v') }}

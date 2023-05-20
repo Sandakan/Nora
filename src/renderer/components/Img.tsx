@@ -22,6 +22,7 @@ type Props = {
   showImgPropsOnTooltip?: boolean;
   tabIndex?: number;
   showAltAsTooltipLabel?: boolean;
+  draggable?: boolean;
 };
 
 /* <picture
@@ -83,6 +84,7 @@ const Img = (props: Props) => {
     showImgPropsOnTooltip = false,
     tabIndex = -1,
     showAltAsTooltipLabel = false,
+    draggable = false,
   } = props;
 
   const imgRef = React.useRef<HTMLImageElement>(null);
@@ -95,6 +97,7 @@ const Img = (props: Props) => {
       alt={alt}
       ref={imgRef}
       className={`relative outline-1 outline-offset-4 focus-visible:!outline ${className}`}
+      draggable={draggable}
       onError={(e) => {
         if (errorCountRef.current < 3) {
           errorCountRef.current += 1;

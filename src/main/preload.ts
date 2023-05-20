@@ -5,6 +5,7 @@ const properties = {
   isInDevelopment:
     process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true',
   commandLineArgs: process.argv,
+  DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
 };
 
 const windowControls = {
@@ -284,7 +285,9 @@ const songUpdates = {
   getImgFileLocation: (): Promise<string> =>
     ipcRenderer.invoke('app/getImgFileLocation'),
   revealSongInFileExplorer: (songId: string): void =>
-    ipcRenderer.send('revealSongInFileExplorer', songId),
+    ipcRenderer.send('app/revealSongInFileExplorer', songId),
+  saveArtworkToSystem: (songId: string): void =>
+    ipcRenderer.send('app/saveArtworkToSystem', songId),
 };
 
 // $ FETCH SONG DATA FROM INTERNET
@@ -348,7 +351,7 @@ const folderData = {
       isBlacklistFolder
     ),
   revealFolderInFileExplorer: (folderPath: string): void =>
-    ipcRenderer.send('revealFolderInFileExplorer', folderPath),
+    ipcRenderer.send('app/revealFolderInFileExplorer', folderPath),
   getFolderStructures: (): Promise<FolderStructure[]> =>
     ipcRenderer.invoke('app/getFolderStructures'),
   removeAMusicFolder: (absolutePath: string): Promise<void> =>
