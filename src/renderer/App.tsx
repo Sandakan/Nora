@@ -9,7 +9,9 @@ import {
   AppUpdateContextType,
 } from './contexts/AppUpdateContext';
 import { SongPositionContext } from './contexts/SongPositionContext';
-import packageFile from '../../package.json';
+
+import useNetworkConnectivity from './hooks/useNetworkConnectivity';
+
 import TitleBar from './components/TitleBar/TitleBar';
 import SongControlsContainer from './components/SongsControlsContainer/SongControlsContainer';
 import BodyAndSideBarContainer from './components/BodyAndSidebarContainer';
@@ -21,12 +23,14 @@ import Button from './components/Button';
 import ReleaseNotesPrompt from './components/ReleaseNotesPrompt/ReleaseNotesPrompt';
 import Img from './components/Img';
 import Preloader from './components/Preloader/Preloader';
+
 import isLatestVersion from './utils/isLatestVersion';
 import roundTo from './utils/roundTo';
 import storage, { LOCAL_STORAGE_DEFAULT_TEMPLATE } from './utils/localStorage';
-import useNetworkConnectivity from './hooks/useNetworkConnectivity';
 import { isDataChanged } from './utils/hasDataChanged';
 import log from './utils/log';
+
+import packageFile from '../../package.json';
 
 interface AppReducer {
   userData: UserData;

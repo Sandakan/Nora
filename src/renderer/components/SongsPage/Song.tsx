@@ -153,7 +153,7 @@ const Song = React.forwardRef(
     }, [multipleSelectionsData, songId]);
 
     const songArtists = React.useMemo(() => {
-      if (Array.isArray(artists)) {
+      if (Array.isArray(artists) && artists.length > 0) {
         return artists
           .map((artist, i) => {
             const arr = [
@@ -175,7 +175,7 @@ const Song = React.forwardRef(
           })
           .flat();
       }
-      return <span>Unknown Artist</span>;
+      return <span className="text-xs font-normal">Unknown Artist</span>;
     }, [artists, currentSongData.songId, isAMultipleSelection, songId]);
 
     const goToSongInfoPage = React.useCallback(() => {

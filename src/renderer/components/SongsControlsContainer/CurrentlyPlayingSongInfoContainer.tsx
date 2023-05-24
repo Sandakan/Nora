@@ -124,20 +124,22 @@ const CurrentlyPlayingSongInfoContainer = () => {
   );
 
   const songArtists = React.useMemo(() => {
-    if (currentSongData.songId && Array.isArray(currentSongData.artists)) {
-      if (currentSongData.artists.length > 0) {
-        return currentSongData.artists
+    const { songId, artists, isKnownSource } = currentSongData;
+
+    if (songId && Array.isArray(artists)) {
+      if (artists.length > 0) {
+        return artists
           .map((artist, i, artistArr) => {
             const arr = [
               <SongArtist
                 key={artist.artistId}
                 artistId={artist.artistId}
                 name={artist.name}
-                isFromKnownSource={currentSongData.isKnownSource}
+                isFromKnownSource={isKnownSource}
               />,
             ];
 
-            if ((currentSongData.artists?.length ?? 1) - 1 !== i)
+            if ((artists.length ?? 1) - 1 !== i)
               arr.push(
                 <span
                   key={`${artistArr[i].name},${artistArr[i + 1].name}`}
@@ -151,14 +153,10 @@ const CurrentlyPlayingSongInfoContainer = () => {
           })
           .flat();
       }
-      return <span>Unknown Artist</span>;
+      return <span className="text-xs font-normal">Unknown Artist</span>;
     }
     return '';
-  }, [
-    currentSongData.artists,
-    currentSongData.songId,
-    currentSongData.isKnownSource,
-  ]);
+  }, [currentSongData]);
 
   const contextMenuCurrentSongData =
     React.useMemo((): ContextMenuAdditionalData => {

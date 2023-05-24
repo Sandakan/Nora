@@ -121,7 +121,7 @@ const AudioPlaybackSettings = () => {
           />
         </li>
 
-        <li className="playback-rate mb-6">
+        <li className="playback-rate mb-6" id="playbackRateInterval">
           <div className="description">
             Change the default playback rate of the player.
           </div>

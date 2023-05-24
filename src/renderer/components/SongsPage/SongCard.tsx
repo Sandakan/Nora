@@ -487,7 +487,7 @@ const SongCard = (props: SongCardProp) => {
   ]);
 
   const songArtistComponents = React.useMemo(() => {
-    if (Array.isArray(artists)) {
+    if (Array.isArray(artists) && artists.length > 0) {
       return artists
         .map((artist, i) => {
           const arr = [
@@ -513,7 +513,7 @@ const SongCard = (props: SongCardProp) => {
         })
         .flat();
     }
-    return <span>Unknown Artist</span>;
+    return <span className="text-xs font-normal">Unknown Artist</span>;
   }, [artists]);
 
   return (
@@ -568,7 +568,7 @@ const SongCard = (props: SongCardProp) => {
           src={artworkPath}
           loading="eager"
           alt="Song cover"
-          className="h-full w-full object-cover object-center brightness-90 dark:brightness-90"
+          className="h-full w-full object-cover object-center dark:brightness-90"
         />
       </div>
       <div

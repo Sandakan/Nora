@@ -230,7 +230,7 @@ const AlbumInfoPage = () => {
 
   const albumArtistComponents = React.useMemo(() => {
     const { artists } = albumContent.albumData;
-    if (artists)
+    if (Array.isArray(artists) && artists.length > 0)
       return artists
         .map((artist, i) => {
           const arr = [
@@ -248,7 +248,7 @@ const AlbumInfoPage = () => {
           return arr;
         })
         .flat();
-    return <span>Unknown Artist</span>;
+    return <span className="text-xs font-normal">Unknown Artist</span>;
   }, [albumContent.albumData]);
 
   const calculateTotalTime = React.useCallback(() => {
