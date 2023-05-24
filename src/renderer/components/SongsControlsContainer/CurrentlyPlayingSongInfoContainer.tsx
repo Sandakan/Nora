@@ -232,6 +232,16 @@ const CurrentlyPlayingSongInfoContainer = () => {
           }),
       },
       {
+        label: 'Save Song Artwork',
+        class: 'edit',
+        iconName: 'image',
+        iconClassName: 'material-icons-round-outlined',
+        handlerFunction: () =>
+          artworkPath &&
+          window.api.songUpdates.saveArtworkToSystem(artworkPath),
+        isDisabled: currentSongData.artworkPath === undefined,
+      },
+      {
         label: 'Hr',
         isContextMenuItemSeperator: true,
         handlerFunction: () => true,

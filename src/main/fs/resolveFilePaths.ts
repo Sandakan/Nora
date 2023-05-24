@@ -29,24 +29,23 @@ export const resetArtworkCache = (type: keyof typeof timestamps | 'all') => {
 export const getSongArtworkPath = (
   id: string,
   isArtworkAvailable = true,
-  resetCache = false
+  resetCache = false,
+  sendRealPath = false
 ): ArtworkPaths => {
   if (resetCache) resetArtworkCache('songs');
 
-  const timestampStr = `?ts=${timestamps.songs}`;
+  const FILE_URL = sendRealPath ? '' : DEFAULT_FILE_URL;
+  const timestampStr = sendRealPath ? '' : `?ts=${timestamps.songs}`;
 
   if (isArtworkAvailable) {
     return {
       isDefaultArtwork: !isArtworkAvailable,
       artworkPath:
-        path.join(
-          DEFAULT_FILE_URL,
-          DEFAULT_ARTWORK_SAVE_LOCATION,
-          `${id}.webp`
-        ) + timestampStr,
+        path.join(FILE_URL, DEFAULT_ARTWORK_SAVE_LOCATION, `${id}.webp`) +
+        timestampStr,
       optimizedArtworkPath:
         path.join(
-          DEFAULT_FILE_URL,
+          FILE_URL,
           DEFAULT_ARTWORK_SAVE_LOCATION,
           `${id}-optimized.webp`
         ) + timestampStr,
@@ -54,7 +53,7 @@ export const getSongArtworkPath = (
   }
   const defaultPath =
     path.join(
-      DEFAULT_FILE_URL,
+      FILE_URL,
       getAssetPath('images', 'webp', 'song_cover_default.webp')
     ) + timestampStr;
   return {

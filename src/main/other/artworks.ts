@@ -121,6 +121,59 @@ const manageArtworkRemovalErrors = (err: Error) => {
   throw err;
 };
 
+// export const removeArtwork = async (
+//   artworkPaths: ArtworkPaths,
+//   type: QueueTypes = 'songs'
+// ) => {
+//   let retryCount = 0;
+//   let timeOutId: NodeJS.Timeout;
+
+//   const tryToRemoveArtwork = async (artworks: ArtworkPaths) => {
+//     if (timeOutId) clearTimeout(timeOutId);
+//     try {
+//       await fs
+//         .unlink(removeDefaultAppProtocolFromFilePath(artworks.artworkPath))
+//         .catch(manageArtworkRemovalErrors);
+//       await fs
+//         .unlink(
+//           removeDefaultAppProtocolFromFilePath(artworks.optimizedArtworkPath)
+//         )
+//         .catch(manageArtworkRemovalErrors);
+//     } catch (error: any) {
+//       if ('code' in error && error.code === 'EBUSY') {
+//         if (retryCount < 5) {
+//           retryCount += 1;
+//           timeOutId = setTimeout(() => tryToRemoveArtwork(artworkPaths), 300);
+//           log(
+//             `Failed to remove artwork. Starting retry no ${retryCount} in 3 seconds`,
+//             undefined,
+//             'WARN',
+//             { sendToRenderer: true }
+//           );
+//         } else {
+//           log(
+//             `Failed to remove artwork. Failed ${retryCount} out of 5 efforts`,
+//             undefined,
+//             'WARN'
+//           );
+//           throw error;
+//         }
+//       } else throw error;
+//     }
+//   };
+
+//   try {
+//     await tryToRemoveArtwork(artworkPaths);
+//   } catch (error) {
+//     log(
+//       `Error occurred when removing a ${type} artwork.`,
+//       { error, artworkPaths },
+//       'ERROR'
+//     );
+//     throw new Error(`Error occurred when removing a ${type} artwork.`);
+//   }
+// };
+
 export const removeArtwork = async (
   artworkPaths: ArtworkPaths,
   type: QueueTypes = 'songs'

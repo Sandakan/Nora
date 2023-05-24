@@ -5,16 +5,45 @@
 const semVerRegex =
   /^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
 
-export const getVersionInfoFromString = (versionString: string) => {
+interface VersionInfo {
+  major: string;
+  minor: string;
+  patch: string;
+}
+
+interface ExtendedVersionInfo extends VersionInfo {
+  preRelease?: string;
+  releasePhase?: string;
+}
+
+export const getVersionInfoFromString = (
+  versionString: string
+): ExtendedVersionInfo | undefined => {
   const versionData = versionString.match(semVerRegex);
 
   if (versionData) {
     const [, major, minor, patch, preRelease] = versionData;
-    const releasePhase = preRelease.replace(/[^a-zA-Z]/gi, '');
+    const releasePhase = preRelease?.replace(/[^a-zA-Z]/gi, '');
 
     return { major, minor, patch, preRelease, releasePhase };
   }
   return undefined;
+};
+
+const compareMajorMinorAndPatch = (
+  Lv: ExtendedVersionInfo,
+  Cv: ExtendedVersionInfo
+) => {
+  if (Lv.major > Cv.major) return false;
+  if (Lv.major < Cv.major) return true;
+
+  if (Lv.minor > Cv.minor) return false;
+  if (Lv.minor < Cv.minor) return true;
+
+  if (Lv.patch > Cv.patch) return false;
+  if (Lv.patch < Cv.patch) return true;
+
+  return true;
 };
 
 const isLatestVersion = (
@@ -27,18 +56,8 @@ const isLatestVersion = (
   // Lv - Latest Version
   // Cv - Current Version
   if (latestVersion && currentVersion) {
-    const {
-      major: LvMajor,
-      minor: LvMinor,
-      patch: LvPatch,
-      preRelease: LvPreRelease,
-    } = latestVersion;
-    const {
-      major: CvMajor,
-      minor: CvMinor,
-      patch: CvPatch,
-      preRelease: CvPreRelease,
-    } = currentVersion;
+    const { preRelease: LvPreRelease } = latestVersion;
+    const { preRelease: CvPreRelease } = currentVersion;
 
     console.log(
       'latest version',
@@ -47,23 +66,14 @@ const isLatestVersion = (
       currentVersion
     );
 
-    if (LvMajor > CvMajor) return false;
-    if (LvMajor < CvMajor) return true;
-
-    if (LvMinor > CvMinor) return false;
-    if (LvMinor < CvMinor) return true;
-
-    if (LvPatch > CvPatch) return false;
-    if (LvPatch < CvPatch) return true;
+    if (LvPreRelease === CvPreRelease)
+      return compareMajorMinorAndPatch(latestVersion, currentVersion);
 
     if (LvPreRelease && !CvPreRelease) return true;
     if (!LvPreRelease && CvPreRelease) return false;
-    if (LvPreRelease && CvPreRelease && LvPreRelease !== CvPreRelease) {
-      const res = currentVersionString.localeCompare(latestVersionString);
-
-      if (res === 1) return false;
+    if (LvPreRelease && CvPreRelease && LvPreRelease !== CvPreRelease)
       return true;
-    }
+    return true;
   }
   return false;
 };

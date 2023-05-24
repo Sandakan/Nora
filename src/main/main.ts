@@ -16,6 +16,7 @@ import {
   nativeImage,
   OpenDialogOptions,
   powerMonitor,
+  SaveDialogOptions,
 } from 'electron';
 import path from 'path';
 import os from 'os';
@@ -92,6 +93,7 @@ import addArtworkToAPlaylist from './core/addArtworkToAPlaylist';
 import getArtworksForMultipleArtworksCover from './core/getArtworksForMultipleArtworksCover';
 import { resolveSeparateArtists } from './core/resolveSeparateArtists';
 import resolveFeaturingArtists from './core/resolveFeaturingArtists';
+import saveArtworkToSystem from './core/saveArtworkToSystem';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -121,6 +123,11 @@ const DEFAULT_OPEN_DIALOG_OPTIONS: OpenDialogOptions = {
     },
   ],
   properties: ['openDirectory', 'multiSelections'],
+};
+const DEFAULT_SAVE_DIALOG_OPTIONS: SaveDialogOptions = {
+  title: 'Select the destination to Save',
+  buttonLabel: 'Save',
+  properties: ['createDirectory', 'showOverwriteConfirmation'],
 };
 
 // / / / / / / VARIABLES / / / / / / /
@@ -632,12 +639,16 @@ app
         shell.openPath(path.join(app.getPath('userData'), 'logs.txt'))
       );
 
-      ipcMain.on('revealSongInFileExplorer', (_, songId: string) =>
+      ipcMain.on('app/revealSongInFileExplorer', (_, songId: string) =>
         revealSongInFileExplorer(songId)
       );
 
-      ipcMain.on('revealFolderInFileExplorer', (_, folderPath: string) =>
+      ipcMain.on('app/revealFolderInFileExplorer', (_, folderPath: string) =>
         shell.showItemInFolder(folderPath)
+      );
+
+      ipcMain.on('app/saveArtworkToSystem', (_, songId: string) =>
+        saveArtworkToSystem(songId)
       );
 
       ipcMain.on('app/openInBrowser', (_, url: string) =>
@@ -883,6 +894,21 @@ export async function showOpenDialog(
     throw new Error('PROMPT_CLOSED_BEFORE_INPUT' as MessageCodes);
   }
   return filePaths;
+}
+
+export async function showSaveDialog(
+  saveDialogOptions = DEFAULT_SAVE_DIALOG_OPTIONS
+) {
+  const { canceled, filePath } = await dialog.showSaveDialog(
+    mainWindow,
+    saveDialogOptions
+  );
+
+  if (canceled) {
+    log('User cancelled the folder selection popup.');
+    throw new Error('PROMPT_CLOSED_BEFORE_INPUT' as MessageCodes);
+  }
+  return filePath;
 }
 
 function manageAppMoveEvent() {

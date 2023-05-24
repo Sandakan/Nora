@@ -250,7 +250,7 @@ const PlaylistInfoPage = () => {
       <>
         {Object.keys(playlistData).length > 0 && (
           <div className="playlist-img-and-info-container appear-from-bottom mb-8 flex flex-row items-center justify-start">
-            <div className="playlist-cover-container mt-2">
+            <div className="playlist-cover-container mt-2 overflow-hidden">
               {localStorageData?.preferences.enableArtworkFromSongCovers &&
               playlistData.songs.length > 1 ? (
                 <div className="relative h-60 w-60">
@@ -263,7 +263,7 @@ const PlaylistInfoPage = () => {
                     src={playlistData.artworkPaths.artworkPath}
                     alt="Playlist Cover"
                     loading="lazy"
-                    className="absolute bottom-2 right-2 h-16 w-16 !rounded-lg"
+                    className="!absolute bottom-4 right-4 h-16 w-16 !rounded-lg"
                   />
                 </div>
               ) : (

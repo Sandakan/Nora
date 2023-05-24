@@ -15,7 +15,7 @@ import WindowControlsContainer from './WindowControlsContainer';
 import LightModeLogo from '../../../../assets/images/webp/logo_light_mode.webp';
 
 const appReleasePhase =
-  getVersionInfoFromString(version)?.releasePhase || 'alpha';
+  getVersionInfoFromString(version)?.releasePhase || 'stable';
 
 const TitleBar = React.memo(() => {
   const { bodyBackgroundImage } = React.useContext(AppContext);

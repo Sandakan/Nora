@@ -80,7 +80,9 @@ const AboutSettings = () => {
                     <span
                       title={
                         currentVersionReleasedDate
-                          ? `Released on ${currentVersionReleasedDate}`
+                          ? `Released on ${new Date(
+                              currentVersionReleasedDate
+                            ).toLocaleDateString()}`
                           : undefined
                       }
                     >
