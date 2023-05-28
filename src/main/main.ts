@@ -94,6 +94,7 @@ import getArtworksForMultipleArtworksCover from './core/getArtworksForMultipleAr
 import { resolveSeparateArtists } from './core/resolveSeparateArtists';
 import resolveFeaturingArtists from './core/resolveFeaturingArtists';
 import saveArtworkToSystem from './core/saveArtworkToSystem';
+import exportAppData from './core/exportAppData';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -653,6 +654,10 @@ app
 
       ipcMain.on('app/openInBrowser', (_, url: string) =>
         shell.openExternal(url)
+      );
+
+      ipcMain.on('app/exportAppData', (_, localStorageData: string) =>
+        exportAppData(localStorageData)
       );
 
       ipcMain.handle(

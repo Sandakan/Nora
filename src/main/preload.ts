@@ -481,6 +481,8 @@ const settingsHelpers = {
   openDevtools: () => ipcRenderer.send('app/openDevTools'),
   networkStatusChange: (isConnected: boolean): void =>
     ipcRenderer.send('app/networkStatusChange', isConnected),
+  exportAppData: (localStorageData: string): void =>
+    ipcRenderer.send('app/exportAppData', localStorageData),
 };
 
 // $ APP RESTART OR RESET

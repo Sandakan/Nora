@@ -6,7 +6,7 @@ import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 
 import Song from 'renderer/components/SongsPage/Song';
-import MainContainer from 'renderer/components/MainContainer';
+import SecondaryContainer from 'renderer/components/SecondaryContainer';
 
 type Props = { songData: SongData[] };
 
@@ -68,7 +68,7 @@ const AllSongResults = (prop: Props) => {
   );
 
   return (
-    <MainContainer
+    <SecondaryContainer
       className="songs-container h-full flex-1"
       ref={songsContainerRef}
       focusable
@@ -105,7 +105,7 @@ const AllSongResults = (prop: Props) => {
           {songs}
         </List>
       )}
-    </MainContainer>
+    </SecondaryContainer>
   );
 };
 

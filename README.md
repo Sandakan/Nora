@@ -88,6 +88,19 @@ Visit the [release notes](/changelog.md) to see what's new on the latest release
 
 <div align="center"> 
   <div>
+    <h3><i>" A sleek music player with a modern design, this solution seeks to provide users with a seamless experience when it comes to listening to their favorite local tunes. "</i></h3>
+    <a href="https://www.softpedia.com/get/Multimedia/Audio/Audio-Players/Oto-Music-for-Desktop.shtml"><i>Robert Condorache &bull; Softpedia </i></a>
+  </div> 
+</div>
+
+<br>
+
+<div align="center"> &bull; &bull; &bull; </div>
+
+<br>
+
+<div align="center"> 
+  <div>
     <h3><i>" The application interface adopts rounded corners in a large area, the fonts and icons are round and cute, and the visual effect is very comfortable. "</i></h3>
     <a href="https://sspai.com/post/78669"><i>Apps Worth Watching in the Near Future &bull; SSPAI</i></a>
   </div> 

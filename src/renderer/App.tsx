@@ -1,7 +1,8 @@
 /* eslint-disable no-use-before-define */
-import React, { ReactNode } from 'react';
+import React, { ReactNode, Suspense } from 'react';
 import 'tailwindcss/tailwind.css';
 import '../../assets/styles/styles.css';
+import packageFile from '../../package.json';
 
 import { AppContext, AppStateContextType } from './contexts/AppContext';
 import {
@@ -17,7 +18,6 @@ import SongControlsContainer from './components/SongsControlsContainer/SongContr
 import BodyAndSideBarContainer from './components/BodyAndSidebarContainer';
 import PromptMenu from './components/PromptMenu/PromptMenu';
 import ContextMenu from './components/ContextMenu/ContextMenu';
-import MiniPlayer from './components/MiniPlayer/MiniPlayer';
 import ErrorPrompt from './components/ErrorPrompt';
 import Button from './components/Button';
 import ReleaseNotesPrompt from './components/ReleaseNotesPrompt/ReleaseNotesPrompt';
@@ -30,7 +30,11 @@ import storage, { LOCAL_STORAGE_DEFAULT_TEMPLATE } from './utils/localStorage';
 import { isDataChanged } from './utils/hasDataChanged';
 import log from './utils/log';
 
-import packageFile from '../../package.json';
+import ErrorBoundary from './components/ErrorBoundary';
+
+const MiniPlayer = React.lazy(
+  () => import('./components/MiniPlayer/MiniPlayer')
+);
 
 interface AppReducer {
   userData: UserData;
@@ -2630,60 +2634,65 @@ export default function App() {
       content.localStorage.preferences.removeAnimationsOnBatteryPower);
 
   return (
-    <AppContext.Provider value={appContextStateValues}>
-      <AppUpdateContext.Provider value={appUpdateContextValues}>
-        {!content.player.isMiniPlayer && (
-          <div
-            className={`App select-none ${
-              content.isDarkMode
-                ? 'dark bg-dark-background-color-1'
-                : 'bg-background-color-1'
-            } ${
-              isReducedMotion
-                ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
-                : ''
-            } grid !h-screen w-full grid-rows-[auto_1fr_auto] items-center overflow-y-hidden after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc]  [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
-            ref={AppRef}
-            onDragEnter={addSongDropPlaceholder}
-            onDragLeave={removeSongDropPlaceholder}
-            onDragOver={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-            onDrop={onSongDrop}
-          >
-            <Preloader />
-
-            {contentRef.current.bodyBackgroundImage && (
-              <div className="body-background-image-container absolute h-full w-full animate-bg-image-appear overflow-hidden bg-center transition-[filter] duration-500">
-                <Img
-                  className="w-full bg-cover"
-                  src={contentRef.current.bodyBackgroundImage}
-                  alt=""
-                />
-              </div>
-            )}
-            <ContextMenu />
-            <PromptMenu />
-            <TitleBar />
-            <SongPositionContext.Provider value={songPositionContextValues}>
-              <BodyAndSideBarContainer />
-              <SongControlsContainer />
-            </SongPositionContext.Provider>
-          </div>
-        )}
-        <SongPositionContext.Provider value={songPositionContextValues}>
-          {content.player.isMiniPlayer && (
-            <MiniPlayer
-              className={`${
+    <ErrorBoundary>
+      <AppContext.Provider value={appContextStateValues}>
+        <AppUpdateContext.Provider value={appUpdateContextValues}>
+          {!content.player.isMiniPlayer && (
+            <div
+              className={`App select-none ${
+                content.isDarkMode
+                  ? 'dark bg-dark-background-color-1'
+                  : 'bg-background-color-1'
+              } ${
                 isReducedMotion
                   ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
                   : ''
-              }`}
-            />
+              } grid !h-screen w-full grid-rows-[auto_1fr_auto] items-center overflow-y-hidden after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc]  [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
+              ref={AppRef}
+              onDragEnter={addSongDropPlaceholder}
+              onDragLeave={removeSongDropPlaceholder}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onDrop={onSongDrop}
+            >
+              <Preloader />
+              {contentRef.current.bodyBackgroundImage && (
+                <div className="body-background-image-container absolute h-full w-full animate-bg-image-appear overflow-hidden bg-center transition-[filter] duration-500">
+                  <Img
+                    className="w-full bg-cover"
+                    src={contentRef.current.bodyBackgroundImage}
+                    alt=""
+                  />
+                </div>
+              )}
+              <ContextMenu />
+              <PromptMenu />
+              <TitleBar />
+              <SongPositionContext.Provider value={songPositionContextValues}>
+                <BodyAndSideBarContainer />
+                <SongControlsContainer />
+              </SongPositionContext.Provider>
+            </div>
           )}
-        </SongPositionContext.Provider>
-      </AppUpdateContext.Provider>
-    </AppContext.Provider>
+          <SongPositionContext.Provider value={songPositionContextValues}>
+            {content.player.isMiniPlayer && (
+              <ErrorBoundary>
+                <Suspense fallback={<div>Loading...</div>}>
+                  <MiniPlayer
+                    className={`${
+                      isReducedMotion
+                        ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
+                        : ''
+                    }`}
+                  />
+                </Suspense>
+              </ErrorBoundary>
+            )}
+          </SongPositionContext.Provider>
+        </AppUpdateContext.Provider>
+      </AppContext.Provider>
+    </ErrorBoundary>
   );
 }

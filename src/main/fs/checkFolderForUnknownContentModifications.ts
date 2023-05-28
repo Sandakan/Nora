@@ -8,7 +8,7 @@ import {
 } from '../filesystem';
 import log from '../log';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
-import { parseSong } from '../parseSong';
+import { tryToParseSong } from '../parseSong';
 import { saveAbortController } from './controlAbortControllers';
 import { generatePalettes } from '../other/generatePalette';
 
@@ -83,7 +83,7 @@ const addNewlyAddedSongsToLibrary = async (
 
     const newlyAddedSongPath = newlyAddedSongPaths[i];
     try {
-      await parseSong(newlyAddedSongPath);
+      await tryToParseSong(newlyAddedSongPath);
       log(`${path.basename(newlyAddedSongPath)} song added.`);
     } catch (error) {
       log(

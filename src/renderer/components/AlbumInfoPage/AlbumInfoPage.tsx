@@ -213,6 +213,7 @@ const AlbumInfoPage = () => {
                 duration={song.duration}
                 songId={song.songId}
                 path={song.path}
+                album={song.album}
                 isAFavorite={song.isAFavorite}
                 year={song.year}
                 isBlacklisted={song.isBlacklisted}

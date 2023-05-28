@@ -5,6 +5,7 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 
 import calculateElapsedTime from 'renderer/utils/calculateElapsedTime';
+import storage from 'renderer/utils/localStorage';
 
 import OpenLinkConfirmPrompt from 'renderer/components/OpenLinkConfirmPrompt';
 import {
@@ -306,6 +307,17 @@ const AboutSettings = () => {
                 />
               );
             }}
+          />
+
+          <Button
+            label="Export App Data"
+            iconName="file_upload"
+            className="mb-4 rounded-2xl"
+            clickHandler={() =>
+              window.api.settingsHelpers.exportAppData(
+                JSON.stringify(storage.getAllItems())
+              )
+            }
           />
         </div>
         <div className="about-description mt-4 text-sm font-light">
