@@ -216,49 +216,37 @@
     "fileAssociations": [
       {
         "mimeType": "audio/mpeg",
-        "ext": [
-          "mp3"
-        ],
+        "ext": "mp3",
         "role": "Editor",
         "icon": "./assets/installer_assets/file_associated_icons/mp3.ico"
       },
       {
         "mimeType": "audio/wav",
-        "ext": [
-          "wav"
-        ],
+        "ext": "wav",
         "role": "Editor",
         "icon": "./assets/installer_assets/file_associated_icons/wav.ico"
       },
       {
         "mimeType": "audio/ogg",
-        "ext": [
-          "ogg"
-        ],
+        "ext": "ogg",
         "role": "Editor",
         "icon": "./assets/installer_assets/file_associated_icons/ogg.ico"
       },
       {
         "mimeType": "audio/aac",
-        "ext": [
-          "aac"
-        ],
+        "ext": "aac",
         "role": "Editor",
         "icon": "./assets/installer_assets/file_associated_icons/aac.ico"
       },
       {
         "mimeType": "audio/x-m4r",
-        "ext": [
-          "m4r"
-        ],
+        "ext": "m4r",
         "role": "Editor",
         "icon": "./assets/installer_assets/file_associated_icons/m4r.ico"
       },
       {
         "mimeType": "audio/flac",
-        "ext": [
-          "flac"
-        ],
+        "ext": "flac",
         "role": "Editor",
         "icon": "./assets/installer_assets/file_associated_icons/flac.ico"
       }

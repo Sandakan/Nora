@@ -117,7 +117,7 @@ const SongInfoPage = () => {
   }, [fetchSongInfo]);
   const songArtists = React.useMemo(() => {
     const artists = songInfo?.artists;
-    if (Array.isArray(artists)) {
+    if (Array.isArray(artists) && artists.length > 0) {
       return artists
         .map((artist, i, artistArr) => {
           const arr = [
@@ -145,7 +145,7 @@ const SongInfoPage = () => {
         })
         .flat();
     }
-    return <span>Unknown Artist</span>;
+    return <span className="text-xs font-normal">Unknown Artist</span>;
   }, [bodyBackgroundImage, songInfo?.artists]);
 
   const { allTimeListens, thisYearListens, thisMonthListens } =

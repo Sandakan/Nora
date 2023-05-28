@@ -290,7 +290,7 @@ const ArtistInfoPage = () => {
         return (
           <Album
             index={index}
-            key={`${album.albumId}-${album.title}`}
+            key={album.albumId}
             albumId={album.albumId}
             artists={album.artists}
             artworkPaths={album.artworkPaths}

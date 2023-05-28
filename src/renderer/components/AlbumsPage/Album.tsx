@@ -170,7 +170,7 @@ export const Album = (props: AlbumProp) => {
 
   const albumArtists = React.useMemo(() => {
     const { artists } = props;
-    if (Array.isArray(artists)) {
+    if (Array.isArray(artists) && artists.length > 0) {
       return artists
         .map((artist, i) => {
           const arr = [
@@ -200,7 +200,7 @@ export const Album = (props: AlbumProp) => {
         })
         .flat();
     }
-    return <span>Unknown Artist</span>;
+    return <span className="text-xs font-normal">Unknown Artist</span>;
   }, [isAMultipleSelection, props]);
 
   const contextMenuItems = React.useMemo(() => {

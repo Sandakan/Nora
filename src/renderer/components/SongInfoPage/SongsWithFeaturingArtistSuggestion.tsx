@@ -218,7 +218,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
                 </p>
                 <Checkbox
                   id="featArtistsTitleReset"
-                  labelContent="Remove information related to featuring artists in the song title"
+                  labelContent="Remove featuring artists information from song title after adding artists to the song."
                   className="my-4 !text-sm"
                   isChecked={isRemovingFeatInfoFromTitle}
                   checkedStateUpdateFunction={(state) =>

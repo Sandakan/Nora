@@ -27,9 +27,6 @@ jobs:
           node-version: 18
           check-latest: true
 
-      - name: Print environment variables
-        run: node -e "console.log(process.env)"
-
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1
         with:
@@ -39,5 +36,6 @@ jobs:
 
           # If the commit is tagged with a version (e.g. "v1.0.0"),
           # release the app after building
+          release: true
           # release: ${{ startsWith(github.ref, 'refs/heads/master') }}
-          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          # release: ${{ startsWith(github.ref, 'refs/tags/v') }}
