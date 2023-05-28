@@ -1,14 +1,21 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
-import LightModeLogo from '../../../../assets/images/webp/logo_light_mode.webp';
+import { getVersionInfoFromString } from 'renderer/utils/isLatestVersion';
 import { AppContext } from '../../contexts/AppContext';
+
 import { version } from '../../../../package.json';
+
 import Img from '../Img';
 import NetworkIndicator from './indicators/NetworkIndicator';
 import NewUpdateIndicator from './indicators/NewUpdateIndicator';
 import ChangeThemeBtn from './special_controls/ChangeThemeBtn';
 import NavigationControlsContainer from './NavigationControlsContainer';
 import WindowControlsContainer from './WindowControlsContainer';
+
+import LightModeLogo from '../../../../assets/images/webp/logo_light_mode.webp';
+
+const appReleasePhase =
+  getVersionInfoFromString(version)?.releasePhase || 'stable';
 
 const TitleBar = React.memo(() => {
   const { bodyBackgroundImage } = React.useContext(AppContext);
@@ -37,7 +44,7 @@ const TitleBar = React.memo(() => {
                 className="app-version ml-1 cursor-pointer text-[0.6rem] font-semibold uppercase text-font-color-highlight dark:text-dark-font-color-highlight"
                 title={`v${version}`}
               >
-                stable
+                {appReleasePhase}
               </sup>
             </span>
           </span>
@@ -51,7 +58,7 @@ const TitleBar = React.memo(() => {
             <NetworkIndicator />
           </div>
           <div className="special-controls-container">
-            {window.api.isInDevelopment && <ChangeThemeBtn />}
+            {window.api.properties.isInDevelopment && <ChangeThemeBtn />}
           </div>
         </div>
         <WindowControlsContainer />

@@ -44,7 +44,7 @@ const MusicFoldersPage = () => {
 
   const fetchFoldersData = React.useCallback(
     () =>
-      window.api
+      window.api.folderData
         .getFolderData([], sortingOrder)
         .then((res) => {
           if (Array.isArray(res) && res.length > 0) return setMusicFolders(res);

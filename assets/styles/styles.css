@@ -254,12 +254,14 @@ input[type='range'].vertical::-webkit-slider-runnable-track {
   transform: scale(0);
 }
 
+[type='range'].thumb-visible::-webkit-slider-thumb {
+  opacity: 1;
+  transform: scale(0.75);
+}
 [type='range'].vertical::-webkit-slider-thumb {
   height: 0.875rem;
   width: 0.875rem;
   cursor: row-resize;
-  opacity: 1;
-  transform: scale(0.75);
 }
 
 input[type='range']:hover::-webkit-slider-thumb {

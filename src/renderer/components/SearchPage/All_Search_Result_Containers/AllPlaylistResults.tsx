@@ -5,7 +5,7 @@ import { Playlist } from 'renderer/components/PlaylistsPage/Playlist';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
-import MainContainer from 'renderer/components/MainContainer';
+import SecondaryContainer from 'renderer/components/SecondaryContainer';
 
 type Props = { playlistData: Playlist[] };
 
@@ -61,7 +61,7 @@ const AllPlaylistResults = (prop: Props) => {
   );
 
   return (
-    <MainContainer
+    <SecondaryContainer
       className="playlists-container flex h-full flex-wrap"
       ref={containerRef}
       focusable
@@ -100,7 +100,7 @@ const AllPlaylistResults = (prop: Props) => {
           {row}
         </Grid>
       )}
-    </MainContainer>
+    </SecondaryContainer>
   );
 };
 

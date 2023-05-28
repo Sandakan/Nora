@@ -21,7 +21,7 @@ export default (props: NewPlaylistPromptProp) => {
 
   const createNewPlaylist = (playlistName: string) => {
     if (playlistName !== '') {
-      window.api
+      window.api.playlistsData
         .addNewPlaylist(playlistName.trim(), undefined, artworkPath)
         .then((res) => {
           if (res && res.success && res.playlist) {
@@ -72,7 +72,7 @@ export default (props: NewPlaylistPromptProp) => {
           iconName="edit"
           iconClassName="group:hover:text-font-color-black dark:group:hover:text-font-color-black mr-0"
           clickHandler={() =>
-            window.api
+            window.api.songUpdates
               .getImgFileLocation()
               .then((res) => setArtworkPath(res))
               // eslint-disable-next-line no-console

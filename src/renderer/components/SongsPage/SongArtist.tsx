@@ -1,7 +1,6 @@
 import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import Button from '../Button';
 
 interface SongArtistProp {
   artistId: string;
@@ -34,16 +33,21 @@ function SongArtist(props: SongArtistProp) {
   );
 
   return (
-    <Button
-      className={`!m-0 inline !rounded-none !border-0 !p-0 text-xs font-normal outline-1 -outline-offset-1 focus-visible:!outline ${
+    <span
+      className={`text-xs font-normal outline-1 -outline-offset-1 focus-visible:!outline ${
         isFromKnownSource && 'hover:underline'
       } ${className}`}
       key={artistId}
-      label={name}
+      title={name}
       style={style}
-      clickHandler={() =>
-        isFromKnownSource && showArtistInfoPage(name, artistId)
+      onClick={() => isFromKnownSource && showArtistInfoPage(name, artistId)}
+      onKeyDown={(e) =>
+        e.key === 'Enter' &&
+        isFromKnownSource &&
+        showArtistInfoPage(name, artistId)
       }
+      role="button"
+      tabIndex={0}
       onContextMenu={(e) => {
         e.stopPropagation();
         if (isFromKnownSource) {
@@ -61,7 +65,9 @@ function SongArtist(props: SongArtistProp) {
           );
         }
       }}
-    />
+    >
+      {name}
+    </span>
   );
 }
 

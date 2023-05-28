@@ -10,6 +10,8 @@ type Props = {
   name?: string;
   artistId?: string;
 };
+export const separateArtistsRegex =
+  / and | [Ff](?:ea)?t\. |&|,|;|·| ?\| | ?\/ | ?\\ /gm;
 
 const SeparateArtistsSuggestion = (props: Props) => {
   const { bodyBackgroundImage, currentSongData } = React.useContext(AppContext);
@@ -35,7 +37,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
   }, [artistId, ignoredArtists]);
 
   const separatedArtistsNames = React.useMemo(() => {
-    const artists = name.split(/ and |&|,|;|·|\||\/|\\/gm);
+    const artists = name.split(separateArtistsRegex);
     const filterArtists = artists.filter(
       (x) => x !== undefined && x.trim() !== ''
     );
@@ -49,11 +51,16 @@ const SeparateArtistsSuggestion = (props: Props) => {
       const artists = separatedArtistsNames.map((artist, i, arr) => {
         return (
           <>
-            <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
+            <span
+              className="text-font-color-highlight dark:text-dark-font-color-highlight"
+              key={artist}
+            >
               {artist}
             </span>
             {i !== arr.length - 1 && (
-              <span>{i === arr.length - 2 ? ' and ' : ', '}</span>
+              <span key={`${arr[i]}=>${arr[i + 1]}`}>
+                {i === arr.length - 2 ? ' and ' : ', '}
+              </span>
             )}
           </>
         );
@@ -72,7 +79,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
       setIsDisabled(true);
       setIsPending(true);
 
-      window.api
+      window.api.suggestions
         .resolveSeparateArtists(artistId, separatedArtistsNames)
         .then((res) => {
           if (
@@ -174,13 +181,6 @@ const SeparateArtistsSuggestion = (props: Props) => {
                     separateArtists(setIsDisabled, setIsPending)
                   }
                 />
-                {/* <Button
-                  className="!border-0 bg-background-color-1/50 !px-4 !py-2 transition-colors hover:bg-background-color-1 hover:!text-font-color-highlight dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:!text-dark-font-color-highlight outline-1 focus-visible:!outline"
-                  iconName="edit"
-                  iconClassName="material-icons-round-outlined"
-                  label="Edit in metadata page"
-                  clickHandler={() => true}
-                /> */}
                 <Button
                   className="!mr-0 !border-0 bg-background-color-1/50 !px-4 !py-2 outline-1 transition-colors hover:bg-background-color-1 hover:!text-font-color-highlight focus-visible:!outline dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:!text-dark-font-color-highlight"
                   iconName="do_not_disturb_on"

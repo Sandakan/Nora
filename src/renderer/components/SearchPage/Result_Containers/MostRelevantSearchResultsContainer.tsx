@@ -20,7 +20,28 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
 
   const MostRelevantResults = [];
 
+  const [isOverScrolling, setIsOverScrolling] = React.useState(true);
   const mostRelevantResultContainerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const { albums, artists, genres, playlists, songs } = searchResults;
+    const totalResults =
+      albums.length +
+      artists.length +
+      genres.length +
+      playlists.length +
+      songs.length;
+
+    if (totalResults > 0 && mostRelevantResultContainerRef.current) {
+      const { scrollWidth, clientWidth } =
+        mostRelevantResultContainerRef.current;
+
+      console.log({ scrollWidth, clientWidth });
+      const isScrollable = scrollWidth > clientWidth;
+
+      setIsOverScrolling(isScrollable);
+    }
+  }, [searchResults]);
 
   if (searchResults.songs.length > 0) {
     const firstResult = searchResults.songs[0];
@@ -109,7 +130,9 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             class: 'reveal-file-explorer',
             iconName: 'folder_open',
             handlerFunction: () =>
-              window.api.revealSongInFileExplorer(firstResult.songId),
+              window.api.songUpdates.revealSongInFileExplorer(
+                firstResult.songId
+              ),
           },
           {
             label: 'Info',
@@ -147,7 +170,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: 'Play all Songs',
             iconName: 'play_arrow',
             handlerFunction: () =>
-              window.api
+              window.api.audioLibraryControls
                 .getSongInfo(
                   firstResult.songs.map((song) => song.songId),
                   undefined,
@@ -214,7 +237,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: 'Play',
             iconName: 'play_arrow',
             handlerFunction: () =>
-              window.api
+              window.api.audioLibraryControls
                 .getSongInfo(
                   firstResult.songs.map((song) => song.songId),
                   undefined,
@@ -277,7 +300,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: 'Play',
             iconName: 'play_arrow',
             handlerFunction: () =>
-              window.api
+              window.api.audioLibraryControls
                 .getSongInfo(firstResult.songs, undefined, undefined, true)
                 .then((songs) => {
                   if (Array.isArray(songs))
@@ -315,7 +338,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             label: 'Play',
             iconName: 'play_arrow',
             handlerFunction: () =>
-              window.api
+              window.api.audioLibraryControls
                 .getSongInfo(
                   firstResult.songs.map((song) => song.songId),
                   undefined,
@@ -355,11 +378,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
         </div>
         <div
           className={`results-container overflow-x-auto ${
-            mostRelevantResultContainerRef.current &&
-            mostRelevantResultContainerRef.current.scrollWidth >
-              mostRelevantResultContainerRef.current.clientWidth
-              ? 'overscroll-contain'
-              : 'overscroll-auto'
+            isOverScrolling ? 'overscroll-contain' : 'overscroll-auto'
           } transition-[transform,opacity] ${
             MostRelevantResults.length > 0
               ? 'visible flex translate-y-0 pb-4 opacity-100 [&>div.active]:flex [&>div]:hidden'

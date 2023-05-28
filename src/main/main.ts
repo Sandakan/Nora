@@ -16,6 +16,7 @@ import {
   nativeImage,
   OpenDialogOptions,
   powerMonitor,
+  SaveDialogOptions,
 } from 'electron';
 import path from 'path';
 import os from 'os';
@@ -91,6 +92,9 @@ import { resolveArtistDuplicates } from './core/resolveDuplicates';
 import addArtworkToAPlaylist from './core/addArtworkToAPlaylist';
 import getArtworksForMultipleArtworksCover from './core/getArtworksForMultipleArtworksCover';
 import { resolveSeparateArtists } from './core/resolveSeparateArtists';
+import resolveFeaturingArtists from './core/resolveFeaturingArtists';
+import saveArtworkToSystem from './core/saveArtworkToSystem';
+import exportAppData from './core/exportAppData';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -120,6 +124,11 @@ const DEFAULT_OPEN_DIALOG_OPTIONS: OpenDialogOptions = {
     },
   ],
   properties: ['openDirectory', 'multiSelections'],
+};
+const DEFAULT_SAVE_DIALOG_OPTIONS: SaveDialogOptions = {
+  title: 'Select the destination to Save',
+  buttonLabel: 'Save',
+  properties: ['createDirectory', 'showOverwriteConfirmation'],
 };
 
 // / / / / / / VARIABLES / / / / / / /
@@ -343,8 +352,8 @@ app
         console.log('Left full screen');
         mainWindow.webContents.send('app/leftFullscreen');
       });
-      powerMonitor.addListener('on-ac', toggleonBatteryPower);
-      powerMonitor.addListener('on-battery', toggleonBatteryPower);
+      powerMonitor.addListener('on-ac', toggleOnBatteryPower);
+      powerMonitor.addListener('on-battery', toggleOnBatteryPower);
 
       ipcMain.on('app/getSongPosition', (_, position: number) =>
         saveUserData('currentSong.stoppedPosition', position)
@@ -456,13 +465,6 @@ app
 
       ipcMain.handle('app/generatePalettes', generatePalettes);
 
-      ipcMain.on(
-        'app/savePageSortState',
-        (_, pageType: PageSortTypes, state: unknown) => {
-          saveUserData(pageType, state);
-        }
-      );
-
       ipcMain.handle('app/getArtistArtworks', (_, artistId: string) =>
         getArtistInfoFromNet(artistId)
       );
@@ -531,6 +533,21 @@ app
         'app/resolveSeparateArtists',
         (_, separateArtistId: string, separateArtistNames: string[]) =>
           resolveSeparateArtists(separateArtistId, separateArtistNames)
+      );
+
+      ipcMain.handle(
+        'app/resolveFeaturingArtists',
+        (
+          _,
+          songId: string,
+          featArtistNames: string[],
+          removeFeatInfoInTitle?: boolean
+        ) =>
+          resolveFeaturingArtists(
+            songId,
+            featArtistNames,
+            removeFeatInfoInTitle
+          )
       );
 
       ipcMain.handle(
@@ -623,12 +640,24 @@ app
         shell.openPath(path.join(app.getPath('userData'), 'logs.txt'))
       );
 
-      ipcMain.on('revealSongInFileExplorer', (_, songId: string) =>
+      ipcMain.on('app/revealSongInFileExplorer', (_, songId: string) =>
         revealSongInFileExplorer(songId)
+      );
+
+      ipcMain.on('app/revealFolderInFileExplorer', (_, folderPath: string) =>
+        shell.showItemInFolder(folderPath)
+      );
+
+      ipcMain.on('app/saveArtworkToSystem', (_, songId: string) =>
+        saveArtworkToSystem(songId)
       );
 
       ipcMain.on('app/openInBrowser', (_, url: string) =>
         shell.openExternal(url)
+      );
+
+      ipcMain.on('app/exportAppData', (_, localStorageData: string) =>
+        exportAppData(localStorageData)
       );
 
       ipcMain.handle(
@@ -772,7 +801,7 @@ function handleBeforeQuit() {
   );
 }
 
-function toggleonBatteryPower() {
+function toggleOnBatteryPower() {
   isOnBatteryPower = powerMonitor.isOnBatteryPower();
   mainWindow.webContents.send('app/isOnBatteryPower', isOnBatteryPower);
 }
@@ -870,6 +899,21 @@ export async function showOpenDialog(
     throw new Error('PROMPT_CLOSED_BEFORE_INPUT' as MessageCodes);
   }
   return filePaths;
+}
+
+export async function showSaveDialog(
+  saveDialogOptions = DEFAULT_SAVE_DIALOG_OPTIONS
+) {
+  const { canceled, filePath } = await dialog.showSaveDialog(
+    mainWindow,
+    saveDialogOptions
+  );
+
+  if (canceled) {
+    log('User cancelled the folder selection popup.');
+    throw new Error('PROMPT_CLOSED_BEFORE_INPUT' as MessageCodes);
+  }
+  return filePath;
 }
 
 function manageAppMoveEvent() {

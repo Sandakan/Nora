@@ -133,6 +133,13 @@ const Folder = (props: FolderProps) => {
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
+        label: 'Reveal in File Explorer',
+        class: 'reveal-file-explorer',
+        iconName: 'folder_open',
+        handlerFunction: () =>
+          window.api.folderData.revealFolderInFileExplorer(folderPath),
+      },
+      {
         label: 'Hr',
         isContextMenuItemSeperator: true,
         handlerFunction: null,
@@ -150,11 +157,11 @@ const Folder = (props: FolderProps) => {
           : 'block',
         handlerFunction: () => {
           if (isMultipleSelectionEnabled) {
-            window.api
+            window.api.folderData
               .toggleBlacklistedFolders(folderPaths)
               .catch((err) => console.error(err));
           } else if (isBlacklisted)
-            window.api
+            window.api.folderData
               .restoreBlacklistedFolders([folderPath])
               .catch((err) => console.error(err));
           else

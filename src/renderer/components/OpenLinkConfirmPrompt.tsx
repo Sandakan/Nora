@@ -34,11 +34,11 @@ const OpenLinkConfirmPrompt = (props: OpenLinkConfirmPromptProps) => {
           className="cursor-pointer font-normal text-font-color-highlight-2 hover:underline dark:text-dark-font-color-highlight-2"
           onClick={() => {
             changePromptMenuData(false);
-            window.api.openInBrowser(link);
+            window.api.settingsHelpers.openInBrowser(link);
           }}
           onKeyDown={() => {
             changePromptMenuData(false);
-            window.api.openInBrowser(link);
+            window.api.settingsHelpers.openInBrowser(link);
           }}
           role="link"
           tabIndex={0}
@@ -71,7 +71,7 @@ const OpenLinkConfirmPrompt = (props: OpenLinkConfirmPromptProps) => {
               'doNotVerifyWhenOpeningLinks',
               checkboxState
             );
-            window.api.openInBrowser(link);
+            window.api.settingsHelpers.openInBrowser(link);
             changePromptMenuData(false);
           }}
         />

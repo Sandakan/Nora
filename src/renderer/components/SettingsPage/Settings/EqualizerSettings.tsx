@@ -449,7 +449,7 @@ const EqualizerSettings = () => {
               <div className="range-slider flex h-60 w-8 flex-col items-center justify-end pt-2">
                 <input
                   type="range"
-                  className="vertical h-10 w-48 -rotate-90 cursor-row-resize appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-60Hz-equalizer-bar)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
+                  className="vertical thumb-visible h-10 w-48 -rotate-90 cursor-row-resize appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-60Hz-equalizer-bar)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
                   min="-12"
                   value={content.sixtyHertz}
                   max="12"
@@ -469,7 +469,7 @@ const EqualizerSettings = () => {
               <div className="range-slider flex h-60 w-8 flex-col items-center justify-end pt-2">
                 <input
                   type="range"
-                  className="vertical h-10 w-48 -rotate-90 cursor-row-resize appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-150Hz-equalizer-bar)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
+                  className="vertical thumb-visible h-10 w-48 -rotate-90 cursor-row-resize appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-150Hz-equalizer-bar)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
                   min="-12"
                   value={content.hundredFiftyHertz}
                   max="12"
@@ -491,7 +491,7 @@ const EqualizerSettings = () => {
               <div className="range-slider flex h-60 w-8 flex-col items-center justify-end pt-2">
                 <input
                   type="range"
-                  className="vertical h-10 w-48 -rotate-90 cursor-row-resize appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-400Hz-equalizer-bar)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
+                  className="vertical thumb-visible h-10 w-48 -rotate-90 cursor-row-resize appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-400Hz-equalizer-bar)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
                   min="-12"
                   value={content.fourHundredHertz}
                   max="12"
@@ -513,7 +513,7 @@ const EqualizerSettings = () => {
               <div className="range-slider flex h-60 w-8 flex-col items-center justify-end pt-2">
                 <input
                   type="range"
-                  className="vertical h-10 w-48 -rotate-90 cursor-row-resize appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-1kHz-equalizer-bar)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
+                  className="vertical thumb-visible h-10 w-48 -rotate-90 cursor-row-resize appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-1kHz-equalizer-bar)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
                   min="-12"
                   value={content.oneKiloHertz}
                   max="12"
@@ -533,7 +533,7 @@ const EqualizerSettings = () => {
               <div className="range-slider flex h-60 w-8 flex-col items-center justify-end pt-2">
                 <input
                   type="range"
-                  className="vertical h-10 w-48 -rotate-90 cursor-row-resize appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-2-4kHz-equalizer-bar)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
+                  className="vertical thumb-visible h-10 w-48 -rotate-90 cursor-row-resize appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-2-4kHz-equalizer-bar)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
                   min="-12"
                   value={content.twoPointFourKiloHertz}
                   max="12"
@@ -555,7 +555,7 @@ const EqualizerSettings = () => {
               <div className="range-slider flex h-60 w-8 flex-col items-center justify-end pt-2">
                 <input
                   type="range"
-                  className="vertical h-10 w-48 -rotate-90 cursor-row-resize appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-15kHz-equalizer-bar)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
+                  className="vertical thumb-visible h-10 w-48 -rotate-90 cursor-row-resize appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-15kHz-equalizer-bar)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
                   min="-12"
                   value={content.fifteenKiloHertz}
                   max="12"

@@ -66,7 +66,7 @@ const GenreInfoPage = () => {
 
   const fetchGenresData = React.useCallback(() => {
     if (currentlyActivePage.data) {
-      window.api
+      window.api.genresData
         .getGenresData([currentlyActivePage.data.genreId])
         .then((res) => {
           if (res && res.length > 0 && res[0]) setGenreData(res[0]);
@@ -78,7 +78,7 @@ const GenreInfoPage = () => {
 
   const fetchSongsData = React.useCallback(() => {
     if (genreData && genreData.songs && genreData.songs.length > 0) {
-      window.api
+      window.api.audioLibraryControls
         .getSongInfo(
           genreData.songs.map((song) => song.songId),
           sortingOrder

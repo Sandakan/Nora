@@ -137,7 +137,7 @@ const SongCard = (props: SongCardProp) => {
     });
 
   const handleLikeButtonClick = React.useCallback(() => {
-    window.api
+    window.api.playerControls
       .toggleLikeSongs([songId], !isSongAFavorite)
       .then((res) => {
         if (res && res.likes.length + res.dislikes.length > 0) {
@@ -299,7 +299,7 @@ const SongCard = (props: SongCardProp) => {
           ? 'material-icons-round mr-4 text-xl'
           : 'material-icons-round-outlined mr-4 text-xl',
         handlerFunction: () => {
-          window.api
+          window.api.playerControls
             .toggleLikeSongs(
               isMultipleSelectionsEnabled ? [...songIds] : [songId]
             )
@@ -326,7 +326,7 @@ const SongCard = (props: SongCardProp) => {
         },
       },
       {
-        label: 'Add to a Playlists',
+        label: 'Add to Playlists',
         iconName: 'playlist_add',
         handlerFunction: () => {
           changePromptMenuData(
@@ -371,7 +371,8 @@ const SongCard = (props: SongCardProp) => {
         label: 'Reveal in File Explorer',
         class: 'reveal-file-explorer',
         iconName: 'folder_open',
-        handlerFunction: () => window.api.revealSongInFileExplorer(songId),
+        handlerFunction: () =>
+          window.api.songUpdates.revealSongInFileExplorer(songId),
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
@@ -417,11 +418,11 @@ const SongCard = (props: SongCardProp) => {
         iconName: isBlacklisted ? 'settings_backup_restore' : 'block',
         handlerFunction: () => {
           if (isBlacklisted)
-            window.api
+            window.api.audioLibraryControls
               .restoreBlacklistedSongs([songId])
               .catch((err) => console.error(err));
           else if (localStorageData?.preferences.doNotShowBlacklistSongConfirm)
-            window.api
+            window.api.audioLibraryControls
               .blacklistSongs([songId])
               .then(() =>
                 addNewNotifications([
@@ -485,38 +486,35 @@ const SongCard = (props: SongCardProp) => {
     localStorageData?.preferences.doNotShowBlacklistSongConfirm,
   ]);
 
-  const songArtistComponents = React.useMemo(
-    () =>
-      Array.isArray(artists) ? (
-        artists
-          .map((artist, i) =>
-            (artists?.length ?? 1) - 1 === i ? (
-              <SongArtist
-                key={artist.artistId}
-                artistId={artist.artistId}
-                name={artist.name}
-                className="!text-font-color-white/80 dark:!text-font-color-white/80"
-              />
-            ) : (
-              [
-                <SongArtist
-                  key={artist.artistId}
-                  artistId={artist.artistId}
-                  name={artist.name}
-                  className="!text-font-color-white/80 dark:!text-font-color-white/80"
-                />,
-                <span className="mr-1 !text-font-color-white/80 dark:!text-font-color-white/80">
-                  ,
-                </span>,
-              ]
-            )
-          )
-          .flat()
-      ) : (
-        <span>Unknown Artist</span>
-      ),
-    [artists]
-  );
+  const songArtistComponents = React.useMemo(() => {
+    if (Array.isArray(artists) && artists.length > 0) {
+      return artists
+        .map((artist, i) => {
+          const arr = [
+            <SongArtist
+              key={artist.artistId}
+              artistId={artist.artistId}
+              name={artist.name}
+              className="!text-font-color-white/80 dark:!text-font-color-white/80"
+            />,
+          ];
+
+          if ((artists?.length ?? 1) - 1 !== i)
+            arr.push(
+              <span
+                className="mr-1"
+                key={`${artists[i].name}=>${artists[i + 1].name}`}
+              >
+                ,
+              </span>
+            );
+
+          return arr;
+        })
+        .flat();
+    }
+    return <span className="text-xs font-normal">Unknown Artist</span>;
+  }, [artists]);
 
   return (
     <div
@@ -527,7 +525,7 @@ const SongCard = (props: SongCardProp) => {
         currentSongData.songId === songId && 'current-song'
       } ${
         isSongPlaying && 'playing'
-      } group/songCard relative mb-2 mr-2 aspect-[2/1] min-w-[10rem] max-w-[24rem] overflow-hidden rounded-2xl border-[transparent] border-background-color-2 shadow-xl transition-[border-color] ease-in-out dark:border-dark-background-color-2 ${
+      } group/songCard relative mb-2 mr-2 aspect-[2/1] min-w-[15rem] max-w-[24rem] overflow-hidden rounded-2xl border-[transparent] border-background-color-2 shadow-xl transition-[border-color] ease-in-out dark:border-dark-background-color-2 ${
         className || ''
       } ${isBlacklisted && '!opacity-90 !brightness-50 dark:!opacity-75'} ${
         isMultipleSelectionEnabled &&
@@ -570,7 +568,7 @@ const SongCard = (props: SongCardProp) => {
           src={artworkPath}
           loading="eager"
           alt="Song cover"
-          className="h-full w-full object-cover object-center brightness-90 dark:brightness-90"
+          className="h-full w-full object-cover object-center dark:brightness-90"
         />
       </div>
       <div
@@ -634,7 +632,7 @@ const SongCard = (props: SongCardProp) => {
               {title}
             </div>
             <div
-              className="song-artists flex w-full max-w-full truncate text-sm transition-none"
+              className="song-artists w-full max-w-full truncate text-sm transition-none"
               title={
                 artists
                   ? artists.map((x) => x.name).join(', ')

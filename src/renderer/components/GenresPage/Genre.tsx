@@ -52,7 +52,7 @@ const Genre = (props: GenreProp) => {
 
   const playGenreSongs = React.useCallback(
     (isShuffle = false) => {
-      return window.api
+      return window.api.audioLibraryControls
         .getSongInfo(songIds, undefined, undefined, true)
         .then((songs) => {
           if (Array.isArray(songs))
@@ -74,7 +74,7 @@ const Genre = (props: GenreProp) => {
   const playGenreSongsForMultipleSelections = React.useCallback(
     (isShuffle = false) => {
       const { multipleSelections: genreIds } = multipleSelectionsData;
-      window.api
+      window.api.genresData
         .getGenresData(genreIds)
         .then((genres) => {
           if (Array.isArray(genres) && genres.length > 0) {
@@ -82,7 +82,7 @@ const Genre = (props: GenreProp) => {
               .map((genre) => genre.songs.map((song) => song.songId))
               .flat();
 
-            return window.api.getSongInfo(
+            return window.api.audioLibraryControls.getSongInfo(
               genreSongIds,
               undefined,
               undefined,
@@ -111,7 +111,7 @@ const Genre = (props: GenreProp) => {
 
   const addToQueueForMultipleSelections = React.useCallback(() => {
     const { multipleSelections: genreIds } = multipleSelectionsData;
-    window.api
+    window.api.genresData
       .getGenresData(genreIds)
       .then((genres) => {
         if (Array.isArray(genres) && genres.length > 0) {
@@ -119,7 +119,7 @@ const Genre = (props: GenreProp) => {
             .map((genre) => genre.songs.map((song) => song.songId))
             .flat();
 
-          return window.api.getSongInfo(
+          return window.api.audioLibraryControls.getSongInfo(
             genreSongIds,
             undefined,
             undefined,

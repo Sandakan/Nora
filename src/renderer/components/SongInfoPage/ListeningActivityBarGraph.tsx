@@ -1,6 +1,9 @@
 import React from 'react';
 
-type Props = { listeningData: SongListeningData | undefined };
+type Props = {
+  listeningData: SongListeningData | undefined;
+  className?: string;
+};
 
 const monthNames = [
   'Jan',
@@ -36,7 +39,7 @@ function getLastNoOfMonths<T>(
 }
 
 const ListeningActivityBarGraph = (props: Props) => {
-  const { listeningData } = props;
+  const { listeningData, className } = props;
 
   const { currentYear } = React.useMemo(() => {
     const currentDate = new Date();
@@ -49,8 +52,6 @@ const ListeningActivityBarGraph = (props: Props) => {
     if (listeningData) {
       for (const listen of listeningData.listens) {
         if (listen.year === currentYear) {
-          const max = Math.max(...listen.listens.map((x) => x[1]));
-
           const monthsWithNames: { listens: number; month: string }[] = [];
 
           for (let i = 0; i < monthNames.length; i += 1) {
@@ -73,9 +74,14 @@ const ListeningActivityBarGraph = (props: Props) => {
             7
           );
 
+          const max = Math.max(...lastMonths.map((x) => x.listens));
+
           return lastMonths.map((month, index) => {
             return (
-              <div className=" relative flex h-full flex-col items-center justify-end">
+              <div
+                key={month.month}
+                className="relative flex h-full flex-col items-center justify-end"
+              >
                 <div className="flex h-full items-end rounded-2xl bg-background-color-1/50 dark:bg-dark-background-color-1/50">
                   <div
                     className="order-1 w-[10px] rounded-2xl bg-font-color-highlight transition-[height] dark:bg-dark-font-color-highlight"
@@ -83,7 +89,7 @@ const ListeningActivityBarGraph = (props: Props) => {
                       height: `${
                         month.listens === 0
                           ? '10px'
-                          : `${(month.listens / max) * 75}%`
+                          : `${(month.listens / max) * 90}%`
                       }`,
                       transitionDelay: `${index * 50 + 500}`,
                     }}
@@ -105,7 +111,7 @@ const ListeningActivityBarGraph = (props: Props) => {
 
   return (
     <div
-      className="appear-from-bottom mr-4 flex h-full w-[70%] flex-col rounded-md bg-background-color-2/70 pb-2 pt-2 text-center backdrop-blur-md dark:bg-dark-background-color-2/70"
+      className={`appear-from-bottom mr-4 flex h-full min-h-[18rem] w-[70%] max-w-lg flex-col rounded-md bg-background-color-2/70 pb-2 pt-2 text-center backdrop-blur-md dark:bg-dark-background-color-2/70 ${className}`}
       title="Bar graph about no of listens per day"
     >
       <div className="pb-1 font-thin text-font-color dark:text-font-color-white">

@@ -59,7 +59,7 @@ export const Playlist = (props: PlaylistProp) => {
 
   const playAllSongs = React.useCallback(
     (isShuffling = false) => {
-      window.api
+      window.api.audioLibraryControls
         .getSongInfo(props.songs, undefined, undefined, true)
         .then((songs) => {
           if (Array.isArray(songs))
@@ -82,12 +82,17 @@ export const Playlist = (props: PlaylistProp) => {
   const playAllSongsForMultipleSelections = React.useCallback(
     (isShuffling = false) => {
       const { multipleSelections: playlistIds } = multipleSelectionsData;
-      window.api
+      window.api.playlistsData
         .getPlaylistData(playlistIds)
         .then((playlists) => {
           const ids = playlists.map((playlist) => playlist.songs).flat();
 
-          return window.api.getSongInfo(ids, undefined, undefined, true);
+          return window.api.audioLibraryControls.getSongInfo(
+            ids,
+            undefined,
+            undefined,
+            true
+          );
         })
         .then((songs) => {
           if (Array.isArray(songs)) {
@@ -114,7 +119,7 @@ export const Playlist = (props: PlaylistProp) => {
 
   const addToQueueForMultipleSelections = React.useCallback(() => {
     const { multipleSelections: playlistIds } = multipleSelectionsData;
-    window.api
+    window.api.playlistsData
       .getPlaylistData(playlistIds)
       .then((playlists) => {
         if (Array.isArray(playlists) && playlists.length > 0) {
@@ -122,7 +127,7 @@ export const Playlist = (props: PlaylistProp) => {
             .map((playlist) => playlist.songs)
             .flat();
 
-          return window.api.getSongInfo(
+          return window.api.audioLibraryControls.getSongInfo(
             playlistSongIds,
             undefined,
             undefined,
@@ -213,14 +218,14 @@ export const Playlist = (props: PlaylistProp) => {
         handlerFunction: () => true,
       },
       {
-        label: 'Add artwork',
+        label: props.isArtworkAvailable ? 'Change artwork' : 'Add artwork',
         iconName: 'photo_camera',
         handlerFunction: () => {
-          window.api
+          window.api.songUpdates
             .getImgFileLocation()
             .then((artworkPath) => {
               if (artworkPath) {
-                return window.api.addArtworkToAPlaylist(
+                return window.api.playlistsData.addArtworkToAPlaylist(
                   props.playlistId,
                   artworkPath
                 );
@@ -380,7 +385,7 @@ export const Playlist = (props: PlaylistProp) => {
         else openPlaylistInfoPage();
       }}
     >
-      <div className="playlist-cover-and-play-btn-container relative h-[70%] cursor-pointer overflow-hidden rounded-xl before:invisible before:absolute before:z-10 before:h-full before:w-full before:bg-gradient-to-b before:from-[hsla(0,0%,0%,0%)] before:to-[hsla(0,0%,0%,40%)] before:opacity-0 before:transition-[visibility,opacity] before:duration-300 before:content-[''] group-focus-within:before:visible group-focus-within:before:opacity-100 group-hover:before:visible group-hover:before:opacity-100">
+      <div className="playlist-cover-and-play-btn-container relative aspect-square w-full cursor-pointer overflow-hidden rounded-xl before:invisible before:absolute before:z-10 before:h-full before:w-full before:bg-gradient-to-b before:from-[hsla(0,0%,0%,0%)] before:to-[hsla(0,0%,0%,40%)] before:opacity-0 before:transition-[visibility,opacity] before:duration-300 before:content-[''] group-focus-within:before:visible group-focus-within:before:opacity-100 group-hover:before:visible group-hover:before:opacity-100">
         {isMultipleSelectionEnabled &&
         multipleSelectionsData.selectionType === 'playlist' ? (
           <MultipleSelectionCheckbox
@@ -399,7 +404,7 @@ export const Playlist = (props: PlaylistProp) => {
         <div className="playlist-cover-container h-full cursor-pointer overflow-hidden">
           {localStorageData?.preferences.enableArtworkFromSongCovers &&
           props.songs.length > 2 ? (
-            <div className="relative h-full w-full">
+            <div className="relative aspect-square w-full">
               <MultipleArtworksCover
                 songIds={props.songs}
                 className="aspect-square w-full"
@@ -408,7 +413,7 @@ export const Playlist = (props: PlaylistProp) => {
                 src={props.artworkPaths.artworkPath}
                 alt="Playlist Cover"
                 loading="lazy"
-                className="absolute bottom-2 left-2 h-8 w-8 !rounded-md"
+                className="!absolute bottom-1 left-1 h-8 w-8 !rounded-md"
               />
             </div>
           ) : (

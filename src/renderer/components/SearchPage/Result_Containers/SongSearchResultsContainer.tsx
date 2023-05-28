@@ -5,10 +5,20 @@ import Song from 'renderer/components/SongsPage/Song';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 
-type Props = { songs: SongData[]; searchInput: string };
+type Props = {
+  songs: SongData[];
+  searchInput: string;
+  noOfVisibleSongs?: number;
+  isPredictiveSearchEnabled: boolean;
+};
 
 const SongSearchResultsContainer = (props: Props) => {
-  const { searchInput, songs } = props;
+  const {
+    searchInput,
+    songs,
+    noOfVisibleSongs = 5,
+    isPredictiveSearchEnabled,
+  } = props;
   const {
     isMultipleSelectionEnabled,
     multipleSelectionsData,
@@ -22,7 +32,7 @@ const SongSearchResultsContainer = (props: Props) => {
       songs.length > 0
         ? songs
             .map((song, index) => {
-              if (index < 5)
+              if (index < noOfVisibleSongs)
                 return (
                   <Song
                     key={song.songId}
@@ -46,7 +56,11 @@ const SongSearchResultsContainer = (props: Props) => {
             })
             .filter((song) => song !== undefined)
         : [],
-    [localStorageData?.preferences?.isSongIndexingEnabled, songs]
+    [
+      localStorageData?.preferences?.isSongIndexingEnabled,
+      noOfVisibleSongs,
+      songs,
+    ]
   );
 
   return (
@@ -97,7 +111,7 @@ const SongSearchResultsContainer = (props: Props) => {
                 isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
               }
             />
-            {songs.length > 5 && (
+            {songs.length > noOfVisibleSongs && (
               <Button
                 label="Show All"
                 iconName="apps"
@@ -107,6 +121,7 @@ const SongSearchResultsContainer = (props: Props) => {
                     searchQuery: searchInput,
                     searchFilter: 'Songs' as SearchFilters,
                     searchResults: songs,
+                    isPredictiveSearchEnabled,
                   })
                 }
               />

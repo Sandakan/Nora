@@ -20,7 +20,9 @@ const ContextMenuDataItem = (props: { data: ContextMenuAdditionalData }) => {
             <span className="sub-title truncate text-[0.6rem] font-light">
               {subTitle}
             </span>
-            {subTitle && subTitle2 && <span className="mx-1">&bull;</span>}
+            {subTitle && subTitle2 && (
+              <span className="mx-1 leading-[0.9]">&bull;</span>
+            )}
             <span className="sub-title truncate text-[0.6rem] font-light">
               {subTitle2}
             </span>

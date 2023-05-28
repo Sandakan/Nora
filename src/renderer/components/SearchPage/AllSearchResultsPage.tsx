@@ -1,6 +1,8 @@
 import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import log from 'renderer/utils/log';
+
 import Button from '../Button';
 import MainContainer from '../MainContainer';
 
@@ -10,17 +12,28 @@ import AllPlaylistResults from './All_Search_Result_Containers/AllPlaylistResult
 import AllAlbumResults from './All_Search_Result_Containers/AllAlbumResults';
 import AllGenreResults from './All_Search_Result_Containers/AllGenreResults';
 
+type AllSearchResultProp = {
+  searchQuery: string;
+  searchFilter: SearchFilters;
+  isPredictiveSearchEnabled: boolean;
+};
+
 const AllSearchResultsPage = () => {
   const { currentlyActivePage, isMultipleSelectionEnabled } =
     React.useContext(AppContext);
   const { toggleMultipleSelections } = React.useContext(AppUpdateContext);
-  const data = currentlyActivePage.data as {
-    searchQuery: string;
-    searchFilter: SearchFilters;
-    searchResults: (SongData | Artist | Album | Genre | Playlist)[];
-  };
+  const data = currentlyActivePage.data as AllSearchResultProp;
 
-  const selectType = React.useMemo((): QueueTypes | undefined => {
+  const [searchResults, setSearchResults] = React.useState({
+    albums: [],
+    artists: [],
+    songs: [],
+    playlists: [],
+    genres: [],
+    availableResults: [],
+  } as SearchResult);
+
+  const selectedType = React.useMemo((): QueueTypes | undefined => {
     if (data.searchFilter === 'Songs') return 'songs';
     if (data.searchFilter === 'Artists') return 'artist';
     if (data.searchFilter === 'Playlists') return 'playlist';
@@ -28,6 +41,64 @@ const AllSearchResultsPage = () => {
     if (data.searchFilter === 'Genres') return 'genre';
     return undefined;
   }, [data.searchFilter]);
+
+  const fetchSearchResults = React.useCallback(() => {
+    if (data.searchQuery.trim() !== '') {
+      window.api.search
+        .search(
+          data.searchFilter,
+          data.searchQuery,
+          false,
+          data.isPredictiveSearchEnabled
+        )
+        .then((results) => {
+          return setSearchResults(results);
+        })
+        .catch((err) => log(err, 'warn'));
+    } else
+      setSearchResults({
+        albums: [],
+        artists: [],
+        songs: [],
+        playlists: [],
+        genres: [],
+        availableResults: [],
+      });
+  }, [data]);
+
+  React.useEffect(() => {
+    fetchSearchResults();
+    const manageSearchResultsUpdatesInAllSearchResultsPage = (e: Event) => {
+      if ('detail' in e) {
+        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>)
+          .detail;
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (
+            event.dataType === 'songs' ||
+            event.dataType === 'artists' ||
+            event.dataType === 'albums' ||
+            event.dataType === 'playlists/newPlaylist' ||
+            event.dataType === 'playlists/deletedPlaylist' ||
+            event.dataType === 'genres/newGenre' ||
+            event.dataType === 'genres/deletedGenre' ||
+            event.dataType === 'blacklist/songBlacklist'
+          )
+            fetchSearchResults();
+        }
+      }
+    };
+    document.addEventListener(
+      'app/dataUpdates',
+      manageSearchResultsUpdatesInAllSearchResultsPage
+    );
+    return () => {
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageSearchResultsUpdatesInAllSearchResultsPage
+      );
+    };
+  }, [fetchSearchResults]);
 
   return (
     <MainContainer className="main-container all-search-results-container !h-full !pb-0">
@@ -59,10 +130,10 @@ const AllSearchResultsPage = () => {
               clickHandler={() => {
                 toggleMultipleSelections(
                   !isMultipleSelectionEnabled,
-                  selectType
+                  selectedType
                 );
               }}
-              isDisabled={selectType === undefined}
+              isDisabled={selectedType === undefined}
               tooltipLabel={
                 isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
               }
@@ -71,19 +142,19 @@ const AllSearchResultsPage = () => {
         </div>
 
         {data.searchFilter === 'Songs' && (
-          <AllSongResults songData={data.searchResults as SongData[]} />
+          <AllSongResults songData={searchResults.songs} />
         )}
         {data.searchFilter === 'Artists' && (
-          <AllArtistResults artistData={data.searchResults as Artist[]} />
+          <AllArtistResults artistData={searchResults.artists} />
         )}
         {data.searchFilter === 'Playlists' && (
-          <AllPlaylistResults playlistData={data.searchResults as Playlist[]} />
+          <AllPlaylistResults playlistData={searchResults.playlists} />
         )}
         {data.searchFilter === 'Albums' && (
-          <AllAlbumResults albumData={data.searchResults as Album[]} />
+          <AllAlbumResults albumData={searchResults.albums} />
         )}
         {data.searchFilter === 'Genres' && (
-          <AllGenreResults genreData={data.searchResults as Genre[]} />
+          <AllGenreResults genreData={searchResults.genres} />
         )}
       </>
     </MainContainer>

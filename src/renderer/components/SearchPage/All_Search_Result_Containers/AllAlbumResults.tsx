@@ -5,7 +5,7 @@ import { Album } from 'renderer/components/AlbumsPage/Album';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
-import MainContainer from 'renderer/components/MainContainer';
+import SecondaryContainer from 'renderer/components/SecondaryContainer';
 
 type Props = { albumData: Album[] };
 
@@ -58,7 +58,7 @@ const AllAlbumResults = (prop: Props) => {
   );
 
   return (
-    <MainContainer
+    <SecondaryContainer
       className="albums-container h-full w-full flex-grow"
       ref={containerRef}
     >
@@ -90,7 +90,7 @@ const AllAlbumResults = (prop: Props) => {
           {row}
         </Grid>
       )}
-    </MainContainer>
+    </SecondaryContainer>
   );
 };
 

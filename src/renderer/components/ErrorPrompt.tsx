@@ -49,7 +49,7 @@ export default (props: ErrorPromptProps) => {
           label="Restart App"
           iconName="sync"
           className="mt-6 w-fit !bg-background-color-3 !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
-          clickHandler={() => window.api.restartRenderer(reason)}
+          clickHandler={() => window.api.appControls.restartRenderer(reason)}
         />
       </div>
     </>

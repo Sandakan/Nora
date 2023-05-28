@@ -50,7 +50,7 @@ const configuration: webpack.Configuration = {
   },
 
   plugins: [
-    new DotEnvWebpackPlugin({ path: './.env' }),
+    new DotEnvWebpackPlugin({ path: './.env', systemvars: true }),
     new BundleAnalyzerPlugin({
       analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
     }),

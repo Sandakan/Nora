@@ -54,7 +54,7 @@ const RecentlyAddedSongs = React.forwardRef(
 
     return (
       <SecondaryContainer
-        className="recently-added-songs-container appear-from-bottom h-fit max-h-full flex-col pb-8 pl-8"
+        className="recently-added-songs-container appear-from-bottom h-fit max-h-full w-full flex-col pb-8 pl-8"
         focusable
         onKeyDown={(e) => {
           if (e.ctrlKey && e.key === 'a') {
@@ -83,14 +83,10 @@ const RecentlyAddedSongs = React.forwardRef(
             <div
               style={{
                 gridTemplateColumns: `repeat(${Math.floor(
-                  (noOfVisibleSongs < 6
-                    ? 6
-                    : noOfVisibleSongs < MAX_SONG_LIMIT
-                    ? noOfVisibleSongs
-                    : MAX_SONG_LIMIT) / 2
+                  noOfVisibleSongs / 2
                 )},1fr)`,
               }}
-              className="songs-container grid grid-rows-2 gap-2 pr-2"
+              className="songs-container grid max-w-full grid-rows-2 gap-2 pr-2"
             >
               {latestSongComponents}
             </div>

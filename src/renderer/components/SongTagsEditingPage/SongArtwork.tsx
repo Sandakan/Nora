@@ -35,7 +35,7 @@ const SongArtwork = (props: Props) => {
           iconName="edit"
           iconClassName="text-font-color-white dark:text-font-color-white mr-0"
           clickHandler={() =>
-            window.api
+            window.api.songUpdates
               .getImgFileLocation()
               .then((res) =>
                 updateSongInfo((prevData) => ({

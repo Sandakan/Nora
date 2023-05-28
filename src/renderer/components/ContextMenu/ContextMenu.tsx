@@ -42,8 +42,8 @@ const ContextMenu = React.memo(() => {
             ? pageY -
               menuHeight +
               // ? 40px get added to stop the context menu from reaching the title-bar.
-              // ? Height of the title bar is  60px (3.75rem).
-              (pageY - menuHeight > 60 ? 0 : 60)
+              // ? Height of the title bar is  40px (2.5rem).
+              (pageY - menuHeight > 40 ? 0 : Math.abs(pageY - menuHeight) + 40)
             : pageY,
         transformOrigin: `${
           pageY + menuHeight > viewportHeight ? 'bottom' : 'top'

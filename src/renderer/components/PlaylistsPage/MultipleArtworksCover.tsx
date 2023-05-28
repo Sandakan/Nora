@@ -20,7 +20,7 @@ const MultipleArtworksCover = (props: Props) => {
   const [artworks, setArtworks] = React.useState<string[]>([]);
 
   React.useEffect(() => {
-    window.api
+    window.api.playlistsData
       .getArtworksForMultipleArtworksCover(songIds)
       .then((res) => setArtworks(res))
       .catch((err) => console.error(err));

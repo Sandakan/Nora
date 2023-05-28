@@ -18,6 +18,7 @@ interface VersionProp {
 const Version = (props: VersionProp) => {
   const { version, releaseDate, isLatest, notes } = props;
   const elapsed = calculateElapsedTime(releaseDate);
+  const localeReleaseDate = new Date(releaseDate).toLocaleDateString();
   return (
     <div key={version} className="app-version group mb-8 px-4 pb-4 last:pb-8">
       <div className="version-info mb-4 flex justify-between text-lg font-medium">
@@ -28,14 +29,14 @@ const Version = (props: VersionProp) => {
           {elapsed && !elapsed.isFuture ? (
             <span
               className="text-font-color-highlight dark:text-dark-font-color-highlight"
-              title={`Released on ${releaseDate}`}
+              title={`Released on ${localeReleaseDate}`}
             >
               {isLatest ? <>Latest &bull;</> : ''}({elapsed.elapsed}{' '}
               {elapsed.type}
               {elapsed.elapsed === 1 ? '' : 's'} ago)
             </span>
           ) : (
-            new Date(releaseDate).toDateString()
+            localeReleaseDate
           )}
         </span>
       </div>

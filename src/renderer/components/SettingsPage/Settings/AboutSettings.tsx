@@ -5,6 +5,7 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 
 import calculateElapsedTime from 'renderer/utils/calculateElapsedTime';
+import storage from 'renderer/utils/localStorage';
 
 import OpenLinkConfirmPrompt from 'renderer/components/OpenLinkConfirmPrompt';
 import {
@@ -80,7 +81,9 @@ const AboutSettings = () => {
                     <span
                       title={
                         currentVersionReleasedDate
-                          ? `Released on ${currentVersionReleasedDate}`
+                          ? `Released on ${new Date(
+                              currentVersionReleasedDate
+                            ).toLocaleDateString()}`
                           : undefined
                       }
                     >
@@ -97,7 +100,9 @@ const AboutSettings = () => {
               iconName="language"
               iconClassName="!text-2xl"
               tooltipLabel="Nora's Website (Under Development)"
-              clickHandler={() => window.api.openInBrowser('nora:')}
+              clickHandler={() =>
+                window.api.settingsHelpers.openInBrowser('nora:')
+              }
               isDisabled
             />
             <Img
@@ -209,25 +214,29 @@ const AboutSettings = () => {
             iconClassName="material-icons-round-outlined"
             className="about-link mb-4 block w-fit cursor-pointer"
             label="Open Log file"
-            clickHandler={() => window.api.openLogFile()}
+            clickHandler={() => window.api.log.openLogFile()}
           />
           <Button
             label="Open Devtools"
             iconName="code"
             className="mb-4 rounded-2xl"
-            clickHandler={() => window.api.openDevtools()}
+            clickHandler={() => window.api.settingsHelpers.openDevtools()}
           />
           <Button
             label="Resync Library"
             iconName="sync"
             className="mb-4 rounded-2xl"
-            clickHandler={() => window.api.resyncSongsLibrary()}
+            clickHandler={() =>
+              window.api.audioLibraryControls.resyncSongsLibrary()
+            }
           />
           <Button
             label="Generate Palettes"
             iconName="temp_preferences_custom"
             className="mb-4 rounded-2xl"
-            clickHandler={() => window.api.generatePalettes()}
+            clickHandler={() =>
+              window.api.audioLibraryControls.generatePalettes()
+            }
           />
           <Button
             label="App Shortcuts"
@@ -274,7 +283,7 @@ const AboutSettings = () => {
                   confirmButton={{
                     label: 'Clear History',
                     clickHandler: () => {
-                      window.api
+                      window.api.audioLibraryControls
                         .clearSongHistory()
                         .then((res) => {
                           if (res.success) {
@@ -298,6 +307,17 @@ const AboutSettings = () => {
                 />
               );
             }}
+          />
+
+          <Button
+            label="Export App Data"
+            iconName="file_upload"
+            className="mb-4 rounded-2xl"
+            clickHandler={() =>
+              window.api.settingsHelpers.exportAppData(
+                JSON.stringify(storage.getAllItems())
+              )
+            }
           />
         </div>
         <div className="about-description mt-4 text-sm font-light">

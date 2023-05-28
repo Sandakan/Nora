@@ -105,7 +105,7 @@ const AddMusicFoldersPrompt = (props: Props) => {
     ) => {
       setIsDisabled(true);
       setIsPending(true);
-      window.api
+      window.api.folderData
         .getFolderStructures()
         .then((structures) => {
           console.log(structures);
@@ -226,7 +226,7 @@ const AddMusicFoldersPrompt = (props: Props) => {
                 setIsDisabled(true);
                 setIsPending(true);
 
-                window.api
+                window.api.audioLibraryControls
                   .addSongsFromFolderStructures(validFolders, sortType)
                   .then(onSuccess)
                   .finally(() => {

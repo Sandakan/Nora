@@ -39,7 +39,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
     if (isIgnored) setIsVisible(false);
 
     if (name?.trim() && !isIgnored) {
-      window.api
+      window.api.suggestions
         .getArtistDuplicates(name)
         .then((res) => setDuplicateArtists(res))
         .catch((err) => console.error(err));
@@ -91,7 +91,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
         .map((x) => x.artistId)
         .filter((id) => id !== selectedId);
 
-      window.api
+      window.api.suggestions
         .resolveArtistDuplicates(selectedId, duplicateIds)
         .then((res) => {
           if (

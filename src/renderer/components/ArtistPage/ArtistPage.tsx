@@ -44,7 +44,7 @@ const ArtistPage = () => {
 
   const fetchArtistsData = React.useCallback(
     () =>
-      window.api.getArtistData([], sortingOrder).then((res) => {
+      window.api.artistsData.getArtistData([], sortingOrder).then((res) => {
         if (res && Array.isArray(res)) {
           if (res.length > 0) return setArtistsData(res);
           return setArtistsData([]);

@@ -1,14 +1,205 @@
 {
   "latestVersion": {
-    "version": "2.0.0-stable",
+    "version": "2.2.0-stable",
     "phase": "stable",
-    "releaseDate": "2023 April 23",
-    "artwork": "/assets/other/release artworks/whats-new-v2.0.0-stable.webp",
+    "releaseDate": "2023-05-20T06:56:34.692Z",
+    "artwork": "/assets/other/release artworks/whats-new-v2.2.0-stable.webp",
     "importantNotes": [
-      "Installing this update would RESET the app to provide support for new features."
+      "This update fixes the new update notification bug.",
+      "From this update onwards, I will add Linux installers for Nora. Keep in mind that even though Nora is stable on Windows, it may not be stable on Linux. Since I won't be able to test Linux builds on my machine, I will be relying on user feedback for Linux build improvements."
     ]
   },
   "versions": [
+    {
+      "version": "2.2.0-stable",
+      "artwork": "/assets/other/release artworks/whats-new-v2.2.0-stable.webp",
+      "releaseDate": "2023-05-20T06:56:34.692Z",
+      "importantNotes": [
+        "This update fixes the new update notification bug.",
+        "From this update onwards, I will add Linux installers for Nora. Keep in mind that even though Nora is stable on Windows, it may not be stable on Linux. Since I won't be able to test Linux builds on my machine, I will be relying on user feedback for Linux build improvements."
+      ],
+      "notes": {
+        "new": [
+          {
+            "note": "Added the feature to save some images that appear in the app."
+          },
+          {
+            "note": "Added an experimental fix for the bug where other music players like Groove Music don't recognize artworks edited by Nora."
+          },
+          {
+            "note": "Added a new keyboard shortcut to quickly navigate to Search. Fixes #173."
+          }
+        ],
+        "fixed": [
+          {
+            "note": "Improved the artists' splitting algorithm of suggestions."
+          },
+          {
+            "note": "Fixed a bug where images and lyrics lines are draggable."
+          },
+          {
+            "note": "Fixed a bug where playlist images aren't positioned correctly when the 'artworks made from song covers' feature is enabled."
+          },
+          {
+            "note": "Fixed a bug in which the app doesn't inform the user if the metadata update process fails."
+          },
+          {
+            "note": "Improved the app version matching algorithm and fixed a bug where the app informs the user about a new update even though app the is in the latest version."
+          },
+          {
+            "note": "Fixed a test contrast issue on the Artist Info page. Fixes #174."
+          },
+          {
+            "note": "In Search page, the 'Most Relevant' list (side-scroll) doesn't prevent you from scrolling down when hovering over them."
+          }
+        ],
+        "knownIssues": [
+          {
+            "note": "Sometimes updating song artwork may need an app restart to show on the app."
+          },
+          {
+            "note": "The app may crash in mini-player mode when trying to use window snap feature."
+          }
+        ]
+      }
+    },
+    {
+      "version": "2.1.0-stable",
+      "artwork": "/assets/other/release artworks/whats-new-v2.1.0-stable.webp",
+      "releaseDate": "2023 May 14",
+      "importantNotes": [
+        "This update includes fixes for app responsiveness no different screen sizes.",
+        "Welcome to a new design for Song Cards in Home page."
+      ],
+      "notes": {
+        "new": [
+          {
+            "note": "Added a new design for the song cards on the Home page. Thanks to @Shapalapa for the design inspiration."
+          },
+          {
+            "note": "Now songs show their album name next to their artist names."
+          },
+          {
+            "note": "Added support for a new suggestion in the SongInfoPage that gets triggered when there are names of featured artists in the title of a song asking to add them to the song artists."
+          },
+          {
+            "note": "Added the 'go to album' option to the context menu of songs."
+          },
+          {
+            "note": "Added a feature to show the details of the song when right-clicking to get the context menu."
+          },
+          {
+            "note": "Linked the new Nora Official Discord server with the app."
+          },
+          {
+            "note": "Now, the SearchPage won't limit the no of results you can see to 5 on some components."
+          },
+          {
+            "note": "Added experimental support for the offset tag in synced lyrics."
+          },
+          {
+            "note": "Added a new hotkey to change the playback speed."
+          },
+          {
+            "note": "Added support for a range of playback speeds instead of a predefined list."
+          },
+          {
+            "note": "Added experimental feature as the default sorting option for songs in an album according to their track number."
+          },
+          {
+            "note": "Added a new context menu option for folders to show the relevant folder on the window's explorer."
+          }
+        ],
+        "fixed": [
+          {
+            "note": "Fixed some bugs related to draggable songs in the queue."
+          },
+          {
+            "note": "Fixed some bugs related to sorting content in the app."
+          },
+          {
+            "note": "Fixed a bug where clicking \"Play Next\" would add the song next to the next song."
+          },
+          {
+            "note": "Updated the context menu options by right-clicking the current song info container in the footer."
+          },
+          {
+            "note": "Fixed a bug where deleting the current playing song wouldn't remove it from the current queue."
+          },
+          {
+            "note": "Fixed some bugs related to lyrics not being read from the audio source."
+          },
+          {
+            "note": "Fixed a bug where app UI goes out of bounds."
+          },
+          {
+            "note": "Fixed a possible bug where media control buttons don't work as expected."
+          },
+          {
+            "note": "Removed predictive search when searching for artists, albums, and genres in the SongTagsEditingPage."
+          },
+          {
+            "note": "Updated components to show information about the content when right-clicking a component."
+          },
+          {
+            "note": "Fixed some image scaling issues in ArtistInfoPage."
+          },
+          {
+            "note": "Fixed a bug where adding song metadata from the internet with new album data doesn't count the song artwork to the album artwork."
+          },
+          {
+            "note": "Improved the app's responsiveness to various screen sizes."
+          },
+          {
+            "note": "Updated the file association icons to show the relevant file type."
+          },
+          {
+            "note": "Fixed a bug related to synced lyrics saved in audio files."
+          },
+          {
+            "note": "Fixed a bug where sometimes users can't see the artist name when in ArtistInfoPage due to contrast issues between light and dark modes."
+          },
+          {
+            "note": "Improved the artist detection algorithm of the SeparateArtistsSuggestion."
+          },
+          {
+            "note": "Improved app performance by loading only necessary components to display."
+          },
+          {
+            "note": "Fixed a bug where the context menu overflows out of the visible part of the app's window."
+          },
+          {
+            "note": "Fixed some bugs related to how SongCards display in the HomePage when different screen sizes."
+          },
+          {
+            "note": "Added a new line with \"•••\" as the first line of synced lyrics."
+          },
+          {
+            "note": "Fixed a bug where metrics in ListeningActivityBarGraph overflow out of its container."
+          },
+          {
+            "note": "Fixed a bug where the \"Download Synced Lyrics\" button in the metadata editing page keeps spinning even though fetching lyrics failed."
+          },
+          {
+            "note": "Improved the app version detection algorithm of the app."
+          },
+          {
+            "note": "Fixed a bug where library updates don't reflect on the AllSearchResultsPage."
+          },
+          {
+            "note": "Updated Musixmatch Settings to show a message about the token updating process."
+          }
+        ],
+        "knownIssues": [
+          {
+            "note": "Sometimes updating song artwork may need an app restart to show on the app."
+          },
+          {
+            "note": "The app may crash in mini-player mode when trying to use window snap feature."
+          }
+        ]
+      }
+    },
     {
       "version": "2.0.0-stable",
       "artwork": "/assets/other/release artworks/whats-new-v2.0.0-stable.webp",

@@ -158,7 +158,7 @@ const ReleaseNotesPrompt = () => {
                 <Img
                   src={`${packageFile.urls.raw_repository_url}master${latestUpdatedInfo.artwork}`}
                   fallbackSrc={latestUpdatedInfo.artwork}
-                  className="rounded-lg"
+                  className="mx-auto rounded-lg"
                   alt=""
                 />
               </div>

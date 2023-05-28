@@ -35,7 +35,7 @@ const SongMetadataResultsSelectPage = (
     (title: string, artists: string[]) => {
       setLoadingStates('PENDING');
       if (title) {
-        window.api
+        window.api.songDataFromInternet
           .searchSongMetadataResultsInInternet(title, artists)
           .then((res) => {
             setLoadingStates(res.length === 0 ? 'EMPTY' : 'SUCCESS');

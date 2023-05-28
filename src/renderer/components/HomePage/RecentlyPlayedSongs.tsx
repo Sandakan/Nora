@@ -78,13 +78,7 @@ const RecentlyPlayedSongs = (props: Props) => {
             </div>
             <div
               style={{
-                gridTemplateColumns: `repeat(${
-                  noOfVisibleSongs < 3
-                    ? 3
-                    : noOfVisibleSongs < MAX_SONG_LIMIT
-                    ? noOfVisibleSongs
-                    : MAX_SONG_LIMIT
-                },1fr)`,
+                gridTemplateColumns: `repeat(${noOfVisibleSongs},1fr)`,
               }}
               className="songs-container grid gap-2 pr-2"
             >

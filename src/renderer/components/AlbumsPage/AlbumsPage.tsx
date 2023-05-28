@@ -16,7 +16,7 @@ import Button from '../Button';
 
 import NoAlbumsImage from '../../../../assets/images/svg/Easter bunny_Monochromatic.svg';
 
-export const AlbumsPage = () => {
+const AlbumsPage = () => {
   const {
     currentlyActivePage,
     localStorageData,
@@ -45,7 +45,7 @@ export const AlbumsPage = () => {
 
   const fetchAlbumData = React.useCallback(
     () =>
-      window.api.getAlbumData([], sortingOrder).then((res) => {
+      window.api.albumsData.getAlbumData([], sortingOrder).then((res) => {
         if (res && Array.isArray(res)) {
           if (res.length > 0) setAlbumsData(res);
           else setAlbumsData([]);
@@ -243,3 +243,5 @@ export const AlbumsPage = () => {
     </MainContainer>
   );
 };
+
+export default AlbumsPage;

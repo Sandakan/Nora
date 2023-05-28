@@ -14,7 +14,12 @@ const log = (
 
   if (logType) console[logToConsoleType](log);
 
-  window.api.sendLogs(message, logType, forceWindowRestart, forceMainRestart);
+  window.api.log.sendLogs(
+    message,
+    logType,
+    forceWindowRestart,
+    forceMainRestart
+  );
 };
 
 export default log;

@@ -12,11 +12,15 @@ import SecondaryContainer from '../SecondaryContainer';
 import SongArtist from '../SongsPage/SongArtist';
 import ListeningActivityBarGraph from './ListeningActivityBarGraph';
 import SongStat from './SongStat';
+import SongsWithFeaturingArtistsSuggestion from './SongsWithFeaturingArtistSuggestion';
 
 const SongInfoPage = () => {
   const { currentlyActivePage, bodyBackgroundImage } = useContext(AppContext);
-  const { changeCurrentActivePage, updateBodyBackgroundImage } =
-    React.useContext(AppUpdateContext);
+  const {
+    changeCurrentActivePage,
+    updateBodyBackgroundImage,
+    updateContextMenuData,
+  } = React.useContext(AppUpdateContext);
 
   const [songInfo, setSongInfo] = React.useState<SongData>();
   const [listeningData, setListeningData] = React.useState<SongListeningData>();
@@ -39,11 +43,24 @@ const SongInfoPage = () => {
     else songDuration = `${minutes} minutes ${seconds} seconds`;
   }
 
+  const updateSongInfo = React.useCallback(
+    (callback: (prevData: SongData) => SongData) => {
+      setSongInfo((prevData) => {
+        if (prevData) {
+          const updatedSongData = callback(prevData);
+          return updatedSongData;
+        }
+        return prevData;
+      });
+    },
+    []
+  );
+
   const fetchSongInfo = React.useCallback(() => {
     if (currentlyActivePage.data && currentlyActivePage.data.songId) {
       console.time('fetchTime');
 
-      window.api
+      window.api.audioLibraryControls
         .getSongInfo([currentlyActivePage.data.songId])
         .then((res) => {
           console.log(`Time end : ${console.timeEnd('fetchTime')}`);
@@ -56,7 +73,7 @@ const SongInfoPage = () => {
         })
         .catch((err) => log(err));
 
-      window.api
+      window.api.audioLibraryControls
         .getSongListeningData([currentlyActivePage.data.songId])
         .then((res) => {
           if (res && res.length > 0) setListeningData(res[0]);
@@ -98,37 +115,38 @@ const SongInfoPage = () => {
       );
     };
   }, [fetchSongInfo]);
+  const songArtists = React.useMemo(() => {
+    const artists = songInfo?.artists;
+    if (Array.isArray(artists) && artists.length > 0) {
+      return artists
+        .map((artist, i, artistArr) => {
+          const arr = [
+            <SongArtist
+              key={artist.artistId}
+              artistId={artist.artistId}
+              name={artist.name}
+              className={`ml-1 !text-base ${
+                bodyBackgroundImage && '!text-white'
+              }`}
+            />,
+          ];
 
-  const songArtists = React.useMemo(
-    () =>
-      songInfo && songInfo.artists ? (
-        songInfo.artists.length > 0 ? (
-          songInfo.artists.map((artist, index) => (
-            <>
-              <SongArtist
-                key={artist.artistId}
-                artistId={artist.artistId}
-                name={artist.name}
-                className={`ml-1 !text-base ${
-                  bodyBackgroundImage && '!text-white'
-                }`}
-              />
+          if ((artists?.length ?? 1) - 1 !== i)
+            arr.push(
+              <span
+                className="mr-1"
+                key={`${artistArr[i]}=>${artistArr[i + 1]}`}
+              >
+                ,
+              </span>
+            );
 
-              {songInfo.artists && songInfo.artists.length - 1 !== index ? (
-                <span className="mr-1">,</span>
-              ) : (
-                ''
-              )}
-            </>
-          ))
-        ) : (
-          <span>&apos;Unknown Artist&apos;</span>
-        )
-      ) : (
-        'Unknown Artist'
-      ),
-    [songInfo, bodyBackgroundImage]
-  );
+          return arr;
+        })
+        .flat();
+    }
+    return <span className="text-xs font-normal">Unknown Artist</span>;
+  }, [bodyBackgroundImage, songInfo?.artists]);
 
   const { allTimeListens, thisYearListens, thisMonthListens } =
     React.useMemo(() => {
@@ -192,6 +210,26 @@ const SongInfoPage = () => {
               src={songInfo.artworkPaths?.artworkPath}
               alt={`${songInfo.title} cover`}
               className="h-full object-cover"
+              onContextMenu={(e) =>
+                !songInfo.artworkPaths.isDefaultArtwork &&
+                updateContextMenuData(
+                  true,
+                  [
+                    {
+                      label: 'Save Song Artwork',
+                      class: 'edit',
+                      iconName: 'image',
+                      iconClassName: 'material-icons-round-outlined',
+                      handlerFunction: () =>
+                        window.api.songUpdates.saveArtworkToSystem(
+                          songInfo.artworkPaths.artworkPath
+                        ),
+                    },
+                  ],
+                  e.pageX,
+                  e.pageY
+                )
+              }
             />
           </div>
           <div
@@ -252,11 +290,23 @@ const SongInfoPage = () => {
             )}
           </div>
         </div>
+
+        <SongsWithFeaturingArtistsSuggestion
+          songId={songInfo.songId}
+          songTitle={songInfo.title}
+          artistNames={songInfo.artists?.map((x) => x.name) || []}
+          path={songInfo.path}
+          updateSongInfo={updateSongInfo}
+        />
+
         {listeningData && (
           <SecondaryContainer className="secondary-container song-stats-container mt-8 flex h-fit flex-row flex-wrap rounded-2xl p-2">
-            <div className="flex items-center justify-between py-4">
-              <ListeningActivityBarGraph listeningData={listeningData} />
-              <div className="flex w-fit flex-wrap">
+            <div className="flex items-center justify-between py-4 xl:flex-col">
+              <ListeningActivityBarGraph
+                listeningData={listeningData}
+                className="xl:order-2"
+              />
+              <div className="stat-cards flex w-fit flex-wrap xl:order-1 xl:mt-4 xl:items-center xl:justify-center">
                 <SongStat
                   key={0}
                   title="All time Listens"

@@ -26,7 +26,7 @@ const StartupSettings = () => {
                 : false
             }
             checkedStateUpdateFunction={(state) =>
-              window.api.toggleAutoLaunch(state).then(() =>
+              window.api.settingsHelpers.toggleAutoLaunch(state).then(() =>
                 updateUserData((prevUserData) => {
                   return {
                     ...prevUserData,
@@ -66,7 +66,7 @@ const StartupSettings = () => {
             }
             isDisabled={userData && !userData.preferences?.autoLaunchApp}
             checkedStateUpdateFunction={(state) =>
-              window.api
+              window.api.userData
                 .saveUserData(
                   'preferences.openWindowAsHiddenOnSystemStart',
                   state
@@ -98,7 +98,7 @@ const StartupSettings = () => {
                 : false
             }
             checkedStateUpdateFunction={(state) =>
-              window.api
+              window.api.userData
                 .saveUserData('preferences.hideWindowOnClose', state)
                 .then(() =>
                   updateUserData((prevUserData) => {

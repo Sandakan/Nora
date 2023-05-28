@@ -95,25 +95,27 @@ const BlacklistFolderConfrimPrompt = (props: {
           label={`Blacklist Folder${folderPaths.length !== 1 ? 's' : ''}`}
           className="blacklist-folders-btn mt-4 !bg-background-color-3 px-8 text-lg text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
           clickHandler={() => {
-            return window.api.blacklistFolders(folderPaths).then(() => {
-              addNewNotifications([
-                {
-                  id: `${folderName}Blacklisted`,
-                  delay: 5000,
-                  content: (
-                    <span>
-                      &apos;
-                      {isMultipleSelectionEnabled
-                        ? `${folderPaths.length} folders`
-                        : folderName}
-                      &apos; blacklisted.
-                    </span>
-                  ),
-                  icon: <span className="material-icons-round">block</span>,
-                },
-              ]);
-              return changePromptMenuData(false);
-            });
+            return window.api.folderData
+              .blacklistFolders(folderPaths)
+              .then(() => {
+                addNewNotifications([
+                  {
+                    id: `${folderName}Blacklisted`,
+                    delay: 5000,
+                    content: (
+                      <span>
+                        &apos;
+                        {isMultipleSelectionEnabled
+                          ? `${folderPaths.length} folders`
+                          : folderName}
+                        &apos; blacklisted.
+                      </span>
+                    ),
+                    icon: <span className="material-icons-round">block</span>,
+                  },
+                ]);
+                return changePromptMenuData(false);
+              });
           }}
         />
       </div>

@@ -33,7 +33,7 @@ const MusicFolderInfoPage = () => {
 
   const fetchFolderInfo = React.useCallback(() => {
     if (currentlyActivePage?.data && currentlyActivePage?.data?.folderPath) {
-      window.api
+      window.api.folderData
         .getFolderData([currentlyActivePage?.data?.folderPath])
         .then((res) => {
           if (res) return setFolderInfo(res[0]);
@@ -46,7 +46,7 @@ const MusicFolderInfoPage = () => {
 
   const fetchFolderSongs = React.useCallback(() => {
     if (folderInfo && folderInfo.songIds.length > 0) {
-      window.api
+      window.api.audioLibraryControls
         .getSongInfo(folderInfo.songIds, sortingOrder)
         .then((res) => {
           if (res && res.length > 0) return setFolderSongs(res);
@@ -211,7 +211,8 @@ const MusicFolderInfoPage = () => {
       {
         label: 'Resync library',
         iconName: 'sync',
-        handlerFunction: () => window.api.resyncSongsLibrary(),
+        handlerFunction: () =>
+          window.api.audioLibraryControls.resyncSongsLibrary(),
       },
     ],
     []

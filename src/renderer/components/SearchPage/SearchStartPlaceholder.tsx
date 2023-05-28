@@ -25,7 +25,7 @@ const SearchStartPlaceholder = (props: Props) => {
   );
 
   const fetchRecentSearchResults = React.useCallback(() => {
-    window.api
+    window.api.userData
       .getUserData()
       .then((data) => {
         if (data && Array.isArray(data.recentSearches))
@@ -103,7 +103,7 @@ const SearchStartPlaceholder = (props: Props) => {
           <div className="description text-xl text-font-color-black dark:text-font-color-white">
             Search for anything in your library...
           </div>
-          <div className="recent-search-results-container mt-4 flex flex-wrap items-center justify-center px-[15%]">
+          <div className="recent-search-results-container mt-4 flex w-[clamp(12.5rem,90%,50rem)] flex-wrap items-center justify-center">
             {recentSearchResultComponents}
           </div>
           {recentSearchResultComponents.length > 0 && (
@@ -112,7 +112,7 @@ const SearchStartPlaceholder = (props: Props) => {
               className="!m-0 !mt-4 !rounded-none !border-0 !p-0 !text-font-color-highlight outline-1 outline-offset-1 hover:underline focus-visible:!outline dark:!text-dark-font-color-highlight/75"
               clickHandler={(_, setIsDisabled) => {
                 setIsDisabled(true);
-                window.api.clearSearchHistory().catch((err) => {
+                window.api.search.clearSearchHistory().catch((err) => {
                   setIsDisabled(false);
                   console.warn(err);
                 });

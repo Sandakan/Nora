@@ -54,5 +54,5 @@ export default (
   });
 
   if (!options?.preventLoggingToConsole) console.log(str);
-  if (options.sendToRenderer) sendMessageToRenderer(str);
+  if (options.sendToRenderer) sendMessageToRenderer(mes);
 };

@@ -110,9 +110,13 @@ function SongMetadataResult(props: SongMetadataResultProp) {
   } = props;
 
   const addToMetadata = React.useCallback(async () => {
-    const albumData = album ? await window.api.getAlbumData([album]) : [];
-    const artistData = await window.api.getArtistData(artists);
-    const genreData = genres ? await window.api.getGenresData(genres) : [];
+    const albumData = album
+      ? await window.api.albumsData.getAlbumData([album])
+      : [];
+    const artistData = await window.api.artistsData.getArtistData(artists);
+    const genreData = genres
+      ? await window.api.genresData.getGenresData(genres)
+      : [];
 
     updateSongInfo((prevData): SongTags => {
       changePromptMenuData(false, undefined, '');

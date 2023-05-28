@@ -4,6 +4,7 @@ import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 
 import Img from '../Img';
+import Button from '../Button';
 
 export interface MostRelevantResultProp {
   resultType: 'artist' | 'song' | 'album' | 'playlist' | 'genre';
@@ -66,7 +67,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
 
   return (
     <div
-      className={`result appear-from-bottom group most-relevant-${resultType.toLowerCase()} active mr-4 flex h-40 w-fit min-w-[20rem] max-w-sm cursor-pointer items-center rounded-lg bg-background-color-2 py-3 pl-3 pr-4 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:hover:bg-dark-background-color-3`}
+      className={`result appear-from-bottom group most-relevant-${resultType.toLowerCase()} active mr-4 grid h-40 w-fit min-w-[20rem] max-w-md cursor-pointer grid-cols-[10rem_1fr] items-center rounded-lg bg-background-color-2 py-3 pl-3 pr-4 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:hover:bg-dark-background-color-3`}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -83,13 +84,15 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
     >
       <div className="result-img-container relative mr-4 flex h-full w-fit items-center justify-center overflow-hidden">
         {resultType.toLowerCase() !== 'artist' && (
-          <span
-            title="Play Song"
-            className="material-icons-round icon absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer text-4xl text-font-color-white text-opacity-0 group-hover:text-font-color-white group-hover:text-opacity-100 dark:group-hover:text-font-color-white"
-            onClick={() => playSong(id)}
-          >
-            play_circle
-          </span>
+          <Button
+            className="absolute z-10 !m-0 !rounded-none !border-0 !p-0 opacity-75 outline-1 outline-offset-1 transition-opacity hover:opacity-100 focus-visible:!outline group-hover:opacity-100"
+            iconName="play_circle"
+            iconClassName="!text-4xl !leading-none text-font-color-white"
+            clickHandler={(e) => {
+              e.stopPropagation();
+              playSong(id);
+            }}
+          />
         )}
         <Img
           src={onlineArtworkPath}
@@ -101,7 +104,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
           }`}
         />
       </div>
-      <div className="result-info-container max-w-[60%] text-font-color-black group-hover:text-font-color-black dark:text-font-color-white dark:group-hover:text-font-color-black">
+      <div className="result-info-container max-w-[50%] text-font-color-black group-hover:text-font-color-black dark:text-font-color-white dark:group-hover:text-font-color-black">
         <div className="title overflow-hidden text-ellipsis whitespace-nowrap text-2xl">
           {title}
         </div>
