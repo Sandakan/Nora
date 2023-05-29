@@ -1,5 +1,6 @@
 /* eslint-disable no-use-before-define */
 import React, { ReactNode, Suspense } from 'react';
+import { Howler, Howl } from 'howler';
 import 'tailwindcss/tailwind.css';
 import '../../assets/styles/styles.css';
 import packageFile from '../../package.json';
@@ -66,6 +67,7 @@ type AppReducerStateActions =
   | 'CURRENT_ACTIVE_PAGE_DATA_UPDATE'
   | 'UPDATE_NAVIGATION_HISTORY'
   | 'UPDATE_MINI_PLAYER_STATE'
+  | 'UPDATE_MINI_PLAYER_LYRICS_VISIBILITY_STATE'
   | 'UPDATE_VOLUME'
   | 'UPDATE_MUTED_STATE'
   | 'UPDATE_SONG_POSITION'
@@ -274,6 +276,21 @@ const reducer = (
             typeof action.data === 'boolean'
               ? action.data
               : state.player.isMiniPlayer,
+          isMiniPlayerLyricsVisible:
+            action.data === true
+              ? false
+              : state.player.isMiniPlayerLyricsVisible,
+        },
+      };
+    case 'UPDATE_MINI_PLAYER_LYRICS_VISIBILITY_STATE':
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          isMiniPlayerLyricsVisible:
+            typeof action.data === 'boolean'
+              ? action.data
+              : state.player.isMiniPlayerLyricsVisible,
         },
       };
     case 'UPDATE_SONG_POSITION':
@@ -416,68 +433,10 @@ const reducer = (
   }
 };
 
-const player = new Audio();
-let repetitivePlaybackErrorsCount = 0;
-
-const context = new window.AudioContext();
-const source = context.createMediaElementSource(player);
-const sixtyHertzFilter = context.createBiquadFilter();
-const hundredFiftyHertzFilter = context.createBiquadFilter();
-const fourHundredHertzFilter = context.createBiquadFilter();
-const thousandHertzFilter = context.createBiquadFilter();
-const twoThousandHertzFilter = context.createBiquadFilter();
-const fifteenThousandHertzFilter = context.createBiquadFilter();
-
-source.connect(sixtyHertzFilter);
-sixtyHertzFilter.connect(hundredFiftyHertzFilter);
-hundredFiftyHertzFilter.connect(fourHundredHertzFilter);
-fourHundredHertzFilter.connect(thousandHertzFilter);
-thousandHertzFilter.connect(twoThousandHertzFilter);
-twoThousandHertzFilter.connect(fifteenThousandHertzFilter);
-fifteenThousandHertzFilter.connect(context.destination);
-
+// let repetitivePlaybackErrorsCount = 0;
 // ? / / / / / / /  PLAYER DEFAULT OPTIONS / / / / / / / / / / / / / /
-player.preload = 'auto';
-player.defaultPlaybackRate = 1.0;
 
-sixtyHertzFilter.type = 'peaking';
-sixtyHertzFilter.frequency.value = 60;
-sixtyHertzFilter.Q.value = 1;
-sixtyHertzFilter.gain.value = 0;
-
-hundredFiftyHertzFilter.type = 'peaking';
-hundredFiftyHertzFilter.frequency.value = 150;
-hundredFiftyHertzFilter.Q.value = 1;
-hundredFiftyHertzFilter.gain.value = 0;
-
-fourHundredHertzFilter.type = 'peaking';
-fourHundredHertzFilter.frequency.value = 400;
-fourHundredHertzFilter.Q.value = 1;
-fourHundredHertzFilter.gain.value = 0;
-
-thousandHertzFilter.type = 'peaking';
-thousandHertzFilter.frequency.value = 1000;
-thousandHertzFilter.Q.value = 1;
-thousandHertzFilter.gain.value = 0;
-
-twoThousandHertzFilter.type = 'peaking';
-twoThousandHertzFilter.frequency.value = 2400;
-twoThousandHertzFilter.Q.value = 1;
-twoThousandHertzFilter.gain.value = 0;
-
-fifteenThousandHertzFilter.type = 'peaking';
-fifteenThousandHertzFilter.frequency.value = 15000;
-fifteenThousandHertzFilter.Q.value = 1;
-fifteenThousandHertzFilter.gain.value = 0;
-
-player.addEventListener('player/trackchange', (e) => {
-  if ('detail' in e) {
-    console.log(
-      `player track changed to ${(e as DetailAvailableEvent<string>).detail}.`
-    );
-  }
-});
-// / / / / / / / /
+// ? / / / / / / / /
 
 const updateNetworkStatus = () =>
   window.api.settingsHelpers.networkStatusChange(navigator.onLine);
@@ -512,6 +471,7 @@ const reducerData: AppReducer = {
     isShuffling: false,
     songPosition: 0,
     isMiniPlayer: false,
+    isMiniPlayerLyricsVisible: false,
     isPlayerStalled: false,
     playbackRate: 1.0,
   },
@@ -547,6 +507,17 @@ const reducerData: AppReducer = {
 };
 
 console.log('Command line args', window.api.properties.commandLineArgs);
+
+let audioPlayer: Howl | undefined;
+// const audio = new Audio();
+
+let isEqualizerInitialized = false;
+let sixtyHertzFilter: BiquadFilterNode;
+let hundredFiftyHertzFilter: BiquadFilterNode;
+let fourHundredHertzFilter: BiquadFilterNode;
+let thousandHertzFilter: BiquadFilterNode;
+let twoThousandHertzFilter: BiquadFilterNode;
+let fifteenThousandHertzFilter: BiquadFilterNode;
 
 export default function App() {
   const [content, dispatch] = React.useReducer(reducer, reducerData);
@@ -601,89 +572,50 @@ export default function App() {
     [content.PromptMenuData.className, content.PromptMenuData.content]
   );
 
-  const managePlaybackErrors = React.useCallback(
-    (err: unknown) => {
-      if (repetitivePlaybackErrorsCount > 5)
-        return console.error('Playback errors exceeded the 5 errors limit.');
-      repetitivePlaybackErrorsCount += 1;
-      const prevSongPosition = player.currentTime;
-      const playerErrorData = player.error;
-      console.error(err, playerErrorData);
-      log(
-        `Error occurred in the player.App error:${err}; Player error: ${playerErrorData};`
-      );
-      if (player.src && playerErrorData) {
-        player.load();
-        player.currentTime = prevSongPosition;
-      } else {
-        player.pause();
-        changePromptMenuData(
-          true,
-          <ErrorPrompt
-            reason="ERROR_IN_PLAYER"
-            message={
-              <>
-                An error ocurred in the player.
-                <br />
-                This could be a result of trying to play a corrupted song.
-                <details>{`${playerErrorData}`}</details>
-              </>
-            }
-            showSendFeedbackBtn
-          />
-        );
-      }
-      return undefined;
-    },
-    [changePromptMenuData]
-  );
-
-  const AUDIO_FADE_INTERVAL = 50;
-  const AUDIO_FADE_DURATION = 250;
-  const fadeOutIntervalId = React.useRef(undefined as NodeJS.Timer | undefined);
-  const fadeInIntervalId = React.useRef(undefined as NodeJS.Timer | undefined);
-  const fadeOutAudio = React.useCallback(() => {
-    if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
-    if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
-    fadeOutIntervalId.current = setInterval(() => {
-      if (player.volume > 0) {
-        const rate =
-          contentRef.current.player.volume.value /
-          (100 * (AUDIO_FADE_DURATION / AUDIO_FADE_INTERVAL));
-        if (player.volume - rate <= 0) player.volume = 0;
-        else player.volume -= rate;
-      } else {
-        player.pause();
-        if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
-      }
-    }, AUDIO_FADE_INTERVAL);
-  }, []);
-
-  const fadeInAudio = React.useCallback(() => {
-    if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
-    if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
-    fadeInIntervalId.current = setInterval(() => {
-      if (player.volume < contentRef.current.player.volume.value / 100) {
-        const rate =
-          (contentRef.current.player.volume.value / 100 / AUDIO_FADE_INTERVAL) *
-          (AUDIO_FADE_DURATION / AUDIO_FADE_INTERVAL);
-        if (
-          player.volume + rate >=
-          contentRef.current.player.volume.value / 100
-        )
-          player.volume = contentRef.current.player.volume.value / 100;
-        else player.volume += rate;
-      } else if (fadeInIntervalId.current) {
-        clearInterval(fadeInIntervalId.current);
-      }
-    }, AUDIO_FADE_INTERVAL);
-  }, []);
+  // const managePlaybackErrors = React.useCallback(
+  //   (err: unknown) => {
+  //     if (repetitivePlaybackErrorsCount > 5)
+  //       return console.error('Playback errors exceeded the 5 errors limit.');
+  //     repetitivePlaybackErrorsCount += 1;
+  //     const prevSongPosition = audioPlayer.seek();
+  //     const playerErrorData = player.error;
+  //     console.error(err, playerErrorData);
+  //     log(
+  //       `Error occurred in the player.App error:${err}; Player error: ${playerErrorData};`
+  //     );
+  //     if (player.src && playerErrorData) {
+  //       player.load();
+  //       audioPlayer.seek(prevSongPosition);
+  //     } else {
+  //       player.pause();
+  //       changePromptMenuData(
+  //         true,
+  //         <ErrorPrompt
+  //           reason="ERROR_IN_PLAYER"
+  //           message={
+  //             <>
+  //               An error ocurred in the player.
+  //               <br />
+  //               This could be a result of trying to play a corrupted song.
+  //               <details>{`${playerErrorData}`}</details>
+  //             </>
+  //           }
+  //           showSendFeedbackBtn
+  //         />
+  //       );
+  //     }
+  //     return undefined;
+  //   },
+  //   [changePromptMenuData]
+  // );
 
   const handleBeforeQuitEvent = React.useCallback(async () => {
-    storage.playback.setCurrentSongOptions(
-      'stoppedPosition',
-      player.currentTime
-    );
+    if (audioPlayer)
+      storage.playback.setCurrentSongOptions(
+        'stoppedPosition',
+        audioPlayer.seek()
+      );
+
     storage.playback.setPlaybackOptions(
       'isRepeating',
       contentRef.current.player.isRepeating
@@ -801,25 +733,89 @@ export default function App() {
     };
   }, []);
 
-  React.useEffect(() => {
-    if (content.localStorage.equalizerPreset) {
-      const {
-        fifteenKiloHertz,
-        fourHundredHertz,
-        hundredFiftyHertz,
-        oneKiloHertz,
-        sixtyHertz,
-        twoPointFourKiloHertz,
-      } = content.localStorage.equalizerPreset;
+  const initEqualizer = React.useCallback((equalizer?: Equalizer) => {
+    if (Howler.masterGain && Howler.ctx) {
+      // const pool = Howler._html5AudioPool;
+      // console.log(pool);
+      //  && pool.length > 0
+      if (!isEqualizerInitialized) {
+        isEqualizerInitialized = true;
 
-      sixtyHertzFilter.gain.value = sixtyHertz;
-      hundredFiftyHertzFilter.gain.value = hundredFiftyHertz;
-      fourHundredHertzFilter.gain.value = fourHundredHertz;
-      thousandHertzFilter.gain.value = oneKiloHertz;
-      twoThousandHertzFilter.gain.value = twoPointFourKiloHertz;
-      fifteenThousandHertzFilter.gain.value = fifteenKiloHertz;
-    }
-  }, [content.localStorage.equalizerPreset]);
+        const context = Howler.ctx;
+        const source = Howler.masterGain;
+        // const context = new window.AudioContext();
+        // const source = context.createMediaElementSource(pool[0]);
+
+        sixtyHertzFilter = context.createBiquadFilter();
+        hundredFiftyHertzFilter = context.createBiquadFilter();
+        fourHundredHertzFilter = context.createBiquadFilter();
+        thousandHertzFilter = context.createBiquadFilter();
+        twoThousandHertzFilter = context.createBiquadFilter();
+        fifteenThousandHertzFilter = context.createBiquadFilter();
+
+        sixtyHertzFilter.type = 'peaking';
+        sixtyHertzFilter.frequency.value = 60;
+        sixtyHertzFilter.Q.value = 1;
+        sixtyHertzFilter.gain.value = 0;
+
+        hundredFiftyHertzFilter.type = 'peaking';
+        hundredFiftyHertzFilter.frequency.value = 150;
+        hundredFiftyHertzFilter.Q.value = 1;
+        hundredFiftyHertzFilter.gain.value = 0;
+
+        fourHundredHertzFilter.type = 'peaking';
+        fourHundredHertzFilter.frequency.value = 400;
+        fourHundredHertzFilter.Q.value = 1;
+        fourHundredHertzFilter.gain.value = 0;
+
+        thousandHertzFilter.type = 'peaking';
+        thousandHertzFilter.frequency.value = 1000;
+        thousandHertzFilter.Q.value = 1;
+        thousandHertzFilter.gain.value = 0;
+
+        twoThousandHertzFilter.type = 'peaking';
+        twoThousandHertzFilter.frequency.value = 2400;
+        twoThousandHertzFilter.Q.value = 1;
+        twoThousandHertzFilter.gain.value = 0;
+
+        fifteenThousandHertzFilter.type = 'peaking';
+        fifteenThousandHertzFilter.frequency.value = 15000;
+        fifteenThousandHertzFilter.Q.value = 1;
+        fifteenThousandHertzFilter.gain.value = 0;
+
+        source.connect(sixtyHertzFilter);
+        sixtyHertzFilter.connect(hundredFiftyHertzFilter);
+        hundredFiftyHertzFilter.connect(fourHundredHertzFilter);
+        fourHundredHertzFilter.connect(thousandHertzFilter);
+        thousandHertzFilter.connect(twoThousandHertzFilter);
+        twoThousandHertzFilter.connect(fifteenThousandHertzFilter);
+        fifteenThousandHertzFilter.connect(context.destination);
+      }
+
+      if (equalizer && isEqualizerInitialized) {
+        const {
+          fifteenKiloHertz,
+          fourHundredHertz,
+          hundredFiftyHertz,
+          oneKiloHertz,
+          sixtyHertz,
+          twoPointFourKiloHertz,
+        } = equalizer;
+
+        sixtyHertzFilter.gain.value = sixtyHertz;
+        hundredFiftyHertzFilter.gain.value = hundredFiftyHertz;
+        fourHundredHertzFilter.gain.value = fourHundredHertz;
+        thousandHertzFilter.gain.value = oneKiloHertz;
+        twoThousandHertzFilter.gain.value = twoPointFourKiloHertz;
+        fifteenThousandHertzFilter.gain.value = fifteenKiloHertz;
+      }
+    } else console.warn('Howler is not using the Web Audio api.');
+  }, []);
+
+  React.useEffect(
+    () => initEqualizer(content.localStorage.equalizerPreset),
+    [content.localStorage.equalizerPreset, initEqualizer]
+  );
 
   const manageWindowBlurOrFocus = React.useCallback(
     (state: 'blur' | 'focus') => {
@@ -845,21 +841,6 @@ export default function App() {
   );
 
   React.useEffect(() => {
-    player.addEventListener('error', (err) => managePlaybackErrors(err));
-    player.addEventListener('play', () => {
-      dispatch({
-        type: 'CURRENT_SONG_PLAYBACK_STATE',
-        data: true,
-      });
-      window.api.playerControls.songPlaybackStateChange(true);
-    });
-    player.addEventListener('pause', () => {
-      dispatch({
-        type: 'CURRENT_SONG_PLAYBACK_STATE',
-        data: false,
-      });
-      window.api.playerControls.songPlaybackStateChange(false);
-    });
     window.api.quitEvent.beforeQuitEvent(handleBeforeQuitEvent);
 
     window.api.windowControls.onWindowBlur(() =>
@@ -879,98 +860,12 @@ export default function App() {
     return () => {
       window.api.quitEvent.removeBeforeQuitEventListener(handleBeforeQuitEvent);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  React.useEffect(() => {
-    const displayDefaultTitleBar = () => {
-      document.title = `Nora`;
-      storage.playback.setCurrentSongOptions(
-        'stoppedPosition',
-        player.currentTime
-      );
-    };
-    const playSongIfPlayable = () => {
-      if (refStartPlay.current) toggleSongPlayback(true);
-    };
-    const manageSongPositionUpdate = () => {
-      contentRef.current.player.songPosition = roundTo(player.currentTime, 2);
-    };
-    const managePlayerStalledStatus = () => {
-      dispatch({ type: 'PLAYER_WAITING_STATUS', data: true });
-    };
-    const managePlayerNotStalledStatus = () => {
-      dispatch({ type: 'PLAYER_WAITING_STATUS', data: false });
-    };
-
-    const handleSkipForwardClickWithParams = () =>
-      handleSkipForwardClick('PLAYER_SKIP');
-
-    player.addEventListener('canplay', managePlayerNotStalledStatus);
-    player.addEventListener('canplaythrough', managePlayerNotStalledStatus);
-    player.addEventListener('loadeddata', managePlayerNotStalledStatus);
-    player.addEventListener('loadedmetadata', managePlayerNotStalledStatus);
-
-    player.addEventListener('suspend', managePlayerStalledStatus);
-    player.addEventListener('stalled', managePlayerStalledStatus);
-    player.addEventListener('waiting', managePlayerStalledStatus);
-    player.addEventListener('progress', managePlayerStalledStatus);
-
-    player.addEventListener('canplay', playSongIfPlayable);
-    player.addEventListener('ended', handleSkipForwardClickWithParams);
-    player.addEventListener('play', addSongTitleToTitleBar);
-    player.addEventListener('pause', displayDefaultTitleBar);
-
-    const intervalId = setInterval(() => {
-      if (!player.paused) {
-        const currentPosition = contentRef.current.player.songPosition;
-
-        const playerPositionChange = new CustomEvent('player/positionChange', {
-          detail: currentPosition,
-        });
-        player.dispatchEvent(playerPositionChange);
-
-        startTransition(() =>
-          dispatch({
-            type: 'UPDATE_SONG_POSITION',
-            data: currentPosition,
-          })
-        );
-      }
-    }, 1000 / 3);
-
-    player.addEventListener('timeupdate', manageSongPositionUpdate);
-
-    return () => {
-      toggleSongPlayback(false);
-      clearInterval(intervalId);
-      player.removeEventListener('canplay', managePlayerNotStalledStatus);
-      player.removeEventListener(
-        'canplaythrough',
-        managePlayerNotStalledStatus
-      );
-      player.removeEventListener('loadeddata', managePlayerNotStalledStatus);
-      player.removeEventListener(
-        'loadedmetadata',
-        managePlayerNotStalledStatus
-      );
-      player.removeEventListener('suspend', managePlayerStalledStatus);
-      player.removeEventListener('stalled', managePlayerStalledStatus);
-      player.removeEventListener('waiting', managePlayerStalledStatus);
-      player.removeEventListener('progress', managePlayerStalledStatus);
-      player.removeEventListener('timeupdate', manageSongPositionUpdate);
-      player.removeEventListener('canplay', playSongIfPlayable);
-      player.removeEventListener('ended', handleSkipForwardClickWithParams);
-      player.removeEventListener('play', addSongTitleToTitleBar);
-      player.removeEventListener('pause', displayDefaultTitleBar);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [handleBeforeQuitEvent, manageWindowBlurOrFocus, manageWindowFullscreen]);
 
   // VOLUME RELATED SETTINGS
   React.useEffect(() => {
-    player.volume = content.player.volume.value / 100;
-    player.muted = content.player.volume.isMuted;
+    audioPlayer?.volume(content.player.volume.value / 100);
+    audioPlayer?.mute(content.player.volume.isMuted);
   }, [content.player.volume]);
 
   React.useEffect(() => {
@@ -979,10 +874,11 @@ export default function App() {
 
     const syncLocalStorage = () => {
       const allItems = storage.getAllItems();
+      contentRef.current.localStorage = allItems;
       dispatch({ type: 'UPDATE_LOCAL_STORAGE', data: allItems });
 
-      if (player.playbackRate !== allItems.playback.playbackRate)
-        player.playbackRate = allItems.playback.playbackRate;
+      if (audioPlayer && audioPlayer.rate() !== allItems.playback.playbackRate)
+        audioPlayer.rate(allItems.playback.playbackRate);
 
       console.log('local storage updated');
     };
@@ -1008,12 +904,15 @@ export default function App() {
       .then((startUpSongData) => {
         if (startUpSongData) playSongFromUnknownSource(startUpSongData, true);
         else if (playback?.currentSong.songId) {
-          playSong(playback?.currentSong.songId, false);
-
           const currSongPosition = Number(
             playback?.currentSong.stoppedPosition
           );
-          player.currentTime = currSongPosition;
+          playSong(
+            playback?.currentSong.songId,
+            false,
+            undefined,
+            currSongPosition
+          );
           contentRef.current.player.songPosition = currSongPosition;
           dispatch({
             type: 'UPDATE_SONG_POSITION',
@@ -1143,39 +1042,44 @@ export default function App() {
     [content.notificationPanelData.notifications]
   );
 
+  const pauseId = React.useRef<NodeJS.Timeout>();
   const toggleSongPlayback = React.useCallback(
     (startPlay?: boolean) => {
       if (contentRef.current.currentSongData?.songId) {
-        if (typeof startPlay !== 'boolean' || startPlay === player.paused) {
-          if (player.readyState > 0) {
-            if (player.paused) {
-              player
-                .play()
-                .then(() => {
-                  const playbackChange = new CustomEvent(
-                    'player/playbackChange'
-                  );
-                  return player.dispatchEvent(playbackChange);
-                })
-                .catch((err) => managePlaybackErrors(err));
-              return fadeInAudio();
+        if (
+          audioPlayer &&
+          (typeof startPlay !== 'boolean' ||
+            startPlay === !audioPlayer.playing())
+        ) {
+          if (pauseId.current) clearTimeout(pauseId.current);
+          if (audioPlayer.state() !== 'unloaded') {
+            if (!audioPlayer.playing()) {
+              audioPlayer.fade(
+                0,
+                contentRef.current.player.volume.value / 100,
+                250
+              );
+              return audioPlayer.play();
             }
-            if (player.ended) {
-              player.currentTime = 0;
-              player
-                .play()
-                .then(() => {
-                  const playbackChange = new CustomEvent(
-                    'player/playbackChange'
-                  );
-                  return player.dispatchEvent(playbackChange);
-                })
-                .catch((err) => managePlaybackErrors(err));
-              return fadeInAudio();
+            if (audioPlayer.seek() === audioPlayer.duration()) {
+              audioPlayer.seek(0);
+
+              if (!audioPlayer.playing()) {
+                audioPlayer.fade(
+                  0,
+                  contentRef.current.player.volume.value / 100,
+                  250
+                );
+                audioPlayer.play();
+              }
             }
-            const playbackChange = new CustomEvent('player/playbackChange');
-            player.dispatchEvent(playbackChange);
-            return fadeOutAudio();
+
+            audioPlayer.fade(
+              contentRef.current.player.volume.value / 100,
+              0,
+              250
+            );
+            pauseId.current = setTimeout(() => audioPlayer?.pause(), 250);
           }
         }
       } else
@@ -1192,7 +1096,7 @@ export default function App() {
         ]);
       return undefined;
     },
-    [managePlaybackErrors, addNewNotifications, fadeOutAudio, fadeInAudio]
+    [addNewNotifications]
   );
 
   const displayMessageFromMain = React.useCallback(
@@ -1381,21 +1285,12 @@ export default function App() {
       let passedFullListenRange = false;
       let seconds = 0;
 
-      player.addEventListener(
-        'pause',
-        () => {
-          isPaused = true;
-        },
-        { signal: abortController.signal }
-      );
-      player.addEventListener(
-        'play',
-        () => {
-          isPaused = false;
-        },
-        { signal: abortController.signal }
-      );
-      // player.addEventListener(
+      audioPlayer?.on('pause', () => {
+        isPaused = true;
+      });
+      audioPlayer?.on('play', () => {
+        isPaused = false;
+      });
       //   'ended',
       //   () => {
       //     stopRecording(true);
@@ -1459,10 +1354,62 @@ export default function App() {
     []
   );
 
+  const displayDefaultTitleBar = React.useCallback(() => {
+    document.title = `Nora`;
+    if (audioPlayer)
+      storage.playback.setCurrentSongOptions(
+        'stoppedPosition',
+        audioPlayer.seek()
+      );
+  }, []);
+
+  const createHowlInstance = React.useCallback(
+    (songPath: string, isStartPlay = true, seekPosition?: number) => {
+      audioPlayer?.stop();
+      audioPlayer?.unload();
+      audioPlayer = new Howl({
+        // html5: true,
+        src: songPath,
+        autoplay: isStartPlay,
+        volume: contentRef.current.player.volume.value / 100,
+      });
+      if (seekPosition)
+        audioPlayer?.on('load', () => {
+          audioPlayer?.seek(seekPosition);
+
+          initEqualizer(contentRef.current.localStorage.equalizerPreset);
+        });
+      audioPlayer?.on('end', () => handleSkipForwardClick('PLAYER_SKIP'));
+      audioPlayer?.on('play', addSongTitleToTitleBar);
+      audioPlayer?.on('pause', displayDefaultTitleBar);
+      audioPlayer?.on('play', () => {
+        dispatch({
+          type: 'CURRENT_SONG_PLAYBACK_STATE',
+          data: true,
+        });
+        window.api.playerControls.songPlaybackStateChange(true);
+      });
+      audioPlayer?.on('pause', () => {
+        dispatch({
+          type: 'CURRENT_SONG_PLAYBACK_STATE',
+          data: false,
+        });
+        window.api.playerControls.songPlaybackStateChange(false);
+      });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [addSongTitleToTitleBar, displayDefaultTitleBar, initEqualizer]
+  );
+
   const recordRef = React.useRef<() => void>();
 
   const playSong = React.useCallback(
-    (songId: string, isStartPlay = true, playAsCurrentSongIndex = false) => {
+    (
+      songId: string,
+      isStartPlay = true,
+      playAsCurrentSongIndex = false,
+      seekPosition?: number
+    ) => {
       if (typeof songId === 'string') {
         if (contentRef.current.currentSongData.songId === songId)
           return toggleSongPlayback();
@@ -1480,16 +1427,9 @@ export default function App() {
 
               storage.playback.setCurrentSongOptions('songId', songData.songId);
 
-              player.src = songData.path;
-
-              const trackChangeEvent = new CustomEvent('player/trackchange', {
-                detail: songId,
-              });
-              player.dispatchEvent(trackChangeEvent);
+              createHowlInstance(songData.path, isStartPlay, seekPosition);
 
               refStartPlay.current = isStartPlay;
-
-              if (isStartPlay) toggleSongPlayback();
 
               if (recordRef.current) recordRef.current();
               recordRef.current = recordListeningData(
@@ -1610,6 +1550,7 @@ export default function App() {
       addNewNotifications,
       changePromptMenuData,
       toggleSongPlayback,
+      createHowlInstance,
       recordListeningData,
     ]
   );
@@ -1618,7 +1559,7 @@ export default function App() {
     (audioPlayerData: AudioPlayerData, isStartPlay = true) => {
       if (audioPlayerData) {
         const { isKnownSource } = audioPlayerData;
-        if (isKnownSource) playSong(audioPlayerData.songId);
+        if (isKnownSource) playSong(audioPlayerData.songId, isStartPlay);
         else {
           console.log('playSong', audioPlayerData.path);
           dispatch({
@@ -1626,13 +1567,14 @@ export default function App() {
             data: audioPlayerData,
           });
           contentRef.current.currentSongData = audioPlayerData;
-          player.src = audioPlayerData.path;
+
+          createHowlInstance(audioPlayerData.path, isStartPlay);
+
           refStartPlay.current = isStartPlay;
-          if (isStartPlay) toggleSongPlayback();
         }
       }
     },
-    [playSong, toggleSongPlayback]
+    [createHowlInstance, playSong]
   );
 
   const fetchSongFromUnknownSource = React.useCallback(
@@ -1682,87 +1624,94 @@ export default function App() {
     (currentSongIndex: number, isPlaySong = true) => {
       console.log('currentSongIndex', currentSongIndex);
       refQueue.current.currentSongIndex = currentSongIndex;
-      if (isPlaySong) playSong(refQueue.current.queue[currentSongIndex]);
+      if (isPlaySong) playSong(refQueue.current.queue[currentSongIndex], true);
     },
     [playSong]
   );
 
   const handleSkipBackwardClick = React.useCallback(() => {
-    const { currentSongIndex } = refQueue.current;
-    if (player.currentTime > 5) {
-      player.currentTime = 0;
-    } else if (typeof currentSongIndex === 'number') {
-      if (currentSongIndex === 0)
-        changeQueueCurrentSongIndex(refQueue.current.queue.length - 1);
-      else changeQueueCurrentSongIndex(currentSongIndex - 1);
-    } else changeQueueCurrentSongIndex(0);
+    if (audioPlayer) {
+      const { currentSongIndex } = refQueue.current;
+      if (audioPlayer.seek() > 5) {
+        audioPlayer.seek(0);
+      } else if (typeof currentSongIndex === 'number') {
+        if (currentSongIndex === 0)
+          changeQueueCurrentSongIndex(refQueue.current.queue.length - 1);
+        else changeQueueCurrentSongIndex(currentSongIndex - 1);
+      } else changeQueueCurrentSongIndex(0);
+    }
   }, [changeQueueCurrentSongIndex]);
 
   const handleSkipForwardClick = React.useCallback(
     (reason: SongSkipReason = 'USER_SKIP') => {
-      const { currentSongIndex } = refQueue.current;
-      if (
-        contentRef.current.player.isRepeating === 'repeat-1' &&
-        reason !== 'USER_SKIP'
-      ) {
-        player.currentTime = 0;
-        toggleSongPlayback(true);
-        window.api.audioLibraryControls.updateSongListeningData(
-          contentRef.current.currentSongData.songId,
-          'listens',
-          'increment'
-        );
-      } else if (typeof currentSongIndex === 'number') {
-        if (refQueue.current.queue.length > 0) {
-          if (refQueue.current.queue.length - 1 === currentSongIndex) {
-            if (contentRef.current.player.isRepeating === 'repeat')
-              changeQueueCurrentSongIndex(0);
-          } else changeQueueCurrentSongIndex(currentSongIndex + 1);
-        } else console.log('Queue is empty.');
-      } else changeQueueCurrentSongIndex(0);
+      if (audioPlayer) {
+        const { currentSongIndex } = refQueue.current;
+        if (
+          contentRef.current.player.isRepeating === 'repeat-1' &&
+          reason !== 'USER_SKIP'
+        ) {
+          audioPlayer.seek(0);
+          toggleSongPlayback(true);
+          window.api.audioLibraryControls.updateSongListeningData(
+            contentRef.current.currentSongData.songId,
+            'listens',
+            'increment'
+          );
+        } else if (typeof currentSongIndex === 'number') {
+          if (refQueue.current.queue.length > 0) {
+            if (refQueue.current.queue.length - 1 === currentSongIndex) {
+              if (contentRef.current.player.isRepeating === 'repeat')
+                changeQueueCurrentSongIndex(0);
+            } else changeQueueCurrentSongIndex(currentSongIndex + 1);
+          } else console.log('Queue is empty.');
+        } else changeQueueCurrentSongIndex(0);
+      }
     },
     [toggleSongPlayback, changeQueueCurrentSongIndex]
   );
 
   React.useEffect(() => {
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: contentRef.current.currentSongData.title,
-      artist: Array.isArray(contentRef.current.currentSongData.artists)
-        ? contentRef.current.currentSongData.artists
-            .map((artist) => artist.name)
-            .join(', ')
-        : `Unknown Artist`,
-      album: contentRef.current.currentSongData.album
-        ? contentRef.current.currentSongData.album.name || 'Unknown Album'
-        : 'Unknown Album',
-      artwork: [
-        {
-          src: `data:;base64,${contentRef.current.currentSongData.artwork}`,
-          sizes: '300x300',
-          type: 'image/webp',
-        },
-      ],
-    });
-    const handleSkipForwardClickWithParams = () =>
-      handleSkipForwardClick('PLAYER_SKIP');
+    // console.log(Howler!._html5AudioPool);
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: contentRef.current.currentSongData.title,
+        artist: Array.isArray(contentRef.current.currentSongData.artists)
+          ? contentRef.current.currentSongData.artists
+              .map((artist) => artist.name)
+              .join(', ')
+          : `Unknown Artist`,
+        album: contentRef.current.currentSongData.album
+          ? contentRef.current.currentSongData.album.name || 'Unknown Album'
+          : 'Unknown Album',
+        artwork: [
+          {
+            src: `data:;base64,${contentRef.current.currentSongData.artwork}`,
+            sizes: '300x300',
+            type: 'image/webp',
+          },
+        ],
+      });
+      const handleSkipForwardClickWithParams = () =>
+        handleSkipForwardClick('PLAYER_SKIP');
 
-    navigator.mediaSession.setActionHandler('pause', () =>
-      toggleSongPlayback(false)
-    );
-    navigator.mediaSession.setActionHandler('play', () =>
-      toggleSongPlayback(true)
-    );
-    navigator.mediaSession.setActionHandler(
-      'previoustrack',
-      handleSkipBackwardClick
-    );
-    navigator.mediaSession.setActionHandler(
-      `nexttrack`,
-      handleSkipForwardClickWithParams
-    );
-    navigator.mediaSession.playbackState = content.player.isCurrentSongPlaying
-      ? 'playing'
-      : 'paused';
+      navigator.mediaSession.setActionHandler('pause', () =>
+        toggleSongPlayback(false)
+      );
+      navigator.mediaSession.setActionHandler('play', () =>
+        toggleSongPlayback(true)
+      );
+      navigator.mediaSession.setActionHandler(
+        'previoustrack',
+        handleSkipBackwardClick
+      );
+      navigator.mediaSession.setActionHandler(
+        `nexttrack`,
+        handleSkipForwardClickWithParams
+      );
+      navigator.mediaSession.playbackState = content.player.isCurrentSongPlaying
+        ? 'playing'
+        : 'paused';
+    }
     return () => {
       navigator.mediaSession.metadata = null;
       navigator.mediaSession.playbackState = 'none';
@@ -1789,6 +1738,117 @@ export default function App() {
       contentRef.current.player.isShuffling =
         !contentRef.current.player.isShuffling;
   }, []);
+
+  React.useEffect(() => {
+    // const playSongIfPlayable = () => {
+    // if (refStartPlay.current) toggleSongPlayback(true);
+    // };
+    // const manageSongPositionUpdate = () => {
+    //   if (audioPlayer)
+    //     contentRef.current.player.songPosition = roundTo(audioPlayer.seek(), 2);
+    // };
+    // const managePlayerStalledStatus = () => {
+    //   dispatch({ type: 'PLAYER_WAITING_STATUS', data: true });
+    // };
+    // const managePlayerNotStalledStatus = () => {
+    //   dispatch({ type: 'PLAYER_WAITING_STATUS', data: false });
+    // };
+
+    const handleSkipForwardClickWithParams = () =>
+      handleSkipForwardClick('PLAYER_SKIP');
+
+    // player.addEventListener('canplay', managePlayerNotStalledStatus);
+    // player.addEventListener('canplaythrough', managePlayerNotStalledStatus);
+    // player.addEventListener('loadeddata', managePlayerNotStalledStatus);
+    // player.addEventListener('loadedmetadata', managePlayerNotStalledStatus);
+
+    // player.addEventListener('suspend', managePlayerStalledStatus);
+    // player.addEventListener('stalled', managePlayerStalledStatus);
+    // player.addEventListener('waiting', managePlayerStalledStatus);
+    // player.addEventListener('progress', managePlayerStalledStatus);
+
+    // audioPlayer.on('canplay', playSongIfPlayable);
+    audioPlayer?.on('end', handleSkipForwardClickWithParams);
+    audioPlayer?.on('play', addSongTitleToTitleBar);
+    audioPlayer?.on('pause', displayDefaultTitleBar);
+
+    const durationUpdateFunction = () => {
+      if (audioPlayer?.playing()) {
+        const currentPosition = roundTo(audioPlayer.seek(), 2);
+        contentRef.current.player.songPosition = currentPosition;
+
+        // const playerPositionChange = new CustomEvent('player/positionChange', {
+        //   detail: currentPosition,
+        // });
+        // document.dispatchEvent(playerPositionChange);
+
+        startTransition(() =>
+          dispatch({
+            type: 'UPDATE_SONG_POSITION',
+            data: currentPosition,
+          })
+        );
+      }
+    };
+    const index = content.navigationHistory.pageHistoryIndex;
+    const currentPage = content.navigationHistory.history[index].pageTitle;
+    const duration =
+      currentPage === 'Lyrics' || content.player.isMiniPlayerLyricsVisible
+        ? 250
+        : 750;
+
+    const intervalId = setInterval(durationUpdateFunction, duration);
+
+    // audioPlayer?.on('play', manageSongPositionUpdate);
+
+    return () => {
+      clearInterval(intervalId);
+      // toggleSongPlayback(false);
+      // player.removeEventListener('canplay', managePlayerNotStalledStatus);
+      // player.removeEventListener(
+      //   'canplaythrough',
+      //   managePlayerNotStalledStatus
+      // );
+      // player.removeEventListener('loadeddata', managePlayerNotStalledStatus);
+      // player.removeEventListener(
+      //   'loadedmetadata',
+      //   managePlayerNotStalledStatus
+      // );
+      // player.removeEventListener('suspend', managePlayerStalledStatus);
+      // player.removeEventListener('stalled', managePlayerStalledStatus);
+      // player.removeEventListener('waiting', managePlayerStalledStatus);
+      // player.removeEventListener('progress', managePlayerStalledStatus);
+      // player.removeEventListener('timeupdate', manageSongPositionUpdate);
+      // player.removeEventListener('canplay', playSongIfPlayable);
+      // audioPlayer?.off('end', handleSkipForwardClickWithParams);
+      // audioPlayer?.off('play', addSongTitleToTitleBar);
+      // audioPlayer?.off('pause', displayDefaultTitleBar);
+    };
+  }, [
+    addSongTitleToTitleBar,
+    content.navigationHistory.history,
+    content.navigationHistory.pageHistoryIndex,
+    content.player.isMiniPlayerLyricsVisible,
+    content.player.isMiniPlayer,
+    displayDefaultTitleBar,
+    handleSkipForwardClick,
+    toggleSongPlayback,
+  ]);
+
+  const setMiniPlayerLyricsVisibility = React.useCallback(
+    (callback: (prevState: boolean) => boolean) => {
+      if (content.player.isMiniPlayer) {
+        const isVisible = callback(content.player.isMiniPlayerLyricsVisible);
+
+        contentRef.current.player.isMiniPlayerLyricsVisible = isVisible;
+        dispatch({
+          type: 'UPDATE_MINI_PLAYER_LYRICS_VISIBILITY_STATE',
+          data: isVisible,
+        });
+      }
+    },
+    [content.player.isMiniPlayer, content.player.isMiniPlayerLyricsVisible]
+  );
 
   const shuffleQueue = React.useCallback(
     (songIds: string[], currentSongIndex?: number) => {
@@ -2155,9 +2215,6 @@ export default function App() {
   );
 
   const updateVolume = React.useCallback((volume: number) => {
-    if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
-    if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
-
     storage.playback.setVolumeOptions('value', volume);
     contentRef.current.player.volume.value = volume;
     dispatch({
@@ -2167,8 +2224,8 @@ export default function App() {
   }, []);
 
   const updateSongPosition = React.useCallback((position: number) => {
-    if (position >= 0 && position <= player.duration)
-      player.currentTime = position;
+    if (audioPlayer && position >= 0 && position <= audioPlayer.duration())
+      audioPlayer.seek(position);
   }, []);
 
   const toggleMutedState = React.useCallback(
@@ -2219,10 +2276,16 @@ export default function App() {
         e.preventDefault();
 
       // ctrl combinations
-      if (e.ctrlKey && e.key === 'ArrowUp')
-        updateVolume(player.volume + 0.05 <= 1 ? player.volume * 100 + 5 : 100);
-      else if (e.ctrlKey && e.key === 'ArrowDown')
-        updateVolume(player.volume - 0.05 >= 0 ? player.volume * 100 - 5 : 0);
+      if (audioPlayer && e.ctrlKey && e.key === 'ArrowUp')
+        updateVolume(
+          audioPlayer.volume() + 0.05 <= 1
+            ? audioPlayer.volume() * 100 + 5
+            : 100
+        );
+      else if (audioPlayer && e.ctrlKey && e.key === 'ArrowDown')
+        updateVolume(
+          audioPlayer.volume() - 0.05 >= 0 ? audioPlayer.volume() * 100 - 5 : 0
+        );
       else if (e.ctrlKey && e.key === 'm')
         toggleMutedState(!contentRef.current.player.volume.isMuted);
       else if (e.ctrlKey && e.key === 'ArrowRight') handleSkipForwardClick();
@@ -2293,11 +2356,14 @@ export default function App() {
       // default combinations
       else if (e.code === 'Space') toggleSongPlayback();
       // shift combinations
-      else if (e.shiftKey && e.key === 'ArrowLeft') {
-        if (player.currentTime - 10 >= 0) player.currentTime -= 10;
-        else player.currentTime = 0;
-      } else if (e.shiftKey && e.key === 'ArrowRight') {
-        if (player.currentTime + 10 < player.duration) player.currentTime += 10;
+      else if (audioPlayer && e.shiftKey && e.key === 'ArrowLeft') {
+        const seekVal = audioPlayer.seek();
+        if (seekVal - 10 >= 0) audioPlayer.seek(seekVal - 10);
+        else audioPlayer.seek(0);
+      } else if (audioPlayer && e.shiftKey && e.key === 'ArrowRight') {
+        const seekVal = audioPlayer.seek();
+        if (audioPlayer.seek() + 10 < audioPlayer.duration())
+          audioPlayer.seek(seekVal + 10);
       }
       // alt combinations
       else if (e.altKey && e.key === 'Home') updatePageHistoryIndex('home');
@@ -2435,8 +2501,8 @@ export default function App() {
   const clearAudioPlayerData = React.useCallback(() => {
     toggleSongPlayback(false);
 
-    player.currentTime = 0;
-    player.pause();
+    audioPlayer?.seek(0);
+    audioPlayer?.pause();
 
     const updatedQueue = refQueue.current.queue.filter(
       (songId) => songId !== content.currentSongData.songId
@@ -2506,7 +2572,7 @@ export default function App() {
       PromptMenuData: content.PromptMenuData,
       currentSongData: {
         ...content.currentSongData,
-        duration: player.duration || content.currentSongData.duration,
+        duration: audioPlayer?.duration() || content.currentSongData.duration,
       },
       currentlyActivePage:
         contentRef.current.navigationHistory.history[
@@ -2516,10 +2582,12 @@ export default function App() {
       userData: content.userData,
       localStorageData: content.localStorage,
       queue: refQueue.current,
-      isCurrentSongPlaying: content.player.isCurrentSongPlaying,
+      isCurrentSongPlaying:
+        audioPlayer?.playing() || content.player.isCurrentSongPlaying,
       noOfPagesInHistory: content.navigationHistory.history.length - 1,
       pageHistoryIndex: content.navigationHistory.pageHistoryIndex,
       isMiniPlayer: content.player.isMiniPlayer,
+      isMiniPlayerLyricsVisible: content.player.isMiniPlayerLyricsVisible,
       volume: content.player.volume.value,
       isMuted: content.player.volume.isMuted,
       isRepeating: content.player.isRepeating,
@@ -2545,6 +2613,7 @@ export default function App() {
       content.notificationPanelData,
       content.player.isCurrentSongPlaying,
       content.player.isMiniPlayer,
+      content.player.isMiniPlayerLyricsVisible,
       content.player.isPlayerStalled,
       content.player.isRepeating,
       content.player.isShuffling,
@@ -2570,6 +2639,7 @@ export default function App() {
       changeQueueCurrentSongIndex,
       updateCurrentSongPlaybackState,
       updateMiniPlayerStatus,
+      setMiniPlayerLyricsVisibility,
       handleSkipBackwardClick,
       handleSkipForwardClick,
       updateSongPosition,
@@ -2597,6 +2667,7 @@ export default function App() {
       handleSkipBackwardClick,
       handleSkipForwardClick,
       playSong,
+      setMiniPlayerLyricsVisibility,
       toggleIsFavorite,
       toggleMultipleSelections,
       toggleMutedState,
