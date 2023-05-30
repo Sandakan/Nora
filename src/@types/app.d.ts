@@ -239,8 +239,14 @@ declare global {
     isOfflineLyricsAvailable: boolean;
   }
 
-  interface SyncedLyricLine {
+  export type SyncedLyricsLineText = {
     text: string;
+    start: number;
+    end: number;
+    unparsedText: string;
+  }[];
+  interface SyncedLyricLine {
+    text: string | SyncedLyricsLineText;
     start: number;
     end: number;
   }

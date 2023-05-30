@@ -576,8 +576,8 @@ const SongCard = (props: SongCardProp) => {
         data-song-id={songId}
         style={{ background }}
       >
-        <div className="song-states-container flex items-center justify-between">
-          <div className="state-info">
+        <div className="song-states-container flex items-center justify-between ">
+          <div className="state-info flex">
             {typeof queue.currentSongIndex === 'number' &&
               Array.isArray(queue.queue) &&
               queue.queue.length > 0 &&
@@ -592,9 +592,9 @@ const SongCard = (props: SongCardProp) => {
               </span>
             )}
           </div>
-          <div className="state-icons">
+          <div className="state-icons flex">
             <Button
-              className="!m-0 !rounded-none !border-0 !p-1 !text-inherit opacity-50 outline-1 outline-offset-1 transition-opacity focus-visible:!outline group-focus-within/songCard:opacity-100 group-hover/songCard:opacity-100"
+              className="order-2 !m-0 !rounded-none !border-0 !p-1 !text-inherit opacity-50 outline-1 outline-offset-1 transition-opacity focus-visible:!outline group-focus-within/songCard:opacity-100 group-hover/songCard:opacity-100"
               iconName="favorite"
               iconClassName={`${
                 isSongAFavorite
@@ -609,7 +609,7 @@ const SongCard = (props: SongCardProp) => {
             />
             {isBlacklisted && (
               <span
-                className="material-icons-round cursor-pointer p-1 text-2xl dark:text-font-color-white"
+                className="material-icons-round order-1 cursor-pointer p-1 text-2xl dark:text-font-color-white"
                 title={`'${title}' is blacklisted.`}
               >
                 block

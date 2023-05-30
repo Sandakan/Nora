@@ -921,29 +921,10 @@ export default function App() {
     player.addEventListener('play', addSongTitleToTitleBar);
     player.addEventListener('pause', displayDefaultTitleBar);
 
-    const intervalId = setInterval(() => {
-      if (!player.paused) {
-        const currentPosition = contentRef.current.player.songPosition;
-
-        const playerPositionChange = new CustomEvent('player/positionChange', {
-          detail: currentPosition,
-        });
-        player.dispatchEvent(playerPositionChange);
-
-        startTransition(() =>
-          dispatch({
-            type: 'UPDATE_SONG_POSITION',
-            data: currentPosition,
-          })
-        );
-      }
-    }, 1000 / 3);
-
     player.addEventListener('timeupdate', manageSongPositionUpdate);
 
     return () => {
       toggleSongPlayback(false);
-      clearInterval(intervalId);
       player.removeEventListener('canplay', managePlayerNotStalledStatus);
       player.removeEventListener(
         'canplaythrough',
@@ -966,6 +947,37 @@ export default function App() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  React.useEffect(() => {
+    const index = content.navigationHistory.pageHistoryIndex;
+    const currentPage = content.navigationHistory.history[index].pageTitle;
+    const duration =
+      currentPage === 'Lyrics' || content.player.isMiniPlayer ? 200 : 750;
+
+    const intervalId = setInterval(() => {
+      if (!player.paused) {
+        const currentPosition = contentRef.current.player.songPosition;
+
+        const playerPositionChange = new CustomEvent('player/positionChange', {
+          detail: currentPosition,
+        });
+        player.dispatchEvent(playerPositionChange);
+
+        startTransition(() =>
+          dispatch({
+            type: 'UPDATE_SONG_POSITION',
+            data: currentPosition,
+          })
+        );
+      }
+    }, duration);
+
+    return () => clearInterval(intervalId);
+  }, [
+    content.navigationHistory.history,
+    content.navigationHistory.pageHistoryIndex,
+    content.player.isMiniPlayer,
+  ]);
 
   // VOLUME RELATED SETTINGS
   React.useEffect(() => {

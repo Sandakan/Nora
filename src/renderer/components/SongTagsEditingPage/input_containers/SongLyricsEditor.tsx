@@ -76,7 +76,7 @@ const SongLyricsEditor = (props: Props) => {
             verified
           </span>
           <span className="text-sm font-extralight">
-            Synced lyrics supported.{' '}
+            Enhanced Synced lyrics supported.{' '}
             <Hyperlink
               link="https://wikipedia.org/wiki/LRC_(file_format)"
               linkTitle="Read more about LRC format"

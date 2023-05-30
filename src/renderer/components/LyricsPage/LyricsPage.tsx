@@ -108,12 +108,16 @@ const LyricsPage = () => {
             key="..."
             index={0}
             lyric="•••"
-            syncedLyrics={{ start: 0, end: syncedLyrics[0].start + offset }}
+            syncedLyrics={{
+              start: 0,
+              end: (syncedLyrics[0]?.start || 0) + offset,
+            }}
             isAutoScrolling={isAutoScrolling}
           />
         );
 
-        if (syncedLyrics[0].start !== 0) syncedLyricsLines.unshift(firstLine);
+        if ((syncedLyrics[0]?.start || 0) !== 0)
+          syncedLyricsLines.unshift(firstLine);
         return syncedLyricsLines;
       }
       if (!isSynced) {
