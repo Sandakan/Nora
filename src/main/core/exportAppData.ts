@@ -1,4 +1,4 @@
-import { OpenDialogOptions } from 'electron';
+import { OpenDialogOptions, app } from 'electron';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -9,9 +9,13 @@ import {
   getListeningData,
   getPlaylistData,
   getSongsData,
+  getBlacklistData,
+  getUserData,
 } from '../filesystem';
 import { showOpenDialog } from '../main';
 import log from '../log';
+import copyDir from '../utils/copyDir';
+import makeDir from '../utils/makeDir';
 
 const DEFAULT_EXPORT_DIALOG_OPTIONS: OpenDialogOptions = {
   title: 'Select a Destination to Export App Data',
@@ -19,18 +23,53 @@ const DEFAULT_EXPORT_DIALOG_OPTIONS: OpenDialogOptions = {
   properties: ['openDirectory', 'createDirectory'],
 };
 
+const userDataPath = app.getPath('userData');
+export const songCoversFolderPath = path.join(userDataPath, 'song_covers');
+
+const warningMessage = `***** IMPORTANT *****
+
+Please do not try to edit the contents of the 'Nora exports' folder.
+
+This will most likely break the app in your system and you won't be able
+to restore your data in Nora again.
+
+These files are in plain-text to show users that there's nothing to hide 
+in these config files.
+
+***** ***** ***** *****
+`;
+
 const exportAppData = async (localStorageData: string) => {
   const destinations = await showOpenDialog(DEFAULT_EXPORT_DIALOG_OPTIONS);
+
+  log('Started to export app data. Please wait...', undefined, undefined, {
+    sendToRenderer: true,
+  });
+
   try {
     if (Array.isArray(destinations) && destinations.length > 0) {
       const destination = path.join(destinations[0], 'Nora exports');
-      await fs.mkdir(destination);
+      const { exist } = await makeDir(destination);
+
+      if (exist)
+        log(
+          `'Nora exports' folder already exists. Will re-write contents of the folder.`
+        );
 
       // SONG DATA
       const songData = getSongsData();
       const songDataString = JSON.stringify({ songs: songData });
 
       await fs.writeFile(path.join(destination, 'songs.json'), songDataString);
+
+      // BLACKLIST DATA
+      const blacklistData = getBlacklistData();
+      const blacklistDataString = JSON.stringify({ blacklists: blacklistData });
+
+      await fs.writeFile(
+        path.join(destination, 'blacklist.json'),
+        blacklistDataString
+      );
 
       // ARTIST DATA
       const artistData = getArtistsData();
@@ -55,7 +94,7 @@ const exportAppData = async (localStorageData: string) => {
       const albumDataString = JSON.stringify({ albums: albumData });
 
       await fs.writeFile(
-        path.join(destination, 'genres.json'),
+        path.join(destination, 'albums.json'),
         albumDataString
       );
 
@@ -69,11 +108,20 @@ const exportAppData = async (localStorageData: string) => {
       );
 
       // LISTENING DATA
+      const userData = getUserData();
+      const userDataString = JSON.stringify({ userData });
+
+      await fs.writeFile(
+        path.join(destination, 'userData.json'),
+        userDataString
+      );
+
+      // LISTENING DATA
       const listeningData = getListeningData();
       const listeningDataString = JSON.stringify({ listeningData });
 
       await fs.writeFile(
-        path.join(destination, 'listenings.json'),
+        path.join(destination, 'listening_data.json'),
         listeningDataString
       );
 
@@ -81,6 +129,21 @@ const exportAppData = async (localStorageData: string) => {
       await fs.writeFile(
         path.join(destination, 'localStorageData.json'),
         localStorageData
+      );
+
+      // SONG ARTWORKS
+      await copyDir(
+        songCoversFolderPath,
+        path.join(destination, 'song_covers')
+      );
+
+      // WARNING TEXT MESSAGE
+      await fs.writeFile(
+        path.join(
+          destination,
+          'IMPORTANT - DO NOT EDIT CONTENTS IN THIS DIRECTORY.txt'
+        ),
+        warningMessage
       );
 
       return log('Exported app data successfully.', undefined, 'INFO', {

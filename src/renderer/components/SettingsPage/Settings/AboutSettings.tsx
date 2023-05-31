@@ -107,7 +107,7 @@ const AboutSettings = () => {
             />
             <Img
               src={isDarkMode ? DiscordLightIcon : DiscordDarkIcon}
-              className="mr-6 w-6 cursor-pointer opacity-80 transition-opacity hover:opacity-100"
+              className="mr-6 w-6 cursor-pointer opacity-70 transition-opacity hover:opacity-100"
               alt="Nora's Official Discord Server"
               showAltAsTooltipLabel
               onClick={() =>
@@ -313,11 +313,40 @@ const AboutSettings = () => {
             label="Export App Data"
             iconName="file_upload"
             className="mb-4 rounded-2xl"
-            clickHandler={() =>
-              window.api.settingsHelpers.exportAppData(
-                JSON.stringify(storage.getAllItems())
-              )
-            }
+            clickHandler={(_, setIsDisabled, setIsPending) => {
+              setIsDisabled(true);
+              setIsPending(true);
+
+              return window.api.settingsHelpers
+                .exportAppData(JSON.stringify(storage.getAllItems()))
+                .finally(() => {
+                  setIsDisabled(false);
+                  setIsPending(false);
+                })
+                .catch((err) => console.error(err));
+            }}
+          />
+
+          <Button
+            label="Import App Data"
+            iconName="publish"
+            className="mb-4 rounded-2xl"
+            clickHandler={(_, setIsDisabled, setIsPending) => {
+              setIsDisabled(true);
+              setIsPending(true);
+
+              return window.api.settingsHelpers
+                .importAppData()
+                .then((res) => {
+                  if (res) storage.setAllItems(res);
+                  return undefined;
+                })
+                .finally(() => {
+                  setIsDisabled(false);
+                  setIsPending(false);
+                })
+                .catch((err) => console.error(err));
+            }}
           />
         </div>
         <div className="about-description mt-4 text-sm font-light">

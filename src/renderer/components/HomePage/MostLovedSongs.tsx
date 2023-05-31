@@ -2,14 +2,19 @@
 import React from 'react';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+
 import SecondaryContainer from '../SecondaryContainer';
 import SongCard from '../SongsPage/SongCard';
 
 import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
+import Button from '../Button';
 
 type Props = { mostLovedSongs: AudioInfo[]; noOfVisibleSongs: number };
 
 const MostLovedSongs = (props: Props) => {
+  const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
+
   const { mostLovedSongs, noOfVisibleSongs = 3 } = props;
   const MAX_SONG_LIMIT = 15;
 
@@ -57,8 +62,20 @@ const MostLovedSongs = (props: Props) => {
           }}
         >
           <>
-            <div className="title-container mb-4 mt-1 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+            <div className="title-container mb-4 mt-1 flex items-center justify-between text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
               Most Loved Songs
+              <Button
+                label="Show All"
+                tooltipLabel="Opens 'Favorites' playlist with 'AllTimeMostListened' sort option."
+                iconName="apps"
+                className="show-all-btn text-sm font-normal"
+                clickHandler={() =>
+                  changeCurrentActivePage('PlaylistInfo', {
+                    playlistId: 'Favorites',
+                    sortingOrder: 'allTimeMostListened',
+                  })
+                }
+              />
             </div>
             <div
               style={{

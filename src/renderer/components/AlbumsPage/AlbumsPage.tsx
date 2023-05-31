@@ -128,24 +128,25 @@ const AlbumsPage = () => {
       }}
     >
       <>
-        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-          <div className="container flex">
-            Albums{' '}
-            <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
-              {isMultipleSelectionEnabled ? (
-                <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
-                  {multipleSelectionsData.multipleSelections.length} selections
-                </div>
-              ) : (
-                albumsData.length > 0 && (
-                  <span className="no-of-albums">{`${albumsData.length} album${
-                    albumsData.length === 1 ? '' : 's'
-                  }`}</span>
-                )
-              )}
+        {albumsData.length > 0 && (
+          <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+            <div className="container flex">
+              Albums{' '}
+              <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
+                {isMultipleSelectionEnabled ? (
+                  <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
+                    {multipleSelectionsData.multipleSelections.length}{' '}
+                    selections
+                  </div>
+                ) : (
+                  albumsData.length > 0 && (
+                    <span className="no-of-albums">{`${
+                      albumsData.length
+                    } album${albumsData.length === 1 ? '' : 's'}`}</span>
+                  )
+                )}
+              </div>
             </div>
-          </div>
-          {albumsData.length > 0 && (
             <div className="other-controls-container flex">
               <Button
                 label={isMultipleSelectionEnabled ? 'Unselect All' : 'Select'}
@@ -182,8 +183,8 @@ const AlbumsPage = () => {
                 }}
               />
             </div>
-          )}
-        </div>
+          </div>
+        )}
         <div
           className={`albums-container h-full w-full flex-grow ${
             !(albumsData && albumsData.length > 0) && 'hidden'

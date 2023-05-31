@@ -95,6 +95,7 @@ import { resolveSeparateArtists } from './core/resolveSeparateArtists';
 import resolveFeaturingArtists from './core/resolveFeaturingArtists';
 import saveArtworkToSystem from './core/saveArtworkToSystem';
 import exportAppData from './core/exportAppData';
+import importAppData from './core/importAppData';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -634,7 +635,7 @@ app
 
       ipcMain.handle('app/getFolderStructures', () => getFolderStructures());
 
-      ipcMain.on('app/resetApp', () => resetApp());
+      ipcMain.on('app/resetApp', () => resetApp(!IS_DEVELOPMENT));
 
       ipcMain.on('app/openLogFile', () =>
         shell.openPath(path.join(app.getPath('userData'), 'logs.txt'))
@@ -656,9 +657,11 @@ app
         shell.openExternal(url)
       );
 
-      ipcMain.on('app/exportAppData', (_, localStorageData: string) =>
+      ipcMain.handle('app/exportAppData', (_, localStorageData: string) =>
         exportAppData(localStorageData)
       );
+
+      ipcMain.handle('app/importAppData', importAppData);
 
       ipcMain.handle(
         'app/getRendererLogs',
@@ -951,11 +954,14 @@ async function handleSecondInstances(_: unknown, argv: string[]) {
   );
 }
 
-function restartApp(reason: string) {
-  log(`RENDERER REQUESTED A FULL APP REFRESH.\nREASON : ${reason}`);
-  mainWindow.webContents.send('app/beforeQuitEvent');
-  closeAllAbortControllers();
-  app.relaunch({ args: process.argv.slice(1).concat(['--relaunch']) });
+export function restartApp(reason: string, noQuitEvents = false) {
+  log(`REQUESTED A FULL APP REFRESH.\nREASON : ${reason}`);
+
+  if (!noQuitEvents) {
+    mainWindow.webContents.send('app/beforeQuitEvent');
+    closeAllAbortControllers();
+  }
+  app.relaunch();
   app.exit(0);
 }
 
@@ -1015,7 +1021,7 @@ async function getImagefileLocation() {
   return filePaths[0];
 }
 
-async function resetApp(isRestartApp = false) {
+async function resetApp(isRestartApp = true) {
   log('!-!-!-!-!-!  STARTED THE RESETTING PROCESS OF THE APP.  !-!-!-!-!-!');
   try {
     await mainWindow.webContents.session.clearStorageData();
@@ -1034,10 +1040,8 @@ async function resetApp(isRestartApp = false) {
     );
   } finally {
     log(`====== RELOADING THE ${isRestartApp ? 'APP' : 'RENDERER'} ======`);
-    if (isRestartApp) {
-      app.relaunch();
-      app.quit();
-    } else mainWindow.webContents.reload();
+    if (isRestartApp) restartApp('App resetted.');
+    else mainWindow.webContents.reload();
   }
 }
 

@@ -143,25 +143,26 @@ const ArtistPage = () => {
       }}
     >
       <>
-        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-          <div className="container flex">
-            Artists{' '}
-            <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
-              {isMultipleSelectionEnabled ? (
-                <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
-                  {multipleSelectionsData.multipleSelections.length} selections
-                </div>
-              ) : (
-                artistsData &&
-                artistsData.length > 0 && (
-                  <span className="no-of-artists">{`${
-                    artistsData.length
-                  } artist${artistsData.length === 1 ? '' : 's'}`}</span>
-                )
-              )}
+        {artistsData.length > 0 && (
+          <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+            <div className="container flex">
+              Artists{' '}
+              <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
+                {isMultipleSelectionEnabled ? (
+                  <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
+                    {multipleSelectionsData.multipleSelections.length}{' '}
+                    selections
+                  </div>
+                ) : (
+                  artistsData &&
+                  artistsData.length > 0 && (
+                    <span className="no-of-artists">{`${
+                      artistsData.length
+                    } artist${artistsData.length === 1 ? '' : 's'}`}</span>
+                  )
+                )}
+              </div>
             </div>
-          </div>
-          {artistsData.length > 0 && (
             <div className="other-control-container flex">
               <Button
                 label={isMultipleSelectionEnabled ? 'Unselect All' : 'Select'}
@@ -203,8 +204,8 @@ const ArtistPage = () => {
                 }}
               />
             </div>
-          )}
-        </div>
+          </div>
+        )}
         <div
           className={`artists-container flex !h-full flex-wrap ${
             !(artistsData && artistsData.length > 0) && 'hidden'

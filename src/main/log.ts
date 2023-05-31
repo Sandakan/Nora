@@ -5,7 +5,12 @@ import { sendMessageToRenderer } from './main';
 
 interface LogOptions {
   preventLoggingToConsole?: boolean;
-  sendToRenderer?: boolean;
+  sendToRenderer?:
+    | boolean
+    | {
+        code?: MessageCodes;
+        data?: Object;
+      };
 }
 
 const defaultLogOptions: LogOptions = {
@@ -45,6 +50,26 @@ export default (
   const seperator =
     messageType === 'ERROR' ? '======' : messageType === 'WARN' ? '######' : '';
 
+  if (options.sendToRenderer) {
+    const rendererMsgOptions = {
+      code: undefined as MessageCodes | undefined,
+      data: undefined as Object | undefined,
+    };
+
+    if (typeof options.sendToRenderer !== 'boolean') {
+      const { code, data: rendererData } = options.sendToRenderer;
+
+      rendererMsgOptions.code = code;
+      rendererMsgOptions.data = rendererData;
+    }
+
+    sendMessageToRenderer(
+      mes,
+      rendererMsgOptions.code,
+      rendererMsgOptions.data
+    );
+  }
+
   if (messageType !== 'INFO') mes = mes.toUpperCase();
   const str = `\n[${new Date().toUTCString()}] = ${seperator} ${mes} ${seperator}\n\t${objectToString(
     data
@@ -54,5 +79,4 @@ export default (
   });
 
   if (!options?.preventLoggingToConsole) console.log(str);
-  if (options.sendToRenderer) sendMessageToRenderer(mes);
 };

@@ -189,12 +189,36 @@ const SongsPage = () => {
               isBlacklisted: song.isBlacklisted,
             };
           });
-          return dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
+          dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
         }}
-        onFailure={(err) => console.error(err)}
+        onFailure={() => dispatch({ type: 'SONGS_DATA', data: [null] })}
       />
     );
   }, [changePromptMenuData]);
+
+  const importAppData = React.useCallback(
+    (
+      _: unknown,
+      setIsDisabled: (state: boolean) => void,
+      setIsPending: (state: boolean) => void
+    ) => {
+      setIsDisabled(true);
+      setIsPending(true);
+
+      return window.api.settingsHelpers
+        .importAppData()
+        .then((res) => {
+          if (res) storage.setAllItems(res);
+          return undefined;
+        })
+        .finally(() => {
+          setIsDisabled(false);
+          setIsPending(false);
+        })
+        .catch((err) => console.error(err));
+    },
+    []
+  );
 
   const selectAllHandler = useSelectAllHandler(
     content.songsData,
@@ -259,136 +283,132 @@ const SongsPage = () => {
       }}
     >
       <>
-        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium  text-font-color-highlight dark:text-dark-font-color-highlight">
-          <div className="container flex">
-            Songs{' '}
-            <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
-              {isMultipleSelectionEnabled ? (
-                <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
-                  {multipleSelectionsData.multipleSelections.length} selections
-                </div>
-              ) : (
-                content.songsData &&
-                content.songsData.length > 0 && (
-                  <span className="no-of-songs">
-                    {content.songsData.length} songs
-                  </span>
-                )
-              )}
+        {content.songsData && content.songsData.length > 0 && (
+          <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium  text-font-color-highlight dark:text-dark-font-color-highlight">
+            <div className="container flex">
+              Songs{' '}
+              <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
+                {isMultipleSelectionEnabled ? (
+                  <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
+                    {multipleSelectionsData.multipleSelections.length}{' '}
+                    selections
+                  </div>
+                ) : (
+                  content.songsData &&
+                  content.songsData.length > 0 && (
+                    <span className="no-of-songs">
+                      {content.songsData.length} songs
+                    </span>
+                  )
+                )}
+              </div>
+            </div>
+            <div className="other-controls-container flex">
+              <Button
+                key={0}
+                className="more-options-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                iconName="more_horiz"
+                clickHandler={(e) => {
+                  e.stopPropagation();
+                  const button = e.currentTarget || e.target;
+                  const { x, y } = button.getBoundingClientRect();
+                  updateContextMenuData(
+                    true,
+                    [
+                      {
+                        label: 'Resync library',
+                        iconName: 'sync',
+                        handlerFunction: () =>
+                          window.api.audioLibraryControls.resyncSongsLibrary(),
+                      },
+                    ],
+                    x + 10,
+                    y + 50
+                  );
+                }}
+                tooltipLabel="More Options"
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  updateContextMenuData(
+                    true,
+                    [
+                      {
+                        label: 'Resync library',
+                        iconName: 'sync',
+                        handlerFunction: () =>
+                          window.api.audioLibraryControls.resyncSongsLibrary(),
+                      },
+                    ],
+                    e.pageX,
+                    e.pageY
+                  );
+                }}
+              />
+              <Button
+                key={1}
+                className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                iconName={
+                  isMultipleSelectionEnabled ? 'remove_done' : 'checklist'
+                }
+                clickHandler={() =>
+                  toggleMultipleSelections(!isMultipleSelectionEnabled, 'songs')
+                }
+                tooltipLabel={
+                  isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
+                }
+              />
+              <Button
+                key={2}
+                tooltipLabel="Play All"
+                className="play-all-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                iconName="play_arrow"
+                clickHandler={() =>
+                  createQueue(
+                    content.songsData
+                      .filter((song) => !song.isBlacklisted)
+                      .map((song) => song.songId),
+                    'songs',
+                    false,
+                    undefined,
+                    true
+                  )
+                }
+              />
+              <Button
+                key={3}
+                label="Shuffle and Play"
+                className="shuffle-and-play-all-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                iconName="shuffle"
+                clickHandler={() =>
+                  createQueue(
+                    content.songsData
+                      .filter((song) => !song.isBlacklisted)
+                      .map((song) => song.songId),
+                    'songs',
+                    true,
+                    undefined,
+                    true
+                  )
+                }
+              />
+              <Dropdown
+                name="songsPageSortDropdown"
+                value={content.sortingOrder}
+                options={dropdownOptions}
+                onChange={(e) => {
+                  updateCurrentlyActivePageData((currentPageData) => ({
+                    ...currentPageData,
+                    sortingOrder: e.currentTarget.value as SongSortTypes,
+                  }));
+                  dispatch({
+                    type: 'SORTING_ORDER',
+                    data: e.currentTarget.value,
+                  });
+                }}
+              />
             </div>
           </div>
-          <div className="other-controls-container flex">
-            {content.songsData && content.songsData.length > 0 && (
-              <>
-                <Button
-                  key={0}
-                  className="more-options-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-                  iconName="more_horiz"
-                  clickHandler={(e) => {
-                    e.stopPropagation();
-                    const button = e.currentTarget || e.target;
-                    const { x, y } = button.getBoundingClientRect();
-                    updateContextMenuData(
-                      true,
-                      [
-                        {
-                          label: 'Resync library',
-                          iconName: 'sync',
-                          handlerFunction: () =>
-                            window.api.audioLibraryControls.resyncSongsLibrary(),
-                        },
-                      ],
-                      x + 10,
-                      y + 50
-                    );
-                  }}
-                  tooltipLabel="More Options"
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    updateContextMenuData(
-                      true,
-                      [
-                        {
-                          label: 'Resync library',
-                          iconName: 'sync',
-                          handlerFunction: () =>
-                            window.api.audioLibraryControls.resyncSongsLibrary(),
-                        },
-                      ],
-                      e.pageX,
-                      e.pageY
-                    );
-                  }}
-                />
-                <Button
-                  key={1}
-                  className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-                  iconName={
-                    isMultipleSelectionEnabled ? 'remove_done' : 'checklist'
-                  }
-                  clickHandler={() =>
-                    toggleMultipleSelections(
-                      !isMultipleSelectionEnabled,
-                      'songs'
-                    )
-                  }
-                  tooltipLabel={
-                    isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
-                  }
-                />
-                <Button
-                  key={2}
-                  tooltipLabel="Play All"
-                  className="play-all-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-                  iconName="play_arrow"
-                  clickHandler={() =>
-                    createQueue(
-                      content.songsData
-                        .filter((song) => !song.isBlacklisted)
-                        .map((song) => song.songId),
-                      'songs',
-                      false,
-                      undefined,
-                      true
-                    )
-                  }
-                />
-                <Button
-                  key={3}
-                  label="Shuffle and Play"
-                  className="shuffle-and-play-all-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-                  iconName="shuffle"
-                  clickHandler={() =>
-                    createQueue(
-                      content.songsData
-                        .filter((song) => !song.isBlacklisted)
-                        .map((song) => song.songId),
-                      'songs',
-                      true,
-                      undefined,
-                      true
-                    )
-                  }
-                />
-                <Dropdown
-                  name="songsPageSortDropdown"
-                  value={content.sortingOrder}
-                  options={dropdownOptions}
-                  onChange={(e) => {
-                    updateCurrentlyActivePageData((currentPageData) => ({
-                      ...currentPageData,
-                      sortingOrder: e.currentTarget.value as SongSortTypes,
-                    }));
-                    dispatch({
-                      type: 'SORTING_ORDER',
-                      data: e.currentTarget.value,
-                    });
-                  }}
-                />
-              </>
-            )}
-          </div>
-        </div>
+        )}
         <div
           className="songs-container appear-from-bottom h-full flex-1 delay-100"
           ref={songsContainerRef}
@@ -444,11 +464,21 @@ const SongsPage = () => {
             <span>
               What&apos;s a world without music. So let&apos;s find them...
             </span>
-            <Button
-              label="Add Folder"
-              className="mt-4 w-40 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
-              clickHandler={addNewSongs}
-            />
+            <div className="flex items-center justify-between">
+              <Button
+                label="Add Folder"
+                iconName="create_new_folder"
+                iconClassName="material-icons-round-outlined"
+                className="mt-4 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
+                clickHandler={addNewSongs}
+              />
+              <Button
+                label="Import App Data"
+                iconName="upload"
+                className="mt-4 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
+                clickHandler={importAppData}
+              />
+            </div>
           </div>
         )}
       </>

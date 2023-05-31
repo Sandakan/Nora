@@ -242,6 +242,11 @@ export const getUserData = () => {
   return userDataStore.get('userData', USER_DATA_TEMPLATE) as UserData;
 };
 
+export const saveUserData = (userData: UserData) => {
+  cachedUserData = userData;
+  userDataStore.set('userData', userData);
+};
+
 export function setUserData(dataType: UserDataTypes, data: unknown) {
   const userData = getUserData();
   if (userData) {
@@ -308,8 +313,7 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
         'Error occurred in setUserData function due ot invalid dataType or data.'
       );
 
-    cachedUserData = userData;
-    userDataStore.set('userData', userData);
+    saveUserData(userData);
 
     if (dataType === 'musicFolders') dataUpdateEvent('userData/musicFolder');
     else if (
@@ -447,6 +451,11 @@ export const getListeningData = (
   return listeningData;
 };
 
+export const saveListeningData = (listeningData: SongListeningData[]) => {
+  cachedListeningData = listeningData;
+  return listeningDataStore.set('listeningData', listeningData);
+};
+
 export const setListeningData = (data: SongListeningData) => {
   const results =
     cachedListeningData && cachedListeningData.length > 0
@@ -460,14 +469,12 @@ export const setListeningData = (data: SongListeningData) => {
       results[i].inNoOfPlaylists = data.inNoOfPlaylists;
       results[i].listens = data.listens;
 
-      cachedListeningData = results;
-      return listeningDataStore.set('listeningData', results);
+      break;
     }
   }
 
   results.push(data);
-  cachedListeningData = results;
-  listeningDataStore.set('listeningData', results);
+  saveListeningData(results);
   return dataUpdateEvent('songs/listeningData');
 };
 

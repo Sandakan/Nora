@@ -145,7 +145,7 @@ const parseLyrics = (lyricsString: string): LyricsData => {
   lyricsOffsetRegex.lastIndex = 0;
 
   const copyright = copyrightMatch?.groups?.copyright || undefined;
-  const offset = Number(lyricsOffsetMatch?.groups?.lyricsOffset) || undefined;
+  const offset = Number(lyricsOffsetMatch?.groups?.lyricsOffset) / 1000 || 0;
   const lines = lyricsString.split('\n');
   const lyricsLines = lines.filter(
     (line) => line.trim() !== '' && isNotALyricsMetadataLine(line)
