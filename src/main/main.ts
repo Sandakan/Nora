@@ -96,6 +96,8 @@ import resolveFeaturingArtists from './core/resolveFeaturingArtists';
 import saveArtworkToSystem from './core/saveArtworkToSystem';
 import exportAppData from './core/exportAppData';
 import importAppData from './core/importAppData';
+import exportPlaylist from './core/exportPlaylist';
+import importPlaylist from './core/importPlaylist';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -661,7 +663,13 @@ app
         exportAppData(localStorageData)
       );
 
+      ipcMain.handle('app/exportPlaylist', (_, playlistId: string) =>
+        exportPlaylist(playlistId)
+      );
+
       ipcMain.handle('app/importAppData', importAppData);
+
+      ipcMain.handle('app/importPlaylist', importPlaylist);
 
       ipcMain.handle(
         'app/getRendererLogs',
@@ -811,7 +819,7 @@ function toggleOnBatteryPower() {
 
 export function sendMessageToRenderer(
   message: string,
-  code?: MessageCodes,
+  code: MessageCodes = 'INFO',
   data?: object
 ) {
   mainWindow.webContents.send(
@@ -976,7 +984,7 @@ async function revealSongInFileExplorer(songId: string) {
     `Revealing song file in explorer failed because song couldn't be found in the library.`,
     undefined,
     'WARN',
-    { sendToRenderer: true }
+    { sendToRenderer: 'FAILURE' }
   );
 }
 

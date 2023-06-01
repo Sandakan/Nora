@@ -176,7 +176,7 @@ const importAppData = async () => {
     const missingEntries: string[] = [];
 
     log('Started to import app data. Please wait...', undefined, undefined, {
-      sendToRenderer: true,
+      sendToRenderer: 'LOADING',
     });
 
     if (Array.isArray(destinations) && destinations.length > 0) {
@@ -204,13 +204,18 @@ const importAppData = async () => {
         await importRequiredData(importDir);
 
         log('Successfully imported app data.', undefined, undefined, {
-          sendToRenderer: true,
+          sendToRenderer: 'SUCCESS',
         });
 
         if (localStorageData) {
-          log('Restarting app in 5 seconds', undefined, 'WARN', {
-            sendToRenderer: true,
-          });
+          log(
+            'Successfully imported app data. Restarting app in 5 seconds',
+            undefined,
+            'WARN',
+            {
+              sendToRenderer: 'FAILURE',
+            }
+          );
           setTimeout(restartFunc, 5000);
           return localStorageData;
         }
@@ -220,7 +225,7 @@ const importAppData = async () => {
         'Failed to import app data. Missing required files in the selected folder.',
         { missingEntries },
         'WARN',
-        { sendToRenderer: true }
+        { sendToRenderer: 'FAILURE' }
       );
     }
     return log(
@@ -230,7 +235,7 @@ const importAppData = async () => {
     );
   } catch (error) {
     return log('Failed to import app data.', { error }, 'ERROR', {
-      sendToRenderer: true,
+      sendToRenderer: 'FAILURE',
     });
   }
 };

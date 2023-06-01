@@ -31,6 +31,7 @@ import { isDataChanged } from './utils/hasDataChanged';
 import log from './utils/log';
 
 import ErrorBoundary from './components/ErrorBoundary';
+import parseNotificationFromMain from './other/parseNotificationFromMain';
 
 const MiniPlayer = React.lazy(
   () => import('./components/MiniPlayer/MiniPlayer')
@@ -1214,119 +1215,13 @@ export default function App() {
       messageCode?: MessageCodes,
       data?: Record<string, unknown>
     ) => {
-      const notificationData: AppNotification = {
-        buttons: [],
-        content: <div>{message}</div>,
-        id: messageCode || 'mainProcessMessage',
-        type: 'DEFAULT',
-      };
-      const defaultButtonStyles =
-        '!bg-background-color-3 dark:!bg-dark-background-color-3 !text-font-color-black dark:!text-font-color-black !font-light';
-      const showMessage = true;
+      const notification = parseNotificationFromMain(
+        message,
+        messageCode,
+        data
+      );
 
-      if (messageCode === 'APP_THEME_CHANGE')
-        notificationData.icon = (
-          <span className="material-icons-round">brightness_4</span>
-        );
-      if (messageCode === 'PARSE_SUCCESSFUL') {
-        notificationData.icon = (
-          <span className="material-icons-round-outlined icon">
-            file_download
-          </span>
-        );
-        notificationData.id = (data?.songId as string) ?? messageCode;
-      }
-      if (messageCode === 'RESYNC_SUCCESSFUL') {
-        notificationData.icon = (
-          <span className="material-icons-round-outlined icon">check</span>
-        );
-      }
-      if (messageCode === 'PARSE_FAILED') {
-        notificationData.delay = 15000;
-        notificationData.buttons?.push({
-          label: 'Resync Songs',
-          iconClassName: 'sync',
-          className: defaultButtonStyles,
-          clickHandler: () =>
-            window.api.audioLibraryControls.resyncSongsLibrary(),
-        });
-      }
-      if (
-        messageCode === 'PLAYBACK_FROM_UNKNOWN_SOURCE' &&
-        data &&
-        'path' in data
-      ) {
-        notificationData.icon = (
-          <span className="material-icons-round-outlined icon">error</span>
-        );
-        notificationData.delay = 15000;
-        // info.buttons?.push({
-        //   label: 'Add to the library',
-        //   iconClassName: 'add',
-        //   className: defaultButtonStyles,
-        //   clickHandler: () => console.log(data),
-        // });
-      }
-      if (
-        (messageCode === 'SONG_LIKE' || messageCode === 'SONG_DISLIKE') &&
-        data &&
-        'artworkPath' in data
-      ) {
-        notificationData.icon = (
-          <div className="relative h-8 w-8">
-            <Img
-              className="aspect-square h-full w-full rounded-sm"
-              src={`nora://localFiles/${data.artworkPath as string}`}
-              alt="song artwork"
-            />
-            <span
-              className={`material-icons-round${
-                messageCode === 'SONG_DISLIKE' ? '-outlined' : ''
-              } icon absolute -bottom-1 -right-1 text-font-color-crimson dark:text-font-color-crimson`}
-            >
-              favorite
-            </span>
-          </div>
-        );
-      }
-      if (
-        (messageCode === 'SONG_REMOVE_PROCESS_UPDATE' ||
-          messageCode === 'AUDIO_PARSING_PROCESS_UPDATE') &&
-        data &&
-        'max' in data &&
-        'value' in data
-      ) {
-        notificationData.type = 'WITH_PROGRESS_BAR';
-        notificationData.progressBarData = {
-          max: (data?.max as number) || 0,
-          value: (data?.value as number) || 0,
-        };
-        notificationData.icon = (
-          <span className="material-icons-round-outlined icon">
-            {messageCode === 'AUDIO_PARSING_PROCESS_UPDATE' ? 'add' : 'delete'}
-          </span>
-        );
-      }
-      if (
-        messageCode === 'SONG_PALETTE_GENERAING_PROCESS_UPDATE' ||
-        (messageCode === 'GENRE_PALETTE_GENERAING_PROCESS_UPDATE' &&
-          data &&
-          'max' in data &&
-          'value' in data)
-      ) {
-        notificationData.type = 'WITH_PROGRESS_BAR';
-        notificationData.progressBarData = {
-          max: (data?.max as number) || 0,
-          value: (data?.value as number) || 0,
-        };
-        notificationData.icon = (
-          <span className="material-icons-round-outlined icon">
-            magic_button
-          </span>
-        );
-      }
-
-      if (showMessage) addNewNotifications([notificationData]);
+      addNewNotifications([notification]);
     },
     [addNewNotifications]
   );

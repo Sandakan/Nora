@@ -264,6 +264,13 @@ export const Playlist = (props: PlaylistProp) => {
             ]);
         },
       },
+      {
+        label: 'Export Playlist',
+        iconName: 'upload',
+        handlerFunction: () =>
+          window.api.playlistsData.exportPlaylist(props.playlistId),
+        isDisabled: isMultipleSelectionsEnabled,
+      },
       // {
       //   label: 'Select/Unselect All',
       //   iconName: 'checklist',

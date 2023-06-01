@@ -639,7 +639,9 @@ declare global {
     className: string;
   }
 
-  // ? Notification panel related types
+  // ? Notification panel related
+
+  type DefaultCodes = 'SUCCESS' | 'FAILURE' | 'LOADING' | 'INFO';
 
   type ErrorCodes =
     | 'SONG_NOT_FOUND'
@@ -656,6 +658,7 @@ declare global {
     | 'UNSUPPORTED_FILE_EXTENSION';
 
   type MessageCodes =
+    | DefaultCodes
     | ErrorCodes
     | 'SONG_LIKE'
     | 'SONG_DISLIKE'

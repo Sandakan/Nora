@@ -3,10 +3,11 @@ import { appendFileSync } from 'fs';
 import path from 'path';
 import { sendMessageToRenderer } from './main';
 
-interface LogOptions {
+export interface LogOptions {
   preventLoggingToConsole?: boolean;
   sendToRenderer?:
     | boolean
+    | MessageCodes
     | {
         code?: MessageCodes;
         data?: Object;
@@ -17,7 +18,7 @@ const defaultLogOptions: LogOptions = {
   preventLoggingToConsole: false,
 };
 
-type LogMessageTypes = 'INFO' | 'WARN' | 'ERROR';
+export type LogMessageTypes = 'INFO' | 'WARN' | 'ERROR';
 
 const objectToString = (obj?: Record<string, unknown>) => {
   if (obj) {
@@ -52,16 +53,18 @@ export default (
 
   if (options.sendToRenderer) {
     const rendererMsgOptions = {
-      code: undefined as MessageCodes | undefined,
+      code: (messageType === 'INFO' ? 'INFO' : 'FAILURE') as MessageCodes,
       data: undefined as Object | undefined,
     };
 
-    if (typeof options.sendToRenderer !== 'boolean') {
+    if (typeof options.sendToRenderer === 'object') {
       const { code, data: rendererData } = options.sendToRenderer;
 
-      rendererMsgOptions.code = code;
+      if (code) rendererMsgOptions.code = code;
       rendererMsgOptions.data = rendererData;
     }
+    if (typeof options.sendToRenderer === 'string')
+      rendererMsgOptions.code = options.sendToRenderer;
 
     sendMessageToRenderer(
       mes,

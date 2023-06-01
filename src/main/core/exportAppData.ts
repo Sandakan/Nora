@@ -43,12 +43,15 @@ const exportAppData = async (localStorageData: string) => {
   const destinations = await showOpenDialog(DEFAULT_EXPORT_DIALOG_OPTIONS);
 
   log('Started to export app data. Please wait...', undefined, undefined, {
-    sendToRenderer: true,
+    sendToRenderer: 'LOADING',
   });
 
   try {
     if (Array.isArray(destinations) && destinations.length > 0) {
-      const destination = path.join(destinations[0], 'Nora exports');
+      const destination =
+        path.basename(destinations[0]) === 'Nora exports'
+          ? destinations[0]
+          : path.join(destinations[0], 'Nora exports');
       const { exist } = await makeDir(destination);
 
       if (exist)
@@ -147,21 +150,21 @@ const exportAppData = async (localStorageData: string) => {
       );
 
       return log('Exported app data successfully.', undefined, 'INFO', {
-        sendToRenderer: true,
+        sendToRenderer: 'SUCCESS',
       });
     }
     return log(
       `Failed to export app data because user didn't select a destination.`,
       undefined,
       'WARN',
-      { sendToRenderer: true }
+      { sendToRenderer: 'FAILURE' }
     );
   } catch (err) {
     log(
       'Error occurred when exporting app data.',
       { err, destinations },
       'ERROR',
-      { sendToRenderer: true }
+      { sendToRenderer: 'FAILURE' }
     );
     throw err;
   }
