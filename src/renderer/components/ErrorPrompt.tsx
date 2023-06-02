@@ -1,12 +1,12 @@
 /* eslint-disable react/require-default-props */
-import { ReactElement } from 'react';
+import { ReactNode } from 'react';
 import packageFile from '../../../package.json';
 import Button from './Button';
 import Hyperlink from './Hyperlink';
 
 interface ErrorPromptProps {
   reason: string;
-  message?: ReactElement<any, any>;
+  message?: ReactNode;
   showSendFeedbackBtn?: boolean;
 }
 export default (props: ErrorPromptProps) => {

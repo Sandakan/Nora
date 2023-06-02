@@ -10,6 +10,8 @@ const Notification = (props: AppNotification) => {
     delay,
     buttons,
     icon,
+    iconName,
+    iconClassName,
     type = 'DEFAULT',
     progressBarData = { max: 100, value: 50 },
   } = props;
@@ -77,6 +79,18 @@ const Notification = (props: AppNotification) => {
       }
     };
   }, [delay, id, removeNotification, updateNotifications]);
+
+  const notificationIcon = React.useMemo(() => {
+    if (icon) return icon;
+    if (iconName)
+      return (
+        <span className={iconClassName ?? 'material-icons-round'}>
+          {iconName}
+        </span>
+      );
+    return undefined;
+  }, [icon, iconClassName, iconName]);
+
   return (
     <div
       className={`notification ${
@@ -95,7 +109,7 @@ const Notification = (props: AppNotification) => {
       >
         <div className="notification-info-container flex flex-row items-center">
           <div className="icon-container mx-3 flex items-center justify-center [&>img]:aspect-square [&>img]:h-4 [&>span]:text-xl">
-            {icon}
+            {notificationIcon}
           </div>
           <div className="message-container overflow-hidden text-ellipsis py-1">
             {content}

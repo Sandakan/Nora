@@ -97,6 +97,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
           return addNewNotifications([
             {
               content: 'Artist conflict resolved successfully.',
+              iconName: 'done',
               delay: 5000,
               id: 'ArtistDuplicateSuggestion',
             },

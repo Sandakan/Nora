@@ -696,6 +696,8 @@ declare global {
     order?: number;
     content: ReactNode;
     icon?: ReactElement<any, any>;
+    iconName?: string;
+    iconClassName?: string;
     buttons?: ButtonProps[];
     type?: NotificationTypes;
     progressBarData?: {

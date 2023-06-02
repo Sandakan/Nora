@@ -7,7 +7,7 @@ export interface AppStateContextType {
   // CONTEXT MENU
   contextMenuData: ContextMenuData;
   // PROMPT MENU
-  PromptMenuData: {
+  promptMenuData: {
     content: any;
     isVisible: boolean;
     className: string;

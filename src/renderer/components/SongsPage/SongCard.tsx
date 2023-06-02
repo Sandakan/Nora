@@ -527,7 +527,7 @@ const SongCard = (props: SongCardProp) => {
         isSongPlaying && 'playing'
       } group/songCard relative mb-2 mr-2 aspect-[2/1] min-w-[15rem] max-w-[24rem] overflow-hidden rounded-2xl border-[transparent] border-background-color-2 shadow-xl transition-[border-color] ease-in-out dark:border-dark-background-color-2 ${
         className || ''
-      } ${isBlacklisted && '!opacity-90 !brightness-50 dark:!opacity-75'} ${
+      } ${
         isMultipleSelectionEnabled &&
         multipleSelectionsData.selectionType === 'songs' &&
         'border-4'
@@ -568,7 +568,9 @@ const SongCard = (props: SongCardProp) => {
           src={artworkPath}
           loading="eager"
           alt="Song cover"
-          className="h-full w-full object-cover object-center dark:brightness-90"
+          className={`h-full w-full object-cover object-center transition-[filter] group-focus-within/songCard:brightness-90 group-hover/songCard:brightness-90 dark:brightness-90 ${
+            isBlacklisted && '!brightness-50 dark:!brightness-[.40]'
+          }`}
         />
       </div>
       <div
@@ -591,6 +593,18 @@ const SongCard = (props: SongCardProp) => {
                 PLAYING NOW
               </span>
             )}
+            {isBlacklisted &&
+              !(
+                typeof queue.currentSongIndex === 'number' &&
+                Array.isArray(queue.queue) &&
+                queue.queue.length > 0 &&
+                queue?.queue?.at(queue.currentSongIndex + 1) === songId &&
+                currentSongData.songId === songId
+              ) && (
+                <span className="font-semibold uppercase !text-font-color-white opacity-50 transition-opacity group-hover/songCard:opacity-90">
+                  BLACKLISTED
+                </span>
+              )}
           </div>
           <div className="state-icons flex">
             <Button
@@ -607,14 +621,6 @@ const SongCard = (props: SongCardProp) => {
                 handleLikeButtonClick();
               }}
             />
-            {isBlacklisted && (
-              <span
-                className="material-icons-round order-1 cursor-pointer p-1 text-2xl dark:text-font-color-white"
-                title={`'${title}' is blacklisted.`}
-              >
-                block
-              </span>
-            )}
           </div>
         </div>
         <div className="song-info-and-play-btn-container flex w-full items-center justify-between">

@@ -197,12 +197,8 @@ const parseNotificationFromMain = (
         if (progressBarData) notificationData.progressBarData = progressBarData;
 
         if (icon) notificationData.icon = icon;
-        else if (iconName)
-          notificationData.icon = (
-            <span className={iconClassName ?? 'material-icons-round'}>
-              {iconName}
-            </span>
-          );
+        if (iconName) notificationData.iconName = iconName;
+        if (iconClassName) notificationData.iconClassName = iconClassName;
 
         break;
       }
