@@ -96,14 +96,13 @@ const AboutSettings = () => {
           </div>
           <div className="flex items-center">
             <Button
-              className="about-link !mr-6 block w-fit cursor-pointer !rounded-none !border-0 !p-0 outline-1 outline-offset-2 focus-visible:!outline"
+              className="about-link !mr-6 block w-fit cursor-pointer !rounded-none !border-0 !p-0 opacity-70 outline-1 outline-offset-2 transition-opacity hover:opacity-100 focus-visible:!outline"
               iconName="language"
               iconClassName="!text-2xl"
-              tooltipLabel="Nora's Website (Under Development)"
+              tooltipLabel="Nora's Website"
               clickHandler={() =>
-                window.api.settingsHelpers.openInBrowser('nora:')
+                window.api.settingsHelpers.openInBrowser(urls.website_url)
               }
-              isDisabled
             />
             <Img
               src={isDarkMode ? DiscordLightIcon : DiscordDarkIcon}

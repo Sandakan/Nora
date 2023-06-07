@@ -8,7 +8,7 @@ type Props = {
 const SongYearInput = (props: Props) => {
   const { songYear, updateSongInfo } = props;
   return (
-    <div className="tag-input mb-6 flex w-[45%] min-w-[10rem] flex-col">
+    <div className="tag-input flex min-w-[10rem] max-w-2xl flex-col">
       <label htmlFor="song-year-id3-tag">Released Year</label>
       <input
         type="number"

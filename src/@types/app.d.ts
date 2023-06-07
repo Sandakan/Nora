@@ -964,6 +964,7 @@ declare global {
     title: string;
     artists?: SongTagsArtistData[];
     album?: SongTagsAlbumData;
+    trackNumber?: number;
     releasedYear?: number;
     genres?: { genreId?: string; name: string; artworkPath?: string }[];
     composer?: string;

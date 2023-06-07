@@ -19,12 +19,31 @@ import SongComposerInput from './input_containers/SongComposerInput';
 import SongLyricsEditor from './input_containers/SongLyricsEditor';
 
 import { appPreferences } from '../../../../package.json';
+import SongTrackNumberInput from './input_containers/SongTrackNumberInput';
+import ResetTagsToDefaultPrompt from './ResetTagsToDefaultPrompt';
 
 export interface MetadataKeywords {
   albumKeyword?: string;
   artistKeyword?: string;
   genreKeyword?: string;
 }
+
+type ArtistResult = {
+  artistId?: string;
+  name: string;
+  artworkPath?: string;
+  onlineArtworkPaths?: OnlineArtistArtworks;
+};
+
+type AlbumResult = {
+  title: string;
+  albumId?: string;
+  noOfSongs?: number;
+  artists?: string[];
+  artworkPath?: string;
+};
+
+type GenreResult = { genreId?: string; name: string; artworkPath?: string };
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -45,6 +64,15 @@ function SongTagsEditingPage() {
   const [defaultValues, setDefaultValues] = React.useState({
     title: '',
   } as SongTags);
+
+  const [artistKeyword, setArtistKeyword] = React.useState('');
+  const [artistResults, setArtistResults] = React.useState<ArtistResult[]>([]);
+
+  const [albumKeyword, setAlbumKeyword] = React.useState('');
+  const [albumResults, setAlbumResults] = React.useState<AlbumResult[]>([]);
+
+  const [genreKeyword, setGenreKeyword] = React.useState('');
+  const [genreResults, setGenreResults] = React.useState<GenreResult[]>([]);
 
   const { songId, songPath, isKnownSource } = React.useMemo(
     () => ({
@@ -87,32 +115,6 @@ function SongTagsEditingPage() {
         })
         .catch((err) => console.error(err));
   }, [isKnownSource, songId, songPath]);
-
-  const [artistKeyword, setArtistKeyword] = React.useState('');
-  const [artistResults, setArtistResults] = React.useState(
-    [] as {
-      artistId?: string;
-      name: string;
-      artworkPath?: string;
-      onlineArtworkPaths?: OnlineArtistArtworks;
-    }[]
-  );
-
-  const [albumKeyword, setAlbumKeyword] = React.useState('');
-  const [albumResults, setAlbumResults] = React.useState(
-    [] as {
-      title: string;
-      albumId?: string;
-      noOfSongs?: number;
-      artists?: string[];
-      artworkPath?: string;
-    }[]
-  );
-
-  const [genreKeyword, setGenreKeyword] = React.useState('');
-  const [genreResults, setGenreResults] = React.useState(
-    [] as { genreId?: string; name: string; artworkPath?: string }[]
-  );
 
   React.useEffect(() => {
     if (artistKeyword.trim()) {
@@ -206,18 +208,6 @@ function SongTagsEditingPage() {
     []
   );
 
-  // const updateMetadataKeywords = React.useCallback(
-  //   (metadataKeywords: MetadataKeywords) => {
-  //     if (metadataKeywords.albumKeyword)
-  //       setAlbumKeyword(metadataKeywords.albumKeyword);
-  //     if (metadataKeywords.artistKeyword)
-  //       setArtistKeyword(metadataKeywords.artistKeyword);
-  //     if (metadataKeywords.genreKeyword)
-  //       setGenreKeyword(metadataKeywords.genreKeyword);
-  //   },
-  //   []
-  // );
-
   const fetchSongDataFromNet = React.useCallback(() => {
     if (songInfo.title) {
       changePromptMenuData(
@@ -259,9 +249,8 @@ function SongTagsEditingPage() {
           addNewNotifications([
             {
               id: `songDataUpdated`,
-              delay: 5000,
-              content: <span>Successfully updated the song.</span>,
-              icon: <span className="material-icons-round icon">done</span>,
+              content: `Successfully updated the song.`,
+              iconName: 'done',
             },
           ]);
           return window.api.songUpdates.getSongId3Tags(
@@ -280,13 +269,9 @@ function SongTagsEditingPage() {
         addNewNotifications([
           {
             id: `songDataUpdateFailed`,
-            delay: 5000,
-            content: <span>Song data update failed.</span>,
-            icon: (
-              <span className="material-icons-round-outlined icon">
-                warning
-              </span>
-            ),
+            content: `Song data update failed.`,
+            iconName: 'warning',
+            iconClassName: 'material-icons-round-outlined icon',
           },
         ]);
         console.error(err);
@@ -303,56 +288,27 @@ function SongTagsEditingPage() {
     if (!Object.values(data).every((x: boolean) => !x)) {
       changePromptMenuData(
         true,
-        <div>
-          <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
-            Confrim Before Resetting Song Data to Default
-          </div>
-          <div className="description">
-            Are you sure you want to reset the song data. You will lose the data
-            you edited on this screen.
-          </div>
-          <div className="mt-4 pl-4">
-            {(entries.filter((x) => x[1]) ?? []).map(([x]) => (
-              <div>
-                {x.toUpperCase()} :
-                <span className="ml-2 font-medium text-font-color-crimson">
-                  CHANGED
-                </span>
-              </div>
-            ))}
-          </div>
-          <div className="mt-6 flex justify-end">
-            <Button
-              label="Cancel"
-              className="w-32"
-              clickHandler={() => changePromptMenuData(false)}
-            />
-            <Button
-              label="Reset to Default"
-              className="w-[12rem] !bg-background-color-3 !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
-              clickHandler={() => {
-                changePromptMenuData(false);
-                setSongInfo(defaultValues);
-                setAlbumKeyword('');
-                setAlbumResults([]);
-                setArtistKeyword('');
-                setArtistResults([]);
-                setGenreKeyword('');
-                setGenreResults([]);
-              }}
-            />
-          </div>
-        </div>
+        <ResetTagsToDefaultPrompt
+          dataEntries={entries}
+          resetButtonHandler={() => {
+            changePromptMenuData(false);
+            setSongInfo(defaultValues);
+            setAlbumKeyword('');
+            setAlbumResults([]);
+            setArtistKeyword('');
+            setArtistResults([]);
+            setGenreKeyword('');
+            setGenreResults([]);
+          }}
+        />
       );
-    } else {
+    } else
       addNewNotifications([
         {
           id: 'songDataUnedited',
-          delay: 5000,
-          content: <span>You didn't change any song data.</span>,
+          content: `You didn't change any song data.`,
         },
       ]);
-    }
   };
 
   const areThereDataChanges = React.useMemo(
@@ -422,7 +378,10 @@ function SongTagsEditingPage() {
                 />
               </div>
             </div>
-            <div className="inputs-container flex flex-wrap justify-around text-font-color-black dark:text-font-color-white">
+            <div
+              className="inputs-container grid grid-flow-row grid-cols-2 content-around gap-8 text-font-color-black 
+            dark:text-font-color-white"
+            >
               <SongNameInput
                 songTitle={songInfo.title}
                 updateSongInfo={updateSongInfo}
@@ -460,7 +419,12 @@ function SongTagsEditingPage() {
                 songComposer={songInfo.composer}
                 updateSongInfo={updateSongInfo}
               />
-              <hr className="horizontal-rule my-8 h-[0.1rem] w-[95%] border-0 bg-background-color-2 dark:bg-dark-background-color-2" />
+              {/* SONG TRACK NUMBER */}
+              <SongTrackNumberInput
+                songTrackNumber={songInfo.trackNumber}
+                updateSongInfo={updateSongInfo}
+              />
+              <hr className="horizontal-rule col-span-2 h-[0.1rem] w-[95%] border-0 bg-background-color-2 dark:bg-dark-background-color-2" />
               {/* SONG LYRICS EDITOR */}
               <SongLyricsEditor
                 songTitle={songInfo.title}

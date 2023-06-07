@@ -417,9 +417,17 @@ export const manageAlbums = (
   const relevantAlbums: SavableAlbum[] = [];
   if (songAlbumName) {
     if (Array.isArray(allAlbumsData)) {
-      if (allAlbumsData.some((a) => a.title === songAlbumName)) {
+      const albumArtistNames = songArtists?.map((x) => x.name) || [];
+      const isAlbumNameExistInLibrary = allAlbumsData.some(
+        (a) => a.title === songAlbumName
+      );
+
+      if (isAlbumNameExistInLibrary) {
         const updatedAlbums = allAlbumsData.map((album) => {
-          if (album.title === songAlbumName) {
+          if (
+            album.title === songAlbumName &&
+            album.artists?.every((x) => albumArtistNames?.includes(x.name))
+          ) {
             album.songs.push({
               title: songTitle,
               songId,

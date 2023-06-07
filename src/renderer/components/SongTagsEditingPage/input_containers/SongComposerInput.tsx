@@ -8,7 +8,7 @@ type Props = {
 const SongComposerInput = (props: Props) => {
   const { songComposer, updateSongInfo } = props;
   return (
-    <div className="tag-input mb-6 flex w-[45%] min-w-[10rem] flex-col">
+    <div className="tag-input flex min-w-[10rem] max-w-2xl flex-col">
       <label htmlFor="song-composer-id3-tag">Composer</label>
       <input
         type="text"

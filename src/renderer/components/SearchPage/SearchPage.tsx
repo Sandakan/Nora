@@ -163,13 +163,30 @@ const SearchPage = () => {
   return (
     <MainContainer className="!h-full !pb-0" ref={searchContainerRef}>
       <div className="appear-from-bottom mb-4 flex items-center">
-        <div className="search-bar-container flex w-1/2 min-w-[25rem] max-w-xl items-center rounded-3xl bg-background-color-2 px-2 py-1 shadow-md dark:bg-dark-background-color-2">
-          <span
-            className="material-icons-round icon flex cursor-help items-center justify-center p-2 text-2xl text-font-color-highlight dark:text-dark-font-color-highlight"
-            title={`Use ' ; ' to separate keywords in Search.`}
-          >
-            search
-          </span>
+        <div className="search-bar-container flex w-1/2 min-w-[25rem] max-w-xl items-center rounded-3xl bg-background-color-2 px-2 py-1 dark:bg-dark-background-color-2">
+          <Button
+            className={`!my-1 !ml-1 !mr-2 !rounded-3xl border-none !px-4 !py-2 shadow-sm outline-1 outline-offset-1 focus-visible:!outline ${
+              isPredictiveSearchEnabled
+                ? 'bg-background-color-3 !text-black dark:bg-dark-background-color-3'
+                : 'bg-background-color-1/50 !text-font-color-highlight hover:bg-background-color-1 focus-visible:bg-background-color-1 dark:bg-dark-background-color-1/50 dark:!text-dark-font-color-highlight dark:hover:bg-dark-background-color-1 dark:focus-visible:bg-dark-background-color-1'
+            }`}
+            iconName={isPredictiveSearchEnabled ? 'auto_fix' : 'auto_fix_off'}
+            // label="Predictive Search"
+            tooltipLabel={`${
+              isPredictiveSearchEnabled ? 'Disable' : 'Enable'
+            } predictive search`}
+            iconClassName="material-icons-round-outlined"
+            clickHandler={() =>
+              setIsPredictiveSearchEnabled((state) => {
+                storage.preferences.setPreferences(
+                  'isPredictiveSearchEnabled',
+                  !state
+                );
+                return !state;
+              })
+            }
+          />
+
           {/* SEARCH INPUT */}
           <input
             type="search"
@@ -194,23 +211,12 @@ const SearchPage = () => {
             autoFocus
           />
         </div>
-        <Button
-          className="!mr-0 ml-2 !border-none !p-2 outline-1 outline-offset-1 hover:bg-background-color-2/80 focus-visible:!outline dark:hover:bg-dark-background-color-2/80"
-          iconName={isPredictiveSearchEnabled ? 'auto_fix' : 'auto_fix_off'}
-          tooltipLabel={`${
-            isPredictiveSearchEnabled ? 'Disable' : 'Enable'
-          } predictive search`}
-          iconClassName="material-icons-round-outlined"
-          clickHandler={() =>
-            setIsPredictiveSearchEnabled((state) => {
-              storage.preferences.setPreferences(
-                'isPredictiveSearchEnabled',
-                !state
-              );
-              return !state;
-            })
-          }
-        />
+        <span
+          className="material-icons-round-outlined ml-4 cursor-help text-2xl text-font-color-highlight dark:text-dark-font-color-highlight"
+          title={`Use ' ; ' to separate keywords in Search.`}
+        >
+          help
+        </span>
       </div>
       {/* SEARCH FILTERS */}
       <div className="search-filters-container mb-6">

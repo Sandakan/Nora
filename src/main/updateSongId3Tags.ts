@@ -591,6 +591,7 @@ const updateSongId3TagsOfUnknownSource = async (
         album: newSongTags.album?.title,
         genre: newSongTags.genres?.map((genre) => genre.name).join(', '),
         composer: newSongTags.composer,
+        trackNumber: newSongTags.trackNumber?.toString(),
         year: newSongTags.releasedYear
           ? `${newSongTags.releasedYear}`
           : undefined,
@@ -779,6 +780,7 @@ const updateSongId3Tags = async (
             album: tags.album?.title,
             genre: tags.genres?.map((genre) => genre.name).join(', '),
             composer: tags.composer,
+            trackNumber: tags.trackNumber?.toString(),
             year: tags.releasedYear ? `${tags.releasedYear}` : undefined,
             image: await parseImgDataForNodeID3(),
             unsynchronisedLyrics,

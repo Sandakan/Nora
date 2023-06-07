@@ -24,7 +24,8 @@
   },
   "urls": {
     "raw_repository_url": "https://raw.githubusercontent.com/Sandakan/Nora/",
-    "discord_invite_url": "https://discord.gg/c5rGKnBs4y"
+    "discord_invite_url": "https://discord.gg/c5rGKnBs4y",
+    "website_url": "https://noramusic.netlify.app/"
   },
   "homepage": "https://github.com/Sandakan/Nora",
   "bugs": {

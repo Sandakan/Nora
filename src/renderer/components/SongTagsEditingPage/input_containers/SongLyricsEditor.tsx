@@ -41,8 +41,8 @@ const SongLyricsEditor = (props: Props) => {
     [songLyrics]
   );
   return (
-    <div className="song-lyrics-editor-container flex w-[95%] items-center justify-between">
-      <div className="tag-input mb-6 flex h-full w-[65%] min-w-[10rem] flex-col">
+    <div className="song-lyrics-editor-container col-span-2 grid w-[95%] grid-cols-[minmax(50%,65%)_1fr] gap-8">
+      <div className="tag-input mb-6 flex h-full min-w-[10rem] flex-col">
         <label htmlFor="song-lyrics-id3-tag">Lyrics</label>
         <textarea
           id="song-lyrics-id3-tag"
@@ -85,7 +85,7 @@ const SongLyricsEditor = (props: Props) => {
           </span>
         </div>
       </div>
-      <div className="song-lyrics-buttons flex h-full w-1/3 flex-col items-end justify-start py-8">
+      <div className="song-lyrics-buttons mt-12 flex flex-col items-end">
         <Button
           key={0}
           label="Download Lyrics"

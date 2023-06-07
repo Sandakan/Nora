@@ -604,7 +604,7 @@ const Song = React.forwardRef(
         ref={ref}
       >
         <div
-          className={`song-cover-and-play-btn-container flex w-[(6rem,15%,9rem)] shrink-0 items-center justify-center ${
+          className={`song-cover-and-play-btn-container flex w-[clamp(6rem,15%,9rem)] shrink-0 items-center justify-center ${
             !isIndexingSongs && '!w-[clamp(4rem,10%,6rem)]'
           }`}
         >
