@@ -94,6 +94,7 @@
   "dependencies": {
     "didyoumean2": "^5.0.0",
     "electron-store": "^8.1.0",
+    "howler": "^2.2.3",
     "music-metadata": "^7.13.4",
     "node-id3": "^0.2.6",
     "node-vibrant": "^3.2.1-alpha.1",
@@ -110,6 +111,7 @@
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.2",
     "@types/auto-launch": "^5.0.2",
     "@types/dotenv-webpack": "^7.0.4",
+    "@types/howler": "^2.2.7",
     "@types/jest": "^29.5.1",
     "@types/node": "18.16.3",
     "@types/react": "^18.2.7",
