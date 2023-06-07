@@ -209,7 +209,6 @@ declare global {
     songPosition: number;
     isShuffling: boolean;
     isMiniPlayer: boolean;
-    isMiniPlayerLyricsVisible: boolean;
     isPlayerStalled: boolean;
     playbackRate: number;
   }

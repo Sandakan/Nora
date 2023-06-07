@@ -25,11 +25,9 @@ export default function MiniPlayer(props: MiniPlayerProps) {
     isMuted,
     volume,
     localStorageData,
-    isMiniPlayerLyricsVisible: isLyricsVisible,
   } = React.useContext(AppContext);
   const {
     updateMiniPlayerStatus,
-    setMiniPlayerLyricsVisibility: setIsLyricsVisible,
     toggleSongPlayback,
     handleSkipBackwardClick,
     handleSkipForwardClick,
@@ -48,6 +46,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
   const isMouseScrollRef = React.useRef(false);
   const seekbarRef = React.useRef(null as HTMLInputElement | null);
 
+  const [isLyricsVisible, setIsLyricsVisible] = React.useState(false);
   const [lyrics, setLyrics] = React.useState<SongLyrics | null | undefined>(
     null
   );
@@ -88,7 +87,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
         if (e.key === 'n') updateMiniPlayerStatus(!isMiniPlayer);
       }
     },
-    [isMiniPlayer, setIsLyricsVisible, updateMiniPlayerStatus]
+    [isMiniPlayer, updateMiniPlayerStatus]
   );
 
   React.useEffect(() => {
