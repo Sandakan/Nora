@@ -36,7 +36,6 @@ export interface AppStateContextType {
   isMultipleSelectionEnabled: boolean;
   // MINI PLAYER
   isMiniPlayer: boolean;
-  isMiniPlayerLyricsVisible: boolean;
   // APP UPDATES DATA
   appUpdatesState: AppUpdatesState;
   // OTHER

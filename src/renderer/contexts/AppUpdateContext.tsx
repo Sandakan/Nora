@@ -63,9 +63,6 @@ export interface AppUpdateContextType {
   ) => void;
   changeQueueCurrentSongIndex: (currentSongIndex: number) => void;
   updateMiniPlayerStatus: (isVisible: boolean) => void;
-  setMiniPlayerLyricsVisibility: (
-    callback: (prevState: boolean) => boolean
-  ) => void;
   clearAudioPlayerData: () => void;
   updateBodyBackgroundImage: (isVisible: boolean, src?: string) => void;
   updateMultipleSelections: (
