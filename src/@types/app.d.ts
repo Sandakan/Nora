@@ -215,6 +215,8 @@ declare global {
 
   type SongSkipReason = 'USER_SKIP' | 'PLAYER_SKIP';
 
+  type AutomaticallySaveLyricsTypes = 'SYNCED' | 'SYNCED_OR_UN_SYNCED' | 'NONE';
+
   type LyricsTypes = 'SYNCED' | 'UN_SYNCED' | 'ANY';
 
   type LyricsRequestTypes = 'ONLINE_ONLY' | 'OFFLINE_ONLY' | 'ANY';
@@ -437,6 +439,7 @@ declare global {
     shuffleArtworkFromSongCovers: boolean;
     removeAnimationsOnBatteryPower: boolean;
     isPredictiveSearchEnabled: boolean;
+    lyricsAutomaticallySaveState: AutomaticallySaveLyricsTypes;
   }
 
   interface CurrentSong {

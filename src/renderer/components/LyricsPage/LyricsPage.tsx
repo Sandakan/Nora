@@ -5,6 +5,7 @@ import debounce from 'renderer/utils/debounce';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
+
 import LyricLine from './LyricLine';
 import NoLyricsImage from '../../../../assets/images/svg/Sun_Monochromatic.svg';
 import FetchingLyricsImage from '../../../../assets/images/svg/Waiting_Monochromatic.svg';
@@ -25,7 +26,7 @@ document.addEventListener('lyrics/scrollIntoView', () => {
 });
 
 const LyricsPage = () => {
-  const { currentSongData } = useContext(AppContext);
+  const { currentSongData, localStorageData } = useContext(AppContext);
   const { addNewNotifications } = React.useContext(AppUpdateContext);
 
   const [lyrics, setLyrics] = React.useState(
@@ -61,14 +62,19 @@ const LyricsPage = () => {
       },
     ]);
     window.api.lyrics
-      .getSongLyrics({
-        songTitle: currentSongData.title,
-        songArtists: Array.isArray(currentSongData.artists)
-          ? currentSongData.artists.map((artist) => artist.name)
-          : [],
-        songPath: currentSongData.path,
-        duration: currentSongData.duration,
-      })
+      .getSongLyrics(
+        {
+          songTitle: currentSongData.title,
+          songArtists: Array.isArray(currentSongData.artists)
+            ? currentSongData.artists.map((artist) => artist.name)
+            : [],
+          songPath: currentSongData.path,
+          duration: currentSongData.duration,
+        },
+        undefined,
+        undefined,
+        localStorageData.preferences.lyricsAutomaticallySaveState
+      )
       .then((res) => setLyrics(res))
       .catch((err) => console.error(err));
   }, [
@@ -78,6 +84,7 @@ const LyricsPage = () => {
     currentSongData.path,
     currentSongData.songId,
     currentSongData.title,
+    localStorageData.preferences.lyricsAutomaticallySaveState,
   ]);
 
   const lyricsComponents = React.useMemo(() => {
@@ -155,7 +162,8 @@ const LyricsPage = () => {
             duration: currentSongData.duration,
           },
           'ANY',
-          'ONLINE_ONLY'
+          'ONLINE_ONLY',
+          localStorageData.preferences.lyricsAutomaticallySaveState
         )
         .then((res) => setLyrics(res))
         .finally(() => {
@@ -169,6 +177,7 @@ const LyricsPage = () => {
       currentSongData.duration,
       currentSongData.path,
       currentSongData.title,
+      localStorageData.preferences.lyricsAutomaticallySaveState,
     ]
   );
 
@@ -191,7 +200,8 @@ const LyricsPage = () => {
             duration: currentSongData.duration,
           },
           'ANY',
-          'OFFLINE_ONLY'
+          'OFFLINE_ONLY',
+          localStorageData.preferences.lyricsAutomaticallySaveState
         )
         .then((res) => setLyrics(res))
         .finally(() => setIsDisabled(false))
@@ -202,6 +212,7 @@ const LyricsPage = () => {
       currentSongData.duration,
       currentSongData.path,
       currentSongData.title,
+      localStorageData.preferences.lyricsAutomaticallySaveState,
     ]
   );
 
@@ -293,7 +304,7 @@ const LyricsPage = () => {
     >
       <>
         {isOnline || lyrics ? (
-          lyrics ? (
+          lyrics && lyrics.lyrics.lyrics.length > 0 ? (
             <>
               <div className="title-container relative flex w-full items-center justify-between py-2 pl-8 pr-2 text-2xl text-font-color-highlight dark:text-dark-font-color-highlight">
                 <div className="flex max-w-[40%] items-center">
@@ -411,7 +422,7 @@ const LyricsPage = () => {
                 />
               </div>
             </>
-          ) : lyrics === undefined ? (
+          ) : lyrics === undefined || lyrics?.lyrics.lyrics.length === 0 ? (
             <NoLyrics
               artworkPath={NoLyricsImage}
               content="We couldn't find any lyrics for this song."

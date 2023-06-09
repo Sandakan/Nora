@@ -19,6 +19,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     shuffleArtworkFromSongCovers: false,
     removeAnimationsOnBatteryPower: false,
     isPredictiveSearchEnabled: true,
+    lyricsAutomaticallySaveState: 'NONE',
   },
   playback: {
     currentSong: {

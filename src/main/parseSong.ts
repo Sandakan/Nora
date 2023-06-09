@@ -184,11 +184,16 @@ export const parseSong = async (
 
     // const start2 = timeEnd(start1, 'Time to fetch stats and parse metadata');
 
+    const isSongAvailable = songs.some(
+      (song) => song.path === absoluteFilePath
+    );
+    const isSongInParseQueue = parseQueue.includes(absoluteFilePath);
+
     if (
       Array.isArray(songs) &&
       metadata &&
-      !songs.some((song) => song.path === absoluteFilePath) &&
-      !parseQueue.includes(absoluteFilePath)
+      !isSongAvailable &&
+      !isSongInParseQueue
     ) {
       parseQueue.push(absoluteFilePath);
 
@@ -238,15 +243,7 @@ export const parseSong = async (
           ? { name: metadata.common.album, albumId: '' }
           : undefined,
         genres: [],
-        // albumArtist: metadata.common.albumartist || undefined,
         year: metadata.common?.year,
-        // palette:
-        //   palette && palette.DarkVibrant && palette.LightVibrant
-        //     ? {
-        //         DarkVibrant: palette.DarkVibrant,
-        //         LightVibrant: palette.LightVibrant,
-        //       }
-        //     : undefined,
         isAFavorite: false,
         isArtworkAvailable: !songArtworkPaths.isDefaultArtwork,
         path: absoluteFilePath,
@@ -424,10 +421,11 @@ export const manageAlbums = (
 
       if (isAlbumNameExistInLibrary) {
         const updatedAlbums = allAlbumsData.map((album) => {
-          if (
+          const isThisTheAlbum =
             album.title === songAlbumName &&
-            album.artists?.every((x) => albumArtistNames?.includes(x.name))
-          ) {
+            album.artists?.every((x) => albumArtistNames?.includes(x.name));
+
+          if (isThisTheAlbum) {
             album.songs.push({
               title: songTitle,
               songId,
@@ -483,17 +481,27 @@ export const manageArtists = (
   let updatedArtists = allArtists;
   const newArtists: SavableArtist[] = [];
   const relevantArtists: SavableArtist[] = [];
+
   if (Array.isArray(updatedArtists)) {
     if (songArtists && songArtists.length > 0) {
       for (let x = 0; x < songArtists.length; x += 1) {
-        const newArtist = songArtists[x];
-        if (allArtists.some((artist) => artist.name === newArtist.name)) {
-          let z = updatedArtists.filter((val) => val.name === newArtist.name);
-          z = z.map((artist) => {
+        const newArtistName = songArtists[x].name.trim();
+        const isArtistAvailable = allArtists.some(
+          (artist) =>
+            artist.name.trim().toLowerCase() === newArtistName.toLowerCase()
+        );
+
+        if (isArtistAvailable) {
+          let matchedArtists = updatedArtists.filter(
+            (artist) =>
+              artist.name.trim().toLowerCase() === newArtistName.toLowerCase()
+          );
+          matchedArtists = matchedArtists.map((artist) => {
             artist.songs.push({
               title: songTitle,
               songId,
             });
+
             if (relevantAlbums.length > 0) {
               relevantAlbums.forEach((relevantAlbum) =>
                 artist.albums?.push({
@@ -506,11 +514,11 @@ export const manageArtists = (
             return artist;
           });
           updatedArtists = updatedArtists
-            .filter((val) => val.name !== newArtist.name)
-            .concat(z);
+            .filter((val) => val.name !== newArtistName)
+            .concat(matchedArtists);
         } else {
           const artist: SavableArtist = {
-            name: newArtist.name,
+            name: newArtistName,
             artistId: generateRandomId(),
             songs: [
               {
@@ -555,29 +563,38 @@ export const manageGenres = (
   const newGenres: SavableGenre[] = [];
   const relevantGenres: SavableGenre[] = [];
   let genres = allGenres;
-  if (
-    Array.isArray(songGenres) &&
-    songGenres.length > 0 &&
-    Array.isArray(genres)
-  ) {
+
+  const areGenresAvailable =
+    Array.isArray(songGenres) && songGenres.length > 0 && Array.isArray(genres);
+
+  if (areGenresAvailable) {
     for (let x = 0; x < songGenres.length; x += 1) {
-      const songGenre = songGenres[x];
-      if (genres.some((genre) => genre.name === songGenre)) {
-        let y = genres.filter((genre) => genre.name === songGenre);
-        y = y.map((z) => {
-          z.artworkName =
+      const songGenre = songGenres[x].trim();
+      const isGenreAvialable = genres.some(
+        (genre) => genre.name.trim().toLowerCase() === songGenre.toLowerCase()
+      );
+
+      if (isGenreAvialable) {
+        let matchedGenres = genres.filter(
+          (genre) => genre.name.trim().toLowerCase() === songGenre.toLowerCase()
+        );
+        matchedGenres = matchedGenres.map((matchedGenre) => {
+          matchedGenre.artworkName =
             songArtworkPaths && !songArtworkPaths.isDefaultArtwork
               ? path.basename(songArtworkPaths.artworkPath)
-              : z.artworkName || undefined;
-          z.backgroundColor = darkVibrantBgColor || z.backgroundColor;
-          z.songs.push({
+              : matchedGenre.artworkName || undefined;
+          matchedGenre.backgroundColor =
+            darkVibrantBgColor || matchedGenre.backgroundColor;
+          matchedGenre.songs.push({
             songId,
             title: songTitle,
           });
-          relevantGenres.push(z);
-          return z;
+          relevantGenres.push(matchedGenre);
+          return matchedGenre;
         });
-        genres = genres.filter((genre) => genre.name !== songGenre).concat(y);
+        genres = genres
+          .filter((genre) => genre.name !== songGenre)
+          .concat(matchedGenres);
       } else {
         const newGenre: SavableGenre = {
           name: songGenre,

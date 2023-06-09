@@ -174,35 +174,45 @@ export default function App() {
 
   const managePlaybackErrors = React.useCallback(
     (err: unknown) => {
-      if (repetitivePlaybackErrorsCount > 5)
-        return console.error('Playback errors exceeded the 5 errors limit.');
-      repetitivePlaybackErrorsCount += 1;
-      const prevSongPosition = player.currentTime;
       const playerErrorData = player.error;
       console.error(err, playerErrorData);
+
+      const prompt = (
+        <ErrorPrompt
+          reason="ERROR_IN_PLAYER"
+          message={
+            <>
+              An error ocurred in the player.
+              <br />
+              This could be a result of trying to play a corrupted song.
+              <details className="mt-4">
+                {playerErrorData
+                  ? `CODE ${playerErrorData.code} : ${playerErrorData.message}`
+                  : 'No error message generated.'}
+              </details>
+            </>
+          }
+          showSendFeedbackBtn
+        />
+      );
+
+      if (repetitivePlaybackErrorsCount > 5) {
+        changePromptMenuData(true, prompt);
+        return console.error('Playback errors exceeded the 5 errors limit.');
+      }
+
+      repetitivePlaybackErrorsCount += 1;
+      const prevSongPosition = player.currentTime;
       log(
         `Error occurred in the player.App error:${err}; Player error: ${playerErrorData};`
       );
+
       if (player.src && playerErrorData) {
         player.load();
         player.currentTime = prevSongPosition;
       } else {
         player.pause();
-        changePromptMenuData(
-          true,
-          <ErrorPrompt
-            reason="ERROR_IN_PLAYER"
-            message={
-              <>
-                An error ocurred in the player.
-                <br />
-                This could be a result of trying to play a corrupted song.
-                <details>{`${playerErrorData}`}</details>
-              </>
-            }
-            showSendFeedbackBtn
-          />
-        );
+        changePromptMenuData(true, prompt);
       }
       return undefined;
     },
@@ -884,6 +894,7 @@ export default function App() {
 
   const playSong = React.useCallback(
     (songId: string, isStartPlay = true, playAsCurrentSongIndex = false) => {
+      repetitivePlaybackErrorsCount = 0;
       if (typeof songId === 'string') {
         if (contentRef.current.currentSongData.songId === songId)
           return toggleSongPlayback();

@@ -43,7 +43,7 @@ const fetchSongArtworksFromSpotify = async (spotifySongId: string) => {
         const highResArtworkUrl =
           SPOTIFY_IMAGE_BASE_URL + spotifyReqId + HIGH_RES + spotifyImgId;
 
-        console.log(highResArtworkUrl, lowResArtworkUrl);
+        // console.log(highResArtworkUrl, lowResArtworkUrl);
         return { highResArtworkUrl, lowResArtworkUrl };
       }
     }

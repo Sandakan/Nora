@@ -226,13 +226,15 @@ const lyrics = {
   getSongLyrics: (
     songInfo: LyricsRequestTrackInfo,
     lyricsType?: LyricsTypes,
-    lyricsRequestType?: LyricsRequestTypes
+    lyricsRequestType?: LyricsRequestTypes,
+    saveLyricsAutomatically?: AutomaticallySaveLyricsTypes
   ): Promise<SongLyrics | undefined> =>
     ipcRenderer.invoke(
       'app/getSongLyrics',
       songInfo,
       lyricsType,
-      lyricsRequestType
+      lyricsRequestType,
+      saveLyricsAutomatically
     ),
 
   saveLyricsToSong: (songPath: string, text: SongLyrics) =>

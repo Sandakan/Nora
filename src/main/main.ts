@@ -431,8 +431,15 @@ app
           _,
           trackInfo: LyricsRequestTrackInfo,
           lyricsType?: LyricsTypes,
-          lyricsRequestType?: LyricsRequestTypes
-        ) => getSongLyrics(trackInfo, lyricsType, lyricsRequestType)
+          lyricsRequestType?: LyricsRequestTypes,
+          saveLyricsAutomatically?: AutomaticallySaveLyricsTypes
+        ) =>
+          getSongLyrics(
+            trackInfo,
+            lyricsType,
+            lyricsRequestType,
+            saveLyricsAutomatically
+          )
       );
 
       ipcMain.handle(
@@ -777,15 +784,25 @@ app.on('window-all-closed', () => {
 
 // / / / / / / / / / / / / / / / / / / / / / / / / / / / /
 function manageWindowFinishLoad() {
-  const userData = getUserData();
-  if (userData.windowPositions.mainWindow) {
-    const { x, y } = userData.windowPositions.mainWindow;
+  const { windowDiamensions, windowPositions } = getUserData();
+  if (windowPositions.mainWindow) {
+    const { x, y } = windowPositions.mainWindow;
     mainWindow.setPosition(x, y, true);
   } else {
     mainWindow.center();
     const [x, y] = mainWindow.getPosition();
     saveUserData('windowPositions.mainWindow', { x, y });
   }
+
+  if (windowDiamensions.mainWindow) {
+    const { x, y } = windowDiamensions.mainWindow;
+    mainWindow.setSize(
+      x || MAIN_WINDOW_DEFAULT_SIZE_X,
+      y || MAIN_WINDOW_DEFAULT_SIZE_Y,
+      true
+    );
+  }
+
   mainWindow.show();
 
   if (IS_DEVELOPMENT)
