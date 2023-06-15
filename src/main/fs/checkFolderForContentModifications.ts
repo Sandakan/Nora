@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import log from '../log';
 import { sendMessageToRenderer } from '../main';
-import { tryToParseSong } from '../parseSong';
+import { tryToParseSong } from '../parseSong/parseSong';
 import { getSongsData, supportedMusicExtensions } from '../filesystem';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
 
@@ -57,7 +57,7 @@ const checkFolderForContentModifications = async (
       supportedMusicExtensions.includes(path.extname(filename));
     const isADeletedSong = songs.some((song) => song.path === songPath);
 
-    if (isNewlyAddedSong) return tryToParseSong(songPath);
+    if (isNewlyAddedSong) return tryToParseSong(songPath, true);
     if (isADeletedSong)
       return tryToRemoveSongFromLibrary(folderPath, filename, abortSignal);
   }

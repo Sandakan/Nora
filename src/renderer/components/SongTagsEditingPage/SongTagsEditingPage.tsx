@@ -16,7 +16,7 @@ import SongArtistsInput from './input_containers/SongArtistsInput';
 import SongAlbumInput from './input_containers/SongAlbumInput';
 import SongGenresInput from './input_containers/SongGenresInput';
 import SongComposerInput from './input_containers/SongComposerInput';
-import SongLyricsEditor from './input_containers/SongLyricsEditor';
+import SongLyricsEditorInput from './input_containers/SongLyricsEditorInput';
 
 import { appPreferences } from '../../../../package.json';
 import SongTrackNumberInput from './input_containers/SongTrackNumberInput';
@@ -426,8 +426,9 @@ function SongTagsEditingPage() {
               />
               <hr className="horizontal-rule col-span-2 h-[0.1rem] w-[95%] border-0 bg-background-color-2 dark:bg-dark-background-color-2" />
               {/* SONG LYRICS EDITOR */}
-              <SongLyricsEditor
+              <SongLyricsEditorInput
                 songTitle={songInfo.title}
+                songId={songId}
                 songArtists={songInfo.artists}
                 songPath={songPath}
                 duration={songInfo.duration}

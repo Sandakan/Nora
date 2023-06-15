@@ -12,7 +12,7 @@ import {
 import {
   generateCoverBuffer,
   getDefaultSongCoverImgBuffer,
-} from '../parseSong';
+} from '../parseSong/generateCoverBuffer';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 
 let defaultPalette: NodeVibrantPalette;

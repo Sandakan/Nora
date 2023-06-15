@@ -27,7 +27,8 @@ document.addEventListener('lyrics/scrollIntoView', () => {
 
 const LyricsPage = () => {
   const { currentSongData, localStorageData } = useContext(AppContext);
-  const { addNewNotifications } = React.useContext(AppUpdateContext);
+  const { addNewNotifications, updateCurrentlyActivePageData } =
+    React.useContext(AppUpdateContext);
 
   const [lyrics, setLyrics] = React.useState(
     null as SongLyrics | undefined | null
@@ -86,6 +87,12 @@ const LyricsPage = () => {
     currentSongData.title,
     localStorageData.preferences.lyricsAutomaticallySaveState,
   ]);
+
+  React.useEffect(() => {
+    updateCurrentlyActivePageData((prevData) => {
+      return { ...prevData, isLowResponseRequired: lyrics?.lyrics.isSynced };
+    });
+  }, [lyrics?.lyrics.isSynced, updateCurrentlyActivePageData]);
 
   const lyricsComponents = React.useMemo(() => {
     if (lyrics && lyrics?.lyrics) {

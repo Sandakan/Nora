@@ -23,7 +23,7 @@ import os from 'os';
 import * as dotenv from 'dotenv';
 // import * as Sentry from '@sentry/electron';
 
-import log from './log';
+import log, { logFilePath } from './log';
 import {
   getSongsData,
   getUserData,
@@ -145,8 +145,8 @@ let isOnBatteryPower = false;
 
 // / / / / / / INITIALIZATION / / / / / / /
 
-export const IS_DEVELOPMENT =
-  process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
+const IS_DEVELOPMENT =
+  !app.isPackaged || process.env.NODE_ENV === 'development';
 
 const appIcon = nativeImage.createFromPath(
   getAssetPath('images', 'logo_light_mode.png')
@@ -646,9 +646,7 @@ app
 
       ipcMain.on('app/resetApp', () => resetApp(!IS_DEVELOPMENT));
 
-      ipcMain.on('app/openLogFile', () =>
-        shell.openPath(path.join(app.getPath('userData'), 'logs.txt'))
-      );
+      ipcMain.on('app/openLogFile', () => shell.openPath(logFilePath));
 
       ipcMain.on('app/revealSongInFileExplorer', (_, songId: string) =>
         revealSongInFileExplorer(songId)

@@ -17,39 +17,45 @@ export interface AppReducer {
 }
 
 type AppReducerStateActions =
-  | 'USER_DATA_CHANGE'
-  | 'START_PLAY_STATE_CHANGE'
-  | 'APP_THEME_CHANGE'
-  | 'CURRENT_SONG_DATA_CHANGE'
-  | 'CURRENT_SONG_PLAYBACK_STATE'
-  | 'PROMPT_MENU_DATA_CHANGE'
-  | 'ADD_NEW_NOTIFICATIONS'
-  | 'UPDATE_NOTIFICATIONS'
-  | 'CONTEXT_MENU_DATA_CHANGE'
-  | 'CONTEXT_MENU_VISIBILITY_CHANGE'
-  | 'CURRENT_ACTIVE_PAGE_DATA_UPDATE'
-  | 'UPDATE_NAVIGATION_HISTORY'
-  | 'UPDATE_MINI_PLAYER_STATE'
-  | 'UPDATE_VOLUME'
-  | 'UPDATE_MUTED_STATE'
-  | 'UPDATE_SONG_POSITION'
-  | 'UPDATE_IS_REPEATING_STATE'
-  | 'TOGGLE_IS_FAVORITE_STATE'
-  | 'TOGGLE_SHUFFLE_STATE'
-  | 'UPDATE_VOLUME_VALUE'
-  | 'TOGGLE_REDUCED_MOTION'
-  | 'TOGGLE_SONG_INDEXING'
-  | 'PLAYER_WAITING_STATUS'
-  | 'UPDATE_BODY_BACKGROUND_IMAGE'
-  | 'UPDATE_MULTIPLE_SELECTIONS_DATA'
-  | 'CHANGE_APP_UPDATES_DATA'
-  | 'UPDATE_LOCAL_STORAGE'
-  | 'UPDATE_BATTERY_POWER_STATE'
-  | 'TOGGLE_SHOW_SONG_REMAINING_DURATION';
+  | { type: 'USER_DATA_CHANGE'; data: UserData }
+  | { type: 'START_PLAY_STATE_CHANGE'; data: unknown }
+  | {
+      type: 'APP_THEME_CHANGE';
+      data: AppThemeData;
+    }
+  | { type: 'CURRENT_SONG_DATA_CHANGE'; data: AudioPlayerData | {} }
+  | { type: 'CURRENT_SONG_PLAYBACK_STATE'; data: boolean }
+  | { type: 'PROMPT_MENU_DATA_CHANGE'; data: PromptMenuData }
+  | { type: 'ADD_NEW_NOTIFICATIONS'; data: AppNotification[] }
+  | { type: 'UPDATE_NOTIFICATIONS'; data: AppNotification[] }
+  | { type: 'CONTEXT_MENU_DATA_CHANGE'; data: ContextMenuData }
+  | { type: 'CONTEXT_MENU_VISIBILITY_CHANGE'; data: boolean }
+  | { type: 'CURRENT_ACTIVE_PAGE_DATA_UPDATE'; data: PageData }
+  | { type: 'UPDATE_NAVIGATION_HISTORY'; data: NavigationHistoryData }
+  | { type: 'UPDATE_MINI_PLAYER_STATE'; data: boolean }
+  | {
+      type: 'UPDATE_VOLUME';
+      data: PlayerVolume;
+    }
+  | { type: 'UPDATE_MUTED_STATE'; data?: boolean }
+  | { type: 'UPDATE_SONG_POSITION'; data: number }
+  | { type: 'UPDATE_IS_REPEATING_STATE'; data: RepeatTypes }
+  | { type: 'TOGGLE_IS_FAVORITE_STATE'; data?: boolean }
+  | { type: 'TOGGLE_SHUFFLE_STATE'; data?: boolean }
+  | { type: 'UPDATE_VOLUME_VALUE'; data: number }
+  | { type: 'TOGGLE_REDUCED_MOTION'; data?: boolean }
+  | { type: 'TOGGLE_SONG_INDEXING'; data?: boolean }
+  | { type: 'PLAYER_WAITING_STATUS'; data: boolean }
+  | { type: 'UPDATE_BODY_BACKGROUND_IMAGE'; data?: string }
+  | { type: 'UPDATE_MULTIPLE_SELECTIONS_DATA'; data: MultipleSelectionData }
+  | { type: 'CHANGE_APP_UPDATES_DATA'; data: AppUpdatesState }
+  | { type: 'UPDATE_LOCAL_STORAGE'; data: LocalStorage }
+  | { type: 'UPDATE_BATTERY_POWER_STATE'; data: boolean }
+  | { type: 'TOGGLE_SHOW_SONG_REMAINING_DURATION'; data?: boolean };
 
 const reducer = (
   state: AppReducer,
-  action: { type: AppReducerStateActions; data?: unknown }
+  action: AppReducerStateActions
 ): AppReducer => {
   switch (action.type) {
     case 'APP_THEME_CHANGE': {

@@ -2,7 +2,10 @@ import { app } from 'electron';
 import { appendFileSync } from 'fs';
 import path from 'path';
 import { sendMessageToRenderer } from './main';
+import { makeDirSync } from './utils/makeDir';
 
+const IS_DEVELOPMENT =
+  !app.isPackaged || process.env.NODE_ENV === 'development';
 export interface LogOptions {
   preventLoggingToConsole?: boolean;
   sendToRenderer?:
@@ -34,6 +37,33 @@ const objectToString = (obj?: Record<string, unknown>) => {
   }
   return '';
 };
+
+const getMinTwoWidthNums = (num: number) => {
+  if (num >= 10) return num.toString();
+  return `0${num}`;
+};
+
+const getLogFilePath = () => {
+  const logSaveFolder = path.join(app.getPath('userData'), 'logs');
+
+  const date = new Date();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const year = date.getFullYear();
+  const formattedDate = `${year}-${getMinTwoWidthNums(
+    month
+  )}-${getMinTwoWidthNums(day)}`;
+
+  const appState = IS_DEVELOPMENT ? 'dev' : 'prod';
+  const logFileName = `${formattedDate}.${appState}.log.txt`;
+
+  makeDirSync(logSaveFolder);
+
+  const logFilePath = path.join(logSaveFolder, logFileName);
+  return logFilePath;
+};
+
+export const logFilePath = getLogFilePath();
 
 /** A function that takes two parameters, message and preventLoggingToConsole. */
 export default (
@@ -77,9 +107,7 @@ export default (
   const str = `\n[${new Date().toUTCString()}] = ${seperator} ${mes} ${seperator}\n\t${objectToString(
     data
   )}`;
-  appendFileSync(path.join(app.getPath('userData'), 'logs.txt'), str, {
-    encoding: 'utf-8',
-  });
+  appendFileSync(logFilePath, str, { encoding: 'utf-8' });
 
   if (!options?.preventLoggingToConsole) console.log(str);
 };

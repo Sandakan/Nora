@@ -27,6 +27,9 @@ const GenreInfoPage = React.lazy(() => import('./GenreInfoPage/GenreInfoPage'));
 const SongTagsEditingPage = React.lazy(
   () => import('./SongTagsEditingPage/SongTagsEditingPage')
 );
+const LyricsEditingPage = React.lazy(
+  () => import('./LyricsEditingPage/LyricsEditingPage')
+);
 const SongsPage = React.lazy(() => import('./SongsPage/SongsPage'));
 const ErrorBoundary = React.lazy(() => import('./ErrorBoundary'));
 const MusicFoldersPage = React.lazy(
@@ -105,6 +108,9 @@ const Body = React.memo(() => {
             currentlyActivePage.data !== '' && <MusicFolderInfoPage />}
           {currentlyActivePage.pageTitle === 'SongTagsEditor' && (
             <SongTagsEditingPage />
+          )}
+          {currentlyActivePage.pageTitle === 'LyricsEditor' && (
+            <LyricsEditingPage />
           )}
         </Suspense>
       </ErrorBoundary>

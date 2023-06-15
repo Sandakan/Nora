@@ -101,7 +101,14 @@ const AboutSettings = () => {
               iconClassName="!text-2xl"
               tooltipLabel="Nora's Website"
               clickHandler={() =>
-                window.api.settingsHelpers.openInBrowser(urls.website_url)
+                changePromptMenuData(
+                  true,
+                  <OpenLinkConfirmPrompt
+                    link={urls.website_url}
+                    title="Nora's Official Website"
+                  />,
+                  'flex flex-col'
+                )
               }
             />
             <Img

@@ -9,6 +9,7 @@ import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
 
 type Props = {
   songTitle: string;
+  songId: string;
   songArtists?: {
     artistId?: string | undefined;
     name: string;
@@ -22,24 +23,138 @@ type Props = {
   updateSongInfo: (callback: (prevSongInfo: SongTags) => SongTags) => void;
 };
 
-const SongLyricsEditor = (props: Props) => {
+const SongLyricsEditorInput = (props: Props) => {
   const { userData } = React.useContext(AppContext);
-  const { addNewNotifications } = React.useContext(AppUpdateContext);
+  const { addNewNotifications, changeCurrentActivePage } =
+    React.useContext(AppUpdateContext);
 
   const { isOnline } = useNetworkConnectivity();
 
   const {
     songTitle,
+    songId,
     songArtists,
     songLyrics,
     updateSongInfo,
     duration,
     songPath,
   } = props;
+
   const isLyricsSynced = React.useMemo(
     () => syncedLyricsRegex.test(songLyrics || ''),
     [songLyrics]
   );
+
+  const downloadLyrics = React.useCallback(
+    (
+      _: unknown,
+      setIsDisabled: (state: boolean) => void,
+      setIsPending: (state: boolean) => void
+    ) => {
+      setIsDisabled(true);
+      setIsPending(true);
+      window.api.lyrics
+        .getSongLyrics(
+          {
+            songTitle,
+            songArtists: songArtists?.map((artist) => artist.name),
+            duration,
+            songPath,
+          },
+          'UN_SYNCED',
+          'ONLINE_ONLY'
+        )
+        .then((res) => {
+          if (res) {
+            updateSongInfo((prevData) => ({
+              ...prevData,
+              lyrics: res.lyrics.unparsedLyrics,
+            }));
+            setIsDisabled(false);
+            setIsPending(false);
+          }
+          return undefined;
+        })
+        .catch((err) => {
+          addNewNotifications([
+            {
+              id: `fetchUnsyncedLyricsFailed`,
+              delay: 5000,
+              content: <span>Failed to fetch un-synced lyrics.</span>,
+              icon: <span className="material-icons-round icon">warning</span>,
+            },
+          ]);
+          setIsPending(false);
+          console.error(err);
+        });
+    },
+    [
+      addNewNotifications,
+      duration,
+      songArtists,
+      songPath,
+      songTitle,
+      updateSongInfo,
+    ]
+  );
+
+  const downloadSyncedLyrics = React.useCallback(
+    (
+      _: unknown,
+      setIsDisabled: (state: boolean) => void,
+      setIsPending: (state: boolean) => void
+    ) => {
+      setIsDisabled(true);
+      setIsPending(true);
+      window.api.lyrics
+        .getSongLyrics(
+          {
+            songTitle,
+            songArtists: songArtists?.map((artist) => artist.name),
+            duration,
+            songPath,
+          },
+          'SYNCED',
+          'ONLINE_ONLY'
+        )
+        .then((res) => {
+          if (res) {
+            updateSongInfo((prevData) => ({
+              ...prevData,
+              lyrics: res.lyrics.unparsedLyrics,
+            }));
+            setIsDisabled(false);
+            return setIsPending(false);
+          }
+          throw new Error('download synced lyrics failed.');
+        })
+        .catch((err) => {
+          addNewNotifications([
+            {
+              id: `fetchSyncedLyricsFailed`,
+              delay: 5000,
+              content: <span>Failed to fetch synced lyrics.</span>,
+              icon: (
+                <span className="material-icons-round-outlined icon">
+                  warning
+                </span>
+              ),
+            },
+          ]);
+          setIsPending(false);
+          console.error(err);
+        });
+    },
+    [
+      addNewNotifications,
+      duration,
+      songArtists,
+      songPath,
+      songTitle,
+      updateSongInfo,
+    ]
+  );
+
   return (
     <div className="song-lyrics-editor-container col-span-2 grid w-[95%] grid-cols-[minmax(50%,65%)_1fr] gap-8">
       <div className="tag-input mb-6 flex h-full min-w-[10rem] flex-col">
@@ -92,46 +207,7 @@ const SongLyricsEditor = (props: Props) => {
           iconName="download"
           iconClassName="mr-2"
           className="download-lyrics-btn"
-          clickHandler={(_, setIsDisabled, setIsPending) => {
-            setIsDisabled(true);
-            setIsPending(true);
-            window.api.lyrics
-              .getSongLyrics(
-                {
-                  songTitle,
-                  songArtists: songArtists?.map((artist) => artist.name),
-                  duration,
-                  songPath,
-                },
-                'UN_SYNCED',
-                'ONLINE_ONLY'
-              )
-              .then((res) => {
-                if (res) {
-                  updateSongInfo((prevData) => ({
-                    ...prevData,
-                    lyrics: res.lyrics.unparsedLyrics,
-                  }));
-                  setIsDisabled(false);
-                  setIsPending(false);
-                }
-                return undefined;
-              })
-              .catch((err) => {
-                addNewNotifications([
-                  {
-                    id: `fetchUnsyncedLyricsFailed`,
-                    delay: 5000,
-                    content: <span>Failed to fetch un-synced lyrics.</span>,
-                    icon: (
-                      <span className="material-icons-round icon">warning</span>
-                    ),
-                  },
-                ]);
-                setIsPending(false);
-                console.error(err);
-              });
-          }}
+          clickHandler={downloadLyrics}
           tooltipLabel={
             isOnline ? undefined : 'You are not connected to the internet.'
           }
@@ -143,48 +219,7 @@ const SongLyricsEditor = (props: Props) => {
           iconName="download"
           className="download-synced-lyrics-btn mt-4"
           iconClassName="mr-2"
-          clickHandler={(_, setIsDisabled, setIsPending) => {
-            setIsDisabled(true);
-            setIsPending(true);
-            window.api.lyrics
-              .getSongLyrics(
-                {
-                  songTitle,
-                  songArtists: songArtists?.map((artist) => artist.name),
-                  duration,
-                  songPath,
-                },
-                'SYNCED',
-                'ONLINE_ONLY'
-              )
-              .then((res) => {
-                if (res) {
-                  updateSongInfo((prevData) => ({
-                    ...prevData,
-                    lyrics: res.lyrics.unparsedLyrics,
-                  }));
-                  setIsDisabled(false);
-                  setIsPending(false);
-                }
-                throw new Error('download synced lyrics failed.');
-              })
-              .catch((err) => {
-                addNewNotifications([
-                  {
-                    id: `fetchSyncedLyricsFailed`,
-                    delay: 5000,
-                    content: <span>Failed to fetch synced lyrics.</span>,
-                    icon: (
-                      <span className="material-icons-round-outlined icon">
-                        warning
-                      </span>
-                    ),
-                  },
-                ]);
-                setIsPending(false);
-                console.error(err);
-              });
-          }}
+          clickHandler={downloadSyncedLyrics}
           isDisabled={
             !(isOnline && userData?.preferences.isMusixmatchLyricsEnabled)
           }
@@ -196,9 +231,32 @@ const SongLyricsEditor = (props: Props) => {
               : 'You are not connected to the internet.'
           }
         />
+        <Button
+          key={0}
+          label="Edit in Lyrics Editor"
+          iconName="edit"
+          iconClassName="mr-2"
+          className="edit-lyrics-btn mt-4"
+          clickHandler={() =>
+            songLyrics &&
+            changeCurrentActivePage('LyricsEditor', {
+              lyrics: songLyrics,
+              songId,
+              songTitle,
+            })
+          }
+          tooltipLabel={
+            songLyrics
+              ? isLyricsSynced
+                ? 'Synced lyrics still not supported.'
+                : 'Edit available lyrics in the Lyrics Editor.'
+              : 'No lyrics found'
+          }
+          isDisabled={songLyrics ? isLyricsSynced : true}
+        />
       </div>
     </div>
   );
 };
 
-export default SongLyricsEditor;
+export default SongLyricsEditorInput;

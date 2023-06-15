@@ -95,6 +95,7 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
           <Img
             className="aspect-square h-full w-full rounded-sm"
             src={`nora://localFiles/${data?.artworkPath as string}`}
+            loading="eager"
             alt="song artwork"
           />
           <span
@@ -170,10 +171,11 @@ const parseNotificationFromMain = (
 
     for (const config of notificationsFromMainConfig) {
       const { trigger, validate = () => true, update } = config;
+      const validateFunc = validate.bind(config);
 
-      if (trigger.includes(messageCode) && validate(obj)) {
+      if (trigger.includes(messageCode) && validateFunc(obj)) {
         let configData = config;
-        if (update) configData = update(obj);
+        if (update) configData = update.bind(configData, obj)();
 
         const {
           id,

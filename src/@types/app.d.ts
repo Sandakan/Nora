@@ -202,9 +202,10 @@ declare global {
 
   type RepeatTypes = 'false' | 'repeat' | 'repeat-1';
 
+  type PlayerVolume = { isMuted: boolean; value: number };
   interface Player {
     isCurrentSongPlaying: boolean;
-    volume: { isMuted: boolean; value: number };
+    volume: PlayerVolume;
     isRepeating: RepeatTypes;
     songPosition: number;
     isShuffling: boolean;
@@ -638,7 +639,7 @@ declare global {
 
   interface PromptMenuData {
     isVisible: boolean;
-    content: ReactElement<any, any>;
+    content: ReactNode;
     className: string;
   }
 
@@ -714,10 +715,15 @@ declare global {
   interface NavigationHistory {
     pageTitle: PageTitles;
     data?: PageData;
+    onPageChange?: (
+      changedPageTitle: PageTitles,
+      changedPageData?: any
+    ) => void;
   }
 
   interface PageData extends Record<string, unknown> {
     scrollTopOffset?: number;
+    isLowResponseRequired?: boolean;
   }
 
   interface NavigationHistoryData {
@@ -853,6 +859,7 @@ declare global {
     | 'MusicFolderInfo'
     | 'CurrentQueue'
     | 'SongTagsEditor'
+    | 'LyricsEditor'
     | 'AllSearchResults';
 
   type PromiseFunctionReturn = Promise<{ success: boolean; message?: string }>;

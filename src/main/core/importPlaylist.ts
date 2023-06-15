@@ -4,9 +4,11 @@ import path from 'path';
 
 import { showOpenDialog } from '../main';
 import log from '../log';
-import { getSongsData } from '../filesystem';
+import { getPlaylistData, getSongsData } from '../filesystem';
 import { appPreferences } from '../../../package.json';
 import addNewPlaylist from './addNewPlaylist';
+import addSongsToPlaylist from './addSongsToPlaylist';
+import toggleLikeSongs from './toggleLikeSongs';
 
 const DEFAULT_EXPORT_DIALOG_OPTIONS: OpenDialogOptions = {
   title: `Select a Destination where your M3U8 file is`,
@@ -37,6 +39,17 @@ const getSongDataFromSongPath = (songPath: string) => {
   const songs = getSongsData();
   for (const song of songs) {
     if (song.path === songPath) return song;
+  }
+  return undefined;
+};
+
+const checkPlaylist = (playlistName: string) => {
+  const playlistData = getPlaylistData();
+
+  for (const playlist of playlistData) {
+    if (playlist.name === playlistName) {
+      return playlist;
+    }
   }
   return undefined;
 };
@@ -77,23 +90,58 @@ const importPlaylist = async () => {
             );
 
           if (availSongIdsForPlaylist.length > 0) {
-            const res = await addNewPlaylist(fileName, availSongIdsForPlaylist);
+            const playlistName = fileName;
 
-            if (res.success)
-              return log(
-                `Imported '${fileName}' playlist successfully.`,
-                undefined,
-                'INFO',
-                {
-                  sendToRenderer: 'SUCCESS',
-                }
+            const availablePlaylist = checkPlaylist(playlistName);
+
+            if (availablePlaylist) {
+              try {
+                if (availablePlaylist.playlistId === 'Favorites') {
+                  const newAvailSongIds = availSongIdsForPlaylist.filter(
+                    (id) => !availablePlaylist.songs.includes(id)
+                  );
+                  await toggleLikeSongs(newAvailSongIds, true);
+                } else
+                  addSongsToPlaylist(
+                    availablePlaylist.playlistId,
+                    availSongIdsForPlaylist
+                  );
+                return log(
+                  `Imported ${availSongIdsForPlaylist.length} songs to the existing '${availablePlaylist.name}' playlist.`,
+                  { playlistName },
+                  'ERROR',
+                  { sendToRenderer: 'FAILURE' }
+                );
+              } catch (error: any) {
+                return log(
+                  'Error occurred when importing songs to an existing playlist.',
+                  { playlistName },
+                  'ERROR',
+                  { sendToRenderer: 'FAILURE' }
+                );
+              }
+            } else {
+              const res = await addNewPlaylist(
+                playlistName,
+                availSongIdsForPlaylist
               );
-            return log(
-              res.message || 'Failed to create a playlist',
-              { res },
-              'ERROR',
-              { sendToRenderer: 'FAILURE' }
-            );
+
+              if (res.success)
+                return log(
+                  `Imported '${fileName}' playlist successfully.`,
+                  undefined,
+                  'INFO',
+                  {
+                    sendToRenderer: 'SUCCESS',
+                  }
+                );
+              return log(
+                res.message || 'Failed to create a playlist',
+                { res },
+                'ERROR',
+                { sendToRenderer: 'FAILURE' }
+              );
+            }
           }
         }
         return log(

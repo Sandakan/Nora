@@ -212,6 +212,7 @@ const GenreInfoPage = () => {
             <Img
               src={genreData.artworkPaths.artworkPath}
               className="mr-8 aspect-square max-w-[14rem] rounded-lg"
+              loading="eager"
             />
             <div className="genre-info-container flex-grow">
               <div className="font-semibold tracking-wider opacity-50">

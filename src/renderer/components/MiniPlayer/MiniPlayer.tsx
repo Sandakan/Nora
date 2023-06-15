@@ -190,6 +190,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
         <Img
           src={currentSongData.artworkPath}
           fallbackSrc={DefaultSongCover}
+          loading="eager"
           alt="Song Cover"
           className={`h-full w-full object-cover transition-[filter] delay-100 duration-200 ease-in-out group-focus-within:blur-[2px] group-focus-within:brightness-75 group-hover:blur-[2px] group-hover:brightness-75 group-focus:blur-[4px] group-focus:brightness-75 ${
             isLyricsVisible ? '!blur-[2px] !brightness-[.25]' : ''

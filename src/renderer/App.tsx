@@ -31,7 +31,7 @@ import log from './utils/log';
 
 import ErrorBoundary from './components/ErrorBoundary';
 import parseNotificationFromMain from './other/parseNotificationFromMain';
-import reducer, { DEFAULT_REDUCER_DATA } from './other/reducer';
+import reducer, { DEFAULT_REDUCER_DATA } from './other/appReducer';
 import ListeningDataSession from './other/listeningDataSession';
 import updateQueueOnSongPlay from './other/updateQueueOnSongPlay';
 import SongUnplayableErrorPrompt, {
@@ -47,6 +47,7 @@ const MiniPlayer = React.lazy(
 
 const player = new Audio();
 let repetitivePlaybackErrorsCount = 0;
+const lowResponseTimeRequiredPages: PageTitles[] = ['Lyrics', 'LyricsEditor'];
 
 const context = new window.AudioContext();
 const source = context.createMediaElementSource(player);
@@ -531,9 +532,14 @@ export default function App() {
 
   React.useEffect(() => {
     const index = content.navigationHistory.pageHistoryIndex;
-    const currentPage = content.navigationHistory.history[index].pageTitle;
-    const duration =
-      currentPage === 'Lyrics' || content.player.isMiniPlayer ? 200 : 750;
+    const { pageTitle: currentPage, data } =
+      content.navigationHistory.history[index];
+    const isLowResponseRequired =
+      (lowResponseTimeRequiredPages.includes(currentPage) &&
+        data?.isLowResponseRequired) ||
+      content.player.isMiniPlayer;
+
+    const duration = isLowResponseRequired ? 200 : 750;
 
     const intervalId = setInterval(() => {
       if (!player.paused) {
@@ -1358,7 +1364,7 @@ export default function App() {
   const changeCurrentActivePage = React.useCallback(
     (pageClass: PageTitles, data?: PageData) => {
       const { navigationHistory } = contentRef.current;
-      const { pageTitle } =
+      const { pageTitle, onPageChange } =
         navigationHistory.history[navigationHistory.pageHistoryIndex];
 
       const currentPageData =
@@ -1367,6 +1373,7 @@ export default function App() {
         pageTitle !== pageClass ||
         (currentPageData && data && isDataChanged(currentPageData, data))
       ) {
+        if (onPageChange) onPageChange(pageClass, data);
         const pageData = {
           pageTitle: pageClass,
           data,
@@ -1883,6 +1890,7 @@ export default function App() {
                 <div className="body-background-image-container absolute h-full w-full animate-bg-image-appear overflow-hidden bg-center transition-[filter] duration-500">
                   <Img
                     className="w-full bg-cover"
+                    loading="eager"
                     src={contentRef.current.bodyBackgroundImage}
                     alt=""
                   />

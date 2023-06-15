@@ -77,9 +77,10 @@ const CurrentlyPlayingSongInfoContainer = () => {
         .filter((artist, index) => artist.onlineArtworkPaths && index < 2)
         .map((artist, index) => (
           <Img
+            key={artist.artistId}
             src={artist.onlineArtworkPaths?.picture_small}
             fallbackSrc={artist.artworkPath}
-            key={artist.artistId}
+            loading="eager"
             className={`absolute aspect-square w-6 rounded-full border-2 border-background-color-1 dark:border-dark-background-color-1 ${
               index === 0 ? 'z-2' : '-translate-x-2'
             }`}

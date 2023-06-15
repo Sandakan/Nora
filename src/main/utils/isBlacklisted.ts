@@ -15,10 +15,10 @@ export const isParentFolderBlacklisted = (folderPath: string) => {
 export const isFolderBlacklisted = (folderPath: string) => {
   const { folderBlacklist } = getBlacklistData();
 
-  const isBlacklsited = folderBlacklist.includes(path.normalize(folderPath));
+  const isBlacklisted = folderBlacklist.includes(path.normalize(folderPath));
   const isParentBlacklisted = isParentFolderBlacklisted(folderPath);
 
-  return isBlacklsited || isParentBlacklisted;
+  return isBlacklisted || isParentBlacklisted;
 };
 
 export const isSongBlacklisted = (songId: string, songPath: string) => {

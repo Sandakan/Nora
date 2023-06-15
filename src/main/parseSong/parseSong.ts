@@ -5,11 +5,9 @@ import * as musicMetaData from 'music-metadata';
 import fs from 'fs/promises';
 import path from 'path';
 
-import sharp from 'sharp';
-import { generateRandomId } from './utils/randomId';
-import log from './log';
+import { generateRandomId } from '../utils/randomId';
+import log from '../log';
 import {
-  DEFAULT_ARTWORK_SAVE_LOCATION,
   getAlbumsData,
   getArtistsData,
   getGenresData,
@@ -18,91 +16,18 @@ import {
   setArtistsData,
   setGenresData,
   setSongsData,
-} from './filesystem';
-import { dataUpdateEvent, sendMessageToRenderer } from './main';
-import { storeArtworks } from './other/artworks';
-import getAssetPath from './utils/getAssetPath';
-import { generatePalettes } from './other/generatePalette';
+} from '../filesystem';
+import { dataUpdateEvent, sendMessageToRenderer } from '../main';
+import { storeArtworks } from '../other/artworks';
+import { generatePalettes } from '../other/generatePalette';
+import { isSongBlacklisted } from '../utils/isBlacklisted';
 // import { timeEnd, timeStart } from './utils/measureTimeUsage';
-
-let defaultSongCoverImgBuffer: Buffer;
-
-export const getDefaultSongCoverImgBuffer = async () => {
-  if (defaultSongCoverImgBuffer) return defaultSongCoverImgBuffer;
-
-  try {
-    const buffer = await sharp(
-      getAssetPath('images', 'webp', 'song_cover_default.webp')
-    )
-      .png()
-      .toBuffer();
-    defaultSongCoverImgBuffer = buffer;
-    return buffer;
-  } catch (error) {
-    log(
-      `ERROR OCCURRED WHEN READING A FILE OF NAME 'song_cover_default.webp'.`,
-      { error },
-      'ERROR'
-    );
-    return undefined;
-  }
-};
-
-export const generateCoverBuffer = async (
-  cover?: musicMetaData.IPicture[] | string,
-  noDefaultOnUndefined = false
-) => {
-  if (
-    (cover === undefined ||
-      (typeof cover !== 'string' && cover[0].data === undefined)) &&
-    noDefaultOnUndefined
-  )
-    return undefined;
-  if (cover) {
-    if (typeof cover === 'string') {
-      try {
-        const imgPath = path.join(DEFAULT_ARTWORK_SAVE_LOCATION, cover);
-        const isWebp = path.extname(imgPath) === '.webp';
-
-        const buffer = isWebp
-          ? await sharp(imgPath).png().toBuffer()
-          : await fs.readFile(imgPath);
-
-        return buffer;
-      } catch (error) {
-        log(
-          `ERROR OCCURRED WHEN TRYING TO GENERATE ARTWORK BUFFER.`,
-          { error },
-          'ERROR'
-        );
-        return getDefaultSongCoverImgBuffer();
-      }
-    }
-
-    if (cover[0].format === 'image/webp') {
-      try {
-        const buffer = await sharp(cover[0].data).png().toBuffer();
-        return buffer;
-      } catch (error) {
-        log(
-          'Error occurred when trying to get artwork buffer of a song.',
-          { error },
-          'WARN'
-        );
-        return getDefaultSongCoverImgBuffer();
-      }
-    }
-
-    return cover[0].data;
-  }
-
-  return getDefaultSongCoverImgBuffer();
-};
 
 let pathsQueue: string[] = [];
 
 export const tryToParseSong = (
   songPath: string,
+  generatePalettesAfterParsing = false,
   noRendererMessages = false
 ) => {
   let timeOutId: NodeJS.Timeout;
@@ -115,11 +40,10 @@ export const tryToParseSong = (
       try {
         await parseSong(songPath, noRendererMessages);
         log(`'${songFileName}' song added to the library.`);
-        setTimeout(generatePalettes, 1500);
+        if (generatePalettesAfterParsing) setTimeout(generatePalettes, 1500);
 
         dataUpdateEvent('songs/newSong');
         pathsQueue = pathsQueue.filter((x) => x !== songPath);
-        return;
       } catch (error) {
         if (errRetryCount < 5) {
           // THIS ERROR OCCURRED WHEN THE APP STARTS READING DATA WHILE THE SONG IS STILL WRITING TO THE DISK. POSSIBLE SOLUTION IS TO SET A TIMEOUT AND REDO THE PROCESS.
@@ -155,7 +79,6 @@ export const parseSong = async (
   noRendererMessages = false
 ): Promise<SongData | undefined> => {
   // const start = timeStart();
-
   log(
     `Starting the parsing process of song '${path.basename(absoluteFilePath)}'.`
   );
@@ -188,13 +111,13 @@ export const parseSong = async (
       (song) => song.path === absoluteFilePath
     );
     const isSongInParseQueue = parseQueue.includes(absoluteFilePath);
-
-    if (
+    const isSongEligibleForParsing =
       Array.isArray(songs) &&
       metadata &&
       !isSongAvailable &&
-      !isSongInParseQueue
-    ) {
+      !isSongInParseQueue;
+
+    if (isSongEligibleForParsing) {
       parseQueue.push(absoluteFilePath);
 
       // timeEnd(start2, 'Time to start organizing metadata');
@@ -230,18 +153,9 @@ export const parseSong = async (
       const songInfo: SavableSongData = {
         songId,
         title: songTitle,
-        artists: metadata.common.artists
-          ? metadata.common.artists[0].split(',').map((x) => {
-              return { name: x.trim(), artistId: '' };
-            })
-          : undefined,
-        duration:
-          typeof metadata.format.duration === 'number'
-            ? parseFloat(metadata.format.duration.toFixed(2))
-            : 0,
-        album: metadata.common.album
-          ? { name: metadata.common.album, albumId: '' }
-          : undefined,
+        artists: getArtistNamesFromSong(metadata.common.artists),
+        duration: getSongDurationFromSong(metadata.format.duration),
+        album: getAlbumInfoFromSong(metadata.common.album),
         genres: [],
         year: metadata.common?.year,
         isAFavorite: false,
@@ -270,7 +184,7 @@ export const parseSong = async (
 
       // const start9 = timeEnd(start8, 'Time to manage albums');
 
-      if (songInfo.album)
+      if (songInfo.album && relevantAlbums.length > 0)
         songInfo.album = {
           name: relevantAlbums[0].title,
           albumId: relevantAlbums[0].albumId,
@@ -292,7 +206,7 @@ export const parseSong = async (
 
       // const start11 = timeEnd(start10, 'Time to manage artists');
 
-      if (songInfo.artists) {
+      if (songInfo.artists && relevantArtists.length > 0) {
         for (let x = 0; x < relevantArtists.length; x += 1) {
           for (let y = 0; y < songInfo.artists.length; y += 1) {
             if (relevantArtists[x].name === songInfo.artists[y].name)
@@ -391,15 +305,55 @@ export const parseSong = async (
       return {
         ...songInfo,
         artworkPaths: songArtworkPaths,
-        // a newly parsed song cannot be blacklisted
-        isBlacklisted: false,
+        isBlacklisted: isSongBlacklisted(songId, absoluteFilePath),
       };
     }
+    log(
+      'Song not eligable for parsing.',
+      {
+        absoluteFilePath,
+        reason: {
+          isSongArrayAvailable: Array.isArray(songs),
+          isSongAvailable,
+          isSongInParseQueue,
+        },
+      },
+      'WARN'
+    );
     return undefined;
   } catch (err) {
-    console.error(err);
+    log(`Error occurred when parsing a song.`, { err }, 'ERROR');
     throw err;
+  } finally {
+    parseQueue = parseQueue.filter((dir) => dir !== absoluteFilePath);
   }
+};
+
+const getArtistNamesFromSong = (artists = [] as string[]) => {
+  if (artists.length > 0) {
+    const [artistData] = artists;
+    const splittedArtists = artistData.split(',');
+    const splittedArtistsInfo = splittedArtists.map((x) => ({
+      name: x.trim(),
+      artistId: '',
+    }));
+
+    return splittedArtistsInfo;
+  }
+  return undefined;
+};
+
+const getSongDurationFromSong = (duration?: number) => {
+  if (typeof duration === 'number') {
+    const fixedDuration = duration.toFixed(2);
+    return parseFloat(fixedDuration);
+  }
+  return 0;
+};
+
+const getAlbumInfoFromSong = (album?: string) => {
+  if (album) return { name: album, albumId: '' };
+  return undefined;
 };
 
 export const manageAlbums = (
@@ -414,18 +368,12 @@ export const manageAlbums = (
   const relevantAlbums: SavableAlbum[] = [];
   if (songAlbumName) {
     if (Array.isArray(allAlbumsData)) {
-      const albumArtistNames = songArtists?.map((x) => x.name) || [];
-      const isAlbumNameExistInLibrary = allAlbumsData.some(
+      const isAlbumAvailable = allAlbumsData.some(
         (a) => a.title === songAlbumName
       );
-
-      if (isAlbumNameExistInLibrary) {
+      if (isAlbumAvailable) {
         const updatedAlbums = allAlbumsData.map((album) => {
-          const isThisTheAlbum =
-            album.title === songAlbumName &&
-            album.artists?.every((x) => albumArtistNames?.includes(x.name));
-
-          if (isThisTheAlbum) {
+          if (album.title === songAlbumName) {
             album.songs.push({
               title: songTitle,
               songId,
@@ -485,23 +433,18 @@ export const manageArtists = (
   if (Array.isArray(updatedArtists)) {
     if (songArtists && songArtists.length > 0) {
       for (let x = 0; x < songArtists.length; x += 1) {
-        const newArtistName = songArtists[x].name.trim();
-        const isArtistAvailable = allArtists.some(
-          (artist) =>
-            artist.name.trim().toLowerCase() === newArtistName.toLowerCase()
-        );
+        const newArtist = songArtists[x];
 
+        const isArtistAvailable = allArtists.some(
+          (artist) => artist.name === newArtist.name
+        );
         if (isArtistAvailable) {
-          let matchedArtists = updatedArtists.filter(
-            (artist) =>
-              artist.name.trim().toLowerCase() === newArtistName.toLowerCase()
-          );
-          matchedArtists = matchedArtists.map((artist) => {
+          let z = updatedArtists.filter((val) => val.name === newArtist.name);
+          z = z.map((artist) => {
             artist.songs.push({
               title: songTitle,
               songId,
             });
-
             if (relevantAlbums.length > 0) {
               relevantAlbums.forEach((relevantAlbum) =>
                 artist.albums?.push({
@@ -514,11 +457,11 @@ export const manageArtists = (
             return artist;
           });
           updatedArtists = updatedArtists
-            .filter((val) => val.name !== newArtistName)
-            .concat(matchedArtists);
+            .filter((val) => val.name !== newArtist.name)
+            .concat(z);
         } else {
           const artist: SavableArtist = {
-            name: newArtistName,
+            name: newArtist.name,
             artistId: generateRandomId(),
             songs: [
               {
@@ -563,38 +506,29 @@ export const manageGenres = (
   const newGenres: SavableGenre[] = [];
   const relevantGenres: SavableGenre[] = [];
   let genres = allGenres;
-
-  const areGenresAvailable =
-    Array.isArray(songGenres) && songGenres.length > 0 && Array.isArray(genres);
-
-  if (areGenresAvailable) {
+  if (
+    Array.isArray(songGenres) &&
+    songGenres.length > 0 &&
+    Array.isArray(genres)
+  ) {
     for (let x = 0; x < songGenres.length; x += 1) {
-      const songGenre = songGenres[x].trim();
-      const isGenreAvialable = genres.some(
-        (genre) => genre.name.trim().toLowerCase() === songGenre.toLowerCase()
-      );
-
-      if (isGenreAvialable) {
-        let matchedGenres = genres.filter(
-          (genre) => genre.name.trim().toLowerCase() === songGenre.toLowerCase()
-        );
-        matchedGenres = matchedGenres.map((matchedGenre) => {
-          matchedGenre.artworkName =
+      const songGenre = songGenres[x];
+      if (genres.some((genre) => genre.name === songGenre)) {
+        let y = genres.filter((genre) => genre.name === songGenre);
+        y = y.map((z) => {
+          z.artworkName =
             songArtworkPaths && !songArtworkPaths.isDefaultArtwork
               ? path.basename(songArtworkPaths.artworkPath)
-              : matchedGenre.artworkName || undefined;
-          matchedGenre.backgroundColor =
-            darkVibrantBgColor || matchedGenre.backgroundColor;
-          matchedGenre.songs.push({
+              : z.artworkName || undefined;
+          z.backgroundColor = darkVibrantBgColor || z.backgroundColor;
+          z.songs.push({
             songId,
             title: songTitle,
           });
-          relevantGenres.push(matchedGenre);
-          return matchedGenre;
+          relevantGenres.push(z);
+          return z;
         });
-        genres = genres
-          .filter((genre) => genre.name !== songGenre)
-          .concat(matchedGenres);
+        genres = genres.filter((genre) => genre.name !== songGenre).concat(y);
       } else {
         const newGenre: SavableGenre = {
           name: songGenre,

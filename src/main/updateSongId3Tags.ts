@@ -732,6 +732,9 @@ const updateSongId3Tags = async (
           genres = updatedGenreData.updatedGenres;
           song = updatedGenreData.updatedSongData;
 
+          // / / / / / / / SONG TRACK NUMBER / / / / / / /
+          song.trackNo = tags.trackNumber;
+
           // / / / / / / / SONG LYRICS / / / / / / /
           const { synchronisedLyrics, unsynchronisedLyrics } =
             manageLyricsUpdates(tags, song);

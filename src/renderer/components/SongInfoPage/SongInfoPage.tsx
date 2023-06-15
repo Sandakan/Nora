@@ -210,6 +210,7 @@ const SongInfoPage = () => {
               src={songInfo.artworkPaths?.artworkPath}
               alt={`${songInfo.title} cover`}
               className="h-full object-cover"
+              loading="eager"
               onContextMenu={(e) =>
                 !songInfo.artworkPaths.isDefaultArtwork &&
                 updateContextMenuData(

@@ -284,6 +284,7 @@ const AlbumInfoPage = () => {
               <Img
                 src={albumContent.albumData.artworkPaths.artworkPath}
                 className="w-52 rounded-xl"
+                loading="eager"
                 alt="Album Cover"
               />
             )}{' '}

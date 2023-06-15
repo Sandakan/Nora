@@ -163,7 +163,7 @@ const saveLyricsAutomaticallyIfAsked = async (
   ) {
     await saveLyricsToSong(songPath, lyrics);
     return log(
-      'Automatically downloaded lyrics saved successfully.',
+      `Lyrics for '${lyrics.title}' saved successfully.`,
       {
         songPath,
       },

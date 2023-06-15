@@ -368,6 +368,7 @@ const ArtistInfoPage = () => {
             src={artistData?.onlineArtworkPaths?.picture_medium}
             fallbackSrc={artistData?.artworkPaths?.artworkPath}
             className="!aspect-square max-h-60 max-w-[15rem] rounded-full object-cover"
+            loading="eager"
             alt="Album Cover"
             onContextMenu={(e) =>
               (artistData?.onlineArtworkPaths?.picture_xl ||

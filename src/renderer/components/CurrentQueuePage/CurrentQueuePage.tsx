@@ -467,6 +467,7 @@ const CurrentQueuePage = () => {
                 }`}
                 src={queueInfo.onlineArtworkPath}
                 fallbackSrc={queueInfo.artworkPath}
+                loading="eager"
                 alt="Current Playing Queue Cover"
               />
             </div>
