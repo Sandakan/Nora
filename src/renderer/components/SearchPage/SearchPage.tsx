@@ -36,9 +36,7 @@ const SearchPage = () => {
   const { updateCurrentlyActivePageData } = React.useContext(AppUpdateContext);
 
   const [searchInput, setSearchInput] = React.useState(
-    currentlyActivePage?.data?.keyword
-      ? (currentlyActivePage.data.keyword as string)
-      : ''
+    currentlyActivePage?.data?.keyword || ''
   );
   const [isPredictiveSearchEnabled, setIsPredictiveSearchEnabled] =
     React.useState(
@@ -48,7 +46,6 @@ const SearchPage = () => {
   const searchContainerRef = React.useRef(null);
   const { width } = useResizeObserver(searchContainerRef);
 
-  const deferredSearchInput = React.useDeferredValue(searchInput);
   const [searchResults, setSearchResults] = React.useState({
     albums: [],
     artists: [],
@@ -89,17 +86,12 @@ const SearchPage = () => {
 
   const timeOutIdRef = React.useRef(undefined as NodeJS.Timer | undefined);
   const fetchSearchResults = React.useCallback(() => {
-    if (deferredSearchInput.trim() !== '') {
+    if (searchInput.trim() !== '') {
       if (timeOutIdRef.current) clearTimeout(timeOutIdRef.current);
       timeOutIdRef.current = setTimeout(
         () =>
           window.api.search
-            .search(
-              activeFilter,
-              deferredSearchInput,
-              true,
-              isPredictiveSearchEnabled
-            )
+            .search(activeFilter, searchInput, true, isPredictiveSearchEnabled)
             .then((results) => {
               return setSearchResults(results);
             }),
@@ -114,12 +106,7 @@ const SearchPage = () => {
         genres: [],
         availableResults: [],
       });
-  }, [
-    activeFilter,
-    deferredSearchInput,
-    timeOutIdRef,
-    isPredictiveSearchEnabled,
-  ]);
+  }, [activeFilter, searchInput, timeOutIdRef, isPredictiveSearchEnabled]);
 
   React.useEffect(() => {
     fetchSearchResults();

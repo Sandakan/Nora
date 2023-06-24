@@ -30,6 +30,7 @@ interface SongProp {
   isIndexingSongs: boolean;
   isAFavorite: boolean;
   className?: string;
+  onPlayClick?: (currSongId: string) => void;
   style?: React.CSSProperties;
   isDraggable?: boolean;
   provided?: DraggableProvided;
@@ -77,6 +78,7 @@ const Song = React.forwardRef(
       year,
       selectAllHandler,
       provided = {} as any,
+      onPlayClick,
     } = props;
 
     const [isAFavorite, setIsAFavorite] = React.useState(props.isAFavorite);
@@ -100,8 +102,9 @@ const Song = React.forwardRef(
     ]);
 
     const handlePlayBtnClick = React.useCallback(() => {
-      playSong(songId);
-    }, [playSong, songId]);
+      if (onPlayClick) return onPlayClick(songId);
+      return playSong(songId);
+    }, [onPlayClick, playSong, songId]);
 
     const handleLikeButtonClick = React.useCallback(() => {
       window.api.playerControls
@@ -199,7 +202,7 @@ const Song = React.forwardRef(
         currentlyActivePage.pageTitle !== 'AlbumInfo' &&
         currentlyActivePage?.data?.albumId !== album.albumId
       )
-        changeCurrentActivePage('SongInfo', {
+        changeCurrentActivePage('AlbumInfo', {
           albumId: album.albumId,
         });
     }, [

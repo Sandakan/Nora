@@ -22,6 +22,7 @@ const lyricsOffsetRegex = /^\[offset:(?<lyricsOffset>[+-]?\d+)\]$/gm;
 
 const getSecondsFromLyricsLine = (lyric: string) => {
   const lyricsStartMatch = lyric.match(syncedLyricsRegex);
+  syncedLyricsRegex.lastIndex = 0;
   const replaceRegex = /[[\]]/gm;
   if (Array.isArray(lyricsStartMatch)) {
     const [sec, ms] = lyricsStartMatch[0]

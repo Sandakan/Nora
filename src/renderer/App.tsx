@@ -274,6 +274,7 @@ export default function App() {
       'isShuffling',
       contentRef.current.player.isShuffling
     );
+    storage.queue.setQueue(refQueue.current);
   }, []);
 
   const updateAppUpdatesState = React.useCallback((state: AppUpdatesState) => {
@@ -535,11 +536,11 @@ export default function App() {
     const { pageTitle: currentPage, data } =
       content.navigationHistory.history[index];
     const isLowResponseRequired =
-      (lowResponseTimeRequiredPages.includes(currentPage) &&
-        data?.isLowResponseRequired) ||
+      lowResponseTimeRequiredPages.includes(currentPage) ||
+      data?.isLowResponseRequired ||
       content.player.isMiniPlayer;
 
-    const duration = isLowResponseRequired ? 200 : 750;
+    const duration = isLowResponseRequired ? 200 : 1000;
 
     const intervalId = setInterval(() => {
       if (!player.paused) {
@@ -550,12 +551,18 @@ export default function App() {
         });
         player.dispatchEvent(playerPositionChange);
 
-        startTransition(() =>
+        if (isLowResponseRequired)
           dispatch({
             type: 'UPDATE_SONG_POSITION',
             data: currentPosition,
-          })
-        );
+          });
+        else
+          startTransition(() =>
+            dispatch({
+              type: 'UPDATE_SONG_POSITION',
+              data: currentPosition,
+            })
+          );
       }
     }, duration);
 
@@ -720,10 +727,13 @@ export default function App() {
         resultNotifications.unshift(...newNotifications);
         contentRef.current.notificationPanelData.notifications =
           resultNotifications;
-        dispatch({
-          type: 'ADD_NEW_NOTIFICATIONS',
-          data: resultNotifications,
-        });
+
+        startTransition(() =>
+          dispatch({
+            type: 'ADD_NEW_NOTIFICATIONS',
+            data: resultNotifications,
+          })
+        );
       }
     },
     []
@@ -1041,12 +1051,20 @@ export default function App() {
               changeQueueCurrentSongIndex(0);
           } else changeQueueCurrentSongIndex(currentSongIndex + 1);
         } else console.log('Queue is empty.');
-      } else changeQueueCurrentSongIndex(0);
+      } else if (refQueue.current.queue.length > 0)
+        changeQueueCurrentSongIndex(0);
     },
     [toggleSongPlayback, changeQueueCurrentSongIndex]
   );
 
   React.useEffect(() => {
+    // let url: string | undefined;
+
+    // if (contentRef.current.currentSongData.artwork) {
+    //   const decoded = atob(contentRef.current.currentSongData.artwork);
+    //   const blob = new Blob([contentRef.current.currentSongData.artwork]);
+    //   url = URL.createObjectURL(blob);
+    // }
     navigator.mediaSession.metadata = new MediaMetadata({
       title: contentRef.current.currentSongData.title,
       artist: Array.isArray(contentRef.current.currentSongData.artists)
@@ -1060,7 +1078,9 @@ export default function App() {
       artwork: [
         {
           src: `data:;base64,${contentRef.current.currentSongData.artwork}`,
-          sizes: '300x300',
+          // src: url || '',
+          // src: contentRef.current.currentSongData.artworkPath || '',
+          sizes: '1000x1000',
           type: 'image/webp',
         },
       ],
@@ -1086,6 +1106,7 @@ export default function App() {
       ? 'playing'
       : 'paused';
     return () => {
+      // if (url) URL.revokeObjectURL(url);
       navigator.mediaSession.metadata = null;
       navigator.mediaSession.playbackState = 'none';
       navigator.mediaSession.setActionHandler('play', null);
@@ -1135,7 +1156,7 @@ export default function App() {
         queueType,
       } as Queue;
 
-      if (isShuffleQueue) {
+      if (isShuffleQueue || content.player.isShuffling) {
         const { shuffledQueue, positions } = shuffleQueue(queue.queue);
         queue.queue = shuffledQueue;
 
@@ -1147,7 +1168,12 @@ export default function App() {
       refQueue.current = queue;
       if (startPlaying) changeQueueCurrentSongIndex(0);
     },
-    [changeQueueCurrentSongIndex, shuffleQueue, toggleShuffling]
+    [
+      changeQueueCurrentSongIndex,
+      content.player.isShuffling,
+      shuffleQueue,
+      toggleShuffling,
+    ]
   );
 
   const updateQueueData = React.useCallback(
@@ -1422,7 +1448,7 @@ export default function App() {
         onlyChangeCurrentSongData
       )
         .then((newFavorite) => {
-          if (newFavorite) {
+          if (typeof newFavorite === 'boolean') {
             contentRef.current.currentSongData.isAFavorite = newFavorite;
             return dispatch({
               type: 'TOGGLE_IS_FAVORITE_STATE',

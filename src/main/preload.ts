@@ -288,8 +288,8 @@ const songUpdates = {
     ipcRenderer.invoke('app/getImgFileLocation'),
   revealSongInFileExplorer: (songId: string): void =>
     ipcRenderer.send('app/revealSongInFileExplorer', songId),
-  saveArtworkToSystem: (songId: string): void =>
-    ipcRenderer.send('app/saveArtworkToSystem', songId),
+  saveArtworkToSystem: (songId: string, saveName?: string): void =>
+    ipcRenderer.send('app/saveArtworkToSystem', songId, saveName),
 };
 
 // $ FETCH SONG DATA FROM INTERNET

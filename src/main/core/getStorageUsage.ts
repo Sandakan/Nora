@@ -23,7 +23,7 @@ const getAppDataStorageMetrics = async () => {
 
   const totalArtworkCacheSize = artworkCacheSize + tempArtworkCacheSize;
 
-  const logSize = await getFileSize(path.join(appDataPath, 'logs.txt'));
+  const logSize = await getDirSize(path.join(appDataPath, 'logs'));
 
   const songDataSize = await getFileSize(path.join(appDataPath, 'songs.json'));
   const artistDataSize = await getFileSize(

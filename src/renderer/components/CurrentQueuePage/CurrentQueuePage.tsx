@@ -1,7 +1,4 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-/* eslint-disable react/no-array-index-key */
 /* eslint-disable promise/always-return */
-/* eslint-disable react/destructuring-assignment */
 /* eslint-disable promise/catch-or-return */
 import React, { useContext } from 'react';
 import { FixedSizeList, FixedSizeList as List } from 'react-window';
@@ -225,6 +222,7 @@ const CurrentQueuePage = () => {
   const row = React.useCallback(
     (props: { index: number; style: React.CSSProperties }) => {
       const { index, style } = props;
+      // eslint-disable-next-line react/jsx-no-useless-fragment
       if (queuedSongs[index] === undefined) return <></>;
 
       const {
@@ -269,6 +267,8 @@ const CurrentQueuePage = () => {
                   isBlacklisted={isBlacklisted}
                   isAFavorite={isAFavorite}
                   selectAllHandler={selectAllHandler}
+                  // no need for onPlayClick because the component is in the currentQueuePage
+                  // onPlayClick={handleSongPlayBtnClick}
                   additionalContextMenuItems={[
                     {
                       label: 'Remove from Queue',
@@ -422,6 +422,7 @@ const CurrentQueuePage = () => {
               isDisabled={queue.queue.length > 0 === false}
               clickHandler={() => {
                 updateQueueData(undefined, queue.queue, true);
+                fetchAllSongsData();
                 addNewNotifications([
                   {
                     id: 'shuffleQueue',

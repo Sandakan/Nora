@@ -2,10 +2,12 @@
 import React from 'react';
 import Button from 'renderer/components/Button';
 import Hyperlink from 'renderer/components/Hyperlink';
+import { EditingLyricsLineData } from 'renderer/components/LyricsEditingPage/LyricsEditingPage';
 import { syncedLyricsRegex } from 'renderer/components/LyricsPage/LyricsPage';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
+import parseLyrics from 'renderer/utils/parseLyrics';
 
 type Props = {
   songTitle: string;
@@ -22,6 +24,9 @@ type Props = {
   // eslint-disable-next-line no-unused-vars
   updateSongInfo: (callback: (prevSongInfo: SongTags) => SongTags) => void;
 };
+
+export const extendedSyncedLyricsLineRegex =
+  /(?<extSyncTimeStamp><\d+:\d{1,2}\.\d{1,3}>) ?(?=(?<lyric>[^<>\n]+))/gm;
 
 const SongLyricsEditorInput = (props: Props) => {
   const { userData } = React.useContext(AppContext);
@@ -44,6 +49,13 @@ const SongLyricsEditorInput = (props: Props) => {
     () => syncedLyricsRegex.test(songLyrics || ''),
     [songLyrics]
   );
+
+  const isLyricsEnhancedSynced = React.useMemo(() => {
+    const res = !!songLyrics && extendedSyncedLyricsLineRegex.test(songLyrics);
+    extendedSyncedLyricsLineRegex.lastIndex = 0;
+
+    return res;
+  }, [songLyrics]);
 
   const downloadLyrics = React.useCallback(
     (
@@ -70,10 +82,12 @@ const SongLyricsEditorInput = (props: Props) => {
               ...prevData,
               lyrics: res.lyrics.unparsedLyrics,
             }));
-            setIsDisabled(false);
-            setIsPending(false);
           }
           return undefined;
+        })
+        .finally(() => {
+          setIsDisabled(false);
+          setIsPending(false);
         })
         .catch((err) => {
           addNewNotifications([
@@ -84,7 +98,6 @@ const SongLyricsEditorInput = (props: Props) => {
               icon: <span className="material-icons-round icon">warning</span>,
             },
           ]);
-          setIsPending(false);
           console.error(err);
         });
     },
@@ -155,13 +168,38 @@ const SongLyricsEditorInput = (props: Props) => {
     ]
   );
 
+  const goToLyricsEditor = React.useCallback(() => {
+    if (songLyrics && !isLyricsEnhancedSynced) {
+      let lines: EditingLyricsLineData[] = [];
+      const { isSynced, syncedLyrics, unsyncedLyrics } =
+        parseLyrics(songLyrics);
+
+      if (isSynced) lines = syncedLyrics;
+      else {
+        lines = unsyncedLyrics.map((line) => ({ line }));
+      }
+
+      changeCurrentActivePage('LyricsEditor', {
+        lyrics: lines,
+        songId,
+        songTitle,
+      });
+    }
+  }, [
+    changeCurrentActivePage,
+    isLyricsEnhancedSynced,
+    songId,
+    songLyrics,
+    songTitle,
+  ]);
+
   return (
     <div className="song-lyrics-editor-container col-span-2 grid w-[95%] grid-cols-[minmax(50%,65%)_1fr] gap-8">
       <div className="tag-input mb-6 flex h-full min-w-[10rem] flex-col">
         <label htmlFor="song-lyrics-id3-tag">Lyrics</label>
         <textarea
           id="song-lyrics-id3-tag"
-          className="mt-4 max-h-80 min-h-[12rem] rounded-2xl border-[0.15rem] border-background-color-2 bg-background-color-1 p-4 transition-colors focus:border-font-color-highlight dark:border-dark-background-color-2 dark:bg-dark-background-color-1 dark:focus:border-dark-font-color-highlight"
+          className="mt-4 max-h-80 min-h-[12rem] rounded-2xl border-[0.15rem] border-background-color-2 bg-background-color-2 p-4 transition-colors focus:border-font-color-highlight dark:border-dark-background-color-2 dark:bg-dark-background-color-2 dark:focus:border-dark-font-color-highlight"
           name="lyrics"
           placeholder="Lyrics"
           value={songLyrics ?? ''}
@@ -232,27 +270,20 @@ const SongLyricsEditorInput = (props: Props) => {
           }
         />
         <Button
-          key={0}
+          key={2}
           label="Edit in Lyrics Editor"
           iconName="edit"
           iconClassName="mr-2"
           className="edit-lyrics-btn mt-4"
-          clickHandler={() =>
-            songLyrics &&
-            changeCurrentActivePage('LyricsEditor', {
-              lyrics: songLyrics,
-              songId,
-              songTitle,
-            })
-          }
+          clickHandler={goToLyricsEditor}
           tooltipLabel={
             songLyrics
-              ? isLyricsSynced
-                ? 'Synced lyrics still not supported.'
+              ? isLyricsEnhancedSynced
+                ? 'Enhanced Synced lyrics are not supported.'
                 : 'Edit available lyrics in the Lyrics Editor.'
               : 'No lyrics found'
           }
-          isDisabled={songLyrics ? isLyricsSynced : true}
+          isDisabled={songLyrics ? isLyricsEnhancedSynced : true}
         />
       </div>
     </div>

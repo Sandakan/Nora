@@ -223,7 +223,8 @@ const SongInfoPage = () => {
                       iconClassName: 'material-icons-round-outlined',
                       handlerFunction: () =>
                         window.api.songUpdates.saveArtworkToSystem(
-                          songInfo.artworkPaths.artworkPath
+                          songInfo.artworkPaths.artworkPath,
+                          `${songInfo.title} song artwork`.replaceAll(' ', '_')
                         ),
                     },
                   ],

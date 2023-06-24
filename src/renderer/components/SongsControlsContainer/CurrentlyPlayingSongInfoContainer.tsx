@@ -237,7 +237,10 @@ const CurrentlyPlayingSongInfoContainer = () => {
         iconClassName: 'material-icons-round-outlined',
         handlerFunction: () =>
           artworkPath &&
-          window.api.songUpdates.saveArtworkToSystem(artworkPath),
+          window.api.songUpdates.saveArtworkToSystem(
+            artworkPath,
+            `${title} song artwork`.replaceAll(' ', '_')
+          ),
         isDisabled: currentSongData.artworkPath === undefined,
       },
       {

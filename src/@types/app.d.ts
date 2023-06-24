@@ -485,6 +485,11 @@ declare global {
     genresPage?: GenreSortTypes;
   }
 
+  interface LyricsEditorSettings {
+    offset: number;
+    editNextStartTagWithCurrentEndTag: boolean;
+  }
+
   interface LocalStorage {
     preferences: Preferences;
     playback: Playback;
@@ -494,6 +499,7 @@ declare global {
     ignoredDuplicates: IgnoredDuplicates;
     sortingStates: SortingStates;
     equalizerPreset: Equalizer;
+    lyricsEditorSettings: LyricsEditorSettings;
   }
 
   // ? Playlists related types

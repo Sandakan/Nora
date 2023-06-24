@@ -131,6 +131,7 @@ const ArtistPage = () => {
     [artistsData, noOfColumns, selectAllHandler]
   );
 
+  console.log('offset', currentlyActivePage?.data);
   return (
     <MainContainer
       className="appear-from-bottom artists-list-container !h-full overflow-hidden !pb-0"
@@ -222,18 +223,20 @@ const ArtistPage = () => {
               height={height || 300}
               width={width || 500}
               overscanRowCount={2}
+              initialScrollLeft={currentlyActivePage?.data?.scrollLeftOffset}
               initialScrollTop={currentlyActivePage?.data?.scrollTopOffset}
-              onScroll={(data) =>
-                debounce(
-                  () =>
-                    data.scrollTop !== 0 &&
-                    updateCurrentlyActivePageData((currentPageData) => ({
-                      ...currentPageData,
-                      scrollTopOffset: data.scrollTop,
-                    })),
-                  500
-                )
-              }
+              onScroll={(data) => {
+                if (!data.scrollUpdateWasRequested && data.scrollTop !== 0)
+                  debounce(
+                    () =>
+                      updateCurrentlyActivePageData((currentPageData) => ({
+                        ...currentPageData,
+                        scrollTopOffset: data.scrollTop,
+                        scrollLeftOffset: data.scrollLeft,
+                      })),
+                    500
+                  );
+              }}
             >
               {row}
             </Grid>

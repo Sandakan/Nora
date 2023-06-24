@@ -5,6 +5,7 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 import storage from 'renderer/utils/localStorage';
+import debounce from 'renderer/utils/debounce';
 
 import Song from './Song';
 import Button from '../Button';
@@ -96,13 +97,13 @@ const SongsPage = () => {
   } = React.useContext(AppContext);
   const {
     createQueue,
+    playSong,
     updateCurrentlyActivePageData,
     toggleMultipleSelections,
     updateContextMenuData,
     changePromptMenuData,
   } = React.useContext(AppUpdateContext);
 
-  const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
   const [content, dispatch] = React.useReducer(reducer, {
     songsData: [],
     sortingOrder:
@@ -226,6 +227,17 @@ const SongsPage = () => {
     'songId'
   );
 
+  const handleSongPlayBtnClick = React.useCallback(
+    (currSongId: string) => {
+      const queueSongIds = content.songsData
+        .filter((song) => !song.isBlacklisted)
+        .map((song) => song.songId);
+      createQueue(queueSongIds, 'songs', false, undefined, false);
+      playSong(currSongId, true);
+    },
+    [content.songsData, createQueue, playSong]
+  );
+
   const songs = React.useCallback(
     (props: { index: number; style: React.CSSProperties }) => {
       const { index, style } = props;
@@ -241,6 +253,7 @@ const SongsPage = () => {
         path,
         isBlacklisted,
       } = content.songsData[index];
+
       return (
         <div style={style}>
           <Song
@@ -259,6 +272,7 @@ const SongsPage = () => {
             path={path}
             isAFavorite={isAFavorite}
             isBlacklisted={isBlacklisted}
+            onPlayClick={handleSongPlayBtnClick}
             selectAllHandler={selectAllHandler}
           />
         </div>
@@ -266,6 +280,7 @@ const SongsPage = () => {
     },
     [
       content.songsData,
+      handleSongPlayBtnClick,
       localStorageData?.preferences.isSongIndexingEnabled,
       selectAllHandler,
     ]
@@ -425,10 +440,8 @@ const SongsPage = () => {
                 currentlyActivePage.data?.scrollTopOffset ?? 0
               }
               onScroll={(data) => {
-                if (scrollOffsetTimeoutIdRef.current)
-                  clearTimeout(scrollOffsetTimeoutIdRef.current);
                 if (!data.scrollUpdateWasRequested && data.scrollOffset !== 0)
-                  scrollOffsetTimeoutIdRef.current = setTimeout(
+                  debounce(
                     () =>
                       updateCurrentlyActivePageData((currentPageData) => ({
                         ...currentPageData,

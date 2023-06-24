@@ -24,8 +24,23 @@ const SongSearchResultsContainer = (props: Props) => {
     multipleSelectionsData,
     localStorageData,
   } = React.useContext(AppContext);
-  const { toggleMultipleSelections, changeCurrentActivePage } =
-    React.useContext(AppUpdateContext);
+  const {
+    toggleMultipleSelections,
+    changeCurrentActivePage,
+    createQueue,
+    playSong,
+  } = React.useContext(AppUpdateContext);
+
+  const handleSongPlayBtnClick = React.useCallback(
+    (currSongId: string) => {
+      const queueSongIds = songs
+        .filter((song) => !song.isBlacklisted)
+        .map((song) => song.songId);
+      createQueue(queueSongIds, 'songs', false, undefined, false);
+      playSong(currSongId, true);
+    },
+    [createQueue, playSong, songs]
+  );
 
   const songResults = React.useMemo(
     () =>
@@ -50,6 +65,7 @@ const SongSearchResultsContainer = (props: Props) => {
                     isAFavorite={song.isAFavorite}
                     year={song.year}
                     isBlacklisted={song.isBlacklisted}
+                    onPlayClick={handleSongPlayBtnClick}
                   />
                 );
               return undefined;
@@ -57,6 +73,7 @@ const SongSearchResultsContainer = (props: Props) => {
             .filter((song) => song !== undefined)
         : [],
     [
+      handleSongPlayBtnClick,
       localStorageData?.preferences?.isSongIndexingEnabled,
       noOfVisibleSongs,
       songs,

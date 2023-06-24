@@ -63,6 +63,7 @@ const PlaylistInfoPage = () => {
     addNewNotifications,
     createQueue,
     updateCurrentlyActivePageData,
+    playSong,
   } = React.useContext(AppUpdateContext);
 
   const [playlistData, setPlaylistData] = React.useState({} as Playlist);
@@ -171,6 +172,24 @@ const PlaylistInfoPage = () => {
     'songs',
     'songId'
   );
+
+  const handleSongPlayBtnClick = React.useCallback(
+    (currSongId: string) => {
+      const queueSongIds = playlistSongs
+        .filter((song) => !song.isBlacklisted)
+        .map((song) => song.songId);
+      createQueue(
+        queueSongIds,
+        'playlist',
+        false,
+        playlistData.playlistId,
+        false
+      );
+      playSong(currSongId, true);
+    },
+    [createQueue, playSong, playlistData.playlistId, playlistSongs]
+  );
+
   const songComponents = React.useMemo(
     () =>
       playlistSongs.length > 0
@@ -192,6 +211,7 @@ const PlaylistInfoPage = () => {
                 year={song.year}
                 isAFavorite={song.isAFavorite}
                 isBlacklisted={song.isBlacklisted}
+                onPlayClick={handleSongPlayBtnClick}
                 additionalContextMenuItems={[
                   {
                     label: 'Remove from this Playlist',
@@ -229,6 +249,7 @@ const PlaylistInfoPage = () => {
     [
       playlistSongs,
       localStorageData?.preferences?.isSongIndexingEnabled,
+      handleSongPlayBtnClick,
       selectAllHandler,
       playlistData.playlistId,
       playlistData.name,

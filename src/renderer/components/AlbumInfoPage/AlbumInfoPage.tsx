@@ -96,6 +96,7 @@ const AlbumInfoPage = () => {
     updateQueueData,
     addNewNotifications,
     updateCurrentlyActivePageData,
+    playSong,
   } = useContext(AppUpdateContext);
 
   const [albumContent, dispatch] = React.useReducer(reducer, {
@@ -196,6 +197,29 @@ const AlbumInfoPage = () => {
     'songs',
     'songId'
   );
+
+  const handleSongPlayBtnClick = React.useCallback(
+    (currSongId: string) => {
+      const queueSongIds = albumContent.songsData
+        .filter((song) => !song.isBlacklisted)
+        .map((song) => song.songId);
+      createQueue(
+        queueSongIds,
+        'album',
+        false,
+        albumContent.albumData.albumId,
+        false
+      );
+      playSong(currSongId, true);
+    },
+    [
+      albumContent.songsData,
+      albumContent.albumData.albumId,
+      createQueue,
+      playSong,
+    ]
+  );
+
   const songComponents = React.useMemo(
     () =>
       albumContent.songsData.length > 0
@@ -218,12 +242,14 @@ const AlbumInfoPage = () => {
                 year={song.year}
                 isBlacklisted={song.isBlacklisted}
                 selectAllHandler={selectAllHandler}
+                onPlayClick={handleSongPlayBtnClick}
               />
             );
           })
         : [],
     [
       albumContent.songsData,
+      handleSongPlayBtnClick,
       localStorageData?.preferences?.isSongIndexingEnabled,
       selectAllHandler,
     ]

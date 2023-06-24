@@ -656,8 +656,10 @@ app
         shell.showItemInFolder(folderPath)
       );
 
-      ipcMain.on('app/saveArtworkToSystem', (_, songId: string) =>
-        saveArtworkToSystem(songId)
+      ipcMain.on(
+        'app/saveArtworkToSystem',
+        (_, songId: string, saveName?: string) =>
+          saveArtworkToSystem(songId, saveName)
       );
 
       ipcMain.on('app/openInBrowser', (_, url: string) =>

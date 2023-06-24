@@ -2,6 +2,7 @@ import debounce from './debounce';
 
 import { version } from '../../../package.json';
 import log from './log';
+import addMissingPropsToAnObject from './addMissingPropsToAnObject';
 
 export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
   preferences: {
@@ -57,6 +58,10 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     twoPointFourKiloHertz: 0,
     fifteenKiloHertz: 0,
   },
+  lyricsEditorSettings: {
+    offset: 0,
+    editNextStartTagWithCurrentEndTag: true,
+  },
 };
 
 const resetLocalStorage = () => {
@@ -98,6 +103,15 @@ const checkLocalStorage = () => {
       );
       throw error;
     }
+  } else {
+    const jsonStore = JSON.parse(store);
+    const updatedStore = addMissingPropsToAnObject(
+      LOCAL_STORAGE_DEFAULT_TEMPLATE,
+      jsonStore,
+      (key) => console.warn(`Added missing '${key}' property to localStorage.`)
+    );
+
+    localStorage.setItem('localStorage', JSON.stringify(updatedStore));
   }
   return console.log('local storage check successful.');
 };
@@ -348,6 +362,20 @@ const setEqualizerPreset = <Data extends Equalizer>(data: Data) =>
 
 const getEqualizerPreset = () => getFullItem('equalizerPreset');
 
+// LYRICS EDITOR
+
+const setLyricsEditorSettings = <
+  Type extends keyof LyricsEditorSettings,
+  Data extends LyricsEditorSettings[Type]
+>(
+  type: Type,
+  data: Data
+) => setItem('lyricsEditorSettings', type, data);
+
+const getLyricsEditorSettings = <Type extends keyof LyricsEditorSettings>(
+  type: Type
+) => getItem('lyricsEditorSettings', type);
+
 // / / / / / / / / / /
 
 export default {
@@ -370,6 +398,7 @@ export default {
   ignoredDuplicates: { setIgnoredDuplicates, getIgnoredDuplicates },
   sortingStates: { setSortingStates, getSortingStates },
   equalizerPreset: { setEqualizerPreset, getEqualizerPreset },
+  lyricsEditorSettings: { setLyricsEditorSettings, getLyricsEditorSettings },
   checkLocalStorage,
   resetLocalStorage,
   getAllItems,

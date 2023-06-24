@@ -21,7 +21,7 @@ class ListeningDataSession {
     this.skipEndRange = calculateTime((this.duration * 10) / 100);
     this.listenEndRange = calculateTime((this.duration * 90) / 100);
     this.abortController = new AbortController();
-    this.isPaused = false;
+    this.isPaused = true;
     this.passedSkipRange = false;
     this.passedFullListenRange = false;
     this.seconds = 0;

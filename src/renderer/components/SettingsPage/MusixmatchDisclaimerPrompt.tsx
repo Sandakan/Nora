@@ -3,8 +3,11 @@ import Hyperlink from 'renderer/components/Hyperlink';
 const MusixmatchDisclaimerPrompt = () => {
   return (
     <div className="">
-      <div className="mb-4 text-2xl font-semibold uppercase">
-        Disclaimer - Musixmatch Lyrics
+      <div className="mb-4 flex items-center text-3xl font-semibold uppercase">
+        <span className="material-icons-round-outlined mr-2 text-4xl !leading-none">
+          error
+        </span>{' '}
+        <p>Disclaimer - Musixmatch Lyrics</p>
       </div>
       <div className="description px-4">
         <ul className="list-disc">

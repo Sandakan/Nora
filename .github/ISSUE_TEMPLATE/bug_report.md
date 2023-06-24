@@ -2,7 +2,7 @@
 name: Bug report
 about: Create a report to help us improve
 title: Bug in Nora
-labels: bug, good first issue
+labels: bug
 assignees: Sandakan
 ---
 
@@ -30,7 +30,7 @@ It is situated in C:\Users\USER_NAME\AppData\Roaming\nora\logs.txt
 **System Information:**
 
 - OS: [e.g. Windows 10]
-- Affected App Version: [e.g.>=0.8.0-alpha]
+- Affected App Version: [e.g.>=2.0.0-stable]
 
 **Additional context**
 Add any other context about the problem here.

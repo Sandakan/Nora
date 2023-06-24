@@ -70,6 +70,7 @@ const ArtistInfoPage = () => {
     updateBodyBackgroundImage,
     updateCurrentlyActivePageData,
     updateContextMenuData,
+    playSong,
   } = React.useContext(AppUpdateContext);
 
   const [artistData, setArtistData] = React.useState<ArtistInfo>();
@@ -315,6 +316,17 @@ const ArtistInfoPage = () => {
     'songId'
   );
 
+  const handleSongPlayBtnClick = React.useCallback(
+    (currSongId: string) => {
+      const queueSongIds = songs
+        .filter((song) => !song.isBlacklisted)
+        .map((song) => song.songId);
+      createQueue(queueSongIds, 'artist', false, artistData?.artistId, false);
+      playSong(currSongId, true);
+    },
+    [artistData?.artistId, createQueue, playSong, songs]
+  );
+
   const songComponenets = React.useMemo(
     () =>
       songs.map((song, index) => {
@@ -336,10 +348,12 @@ const ArtistInfoPage = () => {
             year={song.year}
             isBlacklisted={song.isBlacklisted}
             selectAllHandler={selectAllHandlerForSongs}
+            onPlayClick={handleSongPlayBtnClick}
           />
         );
       }),
     [
+      handleSongPlayBtnClick,
       localStorageData?.preferences?.isSongIndexingEnabled,
       selectAllHandlerForSongs,
       songs,
@@ -387,7 +401,10 @@ const ArtistInfoPage = () => {
                         artistData?.onlineArtworkPaths?.picture_medium;
 
                       if (artworkPath)
-                        window.api.songUpdates.saveArtworkToSystem(artworkPath);
+                        window.api.songUpdates.saveArtworkToSystem(
+                          artworkPath,
+                          artistData.name
+                        );
                     },
                   },
                 ],

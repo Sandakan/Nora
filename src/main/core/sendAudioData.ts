@@ -6,9 +6,27 @@ import { isSongBlacklisted } from '../utils/isBlacklisted';
 import { DEFAULT_FILE_URL, getArtistsData, getSongsData } from '../filesystem';
 import { getSongArtworkPath } from '../fs/resolveFilePaths';
 import log from '../log';
+// import { getDefaultSongCoverImgBuffer } from '../parseSong/generateCoverBuffer';
 import getArtistInfoFromNet from './getArtistInfoFromNet';
 import addToSongsHistory from './addToSongsHistory';
 import updateSongListeningData from './updateSongListeningData';
+
+// let tempArtworkLink: string | undefined;
+
+// const getArtworkLink = async (artwork?: Buffer) => {
+//   const imgData = artwork || (await getDefaultSongCoverImgBuffer());
+
+//   if (imgData) {
+//     if (tempArtworkLink) URL.revokeObjectURL(tempArtworkLink);
+
+//     const blob = new Blob([imgData]);
+//     const link = URL.createObjectURL(blob);
+//     tempArtworkLink = link;
+
+//     return tempArtworkLink;
+//   }
+//   return undefined;
+// };
 
 const getRelevantArtistData = (
   songArtists?: {
@@ -64,6 +82,7 @@ export const sendAudioData = async (
             const artworkData = metadata.common.picture
               ? metadata.common.picture[0].data
               : '';
+            // : undefined;
             addToSongsHistory(song.songId);
             const songArtists = getRelevantArtistData(song.artists);
 
@@ -71,6 +90,7 @@ export const sendAudioData = async (
               title: song.title,
               artists: songArtists.length > 0 ? songArtists : song.artists,
               duration: song.duration,
+              // artwork: await getArtworkLink(artworkData),
               artwork: Buffer.from(artworkData).toString('base64') || undefined,
               artworkPath: getSongArtworkPath(
                 song.songId,

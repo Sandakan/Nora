@@ -1,4 +1,7 @@
 import React from 'react';
+import { AppContext } from 'renderer/contexts/AppContext';
+import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 
 import {
   EditingLyricsLineData,
@@ -7,6 +10,7 @@ import {
 import Button from '../Button';
 
 interface Props extends ExtendedEditingLyricsLineData {
+  isPlaying: boolean;
   updateLineData: (
     callback: (
       prevLineData: ExtendedEditingLyricsLineData[]
@@ -40,9 +44,19 @@ const reducerFunction = (
 };
 
 const EditingLyricsLine = (props: Props) => {
-  // const { songPosition } = React.useContext(SongPositionContext);
+  const { songPosition } = React.useContext(SongPositionContext);
+  const { localStorageData } = React.useContext(AppContext);
+  const { updateSongPosition } = React.useContext(AppUpdateContext);
 
-  const { line, index, isActive, end = 0, start = 0, updateLineData } = props;
+  const {
+    line,
+    index,
+    isActive,
+    end = 0,
+    start = 0,
+    updateLineData,
+    isPlaying,
+  } = props;
   const [content, dispatch] = React.useReducer(reducerFunction, {
     line,
     start,
@@ -69,21 +83,27 @@ const EditingLyricsLine = (props: Props) => {
     });
   }, [end, line, start]);
 
+  const isInRange =
+    start !== 0 && end !== 0 && start < songPosition && end > songPosition;
+
+  const shouldBeScrolledWhenPlaying = isPlaying && isInRange;
+  const shouldBeScrolledWhenActive = !isPlaying && isActive;
+
   React.useEffect(() => {
     if (
-      isActive &&
-      // start &&
-      // songPosition > start &&
       lineRef.current &&
-      !isActiveRef.current
+      (shouldBeScrolledWhenPlaying || shouldBeScrolledWhenActive)
     ) {
-      lineRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-        inline: 'center',
-      });
-    }
-  }, [isActive, start]);
+      if (!isActiveRef.current) {
+        isActiveRef.current = true;
+        lineRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'center',
+        });
+      }
+    } else isActiveRef.current = false;
+  }, [shouldBeScrolledWhenActive, shouldBeScrolledWhenPlaying]);
 
   return (
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions
@@ -94,6 +114,18 @@ const EditingLyricsLine = (props: Props) => {
       } `}
       ref={lineRef}
       onKeyDown={(e) => isEditing && e.stopPropagation()}
+      onDoubleClick={() => {
+        if (isPlaying) updateSongPosition(start);
+        else
+          updateLineData((prevLineData) => {
+            const updatedLineData = prevLineData.map((lineData, i) => {
+              lineData.isActive = i === index;
+
+              return lineData;
+            });
+            return updatedLineData;
+          });
+      }}
     >
       <span className="text-xs opacity-50">
         {index < 10 ? `0${index}` : index}
@@ -102,7 +134,7 @@ const EditingLyricsLine = (props: Props) => {
         <input
           type="text"
           placeholder="Lyrics Text"
-          className="my-2 w-[90%] rounded-xl border-[3px] border-background-color-1 bg-background-color-2 px-4 py-4 text-center dark:border-dark-background-color-1 dark:bg-dark-background-color-2"
+          className="my-2 w-[90%] rounded-xl border-[3px] border-background-color-1 bg-background-color-2 px-4 py-4 text-center dark:border-dark-background-color-1 dark:bg-dark-background-color-1"
           value={content.line}
           onChange={(e) =>
             dispatch({
@@ -113,8 +145,9 @@ const EditingLyricsLine = (props: Props) => {
         />
       ) : (
         <span
-          className={`scale-75 text-center text-4xl font-medium opacity-50 transition-[opacity,transform] ${
-            isActive && '!scale-100 !opacity-100'
+          className={`scale-75 text-center text-5xl font-medium opacity-50 transition-[opacity,transform] ${
+            (isActive || shouldBeScrolledWhenPlaying) &&
+            '!scale-100 !opacity-100'
           }`}
         >
           {content.line}
@@ -126,7 +159,7 @@ const EditingLyricsLine = (props: Props) => {
           <input
             type="number"
             placeholder="Start in seconds"
-            className="mx-2 my-1 min-w-[25%] rounded-xl border-[3px] border-background-color-1 bg-background-color-2 px-1 py-2 text-center dark:border-dark-background-color-1 dark:bg-dark-background-color-2"
+            className="mx-2 my-1 min-w-[20%] rounded-xl border-[3px] border-background-color-1 bg-background-color-2 px-1 py-2 text-center dark:border-dark-background-color-1 dark:bg-dark-background-color-1"
             value={content.start ?? 0}
             onChange={(e) =>
               dispatch({
@@ -139,7 +172,7 @@ const EditingLyricsLine = (props: Props) => {
           <input
             type="number"
             placeholder="End in seconds"
-            className="mx-2 my-1 min-w-[25%] rounded-xl border-[3px] border-background-color-1 bg-background-color-2 px-1 py-2 text-center dark:border-dark-background-color-1 dark:bg-dark-background-color-2"
+            className="mx-2 my-1 min-w-[20%] rounded-xl border-[3px] border-background-color-1 bg-background-color-2 px-1 py-2 text-center dark:border-dark-background-color-1 dark:bg-dark-background-color-1"
             value={content.end ?? 0}
             onChange={(e) =>
               dispatch({
@@ -156,16 +189,59 @@ const EditingLyricsLine = (props: Props) => {
       )}
       <div className="flex items-center justify-center">
         {isEditing && (
-          <Button
-            className="my-2 !border-0 !p-0 text-xs underline opacity-75"
-            label="Reset"
-            clickHandler={() =>
-              dispatch({
-                type: 'UPDATE_ALL_CONTENT',
-                payload: resetLineDataRef.current,
-              })
-            }
-          />
+          <>
+            <Button
+              className="my-2 !border-0 !p-0 text-xs underline opacity-75"
+              label="Reset"
+              clickHandler={() =>
+                dispatch({
+                  type: 'UPDATE_ALL_CONTENT',
+                  payload: resetLineDataRef.current,
+                })
+              }
+            />
+            <Button
+              className="my-2 !border-0 !p-0 text-xs underline opacity-75"
+              label="Add line above"
+              clickHandler={() =>
+                updateLineData((prevLineData) => {
+                  const pos = index - 1 < 0 ? 0 : index - 1;
+                  prevLineData.splice(pos, 0, {
+                    index: 0,
+                    isActive: false,
+                    line: '',
+                  });
+
+                  return prevLineData.map((lineData, i) => ({
+                    ...lineData,
+                    index: i,
+                  }));
+                })
+              }
+            />
+            <Button
+              className="my-2 !border-0 !p-0 text-xs underline opacity-75"
+              label="Add line below"
+              clickHandler={() =>
+                updateLineData((prevLineData) => {
+                  const pos =
+                    index + 1 >= prevLineData.length
+                      ? prevLineData.length
+                      : index + 1;
+                  prevLineData.splice(pos, 0, {
+                    index: 0,
+                    isActive: false,
+                    line: '',
+                  });
+
+                  return prevLineData.map((lineData, i) => ({
+                    ...lineData,
+                    index: i,
+                  }));
+                })
+              }
+            />
+          </>
         )}
         <Button
           className="my-2 !mr-0 !border-0 !p-0 text-xs underline opacity-75"
@@ -180,6 +256,15 @@ const EditingLyricsLine = (props: Props) => {
                     start: content.start || start,
                     end: content.end || end,
                   };
+
+                  if (
+                    localStorageData.lyricsEditorSettings
+                      .editNextStartTagWithCurrentEndTag &&
+                    prevLineData[index + 1]
+                  ) {
+                    prevLineData[index + 1].start = content.end;
+                  }
+
                   return prevLineData;
                 });
               return !isEditingState;
