@@ -10,23 +10,32 @@ import {
 } from '../updateSongId3Tags';
 import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
 
-const saveOptions: SaveDialogOptions = {
-  title: 'Select the destination to save the song artwork',
-  buttonLabel: 'Save Artwork',
-  defaultPath: 'artwork',
-  filters: [
-    {
-      extensions: ['png', 'jpeg', 'webp', 'avif', 'tiff', 'gif'],
-      name: 'Image files',
-    },
-  ],
-  properties: ['createDirectory', 'showOverwriteConfirmation'],
-  nameFieldLabel: 'artwork',
+const getSaveOptions = (saveName?: string) => {
+  const saveOptions: SaveDialogOptions = {
+    title: 'Select the destination to save the artwork',
+    buttonLabel: 'Save Artwork',
+    defaultPath: 'artwork',
+    filters: [
+      {
+        extensions: ['png', 'jpeg', 'webp', 'avif', 'tiff', 'gif'],
+        name: 'Image files',
+      },
+    ],
+    properties: ['createDirectory', 'showOverwriteConfirmation'],
+    nameFieldLabel: 'artwork',
+  };
+
+  if (saveName) {
+    saveOptions.defaultPath = saveName;
+    saveOptions.nameFieldLabel = saveName;
+  }
+  return saveOptions;
 };
 
-const saveArtworkToSystem = async (artworkPath: string) => {
+const saveArtworkToSystem = async (artworkPath: string, saveName?: string) => {
   let artwork: Buffer | undefined;
   try {
+    const saveOptions = getSaveOptions(saveName);
     const savePath = await showSaveDialog(saveOptions);
     if (savePath) {
       const isArtworkPathAWebURL = isPathAWebURL(artworkPath);
@@ -39,7 +48,7 @@ const saveArtworkToSystem = async (artworkPath: string) => {
         );
 
       if (artwork) {
-        await sharp(artwork).toFile(savePath);
+        await sharp(artwork, { animated: true }).toFile(savePath);
         return sendMessageToRenderer(
           'Saved the artwork to the request location.'
         );

@@ -68,15 +68,16 @@ const MusixmatchSettingsPrompt = () => {
           tooltipLabel={showToken ? 'Hide Token' : 'Show Token'}
           className="!m-0 !border-0 !p-0"
           clickHandler={() => setShowToken((prevState) => !prevState)}
-          isDisabled={
-            token === '' ||
-            inputRef.current?.value === userData?.customMusixmatchUserToken
-          }
+          isDisabled={token === '' || !!userData?.customMusixmatchUserToken}
         />
         <Button
           label="Update Token"
           className="ml-4"
-          isDisabled={!isAValidToken || successState === 'success'}
+          isDisabled={
+            !isAValidToken ||
+            successState === 'success' ||
+            inputRef.current?.value === userData?.customMusixmatchUserToken
+          }
           clickHandler={(_e, setIsDisabled, setIsPending) => {
             if (isAValidToken) {
               setIsDisabled(true);

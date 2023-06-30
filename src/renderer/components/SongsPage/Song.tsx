@@ -30,6 +30,7 @@ interface SongProp {
   isIndexingSongs: boolean;
   isAFavorite: boolean;
   className?: string;
+  onPlayClick?: (currSongId: string) => void;
   style?: React.CSSProperties;
   isDraggable?: boolean;
   provided?: DraggableProvided;
@@ -77,6 +78,7 @@ const Song = React.forwardRef(
       year,
       selectAllHandler,
       provided = {} as any,
+      onPlayClick,
     } = props;
 
     const [isAFavorite, setIsAFavorite] = React.useState(props.isAFavorite);
@@ -100,8 +102,9 @@ const Song = React.forwardRef(
     ]);
 
     const handlePlayBtnClick = React.useCallback(() => {
-      playSong(songId);
-    }, [playSong, songId]);
+      if (onPlayClick) return onPlayClick(songId);
+      return playSong(songId);
+    }, [onPlayClick, playSong, songId]);
 
     const handleLikeButtonClick = React.useCallback(() => {
       window.api.playerControls
@@ -153,7 +156,7 @@ const Song = React.forwardRef(
     }, [multipleSelectionsData, songId]);
 
     const songArtists = React.useMemo(() => {
-      if (Array.isArray(artists)) {
+      if (Array.isArray(artists) && artists.length > 0) {
         return artists
           .map((artist, i) => {
             const arr = [
@@ -175,7 +178,7 @@ const Song = React.forwardRef(
           })
           .flat();
       }
-      return <span>Unknown Artist</span>;
+      return <span className="text-xs font-normal">Unknown Artist</span>;
     }, [artists, currentSongData.songId, isAMultipleSelection, songId]);
 
     const goToSongInfoPage = React.useCallback(() => {
@@ -199,7 +202,7 @@ const Song = React.forwardRef(
         currentlyActivePage.pageTitle !== 'AlbumInfo' &&
         currentlyActivePage?.data?.albumId !== album.albumId
       )
-        changeCurrentActivePage('SongInfo', {
+        changeCurrentActivePage('AlbumInfo', {
           albumId: album.albumId,
         });
     }, [
@@ -449,6 +452,13 @@ const Song = React.forwardRef(
           isDisabled: isMultipleSelectionsEnabled,
         },
         {
+          label: 'Re-parse song',
+          class: 'sync',
+          iconName: 'sync',
+          handlerFunction: () => window.api.songUpdates.reParseSong(path),
+          isDisabled: isMultipleSelectionsEnabled,
+        },
+        {
           label: 'Hr',
           isContextMenuItemSeperator: true,
           handlerFunction: () => true,
@@ -604,7 +614,7 @@ const Song = React.forwardRef(
         ref={ref}
       >
         <div
-          className={`song-cover-and-play-btn-container flex w-[(6rem,15%,9rem)] shrink-0 items-center justify-center ${
+          className={`song-cover-and-play-btn-container flex w-[clamp(6rem,15%,9rem)] shrink-0 items-center justify-center ${
             !isIndexingSongs && '!w-[clamp(4rem,10%,6rem)]'
           }`}
         >

@@ -53,10 +53,11 @@ const Button = React.memo((props: ButtonProps) => {
 
   const buttonIcons = React.useMemo(() => {
     if (iconName) {
-      const iconNames = iconName?.split(';');
+      const iconNames = iconName.split(';');
       return iconNames.map((name, index) => {
         return (
           <span
+            key={name}
             className={`material-icons-round icon relative flex items-center justify-center text-lg !leading-none ${
               label && iconNames.length - 1 === index && 'mr-3'
             } ${iconClassName} ${

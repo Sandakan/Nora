@@ -97,7 +97,6 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
         <Img
           src={onlineArtworkPath}
           fallbackSrc={artworkPaths.artworkPath}
-          loading="lazy"
           alt="Most Relevant Result Cover"
           className={`max-h-full ${
             resultType === 'artist' ? 'rounded-full' : 'rounded-md'

@@ -202,9 +202,10 @@ declare global {
 
   type RepeatTypes = 'false' | 'repeat' | 'repeat-1';
 
+  type PlayerVolume = { isMuted: boolean; value: number };
   interface Player {
     isCurrentSongPlaying: boolean;
-    volume: { isMuted: boolean; value: number };
+    volume: PlayerVolume;
     isRepeating: RepeatTypes;
     songPosition: number;
     isShuffling: boolean;
@@ -214,6 +215,8 @@ declare global {
   }
 
   type SongSkipReason = 'USER_SKIP' | 'PLAYER_SKIP';
+
+  type AutomaticallySaveLyricsTypes = 'SYNCED' | 'SYNCED_OR_UN_SYNCED' | 'NONE';
 
   type LyricsTypes = 'SYNCED' | 'UN_SYNCED' | 'ANY';
 
@@ -239,8 +242,14 @@ declare global {
     isOfflineLyricsAvailable: boolean;
   }
 
-  interface SyncedLyricLine {
+  export type SyncedLyricsLineText = {
     text: string;
+    start: number;
+    end: number;
+    unparsedText: string;
+  }[];
+  interface SyncedLyricLine {
+    text: string | SyncedLyricsLineText;
     start: number;
     end: number;
   }
@@ -431,6 +440,7 @@ declare global {
     shuffleArtworkFromSongCovers: boolean;
     removeAnimationsOnBatteryPower: boolean;
     isPredictiveSearchEnabled: boolean;
+    lyricsAutomaticallySaveState: AutomaticallySaveLyricsTypes;
   }
 
   interface CurrentSong {
@@ -475,6 +485,11 @@ declare global {
     genresPage?: GenreSortTypes;
   }
 
+  interface LyricsEditorSettings {
+    offset: number;
+    editNextStartTagWithCurrentEndTag: boolean;
+  }
+
   interface LocalStorage {
     preferences: Preferences;
     playback: Playback;
@@ -484,6 +499,7 @@ declare global {
     ignoredDuplicates: IgnoredDuplicates;
     sortingStates: SortingStates;
     equalizerPreset: Equalizer;
+    lyricsEditorSettings: LyricsEditorSettings;
   }
 
   // ? Playlists related types
@@ -629,11 +645,13 @@ declare global {
 
   interface PromptMenuData {
     isVisible: boolean;
-    content: ReactElement<any, any>;
+    content: ReactNode;
     className: string;
   }
 
-  // ? Notification panel related types
+  // ? Notification panel related
+
+  type DefaultCodes = 'SUCCESS' | 'FAILURE' | 'LOADING' | 'INFO';
 
   type ErrorCodes =
     | 'SONG_NOT_FOUND'
@@ -650,6 +668,7 @@ declare global {
     | 'UNSUPPORTED_FILE_EXTENSION';
 
   type MessageCodes =
+    | DefaultCodes
     | ErrorCodes
     | 'SONG_LIKE'
     | 'SONG_DISLIKE'
@@ -687,6 +706,8 @@ declare global {
     order?: number;
     content: ReactNode;
     icon?: ReactElement<any, any>;
+    iconName?: string;
+    iconClassName?: string;
     buttons?: ButtonProps[];
     type?: NotificationTypes;
     progressBarData?: {
@@ -700,10 +721,15 @@ declare global {
   interface NavigationHistory {
     pageTitle: PageTitles;
     data?: PageData;
+    onPageChange?: (
+      changedPageTitle: PageTitles,
+      changedPageData?: any
+    ) => void;
   }
 
   interface PageData extends Record<string, unknown> {
     scrollTopOffset?: number;
+    isLowResponseRequired?: boolean;
   }
 
   interface NavigationHistoryData {
@@ -839,6 +865,7 @@ declare global {
     | 'MusicFolderInfo'
     | 'CurrentQueue'
     | 'SongTagsEditor'
+    | 'LyricsEditor'
     | 'AllSearchResults';
 
   type PromiseFunctionReturn = Promise<{ success: boolean; message?: string }>;
@@ -953,6 +980,7 @@ declare global {
     title: string;
     artists?: SongTagsArtistData[];
     album?: SongTagsAlbumData;
+    trackNumber?: number;
     releasedYear?: number;
     genres?: { genreId?: string; name: string; artworkPath?: string }[];
     composer?: string;

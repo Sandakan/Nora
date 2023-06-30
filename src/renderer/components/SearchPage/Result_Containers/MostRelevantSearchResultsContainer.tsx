@@ -117,6 +117,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
                       <Img
                         src={firstResult.artworkPaths?.artworkPath}
                         alt="Song Artwork"
+                        loading="eager"
                       />
                     ),
                   },

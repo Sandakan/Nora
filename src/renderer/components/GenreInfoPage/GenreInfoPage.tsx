@@ -58,6 +58,7 @@ const GenreInfoPage = () => {
     updateQueueData,
     addNewNotifications,
     updateCurrentlyActivePageData,
+    playSong,
   } = React.useContext(AppUpdateContext);
 
   const [genreData, setGenreData] = React.useState<Genre>();
@@ -148,6 +149,17 @@ const GenreInfoPage = () => {
 
   const selectAllHandler = useSelectAllHandler(genreSongs, 'songs', 'songId');
 
+  const handleSongPlayBtnClick = React.useCallback(
+    (currSongId: string) => {
+      const queueSongIds = genreSongs
+        .filter((song) => !song.isBlacklisted)
+        .map((song) => song.songId);
+      createQueue(queueSongIds, 'genre', false, genreData?.genreId, false);
+      playSong(currSongId, true);
+    },
+    [createQueue, genreData?.genreId, genreSongs, playSong]
+  );
+
   const songComponents = React.useMemo(
     () =>
       genreSongs.map((song, index) => (
@@ -166,10 +178,12 @@ const GenreInfoPage = () => {
           year={song.year}
           isBlacklisted={song.isBlacklisted}
           selectAllHandler={selectAllHandler}
+          onPlayClick={handleSongPlayBtnClick}
         />
       )),
     [
       genreSongs,
+      handleSongPlayBtnClick,
       localStorageData?.preferences?.isSongIndexingEnabled,
       selectAllHandler,
     ]
@@ -212,6 +226,7 @@ const GenreInfoPage = () => {
             <Img
               src={genreData.artworkPaths.artworkPath}
               className="mr-8 aspect-square max-w-[14rem] rounded-lg"
+              loading="eager"
             />
             <div className="genre-info-container flex-grow">
               <div className="font-semibold tracking-wider opacity-50">

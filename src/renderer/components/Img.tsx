@@ -79,7 +79,7 @@ const Img = (props: Props) => {
     fallbackSrc = DefaultImage,
     noFallbacks = false,
     onClick = () => true,
-    loading = 'eager',
+    loading = 'lazy',
     onContextMenu,
     showImgPropsOnTooltip = false,
     tabIndex = -1,

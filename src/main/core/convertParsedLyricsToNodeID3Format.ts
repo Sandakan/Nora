@@ -7,11 +7,18 @@ const convertParsedLyricsToNodeID3Format = (
   try {
     if (parsedLyrics && parsedLyrics.isSynced && parsedLyrics.syncedLyrics) {
       const { syncedLyrics, copyright } = parsedLyrics;
-      const synchronisedText = syncedLyrics.map((line) => ({
-        text: line.text,
-        // to convert seconds to milliseconds
-        timeStamp: Math.round(line.start * 1000),
-      }));
+      const synchronisedText = syncedLyrics.map((line) => {
+        const text =
+          typeof line.text === 'string'
+            ? line.text
+            : line.text.map((x) => x.unparsedText).join(' ');
+
+        return {
+          text,
+          // to convert seconds to milliseconds
+          timeStamp: Math.round(line.start * 1000),
+        };
+      });
       // lyrics metadata like copyright info is stored on the shortText.
 
       const shortText = copyright ? JSON.stringify({ copyright }) : undefined;

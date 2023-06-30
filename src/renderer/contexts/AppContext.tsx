@@ -7,7 +7,7 @@ export interface AppStateContextType {
   // CONTEXT MENU
   contextMenuData: ContextMenuData;
   // PROMPT MENU
-  PromptMenuData: {
+  promptMenuData: {
     content: any;
     isVisible: boolean;
     className: string;
@@ -15,7 +15,10 @@ export interface AppStateContextType {
   // NOTIFICATION PANEL
   notificationPanelData: NotificationPanelData;
   // CURRENTLY ACTVIE PAGE AND NAVIGATION HISTORY
-  currentlyActivePage: { pageTitle: PageTitles; data?: any };
+  currentlyActivePage: {
+    pageTitle: PageTitles;
+    data?: any;
+  };
   pageHistoryIndex: number;
   noOfPagesInHistory: number;
   // AUDIO PLAYBACK

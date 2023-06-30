@@ -190,6 +190,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
         <Img
           src={currentSongData.artworkPath}
           fallbackSrc={DefaultSongCover}
+          loading="eager"
           alt="Song Cover"
           className={`h-full w-full object-cover transition-[filter] delay-100 duration-200 ease-in-out group-focus-within:blur-[2px] group-focus-within:brightness-75 group-hover:blur-[2px] group-hover:brightness-75 group-focus:blur-[4px] group-focus:brightness-75 ${
             isLyricsVisible ? '!blur-[2px] !brightness-[.25]' : ''
@@ -300,7 +301,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
         >
           <Button
             className="favorite-btn !m-0 h-fit -translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
-            iconClassName={`!text-2xl ${
+            iconClassName={`!text-xl ${
               currentSongData.isAFavorite
                 ? 'meterial-icons-round !text-dark-background-color-3'
                 : 'material-icons-round-outlined'
@@ -321,7 +322,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           <Button
             className="skip-backward-btn !mr-0 ml-4 h-fit -translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
             tooltipLabel="Previous Song (Ctrl + Left Arrow)"
-            iconClassName="!text-4xl"
+            iconClassName="!text-3xl"
             clickHandler={handleSkipBackwardClick}
             iconName="skip_previous"
             removeFocusOnClick
@@ -329,7 +330,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           <Button
             className="play-pause-btn !mx-2 h-fit scale-90 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-6xl text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
             tooltipLabel="Play/Pause (Space)"
-            iconClassName="!text-6xl"
+            iconClassName="!text-5xl"
             clickHandler={toggleSongPlayback}
             iconName={isCurrentSongPlaying ? 'pause_circle' : 'play_circle'}
             removeFocusOnClick
@@ -338,7 +339,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           <Button
             className="skip-backward-btn !mr-4 h-fit translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
             tooltipLabel="Next Song (Ctrl + Right Arrow)"
-            iconClassName="!text-4xl"
+            iconClassName="!text-3xl"
             clickHandler={handleSkipForwardClickWithParams}
             iconName="skip_next"
             removeFocusOnClick
@@ -347,7 +348,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             className={`lyrics-btn !m-0 h-fit translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white ${
               isLyricsVisible && '!text-dark-background-color-3'
             }`}
-            iconClassName="!text-2xl"
+            iconClassName="!text-xl"
             clickHandler={() => setIsLyricsVisible((prevState) => !prevState)}
             iconName="notes"
             tooltipLabel="Lyrics (Ctrl + L)"

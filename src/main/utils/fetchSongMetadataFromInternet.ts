@@ -519,11 +519,11 @@ export const searchSongMetadataResultsInInternet = async (
   );
 
   const hits = await Promise.all([
+    musixmatchHits,
     itunesHits,
     geniusHits,
     deezerHits,
     lastFMHits,
-    musixmatchHits,
   ]);
   const allHits = hits.flat(2);
 

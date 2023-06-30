@@ -11,6 +11,7 @@ import { appPreferences } from '../../../package.json';
 import parseLyrics, {
   parseSyncedLyricsFromAudioDataSource,
 } from '../utils/parseLyrics';
+import saveLyricsToSong from '../saveLyricsToSong';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -147,10 +148,38 @@ const fetchUnsyncedLyrics = async (
   return undefined;
 };
 
+const saveLyricsAutomaticallyIfAsked = async (
+  lyricsType: AutomaticallySaveLyricsTypes,
+  songPath: string,
+  lyrics: SongLyrics
+) => {
+  const {
+    lyrics: { isSynced },
+  } = lyrics;
+  if (lyricsType === 'NONE') return undefined;
+  if (
+    (lyricsType === 'SYNCED' && isSynced) ||
+    lyricsType === 'SYNCED_OR_UN_SYNCED'
+  ) {
+    await saveLyricsToSong(songPath, lyrics);
+    return log(
+      `Lyrics for '${lyrics.title}' saved successfully.`,
+      {
+        songPath,
+      },
+      'INFO',
+      { sendToRenderer: 'SUCCESS' }
+    );
+  }
+
+  return undefined;
+};
+
 const getSongLyrics = async (
   trackInfo: LyricsRequestTrackInfo,
   lyricsType: LyricsTypes = 'ANY',
   lyricsRequestType: LyricsRequestTypes = 'ANY',
+  saveLyricsAutomatically: AutomaticallySaveLyricsTypes = 'NONE',
   abortControllerSignal?: AbortSignal
 ): Promise<SongLyrics | undefined> => {
   const {
@@ -206,6 +235,14 @@ const getSongLyrics = async (
           ...musixmatchLyrics,
           isOfflineLyricsAvailable,
         };
+
+        if (saveLyricsAutomatically !== 'NONE')
+          await saveLyricsAutomaticallyIfAsked(
+            saveLyricsAutomatically,
+            trackInfo.songPath,
+            cachedLyrics
+          );
+
         return cachedLyrics;
       }
 
@@ -216,6 +253,14 @@ const getSongLyrics = async (
         );
         if (unsyncedLyrics) {
           cachedLyrics = { ...unsyncedLyrics, isOfflineLyricsAvailable };
+
+          if (saveLyricsAutomatically === 'SYNCED_OR_UN_SYNCED')
+            await saveLyricsAutomaticallyIfAsked(
+              saveLyricsAutomatically,
+              trackInfo.songPath,
+              cachedLyrics
+            );
+
           return cachedLyrics;
         }
       }

@@ -6,6 +6,7 @@
     "Brainz",
     "Deezer",
     "ecfg",
+    "EXTM",
     "Fashni",
     "FXJOE",
     "horiz",
@@ -58,5 +59,9 @@
     "className",
     "ngClass",
     "iconClassName"
-  ]
+  ],
+  "editor.tokenColorCustomizations": {
+    "comments": "",
+    "textMateRules": []
+  }
 }

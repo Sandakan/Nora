@@ -1,10 +1,66 @@
 # Change Log
 
-> ### The latest version, **( v2.2.0-stable )** contains a lot of new features and improvements. As always expect some bugs in the app.
+> ### The latest version, **( v2.3.0-stable )** contains a lot of new features and improvements. As always expect some bugs in the app.
 
 <br>
 
-![Nora v2.2.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.2.0-stable.webp)
+![Nora v2.3.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.3.0-stable.webp)
+
+<br>
+
+- ### **v2.3.0-stable - ( 30<sup>th</sup> of June 2023 )**
+
+  - ### 🎉 New Features and Features
+
+    - Added support for enhanced synced lyrics in Nora (Experimental).
+    - Added support for syncing unsynced lyrics right from the app (Experimental).
+    - Added support for importing and exporting app data (Experimental).
+    - Added support for importing and exporting playlists (Experimental).
+    - Added support for editing the tracking number of songs from the app (Experimental).
+    - Added support for re-parsing songs on demand to fix any errors that occurred when parsing the song (Experimental).
+    - Added support for animated artworks (Experimental).
+    - Added support for saving automatically downloaded lyrics when in LyricsPage.
+    - Added a button next to `Most Loved Songs` on the `Home page` which directs to the Favorites playlist.
+    - Added the feature to save artwork with the selected artwork's name.
+
+  - ### 🔨 Fixes and Improvements
+    - Fixed a bug where the app may crash in mini-player mode when using Window's window snap feature.
+    - Improved app error handling when parsing songs.
+    - Fixed a bug where the text style of `Unknown artist` is inconsistent across different pages.
+    - Fixed a bug where scrolling to the page section is not working.
+    - Added a fix for flickering issues in notifications with progress indicators.
+    - Fixed a bug where the `Update token` button in the Musixmatch Settings prompt is not disabled even though the typed token is the same saved token.
+    - Fixed a bug where the `Show token` button is not disabled when opening Musixmatch Settings prompt with a previously saved token.
+    - Fixed a bug where clicking the `Adjust Playback Speed` context menu option doesn't point you to the correct section of Settings.
+    - Increased the brightness of Song Card artworks.
+    - Fixed a bug where some messages sent from the main process to the renderer have timestamps.
+    - Fixed a bug where songs in an album don't show their respective album name.
+    - Fixed some additional padding on All Result Pages.
+    - Improved app performance by limiting re-rendering in unwanted situations.
+    - Reduced the size of media control buttons in the Mini player.
+    - Fixed a bug where blacklisted icons in Song cards aren't positioned correctly.
+    - Fixed some bugs related to recording listening data.
+    - Fixed some brightness issues in SongCard.
+    - Fixed a bug where albums with the same names get categorized into the same album even though they have different artists.
+    - Moved the toggle predictive search button into the search bar.
+    - Fixed some styling issues in SongTagsEditingPage.
+    - Linked Nora's website to the app.
+    - Moved lyrics-related settings from the Audio Playback section to the new 'Lyrics' section in Settings.
+    - Fixed a bug where the app doesn't start with the previous window's dimensions.
+    - Fixed a bug where sometimes the app doesn't show an error message when the player stops due to an error.
+    - Moved musixmatch metadata result from the bottom of the list to the top.
+    - Linked Nora's official website to the app.
+    - Improved the render cycle timings to improve app performance.
+    - Marked notifications as a low priority to improve performance.
+    - Fixed a bug where songs inside lists like playlists, genres, albums, etc don't play the whole list when clicking the play button on a song.
+    - Fixed a bug where CurrentQueuePage doesn't get updated when shuffled.
+    - Fixed a bug where incorrect colors are used for inputs in the SongTagsEditingPage.
+    - Fixed a bug where the contents of the TitleBar are not visible when the app is in light mode and displaying a background image.
+    - Fixed a bug where listening data sessions record listening data even though the song is paused.
+    - Fixed some dependency security vulnerabilities.
+    - Improved app logs.
+  - ### 🐜 Known Issues and Bugs
+    - Nora may fail to load some FLAC songs.
 
 <br>
 

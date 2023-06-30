@@ -1,6 +1,7 @@
 import MainContainer from '../MainContainer';
 import AppearanceSettings from './Settings/AppearanceSettings';
 import AudioPlaybackSettings from './Settings/AudioPlaybackSettings';
+import LyricsSettings from './Settings/LyricsSettings';
 import DefaultPageSettings from './Settings/DefaultPageSettings';
 import PreferencesSettings from './Settings/PreferencesSettings';
 import AccessibilitySettings from './Settings/AccessibilitySettings';
@@ -24,6 +25,9 @@ const SettingsPage = () => {
 
           {/* ? AUDIO PLAYBACK SETTINGS */}
           <AudioPlaybackSettings />
+
+          {/* ? LYRICS SETTINGS */}
+          <LyricsSettings />
 
           {/* ? EQUALIZER SETTINGS */}
           <EqualizerSettings />

@@ -4,6 +4,9 @@ on:
   push:
     branches: ['master']
 
+  pull_request:
+    branches: ['master']
+
 env:
   MUSIXMATCH_DEFAULT_USER_TOKEN: ${{ secrets.MUSIXMATCH_DEFAULT_USER_TOKEN }}
   LAST_FM_API_KEY: ${{ secrets.LAST_FM_API_KEY }}
@@ -27,6 +30,10 @@ jobs:
           node-version: 18
           check-latest: true
 
+      - name: Print GitHub Ref
+        run: |
+          echo "GitHub Ref: ${{ github.ref }}"
+
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1
         with:
@@ -36,6 +43,6 @@ jobs:
 
           # If the commit is tagged with a version (e.g. "v1.0.0"),
           # release the app after building
-          release: true
-          # release: ${{ startsWith(github.ref, 'refs/heads/master') }}
+          # release: true
+          release: ${{ startsWith(github.ref, 'refs/heads/master')}}
           # release: ${{ startsWith(github.ref, 'refs/tags/v') }}

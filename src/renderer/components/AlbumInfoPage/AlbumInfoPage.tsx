@@ -96,6 +96,7 @@ const AlbumInfoPage = () => {
     updateQueueData,
     addNewNotifications,
     updateCurrentlyActivePageData,
+    playSong,
   } = useContext(AppUpdateContext);
 
   const [albumContent, dispatch] = React.useReducer(reducer, {
@@ -196,6 +197,29 @@ const AlbumInfoPage = () => {
     'songs',
     'songId'
   );
+
+  const handleSongPlayBtnClick = React.useCallback(
+    (currSongId: string) => {
+      const queueSongIds = albumContent.songsData
+        .filter((song) => !song.isBlacklisted)
+        .map((song) => song.songId);
+      createQueue(
+        queueSongIds,
+        'album',
+        false,
+        albumContent.albumData.albumId,
+        false
+      );
+      playSong(currSongId, true);
+    },
+    [
+      albumContent.songsData,
+      albumContent.albumData.albumId,
+      createQueue,
+      playSong,
+    ]
+  );
+
   const songComponents = React.useMemo(
     () =>
       albumContent.songsData.length > 0
@@ -213,16 +237,19 @@ const AlbumInfoPage = () => {
                 duration={song.duration}
                 songId={song.songId}
                 path={song.path}
+                album={song.album}
                 isAFavorite={song.isAFavorite}
                 year={song.year}
                 isBlacklisted={song.isBlacklisted}
                 selectAllHandler={selectAllHandler}
+                onPlayClick={handleSongPlayBtnClick}
               />
             );
           })
         : [],
     [
       albumContent.songsData,
+      handleSongPlayBtnClick,
       localStorageData?.preferences?.isSongIndexingEnabled,
       selectAllHandler,
     ]
@@ -230,7 +257,7 @@ const AlbumInfoPage = () => {
 
   const albumArtistComponents = React.useMemo(() => {
     const { artists } = albumContent.albumData;
-    if (artists)
+    if (Array.isArray(artists) && artists.length > 0)
       return artists
         .map((artist, i) => {
           const arr = [
@@ -248,7 +275,7 @@ const AlbumInfoPage = () => {
           return arr;
         })
         .flat();
-    return <span>Unknown Artist</span>;
+    return <span className="text-xs font-normal">Unknown Artist</span>;
   }, [albumContent.albumData]);
 
   const calculateTotalTime = React.useCallback(() => {
@@ -283,6 +310,7 @@ const AlbumInfoPage = () => {
               <Img
                 src={albumContent.albumData.artworkPaths.artworkPath}
                 className="w-52 rounded-xl"
+                loading="eager"
                 alt="Album Cover"
               />
             )}{' '}

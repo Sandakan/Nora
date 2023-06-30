@@ -95,6 +95,9 @@ const sendSongID3Tags = async (
               songTags.genre
                 ?.split(',')
                 .map((genre) => ({ genreId: undefined, name: genre.trim() }));
+            const trackNumber =
+              song.trackNo ??
+              (Number(songTags.trackNumber?.split('/').shift()) || undefined);
 
             const res: SongTags = {
               title,
@@ -122,6 +125,7 @@ const sendSongID3Tags = async (
                 song.isArtworkAvailable
               ).artworkPath,
               duration: song.duration,
+              trackNumber,
             };
             return res;
           }

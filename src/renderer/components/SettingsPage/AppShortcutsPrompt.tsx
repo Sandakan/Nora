@@ -1,4 +1,5 @@
 import React from 'react';
+import ShortcutButton from './ShortcutButton';
 
 interface Shortcut {
   label: string;
@@ -49,6 +50,14 @@ const shortcutData: ShortcutCategory[] = [
     ],
   },
   {
+    shortcutCategoryTitle: 'Lyrics Editor',
+    shortcuts: [
+      { label: 'Select the Next Lyrics Line', keys: ['Enter'] },
+      { label: 'Select the Previous Lyrics Line', keys: ['Shift', 'Enter'] },
+      { label: 'Select a custom Lyrics Line', keys: ['Double Click'] },
+    ],
+  },
+  {
     shortcutCategoryTitle: 'Other Shortcuts',
     shortcuts: [
       { label: 'Toggle App Theme', keys: ['Ctrl', 'Y'] },
@@ -68,10 +77,9 @@ const AppShortcutsPrompt = () => {
         const shortcutComponents = shortcuts.map((shortcut) => {
           const { label, keys } = shortcut;
 
-          const shortcutKeyComponents = keys.map((key) => (
-            <div className="shortcut-button mr-2 rounded-md bg-background-color-3/75 px-2 py-1 text-center dark:bg-dark-background-color-3/25">
-              {key}
-            </div>
+          const shortcutKeyComponents = keys.map((key, index) => (
+            // eslint-disable-next-line react/no-array-index-key
+            <ShortcutButton shortcutKey={key} key={index} />
           ));
 
           return (

@@ -226,13 +226,15 @@ const lyrics = {
   getSongLyrics: (
     songInfo: LyricsRequestTrackInfo,
     lyricsType?: LyricsTypes,
-    lyricsRequestType?: LyricsRequestTypes
+    lyricsRequestType?: LyricsRequestTypes,
+    saveLyricsAutomatically?: AutomaticallySaveLyricsTypes
   ): Promise<SongLyrics | undefined> =>
     ipcRenderer.invoke(
       'app/getSongLyrics',
       songInfo,
       lyricsType,
-      lyricsRequestType
+      lyricsRequestType,
+      saveLyricsAutomatically
     ),
 
   saveLyricsToSong: (songPath: string, text: SongLyrics) =>
@@ -277,6 +279,8 @@ const songUpdates = {
       sendUpdatedData,
       isKnownSource
     ),
+  reParseSong: (songPath: string): Promise<SavableSongData | undefined> =>
+    ipcRenderer.invoke('app/reParseSong', songPath),
   getSongId3Tags: (
     songIdOrPath: string,
     isKnownSource: boolean
@@ -286,8 +290,8 @@ const songUpdates = {
     ipcRenderer.invoke('app/getImgFileLocation'),
   revealSongInFileExplorer: (songId: string): void =>
     ipcRenderer.send('app/revealSongInFileExplorer', songId),
-  saveArtworkToSystem: (songId: string): void =>
-    ipcRenderer.send('app/saveArtworkToSystem', songId),
+  saveArtworkToSystem: (songId: string, saveName?: string): void =>
+    ipcRenderer.send('app/saveArtworkToSystem', songId, saveName),
 };
 
 // $ FETCH SONG DATA FROM INTERNET
@@ -438,6 +442,9 @@ const playlistsData = {
     ipcRenderer.invoke('app/removePlaylists', playlistIds),
   getArtworksForMultipleArtworksCover: (songIds: string[]): Promise<string[]> =>
     ipcRenderer.invoke('app/getArtworksForMultipleArtworksCover', songIds),
+  exportPlaylist: (playlistId: string): Promise<void> =>
+    ipcRenderer.invoke('app/exportPlaylist', playlistId),
+  importPlaylist: (): Promise<void> => ipcRenderer.invoke('app/importPlaylist'),
 };
 
 // $ APP LOGS
@@ -481,6 +488,10 @@ const settingsHelpers = {
   openDevtools: () => ipcRenderer.send('app/openDevTools'),
   networkStatusChange: (isConnected: boolean): void =>
     ipcRenderer.send('app/networkStatusChange', isConnected),
+  exportAppData: (localStorageData: string): Promise<void> =>
+    ipcRenderer.invoke('app/exportAppData', localStorageData),
+  importAppData: (): Promise<void | LocalStorage> =>
+    ipcRenderer.invoke('app/importAppData'),
 };
 
 // $ APP RESTART OR RESET

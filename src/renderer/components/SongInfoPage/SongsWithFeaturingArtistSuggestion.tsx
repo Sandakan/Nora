@@ -96,7 +96,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
     return [];
   }, [separatedFeatArtistsNames]);
 
-  const separateArtists = React.useCallback(
+  const addFeatArtistsToSong = React.useCallback(
     (
       setIsDisabled: (_state: boolean) => void,
       setIsPending: (_state: boolean) => void
@@ -135,6 +135,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
           return addNewNotifications([
             {
               content: 'Featuring artists suggestion resolved successfully.',
+              iconName: 'done',
               delay: 5000,
               id: 'FeatArtistsSuggestion',
             },
@@ -218,7 +219,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
                 </p>
                 <Checkbox
                   id="featArtistsTitleReset"
-                  labelContent="Remove information related to featuring artists in the song title"
+                  labelContent="Remove featuring artists information from song title after adding artists to the song."
                   className="my-4 !text-sm"
                   isChecked={isRemovingFeatInfoFromTitle}
                   checkedStateUpdateFunction={(state) =>
@@ -233,7 +234,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
                   iconClassName="material-icons-round-outlined"
                   label={`Add ${separatedFeatArtistsNames.length} artists to the song`}
                   clickHandler={(_, setIsDisabled, setIsPending) =>
-                    separateArtists(setIsDisabled, setIsPending)
+                    addFeatArtistsToSong(setIsDisabled, setIsPending)
                   }
                 />
                 <Button

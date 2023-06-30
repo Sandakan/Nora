@@ -76,6 +76,7 @@ const sendAudioDataFromPath = async (
             songId: generateRandomId(),
             isAFavorite: false,
             isKnownSource: false,
+            isBlacklisted: false,
           };
 
           addToSongsOutsideLibraryData({

@@ -102,11 +102,7 @@ export const parseMusicmatchDataFromLyrics = async (
         for (let i = 0; i < lyricsLinesData.length; i += 1) {
           const { text, time } = lyricsLinesData[i];
           output.push(
-            `[${
-              time.minutes.toString().length > 1
-                ? time.minutes
-                : `0${time.minutes}`
-            }:${
+            `[${time.minutes >= 10 ? time.minutes : `0${time.minutes}`}:${
               time.seconds.toString().length > 1
                 ? time.seconds
                 : `0${time.seconds}`

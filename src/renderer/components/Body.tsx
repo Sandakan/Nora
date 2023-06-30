@@ -1,5 +1,6 @@
 import React, { Suspense, useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
+import SuspenseLoader from './SuspenseLoader';
 
 const HomePage = React.lazy(() => import('./HomePage/HomePage'));
 const ArtistPage = React.lazy(() => import('./ArtistPage/ArtistPage'));
@@ -27,6 +28,9 @@ const GenreInfoPage = React.lazy(() => import('./GenreInfoPage/GenreInfoPage'));
 const SongTagsEditingPage = React.lazy(
   () => import('./SongTagsEditingPage/SongTagsEditingPage')
 );
+const LyricsEditingPage = React.lazy(
+  () => import('./LyricsEditingPage/LyricsEditingPage')
+);
 const SongsPage = React.lazy(() => import('./SongsPage/SongsPage'));
 const ErrorBoundary = React.lazy(() => import('./ErrorBoundary'));
 const MusicFoldersPage = React.lazy(
@@ -43,22 +47,31 @@ const Body = React.memo(() => {
   React.useEffect(() => {
     if (typeof currentlyActivePage.data?.scrollToId === 'string') {
       const { scrollToId } = currentlyActivePage.data;
-      const element = document.querySelector(scrollToId as string);
+      let retryCount = 0;
 
-      if (element && bodyRef.current?.contains(element))
-        setTimeout(
-          () =>
-            element.scrollIntoView({
-              behavior: 'smooth',
-              block: 'center',
-            }),
-          250
-        );
-      else
-        console.warn(
-          `Element with id ${scrollToId} didn't exist to scroll into view.`
-        );
+      const timeoutId = setInterval(() => {
+        const element = document.querySelector(scrollToId as string);
+
+        if (retryCount >= 3) {
+          clearInterval(timeoutId);
+          return console.warn(
+            `Element with id ${scrollToId} didn't exist to scroll into view.`
+          );
+        }
+        if (element && bodyRef.current?.contains(element)) {
+          clearInterval(timeoutId);
+          return element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+          });
+        }
+        retryCount += 1;
+        return undefined;
+      }, 250);
+
+      return () => clearInterval(timeoutId);
     }
+    return undefined;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentlyActivePage.data?.scrollToId]);
 
@@ -68,7 +81,7 @@ const Body = React.memo(() => {
       ref={bodyRef}
     >
       <ErrorBoundary>
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<SuspenseLoader />}>
           {currentlyActivePage.pageTitle === 'Songs' && <SongsPage />}
           {currentlyActivePage.pageTitle === 'Home' && <HomePage />}
           {currentlyActivePage.pageTitle === 'Artists' && <ArtistPage />}
@@ -96,6 +109,9 @@ const Body = React.memo(() => {
             currentlyActivePage.data !== '' && <MusicFolderInfoPage />}
           {currentlyActivePage.pageTitle === 'SongTagsEditor' && (
             <SongTagsEditingPage />
+          )}
+          {currentlyActivePage.pageTitle === 'LyricsEditor' && (
+            <LyricsEditingPage />
           )}
         </Suspense>
       </ErrorBoundary>

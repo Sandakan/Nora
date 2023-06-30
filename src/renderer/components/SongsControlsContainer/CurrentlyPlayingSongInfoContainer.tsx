@@ -77,9 +77,10 @@ const CurrentlyPlayingSongInfoContainer = () => {
         .filter((artist, index) => artist.onlineArtworkPaths && index < 2)
         .map((artist, index) => (
           <Img
+            key={artist.artistId}
             src={artist.onlineArtworkPaths?.picture_small}
             fallbackSrc={artist.artworkPath}
-            key={artist.artistId}
+            loading="eager"
             className={`absolute aspect-square w-6 rounded-full border-2 border-background-color-1 dark:border-dark-background-color-1 ${
               index === 0 ? 'z-2' : '-translate-x-2'
             }`}
@@ -124,20 +125,22 @@ const CurrentlyPlayingSongInfoContainer = () => {
   );
 
   const songArtists = React.useMemo(() => {
-    if (currentSongData.songId && Array.isArray(currentSongData.artists)) {
-      if (currentSongData.artists.length > 0) {
-        return currentSongData.artists
+    const { songId, artists, isKnownSource } = currentSongData;
+
+    if (songId && Array.isArray(artists)) {
+      if (artists.length > 0) {
+        return artists
           .map((artist, i, artistArr) => {
             const arr = [
               <SongArtist
                 key={artist.artistId}
                 artistId={artist.artistId}
                 name={artist.name}
-                isFromKnownSource={currentSongData.isKnownSource}
+                isFromKnownSource={isKnownSource}
               />,
             ];
 
-            if ((currentSongData.artists?.length ?? 1) - 1 !== i)
+            if ((artists.length ?? 1) - 1 !== i)
               arr.push(
                 <span
                   key={`${artistArr[i].name},${artistArr[i + 1].name}`}
@@ -151,14 +154,10 @@ const CurrentlyPlayingSongInfoContainer = () => {
           })
           .flat();
       }
-      return <span>Unknown Artist</span>;
+      return <span className="text-xs font-normal">Unknown Artist</span>;
     }
     return '';
-  }, [
-    currentSongData.artists,
-    currentSongData.songId,
-    currentSongData.isKnownSource,
-  ]);
+  }, [currentSongData]);
 
   const contextMenuCurrentSongData =
     React.useMemo((): ContextMenuAdditionalData => {
@@ -238,7 +237,10 @@ const CurrentlyPlayingSongInfoContainer = () => {
         iconClassName: 'material-icons-round-outlined',
         handlerFunction: () =>
           artworkPath &&
-          window.api.songUpdates.saveArtworkToSystem(artworkPath),
+          window.api.songUpdates.saveArtworkToSystem(
+            artworkPath,
+            `${title} song artwork`.replaceAll(' ', '_')
+          ),
         isDisabled: currentSongData.artworkPath === undefined,
       },
       {

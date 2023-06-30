@@ -10,6 +10,8 @@ const Notification = (props: AppNotification) => {
     delay,
     buttons,
     icon,
+    iconName,
+    iconClassName,
     type = 'DEFAULT',
     progressBarData = { max: 100, value: 50 },
   } = props;
@@ -29,12 +31,14 @@ const Notification = (props: AppNotification) => {
   }%`;
 
   const removeNotification = React.useCallback(() => {
+    const isNotificationAnimationDisabled =
+      localStorageData?.preferences?.isReducedMotion ||
+      type === 'WITH_PROGRESS_BAR';
+
     if (notificationTimeoutIdRef.current)
       clearTimeout(notificationTimeoutIdRef.current);
-    if (
-      notificationRef.current &&
-      !localStorageData?.preferences?.isReducedMotion
-    ) {
+
+    if (notificationRef.current && !isNotificationAnimationDisabled) {
       notificationRef.current.classList.add('disappear-to-bottom');
       notificationRef.current.addEventListener('animationend', () =>
         updateNotifications((currNotifications) =>
@@ -45,7 +49,12 @@ const Notification = (props: AppNotification) => {
       updateNotifications((currNotifications) =>
         currNotifications.filter((x) => x.id !== id)
       );
-  }, [id, localStorageData?.preferences?.isReducedMotion, updateNotifications]);
+  }, [
+    id,
+    localStorageData?.preferences?.isReducedMotion,
+    type,
+    updateNotifications,
+  ]);
 
   React.useLayoutEffect(() => {
     const notification = notificationRef.current;
@@ -70,9 +79,25 @@ const Notification = (props: AppNotification) => {
       }
     };
   }, [delay, id, removeNotification, updateNotifications]);
+
+  const notificationIcon = React.useMemo(() => {
+    if (icon) return icon;
+    if (iconName)
+      return (
+        <span className={iconClassName ?? 'material-icons-round'}>
+          {iconName}
+        </span>
+      );
+    return undefined;
+  }, [icon, iconClassName, iconName]);
+
   return (
     <div
-      className="notification appear-from-bottom group mt-4 flex h-fit max-h-32 min-h-[50px] w-fit min-w-[300px] max-w-sm justify-between rounded-2xl bg-context-menu-background py-2 text-sm font-light text-font-color-black shadow-[5px_25px_50px_0px_rgba(0,0,0,0.2)] backdrop-blur-sm transition-[opacity,transform,visibility] ease-in-out dark:bg-dark-context-menu-background dark:text-font-color-white"
+      className={`notification ${
+        type !== 'WITH_PROGRESS_BAR' && 'appear-from-bottom'
+      } group mt-4 flex h-fit max-h-32 min-h-[50px] w-fit min-w-[300px] max-w-sm justify-between rounded-2xl bg-context-menu-background py-2 text-sm font-light text-font-color-black shadow-[5px_25px_50px_0px_rgba(0,0,0,0.2)] backdrop-blur-sm transition-[opacity,transform,visibility] ease-in-out dark:bg-dark-context-menu-background dark:text-font-color-white ${
+        progressBarData && 'duration-0'
+      }`}
       id="notificationPanelsContainer"
       ref={notificationRef}
       style={notificationPanelStyles}
@@ -84,7 +109,7 @@ const Notification = (props: AppNotification) => {
       >
         <div className="notification-info-container flex flex-row items-center">
           <div className="icon-container mx-3 flex items-center justify-center [&>img]:aspect-square [&>img]:h-4 [&>span]:text-xl">
-            {icon}
+            {notificationIcon}
           </div>
           <div className="message-container overflow-hidden text-ellipsis py-1">
             {content}

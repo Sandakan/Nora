@@ -23,6 +23,8 @@ const NotificationPanel = () => {
           id,
           buttons,
           icon,
+          iconName,
+          iconClassName,
           order,
           progressBarData,
           type,
@@ -34,6 +36,8 @@ const NotificationPanel = () => {
             content={content}
             buttons={buttons}
             icon={icon}
+            iconName={iconName}
+            iconClassName={iconClassName}
             delay={delay}
             order={order}
             type={type}

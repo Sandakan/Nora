@@ -131,6 +131,7 @@ const ArtistPage = () => {
     [artistsData, noOfColumns, selectAllHandler]
   );
 
+  console.log('offset', currentlyActivePage?.data);
   return (
     <MainContainer
       className="appear-from-bottom artists-list-container !h-full overflow-hidden !pb-0"
@@ -143,25 +144,26 @@ const ArtistPage = () => {
       }}
     >
       <>
-        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-          <div className="container flex">
-            Artists{' '}
-            <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
-              {isMultipleSelectionEnabled ? (
-                <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
-                  {multipleSelectionsData.multipleSelections.length} selections
-                </div>
-              ) : (
-                artistsData &&
-                artistsData.length > 0 && (
-                  <span className="no-of-artists">{`${
-                    artistsData.length
-                  } artist${artistsData.length === 1 ? '' : 's'}`}</span>
-                )
-              )}
+        {artistsData.length > 0 && (
+          <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+            <div className="container flex">
+              Artists{' '}
+              <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
+                {isMultipleSelectionEnabled ? (
+                  <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
+                    {multipleSelectionsData.multipleSelections.length}{' '}
+                    selections
+                  </div>
+                ) : (
+                  artistsData &&
+                  artistsData.length > 0 && (
+                    <span className="no-of-artists">{`${
+                      artistsData.length
+                    } artist${artistsData.length === 1 ? '' : 's'}`}</span>
+                  )
+                )}
+              </div>
             </div>
-          </div>
-          {artistsData.length > 0 && (
             <div className="other-control-container flex">
               <Button
                 label={isMultipleSelectionEnabled ? 'Unselect All' : 'Select'}
@@ -203,8 +205,8 @@ const ArtistPage = () => {
                 }}
               />
             </div>
-          )}
-        </div>
+          </div>
+        )}
         <div
           className={`artists-container flex !h-full flex-wrap ${
             !(artistsData && artistsData.length > 0) && 'hidden'
@@ -221,18 +223,20 @@ const ArtistPage = () => {
               height={height || 300}
               width={width || 500}
               overscanRowCount={2}
+              initialScrollLeft={currentlyActivePage?.data?.scrollLeftOffset}
               initialScrollTop={currentlyActivePage?.data?.scrollTopOffset}
-              onScroll={(data) =>
-                debounce(
-                  () =>
-                    data.scrollTop !== 0 &&
-                    updateCurrentlyActivePageData((currentPageData) => ({
-                      ...currentPageData,
-                      scrollTopOffset: data.scrollTop,
-                    })),
-                  500
-                )
-              }
+              onScroll={(data) => {
+                if (!data.scrollUpdateWasRequested && data.scrollTop !== 0)
+                  debounce(
+                    () =>
+                      updateCurrentlyActivePageData((currentPageData) => ({
+                        ...currentPageData,
+                        scrollTopOffset: data.scrollTop,
+                        scrollLeftOffset: data.scrollLeft,
+                      })),
+                    500
+                  );
+              }}
             >
               {row}
             </Grid>

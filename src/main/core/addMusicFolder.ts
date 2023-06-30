@@ -3,7 +3,7 @@ import log from '../log';
 import parseFolderStructuresForSongPaths, {
   doesFolderExistInFolderStructure,
 } from '../fs/parseFolderStructuresForSongPaths';
-import { parseSong } from '../parseSong';
+import { tryToParseSong } from '../parseSong/parseSong';
 import sortSongs from '../utils/sortSongs';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import { generatePalettes } from '../other/generatePalette';
@@ -62,7 +62,7 @@ const addMusicFromFolderStructures = async (
       const songPath = songPaths[i];
       try {
         // eslint-disable-next-line no-await-in-loop
-        const data = await parseSong(songPath, i >= 10);
+        const data = await tryToParseSong(songPath, false, false, i >= 10);
         sendMessageToRenderer(
           `${i + 1} completed out of ${songPaths.length} songs.`,
           'AUDIO_PARSING_PROCESS_UPDATE',

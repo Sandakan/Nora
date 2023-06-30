@@ -286,7 +286,7 @@ const Folder = (props: FolderProps) => {
               {index + 1}
             </div>
           )}
-          <Img src={FolderImg} className="w-8 self-center" />
+          <Img src={FolderImg} loading="eager" className="w-8 self-center" />
           <div className="folder-info ml-6 flex flex-col">
             <span className="folder-name" title={`${prevDir}\${folderName}`}>
               {folderName}

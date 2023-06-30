@@ -23,7 +23,7 @@ import os from 'os';
 import * as dotenv from 'dotenv';
 // import * as Sentry from '@sentry/electron';
 
-import log from './log';
+import log, { logFilePath } from './log';
 import {
   getSongsData,
   getUserData,
@@ -94,6 +94,11 @@ import getArtworksForMultipleArtworksCover from './core/getArtworksForMultipleAr
 import { resolveSeparateArtists } from './core/resolveSeparateArtists';
 import resolveFeaturingArtists from './core/resolveFeaturingArtists';
 import saveArtworkToSystem from './core/saveArtworkToSystem';
+import exportAppData from './core/exportAppData';
+import importAppData from './core/importAppData';
+import exportPlaylist from './core/exportPlaylist';
+import importPlaylist from './core/importPlaylist';
+import reParseSong from './parseSong/reParseSong';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -141,8 +146,8 @@ let isOnBatteryPower = false;
 
 // / / / / / / INITIALIZATION / / / / / / /
 
-export const IS_DEVELOPMENT =
-  process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true';
+const IS_DEVELOPMENT =
+  !app.isPackaged || process.env.NODE_ENV === 'development';
 
 const appIcon = nativeImage.createFromPath(
   getAssetPath('images', 'logo_light_mode.png')
@@ -427,8 +432,15 @@ app
           _,
           trackInfo: LyricsRequestTrackInfo,
           lyricsType?: LyricsTypes,
-          lyricsRequestType?: LyricsRequestTypes
-        ) => getSongLyrics(trackInfo, lyricsType, lyricsRequestType)
+          lyricsRequestType?: LyricsRequestTypes,
+          saveLyricsAutomatically?: AutomaticallySaveLyricsTypes
+        ) =>
+          getSongLyrics(
+            trackInfo,
+            lyricsType,
+            lyricsRequestType,
+            saveLyricsAutomatically
+          )
       );
 
       ipcMain.handle(
@@ -633,11 +645,13 @@ app
 
       ipcMain.handle('app/getFolderStructures', () => getFolderStructures());
 
-      ipcMain.on('app/resetApp', () => resetApp());
-
-      ipcMain.on('app/openLogFile', () =>
-        shell.openPath(path.join(app.getPath('userData'), 'logs.txt'))
+      ipcMain.handle('app/reParseSong', (_, songPath: string) =>
+        reParseSong(songPath)
       );
+
+      ipcMain.on('app/resetApp', () => resetApp(!IS_DEVELOPMENT));
+
+      ipcMain.on('app/openLogFile', () => shell.openPath(logFilePath));
 
       ipcMain.on('app/revealSongInFileExplorer', (_, songId: string) =>
         revealSongInFileExplorer(songId)
@@ -647,13 +661,27 @@ app
         shell.showItemInFolder(folderPath)
       );
 
-      ipcMain.on('app/saveArtworkToSystem', (_, songId: string) =>
-        saveArtworkToSystem(songId)
+      ipcMain.on(
+        'app/saveArtworkToSystem',
+        (_, songId: string, saveName?: string) =>
+          saveArtworkToSystem(songId, saveName)
       );
 
       ipcMain.on('app/openInBrowser', (_, url: string) =>
         shell.openExternal(url)
       );
+
+      ipcMain.handle('app/exportAppData', (_, localStorageData: string) =>
+        exportAppData(localStorageData)
+      );
+
+      ipcMain.handle('app/exportPlaylist', (_, playlistId: string) =>
+        exportPlaylist(playlistId)
+      );
+
+      ipcMain.handle('app/importAppData', importAppData);
+
+      ipcMain.handle('app/importPlaylist', importPlaylist);
 
       ipcMain.handle(
         'app/getRendererLogs',
@@ -761,15 +789,25 @@ app.on('window-all-closed', () => {
 
 // / / / / / / / / / / / / / / / / / / / / / / / / / / / /
 function manageWindowFinishLoad() {
-  const userData = getUserData();
-  if (userData.windowPositions.mainWindow) {
-    const { x, y } = userData.windowPositions.mainWindow;
+  const { windowDiamensions, windowPositions } = getUserData();
+  if (windowPositions.mainWindow) {
+    const { x, y } = windowPositions.mainWindow;
     mainWindow.setPosition(x, y, true);
   } else {
     mainWindow.center();
     const [x, y] = mainWindow.getPosition();
     saveUserData('windowPositions.mainWindow', { x, y });
   }
+
+  if (windowDiamensions.mainWindow) {
+    const { x, y } = windowDiamensions.mainWindow;
+    mainWindow.setSize(
+      x || MAIN_WINDOW_DEFAULT_SIZE_X,
+      y || MAIN_WINDOW_DEFAULT_SIZE_Y,
+      true
+    );
+  }
+
   mainWindow.show();
 
   if (IS_DEVELOPMENT)
@@ -803,7 +841,7 @@ function toggleOnBatteryPower() {
 
 export function sendMessageToRenderer(
   message: string,
-  code?: MessageCodes,
+  code: MessageCodes = 'INFO',
   data?: object
 ) {
   mainWindow.webContents.send(
@@ -946,11 +984,14 @@ async function handleSecondInstances(_: unknown, argv: string[]) {
   );
 }
 
-function restartApp(reason: string) {
-  log(`RENDERER REQUESTED A FULL APP REFRESH.\nREASON : ${reason}`);
-  mainWindow.webContents.send('app/beforeQuitEvent');
-  closeAllAbortControllers();
-  app.relaunch({ args: process.argv.slice(1).concat(['--relaunch']) });
+export function restartApp(reason: string, noQuitEvents = false) {
+  log(`REQUESTED A FULL APP REFRESH.\nREASON : ${reason}`);
+
+  if (!noQuitEvents) {
+    mainWindow.webContents.send('app/beforeQuitEvent');
+    closeAllAbortControllers();
+  }
+  app.relaunch();
   app.exit(0);
 }
 
@@ -965,7 +1006,7 @@ async function revealSongInFileExplorer(songId: string) {
     `Revealing song file in explorer failed because song couldn't be found in the library.`,
     undefined,
     'WARN',
-    { sendToRenderer: true }
+    { sendToRenderer: 'FAILURE' }
   );
 }
 
@@ -1010,7 +1051,7 @@ async function getImagefileLocation() {
   return filePaths[0];
 }
 
-async function resetApp(isRestartApp = false) {
+async function resetApp(isRestartApp = true) {
   log('!-!-!-!-!-!  STARTED THE RESETTING PROCESS OF THE APP.  !-!-!-!-!-!');
   try {
     await mainWindow.webContents.session.clearStorageData();
@@ -1029,10 +1070,8 @@ async function resetApp(isRestartApp = false) {
     );
   } finally {
     log(`====== RELOADING THE ${isRestartApp ? 'APP' : 'RENDERER'} ======`);
-    if (isRestartApp) {
-      app.relaunch();
-      app.quit();
-    } else mainWindow.webContents.reload();
+    if (isRestartApp) restartApp('App resetted.');
+    else mainWindow.webContents.reload();
   }
 }
 

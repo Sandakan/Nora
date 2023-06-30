@@ -22,6 +22,7 @@ const MusicFolderInfoPage = () => {
     createQueue,
     toggleMultipleSelections,
     updateContextMenuData,
+    playSong,
   } = React.useContext(AppUpdateContext);
 
   const [folderInfo, setFolderInfo] = React.useState<MusicFolder>();
@@ -151,6 +152,17 @@ const MusicFolderInfoPage = () => {
 
   const selectAllHandler = useSelectAllHandler(folderSongs, 'songs', 'songId');
 
+  const handleSongPlayBtnClick = React.useCallback(
+    (currSongId: string) => {
+      const queueSongIds = folderSongs
+        .filter((song) => !song.isBlacklisted)
+        .map((song) => song.songId);
+      createQueue(queueSongIds, 'folder', false, folderInfo?.path, false);
+      playSong(currSongId, true);
+    },
+    [createQueue, folderInfo?.path, folderSongs, playSong]
+  );
+
   const row = React.useCallback(
     (props: { index: number; style: React.CSSProperties }) => {
       const { index, style } = props;
@@ -185,12 +197,14 @@ const MusicFolderInfoPage = () => {
             isAFavorite={isAFavorite}
             isBlacklisted={isBlacklisted}
             selectAllHandler={selectAllHandler}
+            onPlayClick={handleSongPlayBtnClick}
           />
         </div>
       );
     },
     [
       folderSongs,
+      handleSongPlayBtnClick,
       localStorageData?.preferences?.isSongIndexingEnabled,
       selectAllHandler,
     ]

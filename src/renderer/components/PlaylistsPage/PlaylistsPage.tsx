@@ -1,9 +1,3 @@
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable promise/always-return */
-/* eslint-disable promise/catch-or-return */
-/* eslint-disable react/self-closing-comp */
-/* eslint-disable react/button-has-type */
-/* eslint-disable import/prefer-default-export */
 import React, { CSSProperties, useContext } from 'react';
 import { FixedSizeGrid as Grid } from 'react-window';
 
@@ -53,6 +47,7 @@ const PlaylistsPage = () => {
     () =>
       window.api.playlistsData.getPlaylistData([], sortingOrder).then((res) => {
         if (res && res.length > 0) setPlaylists(res);
+        return undefined;
       }),
     [sortingOrder]
   );
@@ -146,6 +141,14 @@ const PlaylistsPage = () => {
               handlerFunction: createNewPlaylist,
               iconName: 'add',
             },
+            {
+              label: 'Import Playlist',
+              iconName: 'publish',
+              handlerFunction: () =>
+                window.api.playlistsData
+                  .importPlaylist()
+                  .catch((err) => console.error(err)),
+            },
           ],
           e.pageX,
           e.pageY
@@ -195,7 +198,24 @@ const PlaylistsPage = () => {
                 }
               />
               <Button
-                label="Add New Playlist"
+                label="Import Playlist"
+                className="import-playlist-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                iconName="publish"
+                clickHandler={(_, setIsDisabled, setIsPending) => {
+                  setIsDisabled(true);
+                  setIsPending(true);
+
+                  return window.api.playlistsData
+                    .importPlaylist()
+                    .finally(() => {
+                      setIsDisabled(false);
+                      setIsPending(false);
+                    })
+                    .catch((err) => console.error(err));
+                }}
+              />
+              <Button
+                label="Add Playlist"
                 className="add-new-playlist-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                 iconName="add"
                 clickHandler={createNewPlaylist}

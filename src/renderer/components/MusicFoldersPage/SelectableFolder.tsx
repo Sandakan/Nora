@@ -47,7 +47,7 @@ const SelectableFolder = (props: Props) => {
               updateFolders(state, structure)
             }
           />
-          <Img src={FolderImg} className="ml-2 h-8 w-8" />
+          <Img src={FolderImg} className="ml-2 h-8 w-8" loading="eager" />
           <div className="ml-4">
             <p className="">{folderName}</p>
             <p className=" text-xs opacity-50">
