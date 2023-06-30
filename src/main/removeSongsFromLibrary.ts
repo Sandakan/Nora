@@ -19,7 +19,7 @@ import log from './log';
 import { dataUpdateEvent, sendMessageToRenderer } from './main';
 import { getSongArtworkPath } from './fs/resolveFilePaths';
 
-const manageArtistDataUpdates = (
+export const removeDeletedArtistDataOfSong = (
   artists: SavableArtist[],
   song: SavableSongData
 ) => {
@@ -67,7 +67,7 @@ const manageArtistDataUpdates = (
   return { updatedArtists: artists, isArtistRemoved };
 };
 
-const manageAlbumDataUpdates = (
+export const removeDeletedAlbumDataOfSong = (
   albums: SavableAlbum[],
   song: SavableSongData
 ) => {
@@ -107,7 +107,7 @@ const manageAlbumDataUpdates = (
   return { updatedAlbums: albums, isAlbumRemoved };
 };
 
-const managePlaylistDataUpdates = (
+export const removeDeletedPlaylistDataOfSong = (
   playlists: SavablePlaylist[],
   song: SavableSongData
 ) => {
@@ -139,7 +139,7 @@ const managePlaylistDataUpdates = (
   return { updatedPlaylists: playlists, isPlaylistRemoved };
 };
 
-const manageGenreDataUpdates = (
+export const removeDeletedGenreDataOfSong = (
   genres: SavableGenre[],
   song: SavableSongData
 ) => {
@@ -188,7 +188,7 @@ const manageGenreDataUpdates = (
   return { updatedGenres: genres, isGenreRemoved };
 };
 
-const manageSongArtworkUpdates = async (song: SavableSongData) => {
+export const removeDeletedArtworkDataOfSong = async (song: SavableSongData) => {
   if (song.isArtworkAvailable) {
     const artworkPaths = getSongArtworkPath(
       song.songId,
@@ -206,7 +206,7 @@ const manageSongArtworkUpdates = async (song: SavableSongData) => {
   }
 };
 
-const manageListeningDataUpdates = (
+const removeDeletedListeningDataOfSong = (
   listeningData: SongListeningData[],
   song: SavableSongData
 ) => {
@@ -240,28 +240,28 @@ const removeSong = async (
   log(`Started the deletion process of the song '${path.basename(song.path)}'`);
 
   //   ARTIST DATA UPDATES
-  const updatedArtistData = manageArtistDataUpdates(artists, song);
+  const updatedArtistData = removeDeletedArtistDataOfSong(artists, song);
   isArtistRemoved = updatedArtistData.isArtistRemoved;
   artists = updatedArtistData.updatedArtists;
 
   //   ALBUM DATA UPDATES
-  const updatedAlbumData = manageAlbumDataUpdates(albums, song);
+  const updatedAlbumData = removeDeletedAlbumDataOfSong(albums, song);
   isAlbumRemoved = updatedAlbumData.isAlbumRemoved;
   albums = updatedAlbumData.updatedAlbums;
 
   //   PLAYLIST DATA UPDATES
-  const updatedPlaylistData = managePlaylistDataUpdates(playlists, song);
+  const updatedPlaylistData = removeDeletedPlaylistDataOfSong(playlists, song);
   isPlaylistRemoved = updatedPlaylistData.isPlaylistRemoved;
   playlists = updatedPlaylistData.updatedPlaylists;
 
   //   GENRE DATA UPDATES
-  const updatedGenreData = manageGenreDataUpdates(genres, song);
+  const updatedGenreData = removeDeletedGenreDataOfSong(genres, song);
   isGenreRemoved = updatedGenreData.isGenreRemoved;
   genres = updatedGenreData.updatedGenres;
 
   //   SONG ARTWORK UPDATES
   try {
-    await manageSongArtworkUpdates(song);
+    await removeDeletedArtworkDataOfSong(song);
   } catch (error) {
     throw new Error(
       `Error occurred when trying to remove artwork of ${song.title}`
@@ -269,7 +269,7 @@ const removeSong = async (
   }
 
   // LISTENING DATA UPDATES
-  const { updatedListeningData } = manageListeningDataUpdates(
+  const { updatedListeningData } = removeDeletedListeningDataOfSong(
     listeningData,
     song
   );

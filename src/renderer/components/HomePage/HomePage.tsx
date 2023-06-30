@@ -238,6 +238,7 @@ const HomePage = () => {
             fetchRecentlyPlayedSongs();
           else if (
             event.dataType === 'songs/deletedSong' ||
+            event.dataType === 'songs/updatedSong' ||
             event.dataType === 'songs/newSong' ||
             event.dataType === 'songs/palette' ||
             event.dataType === 'blacklist/songBlacklist' ||

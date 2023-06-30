@@ -2,16 +2,16 @@ import path from 'path';
 
 import { generateRandomId } from '../utils/randomId';
 
-export const manageGenres = (
+export const manageGenresOfParsedSong = (
   allGenres: SavableGenre[],
-  songTitle: string,
-  songId: string,
-  songGenres?: string[],
+  songInfo: SavableSongData,
   songArtworkPaths?: ArtworkPaths,
   darkVibrantBgColor?: { rgb: unknown }
 ) => {
   const newGenres: SavableGenre[] = [];
   const relevantGenres: SavableGenre[] = [];
+  const { title, songId, genres: songGenres } = songInfo;
+
   let genres = allGenres;
   if (
     Array.isArray(songGenres) &&
@@ -20,32 +20,26 @@ export const manageGenres = (
   ) {
     for (let x = 0; x < songGenres.length; x += 1) {
       const songGenre = songGenres[x];
-      if (genres.some((genre) => genre.name === songGenre)) {
-        let y = genres.filter((genre) => genre.name === songGenre);
+      if (genres.some((genre) => genre.name === songGenre.name)) {
+        let y = genres.filter((genre) => genre.name === songGenre.name);
         y = y.map((z) => {
           z.artworkName =
             songArtworkPaths && !songArtworkPaths.isDefaultArtwork
               ? path.basename(songArtworkPaths.artworkPath)
               : z.artworkName || undefined;
           z.backgroundColor = darkVibrantBgColor || z.backgroundColor;
-          z.songs.push({
-            songId,
-            title: songTitle,
-          });
+          z.songs.push({ songId, title });
           relevantGenres.push(z);
           return z;
         });
-        genres = genres.filter((genre) => genre.name !== songGenre).concat(y);
+        genres = genres
+          .filter((genre) => genre.name !== songGenre.name)
+          .concat(y);
       } else {
         const newGenre: SavableGenre = {
-          name: songGenre,
+          name: songGenre.name,
           genreId: generateRandomId(),
-          songs: [
-            {
-              songId,
-              title: songTitle,
-            },
-          ],
+          songs: [{ songId, title }],
           artworkName:
             songArtworkPaths && !songArtworkPaths.isDefaultArtwork
               ? path.basename(songArtworkPaths.artworkPath)
@@ -57,9 +51,9 @@ export const manageGenres = (
         genres.push(newGenre);
       }
     }
-    return { allGenres: genres, newGenres, relevantGenres };
+    return { updatedGenres: genres, newGenres, relevantGenres };
   }
-  return { allGenres: genres || [], newGenres, relevantGenres };
+  return { updatedGenres: genres || [], newGenres, relevantGenres };
 };
 
-export default manageGenres;
+export default manageGenresOfParsedSong;

@@ -2,17 +2,16 @@ import path from 'path';
 
 import { generateRandomId } from '../utils/randomId';
 
-const manageArtists = (
+const manageArtistsOfParsedSong = (
   allArtists: SavableArtist[],
-  songTitle: string,
-  songId: string,
-  songArtists?: { name: string; artistId?: string }[],
+  songInfo: SavableSongData,
   songArtworkPaths?: ArtworkPaths,
   relevantAlbums = [] as SavableAlbum[]
 ) => {
   let updatedArtists = allArtists;
   const newArtists: SavableArtist[] = [];
   const relevantArtists: SavableArtist[] = [];
+  const { title, songId, artists: songArtists } = songInfo;
 
   if (Array.isArray(updatedArtists)) {
     if (songArtists && songArtists.length > 0) {
@@ -25,10 +24,8 @@ const manageArtists = (
         if (isArtistAvailable) {
           let z = updatedArtists.filter((val) => val.name === newArtist.name);
           z = z.map((artist) => {
-            artist.songs.push({
-              title: songTitle,
-              songId,
-            });
+            artist.songs.push({ title, songId });
+
             if (relevantAlbums.length > 0) {
               relevantAlbums.forEach((relevantAlbum) =>
                 artist.albums?.push({
@@ -47,12 +44,7 @@ const manageArtists = (
           const artist: SavableArtist = {
             name: newArtist.name,
             artistId: generateRandomId(),
-            songs: [
-              {
-                songId,
-                title: songTitle,
-              },
-            ],
+            songs: [{ songId, title }],
             artworkName:
               songArtworkPaths && !songArtworkPaths.isDefaultArtwork
                 ? path.basename(songArtworkPaths.artworkPath)
@@ -72,11 +64,11 @@ const manageArtists = (
           updatedArtists.push(artist);
         }
       }
-      return { allArtists: updatedArtists, newArtists, relevantArtists };
+      return { updatedArtists, newArtists, relevantArtists };
     }
-    return { allArtists: updatedArtists, newArtists, relevantArtists };
+    return { updatedArtists, newArtists, relevantArtists };
   }
-  return { allArtists: [], newArtists, relevantArtists };
+  return { updatedArtists: [], newArtists, relevantArtists };
 };
 
-export default manageArtists;
+export default manageArtistsOfParsedSong;

@@ -1,4 +1,4 @@
-import { syncedLyricsRegex } from 'main/utils/isLyricsSynced';
+import isLyricsSynced, { syncedLyricsRegex } from 'main/utils/isLyricsSynced';
 import { EditingLyricsLineData } from 'renderer/components/LyricsEditingPage/LyricsEditingPage';
 import roundTo from './roundTo';
 
@@ -39,8 +39,7 @@ const parseLyrics = (str: string) => {
   let syncedLyrics: EditingLyricsLineData[] = [];
   let unsyncedLyrics: string[] = [];
 
-  const isSynced = syncedLyricsRegex.test(str);
-  syncedLyricsRegex.lastIndex = 0;
+  const isSynced = isLyricsSynced(str);
 
   const splittedLines = str.split('\n');
   const trimmedLines = splittedLines.map((line) => line.trim());

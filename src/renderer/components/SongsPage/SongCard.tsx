@@ -408,6 +408,13 @@ const SongCard = (props: SongCardProp) => {
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
+        label: 'Re-parse song',
+        class: 'sync',
+        iconName: 'sync',
+        handlerFunction: () => window.api.songUpdates.reParseSong(path),
+        isDisabled: isMultipleSelectionsEnabled,
+      },
+      {
         label: 'Hr',
         isContextMenuItemSeperator: true,
         handlerFunction: () => true,

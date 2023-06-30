@@ -1,5 +1,6 @@
 import React, { Suspense, useContext } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
+import SuspenseLoader from './SuspenseLoader';
 
 const HomePage = React.lazy(() => import('./HomePage/HomePage'));
 const ArtistPage = React.lazy(() => import('./ArtistPage/ArtistPage'));
@@ -80,7 +81,7 @@ const Body = React.memo(() => {
       ref={bodyRef}
     >
       <ErrorBoundary>
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<SuspenseLoader />}>
           {currentlyActivePage.pageTitle === 'Songs' && <SongsPage />}
           {currentlyActivePage.pageTitle === 'Home' && <HomePage />}
           {currentlyActivePage.pageTitle === 'Artists' && <ArtistPage />}

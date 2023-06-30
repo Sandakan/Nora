@@ -4,7 +4,6 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
 
-import calculateTime from 'renderer/utils/calculateTime';
 import roundTo from 'renderer/utils/roundTo';
 
 import MainContainer from '../MainContainer';
@@ -13,6 +12,7 @@ import Button from '../Button';
 import LyricsEditorHelpPrompt from './LyricsEditorHelpPrompt';
 import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';
 import LyricsEditorSettingsPrompt from './LyricsEditorSettingsPrompt';
+import LyricsEditorSavePrompt from './LyricsEditorSavePrompt';
 
 export interface EditingLyricsLineData {
   line: string;
@@ -39,6 +39,7 @@ const LyricsEditingPage = () => {
   const [lyricsLines, setLyricsLines] = React.useState<
     ExtendedEditingLyricsLineData[]
   >([]);
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   const offset = localStorageData.lyricsEditorSettings.offset || 0;
   const roundedSongPostion = roundTo(songPosition + offset, 2);
@@ -145,48 +146,14 @@ const LyricsEditingPage = () => {
     [roundedSongPostion]
   );
 
-  const copyLyrics = React.useCallback(() => {
-    const metadataLines: string[] = [];
-
-    const { title, artists, album, duration } = currentSongData;
-    const { minutes: min, seconds: sec } = calculateTime(duration, false);
-    metadataLines.push(`[ti:${title}]`);
-    metadataLines.push(`[length:${min}:${sec}]`);
-
-    if (artists && artists?.length > 0)
-      metadataLines.push(`[ar:${artists.map((x) => x.name).join(', ')}]`);
-    if (album) metadataLines.push(`[al:${album.name}]`);
-    metadataLines.push('');
-
-    const lines = lyricsLines.map((lineData) => {
-      const { line, start = 0 } = lineData;
-      const { minutes, seconds } = calculateTime(start, false);
-      const [secsStr, milliSecsStr = '00'] = seconds.toString().split('.');
-
-      return `[${minutes.length > 1 ? minutes : `0${minutes}`}:${
-        secsStr.length > 1 ? secsStr : `0${secsStr}`
-      }.${
-        milliSecsStr.length > 1 ? milliSecsStr : `0${milliSecsStr}`
-      }] ${line}`;
-    });
-
-    navigator.clipboard
-      .writeText(metadataLines.concat(lines).join('\n'))
-      .then(() => {
-        return console.log('Text copied to clipboard');
-      })
-      .catch((error) => {
-        console.error('Failed to copy text:', error);
-      });
-  }, [currentSongData, lyricsLines]);
-
   const moreOptionsContextMenuItems = React.useMemo((): ContextMenuItem[] => {
     return [
       {
-        label: 'Copy lyrics in LRC format',
-        iconName: 'content_copy',
+        label: 'Help',
+        iconName: 'help',
         iconClassName: 'material-icons-round-outlined',
-        handlerFunction: copyLyrics,
+        handlerFunction: () =>
+          changePromptMenuData(true, <LyricsEditorHelpPrompt />),
       },
       {
         label: '',
@@ -237,14 +204,15 @@ const LyricsEditingPage = () => {
         },
       },
     ];
-  }, [changePromptMenuData, copyLyrics]);
+  }, [changePromptMenuData]);
 
   return (
     <MainContainer
-      className="genres-list-container appear-from-bottom relative !h-full overflow-hidden !pb-0 text-font-color-black dark:text-font-color-white"
+      className="appear-from-bottom relative !h-full overflow-hidden !pb-0 text-font-color-black dark:text-font-color-white"
       onKeyDown={handleShortcuts}
       onFocus={() => setIsFocused(true)}
       onBlur={() => setIsFocused(false)}
+      ref={containerRef}
       focusable
       autoFocus
     >
@@ -259,16 +227,6 @@ const LyricsEditingPage = () => {
             className="!mr-0 mt-4"
             clickHandler={() => songId && playSong(songId)}
           />
-        </div>
-      )}
-      {!isFocused && isTheEditingSongTheCurrSong && !isPlaying && (
-        <div className="absolute z-10 flex h-full w-full flex-col items-center justify-center bg-background-color-1/25 pr-8 dark:bg-dark-background-color-1/25">
-          <span className="material-icons-round-outlined text-5xl">error</span>
-          <p className="mt-2 text-3xl font-medium">Page not focused.</p>
-          <p className="mt-2">
-            Page focus is required for the page-specific shortcuts to work.
-          </p>
-          <p>Click on this page to gain focus.</p>
         </div>
       )}
       <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
@@ -322,6 +280,22 @@ const LyricsEditingPage = () => {
             }}
           />
           <Button
+            label="Save Lyrics"
+            className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+            iconName="save_as"
+            iconClassName="material-icons-round-outlined"
+            isDisabled={!isTheEditingSongTheCurrSong}
+            clickHandler={() =>
+              changePromptMenuData(
+                true,
+                <LyricsEditorSavePrompt
+                  lyricsLines={lyricsLines}
+                  currentSongData={currentSongData}
+                />
+              )
+            }
+          />
+          <Button
             label={isPlaying ? 'Stop and Edit Lyrics' : 'Play Lyrics'}
             className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
             iconName={isPlaying ? 'edit' : 'play_arrow'}
@@ -339,25 +313,29 @@ const LyricsEditingPage = () => {
               changePromptMenuData(true, <LyricsEditorSettingsPrompt />)
             }
           />
-          <Button
-            label="Help"
-            className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-            iconName="help"
-            iconClassName="material-icons-round-outlined"
-            isDisabled={!isTheEditingSongTheCurrSong}
-            clickHandler={() =>
-              changePromptMenuData(true, <LyricsEditorHelpPrompt />)
-            }
-          />
         </div>
       </div>
       <div
-        className={`lyrics-container flex h-full flex-col items-center overflow-auto py-10 pr-6 ${
-          (!isTheEditingSongTheCurrSong || (!isFocused && !isPlaying)) &&
-          'opacity-10'
-        } `}
+        className={`lyrics-container flex h-full flex-col items-center overflow-auto py-10 pr-6 transition-[background,opacity] ${
+          !isTheEditingSongTheCurrSong && 'opacity-10'
+        }`}
       >
         {lyricsLineComponents}
+      </div>
+
+      <div
+        className={`invisible absolute bottom-0 left-1/2 z-10 flex -translate-x-1/2 scale-90 cursor-pointer items-center justify-center rounded-3xl bg-background-color-2 px-4 py-2 opacity-0 shadow-xl transition-[transform,opacity,visibility] duration-200 ease-in-out dark:bg-dark-background-color-2 ${
+          !isFocused &&
+          isTheEditingSongTheCurrSong &&
+          !isPlaying &&
+          '!visible !-translate-y-6 !scale-100 !opacity-100'
+        }`}
+        title="Page focus is required for the page-specific shortcuts to work. Click on this page to gain focus."
+      >
+        <span className="material-icons-round-outlined mr-2 text-xl text-font-color-highlight dark:text-dark-font-color-highlight">
+          error
+        </span>
+        <p className="">Page not focused.</p>
       </div>
     </MainContainer>
   );

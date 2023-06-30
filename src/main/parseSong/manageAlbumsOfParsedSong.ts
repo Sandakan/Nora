@@ -2,16 +2,15 @@ import path from 'path';
 
 import { generateRandomId } from '../utils/randomId';
 
-const manageAlbums = (
+const manageAlbumsOfParsedSong = (
   allAlbumsData: SavableAlbum[],
-  songTitle: string,
-  songId: string,
-  songAlbumName?: string,
-  songArtworkPaths?: ArtworkPaths,
-  songArtists?: { name: string; artistId: string }[],
-  songYear?: number
+  songInfo: SavableSongData,
+  songArtworkPaths?: ArtworkPaths
 ) => {
   const relevantAlbums: SavableAlbum[] = [];
+  const { title, songId, artists, year, album: songAlbum } = songInfo;
+  const songAlbumName = songAlbum?.name;
+
   if (songAlbumName) {
     if (Array.isArray(allAlbumsData)) {
       const isAlbumAvailable = allAlbumsData.some(
@@ -21,7 +20,7 @@ const manageAlbums = (
         const updatedAlbums = allAlbumsData.map((album) => {
           if (album.title === songAlbumName) {
             album.songs.push({
-              title: songTitle,
+              title,
               songId,
             });
             relevantAlbums.push(album);
@@ -37,13 +36,13 @@ const manageAlbums = (
           songArtworkPaths && !songArtworkPaths.isDefaultArtwork
             ? path.basename(songArtworkPaths.artworkPath)
             : undefined,
-        year: songYear,
+        year,
         albumId: generateRandomId(),
-        artists: songArtists,
+        artists,
         songs: [
           {
             songId,
-            title: songTitle,
+            title,
           },
         ],
       };
@@ -64,4 +63,4 @@ const manageAlbums = (
   };
 };
 
-export default manageAlbums;
+export default manageAlbumsOfParsedSong;

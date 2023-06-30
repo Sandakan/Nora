@@ -19,6 +19,7 @@ module.exports = {
     'react/function-component-definition': 'off',
     'default-param-last': 'off',
     'import/prefer-default-export': 'off',
+    'promise/catch-or-return': [2, { allowFinally: true }],
     'import/no-unresolved': [2, { caseSensitive: false }],
     radix: ['warn', 'as-needed'],
     'react/no-unescaped-entities': [

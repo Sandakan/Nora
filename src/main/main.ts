@@ -98,6 +98,7 @@ import exportAppData from './core/exportAppData';
 import importAppData from './core/importAppData';
 import exportPlaylist from './core/exportPlaylist';
 import importPlaylist from './core/importPlaylist';
+import reParseSong from './parseSong/reParseSong';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -643,6 +644,10 @@ app
       );
 
       ipcMain.handle('app/getFolderStructures', () => getFolderStructures());
+
+      ipcMain.handle('app/reParseSong', (_, songPath: string) =>
+        reParseSong(songPath)
+      );
 
       ipcMain.on('app/resetApp', () => resetApp(!IS_DEVELOPMENT));
 

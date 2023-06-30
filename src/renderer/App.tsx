@@ -40,6 +40,7 @@ import SongUnplayableErrorPrompt, {
 import shuffleQueueRandomly from './other/shuffleQueueRandomly';
 import toggleSongIsFavorite from './other/toggleSongIsFavorite';
 import UnsupportedFileMessagePrompt from './other/UnsupportedFileMessagePrompt';
+import SuspenseLoader from './components/SuspenseLoader';
 
 const MiniPlayer = React.lazy(
   () => import('./components/MiniPlayer/MiniPlayer')
@@ -1934,7 +1935,7 @@ export default function App() {
           <SongPositionContext.Provider value={songPositionContextValues}>
             {content.player.isMiniPlayer && (
               <ErrorBoundary>
-                <Suspense fallback={<div>Loading...</div>}>
+                <Suspense fallback={<SuspenseLoader />}>
                   <MiniPlayer
                     className={`${
                       isReducedMotion

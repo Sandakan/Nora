@@ -108,9 +108,9 @@ const EditingLyricsLine = (props: Props) => {
   return (
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <div
-      className={`mb-2 flex w-full flex-col items-center justify-center rounded-xl py-4 ${
+      className={`group mb-2 flex flex-col items-center justify-center rounded-xl py-4 ${
         isEditing &&
-        `bg-background-color-2 shadow-xl dark:bg-dark-background-color-2`
+        `w-full bg-background-color-2 shadow-xl dark:bg-dark-background-color-2 `
       } `}
       ref={lineRef}
       onKeyDown={(e) => isEditing && e.stopPropagation()}
@@ -145,8 +145,8 @@ const EditingLyricsLine = (props: Props) => {
         />
       ) : (
         <span
-          className={`scale-75 text-center text-5xl font-medium opacity-50 transition-[opacity,transform] ${
-            (isActive || shouldBeScrolledWhenPlaying) &&
+          className={`scale-75 cursor-pointer text-center text-5xl font-medium opacity-50 transition-[opacity,transform] group-hover:opacity-75 ${
+            ((!isPlaying && isActive) || shouldBeScrolledWhenPlaying) &&
             '!scale-100 !opacity-100'
           }`}
         >
@@ -187,11 +187,14 @@ const EditingLyricsLine = (props: Props) => {
           From {content.start || '0.00'} to {content.end || '0.00'}
         </span>
       )}
-      <div className="flex items-center justify-center">
+      <div className="flex flex-wrap items-center justify-center">
         {isEditing && (
           <>
             <Button
-              className="my-2 !border-0 !p-0 text-xs underline opacity-75"
+              className={`my-2 text-xs opacity-75 ${
+                isEditing &&
+                '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
+              }`}
               label="Reset"
               clickHandler={() =>
                 dispatch({
@@ -201,7 +204,25 @@ const EditingLyricsLine = (props: Props) => {
               }
             />
             <Button
-              className="my-2 !border-0 !p-0 text-xs underline opacity-75"
+              className={`my-2 text-xs opacity-75 ${
+                isEditing &&
+                '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
+              }`}
+              label="Delete Line"
+              clickHandler={() =>
+                updateLineData((prevLineData) => {
+                  const filteredLineData = prevLineData.filter(
+                    (lineData) => lineData.index !== index
+                  );
+                  return filteredLineData;
+                })
+              }
+            />
+            <Button
+              className={`my-2 text-xs opacity-75 ${
+                isEditing &&
+                '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
+              }`}
               label="Add line above"
               clickHandler={() =>
                 updateLineData((prevLineData) => {
@@ -209,7 +230,7 @@ const EditingLyricsLine = (props: Props) => {
                   prevLineData.splice(pos, 0, {
                     index: 0,
                     isActive: false,
-                    line: '',
+                    line: '•••',
                   });
 
                   return prevLineData.map((lineData, i) => ({
@@ -220,7 +241,10 @@ const EditingLyricsLine = (props: Props) => {
               }
             />
             <Button
-              className="my-2 !border-0 !p-0 text-xs underline opacity-75"
+              className={`my-2 text-xs opacity-75 ${
+                isEditing &&
+                '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
+              }`}
               label="Add line below"
               clickHandler={() =>
                 updateLineData((prevLineData) => {
@@ -231,7 +255,7 @@ const EditingLyricsLine = (props: Props) => {
                   prevLineData.splice(pos, 0, {
                     index: 0,
                     isActive: false,
-                    line: '',
+                    line: '•••',
                   });
 
                   return prevLineData.map((lineData, i) => ({
@@ -244,8 +268,11 @@ const EditingLyricsLine = (props: Props) => {
           </>
         )}
         <Button
-          className="my-2 !mr-0 !border-0 !p-0 text-xs underline opacity-75"
-          label={isEditing ? 'Finish Editing' : 'Edit'}
+          className={`my-2 !mr-0 text-xs opacity-75 ${
+            isEditing &&
+            '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
+          }`}
+          label={isEditing ? 'Finish Editing' : 'Edit Line'}
           clickHandler={() => {
             setIsEditing((isEditingState) => {
               if (isEditingState === true)

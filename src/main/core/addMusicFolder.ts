@@ -62,7 +62,7 @@ const addMusicFromFolderStructures = async (
       const songPath = songPaths[i];
       try {
         // eslint-disable-next-line no-await-in-loop
-        const data = await tryToParseSong(songPath, false, i >= 10);
+        const data = await tryToParseSong(songPath, false, false, i >= 10);
         sendMessageToRenderer(
           `${i + 1} completed out of ${songPaths.length} songs.`,
           'AUDIO_PARSING_PROCESS_UPDATE',

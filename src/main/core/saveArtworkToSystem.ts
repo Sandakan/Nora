@@ -48,7 +48,7 @@ const saveArtworkToSystem = async (artworkPath: string, saveName?: string) => {
         );
 
       if (artwork) {
-        await sharp(artwork).toFile(savePath);
+        await sharp(artwork, { animated: true }).toFile(savePath);
         return sendMessageToRenderer(
           'Saved the artwork to the request location.'
         );

@@ -83,7 +83,7 @@ const addNewlyAddedSongsToLibrary = async (
 
     const newlyAddedSongPath = newlyAddedSongPaths[i];
     try {
-      await tryToParseSong(newlyAddedSongPath, false);
+      await tryToParseSong(newlyAddedSongPath, false, false);
       log(`${path.basename(newlyAddedSongPath)} song added.`);
     } catch (error) {
       log(

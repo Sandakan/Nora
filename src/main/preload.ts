@@ -279,6 +279,8 @@ const songUpdates = {
       sendUpdatedData,
       isKnownSource
     ),
+  reParseSong: (songPath: string): Promise<SavableSongData | undefined> =>
+    ipcRenderer.invoke('app/reParseSong', songPath),
   getSongId3Tags: (
     songIdOrPath: string,
     isKnownSource: boolean

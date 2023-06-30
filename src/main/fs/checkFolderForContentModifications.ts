@@ -57,7 +57,7 @@ const checkFolderForContentModifications = async (
       supportedMusicExtensions.includes(path.extname(filename));
     const isADeletedSong = songs.some((song) => song.path === songPath);
 
-    if (isNewlyAddedSong) return tryToParseSong(songPath, true);
+    if (isNewlyAddedSong) return tryToParseSong(songPath, false, true);
     if (isADeletedSong)
       return tryToRemoveSongFromLibrary(folderPath, filename, abortSignal);
   }
