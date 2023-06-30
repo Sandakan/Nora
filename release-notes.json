@@ -2,7 +2,7 @@
   "latestVersion": {
     "version": "2.3.0-stable",
     "phase": "stable",
-    "releaseDate": "2023-05-20T06:56:34.692Z",
+    "releaseDate": "2023-06-30T15:49:42.178Z",
     "artwork": "/assets/other/release artworks/whats-new-v2.3.0-stable.webp",
     "importantNotes": [
       "This new update includes importing and exporting app data, importing and exporting playlists, support for enhanced synced lyrics and to edit song lyrics and many more fixes and improvements."
@@ -12,7 +12,7 @@
     {
       "version": "2.3.0-stable",
       "artwork": "/assets/other/release artworks/whats-new-v2.3.0-stable.webp",
-      "releaseDate": "2023-05-20T06:56:34.692Z",
+      "releaseDate": "2023-06-30T15:49:42.178Z",
       "importantNotes": [
         "This new update includes importing and exporting app data and playlists, support for enhanced synced lyrics and editing song lyrics and many more fixes and improvements."
       ],
