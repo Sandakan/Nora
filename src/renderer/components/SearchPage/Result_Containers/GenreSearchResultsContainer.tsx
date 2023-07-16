@@ -72,9 +72,11 @@ const GenreSearchResultsContainer = (props: Props) => {
             Genres
             <div className="other-stats-container ml-12 flex items-center text-xs">
               {genres.length > 0 && (
-                <div className="no-of-genres">{`${genres.length} genre${
-                  genres.length === 1 ? '' : 's'
-                }`}</div>
+                <div className="no-of-genres">
+                  {genres.length} genres{' '}
+                  {genres.length > noOfVisibleGenres &&
+                    `(${noOfVisibleGenres} shown)`}
+                </div>
               )}
             </div>
           </div>

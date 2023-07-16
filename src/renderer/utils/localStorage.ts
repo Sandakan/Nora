@@ -94,12 +94,14 @@ const checkLocalStorage = () => {
       );
       return log(
         'Inavalid or outdated local storage found. Resetting the local storage to default properties.',
-        'warn'
+        { isASupportedStoreVersion, store },
+        'WARN'
       );
     } catch (error) {
       log(
         'Error occurred when trying to save default templated for local storage.',
-        'warn'
+        { error },
+        'WARN'
       );
       throw error;
     }

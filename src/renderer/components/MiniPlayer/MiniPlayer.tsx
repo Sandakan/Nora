@@ -244,8 +244,8 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             <Button
               className="go-to-main-player-btn !mr-0 !mt-1 !rounded-md !border-0 !p-2 text-font-color-white outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white"
               tooltipLabel="Go to Main Player (Ctrl + N)"
-              iconName="launch"
-              iconClassName="!text-xl"
+              iconName="pip_exit"
+              iconClassName="material-icons-round-outlined !text-xl"
               clickHandler={() => updateMiniPlayerStatus(!isMiniPlayer)}
               removeFocusOnClick
             />

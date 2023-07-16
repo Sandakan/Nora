@@ -67,6 +67,7 @@ const getArtistInfoFromLastFM = async (
       const url = new URL(LAST_FM_BASE_URL);
       url.searchParams.set('method', 'artist.getinfo');
       url.searchParams.set('format', 'json');
+      url.searchParams.set('autocorrect', '1');
       url.searchParams.set('artist', artistName.trim());
       url.searchParams.set('api_key', LAST_FM_API_KEY);
 
@@ -110,6 +111,7 @@ const validDeezerArtistImageUrlRegex = /\/artist\/\w+\//;
 
 const getAValidDeezerArtistImage = (imageUrl: string) => {
   const isValid = validDeezerArtistImageUrlRegex.test(imageUrl);
+  validDeezerArtistImageUrlRegex.lastIndex = 0;
 
   if (isValid) return imageUrl;
   return undefined;

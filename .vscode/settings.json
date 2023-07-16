@@ -23,6 +23,7 @@
     "Spicetify",
     "sspai",
     "unmaximize",
+    "unmaximized",
     "unsynced",
     "webm",
     "xmark",
@@ -58,7 +59,8 @@
     "class",
     "className",
     "ngClass",
-    "iconClassName"
+    "iconClassName",
+    "titleClassName"
   ],
   "editor.tokenColorCustomizations": {
     "comments": "",

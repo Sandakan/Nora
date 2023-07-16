@@ -12,7 +12,6 @@ const StorageSettings = () => {
     return window.api.storageData
       .getStorageUsage(forceRefresh)
       .then((res) => {
-        console.log(res);
         if (!res || res.totalSize === 0) return setStorageMetrics(undefined);
         return setStorageMetrics(res);
       })

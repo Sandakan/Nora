@@ -665,7 +665,7 @@ const Song = React.forwardRef(
               />
             </div>
             <Img
-              src={artworkPaths.artworkPath}
+              src={artworkPaths.optimizedArtworkPath}
               loading="lazy"
               alt="Song cover"
               className={`aspect-square max-h-full object-contain py-[0.1rem] transition-[filter] duration-300 group-focus-within:brightness-50 group-hover:brightness-50 ${

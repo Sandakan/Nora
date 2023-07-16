@@ -4,6 +4,7 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import useResizeObserver from 'renderer/hooks/useResizeObserver';
 
 import { Album } from '../AlbumsPage/Album';
 import Song from '../SongsPage/Song';
@@ -15,6 +16,7 @@ import Dropdown from '../Dropdown';
 
 import SeparateArtistsSuggestion from './SeparateArtistsSuggestion';
 import DuplicateArtistsSuggestion from './DuplicateArtistsSuggestion';
+import TitleContainer from '../TitleContainer';
 
 const dropdownOptions: { label: string; value: SongSortTypes }[] = [
   { label: 'Added Order', value: 'addedOrder' },
@@ -69,6 +71,7 @@ const ArtistInfoPage = () => {
     addNewNotifications,
     updateBodyBackgroundImage,
     updateCurrentlyActivePageData,
+    changeCurrentActivePage,
     updateContextMenuData,
     playSong,
   } = React.useContext(AppUpdateContext);
@@ -77,6 +80,14 @@ const ArtistInfoPage = () => {
   const [albums, setAlbums] = React.useState<Album[]>([]);
   const [songs, setSongs] = React.useState<SongData[]>([]);
   const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>('aToZ');
+
+  const artistsInfoContainerRef = React.useRef(null);
+  const { width } = useResizeObserver(artistsInfoContainerRef);
+
+  const noOfVisibleAlbums = React.useMemo(
+    () => Math.floor(width / 250) || 4,
+    [width]
+  );
 
   const fetchArtistsData = React.useCallback(() => {
     if (currentlyActivePage?.data?.artistId) {
@@ -287,27 +298,29 @@ const ArtistInfoPage = () => {
 
   const albumComponents = React.useMemo(
     () =>
-      albums.map((album, index) => {
-        return (
-          <Album
-            index={index}
-            key={album.albumId}
-            albumId={album.albumId}
-            artists={album.artists}
-            artworkPaths={album.artworkPaths}
-            songs={album.songs}
-            title={album.title}
-            year={album.year}
-            className={
-              bodyBackgroundImage
-                ? '[&_:not(.icon)]:!text-font-color-white'
-                : ''
-            }
-            selectAllHandler={selectAllHandlerForAlbums}
-          />
-        );
-      }),
-    [albums, bodyBackgroundImage, selectAllHandlerForAlbums]
+      albums
+        .filter((_, i) => i < noOfVisibleAlbums)
+        .map((album, index) => {
+          return (
+            <Album
+              index={index}
+              key={album.albumId}
+              albumId={album.albumId}
+              artists={album.artists}
+              artworkPaths={album.artworkPaths}
+              songs={album.songs}
+              title={album.title}
+              year={album.year}
+              className={
+                bodyBackgroundImage
+                  ? '[&_:not(.icon)]:!text-font-color-white'
+                  : ''
+              }
+              selectAllHandler={selectAllHandlerForAlbums}
+            />
+          );
+        }),
+    [albums, bodyBackgroundImage, noOfVisibleAlbums, selectAllHandlerForAlbums]
   );
 
   const selectAllHandlerForSongs = useSelectAllHandler(
@@ -329,29 +342,31 @@ const ArtistInfoPage = () => {
 
   const songComponenets = React.useMemo(
     () =>
-      songs.map((song, index) => {
-        return (
-          <Song
-            key={song.songId}
-            index={index}
-            isIndexingSongs={
-              localStorageData?.preferences?.isSongIndexingEnabled
-            }
-            title={song.title}
-            artists={song.artists}
-            album={song.album}
-            duration={song.duration}
-            songId={song.songId}
-            artworkPaths={song.artworkPaths}
-            path={song.path}
-            isAFavorite={song.isAFavorite}
-            year={song.year}
-            isBlacklisted={song.isBlacklisted}
-            selectAllHandler={selectAllHandlerForSongs}
-            onPlayClick={handleSongPlayBtnClick}
-          />
-        );
-      }),
+      songs
+        .filter((_, i) => i < 5)
+        .map((song, index) => {
+          return (
+            <Song
+              key={song.songId}
+              index={index}
+              isIndexingSongs={
+                localStorageData?.preferences?.isSongIndexingEnabled
+              }
+              title={song.title}
+              artists={song.artists}
+              album={song.album}
+              duration={song.duration}
+              songId={song.songId}
+              artworkPaths={song.artworkPaths}
+              path={song.path}
+              isAFavorite={song.isAFavorite}
+              year={song.year}
+              isBlacklisted={song.isBlacklisted}
+              selectAllHandler={selectAllHandlerForSongs}
+              onPlayClick={handleSongPlayBtnClick}
+            />
+          );
+        }),
     [
       handleSongPlayBtnClick,
       localStorageData?.preferences?.isSongIndexingEnabled,
@@ -375,7 +390,10 @@ const ArtistInfoPage = () => {
   }, [artistData?.artistPalette, isDarkMode]);
 
   return (
-    <MainContainer className="artist-info-page-container appear-from-bottom relative overflow-y-auto rounded-tl-lg pb-2 pl-2 pr-2 pt-8">
+    <MainContainer
+      className="artist-info-page-container appear-from-bottom relative overflow-y-auto rounded-tl-lg pb-2 pl-2 pr-2 pt-8"
+      ref={artistsInfoContainerRef}
+    >
       <div className="artist-img-and-info-container relative mb-12 flex flex-row items-center pl-8 [&>*]:z-10">
         <div className="artist-img-container relative mr-10 max-h-60 lg:hidden">
           <Img
@@ -511,16 +529,32 @@ const ArtistInfoPage = () => {
           }}
         >
           <>
-            <div
+            <TitleContainer
+              title="Appears In Albums"
+              titleClassName="!text-2xl text-font-color-black !font-normal dark:text-font-color-white"
               className={`title-container ${
                 bodyBackgroundImage
                   ? 'text-font-color-white'
                   : 'text-font-color-black dark:text-font-color-white'
               } mb-4 mt-1
                   text-2xl`}
-            >
-              Appears On Albums
-            </div>
+              otherItems={[
+                <p className="text-xs text-font-color-highlight dark:text-dark-font-color-highlight">
+                  {albums.length} albums{' '}
+                  {albums.length > noOfVisibleAlbums &&
+                    `(${noOfVisibleAlbums} shown)`}
+                </p>,
+              ]}
+              buttons={[
+                {
+                  label: 'Show All',
+                  iconName: 'apps',
+                  className: 'show-all-btn text-sm font-normal',
+                  clickHandler: () => true,
+                  isVisible: albums.length > noOfVisibleAlbums,
+                },
+              ]}
+            />
             <div className="albums-container flex flex-wrap">
               {albumComponents}
             </div>
@@ -539,107 +573,30 @@ const ArtistInfoPage = () => {
           }}
         >
           <>
-            <div
+            <TitleContainer
+              title="Appears In Songs"
+              titleClassName="!text-2xl text-font-color-black !font-normal dark:text-font-color-white"
               className={`title-container ${
                 bodyBackgroundImage
                   ? 'text-font-color-white'
                   : 'text-font-color-black dark:text-font-color-white'
               } mb-4 mt-1
-                  flex items-center justify-between text-2xl`}
-            >
-              Appears on songs
-              {artistData?.songs && artistData.songs.length > 0 && (
-                <div className="artist-buttons mr-4 flex">
-                  <Button
-                    label="Play All"
-                    iconName="play_arrow"
-                    className={
-                      bodyBackgroundImage
-                        ? '!border-background-color-2/50 !text-font-color-white hover:!border-background-color-3 dark:!border-dark-background-color-2/50 dark:hover:!border-dark-background-color-3'
-                        : 'text-font-color-black dark:text-font-color-white'
-                    }
-                    clickHandler={() =>
-                      createQueue(
-                        songs
-                          .filter((song) => !song.isBlacklisted)
-                          .map((song) => song.songId),
-                        'artist',
-                        false,
-                        artistData.artistId,
-                        true
-                      )
-                    }
-                  />
-                  <Button
-                    tooltipLabel="Shuffle and Play"
-                    iconName="shuffle"
-                    className={
-                      bodyBackgroundImage
-                        ? '!border-background-color-2/50 !text-font-color-white hover:!border-background-color-3 dark:!border-dark-background-color-2/50 dark:hover:!border-dark-background-color-3'
-                        : 'text-font-color-black dark:text-font-color-white'
-                    }
-                    clickHandler={() =>
-                      createQueue(
-                        songs
-                          .filter((song) => !song.isBlacklisted)
-                          .map((song) => song.songId),
-                        'artist',
-                        true,
-                        artistData.artistId,
-                        true
-                      )
-                    }
-                  />
-                  <Button
-                    tooltipLabel="Add to Queue"
-                    iconName="add"
-                    className={
-                      bodyBackgroundImage
-                        ? '!border-background-color-2/50 !text-font-color-white hover:!border-background-color-3 dark:!border-dark-background-color-2/50 dark:hover:!border-dark-background-color-3'
-                        : 'text-font-color-black dark:text-font-color-white'
-                    }
-                    clickHandler={() => {
-                      updateQueueData(
-                        undefined,
-                        [...queue.queue, ...songs.map((song) => song.songId)],
-                        false,
-                        false
-                      );
-                      addNewNotifications([
-                        {
-                          id: 'addSongsToQueue',
-                          delay: 5000,
-                          content: (
-                            <span>
-                              Added {songs.length} song
-                              {songs.length === 1 ? '' : 's'} to the queue.
-                            </span>
-                          ),
-                        },
-                      ]);
-                    }}
-                  />
-                  <Dropdown
-                    name="SongsSortDropdown"
-                    className={
-                      bodyBackgroundImage
-                        ? '!border-background-color-2/50 !text-font-color-white hover:!border-background-color-3 active:!border-dark-background-color-3 dark:!border-dark-background-color-2/50 dark:hover:!border-dark-background-color-3 dark:active:!border-dark-background-color-3'
-                        : 'text-font-color-black dark:text-font-color-white'
-                    }
-                    value={sortingOrder}
-                    options={dropdownOptions}
-                    onChange={(e) => {
-                      const order = e.currentTarget.value as SongSortTypes;
-                      updateCurrentlyActivePageData((currentPageData) => ({
-                        ...currentPageData,
-                        sortingOrder: order,
-                      }));
-                      setSortingOrder(order);
-                    }}
-                  />
-                </div>
-              )}
-            </div>
+                  text-2xl`}
+              otherItems={[
+                <p className="text-xs text-font-color-highlight dark:text-dark-font-color-highlight">
+                  {songs.length} songs {songs.length > 5 && '(5 shown)'}
+                </p>,
+              ]}
+              buttons={[
+                {
+                  label: 'Show All',
+                  iconName: 'apps',
+                  className: 'show-all-btn text-sm font-normal',
+                  clickHandler: () => true,
+                  isVisible: songs.length > 5,
+                },
+              ]}
+            />
             <div className="songs-container">{songComponenets}</div>
           </>
         </MainContainer>

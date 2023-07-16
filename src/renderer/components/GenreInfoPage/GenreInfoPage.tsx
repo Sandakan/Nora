@@ -1,16 +1,17 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable no-console */
 import React from 'react';
+import { VariableSizeList as List } from 'react-window';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
-import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
+import useResizeObserver from 'renderer/hooks/useResizeObserver';
+import debounce from 'renderer/utils/debounce';
 
-import Button from '../Button';
-import Dropdown from '../Dropdown';
-import Img from '../Img';
 import MainContainer from '../MainContainer';
 import Song from '../SongsPage/Song';
+import TitleContainer from '../TitleContainer';
+import GenreImgAndInfoContainer from './GenreImgAndInfoContainer';
 
 const dropdownOptions: { label: string; value: SongSortTypes }[] = [
   { label: 'A to Z', value: 'aToZ' },
@@ -64,6 +65,8 @@ const GenreInfoPage = () => {
   const [genreData, setGenreData] = React.useState<Genre>();
   const [genreSongs, setGenreSongs] = React.useState<AudioInfo[]>([]);
   const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>('aToZ');
+  const songsContainerRef = React.useRef<HTMLDivElement>(null);
+  const { width, height } = useResizeObserver(songsContainerRef);
 
   const fetchGenresData = React.useCallback(() => {
     if (currentlyActivePage.data) {
@@ -160,49 +163,67 @@ const GenreInfoPage = () => {
     [createQueue, genreData?.genreId, genreSongs, playSong]
   );
 
-  const songComponents = React.useMemo(
+  const listItems = React.useMemo(
     () =>
-      genreSongs.map((song, index) => (
-        <Song
-          key={index}
-          index={index}
-          isIndexingSongs={localStorageData?.preferences?.isSongIndexingEnabled}
-          songId={song.songId}
-          title={song.title}
-          artists={song.artists}
-          album={song.album}
-          duration={song.duration}
-          artworkPaths={song.artworkPaths}
-          path={song.path}
-          isAFavorite={song.isAFavorite}
-          year={song.year}
-          isBlacklisted={song.isBlacklisted}
-          selectAllHandler={selectAllHandler}
-          onPlayClick={handleSongPlayBtnClick}
-        />
-      )),
+      [genreData, ...genreSongs].filter((x) => x !== undefined) as (
+        | Genre
+        | AudioInfo
+      )[],
+    [genreData, genreSongs]
+  );
+
+  const listComponents = React.useCallback(
+    (props: { index: number; style: React.CSSProperties }) => {
+      const { index, style } = props;
+      const song = listItems[index];
+      return (
+        <div style={style}>
+          {'songId' in song ? (
+            <Song
+              key={index}
+              index={index - 1}
+              isIndexingSongs={
+                localStorageData?.preferences?.isSongIndexingEnabled
+              }
+              title={song.title}
+              artists={song.artists}
+              album={song.album}
+              duration={song.duration}
+              songId={song.songId}
+              artworkPaths={song.artworkPaths}
+              path={song.path}
+              year={song.year}
+              isAFavorite={song.isAFavorite}
+              isBlacklisted={song.isBlacklisted}
+              onPlayClick={handleSongPlayBtnClick}
+              selectAllHandler={selectAllHandler}
+            />
+          ) : (
+            <GenreImgAndInfoContainer
+              genreData={song}
+              genreSongs={genreSongs}
+            />
+          )}
+        </div>
+      );
+    },
     [
       genreSongs,
       handleSongPlayBtnClick,
+      listItems,
       localStorageData?.preferences?.isSongIndexingEnabled,
       selectAllHandler,
     ]
   );
 
-  const totalGenreSongsDuration = React.useMemo(() => {
-    const { hours, minutes, seconds } = calculateTimeFromSeconds(
-      genreSongs.reduce((prev, current) => prev + current.duration, 0)
-    );
-    return `${
-      hours >= 1 ? `${hours} hour${hours === 1 ? '' : 's'} ` : ''
-    }${minutes} minute${minutes === 1 ? '' : 's'} ${seconds} second${
-      seconds === 1 ? '' : 's'
-    }`;
-  }, [genreSongs]);
+  const getItemSize = React.useCallback((index: number) => {
+    if (index === 0) return 270;
+    return 60;
+  }, []);
 
   return (
     <MainContainer
-      className="songs-list-container appear-from-bottom genre-info-page-container !h-full"
+      className="appear-from-bottom genre-info-page-container !h-full !pb-0"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {
@@ -210,120 +231,110 @@ const GenreInfoPage = () => {
           selectAllHandler();
         }
       }}
-      // style={
-      //   genreData.backgroundColor && {
-      //     background: `linear-gradient(180deg, ${`rgb(${
-      //       (genreData.backgroundColor.rgb as number[])[0]
-      //     },${(genreData.backgroundColor.rgb as number[])[1]},${
-      //       (genreData.backgroundColor.rgb as number[])[2]
-      //     })`} 0%, var(--background-color-1) 90%)`,
-      //   }
-      // }
     >
-      <>
-        {genreData && genreData.genreId && (
-          <div className="genre-img-and-info-container my-4 flex h-fit items-center text-font-color-black dark:text-font-color-white">
-            <Img
-              src={genreData.artworkPaths.artworkPath}
-              className="mr-8 aspect-square max-w-[14rem] rounded-lg"
-              loading="eager"
-            />
-            <div className="genre-info-container flex-grow">
-              <div className="font-semibold tracking-wider opacity-50">
-                GENRE
-              </div>
-              <div className="genre-title h-fit max-w-[80%] overflow-hidden text-ellipsis whitespace-nowrap pb-2 text-6xl text-font-color-highlight dark:text-dark-font-color-highlight">
-                {genreData.name}
-              </div>
-              <div className="genre-no-of-songs">{`${
-                genreData.songs.length
-              } song${genreData.songs.length !== 1 ? 's' : ''}`}</div>
-              <div className="genre-total-duration">
-                {totalGenreSongsDuration}
-              </div>
-            </div>
-          </div>
-        )}
-        {genreSongs.length > 0 && (
-          <>
-            <div className="other-controls-container mb-4 flex justify-end px-6">
-              {genreData && genreSongs.length > 0 && (
-                <>
-                  <Button
-                    label="Play All"
-                    iconName="play_arrow"
-                    clickHandler={() =>
-                      createQueue(
-                        genreSongs
-                          .filter((song) => !song.isBlacklisted)
-                          .map((song) => song.songId),
-                        'genre',
-                        false,
-                        genreData.genreId,
-                        true
-                      )
-                    }
-                  />
-                  <Button
-                    iconName="shuffle"
-                    clickHandler={() =>
-                      createQueue(
-                        genreSongs
-                          .filter((song) => !song.isBlacklisted)
-                          .map((song) => song.songId),
-                        'genre',
-                        true,
-                        genreData.genreId,
-                        true
-                      )
-                    }
-                  />
-                  <Button
-                    iconName="add"
-                    clickHandler={() => {
-                      updateQueueData(
-                        undefined,
-                        [
-                          ...queue.queue,
-                          ...genreSongs.map((song) => song.songId),
-                        ],
-                        false,
-                        false
-                      );
-                      addNewNotifications([
-                        {
-                          id: genreData.genreId,
-                          delay: 5000,
-                          content: (
-                            <span>
-                              Added {genreSongs.length} song
-                              {genreSongs.length === 1 ? '' : 's'} to the queue.
-                            </span>
-                          ),
-                        },
-                      ]);
-                    }}
-                  />
-                  <Dropdown
-                    name="songsPageSortDropdown"
-                    value={sortingOrder}
-                    options={dropdownOptions}
-                    onChange={(e) => {
-                      const order = e.currentTarget.value as SongSortTypes;
+      <TitleContainer
+        title={genreData?.name || ''}
+        className="pr-4"
+        buttons={[
+          {
+            label: 'Play All',
+            iconName: 'play_arrow',
+            clickHandler: () =>
+              createQueue(
+                genreSongs
+                  .filter((song) => !song.isBlacklisted)
+                  .map((song) => song.songId),
+                'genre',
+                false,
+                genreData?.genreId,
+                true
+              ),
+            isDisabled: !(genreData && genreSongs.length > 0),
+          },
+          {
+            iconName: 'shuffle',
+            clickHandler: () =>
+              createQueue(
+                genreSongs
+                  .filter((song) => !song.isBlacklisted)
+                  .map((song) => song.songId),
+                'genre',
+                true,
+                genreData?.genreId,
+                true
+              ),
+            isDisabled: !(genreData && genreSongs.length > 0),
+          },
+          {
+            iconName: 'add',
+            clickHandler: () => {
+              updateQueueData(
+                undefined,
+                [...queue.queue, ...genreSongs.map((song) => song.songId)],
+                false,
+                false
+              );
+              addNewNotifications([
+                {
+                  id: genreData?.genreId || '',
+                  delay: 5000,
+                  content: (
+                    <span>
+                      Added {genreSongs.length} song
+                      {genreSongs.length === 1 ? '' : 's'} to the queue.
+                    </span>
+                  ),
+                },
+              ]);
+            },
+            isDisabled: !(genreData && genreSongs.length > 0),
+          },
+        ]}
+        dropdown={{
+          name: 'songsPageSortDropdown',
+          value: sortingOrder,
+          options: dropdownOptions,
+          onChange: (e) => {
+            const order = e.currentTarget.value as SongSortTypes;
+            updateCurrentlyActivePageData((currentPageData) => ({
+              ...currentPageData,
+              sortingOrder: order,
+            }));
+            setSortingOrder(order);
+          },
+          isDisabled: !(genreData && genreSongs.length > 0),
+        }}
+      />
+      <div className="flex h-full flex-col">
+        <div className="songs-list-container h-full" ref={songsContainerRef}>
+          {listItems.length > 0 && (
+            <List
+              itemCount={listItems.length}
+              itemSize={getItemSize}
+              width={width || '100%'}
+              height={height || 450}
+              overscanCount={10}
+              className="appear-from-bottom h-full pb-4 delay-100"
+              initialScrollOffset={
+                currentlyActivePage.data?.scrollTopOffset ?? 0
+              }
+              onScroll={(data) => {
+                if (!data.scrollUpdateWasRequested && data.scrollOffset !== 0)
+                  debounce(
+                    () =>
                       updateCurrentlyActivePageData((currentPageData) => ({
                         ...currentPageData,
-                        sortingOrder: order,
-                      }));
-                      setSortingOrder(order);
-                    }}
-                  />
-                </>
-              )}
-            </div>
-            <div className="songs-container">{songComponents}</div>
-          </>
-        )}
-      </>
+                        scrollTopOffset: data.scrollOffset,
+                      })),
+                    500
+                  );
+              }}
+            >
+              {listComponents}
+            </List>
+          )}
+        </div>
+      </div>
     </MainContainer>
   );
 };

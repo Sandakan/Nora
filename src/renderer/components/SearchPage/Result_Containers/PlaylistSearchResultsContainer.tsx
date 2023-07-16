@@ -76,7 +76,11 @@ const PlaylistSearchResultsContainer = (props: Props) => {
             Playlists{' '}
             <div className="other-stats-container ml-12 flex items-center text-xs">
               {playlists && playlists.length > 0 && (
-                <span className="no-of-songs">{playlists.length} results</span>
+                <span className="no-of-songs">
+                  {playlists.length} results{' '}
+                  {playlists.length > noOfVisiblePlaylists &&
+                    `(${noOfVisiblePlaylists} shown)`}
+                </span>
               )}
             </div>
           </div>

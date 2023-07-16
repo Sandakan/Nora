@@ -119,7 +119,7 @@ window.addEventListener('offline', updateNetworkStatus);
 
 storage.checkLocalStorage();
 
-console.log('Command line args', window.api.properties.commandLineArgs);
+// console.log('Command line args', window.api.properties.commandLineArgs);
 
 export default function App() {
   const [content, dispatch] = React.useReducer(reducer, DEFAULT_REDUCER_DATA);
@@ -175,9 +175,9 @@ export default function App() {
   );
 
   const managePlaybackErrors = React.useCallback(
-    (err: unknown) => {
+    (appError: unknown) => {
       const playerErrorData = player.error;
-      console.error(err, playerErrorData);
+      console.error(appError, playerErrorData);
 
       const prompt = (
         <ErrorPrompt
@@ -200,13 +200,19 @@ export default function App() {
 
       if (repetitivePlaybackErrorsCount > 5) {
         changePromptMenuData(true, prompt);
-        return console.error('Playback errors exceeded the 5 errors limit.');
+        return log(
+          'Playback errors exceeded the 5 errors limit.',
+          { appError, playerErrorData },
+          'ERROR'
+        );
       }
 
       repetitivePlaybackErrorsCount += 1;
       const prevSongPosition = player.currentTime;
       log(
-        `Error occurred in the player.App error:${err}; Player error: ${playerErrorData};`
+        `Error occurred in the player.`,
+        { appError, playerErrorData },
+        'ERROR'
       );
 
       if (player.src && playerErrorData) {
@@ -301,14 +307,19 @@ export default function App() {
           updateAppUpdatesState(isThereAnAppUpdate ? 'OLD' : 'LATEST');
 
           if (isThereAnAppUpdate) {
-            console.log('client has new updates');
             const noUpdateNotificationForNewUpdate =
               storage.preferences.getPreferences(
                 'noUpdateNotificationForNewUpdate'
               );
-            if (
-              noUpdateNotificationForNewUpdate !== res.latestVersion.version
-            ) {
+            const isUpdateIgnored =
+              noUpdateNotificationForNewUpdate !== res.latestVersion.version;
+            log('client has new updates', {
+              isThereAnAppUpdate,
+              noUpdateNotificationForNewUpdate,
+              isUpdateIgnored,
+            });
+
+            if (isUpdateIgnored) {
               changePromptMenuData(
                 true,
                 <ReleaseNotesPrompt />,
@@ -671,20 +682,27 @@ export default function App() {
       })
       .catch((err) => console.error(err));
 
-    window.api.playerControls.toggleSongPlayback(() => {
-      console.log('Main requested song playback');
-      toggleSongPlayback();
-    });
-    window.api.unknownSource.playSongFromUnknownSource((_, data) => {
-      playSongFromUnknownSource(data, true);
-    });
+    const handleToggleSongPlayback = () => toggleSongPlayback();
+    const handlePlaySongFromUnknownSource = (
+      _: unknown,
+      data: AudioPlayerData
+    ) => playSongFromUnknownSource(data, true);
+
+    window.api.unknownSource.playSongFromUnknownSource(
+      handlePlaySongFromUnknownSource
+    );
+
+    window.api.playerControls.toggleSongPlayback(handleToggleSongPlayback);
     window.api.playerControls.skipBackwardToPreviousSong(
       handleSkipBackwardClick
     );
     window.api.playerControls.skipForwardToNextSong(handleSkipForwardClick);
     return () => {
+      window.api.unknownSource.removePlaySongFromUnknownSourceEvent(
+        handleToggleSongPlayback
+      );
       window.api.playerControls.removeTogglePlaybackStateEvent(
-        toggleSongPlayback
+        handleToggleSongPlayback
       );
       window.api.playerControls.removeSkipBackwardToPreviousSongEvent(
         handleSkipBackwardClick
@@ -1401,10 +1419,12 @@ export default function App() {
         (currentPageData && data && isDataChanged(currentPageData, data))
       ) {
         if (onPageChange) onPageChange(pageClass, data);
+
         const pageData = {
           pageTitle: pageClass,
           data,
         };
+
         navigationHistory.history = navigationHistory.history.slice(
           0,
           navigationHistory.pageHistoryIndex + 1
@@ -1414,6 +1434,8 @@ export default function App() {
         contentRef.current.navigationHistory = navigationHistory;
         contentRef.current.bodyBackgroundImage = undefined;
         toggleMultipleSelections(false);
+        log(`User navigated to '${pageClass}'`);
+
         dispatch({
           type: 'UPDATE_NAVIGATION_HISTORY',
           data: navigationHistory,

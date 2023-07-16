@@ -32,7 +32,7 @@ class ErrorBoundary extends React.Component<
       errorInfo,
     });
     // You can also log error messages to an error reporting service here
-    log(error);
+    log(error, undefined, 'ERROR');
   }
 
   render() {

@@ -13,6 +13,7 @@ import SongArtist from '../SongsPage/SongArtist';
 import ListeningActivityBarGraph from './ListeningActivityBarGraph';
 import SongStat from './SongStat';
 import SongsWithFeaturingArtistsSuggestion from './SongsWithFeaturingArtistSuggestion';
+import SongAdditionalInfoItem from './SongAdditionalInfoItem';
 
 const SongInfoPage = () => {
   const { currentlyActivePage, bodyBackgroundImage } = useContext(AppContext);
@@ -35,13 +36,15 @@ const SongInfoPage = () => {
     };
   }, []);
 
-  let songDuration = '0 seconds';
+  const songDuration = React.useMemo(() => {
+    if (songInfo) {
+      const { minutes, seconds } = calculateTimeFromSeconds(songInfo.duration);
 
-  if (songInfo) {
-    const { minutes, seconds } = calculateTimeFromSeconds(songInfo.duration);
-    if (minutes === 0) songDuration = `${seconds} seconds`;
-    else songDuration = `${minutes} minutes ${seconds} seconds`;
-  }
+      if (minutes === 0) return `${seconds} seconds`;
+      return `${minutes} minutes ${seconds} seconds`;
+    }
+    return '0 seconds';
+  }, [songInfo]);
 
   const updateSongInfo = React.useCallback(
     (callback: (prevData: SongData) => SongData) => {
@@ -303,12 +306,12 @@ const SongInfoPage = () => {
 
         {listeningData && (
           <SecondaryContainer className="secondary-container song-stats-container mt-8 flex h-fit flex-row flex-wrap rounded-2xl p-2">
-            <div className="flex items-center justify-between py-4 xl:flex-col">
+            <div className="grid w-full max-w-5xl grid-cols-[1fr_minmax(50%,55%)] grid-rows-none gap-4 py-4 xl:grid-cols-1 xl:grid-rows-2 xl:justify-items-center">
               <ListeningActivityBarGraph
                 listeningData={listeningData}
                 className="xl:order-2"
               />
-              <div className="stat-cards flex w-fit flex-wrap xl:order-1 xl:mt-4 xl:items-center xl:justify-center">
+              <div className="stat-cards grid w-fit grid-cols-2 flex-wrap gap-4 xl:order-1 xl:mt-4 xl:grid-cols-3 xl:grid-rows-2 ">
                 <SongStat
                   key={0}
                   title="All time Listens"
@@ -356,6 +359,79 @@ const SongInfoPage = () => {
                   value={totalSongFullListens}
                 />
               </div>
+            </div>
+            <div className="other-cards appear-from-bottom mr-4 w-full max-w-[60rem] rounded-xl bg-background-color-2/70 p-4 backdrop-blur-sm dark:bg-dark-background-color-2/70 dark:text-font-color-white">
+              {/* <h1 className="text-xl font-medium uppercase">
+                Additional Information
+              </h1> */}
+              <SongAdditionalInfoItem
+                label="Song Title"
+                value={songInfo.title}
+              />
+              <SongAdditionalInfoItem label="Duration" value={songDuration} />
+              {Array.isArray(songInfo.artists) &&
+                songInfo.artists.length > 0 && (
+                  <SongAdditionalInfoItem
+                    label="Artists"
+                    value={songInfo.artists
+                      .map((artist) => artist.name)
+                      .join(', ')}
+                  />
+                )}
+              {songInfo.album && (
+                <SongAdditionalInfoItem
+                  label="Album"
+                  value={songInfo.album?.name}
+                />
+              )}
+              {Array.isArray(songInfo.genres) && songInfo.genres.length > 0 && (
+                <SongAdditionalInfoItem
+                  label="Genres"
+                  value={songInfo.genres.map((genre) => genre.name).join(', ')}
+                />
+              )}
+              {songInfo.trackNo && (
+                <SongAdditionalInfoItem
+                  label="Album Track Number"
+                  value={songInfo.trackNo.toString()}
+                />
+              )}
+              {songInfo.year && (
+                <SongAdditionalInfoItem
+                  label="Released Year"
+                  value={songInfo.year.toString()}
+                />
+              )}
+              <SongAdditionalInfoItem
+                label="Song Added On"
+                value={new Date(songInfo.addedDate).toUTCString()}
+              />
+              {songInfo.modifiedDate && (
+                <SongAdditionalInfoItem
+                  label="Last Modified On"
+                  value={new Date(songInfo.modifiedDate).toUTCString()}
+                />
+              )}
+              {songInfo.sampleRate && (
+                <SongAdditionalInfoItem
+                  label="Sample Rate"
+                  value={`${songInfo.sampleRate} Hz`}
+                />
+              )}
+              {songInfo.bitrate && (
+                <SongAdditionalInfoItem
+                  label="Bit Rate"
+                  value={`${Math.floor(songInfo.bitrate / 1000)} Kbps`}
+                />
+              )}
+              {songInfo.noOfChannels && (
+                <SongAdditionalInfoItem
+                  label="Number of Audio Channels"
+                  value={`${songInfo.noOfChannels} Channels (${
+                    songInfo.noOfChannels === 1 ? 'Mono' : 'Stereo'
+                  })`}
+                />
+              )}
             </div>
           </SecondaryContainer>
         )}

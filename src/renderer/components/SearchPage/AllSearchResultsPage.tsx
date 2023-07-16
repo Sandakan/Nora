@@ -54,7 +54,7 @@ const AllSearchResultsPage = () => {
         .then((results) => {
           return setSearchResults(results);
         })
-        .catch((err) => log(err, 'warn'));
+        .catch((err) => log(err, undefined, 'WARN'));
     } else
       setSearchResults({
         albums: [],

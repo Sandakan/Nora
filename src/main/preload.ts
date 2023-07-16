@@ -174,6 +174,9 @@ const unknownSource = {
   ) => ipcRenderer.on('app/playSongFromUnknownSource', callback),
   getSongFromUnknownSource: (songPath: string): Promise<AudioPlayerData> =>
     ipcRenderer.invoke('app/getSongFromUnknownSource', songPath),
+  removePlaySongFromUnknownSourceEvent: (
+    callback: (_: unknown, audioPlayerData: AudioPlayerData) => void
+  ) => ipcRenderer.removeListener('app/playSongFromUnknownSource', callback),
 };
 
 // $ QUIT EVENT HANDLING
@@ -450,14 +453,16 @@ const playlistsData = {
 // $ APP LOGS
 const log = {
   sendLogs: (
-    logStr: string,
-    logToConsoleType: 'log' | 'warn' | 'error' = 'log',
+    mes: string | Error,
+    data?: Record<string, unknown>,
+    logToConsoleType: LogMessageTypes = 'INFO',
     forceWindowRestart = false,
     forceMainRestart = false
   ): Promise<any> => {
     return ipcRenderer.invoke(
       'app/getRendererLogs',
-      logStr,
+      mes,
+      data,
       logToConsoleType,
       forceWindowRestart,
       forceMainRestart

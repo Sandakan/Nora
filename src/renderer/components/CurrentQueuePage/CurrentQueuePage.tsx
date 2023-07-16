@@ -61,10 +61,14 @@ const CurrentQueuePage = () => {
 
   const fetchAllSongsData = React.useCallback(() => {
     const isTheSameQueue = () => {
+      console.time('same');
+
       const prevSongIds = queuedSongs.map((song) => song.songId);
       const newSongIds = queue.queue;
+      const isSameQueue = prevSongIds.every((id) => newSongIds.includes(id));
+      console.timeEnd('same');
 
-      return prevSongIds.every((id) => newSongIds.includes(id));
+      return isSameQueue;
     };
 
     if (isTheSameQueue() && queuedSongs.length > 0) {
@@ -80,8 +84,10 @@ const CurrentQueuePage = () => {
         return arr;
       });
     } else {
+      console.time('queue');
       window.api.audioLibraryControls.getAllSongs().then((res) => {
         if (res) {
+          console.timeEnd('queue');
           const x = queue.queue
             .map((songId) => {
               return res.data.map((y) => {

@@ -17,6 +17,8 @@ export interface LogOptions {
       };
 }
 
+type LogType = 'MAIN' | 'UI';
+
 const defaultLogOptions: LogOptions = {
   preventLoggingToConsole: false,
 };
@@ -66,11 +68,12 @@ const getLogFilePath = () => {
 export const logFilePath = getLogFilePath();
 
 /** A function that takes two parameters, message and preventLoggingToConsole. */
-export default (
+const log = (
   message: Error | string,
   data?: Record<string, unknown>,
-  messageType = 'INFO' as LogMessageTypes,
-  logOptions?: LogOptions
+  messageType: LogMessageTypes = 'INFO',
+  logOptions?: LogOptions,
+  logType: LogType = 'MAIN'
 ) => {
   let mes: string;
 
@@ -104,10 +107,12 @@ export default (
   }
 
   if (messageType !== 'INFO') mes = mes.toUpperCase();
-  const str = `\n[${new Date().toUTCString()}] = ${seperator} ${mes} ${seperator}\n\t${objectToString(
+  const str = `\n[${new Date().toUTCString()}] [${logType}] = ${seperator} ${mes} ${seperator}\n\t${objectToString(
     data
   )}`;
   appendFileSync(logFilePath, str, { encoding: 'utf-8' });
 
   if (!options?.preventLoggingToConsole) console.log(str);
 };
+
+export default log;

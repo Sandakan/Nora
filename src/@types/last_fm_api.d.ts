@@ -79,3 +79,70 @@ export interface LastFMHitCache {
   id: string;
   data: SongMetadataResultFromInternet;
 }
+
+export interface LastFMAlbumInfoAPI {
+  album: Album;
+  message?: string;
+  error?: number;
+}
+
+interface Album {
+  artist: string;
+  mbid: string;
+  tags: Tags;
+  playcount: string;
+  image: Image[];
+  tracks: Tracks;
+  url: string;
+  name: string;
+  listeners: string;
+  wiki: Wiki;
+}
+
+interface Image {
+  size: string;
+  '#text': string;
+}
+
+interface Tags {
+  tag: Tag[];
+}
+
+interface Tag {
+  url: string;
+  name: string;
+}
+
+interface Tracks {
+  track: Track[];
+}
+
+interface Track {
+  streamable: Streamable;
+  duration: number;
+  url: string;
+  name: string;
+  '@attr': Attr;
+  artist: ArtistClass;
+}
+
+interface Attr {
+  rank: number;
+}
+
+interface ArtistClass {
+  url: string;
+  name: string;
+  mbid: string;
+}
+
+interface Streamable {
+  fulltrack: string;
+  '#text': string;
+}
+
+interface Wiki {
+  published: string;
+  summary: string;
+  content: string;
+}

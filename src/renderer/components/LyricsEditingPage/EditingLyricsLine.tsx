@@ -134,7 +134,7 @@ const EditingLyricsLine = (props: Props) => {
         <input
           type="text"
           placeholder="Lyrics Text"
-          className="my-2 w-[90%] rounded-xl border-[3px] border-background-color-1 bg-background-color-2 px-4 py-4 text-center dark:border-dark-background-color-1 dark:bg-dark-background-color-1"
+          className="my-2 w-[90%] rounded-xl border-[3px] border-background-color-1 bg-background-color-1 px-4 py-4 text-center dark:border-dark-background-color-1 dark:bg-dark-background-color-1"
           value={content.line}
           onChange={(e) =>
             dispatch({
@@ -159,7 +159,7 @@ const EditingLyricsLine = (props: Props) => {
           <input
             type="number"
             placeholder="Start in seconds"
-            className="mx-2 my-1 min-w-[20%] rounded-xl border-[3px] border-background-color-1 bg-background-color-2 px-1 py-2 text-center dark:border-dark-background-color-1 dark:bg-dark-background-color-1"
+            className="mx-2 my-1 min-w-[20%] rounded-xl border-[3px] border-background-color-1 bg-background-color-1 px-1 py-2 text-center dark:border-dark-background-color-1 dark:bg-dark-background-color-1"
             value={content.start ?? 0}
             onChange={(e) =>
               dispatch({
@@ -172,7 +172,7 @@ const EditingLyricsLine = (props: Props) => {
           <input
             type="number"
             placeholder="End in seconds"
-            className="mx-2 my-1 min-w-[20%] rounded-xl border-[3px] border-background-color-1 bg-background-color-2 px-1 py-2 text-center dark:border-dark-background-color-1 dark:bg-dark-background-color-1"
+            className="mx-2 my-1 min-w-[20%] rounded-xl border-[3px] border-background-color-1 bg-background-color-1 px-1 py-2 text-center dark:border-dark-background-color-1 dark:bg-dark-background-color-1"
             value={content.end ?? 0}
             onChange={(e) =>
               dispatch({
@@ -196,6 +196,7 @@ const EditingLyricsLine = (props: Props) => {
                 '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
               }`}
               label="Reset"
+              iconName="restart_alt"
               clickHandler={() =>
                 dispatch({
                   type: 'UPDATE_ALL_CONTENT',
@@ -209,6 +210,7 @@ const EditingLyricsLine = (props: Props) => {
                 '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
               }`}
               label="Delete Line"
+              iconName="delete"
               clickHandler={() =>
                 updateLineData((prevLineData) => {
                   const filteredLineData = prevLineData.filter(
@@ -224,6 +226,7 @@ const EditingLyricsLine = (props: Props) => {
                 '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
               }`}
               label="Add line above"
+              iconName="step_out"
               clickHandler={() =>
                 updateLineData((prevLineData) => {
                   const pos = index - 1 < 0 ? 0 : index - 1;
@@ -246,6 +249,7 @@ const EditingLyricsLine = (props: Props) => {
                 '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
               }`}
               label="Add line below"
+              iconName="step_into"
               clickHandler={() =>
                 updateLineData((prevLineData) => {
                   const pos =
@@ -273,6 +277,7 @@ const EditingLyricsLine = (props: Props) => {
             '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
           }`}
           label={isEditing ? 'Finish Editing' : 'Edit Line'}
+          iconName={isEditing ? 'done' : 'edit'}
           clickHandler={() => {
             setIsEditing((isEditingState) => {
               if (isEditingState === true)

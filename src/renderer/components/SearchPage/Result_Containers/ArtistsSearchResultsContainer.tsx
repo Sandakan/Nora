@@ -79,7 +79,11 @@ const ArtistsSearchResultsContainer = (props: Props) => {
             Artists{' '}
             <div className="other-stats-container ml-12 flex items-center text-xs">
               {artists && artists.length > 0 && (
-                <span className="no-of-songs">{artists.length} results</span>
+                <span className="no-of-songs">
+                  {artists.length} results{' '}
+                  {artists.length > noOfVisibleArtists &&
+                    `(${noOfVisibleArtists} shown)`}
+                </span>
               )}
             </div>
           </div>

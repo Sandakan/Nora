@@ -5,7 +5,7 @@
   "version": "2.3.0-stable",
   "license": "MIT",
   "appPreferences": {
-    "removeReactStrictMode": true,
+    "removeReactStrictMode": false,
     "metadataEditingSupportedExtensions": [
       "mp3"
     ],
@@ -104,7 +104,7 @@
     "songlyrics": "^2.4.5"
   },
   "devDependencies": {
-    "@electron/notarize": "^1.2.4",
+    "@electron/notarize": "^2.1.0",
     "@electron/rebuild": "^3.2.13",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.10",
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.2",
@@ -159,8 +159,8 @@
     "mini-css-extract-plugin": "^2.7.6",
     "postcss": "^8.4.24",
     "postcss-loader": "^7.3.3",
-    "prettier": "^2.8.8",
-    "prettier-plugin-tailwindcss": "^0.3.0",
+    "prettier": "^3.0.0",
+    "prettier-plugin-tailwindcss": "^0.4.0",
     "react-refresh": "^0.14.0",
     "rimraf": "^3.0.2",
     "style-loader": "^3.3.3",

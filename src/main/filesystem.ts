@@ -32,9 +32,11 @@ export const USER_DATA_TEMPLATE: UserData = {
     isMusixmatchLyricsEnabled: false,
     hideWindowOnClose: false,
     openWindowAsHiddenOnSystemStart: false,
+    openWindowMaximizedOnStart: false,
   },
   windowPositions: {},
   windowDiamensions: {},
+  windowState: 'normal',
   recentSearches: [],
 };
 export const HISTORY_PLAYLIST_TEMPLATE: SavablePlaylist = {
@@ -274,6 +276,8 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
       typeof data === 'object'
     ) {
       userData.windowDiamensions.miniPlayer = data as WindowCordinates;
+    } else if (dataType === 'windowState' && typeof data === 'string') {
+      userData.windowState = data as WindowState;
     } else if (dataType === 'recentSearches' && Array.isArray(data)) {
       userData.recentSearches = data as string[];
     } else if (

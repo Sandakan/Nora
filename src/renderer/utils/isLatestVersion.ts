@@ -2,6 +2,8 @@
 // Semantic version checking regex from https://regex101.com/r/vkijKf/1/
 // Pre-release is in the form (alpha|beta).YYYYMMDDNN where NN is a number in range 0 to 99.
 
+import log from './log';
+
 const semVerRegex =
   /^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
 
@@ -59,12 +61,7 @@ const isLatestVersion = (
     const { preRelease: LvPreRelease } = latestVersion;
     const { preRelease: CvPreRelease } = currentVersion;
 
-    console.log(
-      'latest version',
-      latestVersion,
-      'current version',
-      currentVersion
-    );
+    log('Version details', { latestVersion, currentVersion });
 
     if (LvPreRelease === CvPreRelease)
       return compareMajorMinorAndPatch(latestVersion, currentVersion);

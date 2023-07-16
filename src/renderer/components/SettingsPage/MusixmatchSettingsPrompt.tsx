@@ -92,7 +92,7 @@ const MusixmatchSettingsPrompt = () => {
                   return setSuccessState('success');
                 })
                 .catch((err) => {
-                  log(err, 'error');
+                  log(err, undefined, 'ERROR');
                   setSuccessState('failure');
                 })
                 .finally(() => {

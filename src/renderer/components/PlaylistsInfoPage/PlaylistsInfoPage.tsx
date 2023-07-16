@@ -1,19 +1,18 @@
 /* eslint-disable react/no-array-index-key */
 import React, { useContext } from 'react';
+import { VariableSizeList as List } from 'react-window';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
-import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import useResizeObserver from 'renderer/hooks/useResizeObserver';
+import debounce from 'renderer/utils/debounce';
 
-import Button from '../Button';
 import Song from '../SongsPage/Song';
 import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';
-import Img from '../Img';
 import MainContainer from '../MainContainer';
-import Dropdown from '../Dropdown';
 
-import DefaultPlaylistCover from '../../../../assets/images/webp/playlist_cover_default.webp';
-import MultipleArtworksCover from '../PlaylistsPage/MultipleArtworksCover';
+import PlaylistInfoAndImgContainer from './PlaylistInfoAndImgContainer';
+import TitleContainer from '../TitleContainer';
 
 const dropdownOptions: { label: string; value: SongSortTypes }[] = [
   { label: 'Added Order', value: 'addedOrder' },
@@ -71,6 +70,8 @@ const PlaylistInfoPage = () => {
   const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>(
     currentlyActivePage?.data?.sortingOrder || 'addedOrder'
   );
+  const songsContainerRef = React.useRef<HTMLDivElement>(null);
+  const { width, height } = useResizeObserver(songsContainerRef);
 
   const fetchPlaylistData = React.useCallback(() => {
     if (currentlyActivePage.data?.playlistId) {
@@ -156,17 +157,6 @@ const PlaylistInfoPage = () => {
     };
   }, [fetchPlaylistSongsData]);
 
-  const totalPlaylistDuration = React.useMemo(() => {
-    const { hours, minutes, seconds } = calculateTimeFromSeconds(
-      playlistSongs.reduce((prev, current) => prev + current.duration, 0)
-    );
-    return `${
-      hours >= 1 ? `${hours} hour${hours === 1 ? '' : 's'} ` : ''
-    }${minutes} minute${minutes === 1 ? '' : 's'} ${seconds} second${
-      seconds === 1 ? '' : 's'
-    }`;
-  }, [playlistSongs]);
-
   const selectAllHandler = useSelectAllHandler(
     playlistSongs,
     'songs',
@@ -190,76 +180,171 @@ const PlaylistInfoPage = () => {
     [createQueue, playSong, playlistData.playlistId, playlistSongs]
   );
 
-  const songComponents = React.useMemo(
-    () =>
-      playlistSongs.length > 0
-        ? playlistSongs.map((song, index) => {
-            return (
-              <Song
-                key={index}
-                index={index}
-                isIndexingSongs={
-                  localStorageData?.preferences?.isSongIndexingEnabled
-                }
-                title={song.title}
-                artists={song.artists}
-                album={song.album}
-                duration={song.duration}
-                songId={song.songId}
-                artworkPaths={song.artworkPaths}
-                path={song.path}
-                year={song.year}
-                isAFavorite={song.isAFavorite}
-                isBlacklisted={song.isBlacklisted}
-                onPlayClick={handleSongPlayBtnClick}
-                additionalContextMenuItems={[
-                  {
-                    label: 'Remove from this Playlist',
-                    iconName: 'playlist_remove',
-                    handlerFunction: () =>
-                      window.api.playlistsData
-                        .removeSongFromPlaylist(
-                          playlistData.playlistId,
-                          song.songId
-                        )
-                        .then(
-                          (res) =>
-                            res.success &&
-                            addNewNotifications([
-                              {
-                                id: `${song.songId}Removed`,
-                                delay: 5000,
-                                content: (
-                                  <span>
-                                    '{song.title}' removed from '
-                                    {playlistData.name}' playlist successfully.
-                                  </span>
-                                ),
-                              },
-                            ])
-                        )
-                        .catch((err) => console.error(err)),
-                  },
-                ]}
-                selectAllHandler={selectAllHandler}
-              />
-            );
-          })
-        : [],
+  const listItems = React.useMemo(
+    () => [playlistData, ...playlistSongs],
+    [playlistData, playlistSongs]
+  );
+
+  const listComponents = React.useCallback(
+    (props: { index: number; style: React.CSSProperties }) => {
+      const { index, style } = props;
+      const song = listItems[index];
+      return (
+        <div style={style}>
+          {'songId' in song ? (
+            <Song
+              key={index}
+              index={index - 1}
+              isIndexingSongs={
+                localStorageData?.preferences?.isSongIndexingEnabled
+              }
+              title={song.title}
+              artists={song.artists}
+              album={song.album}
+              duration={song.duration}
+              songId={song.songId}
+              artworkPaths={song.artworkPaths}
+              path={song.path}
+              year={song.year}
+              isAFavorite={song.isAFavorite}
+              isBlacklisted={song.isBlacklisted}
+              onPlayClick={handleSongPlayBtnClick}
+              additionalContextMenuItems={[
+                {
+                  label: 'Remove from this Playlist',
+                  iconName: 'playlist_remove',
+                  handlerFunction: () =>
+                    window.api.playlistsData
+                      .removeSongFromPlaylist(
+                        playlistData.playlistId,
+                        song.songId
+                      )
+                      .then(
+                        (res) =>
+                          res.success &&
+                          addNewNotifications([
+                            {
+                              id: `${song.songId}Removed`,
+                              delay: 5000,
+                              content: (
+                                <span>
+                                  '{song.title}' removed from '
+                                  {playlistData.name}' playlist successfully.
+                                </span>
+                              ),
+                            },
+                          ])
+                      )
+                      .catch((err) => console.error(err)),
+                },
+              ]}
+              selectAllHandler={selectAllHandler}
+            />
+          ) : (
+            <PlaylistInfoAndImgContainer
+              playlist={song}
+              songs={playlistSongs}
+            />
+          )}
+        </div>
+      );
+    },
     [
-      playlistSongs,
-      localStorageData?.preferences?.isSongIndexingEnabled,
-      handleSongPlayBtnClick,
-      selectAllHandler,
-      playlistData.playlistId,
-      playlistData.name,
       addNewNotifications,
+      handleSongPlayBtnClick,
+      listItems,
+      localStorageData?.preferences?.isSongIndexingEnabled,
+      playlistData.name,
+      playlistData.playlistId,
+      playlistSongs,
+      selectAllHandler,
     ]
   );
 
+  const clearSongHistory = React.useCallback(() => {
+    changePromptMenuData(
+      true,
+      <SensitiveActionConfirmPrompt
+        title="Confrim the action to clear Song History"
+        content={`You wouldn't be able to see what you have listened previously if you decide to continue this action.`}
+        confirmButton={{
+          label: 'Clear History',
+          clickHandler: () =>
+            window.api.audioLibraryControls
+              .clearSongHistory()
+              .then(
+                (res) =>
+                  res.success &&
+                  addNewNotifications([
+                    {
+                      id: 'queueCleared',
+                      delay: 5000,
+                      content: (
+                        <span>Cleared the song history successfully.</span>
+                      ),
+                    },
+                  ])
+              )
+              .catch((err) => console.error(err)),
+        }}
+      />
+    );
+  }, [addNewNotifications, changePromptMenuData]);
+
+  const addSongsToQueue = React.useCallback(() => {
+    const validSongIds = playlistSongs
+      .filter((song) => !song.isBlacklisted)
+      .map((song) => song.songId);
+    updateQueueData(undefined, [...queue.queue, ...validSongIds]);
+    addNewNotifications([
+      {
+        id: `addedToQueue`,
+        delay: 5000,
+        content: `
+            Added ${validSongIds.length} song${
+          validSongIds.length === 1 ? '' : 's'
+        } to the queue.
+         `,
+      },
+    ]);
+  }, [addNewNotifications, playlistSongs, queue.queue, updateQueueData]);
+
+  const shuffleAndPlaySongs = React.useCallback(
+    () =>
+      createQueue(
+        playlistSongs
+          .filter((song) => !song.isBlacklisted)
+          .map((song) => song.songId),
+        'playlist',
+        true,
+        playlistData.playlistId,
+        true
+      ),
+    [createQueue, playlistData.playlistId, playlistSongs]
+  );
+
+  const playAllSongs = React.useCallback(
+    () =>
+      createQueue(
+        playlistSongs
+          .filter((song) => !song.isBlacklisted)
+          .map((song) => song.songId),
+        'songs',
+        false,
+        playlistData.playlistId,
+        true
+      ),
+    [createQueue, playlistData.playlistId, playlistSongs]
+  );
+
+  const getItemSize = React.useCallback((index: number) => {
+    if (index === 0) return 300;
+    return 60;
+  }, []);
+
   return (
     <MainContainer
-      className="main-container playlist-info-page-container !h-full px-8 pb-8 pr-4 pt-4"
+      className="main-container playlist-info-page-container !h-full px-8 !pb-0 !pr-0"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {
@@ -268,202 +353,89 @@ const PlaylistInfoPage = () => {
         }
       }}
     >
-      <>
-        {Object.keys(playlistData).length > 0 && (
-          <div className="playlist-img-and-info-container appear-from-bottom mb-8 flex flex-row items-center justify-start">
-            <div className="playlist-cover-container mt-2 overflow-hidden">
-              {localStorageData?.preferences.enableArtworkFromSongCovers &&
-              playlistData.songs.length > 1 ? (
-                <div className="relative h-60 w-60">
-                  <MultipleArtworksCover
-                    songIds={playlistData.songs}
-                    className="h-60 w-60"
-                    type={1}
-                  />
-                  <Img
-                    src={playlistData.artworkPaths.artworkPath}
-                    alt="Playlist Cover"
-                    loading="eager"
-                    className="!absolute bottom-4 right-4 h-16 w-16 !rounded-lg"
-                  />
-                </div>
-              ) : (
-                <Img
-                  src={
-                    playlistData.artworkPaths
-                      ? playlistData.artworkPaths.artworkPath
-                      : DefaultPlaylistCover
-                  }
-                  className="w-52 rounded-xl lg:w-48"
-                  alt="Playlist Cover"
-                />
-              )}
-            </div>
-            <div className="playlist-info-container ml-8 text-font-color-black dark:text-font-color-white">
-              <div className="font-semibold tracking-wider opacity-50">
-                PLAYLIST
-              </div>
-              <div className="playlist-name mb-2 w-full overflow-hidden text-ellipsis whitespace-nowrap text-5xl text-font-color-highlight dark:text-dark-font-color-highlight">
-                {playlistData.name}
-              </div>
-              <div className="playlist-no-of-songs w-full overflow-hidden text-ellipsis whitespace-nowrap text-base">
-                {`${playlistData.songs.length} song${
-                  playlistData.songs.length === 1 ? '' : 's'
-                }`}
-              </div>
-              {playlistSongs.length > 0 && (
-                <div className="playlist-total-duration">
-                  {totalPlaylistDuration}
-                </div>
-              )}
-              <div className="playlist-created-date">
-                {`Created on ${new Date(
-                  playlistData.createdDate
-                ).toUTCString()}`}
-              </div>
-            </div>
-          </div>
-        )}
-        {playlistSongs.length > 0 && (
-          <div className="songs-list-container">
-            <div className="title-container mb-4 mt-1 flex items-center justify-between pr-4 text-2xl text-font-color-black dark:text-font-color-white">
-              Songs
-              <div className="other-controls-container flex">
-                {playlistData.songs && playlistData.songs.length > 0 && (
-                  <div className="playlist-buttons flex">
-                    {playlistData.playlistId === 'History' && (
-                      <Button
-                        label="Clear History"
-                        iconName="clear"
-                        clickHandler={() => {
-                          changePromptMenuData(
-                            true,
-                            <SensitiveActionConfirmPrompt
-                              title="Confrim the action to clear Song History"
-                              content={
-                                <div>
-                                  You wouldn't be able to see what you have
-                                  listened previously if you decide to continue
-                                  this action.
-                                </div>
-                              }
-                              confirmButton={{
-                                label: 'Clear History',
-                                clickHandler: () => {
-                                  window.api.audioLibraryControls
-                                    .clearSongHistory()
-                                    .then(
-                                      (res) =>
-                                        res.success &&
-                                        addNewNotifications([
-                                          {
-                                            id: 'queueCleared',
-                                            delay: 5000,
-                                            content: (
-                                              <span>
-                                                Cleared the song history
-                                                successfully.
-                                              </span>
-                                            ),
-                                          },
-                                        ])
-                                    )
-                                    .catch((err) => console.error(err));
-                                },
-                              }}
-                            />
-                          );
-                        }}
-                      />
-                    )}
-                    <Button
-                      label="Play All"
-                      iconName="play_arrow"
-                      clickHandler={() =>
-                        createQueue(
-                          playlistSongs
-                            .filter((song) => !song.isBlacklisted)
-                            .map((song) => song.songId),
-                          'songs',
-                          false,
-                          playlistData.playlistId,
-                          true
-                        )
-                      }
-                    />
-                    <Button
-                      tooltipLabel="Shuffle and Play"
-                      iconName="shuffle"
-                      clickHandler={() =>
-                        createQueue(
-                          playlistSongs
-                            .filter((song) => !song.isBlacklisted)
-                            .map((song) => song.songId),
-                          'playlist',
-                          true,
-                          playlistData.playlistId,
-                          true
-                        )
-                      }
-                    />
-                    <Button
-                      tooltipLabel="Add to Queue"
-                      iconName="add"
-                      clickHandler={() => {
-                        const validSongIds = playlistSongs
-                          .filter((song) => !song.isBlacklisted)
-                          .map((song) => song.songId);
-                        updateQueueData(undefined, [
-                          ...queue.queue,
-                          ...validSongIds,
-                        ]);
-                        addNewNotifications([
-                          {
-                            id: `addedToQueue`,
-                            delay: 5000,
-                            content: (
-                              <span>
-                                Added {validSongIds.length} song
-                                {validSongIds.length === 1 ? '' : 's'} to the
-                                queue.
-                              </span>
-                            ),
-                          },
-                        ]);
-                      }}
-                    />
-
-                    <Dropdown
-                      name="PlaylistPageSortDropdown"
-                      value={sortingOrder}
-                      options={dropdownOptions}
-                      onChange={(e) => {
-                        const order = e.currentTarget.value as SongSortTypes;
-                        updateCurrentlyActivePageData((currentPageData) => ({
-                          ...currentPageData,
-                          sortingOrder: order,
-                        }));
-                        setSortingOrder(order);
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="songs-container appear-from-bottom">
-              {songComponents}
-            </div>
-          </div>
-        )}
-        {playlistSongs.length === 0 && (
-          <div className="no-songs-container appear-from-bottom relative flex h-full flex-grow flex-col items-center justify-center text-center text-lg font-light text-font-color-black !opacity-80 dark:text-font-color-white">
-            <span className="material-icons-round-outlined mb-4 text-5xl">
-              brightness_empty
-            </span>
-            Seems like this playlist is empty.
-          </div>
-        )}
-      </>
+      <TitleContainer
+        title={playlistData.name}
+        className="pr-4"
+        buttons={[
+          {
+            label: 'Clear History',
+            iconName: 'clear',
+            clickHandler: clearSongHistory,
+            isVisible: playlistData.playlistId === 'History',
+            isDisabled: !(playlistData.songs && playlistData.songs.length > 0),
+          },
+          {
+            label: 'Play All',
+            iconName: 'play_arrow',
+            clickHandler: playAllSongs,
+            isDisabled: !(playlistData.songs && playlistData.songs.length > 0),
+          },
+          {
+            tooltipLabel: 'Shuffle and Play',
+            iconName: 'shuffle',
+            clickHandler: shuffleAndPlaySongs,
+            isDisabled: !(playlistData.songs && playlistData.songs.length > 0),
+          },
+          {
+            tooltipLabel: 'Add to Queue',
+            iconName: 'add',
+            clickHandler: addSongsToQueue,
+            isDisabled: !(playlistData.songs && playlistData.songs.length > 0),
+          },
+        ]}
+        dropdown={{
+          name: 'PlaylistPageSortDropdown',
+          value: sortingOrder,
+          options: dropdownOptions,
+          onChange: (e) => {
+            const order = e.currentTarget.value as SongSortTypes;
+            updateCurrentlyActivePageData((currentPageData) => ({
+              ...currentPageData,
+              sortingOrder: order,
+            }));
+            setSortingOrder(order);
+          },
+          isDisabled: !(playlistData.songs && playlistData.songs.length > 0),
+        }}
+      />
+      <div className="flex h-full flex-col">
+        <div className="songs-list-container h-full" ref={songsContainerRef}>
+          {listItems.length > 0 && (
+            <List
+              itemCount={listItems.length}
+              itemSize={getItemSize}
+              width={width || '100%'}
+              height={height || 450}
+              overscanCount={10}
+              className="appear-from-bottom h-full pb-4 delay-100"
+              initialScrollOffset={
+                currentlyActivePage.data?.scrollTopOffset ?? 0
+              }
+              onScroll={(data) => {
+                if (!data.scrollUpdateWasRequested && data.scrollOffset !== 0)
+                  debounce(
+                    () =>
+                      updateCurrentlyActivePageData((currentPageData) => ({
+                        ...currentPageData,
+                        scrollTopOffset: data.scrollOffset,
+                      })),
+                    500
+                  );
+              }}
+            >
+              {listComponents}
+            </List>
+          )}
+        </div>
+      </div>
+      {playlistSongs.length === 0 && (
+        <div className="no-songs-container appear-from-bottom relative flex h-full flex-grow flex-col items-center justify-center text-center text-lg font-light text-font-color-black !opacity-80 dark:text-font-color-white">
+          <span className="material-icons-round-outlined mb-4 text-5xl">
+            brightness_empty
+          </span>
+          Seems like this playlist is empty.
+        </div>
+      )}
     </MainContainer>
   );
 };

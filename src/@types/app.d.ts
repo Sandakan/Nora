@@ -8,6 +8,8 @@ declare global {
     api: typeof api;
   }
 
+  type LogMessageTypes = 'INFO' | 'WARN' | 'ERROR';
+
   type IpcChannels =
     | 'app/beforeQuitEvent'
     | 'app/Close'
@@ -346,6 +348,7 @@ declare global {
     | 'windowPositions.miniPlayer'
     | 'windowDiamensions.mainWindow'
     | 'windowDiamensions.miniPlayer'
+    | 'windowState'
     | 'recentSearches'
     | 'preferences.isMiniPlayerAlwaysOnTop'
     | 'preferences.autoLaunchApp'
@@ -374,6 +377,7 @@ declare global {
     musicFolders: FolderStructure[];
     preferences: {
       autoLaunchApp: boolean;
+      openWindowMaximizedOnStart: boolean;
       openWindowAsHiddenOnSystemStart: boolean;
       isMiniPlayerAlwaysOnTop: boolean;
       isMusixmatchLyricsEnabled: boolean;
@@ -387,6 +391,7 @@ declare global {
       mainWindow?: WindowCordinates;
       miniPlayer?: WindowCordinates;
     };
+    windowState: WindowState;
     recentSearches: string[];
     customMusixmatchUserToken?: string;
     storageMetrics?: StorageMetrics;
@@ -402,6 +407,7 @@ declare global {
     y: number;
   }
 
+  type WindowState = 'maximized' | 'normal' | 'minimized';
   interface MusicFolderData {
     path: string;
     stats: {

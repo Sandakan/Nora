@@ -114,28 +114,30 @@ const SongsPage = () => {
   const songsContainerRef = React.useRef(null as HTMLDivElement | null);
   const { width, height } = useResizeObserver(songsContainerRef);
 
-  const fetchSongsData = React.useCallback(
-    () =>
-      window.api.audioLibraryControls
-        .getAllSongs(content.sortingOrder)
-        .then((audioInfoArray) => {
-          if (audioInfoArray) {
-            if (audioInfoArray.data.length === 0)
-              dispatch({
-                type: 'SONGS_DATA',
-                data: null,
-              });
-            else
-              dispatch({
-                type: 'SONGS_DATA',
-                data: audioInfoArray.data,
-              });
-          }
-          return undefined;
-        })
-        .catch((err) => console.error(err)),
-    [content.sortingOrder]
-  );
+  const fetchSongsData = React.useCallback(() => {
+    console.time('songs');
+
+    window.api.audioLibraryControls
+      .getAllSongs(content.sortingOrder)
+      .then((audioInfoArray) => {
+        console.timeEnd('songs');
+
+        if (audioInfoArray) {
+          if (audioInfoArray.data.length === 0)
+            dispatch({
+              type: 'SONGS_DATA',
+              data: null,
+            });
+          else
+            dispatch({
+              type: 'SONGS_DATA',
+              data: audioInfoArray.data,
+            });
+        }
+        return undefined;
+      })
+      .catch((err) => console.error(err));
+  }, [content.sortingOrder]);
 
   React.useEffect(() => {
     fetchSongsData();
@@ -299,7 +301,7 @@ const SongsPage = () => {
     >
       <>
         {content.songsData && content.songsData.length > 0 && (
-          <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium  text-font-color-highlight dark:text-dark-font-color-highlight">
+          <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
             <div className="container flex">
               Songs{' '}
               <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">

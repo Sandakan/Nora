@@ -13,6 +13,7 @@ import LyricsEditorHelpPrompt from './LyricsEditorHelpPrompt';
 import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';
 import LyricsEditorSettingsPrompt from './LyricsEditorSettingsPrompt';
 import LyricsEditorSavePrompt from './LyricsEditorSavePrompt';
+import PageFocusPrompt from './PageFocusPrompt';
 
 export interface EditingLyricsLineData {
   line: string;
@@ -104,38 +105,32 @@ const LyricsEditingPage = () => {
 
   const handleShortcuts = React.useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
-      if (e.key === 'Enter' && e.shiftKey) {
-        e.stopPropagation();
-        return setLyricsLines((prevLines) => {
-          const slicedPrevLines = prevLines.slice();
-          const lastActiveIndex = prevLines.findIndex((val) => val.isActive);
-
-          if (lastActiveIndex !== -1) {
-            slicedPrevLines[lastActiveIndex].isActive =
-              !slicedPrevLines[lastActiveIndex].isActive;
-          }
-          if (lastActiveIndex - 1 >= 0) {
-            slicedPrevLines[lastActiveIndex - 1].isActive =
-              !slicedPrevLines[lastActiveIndex - 1].isActive;
-          }
-          return slicedPrevLines;
-        });
-      }
       if (e.key === 'Enter') {
         e.stopPropagation();
         return setLyricsLines((prevLines) => {
           const slicedPrevLines = prevLines.slice();
           const lastActiveIndex = prevLines.findIndex((val) => val.isActive);
 
-          if (lastActiveIndex !== -1) {
-            slicedPrevLines[lastActiveIndex].isActive =
-              !slicedPrevLines[lastActiveIndex].isActive;
-            slicedPrevLines[lastActiveIndex].end = roundedSongPostion;
-          }
-          if (lastActiveIndex + 1 !== slicedPrevLines.length) {
-            slicedPrevLines[lastActiveIndex + 1].isActive =
-              !slicedPrevLines[lastActiveIndex + 1].isActive;
-            slicedPrevLines[lastActiveIndex + 1].start = roundedSongPostion;
+          if (e.shiftKey) {
+            if (lastActiveIndex !== -1) {
+              slicedPrevLines[lastActiveIndex].isActive =
+                !slicedPrevLines[lastActiveIndex].isActive;
+            }
+            if (lastActiveIndex - 1 >= 0) {
+              slicedPrevLines[lastActiveIndex - 1].isActive =
+                !slicedPrevLines[lastActiveIndex - 1].isActive;
+            }
+          } else {
+            if (lastActiveIndex !== -1) {
+              slicedPrevLines[lastActiveIndex].isActive =
+                !slicedPrevLines[lastActiveIndex].isActive;
+              slicedPrevLines[lastActiveIndex].end = roundedSongPostion;
+            }
+            if (lastActiveIndex + 1 !== slicedPrevLines.length) {
+              slicedPrevLines[lastActiveIndex + 1].isActive =
+                !slicedPrevLines[lastActiveIndex + 1].isActive;
+              slicedPrevLines[lastActiveIndex + 1].start = roundedSongPostion;
+            }
           }
           return slicedPrevLines;
         });
@@ -145,6 +140,15 @@ const LyricsEditingPage = () => {
     },
     [roundedSongPostion]
   );
+
+  // React.useEffect(() => {
+  //   const container = containerRef.current;
+  //   if (container) container.addEventListener('keydown', handleShortcuts);
+
+  //   return () => {
+  //     if (container) container.removeEventListener('keydown', handleShortcuts);
+  //   };
+  // }, [handleShortcuts]);
 
   const moreOptionsContextMenuItems = React.useMemo((): ContextMenuItem[] => {
     return [
@@ -233,7 +237,6 @@ const LyricsEditingPage = () => {
         <div className="gap-4s container grid grid-cols-[clamp(5rem,1fr,10rem)_1fr] items-center">
           Lyrics Editor{' '}
           <div className="other-stats-container truncate text-xs text-font-color-black dark:text-font-color-white">
-            {/* {isFocused ? ( */}
             <span className="">
               Time : {roundedSongPostion}{' '}
               {localStorageData.lyricsEditorSettings.offset > 0 && (
@@ -242,14 +245,6 @@ const LyricsEditingPage = () => {
                 </span>
               )}
             </span>
-            {/* ) : (
-               <span className="flex items-center font-semibold uppercase text-font-color-highlight dark:text-dark-font-color-highlight">
-                 <span className="material-icons-round-outlined mr-2 text-xl">
-                   error
-                 </span>
-                 Page not focused
-               </span>
-             )} */}
           </div>
         </div>
         <div className="other-controls-container flex">
@@ -323,20 +318,11 @@ const LyricsEditingPage = () => {
         {lyricsLineComponents}
       </div>
 
-      <div
-        className={`invisible absolute bottom-0 left-1/2 z-10 flex -translate-x-1/2 scale-90 cursor-pointer items-center justify-center rounded-3xl bg-background-color-2 px-4 py-2 opacity-0 shadow-xl transition-[transform,opacity,visibility] duration-200 ease-in-out dark:bg-dark-background-color-2 ${
-          !isFocused &&
-          isTheEditingSongTheCurrSong &&
-          !isPlaying &&
-          '!visible !-translate-y-6 !scale-100 !opacity-100'
-        }`}
-        title="Page focus is required for the page-specific shortcuts to work. Click on this page to gain focus."
-      >
-        <span className="material-icons-round-outlined mr-2 text-xl text-font-color-highlight dark:text-dark-font-color-highlight">
-          error
-        </span>
-        <p className="">Page not focused.</p>
-      </div>
+      <PageFocusPrompt
+        isFocused={isFocused}
+        isPlaying={isPlaying}
+        isTheEditingSongTheCurrSong={isTheEditingSongTheCurrSong}
+      />
     </MainContainer>
   );
 };

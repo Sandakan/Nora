@@ -21,8 +21,8 @@ import {
 import path from 'path';
 import os from 'os';
 import * as dotenv from 'dotenv';
-// import * as Sentry from '@sentry/electron';
 
+// import * as Sentry from '@sentry/electron';
 import log, { logFilePath } from './log';
 import {
   getSongsData,
@@ -31,6 +31,7 @@ import {
   resetAppCache,
   getListeningData,
   getBlacklistData,
+  setUserData,
 } from './filesystem';
 import { resolveHtmlPath } from './utils/util';
 import updateSongId3Tags from './updateSongId3Tags';
@@ -146,6 +147,17 @@ let isOnBatteryPower = false;
 
 // / / / / / / INITIALIZATION / / / / / / /
 
+// Behaviour on second instance for parent process
+const hasSingleInstanceLock = app.requestSingleInstanceLock();
+if (!hasSingleInstanceLock) {
+  log(
+    'Another app instance is currently active. Quitting this instance.',
+    undefined,
+    'WARN'
+  );
+  app.quit();
+} else app.on('second-instance', handleSecondInstances);
+
 const IS_DEVELOPMENT =
   !app.isPackaged || process.env.NODE_ENV === 'development';
 
@@ -160,6 +172,7 @@ saveAbortController('main', abortController);
 //   dsn: process.env.SENTRY_DSN,
 // });
 // ? / / / / / / / / / / / / / / / / / / / / / / /
+
 if (IS_DEVELOPMENT) require('electron-debug')();
 
 const APP_INFO = {
@@ -233,22 +246,27 @@ const createWindow = async () => {
   });
 };
 
+// protocol.registerSchemesAsPrivileged([
+//   {
+//     scheme: 'nora',
+//     privileges: {
+//       // standard: true,
+//       // secure: true,
+//       stream: true, // Add this if you intend to use the protocol for streaming i.e. in video/audio html tags.
+//       // supportFetchAPI: true, // Add this if you want to use fetch with this protocol.
+//       // corsEnabled: true, // Add this if you need to enable cors for this protocol.
+//     },
+//   },
+// ]);
+
 app
   .whenReady()
   .then(() => {
-    // Behaviour on second instance for parent process
-    const hasSingleInstanceLock = app.requestSingleInstanceLock();
-    if (!hasSingleInstanceLock) {
-      log(
-        'Another app instance is currently active. Quitting this instance.',
-        undefined,
-        'WARN'
-      );
-      return app.quit();
-    }
+    const userData = getUserData();
+
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
 
-    app.on('second-instance', handleSecondInstances);
+    if (userData.windowState === 'maximized') mainWindow.maximize();
 
     if (!app.isDefaultProtocolClient(DEFAULT_APP_PROTOCOL)) {
       log(
@@ -258,6 +276,8 @@ app
       if (res) log('Default protocol registered successfully.');
       else log('Default protocol registration failed.');
     }
+
+    // protocol.handle('nora', registerFileProtocol);
 
     protocol.registerFileProtocol('nora', registerFileProtocol);
 
@@ -295,6 +315,14 @@ app
       manageAppMoveEvent();
       manageAppResizeEvent();
     });
+
+    mainWindow.on('maximize', () => recordWindowState('maximized'));
+
+    mainWindow.on('minimize', () => recordWindowState('minimized'));
+
+    mainWindow.on('unmaximize', () => recordWindowState('normal'));
+
+    mainWindow.on('restore', () => recordWindowState('normal'));
 
     app.setPath('crashDumps', path.join(app.getPath('userData'), 'crashDumps'));
 
@@ -687,10 +715,19 @@ app
         'app/getRendererLogs',
         (
           _: unknown,
-          logs: string,
-          forceRestart = false,
+          mes: string | Error,
+          data?: Record<string, unknown>,
+          logToConsoleType: LogMessageTypes = 'INFO',
+          forceWindowRestart = false,
           forceMainRestart = false
-        ) => getRendererLogs(logs, forceRestart, forceMainRestart)
+        ) =>
+          getRendererLogs(
+            mes,
+            data,
+            logToConsoleType,
+            forceWindowRestart,
+            forceMainRestart
+          )
       );
 
       ipcMain.handle('app/removeAMusicFolder', (_, absolutePath: string) =>
@@ -899,6 +936,24 @@ function addEventsToCache(
   } satisfies DataUpdateEvent);
 }
 
+// async function registerFileProtocol(req: Request) {
+//   const urlWithQueries = decodeURI(req.url).replace(
+//     /nora:[/\\]{1,2}localFiles[/\\]{1,2}/gm,
+//     ''
+//   );
+
+//   try {
+//     const [url] = urlWithQueries.split('?');
+//     const res = await net.fetch(url);
+//     return res;
+//   } catch (error) {
+//     log(
+//       `====== ERROR OCCURRED WHEN TRYING TO LOCATE A RESOURCE IN THE SYSTEM. =======\nREQUEST : ${urlWithQueries}\nERROR : ${error}`
+//     );
+//     return new Response('404', { status: 404 });
+//   }
+// }
+
 function registerFileProtocol(
   request: { url: string },
   callback: (arg: string) => void
@@ -1086,26 +1141,25 @@ function toggleMiniPlayerAlwaysOnTop(isMiniPlayerAlwaysOnTop: boolean) {
 }
 
 async function getRendererLogs(
-  logs: string,
-  logToConsoleType: 'log' | 'warn' | 'error' = 'log',
-  forceRestart = false,
+  mes: string | Error,
+  data?: Record<string, unknown>,
+  messageType: LogMessageTypes = 'INFO',
+  forceWindowRestart = false,
   forceMainRestart = false
 ) {
-  const messageType =
-    logToConsoleType === 'log'
-      ? 'INFO'
-      : logToConsoleType === 'warn'
-      ? 'WARN'
-      : 'ERROR';
+  log(mes, data, messageType, undefined, 'UI');
 
-  log(logs, undefined, messageType);
-
-  if (forceRestart) return mainWindow.reload();
+  if (forceWindowRestart) return mainWindow.reload();
   if (forceMainRestart) {
     app.relaunch();
     return app.exit();
   }
   return undefined;
+}
+
+function recordWindowState(state: WindowState) {
+  log(`Window state changed`, { state });
+  setUserData('windowState', state);
 }
 
 function restartRenderer() {
