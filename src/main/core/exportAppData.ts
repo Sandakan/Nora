@@ -56,7 +56,7 @@ const exportAppData = async (localStorageData: string) => {
 
       if (exist)
         log(
-          `'Nora exports' folder already exists. Will re-write contents of the folder.`
+          `'Nora exports' folder already exists. Will re-write contents of the folder.`,
         );
 
       // SONG DATA
@@ -71,7 +71,7 @@ const exportAppData = async (localStorageData: string) => {
 
       await fs.writeFile(
         path.join(destination, 'blacklist.json'),
-        blacklistDataString
+        blacklistDataString,
       );
 
       // ARTIST DATA
@@ -80,7 +80,7 @@ const exportAppData = async (localStorageData: string) => {
 
       await fs.writeFile(
         path.join(destination, 'artists.json'),
-        artistDataString
+        artistDataString,
       );
 
       // PLAYLIST DATA
@@ -89,7 +89,7 @@ const exportAppData = async (localStorageData: string) => {
 
       await fs.writeFile(
         path.join(destination, 'playlists.json'),
-        playlistDataString
+        playlistDataString,
       );
 
       // ALBUM DATA
@@ -98,7 +98,7 @@ const exportAppData = async (localStorageData: string) => {
 
       await fs.writeFile(
         path.join(destination, 'albums.json'),
-        albumDataString
+        albumDataString,
       );
 
       // GENRE DATA
@@ -107,7 +107,7 @@ const exportAppData = async (localStorageData: string) => {
 
       await fs.writeFile(
         path.join(destination, 'genres.json'),
-        genreDataString
+        genreDataString,
       );
 
       // LISTENING DATA
@@ -116,7 +116,7 @@ const exportAppData = async (localStorageData: string) => {
 
       await fs.writeFile(
         path.join(destination, 'userData.json'),
-        userDataString
+        userDataString,
       );
 
       // LISTENING DATA
@@ -125,28 +125,28 @@ const exportAppData = async (localStorageData: string) => {
 
       await fs.writeFile(
         path.join(destination, 'listening_data.json'),
-        listeningDataString
+        listeningDataString,
       );
 
       // LOCAL STORAGE DATA
       await fs.writeFile(
         path.join(destination, 'localStorageData.json'),
-        localStorageData
+        localStorageData,
       );
 
       // SONG ARTWORKS
       await copyDir(
         songCoversFolderPath,
-        path.join(destination, 'song_covers')
+        path.join(destination, 'song_covers'),
       );
 
       // WARNING TEXT MESSAGE
       await fs.writeFile(
         path.join(
           destination,
-          'IMPORTANT - DO NOT EDIT CONTENTS IN THIS DIRECTORY.txt'
+          'IMPORTANT - DO NOT EDIT CONTENTS IN THIS DIRECTORY.txt',
         ),
-        warningMessage
+        warningMessage,
       );
 
       return log('Exported app data successfully.', undefined, 'INFO', {
@@ -157,14 +157,14 @@ const exportAppData = async (localStorageData: string) => {
       `Failed to export app data because user didn't select a destination.`,
       undefined,
       'WARN',
-      { sendToRenderer: 'FAILURE' }
+      { sendToRenderer: 'FAILURE' },
     );
   } catch (err) {
     log(
       'Error occurred when exporting app data.',
       { err, destinations },
       'ERROR',
-      { sendToRenderer: 'FAILURE' }
+      { sendToRenderer: 'FAILURE' },
     );
     throw err;
   }

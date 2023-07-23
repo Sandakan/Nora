@@ -16,10 +16,12 @@ import {
   songMigrations,
   userDataMigrations,
 } from './migrations';
+import { encrypt } from './utils/safeStorage';
+import { LastFMSessionData } from '../@types/last_fm_api';
 
 export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(
   app.getPath('userData'),
-  'song_covers'
+  'song_covers',
 );
 export const DEFAULT_FILE_URL = 'nora://localFiles/';
 
@@ -33,6 +35,8 @@ export const USER_DATA_TEMPLATE: UserData = {
     hideWindowOnClose: false,
     openWindowAsHiddenOnSystemStart: false,
     openWindowMaximizedOnStart: false,
+    sendSongScrobblingDataToLastFM: false,
+    sendSongFavoritesDataToLastFM: false,
   },
   windowPositions: {},
   windowDiamensions: {},
@@ -221,19 +225,19 @@ let cachedAlbumsData = albumStore.get('albums', []) as SavableAlbum[];
 let cachedGenresData = genreStore.get('genres', []) as SavableGenre[];
 let cachedPlaylistsData = playlistDataStore.get(
   'playlists',
-  PLAYLIST_DATA_TEMPLATE
+  PLAYLIST_DATA_TEMPLATE,
 ) as SavablePlaylist[];
 let cachedUserData: UserData = userDataStore.get(
   'userData',
-  USER_DATA_TEMPLATE
+  USER_DATA_TEMPLATE,
 ) as UserData;
 let cachedListeningData = listeningDataStore.get(
   'listeningData',
-  []
+  [],
 ) as SongListeningData[];
 let cachedBlacklist = blacklistStore.get(
   'blacklist',
-  BLACKLIST_TEMPLATE
+  BLACKLIST_TEMPLATE,
 ) as Blacklist;
 
 // ? USER DATA GETTERS AND SETTERS
@@ -306,15 +310,28 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
     ) {
       userData.preferences.openWindowAsHiddenOnSystemStart = data;
     } else if (
+      dataType === 'preferences.sendSongScrobblingDataToLastFM' &&
+      typeof data === 'boolean'
+    ) {
+      userData.preferences.sendSongScrobblingDataToLastFM = data;
+    } else if (
+      dataType === 'preferences.sendSongFavoritesDataToLastFM' &&
+      typeof data === 'boolean'
+    ) {
+      userData.preferences.sendSongFavoritesDataToLastFM = data;
+    } else if (
       dataType === 'customMusixmatchUserToken' &&
       typeof data === 'string'
     ) {
-      userData.customMusixmatchUserToken = data;
+      const encryptedToken = encrypt(data);
+      userData.customMusixmatchUserToken = encryptedToken;
+    } else if (dataType === 'lastFmSessionData' && typeof data === 'object') {
+      userData.lastFmSessionData = data as LastFMSessionData;
     } else if (dataType === 'storageMetrics' && typeof data === 'object') {
       userData.storageMetrics = data as StorageMetrics;
     } else
       return log(
-        'Error occurred in setUserData function due ot invalid dataType or data.'
+        'Error occurred in setUserData function due ot invalid dataType or data.',
       );
 
     saveUserData(userData);
@@ -341,7 +358,7 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
     log(
       `ERROR OCCURRED WHEN READING USER DATA. USER DATA ARRAY IS EMPTY.`,
       { userData },
-      'ERROR'
+      'ERROR',
     );
   }
   return undefined;
@@ -420,7 +437,7 @@ export const createNewListeningDataInstance = (songId: string) => {
 };
 
 export const getListeningData = (
-  songIds = [] as string[]
+  songIds = [] as string[],
 ): SongListeningData[] => {
   const data =
     cachedListeningData && cachedListeningData.length > 0
@@ -435,7 +452,7 @@ export const getListeningData = (
   if (results.length === 0) {
     if (songIds.length === 0) return [];
     const defaultOutputs: SongListeningData[] = songIds.map((id) =>
-      createNewListeningDataInstance(id)
+      createNewListeningDataInstance(id),
     );
     return defaultOutputs;
   }
@@ -521,7 +538,7 @@ export const getBlacklistData = (): Blacklist => {
 
 export const addToBlacklist = (
   str: string,
-  blacklistType: 'SONG_BLACKLIST' | 'FOLDER_BLACKLIST'
+  blacklistType: 'SONG_BLACKLIST' | 'FOLDER_BLACKLIST',
 ) => {
   switch (blacklistType) {
     case 'SONG_BLACKLIST':
@@ -541,7 +558,7 @@ export const addToBlacklist = (
 };
 
 export const updateBlacklist = (
-  callback: (_prevBlacklist: Blacklist) => Blacklist
+  callback: (_prevBlacklist: Blacklist) => Blacklist,
 ) => {
   const updatedBlacklist = callback(cachedBlacklist);
   cachedBlacklist = updatedBlacklist;
@@ -564,7 +581,7 @@ export const getDirectories = async (srcpath: string) => {
     const dirs = await fs.readdir(srcpath, { withFileTypes: true });
     const filteredDirs = dirs.filter((dir) => dir.isDirectory());
     const dirsWithFullPaths = filteredDirs.map((dir) =>
-      path.join(srcpath, dir.name)
+      path.join(srcpath, dir.name),
     );
 
     return dirsWithFullPaths;
@@ -572,14 +589,14 @@ export const getDirectories = async (srcpath: string) => {
     log(
       'Error occurred when parsing directories of a path.',
       { srcpath },
-      'ERROR'
+      'ERROR',
     );
     throw error;
   }
 };
 
 export async function getDirectoriesRecursive(
-  srcpath: string
+  srcpath: string,
 ): Promise<string[]> {
   try {
     const dirs = await getDirectories(srcpath);
@@ -587,7 +604,7 @@ export async function getDirectoriesRecursive(
       return [
         srcpath,
         ...flattenPathArrays(
-          await Promise.all(dirs.map(getDirectoriesRecursive))
+          await Promise.all(dirs.map(getDirectoriesRecursive)),
         ),
       ];
     return [];

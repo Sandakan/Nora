@@ -29,7 +29,7 @@ function SongArtist(props: SongArtistProp) {
         artistName,
         artistId: id,
       }),
-    [changeCurrentActivePage, currentSongData.artists]
+    [changeCurrentActivePage, currentSongData.artists],
   );
 
   return (
@@ -61,7 +61,7 @@ function SongArtist(props: SongArtistProp) {
               },
             ],
             e.pageX,
-            e.pageY
+            e.pageY,
           );
         }
       }}

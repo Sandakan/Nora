@@ -32,7 +32,7 @@ export const tryToParseSong = (
   songPath: string,
   reparseToSync = false,
   generatePalettesAfterParsing = false,
-  noRendererMessages = false
+  noRendererMessages = false,
 ) => {
   let timeOutId: NodeJS.Timeout;
 
@@ -56,18 +56,18 @@ export const tryToParseSong = (
           // THIS ERROR OCCURRED WHEN THE APP STARTS READING DATA WHILE THE SONG IS STILL WRITING TO THE DISK. POSSIBLE SOLUTION IS TO SET A TIMEOUT AND REDO THE PROCESS.
           if (timeOutId) clearTimeout(timeOutId);
           log(
-            'ERROR OCCURRED WHEN TRYING TO PARSE SONG DATA. RETRYING IN 5 SECONDS. (ERROR: READ ERROR)'
+            'ERROR OCCURRED WHEN TRYING TO PARSE SONG DATA. RETRYING IN 5 SECONDS. (ERROR: READ ERROR)',
           );
           setTimeout(() => tryParseSong(errRetryCount + 1), 5000);
         } else {
           log(
             `ERROR OCCURRED WHEN PARSING A NEWLY ADDED SONG WHILE THE APP IS OPEN. FAILED 5 OF 5 RETRY EFFORTS.`,
             { error },
-            'ERROR'
+            'ERROR',
           );
           sendMessageToRenderer(
             `'${songFileName}' failed when trying to add the song to the library. Go to settings to resync the library.`,
-            'PARSE_FAILED'
+            'PARSE_FAILED',
           );
           throw error;
         }
@@ -84,7 +84,7 @@ export const tryToParseSong = (
         isSongInPathsQueue,
       },
     },
-    'WARN'
+    'WARN',
   );
   return undefined;
 };
@@ -94,11 +94,13 @@ let parseQueue: string[] = [];
 export const parseSong = async (
   absoluteFilePath: string,
   reparseToSync = false,
-  noRendererMessages = false
+  noRendererMessages = false,
 ): Promise<SongData | undefined> => {
   // const start = timeStart();
   log(
-    `Starting the parsing process of song '${path.basename(absoluteFilePath)}'.`
+    `Starting the parsing process of song '${path.basename(
+      absoluteFilePath,
+    )}'.`,
   );
   const songs = getSongsData();
   const artists = getArtistsData();
@@ -126,7 +128,7 @@ export const parseSong = async (
     // const start2 = timeEnd(start1, 'Time to fetch stats and parse metadata');
 
     const isSongAvailable = songs.some(
-      (song) => song.path === absoluteFilePath
+      (song) => song.path === absoluteFilePath,
     );
     const isSongInParseQueue = parseQueue.includes(absoluteFilePath);
     const isSongEligibleForParsing =
@@ -156,7 +158,7 @@ export const parseSong = async (
       const songArtworkPaths = await storeArtworks(
         songId,
         'songs',
-        metadata.common?.picture?.at(0)?.data
+        metadata.common?.picture?.at(0)?.data,
       );
 
       // const start6 = timeEnd(start4, 'Time to generate store artwork');
@@ -211,7 +213,7 @@ export const parseSong = async (
           artists,
           songInfo,
           songArtworkPaths,
-          relevantAlbums
+          relevantAlbums,
         );
 
       // const start11 = timeEnd(start10, 'Time to manage artists');
@@ -235,7 +237,7 @@ export const parseSong = async (
           genres,
           songInfo,
           songArtworkPaths,
-          songInfo.palette?.DarkVibrant
+          songInfo.palette?.DarkVibrant,
         );
 
       // const start13 = timeEnd(start12, 'Time to manage genres');
@@ -252,7 +254,7 @@ export const parseSong = async (
       songs.push(songInfo);
       log(
         `Finished the parsing process of song with name '${songInfo.title}'. Updated ${relevantArtists.length} artists, ${relevantAlbums.length}  albums, ${relevantGenres.length} genres in the process of parsing song.`,
-        undefined
+        undefined,
       );
       setSongsData(songs);
       setArtistsData(updatedArtists);
@@ -269,39 +271,39 @@ export const parseSong = async (
       if (newArtists.length > 0)
         dataUpdateEvent(
           'artists/newArtist',
-          newArtists.map((x) => x.artistId)
+          newArtists.map((x) => x.artistId),
         );
       if (relevantArtists.length > 0)
         dataUpdateEvent(
           'artists',
-          relevantArtists.map((x) => x.artistId)
+          relevantArtists.map((x) => x.artistId),
         );
       if (newAlbums.length > 0)
         dataUpdateEvent(
           'albums/newAlbum',
-          newAlbums.map((x) => x.albumId)
+          newAlbums.map((x) => x.albumId),
         );
       if (relevantAlbums.length > 0)
         dataUpdateEvent(
           'albums',
-          relevantAlbums.map((x) => x.albumId)
+          relevantAlbums.map((x) => x.albumId),
         );
       if (newGenres.length > 0)
         dataUpdateEvent(
           'genres/newGenre',
-          newGenres.map((x) => x.genreId)
+          newGenres.map((x) => x.genreId),
         );
       if (relevantGenres.length > 0)
         dataUpdateEvent(
           'genres',
-          relevantGenres.map((x) => x.genreId)
+          relevantGenres.map((x) => x.genreId),
         );
 
       if (!noRendererMessages)
         sendMessageToRenderer(
           `'${songTitle}' song added to the library.`,
           'PARSE_SUCCESSFUL',
-          { songId }
+          { songId },
         );
 
       // timeEnd(
@@ -326,7 +328,7 @@ export const parseSong = async (
           isSongInParseQueue,
         },
       },
-      'WARN'
+      'WARN',
     );
     return undefined;
   } catch (err) {

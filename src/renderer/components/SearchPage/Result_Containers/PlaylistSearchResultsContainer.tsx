@@ -28,7 +28,7 @@ const PlaylistSearchResultsContainer = (props: Props) => {
   const selectAllHandler = useSelectAllHandler(
     playlists,
     'playlist',
-    'playlistId'
+    'playlistId',
   );
 
   const playlistResults = React.useMemo(
@@ -54,7 +54,7 @@ const PlaylistSearchResultsContainer = (props: Props) => {
             })
             .filter((x) => x !== undefined)
         : [],
-    [noOfVisiblePlaylists, playlists, selectAllHandler]
+    [noOfVisiblePlaylists, playlists, selectAllHandler],
   );
 
   return (
@@ -102,7 +102,7 @@ const PlaylistSearchResultsContainer = (props: Props) => {
               clickHandler={() =>
                 toggleMultipleSelections(
                   !isMultipleSelectionEnabled,
-                  'playlist'
+                  'playlist',
                 )
               }
               isDisabled={

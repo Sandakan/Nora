@@ -64,7 +64,7 @@ const SongArtistsInput = (props: Props) => {
                       return {
                         ...prevData,
                         artists: prevData.artists?.filter(
-                          (x) => x.name !== artist.name
+                          (x) => x.name !== artist.name,
                         ),
                       };
                     });
@@ -105,11 +105,11 @@ const SongArtistsInput = (props: Props) => {
               updateSongInfo((prevData) => {
                 const artists =
                   prevData.artists?.filter(
-                    (artist) => artist.name !== artistKeyword
+                    (artist) => artist.name !== artistKeyword,
                   ) ?? [];
                 if (
                   artistResults.some(
-                    (x) => artistKeyword.toLowerCase() === x.name.toLowerCase()
+                    (x) => artistKeyword.toLowerCase() === x.name.toLowerCase(),
                   )
                 ) {
                   for (let x = 0; x < artistResults.length; x += 1) {

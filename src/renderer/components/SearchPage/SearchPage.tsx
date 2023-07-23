@@ -36,11 +36,11 @@ const SearchPage = () => {
   const { updateCurrentlyActivePageData } = React.useContext(AppUpdateContext);
 
   const [searchInput, setSearchInput] = React.useState(
-    currentlyActivePage?.data?.keyword || ''
+    currentlyActivePage?.data?.keyword || '',
   );
   const [isPredictiveSearchEnabled, setIsPredictiveSearchEnabled] =
     React.useState(
-      localStorageData?.preferences?.isPredictiveSearchEnabled ?? true
+      localStorageData?.preferences?.isPredictiveSearchEnabled ?? true,
     );
 
   const searchContainerRef = React.useRef(null);
@@ -55,7 +55,7 @@ const SearchPage = () => {
     availableResults: [],
   } as SearchResult);
   const [activeFilter, setActiveFilter] = React.useState(
-    'All' as SearchFilters
+    'All' as SearchFilters,
   );
 
   const { noOfArtists, noOfPlaylists, noOfAlbums, noOfGenres } =
@@ -70,7 +70,7 @@ const SearchPage = () => {
 
   const changeActiveFilter = React.useCallback(
     (filterType: SearchFilters) => setActiveFilter(filterType),
-    []
+    [],
   );
 
   const filters = filterTypes.map((filterType) => {
@@ -95,7 +95,7 @@ const SearchPage = () => {
             .then((results) => {
               return setSearchResults(results);
             }),
-        250
+        250,
       );
     } else
       setSearchResults({
@@ -132,19 +132,19 @@ const SearchPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageSearchResultsUpdatesInSearchPage
+      manageSearchResultsUpdatesInSearchPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageSearchResultsUpdatesInSearchPage
+        manageSearchResultsUpdatesInSearchPage,
       );
     };
   }, [fetchSearchResults]);
 
   const updateSearchInput = React.useCallback(
     (input: string) => setSearchInput(input),
-    []
+    [],
   );
 
   return (
@@ -167,7 +167,7 @@ const SearchPage = () => {
               setIsPredictiveSearchEnabled((state) => {
                 storage.preferences.setPreferences(
                   'isPredictiveSearchEnabled',
-                  !state
+                  !state,
                 );
                 return !state;
               })
@@ -190,7 +190,7 @@ const SearchPage = () => {
                     ...currentData,
                     keyword: e.target.value,
                   })),
-                500
+                500,
               );
               setSearchInput(e.target.value);
             }}

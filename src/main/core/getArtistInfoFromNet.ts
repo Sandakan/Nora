@@ -12,7 +12,7 @@ import { checkIfConnectedToInternet, dataUpdateEvent } from '../main';
 const DEEZER_BASE_URL = 'https://api.deezer.com/';
 
 const getArtistInfoFromDeezer = async (
-  artistName: string
+  artistName: string,
 ): Promise<DeezerArtistInfo[]> => {
   const isConnectedToInternet = checkIfConnectedToInternet();
   if (isConnectedToInternet) {
@@ -35,7 +35,7 @@ const getArtistInfoFromDeezer = async (
       log(
         `ERROR OCCURRED PARSING JSON DATA FETCHED FROM DEEZER API ABOUT ARTISTS ARTWORKS.`,
         { error },
-        'ERROR'
+        'ERROR',
       );
       throw new Error(error as string);
     }
@@ -43,7 +43,7 @@ const getArtistInfoFromDeezer = async (
     log(
       `ERROR OCCURRED WHEN TRYING TO FETCH FROM DEEZER API ABOUT ARTISTS ARTWORKS. APP IS NOT CONNECTED TO THE INTERNET.`,
       undefined,
-      'ERROR'
+      'ERROR',
     );
     throw new Error('NO_NETWORK_CONNECTION' as MessageCodes);
   }
@@ -52,7 +52,7 @@ const getArtistInfoFromDeezer = async (
 const LAST_FM_BASE_URL = 'http://ws.audioscrobbler.com/2.0/';
 
 const getArtistInfoFromLastFM = async (
-  artistName: string
+  artistName: string,
 ): Promise<LastFMArtistDataApi> => {
   const isConnectedToInternet = checkIfConnectedToInternet();
   if (isConnectedToInternet) {
@@ -76,10 +76,10 @@ const getArtistInfoFromLastFM = async (
         const data = (await res.json()) as LastFMArtistDataApi;
         if (data.error) {
           log(
-            `Artist info of '${artistName}' not found in the internet.\nRESPONSE : ${data.error} => ${data.message}`
+            `Artist info of '${artistName}' not found in the internet.\nRESPONSE : ${data.error} => ${data.message}`,
           );
           throw new Error(
-            `Artist info of '${artistName}' not found in the internet.`
+            `Artist info of '${artistName}' not found in the internet.`,
           );
         }
         return data;
@@ -91,17 +91,17 @@ const getArtistInfoFromLastFM = async (
       log(
         `ERROR OCCURRED PARSING FETCHED DATA FROM LAST_FM API ABOUT ARTISTS INFORMATION.`,
         { error },
-        'ERROR'
+        'ERROR',
       );
       throw new Error(
-        `An error occurred when parsing fetched data. error : ${error}`
+        `An error occurred when parsing fetched data. error : ${error}`,
       );
     }
   } else {
     log(
       `ERROR OCCURRED WHEN TRYING TO FETCH FROM DEEZER API ABOUT ARTIST INFORMATION. APP IS NOT CONNECTED TO THE INTERNET.`,
       undefined,
-      'ERROR'
+      'ERROR',
     );
     throw new Error('NO_NETWORK_CONNECTION' as MessageCodes);
   }
@@ -131,24 +131,24 @@ const getArtistArtworksFromNet = async (artist: SavableArtist) => {
           caseSensitive: false,
           matchPath: ['name'],
           returnType: ReturnTypeEnums.FIRST_CLOSEST_MATCH,
-        }
+        },
       ) as DeezerArtistInfo | null;
 
       if (closestResult) {
         const picture_xl = getAValidDeezerArtistImage(
-          closestResult?.picture_xl
+          closestResult?.picture_xl,
         );
         const picture_small = getAValidDeezerArtistImage(
           closestResult?.picture_small ||
             closestResult?.picture_medium ||
             closestResult?.picture_big ||
-            closestResult?.picture_xl
+            closestResult?.picture_xl,
         );
         const picture_medium = getAValidDeezerArtistImage(
           closestResult?.picture_medium ||
             closestResult?.picture_big ||
             closestResult?.picture_xl ||
-            closestResult?.picture_small
+            closestResult?.picture_small,
         );
 
         if (picture_small && picture_medium)
@@ -166,7 +166,7 @@ const getArtistArtworksFromNet = async (artist: SavableArtist) => {
               closestResult?.picture_big,
               closestResult?.picture_xl,
             ],
-          }
+          },
         );
       }
     }
@@ -175,10 +175,10 @@ const getArtistArtworksFromNet = async (artist: SavableArtist) => {
 };
 
 const getArtistInfoFromNet = async (
-  artistId: string
+  artistId: string,
 ): Promise<ArtistInfoFromNet> => {
   log(
-    `Requested artist information related to an artist with id ${artistId} from the internet`
+    `Requested artist information related to an artist with id ${artistId} from the internet`,
   );
   const artists = getArtistsData();
   if (Array.isArray(artists) && artists.length > 0) {
@@ -189,7 +189,7 @@ const getArtistInfoFromNet = async (
         const artistInfo = await getArtistInfoFromLastFM(artist.name);
         if (artistArtworks && artistInfo) {
           const artistPalette = await generatePalette(
-            artistArtworks.picture_medium
+            artistArtworks.picture_medium,
           );
           if (!artist.onlineArtworkPaths) {
             artists[x].onlineArtworkPaths = artistArtworks;
@@ -203,20 +203,20 @@ const getArtistInfoFromNet = async (
           } as ArtistInfoFromNet;
         }
         log(
-          `ERROR OCCURRED WHEN FETCHING ARTIST ARTWORKS FROM DEEZER NETWORK OR FETCHING ARTIST INFO FROM LAST_FM NETWORK.`
+          `ERROR OCCURRED WHEN FETCHING ARTIST ARTWORKS FROM DEEZER NETWORK OR FETCHING ARTIST INFO FROM LAST_FM NETWORK.`,
         );
         throw new Error(
-          'ERROR OCCURRED WHEN FETCHING ARTIST ARTWORKS FROM DEEZER NETWORK OR FETCHING ARTIST INFO FROM LAST_FM NETWORK.'
+          'ERROR OCCURRED WHEN FETCHING ARTIST ARTWORKS FROM DEEZER NETWORK OR FETCHING ARTIST INFO FROM LAST_FM NETWORK.',
         );
       }
     }
     log(
-      `No artists found with the given name ${artistId} when trying to fetch artist info from the internet.`
+      `No artists found with the given name ${artistId} when trying to fetch artist info from the internet.`,
     );
     throw new Error(`no artists found with the given name ${artistId}`);
   }
   log(
-    `ERROR OCCURRED WHEN SEARCHING FOR ARTISTS IN getArtistInfoFromNet FUNCTION. ARTISTS ARRAY IS EMPTY.`
+    `ERROR OCCURRED WHEN SEARCHING FOR ARTISTS IN getArtistInfoFromNet FUNCTION. ARTISTS ARRAY IS EMPTY.`,
   );
   throw new Error('NO_ARTISTS_FOUND' as MessageCodes);
 };

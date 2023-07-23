@@ -42,7 +42,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
 
   const ignoredSongs = React.useMemo(
     () => storage.ignoredSongsWithFeatArtists.getIgnoredSongsWithFeatArtists(),
-    []
+    [],
   );
 
   React.useEffect(() => {
@@ -61,7 +61,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
       const filteredFeatArtists = featArtists.filter((featArtistName) => {
         const isArtistAvailable = artistNames.some(
           (name) =>
-            name.toLowerCase().trim() === featArtistName.toLowerCase().trim()
+            name.toLowerCase().trim() === featArtistName.toLowerCase().trim(),
         );
 
         return (
@@ -99,7 +99,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
   const addFeatArtistsToSong = React.useCallback(
     (
       setIsDisabled: (_state: boolean) => void,
-      setIsPending: (_state: boolean) => void
+      setIsPending: (_state: boolean) => void,
     ) => {
       setIsDisabled(true);
       setIsPending(true);
@@ -108,7 +108,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
         .resolveFeaturingArtists(
           songId,
           separatedFeatArtistsNames,
-          isRemovingFeatInfoFromTitle
+          isRemovingFeatInfoFromTitle,
         )
         .then((res) => {
           if (res?.updatedData) {
@@ -155,7 +155,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
       updateSongInfo,
       currentSongData.songId,
       updateCurrentSongData,
-    ]
+    ],
   );
 
   return (

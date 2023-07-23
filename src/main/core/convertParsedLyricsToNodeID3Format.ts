@@ -2,7 +2,7 @@ import { TagConstants } from 'node-id3';
 import log from '../log';
 
 const convertParsedLyricsToNodeID3Format = (
-  parsedLyrics?: LyricsData
+  parsedLyrics?: LyricsData,
 ): SynchronisedLyrics => {
   try {
     if (parsedLyrics && parsedLyrics.isSynced && parsedLyrics.syncedLyrics) {
@@ -38,7 +38,7 @@ const convertParsedLyricsToNodeID3Format = (
     log(
       `Error occurred when converting parsed lyrics to NodeID3 Synchronised Lyrics format.`,
       { error },
-      'WARN'
+      'WARN',
     );
     return [];
   }

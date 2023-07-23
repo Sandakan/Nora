@@ -22,7 +22,7 @@ const convertToBytes = (val: number, dataType: DataType = 'B') => {
 };
 
 const getRootSize = (
-  appPath: string
+  appPath: string,
 ): Promise<{ freeSpace: number; size: number }> =>
   new Promise((resolve, reject) => {
     try {
@@ -56,7 +56,7 @@ const getRootSize = (
               }
             }
             return resolve(output);
-          }
+          },
         );
       } else if (platform === 'linux')
         childProcess.execFile(
@@ -80,17 +80,17 @@ const getRootSize = (
               ) {
                 output.size = convertToBytes(
                   parseInt(groups.size),
-                  groups.sizeType as DataType
+                  groups.sizeType as DataType,
                 );
                 output.freeSpace = convertToBytes(
                   parseInt(groups.avail),
-                  groups.availType as DataType
+                  groups.availType as DataType,
                 );
                 return resolve(output);
               }
             }
             return resolve(output);
-          }
+          },
         );
       else log(`No support for getting root size in ${platform}.`);
     } catch (error) {

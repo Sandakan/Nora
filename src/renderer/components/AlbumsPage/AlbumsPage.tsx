@@ -30,7 +30,7 @@ const AlbumsPage = () => {
   const [sortingOrder, setSortingOrder] = React.useState<AlbumSortTypes>(
     currentlyActivePage?.data?.sortingOrder ||
       localStorageData?.sortingStates?.albumsPage ||
-      'aToZ'
+      'aToZ',
   );
 
   const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
@@ -52,7 +52,7 @@ const AlbumsPage = () => {
         }
         return undefined;
       }),
-    [sortingOrder]
+    [sortingOrder],
   );
 
   React.useEffect(() => {
@@ -72,7 +72,7 @@ const AlbumsPage = () => {
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageDataUpdatesInAlbumsPage
+        manageDataUpdatesInAlbumsPage,
       );
     };
   }, [fetchAlbumData]);
@@ -113,7 +113,7 @@ const AlbumsPage = () => {
       }
       return <div style={style} />;
     },
-    [albumsData, noOfColumns, selectAllHandler]
+    [albumsData, noOfColumns, selectAllHandler],
   );
 
   return (
@@ -212,7 +212,7 @@ const AlbumsPage = () => {
                         ...currentPageData,
                         scrollTopOffset: data.scrollTop,
                       })),
-                    500
+                    500,
                   );
               }}
             >

@@ -322,7 +322,7 @@ function reducer(state: Equalizer, action: Action): Equalizer {
 }
 
 const getPresetName = (
-  equalizer: Equalizer
+  equalizer: Equalizer,
 ): EqualierPresetDropdownOptionValues => {
   for (const preset of equalizerPresets) {
     if (preset.preset) {
@@ -362,7 +362,7 @@ const EqualizerSettings = () => {
         oneKiloHertz: 0,
         twoPointFourKiloHertz: 0,
         fifteenKiloHertz: 0,
-      } as Equalizer)
+      } as Equalizer),
   );
 
   const [selectedPreset, setSelectedPreset] =
@@ -370,7 +370,7 @@ const EqualizerSettings = () => {
 
   const isTheDefaultPreset = React.useMemo(
     () => selectedPreset === 'flat',
-    [selectedPreset]
+    [selectedPreset],
   );
 
   React.useEffect(() => {

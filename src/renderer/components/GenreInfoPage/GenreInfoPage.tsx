@@ -85,7 +85,7 @@ const GenreInfoPage = () => {
       window.api.audioLibraryControls
         .getSongInfo(
           genreData.songs.map((song) => song.songId),
-          sortingOrder
+          sortingOrder,
         )
         .then((res) => {
           if (res) return setGenreSongs(res);
@@ -110,12 +110,12 @@ const GenreInfoPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageGenreUpdatesInGenresInfoPage
+      manageGenreUpdatesInGenresInfoPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageGenreUpdatesInGenresInfoPage
+        manageGenreUpdatesInGenresInfoPage,
       );
     };
   }, [fetchGenresData]);
@@ -140,12 +140,12 @@ const GenreInfoPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageSongUpdatesInGenreInfoPage
+      manageSongUpdatesInGenreInfoPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageSongUpdatesInGenreInfoPage
+        manageSongUpdatesInGenreInfoPage,
       );
     };
   }, [fetchSongsData]);
@@ -160,7 +160,7 @@ const GenreInfoPage = () => {
       createQueue(queueSongIds, 'genre', false, genreData?.genreId, false);
       playSong(currSongId, true);
     },
-    [createQueue, genreData?.genreId, genreSongs, playSong]
+    [createQueue, genreData?.genreId, genreSongs, playSong],
   );
 
   const listItems = React.useMemo(
@@ -169,7 +169,7 @@ const GenreInfoPage = () => {
         | Genre
         | AudioInfo
       )[],
-    [genreData, genreSongs]
+    [genreData, genreSongs],
   );
 
   const listComponents = React.useCallback(
@@ -213,7 +213,7 @@ const GenreInfoPage = () => {
       listItems,
       localStorageData?.preferences?.isSongIndexingEnabled,
       selectAllHandler,
-    ]
+    ],
   );
 
   const getItemSize = React.useCallback((index: number) => {
@@ -247,7 +247,7 @@ const GenreInfoPage = () => {
                 'genre',
                 false,
                 genreData?.genreId,
-                true
+                true,
               ),
             isDisabled: !(genreData && genreSongs.length > 0),
           },
@@ -261,7 +261,7 @@ const GenreInfoPage = () => {
                 'genre',
                 true,
                 genreData?.genreId,
-                true
+                true,
               ),
             isDisabled: !(genreData && genreSongs.length > 0),
           },
@@ -272,7 +272,7 @@ const GenreInfoPage = () => {
                 undefined,
                 [...queue.queue, ...genreSongs.map((song) => song.songId)],
                 false,
-                false
+                false,
               );
               addNewNotifications([
                 {
@@ -326,7 +326,7 @@ const GenreInfoPage = () => {
                         ...currentPageData,
                         scrollTopOffset: data.scrollOffset,
                       })),
-                    500
+                    500,
                   );
               }}
             >

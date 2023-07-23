@@ -12,16 +12,16 @@ import sendAudioData from './sendAudioData';
 const defaultSongCoverPath = getAssetPath(
   'images',
   'webp',
-  'song_cover_default.webp'
+  'song_cover_default.webp',
 );
 
 const sendAudioDataFromPath = async (
-  songPath: string
+  songPath: string,
 ): Promise<AudioPlayerData> => {
   log(`Parsing song data from song path -${songPath}-`);
   if (
     appPreferences.supportedMusicExtensions.some((ext) =>
-      path.extname(songPath).includes(ext)
+      path.extname(songPath).includes(ext),
     )
   ) {
     const songs = getSongsData();
@@ -52,10 +52,10 @@ const sendAudioDataFromPath = async (
               ? (await createTempArtwork(metadata.common.picture[0].data).catch(
                   (err) =>
                     log(
-                      `Artwork creation failed for song from an unknown source.\nPATH : ${songPath}; ERROR : ${err}`
-                    )
+                      `Artwork creation failed for song from an unknown source.\nPATH : ${songPath}; ERROR : ${err}`,
+                    ),
                 )) ?? defaultSongCoverPath
-              : defaultSongCoverPath
+              : defaultSongCoverPath,
           );
 
           const title =
@@ -90,7 +90,7 @@ const sendAudioDataFromPath = async (
           sendMessageToRenderer(
             'You are playing a song outside from your library.',
             'PLAYBACK_FROM_UNKNOWN_SOURCE',
-            { path: songPath }
+            { path: songPath },
           );
           return data;
         }
@@ -98,21 +98,21 @@ const sendAudioDataFromPath = async (
         throw new Error('SONG_NOT_FOUND' as ErrorCodes);
       }
       log(
-        `ERROR OCCURRED WHEN READING data.json TO GET SONGS DATA. data.json didn't return an array.`
+        `ERROR OCCURRED WHEN READING data.json TO GET SONGS DATA. data.json didn't return an array.`,
       );
       throw new Error('SONG_DATA_SEND_FAILED' as ErrorCodes);
     } catch (err) {
       log(
         `ERROR OCCURRED WHEN TRYING TO SEND SONGS DATA FROM AN UNPARSED SOURCE.`,
-        { err }
+        { err },
       );
       throw new Error('SONG_DATA_SEND_FAILED' as ErrorCodes);
     }
   } else {
     log(
       `USER TRIED TO OPEN A FILE WITH AN UNSUPPORTED EXTENSION '${path.extname(
-        songPath
-      )}'.`
+        songPath,
+      )}'.`,
     );
     throw new Error('UNSUPPORTED_FILE_EXTENSION' as ErrorCodes);
   }

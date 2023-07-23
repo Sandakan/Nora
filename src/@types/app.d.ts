@@ -2,6 +2,7 @@ import NodeID3 from 'node-id3';
 import { ReactElement, ReactNode } from 'react';
 import { ButtonProps } from 'renderer/components/Button';
 import { api } from '../main/preload';
+import { LastFMSessionData } from './last_fm_api';
 
 declare global {
   interface Window {
@@ -355,7 +356,10 @@ declare global {
     | 'preferences.isMusixmatchLyricsEnabled'
     | 'preferences.hideWindowOnClose'
     | 'preferences.openWindowAsHiddenOnSystemStart'
+    | 'preferences.sendSongScrobblingDataToLastFM'
+    | 'preferences.sendSongFavoritesDataToLastFM'
     | 'customMusixmatchUserToken'
+    | 'lastFmSessionData'
     | 'storageMetrics'
     | PageSortTypes;
 
@@ -382,6 +386,8 @@ declare global {
       isMiniPlayerAlwaysOnTop: boolean;
       isMusixmatchLyricsEnabled: boolean;
       hideWindowOnClose: boolean;
+      sendSongScrobblingDataToLastFM: boolean;
+      sendSongFavoritesDataToLastFM: boolean;
     };
     windowPositions: {
       mainWindow?: WindowCordinates;
@@ -394,6 +400,7 @@ declare global {
     windowState: WindowState;
     recentSearches: string[];
     customMusixmatchUserToken?: string;
+    lastFmSessionData?: LastFMSessionData;
     storageMetrics?: StorageMetrics;
   }
 
@@ -729,7 +736,7 @@ declare global {
     data?: PageData;
     onPageChange?: (
       changedPageTitle: PageTitles,
-      changedPageData?: any
+      changedPageData?: any,
     ) => void;
   }
 
@@ -990,7 +997,8 @@ declare global {
     releasedYear?: number;
     genres?: { genreId?: string; name: string; artworkPath?: string }[];
     composer?: string;
-    lyrics?: string;
+    synchronizedLyrics?: string;
+    unsynchronizedLyrics?: string;
     artworkPath?: string;
     duration: number;
   }

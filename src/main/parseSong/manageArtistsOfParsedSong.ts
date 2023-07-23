@@ -6,7 +6,7 @@ const manageArtistsOfParsedSong = (
   allArtists: SavableArtist[],
   songInfo: SavableSongData,
   songArtworkPaths?: ArtworkPaths,
-  relevantAlbums = [] as SavableAlbum[]
+  relevantAlbums = [] as SavableAlbum[],
 ) => {
   let updatedArtists = allArtists;
   const newArtists: SavableArtist[] = [];
@@ -19,7 +19,7 @@ const manageArtistsOfParsedSong = (
         const newArtist = songArtists[x];
 
         const isArtistAvailable = allArtists.some(
-          (artist) => artist.name === newArtist.name
+          (artist) => artist.name === newArtist.name,
         );
         if (isArtistAvailable) {
           let z = updatedArtists.filter((val) => val.name === newArtist.name);
@@ -27,11 +27,12 @@ const manageArtistsOfParsedSong = (
             artist.songs.push({ title, songId });
 
             if (relevantAlbums.length > 0) {
-              relevantAlbums.forEach((relevantAlbum) =>
-                artist.albums?.push({
-                  title: relevantAlbum.title,
-                  albumId: relevantAlbum.albumId,
-                })
+              relevantAlbums.forEach(
+                (relevantAlbum) =>
+                  artist.albums?.push({
+                    title: relevantAlbum.title,
+                    albumId: relevantAlbum.albumId,
+                  }),
               );
             }
             relevantArtists.push(artist);

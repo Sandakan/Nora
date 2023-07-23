@@ -18,7 +18,7 @@ const { metadataEditingSupportedExtensions } = appPreferences;
 let cachedLyrics = undefined as SongLyrics | undefined;
 
 export const updateCachedLyrics = (
-  callback: (prevLyrics: typeof cachedLyrics) => SongLyrics | undefined
+  callback: (prevLyrics: typeof cachedLyrics) => SongLyrics | undefined,
 ) => {
   const lyrics = callback(cachedLyrics);
   if (lyrics) cachedLyrics = lyrics;
@@ -52,7 +52,7 @@ const fetchLyricsFromAudioSource = (songPath: string) => {
       log(
         `Nora doesn't support reading lyrics metadata from songs in ${songExt} format.`,
         { songPath },
-        'ERROR'
+        'ERROR',
       );
     // No lyrics found on the audio_source.
     return undefined;
@@ -60,7 +60,7 @@ const fetchLyricsFromAudioSource = (songPath: string) => {
     log(
       'Error occurred when trying to fetch lyrics from the audio source.',
       { songPath, error },
-      'ERROR'
+      'ERROR',
     );
     return undefined;
   }
@@ -69,7 +69,7 @@ const fetchLyricsFromAudioSource = (songPath: string) => {
 const getLyricsFromMusixmatch = async (
   trackInfo: LyricsRequestTrackInfo,
   lyricsType?: LyricsTypes,
-  abortControllerSignal?: AbortSignal
+  abortControllerSignal?: AbortSignal,
 ) => {
   const { songTitle, songArtists = [], duration } = trackInfo;
 
@@ -90,7 +90,7 @@ const getLyricsFromMusixmatch = async (
         },
         mxmUserToken,
         lyricsType,
-        abortControllerSignal
+        abortControllerSignal,
       );
 
       if (musixmatchLyrics) {
@@ -124,7 +124,7 @@ const getLyricsFromMusixmatch = async (
 
 const fetchUnsyncedLyrics = async (
   songTitle: string,
-  songArtists: string[]
+  songArtists: string[],
 ) => {
   const str = songArtists ? `${songTitle} ${songArtists.join(' ')}` : songTitle;
   // no abort controller support for songLyrics.
@@ -151,7 +151,7 @@ const fetchUnsyncedLyrics = async (
 const saveLyricsAutomaticallyIfAsked = async (
   lyricsType: AutomaticallySaveLyricsTypes,
   songPath: string,
-  lyrics: SongLyrics
+  lyrics: SongLyrics,
 ) => {
   const {
     lyrics: { isSynced },
@@ -168,7 +168,7 @@ const saveLyricsAutomaticallyIfAsked = async (
         songPath,
       },
       'INFO',
-      { sendToRenderer: 'SUCCESS' }
+      { sendToRenderer: 'SUCCESS' },
     );
   }
 
@@ -180,7 +180,7 @@ const getSongLyrics = async (
   lyricsType: LyricsTypes = 'ANY',
   lyricsRequestType: LyricsRequestTypes = 'ANY',
   saveLyricsAutomatically: AutomaticallySaveLyricsTypes = 'NONE',
-  abortControllerSignal?: AbortSignal
+  abortControllerSignal?: AbortSignal,
 ): Promise<SongLyrics | undefined> => {
   const {
     songTitle,
@@ -227,7 +227,7 @@ const getSongLyrics = async (
       const musixmatchLyrics = await getLyricsFromMusixmatch(
         trackInfo,
         lyricsType,
-        abortControllerSignal
+        abortControllerSignal,
       );
 
       if (musixmatchLyrics) {
@@ -240,7 +240,7 @@ const getSongLyrics = async (
           await saveLyricsAutomaticallyIfAsked(
             saveLyricsAutomatically,
             trackInfo.songPath,
-            cachedLyrics
+            cachedLyrics,
           );
 
         return cachedLyrics;
@@ -249,7 +249,7 @@ const getSongLyrics = async (
       if (lyricsType !== 'SYNCED') {
         const unsyncedLyrics = await fetchUnsyncedLyrics(
           songTitle,
-          songArtists
+          songArtists,
         );
         if (unsyncedLyrics) {
           cachedLyrics = { ...unsyncedLyrics, isOfflineLyricsAvailable };
@@ -258,7 +258,7 @@ const getSongLyrics = async (
             await saveLyricsAutomaticallyIfAsked(
               saveLyricsAutomatically,
               trackInfo.songPath,
-              cachedLyrics
+              cachedLyrics,
             );
 
           return cachedLyrics;
@@ -266,7 +266,7 @@ const getSongLyrics = async (
       }
     } catch (error) {
       log(
-        `No lyrics found in the internet for the requested query.\nERROR : ${error}`
+        `No lyrics found in the internet for the requested query.\nERROR : ${error}`,
       );
       sendMessageToRenderer(`We couldn't find lyrics for ${songTitle}`);
       return undefined;

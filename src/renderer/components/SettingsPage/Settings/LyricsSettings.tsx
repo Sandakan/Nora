@@ -26,7 +26,7 @@ const LyricsSettings = () => {
 
   React.useEffect(() => {
     const lyricsSaveState = storage.preferences.getPreferences(
-      'lyricsAutomaticallySaveState'
+      'lyricsAutomaticallySaveState',
     );
 
     setLyricsAutomaticallySaveState(lyricsSaveState);
@@ -64,7 +64,7 @@ const LyricsSettings = () => {
                   changePromptMenuData(
                     true,
                     <MusixmatchSettingsPrompt />,
-                    'edit-musixmatch-settings'
+                    'edit-musixmatch-settings',
                   )
                 }
               />
@@ -91,7 +91,7 @@ const LyricsSettings = () => {
                         ...prevData.preferences,
                         isMusixmatchLyricsEnabled: state,
                       },
-                    }))
+                    })),
                   )
                   .catch((err) => console.error(err));
               }}
@@ -115,7 +115,7 @@ const LyricsSettings = () => {
               setLyricsAutomaticallySaveState(val);
               storage.preferences.setPreferences(
                 'lyricsAutomaticallySaveState',
-                val
+                val,
               );
             }}
           />

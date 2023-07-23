@@ -18,7 +18,7 @@ const clearSongHistory = () => {
     return true;
   }
   log(
-    `======= ERROR OCCURRED WHEN TRYING TO CLEAR THE SONG HISTORY. =======\nERROR: PLAYLIST DATA IS EMPTY OR NOT AN ARRAY`
+    `======= ERROR OCCURRED WHEN TRYING TO CLEAR THE SONG HISTORY. =======\nERROR: PLAYLIST DATA IS EMPTY OR NOT AN ARRAY`,
   );
   throw new Error('Empty playlist data array.');
 };

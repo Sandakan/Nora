@@ -47,7 +47,7 @@ const SongAlbumInput = (props: Props) => {
                   src={
                     songAlbum.artworkPath
                       ? /(^$|(http(s)?:\/\/)([\w-]+\.)+[\w-]+([\w- ;,./?%&=]*))/gm.test(
-                          songAlbum.artworkPath
+                          songAlbum.artworkPath,
                         )
                         ? songAlbum.artworkPath
                         : `nora://localFiles/${songAlbum.artworkPath}`
@@ -112,7 +112,7 @@ const SongAlbumInput = (props: Props) => {
               updateSongInfo((prevData) => {
                 if (
                   albumResults.some(
-                    (x) => albumKeyword.toLowerCase() === x.title.toLowerCase()
+                    (x) => albumKeyword.toLowerCase() === x.title.toLowerCase(),
                   )
                 ) {
                   for (let x = 0; x < albumResults.length; x += 1) {

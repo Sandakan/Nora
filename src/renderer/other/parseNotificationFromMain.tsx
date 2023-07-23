@@ -157,7 +157,7 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
 const parseNotificationFromMain = (
   message: string,
   messageCode: MessageCodes = 'INFO',
-  data?: Record<string, unknown>
+  data?: Record<string, unknown>,
 ) => {
   const notificationData: AppNotification = {
     buttons: [],

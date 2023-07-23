@@ -1,7 +1,7 @@
 const updateQueueOnSongPlay = (
   queue: Queue,
   songId: string,
-  playAsCurrentSongIndex: boolean
+  playAsCurrentSongIndex: boolean,
 ) => {
   if (queue.queue.length > 0) {
     // check if songId exists in the queue

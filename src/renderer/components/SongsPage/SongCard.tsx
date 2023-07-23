@@ -68,12 +68,12 @@ const SongCard = (props: SongCardProp) => {
   const [isSongAFavorite, setIsSongAFavorite] = React.useState(
     songId === currentSongData.songId
       ? currentSongData.isAFavorite
-      : isAFavorite
+      : isAFavorite,
   );
   const [isSongPlaying, setIsSongPlaying] = React.useState(
     currentSongData
       ? currentSongData.songId === songId && isCurrentSongPlaying
-      : false
+      : false,
   );
   React.useEffect(() => {
     setIsSongPlaying(() => {
@@ -93,7 +93,7 @@ const SongCard = (props: SongCardProp) => {
       palette && palette.LightVibrant && palette.DarkVibrant
         ? palette.LightVibrant.rgb
         : [47, 49, 55],
-    [palette]
+    [palette],
   );
 
   const background = `linear-gradient(to top,rgba(${r},${g},${b},0.3) 0%,rgba(${r},${g},${b},0.15) 40%), linear-gradient(to top,rgba(0,0,0,0.8)0%,rgba(0,0,0,0.1) 60%)`;
@@ -108,7 +108,7 @@ const SongCard = (props: SongCardProp) => {
     if (multipleSelectionsData.multipleSelections.length <= 0) return false;
     if (
       multipleSelectionsData.multipleSelections.some(
-        (selectionId) => selectionId === songId
+        (selectionId) => selectionId === songId,
       )
     )
       return true;
@@ -232,7 +232,7 @@ const SongCard = (props: SongCardProp) => {
             newQueue.splice(
               newQueue.indexOf(currentSongData.songId) + 1 || 0,
               0,
-              songId
+              songId,
             );
 
             const duplicateSongIndex = queue.queue.indexOf(songId);
@@ -301,7 +301,7 @@ const SongCard = (props: SongCardProp) => {
         handlerFunction: () => {
           window.api.playerControls
             .toggleLikeSongs(
-              isMultipleSelectionsEnabled ? [...songIds] : [songId]
+              isMultipleSelectionsEnabled ? [...songIds] : [songId],
             )
             .then((res) => {
               if (res && res.likes.length + res.dislikes.length > 0) {
@@ -334,7 +334,7 @@ const SongCard = (props: SongCardProp) => {
             <AddSongsToPlaylists
               songIds={isAMultipleSelection ? songIds : [songId]}
               title={title}
-            />
+            />,
           );
           toggleMultipleSelections(false);
         },
@@ -347,7 +347,7 @@ const SongCard = (props: SongCardProp) => {
             return updateMultipleSelections(
               songId,
               'songs',
-              isAMultipleSelection ? 'remove' : 'add'
+              isAMultipleSelection ? 'remove' : 'add',
             );
           }
           return toggleMultipleSelections(!isAMultipleSelection, 'songs', [
@@ -439,13 +439,13 @@ const SongCard = (props: SongCardProp) => {
                     content: <span>&apos;{title}&apos; blacklisted.</span>,
                     icon: <span className="material-icons-round">block</span>,
                   },
-                ])
+                ]),
               )
               .catch((err) => console.error(err));
           else
             changePromptMenuData(
               true,
-              <BlacklistSongConfrimPrompt title={title} songIds={[songId]} />
+              <BlacklistSongConfrimPrompt title={title} songIds={[songId]} />,
             );
           return toggleMultipleSelections(false);
         },
@@ -459,7 +459,7 @@ const SongCard = (props: SongCardProp) => {
             true,
             <DeleteSongsFromSystemConfrimPrompt
               songIds={isMultipleSelectionsEnabled ? songIds : [songId]}
-            />
+            />,
           );
           toggleMultipleSelections(false);
         },
@@ -513,7 +513,7 @@ const SongCard = (props: SongCardProp) => {
                 key={`${artists[i].name}=>${artists[i + 1].name}`}
               >
                 ,
-              </span>
+              </span>,
             );
 
           return arr;
@@ -552,7 +552,7 @@ const SongCard = (props: SongCardProp) => {
           contextMenuItems,
           e.pageX,
           e.pageY,
-          contextMenuItemData
+          contextMenuItemData,
         );
       }}
       onClick={(e) => {
@@ -565,7 +565,7 @@ const SongCard = (props: SongCardProp) => {
           updateMultipleSelections(
             songId,
             'songs',
-            isAMultipleSelection ? 'remove' : 'add'
+            isAMultipleSelection ? 'remove' : 'add',
           );
       }}
       title={isBlacklisted ? `'${title}' is blacklisted.` : undefined}

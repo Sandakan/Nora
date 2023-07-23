@@ -10,7 +10,7 @@ const AlbumImgAndInfoContainer = (props: Props) => {
 
   const calculateTotalTime = React.useCallback(() => {
     const { hours, minutes, seconds } = calculateTimeFromSeconds(
-      songsData.reduce((prev, current) => prev + current.duration, 0)
+      songsData.reduce((prev, current) => prev + current.duration, 0),
     );
     return `${
       hours >= 1 ? `${hours} hour${hours === 1 ? '' : 's'} ` : ''

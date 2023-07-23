@@ -37,7 +37,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
       changeCurrentActivePage('SongInfo', {
         songId,
       }),
-    [changeCurrentActivePage]
+    [changeCurrentActivePage],
   );
 
   const goToArtistInfoPage = React.useCallback(
@@ -46,7 +46,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
         artistName,
         artistId,
       }),
-    [changeCurrentActivePage]
+    [changeCurrentActivePage],
   );
 
   const goToAlbumInfoPage = React.useCallback(
@@ -54,7 +54,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
       changeCurrentActivePage('AlbumInfo', {
         albumId,
       }),
-    [changeCurrentActivePage]
+    [changeCurrentActivePage],
   );
 
   const goToGenreInfoPage = React.useCallback(
@@ -62,7 +62,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
       changeCurrentActivePage('GenreInfo', {
         genreId,
       }),
-    [changeCurrentActivePage]
+    [changeCurrentActivePage],
   );
 
   return (

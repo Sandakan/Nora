@@ -7,7 +7,7 @@ import sortSongs from '../utils/sortSongs';
 const getAllSongs = async (
   sortType = 'aToZ' as SongSortTypes,
   pageNo = 1,
-  maxResultsPerPage = 0
+  maxResultsPerPage = 0,
 ) => {
   const result: GetAllSongsResult = {
     data: [],
@@ -24,7 +24,7 @@ const getAllSongs = async (
       result.maxResultsPerPage = songsData.length;
     if (result.maxResultsPerPage !== undefined)
       result.noOfPages = Math.floor(
-        songsData.length / result.maxResultsPerPage
+        songsData.length / result.maxResultsPerPage,
       );
     const audioData = sortSongs(songsData, sortType, listeningData).map(
       (songInfo) => {
@@ -37,7 +37,7 @@ const getAllSongs = async (
           duration: songInfo.duration,
           artworkPaths: getSongArtworkPath(
             songInfo.songId,
-            songInfo.isArtworkAvailable
+            songInfo.isArtworkAvailable,
           ),
           path: songInfo.path,
           year: songInfo.year,
@@ -47,7 +47,7 @@ const getAllSongs = async (
           isAFavorite: songInfo.isAFavorite,
           isBlacklisted,
         } satisfies AudioInfo;
-      }
+      },
     );
 
     const resultsStartIndex = (result.pageNo - 1) * result.maxResultsPerPage;
@@ -58,7 +58,7 @@ const getAllSongs = async (
         : audioData.slice(resultsStartIndex, resultsEndIndex);
   }
   log(
-    `Sending data related to all the songs with filters of sortType=${sortType} pageNo=${result.pageNo} maxResultsPerPage=${result.maxResultsPerPage}`
+    `Sending data related to all the songs with filters of sortType=${sortType} pageNo=${result.pageNo} maxResultsPerPage=${result.maxResultsPerPage}`,
   );
   return result;
 };

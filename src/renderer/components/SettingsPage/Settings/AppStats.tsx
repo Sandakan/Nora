@@ -88,7 +88,7 @@ const AppStats = () => {
           </span>
         );
       }),
-    [stats]
+    [stats],
   );
 
   return (

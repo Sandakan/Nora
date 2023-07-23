@@ -17,7 +17,7 @@ import sendSongID3Tags from './sendSongId3Tags';
 /* eslint-disable import/prefer-default-export */
 export const resolveSeparateArtists = async (
   separateArtistId: string,
-  separateArtistNames: string[]
+  separateArtistNames: string[],
 ) => {
   let updatedData: UpdateSongDataResult | undefined;
 
@@ -27,7 +27,7 @@ export const resolveSeparateArtists = async (
 
   const selectedArtistData = getSelectedArtist(separateArtistId);
   const selectedArtistSongIds = selectedArtistData?.artist?.songs.map(
-    (x) => x.songId
+    (x) => x.songId,
   );
 
   if (selectedArtistData) {
@@ -55,7 +55,7 @@ export const resolveSeparateArtists = async (
     }
 
     artistsData = artistsData.filter(
-      (x) => x.artistId !== selectedArtist.artistId
+      (x) => x.artistId !== selectedArtist.artistId,
     );
 
     artistsData.push(...newArtists);
@@ -72,7 +72,7 @@ export const resolveSeparateArtists = async (
         album.artists!.push(
           ...newArtists
             .concat(availArtists)
-            .map((x) => ({ artistId: x.artistId, name: x.name }))
+            .map((x) => ({ artistId: x.artistId, name: x.name })),
         );
       }
     }
@@ -106,7 +106,7 @@ export const resolveSeparateArtists = async (
                   artworkPath: getArtistArtworkPath(x.artworkName).artworkPath,
                   onlineArtworkPaths: x.onlineArtworkPaths,
                 };
-              }) satisfies typeof songTags.artists)
+              }) satisfies typeof songTags.artists),
             );
           }
 
@@ -114,14 +114,14 @@ export const resolveSeparateArtists = async (
             ...newArtists.concat(availArtists).map((x) => ({
               artistId: x.artistId,
               name: x.name,
-            }))
+            })),
           );
 
           updatedData = await updateSongId3Tags(
             song.songId,
             songTags,
             true,
-            true
+            true,
           );
         }
       }

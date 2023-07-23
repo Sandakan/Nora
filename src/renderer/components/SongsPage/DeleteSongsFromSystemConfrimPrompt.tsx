@@ -66,7 +66,7 @@ export default (props: { songIds: string[] }) => {
             return window.api.audioLibraryControls
               .deleteSongsFromSystem(
                 songsData.map((song) => song.path),
-                isPermanentDelete
+                isPermanentDelete,
               )
               .then((res) => {
                 if (res.success) {

@@ -13,8 +13,8 @@ interface Props extends ExtendedEditingLyricsLineData {
   isPlaying: boolean;
   updateLineData: (
     callback: (
-      prevLineData: ExtendedEditingLyricsLineData[]
-    ) => ExtendedEditingLyricsLineData[]
+      prevLineData: ExtendedEditingLyricsLineData[],
+    ) => ExtendedEditingLyricsLineData[],
   ) => void;
 }
 
@@ -26,7 +26,7 @@ type EditingLyricsLineDataActions =
 
 const reducerFunction = (
   state: EditingLyricsLineData,
-  action: EditingLyricsLineDataActions
+  action: EditingLyricsLineDataActions,
 ): EditingLyricsLineData => {
   switch (action.type) {
     case 'UPDATE_LYRICS_TEXT':
@@ -214,7 +214,7 @@ const EditingLyricsLine = (props: Props) => {
               clickHandler={() =>
                 updateLineData((prevLineData) => {
                   const filteredLineData = prevLineData.filter(
-                    (lineData) => lineData.index !== index
+                    (lineData) => lineData.index !== index,
                   );
                   return filteredLineData;
                 })

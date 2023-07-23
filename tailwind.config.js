@@ -91,7 +91,7 @@ module.exports = {
             2: '2',
             3: '3',
           },
-        }
+        },
       );
     }),
     plugin(({ matchVariant }) => {
@@ -106,7 +106,7 @@ module.exports = {
             2: '2',
             3: '3',
           },
-        }
+        },
       );
     }),
   ],

@@ -70,7 +70,7 @@ const dropdownOptions: { label: string; value: SongSortTypes }[] = [
 
 const reducer = (
   state: SongPageReducer,
-  action: { type: SongPageReducerActionTypes; data: any }
+  action: { type: SongPageReducerActionTypes; data: any },
 ): SongPageReducer => {
   switch (action.type) {
     case 'SONGS_DATA':
@@ -159,12 +159,12 @@ const SongsPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageSongsDataUpdatesInSongsPage
+      manageSongsDataUpdatesInSongsPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageSongsDataUpdatesInSongsPage
+        manageSongsDataUpdatesInSongsPage,
       );
     };
   }, [fetchSongsData]);
@@ -195,7 +195,7 @@ const SongsPage = () => {
           dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
         }}
         onFailure={() => dispatch({ type: 'SONGS_DATA', data: [null] })}
-      />
+      />,
     );
   }, [changePromptMenuData]);
 
@@ -203,7 +203,7 @@ const SongsPage = () => {
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
-      setIsPending: (state: boolean) => void
+      setIsPending: (state: boolean) => void,
     ) => {
       setIsDisabled(true);
       setIsPending(true);
@@ -220,13 +220,13 @@ const SongsPage = () => {
         })
         .catch((err) => console.error(err));
     },
-    []
+    [],
   );
 
   const selectAllHandler = useSelectAllHandler(
     content.songsData,
     'songs',
-    'songId'
+    'songId',
   );
 
   const handleSongPlayBtnClick = React.useCallback(
@@ -237,7 +237,7 @@ const SongsPage = () => {
       createQueue(queueSongIds, 'songs', false, undefined, false);
       playSong(currSongId, true);
     },
-    [content.songsData, createQueue, playSong]
+    [content.songsData, createQueue, playSong],
   );
 
   const songs = React.useCallback(
@@ -285,7 +285,7 @@ const SongsPage = () => {
       handleSongPlayBtnClick,
       localStorageData?.preferences.isSongIndexingEnabled,
       selectAllHandler,
-    ]
+    ],
   );
 
   return (
@@ -340,7 +340,7 @@ const SongsPage = () => {
                       },
                     ],
                     x + 10,
-                    y + 50
+                    y + 50,
                   );
                 }}
                 tooltipLabel="More Options"
@@ -357,7 +357,7 @@ const SongsPage = () => {
                       },
                     ],
                     e.pageX,
-                    e.pageY
+                    e.pageY,
                   );
                 }}
               />
@@ -387,7 +387,7 @@ const SongsPage = () => {
                     'songs',
                     false,
                     undefined,
-                    true
+                    true,
                   )
                 }
               />
@@ -404,7 +404,7 @@ const SongsPage = () => {
                     'songs',
                     true,
                     undefined,
-                    true
+                    true,
                   )
                 }
               />
@@ -449,7 +449,7 @@ const SongsPage = () => {
                         ...currentPageData,
                         scrollTopOffset: data.scrollOffset,
                       })),
-                    500
+                    500,
                   );
               }}
             >

@@ -109,7 +109,7 @@ const Img = (props: Props) => {
           log(
             'maximum img fetch error count reached.',
             { src, fallbackSrc, props: imgPropsRef.current },
-            'WARN'
+            'WARN',
           );
           e.currentTarget.src = DefaultImage;
         }

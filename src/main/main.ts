@@ -100,6 +100,9 @@ import importAppData from './core/importAppData';
 import exportPlaylist from './core/exportPlaylist';
 import importPlaylist from './core/importPlaylist';
 import reParseSong from './parseSong/reParseSong';
+import { compare } from './utils/safeStorage';
+import manageLastFmAuth from './other/manageLastFmAuth';
+import scrobbleSong from './other/scrobbleSong';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -153,7 +156,7 @@ if (!hasSingleInstanceLock) {
   log(
     'Another app instance is currently active. Quitting this instance.',
     undefined,
-    'WARN'
+    'WARN',
   );
   app.quit();
 } else app.on('second-instance', handleSecondInstances);
@@ -162,7 +165,7 @@ const IS_DEVELOPMENT =
   !app.isPackaged || process.env.NODE_ENV === 'development';
 
 const appIcon = nativeImage.createFromPath(
-  getAssetPath('images', 'logo_light_mode.png')
+  getAssetPath('images', 'logo_light_mode.png'),
 );
 
 dotenv.config({ debug: IS_DEVELOPMENT });
@@ -184,7 +187,7 @@ const APP_INFO = {
     architechture: os.arch(),
     platform: os.platform(),
     totalMemory: `${os.totalmem()} (~${Math.floor(
-      os.totalmem() / (1024 * 1024 * 1024)
+      os.totalmem() / (1024 * 1024 * 1024),
     )} GB)`,
   },
 };
@@ -199,12 +202,12 @@ const installExtensions = async () => {
   return installer
     .default(
       extensions.map((name) => installer[name]),
-      forceDownload
+      forceDownload,
     )
     .catch((err: unknown) =>
       log(
-        `====== ERROR OCCURRED WHEN TRYING TO INSTALL EXTENSIONS TO DEVTOOLS ======\nERROR : ${err}`
-      )
+        `====== ERROR OCCURRED WHEN TRYING TO INSTALL EXTENSIONS TO DEVTOOLS ======\nERROR : ${err}`,
+      ),
     );
 };
 
@@ -270,7 +273,7 @@ app
 
     if (!app.isDefaultProtocolClient(DEFAULT_APP_PROTOCOL)) {
       log(
-        'No default protocol registered. Starting the default protocol registration process.'
+        'No default protocol registered. Starting the default protocol registration process.',
       );
       const res = app.setAsDefaultProtocolClient(DEFAULT_APP_PROTOCOL);
       if (res) log('Default protocol registered successfully.');
@@ -330,13 +333,13 @@ app
       crashReporter.start({ uploadToServer: false });
       log(
         `APP STARTUP COMMAND LINE ARGUMENTS\nARGS : [ ${process.argv.join(
-          ', '
-        )} ]`
+          ', ',
+        )} ]`,
       );
     });
 
     mainWindow.webContents.addListener('zoom-changed', (_, dir) =>
-      log(`Renderer zoomed ${dir}. ${mainWindow.webContents.getZoomLevel()}`)
+      log(`Renderer zoomed ${dir}. ${mainWindow.webContents.getZoomLevel()}`),
     );
 
     // ? / / / / / / / / /  IPC RENDERER EVENTS  / / / / / / / / / / / /
@@ -348,7 +351,7 @@ app
       ipcMain.on('app/toggleMaximize', () =>
         mainWindow.isMaximized()
           ? mainWindow.unmaximize()
-          : mainWindow.maximize()
+          : mainWindow.maximize(),
       );
 
       ipcMain.on('app/hide', () => mainWindow.hide());
@@ -356,7 +359,7 @@ app
       ipcMain.on('app/show', () => mainWindow.show());
 
       ipcMain.on('app/changeAppTheme', (_, theme?: AppTheme) =>
-        changeAppTheme(theme)
+        changeAppTheme(theme),
       );
 
       ipcMain.on(
@@ -365,7 +368,7 @@ app
           console.log(`Player playback status : ${isPlaying}`);
           isAudioPlaying = isPlaying;
           manageTaskbarPlaybackButtonControls(mainWindow, true, isPlaying);
-        }
+        },
       );
 
       ipcMain.handle('app/checkForStartUpSongs', () => checkForStartUpSongs());
@@ -388,31 +391,31 @@ app
       powerMonitor.addListener('on-battery', toggleOnBatteryPower);
 
       ipcMain.on('app/getSongPosition', (_, position: number) =>
-        saveUserData('currentSong.stoppedPosition', position)
+        saveUserData('currentSong.stoppedPosition', position),
       );
 
       ipcMain.handle(
         'app/addSongsFromFolderStructures',
         (_, structures: FolderStructure[], sortType: SongSortTypes) =>
-          addSongsFromFolderStructures(structures, sortType)
+          addSongsFromFolderStructures(structures, sortType),
       );
 
       ipcMain.handle('app/getSong', (_, id: string) => sendAudioData(id));
 
       ipcMain.handle('app/getSongFromUnknownSource', (_, songPath: string) =>
-        sendAudioDataFromPath(songPath)
+        sendAudioDataFromPath(songPath),
       );
 
       ipcMain.handle(
         'app/toggleLikeSongs',
         (_, songIds: string[], likeSong?: boolean) =>
-          toggleLikeSongs(songIds, likeSong)
+          toggleLikeSongs(songIds, likeSong),
       );
 
       ipcMain.handle(
         'app/toggleLikeArtists',
         (_, artistIds: string[], likeArtist?: boolean) =>
-          toggleLikeArtists(artistIds, likeArtist)
+          toggleLikeArtists(artistIds, likeArtist),
       );
 
       ipcMain.handle(
@@ -421,18 +424,18 @@ app
           _,
           sortType?: SongSortTypes,
           pageNo?: number,
-          maxResultsPerPage?: number
-        ) => getAllSongs(sortType, pageNo, maxResultsPerPage)
+          maxResultsPerPage?: number,
+        ) => getAllSongs(sortType, pageNo, maxResultsPerPage),
       );
 
       ipcMain.handle(
         'app/saveUserData',
         (_, dataType: UserDataTypes, data: string) =>
-          saveUserData(dataType, data)
+          saveUserData(dataType, data),
       );
 
       ipcMain.handle('app/getStorageUsage', (_, forceRefresh?: boolean) =>
-        getStorageUsage(forceRefresh)
+        getStorageUsage(forceRefresh),
       );
 
       ipcMain.handle('app/getUserData', () => getUserData());
@@ -444,14 +447,14 @@ app
           searchFilters: SearchFilters,
           value: string,
           updateSearchHistory?: boolean,
-          isPredictiveSearchEnabled?: boolean
+          isPredictiveSearchEnabled?: boolean,
         ) =>
           search(
             searchFilters,
             value,
             updateSearchHistory,
-            isPredictiveSearchEnabled
-          )
+            isPredictiveSearchEnabled,
+          ),
       );
 
       ipcMain.handle(
@@ -461,20 +464,20 @@ app
           trackInfo: LyricsRequestTrackInfo,
           lyricsType?: LyricsTypes,
           lyricsRequestType?: LyricsRequestTypes,
-          saveLyricsAutomatically?: AutomaticallySaveLyricsTypes
+          saveLyricsAutomatically?: AutomaticallySaveLyricsTypes,
         ) =>
           getSongLyrics(
             trackInfo,
             lyricsType,
             lyricsRequestType,
-            saveLyricsAutomatically
-          )
+            saveLyricsAutomatically,
+          ),
       );
 
       ipcMain.handle(
         'app/saveLyricsToSong',
         (_, songPath: string, lyrics: SongLyrics) =>
-          saveLyricsToSong(songPath, lyrics)
+          saveLyricsToSong(songPath, lyrics),
       );
 
       ipcMain.handle(
@@ -484,12 +487,12 @@ app
           songIds: string[],
           sortType?: SongSortTypes,
           limit?: number,
-          preserveIdOrder = false
-        ) => getSongInfo(songIds, sortType, limit, preserveIdOrder)
+          preserveIdOrder = false,
+        ) => getSongInfo(songIds, sortType, limit, preserveIdOrder),
       );
 
       ipcMain.handle('app/getSongListeningData', (_, songIds: string[]) =>
-        getListeningData(songIds)
+        getListeningData(songIds),
       );
 
       ipcMain.handle(
@@ -498,32 +501,38 @@ app
           _,
           songId: string,
           dataType: ListeningDataTypes,
-          dataUpdateType: ListeningDataUpdateTypes
-        ) => updateSongListeningData(songId, dataType, dataUpdateType)
+          dataUpdateType: ListeningDataUpdateTypes,
+        ) => updateSongListeningData(songId, dataType, dataUpdateType),
       );
 
       ipcMain.handle('app/generatePalettes', generatePalettes);
 
+      ipcMain.handle(
+        'app/scrobbleSong',
+        (_, songId: string, startTimeInSecs: number) =>
+          scrobbleSong(songId, startTimeInSecs),
+      );
+
       ipcMain.handle('app/getArtistArtworks', (_, artistId: string) =>
-        getArtistInfoFromNet(artistId)
+        getArtistInfoFromNet(artistId),
       );
 
       ipcMain.handle(
         'app/fetchSongInfoFromNet',
         (_, songTitle: string, songArtists: string[]) =>
-          fetchSongInfoFromLastFM(songTitle, songArtists)
+          fetchSongInfoFromLastFM(songTitle, songArtists),
       );
 
       ipcMain.handle(
         'app/searchSongMetadataResultsInInternet',
         (_, songTitle: string, songArtists: string[]) =>
-          searchSongMetadataResultsInInternet(songTitle, songArtists)
+          searchSongMetadataResultsInInternet(songTitle, songArtists),
       );
 
       ipcMain.handle(
         'app/fetchSongMetadataFromInternet',
         (_, source: SongMetadataSource, sourceId: string) =>
-          fetchSongMetadataFromInternet(source, sourceId)
+          fetchSongMetadataFromInternet(source, sourceId),
       );
 
       ipcMain.handle(
@@ -532,20 +541,20 @@ app
           _,
           artistIdsOrNames?: string[],
           sortType?: ArtistSortTypes,
-          limit?: number
-        ) => fetchArtistData(artistIdsOrNames, sortType, limit)
+          limit?: number,
+        ) => fetchArtistData(artistIdsOrNames, sortType, limit),
       );
 
       ipcMain.handle(
         'app/getGenresData',
         (_, genreNamesOrIds?: string[], sortType?: GenreSortTypes) =>
-          getGenresInfo(genreNamesOrIds, sortType)
+          getGenresInfo(genreNamesOrIds, sortType),
       );
 
       ipcMain.handle(
         'app/getAlbumData',
         (_, albumTitlesOrIds?: string[], sortType?: AlbumSortTypes) =>
-          fetchAlbumData(albumTitlesOrIds, sortType)
+          fetchAlbumData(albumTitlesOrIds, sortType),
       );
 
       ipcMain.handle(
@@ -554,24 +563,24 @@ app
           _,
           playlistIds?: string[],
           sortType?: AlbumSortTypes,
-          onlyMutablePlaylists = false
-        ) => sendPlaylistData(playlistIds, sortType, onlyMutablePlaylists)
+          onlyMutablePlaylists = false,
+        ) => sendPlaylistData(playlistIds, sortType, onlyMutablePlaylists),
       );
 
       ipcMain.handle('app/getArtistDuplicates', (_, artistName: string) =>
-        getArtistDuplicates(artistName)
+        getArtistDuplicates(artistName),
       );
 
       ipcMain.handle(
         'app/resolveArtistDuplicates',
         (_, selectedArtistId: string, duplicateIds: string[]) =>
-          resolveArtistDuplicates(selectedArtistId, duplicateIds)
+          resolveArtistDuplicates(selectedArtistId, duplicateIds),
       );
 
       ipcMain.handle(
         'app/resolveSeparateArtists',
         (_, separateArtistId: string, separateArtistNames: string[]) =>
-          resolveSeparateArtists(separateArtistId, separateArtistNames)
+          resolveSeparateArtists(separateArtistId, separateArtistNames),
       );
 
       ipcMain.handle(
@@ -580,41 +589,41 @@ app
           _,
           songId: string,
           featArtistNames: string[],
-          removeFeatInfoInTitle?: boolean
+          removeFeatInfoInTitle?: boolean,
         ) =>
           resolveFeaturingArtists(
             songId,
             featArtistNames,
-            removeFeatInfoInTitle
-          )
+            removeFeatInfoInTitle,
+          ),
       );
 
       ipcMain.handle(
         'app/addNewPlaylist',
         (_, playlistName: string, songIds?: string[], artworkPath?: string) =>
-          addNewPlaylist(playlistName, songIds, artworkPath)
+          addNewPlaylist(playlistName, songIds, artworkPath),
       );
 
       ipcMain.handle('app/removePlaylists', (_, playlistIds: string[]) =>
-        removePlaylists(playlistIds)
+        removePlaylists(playlistIds),
       );
 
       ipcMain.handle(
         'app/addSongsToPlaylist',
         (_, playlistId: string, songIds: string[]) =>
-          addSongsToPlaylist(playlistId, songIds)
+          addSongsToPlaylist(playlistId, songIds),
       );
 
       ipcMain.handle(
         'app/removeSongFromPlaylist',
         (_, playlistId: string, songId: string) =>
-          removeSongFromPlaylist(playlistId, songId)
+          removeSongFromPlaylist(playlistId, songId),
       );
 
       ipcMain.handle(
         'app/addArtworkToAPlaylist',
         (_, playlistId: string, artworkPath: string) =>
-          addArtworkToAPlaylist(playlistId, artworkPath)
+          addArtworkToAPlaylist(playlistId, artworkPath),
       );
 
       ipcMain.handle('app/clearSongHistory', () => clearSongHistory());
@@ -625,26 +634,26 @@ app
           deleteSongsFromSystem(
             absoluteFilePaths,
             abortController.signal,
-            isPermanentDelete
-          )
+            isPermanentDelete,
+          ),
       );
 
       ipcMain.handle('app/resyncSongsLibrary', async () => {
         await checkForNewSongs();
         sendMessageToRenderer(
           'Library resync successfull.',
-          'RESYNC_SUCCESSFUL'
+          'RESYNC_SUCCESSFUL',
         );
       });
 
       ipcMain.handle('app/getBlacklistData', getBlacklistData);
 
       ipcMain.handle('app/blacklistSongs', (_, songIds: string[]) =>
-        blacklistSongs(songIds)
+        blacklistSongs(songIds),
       );
 
       ipcMain.handle('app/restoreBlacklistedSongs', (_, songIds: string[]) =>
-        restoreBlacklistedSongs(songIds)
+        restoreBlacklistedSongs(songIds),
       );
 
       ipcMain.handle(
@@ -654,9 +663,9 @@ app
           songIdOrPath: string,
           tags: SongTags,
           sendUpdatedData?: boolean,
-          isKnownSource = true
+          isKnownSource = true,
         ) =>
-          updateSongId3Tags(songIdOrPath, tags, sendUpdatedData, isKnownSource)
+          updateSongId3Tags(songIdOrPath, tags, sendUpdatedData, isKnownSource),
       );
 
       ipcMain.handle('app/getImgFileLocation', getImagefileLocation);
@@ -664,17 +673,17 @@ app
       ipcMain.handle(
         'app/getSongId3Tags',
         (_, songId: string, isKnownSource = true) =>
-          sendSongID3Tags(songId, isKnownSource)
+          sendSongID3Tags(songId, isKnownSource),
       );
 
       ipcMain.handle('app/clearSearchHistory', (_, searchText?: string[]) =>
-        clearSearchHistoryResults(searchText)
+        clearSearchHistoryResults(searchText),
       );
 
       ipcMain.handle('app/getFolderStructures', () => getFolderStructures());
 
       ipcMain.handle('app/reParseSong', (_, songPath: string) =>
-        reParseSong(songPath)
+        reParseSong(songPath),
       );
 
       ipcMain.on('app/resetApp', () => resetApp(!IS_DEVELOPMENT));
@@ -682,29 +691,35 @@ app
       ipcMain.on('app/openLogFile', () => shell.openPath(logFilePath));
 
       ipcMain.on('app/revealSongInFileExplorer', (_, songId: string) =>
-        revealSongInFileExplorer(songId)
+        revealSongInFileExplorer(songId),
       );
 
       ipcMain.on('app/revealFolderInFileExplorer', (_, folderPath: string) =>
-        shell.showItemInFolder(folderPath)
+        shell.showItemInFolder(folderPath),
       );
 
       ipcMain.on(
         'app/saveArtworkToSystem',
         (_, songId: string, saveName?: string) =>
-          saveArtworkToSystem(songId, saveName)
+          saveArtworkToSystem(songId, saveName),
       );
 
       ipcMain.on('app/openInBrowser', (_, url: string) =>
-        shell.openExternal(url)
+        shell.openExternal(url),
+      );
+
+      ipcMain.on('app/loginToLastFmInBrowser', () =>
+        shell.openExternal(
+          `http://www.last.fm/api/auth/?api_key=${process.env.LAST_FM_API_KEY}&cb=nora://auth?service=lastfm`,
+        ),
       );
 
       ipcMain.handle('app/exportAppData', (_, localStorageData: string) =>
-        exportAppData(localStorageData)
+        exportAppData(localStorageData),
       );
 
       ipcMain.handle('app/exportPlaylist', (_, playlistId: string) =>
-        exportPlaylist(playlistId)
+        exportPlaylist(playlistId),
       );
 
       ipcMain.handle('app/importAppData', importAppData);
@@ -719,54 +734,60 @@ app
           data?: Record<string, unknown>,
           logToConsoleType: LogMessageTypes = 'INFO',
           forceWindowRestart = false,
-          forceMainRestart = false
+          forceMainRestart = false,
         ) =>
           getRendererLogs(
             mes,
             data,
             logToConsoleType,
             forceWindowRestart,
-            forceMainRestart
-          )
+            forceMainRestart,
+          ),
       );
 
       ipcMain.handle('app/removeAMusicFolder', (_, absolutePath: string) =>
-        removeMusicFolder(absolutePath)
+        removeMusicFolder(absolutePath),
       );
 
       ipcMain.handle('app/toggleMiniPlayer', (_, isMiniPlayerActive: boolean) =>
-        toggleMiniPlayer(isMiniPlayerActive)
+        toggleMiniPlayer(isMiniPlayerActive),
       );
 
       ipcMain.handle(
         'app/toggleMiniPlayerAlwaysOnTop',
         (_, isMiniPlayerAlwaysOnTop: boolean) =>
-          toggleMiniPlayerAlwaysOnTop(isMiniPlayerAlwaysOnTop)
+          toggleMiniPlayerAlwaysOnTop(isMiniPlayerAlwaysOnTop),
       );
 
       ipcMain.handle('app/toggleAutoLaunch', (_, autoLaunchState: boolean) =>
-        toggleAutoLaunch(autoLaunchState)
+        toggleAutoLaunch(autoLaunchState),
       );
 
       ipcMain.handle(
         'app/getFolderData',
         (_, folderPaths?: string[], sortType?: FolderSortTypes) =>
-          getMusicFolderData(folderPaths, sortType)
+          getMusicFolderData(folderPaths, sortType),
+      );
+
+      ipcMain.handle(
+        'app/compareEncryptedData',
+        (_, data: string, encryptedData: string) =>
+          compare(data, encryptedData),
       );
 
       ipcMain.handle('app/blacklistFolders', (_, folderPaths: string[]) =>
-        blacklistFolders(folderPaths)
+        blacklistFolders(folderPaths),
       );
 
       ipcMain.handle(
         'app/restoreBlacklistedFolders',
-        (_, folderPaths: string[]) => restoreBlacklistedFolders(folderPaths)
+        (_, folderPaths: string[]) => restoreBlacklistedFolders(folderPaths),
       );
 
       ipcMain.handle(
         'app/toggleBlacklistedFolders',
         (_, folderPaths: string[], isBlacklistFolder?: boolean) =>
-          toggleBlacklistFolders(folderPaths, isBlacklistFolder)
+          toggleBlacklistFolders(folderPaths, isBlacklistFolder),
       );
 
       ipcMain.on(
@@ -775,15 +796,15 @@ app
           log(
             isConnected
               ? `APP CONNECTED TO THE INTERNET SUCCESSFULLY`
-              : `APP DISCONNECTED FROM THE INTERNET`
+              : `APP DISCONNECTED FROM THE INTERNET`,
           );
           isConnectedToInternet = isConnected;
-        }
+        },
       );
 
       ipcMain.handle(
         'app/getArtworksForMultipleArtworksCover',
-        (_, songIds: string[]) => getArtworksForMultipleArtworksCover(songIds)
+        (_, songIds: string[]) => getArtworksForMultipleArtworksCover(songIds),
       );
 
       ipcMain.on('app/openDevTools', () => {
@@ -797,7 +818,7 @@ app
       });
 
       ipcMain.on('app/restartApp', (_: unknown, reason: string) =>
-        restartApp(reason)
+        restartApp(reason),
       );
 
       //  / / / / / / / / / / / GLOBAL SHORTCUTS / / / / / / / / / / / / / /
@@ -811,7 +832,7 @@ app
 
       globalShortcut.register('F12', () => {
         log(
-          'USER REQUESTED FOR DEVTOOLS USING GLOBAL SHORTCUT. - REQUEST WONT BE SERVED.'
+          'USER REQUESTED FOR DEVTOOLS USING GLOBAL SHORTCUT. - REQUEST WONT BE SERVED.',
         );
         // mainWindow.webContents.openDevTools({ mode: 'detach', activate: true });
       });
@@ -841,7 +862,7 @@ function manageWindowFinishLoad() {
     mainWindow.setSize(
       x || MAIN_WINDOW_DEFAULT_SIZE_X,
       y || MAIN_WINDOW_DEFAULT_SIZE_Y,
-      true
+      true,
     );
   }
 
@@ -867,7 +888,7 @@ function handleBeforeQuit() {
   log(
     `QUITING NORA`,
     { uptime: `${Math.floor(process.uptime())} seconds` },
-    'WARN'
+    'WARN',
   );
 }
 
@@ -879,13 +900,13 @@ function toggleOnBatteryPower() {
 export function sendMessageToRenderer(
   message: string,
   code: MessageCodes = 'INFO',
-  data?: object
+  data?: object,
 ) {
   mainWindow.webContents.send(
     'app/sendMessageToRendererEvent',
     message,
     code,
-    data
+    data,
   );
 }
 
@@ -894,7 +915,7 @@ let dataEventsCache: DataUpdateEvent[] = [];
 export function dataUpdateEvent(
   dataType: DataUpdateEventTypes,
   data = [] as string[],
-  message?: string
+  message?: string,
 ) {
   if (dataUpdateEventTimeOutId) clearTimeout(dataUpdateEventTimeOutId);
   log(
@@ -902,7 +923,7 @@ export function dataUpdateEvent(
       data.length > 0 || message ? '\n' : ''
     }${data.length > 0 ? `DATA : ${data}; ` : ''}${
       message ? `MESSAGE : ${data}; ` : ''
-    }`
+    }`,
   );
   addEventsToCache(dataType, data, message);
   dataUpdateEventTimeOutId = setTimeout(() => {
@@ -911,7 +932,7 @@ export function dataUpdateEvent(
       'app/dataUpdateEvent',
       dataEventsCache,
       data,
-      message
+      message,
     );
     dataEventsCache = [];
   }, 1000);
@@ -920,7 +941,7 @@ export function dataUpdateEvent(
 function addEventsToCache(
   dataType: DataUpdateEventTypes,
   data = [] as string[],
-  message?: string
+  message?: string,
 ) {
   for (let i = 0; i < dataEventsCache.length; i += 1) {
     if (dataEventsCache[i].dataType === dataType) {
@@ -956,11 +977,11 @@ function addEventsToCache(
 
 function registerFileProtocol(
   request: { url: string },
-  callback: (arg: string) => void
+  callback: (arg: string) => void,
 ) {
   const urlWithQueries = decodeURI(request.url).replace(
     /nora:[/\\]{1,2}localFiles[/\\]{1,2}/gm,
-    ''
+    '',
   );
 
   try {
@@ -968,18 +989,31 @@ function registerFileProtocol(
     return callback(url);
   } catch (error) {
     log(
-      `====== ERROR OCCURRED WHEN TRYING TO LOCATE A RESOURCE IN THE SYSTEM. =======\nREQUEST : ${urlWithQueries}\nERROR : ${error}`
+      `====== ERROR OCCURRED WHEN TRYING TO LOCATE A RESOURCE IN THE SYSTEM. =======\nREQUEST : ${urlWithQueries}\nERROR : ${error}`,
     );
     return callback('404');
   }
 }
 
+function manageAuthServices(url: string) {
+  log('URL selected for auth service', { url });
+  const { searchParams } = new URL(url);
+
+  if (searchParams.has('service')) {
+    if (searchParams.get('service') === 'lastfm') {
+      const token = searchParams.get('token');
+      if (token) return manageLastFmAuth(token);
+    }
+  }
+  return undefined;
+}
+
 export async function showOpenDialog(
-  openDialogOptions = DEFAULT_OPEN_DIALOG_OPTIONS
+  openDialogOptions = DEFAULT_OPEN_DIALOG_OPTIONS,
 ) {
   const { canceled, filePaths } = await dialog.showOpenDialog(
     mainWindow,
-    openDialogOptions
+    openDialogOptions,
   );
 
   if (canceled) {
@@ -990,11 +1024,11 @@ export async function showOpenDialog(
 }
 
 export async function showSaveDialog(
-  saveDialogOptions = DEFAULT_SAVE_DIALOG_OPTIONS
+  saveDialogOptions = DEFAULT_SAVE_DIALOG_OPTIONS,
 ) {
   const { canceled, filePath } = await dialog.showSaveDialog(
     mainWindow,
-    saveDialogOptions
+    saveDialogOptions,
   );
 
   if (canceled) {
@@ -1009,7 +1043,7 @@ function manageAppMoveEvent() {
   log(
     `User moved the ${
       isMiniPlayer ? 'mini-player' : 'main window'
-    } to (x: ${x}, y: ${y}) coordinates.`
+    } to (x: ${x}, y: ${y}) coordinates.`,
   );
   if (isMiniPlayer) saveUserData('windowPositions.miniPlayer', { x, y });
   else saveUserData('windowPositions.mainWindow', { x, y });
@@ -1020,7 +1054,7 @@ function manageAppResizeEvent() {
   log(
     `User resized the ${
       isMiniPlayer ? 'mini-player' : 'main window'
-    } to (x: ${x}, y: ${y}) diamensions.`
+    } to (x: ${x}, y: ${y}) diamensions.`,
   );
   if (isMiniPlayer) saveUserData('windowDiamensions.miniPlayer', { x, y });
   else saveUserData('windowDiamensions.mainWindow', { x, y });
@@ -1033,10 +1067,19 @@ async function handleSecondInstances(_: unknown, argv: string[]) {
     mainWindow?.focus();
   }
   process.argv = argv;
+
+  manageSecondInstanceArgs(argv);
   mainWindow?.webContents.send(
     'app/playSongFromUnknownSource',
-    await checkForStartUpSongs()
+    await checkForStartUpSongs(),
   );
+}
+
+function manageSecondInstanceArgs(args: string[]) {
+  for (const arg of args) {
+    if (arg.includes('nora://auth')) return manageAuthServices(arg);
+  }
+  return undefined;
 }
 
 export function restartApp(reason: string, noQuitEvents = false) {
@@ -1061,7 +1104,7 @@ async function revealSongInFileExplorer(songId: string) {
     `Revealing song file in explorer failed because song couldn't be found in the library.`,
     undefined,
     'WARN',
-    { sendToRenderer: 'FAILURE' }
+    { sendToRenderer: 'FAILURE' },
   );
 }
 
@@ -1074,7 +1117,7 @@ export const addToSongsOutsideLibraryData = (data: SongOutsideLibraryData) =>
 
 export const updateSongsOutsideLibraryData = (
   songidOrPath: string,
-  data: SongOutsideLibraryData
+  data: SongOutsideLibraryData,
 ) => {
   for (let i = 0; i < songsOutsideLibraryData.length; i += 1) {
     if (
@@ -1088,10 +1131,10 @@ export const updateSongsOutsideLibraryData = (
   log(
     `songIdOrPath ${songidOrPath} does't exist on songsOutsideLibraryData.`,
     undefined,
-    'ERROR'
+    'ERROR',
   );
   throw new Error(
-    `songIdOrPath ${songidOrPath} does't exist on songsOutsideLibraryData.`
+    `songIdOrPath ${songidOrPath} does't exist on songsOutsideLibraryData.`,
   );
 };
 
@@ -1113,15 +1156,15 @@ async function resetApp(isRestartApp = true) {
     resetAppCache();
     await resetAppData();
     log(
-      `########## SUCCESSFULLY RESETTED THE APP. RESTARTING THE APP NOW. ##########`
+      `########## SUCCESSFULLY RESETTED THE APP. RESTARTING THE APP NOW. ##########`,
     );
     sendMessageToRenderer(
-      'Successfully resetted the app. Restarting the app now.'
+      'Successfully resetted the app. Restarting the app now.',
     );
   } catch (error) {
     sendMessageToRenderer('Resetting the app failed. Reloading the app now.');
     log(
-      `====== ERROR OCCURRED WHEN RESETTING THE APP. RELOADING THE APP NOW.  ======\nERROR : ${error}`
+      `====== ERROR OCCURRED WHEN RESETTING THE APP. RELOADING THE APP NOW.  ======\nERROR : ${error}`,
     );
   } finally {
     log(`====== RELOADING THE ${isRestartApp ? 'APP' : 'RENDERER'} ======`);
@@ -1135,7 +1178,7 @@ function toggleMiniPlayerAlwaysOnTop(isMiniPlayerAlwaysOnTop: boolean) {
     if (isMiniPlayer) mainWindow.setAlwaysOnTop(isMiniPlayerAlwaysOnTop);
     saveUserData(
       'preferences.isMiniPlayerAlwaysOnTop',
-      isMiniPlayerAlwaysOnTop
+      isMiniPlayerAlwaysOnTop,
     );
   }
 }
@@ -1145,7 +1188,7 @@ async function getRendererLogs(
   data?: Record<string, unknown>,
   messageType: LogMessageTypes = 'INFO',
   forceWindowRestart = false,
-  forceMainRestart = false
+  forceMainRestart = false,
 ) {
   log(mes, data, messageType, undefined, 'UI');
 
@@ -1180,7 +1223,7 @@ function watchForSystemThemeChanges() {
   if (IS_DEVELOPMENT && useSystemTheme)
     sendMessageToRenderer(
       `System theme changed to ${theme}`,
-      'APP_THEME_CHANGE'
+      'APP_THEME_CHANGE',
     );
 
   if (useSystemTheme) changeAppTheme('system');
@@ -1192,7 +1235,7 @@ function toggleMiniPlayer(isActivateMiniPlayer: boolean) {
     log(
       `Toggled the mini-player to be ${
         isActivateMiniPlayer ? 'enabled' : 'disabled'
-      }.`
+      }.`,
     );
     isMiniPlayer = isActivateMiniPlayer;
     const { windowPositions, windowDiamensions, preferences } = getUserData();
@@ -1209,7 +1252,7 @@ function toggleMiniPlayer(isActivateMiniPlayer: boolean) {
         mainWindow.setSize(
           MINI_PLAYER_MIN_SIZE_X,
           MINI_PLAYER_MIN_SIZE_Y,
-          true
+          true,
         );
       if (windowPositions.miniPlayer) {
         const { x, y } = windowPositions.miniPlayer;
@@ -1231,7 +1274,7 @@ function toggleMiniPlayer(isActivateMiniPlayer: boolean) {
         mainWindow.setSize(
           MAIN_WINDOW_DEFAULT_SIZE_X,
           MAIN_WINDOW_DEFAULT_SIZE_Y,
-          true
+          true,
         );
       if (windowPositions.mainWindow) {
         const { x, y } = windowPositions.mainWindow;

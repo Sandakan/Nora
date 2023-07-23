@@ -1,10 +1,12 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useContext } from 'react';
+import React, { CSSProperties, useContext } from 'react';
+import { FixedSizeList as List, FixedSizeGrid as Grid } from 'react-window';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
+import clamp from 'renderer/utils/clamp';
 
 import { Album } from '../AlbumsPage/Album';
 import Song from '../SongsPage/Song';
@@ -12,66 +14,66 @@ import Button from '../Button';
 import MainContainer from '../MainContainer';
 import Hyperlink from '../Hyperlink';
 import Img from '../Img';
-import Dropdown from '../Dropdown';
+// import Dropdown from '../Dropdown';
 
 import SeparateArtistsSuggestion from './SeparateArtistsSuggestion';
 import DuplicateArtistsSuggestion from './DuplicateArtistsSuggestion';
 import TitleContainer from '../TitleContainer';
 
-const dropdownOptions: { label: string; value: SongSortTypes }[] = [
-  { label: 'Added Order', value: 'addedOrder' },
-  { label: 'A to Z', value: 'aToZ' },
-  { label: 'Z to A', value: 'zToA' },
-  { label: 'Newest', value: 'dateAddedAscending' },
-  { label: 'Oldest', value: 'dateAddedDescending' },
-  { label: 'Released Year (Ascending)', value: 'releasedYearAscending' },
-  { label: 'Released Year (Descending)', value: 'releasedYearDescending' },
-  {
-    label: 'Most Listened (All Time)',
-    value: 'allTimeMostListened',
-  },
-  {
-    label: 'Least Listened (All Time)',
-    value: 'allTimeLeastListened',
-  },
-  {
-    label: 'Most Listened (This Month)',
-    value: 'monthlyMostListened',
-  },
-  {
-    label: 'Least Listened (This Month)',
-    value: 'monthlyLeastListened',
-  },
-  {
-    label: 'Artist Name (A to Z)',
-    value: 'artistNameAscending',
-  },
-  {
-    label: 'Artist Name (Z to A)',
-    value: 'artistNameDescending',
-  },
-  { label: 'Album Name (A to Z)', value: 'albumNameAscending' },
-  {
-    label: 'Album Name (Z to A)',
-    value: 'albumNameDescending',
-  },
-];
+// const dropdownOptions: { label: string; value: SongSortTypes }[] = [
+//   { label: 'Added Order', value: 'addedOrder' },
+//   { label: 'A to Z', value: 'aToZ' },
+//   { label: 'Z to A', value: 'zToA' },
+//   { label: 'Newest', value: 'dateAddedAscending' },
+//   { label: 'Oldest', value: 'dateAddedDescending' },
+//   { label: 'Released Year (Ascending)', value: 'releasedYearAscending' },
+//   { label: 'Released Year (Descending)', value: 'releasedYearDescending' },
+//   {
+//     label: 'Most Listened (All Time)',
+//     value: 'allTimeMostListened',
+//   },
+//   {
+//     label: 'Least Listened (All Time)',
+//     value: 'allTimeLeastListened',
+//   },
+//   {
+//     label: 'Most Listened (This Month)',
+//     value: 'monthlyMostListened',
+//   },
+//   {
+//     label: 'Least Listened (This Month)',
+//     value: 'monthlyLeastListened',
+//   },
+//   {
+//     label: 'Artist Name (A to Z)',
+//     value: 'artistNameAscending',
+//   },
+//   {
+//     label: 'Artist Name (Z to A)',
+//     value: 'artistNameDescending',
+//   },
+//   { label: 'Album Name (A to Z)', value: 'albumNameAscending' },
+//   {
+//     label: 'Album Name (Z to A)',
+//     value: 'albumNameDescending',
+//   },
+// ];
 
 const ArtistInfoPage = () => {
   const {
     currentlyActivePage,
-    queue,
+    // queue,
     isDarkMode,
     bodyBackgroundImage,
     localStorageData,
   } = useContext(AppContext);
   const {
     createQueue,
-    updateQueueData,
-    addNewNotifications,
     updateBodyBackgroundImage,
-    updateCurrentlyActivePageData,
-    changeCurrentActivePage,
+    // updateQueueData,
+    // addNewNotifications,
+    // updateCurrentlyActivePageData,
+    // changeCurrentActivePage,
     updateContextMenuData,
     playSong,
   } = React.useContext(AppUpdateContext);
@@ -79,14 +81,26 @@ const ArtistInfoPage = () => {
   const [artistData, setArtistData] = React.useState<ArtistInfo>();
   const [albums, setAlbums] = React.useState<Album[]>([]);
   const [songs, setSongs] = React.useState<SongData[]>([]);
+  const [isAllAlbumsVisible, setIsAllAlbumsVisible] = React.useState(false);
+  const [isAllSongsVisible, setIsAllSongsVisible] = React.useState(false);
   const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>('aToZ');
 
-  const artistsInfoContainerRef = React.useRef(null);
-  const { width } = useResizeObserver(artistsInfoContainerRef);
+  const songsContainerRef = React.useRef(null);
+  const { width, height } = useResizeObserver(songsContainerRef);
+
+  const CONTAINER_PADDING = 30;
+  const relevantWidth = React.useMemo(() => width - CONTAINER_PADDING, [width]);
+
+  const MIN_ITEM_WIDTH = 220;
+  const MIN_ITEM_HEIGHT = 280;
+  const noOfColumns = Math.floor(relevantWidth / MIN_ITEM_WIDTH);
+  const noOfRows = Math.ceil(albums.length / noOfColumns);
+  const itemWidth =
+    MIN_ITEM_WIDTH + ((relevantWidth % MIN_ITEM_WIDTH) - 10) / noOfColumns;
 
   const noOfVisibleAlbums = React.useMemo(
-    () => Math.floor(width / 250) || 4,
-    [width]
+    () => Math.floor(relevantWidth / 250) || 4,
+    [relevantWidth],
   );
 
   const fetchArtistsData = React.useCallback(() => {
@@ -98,7 +112,7 @@ const ArtistInfoPage = () => {
             if (res[0].onlineArtworkPaths?.picture_medium)
               updateBodyBackgroundImage(
                 true,
-                res[0].onlineArtworkPaths?.picture_medium
+                res[0].onlineArtworkPaths?.picture_medium,
               );
             setArtistData(res[0]);
           }
@@ -137,7 +151,7 @@ const ArtistInfoPage = () => {
       window.api.audioLibraryControls
         .getSongInfo(
           artistData.songs.map((song) => song.songId),
-          sortingOrder
+          sortingOrder,
         )
         .then((songsData) => {
           if (songsData && songsData.length > 0) setSongs(songsData);
@@ -172,12 +186,12 @@ const ArtistInfoPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageArtistDataUpdatesInArtistInfoPage
+      manageArtistDataUpdatesInArtistInfoPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageArtistDataUpdatesInArtistInfoPage
+        manageArtistDataUpdatesInArtistInfoPage,
       );
     };
   }, [fetchArtistsData]);
@@ -195,12 +209,12 @@ const ArtistInfoPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageArtistArtworkUpdatesInArtistInfoPage
+      manageArtistArtworkUpdatesInArtistInfoPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageArtistArtworkUpdatesInArtistInfoPage
+        manageArtistArtworkUpdatesInArtistInfoPage,
       );
     };
   }, [fetchArtistArtworks]);
@@ -224,12 +238,12 @@ const ArtistInfoPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageSongDataUpdatesInArtistInfoPage
+      manageSongDataUpdatesInArtistInfoPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageSongDataUpdatesInArtistInfoPage
+        manageSongDataUpdatesInArtistInfoPage,
       );
     };
   }, [fetchSongsData]);
@@ -248,19 +262,19 @@ const ArtistInfoPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageAlbumDataUpdatesInArtistInfoPage
+      manageAlbumDataUpdatesInArtistInfoPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageAlbumDataUpdatesInArtistInfoPage
+        manageAlbumDataUpdatesInArtistInfoPage,
       );
     };
   }, [fetchAlbumsData]);
 
   const calculateTotalTime = React.useCallback(() => {
     const { hours, minutes, seconds } = calculateTimeFromSeconds(
-      songs.reduce((prev, current) => prev + current.duration, 0)
+      songs.reduce((prev, current) => prev + current.duration, 0),
     );
     return `${
       hours >= 1 ? `${hours} hour${hours === 1 ? '' : 's'} ` : ''
@@ -293,7 +307,7 @@ const ArtistInfoPage = () => {
   const selectAllHandlerForAlbums = useSelectAllHandler(
     albums,
     'album',
-    'albumId'
+    'albumId',
   );
 
   const albumComponents = React.useMemo(
@@ -320,13 +334,52 @@ const ArtistInfoPage = () => {
             />
           );
         }),
-    [albums, bodyBackgroundImage, noOfVisibleAlbums, selectAllHandlerForAlbums]
+    [albums, bodyBackgroundImage, noOfVisibleAlbums, selectAllHandlerForAlbums],
+  );
+
+  const albumGridComponents = React.useCallback(
+    (props: {
+      columnIndex: number;
+      rowIndex: number;
+      style: CSSProperties;
+    }) => {
+      const { columnIndex, rowIndex, style } = props;
+      const index = rowIndex * noOfColumns + columnIndex;
+      // eslint-disable-next-line no-console
+      if (index < albums.length) {
+        const {
+          albumId,
+          year,
+          artists,
+          title,
+          songs: songsInfo,
+          artworkPaths,
+        } = albums[index];
+        return (
+          <div style={{ ...style, display: 'flex', justifyContent: 'center' }}>
+            <Album
+              key={`${albumId}-${title}`}
+              index={index}
+              artworkPaths={artworkPaths}
+              albumId={albumId}
+              title={title}
+              year={year}
+              artists={artists}
+              songs={songsInfo}
+              selectAllHandler={selectAllHandlerForAlbums}
+            />
+          </div>
+        );
+      }
+      return <div style={style} />;
+    },
+    [albums, noOfColumns, selectAllHandlerForAlbums],
   );
 
   const selectAllHandlerForSongs = useSelectAllHandler(
     songs,
     'songs',
-    'songId'
+    'songId',
   );
 
   const handleSongPlayBtnClick = React.useCallback(
@@ -337,7 +390,7 @@ const ArtistInfoPage = () => {
       createQueue(queueSongIds, 'artist', false, artistData?.artistId, false);
       playSong(currSongId, true);
     },
-    [artistData?.artistId, createQueue, playSong, songs]
+    [artistData?.artistId, createQueue, playSong, songs],
   );
 
   const songComponenets = React.useMemo(
@@ -372,7 +425,57 @@ const ArtistInfoPage = () => {
       localStorageData?.preferences?.isSongIndexingEnabled,
       selectAllHandlerForSongs,
       songs,
-    ]
+    ],
+  );
+
+  const selectAllHandler = useSelectAllHandler(songs, 'songs', 'songId');
+
+  const songListComponents = React.useCallback(
+    (props: { index: number; style: React.CSSProperties }) => {
+      const { index, style } = props;
+      const {
+        songId,
+        title,
+        artists,
+        album,
+        duration,
+        isAFavorite,
+        artworkPaths,
+        year,
+        path,
+        isBlacklisted,
+      } = songs[index];
+
+      return (
+        <div style={style}>
+          <Song
+            key={index}
+            index={index}
+            isIndexingSongs={
+              localStorageData?.preferences.isSongIndexingEnabled
+            }
+            title={title}
+            songId={songId}
+            artists={artists}
+            album={album}
+            artworkPaths={artworkPaths}
+            duration={duration}
+            year={year}
+            path={path}
+            isAFavorite={isAFavorite}
+            isBlacklisted={isBlacklisted}
+            onPlayClick={handleSongPlayBtnClick}
+            selectAllHandler={selectAllHandler}
+          />
+        </div>
+      );
+    },
+    [
+      handleSongPlayBtnClick,
+      localStorageData?.preferences.isSongIndexingEnabled,
+      selectAllHandler,
+      songs,
+    ],
   );
 
   const fontColor = React.useMemo(() => {
@@ -392,7 +495,7 @@ const ArtistInfoPage = () => {
   return (
     <MainContainer
       className="artist-info-page-container appear-from-bottom relative overflow-y-auto rounded-tl-lg pb-2 pl-2 pr-2 pt-8"
-      ref={artistsInfoContainerRef}
+      ref={songsContainerRef}
     >
       <div className="artist-img-and-info-container relative mb-12 flex flex-row items-center pl-8 [&>*]:z-10">
         <div className="artist-img-container relative mr-10 max-h-60 lg:hidden">
@@ -421,13 +524,13 @@ const ArtistInfoPage = () => {
                       if (artworkPath)
                         window.api.songUpdates.saveArtworkToSystem(
                           artworkPath,
-                          artistData.name
+                          artistData.name,
                         );
                     },
                   },
                 ],
                 e.pageX,
-                e.pageY
+                e.pageY,
               )
             }
           />
@@ -449,7 +552,7 @@ const ArtistInfoPage = () => {
                 window.api.artistsData
                   .toggleLikeArtists(
                     [artistData.artistId],
-                    !artistData.isAFavorite
+                    !artistData.isAFavorite,
                   )
                   .then(
                     (res) =>
@@ -460,8 +563,8 @@ const ArtistInfoPage = () => {
                               ...prevData,
                               isAFavorite: !prevData.isAFavorite,
                             }
-                          : undefined
-                      )
+                          : undefined,
+                      ),
                   )
                   .catch((err) => console.error(err));
             }}
@@ -542,6 +645,7 @@ const ArtistInfoPage = () => {
                 <p className="text-xs text-font-color-highlight dark:text-dark-font-color-highlight">
                   {albums.length} albums{' '}
                   {albums.length > noOfVisibleAlbums &&
+                    !isAllAlbumsVisible &&
                     `(${noOfVisibleAlbums} shown)`}
                 </p>,
               ]}
@@ -550,13 +654,29 @@ const ArtistInfoPage = () => {
                   label: 'Show All',
                   iconName: 'apps',
                   className: 'show-all-btn text-sm font-normal',
-                  clickHandler: () => true,
-                  isVisible: albums.length > noOfVisibleAlbums,
+                  clickHandler: () => setIsAllAlbumsVisible(true),
+                  isVisible:
+                    albums.length > noOfVisibleAlbums && !isAllAlbumsVisible,
                 },
               ]}
             />
-            <div className="albums-container flex flex-wrap">
-              {albumComponents}
+            <div className="albums-container flex flex-wrap overflow-x-hidden">
+              {isAllAlbumsVisible ? (
+                <Grid
+                  className="appear-from-bottom delay-100"
+                  columnCount={noOfColumns || 5}
+                  columnWidth={itemWidth}
+                  rowCount={noOfRows || 5}
+                  rowHeight={MIN_ITEM_HEIGHT}
+                  width={relevantWidth}
+                  height={clamp(300, height || 0, 400)}
+                  overscanRowCount={2}
+                >
+                  {albumGridComponents}
+                </Grid>
+              ) : (
+                albumComponents
+              )}
             </div>
           </>
         </MainContainer>
@@ -584,7 +704,8 @@ const ArtistInfoPage = () => {
                   text-2xl`}
               otherItems={[
                 <p className="text-xs text-font-color-highlight dark:text-dark-font-color-highlight">
-                  {songs.length} songs {songs.length > 5 && '(5 shown)'}
+                  {songs.length} songs{' '}
+                  {songs.length > 5 && !isAllSongsVisible && '(5 shown)'}
                 </p>,
               ]}
               buttons={[
@@ -592,12 +713,27 @@ const ArtistInfoPage = () => {
                   label: 'Show All',
                   iconName: 'apps',
                   className: 'show-all-btn text-sm font-normal',
-                  clickHandler: () => true,
-                  isVisible: songs.length > 5,
+                  clickHandler: () => setIsAllSongsVisible(true),
+                  isVisible: songs.length > 5 && !isAllSongsVisible,
                 },
               ]}
             />
-            <div className="songs-container">{songComponenets}</div>
+            <div className="songs-container">
+              {isAllSongsVisible ? (
+                <List
+                  itemCount={songs.length}
+                  itemSize={60}
+                  width={relevantWidth || '100%'}
+                  height={clamp(300, height || 0, 400)}
+                  overscanCount={10}
+                  className="appear-from-bottom delay-100"
+                >
+                  {songListComponents}
+                </List>
+              ) : (
+                songComponenets
+              )}
+            </div>
           </>
         </MainContainer>
       )}

@@ -20,7 +20,7 @@ const OpenLinkConfirmPrompt = (props: OpenLinkConfirmPromptProps) => {
   const [checkboxState, setCheckboxState] = React.useState(
     (localStorageData &&
       localStorageData.preferences.doNotVerifyWhenOpeningLinks) ??
-      false
+      false,
   );
 
   return (
@@ -69,7 +69,7 @@ const OpenLinkConfirmPrompt = (props: OpenLinkConfirmPromptProps) => {
           clickHandler={() => {
             storage.preferences.setPreferences(
               'doNotVerifyWhenOpeningLinks',
-              checkboxState
+              checkboxState,
             );
             window.api.settingsHelpers.openInBrowser(link);
             changePromptMenuData(false);

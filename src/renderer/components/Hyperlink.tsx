@@ -26,7 +26,7 @@ const Hyperlink = (props: HyperlinkProp) => {
       changePromptMenuData(
         true,
         <OpenLinkConfirmPrompt link={link} title={linkTitle} />,
-        'confirm-link-direct'
+        'confirm-link-direct',
       );
   }, [
     changePromptMenuData,

@@ -46,7 +46,7 @@ const BlacklistedSong = (props: BlacklistedSongProp) => {
                     <span className="material-icons-round icon">check</span>
                   ),
                 },
-              ])
+              ]),
             )
         }
       />

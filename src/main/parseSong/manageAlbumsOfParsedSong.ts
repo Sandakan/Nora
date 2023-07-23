@@ -5,7 +5,7 @@ import { generateRandomId } from '../utils/randomId';
 const manageAlbumsOfParsedSong = (
   allAlbumsData: SavableAlbum[],
   songInfo: SavableSongData,
-  songArtworkPaths?: ArtworkPaths
+  songArtworkPaths?: ArtworkPaths,
 ) => {
   const relevantAlbums: SavableAlbum[] = [];
   const { title, songId, artists, year, album: songAlbum } = songInfo;
@@ -14,7 +14,7 @@ const manageAlbumsOfParsedSong = (
   if (songAlbumName) {
     if (Array.isArray(allAlbumsData)) {
       const isAlbumAvailable = allAlbumsData.some(
-        (a) => a.title === songAlbumName
+        (a) => a.title === songAlbumName,
       );
       if (isAlbumAvailable) {
         const updatedAlbums = allAlbumsData.map((album) => {

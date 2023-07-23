@@ -43,7 +43,7 @@ export const Album = (props: AlbumProp) => {
           props.songs.map((song) => song.songId),
           undefined,
           undefined,
-          true
+          true,
         )
         .then((songs) => {
           if (Array.isArray(songs))
@@ -54,12 +54,12 @@ export const Album = (props: AlbumProp) => {
               'album',
               isShuffle,
               props.albumId,
-              true
+              true,
             );
           return undefined;
         });
     },
-    [createQueue, props.albumId, props.songs]
+    [createQueue, props.albumId, props.songs],
   );
 
   const playAlbumSongsForMultipleSelections = React.useCallback(
@@ -78,7 +78,7 @@ export const Album = (props: AlbumProp) => {
               albumSongIds,
               undefined,
               undefined,
-              true
+              true,
             );
           }
           return undefined;
@@ -92,13 +92,13 @@ export const Album = (props: AlbumProp) => {
               'songs',
               isShuffle,
               undefined,
-              true
+              true,
             );
           return undefined;
         })
         .catch((err) => console.error(err));
     },
-    [createQueue, multipleSelectionsData]
+    [createQueue, multipleSelectionsData],
   );
 
   const addToQueueForMultipleSelections = React.useCallback(() => {
@@ -115,7 +115,7 @@ export const Album = (props: AlbumProp) => {
             albumSongIds,
             undefined,
             undefined,
-            true
+            true,
           );
         }
         return undefined;
@@ -125,7 +125,7 @@ export const Album = (props: AlbumProp) => {
           queue.queue.push(
             ...songs
               .filter((song) => !song.isBlacklisted)
-              .map((song) => song.songId)
+              .map((song) => song.songId),
           );
           updateQueueData(undefined, queue.queue);
           addNewNotifications([
@@ -152,7 +152,7 @@ export const Album = (props: AlbumProp) => {
       changeCurrentActivePage('AlbumInfo', {
         albumId: props.albumId,
       }),
-    [changeCurrentActivePage, currentlyActivePage?.data, props.albumId]
+    [changeCurrentActivePage, currentlyActivePage?.data, props.albumId],
   );
 
   const isAMultipleSelection = React.useMemo(() => {
@@ -161,7 +161,7 @@ export const Album = (props: AlbumProp) => {
     if (multipleSelectionsData.multipleSelections.length <= 0) return false;
     if (
       multipleSelectionsData.multipleSelections.some(
-        (selectionId) => selectionId === props.albumId
+        (selectionId) => selectionId === props.albumId,
       )
     )
       return true;
@@ -193,7 +193,7 @@ export const Album = (props: AlbumProp) => {
                 className="mr-1"
               >
                 ,
-              </span>
+              </span>,
             );
 
           return arr;
@@ -273,7 +273,7 @@ export const Album = (props: AlbumProp) => {
             return updateMultipleSelections(
               props.albumId,
               'album',
-              isAMultipleSelection ? 'remove' : 'add'
+              isAMultipleSelection ? 'remove' : 'add',
             );
           }
           return toggleMultipleSelections(!isAMultipleSelection, 'album', [
@@ -332,7 +332,7 @@ export const Album = (props: AlbumProp) => {
       props?.artworkPaths?.optimizedArtworkPath,
       props.songs.length,
       props.title,
-    ]
+    ],
   );
 
   return (
@@ -351,7 +351,7 @@ export const Album = (props: AlbumProp) => {
           contextMenuItems,
           e.pageX,
           e.pageY,
-          contextMenuItemData
+          contextMenuItemData,
         )
       }
       onClick={(e) => {
@@ -364,7 +364,7 @@ export const Album = (props: AlbumProp) => {
           updateMultipleSelections(
             props.albumId,
             'album',
-            isAMultipleSelection ? 'remove' : 'add'
+            isAMultipleSelection ? 'remove' : 'add',
           );
         else showAlbumInfoPage();
       }}

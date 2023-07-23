@@ -14,7 +14,7 @@ import { timeEnd, timeStart } from '../utils/measureTimeUsage';
 const createArtworks = async (
   id: string,
   artworkType: QueueTypes,
-  artwork?: Buffer | string
+  artwork?: Buffer | string,
 ) => {
   const defaultPath = path.join(
     DEFAULT_FILE_URL,
@@ -25,8 +25,8 @@ const createArtworks = async (
         ? 'playlist_cover_default.webp'
         : artworkType === 'album'
         ? 'album_cover_default.webp'
-        : 'song_cover_default.webp'
-    )
+        : 'song_cover_default.webp',
+    ),
   );
   const defaultArtworkPaths = {
     isDefaultArtwork: true,
@@ -38,7 +38,7 @@ const createArtworks = async (
     const imgPath = path.join(DEFAULT_ARTWORK_SAVE_LOCATION, `${id}.webp`);
     const optimizedImgPath = path.join(
       DEFAULT_ARTWORK_SAVE_LOCATION,
-      `${id}-optimized.webp`
+      `${id}-optimized.webp`,
     );
 
     try {
@@ -50,7 +50,7 @@ const createArtworks = async (
           log(
             `ERROR OCCURRED WHEN OPTIMIZING ARTWORK OF A SONG WITH SONGID -${id}- IMAGE USING SHARP PACKAGE.`,
             { err },
-            'ERROR'
+            'ERROR',
           );
           throw err;
         });
@@ -65,7 +65,7 @@ const createArtworks = async (
           log(
             `ERROR OCCURRED WHEN CREATING ARTWORK OF A SONG WITH SONGID -${id}- IMAGE USING SHARP PACKAGE.`,
             { err },
-            'ERROR'
+            'ERROR',
           );
           throw err;
         });
@@ -96,7 +96,7 @@ const checkForDefaultArtworkSaveLocation = async () => {
 export const storeArtworks = async (
   id: string,
   artworkType: QueueTypes,
-  artwork?: Buffer | string
+  artwork?: Buffer | string,
 ): Promise<ArtworkPaths> => {
   try {
     const start = timeStart();
@@ -176,7 +176,7 @@ const manageArtworkRemovalErrors = (err: Error) => {
 
 export const removeArtwork = async (
   artworkPaths: ArtworkPaths,
-  type: QueueTypes = 'songs'
+  type: QueueTypes = 'songs',
 ) => {
   try {
     await fs
@@ -184,21 +184,21 @@ export const removeArtwork = async (
       .catch(manageArtworkRemovalErrors);
     await fs
       .unlink(
-        removeDefaultAppProtocolFromFilePath(artworkPaths.optimizedArtworkPath)
+        removeDefaultAppProtocolFromFilePath(artworkPaths.optimizedArtworkPath),
       )
       .catch(manageArtworkRemovalErrors);
   } catch (error) {
     log(
       `Error occurred when removing a ${type} artwork.`,
       { error, artworkPaths },
-      'ERROR'
+      'ERROR',
     );
     throw new Error(`Error occurred when removing a ${type} artwork.`);
   }
 };
 
 export const removeSongArtworkFromUnknownSource = async (
-  artworkPath: string
+  artworkPath: string,
 ) => {
   try {
     await fs.unlink(removeDefaultAppProtocolFromFilePath(artworkPath));
@@ -207,10 +207,10 @@ export const removeSongArtworkFromUnknownSource = async (
     log(
       'Error occurred when removing artwork of a song from an unknown source.',
       { artworkPath },
-      'ERROR'
+      'ERROR',
     );
     throw new Error(
-      'Error occurred when removing artwork of a song from an unknown source.'
+      'Error occurred when removing artwork of a song from an unknown source.',
     );
   }
 };
@@ -229,7 +229,7 @@ const createTempFolder = async (folderPath: string) => {
 };
 
 export const createTempArtwork = async (
-  artwork: Buffer | string
+  artwork: Buffer | string,
 ): Promise<string> => {
   try {
     const tempFolder = path.join(app.getPath('userData'), 'temp_artworks');
@@ -257,7 +257,7 @@ export const clearTempArtworkFolder = () => {
     log(
       'Error occurred when trying to clear contents in the temp_artwork folder.',
       { error },
-      'ERROR'
+      'ERROR',
     );
     return undefined;
   }

@@ -124,12 +124,12 @@ const CurrentQueuePage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageSongUpdatesInCurrentQueue
+      manageSongUpdatesInCurrentQueue,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageSongUpdatesInCurrentQueue
+        manageSongUpdatesInCurrentQueue,
       );
     };
   }, [fetchAllSongsData]);
@@ -285,8 +285,8 @@ const CurrentQueuePage = () => {
                           queue.queue.filter((id) =>
                             isMultipleSelectionsEnabled
                               ? !songIds.includes(id)
-                              : id !== songId
-                          )
+                              : id !== songId,
+                          ),
                         );
                         toggleMultipleSelections(false);
                       },
@@ -307,12 +307,12 @@ const CurrentQueuePage = () => {
       selectAllHandler,
       toggleMultipleSelections,
       updateQueueData,
-    ]
+    ],
   );
 
   const calculateTotalTime = React.useCallback(() => {
     const { hours, minutes, seconds } = calculateTimeFromSeconds(
-      queuedSongs.reduce((prev, current) => prev + current.duration, 0)
+      queuedSongs.reduce((prev, current) => prev + current.duration, 0),
     );
     return `${
       hours >= 1 ? `${hours} hour${hours === 1 ? '' : 's'} ` : ''
@@ -361,7 +361,7 @@ const CurrentQueuePage = () => {
         handlerFunction: centerCurrentlyPlayingSong,
       },
     ],
-    [centerCurrentlyPlayingSong, isAutoScrolling]
+    [centerCurrentlyPlayingSong, isAutoScrolling],
   );
 
   return (
@@ -392,7 +392,7 @@ const CurrentQueuePage = () => {
                   true,
                   moreOptionsContextMenuItems,
                   x + 10,
-                  y + 50
+                  y + 50,
                 );
               }}
               tooltipLabel="More Options"
@@ -402,7 +402,7 @@ const CurrentQueuePage = () => {
                   true,
                   moreOptionsContextMenuItems,
                   e.pageX,
-                  e.pageY
+                  e.pageY,
                 );
               }}
             />
@@ -553,7 +553,7 @@ const CurrentQueuePage = () => {
                       if (!isFirstRenderFinishedRef.current) {
                         setTimeout(() => {
                           const index = queue?.queue?.indexOf(
-                            currentSongData.songId
+                            currentSongData.songId,
                           );
                           if (index >= 0) {
                             if (ListRef.current) {
@@ -580,9 +580,9 @@ const CurrentQueuePage = () => {
                               (currentPageData) => ({
                                 ...currentPageData,
                                 scrollTopOffset: data.scrollOffset,
-                              })
+                              }),
                             ),
-                          500
+                          500,
                         );
                     }}
                   >

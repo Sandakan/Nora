@@ -90,18 +90,18 @@ const checkLocalStorage = () => {
       localStorage.setItem('version', version);
       localStorage.setItem(
         'localStorage',
-        JSON.stringify(LOCAL_STORAGE_DEFAULT_TEMPLATE)
+        JSON.stringify(LOCAL_STORAGE_DEFAULT_TEMPLATE),
       );
       return log(
         'Inavalid or outdated local storage found. Resetting the local storage to default properties.',
         { isASupportedStoreVersion, store },
-        'WARN'
+        'WARN',
       );
     } catch (error) {
       log(
         'Error occurred when trying to save default templated for local storage.',
         { error },
-        'WARN'
+        'WARN',
       );
       throw error;
     }
@@ -110,7 +110,7 @@ const checkLocalStorage = () => {
     const updatedStore = addMissingPropsToAnObject(
       LOCAL_STORAGE_DEFAULT_TEMPLATE,
       jsonStore,
-      (key) => console.warn(`Added missing '${key}' property to localStorage.`)
+      (key) => console.warn(`Added missing '${key}' property to localStorage.`),
     );
 
     localStorage.setItem('localStorage', JSON.stringify(updatedStore));
@@ -147,10 +147,10 @@ const setAllItems = (storage: LocalStorage) => {
 
 const setFullItem = <
   ItemType extends keyof LocalStorage,
-  Data extends LocalStorage[ItemType]
+  Data extends LocalStorage[ItemType],
 >(
   itemType: ItemType,
-  data: Data
+  data: Data,
 ) => {
   const storage = getAllItems();
   try {
@@ -160,7 +160,7 @@ const setFullItem = <
       setAllItems(storage);
     } else
       throw new Error(
-        `option ${String(itemType)} doesn't exist on localStorage.`
+        `option ${String(itemType)} doesn't exist on localStorage.`,
       );
   } catch (error) {
     console.error(error);
@@ -168,7 +168,7 @@ const setFullItem = <
 };
 
 const getFullItem = <ItemType extends keyof LocalStorage>(
-  itemType: ItemType
+  itemType: ItemType,
 ) => {
   const storage = getAllItems();
   if (itemType in storage) return storage[itemType];
@@ -181,19 +181,19 @@ const getFullItem = <ItemType extends keyof LocalStorage>(
 
   throw new Error(
     `requested item type '${itemType}' or type '${String(
-      itemType
-    )}' didn't exist in the local storage.`
+      itemType,
+    )}' didn't exist in the local storage.`,
   );
 };
 
 const setItem = <
   ItemType extends keyof LocalStorage,
   Type extends keyof LocalStorage[ItemType],
-  Data extends LocalStorage[ItemType][Type]
+  Data extends LocalStorage[ItemType][Type],
 >(
   itemType: ItemType,
   type: Type,
-  data: Data
+  data: Data,
 ) => {
   const storage = getAllItems();
   try {
@@ -214,10 +214,10 @@ const setItem = <
 
 const getItem = <
   ItemType extends keyof LocalStorage,
-  Type extends keyof LocalStorage[ItemType]
+  Type extends keyof LocalStorage[ItemType],
 >(
   itemType: ItemType,
-  type: Type
+  type: Type,
 ) => {
   const storage = getAllItems();
   if (itemType in storage && type in storage[itemType])
@@ -234,8 +234,8 @@ const getItem = <
 
   throw new Error(
     `requested item type '${itemType}' or type '${String(
-      type
-    )}' didn't exist in the local storage.`
+      type,
+    )}' didn't exist in the local storage.`,
   );
 };
 
@@ -243,10 +243,10 @@ const getItem = <
 
 const setPreferences = <
   Type extends keyof Preferences,
-  Data extends Preferences[Type]
+  Data extends Preferences[Type],
 >(
   type: Type,
-  data: Data
+  data: Data,
 ) => setItem('preferences', type, data);
 
 const getPreferences = <Type extends keyof Preferences>(type: Type) =>
@@ -256,10 +256,10 @@ const getPreferences = <Type extends keyof Preferences>(type: Type) =>
 
 const setPlaybackOptions = <
   Type extends keyof Playback,
-  Data extends Playback[Type]
+  Data extends Playback[Type],
 >(
   type: Type,
-  data: Data
+  data: Data,
 ) => setItem('playback', type, data);
 
 const getPlaybackOptions = <Type extends keyof Playback>(type: Type) =>
@@ -267,10 +267,10 @@ const getPlaybackOptions = <Type extends keyof Playback>(type: Type) =>
 
 const setCurrentSongOptions = <
   Type extends keyof CurrentSong,
-  Data extends CurrentSong[Type]
+  Data extends CurrentSong[Type],
 >(
   type: Type,
-  data: Data
+  data: Data,
 ) => {
   const currentSong = getPlaybackOptions('currentSong');
   if (type in currentSong) {
@@ -281,7 +281,7 @@ const setCurrentSongOptions = <
 
 const setVolumeOptions = <Type extends keyof Volume, Data extends Volume[Type]>(
   type: Type,
-  data: Data
+  data: Data,
 ) => {
   const volume = getPlaybackOptions('volume');
   if (type in volume) {
@@ -334,24 +334,24 @@ const getIgnoredSongsWithFeatArtists = () =>
 
 const setIgnoredDuplicates = <
   Type extends keyof IgnoredDuplicates,
-  Data extends IgnoredDuplicates[Type]
+  Data extends IgnoredDuplicates[Type],
 >(
   type: Type,
-  data: Data
+  data: Data,
 ) => setItem('ignoredDuplicates', type, data);
 
 const getIgnoredDuplicates = <Type extends keyof IgnoredDuplicates>(
-  type: Type
+  type: Type,
 ) => getItem('ignoredDuplicates', type);
 
 // SORTING STATES
 
 const setSortingStates = <
   Type extends keyof SortingStates,
-  Data extends SortingStates[Type]
+  Data extends SortingStates[Type],
 >(
   type: Type,
-  data: Data
+  data: Data,
 ) => setItem('sortingStates', type, data);
 
 const getSortingStates = <Type extends keyof SortingStates>(type: Type) =>
@@ -368,14 +368,14 @@ const getEqualizerPreset = () => getFullItem('equalizerPreset');
 
 const setLyricsEditorSettings = <
   Type extends keyof LyricsEditorSettings,
-  Data extends LyricsEditorSettings[Type]
+  Data extends LyricsEditorSettings[Type],
 >(
   type: Type,
-  data: Data
+  data: Data,
 ) => setItem('lyricsEditorSettings', type, data);
 
 const getLyricsEditorSettings = <Type extends keyof LyricsEditorSettings>(
-  type: Type
+  type: Type,
 ) => getItem('lyricsEditorSettings', type);
 
 // / / / / / / / / / /

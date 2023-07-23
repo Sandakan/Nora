@@ -3,7 +3,7 @@ const log = (
   data?: Record<string, unknown>,
   logToConsoleType: LogMessageTypes = 'INFO',
   forceWindowRestart = false,
-  forceMainRestart = false
+  forceMainRestart = false,
 ) => {
   let logType = logToConsoleType;
   let message: typeof str;
@@ -30,7 +30,7 @@ const log = (
     parsedData,
     logType,
     forceWindowRestart,
-    forceMainRestart
+    forceMainRestart,
   );
 };
 

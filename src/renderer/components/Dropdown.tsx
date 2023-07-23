@@ -38,7 +38,7 @@ function Dropdown<T extends string>(props: DropdownProp<T>) {
           {option.label}
         </option>
       )),
-    [options]
+    [options],
   );
 
   return (

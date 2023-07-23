@@ -6,7 +6,7 @@ Throttling limits the rate at which a function can be executed. It ensures that 
 
 const throttle = <Args extends any[]>(
   cb: (...args: Args) => void,
-  delay = 1000
+  delay = 1000,
 ) => {
   let shouldWait = false;
   let waitingArgs: any;

@@ -52,7 +52,7 @@ const MusicFoldersPage = () => {
           return undefined;
         })
         .catch((err) => console.error(err)),
-    [sortingOrder]
+    [sortingOrder],
   );
 
   React.useEffect(() => {
@@ -75,25 +75,25 @@ const MusicFoldersPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageFolderDataUpdatesInMusicFoldersPage
+      manageFolderDataUpdatesInMusicFoldersPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageFolderDataUpdatesInMusicFoldersPage
+        manageFolderDataUpdatesInMusicFoldersPage,
       );
     };
   }, [fetchFoldersData]);
 
   const musicFoldersWithPaths = React.useMemo(
     () => musicFolders.map((x) => ({ ...x, folderPath: x.path })),
-    [musicFolders]
+    [musicFolders],
   );
 
   const selectAllHandler = useSelectAllHandler(
     musicFoldersWithPaths,
     'folder',
-    'folderPath'
+    'folderPath',
   );
 
   // const folders = React.useCallback(
@@ -138,7 +138,7 @@ const MusicFoldersPage = () => {
   const addNewFolder = React.useCallback(() => {
     changePromptMenuData(
       true,
-      <AddMusicFoldersPrompt onFailure={(err) => console.error(err)} />
+      <AddMusicFoldersPrompt onFailure={(err) => console.error(err)} />,
     );
   }, [changePromptMenuData]);
 
@@ -146,7 +146,7 @@ const MusicFoldersPage = () => {
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
-      setIsPending: (state: boolean) => void
+      setIsPending: (state: boolean) => void,
     ) => {
       setIsDisabled(true);
       setIsPending(true);
@@ -163,7 +163,7 @@ const MusicFoldersPage = () => {
         })
         .catch((err) => console.error(err));
     },
-    []
+    [],
   );
 
   return (
@@ -207,7 +207,7 @@ const MusicFoldersPage = () => {
                   clickHandler={() =>
                     toggleMultipleSelections(
                       !isMultipleSelectionEnabled,
-                      'folder'
+                      'folder',
                     )
                   }
                   tooltipLabel={

@@ -24,7 +24,7 @@ const SongArtistInputResult = (props: Props) => {
         updateSongInfo((prevData) => {
           const artists =
             prevData.artists?.filter(
-              (artist) => artist.name !== artistData.name
+              (artist) => artist.name !== artistData.name,
             ) ?? [];
           artists?.push({
             name: artistData.name,

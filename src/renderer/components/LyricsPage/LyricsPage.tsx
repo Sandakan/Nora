@@ -31,7 +31,7 @@ const LyricsPage = () => {
     React.useContext(AppUpdateContext);
 
   const [lyrics, setLyrics] = React.useState(
-    null as SongLyrics | undefined | null
+    null as SongLyrics | undefined | null,
   );
 
   const lyricsLinesContainerRef = React.useRef<HTMLDivElement>(null);
@@ -74,7 +74,7 @@ const LyricsPage = () => {
         },
         undefined,
         undefined,
-        localStorageData.preferences.lyricsAutomaticallySaveState
+        localStorageData.preferences.lyricsAutomaticallySaveState,
       )
       .then((res) => setLyrics(res))
       .catch((err) => console.error(err));
@@ -154,7 +154,7 @@ const LyricsPage = () => {
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
-      setIsPending: (state: boolean) => void
+      setIsPending: (state: boolean) => void,
     ) => {
       setIsDisabled(true);
       setIsPending(true);
@@ -170,7 +170,7 @@ const LyricsPage = () => {
           },
           'ANY',
           'ONLINE_ONLY',
-          localStorageData.preferences.lyricsAutomaticallySaveState
+          localStorageData.preferences.lyricsAutomaticallySaveState,
         )
         .then((res) => setLyrics(res))
         .finally(() => {
@@ -185,12 +185,12 @@ const LyricsPage = () => {
       currentSongData.path,
       currentSongData.title,
       localStorageData.preferences.lyricsAutomaticallySaveState,
-    ]
+    ],
   );
 
   const pathExt = React.useMemo(
     () => window.api.utils.getExtension(currentSongData.path),
-    [currentSongData.path]
+    [currentSongData.path],
   );
 
   const showOfflineLyrics = React.useCallback(
@@ -208,7 +208,7 @@ const LyricsPage = () => {
           },
           'ANY',
           'OFFLINE_ONLY',
-          localStorageData.preferences.lyricsAutomaticallySaveState
+          localStorageData.preferences.lyricsAutomaticallySaveState,
         )
         .then((res) => setLyrics(res))
         .finally(() => setIsDisabled(false))
@@ -220,14 +220,14 @@ const LyricsPage = () => {
       currentSongData.path,
       currentSongData.title,
       localStorageData.preferences.lyricsAutomaticallySaveState,
-    ]
+    ],
   );
 
   const saveOnlineLyrics = React.useCallback(
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
-      setIsPending: (state: boolean) => void
+      setIsPending: (state: boolean) => void,
     ) => {
       if (lyrics) {
         setIsDisabled(true);
@@ -266,7 +266,7 @@ const LyricsPage = () => {
           .catch((err) => console.error(err));
       }
     },
-    [addNewNotifications, currentSongData.path, lyrics]
+    [addNewNotifications, currentSongData.path, lyrics],
   );
 
   const refreshOnlineLyrics = React.useCallback(
@@ -283,7 +283,7 @@ const LyricsPage = () => {
             duration: currentSongData.duration,
           },
           'ANY',
-          'ONLINE_ONLY'
+          'ONLINE_ONLY',
         )
         .then((res) => setLyrics(res))
         .finally(() => setIsDisabled(false))
@@ -294,12 +294,12 @@ const LyricsPage = () => {
       currentSongData.duration,
       currentSongData.path,
       currentSongData.title,
-    ]
+    ],
   );
 
   const isSaveLyricsBtnDisabled = React.useMemo(
     () => !metadataEditingSupportedExtensions.includes(pathExt),
-    [pathExt]
+    [pathExt],
   );
 
   return (

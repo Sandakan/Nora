@@ -9,7 +9,7 @@ import Checkbox from '../Checkbox';
 const LyricsEditorSettingsPrompt = () => {
   const { localStorageData } = React.useContext(AppContext);
   const [offset, setOffset] = React.useState(
-    localStorageData.lyricsEditorSettings.offset || 0
+    localStorageData.lyricsEditorSettings.offset || 0,
   );
 
   return (
@@ -36,7 +36,7 @@ const LyricsEditorSettingsPrompt = () => {
             checkedStateUpdateFunction={(state) =>
               storage.lyricsEditorSettings.setLyricsEditorSettings(
                 'editNextStartTagWithCurrentEndTag',
-                state
+                state,
               )
             }
             labelContent="Edit next line's start tag with the current line's end tag automatically."
@@ -61,7 +61,7 @@ const LyricsEditorSettingsPrompt = () => {
               debounce(() => {
                 storage.lyricsEditorSettings.setLyricsEditorSettings(
                   'offset',
-                  newOffset
+                  newOffset,
                 );
               }, 250);
             }}

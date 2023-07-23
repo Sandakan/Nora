@@ -87,7 +87,7 @@ const Song = React.forwardRef(
 
     React.useEffect(() => {
       setIsSongPlaying(
-        () => currentSongData?.songId === songId && isCurrentSongPlaying
+        () => currentSongData?.songId === songId && isCurrentSongPlaying,
       );
       setIsAFavorite((prevState) => {
         if (currentSongData?.songId === songId)
@@ -148,7 +148,7 @@ const Song = React.forwardRef(
       if (multipleSelectionsData.multipleSelections.length <= 0) return false;
       if (
         multipleSelectionsData.multipleSelections.some(
-          (selectionId) => selectionId === songId
+          (selectionId) => selectionId === songId,
         )
       )
         return true;
@@ -298,7 +298,7 @@ const Song = React.forwardRef(
               newQueue.splice(
                 newQueue.indexOf(currentSongData.songId) + 1 || 0,
                 0,
-                songId
+                songId,
               );
               updateQueueData(currentSongIndex, newQueue, undefined, false);
               addNewNotifications([
@@ -358,7 +358,7 @@ const Song = React.forwardRef(
           handlerFunction: () => {
             window.api.playerControls
               .toggleLikeSongs(
-                isMultipleSelectionsEnabled ? [...songIds] : [songId]
+                isMultipleSelectionsEnabled ? [...songIds] : [songId],
               )
               .then((res) => {
                 if (res && res.likes.length + res.dislikes.length > 0) {
@@ -381,7 +381,7 @@ const Song = React.forwardRef(
               <AddSongsToPlaylists
                 songIds={isAMultipleSelection ? songIds : [songId]}
                 title={title}
-              />
+              />,
             );
             toggleMultipleSelections(false);
           },
@@ -394,7 +394,7 @@ const Song = React.forwardRef(
               updateMultipleSelections(
                 songId,
                 'songs',
-                isAMultipleSelection ? 'remove' : 'add'
+                isAMultipleSelection ? 'remove' : 'add',
               );
             } else
               toggleMultipleSelections(!isAMultipleSelection, 'songs', [
@@ -485,13 +485,13 @@ const Song = React.forwardRef(
                       content: `'${title}' blacklisted.`,
                       icon: <span className="material-icons-round">block</span>,
                     },
-                  ])
+                  ]),
                 )
                 .catch((err) => console.error(err));
             else
               changePromptMenuData(
                 true,
-                <BlacklistSongConfrimPrompt title={title} songIds={[songId]} />
+                <BlacklistSongConfrimPrompt title={title} songIds={[songId]} />,
               );
             return toggleMultipleSelections(false);
           },
@@ -505,7 +505,7 @@ const Song = React.forwardRef(
               true,
               <DeleteSongsFromSystemConfrimPrompt
                 songIds={isMultipleSelectionsEnabled ? songIds : [songId]}
-              />
+              />,
             );
             toggleMultipleSelections(false);
           },
@@ -589,7 +589,7 @@ const Song = React.forwardRef(
             contextMenuItems,
             e.pageX,
             e.pageY,
-            contextMenuItemData
+            contextMenuItemData,
           );
         }}
         onClick={(e) => {
@@ -603,7 +603,7 @@ const Song = React.forwardRef(
               updateMultipleSelections(
                 songId,
                 'songs',
-                isAMultipleSelection ? 'remove' : 'add'
+                isAMultipleSelection ? 'remove' : 'add',
               );
           }, 100);
         }}
@@ -742,7 +742,7 @@ const Song = React.forwardRef(
         </div>
       </div>
     );
-  }
+  },
 );
 
 Song.displayName = 'Song';

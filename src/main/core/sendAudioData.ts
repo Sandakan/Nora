@@ -32,7 +32,7 @@ const getRelevantArtistData = (
   songArtists?: {
     artistId: string;
     name: string;
-  }[]
+  }[],
 ) => {
   const artists = getArtistsData();
   const relevantArtists: {
@@ -66,7 +66,7 @@ const getRelevantArtistData = (
 };
 
 export const sendAudioData = async (
-  audioId: string
+  audioId: string,
 ): Promise<AudioPlayerData> => {
   log(`Fetching song data for song id -${audioId}-`);
   try {
@@ -94,7 +94,7 @@ export const sendAudioData = async (
               artwork: Buffer.from(artworkData).toString('base64') || undefined,
               artworkPath: getSongArtworkPath(
                 song.songId,
-                song.isArtworkAvailable
+                song.isArtworkAvailable,
               ).artworkPath,
               path: path.join(DEFAULT_FILE_URL, song.path),
               songId: song.songId,
@@ -112,10 +112,10 @@ export const sendAudioData = async (
           log(
             `ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA`,
             undefined,
-            'ERROR'
+            'ERROR',
           );
           throw new Error(
-            'ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA'
+            'ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA',
           );
         }
       }
@@ -125,7 +125,7 @@ export const sendAudioData = async (
     log(
       `ERROR OCCURRED WHEN READING data.json TO GET SONGS DATA. data.json FILE DOESN'T EXIST OR SONGS ARRAY IS EMPTY.`,
       undefined,
-      'ERROR'
+      'ERROR',
     );
     throw new Error('EMPTY_SONG_ARRAY' as ErrorCodes);
   } catch (err) {

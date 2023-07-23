@@ -56,7 +56,7 @@ const LyricsEditingPage = () => {
 
   const isTheEditingSongTheCurrSong = React.useMemo(
     () => currentSongData.songId === songId,
-    [currentSongData.songId, songId]
+    [currentSongData.songId, songId],
   );
 
   React.useEffect(() => {
@@ -66,7 +66,7 @@ const LyricsEditingPage = () => {
           ...line,
           index,
           isActive: false,
-        })
+        }),
       );
 
       setLyricsLines(lines);
@@ -138,7 +138,7 @@ const LyricsEditingPage = () => {
 
       return undefined;
     },
-    [roundedSongPostion]
+    [roundedSongPostion],
   );
 
   // React.useEffect(() => {
@@ -199,11 +199,11 @@ const LyricsEditingPage = () => {
                       line.isActive = false;
 
                       return line;
-                    })
+                    }),
                   );
                 },
               }}
-            />
+            />,
           );
         },
       },
@@ -260,7 +260,7 @@ const LyricsEditingPage = () => {
                 true,
                 moreOptionsContextMenuItems,
                 x + 10,
-                y + 50
+                y + 50,
               );
             }}
             tooltipLabel="More Options"
@@ -270,7 +270,7 @@ const LyricsEditingPage = () => {
                 true,
                 moreOptionsContextMenuItems,
                 e.pageX,
-                e.pageY
+                e.pageY,
               );
             }}
           />
@@ -286,7 +286,7 @@ const LyricsEditingPage = () => {
                 <LyricsEditorSavePrompt
                   lyricsLines={lyricsLines}
                   currentSongData={currentSongData}
-                />
+                />,
               )
             }
           />

@@ -35,7 +35,7 @@ type HomePageReducerActionTypes =
 
 const reducer = (
   state: HomePageReducer,
-  action: { type: HomePageReducerActionTypes; data?: any }
+  action: { type: HomePageReducerActionTypes; data?: any },
 ): HomePageReducer => {
   switch (action.type) {
     case 'SONGS_DATA':
@@ -85,7 +85,7 @@ const HomePage = () => {
 
   const recentlyAddedSongsContainerRef = React.useRef<HTMLDivElement>(null);
   const recentlyAddedSongsContainerDiamensions = useResizeObserver(
-    recentlyAddedSongsContainerRef
+    recentlyAddedSongsContainerRef,
   );
   const {
     noOfRecentlyAddedSongCards,
@@ -133,7 +133,7 @@ const HomePage = () => {
           recentSongs[0].songs,
           undefined,
           noOfRecentandLovedSongCards + 5,
-          true
+          true,
         )
         .then(
           (res) =>
@@ -141,7 +141,7 @@ const HomePage = () => {
             dispatch({
               type: 'RECENTLY_PLAYED_SONGS_DATA',
               data: res,
-            })
+            }),
         )
         .catch((err) => console.error(err));
   }, [noOfRecentandLovedSongCards]);
@@ -152,9 +152,9 @@ const HomePage = () => {
         ...new Set(
           content.recentlyPlayedSongs
             .map((song) =>
-              song.artists ? song.artists.map((artist) => artist.artistId) : []
+              song.artists ? song.artists.map((artist) => artist.artistId) : [],
             )
-            .flat()
+            .flat(),
         ),
       ];
 
@@ -167,7 +167,7 @@ const HomePage = () => {
               dispatch({
                 type: 'RECENT_SONGS_ARTISTS',
                 data: res,
-              })
+              }),
           )
           .catch((err) => console.error(err));
     }
@@ -183,7 +183,7 @@ const HomePage = () => {
             res[0].songs,
             'allTimeMostListened',
             noOfRecentandLovedSongCards + 5,
-            true
+            true,
           );
         }
         return undefined;
@@ -192,7 +192,7 @@ const HomePage = () => {
         (lovedSongs) =>
           Array.isArray(lovedSongs) &&
           lovedSongs.length > 0 &&
-          dispatch({ type: 'MOST_LOVED_SONGS', data: lovedSongs })
+          dispatch({ type: 'MOST_LOVED_SONGS', data: lovedSongs }),
       )
       .catch((err) => console.error(err));
   }, [noOfRecentandLovedSongCards]);
@@ -203,9 +203,9 @@ const HomePage = () => {
         ...new Set(
           content.mostLovedSongs
             .map((song) =>
-              song.artists ? song.artists.map((artist) => artist.artistId) : []
+              song.artists ? song.artists.map((artist) => artist.artistId) : [],
             )
-            .flat()
+            .flat(),
         ),
       ];
       window.api.artistsData
@@ -216,7 +216,7 @@ const HomePage = () => {
             dispatch({
               type: 'MOST_LOVED_ARTISTS',
               data: res,
-            })
+            }),
         )
         .catch((err) => console.error(err));
     }
@@ -269,7 +269,7 @@ const HomePage = () => {
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageDataUpdatesInHomePage
+        manageDataUpdatesInHomePage,
       );
     };
   }, [
@@ -305,7 +305,7 @@ const HomePage = () => {
           dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
         }}
         onFailure={() => dispatch({ type: 'SONGS_DATA', data: [null] })}
-      />
+      />,
     );
   }, [changePromptMenuData]);
 
@@ -313,7 +313,7 @@ const HomePage = () => {
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
-      setIsPending: (state: boolean) => void
+      setIsPending: (state: boolean) => void,
     ) => {
       setIsDisabled(true);
       setIsPending(true);
@@ -330,7 +330,7 @@ const HomePage = () => {
         })
         .catch((err) => console.error(err));
     },
-    []
+    [],
   );
 
   const homePageContextMenus: ContextMenuItem[] = React.useMemo(
@@ -356,7 +356,7 @@ const HomePage = () => {
                     }
                     showSendFeedbackBtn
                   />,
-                  'error-alert-prompt'
+                  'error-alert-prompt',
                 ),
             },
             {
@@ -379,7 +379,7 @@ const HomePage = () => {
             },
           ]
         : [],
-    [changePromptMenuData, addNewNotifications]
+    [changePromptMenuData, addNewNotifications],
   );
 
   return (
@@ -405,7 +405,7 @@ const HomePage = () => {
             <RecentlyPlayedSongs
               recentlyPlayedSongs={content.recentlyPlayedSongs.slice(
                 0,
-                noOfRecentandLovedSongCards
+                noOfRecentandLovedSongCards,
               )}
               noOfVisibleSongs={noOfRecentandLovedSongCards}
             />
@@ -416,7 +416,7 @@ const HomePage = () => {
             <MostLovedSongs
               mostLovedSongs={content.mostLovedSongs.slice(
                 0,
-                noOfRecentandLovedSongCards
+                noOfRecentandLovedSongCards,
               )}
               noOfVisibleSongs={noOfRecentandLovedSongCards}
             />

@@ -33,7 +33,7 @@ const ConfirmDeletePlaylists = (props: ConfirmDeletePlaylistProp) => {
     const unRemovablePlaylistIds = ['History', 'Favorites'];
 
     return !playlistIds.some((playlistId) =>
-      unRemovablePlaylistIds.includes(playlistId)
+      unRemovablePlaylistIds.includes(playlistId),
     );
   }, [playlistIds]);
 

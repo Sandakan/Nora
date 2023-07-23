@@ -81,12 +81,12 @@ function SongTagsEditingPage() {
       isKnownSource:
         (currentlyActivePage.data.isKnownSource as boolean) ?? true,
     }),
-    [currentlyActivePage.data]
+    [currentlyActivePage.data],
   );
 
   const pathExt = React.useMemo(
     () => window.api.utils.getExtension(songPath),
-    [songPath]
+    [songPath],
   );
 
   const isMetadataEditingSupported = React.useMemo(() => {
@@ -131,7 +131,7 @@ function SongTagsEditingPage() {
                   artistId: artist.artistId,
                   artworkPaths: artist.artworkPaths,
                   onlineArtworkPaths: artist.onlineArtworkPaths,
-                }))
+                })),
             );
           else setArtistResults([]);
           return undefined;
@@ -155,7 +155,7 @@ function SongTagsEditingPage() {
                   albumId: album.albumId,
                   noOfSongs: album.songs.length,
                   artworkPath: album?.artworkPaths?.artworkPath,
-                }))
+                })),
             );
           else setAlbumResults([]);
           return undefined;
@@ -178,7 +178,7 @@ function SongTagsEditingPage() {
                   name: genre.name,
                   genreId: genre.genreId,
                   artworkPaths: genre.artworkPaths,
-                }))
+                })),
             );
           else setGenreResults([]);
           return undefined;
@@ -192,20 +192,20 @@ function SongTagsEditingPage() {
       const updatedData = callback(songInfo);
       setSongInfo(updatedData);
     },
-    [songInfo]
+    [songInfo],
   );
 
   const updateArtistKeyword = React.useCallback(
     (keyword: string) => setArtistKeyword(keyword),
-    []
+    [],
   );
   const updateAlbumKeyword = React.useCallback(
     (keyword: string) => setAlbumKeyword(keyword),
-    []
+    [],
   );
   const updateGenreKeyword = React.useCallback(
     (keyword: string) => setGenreKeyword(keyword),
-    []
+    [],
   );
 
   const fetchSongDataFromNet = React.useCallback(() => {
@@ -216,7 +216,7 @@ function SongTagsEditingPage() {
           songTitle={songInfo.title}
           songArtists={songInfo.artists?.map((x) => x.name) ?? []}
           updateSongInfo={updateSongInfo}
-        />
+        />,
       );
     }
   }, [songInfo.title, songInfo.artists, changePromptMenuData, updateSongInfo]);
@@ -224,7 +224,7 @@ function SongTagsEditingPage() {
   const saveTags = (
     _: unknown,
     setIsDisabled: (state: boolean) => void,
-    setIsPending: (state: boolean) => void
+    setIsPending: (state: boolean) => void,
   ) => {
     setIsDisabled(true);
     setIsPending(true);
@@ -234,7 +234,7 @@ function SongTagsEditingPage() {
         isKnownSource ? songId : songPath,
         songInfo,
         songId === currentSongData.songId,
-        isKnownSource
+        isKnownSource,
       )
       .then((res) => {
         if (res.success) {
@@ -255,7 +255,7 @@ function SongTagsEditingPage() {
           ]);
           return window.api.songUpdates.getSongId3Tags(
             isKnownSource ? songId : songPath,
-            isKnownSource
+            isKnownSource,
           );
         }
         throw new Error('Error ocurred when updating song ID3 tags.');
@@ -300,7 +300,7 @@ function SongTagsEditingPage() {
             setGenreKeyword('');
             setGenreResults([]);
           }}
-        />
+        />,
       );
     } else
       addNewNotifications([
@@ -313,7 +313,7 @@ function SongTagsEditingPage() {
 
   const areThereDataChanges = React.useMemo(
     () => isDataChanged(defaultValues, songInfo),
-    [defaultValues, songInfo]
+    [defaultValues, songInfo],
   );
 
   const songNameFromPath = React.useMemo(() => {
@@ -432,7 +432,8 @@ function SongTagsEditingPage() {
                 songArtists={songInfo.artists}
                 songPath={songPath}
                 duration={songInfo.duration}
-                songLyrics={songInfo.lyrics}
+                synchronizedLyrics={songInfo.synchronizedLyrics}
+                unsynchronizedLyrics={songInfo.unsynchronizedLyrics}
                 updateSongInfo={updateSongInfo}
               />
             </div>
@@ -455,6 +456,15 @@ function SongTagsEditingPage() {
                 clickHandler={resetDataToDefaults}
               />
             </div>
+            {currentSongData.songId === songId && (
+              <p className="appear-from-bottom ml-2 text-sm font-medium flex items-center text-font-color-highlight dark:text-dark-font-color-highlight">
+                <span className="material-icons-round-outlined text-xl mr-2">
+                  error
+                </span>{' '}
+                Avoid editing metadata of a currently playing song to prevent
+                corruptions.
+              </p>
+            )}
           </>
         )}
 
@@ -467,7 +477,7 @@ function SongTagsEditingPage() {
             <p
               className="mt-4 cursor-pointer text-xs font-light opacity-50"
               title={window.api.utils.removeDefaultAppProtocolFromFilePath(
-                songPath
+                songPath,
               )}
             >
               {window.api.utils.getBaseName(songPath)}

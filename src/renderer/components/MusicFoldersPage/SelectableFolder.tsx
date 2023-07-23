@@ -27,7 +27,7 @@ const SelectableFolder = (props: Props) => {
           updateFolders={updateFolders}
         />
       )),
-    [structure.subFolders, updateFolders]
+    [structure.subFolders, updateFolders],
   );
 
   return (

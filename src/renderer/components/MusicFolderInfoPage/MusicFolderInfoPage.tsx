@@ -71,12 +71,12 @@ const MusicFolderInfoPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageFolderInfoUpdatesInMusicFolderInfoPage
+      manageFolderInfoUpdatesInMusicFolderInfoPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageFolderInfoUpdatesInMusicFolderInfoPage
+        manageFolderInfoUpdatesInMusicFolderInfoPage,
       );
     };
   }, [fetchFolderInfo]);
@@ -102,12 +102,12 @@ const MusicFolderInfoPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageSongUpdatesInMusicFolderInfoPage
+      manageSongUpdatesInMusicFolderInfoPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageSongUpdatesInMusicFolderInfoPage
+        manageSongUpdatesInMusicFolderInfoPage,
       );
     };
   }, [fetchFolderSongs]);
@@ -160,7 +160,7 @@ const MusicFolderInfoPage = () => {
       createQueue(queueSongIds, 'folder', false, folderInfo?.path, false);
       playSong(currSongId, true);
     },
-    [createQueue, folderInfo?.path, folderSongs, playSong]
+    [createQueue, folderInfo?.path, folderSongs, playSong],
   );
 
   const row = React.useCallback(
@@ -207,7 +207,7 @@ const MusicFolderInfoPage = () => {
       handleSongPlayBtnClick,
       localStorageData?.preferences?.isSongIndexingEnabled,
       selectAllHandler,
-    ]
+    ],
   );
 
   const { folderName } = React.useMemo(() => {
@@ -229,7 +229,7 @@ const MusicFolderInfoPage = () => {
           window.api.audioLibraryControls.resyncSongsLibrary(),
       },
     ],
-    []
+    [],
   );
 
   return (
@@ -302,7 +302,7 @@ const MusicFolderInfoPage = () => {
                     'folder',
                     false,
                     folderInfo.path,
-                    true
+                    true,
                   )
                 }
               />
@@ -319,7 +319,7 @@ const MusicFolderInfoPage = () => {
                     'folder',
                     true,
                     folderInfo.path,
-                    true
+                    true,
                   )
                 }
               />

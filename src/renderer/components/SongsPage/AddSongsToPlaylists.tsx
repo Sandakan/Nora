@@ -92,7 +92,7 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
                   songIds.length === 1 &&
                   playlist.songs.some((id) => songIds.includes(id)),
               };
-            })
+            }),
           );
         }
         return undefined;
@@ -102,7 +102,7 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
 
   const addSongsToPlaylists = React.useCallback(() => {
     const selectedPlaylists = playlists.filter(
-      (playlist) => playlist.isSelected
+      (playlist) => playlist.isSelected,
     );
     const promises = selectedPlaylists.map(async (playlist) => {
       if (playlist.playlistId === 'Favorites')
@@ -167,12 +167,12 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
             );
           })
         : [],
-    [playlists]
+    [playlists],
   );
 
   const noOfSelectedPlaylists = React.useMemo(
     () => playlists.filter((playlist) => playlist.isSelected).length,
-    [playlists]
+    [playlists],
   );
 
   return (

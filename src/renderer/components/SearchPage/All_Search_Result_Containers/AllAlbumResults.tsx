@@ -54,7 +54,7 @@ const AllAlbumResults = (prop: Props) => {
       }
       return <div style={style} />;
     },
-    [albumData, noOfColumns, selectAllHandler]
+    [albumData, noOfColumns, selectAllHandler],
   );
 
   return (
@@ -83,7 +83,7 @@ const AllAlbumResults = (prop: Props) => {
                     ...currentPageData,
                     scrollTopOffset: data.scrollTop,
                   })),
-                500
+                500,
               );
           }}
         >

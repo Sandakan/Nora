@@ -15,7 +15,7 @@ const useSelectAllHandler = <Obj extends Record<string, any>>(
   idProperty: keyof Pick<
     Obj,
     { [Prop in keyof Obj]: Obj[Prop] extends string ? Prop : never }[keyof Obj]
-  >
+  >,
 ) => {
   const { multipleSelectionsData } = React.useContext(AppContext);
   const { toggleMultipleSelections } = React.useContext(AppUpdateContext);
@@ -43,7 +43,7 @@ const useSelectAllHandler = <Obj extends Record<string, any>>(
             const selectedIds = slice(
               arr.map((prop) => prop[idProperty] as string),
               lastAddedIndex,
-              currIndex
+              currIndex,
             );
             ids.push(...selectedIds);
           }
@@ -65,7 +65,7 @@ const useSelectAllHandler = <Obj extends Record<string, any>>(
       multipleSelectionsData.multipleSelections,
       selectionType,
       toggleMultipleSelections,
-    ]
+    ],
   );
 
   return selectAllHandler;

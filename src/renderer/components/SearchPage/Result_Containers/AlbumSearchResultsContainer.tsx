@@ -50,7 +50,7 @@ const AlbumSearchResultsContainer = (props: Props) => {
             })
             .filter((album) => album !== undefined)
         : [],
-    [albums, noOfVisibleAlbums, selectAllHandler]
+    [albums, noOfVisibleAlbums, selectAllHandler],
   );
 
   return (

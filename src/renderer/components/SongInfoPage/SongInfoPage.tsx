@@ -13,7 +13,7 @@ import SongArtist from '../SongsPage/SongArtist';
 import ListeningActivityBarGraph from './ListeningActivityBarGraph';
 import SongStat from './SongStat';
 import SongsWithFeaturingArtistsSuggestion from './SongsWithFeaturingArtistSuggestion';
-import SongAdditionalInfoItem from './SongAdditionalInfoItem';
+import SongAdditionalInfoContainer from './SongAdditionalInfoContainer';
 
 const SongInfoPage = () => {
   const { currentlyActivePage, bodyBackgroundImage } = useContext(AppContext);
@@ -56,7 +56,7 @@ const SongInfoPage = () => {
         return prevData;
       });
     },
-    []
+    [],
   );
 
   const fetchSongInfo = React.useCallback(() => {
@@ -109,12 +109,12 @@ const SongInfoPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageSongInfoUpdatesInSongInfoPage
+      manageSongInfoUpdatesInSongInfoPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageSongInfoUpdatesInSongInfoPage
+        manageSongInfoUpdatesInSongInfoPage,
       );
     };
   }, [fetchSongInfo]);
@@ -141,7 +141,7 @@ const SongInfoPage = () => {
                 key={`${artistArr[i]}=>${artistArr[i + 1]}`}
               >
                 ,
-              </span>
+              </span>,
             );
 
           return arr;
@@ -172,7 +172,7 @@ const SongInfoPage = () => {
               .flat(5)
               .reduce(
                 (prevValue, currValue) => prevValue + (currValue || 0),
-                0
+                0,
               );
 
             for (const listen of listens[i].listens) {
@@ -227,12 +227,12 @@ const SongInfoPage = () => {
                       handlerFunction: () =>
                         window.api.songUpdates.saveArtworkToSystem(
                           songInfo.artworkPaths.artworkPath,
-                          `${songInfo.title} song artwork`.replaceAll(' ', '_')
+                          `${songInfo.title} song artwork`.replaceAll(' ', '_'),
                         ),
                     },
                   ],
                   e.pageX,
-                  e.pageY
+                  e.pageY,
                 )
               }
             />
@@ -360,79 +360,10 @@ const SongInfoPage = () => {
                 />
               </div>
             </div>
-            <div className="other-cards appear-from-bottom mr-4 w-full max-w-[60rem] rounded-xl bg-background-color-2/70 p-4 backdrop-blur-sm dark:bg-dark-background-color-2/70 dark:text-font-color-white">
-              {/* <h1 className="text-xl font-medium uppercase">
-                Additional Information
-              </h1> */}
-              <SongAdditionalInfoItem
-                label="Song Title"
-                value={songInfo.title}
-              />
-              <SongAdditionalInfoItem label="Duration" value={songDuration} />
-              {Array.isArray(songInfo.artists) &&
-                songInfo.artists.length > 0 && (
-                  <SongAdditionalInfoItem
-                    label="Artists"
-                    value={songInfo.artists
-                      .map((artist) => artist.name)
-                      .join(', ')}
-                  />
-                )}
-              {songInfo.album && (
-                <SongAdditionalInfoItem
-                  label="Album"
-                  value={songInfo.album?.name}
-                />
-              )}
-              {Array.isArray(songInfo.genres) && songInfo.genres.length > 0 && (
-                <SongAdditionalInfoItem
-                  label="Genres"
-                  value={songInfo.genres.map((genre) => genre.name).join(', ')}
-                />
-              )}
-              {songInfo.trackNo && (
-                <SongAdditionalInfoItem
-                  label="Album Track Number"
-                  value={songInfo.trackNo.toString()}
-                />
-              )}
-              {songInfo.year && (
-                <SongAdditionalInfoItem
-                  label="Released Year"
-                  value={songInfo.year.toString()}
-                />
-              )}
-              <SongAdditionalInfoItem
-                label="Song Added On"
-                value={new Date(songInfo.addedDate).toUTCString()}
-              />
-              {songInfo.modifiedDate && (
-                <SongAdditionalInfoItem
-                  label="Last Modified On"
-                  value={new Date(songInfo.modifiedDate).toUTCString()}
-                />
-              )}
-              {songInfo.sampleRate && (
-                <SongAdditionalInfoItem
-                  label="Sample Rate"
-                  value={`${songInfo.sampleRate} Hz`}
-                />
-              )}
-              {songInfo.bitrate && (
-                <SongAdditionalInfoItem
-                  label="Bit Rate"
-                  value={`${Math.floor(songInfo.bitrate / 1000)} Kbps`}
-                />
-              )}
-              {songInfo.noOfChannels && (
-                <SongAdditionalInfoItem
-                  label="Number of Audio Channels"
-                  value={`${songInfo.noOfChannels} Channels (${
-                    songInfo.noOfChannels === 1 ? 'Mono' : 'Stereo'
-                  })`}
-                />
-              )}
-            </div>
+            <SongAdditionalInfoContainer
+              songInfo={songInfo}
+              songDurationStr={songDuration}
+            />
           </SecondaryContainer>
         )}
       </>

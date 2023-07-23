@@ -56,7 +56,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
                 return undefined;
               })
               .catch((err) => console.error(err)),
-          5000
+          5000,
         );
       }
     }
@@ -107,7 +107,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
             songId,
           })
         : undefined,
-    [changeCurrentActivePage, currentSongData.isKnownSource]
+    [changeCurrentActivePage, currentSongData.isKnownSource],
   );
 
   const gotToSongAlbumPage = React.useCallback(
@@ -121,7 +121,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
       changeCurrentActivePage,
       currentSongData.album,
       currentSongData.isKnownSource,
-    ]
+    ],
   );
 
   const songArtists = React.useMemo(() => {
@@ -147,7 +147,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
                   className="mr-1"
                 >
                   ,
-                </span>
+                </span>,
               );
 
             return arr;
@@ -189,7 +189,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
         handlerFunction: () => {
           changePromptMenuData(
             true,
-            <AddSongsToPlaylists songIds={[songId]} title={title} />
+            <AddSongsToPlaylists songIds={[songId]} title={title} />,
           );
           toggleMultipleSelections(false);
         },
@@ -239,7 +239,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
           artworkPath &&
           window.api.songUpdates.saveArtworkToSystem(
             artworkPath,
-            `${title} song artwork`.replaceAll(' ', '_')
+            `${title} song artwork`.replaceAll(' ', '_'),
           ),
         isDisabled: currentSongData.artworkPath === undefined,
       },
@@ -267,13 +267,13 @@ const CurrentlyPlayingSongInfoContainer = () => {
                     content: <span>&apos;{title}&apos; blacklisted.</span>,
                     icon: <span className="material-icons-round">block</span>,
                   },
-                ])
+                ]),
               )
               .catch((err) => console.error(err));
           else
             changePromptMenuData(
               true,
-              <BlacklistSongConfrimPrompt title={title} songIds={[songId]} />
+              <BlacklistSongConfrimPrompt title={title} songIds={[songId]} />,
             );
           return toggleMultipleSelections(false);
         },
@@ -284,7 +284,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
         handlerFunction: () => {
           changePromptMenuData(
             true,
-            <DeleteSongsFromSystemConfrimPrompt songIds={[songId]} />
+            <DeleteSongsFromSystemConfrimPrompt songIds={[songId]} />,
           );
           toggleMultipleSelections(false);
         },
@@ -323,7 +323,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
               contextMenuItems,
               e.pageX,
               e.pageY,
-              contextMenuCurrentSongData
+              contextMenuCurrentSongData,
             );
           }}
         />
@@ -348,7 +348,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
                   contextMenuItems,
                   e.pageX,
                   e.pageY,
-                  contextMenuCurrentSongData
+                  contextMenuCurrentSongData,
                 );
               }}
               tabIndex={0}

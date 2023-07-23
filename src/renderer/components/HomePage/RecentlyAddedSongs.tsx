@@ -19,7 +19,7 @@ const RecentlyAddedSongs = React.forwardRef(
     const selectAllHandler = useSelectAllHandler(
       latestSongs,
       'songs',
-      'songId'
+      'songId',
     );
 
     const latestSongComponents = React.useMemo(
@@ -49,7 +49,7 @@ const RecentlyAddedSongs = React.forwardRef(
                 );
               })
           : [],
-      [latestSongs, noOfVisibleSongs, selectAllHandler]
+      [latestSongs, noOfVisibleSongs, selectAllHandler],
     );
 
     return (
@@ -83,7 +83,7 @@ const RecentlyAddedSongs = React.forwardRef(
             <div
               style={{
                 gridTemplateColumns: `repeat(${Math.floor(
-                  noOfVisibleSongs / 2
+                  noOfVisibleSongs / 2,
                 )},1fr)`,
               }}
               className="songs-container grid max-w-full grid-rows-2 gap-2 pr-2"
@@ -94,7 +94,7 @@ const RecentlyAddedSongs = React.forwardRef(
         )}
       </SecondaryContainer>
     );
-  }
+  },
 );
 
 RecentlyAddedSongs.displayName = 'RecentlyAddedSongs';

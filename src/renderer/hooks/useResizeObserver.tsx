@@ -3,7 +3,7 @@ import debounce from 'renderer/utils/debounce';
 
 export default function useResizeObserver(
   elRef: React.MutableRefObject<HTMLElement | null | undefined>,
-  debounceTimeout?: number
+  debounceTimeout?: number,
 ) {
   const [breakSize, setBreakSize] = React.useState({ width: 0, height: 0 });
 
@@ -14,7 +14,7 @@ export default function useResizeObserver(
       if (debounceTimeout === undefined || debounceTimeout === 0)
         setBreakSize({ width, height });
       else debounce(() => setBreakSize({ width, height }), debounceTimeout);
-    })
+    }),
   );
 
   React.useLayoutEffect(() => {

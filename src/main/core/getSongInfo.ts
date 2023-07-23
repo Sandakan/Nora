@@ -9,7 +9,7 @@ const getSongInfo = async (
   sortType?: SongSortTypes,
   limit = songIds.length,
   preserveIdOrder = false,
-  noBlacklistedSongs = false
+  noBlacklistedSongs = false,
 ): Promise<SongData[]> => {
   log(
     `Fetching data related to ${
@@ -17,7 +17,7 @@ const getSongInfo = async (
     } songs from getSongInfo ${
       sortType ? `with ${sortType}` : 'without'
     } sorting.`,
-    { sortType, limit, preserveIdOrder, noBlacklistedSongs }
+    { sortType, limit, preserveIdOrder, noBlacklistedSongs },
   );
   if (songIds.length > 0) {
     const songsData = getSongsData();
@@ -53,13 +53,13 @@ const getSongInfo = async (
 
         if (noBlacklistedSongs)
           updatedResults = updatedResults.filter(
-            (result) => !result.isBlacklisted
+            (result) => !result.isBlacklisted,
           );
 
         if (limit) {
           if (typeof sortType === 'string')
             return sortSongs(updatedResults, sortType, listeningData).filter(
-              (_, index) => index < limit
+              (_, index) => index < limit,
             );
           return updatedResults.filter((_, index) => index < limit);
         }
@@ -67,18 +67,18 @@ const getSongInfo = async (
       }
       log(
         `Request failed to get songs info of songs with ids ${songIds.join(
-          ','
-        )} because they cannot be found.`
+          ',',
+        )} because they cannot be found.`,
       );
       return [];
     }
     log(
-      `ERROR OCCURRED WHEN TRYING GET SONGS INFO FROM getSongInfo FUNCTION. SONGS DATA ARE EMPTY.`
+      `ERROR OCCURRED WHEN TRYING GET SONGS INFO FROM getSongInfo FUNCTION. SONGS DATA ARE EMPTY.`,
     );
     return [];
   }
   log(
-    `APP MADE A REQUEST TO getSongInfo FUNCTION WITH AN EMPTY ARRAY OF SONG IDS. `
+    `APP MADE A REQUEST TO getSongInfo FUNCTION WITH AN EMPTY ARRAY OF SONG IDS. `,
   );
   return [];
 };

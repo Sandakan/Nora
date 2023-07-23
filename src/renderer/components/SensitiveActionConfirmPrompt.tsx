@@ -11,7 +11,7 @@ interface SensitiveActionConfrimPromptProp {
 }
 
 const SensitiveActionConfirmPrompt = (
-  props: SensitiveActionConfrimPromptProp
+  props: SensitiveActionConfrimPromptProp,
 ) => {
   const { changePromptMenuData } = React.useContext(AppUpdateContext);
   const {

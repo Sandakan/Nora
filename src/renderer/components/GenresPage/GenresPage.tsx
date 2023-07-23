@@ -33,7 +33,7 @@ const GenresPage = () => {
   const [sortingOrder, setSortingOrder] = React.useState<GenreSortTypes>(
     currentlyActivePage?.data?.sortingOrder ||
       localStorageData?.sortingStates?.genresPage ||
-      'aToZ'
+      'aToZ',
   );
 
   const containerRef = React.useRef(null as HTMLDivElement | null);
@@ -42,7 +42,7 @@ const GenresPage = () => {
   const MIN_ITEM_HEIGHT = 180;
   const noOfColumns = Math.floor(width / MIN_ITEM_WIDTH);
   const noOfRows = Math.ceil(
-    (genresData ? genresData.length : 1) / noOfColumns
+    (genresData ? genresData.length : 1) / noOfColumns,
   );
   const itemWidth =
     MIN_ITEM_WIDTH + ((width % MIN_ITEM_WIDTH) - 10) / noOfColumns;
@@ -72,25 +72,25 @@ const GenresPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageGenreDataUpdatesInGenresPage
+      manageGenreDataUpdatesInGenresPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageGenreDataUpdatesInGenresPage
+        manageGenreDataUpdatesInGenresPage,
       );
     };
   }, [fetchGenresData]);
 
   React.useEffect(
     () => storage.sortingStates.setSortingStates('genresPage', sortingOrder),
-    [sortingOrder]
+    [sortingOrder],
   );
 
   const selectAllHandler = useSelectAllHandler(
     genresData as Genre[],
     'genre',
-    'genreId'
+    'genreId',
   );
 
   const row = React.useCallback(
@@ -120,7 +120,7 @@ const GenresPage = () => {
       }
       return <div style={style} />;
     },
-    [genresData, noOfColumns, selectAllHandler]
+    [genresData, noOfColumns, selectAllHandler],
   );
 
   return (
@@ -216,7 +216,7 @@ const GenresPage = () => {
                         ...currentPageData,
                         scrollTopOffset: data.scrollTop,
                       })),
-                    500
+                    500,
                   );
               }}
             >

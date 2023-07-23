@@ -63,7 +63,7 @@ const OtherSongControlsContainer = () => {
           },
         ],
         pageX,
-        pageY
+        pageY,
       );
     },
     [
@@ -71,7 +71,7 @@ const OtherSongControlsContainer = () => {
       isMiniPlayer,
       updateContextMenuData,
       updateMiniPlayerStatus,
-    ]
+    ],
   );
 
   return (

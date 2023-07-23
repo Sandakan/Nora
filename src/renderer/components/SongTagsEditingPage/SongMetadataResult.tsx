@@ -1,4 +1,5 @@
 import React from 'react';
+import isLyricsSynced from 'main/utils/isLyricsSynced';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
 import Img from '../Img';
@@ -19,7 +20,7 @@ interface SongMetadataResultProp {
 export const manageAlbumData = (
   albumData: Album[],
   album?: string,
-  songArtwork?: string
+  songArtwork?: string,
 ): SongTagsAlbumData | undefined => {
   if (albumData.length > 0)
     return {
@@ -36,7 +37,7 @@ export const manageAlbumData = (
 
 export const manageArtistsData = (
   artistData: Artist[],
-  artists: string[]
+  artists: string[],
 ):
   | {
       artistId?: string;
@@ -51,7 +52,7 @@ export const manageArtistsData = (
       artistId: data.artistId,
       artworkPath: data.artworkPaths.optimizedArtworkPath,
       onlineArtworkPaths: data.onlineArtworkPaths,
-    })
+    }),
   );
 
   for (const artistName of artists) {
@@ -64,7 +65,7 @@ export const manageArtistsData = (
 
 export const manageGenresData = (
   genreData: Genre[],
-  genres?: string[]
+  genres?: string[],
 ):
   | {
       genreId?: string | undefined;
@@ -78,7 +79,7 @@ export const manageGenresData = (
         name: data.name,
         genreId: data.genreId,
         artworkPath: data.artworkPaths.optimizedArtworkPath,
-      })
+      }),
     );
 
     for (const genreName of genres) {
@@ -122,11 +123,18 @@ function SongMetadataResult(props: SongMetadataResultProp) {
       changePromptMenuData(false, undefined, '');
 
       const artworkPath = manageArtworks(prevData, artworkPaths);
+      const isLyricsSynchronised = isLyricsSynced(lyrics || '');
+
       return {
         ...prevData,
         title: title || prevData.title,
         releasedYear: releasedYear || prevData.releasedYear,
-        lyrics: lyrics || prevData.lyrics,
+        synchronizedLyrics:
+          lyrics && isLyricsSynchronised ? lyrics : prevData.synchronizedLyrics,
+        unsynchronizedLyrics:
+          lyrics && !isLyricsSynchronised
+            ? lyrics
+            : prevData.unsynchronizedLyrics,
         artworkPath,
         album: manageAlbumData(albumData, album, artworkPath),
         artists: manageArtistsData(artistData, artists),
@@ -206,7 +214,7 @@ function SongMetadataResult(props: SongMetadataResultProp) {
                 lyrics={lyrics}
                 releasedYear={releasedYear}
                 updateSongInfo={updateSongInfo}
-              />
+              />,
             );
           }}
           tooltipLabel="Customize Metadata"

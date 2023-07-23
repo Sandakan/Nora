@@ -39,7 +39,7 @@ const SongSearchResultsContainer = (props: Props) => {
       createQueue(queueSongIds, 'songs', false, undefined, false);
       playSong(currSongId, true);
     },
-    [createQueue, playSong, songs]
+    [createQueue, playSong, songs],
   );
 
   const songResults = React.useMemo(
@@ -77,7 +77,7 @@ const SongSearchResultsContainer = (props: Props) => {
       localStorageData?.preferences?.isSongIndexingEnabled,
       noOfVisibleSongs,
       songs,
-    ]
+    ],
   );
 
   return (

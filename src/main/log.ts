@@ -53,7 +53,7 @@ const getLogFilePath = () => {
   const day = date.getDate();
   const year = date.getFullYear();
   const formattedDate = `${year}-${getMinTwoWidthNums(
-    month
+    month,
   )}-${getMinTwoWidthNums(day)}`;
 
   const appState = IS_DEVELOPMENT ? 'dev' : 'prod';
@@ -73,7 +73,7 @@ const log = (
   data?: Record<string, unknown>,
   messageType: LogMessageTypes = 'INFO',
   logOptions?: LogOptions,
-  logType: LogType = 'MAIN'
+  logType: LogType = 'MAIN',
 ) => {
   let mes: string;
 
@@ -102,13 +102,13 @@ const log = (
     sendMessageToRenderer(
       mes,
       rendererMsgOptions.code,
-      rendererMsgOptions.data
+      rendererMsgOptions.data,
     );
   }
 
   if (messageType !== 'INFO') mes = mes.toUpperCase();
   const str = `\n[${new Date().toUTCString()}] [${logType}] = ${seperator} ${mes} ${seperator}\n\t${objectToString(
-    data
+    data,
   )}`;
   appendFileSync(logFilePath, str, { encoding: 'utf-8' });
 

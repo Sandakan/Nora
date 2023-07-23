@@ -15,7 +15,7 @@ type Props = {
 
 const convertLyricsStrToObj = (
   lyricsLines: ExtendedEditingLyricsLineData[],
-  currentSongData: AudioPlayerData
+  currentSongData: AudioPlayerData,
 ) => {
   const metadataLines: string[] = [];
 
@@ -75,7 +75,7 @@ const LyricsEditorSavePrompt = (props: Props) => {
 
   const parsedLyrics = React.useMemo(
     () => convertLyricsStrToObj(lyricsLines, currentSongData),
-    [currentSongData, lyricsLines]
+    [currentSongData, lyricsLines],
   );
 
   //   React.useEffect(() => {
@@ -87,7 +87,7 @@ const LyricsEditorSavePrompt = (props: Props) => {
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
-      setIsPending: (state: boolean) => void
+      setIsPending: (state: boolean) => void,
     ) => {
       if (parsedLyrics?.lyrics.unparsedLyrics) {
         setIsDisabled(true);
@@ -106,14 +106,14 @@ const LyricsEditorSavePrompt = (props: Props) => {
           });
       }
     },
-    [parsedLyrics]
+    [parsedLyrics],
   );
 
   const saveLyricsToSong = React.useCallback(
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
-      setIsPending: (state: boolean) => void
+      setIsPending: (state: boolean) => void,
     ) => {
       if (parsedLyrics && currentSongData.title === parsedLyrics.title) {
         setIsDisabled(true);
@@ -149,7 +149,7 @@ const LyricsEditorSavePrompt = (props: Props) => {
       currentSongData.path,
       currentSongData.title,
       parsedLyrics,
-    ]
+    ],
   );
 
   return (

@@ -10,6 +10,7 @@ import AboutSettings from './Settings/AboutSettings';
 import StorageSettings from './Settings/StorageSettings';
 import EqualizerSettings from './Settings/EqualizerSettings';
 import PerformanceSettings from './Settings/PerformanceSettings';
+import AccountsSettings from './Settings/AccountsSettings';
 
 const SettingsPage = () => {
   return (
@@ -25,6 +26,9 @@ const SettingsPage = () => {
 
           {/* ? AUDIO PLAYBACK SETTINGS */}
           <AudioPlaybackSettings />
+
+          {/* ? ACCOUNTS SETTINGS */}
+          <AccountsSettings />
 
           {/* ? LYRICS SETTINGS */}
           <LyricsSettings />

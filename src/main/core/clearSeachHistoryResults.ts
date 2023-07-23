@@ -6,7 +6,7 @@ const clearSearchHistoryResults = (resultsToRemove = [] as string[]) => {
   log(
     `User request to remove ${
       resultsToRemove.length > 0 ? resultsToRemove.length : 'all'
-    } results from the search history.`
+    } results from the search history.`,
   );
   const { recentSearches } = getUserData();
   if (Array.isArray(recentSearches)) {
@@ -15,7 +15,7 @@ const clearSearchHistoryResults = (resultsToRemove = [] as string[]) => {
     else {
       const updatedRecentSearches = recentSearches.filter(
         (recentSearch) =>
-          !resultsToRemove.some((result) => recentSearch === result)
+          !resultsToRemove.some((result) => recentSearch === result),
       );
       setUserData('recentSearches', updatedRecentSearches);
     }

@@ -16,7 +16,7 @@ const RecentlyPlayedArtists = (props: Props) => {
   const selectAllHandler = useSelectAllHandler(
     recentlyPlayedSongArtists,
     'artist',
-    'artistId'
+    'artistId',
   );
 
   const recentlyPlayedSongArtistsComponents = React.useMemo(
@@ -42,7 +42,7 @@ const RecentlyPlayedArtists = (props: Props) => {
           return undefined;
         })
         .filter((x) => x !== undefined),
-    [noOfVisibleArtists, recentlyPlayedSongArtists, selectAllHandler]
+    [noOfVisibleArtists, recentlyPlayedSongArtists, selectAllHandler],
   );
 
   return (

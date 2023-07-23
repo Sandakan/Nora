@@ -20,7 +20,7 @@ const Notification = (props: AppNotification) => {
 
   const notificationRef = React.useRef(null as HTMLDivElement | null);
   const notificationTimeoutIdRef = React.useRef(
-    undefined as NodeJS.Timeout | undefined
+    undefined as NodeJS.Timeout | undefined,
   );
   const [dimensions, setDimensions] = React.useState({ width: 0, height: 0 });
 
@@ -42,12 +42,12 @@ const Notification = (props: AppNotification) => {
       notificationRef.current.classList.add('disappear-to-bottom');
       notificationRef.current.addEventListener('animationend', () =>
         updateNotifications((currNotifications) =>
-          currNotifications.filter((x) => x.id !== id)
-        )
+          currNotifications.filter((x) => x.id !== id),
+        ),
       );
     } else
       updateNotifications((currNotifications) =>
-        currNotifications.filter((x) => x.id !== id)
+        currNotifications.filter((x) => x.id !== id),
       );
   }, [
     id,
@@ -65,7 +65,7 @@ const Notification = (props: AppNotification) => {
       });
       notificationTimeoutIdRef.current = setTimeout(
         removeNotification,
-        delay ?? 5000
+        delay ?? 5000,
       );
     }
     return () => {
@@ -74,7 +74,7 @@ const Notification = (props: AppNotification) => {
       if (notification?.classList.contains('disappear-to-bottom')) {
         clearTimeout(notificationTimeoutIdRef.current);
         updateNotifications((currNotifications) =>
-          currNotifications.filter((x) => x.id !== id)
+          currNotifications.filter((x) => x.id !== id),
         );
       }
     };

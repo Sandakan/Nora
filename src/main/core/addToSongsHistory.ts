@@ -8,14 +8,14 @@ import { dataUpdateEvent } from '../main';
 
 export const addToSongsHistory = (songId: string) => {
   log(
-    `Requested a song with id -${songId}- to be added to the History playlist.`
+    `Requested a song with id -${songId}- to be added to the History playlist.`,
   );
   let playlists = getPlaylistData();
   if (playlists && Array.isArray(playlists)) {
     if (
       playlists.some(
         (playlist) =>
-          playlist.name === 'History' && playlist.playlistId === 'History'
+          playlist.name === 'History' && playlist.playlistId === 'History',
       )
     ) {
       playlists = playlists.map((playlist) => {
@@ -39,7 +39,7 @@ export const addToSongsHistory = (songId: string) => {
     return true;
   }
   log(
-    `ERROR OCCURRED WHEN TRYING TO ADD A SONG TO THE FAVORITES. PLAYLIST DATA ARE EMPTY.`
+    `ERROR OCCURRED WHEN TRYING TO ADD A SONG TO THE FAVORITES. PLAYLIST DATA ARE EMPTY.`,
   );
   throw new Error('Playlists is not an array.');
 };

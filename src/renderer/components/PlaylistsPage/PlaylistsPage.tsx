@@ -30,7 +30,7 @@ const PlaylistsPage = () => {
   const [sortingOrder, setSortingOrder] = React.useState<PlaylistSortTypes>(
     currentlyActivePage?.data?.sortingOrder ||
       localStorageData?.sortingStates?.playlistsPage ||
-      'aToZ'
+      'aToZ',
   );
 
   const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
@@ -49,7 +49,7 @@ const PlaylistsPage = () => {
         if (res && res.length > 0) setPlaylists(res);
         return undefined;
       }),
-    [sortingOrder]
+    [sortingOrder],
   );
 
   React.useEffect(() => {
@@ -66,12 +66,12 @@ const PlaylistsPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      managePlaylistDataUpdatesInPlaylistsPage
+      managePlaylistDataUpdatesInPlaylistsPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        managePlaylistDataUpdatesInPlaylistsPage
+        managePlaylistDataUpdatesInPlaylistsPage,
       );
     };
   }, [fetchPlaylistData]);
@@ -83,7 +83,7 @@ const PlaylistsPage = () => {
   const selectAllHandler = useSelectAllHandler(
     playlists,
     'playlist',
-    'playlistId'
+    'playlistId',
   );
 
   const row = React.useCallback(
@@ -114,7 +114,7 @@ const PlaylistsPage = () => {
       }
       return <div style={style} />;
     },
-    [noOfColumns, playlists, selectAllHandler]
+    [noOfColumns, playlists, selectAllHandler],
   );
 
   const createNewPlaylist = React.useCallback(
@@ -124,9 +124,9 @@ const PlaylistsPage = () => {
         <NewPlaylistPrompt
           currentPlaylists={playlists}
           updatePlaylists={(newPlaylists) => setPlaylists(newPlaylists)}
-        />
+        />,
       ),
-    [changePromptMenuData, playlists]
+    [changePromptMenuData, playlists],
   );
 
   return (
@@ -151,7 +151,7 @@ const PlaylistsPage = () => {
             },
           ],
           e.pageX,
-          e.pageY
+          e.pageY,
         )
       }
       focusable
@@ -190,7 +190,7 @@ const PlaylistsPage = () => {
                 clickHandler={() =>
                   toggleMultipleSelections(
                     !isMultipleSelectionEnabled,
-                    'playlist'
+                    'playlist',
                   )
                 }
                 tooltipLabel={
@@ -270,7 +270,7 @@ const PlaylistsPage = () => {
                         ...currentPageData,
                         scrollTopOffset: data.scrollTop,
                       })),
-                    500
+                    500,
                   );
               }}
             >

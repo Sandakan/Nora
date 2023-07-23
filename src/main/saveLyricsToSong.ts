@@ -7,7 +7,7 @@ import log from './log';
 
 const saveLyricsToSong = async (
   songPathWithProtocol: string,
-  lyrics: SongLyrics
+  lyrics: SongLyrics,
 ) => {
   const songPath = removeDefaultAppProtocolFromFilePath(songPathWithProtocol);
   if (lyrics && lyrics?.lyrics) {
@@ -29,7 +29,7 @@ const saveLyricsToSong = async (
           unsynchronisedLyrics,
           synchronisedLyrics: synchronisedLyrics || [],
         },
-        songPath
+        songPath,
       );
       updateCachedLyrics((prevLyrics) => {
         if (prevLyrics)
@@ -41,13 +41,13 @@ const saveLyricsToSong = async (
         return undefined;
       });
       return log(
-        `Updated lyrics on '${path.basename(songPath)}' successfully.`
+        `Updated lyrics on '${path.basename(songPath)}' successfully.`,
       );
     } catch (error) {
       log(
         `FAILED TO UPDATE THE SONG FILE WITH THE NEW UPDATES. `,
         { error },
-        'ERROR'
+        'ERROR',
       );
       throw error;
     }

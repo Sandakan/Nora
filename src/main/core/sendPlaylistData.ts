@@ -6,7 +6,7 @@ import sortPlaylists from '../utils/sortPlaylists';
 const sendPlaylistData = (
   playlistIds = [] as string[],
   sortType?: PlaylistSortTypes,
-  onlyMutablePlaylists = false
+  onlyMutablePlaylists = false,
 ): Playlist[] => {
   const playlists = getPlaylistData();
   if (playlistIds && playlists && Array.isArray(playlists)) {

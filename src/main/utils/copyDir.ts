@@ -24,7 +24,7 @@ async function copyDir(src: string, dest: string) {
     log(
       'Error occurred when copying the directory',
       { error, src, dest },
-      'ERROR'
+      'ERROR',
     );
     throw error;
   }

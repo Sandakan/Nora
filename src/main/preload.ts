@@ -22,12 +22,12 @@ const windowControls = {
 
 const theme = {
   listenForSystemThemeChanges: (
-    callback: (e: any, isDarkMode: boolean, usingSystemTheme: boolean) => void
+    callback: (e: any, isDarkMode: boolean, usingSystemTheme: boolean) => void,
   ) => ipcRenderer.on('app/systemThemeChange', callback),
   changeAppTheme: (appTheme?: AppTheme): void =>
     ipcRenderer.send('app/changeAppTheme', appTheme),
   stoplisteningForSystemThemeChanges: (
-    callback: (e: any, isDarkMode: boolean, usingSystemTheme: boolean) => void
+    callback: (e: any, isDarkMode: boolean, usingSystemTheme: boolean) => void,
   ) => ipcRenderer.removeListener('app/systemThemeChange', callback),
 };
 
@@ -44,7 +44,7 @@ const playerControls = {
     ipcRenderer.send('app/getSongPosition', position),
   toggleLikeSongs: (
     songIds: string[],
-    isLikeSong?: boolean
+    isLikeSong?: boolean,
   ): Promise<ToggleLikeSongReturnValue | undefined> =>
     ipcRenderer.invoke('app/toggleLikeSongs', songIds, isLikeSong),
 
@@ -61,50 +61,50 @@ const audioLibraryControls = {
     ipcRenderer.invoke('app/checkForStartUpSongs'),
   addSongsFromFolderStructures: (
     structures: FolderStructure[],
-    sortType?: SongSortTypes
+    sortType?: SongSortTypes,
   ): Promise<SongData[]> =>
     ipcRenderer.invoke(
       'app/addSongsFromFolderStructures',
       structures,
-      sortType
+      sortType,
     ),
 
   getSong: (
     songId: string,
-    updateListeningRate = true
+    updateListeningRate = true,
   ): Promise<AudioPlayerData> =>
     ipcRenderer.invoke('app/getSong', songId, updateListeningRate),
   getAllSongs: (
     sortType?: SongSortTypes,
     pageNo?: number,
-    maxResultsPerPage?: number
+    maxResultsPerPage?: number,
   ): Promise<GetAllSongsResult> =>
     ipcRenderer.invoke('app/getAllSongs', sortType, pageNo, maxResultsPerPage),
   getSongInfo: (
     songIds: string[],
     sortType?: SongSortTypes,
     limit?: number,
-    preserveIdOrder = false
+    preserveIdOrder = false,
   ): Promise<SongData[] | undefined> =>
     ipcRenderer.invoke(
       'app/getSongInfo',
       songIds,
       sortType,
       limit,
-      preserveIdOrder
+      preserveIdOrder,
     ),
   getSongListeningData: (songIds: string[]): Promise<SongListeningData[]> =>
     ipcRenderer.invoke('app/getSongListeningData', songIds),
   updateSongListeningData: (
     songId: string,
     dataType: ListeningDataTypes,
-    dataUpdateType: ListeningDataUpdateTypes
+    dataUpdateType: ListeningDataUpdateTypes,
   ): Promise<void> =>
     ipcRenderer.invoke(
       'app/updateSongListeningData',
       songId,
       dataType,
-      dataUpdateType
+      dataUpdateType,
     ),
   resyncSongsLibrary: (): Promise<true> =>
     ipcRenderer.invoke('app/resyncSongsLibrary'),
@@ -117,17 +117,19 @@ const audioLibraryControls = {
     ipcRenderer.invoke('app/restoreBlacklistedSongs', songIds),
   deleteSongsFromSystem: (
     absoluteFilePaths: string[],
-    isPermanentDelete: boolean
+    isPermanentDelete: boolean,
   ): PromiseFunctionReturn =>
     ipcRenderer.invoke(
       'app/deleteSongsFromSystem',
       absoluteFilePaths,
-      isPermanentDelete
+      isPermanentDelete,
     ),
   generatePalettes: (): Promise<void> =>
     ipcRenderer.invoke('app/generatePalettes'),
   clearSongHistory: (): PromiseFunctionReturn =>
     ipcRenderer.invoke('app/clearSongHistory'),
+  scrobbleSong: (songId: string, startTimeInSecs: number): Promise<void> =>
+    ipcRenderer.invoke('app/scrobbleSong', songId, startTimeInSecs),
 };
 
 const suggestions = {
@@ -136,46 +138,46 @@ const suggestions = {
 
   resolveArtistDuplicates: (
     selectedArtistId: string,
-    duplicateIds: string[]
+    duplicateIds: string[],
   ): Promise<UpdateSongDataResult | undefined> =>
     ipcRenderer.invoke(
       'app/resolveArtistDuplicates',
       selectedArtistId,
-      duplicateIds
+      duplicateIds,
     ),
 
   resolveSeparateArtists: (
     separateArtistId: string,
-    separateArtistNames: string[]
+    separateArtistNames: string[],
   ): Promise<UpdateSongDataResult | undefined> =>
     ipcRenderer.invoke(
       'app/resolveSeparateArtists',
       separateArtistId,
-      separateArtistNames
+      separateArtistNames,
     ),
 
   resolveFeaturingArtists: (
     songId: string,
     featArtistNames: string[],
-    removeFeatInfoInTitle?: boolean
+    removeFeatInfoInTitle?: boolean,
   ): Promise<UpdateSongDataResult | undefined> =>
     ipcRenderer.invoke(
       'app/resolveFeaturingArtists',
       songId,
       featArtistNames,
-      removeFeatInfoInTitle
+      removeFeatInfoInTitle,
     ),
 };
 
 // $ APP PLAYER UNKNOWN SONGS FETCHING APIS
 const unknownSource = {
   playSongFromUnknownSource: (
-    callback: (_: unknown, audioPlayerData: AudioPlayerData) => void
+    callback: (_: unknown, audioPlayerData: AudioPlayerData) => void,
   ) => ipcRenderer.on('app/playSongFromUnknownSource', callback),
   getSongFromUnknownSource: (songPath: string): Promise<AudioPlayerData> =>
     ipcRenderer.invoke('app/getSongFromUnknownSource', songPath),
   removePlaySongFromUnknownSourceEvent: (
-    callback: (_: unknown, audioPlayerData: AudioPlayerData) => void
+    callback: (_: unknown, audioPlayerData: AudioPlayerData) => void,
   ) => ipcRenderer.removeListener('app/playSongFromUnknownSource', callback),
 };
 
@@ -190,10 +192,10 @@ const quitEvent = {
 // $ SYSTEM BATTERY RELATED EVENTS
 const battery = {
   listenForBatteryPowerStateChanges: (
-    callback: (_: any, isOnBatteryPower: boolean) => void
+    callback: (_: any, isOnBatteryPower: boolean) => void,
   ) => ipcRenderer.on('app/isOnBatteryPower', callback),
   stopListeningForBatteryPowerStateChanges: (
-    callback: (_: any, isOnBatteryPower: boolean) => void
+    callback: (_: any, isOnBatteryPower: boolean) => void,
   ) => ipcRenderer.removeListener('app/isOnBatteryPower', callback),
 };
 
@@ -211,14 +213,14 @@ const search = {
     filter: SearchFilters,
     value: string,
     updateSearchHistory?: boolean,
-    isPredictiveSearchEnabled?: boolean
+    isPredictiveSearchEnabled?: boolean,
   ): Promise<SearchResult> =>
     ipcRenderer.invoke(
       'app/search',
       filter,
       value,
       updateSearchHistory,
-      isPredictiveSearchEnabled
+      isPredictiveSearchEnabled,
     ),
   clearSearchHistory: (searchText?: string[]): Promise<boolean> =>
     ipcRenderer.invoke('app/clearSearchHistory', searchText),
@@ -230,14 +232,14 @@ const lyrics = {
     songInfo: LyricsRequestTrackInfo,
     lyricsType?: LyricsTypes,
     lyricsRequestType?: LyricsRequestTypes,
-    saveLyricsAutomatically?: AutomaticallySaveLyricsTypes
+    saveLyricsAutomatically?: AutomaticallySaveLyricsTypes,
   ): Promise<SongLyrics | undefined> =>
     ipcRenderer.invoke(
       'app/getSongLyrics',
       songInfo,
       lyricsType,
       lyricsRequestType,
-      saveLyricsAutomatically
+      saveLyricsAutomatically,
     ),
 
   saveLyricsToSong: (songPath: string, text: SongLyrics) =>
@@ -251,8 +253,8 @@ const messages = {
       event: unknown,
       message: string,
       messageCode?: MessageCodes,
-      data?: Record<string, unknown>
-    ) => void
+      data?: Record<string, unknown>,
+    ) => void,
   ) => ipcRenderer.on('app/sendMessageToRendererEvent', callback),
   removeMessageToRendererEventListener: (callback: (...args: any[]) => void) =>
     ipcRenderer.removeListener('app/sendMessageToRendererEvent', callback),
@@ -261,7 +263,7 @@ const messages = {
 // $ APP DATA UPDATE EVENTS
 const dataUpdates = {
   dataUpdateEvent: (
-    callback: (e: unknown, dataEvents: DataUpdateEvent[]) => void
+    callback: (e: unknown, dataEvents: DataUpdateEvent[]) => void,
   ) => ipcRenderer.on('app/dataUpdateEvent', callback),
   removeDataUpdateEventListeners: () =>
     ipcRenderer.removeAllListeners('app/dataUpdateEvent'),
@@ -273,20 +275,20 @@ const songUpdates = {
     songIdOrPath: string,
     tags: SongTags,
     sendUpdatedData: boolean,
-    isKnownSource: boolean
+    isKnownSource: boolean,
   ): Promise<UpdateSongDataResult> =>
     ipcRenderer.invoke(
       'app/updateSongId3Tags',
       songIdOrPath,
       tags,
       sendUpdatedData,
-      isKnownSource
+      isKnownSource,
     ),
   reParseSong: (songPath: string): Promise<SavableSongData | undefined> =>
     ipcRenderer.invoke('app/reParseSong', songPath),
   getSongId3Tags: (
     songIdOrPath: string,
-    isKnownSource: boolean
+    isKnownSource: boolean,
   ): Promise<SongTags> =>
     ipcRenderer.invoke('app/getSongId3Tags', songIdOrPath, isKnownSource),
   getImgFileLocation: (): Promise<string> =>
@@ -301,25 +303,25 @@ const songUpdates = {
 const songDataFromInternet = {
   searchSongMetadataResultsInInternet: (
     songTitle: string,
-    songArtists: string[]
+    songArtists: string[],
   ): Promise<SongMetadataResultFromInternet[]> =>
     ipcRenderer.invoke(
       'app/searchSongMetadataResultsInInternet',
       songTitle,
-      songArtists
+      songArtists,
     ),
   fetchSongMetadataFromInternet: (
     songTitle: string,
-    songArtists: string[]
+    songArtists: string[],
   ): Promise<SongMetadataResultFromInternet[]> =>
     ipcRenderer.invoke(
       'app/fetchSongMetadataFromInternet',
       songTitle,
-      songArtists
+      songArtists,
     ),
   fetchSongInfoFromNet: (
     songTitle: string,
-    songArtists: string[]
+    songArtists: string[],
   ): Promise<LastFMTrackInfoApi | undefined> =>
     ipcRenderer.invoke('app/fetchSongInfoFromNet', songTitle, songArtists),
 };
@@ -341,7 +343,7 @@ const storageData = {
 const folderData = {
   getFolderData: (
     folderPaths: string[],
-    sortType?: FolderSortTypes
+    sortType?: FolderSortTypes,
   ): Promise<MusicFolder[]> =>
     ipcRenderer.invoke('app/getFolderData', folderPaths, sortType),
   blacklistFolders: (folderPaths: string[]): Promise<void> =>
@@ -350,12 +352,12 @@ const folderData = {
     ipcRenderer.invoke('app/restoreBlacklistedFolders', folderPaths),
   toggleBlacklistedFolders: (
     folderPaths: string[],
-    isBlacklistFolder?: boolean
+    isBlacklistFolder?: boolean,
   ): Promise<void> =>
     ipcRenderer.invoke(
       'app/toggleBlacklistedFolders',
       folderPaths,
-      isBlacklistFolder
+      isBlacklistFolder,
     ),
   revealFolderInFileExplorer: (folderPath: string): void =>
     ipcRenderer.send('app/revealFolderInFileExplorer', folderPath),
@@ -370,16 +372,16 @@ const artistsData = {
   getArtistData: (
     artistIdsOrNames?: string[],
     sortType?: ArtistSortTypes,
-    limit?: number
+    limit?: number,
   ): Promise<Artist[]> =>
     ipcRenderer.invoke('app/getArtistData', artistIdsOrNames, sortType, limit),
   toggleLikeArtists: (
     artistIds: string[],
-    likeArtist?: boolean
+    likeArtist?: boolean,
   ): Promise<ToggleLikeSongReturnValue | undefined> =>
     ipcRenderer.invoke('app/toggleLikeArtists', artistIds, likeArtist),
   getArtistArtworks: (
-    artistId: string
+    artistId: string,
   ): Promise<ArtistInfoFromNet | undefined> =>
     ipcRenderer.invoke('app/getArtistArtworks', artistId),
 };
@@ -388,7 +390,7 @@ const artistsData = {
 const genresData = {
   getGenresData: (
     genreNamesOrIds?: string[],
-    sortType?: GenreSortTypes
+    sortType?: GenreSortTypes,
   ): Promise<Genre[]> =>
     ipcRenderer.invoke('app/getGenresData', genreNamesOrIds, sortType),
 };
@@ -397,7 +399,7 @@ const genresData = {
 const albumsData = {
   getAlbumData: (
     albumTitlesOrIds?: string[],
-    sortType?: AlbumSortTypes
+    sortType?: AlbumSortTypes,
   ): Promise<Album[]> =>
     ipcRenderer.invoke('app/getAlbumData', albumTitlesOrIds, sortType),
 };
@@ -407,38 +409,38 @@ const playlistsData = {
   getPlaylistData: (
     playlistIds?: string[],
     sortType?: PlaylistSortTypes,
-    onlyMutablePlaylists?: boolean
+    onlyMutablePlaylists?: boolean,
   ): Promise<Playlist[]> =>
     ipcRenderer.invoke(
       'app/getPlaylistData',
       playlistIds,
       sortType,
-      onlyMutablePlaylists
+      onlyMutablePlaylists,
     ),
   addNewPlaylist: (
     playlistName: string,
     songIds?: string[],
-    artworkPath?: string
+    artworkPath?: string,
   ): Promise<{ success: boolean; message?: string; playlist?: Playlist }> =>
     ipcRenderer.invoke(
       'app/addNewPlaylist',
       playlistName,
       songIds,
-      artworkPath
+      artworkPath,
     ),
   addSongsToPlaylist: (
     playlistId: string,
-    songIds: string[]
+    songIds: string[],
   ): PromiseFunctionReturn =>
     ipcRenderer.invoke('app/addSongsToPlaylist', playlistId, songIds),
   addArtworkToAPlaylist: (
     playlistId: string,
-    artworkPath: string
+    artworkPath: string,
   ): Promise<ArtworkPaths | undefined> =>
     ipcRenderer.invoke('app/addArtworkToAPlaylist', playlistId, artworkPath),
   removeSongFromPlaylist: (
     playlistId: string,
-    songId: string
+    songId: string,
   ): PromiseFunctionReturn =>
     ipcRenderer.invoke('app/removeSongFromPlaylist', playlistId, songId),
   removePlaylists: (playlistIds: string[]) =>
@@ -457,7 +459,7 @@ const log = {
     data?: Record<string, unknown>,
     logToConsoleType: LogMessageTypes = 'INFO',
     forceWindowRestart = false,
-    forceMainRestart = false
+    forceMainRestart = false,
   ): Promise<any> => {
     return ipcRenderer.invoke(
       'app/getRendererLogs',
@@ -465,7 +467,7 @@ const log = {
       data,
       logToConsoleType,
       forceWindowRestart,
-      forceMainRestart
+      forceMainRestart,
     );
   },
   openLogFile: (): void => ipcRenderer.send('app/openLogFile'),
@@ -476,11 +478,11 @@ const miniPlayer = {
   toggleMiniPlayer: (isMiniPlayerActive: boolean): Promise<void> =>
     ipcRenderer.invoke('app/toggleMiniPlayer', isMiniPlayerActive),
   toggleMiniPlayerAlwaysOnTop: (
-    isMiniPlayerAlwaysOnTop: boolean
+    isMiniPlayerAlwaysOnTop: boolean,
   ): Promise<void> =>
     ipcRenderer.invoke(
       'app/toggleMiniPlayerAlwaysOnTop',
-      isMiniPlayerAlwaysOnTop
+      isMiniPlayerAlwaysOnTop,
     ),
 };
 
@@ -497,6 +499,9 @@ const settingsHelpers = {
     ipcRenderer.invoke('app/exportAppData', localStorageData),
   importAppData: (): Promise<void | LocalStorage> =>
     ipcRenderer.invoke('app/importAppData'),
+  compareEncryptedData: (): Promise<boolean> =>
+    ipcRenderer.invoke('app/compareEncryptedData'),
+  loginToLastFmInBrowser: () => ipcRenderer.send('app/loginToLastFmInBrowser'),
 };
 
 // $ APP RESTART OR RESET
@@ -531,7 +536,7 @@ const utils = {
   removeDefaultAppProtocolFromFilePath: (filePath: string) => {
     return filePath.replace(
       /nora:[/\\]{1,2}localFiles[/\\]{1,2}|\?[\w+=\w+&?]+$/gm,
-      ''
+      '',
     );
   },
 };

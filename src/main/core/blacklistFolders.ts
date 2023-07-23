@@ -6,7 +6,7 @@ const blacklistFolders = (folderPaths: string[]) => {
   const blacklist = getBlacklistData();
 
   blacklist.folderBlacklist = Array.from(
-    new Set([...blacklist.folderBlacklist, ...folderPaths])
+    new Set([...blacklist.folderBlacklist, ...folderPaths]),
   );
   setBlacklist(blacklist);
 
@@ -14,7 +14,7 @@ const blacklistFolders = (folderPaths: string[]) => {
   log(
     'Folder blacklist updated because a new songs got blacklisted.',
     { folderPaths },
-    'INFO'
+    'INFO',
   );
 };
 

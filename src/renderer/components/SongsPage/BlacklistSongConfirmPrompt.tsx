@@ -87,7 +87,7 @@ const BlacklistSongConfrimPrompt = (props: {
                 if (isDoNotShowAgain)
                   storage.preferences.setPreferences(
                     'isSongIndexingEnabled',
-                    isDoNotShowAgain
+                    isDoNotShowAgain,
                   );
                 changePromptMenuData(false);
                 return addNewNotifications([

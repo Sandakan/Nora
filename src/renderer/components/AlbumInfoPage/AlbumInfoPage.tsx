@@ -26,7 +26,7 @@ type AlbumContentReducerActions =
 
 const reducer = (
   state: AlbumContentReducer,
-  action: { type: AlbumContentReducerActions; data: any }
+  action: { type: AlbumContentReducerActions; data: any },
 ): AlbumContentReducer => {
   switch (action.type) {
     case 'ALBUM_DATA_UPDATE':
@@ -130,7 +130,7 @@ const AlbumInfoPage = () => {
       window.api.audioLibraryControls
         .getSongInfo(
           albumContent.albumData.songs.map((song) => song.songId),
-          albumContent.sortingOrder
+          albumContent.sortingOrder,
         )
         .then((res) => {
           if (res && res.length > 0) {
@@ -156,12 +156,12 @@ const AlbumInfoPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageDataUpdatesInAlbumsInfoPage
+      manageDataUpdatesInAlbumsInfoPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageDataUpdatesInAlbumsInfoPage
+        manageDataUpdatesInAlbumsInfoPage,
       );
     };
   }, [fetchAlbumData]);
@@ -185,12 +185,12 @@ const AlbumInfoPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageAlbumSongUpdatesInAlbumInfoPage
+      manageAlbumSongUpdatesInAlbumInfoPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageAlbumSongUpdatesInAlbumInfoPage
+        manageAlbumSongUpdatesInAlbumInfoPage,
       );
     };
   }, [fetchAlbumSongs]);
@@ -198,7 +198,7 @@ const AlbumInfoPage = () => {
   const selectAllHandler = useSelectAllHandler(
     albumContent.songsData,
     'songs',
-    'songId'
+    'songId',
   );
 
   const handleSongPlayBtnClick = React.useCallback(
@@ -211,7 +211,7 @@ const AlbumInfoPage = () => {
         'album',
         false,
         albumContent.albumData.albumId,
-        false
+        false,
       );
       playSong(currSongId, true);
     },
@@ -220,12 +220,12 @@ const AlbumInfoPage = () => {
       albumContent.albumData.albumId,
       createQueue,
       playSong,
-    ]
+    ],
   );
 
   const listItems = React.useMemo(
     () => [albumContent.albumData, ...albumContent.songsData],
-    [albumContent.albumData, albumContent.songsData]
+    [albumContent.albumData, albumContent.songsData],
   );
 
   const listComponents = React.useCallback(
@@ -270,7 +270,7 @@ const AlbumInfoPage = () => {
       listItems,
       localStorageData?.preferences?.isSongIndexingEnabled,
       selectAllHandler,
-    ]
+    ],
   );
 
   const getItemSize = React.useCallback((index: number) => {
@@ -304,7 +304,7 @@ const AlbumInfoPage = () => {
                 'songs',
                 false,
                 albumContent.albumData.albumId,
-                true
+                true,
               ),
             isDisabled: !(albumContent.songsData.length > 0),
           },
@@ -319,7 +319,7 @@ const AlbumInfoPage = () => {
                 'songs',
                 true,
                 albumContent.albumData.albumId,
-                true
+                true,
               ),
             isDisabled: !(albumContent.songsData.length > 0),
           },
@@ -334,7 +334,7 @@ const AlbumInfoPage = () => {
                   ...albumContent.songsData.map((song) => song.songId),
                 ],
                 false,
-                false
+                false,
               );
               addNewNotifications([
                 {
@@ -386,7 +386,7 @@ const AlbumInfoPage = () => {
                       ...currentPageData,
                       scrollTopOffset: data.scrollOffset,
                     })),
-                  500
+                  500,
                 );
             }}
           >

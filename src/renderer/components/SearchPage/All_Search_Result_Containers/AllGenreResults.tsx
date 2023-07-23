@@ -54,7 +54,7 @@ const AllGenreResults = (prop: Props) => {
       }
       return <div style={style} />;
     },
-    [genreData, noOfColumns, selectAllHandler]
+    [genreData, noOfColumns, selectAllHandler],
   );
 
   return (
@@ -92,7 +92,7 @@ const AllGenreResults = (prop: Props) => {
                     ...currentPageData,
                     scrollTopOffset: data.scrollTop,
                   })),
-                500
+                500,
               );
           }}
         >

@@ -50,7 +50,7 @@ const GenreSearchResultsContainer = (props: Props) => {
             })
             .filter((x) => x !== undefined)
         : [],
-    [genres, noOfVisibleGenres, selectAllHandler]
+    [genres, noOfVisibleGenres, selectAllHandler],
   );
 
   return (

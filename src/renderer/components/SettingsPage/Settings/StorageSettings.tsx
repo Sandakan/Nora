@@ -256,7 +256,7 @@ const StorageSettings = () => {
                   parseByteSizes(
                     storageMetrics.rootSizes.size -
                       storageMetrics.rootSizes.freeSpace -
-                      storageMetrics.totalSize
+                      storageMetrics.totalSize,
                   )?.size
                 }
               </span>
@@ -284,7 +284,7 @@ const StorageSettings = () => {
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                 {
                   parseByteSizes(
-                    storageMetrics?.appDataSizes.tempArtworkCacheSize
+                    storageMetrics?.appDataSizes.tempArtworkCacheSize,
                   )?.size
                 }
               </span>

@@ -6,7 +6,7 @@ export const manageGenresOfParsedSong = (
   allGenres: SavableGenre[],
   songInfo: SavableSongData,
   songArtworkPaths?: ArtworkPaths,
-  darkVibrantBgColor?: { rgb: unknown }
+  darkVibrantBgColor?: { rgb: unknown },
 ) => {
   const newGenres: SavableGenre[] = [];
   const relevantGenres: SavableGenre[] = [];

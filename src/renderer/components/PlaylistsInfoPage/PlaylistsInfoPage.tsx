@@ -68,7 +68,7 @@ const PlaylistInfoPage = () => {
   const [playlistData, setPlaylistData] = React.useState({} as Playlist);
   const [playlistSongs, setPlaylistSongs] = React.useState([] as SongData[]);
   const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>(
-    currentlyActivePage?.data?.sortingOrder || 'addedOrder'
+    currentlyActivePage?.data?.sortingOrder || 'addedOrder',
   );
   const songsContainerRef = React.useRef<HTMLDivElement>(null);
   const { width, height } = useResizeObserver(songsContainerRef);
@@ -93,7 +93,7 @@ const PlaylistInfoPage = () => {
           playlistData.songs,
           sortingOrder,
           undefined,
-          preserveAddedOrder
+          preserveAddedOrder,
         )
         .then((songsData) => {
           if (songsData && songsData.length > 0) setPlaylistSongs(songsData);
@@ -117,12 +117,12 @@ const PlaylistInfoPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      managePlaylistUpdatesInPlaylistsInfoPage
+      managePlaylistUpdatesInPlaylistsInfoPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        managePlaylistUpdatesInPlaylistsInfoPage
+        managePlaylistUpdatesInPlaylistsInfoPage,
       );
     };
   }, [fetchPlaylistData]);
@@ -147,12 +147,12 @@ const PlaylistInfoPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      managePlaylistSongUpdatesInPlaylistInfoPage
+      managePlaylistSongUpdatesInPlaylistInfoPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        managePlaylistSongUpdatesInPlaylistInfoPage
+        managePlaylistSongUpdatesInPlaylistInfoPage,
       );
     };
   }, [fetchPlaylistSongsData]);
@@ -160,7 +160,7 @@ const PlaylistInfoPage = () => {
   const selectAllHandler = useSelectAllHandler(
     playlistSongs,
     'songs',
-    'songId'
+    'songId',
   );
 
   const handleSongPlayBtnClick = React.useCallback(
@@ -173,16 +173,16 @@ const PlaylistInfoPage = () => {
         'playlist',
         false,
         playlistData.playlistId,
-        false
+        false,
       );
       playSong(currSongId, true);
     },
-    [createQueue, playSong, playlistData.playlistId, playlistSongs]
+    [createQueue, playSong, playlistData.playlistId, playlistSongs],
   );
 
   const listItems = React.useMemo(
     () => [playlistData, ...playlistSongs],
-    [playlistData, playlistSongs]
+    [playlistData, playlistSongs],
   );
 
   const listComponents = React.useCallback(
@@ -217,7 +217,7 @@ const PlaylistInfoPage = () => {
                     window.api.playlistsData
                       .removeSongFromPlaylist(
                         playlistData.playlistId,
-                        song.songId
+                        song.songId,
                       )
                       .then(
                         (res) =>
@@ -233,7 +233,7 @@ const PlaylistInfoPage = () => {
                                 </span>
                               ),
                             },
-                          ])
+                          ]),
                       )
                       .catch((err) => console.error(err)),
                 },
@@ -258,7 +258,7 @@ const PlaylistInfoPage = () => {
       playlistData.playlistId,
       playlistSongs,
       selectAllHandler,
-    ]
+    ],
   );
 
   const clearSongHistory = React.useCallback(() => {
@@ -283,11 +283,11 @@ const PlaylistInfoPage = () => {
                         <span>Cleared the song history successfully.</span>
                       ),
                     },
-                  ])
+                  ]),
               )
               .catch((err) => console.error(err)),
         }}
-      />
+      />,
     );
   }, [addNewNotifications, changePromptMenuData]);
 
@@ -302,8 +302,8 @@ const PlaylistInfoPage = () => {
         delay: 5000,
         content: `
             Added ${validSongIds.length} song${
-          validSongIds.length === 1 ? '' : 's'
-        } to the queue.
+              validSongIds.length === 1 ? '' : 's'
+            } to the queue.
          `,
       },
     ]);
@@ -318,9 +318,9 @@ const PlaylistInfoPage = () => {
         'playlist',
         true,
         playlistData.playlistId,
-        true
+        true,
       ),
-    [createQueue, playlistData.playlistId, playlistSongs]
+    [createQueue, playlistData.playlistId, playlistSongs],
   );
 
   const playAllSongs = React.useCallback(
@@ -332,9 +332,9 @@ const PlaylistInfoPage = () => {
         'songs',
         false,
         playlistData.playlistId,
-        true
+        true,
       ),
-    [createQueue, playlistData.playlistId, playlistSongs]
+    [createQueue, playlistData.playlistId, playlistSongs],
   );
 
   const getItemSize = React.useCallback((index: number) => {
@@ -419,7 +419,7 @@ const PlaylistInfoPage = () => {
                         ...currentPageData,
                         scrollTopOffset: data.scrollOffset,
                       })),
-                    500
+                    500,
                   );
               }}
             >

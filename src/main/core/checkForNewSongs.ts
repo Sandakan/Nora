@@ -18,10 +18,10 @@ const checkForNewSongs = async () => {
       } catch (error) {
         log(
           `Error occurred when trying to check for unknown modifications of '${path.basename(
-            folder.path
+            folder.path,
           )}'.`,
           { error },
-          'ERROR'
+          'ERROR',
         );
       }
     }
@@ -30,7 +30,7 @@ const checkForNewSongs = async () => {
   log(
     `ERROR OCCURRED WHEN TRYING TO READ MUSIC FOLDERS ARRAY IN USER DATA. IT WAS POSSIBLY EMPTY.`,
     undefined,
-    'ERROR'
+    'ERROR',
   );
 };
 

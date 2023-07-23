@@ -10,7 +10,7 @@ const fileNameRegex = /^.{1,}\.\w{1,}$/;
 
 const parentFolderWatcherFunction = async (
   eventType: WatchEventType,
-  filename: string
+  filename: string,
 ) => {
   if (filename) {
     if (eventType === 'rename') {
@@ -26,7 +26,7 @@ const parentFolderWatcherFunction = async (
     log(
       'ERROR OCCURRED WHEN TRYING TO WATCH PARENT FOLDERS. FILE WATCHER FUNCTION SENT A FILENAME OF undefined.',
       undefined,
-      'ERROR'
+      'ERROR',
     );
   }
 };
@@ -41,22 +41,22 @@ const addWatcherToParentFolder = (parentFolderPath: string) => {
         // ! TODO - recursive mode won't work on linux
         recursive: true,
       },
-      (eventType, filename) => parentFolderWatcherFunction(eventType, filename)
+      (eventType, filename) => parentFolderWatcherFunction(eventType, filename),
     );
     log(
       'Added watcher to a parent folder successfully.',
       { parentFolderPath },
-      'WARN'
+      'WARN',
     );
     watcher.addListener('error', (e) =>
-      log(`ERROR OCCURRED WHEN WATCHING A FOLDER.`, { e }, 'ERROR')
+      log(`ERROR OCCURRED WHEN WATCHING A FOLDER.`, { e }, 'ERROR'),
     );
     watcher.addListener('close', () =>
       log(
         `Successfully closed the parent folder watcher.`,
         { parentFolderPath },
-        'WARN'
-      )
+        'WARN',
+      ),
     );
     saveAbortController(parentFolderPath, abortController);
   } catch (error) {
@@ -80,10 +80,10 @@ const addWatchersToParentFolders = async () => {
       } catch (error) {
         log(
           `ERROR OCCURRED WHEN ADDING WATCHER TO '${path.basename(
-            parentFolderPath
+            parentFolderPath,
           )}' PARENT FOLDER.`,
           { error },
-          'ERROR'
+          'ERROR',
         );
       }
     }
@@ -92,7 +92,7 @@ const addWatchersToParentFolders = async () => {
   log(
     `ERROR OCCURRED WHEN TRYING TO ADD WATCHERS TO PARENT FOLDERS OF MUSIC FOLDERS. NO PARENT FOLDERS FOUND.`,
     undefined,
-    'ERROR'
+    'ERROR',
   );
 };
 

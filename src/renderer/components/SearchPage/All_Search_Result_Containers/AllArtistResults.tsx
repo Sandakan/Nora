@@ -28,7 +28,7 @@ const AllArtistResults = (prop: Props) => {
   const selectAllHandler = useSelectAllHandler(
     artistData,
     'artist',
-    'artistId'
+    'artistId',
   );
 
   const row = React.useCallback(
@@ -68,7 +68,7 @@ const AllArtistResults = (prop: Props) => {
       }
       return <div style={style} />;
     },
-    [artistData, noOfColumns, selectAllHandler]
+    [artistData, noOfColumns, selectAllHandler],
   );
 
   return (
@@ -104,7 +104,7 @@ const AllArtistResults = (prop: Props) => {
                     ...currentPageData,
                     scrollTopOffset: data.scrollTop,
                   })),
-                500
+                500,
               );
           }}
         >

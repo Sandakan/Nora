@@ -13,7 +13,7 @@ const GenreImgAndInfoContainer = (props: Props) => {
 
   const totalGenreSongsDuration = React.useMemo(() => {
     const { hours, minutes, seconds } = calculateTimeFromSeconds(
-      genreSongs.reduce((prev, current) => prev + current.duration, 0)
+      genreSongs.reduce((prev, current) => prev + current.duration, 0),
     );
     return `${
       hours >= 1 ? `${hours} hour${hours === 1 ? '' : 's'} ` : ''

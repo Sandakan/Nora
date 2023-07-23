@@ -48,7 +48,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
 
   const [isLyricsVisible, setIsLyricsVisible] = React.useState(false);
   const [lyrics, setLyrics] = React.useState<SongLyrics | null | undefined>(
-    null
+    null,
   );
 
   const volumeSliderRef = React.useRef<HTMLInputElement>(null);
@@ -87,7 +87,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
         if (e.key === 'n') updateMiniPlayerStatus(!isMiniPlayer);
       }
     },
-    [isMiniPlayer, updateMiniPlayerStatus]
+    [isMiniPlayer, updateMiniPlayerStatus],
   );
 
   React.useEffect(() => {
@@ -161,7 +161,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
 
   const handleSkipForwardClickWithParams = React.useCallback(
     () => handleSkipForwardClick('USER_SKIP'),
-    [handleSkipForwardClick]
+    [handleSkipForwardClick],
   );
 
   const toggleAlwaysOnTop = React.useCallback(() => {
@@ -172,7 +172,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           if (prevUserData?.preferences)
             prevUserData.preferences.isMiniPlayerAlwaysOnTop = state;
           return prevUserData as UserData;
-        })
+        }),
       );
     }
     return undefined;

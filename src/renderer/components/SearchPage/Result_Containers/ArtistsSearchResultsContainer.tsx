@@ -51,7 +51,7 @@ const ArtistsSearchResultsContainer = (props: Props) => {
             })
             .filter((artist) => artist !== undefined)
         : [],
-    [artists, noOfVisibleArtists, selectAllHandler]
+    [artists, noOfVisibleArtists, selectAllHandler],
   );
 
   return (

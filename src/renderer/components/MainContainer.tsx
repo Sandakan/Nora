@@ -11,10 +11,10 @@ interface MainContainerProp {
   noDefaultStyles?: boolean;
   style?: React.CSSProperties;
   onContextMenu?: (
-    _e: MouseEvent<HTMLDivElement, globalThis.MouseEvent>
+    _e: MouseEvent<HTMLDivElement, globalThis.MouseEvent>,
   ) => void;
   onClick?: (
-    _e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>
+    _e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>,
   ) => void;
   onScroll?: (_e: React.UIEvent<HTMLDivElement, UIEvent>) => void;
   role?: React.AriaRole;
@@ -66,7 +66,7 @@ const MainContainer = React.forwardRef(
         </div>
       </ErrorBoundary>
     );
-  }
+  },
 );
 
 MainContainer.displayName = 'MainContainer';

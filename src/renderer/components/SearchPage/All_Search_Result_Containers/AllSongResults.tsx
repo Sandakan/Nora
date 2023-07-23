@@ -31,7 +31,7 @@ const AllSongResults = (prop: Props) => {
       createQueue(queueSongIds, 'songs', false, undefined, false);
       playSong(currSongId, true);
     },
-    [createQueue, playSong, songData]
+    [createQueue, playSong, songData],
   );
 
   const songs = React.useCallback(
@@ -78,7 +78,7 @@ const AllSongResults = (prop: Props) => {
       localStorageData?.preferences?.isSongIndexingEnabled,
       selectAllHandler,
       songData,
-    ]
+    ],
   );
 
   return (
@@ -112,7 +112,7 @@ const AllSongResults = (prop: Props) => {
                     ...currentPageData,
                     scrollTopOffset: data.scrollOffset,
                   })),
-                500
+                500,
               );
           }}
         >

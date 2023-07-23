@@ -101,7 +101,7 @@ const AppShortcutsPrompt = () => {
           </li>
         );
       }),
-    []
+    [],
   );
   return (
     <div>

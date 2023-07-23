@@ -101,7 +101,7 @@ const Sidebar = React.memo(() => {
       changeCurrentActivePage(id as PageTitles, pageData);
       addActiveToSidebarItem(id);
     },
-    [addActiveToSidebarItem, changeCurrentActivePage]
+    [addActiveToSidebarItem, changeCurrentActivePage],
   );
 
   React.useEffect(() => {
@@ -120,7 +120,7 @@ const Sidebar = React.memo(() => {
           isActive={link.isActive}
         />
       )),
-    [data, clickHandler]
+    [data, clickHandler],
   );
 
   return (

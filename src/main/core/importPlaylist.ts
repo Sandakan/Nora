@@ -86,7 +86,7 @@ const importPlaylist = async () => {
               'INFO',
               {
                 sendToRenderer: 'FAILURE',
-              }
+              },
             );
 
           if (availSongIdsForPlaylist.length > 0) {
@@ -98,32 +98,32 @@ const importPlaylist = async () => {
               try {
                 if (availablePlaylist.playlistId === 'Favorites') {
                   const newAvailSongIds = availSongIdsForPlaylist.filter(
-                    (id) => !availablePlaylist.songs.includes(id)
+                    (id) => !availablePlaylist.songs.includes(id),
                   );
                   await toggleLikeSongs(newAvailSongIds, true);
                 } else
                   addSongsToPlaylist(
                     availablePlaylist.playlistId,
-                    availSongIdsForPlaylist
+                    availSongIdsForPlaylist,
                   );
                 return log(
                   `Imported ${availSongIdsForPlaylist.length} songs to the existing '${availablePlaylist.name}' playlist.`,
                   { playlistName },
                   'ERROR',
-                  { sendToRenderer: 'FAILURE' }
+                  { sendToRenderer: 'FAILURE' },
                 );
               } catch (error: any) {
                 return log(
                   'Error occurred when importing songs to an existing playlist.',
                   { playlistName },
                   'ERROR',
-                  { sendToRenderer: 'FAILURE' }
+                  { sendToRenderer: 'FAILURE' },
                 );
               }
             } else {
               const res = await addNewPlaylist(
                 playlistName,
-                availSongIdsForPlaylist
+                availSongIdsForPlaylist,
               );
 
               if (res.success)
@@ -133,13 +133,13 @@ const importPlaylist = async () => {
                   'INFO',
                   {
                     sendToRenderer: 'SUCCESS',
-                  }
+                  },
                 );
               return log(
                 res.message || 'Failed to create a playlist',
                 { res },
                 'ERROR',
-                { sendToRenderer: 'FAILURE' }
+                { sendToRenderer: 'FAILURE' },
               );
             }
           }
@@ -150,7 +150,7 @@ const importPlaylist = async () => {
           'ERROR',
           {
             sendToRenderer: 'FAILURE',
-          }
+          },
         );
       }
       return log(
@@ -159,7 +159,7 @@ const importPlaylist = async () => {
         'ERROR',
         {
           sendToRenderer: 'FAILURE',
-        }
+        },
       );
     }
     return log(
@@ -168,7 +168,7 @@ const importPlaylist = async () => {
       'WARN',
       {
         sendToRenderer: 'FAILURE',
-      }
+      },
     );
   } catch (error) {
     return log(`Failed to import the playlist.`, { error }, 'ERROR', {

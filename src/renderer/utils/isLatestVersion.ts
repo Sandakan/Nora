@@ -2,8 +2,6 @@
 // Semantic version checking regex from https://regex101.com/r/vkijKf/1/
 // Pre-release is in the form (alpha|beta).YYYYMMDDNN where NN is a number in range 0 to 99.
 
-import log from './log';
-
 const semVerRegex =
   /^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
 
@@ -19,7 +17,7 @@ interface ExtendedVersionInfo extends VersionInfo {
 }
 
 export const getVersionInfoFromString = (
-  versionString: string
+  versionString: string,
 ): ExtendedVersionInfo | undefined => {
   const versionData = versionString.match(semVerRegex);
 
@@ -34,7 +32,7 @@ export const getVersionInfoFromString = (
 
 const compareMajorMinorAndPatch = (
   Lv: ExtendedVersionInfo,
-  Cv: ExtendedVersionInfo
+  Cv: ExtendedVersionInfo,
 ) => {
   if (Lv.major > Cv.major) return false;
   if (Lv.major < Cv.major) return true;
@@ -50,7 +48,7 @@ const compareMajorMinorAndPatch = (
 
 const isLatestVersion = (
   latestVersionString: string,
-  currentVersionString: string
+  currentVersionString: string,
 ) => {
   const latestVersion = getVersionInfoFromString(latestVersionString);
   const currentVersion = getVersionInfoFromString(currentVersionString);
@@ -61,7 +59,7 @@ const isLatestVersion = (
     const { preRelease: LvPreRelease } = latestVersion;
     const { preRelease: CvPreRelease } = currentVersion;
 
-    log('Version details', { latestVersion, currentVersion });
+    console.log('Version details', { latestVersion, currentVersion });
 
     if (LvPreRelease === CvPreRelease)
       return compareMajorMinorAndPatch(latestVersion, currentVersion);

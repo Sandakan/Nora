@@ -47,7 +47,7 @@ const Genre = (props: GenreProp) => {
       changeCurrentActivePage('GenreInfo', {
         genreId,
       }),
-    [changeCurrentActivePage, genreId]
+    [changeCurrentActivePage, genreId],
   );
 
   const playGenreSongs = React.useCallback(
@@ -63,12 +63,12 @@ const Genre = (props: GenreProp) => {
               'genre',
               isShuffle,
               genreId,
-              true
+              true,
             );
           return undefined;
         });
     },
-    [createQueue, genreId, songIds]
+    [createQueue, genreId, songIds],
   );
 
   const playGenreSongsForMultipleSelections = React.useCallback(
@@ -86,7 +86,7 @@ const Genre = (props: GenreProp) => {
               genreSongIds,
               undefined,
               undefined,
-              true
+              true,
             );
           }
           return undefined;
@@ -100,13 +100,13 @@ const Genre = (props: GenreProp) => {
               'songs',
               isShuffle,
               undefined,
-              true
+              true,
             );
           return undefined;
         })
         .catch((err) => console.error(err));
     },
-    [createQueue, multipleSelectionsData]
+    [createQueue, multipleSelectionsData],
   );
 
   const addToQueueForMultipleSelections = React.useCallback(() => {
@@ -123,7 +123,7 @@ const Genre = (props: GenreProp) => {
             genreSongIds,
             undefined,
             undefined,
-            true
+            true,
           );
         }
         return undefined;
@@ -133,7 +133,7 @@ const Genre = (props: GenreProp) => {
           queue.queue.push(
             ...songs
               .filter((song) => !song.isBlacklisted)
-              .map((song) => song.songId)
+              .map((song) => song.songId),
           );
           updateQueueData(undefined, queue.queue);
           addNewNotifications([
@@ -160,7 +160,7 @@ const Genre = (props: GenreProp) => {
     if (multipleSelectionsData.multipleSelections.length <= 0) return false;
     if (
       multipleSelectionsData.multipleSelections.some(
-        (selectionId) => selectionId === genreId
+        (selectionId) => selectionId === genreId,
       )
     )
       return true;
@@ -230,7 +230,7 @@ const Genre = (props: GenreProp) => {
             return updateMultipleSelections(
               genreId,
               'genre',
-              isAMultipleSelection ? 'remove' : 'add'
+              isAMultipleSelection ? 'remove' : 'add',
             );
           }
           return toggleMultipleSelections(!isAMultipleSelection, 'genre', [
@@ -292,7 +292,7 @@ const Genre = (props: GenreProp) => {
       multipleSelectionsData.selectionType,
       songIds.length,
       title,
-    ]
+    ],
   );
 
   return (
@@ -322,7 +322,7 @@ const Genre = (props: GenreProp) => {
           updateMultipleSelections(
             genreId,
             'genre',
-            isAMultipleSelection ? 'remove' : 'add'
+            isAMultipleSelection ? 'remove' : 'add',
           );
         else goToGenreInfoPage();
       }}
@@ -332,7 +332,7 @@ const Genre = (props: GenreProp) => {
           contextMenuItems,
           e.pageX,
           e.pageY,
-          contextMenuItemData
+          contextMenuItemData,
         )
       }
     >

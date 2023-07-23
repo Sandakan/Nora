@@ -3,34 +3,34 @@ import { createContext, ReactNode } from 'react';
 
 export interface AppUpdateContextType {
   updateUserData: (
-    callback: (prevState: UserData) => UserData | Promise<UserData> | void
+    callback: (prevState: UserData) => UserData | Promise<UserData> | void,
   ) => void;
   updateCurrentSongData: (
-    callback: (prevState: AudioPlayerData) => AudioPlayerData
+    callback: (prevState: AudioPlayerData) => AudioPlayerData,
   ) => void;
   updateContextMenuData: (
     isVisible: boolean,
     menuItems?: ContextMenuItem[],
     pageX?: number,
     pageY?: number,
-    contextMenuData?: ContextMenuAdditionalData
+    contextMenuData?: ContextMenuAdditionalData,
   ) => void;
   changePromptMenuData: (
     isVisible: boolean,
     content?: ReactNode,
-    className?: string
+    className?: string,
   ) => void;
   addNewNotifications: (newNotifications: AppNotification[]) => void;
   updateNotifications: (
-    callback: (currentNotifications: AppNotification[]) => AppNotification[]
+    callback: (currentNotifications: AppNotification[]) => AppNotification[],
   ) => void;
   changeCurrentActivePage: (pageTitle: PageTitles, data?: PageData) => void;
   updatePageHistoryIndex: (
     type: 'increment' | 'decrement' | 'home',
-    pageIndex?: number
+    pageIndex?: number,
   ) => void;
   updateCurrentlyActivePageData: (
-    callback: (currentPageData: PageData) => PageData
+    callback: (currentPageData: PageData) => PageData,
   ) => void;
   playSong: (songId: string, isStartPlay?: boolean) => void;
   updateCurrentSongPlaybackState: (isPlaying: boolean) => void;
@@ -41,7 +41,7 @@ export interface AppUpdateContextType {
   toggleRepeat: (newState?: RepeatTypes) => void;
   toggleIsFavorite: (
     isFavorite: boolean,
-    onlyChangeCurrentSongData?: boolean
+    onlyChangeCurrentSongData?: boolean,
   ) => void;
   toggleMutedState: (isMuted?: boolean) => void;
   updateVolume: (volume: number) => void;
@@ -52,14 +52,14 @@ export interface AppUpdateContextType {
     queueType: QueueTypes,
     isShuffleQueue?: boolean,
     queueId?: string,
-    startPlaying?: boolean
+    startPlaying?: boolean,
   ) => void;
   updateQueueData: (
     currentSongIndex?: number,
     queue?: string[],
     isShuffleQueue?: boolean,
     playCurrentSongIndex?: boolean,
-    clearPreviousQueueData?: boolean
+    clearPreviousQueueData?: boolean,
   ) => void;
   changeQueueCurrentSongIndex: (currentSongIndex: number) => void;
   updateMiniPlayerStatus: (isVisible: boolean) => void;
@@ -68,13 +68,13 @@ export interface AppUpdateContextType {
   updateMultipleSelections: (
     id: string,
     selectionType: QueueTypes,
-    type: 'add' | 'remove'
+    type: 'add' | 'remove',
   ) => void;
   toggleMultipleSelections: (
     isEnabled?: boolean,
     selectionType?: QueueTypes,
     addSelections?: string[],
-    replaceSelections?: boolean
+    replaceSelections?: boolean,
   ) => void;
   updateAppUpdatesState: (state: AppUpdatesState) => void;
 }

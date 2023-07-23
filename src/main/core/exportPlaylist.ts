@@ -48,7 +48,7 @@ const createM3u8FileForPlaylist = async (playlist: SavablePlaylist) => {
         'INFO',
         {
           sendToRenderer: 'SUCCESS',
-        }
+        },
       );
     }
     return log(
@@ -57,7 +57,7 @@ const createM3u8FileForPlaylist = async (playlist: SavablePlaylist) => {
       'WARN',
       {
         sendToRenderer: 'FAILURE',
-      }
+      },
     );
   } catch (error) {
     return log(
@@ -66,7 +66,7 @@ const createM3u8FileForPlaylist = async (playlist: SavablePlaylist) => {
       'ERROR',
       {
         sendToRenderer: 'FAILURE',
-      }
+      },
     );
   }
 };
@@ -82,7 +82,7 @@ const exportPlaylist = (playlistId: string) => {
   return log(
     "Failed to export playlist because requested playlist didn't exist.",
     { playlistId },
-    'ERROR'
+    'ERROR',
   );
 };
 

@@ -23,7 +23,7 @@ const monthNames = [
 function getLastNoOfMonths<T>(
   months: T[],
   start: number,
-  requiredNoOfMonths = 6
+  requiredNoOfMonths = 6,
 ) {
   const arr: T[] = [];
   let count = 0;
@@ -71,7 +71,7 @@ const ListeningActivityBarGraph = (props: Props) => {
           const lastMonths = getLastNoOfMonths(
             monthsWithNames,
             new Date().getMonth(),
-            7
+            7,
           );
 
           const max = Math.max(...lastMonths.map((x) => x.listens));

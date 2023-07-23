@@ -81,7 +81,7 @@ const LyricLine = (props: LyricProp) => {
         syncedLyrics
           ? `${roundTo(syncedLyrics.start - delay, 2)} to ${roundTo(
               syncedLyrics.end - delay,
-              2
+              2,
             )}`
           : undefined
       }
