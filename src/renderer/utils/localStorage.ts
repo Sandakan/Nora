@@ -60,7 +60,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
   },
   lyricsEditorSettings: {
     offset: 0,
-    editNextStartTagWithCurrentEndTag: true,
+    editNextAndCurrentStartAndEndTagsAutomatically: true,
   },
 };
 

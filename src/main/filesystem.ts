@@ -37,6 +37,7 @@ export const USER_DATA_TEMPLATE: UserData = {
     openWindowMaximizedOnStart: false,
     sendSongScrobblingDataToLastFM: false,
     sendSongFavoritesDataToLastFM: false,
+    sendNowPlayingSongDataToLastFM: false,
   },
   windowPositions: {},
   windowDiamensions: {},
@@ -319,6 +320,11 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
       typeof data === 'boolean'
     ) {
       userData.preferences.sendSongFavoritesDataToLastFM = data;
+    } else if (
+      dataType === 'preferences.sendNowPlayingSongDataToLastFM' &&
+      typeof data === 'boolean'
+    ) {
+      userData.preferences.sendNowPlayingSongDataToLastFM = data;
     } else if (
       dataType === 'customMusixmatchUserToken' &&
       typeof data === 'string'

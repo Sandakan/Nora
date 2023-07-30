@@ -213,7 +213,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           lyrics.lyrics.isSynced &&
           lyricsComponents}
         {isLyricsVisible && lyrics && !lyrics.lyrics.isSynced && (
-          <div className="flex h-full w-full items-center justify-center text-font-color-white">
+          <div className="flex h-full w-full items-center justify-center text-font-color-white opacity-75">
             No Synced Lyrics found.
           </div>
         )}
@@ -370,7 +370,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
               {currentSongData.title}
             </div>
             <div
-              className="song-artists text-sm text-font-color-white/80"
+              className="song-artists text-xs text-font-color-white/80"
               title={currentSongData.artists
                 ?.map((artist) => artist.name)
                 .join(', ')}

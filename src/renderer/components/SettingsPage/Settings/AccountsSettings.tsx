@@ -45,7 +45,10 @@ const AccountsSettings = () => {
                 <span className="material-icons-round-outlined text-xl mr-2">
                   {isLastFmConnected ? 'done' : 'close'}
                 </span>{' '}
-                Last.fm {!isLastFmConnected && 'Not '}Connected
+                Last.fm {!isLastFmConnected && 'Not '}Connected{' '}
+                {isLastFmConnected &&
+                  userData?.lastFmSessionData &&
+                  `(Logged in as ${userData.lastFmSessionData.name})`}
               </p>
               <ul className="list-disc text-sm list-inside">
                 <li>Connect with Last.fm to enable Scrobbling.</li>
@@ -59,18 +62,16 @@ const AccountsSettings = () => {
                 </li>
                 <li>This feature requires an internet connection.</li>
               </ul>
-              {!isLastFmConnected && (
-                <Button
-                  label="Login in Browser"
-                  iconName="open_in_new"
-                  className="mt-2"
-                  clickHandler={(_e, setIsDisabled, setIsPending) => {
-                    setIsDisabled(true);
-                    setIsPending(true);
-                    return window.api.settingsHelpers.loginToLastFmInBrowser();
-                  }}
-                />
-              )}
+              <Button
+                label={
+                  isLastFmConnected ? 'Authenticate Again' : 'Login in Browser'
+                }
+                iconName="open_in_new"
+                className="mt-2"
+                clickHandler={() =>
+                  window.api.settingsHelpers.loginToLastFmInBrowser()
+                }
+              />
             </div>
           </div>
           <ul className="list-disc mt-4 pl-8 marker:bg-background-color-3 dark:marker:bg-background-color-3">
@@ -138,6 +139,40 @@ const AccountsSettings = () => {
                     )
                 }
                 labelContent="Send Favorites data"
+                isDisabled={!isLastFmConnected}
+              />
+            </li>
+            <li
+              className={`last-fm-integration mb-4 transition-opacity ${
+                !isLastFmConnected && 'cursor-not-allowed opacity-50'
+              }`}
+            >
+              <div className="description">
+                Send Now Playing song data to LastFm automatically when you
+                start to play a song.
+              </div>
+              <Checkbox
+                id="sendNowPlayingSongDataToLastFM"
+                isChecked={
+                  !!userData?.preferences.sendNowPlayingSongDataToLastFM
+                }
+                checkedStateUpdateFunction={(state) =>
+                  window.api.userData
+                    .saveUserData(
+                      'preferences.sendNowPlayingSongDataToLastFM',
+                      state,
+                    )
+                    .then(() =>
+                      updateUserData((prevUserData) => ({
+                        ...prevUserData,
+                        preferences: {
+                          ...prevUserData.preferences,
+                          sendNowPlayingSongDataToLastFM: state,
+                        },
+                      })),
+                    )
+                }
+                labelContent="Send Now Playing Song data"
                 isDisabled={!isLastFmConnected}
               />
             </li>

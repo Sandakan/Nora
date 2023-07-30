@@ -101,6 +101,7 @@
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",
     "react-window": "^1.8.9",
+    "react-window-infinite-loader": "^1.0.9",
     "songlyrics": "^2.4.5"
   },
   "devDependencies": {
@@ -117,6 +118,7 @@
     "@types/react-dom": "^18.2.5",
     "@types/react-test-renderer": "^18.0.0",
     "@types/react-window": "^1.8.5",
+    "@types/react-window-infinite-loader": "^1.0.6",
     "@types/sharp": "^0.32.0",
     "@types/terser-webpack-plugin": "^5.2.0",
     "@types/webpack-bundle-analyzer": "^4.6.0",

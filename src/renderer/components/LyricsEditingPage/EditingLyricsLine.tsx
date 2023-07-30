@@ -291,10 +291,12 @@ const EditingLyricsLine = (props: Props) => {
 
                   if (
                     localStorageData.lyricsEditorSettings
-                      .editNextStartTagWithCurrentEndTag &&
-                    prevLineData[index + 1]
+                      .editNextAndCurrentStartAndEndTagsAutomatically
                   ) {
-                    prevLineData[index + 1].start = content.end;
+                    if (prevLineData[index - 1])
+                      prevLineData[index - 1].end = content.start;
+                    if (prevLineData[index + 1])
+                      prevLineData[index + 1].start = content.end;
                   }
 
                   return prevLineData;

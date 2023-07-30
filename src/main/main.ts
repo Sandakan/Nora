@@ -101,8 +101,11 @@ import exportPlaylist from './core/exportPlaylist';
 import importPlaylist from './core/importPlaylist';
 import reParseSong from './parseSong/reParseSong';
 import { compare } from './utils/safeStorage';
-import manageLastFmAuth from './other/manageLastFmAuth';
-import scrobbleSong from './other/scrobbleSong';
+import manageLastFmAuth from './auth/manageLastFmAuth';
+import scrobbleSong from './other/lastFm/scrobbleSong';
+import getSimilarTracks from './other/lastFm/getSimilarTracks';
+import sendNowPlayingSongDataToLastFM from './other/lastFm/sendNowPlayingSongDataToLastFM';
+import getAlbumInfoFromLastFM from './other/lastFm/getAlbumInfoFromLastFM';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -491,6 +494,14 @@ app
         ) => getSongInfo(songIds, sortType, limit, preserveIdOrder),
       );
 
+      ipcMain.handle('app/getSimilarTracksForASong', (_, songId: string) =>
+        getSimilarTracks(songId),
+      );
+
+      ipcMain.handle('app/getAlbumInfoFromLastFM', (_, albumId: string) =>
+        getAlbumInfoFromLastFM(albumId),
+      );
+
       ipcMain.handle('app/getSongListeningData', (_, songIds: string[]) =>
         getListeningData(songIds),
       );
@@ -511,6 +522,11 @@ app
         'app/scrobbleSong',
         (_, songId: string, startTimeInSecs: number) =>
           scrobbleSong(songId, startTimeInSecs),
+      );
+
+      ipcMain.handle(
+        'app/sendNowPlayingSongDataToLastFM',
+        (_, songId: string) => sendNowPlayingSongDataToLastFM(songId),
       );
 
       ipcMain.handle('app/getArtistArtworks', (_, artistId: string) =>

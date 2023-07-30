@@ -1,14 +1,14 @@
 /* eslint-disable prefer-destructuring */
-import { getUserData } from '../filesystem';
-import log from '../log';
-import hashText from '../utils/hashText';
-import { decrypt } from '../utils/safeStorage';
+import { getUserData } from '../../filesystem';
+import log from '../../log';
+import hashText from '../../utils/hashText';
 import {
   AuthData,
   LastFMLoveUnlovePostResponse,
   LoveParams,
-} from '../../@types/last_fm_api';
-import { checkIfConnectedToInternet } from '../main';
+} from '../../../@types/last_fm_api';
+import { checkIfConnectedToInternet } from '../../main';
+import getLastFmAuthData from './getLastFMAuthData';
 
 type Method = 'track.love' | 'track.unlove';
 
@@ -54,18 +54,11 @@ const sendFavoritesDataToLastFM = async (
     const userData = getUserData();
     const isConnectedToInternet = checkIfConnectedToInternet();
 
-    const encryptedSessionKey = userData.lastFmSessionData?.key;
     const isSendingLoveEnabled =
-      encryptedSessionKey && userData.preferences.sendSongFavoritesDataToLastFM;
+      userData.preferences.sendSongFavoritesDataToLastFM;
 
     if (isSendingLoveEnabled && isConnectedToInternet) {
-      const SESSION_KEY = decrypt(encryptedSessionKey);
-
-      const LAST_FM_API_KEY = process.env.LAST_FM_API_KEY;
-      const LAST_FM_SHARED_SECRET = process.env.LAST_FM_SHARED_SECRET;
-      if (!LAST_FM_API_KEY) throw new Error('LastFM api key not found.');
-      if (!LAST_FM_SHARED_SECRET)
-        throw new Error('LastFM shared secret key not found.');
+      const authData = getLastFmAuthData();
 
       const url = new URL('http://ws.audioscrobbler.com/2.0/');
       url.searchParams.set('format', 'json');
@@ -75,11 +68,7 @@ const sendFavoritesDataToLastFM = async (
         artist: artists.join(', '),
       };
 
-      const body = generateApiResponseBody(
-        method,
-        { LAST_FM_API_KEY, SESSION_KEY, LAST_FM_SHARED_SECRET },
-        params,
-      );
+      const body = generateApiResponseBody(method, authData, params);
 
       const res = await fetch(url, {
         method: 'POST',

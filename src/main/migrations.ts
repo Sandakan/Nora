@@ -137,6 +137,7 @@ export const userDataMigrations = {
     userData.windowState = 'normal';
     userData.preferences.sendSongScrobblingDataToLastFM = false;
     userData.preferences.sendSongFavoritesDataToLastFM = false;
+    userData.preferences.sendNowPlayingSongDataToLastFM = false;
     if (userData.customMusixmatchUserToken)
       userData.customMusixmatchUserToken = encrypt(
         userData.customMusixmatchUserToken,

@@ -1,6 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
 import { FixedSizeList as List } from 'react-window';
+// import InfiniteLoader from 'react-window-infinite-loader';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
@@ -430,6 +431,40 @@ const SongsPage = () => {
           className="songs-container appear-from-bottom h-full flex-1 delay-100"
           ref={songsContainerRef}
         >
+          {/* <InfiniteLoader
+            // isItemLoaded={isItemLoaded}
+            itemCount={60}
+            // loadMoreItems={loadMoreItems}
+          >
+            {({ onItemsRendered, ref }) => (
+              <List
+                ref={ref}
+                onItemsRendered={onItemsRendered}
+                itemCount={content.songsData.length}
+                itemSize={60}
+                width={width || '100%'}
+                height={height || 450}
+                overscanCount={10}
+                className="appear-from-bottom delay-100"
+                initialScrollOffset={
+                  currentlyActivePage.data?.scrollTopOffset ?? 0
+                }
+                onScroll={(data) => {
+                  if (!data.scrollUpdateWasRequested && data.scrollOffset !== 0)
+                    debounce(
+                      () =>
+                        updateCurrentlyActivePageData((currentPageData) => ({
+                          ...currentPageData,
+                          scrollTopOffset: data.scrollOffset,
+                        })),
+                      500,
+                    );
+                }}
+              >
+                {songs}
+              </List>
+            )}
+          </InfiniteLoader> */}
           {content.songsData && content.songsData.length > 0 && (
             <List
               itemCount={content.songsData.length}

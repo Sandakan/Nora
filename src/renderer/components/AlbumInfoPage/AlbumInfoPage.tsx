@@ -12,15 +12,19 @@ import MainContainer from '../MainContainer';
 import Song from '../SongsPage/Song';
 import TitleContainer from '../TitleContainer';
 import AlbumImgAndInfoContainer from './AlbumImgAndInfoContainer';
+import { LastFMAlbumInfo } from '../../../@types/last_fm_album_info_api';
+import OnlineAlbumInfoContainer from './OnlineAlbumInfoContainer';
 
 interface AlbumContentReducer {
   albumData: Album;
+  otherAlbumData?: LastFMAlbumInfo;
   songsData: SongData[];
   sortingOrder: SongSortTypes;
 }
 
 type AlbumContentReducerActions =
   | 'ALBUM_DATA_UPDATE'
+  | 'OTHER_ALBUM_DATA_UPDATE'
   | 'SONGS_DATA_UPDATE'
   | 'UPDATE_SORTING_ORDER';
 
@@ -33,6 +37,11 @@ const reducer = (
       return {
         ...state,
         albumData: action.data,
+      };
+    case 'OTHER_ALBUM_DATA_UPDATE':
+      return {
+        ...state,
+        otherAlbumData: action.data,
       };
     case 'SONGS_DATA_UPDATE':
       return {
@@ -107,6 +116,17 @@ const AlbumInfoPage = () => {
     songsData: [] as SongData[],
     sortingOrder: 'trackNoAscending' as SongSortTypes,
   });
+
+  React.useEffect(() => {
+    if (currentlyActivePage.data.albumId)
+      window.api.albumsData
+        .getAlbumInfoFromLastFM(currentlyActivePage.data.albumId)
+        .then((res) => {
+          if (res) dispatch({ type: 'OTHER_ALBUM_DATA_UPDATE', data: res });
+          return undefined;
+        })
+        .catch((err) => console.error(err));
+  }, [currentlyActivePage.data.albumId]);
 
   const fetchAlbumData = React.useCallback(() => {
     if (currentlyActivePage.data.albumId) {
@@ -223,10 +243,20 @@ const AlbumInfoPage = () => {
     ],
   );
 
-  const listItems = React.useMemo(
-    () => [albumContent.albumData, ...albumContent.songsData],
-    [albumContent.albumData, albumContent.songsData],
-  );
+  const listItems = React.useMemo(() => {
+    const items: (Album | SongData | LastFMAlbumInfo)[] = [
+      albumContent.albumData,
+      ...albumContent.songsData,
+    ];
+
+    if (albumContent?.otherAlbumData) items.push(albumContent.otherAlbumData);
+
+    return items;
+  }, [
+    albumContent.albumData,
+    albumContent?.otherAlbumData,
+    albumContent.songsData,
+  ]);
 
   const listComponents = React.useCallback(
     (props: { index: number; style: React.CSSProperties }) => {
@@ -255,6 +285,11 @@ const AlbumInfoPage = () => {
               selectAllHandler={selectAllHandler}
               onPlayClick={handleSongPlayBtnClick}
             />
+          ) : 'sortedAllTracks' in song ? (
+            <OnlineAlbumInfoContainer
+              albumTitle={albumContent.albumData.title}
+              otherAlbumData={albumContent.otherAlbumData}
+            />
           ) : (
             <AlbumImgAndInfoContainer
               albumData={song}
@@ -265,6 +300,8 @@ const AlbumInfoPage = () => {
       );
     },
     [
+      albumContent.albumData.title,
+      albumContent.otherAlbumData,
       albumContent.songsData,
       handleSongPlayBtnClick,
       listItems,
@@ -273,10 +310,18 @@ const AlbumInfoPage = () => {
     ],
   );
 
-  const getItemSize = React.useCallback((index: number) => {
-    if (index === 0) return 250;
-    return 60;
-  }, []);
+  const SONG_COMPONENT_HEIGHT = 60;
+  const ALBUM_INFO_COMPONENT_HEIGHT = 250;
+  const ONLINE_ALBUM_INFO_COMPONENT_HEIGHT = 500;
+  const getItemSize = React.useCallback(
+    (index: number) => {
+      const item = listItems[index];
+      if ('songId' in item) return SONG_COMPONENT_HEIGHT;
+      if ('sortedAllTracks' in item) return ONLINE_ALBUM_INFO_COMPONENT_HEIGHT;
+      return ALBUM_INFO_COMPONENT_HEIGHT;
+    },
+    [listItems],
+  );
 
   return (
     <MainContainer

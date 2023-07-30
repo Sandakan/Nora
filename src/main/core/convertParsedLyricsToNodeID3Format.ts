@@ -3,6 +3,7 @@ import log from '../log';
 
 const convertParsedLyricsToNodeID3Format = (
   parsedLyrics?: LyricsData,
+  prevSyncedLyrics: SynchronisedLyrics = [],
 ): SynchronisedLyrics => {
   try {
     if (parsedLyrics && parsedLyrics.isSynced && parsedLyrics.syncedLyrics) {
@@ -24,6 +25,7 @@ const convertParsedLyricsToNodeID3Format = (
       const shortText = copyright ? JSON.stringify({ copyright }) : undefined;
 
       const convertedLyrics = [
+        ...prevSyncedLyrics,
         {
           contentType: TagConstants.SynchronisedLyrics.ContentType.LYRICS,
           timeStampFormat: TagConstants.TimeStampFormat.MILLISECONDS,
@@ -34,15 +36,15 @@ const convertParsedLyricsToNodeID3Format = (
       ] satisfies SynchronisedLyrics;
       return convertedLyrics;
     }
+    return prevSyncedLyrics;
   } catch (error) {
     log(
       `Error occurred when converting parsed lyrics to NodeID3 Synchronised Lyrics format.`,
       { error },
       'WARN',
     );
-    return [];
+    return prevSyncedLyrics;
   }
-  return [];
 };
 
 export default convertParsedLyricsToNodeID3Format;

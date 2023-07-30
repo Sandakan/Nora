@@ -1,30 +1,9 @@
-export interface LastFMArtistDataApi {
-  artist: {
-    name: string;
-    url: string;
-    image: {
-      '#text': string;
-      size: 'small' | 'medium' | 'large' | 'extralarge' | 'mega';
-    }[];
-    tags: {
-      tag: {
-        name: string;
-      }[];
-    };
-    bio: {
-      summary: string;
-      content: string;
-    };
-  };
-  error?: number;
-  message?: string;
-}
-
-export interface LastFMTrackInfoApi {
-  track?: LastFMTrackData;
-  message?: string;
-  error?: number;
-}
+/* eslint-disable no-shadow */
+export type LastFMTrackInfoApi =
+  | {
+      track: LastFMTrackData;
+    }
+  | LastFMError;
 
 interface LastFMTrackData {
   name: string;
@@ -80,73 +59,6 @@ export interface LastFMHitCache {
   data: SongMetadataResultFromInternet;
 }
 
-export interface LastFMAlbumInfoAPI {
-  album: Album;
-  message?: string;
-  error?: number;
-}
-
-interface Album {
-  artist: string;
-  mbid: string;
-  tags: Tags;
-  playcount: string;
-  image: Image[];
-  tracks: Tracks;
-  url: string;
-  name: string;
-  listeners: string;
-  wiki: Wiki;
-}
-
-interface Image {
-  size: string;
-  '#text': string;
-}
-
-interface Tags {
-  tag: Tag[];
-}
-
-interface Tag {
-  url: string;
-  name: string;
-}
-
-interface Tracks {
-  track: Track[];
-}
-
-interface Track {
-  streamable: Streamable;
-  duration: number;
-  url: string;
-  name: string;
-  '@attr': Attr;
-  artist: ArtistClass;
-}
-
-interface Attr {
-  rank: number;
-}
-
-interface ArtistClass {
-  url: string;
-  name: string;
-  mbid: string;
-}
-
-interface Streamable {
-  fulltrack: string;
-  '#text': string;
-}
-
-interface Wiki {
-  published: string;
-  summary: string;
-  content: string;
-}
-
 type LastFMError = { message: string; error: number };
 
 export type LastFMSessionData = {
@@ -158,17 +70,25 @@ export type LastFMSessionGetResponse =
   | { session: LastFMSessionData }
   | LastFMError;
 
-export type ScrobbleParams = {
+export interface updateNowPlayingParams {
   artist: string;
   track: string;
-  timestamp: number;
   album?: string;
-  chosenByUser?: 1 | 0;
   trackNumber?: number;
   mbid?: string;
   albumArtist?: string;
   duration?: number;
-};
+}
+
+export enum ChosenByUserInput {
+  chosenByUser = 1,
+  notChosenByUser = 0,
+}
+
+export interface ScrobbleParams extends updateNowPlayingParams {
+  timestamp: number;
+  chosenByUser?: ChosenByUserInput;
+}
 
 export type LoveParams = { artist: string; track: string };
 

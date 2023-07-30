@@ -14,6 +14,7 @@ import ListeningActivityBarGraph from './ListeningActivityBarGraph';
 import SongStat from './SongStat';
 import SongsWithFeaturingArtistsSuggestion from './SongsWithFeaturingArtistSuggestion';
 import SongAdditionalInfoContainer from './SongAdditionalInfoContainer';
+import SimilarTracksContainer from './SimilarTracksContainer';
 
 const SongInfoPage = () => {
   const { currentlyActivePage, bodyBackgroundImage } = useContext(AppContext);
@@ -63,8 +64,11 @@ const SongInfoPage = () => {
     if (currentlyActivePage.data && currentlyActivePage.data.songId) {
       console.time('fetchTime');
 
+      // eslint-disable-next-line prefer-destructuring
+      const songId = currentlyActivePage.data.songId;
+
       window.api.audioLibraryControls
-        .getSongInfo([currentlyActivePage.data.songId])
+        .getSongInfo([songId])
         .then((res) => {
           console.log(`Time end : ${console.timeEnd('fetchTime')}`);
           if (res && res.length > 0) {
@@ -77,7 +81,7 @@ const SongInfoPage = () => {
         .catch((err) => log(err));
 
       window.api.audioLibraryControls
-        .getSongListeningData([currentlyActivePage.data.songId])
+        .getSongListeningData([songId])
         .then((res) => {
           if (res && res.length > 0) setListeningData(res[0]);
           return undefined;
@@ -364,6 +368,11 @@ const SongInfoPage = () => {
               songInfo={songInfo}
               songDurationStr={songDuration}
             />
+            {currentlyActivePage.data.songId && (
+              <SimilarTracksContainer
+                songId={currentlyActivePage.data.songId}
+              />
+            )}
           </SecondaryContainer>
         )}
       </>

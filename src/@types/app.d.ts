@@ -3,6 +3,7 @@ import { ReactElement, ReactNode } from 'react';
 import { ButtonProps } from 'renderer/components/Button';
 import { api } from '../main/preload';
 import { LastFMSessionData } from './last_fm_api';
+import { SimilarArtist, Tag } from './last_fm_artist_info_api';
 
 declare global {
   interface Window {
@@ -358,6 +359,7 @@ declare global {
     | 'preferences.openWindowAsHiddenOnSystemStart'
     | 'preferences.sendSongScrobblingDataToLastFM'
     | 'preferences.sendSongFavoritesDataToLastFM'
+    | 'preferences.sendNowPlayingSongDataToLastFM'
     | 'customMusixmatchUserToken'
     | 'lastFmSessionData'
     | 'storageMetrics'
@@ -388,6 +390,7 @@ declare global {
       hideWindowOnClose: boolean;
       sendSongScrobblingDataToLastFM: boolean;
       sendSongFavoritesDataToLastFM: boolean;
+      sendNowPlayingSongDataToLastFM: boolean;
     };
     windowPositions: {
       mainWindow?: WindowCordinates;
@@ -500,7 +503,7 @@ declare global {
 
   interface LyricsEditorSettings {
     offset: number;
-    editNextStartTagWithCurrentEndTag: boolean;
+    editNextAndCurrentStartAndEndTagsAutomatically: boolean;
   }
 
   interface LocalStorage {
@@ -593,12 +596,21 @@ declare global {
   interface ArtistInfo extends Artist {
     artistPalette?: NodeVibrantPalette;
     artistBio?: string;
+    similarArtists?: SimilarArtistInfo;
+    tags?: Tag[];
+  }
+
+  interface SimilarArtistInfo {
+    availableArtists: SimilarArtist[];
+    unAvailableArtists: SimilarArtist[];
   }
 
   interface ArtistInfoFromNet {
     artistArtworks?: OnlineArtistArtworks;
     artistPalette?: NodeVibrantPalette;
     artistBio?: string;
+    similarArtists: SimilarArtistInfo;
+    tags: Tag[];
   }
 
   interface OnlineArtistArtworks {

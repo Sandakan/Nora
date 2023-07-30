@@ -1,7 +1,7 @@
 import {
   addAFavoriteToLastFM,
   removeAFavoriteFromLastFM,
-} from '../other/sendFavoritesDataToLastFM';
+} from '../other/lastFm/sendFavoritesDataToLastFM';
 import { getSongsData, setSongsData } from '../filesystem';
 import { getSongArtworkPath } from '../fs/resolveFilePaths';
 import log from '../log';

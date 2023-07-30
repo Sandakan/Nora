@@ -51,15 +51,9 @@ const LyricsPage = () => {
     addNewNotifications([
       {
         id: 'fetchLyrics',
-        delay: 5000,
-        content: (
-          <span>
-            Fetching lyrics for &apos;{currentSongData.title}&apos;...
-          </span>
-        ),
-        icon: (
-          <span className="material-icons-round-outlined !text-xl">mic</span>
-        ),
+        content: `Fetching lyrics for '${currentSongData.title}'...`,
+        iconName: 'mic',
+        iconClassName: 'material-icons-round-outlined !text-xl',
       },
     ]);
     window.api.lyrics
@@ -170,9 +164,19 @@ const LyricsPage = () => {
           },
           'ANY',
           'ONLINE_ONLY',
-          localStorageData.preferences.lyricsAutomaticallySaveState,
+          'NONE',
         )
-        .then((res) => setLyrics(res))
+        .then((res) => {
+          if (res) return setLyrics(res);
+          return addNewNotifications([
+            {
+              id: 'lyricsUpdateFailed',
+              content: `No Online Lyrics Found.`,
+              iconName: 'warning',
+              iconClassName: 'material-icons-round-outlined !text-xl',
+            },
+          ]);
+        })
         .finally(() => {
           setIsDisabled(false);
           setIsPending(false);
@@ -180,11 +184,11 @@ const LyricsPage = () => {
         .catch((err) => console.error(err));
     },
     [
+      addNewNotifications,
       currentSongData.artists,
       currentSongData.duration,
       currentSongData.path,
       currentSongData.title,
-      localStorageData.preferences.lyricsAutomaticallySaveState,
     ],
   );
 
@@ -210,11 +214,22 @@ const LyricsPage = () => {
           'OFFLINE_ONLY',
           localStorageData.preferences.lyricsAutomaticallySaveState,
         )
-        .then((res) => setLyrics(res))
+        .then((res) => {
+          if (res) return setLyrics(res);
+          return addNewNotifications([
+            {
+              id: 'offlineLyricsFetchFailed',
+              content: `No Offline Lyrics Found.`,
+              iconName: 'warning',
+              iconClassName: 'material-icons-round-outlined !text-xl',
+            },
+          ]);
+        })
         .finally(() => setIsDisabled(false))
         .catch((err) => console.error(err));
     },
     [
+      addNewNotifications,
       currentSongData.artists,
       currentSongData.duration,
       currentSongData.path,
@@ -249,13 +264,9 @@ const LyricsPage = () => {
             return addNewNotifications([
               {
                 id: 'lyricsUpdateSuccessful',
-                delay: 5000,
-                content: <span>Lyrics successfully updated.</span>,
-                icon: (
-                  <span className="material-icons-round-outlined !text-xl">
-                    check
-                  </span>
-                ),
+                content: `Lyrics successfully updated.`,
+                iconName: 'check',
+                iconClassName: 'material-icons-round-outlined !text-xl',
               },
             ]);
           })
@@ -285,11 +296,22 @@ const LyricsPage = () => {
           'ANY',
           'ONLINE_ONLY',
         )
-        .then((res) => setLyrics(res))
+        .then((res) => {
+          if (res) return setLyrics(res);
+          return addNewNotifications([
+            {
+              id: 'OnlineLyricsRefreshFailed',
+              content: `Failed to refresh Online Lyrics.`,
+              iconName: 'warning',
+              iconClassName: 'material-icons-round-outlined !text-xl',
+            },
+          ]);
+        })
         .finally(() => setIsDisabled(false))
         .catch((err) => console.error(err));
     },
     [
+      addNewNotifications,
       currentSongData.artists,
       currentSongData.duration,
       currentSongData.path,
@@ -433,6 +455,13 @@ const LyricsPage = () => {
             <NoLyrics
               artworkPath={NoLyricsImage}
               content="We couldn't find any lyrics for this song."
+              // buttons={[
+              //   {
+              //     label: 'Show Saved Lyrics',
+              //     iconName: 'visibility',
+              //     clickHandler: showOfflineLyrics,
+              //   },
+              // ]}
             />
           ) : (
             <NoLyrics

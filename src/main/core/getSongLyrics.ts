@@ -12,6 +12,7 @@ import parseLyrics, {
   parseSyncedLyricsFromAudioDataSource,
 } from '../utils/parseLyrics';
 import saveLyricsToSong from '../saveLyricsToSong';
+import { decrypt } from '../utils/safeStorage';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -75,9 +76,14 @@ const getLyricsFromMusixmatch = async (
 
   const userData = getUserData();
 
-  const mxmUserToken =
-    userData?.customMusixmatchUserToken?.trim() ||
-    process.env.MUSIXMATCH_DEFAULT_USER_TOKEN;
+  let mxmUserToken = process.env.MUSIXMATCH_DEFAULT_USER_TOKEN;
+  const encryptedCustomMxmToken = userData?.customMusixmatchUserToken?.trim();
+
+  if (encryptedCustomMxmToken) {
+    const decryptedCustomMxmToken = decrypt(encryptedCustomMxmToken);
+    mxmUserToken = decryptedCustomMxmToken;
+  }
+
   if (mxmUserToken && userData?.preferences?.isMusixmatchLyricsEnabled) {
     // Searching internet for lyrics because none present on audio source.
     try {

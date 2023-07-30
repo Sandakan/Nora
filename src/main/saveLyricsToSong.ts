@@ -10,6 +10,8 @@ const saveLyricsToSong = async (
   lyrics: SongLyrics,
 ) => {
   const songPath = removeDefaultAppProtocolFromFilePath(songPathWithProtocol);
+  const prevTags = await NodeID3.Promise.read(songPath);
+
   if (lyrics && lyrics?.lyrics) {
     const { isSynced } = lyrics.lyrics;
     const unsynchronisedLyrics = !isSynced
@@ -17,11 +19,11 @@ const saveLyricsToSong = async (
           language: 'ENG',
           text: lyrics.lyrics.unparsedLyrics,
         }
-      : undefined;
+      : prevTags.unsynchronisedLyrics;
 
     const synchronisedLyrics = isSynced
       ? convertParsedLyricsToNodeID3Format(lyrics.lyrics)
-      : undefined;
+      : prevTags.synchronisedLyrics;
 
     try {
       await NodeID3.Promise.update(

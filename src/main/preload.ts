@@ -1,5 +1,7 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { LastFMTrackInfoApi } from '../@types/last_fm_api';
+import { SimilarTracksOutput } from '../@types/last_fm_similar_tracks_api';
+import { LastFMAlbumInfo } from '../@types/last_fm_album_info_api';
 
 const properties = {
   isInDevelopment:
@@ -130,6 +132,10 @@ const audioLibraryControls = {
     ipcRenderer.invoke('app/clearSongHistory'),
   scrobbleSong: (songId: string, startTimeInSecs: number): Promise<void> =>
     ipcRenderer.invoke('app/scrobbleSong', songId, startTimeInSecs),
+  sendNowPlayingSongDataToLastFM: (songId: string): Promise<void> =>
+    ipcRenderer.invoke('app/sendNowPlayingSongDataToLastFM', songId),
+  getSimilarTracksForASong: (songId: string): Promise<SimilarTracksOutput> =>
+    ipcRenderer.invoke('app/getSimilarTracksForASong', songId),
 };
 
 const suggestions = {
@@ -402,6 +408,10 @@ const albumsData = {
     sortType?: AlbumSortTypes,
   ): Promise<Album[]> =>
     ipcRenderer.invoke('app/getAlbumData', albumTitlesOrIds, sortType),
+  getAlbumInfoFromLastFM: (
+    albumId: string,
+  ): Promise<LastFMAlbumInfo | undefined> =>
+    ipcRenderer.invoke('app/getAlbumInfoFromLastFM', albumId),
 };
 
 // $ PLAYLIST DATA AND CONTROLS

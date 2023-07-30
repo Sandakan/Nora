@@ -220,11 +220,8 @@ const SongCard = (props: SongCardProp) => {
             addNewNotifications([
               {
                 id: `${title}PlayNext`,
-                delay: 5000,
-                content: (
-                  <span>{songIds.length} songs will be played next.</span>
-                ),
-                icon: <span className="material-icons-round">shortcut</span>,
+                content: `${songIds.length} songs will be played next.`,
+                iconName: 'shortcut',
               },
             ]);
           } else {
@@ -248,9 +245,8 @@ const SongCard = (props: SongCardProp) => {
             addNewNotifications([
               {
                 id: `${title}PlayNext`,
-                delay: 5000,
-                content: <span>&apos;{title}&apos; will be played next.</span>,
-                icon: <span className="material-icons-round">shortcut</span>,
+                content: `'${title}' will be played next.`,
+                iconName: 'shortcut',
               },
             ]);
           }
@@ -266,10 +262,8 @@ const SongCard = (props: SongCardProp) => {
             addNewNotifications([
               {
                 id: `${songIds.length}AddedToQueueFromMultiSelection`,
-                delay: 5000,
-                content: (
-                  <span>Added {songIds.length} songs to the queue.</span>
-                ),
+                content: `Added ${songIds.length} songs to the queue.`,
+                iconName: 'add',
               },
             ]);
           } else {
@@ -277,8 +271,7 @@ const SongCard = (props: SongCardProp) => {
             addNewNotifications([
               {
                 id: `${title}AddedToQueue`,
-                delay: 5000,
-                content: <span>Added 1 song to the queue.</span>,
+                content: 'Added 1 song to the queue.',
                 icon: (
                   <Img src={artworkPath} loading="lazy" alt="Song Artwork" />
                 ),

@@ -76,17 +76,50 @@ const generateArtworkBuffer = async (artworkPath?: string) => {
     if (isArtworkPathAWebURL) {
       const onlineArtworkBuffer = await fetchArtworkBufferFromURL(
         artworkPath,
-      ).catch((err) =>
+      ).catch((err) => {
         log(
           `ERROR OCCURRED WHEN FETCHING ONLINE ARTWORK BUFFER, NEWLY ADDED TO THE SONG.`,
           { err },
           'ERROR',
-        ),
-      );
+        );
+        return undefined;
+      });
       return onlineArtworkBuffer;
     }
     const localArtworkBuffer = await generateLocalArtworkBuffer(artworkPath);
     return localArtworkBuffer;
+  }
+  return undefined;
+};
+
+const parseImgDataForNodeID3 = async (
+  artworkPaths: ArtworkPaths,
+  artworkBuffer?: Buffer,
+): Promise<
+  | {
+      mime: string;
+      type: {
+        id: number;
+        name?: string | undefined;
+      };
+      description: string;
+      imageBuffer: Buffer;
+    }
+  | undefined
+> => {
+  if (artworkPaths.isDefaultArtwork) return undefined;
+
+  if (artworkBuffer) {
+    const pngBuffer = await sharp(artworkBuffer).toFormat('png').toBuffer();
+
+    if (pngBuffer) {
+      return {
+        type: { id: 1 },
+        mime: 'image/png',
+        description: 'artwork',
+        imageBuffer: pngBuffer,
+      };
+    }
   }
   return undefined;
 };
@@ -430,6 +463,7 @@ const manageArtworkUpdates = async (
   const newArtworkPath = newSongData.artworkPath
     ? removeDefaultAppProtocolFromFilePath(newSongData.artworkPath)
     : undefined;
+  let isArtworkChanged = false;
 
   const artworkBuffer = await generateArtworkBuffer(newArtworkPath);
 
@@ -442,6 +476,7 @@ const manageArtworkUpdates = async (
 
   if (songPrevArtworkPaths.artworkPath !== newArtworkPath) {
     log(`User changed the artwork of the song '${songId}'`);
+    isArtworkChanged = true;
     // check whether song had an artwork before
     if (prevSongData.isArtworkAvailable) {
       // had an artwork before
@@ -472,7 +507,12 @@ const manageArtworkUpdates = async (
       } else prevSongData.palette = undefined;
     }
   }
-  return { songPrevArtworkPaths, artworkBuffer, updatedSongData: prevSongData };
+  return {
+    songPrevArtworkPaths,
+    artworkBuffer,
+    updatedSongData: prevSongData,
+    isArtworkChanged,
+  };
 };
 
 const manageArtworkUpdatesOfSongsFromUnknownSource = async (
@@ -518,6 +558,7 @@ const manageArtworkUpdatesOfSongsFromUnknownSource = async (
 
 const manageLyricsUpdates = (
   tags: SongTags,
+  prevTags: NodeID3.Tags,
   prevSongData?: SavableSongData,
 ) => {
   const parsedSyncedLyrics = tags.synchronizedLyrics
@@ -529,10 +570,12 @@ const manageLyricsUpdates = (
 
   const unsynchronisedLyrics = parsedUnsyncedLyrics
     ? { language: 'ENG', text: parsedUnsyncedLyrics.unparsedLyrics }
-    : undefined;
+    : prevTags.unsynchronisedLyrics;
 
-  const synchronisedLyrics =
-    convertParsedLyricsToNodeID3Format(parsedSyncedLyrics);
+  const synchronisedLyrics = convertParsedLyricsToNodeID3Format(
+    parsedSyncedLyrics,
+    prevTags.synchronisedLyrics,
+  );
 
   if (parsedSyncedLyrics || parsedUnsyncedLyrics) {
     updateCachedLyrics((cachedLyrics) => {
@@ -558,7 +601,7 @@ const manageLyricsUpdates = (
   }
 
   return {
-    parsedLyrics: parsedSyncedLyrics || parsedUnsyncedLyrics,
+    // parsedLyrics: parsedSyncedLyrics || parsedUnsyncedLyrics,
     unsynchronisedLyrics,
     synchronisedLyrics,
   };
@@ -577,6 +620,7 @@ const updateSongId3TagsOfUnknownSource = async (
         removeDefaultAppProtocolFromFilePath(songPath);
 
       const oldSongTags = await sendSongID3Tags(songPath, false);
+      const oldNodeID3Tags = await NodeID3.Promise.read(songPath);
 
       // ?  /////////// ARTWORK DATA FOR SONGS FROM UNKNOWN SOURCES /////////////////
 
@@ -593,8 +637,10 @@ const updateSongId3TagsOfUnknownSource = async (
       );
 
       // ?  /////////// LYRICS DATA FOR SONGS FROM UNKNOWN SOURCES /////////////////
-      const { synchronisedLyrics, unsynchronisedLyrics } =
-        manageLyricsUpdates(newSongTags);
+      const { synchronisedLyrics, unsynchronisedLyrics } = manageLyricsUpdates(
+        newSongTags,
+        oldNodeID3Tags,
+      );
 
       const id3Tags: NodeID3.Tags = {
         title: newSongTags.title,
@@ -702,6 +748,7 @@ const updateSongId3Tags = async (
         try {
           log(`Started the song data updating procees of the song '${songId}'`);
           let song = songs[x];
+          const prevTags = await NodeID3.Promise.read(song.path);
 
           // / / / / / SONG TITLE / / / / / / /
           song.title = tags.title;
@@ -748,7 +795,7 @@ const updateSongId3Tags = async (
 
           // / / / / / / / SONG LYRICS / / / / / / /
           const { synchronisedLyrics, unsynchronisedLyrics } =
-            manageLyricsUpdates(tags, song);
+            manageLyricsUpdates(tags, prevTags, song);
 
           // / / / / / SONG FILE UPDATE PROCESS AND UPDATE FINALIZATION / / / / / /
           const artworkPaths = getSongArtworkPath(
@@ -756,37 +803,6 @@ const updateSongId3Tags = async (
             song.isArtworkAvailable,
             true,
           );
-
-          const parseImgDataForNodeID3 = async (): Promise<
-            | {
-                mime: string;
-                type: {
-                  id: number;
-                  name?: string | undefined;
-                };
-                description: string;
-                imageBuffer: Buffer;
-              }
-            | undefined
-          > => {
-            if (artworkPaths.isDefaultArtwork) return undefined;
-
-            if (artworkBuffer) {
-              const pngBuffer = await sharp(artworkBuffer)
-                .toFormat('png')
-                .toBuffer();
-
-              if (pngBuffer) {
-                return {
-                  type: { id: 1 },
-                  mime: 'image/png',
-                  description: 'artwork',
-                  imageBuffer: pngBuffer,
-                };
-              }
-            }
-            return undefined;
-          };
 
           const id3Tags: NodeID3.Tags = {
             title: tags.title,
@@ -796,7 +812,7 @@ const updateSongId3Tags = async (
             composer: tags.composer,
             trackNumber: tags.trackNumber?.toString(),
             year: tags.releasedYear ? `${tags.releasedYear}` : undefined,
-            image: await parseImgDataForNodeID3(),
+            image: await parseImgDataForNodeID3(artworkPaths, artworkBuffer),
             unsynchronisedLyrics,
             synchronisedLyrics: synchronisedLyrics || [],
           };
