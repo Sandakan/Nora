@@ -10,7 +10,7 @@ const SongAdditionalInfoContainer = (props: Props) => {
   const [isDataVisible, setIsDataVisible] = React.useState(false);
 
   return (
-    <div className="other-cards appear-from-bottom mr-4 w-full max-w-[60rem] rounded-xl bg-background-color-2/70 p-4 backdrop-blur-sm dark:bg-dark-background-color-2/70 dark:text-font-color-white">
+    <div className="other-cards appear-from-bottom mr-4 w-full max-w-full mt-4 rounded-xl bg-background-color-2/70 p-4 backdrop-blur-sm dark:bg-dark-background-color-2/70 dark:text-font-color-white">
       <label
         htmlFor="toggleSuggestionBox"
         className="title-container flex cursor-pointer items-center justify-between font-medium text-font-color-highlight dark:text-dark-font-color-highlight"

@@ -432,7 +432,7 @@ const LyricsPage = () => {
                 </div>
               </div>
               <div
-                className="lyrics-lines-container flex h-full !w-full flex-col items-center overflow-y-auto px-8 py-16"
+                className="lyrics-lines-container flex h-full !w-full flex-col items-center overflow-y-auto px-8 py-[10vh]"
                 ref={lyricsLinesContainerRef}
                 onScroll={() =>
                   debounce(() => {

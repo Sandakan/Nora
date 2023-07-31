@@ -202,7 +202,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
         />
       </div>
       <div
-        className={`mini-player-lyrics-container absolute top-0 flex h-full w-full select-none flex-col items-center overflow-hidden px-2 py-12 transition-[filter] group-focus-within:blur-sm group-focus-within:brightness-50 group-hover:blur-sm group-hover:brightness-50 ${
+        className={`mini-player-lyrics-container absolute top-0 flex h-full w-full select-none flex-col items-center overflow-hidden px-4 py-12 transition-[filter] group-focus-within:blur-sm group-focus-within:brightness-50 group-hover:blur-sm group-hover:brightness-50 ${
           !isCurrentSongPlaying ? 'blur-sm brightness-50' : ''
         }`}
         id="miniPlayerLyricsContainer"

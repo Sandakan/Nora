@@ -309,7 +309,7 @@ const SongInfoPage = () => {
         />
 
         {listeningData && (
-          <SecondaryContainer className="secondary-container song-stats-container mt-8 flex h-fit flex-row flex-wrap rounded-2xl p-2">
+          <SecondaryContainer className="secondary-container song-stats-container justify-center items-center mt-8 flex h-fit flex-row flex-wrap rounded-2xl p-2">
             <div className="grid w-full max-w-5xl grid-cols-[1fr_minmax(50%,55%)] grid-rows-none gap-4 py-4 xl:grid-cols-1 xl:grid-rows-2 xl:justify-items-center">
               <ListeningActivityBarGraph
                 listeningData={listeningData}
