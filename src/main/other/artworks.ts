@@ -1,7 +1,7 @@
-import { app } from 'electron';
 import fs from 'fs/promises';
-import fsExtra from 'fs-extra';
 import path from 'path';
+import { app } from 'electron';
+import fsExtra from 'fs-extra';
 import sharp from 'sharp';
 
 import { DEFAULT_ARTWORK_SAVE_LOCATION, DEFAULT_FILE_URL } from '../filesystem';

@@ -1,8 +1,8 @@
 /* eslint-disable no-loop-func */
 /* eslint-disable no-await-in-loop */
-import NodeID3 from 'node-id3';
 import path from 'path';
 import { readFile, stat } from 'fs/promises';
+import NodeID3 from 'node-id3';
 import sharp from 'sharp';
 
 import {

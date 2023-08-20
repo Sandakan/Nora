@@ -1077,13 +1077,14 @@ export default function App() {
   );
 
   React.useEffect(() => {
-    // let url: string | undefined;
+    const { isInDevelopment } = window.api.properties;
+    let artworkPath: string | undefined;
 
-    // if (contentRef.current.currentSongData.artwork) {
-    //   const decoded = atob(contentRef.current.currentSongData.artwork);
-    //   const blob = new Blob([contentRef.current.currentSongData.artwork]);
-    //   url = URL.createObjectURL(blob);
-    // }
+    if (!isInDevelopment && contentRef.current.currentSongData.artwork) {
+      const blob = new Blob([contentRef.current.currentSongData.artwork]);
+      artworkPath = URL.createObjectURL(blob);
+    }
+
     navigator.mediaSession.metadata = new MediaMetadata({
       title: contentRef.current.currentSongData.title,
       artist: Array.isArray(contentRef.current.currentSongData.artists)
@@ -1096,8 +1097,11 @@ export default function App() {
         : 'Unknown Album',
       artwork: [
         {
-          src: `data:;base64,${contentRef.current.currentSongData.artwork}`,
-          // src: url || '',
+          // src: `http://nora.app/local/${contentRef.current.currentSongData.artworkPath}`,
+          // src: `data:;base64,${contentRef.current.currentSongData.artwork}`,
+          src:
+            artworkPath ||
+            `data:;base64,${contentRef.current.currentSongData.artwork}`,
           // src: contentRef.current.currentSongData.artworkPath || '',
           sizes: '1000x1000',
           type: 'image/webp',
@@ -1125,7 +1129,7 @@ export default function App() {
       ? 'playing'
       : 'paused';
     return () => {
-      // if (url) URL.revokeObjectURL(url);
+      if (artworkPath) URL.revokeObjectURL(artworkPath);
       navigator.mediaSession.metadata = null;
       navigator.mediaSession.playbackState = 'none';
       navigator.mediaSession.setActionHandler('play', null);

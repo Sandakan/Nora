@@ -1,15 +1,15 @@
 import React from 'react';
 import Button, { ButtonProps } from '../Button';
-import Img from '../Img';
 
 interface NoLyricsProp {
-  content: string;
-  artworkPath: string;
+  title: string;
+  description: string;
+  iconName: string;
   buttons?: ButtonProps[];
 }
 
 const NoLyrics = (props: NoLyricsProp) => {
-  const { artworkPath, content, buttons = [] } = props;
+  const { title, iconName, description, buttons = [] } = props;
 
   const buttonComponents = React.useMemo(() => {
     return buttons.map((button) => {
@@ -19,9 +19,12 @@ const NoLyrics = (props: NoLyricsProp) => {
   }, [buttons]);
 
   return (
-    <div className="no-lyrics-container flex h-full flex-col items-center justify-center text-center text-xl text-font-color-black dark:text-font-color-white">
-      <Img src={artworkPath} className="mb-8 w-52" alt="" />
-      <p className="max-w-[70%]">{content}</p>
+    <div className="no-lyrics-container flex h-full flex-col items-center justify-center text-center text-font-color-black/75 dark:text-font-color-white/60">
+      <span className="material-icons-round-outlined text-6xl mb-4">
+        {iconName}
+      </span>
+      <p className="mb-2 text-2xl">{title}</p>
+      <p className="text-sm">{description}</p>
       {buttons.length > 0 && (
         <div className="buttons-container mt-4 flex items-center justify-center">
           {buttonComponents}

@@ -158,6 +158,23 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
     ],
   );
 
+  const ignoreSuggestion = React.useCallback(() => {
+    storage.ignoredSongsWithFeatArtists.setIgnoredSongsWithFeatArtists([
+      songId,
+    ]);
+
+    setIsIgnored(true);
+    addNewNotifications([
+      {
+        id: 'suggestionIgnored',
+        iconName: 'do_not_disturb_on',
+        iconClassName: 'material-icons-round-outlined',
+        delay: 5000,
+        content: `Suggestion ignored.`,
+      },
+    ]);
+  }, [addNewNotifications, songId]);
+
   return (
     <>
       {separatedFeatArtistsNames.length > 0 && !isIgnored && (
@@ -255,24 +272,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
                   iconName="do_not_disturb_on"
                   iconClassName="material-icons-round-outlined"
                   label="Ignore"
-                  clickHandler={() => {
-                    storage.ignoredSeparateArtists.setIgnoredSeparateArtists([
-                      songId,
-                    ]);
-                    setIsIgnored(true);
-                    addNewNotifications([
-                      {
-                        id: 'suggestionIgnored',
-                        icon: (
-                          <span className="material-icons-round-outlined">
-                            do_not_disturb_on
-                          </span>
-                        ),
-                        delay: 5000,
-                        content: <span>Suggestion ignored.</span>,
-                      },
-                    ]);
-                  }}
+                  clickHandler={ignoreSuggestion}
                 />
                 <span
                   className="material-icons-round-outlined ml-4 cursor-pointer text-xl opacity-80 transition-opacity hover:opacity-100"

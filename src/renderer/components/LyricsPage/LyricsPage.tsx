@@ -7,9 +7,6 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
 
 import LyricLine from './LyricLine';
-import NoLyricsImage from '../../../../assets/images/svg/Sun_Monochromatic.svg';
-import FetchingLyricsImage from '../../../../assets/images/svg/Waiting_Monochromatic.svg';
-import NoInternetImage from '../../../../assets/images/svg/Network _Monochromatic.svg';
 import LyricsSource from './LyricsSource';
 import NoLyrics from './NoLyrics';
 import MainContainer from '../MainContainer';
@@ -453,8 +450,9 @@ const LyricsPage = () => {
             </>
           ) : lyrics === undefined || lyrics?.lyrics.lyrics.length === 0 ? (
             <NoLyrics
-              artworkPath={NoLyricsImage}
-              content="We couldn't find any lyrics for this song."
+              iconName="release_alert"
+              title="Lyrics Not Found"
+              description="We couldn't find any lyrics for this song."
               // buttons={[
               //   {
               //     label: 'Show Saved Lyrics',
@@ -465,14 +463,16 @@ const LyricsPage = () => {
             />
           ) : (
             <NoLyrics
-              artworkPath={FetchingLyricsImage}
-              content="Hang on... We are looking everywhere"
+              iconName="hourglass_empty"
+              title="Looking for Lyrics"
+              description="Hang on... We are looking everywhere"
             />
           )
         ) : (
           <NoLyrics
-            artworkPath={NoInternetImage}
-            content="There are no offline lyrics for this song. You need an internet connection to check for online lyrics."
+            iconName="wifi_off"
+            title="No internet connection"
+            description="There are no offline lyrics for this song. You need an internet connection to check for online lyrics."
           />
         )}
       </>

@@ -391,6 +391,7 @@ export const Album = (props: AlbumProp) => {
         <div className="album-cover-container relative h-full overflow-hidden rounded-lg before:invisible before:absolute before:h-full before:w-full before:bg-gradient-to-b before:from-[hsla(0,0%,0%,0%)] before:to-[hsla(0,0%,0%,50%)] before:opacity-0 before:transition-[visibility,opacity] before:duration-300 before:content-[''] group-focus-within:before:visible group-focus-within:before:opacity-100 group-hover:before:visible group-hover:before:opacity-100">
           <Img
             src={props.artworkPaths.artworkPath}
+            fallbackSrc={DefaultAlbumCover}
             loading="lazy"
             alt="Album Cover"
             className="h-full max-h-full w-full object-cover object-center"

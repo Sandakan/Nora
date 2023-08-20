@@ -1,6 +1,8 @@
 /* eslint-disable default-param-last */
 /* eslint-disable no-use-before-define */
 /* eslint-disable global-require */
+import path from 'path';
+import os from 'os';
 import {
   app,
   BrowserWindow,
@@ -18,8 +20,6 @@ import {
   powerMonitor,
   SaveDialogOptions,
 } from 'electron';
-import path from 'path';
-import os from 'os';
 import * as dotenv from 'dotenv';
 
 // import * as Sentry from '@sentry/electron';
@@ -1118,7 +1118,7 @@ async function revealSongInFileExplorer(songId: string) {
   }
   return log(
     `Revealing song file in explorer failed because song couldn't be found in the library.`,
-    undefined,
+    { songId },
     'WARN',
     { sendToRenderer: 'FAILURE' },
   );

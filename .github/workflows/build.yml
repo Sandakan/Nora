@@ -30,10 +30,6 @@ jobs:
           node-version: 18
           check-latest: true
 
-      - name: Print GitHub Ref
-        run: |
-          echo "GitHub Ref: ${{ github.ref }}"
-
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1
         with:

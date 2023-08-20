@@ -1,6 +1,7 @@
 /* eslint-disable no-await-in-loop */
-import * as musicMetaData from 'music-metadata';
 import path from 'path';
+import { app } from 'electron';
+import * as musicMetaData from 'music-metadata';
 
 import { isSongBlacklisted } from '../utils/isBlacklisted';
 import { DEFAULT_FILE_URL, getArtistsData, getSongsData } from '../filesystem';
@@ -27,6 +28,16 @@ import updateSongListeningData from './updateSongListeningData';
 //   }
 //   return undefined;
 // };
+
+const IS_DEVELOPMENT =
+  !app.isPackaged || process.env.NODE_ENV === 'development';
+
+const getArtworkData = (artworkData?: Buffer) => {
+  if (artworkData === undefined) return undefined;
+
+  if (IS_DEVELOPMENT) return Buffer.from(artworkData).toString('base64');
+  return artworkData;
+};
 
 const getRelevantArtistData = (
   songArtists?: {
@@ -81,8 +92,8 @@ export const sendAudioData = async (
           if (metadata) {
             const artworkData = metadata.common.picture
               ? metadata.common.picture[0].data
-              : '';
-            // : undefined;
+              : undefined;
+
             addToSongsHistory(song.songId);
             const songArtists = getRelevantArtistData(song.artists);
 
@@ -91,7 +102,7 @@ export const sendAudioData = async (
               artists: songArtists.length > 0 ? songArtists : song.artists,
               duration: song.duration,
               // artwork: await getArtworkLink(artworkData),
-              artwork: Buffer.from(artworkData).toString('base64') || undefined,
+              artwork: getArtworkData(artworkData),
               artworkPath: getSongArtworkPath(
                 song.songId,
                 song.isArtworkAvailable,

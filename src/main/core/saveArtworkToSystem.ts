@@ -1,5 +1,5 @@
-import sharp from 'sharp';
 import { SaveDialogOptions } from 'electron';
+import sharp from 'sharp';
 
 import log from '../log';
 import { sendMessageToRenderer, showSaveDialog } from '../main';

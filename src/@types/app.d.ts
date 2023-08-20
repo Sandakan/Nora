@@ -132,7 +132,7 @@ declare global {
       onlineArtworkPaths?: OnlineArtistArtworks;
     }[];
     duration: number;
-    artwork?: string;
+    artwork?: string | Buffer;
     artworkPath?: string;
     path: string;
     isAFavorite: boolean;
@@ -488,9 +488,9 @@ declare global {
   }
 
   interface IgnoredDuplicates {
-    artists: string[][];
-    albums: string[][];
-    genres: string[][];
+    artists: string[];
+    albums: string[];
+    genres: string[];
   }
 
   interface SortingStates {

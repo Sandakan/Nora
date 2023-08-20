@@ -1,6 +1,6 @@
-import { SaveDialogOptions } from 'electron';
 import { writeFile } from 'fs/promises';
 import { basename } from 'path';
+import { SaveDialogOptions } from 'electron';
 
 import log from '../log';
 import { getPlaylistData, getSongsData } from '../filesystem';

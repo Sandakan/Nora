@@ -1,9 +1,9 @@
 /* eslint-disable no-use-before-define */
-import * as musicMetaData from 'music-metadata';
 
 // import { createReadStream } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
+import * as musicMetaData from 'music-metadata';
 
 import { generateRandomId } from '../utils/randomId';
 import log from '../log';

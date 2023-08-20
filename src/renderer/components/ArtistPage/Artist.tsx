@@ -347,7 +347,7 @@ export const Artist = (props: ArtistProp) => {
       <div className="artist-img-container relative flex h-3/4 items-center justify-center">
         {isAFavorite && (
           <span
-            className={`material-icons-round absolute -bottom-1 left-2 flex rounded-full bg-background-color-1 p-2 text-2xl !text-font-color-crimson shadow-lg dark:bg-dark-background-color-2 ${
+            className={`material-icons-round absolute -bottom-1 z-10 left-2 flex rounded-full bg-background-color-1 p-2 text-2xl !text-font-color-crimson shadow-lg dark:bg-dark-background-color-2 ${
               isAMultipleSelection &&
               '!bg-background-color-3 dark:!bg-dark-background-color-3'
             }`}
@@ -372,7 +372,7 @@ export const Artist = (props: ArtistProp) => {
       </div>
       <div className="artist-info-container max-h-1/5 relative">
         <Button
-          className={`name-container !m-0 !block !w-full !max-w-full truncate !rounded-none !border-0 !p-0 text-center !text-xl outline-1 outline-offset-1 hover:underline focus-visible:!outline lg:text-base ${
+          className={`name-container !m-0 !block !w-full !max-w-full truncate !rounded-none !border-0 !p-0 text-center !text-lg outline-1 outline-offset-1 hover:underline focus-visible:!outline lg:text-base ${
             isAMultipleSelection &&
             '!text-font-color-black dark:!text-font-color-black'
           }`}

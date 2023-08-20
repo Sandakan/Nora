@@ -205,7 +205,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
                   iconClassName="material-icons-round-outlined"
                   label="Ignore"
                   clickHandler={() => {
-                    storage.ignoredSeparateArtists.setIgnoredSeparateArtists([
+                    storage.ignoredDuplicates.setIgnoredDuplicates('artists', [
                       artistId,
                     ]);
                     setIsVisible(true);

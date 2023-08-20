@@ -316,13 +316,13 @@ const getIgnoredSeparateArtists = () => getFullItem('ignoredSeparateArtists');
 
 // IGNORED SONGS WITH FEATURING ARTISTS
 
-const setIgnoredSongsWithFeatArtists = (artists: string[]) => {
+const setIgnoredSongsWithFeatArtists = (ignoredSongIds: string[]) => {
   const allItems = getAllItems();
   setAllItems({
     ...allItems,
     ignoredSongsWithFeatArtists: [
       ...allItems.ignoredSongsWithFeatArtists,
-      ...artists,
+      ...ignoredSongIds,
     ],
   });
 };

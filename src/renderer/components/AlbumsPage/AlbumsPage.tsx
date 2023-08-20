@@ -1,8 +1,8 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
 import React, { CSSProperties } from 'react';
-import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { FixedSizeGrid as Grid } from 'react-window';
+import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';

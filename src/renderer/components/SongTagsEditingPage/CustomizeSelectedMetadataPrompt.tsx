@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import isLyricsSynced from 'main/utils/isLyricsSynced';
 import React from 'react';
+import isLyricsSynced from 'main/utils/isLyricsSynced';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
 import Checkbox from '../Checkbox';

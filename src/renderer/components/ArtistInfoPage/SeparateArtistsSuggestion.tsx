@@ -198,13 +198,10 @@ const SeparateArtistsSuggestion = (props: Props) => {
                     addNewNotifications([
                       {
                         id: 'suggestionIgnored',
-                        icon: (
-                          <span className="material-icons-round-outlined">
-                            do_not_disturb_on
-                          </span>
-                        ),
+                        iconName: 'do_not_disturb_on',
+                        iconClassName: 'material-icons-round-outlined',
                         delay: 5000,
-                        content: <span>Suggestion ignored.</span>,
+                        content: `Suggestion ignored.`,
                       },
                     ]);
                   }}

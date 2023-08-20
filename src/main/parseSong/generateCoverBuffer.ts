@@ -1,8 +1,8 @@
 import path from 'path';
 import fs from 'fs/promises';
 
-import sharp from 'sharp';
 import * as musicMetaData from 'music-metadata';
+import sharp from 'sharp';
 
 import log from '../log';
 import getAssetPath from '../utils/getAssetPath';

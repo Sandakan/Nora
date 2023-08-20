@@ -1,6 +1,6 @@
-import { OpenDialogOptions, app } from 'electron';
 import fs from 'fs/promises';
 import path from 'path';
+import { OpenDialogOptions, app } from 'electron';
 
 import {
   getAlbumsData,

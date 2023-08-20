@@ -324,6 +324,11 @@ function SongTagsEditingPage() {
     return 'Unknown Title';
   }, [songPath]);
 
+  const isEditingCurrentlyPlayingSong = React.useMemo(
+    () => currentSongData.songId === songId,
+    [currentSongData.songId, songId],
+  );
+
   return (
     <MainContainer className="main-container appear-from-bottom id3-tags-updater-container h-full">
       <>
@@ -443,7 +448,9 @@ function SongTagsEditingPage() {
                 label="Save Tags"
                 iconName="save"
                 iconClassName="material-icons-round-outlined"
-                isDisabled={!areThereDataChanges}
+                isDisabled={
+                  !areThereDataChanges || isEditingCurrentlyPlayingSong
+                }
                 className="update-song-tags-btn"
                 clickHandler={saveTags}
               />
@@ -456,7 +463,7 @@ function SongTagsEditingPage() {
                 clickHandler={resetDataToDefaults}
               />
             </div>
-            {currentSongData.songId === songId && (
+            {isEditingCurrentlyPlayingSong && (
               <p className="appear-from-bottom ml-2 text-sm font-medium flex items-center text-font-color-highlight dark:text-dark-font-color-highlight">
                 <span className="material-icons-round-outlined text-xl mr-2">
                   error

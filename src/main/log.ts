@@ -1,6 +1,6 @@
-import { app } from 'electron';
 import { appendFileSync } from 'fs';
 import path from 'path';
+import { app } from 'electron';
 import { sendMessageToRenderer } from './main';
 import { makeDirSync } from './utils/makeDir';
 

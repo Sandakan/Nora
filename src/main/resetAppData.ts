@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
-import { app } from 'electron';
 import fs from 'fs/promises';
 import path from 'path';
+import { app } from 'electron';
 import log from './log';
 
 const resourcePaths = [

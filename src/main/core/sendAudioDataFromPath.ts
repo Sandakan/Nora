@@ -1,5 +1,5 @@
-import * as musicMetaData from 'music-metadata';
 import path from 'path';
+import * as musicMetaData from 'music-metadata';
 import { appPreferences } from '../../../package.json';
 import { createTempArtwork } from '../other/artworks';
 import { DEFAULT_FILE_URL, getSongsData } from '../filesystem';

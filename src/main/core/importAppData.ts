@@ -1,6 +1,6 @@
-import { OpenDialogOptions } from 'electron';
 import fs from 'fs/promises';
 import path from 'path';
+import { OpenDialogOptions } from 'electron';
 
 import { restartApp, showOpenDialog } from '../main';
 import log from '../log';

@@ -1,5 +1,5 @@
-import NodeID3 from 'node-id3';
 import path from 'path';
+import NodeID3 from 'node-id3';
 import convertParsedLyricsToNodeID3Format from './core/convertParsedLyricsToNodeID3Format';
 import { updateCachedLyrics } from './core/getSongLyrics';
 import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
@@ -26,12 +26,20 @@ const saveLyricsToSong = async (
       : prevTags.synchronisedLyrics;
 
     try {
-      await NodeID3.Promise.update(
+      NodeID3.update(
         {
           unsynchronisedLyrics,
           synchronisedLyrics: synchronisedLyrics || [],
         },
         songPath,
+        {
+          include: [
+            // 'synchronisedLyrics' = 'SYLT',
+            // 'unsynchronisedLyrics' = 'USLT',
+            'SYLT',
+            'USLT',
+          ],
+        },
       );
       updateCachedLyrics((prevLyrics) => {
         if (prevLyrics)

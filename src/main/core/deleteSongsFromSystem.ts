@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
-import { shell } from 'electron';
 import path from 'path';
 import fs from 'fs/promises';
+import { shell } from 'electron';
 import { supportedMusicExtensions } from '../filesystem';
 import log from '../log';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
