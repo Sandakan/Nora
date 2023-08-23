@@ -73,7 +73,7 @@ import sendPlaylistData from './core/sendPlaylistData';
 import fetchAlbumData from './core/fetchAlbumData';
 import fetchArtistData from './core/fetchArtistData';
 import { changeAppTheme } from './core/changeAppTheme';
-import saveLyricsToSong from './saveLyricsToSong';
+import saveLyricsToSong, { savePendingSongLyrics } from './saveLyricsToSong';
 import getMusicFolderData from './core/getMusicFolderData';
 import {
   closeAllAbortControllers,
@@ -150,6 +150,7 @@ let isMiniPlayer = false;
 let isConnectedToInternet = false;
 let isAudioPlaying = false;
 let isOnBatteryPower = false;
+let currentSongPath: string;
 
 // / / / / / / INITIALIZATION / / / / / / /
 
@@ -899,6 +900,7 @@ function manageWindowFinishLoad() {
 
 function handleBeforeQuit() {
   mainWindow.webContents.send('app/beforeQuitEvent');
+  savePendingSongLyrics(currentSongPath, true);
   closeAllAbortControllers();
   clearTempArtworkFolder();
   log(
@@ -1011,6 +1013,11 @@ function registerFileProtocol(
   }
 }
 
+export const setCurrentSongPath = (songPath: string) => {
+  currentSongPath = songPath;
+  savePendingSongLyrics(currentSongPath, false);
+};
+
 function manageAuthServices(url: string) {
   log('URL selected for auth service', { url });
   const { searchParams } = new URL(url);
@@ -1103,6 +1110,7 @@ export function restartApp(reason: string, noQuitEvents = false) {
 
   if (!noQuitEvents) {
     mainWindow.webContents.send('app/beforeQuitEvent');
+    savePendingSongLyrics(currentSongPath, true);
     closeAllAbortControllers();
   }
   app.relaunch();

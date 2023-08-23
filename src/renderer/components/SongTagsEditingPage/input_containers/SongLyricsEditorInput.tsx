@@ -38,8 +38,9 @@ const isLyricsSynchronized = (lyrics: string) => {
   return isSynced;
 };
 
-const isLyricsEnhancedSynced = (lyrics: string) => {
-  const isEnhancedSynced = extendedSyncedLyricsLineRegex.test(lyrics);
+export const isLyricsEnhancedSynced = (syncedLyricsString: string) => {
+  const isEnhancedSynced =
+    extendedSyncedLyricsLineRegex.test(syncedLyricsString);
   extendedSyncedLyricsLineRegex.lastIndex = 0;
 
   return isEnhancedSynced;

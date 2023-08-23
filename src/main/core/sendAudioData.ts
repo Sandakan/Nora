@@ -7,27 +7,10 @@ import { isSongBlacklisted } from '../utils/isBlacklisted';
 import { DEFAULT_FILE_URL, getArtistsData, getSongsData } from '../filesystem';
 import { getSongArtworkPath } from '../fs/resolveFilePaths';
 import log from '../log';
-// import { getDefaultSongCoverImgBuffer } from '../parseSong/generateCoverBuffer';
 import getArtistInfoFromNet from './getArtistInfoFromNet';
 import addToSongsHistory from './addToSongsHistory';
 import updateSongListeningData from './updateSongListeningData';
-
-// let tempArtworkLink: string | undefined;
-
-// const getArtworkLink = async (artwork?: Buffer) => {
-//   const imgData = artwork || (await getDefaultSongCoverImgBuffer());
-
-//   if (imgData) {
-//     if (tempArtworkLink) URL.revokeObjectURL(tempArtworkLink);
-
-//     const blob = new Blob([imgData]);
-//     const link = URL.createObjectURL(blob);
-//     tempArtworkLink = link;
-
-//     return tempArtworkLink;
-//   }
-//   return undefined;
-// };
+import { setCurrentSongPath } from '../main';
 
 const IS_DEVELOPMENT =
   !app.isPackaged || process.env.NODE_ENV === 'development';
@@ -117,6 +100,7 @@ export const sendAudioData = async (
             };
 
             updateSongListeningData(song.songId, 'listens', 'increment');
+            setCurrentSongPath(song.path);
             return data;
             // return log(`total : ${console.timeEnd('total')}`);
           }

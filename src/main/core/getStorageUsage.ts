@@ -1,7 +1,6 @@
 import path from 'path';
 import { app } from 'electron';
 
-
 import { getUserData, setUserData } from '../filesystem';
 
 import getRootSize from '../utils/getRootSize';

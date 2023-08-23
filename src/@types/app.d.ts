@@ -268,6 +268,13 @@ declare global {
   }
 
   // node-id3 synchronisedLyrics types.
+  type UnsynchronisedLyrics =
+    | {
+        language: string;
+        text: string;
+      }
+    | undefined;
+
   type SynchronisedLyrics =
     | Array<{
         /**

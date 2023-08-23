@@ -105,20 +105,28 @@ const LyricsSettings = () => {
             Select an option to save song lyrics automatically when fetched in
             Lyrics Page.
           </div>
-          <Dropdown
-            className="mt-4"
-            name="lyricsAutomaticallySaveState"
-            value={lyricsAutomaticallySaveState}
-            options={automaticallySaveLyricsOptions}
-            onChange={(e) => {
-              const val = e.currentTarget.value as AutomaticallySaveLyricsTypes;
-              setLyricsAutomaticallySaveState(val);
-              storage.preferences.setPreferences(
-                'lyricsAutomaticallySaveState',
-                val,
-              );
-            }}
-          />
+          <div className="flex items-center flex-row mt-4">
+            <Dropdown
+              name="lyricsAutomaticallySaveState"
+              value={lyricsAutomaticallySaveState}
+              options={automaticallySaveLyricsOptions}
+              onChange={(e) => {
+                const val = e.currentTarget
+                  .value as AutomaticallySaveLyricsTypes;
+                setLyricsAutomaticallySaveState(val);
+                storage.preferences.setPreferences(
+                  'lyricsAutomaticallySaveState',
+                  val,
+                );
+              }}
+            />
+            <span
+              className="material-icons-round-outlined ml-4 text-2xl cursor-pointer text-font-color-highlight dark:text-dark-font-color-highlight"
+              title="Automatically downloaded songs will be saved after the current song is finished to prevent confusing the audio player."
+            >
+              help
+            </span>
+          </div>
         </li>
       </ul>
     </li>

@@ -166,17 +166,8 @@ const saveLyricsAutomaticallyIfAsked = async (
   if (
     (lyricsType === 'SYNCED' && isSynced) ||
     lyricsType === 'SYNCED_OR_UN_SYNCED'
-  ) {
-    await saveLyricsToSong(songPath, lyrics);
-    return log(
-      `Lyrics for '${lyrics.title}' saved successfully.`,
-      {
-        songPath,
-      },
-      'INFO',
-      { sendToRenderer: 'SUCCESS' },
-    );
-  }
+  )
+    return saveLyricsToSong(songPath, lyrics);
 
   return undefined;
 };

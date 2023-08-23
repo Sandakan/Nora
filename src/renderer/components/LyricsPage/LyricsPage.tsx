@@ -13,6 +13,8 @@ import MainContainer from '../MainContainer';
 import Button from '../Button';
 
 import { appPreferences } from '../../../../package.json';
+import { isLyricsEnhancedSynced } from '../SongTagsEditingPage/input_containers/SongLyricsEditorInput';
+import { EditingLyricsLineData } from '../LyricsEditingPage/LyricsEditingPage';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -24,8 +26,11 @@ document.addEventListener('lyrics/scrollIntoView', () => {
 
 const LyricsPage = () => {
   const { currentSongData, localStorageData } = useContext(AppContext);
-  const { addNewNotifications, updateCurrentlyActivePageData } =
-    React.useContext(AppUpdateContext);
+  const {
+    addNewNotifications,
+    updateCurrentlyActivePageData,
+    changeCurrentActivePage,
+  } = React.useContext(AppUpdateContext);
 
   const [lyrics, setLyrics] = React.useState(
     null as SongLyrics | undefined | null,
@@ -321,6 +326,42 @@ const LyricsPage = () => {
     [pathExt],
   );
 
+  const isSynchronizedLyricsEnhancedSynced = React.useMemo(
+    () =>
+      lyrics &&
+      lyrics.lyrics.isSynced &&
+      isLyricsEnhancedSynced(lyrics?.lyrics.unparsedLyrics),
+    [lyrics],
+  );
+
+  const goToLyricsEditor = React.useCallback(() => {
+    if (lyrics && !isSynchronizedLyricsEnhancedSynced) {
+      let lines: EditingLyricsLineData[] = [];
+      const { isSynced, syncedLyrics, lyrics: unsyncedLyrics } = lyrics.lyrics;
+
+      if (isSynced && syncedLyrics)
+        lines = syncedLyrics.map((lyric) => ({
+          ...lyric,
+          line: lyric.text as string,
+        }));
+      else {
+        lines = unsyncedLyrics.map((line) => ({ line }));
+      }
+
+      changeCurrentActivePage('LyricsEditor', {
+        lyrics: lines,
+        songId: currentSongData.songId,
+        songTitle: currentSongData.title,
+      });
+    }
+  }, [
+    changeCurrentActivePage,
+    currentSongData.songId,
+    currentSongData.title,
+    isSynchronizedLyricsEnhancedSynced,
+    lyrics,
+  ]);
+
   return (
     <MainContainer
       noDefaultStyles
@@ -348,6 +389,14 @@ const LyricsPage = () => {
                   )}
                 </div>
                 <div className="buttons-container flex">
+                  <Button
+                    key={10}
+                    tooltipLabel="Edit Lyrics in Lyrics Editor"
+                    className="edit-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                    iconName="edit"
+                    clickHandler={goToLyricsEditor}
+                  />
+
                   {lyrics?.lyrics?.isSynced && (
                     <Button
                       key={5}
