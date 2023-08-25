@@ -424,12 +424,8 @@ app
 
       ipcMain.handle(
         'app/getAllSongs',
-        (
-          _,
-          sortType?: SongSortTypes,
-          pageNo?: number,
-          maxResultsPerPage?: number,
-        ) => getAllSongs(sortType, pageNo, maxResultsPerPage),
+        (_, sortType?: SongSortTypes, paginatingData?: PaginatingData) =>
+          getAllSongs(sortType, paginatingData),
       );
 
       ipcMain.handle(

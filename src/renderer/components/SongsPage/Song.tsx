@@ -335,7 +335,9 @@ const Song = React.forwardRef(
                   content: `Added 1 song to the queue.`,
                   icon: (
                     <Img
-                      src={artworkPaths.optimizedArtworkPath}
+                      src={
+                        artworkPaths?.optimizedArtworkPath || DefaultSongCover
+                      }
                       alt="Song Artwork"
                     />
                   ),
@@ -535,8 +537,8 @@ const Song = React.forwardRef(
       addNewNotifications,
       title,
       songId,
-      artworkPaths.optimizedArtworkPath,
-      artworkPaths.artworkPath,
+      artworkPaths?.optimizedArtworkPath,
+      artworkPaths?.artworkPath,
       toggleIsFavorite,
       changePromptMenuData,
       isMultipleSelectionEnabled,
@@ -559,7 +561,7 @@ const Song = React.forwardRef(
             subTitle:
               artists?.map((artist) => artist.name).join(', ') ??
               'Unknown artist',
-            artworkPath: artworkPaths.artworkPath,
+            artworkPath: artworkPaths?.optimizedArtworkPath || DefaultSongCover,
           };
 
     return (
@@ -665,8 +667,8 @@ const Song = React.forwardRef(
               />
             </div>
             <Img
-              src={artworkPaths.optimizedArtworkPath}
-              loading="lazy"
+              src={artworkPaths?.optimizedArtworkPath || DefaultSongCover}
+              loading="eager"
               alt="Song cover"
               className={`aspect-square max-h-full object-contain py-[0.1rem] transition-[filter] duration-300 group-focus-within:brightness-50 group-hover:brightness-50 ${
                 isSongPlaying ? 'brightness-50' : ''

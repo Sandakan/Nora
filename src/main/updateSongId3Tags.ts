@@ -42,6 +42,10 @@ import sendSongID3Tags from './core/sendSongId3Tags';
 import { isSongBlacklisted } from './utils/isBlacklisted';
 import isPathAWebURL from './utils/isPathAWebUrl';
 
+import { appPreferences } from '../../package.json';
+
+const { metadataEditingSupportedExtensions } = appPreferences;
+
 export const fetchArtworkBufferFromURL = async (url: string) => {
   try {
     const res = await fetch(url);
@@ -612,6 +616,18 @@ const updateSongId3TagsOfUnknownSource = async (
   newSongTags: SongTags,
   sendUpdatedData: boolean,
 ) => {
+  const pathExt = path.extname(songPath).replace(/\W/, '');
+  const isASupporedFormat =
+    metadataEditingSupportedExtensions.includes(pathExt);
+
+  if (!isASupporedFormat)
+    return log(
+      `Lyrics cannot be saved because current song extension (${pathExt}) is not supported for modifying metadata.`,
+      { songPath },
+      'ERROR',
+      { sendToRenderer: 'FAILURE' },
+    );
+
   const songsOutsideLibraryData = getSongsOutsideLibraryData();
 
   for (const songOutsideLibraryData of songsOutsideLibraryData) {

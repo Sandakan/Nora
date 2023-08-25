@@ -104,7 +104,10 @@ const HomePage = () => {
 
   const fetchLatestSongs = React.useCallback(() => {
     window.api.audioLibraryControls
-      .getAllSongs('dateAddedAscending', 1, noOfRecentlyAddedSongCards)
+      .getAllSongs('dateAddedAscending', {
+        start: 0,
+        end: noOfRecentlyAddedSongCards,
+      })
       .then((audioData) => {
         if (!audioData || audioData.data.length === 0)
           return dispatch({ type: 'SONGS_DATA', data: [null] });

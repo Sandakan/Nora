@@ -96,7 +96,7 @@ function SongTagsEditingPage() {
     return isASupportedFormat;
   }, [pathExt]);
 
-  React.useEffect(() => {
+  const getSongId3Tags = React.useCallback(() => {
     if (songId)
       window.api.songUpdates
         .getSongId3Tags(isKnownSource ? songId : songPath, isKnownSource)
@@ -115,6 +115,8 @@ function SongTagsEditingPage() {
         })
         .catch((err) => console.error(err));
   }, [isKnownSource, songId, songPath]);
+
+  React.useEffect(() => getSongId3Tags, [getSongId3Tags]);
 
   React.useEffect(() => {
     if (artistKeyword.trim()) {
@@ -439,6 +441,7 @@ function SongTagsEditingPage() {
                 duration={songInfo.duration}
                 synchronizedLyrics={songInfo.synchronizedLyrics}
                 unsynchronizedLyrics={songInfo.unsynchronizedLyrics}
+                isLyricsSavingPending={songInfo.isLyricsSavePending}
                 updateSongInfo={updateSongInfo}
               />
             </div>

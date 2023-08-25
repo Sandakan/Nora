@@ -40,6 +40,7 @@ module.exports = {
     'react/jsx-filename-extension': 'off',
     'no-restricted-syntax': 'off',
     'import/named': 'off',
+    'no-use-before-define': ['error', { functions: false }],
   },
   overrides: [
     {

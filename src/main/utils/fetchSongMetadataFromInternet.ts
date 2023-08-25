@@ -192,7 +192,8 @@ async function fetchSongMetadataResultsFromLastFM(
 
   if (res.ok) {
     const data = (await res.json()) as LastFMTrackInfoApi;
-    if (!data?.error && data?.track) {
+
+    if ('track' in data) {
       const { track } = data;
       const result: SongMetadataResultFromInternet = {
         title: track.name,

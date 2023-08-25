@@ -13,6 +13,7 @@ import {
   getSongArtworkPath,
   removeDefaultAppProtocolFromFilePath,
 } from '../fs/resolveFilePaths';
+import { isLyricsSavePending } from '../saveLyricsToSong';
 import log from '../log';
 import { getSongsOutsideLibraryData } from '../main';
 
@@ -138,6 +139,7 @@ const sendSongID3Tags = async (
               ).artworkPath,
               duration: song.duration,
               trackNumber,
+              isLyricsSavePending: isLyricsSavePending(song.path),
             };
             return res;
           }

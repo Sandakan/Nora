@@ -24,6 +24,7 @@ type Props = {
   duration: number;
   synchronizedLyrics?: string;
   unsynchronizedLyrics?: string;
+  isLyricsSavingPending?: boolean;
   // eslint-disable-next-line no-unused-vars
   updateSongInfo: (callback: (prevSongInfo: SongTags) => SongTags) => void;
 };
@@ -59,6 +60,7 @@ const SongLyricsEditorInput = (props: Props) => {
     songArtists,
     synchronizedLyrics,
     unsynchronizedLyrics,
+    isLyricsSavingPending = false,
     updateSongInfo,
     duration,
     songPath,
@@ -270,6 +272,7 @@ const SongLyricsEditorInput = (props: Props) => {
             iconClassName="material-icons-round-outlined"
           />
         </div>
+
         <textarea
           id="song-lyrics-id3-tag"
           className="mt-4 max-h-80 min-h-[12rem] rounded-2xl border-[0.15rem] border-background-color-2 bg-background-color-2 p-4 transition-colors focus:border-font-color-highlight dark:border-dark-background-color-2 dark:bg-dark-background-color-2 dark:focus:border-dark-font-color-highlight"
@@ -333,11 +336,21 @@ const SongLyricsEditorInput = (props: Props) => {
           </p>
         )}
         {unsynchronizedLyrics && isUnsynchronizedLyricsSynced && (
-          <p className="ml-2 mt-2 text-sm font-medium flex items-center text-font-color-highlight dark:text-dark-font-color-highlight">
+          <p className="ml-2 mt-2 text-sm font-medium flex text-font-color-highlight dark:text-dark-font-color-highlight">
             <span className="material-icons-round-outlined text-xl mr-2">
               error
             </span>{' '}
             Avoid entering Synchronized Lyrics in the Unsynchronized Lyrics Tab.
+          </p>
+        )}
+
+        {isLyricsSavingPending && (
+          <p className="ml-2 mt-2 text-sm font-medium flex items-center text-font-color-highlight dark:text-dark-font-color-highlight">
+            <span className="material-icons-round-outlined text-xl mr-2">
+              error
+            </span>{' '}
+            There are pending lyrics to be saved to this song. They will be
+            saved and will be visible here after the current song is finished.
           </p>
         )}
       </div>

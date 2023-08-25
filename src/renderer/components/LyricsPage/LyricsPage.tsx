@@ -252,7 +252,7 @@ const LyricsPage = () => {
 
         window.api.lyrics
           .saveLyricsToSong(currentSongData.path, lyrics)
-          .then(() => {
+          .then(() =>
             setLyrics((prevData) => {
               if (prevData) {
                 return {
@@ -262,16 +262,8 @@ const LyricsPage = () => {
                 } as SongLyrics;
               }
               return undefined;
-            });
-            return addNewNotifications([
-              {
-                id: 'lyricsUpdateSuccessful',
-                content: `Lyrics successfully updated.`,
-                iconName: 'check',
-                iconClassName: 'material-icons-round-outlined !text-xl',
-              },
-            ]);
-          })
+            }),
+          )
           .finally(() => {
             setIsPending(false);
             setIsDisabled(false);
@@ -279,7 +271,7 @@ const LyricsPage = () => {
           .catch((err) => console.error(err));
       }
     },
-    [addNewNotifications, currentSongData.path, lyrics],
+    [currentSongData.path, lyrics],
   );
 
   const refreshOnlineLyrics = React.useCallback(

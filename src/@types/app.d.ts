@@ -157,12 +157,14 @@ declare global {
     isBlacklisted: boolean;
   }
 
-  interface GetAllSongsResult {
-    data: AudioInfo[];
-    pageNo: number;
-    maxResultsPerPage: number;
-    noOfPages: number;
-    sortType: SongSortTypes;
+  type PaginatingData = { start: number; end: number };
+
+  interface PaginatedResult<DataType extends unknown, SortType extends string> {
+    data: DataType[];
+    sortType: SortType;
+    start: number;
+    end: number;
+    total: number;
   }
 
   interface ToggleLikeSongReturnValue {
@@ -1020,6 +1022,7 @@ declare global {
     unsynchronizedLyrics?: string;
     artworkPath?: string;
     duration: number;
+    isLyricsSavePending?: boolean;
   }
 
   interface SongOutsideLibraryData {

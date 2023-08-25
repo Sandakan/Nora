@@ -78,10 +78,9 @@ const audioLibraryControls = {
     ipcRenderer.invoke('app/getSong', songId, updateListeningRate),
   getAllSongs: (
     sortType?: SongSortTypes,
-    pageNo?: number,
-    maxResultsPerPage?: number,
-  ): Promise<GetAllSongsResult> =>
-    ipcRenderer.invoke('app/getAllSongs', sortType, pageNo, maxResultsPerPage),
+    paginatingData?: PaginatingData,
+  ): Promise<PaginatedResult<AudioInfo, SongSortTypes>> =>
+    ipcRenderer.invoke('app/getAllSongs', sortType, paginatingData),
   getSongInfo: (
     songIds: string[],
     sortType?: SongSortTypes,

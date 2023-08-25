@@ -8,6 +8,10 @@ import { ExtendedEditingLyricsLineData } from './LyricsEditingPage';
 import Button from '../Button';
 import Hyperlink from '../Hyperlink';
 
+import { appPreferences } from '../../../../package.json';
+
+const { metadataEditingSupportedExtensions } = appPreferences;
+
 type Props = {
   lyricsLines: ExtendedEditingLyricsLineData[];
   currentSongData: AudioPlayerData;
@@ -78,10 +82,15 @@ const LyricsEditorSavePrompt = (props: Props) => {
     [currentSongData, lyricsLines],
   );
 
-  //   React.useEffect(() => {
-  //     const obj = convertLyricsStrToObj(lyricsLines, currentSongData);
-  //     setParsedLyrics(obj);
-  //   }, [currentSongData, lyricsLines]);
+  const pathExt = React.useMemo(
+    () => window.api.utils.getExtension(currentSongData.path),
+    [currentSongData.path],
+  );
+
+  const isSaveLyricsBtnDisabled = React.useMemo(
+    () => !metadataEditingSupportedExtensions.includes(pathExt),
+    [pathExt],
+  );
 
   const copyLyrics = React.useCallback(
     (
@@ -115,7 +124,11 @@ const LyricsEditorSavePrompt = (props: Props) => {
       setIsDisabled: (state: boolean) => void,
       setIsPending: (state: boolean) => void,
     ) => {
-      if (parsedLyrics && currentSongData.title === parsedLyrics.title) {
+      if (
+        parsedLyrics &&
+        !isSaveLyricsBtnDisabled &&
+        currentSongData.title === parsedLyrics.title
+      ) {
         setIsDisabled(true);
         setIsPending(true);
 
@@ -148,6 +161,7 @@ const LyricsEditorSavePrompt = (props: Props) => {
       changePromptMenuData,
       currentSongData.path,
       currentSongData.title,
+      isSaveLyricsBtnDisabled,
       parsedLyrics,
     ],
   );
@@ -178,6 +192,12 @@ const LyricsEditorSavePrompt = (props: Props) => {
           iconName="save"
           iconClassName="material-icons-round-outlined"
           clickHandler={saveLyricsToSong}
+          isDisabled={isSaveLyricsBtnDisabled}
+          tooltipLabel={
+            isSaveLyricsBtnDisabled
+              ? `Nora currently doesn't support saving lyrics to songs in '${pathExt}' audio format.`
+              : undefined
+          }
         />
       </div>
       <p className="mt-2 text-xs font-light">

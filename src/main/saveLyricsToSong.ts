@@ -1,8 +1,14 @@
+import path from 'path';
 import NodeID3 from 'node-id3';
+
 import convertParsedLyricsToNodeID3Format from './core/convertParsedLyricsToNodeID3Format';
 import { updateCachedLyrics } from './core/getSongLyrics';
 import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
+import { appPreferences } from '../../package.json';
 import log from './log';
+import { dataUpdateEvent } from './main';
+
+const { metadataEditingSupportedExtensions } = appPreferences;
 
 type PendingSongLyrics = {
   synchronisedLyrics: SynchronisedLyrics;
@@ -16,6 +22,19 @@ const saveLyricsToSong = async (
   lyrics: SongLyrics,
 ) => {
   const songPath = removeDefaultAppProtocolFromFilePath(songPathWithProtocol);
+
+  const pathExt = path.extname(songPath).replace(/\W/, '');
+  const isASupporedFormat =
+    metadataEditingSupportedExtensions.includes(pathExt);
+
+  if (!isASupporedFormat)
+    return log(
+      `Lyrics cannot be saved because current song extension (${pathExt}) is not supported for modifying metadata.`,
+      { songPath },
+      'ERROR',
+      { sendToRenderer: 'FAILURE' },
+    );
+
   const prevTags = await NodeID3.Promise.read(songPath);
 
   if (lyrics && lyrics?.lyrics) {
@@ -49,7 +68,7 @@ const saveLyricsToSong = async (
         return undefined;
       });
       return log(
-        `Lyrics for '${lyrics.title}' will be saved successfully.`,
+        `Lyrics for '${lyrics.title}' will be saved automatically.`,
         {
           songPath,
         },
@@ -69,6 +88,9 @@ const saveLyricsToSong = async (
   throw new Error('no lyrics found to be saved to the song.');
 };
 
+export const isLyricsSavePending = (songPath: string) =>
+  pendingSongLyrics.has(songPath);
+
 export const savePendingSongLyrics = (
   currentSongPath = '',
   forceSave = false,
@@ -86,14 +108,10 @@ export const savePendingSongLyrics = (
 
     if (forceSave || !isACurrentlyPlayingSong) {
       try {
-        NodeID3.update(updatingTags, songPath, {
-          include: [
-            'SYLT', // 'synchronisedLyrics' = 'SYLT',
-            'USLT', // 'unsynchronisedLyrics' = 'USLT',
-          ],
-        });
+        NodeID3.update(updatingTags, songPath);
 
         log(`Successfully saved pending song lyrics of song.`, { songPath });
+        dataUpdateEvent('songs/lyrics');
         pendingSongLyrics.delete(songPath);
       } catch (error) {
         log(
