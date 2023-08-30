@@ -48,11 +48,10 @@ export const resolveArtistDuplicates = async (
         // loop through albums
         for (const album of albums) {
           // check if the albums are linked to the duplicate artist
-          if (
-            artistAlbums.some(
-              (artistAlbum) => artistAlbum.albumId === album.albumId,
-            )
-          ) {
+          const isAlbumLinkedToDuplicateArtist = artistAlbums.some(
+            (artistAlbum) => artistAlbum.albumId === album.albumId,
+          );
+          if (isAlbumLinkedToDuplicateArtist) {
             if (album.artists) {
               album.artists = album.artists!.filter(
                 (songArtist) => songArtist.artistId !== artist.artistId,

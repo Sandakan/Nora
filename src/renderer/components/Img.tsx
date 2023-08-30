@@ -4,13 +4,13 @@ import React from 'react';
 import log from 'renderer/utils/log';
 import DefaultImage from '../../../assets/images/webp/song_cover_default.webp';
 
-interface ImgProps {
+interface ImgProperties {
   width: number;
   height: number;
   quality: string;
 }
 
-type Props = {
+type ImgProps = {
   src?: string;
   fallbackSrc?: string;
   alt?: string;
@@ -71,7 +71,7 @@ type Props = {
   />
 </picture>; */
 
-const Img = (props: Props) => {
+const Img = (props: ImgProps) => {
   const {
     src,
     alt = '',
@@ -79,7 +79,7 @@ const Img = (props: Props) => {
     fallbackSrc = DefaultImage,
     noFallbacks = false,
     onClick = () => true,
-    loading = 'lazy',
+    loading = 'eager',
     onContextMenu,
     showImgPropsOnTooltip = false,
     tabIndex = -1,
@@ -88,7 +88,7 @@ const Img = (props: Props) => {
   } = props;
 
   const imgRef = React.useRef<HTMLImageElement>(null);
-  const imgPropsRef = React.useRef<ImgProps>();
+  const imgPropsRef = React.useRef<ImgProperties>();
   const errorCountRef = React.useRef(0);
 
   return (
@@ -130,7 +130,7 @@ const Img = (props: Props) => {
           img.onload = () => {
             const width = img?.width;
             const height = img?.height;
-            const imgProp: ImgProps = {
+            const imgProp: ImgProperties = {
               width,
               height,
               quality:

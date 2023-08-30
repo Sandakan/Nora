@@ -1,3 +1,5 @@
+import * as dotenv from 'dotenv';
+
 import type Conf from 'conf/dist/source/index';
 import log from './log';
 import {
@@ -66,6 +68,33 @@ export const songMigrations = {
 };
 
 export const artistMigrations = {
+  // ? This migration is added to fix as a fix to https://github.com/Sandakan/Nora/issues/191
+  '2.4.0-stable': (
+    store: Conf<{ version?: string; artists: SavableArtist[] }>,
+  ) => {
+    log('Starting the artists.json migration process.', {
+      version: '2.4.0-stable;',
+    });
+
+    const artists = store.get('artists');
+    for (const artist of artists) {
+      if (Array.isArray(artist.albums)) {
+        const duplicateAlbumsFilteredArr = artist.albums.filter(
+          (album, index, albumsArr) => {
+            return (
+              albumsArr
+                .map((mapObj) => mapObj.albumId)
+                .indexOf(album.albumId) === index
+            );
+          },
+        );
+
+        artist.albums = duplicateAlbumsFilteredArr;
+      }
+    }
+
+    store.set('artists', artists);
+  },
   '2.0.0-stable': (
     store: Conf<{ version?: string; artists: SavableArtist[] }>,
   ) => {
@@ -128,6 +157,8 @@ export const genreMigrations = {
 
 export const userDataMigrations = {
   '2.4.0-stable': (store: Conf<{ version?: string; userData: UserData }>) => {
+    dotenv.config();
+
     log('Starting the userData.json migration process.', {
       version: '2.4.0-stable;',
     });

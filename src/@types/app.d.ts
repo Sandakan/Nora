@@ -508,6 +508,7 @@ declare global {
     playlistsPage?: PlaylistSortTypes;
     albumsPage?: AlbumSortTypes;
     genresPage?: GenreSortTypes;
+    musicFoldersPage?: SongSortTypes;
   }
 
   interface LyricsEditorSettings {
@@ -552,7 +553,7 @@ declare global {
       songId: string;
     }[];
     artworkName?: string;
-    backgroundColor?: { rgb: unknown };
+    backgroundColor?: { rgb: NodeVibrantPaletteSwatch['rgb'] };
   }
 
   interface Genre extends SavableGenre {

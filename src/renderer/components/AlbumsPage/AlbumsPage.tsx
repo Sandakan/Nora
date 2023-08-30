@@ -200,7 +200,7 @@ const AlbumsPage = () => {
               rowHeight={MIN_ITEM_HEIGHT}
               height={height || 300}
               width={width || 500}
-              overscanRowCount={2}
+              overscanRowCount={3}
               initialScrollTop={currentlyActivePage.data?.scrollTopOffset ?? 0}
               onScroll={(data) => {
                 if (scrollOffsetTimeoutIdRef.current)

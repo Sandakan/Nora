@@ -4,6 +4,7 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import storage from 'renderer/utils/localStorage';
 
 import Button from '../Button';
 import Dropdown from '../Dropdown';
@@ -27,7 +28,9 @@ const MusicFolderInfoPage = () => {
 
   const [folderInfo, setFolderInfo] = React.useState<MusicFolder>();
   const [folderSongs, setFolderSongs] = React.useState<SongData[]>([]);
-  const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>('aToZ');
+  const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>(
+    localStorageData?.sortingStates?.songsPage || 'aToZ',
+  );
 
   const songsContainerRef = React.useRef(null as HTMLDivElement | null);
   const { width, height } = useResizeObserver(songsContainerRef);
@@ -112,6 +115,10 @@ const MusicFolderInfoPage = () => {
     };
   }, [fetchFolderSongs]);
 
+  React.useEffect(() => {
+    storage.sortingStates.setSortingStates('musicFoldersPage', sortingOrder);
+  }, [sortingOrder]);
+
   const dropdownOptions: { label: string; value: SongSortTypes }[] = [
     { label: 'A to Z', value: 'aToZ' },
     { label: 'Z to A', value: 'zToA' },
@@ -153,12 +160,19 @@ const MusicFolderInfoPage = () => {
   const selectAllHandler = useSelectAllHandler(folderSongs, 'songs', 'songId');
 
   const handleSongPlayBtnClick = React.useCallback(
-    (currSongId: string) => {
+    (currSongId?: string, shuffleQueue = false, startPlaying = false) => {
       const queueSongIds = folderSongs
         .filter((song) => !song.isBlacklisted)
         .map((song) => song.songId);
-      createQueue(queueSongIds, 'folder', false, folderInfo?.path, false);
-      playSong(currSongId, true);
+      createQueue(
+        queueSongIds,
+        'folder',
+        shuffleQueue,
+        folderInfo?.path,
+        startPlaying,
+      );
+
+      if (currSongId) playSong(currSongId, true);
     },
     [createQueue, folderInfo?.path, folderSongs, playSong],
   );
@@ -295,15 +309,7 @@ const MusicFolderInfoPage = () => {
                 className="play-all-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                 iconName="play_arrow"
                 clickHandler={() =>
-                  createQueue(
-                    folderSongs
-                      .filter((song) => !song.isBlacklisted)
-                      .map((song) => song.songId),
-                    'folder',
-                    false,
-                    folderInfo.path,
-                    true,
-                  )
+                  handleSongPlayBtnClick(undefined, false, true)
                 }
               />
               <Button
@@ -312,15 +318,7 @@ const MusicFolderInfoPage = () => {
                 className="shuffle-and-play-all-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                 iconName="shuffle"
                 clickHandler={() =>
-                  createQueue(
-                    folderSongs
-                      .filter((song) => !song.isBlacklisted)
-                      .map((song) => song.songId),
-                    'folder',
-                    true,
-                    folderInfo.path,
-                    true,
-                  )
+                  handleSongPlayBtnClick(undefined, true, true)
                 }
               />
               <Dropdown

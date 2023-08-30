@@ -15,7 +15,7 @@ interface GenreProp {
   title: string;
   songIds: string[];
   artworkPaths: ArtworkPaths;
-  backgroundColor?: { rgb: unknown };
+  backgroundColor?: { rgb: [number, number, number] };
   className?: string;
   selectAllHandler?: (_upToId?: string) => void;
 }
@@ -307,9 +307,7 @@ const Genre = (props: GenreProp) => {
       }`}
       style={{
         backgroundColor: `rgb(${
-          backgroundColor
-            ? (backgroundColor.rgb as [number, number, number]).join(',')
-            : '23,23,23'
+          backgroundColor ? backgroundColor.rgb.join(',') : '23,23,23'
         })`,
       }}
       onClick={(e) => {

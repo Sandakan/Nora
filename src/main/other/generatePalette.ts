@@ -169,7 +169,9 @@ const generatePalettesForGenres = async () => {
 
             for (const song of songs) {
               if (song.songId === artNameWithoutExt) {
-                genres[i].backgroundColor = song?.palette?.DarkVibrant;
+                genres[i].backgroundColor = song?.palette?.DarkVibrant?.rgb
+                  ? { rgb: song?.palette?.DarkVibrant.rgb }
+                  : undefined;
                 x += 1;
                 break;
               }

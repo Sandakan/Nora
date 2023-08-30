@@ -49,6 +49,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     genresPage: 'aToZ',
     playlistsPage: 'aToZ',
     songsPage: 'aToZ',
+    musicFoldersPage: 'aToZ',
   },
   equalizerPreset: {
     sixtyHertz: 0,

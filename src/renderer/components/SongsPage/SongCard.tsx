@@ -584,12 +584,12 @@ const SongCard = (props: SongCardProp) => {
               Array.isArray(queue.queue) &&
               queue.queue.length > 0 &&
               queue?.queue?.at(queue.currentSongIndex + 1) === songId && (
-                <span className="font-semibold uppercase !text-font-color-white opacity-50 transition-opacity group-hover/songCard:opacity-90">
+                <span className="font-semibold mr-2 last:mr-0 uppercase !text-font-color-white opacity-50 transition-opacity group-hover/songCard:opacity-90">
                   PLAYING NEXT
                 </span>
               )}
             {currentSongData.songId === songId && (
-              <span className="font-semibold uppercase !text-font-color-white opacity-50 transition-opacity group-hover/songCard:opacity-90">
+              <span className="font-semibold mr-2 last:mr-0 uppercase !text-font-color-white opacity-50 transition-opacity group-hover/songCard:opacity-90">
                 PLAYING NOW
               </span>
             )}
@@ -601,7 +601,7 @@ const SongCard = (props: SongCardProp) => {
                 queue?.queue?.at(queue.currentSongIndex + 1) === songId &&
                 currentSongData.songId === songId
               ) && (
-                <span className="font-semibold uppercase !text-font-color-white opacity-50 transition-opacity group-hover/songCard:opacity-90">
+                <span className="font-semibold mr-2 last:mr-0 uppercase !text-font-color-white opacity-50 transition-opacity group-hover/songCard:opacity-90">
                   BLACKLISTED
                 </span>
               )}

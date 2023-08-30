@@ -116,7 +116,9 @@ function SongTagsEditingPage() {
         .catch((err) => console.error(err));
   }, [isKnownSource, songId, songPath]);
 
-  React.useEffect(() => getSongId3Tags, [getSongId3Tags]);
+  React.useEffect(() => {
+    getSongId3Tags();
+  }, [getSongId3Tags]);
 
   React.useEffect(() => {
     if (artistKeyword.trim()) {
