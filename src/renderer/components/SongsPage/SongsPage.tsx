@@ -1,7 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
 import { FixedSizeList as List } from 'react-window';
-// import InfiniteLoader from 'react-window-infinite-loader';
+import InfiniteLoader from 'react-window-infinite-loader';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
@@ -22,9 +22,14 @@ import AddMusicFoldersPrompt from '../MusicFoldersPage/AddMusicFoldersPrompt';
 interface SongPageReducer {
   songsData: AudioInfo[];
   sortingOrder: SongSortTypes;
+  totalSongsCount: number;
 }
 
-type SongPageReducerActionTypes = 'SONGS_DATA' | 'SORTING_ORDER';
+type SongPageReducerActionTypes =
+  | 'SONGS_DATA'
+  | 'TOTAL_SONGS_COUNT'
+  | 'INCREMENTING_SONGS_DATA'
+  | 'SORTING_ORDER';
 
 const dropdownOptions: { label: string; value: SongSortTypes }[] = [
   { label: 'A to Z', value: 'aToZ' },
@@ -79,6 +84,16 @@ const reducer = (
         ...state,
         songsData: action.data,
       };
+    case 'INCREMENTING_SONGS_DATA':
+      return {
+        ...state,
+        songsData: state.songsData.concat(action.data),
+      };
+    case 'TOTAL_SONGS_COUNT':
+      return {
+        ...state,
+        totalSongsCount: action.data,
+      };
     case 'SORTING_ORDER':
       return {
         ...state,
@@ -88,6 +103,8 @@ const reducer = (
       return state;
   }
 };
+
+const MAX_RESULTS_PER_PAGE = 25;
 
 const SongsPage = () => {
   const {
@@ -107,41 +124,68 @@ const SongsPage = () => {
 
   const [content, dispatch] = React.useReducer(reducer, {
     songsData: [],
+    totalSongsCount: 0,
     sortingOrder:
       currentlyActivePage?.data?.sortingOrder ||
       localStorageData?.sortingStates?.songsPage ||
       'aToZ',
   });
-  const songsContainerRef = React.useRef(null as HTMLDivElement | null);
+  const songsContainerRef = React.useRef<HTMLDivElement>(null);
+  const infiniteLoaderRef = React.useRef<InfiniteLoader>(null);
+  const hasInfiniteLoaderMountedRef = React.useRef(false);
   const { width, height } = useResizeObserver(songsContainerRef);
 
-  const fetchSongsData = React.useCallback(() => {
-    console.time('songs');
+  const fetchSongsData = React.useCallback(
+    (start = 0, end = MAX_RESULTS_PER_PAGE) => {
+      console.time('songs');
 
-    window.api.audioLibraryControls
-      .getAllSongs(content.sortingOrder)
-      .then((audioInfoArray) => {
-        console.timeEnd('songs');
+      return window.api.audioLibraryControls
+        .getAllSongs(content.sortingOrder, { start, end })
+        .then((audioInfoArray) => {
+          console.log(audioInfoArray);
+          console.timeEnd('songs');
 
-        if (audioInfoArray) {
-          if (audioInfoArray.data.length === 0)
-            dispatch({
-              type: 'SONGS_DATA',
-              data: null,
-            });
-          else
-            dispatch({
-              type: 'SONGS_DATA',
-              data: audioInfoArray.data,
-            });
-        }
-        return undefined;
-      })
-      .catch((err) => console.error(err));
-  }, [content.sortingOrder]);
+          if (audioInfoArray) {
+            if (audioInfoArray.data.length === 0)
+              dispatch({
+                type: 'SONGS_DATA',
+                data: null,
+              });
+            else {
+              dispatch({
+                type:
+                  start === undefined
+                    ? 'SONGS_DATA'
+                    : 'INCREMENTING_SONGS_DATA',
+                data: audioInfoArray.data,
+              });
+              dispatch({
+                type: 'TOTAL_SONGS_COUNT',
+                data: audioInfoArray.total,
+              });
+            }
+          }
+          return undefined;
+        });
+    },
+    [content.sortingOrder],
+  );
 
   React.useEffect(() => {
     fetchSongsData();
+    if (hasInfiniteLoaderMountedRef.current) {
+      if (infiniteLoaderRef.current) {
+        infiniteLoaderRef.current.resetloadMoreItemsCache(true);
+      }
+    }
+
+    hasInfiniteLoaderMountedRef.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [content.sortingOrder]);
+
+  React.useEffect(() => {
+    // fetchSongsData();
+
     const manageSongsDataUpdatesInSongsPage = (e: Event) => {
       if ('detail' in e) {
         const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>)
@@ -153,8 +197,10 @@ const SongsPage = () => {
             event.dataType === 'songs/newSong' ||
             event.dataType === 'blacklist/songBlacklist' ||
             (event.dataType === 'songs/likes' && event.eventData.length > 1)
-          )
+          ) {
             fetchSongsData();
+            infiniteLoaderRef.current?.resetloadMoreItemsCache(true);
+          }
         }
       }
     };
@@ -168,7 +214,8 @@ const SongsPage = () => {
         manageSongsDataUpdatesInSongsPage,
       );
     };
-  }, [fetchSongsData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   React.useEffect(() => {
     storage.sortingStates.setSortingStates('songsPage', content.sortingOrder);
@@ -244,41 +291,46 @@ const SongsPage = () => {
   const songs = React.useCallback(
     (props: { index: number; style: React.CSSProperties }) => {
       const { index, style } = props;
-      const {
-        songId,
-        title,
-        artists,
-        album,
-        duration,
-        isAFavorite,
-        artworkPaths,
-        year,
-        path,
-        isBlacklisted,
-      } = content.songsData[index];
+      if (content.songsData[index]) {
+        const {
+          songId,
+          title,
+          artists,
+          album,
+          duration,
+          isAFavorite,
+          artworkPaths,
+          year,
+          path,
+          isBlacklisted,
+        } = content.songsData[index];
 
+        return (
+          <div style={style}>
+            <Song
+              key={index}
+              index={index}
+              isIndexingSongs={
+                localStorageData?.preferences.isSongIndexingEnabled
+              }
+              title={title}
+              songId={songId}
+              artists={artists}
+              album={album}
+              artworkPaths={artworkPaths}
+              duration={duration}
+              year={year}
+              path={path}
+              isAFavorite={isAFavorite}
+              isBlacklisted={isBlacklisted}
+              onPlayClick={handleSongPlayBtnClick}
+              selectAllHandler={selectAllHandler}
+            />
+          </div>
+        );
+      }
       return (
-        <div style={style}>
-          <Song
-            key={index}
-            index={index}
-            isIndexingSongs={
-              localStorageData?.preferences.isSongIndexingEnabled
-            }
-            title={title}
-            songId={songId}
-            artists={artists}
-            album={album}
-            artworkPaths={artworkPaths}
-            duration={duration}
-            year={year}
-            path={path}
-            isAFavorite={isAFavorite}
-            isBlacklisted={isBlacklisted}
-            onPlayClick={handleSongPlayBtnClick}
-            selectAllHandler={selectAllHandler}
-          />
-        </div>
+        <div className="relative after:absolute after:mx-auto after:block after:h-4 after:w-4 after:animate-spin-ease after:items-center after:justify-center after:rounded-full after:border-2 after:border-[transparent] after:border-t-font-color-black after:content-[''] dark:after:border-t-font-color-white" />
       );
     },
     [
@@ -313,9 +365,9 @@ const SongsPage = () => {
                   </div>
                 ) : (
                   content.songsData &&
-                  content.songsData.length > 0 && (
+                  content.totalSongsCount > 0 && (
                     <span className="no-of-songs">
-                      {content.songsData.length} songs
+                      {content.totalSongsCount} songs
                     </span>
                   )
                 )}
@@ -431,20 +483,22 @@ const SongsPage = () => {
           className="songs-container appear-from-bottom h-full flex-1 delay-100"
           ref={songsContainerRef}
         >
-          {/* <InfiniteLoader
-            // isItemLoaded={isItemLoaded}
-            itemCount={60}
-            // loadMoreItems={loadMoreItems}
+          <InfiniteLoader
+            isItemLoaded={(index) => !!content.songsData[index]}
+            itemCount={content.totalSongsCount}
+            loadMoreItems={fetchSongsData}
+            minimumBatchSize={MAX_RESULTS_PER_PAGE}
+            ref={infiniteLoaderRef}
           >
             {({ onItemsRendered, ref }) => (
               <List
                 ref={ref}
                 onItemsRendered={onItemsRendered}
-                itemCount={content.songsData.length}
+                itemCount={content.totalSongsCount}
                 itemSize={60}
                 width={width || '100%'}
                 height={height || 450}
-                overscanCount={10}
+                overscanCount={15}
                 className="appear-from-bottom delay-100"
                 initialScrollOffset={
                   currentlyActivePage.data?.scrollTopOffset ?? 0
@@ -464,8 +518,8 @@ const SongsPage = () => {
                 {songs}
               </List>
             )}
-          </InfiniteLoader> */}
-          {content.songsData && content.songsData.length > 0 && (
+          </InfiniteLoader>
+          {/* {content.songsData && content.songsData.length > 0 && (
             <List
               itemCount={content.songsData.length}
               itemSize={60}
@@ -490,7 +544,7 @@ const SongsPage = () => {
             >
               {songs}
             </List>
-          )}
+          )} */}
         </div>
         {content.songsData && content.songsData.length === 0 && (
           <div className="no-songs-container my-[10%] flex h-full w-full flex-col items-center justify-center text-center text-xl text-font-color-black dark:text-font-color-white">
