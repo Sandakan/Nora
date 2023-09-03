@@ -67,7 +67,7 @@ const SongGenresInput = (props: Props) => {
           onKeyDown={(e) => e.stopPropagation()}
         />
         {genreResults.length > 0 && (
-          <ol className="genres-results-container mt-4 rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2 ">
+          <ol className="genres-results-container mt-4 rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2 max-h-60 overflow-y-auto">
             {genreResults.map((x) => (
               <li
                 key={x.genreId ?? x.name}

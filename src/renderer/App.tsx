@@ -1168,18 +1168,18 @@ export default function App() {
     (
       newQueue: string[],
       queueType: QueueTypes,
-      isShuffleQueue = false,
+      isShuffleQueue = content.player.isShuffling,
       queueId?: string,
       startPlaying = false,
     ) => {
       const queue = {
         currentSongIndex: 0,
-        queue: newQueue.map((songId) => songId),
+        queue: newQueue,
         queueId,
         queueType,
       } as Queue;
 
-      if (isShuffleQueue || content.player.isShuffling) {
+      if (isShuffleQueue) {
         const { shuffledQueue, positions } = shuffleQueue(queue.queue);
         queue.queue = shuffledQueue;
 

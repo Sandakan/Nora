@@ -94,7 +94,7 @@ const SongAlbumInput = (props: Props) => {
           onKeyDown={(e) => e.stopPropagation()}
         />
         {albumResults.length > 0 && (
-          <div className="album-results-container mt-4 rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2 ">
+          <div className="album-results-container mt-4 rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2 max-h-60 overflow-y-auto">
             {albumResults.map((x) => (
               <SongAlbumInputResult
                 albumData={x}

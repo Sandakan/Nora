@@ -169,7 +169,10 @@ export const userDataMigrations = {
     userData.preferences.sendSongScrobblingDataToLastFM = false;
     userData.preferences.sendSongFavoritesDataToLastFM = false;
     userData.preferences.sendNowPlayingSongDataToLastFM = false;
-    if (userData.customMusixmatchUserToken)
+    if (
+      userData.customMusixmatchUserToken &&
+      userData.customMusixmatchUserToken.length === 54
+    )
       userData.customMusixmatchUserToken = encrypt(
         userData.customMusixmatchUserToken,
       );

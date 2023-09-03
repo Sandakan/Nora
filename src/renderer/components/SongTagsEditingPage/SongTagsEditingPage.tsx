@@ -129,7 +129,7 @@ function SongTagsEditingPage() {
           if (res.artists.length > 0)
             setArtistResults(
               res.artists
-                .filter((_, index) => index < 5)
+                .filter((_, index) => index < 50)
                 .map((artist) => ({
                   name: artist.name,
                   artistId: artist.artistId,
@@ -153,7 +153,7 @@ function SongTagsEditingPage() {
           if (res.albums.length > 0)
             setAlbumResults(
               res.albums
-                .filter((_, index) => index < 5)
+                .filter((_, index) => index < 50)
                 .map((album) => ({
                   title: album.title,
                   albumId: album.albumId,
@@ -177,7 +177,7 @@ function SongTagsEditingPage() {
           if (res.genres.length > 0)
             setGenreResults(
               res.genres
-                .filter((_, index) => index < 5)
+                .filter((_, index) => index < 50)
                 .map((genre) => ({
                   name: genre.name,
                   genreId: genre.genreId,
