@@ -381,6 +381,13 @@ export const Playlist = (props: PlaylistProp) => {
         if (e.getModifierState('Shift') === true && props.selectAllHandler)
           props.selectAllHandler(props.playlistId);
         else if (
+          e.getModifierState('Control') === true &&
+          !isMultipleSelectionEnabled
+        )
+          toggleMultipleSelections(!isAMultipleSelection, 'playlist', [
+            props.playlistId,
+          ]);
+        else if (
           isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'playlist'
         )

@@ -314,6 +314,11 @@ const Genre = (props: GenreProp) => {
         if (e.getModifierState('Shift') === true && selectAllHandler)
           selectAllHandler(genreId);
         else if (
+          e.getModifierState('Control') === true &&
+          !isMultipleSelectionEnabled
+        )
+          toggleMultipleSelections(!isAMultipleSelection, 'genre', [genreId]);
+        else if (
           isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'genre'
         )

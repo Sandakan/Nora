@@ -68,6 +68,8 @@ Visit the [release notes](/changelog.md) to see what's new on the latest release
 
 ![Switch between Dark and Light Modes Artwork](/assets/other/artwork%202.webp)
 
+![Support for Last.FM Scrobbling](/assets/other/artwork%209.webp)
+
 ![Organize your music library with ease Artwork](/assets/other/artwork%203.webp)
 
 ![See how your favorite artists appear on songs and albums Artwork](/assets/other/artwork%204.webp)

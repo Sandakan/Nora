@@ -250,6 +250,13 @@ const Folder = (props: FolderProps) => {
           if (e.getModifierState('Shift') === true && selectAllHandler)
             selectAllHandler(folderPath);
           else if (
+            e.getModifierState('Control') === true &&
+            !isMultipleSelectionEnabled
+          )
+            toggleMultipleSelections(!isAMultipleSelection, 'folder', [
+              folderPath,
+            ]);
+          else if (
             isMultipleSelectionEnabled &&
             multipleSelectionsData.selectionType === 'folder'
           )

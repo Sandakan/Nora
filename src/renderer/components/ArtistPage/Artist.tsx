@@ -333,6 +333,13 @@ export const Artist = (props: ArtistProp) => {
         if (e.getModifierState('Shift') === true && props.selectAllHandler)
           props.selectAllHandler(props.artistId);
         else if (
+          e.getModifierState('Control') === true &&
+          !isMultipleSelectionEnabled
+        )
+          toggleMultipleSelections(!isAMultipleSelection, 'artist', [
+            props.artistId,
+          ]);
+        else if (
           isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'artist'
         )

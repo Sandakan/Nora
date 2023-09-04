@@ -599,6 +599,13 @@ const Song = React.forwardRef(
             if (e.getModifierState('Shift') === true && selectAllHandler)
               selectAllHandler(songId);
             else if (
+              e.getModifierState('Control') === true &&
+              !isMultipleSelectionEnabled
+            )
+              toggleMultipleSelections(!isAMultipleSelection, 'songs', [
+                songId,
+              ]);
+            else if (
               isMultipleSelectionEnabled &&
               multipleSelectionsData.selectionType === 'songs'
             )

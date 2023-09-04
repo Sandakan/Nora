@@ -358,6 +358,13 @@ export const Album = (props: AlbumProp) => {
         if (e.getModifierState('Shift') === true && props.selectAllHandler)
           props.selectAllHandler(props.albumId);
         else if (
+          e.getModifierState('Control') === true &&
+          !isMultipleSelectionEnabled
+        )
+          toggleMultipleSelections(!isAMultipleSelection, 'album', [
+            props.albumId,
+          ]);
+        else if (
           isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'album'
         )
