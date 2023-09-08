@@ -3,6 +3,7 @@ import debounce from './debounce';
 import { version } from '../../../package.json';
 import log from './log';
 import addMissingPropsToAnObject from './addMissingPropsToAnObject';
+// import isLatestVersion from './isLatestVersion';
 
 export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
   preferences: {
@@ -21,6 +22,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     removeAnimationsOnBatteryPower: false,
     isPredictiveSearchEnabled: true,
     lyricsAutomaticallySaveState: 'NONE',
+    showTrackNumberAsSongIndex: true,
   },
   playback: {
     currentSong: {
@@ -81,31 +83,75 @@ const resetLocalStorage = () => {
   }
 };
 
+// type MigrationData = Record<
+//   /** Version of the app */
+//   string,
+//   (localStorage: LocalStorage) => LocalStorage
+// >;
+
+// const migrateLocalStorage = (
+//   migrationData: MigrationData,
+//   storage: LocalStorage,
+// ) => {
+//   let currentLocalStorage = storage;
+//   let localStorageVersion = localStorage.getItem('version') ?? '1.0.0';
+
+//   for (const [migrationVersion, migrationFunction] of Object.entries(
+//     migrationData,
+//   )) {
+//     const isLocalStorageUpToDate = isLatestVersion(
+//       migrationVersion,
+//       localStorageVersion,
+//     );
+//     if (!isLocalStorageUpToDate) {
+//       log(
+//         `Migrating local storage ${localStorageVersion} => ${migrationVersion}`,
+//         undefined,
+//         'WARN',
+//       );
+//       currentLocalStorage = migrationFunction(currentLocalStorage);
+//       localStorageVersion = migrationVersion;
+//     }
+//   }
+
+//   return {
+//     migratedLocalStorage: currentLocalStorage,
+//     migratedVersion: localStorageVersion,
+//   };
+// };
+
+const repairInvalidLocalStorage = (
+  isASupportedStoreVersion: boolean,
+  store: string | null,
+) => {
+  try {
+    localStorage.setItem('version', version);
+    localStorage.setItem(
+      'localStorage',
+      JSON.stringify(LOCAL_STORAGE_DEFAULT_TEMPLATE),
+    );
+    return log(
+      'Inavalid or outdated local storage found. Resetting the local storage to default properties.',
+      { isASupportedStoreVersion, store },
+      'WARN',
+    );
+  } catch (error) {
+    log(
+      'Error occurred when trying to save default templated for local storage.',
+      { error },
+      'WARN',
+    );
+    throw error;
+  }
+};
+
 const checkLocalStorage = () => {
   const store = localStorage.getItem('localStorage');
   const isASupportedStoreVersion = localStorage.getItem('version') !== null;
   const isAValidStore = store && isASupportedStoreVersion;
 
   if (!isAValidStore) {
-    try {
-      localStorage.setItem('version', version);
-      localStorage.setItem(
-        'localStorage',
-        JSON.stringify(LOCAL_STORAGE_DEFAULT_TEMPLATE),
-      );
-      return log(
-        'Inavalid or outdated local storage found. Resetting the local storage to default properties.',
-        { isASupportedStoreVersion, store },
-        'WARN',
-      );
-    } catch (error) {
-      log(
-        'Error occurred when trying to save default templated for local storage.',
-        { error },
-        'WARN',
-      );
-      throw error;
-    }
+    repairInvalidLocalStorage(isASupportedStoreVersion, store);
   } else {
     const jsonStore = JSON.parse(store);
     const updatedStore = addMissingPropsToAnObject(

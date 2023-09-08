@@ -155,6 +155,7 @@ declare global {
     year?: number;
     palette?: NodeVibrantPalette;
     isBlacklisted: boolean;
+    trackNo?: number;
   }
 
   type PaginatingData = { start: number; end: number };
@@ -466,6 +467,7 @@ declare global {
     removeAnimationsOnBatteryPower: boolean;
     isPredictiveSearchEnabled: boolean;
     lyricsAutomaticallySaveState: AutomaticallySaveLyricsTypes;
+    showTrackNumberAsSongIndex: boolean;
   }
 
   interface CurrentSong {

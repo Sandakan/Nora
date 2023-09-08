@@ -37,6 +37,28 @@ const PreferencesSettings = () => {
         </li>
 
         <li className="checkbox-container">
+          <div className="secondary-container toggle-song-indexing mb-4">
+            <div className="description">
+              Show track number in front of the song when in Albums Page.
+            </div>
+            <Checkbox
+              id="showTrackNumberAsSongIndex"
+              isChecked={
+                localStorageData !== undefined &&
+                localStorageData.preferences.showTrackNumberAsSongIndex
+              }
+              checkedStateUpdateFunction={(state) =>
+                storage.preferences.setPreferences(
+                  'showTrackNumberAsSongIndex',
+                  state,
+                )
+              }
+              labelContent="Show track number as song index"
+            />
+          </div>
+        </li>
+
+        <li className="checkbox-container">
           <div className="secondary-container show-artists-artwork-near-song-controls mb-4">
             <div className="description">
               Shows artist artworks next to the artist names near the title of

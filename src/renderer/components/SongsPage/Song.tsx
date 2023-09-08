@@ -27,6 +27,7 @@ interface SongProp {
   isBlacklisted?: boolean;
   additionalContextMenuItems?: ContextMenuItem[];
   index: number;
+  trackNo?: number | string;
   isIndexingSongs: boolean;
   isAFavorite: boolean;
   className?: string;
@@ -76,6 +77,7 @@ const Song = React.forwardRef(
       album,
       style,
       year,
+      trackNo,
       selectAllHandler,
       provided = {} as any,
       onPlayClick,
@@ -646,9 +648,11 @@ const Song = React.forwardRef(
                 block
               </span>
             </div>
-          ) : isIndexingSongs ? (
+          ) : isIndexingSongs ||
+            (trackNo &&
+              localStorageData.preferences.showTrackNumberAsSongIndex) ? (
             <div className="relative mx-1 h-fit rounded-2xl bg-background-color-1 px-3 text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1">
-              {index + 1}
+              {trackNo ?? index + 1}
             </div>
           ) : (
             ''

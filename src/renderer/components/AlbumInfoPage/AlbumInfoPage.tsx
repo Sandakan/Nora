@@ -272,6 +272,11 @@ const AlbumInfoPage = () => {
               isIndexingSongs={
                 localStorageData?.preferences?.isSongIndexingEnabled
               }
+              trackNo={
+                localStorageData?.preferences?.showTrackNumberAsSongIndex
+                  ? song.trackNo ?? '--'
+                  : undefined
+              }
               title={song.title}
               artists={song.artists}
               artworkPaths={song.artworkPaths}
@@ -306,6 +311,7 @@ const AlbumInfoPage = () => {
       handleSongPlayBtnClick,
       listItems,
       localStorageData?.preferences?.isSongIndexingEnabled,
+      localStorageData?.preferences?.showTrackNumberAsSongIndex,
       selectAllHandler,
     ],
   );
