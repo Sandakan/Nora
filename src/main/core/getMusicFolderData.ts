@@ -18,7 +18,7 @@ const getRelevantSongsofFolders = (folderPath: string) => {
 };
 
 const createFolderData = (
-  folderStructures: FolderStructure[]
+  folderStructures: FolderStructure[],
 ): MusicFolder[] => {
   const foldersData: MusicFolder[] = [];
 
@@ -44,7 +44,7 @@ const createFolderData = (
 
 const selectStructure = (
   folderPath: string,
-  folders: FolderStructure[]
+  folders: FolderStructure[],
 ): FolderStructure | undefined => {
   for (const folder of folders) {
     if (folder.path === folderPath) return folder;
@@ -70,7 +70,7 @@ const selectStructures = (folderPaths: string[]) => {
 
 const getMusicFolderData = (
   folderPaths: string[] = [],
-  sortType?: FolderSortTypes
+  sortType?: FolderSortTypes,
 ) => {
   const userData = getUserData();
 

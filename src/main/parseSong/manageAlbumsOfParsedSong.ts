@@ -5,17 +5,19 @@ import { generateRandomId } from '../utils/randomId';
 const manageAlbumsOfParsedSong = (
   allAlbumsData: SavableAlbum[],
   songInfo: SavableSongData,
-  songArtworkPaths?: ArtworkPaths
+  songArtworkPaths?: ArtworkPaths,
 ) => {
   const relevantAlbums: SavableAlbum[] = [];
   const { title, songId, artists, year, album: songAlbum } = songInfo;
-  const songAlbumName = songAlbum?.name;
+  const songAlbumName = songAlbum?.name.trim();
 
   if (songAlbumName) {
     if (Array.isArray(allAlbumsData)) {
       const isAlbumAvailable = allAlbumsData.some(
-        (a) => a.title === songAlbumName
+        //  album.title doesn't need trimming they are already trimmed when adding them to the database.
+        (album) => album.title === songAlbumName,
       );
+
       if (isAlbumAvailable) {
         const updatedAlbums = allAlbumsData.map((album) => {
           if (album.title === songAlbumName) {
@@ -46,6 +48,7 @@ const manageAlbumsOfParsedSong = (
           },
         ],
       };
+
       allAlbumsData.push(newAlbum);
       relevantAlbums.push(newAlbum);
       return {

@@ -30,6 +30,7 @@ const SearchResultsFilter = React.memo((props: SearchResultsFilterProp) => {
         return '';
     }
   }, [props.filterType]);
+
   return (
     <Button
       className={`appear-from-bottom mr-3 flex w-fit cursor-pointer list-none items-center !border-0 px-4 py-1 text-font-color-black outline-1 outline-offset-1 transition-[width,background,color] duration-200 focus-visible:!outline ${

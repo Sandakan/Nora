@@ -67,10 +67,10 @@ const SongControlsAndSeekbarContainer = () => {
         updateSongPosition(seekbarRef.current?.valueAsNumber ?? 0);
       };
       seekbarRef.current.addEventListener('mousedown', () =>
-        handleSeekbarMouseDown()
+        handleSeekbarMouseDown(),
       );
       seekbarRef.current.addEventListener('mouseup', () =>
-        handleSeekbarMouseUp()
+        handleSeekbarMouseUp(),
       );
       return () => {
         seekBar?.removeEventListener('mouseup', handleSeekbarMouseUp);
@@ -96,7 +96,7 @@ const SongControlsAndSeekbarContainer = () => {
         newQueue.length > 0 ? newQueue : queue.queue,
         true,
         undefined,
-        true
+        true,
       );
     }
     toggleShuffling();

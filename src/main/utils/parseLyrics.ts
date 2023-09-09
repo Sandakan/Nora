@@ -66,7 +66,7 @@ const getSecondsFromExtendedMatch = (match: RegExpMatchArray) => {
 const getExtendedMatchEndTime = (
   matches: RegExpMatchArray[],
   index: number,
-  lineEndTime: number
+  lineEndTime: number,
 ) => {
   if (matches.length - 1 === index) return lineEndTime;
 
@@ -78,7 +78,7 @@ const getExtendedMatchEndTime = (
 
 const getExtendedSyncedLineInfo = (
   line: string,
-  lineEndTime: number
+  lineEndTime: number,
 ): string | SyncedLyricsLineText => {
   try {
     const matches = [...line.matchAll(extendedSyncedLyricsLineRegex)];
@@ -106,7 +106,7 @@ const getExtendedSyncedLineInfo = (
             }
           }
           return res;
-        }
+        },
       );
 
       return extendedSyncLines;
@@ -119,7 +119,7 @@ const getExtendedSyncedLineInfo = (
 
 const parseLyricsText = (
   line: string,
-  lineEndTime: number
+  lineEndTime: number,
 ): string | SyncedLyricsLineText => {
   const textLine = line.replaceAll(syncedLyricsRegex, '').trim();
   syncedLyricsRegex.lastIndex = 0;
@@ -149,11 +149,11 @@ const parseLyrics = (lyricsString: string): LyricsData => {
   const offset = Number(lyricsOffsetMatch?.groups?.lyricsOffset) / 1000 || 0;
   const lines = lyricsString.split('\n');
   const lyricsLines = lines.filter(
-    (line) => line.trim() !== '' && isNotALyricsMetadataLine(line)
+    (line) => line.trim() !== '' && isNotALyricsMetadataLine(line),
   );
 
   const parsedUnsyncedLyricsLines = lyricsLines.map((line) =>
-    line.replaceAll(syncedLyricsRegex, '').trim()
+    line.replaceAll(syncedLyricsRegex, '').trim(),
   );
 
   if (isSynced) {
@@ -165,7 +165,7 @@ const parseLyrics = (lyricsString: string): LyricsData => {
         const parsedLine = parseLyricsText(line, end);
 
         return { text: parsedLine, start, end };
-      }
+      },
     );
 
     return {
@@ -198,7 +198,7 @@ const parseMetadataFromShortText = (shortText?: string) => {
       log(
         'Error occurred when parsing metadata from shortText attribute in NodeID3 format.',
         { error },
-        'INFO'
+        'INFO',
       );
       return metadata;
     }
@@ -212,7 +212,7 @@ const getNextTimestamp = (
     timeStamp: number;
   }[],
   start: number,
-  index: number
+  index: number,
 ) => {
   if (arr.length - 1 === index) return Infinity;
 
@@ -226,7 +226,7 @@ const getNextTimestamp = (
 };
 
 export const parseSyncedLyricsFromAudioDataSource = (
-  input: Input
+  input: Input,
 ): LyricsData | undefined => {
   const { timeStampFormat, synchronisedText, shortText } = input;
 
@@ -249,7 +249,7 @@ export const parseSyncedLyricsFromAudioDataSource = (
           start: timeStamp / 1000,
           end: end / 1000,
         };
-      }
+      },
     );
 
     const unparsedLyrics = syncedLyrics

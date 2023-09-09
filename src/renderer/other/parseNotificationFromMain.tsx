@@ -1,5 +1,3 @@
-import Img from 'renderer/components/Img';
-
 interface AppNotificationConfig extends Partial<AppNotification> {
   // to prevent having an empty array of triggers
   trigger: [MessageCodes, ...MessageCodes[]];
@@ -89,23 +87,15 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
       if (data) return 'artworkPath' in data;
       return false;
     },
-    update({ data, messageCode }) {
+    update({ messageCode }) {
       this.icon = (
-        <div className="relative h-8 w-8">
-          <Img
-            className="aspect-square h-full w-full rounded-sm"
-            src={`nora://localFiles/${data?.artworkPath as string}`}
-            loading="eager"
-            alt="song artwork"
-          />
-          <span
-            className={`material-icons-round${
-              messageCode === 'SONG_DISLIKE' ? '-outlined' : ''
-            } icon absolute -bottom-1 -right-1 text-font-color-crimson dark:text-font-color-crimson`}
-          >
-            favorite
-          </span>
-        </div>
+        <span
+          className={`material-icons-round ${
+            messageCode === 'SONG_DISLIKE' ? '-outlined' : ''
+          } text-font-color-crimson dark:text-font-color-crimson`}
+        >
+          favorite
+        </span>
       );
       return this;
     },
@@ -149,6 +139,12 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
         value: (data?.value as number) || 0,
       };
 
+      if (
+        this.progressBarData &&
+        this.progressBarData.max !== 0 &&
+        this.progressBarData.max === this.progressBarData.value
+      )
+        this.delay = 5000;
       return this;
     },
   },
@@ -157,7 +153,7 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
 const parseNotificationFromMain = (
   message: string,
   messageCode: MessageCodes = 'INFO',
-  data?: Record<string, unknown>
+  data?: Record<string, unknown>,
 ) => {
   const notificationData: AppNotification = {
     buttons: [],

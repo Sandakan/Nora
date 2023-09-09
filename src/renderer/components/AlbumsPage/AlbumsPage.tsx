@@ -1,8 +1,8 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
 import React, { CSSProperties } from 'react';
-import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { FixedSizeGrid as Grid } from 'react-window';
+import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
@@ -30,7 +30,7 @@ const AlbumsPage = () => {
   const [sortingOrder, setSortingOrder] = React.useState<AlbumSortTypes>(
     currentlyActivePage?.data?.sortingOrder ||
       localStorageData?.sortingStates?.albumsPage ||
-      'aToZ'
+      'aToZ',
   );
 
   const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
@@ -52,7 +52,7 @@ const AlbumsPage = () => {
         }
         return undefined;
       }),
-    [sortingOrder]
+    [sortingOrder],
   );
 
   React.useEffect(() => {
@@ -72,7 +72,7 @@ const AlbumsPage = () => {
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageDataUpdatesInAlbumsPage
+        manageDataUpdatesInAlbumsPage,
       );
     };
   }, [fetchAlbumData]);
@@ -113,7 +113,7 @@ const AlbumsPage = () => {
       }
       return <div style={style} />;
     },
-    [albumsData, noOfColumns, selectAllHandler]
+    [albumsData, noOfColumns, selectAllHandler],
   );
 
   return (
@@ -200,7 +200,7 @@ const AlbumsPage = () => {
               rowHeight={MIN_ITEM_HEIGHT}
               height={height || 300}
               width={width || 500}
-              overscanRowCount={2}
+              overscanRowCount={3}
               initialScrollTop={currentlyActivePage.data?.scrollTopOffset ?? 0}
               onScroll={(data) => {
                 if (scrollOffsetTimeoutIdRef.current)
@@ -212,7 +212,7 @@ const AlbumsPage = () => {
                         ...currentPageData,
                         scrollTopOffset: data.scrollTop,
                       })),
-                    500
+                    500,
                   );
               }}
             >

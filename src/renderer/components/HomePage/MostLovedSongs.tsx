@@ -21,7 +21,7 @@ const MostLovedSongs = (props: Props) => {
   const selectAllHandler = useSelectAllHandler(
     mostLovedSongs,
     'songs',
-    'songId'
+    'songId',
   );
   const mostLovedSongComponents = React.useMemo(
     () =>
@@ -45,7 +45,7 @@ const MostLovedSongs = (props: Props) => {
             />
           );
         }),
-    [mostLovedSongs, noOfVisibleSongs, selectAllHandler]
+    [mostLovedSongs, noOfVisibleSongs, selectAllHandler],
   );
 
   return (

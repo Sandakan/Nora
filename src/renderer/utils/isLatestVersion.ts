@@ -17,7 +17,7 @@ interface ExtendedVersionInfo extends VersionInfo {
 }
 
 export const getVersionInfoFromString = (
-  versionString: string
+  versionString: string,
 ): ExtendedVersionInfo | undefined => {
   const versionData = versionString.match(semVerRegex);
 
@@ -32,7 +32,7 @@ export const getVersionInfoFromString = (
 
 const compareMajorMinorAndPatch = (
   Lv: ExtendedVersionInfo,
-  Cv: ExtendedVersionInfo
+  Cv: ExtendedVersionInfo,
 ) => {
   if (Lv.major > Cv.major) return false;
   if (Lv.major < Cv.major) return true;
@@ -48,7 +48,7 @@ const compareMajorMinorAndPatch = (
 
 const isLatestVersion = (
   latestVersionString: string,
-  currentVersionString: string
+  currentVersionString: string,
 ) => {
   const latestVersion = getVersionInfoFromString(latestVersionString);
   const currentVersion = getVersionInfoFromString(currentVersionString);
@@ -59,12 +59,7 @@ const isLatestVersion = (
     const { preRelease: LvPreRelease } = latestVersion;
     const { preRelease: CvPreRelease } = currentVersion;
 
-    console.log(
-      'latest version',
-      latestVersion,
-      'current version',
-      currentVersion
-    );
+    console.log('Version details', { latestVersion, currentVersion });
 
     if (LvPreRelease === CvPreRelease)
       return compareMajorMinorAndPatch(latestVersion, currentVersion);

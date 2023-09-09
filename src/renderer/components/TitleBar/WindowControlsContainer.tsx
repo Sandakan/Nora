@@ -13,11 +13,11 @@ const WindowControlsContainer = () => {
 
   const minimize = React.useCallback(
     () => window.api.windowControls.minimizeApp(),
-    []
+    [],
   );
   const maximize = React.useCallback(
     () => window.api.windowControls.toggleMaximizeApp(),
-    []
+    [],
   );
 
   return (

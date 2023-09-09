@@ -2,7 +2,7 @@ import { isSongBlacklisted } from './isBlacklisted';
 
 const getListeningDataOfASong = (
   songId: string,
-  listeningData: SongListeningData[]
+  listeningData: SongListeningData[],
 ) => {
   if (listeningData.length > 0) {
     for (let i = 0; i < listeningData.length; i += 1) {
@@ -54,7 +54,7 @@ const parseListeningData = (listeningData?: SongListeningData) => {
 function sortSongs<T extends (SavableSongData | SongData)[]>(
   data: T,
   sortType: SongSortTypes,
-  listeningData?: SongListeningData[]
+  listeningData?: SongListeningData[],
 ): T {
   if (data && data.length > 0) {
     if (sortType === 'aToZ')
@@ -196,11 +196,11 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
         return data.sort((a, b) => {
           const listeningDataOfA = getListeningDataOfASong(
             a.songId,
-            listeningData
+            listeningData,
           );
           const listeningDataOfB = getListeningDataOfASong(
             b.songId,
-            listeningData
+            listeningData,
           );
           const parsedListeningDataOfA = parseListeningData(listeningDataOfA);
           const parsedListeningDataOfB = parseListeningData(listeningDataOfB);
@@ -220,11 +220,11 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
         return data.sort((a, b) => {
           const listeningDataOfA = getListeningDataOfASong(
             a.songId,
-            listeningData
+            listeningData,
           );
           const listeningDataOfB = getListeningDataOfASong(
             b.songId,
-            listeningData
+            listeningData,
           );
           const parsedListeningDataOfA = parseListeningData(listeningDataOfA);
           const parsedListeningDataOfB = parseListeningData(listeningDataOfB);
@@ -244,11 +244,11 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
         return data.sort((a, b) => {
           const listeningDataOfA = getListeningDataOfASong(
             a.songId,
-            listeningData
+            listeningData,
           );
           const listeningDataOfB = getListeningDataOfASong(
             b.songId,
-            listeningData
+            listeningData,
           );
           const parsedListeningDataOfA = parseListeningData(listeningDataOfA);
           const parsedListeningDataOfB = parseListeningData(listeningDataOfB);
@@ -268,11 +268,11 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
         return data.sort((a, b) => {
           const listeningDataOfA = getListeningDataOfASong(
             a.songId,
-            listeningData
+            listeningData,
           );
           const listeningDataOfB = getListeningDataOfASong(
             b.songId,
-            listeningData
+            listeningData,
           );
           const parsedListeningDataOfA = parseListeningData(listeningDataOfA);
           const parsedListeningDataOfB = parseListeningData(listeningDataOfB);

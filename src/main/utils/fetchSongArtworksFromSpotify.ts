@@ -48,7 +48,7 @@ const fetchSongArtworksFromSpotify = async (spotifySongId: string) => {
       }
     }
     throw new Error(
-      `Error occurred when fetching artwork from url.\nHTTP Error code ${res.status} - ${res.statusText}`
+      `Error occurred when fetching artwork from url.\nHTTP Error code ${res.status} - ${res.statusText}`,
     );
   } catch (error) {
     log(`Error occurred when fetching artwork from url.`, { error }, 'ERROR');

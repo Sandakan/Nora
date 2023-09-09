@@ -39,7 +39,7 @@ const SongSearchResultsContainer = (props: Props) => {
       createQueue(queueSongIds, 'songs', false, undefined, false);
       playSong(currSongId, true);
     },
-    [createQueue, playSong, songs]
+    [createQueue, playSong, songs],
   );
 
   const songResults = React.useMemo(
@@ -77,7 +77,7 @@ const SongSearchResultsContainer = (props: Props) => {
       localStorageData?.preferences?.isSongIndexingEnabled,
       noOfVisibleSongs,
       songs,
-    ]
+    ],
   );
 
   return (
@@ -98,7 +98,11 @@ const SongSearchResultsContainer = (props: Props) => {
             Songs{' '}
             <div className="other-stats-container ml-12 flex items-center text-xs">
               {songs && songs.length > 0 && (
-                <span className="no-of-songs">{songs.length} results</span>
+                <span className="no-of-songs">
+                  {songs.length} results{' '}
+                  {songs.length > noOfVisibleSongs &&
+                    `(${noOfVisibleSongs} shown)`}
+                </span>
               )}
             </div>
           </div>

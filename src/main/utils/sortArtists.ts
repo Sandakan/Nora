@@ -7,7 +7,7 @@ const sortAtoZ = <T extends (Artist | SavableArtist)[]>(arr: T) =>
       : a.name.toLowerCase().replace(/\W/gi, '') <
         b.name.toLowerCase().replace(/\W/gi, '')
       ? -1
-      : 0
+      : 0,
   );
 const sortZtoA = <T extends (Artist | SavableArtist)[]>(arr: T) =>
   arr.sort((a, b) =>
@@ -17,12 +17,12 @@ const sortZtoA = <T extends (Artist | SavableArtist)[]>(arr: T) =>
       : a.name.toLowerCase().replace(/\W/gi, '') >
         b.name.toLowerCase().replace(/\W/gi, '')
       ? -1
-      : 0
+      : 0,
   );
 
 export default <T extends (Artist | SavableArtist)[]>(
   data: T,
-  sortType: ArtistSortTypes
+  sortType: ArtistSortTypes,
 ) => {
   if (Array.isArray(data) && data.length > 0) {
     if (sortType === 'aToZ') return sortAtoZ(data);
@@ -33,7 +33,7 @@ export default <T extends (Artist | SavableArtist)[]>(
           ? 1
           : a.songs.length > b.songs.length
           ? -1
-          : 0
+          : 0,
       );
     if (sortType === 'noOfSongsAscending')
       return sortAtoZ(data).sort((a, b) =>
@@ -41,7 +41,7 @@ export default <T extends (Artist | SavableArtist)[]>(
           ? 1
           : a.songs.length < b.songs.length
           ? -1
-          : 0
+          : 0,
       );
     if (sortType === 'mostLovedAscending')
       return sortAtoZ(data).sort((a, b) =>
@@ -49,7 +49,7 @@ export default <T extends (Artist | SavableArtist)[]>(
           ? 1
           : a.isAFavorite < b.isAFavorite
           ? -1
-          : 0
+          : 0,
       );
     if (sortType === 'mostLovedDescending')
       return sortAtoZ(data).sort((a, b) =>
@@ -57,7 +57,7 @@ export default <T extends (Artist | SavableArtist)[]>(
           ? 1
           : a.isAFavorite > b.isAFavorite
           ? -1
-          : 0
+          : 0,
       );
   }
   return data;

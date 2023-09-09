@@ -20,7 +20,7 @@ const RecentlyPlayedSongs = (props: Props) => {
   const selectAllHandler = useSelectAllHandler(
     recentlyPlayedSongs,
     'songs',
-    'songId'
+    'songId',
   );
   const recentlyPlayedSongComponents = React.useMemo(
     () =>
@@ -44,7 +44,7 @@ const RecentlyPlayedSongs = (props: Props) => {
             />
           );
         }),
-    [noOfVisibleSongs, recentlyPlayedSongs, selectAllHandler]
+    [noOfVisibleSongs, recentlyPlayedSongs, selectAllHandler],
   );
 
   return (

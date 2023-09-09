@@ -1,7 +1,7 @@
 const addMissingPropsToAnObject = <T>(
   template: T,
   obj: Partial<T>,
-  onMissing?: (missingKey: string) => void
+  onMissing?: (missingKey: string) => void,
 ): T => {
   const result: T = { ...(obj as T) };
 
@@ -24,7 +24,7 @@ const addMissingPropsToAnObject = <T>(
       result[key] = addMissingPropsToAnObject(
         template[key],
         obj[key] || {},
-        onMissing
+        onMissing,
       );
     }
   }

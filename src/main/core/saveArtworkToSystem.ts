@@ -1,5 +1,5 @@
-import sharp from 'sharp';
 import { SaveDialogOptions } from 'electron';
+import sharp from 'sharp';
 
 import log from '../log';
 import { sendMessageToRenderer, showSaveDialog } from '../main';
@@ -44,13 +44,13 @@ const saveArtworkToSystem = async (artworkPath: string, saveName?: string) => {
         artwork = await fetchArtworkBufferFromURL(artworkPath);
       else
         artwork = await generateLocalArtworkBuffer(
-          removeDefaultAppProtocolFromFilePath(artworkPath)
+          removeDefaultAppProtocolFromFilePath(artworkPath),
         );
 
       if (artwork) {
         await sharp(artwork, { animated: true }).toFile(savePath);
         return sendMessageToRenderer(
-          'Saved the artwork to the request location.'
+          'Saved the artwork to the request location.',
         );
       }
     } else sendMessageToRenderer('No save destination selected.');
@@ -60,7 +60,7 @@ const saveArtworkToSystem = async (artworkPath: string, saveName?: string) => {
     log(
       'Error occurred when trying to fulfil the user request to save a song artwork.',
       { error },
-      'ERROR'
+      'ERROR',
     );
     sendMessageToRenderer('Failed to save the song artwork.');
     return undefined;

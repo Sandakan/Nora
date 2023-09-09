@@ -158,15 +158,20 @@ body,
 
 body,
 body * {
-  transition: color var(--transition-duration-0_2s) linear,
+  transition:
+    color var(--transition-duration-0_2s) linear,
     background-color var(--transition-duration-0_2s) linear;
-  -webkit-transition: color var(--transition-duration-0_2s) linear,
+  -webkit-transition:
+    color var(--transition-duration-0_2s) linear,
     background-color var(--transition-duration-0_2s) linear;
-  -moz-transition: color var(--transition-duration-0_2s) linear,
+  -moz-transition:
+    color var(--transition-duration-0_2s) linear,
     background-color var(--transition-duration-0_2s) linear;
-  -ms-transition: color var(--transition-duration-0_2s) linear,
+  -ms-transition:
+    color var(--transition-duration-0_2s) linear,
     background-color var(--transition-duration-0_2s) linear;
-  -o-transition: color var(--transition-duration-0_2s) linear,
+  -o-transition:
+    color var(--transition-duration-0_2s) linear,
     background-color var(--transition-duration-0_2s) linear;
 }
 

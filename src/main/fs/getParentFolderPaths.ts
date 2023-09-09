@@ -21,7 +21,7 @@ const reduceGroupsToHighestDirectories = (groupedDirs: string[][][]) => {
   const output = groupedDirs.map((dirGroup) => {
     const noOfPathsInGroup = dirGroup.map((x) => x.length);
     const indexOfHighestPaths = noOfPathsInGroup.indexOf(
-      Math.min(...noOfPathsInGroup)
+      Math.min(...noOfPathsInGroup),
     );
     return dirGroup[indexOfHighestPaths];
   });

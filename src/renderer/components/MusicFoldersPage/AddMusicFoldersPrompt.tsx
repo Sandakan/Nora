@@ -17,7 +17,7 @@ type Props = {
 };
 
 const makeStructureSelectable = (
-  structure: FolderStructure
+  structure: FolderStructure,
 ): SelectableFolderStructure => {
   const selectableStructure = {
     ...structure,
@@ -26,14 +26,14 @@ const makeStructureSelectable = (
 
   if (structure.subFolders.length > 0) {
     selectableStructure.subFolders = selectableStructure.subFolders.map(
-      (folder) => makeStructureSelectable(folder)
+      (folder) => makeStructureSelectable(folder),
     );
   }
   return selectableStructure;
 };
 
 const removeUnselectedFolders = (
-  selectableFolders: SelectableFolderStructure[]
+  selectableFolders: SelectableFolderStructure[],
 ) => {
   const validFolders: FolderStructure[] = [];
   for (const folder of selectableFolders) {
@@ -53,7 +53,7 @@ const removeUnselectedFolders = (
 const updateFolderSelectedState = (
   folders: SelectableFolderStructure[],
   state: boolean,
-  folder?: SelectableFolderStructure
+  folder?: SelectableFolderStructure,
 ) => {
   for (let i = 0; i < folders.length; i += 1) {
     if (folder === undefined || folders[i].path === folder.path) {
@@ -62,14 +62,14 @@ const updateFolderSelectedState = (
       if (folders[i].subFolders.length > 0) {
         folders[i].subFolders = updateFolderSelectedState(
           folders[i].subFolders,
-          state
+          state,
         );
       }
     } else if (folders[i].subFolders.length > 0) {
       folders[i].subFolders = updateFolderSelectedState(
         folders[i].subFolders.slice(),
         state,
-        folder
+        folder,
       );
     }
   }
@@ -77,7 +77,7 @@ const updateFolderSelectedState = (
 };
 
 const getAllSubDirectories = (
-  folders: SelectableFolderStructure[]
+  folders: SelectableFolderStructure[],
 ): SelectableFolderStructure[] => {
   const output: SelectableFolderStructure[] = [];
   const subDirs = folders.map((folder) => folder.subFolders);
@@ -101,7 +101,7 @@ const AddMusicFoldersPrompt = (props: Props) => {
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
-      setIsPending: (state: boolean) => void
+      setIsPending: (state: boolean) => void,
     ) => {
       setIsDisabled(true);
       setIsPending(true);
@@ -110,7 +110,7 @@ const AddMusicFoldersPrompt = (props: Props) => {
         .then((structures) => {
           console.log(structures);
           const selectableStructures = structures.map((structure) =>
-            makeStructureSelectable(structure)
+            makeStructureSelectable(structure),
           );
           return setFolders(selectableStructures);
         })
@@ -120,7 +120,7 @@ const AddMusicFoldersPrompt = (props: Props) => {
         })
         .catch((err) => console.error(err));
     },
-    []
+    [],
   );
 
   const updateFolders = React.useCallback(
@@ -129,11 +129,11 @@ const AddMusicFoldersPrompt = (props: Props) => {
         const updatedFolders = updateFolderSelectedState(
           data.slice(),
           state,
-          structure
+          structure,
         );
         return updatedFolders;
       }),
-    []
+    [],
   );
 
   const folderComponents = React.useMemo(() => {
@@ -151,7 +151,7 @@ const AddMusicFoldersPrompt = (props: Props) => {
 
   const selectedNoOfParentFolders = React.useMemo(
     () => folders.filter((x) => x.isSelected).length,
-    [folders]
+    [folders],
   );
 
   const selectedNoOfDirectories = React.useMemo(() => {

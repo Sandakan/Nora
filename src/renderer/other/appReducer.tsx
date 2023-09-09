@@ -55,7 +55,7 @@ type AppReducerStateActions =
 
 const reducer = (
   state: AppReducer,
-  action: AppReducerStateActions
+  action: AppReducerStateActions,
 ): AppReducer => {
   switch (action.type) {
     case 'APP_THEME_CHANGE': {
@@ -234,7 +234,7 @@ const reducer = (
       window.api.miniPlayer.toggleMiniPlayer(
         typeof action.data === 'boolean'
           ? action.data
-          : state.player.isMiniPlayer
+          : state.player.isMiniPlayer,
       );
       return {
         ...state,

@@ -7,15 +7,14 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
 
 import LyricLine from './LyricLine';
-import NoLyricsImage from '../../../../assets/images/svg/Sun_Monochromatic.svg';
-import FetchingLyricsImage from '../../../../assets/images/svg/Waiting_Monochromatic.svg';
-import NoInternetImage from '../../../../assets/images/svg/Network _Monochromatic.svg';
 import LyricsSource from './LyricsSource';
 import NoLyrics from './NoLyrics';
 import MainContainer from '../MainContainer';
 import Button from '../Button';
 
 import { appPreferences } from '../../../../package.json';
+import { isLyricsEnhancedSynced } from '../SongTagsEditingPage/input_containers/SongLyricsEditorInput';
+import { EditingLyricsLineData } from '../LyricsEditingPage/LyricsEditingPage';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -27,11 +26,14 @@ document.addEventListener('lyrics/scrollIntoView', () => {
 
 const LyricsPage = () => {
   const { currentSongData, localStorageData } = useContext(AppContext);
-  const { addNewNotifications, updateCurrentlyActivePageData } =
-    React.useContext(AppUpdateContext);
+  const {
+    addNewNotifications,
+    updateCurrentlyActivePageData,
+    changeCurrentActivePage,
+  } = React.useContext(AppUpdateContext);
 
   const [lyrics, setLyrics] = React.useState(
-    null as SongLyrics | undefined | null
+    null as SongLyrics | undefined | null,
   );
 
   const lyricsLinesContainerRef = React.useRef<HTMLDivElement>(null);
@@ -48,20 +50,6 @@ const LyricsPage = () => {
 
   React.useEffect(() => {
     setLyrics(null);
-    addNewNotifications([
-      {
-        id: 'fetchLyrics',
-        delay: 5000,
-        content: (
-          <span>
-            Fetching lyrics for &apos;{currentSongData.title}&apos;...
-          </span>
-        ),
-        icon: (
-          <span className="material-icons-round-outlined !text-xl">mic</span>
-        ),
-      },
-    ]);
     window.api.lyrics
       .getSongLyrics(
         {
@@ -74,7 +62,7 @@ const LyricsPage = () => {
         },
         undefined,
         undefined,
-        localStorageData.preferences.lyricsAutomaticallySaveState
+        localStorageData.preferences.lyricsAutomaticallySaveState,
       )
       .then((res) => setLyrics(res))
       .catch((err) => console.error(err));
@@ -154,7 +142,7 @@ const LyricsPage = () => {
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
-      setIsPending: (state: boolean) => void
+      setIsPending: (state: boolean) => void,
     ) => {
       setIsDisabled(true);
       setIsPending(true);
@@ -170,9 +158,19 @@ const LyricsPage = () => {
           },
           'ANY',
           'ONLINE_ONLY',
-          localStorageData.preferences.lyricsAutomaticallySaveState
+          'NONE',
         )
-        .then((res) => setLyrics(res))
+        .then((res) => {
+          if (res) return setLyrics(res);
+          return addNewNotifications([
+            {
+              id: 'lyricsUpdateFailed',
+              content: `No Online Lyrics Found.`,
+              iconName: 'warning',
+              iconClassName: 'material-icons-round-outlined !text-xl',
+            },
+          ]);
+        })
         .finally(() => {
           setIsDisabled(false);
           setIsPending(false);
@@ -180,17 +178,17 @@ const LyricsPage = () => {
         .catch((err) => console.error(err));
     },
     [
+      addNewNotifications,
       currentSongData.artists,
       currentSongData.duration,
       currentSongData.path,
       currentSongData.title,
-      localStorageData.preferences.lyricsAutomaticallySaveState,
-    ]
+    ],
   );
 
   const pathExt = React.useMemo(
     () => window.api.utils.getExtension(currentSongData.path),
-    [currentSongData.path]
+    [currentSongData.path],
   );
 
   const showOfflineLyrics = React.useCallback(
@@ -208,26 +206,37 @@ const LyricsPage = () => {
           },
           'ANY',
           'OFFLINE_ONLY',
-          localStorageData.preferences.lyricsAutomaticallySaveState
+          localStorageData.preferences.lyricsAutomaticallySaveState,
         )
-        .then((res) => setLyrics(res))
+        .then((res) => {
+          if (res) return setLyrics(res);
+          return addNewNotifications([
+            {
+              id: 'offlineLyricsFetchFailed',
+              content: `No Offline Lyrics Found.`,
+              iconName: 'warning',
+              iconClassName: 'material-icons-round-outlined !text-xl',
+            },
+          ]);
+        })
         .finally(() => setIsDisabled(false))
         .catch((err) => console.error(err));
     },
     [
+      addNewNotifications,
       currentSongData.artists,
       currentSongData.duration,
       currentSongData.path,
       currentSongData.title,
       localStorageData.preferences.lyricsAutomaticallySaveState,
-    ]
+    ],
   );
 
   const saveOnlineLyrics = React.useCallback(
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
-      setIsPending: (state: boolean) => void
+      setIsPending: (state: boolean) => void,
     ) => {
       if (lyrics) {
         setIsDisabled(true);
@@ -235,7 +244,7 @@ const LyricsPage = () => {
 
         window.api.lyrics
           .saveLyricsToSong(currentSongData.path, lyrics)
-          .then(() => {
+          .then(() =>
             setLyrics((prevData) => {
               if (prevData) {
                 return {
@@ -245,20 +254,8 @@ const LyricsPage = () => {
                 } as SongLyrics;
               }
               return undefined;
-            });
-            return addNewNotifications([
-              {
-                id: 'lyricsUpdateSuccessful',
-                delay: 5000,
-                content: <span>Lyrics successfully updated.</span>,
-                icon: (
-                  <span className="material-icons-round-outlined !text-xl">
-                    check
-                  </span>
-                ),
-              },
-            ]);
-          })
+            }),
+          )
           .finally(() => {
             setIsPending(false);
             setIsDisabled(false);
@@ -266,7 +263,7 @@ const LyricsPage = () => {
           .catch((err) => console.error(err));
       }
     },
-    [addNewNotifications, currentSongData.path, lyrics]
+    [currentSongData.path, lyrics],
   );
 
   const refreshOnlineLyrics = React.useCallback(
@@ -283,24 +280,71 @@ const LyricsPage = () => {
             duration: currentSongData.duration,
           },
           'ANY',
-          'ONLINE_ONLY'
+          'ONLINE_ONLY',
         )
-        .then((res) => setLyrics(res))
+        .then((res) => {
+          if (res) return setLyrics(res);
+          return addNewNotifications([
+            {
+              id: 'OnlineLyricsRefreshFailed',
+              content: `Failed to refresh Online Lyrics.`,
+              iconName: 'warning',
+              iconClassName: 'material-icons-round-outlined !text-xl',
+            },
+          ]);
+        })
         .finally(() => setIsDisabled(false))
         .catch((err) => console.error(err));
     },
     [
+      addNewNotifications,
       currentSongData.artists,
       currentSongData.duration,
       currentSongData.path,
       currentSongData.title,
-    ]
+    ],
   );
 
   const isSaveLyricsBtnDisabled = React.useMemo(
     () => !metadataEditingSupportedExtensions.includes(pathExt),
-    [pathExt]
+    [pathExt],
   );
+
+  const isSynchronizedLyricsEnhancedSynced = React.useMemo(
+    () =>
+      lyrics &&
+      lyrics.lyrics.isSynced &&
+      isLyricsEnhancedSynced(lyrics?.lyrics.unparsedLyrics),
+    [lyrics],
+  );
+
+  const goToLyricsEditor = React.useCallback(() => {
+    if (lyrics && !isSynchronizedLyricsEnhancedSynced) {
+      let lines: EditingLyricsLineData[] = [];
+      const { isSynced, syncedLyrics, lyrics: unsyncedLyrics } = lyrics.lyrics;
+
+      if (isSynced && syncedLyrics)
+        lines = syncedLyrics.map((lyric) => ({
+          ...lyric,
+          line: lyric.text as string,
+        }));
+      else {
+        lines = unsyncedLyrics.map((line) => ({ line }));
+      }
+
+      changeCurrentActivePage('LyricsEditor', {
+        lyrics: lines,
+        songId: currentSongData.songId,
+        songTitle: currentSongData.title,
+      });
+    }
+  }, [
+    changeCurrentActivePage,
+    currentSongData.songId,
+    currentSongData.title,
+    isSynchronizedLyricsEnhancedSynced,
+    lyrics,
+  ]);
 
   return (
     <MainContainer
@@ -329,6 +373,14 @@ const LyricsPage = () => {
                   )}
                 </div>
                 <div className="buttons-container flex">
+                  <Button
+                    key={10}
+                    tooltipLabel="Edit Lyrics in Lyrics Editor"
+                    className="edit-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                    iconName="edit"
+                    clickHandler={goToLyricsEditor}
+                  />
+
                   {lyrics?.lyrics?.isSynced && (
                     <Button
                       key={5}
@@ -410,7 +462,7 @@ const LyricsPage = () => {
                 </div>
               </div>
               <div
-                className="lyrics-lines-container flex h-full !w-full flex-col items-center overflow-y-auto px-8 py-16"
+                className="lyrics-lines-container flex h-full !w-full flex-col items-center overflow-y-auto px-8 py-[10vh]"
                 ref={lyricsLinesContainerRef}
                 onScroll={() =>
                   debounce(() => {
@@ -431,19 +483,29 @@ const LyricsPage = () => {
             </>
           ) : lyrics === undefined || lyrics?.lyrics.lyrics.length === 0 ? (
             <NoLyrics
-              artworkPath={NoLyricsImage}
-              content="We couldn't find any lyrics for this song."
+              iconName="release_alert"
+              title="Lyrics Not Found"
+              description="We couldn't find any lyrics for this song."
+              // buttons={[
+              //   {
+              //     label: 'Show Saved Lyrics',
+              //     iconName: 'visibility',
+              //     clickHandler: showOfflineLyrics,
+              //   },
+              // ]}
             />
           ) : (
             <NoLyrics
-              artworkPath={FetchingLyricsImage}
-              content="Hang on... We are looking everywhere"
+              iconName="hourglass_empty"
+              title="Looking for Lyrics"
+              description="Hang on... We are looking everywhere"
             />
           )
         ) : (
           <NoLyrics
-            artworkPath={NoInternetImage}
-            content="There are no offline lyrics for this song. You need an internet connection to check for online lyrics."
+            iconName="wifi_off"
+            title="No internet connection"
+            description="There are no offline lyrics for this song. You need an internet connection to check for online lyrics."
           />
         )}
       </>

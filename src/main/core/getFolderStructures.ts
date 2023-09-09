@@ -37,10 +37,10 @@ export const generateFolderStructure = async (dir: string) => {
     const subDirs = await getDirectories(dir);
     if (Array.isArray(subDirs) && subDirs.length > 0) {
       const subDirsStructurePromise = subDirs.map((subDir) =>
-        generateFolderStructure(subDir)
+        generateFolderStructure(subDir),
       );
       const { fulfilled: subDirsStructures } = await getAllSettledPromises(
-        subDirsStructurePromise
+        subDirsStructurePromise,
       );
 
       structure.subFolders.push(...subDirsStructures);
@@ -63,7 +63,7 @@ export const getFolderStructures = async () => {
   const musicFolderPaths = await showOpenDialog();
 
   const { fulfilled: folderStructures } = await getAllSettledPromises(
-    musicFolderPaths.map((folderPath) => generateFolderStructure(folderPath))
+    musicFolderPaths.map((folderPath) => generateFolderStructure(folderPath)),
   );
 
   return folderStructures;

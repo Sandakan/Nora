@@ -27,7 +27,7 @@ const AllPlaylistResults = (prop: Props) => {
   const selectAllHandler = useSelectAllHandler(
     playlistData,
     'playlist',
-    'playlistId'
+    'playlistId',
   );
   const row = React.useCallback(
     (props: {
@@ -57,7 +57,7 @@ const AllPlaylistResults = (prop: Props) => {
       }
       return <div style={style} />;
     },
-    [noOfColumns, playlistData, selectAllHandler]
+    [noOfColumns, playlistData, selectAllHandler],
   );
 
   return (
@@ -93,7 +93,7 @@ const AllPlaylistResults = (prop: Props) => {
                     ...currentPageData,
                     scrollTopOffset: data.scrollTop,
                   })),
-                500
+                500,
               );
           }}
         >

@@ -44,7 +44,7 @@ const parseLyrics = (str: string) => {
   const splittedLines = str.split('\n');
   const trimmedLines = splittedLines.map((line) => line.trim());
   const filteredLines = trimmedLines.filter(
-    (line) => line && isNotALyricsMetadataLine(line)
+    (line) => line && isNotALyricsMetadataLine(line),
   );
 
   if (isSynced) {

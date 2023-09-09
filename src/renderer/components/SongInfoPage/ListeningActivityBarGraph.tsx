@@ -23,7 +23,7 @@ const monthNames = [
 function getLastNoOfMonths<T>(
   months: T[],
   start: number,
-  requiredNoOfMonths = 6
+  requiredNoOfMonths = 6,
 ) {
   const arr: T[] = [];
   let count = 0;
@@ -71,7 +71,7 @@ const ListeningActivityBarGraph = (props: Props) => {
           const lastMonths = getLastNoOfMonths(
             monthsWithNames,
             new Date().getMonth(),
-            7
+            7,
           );
 
           const max = Math.max(...lastMonths.map((x) => x.listens));
@@ -111,7 +111,7 @@ const ListeningActivityBarGraph = (props: Props) => {
 
   return (
     <div
-      className={`appear-from-bottom mr-4 flex h-full min-h-[18rem] w-[70%] max-w-lg flex-col rounded-md bg-background-color-2/70 pb-2 pt-2 text-center backdrop-blur-md dark:bg-dark-background-color-2/70 ${className}`}
+      className={`appear-from-bottom flex h-full min-h-[18rem] w-full max-w-lg flex-col rounded-md bg-background-color-2/70 py-2 text-center backdrop-blur-md dark:bg-dark-background-color-2/70 ${className}`}
       title="Bar graph about no of listens per day"
     >
       <div className="pb-1 font-thin text-font-color dark:text-font-color-white">

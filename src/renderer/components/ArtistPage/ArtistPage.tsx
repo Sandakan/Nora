@@ -30,7 +30,7 @@ const ArtistPage = () => {
   const [sortingOrder, setSortingOrder] = React.useState<ArtistSortTypes>(
     currentlyActivePage?.data?.sortingOrder ||
       localStorageData?.sortingStates?.artistsPage ||
-      'aToZ'
+      'aToZ',
   );
 
   const containerRef = React.useRef(null as HTMLDivElement | null);
@@ -51,7 +51,7 @@ const ArtistPage = () => {
         }
         return undefined;
       }),
-    [sortingOrder]
+    [sortingOrder],
   );
 
   React.useEffect(() => {
@@ -70,12 +70,12 @@ const ArtistPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageArtistDataUpdatesInArtistsPage
+      manageArtistDataUpdatesInArtistsPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageArtistDataUpdatesInArtistsPage
+        manageArtistDataUpdatesInArtistsPage,
       );
     };
   }, [fetchArtistsData]);
@@ -87,7 +87,7 @@ const ArtistPage = () => {
   const selectAllHandler = useSelectAllHandler(
     artistsData,
     'artist',
-    'artistId'
+    'artistId',
   );
 
   const row = React.useCallback(
@@ -128,7 +128,7 @@ const ArtistPage = () => {
       }
       return <div style={style} />;
     },
-    [artistsData, noOfColumns, selectAllHandler]
+    [artistsData, noOfColumns, selectAllHandler],
   );
 
   console.log('offset', currentlyActivePage?.data);
@@ -174,7 +174,7 @@ const ArtistPage = () => {
                 clickHandler={() =>
                   toggleMultipleSelections(
                     !isMultipleSelectionEnabled,
-                    'artist'
+                    'artist',
                   )
                 }
                 tooltipLabel={
@@ -234,7 +234,7 @@ const ArtistPage = () => {
                         scrollTopOffset: data.scrollTop,
                         scrollLeftOffset: data.scrollLeft,
                       })),
-                    500
+                    500,
                   );
               }}
             >

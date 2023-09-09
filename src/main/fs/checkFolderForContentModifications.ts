@@ -10,14 +10,14 @@ const getFolderDirs = async (folderPath: string) => {
   try {
     const dirs = await fs.readdir(folderPath);
     const supportedDirs = dirs.filter((dir) =>
-      supportedMusicExtensions.includes(path.extname(dir))
+      supportedMusicExtensions.includes(path.extname(dir)),
     );
     return supportedDirs;
   } catch (error) {
     log(
       `ERROR OCCURRED WHEN READING DIRECTORY '${folderPath}'.`,
       { error },
-      'ERROR'
+      'ERROR',
     );
     return undefined;
   }
@@ -26,14 +26,14 @@ const getFolderDirs = async (folderPath: string) => {
 const tryToRemoveSongFromLibrary = async (
   folderPath: string,
   filename: string,
-  abortSignal: AbortSignal
+  abortSignal: AbortSignal,
 ) => {
   try {
     const fullPath = path.normalize(path.join(folderPath, filename));
     await removeSongsFromLibrary([fullPath], abortSignal);
     sendMessageToRenderer(
       `'${filename}' song got deleted from the system.`,
-      'SONG_DELETED'
+      'SONG_DELETED',
     );
   } catch (error) {
     log(`Error occurred when removing a song.`, { error }, 'ERROR');
@@ -43,7 +43,7 @@ const tryToRemoveSongFromLibrary = async (
 const checkFolderForContentModifications = async (
   folderPath: string,
   filename: string,
-  abortSignal: AbortSignal
+  abortSignal: AbortSignal,
 ) => {
   log('Started checking folder for modifications.');
 

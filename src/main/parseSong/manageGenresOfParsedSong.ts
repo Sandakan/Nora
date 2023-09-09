@@ -6,38 +6,55 @@ export const manageGenresOfParsedSong = (
   allGenres: SavableGenre[],
   songInfo: SavableSongData,
   songArtworkPaths?: ArtworkPaths,
-  darkVibrantBgColor?: { rgb: unknown }
+  darkVibrantBgColor?: { rgb: [number, number, number] },
 ) => {
   const newGenres: SavableGenre[] = [];
   const relevantGenres: SavableGenre[] = [];
   const { title, songId, genres: songGenres } = songInfo;
 
-  let genres = allGenres;
+  // let genres = allGenres;
   if (
     Array.isArray(songGenres) &&
     songGenres.length > 0 &&
-    Array.isArray(genres)
+    Array.isArray(allGenres)
   ) {
-    for (let x = 0; x < songGenres.length; x += 1) {
-      const songGenre = songGenres[x];
-      if (genres.some((genre) => genre.name === songGenre.name)) {
-        let y = genres.filter((genre) => genre.name === songGenre.name);
-        y = y.map((z) => {
-          z.artworkName =
-            songArtworkPaths && !songArtworkPaths.isDefaultArtwork
-              ? path.basename(songArtworkPaths.artworkPath)
-              : z.artworkName || undefined;
-          z.backgroundColor = darkVibrantBgColor || z.backgroundColor;
-          z.songs.push({ songId, title });
-          relevantGenres.push(z);
-          return z;
-        });
-        genres = genres
-          .filter((genre) => genre.name !== songGenre.name)
-          .concat(y);
+    for (const songGenre of songGenres) {
+      const songGenreName = songGenre.name.trim();
+      const isGenreAvailable = allGenres.some(
+        (genre) => genre.name === songGenreName,
+      );
+
+      if (isGenreAvailable) {
+        for (const availableGenre of allGenres) {
+          if (availableGenre.name === songGenreName) {
+            availableGenre.artworkName =
+              songArtworkPaths && !songArtworkPaths.isDefaultArtwork
+                ? path.basename(songArtworkPaths.artworkPath)
+                : availableGenre.artworkName || undefined;
+            availableGenre.backgroundColor =
+              darkVibrantBgColor || availableGenre.backgroundColor;
+            availableGenre.songs.push({ songId, title });
+            relevantGenres.push(availableGenre);
+          }
+        }
+
+        // let y = genres.filter((genre) => genre.name === songGenreName);
+        // y = y.map((z) => {
+        //   z.artworkName =
+        //     songArtworkPaths && !songArtworkPaths.isDefaultArtwork
+        //       ? path.basename(songArtworkPaths.artworkPath)
+        //       : z.artworkName || undefined;
+        //   z.backgroundColor = darkVibrantBgColor || z.backgroundColor;
+        //   z.songs.push({ songId, title });
+        //   relevantGenres.push(z);
+        //   return z;
+        // });
+        // genres = genres
+        //   .filter((genre) => genre.name !== songGenreName)
+        //   .concat(y);
       } else {
         const newGenre: SavableGenre = {
-          name: songGenre.name,
+          name: songGenreName,
           genreId: generateRandomId(),
           songs: [{ songId, title }],
           artworkName:
@@ -48,12 +65,12 @@ export const manageGenresOfParsedSong = (
         };
         relevantGenres.push(newGenre);
         newGenres.push(newGenre);
-        genres.push(newGenre);
+        allGenres.push(newGenre);
       }
     }
-    return { updatedGenres: genres, newGenres, relevantGenres };
+    return { updatedGenres: allGenres, newGenres, relevantGenres };
   }
-  return { updatedGenres: genres || [], newGenres, relevantGenres };
+  return { updatedGenres: allGenres || [], newGenres, relevantGenres };
 };
 
 export default manageGenresOfParsedSong;

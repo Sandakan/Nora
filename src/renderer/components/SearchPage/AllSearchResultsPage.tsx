@@ -49,12 +49,12 @@ const AllSearchResultsPage = () => {
           data.searchFilter,
           data.searchQuery,
           false,
-          data.isPredictiveSearchEnabled
+          data.isPredictiveSearchEnabled,
         )
         .then((results) => {
           return setSearchResults(results);
         })
-        .catch((err) => log(err, 'warn'));
+        .catch((err) => log(err, undefined, 'WARN'));
     } else
       setSearchResults({
         albums: [],
@@ -90,12 +90,12 @@ const AllSearchResultsPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageSearchResultsUpdatesInAllSearchResultsPage
+      manageSearchResultsUpdatesInAllSearchResultsPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageSearchResultsUpdatesInAllSearchResultsPage
+        manageSearchResultsUpdatesInAllSearchResultsPage,
       );
     };
   }, [fetchSearchResults]);
@@ -130,7 +130,7 @@ const AllSearchResultsPage = () => {
               clickHandler={() => {
                 toggleMultipleSelections(
                   !isMultipleSelectionEnabled,
-                  selectedType
+                  selectedType,
                 );
               }}
               isDisabled={selectedType === undefined}

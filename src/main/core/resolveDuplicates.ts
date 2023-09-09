@@ -24,7 +24,7 @@ export const getSelectedArtist = (artistIdOrName: string) => {
 
 export const resolveArtistDuplicates = async (
   selectedArtistId: string,
-  duplicateIds: string[]
+  duplicateIds: string[],
 ) => {
   let updatedData: UpdateSongDataResult | undefined;
 
@@ -48,14 +48,13 @@ export const resolveArtistDuplicates = async (
         // loop through albums
         for (const album of albums) {
           // check if the albums are linked to the duplicate artist
-          if (
-            artistAlbums.some(
-              (artistAlbum) => artistAlbum.albumId === album.albumId
-            )
-          ) {
+          const isAlbumLinkedToDuplicateArtist = artistAlbums.some(
+            (artistAlbum) => artistAlbum.albumId === album.albumId,
+          );
+          if (isAlbumLinkedToDuplicateArtist) {
             if (album.artists) {
               album.artists = album.artists!.filter(
-                (songArtist) => songArtist.artistId !== artist.artistId
+                (songArtist) => songArtist.artistId !== artist.artistId,
               );
             } else album.artists = [];
 
@@ -84,7 +83,7 @@ export const resolveArtistDuplicates = async (
 
             if (songTags.artists) {
               songTags.artists = songTags.artists.filter(
-                (songArtist) => songArtist.artistId !== artist.artistId
+                (songArtist) => songArtist.artistId !== artist.artistId,
               );
             } else songTags.artists = [];
 
@@ -96,7 +95,7 @@ export const resolveArtistDuplicates = async (
               song.songId,
               songTags,
               true,
-              true
+              true,
             );
           }
         }

@@ -28,7 +28,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
 
   const ignoredArtists = React.useMemo(
     () => storage.ignoredSeparateArtists.getIgnoredSeparateArtists(),
-    []
+    [],
   );
 
   React.useEffect(() => {
@@ -39,7 +39,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
   const separatedArtistsNames = React.useMemo(() => {
     const artists = name.split(separateArtistsRegex);
     const filterArtists = artists.filter(
-      (x) => x !== undefined && x.trim() !== ''
+      (x) => x !== undefined && x.trim() !== '',
     );
     const trimmedArtists = filterArtists.map((x) => x.trim());
 
@@ -74,7 +74,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
   const separateArtists = React.useCallback(
     (
       setIsDisabled: (_state: boolean) => void,
-      setIsPending: (_state: boolean) => void
+      setIsPending: (_state: boolean) => void,
     ) => {
       setIsDisabled(true);
       setIsPending(true);
@@ -116,7 +116,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
       currentSongData.songId,
       separatedArtistsNames,
       updateCurrentSongData,
-    ]
+    ],
   );
 
   return (
@@ -156,7 +156,10 @@ const SeparateArtistsSuggestion = (props: Props) => {
                 tooltipLabel={
                   isMessageVisible ? 'Hide suggestion' : 'Show suggestion'
                 }
-                clickHandler={() => setIsMessageVisible((state) => !state)}
+                clickHandler={(e) => {
+                  e.preventDefault();
+                  setIsMessageVisible((state) => !state);
+                }}
               />
             </div>
           </label>
@@ -195,13 +198,10 @@ const SeparateArtistsSuggestion = (props: Props) => {
                     addNewNotifications([
                       {
                         id: 'suggestionIgnored',
-                        icon: (
-                          <span className="material-icons-round-outlined">
-                            do_not_disturb_on
-                          </span>
-                        ),
+                        iconName: 'do_not_disturb_on',
+                        iconClassName: 'material-icons-round-outlined',
                         delay: 5000,
-                        content: <span>Suggestion ignored.</span>,
+                        content: `Suggestion ignored.`,
                       },
                     ]);
                   }}

@@ -12,7 +12,7 @@ const generateElapsedString = (elapsed: number, type: ElapsedDateTypes) =>
 
 const calculateElapsed = (
   currentDateInMs: number,
-  elapsedDateInMs: number
+  elapsedDateInMs: number,
 ): DateRounderResult | undefined => {
   if (currentDateInMs && elapsedDateInMs) {
     const isFuture = elapsedDateInMs > currentDateInMs;
@@ -24,7 +24,7 @@ const calculateElapsed = (
     const elapsedDays = Math.floor(milliseconds / (1000 * 60 * 60 * 24));
     const elapsedMonths = Math.floor(milliseconds / (1000 * 60 * 60 * 24 * 30));
     const elapsedYears = Math.floor(
-      milliseconds / (1000 * 60 * 60 * 24 * 30 * 12)
+      milliseconds / (1000 * 60 * 60 * 24 * 30 * 12),
     );
 
     if (elapsedSeconds < 60)
@@ -75,7 +75,7 @@ const calculateElapsed = (
 
 const calculateElapsedTime = (
   dateString: string,
-  currDateString = new Date().toUTCString()
+  currDateString = new Date().toUTCString(),
 ) => {
   const currentDate = Date.parse(currDateString);
   const elapsedDate = Date.parse(dateString);

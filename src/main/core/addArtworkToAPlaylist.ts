@@ -26,7 +26,7 @@ export default async (playlistId: string, artworkPath: string) => {
         const artworkPaths = await storeArtworks(
           playlistId,
           'playlist',
-          artworkPath
+          artworkPath,
         );
 
         playlists[i].isArtworkAvailable = !artworkPaths.isDefaultArtwork;

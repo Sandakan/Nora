@@ -21,7 +21,7 @@ const ThemeSettings = () => {
         .getUserData()
         .then((res) => setTheme(res?.theme))
         .catch((err) => console.error(err)),
-    []
+    [],
   );
 
   React.useEffect(() => {
@@ -38,12 +38,12 @@ const ThemeSettings = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageUserDataUpdatesInSettingsPage
+      manageUserDataUpdatesInSettingsPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageUserDataUpdatesInSettingsPage
+        manageUserDataUpdatesInSettingsPage,
       );
     };
   }, [fetchUserData]);
@@ -56,7 +56,7 @@ const ThemeSettings = () => {
         inputElement?.click();
       }
     },
-    []
+    [],
   );
 
   return theme ? (

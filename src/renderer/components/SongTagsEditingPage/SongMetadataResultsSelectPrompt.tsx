@@ -17,7 +17,7 @@ type DataLoadingStates =
   | 'FETCH_START';
 
 const SongMetadataResultsSelectPage = (
-  props: SongMetadataResultsSelectPageProp
+  props: SongMetadataResultsSelectPageProp,
 ) => {
   const { songTitle, songArtists, updateSongInfo } = props;
   const [songData, setSongData] = React.useState({
@@ -25,10 +25,10 @@ const SongMetadataResultsSelectPage = (
     songArtists: '',
   });
   const [loadingStates, setLoadingStates] = React.useState(
-    'FETCH_START' as DataLoadingStates
+    'FETCH_START' as DataLoadingStates,
   );
   const [songResults, setSongResults] = React.useState(
-    [] as SongMetadataResultFromInternet[]
+    [] as SongMetadataResultFromInternet[],
   );
 
   const fetchSongResults = React.useCallback(
@@ -48,7 +48,7 @@ const SongMetadataResultsSelectPage = (
           });
       }
     },
-    []
+    [],
   );
 
   React.useEffect(() => {
@@ -120,7 +120,7 @@ const SongMetadataResultsSelectPage = (
           clickHandler={() =>
             fetchSongResults(
               songData.songTitle,
-              songData.songArtists.split(', ')
+              songData.songArtists.split(', '),
             )
           }
           className="!w-32 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:hover:border-background-color-3"

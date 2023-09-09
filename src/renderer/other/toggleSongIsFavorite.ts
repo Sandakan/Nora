@@ -2,14 +2,14 @@ const toggleSongIsFavorite = async (
   songId: string,
   isCurrentSongAFavorite: boolean,
   isFavorite?: boolean,
-  onlyChangeCurrentSongData = false
+  onlyChangeCurrentSongData = false,
 ) => {
   const newFavorite = isFavorite ?? !isCurrentSongAFavorite;
 
   if (isCurrentSongAFavorite !== newFavorite && !onlyChangeCurrentSongData) {
     const res = await window.api.playerControls.toggleLikeSongs(
       [songId],
-      newFavorite
+      newFavorite,
     );
     if (res && res.likes.length + res.dislikes.length > 0) {
       return newFavorite;

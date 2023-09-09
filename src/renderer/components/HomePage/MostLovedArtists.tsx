@@ -13,7 +13,7 @@ const MostLovedArtists = (props: Props) => {
   const selectAllHandler = useSelectAllHandler(
     mostLovedArtists,
     'artist',
-    'artistId'
+    'artistId',
   );
   const mostLovedArtistComponents = React.useMemo(
     () =>
@@ -38,7 +38,7 @@ const MostLovedArtists = (props: Props) => {
           return undefined;
         })
         .filter((x) => x !== undefined),
-    [mostLovedArtists, noOfVisibleArtists, selectAllHandler]
+    [mostLovedArtists, noOfVisibleArtists, selectAllHandler],
   );
 
   return (

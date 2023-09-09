@@ -34,7 +34,7 @@ const Checkbox = React.memo((props: CheckboxProp) => {
         inputElement?.click();
       }
     },
-    []
+    [],
   );
 
   return (

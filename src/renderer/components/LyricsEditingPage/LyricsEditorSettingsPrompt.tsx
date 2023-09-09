@@ -9,7 +9,7 @@ import Checkbox from '../Checkbox';
 const LyricsEditorSettingsPrompt = () => {
   const { localStorageData } = React.useContext(AppContext);
   const [offset, setOffset] = React.useState(
-    localStorageData.lyricsEditorSettings.offset || 0
+    localStorageData.lyricsEditorSettings.offset || 0,
   );
 
   return (
@@ -24,22 +24,23 @@ const LyricsEditorSettingsPrompt = () => {
         <li className="secondary-container show-remaining-song-duration mb-4">
           <p className="description">
             Change the start time tag of the next lyrics line when you edit the
-            end time tag of the current lyrics line.
+            end time tag of the current lyrics line and vice versa
+            automatically.
           </p>
           <Checkbox
-            id="editNextStartTagWithCurrentEndTag"
+            id="editNextAndCurrentStartAndEndTagsAutomatically"
             isChecked={
               localStorageData !== undefined &&
               localStorageData.lyricsEditorSettings
-                .editNextStartTagWithCurrentEndTag
+                .editNextAndCurrentStartAndEndTagsAutomatically
             }
             checkedStateUpdateFunction={(state) =>
               storage.lyricsEditorSettings.setLyricsEditorSettings(
-                'editNextStartTagWithCurrentEndTag',
-                state
+                'editNextAndCurrentStartAndEndTagsAutomatically',
+                state,
               )
             }
-            labelContent="Edit next line's start tag with the current line's end tag automatically."
+            labelContent="Edit next line's start tag with the current line's end tag and vice versa automatically."
           />
         </li>
         <li className="secondary-container show-remaining-song-duration mb-4">
@@ -61,7 +62,7 @@ const LyricsEditorSettingsPrompt = () => {
               debounce(() => {
                 storage.lyricsEditorSettings.setLyricsEditorSettings(
                   'offset',
-                  newOffset
+                  newOffset,
                 );
               }, 250);
             }}

@@ -26,7 +26,7 @@ const SongYearInput = (props: Props) => {
             (prevData): SongTags => ({
               ...prevData,
               releasedYear: releasedYear ?? prevData.releasedYear,
-            })
+            }),
           );
         }}
       />

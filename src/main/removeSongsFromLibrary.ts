@@ -21,7 +21,7 @@ import { getSongArtworkPath } from './fs/resolveFilePaths';
 
 export const removeDeletedArtistDataOfSong = (
   artists: SavableArtist[],
-  song: SavableSongData
+  song: SavableSongData,
 ) => {
   let isArtistRemoved = false;
   if (
@@ -30,7 +30,7 @@ export const removeDeletedArtistDataOfSong = (
     Array.isArray(song.artists) &&
     song.artists.length > 0 &&
     artists.some((artist) =>
-      song.artists ? song.artists.some((x) => x.name === artist.name) : false
+      song.artists ? song.artists.some((x) => x.name === artist.name) : false,
     )
   ) {
     for (let i = 0; i < song.artists.length; i += 1) {
@@ -40,10 +40,10 @@ export const removeDeletedArtistDataOfSong = (
         if (artists[x].name === songArtist.name) {
           if (artists[x].songs.length > 1) {
             artists[x].songs = artists[x].songs.filter(
-              (y) => y.songId !== song.songId
+              (y) => y.songId !== song.songId,
             );
             log(
-              `Data related to '${song.title}' in artist '${artists[x].name}' removed.`
+              `Data related to '${song.title}' in artist '${artists[x].name}' removed.`,
             );
           } else {
             if (
@@ -51,11 +51,11 @@ export const removeDeletedArtistDataOfSong = (
               artists[x].songs[0].songId === song.songId
             )
               log(
-                `Artist '${artists[x].name}' related to '${song.title}' removed because of it doesn't contain any other songs.`
+                `Artist '${artists[x].name}' related to '${song.title}' removed because of it doesn't contain any other songs.`,
               );
             else
               log(
-                `Artist '${artists[x].name}' removed because it doesn't have any songs.`
+                `Artist '${artists[x].name}' removed because it doesn't have any songs.`,
               );
             artists.splice(x, 1);
             isArtistRemoved = true;
@@ -69,7 +69,7 @@ export const removeDeletedArtistDataOfSong = (
 
 export const removeDeletedAlbumDataOfSong = (
   albums: SavableAlbum[],
-  song: SavableSongData
+  song: SavableSongData,
 ) => {
   let isAlbumRemoved = false;
   if (
@@ -81,10 +81,10 @@ export const removeDeletedAlbumDataOfSong = (
       if (song.album && albums[x].albumId === song.album.albumId) {
         if (albums[x].songs.length > 1) {
           albums[x].songs = albums[x].songs.filter(
-            (y) => y.songId !== song.songId
+            (y) => y.songId !== song.songId,
           );
           log(
-            `Data related to '${song.title}' in album '${albums[x].title}' removed.`
+            `Data related to '${song.title}' in album '${albums[x].title}' removed.`,
           );
         } else {
           if (
@@ -92,11 +92,11 @@ export const removeDeletedAlbumDataOfSong = (
             albums[x].songs[0].songId === song.songId
           )
             log(
-              `Album '${albums[x].title}' related to '${song.title}' removed because of it doesn't contain any other songs.`
+              `Album '${albums[x].title}' related to '${song.title}' removed because of it doesn't contain any other songs.`,
             );
           else
             log(
-              `Album '${albums[x].title}' removed because it doesn't have any songs.`
+              `Album '${albums[x].title}' removed because it doesn't have any songs.`,
             );
           albums.splice(x, 1);
           isAlbumRemoved = true;
@@ -109,14 +109,14 @@ export const removeDeletedAlbumDataOfSong = (
 
 export const removeDeletedPlaylistDataOfSong = (
   playlists: SavablePlaylist[],
-  song: SavableSongData
+  song: SavableSongData,
 ) => {
   let isPlaylistRemoved = false;
   if (
     Array.isArray(playlists) &&
     playlists.length > 0 &&
     playlists.some((playlist) =>
-      playlist.songs.some((str) => str === song.songId)
+      playlist.songs.some((str) => str === song.songId),
     )
   ) {
     for (let x = 0; x < playlists.length; x += 1) {
@@ -126,11 +126,11 @@ export const removeDeletedPlaylistDataOfSong = (
       ) {
         playlists[x].songs.splice(playlists[x].songs.indexOf(song.songId), 1);
         log(
-          `Data related to '${song.title}' in playlist '${playlists[x].name}' removed.`
+          `Data related to '${song.title}' in playlist '${playlists[x].name}' removed.`,
         );
       } else {
         log(
-          `Playlist '${playlists[x].name}' removed because it doesn't have any songs.`
+          `Playlist '${playlists[x].name}' removed because it doesn't have any songs.`,
         );
         isPlaylistRemoved = true;
       }
@@ -141,7 +141,7 @@ export const removeDeletedPlaylistDataOfSong = (
 
 export const removeDeletedGenreDataOfSong = (
   genres: SavableGenre[],
-  song: SavableSongData
+  song: SavableSongData,
 ) => {
   let isGenreRemoved = false;
   if (
@@ -152,7 +152,7 @@ export const removeDeletedGenreDataOfSong = (
     genres.some((genre) =>
       song.genres
         ? song.genres.some((songGenre) => songGenre.genreId === genre.genreId)
-        : false
+        : false,
     )
   ) {
     for (let i = 0; i < song.genres.length; i += 1) {
@@ -161,10 +161,10 @@ export const removeDeletedGenreDataOfSong = (
         if (genres[x].name === songGenre.name) {
           if (genres[x].songs.length > 1) {
             genres[x].songs = genres[x].songs.filter(
-              (y) => y.songId !== song.songId
+              (y) => y.songId !== song.songId,
             );
             log(
-              `Data related to '${song.title}' in genre '${genres[x].name}' removed.`
+              `Data related to '${song.title}' in genre '${genres[x].name}' removed.`,
             );
           } else {
             if (
@@ -172,11 +172,11 @@ export const removeDeletedGenreDataOfSong = (
               genres[x].songs[0].songId === song.songId
             )
               log(
-                `Genre '${genres[x].name}' related to '${song.title}' removed because of it doesn't contain any other songs.`
+                `Genre '${genres[x].name}' related to '${song.title}' removed because of it doesn't contain any other songs.`,
               );
             else
               log(
-                `Genre '${genres[x].name}' removed because it doesn't have any songs.`
+                `Genre '${genres[x].name}' removed because it doesn't have any songs.`,
               );
             genres.splice(x, 1);
             isGenreRemoved = true;
@@ -192,7 +192,7 @@ export const removeDeletedArtworkDataOfSong = async (song: SavableSongData) => {
   if (song.isArtworkAvailable) {
     const artworkPaths = getSongArtworkPath(
       song.songId,
-      song.isArtworkAvailable
+      song.isArtworkAvailable,
     );
     try {
       await removeArtwork(artworkPaths);
@@ -200,7 +200,7 @@ export const removeDeletedArtworkDataOfSong = async (song: SavableSongData) => {
       log(
         `Error occurred when removing artworks of a song marked for removal from the library.`,
         { error },
-        'ERROR'
+        'ERROR',
       );
     }
   }
@@ -208,11 +208,11 @@ export const removeDeletedArtworkDataOfSong = async (song: SavableSongData) => {
 
 const removeDeletedListeningDataOfSong = (
   listeningData: SongListeningData[],
-  song: SavableSongData
+  song: SavableSongData,
 ) => {
   if (Array.isArray(listeningData) && listeningData.length > 0) {
     const updatedListeningData = listeningData.filter(
-      (data) => data.songId !== song.songId
+      (data) => data.songId !== song.songId,
     );
     return { updatedListeningData };
   }
@@ -225,7 +225,7 @@ const removeSong = async (
   albumsData: SavableAlbum[],
   playlistsData: SavablePlaylist[],
   genreData: SavableGenre[],
-  songsListeningData: SongListeningData[]
+  songsListeningData: SongListeningData[],
 ) => {
   let artists = artistsData;
   let albums = albumsData;
@@ -264,14 +264,14 @@ const removeSong = async (
     await removeDeletedArtworkDataOfSong(song);
   } catch (error) {
     throw new Error(
-      `Error occurred when trying to remove artwork of ${song.title}`
+      `Error occurred when trying to remove artwork of ${song.title}`,
     );
   }
 
   // LISTENING DATA UPDATES
   const { updatedListeningData } = removeDeletedListeningDataOfSong(
     listeningData,
-    song
+    song,
   );
   listeningData = updatedListeningData;
 
@@ -292,7 +292,7 @@ const removeSong = async (
 
 const removeSongsFromLibrary = async (
   songPaths: string[],
-  abortSignal: AbortSignal
+  abortSignal: AbortSignal,
 ): PromiseFunctionReturn => {
   const songs = getSongsData();
   let artists = getArtistsData();
@@ -313,14 +313,14 @@ const removeSongsFromLibrary = async (
       log(
         'Removing songs in the music folder aborted by an abortController signal.',
         { reason: abortSignal?.reason },
-        'WARN'
+        'WARN',
       );
       break;
     }
 
     const song = songs[i];
     const isThisTheSong = songPaths.some(
-      (songPath) => song.path === path.normalize(songPath)
+      (songPath) => song.path === path.normalize(songPath),
     );
     if (!isThisTheSong) {
       updatedSongs.push(song);
@@ -333,7 +333,7 @@ const removeSongsFromLibrary = async (
       albums,
       playlists,
       genres,
-      listeningData
+      listeningData,
     );
     artists = data.artists;
     albums = data.albums;
@@ -348,7 +348,7 @@ const removeSongsFromLibrary = async (
     sendMessageToRenderer(
       `Removed ${index} out of ${songPaths.length} songs.`,
       'SONG_REMOVE_PROCESS_UPDATE',
-      { max: songPaths.length, value: index }
+      { max: songPaths.length, value: index },
     );
   }
 

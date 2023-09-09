@@ -1,6 +1,5 @@
-import { app } from 'electron';
-
 import path from 'path';
+import { app } from 'electron';
 
 import { getUserData, setUserData } from '../filesystem';
 
@@ -15,10 +14,10 @@ const getAppDataStorageMetrics = async () => {
   const appDataSize = await getDirSize(appDataPath);
 
   const artworkCacheSize = await getDirSize(
-    path.join(appDataPath, 'song_covers')
+    path.join(appDataPath, 'song_covers'),
   );
   const tempArtworkCacheSize = await getDirSize(
-    path.join(appDataPath, 'temp_artworks')
+    path.join(appDataPath, 'temp_artworks'),
   );
 
   const totalArtworkCacheSize = artworkCacheSize + tempArtworkCacheSize;
@@ -27,19 +26,19 @@ const getAppDataStorageMetrics = async () => {
 
   const songDataSize = await getFileSize(path.join(appDataPath, 'songs.json'));
   const artistDataSize = await getFileSize(
-    path.join(appDataPath, 'artists.json')
+    path.join(appDataPath, 'artists.json'),
   );
   const albumDataSize = await getFileSize(
-    path.join(appDataPath, 'albums.json')
+    path.join(appDataPath, 'albums.json'),
   );
   const genreDataSize = await getFileSize(
-    path.join(appDataPath, 'genres.json')
+    path.join(appDataPath, 'genres.json'),
   );
   const playlistDataSize = await getFileSize(
-    path.join(appDataPath, 'playlists.json')
+    path.join(appDataPath, 'playlists.json'),
   );
   const userDataSize = await getFileSize(
-    path.join(appDataPath, 'userData.json')
+    path.join(appDataPath, 'userData.json'),
   );
 
   const librarySize =

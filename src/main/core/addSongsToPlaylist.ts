@@ -4,8 +4,8 @@ import log from '../log';
 const addSongsToPlaylist = (playlistId: string, songIds: string[]) => {
   log(
     `Requested a song with ids -${songIds.join(
-      ','
-    )}- to be added to a playlist with id '${playlistId}'.`
+      ',',
+    )}- to be added to a playlist with id '${playlistId}'.`,
   );
   const playlists = getPlaylistData();
   const addedIds: string[] = [];
@@ -31,13 +31,13 @@ const addSongsToPlaylist = (playlistId: string, songIds: string[]) => {
           }`,
           undefined,
           'INFO',
-          { sendToRenderer: 'SUCCESS' }
+          { sendToRenderer: 'SUCCESS' },
         );
       }
     }
 
     log(
-      `Request failed because a playlist with an id '${playlistId}' cannot be found.`
+      `Request failed because a playlist with an id '${playlistId}' cannot be found.`,
     );
     throw new Error(`playlist with an id ${playlistId} couldn't be found.`);
   }

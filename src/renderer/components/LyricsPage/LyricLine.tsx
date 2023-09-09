@@ -81,11 +81,11 @@ const LyricLine = (props: LyricProp) => {
         syncedLyrics
           ? `${roundTo(syncedLyrics.start - delay, 2)} to ${roundTo(
               syncedLyrics.end - delay,
-              2
+              2,
             )}`
           : undefined
       }
-      className={`appear-from-bottom highlight mb-5 w-fit select-none text-center font-['Poppins'] text-4xl font-medium text-font-color-black transition-[color,transform] duration-200 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
+      className={`appear-from-bottom highlight mb-5 w-fit select-none text-center text-4xl font-medium text-font-color-black transition-[transform,color] duration-250 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
         syncedLyrics
           ? `cursor-pointer ${
               songPosition > syncedLyrics.start - delay &&

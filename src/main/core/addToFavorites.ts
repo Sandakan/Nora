@@ -7,7 +7,7 @@ import log from '../log';
 import { dataUpdateEvent } from '../main';
 
 const addToFavorites = (
-  songId: string
+  songId: string,
 ): { success: boolean; message?: string } => {
   log(`Requested a song with id -${songId}- to be added to the favorites.`);
   const playlists = getPlaylistData();
@@ -16,7 +16,7 @@ const addToFavorites = (
       playlists.length > 0 &&
       playlists.some(
         (playlist) =>
-          playlist.name === 'Favorites' && playlist.playlistId === 'Favorites'
+          playlist.name === 'Favorites' && playlist.playlistId === 'Favorites',
       )
     ) {
       for (let i = 0; i < playlists.length; i += 1) {
@@ -26,11 +26,11 @@ const addToFavorites = (
         ) {
           if (
             playlists[i].songs.some(
-              (playlistSongId: string) => playlistSongId === songId
+              (playlistSongId: string) => playlistSongId === songId,
             )
           ) {
             log(
-              `Request failed for the song with id ${songId} to be added to the Favorites because it was already in the Favorites.`
+              `Request failed for the song with id ${songId} to be added to the Favorites because it was already in the Favorites.`,
             );
             return {
               success: false,
@@ -50,7 +50,7 @@ const addToFavorites = (
     return { success: true };
   }
   log(
-    `ERROR OCCURRED WHEN TRYING TO ADD A SONG TO THE FAVORITES. PLAYLIST DATA ARE EMPTY.`
+    `ERROR OCCURRED WHEN TRYING TO ADD A SONG TO THE FAVORITES. PLAYLIST DATA ARE EMPTY.`,
   );
   throw new Error('Playlists is not an array.');
 };

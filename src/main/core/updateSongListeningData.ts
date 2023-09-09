@@ -8,7 +8,7 @@ import { dataUpdateEvent } from '../main';
 
 const incrementListeningDataProperties = (
   dataUpdateType: ListeningDataUpdateTypes,
-  data = 0
+  data = 0,
 ) => {
   const value = dataUpdateType === 'increment' ? 1 : -1;
   if (data + value < 0) return 0;
@@ -17,7 +17,7 @@ const incrementListeningDataProperties = (
 
 const updateSongListensArray = (
   updateType: ListeningDataUpdateTypes,
-  yearlyListens: YearlyListeningRate[]
+  yearlyListens: YearlyListeningRate[],
 ) => {
   const currentDate = new Date();
   const currentNow = currentDate.getTime();
@@ -60,36 +60,36 @@ const updateSongListensArray = (
 const updateListeningData = (
   dataType: ListeningDataTypes,
   listeningData: SongListeningData,
-  updateType: ListeningDataUpdateTypes
+  updateType: ListeningDataUpdateTypes,
 ) => {
   if (dataType === 'fullListens') {
     listeningData.fullListens = incrementListeningDataProperties(
       updateType,
-      listeningData.fullListens
+      listeningData.fullListens,
     );
   } else if (dataType === 'skips') {
     listeningData.skips = incrementListeningDataProperties(
       updateType,
-      listeningData.skips
+      listeningData.skips,
     );
   } else if (dataType === 'noOfPlaylists') {
     listeningData.inNoOfPlaylists = incrementListeningDataProperties(
       updateType,
-      listeningData.inNoOfPlaylists
+      listeningData.inNoOfPlaylists,
     );
   } else if (dataType === 'listens') {
     listeningData.listens = updateSongListensArray(
       updateType,
-      listeningData.listens
+      listeningData.listens,
     );
   } else {
     log(
       `Requested to update song listening data with unknown data type of ${dataType}.`,
       undefined,
-      'WARN'
+      'WARN',
     );
     throw new Error(
-      `Requested to update song listening data with unknown data type of ${dataType}.`
+      `Requested to update song listening data with unknown data type of ${dataType}.`,
     );
   }
 
@@ -101,7 +101,7 @@ const updateListeningData = (
       : dataType === 'skips'
       ? 'songs/listeningData/skips'
       : 'songs/listeningData/inNoOfPlaylists',
-    [listeningData.songId]
+    [listeningData.songId],
   );
   return listeningData;
 };
@@ -109,11 +109,11 @@ const updateListeningData = (
 const updateSongListeningData = (
   songId: string,
   dataType: ListeningDataTypes,
-  updateType: ListeningDataUpdateTypes
+  updateType: ListeningDataUpdateTypes,
 ) => {
   try {
     log(
-      `Requested to ${updateType} ${dataType} of the '${songId}' song's listening data.`
+      `Requested to ${updateType} ${dataType} of the '${songId}' song's listening data.`,
     );
     const listeningData = getListeningData([songId]);
 
@@ -123,20 +123,20 @@ const updateSongListeningData = (
           const updatedListeningData = updateListeningData(
             dataType,
             listeningData[i],
-            updateType
+            updateType,
           );
           return setListeningData(updatedListeningData);
         }
       }
 
       log(
-        `No listening data found for songId ${songId}. Creating a new listening data instance.`
+        `No listening data found for songId ${songId}. Creating a new listening data instance.`,
       );
       const newListeningData = createNewListeningDataInstance(songId);
       const updatedListeningData = updateListeningData(
         dataType,
         newListeningData,
-        updateType
+        updateType,
       );
       return setListeningData(updatedListeningData);
     }
@@ -145,7 +145,7 @@ const updateSongListeningData = (
     return log(
       `Error occurred when trying to update song listening data for the song with id ${songId}`,
       { error },
-      'ERROR'
+      'ERROR',
     );
   }
 };

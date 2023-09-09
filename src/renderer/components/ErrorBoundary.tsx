@@ -32,7 +32,7 @@ class ErrorBoundary extends React.Component<
       errorInfo,
     });
     // You can also log error messages to an error reporting service here
-    log(error);
+    log(error, undefined, 'ERROR');
   }
 
   render() {
@@ -48,8 +48,10 @@ class ErrorBoundary extends React.Component<
               style={{ whiteSpace: 'pre-wrap' }}
               className="mx-auto max-w-[80%] text-sm font-light"
             >
-              <summary className="cursor-pointer">Details</summary>
-              <p>
+              <summary className="cursor-pointer underline px-4 py-2">
+                Details
+              </summary>
+              <p className="p-4 rounded-2xl mt-4 bg-background-color-2 dark:bg-dark-background-color-2">
                 {this.state.error && this.state.error.toString()}
                 <br />
                 {this.state.errorInfo.componentStack}

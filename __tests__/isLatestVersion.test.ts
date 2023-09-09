@@ -15,13 +15,13 @@ describe('App versions check', () => {
 
   test('Versions with same release phases and different build metadata', () => {
     expect(
-      isLatestVersion('2.0.0-stable.20230515', '2.0.0-stable.20230510')
+      isLatestVersion('2.0.0-stable.20230515', '2.0.0-stable.20230510'),
     ).toBe(true);
     expect(isLatestVersion('2.0.0-beta20230510', '2.0.0-beta20230515')).toBe(
-      true
+      true,
     );
     expect(
-      isLatestVersion('2.0.0-alpha.20250101', '2.0.0-alpha.19990509')
+      isLatestVersion('2.0.0-alpha.20250101', '2.0.0-alpha.19990509'),
     ).toBe(true);
   });
 

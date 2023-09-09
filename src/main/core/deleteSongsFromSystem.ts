@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
-import { shell } from 'electron';
 import path from 'path';
 import fs from 'fs/promises';
+import { shell } from 'electron';
 import { supportedMusicExtensions } from '../filesystem';
 import log from '../log';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
@@ -9,12 +9,12 @@ import removeSongsFromLibrary from '../removeSongsFromLibrary';
 const deleteSongsFromSystem = async (
   absoluteFilePaths: string[],
   abortSignal: AbortSignal,
-  isPermanentDelete = false
+  isPermanentDelete = false,
 ) => {
   if (abortSignal.aborted) {
     log(`Song deletion process aborted because abort event triggered.`);
     throw new Error(
-      'Song deletion process aborted because abort event triggered.'
+      'Song deletion process aborted because abort event triggered.',
     );
   }
 
@@ -31,7 +31,7 @@ const deleteSongsFromSystem = async (
     log(
       `Tried to delete a resource which is recognized as a song.`,
       { path: absoluteFilePaths },
-      'WARN'
+      'WARN',
     );
     throw new Error(`Prevented deleting files which are not songs.`);
   }
@@ -58,7 +58,7 @@ const deleteSongsFromSystem = async (
     log(
       `Error occurred when removing a song from the system`,
       undefined,
-      'ERROR'
+      'ERROR',
     );
     log(error as Error, undefined, 'ERROR');
     throw error;

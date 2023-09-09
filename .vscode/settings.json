@@ -20,10 +20,15 @@
     "Resyncing",
     "RIELL",
     "samuelmeuli",
+    "scrobble",
     "Spicetify",
     "sspai",
+    "SYLT",
+    "unlove",
     "unmaximize",
+    "unmaximized",
     "unsynced",
+    "USLT",
     "webm",
     "xmark",
     "Yosef",
@@ -58,7 +63,8 @@
     "class",
     "className",
     "ngClass",
-    "iconClassName"
+    "iconClassName",
+    "titleClassName"
   ],
   "editor.tokenColorCustomizations": {
     "comments": "",

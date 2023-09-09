@@ -59,7 +59,7 @@ const reParseSong = async (filePath: string) => {
           const songArtworkPaths = await storeArtworks(
             songId,
             'songs',
-            metadata.common?.picture?.at(0)?.data
+            metadata.common?.picture?.at(0)?.data,
           );
 
           song.title =
@@ -92,7 +92,7 @@ const reParseSong = async (filePath: string) => {
           const { updatedAlbums, relevantAlbums } = manageAlbumsOfParsedSong(
             updatedAlbumsFromDeletedData,
             song,
-            songArtworkPaths
+            songArtworkPaths,
           );
 
           if (song.album && relevantAlbums.length > 0)
@@ -105,7 +105,7 @@ const reParseSong = async (filePath: string) => {
             updatedArtistsFromDeletedData,
             song,
             songArtworkPaths,
-            relevantAlbums
+            relevantAlbums,
           );
 
           if (song.artists && relevantArtists.length > 0) {
@@ -121,7 +121,7 @@ const reParseSong = async (filePath: string) => {
             updatedGenresFromDeletedData,
             song,
             songArtworkPaths,
-            song.palette?.DarkVibrant
+            song.palette?.DarkVibrant,
           );
 
           song.genres = relevantGenres.map((genre) => {
@@ -134,7 +134,7 @@ const reParseSong = async (filePath: string) => {
               songPath: song?.path,
             },
             'INFO',
-            { sendToRenderer: 'SUCCESS' }
+            { sendToRenderer: 'SUCCESS' },
           );
 
           setSongsData(songs);

@@ -43,7 +43,7 @@ import UnsupportedFileMessagePrompt from './other/UnsupportedFileMessagePrompt';
 import SuspenseLoader from './components/SuspenseLoader';
 
 const MiniPlayer = React.lazy(
-  () => import('./components/MiniPlayer/MiniPlayer')
+  () => import('./components/MiniPlayer/MiniPlayer'),
 );
 
 const player = new Audio();
@@ -104,7 +104,7 @@ fifteenThousandHertzFilter.gain.value = 0;
 player.addEventListener('player/trackchange', (e) => {
   if ('detail' in e) {
     console.log(
-      `player track changed to ${(e as DetailAvailableEvent<string>).detail}.`
+      `player track changed to ${(e as DetailAvailableEvent<string>).detail}.`,
     );
   }
 });
@@ -119,7 +119,7 @@ window.addEventListener('offline', updateNetworkStatus);
 
 storage.checkLocalStorage();
 
-console.log('Command line args', window.api.properties.commandLineArgs);
+// console.log('Command line args', window.api.properties.commandLineArgs);
 
 export default function App() {
   const [content, dispatch] = React.useReducer(reducer, DEFAULT_REDUCER_DATA);
@@ -145,7 +145,7 @@ export default function App() {
       e.stopPropagation();
       if (e.relatedTarget === null) AppRef.current?.classList.add('song-drop');
     },
-    []
+    [],
   );
 
   const removeSongDropPlaceholder = React.useCallback(
@@ -155,7 +155,7 @@ export default function App() {
       if (e.relatedTarget === null)
         AppRef.current?.classList.remove('song-drop');
     },
-    []
+    [],
   );
 
   const changePromptMenuData = React.useCallback(
@@ -171,13 +171,13 @@ export default function App() {
         },
       });
     },
-    [content.promptMenuData.className, content.promptMenuData.content]
+    [content.promptMenuData.className, content.promptMenuData.content],
   );
 
   const managePlaybackErrors = React.useCallback(
-    (err: unknown) => {
+    (appError: unknown) => {
       const playerErrorData = player.error;
-      console.error(err, playerErrorData);
+      console.error(appError, playerErrorData);
 
       const prompt = (
         <ErrorPrompt
@@ -200,13 +200,19 @@ export default function App() {
 
       if (repetitivePlaybackErrorsCount > 5) {
         changePromptMenuData(true, prompt);
-        return console.error('Playback errors exceeded the 5 errors limit.');
+        return log(
+          'Playback errors exceeded the 5 errors limit.',
+          { appError, playerErrorData },
+          'ERROR',
+        );
       }
 
       repetitivePlaybackErrorsCount += 1;
       const prevSongPosition = player.currentTime;
       log(
-        `Error occurred in the player.App error:${err}; Player error: ${playerErrorData};`
+        `Error occurred in the player.`,
+        { appError, playerErrorData },
+        'ERROR',
       );
 
       if (player.src && playerErrorData) {
@@ -218,7 +224,7 @@ export default function App() {
       }
       return undefined;
     },
-    [changePromptMenuData]
+    [changePromptMenuData],
   );
 
   const AUDIO_FADE_INTERVAL = 50;
@@ -265,15 +271,15 @@ export default function App() {
   const handleBeforeQuitEvent = React.useCallback(async () => {
     storage.playback.setCurrentSongOptions(
       'stoppedPosition',
-      player.currentTime
+      player.currentTime,
     );
     storage.playback.setPlaybackOptions(
       'isRepeating',
-      contentRef.current.player.isRepeating
+      contentRef.current.player.isRepeating,
     );
     storage.playback.setPlaybackOptions(
       'isShuffling',
-      contentRef.current.player.isShuffling
+      contentRef.current.player.isShuffling,
     );
     storage.queue.setQueue(refQueue.current);
   }, []);
@@ -295,24 +301,29 @@ export default function App() {
         .then((res: Changelog) => {
           const isThereAnAppUpdate = !isLatestVersion(
             res.latestVersion.version,
-            packageFile.version
+            packageFile.version,
           );
 
           updateAppUpdatesState(isThereAnAppUpdate ? 'OLD' : 'LATEST');
 
           if (isThereAnAppUpdate) {
-            console.log('client has new updates');
             const noUpdateNotificationForNewUpdate =
               storage.preferences.getPreferences(
-                'noUpdateNotificationForNewUpdate'
+                'noUpdateNotificationForNewUpdate',
               );
-            if (
-              noUpdateNotificationForNewUpdate !== res.latestVersion.version
-            ) {
+            const isUpdateIgnored =
+              noUpdateNotificationForNewUpdate !== res.latestVersion.version;
+            log('client has new updates', {
+              isThereAnAppUpdate,
+              noUpdateNotificationForNewUpdate,
+              isUpdateIgnored,
+            });
+
+            if (isUpdateIgnored) {
               changePromptMenuData(
                 true,
                 <ReleaseNotesPrompt />,
-                'release-notes px-8 py-4'
+                'release-notes px-8 py-4',
               );
             }
           } else console.log('client is up-to-date.');
@@ -327,7 +338,7 @@ export default function App() {
       updateAppUpdatesState('NO_NETWORK_CONNECTION');
 
       console.log(
-        `couldn't check for app updates. Check the network connection.`
+        `couldn't check for app updates. Check the network connection.`,
       );
     }
   }, [changePromptMenuData, updateAppUpdatesState]);
@@ -343,20 +354,20 @@ export default function App() {
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isOnline]
+    [isOnline],
   );
 
   React.useEffect(() => {
     const watchForSystemThemeChanges = (
       _: unknown,
       isDarkMode: boolean,
-      usingSystemTheme: boolean
+      usingSystemTheme: boolean,
     ) => {
       console.log(
         'theme changed : isDarkMode',
         isDarkMode,
         'usingSystemTheme',
-        usingSystemTheme
+        usingSystemTheme,
       );
       const theme = {
         isDarkMode,
@@ -377,10 +388,10 @@ export default function App() {
     window.api.battery.listenForBatteryPowerStateChanges(watchPowerChanges);
     return () => {
       window.api.theme.stoplisteningForSystemThemeChanges(
-        watchForSystemThemeChanges
+        watchForSystemThemeChanges,
       );
       window.api.battery.stopListeningForBatteryPowerStateChanges(
-        watchPowerChanges
+        watchPowerChanges,
       );
     };
   }, []);
@@ -412,7 +423,7 @@ export default function App() {
         if (state === 'focus') AppRef.current.classList.remove('blurred');
       }
     },
-    []
+    [],
   );
 
   const manageWindowFullscreen = React.useCallback(
@@ -425,7 +436,7 @@ export default function App() {
       }
       return undefined;
     },
-    []
+    [],
   );
 
   React.useEffect(() => {
@@ -447,17 +458,17 @@ export default function App() {
     window.api.quitEvent.beforeQuitEvent(handleBeforeQuitEvent);
 
     window.api.windowControls.onWindowBlur(() =>
-      manageWindowBlurOrFocus('blur')
+      manageWindowBlurOrFocus('blur'),
     );
     window.api.windowControls.onWindowFocus(() =>
-      manageWindowBlurOrFocus('focus')
+      manageWindowBlurOrFocus('focus'),
     );
 
     window.api.fullscreen.onEnterFullscreen(() =>
-      manageWindowFullscreen('fullscreen')
+      manageWindowFullscreen('fullscreen'),
     );
     window.api.fullscreen.onLeaveFullscreen(() =>
-      manageWindowFullscreen('windowed')
+      manageWindowFullscreen('windowed'),
     );
 
     return () => {
@@ -471,7 +482,7 @@ export default function App() {
       document.title = `Nora`;
       storage.playback.setCurrentSongOptions(
         'stoppedPosition',
-        player.currentTime
+        player.currentTime,
       );
     };
     const playSongIfPlayable = () => {
@@ -512,12 +523,12 @@ export default function App() {
       player.removeEventListener('canplay', managePlayerNotStalledStatus);
       player.removeEventListener(
         'canplaythrough',
-        managePlayerNotStalledStatus
+        managePlayerNotStalledStatus,
       );
       player.removeEventListener('loadeddata', managePlayerNotStalledStatus);
       player.removeEventListener(
         'loadedmetadata',
-        managePlayerNotStalledStatus
+        managePlayerNotStalledStatus,
       );
       player.removeEventListener('suspend', managePlayerStalledStatus);
       player.removeEventListener('stalled', managePlayerStalledStatus);
@@ -562,7 +573,7 @@ export default function App() {
             dispatch({
               type: 'UPDATE_SONG_POSITION',
               data: currentPosition,
-            })
+            }),
           );
       }
     }, duration);
@@ -618,7 +629,7 @@ export default function App() {
           playSong(playback?.currentSong.songId, false);
 
           const currSongPosition = Number(
-            playback?.currentSong.stoppedPosition
+            playback?.currentSong.stoppedPosition,
           );
           player.currentTime = currSongPosition;
           contentRef.current.player.songPosition = currSongPosition;
@@ -645,7 +656,7 @@ export default function App() {
           if (!audioData) return undefined;
           createQueue(
             audioData.data.map((song) => song.songId),
-            'songs'
+            'songs',
           );
           return undefined;
         })
@@ -671,26 +682,33 @@ export default function App() {
       })
       .catch((err) => console.error(err));
 
-    window.api.playerControls.toggleSongPlayback(() => {
-      console.log('Main requested song playback');
-      toggleSongPlayback();
-    });
-    window.api.unknownSource.playSongFromUnknownSource((_, data) => {
-      playSongFromUnknownSource(data, true);
-    });
+    const handleToggleSongPlayback = () => toggleSongPlayback();
+    const handlePlaySongFromUnknownSource = (
+      _: unknown,
+      data: AudioPlayerData,
+    ) => playSongFromUnknownSource(data, true);
+
+    window.api.unknownSource.playSongFromUnknownSource(
+      handlePlaySongFromUnknownSource,
+    );
+
+    window.api.playerControls.toggleSongPlayback(handleToggleSongPlayback);
     window.api.playerControls.skipBackwardToPreviousSong(
-      handleSkipBackwardClick
+      handleSkipBackwardClick,
     );
     window.api.playerControls.skipForwardToNextSong(handleSkipForwardClick);
     return () => {
+      window.api.unknownSource.removePlaySongFromUnknownSourceEvent(
+        handleToggleSongPlayback,
+      );
       window.api.playerControls.removeTogglePlaybackStateEvent(
-        toggleSongPlayback
+        handleToggleSongPlayback,
       );
       window.api.playerControls.removeSkipBackwardToPreviousSongEvent(
-        handleSkipBackwardClick
+        handleSkipBackwardClick,
       );
       window.api.playerControls.removeSkipForwardToNextSongEvent(
-        handleSkipForwardClick
+        handleSkipForwardClick,
       );
       window.api.dataUpdates.removeDataUpdateEventListeners();
     };
@@ -700,7 +718,7 @@ export default function App() {
   React.useEffect(() => {
     const noticeDataUpdateEvents = (
       _: unknown,
-      dataEvents: DataUpdateEvent[]
+      dataEvents: DataUpdateEvent[],
     ) => {
       const event = new CustomEvent('app/dataUpdates', { detail: dataEvents });
       document.dispatchEvent(event);
@@ -723,7 +741,7 @@ export default function App() {
         const resultNotifications = currentNotifications.filter(
           (x, index) =>
             !newNotificationIds.some((y) => y === x.id) &&
-            index < maxNotifications
+            index < maxNotifications,
         );
         resultNotifications.unshift(...newNotifications);
         contentRef.current.notificationPanelData.notifications =
@@ -733,16 +751,16 @@ export default function App() {
           dispatch({
             type: 'ADD_NEW_NOTIFICATIONS',
             data: resultNotifications,
-          })
+          }),
         );
       }
     },
-    []
+    [],
   );
 
   const updateNotifications = React.useCallback(
     (
-      callback: (currentNotifications: AppNotification[]) => AppNotification[]
+      callback: (currentNotifications: AppNotification[]) => AppNotification[],
     ) => {
       const currentNotifications = content.notificationPanelData.notifications;
       const updatedNotifications = callback(currentNotifications);
@@ -750,7 +768,7 @@ export default function App() {
         updatedNotifications;
       dispatch({ type: 'UPDATE_NOTIFICATIONS', data: updatedNotifications });
     },
-    [content.notificationPanelData.notifications]
+    [content.notificationPanelData.notifications],
   );
 
   const toggleSongPlayback = React.useCallback(
@@ -763,7 +781,7 @@ export default function App() {
                 .play()
                 .then(() => {
                   const playbackChange = new CustomEvent(
-                    'player/playbackChange'
+                    'player/playbackChange',
                   );
                   return player.dispatchEvent(playbackChange);
                 })
@@ -776,7 +794,7 @@ export default function App() {
                 .play()
                 .then(() => {
                   const playbackChange = new CustomEvent(
-                    'player/playbackChange'
+                    'player/playbackChange',
                   );
                   return player.dispatchEvent(playbackChange);
                 })
@@ -802,7 +820,7 @@ export default function App() {
         ]);
       return undefined;
     },
-    [managePlaybackErrors, addNewNotifications, fadeOutAudio, fadeInAudio]
+    [managePlaybackErrors, addNewNotifications, fadeOutAudio, fadeInAudio],
   );
 
   const displayMessageFromMain = React.useCallback(
@@ -810,24 +828,24 @@ export default function App() {
       _: unknown,
       message: string,
       messageCode?: MessageCodes,
-      data?: Record<string, unknown>
+      data?: Record<string, unknown>,
     ) => {
       const notification = parseNotificationFromMain(
         message,
         messageCode,
-        data
+        data,
       );
 
       addNewNotifications([notification]);
     },
-    [addNewNotifications]
+    [addNewNotifications],
   );
 
   React.useEffect(() => {
     window.api.messages.getMessageFromMain(displayMessageFromMain);
     return () => {
       window.api.messages.removeMessageToRendererEventListener(
-        displayMessageFromMain
+        displayMessageFromMain,
       );
     };
   }, [displayMessageFromMain]);
@@ -886,27 +904,27 @@ export default function App() {
           () => {
             listeningDataSession.isPaused = true;
           },
-          { signal: listeningDataSession.abortController.signal }
+          { signal: listeningDataSession.abortController.signal },
         );
         player.addEventListener(
           'play',
           () => {
             listeningDataSession.isPaused = false;
           },
-          { signal: listeningDataSession.abortController.signal }
+          { signal: listeningDataSession.abortController.signal },
         );
         player.addEventListener(
           'seeked',
           () => {
             listeningDataSession.addSeekPosition = player.currentTime;
           },
-          { signal: listeningDataSession.abortController.signal }
+          { signal: listeningDataSession.abortController.signal },
         );
 
         recordRef.current = listeningDataSession;
       }
     },
-    []
+    [],
   );
 
   const playSong = React.useCallback(
@@ -945,7 +963,7 @@ export default function App() {
               refQueue.current = updateQueueOnSongPlay(
                 refQueue.current,
                 songData.songId,
-                playAsCurrentSongIndex
+                playAsCurrentSongIndex,
               );
             } else console.log(songData);
             return undefined;
@@ -962,10 +980,10 @@ export default function App() {
         <ErrorPrompt
           reason="SONG_ID_UNDEFINED"
           message={`An error ocurred when trying to play a song.\nERROR : SONG_ID_UNDEFINED`}
-        />
+        />,
       );
       return log(
-        `======= ERROR OCCURRED WHEN TRYING TO PLAY A S0NG. =======\nERROR : Song id is of unknown type; SONGIDTYPE : ${typeof songId}`
+        `======= ERROR OCCURRED WHEN TRYING TO PLAY A S0NG. =======\nERROR : Song id is of unknown type; SONGIDTYPE : ${typeof songId}`,
       );
     },
     [
@@ -973,7 +991,7 @@ export default function App() {
       changePromptMenuData,
       toggleSongPlayback,
       recordListeningData,
-    ]
+    ],
   );
 
   const playSongFromUnknownSource = React.useCallback(
@@ -994,7 +1012,7 @@ export default function App() {
         }
       }
     },
-    [playSong, toggleSongPlayback]
+    [playSong, toggleSongPlayback],
   );
 
   const fetchSongFromUnknownSource = React.useCallback(
@@ -1008,7 +1026,7 @@ export default function App() {
           changePromptMenuData(true, <SongUnplayableErrorPrompt err={err} />);
         });
     },
-    [playSongFromUnknownSource, addNewNotifications, changePromptMenuData]
+    [playSongFromUnknownSource, addNewNotifications, changePromptMenuData],
   );
 
   const changeQueueCurrentSongIndex = React.useCallback(
@@ -1017,7 +1035,7 @@ export default function App() {
       refQueue.current.currentSongIndex = currentSongIndex;
       if (isPlaySong) playSong(refQueue.current.queue[currentSongIndex]);
     },
-    [playSong]
+    [playSong],
   );
 
   const handleSkipBackwardClick = React.useCallback(() => {
@@ -1043,7 +1061,7 @@ export default function App() {
         window.api.audioLibraryControls.updateSongListeningData(
           contentRef.current.currentSongData.songId,
           'listens',
-          'increment'
+          'increment',
         );
       } else if (typeof currentSongIndex === 'number') {
         if (refQueue.current.queue.length > 0) {
@@ -1055,17 +1073,18 @@ export default function App() {
       } else if (refQueue.current.queue.length > 0)
         changeQueueCurrentSongIndex(0);
     },
-    [toggleSongPlayback, changeQueueCurrentSongIndex]
+    [toggleSongPlayback, changeQueueCurrentSongIndex],
   );
 
   React.useEffect(() => {
-    // let url: string | undefined;
+    const { isInDevelopment } = window.api.properties;
+    let artworkPath: string | undefined;
 
-    // if (contentRef.current.currentSongData.artwork) {
-    //   const decoded = atob(contentRef.current.currentSongData.artwork);
-    //   const blob = new Blob([contentRef.current.currentSongData.artwork]);
-    //   url = URL.createObjectURL(blob);
-    // }
+    if (!isInDevelopment && contentRef.current.currentSongData.artwork) {
+      const blob = new Blob([contentRef.current.currentSongData.artwork]);
+      artworkPath = URL.createObjectURL(blob);
+    }
+
     navigator.mediaSession.metadata = new MediaMetadata({
       title: contentRef.current.currentSongData.title,
       artist: Array.isArray(contentRef.current.currentSongData.artists)
@@ -1078,8 +1097,11 @@ export default function App() {
         : 'Unknown Album',
       artwork: [
         {
-          src: `data:;base64,${contentRef.current.currentSongData.artwork}`,
-          // src: url || '',
+          // src: `http://nora.app/local/${contentRef.current.currentSongData.artworkPath}`,
+          // src: `data:;base64,${contentRef.current.currentSongData.artwork}`,
+          src:
+            artworkPath ||
+            `data:;base64,${contentRef.current.currentSongData.artwork}`,
           // src: contentRef.current.currentSongData.artworkPath || '',
           sizes: '1000x1000',
           type: 'image/webp',
@@ -1090,24 +1112,24 @@ export default function App() {
       handleSkipForwardClick('PLAYER_SKIP');
 
     navigator.mediaSession.setActionHandler('pause', () =>
-      toggleSongPlayback(false)
+      toggleSongPlayback(false),
     );
     navigator.mediaSession.setActionHandler('play', () =>
-      toggleSongPlayback(true)
+      toggleSongPlayback(true),
     );
     navigator.mediaSession.setActionHandler(
       'previoustrack',
-      handleSkipBackwardClick
+      handleSkipBackwardClick,
     );
     navigator.mediaSession.setActionHandler(
       `nexttrack`,
-      handleSkipForwardClickWithParams
+      handleSkipForwardClickWithParams,
     );
     navigator.mediaSession.playbackState = content.player.isCurrentSongPlaying
       ? 'playing'
       : 'paused';
     return () => {
-      // if (url) URL.revokeObjectURL(url);
+      if (artworkPath) URL.revokeObjectURL(artworkPath);
       navigator.mediaSession.metadata = null;
       navigator.mediaSession.playbackState = 'none';
       navigator.mediaSession.setActionHandler('play', null);
@@ -1139,25 +1161,25 @@ export default function App() {
       toggleShuffling(true);
       return shuffleQueueRandomly(songIds, currentSongIndex);
     },
-    [toggleShuffling]
+    [toggleShuffling],
   );
 
   const createQueue = React.useCallback(
     (
       newQueue: string[],
       queueType: QueueTypes,
-      isShuffleQueue = false,
+      isShuffleQueue = content.player.isShuffling,
       queueId?: string,
-      startPlaying = false
+      startPlaying = false,
     ) => {
       const queue = {
         currentSongIndex: 0,
-        queue: newQueue.map((songId) => songId),
+        queue: newQueue,
         queueId,
         queueType,
       } as Queue;
 
-      if (isShuffleQueue || content.player.isShuffling) {
+      if (isShuffleQueue) {
         const { shuffledQueue, positions } = shuffleQueue(queue.queue);
         queue.queue = shuffledQueue;
 
@@ -1174,7 +1196,7 @@ export default function App() {
       content.player.isShuffling,
       shuffleQueue,
       toggleShuffling,
-    ]
+    ],
   );
 
   const updateQueueData = React.useCallback(
@@ -1183,7 +1205,7 @@ export default function App() {
       newQueue?: string[],
       isShuffleQueue = false,
       playCurrentSongIndex = true,
-      clearPreviousQueueData = false
+      clearPreviousQueueData = false,
     ) => {
       const queue: Queue = {
         ...refQueue.current,
@@ -1199,7 +1221,7 @@ export default function App() {
           queue.queue,
           queue.currentSongIndex ??
             refQueue.current.currentSongIndex ??
-            undefined
+            undefined,
         );
         queue.queue = shuffledQueue;
         if (positions.length > 0) queue.queueBeforeShuffle = positions;
@@ -1210,7 +1232,7 @@ export default function App() {
       if (playCurrentSongIndex && typeof currentSongIndex === 'number')
         playSong(refQueue.current.queue[currentSongIndex]);
     },
-    [playSong, shuffleQueue]
+    [playSong, shuffleQueue],
   );
 
   const updateCurrentSongPlaybackState = React.useCallback(
@@ -1218,7 +1240,7 @@ export default function App() {
       if (isPlaying !== content.player.isCurrentSongPlaying)
         dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: isPlaying });
     },
-    [content.player.isCurrentSongPlaying]
+    [content.player.isCurrentSongPlaying],
   );
 
   const updateContextMenuData = React.useCallback(
@@ -1227,7 +1249,7 @@ export default function App() {
       menuItems: ContextMenuItem[] = [],
       pageX?: number,
       pageY?: number,
-      contextMenuData?: ContextMenuAdditionalData
+      contextMenuData?: ContextMenuAdditionalData,
     ) => {
       const menuData: ContextMenuData = {
         isVisible,
@@ -1252,7 +1274,7 @@ export default function App() {
       });
       contentRef.current.contextMenuData = menuData;
     },
-    []
+    [],
   );
 
   const updateCurrentlyActivePageData = React.useCallback(
@@ -1261,7 +1283,7 @@ export default function App() {
       const updatedData = callback(
         navigationHistory.history[navigationHistory.pageHistoryIndex].data ?? {
           scrollTopOffset: 0,
-        }
+        },
       );
       contentRef.current.navigationHistory.history[
         contentRef.current.navigationHistory.pageHistoryIndex
@@ -1271,7 +1293,7 @@ export default function App() {
         data: updatedData,
       });
     },
-    []
+    [],
   );
 
   const updatePageHistoryIndex = React.useCallback(
@@ -1318,7 +1340,7 @@ export default function App() {
       }
       return undefined;
     },
-    []
+    [],
   );
 
   const updateMultipleSelections = React.useCallback(
@@ -1336,7 +1358,7 @@ export default function App() {
       } else if (type === 'remove') {
         if (!multipleSelections.includes(id)) return;
         multipleSelections = multipleSelections.filter(
-          (selection) => selection !== id
+          (selection) => selection !== id,
         );
       }
 
@@ -1352,7 +1374,7 @@ export default function App() {
         } as MultipleSelectionData,
       });
     },
-    []
+    [],
   );
 
   const toggleMultipleSelections = React.useCallback(
@@ -1360,7 +1382,7 @@ export default function App() {
       isEnabled?: boolean,
       selectionType?: QueueTypes,
       addSelections?: string[],
-      replaceSelections = false
+      replaceSelections = false,
     ) => {
       if (typeof isEnabled === 'boolean') {
         contentRef.current.multipleSelectionsData.selectionType = selectionType;
@@ -1370,7 +1392,7 @@ export default function App() {
               addSelections;
           } else
             contentRef.current.multipleSelectionsData.multipleSelections.push(
-              ...addSelections
+              ...addSelections,
             );
         if (isEnabled === false) {
           contentRef.current.multipleSelectionsData.multipleSelections = [];
@@ -1385,7 +1407,7 @@ export default function App() {
         });
       }
     },
-    []
+    [],
   );
 
   const changeCurrentActivePage = React.useCallback(
@@ -1401,19 +1423,23 @@ export default function App() {
         (currentPageData && data && isDataChanged(currentPageData, data))
       ) {
         if (onPageChange) onPageChange(pageClass, data);
+
         const pageData = {
           pageTitle: pageClass,
           data,
         };
+
         navigationHistory.history = navigationHistory.history.slice(
           0,
-          navigationHistory.pageHistoryIndex + 1
+          navigationHistory.pageHistoryIndex + 1,
         );
         navigationHistory.history.push(pageData);
         navigationHistory.pageHistoryIndex += 1;
         contentRef.current.navigationHistory = navigationHistory;
         contentRef.current.bodyBackgroundImage = undefined;
         toggleMultipleSelections(false);
+        log(`User navigated to '${pageClass}'`);
+
         dispatch({
           type: 'UPDATE_NAVIGATION_HISTORY',
           data: navigationHistory,
@@ -1427,7 +1453,7 @@ export default function App() {
           },
         ]);
     },
-    [addNewNotifications, toggleMultipleSelections]
+    [addNewNotifications, toggleMultipleSelections],
   );
 
   const updateMiniPlayerStatus = React.useCallback(
@@ -1437,7 +1463,7 @@ export default function App() {
         contentRef.current.player.isMiniPlayer = isVisible;
       }
     },
-    [content.player.isMiniPlayer]
+    [content.player.isMiniPlayer],
   );
 
   const toggleIsFavorite = React.useCallback(
@@ -1446,7 +1472,7 @@ export default function App() {
         contentRef.current.currentSongData.songId,
         contentRef.current.currentSongData.isAFavorite,
         isFavorite,
-        onlyChangeCurrentSongData
+        onlyChangeCurrentSongData,
       )
         .then((newFavorite) => {
           if (typeof newFavorite === 'boolean') {
@@ -1460,7 +1486,7 @@ export default function App() {
         })
         .catch((err) => console.error(err));
     },
-    []
+    [],
   );
 
   const updateVolume = React.useCallback((volume: number) => {
@@ -1493,7 +1519,7 @@ export default function App() {
           !contentRef.current.player.volume.isMuted;
       }
     },
-    [content.player.volume.isMuted]
+    [content.player.volume.isMuted],
   );
 
   const manageKeyboardShortcuts = React.useCallback(
@@ -1638,7 +1664,7 @@ export default function App() {
       updatePageHistoryIndex,
       changeCurrentActivePage,
       addNewNotifications,
-    ]
+    ],
   );
 
   React.useEffect(() => {
@@ -1652,7 +1678,7 @@ export default function App() {
 
   const updateUserData = React.useCallback(
     async (
-      callback: (prevState: UserData) => UserData | Promise<UserData> | void
+      callback: (prevState: UserData) => UserData | Promise<UserData> | void,
     ) => {
       try {
         const updatedUserData = await callback(contentRef.current.userData);
@@ -1664,8 +1690,39 @@ export default function App() {
         console.error(error);
       }
     },
-    []
+    [],
   );
+
+  const fetchUserData = React.useCallback(
+    () =>
+      window.api.userData
+        .getUserData()
+        .then((res) => updateUserData(() => res))
+        .catch((err) => console.error(err)),
+    [updateUserData],
+  );
+
+  React.useEffect(() => {
+    fetchUserData();
+    const manageUserDataUpdates = (e: Event) => {
+      if ('detail' in e) {
+        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>)
+          .detail;
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (
+            event.dataType.includes('userData') ||
+            event.dataType === 'settings/preferences'
+          )
+            fetchUserData();
+        }
+      }
+    };
+    document.addEventListener('app/dataUpdates', manageUserDataUpdates);
+    return () => {
+      document.removeEventListener('app/dataUpdates', manageUserDataUpdates);
+    };
+  }, [fetchUserData]);
 
   const onSongDrop = React.useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
@@ -1673,7 +1730,7 @@ export default function App() {
       if (e.dataTransfer.files.length > 0) {
         const isASupportedAudioFormat =
           packageFile.appPreferences.supportedMusicExtensions.some((type) =>
-            e.dataTransfer.files[0].path.endsWith(type)
+            e.dataTransfer.files[0].path.endsWith(type),
           );
 
         if (isASupportedAudioFormat)
@@ -1685,12 +1742,12 @@ export default function App() {
               filePath={
                 e.dataTransfer.files[0].path || e.dataTransfer.files[0].name
               }
-            />
+            />,
           );
       }
       if (AppRef.current) AppRef.current.classList.remove('song-drop');
     },
-    [changePromptMenuData, fetchSongFromUnknownSource]
+    [changePromptMenuData, fetchSongFromUnknownSource],
   );
 
   const updateCurrentSongData = React.useCallback(
@@ -1701,7 +1758,7 @@ export default function App() {
         dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: updatedData });
       }
     },
-    []
+    [],
   );
 
   const clearAudioPlayerData = React.useCallback(() => {
@@ -1711,7 +1768,7 @@ export default function App() {
     player.pause();
 
     const updatedQueue = refQueue.current.queue.filter(
-      (songId) => songId !== content.currentSongData.songId
+      (songId) => songId !== content.currentSongData.songId,
     );
     updateQueueData(null, updatedQueue);
 
@@ -1736,7 +1793,7 @@ export default function App() {
     (isVisible: boolean, src?: string) => {
       let image: string | undefined;
       const disableBackgroundArtworks = storage.preferences.getPreferences(
-        'disableBackgroundArtworks'
+        'disableBackgroundArtworks',
       );
 
       if (!disableBackgroundArtworks && isVisible && src) image = src;
@@ -1747,7 +1804,7 @@ export default function App() {
         data: image,
       });
     },
-    []
+    [],
   );
 
   const updateEqualizerOptions = React.useCallback((options: Equalizer) => {
@@ -1806,7 +1863,7 @@ export default function App() {
       content.player.volume.isMuted,
       content.player.volume.value,
       content.userData,
-    ]
+    ],
   );
 
   const appUpdateContextValues: AppUpdateContextType = React.useMemo(
@@ -1873,14 +1930,14 @@ export default function App() {
       updateSongPosition,
       updateUserData,
       updateVolume,
-    ]
+    ],
   );
 
   const songPositionContextValues = React.useMemo(
     () => ({
       songPosition: content.player.songPosition,
     }),
-    [content.player.songPosition]
+    [content.player.songPosition],
   );
 
   const isReducedMotion =

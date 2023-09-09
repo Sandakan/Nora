@@ -51,7 +51,7 @@ const PromptMenu = () => {
       promptMenuRef.current.addEventListener('click', manageDialogClose);
       promptMenuRef.current.addEventListener(
         'animationend',
-        manageDialogAnimationEnd
+        manageDialogAnimationEnd,
       );
     }
     return () => {

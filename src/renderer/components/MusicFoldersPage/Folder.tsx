@@ -81,7 +81,7 @@ const Folder = (props: FolderProps) => {
     if (multipleSelectionsData.multipleSelections.length <= 0) return false;
     if (
       multipleSelectionsData.multipleSelections.some(
-        (selectionId) => selectionId === folderPath
+        (selectionId) => selectionId === folderPath,
       )
     )
       return true;
@@ -112,7 +112,7 @@ const Folder = (props: FolderProps) => {
             updateMultipleSelections(
               folderPath,
               'folder',
-              isAMultipleSelection ? 'remove' : 'add'
+              isAMultipleSelection ? 'remove' : 'add',
             );
           } else
             toggleMultipleSelections(!isAMultipleSelection, 'folder', [
@@ -170,7 +170,7 @@ const Folder = (props: FolderProps) => {
               <BlacklistFolderConfrimPrompt
                 folderName={folderName}
                 folderPaths={[folderPath]}
-              />
+              />,
             );
 
           toggleMultipleSelections(false, 'folder');
@@ -187,7 +187,7 @@ const Folder = (props: FolderProps) => {
               folderName={folderName || folderPath}
               absolutePath={folderPath}
             />,
-            'delete-folder-confirmation-prompt'
+            'delete-folder-confirmation-prompt',
           ),
         isDisabled: isMultipleSelectionEnabled,
       },
@@ -228,7 +228,7 @@ const Folder = (props: FolderProps) => {
       multipleSelectionsData.multipleSelections.length,
       multipleSelectionsData.selectionType,
       songIds.length,
-    ]
+    ],
   );
 
   return (
@@ -250,13 +250,20 @@ const Folder = (props: FolderProps) => {
           if (e.getModifierState('Shift') === true && selectAllHandler)
             selectAllHandler(folderPath);
           else if (
+            e.getModifierState('Control') === true &&
+            !isMultipleSelectionEnabled
+          )
+            toggleMultipleSelections(!isAMultipleSelection, 'folder', [
+              folderPath,
+            ]);
+          else if (
             isMultipleSelectionEnabled &&
             multipleSelectionsData.selectionType === 'folder'
           )
             updateMultipleSelections(
               folderPath,
               'folder',
-              isAMultipleSelection ? 'remove' : 'add'
+              isAMultipleSelection ? 'remove' : 'add',
             );
           else openMusicFolderInfoPage();
         }}
@@ -269,7 +276,7 @@ const Folder = (props: FolderProps) => {
             contextMenuItems,
             e.pageX,
             e.pageY,
-            contextMenuItemData
+            contextMenuItemData,
           )
         }
       >

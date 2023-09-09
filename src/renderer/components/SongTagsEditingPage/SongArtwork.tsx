@@ -16,7 +16,7 @@ const SongArtwork = (props: Props) => {
         src={
           artworkPath
             ? /(^$|(http(s)?:\/\/)([\w-]+\.)+[\w-]+([\w- ;,./?%&=]*))/gm.test(
-                artworkPath
+                artworkPath,
               )
               ? artworkPath
               : `nora://localFiles/${artworkPath}`
@@ -44,7 +44,7 @@ const SongArtwork = (props: Props) => {
                   album: prevData.album
                     ? { ...prevData.album, artworkPath: res }
                     : undefined,
-                }))
+                })),
               )
               .catch((err) => console.error(err))
           }

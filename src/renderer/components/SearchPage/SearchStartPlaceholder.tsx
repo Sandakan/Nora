@@ -21,7 +21,7 @@ const SearchStartPlaceholder = (props: Props) => {
   const { searchResults, searchInput, updateSearchInput } = props;
 
   const [recentSearchResults, setRecentSearchResults] = React.useState(
-    [] as string[]
+    [] as string[],
   );
 
   const fetchRecentSearchResults = React.useCallback(() => {
@@ -50,12 +50,12 @@ const SearchStartPlaceholder = (props: Props) => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageSearchResultsUpdatesInSearchPage
+      manageSearchResultsUpdatesInSearchPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageSearchResultsUpdatesInSearchPage
+        manageSearchResultsUpdatesInSearchPage,
       );
     };
   }, [fetchRecentSearchResults]);
@@ -79,7 +79,7 @@ const SearchStartPlaceholder = (props: Props) => {
             />
           ))
         : [],
-    [recentSearchResults, updateCurrentlyActivePageData, updateSearchInput]
+    [recentSearchResults, updateCurrentlyActivePageData, updateSearchInput],
   );
 
   return (

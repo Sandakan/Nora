@@ -9,6 +9,8 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
 import parseLyrics from 'renderer/utils/parseLyrics';
 
+type CurrentLyricsTYpe = 'synced' | 'unsynced';
+
 type Props = {
   songTitle: string;
   songId: string;
@@ -20,13 +22,30 @@ type Props = {
   }[];
   songPath: string;
   duration: number;
-  songLyrics?: string;
+  synchronizedLyrics?: string;
+  unsynchronizedLyrics?: string;
+  isLyricsSavingPending?: boolean;
   // eslint-disable-next-line no-unused-vars
   updateSongInfo: (callback: (prevSongInfo: SongTags) => SongTags) => void;
 };
 
 export const extendedSyncedLyricsLineRegex =
   /(?<extSyncTimeStamp><\d+:\d{1,2}\.\d{1,3}>) ?(?=(?<lyric>[^<>\n]+))/gm;
+
+const isLyricsSynchronized = (lyrics: string) => {
+  const isSynced = syncedLyricsRegex.test(lyrics);
+  syncedLyricsRegex.lastIndex = 0;
+
+  return isSynced;
+};
+
+export const isLyricsEnhancedSynced = (syncedLyricsString: string) => {
+  const isEnhancedSynced =
+    extendedSyncedLyricsLineRegex.test(syncedLyricsString);
+  extendedSyncedLyricsLineRegex.lastIndex = 0;
+
+  return isEnhancedSynced;
+};
 
 const SongLyricsEditorInput = (props: Props) => {
   const { userData } = React.useContext(AppContext);
@@ -39,29 +58,51 @@ const SongLyricsEditorInput = (props: Props) => {
     songTitle,
     songId,
     songArtists,
-    songLyrics,
+    synchronizedLyrics,
+    unsynchronizedLyrics,
+    isLyricsSavingPending = false,
     updateSongInfo,
     duration,
     songPath,
   } = props;
 
-  const isLyricsSynced = React.useMemo(
-    () => syncedLyricsRegex.test(songLyrics || ''),
-    [songLyrics]
-  );
+  const [currentLyricsType, setCurrentLyricsType] =
+    React.useState<CurrentLyricsTYpe>(
+      synchronizedLyrics ? 'synced' : 'unsynced',
+    );
 
-  const isLyricsEnhancedSynced = React.useMemo(() => {
-    const res = !!songLyrics && extendedSyncedLyricsLineRegex.test(songLyrics);
-    extendedSyncedLyricsLineRegex.lastIndex = 0;
+  const {
+    isSynchronizedLyricsSynced,
+    isUnsynchronizedLyricsSynced,
+    isSynchronizedLyricsEnhancedSynced,
+  } = React.useMemo(() => {
+    let isSyncedLyricsSynced = false;
+    let isSyncedLyricsEnhancedSynced = false;
+    let isUnsyncedLyricsSynced = false;
 
-    return res;
-  }, [songLyrics]);
+    if (synchronizedLyrics) {
+      isSyncedLyricsSynced = isLyricsSynchronized(synchronizedLyrics);
+      isSyncedLyricsEnhancedSynced = isLyricsEnhancedSynced(synchronizedLyrics);
+    }
+    if (unsynchronizedLyrics)
+      isUnsyncedLyricsSynced = isLyricsSynchronized(unsynchronizedLyrics);
+
+    return {
+      isSynchronizedLyricsSynced: isSyncedLyricsSynced,
+      isSynchronizedLyricsEnhancedSynced: isSyncedLyricsEnhancedSynced,
+      isUnsynchronizedLyricsSynced: isUnsyncedLyricsSynced,
+    };
+  }, [synchronizedLyrics, unsynchronizedLyrics]);
+
+  // React.useEffect(() => {
+  //   setCurrentLyricsType(synchronizedLyrics ? 'synced' : 'unsynced');
+  // }, [synchronizedLyrics]);
 
   const downloadLyrics = React.useCallback(
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
-      setIsPending: (state: boolean) => void
+      setIsPending: (state: boolean) => void,
     ) => {
       setIsDisabled(true);
       setIsPending(true);
@@ -74,13 +115,13 @@ const SongLyricsEditorInput = (props: Props) => {
             songPath,
           },
           'UN_SYNCED',
-          'ONLINE_ONLY'
+          'ONLINE_ONLY',
         )
         .then((res) => {
           if (res) {
             updateSongInfo((prevData) => ({
               ...prevData,
-              lyrics: res.lyrics.unparsedLyrics,
+              unsynchronizedLyrics: res.lyrics.unparsedLyrics,
             }));
           }
           return undefined;
@@ -108,14 +149,14 @@ const SongLyricsEditorInput = (props: Props) => {
       songPath,
       songTitle,
       updateSongInfo,
-    ]
+    ],
   );
 
   const downloadSyncedLyrics = React.useCallback(
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
-      setIsPending: (state: boolean) => void
+      setIsPending: (state: boolean) => void,
     ) => {
       setIsDisabled(true);
       setIsPending(true);
@@ -128,13 +169,13 @@ const SongLyricsEditorInput = (props: Props) => {
             songPath,
           },
           'SYNCED',
-          'ONLINE_ONLY'
+          'ONLINE_ONLY',
         )
         .then((res) => {
           if (res) {
             updateSongInfo((prevData) => ({
               ...prevData,
-              lyrics: res.lyrics.unparsedLyrics,
+              synchronizedLyrics: res.lyrics.unparsedLyrics,
             }));
             setIsDisabled(false);
             return setIsPending(false);
@@ -165,14 +206,22 @@ const SongLyricsEditorInput = (props: Props) => {
       songPath,
       songTitle,
       updateSongInfo,
-    ]
+    ],
   );
 
   const goToLyricsEditor = React.useCallback(() => {
-    if (songLyrics && !isLyricsEnhancedSynced) {
+    if (
+      (synchronizedLyrics || unsynchronizedLyrics) &&
+      !isSynchronizedLyricsEnhancedSynced
+    ) {
+      const lyrics =
+        currentLyricsType === 'synced'
+          ? synchronizedLyrics
+          : unsynchronizedLyrics;
       let lines: EditingLyricsLineData[] = [];
-      const { isSynced, syncedLyrics, unsyncedLyrics } =
-        parseLyrics(songLyrics);
+      const { isSynced, syncedLyrics, unsyncedLyrics } = parseLyrics(
+        lyrics as string,
+      );
 
       if (isSynced) lines = syncedLyrics;
       else {
@@ -187,56 +236,123 @@ const SongLyricsEditorInput = (props: Props) => {
     }
   }, [
     changeCurrentActivePage,
-    isLyricsEnhancedSynced,
+    currentLyricsType,
+    isSynchronizedLyricsEnhancedSynced,
     songId,
-    songLyrics,
     songTitle,
+    synchronizedLyrics,
+    unsynchronizedLyrics,
   ]);
 
   return (
     <div className="song-lyrics-editor-container col-span-2 grid w-[95%] grid-cols-[minmax(50%,65%)_1fr] gap-8">
       <div className="tag-input mb-6 flex h-full min-w-[10rem] flex-col">
-        <label htmlFor="song-lyrics-id3-tag">Lyrics</label>
+        {/* <label htmlFor="song-lyrics-id3-tag">Lyrics</label> */}
+        <div className="flex items-center">
+          <Button
+            className={`mr-3 flex w-fit cursor-pointer list-none items-center !border-0 px-4 py-1 text-font-color-black outline-1 outline-offset-1 transition-[background,color] duration-200 focus-visible:!outline ${
+              currentLyricsType === 'synced'
+                ? 'bg-background-color-3 dark:bg-dark-background-color-3 dark:!text-font-color-black'
+                : 'bg-background-color-2 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:hover:!text-font-color-black'
+            }`}
+            clickHandler={() => setCurrentLyricsType('synced')}
+            label="Synced Lyrics"
+            iconName="timer"
+            iconClassName="material-icons-round-outlined"
+          />
+          <Button
+            className={`mr-3 flex w-fit cursor-pointer list-none items-center !border-0 px-4 py-1 text-font-color-black outline-1 outline-offset-1 transition-[background,color] duration-200 focus-visible:!outline ${
+              currentLyricsType === 'unsynced'
+                ? 'bg-background-color-3 dark:bg-dark-background-color-3 dark:!text-font-color-black'
+                : 'bg-background-color-2 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:hover:!text-font-color-black'
+            }`}
+            clickHandler={() => setCurrentLyricsType('unsynced')}
+            label="Unsynced Lyrics"
+            iconName="timer_off"
+            iconClassName="material-icons-round-outlined"
+          />
+        </div>
+
         <textarea
           id="song-lyrics-id3-tag"
           className="mt-4 max-h-80 min-h-[12rem] rounded-2xl border-[0.15rem] border-background-color-2 bg-background-color-2 p-4 transition-colors focus:border-font-color-highlight dark:border-dark-background-color-2 dark:bg-dark-background-color-2 dark:focus:border-dark-font-color-highlight"
           name="lyrics"
           placeholder="Lyrics"
-          value={songLyrics ?? ''}
+          value={
+            currentLyricsType === 'synced'
+              ? synchronizedLyrics ?? ''
+              : unsynchronizedLyrics ?? ''
+          }
           onKeyDown={(e) => e.stopPropagation()}
           onChange={(e) => {
             const lyrics = e.currentTarget.value;
-            updateSongInfo((prevData) => ({
-              ...prevData,
-              lyrics,
-            }));
+            updateSongInfo((prevData): SongTags => {
+              if (currentLyricsType === 'synced')
+                return {
+                  ...prevData,
+                  synchronizedLyrics: lyrics,
+                };
+              return {
+                ...prevData,
+                unsynchronizedLyrics: lyrics,
+              };
+            });
           }}
         />
-        <div className="ml-2 mt-1 flex items-center">
-          <span
-            className={`material-icons-round-outlined mr-2 cursor-pointer !text-lg ${
-              isLyricsSynced &&
-              'text-font-color-highlight-2 dark:text-dark-font-color-highlight-2'
-            }`}
-            title={
-              songLyrics
-                ? isLyricsSynced
-                  ? 'Lyrics are synced.'
-                  : 'Lyrics are not synced.'
-                : undefined
-            }
-          >
-            verified
-          </span>
-          <span className="text-sm font-extralight">
-            Enhanced Synced lyrics supported.{' '}
-            <Hyperlink
-              link="https://wikipedia.org/wiki/LRC_(file_format)"
-              linkTitle="Read more about LRC format"
-              label="Read more about LRC format."
-            />
-          </span>
-        </div>
+        {currentLyricsType === 'synced' && (
+          <div className="ml-2 mt-1 flex items-center">
+            <span
+              className={`material-icons-round-outlined mr-2 cursor-pointer !text-lg ${
+                isSynchronizedLyricsEnhancedSynced &&
+                'text-font-color-highlight-2 dark:text-dark-font-color-highlight-2'
+              }`}
+              title={
+                synchronizedLyrics
+                  ? isSynchronizedLyricsEnhancedSynced
+                    ? 'Lyrics are enhanced synced.'
+                    : 'Lyrics are not enhanced synced.'
+                  : undefined
+              }
+            >
+              verified
+            </span>
+            <span className="text-sm font-extralight">
+              Enhanced Synced lyrics supported.{' '}
+              <Hyperlink
+                link="https://wikipedia.org/wiki/LRC_(file_format)"
+                linkTitle="Read more about LRC format"
+                label="Read more about LRC format."
+              />
+            </span>
+          </div>
+        )}
+
+        {synchronizedLyrics && !isSynchronizedLyricsSynced && (
+          <p className="ml-2 mt-2 text-sm font-medium flex items-center text-font-color-highlight dark:text-dark-font-color-highlight">
+            <span className="material-icons-round-outlined text-xl mr-2">
+              error
+            </span>{' '}
+            Avoid entering Unsynchronized Lyrics in the Synchronized Lyrics Tab.
+          </p>
+        )}
+        {unsynchronizedLyrics && isUnsynchronizedLyricsSynced && (
+          <p className="ml-2 mt-2 text-sm font-medium flex text-font-color-highlight dark:text-dark-font-color-highlight">
+            <span className="material-icons-round-outlined text-xl mr-2">
+              error
+            </span>{' '}
+            Avoid entering Synchronized Lyrics in the Unsynchronized Lyrics Tab.
+          </p>
+        )}
+
+        {isLyricsSavingPending && (
+          <p className="ml-2 mt-2 text-sm font-medium flex items-center text-font-color-highlight dark:text-dark-font-color-highlight">
+            <span className="material-icons-round-outlined text-xl mr-2">
+              error
+            </span>{' '}
+            There are pending lyrics to be saved to this song. They will be
+            saved and will be visible here after the current song is finished.
+          </p>
+        )}
       </div>
       <div className="song-lyrics-buttons mt-12 flex flex-col items-end">
         <Button
@@ -250,17 +366,19 @@ const SongLyricsEditorInput = (props: Props) => {
             isOnline ? undefined : 'You are not connected to the internet.'
           }
           isDisabled={!isOnline}
+          isVisible={currentLyricsType === 'unsynced'}
         />
         <Button
           key={1}
           label="Download Synced Lyrics"
           iconName="download"
-          className="download-synced-lyrics-btn mt-4"
+          className="download-synced-lyrics-btn"
           iconClassName="mr-2"
           clickHandler={downloadSyncedLyrics}
           isDisabled={
             !(isOnline && userData?.preferences.isMusixmatchLyricsEnabled)
           }
+          isVisible={currentLyricsType === 'synced'}
           tooltipLabel={
             isOnline
               ? userData?.preferences.isMusixmatchLyricsEnabled
@@ -277,13 +395,19 @@ const SongLyricsEditorInput = (props: Props) => {
           className="edit-lyrics-btn mt-4"
           clickHandler={goToLyricsEditor}
           tooltipLabel={
-            songLyrics
-              ? isLyricsEnhancedSynced
+            synchronizedLyrics
+              ? isSynchronizedLyricsEnhancedSynced
                 ? 'Enhanced Synced lyrics are not supported.'
                 : 'Edit available lyrics in the Lyrics Editor.'
               : 'No lyrics found'
           }
-          isDisabled={songLyrics ? isLyricsEnhancedSynced : true}
+          isDisabled={
+            currentLyricsType === 'synced'
+              ? synchronizedLyrics
+                ? isSynchronizedLyricsEnhancedSynced
+                : true
+              : !unsynchronizedLyrics
+          }
         />
       </div>
     </div>

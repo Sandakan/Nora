@@ -7,7 +7,7 @@ const sortAtoZ = <T extends (Playlist | SavablePlaylist)[]>(arr: T) =>
       : a.name.toLowerCase().replace(/\W/gi, '') <
         b.name.toLowerCase().replace(/\W/gi, '')
       ? -1
-      : 0
+      : 0,
   );
 const sortZtoA = <T extends (Playlist | SavablePlaylist)[]>(arr: T) =>
   arr.sort((a, b) =>
@@ -17,12 +17,12 @@ const sortZtoA = <T extends (Playlist | SavablePlaylist)[]>(arr: T) =>
       : a.name.toLowerCase().replace(/\W/gi, '') >
         b.name.toLowerCase().replace(/\W/gi, '')
       ? -1
-      : 0
+      : 0,
   );
 
 export default <T extends (Playlist | SavablePlaylist)[]>(
   data: T,
-  sortType: PlaylistSortTypes
+  sortType: PlaylistSortTypes,
 ) => {
   if (data.length > 0) {
     if (sortType === 'aToZ') return sortAtoZ(data);
@@ -33,7 +33,7 @@ export default <T extends (Playlist | SavablePlaylist)[]>(
           ? 1
           : a.songs.length > b.songs.length
           ? -1
-          : 0
+          : 0,
       );
     if (sortType === 'noOfSongsAscending')
       return sortAtoZ(data).sort((a, b) =>
@@ -41,7 +41,7 @@ export default <T extends (Playlist | SavablePlaylist)[]>(
           ? 1
           : a.songs.length < b.songs.length
           ? -1
-          : 0
+          : 0,
       );
   }
   return data;

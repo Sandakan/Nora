@@ -1,38 +1,32 @@
 /* eslint-disable no-await-in-loop */
-import * as musicMetaData from 'music-metadata';
 import path from 'path';
+import { app } from 'electron';
+import * as musicMetaData from 'music-metadata';
 
 import { isSongBlacklisted } from '../utils/isBlacklisted';
 import { DEFAULT_FILE_URL, getArtistsData, getSongsData } from '../filesystem';
 import { getSongArtworkPath } from '../fs/resolveFilePaths';
 import log from '../log';
-// import { getDefaultSongCoverImgBuffer } from '../parseSong/generateCoverBuffer';
 import getArtistInfoFromNet from './getArtistInfoFromNet';
 import addToSongsHistory from './addToSongsHistory';
 import updateSongListeningData from './updateSongListeningData';
+import { setCurrentSongPath } from '../main';
 
-// let tempArtworkLink: string | undefined;
+const IS_DEVELOPMENT =
+  !app.isPackaged || process.env.NODE_ENV === 'development';
 
-// const getArtworkLink = async (artwork?: Buffer) => {
-//   const imgData = artwork || (await getDefaultSongCoverImgBuffer());
+const getArtworkData = (artworkData?: Buffer) => {
+  if (artworkData === undefined) return undefined;
 
-//   if (imgData) {
-//     if (tempArtworkLink) URL.revokeObjectURL(tempArtworkLink);
-
-//     const blob = new Blob([imgData]);
-//     const link = URL.createObjectURL(blob);
-//     tempArtworkLink = link;
-
-//     return tempArtworkLink;
-//   }
-//   return undefined;
-// };
+  if (IS_DEVELOPMENT) return Buffer.from(artworkData).toString('base64');
+  return artworkData;
+};
 
 const getRelevantArtistData = (
   songArtists?: {
     artistId: string;
     name: string;
-  }[]
+  }[],
 ) => {
   const artists = getArtistsData();
   const relevantArtists: {
@@ -66,7 +60,7 @@ const getRelevantArtistData = (
 };
 
 export const sendAudioData = async (
-  audioId: string
+  audioId: string,
 ): Promise<AudioPlayerData> => {
   log(`Fetching song data for song id -${audioId}-`);
   try {
@@ -81,8 +75,8 @@ export const sendAudioData = async (
           if (metadata) {
             const artworkData = metadata.common.picture
               ? metadata.common.picture[0].data
-              : '';
-            // : undefined;
+              : undefined;
+
             addToSongsHistory(song.songId);
             const songArtists = getRelevantArtistData(song.artists);
 
@@ -91,10 +85,10 @@ export const sendAudioData = async (
               artists: songArtists.length > 0 ? songArtists : song.artists,
               duration: song.duration,
               // artwork: await getArtworkLink(artworkData),
-              artwork: Buffer.from(artworkData).toString('base64') || undefined,
+              artwork: getArtworkData(artworkData),
               artworkPath: getSongArtworkPath(
                 song.songId,
-                song.isArtworkAvailable
+                song.isArtworkAvailable,
               ).artworkPath,
               path: path.join(DEFAULT_FILE_URL, song.path),
               songId: song.songId,
@@ -106,16 +100,17 @@ export const sendAudioData = async (
             };
 
             updateSongListeningData(song.songId, 'listens', 'increment');
+            setCurrentSongPath(song.path);
             return data;
             // return log(`total : ${console.timeEnd('total')}`);
           }
           log(
             `ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA`,
             undefined,
-            'ERROR'
+            'ERROR',
           );
           throw new Error(
-            'ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA'
+            'ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA',
           );
         }
       }
@@ -125,7 +120,7 @@ export const sendAudioData = async (
     log(
       `ERROR OCCURRED WHEN READING data.json TO GET SONGS DATA. data.json FILE DOESN'T EXIST OR SONGS ARRAY IS EMPTY.`,
       undefined,
-      'ERROR'
+      'ERROR',
     );
     throw new Error('EMPTY_SONG_ARRAY' as ErrorCodes);
   } catch (err) {

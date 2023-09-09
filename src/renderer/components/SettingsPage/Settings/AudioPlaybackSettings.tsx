@@ -25,7 +25,7 @@ const AudioPlaybackSettings = () => {
 
   React.useEffect(() => {
     const interval = storage.preferences.getPreferences(
-      'seekbarScrollInterval'
+      'seekbarScrollInterval',
     );
     const playbackRate = storage.playback.getPlaybackOptions('playbackRate');
 
@@ -125,7 +125,7 @@ const AudioPlaybackSettings = () => {
               setSeekbarScrollInterval(val);
               storage.preferences.setPreferences(
                 'seekbarScrollInterval',
-                parseFloat(val)
+                parseFloat(val),
               );
             }}
           />

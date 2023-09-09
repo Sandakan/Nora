@@ -5,46 +5,54 @@ const skipBackLightIcon = nativeImage.createFromPath(
   getAssetPath(
     'images',
     'taskbar buttons',
-    'baseline_skip_previous_white_24dp.png'
-  )
+    'baseline_skip_previous_white_24dp.png',
+  ),
 );
 const playLightIcon = nativeImage.createFromPath(
   getAssetPath(
     'images',
     'taskbar buttons',
-    'baseline_play_arrow_white_24dp.png'
-  )
+    'baseline_play_arrow_white_24dp.png',
+  ),
 );
 const pauseLightIcon = nativeImage.createFromPath(
-  getAssetPath('images', 'taskbar buttons', 'outline_pause_white_24dp.png')
+  getAssetPath('images', 'taskbar buttons', 'outline_pause_white_24dp.png'),
 );
 const skipForwardLightIcon = nativeImage.createFromPath(
-  getAssetPath('images', 'taskbar buttons', 'baseline_skip_next_white_24dp.png')
+  getAssetPath(
+    'images',
+    'taskbar buttons',
+    'baseline_skip_next_white_24dp.png',
+  ),
 );
 const skipBackDarkIcon = nativeImage.createFromPath(
   getAssetPath(
     'images',
     'taskbar buttons',
-    'baseline_skip_previous_black_24dp.png'
-  )
+    'baseline_skip_previous_black_24dp.png',
+  ),
 );
 const playDarkIcon = nativeImage.createFromPath(
   getAssetPath(
     'images',
     'taskbar buttons',
-    'baseline_play_arrow_black_24dp.png'
-  )
+    'baseline_play_arrow_black_24dp.png',
+  ),
 );
 const pauseDarkIcon = nativeImage.createFromPath(
-  getAssetPath('images', 'taskbar buttons', 'outline_pause_black_24dp.png')
+  getAssetPath('images', 'taskbar buttons', 'outline_pause_black_24dp.png'),
 );
 const skipForwardDarkIcon = nativeImage.createFromPath(
-  getAssetPath('images', 'taskbar buttons', 'baseline_skip_next_black_24dp.png')
+  getAssetPath(
+    'images',
+    'taskbar buttons',
+    'baseline_skip_next_black_24dp.png',
+  ),
 );
 const manageTaskbarPlaybackButtonControls = (
   mainWindow: BrowserWindow,
   isPlaybackSupported = true,
-  isPlaying: boolean
+  isPlaying: boolean,
 ) => {
   if (mainWindow) {
     const isDarkMode = nativeTheme.shouldUseDarkColors;

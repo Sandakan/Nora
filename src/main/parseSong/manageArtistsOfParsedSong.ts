@@ -6,43 +6,66 @@ const manageArtistsOfParsedSong = (
   allArtists: SavableArtist[],
   songInfo: SavableSongData,
   songArtworkPaths?: ArtworkPaths,
-  relevantAlbums = [] as SavableAlbum[]
+  relevantAlbums = [] as SavableAlbum[],
 ) => {
-  let updatedArtists = allArtists;
+  // let updatedArtists = allArtists;
   const newArtists: SavableArtist[] = [];
   const relevantArtists: SavableArtist[] = [];
   const { title, songId, artists: songArtists } = songInfo;
 
-  if (Array.isArray(updatedArtists)) {
+  if (Array.isArray(allArtists)) {
     if (songArtists && songArtists.length > 0) {
-      for (let x = 0; x < songArtists.length; x += 1) {
-        const newArtist = songArtists[x];
+      for (const newArtist of songArtists) {
+        const newArtistName = newArtist.name.trim();
 
         const isArtistAvailable = allArtists.some(
-          (artist) => artist.name === newArtist.name
+          (artist) => artist.name === newArtistName,
         );
-        if (isArtistAvailable) {
-          let z = updatedArtists.filter((val) => val.name === newArtist.name);
-          z = z.map((artist) => {
-            artist.songs.push({ title, songId });
 
-            if (relevantAlbums.length > 0) {
-              relevantAlbums.forEach((relevantAlbum) =>
-                artist.albums?.push({
-                  title: relevantAlbum.title,
-                  albumId: relevantAlbum.albumId,
-                })
-              );
+        if (isArtistAvailable) {
+          for (const availableArtist of allArtists) {
+            if (availableArtist.name === newArtistName) {
+              availableArtist.songs.push({ title, songId });
+
+              if (relevantAlbums.length > 0) {
+                relevantAlbums.forEach((relevantAlbum) => {
+                  const isAlbumLinkedToArtist = availableArtist.albums?.some(
+                    (album) => album.albumId === relevantAlbum.albumId,
+                  );
+
+                  if (!isAlbumLinkedToArtist)
+                    availableArtist.albums?.push({
+                      title: relevantAlbum.title,
+                      albumId: relevantAlbum.albumId,
+                    });
+                });
+              }
+              relevantArtists.push(availableArtist);
             }
-            relevantArtists.push(artist);
-            return artist;
-          });
-          updatedArtists = updatedArtists
-            .filter((val) => val.name !== newArtist.name)
-            .concat(z);
+          }
+
+          // let z = updatedArtists.filter((val) => val.name === newArtistName);
+          // z = z.map((artist) => {
+          //   artist.songs.push({ title, songId });
+
+          //   if (relevantAlbums.length > 0) {
+          //     relevantAlbums.forEach(
+          //       (relevantAlbum) =>
+          //         artist.albums?.push({
+          //           title: relevantAlbum.title,
+          //           albumId: relevantAlbum.albumId,
+          //         }),
+          //     );
+          //   }
+          //   relevantArtists.push(artist);
+          //   return artist;
+          // });
+          // updatedArtists = updatedArtists
+          //   .filter((val) => val.name !== newArtistName)
+          //   .concat(z);
         } else {
           const artist: SavableArtist = {
-            name: newArtist.name,
+            name: newArtistName,
             artistId: generateRandomId(),
             songs: [{ songId, title }],
             artworkName:
@@ -61,12 +84,12 @@ const manageArtistsOfParsedSong = (
             isAFavorite: false,
           };
           relevantArtists.push(artist);
-          updatedArtists.push(artist);
+          allArtists.push(artist);
         }
       }
-      return { updatedArtists, newArtists, relevantArtists };
+      return { updatedArtists: allArtists, newArtists, relevantArtists };
     }
-    return { updatedArtists, newArtists, relevantArtists };
+    return { updatedArtists: allArtists, newArtists, relevantArtists };
   }
   return { updatedArtists: [], newArtists, relevantArtists };
 };

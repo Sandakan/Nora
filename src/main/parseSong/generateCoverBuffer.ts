@@ -1,8 +1,8 @@
 import path from 'path';
 import fs from 'fs/promises';
 
-import sharp from 'sharp';
 import * as musicMetaData from 'music-metadata';
+import sharp from 'sharp';
 
 import log from '../log';
 import getAssetPath from '../utils/getAssetPath';
@@ -15,7 +15,7 @@ export const getDefaultSongCoverImgBuffer = async () => {
 
   try {
     const buffer = await sharp(
-      getAssetPath('images', 'webp', 'song_cover_default.webp')
+      getAssetPath('images', 'webp', 'song_cover_default.webp'),
     )
       .png()
       .toBuffer();
@@ -25,7 +25,7 @@ export const getDefaultSongCoverImgBuffer = async () => {
     log(
       `ERROR OCCURRED WHEN READING A FILE OF NAME 'song_cover_default.webp'.`,
       { error },
-      'ERROR'
+      'ERROR',
     );
     return undefined;
   }
@@ -33,7 +33,7 @@ export const getDefaultSongCoverImgBuffer = async () => {
 
 export const generateCoverBuffer = async (
   cover?: musicMetaData.IPicture[] | string,
-  noDefaultOnUndefined = false
+  noDefaultOnUndefined = false,
 ) => {
   if (
     (cover === undefined ||
@@ -56,7 +56,7 @@ export const generateCoverBuffer = async (
         log(
           `ERROR OCCURRED WHEN TRYING TO GENERATE ARTWORK BUFFER.`,
           { error },
-          'ERROR'
+          'ERROR',
         );
         return getDefaultSongCoverImgBuffer();
       }
@@ -70,7 +70,7 @@ export const generateCoverBuffer = async (
         log(
           'Error occurred when trying to get artwork buffer of a song.',
           { error },
-          'WARN'
+          'WARN',
         );
         return getDefaultSongCoverImgBuffer();
       }

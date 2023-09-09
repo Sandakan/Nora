@@ -48,7 +48,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
 
   const [isLyricsVisible, setIsLyricsVisible] = React.useState(false);
   const [lyrics, setLyrics] = React.useState<SongLyrics | null | undefined>(
-    null
+    null,
   );
 
   const volumeSliderRef = React.useRef<HTMLInputElement>(null);
@@ -87,7 +87,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
         if (e.key === 'n') updateMiniPlayerStatus(!isMiniPlayer);
       }
     },
-    [isMiniPlayer, updateMiniPlayerStatus]
+    [isMiniPlayer, updateMiniPlayerStatus],
   );
 
   React.useEffect(() => {
@@ -161,7 +161,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
 
   const handleSkipForwardClickWithParams = React.useCallback(
     () => handleSkipForwardClick('USER_SKIP'),
-    [handleSkipForwardClick]
+    [handleSkipForwardClick],
   );
 
   const toggleAlwaysOnTop = React.useCallback(() => {
@@ -172,7 +172,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           if (prevUserData?.preferences)
             prevUserData.preferences.isMiniPlayerAlwaysOnTop = state;
           return prevUserData as UserData;
-        })
+        }),
       );
     }
     return undefined;
@@ -202,7 +202,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
         />
       </div>
       <div
-        className={`mini-player-lyrics-container absolute top-0 flex h-full w-full select-none flex-col items-center overflow-hidden px-2 py-12 transition-[filter] group-focus-within:blur-sm group-focus-within:brightness-50 group-hover:blur-sm group-hover:brightness-50 ${
+        className={`mini-player-lyrics-container absolute top-0 flex h-full w-full select-none flex-col items-center overflow-hidden px-4 py-12 transition-[filter] group-focus-within:blur-sm group-focus-within:brightness-50 group-hover:blur-sm group-hover:brightness-50 ${
           !isCurrentSongPlaying ? 'blur-sm brightness-50' : ''
         }`}
         id="miniPlayerLyricsContainer"
@@ -213,7 +213,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           lyrics.lyrics.isSynced &&
           lyricsComponents}
         {isLyricsVisible && lyrics && !lyrics.lyrics.isSynced && (
-          <div className="flex h-full w-full items-center justify-center text-font-color-white">
+          <div className="flex h-full w-full items-center justify-center text-font-color-white opacity-75">
             No Synced Lyrics found.
           </div>
         )}
@@ -244,8 +244,8 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             <Button
               className="go-to-main-player-btn !mr-0 !mt-1 !rounded-md !border-0 !p-2 text-font-color-white outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white"
               tooltipLabel="Go to Main Player (Ctrl + N)"
-              iconName="launch"
-              iconClassName="!text-xl"
+              iconName="pip_exit"
+              iconClassName="material-icons-round-outlined !text-xl"
               clickHandler={() => updateMiniPlayerStatus(!isMiniPlayer)}
               removeFocusOnClick
             />
@@ -370,7 +370,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
               {currentSongData.title}
             </div>
             <div
-              className="song-artists text-sm text-font-color-white/80"
+              className="song-artists text-xs text-font-color-white/80"
               title={currentSongData.artists
                 ?.map((artist) => artist.name)
                 .join(', ')}

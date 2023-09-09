@@ -5,7 +5,7 @@ import sortGenres from '../utils/sortGenres';
 
 const getGenresInfo = async (
   genreNamesOrIds: string[] = [],
-  sortType?: GenreSortTypes
+  sortType?: GenreSortTypes,
 ): Promise<Genre[]> => {
   if (genreNamesOrIds) {
     const genres = getGenresData();
@@ -26,12 +26,12 @@ const getGenresInfo = async (
     }
     log(
       `Fetching genres data for genres with ids '${genreNamesOrIds.join(
-        ','
+        ',',
       )}'.${
         genreNamesOrIds.length > 0
           ? ` Found ${results.length} out of ${genreNamesOrIds.length} results.`
           : ` Found ${results.length} results.`
-      }`
+      }`,
     );
     results = results.map((x) => ({
       ...x,

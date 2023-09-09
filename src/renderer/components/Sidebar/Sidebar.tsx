@@ -101,7 +101,7 @@ const Sidebar = React.memo(() => {
       changeCurrentActivePage(id as PageTitles, pageData);
       addActiveToSidebarItem(id);
     },
-    [addActiveToSidebarItem, changeCurrentActivePage]
+    [addActiveToSidebarItem, changeCurrentActivePage],
   );
 
   React.useEffect(() => {
@@ -120,12 +120,12 @@ const Sidebar = React.memo(() => {
           isActive={link.isActive}
         />
       )),
-    [data, clickHandler]
+    [data, clickHandler],
   );
 
   return (
     <nav
-      className={`side-bar relative z-20 order-1 !h-full w-[30%] !max-w-sm flex-grow rounded-tr-2xl transition-[width] ${
+      className={`side-bar relative z-20 order-1 !h-full w-[30%] !max-w-[20rem] flex-grow rounded-tr-2xl transition-[width] ${
         bodyBackgroundImage
           ? 'bg-side-bar-background/50 backdrop-blur-md dark:bg-dark-background-color-2/50'
           : 'bg-side-bar-background dark:bg-dark-background-color-2'

@@ -22,7 +22,7 @@ const checkForFolderUpdates = async (folder: FolderStructure) => {
       log(
         `'${
           path.basename(folder.path) || path
-        }' folder has unknown modifications.`
+        }' folder has unknown modifications.`,
       );
 
       folder.stats.lastModifiedDate = folderStats.mtime;
@@ -31,15 +31,15 @@ const checkForFolderUpdates = async (folder: FolderStructure) => {
       checkFolderForUnknownModifications(folder.path);
     } else
       log(
-        `'${path.basename(folder.path) || path}' folder has no modifications.`
+        `'${path.basename(folder.path) || path}' folder has no modifications.`,
       );
   } catch (error) {
     log(
       `ERROR OCCURRED WHEN FETCHING STATS FOR '${path.basename(
-        folder.path
+        folder.path,
       )}' FOLDER.`,
       { error },
-      'ERROR'
+      'ERROR',
     );
   }
 };
@@ -48,13 +48,13 @@ const folderWatcherFunction = async (
   eventType: WatchEventType,
   filename: string,
   folder: MusicFolderData,
-  abortSignal: AbortSignal
+  abortSignal: AbortSignal,
 ) => {
   // console.log(`folder event - '${eventType}' - ${filename}`);
   if (filename) {
     if (eventType === 'rename') {
       const doesFilenameHasSongExtension = supportedMusicExtensions.includes(
-        path.extname(filename)
+        path.extname(filename),
       );
 
       if (doesFilenameHasSongExtension) {
@@ -62,7 +62,7 @@ const folderWatcherFunction = async (
         await checkFolderForContentModifications(
           folder.path,
           filename,
-          abortSignal
+          abortSignal,
         );
       }
     }
@@ -70,7 +70,7 @@ const folderWatcherFunction = async (
     log(
       'ERROR OCCURRED WHEN TRYING TO READ NEWLY ADDED SONGS. FILE WATCHER FUNCTION SENT A FILENAME OF undefined.',
       undefined,
-      'ERROR'
+      'ERROR',
     );
   }
 };
@@ -88,23 +88,23 @@ export const addWatcherToFolder = async (folder: MusicFolderData) => {
           eventType,
           filename,
           folder,
-          abortController.signal
-        )
+          abortController.signal,
+        ),
     );
     log(
       'Added watcher to a folder successfully.',
       { folderPath: folder.path },
-      'WARN'
+      'WARN',
     );
     watcher.addListener('error', (e) =>
-      log(`ERROR OCCURRED WHEN WATCHING A FOLDER.`, { e }, 'ERROR')
+      log(`ERROR OCCURRED WHEN WATCHING A FOLDER.`, { e }, 'ERROR'),
     );
     watcher.addListener('close', () =>
       log(
         `successfully closed the watcher.`,
         { folderPath: folder.path },
-        'WARN'
-      )
+        'WARN',
+      ),
     );
     saveAbortController(folder.path, abortController);
   } catch (error) {
@@ -134,10 +134,10 @@ const addWatchersToFolders = async (folders?: FolderStructure[]) => {
       } catch (error) {
         log(
           `ERROR OCCURRED WHEN ADDING WATCHER TO '${path.basename(
-            musicFolder.path
+            musicFolder.path,
           )}' MUSIC FOLDER.`,
           { error },
-          'ERROR'
+          'ERROR',
         );
       }
     }
@@ -146,7 +146,7 @@ const addWatchersToFolders = async (folders?: FolderStructure[]) => {
   log(
     `ERROR OCCURRED WHEN TRYING TO READ MUSIC FOLDERS ARRAY IN USER DATA. IT WAS POSSIBLY EMPTY.`,
     undefined,
-    'ERROR'
+    'ERROR',
   );
 };
 

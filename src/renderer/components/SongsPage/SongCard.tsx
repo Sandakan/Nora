@@ -68,12 +68,12 @@ const SongCard = (props: SongCardProp) => {
   const [isSongAFavorite, setIsSongAFavorite] = React.useState(
     songId === currentSongData.songId
       ? currentSongData.isAFavorite
-      : isAFavorite
+      : isAFavorite,
   );
   const [isSongPlaying, setIsSongPlaying] = React.useState(
     currentSongData
       ? currentSongData.songId === songId && isCurrentSongPlaying
-      : false
+      : false,
   );
   React.useEffect(() => {
     setIsSongPlaying(() => {
@@ -93,7 +93,7 @@ const SongCard = (props: SongCardProp) => {
       palette && palette.LightVibrant && palette.DarkVibrant
         ? palette.LightVibrant.rgb
         : [47, 49, 55],
-    [palette]
+    [palette],
   );
 
   const background = `linear-gradient(to top,rgba(${r},${g},${b},0.3) 0%,rgba(${r},${g},${b},0.15) 40%), linear-gradient(to top,rgba(0,0,0,0.8)0%,rgba(0,0,0,0.1) 60%)`;
@@ -108,7 +108,7 @@ const SongCard = (props: SongCardProp) => {
     if (multipleSelectionsData.multipleSelections.length <= 0) return false;
     if (
       multipleSelectionsData.multipleSelections.some(
-        (selectionId) => selectionId === songId
+        (selectionId) => selectionId === songId,
       )
     )
       return true;
@@ -220,11 +220,8 @@ const SongCard = (props: SongCardProp) => {
             addNewNotifications([
               {
                 id: `${title}PlayNext`,
-                delay: 5000,
-                content: (
-                  <span>{songIds.length} songs will be played next.</span>
-                ),
-                icon: <span className="material-icons-round">shortcut</span>,
+                content: `${songIds.length} songs will be played next.`,
+                iconName: 'shortcut',
               },
             ]);
           } else {
@@ -232,7 +229,7 @@ const SongCard = (props: SongCardProp) => {
             newQueue.splice(
               newQueue.indexOf(currentSongData.songId) + 1 || 0,
               0,
-              songId
+              songId,
             );
 
             const duplicateSongIndex = queue.queue.indexOf(songId);
@@ -248,9 +245,8 @@ const SongCard = (props: SongCardProp) => {
             addNewNotifications([
               {
                 id: `${title}PlayNext`,
-                delay: 5000,
-                content: <span>&apos;{title}&apos; will be played next.</span>,
-                icon: <span className="material-icons-round">shortcut</span>,
+                content: `'${title}' will be played next.`,
+                iconName: 'shortcut',
               },
             ]);
           }
@@ -266,10 +262,8 @@ const SongCard = (props: SongCardProp) => {
             addNewNotifications([
               {
                 id: `${songIds.length}AddedToQueueFromMultiSelection`,
-                delay: 5000,
-                content: (
-                  <span>Added {songIds.length} songs to the queue.</span>
-                ),
+                content: `Added ${songIds.length} songs to the queue.`,
+                iconName: 'add',
               },
             ]);
           } else {
@@ -277,8 +271,7 @@ const SongCard = (props: SongCardProp) => {
             addNewNotifications([
               {
                 id: `${title}AddedToQueue`,
-                delay: 5000,
-                content: <span>Added 1 song to the queue.</span>,
+                content: 'Added 1 song to the queue.',
                 icon: (
                   <Img src={artworkPath} loading="lazy" alt="Song Artwork" />
                 ),
@@ -301,7 +294,7 @@ const SongCard = (props: SongCardProp) => {
         handlerFunction: () => {
           window.api.playerControls
             .toggleLikeSongs(
-              isMultipleSelectionsEnabled ? [...songIds] : [songId]
+              isMultipleSelectionsEnabled ? [...songIds] : [songId],
             )
             .then((res) => {
               if (res && res.likes.length + res.dislikes.length > 0) {
@@ -334,7 +327,7 @@ const SongCard = (props: SongCardProp) => {
             <AddSongsToPlaylists
               songIds={isAMultipleSelection ? songIds : [songId]}
               title={title}
-            />
+            />,
           );
           toggleMultipleSelections(false);
         },
@@ -347,7 +340,7 @@ const SongCard = (props: SongCardProp) => {
             return updateMultipleSelections(
               songId,
               'songs',
-              isAMultipleSelection ? 'remove' : 'add'
+              isAMultipleSelection ? 'remove' : 'add',
             );
           }
           return toggleMultipleSelections(!isAMultipleSelection, 'songs', [
@@ -439,13 +432,13 @@ const SongCard = (props: SongCardProp) => {
                     content: <span>&apos;{title}&apos; blacklisted.</span>,
                     icon: <span className="material-icons-round">block</span>,
                   },
-                ])
+                ]),
               )
               .catch((err) => console.error(err));
           else
             changePromptMenuData(
               true,
-              <BlacklistSongConfrimPrompt title={title} songIds={[songId]} />
+              <BlacklistSongConfrimPrompt title={title} songIds={[songId]} />,
             );
           return toggleMultipleSelections(false);
         },
@@ -459,7 +452,7 @@ const SongCard = (props: SongCardProp) => {
             true,
             <DeleteSongsFromSystemConfrimPrompt
               songIds={isMultipleSelectionsEnabled ? songIds : [songId]}
-            />
+            />,
           );
           toggleMultipleSelections(false);
         },
@@ -513,7 +506,7 @@ const SongCard = (props: SongCardProp) => {
                 key={`${artists[i].name}=>${artists[i + 1].name}`}
               >
                 ,
-              </span>
+              </span>,
             );
 
           return arr;
@@ -552,12 +545,17 @@ const SongCard = (props: SongCardProp) => {
           contextMenuItems,
           e.pageX,
           e.pageY,
-          contextMenuItemData
+          contextMenuItemData,
         );
       }}
       onClick={(e) => {
         if (e.getModifierState('Shift') === true && selectAllHandler)
           selectAllHandler(songId);
+        else if (
+          e.getModifierState('Control') === true &&
+          !isMultipleSelectionEnabled
+        )
+          toggleMultipleSelections(!isAMultipleSelection, 'songs', [songId]);
         else if (
           isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'songs'
@@ -565,7 +563,7 @@ const SongCard = (props: SongCardProp) => {
           updateMultipleSelections(
             songId,
             'songs',
-            isAMultipleSelection ? 'remove' : 'add'
+            isAMultipleSelection ? 'remove' : 'add',
           );
       }}
       title={isBlacklisted ? `'${title}' is blacklisted.` : undefined}
@@ -591,12 +589,12 @@ const SongCard = (props: SongCardProp) => {
               Array.isArray(queue.queue) &&
               queue.queue.length > 0 &&
               queue?.queue?.at(queue.currentSongIndex + 1) === songId && (
-                <span className="font-semibold uppercase !text-font-color-white opacity-50 transition-opacity group-hover/songCard:opacity-90">
+                <span className="font-semibold mr-2 last:mr-0 uppercase !text-font-color-white opacity-50 transition-opacity group-hover/songCard:opacity-90">
                   PLAYING NEXT
                 </span>
               )}
             {currentSongData.songId === songId && (
-              <span className="font-semibold uppercase !text-font-color-white opacity-50 transition-opacity group-hover/songCard:opacity-90">
+              <span className="font-semibold mr-2 last:mr-0 uppercase !text-font-color-white opacity-50 transition-opacity group-hover/songCard:opacity-90">
                 PLAYING NOW
               </span>
             )}
@@ -608,7 +606,7 @@ const SongCard = (props: SongCardProp) => {
                 queue?.queue?.at(queue.currentSongIndex + 1) === songId &&
                 currentSongData.songId === songId
               ) && (
-                <span className="font-semibold uppercase !text-font-color-white opacity-50 transition-opacity group-hover/songCard:opacity-90">
+                <span className="font-semibold mr-2 last:mr-0 uppercase !text-font-color-white opacity-50 transition-opacity group-hover/songCard:opacity-90">
                   BLACKLISTED
                 </span>
               )}
