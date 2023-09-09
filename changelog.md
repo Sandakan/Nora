@@ -1,10 +1,64 @@
 # Change Log
 
-> ### The latest version, **( v2.3.0-stable )** contains a lot of new features and improvements. As always expect some bugs in the app.
+> ### The latest version, **( v2.4.0-stable )** contains a lot of new features and improvements. As always expect some bugs in the app.
 
 <br>
 
-![Nora v2.3.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.3.0-stable.webp)
+![Nora v2.4.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.4.0-stable.webp)
+
+<br>
+
+- ### **v2.4.0-stable - ( 09<sup>th</sup> of September 2023 )**
+
+- ### 🎉 New Features and Updates
+
+  - Added support for authenticating Last.FM users from Nora.
+  - Added support for Last.Fm scrobbling. Fixes #187.
+  - Added support for sending favorites data to Last.Fm.
+  - Added support for sending now-playing song info to Last.FM.
+  - Added a feature that shows similar artists and relevant hashtags for an artist when in the ArtistInfopage.
+  - Added a feature that shows similar tracks of a song when in the SongInfoPage.
+  - Added a feature that shows unavailable tracks and a summary of the album when in the AlbumInfoPage.
+  - Added support for saving the window state so that Nora starts from the previous window state (e.g.: full-screen).
+  - Added support for viewing both synchronized and Un-synchronized lyrics in the SongTagsEditingPage.
+  - Added a pane to display additional info about the song in the SongInfoPage.
+  - Added a new `Account Settings` section to the SettingsPage.
+  - Added icons to buttons in the LyricsEditingPage.
+  - Added a button to go to LyricsEditingPage from the LyricsPage.
+  - Added an alert in the SongTagsEditingPage if there are pending lyrics to be written to a song.
+  - Added an option to display song track number instead of the index number when in Albums Info Page. Fixes #194.
+
+- ### 🔨 Fixes and Improvements
+
+  - Fixed a bug where suggestion prompts don't hide when clicked on the button with an up arrow.
+  - Updated the feature to edit the next line's start tag with the current line's end tag and vice versa automatically.
+  - Fixed a bug where saved lyrics will be overwritten if the user selected the 'Synchronized Lyrics Only' or 'Un-synchronized and Synchronized Lyrics Only' options to save lyrics automatically and clicked the 'Show Online Lyrics' button.
+  - Fixed a bug where ignoring DuplicateArtistsSuggestions and SeparateArtistsSuggestions are not working.
+  - Fixed a bug where the 'No lyrics found' message will be shown in the LyricsPage when you try to view online lyrics that are not available for a song but have offline lyrics.
+  - Improved performance when displaying songs in CurrentQueuePage.
+  - Improved app logs to display the destination of the log.
+  - Improved app performance and reduced time taken when opening songs from File Explorer.
+  - Improved performance when opening Albums, Playlists, and Genres with bigger song lists.
+  - Updated outdated dependencies and fixed dependency vulnerabilities.
+  - Updated some icons in the app.
+  - Fixed a bug where saving automatically downloaded lyrics may confuse the audio player to skip the song. Fixes #192.
+  - Fixed a bug where ignoring DuplicateArtistsSuggestions and SeparateArtistsSuggestions are not working.
+  - Fixed a bug where automatically downloaded lyrics may try to save to songs that do not support modifying song metadata.
+  - Fixed a bug where songs show the original artwork instead of the optimized artwork and sometimes may fail to load the optimized artwork.
+  - Fixed a bug where duplicate album entries are added to artists when songs with the same album and artist are parsed. Fixes #191.
+  - Fixed a bug where the sorting state of songs in MusicFoldersPage is not being saved.
+  - Fixed a bug where search results from SongTagsEditingPage for artists, albums, and genres are fixed to a maximum limit of 5.
+  - Fixed a bug where clicking 'Play All' shuffles the queue.
+  - Fixed a bug where Ctrl + Click an item doesn't select it.
+  - Fixed a bug where user cannot use Shift + Click and Control + Click selection combinations simultaneously.
+  - Fixed a bug where suggestions don't get minimized when the up-arrow button is clicked.
+
+- ### 🐜 Known Issues and Bugs
+  - Nora may fail to load some FLAC songs #184.
+
+<br>
+
+![Nora v2.3.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.4.0-stable.webp)
 
 <br>
 
@@ -64,6 +118,10 @@
 
 <br>
 
+![Nora v2.2.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.2.0-stable.webp)
+
+<br>
+
 - ### **v2.2.0-stable - ( 20<sup>th</sup> of May 2023 )**
 
   - ### 🎉 New Features and Features
@@ -88,6 +146,10 @@
   - ### 🐜 Known Issues and Bugs
     - Sometimes updating song artwork may need an app restart to show on the app #162.
     - The app may crash in mini-player mode when trying to use window snap feature #163.
+
+<br>
+
+![Nora v2.1.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.1.0-stable.webp)
 
 <br>
 
@@ -140,6 +202,10 @@
   - ### 🐜 Known Issues and Bugs
     - Sometimes updating song artwork may need an app restart to show on the app #162.
     - The app may crash in mini-player mode when trying to use window snap feature #163.
+
+<br>
+
+![Nora v2.0.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.0.0-stable.webp)
 
 <br>
 
@@ -247,6 +313,10 @@
 
 <br>
 
+![Nora v1.2.0-stable version artwork](assets/other/release%20artworks/whats-new-v1.2.0-stable.webp)
+
+<br>
+
 - ### **v1.2.0-stable - ( 9<sup>th</sup> of March 2023 )**
 
   - ### 🎉 New Features and Features
@@ -281,6 +351,10 @@
     - App theme will be changed when you change your system's theme even though you didn't select to use system theme in the app.
     - If a song is added next to the last song of the queue, the last song won't be played.
     - Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song.
+
+<br>
+
+![Nora v1.1.0-stable version artwork](assets/other/release%20artworks/whats-new-v1.1.0-stable.webp)
 
 <br>
 
@@ -319,6 +393,10 @@
     - App theme will be changed when you change your system's theme even though you didn't select to use system theme in the app.
     - If a song is added next to the last song of the queue, the last song won't be played.
     - Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song.
+
+<br>
+
+![Nora v1.0.0-stable version artwork](assets/other/release%20artworks/whats-new-v1.0.0-stable.webp)
 
 <br>
 
@@ -440,6 +518,10 @@
 
 <br>
 
+![Nora v0.8.0-alpha version artwork](assets/other/release%20artworks/whats-new-v0.8.0-alpha.webp)
+
+<br>
+
 - ### **v0.8.0-alpha - ( 19<sup>th</sup> of August 2022 )**
 
   - ### 🎉 New Features and Updates
@@ -471,6 +553,10 @@
     - Trying to play corrupted songs will make the app player unusable. Workaround is to play the next song and restart the renderer using F5 button.
     - Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song.
     - There is still a small amount of unwanted cpu consumption due to over-rendering of components.
+
+<br>
+
+![Nora v0.7.0-alpha version artwork](assets/other/release%20artworks/whats-new-v0.7.0-alpha.webp)
 
 <br>
 
