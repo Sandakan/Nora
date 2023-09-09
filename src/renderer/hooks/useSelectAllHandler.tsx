@@ -31,7 +31,7 @@ const useSelectAllHandler = <Obj extends Record<string, any>>(
         return undefined;
       };
 
-      const ids: string[] = [];
+      const ids: string[] = multipleSelectionsData.multipleSelections;
       if (upToId) {
         if (multipleSelectionsData.multipleSelections.length > 0) {
           const currIndex = getItemFromIndex(upToId);

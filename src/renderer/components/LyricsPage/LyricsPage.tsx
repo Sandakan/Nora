@@ -50,14 +50,6 @@ const LyricsPage = () => {
 
   React.useEffect(() => {
     setLyrics(null);
-    addNewNotifications([
-      {
-        id: 'fetchLyrics',
-        content: `Fetching lyrics for '${currentSongData.title}'...`,
-        iconName: 'mic',
-        iconClassName: 'material-icons-round-outlined !text-xl',
-      },
-    ]);
     window.api.lyrics
       .getSongLyrics(
         {

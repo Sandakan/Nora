@@ -15,6 +15,8 @@ import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.
 import DeleteSongsFromSystemConfrimPrompt from './DeleteSongsFromSystemConfrimPrompt';
 import Button from '../Button';
 
+import { appPreferences } from '../../../../package.json';
+
 interface SongProp {
   songId: string;
   artworkPaths: ArtworkPaths;
@@ -721,7 +723,10 @@ const Song = React.forwardRef(
             )}
           </div>
           <div className="song-year flex items-center justify-center text-center text-xs transition-none sm:hidden">
-            {year ?? '----'}
+            {window.api.properties.isInDevelopment &&
+            appPreferences.showSongIdInsteadOfSongYear
+              ? songId
+              : year ?? '----'}
           </div>
           <div className="song-duration flex !w-full items-center justify-between pl-2 pr-4 text-center transition-none sm:pr-1">
             <Button

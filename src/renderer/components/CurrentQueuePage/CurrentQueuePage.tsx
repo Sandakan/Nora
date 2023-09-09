@@ -47,6 +47,7 @@ const CurrentQueuePage = () => {
   } = React.useContext(AppUpdateContext);
 
   const [queuedSongs, setQueuedSongs] = React.useState([] as AudioInfo[]);
+  const previousQueueRef = React.useRef<string[]>([]);
   const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
   const [queueInfo, setQueueInfo] = React.useState({
     artworkPath: DefaultSongCover,
@@ -59,53 +60,33 @@ const CurrentQueuePage = () => {
   const ListRef = React.useRef(null as FixedSizeList | null);
   const isFirstRenderFinishedRef = React.useRef(false);
 
-  const fetchAllSongsData = React.useCallback(() => {
-    const isTheSameQueue = () => {
-      console.time('same');
+  const isTheSameQueue = React.useCallback((newQueueSongIds: string[]) => {
+    const prevQueueSongIds = previousQueueRef.current;
+    const isSameQueue = prevQueueSongIds.every((id) =>
+      newQueueSongIds.includes(id),
+    );
 
-      const prevSongIds = queuedSongs.map((song) => song.songId);
-      const newSongIds = queue.queue;
-      const isSameQueue = prevSongIds.every((id) => newSongIds.includes(id));
-      console.timeEnd('same');
+    return isSameQueue;
+  }, []);
 
-      return isSameQueue;
-    };
-
-    if (isTheSameQueue() && queuedSongs.length > 0) {
-      setQueuedSongs((prevQueuedSongs) => {
-        const newQueuedSongs = queue.queue.map((id) => {
-          for (let i = 0; i < prevQueuedSongs.length; i += 1) {
-            const prevQueuedSong = prevQueuedSongs[i];
-            if (prevQueuedSong.songId === id) return prevQueuedSong;
-          }
-          return undefined;
-        });
-        const arr = newQueuedSongs.filter((x) => x) as AudioInfo[];
-        return arr;
-      });
-    } else {
-      console.time('queue');
-      window.api.audioLibraryControls.getAllSongs().then((res) => {
-        if (res) {
-          console.timeEnd('queue');
-          const x = queue.queue
-            .map((songId) => {
-              return res.data.map((y) => {
-                if (songId === y.songId) return y;
-                return undefined;
-              });
-            })
-            .flat()
-            .filter((y) => y !== undefined) as AudioInfo[];
-          setQueuedSongs(x);
-        }
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queue.queue]);
+  const fetchAllSongsData = React.useCallback(
+    (skipSameQueueCheck = false) => {
+      if (skipSameQueueCheck || !isTheSameQueue(queue.queue)) {
+        window.api.audioLibraryControls
+          .getSongInfo(queue.queue, 'addedOrder', undefined, true)
+          .then((res) => {
+            if (res) {
+              setQueuedSongs(res);
+              previousQueueRef.current = queue.queue.slice();
+            }
+          });
+      }
+    },
+    [isTheSameQueue, queue.queue],
+  );
 
   React.useEffect(() => {
-    fetchAllSongsData();
+    fetchAllSongsData(true);
     const manageSongUpdatesInCurrentQueue = (e: Event) => {
       if ('detail' in e) {
         const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>)
@@ -428,7 +409,7 @@ const CurrentQueuePage = () => {
               isDisabled={queue.queue.length > 0 === false}
               clickHandler={() => {
                 updateQueueData(undefined, queue.queue, true);
-                fetchAllSongsData();
+                fetchAllSongsData(true);
                 addNewNotifications([
                   {
                     id: 'shuffleQueue',

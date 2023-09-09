@@ -207,7 +207,7 @@ const AboutSettings = () => {
                   <div className="mb-4 w-full text-center text-3xl font-medium">
                     Open Source Licenses
                   </div>
-                  <div className="relative max-h-full w-full overflow-y-auto whitespace-pre-wrap px-4 text-center text-sm">
+                  <div className="relative max-h-full w-full overflow-y-auto whitespace-pre-wrap px-4 text-sm">
                     {openSourceLicenses}
                   </div>
                 </>,

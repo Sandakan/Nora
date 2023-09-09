@@ -12,7 +12,7 @@ const SongAdditionalInfoContainer = (props: Props) => {
   return (
     <div className="other-cards appear-from-bottom mr-4 w-full max-w-full mt-4 rounded-xl bg-background-color-2/70 p-4 backdrop-blur-sm dark:bg-dark-background-color-2/70 dark:text-font-color-white">
       <label
-        htmlFor="toggleSuggestionBox"
+        htmlFor="songAdditionalInfo"
         className="title-container flex cursor-pointer items-center justify-between font-medium text-font-color-highlight dark:text-dark-font-color-highlight"
       >
         <div className="flex items-center">
@@ -23,7 +23,7 @@ const SongAdditionalInfoContainer = (props: Props) => {
         </div>
         <div className="flex items-center">
           <Button
-            id="toggleSuggestionBox"
+            id="songAdditionalInfo"
             className="!m-0 !border-0 !p-0 outline-1 outline-offset-1 hover:bg-background-color-1/50 focus-visible:!outline hover:dark:bg-dark-background-color-1/50"
             iconClassName="!leading-none !text-3xl"
             iconName={isDataVisible ? 'arrow_drop_up' : 'arrow_drop_down'}
@@ -100,6 +100,8 @@ const SongAdditionalInfoContainer = (props: Props) => {
               })`}
             />
           )}
+
+          <SongAdditionalInfoItem label="Song Location" value={songInfo.path} />
         </div>
       )}
     </div>

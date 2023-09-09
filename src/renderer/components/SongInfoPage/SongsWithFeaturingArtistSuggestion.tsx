@@ -212,7 +212,10 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
                 tooltipLabel={
                   isMessageVisible ? 'Hide suggestion' : 'Show suggestion'
                 }
-                clickHandler={() => setIsMessageVisible((state) => !state)}
+                clickHandler={(e) => {
+                  e.preventDefault();
+                  setIsMessageVisible((state) => !state);
+                }}
               />
             </div>
           </label>

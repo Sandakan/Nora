@@ -19,6 +19,7 @@ const OnlineAlbumInfoContainer = (props: Props) => {
       return otherAlbumData.sortedUnAvailAlbumTracks.map((track) => (
         <UnAvailableTrack
           key={track.url}
+          index={track.rank}
           title={track.title}
           artists={track.artists}
           url={track.url}

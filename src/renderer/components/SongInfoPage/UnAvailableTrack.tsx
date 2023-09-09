@@ -3,11 +3,13 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { ParsedSimilarTrack } from '../../../@types/last_fm_similar_tracks_api';
 import OpenLinkConfirmPrompt from '../OpenLinkConfirmPrompt';
 
-const UnAvailableTrack = (
-  props: Omit<ParsedSimilarTrack, 'songData' | 'match'>,
-) => {
+type Props = Omit<ParsedSimilarTrack, 'songData' | 'match'> & {
+  index?: number;
+};
+
+const UnAvailableTrack = (props: Props) => {
   const { changePromptMenuData } = React.useContext(AppUpdateContext);
-  const { title, artists = [], url } = props;
+  const { title, artists = [], url, index } = props;
 
   const handleButtonClick = React.useCallback(() => {
     return changePromptMenuData(
@@ -28,6 +30,11 @@ const UnAvailableTrack = (
         open_in_new
       </span>
       <p className="text-sm">
+        {index && (
+          <span className="index text-font-color-highlight dark:text-dark-font-color-highlight">
+            {index}.{' '}
+          </span>
+        )}
         <span className="title">{title}</span>
         {artists.length > 0 && (
           <>
