@@ -4,57 +4,62 @@
 
 <br>
 
-![Nora v2.4.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.4.0-stable.webp)
+<br>
+
+- ### **v2.4.1-stable - ( 10<sup>th</sup> of September 2023 )**
+
+  - ### 🔨 Fixes and Improvements
+    - Fixed a bug where environment variables are not initialized when migrating the database to a newer version. Fixes #195.
 
 <br>
 
 - ### **v2.4.0-stable - ( 09<sup>th</sup> of September 2023 )**
 
-- ### 🎉 New Features and Updates
+  - ### 🎉 New Features and Updates
 
-  - Added support for authenticating Last.FM users from Nora.
-  - Added support for Last.Fm scrobbling. Fixes #187.
-  - Added support for sending favorites data to Last.Fm.
-  - Added support for sending now-playing song info to Last.FM.
-  - Added a feature that shows similar artists and relevant hashtags for an artist when in the ArtistInfopage.
-  - Added a feature that shows similar tracks of a song when in the SongInfoPage.
-  - Added a feature that shows unavailable tracks and a summary of the album when in the AlbumInfoPage.
-  - Added support for saving the window state so that Nora starts from the previous window state (e.g.: full-screen).
-  - Added support for viewing both synchronized and Un-synchronized lyrics in the SongTagsEditingPage.
-  - Added a pane to display additional info about the song in the SongInfoPage.
-  - Added a new `Account Settings` section to the SettingsPage.
-  - Added icons to buttons in the LyricsEditingPage.
-  - Added a button to go to LyricsEditingPage from the LyricsPage.
-  - Added an alert in the SongTagsEditingPage if there are pending lyrics to be written to a song.
-  - Added an option to display song track number instead of the index number when in Albums Info Page. Fixes #194.
+    - Added support for authenticating Last.FM users from Nora.
+    - Added support for Last.Fm scrobbling. Fixes #187.
+    - Added support for sending favorites data to Last.Fm.
+    - Added support for sending now-playing song info to Last.FM.
+    - Added a feature that shows similar artists and relevant hashtags for an artist when in the ArtistInfopage.
+    - Added a feature that shows similar tracks of a song when in the SongInfoPage.
+    - Added a feature that shows unavailable tracks and a summary of the album when in the AlbumInfoPage.
+    - Added support for saving the window state so that Nora starts from the previous window state (e.g.: full-screen).
+    - Added support for viewing both synchronized and Un-synchronized lyrics in the SongTagsEditingPage.
+    - Added a pane to display additional info about the song in the SongInfoPage.
+    - Added a new `Account Settings` section to the SettingsPage.
+    - Added icons to buttons in the LyricsEditingPage.
+    - Added a button to go to LyricsEditingPage from the LyricsPage.
+    - Added an alert in the SongTagsEditingPage if there are pending lyrics to be written to a song.
+    - Added an option to display song track number instead of the index number when in Albums Info Page. Fixes #194.
 
-- ### 🔨 Fixes and Improvements
+  - ### 🔨 Fixes and Improvements
 
-  - Fixed a bug where suggestion prompts don't hide when clicked on the button with an up arrow.
-  - Updated the feature to edit the next line's start tag with the current line's end tag and vice versa automatically.
-  - Fixed a bug where saved lyrics will be overwritten if the user selected the 'Synchronized Lyrics Only' or 'Un-synchronized and Synchronized Lyrics Only' options to save lyrics automatically and clicked the 'Show Online Lyrics' button.
-  - Fixed a bug where ignoring DuplicateArtistsSuggestions and SeparateArtistsSuggestions are not working.
-  - Fixed a bug where the 'No lyrics found' message will be shown in the LyricsPage when you try to view online lyrics that are not available for a song but have offline lyrics.
-  - Improved performance when displaying songs in CurrentQueuePage.
-  - Improved app logs to display the destination of the log.
-  - Improved app performance and reduced time taken when opening songs from File Explorer.
-  - Improved performance when opening Albums, Playlists, and Genres with bigger song lists.
-  - Updated outdated dependencies and fixed dependency vulnerabilities.
-  - Updated some icons in the app.
-  - Fixed a bug where saving automatically downloaded lyrics may confuse the audio player to skip the song. Fixes #192.
-  - Fixed a bug where ignoring DuplicateArtistsSuggestions and SeparateArtistsSuggestions are not working.
-  - Fixed a bug where automatically downloaded lyrics may try to save to songs that do not support modifying song metadata.
-  - Fixed a bug where songs show the original artwork instead of the optimized artwork and sometimes may fail to load the optimized artwork.
-  - Fixed a bug where duplicate album entries are added to artists when songs with the same album and artist are parsed. Fixes #191.
-  - Fixed a bug where the sorting state of songs in MusicFoldersPage is not being saved.
-  - Fixed a bug where search results from SongTagsEditingPage for artists, albums, and genres are fixed to a maximum limit of 5.
-  - Fixed a bug where clicking 'Play All' shuffles the queue.
-  - Fixed a bug where Ctrl + Click an item doesn't select it.
-  - Fixed a bug where user cannot use Shift + Click and Control + Click selection combinations simultaneously.
-  - Fixed a bug where suggestions don't get minimized when the up-arrow button is clicked.
+    - Fixed a bug where suggestion prompts don't hide when clicked on the button with an up arrow.
+    - Updated the feature to edit the next line's start tag with the current line's end tag and vice versa automatically.
+    - Fixed a bug where saved lyrics will be overwritten if the user selected the 'Synchronized Lyrics Only' or 'Un-synchronized and Synchronized Lyrics Only' options to save lyrics automatically and clicked the 'Show Online Lyrics' button.
+    - Fixed a bug where ignoring DuplicateArtistsSuggestions and SeparateArtistsSuggestions are not working.
+    - Fixed a bug where the 'No lyrics found' message will be shown in the LyricsPage when you try to view online lyrics that are not available for a song but have offline lyrics.
+    - Improved performance when displaying songs in CurrentQueuePage.
+    - Improved app logs to display the destination of the log.
+    - Improved app performance and reduced time taken when opening songs from File Explorer.
+    - Improved performance when opening Albums, Playlists, and Genres with bigger song lists.
+    - Updated outdated dependencies and fixed dependency vulnerabilities.
+    - Updated some icons in the app.
+    - Fixed a bug where saving automatically downloaded lyrics may confuse the audio player to skip the song. Fixes #192.
+    - Fixed a bug where ignoring DuplicateArtistsSuggestions and SeparateArtistsSuggestions are not working.
+    - Fixed a bug where automatically downloaded lyrics may try to save to songs that do not support modifying song metadata.
+    - Fixed a bug where songs show the original artwork instead of the optimized artwork and sometimes may fail to load the optimized artwork.
+    - Fixed a bug where duplicate album entries are added to artists when songs with the same album and artist are parsed. Fixes #191.
+    - Fixed a bug where the sorting state of songs in MusicFoldersPage is not being saved.
+    - Fixed a bug where search results from SongTagsEditingPage for artists, albums, and genres are fixed to a maximum limit of 5.
+    - Fixed a bug where clicking 'Play All' shuffles the queue.
+    - Fixed a bug where Ctrl + Click an item doesn't select it.
+    - Fixed a bug where user cannot use Shift + Click and Control + Click selection combinations simultaneously.
+    - Fixed a bug where suggestions don't get minimized when the up-arrow button is clicked.
 
-- ### 🐜 Known Issues and Bugs
-  - Nora may fail to load some FLAC songs #184.
+  - ### 🐜 Known Issues and Bugs
+    - Nora may fail to load some FLAC songs #184.
 
 <br>
 

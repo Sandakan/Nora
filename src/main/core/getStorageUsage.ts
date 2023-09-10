@@ -102,7 +102,7 @@ const getStorageUsage = async (forceRefresh = false) => {
       appFolderSize,
       appDataSizes,
       totalSize,
-      generatedDate: new Date().toUTCString(),
+      generatedDate: new Date().toISOString(),
     };
 
     setUserData('storageMetrics', storageMetrics);

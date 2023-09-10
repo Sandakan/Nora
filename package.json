@@ -182,8 +182,6 @@
     "@types/react-test-renderer": "^18.0.0",
     "@types/react-window": "^1.8.5",
     "@types/react-window-infinite-loader": "^1.0.6",
-    "@types/sharp": "^0.32.0",
-    "@types/terser-webpack-plugin": "^5.2.0",
     "@types/webpack-bundle-analyzer": "^4.6.0",
     "@typescript-eslint/eslint-plugin": "^6.4.0",
     "@typescript-eslint/parser": "^6.4.0",
@@ -340,5 +338,5 @@
     "raw_repository_url": "https://raw.githubusercontent.com/Sandakan/Nora/",
     "website_url": "https://noramusic.netlify.app/"
   },
-  "version": "2.4.0-stable"
+  "version": "2.4.1-stable"
 }
