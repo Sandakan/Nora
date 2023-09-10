@@ -1,5 +1,3 @@
-import * as dotenv from 'dotenv';
-
 import type Conf from 'conf/dist/source/index';
 import log from './log';
 import {
@@ -157,8 +155,6 @@ export const genreMigrations = {
 
 export const userDataMigrations = {
   '2.4.0-stable': (store: Conf<{ version?: string; userData: UserData }>) => {
-    dotenv.config();
-
     log('Starting the userData.json migration process.', {
       version: '2.4.0-stable;',
     });

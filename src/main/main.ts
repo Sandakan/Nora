@@ -1,3 +1,4 @@
+/* eslint-disable import/first */
 /* eslint-disable default-param-last */
 /* eslint-disable no-use-before-define */
 /* eslint-disable global-require */
@@ -20,7 +21,7 @@ import {
   powerMonitor,
   SaveDialogOptions,
 } from 'electron';
-import * as dotenv from 'dotenv';
+import 'dotenv/config';
 
 // import * as Sentry from '@sentry/electron';
 import log, { logFilePath } from './log';
@@ -172,7 +173,7 @@ const appIcon = nativeImage.createFromPath(
   getAssetPath('images', 'logo_light_mode.png'),
 );
 
-dotenv.config({ debug: IS_DEVELOPMENT });
+// dotenv.config({ debug: true });
 saveAbortController('main', abortController);
 
 // Sentry.init({
