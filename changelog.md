@@ -6,6 +6,15 @@
 
 <br>
 
+- ### **v2.4.2-stable - ( 10<sup>th</sup> of September 2023 )**
+
+  - ### 🔨 Fixes and Improvements
+    - Fixed a bug where the installer doesn't include required environment variables.
+    - Fixed a bug where users can't apply custom musixmatch tokens.
+    - Fixed a bug where users can't authenticate with Last.FM.
+
+<br>
+
 - ### **v2.4.1-stable - ( 10<sup>th</sup> of September 2023 )**
 
   - ### 🔨 Fixes and Improvements
