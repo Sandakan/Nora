@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-autofocus */
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
@@ -10,15 +11,18 @@ interface MainContainerProp {
   noDefaultStyles?: boolean;
   style?: React.CSSProperties;
   onContextMenu?: (
-    _e: MouseEvent<HTMLDivElement, globalThis.MouseEvent>
+    _e: MouseEvent<HTMLDivElement, globalThis.MouseEvent>,
   ) => void;
   onClick?: (
-    _e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>
+    _e: React.MouseEvent<HTMLDivElement, globalThis.MouseEvent>,
   ) => void;
   onScroll?: (_e: React.UIEvent<HTMLDivElement, UIEvent>) => void;
   role?: React.AriaRole;
   onKeyDown?: (_e: React.KeyboardEvent<HTMLDivElement>) => void;
+  onFocus?: (_e: React.FocusEvent<HTMLDivElement, Element>) => void;
+  onBlur?: (_e: React.FocusEvent<HTMLDivElement, Element>) => void;
   focusable?: boolean;
+  autoFocus?: boolean;
 }
 
 const MainContainer = React.forwardRef(
@@ -32,8 +36,11 @@ const MainContainer = React.forwardRef(
       onKeyDown,
       role,
       onScroll,
+      onFocus,
+      onBlur,
       noDefaultStyles = false,
       focusable = false,
+      autoFocus = false,
     } = props;
     return (
       <ErrorBoundary>
@@ -51,12 +58,15 @@ const MainContainer = React.forwardRef(
           role={role ?? focusable ? 'none' : undefined}
           ref={ref}
           tabIndex={focusable ? 1 : undefined}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          autoFocus={focusable && autoFocus}
         >
           {children}
         </div>
       </ErrorBoundary>
     );
-  }
+  },
 );
 
 MainContainer.displayName = 'MainContainer';

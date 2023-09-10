@@ -2,6 +2,8 @@ import React from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 
+import storage from '../../utils/localStorage';
+
 import ErrorPrompt from '../ErrorPrompt';
 import MainContainer from '../MainContainer';
 import Button from '../Button';
@@ -33,7 +35,7 @@ type HomePageReducerActionTypes =
 
 const reducer = (
   state: HomePageReducer,
-  action: { type: HomePageReducerActionTypes; data?: any }
+  action: { type: HomePageReducerActionTypes; data?: any },
 ): HomePageReducer => {
   switch (action.type) {
     case 'SONGS_DATA':
@@ -83,7 +85,7 @@ const HomePage = () => {
 
   const recentlyAddedSongsContainerRef = React.useRef<HTMLDivElement>(null);
   const recentlyAddedSongsContainerDiamensions = useResizeObserver(
-    recentlyAddedSongsContainerRef
+    recentlyAddedSongsContainerRef,
   );
   const {
     noOfRecentlyAddedSongCards,
@@ -102,7 +104,10 @@ const HomePage = () => {
 
   const fetchLatestSongs = React.useCallback(() => {
     window.api.audioLibraryControls
-      .getAllSongs('dateAddedAscending', 1, noOfRecentlyAddedSongCards)
+      .getAllSongs('dateAddedAscending', {
+        start: 0,
+        end: noOfRecentlyAddedSongCards,
+      })
       .then((audioData) => {
         if (!audioData || audioData.data.length === 0)
           return dispatch({ type: 'SONGS_DATA', data: [null] });
@@ -131,7 +136,7 @@ const HomePage = () => {
           recentSongs[0].songs,
           undefined,
           noOfRecentandLovedSongCards + 5,
-          true
+          true,
         )
         .then(
           (res) =>
@@ -139,7 +144,7 @@ const HomePage = () => {
             dispatch({
               type: 'RECENTLY_PLAYED_SONGS_DATA',
               data: res,
-            })
+            }),
         )
         .catch((err) => console.error(err));
   }, [noOfRecentandLovedSongCards]);
@@ -150,9 +155,9 @@ const HomePage = () => {
         ...new Set(
           content.recentlyPlayedSongs
             .map((song) =>
-              song.artists ? song.artists.map((artist) => artist.artistId) : []
+              song.artists ? song.artists.map((artist) => artist.artistId) : [],
             )
-            .flat()
+            .flat(),
         ),
       ];
 
@@ -165,7 +170,7 @@ const HomePage = () => {
               dispatch({
                 type: 'RECENT_SONGS_ARTISTS',
                 data: res,
-              })
+              }),
           )
           .catch((err) => console.error(err));
     }
@@ -181,7 +186,7 @@ const HomePage = () => {
             res[0].songs,
             'allTimeMostListened',
             noOfRecentandLovedSongCards + 5,
-            true
+            true,
           );
         }
         return undefined;
@@ -190,7 +195,7 @@ const HomePage = () => {
         (lovedSongs) =>
           Array.isArray(lovedSongs) &&
           lovedSongs.length > 0 &&
-          dispatch({ type: 'MOST_LOVED_SONGS', data: lovedSongs })
+          dispatch({ type: 'MOST_LOVED_SONGS', data: lovedSongs }),
       )
       .catch((err) => console.error(err));
   }, [noOfRecentandLovedSongCards]);
@@ -201,9 +206,9 @@ const HomePage = () => {
         ...new Set(
           content.mostLovedSongs
             .map((song) =>
-              song.artists ? song.artists.map((artist) => artist.artistId) : []
+              song.artists ? song.artists.map((artist) => artist.artistId) : [],
             )
-            .flat()
+            .flat(),
         ),
       ];
       window.api.artistsData
@@ -214,7 +219,7 @@ const HomePage = () => {
             dispatch({
               type: 'MOST_LOVED_ARTISTS',
               data: res,
-            })
+            }),
         )
         .catch((err) => console.error(err));
     }
@@ -236,6 +241,7 @@ const HomePage = () => {
             fetchRecentlyPlayedSongs();
           else if (
             event.dataType === 'songs/deletedSong' ||
+            event.dataType === 'songs/updatedSong' ||
             event.dataType === 'songs/newSong' ||
             event.dataType === 'songs/palette' ||
             event.dataType === 'blacklist/songBlacklist' ||
@@ -266,7 +272,7 @@ const HomePage = () => {
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageDataUpdatesInHomePage
+        manageDataUpdatesInHomePage,
       );
     };
   }, [
@@ -280,7 +286,7 @@ const HomePage = () => {
   React.useEffect(() => fetchRecentArtistsData(), [fetchRecentArtistsData]);
   React.useEffect(() => fetchMostLovedArtists(), [fetchMostLovedArtists]);
 
-  const addNewSongs = () => {
+  const addNewSongs = React.useCallback(() => {
     changePromptMenuData(
       true,
       <AddMusicFoldersPrompt
@@ -302,9 +308,33 @@ const HomePage = () => {
           dispatch({ type: 'SONGS_DATA', data: relevantSongsData });
         }}
         onFailure={() => dispatch({ type: 'SONGS_DATA', data: [null] })}
-      />
+      />,
     );
-  };
+  }, [changePromptMenuData]);
+
+  const importAppData = React.useCallback(
+    (
+      _: unknown,
+      setIsDisabled: (state: boolean) => void,
+      setIsPending: (state: boolean) => void,
+    ) => {
+      setIsDisabled(true);
+      setIsPending(true);
+
+      return window.api.settingsHelpers
+        .importAppData()
+        .then((res) => {
+          if (res) storage.setAllItems(res);
+          return undefined;
+        })
+        .finally(() => {
+          setIsDisabled(false);
+          setIsPending(false);
+        })
+        .catch((err) => console.error(err));
+    },
+    [],
+  );
 
   const homePageContextMenus: ContextMenuItem[] = React.useMemo(
     () =>
@@ -329,7 +359,7 @@ const HomePage = () => {
                     }
                     showSendFeedbackBtn
                   />,
-                  'error-alert-prompt'
+                  'error-alert-prompt',
                 ),
             },
             {
@@ -352,7 +382,7 @@ const HomePage = () => {
             },
           ]
         : [],
-    [changePromptMenuData, addNewNotifications]
+    [changePromptMenuData, addNewNotifications],
   );
 
   return (
@@ -378,7 +408,7 @@ const HomePage = () => {
             <RecentlyPlayedSongs
               recentlyPlayedSongs={content.recentlyPlayedSongs.slice(
                 0,
-                noOfRecentandLovedSongCards
+                noOfRecentandLovedSongCards,
               )}
               noOfVisibleSongs={noOfRecentandLovedSongCards}
             />
@@ -389,7 +419,7 @@ const HomePage = () => {
             <MostLovedSongs
               mostLovedSongs={content.mostLovedSongs.slice(
                 0,
-                noOfRecentandLovedSongCards
+                noOfRecentandLovedSongCards,
               )}
               noOfVisibleSongs={noOfRecentandLovedSongCards}
             />
@@ -408,11 +438,21 @@ const HomePage = () => {
               alt="No songs available."
             />
             <div>There&apos;s nothing here. Do you know where are they?</div>
-            <Button
-              label="Add Folder"
-              className="mt-4 w-40 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
-              clickHandler={addNewSongs}
-            />
+            <div className="flex items-center justify-between">
+              <Button
+                label="Add Folder"
+                iconName="create_new_folder"
+                iconClassName="material-icons-round-outlined"
+                className="mt-4 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
+                clickHandler={addNewSongs}
+              />
+              <Button
+                label="Import App Data"
+                iconName="upload"
+                className="mt-4 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
+                clickHandler={importAppData}
+              />
+            </div>
           </div>
         )}
         {content.recentlyPlayedSongs.length === 0 &&

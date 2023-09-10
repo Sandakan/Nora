@@ -56,7 +56,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
                 return undefined;
               })
               .catch((err) => console.error(err)),
-          5000
+          5000,
         );
       }
     }
@@ -77,9 +77,10 @@ const CurrentlyPlayingSongInfoContainer = () => {
         .filter((artist, index) => artist.onlineArtworkPaths && index < 2)
         .map((artist, index) => (
           <Img
+            key={artist.artistId}
             src={artist.onlineArtworkPaths?.picture_small}
             fallbackSrc={artist.artworkPath}
-            key={artist.artistId}
+            loading="eager"
             className={`absolute aspect-square w-6 rounded-full border-2 border-background-color-1 dark:border-dark-background-color-1 ${
               index === 0 ? 'z-2' : '-translate-x-2'
             }`}
@@ -106,7 +107,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
             songId,
           })
         : undefined,
-    [changeCurrentActivePage, currentSongData.isKnownSource]
+    [changeCurrentActivePage, currentSongData.isKnownSource],
   );
 
   const gotToSongAlbumPage = React.useCallback(
@@ -120,7 +121,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
       changeCurrentActivePage,
       currentSongData.album,
       currentSongData.isKnownSource,
-    ]
+    ],
   );
 
   const songArtists = React.useMemo(() => {
@@ -146,7 +147,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
                   className="mr-1"
                 >
                   ,
-                </span>
+                </span>,
               );
 
             return arr;
@@ -188,7 +189,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
         handlerFunction: () => {
           changePromptMenuData(
             true,
-            <AddSongsToPlaylists songIds={[songId]} title={title} />
+            <AddSongsToPlaylists songIds={[songId]} title={title} />,
           );
           toggleMultipleSelections(false);
         },
@@ -236,7 +237,10 @@ const CurrentlyPlayingSongInfoContainer = () => {
         iconClassName: 'material-icons-round-outlined',
         handlerFunction: () =>
           artworkPath &&
-          window.api.songUpdates.saveArtworkToSystem(artworkPath),
+          window.api.songUpdates.saveArtworkToSystem(
+            artworkPath,
+            `${title} song artwork`.replaceAll(' ', '_'),
+          ),
         isDisabled: currentSongData.artworkPath === undefined,
       },
       {
@@ -263,13 +267,13 @@ const CurrentlyPlayingSongInfoContainer = () => {
                     content: <span>&apos;{title}&apos; blacklisted.</span>,
                     icon: <span className="material-icons-round">block</span>,
                   },
-                ])
+                ]),
               )
               .catch((err) => console.error(err));
           else
             changePromptMenuData(
               true,
-              <BlacklistSongConfrimPrompt title={title} songIds={[songId]} />
+              <BlacklistSongConfrimPrompt title={title} songIds={[songId]} />,
             );
           return toggleMultipleSelections(false);
         },
@@ -280,7 +284,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
         handlerFunction: () => {
           changePromptMenuData(
             true,
-            <DeleteSongsFromSystemConfrimPrompt songIds={[songId]} />
+            <DeleteSongsFromSystemConfrimPrompt songIds={[songId]} />,
           );
           toggleMultipleSelections(false);
         },
@@ -319,7 +323,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
               contextMenuItems,
               e.pageX,
               e.pageY,
-              contextMenuCurrentSongData
+              contextMenuCurrentSongData,
             );
           }}
         />
@@ -344,7 +348,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
                   contextMenuItems,
                   e.pageX,
                   e.pageY,
-                  contextMenuCurrentSongData
+                  contextMenuCurrentSongData,
                 );
               }}
               tabIndex={0}

@@ -12,7 +12,6 @@ const StorageSettings = () => {
     return window.api.storageData
       .getStorageUsage(forceRefresh)
       .then((res) => {
-        console.log(res);
         if (!res || res.totalSize === 0) return setStorageMetrics(undefined);
         return setStorageMetrics(res);
       })
@@ -257,7 +256,7 @@ const StorageSettings = () => {
                   parseByteSizes(
                     storageMetrics.rootSizes.size -
                       storageMetrics.rootSizes.freeSpace -
-                      storageMetrics.totalSize
+                      storageMetrics.totalSize,
                   )?.size
                 }
               </span>
@@ -285,7 +284,7 @@ const StorageSettings = () => {
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                 {
                   parseByteSizes(
-                    storageMetrics?.appDataSizes.tempArtworkCacheSize
+                    storageMetrics?.appDataSizes.tempArtworkCacheSize,
                   )?.size
                 }
               </span>

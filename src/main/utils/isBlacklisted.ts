@@ -6,7 +6,7 @@ export const isParentFolderBlacklisted = (folderPath: string) => {
 
   const isParentBlacklisted = folderBlacklist.some(
     (blacklistedFolderPath) =>
-      path.dirname(folderPath) === blacklistedFolderPath
+      path.dirname(folderPath) === blacklistedFolderPath,
   );
 
   return isParentBlacklisted;
@@ -15,17 +15,17 @@ export const isParentFolderBlacklisted = (folderPath: string) => {
 export const isFolderBlacklisted = (folderPath: string) => {
   const { folderBlacklist } = getBlacklistData();
 
-  const isBlacklsited = folderBlacklist.includes(path.normalize(folderPath));
+  const isBlacklisted = folderBlacklist.includes(path.normalize(folderPath));
   const isParentBlacklisted = isParentFolderBlacklisted(folderPath);
 
-  return isBlacklsited || isParentBlacklisted;
+  return isBlacklisted || isParentBlacklisted;
 };
 
 export const isSongBlacklisted = (songId: string, songPath: string) => {
   const { folderBlacklist, songBlacklist } = getBlacklistData();
 
   const isFolderInBlacklist = folderBlacklist.some((folderPath) =>
-    path.normalize(songPath).includes(path.normalize(folderPath))
+    path.normalize(songPath).includes(path.normalize(folderPath)),
   );
 
   const isSongInBlacklist = songBlacklist.includes(songId);

@@ -1,9 +1,3 @@
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable promise/always-return */
-/* eslint-disable promise/catch-or-return */
-/* eslint-disable react/self-closing-comp */
-/* eslint-disable react/button-has-type */
-/* eslint-disable import/prefer-default-export */
 import React, { CSSProperties, useContext } from 'react';
 import { FixedSizeGrid as Grid } from 'react-window';
 
@@ -36,7 +30,7 @@ const PlaylistsPage = () => {
   const [sortingOrder, setSortingOrder] = React.useState<PlaylistSortTypes>(
     currentlyActivePage?.data?.sortingOrder ||
       localStorageData?.sortingStates?.playlistsPage ||
-      'aToZ'
+      'aToZ',
   );
 
   const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
@@ -53,8 +47,9 @@ const PlaylistsPage = () => {
     () =>
       window.api.playlistsData.getPlaylistData([], sortingOrder).then((res) => {
         if (res && res.length > 0) setPlaylists(res);
+        return undefined;
       }),
-    [sortingOrder]
+    [sortingOrder],
   );
 
   React.useEffect(() => {
@@ -71,12 +66,12 @@ const PlaylistsPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      managePlaylistDataUpdatesInPlaylistsPage
+      managePlaylistDataUpdatesInPlaylistsPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        managePlaylistDataUpdatesInPlaylistsPage
+        managePlaylistDataUpdatesInPlaylistsPage,
       );
     };
   }, [fetchPlaylistData]);
@@ -88,7 +83,7 @@ const PlaylistsPage = () => {
   const selectAllHandler = useSelectAllHandler(
     playlists,
     'playlist',
-    'playlistId'
+    'playlistId',
   );
 
   const row = React.useCallback(
@@ -119,7 +114,7 @@ const PlaylistsPage = () => {
       }
       return <div style={style} />;
     },
-    [noOfColumns, playlists, selectAllHandler]
+    [noOfColumns, playlists, selectAllHandler],
   );
 
   const createNewPlaylist = React.useCallback(
@@ -129,9 +124,9 @@ const PlaylistsPage = () => {
         <NewPlaylistPrompt
           currentPlaylists={playlists}
           updatePlaylists={(newPlaylists) => setPlaylists(newPlaylists)}
-        />
+        />,
       ),
-    [changePromptMenuData, playlists]
+    [changePromptMenuData, playlists],
   );
 
   return (
@@ -146,9 +141,17 @@ const PlaylistsPage = () => {
               handlerFunction: createNewPlaylist,
               iconName: 'add',
             },
+            {
+              label: 'Import Playlist',
+              iconName: 'publish',
+              handlerFunction: () =>
+                window.api.playlistsData
+                  .importPlaylist()
+                  .catch((err) => console.error(err)),
+            },
           ],
           e.pageX,
-          e.pageY
+          e.pageY,
         )
       }
       focusable
@@ -187,7 +190,7 @@ const PlaylistsPage = () => {
                 clickHandler={() =>
                   toggleMultipleSelections(
                     !isMultipleSelectionEnabled,
-                    'playlist'
+                    'playlist',
                   )
                 }
                 tooltipLabel={
@@ -195,7 +198,24 @@ const PlaylistsPage = () => {
                 }
               />
               <Button
-                label="Add New Playlist"
+                label="Import Playlist"
+                className="import-playlist-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                iconName="publish"
+                clickHandler={(_, setIsDisabled, setIsPending) => {
+                  setIsDisabled(true);
+                  setIsPending(true);
+
+                  return window.api.playlistsData
+                    .importPlaylist()
+                    .finally(() => {
+                      setIsDisabled(false);
+                      setIsPending(false);
+                    })
+                    .catch((err) => console.error(err));
+                }}
+              />
+              <Button
+                label="Add Playlist"
                 className="add-new-playlist-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                 iconName="add"
                 clickHandler={createNewPlaylist}
@@ -250,7 +270,7 @@ const PlaylistsPage = () => {
                         ...currentPageData,
                         scrollTopOffset: data.scrollTop,
                       })),
-                    500
+                    500,
                   );
               }}
             >

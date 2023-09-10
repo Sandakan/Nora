@@ -1,6 +1,7 @@
 import MainContainer from '../MainContainer';
 import AppearanceSettings from './Settings/AppearanceSettings';
 import AudioPlaybackSettings from './Settings/AudioPlaybackSettings';
+import LyricsSettings from './Settings/LyricsSettings';
 import DefaultPageSettings from './Settings/DefaultPageSettings';
 import PreferencesSettings from './Settings/PreferencesSettings';
 import AccessibilitySettings from './Settings/AccessibilitySettings';
@@ -9,6 +10,7 @@ import AboutSettings from './Settings/AboutSettings';
 import StorageSettings from './Settings/StorageSettings';
 import EqualizerSettings from './Settings/EqualizerSettings';
 import PerformanceSettings from './Settings/PerformanceSettings';
+import AccountsSettings from './Settings/AccountsSettings';
 
 const SettingsPage = () => {
   return (
@@ -24,6 +26,12 @@ const SettingsPage = () => {
 
           {/* ? AUDIO PLAYBACK SETTINGS */}
           <AudioPlaybackSettings />
+
+          {/* ? ACCOUNTS SETTINGS */}
+          <AccountsSettings />
+
+          {/* ? LYRICS SETTINGS */}
+          <LyricsSettings />
 
           {/* ? EQUALIZER SETTINGS */}
           <EqualizerSettings />

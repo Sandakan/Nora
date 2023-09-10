@@ -65,6 +65,7 @@ export default (props: NewPlaylistPromptProp) => {
               : PlaylistDefaultCover
           }
           alt="Playlist default cover"
+          loading="eager"
           className="aspect-square w-full max-w-[15rem] rounded-xl shadow-lg"
         />
         <Button

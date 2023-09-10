@@ -10,6 +10,8 @@ const Notification = (props: AppNotification) => {
     delay,
     buttons,
     icon,
+    iconName,
+    iconClassName,
     type = 'DEFAULT',
     progressBarData = { max: 100, value: 50 },
   } = props;
@@ -18,7 +20,7 @@ const Notification = (props: AppNotification) => {
 
   const notificationRef = React.useRef(null as HTMLDivElement | null);
   const notificationTimeoutIdRef = React.useRef(
-    undefined as NodeJS.Timeout | undefined
+    undefined as NodeJS.Timeout | undefined,
   );
   const [dimensions, setDimensions] = React.useState({ width: 0, height: 0 });
 
@@ -40,12 +42,12 @@ const Notification = (props: AppNotification) => {
       notificationRef.current.classList.add('disappear-to-bottom');
       notificationRef.current.addEventListener('animationend', () =>
         updateNotifications((currNotifications) =>
-          currNotifications.filter((x) => x.id !== id)
-        )
+          currNotifications.filter((x) => x.id !== id),
+        ),
       );
     } else
       updateNotifications((currNotifications) =>
-        currNotifications.filter((x) => x.id !== id)
+        currNotifications.filter((x) => x.id !== id),
       );
   }, [
     id,
@@ -63,7 +65,7 @@ const Notification = (props: AppNotification) => {
       });
       notificationTimeoutIdRef.current = setTimeout(
         removeNotification,
-        delay ?? 5000
+        delay ?? 5000,
       );
     }
     return () => {
@@ -72,11 +74,23 @@ const Notification = (props: AppNotification) => {
       if (notification?.classList.contains('disappear-to-bottom')) {
         clearTimeout(notificationTimeoutIdRef.current);
         updateNotifications((currNotifications) =>
-          currNotifications.filter((x) => x.id !== id)
+          currNotifications.filter((x) => x.id !== id),
         );
       }
     };
   }, [delay, id, removeNotification, updateNotifications]);
+
+  const notificationIcon = React.useMemo(() => {
+    if (icon) return icon;
+    if (iconName)
+      return (
+        <span className={iconClassName ?? 'material-icons-round'}>
+          {iconName}
+        </span>
+      );
+    return undefined;
+  }, [icon, iconClassName, iconName]);
+
   return (
     <div
       className={`notification ${
@@ -95,7 +109,7 @@ const Notification = (props: AppNotification) => {
       >
         <div className="notification-info-container flex flex-row items-center">
           <div className="icon-container mx-3 flex items-center justify-center [&>img]:aspect-square [&>img]:h-4 [&>span]:text-xl">
-            {icon}
+            {notificationIcon}
           </div>
           <div className="message-container overflow-hidden text-ellipsis py-1">
             {content}

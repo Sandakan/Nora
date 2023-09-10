@@ -1,8 +1,8 @@
 /* eslint-disable no-loop-func */
 /* eslint-disable no-await-in-loop */
-import NodeID3 from 'node-id3';
 import path from 'path';
 import { readFile, stat } from 'fs/promises';
+import NodeID3 from 'node-id3';
 import sharp from 'sharp';
 
 import {
@@ -42,6 +42,10 @@ import sendSongID3Tags from './core/sendSongId3Tags';
 import { isSongBlacklisted } from './utils/isBlacklisted';
 import isPathAWebURL from './utils/isPathAWebUrl';
 
+import { appPreferences } from '../../package.json';
+
+const { metadataEditingSupportedExtensions } = appPreferences;
+
 export const fetchArtworkBufferFromURL = async (url: string) => {
   try {
     const res = await fetch(url);
@@ -50,7 +54,7 @@ export const fetchArtworkBufferFromURL = async (url: string) => {
     log(
       `Error occurred when fetching artwork from url. HTTP Error Code:${res.status} - ${res.statusText}`,
       undefined,
-      'ERROR'
+      'ERROR',
     );
     return undefined;
   } catch (error) {
@@ -64,7 +68,7 @@ export const generateLocalArtworkBuffer = (filePath: string) =>
     log(
       `ERROR OCCURRED WHEN TRYING TO GENERATE BUFFER OF THE SONG ARTWORK.`,
       { err },
-      'ERROR'
+      'ERROR',
     );
     return undefined;
   });
@@ -75,14 +79,15 @@ const generateArtworkBuffer = async (artworkPath?: string) => {
 
     if (isArtworkPathAWebURL) {
       const onlineArtworkBuffer = await fetchArtworkBufferFromURL(
-        artworkPath
-      ).catch((err) =>
+        artworkPath,
+      ).catch((err) => {
         log(
           `ERROR OCCURRED WHEN FETCHING ONLINE ARTWORK BUFFER, NEWLY ADDED TO THE SONG.`,
           { err },
-          'ERROR'
-        )
-      );
+          'ERROR',
+        );
+        return undefined;
+      });
       return onlineArtworkBuffer;
     }
     const localArtworkBuffer = await generateLocalArtworkBuffer(artworkPath);
@@ -91,21 +96,53 @@ const generateArtworkBuffer = async (artworkPath?: string) => {
   return undefined;
 };
 
+const parseImgDataForNodeID3 = async (
+  artworkPaths: ArtworkPaths,
+  artworkBuffer?: Buffer,
+): Promise<
+  | {
+      mime: string;
+      type: {
+        id: number;
+        name?: string | undefined;
+      };
+      description: string;
+      imageBuffer: Buffer;
+    }
+  | undefined
+> => {
+  if (artworkPaths.isDefaultArtwork) return undefined;
+
+  if (artworkBuffer) {
+    const pngBuffer = await sharp(artworkBuffer).toFormat('png').toBuffer();
+
+    if (pngBuffer) {
+      return {
+        type: { id: 1 },
+        mime: 'image/png',
+        description: 'artwork',
+        imageBuffer: pngBuffer,
+      };
+    }
+  }
+  return undefined;
+};
+
 const manageArtistDataUpdates = (
   artists: SavableArtist[],
   newSongData: SongTags,
-  prevSongData: SavableSongData
+  prevSongData: SavableSongData,
 ) => {
   // these artists should be created as new artists.
   const artistsWithoutIds = Array.isArray(newSongData.artists)
     ? newSongData.artists.filter(
-        (artist) => typeof artist.artistId !== 'string'
+        (artist) => typeof artist.artistId !== 'string',
       )
     : [];
   // these artists are available in the library but may not be in the initial song data.
   const artistsWithIds = Array.isArray(newSongData.artists)
     ? newSongData.artists.filter(
-        (artist) => typeof artist.artistId === 'string'
+        (artist) => typeof artist.artistId === 'string',
       )
     : [];
   //  these artists are available in the library and recently unlinked from the song.
@@ -115,21 +152,21 @@ const manageArtistDataUpdates = (
       ? prevSongData.artists.length > 0 && artistsWithIds.length === 0
         ? prevSongData.artists
         : prevSongData.artists.filter(
-            (a) => !artistsWithIds?.some((b) => a.artistId === b.artistId)
+            (a) => !artistsWithIds?.some((b) => a.artistId === b.artistId),
           )
       : [];
   // these artists are available in the library and already linked to the song.
   const linkedArtists =
     artistsWithIds.length > 0 && Array.isArray(prevSongData.artists)
-      ? artistsWithIds.filter((a) =>
-          prevSongData.artists?.some((b) => a.artistId === b.artistId)
+      ? artistsWithIds.filter(
+          (a) => prevSongData.artists?.some((b) => a.artistId === b.artistId),
         )
       : [];
   //  these artists are available in the library and recently linked to the song.
   const newlyLinkedArtists =
     artistsWithIds.length > 0 && Array.isArray(prevSongData.artists)
       ? artistsWithIds.filter(
-          (a) => !prevSongData.artists?.some((b) => a.artistId === b.artistId)
+          (a) => !prevSongData.artists?.some((b) => a.artistId === b.artistId),
         )
       : [];
 
@@ -137,13 +174,13 @@ const manageArtistDataUpdates = (
 
   if (artistsWithoutIds.length > 0) {
     log(
-      `User created ${artistsWithoutIds.length} no of artists when updating a song.`
+      `User created ${artistsWithoutIds.length} no of artists when updating a song.`,
     );
     for (let e = 0; e < artistsWithoutIds.length; e += 1) {
       const artistData = artistsWithoutIds[e];
       const songArtworkPaths = getSongArtworkPath(
         prevSongData.songId,
-        prevSongData.isArtworkAvailable
+        prevSongData.isArtworkAvailable,
       );
       const newArtist: SavableArtist = {
         artistId: generateRandomId(),
@@ -165,7 +202,7 @@ const manageArtistDataUpdates = (
     for (let i = 0; i < artists.length; i += 1) {
       if (
         unlinkedArtists.some(
-          (unlinkedArtist) => unlinkedArtist.artistId === artists[i].artistId
+          (unlinkedArtist) => unlinkedArtist.artistId === artists[i].artistId,
         )
       ) {
         if (
@@ -173,12 +210,12 @@ const manageArtistDataUpdates = (
           artists[i].songs[0].songId === prevSongData.songId
         ) {
           log(
-            `'${artists[i].name}' got removed because user removed the only link it has with a song.`
+            `'${artists[i].name}' got removed because user removed the only link it has with a song.`,
           );
           artists.splice(i, 1);
         } else {
           artists[i].songs = artists[i].songs.filter(
-            (s) => s.songId !== prevSongData.songId
+            (s) => s.songId !== prevSongData.songId,
           );
         }
       }
@@ -204,13 +241,13 @@ const manageArtistDataUpdates = (
           log(
             `ARTIST WITHOUT AN ID FOUND.`,
             { ARTIST_NAME: artist.name },
-            'ERROR'
+            'ERROR',
           );
         return {
           artistId: artist.artistId as string,
           name: artist.name,
         };
-      })
+      }),
     );
   }
 
@@ -229,7 +266,7 @@ const manageGenreDataUpdates = (
   genres: SavableGenre[],
   prevSongData: SavableSongData,
   newSongData: SongTags,
-  songArtworkPaths: ArtworkPaths
+  songArtworkPaths: ArtworkPaths,
 ) => {
   const { songId } = prevSongData;
   // these genres should be created as new genres.
@@ -244,21 +281,21 @@ const manageGenreDataUpdates = (
   const unlinkedGenres =
     genresWithIds.length > 0 && Array.isArray(prevSongData.genres)
       ? prevSongData.genres.filter(
-          (a) => !genresWithIds?.some((b) => a.genreId === b.genreId)
+          (a) => !genresWithIds?.some((b) => a.genreId === b.genreId),
         )
       : [];
   // these Genres are available in the library and already linked to the song.
   const linkedGenres =
     genresWithIds.length > 0 && Array.isArray(prevSongData.genres)
-      ? genresWithIds.filter((a) =>
-          prevSongData.genres?.some((b) => a.genreId === b.genreId)
+      ? genresWithIds.filter(
+          (a) => prevSongData.genres?.some((b) => a.genreId === b.genreId),
         )
       : [];
   //  these Genres are available in the library and recently linked to the song.
   const newlyLinkedGenres =
     genresWithIds.length > 0 && Array.isArray(prevSongData.genres)
       ? genresWithIds.filter(
-          (a) => !prevSongData.genres?.some((b) => a.genreId === b.genreId)
+          (a) => !prevSongData.genres?.some((b) => a.genreId === b.genreId),
         )
       : [];
 
@@ -284,7 +321,7 @@ const manageGenreDataUpdates = (
     for (let i = 0; i < genres.length; i += 1) {
       if (
         unlinkedGenres.some(
-          (unlinkedGenre) => unlinkedGenre.genreId === genres[i].genreId
+          (unlinkedGenre) => unlinkedGenre.genreId === genres[i].genreId,
         )
       ) {
         if (
@@ -292,7 +329,7 @@ const manageGenreDataUpdates = (
           genres[i].songs[0].songId === songId
         ) {
           log(
-            `'${genres[i].name}' got removed because user removed the only link it has with a song.`
+            `'${genres[i].name}' got removed because user removed the only link it has with a song.`,
           );
           genres.splice(i, 1);
         } else {
@@ -318,10 +355,10 @@ const manageGenreDataUpdates = (
           log(
             `GENRE WITHOUT AN ID FOUND.`,
             { GENRE_NAME: genre.name },
-            'ERROR'
+            'ERROR',
           );
         return { genreId: genre.genreId as string, name: genre.name };
-      })
+      }),
     );
   }
 
@@ -341,7 +378,7 @@ const manageAlbumDataUpdates = (
   albums: SavableAlbum[],
   prevSongData: SavableSongData,
   newSongData: SongTags,
-  songArtworkPaths: ArtworkPaths
+  songArtworkPaths: ArtworkPaths,
 ) => {
   const { songId } = prevSongData;
   if (newSongData.album) {
@@ -353,14 +390,14 @@ const manageAlbumDataUpdates = (
         for (let i = 0; i < albums.length; i += 1) {
           if (albums[i].albumId === prevSongData.album?.albumId) {
             albums[i].songs = albums[i].songs.filter(
-              (z) => z.songId !== songId
+              (z) => z.songId !== songId,
             );
           }
           if (albums[i].albumId === newSongData.album.albumId) {
             if (prevSongData.artists && albums[i].artists) {
               albums[i].artists = albums[i].artists?.filter(
                 (d) =>
-                  !prevSongData.artists?.some((e) => e.artistId === d.artistId)
+                  !prevSongData.artists?.some((e) => e.artistId === d.artistId),
               );
             }
             if (newSongData.artists) {
@@ -368,7 +405,7 @@ const manageAlbumDataUpdates = (
                 ...newSongData.artists.map((x) => ({
                   name: x.name,
                   artistId: x.artistId as string,
-                }))
+                })),
               );
             }
             albums[i].songs.push({ title: prevSongData.title, songId });
@@ -410,7 +447,7 @@ const manageAlbumDataUpdates = (
           albums.splice(c, 1);
         } else {
           albums[c].songs = albums[c].songs.filter(
-            (d) => d.songId !== prevSongData.songId
+            (d) => d.songId !== prevSongData.songId,
           );
         }
         prevSongData.album = undefined;
@@ -424,12 +461,13 @@ const manageAlbumDataUpdates = (
 
 const manageArtworkUpdates = async (
   prevSongData: SavableSongData,
-  newSongData: SongTags
+  newSongData: SongTags,
 ) => {
   const { songId } = prevSongData;
   const newArtworkPath = newSongData.artworkPath
     ? removeDefaultAppProtocolFromFilePath(newSongData.artworkPath)
     : undefined;
+  let isArtworkChanged = false;
 
   const artworkBuffer = await generateArtworkBuffer(newArtworkPath);
 
@@ -437,11 +475,12 @@ const manageArtworkUpdates = async (
     prevSongData.songId,
     prevSongData.isArtworkAvailable,
     false,
-    true
+    true,
   );
 
   if (songPrevArtworkPaths.artworkPath !== newArtworkPath) {
     log(`User changed the artwork of the song '${songId}'`);
+    isArtworkChanged = true;
     // check whether song had an artwork before
     if (prevSongData.isArtworkAvailable) {
       // had an artwork before
@@ -451,7 +490,7 @@ const manageArtworkUpdates = async (
         log(
           `ERROR OCCURRED WHEN TRYING TO REMOVE SONG ARTWORK OF '${songId}'.`,
           { err },
-          'ERROR'
+          'ERROR',
         );
         throw err;
       });
@@ -472,12 +511,17 @@ const manageArtworkUpdates = async (
       } else prevSongData.palette = undefined;
     }
   }
-  return { songPrevArtworkPaths, artworkBuffer, updatedSongData: prevSongData };
+  return {
+    songPrevArtworkPaths,
+    artworkBuffer,
+    updatedSongData: prevSongData,
+    isArtworkChanged,
+  };
 };
 
 const manageArtworkUpdatesOfSongsFromUnknownSource = async (
   prevSongTags: SongTags,
-  newSongTags: SongTags
+  newSongTags: SongTags,
 ) => {
   const oldArtworkPath = prevSongTags.artworkPath
     ? removeDefaultAppProtocolFromFilePath(prevSongTags.artworkPath)
@@ -518,28 +562,38 @@ const manageArtworkUpdatesOfSongsFromUnknownSource = async (
 
 const manageLyricsUpdates = (
   tags: SongTags,
-  prevSongData?: SavableSongData
+  prevTags: NodeID3.Tags,
+  prevSongData?: SavableSongData,
 ) => {
-  const parsedLyrics = tags.lyrics ? parseLyrics(tags.lyrics) : undefined;
+  const parsedSyncedLyrics = tags.synchronizedLyrics
+    ? parseLyrics(tags.synchronizedLyrics)
+    : undefined;
+  const parsedUnsyncedLyrics = tags.unsynchronizedLyrics
+    ? parseLyrics(tags.unsynchronizedLyrics)
+    : undefined;
 
-  const unsynchronisedLyrics =
-    parsedLyrics && !parsedLyrics.isSynced
-      ? { language: 'ENG', text: parsedLyrics.unparsedLyrics }
-      : undefined;
+  const unsynchronisedLyrics = parsedUnsyncedLyrics
+    ? { language: 'ENG', text: parsedUnsyncedLyrics.unparsedLyrics }
+    : prevTags.unsynchronisedLyrics;
 
-  const synchronisedLyrics = convertParsedLyricsToNodeID3Format(parsedLyrics);
+  const synchronisedLyrics = convertParsedLyricsToNodeID3Format(
+    parsedSyncedLyrics,
+    prevTags.synchronisedLyrics,
+  );
 
-  if (parsedLyrics) {
+  if (parsedSyncedLyrics || parsedUnsyncedLyrics) {
     updateCachedLyrics((cachedLyrics) => {
-      if (cachedLyrics && tags.lyrics) {
+      if (cachedLyrics) {
         const { title } = cachedLyrics;
         if (title === tags.title || title === prevSongData?.title) {
-          const { isSynced } = parsedLyrics;
+          const lyrics = (parsedSyncedLyrics ||
+            parsedUnsyncedLyrics) as LyricsData;
+          const { isSynced } = lyrics;
           const lyricsType: LyricsTypes = isSynced ? 'SYNCED' : 'ANY';
 
-          cachedLyrics.lyrics = parsedLyrics;
+          cachedLyrics.lyrics = lyrics;
           cachedLyrics.lyricsType = lyricsType;
-          cachedLyrics.copyright = parsedLyrics.copyright;
+          cachedLyrics.copyright = lyrics.copyright;
           cachedLyrics.source = 'IN_SONG_LYRICS';
           cachedLyrics.isOfflineLyricsAvailable = true;
 
@@ -550,14 +604,30 @@ const manageLyricsUpdates = (
     });
   }
 
-  return { parsedLyrics, unsynchronisedLyrics, synchronisedLyrics };
+  return {
+    // parsedLyrics: parsedSyncedLyrics || parsedUnsyncedLyrics,
+    unsynchronisedLyrics,
+    synchronisedLyrics,
+  };
 };
 
 const updateSongId3TagsOfUnknownSource = async (
   songPath: string,
   newSongTags: SongTags,
-  sendUpdatedData: boolean
+  sendUpdatedData: boolean,
 ) => {
+  const pathExt = path.extname(songPath).replace(/\W/, '');
+  const isASupporedFormat =
+    metadataEditingSupportedExtensions.includes(pathExt);
+
+  if (!isASupporedFormat)
+    return log(
+      `Lyrics cannot be saved because current song extension (${pathExt}) is not supported for modifying metadata.`,
+      { songPath },
+      'ERROR',
+      { sendToRenderer: 'FAILURE' },
+    );
+
   const songsOutsideLibraryData = getSongsOutsideLibraryData();
 
   for (const songOutsideLibraryData of songsOutsideLibraryData) {
@@ -566,24 +636,27 @@ const updateSongId3TagsOfUnknownSource = async (
         removeDefaultAppProtocolFromFilePath(songPath);
 
       const oldSongTags = await sendSongID3Tags(songPath, false);
+      const oldNodeID3Tags = await NodeID3.Promise.read(songPath);
 
       // ?  /////////// ARTWORK DATA FOR SONGS FROM UNKNOWN SOURCES /////////////////
 
       const { artworkPath, artworkBuffer } =
         await manageArtworkUpdatesOfSongsFromUnknownSource(
           oldSongTags,
-          newSongTags
+          newSongTags,
         );
       songOutsideLibraryData.artworkPath = artworkPath;
 
       updateSongsOutsideLibraryData(
         songOutsideLibraryData.songId,
-        songOutsideLibraryData
+        songOutsideLibraryData,
       );
 
       // ?  /////////// LYRICS DATA FOR SONGS FROM UNKNOWN SOURCES /////////////////
-      const { synchronisedLyrics, unsynchronisedLyrics } =
-        manageLyricsUpdates(newSongTags);
+      const { synchronisedLyrics, unsynchronisedLyrics } = manageLyricsUpdates(
+        newSongTags,
+        oldNodeID3Tags,
+      );
 
       const id3Tags: NodeID3.Tags = {
         title: newSongTags.title,
@@ -591,6 +664,7 @@ const updateSongId3TagsOfUnknownSource = async (
         album: newSongTags.album?.title,
         genre: newSongTags.genres?.map((genre) => genre.name).join(', '),
         composer: newSongTags.composer,
+        trackNumber: newSongTags.trackNumber?.toString(),
         year: newSongTags.releasedYear
           ? `${newSongTags.releasedYear}`
           : undefined,
@@ -606,10 +680,10 @@ const updateSongId3TagsOfUnknownSource = async (
           log(
             `FAILED TO UPDATE THE SONG FILE WITH THE NEW UPDATES. `,
             { err },
-            'ERROR'
+            'ERROR',
           );
           throw err;
-        }
+        },
       );
 
       if (sendUpdatedData) {
@@ -638,7 +712,7 @@ const updateSongId3TagsOfUnknownSource = async (
           isKnownSource: false,
           isBlacklisted: isSongBlacklisted(
             songOutsideLibraryData.songId,
-            songOutsideLibraryData.path
+            songOutsideLibraryData.path,
           ),
         };
 
@@ -653,7 +727,7 @@ const updateSongId3Tags = async (
   songIdOrPath: string,
   tags: SongTags,
   sendUpdatedData = false,
-  isKnownSource = true
+  isKnownSource = true,
 ) => {
   const songs = getSongsData();
   let artists = getArtistsData();
@@ -667,7 +741,7 @@ const updateSongId3Tags = async (
       const data = await updateSongId3TagsOfUnknownSource(
         songIdOrPath,
         tags,
-        sendUpdatedData
+        sendUpdatedData,
       );
       if (data) result.updatedData = data;
       result.success = true;
@@ -677,7 +751,7 @@ const updateSongId3Tags = async (
       log(
         'Error occurred when updating song id3 tags of a song from unknown source.',
         { error, songIdOrPath },
-        'ERROR'
+        'ERROR',
       );
       return result;
     }
@@ -690,6 +764,7 @@ const updateSongId3Tags = async (
         try {
           log(`Started the song data updating procees of the song '${songId}'`);
           let song = songs[x];
+          const prevTags = await NodeID3.Promise.read(song.path);
 
           // / / / / / SONG TITLE / / / / / / /
           song.title = tags.title;
@@ -706,7 +781,7 @@ const updateSongId3Tags = async (
           const { updatedArtists } = manageArtistDataUpdates(
             artists,
             tags,
-            song
+            song,
           );
           artists = updatedArtists;
 
@@ -715,7 +790,7 @@ const updateSongId3Tags = async (
             albums,
             song,
             tags,
-            songPrevArtworkPaths
+            songPrevArtworkPaths,
           );
           albums = updatedAlbumData.updatedAlbums;
           song = updatedAlbumData.updatedSongData;
@@ -726,52 +801,24 @@ const updateSongId3Tags = async (
             genres,
             song,
             tags,
-            songPrevArtworkPaths
+            songPrevArtworkPaths,
           );
           genres = updatedGenreData.updatedGenres;
           song = updatedGenreData.updatedSongData;
 
+          // / / / / / / / SONG TRACK NUMBER / / / / / / /
+          song.trackNo = tags.trackNumber;
+
           // / / / / / / / SONG LYRICS / / / / / / /
           const { synchronisedLyrics, unsynchronisedLyrics } =
-            manageLyricsUpdates(tags, song);
+            manageLyricsUpdates(tags, prevTags, song);
 
           // / / / / / SONG FILE UPDATE PROCESS AND UPDATE FINALIZATION / / / / / /
           const artworkPaths = getSongArtworkPath(
             song.songId,
             song.isArtworkAvailable,
-            true
+            true,
           );
-
-          const parseImgDataForNodeID3 = async (): Promise<
-            | {
-                mime: string;
-                type: {
-                  id: number;
-                  name?: string | undefined;
-                };
-                description: string;
-                imageBuffer: Buffer;
-              }
-            | undefined
-          > => {
-            if (artworkPaths.isDefaultArtwork) return undefined;
-
-            if (artworkBuffer) {
-              const pngBuffer = await sharp(artworkBuffer)
-                .toFormat('png')
-                .toBuffer();
-
-              if (pngBuffer) {
-                return {
-                  type: { id: 1 },
-                  mime: 'image/png',
-                  description: 'artwork',
-                  imageBuffer: pngBuffer,
-                };
-              }
-            }
-            return undefined;
-          };
 
           const id3Tags: NodeID3.Tags = {
             title: tags.title,
@@ -779,8 +826,9 @@ const updateSongId3Tags = async (
             album: tags.album?.title,
             genre: tags.genres?.map((genre) => genre.name).join(', '),
             composer: tags.composer,
+            trackNumber: tags.trackNumber?.toString(),
             year: tags.releasedYear ? `${tags.releasedYear}` : undefined,
-            image: await parseImgDataForNodeID3(),
+            image: await parseImgDataForNodeID3(artworkPaths, artworkBuffer),
             unsynchronisedLyrics,
             synchronisedLyrics: synchronisedLyrics || [],
           };
@@ -789,7 +837,7 @@ const updateSongId3Tags = async (
             log(
               `FAILED TO UPDATE THE SONG FILE WITH THE NEW UPDATES. `,
               { err },
-              'ERROR'
+              'ERROR',
             );
             throw err;
           });
@@ -798,7 +846,7 @@ const updateSongId3Tags = async (
             log(
               `FAILED TO GET SONG STATS AFTER UPDATING THE SONG WITH NEWER METADATA.`,
               { err },
-              'ERROR'
+              'ERROR',
             );
             throw err;
           });
@@ -820,8 +868,8 @@ const updateSongId3Tags = async (
 
           if (sendUpdatedData) {
             const songArtists = artists
-              .filter((z) =>
-                song.artists?.some((y) => y.artistId === z.artistId)
+              .filter(
+                (z) => song.artists?.some((y) => y.artistId === z.artistId),
               )
               .map((z) => ({
                 artistId: z.artistId,
@@ -863,7 +911,7 @@ const updateSongId3Tags = async (
   }
   log('FAILED TO UPDATE SONGSDATA. SONGS ARRAY IS EMPTY.', undefined, 'ERROR');
   throw new Error(
-    'Called songDataUpdatedFunction without data in the songs array.'
+    'Called songDataUpdatedFunction without data in the songs array.',
   );
 };
 

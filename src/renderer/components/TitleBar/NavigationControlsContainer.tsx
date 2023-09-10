@@ -4,7 +4,8 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
 
 const NavigationControlsContainer = () => {
-  const { pageHistoryIndex, noOfPagesInHistory } = React.useContext(AppContext);
+  const { pageHistoryIndex, noOfPagesInHistory, bodyBackgroundImage } =
+    React.useContext(AppContext);
   const { updatePageHistoryIndex } = React.useContext(AppUpdateContext);
   return (
     <div className="navigation-controls-container ml-12 flex min-w-[9rem] items-center justify-between">
@@ -15,6 +16,9 @@ const NavigationControlsContainer = () => {
           pageHistoryIndex > 0
             ? 'available visible translate-x-0 opacity-100 focus-visible:!outline'
             : 'invisible -translate-x-8 opacity-0'
+        } ${
+          bodyBackgroundImage &&
+          '!text-font-color-white hover:!text-font-color-highlight'
         }`}
         clickHandler={() => updatePageHistoryIndex('decrement')}
         tooltipLabel="Go Back (Alt + Left Arrow)"
@@ -27,6 +31,9 @@ const NavigationControlsContainer = () => {
           noOfPagesInHistory > 0
             ? 'available scale-1 visible opacity-100 focus-visible:!outline'
             : 'invisible scale-50 opacity-0'
+        } ${
+          bodyBackgroundImage &&
+          '!text-font-color-white hover:!text-font-color-highlight'
         }`}
         clickHandler={() => updatePageHistoryIndex('home')}
         tooltipLabel="Go to Home (Alt + Home)"
@@ -39,6 +46,9 @@ const NavigationControlsContainer = () => {
           noOfPagesInHistory !== 0 && pageHistoryIndex < noOfPagesInHistory
             ? 'available visible translate-x-0 opacity-100 focus-visible:!outline'
             : 'invisible translate-x-8 opacity-0'
+        } ${
+          bodyBackgroundImage &&
+          '!text-font-color-white hover:!text-font-color-highlight'
         }`}
         clickHandler={() => updatePageHistoryIndex('increment')}
         tooltipLabel="Go forward (Alt + Right Arrow)"

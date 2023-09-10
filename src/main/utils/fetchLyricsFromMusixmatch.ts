@@ -24,7 +24,7 @@ interface TrackInfo {
 
 export const parseMusicmatchDataFromLyrics = async (
   data: MusixmatchLyricsAPI,
-  lyricsType: LyricsTypes
+  lyricsType: LyricsTypes,
 ): Promise<MusixmatchLyrics | undefined> => {
   let metadata = {} as MusixmatchLyricsMetadata;
   const output: string[] = [];
@@ -63,7 +63,7 @@ export const parseMusicmatchDataFromLyrics = async (
       output.push(
         `[length:${Math.floor(metadata.duration / 60)}:${
           metadata.duration % 60
-        }]`
+        }]`,
       );
     }
 
@@ -76,7 +76,7 @@ export const parseMusicmatchDataFromLyrics = async (
       data.message.body.macro_calls['track.subtitles.get'].message.header
         .status_code === 200 &&
       !Array.isArray(
-        data.message.body.macro_calls['track.subtitles.get'].message.body
+        data.message.body.macro_calls['track.subtitles.get'].message.body,
       )
     ) {
       // contains synced lyrics
@@ -89,28 +89,24 @@ export const parseMusicmatchDataFromLyrics = async (
           output.push(
             `[copyright:Musixmatch Lyrics. ${lyrics_copyright.replaceAll(
               '\n',
-              ''
-            )}]`
+              '',
+            )}]`,
           );
           metadata.copyright = lyrics_copyright;
         }
 
         const lyricsLinesData = JSON.parse(
-          subtitle_body
+          subtitle_body,
         ) as MusixmatchLyricsLine[];
 
         for (let i = 0; i < lyricsLinesData.length; i += 1) {
           const { text, time } = lyricsLinesData[i];
           output.push(
-            `[${
-              time.minutes.toString().length > 1
-                ? time.minutes
-                : `0${time.minutes}`
-            }:${
+            `[${time.minutes >= 10 ? time.minutes : `0${time.minutes}`}:${
               time.seconds.toString().length > 1
                 ? time.seconds
                 : `0${time.seconds}`
-            }.${time.hundredths}]${text || '♪'}`
+            }.${time.hundredths}]${text || '♪'}`,
           );
         }
       }
@@ -120,7 +116,7 @@ export const parseMusicmatchDataFromLyrics = async (
       data.message.body.macro_calls['track.lyrics.get'].message.header
         .status_code === 200 &&
       !Array.isArray(
-        data.message.body.macro_calls['track.lyrics.get'].message.body
+        data.message.body.macro_calls['track.lyrics.get'].message.body,
       ) &&
       data.message.body.macro_calls['track.lyrics.get'].message.body.lyrics
         .restricted !== 1
@@ -129,7 +125,7 @@ export const parseMusicmatchDataFromLyrics = async (
       output.push(
         ...data.message.body.macro_calls[
           'track.lyrics.get'
-        ].message.body.lyrics.lyrics_body.split('\n')
+        ].message.body.lyrics.lyrics_body.split('\n'),
       );
       metadata.copyright =
         data.message.body.macro_calls[
@@ -143,7 +139,7 @@ export const parseMusicmatchDataFromLyrics = async (
       output.unshift(
         `[by:Implementation from Fashni's MxLRC (https://github.com/fashni/MxLRC)]`,
         `[re:Nora Player (${repository.url})]`,
-        `[ve:${version}]`
+        `[ve:${version}]`,
       );
 
     const lyrics = output.join('\n');
@@ -168,7 +164,7 @@ const fetchLyricsFromMusixmatch = async (
   usertoken: string,
   // eslint-disable-next-line default-param-last
   lyricsType: LyricsTypes = 'ANY',
-  abortSignal?: AbortSignal
+  abortSignal?: AbortSignal,
 ): Promise<MusixmatchLyrics | undefined> => {
   const headers = {
     authority: 'apic-desktop.musixmatch.com',
@@ -196,7 +192,7 @@ const fetchLyricsFromMusixmatch = async (
       return lyrics;
     }
     throw new Error(
-      `Error occurred when fetching lyrics.\nHTTP Error Code : ${res.status} - ${res.statusText}`
+      `Error occurred when fetching lyrics.\nHTTP Error Code : ${res.status} - ${res.statusText}`,
     );
   } catch (error) {
     log('Error ocurred when fetching lyrics', { error }, 'ERROR');

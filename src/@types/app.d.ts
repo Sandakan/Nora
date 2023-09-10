@@ -2,11 +2,15 @@ import NodeID3 from 'node-id3';
 import { ReactElement, ReactNode } from 'react';
 import { ButtonProps } from 'renderer/components/Button';
 import { api } from '../main/preload';
+import { LastFMSessionData } from './last_fm_api';
+import { SimilarArtist, Tag } from './last_fm_artist_info_api';
 
 declare global {
   interface Window {
     api: typeof api;
   }
+
+  type LogMessageTypes = 'INFO' | 'WARN' | 'ERROR';
 
   type IpcChannels =
     | 'app/beforeQuitEvent'
@@ -128,7 +132,7 @@ declare global {
       onlineArtworkPaths?: OnlineArtistArtworks;
     }[];
     duration: number;
-    artwork?: string;
+    artwork?: string | Buffer;
     artworkPath?: string;
     path: string;
     isAFavorite: boolean;
@@ -151,14 +155,17 @@ declare global {
     year?: number;
     palette?: NodeVibrantPalette;
     isBlacklisted: boolean;
+    trackNo?: number;
   }
 
-  interface GetAllSongsResult {
-    data: AudioInfo[];
-    pageNo: number;
-    maxResultsPerPage: number;
-    noOfPages: number;
-    sortType: SongSortTypes;
+  type PaginatingData = { start: number; end: number };
+
+  interface PaginatedResult<DataType extends unknown, SortType extends string> {
+    data: DataType[];
+    sortType: SortType;
+    start: number;
+    end: number;
+    total: number;
   }
 
   interface ToggleLikeSongReturnValue {
@@ -202,9 +209,10 @@ declare global {
 
   type RepeatTypes = 'false' | 'repeat' | 'repeat-1';
 
+  type PlayerVolume = { isMuted: boolean; value: number };
   interface Player {
     isCurrentSongPlaying: boolean;
-    volume: { isMuted: boolean; value: number };
+    volume: PlayerVolume;
     isRepeating: RepeatTypes;
     songPosition: number;
     isShuffling: boolean;
@@ -214,6 +222,8 @@ declare global {
   }
 
   type SongSkipReason = 'USER_SKIP' | 'PLAYER_SKIP';
+
+  type AutomaticallySaveLyricsTypes = 'SYNCED' | 'SYNCED_OR_UN_SYNCED' | 'NONE';
 
   type LyricsTypes = 'SYNCED' | 'UN_SYNCED' | 'ANY';
 
@@ -239,8 +249,14 @@ declare global {
     isOfflineLyricsAvailable: boolean;
   }
 
-  interface SyncedLyricLine {
+  export type SyncedLyricsLineText = {
     text: string;
+    start: number;
+    end: number;
+    unparsedText: string;
+  }[];
+  interface SyncedLyricLine {
+    text: string | SyncedLyricsLineText;
     start: number;
     end: number;
   }
@@ -255,6 +271,13 @@ declare global {
   }
 
   // node-id3 synchronisedLyrics types.
+  type UnsynchronisedLyrics =
+    | {
+        language: string;
+        text: string;
+      }
+    | undefined;
+
   type SynchronisedLyrics =
     | Array<{
         /**
@@ -337,13 +360,18 @@ declare global {
     | 'windowPositions.miniPlayer'
     | 'windowDiamensions.mainWindow'
     | 'windowDiamensions.miniPlayer'
+    | 'windowState'
     | 'recentSearches'
     | 'preferences.isMiniPlayerAlwaysOnTop'
     | 'preferences.autoLaunchApp'
     | 'preferences.isMusixmatchLyricsEnabled'
     | 'preferences.hideWindowOnClose'
     | 'preferences.openWindowAsHiddenOnSystemStart'
+    | 'preferences.sendSongScrobblingDataToLastFM'
+    | 'preferences.sendSongFavoritesDataToLastFM'
+    | 'preferences.sendNowPlayingSongDataToLastFM'
     | 'customMusixmatchUserToken'
+    | 'lastFmSessionData'
     | 'storageMetrics'
     | PageSortTypes;
 
@@ -365,10 +393,14 @@ declare global {
     musicFolders: FolderStructure[];
     preferences: {
       autoLaunchApp: boolean;
+      openWindowMaximizedOnStart: boolean;
       openWindowAsHiddenOnSystemStart: boolean;
       isMiniPlayerAlwaysOnTop: boolean;
       isMusixmatchLyricsEnabled: boolean;
       hideWindowOnClose: boolean;
+      sendSongScrobblingDataToLastFM: boolean;
+      sendSongFavoritesDataToLastFM: boolean;
+      sendNowPlayingSongDataToLastFM: boolean;
     };
     windowPositions: {
       mainWindow?: WindowCordinates;
@@ -378,8 +410,10 @@ declare global {
       mainWindow?: WindowCordinates;
       miniPlayer?: WindowCordinates;
     };
+    windowState: WindowState;
     recentSearches: string[];
     customMusixmatchUserToken?: string;
+    lastFmSessionData?: LastFMSessionData;
     storageMetrics?: StorageMetrics;
   }
 
@@ -393,6 +427,7 @@ declare global {
     y: number;
   }
 
+  type WindowState = 'maximized' | 'normal' | 'minimized';
   interface MusicFolderData {
     path: string;
     stats: {
@@ -431,6 +466,8 @@ declare global {
     shuffleArtworkFromSongCovers: boolean;
     removeAnimationsOnBatteryPower: boolean;
     isPredictiveSearchEnabled: boolean;
+    lyricsAutomaticallySaveState: AutomaticallySaveLyricsTypes;
+    showTrackNumberAsSongIndex: boolean;
   }
 
   interface CurrentSong {
@@ -462,9 +499,9 @@ declare global {
   }
 
   interface IgnoredDuplicates {
-    artists: string[][];
-    albums: string[][];
-    genres: string[][];
+    artists: string[];
+    albums: string[];
+    genres: string[];
   }
 
   interface SortingStates {
@@ -473,6 +510,12 @@ declare global {
     playlistsPage?: PlaylistSortTypes;
     albumsPage?: AlbumSortTypes;
     genresPage?: GenreSortTypes;
+    musicFoldersPage?: SongSortTypes;
+  }
+
+  interface LyricsEditorSettings {
+    offset: number;
+    editNextAndCurrentStartAndEndTagsAutomatically: boolean;
   }
 
   interface LocalStorage {
@@ -484,6 +527,7 @@ declare global {
     ignoredDuplicates: IgnoredDuplicates;
     sortingStates: SortingStates;
     equalizerPreset: Equalizer;
+    lyricsEditorSettings: LyricsEditorSettings;
   }
 
   // ? Playlists related types
@@ -511,7 +555,7 @@ declare global {
       songId: string;
     }[];
     artworkName?: string;
-    backgroundColor?: { rgb: unknown };
+    backgroundColor?: { rgb: NodeVibrantPaletteSwatch['rgb'] };
   }
 
   interface Genre extends SavableGenre {
@@ -564,12 +608,21 @@ declare global {
   interface ArtistInfo extends Artist {
     artistPalette?: NodeVibrantPalette;
     artistBio?: string;
+    similarArtists?: SimilarArtistInfo;
+    tags?: Tag[];
+  }
+
+  interface SimilarArtistInfo {
+    availableArtists: SimilarArtist[];
+    unAvailableArtists: SimilarArtist[];
   }
 
   interface ArtistInfoFromNet {
     artistArtworks?: OnlineArtistArtworks;
     artistPalette?: NodeVibrantPalette;
     artistBio?: string;
+    similarArtists: SimilarArtistInfo;
+    tags: Tag[];
   }
 
   interface OnlineArtistArtworks {
@@ -629,11 +682,13 @@ declare global {
 
   interface PromptMenuData {
     isVisible: boolean;
-    content: ReactElement<any, any>;
+    content: ReactNode;
     className: string;
   }
 
-  // ? Notification panel related types
+  // ? Notification panel related
+
+  type DefaultCodes = 'SUCCESS' | 'FAILURE' | 'LOADING' | 'INFO';
 
   type ErrorCodes =
     | 'SONG_NOT_FOUND'
@@ -650,6 +705,7 @@ declare global {
     | 'UNSUPPORTED_FILE_EXTENSION';
 
   type MessageCodes =
+    | DefaultCodes
     | ErrorCodes
     | 'SONG_LIKE'
     | 'SONG_DISLIKE'
@@ -687,6 +743,8 @@ declare global {
     order?: number;
     content: ReactNode;
     icon?: ReactElement<any, any>;
+    iconName?: string;
+    iconClassName?: string;
     buttons?: ButtonProps[];
     type?: NotificationTypes;
     progressBarData?: {
@@ -700,10 +758,15 @@ declare global {
   interface NavigationHistory {
     pageTitle: PageTitles;
     data?: PageData;
+    onPageChange?: (
+      changedPageTitle: PageTitles,
+      changedPageData?: any,
+    ) => void;
   }
 
   interface PageData extends Record<string, unknown> {
     scrollTopOffset?: number;
+    isLowResponseRequired?: boolean;
   }
 
   interface NavigationHistoryData {
@@ -839,6 +902,7 @@ declare global {
     | 'MusicFolderInfo'
     | 'CurrentQueue'
     | 'SongTagsEditor'
+    | 'LyricsEditor'
     | 'AllSearchResults';
 
   type PromiseFunctionReturn = Promise<{ success: boolean; message?: string }>;
@@ -953,12 +1017,15 @@ declare global {
     title: string;
     artists?: SongTagsArtistData[];
     album?: SongTagsAlbumData;
+    trackNumber?: number;
     releasedYear?: number;
     genres?: { genreId?: string; name: string; artworkPath?: string }[];
     composer?: string;
-    lyrics?: string;
+    synchronizedLyrics?: string;
+    unsynchronizedLyrics?: string;
     artworkPath?: string;
     duration: number;
+    isLyricsSavePending?: boolean;
   }
 
   interface SongOutsideLibraryData {

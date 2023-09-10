@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
-import { app } from 'electron';
 import fs from 'fs/promises';
 import path from 'path';
+import { app } from 'electron';
 import log from './log';
 
 const resourcePaths = [
@@ -20,7 +20,7 @@ const userDataPath = app.getPath('userData');
 const manageErrors = (err: any) => {
   if ('code' in err && err.code === 'ENOENT') {
     return log(
-      `A RECOVERABLE ERROR OCURRED WHEN RESETTING AN APP DATA MODULE.\nERROR : ${err}`
+      `A RECOVERABLE ERROR OCURRED WHEN RESETTING AN APP DATA MODULE.\nERROR : ${err}`,
     );
   }
   throw err;
@@ -46,7 +46,7 @@ const resetAppData = async () => {
     log(
       `AN UNRECOVERABLE ERROR OCCURRED WHEN RESETTING THE APP.`,
       { error },
-      'ERROR'
+      'ERROR',
     );
     throw error;
   }

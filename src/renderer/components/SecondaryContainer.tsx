@@ -28,7 +28,7 @@ const SecondaryContainer = React.forwardRef(
         </div>
       </ErrorBoundary>
     );
-  }
+  },
 );
 
 SecondaryContainer.displayName = 'SecondaryContainer';

@@ -8,14 +8,14 @@ import {
 } from '../filesystem';
 import log from '../log';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
-import { parseSong } from '../parseSong';
+import { tryToParseSong } from '../parseSong/parseSong';
 import { saveAbortController } from './controlAbortControllers';
 import { generatePalettes } from '../other/generatePalette';
 
 const abortController = new AbortController();
 saveAbortController(
   'checkFolderForUnknownContentModifications',
-  abortController
+  abortController,
 );
 
 const getSongPathsRelativeToFolder = (folderPath: string) => {
@@ -25,7 +25,7 @@ const getSongPathsRelativeToFolder = (folderPath: string) => {
   if (Array.isArray(songPaths)) {
     const allSongPaths = songPaths.concat(blacklistedSongPaths);
     const relevantSongPaths = allSongPaths.filter(
-      (songPath) => path.dirname(songPath) === folderPath
+      (songPath) => path.dirname(songPath) === folderPath,
     );
     return relevantSongPaths;
   }
@@ -36,17 +36,17 @@ const getFullPathsOfFolderDirs = async (folderPath: string) => {
   try {
     const dirs = await fs.readdir(folderPath);
     const supportedDirs = dirs.filter((filePath) =>
-      supportedMusicExtensions.includes(path.extname(filePath))
+      supportedMusicExtensions.includes(path.extname(filePath)),
     );
     const fullPaths = supportedDirs.map((filePath) =>
-      path.join(folderPath, filePath)
+      path.join(folderPath, filePath),
     );
     return fullPaths;
   } catch (error) {
     log(
       `ERROR OCCURRED WHEN TRYING TO READ THE DIRECTORY.`,
       { error },
-      'ERROR'
+      'ERROR',
     );
     throw error;
   }
@@ -54,7 +54,7 @@ const getFullPathsOfFolderDirs = async (folderPath: string) => {
 
 const removeDeletedSongsFromLibrary = async (
   deletedSongPaths: string[],
-  abortSignal: AbortSignal
+  abortSignal: AbortSignal,
 ) => {
   try {
     await removeSongsFromLibrary(deletedSongPaths, abortSignal);
@@ -62,34 +62,34 @@ const removeDeletedSongsFromLibrary = async (
     log(
       `ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA`,
       { error },
-      'ERROR'
+      'ERROR',
     );
   }
 };
 
 const addNewlyAddedSongsToLibrary = async (
   newlyAddedSongPaths: string[],
-  abortSignal: AbortSignal
+  abortSignal: AbortSignal,
 ) => {
   for (let i = 0; i < newlyAddedSongPaths.length; i += 1) {
     if (abortSignal?.aborted) {
       log(
         'Parsing songs in the music folder aborted by an abortController signal.',
         { reason: abortSignal?.reason },
-        'WARN'
+        'WARN',
       );
       break;
     }
 
     const newlyAddedSongPath = newlyAddedSongPaths[i];
     try {
-      await parseSong(newlyAddedSongPath);
+      await tryToParseSong(newlyAddedSongPath, false, false);
       log(`${path.basename(newlyAddedSongPath)} song added.`);
     } catch (error) {
       log(
         `ERROR OCCURRED WHEN PARSING SONGS ADDED BEFORE APPLICATION LAUNCH `,
         { error },
-        'ERROR'
+        'ERROR',
       );
     }
   }
@@ -105,11 +105,11 @@ const checkFolderForUnknownModifications = async (folderPath: string) => {
     if (dirs) {
       // checks for newly added songs that got added before application launch
       const newlyAddedSongPaths = dirs.filter(
-        (dir) => !relevantFolderSongPaths.some((songPath) => songPath === dir)
+        (dir) => !relevantFolderSongPaths.some((songPath) => songPath === dir),
       );
       // checks for deleted songs that got deleted before application launch
       const deletedSongPaths = relevantFolderSongPaths.filter(
-        (songPath) => !dirs.some((dir) => dir === songPath)
+        (songPath) => !dirs.some((dir) => dir === songPath),
       );
 
       log(
@@ -119,7 +119,7 @@ const checkFolderForUnknownModifications = async (folderPath: string) => {
           newlyAddedSongPaths.length > 0 || deletedSongPaths.length > 0
             ? `\nNewSongs : '${newlyAddedSongPaths}';\n DeletedSongs : '${deletedSongPaths}';`
             : ''
-        }`
+        }`,
       );
 
       // Prioritises deleting songs before adding new songs to prevent data clashes.
@@ -127,7 +127,7 @@ const checkFolderForUnknownModifications = async (folderPath: string) => {
         // deleting songs from the library that got deleted before application launch
         await removeDeletedSongsFromLibrary(
           deletedSongPaths,
-          abortController.signal
+          abortController.signal,
         );
       }
 
@@ -135,7 +135,7 @@ const checkFolderForUnknownModifications = async (folderPath: string) => {
         // parses new songs that added before application launch
         await addNewlyAddedSongsToLibrary(
           newlyAddedSongPaths,
-          abortController.signal
+          abortController.signal,
         );
       }
     }

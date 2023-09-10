@@ -42,7 +42,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
 
   const ignoredSongs = React.useMemo(
     () => storage.ignoredSongsWithFeatArtists.getIgnoredSongsWithFeatArtists(),
-    []
+    [],
   );
 
   React.useEffect(() => {
@@ -61,7 +61,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
       const filteredFeatArtists = featArtists.filter((featArtistName) => {
         const isArtistAvailable = artistNames.some(
           (name) =>
-            name.toLowerCase().trim() === featArtistName.toLowerCase().trim()
+            name.toLowerCase().trim() === featArtistName.toLowerCase().trim(),
         );
 
         return (
@@ -96,10 +96,10 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
     return [];
   }, [separatedFeatArtistsNames]);
 
-  const separateArtists = React.useCallback(
+  const addFeatArtistsToSong = React.useCallback(
     (
       setIsDisabled: (_state: boolean) => void,
-      setIsPending: (_state: boolean) => void
+      setIsPending: (_state: boolean) => void,
     ) => {
       setIsDisabled(true);
       setIsPending(true);
@@ -108,7 +108,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
         .resolveFeaturingArtists(
           songId,
           separatedFeatArtistsNames,
-          isRemovingFeatInfoFromTitle
+          isRemovingFeatInfoFromTitle,
         )
         .then((res) => {
           if (res?.updatedData) {
@@ -135,6 +135,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
           return addNewNotifications([
             {
               content: 'Featuring artists suggestion resolved successfully.',
+              iconName: 'done',
               delay: 5000,
               id: 'FeatArtistsSuggestion',
             },
@@ -154,8 +155,25 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
       updateSongInfo,
       currentSongData.songId,
       updateCurrentSongData,
-    ]
+    ],
   );
+
+  const ignoreSuggestion = React.useCallback(() => {
+    storage.ignoredSongsWithFeatArtists.setIgnoredSongsWithFeatArtists([
+      songId,
+    ]);
+
+    setIsIgnored(true);
+    addNewNotifications([
+      {
+        id: 'suggestionIgnored',
+        iconName: 'do_not_disturb_on',
+        iconClassName: 'material-icons-round-outlined',
+        delay: 5000,
+        content: `Suggestion ignored.`,
+      },
+    ]);
+  }, [addNewNotifications, songId]);
 
   return (
     <>
@@ -194,7 +212,10 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
                 tooltipLabel={
                   isMessageVisible ? 'Hide suggestion' : 'Show suggestion'
                 }
-                clickHandler={() => setIsMessageVisible((state) => !state)}
+                clickHandler={(e) => {
+                  e.preventDefault();
+                  setIsMessageVisible((state) => !state);
+                }}
               />
             </div>
           </label>
@@ -233,7 +254,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
                   iconClassName="material-icons-round-outlined"
                   label={`Add ${separatedFeatArtistsNames.length} artists to the song`}
                   clickHandler={(_, setIsDisabled, setIsPending) =>
-                    separateArtists(setIsDisabled, setIsPending)
+                    addFeatArtistsToSong(setIsDisabled, setIsPending)
                   }
                 />
                 <Button
@@ -254,24 +275,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
                   iconName="do_not_disturb_on"
                   iconClassName="material-icons-round-outlined"
                   label="Ignore"
-                  clickHandler={() => {
-                    storage.ignoredSeparateArtists.setIgnoredSeparateArtists([
-                      songId,
-                    ]);
-                    setIsIgnored(true);
-                    addNewNotifications([
-                      {
-                        id: 'suggestionIgnored',
-                        icon: (
-                          <span className="material-icons-round-outlined">
-                            do_not_disturb_on
-                          </span>
-                        ),
-                        delay: 5000,
-                        content: <span>Suggestion ignored.</span>,
-                      },
-                    ]);
-                  }}
+                  clickHandler={ignoreSuggestion}
                 />
                 <span
                   className="material-icons-round-outlined ml-4 cursor-pointer text-xl opacity-80 transition-opacity hover:opacity-100"

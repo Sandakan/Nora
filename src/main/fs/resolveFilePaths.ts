@@ -30,7 +30,7 @@ export const getSongArtworkPath = (
   id: string,
   isArtworkAvailable = true,
   resetCache = false,
-  sendRealPath = false
+  sendRealPath = false,
 ): ArtworkPaths => {
   if (resetCache) resetArtworkCache('songs');
 
@@ -47,14 +47,14 @@ export const getSongArtworkPath = (
         path.join(
           FILE_URL,
           DEFAULT_ARTWORK_SAVE_LOCATION,
-          `${id}-optimized.webp`
+          `${id}-optimized.webp`,
         ) + timestampStr,
     };
   }
   const defaultPath =
     path.join(
       FILE_URL,
-      getAssetPath('images', 'webp', 'song_cover_default.webp')
+      getAssetPath('images', 'webp', 'song_cover_default.webp'),
     ) + timestampStr;
   return {
     isDefaultArtwork: isArtworkAvailable,
@@ -65,7 +65,7 @@ export const getSongArtworkPath = (
 
 export const getArtistArtworkPath = (
   artworkName?: string,
-  resetCache = false
+  resetCache = false,
 ): ArtworkPaths => {
   if (resetCache) resetArtworkCache('artists');
 
@@ -78,19 +78,19 @@ export const getArtistArtworkPath = (
         path.join(
           DEFAULT_FILE_URL,
           DEFAULT_ARTWORK_SAVE_LOCATION,
-          `${artworkName}`
+          `${artworkName}`,
         ) + timestampStr,
       optimizedArtworkPath:
         path.join(
           DEFAULT_FILE_URL,
           DEFAULT_ARTWORK_SAVE_LOCATION,
-          `${artworkName.replace(/\.webp^/, '-optimized.webp')}`
+          `${artworkName.replace(/\.webp^/, '-optimized.webp')}`,
         ) + timestampStr,
     };
   }
   const defaultPath = path.join(
     DEFAULT_FILE_URL,
-    getAssetPath('images', 'webp', 'artist_cover_default.webp')
+    getAssetPath('images', 'webp', 'artist_cover_default.webp'),
   );
   return {
     isDefaultArtwork: !artworkName,
@@ -101,7 +101,7 @@ export const getArtistArtworkPath = (
 
 export const getAlbumArtworkPath = (
   artworkName?: string,
-  resetCache = false
+  resetCache = false,
 ): ArtworkPaths => {
   if (resetCache) resetArtworkCache('albums');
 
@@ -114,19 +114,19 @@ export const getAlbumArtworkPath = (
         path.join(
           DEFAULT_FILE_URL,
           DEFAULT_ARTWORK_SAVE_LOCATION,
-          `${artworkName}`
+          `${artworkName}`,
         ) + timestampStr,
       optimizedArtworkPath:
         path.join(
           DEFAULT_FILE_URL,
           DEFAULT_ARTWORK_SAVE_LOCATION,
-          `${artworkName.replace(/\.webp^/, '-optimized.webp')}`
+          `${artworkName.replace(/\.webp^/, '-optimized.webp')}`,
         ) + timestampStr,
     };
   }
   const defaultPath = path.join(
     DEFAULT_FILE_URL,
-    getAssetPath('images', 'webp', 'album_cover_default.webp')
+    getAssetPath('images', 'webp', 'album_cover_default.webp'),
   );
   return {
     isDefaultArtwork: !artworkName,
@@ -137,7 +137,7 @@ export const getAlbumArtworkPath = (
 
 export const getGenreArtworkPath = (
   artworkName?: string,
-  resetCache = false
+  resetCache = false,
 ): ArtworkPaths => {
   if (resetCache) resetArtworkCache('genres');
 
@@ -150,19 +150,19 @@ export const getGenreArtworkPath = (
         path.join(
           DEFAULT_FILE_URL,
           DEFAULT_ARTWORK_SAVE_LOCATION,
-          `${artworkName}`
+          `${artworkName}`,
         ) + timestampStr,
       optimizedArtworkPath:
         path.join(
           DEFAULT_FILE_URL,
           DEFAULT_ARTWORK_SAVE_LOCATION,
-          `${artworkName.replace(/\.webp^/, '-optimized.webp')}`
+          `${artworkName.replace(/\.webp^/, '-optimized.webp')}`,
         ) + timestampStr,
     };
   }
   const defaultPath = path.join(
     DEFAULT_FILE_URL,
-    getAssetPath('images', 'webp', 'song_cover_default.webp')
+    getAssetPath('images', 'webp', 'song_cover_default.webp'),
   );
   return {
     isDefaultArtwork: !artworkName,
@@ -174,7 +174,7 @@ export const getGenreArtworkPath = (
 export const getPlaylistArtworkPath = (
   playlistId: string,
   isArtworkAvailable: boolean,
-  resetCache = false
+  resetCache = false,
 ): ArtworkPaths => {
   if (resetCache) resetArtworkCache('playlists');
 
@@ -184,22 +184,22 @@ export const getPlaylistArtworkPath = (
     playlistId === 'History'
       ? path.join(
           DEFAULT_FILE_URL,
-          getAssetPath('images', 'webp', 'history-playlist-icon.webp')
+          getAssetPath('images', 'webp', 'history-playlist-icon.webp'),
         ) + timestampStr
       : playlistId === 'Favorites'
       ? path.join(
           DEFAULT_FILE_URL,
-          getAssetPath('images', 'webp', 'favorites-playlist-icon.webp')
+          getAssetPath('images', 'webp', 'favorites-playlist-icon.webp'),
         ) + timestampStr
       : isArtworkAvailable
       ? path.join(
           DEFAULT_FILE_URL,
           DEFAULT_ARTWORK_SAVE_LOCATION,
-          `${playlistId}.webp`
+          `${playlistId}.webp`,
         ) + timestampStr
       : path.join(
           DEFAULT_FILE_URL,
-          getAssetPath('images', 'webp', 'playlist_cover_default.webp')
+          getAssetPath('images', 'webp', 'playlist_cover_default.webp'),
         ) + timestampStr;
   return {
     isDefaultArtwork: !isArtworkAvailable,
@@ -211,7 +211,7 @@ export const getPlaylistArtworkPath = (
 export const removeDefaultAppProtocolFromFilePath = (filePath: string) => {
   const strippedPath = filePath.replace(
     /nora:[/\\]{1,2}localFiles[/\\]{1,2}|\?[\w+=\w+&?]+$/gm,
-    ''
+    '',
   );
 
   if (platform === 'linux') return `/${strippedPath}`;

@@ -24,7 +24,7 @@ const SongGenresInput = (props: Props) => {
     updateGenreKeyword,
   } = props;
   return (
-    <div className="tag-input mb-6 flex w-[45%] min-w-[10rem] flex-col">
+    <div className="tag-input flex min-w-[10rem] max-w-2xl flex-col">
       <label htmlFor="song-genres-id3-tag">Genres</label>
       <div className="mt-2 w-[90%] rounded-xl border-2 border-background-color-2 p-2 dark:border-dark-background-color-2">
         <div className="genres-container flex flex-wrap p-2 empty:py-2 empty:after:h-full empty:after:w-full empty:after:text-center empty:after:text-[#ccc] empty:after:content-['No_genres_selected_for_this_song.'] dark:empty:after:text-[#ccc]">
@@ -44,7 +44,7 @@ const SongGenresInput = (props: Props) => {
                         ...prevData,
                         genres:
                           prevData.genres?.filter(
-                            (x) => x.name !== genre.name
+                            (x) => x.name !== genre.name,
                           ) ?? [],
                       };
                     });
@@ -56,6 +56,7 @@ const SongGenresInput = (props: Props) => {
         </div>
         <input
           type="search"
+          id="song-genres-id3-tag"
           className="mt-4 w-full rounded-xl border-2 border-transparent bg-background-color-2 p-2 transition-colors focus:border-font-color-highlight dark:bg-dark-background-color-2 dark:focus:border-dark-font-color-highlight"
           placeholder="Search for genres here."
           value={genreKeyword}
@@ -66,7 +67,7 @@ const SongGenresInput = (props: Props) => {
           onKeyDown={(e) => e.stopPropagation()}
         />
         {genreResults.length > 0 && (
-          <ol className="genres-results-container mt-4 rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2 ">
+          <ol className="genres-results-container mt-4 rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2 max-h-60 overflow-y-auto">
             {genreResults.map((x) => (
               <li
                 key={x.genreId ?? x.name}
@@ -75,7 +76,7 @@ const SongGenresInput = (props: Props) => {
                   updateSongInfo((prevData) => {
                     const genres =
                       prevData.genres?.filter(
-                        (genre) => genre.name !== x.name
+                        (genre) => genre.name !== x.name,
                       ) ?? [];
                     genres?.push({
                       name: x.name,
@@ -102,11 +103,11 @@ const SongGenresInput = (props: Props) => {
               updateSongInfo((prevData) => {
                 const genres =
                   prevData.genres?.filter(
-                    (genre) => genre.name !== genreKeyword
+                    (genre) => genre.name !== genreKeyword,
                   ) ?? [];
                 if (
                   genreResults.some(
-                    (x) => genreKeyword.toLowerCase() === x.name.toLowerCase()
+                    (x) => genreKeyword.toLowerCase() === x.name.toLowerCase(),
                   )
                 ) {
                   for (let x = 0; x < genreResults.length; x += 1) {

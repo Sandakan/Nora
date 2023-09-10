@@ -43,12 +43,12 @@ const fetchSongArtworksFromSpotify = async (spotifySongId: string) => {
         const highResArtworkUrl =
           SPOTIFY_IMAGE_BASE_URL + spotifyReqId + HIGH_RES + spotifyImgId;
 
-        console.log(highResArtworkUrl, lowResArtworkUrl);
+        // console.log(highResArtworkUrl, lowResArtworkUrl);
         return { highResArtworkUrl, lowResArtworkUrl };
       }
     }
     throw new Error(
-      `Error occurred when fetching artwork from url.\nHTTP Error code ${res.status} - ${res.statusText}`
+      `Error occurred when fetching artwork from url.\nHTTP Error code ${res.status} - ${res.statusText}`,
     );
   } catch (error) {
     log(`Error occurred when fetching artwork from url.`, { error }, 'ERROR');

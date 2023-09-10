@@ -6,14 +6,15 @@ import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 
 import Song from 'renderer/components/SongsPage/Song';
-import MainContainer from 'renderer/components/MainContainer';
+import SecondaryContainer from 'renderer/components/SecondaryContainer';
 
 type Props = { songData: SongData[] };
 
 const AllSongResults = (prop: Props) => {
   const { currentlyActivePage, localStorageData } =
     React.useContext(AppContext);
-  const { updateCurrentlyActivePageData } = React.useContext(AppUpdateContext);
+  const { updateCurrentlyActivePageData, createQueue, playSong } =
+    React.useContext(AppUpdateContext);
 
   const { songData } = prop;
   const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
@@ -21,6 +22,17 @@ const AllSongResults = (prop: Props) => {
   const { width, height } = useResizeObserver(songsContainerRef);
 
   const selectAllHandler = useSelectAllHandler(songData, 'songs', 'songId');
+
+  const handleSongPlayBtnClick = React.useCallback(
+    (currSongId: string) => {
+      const queueSongIds = songData
+        .filter((song) => !song.isBlacklisted)
+        .map((song) => song.songId);
+      createQueue(queueSongIds, 'songs', false, undefined, false);
+      playSong(currSongId, true);
+    },
+    [createQueue, playSong, songData],
+  );
 
   const songs = React.useCallback(
     (props: { index: number; style: React.CSSProperties }) => {
@@ -56,19 +68,21 @@ const AllSongResults = (prop: Props) => {
             isAFavorite={isAFavorite}
             isBlacklisted={isBlacklisted}
             selectAllHandler={selectAllHandler}
+            onPlayClick={handleSongPlayBtnClick}
           />
         </div>
       );
     },
     [
+      handleSongPlayBtnClick,
       localStorageData?.preferences?.isSongIndexingEnabled,
       selectAllHandler,
       songData,
-    ]
+    ],
   );
 
   return (
-    <MainContainer
+    <SecondaryContainer
       className="songs-container h-full flex-1"
       ref={songsContainerRef}
       focusable
@@ -98,14 +112,14 @@ const AllSongResults = (prop: Props) => {
                     ...currentPageData,
                     scrollTopOffset: data.scrollOffset,
                   })),
-                500
+                500,
               );
           }}
         >
           {songs}
         </List>
       )}
-    </MainContainer>
+    </SecondaryContainer>
   );
 };
 

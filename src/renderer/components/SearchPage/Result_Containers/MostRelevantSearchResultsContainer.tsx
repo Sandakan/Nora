@@ -69,10 +69,10 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             iconName: 'shortcut',
             handlerFunction: () => {
               const newQueue = queue.queue.filter(
-                (id) => id !== firstResult.songId
+                (id) => id !== firstResult.songId,
               );
               const duplicateSongIndex = queue.queue.indexOf(
-                firstResult.songId
+                firstResult.songId,
               );
 
               const currentSongIndex =
@@ -85,7 +85,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
               newQueue.splice(
                 newQueue.indexOf(currentSongData.songId) + 1 || 0,
                 0,
-                firstResult.songId
+                firstResult.songId,
               );
               updateQueueData(currentSongIndex, newQueue, undefined, false);
               addNewNotifications([
@@ -117,10 +117,11 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
                       <Img
                         src={firstResult.artworkPaths?.artworkPath}
                         alt="Song Artwork"
+                        loading="eager"
                       />
                     ),
                   },
-                ]
+                ],
                 // <span className="material-icons-round icon">playlist_add</span>
               );
             },
@@ -131,7 +132,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             iconName: 'folder_open',
             handlerFunction: () =>
               window.api.songUpdates.revealSongInFileExplorer(
-                firstResult.songId
+                firstResult.songId,
               ),
           },
           {
@@ -144,7 +145,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
               }),
           },
         ]}
-      />
+      />,
     );
   }
 
@@ -175,7 +176,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
                   firstResult.songs.map((song) => song.songId),
                   undefined,
                   undefined,
-                  true
+                  true,
                 )
                 .then((songs) => {
                   if (Array.isArray(songs))
@@ -186,7 +187,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
                       'artist',
                       false,
                       firstResult.artistId,
-                      true
+                      true,
                     );
                   return undefined;
                 }),
@@ -211,7 +212,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             },
           },
         ]}
-      />
+      />,
     );
   }
 
@@ -242,7 +243,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
                   firstResult.songs.map((song) => song.songId),
                   undefined,
                   undefined,
-                  true
+                  true,
                 )
                 .then((songs) => {
                   if (Array.isArray(songs))
@@ -253,7 +254,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
                       'album',
                       false,
                       firstResult.albumId,
-                      true
+                      true,
                     );
                   return undefined;
                 }),
@@ -279,7 +280,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             },
           },
         ]}
-      />
+      />,
     );
   }
 
@@ -311,13 +312,13 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
                       'playlist',
                       false,
                       firstResult.playlistId,
-                      true
+                      true,
                     );
                   return undefined;
                 }),
           },
         ]}
-      />
+      />,
     );
   }
 
@@ -343,7 +344,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
                   firstResult.songs.map((song) => song.songId),
                   undefined,
                   undefined,
-                  true
+                  true,
                 )
                 .then((songs) => {
                   if (Array.isArray(songs))
@@ -354,13 +355,13 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
                       'playlist',
                       false,
                       firstResult.genreId,
-                      true
+                      true,
                     );
                   return undefined;
                 }),
           },
         ]}
-      />
+      />,
     );
   }
 

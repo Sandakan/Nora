@@ -8,7 +8,7 @@ import Button from '../Button';
 import MainContainer from '../MainContainer';
 
 const PromptMenu = () => {
-  const { PromptMenuData } = React.useContext(AppContext);
+  const { promptMenuData } = React.useContext(AppContext);
   const { changePromptMenuData } = React.useContext(AppUpdateContext);
   const promptMenuRef =
     React.useRef() as React.MutableRefObject<HTMLDialogElement>;
@@ -16,17 +16,17 @@ const PromptMenu = () => {
   const [isContentVisible, setIsContentVisible] = React.useState(false);
 
   React.useEffect(() => {
-    if (PromptMenuData.isVisible) setIsContentVisible(true);
-  }, [PromptMenuData.isVisible]);
+    if (promptMenuData.isVisible) setIsContentVisible(true);
+  }, [promptMenuData.isVisible]);
 
   React.useEffect(() => {
-    if (PromptMenuData && promptMenuRef.current) {
-      const { isVisible } = PromptMenuData;
+    if (promptMenuData && promptMenuRef.current) {
+      const { isVisible } = promptMenuData;
       if (isVisible) {
         if (!promptMenuRef.current.open) promptMenuRef.current.showModal();
       }
     }
-  }, [PromptMenuData]);
+  }, [promptMenuData]);
 
   React.useEffect(() => {
     const dialog = promptMenuRef.current;
@@ -41,7 +41,7 @@ const PromptMenu = () => {
     };
 
     const manageDialogAnimationEnd = () => {
-      if (dialog && !PromptMenuData.isVisible) {
+      if (dialog && !promptMenuData.isVisible) {
         dialog.close();
         setIsContentVisible(false);
       }
@@ -51,7 +51,7 @@ const PromptMenu = () => {
       promptMenuRef.current.addEventListener('click', manageDialogClose);
       promptMenuRef.current.addEventListener(
         'animationend',
-        manageDialogAnimationEnd
+        manageDialogAnimationEnd,
       );
     }
     return () => {
@@ -60,13 +60,13 @@ const PromptMenu = () => {
         dialog.removeEventListener('animationend', manageDialogAnimationEnd);
       }
     };
-  }, [PromptMenuData.isVisible, changePromptMenuData]);
+  }, [promptMenuData.isVisible, changePromptMenuData]);
 
   return (
     <dialog
       className={`dialog-menu relative left-1/2 top-1/2 h-fit max-h-[80%] min-h-[300px] w-[80%] min-w-[800px] max-w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-background-color-1 py-10 shadow-[rgba(100,100,111,0.2)_0px_7px_29px_0px] transition-[transform,visibility,opacity] ease-in-out open:backdrop:transition-[background,backdrop-filter] dark:bg-dark-background-color-1 
       ${
-        PromptMenuData.isVisible
+        promptMenuData.isVisible
           ? 'open:animate-dialog-appear-ease-in-out open:backdrop:bg-[hsla(228deg,7%,14%,0.75)] open:backdrop:dark:bg-[hsla(228deg,7%,14%,0.75)]'
           : 'animate-dialog-dissappear-ease-in-out backdrop:bg-[hsla(228deg,7%,14%,0)] backdrop:dark:bg-[hsla(228deg,7%,14%,0)]'
       }
@@ -78,6 +78,7 @@ const PromptMenu = () => {
       ref={promptMenuRef}
     >
       <Button
+        key={0}
         className="prompt-menu-close-btn absolute right-4 top-4 !m-0 !rounded-none !border-0 !p-0 text-font-color-black outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white"
         iconName="close"
         iconClassName="!leading-none !text-xl"
@@ -88,10 +89,10 @@ const PromptMenu = () => {
       />
       <MainContainer
         className={`prompt-menu-inner relative max-h-full px-8 pb-2 text-font-color-black dark:text-font-color-white ${
-          PromptMenuData.className ?? ''
+          promptMenuData.className ?? ''
         }`}
       >
-        {isContentVisible && PromptMenuData.content}
+        {isContentVisible && promptMenuData.content}
       </MainContainer>
     </dialog>
   );

@@ -15,6 +15,8 @@ import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.
 import DeleteSongsFromSystemConfrimPrompt from './DeleteSongsFromSystemConfrimPrompt';
 import Button from '../Button';
 
+import { appPreferences } from '../../../../package.json';
+
 interface SongProp {
   songId: string;
   artworkPaths: ArtworkPaths;
@@ -27,9 +29,11 @@ interface SongProp {
   isBlacklisted?: boolean;
   additionalContextMenuItems?: ContextMenuItem[];
   index: number;
+  trackNo?: number | string;
   isIndexingSongs: boolean;
   isAFavorite: boolean;
   className?: string;
+  onPlayClick?: (currSongId: string) => void;
   style?: React.CSSProperties;
   isDraggable?: boolean;
   provided?: DraggableProvided;
@@ -75,8 +79,10 @@ const Song = React.forwardRef(
       album,
       style,
       year,
+      trackNo,
       selectAllHandler,
       provided = {} as any,
+      onPlayClick,
     } = props;
 
     const [isAFavorite, setIsAFavorite] = React.useState(props.isAFavorite);
@@ -85,7 +91,7 @@ const Song = React.forwardRef(
 
     React.useEffect(() => {
       setIsSongPlaying(
-        () => currentSongData?.songId === songId && isCurrentSongPlaying
+        () => currentSongData?.songId === songId && isCurrentSongPlaying,
       );
       setIsAFavorite((prevState) => {
         if (currentSongData?.songId === songId)
@@ -100,8 +106,9 @@ const Song = React.forwardRef(
     ]);
 
     const handlePlayBtnClick = React.useCallback(() => {
-      playSong(songId);
-    }, [playSong, songId]);
+      if (onPlayClick) return onPlayClick(songId);
+      return playSong(songId);
+    }, [onPlayClick, playSong, songId]);
 
     const handleLikeButtonClick = React.useCallback(() => {
       window.api.playerControls
@@ -145,7 +152,7 @@ const Song = React.forwardRef(
       if (multipleSelectionsData.multipleSelections.length <= 0) return false;
       if (
         multipleSelectionsData.multipleSelections.some(
-          (selectionId) => selectionId === songId
+          (selectionId) => selectionId === songId,
         )
       )
         return true;
@@ -199,7 +206,7 @@ const Song = React.forwardRef(
         currentlyActivePage.pageTitle !== 'AlbumInfo' &&
         currentlyActivePage?.data?.albumId !== album.albumId
       )
-        changeCurrentActivePage('SongInfo', {
+        changeCurrentActivePage('AlbumInfo', {
           albumId: album.albumId,
         });
     }, [
@@ -295,7 +302,7 @@ const Song = React.forwardRef(
               newQueue.splice(
                 newQueue.indexOf(currentSongData.songId) + 1 || 0,
                 0,
-                songId
+                songId,
               );
               updateQueueData(currentSongIndex, newQueue, undefined, false);
               addNewNotifications([
@@ -332,7 +339,9 @@ const Song = React.forwardRef(
                   content: `Added 1 song to the queue.`,
                   icon: (
                     <Img
-                      src={artworkPaths.optimizedArtworkPath}
+                      src={
+                        artworkPaths?.optimizedArtworkPath || DefaultSongCover
+                      }
                       alt="Song Artwork"
                     />
                   ),
@@ -355,7 +364,7 @@ const Song = React.forwardRef(
           handlerFunction: () => {
             window.api.playerControls
               .toggleLikeSongs(
-                isMultipleSelectionsEnabled ? [...songIds] : [songId]
+                isMultipleSelectionsEnabled ? [...songIds] : [songId],
               )
               .then((res) => {
                 if (res && res.likes.length + res.dislikes.length > 0) {
@@ -378,7 +387,7 @@ const Song = React.forwardRef(
               <AddSongsToPlaylists
                 songIds={isAMultipleSelection ? songIds : [songId]}
                 title={title}
-              />
+              />,
             );
             toggleMultipleSelections(false);
           },
@@ -391,7 +400,7 @@ const Song = React.forwardRef(
               updateMultipleSelections(
                 songId,
                 'songs',
-                isAMultipleSelection ? 'remove' : 'add'
+                isAMultipleSelection ? 'remove' : 'add',
               );
             } else
               toggleMultipleSelections(!isAMultipleSelection, 'songs', [
@@ -449,6 +458,13 @@ const Song = React.forwardRef(
           isDisabled: isMultipleSelectionsEnabled,
         },
         {
+          label: 'Re-parse song',
+          class: 'sync',
+          iconName: 'sync',
+          handlerFunction: () => window.api.songUpdates.reParseSong(path),
+          isDisabled: isMultipleSelectionsEnabled,
+        },
+        {
           label: 'Hr',
           isContextMenuItemSeperator: true,
           handlerFunction: () => true,
@@ -475,13 +491,13 @@ const Song = React.forwardRef(
                       content: `'${title}' blacklisted.`,
                       icon: <span className="material-icons-round">block</span>,
                     },
-                  ])
+                  ]),
                 )
                 .catch((err) => console.error(err));
             else
               changePromptMenuData(
                 true,
-                <BlacklistSongConfrimPrompt title={title} songIds={[songId]} />
+                <BlacklistSongConfrimPrompt title={title} songIds={[songId]} />,
               );
             return toggleMultipleSelections(false);
           },
@@ -495,7 +511,7 @@ const Song = React.forwardRef(
               true,
               <DeleteSongsFromSystemConfrimPrompt
                 songIds={isMultipleSelectionsEnabled ? songIds : [songId]}
-              />
+              />,
             );
             toggleMultipleSelections(false);
           },
@@ -525,8 +541,8 @@ const Song = React.forwardRef(
       addNewNotifications,
       title,
       songId,
-      artworkPaths.optimizedArtworkPath,
-      artworkPaths.artworkPath,
+      artworkPaths?.optimizedArtworkPath,
+      artworkPaths?.artworkPath,
       toggleIsFavorite,
       changePromptMenuData,
       isMultipleSelectionEnabled,
@@ -549,7 +565,7 @@ const Song = React.forwardRef(
             subTitle:
               artists?.map((artist) => artist.name).join(', ') ??
               'Unknown artist',
-            artworkPath: artworkPaths.artworkPath,
+            artworkPath: artworkPaths?.optimizedArtworkPath || DefaultSongCover,
           };
 
     return (
@@ -579,7 +595,7 @@ const Song = React.forwardRef(
             contextMenuItems,
             e.pageX,
             e.pageY,
-            contextMenuItemData
+            contextMenuItemData,
           );
         }}
         onClick={(e) => {
@@ -587,13 +603,20 @@ const Song = React.forwardRef(
             if (e.getModifierState('Shift') === true && selectAllHandler)
               selectAllHandler(songId);
             else if (
+              e.getModifierState('Control') === true &&
+              !isMultipleSelectionEnabled
+            )
+              toggleMultipleSelections(!isAMultipleSelection, 'songs', [
+                songId,
+              ]);
+            else if (
               isMultipleSelectionEnabled &&
               multipleSelectionsData.selectionType === 'songs'
             )
               updateMultipleSelections(
                 songId,
                 'songs',
-                isAMultipleSelection ? 'remove' : 'add'
+                isAMultipleSelection ? 'remove' : 'add',
               );
           }, 100);
         }}
@@ -604,7 +627,7 @@ const Song = React.forwardRef(
         ref={ref}
       >
         <div
-          className={`song-cover-and-play-btn-container flex w-[(6rem,15%,9rem)] shrink-0 items-center justify-center ${
+          className={`song-cover-and-play-btn-container flex w-[clamp(6rem,15%,9rem)] shrink-0 items-center justify-center ${
             !isIndexingSongs && '!w-[clamp(4rem,10%,6rem)]'
           }`}
         >
@@ -627,9 +650,11 @@ const Song = React.forwardRef(
                 block
               </span>
             </div>
-          ) : isIndexingSongs ? (
+          ) : isIndexingSongs ||
+            (trackNo &&
+              localStorageData.preferences.showTrackNumberAsSongIndex) ? (
             <div className="relative mx-1 h-fit rounded-2xl bg-background-color-1 px-3 text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1">
-              {index + 1}
+              {trackNo ?? index + 1}
             </div>
           ) : (
             ''
@@ -655,8 +680,8 @@ const Song = React.forwardRef(
               />
             </div>
             <Img
-              src={artworkPaths.artworkPath}
-              loading="lazy"
+              src={artworkPaths?.optimizedArtworkPath || DefaultSongCover}
+              loading="eager"
               alt="Song cover"
               className={`aspect-square max-h-full object-contain py-[0.1rem] transition-[filter] duration-300 group-focus-within:brightness-50 group-hover:brightness-50 ${
                 isSongPlaying ? 'brightness-50' : ''
@@ -698,7 +723,10 @@ const Song = React.forwardRef(
             )}
           </div>
           <div className="song-year flex items-center justify-center text-center text-xs transition-none sm:hidden">
-            {year ?? '----'}
+            {window.api.properties.isInDevelopment &&
+            appPreferences.showSongIdInsteadOfSongYear
+              ? songId
+              : year ?? '----'}
           </div>
           <div className="song-duration flex !w-full items-center justify-between pl-2 pr-4 text-center transition-none sm:pr-1">
             <Button
@@ -732,7 +760,7 @@ const Song = React.forwardRef(
         </div>
       </div>
     );
-  }
+  },
 );
 
 Song.displayName = 'Song';

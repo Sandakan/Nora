@@ -1,7 +1,4 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-/* eslint-disable react/no-array-index-key */
 /* eslint-disable promise/always-return */
-/* eslint-disable react/destructuring-assignment */
 /* eslint-disable promise/catch-or-return */
 import React, { useContext } from 'react';
 import { FixedSizeList, FixedSizeList as List } from 'react-window';
@@ -50,6 +47,7 @@ const CurrentQueuePage = () => {
   } = React.useContext(AppUpdateContext);
 
   const [queuedSongs, setQueuedSongs] = React.useState([] as AudioInfo[]);
+  const previousQueueRef = React.useRef<string[]>([]);
   const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
   const [queueInfo, setQueueInfo] = React.useState({
     artworkPath: DefaultSongCover,
@@ -62,47 +60,33 @@ const CurrentQueuePage = () => {
   const ListRef = React.useRef(null as FixedSizeList | null);
   const isFirstRenderFinishedRef = React.useRef(false);
 
-  const fetchAllSongsData = React.useCallback(() => {
-    const isTheSameQueue = () => {
-      const prevSongIds = queuedSongs.map((song) => song.songId);
-      const newSongIds = queue.queue;
+  const isTheSameQueue = React.useCallback((newQueueSongIds: string[]) => {
+    const prevQueueSongIds = previousQueueRef.current;
+    const isSameQueue = prevQueueSongIds.every((id) =>
+      newQueueSongIds.includes(id),
+    );
 
-      return prevSongIds.every((id) => newSongIds.includes(id));
-    };
+    return isSameQueue;
+  }, []);
 
-    if (isTheSameQueue() && queuedSongs.length > 0) {
-      setQueuedSongs((prevQueuedSongs) => {
-        const newQueuedSongs = queue.queue.map((id) => {
-          for (let i = 0; i < prevQueuedSongs.length; i += 1) {
-            const prevQueuedSong = prevQueuedSongs[i];
-            if (prevQueuedSong.songId === id) return prevQueuedSong;
-          }
-          return undefined;
-        });
-        const arr = newQueuedSongs.filter((x) => x) as AudioInfo[];
-        return arr;
-      });
-    } else {
-      window.api.audioLibraryControls.getAllSongs().then((res) => {
-        if (res) {
-          const x = queue.queue
-            .map((songId) => {
-              return res.data.map((y) => {
-                if (songId === y.songId) return y;
-                return undefined;
-              });
-            })
-            .flat()
-            .filter((y) => y !== undefined) as AudioInfo[];
-          setQueuedSongs(x);
-        }
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queue.queue]);
+  const fetchAllSongsData = React.useCallback(
+    (skipSameQueueCheck = false) => {
+      if (skipSameQueueCheck || !isTheSameQueue(queue.queue)) {
+        window.api.audioLibraryControls
+          .getSongInfo(queue.queue, 'addedOrder', undefined, true)
+          .then((res) => {
+            if (res) {
+              setQueuedSongs(res);
+              previousQueueRef.current = queue.queue.slice();
+            }
+          });
+      }
+    },
+    [isTheSameQueue, queue.queue],
+  );
 
   React.useEffect(() => {
-    fetchAllSongsData();
+    fetchAllSongsData(true);
     const manageSongUpdatesInCurrentQueue = (e: Event) => {
       if ('detail' in e) {
         const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>)
@@ -121,12 +105,12 @@ const CurrentQueuePage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageSongUpdatesInCurrentQueue
+      manageSongUpdatesInCurrentQueue,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageSongUpdatesInCurrentQueue
+        manageSongUpdatesInCurrentQueue,
       );
     };
   }, [fetchAllSongsData]);
@@ -225,6 +209,7 @@ const CurrentQueuePage = () => {
   const row = React.useCallback(
     (props: { index: number; style: React.CSSProperties }) => {
       const { index, style } = props;
+      // eslint-disable-next-line react/jsx-no-useless-fragment
       if (queuedSongs[index] === undefined) return <></>;
 
       const {
@@ -269,6 +254,8 @@ const CurrentQueuePage = () => {
                   isBlacklisted={isBlacklisted}
                   isAFavorite={isAFavorite}
                   selectAllHandler={selectAllHandler}
+                  // no need for onPlayClick because the component is in the currentQueuePage
+                  // onPlayClick={handleSongPlayBtnClick}
                   additionalContextMenuItems={[
                     {
                       label: 'Remove from Queue',
@@ -279,8 +266,8 @@ const CurrentQueuePage = () => {
                           queue.queue.filter((id) =>
                             isMultipleSelectionsEnabled
                               ? !songIds.includes(id)
-                              : id !== songId
-                          )
+                              : id !== songId,
+                          ),
                         );
                         toggleMultipleSelections(false);
                       },
@@ -301,12 +288,12 @@ const CurrentQueuePage = () => {
       selectAllHandler,
       toggleMultipleSelections,
       updateQueueData,
-    ]
+    ],
   );
 
   const calculateTotalTime = React.useCallback(() => {
     const { hours, minutes, seconds } = calculateTimeFromSeconds(
-      queuedSongs.reduce((prev, current) => prev + current.duration, 0)
+      queuedSongs.reduce((prev, current) => prev + current.duration, 0),
     );
     return `${
       hours >= 1 ? `${hours} hour${hours === 1 ? '' : 's'} ` : ''
@@ -355,7 +342,7 @@ const CurrentQueuePage = () => {
         handlerFunction: centerCurrentlyPlayingSong,
       },
     ],
-    [centerCurrentlyPlayingSong, isAutoScrolling]
+    [centerCurrentlyPlayingSong, isAutoScrolling],
   );
 
   return (
@@ -386,7 +373,7 @@ const CurrentQueuePage = () => {
                   true,
                   moreOptionsContextMenuItems,
                   x + 10,
-                  y + 50
+                  y + 50,
                 );
               }}
               tooltipLabel="More Options"
@@ -396,7 +383,7 @@ const CurrentQueuePage = () => {
                   true,
                   moreOptionsContextMenuItems,
                   e.pageX,
-                  e.pageY
+                  e.pageY,
                 );
               }}
             />
@@ -422,6 +409,7 @@ const CurrentQueuePage = () => {
               isDisabled={queue.queue.length > 0 === false}
               clickHandler={() => {
                 updateQueueData(undefined, queue.queue, true);
+                fetchAllSongsData(true);
                 addNewNotifications([
                   {
                     id: 'shuffleQueue',
@@ -467,6 +455,7 @@ const CurrentQueuePage = () => {
                 }`}
                 src={queueInfo.onlineArtworkPath}
                 fallbackSrc={queueInfo.artworkPath}
+                loading="eager"
                 alt="Current Playing Queue Cover"
               />
             </div>
@@ -545,7 +534,7 @@ const CurrentQueuePage = () => {
                       if (!isFirstRenderFinishedRef.current) {
                         setTimeout(() => {
                           const index = queue?.queue?.indexOf(
-                            currentSongData.songId
+                            currentSongData.songId,
                           );
                           if (index >= 0) {
                             if (ListRef.current) {
@@ -572,9 +561,9 @@ const CurrentQueuePage = () => {
                               (currentPageData) => ({
                                 ...currentPageData,
                                 scrollTopOffset: data.scrollOffset,
-                              })
+                              }),
                             ),
-                          500
+                          500,
                         );
                     }}
                   >

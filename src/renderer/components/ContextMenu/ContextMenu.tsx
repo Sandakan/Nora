@@ -76,7 +76,7 @@ const ContextMenu = React.memo(() => {
             />
           );
         }),
-    [menuItems]
+    [menuItems],
   );
   return (
     <div

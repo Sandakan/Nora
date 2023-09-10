@@ -35,7 +35,7 @@ const StartupSettings = () => {
                       autoLaunchApp: state,
                     },
                   };
-                })
+                }),
               )
             }
             labelContent="Auto launch at startup"
@@ -69,7 +69,7 @@ const StartupSettings = () => {
               window.api.userData
                 .saveUserData(
                   'preferences.openWindowAsHiddenOnSystemStart',
-                  state
+                  state,
                 )
                 .then(() =>
                   updateUserData((prevUserData) => {
@@ -80,7 +80,7 @@ const StartupSettings = () => {
                         openWindowAsHiddenOnSystemStart: state,
                       },
                     };
-                  })
+                  }),
                 )
             }
             labelContent="Launch app with the window hidden on startup"
@@ -109,7 +109,7 @@ const StartupSettings = () => {
                         hideWindowOnClose: state,
                       },
                     };
-                  })
+                  }),
                 )
             }
             labelContent="Hide window to the system tray when close button is clicked."

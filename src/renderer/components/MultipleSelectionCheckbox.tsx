@@ -19,7 +19,7 @@ const MultipleSelectionCheckbox = (props: Props) => {
     if (multipleSelectionsData.multipleSelections.length <= 0) return false;
     if (
       multipleSelectionsData.multipleSelections.some(
-        (selectionId) => selectionId === id
+        (selectionId) => selectionId === id,
       )
     )
       return true;

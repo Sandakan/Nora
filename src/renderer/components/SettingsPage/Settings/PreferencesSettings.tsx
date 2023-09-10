@@ -28,10 +28,32 @@ const PreferencesSettings = () => {
               checkedStateUpdateFunction={(state) =>
                 storage.preferences.setPreferences(
                   'isSongIndexingEnabled',
-                  state
+                  state,
                 )
               }
               labelContent="Enable song indexing"
+            />
+          </div>
+        </li>
+
+        <li className="checkbox-container">
+          <div className="secondary-container toggle-song-indexing mb-4">
+            <div className="description">
+              Show track number in front of the song when in Albums Page.
+            </div>
+            <Checkbox
+              id="showTrackNumberAsSongIndex"
+              isChecked={
+                localStorageData !== undefined &&
+                localStorageData.preferences.showTrackNumberAsSongIndex
+              }
+              checkedStateUpdateFunction={(state) =>
+                storage.preferences.setPreferences(
+                  'showTrackNumberAsSongIndex',
+                  state,
+                )
+              }
+              labelContent="Show track number as song index"
             />
           </div>
         </li>
@@ -51,7 +73,7 @@ const PreferencesSettings = () => {
               checkedStateUpdateFunction={(state) =>
                 storage.preferences.setPreferences(
                   'showArtistArtworkNearSongControls',
-                  state
+                  state,
                 )
               }
               labelContent="Show artists artworks next to their names"
@@ -74,7 +96,7 @@ const PreferencesSettings = () => {
               checkedStateUpdateFunction={(state) =>
                 storage.preferences.setPreferences(
                   'disableBackgroundArtworks',
-                  state
+                  state,
                 )
               }
               labelContent="Disable background artworks"
@@ -97,7 +119,7 @@ const PreferencesSettings = () => {
               checkedStateUpdateFunction={(state) =>
                 storage.preferences.setPreferences(
                   'enableArtworkFromSongCovers',
-                  state
+                  state,
                 )
               }
               labelContent="Enable artwork made from song covers on Playlists"
@@ -117,7 +139,7 @@ const PreferencesSettings = () => {
               checkedStateUpdateFunction={(state) =>
                 storage.preferences.setPreferences(
                   'shuffleArtworkFromSongCovers',
-                  state
+                  state,
                 )
               }
               labelContent="Enable shuffling the artwork made from song covers"

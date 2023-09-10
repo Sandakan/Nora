@@ -1,7 +1,7 @@
 const hasArrayChanged = (oldArr: unknown[], newArr: unknown[]) => {
   const isLengthEqual = newArr.length === oldArr.length;
   const arePropertiesEqual = newArr.every(
-    (value, index) => value === oldArr[index]
+    (value, index) => value === oldArr[index],
   );
 
   const isArrayDataChanged = !(isLengthEqual && arePropertiesEqual);
@@ -22,7 +22,7 @@ const isAnArray = (obj: unknown): obj is [] => Array.isArray(obj);
 const hasDataChanged = (
   oldObj: Record<string, any>,
   newObj: Record<string, any>,
-  returnBoolean = false
+  returnBoolean = false,
 ) => {
   try {
     const oldObjEntries = Object.keys(oldObj);
@@ -50,7 +50,7 @@ const hasDataChanged = (
             // newObj is an object but not an array
             const data = hasDataChanged(oldObjEntry, newObjEntry);
             const isObjDataChanged = Object.values(data).every(
-              (bool: boolean) => !bool
+              (bool: boolean) => !bool,
             );
 
             if (isObjDataChanged) isDataChanged = true;
@@ -78,12 +78,12 @@ const hasDataChanged = (
 
 export const isDataChanged = (
   oldObj: Record<string, any>,
-  newObj: Record<string, any>
+  newObj: Record<string, any>,
 ) => {
   const isChanged = hasDataChanged(oldObj, newObj, true);
   if (typeof isChanged === 'boolean') return isChanged;
   throw new Error(
-    'hasDataChanged retuned a non boolean output eventhough returnBoolean is true.'
+    'hasDataChanged retuned a non boolean output eventhough returnBoolean is true.',
   );
 };
 

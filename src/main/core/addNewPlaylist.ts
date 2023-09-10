@@ -7,14 +7,14 @@ import { generateRandomId } from '../utils/randomId';
 const createNewPlaylist = async (
   name: string,
   songIds?: string[],
-  artworkPath?: string
+  artworkPath?: string,
 ) => {
   try {
     const playlistId = generateRandomId();
     const artworkPaths = await storeArtworks(
       playlistId,
       'playlist',
-      artworkPath
+      artworkPath,
     );
     const newPlaylist: SavablePlaylist = {
       name,
@@ -34,14 +34,14 @@ const createNewPlaylist = async (
 const addNewPlaylist = async (
   name: string,
   songIds?: string[],
-  artworkPath?: string
+  artworkPath?: string,
 ): Promise<{ success: boolean; message?: string; playlist?: Playlist }> => {
   log(`Requested a creation of new playlist with a name ${name}`);
   const playlists = getPlaylistData();
   if (playlists && Array.isArray(playlists)) {
     if (playlists.some((playlist) => playlist.name === name)) {
       log(
-        `Request failed because there is already a playlist named '${name}'.`
+        `Request failed because there is already a playlist named '${name}'.`,
       );
       return {
         success: false,
@@ -53,7 +53,7 @@ const addNewPlaylist = async (
       const { newPlaylist, newPlaylistArtworkPaths } = await createNewPlaylist(
         name,
         songIds,
-        artworkPath
+        artworkPath,
       );
 
       playlists.push(newPlaylist);
@@ -70,7 +70,7 @@ const addNewPlaylist = async (
     }
   }
   log(
-    `ERROR OCCURRED WHEN TRYING TO ADD A SONG TO THE FAVORITES. PLAYLIST DATA ARE EMPTY.`
+    `ERROR OCCURRED WHEN TRYING TO ADD A SONG TO THE FAVORITES. PLAYLIST DATA ARE EMPTY.`,
   );
   throw new Error('Playlists is not an array.');
 };

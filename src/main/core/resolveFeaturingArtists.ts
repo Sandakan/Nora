@@ -6,7 +6,7 @@ import log from '../log';
 const featArtistsRegex = /\(? ?feat.? (?<featArtists>[\w&, À-ÿ\d]+)\)?/gm;
 
 const getArtist = (
-  name: string
+  name: string,
 ): {
   name: string;
   artistId?: string;
@@ -24,13 +24,13 @@ const getArtist = (
 const resolveFeaturingArtists = async (
   songId: string,
   featArtistNames: string[],
-  removeFeatInfoInTitle = false
+  removeFeatInfoInTitle = false,
 ): Promise<UpdateSongDataResult> => {
   try {
     const songTags = await sendSongID3Tags(songId, true);
 
     const featArtists: SongTagsArtistData[] = featArtistNames.map(
-      (featArtistName) => getArtist(featArtistName)
+      (featArtistName) => getArtist(featArtistName),
     );
 
     if (songTags?.artists) songTags?.artists.push(...featArtists);
@@ -46,14 +46,14 @@ const resolveFeaturingArtists = async (
     const updatedData = await updateSongId3Tags(songId, songTags, true, true);
 
     log(
-      `Resolved suggestion add featuring artists to the song '${songTags.title}'.`
+      `Resolved suggestion add featuring artists to the song '${songTags.title}'.`,
     );
 
     return updatedData;
   } catch (error) {
     log(
       `Error occurred when resolving featuring artists suggestion for for a song`,
-      { songId, removeFeatInfoInTitle, error }
+      { songId, removeFeatInfoInTitle, error },
     );
     throw error;
   }

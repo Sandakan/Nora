@@ -61,11 +61,11 @@ export const Artist = (props: ArtistProp) => {
               'artist',
               isShuffle,
               props.artistId,
-              true
+              true,
             );
           return undefined;
         }),
-    [createQueue, props.artistId, props.songIds]
+    [createQueue, props.artistId, props.songIds],
   );
 
   const playArtistSongsForMultipleSelections = React.useCallback(
@@ -92,13 +92,13 @@ export const Artist = (props: ArtistProp) => {
               'artist',
               isShuffling,
               props.artistId,
-              true
+              true,
             );
           }
           return undefined;
         });
     },
-    [createQueue, multipleSelectionsData, props.artistId]
+    [createQueue, multipleSelectionsData, props.artistId],
   );
 
   const isAMultipleSelection = React.useMemo(() => {
@@ -107,7 +107,7 @@ export const Artist = (props: ArtistProp) => {
     if (multipleSelectionsData.multipleSelections.length <= 0) return false;
     if (
       multipleSelectionsData.multipleSelections.some(
-        (selectionId) => selectionId === props.artistId
+        (selectionId) => selectionId === props.artistId,
       )
     )
       return true;
@@ -159,7 +159,7 @@ export const Artist = (props: ArtistProp) => {
                 updateQueueData(
                   undefined,
                   [...queue.queue, ...uniqueSongIds],
-                  false
+                  false,
                 );
                 return addNewNotifications([
                   {
@@ -178,7 +178,7 @@ export const Artist = (props: ArtistProp) => {
             undefined,
             [...queue.queue, ...props.songIds],
             false,
-            false
+            false,
           );
           return addNewNotifications([
             {
@@ -217,7 +217,7 @@ export const Artist = (props: ArtistProp) => {
 
           return window.api.artistsData
             .toggleLikeArtists(
-              isMultipleSelectionsEnabled ? artistIds : [props.artistId]
+              isMultipleSelectionsEnabled ? artistIds : [props.artistId],
             )
             .then((res) => {
               if (res && res.likes.length + res.dislikes.length > 0) {
@@ -248,7 +248,7 @@ export const Artist = (props: ArtistProp) => {
             return updateMultipleSelections(
               props.artistId,
               'artist',
-              isAMultipleSelection ? 'remove' : 'add'
+              isAMultipleSelection ? 'remove' : 'add',
             );
           }
           return toggleMultipleSelections(!isAMultipleSelection, 'artist', [
@@ -306,7 +306,7 @@ export const Artist = (props: ArtistProp) => {
       props.name,
       props?.onlineArtworkPaths?.picture_small,
       props.songIds.length,
-    ]
+    ],
   );
 
   return (
@@ -326,12 +326,19 @@ export const Artist = (props: ArtistProp) => {
           artistContextMenus,
           e.pageX,
           e.pageY,
-          contextMenuItemData
+          contextMenuItemData,
         );
       }}
       onClick={(e) => {
         if (e.getModifierState('Shift') === true && props.selectAllHandler)
           props.selectAllHandler(props.artistId);
+        else if (
+          e.getModifierState('Control') === true &&
+          !isMultipleSelectionEnabled
+        )
+          toggleMultipleSelections(!isAMultipleSelection, 'artist', [
+            props.artistId,
+          ]);
         else if (
           isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'artist'
@@ -339,7 +346,7 @@ export const Artist = (props: ArtistProp) => {
           updateMultipleSelections(
             props.artistId,
             'artist',
-            isAMultipleSelection ? 'remove' : 'add'
+            isAMultipleSelection ? 'remove' : 'add',
           );
         else goToArtistInfoPage();
       }}
@@ -347,7 +354,7 @@ export const Artist = (props: ArtistProp) => {
       <div className="artist-img-container relative flex h-3/4 items-center justify-center">
         {isAFavorite && (
           <span
-            className={`material-icons-round absolute -bottom-1 left-2 flex rounded-full bg-background-color-1 p-2 text-2xl !text-font-color-crimson shadow-lg dark:bg-dark-background-color-2 ${
+            className={`material-icons-round absolute -bottom-1 z-10 left-2 flex rounded-full bg-background-color-1 p-2 text-2xl !text-font-color-crimson shadow-lg dark:bg-dark-background-color-2 ${
               isAMultipleSelection &&
               '!bg-background-color-3 dark:!bg-dark-background-color-3'
             }`}
@@ -372,7 +379,7 @@ export const Artist = (props: ArtistProp) => {
       </div>
       <div className="artist-info-container max-h-1/5 relative">
         <Button
-          className={`name-container !m-0 !block !w-full !max-w-full truncate !rounded-none !border-0 !p-0 text-center !text-xl outline-1 outline-offset-1 hover:underline focus-visible:!outline lg:text-base ${
+          className={`name-container !m-0 !block !w-full !max-w-full truncate !rounded-none !border-0 !p-0 text-center !text-lg outline-1 outline-offset-1 hover:underline focus-visible:!outline lg:text-base ${
             isAMultipleSelection &&
             '!text-font-color-black dark:!text-font-color-black'
           }`}

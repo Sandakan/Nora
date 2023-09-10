@@ -30,7 +30,7 @@ const PerformanceSettings = () => {
             checkedStateUpdateFunction={(state) =>
               storage.preferences.setPreferences(
                 'removeAnimationsOnBatteryPower',
-                state
+                state,
               )
             }
           />

@@ -22,7 +22,7 @@ const getSongSearchResults = (
   songs: SavableSongData[],
   keyword: string,
   filter: SearchFilters,
-  isPredictiveSearchEnabled = true
+  isPredictiveSearchEnabled = true,
 ): SongData[] => {
   if (
     Array.isArray(songs) &&
@@ -40,7 +40,7 @@ const getSongSearchResults = (
           caseSensitive: false,
           matchPath: ['title'],
           returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
-        }
+        },
       ) as unknown as SavableSongData[];
 
     if (returnValue.length === 0) {
@@ -72,7 +72,7 @@ const getArtistSearchResults = (
   artists: SavableArtist[],
   keyword: string,
   filter: SearchFilters,
-  isPredictiveSearchEnabled = true
+  isPredictiveSearchEnabled = true,
 ): Artist[] => {
   if (
     Array.isArray(artists) &&
@@ -89,12 +89,12 @@ const getArtistSearchResults = (
           caseSensitive: false,
           matchPath: ['name'],
           returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
-        }
+        },
       ) as unknown as SavableArtist[];
 
     if (returnValue.length === 0) {
       returnValue = artists.filter((artist) =>
-        new RegExp(keyword, 'gim').test(artist.name)
+        new RegExp(keyword, 'gim').test(artist.name),
       );
     }
 
@@ -110,7 +110,7 @@ const getAlbumSearchResults = (
   albums: SavableAlbum[],
   keyword: string,
   filter: SearchFilters,
-  isPredictiveSearchEnabled = true
+  isPredictiveSearchEnabled = true,
 ): Album[] => {
   if (
     Array.isArray(albums) &&
@@ -127,12 +127,12 @@ const getAlbumSearchResults = (
           caseSensitive: false,
           matchPath: ['title'],
           returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
-        }
+        },
       ) as unknown as SavableAlbum[];
 
     if (returnValue.length === 0) {
       returnValue = albums.filter((album) =>
-        new RegExp(keyword, 'gim').test(album.title)
+        new RegExp(keyword, 'gim').test(album.title),
       );
     }
 
@@ -148,7 +148,7 @@ const getPlaylistSearchResults = (
   playlists: SavablePlaylist[],
   keyword: string,
   filter: SearchFilters,
-  isPredictiveSearchEnabled = true
+  isPredictiveSearchEnabled = true,
 ): Playlist[] => {
   if (
     Array.isArray(playlists) &&
@@ -165,12 +165,12 @@ const getPlaylistSearchResults = (
           caseSensitive: false,
           matchPath: ['name'],
           returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
-        }
+        },
       ) as unknown as SavablePlaylist[];
 
     if (returnValue.length === 0) {
       returnValue = playlists.filter((playlist) =>
-        new RegExp(keyword, 'gim').test(playlist.name)
+        new RegExp(keyword, 'gim').test(playlist.name),
       );
     }
 
@@ -186,7 +186,7 @@ const getGenreSearchResults = (
   genres: SavableGenre[],
   keyword: string,
   filter: SearchFilters,
-  isPredictiveSearchEnabled = true
+  isPredictiveSearchEnabled = true,
 ): Genre[] => {
   if (
     Array.isArray(genres) &&
@@ -203,12 +203,12 @@ const getGenreSearchResults = (
           caseSensitive: false,
           matchPath: ['name'],
           returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
-        }
+        },
       ) as unknown as SavableGenre[];
 
     if (returnValue.length === 0) {
       returnValue = genres.filter((genre) =>
-        new RegExp(keyword, 'gim').test(genre.name)
+        new RegExp(keyword, 'gim').test(genre.name),
       );
     }
 
@@ -225,7 +225,7 @@ const search = (
   filter: SearchFilters,
   value: string,
   updateSearchHistory = true,
-  isIsPredictiveSearchEnabled = true
+  isIsPredictiveSearchEnabled = true,
 ): SearchResult => {
   const songsData = getSongsData();
   const artistsData = getArtistsData();
@@ -248,31 +248,31 @@ const search = (
       songsData,
       keyword,
       filter,
-      isIsPredictiveSearchEnabled
+      isIsPredictiveSearchEnabled,
     );
     const artistsResults = getArtistSearchResults(
       artistsData,
       keyword,
       filter,
-      isIsPredictiveSearchEnabled
+      isIsPredictiveSearchEnabled,
     );
     const albumsResults = getAlbumSearchResults(
       albumsData,
       keyword,
       filter,
-      isIsPredictiveSearchEnabled
+      isIsPredictiveSearchEnabled,
     );
     const playlistsResults = getPlaylistSearchResults(
       playlistData,
       keyword,
       filter,
-      isIsPredictiveSearchEnabled
+      isIsPredictiveSearchEnabled,
     );
     const genresResults = getGenreSearchResults(
       genresData,
       keyword,
       filter,
-      isIsPredictiveSearchEnabled
+      isIsPredictiveSearchEnabled,
     );
 
     songs.push(...songsResults);
@@ -297,7 +297,7 @@ const search = (
       artists.length
     } artists results, ${albums.length} albums results, ${
       playlists.length
-    } playlists results and ${genres.length} genres results.`
+    } playlists results and ${genres.length} genres results.`,
   );
 
   if (updateSearchHistory) {

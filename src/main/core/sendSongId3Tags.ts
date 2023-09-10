@@ -13,6 +13,7 @@ import {
   getSongArtworkPath,
   removeDefaultAppProtocolFromFilePath,
 } from '../fs/resolveFilePaths';
+import { isLyricsSavePending } from '../saveLyricsToSong';
 import log from '../log';
 import { getSongsOutsideLibraryData } from '../main';
 
@@ -23,8 +24,16 @@ const { metadataEditingSupportedExtensions } = appPreferences;
 const getSongId3Tags = (songPath: string) =>
   NodeID3.Promise.read(songPath, { noRaw: true });
 
-const getLyricsFromSongID3Tags = (songID3Tags: NodeID3.Tags) => {
-  const { unsynchronisedLyrics, synchronisedLyrics } = songID3Tags;
+const getUnsynchronizedLyricsFromSongID3Tags = (songID3Tags: NodeID3.Tags) => {
+  const { unsynchronisedLyrics } = songID3Tags;
+
+  if (unsynchronisedLyrics) return unsynchronisedLyrics.text;
+
+  return undefined;
+};
+
+const getSynchronizedLyricsFromSongID3Tags = (songID3Tags: NodeID3.Tags) => {
+  const { synchronisedLyrics } = songID3Tags;
 
   if (Array.isArray(synchronisedLyrics) && synchronisedLyrics.length > 0) {
     const syncedLyricsData = synchronisedLyrics[synchronisedLyrics.length - 1];
@@ -33,18 +42,17 @@ const getLyricsFromSongID3Tags = (songID3Tags: NodeID3.Tags) => {
 
     return parsedSyncedLyrics?.unparsedLyrics;
   }
-  if (unsynchronisedLyrics) return unsynchronisedLyrics.text;
   return undefined;
 };
 
 const sendSongID3Tags = async (
   songIdOrPath: string,
-  isKnownSource = true
+  isKnownSource = true,
 ): Promise<SongTags> => {
   log(
     `Requested song ID3 tags for the song -${songIdOrPath}- ${
       isKnownSource ? 'from the library' : 'outside the library'
-    }.`
+    }.`,
   );
 
   if (isKnownSource) {
@@ -65,20 +73,22 @@ const sendSongID3Tags = async (
 
           if (!isASupporedFormat)
             throw new Error(
-              `No support for editing song metadata in '${pathExt}' format.`
+              `No support for editing song metadata in '${pathExt}' format.`,
             );
 
           const songAlbum = albums.find(
-            (val) => val.albumId === song.album?.albumId
+            (val) => val.albumId === song.album?.albumId,
           );
           const songArtists = song.artists
-            ? artists.filter((artist) =>
-                song.artists?.some((x) => x.artistId === artist.artistId)
+            ? artists.filter(
+                (artist) =>
+                  song.artists?.some((x) => x.artistId === artist.artistId),
               )
             : undefined;
           const songGenres = song.genres
-            ? genres.filter((artist) =>
-                song.genres?.some((x) => x.genreId === artist.genreId)
+            ? genres.filter(
+                (artist) =>
+                  song.genres?.some((x) => x.genreId === artist.genreId),
               )
             : undefined;
           const songTags = await getSongId3Tags(song.path);
@@ -95,6 +105,9 @@ const sendSongID3Tags = async (
               songTags.genre
                 ?.split(',')
                 .map((genre) => ({ genreId: undefined, name: genre.trim() }));
+            const trackNumber =
+              song.trackNo ??
+              (Number(songTags.trackNumber?.split('/').shift()) || undefined);
 
             const res: SongTags = {
               title,
@@ -116,20 +129,25 @@ const sendSongID3Tags = async (
               genres: tagGenres,
               releasedYear: Number(songTags.year) || undefined,
               composer: songTags.composer,
-              lyrics: getLyricsFromSongID3Tags(songTags),
+              synchronizedLyrics:
+                getSynchronizedLyricsFromSongID3Tags(songTags),
+              unsynchronizedLyrics:
+                getUnsynchronizedLyricsFromSongID3Tags(songTags),
               artworkPath: getSongArtworkPath(
                 song.songId,
-                song.isArtworkAvailable
+                song.isArtworkAvailable,
               ).artworkPath,
               duration: song.duration,
+              trackNumber,
+              isLyricsSavePending: isLyricsSavePending(song.path),
             };
             return res;
           }
           log(
-            `====== ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA ======`
+            `====== ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA ======`,
           );
           throw new Error(
-            'ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA'
+            'ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA',
           );
         }
       }
@@ -145,7 +163,7 @@ const sendSongID3Tags = async (
 
     if (!isASupportedFormat)
       throw new Error(
-        `No support for editing song metadata in '${pathExt}' format.`
+        `No support for editing song metadata in '${pathExt}' format.`,
       );
 
     try {
@@ -165,7 +183,9 @@ const sendSongID3Tags = async (
             genres: songTags.genre ? [{ name: songTags.genre }] : undefined,
             releasedYear: Number(songTags.year) || undefined,
             composer: songTags.composer,
-            lyrics: getLyricsFromSongID3Tags(songTags),
+            synchronizedLyrics: getSynchronizedLyricsFromSongID3Tags(songTags),
+            unsynchronizedLyrics:
+              getUnsynchronizedLyricsFromSongID3Tags(songTags),
             artworkPath: songOutsideLibraryData.artworkPath,
             duration: songOutsideLibraryData.duration,
           };
@@ -173,21 +193,21 @@ const sendSongID3Tags = async (
         }
       }
       throw new Error(
-        `Song couldn't be found in the songsOutsideLibraryData array.`
+        `Song couldn't be found in the songsOutsideLibraryData array.`,
       );
     } catch (error) {
       log(
         'Error occurred when trying to send ID3 tags of a song outside the library.',
         { error },
-        'ERROR'
+        'ERROR',
       );
       throw new Error(
-        'Error occurred when trying to send ID3 tags of a song outside the library.'
+        'Error occurred when trying to send ID3 tags of a song outside the library.',
       );
     }
   }
   log(
-    `====== ERROR OCCURRED WHEN TRYING TO READ DATA FROM data.json. FILE IS INACCESSIBLE, CORRUPTED OR EMPTY. ======`
+    `====== ERROR OCCURRED WHEN TRYING TO READ DATA FROM data.json. FILE IS INACCESSIBLE, CORRUPTED OR EMPTY. ======`,
   );
   throw new Error('DATA_FILE_ERROR' as MessageCodes);
 };

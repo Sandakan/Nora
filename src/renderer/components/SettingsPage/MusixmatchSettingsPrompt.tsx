@@ -9,9 +9,7 @@ import Hyperlink from '../Hyperlink';
 const MusixmatchSettingsPrompt = () => {
   const { userData } = React.useContext(AppContext);
   const { updateUserData } = React.useContext(AppUpdateContext);
-  const [token, setToken] = React.useState(
-    userData?.customMusixmatchUserToken || ''
-  );
+  const [token, setToken] = React.useState('');
   const [showToken, setShowToken] = React.useState(false);
   const [successState, setSuccessState] = React.useState<
     'unknown' | 'success' | 'failure'
@@ -20,6 +18,12 @@ const MusixmatchSettingsPrompt = () => {
 
   const isAValidToken =
     token.trim().length === 54 && !/\W/gm.test(token.trim());
+
+  const isSavedTokenAvailable = React.useMemo(
+    () => !!userData?.customMusixmatchUserToken,
+    [userData?.customMusixmatchUserToken],
+  );
+
   return (
     <div>
       <div className="title-container mb-4 text-2xl font-medium uppercase text-font-color-black dark:text-font-color-white">
@@ -27,11 +31,11 @@ const MusixmatchSettingsPrompt = () => {
       </div>
       <ul className="list-inside list-disc font-light">
         <li>
-          Musixmatch can sometimes not show lyrics properly due to prolonged use
-          of the service from the same token.
+          Musixmatch requires a user token to provide its service properly.
         </li>
         <li>
-          Musixmatch requires a user token to provide its service properly.
+          Musixmatch can sometimes fail to show lyrics due to prolonged use of
+          the service from the same token.
         </li>
         <li>
           Follow the guide from{' '}
@@ -40,7 +44,7 @@ const MusixmatchSettingsPrompt = () => {
             linkTitle="Spicetify WiKi"
             link="https://spicetify.app/docs/faq#sometimes-popup-lyrics-andor-lyrics-plus-seem-to-not-work"
           />{' '}
-          to get a new Musixmatch usertoken.
+          to get a new Musixmatch token.
         </li>
       </ul>
 
@@ -73,11 +77,7 @@ const MusixmatchSettingsPrompt = () => {
         <Button
           label="Update Token"
           className="ml-4"
-          isDisabled={
-            !isAValidToken ||
-            successState === 'success' ||
-            inputRef.current?.value === userData?.customMusixmatchUserToken
-          }
+          isDisabled={!isAValidToken || successState === 'success'}
           clickHandler={(_e, setIsDisabled, setIsPending) => {
             if (isAValidToken) {
               setIsDisabled(true);
@@ -92,7 +92,7 @@ const MusixmatchSettingsPrompt = () => {
                   return setSuccessState('success');
                 })
                 .catch((err) => {
-                  log(err, 'error');
+                  log(err, undefined, 'ERROR');
                   setSuccessState('failure');
                 })
                 .finally(() => {
@@ -105,7 +105,7 @@ const MusixmatchSettingsPrompt = () => {
         />
       </div>
 
-      <ul className="ml-4 mt-4 list-inside list-disc text-sm font-medium text-font-color-crimson">
+      <ul className="empty:mt-0 ml-4 mt-4 list-disc text-sm font-medium text-font-color-crimson">
         {successState === 'success' && (
           <li className="flex text-green-500">
             <span className="material-icons-round mr-2 text-xl">done</span>{' '}
@@ -120,15 +120,34 @@ const MusixmatchSettingsPrompt = () => {
         )}
         {token.trim().length !== 54 && token.trim().length !== 0 && (
           <li>
-            user token should be a string with{' '}
+            TOKEN should be a string with{' '}
             <span className="font-semibold uppercase">54 characters</span>. (
             {54 - token.trim().length} more characters required.)
           </li>
         )}
         {/\W/gm.test(token.trim()) && (
-          <li>string should only contain alpha-numeric characters.</li>
+          <li>TOKEN should only contain alpha-numeric characters.</li>
         )}
       </ul>
+
+      {isSavedTokenAvailable && (
+        <div className="mt-2 text-green-500">
+          <p className="flex uppercase font-semibold items-center">
+            <span className="material-icons-round-outlined text-xl mr-2">
+              done
+            </span>{' '}
+            A saved token available.
+          </p>
+          <p className="text-sm">
+            A valid Musixmatch token saved by the user is already available in
+            Nora.
+          </p>
+          <p className="text-sm">
+            You only need to change the token if the service is not functioning
+            properly.
+          </p>
+        </div>
+      )}
     </div>
   );
 };

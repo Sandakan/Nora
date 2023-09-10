@@ -34,7 +34,7 @@ const DefaultPageSettings = () => {
             onChange={(e) => {
               storage.preferences.setPreferences(
                 'defaultPageOnStartUp',
-                e.target.value as DefaultPages
+                e.target.value as DefaultPages,
               );
             }}
           />

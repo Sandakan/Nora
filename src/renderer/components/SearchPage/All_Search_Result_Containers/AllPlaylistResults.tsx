@@ -5,7 +5,7 @@ import { Playlist } from 'renderer/components/PlaylistsPage/Playlist';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
-import MainContainer from 'renderer/components/MainContainer';
+import SecondaryContainer from 'renderer/components/SecondaryContainer';
 
 type Props = { playlistData: Playlist[] };
 
@@ -27,7 +27,7 @@ const AllPlaylistResults = (prop: Props) => {
   const selectAllHandler = useSelectAllHandler(
     playlistData,
     'playlist',
-    'playlistId'
+    'playlistId',
   );
   const row = React.useCallback(
     (props: {
@@ -57,11 +57,11 @@ const AllPlaylistResults = (prop: Props) => {
       }
       return <div style={style} />;
     },
-    [noOfColumns, playlistData, selectAllHandler]
+    [noOfColumns, playlistData, selectAllHandler],
   );
 
   return (
-    <MainContainer
+    <SecondaryContainer
       className="playlists-container flex h-full flex-wrap"
       ref={containerRef}
       focusable
@@ -93,14 +93,14 @@ const AllPlaylistResults = (prop: Props) => {
                     ...currentPageData,
                     scrollTopOffset: data.scrollTop,
                   })),
-                500
+                500,
               );
           }}
         >
           {row}
         </Grid>
       )}
-    </MainContainer>
+    </SecondaryContainer>
   );
 };
 

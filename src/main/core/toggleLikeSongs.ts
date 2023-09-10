@@ -1,3 +1,7 @@
+import {
+  addAFavoriteToLastFM,
+  removeAFavoriteFromLastFM,
+} from '../other/lastFm/sendFavoritesDataToLastFM';
 import { getSongsData, setSongsData } from '../filesystem';
 import { getSongArtworkPath } from '../fs/resolveFilePaths';
 import log from '../log';
@@ -8,6 +12,10 @@ import removeFromFavorites from './removeFromFavorites';
 const likeTheSong = (song: SavableSongData) => {
   if (!song.isAFavorite) {
     addToFavorites(song.songId);
+
+    const songArtists = song.artists?.map((artist) => artist.name);
+    addAFavoriteToLastFM(song.title, songArtists);
+
     sendMessageToRenderer(
       `'${
         song.title.length > 20
@@ -18,7 +26,7 @@ const likeTheSong = (song: SavableSongData) => {
       {
         artworkPath: getSongArtworkPath(song.songId, song.isArtworkAvailable)
           .artworkPath,
-      }
+      },
     );
     song.isAFavorite = true;
     return song;
@@ -30,6 +38,10 @@ const dislikeTheSong = (song: SavableSongData) => {
   if (song.isAFavorite) {
     song.isAFavorite = false;
     removeFromFavorites(song.songId);
+
+    const songArtists = song.artists?.map((artist) => artist.name);
+    removeAFavoriteFromLastFM(song.title, songArtists);
+
     sendMessageToRenderer(
       `'${
         song.title.length > 20
@@ -40,7 +52,7 @@ const dislikeTheSong = (song: SavableSongData) => {
       {
         artworkPath: getSongArtworkPath(song.songId, song.isArtworkAvailable)
           .artworkPath,
-      }
+      },
     );
     return song;
   }
@@ -61,7 +73,7 @@ const toggleLikeSongs = async (songIds: string[], isLikeSong?: boolean) => {
           : 'dislike'
         : 'toggle like'
     } ${songIds.length} songs.`,
-    { songIds }
+    { songIds },
   );
   if (songs.length > 0) {
     const updatedSongs = songs.map((song) => {

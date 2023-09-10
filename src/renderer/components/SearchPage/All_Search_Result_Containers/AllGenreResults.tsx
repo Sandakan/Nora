@@ -1,7 +1,7 @@
 import React, { CSSProperties } from 'react';
 import { FixedSizeGrid as Grid } from 'react-window';
 import Genre from 'renderer/components/GenresPage/Genre';
-import MainContainer from 'renderer/components/MainContainer';
+import SecondaryContainer from 'renderer/components/SecondaryContainer';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
@@ -54,11 +54,11 @@ const AllGenreResults = (prop: Props) => {
       }
       return <div style={style} />;
     },
-    [genreData, noOfColumns, selectAllHandler]
+    [genreData, noOfColumns, selectAllHandler],
   );
 
   return (
-    <MainContainer
+    <SecondaryContainer
       className={`genres-container flex h-full flex-wrap ${
         !(genreData && genreData.length > 0) && 'hidden'
       }`}
@@ -92,14 +92,14 @@ const AllGenreResults = (prop: Props) => {
                     ...currentPageData,
                     scrollTopOffset: data.scrollTop,
                   })),
-                500
+                500,
               );
           }}
         >
           {row}
         </Grid>
       )}
-    </MainContainer>
+    </SecondaryContainer>
   );
 };
 

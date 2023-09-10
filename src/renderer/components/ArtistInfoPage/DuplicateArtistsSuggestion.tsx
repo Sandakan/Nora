@@ -28,7 +28,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
 
   const ignoredDuplicateArtists = React.useMemo(
     () => storage.ignoredDuplicates.getIgnoredDuplicates('artists'),
-    []
+    [],
   );
 
   React.useEffect(() => {
@@ -82,7 +82,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
     (
       selectedId: string,
       setIsDisabled: (_state: boolean) => void,
-      setIsPending: (_state: boolean) => void
+      setIsPending: (_state: boolean) => void,
     ) => {
       setIsDisabled(true);
       setIsPending(true);
@@ -109,6 +109,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
           return addNewNotifications([
             {
               content: 'Artist conflict resolved successfully.',
+              iconName: 'done',
               delay: 5000,
               id: 'ArtistDuplicateSuggestion',
             },
@@ -127,7 +128,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
       currentlyActivePage.data?.artistId,
       duplicateArtists,
       updateCurrentSongData,
-    ]
+    ],
   );
 
   return (
@@ -167,7 +168,10 @@ const DuplicateArtistsSuggestion = (props: Props) => {
                 tooltipLabel={
                   isMessageVisible ? 'Hide suggestion' : 'Show suggestion'
                 }
-                clickHandler={() => setIsMessageVisible((state) => !state)}
+                clickHandler={(e) => {
+                  e.preventDefault();
+                  setIsMessageVisible((state) => !state);
+                }}
               />
             </div>
           </label>
@@ -201,7 +205,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
                   iconClassName="material-icons-round-outlined"
                   label="Ignore"
                   clickHandler={() => {
-                    storage.ignoredSeparateArtists.setIgnoredSeparateArtists([
+                    storage.ignoredDuplicates.setIgnoredDuplicates('artists', [
                       artistId,
                     ]);
                     setIsVisible(true);

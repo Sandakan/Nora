@@ -12,9 +12,10 @@ export interface ButtonProps {
       | React.MouseEvent<HTMLButtonElement, MouseEvent>
       | React.KeyboardEvent<HTMLButtonElement>,
     setIsDisabled: (state: boolean) => void,
-    setIsPending: (state: boolean) => void
+    setIsPending: (state: boolean) => void,
   ) => void;
   isDisabled?: boolean;
+  isVisible?: boolean;
   tooltipLabel?: string;
   pendingAnimationOnDisabled?: boolean;
   style?: React.CSSProperties;
@@ -35,13 +36,14 @@ const Button = React.memo((props: ButtonProps) => {
     pendingAnimationOnDisabled = false,
     onContextMenu,
     isDisabled = false,
+    isVisible = true,
     style,
     removeFocusOnClick = true,
   } = props;
 
   const [isButtonDisabled, setIsButtonDisabled] = React.useState(isDisabled);
   const [isStatusPending, setIsStatusPending] = React.useState(
-    pendingAnimationOnDisabled
+    pendingAnimationOnDisabled,
   );
 
   React.useEffect(() => {
@@ -53,10 +55,11 @@ const Button = React.memo((props: ButtonProps) => {
 
   const buttonIcons = React.useMemo(() => {
     if (iconName) {
-      const iconNames = iconName?.split(';');
+      const iconNames = iconName.split(';');
       return iconNames.map((name, index) => {
         return (
           <span
+            key={name}
             className={`material-icons-round icon relative flex items-center justify-center text-lg !leading-none ${
               label && iconNames.length - 1 === index && 'mr-3'
             } ${iconClassName} ${
@@ -78,7 +81,7 @@ const Button = React.memo((props: ButtonProps) => {
       className={`button group mr-4 flex cursor-pointer items-center justify-center rounded-3xl border-[3px] border-background-color-2 bg-[transparent] px-4 py-2 text-sm text-font-color-black transition-[border,background,color] ease-in-out hover:border-background-color-3 focus-visible:!border-font-color-highlight-2 dark:border-dark-background-color-2 dark:bg-[transparent] dark:text-font-color-white dark:hover:border-dark-background-color-3 dark:focus-visible:!border-dark-font-color-highlight-2 ${
         isButtonDisabled &&
         `!cursor-not-allowed  !border-font-color-dimmed/10 !text-opacity-50 !brightness-50 !transition-none dark:!border-font-color-dimmed/40`
-      } ${className}`}
+      } ${!isVisible && 'hidden'} ${className}`}
       onClick={(e) => {
         if (!isButtonDisabled) {
           if (removeFocusOnClick) e.currentTarget.blur();

@@ -48,7 +48,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
 
   const [isLyricsVisible, setIsLyricsVisible] = React.useState(false);
   const [lyrics, setLyrics] = React.useState<SongLyrics | null | undefined>(
-    null
+    null,
   );
 
   const volumeSliderRef = React.useRef<HTMLInputElement>(null);
@@ -87,7 +87,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
         if (e.key === 'n') updateMiniPlayerStatus(!isMiniPlayer);
       }
     },
-    [isMiniPlayer, updateMiniPlayerStatus]
+    [isMiniPlayer, updateMiniPlayerStatus],
   );
 
   React.useEffect(() => {
@@ -161,7 +161,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
 
   const handleSkipForwardClickWithParams = React.useCallback(
     () => handleSkipForwardClick('USER_SKIP'),
-    [handleSkipForwardClick]
+    [handleSkipForwardClick],
   );
 
   const toggleAlwaysOnTop = React.useCallback(() => {
@@ -172,7 +172,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           if (prevUserData?.preferences)
             prevUserData.preferences.isMiniPlayerAlwaysOnTop = state;
           return prevUserData as UserData;
-        })
+        }),
       );
     }
     return undefined;
@@ -190,6 +190,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
         <Img
           src={currentSongData.artworkPath}
           fallbackSrc={DefaultSongCover}
+          loading="eager"
           alt="Song Cover"
           className={`h-full w-full object-cover transition-[filter] delay-100 duration-200 ease-in-out group-focus-within:blur-[2px] group-focus-within:brightness-75 group-hover:blur-[2px] group-hover:brightness-75 group-focus:blur-[4px] group-focus:brightness-75 ${
             isLyricsVisible ? '!blur-[2px] !brightness-[.25]' : ''
@@ -201,7 +202,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
         />
       </div>
       <div
-        className={`mini-player-lyrics-container absolute top-0 flex h-full w-full select-none flex-col items-center overflow-hidden px-2 py-12 transition-[filter] group-focus-within:blur-sm group-focus-within:brightness-50 group-hover:blur-sm group-hover:brightness-50 ${
+        className={`mini-player-lyrics-container absolute top-0 flex h-full w-full select-none flex-col items-center overflow-hidden px-4 py-12 transition-[filter] group-focus-within:blur-sm group-focus-within:brightness-50 group-hover:blur-sm group-hover:brightness-50 ${
           !isCurrentSongPlaying ? 'blur-sm brightness-50' : ''
         }`}
         id="miniPlayerLyricsContainer"
@@ -212,7 +213,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           lyrics.lyrics.isSynced &&
           lyricsComponents}
         {isLyricsVisible && lyrics && !lyrics.lyrics.isSynced && (
-          <div className="flex h-full w-full items-center justify-center text-font-color-white">
+          <div className="flex h-full w-full items-center justify-center text-font-color-white opacity-75">
             No Synced Lyrics found.
           </div>
         )}
@@ -243,8 +244,8 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             <Button
               className="go-to-main-player-btn !mr-0 !mt-1 !rounded-md !border-0 !p-2 text-font-color-white outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white"
               tooltipLabel="Go to Main Player (Ctrl + N)"
-              iconName="launch"
-              iconClassName="!text-xl"
+              iconName="pip_exit"
+              iconClassName="material-icons-round-outlined !text-xl"
               clickHandler={() => updateMiniPlayerStatus(!isMiniPlayer)}
               removeFocusOnClick
             />
@@ -300,7 +301,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
         >
           <Button
             className="favorite-btn !m-0 h-fit -translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
-            iconClassName={`!text-2xl ${
+            iconClassName={`!text-xl ${
               currentSongData.isAFavorite
                 ? 'meterial-icons-round !text-dark-background-color-3'
                 : 'material-icons-round-outlined'
@@ -321,7 +322,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           <Button
             className="skip-backward-btn !mr-0 ml-4 h-fit -translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
             tooltipLabel="Previous Song (Ctrl + Left Arrow)"
-            iconClassName="!text-4xl"
+            iconClassName="!text-3xl"
             clickHandler={handleSkipBackwardClick}
             iconName="skip_previous"
             removeFocusOnClick
@@ -329,7 +330,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           <Button
             className="play-pause-btn !mx-2 h-fit scale-90 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-6xl text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
             tooltipLabel="Play/Pause (Space)"
-            iconClassName="!text-6xl"
+            iconClassName="!text-5xl"
             clickHandler={toggleSongPlayback}
             iconName={isCurrentSongPlaying ? 'pause_circle' : 'play_circle'}
             removeFocusOnClick
@@ -338,7 +339,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           <Button
             className="skip-backward-btn !mr-4 h-fit translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
             tooltipLabel="Next Song (Ctrl + Right Arrow)"
-            iconClassName="!text-4xl"
+            iconClassName="!text-3xl"
             clickHandler={handleSkipForwardClickWithParams}
             iconName="skip_next"
             removeFocusOnClick
@@ -347,7 +348,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             className={`lyrics-btn !m-0 h-fit translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white ${
               isLyricsVisible && '!text-dark-background-color-3'
             }`}
-            iconClassName="!text-2xl"
+            iconClassName="!text-xl"
             clickHandler={() => setIsLyricsVisible((prevState) => !prevState)}
             iconName="notes"
             tooltipLabel="Lyrics (Ctrl + L)"
@@ -369,7 +370,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
               {currentSongData.title}
             </div>
             <div
-              className="song-artists text-sm text-font-color-white/80"
+              className="song-artists text-xs text-font-color-white/80"
               title={currentSongData.artists
                 ?.map((artist) => artist.name)
                 .join(', ')}

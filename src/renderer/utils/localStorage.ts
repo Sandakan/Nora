@@ -2,6 +2,8 @@ import debounce from './debounce';
 
 import { version } from '../../../package.json';
 import log from './log';
+import addMissingPropsToAnObject from './addMissingPropsToAnObject';
+// import isLatestVersion from './isLatestVersion';
 
 export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
   preferences: {
@@ -19,6 +21,8 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     shuffleArtworkFromSongCovers: false,
     removeAnimationsOnBatteryPower: false,
     isPredictiveSearchEnabled: true,
+    lyricsAutomaticallySaveState: 'NONE',
+    showTrackNumberAsSongIndex: true,
   },
   playback: {
     currentSong: {
@@ -47,6 +51,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     genresPage: 'aToZ',
     playlistsPage: 'aToZ',
     songsPage: 'aToZ',
+    musicFoldersPage: 'aToZ',
   },
   equalizerPreset: {
     sixtyHertz: 0,
@@ -55,6 +60,10 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     oneKiloHertz: 0,
     twoPointFourKiloHertz: 0,
     fifteenKiloHertz: 0,
+  },
+  lyricsEditorSettings: {
+    offset: 0,
+    editNextAndCurrentStartAndEndTagsAutomatically: true,
   },
 };
 
@@ -74,29 +83,84 @@ const resetLocalStorage = () => {
   }
 };
 
+// type MigrationData = Record<
+//   /** Version of the app */
+//   string,
+//   (localStorage: LocalStorage) => LocalStorage
+// >;
+
+// const migrateLocalStorage = (
+//   migrationData: MigrationData,
+//   storage: LocalStorage,
+// ) => {
+//   let currentLocalStorage = storage;
+//   let localStorageVersion = localStorage.getItem('version') ?? '1.0.0';
+
+//   for (const [migrationVersion, migrationFunction] of Object.entries(
+//     migrationData,
+//   )) {
+//     const isLocalStorageUpToDate = isLatestVersion(
+//       migrationVersion,
+//       localStorageVersion,
+//     );
+//     if (!isLocalStorageUpToDate) {
+//       log(
+//         `Migrating local storage ${localStorageVersion} => ${migrationVersion}`,
+//         undefined,
+//         'WARN',
+//       );
+//       currentLocalStorage = migrationFunction(currentLocalStorage);
+//       localStorageVersion = migrationVersion;
+//     }
+//   }
+
+//   return {
+//     migratedLocalStorage: currentLocalStorage,
+//     migratedVersion: localStorageVersion,
+//   };
+// };
+
+const repairInvalidLocalStorage = (
+  isASupportedStoreVersion: boolean,
+  store: string | null,
+) => {
+  try {
+    localStorage.setItem('version', version);
+    localStorage.setItem(
+      'localStorage',
+      JSON.stringify(LOCAL_STORAGE_DEFAULT_TEMPLATE),
+    );
+    return log(
+      'Inavalid or outdated local storage found. Resetting the local storage to default properties.',
+      { isASupportedStoreVersion, store },
+      'WARN',
+    );
+  } catch (error) {
+    log(
+      'Error occurred when trying to save default templated for local storage.',
+      { error },
+      'WARN',
+    );
+    throw error;
+  }
+};
+
 const checkLocalStorage = () => {
   const store = localStorage.getItem('localStorage');
   const isASupportedStoreVersion = localStorage.getItem('version') !== null;
   const isAValidStore = store && isASupportedStoreVersion;
 
   if (!isAValidStore) {
-    try {
-      localStorage.setItem('version', version);
-      localStorage.setItem(
-        'localStorage',
-        JSON.stringify(LOCAL_STORAGE_DEFAULT_TEMPLATE)
-      );
-      return log(
-        'Inavalid or outdated local storage found. Resetting the local storage to default properties.',
-        'warn'
-      );
-    } catch (error) {
-      log(
-        'Error occurred when trying to save default templated for local storage.',
-        'warn'
-      );
-      throw error;
-    }
+    repairInvalidLocalStorage(isASupportedStoreVersion, store);
+  } else {
+    const jsonStore = JSON.parse(store);
+    const updatedStore = addMissingPropsToAnObject(
+      LOCAL_STORAGE_DEFAULT_TEMPLATE,
+      jsonStore,
+      (key) => console.warn(`Added missing '${key}' property to localStorage.`),
+    );
+
+    localStorage.setItem('localStorage', JSON.stringify(updatedStore));
   }
   return console.log('local storage check successful.');
 };
@@ -130,10 +194,10 @@ const setAllItems = (storage: LocalStorage) => {
 
 const setFullItem = <
   ItemType extends keyof LocalStorage,
-  Data extends LocalStorage[ItemType]
+  Data extends LocalStorage[ItemType],
 >(
   itemType: ItemType,
-  data: Data
+  data: Data,
 ) => {
   const storage = getAllItems();
   try {
@@ -143,7 +207,7 @@ const setFullItem = <
       setAllItems(storage);
     } else
       throw new Error(
-        `option ${String(itemType)} doesn't exist on localStorage.`
+        `option ${String(itemType)} doesn't exist on localStorage.`,
       );
   } catch (error) {
     console.error(error);
@@ -151,7 +215,7 @@ const setFullItem = <
 };
 
 const getFullItem = <ItemType extends keyof LocalStorage>(
-  itemType: ItemType
+  itemType: ItemType,
 ) => {
   const storage = getAllItems();
   if (itemType in storage) return storage[itemType];
@@ -164,19 +228,19 @@ const getFullItem = <ItemType extends keyof LocalStorage>(
 
   throw new Error(
     `requested item type '${itemType}' or type '${String(
-      itemType
-    )}' didn't exist in the local storage.`
+      itemType,
+    )}' didn't exist in the local storage.`,
   );
 };
 
 const setItem = <
   ItemType extends keyof LocalStorage,
   Type extends keyof LocalStorage[ItemType],
-  Data extends LocalStorage[ItemType][Type]
+  Data extends LocalStorage[ItemType][Type],
 >(
   itemType: ItemType,
   type: Type,
-  data: Data
+  data: Data,
 ) => {
   const storage = getAllItems();
   try {
@@ -197,10 +261,10 @@ const setItem = <
 
 const getItem = <
   ItemType extends keyof LocalStorage,
-  Type extends keyof LocalStorage[ItemType]
+  Type extends keyof LocalStorage[ItemType],
 >(
   itemType: ItemType,
-  type: Type
+  type: Type,
 ) => {
   const storage = getAllItems();
   if (itemType in storage && type in storage[itemType])
@@ -217,8 +281,8 @@ const getItem = <
 
   throw new Error(
     `requested item type '${itemType}' or type '${String(
-      type
-    )}' didn't exist in the local storage.`
+      type,
+    )}' didn't exist in the local storage.`,
   );
 };
 
@@ -226,10 +290,10 @@ const getItem = <
 
 const setPreferences = <
   Type extends keyof Preferences,
-  Data extends Preferences[Type]
+  Data extends Preferences[Type],
 >(
   type: Type,
-  data: Data
+  data: Data,
 ) => setItem('preferences', type, data);
 
 const getPreferences = <Type extends keyof Preferences>(type: Type) =>
@@ -239,10 +303,10 @@ const getPreferences = <Type extends keyof Preferences>(type: Type) =>
 
 const setPlaybackOptions = <
   Type extends keyof Playback,
-  Data extends Playback[Type]
+  Data extends Playback[Type],
 >(
   type: Type,
-  data: Data
+  data: Data,
 ) => setItem('playback', type, data);
 
 const getPlaybackOptions = <Type extends keyof Playback>(type: Type) =>
@@ -250,10 +314,10 @@ const getPlaybackOptions = <Type extends keyof Playback>(type: Type) =>
 
 const setCurrentSongOptions = <
   Type extends keyof CurrentSong,
-  Data extends CurrentSong[Type]
+  Data extends CurrentSong[Type],
 >(
   type: Type,
-  data: Data
+  data: Data,
 ) => {
   const currentSong = getPlaybackOptions('currentSong');
   if (type in currentSong) {
@@ -264,7 +328,7 @@ const setCurrentSongOptions = <
 
 const setVolumeOptions = <Type extends keyof Volume, Data extends Volume[Type]>(
   type: Type,
-  data: Data
+  data: Data,
 ) => {
   const volume = getPlaybackOptions('volume');
   if (type in volume) {
@@ -299,13 +363,13 @@ const getIgnoredSeparateArtists = () => getFullItem('ignoredSeparateArtists');
 
 // IGNORED SONGS WITH FEATURING ARTISTS
 
-const setIgnoredSongsWithFeatArtists = (artists: string[]) => {
+const setIgnoredSongsWithFeatArtists = (ignoredSongIds: string[]) => {
   const allItems = getAllItems();
   setAllItems({
     ...allItems,
     ignoredSongsWithFeatArtists: [
       ...allItems.ignoredSongsWithFeatArtists,
-      ...artists,
+      ...ignoredSongIds,
     ],
   });
 };
@@ -317,24 +381,24 @@ const getIgnoredSongsWithFeatArtists = () =>
 
 const setIgnoredDuplicates = <
   Type extends keyof IgnoredDuplicates,
-  Data extends IgnoredDuplicates[Type]
+  Data extends IgnoredDuplicates[Type],
 >(
   type: Type,
-  data: Data
+  data: Data,
 ) => setItem('ignoredDuplicates', type, data);
 
 const getIgnoredDuplicates = <Type extends keyof IgnoredDuplicates>(
-  type: Type
+  type: Type,
 ) => getItem('ignoredDuplicates', type);
 
 // SORTING STATES
 
 const setSortingStates = <
   Type extends keyof SortingStates,
-  Data extends SortingStates[Type]
+  Data extends SortingStates[Type],
 >(
   type: Type,
-  data: Data
+  data: Data,
 ) => setItem('sortingStates', type, data);
 
 const getSortingStates = <Type extends keyof SortingStates>(type: Type) =>
@@ -346,6 +410,20 @@ const setEqualizerPreset = <Data extends Equalizer>(data: Data) =>
   setFullItem('equalizerPreset', data);
 
 const getEqualizerPreset = () => getFullItem('equalizerPreset');
+
+// LYRICS EDITOR
+
+const setLyricsEditorSettings = <
+  Type extends keyof LyricsEditorSettings,
+  Data extends LyricsEditorSettings[Type],
+>(
+  type: Type,
+  data: Data,
+) => setItem('lyricsEditorSettings', type, data);
+
+const getLyricsEditorSettings = <Type extends keyof LyricsEditorSettings>(
+  type: Type,
+) => getItem('lyricsEditorSettings', type);
 
 // / / / / / / / / / /
 
@@ -369,6 +447,7 @@ export default {
   ignoredDuplicates: { setIgnoredDuplicates, getIgnoredDuplicates },
   sortingStates: { setSortingStates, getSortingStates },
   equalizerPreset: { setEqualizerPreset, getEqualizerPreset },
+  lyricsEditorSettings: { setLyricsEditorSettings, getLyricsEditorSettings },
   checkLocalStorage,
   resetLocalStorage,
   getAllItems,

@@ -33,7 +33,7 @@ const GenresPage = () => {
   const [sortingOrder, setSortingOrder] = React.useState<GenreSortTypes>(
     currentlyActivePage?.data?.sortingOrder ||
       localStorageData?.sortingStates?.genresPage ||
-      'aToZ'
+      'aToZ',
   );
 
   const containerRef = React.useRef(null as HTMLDivElement | null);
@@ -42,7 +42,7 @@ const GenresPage = () => {
   const MIN_ITEM_HEIGHT = 180;
   const noOfColumns = Math.floor(width / MIN_ITEM_WIDTH);
   const noOfRows = Math.ceil(
-    (genresData ? genresData.length : 1) / noOfColumns
+    (genresData ? genresData.length : 1) / noOfColumns,
   );
   const itemWidth =
     MIN_ITEM_WIDTH + ((width % MIN_ITEM_WIDTH) - 10) / noOfColumns;
@@ -72,25 +72,25 @@ const GenresPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageGenreDataUpdatesInGenresPage
+      manageGenreDataUpdatesInGenresPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageGenreDataUpdatesInGenresPage
+        manageGenreDataUpdatesInGenresPage,
       );
     };
   }, [fetchGenresData]);
 
   React.useEffect(
     () => storage.sortingStates.setSortingStates('genresPage', sortingOrder),
-    [sortingOrder]
+    [sortingOrder],
   );
 
   const selectAllHandler = useSelectAllHandler(
     genresData as Genre[],
     'genre',
-    'genreId'
+    'genreId',
   );
 
   const row = React.useCallback(
@@ -120,7 +120,7 @@ const GenresPage = () => {
       }
       return <div style={style} />;
     },
-    [genresData, noOfColumns, selectAllHandler]
+    [genresData, noOfColumns, selectAllHandler],
   );
 
   return (
@@ -135,64 +135,60 @@ const GenresPage = () => {
       }}
     >
       <>
-        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-          <div className="container flex">
-            Genres{' '}
-            <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
-              {isMultipleSelectionEnabled ? (
-                <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
-                  {multipleSelectionsData.multipleSelections.length} selections
-                </div>
-              ) : (
-                genresData &&
-                genresData.length > 0 && (
-                  <div className="no-of-genres">{`${genresData.length} genre${
-                    genresData.length === 1 ? '' : 's'
-                  }`}</div>
-                )
-              )}
+        {genresData && genresData.length > 0 && (
+          <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+            <div className="container flex">
+              Genres{' '}
+              <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
+                {isMultipleSelectionEnabled ? (
+                  <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
+                    {multipleSelectionsData.multipleSelections.length}{' '}
+                    selections
+                  </div>
+                ) : (
+                  genresData &&
+                  genresData.length > 0 && (
+                    <div className="no-of-genres">{`${genresData.length} genre${
+                      genresData.length === 1 ? '' : 's'
+                    }`}</div>
+                  )
+                )}
+              </div>
+            </div>
+            <div className="other-controls-container flex">
+              <Button
+                label={isMultipleSelectionEnabled ? 'Unselect All' : 'Select'}
+                className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                iconName={
+                  isMultipleSelectionEnabled ? 'remove_done' : 'checklist'
+                }
+                clickHandler={() =>
+                  toggleMultipleSelections(!isMultipleSelectionEnabled, 'genre')
+                }
+                tooltipLabel={
+                  isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
+                }
+              />
+              <Dropdown
+                name="genreSortDropdown"
+                value={sortingOrder}
+                options={[
+                  { label: 'A to Z', value: 'aToZ' },
+                  { label: 'Z to A', value: 'zToA' },
+                  { label: 'High Song Count', value: 'noOfSongsDescending' },
+                  { label: 'Low Song Count', value: 'noOfSongsAscending' },
+                ]}
+                onChange={(e) => {
+                  updateCurrentlyActivePageData((currentData) => ({
+                    ...currentData,
+                    sortingOrder: e.currentTarget.value as ArtistSortTypes,
+                  }));
+                  setSortingOrder(e.currentTarget.value as GenreSortTypes);
+                }}
+              />
             </div>
           </div>
-          {genresData && genresData.length > 0 && (
-            <div className="other-controls-container flex">
-              <>
-                <Button
-                  label={isMultipleSelectionEnabled ? 'Unselect All' : 'Select'}
-                  className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-                  iconName={
-                    isMultipleSelectionEnabled ? 'remove_done' : 'checklist'
-                  }
-                  clickHandler={() =>
-                    toggleMultipleSelections(
-                      !isMultipleSelectionEnabled,
-                      'genre'
-                    )
-                  }
-                  tooltipLabel={
-                    isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
-                  }
-                />
-                <Dropdown
-                  name="genreSortDropdown"
-                  value={sortingOrder}
-                  options={[
-                    { label: 'A to Z', value: 'aToZ' },
-                    { label: 'Z to A', value: 'zToA' },
-                    { label: 'High Song Count', value: 'noOfSongsDescending' },
-                    { label: 'Low Song Count', value: 'noOfSongsAscending' },
-                  ]}
-                  onChange={(e) => {
-                    updateCurrentlyActivePageData((currentData) => ({
-                      ...currentData,
-                      sortingOrder: e.currentTarget.value as ArtistSortTypes,
-                    }));
-                    setSortingOrder(e.currentTarget.value as GenreSortTypes);
-                  }}
-                />
-              </>
-            </div>
-          )}
-        </div>
+        )}
         <div
           className={`genres-container flex h-full flex-wrap ${
             !(genresData && genresData.length > 0) && 'hidden'
@@ -220,7 +216,7 @@ const GenresPage = () => {
                         ...currentPageData,
                         scrollTopOffset: data.scrollTop,
                       })),
-                    500
+                    500,
                   );
               }}
             >

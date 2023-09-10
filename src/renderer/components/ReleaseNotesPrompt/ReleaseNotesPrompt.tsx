@@ -32,7 +32,7 @@ const ReleaseNotesPrompt = () => {
         if (dateNowOfA === dateNowOfB) return 0;
         if (dateNowOfA > dateNowOfB) return -1;
         return 1;
-      }
+      },
     );
 
     const latestVersion = sortedReleaseNotes[0];
@@ -55,7 +55,7 @@ const ReleaseNotesPrompt = () => {
     [
       latestUpdatedInfo.version,
       localStorageData?.preferences?.noUpdateNotificationForNewUpdate,
-    ]
+    ],
   );
 
   const updateNoNewUpdateInform = React.useCallback(
@@ -63,10 +63,10 @@ const ReleaseNotesPrompt = () => {
       const result = state ? latestUpdatedInfo.version : packageFile.version;
       storage.preferences.setPreferences(
         'noUpdateNotificationForNewUpdate',
-        result
+        result,
       );
     },
-    [latestUpdatedInfo.version]
+    [latestUpdatedInfo.version],
   );
 
   React.useEffect(() => {
@@ -91,7 +91,7 @@ const ReleaseNotesPrompt = () => {
 
   const isAppLatestVersion = React.useMemo(
     () => isLatestVersion(latestUpdatedInfo.version, packageFile.version),
-    [latestUpdatedInfo.version]
+    [latestUpdatedInfo.version],
   );
 
   React.useEffect(() => {
@@ -109,7 +109,7 @@ const ReleaseNotesPrompt = () => {
           isLatest={latestUpdatedInfo.version === version.version}
         />
       )),
-    [latestUpdatedInfo.version, releaseNotes.versions]
+    [latestUpdatedInfo.version, releaseNotes.versions],
   );
 
   const latestVersionImportantNotes = React.useMemo(() => {

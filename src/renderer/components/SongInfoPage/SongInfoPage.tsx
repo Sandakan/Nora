@@ -13,6 +13,8 @@ import SongArtist from '../SongsPage/SongArtist';
 import ListeningActivityBarGraph from './ListeningActivityBarGraph';
 import SongStat from './SongStat';
 import SongsWithFeaturingArtistsSuggestion from './SongsWithFeaturingArtistSuggestion';
+import SongAdditionalInfoContainer from './SongAdditionalInfoContainer';
+import SimilarTracksContainer from './SimilarTracksContainer';
 
 const SongInfoPage = () => {
   const { currentlyActivePage, bodyBackgroundImage } = useContext(AppContext);
@@ -35,13 +37,15 @@ const SongInfoPage = () => {
     };
   }, []);
 
-  let songDuration = '0 seconds';
+  const songDuration = React.useMemo(() => {
+    if (songInfo) {
+      const { minutes, seconds } = calculateTimeFromSeconds(songInfo.duration);
 
-  if (songInfo) {
-    const { minutes, seconds } = calculateTimeFromSeconds(songInfo.duration);
-    if (minutes === 0) songDuration = `${seconds} seconds`;
-    else songDuration = `${minutes} minutes ${seconds} seconds`;
-  }
+      if (minutes === 0) return `${seconds} seconds`;
+      return `${minutes} minutes ${seconds} seconds`;
+    }
+    return '0 seconds';
+  }, [songInfo]);
 
   const updateSongInfo = React.useCallback(
     (callback: (prevData: SongData) => SongData) => {
@@ -53,15 +57,18 @@ const SongInfoPage = () => {
         return prevData;
       });
     },
-    []
+    [],
   );
 
   const fetchSongInfo = React.useCallback(() => {
     if (currentlyActivePage.data && currentlyActivePage.data.songId) {
       console.time('fetchTime');
 
+      // eslint-disable-next-line prefer-destructuring
+      const songId = currentlyActivePage.data.songId;
+
       window.api.audioLibraryControls
-        .getSongInfo([currentlyActivePage.data.songId])
+        .getSongInfo([songId])
         .then((res) => {
           console.log(`Time end : ${console.timeEnd('fetchTime')}`);
           if (res && res.length > 0) {
@@ -74,7 +81,7 @@ const SongInfoPage = () => {
         .catch((err) => log(err));
 
       window.api.audioLibraryControls
-        .getSongListeningData([currentlyActivePage.data.songId])
+        .getSongListeningData([songId])
         .then((res) => {
           if (res && res.length > 0) setListeningData(res[0]);
           return undefined;
@@ -106,12 +113,12 @@ const SongInfoPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageSongInfoUpdatesInSongInfoPage
+      manageSongInfoUpdatesInSongInfoPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageSongInfoUpdatesInSongInfoPage
+        manageSongInfoUpdatesInSongInfoPage,
       );
     };
   }, [fetchSongInfo]);
@@ -138,7 +145,7 @@ const SongInfoPage = () => {
                 key={`${artistArr[i]}=>${artistArr[i + 1]}`}
               >
                 ,
-              </span>
+              </span>,
             );
 
           return arr;
@@ -169,7 +176,7 @@ const SongInfoPage = () => {
               .flat(5)
               .reduce(
                 (prevValue, currValue) => prevValue + (currValue || 0),
-                0
+                0,
               );
 
             for (const listen of listens[i].listens) {
@@ -210,6 +217,7 @@ const SongInfoPage = () => {
               src={songInfo.artworkPaths?.artworkPath}
               alt={`${songInfo.title} cover`}
               className="h-full object-cover"
+              loading="eager"
               onContextMenu={(e) =>
                 !songInfo.artworkPaths.isDefaultArtwork &&
                 updateContextMenuData(
@@ -222,12 +230,13 @@ const SongInfoPage = () => {
                       iconClassName: 'material-icons-round-outlined',
                       handlerFunction: () =>
                         window.api.songUpdates.saveArtworkToSystem(
-                          songInfo.artworkPaths.artworkPath
+                          songInfo.artworkPaths.artworkPath,
+                          `${songInfo.title} song artwork`.replaceAll(' ', '_'),
                         ),
                     },
                   ],
                   e.pageX,
-                  e.pageY
+                  e.pageY,
                 )
               }
             />
@@ -300,13 +309,13 @@ const SongInfoPage = () => {
         />
 
         {listeningData && (
-          <SecondaryContainer className="secondary-container song-stats-container mt-8 flex h-fit flex-row flex-wrap rounded-2xl p-2">
-            <div className="flex items-center justify-between py-4 xl:flex-col">
+          <SecondaryContainer className="secondary-container song-stats-container justify-center items-center mt-8 flex h-fit flex-row flex-wrap rounded-2xl p-2">
+            <div className="grid w-full max-w-5xl grid-cols-[1fr_minmax(50%,55%)] grid-rows-none gap-4 py-4 xl:grid-cols-1 xl:grid-rows-2 xl:justify-items-center">
               <ListeningActivityBarGraph
                 listeningData={listeningData}
                 className="xl:order-2"
               />
-              <div className="stat-cards flex w-fit flex-wrap xl:order-1 xl:mt-4 xl:items-center xl:justify-center">
+              <div className="stat-cards grid w-fit grid-cols-2 flex-wrap gap-4 xl:order-1 xl:mt-4 xl:grid-cols-3 xl:grid-rows-2 ">
                 <SongStat
                   key={0}
                   title="All time Listens"
@@ -355,6 +364,15 @@ const SongInfoPage = () => {
                 />
               </div>
             </div>
+            <SongAdditionalInfoContainer
+              songInfo={songInfo}
+              songDurationStr={songDuration}
+            />
+            {currentlyActivePage.data.songId && (
+              <SimilarTracksContainer
+                songId={currentlyActivePage.data.songId}
+              />
+            )}
           </SecondaryContainer>
         )}
       </>

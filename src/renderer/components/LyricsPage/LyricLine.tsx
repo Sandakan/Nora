@@ -9,7 +9,7 @@ import roundTo from 'renderer/utils/roundTo';
 import { syncedLyricsRegex } from './LyricsPage';
 
 interface LyricProp {
-  lyric: string;
+  lyric: string | SyncedLyricsLineText;
   index: number;
   syncedLyrics?: { start: number; end: number };
   isAutoScrolling?: boolean;
@@ -47,10 +47,30 @@ const LyricLine = (props: LyricProp) => {
     }
   }, [syncedLyrics, songPosition, isAutoScrolling]);
 
-  const lyricString = React.useMemo(
-    () => lyric.replaceAll(syncedLyricsRegex, '').trim(),
-    [lyric]
-  );
+  const lyricString = React.useMemo(() => {
+    if (typeof lyric === 'string')
+      return lyric.replaceAll(syncedLyricsRegex, '').trim();
+
+    // const { start, end } = syncedLyrics!;
+    const extendedLyricLines = lyric.map((x) => {
+      return (
+        <span
+          key={x.text}
+          className={`mr-2 text-font-color-black last:mr-0 dark:text-font-color-white ${
+            songPosition > x.start - delay && songPosition < x.end - delay
+              ? '!text-opacity-90'
+              : // : songPosition > start - delay && songPosition < end - delay
+                // ? '!text-opacity-40'
+                '!text-opacity-20 hover:!text-opacity-75'
+          }`}
+        >
+          {x.text}
+        </span>
+      );
+    });
+
+    return extendedLyricLines;
+  }, [lyric, songPosition]);
 
   return (
     <div
@@ -59,13 +79,13 @@ const LyricLine = (props: LyricProp) => {
       }}
       title={
         syncedLyrics
-          ? `${lyricString} - ${roundTo(
-              syncedLyrics.start - delay,
-              2
-            )} to ${roundTo(syncedLyrics.end - delay, 2)}`
+          ? `${roundTo(syncedLyrics.start - delay, 2)} to ${roundTo(
+              syncedLyrics.end - delay,
+              2,
+            )}`
           : undefined
       }
-      className={`appear-from-bottom highlight mb-5 w-fit select-none text-center font-['Poppins'] text-4xl font-medium text-font-color-black transition-[color,transform] duration-200 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
+      className={`appear-from-bottom highlight mb-5 w-fit select-none text-center text-4xl font-medium text-font-color-black transition-[transform,color] duration-250 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
         syncedLyrics
           ? `cursor-pointer ${
               songPosition > syncedLyrics.start - delay &&

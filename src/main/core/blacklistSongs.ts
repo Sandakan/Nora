@@ -6,7 +6,7 @@ const blacklistSongs = (songIds: string[]) => {
   const blacklist = getBlacklistData();
 
   blacklist.songBlacklist = Array.from(
-    new Set([...blacklist.songBlacklist, ...songIds])
+    new Set([...blacklist.songBlacklist, ...songIds]),
   );
   setBlacklist(blacklist);
 
@@ -14,7 +14,7 @@ const blacklistSongs = (songIds: string[]) => {
   log(
     'Song blacklist updated because a new songs got blacklisted.',
     { songIds },
-    'INFO'
+    'INFO',
   );
 };
 

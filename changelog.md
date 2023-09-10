@@ -1,6 +1,120 @@
 # Change Log
 
-> ### The latest version, **( v2.2.0-stable )** contains a lot of new features and improvements. As always expect some bugs in the app.
+> ### The latest version, **( v2.4.0-stable )** contains a lot of new features and improvements. As always expect some bugs in the app.
+
+<br>
+
+![Nora v2.4.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.4.0-stable.webp)
+
+<br>
+
+- ### **v2.4.0-stable - ( 09<sup>th</sup> of September 2023 )**
+
+- ### 🎉 New Features and Updates
+
+  - Added support for authenticating Last.FM users from Nora.
+  - Added support for Last.Fm scrobbling. Fixes #187.
+  - Added support for sending favorites data to Last.Fm.
+  - Added support for sending now-playing song info to Last.FM.
+  - Added a feature that shows similar artists and relevant hashtags for an artist when in the ArtistInfopage.
+  - Added a feature that shows similar tracks of a song when in the SongInfoPage.
+  - Added a feature that shows unavailable tracks and a summary of the album when in the AlbumInfoPage.
+  - Added support for saving the window state so that Nora starts from the previous window state (e.g.: full-screen).
+  - Added support for viewing both synchronized and Un-synchronized lyrics in the SongTagsEditingPage.
+  - Added a pane to display additional info about the song in the SongInfoPage.
+  - Added a new `Account Settings` section to the SettingsPage.
+  - Added icons to buttons in the LyricsEditingPage.
+  - Added a button to go to LyricsEditingPage from the LyricsPage.
+  - Added an alert in the SongTagsEditingPage if there are pending lyrics to be written to a song.
+  - Added an option to display song track number instead of the index number when in Albums Info Page. Fixes #194.
+
+- ### 🔨 Fixes and Improvements
+
+  - Fixed a bug where suggestion prompts don't hide when clicked on the button with an up arrow.
+  - Updated the feature to edit the next line's start tag with the current line's end tag and vice versa automatically.
+  - Fixed a bug where saved lyrics will be overwritten if the user selected the 'Synchronized Lyrics Only' or 'Un-synchronized and Synchronized Lyrics Only' options to save lyrics automatically and clicked the 'Show Online Lyrics' button.
+  - Fixed a bug where ignoring DuplicateArtistsSuggestions and SeparateArtistsSuggestions are not working.
+  - Fixed a bug where the 'No lyrics found' message will be shown in the LyricsPage when you try to view online lyrics that are not available for a song but have offline lyrics.
+  - Improved performance when displaying songs in CurrentQueuePage.
+  - Improved app logs to display the destination of the log.
+  - Improved app performance and reduced time taken when opening songs from File Explorer.
+  - Improved performance when opening Albums, Playlists, and Genres with bigger song lists.
+  - Updated outdated dependencies and fixed dependency vulnerabilities.
+  - Updated some icons in the app.
+  - Fixed a bug where saving automatically downloaded lyrics may confuse the audio player to skip the song. Fixes #192.
+  - Fixed a bug where ignoring DuplicateArtistsSuggestions and SeparateArtistsSuggestions are not working.
+  - Fixed a bug where automatically downloaded lyrics may try to save to songs that do not support modifying song metadata.
+  - Fixed a bug where songs show the original artwork instead of the optimized artwork and sometimes may fail to load the optimized artwork.
+  - Fixed a bug where duplicate album entries are added to artists when songs with the same album and artist are parsed. Fixes #191.
+  - Fixed a bug where the sorting state of songs in MusicFoldersPage is not being saved.
+  - Fixed a bug where search results from SongTagsEditingPage for artists, albums, and genres are fixed to a maximum limit of 5.
+  - Fixed a bug where clicking 'Play All' shuffles the queue.
+  - Fixed a bug where Ctrl + Click an item doesn't select it.
+  - Fixed a bug where user cannot use Shift + Click and Control + Click selection combinations simultaneously.
+  - Fixed a bug where suggestions don't get minimized when the up-arrow button is clicked.
+
+- ### 🐜 Known Issues and Bugs
+  - Nora may fail to load some FLAC songs #184.
+
+<br>
+
+![Nora v2.3.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.4.0-stable.webp)
+
+<br>
+
+- ### **v2.3.0-stable - ( 30<sup>th</sup> of June 2023 )**
+
+  - ### 🎉 New Features and Features
+
+    - Added support for enhanced synced lyrics in Nora (Experimental).
+    - Added support for syncing unsynced lyrics right from the app (Experimental).
+    - Added support for importing and exporting app data (Experimental).
+    - Added support for importing and exporting playlists (Experimental).
+    - Added support for editing the tracking number of songs from the app (Experimental).
+    - Added support for re-parsing songs on demand to fix any errors that occurred when parsing the song (Experimental).
+    - Added support for animated artworks (Experimental).
+    - Added support for saving automatically downloaded lyrics when in LyricsPage.
+    - Added a button next to `Most Loved Songs` on the `Home page` which directs to the Favorites playlist.
+    - Added the feature to save artwork with the selected artwork's name.
+
+  - ### 🔨 Fixes and Improvements
+    - Fixed a bug where the app may crash in mini-player mode when using Window's window snap feature.
+    - Improved app error handling when parsing songs.
+    - Fixed a bug where the text style of `Unknown artist` is inconsistent across different pages.
+    - Fixed a bug where scrolling to the page section is not working.
+    - Added a fix for flickering issues in notifications with progress indicators.
+    - Fixed a bug where the `Update token` button in the Musixmatch Settings prompt is not disabled even though the typed token is the same saved token.
+    - Fixed a bug where the `Show token` button is not disabled when opening Musixmatch Settings prompt with a previously saved token.
+    - Fixed a bug where clicking the `Adjust Playback Speed` context menu option doesn't point you to the correct section of Settings.
+    - Increased the brightness of Song Card artworks.
+    - Fixed a bug where some messages sent from the main process to the renderer have timestamps.
+    - Fixed a bug where songs in an album don't show their respective album name.
+    - Fixed some additional padding on All Result Pages.
+    - Improved app performance by limiting re-rendering in unwanted situations.
+    - Reduced the size of media control buttons in the Mini player.
+    - Fixed a bug where blacklisted icons in Song cards aren't positioned correctly.
+    - Fixed some bugs related to recording listening data.
+    - Fixed some brightness issues in SongCard.
+    - Fixed a bug where albums with the same names get categorized into the same album even though they have different artists.
+    - Moved the toggle predictive search button into the search bar.
+    - Fixed some styling issues in SongTagsEditingPage.
+    - Linked Nora's website to the app.
+    - Moved lyrics-related settings from the Audio Playback section to the new 'Lyrics' section in Settings.
+    - Fixed a bug where the app doesn't start with the previous window's dimensions.
+    - Fixed a bug where sometimes the app doesn't show an error message when the player stops due to an error.
+    - Moved musixmatch metadata result from the bottom of the list to the top.
+    - Linked Nora's official website to the app.
+    - Improved the render cycle timings to improve app performance.
+    - Marked notifications as a low priority to improve performance.
+    - Fixed a bug where songs inside lists like playlists, genres, albums, etc don't play the whole list when clicking the play button on a song.
+    - Fixed a bug where CurrentQueuePage doesn't get updated when shuffled.
+    - Fixed a bug where incorrect colors are used for inputs in the SongTagsEditingPage.
+    - Fixed a bug where the contents of the TitleBar are not visible when the app is in light mode and displaying a background image.
+    - Fixed a bug where listening data sessions record listening data even though the song is paused.
+    - Fixed some dependency security vulnerabilities.
+    - Improved app logs.
+  - ### 🐜 Known Issues and Bugs
+    - Nora may fail to load some FLAC songs.
 
 <br>
 
@@ -32,6 +146,10 @@
   - ### 🐜 Known Issues and Bugs
     - Sometimes updating song artwork may need an app restart to show on the app #162.
     - The app may crash in mini-player mode when trying to use window snap feature #163.
+
+<br>
+
+![Nora v2.1.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.1.0-stable.webp)
 
 <br>
 
@@ -84,6 +202,10 @@
   - ### 🐜 Known Issues and Bugs
     - Sometimes updating song artwork may need an app restart to show on the app #162.
     - The app may crash in mini-player mode when trying to use window snap feature #163.
+
+<br>
+
+![Nora v2.0.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.0.0-stable.webp)
 
 <br>
 
@@ -191,6 +313,10 @@
 
 <br>
 
+![Nora v1.2.0-stable version artwork](assets/other/release%20artworks/whats-new-v1.2.0-stable.webp)
+
+<br>
+
 - ### **v1.2.0-stable - ( 9<sup>th</sup> of March 2023 )**
 
   - ### 🎉 New Features and Features
@@ -225,6 +351,10 @@
     - App theme will be changed when you change your system's theme even though you didn't select to use system theme in the app.
     - If a song is added next to the last song of the queue, the last song won't be played.
     - Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song.
+
+<br>
+
+![Nora v1.1.0-stable version artwork](assets/other/release%20artworks/whats-new-v1.1.0-stable.webp)
 
 <br>
 
@@ -263,6 +393,10 @@
     - App theme will be changed when you change your system's theme even though you didn't select to use system theme in the app.
     - If a song is added next to the last song of the queue, the last song won't be played.
     - Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song.
+
+<br>
+
+![Nora v1.0.0-stable version artwork](assets/other/release%20artworks/whats-new-v1.0.0-stable.webp)
 
 <br>
 
@@ -384,6 +518,10 @@
 
 <br>
 
+![Nora v0.8.0-alpha version artwork](assets/other/release%20artworks/whats-new-v0.8.0-alpha.webp)
+
+<br>
+
 - ### **v0.8.0-alpha - ( 19<sup>th</sup> of August 2022 )**
 
   - ### 🎉 New Features and Updates
@@ -415,6 +553,10 @@
     - Trying to play corrupted songs will make the app player unusable. Workaround is to play the next song and restart the renderer using F5 button.
     - Sometimes adding a song to play next would only add it to the queue instead of adding it next to the current song.
     - There is still a small amount of unwanted cpu consumption due to over-rendering of components.
+
+<br>
+
+![Nora v0.7.0-alpha version artwork](assets/other/release%20artworks/whats-new-v0.7.0-alpha.webp)
 
 <br>
 

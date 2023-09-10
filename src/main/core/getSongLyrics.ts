@@ -11,13 +11,15 @@ import { appPreferences } from '../../../package.json';
 import parseLyrics, {
   parseSyncedLyricsFromAudioDataSource,
 } from '../utils/parseLyrics';
+import saveLyricsToSong from '../saveLyricsToSong';
+import { decrypt } from '../utils/safeStorage';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
 let cachedLyrics = undefined as SongLyrics | undefined;
 
 export const updateCachedLyrics = (
-  callback: (prevLyrics: typeof cachedLyrics) => SongLyrics | undefined
+  callback: (prevLyrics: typeof cachedLyrics) => SongLyrics | undefined,
 ) => {
   const lyrics = callback(cachedLyrics);
   if (lyrics) cachedLyrics = lyrics;
@@ -51,7 +53,7 @@ const fetchLyricsFromAudioSource = (songPath: string) => {
       log(
         `Nora doesn't support reading lyrics metadata from songs in ${songExt} format.`,
         { songPath },
-        'ERROR'
+        'ERROR',
       );
     // No lyrics found on the audio_source.
     return undefined;
@@ -59,7 +61,7 @@ const fetchLyricsFromAudioSource = (songPath: string) => {
     log(
       'Error occurred when trying to fetch lyrics from the audio source.',
       { songPath, error },
-      'ERROR'
+      'ERROR',
     );
     return undefined;
   }
@@ -68,15 +70,20 @@ const fetchLyricsFromAudioSource = (songPath: string) => {
 const getLyricsFromMusixmatch = async (
   trackInfo: LyricsRequestTrackInfo,
   lyricsType?: LyricsTypes,
-  abortControllerSignal?: AbortSignal
+  abortControllerSignal?: AbortSignal,
 ) => {
   const { songTitle, songArtists = [], duration } = trackInfo;
 
   const userData = getUserData();
 
-  const mxmUserToken =
-    userData?.customMusixmatchUserToken?.trim() ||
-    process.env.MUSIXMATCH_DEFAULT_USER_TOKEN;
+  let mxmUserToken = process.env.MUSIXMATCH_DEFAULT_USER_TOKEN;
+  const encryptedCustomMxmToken = userData?.customMusixmatchUserToken?.trim();
+
+  if (encryptedCustomMxmToken) {
+    const decryptedCustomMxmToken = decrypt(encryptedCustomMxmToken);
+    mxmUserToken = decryptedCustomMxmToken;
+  }
+
   if (mxmUserToken && userData?.preferences?.isMusixmatchLyricsEnabled) {
     // Searching internet for lyrics because none present on audio source.
     try {
@@ -89,7 +96,7 @@ const getLyricsFromMusixmatch = async (
         },
         mxmUserToken,
         lyricsType,
-        abortControllerSignal
+        abortControllerSignal,
       );
 
       if (musixmatchLyrics) {
@@ -123,7 +130,7 @@ const getLyricsFromMusixmatch = async (
 
 const fetchUnsyncedLyrics = async (
   songTitle: string,
-  songArtists: string[]
+  songArtists: string[],
 ) => {
   const str = songArtists ? `${songTitle} ${songArtists.join(' ')}` : songTitle;
   // no abort controller support for songLyrics.
@@ -147,11 +154,30 @@ const fetchUnsyncedLyrics = async (
   return undefined;
 };
 
+const saveLyricsAutomaticallyIfAsked = async (
+  lyricsType: AutomaticallySaveLyricsTypes,
+  songPath: string,
+  lyrics: SongLyrics,
+) => {
+  const {
+    lyrics: { isSynced },
+  } = lyrics;
+  if (lyricsType === 'NONE') return undefined;
+  if (
+    (lyricsType === 'SYNCED' && isSynced) ||
+    lyricsType === 'SYNCED_OR_UN_SYNCED'
+  )
+    return saveLyricsToSong(songPath, lyrics);
+
+  return undefined;
+};
+
 const getSongLyrics = async (
   trackInfo: LyricsRequestTrackInfo,
   lyricsType: LyricsTypes = 'ANY',
   lyricsRequestType: LyricsRequestTypes = 'ANY',
-  abortControllerSignal?: AbortSignal
+  saveLyricsAutomatically: AutomaticallySaveLyricsTypes = 'NONE',
+  abortControllerSignal?: AbortSignal,
 ): Promise<SongLyrics | undefined> => {
   const {
     songTitle,
@@ -198,7 +224,7 @@ const getSongLyrics = async (
       const musixmatchLyrics = await getLyricsFromMusixmatch(
         trackInfo,
         lyricsType,
-        abortControllerSignal
+        abortControllerSignal,
       );
 
       if (musixmatchLyrics) {
@@ -206,22 +232,38 @@ const getSongLyrics = async (
           ...musixmatchLyrics,
           isOfflineLyricsAvailable,
         };
+
+        if (saveLyricsAutomatically !== 'NONE')
+          await saveLyricsAutomaticallyIfAsked(
+            saveLyricsAutomatically,
+            trackInfo.songPath,
+            cachedLyrics,
+          );
+
         return cachedLyrics;
       }
 
       if (lyricsType !== 'SYNCED') {
         const unsyncedLyrics = await fetchUnsyncedLyrics(
           songTitle,
-          songArtists
+          songArtists,
         );
         if (unsyncedLyrics) {
           cachedLyrics = { ...unsyncedLyrics, isOfflineLyricsAvailable };
+
+          if (saveLyricsAutomatically === 'SYNCED_OR_UN_SYNCED')
+            await saveLyricsAutomaticallyIfAsked(
+              saveLyricsAutomatically,
+              trackInfo.songPath,
+              cachedLyrics,
+            );
+
           return cachedLyrics;
         }
       }
     } catch (error) {
       log(
-        `No lyrics found in the internet for the requested query.\nERROR : ${error}`
+        `No lyrics found in the internet for the requested query.\nERROR : ${error}`,
       );
       sendMessageToRenderer(`We couldn't find lyrics for ${songTitle}`);
       return undefined;

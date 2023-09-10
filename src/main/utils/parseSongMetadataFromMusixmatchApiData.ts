@@ -7,7 +7,7 @@ import fetchSongArtworksFromSpotify from './fetchSongArtworksFromSpotify';
 
 async function parseSongMetadataFromMusixmatchApiData(
   data: MusixmatchLyricsAPI,
-  spotifyArtworks = false
+  spotifyArtworks = false,
 ) {
   if (
     data.message.body.macro_calls['matcher.track.get'].message.header

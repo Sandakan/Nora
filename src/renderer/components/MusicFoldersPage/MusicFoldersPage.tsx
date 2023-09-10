@@ -4,6 +4,7 @@ import React from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import storage from 'renderer/utils/localStorage';
 
 import Button from '../Button';
 import Dropdown, { DropdownOption } from '../Dropdown';
@@ -51,7 +52,7 @@ const MusicFoldersPage = () => {
           return undefined;
         })
         .catch((err) => console.error(err)),
-    [sortingOrder]
+    [sortingOrder],
   );
 
   React.useEffect(() => {
@@ -74,25 +75,25 @@ const MusicFoldersPage = () => {
     };
     document.addEventListener(
       'app/dataUpdates',
-      manageFolderDataUpdatesInMusicFoldersPage
+      manageFolderDataUpdatesInMusicFoldersPage,
     );
     return () => {
       document.removeEventListener(
         'app/dataUpdates',
-        manageFolderDataUpdatesInMusicFoldersPage
+        manageFolderDataUpdatesInMusicFoldersPage,
       );
     };
   }, [fetchFoldersData]);
 
   const musicFoldersWithPaths = React.useMemo(
     () => musicFolders.map((x) => ({ ...x, folderPath: x.path })),
-    [musicFolders]
+    [musicFolders],
   );
 
   const selectAllHandler = useSelectAllHandler(
     musicFoldersWithPaths,
     'folder',
-    'folderPath'
+    'folderPath',
   );
 
   // const folders = React.useCallback(
@@ -137,9 +138,33 @@ const MusicFoldersPage = () => {
   const addNewFolder = React.useCallback(() => {
     changePromptMenuData(
       true,
-      <AddMusicFoldersPrompt onFailure={(err) => console.error(err)} />
+      <AddMusicFoldersPrompt onFailure={(err) => console.error(err)} />,
     );
   }, [changePromptMenuData]);
+
+  const importAppData = React.useCallback(
+    (
+      _: unknown,
+      setIsDisabled: (state: boolean) => void,
+      setIsPending: (state: boolean) => void,
+    ) => {
+      setIsDisabled(true);
+      setIsPending(true);
+
+      return window.api.settingsHelpers
+        .importAppData()
+        .then((res) => {
+          if (res) storage.setAllItems(res);
+          return undefined;
+        })
+        .finally(() => {
+          setIsDisabled(false);
+          setIsPending(false);
+        })
+        .catch((err) => console.error(err));
+    },
+    [],
+  );
 
   return (
     <MainContainer
@@ -182,7 +207,7 @@ const MusicFoldersPage = () => {
                   clickHandler={() =>
                     toggleMultipleSelections(
                       !isMultipleSelectionEnabled,
-                      'folder'
+                      'folder',
                     )
                   }
                   tooltipLabel={
@@ -197,7 +222,7 @@ const MusicFoldersPage = () => {
                   clickHandler={addNewFolder}
                 />
                 <Dropdown
-                  name="genreSortDropdown"
+                  name="folderSortDropdown"
                   value={sortingOrder}
                   options={folderDropdownOptions}
                   onChange={(e) => {
@@ -255,14 +280,23 @@ const MusicFoldersPage = () => {
             <Img src={NoFoldersImage} className="w-60" />
             <br />
             <p>No Folders added to the library.</p>
-            <Button
-              label="Add new Folder"
-              className="mt-4 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
-              iconName="create_new_folder"
-              pendingAnimationOnDisabled
-              iconClassName="material-icons-round-outlined"
-              clickHandler={addNewFolder}
-            />
+
+            <div className="flex items-center justify-between">
+              <Button
+                label="Add new Folder"
+                className="mt-4 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
+                iconName="create_new_folder"
+                pendingAnimationOnDisabled
+                iconClassName="material-icons-round-outlined"
+                clickHandler={addNewFolder}
+              />
+              <Button
+                label="Import App Data"
+                iconName="upload"
+                className="mt-4 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
+                clickHandler={importAppData}
+              />
+            </div>
           </div>
         )}
       </>

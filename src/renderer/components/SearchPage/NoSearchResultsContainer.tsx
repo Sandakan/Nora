@@ -30,7 +30,7 @@ const NoSearchResultsContainer = (props: Props) => {
             />
           ))
         : [],
-    [searchResults.availableResults, updateSearchInput]
+    [searchResults.availableResults, updateSearchInput],
   );
 
   return (

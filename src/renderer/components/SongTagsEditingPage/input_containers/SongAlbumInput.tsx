@@ -33,7 +33,7 @@ const SongAlbumInput = (props: Props) => {
     updateSongInfo,
   } = props;
   return (
-    <div className="tag-input mb-6 flex w-[45%] min-w-[10rem] flex-col">
+    <div className="tag-input flex min-w-[10rem] max-w-2xl flex-col">
       <label htmlFor="songAlbumNameId3Tag">Album Name</label>
       <div className="mt-2 w-[90%] rounded-xl border-2 border-background-color-2 p-2 dark:border-dark-background-color-2">
         <div className="album-names-container p-2 empty:py-2 empty:after:block empty:after:w-full empty:after:text-center  empty:after:text-[#ccc] empty:after:content-['No_album_selected_for_this_song.'] dark:empty:after:text-[#ccc]">
@@ -47,7 +47,7 @@ const SongAlbumInput = (props: Props) => {
                   src={
                     songAlbum.artworkPath
                       ? /(^$|(http(s)?:\/\/)([\w-]+\.)+[\w-]+([\w- ;,./?%&=]*))/gm.test(
-                          songAlbum.artworkPath
+                          songAlbum.artworkPath,
                         )
                         ? songAlbum.artworkPath
                         : `nora://localFiles/${songAlbum.artworkPath}`
@@ -94,7 +94,7 @@ const SongAlbumInput = (props: Props) => {
           onKeyDown={(e) => e.stopPropagation()}
         />
         {albumResults.length > 0 && (
-          <div className="album-results-container mt-4 rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2 ">
+          <div className="album-results-container mt-4 rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2 max-h-60 overflow-y-auto">
             {albumResults.map((x) => (
               <SongAlbumInputResult
                 albumData={x}
@@ -112,7 +112,7 @@ const SongAlbumInput = (props: Props) => {
               updateSongInfo((prevData) => {
                 if (
                   albumResults.some(
-                    (x) => albumKeyword.toLowerCase() === x.title.toLowerCase()
+                    (x) => albumKeyword.toLowerCase() === x.title.toLowerCase(),
                   )
                 ) {
                   for (let x = 0; x < albumResults.length; x += 1) {

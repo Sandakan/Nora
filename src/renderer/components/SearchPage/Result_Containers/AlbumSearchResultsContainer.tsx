@@ -50,7 +50,7 @@ const AlbumSearchResultsContainer = (props: Props) => {
             })
             .filter((album) => album !== undefined)
         : [],
-    [albums, noOfVisibleAlbums, selectAllHandler]
+    [albums, noOfVisibleAlbums, selectAllHandler],
   );
 
   return (
@@ -74,7 +74,11 @@ const AlbumSearchResultsContainer = (props: Props) => {
             Albums{' '}
             <div className="other-stats-container ml-12 flex items-center text-xs">
               {albums && albums.length > 0 && (
-                <span className="no-of-songs">{albums.length} results</span>
+                <span className="no-of-songs">
+                  {albums.length} results{' '}
+                  {albums.length > noOfVisibleAlbums &&
+                    `(${noOfVisibleAlbums} shown)`}
+                </span>
               )}
             </div>
           </div>

@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import isLyricsSynced from 'main/utils/isLyricsSynced';
 import React from 'react';
+import isLyricsSynced from 'main/utils/isLyricsSynced';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
 import Checkbox from '../Checkbox';
@@ -37,7 +37,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
   } = props;
 
   const [selectedArtwork, setSelectedArtwork] = React.useState(
-    artworkPaths?.at(-1)
+    artworkPaths?.at(-1),
   );
   const [selectedMetadata, setSelectedMetadata] = React.useState({
     isTitleSelected: true,
@@ -61,7 +61,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
           }`}
           onClick={() =>
             setSelectedArtwork((prevArtwork) =>
-              prevArtwork === artwork ? '' : artwork
+              prevArtwork === artwork ? '' : artwork,
             )
           }
         >
@@ -79,7 +79,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
             clickHandler={(e) => {
               e.stopPropagation();
               setSelectedArtwork((prevArtwork) =>
-                prevArtwork === artwork ? '' : artwork
+                prevArtwork === artwork ? '' : artwork,
               );
             }}
           />
@@ -90,7 +90,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
 
   const isLyricsSynchronised = React.useMemo(
     () => isLyricsSynced(lyrics || ''),
-    [lyrics]
+    [lyrics],
   );
 
   const updateSelectedMetadata = React.useCallback(async () => {
@@ -127,13 +127,20 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
           isReleasedYearSelected && typeof releasedYear === 'number'
             ? releasedYear
             : prevData?.releasedYear,
-        lyrics: isLyricsSelected && lyrics ? lyrics : prevData?.lyrics,
+        synchronizedLyrics:
+          isLyricsSelected && lyrics && isLyricsSynchronised
+            ? lyrics
+            : prevData?.synchronizedLyrics,
+        unsynchronizedLyrics:
+          isLyricsSelected && lyrics && !isLyricsSynchronised
+            ? lyrics
+            : prevData?.unsynchronizedLyrics,
         artworkPath: selectedArtwork || prevData?.artworkPath,
         album: albumData
           ? manageAlbumData(
               albumData,
               album,
-              selectedArtwork || prevData?.artworkPath
+              selectedArtwork || prevData?.artworkPath,
             )
           : prevData.album,
         artists: artistData
@@ -149,6 +156,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
     artists,
     changePromptMenuData,
     genres,
+    isLyricsSynchronised,
     lyrics,
     releasedYear,
     selectedArtwork,
@@ -174,7 +182,14 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
         ...prevData,
         title: title || prevData?.title,
         releasedYear: releasedYear ?? prevData?.releasedYear,
-        lyrics: lyrics || prevData?.lyrics,
+        synchronizedLyrics:
+          isLyricsSynchronised && lyrics
+            ? lyrics
+            : prevData?.synchronizedLyrics,
+        unsynchronizedLyrics:
+          !isLyricsSynchronised && lyrics
+            ? lyrics
+            : prevData?.unsynchronizedLyrics,
         artworkPath,
         artists: manageArtistsData(artistData, artists),
         album: manageAlbumData(albumData, album, artworkPath),
@@ -186,6 +201,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
     artists,
     changePromptMenuData,
     genres,
+    isLyricsSynchronised,
     lyrics,
     releasedYear,
     selectedArtwork,
@@ -221,12 +237,12 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
       selectedArtwork,
       selectedMetadata,
       title,
-    ]
+    ],
   );
 
   const isAllMetadataSelected = React.useMemo(
     () => Object.values(selectedMetadata).every((bool) => bool),
-    [selectedMetadata]
+    [selectedMetadata],
   );
 
   return (

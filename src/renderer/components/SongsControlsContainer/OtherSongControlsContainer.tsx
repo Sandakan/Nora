@@ -57,13 +57,13 @@ const OtherSongControlsContainer = () => {
           },
           {
             label: 'Open Mini Player',
-            iconName: 'tab',
+            iconName: 'pip',
             iconClassName: 'material-icons-round-outlined mr-2',
             handlerFunction: () => updateMiniPlayerStatus(!isMiniPlayer),
           },
         ],
         pageX,
-        pageY
+        pageY,
       );
     },
     [
@@ -71,7 +71,7 @@ const OtherSongControlsContainer = () => {
       isMiniPlayer,
       updateContextMenuData,
       updateMiniPlayerStatus,
-    ]
+    ],
   );
 
   return (
@@ -98,7 +98,7 @@ const OtherSongControlsContainer = () => {
         className="mini-player-btn !mr-6 !rounded-none !border-0 !p-0 text-font-color-black text-opacity-60 outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white lg:hidden"
         clickHandler={() => updateMiniPlayerStatus(!isMiniPlayer)}
         tooltipLabel="Open in Mini player (Ctrl + N)"
-        iconName="tab"
+        iconName="pip"
         iconClassName="material-icons-round-outlined icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"
       />
 

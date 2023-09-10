@@ -10,25 +10,25 @@ const restoreBlacklistedFolders = async (blacklistedFolderPaths: string[]) => {
 
   for (const blacklistedFolderPath of blacklistedFolderPaths) {
     const isParentBlacklisted = isParentFolderBlacklisted(
-      blacklistedFolderPath
+      blacklistedFolderPath,
     );
     const isParentNotInFolderPaths = !blacklistedFolderPaths.includes(
-      path.dirname(blacklistedFolderPath)
+      path.dirname(blacklistedFolderPath),
     );
 
     if (isParentBlacklisted && isParentNotInFolderPaths)
       sendMessageToRenderer(
         `Couldn't whitelist '${path.basename(
-          blacklistedFolderPath
+          blacklistedFolderPath,
         )}' folder because its parent folder '${path.basename(
-          path.dirname(blacklistedFolderPath)
-        )}' is also blacklisted. Whitelist the parent folder to whitelist this folder.`
+          path.dirname(blacklistedFolderPath),
+        )}' is also blacklisted. Whitelist the parent folder to whitelist this folder.`,
       );
   }
 
   blacklist.folderBlacklist = blacklist.folderBlacklist.filter(
     (blacklistedFolderPath) =>
-      !blacklistedFolderPaths.includes(blacklistedFolderPath)
+      !blacklistedFolderPaths.includes(blacklistedFolderPath),
   );
 
   setBlacklist(blacklist);
@@ -36,7 +36,7 @@ const restoreBlacklistedFolders = async (blacklistedFolderPaths: string[]) => {
   log(
     'Folder blacklist updated because some songs got removed from the blacklist.',
     { blacklistedFolderPaths },
-    'INFO'
+    'INFO',
   );
 };
 

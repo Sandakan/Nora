@@ -45,7 +45,7 @@ const SongArtistsInput = (props: Props) => {
   }, [artistResults, updateArtistKeyword, updateSongInfo]);
 
   return (
-    <div className="tag-input mb-6 flex w-[45%] min-w-[10rem] flex-col">
+    <div className="tag-input flex min-w-[10rem] max-w-2xl flex-col">
       <label htmlFor="song-artists-id3-tag">Song Artists</label>
       <div className="mt-2 w-[90%] rounded-xl border-2 border-background-color-2 p-2 dark:border-dark-background-color-2">
         <div className="artists-container flex flex-wrap p-2 empty:py-2 empty:after:h-full empty:after:w-full empty:after:text-center empty:after:text-[#ccc] empty:after:content-['No_artists_selected_for_this_song.'] dark:empty:after:text-[#ccc]">
@@ -64,7 +64,7 @@ const SongArtistsInput = (props: Props) => {
                       return {
                         ...prevData,
                         artists: prevData.artists?.filter(
-                          (x) => x.name !== artist.name
+                          (x) => x.name !== artist.name,
                         ),
                       };
                     });
@@ -82,6 +82,7 @@ const SongArtistsInput = (props: Props) => {
         </div>
         <input
           type="search"
+          id="song-artists-id3-tag"
           className="mt-4 w-full rounded-xl border-2 border-transparent bg-background-color-2 p-2 transition-colors focus:border-font-color-highlight dark:bg-dark-background-color-2 dark:focus:border-dark-font-color-highlight"
           placeholder="Search for artists here."
           value={artistKeyword}
@@ -92,7 +93,7 @@ const SongArtistsInput = (props: Props) => {
           onKeyDown={(e) => e.stopPropagation()}
         />
         {artistResults.length > 0 && (
-          <div className="artists-results-container mt-4 rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2">
+          <div className="artists-results-container mt-4 rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2 max-h-60 overflow-y-auto">
             {artistResultComponents}
           </div>
         )}
@@ -104,11 +105,11 @@ const SongArtistsInput = (props: Props) => {
               updateSongInfo((prevData) => {
                 const artists =
                   prevData.artists?.filter(
-                    (artist) => artist.name !== artistKeyword
+                    (artist) => artist.name !== artistKeyword,
                   ) ?? [];
                 if (
                   artistResults.some(
-                    (x) => artistKeyword.toLowerCase() === x.name.toLowerCase()
+                    (x) => artistKeyword.toLowerCase() === x.name.toLowerCase(),
                   )
                 ) {
                   for (let x = 0; x < artistResults.length; x += 1) {

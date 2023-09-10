@@ -25,7 +25,7 @@ const TitleBar = React.memo(() => {
       id="title-bar"
       className={`relative top-0 z-40 flex h-10 w-full items-center justify-between overflow-hidden bg-transparent text-font-color-black transition-opacity dark:text-font-color-white ${
         bodyBackgroundImage &&
-        'bg-background-color-1/50 backdrop-blur-md dark:bg-dark-background-color-1/70'
+        'bg-background-color-1/50 !text-font-color-white backdrop-blur-md dark:bg-dark-background-color-1/70'
       }`}
     >
       <div className="logo-and-app-name-container ml-2 flex h-full w-fit items-center">
@@ -41,7 +41,9 @@ const TitleBar = React.memo(() => {
             <span>
               Nora
               <sup
-                className="app-version ml-1 cursor-pointer text-[0.6rem] font-semibold uppercase text-font-color-highlight dark:text-dark-font-color-highlight"
+                className={`app-version ml-1 cursor-pointer text-[0.6rem] font-semibold uppercase text-font-color-highlight dark:text-dark-font-color-highlight ${
+                  bodyBackgroundImage && '!text-dark-font-color-highlight'
+                } `}
                 title={`v${version}`}
               >
                 {appReleasePhase}
@@ -54,6 +56,7 @@ const TitleBar = React.memo(() => {
       <div className="window-controls-and-special-controls-and-indicators-container flex h-full flex-row">
         <div className="special-controls-and-indicators-container mr-2 flex items-center justify-between py-1">
           <div className="indicators-container flex flex-row">
+            {/* <ThrottlingIndicator /> */}
             <NewUpdateIndicator />
             <NetworkIndicator />
           </div>

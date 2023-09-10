@@ -6,7 +6,7 @@ export default () => {
       <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
         Confirm App Reset
       </div>
-      <div>
+      <p>
         Resetting the app will remove all of your user data including data about
         songs, data about favorites, data about your preferences, applied
         settings data etc; but NOT the songs in this system. Keep in mind that
@@ -15,7 +15,9 @@ export default () => {
           IRREVERSIBLE
         </span>
         .
-      </div>
+      </p>
+      <br />
+      <p>Nora will restart after the reset.</p>
       <div className="buttons-container flex items-center justify-end">
         <Button
           label="Reset The App"

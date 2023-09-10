@@ -1,11 +1,11 @@
  <h1 align="center">
-   <img class="logo" src="assets/images/webp/logo_light_mode.webp" width="60px">
-   <p>Nora Player</p>
+   <img class="logo" src="assets/other/nora_logo_banner.webp">
+   <!-- <p>Nora Player</p> -->
  </h1>
 
  <div align="center">
   <img alt="GitHub all releases" src="https://img.shields.io/github/downloads/Sandakan/Nora/total?label=all%20time%20downloads&style=for-the-badge">
-  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/downloads/Sandakan/Nora/v2.2.0-stable/total?style=for-the-badge">
+  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/downloads/Sandakan/Nora/v2.4.0-stable/total?style=for-the-badge">
   <img alt="GitHub package.json version" src="https://img.shields.io/github/package-json/v/Sandakan/Nora?color=blue&label=latest%20version&style=for-the-badge">
   <a href="https://github.com/Sandakan/Nora/blob/master/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/Sandakan/Nora?style=for-the-badge"></a>
   <a href="https://github.com/Sandakan/Nora/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/Sandakan/Oto-Music-for-Desktop?style=for-the-badge"></a>
@@ -58,7 +58,7 @@ It packs a horizon of features including,
 
 <br>
 
-![Latest Version Artwork](/assets/other/release%20artworks/whats-new-v2.2.0-stable.webp)
+![Latest Version Artwork](/assets/other/release%20artworks/whats-new-v2.4.0-stable.webp)
 
 Visit the [release notes](/changelog.md) to see what's new on the latest release.</p>
 
@@ -67,6 +67,8 @@ Visit the [release notes](/changelog.md) to see what's new on the latest release
 ![Support for Online and Offline Lyrics Artwork](/assets/other/artwork%201.webp)
 
 ![Switch between Dark and Light Modes Artwork](/assets/other/artwork%202.webp)
+
+![Support for Last.FM Scrobbling](/assets/other/artwork%209.webp)
 
 ![Organize your music library with ease Artwork](/assets/other/artwork%203.webp)
 
@@ -83,6 +85,19 @@ Visit the [release notes](/changelog.md) to see what's new on the latest release
 <br/>
 
 ## User Feedback
+
+<br>
+
+<div align="center"> 
+  <div>
+    <h3><i>" A sleek music player with a modern design, this solution seeks to provide users with a seamless experience when it comes to listening to their favorite local tunes. "</i></h3>
+    <a href="https://www.softpedia.com/get/Multimedia/Audio/Audio-Players/Oto-Music-for-Desktop.shtml"><i>Robert Condorache &bull; Softpedia </i></a>
+  </div> 
+</div>
+
+<br>
+
+<div align="center"> &bull; &bull; &bull; </div>
 
 <br>
 

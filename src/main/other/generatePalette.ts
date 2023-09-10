@@ -12,7 +12,7 @@ import {
 import {
   generateCoverBuffer,
   getDefaultSongCoverImgBuffer,
-} from '../parseSong';
+} from '../parseSong/generateCoverBuffer';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 
 let defaultPalette: NodeVibrantPalette;
@@ -31,7 +31,7 @@ const getDefaultPalette = async () => {
 
 const generatePalette = async (
   artwork?: Buffer | string,
-  sendAdditionalData = true
+  sendAdditionalData = true,
 ): Promise<NodeVibrantPalette | undefined> => {
   if (artwork) {
     const start = timeStart();
@@ -42,7 +42,7 @@ const generatePalette = async (
         return log(
           `ERROR OCCURRED WHEN PARSING A SONG ARTWORK TO GET A COLOR PALETTE.`,
           { err },
-          'ERROR'
+          'ERROR',
         );
       });
 
@@ -50,7 +50,7 @@ const generatePalette = async (
 
     if (palette) {
       const generatePaletteSwatch = <T extends typeof palette.DarkMuted>(
-        nodeVibrantSwatch: T
+        nodeVibrantSwatch: T,
       ): NodeVibrantPaletteSwatch | undefined => {
         if (nodeVibrantSwatch) {
           const data = {
@@ -104,7 +104,7 @@ const generatePalettesForSongs = async () => {
     let x = 0;
     const noOfNoPaletteSongs = songs.reduce(
       (acc, song) => (!song.palette ? acc + 1 : acc),
-      0
+      0,
     );
 
     if (noOfNoPaletteSongs > 0) {
@@ -114,7 +114,7 @@ const generatePalettesForSongs = async () => {
 
           const coverBuffer = await generateCoverBuffer(
             metadata?.common?.picture,
-            true
+            true,
           );
 
           const palette = await generatePalette(coverBuffer);
@@ -133,7 +133,7 @@ const generatePalettesForSongs = async () => {
           sendMessageToRenderer(
             `Generating palettes for ${x} out of ${noOfNoPaletteSongs} songs.`,
             'SONG_PALETTE_GENERAING_PROCESS_UPDATE',
-            { max: noOfNoPaletteSongs, value: x }
+            { max: noOfNoPaletteSongs, value: x },
           );
         }
       }
@@ -157,7 +157,7 @@ const generatePalettesForGenres = async () => {
     let x = 0;
     const noOfNoPaletteGenres = genres.reduce(
       (acc, genre) => (!genre?.backgroundColor ? acc + 1 : acc),
-      0
+      0,
     );
 
     if (noOfNoPaletteGenres > 0) {
@@ -169,7 +169,9 @@ const generatePalettesForGenres = async () => {
 
             for (const song of songs) {
               if (song.songId === artNameWithoutExt) {
-                genres[i].backgroundColor = song?.palette?.DarkVibrant;
+                genres[i].backgroundColor = song?.palette?.DarkVibrant?.rgb
+                  ? { rgb: song?.palette?.DarkVibrant.rgb }
+                  : undefined;
                 x += 1;
                 break;
               }
@@ -177,7 +179,7 @@ const generatePalettesForGenres = async () => {
           } else {
             const coverBuffer = await generateCoverBuffer(
               genreArtworkName,
-              true
+              true,
             );
 
             const palette = await generatePalette(coverBuffer);
@@ -189,7 +191,7 @@ const generatePalettesForGenres = async () => {
           sendMessageToRenderer(
             `Generating palettes for ${x} out of ${noOfNoPaletteGenres} genres.`,
             'GENRE_PALETTE_GENERAING_PROCESS_UPDATE',
-            { max: noOfNoPaletteGenres, value: x }
+            { max: noOfNoPaletteGenres, value: x },
           );
         }
       }
@@ -208,7 +210,7 @@ export const generatePalettes = async () => {
       return undefined;
     })
     .catch((error) =>
-      log('Error occurred when generating palettes.', { error }, 'ERROR')
+      log('Error occurred when generating palettes.', { error }, 'ERROR'),
     );
 };
 

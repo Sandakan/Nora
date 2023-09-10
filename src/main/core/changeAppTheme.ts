@@ -19,7 +19,7 @@ export const changeAppTheme = (theme?: AppTheme) => {
     mainWindow.webContents.send(
       'app/systemThemeChange',
       isDarkMode,
-      useSystemTheme
+      useSystemTheme,
     );
 
   setUserData('theme', {
