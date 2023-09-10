@@ -165,13 +165,20 @@ export const userDataMigrations = {
     userData.preferences.sendSongScrobblingDataToLastFM = false;
     userData.preferences.sendSongFavoritesDataToLastFM = false;
     userData.preferences.sendNowPlayingSongDataToLastFM = false;
-    if (
-      userData.customMusixmatchUserToken &&
-      userData.customMusixmatchUserToken.length === 54
-    )
-      userData.customMusixmatchUserToken = encrypt(
-        userData.customMusixmatchUserToken,
-      );
+    try {
+      if (
+        userData.customMusixmatchUserToken &&
+        userData.customMusixmatchUserToken.length === 54
+      )
+        userData.customMusixmatchUserToken = encrypt(
+          userData.customMusixmatchUserToken,
+        );
+    } catch (error) {
+      log('Error occurred when encrypting customMusixmatchUserToken', {
+        error,
+      });
+      userData.customMusixmatchUserToken = undefined;
+    }
 
     store.set('userData', userData);
   },

@@ -1,19 +1,19 @@
 {
-  "name": "nora",
-  "productName": "Nora",
-  "version": "2.4.0-stable",
-  "description": "An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar.",
-  "main": "./dist/main/main.js",
-  "author": {
-    "name": "Sandakan Nipunajith",
-    "email": "adsandakannipunajith2003@outlook.com",
-    "url": "https://github.com/Sandakan/Nora"
-  },
-  "scripts": {
-    "electron-rebuild": "node -r ts-node/register ../../.erb/scripts/electron-rebuild.js",
-    "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts",
-    "postinstall": "npm run electron-rebuild && npm run link-modules"
-  },
-  "dependencies": {},
-  "license": "MIT"
+    "author": {
+        "email": "adsandakannipunajith2003@outlook.com",
+        "name": "Sandakan Nipunajith",
+        "url": "https://github.com/Sandakan/Nora"
+    },
+    "dependencies": {},
+    "description": "An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar.",
+    "license": "MIT",
+    "main": "./dist/main/main.js",
+    "name": "nora",
+    "productName": "Nora",
+    "scripts": {
+        "electron-rebuild": "node -r ts-node/register ../../.erb/scripts/electron-rebuild.js",
+        "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts",
+        "postinstall": "npm run electron-rebuild && npm run link-modules"
+    },
+    "version": "2.4.1-stable"
 }

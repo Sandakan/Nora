@@ -2,13 +2,32 @@
   "latestVersion": {
     "artwork": "/assets/other/release artworks/whats-new-v2.4.0-stable.webp",
     "importantNotes": [
-      "This update adds support for Last.FM Integration and fixes a random bug where the player skips the song early after saving metadata."
+      "This update fixes the bug where Nora crashes saying 'ENCRYPTION_SECRET not found'."
     ],
     "phase": "stable",
     "releaseDate": "2023-09-09T14:06:47.910Z",
-    "version": "2.4.0-stable"
+    "version": "2.4.1-stable"
   },
   "versions": [
+    {
+      "artwork": "/assets/other/release artworks/whats-new-v2.4.0-stable.webp",
+      "importantNotes": [
+        "This update fixes the bug where Nora crashes saying 'ENCRYPTION_SECRET not found'."
+      ],
+      "notes": {
+        "fixed": [
+          "Fixed a bug where environment variables are not initialized when migrating the database to a newer version."
+        ],
+        "knownIssues": [
+          {
+            "note": "Nora may fail to load some FLAC songs."
+          }
+        ],
+        "new": []
+      },
+      "releaseDate": "2023-09-10T14:41:50.712Z",
+      "version": "2.4.1-stable"
+    },
     {
       "artwork": "/assets/other/release artworks/whats-new-v2.4.0-stable.webp",
       "importantNotes": [
