@@ -52,12 +52,12 @@ const lowResponseTimeRequiredPages: PageTitles[] = ['Lyrics', 'LyricsEditor'];
 
 const context = new window.AudioContext();
 const source = context.createMediaElementSource(player);
-const sixtyHertzFilter = context.createBiquadFilter();
-const hundredFiftyHertzFilter = context.createBiquadFilter();
-const fourHundredHertzFilter = context.createBiquadFilter();
-const thousandHertzFilter = context.createBiquadFilter();
-const twoThousandHertzFilter = context.createBiquadFilter();
-const fifteenThousandHertzFilter = context.createBiquadFilter();
+const sixtyHertzFilter = context.createBiquadFilter(); // 60Hz
+const hundredFiftyHertzFilter = context.createBiquadFilter(); // 150Hz
+const fourHundredHertzFilter = context.createBiquadFilter(); // 400Hz
+const thousandHertzFilter = context.createBiquadFilter(); // 1000Hz
+const twoThousandHertzFilter = context.createBiquadFilter(); // 2000Hz
+const fifteenThousandHertzFilter = context.createBiquadFilter(); // 15000Hz
 
 source.connect(sixtyHertzFilter);
 sixtyHertzFilter.connect(hundredFiftyHertzFilter);
