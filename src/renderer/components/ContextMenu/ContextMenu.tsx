@@ -89,6 +89,7 @@ const ContextMenu = React.memo(() => {
       style={{
         top: dimensions.positionY,
         left: dimensions.positionX,
+        // transform: `translate(${dimensions.positionX}px,${dimensions.positionY}px)`,
         transformOrigin: dimensions.transformOrigin,
       }}
       ref={contextMenuRef}

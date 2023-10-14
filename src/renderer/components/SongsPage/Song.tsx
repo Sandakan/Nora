@@ -653,7 +653,17 @@ const Song = React.forwardRef(
           ) : isIndexingSongs ||
             (trackNo &&
               localStorageData.preferences.showTrackNumberAsSongIndex) ? (
-            <div className="relative mx-1 h-fit rounded-2xl bg-background-color-1 px-3 text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1">
+            <div
+              className={`relative mx-1 h-fit text-sm flex items-center justify-center rounded-2xl bg-background-color-1 px-3 text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1 text-center ${
+                index < 10
+                  ? 'min-w-[2rem]'
+                  : index < 100
+                  ? 'min-w-[2.75rem]'
+                  : index < 1000
+                  ? 'min-w-[3.25rem]'
+                  : 'min-w-[4rem]'
+              }`}
+            >
               {trackNo ?? index + 1}
             </div>
           ) : (

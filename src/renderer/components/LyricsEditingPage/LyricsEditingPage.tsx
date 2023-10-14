@@ -239,9 +239,10 @@ const LyricsEditingPage = () => {
           <div className="other-stats-container truncate text-xs text-font-color-black dark:text-font-color-white">
             <span className="">
               Time : {roundedSongPostion}{' '}
-              {localStorageData.lyricsEditorSettings.offset > 0 && (
+              {localStorageData.lyricsEditorSettings.offset !== 0 && (
                 <span className="font-medium uppercase text-font-color-highlight dark:text-dark-font-color-highlight">
-                  + {localStorageData.lyricsEditorSettings.offset} offset
+                  {localStorageData.lyricsEditorSettings.offset > 0 && '+'}{' '}
+                  {localStorageData.lyricsEditorSettings.offset} offset
                 </span>
               )}
             </span>

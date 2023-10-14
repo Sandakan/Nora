@@ -165,6 +165,7 @@ const ArtistInfoPage = () => {
         })
         .catch((err) => console.error(err));
     }
+    return setSongs([]);
   }, [artistData?.songs, sortingOrder]);
 
   const fetchAlbumsData = React.useCallback(() => {
@@ -177,6 +178,7 @@ const ArtistInfoPage = () => {
         })
         .catch((err) => console.error(err));
     }
+    return setAlbums([]);
   }, [artistData?.albums]);
 
   React.useEffect(() => {

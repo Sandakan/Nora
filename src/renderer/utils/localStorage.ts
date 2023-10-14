@@ -1,8 +1,10 @@
+import localStorageMigrationData from 'renderer/other/localStorageMigrations';
 import debounce from './debounce';
 
 import { version } from '../../../package.json';
 import log from './log';
 import addMissingPropsToAnObject from './addMissingPropsToAnObject';
+import isLatestVersion from './isLatestVersion';
 // import isLatestVersion from './isLatestVersion';
 
 export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
@@ -54,12 +56,16 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     musicFoldersPage: 'aToZ',
   },
   equalizerPreset: {
-    sixtyHertz: 0,
-    hundredFiftyHertz: 0,
-    fourHundredHertz: 0,
-    oneKiloHertz: 0,
-    twoPointFourKiloHertz: 0,
-    fifteenKiloHertz: 0,
+    thirtyTwoHertzFilter: 0,
+    sixtyFourHertzFilter: 0,
+    hundredTwentyFiveHertzFilter: 0,
+    twoHundredFiftyHertzFilter: 0,
+    fiveHundredHertzFilter: 0,
+    thousandHertzFilter: 0,
+    twoThousandHertzFilter: 0,
+    fourThousandHertzFilter: 0,
+    eightThousandHertzFilter: 0,
+    sixteenThousandHertzFilter: 0,
   },
   lyricsEditorSettings: {
     offset: 0,
@@ -83,42 +89,42 @@ const resetLocalStorage = () => {
   }
 };
 
-// type MigrationData = Record<
-//   /** Version of the app */
-//   string,
-//   (localStorage: LocalStorage) => LocalStorage
-// >;
+export type MigrationData = Record<
+  /** Version of the app */
+  string,
+  (localStorage: LocalStorage) => LocalStorage
+>;
 
-// const migrateLocalStorage = (
-//   migrationData: MigrationData,
-//   storage: LocalStorage,
-// ) => {
-//   let currentLocalStorage = storage;
-//   let localStorageVersion = localStorage.getItem('version') ?? '1.0.0';
+const migrateLocalStorage = (
+  migrationData: MigrationData,
+  storage: LocalStorage,
+) => {
+  let currentLocalStorage = storage;
+  let localStorageVersion = localStorage.getItem('version') ?? '1.0.0';
 
-//   for (const [migrationVersion, migrationFunction] of Object.entries(
-//     migrationData,
-//   )) {
-//     const isLocalStorageUpToDate = isLatestVersion(
-//       migrationVersion,
-//       localStorageVersion,
-//     );
-//     if (!isLocalStorageUpToDate) {
-//       log(
-//         `Migrating local storage ${localStorageVersion} => ${migrationVersion}`,
-//         undefined,
-//         'WARN',
-//       );
-//       currentLocalStorage = migrationFunction(currentLocalStorage);
-//       localStorageVersion = migrationVersion;
-//     }
-//   }
+  for (const [migrationVersion, migrationFunction] of Object.entries(
+    migrationData,
+  )) {
+    const isLocalStorageUpToDate = isLatestVersion(
+      migrationVersion,
+      localStorageVersion,
+    );
+    if (!isLocalStorageUpToDate) {
+      log(
+        `Migrating local storage ${localStorageVersion} => ${migrationVersion}`,
+        undefined,
+        'WARN',
+      );
+      currentLocalStorage = migrationFunction(currentLocalStorage);
+      localStorageVersion = migrationVersion;
+    }
+  }
 
-//   return {
-//     migratedLocalStorage: currentLocalStorage,
-//     migratedVersion: localStorageVersion,
-//   };
-// };
+  return {
+    migratedLocalStorage: currentLocalStorage,
+    migratedVersion: localStorageVersion,
+  };
+};
 
 const repairInvalidLocalStorage = (
   isASupportedStoreVersion: boolean,
@@ -147,20 +153,27 @@ const repairInvalidLocalStorage = (
 
 const checkLocalStorage = () => {
   const store = localStorage.getItem('localStorage');
-  const isASupportedStoreVersion = localStorage.getItem('version') !== null;
+  const currentLocalStorageVersion = localStorage.getItem('version');
+  const isASupportedStoreVersion = currentLocalStorageVersion !== null;
   const isAValidStore = store && isASupportedStoreVersion;
 
   if (!isAValidStore) {
     repairInvalidLocalStorage(isASupportedStoreVersion, store);
   } else {
     const jsonStore = JSON.parse(store);
+    const { migratedLocalStorage, migratedVersion } = migrateLocalStorage(
+      localStorageMigrationData,
+      jsonStore,
+    );
+
     const updatedStore = addMissingPropsToAnObject(
       LOCAL_STORAGE_DEFAULT_TEMPLATE,
-      jsonStore,
+      migratedLocalStorage,
       (key) => console.warn(`Added missing '${key}' property to localStorage.`),
     );
 
     localStorage.setItem('localStorage', JSON.stringify(updatedStore));
+    localStorage.setItem('version', migratedVersion);
   }
   return console.log('local storage check successful.');
 };

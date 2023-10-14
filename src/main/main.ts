@@ -21,6 +21,7 @@ import {
   powerMonitor,
   SaveDialogOptions,
 } from 'electron';
+import debug from 'electron-debug';
 import 'dotenv/config';
 
 // import * as Sentry from '@sentry/electron';
@@ -180,9 +181,7 @@ saveAbortController('main', abortController);
 //   dsn: process.env.SENTRY_DSN,
 // });
 // ? / / / / / / / / / / / / / / / / / / / / / / /
-
-if (IS_DEVELOPMENT) require('electron-debug')();
-
+debug();
 const APP_INFO = {
   environment: IS_DEVELOPMENT ? 'DEV' : 'PRODUCTION',
   appVersion: `v${version}`,
@@ -332,7 +331,7 @@ app
 
     mainWindow.on('restore', () => recordWindowState('normal'));
 
-    app.setPath('crashDumps', path.join(app.getPath('userData'), 'crashDumps'));
+    // app.setPath('crashDumps', path.join(app.getPath('userData'), 'crashDumps'));
 
     app.on('will-finish-launching', () => {
       crashReporter.start({ uploadToServer: false });
@@ -925,7 +924,7 @@ export function sendMessageToRenderer(
   );
 }
 
-let dataUpdateEventTimeOutId: NodeJS.Timer;
+let dataUpdateEventTimeOutId: NodeJS.Timeout;
 let dataEventsCache: DataUpdateEvent[] = [];
 export function dataUpdateEvent(
   dataType: DataUpdateEventTypes,

@@ -1,6 +1,7 @@
 import NodeID3 from 'node-id3';
 import { ReactElement, ReactNode } from 'react';
 import { ButtonProps } from 'renderer/components/Button';
+import { DropdownOption } from 'renderer/components/Dropdown';
 import { api } from '../main/preload';
 import { LastFMSessionData } from './last_fm_api';
 import { SimilarArtist, Tag } from './last_fm_artist_info_api';
@@ -79,7 +80,7 @@ declare global {
     artists?: { artistId: string; name: string }[];
     album?: { albumId: string; name: string };
     genres?: { genreId: string; name: string }[];
-    albumArtist?: string;
+    albumArtist?: { artistId: string; name: string };
     bitrate?: number;
     trackNo?: number;
     noOfChannels?: number;
@@ -489,13 +490,72 @@ declare global {
     playbackRate: number;
   }
 
-  interface Equalizer {
-    sixtyHertz: number;
-    hundredFiftyHertz: number;
-    fourHundredHertz: number;
-    oneKiloHertz: number;
-    twoPointFourKiloHertz: number;
-    fifteenKiloHertz: number;
+  type EqualizerBandFilters =
+    | 'thirtyTwoHertzFilter'
+    | 'sixtyFourHertzFilter'
+    | 'hundredTwentyFiveHertzFilter'
+    | 'twoHundredFiftyHertzFilter'
+    | 'fiveHundredHertzFilter'
+    | 'thousandHertzFilter'
+    | 'twoThousandHertzFilter'
+    | 'fourThousandHertzFilter'
+    | 'eightThousandHertzFilter'
+    | 'sixteenThousandHertzFilter';
+
+  type EqualierPresetDropdownOptionValues =
+    | 'Custom'
+    | 'Flat'
+    | 'Acoustic'
+    | 'Bass Booster'
+    | 'Bass Reducer'
+    | 'Classical'
+    | 'Club'
+    | 'Dance'
+    | 'Deep'
+    | 'Electronic'
+    | 'Hip-Hop'
+    | 'Jazz'
+    | 'Latin'
+    | 'Live'
+    | 'Loudness'
+    | 'Lounge'
+    | 'Metal'
+    | 'Piano'
+    | 'Pop'
+    | 'Reggae'
+    | 'RnB'
+    | 'Rock'
+    | 'Ska'
+    | 'Small Speakers'
+    | 'Soft'
+    | 'Soft Rock'
+    | 'Spoken Word'
+    | 'Techno'
+    | 'Treble Booster'
+    | 'Treble Reducer'
+    | 'Vocal Booster';
+
+  interface Equalizer extends Record<EqualizerBandFilters, number> {
+    thirtyTwoHertzFilter: number;
+    sixtyFourHertzFilter: number;
+    hundredTwentyFiveHertzFilter: number;
+    twoHundredFiftyHertzFilter: number;
+    fiveHundredHertzFilter: number;
+    thousandHertzFilter: number;
+    twoThousandHertzFilter: number;
+    fourThousandHertzFilter: number;
+    eightThousandHertzFilter: number;
+    sixteenThousandHertzFilter: number;
+  }
+
+  type EqualizerPresetsData = {
+    title: EqualierPresetDropdownOptionValues;
+    preset: Equalizer;
+  }[];
+
+  interface EqualizerPresetDropdownOptions
+    extends DropdownOption<EqualierPresetDropdownOptionValues> {
+    preset?: Equalizer;
   }
 
   interface IgnoredDuplicates {

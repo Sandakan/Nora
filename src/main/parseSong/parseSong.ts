@@ -174,6 +174,9 @@ export const parseSong = async (
         songId,
         title: songTitle,
         artists: getArtistNamesFromSong(metadata.common.artists),
+        albumArtist: metadata.common.albumartist
+          ? getArtistNamesFromSong([metadata.common.albumartist])?.at(1)
+          : undefined,
         duration: getSongDurationFromSong(metadata.format.duration),
         album: getAlbumInfoFromSong(metadata.common.album),
         genres: getGenreInfoFromSong(metadata.common.genre),

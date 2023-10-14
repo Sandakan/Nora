@@ -18,7 +18,7 @@ class ListeningDataSession {
   intervalId?: NodeJS.Timer;
   nowPlayingIntervalId?: NodeJS.Timer;
   seeks: { position: number; seeks: number }[];
-  recordStartTime: Date;
+  startTime: Date;
 
   constructor(songId: string, duration: number, chosenByUser = false) {
     this.songId = songId;
@@ -36,7 +36,7 @@ class ListeningDataSession {
     this.passedScrobblingRange = false;
     this.seconds = 0;
     this.seeks = [];
-    this.recordStartTime = new Date();
+    this.startTime = new Date();
   }
 
   recordListeningData() {
@@ -82,7 +82,6 @@ class ListeningDataSession {
           'fullListens',
           'increment',
         );
-        this.stopRecording();
       }
       // listen for scrobbling event
       if (
@@ -96,7 +95,7 @@ class ListeningDataSession {
         );
         window.api.audioLibraryControls.scrobbleSong(
           this.songId,
-          this.recordStartTime.getTime() / 1000,
+          this.startTime.getTime() / 1000,
         );
       }
       if (!this.isPaused) {

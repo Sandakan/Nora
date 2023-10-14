@@ -14,6 +14,27 @@ const calculateTimeFromSeconds = (secs = 0) => {
   const hoursWithoutDays = totalHours - totalDays * 24;
   const minutesWithoutHours = totalMinutes - totalHours * 60;
 
+  const yearsString =
+    totalYears >= 1 ? `${totalYears} hour${totalYears === 1 ? '' : 's'} ` : '';
+  const monthsString =
+    monthsWithoutYears >= 1
+      ? `${monthsWithoutYears} hour${monthsWithoutYears === 1 ? '' : 's'} `
+      : '';
+  const daysString =
+    daysWithoutMonths >= 1
+      ? `${daysWithoutMonths} day${daysWithoutMonths === 1 ? '' : 's'} `
+      : '';
+  const hoursString =
+    hoursWithoutDays >= 1
+      ? `${hoursWithoutDays} hour${hoursWithoutDays === 1 ? '' : 's'} `
+      : '';
+  const minutesString = `${minutesWithoutHours} minute${
+    minutesWithoutHours === 1 ? '' : 's'
+  }`;
+  const secondsString = ` ${seconds} second${seconds === 1 ? '' : 's'}`;
+
+  const timeString = `${yearsString}${monthsString}${daysString}${hoursString}${minutesString}${secondsString}`;
+
   return {
     years: totalYears,
     months: monthsWithoutYears,
@@ -21,6 +42,7 @@ const calculateTimeFromSeconds = (secs = 0) => {
     hours: hoursWithoutDays,
     minutes: minutesWithoutHours,
     seconds,
+    timeString,
   };
 };
 

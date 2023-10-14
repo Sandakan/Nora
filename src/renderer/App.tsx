@@ -41,6 +41,7 @@ import shuffleQueueRandomly from './other/shuffleQueueRandomly';
 import toggleSongIsFavorite from './other/toggleSongIsFavorite';
 import UnsupportedFileMessagePrompt from './other/UnsupportedFileMessagePrompt';
 import SuspenseLoader from './components/SuspenseLoader';
+import { equalizerBandHertzData } from './other/equalizerData';
 
 const MiniPlayer = React.lazy(
   () => import('./components/MiniPlayer/MiniPlayer'),
@@ -50,56 +51,42 @@ const player = new Audio();
 let repetitivePlaybackErrorsCount = 0;
 const lowResponseTimeRequiredPages: PageTitles[] = ['Lyrics', 'LyricsEditor'];
 
+// ? / / / / / / /  EQUALIZER INITIALIZATION / / / / / / / / / / / / / /
 const context = new window.AudioContext();
-const source = context.createMediaElementSource(player);
-const sixtyHertzFilter = context.createBiquadFilter(); // 60Hz
-const hundredFiftyHertzFilter = context.createBiquadFilter(); // 150Hz
-const fourHundredHertzFilter = context.createBiquadFilter(); // 400Hz
-const thousandHertzFilter = context.createBiquadFilter(); // 1000Hz
-const twoThousandHertzFilter = context.createBiquadFilter(); // 2000Hz
-const fifteenThousandHertzFilter = context.createBiquadFilter(); // 15000Hz
+const equalizerBands = new Map<EqualizerBandFilters, BiquadFilterNode>();
 
-source.connect(sixtyHertzFilter);
-sixtyHertzFilter.connect(hundredFiftyHertzFilter);
-hundredFiftyHertzFilter.connect(fourHundredHertzFilter);
-fourHundredHertzFilter.connect(thousandHertzFilter);
-thousandHertzFilter.connect(twoThousandHertzFilter);
-twoThousandHertzFilter.connect(fifteenThousandHertzFilter);
-fifteenThousandHertzFilter.connect(context.destination);
+for (const [filterName, hertzValue] of Object.entries(equalizerBandHertzData)) {
+  const equalizerFilterName = filterName as EqualizerBandFilters;
+  const equalizerBand = context.createBiquadFilter();
+
+  equalizerBand.type = 'peaking';
+  equalizerBand.frequency.value = hertzValue;
+  equalizerBand.Q.value = 1;
+  equalizerBand.gain.value = 0;
+
+  equalizerBands.set(equalizerFilterName, equalizerBand);
+}
+
+const source = context.createMediaElementSource(player);
+const filterMapKeys = [...equalizerBands.keys()];
+
+equalizerBands.forEach((filter, key, map) => {
+  const currentFilterIndex = filterMapKeys.indexOf(key);
+  const isTheFirstFilter = currentFilterIndex === 0;
+  const isTheLastFilter = currentFilterIndex === filterMapKeys.length - 1;
+
+  if (isTheFirstFilter) source.connect(filter);
+  else {
+    const prevFilter = map.get(filterMapKeys[currentFilterIndex - 1]);
+    if (prevFilter) prevFilter.connect(filter);
+
+    if (isTheLastFilter) filter.connect(context.destination);
+  }
+});
 
 // ? / / / / / / /  PLAYER DEFAULT OPTIONS / / / / / / / / / / / / / /
 player.preload = 'auto';
 player.defaultPlaybackRate = 1.0;
-
-sixtyHertzFilter.type = 'peaking';
-sixtyHertzFilter.frequency.value = 60;
-sixtyHertzFilter.Q.value = 1;
-sixtyHertzFilter.gain.value = 0;
-
-hundredFiftyHertzFilter.type = 'peaking';
-hundredFiftyHertzFilter.frequency.value = 150;
-hundredFiftyHertzFilter.Q.value = 1;
-hundredFiftyHertzFilter.gain.value = 0;
-
-fourHundredHertzFilter.type = 'peaking';
-fourHundredHertzFilter.frequency.value = 400;
-fourHundredHertzFilter.Q.value = 1;
-fourHundredHertzFilter.gain.value = 0;
-
-thousandHertzFilter.type = 'peaking';
-thousandHertzFilter.frequency.value = 1000;
-thousandHertzFilter.Q.value = 1;
-thousandHertzFilter.gain.value = 0;
-
-twoThousandHertzFilter.type = 'peaking';
-twoThousandHertzFilter.frequency.value = 2400;
-twoThousandHertzFilter.Q.value = 1;
-twoThousandHertzFilter.gain.value = 0;
-
-fifteenThousandHertzFilter.type = 'peaking';
-fifteenThousandHertzFilter.frequency.value = 15000;
-fifteenThousandHertzFilter.Q.value = 1;
-fifteenThousandHertzFilter.gain.value = 0;
 
 player.addEventListener('player/trackchange', (e) => {
   if ('detail' in e) {
@@ -229,8 +216,12 @@ export default function App() {
 
   const AUDIO_FADE_INTERVAL = 50;
   const AUDIO_FADE_DURATION = 250;
-  const fadeOutIntervalId = React.useRef(undefined as NodeJS.Timer | undefined);
-  const fadeInIntervalId = React.useRef(undefined as NodeJS.Timer | undefined);
+  const fadeOutIntervalId = React.useRef(
+    undefined as NodeJS.Timeout | undefined,
+  );
+  const fadeInIntervalId = React.useRef(
+    undefined as NodeJS.Timeout | undefined,
+  );
   const fadeOutAudio = React.useCallback(() => {
     if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
     if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
@@ -398,21 +389,14 @@ export default function App() {
 
   React.useEffect(() => {
     if (content.localStorage.equalizerPreset) {
-      const {
-        fifteenKiloHertz,
-        fourHundredHertz,
-        hundredFiftyHertz,
-        oneKiloHertz,
-        sixtyHertz,
-        twoPointFourKiloHertz,
-      } = content.localStorage.equalizerPreset;
+      const filters = content.localStorage.equalizerPreset;
+      for (const filter of Object.entries(filters)) {
+        const filterName = filter[0] as EqualizerBandFilters;
+        const gainValue: number = filter[1];
 
-      sixtyHertzFilter.gain.value = sixtyHertz;
-      hundredFiftyHertzFilter.gain.value = hundredFiftyHertz;
-      fourHundredHertzFilter.gain.value = fourHundredHertz;
-      thousandHertzFilter.gain.value = oneKiloHertz;
-      twoThousandHertzFilter.gain.value = twoPointFourKiloHertz;
-      fifteenThousandHertzFilter.gain.value = fifteenKiloHertz;
+        const equalizerFilter = equalizerBands.get(filterName);
+        if (equalizerFilter) equalizerFilter.gain.value = gainValue;
+      }
     }
   }, [content.localStorage.equalizerPreset]);
 
@@ -892,8 +876,12 @@ export default function App() {
   const recordRef = React.useRef<ListeningDataSession>();
 
   const recordListeningData = React.useCallback(
-    (songId: string, duration: number) => {
-      if (recordRef?.current?.songId !== songId) {
+    (songId: string, duration: number, isRepeating = false) => {
+      if (recordRef?.current?.songId !== songId || isRepeating) {
+        if (isRepeating)
+          console.warn(
+            `Added another song record instance for the repetition of ${songId}`,
+          );
         if (recordRef.current) recordRef.current.stopRecording();
 
         const listeningDataSession = new ListeningDataSession(songId, duration);
@@ -1058,6 +1046,8 @@ export default function App() {
       ) {
         player.currentTime = 0;
         toggleSongPlayback(true);
+        if (recordRef.current) recordRef.current.recordListeningData();
+
         window.api.audioLibraryControls.updateSongListeningData(
           contentRef.current.currentSongData.songId,
           'listens',
@@ -1073,7 +1063,7 @@ export default function App() {
       } else if (refQueue.current.queue.length > 0)
         changeQueueCurrentSongIndex(0);
     },
-    [toggleSongPlayback, changeQueueCurrentSongIndex],
+    [changeQueueCurrentSongIndex, toggleSongPlayback],
   );
 
   React.useEffect(() => {
@@ -1626,6 +1616,7 @@ export default function App() {
         ]);
       }
       // default combinations
+      else if (e.code === 'Escape') toggleMultipleSelections(false);
       else if (e.code === 'Space') toggleSongPlayback();
       // shift combinations
       else if (e.shiftKey && e.key === 'ArrowLeft') {
@@ -1660,9 +1651,10 @@ export default function App() {
       content.navigationHistory.history,
       content.navigationHistory.pageHistoryIndex,
       content.localStorage.playback.playbackRate,
+      changeCurrentActivePage,
+      toggleMultipleSelections,
       toggleSongPlayback,
       updatePageHistoryIndex,
-      changeCurrentActivePage,
       addNewNotifications,
     ],
   );

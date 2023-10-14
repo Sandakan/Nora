@@ -48,6 +48,21 @@ const LyricsPage = () => {
     return undefined;
   }, [lyrics]);
 
+  // const manageLyricsPageKeyboardShortcuts = React.useCallback(
+  //   (e: KeyboardEvent) => {
+  //     if (e.altKey && e.key === 'ArrowUp') e.preventDefault();
+  //    else  if (e.altKey && e.key === 'ArrowDown') e.preventDefault();
+  //   },
+  //   [],
+  // );
+
+  // React.useEffect(() => {
+  //   window.addEventListener('keydown', manageLyricsPageKeyboardShortcuts);
+  //   return () => {
+  //     window.removeEventListener('keydown', manageLyricsPageKeyboardShortcuts);
+  //   };
+  // }, [manageLyricsPageKeyboardShortcuts]);
+
   React.useEffect(() => {
     setLyrics(null);
     window.api.lyrics

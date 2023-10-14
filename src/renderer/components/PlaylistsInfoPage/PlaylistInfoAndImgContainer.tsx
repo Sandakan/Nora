@@ -16,14 +16,10 @@ const PlaylistInfoAndImgContainer = (props: Props) => {
   const { playlist, songs } = props;
 
   const totalPlaylistDuration = React.useMemo(() => {
-    const { hours, minutes, seconds } = calculateTimeFromSeconds(
+    const { timeString } = calculateTimeFromSeconds(
       songs.reduce((prev, current) => prev + current.duration, 0),
     );
-    return `${
-      hours >= 1 ? `${hours} hour${hours === 1 ? '' : 's'} ` : ''
-    }${minutes} minute${minutes === 1 ? '' : 's'} ${seconds} second${
-      seconds === 1 ? '' : 's'
-    }`;
+    return timeString;
   }, [songs]);
 
   return (
