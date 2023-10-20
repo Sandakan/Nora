@@ -138,7 +138,7 @@ export const parseMusicmatchDataFromLyrics = async (
       // [ve:version of program]
       output.unshift(
         `[by:Implementation from Fashni's MxLRC (https://github.com/fashni/MxLRC)]`,
-        `[re:Nora Player (${repository.url})]`,
+        `[re:Nora (${repository.url})]`,
         `[ve:${version}]`,
       );
 

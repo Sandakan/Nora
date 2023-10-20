@@ -57,7 +57,8 @@ const useSelectAllHandler = <Obj extends Record<string, any>>(
           ids.push(...selectedIds);
       }
 
-      toggleMultipleSelections(true, selectionType, ids, true);
+      const uniqueIds = new Set(ids);
+      toggleMultipleSelections(true, selectionType, [...uniqueIds], true);
     },
     [
       arr,

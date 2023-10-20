@@ -50,6 +50,13 @@ const shortcutData: ShortcutCategory[] = [
     ],
   },
   {
+    shortcutCategoryTitle: 'Lyrics',
+    shortcuts: [
+      { label: 'Play the Next Lyrics Line', keys: ['Alt', 'Down'] },
+      { label: 'Play the Previous Lyrics Line', keys: ['Alt', 'Up'] },
+    ],
+  },
+  {
     shortcutCategoryTitle: 'Lyrics Editor',
     shortcuts: [
       { label: 'Select the Next Lyrics Line', keys: ['Enter'] },
@@ -78,14 +85,21 @@ const AppShortcutsPrompt = () => {
           const { label, keys } = shortcut;
 
           const shortcutKeyComponents = keys.map((key, index) => (
-            // eslint-disable-next-line react/no-array-index-key
-            <ShortcutButton shortcutKey={key} key={index} />
+            <>
+              {/*  eslint-disable-next-line react/no-array-index-key */}
+              <ShortcutButton shortcutKey={key} key={index} />
+              {index !== keys.length - 1 && (
+                <span className="mx-2 text-font-color-dimmed">+</span>
+              )}
+            </>
           ));
 
           return (
             <div className="shortcut mb-4 flex w-[45%] items-center justify-between p-2">
               <div className="shortcut-label opacity-75">{label}</div>
-              <div className="shortcut-keys flex">{shortcutKeyComponents}</div>
+              <div className="shortcut-keys flex items-center">
+                {shortcutKeyComponents}
+              </div>
             </div>
           );
         });

@@ -654,17 +654,19 @@ const Song = React.forwardRef(
             (trackNo &&
               localStorageData.preferences.showTrackNumberAsSongIndex) ? (
             <div
-              className={`relative mx-1 h-fit text-sm flex items-center justify-center rounded-2xl bg-background-color-1 px-3 text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1 text-center ${
+              className={`relative mx-1 flex items-center py-1 justify-center rounded-2xl bg-background-color-1 px-3 text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1 text-center ${
                 index < 10
-                  ? 'min-w-[2rem]'
+                  ? 'min-w-[1.75rem]'
                   : index < 100
-                  ? 'min-w-[2.75rem]'
+                  ? 'min-w-[2.5rem]'
                   : index < 1000
-                  ? 'min-w-[3.25rem]'
-                  : 'min-w-[4rem]'
+                  ? 'min-w-[3rem]'
+                  : 'min-w-[3.75rem]'
               }`}
             >
-              {trackNo ?? index + 1}
+              <span className="text-sm leading-[.9]">
+                {trackNo ?? index + 1}
+              </span>
             </div>
           ) : (
             ''

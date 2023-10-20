@@ -485,7 +485,7 @@ function SongTagsEditingPage() {
             <span className="material-icons-round-outlined text-6xl">
               campaign
             </span>
-            <p className="mt-2 text-2xl">No Support</p>
+            <p className="mt-2 text-2xl">Not Supported</p>
             <p
               className="mt-4 cursor-pointer text-xs font-light opacity-50"
               title={window.api.utils.removeDefaultAppProtocolFromFilePath(

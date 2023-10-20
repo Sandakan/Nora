@@ -6,7 +6,7 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
 import roundTo from 'renderer/utils/roundTo';
-import { syncedLyricsRegex } from './LyricsPage';
+import { delay, syncedLyricsRegex } from './LyricsPage';
 
 interface LyricProp {
   lyric: string | SyncedLyricsLineText;
@@ -27,9 +27,6 @@ const LyricLine = (props: LyricProp) => {
   const isTheCurrnetLineRef = React.useRef(false);
 
   const { index, lyric, syncedLyrics, isAutoScrolling = true } = props;
-
-  // substracted 350 milliseconds to keep lyrics in sync with the lyrics line animations.
-  const delay = 0.35;
 
   React.useEffect(() => {
     if (lyricsRef.current && syncedLyrics) {

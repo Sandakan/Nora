@@ -3,6 +3,7 @@
 import React, { useContext } from 'react';
 import debounce from 'renderer/utils/debounce';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
 
@@ -19,17 +20,23 @@ import { EditingLyricsLineData } from '../LyricsEditingPage/LyricsEditingPage';
 const { metadataEditingSupportedExtensions } = appPreferences;
 
 export const syncedLyricsRegex = /^\[\d+:\d{1,2}\.\d{1,3}]/gm;
+
+// substracted 350 milliseconds to keep lyrics in sync with the lyrics line animations.
+export const delay = 0.35;
+
 let isScrollingByCode = false;
 document.addEventListener('lyrics/scrollIntoView', () => {
   isScrollingByCode = true;
 });
 
 const LyricsPage = () => {
+  const { songPosition } = React.useContext(SongPositionContext);
   const { currentSongData, localStorageData } = useContext(AppContext);
   const {
     addNewNotifications,
     updateCurrentlyActivePageData,
     changeCurrentActivePage,
+    updateSongPosition,
   } = React.useContext(AppUpdateContext);
 
   const [lyrics, setLyrics] = React.useState(
@@ -48,39 +55,71 @@ const LyricsPage = () => {
     return undefined;
   }, [lyrics]);
 
-  // const manageLyricsPageKeyboardShortcuts = React.useCallback(
-  //   (e: KeyboardEvent) => {
-  //     if (e.altKey && e.key === 'ArrowUp') e.preventDefault();
-  //    else  if (e.altKey && e.key === 'ArrowDown') e.preventDefault();
-  //   },
-  //   [],
-  // );
+  const skipLyricsLines = React.useCallback(
+    (option: 'previous' | 'next' = 'next') => {
+      if (lyrics?.lyrics.isSynced) {
+        const { syncedLyrics } = lyrics.lyrics;
 
-  // React.useEffect(() => {
-  //   window.addEventListener('keydown', manageLyricsPageKeyboardShortcuts);
-  //   return () => {
-  //     window.removeEventListener('keydown', manageLyricsPageKeyboardShortcuts);
-  //   };
-  // }, [manageLyricsPageKeyboardShortcuts]);
+        if (syncedLyrics) {
+          const lyricsLines: typeof syncedLyrics = [
+            { start: 0, end: syncedLyrics[0].start, text: '...' },
+            ...syncedLyrics,
+          ];
+          for (let i = 0; i < lyricsLines.length; i += 1) {
+            const { start, end } = lyricsLines[i];
+            const isInRange =
+              songPosition > start - delay && songPosition < end - delay;
+            if (isInRange) {
+              if (option === 'next' && lyricsLines[i + 1])
+                updateSongPosition(lyricsLines[i + 1].start);
+              else if (option === 'previous' && lyricsLines[i - 1])
+                updateSongPosition(lyricsLines[i - 1].start);
+            }
+          }
+        }
+      }
+    },
+    [lyrics?.lyrics, songPosition, updateSongPosition],
+  );
+
+  const manageLyricsPageKeyboardShortcuts = React.useCallback(
+    (e: KeyboardEvent) => {
+      if (e.altKey && e.key === 'ArrowUp') skipLyricsLines('previous');
+      else if (e.altKey && e.key === 'ArrowDown') skipLyricsLines('next');
+    },
+    [skipLyricsLines],
+  );
 
   React.useEffect(() => {
-    setLyrics(null);
-    window.api.lyrics
-      .getSongLyrics(
-        {
-          songTitle: currentSongData.title,
-          songArtists: Array.isArray(currentSongData.artists)
-            ? currentSongData.artists.map((artist) => artist.name)
-            : [],
-          songPath: currentSongData.path,
-          duration: currentSongData.duration,
-        },
-        undefined,
-        undefined,
-        localStorageData.preferences.lyricsAutomaticallySaveState,
-      )
-      .then((res) => setLyrics(res))
-      .catch((err) => console.error(err));
+    window.addEventListener('keydown', manageLyricsPageKeyboardShortcuts);
+    return () => {
+      window.removeEventListener('keydown', manageLyricsPageKeyboardShortcuts);
+    };
+  }, [manageLyricsPageKeyboardShortcuts]);
+
+  const requestedLyricsTitle = React.useRef<string>();
+
+  React.useEffect(() => {
+    if (requestedLyricsTitle.current !== currentSongData.title) {
+      requestedLyricsTitle.current = currentSongData.title;
+      setLyrics(null);
+      window.api.lyrics
+        .getSongLyrics(
+          {
+            songTitle: currentSongData.title,
+            songArtists: Array.isArray(currentSongData.artists)
+              ? currentSongData.artists.map((artist) => artist.name)
+              : [],
+            songPath: currentSongData.path,
+            duration: currentSongData.duration,
+          },
+          undefined,
+          undefined,
+          localStorageData.preferences.lyricsAutomaticallySaveState,
+        )
+        .then((res) => setLyrics(res))
+        .catch((err) => console.error(err));
+    }
   }, [
     addNewNotifications,
     currentSongData.artists,

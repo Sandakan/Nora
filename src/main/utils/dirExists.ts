@@ -1,8 +1,8 @@
 import { accessSync, constants } from 'fs';
 
-export const dirExistsSync = (dir: string) => {
+export const dirExistsSync = (dir: string, mode = constants.F_OK) => {
   try {
-    accessSync(dir, constants.F_OK);
+    accessSync(dir, mode);
     return true;
   } catch (error) {
     if ('code' in (error as any)) {

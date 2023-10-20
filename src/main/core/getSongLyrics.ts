@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'fs/promises';
 import NodeID3 from 'node-id3';
 import songlyrics from 'songlyrics';
 
@@ -64,6 +65,22 @@ const fetchLyricsFromAudioSource = (songPath: string) => {
       'ERROR',
     );
     return undefined;
+  }
+};
+
+const fetchLyricsFromLRCFile = async (songPath: string) => {
+  const lrcFilePath = `${songPath}.lrc`;
+  try {
+    const lyricsInLrcFormat = await fs.readFile(lrcFilePath, {
+      encoding: 'utf-8',
+    });
+    const parsedLyrics = parseLyrics(lyricsInLrcFormat);
+    return parsedLyrics;
+  } catch (error) {
+    return log(
+      `Lyrics containing LRC file for ${path.basename(songPath)} didn't exist.`,
+      { error },
+    );
   }
 };
 
@@ -191,8 +208,11 @@ const getSongLyrics = async (
 
   log(`Fetching lyrics for '${songTitle} - ${songArtists.join(',')}'.`);
 
-  const audioSourceLyrics = fetchLyricsFromAudioSource(songPath);
-  if (audioSourceLyrics) isOfflineLyricsAvailable = true;
+  const offlineLyrics =
+    fetchLyricsFromAudioSource(songPath) ||
+    (await fetchLyricsFromLRCFile(songPath));
+
+  if (offlineLyrics) isOfflineLyricsAvailable = true;
 
   if (lyricsRequestType !== 'ONLINE_ONLY') {
     if (
@@ -204,15 +224,15 @@ const getSongLyrics = async (
       return cachedLyrics;
     }
 
-    if (audioSourceLyrics) {
-      const { isSynced } = audioSourceLyrics;
+    if (offlineLyrics) {
+      const { isSynced } = offlineLyrics;
       const type: LyricsTypes = isSynced ? 'SYNCED' : 'UN_SYNCED';
 
       cachedLyrics = {
         title: songTitle,
         source: 'IN_SONG_LYRICS',
         lyricsType: type,
-        lyrics: audioSourceLyrics,
+        lyrics: offlineLyrics,
         isOfflineLyricsAvailable,
       };
       return cachedLyrics;
