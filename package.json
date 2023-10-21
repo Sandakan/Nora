@@ -157,7 +157,6 @@
   "dependencies": {
     "didyoumean2": "^6.0.1",
     "electron-store": "^8.1.0",
-    "electron-updater": "^6.1.4",
     "music-metadata": "^7.13.4",
     "node-id3": "^0.2.6",
     "node-vibrant": "^3.2.1-alpha.1",
@@ -339,5 +338,5 @@
     "raw_repository_url": "https://raw.githubusercontent.com/Sandakan/Nora/",
     "website_url": "https://noramusic.netlify.app/"
   },
-  "version": "2.4.2-stable"
+  "version": "2.4.3-stable"
 }

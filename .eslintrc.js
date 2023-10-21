@@ -49,6 +49,11 @@ module.exports = {
         'no-use-before-define': 'off',
       },
     },
+
+    {
+      files: ['./.eslintrc.js'],
+      parserOptions: { project: null },
+    },
   ],
   parserOptions: {
     ecmaVersion: 2020,

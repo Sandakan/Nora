@@ -15,5 +15,5 @@
         "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts",
         "postinstall": "npm run electron-rebuild && npm run link-modules"
     },
-    "version": "2.4.2-stable"
+    "version": "2.4.3-stable"
 }
