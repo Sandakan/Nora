@@ -42,6 +42,7 @@ module.exports = {
     'import/named': 'off',
     'no-use-before-define': ['error', { functions: false }],
   },
+  ignorePatterns: ['./eslintrc.js'],
   overrides: [
     {
       files: ['**/*.d.ts'],
