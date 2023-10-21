@@ -195,7 +195,7 @@
     "detect-port": "^1.5.1",
     "dotenv": "^16.3.0",
     "dotenv-webpack": "^8.0.1",
-    "electron": "^26.0.0",
+    "electron": "^27.0.0",
     "electron-builder": "^24.4.0",
     "electron-debug": "^3.2.0",
     "electron-devtools-installer": "^3.2.0",
@@ -338,5 +338,5 @@
     "raw_repository_url": "https://raw.githubusercontent.com/Sandakan/Nora/",
     "website_url": "https://noramusic.netlify.app/"
   },
-  "version": "2.4.2-stable"
+  "version": "2.4.3-stable"
 }
