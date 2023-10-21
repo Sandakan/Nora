@@ -42,13 +42,17 @@ module.exports = {
     'import/named': 'off',
     'no-use-before-define': ['error', { functions: false }],
   },
-  ignorePatterns: ['./eslintrc.js'],
   overrides: [
     {
       files: ['**/*.d.ts'],
       rules: {
         'no-use-before-define': 'off',
       },
+    },
+
+    {
+      files: ['./.eslintrc.js'],
+      parserOptions: { project: null },
     },
   ],
   parserOptions: {
