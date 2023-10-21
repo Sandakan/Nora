@@ -1,6 +1,15 @@
 # Change Log
 
-> ### The latest version, **( v2.4.0-stable )** contains a lot of new features and improvements. As always expect some bugs in the app.
+> ### The latest version, **( v2.4.3-stable )** contains a lot of new features and improvements. As always expect some bugs in the app.
+
+<br>
+
+<br>
+
+- ### **v2.4.3-stable - ( 21<sup>th</sup> of October 2023 )**
+
+  - ### 🔨 Fixes and Improvements
+    - Updated dependencies to fix some security vulnerabilities.
 
 <br>
 

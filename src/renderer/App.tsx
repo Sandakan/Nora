@@ -229,8 +229,12 @@ export default function App() {
 
   const AUDIO_FADE_INTERVAL = 50;
   const AUDIO_FADE_DURATION = 250;
-  const fadeOutIntervalId = React.useRef(undefined as NodeJS.Timer | undefined);
-  const fadeInIntervalId = React.useRef(undefined as NodeJS.Timer | undefined);
+  const fadeOutIntervalId = React.useRef(
+    undefined as NodeJS.Timeout | undefined,
+  );
+  const fadeInIntervalId = React.useRef(
+    undefined as NodeJS.Timeout | undefined,
+  );
   const fadeOutAudio = React.useCallback(() => {
     if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
     if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
