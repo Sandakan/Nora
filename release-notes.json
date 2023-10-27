@@ -64,7 +64,9 @@
       ],
       "notes": {
         "fixed": [
-          "Fixed a bug where environment variables are not initialized when migrating the database to a newer version."
+          {
+            "note": "Fixed a bug where environment variables are not initialized when migrating the database to a newer version."
+          }
         ],
         "knownIssues": [
           {

@@ -7,6 +7,7 @@ import { tryToParseSong } from '../parseSong/parseSong';
 import sortSongs from '../utils/sortSongs';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import { generatePalettes } from '../other/generatePalette';
+import { timeEnd, timeStart } from '../utils/measureTimeUsage';
 
 const removeAlreadyAvailableStructures = (structures: FolderStructure[]) => {
   const parents: FolderStructure[] = [];
@@ -49,6 +50,7 @@ const addMusicFromFolderStructures = async (
   let songs: SongData[] = [];
 
   if (songPaths) {
+    const startTime = timeStart();
     for (let i = 0; i < songPaths.length; i += 1) {
       if (abortSignal?.aborted) {
         log(
@@ -77,6 +79,7 @@ const addMusicFromFolderStructures = async (
         );
       }
     }
+    timeEnd(startTime, 'Time to parse the whole folder');
     setTimeout(generatePalettes, 1500);
   } else throw new Error('Failed to get song paths from music folders.');
 
@@ -86,7 +89,6 @@ const addMusicFromFolderStructures = async (
     `Successfully parsed ${songs.length} songs from the selected music folders.`,
     {
       folderPaths: eligableStructures.map((x) => x.path),
-      timeElapsed: console.timeEnd('parseTime'),
     },
   );
   dataUpdateEvent('userData/musicFolder');

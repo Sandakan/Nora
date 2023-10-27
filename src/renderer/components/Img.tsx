@@ -71,7 +71,7 @@ type ImgProps = {
   />
 </picture>; */
 
-const Img = (props: ImgProps) => {
+const Img = React.memo((props: ImgProps) => {
   const {
     src,
     alt = '',
@@ -90,13 +90,16 @@ const Img = (props: ImgProps) => {
   const imgRef = React.useRef<HTMLImageElement>(null);
   const imgPropsRef = React.useRef<ImgProperties>();
   const errorCountRef = React.useRef(0);
+  const isFirstTimeRef = React.useRef(true);
 
   return (
     <img
       src={src || fallbackSrc}
       alt={alt}
       ref={imgRef}
-      className={`relative outline-1 outline-offset-4 focus-visible:!outline ${className}`}
+      className={`relative outline-1 outline-offset-4 delay-[250ms] transition-opacity focus-visible:!outline ${
+        isFirstTimeRef.current && 'opacity-0'
+      } ${className}`}
       draggable={draggable}
       onError={(e) => {
         if (errorCountRef.current < 3) {
@@ -125,6 +128,10 @@ const Img = (props: ImgProps) => {
       loading={loading}
       onContextMenu={onContextMenu}
       onLoad={(e) => {
+        if (isFirstTimeRef.current) isFirstTimeRef.current = false;
+        e.currentTarget.classList.add('!opacity-100');
+        e.currentTarget.classList.remove('opacity-0');
+
         if (showImgPropsOnTooltip) {
           const img = new Image();
           img.onload = () => {
@@ -155,6 +162,7 @@ const Img = (props: ImgProps) => {
       tabIndex={tabIndex}
     />
   );
-};
+});
 
+Img.displayName = 'Img';
 export default Img;

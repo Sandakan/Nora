@@ -1,4 +1,3 @@
-import fs from 'fs/promises';
 import path from 'path';
 import NodeID3 from 'node-id3';
 
@@ -8,7 +7,8 @@ import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
 import { appPreferences } from '../../package.json';
 import log from './log';
 import { dataUpdateEvent } from './main';
-import convertLyricsToLrcFormat from './utils/convertLyricsToLrcFormat';
+import saveLyricsToLRCFile from './core/saveLyricsToLrcFile';
+import { getUserData } from './filesystem';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -19,32 +19,23 @@ type PendingSongLyrics = {
 
 const pendingSongLyrics = new Map<string, PendingSongLyrics>();
 
-const saveLyricsToLRCFile = async (
-  songPathWithoutProtocol: string,
-  songLyrics: SongLyrics,
-) => {
-  const songContainingFolderPath = path.dirname(songPathWithoutProtocol);
-  const songFileName = path.basename(songPathWithoutProtocol);
-  const lrcFilePath = path.join(
-    songContainingFolderPath,
-    `${songFileName}.lrc`,
-  );
-  const lrcFormattedLyrics = convertLyricsToLrcFormat(songLyrics);
-
-  await fs.writeFile(lrcFilePath, lrcFormattedLyrics);
-  log(`Lyrics saved in ${lrcFilePath}.`, { title: songLyrics.title });
-};
-
 const saveLyricsToSong = async (
   songPathWithProtocol: string,
   lyrics: SongLyrics,
 ) => {
+  const userData = getUserData();
   const songPath = removeDefaultAppProtocolFromFilePath(songPathWithProtocol);
 
-  if (lyrics && lyrics?.lyrics) {
+  if (lyrics && lyrics.lyrics.lyrics.length > 0) {
     const pathExt = path.extname(songPath).replace(/\W/, '');
     const isASupporedFormat =
       metadataEditingSupportedExtensions.includes(pathExt);
+
+    if (
+      !isASupporedFormat ||
+      userData.preferences.saveLyricsInLrcFilesForSupportedSongs
+    )
+      saveLyricsToLRCFile(songPath, lyrics);
 
     if (isASupporedFormat) {
       const prevTags = await NodeID3.Promise.read(songPath);
@@ -95,7 +86,6 @@ const saveLyricsToSong = async (
         throw error;
       }
     } else {
-      saveLyricsToLRCFile(songPath, lyrics);
       return log(
         `Lyrics for this song with '${pathExt}' extension will be saved in a LRC file.`,
         { songPath },

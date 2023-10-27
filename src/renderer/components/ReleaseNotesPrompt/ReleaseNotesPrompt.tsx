@@ -20,8 +20,9 @@ const ReleaseNotesPrompt = () => {
   const { updateAppUpdatesState } = React.useContext(AppUpdateContext);
 
   const { isOnline } = useNetworkConnectivity();
-  const [releaseNotes, setReleaseNotes] =
-    React.useState<Changelog>(localReleseNotes);
+  const [releaseNotes, setReleaseNotes] = React.useState<Changelog>(
+    localReleseNotes satisfies Changelog,
+  );
 
   const latestUpdatedInfo = React.useMemo(() => {
     const sortedReleaseNotes = releaseNotes.versions.sort(

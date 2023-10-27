@@ -103,7 +103,9 @@ const Button = React.memo((props: ButtonProps) => {
       ) : (
         buttonIcons
       )}
-      {label && <span className="button-label-text w-max">{label}</span>}
+      {label && (
+        <span className="button-label-text w-max leading-none">{label}</span>
+      )}
     </button>
   );
 });

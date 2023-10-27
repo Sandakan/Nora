@@ -38,6 +38,7 @@ export const USER_DATA_TEMPLATE: UserData = {
     sendSongScrobblingDataToLastFM: false,
     sendSongFavoritesDataToLastFM: false,
     sendNowPlayingSongDataToLastFM: false,
+    saveLyricsInLrcFilesForSupportedSongs: false,
   },
   windowPositions: {},
   windowDiamensions: {},
@@ -306,6 +307,11 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
     ) {
       userData.preferences.hideWindowOnClose = data;
     } else if (
+      dataType === 'preferences.saveLyricsInLrcFilesForSupportedSongs' &&
+      typeof data === 'boolean'
+    ) {
+      userData.preferences.saveLyricsInLrcFilesForSupportedSongs = data;
+    } else if (
       dataType === 'preferences.openWindowAsHiddenOnSystemStart' &&
       typeof data === 'boolean'
     ) {
@@ -331,6 +337,11 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
     ) {
       const encryptedToken = encrypt(data);
       userData.customMusixmatchUserToken = encryptedToken;
+    } else if (
+      dataType === 'customLrcFilesSaveLocation' &&
+      typeof data === 'string'
+    ) {
+      userData.customLrcFilesSaveLocation = data;
     } else if (dataType === 'lastFmSessionData' && typeof data === 'object') {
       userData.lastFmSessionData = data as LastFMSessionData;
     } else if (dataType === 'storageMetrics' && typeof data === 'object') {

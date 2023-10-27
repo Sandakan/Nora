@@ -29,6 +29,8 @@ const MusicFoldersPage = () => {
     isMultipleSelectionEnabled,
     // currentlyActivePage,
     multipleSelectionsData,
+    currentlyActivePage,
+    localStorageData,
   } = React.useContext(AppContext);
   const {
     updateCurrentlyActivePageData,
@@ -36,8 +38,11 @@ const MusicFoldersPage = () => {
     changePromptMenuData,
   } = React.useContext(AppUpdateContext);
   const [musicFolders, setMusicFolders] = React.useState<MusicFolder[]>([]);
-  const [sortingOrder, setSortingOrder] =
-    React.useState<FolderSortTypes>('aToZ');
+  const [sortingOrder, setSortingOrder] = React.useState<FolderSortTypes>(
+    currentlyActivePage?.data?.sortingOrder ||
+      localStorageData?.sortingStates?.musicFoldersPage ||
+      'aToZ',
+  );
 
   // const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
   const foldersContainerRef = React.useRef(null as HTMLDivElement | null);
@@ -84,6 +89,10 @@ const MusicFoldersPage = () => {
       );
     };
   }, [fetchFoldersData]);
+
+  React.useEffect(() => {
+    storage.sortingStates.setSortingStates('musicFoldersPage', sortingOrder);
+  }, [sortingOrder]);
 
   const musicFoldersWithPaths = React.useMemo(
     () => musicFolders.map((x) => ({ ...x, folderPath: x.path })),

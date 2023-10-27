@@ -33,6 +33,7 @@ import ResetAppConfirmationPrompt from '../../HomePage/ResetAppConfirmationPromp
 import SensitiveActionConfirmPrompt from '../../SensitiveActionConfirmPrompt';
 import AppShortcutsPrompt from '../AppShortcutsPrompt';
 import AppStats from './AppStats';
+import ClearLocalStoragePrompt from '../ClearLocalStoragePrompt';
 
 const AboutSettings = () => {
   const { isDarkMode } = React.useContext(AppContext);
@@ -266,6 +267,19 @@ const AboutSettings = () => {
               changePromptMenuData(
                 true,
                 <ResetAppConfirmationPrompt />,
+                'confirm-app-reset',
+              )
+            }
+          />
+          <Button
+            label="Clear Optional Data"
+            iconName="delete"
+            className="mb-4 rounded-2xl"
+            iconClassName="material-icons-round-outlined"
+            clickHandler={() =>
+              changePromptMenuData(
+                true,
+                <ClearLocalStoragePrompt />,
                 'confirm-app-reset',
               )
             }

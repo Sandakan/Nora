@@ -80,9 +80,10 @@ declare global {
     artists?: { artistId: string; name: string }[];
     album?: { albumId: string; name: string };
     genres?: { genreId: string; name: string }[];
-    albumArtist?: { artistId: string; name: string };
+    albumArtists?: { artistId: string; name: string }[];
     bitrate?: number;
     trackNo?: number;
+    diskNo?: number;
     noOfChannels?: number;
     year?: number;
     sampleRate?: number;
@@ -371,7 +372,9 @@ declare global {
     | 'preferences.sendSongScrobblingDataToLastFM'
     | 'preferences.sendSongFavoritesDataToLastFM'
     | 'preferences.sendNowPlayingSongDataToLastFM'
+    | 'preferences.saveLyricsInLrcFilesForSupportedSongs'
     | 'customMusixmatchUserToken'
+    | 'customLrcFilesSaveLocation'
     | 'lastFmSessionData'
     | 'storageMetrics'
     | PageSortTypes;
@@ -402,6 +405,7 @@ declare global {
       sendSongScrobblingDataToLastFM: boolean;
       sendSongFavoritesDataToLastFM: boolean;
       sendNowPlayingSongDataToLastFM: boolean;
+      saveLyricsInLrcFilesForSupportedSongs: boolean;
     };
     windowPositions: {
       mainWindow?: WindowCordinates;
@@ -416,6 +420,7 @@ declare global {
     customMusixmatchUserToken?: string;
     lastFmSessionData?: LastFMSessionData;
     storageMetrics?: StorageMetrics;
+    customLrcFilesSaveLocation?: string;
   }
 
   interface AppThemeData {
@@ -570,7 +575,7 @@ declare global {
     playlistsPage?: PlaylistSortTypes;
     albumsPage?: AlbumSortTypes;
     genresPage?: GenreSortTypes;
-    musicFoldersPage?: SongSortTypes;
+    musicFoldersPage?: FolderSortTypes;
   }
 
   interface LyricsEditorSettings {
@@ -1120,16 +1125,16 @@ declare global {
     releaseDate: string;
     importantNotes?: string[];
     artwork?: string;
-    notes: Notes;
+    notes: ChangelogNoteTypes;
   }
 
-  export interface Notes {
-    new: Fixed[];
-    fixed: Fixed[];
-    knownIssues: Fixed[];
+  export interface ChangelogNoteTypes {
+    new: ChangelogNote[];
+    fixed: ChangelogNote[];
+    knownIssues: ChangelogNote[];
   }
 
-  export interface Fixed {
+  export interface ChangelogNote {
     note: string;
   }
 

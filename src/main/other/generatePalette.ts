@@ -34,7 +34,6 @@ const generatePalette = async (
   sendAdditionalData = true,
 ): Promise<NodeVibrantPalette | undefined> => {
   if (artwork) {
-    const start = timeStart();
     const palette = await nodeVibrant
       .from(artwork)
       .getPalette()
@@ -45,8 +44,6 @@ const generatePalette = async (
           'ERROR',
         );
       });
-
-    timeEnd(start, 'Time to generate the nodeVibrant palette');
 
     if (palette) {
       const generatePaletteSwatch = <T extends typeof palette.DarkMuted>(
@@ -87,7 +84,6 @@ const generatePalette = async (
         DarkMuted: generatePaletteSwatch(palette.DarkMuted),
       };
 
-      timeEnd(start, 'Time to finish generating the palette');
       return outputPalette;
     }
     log('GENERATED ARTWORK PALETTE EMPTY.', undefined, 'ERROR');
@@ -108,6 +104,8 @@ const generatePalettesForSongs = async () => {
     );
 
     if (noOfNoPaletteSongs > 0) {
+      const start = timeStart();
+
       for (let i = 0; i < songs.length; i += 1) {
         if (!songs[i].palette) {
           const metadata = await musicMetaData.parseFile(songs[i].path);
@@ -137,7 +135,7 @@ const generatePalettesForSongs = async () => {
           );
         }
       }
-
+      timeEnd(start, 'Time to finish generating palettes for songs');
       setSongsData(songs);
       dataUpdateEvent('songs/palette');
     } else sendMessageToRenderer(`No more palettes for songs to be generated.`);
@@ -161,6 +159,8 @@ const generatePalettesForGenres = async () => {
     );
 
     if (noOfNoPaletteGenres > 0) {
+      const start = timeStart();
+
       for (let i = 0; i < genres.length; i += 1) {
         const genreArtworkName = genres[i].artworkName;
         if (!genres[i]?.backgroundColor) {
@@ -195,6 +195,7 @@ const generatePalettesForGenres = async () => {
           );
         }
       }
+      timeEnd(start, 'Time to finish generating palettes for genres');
 
       setGenresData(genres);
       dataUpdateEvent('genres/backgroundColor');

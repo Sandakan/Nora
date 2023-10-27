@@ -69,17 +69,34 @@ const fetchLyricsFromAudioSource = (songPath: string) => {
 };
 
 const fetchLyricsFromLRCFile = async (songPath: string) => {
-  const lrcFilePath = `${songPath}.lrc`;
+  const userData = getUserData();
+  const defaultLrcFilePath = `${songPath}.lrc`;
+  const customLrcFilePath = userData.customLrcFilesSaveLocation
+    ? path.join(
+        userData.customLrcFilesSaveLocation,
+        `${path.basename(songPath)}.lrc`,
+      )
+    : undefined;
+
   try {
-    const lyricsInLrcFormat = await fs.readFile(lrcFilePath, {
-      encoding: 'utf-8',
-    });
+    const lyricsInLrcFormat = await fs
+      .readFile(defaultLrcFilePath, {
+        encoding: 'utf-8',
+      })
+      .catch((err) => {
+        if (userData.customLrcFilesSaveLocation) {
+          return fs.readFile(defaultLrcFilePath, {
+            encoding: 'utf-8',
+          });
+        }
+        throw err;
+      });
     const parsedLyrics = parseLyrics(lyricsInLrcFormat);
     return parsedLyrics;
   } catch (error) {
     return log(
       `Lyrics containing LRC file for ${path.basename(songPath)} didn't exist.`,
-      { error },
+      { defaultLrcFilePath, customLrcFilePath },
     );
   }
 };

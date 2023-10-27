@@ -66,8 +66,14 @@
     "iconClassName",
     "titleClassName"
   ],
+  "json.schemas": [
+    {
+      "fileMatch": ["../release-notes.json"],
+      "url": "../release-notes-schema.json"
+    }
+  ],
   "editor.tokenColorCustomizations": {
-    "comments": "",
+    "comments": "#00b894",
     "textMateRules": []
   }
 }

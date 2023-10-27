@@ -86,16 +86,17 @@ const EqualizerSettings = () => {
         equalizerBandHertzData as Record<string, number>
       )[equalizerFilterName];
 
-      const band = (
-        <EqualierBand
-          value={filterValue}
-          hertzValue={filterHertzValue}
-          onChange={(val) => {
-            dispatch({ type: equalizerFilterName, data: val });
-          }}
-        />
-      );
-      bands.push(band);
+      if (filterHertzValue) {
+        bands.push(
+          <EqualierBand
+            value={filterValue}
+            hertzValue={filterHertzValue}
+            onChange={(val) => {
+              dispatch({ type: equalizerFilterName, data: val });
+            }}
+          />,
+        );
+      }
     }
     return bands;
   }, [content]);

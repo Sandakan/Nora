@@ -11,6 +11,7 @@ import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.
 import Button from '../Button';
 import Img from '../Img';
 import LyricLine from '../LyricsPage/LyricLine';
+import UpNextSongPopup from '../SongsControlsContainer/UpNextSongPopup';
 
 type MiniPlayerProps = {
   className?: string;
@@ -42,6 +43,9 @@ export default function MiniPlayer(props: MiniPlayerProps) {
 
   const { songPosition } = React.useContext(SongPositionContext);
   const [songPos, setSongPos] = React.useState(0);
+  const [isNextSongPopupVisible, setIsNextSongPopupVisible] =
+    React.useState(false);
+
   const isMouseDownRef = React.useRef(false);
   const isMouseScrollRef = React.useRef(false);
   const seekbarRef = React.useRef(null as HTMLInputElement | null);
@@ -364,25 +368,34 @@ export default function MiniPlayer(props: MiniPlayerProps) {
         >
           <div className="relative flex w-full flex-col items-center justify-center transition-[filter,opacity] delay-200 group-focus-within/info:pointer-events-none group-focus-within/info:opacity-50 group-focus-within/info:blur-sm group-focus-within/info:delay-0 group-hover/info:pointer-events-none group-hover/info:opacity-50 group-hover/info:blur-sm">
             <div
-              className="song-title max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-xl"
+              className="song-title max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-xl font-medium"
               title={currentSongData.title}
             >
               {currentSongData.title}
             </div>
-            <div
-              className="song-artists text-xs text-font-color-white/80"
-              title={currentSongData.artists
-                ?.map((artist) => artist.name)
-                .join(', ')}
-            >
-              {currentSongData.songId && Array.isArray(currentSongData.artists)
-                ? currentSongData.artists?.length > 0
-                  ? currentSongData.artists
-                      .map((artist) => artist.name)
-                      .join(', ')
-                  : 'Unknown Artist'
-                : ''}
-            </div>
+            {!isNextSongPopupVisible && (
+              <div
+                className="song-artists appear-from-bottom text-xs text-font-color-white/80"
+                title={currentSongData.artists
+                  ?.map((artist) => artist.name)
+                  .join(', ')}
+              >
+                {currentSongData.songId &&
+                Array.isArray(currentSongData.artists)
+                  ? currentSongData.artists?.length > 0
+                    ? currentSongData.artists
+                        .map((artist) => artist.name)
+                        .join(', ')
+                    : 'Unknown Artist'
+                  : ''}
+              </div>
+            )}
+            <UpNextSongPopup
+              isSemiTransparent
+              onPopupAppears={(isVisible) =>
+                setIsNextSongPopupVisible(isVisible)
+              }
+            />
           </div>
           <div className="pointer-events-none absolute flex items-center opacity-0 transition-opacity delay-200 group-focus-within/info:pointer-events-auto group-focus-within/info:opacity-100 group-focus-within/info:delay-0 group-hover/info:pointer-events-auto group-hover/info:opacity-100">
             <Button

@@ -144,7 +144,7 @@ const SimilarTracksContainer = (props: Props) => {
   );
 
   return (
-    <div className="max-w-full">
+    <div className="w-full">
       {availableSimilarTrackComponents.length > 0 && (
         <>
           <TitleContainer

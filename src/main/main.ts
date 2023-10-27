@@ -108,6 +108,7 @@ import scrobbleSong from './other/lastFm/scrobbleSong';
 import getSimilarTracks from './other/lastFm/getSimilarTracks';
 import sendNowPlayingSongDataToLastFM from './other/lastFm/sendNowPlayingSongDataToLastFM';
 import getAlbumInfoFromLastFM from './other/lastFm/getAlbumInfoFromLastFM';
+import renameAPlaylist from './core/renameAPlaylist';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -639,6 +640,12 @@ app
           addArtworkToAPlaylist(playlistId, artworkPath),
       );
 
+      ipcMain.handle(
+        'app/renameAPlaylist',
+        (_, playlistId: string, newName: string) =>
+          renameAPlaylist(playlistId, newName),
+      );
+
       ipcMain.handle('app/clearSongHistory', () => clearSongHistory());
 
       ipcMain.handle(
@@ -682,6 +689,8 @@ app
       );
 
       ipcMain.handle('app/getImgFileLocation', getImagefileLocation);
+
+      ipcMain.handle('app/getFolderLocation', getFolderLocation);
 
       ipcMain.handle(
         'app/getSongId3Tags',
@@ -1159,14 +1168,22 @@ export const updateSongsOutsideLibraryData = (
 };
 
 async function getImagefileLocation() {
-  const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+  const filePaths = await showOpenDialog({
     title: 'Select an Image',
     buttonLabel: 'Select Image',
     filters: [{ name: 'Images', extensions: ['jpg', 'jpeg', 'webp', 'png'] }],
     properties: ['openFile'],
   });
-  if (canceled) throw new Error('PROMPT_CLOSED_BEFORE_INPUT' as MessageCodes);
   return filePaths[0];
+}
+
+async function getFolderLocation() {
+  const folderPaths = await showOpenDialog({
+    title: 'Select a Folder',
+    buttonLabel: 'Select Folder',
+    properties: ['createDirectory', 'openDirectory'],
+  });
+  return folderPaths[0];
 }
 
 async function resetApp(isRestartApp = true) {

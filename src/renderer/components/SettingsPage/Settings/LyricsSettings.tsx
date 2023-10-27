@@ -5,6 +5,7 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 
 import Button from 'renderer/components/Button';
+import Checkbox from 'renderer/components/Checkbox';
 import Dropdown, { DropdownOption } from 'renderer/components/Dropdown';
 import MusixmatchSettingsPrompt from '../MusixmatchSettingsPrompt';
 import MusixmatchDisclaimerPrompt from '../MusixmatchDisclaimerPrompt';
@@ -126,6 +127,67 @@ const LyricsSettings = () => {
             >
               help
             </span>
+          </div>
+        </li>
+
+        <li className="secondary-container always-save-lrc-files mb-4">
+          <div className="description">
+            Enable saving lyrics in LRC files for songs that support metadata
+            editing. Nora will save lyrics in a LRC file if the song doesn't
+            support metadata editing.
+          </div>
+          <Checkbox
+            id="saveLyricsInLrcFilesForSupportedSongs"
+            isChecked={
+              userData !== undefined &&
+              userData?.preferences.saveLyricsInLrcFilesForSupportedSongs
+            }
+            checkedStateUpdateFunction={(state) =>
+              window.api.userData.saveUserData(
+                'preferences.saveLyricsInLrcFilesForSupportedSongs',
+                state,
+              )
+            }
+            labelContent="Save lyrics in LRC files also for supported songs"
+          />
+        </li>
+
+        <li className="lrc-files-custom-save-location mb-4">
+          <div className="description">
+            Select a custom location to save LRC files of songs if you don't
+            want to save them next to the relevant song.
+          </div>
+          <div className="flex-row mt-4 text-sm ml-2">
+            {userData?.customLrcFilesSaveLocation && (
+              <>
+                <span>Selected Custom Location : </span>
+                <span className="mr-4  text-font-color-highlight dark:text-dark-font-color-highlight">
+                  {userData.customLrcFilesSaveLocation}
+                </span>
+              </>
+            )}
+          </div>
+          <div className="flex items-center flex-row mt-4">
+            <Button
+              label="Set Custom Location"
+              iconName="location_on"
+              iconClassName="material-icons-round-outlined"
+              clickHandler={() =>
+                window.api.settingsHelpers
+                  .getFolderLocation()
+                  .then((folderPath) =>
+                    window.api.userData
+                      .saveUserData('customLrcFilesSaveLocation', folderPath)
+                      .then(() =>
+                        updateUserData((prevUserData) => ({
+                          ...prevUserData,
+                          customLrcFilesSaveLocation: folderPath,
+                        })),
+                      ),
+                  )
+                  .catch((err) => console.warn(err))
+              }
+            />
           </div>
         </li>
       </ul>

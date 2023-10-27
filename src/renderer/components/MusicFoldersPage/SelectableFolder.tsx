@@ -62,7 +62,10 @@ const SelectableFolder = (props: Props) => {
             iconClassName="!text-2xl !leading-none"
             id={`${structure.path}RevealBtn`}
             iconName={isSubFoldersVisible ? 'arrow_drop_up' : 'arrow_drop_down'}
-            clickHandler={() => setIsSubFoldersVisible((state) => !state)}
+            clickHandler={(e) => {
+              e.preventDefault();
+              setIsSubFoldersVisible((state) => !state);
+            }}
           />
         )}
       </label>

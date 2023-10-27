@@ -11,6 +11,7 @@ import ConfirmDeletePlaylists from './ConfirmDeletePlaylists';
 import DefaultPlaylistCover from '../../../../assets/images/webp/playlist_cover_default.webp';
 import Button from '../Button';
 import MultipleArtworksCover from './MultipleArtworksCover';
+import RenamePlaylistPrompt from './RenamePlaylistPrompt';
 
 interface PlaylistProp extends Playlist {
   // eslint-disable-next-line react/no-unused-prop-types
@@ -243,6 +244,19 @@ export const Playlist = (props: PlaylistProp) => {
               ]);
             })
             .catch((err) => console.error(err));
+        },
+        isDisabled: isMultipleSelectionsEnabled
+          ? false
+          : props.playlistId === 'History' || props.playlistId === 'Favorites',
+      },
+      {
+        label: 'Rename playlist',
+        iconName: 'edit',
+        handlerFunction: () => {
+          changePromptMenuData(
+            true,
+            <RenamePlaylistPrompt playlistData={props} />,
+          );
         },
         isDisabled: isMultipleSelectionsEnabled
           ? false

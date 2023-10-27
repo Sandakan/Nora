@@ -298,6 +298,7 @@ const songUpdates = {
     ipcRenderer.invoke('app/getSongId3Tags', songIdOrPath, isKnownSource),
   getImgFileLocation: (): Promise<string> =>
     ipcRenderer.invoke('app/getImgFileLocation'),
+
   revealSongInFileExplorer: (songId: string): void =>
     ipcRenderer.send('app/revealSongInFileExplorer', songId),
   saveArtworkToSystem: (songId: string, saveName?: string): void =>
@@ -447,6 +448,8 @@ const playlistsData = {
     artworkPath: string,
   ): Promise<ArtworkPaths | undefined> =>
     ipcRenderer.invoke('app/addArtworkToAPlaylist', playlistId, artworkPath),
+  renameAPlaylist: (playlistId: string, newName: string): Promise<void> =>
+    ipcRenderer.invoke('app/renameAPlaylist', playlistId, newName),
   removeSongFromPlaylist: (
     playlistId: string,
     songId: string,
@@ -511,6 +514,8 @@ const settingsHelpers = {
   compareEncryptedData: (): Promise<boolean> =>
     ipcRenderer.invoke('app/compareEncryptedData'),
   loginToLastFmInBrowser: () => ipcRenderer.send('app/loginToLastFmInBrowser'),
+  getFolderLocation: (): Promise<string> =>
+    ipcRenderer.invoke('app/getFolderLocation'),
 };
 
 // $ APP RESTART OR RESET

@@ -25,7 +25,9 @@ const LyricsSource = (props: LyricsSourceProp) => {
         )}
       </div>
       {copyright && (
-        <div className="text-sm text-font-color-dimmed">&copy; {copyright}</div>
+        <div className="text-sm text-font-color-dimmed [text-wrap:balance]">
+          &copy; {copyright}
+        </div>
       )}
     </div>
   );

@@ -24,6 +24,7 @@ import { isSongBlacklisted } from '../utils/isBlacklisted';
 import manageAlbumsOfParsedSong from './manageAlbumsOfParsedSong';
 import manageArtistsOfParsedSong from './manageArtistsOfParsedSong';
 import manageGenresOfParsedSong from './manageGenresOfParsedSong';
+import manageAlbumArtistOfParsedSong from './manageAlbumArtistOfParsedSong';
 // import { timeEnd, timeStart } from './utils/measureTimeUsage';
 
 let pathsQueue: string[] = [];
@@ -173,10 +174,8 @@ export const parseSong = async (
       const songInfo: SavableSongData = {
         songId,
         title: songTitle,
-        artists: getArtistNamesFromSong(metadata.common.artists),
-        albumArtist: metadata.common.albumartist
-          ? getArtistNamesFromSong([metadata.common.albumartist])?.at(1)
-          : undefined,
+        artists: getArtistNamesFromSong(metadata.common.artist),
+        albumArtists: getArtistNamesFromSong(metadata.common.albumartist),
         duration: getSongDurationFromSong(metadata.format.duration),
         album: getAlbumInfoFromSong(metadata.common.album),
         genres: getGenreInfoFromSong(metadata.common.genre),
@@ -187,6 +186,7 @@ export const parseSong = async (
         sampleRate: metadata.format.sampleRate,
         bitrate: metadata?.format?.bitrate,
         noOfChannels: metadata?.format?.numberOfChannels,
+        diskNo: metadata?.common?.disk?.no ?? undefined,
         trackNo: metadata?.common?.track?.no ?? undefined,
         addedDate: new Date().getTime(),
         createdDate: stats ? stats.birthtime.getTime() : undefined,
@@ -195,38 +195,61 @@ export const parseSong = async (
 
       // const start8 = timeEnd(start6, 'Time to create songInfo basic object');
 
-      const { updatedAlbums, relevantAlbums, newAlbums } =
+      const { updatedAlbums, relevantAlbum, newAlbum } =
         manageAlbumsOfParsedSong(albums, songInfo, songArtworkPaths);
 
       // const start9 = timeEnd(start8, 'Time to manage albums');
 
-      if (songInfo.album && relevantAlbums.length > 0)
+      if (songInfo.album && relevantAlbum)
         songInfo.album = {
-          name: relevantAlbums[0].title,
-          albumId: relevantAlbums[0].albumId,
+          name: relevantAlbum.title,
+          albumId: relevantAlbum.albumId,
         };
 
       // const start10 = timeEnd(
       //   start9,
       //   'Time to update album data in songInfo object'
       // );
-
-      const { updatedArtists, relevantArtists, newArtists } =
-        manageArtistsOfParsedSong(
-          artists,
-          songInfo,
-          songArtworkPaths,
-          relevantAlbums,
-        );
-
+      const {
+        updatedArtists: updatedSongArtists,
+        relevantArtists,
+        newArtists,
+      } = manageArtistsOfParsedSong(artists, songInfo, songArtworkPaths);
       // const start11 = timeEnd(start10, 'Time to manage artists');
 
+      const { relevantAlbumArtists, updatedArtists } =
+        manageAlbumArtistOfParsedSong(
+          updatedSongArtists,
+          songInfo,
+          songArtworkPaths,
+          relevantAlbum,
+        );
+
       if (songInfo.artists && relevantArtists.length > 0) {
-        for (let x = 0; x < relevantArtists.length; x += 1) {
-          for (let y = 0; y < songInfo.artists.length; y += 1) {
-            if (relevantArtists[x].name === songInfo.artists[y].name)
-              songInfo.artists[y].artistId = relevantArtists[x].artistId;
-          }
+        songInfo.artists = relevantArtists.map((artist) => ({
+          artistId: artist.artistId,
+          name: artist.name,
+        }));
+      }
+
+      if (relevantAlbumArtists.length > 0) {
+        songInfo.albumArtists = relevantAlbumArtists.map((albumArtist) => ({
+          artistId: albumArtist.artistId,
+          name: albumArtist.name,
+        }));
+      }
+
+      if (relevantAlbum) {
+        const allRelevantArtists = relevantArtists.concat(relevantAlbumArtists);
+
+        for (const relevantArtist of allRelevantArtists) {
+          relevantAlbum.artists?.forEach((artist) => {
+            if (
+              artist.name === relevantArtist.name &&
+              artist.artistId.length === 0
+            )
+              artist.artistId = relevantArtist.artistId;
+          });
         }
       }
 
@@ -256,7 +279,13 @@ export const parseSong = async (
 
       songs.push(songInfo);
       log(
-        `Finished the parsing process of song with name '${songInfo.title}'. Updated ${relevantArtists.length} artists, ${relevantAlbums.length}  albums, ${relevantGenres.length} genres in the process of parsing song.`,
+        `Finished the parsing process of song with name '${
+          songInfo.title
+        }'. Updated ${relevantArtists.length} artists, ${
+          relevantAlbum ? '1' : '0'
+        }  albums, ${
+          relevantGenres.length
+        } genres in the process of parsing song.`,
         undefined,
       );
       setSongsData(songs);
@@ -281,16 +310,8 @@ export const parseSong = async (
           'artists',
           relevantArtists.map((x) => x.artistId),
         );
-      if (newAlbums.length > 0)
-        dataUpdateEvent(
-          'albums/newAlbum',
-          newAlbums.map((x) => x.albumId),
-        );
-      if (relevantAlbums.length > 0)
-        dataUpdateEvent(
-          'albums',
-          relevantAlbums.map((x) => x.albumId),
-        );
+      if (newAlbum) dataUpdateEvent('albums/newAlbum', [newAlbum.albumId]);
+      if (relevantAlbum) dataUpdateEvent('albums', [relevantAlbum.albumId]);
       if (newGenres.length > 0)
         dataUpdateEvent(
           'genres/newGenre',
@@ -342,10 +363,9 @@ export const parseSong = async (
   }
 };
 
-export const getArtistNamesFromSong = (artists = [] as string[]) => {
-  if (artists.length > 0) {
-    const [artistData] = artists;
-    const splittedArtists = artistData.split(',');
+export const getArtistNamesFromSong = (artists?: string) => {
+  if (artists) {
+    const splittedArtists = artists.split(',');
     const splittedArtistsInfo = splittedArtists.map((x) => ({
       name: x.trim(),
       artistId: '',

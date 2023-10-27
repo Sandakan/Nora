@@ -68,7 +68,9 @@ const PlaylistInfoPage = () => {
   const [playlistData, setPlaylistData] = React.useState({} as Playlist);
   const [playlistSongs, setPlaylistSongs] = React.useState([] as SongData[]);
   const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>(
-    currentlyActivePage?.data?.sortingOrder || 'addedOrder',
+    currentlyActivePage?.data?.sortingOrder ||
+      localStorageData.sortingStates?.songsPage ||
+      'addedOrder',
   );
   const songsContainerRef = React.useRef<HTMLDivElement>(null);
   const { width, height } = useResizeObserver(songsContainerRef);

@@ -52,6 +52,12 @@ const SongAdditionalInfoContainer = (props: Props) => {
               value={songInfo.album?.name}
             />
           )}
+          {songInfo?.albumArtist && (
+            <SongAdditionalInfoItem
+              label="Album Artist"
+              value={songInfo.albumArtist.name}
+            />
+          )}
           {Array.isArray(songInfo.genres) && songInfo.genres.length > 0 && (
             <SongAdditionalInfoItem
               label="Genres"
@@ -100,7 +106,6 @@ const SongAdditionalInfoContainer = (props: Props) => {
               })`}
             />
           )}
-
           <SongAdditionalInfoItem label="Song Location" value={songInfo.path} />
         </div>
       )}

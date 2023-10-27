@@ -82,7 +82,7 @@ const LyricLine = (props: LyricProp) => {
             )}`
           : undefined
       }
-      className={`appear-from-bottom highlight mb-5 w-fit select-none text-center text-4xl font-medium text-font-color-black transition-[transform,color] duration-250 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
+      className={`highlight [text-wrap:balance] mb-5 w-fit select-none text-center text-4xl font-medium text-font-color-black transition-[transform,color] duration-250 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
         syncedLyrics
           ? `cursor-pointer ${
               songPosition > syncedLyrics.start - delay &&
