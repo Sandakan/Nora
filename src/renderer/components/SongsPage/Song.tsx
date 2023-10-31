@@ -698,6 +698,7 @@ const Song = React.forwardRef(
               className={`aspect-square max-h-full object-contain py-[0.1rem] transition-[filter] duration-300 group-focus-within:brightness-50 group-hover:brightness-50 ${
                 isSongPlaying ? 'brightness-50' : ''
               }`}
+              enableImgFadeIns={!isMultipleSelectionEnabled}
             />
           </div>
         </div>

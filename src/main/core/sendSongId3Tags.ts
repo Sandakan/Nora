@@ -16,6 +16,7 @@ import {
 import { isLyricsSavePending } from '../saveLyricsToSong';
 import log from '../log';
 import { getSongsOutsideLibraryData } from '../main';
+import { isMetadataUpdatesPending } from '../updateSongId3Tags';
 
 import { appPreferences } from '../../../package.json';
 
@@ -140,6 +141,7 @@ const sendSongID3Tags = async (
               duration: song.duration,
               trackNumber,
               isLyricsSavePending: isLyricsSavePending(song.path),
+              isMetadataSavePending: isMetadataUpdatesPending(song.path),
             };
             return res;
           }

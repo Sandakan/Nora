@@ -74,6 +74,9 @@ function SongTagsEditingPage() {
   const [genreKeyword, setGenreKeyword] = React.useState('');
   const [genreResults, setGenreResults] = React.useState<GenreResult[]>([]);
 
+  const [isMetadataUpdatesPending, setIsMetadataUpdatesPending] =
+    React.useState(false);
+
   const { songId, songPath, isKnownSource } = React.useMemo(
     () => ({
       songId: currentlyActivePage.data.songId as string,
@@ -110,6 +113,7 @@ function SongTagsEditingPage() {
 
             setDefaultValues(data);
             setSongInfo(data);
+            setIsMetadataUpdatesPending(!!data.isMetadataSavePending);
           }
           return undefined;
         })
@@ -119,6 +123,38 @@ function SongTagsEditingPage() {
   React.useEffect(() => {
     getSongId3Tags();
   }, [getSongId3Tags]);
+
+  React.useEffect(() => {
+    const manageMetadataUpdatesInSongsTagsEditingPage = (e: Event) => {
+      if ('detail' in e) {
+        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>)
+          .detail;
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (event.dataType === 'songs/updatedSong')
+            window.api.songUpdates
+              .isMetadataUpdatesPending(songPath)
+              .then((currentState) =>
+                setIsMetadataUpdatesPending((prevState) => {
+                  if (prevState === true && currentState === false)
+                    getSongId3Tags();
+                  return currentState;
+                }),
+              );
+        }
+      }
+    };
+    document.addEventListener(
+      'app/dataUpdates',
+      manageMetadataUpdatesInSongsTagsEditingPage,
+    );
+    return () => {
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageMetadataUpdatesInSongsTagsEditingPage,
+      );
+    };
+  }, [getSongId3Tags, songPath]);
 
   React.useEffect(() => {
     if (artistKeyword.trim()) {
@@ -250,13 +286,13 @@ function SongTagsEditingPage() {
               ...updatedData,
             }));
           }
-          addNewNotifications([
-            {
-              id: `songDataUpdated`,
-              content: `Successfully updated the song.`,
-              iconName: 'done',
-            },
-          ]);
+          // addNewNotifications([
+          //   {
+          //     id: `songDataUpdated`,
+          //     content: `Successfully updated the song.`,
+          //     iconName: 'done',
+          //   },
+          // ]);
           return window.api.songUpdates.getSongId3Tags(
             isKnownSource ? songId : songPath,
             isKnownSource,
@@ -267,6 +303,7 @@ function SongTagsEditingPage() {
       .then((res) => {
         setSongInfo(res);
         setDefaultValues(res);
+        setIsMetadataUpdatesPending(!!res.isMetadataSavePending);
         return undefined;
       })
       .catch((err) => {
@@ -328,10 +365,10 @@ function SongTagsEditingPage() {
     return 'Unknown Title';
   }, [songPath]);
 
-  const isEditingCurrentlyPlayingSong = React.useMemo(
-    () => currentSongData.songId === songId,
-    [currentSongData.songId, songId],
-  );
+  // const isEditingCurrentlyPlayingSong = React.useMemo(
+  //   () => currentSongData.songId === songId,
+  //   [currentSongData.songId, songId],
+  // );
 
   return (
     <MainContainer className="main-container appear-from-bottom id3-tags-updater-container h-full">
@@ -447,15 +484,15 @@ function SongTagsEditingPage() {
                 updateSongInfo={updateSongInfo}
               />
             </div>
+            <hr className="horizontal-rule col-span-2 h-[0.1rem] w-[95%] border-0 bg-background-color-2 dark:bg-dark-background-color-2" />
+
             <div className="id3-control-buttons-container flex p-4">
               <Button
                 key={0}
                 label="Save Tags"
                 iconName="save"
                 iconClassName="material-icons-round-outlined"
-                isDisabled={
-                  !areThereDataChanges || isEditingCurrentlyPlayingSong
-                }
+                isDisabled={!areThereDataChanges}
                 className="update-song-tags-btn"
                 clickHandler={saveTags}
               />
@@ -468,13 +505,12 @@ function SongTagsEditingPage() {
                 clickHandler={resetDataToDefaults}
               />
             </div>
-            {isEditingCurrentlyPlayingSong && (
+            {isMetadataUpdatesPending && (
               <p className="appear-from-bottom ml-2 text-sm font-medium flex items-center text-font-color-highlight dark:text-dark-font-color-highlight">
                 <span className="material-icons-round-outlined text-xl mr-2">
                   error
                 </span>{' '}
-                Avoid editing metadata of a currently playing song to prevent
-                corruptions.
+                A metadata update of this song is pending to be saved.
               </p>
             )}
           </>

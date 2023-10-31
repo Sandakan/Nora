@@ -303,6 +303,8 @@ const songUpdates = {
     ipcRenderer.send('app/revealSongInFileExplorer', songId),
   saveArtworkToSystem: (songId: string, saveName?: string): void =>
     ipcRenderer.send('app/saveArtworkToSystem', songId, saveName),
+  isMetadataUpdatesPending: (songPath: string): Promise<boolean> =>
+    ipcRenderer.invoke('app/isMetadataUpdatesPending', songPath),
 };
 
 // $ FETCH SONG DATA FROM INTERNET

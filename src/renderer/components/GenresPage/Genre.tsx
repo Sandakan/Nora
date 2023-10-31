@@ -344,6 +344,7 @@ const Genre = (props: GenreProp) => {
           src={artworkPaths.artworkPath}
           className="aspect-square rounded-md shadow-2xl"
           alt="Artwork cover"
+          enableImgFadeIns={!isMultipleSelectionEnabled}
         />
       </div>
       <div className="genre-info-container w-3/5 flex-grow-0">

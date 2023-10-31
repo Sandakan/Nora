@@ -402,6 +402,7 @@ export const Album = (props: AlbumProp) => {
             loading="lazy"
             alt="Album Cover"
             className="h-full max-h-full w-full object-cover object-center"
+            enableImgFadeIns={!isMultipleSelectionEnabled}
           />
         </div>
       </div>

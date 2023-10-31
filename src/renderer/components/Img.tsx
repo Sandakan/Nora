@@ -23,6 +23,7 @@ type ImgProps = {
   tabIndex?: number;
   showAltAsTooltipLabel?: boolean;
   draggable?: boolean;
+  enableImgFadeIns?: boolean;
 };
 
 /* <picture
@@ -85,6 +86,7 @@ const Img = React.memo((props: ImgProps) => {
     tabIndex = -1,
     showAltAsTooltipLabel = false,
     draggable = false,
+    enableImgFadeIns = true,
   } = props;
 
   const imgRef = React.useRef<HTMLImageElement>(null);
@@ -97,8 +99,10 @@ const Img = React.memo((props: ImgProps) => {
       src={src || fallbackSrc}
       alt={alt}
       ref={imgRef}
-      className={`relative outline-1 outline-offset-4 delay-[250ms] transition-opacity focus-visible:!outline ${
-        isFirstTimeRef.current && 'opacity-0'
+      className={`relative outline-1 outline-offset-4 focus-visible:!outline ${
+        enableImgFadeIns && isFirstTimeRef.current
+          ? 'opacity-0 delay-[250ms] transition-opacity'
+          : '!opacity-100'
       } ${className}`}
       draggable={draggable}
       onError={(e) => {
@@ -128,9 +132,10 @@ const Img = React.memo((props: ImgProps) => {
       loading={loading}
       onContextMenu={onContextMenu}
       onLoad={(e) => {
-        if (isFirstTimeRef.current) isFirstTimeRef.current = false;
+        if (isFirstTimeRef.current) {
+          isFirstTimeRef.current = false;
+        }
         e.currentTarget.classList.add('!opacity-100');
-        e.currentTarget.classList.remove('opacity-0');
 
         if (showImgPropsOnTooltip) {
           const img = new Image();

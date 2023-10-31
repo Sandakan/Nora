@@ -89,6 +89,9 @@ const EditingLyricsLine = (props: Props) => {
   const shouldBeScrolledWhenPlaying = isPlaying && isInRange;
   const shouldBeScrolledWhenActive = !isPlaying && isActive;
 
+  const shouldHighlight =
+    (!isPlaying && isActive) || shouldBeScrolledWhenPlaying;
+
   React.useEffect(() => {
     if (
       lineRef.current &&
@@ -146,8 +149,7 @@ const EditingLyricsLine = (props: Props) => {
       ) : (
         <span
           className={`scale-75 cursor-pointer text-center text-5xl font-medium opacity-50 transition-[opacity,transform] group-hover:opacity-75 ${
-            ((!isPlaying && isActive) || shouldBeScrolledWhenPlaying) &&
-            '!scale-100 !opacity-100'
+            shouldHighlight && '!scale-100 !opacity-100'
           }`}
         >
           {content.line}
@@ -270,6 +272,34 @@ const EditingLyricsLine = (props: Props) => {
               }
             />
           </>
+        )}
+        {shouldHighlight && (
+          <Button
+            className={`my-2 text-xs opacity-75 ${
+              isEditing &&
+              '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
+            }`}
+            label="Add Instrumental Line Below"
+            iconName="music_note"
+            clickHandler={() => {
+              updateLineData((prevLineData) => {
+                const pos =
+                  index + 1 >= prevLineData.length
+                    ? prevLineData.length
+                    : index + 1;
+                prevLineData.splice(pos, 0, {
+                  index: 0,
+                  isActive: false,
+                  line: ' ♪ ',
+                });
+
+                return prevLineData.map((lineData, i) => ({
+                  ...lineData,
+                  index: i,
+                }));
+              });
+            }}
+          />
         )}
         <Button
           className={`my-2 !mr-0 text-xs opacity-75 ${

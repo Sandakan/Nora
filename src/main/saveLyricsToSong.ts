@@ -13,6 +13,7 @@ import { getUserData } from './filesystem';
 const { metadataEditingSupportedExtensions } = appPreferences;
 
 type PendingSongLyrics = {
+  title: string;
   synchronisedLyrics: SynchronisedLyrics;
   unsynchronisedLyrics: UnsynchronisedLyrics;
 };
@@ -28,16 +29,16 @@ const saveLyricsToSong = async (
 
   if (lyrics && lyrics.lyrics.lyrics.length > 0) {
     const pathExt = path.extname(songPath).replace(/\W/, '');
-    const isASupporedFormat =
+    const isASupportedFormat =
       metadataEditingSupportedExtensions.includes(pathExt);
 
     if (
-      !isASupporedFormat ||
+      !isASupportedFormat ||
       userData.preferences.saveLyricsInLrcFilesForSupportedSongs
     )
       saveLyricsToLRCFile(songPath, lyrics);
 
-    if (isASupporedFormat) {
+    if (isASupportedFormat) {
       const prevTags = await NodeID3.Promise.read(songPath);
 
       const { isSynced } = lyrics.lyrics;
@@ -54,6 +55,7 @@ const saveLyricsToSong = async (
 
       try {
         const updatingTags = {
+          title: lyrics.title,
           unsynchronisedLyrics,
           synchronisedLyrics: synchronisedLyrics || [],
         };
@@ -120,7 +122,12 @@ export const savePendingSongLyrics = (
       try {
         NodeID3.update(updatingTags, songPath);
 
-        log(`Successfully saved pending song lyrics of song.`, { songPath });
+        log(
+          `Successfully saved pending lyrics of '${updatingTags.title}'.`,
+          { songPath },
+          'INFO',
+          { sendToRenderer: 'SUCCESS' },
+        );
         dataUpdateEvent('songs/lyrics');
         pendingSongLyrics.delete(songPath);
       } catch (error) {

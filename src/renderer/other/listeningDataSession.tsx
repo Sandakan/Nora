@@ -15,8 +15,8 @@ class ListeningDataSession {
   skipEndRange: ReturnType<typeof calculateTime>;
   listenEndRange: ReturnType<typeof calculateTime>;
   scrobbleEndRange: ReturnType<typeof calculateTime>;
-  intervalId?: NodeJS.Timer;
-  nowPlayingIntervalId?: NodeJS.Timer;
+  intervalId?: NodeJS.Timeout;
+  nowPlayingIntervalId?: NodeJS.Timeout;
   seeks: { position: number; seeks: number }[];
   startTime: Date;
 
@@ -41,10 +41,11 @@ class ListeningDataSession {
 
   recordListeningData() {
     console.warn(
-      `Started recording listening data for ${this.songId}`,
+      `Started recording listening data for '${this.songId}'`,
       'duration',
       calculateTime(this.duration),
     );
+
     this.nowPlayingIntervalId = setTimeout(() => {
       window.api.audioLibraryControls.sendNowPlayingSongDataToLastFM(
         this.songId,

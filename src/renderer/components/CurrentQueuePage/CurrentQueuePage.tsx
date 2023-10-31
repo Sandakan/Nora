@@ -291,16 +291,16 @@ const CurrentQueuePage = () => {
     ],
   );
 
-  const calculateTotalTime = React.useCallback(() => {
+  const calculateTotalTime = React.useCallback((songs: AudioInfo[]) => {
     const { hours, minutes, seconds } = calculateTimeFromSeconds(
-      queuedSongs.reduce((prev, current) => prev + current.duration, 0),
+      songs.reduce((prev, current) => prev + current.duration, 0),
     );
     return `${
       hours >= 1 ? `${hours} hour${hours === 1 ? '' : 's'} ` : ''
     }${minutes} minute${minutes === 1 ? '' : 's'} ${seconds} second${
       seconds === 1 ? '' : 's'
     }`;
-  }, [queuedSongs]);
+  }, []);
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return undefined;
@@ -469,8 +469,15 @@ const CurrentQueuePage = () => {
                   queuedSongs.length
                 } song${queuedSongs.length !== 1 ? 's' : ''}`}</div>
                 <span className="mx-1">&bull;</span>
-                <div className="queue-total-duration">
-                  {calculateTotalTime()}
+                <div className="queue-duration">
+                  <span>{calculateTotalTime(queuedSongs)}</span>{' '}
+                  <span>
+                    (
+                    {calculateTotalTime(
+                      queuedSongs.slice(queue.currentSongIndex ?? 0),
+                    )}{' '}
+                    remaining)
+                  </span>
                 </div>
               </div>
               {/* <div className="queue-buttons mt-4 flex"></div> */}

@@ -36,7 +36,10 @@ import {
   setUserData,
 } from './filesystem';
 import { resolveHtmlPath } from './utils/util';
-import updateSongId3Tags from './updateSongId3Tags';
+import updateSongId3Tags, {
+  isMetadataUpdatesPending,
+  savePendingMetadataUpdates,
+} from './updateSongId3Tags';
 import { version, appPreferences } from '../../package.json';
 import search from './search';
 import {
@@ -109,6 +112,7 @@ import getSimilarTracks from './other/lastFm/getSimilarTracks';
 import sendNowPlayingSongDataToLastFM from './other/lastFm/sendNowPlayingSongDataToLastFM';
 import getAlbumInfoFromLastFM from './other/lastFm/getAlbumInfoFromLastFM';
 import renameAPlaylist from './core/renameAPlaylist';
+import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -797,6 +801,12 @@ app
           compare(data, encryptedData),
       );
 
+      ipcMain.handle('app/isMetadataUpdatesPending', (_, songPath: string) =>
+        isMetadataUpdatesPending(
+          removeDefaultAppProtocolFromFilePath(songPath),
+        ),
+      );
+
       ipcMain.handle('app/blacklistFolders', (_, folderPaths: string[]) =>
         blacklistFolders(folderPaths),
       );
@@ -906,6 +916,7 @@ function manageWindowFinishLoad() {
 function handleBeforeQuit() {
   mainWindow.webContents.send('app/beforeQuitEvent');
   savePendingSongLyrics(currentSongPath, true);
+  savePendingMetadataUpdates(currentSongPath, true);
   closeAllAbortControllers();
   clearTempArtworkFolder();
   log(
@@ -1021,7 +1032,10 @@ function registerFileProtocol(
 export const setCurrentSongPath = (songPath: string) => {
   currentSongPath = songPath;
   savePendingSongLyrics(currentSongPath, false);
+  savePendingMetadataUpdates(currentSongPath, true);
 };
+
+export const getCurrentSongPath = () => currentSongPath;
 
 function manageAuthServices(url: string) {
   log('URL selected for auth service', { url });
@@ -1116,6 +1130,7 @@ export function restartApp(reason: string, noQuitEvents = false) {
   if (!noQuitEvents) {
     mainWindow.webContents.send('app/beforeQuitEvent');
     savePendingSongLyrics(currentSongPath, true);
+    savePendingMetadataUpdates(currentSongPath, true);
     closeAllAbortControllers();
   }
   app.relaunch();

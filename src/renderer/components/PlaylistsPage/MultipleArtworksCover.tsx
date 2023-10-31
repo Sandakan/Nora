@@ -11,11 +11,19 @@ type Props = {
   imgClassName?: string;
   holderClassName?: string;
   type?: number;
+  enableImgFadeIns?: boolean;
 };
 
 const MultipleArtworksCover = (props: Props) => {
   const { localStorageData } = React.useContext(AppContext);
-  const { className, songIds, imgClassName, holderClassName, type = 2 } = props;
+  const {
+    className,
+    songIds,
+    imgClassName,
+    holderClassName,
+    type = 2,
+    enableImgFadeIns = true,
+  } = props;
 
   const [artworks, setArtworks] = React.useState<string[]>([]);
 
@@ -56,6 +64,7 @@ const MultipleArtworksCover = (props: Props) => {
               } ${cond && 'col-span-2 row-span-2 !rounded-md'} ${imgClassName}`}
               src={artwork}
               fallbackSrc={DefaultImgCover}
+              enableImgFadeIns={enableImgFadeIns}
             />
           );
         });
@@ -63,6 +72,7 @@ const MultipleArtworksCover = (props: Props) => {
     return [];
   }, [
     artworks,
+    enableImgFadeIns,
     imgClassName,
     localStorageData?.preferences.shuffleArtworkFromSongCovers,
     type,

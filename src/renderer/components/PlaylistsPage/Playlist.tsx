@@ -436,12 +436,14 @@ export const Playlist = (props: PlaylistProp) => {
               <MultipleArtworksCover
                 songIds={props.songs}
                 className="aspect-square w-full"
+                enableImgFadeIns={!isMultipleSelectionEnabled}
               />
               <Img
                 src={props.artworkPaths.artworkPath}
                 alt="Playlist Cover"
                 loading="lazy"
                 className="!absolute bottom-1 left-1 h-8 w-8 !rounded-md"
+                enableImgFadeIns={!isMultipleSelectionEnabled}
               />
             </div>
           ) : (
@@ -450,6 +452,7 @@ export const Playlist = (props: PlaylistProp) => {
               alt="Playlist Cover"
               loading="lazy"
               className="h-full w-full"
+              enableImgFadeIns={!isMultipleSelectionEnabled}
             />
           )}
         </div>

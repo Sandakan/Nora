@@ -1046,7 +1046,11 @@ export default function App() {
       ) {
         player.currentTime = 0;
         toggleSongPlayback(true);
-        if (recordRef.current) recordRef.current.recordListeningData();
+        recordListeningData(
+          contentRef.current.currentSongData.songId,
+          contentRef.current.currentSongData.duration,
+          true,
+        );
 
         window.api.audioLibraryControls.updateSongListeningData(
           contentRef.current.currentSongData.songId,
@@ -1063,7 +1067,7 @@ export default function App() {
       } else if (refQueue.current.queue.length > 0)
         changeQueueCurrentSongIndex(0);
     },
-    [changeQueueCurrentSongIndex, toggleSongPlayback],
+    [changeQueueCurrentSongIndex, recordListeningData, toggleSongPlayback],
   );
 
   React.useEffect(() => {

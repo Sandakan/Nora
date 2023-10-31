@@ -1091,6 +1091,7 @@ declare global {
     artworkPath?: string;
     duration: number;
     isLyricsSavePending?: boolean;
+    isMetadataSavePending?: boolean;
   }
 
   interface SongOutsideLibraryData {

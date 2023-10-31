@@ -26,6 +26,28 @@ export const updateCachedLyrics = (
   if (lyrics) cachedLyrics = lyrics;
 };
 
+export const parseLyricsFromID3Format = (
+  synchronisedLyrics: NodeID3.Tags['synchronisedLyrics'],
+  unsynchronisedLyrics: NodeID3.Tags['unsynchronisedLyrics'],
+) => {
+  if (Array.isArray(synchronisedLyrics) && synchronisedLyrics.length > 0) {
+    const reversedForLatestLyricsStore = synchronisedLyrics.reverse();
+
+    for (const syncedLyricsData of reversedForLatestLyricsStore) {
+      const parsedSyncedLyrics =
+        parseSyncedLyricsFromAudioDataSource(syncedLyricsData);
+
+      if (parsedSyncedLyrics) return parsedSyncedLyrics;
+    }
+  }
+
+  if (unsynchronisedLyrics?.text) {
+    const parsedLyrics = parseLyrics(unsynchronisedLyrics.text);
+    if (parsedLyrics) return parsedLyrics;
+  }
+  return undefined;
+};
+
 const fetchLyricsFromAudioSource = (songPath: string) => {
   try {
     const songExt = path.extname(songPath).replace('.', '');
@@ -34,28 +56,13 @@ const fetchLyricsFromAudioSource = (songPath: string) => {
     if (isSupported) {
       const songData = NodeID3.read(songPath);
       const { unsynchronisedLyrics, synchronisedLyrics } = songData;
-
-      if (Array.isArray(synchronisedLyrics) && synchronisedLyrics.length > 0) {
-        const reversedForLatestLyricsStore = synchronisedLyrics.reverse();
-
-        for (const syncedLyricsData of reversedForLatestLyricsStore) {
-          const parsedSyncedLyrics =
-            parseSyncedLyricsFromAudioDataSource(syncedLyricsData);
-
-          if (parsedSyncedLyrics) return parsedSyncedLyrics;
-        }
-      }
-
-      if (unsynchronisedLyrics?.text) {
-        const parsedLyrics = parseLyrics(unsynchronisedLyrics.text);
-        if (parsedLyrics) return parsedLyrics;
-      }
-    } else
-      log(
-        `Nora doesn't support reading lyrics metadata from songs in ${songExt} format.`,
-        { songPath },
-        'ERROR',
-      );
+      return parseLyricsFromID3Format(synchronisedLyrics, unsynchronisedLyrics);
+    }
+    log(
+      `Nora doesn't support reading lyrics metadata from songs in ${songExt} format.`,
+      { songPath },
+      'ERROR',
+    );
     // No lyrics found on the audio_source.
     return undefined;
   } catch (error) {

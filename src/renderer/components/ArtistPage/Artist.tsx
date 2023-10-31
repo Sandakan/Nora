@@ -367,6 +367,7 @@ export const Artist = (props: ArtistProp) => {
           fallbackSrc={props.artworkPaths.artworkPath}
           alt="Default song cover"
           className="aspect-square h-full rounded-full object-cover"
+          enableImgFadeIns={!isMultipleSelectionEnabled}
         />
         {isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'artist' && (
