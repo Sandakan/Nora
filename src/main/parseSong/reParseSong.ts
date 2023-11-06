@@ -35,6 +35,7 @@ import manageAlbumsOfParsedSong from './manageAlbumsOfParsedSong';
 import manageArtistsOfParsedSong from './manageArtistsOfParsedSong';
 import manageGenresOfParsedSong from './manageGenresOfParsedSong';
 import { generatePalettes } from '../other/generatePalette';
+import manageAlbumArtistOfParsedSong from './manageAlbumArtistOfParsedSong';
 
 const reParseSong = async (filePath: string) => {
   const songs = getSongsData();
@@ -85,35 +86,63 @@ const reParseSong = async (filePath: string) => {
           const { updatedGenres: updatedGenresFromDeletedData } =
             removeDeletedGenreDataOfSong(genres, song);
 
-          song.artists = getArtistNamesFromSong(metadata.common.artists);
+          song.artists = getArtistNamesFromSong(metadata.common.artist);
           song.album = getAlbumInfoFromSong(metadata.common.album);
           song.genres = getGenreInfoFromSong(metadata.common.genre);
 
-          const { updatedAlbums, relevantAlbums } = manageAlbumsOfParsedSong(
+          const { updatedAlbums, relevantAlbum } = manageAlbumsOfParsedSong(
             updatedAlbumsFromDeletedData,
             song,
             songArtworkPaths,
           );
 
-          if (song.album && relevantAlbums.length > 0)
+          if (song.album && relevantAlbum)
             song.album = {
-              name: relevantAlbums[0].title,
-              albumId: relevantAlbums[0].albumId,
+              name: relevantAlbum.title,
+              albumId: relevantAlbum.albumId,
             };
 
-          const { updatedArtists, relevantArtists } = manageArtistsOfParsedSong(
-            updatedArtistsFromDeletedData,
-            song,
-            songArtworkPaths,
-            relevantAlbums,
-          );
+          const { updatedArtists: updatedSongArtists, relevantArtists } =
+            manageArtistsOfParsedSong(
+              updatedArtistsFromDeletedData,
+              song,
+              songArtworkPaths,
+            );
+
+          const { relevantAlbumArtists, updatedArtists } =
+            manageAlbumArtistOfParsedSong(
+              updatedSongArtists,
+              song,
+              songArtworkPaths,
+              relevantAlbum,
+            );
 
           if (song.artists && relevantArtists.length > 0) {
-            for (let x = 0; x < relevantArtists.length; x += 1) {
-              for (let y = 0; y < song.artists.length; y += 1) {
-                if (relevantArtists[x].name === song.artists[y].name)
-                  song.artists[y].artistId = relevantArtists[x].artistId;
-              }
+            song.artists = relevantArtists.map((artist) => ({
+              artistId: artist.artistId,
+              name: artist.name,
+            }));
+          }
+
+          if (relevantAlbumArtists.length > 0) {
+            song.albumArtists = relevantAlbumArtists.map((albumArtist) => ({
+              artistId: albumArtist.artistId,
+              name: albumArtist.name,
+            }));
+          }
+
+          if (relevantAlbum) {
+            const allRelevantArtists =
+              relevantArtists.concat(relevantAlbumArtists);
+
+            for (const relevantArtist of allRelevantArtists) {
+              relevantAlbum.artists?.forEach((artist) => {
+                if (
+                  artist.name === relevantArtist.name &&
+                  artist.artistId.length === 0
+                )
+                  artist.artistId = relevantArtist.artistId;
+              });
             }
           }
 

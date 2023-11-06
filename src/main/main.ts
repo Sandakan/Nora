@@ -220,6 +220,12 @@ const installExtensions = async () => {
     );
 };
 
+const getBackgroundColor = () => {
+  const userData = getUserData();
+  if (userData.theme.isDarkMode) return 'hsla(228, 7%, 14%, 100%)';
+  return 'hsl(0, 0%, 100%)';
+};
+
 const createWindow = async () => {
   if (IS_DEVELOPMENT) installExtensions();
 
@@ -237,7 +243,7 @@ const createWindow = async () => {
     visualEffectState: 'followWindow',
     roundedCorners: true,
     frame: false,
-    backgroundColor: '#212226',
+    backgroundColor: getBackgroundColor(),
     icon: appIcon,
     titleBarStyle: 'hidden',
     show: false,

@@ -58,11 +58,17 @@ const SongAlbumInput = (props: Props) => {
                   className="aspect-square w-16 rounded-lg"
                   alt=""
                 />
-                <div className="ml-4 flex flex-col text-left">
+                <div className="ml-4 flex flex-col text-left leading-none">
                   <span className="font-medium">{songAlbum.title}</span>
-                  <span className="text-xs">{`${
-                    songAlbum.noOfSongs ?? 0
-                  } songs (including current song)`}</span>
+                  <span>
+                    <span className="font-medium text-xs">
+                      {songAlbum.artists?.join(', ') || 'Unknown Artist'}
+                    </span>
+                    <span className="mx-1">&bull;</span>
+                    <span className="text-xs">{`${
+                      songAlbum.noOfSongs ?? 0
+                    } song(s)`}</span>
+                  </span>
                 </div>
               </div>
               <Button

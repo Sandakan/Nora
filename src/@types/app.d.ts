@@ -191,8 +191,14 @@ declare global {
     inNoOfPlaylists?: number;
     /** an array of listening records for each year. */
     listens: YearlyListeningRate[];
+    /** an array of listening records for each year. */
+    seeks?: SongSeek[];
   }
 
+  interface SongSeek {
+    position: number;
+    seeks: number;
+  }
   interface YearlyListeningRate {
     year: number;
     /** [Date in milliseconds, No of listens in that day] [] */
@@ -1081,6 +1087,7 @@ declare global {
   interface SongTags {
     title: string;
     artists?: SongTagsArtistData[];
+    albumArtists?: SongTagsArtistData[];
     album?: SongTagsAlbumData;
     trackNumber?: number;
     releasedYear?: number;

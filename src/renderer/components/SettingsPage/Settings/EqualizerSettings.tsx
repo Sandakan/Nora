@@ -11,14 +11,6 @@ import {
 import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from 'renderer/utils/localStorage';
 import EqualierBand from './EqualierBand';
 
-const equalizerPresets: EqualizerPresetDropdownOptions[] = [
-  {
-    label: 'Custom',
-    value: 'Custom',
-    isDisabled: true,
-  },
-];
-
 const presets: EqualizerPresetDropdownOptions[] = equalizerPresetsData.map(
   (presetData) => {
     return {
@@ -28,7 +20,15 @@ const presets: EqualizerPresetDropdownOptions[] = equalizerPresetsData.map(
     };
   },
 );
-equalizerPresets.push(...presets);
+
+const equalizerPresets: EqualizerPresetDropdownOptions[] = [
+  {
+    label: 'Custom',
+    value: 'Custom',
+    isDisabled: true,
+  },
+  ...presets,
+];
 
 type Action =
   | { type?: undefined; data: Equalizer }
@@ -50,8 +50,8 @@ const getPresetName = (equalizer: Equalizer): string => {
     if (presetData.preset) {
       const { preset, value } = presetData;
 
-      if (hasDataChanged(preset, equalizer, true)) return value;
-      return presetData.value;
+      const isTheSamePresets = !hasDataChanged(preset, equalizer, true);
+      if (isTheSamePresets) return value;
     }
   }
   return 'custom';

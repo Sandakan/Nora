@@ -86,6 +86,14 @@ const sendSongID3Tags = async (
                   song.artists?.some((x) => x.artistId === artist.artistId),
               )
             : undefined;
+          const songAlbumArtists = song.albumArtists
+            ? artists.filter(
+                (artist) =>
+                  song.albumArtists?.some(
+                    (x) => x.artistId === artist.artistId,
+                  ),
+              )
+            : undefined;
           const songGenres = song.genres
             ? genres.filter(
                 (artist) =>
@@ -101,6 +109,12 @@ const sendSongID3Tags = async (
                 name: artist.trim(),
                 artistId: undefined,
               }));
+            const tagAlbumArtists =
+              songAlbumArtists ??
+              songTags.performerInfo?.split(',').map((artist) => ({
+                name: artist.trim(),
+                artistId: undefined,
+              }));
             const tagGenres =
               songGenres ??
               songTags.genre
@@ -113,6 +127,7 @@ const sendSongID3Tags = async (
             const res: SongTags = {
               title,
               artists: tagArtists,
+              albumArtists: tagAlbumArtists,
               album: songAlbum
                 ? {
                     ...songAlbum,

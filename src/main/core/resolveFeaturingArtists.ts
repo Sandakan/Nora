@@ -46,7 +46,7 @@ const resolveFeaturingArtists = async (
     const updatedData = await updateSongId3Tags(songId, songTags, true, true);
 
     log(
-      `Resolved suggestion add featuring artists to the song '${songTags.title}'.`,
+      `Resolved suggestion of adding featured artists to the song '${songTags.title}'.`,
     );
 
     return updatedData;

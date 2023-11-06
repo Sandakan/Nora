@@ -48,11 +48,11 @@ const LyricLine = (props: LyricProp) => {
     if (typeof lyric === 'string')
       return lyric.replaceAll(syncedLyricsRegex, '').trim();
 
-    // const { start, end } = syncedLyrics!;
     const extendedLyricLines = lyric.map((x) => {
       return (
         <span
           key={x.text}
+          onClick={() => updateSongPosition(x.start)}
           className={`mr-2 text-font-color-black last:mr-0 dark:text-font-color-white ${
             songPosition > x.start - delay && songPosition < x.end - delay
               ? '!text-opacity-90'
@@ -67,7 +67,7 @@ const LyricLine = (props: LyricProp) => {
     });
 
     return extendedLyricLines;
-  }, [lyric, songPosition]);
+  }, [lyric, songPosition, updateSongPosition]);
 
   return (
     <div
@@ -82,18 +82,22 @@ const LyricLine = (props: LyricProp) => {
             )}`
           : undefined
       }
-      className={`highlight [text-wrap:balance] mb-5 w-fit select-none text-center text-4xl font-medium text-font-color-black transition-[transform,color] duration-250 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
+      className={`highlight ![text-wrap:balance] flex flex-wrap items-center justify-center text-wrap mb-5 w-fit select-none text-center text-4xl font-medium text-font-color-black transition-[transform,color] duration-250 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
         syncedLyrics
           ? `cursor-pointer ${
               songPosition > syncedLyrics.start - delay &&
               songPosition < syncedLyrics.end - delay
-                ? '!scale-100 text-5xl !text-opacity-90'
+                ? '!scale-100 text-5xl !text-opacity-90 [&>span]:!mr-3'
                 : '!scale-75 !text-opacity-20 hover:!text-opacity-75'
             }`
           : ''
       } ${isMiniPlayer && '!mb-2 !text-2xl !text-font-color-white'}`}
       ref={lyricsRef}
-      onClick={() => syncedLyrics && updateSongPosition(syncedLyrics.start)}
+      onClick={() =>
+        syncedLyrics &&
+        typeof lyric === 'string' &&
+        updateSongPosition(syncedLyrics.start)
+      }
     >
       {lyricString}
     </div>

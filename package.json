@@ -331,7 +331,7 @@
     "start:main": "cross-env NODE_ENV=development electronmon --inspect=5858 --remote-debugging-port=9223 --trace-warnings -r ts-node/register/transpile-only .",
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
-    "test": "jest"
+    "test": "jest --collect-coverage"
   },
   "urls": {
     "discord_invite_url": "https://discord.gg/c5rGKnBs4y",

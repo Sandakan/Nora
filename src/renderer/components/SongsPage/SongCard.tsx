@@ -576,6 +576,7 @@ const SongCard = (props: SongCardProp) => {
           className={`h-full w-full object-cover object-center transition-[filter] group-focus-within/songCard:brightness-90 group-hover/songCard:brightness-90 dark:brightness-90 ${
             isBlacklisted && '!brightness-50 dark:!brightness-[.40]'
           }`}
+          enableImgFadeIns={!isMultipleSelectionEnabled}
         />
       </div>
       <div

@@ -1,29 +1,34 @@
+const isAnObject = (obj: unknown): obj is Record<string, unknown> =>
+  typeof obj === 'object';
+
+const isAnArray = (obj: unknown): obj is [] => Array.isArray(obj);
+
 const hasArrayChanged = (oldArr: unknown[], newArr: unknown[]) => {
   const isLengthEqual = newArr.length === oldArr.length;
-  const arePropertiesEqual = newArr.every(
-    (value, index) => value === oldArr[index],
-  );
+  const arePropertiesEqual = newArr.every((newValue, index) => {
+    const oldValue = oldArr[index];
+    if (isAnObject(oldValue) && isAnObject(newValue)) {
+      const isChanged = hasDataChanged(oldValue, newValue, true);
+      return !isChanged;
+    }
+    return oldValue === newValue;
+  });
 
   const isArrayDataChanged = !(isLengthEqual && arePropertiesEqual);
 
   return isArrayDataChanged;
 };
 
-const isAnObject = (obj: unknown): obj is Record<string, unknown> =>
-  typeof obj === 'object';
-
-const isAnArray = (obj: unknown): obj is [] => Array.isArray(obj);
-
 /** Returns an object containing the properties of the input objects and and a boolean as a value stating whether those properties have changed or not.
  *@param oldObj Old object to be compared to
  *@param newObj New object to be compared to
  */
 
-const hasDataChanged = (
+function hasDataChanged(
   oldObj: Record<string, any>,
   newObj: Record<string, any>,
   returnBoolean = false,
-) => {
+) {
   try {
     const oldObjEntries = Object.keys(oldObj);
     const newObjEntries = Object.keys(newObj);
@@ -48,10 +53,12 @@ const hasDataChanged = (
             comp[entry] = isArrayDataChanged;
           } else {
             // newObj is an object but not an array
-            const data = hasDataChanged(oldObjEntry, newObjEntry);
-            const isObjDataChanged = Object.values(data).every(
-              (bool: boolean) => !bool,
-            );
+
+            const isObjDataChanged = hasDataChanged(
+              oldObjEntry,
+              newObjEntry,
+              true,
+            ) as boolean;
 
             if (isObjDataChanged) isDataChanged = true;
             comp[entry] = isObjDataChanged;
@@ -74,7 +81,7 @@ const hasDataChanged = (
     console.error(error);
     return false;
   }
-};
+}
 
 export const isDataChanged = (
   oldObj: Record<string, any>,
@@ -86,5 +93,4 @@ export const isDataChanged = (
     'hasDataChanged retuned a non boolean output eventhough returnBoolean is true.',
   );
 };
-
 export default hasDataChanged;

@@ -127,9 +127,11 @@ class ListeningDataSession {
   }
 
   set addSeekPosition(seekPosition: number) {
+    const seekRange = 5;
     for (const seek of this.seeks) {
       const isSeekPositionInRange =
-        seekPosition > seek.position - 4 && seekPosition < seek.position + 4;
+        seekPosition > seek.position - seekRange &&
+        seekPosition < seek.position + seekRange;
       if (isSeekPositionInRange) {
         seek.seeks += 1;
         return;

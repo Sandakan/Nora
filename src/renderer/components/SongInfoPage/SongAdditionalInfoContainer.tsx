@@ -52,10 +52,12 @@ const SongAdditionalInfoContainer = (props: Props) => {
               value={songInfo.album?.name}
             />
           )}
-          {songInfo?.albumArtist && (
+          {songInfo?.albumArtists && (
             <SongAdditionalInfoItem
-              label="Album Artist"
-              value={songInfo.albumArtist.name}
+              label="Album Artists"
+              value={songInfo.albumArtists
+                .map((artist) => artist.name)
+                .join(', ')}
             />
           )}
           {Array.isArray(songInfo.genres) && songInfo.genres.length > 0 && (

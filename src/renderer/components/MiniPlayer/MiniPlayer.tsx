@@ -19,6 +19,7 @@ type MiniPlayerProps = {
 
 export default function MiniPlayer(props: MiniPlayerProps) {
   const {
+    isDarkMode,
     isMiniPlayer,
     currentSongData,
     isCurrentSongPlaying,
@@ -184,9 +185,9 @@ export default function MiniPlayer(props: MiniPlayerProps) {
 
   return (
     <div
-      className={`mini-player dark group h-full select-none overflow-hidden delay-100 ${
-        !isCurrentSongPlaying && 'paused'
-      } ${
+      className={`mini-player dark group h-full !transition-none select-none overflow-hidden delay-100 ${
+        isDarkMode ? '!bg-dark-background-color-1' : '!bg-background-color-1'
+      } ${!isCurrentSongPlaying && 'paused'} ${
         localStorageData?.preferences?.isReducedMotion ? 'reduced-motion' : ''
       } [&:focus-within>.container>.song-controls-container>button]:translate-x-0 [&:focus-within>.container>.song-controls-container>button]:scale-100 [&:focus-within>.container>.song-controls-container]:visible [&:focus-within>.container>.song-controls-container]:opacity-100 [&:hover>.container>.song-controls-container>button]:translate-x-0 [&:hover>.container>.song-controls-container>button]:scale-100 [&:hover>.container>.song-controls-container]:visible [&:hover>.container>.song-controls-container]:opacity-100 ${className}`}
     >

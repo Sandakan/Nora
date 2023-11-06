@@ -20,6 +20,9 @@ type Input = {
 const copyrightMatchRegex = /^\[copyright:(?<copyright>.+)\]$/gm;
 const lyricsOffsetRegex = /^\[offset:(?<lyricsOffset>[+-]?\d+)\]$/gm;
 
+const startTimestampMatchRegex =
+  /(?<extSyncTimeStamp>\[\d+:\d{1,2}\.\d{1,3}\])/gm;
+
 const getSecondsFromLyricsLine = (lyric: string) => {
   const lyricsStartMatch = lyric.match(syncedLyricsRegex);
   syncedLyricsRegex.lastIndex = 0;
@@ -36,7 +39,8 @@ const getSecondsFromLyricsLine = (lyric: string) => {
 };
 
 const getSecondsFromExtendedTimeStamp = (text: string) => {
-  const extendedReplaceRegex = /[<>]/gm;
+  // eslint-disable-next-line no-useless-escape
+  const extendedReplaceRegex = /[<>\[\]]/gm;
 
   const [sec, ms] = text.replaceAll(extendedReplaceRegex, '').split(':');
   extendedReplaceRegex.lastIndex = 0;
@@ -259,7 +263,14 @@ export const parseSyncedLyricsFromAudioDataSource = (
         const lyricLine =
           typeof text === 'string'
             ? text
-            : text.map((x) => x.unparsedText).join(' ');
+            : text
+                .map((x) => {
+                  startTimestampMatchRegex.lastIndex = 0;
+                  if (startTimestampMatchRegex.test(x.unparsedText))
+                    return x.text;
+                  return x.unparsedText;
+                })
+                .join(' ');
         const secs = Math.floor(start % 60);
         const secsStr = secs.toString().length > 1 ? secs : `0${secs}`;
         const mins = Math.floor(start / 60);

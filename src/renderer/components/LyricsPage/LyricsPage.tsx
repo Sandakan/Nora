@@ -117,7 +117,13 @@ const LyricsPage = () => {
           undefined,
           localStorageData.preferences.lyricsAutomaticallySaveState,
         )
-        .then((res) => setLyrics(res))
+        .then((res) => {
+          setLyrics(res);
+
+          if (lyricsLinesContainerRef.current?.scrollTop)
+            lyricsLinesContainerRef.current.scrollTop = 0;
+          return undefined;
+        })
         .catch((err) => console.error(err));
     }
   }, [
@@ -403,7 +409,7 @@ const LyricsPage = () => {
   return (
     <MainContainer
       noDefaultStyles
-      className={`lyrics-container relative flex h-full flex-col ${
+      className={`lyrics-container appear-from-bottom relative flex h-full flex-col ${
         lyrics && isOnline ? 'justify-start' : 'items-center justify-center'
       }`}
     >

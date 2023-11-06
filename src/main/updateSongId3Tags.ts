@@ -117,7 +117,7 @@ export const savePendingMetadataUpdates = (
         }
 
         log(
-          `Successfully saved pending lyrics of '${pendingMetadata.tags.title}'.`,
+          `Successfully saved pending metadata updates of '${pendingMetadata.tags.title}'.`,
           { songPath },
           'INFO',
           { sendToRenderer: 'SUCCESS' },

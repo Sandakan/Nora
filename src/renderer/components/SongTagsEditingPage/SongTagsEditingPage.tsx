@@ -21,6 +21,7 @@ import SongLyricsEditorInput from './input_containers/SongLyricsEditorInput';
 import { appPreferences } from '../../../../package.json';
 import SongTrackNumberInput from './input_containers/SongTrackNumberInput';
 import ResetTagsToDefaultPrompt from './ResetTagsToDefaultPrompt';
+import SongAlbumArtistsInput from './input_containers/SongAlbumArtistInput';
 
 export interface MetadataKeywords {
   albumKeyword?: string;
@@ -70,6 +71,11 @@ function SongTagsEditingPage() {
 
   const [albumKeyword, setAlbumKeyword] = React.useState('');
   const [albumResults, setAlbumResults] = React.useState<AlbumResult[]>([]);
+
+  const [albumArtistKeyword, setAlbumArtistKeyword] = React.useState('');
+  const [albumArtistResults, setAlbumArtistResults] = React.useState<
+    ArtistResult[]
+  >([]);
 
   const [genreKeyword, setGenreKeyword] = React.useState('');
   const [genreResults, setGenreResults] = React.useState<GenreResult[]>([]);
@@ -205,6 +211,30 @@ function SongTagsEditingPage() {
   }, [albumKeyword]);
 
   React.useEffect(() => {
+    if (albumArtistKeyword.trim()) {
+      window.api.search
+        .search('Artists', albumArtistKeyword, false, false)
+        .then((res) => {
+          console.log(res);
+          if (res.artists.length > 0)
+            setAlbumArtistResults(
+              res.artists
+                .filter((_, index) => index < 50)
+                .map((artist) => ({
+                  name: artist.name,
+                  artistId: artist.artistId,
+                  artworkPaths: artist.artworkPaths,
+                  onlineArtworkPaths: artist.onlineArtworkPaths,
+                })),
+            );
+          else setAlbumArtistResults([]);
+          return undefined;
+        })
+        .catch((err) => console.error(err));
+    } else setAlbumArtistResults([]);
+  }, [albumArtistKeyword]);
+
+  React.useEffect(() => {
     if (genreKeyword.trim()) {
       window.api.search
         .search('Genres', genreKeyword, false, false)
@@ -241,6 +271,10 @@ function SongTagsEditingPage() {
   );
   const updateAlbumKeyword = React.useCallback(
     (keyword: string) => setAlbumKeyword(keyword),
+    [],
+  );
+  const updateAlbumArtistKeyword = React.useCallback(
+    (keyword: string) => setAlbumArtistKeyword(keyword),
     [],
   );
   const updateGenreKeyword = React.useCallback(
@@ -365,10 +399,10 @@ function SongTagsEditingPage() {
     return 'Unknown Title';
   }, [songPath]);
 
-  // const isEditingCurrentlyPlayingSong = React.useMemo(
-  //   () => currentSongData.songId === songId,
-  //   [currentSongData.songId, songId],
-  // );
+  const isEditingCurrentlyPlayingSong = React.useMemo(
+    () => currentSongData.songId === songId,
+    [currentSongData.songId, songId],
+  );
 
   return (
     <MainContainer className="main-container appear-from-bottom id3-tags-updater-container h-full">
@@ -444,6 +478,15 @@ function SongTagsEditingPage() {
                 updateArtistKeyword={updateArtistKeyword}
                 updateSongInfo={updateSongInfo}
               />
+              {/* ? SONG ALBUM ARTSITS */}
+              <SongAlbumArtistsInput
+                artistResults={albumArtistResults}
+                albumArtistKeyword={albumArtistKeyword}
+                songAlbum={songInfo.album}
+                songAlbumArtists={songInfo.albumArtists}
+                updateAlbumArtistKeyword={updateAlbumArtistKeyword}
+                updateSongInfo={updateSongInfo}
+              />
               {/* ALBUM NAME */}
               <SongAlbumInput
                 albumKeyword={albumKeyword}
@@ -483,10 +526,10 @@ function SongTagsEditingPage() {
                 isLyricsSavingPending={songInfo.isLyricsSavePending}
                 updateSongInfo={updateSongInfo}
               />
+              <hr className="horizontal-rule col-span-2 h-[0.1rem] w-[95%] border-0 bg-background-color-2 dark:bg-dark-background-color-2" />
             </div>
-            <hr className="horizontal-rule col-span-2 h-[0.1rem] w-[95%] border-0 bg-background-color-2 dark:bg-dark-background-color-2" />
 
-            <div className="id3-control-buttons-container flex p-4">
+            <div className="id3-control-buttons-container flex mt-4 p-4">
               <Button
                 key={0}
                 label="Save Tags"
@@ -505,8 +548,17 @@ function SongTagsEditingPage() {
                 clickHandler={resetDataToDefaults}
               />
             </div>
+            {isEditingCurrentlyPlayingSong && areThereDataChanges && (
+              <p className="appear-from-bottom ml-2 mb-2 text-sm font-medium flex items-center text-font-color-highlight dark:text-dark-font-color-highlight">
+                <span className="material-icons-round-outlined text-xl mr-2">
+                  error
+                </span>{' '}
+                Metadata updates of currently playing songs will be saved after
+                the song playback is finished.
+              </p>
+            )}
             {isMetadataUpdatesPending && (
-              <p className="appear-from-bottom ml-2 text-sm font-medium flex items-center text-font-color-highlight dark:text-dark-font-color-highlight">
+              <p className="appear-from-bottom ml-2 mb-2 text-sm font-medium flex items-center text-font-color-highlight dark:text-dark-font-color-highlight">
                 <span className="material-icons-round-outlined text-xl mr-2">
                   error
                 </span>{' '}
