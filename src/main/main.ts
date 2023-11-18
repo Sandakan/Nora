@@ -20,6 +20,7 @@ import {
   OpenDialogOptions,
   powerMonitor,
   SaveDialogOptions,
+  net,
 } from 'electron';
 import debug from 'electron-debug';
 import 'dotenv/config';
@@ -154,7 +155,7 @@ const DEFAULT_SAVE_DIALOG_OPTIONS: SaveDialogOptions = {
 export let mainWindow: BrowserWindow;
 let tray: Tray;
 let isMiniPlayer = false;
-let isConnectedToInternet = false;
+// let isConnectedToInternet = false;
 let isAudioPlaying = false;
 let isOnBatteryPower = false;
 let currentSongPath: string;
@@ -836,7 +837,7 @@ app
               ? `APP CONNECTED TO THE INTERNET SUCCESSFULLY`
               : `APP DISCONNECTED FROM THE INTERNET`,
           );
-          isConnectedToInternet = isConnected;
+          // isConnectedToInternet = isConnected;
         },
       );
 
@@ -1364,4 +1365,4 @@ async function toggleAutoLaunch(autoLaunchState: boolean) {
   saveUserData('preferences.autoLaunchApp', autoLaunchState);
 }
 
-export const checkIfConnectedToInternet = () => isConnectedToInternet;
+export const checkIfConnectedToInternet = () => net.isOnline();

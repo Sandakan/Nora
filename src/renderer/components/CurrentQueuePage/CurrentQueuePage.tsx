@@ -331,18 +331,18 @@ const CurrentQueuePage = () => {
 
   const moreOptionsContextMenuItems = React.useMemo(
     () => [
-      {
-        label: `${isAutoScrolling ? 'Disable' : 'Enable'} Auto Scrolling`,
-        iconName: isAutoScrolling ? 'flash_off' : 'flash_on',
-        handlerFunction: () => setIsAutoScrolling((state) => !state),
-      },
+      // {
+      //   label: `${isAutoScrolling ? 'Disable' : 'Enable'} Auto Scrolling`,
+      //   iconName: isAutoScrolling ? 'flash_off' : 'flash_on',
+      //   handlerFunction: () => setIsAutoScrolling((state) => !state),
+      // },
       {
         label: 'Scroll to currently playing song',
         iconName: 'vertical_align_center',
         handlerFunction: centerCurrentlyPlayingSong,
       },
     ],
-    [centerCurrentlyPlayingSong, isAutoScrolling],
+    [centerCurrentlyPlayingSong],
   );
 
   return (
@@ -400,6 +400,16 @@ const CurrentQueuePage = () => {
               tooltipLabel={
                 isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
               }
+            />
+            <Button
+              key={1}
+              className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+              iconName={isAutoScrolling ? 'flash_off' : 'flash_on'}
+              clickHandler={() => setIsAutoScrolling((state) => !state)}
+              isDisabled={queue.queue.length > 0 === false}
+              tooltipLabel={`${
+                isAutoScrolling ? 'Disable' : 'Enable'
+              } Auto Scrolling`}
             />
             <Button
               key={2}

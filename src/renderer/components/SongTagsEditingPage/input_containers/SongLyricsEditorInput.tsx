@@ -210,10 +210,7 @@ const SongLyricsEditorInput = (props: Props) => {
   );
 
   const goToLyricsEditor = React.useCallback(() => {
-    if (
-      (synchronizedLyrics || unsynchronizedLyrics) &&
-      !isSynchronizedLyricsEnhancedSynced
-    ) {
+    if (synchronizedLyrics || unsynchronizedLyrics) {
       const lyrics =
         currentLyricsType === 'synced'
           ? synchronizedLyrics
@@ -225,19 +222,20 @@ const SongLyricsEditorInput = (props: Props) => {
 
       if (isSynced) lines = syncedLyrics;
       else {
-        lines = unsyncedLyrics.map((line) => ({ line }));
+        lines = unsyncedLyrics.map((line) => ({ text: line }));
       }
 
       changeCurrentActivePage('LyricsEditor', {
         lyrics: lines,
         songId,
         songTitle,
+        isEditingEnhancedSyncedLyrics:
+          currentLyricsType === 'synced' && isLyricsEnhancedSynced,
       });
     }
   }, [
     changeCurrentActivePage,
     currentLyricsType,
-    isSynchronizedLyricsEnhancedSynced,
     songId,
     songTitle,
     synchronizedLyrics,
@@ -396,17 +394,11 @@ const SongLyricsEditorInput = (props: Props) => {
           clickHandler={goToLyricsEditor}
           tooltipLabel={
             synchronizedLyrics
-              ? isSynchronizedLyricsEnhancedSynced
-                ? 'Enhanced Synced lyrics are not supported.'
-                : 'Edit available lyrics in the Lyrics Editor.'
+              ? 'Edit available lyrics in the Lyrics Editor.'
               : 'No lyrics found'
           }
           isDisabled={
-            currentLyricsType === 'synced'
-              ? synchronizedLyrics
-                ? isSynchronizedLyricsEnhancedSynced
-                : true
-              : !unsynchronizedLyrics
+            currentLyricsType === 'synced' ? false : !unsynchronizedLyrics
           }
         />
       </div>

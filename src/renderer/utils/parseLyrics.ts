@@ -54,7 +54,7 @@ const parseLyrics = (str: string) => {
 
       const parsedLine = parseLyricsText(line);
 
-      return { line: parsedLine, start, end };
+      return { text: parsedLine, start, end };
     });
   }
 

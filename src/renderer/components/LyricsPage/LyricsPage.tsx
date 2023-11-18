@@ -120,7 +120,7 @@ const LyricsPage = () => {
         .then((res) => {
           setLyrics(res);
 
-          if (lyricsLinesContainerRef.current?.scrollTop)
+          if (lyricsLinesContainerRef.current)
             lyricsLinesContainerRef.current.scrollTop = 0;
           return undefined;
         })
@@ -379,23 +379,25 @@ const LyricsPage = () => {
   );
 
   const goToLyricsEditor = React.useCallback(() => {
-    if (lyrics && !isSynchronizedLyricsEnhancedSynced) {
+    if (lyrics) {
       let lines: EditingLyricsLineData[] = [];
       const { isSynced, syncedLyrics, lyrics: unsyncedLyrics } = lyrics.lyrics;
 
       if (isSynced && syncedLyrics)
         lines = syncedLyrics.map((lyric) => ({
           ...lyric,
-          line: lyric.text as string,
+          line: lyric.text,
         }));
       else {
-        lines = unsyncedLyrics.map((line) => ({ line }));
+        lines = unsyncedLyrics.map((line) => ({ text: line }));
       }
 
       changeCurrentActivePage('LyricsEditor', {
         lyrics: lines,
         songId: currentSongData.songId,
         songTitle: currentSongData.title,
+        isEditingEnhancedSyncedLyrics:
+          isSynced && isSynchronizedLyricsEnhancedSynced,
       });
     }
   }, [
@@ -409,7 +411,7 @@ const LyricsPage = () => {
   return (
     <MainContainer
       noDefaultStyles
-      className={`lyrics-container appear-from-bottom relative flex h-full flex-col ${
+      className={`lyrics-container ![overflow-anchor:none] appear-from-bottom relative flex h-full flex-col ${
         lyrics && isOnline ? 'justify-start' : 'items-center justify-center'
       }`}
     >

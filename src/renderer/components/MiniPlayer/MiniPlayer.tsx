@@ -140,10 +140,15 @@ export default function MiniPlayer(props: MiniPlayerProps) {
 
   const lyricsComponents = React.useMemo(() => {
     if (lyrics && lyrics?.lyrics) {
-      const { isSynced, lyrics: unsyncedLyrics, syncedLyrics } = lyrics.lyrics;
+      const {
+        isSynced,
+        lyrics: unsyncedLyrics,
+        syncedLyrics,
+        offset = 0,
+      } = lyrics.lyrics;
 
       if (syncedLyrics) {
-        return syncedLyrics.map((lyric, index) => {
+        const syncedLyricsLines = syncedLyrics.map((lyric, index) => {
           const { text, end, start } = lyric;
           return (
             <LyricLine
@@ -154,6 +159,23 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             />
           );
         });
+
+        const firstLine = (
+          <LyricLine
+            key="..."
+            index={0}
+            lyric="•••"
+            syncedLyrics={{
+              start: 0,
+              end: (syncedLyrics[0]?.start || 0) + offset,
+            }}
+          />
+        );
+
+        if ((syncedLyrics[0]?.start || 0) !== 0)
+          syncedLyricsLines.unshift(firstLine);
+
+        return syncedLyricsLines;
       }
       if (!isSynced) {
         return unsyncedLyrics.map((line, index) => {
@@ -305,7 +327,9 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           }`}
         >
           <Button
-            className="favorite-btn !m-0 h-fit -translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
+            className={`favorite-btn !m-0 h-fit -translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white dark:after:bg-dark-font-color-highlight after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity ${
+              currentSongData.isAFavorite && 'after:opacity-100'
+            }`}
             iconClassName={`!text-xl ${
               currentSongData.isAFavorite
                 ? 'meterial-icons-round !text-dark-background-color-3'
@@ -350,8 +374,9 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             removeFocusOnClick
           />
           <Button
-            className={`lyrics-btn !m-0 h-fit translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white ${
-              isLyricsVisible && '!text-dark-background-color-3'
+            className={`lyrics-btn !m-0 h-fit translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity dark:after:bg-dark-font-color-highlight ${
+              isLyricsVisible &&
+              '!text-dark-background-color-3 after:opacity-100'
             }`}
             iconClassName="!text-xl"
             clickHandler={() => setIsLyricsVisible((prevState) => !prevState)}

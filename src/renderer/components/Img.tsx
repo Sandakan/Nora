@@ -95,6 +95,7 @@ const Img = React.memo((props: ImgProps) => {
   const isFirstTimeRef = React.useRef(true);
 
   return (
+    // <div className="inline-block relative">
     <img
       src={src || fallbackSrc}
       alt={alt}
@@ -102,13 +103,12 @@ const Img = React.memo((props: ImgProps) => {
       className={`relative outline-1 outline-offset-4 focus-visible:!outline ${
         enableImgFadeIns && isFirstTimeRef.current
           ? 'opacity-0 delay-[250ms] transition-opacity'
-          : '!opacity-100'
+          : '!opacity-100 !transition-none'
       } ${className}`}
       draggable={draggable}
       onError={(e) => {
         if (errorCountRef.current < 3) {
           errorCountRef.current += 1;
-
           if (!noFallbacks && e.currentTarget.src !== fallbackSrc)
             e.currentTarget.src = fallbackSrc;
           else e.currentTarget.src = DefaultImage;
@@ -136,7 +136,6 @@ const Img = React.memo((props: ImgProps) => {
           isFirstTimeRef.current = false;
         }
         e.currentTarget.classList.add('!opacity-100');
-
         if (showImgPropsOnTooltip) {
           const img = new Image();
           img.onload = () => {
@@ -153,7 +152,6 @@ const Img = React.memo((props: ImgProps) => {
                   : 'LOW QUALITY',
             };
             imgPropsRef.current = imgProp;
-
             if (imgRef.current !== null && 'dataset' in imgRef.current) {
               const { dataset } = imgRef.current;
               dataset.width = imgProp.width.toString();
@@ -166,6 +164,7 @@ const Img = React.memo((props: ImgProps) => {
       }}
       tabIndex={tabIndex}
     />
+    // </div>
   );
 });
 

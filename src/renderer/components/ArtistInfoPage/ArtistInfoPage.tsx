@@ -489,7 +489,7 @@ const ArtistInfoPage = () => {
           <Img
             src={artistData?.onlineArtworkPaths?.picture_medium}
             fallbackSrc={artistData?.artworkPaths?.artworkPath}
-            className="!aspect-square max-h-60 max-w-[15rem] rounded-full object-cover"
+            className="!aspect-square h-60 w-[15rem] rounded-full object-cover"
             loading="eager"
             alt="Album Cover"
             onContextMenu={(e) =>

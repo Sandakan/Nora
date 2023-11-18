@@ -69,6 +69,20 @@ const LyricLine = (props: LyricProp) => {
     return extendedLyricLines;
   }, [lyric, songPosition, updateSongPosition]);
 
+  const lyricDurationBarProperties: any = {};
+  // eslint-disable-next-line dot-notation
+  lyricDurationBarProperties['--duration'] = syncedLyrics
+    ? songPosition < syncedLyrics.start - delay
+      ? '0%'
+      : songPosition > syncedLyrics.end - delay
+      ? '100%'
+      : `${
+          ((songPosition - (syncedLyrics.start - delay)) /
+            (syncedLyrics.end - delay - (syncedLyrics.start - delay))) *
+          100
+        }%`
+    : '0%';
+
   return (
     <div
       style={{
@@ -82,12 +96,12 @@ const LyricLine = (props: LyricProp) => {
             )}`
           : undefined
       }
-      className={`highlight ![text-wrap:balance] flex flex-wrap items-center justify-center text-wrap mb-5 w-fit select-none text-center text-4xl font-medium text-font-color-black transition-[transform,color] duration-250 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
+      className={`highlight ![text-wrap:balance] flex items-center justify-center flex-col text-wrap mb-5 w-fit select-none text-center text-4xl font-medium text-font-color-black transition-[transform,color] duration-250 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
         syncedLyrics
           ? `cursor-pointer ${
               songPosition > syncedLyrics.start - delay &&
               songPosition < syncedLyrics.end - delay
-                ? '!scale-100 text-5xl !text-opacity-90 [&>span]:!mr-3'
+                ? '!scale-100 text-5xl !text-opacity-90 [&>div>span]:!mr-3 [&>div>span]:last:!mr-0'
                 : '!scale-75 !text-opacity-20 hover:!text-opacity-75'
             }`
           : ''
@@ -99,7 +113,20 @@ const LyricLine = (props: LyricProp) => {
         updateSongPosition(syncedLyrics.start)
       }
     >
-      {lyricString}
+      <div className="flex flex-wrap flex-row items-center justify-center">
+        {lyricString}
+      </div>
+      <span
+        style={lyricDurationBarProperties}
+        className={`min-w-[2rem] mt-1 max-w-[4rem] w-1/2 h-1 bg-background-color-2 opacity-0 invisible transition-[visibility,opacity] dark:bg-dark-background-color-2 block rounded-md ${
+          syncedLyrics &&
+          songPosition > syncedLyrics.start - delay &&
+          songPosition < syncedLyrics.end - delay &&
+          'dark:!opacity-50 !opacity-100 !visible'
+        }`}
+      >
+        <span className="w-[var(--duration)] h-full block rounded-md duration-300 bg-background-color-dimmed dark:bg-background-color-dimmed transition-[width]" />
+      </span>
     </div>
   );
 };

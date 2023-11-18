@@ -6,6 +6,7 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import {
   EditingLyricsLineData,
   ExtendedEditingLyricsLineData,
+  LyricsLineData,
 } from './LyricsEditingPage';
 import Button from '../Button';
 
@@ -19,7 +20,7 @@ interface Props extends ExtendedEditingLyricsLineData {
 }
 
 type EditingLyricsLineDataActions =
-  | { type: 'UPDATE_LYRICS_TEXT'; payload: string }
+  | { type: 'UPDATE_LYRICS_TEXT'; payload: string | LyricsLineData[] }
   | { type: 'UPDATE_LYRICS_START_TAG'; payload: number }
   | { type: 'UPDATE_LYRICS_END_TAG'; payload: number }
   | { type: 'UPDATE_ALL_CONTENT'; payload: EditingLyricsLineData };
@@ -30,7 +31,7 @@ const reducerFunction = (
 ): EditingLyricsLineData => {
   switch (action.type) {
     case 'UPDATE_LYRICS_TEXT':
-      return { ...state, line: action.payload };
+      return { ...state, text: action.payload };
     case 'UPDATE_LYRICS_START_TAG':
       return { ...state, start: action.payload };
     case 'UPDATE_LYRICS_END_TAG':
@@ -49,7 +50,7 @@ const EditingLyricsLine = (props: Props) => {
   const { updateSongPosition } = React.useContext(AppUpdateContext);
 
   const {
-    line,
+    text,
     index,
     isActive,
     end = 0,
@@ -58,7 +59,7 @@ const EditingLyricsLine = (props: Props) => {
     isPlaying,
   } = props;
   const [content, dispatch] = React.useReducer(reducerFunction, {
-    line,
+    text,
     start,
     end,
   } as EditingLyricsLineData);
@@ -67,21 +68,26 @@ const EditingLyricsLine = (props: Props) => {
   const lineRef = React.useRef<HTMLDivElement>(null);
   const isActiveRef = React.useRef(false);
   const resetLineDataRef = React.useRef<EditingLyricsLineData>({
-    line,
+    text,
     start,
     end,
   });
+
+  const isEditingEnhancedSyncedLyrics = React.useMemo(
+    () => typeof text !== 'string',
+    [text],
+  );
 
   React.useEffect(() => {
     dispatch({
       type: 'UPDATE_ALL_CONTENT',
       payload: {
-        line,
+        text,
         start,
         end,
       },
     });
-  }, [end, line, start]);
+  }, [end, text, start]);
 
   const isInRange =
     start !== 0 && end !== 0 && start < songPosition && end > songPosition;
@@ -107,6 +113,45 @@ const EditingLyricsLine = (props: Props) => {
       }
     } else isActiveRef.current = false;
   }, [shouldBeScrolledWhenActive, shouldBeScrolledWhenPlaying]);
+
+  const lyricsLineComponent = !isEditing ? (
+    <span
+      className={`scale-75 cursor-pointer text-center text-5xl font-medium opacity-50 transition-[opacity,transform] ${
+        shouldHighlight ? '!scale-100 !opacity-100 group-hover:opacity-75' : ''
+      } ${
+        typeof content.text === 'object' &&
+        'flex flex-wrap items-center justify-center text-wrap'
+      }`}
+    >
+      {typeof content.text === 'string'
+        ? content.text
+        : content.text.map((word) => {
+            const {
+              text: wordText,
+              end: wordEnd = 0,
+              start: wordStart = 0,
+            } = word;
+
+            const TRANSITION_DURATION = 0;
+            const position = songPosition - TRANSITION_DURATION;
+            const isWordInRange =
+              wordStart !== 0 &&
+              wordEnd !== 0 &&
+              wordStart < position &&
+              wordEnd > position;
+            return (
+              <div
+                className={`mr-3 flex flex-col items-start opacity-50 hover:opacity-100 ${
+                  shouldHighlight && isWordInRange && '!opacity-100'
+                }`}
+              >
+                <span className="text-xs">{wordStart}</span>
+                <span>{wordText}</span>
+              </div>
+            );
+          })}
+    </span>
+  ) : undefined;
 
   return (
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions
@@ -138,22 +183,25 @@ const EditingLyricsLine = (props: Props) => {
           type="text"
           placeholder="Lyrics Text"
           className="my-2 w-[90%] rounded-xl border-[3px] border-background-color-1 bg-background-color-1 px-4 py-4 text-center dark:border-dark-background-color-1 dark:bg-dark-background-color-1"
-          value={content.line}
-          onChange={(e) =>
+          value={
+            typeof content.text === 'string'
+              ? content.text
+              : content.text.map((data) => data.text).join(' ')
+          }
+          onChange={(e) => {
+            const { value } = e.currentTarget;
+            const lineData = isEditingEnhancedSyncedLyrics
+              ? value.split(' ').map((line): LyricsLineData => ({ text: line }))
+              : value;
+
             dispatch({
               type: 'UPDATE_LYRICS_TEXT',
-              payload: e.currentTarget.value,
-            })
-          }
+              payload: lineData,
+            });
+          }}
         />
       ) : (
-        <span
-          className={`scale-75 cursor-pointer text-center text-5xl font-medium opacity-50 transition-[opacity,transform] group-hover:opacity-75 ${
-            shouldHighlight && '!scale-100 !opacity-100'
-          }`}
-        >
-          {content.line}
-        </span>
+        lyricsLineComponent
       )}
       {isEditing ? (
         <div className="flex items-center justify-center">
@@ -235,7 +283,7 @@ const EditingLyricsLine = (props: Props) => {
                   prevLineData.splice(pos, 0, {
                     index: 0,
                     isActive: false,
-                    line: '•••',
+                    text: '•••',
                   });
 
                   return prevLineData.map((lineData, i) => ({
@@ -261,7 +309,7 @@ const EditingLyricsLine = (props: Props) => {
                   prevLineData.splice(pos, 0, {
                     index: 0,
                     isActive: false,
-                    line: '•••',
+                    text: '•••',
                   });
 
                   return prevLineData.map((lineData, i) => ({
@@ -290,7 +338,7 @@ const EditingLyricsLine = (props: Props) => {
                 prevLineData.splice(pos, 0, {
                   index: 0,
                   isActive: false,
-                  line: ' ♪ ',
+                  text: ' ♪ ',
                 });
 
                 return prevLineData.map((lineData, i) => ({
@@ -314,7 +362,7 @@ const EditingLyricsLine = (props: Props) => {
                 updateLineData((prevLineData) => {
                   prevLineData[index] = {
                     ...prevLineData[index],
-                    line: content.line || line,
+                    text: content.text || text,
                     start: content.start || start,
                     end: content.end || end,
                   };

@@ -536,7 +536,7 @@ export default function App() {
       data?.isLowResponseRequired ||
       content.player.isMiniPlayer;
 
-    const duration = isLowResponseRequired ? 200 : 1000;
+    const duration = isLowResponseRequired ? 100 : 1000;
 
     const intervalId = setInterval(() => {
       if (!player.paused) {
@@ -1586,6 +1586,8 @@ export default function App() {
         if (updatedPlaybackRate + 0.05 > 4) updatedPlaybackRate = 4;
         else updatedPlaybackRate += 0.05;
 
+        updatedPlaybackRate = parseFloat(updatedPlaybackRate.toFixed(2));
+
         storage.setItem('playback', 'playbackRate', updatedPlaybackRate);
         addNewNotifications([
           {
@@ -1600,6 +1602,8 @@ export default function App() {
 
         if (updatedPlaybackRate - 0.05 < 0.25) updatedPlaybackRate = 0.25;
         else updatedPlaybackRate -= 0.05;
+
+        updatedPlaybackRate = parseFloat(updatedPlaybackRate.toFixed(2));
 
         storage.setItem('playback', 'playbackRate', updatedPlaybackRate);
         addNewNotifications([

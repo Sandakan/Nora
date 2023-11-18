@@ -15,8 +15,14 @@ import LyricsEditorSettingsPrompt from './LyricsEditorSettingsPrompt';
 import LyricsEditorSavePrompt from './LyricsEditorSavePrompt';
 import PageFocusPrompt from './PageFocusPrompt';
 
+export interface LyricsLineData {
+  text: string;
+  start?: number;
+  end?: number;
+}
+
 export interface EditingLyricsLineData {
-  line: string;
+  text: string | LyricsLineData[];
   start?: number;
   end?: number;
 }
@@ -37,6 +43,8 @@ const LyricsEditingPage = () => {
 
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [isFocused, setIsFocused] = React.useState(false);
+  const [isEditingEnhancedSyncedLyrics, setIsEditingEnhancedSyncedLyrics] =
+    React.useState(false);
   const [lyricsLines, setLyricsLines] = React.useState<
     ExtendedEditingLyricsLineData[]
   >([]);
@@ -44,8 +52,13 @@ const LyricsEditingPage = () => {
 
   const offset = localStorageData.lyricsEditorSettings.offset || 0;
   const roundedSongPostion = roundTo(songPosition + offset, 2);
+
   const { songId, lyrics, songTitle } = React.useMemo(() => {
     const { data } = currentlyActivePage;
+
+    setIsEditingEnhancedSyncedLyrics(
+      typeof data.lyrics === 'object' && !!data.isEditingEnhancedSyncedLyrics,
+    );
 
     return {
       songId: data.songId as string | undefined,
@@ -62,8 +75,15 @@ const LyricsEditingPage = () => {
   React.useEffect(() => {
     if (lyrics) {
       const lines: ExtendedEditingLyricsLineData[] = lyrics.map(
-        (line, index) => ({
-          ...line,
+        (lineData, index) => ({
+          ...lineData,
+          text:
+            typeof lineData.text === 'string' && isEditingEnhancedSyncedLyrics
+              ? lineData.text
+                  .trim()
+                  .split(' ')
+                  .map((text): LyricsLineData => ({ text }))
+              : lineData.text,
           index,
           isActive: false,
         }),
@@ -71,7 +91,7 @@ const LyricsEditingPage = () => {
 
       setLyricsLines(lines);
     }
-  }, [lyrics]);
+  }, [isEditingEnhancedSyncedLyrics, lyrics]);
 
   React.useEffect(() => {
     updateCurrentlyActivePageData((prevData) => {
@@ -83,24 +103,30 @@ const LyricsEditingPage = () => {
   }, [isPlaying, isTheEditingSongTheCurrSong, updateCurrentlyActivePageData]);
 
   const lyricsLineComponents = React.useMemo(() => {
-    return lyricsLines.map((lyricsLine, index) => (
-      <EditingLyricsLine
-        isActive={lyricsLine.isActive}
-        line={lyricsLine.line}
-        index={index}
-        // eslint-disable-next-line react/no-array-index-key
-        key={`${index}-${lyricsLine.line}`}
-        start={lyricsLine.start}
-        end={lyricsLine.end}
-        updateLineData={(callback) => {
-          setLyricsLines((prevLyricsLines) => {
-            const updatedLyricsLines = callback(prevLyricsLines);
-            return updatedLyricsLines.slice();
-          });
-        }}
-        isPlaying={isPlaying}
-      />
-    ));
+    return lyricsLines.map((lyricsLine, index) => {
+      const key =
+        typeof lyricsLine.text === 'string'
+          ? `${index}-${lyricsLine.text}`
+          : `${index}-${lyricsLine.text.map((line) => line.text).join(' ')}`;
+
+      return (
+        <EditingLyricsLine
+          isActive={lyricsLine.isActive}
+          text={lyricsLine.text}
+          index={index}
+          key={key}
+          start={lyricsLine.start}
+          end={lyricsLine.end}
+          updateLineData={(callback) => {
+            setLyricsLines((prevLyricsLines) => {
+              const updatedLyricsLines = callback(prevLyricsLines);
+              return updatedLyricsLines.slice();
+            });
+          }}
+          isPlaying={isPlaying}
+        />
+      );
+    });
   }, [isPlaying, lyricsLines]);
 
   const handleShortcuts = React.useCallback(
@@ -140,15 +166,6 @@ const LyricsEditingPage = () => {
     },
     [roundedSongPostion],
   );
-
-  // React.useEffect(() => {
-  //   const container = containerRef.current;
-  //   if (container) container.addEventListener('keydown', handleShortcuts);
-
-  //   return () => {
-  //     if (container) container.removeEventListener('keydown', handleShortcuts);
-  //   };
-  // }, [handleShortcuts]);
 
   const moreOptionsContextMenuItems = React.useMemo((): ContextMenuItem[] => {
     return [
@@ -192,15 +209,21 @@ const LyricsEditingPage = () => {
               confirmButton={{
                 label: 'Reset Lyrics',
                 clickHandler: () => {
-                  setLyricsLines((lines) =>
-                    lines.map((line) => {
-                      line.start = undefined;
-                      line.end = undefined;
-                      line.isActive = false;
-
-                      return line;
+                  const lines: ExtendedEditingLyricsLineData[] = lyrics.map(
+                    (lineData, index) => ({
+                      ...lineData,
+                      text:
+                        typeof lineData.text === 'string' &&
+                        isEditingEnhancedSyncedLyrics
+                          ? lineData.text
+                              .split(' ')
+                              .map((text): LyricsLineData => ({ text }))
+                          : lineData.text,
+                      index,
+                      isActive: false,
                     }),
                   );
+                  setLyricsLines(lines);
                 },
               }}
             />,
@@ -208,7 +231,7 @@ const LyricsEditingPage = () => {
         },
       },
     ];
-  }, [changePromptMenuData]);
+  }, [changePromptMenuData, isEditingEnhancedSyncedLyrics, lyrics]);
 
   return (
     <MainContainer
@@ -237,6 +260,8 @@ const LyricsEditingPage = () => {
         <div className="gap-4s container grid grid-cols-[clamp(5rem,1fr,10rem)_1fr] items-center">
           Lyrics Editor{' '}
           <div className="other-stats-container truncate text-xs text-font-color-black dark:text-font-color-white">
+            <span>Speed : {localStorageData.playback.playbackRate}x</span>
+            <span className="mx-2">&bull;</span>
             <span className="">
               Time : {roundedSongPostion}{' '}
               {localStorageData.lyricsEditorSettings.offset !== 0 && (

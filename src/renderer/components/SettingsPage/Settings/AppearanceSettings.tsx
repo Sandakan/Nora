@@ -94,7 +94,7 @@ const ThemeSettings = () => {
               <Img
                 loading="eager"
                 src={HomeImgLight}
-                className="w-40 shadow-md"
+                className="h-24 w-40 shadow-md"
               />
               <span className="mt-4 peer-checked:!text-font-color-black dark:peer-checked:!text-font-color-black">
                 Light Theme
@@ -123,7 +123,7 @@ const ThemeSettings = () => {
               <Img
                 loading="eager"
                 src={HomeImgDark}
-                className="w-40 shadow-md"
+                className="h-24 w-40 shadow-md"
               />
               <span className="mt-4 peer-checked:!text-font-color-black dark:peer-checked:!text-font-color-black">
                 Dark Theme
@@ -151,7 +151,7 @@ const ThemeSettings = () => {
               <Img
                 loading="eager"
                 src={HomeImgLightDark}
-                className="w-40 shadow-md"
+                className="h-24 w-40 shadow-md"
               />
               <span className="mt-4 peer-checked:!text-font-color-black dark:peer-checked:!text-font-color-black">
                 System Theme
