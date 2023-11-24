@@ -204,14 +204,14 @@ export const Artist = (props: ArtistProp) => {
         label: isMultipleSelectionEnabled
           ? 'Toggle Like Artists'
           : isAFavorite
-          ? 'Dislike Artist'
-          : 'Like Artist',
+            ? 'Dislike Artist'
+            : 'Like Artist',
         iconName: 'favorite',
         iconClassName: isMultipleSelectionsEnabled
           ? 'material-icons-round-outlined mr-4 text-xl'
           : isAFavorite
-          ? 'material-icons-round mr-4 text-xl'
-          : 'material-icons-round-outlined mr-4 text-xl',
+            ? 'material-icons-round mr-4 text-xl'
+            : 'material-icons-round-outlined mr-4 text-xl',
         handlerFunction: () => {
           const { multipleSelections: artistIds } = multipleSelectionsData;
 

@@ -864,8 +864,8 @@ export default function App() {
       (contentRef.current.player.isRepeating === 'false'
         ? 'repeat'
         : contentRef.current.player.isRepeating === 'repeat'
-        ? 'repeat-1'
-        : 'false');
+          ? 'repeat-1'
+          : 'false');
     contentRef.current.player.isRepeating = repeatState;
     dispatch({
       type: 'UPDATE_IS_REPEATING_STATE',

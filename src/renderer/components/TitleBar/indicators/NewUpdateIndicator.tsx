@@ -22,21 +22,21 @@ const NewUpdateIndicator = () => {
             appUpdatesState === 'OLD'
               ? 'download'
               : appUpdatesState === 'LATEST'
-              ? 'download_done'
-              : appUpdatesState === 'CHECKING'
-              ? 'sync'
-              : 'warning'
+                ? 'download_done'
+                : appUpdatesState === 'CHECKING'
+                  ? 'sync'
+                  : 'warning'
           }
           tooltipLabel={
             appUpdatesState === 'OLD'
               ? 'New app update available.'
               : appUpdatesState === 'CHECKING'
-              ? 'Checking for app updates...'
-              : appUpdatesState === 'ERROR'
-              ? 'Error occurred when checking for app updates.'
-              : appUpdatesState === 'NO_NETWORK_CONNECTION'
-              ? 'Error occurred when checking for app updates. No internet connection found.'
-              : undefined
+                ? 'Checking for app updates...'
+                : appUpdatesState === 'ERROR'
+                  ? 'Error occurred when checking for app updates.'
+                  : appUpdatesState === 'NO_NETWORK_CONNECTION'
+                    ? 'Error occurred when checking for app updates. No internet connection found.'
+                    : undefined
           }
           clickHandler={() =>
             changePromptMenuData(true, <ReleaseNotesPrompt />)

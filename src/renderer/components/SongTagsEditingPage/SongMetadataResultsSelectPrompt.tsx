@@ -133,8 +133,8 @@ const SongMetadataResultsSelectPage = (
           loadingStates === 'PENDING'
             ? `after:absolute after:h-5 after:w-5 after:animate-spin-ease after:rounded-full after:border-2 after:border-[transparent] after:border-t-font-color-black after:content-[''] dark:after:border-t-font-color-white`
             : loadingStates === 'EMPTY'
-            ? `flex items-center justify-center text-font-color-dimmed after:absolute after:content-["We_couldn't_find_any_results."]`
-            : ''
+              ? `flex items-center justify-center text-font-color-dimmed after:absolute after:content-["We_couldn't_find_any_results."]`
+              : ''
         }`}
       >
         {songResultComponents.length > 0 &&

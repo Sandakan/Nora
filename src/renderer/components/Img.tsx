@@ -126,8 +126,8 @@ const Img = React.memo((props: ImgProps) => {
         showImgPropsOnTooltip && imgPropsRef.current
           ? `Quality : ${imgPropsRef.current.quality}\nImage width : ${imgPropsRef.current?.width}px\nImage height : ${imgPropsRef.current?.height}px`
           : showAltAsTooltipLabel
-          ? alt
-          : undefined
+            ? alt
+            : undefined
       }
       loading={loading}
       onContextMenu={onContextMenu}
@@ -148,8 +148,8 @@ const Img = React.memo((props: ImgProps) => {
                 width >= 1000 || height >= 1000
                   ? 'HIGH QUALITY'
                   : width >= 500 || height >= 500
-                  ? 'MEDIUM QUALITY'
-                  : 'LOW QUALITY',
+                    ? 'MEDIUM QUALITY'
+                    : 'LOW QUALITY',
             };
             imgPropsRef.current = imgProp;
             if (imgRef.current !== null && 'dataset' in imgRef.current) {

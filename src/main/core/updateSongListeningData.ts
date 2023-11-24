@@ -112,10 +112,10 @@ const updateListeningData = <
     dataType === 'listens'
       ? 'songs/listeningData/listens'
       : dataType === 'fullListens'
-      ? 'songs/listeningData/fullSongListens'
-      : dataType === 'skips'
-      ? 'songs/listeningData/skips'
-      : 'songs/listeningData/inNoOfPlaylists',
+        ? 'songs/listeningData/fullSongListens'
+        : dataType === 'skips'
+          ? 'songs/listeningData/skips'
+          : 'songs/listeningData/inNoOfPlaylists',
     [listeningData.songId],
   );
   return listeningData;

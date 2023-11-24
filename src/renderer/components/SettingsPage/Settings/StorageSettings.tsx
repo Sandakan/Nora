@@ -91,18 +91,16 @@ const StorageSettings = () => {
   const appStorageBarCssProperties: any = {};
   const appDataStorageBarCssProperties: any = {};
 
-  appStorageBarCssProperties[
-    '--other-applications-size-storage-bar-width'
-  ] = `${appStorageBarWidths?.otherApplicationSizesWidth || 0}%`;
+  appStorageBarCssProperties['--other-applications-size-storage-bar-width'] =
+    `${appStorageBarWidths?.otherApplicationSizesWidth || 0}%`;
   appStorageBarCssProperties['--app-folder-size-storage-bar-width'] = `${
     appStorageBarWidths?.appFolderSizeWidth || 0
   }%`;
   appStorageBarCssProperties['--artwork-cache-size-storage-bar-width'] = `${
     appStorageBarWidths?.artworkCacheSizeWidth || 0
   }%`;
-  appStorageBarCssProperties[
-    '--temp-artwork-cache-size-storage-bar-width'
-  ] = `${appStorageBarWidths?.tempArtworkCacheSizeWidth || 0}%`;
+  appStorageBarCssProperties['--temp-artwork-cache-size-storage-bar-width'] =
+    `${appStorageBarWidths?.tempArtworkCacheSizeWidth || 0}%`;
   appStorageBarCssProperties['--song-data-size-storage-bar-width'] = `${
     appStorageBarWidths?.songDataSizeWidth || 0
   }%`;

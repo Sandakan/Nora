@@ -148,13 +148,13 @@ const Folder = (props: FolderProps) => {
         label: isMultipleSelectionEnabled
           ? 'Toggle blacklist Folder'
           : isBlacklisted
-          ? 'Restore from Blacklist'
-          : 'Blacklist Folder',
+            ? 'Restore from Blacklist'
+            : 'Blacklist Folder',
         iconName: isMultipleSelectionEnabled
           ? 'settings_backup_restore'
           : isBlacklisted
-          ? 'settings_backup_restore'
-          : 'block',
+            ? 'settings_backup_restore'
+            : 'block',
         handlerFunction: () => {
           if (isMultipleSelectionEnabled) {
             window.api.folderData

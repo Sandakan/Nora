@@ -289,8 +289,8 @@ const SongCard = (props: SongCardProp) => {
         iconClassName: isMultipleSelectionsEnabled
           ? 'material-icons-round-outlined mr-4 text-xl'
           : isSongAFavorite
-          ? 'material-icons-round mr-4 text-xl'
-          : 'material-icons-round-outlined mr-4 text-xl',
+            ? 'material-icons-round mr-4 text-xl'
+            : 'material-icons-round-outlined mr-4 text-xl',
         handlerFunction: () => {
           window.api.playerControls
             .toggleLikeSongs(

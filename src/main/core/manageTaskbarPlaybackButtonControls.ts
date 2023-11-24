@@ -74,8 +74,8 @@ const manageTaskbarPlaybackButtonControls = (
             ? pauseLightIcon
             : playLightIcon
           : isPlaying
-          ? pauseDarkIcon
-          : playDarkIcon,
+            ? pauseDarkIcon
+            : playDarkIcon,
         flags: isPlaybackSupported ? undefined : ['disabled'],
         click: () => {
           console.log('Play button clicked');

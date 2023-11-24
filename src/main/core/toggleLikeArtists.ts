@@ -54,8 +54,8 @@ const toggleLikeArtists = async (
       isLikeArtist === undefined
         ? 'toggle like'
         : isLikeArtist
-        ? 'like'
-        : 'dislike'
+          ? 'like'
+          : 'dislike'
     } artists with ids -${artistIds.join(', ')}-`,
   );
   if (artists.length > 0) {

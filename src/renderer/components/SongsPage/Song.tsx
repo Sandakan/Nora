@@ -359,8 +359,8 @@ const Song = React.forwardRef(
           iconClassName: isMultipleSelectionsEnabled
             ? 'material-icons-round-outlined mr-4 text-xl'
             : isAFavorite
-            ? 'material-icons-round mr-4 text-xl'
-            : 'material-icons-round-outlined mr-4 text-xl',
+              ? 'material-icons-round mr-4 text-xl'
+              : 'material-icons-round-outlined mr-4 text-xl',
           handlerFunction: () => {
             window.api.playerControls
               .toggleLikeSongs(
@@ -580,12 +580,12 @@ const Song = React.forwardRef(
               ? `bg-background-color-3/70 text-font-color-black shadow-lg backdrop-blur-md dark:bg-dark-background-color-3/70`
               : 'bg-background-color-3 text-font-color-black shadow-lg dark:bg-dark-background-color-3'
             : bodyBackgroundImage
-            ? `bg-background-color-2/70 backdrop-blur-md hover:!bg-background-color-2 dark:bg-dark-background-color-2/70 dark:hover:!bg-dark-background-color-2`
-            : `odd:bg-background-color-2/70 hover:!bg-background-color-2 dark:odd:bg-dark-background-color-2/50 dark:hover:!bg-dark-background-color-2 ${
-                (index + 1) % 2 === 1
-                  ? '!bg-background-color-2/70 dark:!bg-dark-background-color-2/50'
-                  : '!bg-background-color-1 dark:!bg-dark-background-color-1'
-              }`
+              ? `bg-background-color-2/70 backdrop-blur-md hover:!bg-background-color-2 dark:bg-dark-background-color-2/70 dark:hover:!bg-dark-background-color-2`
+              : `odd:bg-background-color-2/70 hover:!bg-background-color-2 dark:odd:bg-dark-background-color-2/50 dark:hover:!bg-dark-background-color-2 ${
+                  (index + 1) % 2 === 1
+                    ? '!bg-background-color-2/70 dark:!bg-dark-background-color-2/50'
+                    : '!bg-background-color-1 dark:!bg-dark-background-color-1'
+                }`
         } ${!isAMultipleSelection && isBlacklisted && '!opacity-30'}`}
         onContextMenu={(e) => {
           e.preventDefault();
@@ -658,10 +658,10 @@ const Song = React.forwardRef(
                 index < 10
                   ? 'min-w-[1.75rem]'
                   : index < 100
-                  ? 'min-w-[2.5rem]'
-                  : index < 1000
-                  ? 'min-w-[3rem]'
-                  : 'min-w-[3.75rem]'
+                    ? 'min-w-[2.5rem]'
+                    : index < 1000
+                      ? 'min-w-[3rem]'
+                      : 'min-w-[3.75rem]'
               }`}
             >
               <span className="text-sm leading-[.9]">
@@ -755,8 +755,8 @@ const Song = React.forwardRef(
                     ? '!text-font-color-black dark:!text-font-color-black'
                     : '!text-font-color-highlight dark:!text-dark-background-color-3'
                   : currentSongData.songId === songId || isAMultipleSelection
-                  ? '!text-font-color-black dark:!text-font-color-black'
-                  : '!text-font-color-highlight dark:!text-dark-background-color-3'
+                    ? '!text-font-color-black dark:!text-font-color-black'
+                    : '!text-font-color-highlight dark:!text-dark-background-color-3'
               }`}
               tooltipLabel={`You ${
                 isAFavorite ? 'liked' : "didn't like"

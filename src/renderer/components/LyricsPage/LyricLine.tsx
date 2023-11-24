@@ -75,12 +75,12 @@ const LyricLine = (props: LyricProp) => {
     ? songPosition < syncedLyrics.start - delay
       ? '0%'
       : songPosition > syncedLyrics.end - delay
-      ? '100%'
-      : `${
-          ((songPosition - (syncedLyrics.start - delay)) /
-            (syncedLyrics.end - delay - (syncedLyrics.start - delay))) *
-          100
-        }%`
+        ? '100%'
+        : `${
+            ((songPosition - (syncedLyrics.start - delay)) /
+              (syncedLyrics.end - delay - (syncedLyrics.start - delay))) *
+            100
+          }%`
     : '0%';
 
   return (

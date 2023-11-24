@@ -5,9 +5,9 @@ const sortAtoZ = <T extends (Album | SavableAlbum)[]>(arr: T) =>
     b.title.toLowerCase().replace(/\W/gi, '')
       ? 1
       : a.title.toLowerCase().replace(/\W/gi, '') <
-        b.title.toLowerCase().replace(/\W/gi, '')
-      ? -1
-      : 0,
+          b.title.toLowerCase().replace(/\W/gi, '')
+        ? -1
+        : 0,
   );
 const sortZtoA = <T extends (Album | SavableAlbum)[]>(arr: T) =>
   arr.sort((a, b) =>
@@ -15,9 +15,9 @@ const sortZtoA = <T extends (Album | SavableAlbum)[]>(arr: T) =>
     b.title.toLowerCase().replace(/\W/gi, '')
       ? 1
       : a.title.toLowerCase().replace(/\W/gi, '') >
-        b.title.toLowerCase().replace(/\W/gi, '')
-      ? -1
-      : 0,
+          b.title.toLowerCase().replace(/\W/gi, '')
+        ? -1
+        : 0,
   );
 
 export default <T extends (Album | SavableAlbum)[]>(
@@ -32,16 +32,16 @@ export default <T extends (Album | SavableAlbum)[]>(
         a.songs.length < b.songs.length
           ? 1
           : a.songs.length > b.songs.length
-          ? -1
-          : 0,
+            ? -1
+            : 0,
       );
     if (sortType === 'noOfSongsAscending')
       return sortAtoZ(data).sort((a, b) =>
         a.songs.length > b.songs.length
           ? 1
           : a.songs.length < b.songs.length
-          ? -1
-          : 0,
+            ? -1
+            : 0,
       );
   }
   return data;

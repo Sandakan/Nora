@@ -137,11 +137,11 @@ const sendSongID3Tags = async (
                       .artworkPath,
                   }
                 : songTags.album
-                ? {
-                    title: songTags.album ?? 'Unknown Album',
-                    albumId: undefined,
-                  }
-                : undefined,
+                  ? {
+                      title: songTags.album ?? 'Unknown Album',
+                      albumId: undefined,
+                    }
+                  : undefined,
               genres: tagGenres,
               releasedYear: Number(songTags.year) || undefined,
               composer: songTags.composer,
