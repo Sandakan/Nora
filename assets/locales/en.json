@@ -1,0 +1,30 @@
+{
+  "translation": {
+    "homePage": {
+      "empty": "There's nothing here. Do you know where are they?",
+      "loading": "Just hold on. We are readying everything for you...",
+      "listenMoreToShowMetrics": "Listen to some songs to show additional metrics.",
+
+      "recentlyAddedSongs": "Recently Added Songs",
+      "recentlyPlayedSongs": "Recently Played Songs",
+      "recentArtists": "Recent Artists",
+      "mostLovedSongs": "Most Loved Songs",
+      "mostLovedArtists": "Most Loved Artists",
+
+      "openSongsWithNewestSortOption": "Opens 'Songs' with 'Newest' sort option.",
+      "openPlaybackHistory": "Opens 'History' playlist with 'addedOrder' sort option",
+      "openFavoritesWithAllTimeMostListenedSortOption": "Opens 'Favorites' playlist with 'AllTimeMostListened' sort option",
+
+      "noSongsAvailable": "No songs available",
+      "stayCalm": "Stay calm",
+
+      "showAll": "Show All"
+    },
+    "foldersPage": {
+      "addFolder": "Add Folder"
+    },
+    "settingsPage": {
+      "importAppData": "Import App Data"
+    }
+  }
+}

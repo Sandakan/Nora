@@ -449,6 +449,7 @@ export const createNewListeningDataInstance = (songId: string) => {
     fullListens: 0,
     inNoOfPlaylists: 0,
     listens: [{ year: currentYear, listens: [] }],
+    seeks: [],
   };
   return newListeningData;
 };
@@ -475,14 +476,22 @@ export const getListeningData = (
   }
 
   const listeningData: SongListeningData[] = results.map((x) => {
-    const { songId, skips, fullListens, inNoOfPlaylists, listens } = x;
+    const {
+      songId,
+      skips = 0,
+      fullListens = 0,
+      inNoOfPlaylists = 0,
+      listens,
+      seeks = [],
+    } = x;
 
     return {
       songId,
-      skips: skips ?? 0,
-      fullListens: fullListens ?? 0,
-      inNoOfPlaylists: inNoOfPlaylists ?? 0,
+      skips,
+      fullListens,
+      inNoOfPlaylists,
       listens,
+      seeks,
     };
   });
 
@@ -506,6 +515,7 @@ export const setListeningData = (data: SongListeningData) => {
       results[i].fullListens = data.fullListens;
       results[i].inNoOfPlaylists = data.inNoOfPlaylists;
       results[i].listens = data.listens;
+      results[i].seeks = data.seeks;
 
       break;
     }

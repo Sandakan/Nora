@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 
@@ -71,6 +72,7 @@ const reducer = (
 const HomePage = () => {
   const { updateContextMenuData, changePromptMenuData, addNewNotifications } =
     React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const [content, dispatch] = React.useReducer(reducer, {
     latestSongs: [],
@@ -387,7 +389,7 @@ const HomePage = () => {
 
   return (
     <MainContainer
-      className="home-page relative !h-full overflow-y-auto !pl-0"
+      className="home-page relative !h-full overflow-y-auto !pl-0 [scrollbar-gutter:stable]"
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -435,19 +437,19 @@ const HomePage = () => {
             <Img
               src={NoSongsImage}
               className="mb-8 w-60"
-              alt="No songs available."
+              alt={t('homePage.noSongsAvailable')}
             />
-            <div>There&apos;s nothing here. Do you know where are they?</div>
+            <div>{t('homePage.empty')}</div>
             <div className="flex items-center justify-between">
               <Button
-                label="Add Folder"
+                label={t('foldersPage.addFolder')}
                 iconName="create_new_folder"
                 iconClassName="material-icons-round-outlined"
                 className="mt-4 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
                 clickHandler={addNewSongs}
               />
               <Button
-                label="Import App Data"
+                label={t('settingsPage.importAppData')}
                 iconName="upload"
                 className="mt-4 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
                 clickHandler={importAppData}
@@ -461,9 +463,9 @@ const HomePage = () => {
               <Img
                 src={DataFetchingImage}
                 className="mb-8 w-48"
-                alt="Stay calm"
+                alt={t('homePage.stayCalm')}
               />
-              <span>Just hold on. We are readying everything for you...</span>
+              <span> {t('homePage.loading')}</span>
             </div>
           )}
         {content.latestSongs.length > 0 &&
@@ -473,9 +475,7 @@ const HomePage = () => {
               <span className="material-icons-round-outlined mb-1 text-4xl">
                 headphones
               </span>{' '}
-              <p className="text-sm">
-                Listen to some songs to show additional metrics.
-              </p>
+              <p className="text-sm">{t('homePage.listenMoreToShowMetrics')}</p>
             </div>
           )}
       </>

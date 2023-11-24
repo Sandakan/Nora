@@ -517,12 +517,15 @@ app
 
       ipcMain.handle(
         'app/updateSongListeningData',
-        (
-          _,
+        <
+          DataType extends keyof ListeningDataTypes,
+          Value extends ListeningDataTypes[DataType],
+        >(
+          _: unknown,
           songId: string,
-          dataType: ListeningDataTypes,
-          dataUpdateType: ListeningDataUpdateTypes,
-        ) => updateSongListeningData(songId, dataType, dataUpdateType),
+          dataType: DataType,
+          value: Value,
+        ) => updateSongListeningData(songId, dataType, value),
       );
 
       ipcMain.handle('app/generatePalettes', generatePalettes);

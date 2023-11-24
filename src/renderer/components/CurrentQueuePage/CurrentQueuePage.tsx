@@ -535,7 +535,7 @@ const CurrentQueuePage = () => {
               >
                 {(droppableProvided, snapshot) => (
                   <List
-                    className="appear-from-bottom delay-100"
+                    className="appear-from-bottom delay-100 [scrollbar-gutter:stable]"
                     height={height}
                     itemCount={
                       snapshot.isUsingPlaceholder

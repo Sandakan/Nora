@@ -197,19 +197,36 @@ const SongInfoPage = () => {
       };
     }, [currentMonth, currentYear, listeningData]);
 
-  const { totalSongFullListens, totalSongSkips } = React.useMemo(() => {
+  const {
+    totalSongFullListens,
+    totalSongSkips,
+    maxSongSeekPosition,
+    maxSongSeekFrequency,
+  } = React.useMemo(() => {
     if (listeningData) {
-      const { fullListens = 0, skips = 0 } = listeningData;
+      const { fullListens = 0, skips = 0, seeks = [] } = listeningData;
+
+      const sortedSeeks = seeks.sort((a, b) =>
+        a.seeks > b.seeks ? 1 : a.seeks < b.seeks ? -1 : 0,
+      );
+      const maxSeekPosition = sortedSeeks.at(0)?.position;
+      const maxSeekFrequency = sortedSeeks.at(0)?.seeks;
+
       return {
         totalSongFullListens: valueRounder(fullListens),
         totalSongSkips: valueRounder(skips),
+        maxSongSeekPosition: maxSeekPosition,
+        maxSongSeekFrequency: maxSeekFrequency,
       };
     }
-    return { totalSongFullListens: 0, totalSongSkips: 0 };
+    return {
+      totalSongFullListens: 0,
+      totalSongSkips: 0,
+    };
   }, [listeningData]);
 
   return songInfo ? (
-    <MainContainer className="song-information-container pt-8">
+    <MainContainer className="song-information-container pt-8 [scrollbar-gutter:stable]">
       <>
         <div className="appear-from-bottom container flex">
           <div className="song-cover-container mr-8 h-60 w-fit overflow-hidden rounded-md">
@@ -362,6 +379,27 @@ const SongInfoPage = () => {
                   title="Full Song Listens"
                   value={totalSongFullListens}
                 />
+                {maxSongSeekPosition !== undefined && (
+                  <SongStat
+                    key={6}
+                    title="Most seeked position"
+                    value={
+                      <span className="flex flex-col">
+                        <span className="text-2xl">
+                          {maxSongSeekPosition.toFixed(1)}
+                        </span>
+                        <span className="text-xs">seconds</span>
+                      </span>
+                    }
+                  />
+                )}
+                {maxSongSeekFrequency !== undefined && (
+                  <SongStat
+                    key={7}
+                    title="Most seeked frequency"
+                    value={maxSongSeekFrequency}
+                  />
+                )}
               </div>
             </div>
             <SongAdditionalInfoContainer

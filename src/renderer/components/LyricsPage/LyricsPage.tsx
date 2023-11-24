@@ -524,7 +524,7 @@ const LyricsPage = () => {
                 </div>
               </div>
               <div
-                className="lyrics-lines-container flex h-full !w-full flex-col items-center overflow-y-auto px-8 py-[10vh]"
+                className="lyrics-lines-container flex h-full !w-full flex-col items-center overflow-y-auto px-8 py-[10vh] [scrollbar-gutter:stable]"
                 ref={lyricsLinesContainerRef}
                 onScroll={() =>
                   debounce(() => {

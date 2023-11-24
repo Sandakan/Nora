@@ -472,7 +472,7 @@ const SongsPage = () => {
               width={width || '100%'}
               height={height || 450}
               overscanCount={10}
-              className="appear-from-bottom delay-100"
+              className="appear-from-bottom delay-100 [scrollbar-gutter:stable]"
               initialScrollOffset={
                 currentlyActivePage.data?.scrollTopOffset ?? 0
               }

@@ -116,7 +116,7 @@ const MusicFolderInfoPage = () => {
   }, [fetchFolderSongs]);
 
   React.useEffect(() => {
-    storage.sortingStates.setSortingStates('musicFoldersPage', sortingOrder);
+    storage.sortingStates.setSortingStates('songsPage', sortingOrder);
   }, [sortingOrder]);
 
   const dropdownOptions: { label: string; value: SongSortTypes }[] = [
@@ -342,7 +342,7 @@ const MusicFolderInfoPage = () => {
         >
           {folderSongs && folderSongs.length > 0 && (
             <List
-              className="appear-from-bottom delay-100"
+              className="appear-from-bottom delay-100 [scrollbar-gutter:stable]"
               itemCount={folderSongs.length}
               itemSize={60}
               width={width || '100%'}

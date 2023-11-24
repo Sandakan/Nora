@@ -405,7 +405,7 @@ function SongTagsEditingPage() {
   );
 
   return (
-    <MainContainer className="main-container appear-from-bottom id3-tags-updater-container h-full">
+    <MainContainer className="main-container appear-from-bottom id3-tags-updater-container h-full [scrollbar-gutter:stable]">
       <>
         {(songId || songPath) && isMetadataEditingSupported && (
           <>

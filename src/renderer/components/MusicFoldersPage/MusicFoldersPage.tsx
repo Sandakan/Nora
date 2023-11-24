@@ -248,7 +248,7 @@ const MusicFoldersPage = () => {
         )}
 
         <div
-          className={`folders-container ${
+          className={`folders-container [scrollbar-gutter:stable] ${
             musicFolders && musicFolders.length > 0 && 'h-full'
           }`}
           ref={foldersContainerRef}

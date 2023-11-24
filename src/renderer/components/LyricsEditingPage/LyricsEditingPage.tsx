@@ -337,7 +337,7 @@ const LyricsEditingPage = () => {
         </div>
       </div>
       <div
-        className={`lyrics-container flex h-full flex-col items-center overflow-auto py-10 pr-6 transition-[background,opacity] ${
+        className={`lyrics-container flex h-full flex-col items-center overflow-auto py-10 pr-6 transition-[background,opacity] [scrollbar-gutter:stable] ${
           !isTheEditingSongTheCurrSong && 'opacity-10'
         }`}
       >

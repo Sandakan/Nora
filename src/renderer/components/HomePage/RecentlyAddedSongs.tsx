@@ -1,5 +1,6 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import React, { ForwardedRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 import SongCard from '../SongsPage/SongCard';
@@ -12,6 +13,7 @@ type Props = { latestSongs: AudioInfo[]; noOfVisibleSongs: number };
 const RecentlyAddedSongs = React.forwardRef(
   (props: Props, ref: ForwardedRef<HTMLDivElement>) => {
     const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
+    const { t } = useTranslation();
 
     const { latestSongs, noOfVisibleSongs = 6 } = props;
     const MAX_SONG_LIMIT = 30;
@@ -67,9 +69,9 @@ const RecentlyAddedSongs = React.forwardRef(
         {latestSongs.length > 0 && latestSongs[0] !== null && (
           <>
             <div className="title-container my-4 flex items-center justify-between text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-              Recently Added Songs
+              {t('homePage.recentlyAddedSongs')}
               <Button
-                label="Show All"
+                label={t('homePage.showAll')}
                 tooltipLabel="Opens 'Songs' with 'Newest' sort option."
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"

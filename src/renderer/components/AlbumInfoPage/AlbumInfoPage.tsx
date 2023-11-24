@@ -427,7 +427,7 @@ const AlbumInfoPage = () => {
             width={width || '100%'}
             height={height || 450}
             overscanCount={10}
-            className="appear-from-bottom h-full pb-4 delay-100"
+            className="appear-from-bottom h-full pb-4 delay-100 [scrollbar-gutter:stable]"
             initialScrollOffset={currentlyActivePage.data?.scrollTopOffset ?? 0}
             onScroll={(data) => {
               if (!data.scrollUpdateWasRequested && data.scrollOffset !== 0)

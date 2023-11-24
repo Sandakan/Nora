@@ -81,7 +81,7 @@ class ListeningDataSession {
         window.api.audioLibraryControls.updateSongListeningData(
           this.songId,
           'fullListens',
-          'increment',
+          1,
         );
       }
       // listen for scrobbling event
@@ -114,9 +114,21 @@ class ListeningDataSession {
         window.api.audioLibraryControls.updateSongListeningData(
           this.songId,
           'skips',
-          'increment',
+          1,
         );
       }
+
+      const seeks = this.seeks.filter(
+        (seekInstance) => seekInstance.seeks >= 3,
+      );
+      if (seeks.length > 0) {
+        window.api.audioLibraryControls.updateSongListeningData(
+          this.songId,
+          'seeks',
+          seeks,
+        );
+      }
+
       this.abortController.abort();
       clearInterval(this.intervalId);
       clearTimeout(this.nowPlayingIntervalId);

@@ -205,13 +205,9 @@ declare global {
     listens: [number, number][];
   }
 
-  type ListeningDataTypes =
-    | 'skips'
-    | 'fullListens'
-    | 'noOfPlaylists'
-    | 'listens';
-
-  type ListeningDataUpdateTypes = 'increment' | 'decrement';
+  interface ListeningDataTypes extends Omit<SongListeningData, 'listens'> {
+    listens: number;
+  }
 
   // ? Audio player and lyrics related types
 

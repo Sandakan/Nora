@@ -12,8 +12,8 @@ const manageAlbumsOfParsedSong = (
   const {
     title,
     songId,
-    albumArtists,
-    artists,
+    albumArtists = [],
+    artists = [],
     year,
     album: songAlbum,
   } = songInfo;
@@ -21,15 +21,25 @@ const manageAlbumsOfParsedSong = (
   const songAlbumName = songAlbum?.name.trim();
   const relevantAlbumArtists: { artistId: string; name: string }[] = [];
 
-  if (albumArtists && albumArtists.length > 0)
-    relevantAlbumArtists.push(...albumArtists);
-  else if (artists && artists.length > 0) relevantAlbumArtists.push(...artists);
+  if (albumArtists.length > 0) relevantAlbumArtists.push(...albumArtists);
+  else if (artists.length > 0) relevantAlbumArtists.push(...artists);
 
   if (songAlbumName) {
     if (Array.isArray(allAlbumsData)) {
       const isAlbumAvailable = allAlbumsData.some(
         //  album.title doesn't need trimming because they are already trimmed when adding them to the database.
         (album) => album.title === songAlbumName,
+        // &&
+        // // to prevent mixing songs from same album names with different album artists
+        // (albumArtists.length > 0 &&
+        // Array.isArray(album.artists) &&
+        // album.artists.length > 0
+        //   ? album.artists.every((artist) =>
+        //       albumArtists.some(
+        //         (albumArtist) => albumArtist.name === artist.name,
+        //       ),
+        //     )
+        //   : true),
       );
 
       if (isAlbumAvailable) {

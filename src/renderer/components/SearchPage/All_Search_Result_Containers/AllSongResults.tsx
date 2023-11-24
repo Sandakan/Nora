@@ -95,7 +95,7 @@ const AllSongResults = (prop: Props) => {
     >
       {songData && songData.length > 0 && (
         <List
-          className="appear-from-bottom delay-100"
+          className="appear-from-bottom delay-100 [scrollbar-gutter:stable]"
           itemCount={songData.length}
           itemSize={60}
           width={width || '100%'}

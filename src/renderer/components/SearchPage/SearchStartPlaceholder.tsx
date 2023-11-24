@@ -100,8 +100,9 @@ const SearchStartPlaceholder = (props: Props) => {
             }
             alt="Flying kite"
           />
+
           <div className="description text-xl text-font-color-black dark:text-font-color-white">
-            Search for anything in your library...
+            Search for anything in your library
           </div>
           <div className="recent-search-results-container mt-4 flex w-[clamp(12.5rem,90%,50rem)] flex-wrap items-center justify-center">
             {recentSearchResultComponents}

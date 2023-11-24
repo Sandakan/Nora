@@ -1055,7 +1055,7 @@ export default function App() {
         window.api.audioLibraryControls.updateSongListeningData(
           contentRef.current.currentSongData.songId,
           'listens',
-          'increment',
+          1,
         );
       } else if (typeof currentSongIndex === 'number') {
         if (refQueue.current.queue.length > 0) {
