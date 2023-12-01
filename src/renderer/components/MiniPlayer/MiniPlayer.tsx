@@ -3,6 +3,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
@@ -43,6 +44,8 @@ export default function MiniPlayer(props: MiniPlayerProps) {
   const { className } = props;
 
   const { songPosition } = React.useContext(SongPositionContext);
+  const { t } = useTranslation();
+
   const [songPos, setSongPos] = React.useState(0);
   const [isNextSongPopupVisible, setIsNextSongPopupVisible] =
     React.useState(false);
@@ -241,12 +244,12 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           lyricsComponents}
         {isLyricsVisible && lyrics && !lyrics.lyrics.isSynced && (
           <div className="flex h-full w-full items-center justify-center text-font-color-white opacity-75">
-            No Synced Lyrics found.
+            {t('lyricsPage.noSyncedLyrics')}
           </div>
         )}
         {isLyricsVisible && lyrics === undefined && (
           <div className="flex h-full w-full items-center justify-center text-font-color-white">
-            No Lyrics found.
+            {t('lyricsPage.noLyrics')}
           </div>
         )}
       </div>
@@ -270,7 +273,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           >
             <Button
               className="go-to-main-player-btn !mr-0 !mt-1 !rounded-md !border-0 !p-2 text-font-color-white outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white"
-              tooltipLabel="Go to Main Player (Ctrl + N)"
+              tooltipLabel={t('player.goToMainPlayer')}
               iconName="pip_exit"
               iconClassName="material-icons-round-outlined !text-xl"
               clickHandler={() => updateMiniPlayerStatus(!isMiniPlayer)}
@@ -289,9 +292,13 @@ export default function MiniPlayer(props: MiniPlayerProps) {
                   : 'move_up'
               }
               iconClassName="material-icons-round text-xl"
-              tooltipLabel={`Always on top : ${
-                userData?.preferences.isMiniPlayerAlwaysOnTop ? 'ON' : 'OFF'
-              }`}
+              tooltipLabel={t(
+                `miniPlayer.${
+                  userData?.preferences.isMiniPlayerAlwaysOnTop
+                    ? 'alwaysOnTopEnabled'
+                    : 'alwaysOnTopDisabled'
+                }`,
+              )}
               removeFocusOnClick
               clickHandler={toggleAlwaysOnTop}
             />
@@ -300,7 +307,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             <Button
               className="minimize-btn !m-0 flex h-full items-center justify-center !rounded-none !border-0 !px-2 text-center text-xl outline-1 -outline-offset-2 transition-[background] ease-in-out hover:!bg-[hsla(0deg,0%,80%,0.5)] focus-visible:!outline"
               clickHandler={() => window.api.windowControls.minimizeApp()}
-              tooltipLabel="Minimize"
+              tooltipLabel={t('titleBar.minimize')}
               iconName="minimize"
               iconClassName="material-icons-round icon flex h-fit cursor-pointer items-center justify-center text-center text-xl !font-light transition-[background] ease-in-out"
               removeFocusOnClick
@@ -312,7 +319,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
                   window.api.windowControls.hideApp();
                 else window.api.windowControls.closeApp();
               }}
-              tooltipLabel="Close"
+              tooltipLabel={t('titleBar.close')}
               iconName="close"
               iconClassName="material-icons-round icon flex h-fit  cursor-pointer items-center justify-center text-center text-xl !font-light transition-[background] ease-in-out"
               removeFocusOnClick
@@ -338,8 +345,8 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             isDisabled={!currentSongData.isKnownSource}
             tooltipLabel={
               currentSongData.isKnownSource
-                ? 'Like/Dislike (Ctrl + H)'
-                : `Liking/Disliking songs is disabled because current playing song is from an unknown source and it doesn't support likes.`
+                ? t('player.likeDislike')
+                : t('player.likeDislikeDisabled')
             }
             clickHandler={() =>
               currentSongData.isKnownSource &&
@@ -350,7 +357,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           />
           <Button
             className="skip-backward-btn !mr-0 ml-4 h-fit -translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
-            tooltipLabel="Previous Song (Ctrl + Left Arrow)"
+            tooltipLabel={t('player.prevSong')}
             iconClassName="!text-3xl"
             clickHandler={handleSkipBackwardClick}
             iconName="skip_previous"
@@ -358,7 +365,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           />
           <Button
             className="play-pause-btn !mx-2 h-fit scale-90 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-6xl text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
-            tooltipLabel="Play/Pause (Space)"
+            tooltipLabel={t('player.playPause')}
             iconClassName="!text-5xl"
             clickHandler={toggleSongPlayback}
             iconName={isCurrentSongPlaying ? 'pause_circle' : 'play_circle'}
@@ -367,7 +374,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
 
           <Button
             className="skip-backward-btn !mr-4 h-fit translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
-            tooltipLabel="Next Song (Ctrl + Right Arrow)"
+            tooltipLabel={t('player.nextSong')}
             iconClassName="!text-3xl"
             clickHandler={handleSkipForwardClickWithParams}
             iconName="skip_next"
@@ -381,7 +388,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             iconClassName="!text-xl"
             clickHandler={() => setIsLyricsVisible((prevState) => !prevState)}
             iconName="notes"
-            tooltipLabel="Lyrics (Ctrl + L)"
+            tooltipLabel={t('player.lyrics')}
             removeFocusOnClick
           />
         </div>
@@ -412,7 +419,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
                     ? currentSongData.artists
                         .map((artist) => artist.name)
                         .join(', ')
-                    : 'Unknown Artist'
+                    : t('common.unknownArtist')
                   : ''}
               </div>
             )}
@@ -428,7 +435,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
               className={`volume-btn !mr-2 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:after:bg-dark-font-color-highlight ${
                 isMuted && 'after:opacity-100'
               }`}
-              tooltipLabel="Mute/Unmute (Ctrl + M)"
+              tooltipLabel={t('player.muteUnmute')}
               iconName={isMuted ? 'volume_off' : 'volume_up'}
               iconClassName={`material-icons-round text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white ${
                 isMuted &&

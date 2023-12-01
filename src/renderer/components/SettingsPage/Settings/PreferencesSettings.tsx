@@ -1,23 +1,24 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import storage from 'renderer/utils/localStorage';
 import Checkbox from '../../Checkbox';
 
 const PreferencesSettings = () => {
   const { userData, localStorageData } = React.useContext(AppContext);
+  const { t } = useTranslation();
 
   return (
     <li className="main-container preferences-settings-container mb-16">
       <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         <span className="material-icons-round-outlined mr-2">tune</span>
-        Preferences
+        {t('settingsPage.preferences')}
       </div>
       <ul className="list-disc pl-6 marker:bg-background-color-3 dark:marker:bg-background-color-3">
         <li className="checkbox-container">
           <div className="secondary-container toggle-song-indexing mb-4">
             <div className="description">
-              Enables indexing of songs in pages. This will help you to be in
-              order.
+              {t('settingsPage.songIndexingDescription')}
             </div>
             <Checkbox
               id="isSongIndexingEnabled"
@@ -31,7 +32,7 @@ const PreferencesSettings = () => {
                   state,
                 )
               }
-              labelContent="Enable song indexing"
+              labelContent={t('settingsPage.enableSongIndexing')}
             />
           </div>
         </li>
@@ -39,7 +40,7 @@ const PreferencesSettings = () => {
         <li className="checkbox-container">
           <div className="secondary-container toggle-song-indexing mb-4">
             <div className="description">
-              Show track number in front of the song when in Albums Page.
+              {t('settingsPage.showTrackNumberAsSongIndexDescription')}
             </div>
             <Checkbox
               id="showTrackNumberAsSongIndex"
@@ -53,7 +54,7 @@ const PreferencesSettings = () => {
                   state,
                 )
               }
-              labelContent="Show track number as song index"
+              labelContent={t('settingsPage.showTrackNumberAsSongIndex')}
             />
           </div>
         </li>
@@ -61,8 +62,7 @@ const PreferencesSettings = () => {
         <li className="checkbox-container">
           <div className="secondary-container show-artists-artwork-near-song-controls mb-4">
             <div className="description">
-              Shows artist artworks next to the artist names near the title of
-              the song on the song controls panel.
+              {t('settingsPage.showArtistArtworkNearSongControlsDescription')}
             </div>
             <Checkbox
               id="showArtistArtworkNearSongControls"
@@ -76,7 +76,7 @@ const PreferencesSettings = () => {
                   state,
                 )
               }
-              labelContent="Show artists artworks next to their names"
+              labelContent={t('settingsPage.showArtistArtworkNearSongControls')}
             />
           </div>
         </li>
@@ -84,8 +84,7 @@ const PreferencesSettings = () => {
         <li className="checkbox-container">
           <div className="secondary-container disable-background-artworks mb-4">
             <div className="description">
-              Disables the background artworks that appears when visiting
-              certain pages.
+              {t('settingsPage.disableBackgroundArtworksDescription')}
             </div>
             <Checkbox
               id="disableBackgroundArtwork"
@@ -99,7 +98,7 @@ const PreferencesSettings = () => {
                   state,
                 )
               }
-              labelContent="Disable background artworks"
+              labelContent={t('settingsPage.disableBackgroundArtworks')}
             />
           </div>
         </li>
@@ -107,7 +106,7 @@ const PreferencesSettings = () => {
         <li className="checkbox-container">
           <div className="secondary-container enable-artwork-from-song-covers mb-4">
             <div className="description">
-              Configure settings related to artworks made from song covers.
+              {t('settingsPage.playlistArtworksDescription')}
             </div>
             <Checkbox
               id="enableArtworkFromSongCovers"
@@ -122,7 +121,7 @@ const PreferencesSettings = () => {
                   state,
                 )
               }
-              labelContent="Enable artwork made from song covers on Playlists"
+              labelContent={t('settingsPage.enablePlaylistArtworks')}
             />
             <Checkbox
               id="shuffleArtworkFromSongCovers"
@@ -142,7 +141,7 @@ const PreferencesSettings = () => {
                   state,
                 )
               }
-              labelContent="Enable shuffling the artwork made from song covers"
+              labelContent={t('settingsPage.shuffleArtworkFromSongCovers')}
             />
           </div>
         </li>

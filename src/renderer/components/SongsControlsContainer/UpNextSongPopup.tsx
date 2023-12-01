@@ -1,5 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 
@@ -13,6 +14,7 @@ type Props = {
 const UpNextSongPopup = (props: Props) => {
   const { queue, currentSongData } = React.useContext(AppContext);
   const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const { onPopupAppears, isSemiTransparent = false } = props;
 
@@ -81,7 +83,7 @@ const UpNextSongPopup = (props: Props) => {
     >
       <p className="truncate">
         <span className="font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-          Up Next
+          {t('player.upNext')}
         </span>{' '}
         <span
           className="cursor-pointer outline-1 outline-offset-1 hover:underline focus-visible:!outline"
@@ -96,7 +98,7 @@ const UpNextSongPopup = (props: Props) => {
           <>
             {' '}
             <span className="font-light text-font-color-highlight dark:text-dark-font-color-highlight">
-              by
+              {t('player.by')}
             </span>{' '}
             <span
               className="cursor-pointer outline-1 outline-offset-1 hover:underline focus-visible:!outline"
@@ -127,7 +129,7 @@ const UpNextSongPopup = (props: Props) => {
       </p>
       <Button
         iconName="close"
-        tooltipLabel="Close Up Next"
+        tooltipLabel={t('player.closeUpNext')}
         className="!m-0 !hidden !border-none !py-0 !pl-1 !pr-0 !text-base !text-font-color-highlight outline-1 outline-offset-1 focus-visible:!outline group-hover/nextSong:!flex dark:!text-dark-font-color-highlight"
         clickHandler={() => setUpNextSongData(undefined)}
       />

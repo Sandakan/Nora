@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
@@ -48,6 +49,7 @@ const EditingLyricsLine = (props: Props) => {
   const { songPosition } = React.useContext(SongPositionContext);
   const { localStorageData } = React.useContext(AppContext);
   const { updateSongPosition } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const {
     text,
@@ -181,7 +183,7 @@ const EditingLyricsLine = (props: Props) => {
       {isEditing ? (
         <input
           type="text"
-          placeholder="Lyrics Text"
+          placeholder={t('lyricsEditingPage.lyricsText')}
           className="my-2 w-[90%] rounded-xl border-[3px] border-background-color-1 bg-background-color-1 px-4 py-4 text-center dark:border-dark-background-color-1 dark:bg-dark-background-color-1"
           value={
             typeof content.text === 'string'
@@ -208,7 +210,7 @@ const EditingLyricsLine = (props: Props) => {
           From{' '}
           <input
             type="number"
-            placeholder="Start in seconds"
+            placeholder={t('lyricsEditingPage.startInSeconds')}
             className="mx-2 my-1 min-w-[20%] rounded-xl border-[3px] border-background-color-1 bg-background-color-1 px-1 py-2 text-center dark:border-dark-background-color-1 dark:bg-dark-background-color-1"
             value={content.start ?? 0}
             onChange={(e) =>
@@ -221,7 +223,7 @@ const EditingLyricsLine = (props: Props) => {
           to{' '}
           <input
             type="number"
-            placeholder="End in seconds"
+            placeholder={t('lyricsEditingPage.endInSeconds')}
             className="mx-2 my-1 min-w-[20%] rounded-xl border-[3px] border-background-color-1 bg-background-color-1 px-1 py-2 text-center dark:border-dark-background-color-1 dark:bg-dark-background-color-1"
             value={content.end ?? 0}
             onChange={(e) =>
@@ -234,7 +236,10 @@ const EditingLyricsLine = (props: Props) => {
         </div>
       ) : (
         <span className="text-xs opacity-75">
-          From {content.start || '0.00'} to {content.end || '0.00'}
+          {t('lyricsEditingPage.fromTo', {
+            start: content.start || '0.00',
+            end: content.end || '0.00',
+          })}
         </span>
       )}
       <div className="flex flex-wrap items-center justify-center">
@@ -245,7 +250,7 @@ const EditingLyricsLine = (props: Props) => {
                 isEditing &&
                 '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
               }`}
-              label="Reset"
+              label={t('settingsPage.reset')}
               iconName="restart_alt"
               clickHandler={() =>
                 dispatch({
@@ -259,7 +264,7 @@ const EditingLyricsLine = (props: Props) => {
                 isEditing &&
                 '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
               }`}
-              label="Delete Line"
+              label={t('lyricsEditingPage.deleteLine')}
               iconName="delete"
               clickHandler={() =>
                 updateLineData((prevLineData) => {
@@ -275,7 +280,7 @@ const EditingLyricsLine = (props: Props) => {
                 isEditing &&
                 '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
               }`}
-              label="Add line above"
+              label={t('lyricsEditingPage.addLineAbove')}
               iconName="step_out"
               clickHandler={() =>
                 updateLineData((prevLineData) => {
@@ -298,7 +303,7 @@ const EditingLyricsLine = (props: Props) => {
                 isEditing &&
                 '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
               }`}
-              label="Add line below"
+              label={t('lyricsEditingPage.addLineBelow')}
               iconName="step_into"
               clickHandler={() =>
                 updateLineData((prevLineData) => {
@@ -327,7 +332,7 @@ const EditingLyricsLine = (props: Props) => {
               isEditing &&
               '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
             }`}
-            label="Add Instrumental Line Below"
+            label={t('lyricsEditingPage.addInstrumentalLineBelow')}
             iconName="music_note"
             clickHandler={() => {
               updateLineData((prevLineData) => {
@@ -354,7 +359,9 @@ const EditingLyricsLine = (props: Props) => {
             isEditing &&
             '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
           }`}
-          label={isEditing ? 'Finish Editing' : 'Edit Line'}
+          label={t(
+            `lyricsEditingPage.${isEditing ? 'finishEditing' : 'editLine'}`,
+          )}
           iconName={isEditing ? 'done' : 'edit'}
           clickHandler={() => {
             setIsEditing((isEditingState) => {

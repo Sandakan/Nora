@@ -1,6 +1,7 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable react/no-array-index-key */
 import React, { useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import debounce from 'renderer/utils/debounce';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
@@ -38,6 +39,7 @@ const LyricsPage = () => {
     changeCurrentActivePage,
     updateSongPosition,
   } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const [lyrics, setLyrics] = React.useState(
     null as SongLyrics | undefined | null,
@@ -225,7 +227,7 @@ const LyricsPage = () => {
           return addNewNotifications([
             {
               id: 'lyricsUpdateFailed',
-              content: `No Online Lyrics Found.`,
+              content: t('lyricsPage.noOnlineLyrics'),
               iconName: 'warning',
               iconClassName: 'material-icons-round-outlined !text-xl',
             },
@@ -243,6 +245,7 @@ const LyricsPage = () => {
       currentSongData.duration,
       currentSongData.path,
       currentSongData.title,
+      t,
     ],
   );
 
@@ -273,7 +276,7 @@ const LyricsPage = () => {
           return addNewNotifications([
             {
               id: 'offlineLyricsFetchFailed',
-              content: `No Offline Lyrics Found.`,
+              content: t('lyricsPage.noOfflineLyrics'),
               iconName: 'warning',
               iconClassName: 'material-icons-round-outlined !text-xl',
             },
@@ -289,6 +292,7 @@ const LyricsPage = () => {
       currentSongData.path,
       currentSongData.title,
       localStorageData.preferences.lyricsAutomaticallySaveState,
+      t,
     ],
   );
 
@@ -347,7 +351,7 @@ const LyricsPage = () => {
           return addNewNotifications([
             {
               id: 'OnlineLyricsRefreshFailed',
-              content: `Failed to refresh Online Lyrics.`,
+              content: t('lyricsPage.onlineLyricsRefreshFailed'),
               iconName: 'warning',
               iconClassName: 'material-icons-round-outlined !text-xl',
             },
@@ -362,6 +366,7 @@ const LyricsPage = () => {
       currentSongData.duration,
       currentSongData.path,
       currentSongData.title,
+      t,
     ],
   );
 
@@ -423,7 +428,9 @@ const LyricsPage = () => {
                 <div className="flex max-w-[40%] items-center">
                   <span className="overflow-hidden text-ellipsis whitespace-nowrap">
                     {lyrics.source === 'IN_SONG_LYRICS' ? 'Offline' : 'Online'}{' '}
-                    Lyrics for '{currentSongData.title}'
+                    {t('lyricsPage.lyricsForSong', {
+                      title: currentSongData.title,
+                    })}
                   </span>
                   {!lyrics.isOfflineLyricsAvailable && (
                     <span
@@ -437,7 +444,7 @@ const LyricsPage = () => {
                 <div className="buttons-container flex">
                   <Button
                     key={10}
-                    tooltipLabel="Edit Lyrics in Lyrics Editor"
+                    tooltipLabel={t('lyricsPage.editLyrics')}
                     className="edit-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                     iconName="edit"
                     clickHandler={goToLyricsEditor}
@@ -447,17 +454,14 @@ const LyricsPage = () => {
                     <Button
                       key={5}
                       label={
-                        lyrics && lyrics.source === 'IN_SONG_LYRICS'
-                          ? isAutoScrolling
-                            ? 'Stop Auto Scrolling'
-                            : 'Enable auto scrolling'
-                          : undefined
-                      }
-                      tooltipLabel={
                         lyrics && lyrics.source !== 'IN_SONG_LYRICS'
-                          ? isAutoScrolling
-                            ? 'Stop Auto Scrolling'
-                            : 'Enable auto scrolling'
+                          ? t(
+                              `currentQueuePage.${
+                                isAutoScrolling
+                                  ? 'disableAutoScrolling'
+                                  : 'enableAutoScrolling'
+                              }`,
+                            )
                           : undefined
                       }
                       pendingAnimationOnDisabled
@@ -471,14 +475,12 @@ const LyricsPage = () => {
                   {lyrics && lyrics.source === 'IN_SONG_LYRICS' && (
                     <Button
                       key={3}
-                      label="Show online lyrics"
+                      label={t('lyricsPage.showOnlineLyrics')}
                       className="show-online-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                       iconName="language"
                       isDisabled={!isOnline}
                       tooltipLabel={
-                        isOnline
-                          ? undefined
-                          : 'You are not connected to internet.'
+                        isOnline ? undefined : t('common.noInternet')
                       }
                       clickHandler={showOnlineLyrics}
                     />
@@ -487,7 +489,7 @@ const LyricsPage = () => {
                     <>
                       <Button
                         key={5}
-                        tooltipLabel="Refresh Online Lyrics"
+                        label={t('lyricsPage.refreshOnlineLyrics')}
                         pendingAnimationOnDisabled
                         className="refresh-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                         iconName="refresh"
@@ -495,26 +497,31 @@ const LyricsPage = () => {
                       />
                       <Button
                         key={3}
-                        label="Show saved lyrics"
+                        label={t('lyricsPage.showSavedLyrics')}
                         className="show-online-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                         iconName="visibility"
                         clickHandler={showOfflineLyrics}
                         isDisabled={!lyrics.isOfflineLyricsAvailable}
                         tooltipLabel={
                           !lyrics.isOfflineLyricsAvailable
-                            ? 'No saved lyrics found.'
+                            ? t('lyricsPage.noSavedLyrics')
                             : undefined
                         }
                       />
                       <Button
                         key={4}
-                        label="Save lyrics"
+                        label={t('lyricsEditingPage.saveLyrics')}
                         className="save-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                         iconName="save"
                         isDisabled={isSaveLyricsBtnDisabled}
                         tooltipLabel={
                           isSaveLyricsBtnDisabled
-                            ? `Nora currently doesn't support saving lyrics to songs in '${pathExt}' audio format.`
+                            ? t(
+                                'lyricsEditorSavePrompt.saveLyricsNotSupported',
+                                {
+                                  format: pathExt,
+                                },
+                              )
                             : undefined
                         }
                         clickHandler={saveOnlineLyrics}
@@ -546,28 +553,21 @@ const LyricsPage = () => {
           ) : lyrics === undefined || lyrics?.lyrics.lyrics.length === 0 ? (
             <NoLyrics
               iconName="release_alert"
-              title="Lyrics Not Found"
-              description="We couldn't find any lyrics for this song."
-              // buttons={[
-              //   {
-              //     label: 'Show Saved Lyrics',
-              //     iconName: 'visibility',
-              //     clickHandler: showOfflineLyrics,
-              //   },
-              // ]}
+              title={t('lyricsPage.noLyrics')}
+              description={t('lyricsPage.noLyricsDescription')}
             />
           ) : (
             <NoLyrics
               iconName="hourglass_empty"
-              title="Looking for Lyrics"
-              description="Hang on... We are looking everywhere"
+              title={t('lyricsPage.lyricsLoading')}
+              description={t('lyricsPage.lyricsLoadingDescription')}
             />
           )
         ) : (
           <NoLyrics
             iconName="wifi_off"
-            title="No internet connection"
-            description="There are no offline lyrics for this song. You need an internet connection to check for online lyrics."
+            title={t('lyricsPage.noLyrics')}
+            description={t('lyricsPage.noInternetDescription')}
           />
         )}
       </>

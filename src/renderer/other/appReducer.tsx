@@ -386,7 +386,7 @@ const reducer = (
   }
 };
 
-const USER_DATA_TEMPLATE: UserData = {
+export const USER_DATA_TEMPLATE: UserData = {
   theme: { isDarkMode: false, useSystemTheme: true },
   musicFolders: [],
   preferences: {
@@ -395,9 +395,15 @@ const USER_DATA_TEMPLATE: UserData = {
     isMusixmatchLyricsEnabled: false,
     hideWindowOnClose: false,
     openWindowAsHiddenOnSystemStart: false,
+    openWindowMaximizedOnStart: false,
+    sendSongScrobblingDataToLastFM: false,
+    sendSongFavoritesDataToLastFM: false,
+    sendNowPlayingSongDataToLastFM: false,
+    saveLyricsInLrcFilesForSupportedSongs: false,
   },
   windowPositions: {},
   windowDiamensions: {},
+  windowState: 'normal',
   recentSearches: [],
 };
 

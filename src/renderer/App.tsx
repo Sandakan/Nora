@@ -1,5 +1,6 @@
 /* eslint-disable no-use-before-define */
 import React, { ReactNode, Suspense } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import 'tailwindcss/tailwind.css';
 import '../../assets/styles/styles.css';
 import packageFile from '../../package.json';
@@ -39,7 +40,7 @@ import SongUnplayableErrorPrompt, {
 } from './components/SongUnplayableErrorPrompt';
 import shuffleQueueRandomly from './other/shuffleQueueRandomly';
 import toggleSongIsFavorite from './other/toggleSongIsFavorite';
-import UnsupportedFileMessagePrompt from './other/UnsupportedFileMessagePrompt';
+import UnsupportedFileMessagePrompt from './components/UnsupportedFileMessagePrompt';
 import SuspenseLoader from './components/SuspenseLoader';
 import { equalizerBandHertzData } from './other/equalizerData';
 
@@ -109,6 +110,8 @@ storage.checkLocalStorage();
 // console.log('Command line args', window.api.properties.commandLineArgs);
 
 export default function App() {
+  const { t } = useTranslation();
+
   const [content, dispatch] = React.useReducer(reducer, DEFAULT_REDUCER_DATA);
   // Had to use a Ref in parallel with the Reducer to avoid an issue that happens when using content.* not giving the intended data in useCallback functions even though it was added as a dependency of that function.
   const contentRef = React.useRef(DEFAULT_REDUCER_DATA);
@@ -170,16 +173,19 @@ export default function App() {
         <ErrorPrompt
           reason="ERROR_IN_PLAYER"
           message={
-            <>
-              An error ocurred in the player.
-              <br />
-              This could be a result of trying to play a corrupted song.
-              <details className="mt-4">
-                {playerErrorData
-                  ? `CODE ${playerErrorData.code} : ${playerErrorData.message}`
-                  : 'No error message generated.'}
-              </details>
-            </>
+            <Trans
+              i18nKey="player.errorMessage"
+              components={{
+                br: <br />,
+                details: (
+                  <details className="mt-4">
+                    {playerErrorData
+                      ? `CODE ${playerErrorData.code} : ${playerErrorData.message}`
+                      : t('player.noErrorMessage')}
+                  </details>
+                ),
+              }}
+            />
           }
           showSendFeedbackBtn
         />
@@ -211,7 +217,7 @@ export default function App() {
       }
       return undefined;
     },
-    [changePromptMenuData],
+    [changePromptMenuData, t],
   );
 
   const AUDIO_FADE_INTERVAL = 50;
@@ -794,17 +800,13 @@ export default function App() {
         addNewNotifications([
           {
             id: 'noSongToPlay',
-            content: <span>Please select a song to play.</span>,
-            icon: (
-              <span className="material-icons-round-outlined text-lg">
-                error
-              </span>
-            ),
+            content: t('notifications.selectASongToPlay'),
+            iconName: 'error',
           },
         ]);
       return undefined;
     },
-    [managePlaybackErrors, addNewNotifications, fadeOutAudio, fadeInAudio],
+    [addNewNotifications, t, fadeOutAudio, fadeInAudio, managePlaybackErrors],
   );
 
   const displayMessageFromMain = React.useCallback(
@@ -967,7 +969,7 @@ export default function App() {
         true,
         <ErrorPrompt
           reason="SONG_ID_UNDEFINED"
-          message={`An error ocurred when trying to play a song.\nERROR : SONG_ID_UNDEFINED`}
+          message={`${t('player.errorTitle')}\nERROR : SONG_ID_UNDEFINED`}
         />,
       );
       return log(
@@ -977,6 +979,7 @@ export default function App() {
     [
       addNewNotifications,
       changePromptMenuData,
+      t,
       toggleSongPlayback,
       recordListeningData,
     ],
@@ -1085,10 +1088,11 @@ export default function App() {
         ? contentRef.current.currentSongData.artists
             .map((artist) => artist.name)
             .join(', ')
-        : `Unknown Artist`,
+        : t('common.unknownArtist'),
       album: contentRef.current.currentSongData.album
-        ? contentRef.current.currentSongData.album.name || 'Unknown Album'
-        : 'Unknown Album',
+        ? contentRef.current.currentSongData.album.name ||
+          t('common.unknownAlbum')
+        : t('common.unknownAlbum'),
       artwork: [
         {
           // src: `http://nora.app/local/${contentRef.current.currentSongData.artworkPath}`,
@@ -1138,6 +1142,7 @@ export default function App() {
     content.player.isCurrentSongPlaying,
     handleSkipBackwardClick,
     handleSkipForwardClick,
+    t,
     toggleSongPlayback,
   ]);
 
@@ -1441,13 +1446,13 @@ export default function App() {
       } else
         addNewNotifications([
           {
-            content: 'You are already in the current page.',
+            content: t('notifications.alreadyInPage'),
             id: 'alreadyInCurrentPage',
             delay: 2500,
           },
         ]);
     },
-    [addNewNotifications, toggleMultipleSelections],
+    [addNewNotifications, t, toggleMultipleSelections],
   );
 
   const updateMiniPlayerStatus = React.useCallback(
@@ -1592,8 +1597,10 @@ export default function App() {
         addNewNotifications([
           {
             id: 'playbackRate',
-            icon: <span className="material-icons-round">avg_pace</span>,
-            content: `Playback Rate Changed to ${updatedPlaybackRate} x`,
+            iconName: 'avg_pace',
+            content: t('notifications.playbackRateChanged', {
+              val: updatedPlaybackRate,
+            }),
           },
         ]);
       } else if (e.ctrlKey && e.key === '[') {
@@ -1609,8 +1616,10 @@ export default function App() {
         addNewNotifications([
           {
             id: 'playbackRate',
-            icon: <span className="material-icons-round">avg_pace</span>,
-            content: `Playback Rate Changed to ${updatedPlaybackRate} x`,
+            iconName: 'avg_pace',
+            content: t('notifications.playbackRateChanged', {
+              val: updatedPlaybackRate,
+            }),
           },
         ]);
       } else if (e.ctrlKey && e.key === '\\') {
@@ -1618,8 +1627,8 @@ export default function App() {
         addNewNotifications([
           {
             id: 'playbackRate',
-            icon: <span className="material-icons-round">avg_pace</span>,
-            content: `Playback Rate Resetted to 1x`,
+            iconName: 'avg_pace',
+            content: t('notifications.playbackRateReset'),
           },
         ]);
       }
@@ -1664,6 +1673,7 @@ export default function App() {
       toggleSongPlayback,
       updatePageHistoryIndex,
       addNewNotifications,
+      t,
     ],
   );
 
@@ -1779,12 +1789,13 @@ export default function App() {
       {
         id: 'songPausedOnDelete',
         delay: 7500,
-        content: 'Current song playback paused because the song was deleted.',
+        content: t('notifications.playbackPausedDueToSongDeletion'),
       },
     ]);
   }, [
     addNewNotifications,
     content.currentSongData.songId,
+    t,
     toggleSongPlayback,
     updateQueueData,
   ]);

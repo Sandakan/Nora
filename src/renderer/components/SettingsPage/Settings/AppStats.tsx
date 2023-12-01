@@ -1,7 +1,10 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { valueRounder } from 'renderer/utils/valueRounder';
 
 const AppStats = () => {
+  const { t } = useTranslation();
+
   const [stats, setStats] = React.useState({
     songs: 0,
     artists: 0,
@@ -75,20 +78,44 @@ const AppStats = () => {
   const statComponents = React.useMemo(
     () =>
       Object.entries(stats).map(([key, value]) => {
+        const statKey = key as keyof typeof stats;
+        let keyName;
+
+        switch (statKey) {
+          case 'songs':
+            keyName = t(`common.song`, { count: value });
+            break;
+          case 'artists':
+            keyName = t(`common.artist`, { count: value });
+            break;
+          case 'albums':
+            keyName = t(`common.album`, { count: value });
+            break;
+          case 'playlists':
+            keyName = t(`common.playlist`, { count: value });
+            break;
+          case 'genres':
+            keyName = t(`common.genre`, { count: value });
+            break;
+
+          default:
+            break;
+        }
+
         return (
           <span
             className="flex flex-col items-center border-[3px] border-b-0 border-r-0 border-t-0 border-background-color-2 py-4 text-lg first:border-l-0 dark:border-dark-background-color-2"
-            title={`${value} ${key}`}
-            key={`${value}-${key}`}
+            title={`${value} ${statKey}`}
+            key={`${value}-${statKey}`}
           >
             <span className="text-xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
               {valueRounder(value)}
             </span>
-            <span className="opacity-75">{key}</span>
+            <span className="opacity-75 lowercase">{keyName}</span>
           </span>
         );
       }),
-    [stats],
+    [stats, t],
   );
 
   return (

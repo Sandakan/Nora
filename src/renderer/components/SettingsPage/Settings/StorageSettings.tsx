@@ -1,9 +1,12 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import Button from 'renderer/components/Button';
 import calculateElapsedTime from 'renderer/utils/calculateElapsedTime';
 import parseByteSizes from 'renderer/utils/parseByteSizes';
 
 const StorageSettings = () => {
+  const { t } = useTranslation();
+
   const [storageMetrics, setStorageMetrics] = React.useState<
     StorageMetrics | null | undefined
   >();
@@ -143,74 +146,76 @@ const StorageSettings = () => {
     <li className="main-container storage-settings-container mb-16">
       <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         <span className="material-icons-round-outlined mr-2">hard_drive</span>
-        Storage
+        {t('settingsPage.storage')}
       </div>
-      <p>See how Nora manages your library and utilizes your storage.</p>
+      <p>{t('settingsPage.storageDescription')}</p>
 
       {storageMetrics && (
         <div>
           <div className="mx-auto mt-6 w-4/5">
             <div className="flex items-center justify-between text-sm uppercase opacity-50">
-              <span>Full storage Usage</span>{' '}
+              <span> {t('settingsPage.fullStorageSpace')}</span>{' '}
               <span>
-                {parseByteSizes(storageMetrics?.totalSize)?.size} out of{' '}
-                {parseByteSizes(storageMetrics?.rootSizes.size)?.size}
+                {t('settingsPage.fullStorageOutOfUsage', {
+                  value: parseByteSizes(storageMetrics?.totalSize)?.size,
+                  total: parseByteSizes(storageMetrics?.rootSizes.size)?.size,
+                })}
               </span>
             </div>
 
             <div
               className="mt-2 flex h-4 overflow-hidden rounded-md bg-background-color-2 dark:bg-dark-background-color-2/75"
               style={appStorageBarCssProperties}
-              title="Free space"
+              title={t('settingsPage.freeSpace')}
             >
               <div
                 className="!h-full w-[var(--other-applications-size-storage-bar-width)] cursor-pointer bg-[#ffbe76] opacity-75 transition-opacity hover:opacity-100"
-                title="Other Applications"
+                title={t('settingsPage.otherApplications')}
               />
               <div
                 className="!h-full w-[var(--artwork-cache-size-storage-bar-width)] cursor-pointer bg-[#55efc4] opacity-75 transition-opacity hover:opacity-100"
-                title="Artwork Cache"
+                title={t('settingsPage.artworkCache')}
               />
               <div
                 className="!h-full w-[var(--temp-artwork-cache-size-storage-bar-width)] cursor-pointer bg-[#00b894] opacity-75 transition-opacity hover:opacity-100"
-                title="Temp Artwork Cache"
+                title={t('settingsPage.tempArtworkCache')}
               />
               <div
                 className="!h-full w-[var(--song-data-size-storage-bar-width)] cursor-pointer bg-[#00cec9] opacity-75 transition-opacity hover:opacity-100"
-                title="Song Data"
+                title={t('settingsPage.songsData')}
               />
               <div
                 className="!h-full w-[var(--artist-data-size-storage-bar-width)] cursor-pointer bg-[#0984e3] opacity-75 transition-opacity hover:opacity-100"
-                title="Artist Data"
+                title={t('settingsPage.artistsData')}
               />
               <div
                 className="!h-full w-[var(--album-data-size-storage-bar-width)] cursor-pointer bg-[#6c5ce7] opacity-75 transition-opacity hover:opacity-100"
-                title="Album Data"
+                title={t('settingsPage.albumsData')}
               />
               <div
                 className="!h-full w-[var(--playlist-data-size-storage-bar-width)] cursor-pointer bg-[#fdcb6e] opacity-75 transition-opacity hover:opacity-100"
-                title="Playlist Data"
+                title={t('settingsPage.playlistsData')}
               />
               <div
                 className="!h-full w-[var(--genre-data-size-storage-bar-width)] cursor-pointer bg-[#e17055] opacity-75 transition-opacity hover:opacity-100"
-                title="Genre Data"
+                title={t('settingsPage.genresData')}
               />
               <div
                 className="!h-full w-[var(--log-size-storage-bar-width)] cursor-pointer bg-[#e84393] opacity-75 transition-opacity hover:opacity-100"
-                title="App Logs"
+                title={t('settingsPage.appLogs')}
               />
               <div
                 className="!h-full w-[var(--user-data-size-storage-bar-width)] cursor-pointer bg-[#d63031] opacity-75 transition-opacity hover:opacity-100"
-                title="User Data"
+                title={t('settingsPage.userData')}
               />
               <div
                 className="!h-full w-[var(--app-folder-size-storage-bar-width)] cursor-pointer bg-[#4834d4] opacity-75 transition-opacity hover:opacity-100"
-                title="Internal App Files"
+                title={t('settingsPage.internalAppFiles')}
               />
             </div>
 
             <div className="mt-10 flex items-center justify-between text-sm uppercase opacity-50">
-              <span>Storage Use for Library Data</span>{' '}
+              <span> {t('settingsPage.storageUseForLibraryData')}</span>{' '}
               <span>
                 {parseByteSizes(storageMetrics?.appDataSizes.librarySize)?.size}
               </span>
@@ -222,23 +227,23 @@ const StorageSettings = () => {
             >
               <div
                 className="!h-full w-[var(--song-data-size-storage-bar-width)] cursor-pointer bg-[#00cec9] opacity-75 transition-opacity hover:opacity-100"
-                title="Song Data"
+                title={t('settingsPage.songsData')}
               />
               <div
                 className="!h-full w-[var(--artist-data-size-storage-bar-width)] cursor-pointer bg-[#0984e3] opacity-75 transition-opacity hover:opacity-100"
-                title="Artist Data"
+                title={t('settingsPage.artistsData')}
               />
               <div
                 className="!h-full w-[var(--album-data-size-storage-bar-width)] cursor-pointer bg-[#6c5ce7] opacity-75 transition-opacity hover:opacity-100"
-                title="Album Data"
+                title={t('settingsPage.albumsData')}
               />
               <div
                 className="!h-full w-[var(--playlist-data-size-storage-bar-width)] cursor-pointer bg-[#fdcb6e] opacity-75 transition-opacity hover:opacity-100"
-                title="Playlist Data"
+                title={t('settingsPage.playlistsData')}
               />
               <div
                 className="!h-full w-[var(--genre-data-size-storage-bar-width)] cursor-pointer bg-[#e17055] opacity-75 transition-opacity hover:opacity-100"
-                title="Genre Data"
+                title={t('settingsPage.genresData')}
               />
               {/* <div className="!h-full w-[var(--log-size-storage-bar-width)] bg-[#e84393]" /> */}
               {/* <div className="!h-full w-[var(--user_data-size-storage-bar-width)] bg-[#d63031]" /> */}
@@ -247,8 +252,8 @@ const StorageSettings = () => {
 
           <ul className="mt-10 flex flex-wrap items-center justify-center px-8">
             <li className="mb-4 mr-8 flex items-center">
-              <div className="mr-4 h-4 w-4 rounded-full bg-[#ffbe76]" /> Other
-              Applications Files :{' '}
+              <div className="mr-4 h-4 w-4 rounded-full bg-[#ffbe76]" />
+              {t('settingsPage.otherAppFiles')} :{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                 {
                   parseByteSizes(
@@ -260,15 +265,15 @@ const StorageSettings = () => {
               </span>
             </li>
             <li className="mb-4 mr-8 flex items-center">
-              <div className="mr-4 h-4 w-4 rounded-full bg-[#4834d4]" />{' '}
-              Internal App Files :{' '}
+              <div className="mr-4 h-4 w-4 rounded-full bg-[#4834d4]" />
+              {t('settingsPage.internalAppFiles')} :{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                 {parseByteSizes(storageMetrics?.appFolderSize)?.size}
               </span>
             </li>
             <li className="mb-4 mr-8 flex items-center">
-              <div className="mr-4 h-4 w-4 rounded-full bg-[#55efc4]" /> Artwork
-              Cache :{' '}
+              <div className="mr-4 h-4 w-4 rounded-full bg-[#55efc4]" />
+              {t('settingsPage.artworkCache')} :{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                 {
                   parseByteSizes(storageMetrics?.appDataSizes.artworkCacheSize)
@@ -277,8 +282,8 @@ const StorageSettings = () => {
               </span>
             </li>
             <li className="mb-4 mr-8 flex items-center">
-              <div className="mr-4 h-4 w-4 rounded-full bg-[#00b894]" /> Temp
-              Artwork Cache :{' '}
+              <div className="mr-4 h-4 w-4 rounded-full bg-[#00b894]" />
+              {t('settingsPage.tempArtworkCache')} :{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                 {
                   parseByteSizes(
@@ -288,8 +293,8 @@ const StorageSettings = () => {
               </span>
             </li>
             <li className="mb-4 mr-8 flex items-center">
-              <div className="mr-4 h-4 w-4 rounded-full bg-[#00cec9]" /> Songs
-              Data :{' '}
+              <div className="mr-4 h-4 w-4 rounded-full bg-[#00cec9]" />
+              {t('settingsPage.songsData')}{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                 {
                   parseByteSizes(storageMetrics?.appDataSizes.songDataSize)
@@ -298,8 +303,8 @@ const StorageSettings = () => {
               </span>
             </li>
             <li className="mb-4 mr-8 flex items-center">
-              <div className="mr-4 h-4 w-4 rounded-full bg-[#0984e3]" /> Artists
-              Data :{' '}
+              <div className="mr-4 h-4 w-4 rounded-full bg-[#0984e3]" />
+              {t('settingsPage.artistsData')}{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                 {
                   parseByteSizes(storageMetrics?.appDataSizes.artistDataSize)
@@ -308,8 +313,8 @@ const StorageSettings = () => {
               </span>
             </li>
             <li className="mb-4 mr-8 flex items-center">
-              <div className="mr-4 h-4 w-4 rounded-full bg-[#6c5ce7]" /> Albums
-              Data :{' '}
+              <div className="mr-4 h-4 w-4 rounded-full bg-[#6c5ce7]" />
+              {t('settingsPage.albumsData')}{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                 {
                   parseByteSizes(storageMetrics?.appDataSizes.albumDataSize)
@@ -318,8 +323,8 @@ const StorageSettings = () => {
               </span>
             </li>
             <li className="mb-4 mr-8 flex items-center">
-              <div className="mr-4 h-4 w-4 rounded-full bg-[#fdcb6e]" />{' '}
-              Playlists Data :{' '}
+              <div className="mr-4 h-4 w-4 rounded-full bg-[#fdcb6e]" />
+              {t('settingsPage.playlistsData')}{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                 {
                   parseByteSizes(storageMetrics?.appDataSizes.playlistDataSize)
@@ -328,8 +333,8 @@ const StorageSettings = () => {
               </span>
             </li>
             <li className="mb-4 mr-8 flex items-center">
-              <div className="mr-4 h-4 w-4 rounded-full bg-[#e17055]" /> Genres
-              Data :{' '}
+              <div className="mr-4 h-4 w-4 rounded-full bg-[#e17055]" />
+              {t('settingsPage.genresData')}{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                 {
                   parseByteSizes(storageMetrics?.appDataSizes.genreDataSize)
@@ -338,8 +343,8 @@ const StorageSettings = () => {
               </span>
             </li>
             <li className="mb-4 mr-8 flex items-center">
-              <div className="mr-4 h-4 w-4 rounded-full bg-[#d63031]" /> User
-              Data :{' '}
+              <div className="mr-4 h-4 w-4 rounded-full bg-[#d63031]" />
+              {t('settingsPage.userData')}{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                 {
                   parseByteSizes(storageMetrics?.appDataSizes.userDataSize)
@@ -348,8 +353,8 @@ const StorageSettings = () => {
               </span>
             </li>
             <li className="mb-4 mr-8 flex items-center">
-              <div className="mr-4 h-4 w-4 rounded-full bg-[#e84393]" /> App
-              Logs :{' '}
+              <div className="mr-4 h-4 w-4 rounded-full bg-[#e84393]" />
+              {t('settingsPage.appLogs')}{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                 {parseByteSizes(storageMetrics?.appDataSizes.logSize)?.size}
               </span>
@@ -358,7 +363,7 @@ const StorageSettings = () => {
 
           <div className="group flex items-center justify-center py-4 text-xs uppercase opacity-50">
             <span title={`Generated on ${storageMetrics.generatedDate}.`}>
-              Generated{' '}
+              {t('settingsPage.generated')}{' '}
               <span>
                 {
                   calculateElapsedTime(storageMetrics.generatedDate)
@@ -369,7 +374,7 @@ const StorageSettings = () => {
             <span className="mx-2">&bull;</span>
             <Button
               className="!m-0 !rounded-none !border-0 !p-0 !text-xs uppercase outline-1 outline-offset-2 hover:underline focus-visible:!outline"
-              label="Generate storage metrics again"
+              label={t('settingsPage.generateStorageMetricsAgain')}
               clickHandler={(_, setIsDisabled, setIsPending) => {
                 setIsDisabled(true);
                 setIsPending(true);
@@ -391,16 +396,14 @@ const StorageSettings = () => {
             hard_drive
           </span>
           <p className="mt-4 opacity-50">
-            Seems like you haven't generated storage metrics before.
+            {t('settingsPage.generateStorageMetricsAgain')}
           </p>
           <p className="mt-1 px-8 text-center text-sm font-light opacity-50">
-            Generating storage metrics is a relatively high computational task.
-            Continuing this action could make the app unresponsive temporarily.
-            Please be patient...
+            {t('settingsPage.storageMetricsGenerationDisclaimer')}
           </p>
           <Button
             className="!mr-0 mt-4"
-            label="Generate storage metrics"
+            label={t('settingsPage.generateStorageMetrics')}
             iconName="hourglass_empty"
             clickHandler={(_, setIsDisabled, setIsPending) => {
               setIsDisabled(true);
@@ -421,10 +424,12 @@ const StorageSettings = () => {
           <span className="material-icons-round text-4xl">
             running_with_errors
           </span>
-          <p className="mt-4">Seems like something went wrong in our end.</p>
+          <p className="mt-4">
+            {t('settingsPage.storageMetricsGenerationError')}
+          </p>
           <Button
             className="!mr-0 mt-4 !rounded-none !border-0 !p-0 !text-xs uppercase outline-1 outline-offset-2 hover:underline focus-visible:!outline"
-            label="Generate storage metrics again"
+            label={t('settingsPage.generateStorageMetricsAgain')}
             clickHandler={(_, setIsDisabled, setIsPending) => {
               setIsDisabled(true);
               setIsPending(true);

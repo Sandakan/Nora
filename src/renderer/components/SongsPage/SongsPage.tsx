@@ -1,5 +1,6 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { FixedSizeList as List } from 'react-window';
 // import InfiniteLoader from 'react-window-infinite-loader';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
@@ -7,11 +8,12 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 import storage from 'renderer/utils/localStorage';
 import debounce from 'renderer/utils/debounce';
+import i18n from 'renderer/i18n';
 
 import Song from './Song';
 import Button from '../Button';
 import MainContainer from '../MainContainer';
-import Dropdown from '../Dropdown';
+import Dropdown, { DropdownOption } from '../Dropdown';
 import useResizeObserver from '../../hooks/useResizeObserver';
 import Img from '../Img';
 
@@ -26,45 +28,60 @@ interface SongPageReducer {
 
 type SongPageReducerActionTypes = 'SONGS_DATA' | 'SORTING_ORDER';
 
-const dropdownOptions: { label: string; value: SongSortTypes }[] = [
-  { label: 'A to Z', value: 'aToZ' },
-  { label: 'Z to A', value: 'zToA' },
-  { label: 'Newest', value: 'dateAddedAscending' },
-  { label: 'Oldest', value: 'dateAddedDescending' },
-  { label: 'Released Year (Ascending)', value: 'releasedYearAscending' },
-  { label: 'Released Year (Descending)', value: 'releasedYearDescending' },
+export const songSortOptions: DropdownOption<SongSortTypes>[] = [
+  { label: i18n.t('sortTypes.aToZ'), value: 'aToZ' },
+  { label: i18n.t('sortTypes.zToA'), value: 'zToA' },
   {
-    label: 'Most Listened (All Time)',
+    label: i18n.t('sortTypes.dateAddedAscending'),
+    value: 'dateAddedAscending',
+  },
+  {
+    label: i18n.t('sortTypes.dateAddedDescending'),
+    value: 'dateAddedDescending',
+  },
+  {
+    label: i18n.t('sortTypes.releasedYearAscending'),
+    value: 'releasedYearAscending',
+  },
+  {
+    label: i18n.t('sortTypes.releasedYearDescending'),
+    value: 'releasedYearDescending',
+  },
+  {
+    label: i18n.t('sortTypes.allTimeMostListened'),
     value: 'allTimeMostListened',
   },
   {
-    label: 'Least Listened (All Time)',
+    label: i18n.t('sortTypes.allTimeLeastListened'),
     value: 'allTimeLeastListened',
   },
   {
-    label: 'Most Listened (This Month)',
+    label: i18n.t('sortTypes.monthlyMostListened'),
     value: 'monthlyMostListened',
   },
   {
-    label: 'Least Listened (This Month)',
+    label: i18n.t('sortTypes.monthlyLeastListened'),
     value: 'monthlyLeastListened',
   },
   {
-    label: 'Artist Name (A to Z)',
+    label: i18n.t('sortTypes.artistNameAscending'),
     value: 'artistNameAscending',
   },
   {
-    label: 'Artist Name (Z to A)',
+    label: i18n.t('sortTypes.artistNameDescending'),
     value: 'artistNameDescending',
   },
-  { label: 'Album Name (A to Z)', value: 'albumNameAscending' },
   {
-    label: 'Album Name (Z to A)',
+    label: i18n.t('sortTypes.albumNameAscending'),
+    value: 'albumNameAscending',
+  },
+  {
+    label: i18n.t('sortTypes.albumNameDescending'),
     value: 'albumNameDescending',
   },
-  { label: 'Blacklisted Songs', value: 'blacklistedSongs' },
+  { label: i18n.t('sortTypes.blacklistedSongs'), value: 'blacklistedSongs' },
   {
-    label: 'Whitelisted Songs',
+    label: i18n.t('sortTypes.whitelistedSongs'),
     value: 'whitelistedSongs',
   },
 ];
@@ -104,6 +121,7 @@ const SongsPage = () => {
     updateContextMenuData,
     changePromptMenuData,
   } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const [content, dispatch] = React.useReducer(reducer, {
     songsData: [],
@@ -304,18 +322,21 @@ const SongsPage = () => {
         {content.songsData && content.songsData.length > 0 && (
           <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
             <div className="container flex">
-              Songs{' '}
+              {t('common.song_other')}{' '}
               <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
                 {isMultipleSelectionEnabled ? (
                   <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
-                    {multipleSelectionsData.multipleSelections.length}{' '}
-                    selections
+                    {t('common.selectionWithCount', {
+                      count: multipleSelectionsData.multipleSelections.length,
+                    })}
                   </div>
                 ) : (
                   content.songsData &&
                   content.songsData.length > 0 && (
                     <span className="no-of-songs">
-                      {content.songsData.length} songs
+                      {t('common.songWithCount', {
+                        count: content.songsData.length,
+                      })}
                     </span>
                   )
                 )}
@@ -334,7 +355,7 @@ const SongsPage = () => {
                     true,
                     [
                       {
-                        label: 'Resync library',
+                        label: t('settingsPage.resyncLibrary'),
                         iconName: 'sync',
                         handlerFunction: () =>
                           window.api.audioLibraryControls.resyncSongsLibrary(),
@@ -344,14 +365,14 @@ const SongsPage = () => {
                     y + 50,
                   );
                 }}
-                tooltipLabel="More Options"
+                tooltipLabel={t('common.moreOptions')}
                 onContextMenu={(e) => {
                   e.preventDefault();
                   updateContextMenuData(
                     true,
                     [
                       {
-                        label: 'Resync library',
+                        label: t('settingsPage.resyncLibrary'),
                         iconName: 'sync',
                         handlerFunction: () =>
                           window.api.audioLibraryControls.resyncSongsLibrary(),
@@ -371,13 +392,18 @@ const SongsPage = () => {
                 clickHandler={() =>
                   toggleMultipleSelections(!isMultipleSelectionEnabled, 'songs')
                 }
-                tooltipLabel={
-                  isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
-                }
+                tooltipLabel={t(
+                  `common.${
+                    isMultipleSelectionEnabled &&
+                    multipleSelectionsData.selectionType === 'songs'
+                      ? 'unselectAll'
+                      : 'select'
+                  }`,
+                )}
               />
               <Button
                 key={2}
-                tooltipLabel="Play All"
+                tooltipLabel={t('common.playAll')}
                 className="play-all-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                 iconName="play_arrow"
                 clickHandler={() =>
@@ -394,7 +420,7 @@ const SongsPage = () => {
               />
               <Button
                 key={3}
-                label="Shuffle and Play"
+                label={t('common.shuffleAndPlay')}
                 className="shuffle-and-play-all-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                 iconName="shuffle"
                 clickHandler={() =>
@@ -412,7 +438,7 @@ const SongsPage = () => {
               <Dropdown
                 name="songsPageSortDropdown"
                 value={content.sortingOrder}
-                options={dropdownOptions}
+                options={songSortOptions}
                 onChange={(e) => {
                   updateCurrentlyActivePageData((currentPageData) => ({
                     ...currentPageData,
@@ -494,36 +520,24 @@ const SongsPage = () => {
         </div>
         {content.songsData && content.songsData.length === 0 && (
           <div className="no-songs-container my-[10%] flex h-full w-full flex-col items-center justify-center text-center text-xl text-font-color-black dark:text-font-color-white">
-            <Img
-              src={DataFetchingImage}
-              alt="No songs available."
-              className="mb-8 w-60"
-            />
-            <span>
-              Like road trips? Just asking. It wouldn't take that long...
-            </span>
+            <Img src={DataFetchingImage} alt="" className="mb-8 w-60" />
+            <span>{t('songsPage.loading')}</span>
           </div>
         )}
         {content.songsData === null && (
           <div className="no-songs-container my-[8%] flex h-full w-full flex-col items-center justify-center text-center text-xl text-font-color-black dark:text-font-color-white">
-            <Img
-              src={NoSongsImage}
-              alt="No songs available."
-              className="mb-8 w-60"
-            />
-            <span>
-              What&apos;s a world without music. So let&apos;s find them...
-            </span>
+            <Img src={NoSongsImage} alt="" className="mb-8 w-60" />
+            <span>{t('songsPage.empty')}</span>
             <div className="flex items-center justify-between">
               <Button
-                label="Add Folder"
+                label={t('foldersPage.addFolder')}
                 iconName="create_new_folder"
                 iconClassName="material-icons-round-outlined"
                 className="mt-4 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
                 clickHandler={addNewSongs}
               />
               <Button
-                label="Import App Data"
+                label={t('settingsPage.importAppData')}
                 iconName="upload"
                 className="mt-4 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
                 clickHandler={importAppData}

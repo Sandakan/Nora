@@ -1,5 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+
 import Button from 'renderer/components/Button';
 import Img from 'renderer/components/Img';
 import SongArtistInputResult from './SongArtistInputResult';
@@ -30,6 +32,8 @@ type Props = {
 };
 
 const SongAlbumArtistsInput = (props: Props) => {
+  const { t } = useTranslation();
+
   const {
     songAlbum,
     songAlbumArtists,
@@ -89,7 +93,9 @@ const SongAlbumArtistsInput = (props: Props) => {
 
   return (
     <div className="tag-input flex min-w-[10rem] max-w-2xl flex-col">
-      <label htmlFor="song-album-artists-id3-tag">Song Album Artists</label>
+      <label htmlFor="song-album-artists-id3-tag">
+        {t('common.albumArtists')}
+      </label>
       <div className="mt-2 w-[90%] rounded-xl border-2 border-background-color-2 p-2 dark:border-dark-background-color-2">
         <div className="artists-container flex flex-wrap p-2 empty:py-2 empty:after:h-full empty:after:w-full empty:after:text-center empty:after:text-[#ccc] empty:after:content-['No_artists_selected_for_this_song.'] dark:empty:after:text-[#ccc]">
           {albumArtistComponents}
@@ -100,9 +106,10 @@ const SongAlbumArtistsInput = (props: Props) => {
                 <span className="material-icons-round-outlined text-xl mr-2">
                   error
                 </span>{' '}
-                Song already has an album named '{songAlbum.title}' but its
-                artists(s) '{songAlbum.artists?.join(', ')}' are not specified
-                as album artists for this song.
+                {t('songTagsEditingPage.albumArtistNotMentioned', {
+                  title: songAlbum.title,
+                  artists: songAlbum.artists?.join(', '),
+                })}
               </p>
             )}
           {songAlbumArtists &&
@@ -117,12 +124,13 @@ const SongAlbumArtistsInput = (props: Props) => {
                 <span className="material-icons-round-outlined text-xl mr-2">
                   error
                 </span>{' '}
-                Selected album artist(s) '
-                {songAlbumArtists
-                  .map((albumArtist) => albumArtist.name)
-                  .join(', ')}
-                ' don't match with the selected album '{songAlbum.title}'
-                artist(s) '{songAlbum.artists?.join(', ')}'.
+                {t('songTagsEditingPage.songAlbumArtistMismatch', {
+                  albumTitle: songAlbum.title,
+                  albumArtists: songAlbum.artists?.join(', '),
+                  songAlbumArtists: songAlbumArtists
+                    .map((albumArtist) => albumArtist.name)
+                    .join(', '),
+                })}
               </p>
             )}
         </div>
@@ -130,7 +138,7 @@ const SongAlbumArtistsInput = (props: Props) => {
           type="search"
           id="song-album-artists-id3-tag"
           className="mt-4 w-full rounded-xl border-2 border-transparent bg-background-color-2 p-2 transition-colors focus:border-font-color-highlight dark:bg-dark-background-color-2 dark:focus:border-dark-font-color-highlight"
-          placeholder="Search for artists here."
+          placeholder={t('songTagsEditingPage.searchForArtists')}
           value={albumArtistKeyword}
           onChange={(e) => {
             const { value } = e.target;
@@ -145,7 +153,9 @@ const SongAlbumArtistsInput = (props: Props) => {
         )}
         {albumArtistKeyword.trim() && (
           <Button
-            label={`Add new artist '${albumArtistKeyword}'`}
+            label={t('songTagsEditingPage.addNewArtist', {
+              name: albumArtistKeyword,
+            })}
             className="mt-4 !w-full !bg-background-color-2 hover:!bg-background-color-3 hover:text-font-color-black dark:!bg-dark-background-color-2 hover:dark:!bg-dark-background-color-3 hover:dark:text-font-color-black"
             clickHandler={() => {
               updateSongInfo((prevData) => {

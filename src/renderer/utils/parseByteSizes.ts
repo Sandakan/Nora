@@ -1,3 +1,4 @@
+import i18n from 'renderer/i18n';
 import roundTo from './roundTo';
 
 type ParsedByteSizes = {
@@ -24,14 +25,14 @@ const parseByteSizes = (bytes: number, roundToVal = 3) => {
   sizes.gigaBytes = roundTo(sizes.megaBytes / 1024, roundToVal);
 
   if (bytes >= 0 && bytes < 2 ** 10) {
-    sizes.size = `${bytes} bytes`;
+    sizes.size = i18n.t('data.byteWithCount', { count: bytes });
   } else if (bytes >= 2 ** 10 && bytes < 2 ** 20) {
     sizes.size = `${sizes.kiloBytes} KB`;
   } else if (bytes >= 2 ** 20 && bytes < 2 ** 30) {
     sizes.size = `${sizes.megaBytes} MB`;
   } else if (bytes >= 2 ** 30 && bytes < 2 ** 40) {
     sizes.size = `${sizes.gigaBytes} GB`;
-  } else sizes.size = '0 bytes';
+  } else sizes.size = i18n.t('data.byteWithCount', { count: 0 });
 
   return sizes;
 };

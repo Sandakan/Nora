@@ -2,6 +2,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
@@ -23,6 +24,8 @@ const LyricLine = (props: LyricProp) => {
   const { isMiniPlayer } = React.useContext(AppContext);
   const { songPosition } = React.useContext(SongPositionContext);
   const { updateSongPosition } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const lyricsRef = React.useRef(null as HTMLDivElement | null);
   const isTheCurrnetLineRef = React.useRef(false);
 
@@ -90,10 +93,10 @@ const LyricLine = (props: LyricProp) => {
       }}
       title={
         syncedLyrics
-          ? `${roundTo(syncedLyrics.start - delay, 2)} to ${roundTo(
-              syncedLyrics.end - delay,
-              2,
-            )}`
+          ? t(`lyricsEditingPage.fromTo`, {
+              start: roundTo(syncedLyrics.start - delay, 2),
+              to: roundTo(syncedLyrics.end - delay, 2),
+            })
           : undefined
       }
       className={`highlight ![text-wrap:balance] flex items-center justify-center flex-col text-wrap mb-5 w-fit select-none text-center text-4xl font-medium text-font-color-black transition-[transform,color] duration-250 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${

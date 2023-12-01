@@ -67,7 +67,7 @@ const RecentlyPlayedSongs = (props: Props) => {
               {t('homePage.recentlyPlayedSongs')}
 
               <Button
-                label={t('homePage.showAll')}
+                label={t('common.showAll')}
                 tooltipLabel={t('homePage.openPlaybackHistory')}
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"

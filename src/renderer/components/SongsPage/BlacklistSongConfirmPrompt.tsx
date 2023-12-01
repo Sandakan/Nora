@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import storage from 'renderer/utils/localStorage';
 import Button from '../Button';
@@ -12,57 +13,51 @@ const BlacklistSongConfrimPrompt = (props: {
 }) => {
   const { addNewNotifications, changePromptMenuData } =
     React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const { songIds, title } = props;
   const [isDoNotShowAgain, setIsDoNotShowAgain] = React.useState(false);
   return (
     <>
       <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-        Confirm Blacklisting{' '}
-        {songIds.length === 1 && title ? (
-          <>&apos;{title}&apos;</>
-        ) : (
-          `${songIds.length} songs`
-        )}{' '}
-        from the library
+        {t('blacklistSongConfirmPrompt.title', { count: songIds.length })}
       </div>
       <div className="description">
-        You are about to blacklist{' '}
-        {songIds.length === 1 ? 'this song' : 'these songs'} from the libary.
-        You can restore {songIds.length === 1 ? 'it' : 'them'} again from the
-        Settings Page or by right clicking a blacklisted song. Your data related
-        to {songIds.length === 1 ? 'this song' : 'these songs'} won't be
-        affected by this action.
+        {t('blacklistSongConfirmPrompt.message', { count: songIds.length })}
         <div className="mt-4">
-          What Blacklisting a song does
+          {t('blacklistSongConfirmPrompt.effectTitle')}
           <ul className="list-inside list-disc pl-4 marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight">
             <li>
-              Will appear greyed out in the library with '
-              <span className="material-icons-round text-font-color-highlight dark:text-dark-font-color-highlight">
-                block
-              </span>
-              ' symbol
+              <Trans
+                i18nKey="blacklistSongConfirmPrompt.effect1"
+                components={{
+                  span: (
+                    <span className="material-icons-round text-font-color-highlight dark:text-dark-font-color-highlight">
+                      block
+                    </span>
+                  ),
+                }}
+              />
             </li>
             <li>
-              Won't be added to the queue automatically or by{' '}
-              <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
-                'Shuffle and Play'
-              </span>{' '}
-              or{' '}
-              <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
-                'Play All'
-              </span>{' '}
-              unless you explicitly added them.
+              <Trans
+                i18nKey="blacklistSongConfirmPrompt.effect2"
+                components={{
+                  span: (
+                    <span className="text-font-color-highlight dark:text-dark-font-color-highlight" />
+                  ),
+                }}
+              />
             </li>
             <li>
-              Can still be played by double clicking or by selecting{' '}
-              <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
-                'Play'
-              </span>{' '}
-              or{' '}
-              <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
-                'Play Next'
-              </span>
-              .
+              <Trans
+                i18nKey="blacklistSongConfirmPrompt.effect3"
+                components={{
+                  span: (
+                    <span className="text-font-color-highlight dark:text-dark-font-color-highlight" />
+                  ),
+                }}
+              />
             </li>
           </ul>
         </div>
@@ -70,7 +65,7 @@ const BlacklistSongConfrimPrompt = (props: {
       <Checkbox
         id="doNotShowAgainCheckbox"
         className="no-blacklist-song-confirm-checkbox-container mt-8"
-        labelContent="Do not show this message again."
+        labelContent={t('common.doNotShowThisMessageAgain')}
         isChecked={isDoNotShowAgain}
         checkedStateUpdateFunction={(state) => {
           setIsDoNotShowAgain(state);
@@ -78,7 +73,7 @@ const BlacklistSongConfrimPrompt = (props: {
       />
       <div className="buttons-container flex items-center justify-end">
         <Button
-          label={`Blacklist Song${songIds.length !== 1 ? 's' : ''}`}
+          label={t('song.blacklistSong', { count: songIds.length })}
           className="blacklist-song-btn mt-4 !bg-background-color-3 px-8 text-lg text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
           clickHandler={() =>
             window.api.audioLibraryControls
@@ -94,21 +89,10 @@ const BlacklistSongConfrimPrompt = (props: {
                   {
                     id: `${title}Blacklisted`,
                     delay: 5000,
-                    content: (
-                      <span>
-                        {songIds.length === 1 && title ? (
-                          <>&apos;{title}&apos;</>
-                        ) : (
-                          `${songIds.length} songs`
-                        )}{' '}
-                        blacklisted and removed from the library.
-                      </span>
-                    ),
-                    icon: (
-                      <span className="material-icons-round">
-                        delete_outline
-                      </span>
-                    ),
+                    content: t('blacklistSongConfirmPrompt.songsBlacklisted', {
+                      count: songIds.length,
+                    }),
+                    iconName: 'delete_outline',
                   },
                 ]);
               })

@@ -1,7 +1,8 @@
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { Trans, useTranslation } from 'react-i18next';
+// import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
 import Checkbox from '../Checkbox';
@@ -10,9 +11,11 @@ const BlacklistFolderConfrimPrompt = (props: {
   folderPaths: string[];
   folderName?: string;
 }) => {
-  const { isMultipleSelectionEnabled } = React.useContext(AppContext);
+  // const { isMultipleSelectionEnabled } = React.useContext(AppContext);
   const { addNewNotifications, changePromptMenuData } =
     React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const { folderPaths, folderName } = props;
   const [isDoNotShowAgain, setIsDoNotShowAgain] = React.useState(false);
   return (
@@ -27,56 +30,60 @@ const BlacklistFolderConfrimPrompt = (props: {
         .
       </div>
       <div className="description">
-        You are about to blacklist{' '}
-        {folderPaths.length === 1 ? 'this folder' : 'these folders'}. You can
-        restore {folderPaths.length === 1 ? 'it' : 'them'} again from the
-        Folders Pane by right clicking a blacklisted folder. Your data related
-        to {folderPaths.length === 1 ? 'this folder' : 'these folders'} won't be
-        affected by this action.
+        {t('blacklistFolderConfirmPrompt.message', {
+          count: folderPaths.length,
+        })}
+
         <div className="mt-4">
-          What Blacklisting a folder does
+          {t('blacklistFolderConfirmPrompt.effectTitle')}
           <ul className="list-inside list-disc pl-4 marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight">
             <li>
-              Will appear greyed out in the Folders pane with '
-              <span className="material-icons-round text-font-color-highlight dark:text-dark-font-color-highlight">
-                block
-              </span>
-              ' symbol
+              <Trans
+                i18nKey="blacklistFolderConfirmPrompt.effect1"
+                components={{
+                  span: (
+                    <span className="material-icons-round text-font-color-highlight dark:text-dark-font-color-highlight" />
+                  ),
+                }}
+              />
             </li>
-            <li>Songs linked to this folder will also be blacklisted.</li>
+            <li>{t('blacklistFolderConfirmPrompt.effect2')}</li>
           </ul>
         </div>
         <div className="mt-4">
-          What happens to songs linked to a blacklisted folder
+          {t('blacklistFolderConfirmPrompt.effectTitle2')}
           <ul className="list-inside list-disc pl-4 marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight">
             <li>
-              Will appear greyed out in the library with '
-              <span className="material-icons-round text-font-color-highlight dark:text-dark-font-color-highlight">
-                block
-              </span>
-              ' symbol
+              <Trans
+                i18nKey="blacklistSongConfirmPrompt.effect1"
+                components={{
+                  span: (
+                    <span className="material-icons-round text-font-color-highlight dark:text-dark-font-color-highlight">
+                      block
+                    </span>
+                  ),
+                }}
+              />
             </li>
             <li>
-              Won't be added to the queue automatically or by{' '}
-              <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
-                'Shuffle and Play'
-              </span>{' '}
-              or{' '}
-              <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
-                'Play All'
-              </span>{' '}
-              unless you explicitly added them.
+              <Trans
+                i18nKey="blacklistSongConfirmPrompt.effect2"
+                components={{
+                  span: (
+                    <span className="text-font-color-highlight dark:text-dark-font-color-highlight" />
+                  ),
+                }}
+              />
             </li>
             <li>
-              Can still be played by double clicking or by selecting{' '}
-              <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
-                'Play'
-              </span>{' '}
-              or{' '}
-              <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
-                'Play Next'
-              </span>
-              .
+              <Trans
+                i18nKey="blacklistSongConfirmPrompt.effect3"
+                components={{
+                  span: (
+                    <span className="text-font-color-highlight dark:text-dark-font-color-highlight" />
+                  ),
+                }}
+              />
             </li>
           </ul>
         </div>
@@ -84,7 +91,7 @@ const BlacklistFolderConfrimPrompt = (props: {
       <Checkbox
         id="doNotShowAgainCheckbox"
         className="no-blacklist-song-confirm-checkbox-container mt-8"
-        labelContent="Do not show this message again."
+        labelContent={t('common.doNotShowThisMessageAgain')}
         isChecked={isDoNotShowAgain}
         checkedStateUpdateFunction={(state) => {
           setIsDoNotShowAgain(state);
@@ -102,16 +109,11 @@ const BlacklistFolderConfrimPrompt = (props: {
                   {
                     id: `${folderName}Blacklisted`,
                     delay: 5000,
-                    content: (
-                      <span>
-                        &apos;
-                        {isMultipleSelectionEnabled
-                          ? `${folderPaths.length} folders`
-                          : folderName}
-                        &apos; blacklisted.
-                      </span>
+                    content: t(
+                      'blacklistFolderConfirmPrompt.folderBlacklisted',
+                      { count: folderPaths.length },
                     ),
-                    icon: <span className="material-icons-round">block</span>,
+                    iconName: 'block',
                   },
                 ]);
                 return changePromptMenuData(false);

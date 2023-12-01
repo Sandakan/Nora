@@ -1,5 +1,6 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import storage from 'renderer/utils/localStorage';
@@ -24,6 +25,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
     changeCurrentActivePage,
     updateCurrentSongData,
   } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const {
     songTitle = '',
@@ -85,7 +87,9 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
               {artist}
             </span>
             {i !== arr.length - 1 && (
-              <span>{i === arr.length - 2 ? ' and ' : ', '}</span>
+              <span>
+                {i === arr.length - 2 ? ` ${t('common.and')} ` : ', '}
+              </span>
             )}
           </span>
         );
@@ -94,7 +98,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
       return artists;
     }
     return [];
-  }, [separatedFeatArtistsNames]);
+  }, [separatedFeatArtistsNames, t]);
 
   const addFeatArtistsToSong = React.useCallback(
     (
@@ -134,7 +138,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
 
           return addNewNotifications([
             {
-              content: 'Featuring artists suggestion resolved successfully.',
+              content: t('common.featArtistSuggestionResolved'),
               iconName: 'done',
               delay: 5000,
               id: 'FeatArtistsSuggestion',
@@ -152,6 +156,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
       separatedFeatArtistsNames,
       isRemovingFeatInfoFromTitle,
       addNewNotifications,
+      t,
       updateSongInfo,
       currentSongData.songId,
       updateCurrentSongData,
@@ -170,10 +175,10 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
         iconName: 'do_not_disturb_on',
         iconClassName: 'material-icons-round-outlined',
         delay: 5000,
-        content: `Suggestion ignored.`,
+        content: t('notifications.suggestionIgnored'),
       },
     ]);
-  }, [addNewNotifications, songId]);
+  }, [addNewNotifications, songId, t]);
 
   return (
     <>
@@ -193,7 +198,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
               <span className="material-icons-round-outlined mr-2 text-2xl">
                 help
               </span>{' '}
-              Suggestion{' '}
+              {t('common.suggestion')}{' '}
             </div>
             <div className="flex items-center">
               <span
@@ -209,9 +214,9 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
                 iconName={
                   isMessageVisible ? 'arrow_drop_up' : 'arrow_drop_down'
                 }
-                tooltipLabel={
-                  isMessageVisible ? 'Hide suggestion' : 'Show suggestion'
-                }
+                tooltipLabel={`common.${
+                  isMessageVisible ? 'hideSuggestion' : 'showSuggestion'
+                }`}
                 clickHandler={(e) => {
                   e.preventDefault();
                   setIsMessageVisible((state) => !state);
@@ -222,24 +227,19 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
           {isMessageVisible && (
             <div>
               <div>
-                <p className="mt-2 text-sm">
-                  {separatedFeatArtistsNames.length === 1 ? 'Is' : 'Are'}{' '}
-                  {artistComponents}{' '}
-                  {separatedFeatArtistsNames.length === 1
-                    ? 'an artist'
-                    : `${separatedFeatArtistsNames.length} artists`}{' '}
-                  featuring in this song?
-                </p>
-                <p className="mt-2 text-sm">
-                  If so, you can add{' '}
-                  {separatedFeatArtistsNames.length === 1
-                    ? 'that artist as an artist'
-                    : 'those artists as artists'}{' '}
-                  of the song, or you can ignore this suggestion.
-                </p>
+                <Trans
+                  i18nKey="featArtistsSuggestion.message"
+                  values={{ count: separatedFeatArtistsNames.length }}
+                  components={{
+                    p: <p className="mt-2 text-sm" />,
+                    span: <span>{artistComponents}</span>,
+                  }}
+                />
                 <Checkbox
                   id="featArtistsTitleReset"
-                  labelContent="Remove featuring artists information from song title after adding artists to the song."
+                  labelContent={t(
+                    'featArtistsSuggestion.featArtistsTitleReset',
+                  )}
                   className="my-4 !text-sm"
                   isChecked={isRemovingFeatInfoFromTitle}
                   checkedStateUpdateFunction={(state) =>
@@ -252,7 +252,9 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
                   className="!border-0 bg-background-color-1/50 !px-4 !py-2 outline-1 transition-colors hover:bg-background-color-1 hover:!text-font-color-highlight focus-visible:!outline dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:!text-dark-font-color-highlight"
                   iconName="verified"
                   iconClassName="material-icons-round-outlined"
-                  label={`Add ${separatedFeatArtistsNames.length} artists to the song`}
+                  label={t('featArtistsSuggestion.addArtistsToSong', {
+                    count: separatedFeatArtistsNames.length,
+                  })}
                   clickHandler={(_, setIsDisabled, setIsPending) =>
                     addFeatArtistsToSong(setIsDisabled, setIsPending)
                   }
@@ -261,7 +263,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
                   className="!border-0 bg-background-color-1/50 !px-4 !py-2 outline-1 transition-colors hover:bg-background-color-1 hover:!text-font-color-highlight focus-visible:!outline dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:!text-dark-font-color-highlight"
                   iconName="edit"
                   iconClassName="material-icons-round-outlined"
-                  label="Edit in Metadata Editing Page"
+                  label={t('featArtistsSuggestion.editInMetadataEditingPage')}
                   clickHandler={() =>
                     changeCurrentActivePage('SongTagsEditor', {
                       songId,
@@ -274,12 +276,12 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
                   className="!mr-0 !border-0 bg-background-color-1/50 !px-4 !py-2 outline-1 transition-colors hover:bg-background-color-1 hover:!text-font-color-highlight focus-visible:!outline dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:!text-dark-font-color-highlight"
                   iconName="do_not_disturb_on"
                   iconClassName="material-icons-round-outlined"
-                  label="Ignore"
+                  label={t('common.ignore')}
                   clickHandler={ignoreSuggestion}
                 />
                 <span
                   className="material-icons-round-outlined ml-4 cursor-pointer text-xl opacity-80 transition-opacity hover:opacity-100"
-                  title="Keep in mind that adding featuring artists to the song will update the song data in the library as well as the song metadata."
+                  title={t('featArtistsSuggestion.modificationNotice')}
                 >
                   info
                 </span>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
 
 import Img from '../Img';
@@ -9,18 +10,17 @@ type Props = {
 };
 
 const GenreImgAndInfoContainer = (props: Props) => {
+  const { t } = useTranslation();
+
   const { genreData, genreSongs } = props;
 
-  const totalGenreSongsDuration = React.useMemo(() => {
-    const { hours, minutes, seconds } = calculateTimeFromSeconds(
-      genreSongs.reduce((prev, current) => prev + current.duration, 0),
-    );
-    return `${
-      hours >= 1 ? `${hours} hour${hours === 1 ? '' : 's'} ` : ''
-    }${minutes} minute${minutes === 1 ? '' : 's'} ${seconds} second${
-      seconds === 1 ? '' : 's'
-    }`;
-  }, [genreSongs]);
+  const totalGenreSongsDuration = React.useMemo(
+    () =>
+      calculateTimeFromSeconds(
+        genreSongs.reduce((prev, current) => prev + current.duration, 0),
+      ).timeString,
+    [genreSongs],
+  );
 
   return (
     // eslint-disable-next-line react/jsx-no-useless-fragment
@@ -33,13 +33,15 @@ const GenreImgAndInfoContainer = (props: Props) => {
             loading="eager"
           />
           <div className="genre-info-container flex-grow">
-            <div className="font-semibold tracking-wider opacity-50">GENRE</div>
+            <div className="font-semibold tracking-wider opacity-50 uppercase">
+              {t('common.genre_one')}
+            </div>
             <div className="genre-title h-fit max-w-[80%] overflow-hidden text-ellipsis whitespace-nowrap pb-2 text-6xl text-font-color-highlight dark:text-dark-font-color-highlight">
               {genreData.name}
             </div>
-            <div className="genre-no-of-songs">{`${
-              genreData.songs.length
-            } song${genreData.songs.length !== 1 ? 's' : ''}`}</div>
+            <div className="genre-no-of-songs">
+              {t('common.songWithCount', { count: genreData.songs.length })}
+            </div>
             <div className="genre-total-duration">
               {totalGenreSongsDuration}
             </div>

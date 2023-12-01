@@ -1,4 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+
+import i18n from 'renderer/i18n';
+
 import ShortcutButton from './ShortcutButton';
 
 interface Shortcut {
@@ -11,71 +15,173 @@ interface ShortcutCategory {
   shortcuts: Shortcut[];
 }
 
+const enterKey = i18n.t('appShortcutsPrompt.enterKey');
+const spaceKey = i18n.t('appShortcutsPrompt.spaceKey');
+const ctrlKey = i18n.t('appShortcutsPrompt.ctrlKey');
+const shiftKey = i18n.t('appShortcutsPrompt.shiftKey');
+const altKey = i18n.t('appShortcutsPrompt.altKey');
+const rightArrowKey = i18n.t('appShortcutsPrompt.rightArrowKey');
+const leftArrowKey = i18n.t('appShortcutsPrompt.leftArrowKey');
+const upArrowKey = i18n.t('appShortcutsPrompt.upArrowKey');
+const downArrowKey = i18n.t('appShortcutsPrompt.downArrowKey');
+const homeKey = i18n.t('appShortcutsPrompt.homeKey');
+const mouseClick = i18n.t('appShortcutsPrompt.mouseClick');
+const doubleClick = i18n.t('appShortcutsPrompt.doubleClick');
+
 const shortcutData: ShortcutCategory[] = [
   {
-    shortcutCategoryTitle: 'Media Playback',
+    shortcutCategoryTitle: i18n.t('appShortcutsPrompt.mediaPlayback'),
     shortcuts: [
-      { label: 'Play / Pause', keys: ['Space'] },
-      { label: 'Toggle Mute', keys: ['Ctrl', 'M'] },
-      { label: 'Next Song', keys: ['Ctrl', 'Right Arrow'] },
-      { label: 'Previous Song', keys: ['Ctrl', 'Left Arrow'] },
-      { label: '10 Seconds Forward', keys: ['Shift', 'Right Arrow'] },
-      { label: '10 Seconds Backward', keys: ['Shift', 'Left Arrow'] },
-      { label: 'Increase Volume', keys: ['Ctrl', 'Up Arrow'] },
-      { label: 'Decrease Volume', keys: ['Ctrl', 'Down Arrow'] },
-      { label: 'Toggle Queue Shuffle', keys: ['Ctrl', 'S'] },
-      { label: 'Toggle Queue Repeat', keys: ['Ctrl', 'T'] },
-      { label: 'Toggle Favorite', keys: ['Ctrl', 'H'] },
-      { label: 'Increase Playback Rate By 0.05x', keys: ['Ctrl', ']'] },
-      { label: 'Decrease Playback Rate By 0.05x', keys: ['Ctrl', '['] },
-      { label: 'Reset Playback Rate to 1x', keys: ['Ctrl', '\\'] },
+      {
+        label: i18n.t('appShortcutsPrompt.playPause'),
+        keys: [spaceKey],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.toggleMute'),
+        keys: [ctrlKey, 'M'],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.nextSong'),
+        keys: [ctrlKey, rightArrowKey],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.prevSong'),
+        keys: [ctrlKey, leftArrowKey],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.tenSecondsForward'),
+        keys: [shiftKey, rightArrowKey],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.tenSecondsBackward'),
+        keys: [shiftKey, leftArrowKey],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.upVolume'),
+        keys: [ctrlKey, upArrowKey],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.downVolume'),
+        keys: [ctrlKey, downArrowKey],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.toggleShuffle'),
+        keys: [ctrlKey, 'S'],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.toggleRepeat'),
+        keys: [ctrlKey, 'T'],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.toggleFavorite'),
+        keys: [ctrlKey, 'H'],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.upPlaybackRate'),
+        keys: [ctrlKey, ']'],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.downPlaybackRate'),
+        keys: [ctrlKey, '['],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.resetPlaybackRate'),
+        keys: [ctrlKey, '\\'],
+      },
     ],
   },
   {
-    shortcutCategoryTitle: 'Navigation',
+    shortcutCategoryTitle: i18n.t('appShortcutsPrompt.navigation'),
     shortcuts: [
-      { label: 'Go to Home', keys: ['Alt', 'Home'] },
-      { label: 'Go Back', keys: ['Alt', 'Left Arrow'] },
-      { label: 'Go Forward', keys: ['Alt', 'Right Arrow'] },
-      { label: 'Open Mini Player', keys: ['Ctrl', 'N'] },
-      { label: 'Go to Lyrics', keys: ['Ctrl', 'L'] },
-      { label: 'Go to Current Queue', keys: ['Ctrl', 'Q'] },
-      { label: 'Go to Search', keys: ['Ctrl', 'F'] },
+      { label: i18n.t('appShortcutsPrompt.goHome'), keys: [altKey, homeKey] },
+      {
+        label: i18n.t('appShortcutsPrompt.goBack'),
+        keys: [altKey, leftArrowKey],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.goForward'),
+        keys: [altKey, rightArrowKey],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.openMiniPlayer'),
+        keys: [ctrlKey, 'N'],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.goToLyrics'),
+        keys: [ctrlKey, 'L'],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.goToQueue'),
+        keys: [ctrlKey, 'Q'],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.goToSearch'),
+        keys: [ctrlKey, 'F'],
+      },
     ],
   },
   {
-    shortcutCategoryTitle: 'Selections',
+    shortcutCategoryTitle: i18n.t('appShortcutsPrompt.selections'),
     shortcuts: [
-      { label: 'Select Multiple Items', keys: ['Shift', 'Mouse Click'] },
+      {
+        label: i18n.t('appShortcutsPrompt.selectMultipleItems'),
+        keys: [shiftKey, mouseClick],
+      },
     ],
   },
   {
-    shortcutCategoryTitle: 'Lyrics',
+    shortcutCategoryTitle: i18n.t('appShortcutsPrompt.lyrics'),
     shortcuts: [
-      { label: 'Play the Next Lyrics Line', keys: ['Alt', 'Down'] },
-      { label: 'Play the Previous Lyrics Line', keys: ['Alt', 'Up'] },
+      {
+        label: i18n.t('appShortcutsPrompt.playNextLyricsLine'),
+        keys: [altKey, downArrowKey],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.playPrevLyricsLine'),
+        keys: [altKey, upArrowKey],
+      },
     ],
   },
   {
-    shortcutCategoryTitle: 'Lyrics Editor',
+    shortcutCategoryTitle: i18n.t('appShortcutsPrompt.lyricsEditor'),
     shortcuts: [
-      { label: 'Select the Next Lyrics Line', keys: ['Enter'] },
-      { label: 'Select the Previous Lyrics Line', keys: ['Shift', 'Enter'] },
-      { label: 'Select a custom Lyrics Line', keys: ['Double Click'] },
+      {
+        label: i18n.t('appShortcutsPrompt.selectNextLyricsLine'),
+        keys: [enterKey],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.selectPrevLyricsLine'),
+        keys: [shiftKey, enterKey],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.selectCustomLyricsLine'),
+        keys: [doubleClick],
+      },
     ],
   },
   {
-    shortcutCategoryTitle: 'Other Shortcuts',
+    shortcutCategoryTitle: i18n.t('appShortcutsPrompt.otherShortcuts'),
     shortcuts: [
-      { label: 'Toggle App Theme', keys: ['Ctrl', 'Y'] },
-      // { label: 'Toggle Mini Player Always On Top', keys: ['Ctrl', 'O'] },
-      { label: 'Reload', keys: ['Ctrl', 'R'] },
-      { label: 'Open Devtools', keys: ['F12'] },
+      {
+        label: i18n.t('appShortcutsPrompt.toggleTheme'),
+        keys: [ctrlKey, 'Y'],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.toggleMiniPlayerAlwaysOnTop'),
+        keys: [ctrlKey, 'O'],
+      },
+      {
+        label: i18n.t('appShortcutsPrompt.reload'),
+        keys: [ctrlKey, 'R'],
+      },
+      { label: i18n.t('appShortcutsPrompt.openDevtools'), keys: ['F12'] },
     ],
   },
 ];
 
 const AppShortcutsPrompt = () => {
+  const { t } = useTranslation();
+
   const shortcutCategoryComponents = React.useMemo(
     () =>
       shortcutData.map((category) => {
@@ -120,7 +226,7 @@ const AppShortcutsPrompt = () => {
   return (
     <div>
       <div className="title-container text-center text-3xl font-medium">
-        In App Shortcuts
+        {t('appShortcutsPrompt.inAppShortcuts')}
       </div>
       <ul className="shortcuts-categories-container px-4">
         {shortcutCategoryComponents}

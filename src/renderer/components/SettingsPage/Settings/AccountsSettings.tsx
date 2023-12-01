@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 
@@ -10,6 +11,7 @@ import LastFMIcon from '../../../../../assets/images/webp/last-fm-logo.webp';
 const AccountsSettings = () => {
   const { userData } = React.useContext(AppContext);
   const { updateUserData } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const isLastFmConnected = React.useMemo(
     () => !!userData?.lastFmSessionData,
@@ -22,15 +24,18 @@ const AccountsSettings = () => {
         <span className="material-icons-round-outlined mr-2">
           account_circle
         </span>
-        Accounts
+        {t('settingsPage.accounts')}
       </div>
       <ul className="list-disc pl-6 marker:bg-background-color-3 dark:marker:bg-background-color-3">
         <li className="last-fm-integration mb-4">
-          <div className="description">Integrate Last.fm with Nora.</div>
+          <div className="description">
+            {' '}
+            {t('settingsPage.integrateLastFm')}
+          </div>
           <div className="p-4 pb-0 flex">
             <img
               src={LastFMIcon}
-              alt="LastFm Icon"
+              alt={t('settingsPage.lastFmLogo')}
               className={`rounded-md w-16 mr-4 h-16 ${
                 !isLastFmConnected && 'grayscale brightness-90'
               }`}
@@ -45,26 +50,28 @@ const AccountsSettings = () => {
                 <span className="material-icons-round-outlined text-xl mr-2">
                   {isLastFmConnected ? 'done' : 'close'}
                 </span>{' '}
-                Last.fm {!isLastFmConnected && 'Not '}Connected{' '}
+                {t(
+                  isLastFmConnected
+                    ? 'settingsPage.lastFmConnected'
+                    : 'settingsPage.lastFmNotConnected',
+                )}{' '}
                 {isLastFmConnected &&
                   userData?.lastFmSessionData &&
-                  `(Logged in as ${userData.lastFmSessionData.name})`}
+                  `(${t('settingsPage.loggedInAs')} ${
+                    userData.lastFmSessionData.name
+                  })`}
               </p>
               <ul className="list-disc text-sm list-inside">
-                <li>Connect with Last.fm to enable Scrobbling.</li>
-                <li>
-                  Scrobbling is a way to send information about the music a user
-                  is listening to.
-                </li>
-                <li>
-                  Whenever you listen to a song, Last.fm “scrobbles” that song
-                  and adds it to your account.
-                </li>
-                <li>This feature requires an internet connection.</li>
+                <li>{t('settingsPage.lastFmDescription1')}</li>
+                <li>{t('settingsPage.lastFmDescription2')}</li>
+                <li>{t('settingsPage.lastFmDescription3')}</li>
+                <li>{t('settingsPage.lastFmDescription4')}</li>
               </ul>
               <Button
                 label={
-                  isLastFmConnected ? 'Authenticate Again' : 'Login in Browser'
+                  isLastFmConnected
+                    ? t('settingsPage.authenticateAgain')
+                    : t('settingsPage.loginInBrowser')
                 }
                 iconName="open_in_new"
                 className="mt-2"
@@ -81,8 +88,7 @@ const AccountsSettings = () => {
               }`}
             >
               <div className="description">
-                Enable Last.Fm Scrobbling to send data related to how you listen
-                to songs.
+                {t('settingsPage.scrobblingDescription')}
               </div>
               <Checkbox
                 id="sendSongScrobblingDataToLastFM"
@@ -105,7 +111,7 @@ const AccountsSettings = () => {
                       })),
                     )
                 }
-                labelContent="Enable Last.Fm Scrobbling"
+                labelContent={t('settingsPage.enableScrobbling')}
                 isDisabled={!isLastFmConnected}
               />
             </li>
@@ -115,7 +121,7 @@ const AccountsSettings = () => {
               }`}
             >
               <div className="description">
-                Send Favorites data to Last.Fm when you Like/Dislike songs.
+                {t('settingsPage.sendFavoritesToLastFmDescription')}
               </div>
               <Checkbox
                 id="sendSongFavoritesDataToLastFM"
@@ -138,7 +144,7 @@ const AccountsSettings = () => {
                       })),
                     )
                 }
-                labelContent="Send Favorites data"
+                labelContent={t('settingsPage.sendFavoritesToLastFm')}
                 isDisabled={!isLastFmConnected}
               />
             </li>
@@ -148,8 +154,7 @@ const AccountsSettings = () => {
               }`}
             >
               <div className="description">
-                Send Now Playing song data to LastFm automatically when you
-                start to play a song.
+                {t('settingsPage.sendNowPlayingToLastFmDescription')}
               </div>
               <Checkbox
                 id="sendNowPlayingSongDataToLastFM"
@@ -172,7 +177,7 @@ const AccountsSettings = () => {
                       })),
                     )
                 }
-                labelContent="Send Now Playing Song data"
+                labelContent={t('settingsPage.sendNowPlayingToLastFm')}
                 isDisabled={!isLastFmConnected}
               />
             </li>

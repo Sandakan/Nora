@@ -1,6 +1,7 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 
 import Button from '../Button';
@@ -18,6 +19,8 @@ type Props = {
 
 const SearchStartPlaceholder = (props: Props) => {
   const { updateCurrentlyActivePageData } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const { searchResults, searchInput, updateSearchInput } = props;
 
   const [recentSearchResults, setRecentSearchResults] = React.useState(
@@ -98,11 +101,11 @@ const SearchStartPlaceholder = (props: Props) => {
                 ? 'mb-4 w-60 max-w-full'
                 : ''
             }
-            alt="Flying kite"
+            alt=""
           />
 
           <div className="description text-xl text-font-color-black dark:text-font-color-white">
-            Search for anything in your library
+            {t('searchPage.searchForAnythingInLibrary')}
           </div>
           <div className="recent-search-results-container mt-4 flex w-[clamp(12.5rem,90%,50rem)] flex-wrap items-center justify-center">
             {recentSearchResultComponents}

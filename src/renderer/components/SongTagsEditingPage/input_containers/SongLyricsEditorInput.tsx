@@ -1,11 +1,13 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { AppContext } from 'renderer/contexts/AppContext';
+import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from 'renderer/components/Button';
 import Hyperlink from 'renderer/components/Hyperlink';
 import { EditingLyricsLineData } from 'renderer/components/LyricsEditingPage/LyricsEditingPage';
 import { syncedLyricsRegex } from 'renderer/components/LyricsPage/LyricsPage';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
 import parseLyrics from 'renderer/utils/parseLyrics';
 
@@ -51,6 +53,7 @@ const SongLyricsEditorInput = (props: Props) => {
   const { userData } = React.useContext(AppContext);
   const { addNewNotifications, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const { isOnline } = useNetworkConnectivity();
 
@@ -187,12 +190,8 @@ const SongLyricsEditorInput = (props: Props) => {
             {
               id: `fetchSyncedLyricsFailed`,
               delay: 5000,
-              content: <span>Failed to fetch synced lyrics.</span>,
-              icon: (
-                <span className="material-icons-round-outlined icon">
-                  warning
-                </span>
-              ),
+              content: t('songTagsEditingPage.syncedLyricsFetchFailed'),
+              iconName: 'warning',
             },
           ]);
           setIsPending(false);
@@ -205,6 +204,7 @@ const SongLyricsEditorInput = (props: Props) => {
       songArtists,
       songPath,
       songTitle,
+      t,
       updateSongInfo,
     ],
   );
@@ -254,7 +254,7 @@ const SongLyricsEditorInput = (props: Props) => {
                 : 'bg-background-color-2 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:hover:!text-font-color-black'
             }`}
             clickHandler={() => setCurrentLyricsType('synced')}
-            label="Synced Lyrics"
+            label={t('common.syncedLyrics')}
             iconName="timer"
             iconClassName="material-icons-round-outlined"
           />
@@ -265,7 +265,7 @@ const SongLyricsEditorInput = (props: Props) => {
                 : 'bg-background-color-2 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:hover:!text-font-color-black'
             }`}
             clickHandler={() => setCurrentLyricsType('unsynced')}
-            label="Unsynced Lyrics"
+            label={t('common.unsyncedLyrics')}
             iconName="timer_off"
             iconClassName="material-icons-round-outlined"
           />
@@ -275,7 +275,7 @@ const SongLyricsEditorInput = (props: Props) => {
           id="song-lyrics-id3-tag"
           className="mt-4 max-h-80 min-h-[12rem] rounded-2xl border-[0.15rem] border-background-color-2 bg-background-color-2 p-4 transition-colors focus:border-font-color-highlight dark:border-dark-background-color-2 dark:bg-dark-background-color-2 dark:focus:border-dark-font-color-highlight"
           name="lyrics"
-          placeholder="Lyrics"
+          placeholder={t('common.lyrics')}
           value={
             currentLyricsType === 'synced'
               ? synchronizedLyrics ?? ''
@@ -306,20 +306,23 @@ const SongLyricsEditorInput = (props: Props) => {
               }`}
               title={
                 synchronizedLyrics
-                  ? isSynchronizedLyricsEnhancedSynced
-                    ? 'Lyrics are enhanced synced.'
-                    : 'Lyrics are not enhanced synced.'
+                  ? t(
+                      `songTagsEditingPage.${
+                        isSynchronizedLyricsEnhancedSynced
+                          ? 'lyricsEnhancedSynced'
+                          : 'lyricsNotEnhancedSynced'
+                      }`,
+                    )
                   : undefined
               }
             >
               verified
             </span>
             <span className="text-sm font-extralight">
-              Enhanced Synced lyrics supported.{' '}
+              {t('songTagsEditingPage.enhancedLyricsSupported')}{' '}
               <Hyperlink
                 link="https://wikipedia.org/wiki/LRC_(file_format)"
-                linkTitle="Read more about LRC format"
-                label="Read more about LRC format."
+                label={t('songTagsEditingPage.readMoreAboutLrc')}
               />
             </span>
           </div>
@@ -330,7 +333,7 @@ const SongLyricsEditorInput = (props: Props) => {
             <span className="material-icons-round-outlined text-xl mr-2">
               error
             </span>{' '}
-            Avoid entering Unsynchronized Lyrics in the Synchronized Lyrics Tab.
+            {t('songTagsEditingPage.avoidUnsyncedOnSyncedLyricsTab')}
           </p>
         )}
         {unsynchronizedLyrics && isUnsynchronizedLyricsSynced && (
@@ -338,7 +341,7 @@ const SongLyricsEditorInput = (props: Props) => {
             <span className="material-icons-round-outlined text-xl mr-2">
               error
             </span>{' '}
-            Avoid entering Synchronized Lyrics in the Unsynchronized Lyrics Tab.
+            {t('songTagsEditingPage.avoidSyncedOnUnsyncedLyricsTab')}
           </p>
         )}
 
@@ -347,28 +350,25 @@ const SongLyricsEditorInput = (props: Props) => {
             <span className="material-icons-round-outlined text-xl mr-2">
               error
             </span>{' '}
-            There are pending lyrics to be saved to this song. They will be
-            saved and will be visible here after the current song is finished.
+            {t('songTagsEditingPage.pendingLyricsSavesAvailable')}
           </p>
         )}
       </div>
       <div className="song-lyrics-buttons mt-12 flex flex-col items-end">
         <Button
           key={0}
-          label="Download Lyrics"
+          label={t('songTagsEditingPage.downloadLyrics')}
           iconName="download"
           iconClassName="mr-2"
           className="download-lyrics-btn"
           clickHandler={downloadLyrics}
-          tooltipLabel={
-            isOnline ? undefined : 'You are not connected to the internet.'
-          }
+          tooltipLabel={isOnline ? undefined : t('common.noInternet')}
           isDisabled={!isOnline}
           isVisible={currentLyricsType === 'unsynced'}
         />
         <Button
           key={1}
-          label="Download Synced Lyrics"
+          label={t('songTagsEditingPage.downloadSyncedLyrics')}
           iconName="download"
           className="download-synced-lyrics-btn"
           iconClassName="mr-2"
@@ -381,22 +381,20 @@ const SongLyricsEditorInput = (props: Props) => {
             isOnline
               ? userData?.preferences.isMusixmatchLyricsEnabled
                 ? undefined
-                : 'You have to enable Musixmatch Lyrics from Settings to use this feature.'
-              : 'You are not connected to the internet.'
+                : t('songTagsEditingPage.musixmatchNotEnabled')
+              : t('common.noInternet')
           }
         />
         <Button
           key={2}
-          label="Edit in Lyrics Editor"
+          label={t('lyricsPage.editLyrics')}
           iconName="edit"
           iconClassName="mr-2"
           className="edit-lyrics-btn mt-4"
           clickHandler={goToLyricsEditor}
-          tooltipLabel={
-            synchronizedLyrics
-              ? 'Edit available lyrics in the Lyrics Editor.'
-              : 'No lyrics found'
-          }
+          tooltipLabel={t(
+            `lyricsPage.${synchronizedLyrics ? 'editLyrics' : 'noLyrics'}`,
+          )}
           isDisabled={
             currentLyricsType === 'synced' ? false : !unsynchronizedLyrics
           }

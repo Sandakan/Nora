@@ -1,3 +1,5 @@
+import i18n from 'renderer/i18n';
+
 interface AppNotificationConfig extends Partial<AppNotification> {
   // to prevent having an empty array of triggers
   trigger: [MessageCodes, ...MessageCodes[]];
@@ -63,7 +65,7 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
     delay: 15000,
     buttons: [
       {
-        label: 'Resync Songs',
+        label: i18n.t('settingsPage.resyncLibrary'),
         iconClassName: 'sync',
         className: defaultButtonStyles,
         clickHandler: () =>
@@ -157,7 +159,7 @@ const parseNotificationFromMain = (
 ) => {
   const notificationData: AppNotification = {
     buttons: [],
-    content: <div>{message}</div>,
+    content: message,
     id: messageCode,
     type: 'DEFAULT',
   };

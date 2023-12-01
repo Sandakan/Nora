@@ -3,6 +3,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { ForwardedRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { DraggableProvided } from 'react-beautiful-dnd';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
@@ -64,6 +65,7 @@ const Song = React.forwardRef(
       updateMultipleSelections,
       createQueue,
     } = React.useContext(AppUpdateContext);
+    const { t } = useTranslation();
 
     const {
       index,
@@ -182,7 +184,10 @@ const Song = React.forwardRef(
           })
           .flat();
       }
-      return <span className="text-xs font-normal">Unknown Artist</span>;
+      return (
+        <span className="text-xs font-normal">{t('common.unknownArtist')}</span>
+      );
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [artists, currentSongData.songId, isAMultipleSelection, songId]);
 
     const goToSongInfoPage = React.useCallback(() => {
@@ -232,7 +237,7 @@ const Song = React.forwardRef(
           isDisabled: additionalContextMenuItems === undefined,
         },
         {
-          label: 'Play',
+          label: t('common.play'),
           handlerFunction: () => {
             handlePlayBtnClick();
             toggleMultipleSelections(false);
@@ -241,7 +246,7 @@ const Song = React.forwardRef(
           isDisabled: isMultipleSelectionsEnabled,
         },
         {
-          label: 'Create A Queue',
+          label: t('common.createAQueue'),
           handlerFunction: () => {
             createQueue(songIds, 'songs', false, undefined, true);
             toggleMultipleSelections(false);
@@ -250,9 +255,11 @@ const Song = React.forwardRef(
           isDisabled: !isMultipleSelectionsEnabled,
         },
         {
-          label: isMultipleSelectionsEnabled
-            ? 'Add all to Play Next'
-            : 'Play Next',
+          label: t(
+            `common.${
+              isMultipleSelectionsEnabled ? 'playNextAll' : 'playNext'
+            }`,
+          ),
           iconName: 'shortcut',
           handlerFunction: () => {
             if (isMultipleSelectionsEnabled) {
@@ -283,9 +290,10 @@ const Song = React.forwardRef(
               addNewNotifications([
                 {
                   id: `${title}PlayNext`,
-                  delay: 5000,
-                  content: `${songIds.length} songs will be played next.`,
-                  icon: <span className="material-icons-round">shortcut</span>,
+                  content: t('notifications.playingNextSongsWithCount', {
+                    count: songIds.length,
+                  }),
+                  iconName: 'shortcut',
                 },
               ]);
             } else {
@@ -308,9 +316,8 @@ const Song = React.forwardRef(
               addNewNotifications([
                 {
                   id: `${title}PlayNext`,
-                  delay: 5000,
-                  content: `'${title}' will be played next.`,
-                  icon: <span className="material-icons-round">shortcut</span>,
+                  content: t('notifications.playingNext', { title }),
+                  iconName: 'shortcut',
                 },
               ]);
             }
@@ -318,7 +325,7 @@ const Song = React.forwardRef(
           },
         },
         {
-          label: 'Add to queue',
+          label: t('common.addToQueue'),
           iconName: 'queue',
           handlerFunction: () => {
             if (isMultipleSelectionsEnabled) {
@@ -326,8 +333,10 @@ const Song = React.forwardRef(
               addNewNotifications([
                 {
                   id: `${songIds.length}AddedToQueueFromMultiSelection`,
-                  delay: 5000,
-                  content: `Added ${songIds.length} songs to the queue.`,
+                  content: t('notifications.addedToQueue', {
+                    count: songIds.length,
+                  }),
+                  iconName: 'add',
                 },
               ]);
             } else {
@@ -335,13 +344,15 @@ const Song = React.forwardRef(
               addNewNotifications([
                 {
                   id: `${title}AddedToQueue`,
-                  delay: 5000,
-                  content: `Added 1 song to the queue.`,
+                  content: t('notifications.addedToQueue', {
+                    count: 1,
+                  }),
                   icon: (
                     <Img
                       src={
                         artworkPaths?.optimizedArtworkPath || DefaultSongCover
                       }
+                      loading="lazy"
                       alt="Song Artwork"
                     />
                   ),
@@ -353,8 +364,8 @@ const Song = React.forwardRef(
         },
         {
           label: isMultipleSelectionsEnabled
-            ? 'Toggle Like/Dislike Songs'
-            : `${isAFavorite ? 'Unlike' : 'Like'} the song`,
+            ? t('song.toggleLikeSongs')
+            : t(`song.${isAFavorite ? 'unlikeSong' : 'likeSong'}`),
           iconName: `favorite`,
           iconClassName: isMultipleSelectionsEnabled
             ? 'material-icons-round-outlined mr-4 text-xl'
@@ -379,7 +390,7 @@ const Song = React.forwardRef(
           },
         },
         {
-          label: 'Add to Playlists',
+          label: t('song.addToPlaylists'),
           iconName: 'playlist_add',
           handlerFunction: () => {
             changePromptMenuData(
@@ -393,7 +404,7 @@ const Song = React.forwardRef(
           },
         },
         {
-          label: isAMultipleSelection ? 'Unselect' : 'Select',
+          label: t(`common.${isAMultipleSelection ? 'unselect' : 'select'}`),
           iconName: 'checklist',
           handlerFunction: () => {
             if (isMultipleSelectionEnabled) {
@@ -421,7 +432,7 @@ const Song = React.forwardRef(
           isDisabled: isMultipleSelectionsEnabled,
         },
         {
-          label: 'Reveal in File Explorer',
+          label: t('song.revealInFileExplorer'),
           class: 'reveal-file-explorer',
           iconName: 'folder_open',
           handlerFunction: () =>
@@ -429,14 +440,14 @@ const Song = React.forwardRef(
           isDisabled: isMultipleSelectionsEnabled,
         },
         {
-          label: 'Info',
+          label: t('common.info'),
           class: 'info',
           iconName: 'info',
           handlerFunction: goToSongInfoPage,
           isDisabled: isMultipleSelectionsEnabled,
         },
         {
-          label: 'Go to Album',
+          label: t('song.goToAlbum'),
           iconName: 'album',
           handlerFunction: () =>
             album &&
@@ -446,7 +457,7 @@ const Song = React.forwardRef(
           isDisabled: !album,
         },
         {
-          label: 'Edit song tags',
+          label: t('song.editSongTags'),
           class: 'edit',
           iconName: 'edit',
           handlerFunction: () =>
@@ -458,7 +469,7 @@ const Song = React.forwardRef(
           isDisabled: isMultipleSelectionsEnabled,
         },
         {
-          label: 'Re-parse song',
+          label: t('song.reparseSong'),
           class: 'sync',
           iconName: 'sync',
           handlerFunction: () => window.api.songUpdates.reParseSong(path),
@@ -471,7 +482,9 @@ const Song = React.forwardRef(
           isDisabled: isMultipleSelectionsEnabled,
         },
         {
-          label: isBlacklisted ? 'Restore from Blacklist' : 'Blacklist Song',
+          label: t(`song.${isBlacklisted ? 'deblacklist' : 'blacklistSong'}`, {
+            count: 1,
+          }),
           iconName: isBlacklisted ? 'settings_backup_restore' : 'block',
           handlerFunction: () => {
             if (isBlacklisted)
@@ -488,8 +501,8 @@ const Song = React.forwardRef(
                     {
                       id: `${title}Blacklisted`,
                       delay: 5000,
-                      content: `'${title}' blacklisted.`,
-                      icon: <span className="material-icons-round">block</span>,
+                      content: t('notifications.songBlacklisted', { title }),
+                      iconName: 'block',
                     },
                   ]),
                 )
@@ -504,7 +517,7 @@ const Song = React.forwardRef(
           isDisabled: isMultipleSelectionsEnabled,
         },
         {
-          label: 'Delete from System',
+          label: t('song.delete'),
           iconName: 'delete',
           handlerFunction: () => {
             changePromptMenuData(
@@ -526,6 +539,7 @@ const Song = React.forwardRef(
       multipleSelectionsData,
       isAMultipleSelection,
       additionalContextMenuItems,
+      t,
       isAFavorite,
       goToSongInfoPage,
       album,
@@ -542,7 +556,7 @@ const Song = React.forwardRef(
       title,
       songId,
       artworkPaths?.optimizedArtworkPath,
-      artworkPaths?.artworkPath,
+      artworkPaths.artworkPath,
       toggleIsFavorite,
       changePromptMenuData,
       isMultipleSelectionEnabled,
@@ -557,14 +571,16 @@ const Song = React.forwardRef(
       multipleSelectionsData.selectionType === 'songs' &&
       isAMultipleSelection
         ? {
-            title: `${multipleSelectionsData.multipleSelections.length} selected songs`,
+            title: t('song.selectedSongCount', {
+              count: multipleSelectionsData.multipleSelections.length,
+            }),
             artworkPath: DefaultSongCover,
           }
         : {
-            title: title || 'Unknown title',
+            title: title || t('common.unknownTitle'),
             subTitle:
               artists?.map((artist) => artist.name).join(', ') ??
-              'Unknown artist',
+              t('common.unknownArtist'),
             artworkPath: artworkPaths?.optimizedArtworkPath || DefaultSongCover,
           };
 
@@ -639,7 +655,7 @@ const Song = React.forwardRef(
           ) : isBlacklisted ? (
             <div
               className="relative flex h-full items-center justify-center"
-              title={`'${title}' is blacklisted.`}
+              title={t('notifications.songBlacklisted', { title })}
             >
               <span
                 className={`material-icons-round mx-2 text-2xl text-font-color-black dark:text-font-color-white ${
@@ -732,7 +748,7 @@ const Song = React.forwardRef(
                 {album.name}
               </span>
             ) : (
-              'Unknown album'
+              t('common.unknownAlbum')
             )}
           </div>
           <div className="song-year flex items-center justify-center text-center text-xs transition-none sm:hidden">
@@ -758,9 +774,9 @@ const Song = React.forwardRef(
                     ? '!text-font-color-black dark:!text-font-color-black'
                     : '!text-font-color-highlight dark:!text-dark-background-color-3'
               }`}
-              tooltipLabel={`You ${
-                isAFavorite ? 'liked' : "didn't like"
-              } this song.`}
+              tooltipLabel={t(
+                `song.${isAFavorite ? 'likedThisSong' : 'dislikedThisSong'}`,
+              )}
               clickHandler={(e) => {
                 e.stopPropagation();
                 handleLikeButtonClick();

@@ -71,8 +71,8 @@ const RecentlyAddedSongs = React.forwardRef(
             <div className="title-container my-4 flex items-center justify-between text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
               {t('homePage.recentlyAddedSongs')}
               <Button
-                label={t('homePage.showAll')}
-                tooltipLabel="Opens 'Songs' with 'Newest' sort option."
+                label={t('common.showAll')}
+                tooltipLabel={t('homePage.openSongsWithNewestSortOption')}
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>

@@ -1,5 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+
 import Button from '../Button';
 import SongMetadataResult from './SongMetadataResult';
 
@@ -19,7 +21,10 @@ type DataLoadingStates =
 const SongMetadataResultsSelectPage = (
   props: SongMetadataResultsSelectPageProp,
 ) => {
+  const { t } = useTranslation();
+
   const { songTitle, songArtists, updateSongInfo } = props;
+
   const [songData, setSongData] = React.useState({
     songTitle: '',
     songArtists: '',
@@ -77,14 +82,20 @@ const SongMetadataResultsSelectPage = (
   return (
     <div className="relative">
       <div className="title-container mb-4 w-full text-2xl font-medium">
-        Results related to{' '}
-        <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
-          "{songTitle}"
-        </span>
+        <Trans
+          i18nKey="songMetadataResultSelectPrompt.title"
+          components={{
+            span: (
+              <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
+                "{songTitle}"
+              </span>
+            ),
+          }}
+        />
       </div>
       <div className="query-editing-inputs-container my-2 flex items-center justify-between">
         <div>
-          <label htmlFor="songTitleInput">Title : </label>
+          <label htmlFor="songTitleInput">{t('common.title')} : </label>
           <input
             type="text"
             id="songTitleInput"
@@ -99,7 +110,9 @@ const SongMetadataResultsSelectPage = (
             onKeyDown={(e) => e.stopPropagation()}
             placeholder="Song Title"
           />
-          <label htmlFor="songArtistsInput">Artists : </label>
+          <label htmlFor="songArtistsInput">
+            {t('common.artist_other')} :{' '}
+          </label>
           <input
             type="text"
             id="songArtistsInput"
@@ -116,7 +129,7 @@ const SongMetadataResultsSelectPage = (
           />
         </div>
         <Button
-          label="Search"
+          label={t('common.search')}
           clickHandler={() =>
             fetchSongResults(
               songData.songTitle,

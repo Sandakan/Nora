@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
@@ -7,6 +8,8 @@ const NavigationControlsContainer = () => {
   const { pageHistoryIndex, noOfPagesInHistory, bodyBackgroundImage } =
     React.useContext(AppContext);
   const { updatePageHistoryIndex } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   return (
     <div className="navigation-controls-container ml-12 flex min-w-[9rem] items-center justify-between">
       <Button
@@ -21,7 +24,7 @@ const NavigationControlsContainer = () => {
           '!text-font-color-white hover:!text-font-color-highlight'
         }`}
         clickHandler={() => updatePageHistoryIndex('decrement')}
-        tooltipLabel="Go Back (Alt + Left Arrow)"
+        tooltipLabel={t('titleBar.goBack')}
       />
 
       <Button
@@ -36,7 +39,7 @@ const NavigationControlsContainer = () => {
           '!text-font-color-white hover:!text-font-color-highlight'
         }`}
         clickHandler={() => updatePageHistoryIndex('home')}
-        tooltipLabel="Go to Home (Alt + Home)"
+        tooltipLabel={t('titleBar.goHome')}
       />
 
       <Button
@@ -51,7 +54,7 @@ const NavigationControlsContainer = () => {
           '!text-font-color-white hover:!text-font-color-highlight'
         }`}
         clickHandler={() => updatePageHistoryIndex('increment')}
-        tooltipLabel="Go forward (Alt + Right Arrow)"
+        tooltipLabel={t('titleBar.goForward')}
       />
     </div>
   );

@@ -1,10 +1,12 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import storage from 'renderer/utils/localStorage';
 import Checkbox from '../../Checkbox';
 
 const PerformanceSettings = () => {
   const { localStorageData } = React.useContext(AppContext);
+  const { t } = useTranslation();
 
   return (
     <li className="main-container performance-settings-container mb-16">
@@ -12,17 +14,16 @@ const PerformanceSettings = () => {
         <span className="material-icons-round-outlined mr-2 leading-none">
           offline_bolt
         </span>
-        <span>Performance</span>
+        <span> {t('settingsPage.performance')}</span>
       </div>
       <ul className="list-disc pl-6 marker:bg-background-color-3 dark:marker:bg-background-color-3">
         <li className="secondary-container toggle-remove-animations-on-battery-power mb-4">
           <div className="description">
-            Removes animation that appears in the app when system is on battery
-            power.
+            {t('settingsPage.removeAnimationOnBatteryDescription')}
           </div>
           <Checkbox
             id="removeAnimationsOnBatteryPower"
-            labelContent="Remove animations when in battery power"
+            labelContent={t('settingsPage.removeAnimationOnBattery')}
             isChecked={
               localStorageData !== undefined &&
               localStorageData.preferences.removeAnimationsOnBatteryPower

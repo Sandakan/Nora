@@ -1,6 +1,7 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable no-console */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { VariableSizeList as List } from 'react-window';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
@@ -12,44 +13,7 @@ import MainContainer from '../MainContainer';
 import Song from '../SongsPage/Song';
 import TitleContainer from '../TitleContainer';
 import GenreImgAndInfoContainer from './GenreImgAndInfoContainer';
-
-const dropdownOptions: { label: string; value: SongSortTypes }[] = [
-  { label: 'A to Z', value: 'aToZ' },
-  { label: 'Z to A', value: 'zToA' },
-  { label: 'Newest', value: 'dateAddedAscending' },
-  { label: 'Oldest', value: 'dateAddedDescending' },
-  { label: 'Released Year (Ascending)', value: 'releasedYearAscending' },
-  { label: 'Released Year (Descending)', value: 'releasedYearDescending' },
-  {
-    label: 'Most Listened (All Time)',
-    value: 'allTimeMostListened',
-  },
-  {
-    label: 'Least Listened (All Time)',
-    value: 'allTimeLeastListened',
-  },
-  {
-    label: 'Most Listened (This Month)',
-    value: 'monthlyMostListened',
-  },
-  {
-    label: 'Least Listened (This Month)',
-    value: 'monthlyLeastListened',
-  },
-  {
-    label: 'Artist Name (A to Z)',
-    value: 'artistNameAscending',
-  },
-  {
-    label: 'Artist Name (Z to A)',
-    value: 'artistNameDescending',
-  },
-  { label: 'Album Name (A to Z)', value: 'albumNameAscending' },
-  {
-    label: 'Album Name (Z to A)',
-    value: 'albumNameDescending',
-  },
-];
+import { songSortOptions } from '../SongsPage/SongsPage';
 
 const GenreInfoPage = () => {
   const { currentlyActivePage, queue, localStorageData } =
@@ -61,6 +25,7 @@ const GenreInfoPage = () => {
     updateCurrentlyActivePageData,
     playSong,
   } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const [genreData, setGenreData] = React.useState<Genre>();
   const [genreSongs, setGenreSongs] = React.useState<AudioInfo[]>([]);
@@ -237,7 +202,7 @@ const GenreInfoPage = () => {
         className="pr-4"
         buttons={[
           {
-            label: 'Play All',
+            label: t('common.playAll'),
             iconName: 'play_arrow',
             clickHandler: () =>
               createQueue(
@@ -278,12 +243,9 @@ const GenreInfoPage = () => {
                 {
                   id: genreData?.genreId || '',
                   delay: 5000,
-                  content: (
-                    <span>
-                      Added {genreSongs.length} song
-                      {genreSongs.length === 1 ? '' : 's'} to the queue.
-                    </span>
-                  ),
+                  content: t('notifications.addedToQueue', {
+                    count: genreSongs.length,
+                  }),
                 },
               ]);
             },
@@ -293,7 +255,7 @@ const GenreInfoPage = () => {
         dropdown={{
           name: 'songsPageSortDropdown',
           value: sortingOrder,
-          options: dropdownOptions,
+          options: songSortOptions,
           onChange: (e) => {
             const order = e.currentTarget.value as SongSortTypes;
             updateCurrentlyActivePageData((currentPageData) => ({

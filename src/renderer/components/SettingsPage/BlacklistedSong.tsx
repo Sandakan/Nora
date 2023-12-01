@@ -1,5 +1,8 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+
 import Button from '../Button';
 
 interface BlacklistedSongProp {
@@ -11,6 +14,8 @@ interface BlacklistedSongProp {
 
 const BlacklistedSong = (props: BlacklistedSongProp) => {
   const { addNewNotifications } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const { title, index, songId, songPath } = props;
 
   return (
@@ -39,9 +44,7 @@ const BlacklistedSong = (props: BlacklistedSongProp) => {
                 {
                   id: `${title}RestoreSuccess`,
                   delay: 5000,
-                  content: (
-                    <span>&apos;{title}&apos; song restored successfully.</span>
-                  ),
+                  content: t('notifications.songRestoreSuccess'),
                   icon: (
                     <span className="material-icons-round icon">check</span>
                   ),

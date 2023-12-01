@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 
 import Button from './Button';
@@ -14,6 +15,8 @@ export const unplayableSongNotificationConfig = {
 
 const SongUnplayableErrorPrompt = (props: Props) => {
   const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const { err } = props;
   return (
     <div>
@@ -21,17 +24,14 @@ const SongUnplayableErrorPrompt = (props: Props) => {
         <span className="material-icons-round-outlined mr-4">
           play_disabled
         </span>
-        Couldn't Play the Song
+        {t('songUnplayableErrorPrompt.title')}
       </div>
-      <p>
-        Seems like we can't play that song. Please check whether the selected
-        song is available in your system and accessible by the app.
-      </p>
+      <p>{t('songUnplayableErrorPrompt.description')}</p>
       <div className="mt-6">
         ERROR: {err?.message.split(':').at(-1) ?? 'UNKNOWN'}
       </div>
       <Button
-        label="OK"
+        label={t('common.ok')}
         className="remove-song-from-library-btn float-right mt-2 w-[10rem] !bg-background-color-3 text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
         clickHandler={() => changePromptMenuData(false)}
       />

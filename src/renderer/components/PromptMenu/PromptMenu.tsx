@@ -2,6 +2,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
 import Button from '../Button';
@@ -10,6 +11,8 @@ import MainContainer from '../MainContainer';
 const PromptMenu = () => {
   const { promptMenuData } = React.useContext(AppContext);
   const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const promptMenuRef =
     React.useRef() as React.MutableRefObject<HTMLDialogElement>;
 
@@ -81,6 +84,7 @@ const PromptMenu = () => {
         key={0}
         className="prompt-menu-close-btn absolute right-4 top-4 !m-0 !rounded-none !border-0 !p-0 text-font-color-black outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white"
         iconName="close"
+        tooltipLabel={t('common.close')}
         iconClassName="!leading-none !text-xl"
         clickHandler={(e) => {
           e.stopPropagation();

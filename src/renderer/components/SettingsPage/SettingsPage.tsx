@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import MainContainer from '../MainContainer';
 import AppearanceSettings from './Settings/AppearanceSettings';
 import AudioPlaybackSettings from './Settings/AudioPlaybackSettings';
@@ -13,11 +15,12 @@ import PerformanceSettings from './Settings/PerformanceSettings';
 import AccountsSettings from './Settings/AccountsSettings';
 
 const SettingsPage = () => {
+  const { t } = useTranslation();
   return (
     <MainContainer className="main-container settings-container appear-from-bottom !mb-0 !h-fit pb-8 pr-8 text-font-color-black dark:text-font-color-white [scrollbar-gutter:stable]">
       <>
         <div className="title-container mb-4 mt-1 flex items-center justify-between text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-          Settings
+          {t('settingsPage.settings')}
         </div>
 
         <ul className="pl-4">

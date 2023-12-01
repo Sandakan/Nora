@@ -1,6 +1,7 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 
@@ -10,6 +11,8 @@ import ReleaseNotesPrompt from '../../ReleaseNotesPrompt/ReleaseNotesPrompt';
 const NewUpdateIndicator = () => {
   const { appUpdatesState } = React.useContext(AppContext);
   const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   return (
     <>
       {!(appUpdatesState === 'UNKNOWN') && (
@@ -27,17 +30,17 @@ const NewUpdateIndicator = () => {
                   ? 'sync'
                   : 'warning'
           }
-          tooltipLabel={
+          tooltipLabel={t(
             appUpdatesState === 'OLD'
-              ? 'New app update available.'
+              ? 'common.newUpdateAvailable'
               : appUpdatesState === 'CHECKING'
-                ? 'Checking for app updates...'
+                ? 'common.checkingForUpdates'
                 : appUpdatesState === 'ERROR'
-                  ? 'Error occurred when checking for app updates.'
+                  ? 'common.updateCheckError'
                   : appUpdatesState === 'NO_NETWORK_CONNECTION'
-                    ? 'Error occurred when checking for app updates. No internet connection found.'
-                    : undefined
-          }
+                    ? 'common.updateCheckErrorNoInternet'
+                    : 'releaseNotesPrompt.latestVersion',
+          )}
           clickHandler={() =>
             changePromptMenuData(true, <ReleaseNotesPrompt />)
           }

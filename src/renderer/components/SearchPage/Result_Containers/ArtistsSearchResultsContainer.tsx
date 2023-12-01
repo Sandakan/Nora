@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Artist } from 'renderer/components/ArtistPage/Artist';
 import Button from 'renderer/components/Button';
 import SecondaryContainer from 'renderer/components/SecondaryContainer';
@@ -24,6 +25,7 @@ const ArtistsSearchResultsContainer = (props: Props) => {
     React.useContext(AppContext);
   const { toggleMultipleSelections, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const selectAllHandler = useSelectAllHandler(artists, 'artist', 'artistId');
 
@@ -80,21 +82,28 @@ const ArtistsSearchResultsContainer = (props: Props) => {
             <div className="other-stats-container ml-12 flex items-center text-xs">
               {artists && artists.length > 0 && (
                 <span className="no-of-songs">
-                  {artists.length} results{' '}
-                  {artists.length > noOfVisibleArtists &&
-                    `(${noOfVisibleArtists} shown)`}
+                  {t(
+                    `searchPage.${
+                      artists.length > noOfVisibleArtists
+                        ? 'resultAndVisibleCount'
+                        : 'resultCount'
+                    }`,
+                    { count: artists.length, noVisible: noOfVisibleArtists },
+                  )}
                 </span>
               )}
             </div>
           </div>
           <div className="other-controls-container flex">
             <Button
-              label={
-                isMultipleSelectionEnabled &&
-                multipleSelectionsData.selectionType === 'artist'
-                  ? 'Unselect All'
-                  : 'Select'
-              }
+              label={t(
+                `common.${
+                  isMultipleSelectionEnabled &&
+                  multipleSelectionsData.selectionType === 'artist'
+                    ? 'unselectAll'
+                    : 'select'
+                }`,
+              )}
               className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
               iconName={
                 isMultipleSelectionEnabled &&
@@ -109,13 +118,15 @@ const ArtistsSearchResultsContainer = (props: Props) => {
                 isMultipleSelectionEnabled &&
                 multipleSelectionsData.selectionType !== 'artist'
               }
-              tooltipLabel={
-                isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
-              }
+              tooltipLabel={t(
+                `common.${
+                  isMultipleSelectionEnabled ? 'unselectAll' : 'select'
+                }`,
+              )}
             />
             {artists.length > noOfVisibleArtists && (
               <Button
-                label="Show All"
+                label={t('common.showAll')}
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>

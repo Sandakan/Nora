@@ -1,4 +1,5 @@
 import React, { CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FixedSizeGrid as Grid } from 'react-window';
 
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
@@ -7,14 +8,36 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import debounce from 'renderer/utils/debounce';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 import storage from 'renderer/utils/localStorage';
+import i18n from 'renderer/i18n';
 
 import { Artist } from './Artist';
-import Dropdown from '../Dropdown';
+import Dropdown, { DropdownOption } from '../Dropdown';
 import MainContainer from '../MainContainer';
 import Img from '../Img';
 import Button from '../Button';
 
 import NoArtistImage from '../../../../assets/images/svg/Sun_Monochromatic.svg';
+
+const artistSortOptions: DropdownOption<ArtistSortTypes>[] = [
+  { label: i18n.t('sortTypes.aToZ'), value: 'aToZ' },
+  { label: i18n.t('sortTypes.zToA'), value: 'zToA' },
+  {
+    label: i18n.t('sortTypes.noOfSongsDescending'),
+    value: 'noOfSongsDescending',
+  },
+  {
+    label: i18n.t('sortTypes.noOfSongsAscending'),
+    value: 'noOfSongsAscending',
+  },
+  {
+    label: i18n.t('sortTypes.mostLovedDescending'),
+    value: 'mostLovedDescending',
+  },
+  {
+    label: i18n.t('sortTypes.mostLovedAscending'),
+    value: 'mostLovedAscending',
+  },
+];
 
 const ArtistPage = () => {
   const {
@@ -25,6 +48,7 @@ const ArtistPage = () => {
   } = React.useContext(AppContext);
   const { updateCurrentlyActivePageData, toggleMultipleSelections } =
     React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const [artistsData, setArtistsData] = React.useState([] as Artist[]);
   const [sortingOrder, setSortingOrder] = React.useState<ArtistSortTypes>(
@@ -147,26 +171,33 @@ const ArtistPage = () => {
         {artistsData.length > 0 && (
           <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
             <div className="container flex">
-              Artists{' '}
+              {t('common.artist_other')}{' '}
               <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
                 {isMultipleSelectionEnabled ? (
                   <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
-                    {multipleSelectionsData.multipleSelections.length}{' '}
-                    selections
+                    {t('common.selectionWithCount', {
+                      count: multipleSelectionsData.multipleSelections.length,
+                    })}
                   </div>
                 ) : (
                   artistsData &&
                   artistsData.length > 0 && (
-                    <span className="no-of-artists">{`${
-                      artistsData.length
-                    } artist${artistsData.length === 1 ? '' : 's'}`}</span>
+                    <span className="no-of-artists">
+                      {t('common.artistWithCount', {
+                        count: artistsData.length,
+                      })}
+                    </span>
                   )
                 )}
               </div>
             </div>
             <div className="other-control-container flex">
               <Button
-                label={isMultipleSelectionEnabled ? 'Unselect All' : 'Select'}
+                label={t(
+                  `common.${
+                    isMultipleSelectionEnabled ? 'unselectAll' : 'select'
+                  }`,
+                )}
                 className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                 iconName={
                   isMultipleSelectionEnabled ? 'remove_done' : 'checklist'
@@ -177,23 +208,11 @@ const ArtistPage = () => {
                     'artist',
                   )
                 }
-                tooltipLabel={
-                  isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
-                }
               />
               <Dropdown
                 name="artistsSortDropdown"
                 value={sortingOrder}
-                options={
-                  [
-                    { label: 'A to Z', value: 'aToZ' },
-                    { label: 'Z to A', value: 'zToA' },
-                    { label: 'High Song Count', value: 'noOfSongsDescending' },
-                    { label: 'Low Song Count', value: 'noOfSongsAscending' },
-                    { label: 'Most Loved', value: 'mostLovedDescending' },
-                    { label: 'Least Loved', value: 'mostLovedAscending' },
-                  ] as { label: string; value: ArtistSortTypes }[]
-                }
+                options={artistSortOptions}
                 onChange={(e) => {
                   const artistSortType = e.currentTarget
                     .value as ArtistSortTypes;
@@ -259,7 +278,7 @@ const ArtistPage = () => {
               alt="Sun in a desert"
               className="mb-8 w-60"
             />
-            <div>Hmm... Where did the artists go?</div>
+            <div>{t('artistsPage.empty')}</div>
           </div>
         )}
       </>

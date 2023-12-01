@@ -1,5 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
 
@@ -11,6 +12,8 @@ interface ConfirmDeletePlaylistProp {
 const ConfirmDeletePlaylists = (props: ConfirmDeletePlaylistProp) => {
   const { addNewNotifications, changePromptMenuData } =
     React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const { playlistIds, playlistName } = props;
 
   const [playlistsData, setPlaylistsData] = React.useState<Playlist[]>([]);
@@ -46,34 +49,30 @@ const ConfirmDeletePlaylists = (props: ConfirmDeletePlaylistProp) => {
           {
             id: `playlistsDeleted`,
             delay: 5000,
-            content: <span>{playlistIds.length} playlists deleted.</span>,
+            content: t(
+              'confirmDeletePlaylistsPrompt.playlistsDeletedWithCount',
+              { count: playlistIds.length },
+            ),
           },
         ]);
       })
       .catch((err) => console.error(err));
-  }, [addNewNotifications, changePromptMenuData, playlistIds]);
+  }, [addNewNotifications, changePromptMenuData, playlistIds, t]);
 
   return (
     <>
       <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
-        Confrim Deleting{' '}
-        {playlistIds.length === 1
-          ? `'${playlistName}' playlist`
-          : `${playlistIds.length} playlists`}
-        .
+        {t('confirmDeletePlaylistsPrompt.confirmPlaylistDeleteWithCount', {
+          count: playlistIds.length,
+          playlistName,
+        })}
       </div>
       <div className="description">
-        Removing{' '}
-        {playlistIds.length === 1 ? 'this playlist' : 'these playlists'} will
-        remove the connection between{' '}
-        {playlistIds.length === 1 ? 'this playlist' : 'these playlists'} and the
-        songs that you organized into{' '}
-        {playlistIds.length === 1 ? 'this playlist' : 'these playlists'}. You
-        won't be able to access{' '}
-        {playlistIds.length === 1 ? 'this playlist' : 'these playlists'} again
-        if you decide to delete it.
+        {t('confirmDeletePlaylistsPrompt.message', {
+          count: playlistIds.length,
+        })}
         <div className="info-about-affecting-files-container mt-4">
-          <p>Proceeding this action affects these playlists :</p>
+          <p>{t('confirmDeletePlaylistsPrompt.modificationNotice')}</p>
           <ul className="ml-4 list-inside list-disc">
             {playlistsData.map((playlist) => (
               <li className="text-sm font-light">{playlist.name}</li>
@@ -86,13 +85,15 @@ const ConfirmDeletePlaylists = (props: ConfirmDeletePlaylistProp) => {
           <span className="material-icons-round-outlined mr-2 text-lg">
             warning
           </span>{' '}
-          You cannot remove Playlists like History or Favorites.
+          {t('resetAppConfirmationPrompt.systemPlaylistsRemovalProhibited')}
         </h4>
       )}
       {arePlaylistsRemovable && (
         <div className="buttons-container mt-8 flex w-full justify-end">
           <Button
-            label="Delete Playlists"
+            label={t('playlist.deletePlaylist', {
+              count: playlistsData.length,
+            })}
             className="delete-playlist-btn danger-btn float-right h-10 w-48 cursor-pointer rounded-lg border-[transparent] !bg-font-color-crimson text-font-color-white outline-none ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson"
             clickHandler={removePlaylists}
           />

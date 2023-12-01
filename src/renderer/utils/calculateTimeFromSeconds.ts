@@ -1,3 +1,5 @@
+import i18n from 'renderer/i18n';
+
 const calculateTimeFromSeconds = (secs = 0) => {
   // eslint-disable-next-line no-param-reassign
   if (typeof secs !== 'number' && secs < 0) secs = 0;
@@ -14,26 +16,20 @@ const calculateTimeFromSeconds = (secs = 0) => {
   const hoursWithoutDays = totalHours - totalDays * 24;
   const minutesWithoutHours = totalMinutes - totalHours * 60;
 
-  const yearsString =
-    totalYears >= 1 ? `${totalYears} hour${totalYears === 1 ? '' : 's'} ` : '';
-  const monthsString =
-    monthsWithoutYears >= 1
-      ? `${monthsWithoutYears} hour${monthsWithoutYears === 1 ? '' : 's'} `
-      : '';
-  const daysString =
-    daysWithoutMonths >= 1
-      ? `${daysWithoutMonths} day${daysWithoutMonths === 1 ? '' : 's'} `
-      : '';
-  const hoursString =
-    hoursWithoutDays >= 1
-      ? `${hoursWithoutDays} hour${hoursWithoutDays === 1 ? '' : 's'} `
-      : '';
-  const minutesString = `${minutesWithoutHours} minute${
-    minutesWithoutHours === 1 ? '' : 's'
-  }`;
-  const secondsString = ` ${seconds} second${seconds === 1 ? '' : 's'}`;
+  const timeArr: string[] = [];
 
-  const timeString = `${yearsString}${monthsString}${daysString}${hoursString}${minutesString}${secondsString}`;
+  if (totalYears >= 1) timeArr.push(i18n.t('time.year', { count: totalYears }));
+  if (monthsWithoutYears >= 1)
+    timeArr.push(i18n.t('time.month', { count: monthsWithoutYears }));
+  if (daysWithoutMonths >= 1)
+    timeArr.push(i18n.t('time.day', { count: daysWithoutMonths }));
+  if (hoursWithoutDays >= 1)
+    timeArr.push(i18n.t('time.hour', { count: hoursWithoutDays }));
+  if (minutesWithoutHours >= 1)
+    timeArr.push(i18n.t('time.minute', { count: minutesWithoutHours }));
+  timeArr.push(i18n.t('time.second', { count: seconds }));
+
+  const timeString = timeArr.join(' ');
 
   return {
     years: totalYears,

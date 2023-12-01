@@ -1,12 +1,14 @@
 /* eslint-disable jsx-a11y/no-autofocus */
 import React, { useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import debounce from 'renderer/utils/debounce';
 import storage from 'renderer/utils/localStorage';
+import i18n from 'renderer/i18n';
 
-import SearchResultsFilter from './SearchResultsFilter';
+import SearchResultsFilter, { SearchResultFilter } from './SearchResultsFilter';
 import MainContainer from '../MainContainer';
 import GenreSearchResultsContainer from './Result_Containers/GenreSearchResultsContainer';
 import PlaylistSearchResultsContainer from './Result_Containers/PlaylistSearchResultsContainer';
@@ -18,13 +20,17 @@ import NoSearchResultsContainer from './NoSearchResultsContainer';
 import SearchStartPlaceholder from './SearchStartPlaceholder';
 import Button from '../Button';
 
-const filterTypes: SearchFilters[] = [
-  'All',
-  'Songs',
-  'Albums',
-  'Artists',
-  'Playlists',
-  'Genres',
+const searchFilter: SearchResultFilter[] = [
+  { label: i18n.t('searchPage.allFilter'), icon: 'select_all', value: 'All' },
+  { label: i18n.t('common.song_other'), icon: 'music_note', value: 'Songs' },
+  { label: i18n.t('common.album_other'), icon: 'people', value: 'Albums' },
+  { label: i18n.t('common.artist_other'), icon: 'album', value: 'Artists' },
+  {
+    label: i18n.t('common.playlist_other'),
+    icon: 'track_changes',
+    value: 'Playlists',
+  },
+  { label: i18n.t('common.genre_other'), icon: 'queue_music', value: 'Genres' },
 ];
 const ARTIST_WIDTH = 175;
 const ALBUM_WIDTH = 210;
@@ -34,6 +40,7 @@ const GENRE_WIDTH = 300;
 const SearchPage = () => {
   const { currentlyActivePage, localStorageData } = useContext(AppContext);
   const { updateCurrentlyActivePageData } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const [searchInput, setSearchInput] = React.useState(
     currentlyActivePage?.data?.keyword || '',
@@ -73,12 +80,14 @@ const SearchPage = () => {
     [],
   );
 
-  const filters = filterTypes.map((filterType) => {
+  const filters = searchFilter.map((filter) => {
     return (
       <SearchResultsFilter
-        key={filterType}
-        filterType={filterType}
-        isCurrentActiveFilter={filterType === activeFilter}
+        key={filter.value}
+        label={filter.label}
+        icon={filter.icon}
+        value={filter.value}
+        isCurrentActiveFilter={filter.value === activeFilter}
         changeActiveFilter={changeActiveFilter}
       />
     );
@@ -162,10 +171,13 @@ const SearchPage = () => {
                   : 'bg-background-color-1/50 !text-font-color-highlight hover:bg-background-color-1 focus-visible:bg-background-color-1 dark:bg-dark-background-color-1/50 dark:!text-dark-font-color-highlight dark:hover:bg-dark-background-color-1 dark:focus-visible:bg-dark-background-color-1'
               }`}
               iconName={isPredictiveSearchEnabled ? 'auto_fix' : 'auto_fix_off'}
-              // label="Predictive Search"
-              tooltipLabel={`${
-                isPredictiveSearchEnabled ? 'Disable' : 'Enable'
-              } predictive search`}
+              tooltipLabel={t(
+                `searchPage.${
+                  isPredictiveSearchEnabled
+                    ? 'disablePredictiveSearch'
+                    : 'enablePredictiveSearch'
+                }`,
+              )}
               iconClassName="material-icons-round-outlined"
               clickHandler={() =>
                 setIsPredictiveSearchEnabled((state) => {
@@ -184,7 +196,7 @@ const SearchPage = () => {
               id="searchBar"
               className="h-full w-full border-2 border-[transparent] bg-[transparent] text-font-color-black outline-none placeholder:text-font-color-highlight dark:text-font-color-white dark:placeholder:text-dark-font-color-highlight"
               aria-label="Search"
-              placeholder="Search for anything"
+              placeholder={t('searchPage.searchForAnything')}
               value={searchInput}
               onChange={(e) => {
                 debounce(
@@ -203,7 +215,7 @@ const SearchPage = () => {
           </div>
           <span
             className="material-icons-round-outlined ml-4 cursor-help text-2xl text-font-color-highlight dark:text-dark-font-color-highlight"
-            title={`Use ' ; ' to separate keywords in Search.`}
+            title={t('searchPage.separateKeywords')}
           >
             help
           </span>

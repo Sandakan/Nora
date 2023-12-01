@@ -45,6 +45,7 @@ export const USER_DATA_TEMPLATE: UserData = {
   windowState: 'normal',
   recentSearches: [],
 };
+
 export const HISTORY_PLAYLIST_TEMPLATE: SavablePlaylist = {
   name: 'History',
   playlistId: 'History',

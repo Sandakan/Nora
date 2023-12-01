@@ -1,5 +1,6 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
@@ -18,6 +19,7 @@ import ReleaseNotesAppUpdateInfo from './ReleaseNotesAppUpdateInfo';
 const ReleaseNotesPrompt = () => {
   const { appUpdatesState, localStorageData } = React.useContext(AppContext);
   const { updateAppUpdatesState } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const { isOnline } = useNetworkConnectivity();
   const [releaseNotes, setReleaseNotes] = React.useState<Changelog>(
@@ -39,6 +41,7 @@ const ReleaseNotesPrompt = () => {
     const latestVersion = sortedReleaseNotes[0];
 
     // ! / / / / TO BE DEPRECATED CODE / / /
+    /** @deprecated  */
     if (releaseNotes.latestVersion) {
       latestVersion.artwork ||= releaseNotes.latestVersion.artwork;
       latestVersion.importantNotes ??=
@@ -138,7 +141,7 @@ const ReleaseNotesPrompt = () => {
         {releaseNotes && (
           <>
             <h2 className="title-container mb-2 text-center text-3xl font-medium">
-              Changelog
+              {t('releaseNotesPrompt.changelog')}
               <ReleaseNotesAppUpdateInfo state={appUpdatesState} />
             </h2>
             {isOnline && !isAppLatestVersion && (
@@ -147,7 +150,9 @@ const ReleaseNotesPrompt = () => {
                   id="noNewUpdateInformCheckbox"
                   className="text-sm"
                   isChecked={noNewUpdateInform}
-                  labelContent="Do not remind me again about this version of the app."
+                  labelContent={t(
+                    'releaseNotesPrompt.doNotRemindThisVersionUpdate',
+                  )}
                   checkedStateUpdateFunction={(state) =>
                     updateNoNewUpdateInform(state)
                   }

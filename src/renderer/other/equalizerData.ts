@@ -15,11 +15,11 @@ export const equalizerBandHertzData: Record<EqualizerBandFilters, number> = {
 
 export const equalizerPresetsData: EqualizerPresetsData = [
   {
-    title: 'Flat',
+    title: 'flat',
     preset: LOCAL_STORAGE_DEFAULT_TEMPLATE.equalizerPreset,
   },
   {
-    title: 'Acoustic',
+    title: 'acoustic',
     preset: {
       thirtyTwoHertzFilter: 4.8,
       sixtyFourHertzFilter: 4.5,
@@ -34,7 +34,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Bass Booster',
+    title: 'bassBooster',
     preset: {
       thirtyTwoHertzFilter: 5,
       sixtyFourHertzFilter: 4,
@@ -49,7 +49,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Bass Reducer',
+    title: 'bassReducer',
     preset: {
       thirtyTwoHertzFilter: -6.2,
       sixtyFourHertzFilter: -4.5,
@@ -64,7 +64,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Classical',
+    title: 'classical',
     preset: {
       thirtyTwoHertzFilter: 0,
       sixtyFourHertzFilter: 0,
@@ -79,7 +79,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Club',
+    title: 'club',
     preset: {
       thirtyTwoHertzFilter: 0.1,
       sixtyFourHertzFilter: 0.1,
@@ -94,7 +94,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Dance',
+    title: 'dance',
     preset: {
       thirtyTwoHertzFilter: 6.8,
       sixtyFourHertzFilter: 5.3,
@@ -109,7 +109,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Deep',
+    title: 'deep',
     preset: {
       thirtyTwoHertzFilter: 4.5,
       sixtyFourHertzFilter: 3,
@@ -124,7 +124,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Electronic',
+    title: 'electronic',
     preset: {
       thirtyTwoHertzFilter: 4,
       sixtyFourHertzFilter: 3.5,
@@ -139,7 +139,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Hip-Hop',
+    title: 'hipHop',
     preset: {
       thirtyTwoHertzFilter: 4.5,
       sixtyFourHertzFilter: 3.8,
@@ -154,7 +154,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Jazz',
+    title: 'jazz',
     preset: {
       thirtyTwoHertzFilter: 3.8,
       sixtyFourHertzFilter: 2.3,
@@ -169,7 +169,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Latin',
+    title: 'latin',
     preset: {
       thirtyTwoHertzFilter: 4,
       sixtyFourHertzFilter: 2.3,
@@ -184,7 +184,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Live',
+    title: 'live',
     preset: {
       thirtyTwoHertzFilter: -4.6,
       sixtyFourHertzFilter: -2.9,
@@ -199,7 +199,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Loudness',
+    title: 'loudness',
     preset: {
       thirtyTwoHertzFilter: 5.2,
       sixtyFourHertzFilter: 3.5,
@@ -214,7 +214,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Lounge',
+    title: 'lounge',
     preset: {
       thirtyTwoHertzFilter: -3.5,
       sixtyFourHertzFilter: -1.8,
@@ -229,7 +229,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Metal',
+    title: 'metal',
     preset: {
       thirtyTwoHertzFilter: -0.3,
       sixtyFourHertzFilter: 2.9,
@@ -244,7 +244,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Piano',
+    title: 'piano',
     preset: {
       thirtyTwoHertzFilter: 2.6,
       sixtyFourHertzFilter: 1.6,
@@ -259,7 +259,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Pop',
+    title: 'pop',
     preset: {
       thirtyTwoHertzFilter: -2.4,
       sixtyFourHertzFilter: -0.9,
@@ -274,7 +274,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Reggae',
+    title: 'reggae',
     preset: {
       thirtyTwoHertzFilter: 0,
       sixtyFourHertzFilter: 0,
@@ -289,7 +289,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'RnB',
+    title: 'rnb',
     preset: {
       thirtyTwoHertzFilter: 2.1,
       sixtyFourHertzFilter: 6.2,
@@ -304,7 +304,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Rock',
+    title: 'rock',
     preset: {
       thirtyTwoHertzFilter: 5.9,
       sixtyFourHertzFilter: 4.8,
@@ -319,7 +319,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Ska',
+    title: 'ska',
     preset: {
       thirtyTwoHertzFilter: -1.8,
       sixtyFourHertzFilter: -3,
@@ -334,7 +334,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Small Speakers',
+    title: 'smallSpeakers',
     preset: {
       thirtyTwoHertzFilter: 4.8,
       sixtyFourHertzFilter: 3.5,
@@ -349,7 +349,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Soft',
+    title: 'soft',
     preset: {
       thirtyTwoHertzFilter: 3,
       sixtyFourHertzFilter: 0.9,
@@ -364,7 +364,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Soft Rock',
+    title: 'softRock',
     preset: {
       thirtyTwoHertzFilter: 2.6,
       sixtyFourHertzFilter: 2.6,
@@ -379,7 +379,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Spoken Word',
+    title: 'spokenWord',
     preset: {
       thirtyTwoHertzFilter: -4.3,
       sixtyFourHertzFilter: -1.1,
@@ -394,7 +394,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Techno',
+    title: 'techno',
     preset: {
       thirtyTwoHertzFilter: 4.8,
       sixtyFourHertzFilter: 3.5,
@@ -409,7 +409,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Treble Booster',
+    title: 'trebleBooster',
     preset: {
       thirtyTwoHertzFilter: -0.4,
       sixtyFourHertzFilter: -0.4,
@@ -424,7 +424,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Treble Reducer',
+    title: 'trebleReducer',
     preset: {
       thirtyTwoHertzFilter: -0.4,
       sixtyFourHertzFilter: -0.4,
@@ -439,7 +439,7 @@ export const equalizerPresetsData: EqualizerPresetsData = [
     },
   },
   {
-    title: 'Vocal Booster',
+    title: 'vocalBooster',
     preset: {
       thirtyTwoHertzFilter: -2.1,
       sixtyFourHertzFilter: -3.3,

@@ -1,5 +1,6 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { CSSProperties, useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FixedSizeList as List, FixedSizeGrid as Grid } from 'react-window';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
@@ -20,45 +21,7 @@ import DuplicateArtistsSuggestion from './DuplicateArtistsSuggestion';
 import TitleContainer from '../TitleContainer';
 import SimilarArtistsContainer from './SimilarArtistsContainer';
 import Biography from '../Biography/Biography';
-
-const dropdownOptions: { label: string; value: SongSortTypes }[] = [
-  { label: 'Added Order', value: 'addedOrder' },
-  { label: 'A to Z', value: 'aToZ' },
-  { label: 'Z to A', value: 'zToA' },
-  { label: 'Newest', value: 'dateAddedAscending' },
-  { label: 'Oldest', value: 'dateAddedDescending' },
-  { label: 'Released Year (Ascending)', value: 'releasedYearAscending' },
-  { label: 'Released Year (Descending)', value: 'releasedYearDescending' },
-  {
-    label: 'Most Listened (All Time)',
-    value: 'allTimeMostListened',
-  },
-  {
-    label: 'Least Listened (All Time)',
-    value: 'allTimeLeastListened',
-  },
-  {
-    label: 'Most Listened (This Month)',
-    value: 'monthlyMostListened',
-  },
-  {
-    label: 'Least Listened (This Month)',
-    value: 'monthlyLeastListened',
-  },
-  {
-    label: 'Artist Name (A to Z)',
-    value: 'artistNameAscending',
-  },
-  {
-    label: 'Artist Name (Z to A)',
-    value: 'artistNameDescending',
-  },
-  { label: 'Album Name (A to Z)', value: 'albumNameAscending' },
-  {
-    label: 'Album Name (Z to A)',
-    value: 'albumNameDescending',
-  },
-];
+import { songSortOptions } from '../SongsPage/SongsPage';
 
 const ArtistInfoPage = () => {
   const {
@@ -81,6 +44,7 @@ const ArtistInfoPage = () => {
     toggleMultipleSelections,
     playSong,
   } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const [artistData, setArtistData] = React.useState<ArtistInfo>();
   const [albums, setAlbums] = React.useState<Album[]>([]);
@@ -280,16 +244,13 @@ const ArtistInfoPage = () => {
     };
   }, [fetchAlbumsData]);
 
-  const calculateTotalTime = React.useCallback(() => {
-    const { hours, minutes, seconds } = calculateTimeFromSeconds(
-      songs.reduce((prev, current) => prev + current.duration, 0),
-    );
-    return `${
-      hours >= 1 ? `${hours} hour${hours === 1 ? '' : 's'} ` : ''
-    }${minutes} minute${minutes === 1 ? '' : 's'} ${seconds} second${
-      seconds === 1 ? '' : 's'
-    }`;
-  }, [songs]);
+  const artistSongsDuration = React.useMemo(
+    () =>
+      calculateTimeFromSeconds(
+        songs.reduce((prev, current) => prev + current.duration, 0),
+      ).timeString,
+    [songs],
+  );
 
   const selectAllHandlerForAlbums = useSelectAllHandler(
     albums,
@@ -499,7 +460,7 @@ const ArtistInfoPage = () => {
                 true,
                 [
                   {
-                    label: 'Save Artwork',
+                    label: t('common.saveArtwork'),
                     class: 'save',
                     iconName: 'image',
                     iconClassName: 'material-icons-round-outlined',
@@ -523,11 +484,12 @@ const ArtistInfoPage = () => {
           />
           <Button
             className="absolute bottom-4 right-2 !m-0 flex rounded-full !border-0 bg-background-color-1 !p-3 shadow-xl outline-1 -outline-offset-[6px] focus-visible:!outline dark:bg-dark-background-color-2"
-            tooltipLabel={
-              artistData?.isAFavorite
-                ? `Dislike '${artistData?.name}'`
-                : `Like '${artistData?.name}'`
-            }
+            tooltipLabel={t(
+              `artistInfoPage.${
+                artistData?.isAFavorite ? `dislikeArtist` : `likeArtist`
+              }`,
+              { name: artistData?.name },
+            )}
             iconName="favorite"
             iconClassName={`!text-3xl !leading-none ${
               artistData?.isAFavorite
@@ -574,24 +536,20 @@ const ArtistInfoPage = () => {
                 : undefined
             }
           >
-            {artistData?.name || 'Unknown Artist'}
+            {artistData?.name || t('common.unknownArtist')}
           </div>
           {artistData?.songs && (
             <div className="artist-no-of-songs">
-              {artistData.albums && artistData.albums.length > 0
-                ? `${artistData.albums.length} album${
-                    artistData.albums.length === 1 ? '' : 's'
-                  } `
-                : '0 albums '}
-              &bull;
-              {` ${artistData.songs.length} song${
-                artistData.songs.length === 1 ? '' : 's'
-              } `}
+              {t('common.albumWithCount', {
+                count: artistData?.albums?.length || 0,
+              })}{' '}
+              &bull;{' '}
+              {t('common.songWithCount', { count: artistData.songs.length })}
             </div>
           )}
           {songs.length > 0 && (
             <div className="artist-total-songs-duration">
-              {calculateTotalTime()}
+              {artistSongsDuration}
             </div>
           )}
         </div>
@@ -620,7 +578,7 @@ const ArtistInfoPage = () => {
         >
           <>
             <TitleContainer
-              title="Appears In Albums"
+              title={t('artistInfoPage.appearsInAlbums')}
               titleClassName="!text-2xl text-font-color-black !font-normal dark:text-font-color-white"
               className={`title-container ${
                 bodyBackgroundImage
@@ -632,21 +590,24 @@ const ArtistInfoPage = () => {
                 isMultipleSelectionEnabled &&
                 multipleSelectionsData.selectionType === 'album' ? (
                   <p className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
-                    {multipleSelectionsData.multipleSelections.length}{' '}
-                    selections
+                    {t('common.selectionWithCount', {
+                      count: multipleSelectionsData.multipleSelections.length,
+                    })}
                   </p>
                 ) : (
                   <p className="text-xs text-font-color-highlight dark:text-dark-font-color-highlight">
-                    {albums.length} albums{' '}
+                    {t('common.albumWithCount', { count: albums.length })}{' '}
                     {albums.length > noOfVisibleAlbums &&
                       !isAllAlbumsVisible &&
-                      `(${noOfVisibleAlbums} shown)`}
+                      t('common.shownWithCount', {
+                        count: artistData?.albums?.length || 0,
+                      })}
                   </p>
                 ),
               ]}
               buttons={[
                 {
-                  label: 'Show All',
+                  label: t('common.showAll'),
                   iconName: 'apps',
                   className: 'show-all-btn text-sm font-normal',
                   clickHandler: () => setIsAllAlbumsVisible(true),
@@ -689,7 +650,7 @@ const ArtistInfoPage = () => {
         >
           <>
             <TitleContainer
-              title="Appears In Songs"
+              title={t('artistInfoPage.appearsInSongs')}
               titleClassName="!text-2xl text-font-color-black !font-normal dark:text-font-color-white"
               className={`title-container ${
                 bodyBackgroundImage
@@ -700,19 +661,22 @@ const ArtistInfoPage = () => {
                 isMultipleSelectionEnabled &&
                 multipleSelectionsData.selectionType === 'songs' ? (
                   <p className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
-                    {multipleSelectionsData.multipleSelections.length}{' '}
-                    selections
+                    {t('common.selectionWithCount', {
+                      count: multipleSelectionsData.multipleSelections.length,
+                    })}
                   </p>
                 ) : (
                   <p className="text-xs text-font-color-highlight dark:text-dark-font-color-highlight">
-                    {songs.length} songs{' '}
-                    {songs.length > 5 && !isAllSongsVisible && '(5 shown)'}
+                    {t('common.songWithCount', { count: songs.length })}
+                    {songs.length > 5 && !isAllSongsVisible && (
+                      <> ({t('common.shownWithCount', { count: 5 })})</>
+                    )}
                   </p>
                 ),
               ]}
               buttons={[
                 {
-                  tooltipLabel: 'More Options',
+                  tooltipLabel: t('common.moreOptions'),
                   className:
                     'more-options-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0',
                   iconName: 'more_horiz',
@@ -724,7 +688,7 @@ const ArtistInfoPage = () => {
                       true,
                       [
                         {
-                          label: 'Shuffle and Play',
+                          label: t('common.shuffleAndPlay'),
                           iconName: 'shuffle',
                           handlerFunction: () =>
                             createQueue(
@@ -738,7 +702,7 @@ const ArtistInfoPage = () => {
                             ),
                         },
                         {
-                          label: 'Play All',
+                          label: t('common.playAll'),
                           iconName: 'play_arrow',
                           handlerFunction: () =>
                             createQueue(
@@ -760,9 +724,13 @@ const ArtistInfoPage = () => {
                               !isMultipleSelectionEnabled,
                               'songs',
                             ),
-                          label: isMultipleSelectionEnabled
-                            ? 'Unselect All'
-                            : 'Select',
+                          label: t(
+                            `common.${
+                              isMultipleSelectionEnabled
+                                ? 'unselectAll'
+                                : 'select'
+                            }`,
+                          ),
                         },
                       ],
                       x + 10,
@@ -771,7 +739,7 @@ const ArtistInfoPage = () => {
                   },
                 },
                 {
-                  label: 'Show All',
+                  label: t('common.showAll'),
                   iconName: 'apps',
                   className: 'show-all-btn text-sm font-normal',
                   clickHandler: () => setIsAllSongsVisible(true),
@@ -781,7 +749,7 @@ const ArtistInfoPage = () => {
               dropdown={{
                 name: 'ArtistInfoPageSongsSortDropdown',
                 value: sortingOrder,
-                options: dropdownOptions,
+                options: songSortOptions,
                 onChange: (e) =>
                   setSortingOrder(e.currentTarget.value as SongSortTypes),
               }}
@@ -816,7 +784,9 @@ const ArtistInfoPage = () => {
           bio={artistData?.artistBio}
           tags={artistData.tags}
           hyperlinkData={{
-            labelTitle: `Read More about ${artistData.name}`,
+            labelTitle: t('common.readMoreAboutTitle', {
+              title: artistData.name,
+            }),
           }}
         />
       )}

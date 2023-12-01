@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
@@ -23,6 +24,7 @@ const SongInfoPage = () => {
     updateBodyBackgroundImage,
     updateContextMenuData,
   } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const [songInfo, setSongInfo] = React.useState<SongData>();
   const [listeningData, setListeningData] = React.useState<SongListeningData>();
@@ -38,13 +40,9 @@ const SongInfoPage = () => {
   }, []);
 
   const songDuration = React.useMemo(() => {
-    if (songInfo) {
-      const { minutes, seconds } = calculateTimeFromSeconds(songInfo.duration);
+    const { timeString } = calculateTimeFromSeconds(songInfo?.duration ?? 0);
 
-      if (minutes === 0) return `${seconds} seconds`;
-      return `${minutes} minutes ${seconds} seconds`;
-    }
-    return '0 seconds';
+    return timeString;
   }, [songInfo]);
 
   const updateSongInfo = React.useCallback(
@@ -152,8 +150,10 @@ const SongInfoPage = () => {
         })
         .flat();
     }
-    return <span className="text-xs font-normal">Unknown Artist</span>;
-  }, [bodyBackgroundImage, songInfo?.artists]);
+    return (
+      <span className="text-xs font-normal">{t('common.unknownArtist')}</span>
+    );
+  }, [bodyBackgroundImage, songInfo?.artists, t]);
 
   const { allTimeListens, thisYearListens, thisMonthListens } =
     React.useMemo(() => {
@@ -241,7 +241,7 @@ const SongInfoPage = () => {
                   true,
                   [
                     {
-                      label: 'Save Song Artwork',
+                      label: t('common.saveArtwork'),
                       class: 'edit',
                       iconName: 'image',
                       iconClassName: 'material-icons-round-outlined',
@@ -265,8 +265,8 @@ const SongInfoPage = () => {
                 : 'text-font-color-black dark:text-font-color-white'
             }`}
           >
-            <div className="font-semibold opacity-50 dark:font-medium">
-              SONG
+            <div className="font-semibold opacity-50 dark:font-medium uppercase">
+              {t('common.song_one')}
             </div>
             <div
               className={`title info-type-1 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-5xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight ${
@@ -283,9 +283,8 @@ const SongInfoPage = () => {
               className={`info-type-2 !mr-0 mb-5 !w-fit truncate !border-0 !p-0 ${
                 songInfo.album && 'hover:underline'
               } ${bodyBackgroundImage && '!text-white'}`}
-              label={songInfo.album ? songInfo.album.name : 'Unknown Album'}
-              tooltipLabel={
-                songInfo.album ? songInfo.album.name : 'Unknown Album'
+              label={
+                songInfo.album ? songInfo.album.name : t('common.unknownAlbum')
               }
               clickHandler={() => {
                 if (songInfo.album) {
@@ -335,26 +334,26 @@ const SongInfoPage = () => {
               <div className="stat-cards grid w-fit grid-cols-2 flex-wrap gap-4 xl:order-1 xl:mt-4 xl:grid-cols-3 xl:grid-rows-2 ">
                 <SongStat
                   key={0}
-                  title="All time Listens"
+                  title={t('songInfoPage.allTimeListens')}
                   value={valueRounder(allTimeListens)}
                 />
                 <SongStat
                   key={1}
-                  title="Listens This Month"
+                  title={t('songInfoPage.listensThisMonth')}
                   value={valueRounder(thisMonthListens)}
                 />
                 <SongStat
                   key={2}
-                  title="Listens This Year"
+                  title={t('songInfoPage.listensThisYear')}
                   value={valueRounder(thisYearListens)}
                 />
                 <SongStat
                   key={3}
-                  title={
-                    songInfo.isAFavorite
-                      ? 'You loved this song'
-                      : "You didn't like this song"
-                  }
+                  title={t(
+                    `songInfoPage.${
+                      songInfo.isAFavorite ? 'lovedSong' : 'unlovedSong'
+                    }`,
+                  )}
                   value={
                     <span
                       className={`${
@@ -371,24 +370,28 @@ const SongInfoPage = () => {
                 />
                 <SongStat
                   key={4}
-                  title="Total Song Skips"
+                  title={t('songInfoPage.totalSongSkips')}
                   value={totalSongSkips}
                 />
                 <SongStat
                   key={5}
-                  title="Full Song Listens"
+                  title={t('songInfoPage.fullSongListens')}
                   value={totalSongFullListens}
                 />
                 {maxSongSeekPosition !== undefined && (
                   <SongStat
                     key={6}
-                    title="Most seeked position"
+                    title={t('songInfoPage.mostSeekedPosition')}
                     value={
                       <span className="flex flex-col">
                         <span className="text-2xl">
                           {maxSongSeekPosition.toFixed(1)}
                         </span>
-                        <span className="text-xs">seconds</span>
+                        <span className="text-xs">
+                          {t('time.second', {
+                            count: parseFloat(maxSongSeekPosition.toFixed(1)),
+                          })}
+                        </span>
                       </span>
                     }
                   />
@@ -396,7 +399,7 @@ const SongInfoPage = () => {
                 {maxSongSeekFrequency !== undefined && (
                   <SongStat
                     key={7}
-                    title="Most seeked frequency"
+                    title={t('songInfoPage.mostSeekedFrequency')}
                     value={maxSongSeekFrequency}
                   />
                 )}

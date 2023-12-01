@@ -3,6 +3,7 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface CheckboxProp {
   id: string;
@@ -15,6 +16,8 @@ interface CheckboxProp {
 }
 
 const Checkbox = React.memo((props: CheckboxProp) => {
+  const { t } = useTranslation();
+
   const {
     id,
     checkedStateUpdateFunction,
@@ -46,7 +49,7 @@ const Checkbox = React.memo((props: CheckboxProp) => {
       tabIndex={isDisabled ? -1 : 0}
       onKeyDown={focusInput}
       title={
-        tooltipLabel ?? isDisabled ? 'This option is disabled.' : undefined
+        tooltipLabel ?? isDisabled ? t('common.optionDisabled') : undefined
       }
     >
       <input

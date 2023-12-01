@@ -67,7 +67,7 @@ const MostLovedSongs = (props: Props) => {
             <div className="title-container mb-4 mt-1 flex items-center justify-between text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
               {t('homePage.mostLovedSongs')}
               <Button
-                label={t('homePage.showAll')}
+                label={t('common.showAll')}
                 tooltipLabel={t(
                   'homePage.openFavoritesWithAllTimeMostListenedSortOption',
                 )}

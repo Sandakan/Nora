@@ -1,5 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import Button from 'renderer/components/Button';
 import Genre from 'renderer/components/GenresPage/Genre';
 import SecondaryContainer from 'renderer/components/SecondaryContainer';
@@ -19,6 +20,8 @@ const GenreSearchResultsContainer = (props: Props) => {
     React.useContext(AppContext);
   const { toggleMultipleSelections, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const {
     genres,
     searchInput,
@@ -73,21 +76,28 @@ const GenreSearchResultsContainer = (props: Props) => {
             <div className="other-stats-container ml-12 flex items-center text-xs">
               {genres.length > 0 && (
                 <div className="no-of-genres">
-                  {genres.length} genres{' '}
-                  {genres.length > noOfVisibleGenres &&
-                    `(${noOfVisibleGenres} shown)`}
+                  {t(
+                    `searchPage.${
+                      genres.length > noOfVisibleGenres
+                        ? 'resultAndVisibleCount'
+                        : 'resultCount'
+                    }`,
+                    { count: genres.length, noVisible: noOfVisibleGenres },
+                  )}
                 </div>
               )}
             </div>
           </div>
           <div className="other-controls-container flex">
             <Button
-              label={
-                isMultipleSelectionEnabled &&
-                multipleSelectionsData.selectionType === 'genre'
-                  ? 'Unselect All'
-                  : 'Select'
-              }
+              label={t(
+                `common.${
+                  isMultipleSelectionEnabled &&
+                  multipleSelectionsData.selectionType === 'genre'
+                    ? 'unselectAll'
+                    : 'select'
+                }`,
+              )}
               className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
               iconName={
                 isMultipleSelectionEnabled &&
@@ -102,13 +112,15 @@ const GenreSearchResultsContainer = (props: Props) => {
                 isMultipleSelectionEnabled &&
                 multipleSelectionsData.selectionType !== 'genre'
               }
-              tooltipLabel={
-                isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
-              }
+              tooltipLabel={t(
+                `common.${
+                  isMultipleSelectionEnabled ? 'unselectAll' : 'select'
+                }`,
+              )}
             />
             {genres.length > noOfVisibleGenres && (
               <Button
-                label="Show All"
+                label={t('common.showAll')}
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>

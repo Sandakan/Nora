@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import Hyperlink from '../Hyperlink';
 import HashTag from './HashTag';
@@ -16,12 +17,14 @@ type Props = {
 
 const Biography = (props: Props) => {
   const { bodyBackgroundImage } = React.useContext(AppContext);
+  const { t } = useTranslation();
+
   const {
     bio,
     bioUserName = '',
     hyperlinkData: {
-      label = 'Read More...',
-      labelTitle = 'Read More in LastFM',
+      label = t('biography.readMore'),
+      labelTitle = t('biography.readMoreInLastFm'),
     },
     tags = [],
   } = props;
@@ -55,7 +58,12 @@ const Biography = (props: Props) => {
       }`}
     >
       <h3 className="mb-2 font-medium text-xl text-font-color-highlight dark:text-dark-font-color-highlight">
-        About <span className="font-semibold">{bioUserName}</span>
+        <Trans
+          i18nKey="biography.aboutName"
+          components={{
+            span: <span className="font-semibold">{bioUserName}</span>,
+          }}
+        />
       </h3>
       {bio && (
         <div>

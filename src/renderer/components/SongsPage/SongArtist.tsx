@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 
 interface SongArtistProp {
@@ -12,6 +13,8 @@ interface SongArtistProp {
 function SongArtist(props: SongArtistProp) {
   const { updateContextMenuData, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const {
     artistId,
     name,
@@ -52,7 +55,7 @@ function SongArtist(props: SongArtistProp) {
             true,
             [
               {
-                label: 'Info',
+                label: t('common.info'),
                 iconName: 'info',
                 handlerFunction: () => showArtistInfoPage(name, artistId),
               },

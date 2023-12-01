@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
@@ -29,6 +30,7 @@ const SongControlsAndSeekbarContainer = () => {
     updateSongPosition,
   } = useContext(AppUpdateContext);
   const { songPosition } = useContext(SongPositionContext);
+  const { t } = useTranslation();
 
   const [songPos, setSongPos] = React.useState(0);
   const isMouseDownRef = React.useRef(false);
@@ -119,8 +121,8 @@ const SongControlsAndSeekbarContainer = () => {
           } ${!currentSongData.isKnownSource && '!cursor-none brightness-50'}`}
           tooltipLabel={
             currentSongData.isKnownSource
-              ? 'Like/Dislike (Ctrl + H)'
-              : `Liking/Disliking songs is disabled because current playing song is from an unknown source and it doesn't support likes.`
+              ? t('player.likeDislike')
+              : t('player.likeDislikeDisabled')
           }
           iconName="favorite"
           iconClassName={`${
@@ -138,7 +140,7 @@ const SongControlsAndSeekbarContainer = () => {
           className={`shuffle-btn !m-0 flex items-center justify-center !rounded-none !border-0 !p-0 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:after:bg-dark-font-color-highlight ${
             isShuffling && 'active after:opacity-100'
           }`}
-          tooltipLabel="Shuffle (Ctrl + S)"
+          tooltipLabel={t('player.shuffle')}
           iconName="shuffle"
           iconClassName={`material-icons-round icon !text-2xl opacity-60 transition-opacity hover:opacity-80 ${
             isShuffling &&
@@ -149,7 +151,7 @@ const SongControlsAndSeekbarContainer = () => {
 
         <Button
           className="skip-back-btn !m-0 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 focus-visible:!outline"
-          tooltipLabel="Previous Song (Ctrl + Left Arrow)"
+          tooltipLabel={t('player.prevSong')}
           iconName="skip_previous"
           iconClassName="material-icons-round !text-2xl opacity-60 transition-opacity hover:opacity-80"
           clickHandler={handleSkipBackwardClick}
@@ -160,7 +162,7 @@ const SongControlsAndSeekbarContainer = () => {
             isPlayerStalled &&
             `after:absolute after:h-5 after:w-5 after:animate-spin-ease after:rounded-full after:border-2 after:border-[transparent] after:border-t-font-color-black after:content-[''] dark:after:border-t-font-color-white`
           }`}
-          tooltipLabel="Play/Pause (Space)"
+          tooltipLabel={t('player.playPause')}
           iconName={isCurrentSongPlaying ? 'pause_circle' : 'play_circle'}
           iconClassName={`material-icons-round !text-5xl opacity-80 transition-opacity hover:opacity-80 ${
             isPlayerStalled && '!opacity-10'
@@ -170,7 +172,7 @@ const SongControlsAndSeekbarContainer = () => {
 
         <Button
           className="skip-forward-btn !m-0 flex !rounded-none !border-0 !p-0 outline-1 outline-offset-1 focus-visible:!outline"
-          tooltipLabel="Next Song (Ctrl + Right Arrow)"
+          tooltipLabel={t('player.nextSong')}
           iconName="skip_next"
           iconClassName="material-icons-round !text-2xl opacity-60 transition-opacity hover:opacity-80"
           clickHandler={() => handleSkipForwardClick('USER_SKIP')}
@@ -180,7 +182,7 @@ const SongControlsAndSeekbarContainer = () => {
           className={`repeat-btn !m-0 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:after:bg-dark-font-color-highlight ${
             isRepeating !== 'false' && 'active after:opacity-100'
           }`}
-          tooltipLabel="Repeat (Ctrl + T)"
+          tooltipLabel={t('player.repeat')}
           iconName={
             isRepeating === 'false' || isRepeating === 'repeat'
               ? 'repeat'
@@ -198,7 +200,7 @@ const SongControlsAndSeekbarContainer = () => {
             currentlyActivePage.pageTitle === 'Lyrics' &&
             'active after:opacity-100'
           }`}
-          tooltipLabel="Lyrics (Ctrl + L)"
+          tooltipLabel={t('player.lyrics')}
           iconName="notes"
           iconClassName={`material-icons-round !text-2xl opacity-60 transition-opacity hover:opacity-80 ${
             currentlyActivePage.pageTitle === 'Lyrics' &&

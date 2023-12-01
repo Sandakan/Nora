@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
@@ -40,6 +41,7 @@ const LyricsEditingPage = () => {
     updateContextMenuData,
   } = React.useContext(AppUpdateContext);
   const { songPosition } = React.useContext(SongPositionContext);
+  const { t } = useTranslation();
 
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [isFocused, setIsFocused] = React.useState(false);
@@ -170,7 +172,7 @@ const LyricsEditingPage = () => {
   const moreOptionsContextMenuItems = React.useMemo((): ContextMenuItem[] => {
     return [
       {
-        label: 'Help',
+        label: t('common.help'),
         iconName: 'help',
         iconClassName: 'material-icons-round-outlined',
         handlerFunction: () =>
@@ -182,32 +184,28 @@ const LyricsEditingPage = () => {
         handlerFunction: () => true,
       },
       {
-        label: 'Reset Lyrics',
+        label: t('lyricsEditingPage.resetLyrics'),
         iconName: 'restart_alt',
         iconClassName: 'material-icons-round-outlined',
         handlerFunction: () => {
           changePromptMenuData(
             true,
             <SensitiveActionConfirmPrompt
-              title="Are your sure that you want to Reset Lyrics?"
+              title={t('lyricsEditingPage.resetLyricsConfirm')}
               content={
-                <>
-                  <p>
-                    You will lose{' '}
-                    <span className="font-medium text-font-color-crimson">
-                      recent lyrics line modifications
-                    </span>{' '}
-                    and{' '}
-                    <span className="font-medium text-font-color-crimson">
-                      start/end synchronization data
-                    </span>{' '}
-                    if you continue this action.
-                  </p>
-                  <br /> <p>This action is irreversible.</p>
-                </>
+                <Trans
+                  i18nKey="lyricsEditingPage.resetLyricsConfirmMessage"
+                  components={{
+                    br: <br />,
+                    p: <p />,
+                    span: (
+                      <span className="font-medium text-font-color-crimson" />
+                    ),
+                  }}
+                />
               }
               confirmButton={{
-                label: 'Reset Lyrics',
+                label: t('lyricsEditingPage.resetLyrics'),
                 clickHandler: () => {
                   const lines: ExtendedEditingLyricsLineData[] = lyrics.map(
                     (lineData, index) => ({
@@ -231,7 +229,7 @@ const LyricsEditingPage = () => {
         },
       },
     ];
-  }, [changePromptMenuData, isEditingEnhancedSyncedLyrics, lyrics]);
+  }, [changePromptMenuData, isEditingEnhancedSyncedLyrics, lyrics, t]);
 
   return (
     <MainContainer
@@ -246,10 +244,14 @@ const LyricsEditingPage = () => {
       {!isTheEditingSongTheCurrSong && (
         <div className="absolute z-10 flex h-full w-full flex-col items-center justify-center bg-background-color-1/25 pr-8 dark:bg-dark-background-color-1/25">
           <span className="material-icons-round-outlined text-5xl">error</span>
-          <p className="mt-2 text-3xl font-medium">Not in the right song</p>
-          <p className="">To start editing, play '{songTitle}' song.</p>
+          <p className="mt-2 text-3xl font-medium">
+            {t('lyricsEditingPage.incorrectSongTitle')}
+          </p>
+          <p>
+            {t('lyricsEditingPage.incorrectSongMessage', { title: songTitle })}
+          </p>
           <Button
-            label="Play"
+            label={t('common.play')}
             iconName="play_arrow"
             className="!mr-0 mt-4"
             clickHandler={() => songId && playSong(songId)}
@@ -258,16 +260,21 @@ const LyricsEditingPage = () => {
       )}
       <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         <div className="gap-4s container grid grid-cols-[clamp(5rem,1fr,10rem)_1fr] items-center">
-          Lyrics Editor{' '}
+          {t('lyricsEditingPage.lyricsEditor')}{' '}
           <div className="other-stats-container truncate text-xs text-font-color-black dark:text-font-color-white">
-            <span>Speed : {localStorageData.playback.playbackRate}x</span>
+            <span>
+              {t('lyricsEditingPage.playbackSpeed')} :{' '}
+              {localStorageData.playback.playbackRate}x
+            </span>
             <span className="mx-2">&bull;</span>
             <span className="">
-              Time : {roundedSongPostion}{' '}
+              {t('lyricsEditingPage.playbackTime')} : {roundedSongPostion}{' '}
               {localStorageData.lyricsEditorSettings.offset !== 0 && (
                 <span className="font-medium uppercase text-font-color-highlight dark:text-dark-font-color-highlight">
                   {localStorageData.lyricsEditorSettings.offset > 0 && '+'}{' '}
-                  {localStorageData.lyricsEditorSettings.offset} offset
+                  {t('lyricsEditingPage.offsetWithCount', {
+                    count: localStorageData.lyricsEditorSettings.offset,
+                  })}
                 </span>
               )}
             </span>
@@ -289,7 +296,7 @@ const LyricsEditingPage = () => {
                 y + 50,
               );
             }}
-            tooltipLabel="More Options"
+            tooltipLabel={t('common.moreOptions')}
             onContextMenu={(e) => {
               e.preventDefault();
               updateContextMenuData(
@@ -301,7 +308,7 @@ const LyricsEditingPage = () => {
             }}
           />
           <Button
-            label="Save Lyrics"
+            label={t('lyricsEditingPage.saveLyrics')}
             className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
             iconName="save_as"
             iconClassName="material-icons-round-outlined"
@@ -317,7 +324,11 @@ const LyricsEditingPage = () => {
             }
           />
           <Button
-            label={isPlaying ? 'Stop and Edit Lyrics' : 'Play Lyrics'}
+            label={t(
+              `lyricsEditingPage.${
+                isPlaying ? 'stopAndEditLyrics' : 'playLyrics'
+              }`,
+            )}
             className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
             iconName={isPlaying ? 'edit' : 'play_arrow'}
             iconClassName="material-icons-round"
@@ -325,7 +336,7 @@ const LyricsEditingPage = () => {
             clickHandler={() => setIsPlaying((prevState) => !prevState)}
           />
           <Button
-            label="Configure"
+            label={t('lyricsEditingPage.configure')}
             className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
             iconName="settings"
             iconClassName="material-icons-round-outlined"

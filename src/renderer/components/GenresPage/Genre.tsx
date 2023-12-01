@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Img from '../Img';
@@ -41,6 +42,7 @@ const Genre = (props: GenreProp) => {
     toggleMultipleSelections,
     updateMultipleSelections,
   } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const goToGenreInfoPage = React.useCallback(
     () =>
@@ -140,7 +142,9 @@ const Genre = (props: GenreProp) => {
             {
               id: 'newSongsToQueue',
               delay: 5000,
-              content: <span>Added {songs.length} songs to the queue.</span>,
+              content: t(`notifications.addedToQueue`, {
+                count: songs.length,
+              }),
             },
           ]);
         }
@@ -151,6 +155,7 @@ const Genre = (props: GenreProp) => {
     addNewNotifications,
     multipleSelectionsData,
     queue.queue,
+    t,
     updateQueueData,
   ]);
 
@@ -175,7 +180,7 @@ const Genre = (props: GenreProp) => {
 
     return [
       {
-        label: isMultipleSelectionsEnabled ? 'Play All' : 'Play',
+        label: t(`common.${isMultipleSelectionsEnabled ? 'playAll' : 'play'}`),
         iconName: 'play_arrow',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled)
@@ -186,8 +191,8 @@ const Genre = (props: GenreProp) => {
       },
       {
         label: isMultipleSelectionsEnabled
-          ? 'Shuffle and Play All'
-          : 'Shuffle and Play',
+          ? t(`common.shuffleAndPlayAll`)
+          : t(`common.shuffleAndPlay`),
         iconName: 'shuffle',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled)
@@ -197,7 +202,7 @@ const Genre = (props: GenreProp) => {
         },
       },
       {
-        label: 'Add to queue',
+        label: t(`common.addToQueue`),
         iconName: 'queue',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) addToQueueForMultipleSelections();
@@ -208,9 +213,9 @@ const Genre = (props: GenreProp) => {
               {
                 id: 'newSongsToQueue',
                 delay: 5000,
-                content: (
-                  <span>Added {songIds.length} songs to the queue.</span>
-                ),
+                content: t(`notifications.addedToQueue`, {
+                  count: songIds.length,
+                }),
               },
             ]);
           }
@@ -223,7 +228,7 @@ const Genre = (props: GenreProp) => {
         handlerFunction: () => true,
       },
       {
-        label: isAMultipleSelection ? 'Unselect' : 'Select',
+        label: t(`common.${isAMultipleSelection ? 'unselect' : 'select'}`),
         iconName: 'checklist',
         handlerFunction: () => {
           if (isMultipleSelectionEnabled) {
@@ -245,7 +250,7 @@ const Genre = (props: GenreProp) => {
       //   handlerFunction: () => selectAllHandler && selectAllHandler(),
       // },
       {
-        label: 'Info',
+        label: t(`common.info`),
         iconName: 'info',
         iconClassName: 'material-icons-round-outlined',
         handlerFunction: goToGenreInfoPage,
@@ -256,6 +261,7 @@ const Genre = (props: GenreProp) => {
     multipleSelectionsData.selectionType,
     multipleSelectionsData.multipleSelections.length,
     isAMultipleSelection,
+    t,
     goToGenreInfoPage,
     playGenreSongsForMultipleSelections,
     playGenreSongs,
@@ -276,7 +282,9 @@ const Genre = (props: GenreProp) => {
       multipleSelectionsData.selectionType === 'genre' &&
       isAMultipleSelection
         ? {
-            title: `${multipleSelectionsData.multipleSelections.length} selected genres`,
+            title: t(`genre.selectedGenreCount`, {
+              count: multipleSelectionsData.multipleSelections.length,
+            }),
             artworkPath: DefaultGenreCover,
           }
         : {
@@ -291,6 +299,7 @@ const Genre = (props: GenreProp) => {
       multipleSelectionsData.multipleSelections.length,
       multipleSelectionsData.selectionType,
       songIds.length,
+      t,
       title,
     ],
   );
@@ -353,9 +362,11 @@ const Genre = (props: GenreProp) => {
           label={title}
           clickHandler={goToGenreInfoPage}
         />
-        <div className="genre-no-of-songs text-sm text-font-color-white/75 dark:text-font-color-white/75">{`${
-          songIds.length
-        } song${songIds.length === 1 ? '' : 's'}`}</div>
+        <div className="genre-no-of-songs text-sm text-font-color-white/75 dark:text-font-color-white/75">
+          {t(`common.songWithCount`, {
+            count: songIds.length,
+          })}
+        </div>
         {isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'genre' && (
             <MultipleSelectionCheckbox

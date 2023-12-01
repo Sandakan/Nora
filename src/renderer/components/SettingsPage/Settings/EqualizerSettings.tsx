@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import Button from 'renderer/components/Button';
 import Dropdown from 'renderer/components/Dropdown';
 import { AppContext } from 'renderer/contexts/AppContext';
@@ -9,12 +10,14 @@ import {
   equalizerPresetsData,
 } from 'renderer/other/equalizerData';
 import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from 'renderer/utils/localStorage';
+import i18n from 'renderer/i18n';
+
 import EqualierBand from './EqualierBand';
 
 const presets: EqualizerPresetDropdownOptions[] = equalizerPresetsData.map(
   (presetData) => {
     return {
-      label: presetData.title,
+      label: i18n.t(`equalizerPresets.${presetData.title}`),
       value: presetData.title,
       preset: presetData.preset,
     };
@@ -23,8 +26,8 @@ const presets: EqualizerPresetDropdownOptions[] = equalizerPresetsData.map(
 
 const equalizerPresets: EqualizerPresetDropdownOptions[] = [
   {
-    label: 'Custom',
-    value: 'Custom',
+    label: i18n.t('equalizerPresets.custom'),
+    value: 'custom',
     isDisabled: true,
   },
   ...presets,
@@ -60,6 +63,8 @@ const getPresetName = (equalizer: Equalizer): string => {
 const EqualizerSettings = () => {
   const { equalizerOptions } = React.useContext(AppContext);
   const { updateEqualizerOptions } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const [content, dispatch] = React.useReducer(
     reducer,
     equalizerOptions || LOCAL_STORAGE_DEFAULT_TEMPLATE.equalizerPreset,
@@ -89,6 +94,7 @@ const EqualizerSettings = () => {
       if (filterHertzValue) {
         bands.push(
           <EqualierBand
+            key={equalizerFilterName}
             value={filterValue}
             hertzValue={filterHertzValue}
             onChange={(val) => {
@@ -105,7 +111,7 @@ const EqualizerSettings = () => {
     <li className="main-container equalizer-settings-container mb-12">
       <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         <span className="material-icons-round-outlined mr-2">graphic_eq</span>
-        Equalizer
+        {t('settingsPage.equalizer')}
       </div>
       <div className="pl-6">
         <div className="flex items-center justify-between">
@@ -125,7 +131,7 @@ const EqualizerSettings = () => {
             }}
           />
           <Button
-            label="Reset"
+            label={t('settingsPage.reset')}
             iconName="restart_alt"
             isDisabled={isTheDefaultPreset}
             clickHandler={() => {

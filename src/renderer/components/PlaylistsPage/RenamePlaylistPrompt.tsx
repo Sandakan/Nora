@@ -1,5 +1,6 @@
 /* eslint-disable jsx-a11y/no-autofocus */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 
 import Img from '../Img';
@@ -10,6 +11,8 @@ type Props = { playlistData: Playlist };
 const RenamePlaylistPrompt = (props: Props) => {
   const { playlistData } = props;
   const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const { name, playlistId, artworkPaths } = playlistData;
 
   const [input, setInput] = React.useState(name);
@@ -33,13 +36,13 @@ const RenamePlaylistPrompt = (props: Props) => {
         />
       </div>
       <span className="mb-4 text-center text-2xl font-medium">
-        Rename '{name}' playlist
+        {t('renamePlaylistPrompt.renamePlaylistWithName', { name })}
       </span>
       <input
         type="text"
         name="playlistName"
         className="playlist-name-input w-fit min-w-[400px] max-w-[75%] rounded-2xl border-[transparent] !bg-background-color-2 px-6 py-3 text-lg text-font-color-black outline-none dark:!bg-dark-background-color-2 dark:text-font-color-white"
-        placeholder="Playlist Name"
+        placeholder={t('renamePlaylistPrompt.playlistName')}
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => {
@@ -49,7 +52,7 @@ const RenamePlaylistPrompt = (props: Props) => {
         autoFocus
       />
       <Button
-        label="Rename Playlist"
+        label={t('playlist.renamePlaylist')}
         iconName="edit"
         className="!mr-0 mt-6 cursor-pointer justify-center !bg-background-color-3 p-2 !px-8 !py-3 text-lg !text-font-color-black dark:!bg-dark-background-color-3 dark:text-font-color-black"
         clickHandler={() => renamePlaylist(input)}

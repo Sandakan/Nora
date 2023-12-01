@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Checkbox from '../Checkbox';
 import Button from '../Button';
@@ -17,6 +18,8 @@ interface SelectablePlaylistProp extends Playlist {
 }
 
 const SelectablePlaylist = (props: SelectablePlaylistProp) => {
+  const { t } = useTranslation();
+
   const {
     playlistId,
     artworkPaths,
@@ -61,9 +64,9 @@ const SelectablePlaylist = (props: SelectablePlaylistProp) => {
         >
           {name}
         </div>
-        <div className="playlist-no-of-songs text-sm font-light">{`${
-          songs.length
-        } song${songs.length === 1 ? '' : 's'}`}</div>
+        <div className="playlist-no-of-songs text-sm font-light">
+          {t('common.songWithCount', { count: songs.length })}
+        </div>
       </div>
     </div>
   );
@@ -76,6 +79,8 @@ interface SelectPlaylist extends Playlist {
 const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
   const { changePromptMenuData, addNewNotifications } =
     React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const { songIds, title } = props;
   const [playlists, setPlaylists] = React.useState([] as SelectPlaylist[]);
 
@@ -121,16 +126,11 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
           {
             id: 'songAddedtoPlaylists',
             delay: 5000,
-            icon: <span className="material-icons-round">playlist_add</span>,
-            content: (
-              <span>
-                Added{' '}
-                {selectedPlaylists.length > 1
-                  ? `${selectedPlaylists.length} songs`
-                  : `'${title}'`}{' '}
-                to {`${selectedPlaylists.length} playlists.`}
-              </span>
-            ),
+            iconName: 'playlist_add',
+            content: t('addSongsToPlaylistsPrompt.songsAddedToPlaylists', {
+              count: songIds.length,
+              playlistCount: selectedPlaylists.length,
+            }),
           },
         ]);
       })
@@ -138,7 +138,7 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
       .finally(() => {
         changePromptMenuData(false);
       });
-  }, [playlists, songIds, title, changePromptMenuData, addNewNotifications]);
+  }, [playlists, songIds, addNewNotifications, t, changePromptMenuData]);
 
   const playlistComponents = React.useMemo(
     () =>
@@ -182,10 +182,7 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
         {songIds.length > 1 ? `${songIds.length} songs` : `'${title}' song`}
       </div>
       {songIds.length > 1 && (
-        <p>
-          &bull; When adding multiple songs to playlists, songs that are already
-          in selected playlists will be ignored.
-        </p>
+        <p>&bull; {t('addSongsToPlaylistsPrompt.duplicationNotice')}</p>
       )}
       {playlistComponents.length > 0 && (
         <div className="playlists-container mt-4 flex h-full flex-wrap">
@@ -194,7 +191,7 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
       )}
       <div className="buttons-and-other-info-container flex items-center justify-end">
         <span className="mr-12 text-font-color-highlight dark:text-dark-font-color-highlight">
-          {noOfSelectedPlaylists} selected
+          {t('common.selectionWithCount', { count: noOfSelectedPlaylists })}
         </span>
         <div className="buttons-container flex">
           <Button
@@ -203,7 +200,7 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
             clickHandler={() => changePromptMenuData(false)}
           />
           <Button
-            label="Add to Playlist(s)"
+            label={t('song.addToPlaylists')}
             iconName="playlist_add"
             clickHandler={addSongsToPlaylists}
             className="!bg-background-color-3 px-6  text-font-color-black dark:!bg-dark-background-color-3 dark:!text-font-color-black"

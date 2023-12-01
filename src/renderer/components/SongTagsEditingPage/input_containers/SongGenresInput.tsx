@@ -1,6 +1,8 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
+import { useTranslation } from 'react-i18next';
+
 import Button from 'renderer/components/Button';
 
 type Props = {
@@ -16,6 +18,7 @@ type Props = {
 };
 
 const SongGenresInput = (props: Props) => {
+  const { t } = useTranslation();
   const {
     songGenres,
     genreResults,
@@ -23,9 +26,10 @@ const SongGenresInput = (props: Props) => {
     updateSongInfo,
     updateGenreKeyword,
   } = props;
+
   return (
     <div className="tag-input flex min-w-[10rem] max-w-2xl flex-col">
-      <label htmlFor="song-genres-id3-tag">Genres</label>
+      <label htmlFor="song-genres-id3-tag">{t('common.genre_other')}</label>
       <div className="mt-2 w-[90%] rounded-xl border-2 border-background-color-2 p-2 dark:border-dark-background-color-2">
         <div className="genres-container flex flex-wrap p-2 empty:py-2 empty:after:h-full empty:after:w-full empty:after:text-center empty:after:text-[#ccc] empty:after:content-['No_genres_selected_for_this_song.'] dark:empty:after:text-[#ccc]">
           {songGenres &&
@@ -58,7 +62,7 @@ const SongGenresInput = (props: Props) => {
           type="search"
           id="song-genres-id3-tag"
           className="mt-4 w-full rounded-xl border-2 border-transparent bg-background-color-2 p-2 transition-colors focus:border-font-color-highlight dark:bg-dark-background-color-2 dark:focus:border-dark-font-color-highlight"
-          placeholder="Search for genres here."
+          placeholder={t('songTagsEditingPage.searchForGenres')}
           value={genreKeyword}
           onChange={(e) => {
             const { value } = e.target;
@@ -97,7 +101,7 @@ const SongGenresInput = (props: Props) => {
         )}
         {genreKeyword.trim() && (
           <Button
-            label={`Add new genre '${genreKeyword}'`}
+            label={t('songTagsEditingPage.addNewGenre')}
             className="mt-4 !w-full !bg-background-color-2 hover:!bg-background-color-3 hover:text-font-color-black dark:!bg-dark-background-color-2 hover:dark:!bg-dark-background-color-3 hover:dark:text-font-color-black"
             clickHandler={() => {
               updateSongInfo((prevData) => {

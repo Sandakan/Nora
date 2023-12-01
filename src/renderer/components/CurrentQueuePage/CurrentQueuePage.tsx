@@ -1,6 +1,7 @@
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
 import React, { useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FixedSizeList, FixedSizeList as List } from 'react-window';
 import {
   Draggable,
@@ -12,13 +13,13 @@ import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
 
 import Button from '../Button';
 import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 import DefaultPlaylistCover from '../../../../assets/images/webp/playlist_cover_default.webp';
 import FolderImg from '../../../../assets/images/webp/empty-folder.webp';
 import NoSongsImage from '../../../../assets/images/svg/Sun_Monochromatic.svg';
-import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
 import MainContainer from '../MainContainer';
 import Img from '../Img';
 import Song from '../SongsPage/Song';
@@ -45,6 +46,7 @@ const CurrentQueuePage = () => {
     updateContextMenuData,
     toggleMultipleSelections,
   } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const [queuedSongs, setQueuedSongs] = React.useState([] as AudioInfo[]);
   const previousQueueRef = React.useRef<string[]>([]);
@@ -194,7 +196,12 @@ const CurrentQueuePage = () => {
                 return {
                   ...prevData,
                   artworkPath: FolderImg,
-                  title: `'${folderName || 'Unknown'}' Folder`,
+                  title: t(
+                    folderName
+                      ? 'currentQueuePage.folderWithName'
+                      : 'common.unknownFolder',
+                    { name: folderName },
+                  ),
                 };
               });
             }
@@ -202,7 +209,7 @@ const CurrentQueuePage = () => {
         }
       }
     }
-  }, [currentSongData.artworkPath, queue.queueId, queue.queueType]);
+  }, [currentSongData.artworkPath, queue.queueId, queue.queueType, t]);
 
   const selectAllHandler = useSelectAllHandler(queuedSongs, 'songs', 'songId');
 
@@ -258,7 +265,7 @@ const CurrentQueuePage = () => {
                   // onPlayClick={handleSongPlayBtnClick}
                   additionalContextMenuItems={[
                     {
-                      label: 'Remove from Queue',
+                      label: t('common.removeFromQueue'),
                       iconName: 'remove_circle_outline',
                       handlerFunction: () => {
                         updateQueueData(
@@ -286,21 +293,11 @@ const CurrentQueuePage = () => {
       queue.queue,
       queuedSongs,
       selectAllHandler,
+      t,
       toggleMultipleSelections,
       updateQueueData,
     ],
   );
-
-  const calculateTotalTime = React.useCallback((songs: AudioInfo[]) => {
-    const { hours, minutes, seconds } = calculateTimeFromSeconds(
-      songs.reduce((prev, current) => prev + current.duration, 0),
-    );
-    return `${
-      hours >= 1 ? `${hours} hour${hours === 1 ? '' : 's'} ` : ''
-    }${minutes} minute${minutes === 1 ? '' : 's'} ${seconds} second${
-      seconds === 1 ? '' : 's'
-    }`;
-  }, []);
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return undefined;
@@ -331,18 +328,31 @@ const CurrentQueuePage = () => {
 
   const moreOptionsContextMenuItems = React.useMemo(
     () => [
-      // {
-      //   label: `${isAutoScrolling ? 'Disable' : 'Enable'} Auto Scrolling`,
-      //   iconName: isAutoScrolling ? 'flash_off' : 'flash_on',
-      //   handlerFunction: () => setIsAutoScrolling((state) => !state),
-      // },
       {
-        label: 'Scroll to currently playing song',
+        label: t('currentQueuePage.scrollToCurrentPlayingSong'),
         iconName: 'vertical_align_center',
         handlerFunction: centerCurrentlyPlayingSong,
       },
     ],
-    [centerCurrentlyPlayingSong],
+    [centerCurrentlyPlayingSong, t],
+  );
+
+  const queueDuration = React.useMemo(
+    () =>
+      calculateTimeFromSeconds(
+        queuedSongs.reduce((prev, current) => prev + current.duration, 0),
+      ).timeString,
+    [queuedSongs],
+  );
+
+  const completedQueueDuration = React.useMemo(
+    () =>
+      calculateTimeFromSeconds(
+        queuedSongs
+          .slice(queue.currentSongIndex ?? 0)
+          .reduce((prev, current) => prev + current.duration, 0),
+      ).timeString,
+    [queue.currentSongIndex, queuedSongs],
   );
 
   return (
@@ -358,7 +368,7 @@ const CurrentQueuePage = () => {
     >
       <>
         <div className="title-container mb-4 mt-2 flex items-center justify-between pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-          Currently Playing Queue
+          {t('currentQueuePage.queue')}
           <div className="other-controls-container float-right flex">
             <Button
               key={0}
@@ -397,9 +407,11 @@ const CurrentQueuePage = () => {
                 toggleMultipleSelections(!isMultipleSelectionEnabled, 'songs')
               }
               isDisabled={queue.queue.length > 0 === false}
-              tooltipLabel={
-                isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
-              }
+              tooltipLabel={t(
+                `common.${
+                  isMultipleSelectionEnabled ? 'unselectAll' : 'select'
+                }`,
+              )}
             />
             <Button
               key={1}
@@ -407,15 +419,19 @@ const CurrentQueuePage = () => {
               iconName={isAutoScrolling ? 'flash_off' : 'flash_on'}
               clickHandler={() => setIsAutoScrolling((state) => !state)}
               isDisabled={queue.queue.length > 0 === false}
-              tooltipLabel={`${
-                isAutoScrolling ? 'Disable' : 'Enable'
-              } Auto Scrolling`}
+              tooltipLabel={t(
+                `currentQueuePage.${
+                  isAutoScrolling
+                    ? 'disableAutoScrolling'
+                    : 'enableAutoScrolling'
+                }`,
+              )}
             />
             <Button
               key={2}
               className="shuffle-all-button text-sm"
               iconName="shuffle"
-              tooltipLabel="Shuffle Queue"
+              tooltipLabel={t('currentQueuePage.shuffleQueue')}
               isDisabled={queue.queue.length > 0 === false}
               clickHandler={() => {
                 updateQueueData(undefined, queue.queue, true);
@@ -424,17 +440,15 @@ const CurrentQueuePage = () => {
                   {
                     id: 'shuffleQueue',
                     delay: 5000,
-                    content: <span>Queue shuffled successfully.</span>,
-                    icon: (
-                      <span className="material-icons-round icon">shuffle</span>
-                    ),
+                    content: t('currentQueuePage.queueShuffleSuccess'),
+                    iconName: 'shuffle',
                   },
                 ]);
               }}
             />
             <Button
               key={3}
-              label="Clear Queue"
+              label={t('currentQueuePage.clearQueue')}
               className="clear-queue-button text-sm"
               iconName="clear"
               isDisabled={queue.queue.length > 0 === false}
@@ -444,10 +458,8 @@ const CurrentQueuePage = () => {
                   {
                     id: 'clearQueue',
                     delay: 5000,
-                    content: <span>Queue cleared.</span>,
-                    icon: (
-                      <span className="material-icons-round icon">check</span>
-                    ),
+                    content: t('currentQueuePage.queueCleared'),
+                    iconName: 'check',
                   },
                 ]);
               }}
@@ -475,18 +487,18 @@ const CurrentQueuePage = () => {
               </div>
               <div className="queue-title text-3xl">{queueInfo.title}</div>
               <div className="other-info flex text-sm font-light">
-                <div className="queue-no-of-songs">{`${
-                  queuedSongs.length
-                } song${queuedSongs.length !== 1 ? 's' : ''}`}</div>
+                <div className="queue-no-of-songs">
+                  {t('common.songWithCount', { count: queuedSongs.length })}
+                </div>
                 <span className="mx-1">&bull;</span>
                 <div className="queue-duration">
-                  <span>{calculateTotalTime(queuedSongs)}</span>{' '}
+                  <span>{queueDuration}</span>{' '}
                   <span>
                     (
-                    {calculateTotalTime(
-                      queuedSongs.slice(queue.currentSongIndex ?? 0),
-                    )}{' '}
-                    remaining)
+                    {t('currentQueuePage.durationRemaining', {
+                      duration: completedQueueDuration,
+                    })}
+                    )
                   </span>
                 </div>
               </div>
@@ -593,8 +605,8 @@ const CurrentQueuePage = () => {
         </div>
         {queue.queue.length === 0 && (
           <div className="no-songs-container flex h-full w-full flex-col items-center justify-center text-center text-2xl text-[#ccc]">
-            <Img src={NoSongsImage} className="mb-8 w-60" alt="" /> Queue is
-            empty.
+            <Img src={NoSongsImage} className="mb-8 w-60" alt="" />{' '}
+            {t('currentQueuePage.empty')}
           </div>
         )}
       </>

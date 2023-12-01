@@ -1,3 +1,4 @@
+import { Trans, useTranslation } from 'react-i18next';
 import toCapitalCase from 'renderer/utils/toCapitalCase';
 import Hyperlink from '../Hyperlink';
 
@@ -8,20 +9,27 @@ interface LyricsSourceProp {
 }
 
 const LyricsSource = (props: LyricsSourceProp) => {
+  const { t } = useTranslation();
+
   const { source, copyright, link } = props;
   return (
     <div className="source-name mt-12 flex flex-col items-center justify-center text-center text-[#ccc]">
       <div>
         {source !== 'IN_SONG_LYRICS' && (
-          <>
-            Lyrics provided by{' '}
-            <Hyperlink
-              link={link || '#'}
-              linkTitle={decodeURI(link || 'Unknown lyrics provider')}
-              label={toCapitalCase(decodeURI(source))}
-            />
-            .
-          </>
+          <Trans
+            i18nKey="lyricsPage.lyricsProvidedBy"
+            components={{
+              Hyperlink: (
+                <Hyperlink
+                  link={link || '#'}
+                  linkTitle={decodeURI(
+                    link || t('common.unknownLyricsProvider'),
+                  )}
+                  label={toCapitalCase(decodeURI(source))}
+                />
+              ),
+            }}
+          />
         )}
       </div>
       {copyright && (

@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { VariableSizeList as List } from 'react-window';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
@@ -14,6 +15,7 @@ import TitleContainer from '../TitleContainer';
 import AlbumImgAndInfoContainer from './AlbumImgAndInfoContainer';
 import { LastFMAlbumInfo } from '../../../@types/last_fm_album_info_api';
 import OnlineAlbumInfoContainer from './OnlineAlbumInfoContainer';
+import { songSortOptions } from '../SongsPage/SongsPage';
 
 interface AlbumContentReducer {
   albumData: Album;
@@ -58,46 +60,6 @@ const reducer = (
   }
 };
 
-const dropdownOptions: { label: string; value: SongSortTypes }[] = [
-  { label: 'A to Z', value: 'aToZ' },
-  { label: 'Z to A', value: 'zToA' },
-  { label: 'Newest', value: 'dateAddedAscending' },
-  { label: 'Oldest', value: 'dateAddedDescending' },
-  { label: 'Released Year (Ascending)', value: 'releasedYearAscending' },
-  { label: 'Released Year (Descending)', value: 'releasedYearDescending' },
-  { label: 'Track Number (Ascending)', value: 'trackNoAscending' },
-  { label: 'Track Number (Descending)', value: 'trackNoDescending' },
-  {
-    label: 'Most Listened (All Time)',
-    value: 'allTimeMostListened',
-  },
-  {
-    label: 'Least Listened (All Time)',
-    value: 'allTimeLeastListened',
-  },
-  {
-    label: 'Most Listened (This Month)',
-    value: 'monthlyMostListened',
-  },
-  {
-    label: 'Least Listened (This Month)',
-    value: 'monthlyLeastListened',
-  },
-  {
-    label: 'Artist Name (A to Z)',
-    value: 'artistNameAscending',
-  },
-  {
-    label: 'Artist Name (Z to A)',
-    value: 'artistNameDescending',
-  },
-  { label: 'Album Name (A to Z)', value: 'albumNameAscending' },
-  {
-    label: 'Album Name (Z to A)',
-    value: 'albumNameDescending',
-  },
-];
-
 const AlbumInfoPage = () => {
   const { currentlyActivePage, queue, localStorageData } =
     useContext(AppContext);
@@ -108,6 +70,8 @@ const AlbumInfoPage = () => {
     updateCurrentlyActivePageData,
     playSong,
   } = useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const songsContainerRef = React.useRef<HTMLDivElement>(null);
   const { width, height } = useResizeObserver(songsContainerRef);
 
@@ -345,7 +309,7 @@ const AlbumInfoPage = () => {
         className="pr-4"
         buttons={[
           {
-            label: 'Play All',
+            label: t('common.playAll'),
             iconName: 'play_arrow',
             clickHandler: () =>
               createQueue(
@@ -360,7 +324,7 @@ const AlbumInfoPage = () => {
             isDisabled: !(albumContent.songsData.length > 0),
           },
           {
-            tooltipLabel: 'Shuffle and Play',
+            tooltipLabel: t('common.shuffleAndPlay'),
             iconName: 'shuffle',
             clickHandler: () =>
               createQueue(
@@ -375,7 +339,7 @@ const AlbumInfoPage = () => {
             isDisabled: !(albumContent.songsData.length > 0),
           },
           {
-            tooltipLabel: 'Add to Queue',
+            tooltipLabel: t('common.addToQueue'),
             iconName: 'add',
             clickHandler: () => {
               updateQueueData(
@@ -391,13 +355,9 @@ const AlbumInfoPage = () => {
                 {
                   id: albumContent.albumData.albumId,
                   delay: 5000,
-                  content: (
-                    <span>
-                      Added {albumContent.songsData.length} song
-                      {albumContent.songsData.length === 1 ? '' : 's'} to the
-                      queue.
-                    </span>
-                  ),
+                  content: t('notifications.addedToQueue', {
+                    count: albumContent.songsData.length,
+                  }),
                 },
               ]);
             },
@@ -405,9 +365,9 @@ const AlbumInfoPage = () => {
           },
         ]}
         dropdown={{
-          name: 'PlaylistPageSortDropdown',
+          name: 'AlbumInfoPageSortDropdown',
           value: albumContent.sortingOrder,
-          options: dropdownOptions,
+          options: songSortOptions,
           onChange: (e) => {
             const order = e.currentTarget.value as SongSortTypes;
             updateCurrentlyActivePageData((currentPageData) => ({

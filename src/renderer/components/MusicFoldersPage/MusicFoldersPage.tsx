@@ -1,10 +1,12 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 // import { FixedSizeList as List } from 'react-window';
 // import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 import storage from 'renderer/utils/localStorage';
+import i18n from 'renderer/i18n';
 
 import Button from '../Button';
 import Dropdown, { DropdownOption } from '../Dropdown';
@@ -16,12 +18,24 @@ import Folder from './Folder';
 import NoFoldersImage from '../../../../assets/images/svg/Empty Inbox _Monochromatic.svg';
 
 const folderDropdownOptions: DropdownOption<FolderSortTypes>[] = [
-  { label: 'A to Z', value: 'aToZ' },
-  { label: 'Z to A', value: 'zToA' },
-  { label: 'High Song Count', value: 'noOfSongsDescending' },
-  { label: 'Low Song Count', value: 'noOfSongsAscending' },
-  { label: 'Blacklisted Folders', value: 'blacklistedFolders' },
-  { label: 'Whitelisted Folders', value: 'whitelistedFolders' },
+  { label: i18n.t('sortTypes.aToZ'), value: 'aToZ' },
+  { label: i18n.t('sortTypes.zToA'), value: 'zToA' },
+  {
+    label: i18n.t('sortTypes.noOfSongsDescending'),
+    value: 'noOfSongsDescending',
+  },
+  {
+    label: i18n.t('sortTypes.noOfSongsAscending'),
+    value: 'noOfSongsAscending',
+  },
+  {
+    label: i18n.t('sortTypes.blacklistedFolders'),
+    value: 'blacklistedFolders',
+  },
+  {
+    label: i18n.t('sortTypes.whitelistedFolders'),
+    value: 'whitelistedFolders',
+  },
 ];
 
 const MusicFoldersPage = () => {
@@ -37,6 +51,8 @@ const MusicFoldersPage = () => {
     toggleMultipleSelections,
     changePromptMenuData,
   } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const [musicFolders, setMusicFolders] = React.useState<MusicFolder[]>([]);
   const [sortingOrder, setSortingOrder] = React.useState<FolderSortTypes>(
     currentlyActivePage?.data?.sortingOrder ||
@@ -190,18 +206,21 @@ const MusicFoldersPage = () => {
         {musicFolders && musicFolders.length > 0 && (
           <div className="title-container mb-8 mt-2 flex items-center justify-between text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
             <div className="container flex">
-              Music Folders
+              {t('foldersPage.musicFolders')}
               <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
                 {isMultipleSelectionEnabled ? (
                   <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
-                    {multipleSelectionsData.multipleSelections.length}{' '}
-                    selections
+                    {t('common.selectionWithCount', {
+                      count: multipleSelectionsData.multipleSelections.length,
+                    })}
                   </div>
                 ) : (
                   musicFolders.length > 0 && (
-                    <span className="no-of-folders">{`${
-                      musicFolders.length
-                    } folder${musicFolders.length === 1 ? '' : 's'}`}</span>
+                    <span className="no-of-folders">
+                      {t('common.folderWithCount', {
+                        count: musicFolders.length,
+                      })}
+                    </span>
                   )
                 )}
               </div>
@@ -219,12 +238,14 @@ const MusicFoldersPage = () => {
                       'folder',
                     )
                   }
-                  tooltipLabel={
-                    isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
-                  }
+                  tooltipLabel={t(
+                    `common.${
+                      isMultipleSelectionEnabled ? 'unselectAll' : 'select'
+                    }`,
+                  )}
                 />
                 <Button
-                  label="Add new Folder"
+                  label={t('foldersPage.addFolder')}
                   iconName="create_new_folder"
                   pendingAnimationOnDisabled
                   iconClassName="material-icons-round-outlined"
@@ -288,11 +309,11 @@ const MusicFoldersPage = () => {
           <div className="no-folders-container flex h-full flex-col items-center justify-center text-lg text-font-color-black dark:text-font-color-white">
             <Img src={NoFoldersImage} className="w-60" />
             <br />
-            <p>No Folders added to the library.</p>
+            <p> {t('foldersPage.empty')}</p>
 
             <div className="flex items-center justify-between">
               <Button
-                label="Add new Folder"
+                label={t('foldersPage.addFolder')}
                 className="mt-4 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
                 iconName="create_new_folder"
                 pendingAnimationOnDisabled
@@ -300,7 +321,7 @@ const MusicFoldersPage = () => {
                 clickHandler={addNewFolder}
               />
               <Button
-                label="Import App Data"
+                label={t('settingsPage.importAppData')}
                 iconName="upload"
                 className="mt-4 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
                 clickHandler={importAppData}

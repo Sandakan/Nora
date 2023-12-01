@@ -1,5 +1,6 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import storage from 'renderer/utils/localStorage';
@@ -19,6 +20,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
     changeCurrentActivePage,
     updateCurrentSongData,
   } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const { name = '', artistId = '' } = props;
 
@@ -67,7 +69,9 @@ const DuplicateArtistsSuggestion = (props: Props) => {
               }
             />
             {i !== arr.length - 1 && (
-              <span>{i === arr.length - 2 ? ' and ' : ', '}</span>
+              <span>
+                {i === arr.length - 2 ? ` ${t('common.and')} ` : ', '}
+              </span>
             )}
           </>
         );
@@ -76,7 +80,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
       return artists;
     }
     return [];
-  }, [artistId, changeCurrentActivePage, duplicateArtists]);
+  }, [artistId, changeCurrentActivePage, duplicateArtists, t]);
 
   const linkToArtist = React.useCallback(
     (
@@ -108,7 +112,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
             changeCurrentActivePage('Home');
           return addNewNotifications([
             {
-              content: 'Artist conflict resolved successfully.',
+              content: t('common.artistConflictResolved'),
               iconName: 'done',
               delay: 5000,
               id: 'ArtistDuplicateSuggestion',
@@ -127,6 +131,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
       currentSongData.songId,
       currentlyActivePage.data?.artistId,
       duplicateArtists,
+      t,
       updateCurrentSongData,
     ],
   );
@@ -149,7 +154,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
               <span className="material-icons-round-outlined mr-2 text-2xl">
                 help
               </span>{' '}
-              Suggestion
+              {t('common.suggestion')}
             </div>
             <div className="flex items-center">
               <span
@@ -165,9 +170,9 @@ const DuplicateArtistsSuggestion = (props: Props) => {
                 iconName={
                   isMessageVisible ? 'arrow_drop_up' : 'arrow_drop_down'
                 }
-                tooltipLabel={
-                  isMessageVisible ? 'Hide suggestion' : 'Show suggestion'
-                }
+                tooltipLabel={`common.${
+                  isMessageVisible ? 'hideSuggestion' : 'showSuggestion'
+                }`}
                 clickHandler={(e) => {
                   e.preventDefault();
                   setIsMessageVisible((state) => !state);
@@ -177,15 +182,14 @@ const DuplicateArtistsSuggestion = (props: Props) => {
           </label>
           {isMessageVisible && (
             <div>
-              <div>
-                <p className="mt-2 text-sm">
-                  Are {duplicateArtistComponents} the same artist?
-                </p>
-                <p className="mt-2 text-sm">
-                  If they are, you can link content of them into a single
-                  artist, or you can ignore this suggestion.
-                </p>
-              </div>
+              <Trans
+                i18nKey="duplicateArtistsSuggestion.message"
+                components={{
+                  div: <div />,
+                  span: <span>{duplicateArtistComponents}</span>,
+                  p: <p className="mt-2 text-sm" />,
+                }}
+              />
               <div className="mt-3 flex items-center">
                 {duplicateArtists.map((artist) => (
                   <Button
@@ -193,7 +197,9 @@ const DuplicateArtistsSuggestion = (props: Props) => {
                     className="!border-0 bg-background-color-1/50 !px-4 !py-2 outline-1 transition-colors hover:bg-background-color-1 hover:!text-font-color-highlight focus-visible:!outline dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:!text-dark-font-color-highlight"
                     iconName="verified"
                     iconClassName="material-icons-round-outlined"
-                    label={`Link to '${artist.name}'`}
+                    label={t('duplicateArtistsSuggestion.linkToArtist', {
+                      name: artist.name,
+                    })}
                     clickHandler={(_, setIsDisabled, setIsPending) =>
                       linkToArtist(artist.artistId, setIsDisabled, setIsPending)
                     }
@@ -203,7 +209,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
                   className="!mr-0 !border-0 bg-background-color-1/50 !px-4 !py-2 outline-1 transition-colors hover:bg-background-color-1 hover:!text-font-color-highlight focus-visible:!outline dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:!text-dark-font-color-highlight"
                   iconName="do_not_disturb_on"
                   iconClassName="material-icons-round-outlined"
-                  label="Ignore"
+                  label={t('common.ignore')}
                   clickHandler={() => {
                     storage.ignoredDuplicates.setIgnoredDuplicates('artists', [
                       artistId,
@@ -212,13 +218,10 @@ const DuplicateArtistsSuggestion = (props: Props) => {
                     addNewNotifications([
                       {
                         id: 'suggestionIgnored',
-                        icon: (
-                          <span className="material-icons-round-outlined">
-                            do_not_disturb_on
-                          </span>
-                        ),
+                        iconClassName: '!material-icons-round-outlined',
+                        iconName: 'do_not_disturb_on',
                         delay: 5000,
-                        content: <span>Suggestion ignored.</span>,
+                        content: t('notifications.suggestionIgnored'),
                       },
                     ]);
                   }}

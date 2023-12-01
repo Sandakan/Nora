@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import Button from '../Button';
 import Img from '../Img';
 
@@ -9,6 +11,8 @@ type Props = {
 };
 
 const SongArtwork = (props: Props) => {
+  const { t } = useTranslation();
+
   const { artworkPath, updateSongInfo } = props;
   return (
     <div className="song-artwork-container relative mr-8 h-40 w-40 overflow-hidden">
@@ -30,7 +34,7 @@ const SongArtwork = (props: Props) => {
       <div className="absolute left-1/2 top-1/2 flex w-full -translate-x-1/2 -translate-y-1/2 justify-around px-4">
         <Button
           key={0}
-          tooltipLabel="Edit Artwork"
+          tooltipLabel={t('songTagsEditingPage.editArtwork')}
           className="artwork-update-btn mr-0 aspect-square rounded-full border-none !bg-[hsla(0,0%,0%,0.5)] outline-1 outline-offset-1 !transition-[background] hover:!bg-[hsla(0,0%,0%,0.8)] focus-visible:!outline dark:!bg-[hsla(0,0%,0%,0.5)] dark:hover:!bg-[hsla(0,0%,0%,0.8)]"
           iconName="edit"
           iconClassName="text-font-color-white dark:text-font-color-white mr-0"
@@ -52,7 +56,7 @@ const SongArtwork = (props: Props) => {
         {artworkPath && (
           <Button
             key={1}
-            tooltipLabel="Remove Artwork"
+            tooltipLabel={t('songTagsEditingPage.removeArtwork')}
             className="artwork-delete-btn !mr-0 aspect-square rounded-full border-none !bg-[hsla(0,0%,0%,0.5)] outline-1 outline-offset-1 !transition-[background] hover:!bg-[hsla(0,0%,0%,0.8)] focus-visible:!outline dark:!bg-[hsla(0,0%,0%,0.5)] dark:hover:!bg-[hsla(0,0%,0%,0.8)]"
             iconName="delete"
             iconClassName="text-font-color-white dark:text-font-color-white mr-0"

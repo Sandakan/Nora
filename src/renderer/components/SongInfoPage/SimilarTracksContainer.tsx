@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { SimilarTracksOutput } from '../../../@types/last_fm_similar_tracks_api';
@@ -13,6 +14,7 @@ const SimilarTracksContainer = (props: Props) => {
     React.useContext(AppContext);
   const { createQueue, playSong, updateQueueData, addNewNotifications } =
     React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const { songId } = props;
 
@@ -81,7 +83,9 @@ const SimilarTracksContainer = (props: Props) => {
       {
         id: `${queueSongIds.length}PlayNext`,
         delay: 5000,
-        content: `${queueSongIds.length} songs will be played next.`,
+        content: t('notifications.playingNextSongsWithCount', {
+          count: queueSongIds.length,
+        }),
         iconName: 'shortcut',
       },
     ]);
@@ -92,6 +96,7 @@ const SimilarTracksContainer = (props: Props) => {
     currentSongData.songId,
     updateQueueData,
     addNewNotifications,
+    t,
   ]);
 
   const availableSimilarTrackComponents = React.useMemo(
@@ -148,15 +153,15 @@ const SimilarTracksContainer = (props: Props) => {
       {availableSimilarTrackComponents.length > 0 && (
         <>
           <TitleContainer
-            title="Similar Tracks In the Library"
+            title={t('songInfoPage.similarTracksInLibrary')}
             buttons={[
               {
-                label: 'Play',
+                label: t('common.play'),
                 clickHandler: () => handleSongPlayBtnClick(),
                 iconName: 'play_arrow',
               },
               {
-                label: 'Add to Play Next',
+                label: t('common.playNextAll'),
                 clickHandler: addSongsToPlayNext,
                 iconName: 'shortcut',
               },
@@ -176,7 +181,7 @@ const SimilarTracksContainer = (props: Props) => {
       {unAvailableSimilarTrackComponents.length > 0 && (
         <>
           <TitleContainer
-            title="Other Similar Tracks"
+            title={t('songInfoPage.otherSimilarTracks')}
             titleClassName="!text-xl text-font-color-black !font-normal dark:text-font-color-white"
             className={`title-container ${
               bodyBackgroundImage

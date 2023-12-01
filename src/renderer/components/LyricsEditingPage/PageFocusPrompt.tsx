@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 type Props = {
   isFocused: boolean;
   isTheEditingSongTheCurrSong: boolean;
@@ -5,6 +7,8 @@ type Props = {
 };
 
 const PageFocusPrompt = (props: Props) => {
+  const { t } = useTranslation();
+
   const { isFocused, isPlaying, isTheEditingSongTheCurrSong } = props;
 
   return (
@@ -20,7 +24,7 @@ const PageFocusPrompt = (props: Props) => {
       <span className="material-icons-round-outlined mr-2 text-xl text-font-color-highlight dark:text-dark-font-color-highlight">
         error
       </span>
-      <p className="">Page not focused.</p>
+      <p className="">{t('pageFocusPrompt.pageNotFocused')}</p>
     </div>
   );
 };

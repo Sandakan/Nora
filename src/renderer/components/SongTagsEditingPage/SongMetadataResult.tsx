@@ -1,9 +1,13 @@
 import React from 'react';
-import isLyricsSynced from 'main/utils/isLyricsSynced';
+import { useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import isLyricsSynced from 'main/utils/isLyricsSynced';
+
 import Button from '../Button';
 import Img from '../Img';
 import CustomizeSelectedMetadataPrompt from './CustomizeSelectedMetadataPrompt';
+
 import DefaultSongImage from '../../../../assets/images/webp/song_cover_default.webp';
 
 interface SongMetadataResultProp {
@@ -99,6 +103,8 @@ export const manageArtworks = (prevData: SongTags, artworkPaths?: string[]) =>
 
 function SongMetadataResult(props: SongMetadataResultProp) {
   const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const {
     title,
     artists,
@@ -185,7 +191,7 @@ function SongMetadataResult(props: SongMetadataResultProp) {
                 <span className="material-icons-round-outlined mr-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                   verified
                 </span>{' '}
-                {lyrics && 'lyrics included'}
+                {lyrics && t('songTagsEditingPage.lyricsIncluded')}
               </span>
             )}
           </span>
@@ -193,7 +199,7 @@ function SongMetadataResult(props: SongMetadataResultProp) {
       </div>
       <div className="buttons-container flex items-center">
         <Button
-          label="Add to Metadata"
+          label={t('songTagsEditingPage.addToMetadata')}
           iconName="add"
           className="h-fit !bg-background-color-3 px-8 text-lg text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
           clickHandler={addToMetadata}
@@ -217,7 +223,7 @@ function SongMetadataResult(props: SongMetadataResultProp) {
               />,
             );
           }}
-          tooltipLabel="Customize Metadata"
+          tooltipLabel={t('songTagsEditingPage.customizeMetadata')}
         />
       </div>
     </div>

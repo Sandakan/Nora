@@ -1,6 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
 
 const NetworkIndicator = () => {
+  const { t } = useTranslation();
+
   const { isOnline } = useNetworkConnectivity();
 
   return (
@@ -9,9 +12,7 @@ const NetworkIndicator = () => {
         isOnline &&
         'invisible hidden !transition-[visibility] delay-[2500ms] duration-150'
       }`}
-      title={`You are ${
-        isOnline ? 'connected to' : 'disconnected from'
-      } the internet.`}
+      title={t(`common.${isOnline ? 'hasInternet' : 'noInternet'}`)}
     >
       <span
         className={`material-icons-round-outlined py-[2px] leading-none group-hover:text-font-color-highlight dark:group-hover:text-dark-font-color-highlight ${

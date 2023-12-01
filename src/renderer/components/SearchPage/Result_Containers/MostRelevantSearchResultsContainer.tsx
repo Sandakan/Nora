@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import Img from 'renderer/components/Img';
 import SecondaryContainer from 'renderer/components/SecondaryContainer';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
@@ -10,6 +11,8 @@ type Props = { searchResults: SearchResult };
 const MostRelevantSearchResultsContainer = (props: Props) => {
   const { searchResults } = props;
   const { currentSongData, queue } = React.useContext(AppContext);
+  const { t } = useTranslation();
+
   const {
     playSong,
     changeCurrentActivePage,
@@ -55,17 +58,19 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
         infoType1={
           firstResult.artists
             ? firstResult.artists.map((artist) => artist.name).join(',')
-            : 'Unknown Artist'
+            : t('common.unknownArtist')
         }
-        infoType2={firstResult.album ? firstResult.album.name : 'Unknown Album'}
+        infoType2={
+          firstResult.album ? firstResult.album.name : t('common.unknownAlbum')
+        }
         contextMenuItems={[
           {
-            label: 'Play',
+            label: t('common.play'),
             handlerFunction: () => playSong(firstResult.songId),
             iconName: 'play_arrow',
           },
           {
-            label: 'Play Next',
+            label: t('common.playNext'),
             iconName: 'shortcut',
             handlerFunction: () => {
               const newQueue = queue.queue.filter(
@@ -94,7 +99,9 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
                   delay: 5000,
                   content: (
                     <span>
-                      &apos;{firstResult.title}&apos; will be played next.
+                      {t('notifications.playingNext', {
+                        title: firstResult.title,
+                      })}
                     </span>
                   ),
                   icon: <span className="material-icons-round">shortcut</span>,
@@ -103,7 +110,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             },
           },
           {
-            label: 'Add to queue',
+            label: t('common.addToQueue'),
             iconName: 'queue',
             handlerFunction: () => {
               updateQueueData(undefined, [...queue.queue, firstResult.songId]);
@@ -112,11 +119,15 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
                   {
                     id: `${firstResult.title}AddedToQueue`,
                     delay: 5000,
-                    content: <span>Added 1 song to the queue.</span>,
+                    content: (
+                      <span>
+                        {t('notifications.addedToQueue', { count: 1 })}
+                      </span>
+                    ),
                     icon: (
                       <Img
                         src={firstResult.artworkPaths?.artworkPath}
-                        alt="Song Artwork"
+                        alt={t('song.artwork')}
                         loading="eager"
                       />
                     ),
@@ -127,7 +138,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             },
           },
           {
-            label: 'Reveal in File Explorer',
+            label: t('song.revealInFileExplorer'),
             class: 'reveal-file-explorer',
             iconName: 'folder_open',
             handlerFunction: () =>
@@ -136,7 +147,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
               ),
           },
           {
-            label: 'Info',
+            label: t('common.info'),
             class: 'info',
             iconName: 'info',
             handlerFunction: () =>
@@ -163,12 +174,12 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             ? firstResult.onlineArtworkPaths.picture_medium
             : undefined
         }
-        infoType1={`${firstResult.songs.length} song${
-          firstResult.songs.length === 1 ? '' : 's'
-        }`}
+        infoType1={t('common.songWithCount', {
+          count: firstResult.songs.length,
+        })}
         contextMenuItems={[
           {
-            label: 'Play all Songs',
+            label: t('artist.playAllSongs'),
             iconName: 'play_arrow',
             handlerFunction: () =>
               window.api.audioLibraryControls
@@ -193,7 +204,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
                 }),
           },
           {
-            label: 'Info',
+            label: t('common.info'),
             iconName: 'info',
             handlerFunction: () =>
               changeCurrentActivePage('ArtistInfo', {
@@ -202,12 +213,25 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
               }),
           },
           {
-            label: 'Add to queue',
+            label: t('common.addToQueue'),
             iconName: 'queue',
             handlerFunction: () => {
               updateQueueData(undefined, [
                 ...queue.queue,
                 ...firstResult.songs.map((song) => song.songId),
+              ]);
+              addNewNotifications([
+                {
+                  id: `${firstResult.name}AddedToQueue`,
+                  delay: 5000,
+                  content: (
+                    <span>
+                      {t('notifications.addedToQueue', {
+                        count: firstResult.songs.length,
+                      })}
+                    </span>
+                  ),
+                },
               ]);
             },
           },
@@ -228,14 +252,14 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
         infoType1={
           firstResult.artists
             ? firstResult.artists.map((artist) => artist.name).join(',')
-            : 'Unknown Artist'
+            : t('common.unknownArtist')
         }
-        infoType2={`${firstResult.songs.length} song${
-          firstResult.songs.length === 1 ? '' : 's'
-        }`}
+        infoType2={t('common.songWithCount', {
+          count: firstResult.songs.length,
+        })}
         contextMenuItems={[
           {
-            label: 'Play',
+            label: t('common.play'),
             iconName: 'play_arrow',
             handlerFunction: () =>
               window.api.audioLibraryControls
@@ -260,7 +284,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
                 }),
           },
           {
-            label: 'Add to queue',
+            label: t('common.addToQueue'),
             iconName: 'queue',
             handlerFunction: () => {
               queue.queue.push(...firstResult.songs.map((song) => song.songId));
@@ -271,8 +295,9 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
                   delay: 5000,
                   content: (
                     <span>
-                      Added {firstResult.songs.length} song
-                      {firstResult.songs.length === 1 ? '' : 's'} to the queue.
+                      {t('notifications.addedToQueue', {
+                        count: firstResult.songs.length,
+                      })}
                     </span>
                   ),
                 },
@@ -293,12 +318,12 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
         key={3}
         id={firstResult.playlistId}
         artworkPaths={firstResult.artworkPaths}
-        infoType1={`${firstResult.songs.length} song${
-          firstResult.songs.length === 1 ? '' : 's'
-        }`}
+        infoType1={t('common.songWithCount', {
+          count: firstResult.songs.length,
+        })}
         contextMenuItems={[
           {
-            label: 'Play',
+            label: t('common.play'),
             iconName: 'play_arrow',
             handlerFunction: () =>
               window.api.audioLibraryControls
@@ -331,12 +356,12 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
         key={4}
         id={firstResult.genreId}
         artworkPaths={firstResult.artworkPaths}
-        infoType1={`${firstResult.songs.length} song${
-          firstResult.songs.length === 1 ? '' : 's'
-        }`}
+        infoType1={t('common.songWithCount', {
+          count: firstResult.songs.length,
+        })}
         contextMenuItems={[
           {
-            label: 'Play',
+            label: t('common.play'),
             iconName: 'play_arrow',
             handlerFunction: () =>
               window.api.audioLibraryControls
@@ -375,7 +400,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
     >
       <>
         <div className="title-container mb-8 mt-1 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-          Most Relevant
+          {t('searchPage.mostRelevant')}
         </div>
         <div
           className={`results-container overflow-x-auto ${
