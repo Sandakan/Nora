@@ -155,13 +155,17 @@ const LyricsPage = () => {
 
       if (syncedLyrics) {
         const syncedLyricsLines = syncedLyrics.map((lyric, index) => {
-          const { text, end, start } = lyric;
+          const start = lyric.start + offset;
+          const end =
+            (lyric.end === Infinity ? currentSongData.duration : lyric.end) +
+            offset;
+
           return (
             <LyricLine
               key={index}
               index={index}
-              lyric={text}
-              syncedLyrics={{ start: start + offset, end: end + offset }}
+              lyric={lyric.text}
+              syncedLyrics={{ start, end }}
               isAutoScrolling={isAutoScrolling}
             />
           );
@@ -198,7 +202,7 @@ const LyricsPage = () => {
       }
     }
     return [];
-  }, [isAutoScrolling, lyrics]);
+  }, [currentSongData?.duration, isAutoScrolling, lyrics]);
 
   const showOnlineLyrics = React.useCallback(
     (
