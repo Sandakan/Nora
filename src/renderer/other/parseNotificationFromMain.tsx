@@ -24,11 +24,49 @@ const defaultButtonStyles =
 
 const notificationsFromMainConfig: AppNotificationConfig[] = [
   {
-    trigger: ['SUCCESS'],
+    trigger: [
+      'SUCCESS',
+      'RESYNC_SUCCESSFUL',
+      'RESET_SUCCESSFUL',
+      'PENDING_METADATA_UPDATES_SAVED',
+      'LASTFM_LOGIN_SUCCESS',
+      'LYRICS_FIND_FAILED',
+      'SONG_BLACKLISTED',
+      'ARTWORK_SAVED',
+      'FOLDER_PARSED_FOR_DIRECTORIES',
+      'LYRICS_SAVE_QUEUED',
+      'LYRICS_SAVED_IN_LRC_FILE',
+      'PENDING_LYRICS_SAVED',
+      'ADDED_SONGS_TO_PLAYLIST',
+      'APPDATA_EXPORT_SUCCESS',
+      'APPDATA_IMPORT_SUCCESS',
+      'APPDATA_IMPORT_SUCCESS_WITH_PENDING_RESTART',
+      'PLAYLIST_EXPORT_SUCCESS',
+      'PLAYLIST_IMPORT_SUCCESS',
+      'PLAYLIST_RENAME_SUCCESS',
+      'SONG_REPARSE_SUCCESS',
+    ],
     iconName: 'done',
   },
   {
-    trigger: ['FAILURE'],
+    trigger: [
+      'FAILURE',
+      'RESET_FAILED',
+      'SONG_REVEAL_FAILED',
+      'METADATA_UPDATE_FAILED',
+      'ARTWORK_SAVE_FAILED',
+      'APPDATA_EXPORT_FAILED',
+      'APPDATA_IMPORT_FAILED',
+      'APPDATA_IMPORT_FAILED_DUE_TO_MISSING_FILES',
+      'PLAYLIST_EXPORT_FAILED',
+      'PLAYLIST_IMPORT_FAILED',
+      'PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_DATA',
+      'PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_EXTENSION',
+      'PLAYLIST_IMPORT_FAILED_DUE_TO_SONGS_OUTSIDE_LIBRARY',
+      'PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST_FAILED',
+      'PLAYLIST_CREATION_FAILED',
+      'SONG_REPARSE_FAILED',
+    ],
     iconName: 'error',
     iconClassName: 'material-icons-round-outlined',
   },
@@ -38,13 +76,44 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
     iconClassName: 'material-icons-round-outlined',
   },
   {
-    trigger: ['INFO'],
+    trigger: [
+      'INFO',
+      'SONG_EXT_NOT_SUPPORTED_FOR_LYRICS_SAVES',
+      'WHITELISTING_FOLDER_FAILED_DUE_TO_BLACKLISTED_PARENT_FOLDER',
+      'WHITELISTING_SONG_FAILED_DUE_TO_BLACKLISTED_DIRECTORY',
+      'NO_MORE_GENRE_PALETTES',
+      'NO_MORE_SONG_PALETTES',
+      'PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST',
+      'PLAYLIST_NOT_FOUND',
+    ],
     iconName: 'info',
+    iconClassName: 'material-icons-round-outlined',
+  },
+  {
+    trigger: ['DESTINATION_NOT_SELECTED'],
+    iconName: 'wrong_location',
     iconClassName: 'material-icons-round-outlined',
   },
   {
     trigger: ['APP_THEME_CHANGE'],
     iconName: 'brightness_4',
+  },
+  {
+    trigger: ['APPDATA_IMPORT_STARTED'],
+    iconName: 'download',
+  },
+  {
+    trigger: ['APPDATA_EXPORT_STARTED'],
+    iconName: 'publish',
+  },
+  {
+    trigger: [
+      'MUSIC_FOLDER_DELETED',
+      'EMPTY_MUSIC_FOLDER_DELETED',
+      'SONG_DELETED',
+    ],
+    iconName: 'delete',
+    iconClassName: 'material-icons-round-outlined',
   },
   {
     trigger: ['PARSE_SUCCESSFUL'],
@@ -84,6 +153,18 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
     },
   },
   {
+    trigger: ['ARTIST_LIKE', 'ARTIST_DISLIKE'],
+    iconName: 'favorite',
+    update({ messageCode }) {
+      this.iconClassName =
+        messageCode === 'ARTIST_DISLIKE'
+          ? 'material-icons-round-outlined text-font-color-crimson'
+          : '';
+
+      return this;
+    },
+  },
+  {
     trigger: ['SONG_LIKE', 'SONG_DISLIKE'],
     validate({ data }) {
       if (data) return 'artworkPath' in data;
@@ -108,12 +189,12 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
     iconClassName: 'material-icons-round-outlined',
     type: 'WITH_PROGRESS_BAR',
     validate({ data }) {
-      if (data) return 'max' in data && 'value' in data;
+      if (data) return 'total' in data && 'value' in data;
       return false;
     },
     update({ data, messageCode }) {
       this.progressBarData = {
-        max: (data?.max as number) || 0,
+        total: (data?.total as number) || 0,
         value: (data?.value as number) || 0,
       };
       this.iconName =
@@ -124,27 +205,27 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
   },
   {
     trigger: [
-      'SONG_PALETTE_GENERAING_PROCESS_UPDATE',
-      'GENRE_PALETTE_GENERAING_PROCESS_UPDATE',
+      'SONG_PALETTE_GENERATING_PROCESS_UPDATE',
+      'GENRE_PALETTE_GENERATING_PROCESS_UPDATE',
     ],
     delay: 10000,
     iconName: 'magic_button',
     iconClassName: 'material-icons-round-outlined',
     type: 'WITH_PROGRESS_BAR',
     validate({ data }) {
-      if (data) return 'max' in data && 'value' in data;
+      if (data) return 'total' in data && 'value' in data;
       return false;
     },
     update({ data }) {
       this.progressBarData = {
-        max: (data?.max as number) || 0,
+        total: (data?.total as number) || 0,
         value: (data?.value as number) || 0,
       };
 
       if (
         this.progressBarData &&
-        this.progressBarData.max !== 0 &&
-        this.progressBarData.max === this.progressBarData.value
+        this.progressBarData.total !== 0 &&
+        this.progressBarData.total === this.progressBarData.value
       )
         this.delay = 5000;
       return this;
@@ -153,10 +234,15 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
 ];
 
 const parseNotificationFromMain = (
-  message: string,
   messageCode: MessageCodes = 'INFO',
   data?: Record<string, unknown>,
 ) => {
+  const messageKey: any = `backend.${messageCode}`;
+
+  const message = i18n.exists(messageKey)
+    ? (i18n.t(messageKey, data) as string | undefined) || messageCode
+    : messageCode;
+
   const notificationData: AppNotification = {
     buttons: [],
     content: message,

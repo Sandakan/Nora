@@ -387,6 +387,7 @@ const reducer = (
 };
 
 export const USER_DATA_TEMPLATE: UserData = {
+  language: 'en',
   theme: { isDarkMode: false, useSystemTheme: true },
   musicFolders: [],
   preferences: {

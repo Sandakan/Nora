@@ -16,18 +16,17 @@ const likeTheSong = (song: SavableSongData) => {
     const songArtists = song.artists?.map((artist) => artist.name);
     addAFavoriteToLastFM(song.title, songArtists);
 
-    sendMessageToRenderer(
-      `'${
-        song.title.length > 20
-          ? `${song.title.substring(0, 20).trim()}...`
-          : song.title
-      }' added to Favorites.`,
-      'SONG_LIKE',
-      {
+    sendMessageToRenderer({
+      messageCode: 'SONG_LIKE',
+      data: {
+        name:
+          song.title.length > 20
+            ? `${song.title.substring(0, 20).trim()}...`
+            : song.title,
         artworkPath: getSongArtworkPath(song.songId, song.isArtworkAvailable)
           .artworkPath,
       },
-    );
+    });
     song.isAFavorite = true;
     return song;
   }
@@ -42,18 +41,17 @@ const dislikeTheSong = (song: SavableSongData) => {
     const songArtists = song.artists?.map((artist) => artist.name);
     removeAFavoriteFromLastFM(song.title, songArtists);
 
-    sendMessageToRenderer(
-      `'${
-        song.title.length > 20
-          ? `${song.title.substring(0, 20).trim()}...`
-          : song.title
-      }' removed from the Favorites.`,
-      'SONG_DISLIKE',
-      {
+    sendMessageToRenderer({
+      messageCode: 'SONG_DISLIKE',
+      data: {
+        name:
+          song.title.length > 20
+            ? `${song.title.substring(0, 20).trim()}...`
+            : song.title,
         artworkPath: getSongArtworkPath(song.songId, song.isArtworkAvailable)
           .artworkPath,
       },
-    );
+    });
     return song;
   }
   return undefined;

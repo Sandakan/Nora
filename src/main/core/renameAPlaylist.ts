@@ -14,12 +14,12 @@ export default async (playlistId: string, newName: string) => {
         { playlistId, newName },
         'INFO',
         {
-          sendToRenderer: 'SUCCESS',
+          sendToRenderer: { messageCode: 'PLAYLIST_RENAME_SUCCESS' },
         },
       );
     }
   }
   return log('Playlist not found.', { playlistId, newName }, 'WARN', {
-    sendToRenderer: 'FAILURE',
+    sendToRenderer: { messageCode: 'PLAYLIST_NOT_FOUND' },
   });
 };

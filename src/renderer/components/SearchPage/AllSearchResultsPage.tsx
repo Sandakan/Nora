@@ -120,7 +120,7 @@ const AllSearchResultsPage = () => {
                     selectedType === undefined || selectedType === 'songs'
                       ? 'song'
                       : selectedType
-                  }`,
+                  }_other`,
                 ),
               }}
               components={{

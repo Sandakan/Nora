@@ -810,17 +810,8 @@ export default function App() {
   );
 
   const displayMessageFromMain = React.useCallback(
-    (
-      _: unknown,
-      message: string,
-      messageCode?: MessageCodes,
-      data?: Record<string, unknown>,
-    ) => {
-      const notification = parseNotificationFromMain(
-        message,
-        messageCode,
-        data,
-      );
+    (_: unknown, messageCode: MessageCodes, data?: Record<string, unknown>) => {
+      const notification = parseNotificationFromMain(messageCode, data);
 
       addNewNotifications([notification]);
     },

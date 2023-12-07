@@ -77,7 +77,12 @@ const saveLyricsToSong = async (
             songPath,
           },
           'INFO',
-          { sendToRenderer: 'SUCCESS' },
+          {
+            sendToRenderer: {
+              messageCode: 'LYRICS_SAVE_QUEUED',
+              data: { title: lyrics.title },
+            },
+          },
         );
       } catch (error) {
         log(
@@ -92,7 +97,12 @@ const saveLyricsToSong = async (
         `Lyrics for this song with '${pathExt}' extension will be saved in a LRC file.`,
         { songPath },
         'WARN',
-        { sendToRenderer: 'INFO' },
+        {
+          sendToRenderer: {
+            messageCode: 'LYRICS_SAVED_IN_LRC_FILE',
+            data: { ext: pathExt },
+          },
+        },
       );
     }
   }
@@ -126,7 +136,12 @@ export const savePendingSongLyrics = (
           `Successfully saved pending lyrics of '${updatingTags.title}'.`,
           { songPath },
           'INFO',
-          { sendToRenderer: 'SUCCESS' },
+          {
+            sendToRenderer: {
+              messageCode: 'PENDING_LYRICS_SAVED',
+              data: { title: updatingTags.title },
+            },
+          },
         );
         dataUpdateEvent('songs/lyrics');
         pendingSongLyrics.delete(songPath);

@@ -120,7 +120,12 @@ export const savePendingMetadataUpdates = (
           `Successfully saved pending metadata updates of '${pendingMetadata.tags.title}'.`,
           { songPath },
           'INFO',
-          { sendToRenderer: 'SUCCESS' },
+          {
+            sendToRenderer: {
+              messageCode: 'PENDING_METADATA_UPDATES_SAVED',
+              data: { title: pendingMetadata.tags.title },
+            },
+          },
         );
         dataUpdateEvent('songs/artworks');
         dataUpdateEvent('songs/updatedSong');
@@ -755,7 +760,12 @@ const updateSongId3TagsOfUnknownSource = async (
       `Lyrics cannot be saved because current song extension (${pathExt}) is not supported for modifying metadata.`,
       { songPath },
       'ERROR',
-      { sendToRenderer: 'FAILURE' },
+      {
+        sendToRenderer: {
+          messageCode: 'SONG_EXT_NOT_SUPPORTED_FOR_LYRICS_SAVES',
+          data: { ext: pathExt },
+        },
+      },
     );
 
   const songsOutsideLibraryData = getSongsOutsideLibraryData();
@@ -1020,7 +1030,10 @@ const updateSongId3Tags = async (
         } catch (err: any) {
           if ('message' in err) {
             result.reason = err.message;
-            sendMessageToRenderer(`Metadata update Failed. ${err.message}`);
+            sendMessageToRenderer({
+              messageCode: 'METADATA_UPDATE_FAILED',
+              data: { message: err.message },
+            });
           }
           log('Song metadata update failed.', { err }, 'ERROR');
           return result;

@@ -43,10 +43,7 @@ const manageLastFmAuth = async (token: string) => {
       const encryptedKey = encrypt(key);
       log('Successfully retrieved user authentication for LastFM', { name });
       setUserData('lastFmSessionData', { name, key: encryptedKey });
-      return sendMessageToRenderer(
-        'You successfully logged in to LastFM.',
-        'SUCCESS',
-      );
+      return sendMessageToRenderer({ messageCode: 'LASTFM_LOGIN_SUCCESS' });
     }
     throw new Error(`${json.error} - ${json.message}`);
   } catch (error) {

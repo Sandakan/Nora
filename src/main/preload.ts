@@ -259,9 +259,8 @@ const messages = {
   getMessageFromMain: (
     callback: (
       event: unknown,
-      message: string,
-      messageCode?: MessageCodes,
-      data?: Record<string, unknown>,
+      messageCode: MessageCodes,
+      data: Record<string, unknown>,
     ) => void,
   ) => ipcRenderer.on('app/sendMessageToRendererEvent', callback),
   removeMessageToRendererEventListener: (callback: (...args: any[]) => void) =>
@@ -505,6 +504,8 @@ const miniPlayer = {
 
 // $ APP SETTINGS HELPER FUNCTIONS
 const settingsHelpers = {
+  getAppLanguage: (lang: LanguageCodes): void =>
+    ipcRenderer.send('app/getAppLanguage', lang),
   openInBrowser: (url: string): void =>
     ipcRenderer.send('app/openInBrowser', url),
   toggleAutoLaunch: (autoLaunchState: boolean): Promise<void> =>

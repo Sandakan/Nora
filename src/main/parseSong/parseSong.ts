@@ -66,10 +66,10 @@ export const tryToParseSong = (
             { error },
             'ERROR',
           );
-          sendMessageToRenderer(
-            `'${songFileName}' failed when trying to add the song to the library. Go to settings to resync the library.`,
-            'PARSE_FAILED',
-          );
+          sendMessageToRenderer({
+            messageCode: 'PARSE_FAILED',
+            data: { name: songFileName },
+          });
           throw error;
         }
       }
@@ -324,11 +324,10 @@ export const parseSong = async (
         );
 
       if (!noRendererMessages)
-        sendMessageToRenderer(
-          `'${songTitle}' song added to the library.`,
-          'PARSE_SUCCESSFUL',
-          { songId },
-        );
+        sendMessageToRenderer({
+          messageCode: 'PARSE_SUCCESSFUL',
+          data: { name: songTitle, songId },
+        });
 
       // timeEnd(
       //   start15,

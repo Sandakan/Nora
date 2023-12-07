@@ -17,11 +17,14 @@ const restoreBlacklistedSongs = async (blacklistedSongIds: string[]) => {
     const songsData = await getSongInfo(filteredIds);
     for (const songData of songsData) {
       if (songData.isBlacklisted)
-        sendMessageToRenderer(
-          `'${songData.title}' cannot be whitelisted because its directory '${
-            path.basename(path.dirname(songData.path)) || path
-          }' is blacklisted. Whitelist the directory to whitelist the song.`,
-        );
+        sendMessageToRenderer({
+          messageCode: 'WHITELISTING_SONG_FAILED_DUE_TO_BLACKLISTED_DIRECTORY',
+          data: {
+            songName: songData.title,
+            directoryName:
+              path.basename(path.dirname(songData.path)) || songData.path,
+          },
+        });
     }
   }
 
@@ -30,11 +33,10 @@ const restoreBlacklistedSongs = async (blacklistedSongIds: string[]) => {
   );
 
   if (restoredIds.length > 0) {
-    sendMessageToRenderer(
-      `${restoredIds.length} songs restored from the blacklist.`,
-      'SONG_WHITELISTED',
-      { restoredIds },
-    );
+    sendMessageToRenderer({
+      messageCode: 'SONG_WHITELISTED',
+      data: { count: restoredIds.length },
+    });
   }
 
   setBlacklist(blacklist);

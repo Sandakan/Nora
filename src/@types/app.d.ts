@@ -351,6 +351,7 @@ declare global {
 
   type UserDataTypes =
     | 'theme'
+    | 'language'
     | 'currentSong.songId'
     | 'currentSong.stoppedPosition'
     | 'volume.value'
@@ -395,6 +396,7 @@ declare global {
   }
 
   interface UserData {
+    language: LanguageCodes;
     theme: AppThemeData;
     musicFolders: FolderStructure[];
     preferences: {
@@ -424,6 +426,8 @@ declare global {
     storageMetrics?: StorageMetrics;
     customLrcFilesSaveLocation?: string;
   }
+
+  type LanguageCodes = 'en' | 'fr';
 
   interface AppThemeData {
     isDarkMode: boolean;
@@ -769,6 +773,29 @@ declare global {
     | 'CREATE_TEMP_ARTWORK_FAILED'
     | 'READING_MODIFICATIONS_FAILED'
     | 'FOLDER_MODIFICATIONS_CHECK_FAILED'
+    | 'SONG_EXT_NOT_SUPPORTED_FOR_LYRICS_SAVES'
+    | 'RESET_FAILED'
+    | 'MUSIC_FOLDER_DELETED'
+    | 'EMPTY_MUSIC_FOLDER_DELETED'
+    | 'SONG_REVEAL_FAILED'
+    | 'LYRICS_FIND_FAILED'
+    | 'METADATA_UPDATE_FAILED'
+    | 'DESTINATION_NOT_SELECTED'
+    | 'ARTWORK_SAVE_FAILED'
+    | 'APPDATA_EXPORT_FAILED'
+    | 'PLAYLIST_EXPORT_FAILED'
+    | 'APPDATA_IMPORT_FAILED'
+    | 'APPDATA_IMPORT_FAILED_DUE_TO_MISSING_FILES'
+    | 'PLAYLIST_IMPORT_FAILED'
+    | 'PLAYLIST_IMPORT_FAILED_DUE_TO_SONGS_OUTSIDE_LIBRARY'
+    | 'PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST_FAILED'
+    | 'PLAYLIST_CREATION_FAILED'
+    | 'PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_DATA'
+    | 'PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_EXTENSION'
+    | 'PLAYLIST_NOT_FOUND'
+    | 'SONG_REPARSE_FAILED'
+    | 'WHITELISTING_FOLDER_FAILED_DUE_TO_BLACKLISTED_PARENT_FOLDER'
+    | 'WHITELISTING_SONG_FAILED_DUE_TO_BLACKLISTED_DIRECTORY'
     | 'UNSUPPORTED_FILE_EXTENSION';
 
   type MessageCodes =
@@ -782,21 +809,46 @@ declare global {
     | 'PARSE_FAILED'
     | 'PARSE_SUCCESSFUL'
     | 'SONG_DELETED'
-    | 'MUSIC_FOLDER_DELETED'
     | 'NO_NETWORK_CONNECTION'
     | 'NETWORK_DISCONNECTED'
     | 'NETWORK_CONNECTED'
     | 'APP_THEME_CHANGE'
     | 'PLAYBACK_FROM_UNKNOWN_SOURCE'
     | 'AUDIO_PARSING_PROCESS_UPDATE'
-    | 'SONG_PALETTE_GENERAING_PROCESS_UPDATE'
-    | 'GENRE_PALETTE_GENERAING_PROCESS_UPDATE'
+    | 'SONG_PALETTE_GENERATING_PROCESS_UPDATE'
+    | 'GENRE_PALETTE_GENERATING_PROCESS_UPDATE'
     | 'SONG_REMOVE_PROCESS_UPDATE'
+    | 'NO_MORE_SONG_PALETTES'
+    | 'NO_MORE_GENRE_PALETTES'
     | 'SONG_BLACKLISTED'
     | 'SONG_WHITELISTED'
     | 'FOLDER_BLACKLISTED'
     | 'FOLDER_WHITELISTED'
+    | 'PENDING_METADATA_UPDATES_SAVED'
+    | 'FOLDER_PARSED_FOR_DIRECTORIES'
+    | 'RESET_SUCCESSFUL'
+    | 'LYRICS_SAVE_QUEUED'
+    | 'LYRICS_SAVED_IN_LRC_FILE'
+    | 'PENDING_LYRICS_SAVED'
+    | 'LASTFM_LOGIN_SUCCESS'
+    | 'APPDATA_EXPORT_STARTED'
+    | 'APPDATA_IMPORT_STARTED'
+    | 'APPDATA_EXPORT_SUCCESS'
+    | 'APPDATA_IMPORT_SUCCESS'
+    | 'APPDATA_IMPORT_SUCCESS_WITH_PENDING_RESTART'
+    | 'PLAYLIST_EXPORT_SUCCESS'
+    | 'PLAYLIST_IMPORT_SUCCESS'
+    | 'PLAYLIST_RENAME_SUCCESS'
+    | 'PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST'
+    | 'SONG_REPARSE_SUCCESS'
+    | 'ADDED_SONGS_TO_PLAYLIST'
+    | 'ARTWORK_SAVED'
     | 'RESYNC_SUCCESSFUL';
+
+  type MessageToRendererProps = {
+    messageCode: MessageCodes;
+    data?: Record<string, unknown>;
+  };
 
   interface NotificationPanelData {
     notifications: AppNotification[];
@@ -815,7 +867,7 @@ declare global {
     buttons?: ButtonProps[];
     type?: NotificationTypes;
     progressBarData?: {
-      max: number;
+      total: number;
       value: number;
     };
   }

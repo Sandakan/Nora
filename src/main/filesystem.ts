@@ -26,6 +26,7 @@ export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(
 export const DEFAULT_FILE_URL = 'nora://localFiles/';
 
 export const USER_DATA_TEMPLATE: UserData = {
+  language: 'en',
   theme: { isDarkMode: false, useSystemTheme: true },
   musicFolders: [],
   preferences: {
@@ -263,6 +264,8 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
       userData.theme = data as typeof userData.theme;
     else if (dataType === 'musicFolders' && Array.isArray(data)) {
       userData.musicFolders = data;
+    } else if (dataType === 'language' && typeof data === 'string') {
+      userData.language = data as LanguageCodes;
     } else if (
       dataType === 'windowPositions.mainWindow' &&
       typeof data === 'object'

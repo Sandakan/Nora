@@ -31,7 +31,12 @@ const addSongsToPlaylist = (playlistId: string, songIds: string[]) => {
           }`,
           undefined,
           'INFO',
-          { sendToRenderer: 'SUCCESS' },
+          {
+            sendToRenderer: {
+              messageCode: 'ADDED_SONGS_TO_PLAYLIST',
+              data: { count: addedIds.length, name: playlist.name },
+            },
+          },
         );
       }
     }

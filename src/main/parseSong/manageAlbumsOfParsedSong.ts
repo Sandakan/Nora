@@ -26,7 +26,7 @@ const manageAlbumsOfParsedSong = (
 
   if (songAlbumName) {
     if (Array.isArray(allAlbumsData)) {
-      const isAlbumAvailable = allAlbumsData.some(
+      const availableAlbum = allAlbumsData.find(
         //  album.title doesn't need trimming because they are already trimmed when adding them to the database.
         (album) => album.title === songAlbumName,
         // &&
@@ -42,41 +42,34 @@ const manageAlbumsOfParsedSong = (
         //   : true),
       );
 
-      if (isAlbumAvailable) {
-        const updatedAlbums = allAlbumsData.map((album) => {
-          if (album.title === songAlbumName) {
-            album.songs.push({
-              title,
-              songId,
-            });
-            relevantAlbum = album;
-            return album;
-          }
-          return album;
+      if (availableAlbum) {
+        availableAlbum.songs.push({
+          title,
+          songId,
         });
-        return { updatedAlbums, relevantAlbum, newAlbum };
+        relevantAlbum = availableAlbum;
+      } else {
+        const newAlbumData: SavableAlbum = {
+          title: songAlbumName,
+          artworkName:
+            songArtworkPaths && !songArtworkPaths.isDefaultArtwork
+              ? path.basename(songArtworkPaths.artworkPath)
+              : undefined,
+          year,
+          albumId: generateRandomId(),
+          artists: relevantAlbumArtists,
+          songs: [
+            {
+              songId,
+              title,
+            },
+          ],
+        };
+
+        allAlbumsData.push(newAlbumData);
+        relevantAlbum = newAlbumData;
+        newAlbum = newAlbumData;
       }
-      const newAlbumData: SavableAlbum = {
-        title: songAlbumName,
-        artworkName:
-          songArtworkPaths && !songArtworkPaths.isDefaultArtwork
-            ? path.basename(songArtworkPaths.artworkPath)
-            : undefined,
-        year,
-        albumId: generateRandomId(),
-        artists: relevantAlbumArtists,
-        songs: [
-          {
-            songId,
-            title,
-          },
-        ],
-      };
-
-      allAlbumsData.push(newAlbumData);
-      relevantAlbum = newAlbumData;
-      newAlbum = newAlbumData;
-
       return {
         updatedAlbums: allAlbumsData,
         relevantAlbum,

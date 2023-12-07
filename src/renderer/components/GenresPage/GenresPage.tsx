@@ -166,7 +166,7 @@ const GenresPage = () => {
                   genresData &&
                   genresData.length > 0 && (
                     <div className="no-of-genres">
-                      {t('common.genre', { count: genresData.length })}
+                      {t('common.genreWithCount', { count: genresData.length })}
                     </div>
                   )
                 )}

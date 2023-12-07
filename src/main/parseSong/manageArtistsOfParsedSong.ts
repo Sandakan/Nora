@@ -16,17 +16,13 @@ const manageArtistsOfParsedSong = (
       for (const newArtist of songArtists) {
         const newArtistName = newArtist.name.trim();
 
-        const isArtistAvailable = allArtists.some(
+        const availableArtist = allArtists.find(
           (artist) => artist.name === newArtistName,
         );
 
-        if (isArtistAvailable) {
-          for (const availableArtist of allArtists) {
-            if (availableArtist.name === newArtistName) {
-              availableArtist.songs.push({ title, songId });
-              relevantArtists.push(availableArtist);
-            }
-          }
+        if (availableArtist) {
+          availableArtist.songs.push({ title, songId });
+          relevantArtists.push(availableArtist);
         } else {
           const artist: SavableArtist = {
             name: newArtistName,

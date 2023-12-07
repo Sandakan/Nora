@@ -13,6 +13,7 @@ import StorageSettings from './Settings/StorageSettings';
 import EqualizerSettings from './Settings/EqualizerSettings';
 import PerformanceSettings from './Settings/PerformanceSettings';
 import AccountsSettings from './Settings/AccountsSettings';
+import LanguageSettings from './Settings/LanguageSettings';
 
 const SettingsPage = () => {
   const { t } = useTranslation();
@@ -26,6 +27,9 @@ const SettingsPage = () => {
         <ul className="pl-4">
           {/*  APPEARANCE SETTINGS */}
           <AppearanceSettings />
+
+          {/*  LANGUAGE SETTINGS */}
+          <LanguageSettings />
 
           {/* ? AUDIO PLAYBACK SETTINGS */}
           <AudioPlaybackSettings />

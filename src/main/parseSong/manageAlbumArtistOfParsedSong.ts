@@ -17,27 +17,23 @@ const manageAlbumArtistOfParsedSong = (
       for (const albumArtist of albumArtists) {
         const albumArtistName = albumArtist.name.trim();
 
-        const isAlbumArtistAvailable = allArtists.some(
+        const availableAlbumArtist = allArtists.find(
           (artist) => artist.name === albumArtistName,
         );
 
-        if (isAlbumArtistAvailable) {
-          for (const availableArtist of allArtists) {
-            if (availableArtist.name === albumArtistName) {
-              if (relevantAlbum) {
-                const isAlbumLinkedToArtist = availableArtist.albums?.some(
-                  (album) => album.albumId === relevantAlbum.albumId,
-                );
+        if (availableAlbumArtist) {
+          if (relevantAlbum) {
+            const isAlbumLinkedToArtist = availableAlbumArtist.albums?.some(
+              (album) => album.albumId === relevantAlbum.albumId,
+            );
 
-                if (!isAlbumLinkedToArtist)
-                  availableArtist.albums?.push({
-                    title: relevantAlbum.title,
-                    albumId: relevantAlbum.albumId,
-                  });
-              }
-              relevantAlbumArtists.push(availableArtist);
-            }
+            if (!isAlbumLinkedToArtist)
+              availableAlbumArtist.albums?.push({
+                title: relevantAlbum.title,
+                albumId: relevantAlbum.albumId,
+              });
           }
+          relevantAlbumArtists.push(availableAlbumArtist);
         } else {
           const artist: SavableArtist = {
             name: albumArtistName,

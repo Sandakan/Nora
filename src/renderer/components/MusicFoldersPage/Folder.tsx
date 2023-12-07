@@ -311,6 +311,16 @@ const Folder = (props: FolderProps) => {
               {folderName}
             </span>
             <div className="flex items-center opacity-75">
+              {subFolders.length > 0 && (
+                <>
+                  <span className="no-of-sub-folders text-xs font-thin">
+                    {t('common.subFolderWithCount', {
+                      count: subFolders.length,
+                    })}
+                  </span>
+                  <span className="mx-1">&bull;</span>
+                </>
+              )}
               <span className="no-of-songs mr-2 text-xs font-thin">
                 {t('common.songWithCount', { count: noOfSongs })}
               </span>

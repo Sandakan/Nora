@@ -158,7 +158,7 @@ const AlbumsPage = () => {
                 ) : (
                   albumsData.length > 0 && (
                     <span className="no-of-albums">
-                      {t('common.album', { count: albumsData.length })}
+                      {t('common.albumWithCount', { count: albumsData.length })}
                     </span>
                   )
                 )}

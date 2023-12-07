@@ -111,7 +111,9 @@ const OtherSongControlsContainer = () => {
           isMuted && 'after:opacity-100'
         }`}
         tooltipLabel={t('player.muteUnmute')}
-        iconName={isMuted ? 'volume_off' : 'volume_up'}
+        iconName={
+          isMuted ? 'volume_off' : volume > 50 ? 'volume_up' : 'volume_down_alt'
+        }
         iconClassName={`material-icons-round text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white ${
           isMuted &&
           '!text-font-color-highlight !opacity-100 dark:!text-dark-font-color-highlight'

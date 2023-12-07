@@ -224,22 +224,24 @@ const MusicFolderInfoPage = () => {
     >
       <>
         <div className="title-container mb-8 mt-2 flex items-center justify-between pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-          '{folderName}' Folder
-          <div className="other-stats-container flex items-center text-xs text-font-color-black dark:text-font-color-white">
-            {isMultipleSelectionEnabled ? (
-              <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
-                {t('common.selectionWithCount', {
-                  count: multipleSelectionsData.multipleSelections.length,
-                })}
-              </div>
-            ) : (
-              folderSongs &&
-              folderSongs.length > 0 && (
-                <span className="no-of-songs">
-                  {t('common.folderWithCount', { count: folderSongs.length })}
-                </span>
-              )
-            )}
+          <div className="container flex">
+            '{folderName}' {t('common.folder_one')}
+            <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
+              {isMultipleSelectionEnabled ? (
+                <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
+                  {t('common.selectionWithCount', {
+                    count: multipleSelectionsData.multipleSelections.length,
+                  })}
+                </div>
+              ) : (
+                folderSongs &&
+                folderSongs.length > 0 && (
+                  <span className="no-of-songs">
+                    {t('common.folderWithCount', { count: folderSongs.length })}
+                  </span>
+                )
+              )}
+            </div>
           </div>
           {folderInfo && (
             <div className="buttons-container flex text-sm">

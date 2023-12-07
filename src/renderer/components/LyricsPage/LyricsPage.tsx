@@ -453,7 +453,7 @@ const LyricsPage = () => {
                   {lyrics?.lyrics?.isSynced && (
                     <Button
                       key={5}
-                      label={
+                      tooltipLabel={
                         lyrics && lyrics.source !== 'IN_SONG_LYRICS'
                           ? t(
                               `currentQueuePage.${
@@ -489,7 +489,7 @@ const LyricsPage = () => {
                     <>
                       <Button
                         key={5}
-                        label={t('lyricsPage.refreshOnlineLyrics')}
+                        tooltipLabel={t('lyricsPage.refreshOnlineLyrics')}
                         pendingAnimationOnDisabled
                         className="refresh-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                         iconName="refresh"

@@ -163,7 +163,12 @@ const reParseSong = async (filePath: string) => {
               songPath: song?.path,
             },
             'INFO',
-            { sendToRenderer: 'SUCCESS' },
+            {
+              sendToRenderer: {
+                messageCode: 'SONG_REPARSE_SUCCESS',
+                data: { title: song.title },
+              },
+            },
           );
 
           setSongsData(songs);
@@ -184,7 +189,7 @@ const reParseSong = async (filePath: string) => {
     return undefined;
   } catch (error) {
     return log('Error occurred when re-parsing the song.', { error }, 'ERROR', {
-      sendToRenderer: 'FAILURE',
+      sendToRenderer: { messageCode: 'SONG_REPARSE_FAILED' },
     });
   }
 };

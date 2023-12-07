@@ -191,7 +191,10 @@ const fetchUnsyncedLyrics = async (
     };
   }
   log(`No lyrics found in the internet for the requested query.`);
-  sendMessageToRenderer(`We couldn't find lyrics for ${songTitle}`);
+  sendMessageToRenderer({
+    messageCode: 'LYRICS_FIND_FAILED',
+    data: { title: songTitle },
+  });
   return undefined;
 };
 
@@ -309,7 +312,10 @@ const getSongLyrics = async (
       log(
         `No lyrics found in the internet for the requested query.\nERROR : ${error}`,
       );
-      sendMessageToRenderer(`We couldn't find lyrics for ${songTitle}`);
+      sendMessageToRenderer({
+        messageCode: 'LYRICS_FIND_FAILED',
+        data: { title: songTitle },
+      });
       return undefined;
     }
   }

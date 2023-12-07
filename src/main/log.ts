@@ -8,13 +8,7 @@ const IS_DEVELOPMENT =
   !app.isPackaged || process.env.NODE_ENV === 'development';
 export interface LogOptions {
   preventLoggingToConsole?: boolean;
-  sendToRenderer?:
-    | boolean
-    | MessageCodes
-    | {
-        code?: MessageCodes;
-        data?: Object;
-      };
+  sendToRenderer?: MessageToRendererProps;
 }
 
 type LogType = 'MAIN' | 'UI';
@@ -85,25 +79,21 @@ const log = (
     messageType === 'ERROR' ? '======' : messageType === 'WARN' ? '######' : '';
 
   if (options.sendToRenderer) {
-    const rendererMsgOptions = {
-      code: (messageType === 'INFO' ? 'INFO' : 'FAILURE') as MessageCodes,
-      data: undefined as Object | undefined,
-    };
+    // const rendererMsgOptions = {
+    //   code: (messageType === 'INFO' ? 'INFO' : 'FAILURE') as MessageCodes,
+    //   data: undefined as Object | undefined,
+    // };
 
-    if (typeof options.sendToRenderer === 'object') {
-      const { code, data: rendererData } = options.sendToRenderer;
+    // if (typeof options.sendToRenderer === 'object') {
+    //   const { messageCode, data: rendererData } = options.sendToRenderer;
 
-      if (code) rendererMsgOptions.code = code;
-      rendererMsgOptions.data = rendererData;
-    }
-    if (typeof options.sendToRenderer === 'string')
-      rendererMsgOptions.code = options.sendToRenderer;
+    //   if (code) rendererMsgOptions.code = code;
+    //   rendererMsgOptions.data = rendererData;
+    // }
+    // if (typeof options.sendToRenderer === 'string')
+    //   rendererMsgOptions.code = options.sendToRenderer;
 
-    sendMessageToRenderer(
-      mes,
-      rendererMsgOptions.code,
-      rendererMsgOptions.data,
-    );
+    sendMessageToRenderer(options.sendToRenderer);
   }
 
   if (messageType !== 'INFO') mes = mes.toUpperCase();

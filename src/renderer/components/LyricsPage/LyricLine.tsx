@@ -95,7 +95,7 @@ const LyricLine = (props: LyricProp) => {
         syncedLyrics
           ? t(`lyricsEditingPage.fromTo`, {
               start: roundTo(syncedLyrics.start - delay, 2),
-              to: roundTo(syncedLyrics.end - delay, 2),
+              end: roundTo(syncedLyrics.end - delay, 2),
             })
           : undefined
       }

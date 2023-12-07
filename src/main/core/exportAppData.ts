@@ -43,7 +43,7 @@ const exportAppData = async (localStorageData: string) => {
   const destinations = await showOpenDialog(DEFAULT_EXPORT_DIALOG_OPTIONS);
 
   log('Started to export app data. Please wait...', undefined, undefined, {
-    sendToRenderer: 'LOADING',
+    sendToRenderer: { messageCode: 'APPDATA_EXPORT_STARTED' },
   });
 
   try {
@@ -150,21 +150,21 @@ const exportAppData = async (localStorageData: string) => {
       );
 
       return log('Exported app data successfully.', undefined, 'INFO', {
-        sendToRenderer: 'SUCCESS',
+        sendToRenderer: { messageCode: 'APPDATA_EXPORT_SUCCESS' },
       });
     }
     return log(
       `Failed to export app data because user didn't select a destination.`,
       undefined,
       'WARN',
-      { sendToRenderer: 'FAILURE' },
+      { sendToRenderer: { messageCode: 'DESTINATION_NOT_SELECTED' } },
     );
   } catch (err) {
     log(
       'Error occurred when exporting app data.',
       { err, destinations },
       'ERROR',
-      { sendToRenderer: 'FAILURE' },
+      { sendToRenderer: { messageCode: 'APPDATA_EXPORT_FAILED' } },
     );
     throw err;
   }

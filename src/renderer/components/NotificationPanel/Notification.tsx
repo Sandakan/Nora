@@ -13,7 +13,7 @@ const Notification = (props: AppNotification) => {
     iconName,
     iconClassName,
     type = 'DEFAULT',
-    progressBarData = { max: 100, value: 50 },
+    progressBarData = { total: 100, value: 50 },
   } = props;
   const { localStorageData } = React.useContext(AppContext);
   const { updateNotifications } = React.useContext(AppUpdateContext);
@@ -27,7 +27,7 @@ const Notification = (props: AppNotification) => {
   const notificationPanelStyles: any = {};
   notificationPanelStyles['--loading-bar-width'] = `${dimensions.width - 35}px`;
   notificationPanelStyles['--loading-bar-progress'] = `${
-    (progressBarData.value / progressBarData.max) * 100
+    (progressBarData.value / progressBarData.total) * 100
   }%`;
 
   const removeNotification = React.useCallback(() => {

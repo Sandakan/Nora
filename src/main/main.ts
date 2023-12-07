@@ -412,8 +412,8 @@ app
 
       ipcMain.handle(
         'app/addSongsFromFolderStructures',
-        (_, structures: FolderStructure[], sortType: SongSortTypes) =>
-          addSongsFromFolderStructures(structures, sortType),
+        (_, structures: FolderStructure[]) =>
+          addSongsFromFolderStructures(structures),
       );
 
       ipcMain.handle('app/getSong', (_, id: string) => sendAudioData(id));
@@ -674,10 +674,7 @@ app
 
       ipcMain.handle('app/resyncSongsLibrary', async () => {
         await checkForNewSongs();
-        sendMessageToRenderer(
-          'Library resync successfull.',
-          'RESYNC_SUCCESSFUL',
-        );
+        sendMessageToRenderer({ messageCode: 'RESYNC_SUCCESSFUL' });
       });
 
       ipcMain.handle('app/getBlacklistData', getBlacklistData);
@@ -941,15 +938,12 @@ function toggleOnBatteryPower() {
   mainWindow.webContents.send('app/isOnBatteryPower', isOnBatteryPower);
 }
 
-export function sendMessageToRenderer(
-  message: string,
-  code: MessageCodes = 'INFO',
-  data?: object,
-) {
+export function sendMessageToRenderer(props: MessageToRendererProps) {
+  const { messageCode, data } = props;
+
   mainWindow.webContents.send(
     'app/sendMessageToRendererEvent',
-    message,
-    code,
+    messageCode,
     data,
   );
 }
@@ -1158,7 +1152,7 @@ async function revealSongInFileExplorer(songId: string) {
     `Revealing song file in explorer failed because song couldn't be found in the library.`,
     { songId },
     'WARN',
-    { sendToRenderer: 'FAILURE' },
+    { sendToRenderer: { messageCode: 'SONG_REVEAL_FAILED' } },
   );
 }
 
@@ -1220,11 +1214,9 @@ async function resetApp(isRestartApp = true) {
     log(
       `########## SUCCESSFULLY RESETTED THE APP. RESTARTING THE APP NOW. ##########`,
     );
-    sendMessageToRenderer(
-      'Successfully resetted the app. Restarting the app now.',
-    );
+    sendMessageToRenderer({ messageCode: 'RESET_SUCCESSFUL' });
   } catch (error) {
-    sendMessageToRenderer('Resetting the app failed. Reloading the app now.');
+    sendMessageToRenderer({ messageCode: 'RESET_FAILED' });
     log(
       `====== ERROR OCCURRED WHEN RESETTING THE APP. RELOADING THE APP NOW.  ======\nERROR : ${error}`,
     );
@@ -1283,10 +1275,7 @@ function watchForSystemThemeChanges() {
 
   const theme = nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
   if (IS_DEVELOPMENT && useSystemTheme)
-    sendMessageToRenderer(
-      `System theme changed to ${theme}`,
-      'APP_THEME_CHANGE',
-    );
+    sendMessageToRenderer({ messageCode: 'APP_THEME_CHANGE', data: { theme } });
 
   if (useSystemTheme) changeAppTheme('system');
   else log(`System theme changed to ${theme}`);

@@ -20,23 +20,19 @@ export const manageGenresOfParsedSong = (
   ) {
     for (const songGenre of songGenres) {
       const songGenreName = songGenre.name.trim();
-      const isGenreAvailable = allGenres.some(
+      const availableGenre = allGenres.find(
         (genre) => genre.name === songGenreName,
       );
 
-      if (isGenreAvailable) {
-        for (const availableGenre of allGenres) {
-          if (availableGenre.name === songGenreName) {
-            availableGenre.artworkName =
-              songArtworkPaths && !songArtworkPaths.isDefaultArtwork
-                ? path.basename(songArtworkPaths.artworkPath)
-                : availableGenre.artworkName || undefined;
-            availableGenre.backgroundColor =
-              darkVibrantBgColor || availableGenre.backgroundColor;
-            availableGenre.songs.push({ songId, title });
-            relevantGenres.push(availableGenre);
-          }
-        }
+      if (availableGenre) {
+        availableGenre.artworkName =
+          songArtworkPaths && !songArtworkPaths.isDefaultArtwork
+            ? path.basename(songArtworkPaths.artworkPath)
+            : availableGenre.artworkName || undefined;
+        availableGenre.backgroundColor =
+          darkVibrantBgColor || availableGenre.backgroundColor;
+        availableGenre.songs.push({ songId, title });
+        relevantGenres.push(availableGenre);
 
         // let y = genres.filter((genre) => genre.name === songGenreName);
         // y = y.map((z) => {

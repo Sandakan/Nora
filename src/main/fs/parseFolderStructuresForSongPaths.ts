@@ -150,9 +150,13 @@ const parseFolderStructuresForSongPaths = async (
   const foldersWithStatData =
     getAllFoldersFromFolderStructures(folderStructures);
 
-  sendMessageToRenderer(
-    `${foldersWithStatData.length} directories found in ${folderStructures.length} selected folders.`,
-  );
+  sendMessageToRenderer({
+    messageCode: 'FOLDER_PARSED_FOR_DIRECTORIES',
+    data: {
+      count: foldersWithStatData.length,
+      folderCount: folderStructures.length,
+    },
+  });
   log(
     `${foldersWithStatData.length} directories found in ${folderStructures.length} selected folders.`,
   );
