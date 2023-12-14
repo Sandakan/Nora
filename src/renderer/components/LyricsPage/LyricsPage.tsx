@@ -16,7 +16,7 @@ import Button from '../Button';
 
 import { appPreferences } from '../../../../package.json';
 import { isLyricsEnhancedSynced } from '../SongTagsEditingPage/input_containers/SongLyricsEditorInput';
-import { EditingLyricsLineData } from '../LyricsEditingPage/LyricsEditingPage';
+import { LyricData } from '../LyricsEditingPage/LyricsEditingPage';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -389,13 +389,13 @@ const LyricsPage = () => {
 
   const goToLyricsEditor = React.useCallback(() => {
     if (lyrics) {
-      let lines: EditingLyricsLineData[] = [];
+      let lines: LyricData[] = [];
       const { isSynced, syncedLyrics, lyrics: unsyncedLyrics } = lyrics.lyrics;
 
       if (isSynced && syncedLyrics)
         lines = syncedLyrics.map((lyric) => ({
           ...lyric,
-          line: lyric.text,
+          text: lyric.text,
         }));
       else {
         lines = unsyncedLyrics.map((line) => ({ text: line }));

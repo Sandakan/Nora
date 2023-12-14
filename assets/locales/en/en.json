@@ -164,7 +164,8 @@
     "mostLovedDescending": "Most Loved",
     "mostLovedAscending": "Least Loved",
     "trackNoAscending": "Track Number (Ascending)",
-    "trackNoDescending": "Track Number (Descending)"
+    "trackNoDescending": "Track Number (Descending)",
+    "addedOrder": "Added Order"
   },
 
   "equalizerPresets": {
@@ -612,7 +613,7 @@
     "lyricsEnhancedSynced": "Lyrics are enhanced synced.",
     "lyricsNotEnhancedSynced": "Lyrics are enhanced synced.",
     "enhancedLyricsSupported": "Enhanced Synced Lyrics supported.",
-    "readMoreAboutLrc": "$t(common.readMoreAboutTitle,  {\"title\": LRC format)",
+    "readMoreAboutLrc": "$t(common.readMoreAboutTitle, {\"title\": \"LRC format\"})",
     "avoidUnsyncedOnSyncedLyricsTab": "Avoid entering Unsynchronized Lyrics in the Synchronized Lyrics Tab.",
     "avoidSyncedOnUnsyncedLyricsTab": "Avoid entering Synchronized Lyrics in the Unsynchronized Lyrics Tab.",
     "pendingLyricsSavesAvailable": "There are pending lyrics to be saved to this song. They will be saved and will be visible here after the current song is finished.",
@@ -627,18 +628,24 @@
   },
 
   "time": {
-    "second_one": "{{count}} second",
-    "second_other": "{{count}} seconds",
-    "minute_one": "{{count}} minute",
-    "minute_other": "{{count}} minutes",
-    "hour_one": "{{count}} hour",
-    "hour_other": "{{count}} hours",
-    "day_one": "{{count}} day",
-    "day_other": "{{count}} days",
-    "month_one": "{{count}} month",
-    "month_other": "{{count}} months",
-    "year_one": "{{count}} year",
-    "year_other": "{{count}} years"
+    "second_one": "second",
+    "second_other": "seconds",
+    "minute_one": "minute",
+    "minute_other": "minutes",
+    "hour_one": "hour",
+    "hour_other": "hours",
+    "day_one": "day",
+    "day_other": "days",
+    "month_one": "month",
+    "month_other": "months",
+    "year_one": "year",
+    "year_other": "years",
+    "secondWithCount": "{{count}} $t(time.second, {\"count\":{{count}}})",
+    "minuteWithCount": "{{count}} $t(time.minute, {\"count\":{{count}}})",
+    "hourWithCount": "{{count}} $t(time.hour, {\"count\":{{count}}})",
+    "dayWithCount": "{{count}} $t(time.day, {\"count\":{{count}}})",
+    "monthWithCount": "{{count}} $t(time.month, {\"count\":{{count}}})",
+    "yearWithCount": "{{count}} $t(time.year, {\"count\":{{count}}})"
   },
 
   "elapsedTime": {
@@ -992,7 +999,7 @@
     "RESET_SUCCESSFUL": "Successfully resetted the app. Restarting the app now.",
     "RESET_FAILED": "Resetting the app failed. Reloading the app now.",
     "APP_THEME_CHANGE": "System theme changed to {{theme}}",
-    "SONG_REMOVE_PROCESS_UPDATE": "Removed {{value}} out of ${{total}} songs.",
+    "SONG_REMOVE_PROCESS_UPDATE": "Removed {{value}} out of {{total}} songs.",
     "SONG_REVEAL_FAILED": "Revealing song file in explorer failed because song couldn't be found in the library.",
     "PENDING_METADATA_UPDATES_SAVED": "Successfully saved pending metadata updates of '{{title}}'.",
     "METADATA_UPDATE_FAILED": "Metadata update failed. {{message}}",

@@ -132,6 +132,7 @@ const EditingLyricsLine = (props: Props) => {
               text: wordText,
               end: wordEnd = 0,
               start: wordStart = 0,
+              isActive: isWordActive,
             } = word;
 
             const TRANSITION_DURATION = 0;
@@ -144,7 +145,9 @@ const EditingLyricsLine = (props: Props) => {
             return (
               <div
                 className={`mr-3 flex flex-col items-start opacity-50 hover:opacity-100 ${
-                  shouldHighlight && isWordInRange && '!opacity-100'
+                  ((isPlaying && isWordInRange) ||
+                    (!isPlaying && isWordActive)) &&
+                  '!opacity-100'
                 }`}
               >
                 <span className="text-xs">{wordStart}</span>
@@ -193,7 +196,11 @@ const EditingLyricsLine = (props: Props) => {
           onChange={(e) => {
             const { value } = e.currentTarget;
             const lineData = isEditingEnhancedSyncedLyrics
-              ? value.split(' ').map((line): LyricsLineData => ({ text: line }))
+              ? value
+                  .split(' ')
+                  .map(
+                    (line): LyricsLineData => ({ text: line, isActive: false }),
+                  )
               : value;
 
             dispatch({

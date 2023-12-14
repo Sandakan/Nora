@@ -350,7 +350,9 @@ const PlaylistInfoPage = () => {
         dropdown={{
           name: 'PlaylistPageSortDropdown',
           value: sortingOrder,
-          options: songSortOptions,
+          options: songSortOptions.concat([
+            { label: t('sortTypes.addedOrder'), value: 'addedOrder' },
+          ]),
           onChange: (e) => {
             const order = e.currentTarget.value as SongSortTypes;
             updateCurrentlyActivePageData((currentPageData) => ({

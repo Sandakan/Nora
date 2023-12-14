@@ -16,18 +16,20 @@ const removeFromFavorites = (
           playlist.name === 'Favorites' && playlist.playlistId === 'Favorites',
       )
     ) {
-      for (let i = 0; i < playlists.length; i += 1) {
-        if (
-          playlists[i].name === 'Favorites' &&
-          playlists[i].playlistId === 'Favorites' &&
-          playlists[i].songs.some(
-            (playlistSongId: string) => playlistSongId === songId,
-          )
-        ) {
-          const { songs } = playlists[i];
-          songs.splice(songs.indexOf(songId), 1);
-          playlists[i].songs = songs;
-        }
+      const selectedPlaylist = playlists.find(
+        (playlist) =>
+          playlist.name === 'Favorites' && playlist.playlistId === 'Favorites',
+      );
+
+      if (
+        selectedPlaylist &&
+        selectedPlaylist.songs.some(
+          (playlistSongId: string) => playlistSongId === songId,
+        )
+      ) {
+        const { songs } = selectedPlaylist;
+        songs.splice(songs.indexOf(songId), 1);
+        selectedPlaylist.songs = songs;
       }
       setPlaylistData(playlists);
       dataUpdateEvent('playlists/favorites');

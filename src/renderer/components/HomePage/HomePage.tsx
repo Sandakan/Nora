@@ -450,7 +450,7 @@ const HomePage = () => {
               />
               <Button
                 label={t('settingsPage.importAppData')}
-                iconName="upload"
+                iconName="publish"
                 className="mt-4 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
                 clickHandler={importAppData}
               />

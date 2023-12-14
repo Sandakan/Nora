@@ -16,10 +16,18 @@ import LyricsEditorSettingsPrompt from './LyricsEditorSettingsPrompt';
 import LyricsEditorSavePrompt from './LyricsEditorSavePrompt';
 import PageFocusPrompt from './PageFocusPrompt';
 
+export interface LyricData {
+  text: string | Omit<SyncedLyricsLineText, 'unparsedText'>;
+  start?: number;
+  end?: number;
+}
+
 export interface LyricsLineData {
   text: string;
   start?: number;
   end?: number;
+  unparsedText?: string;
+  isActive: boolean;
 }
 
 export interface EditingLyricsLineData {
@@ -64,7 +72,7 @@ const LyricsEditingPage = () => {
 
     return {
       songId: data.songId as string | undefined,
-      lyrics: (data.lyrics || []) as EditingLyricsLineData[],
+      lyrics: (data.lyrics || []) as LyricData[],
       songTitle: data.songTitle as string | undefined,
     };
   }, [currentlyActivePage]);
@@ -80,12 +88,9 @@ const LyricsEditingPage = () => {
         (lineData, index) => ({
           ...lineData,
           text:
-            typeof lineData.text === 'string' && isEditingEnhancedSyncedLyrics
-              ? lineData.text
-                  .trim()
-                  .split(' ')
-                  .map((text): LyricsLineData => ({ text }))
-              : lineData.text,
+            typeof lineData.text === 'string'
+              ? lineData.text.trim()
+              : lineData.text.map((val) => ({ ...val, isActive: false })),
           index,
           isActive: false,
         }),
@@ -131,42 +136,136 @@ const LyricsEditingPage = () => {
     });
   }, [isPlaying, lyricsLines]);
 
+  const updateTextActiveStatus = React.useCallback(
+    <T extends { isActive: boolean; end?: number; start?: number }>(
+      textLine: T[],
+      shiftKeyEnabled: boolean,
+    ) => {
+      const slicedPrevTextLine = textLine.slice();
+      const lastActiveTextIndex = textLine.findIndex((val) => val.isActive);
+      // const wasFirstLineActive = textLine.at(0)?.isActive || false;
+      // const wasLastLineActive = textLine.at(-1)?.isActive || false;
+
+      if (shiftKeyEnabled) {
+        if (lastActiveTextIndex !== -1) {
+          slicedPrevTextLine[lastActiveTextIndex].isActive =
+            !slicedPrevTextLine[lastActiveTextIndex].isActive;
+        }
+        if (lastActiveTextIndex - 1 >= 0) {
+          slicedPrevTextLine[lastActiveTextIndex - 1].isActive =
+            !slicedPrevTextLine[lastActiveTextIndex - 1].isActive;
+        }
+      } else {
+        if (lastActiveTextIndex !== -1) {
+          slicedPrevTextLine[lastActiveTextIndex].isActive =
+            !slicedPrevTextLine[lastActiveTextIndex].isActive;
+          slicedPrevTextLine[lastActiveTextIndex].end = roundedSongPostion;
+        }
+        if (lastActiveTextIndex + 1 !== slicedPrevTextLine.length) {
+          slicedPrevTextLine[lastActiveTextIndex + 1].isActive =
+            !slicedPrevTextLine[lastActiveTextIndex + 1].isActive;
+          slicedPrevTextLine[lastActiveTextIndex + 1].start =
+            roundedSongPostion;
+        }
+      }
+
+      return slicedPrevTextLine;
+    },
+    [roundedSongPostion],
+  );
+
   const handleShortcuts = React.useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       if (e.key === 'Enter') {
         e.stopPropagation();
-        return setLyricsLines((prevLines) => {
-          const slicedPrevLines = prevLines.slice();
-          const lastActiveIndex = prevLines.findIndex((val) => val.isActive);
 
-          if (e.shiftKey) {
-            if (lastActiveIndex !== -1) {
-              slicedPrevLines[lastActiveIndex].isActive =
-                !slicedPrevLines[lastActiveIndex].isActive;
-            }
-            if (lastActiveIndex - 1 >= 0) {
-              slicedPrevLines[lastActiveIndex - 1].isActive =
-                !slicedPrevLines[lastActiveIndex - 1].isActive;
-            }
+        return setLyricsLines((prevLines) => {
+          // updateTextActiveStatus(prevLines, e.shiftKey);
+
+          const slicedPrevLines = prevLines.slice();
+          const lastActiveLineIndex = prevLines.findIndex(
+            (val) => val.isActive,
+          );
+
+          // // Is a main line active
+          // if (lastActiveLineIndex === -1) {
+          //   // Make the first main line active
+          //   slicedPrevLines[0].isActive = true;
+
+          //   // has text blocks
+          //   if (Array.isArray(slicedPrevLines[0]?.text)) {
+          //     // make the first text block active
+          //     const textLine = slicedPrevLines[0].text;
+          //     const slicedPrevTextLine = textLine.slice();
+          //     slicedPrevTextLine[0].isActive = true;
+
+          //     slicedPrevLines[0].text = slicedPrevTextLine;
+          //   }
+          //   // Is the active main line the last line?
+          // } else if (lastActiveLineIndex === slicedPrevLines.length - 1) {
+          //   // Remove active from the last main line
+          //   slicedPrevLines[lastActiveLineIndex].isActive = false;
+          // } else if (
+          //   Array.isArray(slicedPrevLines[lastActiveLineIndex]?.text)
+          // ) {
+          //   const textLine = slicedPrevLines[lastActiveLineIndex]
+          //     ?.text as LyricsLineData[];
+          //   const lastActiveTextIndex = textLine.findIndex(
+          //     (val) => val.isActive,
+          //   );
+
+          //   if (lastActiveTextIndex === -1) textLine[0].isActive = true;
+          //   else if (lastActiveTextIndex === textLine.length - 1) {
+          //     textLine[lastActiveTextIndex].isActive = false;
+          //     textLine[lastActiveTextIndex + 1].isActive = true;
+          //   } else {
+          //     // Make the next main line active
+          //   }
+          // } else {
+          //   // Make the next main line active
+          // }
+          const textLine = slicedPrevLines[lastActiveLineIndex]?.text;
+          if (Array.isArray(textLine) && !textLine.at(-1)?.isActive) {
+            slicedPrevLines[lastActiveLineIndex].text = updateTextActiveStatus(
+              textLine,
+              e.shiftKey,
+            );
           } else {
-            if (lastActiveIndex !== -1) {
-              slicedPrevLines[lastActiveIndex].isActive =
-                !slicedPrevLines[lastActiveIndex].isActive;
-              slicedPrevLines[lastActiveIndex].end = roundedSongPostion;
+            if (e.shiftKey) {
+              if (lastActiveLineIndex !== -1) {
+                slicedPrevLines[lastActiveLineIndex].isActive =
+                  !slicedPrevLines[lastActiveLineIndex].isActive;
+              }
+              if (lastActiveLineIndex - 1 >= 0) {
+                slicedPrevLines[lastActiveLineIndex - 1].isActive =
+                  !slicedPrevLines[lastActiveLineIndex - 1].isActive;
+              }
+            } else {
+              if (lastActiveLineIndex !== -1) {
+                slicedPrevLines[lastActiveLineIndex].isActive =
+                  !slicedPrevLines[lastActiveLineIndex].isActive;
+                slicedPrevLines[lastActiveLineIndex].end = roundedSongPostion;
+              }
+              if (lastActiveLineIndex + 1 !== slicedPrevLines.length) {
+                slicedPrevLines[lastActiveLineIndex + 1].isActive =
+                  !slicedPrevLines[lastActiveLineIndex + 1].isActive;
+                slicedPrevLines[lastActiveLineIndex + 1].start =
+                  roundedSongPostion;
+              }
             }
-            if (lastActiveIndex + 1 !== slicedPrevLines.length) {
-              slicedPrevLines[lastActiveIndex + 1].isActive =
-                !slicedPrevLines[lastActiveIndex + 1].isActive;
-              slicedPrevLines[lastActiveIndex + 1].start = roundedSongPostion;
-            }
+
+            if (Array.isArray(textLine))
+              slicedPrevLines[lastActiveLineIndex].text =
+                updateTextActiveStatus(textLine, e.shiftKey);
           }
+
           return slicedPrevLines;
         });
       }
 
       return undefined;
     },
-    [roundedSongPostion],
+    [roundedSongPostion, updateTextActiveStatus],
   );
 
   const moreOptionsContextMenuItems = React.useMemo((): ContextMenuItem[] => {
@@ -211,12 +310,12 @@ const LyricsEditingPage = () => {
                     (lineData, index) => ({
                       ...lineData,
                       text:
-                        typeof lineData.text === 'string' &&
-                        isEditingEnhancedSyncedLyrics
+                        typeof lineData.text === 'string'
                           ? lineData.text
-                              .split(' ')
-                              .map((text): LyricsLineData => ({ text }))
-                          : lineData.text,
+                          : lineData.text.map((val) => ({
+                              ...val,
+                              isActive: false,
+                            })),
                       index,
                       isActive: false,
                     }),
@@ -229,7 +328,7 @@ const LyricsEditingPage = () => {
         },
       },
     ];
-  }, [changePromptMenuData, isEditingEnhancedSyncedLyrics, lyrics, t]);
+  }, [changePromptMenuData, lyrics, t]);
 
   return (
     <MainContainer
@@ -319,6 +418,7 @@ const LyricsEditingPage = () => {
                 <LyricsEditorSavePrompt
                   lyricsLines={lyricsLines}
                   currentSongData={currentSongData}
+                  isEditingEnhancedSyncedLyrics={isEditingEnhancedSyncedLyrics}
                 />,
               )
             }

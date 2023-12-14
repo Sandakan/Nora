@@ -18,16 +18,19 @@ const calculateTimeFromSeconds = (secs = 0) => {
 
   const timeArr: string[] = [];
 
-  if (totalYears >= 1) timeArr.push(i18n.t('time.year', { count: totalYears }));
+  if (totalYears >= 1)
+    timeArr.push(i18n.t('time.yearWithCount', { count: totalYears }));
   if (monthsWithoutYears >= 1)
-    timeArr.push(i18n.t('time.month', { count: monthsWithoutYears }));
+    timeArr.push(i18n.t('time.monthWithCount', { count: monthsWithoutYears }));
   if (daysWithoutMonths >= 1)
-    timeArr.push(i18n.t('time.day', { count: daysWithoutMonths }));
+    timeArr.push(i18n.t('time.dayWithCount', { count: daysWithoutMonths }));
   if (hoursWithoutDays >= 1)
-    timeArr.push(i18n.t('time.hour', { count: hoursWithoutDays }));
+    timeArr.push(i18n.t('time.hourWithCount', { count: hoursWithoutDays }));
   if (minutesWithoutHours >= 1)
-    timeArr.push(i18n.t('time.minute', { count: minutesWithoutHours }));
-  timeArr.push(i18n.t('time.second', { count: seconds }));
+    timeArr.push(
+      i18n.t('time.minuteWithCount', { count: minutesWithoutHours }),
+    );
+  timeArr.push(i18n.t('time.secondWithCount', { count: seconds }));
 
   const timeString = timeArr.join(' ');
 

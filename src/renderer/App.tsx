@@ -964,7 +964,13 @@ export default function App() {
         />,
       );
       return log(
-        `======= ERROR OCCURRED WHEN TRYING TO PLAY A S0NG. =======\nERROR : Song id is of unknown type; SONGIDTYPE : ${typeof songId}`,
+        'ERROR OCCURRED WHEN TRYING TO PLAY A S0NG.',
+        {
+          error: 'Song id is of unknown type',
+          songIdType: typeof songId,
+          songId,
+        },
+        'ERROR',
       );
     },
     [
@@ -1025,9 +1031,10 @@ export default function App() {
     if (player.currentTime > 5) {
       player.currentTime = 0;
     } else if (typeof currentSongIndex === 'number') {
-      if (currentSongIndex === 0)
-        changeQueueCurrentSongIndex(refQueue.current.queue.length - 1);
-      else changeQueueCurrentSongIndex(currentSongIndex - 1);
+      if (currentSongIndex === 0) {
+        if (refQueue.current.queue.length > 0)
+          changeQueueCurrentSongIndex(refQueue.current.queue.length - 1);
+      } else changeQueueCurrentSongIndex(currentSongIndex - 1);
     } else changeQueueCurrentSongIndex(0);
   }, [changeQueueCurrentSongIndex]);
 

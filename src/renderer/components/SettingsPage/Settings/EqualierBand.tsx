@@ -12,7 +12,7 @@ const EqualierBand = (props: Props) => {
 
   return (
     <div
-      className="section mx-6 flex flex-col text-center"
+      className="section xl:mx-2 mx-6 flex flex-col text-center"
       style={bandWidthStyle}
     >
       <div className="sliders flex">

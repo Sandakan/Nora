@@ -97,7 +97,11 @@ const ArtistInfoPage = () => {
         .then((x) => {
           if (x)
             setArtistData((prevData) => {
-              if (prevData)
+              if (prevData) {
+                updateBodyBackgroundImage(
+                  true,
+                  x.artistArtworks?.picture_medium,
+                );
                 return {
                   ...prevData,
                   onlineArtworkPaths: x.artistArtworks,
@@ -106,6 +110,7 @@ const ArtistInfoPage = () => {
                   similarArtists: x.similarArtists || prevData.similarArtists,
                   tags: x.tags,
                 };
+              }
               return undefined;
             });
           return undefined;
@@ -114,7 +119,7 @@ const ArtistInfoPage = () => {
           console.error(err);
         });
     }
-  }, [artistData?.artistId]);
+  }, [artistData?.artistId, updateBodyBackgroundImage]);
 
   const fetchSongsData = React.useCallback(() => {
     if (artistData?.songs && artistData.songs.length > 0) {

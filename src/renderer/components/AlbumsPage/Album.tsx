@@ -208,7 +208,7 @@ export const Album = (props: AlbumProp) => {
     );
   }, [isAMultipleSelection, props, t]);
 
-  const contextMenuItems = React.useMemo(() => {
+  const contextMenuItems: ContextMenuItem[] = React.useMemo(() => {
     const isMultipleSelectionsEnabled =
       multipleSelectionsData.selectionType === 'album' &&
       multipleSelectionsData.multipleSelections.length !== 1 &&
@@ -327,7 +327,7 @@ export const Album = (props: AlbumProp) => {
             subTitle: t('common.songWithCount', { count: props.songs.length }),
             subTitle2:
               props.artists?.map((artist) => artist.name).join(', ') ||
-              'Unknown artist',
+              t('common.unknownArtist'),
           },
     [
       isAMultipleSelection,

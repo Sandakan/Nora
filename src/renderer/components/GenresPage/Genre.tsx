@@ -290,7 +290,7 @@ const Genre = (props: GenreProp) => {
         : {
             title,
             artworkPath: artworkPaths?.optimizedArtworkPath,
-            subTitle: `${songIds.length} songs`,
+            subTitle: t('common.songWithCount', { count: songIds.length }),
           },
     [
       artworkPaths?.optimizedArtworkPath,

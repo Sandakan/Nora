@@ -51,20 +51,22 @@ const LyricLine = (props: LyricProp) => {
     if (typeof lyric === 'string')
       return lyric.replaceAll(syncedLyricsRegex, '').trim();
 
-    const extendedLyricLines = lyric.map((x) => {
+    const extendedLyricLines = lyric.map((extendedText, i) => {
       return (
         <span
-          key={x.text}
-          onClick={() => updateSongPosition(x.start)}
+          // eslint-disable-next-line react/no-array-index-key
+          key={`${i}-${extendedText.text}`}
+          onClick={() => updateSongPosition(extendedText.start)}
           className={`mr-2 text-font-color-black last:mr-0 dark:text-font-color-white ${
-            songPosition > x.start - delay && songPosition < x.end - delay
+            songPosition > extendedText.start - delay &&
+            songPosition < extendedText.end - delay
               ? '!text-opacity-90'
               : // : songPosition > start - delay && songPosition < end - delay
                 // ? '!text-opacity-40'
                 '!text-opacity-20 hover:!text-opacity-75'
           }`}
         >
-          {x.text}
+          {extendedText.text}
         </span>
       );
     });

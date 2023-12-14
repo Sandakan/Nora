@@ -16,11 +16,25 @@ const { metadataEditingSupportedExtensions } = appPreferences;
 type Props = {
   lyricsLines: ExtendedEditingLyricsLineData[];
   currentSongData: AudioPlayerData;
+  isEditingEnhancedSyncedLyrics: boolean;
+};
+
+const generateTimestamp = (start = 0, format: '[]' | '<>' = '[]') => {
+  const { minutes, seconds } = calculateTime(start, false);
+  const [secsStr, milliSecsStr = '00'] = seconds.toString().split('.');
+
+  const timestampContents = `${minutes.length > 1 ? minutes : `0${minutes}`}:${
+    secsStr.length > 1 ? secsStr : `0${secsStr}`
+  }.${milliSecsStr.length > 1 ? milliSecsStr : `0${milliSecsStr}`}`;
+
+  if (format === '[]') return `[${timestampContents}]`;
+  return `<${timestampContents}>`;
 };
 
 const convertLyricsStrToObj = (
   lyricsLines: ExtendedEditingLyricsLineData[],
   currentSongData: AudioPlayerData,
+  isEditingEnhancedSyncedLyrics: boolean,
 ) => {
   const metadataLines: string[] = [];
 
@@ -36,12 +50,20 @@ const convertLyricsStrToObj = (
 
   const lines = lyricsLines.map((lineData) => {
     const { text, start = 0 } = lineData;
-    const { minutes, seconds } = calculateTime(start, false);
-    const [secsStr, milliSecsStr = '00'] = seconds.toString().split('.');
 
-    return `[${minutes.length > 1 ? minutes : `0${minutes}`}:${
-      secsStr.length > 1 ? secsStr : `0${secsStr}`
-    }.${milliSecsStr.length > 1 ? milliSecsStr : `0${milliSecsStr}`}] ${text}`;
+    if (isEditingEnhancedSyncedLyrics && Array.isArray(text))
+      return text
+        .map((textData, i) => {
+          const timestamp = generateTimestamp(
+            textData.start,
+            i === 0 ? '[]' : '<>',
+          );
+          return `${timestamp} ${textData.text}`;
+        })
+        .join(' ');
+
+    const timestamp = generateTimestamp(start, '[]');
+    return `${timestamp} ${text}`;
   });
 
   const lyrics = metadataLines.concat(lines).join('\n');
@@ -80,11 +102,16 @@ const LyricsEditorSavePrompt = (props: Props) => {
     React.useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const { lyricsLines, currentSongData } = props;
+  const { lyricsLines, currentSongData, isEditingEnhancedSyncedLyrics } = props;
 
   const parsedLyrics = React.useMemo(
-    () => convertLyricsStrToObj(lyricsLines, currentSongData),
-    [currentSongData, lyricsLines],
+    () =>
+      convertLyricsStrToObj(
+        lyricsLines,
+        currentSongData,
+        isEditingEnhancedSyncedLyrics,
+      ),
+    [currentSongData, isEditingEnhancedSyncedLyrics, lyricsLines],
   );
 
   const pathExt = React.useMemo(

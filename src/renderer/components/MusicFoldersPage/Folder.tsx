@@ -228,7 +228,11 @@ const Folder = (props: FolderProps) => {
             title: folderName || 'Unknown Folder',
             artworkPath: FolderImg,
             artworkClassName: '!w-6',
-            subTitle: `${songIds.length} songs`,
+            subTitle: t('common.songWithCount', { count: noOfSongs }),
+            subTitle2:
+              subFolders.length > 0
+                ? t('common.subFolderWithCount', { count: subFolders.length })
+                : undefined,
           },
     [
       folderName,
@@ -236,7 +240,8 @@ const Folder = (props: FolderProps) => {
       isMultipleSelectionEnabled,
       multipleSelectionsData.multipleSelections.length,
       multipleSelectionsData.selectionType,
-      songIds.length,
+      noOfSongs,
+      subFolders.length,
       t,
     ],
   );

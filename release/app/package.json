@@ -5,7 +5,7 @@
         "url": "https://github.com/Sandakan/Nora"
     },
     "dependencies": {
-        "sharp": "^0.32.1"
+        "sharp": "^0.33.0"
     },
     "description": "An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar.",
     "license": "MIT",
