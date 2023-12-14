@@ -1,14 +1,154 @@
 {
   "latestVersion": {
-    "artwork": "/assets/other/release artworks/whats-new-v2.4.0-stable.webp",
+    "artwork": "/assets/other/release artworks/whats-new-v2.5.0-stable.webp",
     "importantNotes": [
-      "This update includes a few fixes for some reported vulnerabilities from app dependencies."
+      "This update some most requested features such as 10-band equalizer, localization support, reading/writing lyrics from LRC files and a lot of bug fixes."
     ],
     "phase": "stable",
-    "releaseDate": "2023-10-21T06:45:41.882Z",
-    "version": "2.4.3-stable"
+    "releaseDate": "2023-12-14T15:30:52.472Z",
+    "version": "2.5.0-stable"
   },
   "versions": [
+    {
+      "artwork": "/assets/other/release artworks/whats-new-v2.5.0-stable.webp",
+      "importantNotes": [
+        "This update some most requested features such as 10-band equalizer, localization support, reading/writing lyrics from LRC files and a lot of bug fixes."
+      ],
+      "notes": {
+        "fixed": [
+          {
+            "note": "Improved app performance when parsing large libraries and toggling favorites."
+          },
+          {
+            "note": "Improved how index numbers are displayed in songs."
+          },
+          {
+            "note": "Fixed padding issues when displaying song index."
+          },
+          {
+            "note": "Improved animations fluidness of the app."
+          },
+          {
+            "note": "Fixed a bug where multiple selections add duplicates to the selections."
+          },
+          {
+            "note": "Fixed a bug where albums persist from the previous page when in ArtistPage page if the previous ArtistPage had albums but the current one doesn't."
+          },
+          {
+            "note": "Fixed a bug where lyrics offset is showed as positive even though it is set to negative."
+          },
+          {
+            "note": "Fixed a bug where total song duration in Playlists, CurrentQueue are reset if they count to more than 24 hours."
+          },
+          {
+            "note": "Fixed a bug where default artist artworks are not displayed."
+          },
+          {
+            "note": "Fixed a bug where albums are created using data from artist tag in a song instead of the albumArtist tag."
+          },
+          {
+            "note": "Fixed a bug where sorting option is not saved in FoldersPage and PlaylistInfoPage.  "
+          },
+          {
+            "note": "Fixed a bug where the user cannot remove unsynchronized lyrics from a song."
+          },
+          {
+            "note": "Fixed a bug where listening data are not recorded if the song is being repeated."
+          },
+          {
+            "note": "Fixed a bug where Last.FM scrobbling data is not sent if the song is being repeated."
+          },
+          {
+            "note": "Fixed a bug where images flash when components re-render."
+          },
+          {
+            "note": "Fixed a bug where correct equalizer preset name is not displayed when changing different presets."
+          },
+          {
+            "note": "Fixed a bug where SongTagsEditingPage shows that there are metadata updates even though there aren't any when opening the page."
+          },
+          {
+            "note": "Fixed a bug where the last lyric line shows its range ends in Infinity."
+          },
+          {
+            "note": "Fixed a bug where background image doesn't update when a new artist artwork is downloaded in ArtistInfoPage."
+          },
+          {
+            "note": "Improved animations when displaying enhanced lyrics."
+          }
+        ],
+        "knownIssues": [],
+        "new": [
+          { "note": "Added localization support for Nora." },
+          {
+            "note": "Added a setting to change the language in Nora."
+          },
+          {
+            "note": "Added support for reading album artists in songs."
+          },
+          {
+            "note": "Added support reading and writing song lyrics to .LRC files."
+          },
+          {
+            "note": "Added a feature to play the next/previous lyrics line using Alt + Up/Down shortcuts for synced lyrics in LyricsPage."
+          },
+          { "note": "Added support for 10-band equalizer." },
+          {
+            "note": "Added partial support for saving song album artist."
+          },
+          {
+            "note": "Added migrations support for local storage."
+          },
+          {
+            "note": "Added support for saving LRC files in a separate folder other than the folder where the relevant song is located."
+          },
+          {
+            "note": "Added support for renaming the playlist."
+          },
+          {
+            "note": "Scrobble song requests now include albumArtist data."
+          },
+          {
+            "note": "Sorting songs with 'track number' now also considers their disk numbers. "
+          },
+          {
+            "note": "Added up next song popup for the mini-player."
+          },
+          {
+            "note": "Added a button to clear app local storage data."
+          },
+          {
+            "note": "Added support for holding metadata saves if that song is currently being played to prevent player confusions and song corruptions."
+          },
+          {
+            "note": "Added support for saving lyrics to an LRC file if edited through the SongTagsEditingPage."
+          },
+          {
+            "note": "CurrentQueuePage now shows the remaining time of the queue."
+          },
+          {
+            "note": "Added a new button to add an instrumental line below when editing lyrics lines."
+          },
+          {
+            "note": "Added a duration bar for lyrics lines to display current line duration."
+          },
+          {
+            "note": "Added auto scrolling as a button in CurrentQueuePage."
+          },
+          {
+            "note": "Added support for recording and storing song seek data."
+          },
+          {
+            "note": "Most seeked position and the seeked frequency of a song will be displayed in the SongInfoPage."
+          },
+          {
+            "note": "Added a new icon to show the lower volume level."
+          }
+        ]
+      },
+      "releaseDate": "2023-12-14T15:30:52.472Z",
+      "version": "2.5.0-stable"
+    },
     {
       "artwork": "/assets/other/release artworks/whats-new-v2.4.0-stable.webp",
       "importantNotes": [

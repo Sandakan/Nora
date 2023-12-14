@@ -7,7 +7,7 @@ import i18n from 'renderer/i18n';
 
 const supportedLanguagesDropdownOptions: DropdownOption<LanguageCodes>[] = [
   { label: `English`, value: 'en' },
-  { label: `Francais`, value: 'fr' },
+  // { label: `Francais`, value: 'fr' },
 ];
 
 const LanguageSettings = () => {
