@@ -1,5 +1,6 @@
 /* eslint-disable promise/catch-or-return */
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 
@@ -21,6 +22,7 @@ import SongLyricsEditorInput from './input_containers/SongLyricsEditorInput';
 import { appPreferences } from '../../../../package.json';
 import SongTrackNumberInput from './input_containers/SongTrackNumberInput';
 import ResetTagsToDefaultPrompt from './ResetTagsToDefaultPrompt';
+import SongAlbumArtistsInput from './input_containers/SongAlbumArtistInput';
 
 export interface MetadataKeywords {
   albumKeyword?: string;
@@ -55,6 +57,7 @@ function SongTagsEditingPage() {
     updateCurrentSongData,
     updatePageHistoryIndex,
   } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const { isOnline } = useNetworkConnectivity();
 
@@ -71,8 +74,16 @@ function SongTagsEditingPage() {
   const [albumKeyword, setAlbumKeyword] = React.useState('');
   const [albumResults, setAlbumResults] = React.useState<AlbumResult[]>([]);
 
+  const [albumArtistKeyword, setAlbumArtistKeyword] = React.useState('');
+  const [albumArtistResults, setAlbumArtistResults] = React.useState<
+    ArtistResult[]
+  >([]);
+
   const [genreKeyword, setGenreKeyword] = React.useState('');
   const [genreResults, setGenreResults] = React.useState<GenreResult[]>([]);
+
+  const [isMetadataUpdatesPending, setIsMetadataUpdatesPending] =
+    React.useState(false);
 
   const { songId, songPath, isKnownSource } = React.useMemo(
     () => ({
@@ -110,6 +121,7 @@ function SongTagsEditingPage() {
 
             setDefaultValues(data);
             setSongInfo(data);
+            setIsMetadataUpdatesPending(!!data.isMetadataSavePending);
           }
           return undefined;
         })
@@ -119,6 +131,38 @@ function SongTagsEditingPage() {
   React.useEffect(() => {
     getSongId3Tags();
   }, [getSongId3Tags]);
+
+  React.useEffect(() => {
+    const manageMetadataUpdatesInSongsTagsEditingPage = (e: Event) => {
+      if ('detail' in e) {
+        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>)
+          .detail;
+        for (let i = 0; i < dataEvents.length; i += 1) {
+          const event = dataEvents[i];
+          if (event.dataType === 'songs/updatedSong')
+            window.api.songUpdates
+              .isMetadataUpdatesPending(songPath)
+              .then((currentState) =>
+                setIsMetadataUpdatesPending((prevState) => {
+                  if (prevState === true && currentState === false)
+                    getSongId3Tags();
+                  return currentState;
+                }),
+              );
+        }
+      }
+    };
+    document.addEventListener(
+      'app/dataUpdates',
+      manageMetadataUpdatesInSongsTagsEditingPage,
+    );
+    return () => {
+      document.removeEventListener(
+        'app/dataUpdates',
+        manageMetadataUpdatesInSongsTagsEditingPage,
+      );
+    };
+  }, [getSongId3Tags, songPath]);
 
   React.useEffect(() => {
     if (artistKeyword.trim()) {
@@ -169,6 +213,30 @@ function SongTagsEditingPage() {
   }, [albumKeyword]);
 
   React.useEffect(() => {
+    if (albumArtistKeyword.trim()) {
+      window.api.search
+        .search('Artists', albumArtistKeyword, false, false)
+        .then((res) => {
+          console.log(res);
+          if (res.artists.length > 0)
+            setAlbumArtistResults(
+              res.artists
+                .filter((_, index) => index < 50)
+                .map((artist) => ({
+                  name: artist.name,
+                  artistId: artist.artistId,
+                  artworkPaths: artist.artworkPaths,
+                  onlineArtworkPaths: artist.onlineArtworkPaths,
+                })),
+            );
+          else setAlbumArtistResults([]);
+          return undefined;
+        })
+        .catch((err) => console.error(err));
+    } else setAlbumArtistResults([]);
+  }, [albumArtistKeyword]);
+
+  React.useEffect(() => {
     if (genreKeyword.trim()) {
       window.api.search
         .search('Genres', genreKeyword, false, false)
@@ -205,6 +273,10 @@ function SongTagsEditingPage() {
   );
   const updateAlbumKeyword = React.useCallback(
     (keyword: string) => setAlbumKeyword(keyword),
+    [],
+  );
+  const updateAlbumArtistKeyword = React.useCallback(
+    (keyword: string) => setAlbumArtistKeyword(keyword),
     [],
   );
   const updateGenreKeyword = React.useCallback(
@@ -250,13 +322,13 @@ function SongTagsEditingPage() {
               ...updatedData,
             }));
           }
-          addNewNotifications([
-            {
-              id: `songDataUpdated`,
-              content: `Successfully updated the song.`,
-              iconName: 'done',
-            },
-          ]);
+          // addNewNotifications([
+          //   {
+          //     id: `songDataUpdated`,
+          //     content: `Successfully updated the song.`,
+          //     iconName: 'done',
+          //   },
+          // ]);
           return window.api.songUpdates.getSongId3Tags(
             isKnownSource ? songId : songPath,
             isKnownSource,
@@ -267,13 +339,14 @@ function SongTagsEditingPage() {
       .then((res) => {
         setSongInfo(res);
         setDefaultValues(res);
+        setIsMetadataUpdatesPending(!!res.isMetadataSavePending);
         return undefined;
       })
       .catch((err) => {
         addNewNotifications([
           {
             id: `songDataUpdateFailed`,
-            content: `Song data update failed.`,
+            content: t('notifications.songDataUpdateFailed'),
             iconName: 'warning',
             iconClassName: 'material-icons-round-outlined icon',
           },
@@ -310,7 +383,7 @@ function SongTagsEditingPage() {
       addNewNotifications([
         {
           id: 'songDataUnedited',
-          content: `You didn't change any song data.`,
+          content: t('notifications.noSongDataEdits'),
         },
       ]);
   };
@@ -325,8 +398,8 @@ function SongTagsEditingPage() {
       const fileName = songPath.split('\\').at(-1);
       if (fileName) return fileName?.replace(/\.\w{3,5}$/gm, '');
     }
-    return 'Unknown Title';
-  }, [songPath]);
+    return t('common.unknownTitle');
+  }, [songPath, t]);
 
   const isEditingCurrentlyPlayingSong = React.useMemo(
     () => currentSongData.songId === songId,
@@ -334,12 +407,12 @@ function SongTagsEditingPage() {
   );
 
   return (
-    <MainContainer className="main-container appear-from-bottom id3-tags-updater-container h-full">
+    <MainContainer className="main-container appear-from-bottom id3-tags-updater-container h-full [scrollbar-gutter:stable]">
       <>
         {(songId || songPath) && isMetadataEditingSupported && (
           <>
             <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-              Song Metadata Editor{' '}
+              {t('songTagsEditingPage.songMetadataEditor')}{' '}
               {!isKnownSource && (
                 <span
                   className="material-icons-round-outlined ml-6 cursor-help text-xl hover:underline"
@@ -369,20 +442,16 @@ function SongTagsEditingPage() {
                 <div className="song-artists">
                   {songInfo.artists && songInfo.artists.length > 0
                     ? songInfo.artists.map((x) => x.name).join(', ')
-                    : 'Unknown Artist'}
+                    : t('common.unknownArtist')}
                 </div>
                 <div className="song-album">{songInfo.album?.title}</div>
                 <Button
-                  label="Search Metadata on Internet"
+                  label={t('songTagsEditingPage.searchMetadataOnInternet')}
                   iconName="download"
                   iconClassName="mr-2"
                   className="download-data-from-lastfm-btn mt-4 w-fit"
                   clickHandler={fetchSongDataFromNet}
-                  tooltipLabel={
-                    isOnline
-                      ? undefined
-                      : 'You are not connected to the internet.'
-                  }
+                  tooltipLabel={isOnline ? undefined : t('common.noInternet')}
                   isDisabled={!isOnline}
                 />
               </div>
@@ -405,6 +474,15 @@ function SongTagsEditingPage() {
                 artistKeyword={artistKeyword}
                 songArtists={songInfo.artists}
                 updateArtistKeyword={updateArtistKeyword}
+                updateSongInfo={updateSongInfo}
+              />
+              {/* ? SONG ALBUM ARTSITS */}
+              <SongAlbumArtistsInput
+                artistResults={albumArtistResults}
+                albumArtistKeyword={albumArtistKeyword}
+                songAlbum={songInfo.album}
+                songAlbumArtists={songInfo.albumArtists}
+                updateAlbumArtistKeyword={updateAlbumArtistKeyword}
                 updateSongInfo={updateSongInfo}
               />
               {/* ALBUM NAME */}
@@ -446,35 +524,42 @@ function SongTagsEditingPage() {
                 isLyricsSavingPending={songInfo.isLyricsSavePending}
                 updateSongInfo={updateSongInfo}
               />
+              <hr className="horizontal-rule col-span-2 h-[0.1rem] w-[95%] border-0 bg-background-color-2 dark:bg-dark-background-color-2" />
             </div>
-            <div className="id3-control-buttons-container flex p-4">
+
+            <div className="id3-control-buttons-container flex mt-4 p-4">
               <Button
                 key={0}
-                label="Save Tags"
+                label={t('songTagsEditingPage.saveTags')}
                 iconName="save"
                 iconClassName="material-icons-round-outlined"
-                isDisabled={
-                  !areThereDataChanges || isEditingCurrentlyPlayingSong
-                }
+                isDisabled={!areThereDataChanges}
                 className="update-song-tags-btn"
                 clickHandler={saveTags}
               />
               <Button
                 key={1}
-                label="Reset to Defaults"
+                label={t('resetTagsToDefaultPrompt.resetToDefault')}
                 iconName="restart_alt"
                 className="reset-song-tags-btn"
                 isDisabled={!areThereDataChanges}
                 clickHandler={resetDataToDefaults}
               />
             </div>
-            {isEditingCurrentlyPlayingSong && (
-              <p className="appear-from-bottom ml-2 text-sm font-medium flex items-center text-font-color-highlight dark:text-dark-font-color-highlight">
+            {isEditingCurrentlyPlayingSong && areThereDataChanges && (
+              <p className="appear-from-bottom ml-2 mb-2 text-sm font-medium flex items-center text-font-color-highlight dark:text-dark-font-color-highlight">
                 <span className="material-icons-round-outlined text-xl mr-2">
                   error
                 </span>{' '}
-                Avoid editing metadata of a currently playing song to prevent
-                corruptions.
+                {t('songTagsEditingPage.updateAddedToBeSavedLater')}
+              </p>
+            )}
+            {isMetadataUpdatesPending && (
+              <p className="appear-from-bottom ml-2 mb-2 text-sm font-medium flex items-center text-font-color-highlight dark:text-dark-font-color-highlight">
+                <span className="material-icons-round-outlined text-xl mr-2">
+                  error
+                </span>{' '}
+                {t('songTagsEditingPage.pendingUpdateAvailable')}
               </p>
             )}
           </>
@@ -485,7 +570,9 @@ function SongTagsEditingPage() {
             <span className="material-icons-round-outlined text-6xl">
               campaign
             </span>
-            <p className="mt-2 text-2xl">No Support</p>
+            <p className="mt-2 text-2xl">
+              {t('songTagsEditingPage.saveTagsNotSupportedTitle')}
+            </p>
             <p
               className="mt-4 cursor-pointer text-xs font-light opacity-50"
               title={window.api.utils.removeDefaultAppProtocolFromFilePath(
@@ -494,22 +581,26 @@ function SongTagsEditingPage() {
             >
               {window.api.utils.getBaseName(songPath)}
             </p>
-            <p className="mt-2 px-8 font-light">
-              Nora currently doesn't support editing song metadata in{' '}
-              <span className="font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-                {pathExt}
-              </span>{' '}
-              format.
-            </p>
-            <p className="px-8 font-light">
-              Currently only{' '}
-              <span className="font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-                mp3
-              </span>{' '}
-              format is supported.
-            </p>
+            <Trans
+              i18nKey="songTagsEditingPage.saveTagsNotSupportedDescription"
+              components={{
+                P1: <p className="mt-2 px-8 font-light" />,
+                P2: <p className="px-8 font-light" />,
+                Format: (
+                  <span className="font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+                    {pathExt}
+                  </span>
+                ),
+                SupportedFormat: (
+                  <span className="font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+                    mp3
+                  </span>
+                ),
+              }}
+            />
+
             <Button
-              label="Go Back"
+              label={t('common.goBack')}
               iconName="arrow_back"
               className="mt-4"
               clickHandler={() => updatePageHistoryIndex('decrement')}

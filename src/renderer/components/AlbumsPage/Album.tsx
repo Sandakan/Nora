@@ -3,6 +3,7 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Img from '../Img';
@@ -35,6 +36,7 @@ export const Album = (props: AlbumProp) => {
     updateMultipleSelections,
     toggleMultipleSelections,
   } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const playAlbumSongs = React.useCallback(
     (isShuffle = false) => {
@@ -132,7 +134,7 @@ export const Album = (props: AlbumProp) => {
             {
               id: 'newSongsToQueue',
               delay: 5000,
-              content: <span>Added {songs.length} songs to the queue.</span>,
+              content: t('notifications.addedToQueue', { count: songs.length }),
             },
           ]);
         }
@@ -143,6 +145,7 @@ export const Album = (props: AlbumProp) => {
     addNewNotifications,
     multipleSelectionsData,
     queue.queue,
+    t,
     updateQueueData,
   ]);
 
@@ -200,17 +203,19 @@ export const Album = (props: AlbumProp) => {
         })
         .flat();
     }
-    return <span className="text-xs font-normal">Unknown Artist</span>;
-  }, [isAMultipleSelection, props]);
+    return (
+      <span className="text-xs font-normal">{t('common.unknownArtist')}</span>
+    );
+  }, [isAMultipleSelection, props, t]);
 
-  const contextMenuItems = React.useMemo(() => {
+  const contextMenuItems: ContextMenuItem[] = React.useMemo(() => {
     const isMultipleSelectionsEnabled =
       multipleSelectionsData.selectionType === 'album' &&
       multipleSelectionsData.multipleSelections.length !== 1 &&
       isAMultipleSelection;
     return [
       {
-        label: isMultipleSelectionsEnabled ? 'Play All' : 'Play',
+        label: t(`common.${isMultipleSelectionsEnabled ? 'playAll' : 'play'}`),
         iconName: 'play_arrow',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled)
@@ -221,8 +226,8 @@ export const Album = (props: AlbumProp) => {
       },
       {
         label: isMultipleSelectionsEnabled
-          ? 'Shuffle and Play All'
-          : 'Shuffle and Play',
+          ? t(`common.shuffleAndPlayAll`)
+          : t(`common.shuffleAndPlay`),
         iconName: 'shuffle',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled)
@@ -232,7 +237,7 @@ export const Album = (props: AlbumProp) => {
         },
       },
       {
-        label: 'Add to queue',
+        label: t(`common.addToQueue`),
         iconName: 'queue',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) addToQueueForMultipleSelections();
@@ -243,12 +248,9 @@ export const Album = (props: AlbumProp) => {
               {
                 id: 'newSongsToQueue',
                 delay: 5000,
-                content: (
-                  <span>
-                    Added {props.songs.length} song
-                    {props.songs.length === 1 ? '' : 's'} to the queue.
-                  </span>
-                ),
+                content: t(`notifications.addedToQueue`, {
+                  count: props.songs.length,
+                }),
               },
             ]);
           }
@@ -261,12 +263,12 @@ export const Album = (props: AlbumProp) => {
         handlerFunction: null,
       },
       {
-        label: 'Info',
+        label: t(`common.info`),
         iconName: 'info',
         handlerFunction: showAlbumInfoPage,
       },
       {
-        label: isAMultipleSelection ? 'Unselect' : 'Select',
+        label: t(`common.${isAMultipleSelection ? 'unselect' : 'select'}`),
         iconName: 'checklist',
         handlerFunction: () => {
           if (isMultipleSelectionEnabled) {
@@ -298,9 +300,11 @@ export const Album = (props: AlbumProp) => {
     multipleSelectionsData.selectionType,
     playAlbumSongs,
     playAlbumSongsForMultipleSelections,
-    props,
+    props.albumId,
+    props.songs,
     queue.queue,
     showAlbumInfoPage,
+    t,
     toggleMultipleSelections,
     updateMultipleSelections,
     updateQueueData,
@@ -312,16 +316,18 @@ export const Album = (props: AlbumProp) => {
       multipleSelectionsData.selectionType === 'album' &&
       isAMultipleSelection
         ? {
-            title: `${multipleSelectionsData.multipleSelections.length} selected albums`,
+            title: t('album.selectedAlbumCount', {
+              count: multipleSelectionsData.multipleSelections.length,
+            }),
             artworkPath: DefaultAlbumCover,
           }
         : {
             title: props.title,
             artworkPath: props?.artworkPaths?.optimizedArtworkPath,
-            subTitle: `${props.songs.length} songs`,
+            subTitle: t('common.songWithCount', { count: props.songs.length }),
             subTitle2:
               props.artists?.map((artist) => artist.name).join(', ') ||
-              'Unknown artist',
+              t('common.unknownArtist'),
           },
     [
       isAMultipleSelection,
@@ -332,6 +338,7 @@ export const Album = (props: AlbumProp) => {
       props?.artworkPaths?.optimizedArtworkPath,
       props.songs.length,
       props.title,
+      t,
     ],
   );
 
@@ -402,6 +409,7 @@ export const Album = (props: AlbumProp) => {
             loading="lazy"
             alt="Album Cover"
             className="h-full max-h-full w-full object-cover object-center"
+            enableImgFadeIns={!isMultipleSelectionEnabled}
           />
         </div>
       </div>
@@ -428,9 +436,9 @@ export const Album = (props: AlbumProp) => {
             {albumArtists}
           </div>
         )}
-        <div className="album-no-of-songs w-full overflow-hidden text-ellipsis whitespace-nowrap text-xs">{`${
-          props.songs.length
-        } song${props.songs.length === 1 ? '' : 's'}`}</div>
+        <div className="album-no-of-songs w-full overflow-hidden text-ellipsis whitespace-nowrap text-xs">
+          {t('common.songWithCount', { count: props.songs.length })}
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
@@ -14,6 +15,7 @@ type Props = { mostLovedSongs: AudioInfo[]; noOfVisibleSongs: number };
 
 const MostLovedSongs = (props: Props) => {
   const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const { mostLovedSongs, noOfVisibleSongs = 3 } = props;
   const MAX_SONG_LIMIT = 15;
@@ -63,10 +65,12 @@ const MostLovedSongs = (props: Props) => {
         >
           <>
             <div className="title-container mb-4 mt-1 flex items-center justify-between text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-              Most Loved Songs
+              {t('homePage.mostLovedSongs')}
               <Button
-                label="Show All"
-                tooltipLabel="Opens 'Favorites' playlist with 'AllTimeMostListened' sort option."
+                label={t('common.showAll')}
+                tooltipLabel={t(
+                  'homePage.openFavoritesWithAllTimeMostListenedSortOption',
+                )}
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from '../Button';
 
@@ -9,6 +10,8 @@ interface RecentSearchResultProp {
 
 const RecentSearchResult = React.memo((props: RecentSearchResultProp) => {
   const { updateContextMenuData } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const recentSearchContextItems: ContextMenuItem[] = [
     {
       label: 'Remove from Search History',
@@ -26,7 +29,9 @@ const RecentSearchResult = React.memo((props: RecentSearchResultProp) => {
           ? props.result.substring(0, 20).concat('...')
           : props.result
       }
-      tooltipLabel={`Search for '${props.result}'`}
+      tooltipLabel={t('searchPage.recentSearchResultTooltipLabel', {
+        value: props.result,
+      })}
       iconName="search"
       clickHandler={props.clickHandler}
       onContextMenu={(e) => {

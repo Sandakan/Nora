@@ -102,21 +102,41 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
         return 0;
       });
     if (sortType === 'trackNoAscending')
-      return data.sort((a, b) => {
-        if (a.trackNo && b.trackNo) {
-          if (a.trackNo > b.trackNo) return 1;
-          if (a.trackNo < b.trackNo) return -1;
-        }
-        return 0;
-      });
+      return (
+        data
+          // sort with the track number
+          .sort((a, b) => {
+            if (a.trackNo !== undefined && b.trackNo !== undefined) {
+              if (a.trackNo > b.trackNo) return 1;
+              if (a.trackNo < b.trackNo) return -1;
+            }
+            return 0;
+          })
+          // sort with the disk number
+          .sort((a, b) => {
+            if (a.diskNo !== undefined && b.diskNo !== undefined) {
+              if (a.diskNo > b.diskNo) return 1;
+              if (a.diskNo < b.diskNo) return -1;
+            }
+            return 0;
+          })
+      );
     if (sortType === 'trackNoDescending')
-      return data.sort((a, b) => {
-        if (a.trackNo && b.trackNo) {
-          if (a.trackNo < b.trackNo) return 1;
-          if (a.trackNo > b.trackNo) return -1;
-        }
-        return 0;
-      });
+      return data
+        .sort((a, b) => {
+          if (a.trackNo !== undefined && b.trackNo !== undefined) {
+            if (a.trackNo < b.trackNo) return 1;
+            if (a.trackNo > b.trackNo) return -1;
+          }
+          return 0;
+        })
+        .sort((a, b) => {
+          if (a.diskNo !== undefined && b.diskNo !== undefined) {
+            if (a.diskNo < b.diskNo) return 1;
+            if (a.diskNo > b.diskNo) return -1;
+          }
+          return 0;
+        });
     if (sortType === 'artistNameAscending')
       return data.sort((a, b) => {
         if (a.artists && b.artists) {

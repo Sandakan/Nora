@@ -31,10 +31,10 @@ const tryToRemoveSongFromLibrary = async (
   try {
     const fullPath = path.normalize(path.join(folderPath, filename));
     await removeSongsFromLibrary([fullPath], abortSignal);
-    sendMessageToRenderer(
-      `'${filename}' song got deleted from the system.`,
-      'SONG_DELETED',
-    );
+    sendMessageToRenderer({
+      messageCode: 'SONG_DELETED',
+      data: { name: filename },
+    });
   } catch (error) {
     log(`Error occurred when removing a song.`, { error }, 'ERROR');
   }

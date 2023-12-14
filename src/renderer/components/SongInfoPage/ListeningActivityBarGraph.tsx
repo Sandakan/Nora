@@ -1,23 +1,25 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+import i18n from 'renderer/i18n';
 
 type Props = {
   listeningData: SongListeningData | undefined;
   className?: string;
 };
 
-const monthNames = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
+const monthNames: string[] = [
+  i18n.t('month.january'),
+  i18n.t('month.february'),
+  i18n.t('month.march'),
+  i18n.t('month.april'),
+  i18n.t('month.may'),
+  i18n.t('month.june'),
+  i18n.t('month.july'),
+  i18n.t('month.august'),
+  i18n.t('month.september'),
+  i18n.t('month.october'),
+  i18n.t('month.november'),
+  i18n.t('month.december'),
 ];
 
 function getLastNoOfMonths<T>(
@@ -38,7 +40,11 @@ function getLastNoOfMonths<T>(
   return arr;
 }
 
+const VISIBLE_NO_OF_MONTHS = 7;
+
 const ListeningActivityBarGraph = (props: Props) => {
+  const { t } = useTranslation();
+
   const { listeningData, className } = props;
 
   const { currentYear } = React.useMemo(() => {
@@ -71,7 +77,7 @@ const ListeningActivityBarGraph = (props: Props) => {
           const lastMonths = getLastNoOfMonths(
             monthsWithNames,
             new Date().getMonth(),
-            7,
+            VISIBLE_NO_OF_MONTHS,
           );
 
           const max = Math.max(...lastMonths.map((x) => x.listens));
@@ -93,12 +99,14 @@ const ListeningActivityBarGraph = (props: Props) => {
                       }`,
                       transitionDelay: `${index * 50 + 500}`,
                     }}
-                    title={`${month.listens} listens`}
+                    title={t('songInfoPage.listensCount', {
+                      count: month.listens,
+                    })}
                   />
                 </div>
-                <div className="order-2 flex w-full flex-col  pt-1  text-font-color  dark:text-font-color-white">
+                <div className="order-2 flex w-full flex-col grow-0 pt-1 text-font-color  dark:text-font-color-white">
                   <span className="font-thin">{month.listens}</span>
-                  <span className="">{month.month}</span>
+                  <span className="truncate px-2">{month.month}</span>
                 </div>
               </div>
             );
@@ -107,7 +115,7 @@ const ListeningActivityBarGraph = (props: Props) => {
       }
     }
     return [];
-  }, [listeningData, currentYear]);
+  }, [listeningData, currentYear, t]);
 
   return (
     <div
@@ -115,10 +123,17 @@ const ListeningActivityBarGraph = (props: Props) => {
       title="Bar graph about no of listens per day"
     >
       <div className="pb-1 font-thin text-font-color dark:text-font-color-white">
-        Listening Activity in the Last 6 Months
+        {t('songInfoPage.listeningActivityInLastMonths', {
+          count: VISIBLE_NO_OF_MONTHS,
+        })}
       </div>
 
-      <div className="flex h-full flex-row items-center justify-around">
+      <div
+        style={{
+          gridTemplateColumns: `repeat(${VISIBLE_NO_OF_MONTHS}, minmax(0, 1fr))`,
+        }}
+        className="grid h-full items-center justify-around"
+      >
         {lastSixMonthsListeningActivity}
       </div>
     </div>

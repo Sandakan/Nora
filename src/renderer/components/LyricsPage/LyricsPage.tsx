@@ -1,8 +1,10 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable react/no-array-index-key */
 import React, { useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import debounce from 'renderer/utils/debounce';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
 
@@ -14,23 +16,30 @@ import Button from '../Button';
 
 import { appPreferences } from '../../../../package.json';
 import { isLyricsEnhancedSynced } from '../SongTagsEditingPage/input_containers/SongLyricsEditorInput';
-import { EditingLyricsLineData } from '../LyricsEditingPage/LyricsEditingPage';
+import { LyricData } from '../LyricsEditingPage/LyricsEditingPage';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
 export const syncedLyricsRegex = /^\[\d+:\d{1,2}\.\d{1,3}]/gm;
+
+// substracted 350 milliseconds to keep lyrics in sync with the lyrics line animations.
+export const delay = 0.35;
+
 let isScrollingByCode = false;
 document.addEventListener('lyrics/scrollIntoView', () => {
   isScrollingByCode = true;
 });
 
 const LyricsPage = () => {
+  const { songPosition } = React.useContext(SongPositionContext);
   const { currentSongData, localStorageData } = useContext(AppContext);
   const {
     addNewNotifications,
     updateCurrentlyActivePageData,
     changeCurrentActivePage,
+    updateSongPosition,
   } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const [lyrics, setLyrics] = React.useState(
     null as SongLyrics | undefined | null,
@@ -48,24 +57,77 @@ const LyricsPage = () => {
     return undefined;
   }, [lyrics]);
 
+  const skipLyricsLines = React.useCallback(
+    (option: 'previous' | 'next' = 'next') => {
+      if (lyrics?.lyrics.isSynced) {
+        const { syncedLyrics } = lyrics.lyrics;
+
+        if (syncedLyrics) {
+          const lyricsLines: typeof syncedLyrics = [
+            { start: 0, end: syncedLyrics[0].start, text: '...' },
+            ...syncedLyrics,
+          ];
+          for (let i = 0; i < lyricsLines.length; i += 1) {
+            const { start, end } = lyricsLines[i];
+            const isInRange =
+              songPosition > start - delay && songPosition < end - delay;
+            if (isInRange) {
+              if (option === 'next' && lyricsLines[i + 1])
+                updateSongPosition(lyricsLines[i + 1].start);
+              else if (option === 'previous' && lyricsLines[i - 1])
+                updateSongPosition(lyricsLines[i - 1].start);
+            }
+          }
+        }
+      }
+    },
+    [lyrics?.lyrics, songPosition, updateSongPosition],
+  );
+
+  const manageLyricsPageKeyboardShortcuts = React.useCallback(
+    (e: KeyboardEvent) => {
+      if (e.altKey && e.key === 'ArrowUp') skipLyricsLines('previous');
+      else if (e.altKey && e.key === 'ArrowDown') skipLyricsLines('next');
+    },
+    [skipLyricsLines],
+  );
+
   React.useEffect(() => {
-    setLyrics(null);
-    window.api.lyrics
-      .getSongLyrics(
-        {
-          songTitle: currentSongData.title,
-          songArtists: Array.isArray(currentSongData.artists)
-            ? currentSongData.artists.map((artist) => artist.name)
-            : [],
-          songPath: currentSongData.path,
-          duration: currentSongData.duration,
-        },
-        undefined,
-        undefined,
-        localStorageData.preferences.lyricsAutomaticallySaveState,
-      )
-      .then((res) => setLyrics(res))
-      .catch((err) => console.error(err));
+    window.addEventListener('keydown', manageLyricsPageKeyboardShortcuts);
+    return () => {
+      window.removeEventListener('keydown', manageLyricsPageKeyboardShortcuts);
+    };
+  }, [manageLyricsPageKeyboardShortcuts]);
+
+  const requestedLyricsTitle = React.useRef<string>();
+
+  React.useEffect(() => {
+    if (requestedLyricsTitle.current !== currentSongData.title) {
+      requestedLyricsTitle.current = currentSongData.title;
+      setLyrics(null);
+      window.api.lyrics
+        .getSongLyrics(
+          {
+            songTitle: currentSongData.title,
+            songArtists: Array.isArray(currentSongData.artists)
+              ? currentSongData.artists.map((artist) => artist.name)
+              : [],
+            songPath: currentSongData.path,
+            duration: currentSongData.duration,
+          },
+          undefined,
+          undefined,
+          localStorageData.preferences.lyricsAutomaticallySaveState,
+        )
+        .then((res) => {
+          setLyrics(res);
+
+          if (lyricsLinesContainerRef.current)
+            lyricsLinesContainerRef.current.scrollTop = 0;
+          return undefined;
+        })
+        .catch((err) => console.error(err));
+    }
   }, [
     addNewNotifications,
     currentSongData.artists,
@@ -93,13 +155,17 @@ const LyricsPage = () => {
 
       if (syncedLyrics) {
         const syncedLyricsLines = syncedLyrics.map((lyric, index) => {
-          const { text, end, start } = lyric;
+          const start = lyric.start + offset;
+          const end =
+            (lyric.end === Infinity ? currentSongData.duration : lyric.end) +
+            offset;
+
           return (
             <LyricLine
               key={index}
               index={index}
-              lyric={text}
-              syncedLyrics={{ start: start + offset, end: end + offset }}
+              lyric={lyric.text}
+              syncedLyrics={{ start, end }}
               isAutoScrolling={isAutoScrolling}
             />
           );
@@ -136,7 +202,7 @@ const LyricsPage = () => {
       }
     }
     return [];
-  }, [isAutoScrolling, lyrics]);
+  }, [currentSongData?.duration, isAutoScrolling, lyrics]);
 
   const showOnlineLyrics = React.useCallback(
     (
@@ -165,7 +231,7 @@ const LyricsPage = () => {
           return addNewNotifications([
             {
               id: 'lyricsUpdateFailed',
-              content: `No Online Lyrics Found.`,
+              content: t('lyricsPage.noOnlineLyrics'),
               iconName: 'warning',
               iconClassName: 'material-icons-round-outlined !text-xl',
             },
@@ -183,6 +249,7 @@ const LyricsPage = () => {
       currentSongData.duration,
       currentSongData.path,
       currentSongData.title,
+      t,
     ],
   );
 
@@ -213,7 +280,7 @@ const LyricsPage = () => {
           return addNewNotifications([
             {
               id: 'offlineLyricsFetchFailed',
-              content: `No Offline Lyrics Found.`,
+              content: t('lyricsPage.noOfflineLyrics'),
               iconName: 'warning',
               iconClassName: 'material-icons-round-outlined !text-xl',
             },
@@ -229,6 +296,7 @@ const LyricsPage = () => {
       currentSongData.path,
       currentSongData.title,
       localStorageData.preferences.lyricsAutomaticallySaveState,
+      t,
     ],
   );
 
@@ -287,7 +355,7 @@ const LyricsPage = () => {
           return addNewNotifications([
             {
               id: 'OnlineLyricsRefreshFailed',
-              content: `Failed to refresh Online Lyrics.`,
+              content: t('lyricsPage.onlineLyricsRefreshFailed'),
               iconName: 'warning',
               iconClassName: 'material-icons-round-outlined !text-xl',
             },
@@ -302,6 +370,7 @@ const LyricsPage = () => {
       currentSongData.duration,
       currentSongData.path,
       currentSongData.title,
+      t,
     ],
   );
 
@@ -319,23 +388,25 @@ const LyricsPage = () => {
   );
 
   const goToLyricsEditor = React.useCallback(() => {
-    if (lyrics && !isSynchronizedLyricsEnhancedSynced) {
-      let lines: EditingLyricsLineData[] = [];
+    if (lyrics) {
+      let lines: LyricData[] = [];
       const { isSynced, syncedLyrics, lyrics: unsyncedLyrics } = lyrics.lyrics;
 
       if (isSynced && syncedLyrics)
         lines = syncedLyrics.map((lyric) => ({
           ...lyric,
-          line: lyric.text as string,
+          text: lyric.text,
         }));
       else {
-        lines = unsyncedLyrics.map((line) => ({ line }));
+        lines = unsyncedLyrics.map((line) => ({ text: line }));
       }
 
       changeCurrentActivePage('LyricsEditor', {
         lyrics: lines,
         songId: currentSongData.songId,
         songTitle: currentSongData.title,
+        isEditingEnhancedSyncedLyrics:
+          isSynced && isSynchronizedLyricsEnhancedSynced,
       });
     }
   }, [
@@ -349,7 +420,7 @@ const LyricsPage = () => {
   return (
     <MainContainer
       noDefaultStyles
-      className={`lyrics-container relative flex h-full flex-col ${
+      className={`lyrics-container ![overflow-anchor:none] appear-from-bottom relative flex h-full flex-col ${
         lyrics && isOnline ? 'justify-start' : 'items-center justify-center'
       }`}
     >
@@ -361,7 +432,9 @@ const LyricsPage = () => {
                 <div className="flex max-w-[40%] items-center">
                   <span className="overflow-hidden text-ellipsis whitespace-nowrap">
                     {lyrics.source === 'IN_SONG_LYRICS' ? 'Offline' : 'Online'}{' '}
-                    Lyrics for '{currentSongData.title}'
+                    {t('lyricsPage.lyricsForSong', {
+                      title: currentSongData.title,
+                    })}
                   </span>
                   {!lyrics.isOfflineLyricsAvailable && (
                     <span
@@ -375,7 +448,7 @@ const LyricsPage = () => {
                 <div className="buttons-container flex">
                   <Button
                     key={10}
-                    tooltipLabel="Edit Lyrics in Lyrics Editor"
+                    tooltipLabel={t('lyricsPage.editLyrics')}
                     className="edit-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                     iconName="edit"
                     clickHandler={goToLyricsEditor}
@@ -384,18 +457,15 @@ const LyricsPage = () => {
                   {lyrics?.lyrics?.isSynced && (
                     <Button
                       key={5}
-                      label={
-                        lyrics && lyrics.source === 'IN_SONG_LYRICS'
-                          ? isAutoScrolling
-                            ? 'Stop Auto Scrolling'
-                            : 'Enable auto scrolling'
-                          : undefined
-                      }
                       tooltipLabel={
                         lyrics && lyrics.source !== 'IN_SONG_LYRICS'
-                          ? isAutoScrolling
-                            ? 'Stop Auto Scrolling'
-                            : 'Enable auto scrolling'
+                          ? t(
+                              `currentQueuePage.${
+                                isAutoScrolling
+                                  ? 'disableAutoScrolling'
+                                  : 'enableAutoScrolling'
+                              }`,
+                            )
                           : undefined
                       }
                       pendingAnimationOnDisabled
@@ -409,14 +479,12 @@ const LyricsPage = () => {
                   {lyrics && lyrics.source === 'IN_SONG_LYRICS' && (
                     <Button
                       key={3}
-                      label="Show online lyrics"
+                      label={t('lyricsPage.showOnlineLyrics')}
                       className="show-online-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                       iconName="language"
                       isDisabled={!isOnline}
                       tooltipLabel={
-                        isOnline
-                          ? undefined
-                          : 'You are not connected to internet.'
+                        isOnline ? undefined : t('common.noInternet')
                       }
                       clickHandler={showOnlineLyrics}
                     />
@@ -425,7 +493,7 @@ const LyricsPage = () => {
                     <>
                       <Button
                         key={5}
-                        tooltipLabel="Refresh Online Lyrics"
+                        tooltipLabel={t('lyricsPage.refreshOnlineLyrics')}
                         pendingAnimationOnDisabled
                         className="refresh-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                         iconName="refresh"
@@ -433,26 +501,31 @@ const LyricsPage = () => {
                       />
                       <Button
                         key={3}
-                        label="Show saved lyrics"
+                        label={t('lyricsPage.showSavedLyrics')}
                         className="show-online-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                         iconName="visibility"
                         clickHandler={showOfflineLyrics}
                         isDisabled={!lyrics.isOfflineLyricsAvailable}
                         tooltipLabel={
                           !lyrics.isOfflineLyricsAvailable
-                            ? 'No saved lyrics found.'
+                            ? t('lyricsPage.noSavedLyrics')
                             : undefined
                         }
                       />
                       <Button
                         key={4}
-                        label="Save lyrics"
+                        label={t('lyricsEditingPage.saveLyrics')}
                         className="save-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                         iconName="save"
                         isDisabled={isSaveLyricsBtnDisabled}
                         tooltipLabel={
                           isSaveLyricsBtnDisabled
-                            ? `Nora currently doesn't support saving lyrics to songs in '${pathExt}' audio format.`
+                            ? t(
+                                'lyricsEditorSavePrompt.saveLyricsNotSupported',
+                                {
+                                  format: pathExt,
+                                },
+                              )
                             : undefined
                         }
                         clickHandler={saveOnlineLyrics}
@@ -462,7 +535,7 @@ const LyricsPage = () => {
                 </div>
               </div>
               <div
-                className="lyrics-lines-container flex h-full !w-full flex-col items-center overflow-y-auto px-8 py-[10vh]"
+                className="lyrics-lines-container flex h-full !w-full flex-col items-center overflow-y-auto px-8 py-[10vh] [scrollbar-gutter:stable]"
                 ref={lyricsLinesContainerRef}
                 onScroll={() =>
                   debounce(() => {
@@ -484,28 +557,21 @@ const LyricsPage = () => {
           ) : lyrics === undefined || lyrics?.lyrics.lyrics.length === 0 ? (
             <NoLyrics
               iconName="release_alert"
-              title="Lyrics Not Found"
-              description="We couldn't find any lyrics for this song."
-              // buttons={[
-              //   {
-              //     label: 'Show Saved Lyrics',
-              //     iconName: 'visibility',
-              //     clickHandler: showOfflineLyrics,
-              //   },
-              // ]}
+              title={t('lyricsPage.noLyrics')}
+              description={t('lyricsPage.noLyricsDescription')}
             />
           ) : (
             <NoLyrics
               iconName="hourglass_empty"
-              title="Looking for Lyrics"
-              description="Hang on... We are looking everywhere"
+              title={t('lyricsPage.lyricsLoading')}
+              description={t('lyricsPage.lyricsLoadingDescription')}
             />
           )
         ) : (
           <NoLyrics
             iconName="wifi_off"
-            title="No internet connection"
-            description="There are no offline lyrics for this song. You need an internet connection to check for online lyrics."
+            title={t('lyricsPage.noLyrics')}
+            description={t('lyricsPage.noInternetDescription')}
           />
         )}
       </>

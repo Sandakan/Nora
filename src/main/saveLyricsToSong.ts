@@ -7,10 +7,13 @@ import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
 import { appPreferences } from '../../package.json';
 import log from './log';
 import { dataUpdateEvent } from './main';
+import saveLyricsToLRCFile from './core/saveLyricsToLrcFile';
+import { getUserData } from './filesystem';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
 type PendingSongLyrics = {
+  title: string;
   synchronisedLyrics: SynchronisedLyrics;
   unsynchronisedLyrics: UnsynchronisedLyrics;
 };
@@ -21,67 +24,86 @@ const saveLyricsToSong = async (
   songPathWithProtocol: string,
   lyrics: SongLyrics,
 ) => {
+  const userData = getUserData();
   const songPath = removeDefaultAppProtocolFromFilePath(songPathWithProtocol);
 
-  const pathExt = path.extname(songPath).replace(/\W/, '');
-  const isASupporedFormat =
-    metadataEditingSupportedExtensions.includes(pathExt);
+  if (lyrics && lyrics.lyrics.lyrics.length > 0) {
+    const pathExt = path.extname(songPath).replace(/\W/, '');
+    const isASupportedFormat =
+      metadataEditingSupportedExtensions.includes(pathExt);
 
-  if (!isASupporedFormat)
-    return log(
-      `Lyrics cannot be saved because current song extension (${pathExt}) is not supported for modifying metadata.`,
-      { songPath },
-      'ERROR',
-      { sendToRenderer: 'FAILURE' },
-    );
+    if (
+      !isASupportedFormat ||
+      userData.preferences.saveLyricsInLrcFilesForSupportedSongs
+    )
+      saveLyricsToLRCFile(songPath, lyrics);
 
-  const prevTags = await NodeID3.Promise.read(songPath);
+    if (isASupportedFormat) {
+      const prevTags = await NodeID3.Promise.read(songPath);
 
-  if (lyrics && lyrics?.lyrics) {
-    const { isSynced } = lyrics.lyrics;
-    const unsynchronisedLyrics: UnsynchronisedLyrics = !isSynced
-      ? {
-          language: 'ENG',
-          text: lyrics.lyrics.unparsedLyrics,
-        }
-      : prevTags.unsynchronisedLyrics;
+      const { isSynced } = lyrics.lyrics;
+      const unsynchronisedLyrics: UnsynchronisedLyrics = !isSynced
+        ? {
+            language: 'ENG',
+            text: lyrics.lyrics.unparsedLyrics,
+          }
+        : prevTags.unsynchronisedLyrics;
 
-    const synchronisedLyrics = isSynced
-      ? convertParsedLyricsToNodeID3Format(lyrics.lyrics)
-      : prevTags.synchronisedLyrics;
+      const synchronisedLyrics = isSynced
+        ? convertParsedLyricsToNodeID3Format(lyrics.lyrics)
+        : prevTags.synchronisedLyrics;
 
-    try {
-      const updatingTags = {
-        unsynchronisedLyrics,
-        synchronisedLyrics: synchronisedLyrics || [],
-      };
-      // Kept to be saved later
-      pendingSongLyrics.set(songPath, updatingTags);
+      try {
+        const updatingTags = {
+          title: lyrics.title,
+          unsynchronisedLyrics,
+          synchronisedLyrics: synchronisedLyrics || [],
+        };
+        // Kept to be saved later
+        pendingSongLyrics.set(songPath, updatingTags);
 
-      updateCachedLyrics((prevLyrics) => {
-        if (prevLyrics)
-          return {
-            ...prevLyrics,
-            source: 'IN_SONG_LYRICS',
-            isOfflineLyricsAvailable: true,
-          };
-        return undefined;
-      });
+        updateCachedLyrics((prevLyrics) => {
+          if (prevLyrics)
+            return {
+              ...prevLyrics,
+              source: 'IN_SONG_LYRICS',
+              isOfflineLyricsAvailable: true,
+            };
+          return undefined;
+        });
+        return log(
+          `Lyrics for '${lyrics.title}' will be saved automatically.`,
+          {
+            songPath,
+          },
+          'INFO',
+          {
+            sendToRenderer: {
+              messageCode: 'LYRICS_SAVE_QUEUED',
+              data: { title: lyrics.title },
+            },
+          },
+        );
+      } catch (error) {
+        log(
+          `FAILED TO UPDATE THE SONG FILE WITH THE NEW UPDATES. `,
+          { error },
+          'ERROR',
+        );
+        throw error;
+      }
+    } else {
       return log(
-        `Lyrics for '${lyrics.title}' will be saved automatically.`,
+        `Lyrics for this song with '${pathExt}' extension will be saved in a LRC file.`,
+        { songPath },
+        'WARN',
         {
-          songPath,
+          sendToRenderer: {
+            messageCode: 'LYRICS_SAVED_IN_LRC_FILE',
+            data: { ext: pathExt },
+          },
         },
-        'INFO',
-        { sendToRenderer: 'SUCCESS' },
       );
-    } catch (error) {
-      log(
-        `FAILED TO UPDATE THE SONG FILE WITH THE NEW UPDATES. `,
-        { error },
-        'ERROR',
-      );
-      throw error;
     }
   }
 
@@ -110,7 +132,17 @@ export const savePendingSongLyrics = (
       try {
         NodeID3.update(updatingTags, songPath);
 
-        log(`Successfully saved pending song lyrics of song.`, { songPath });
+        log(
+          `Successfully saved pending lyrics of '${updatingTags.title}'.`,
+          { songPath },
+          'INFO',
+          {
+            sendToRenderer: {
+              messageCode: 'PENDING_LYRICS_SAVED',
+              data: { title: updatingTags.title },
+            },
+          },
+        );
         dataUpdateEvent('songs/lyrics');
         pendingSongLyrics.delete(songPath);
       } catch (error) {

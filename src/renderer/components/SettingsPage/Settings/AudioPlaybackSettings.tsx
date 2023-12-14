@@ -1,23 +1,30 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import Dropdown, { DropdownOption } from 'renderer/components/Dropdown';
 import { AppContext } from 'renderer/contexts/AppContext';
 import storage from 'renderer/utils/localStorage';
+
 import Button from '../../Button';
 import Checkbox from '../../Checkbox';
+import i18n from '../../../i18n';
+
+const second = i18n.t('settingsPage.second');
+const seconds = i18n.t('settingsPage.second_other');
 
 const seekbarScrollIntervals: DropdownOption<string>[] = [
-  { label: '1 second', value: '1' },
-  { label: '2.5 seconds', value: '2.5' },
-  { label: '5 seconds', value: '5' },
-  { label: '10 seconds', value: '10' },
-  { label: '15 seconds', value: '15' },
-  { label: '20 seconds', value: '20' },
+  { label: `1 ${second}`, value: '1' },
+  { label: `2.5 ${seconds}`, value: '2.5' },
+  { label: `5 ${seconds}`, value: '5' },
+  { label: `10 ${seconds}`, value: '10' },
+  { label: `15 ${seconds}`, value: '15' },
+  { label: `20 ${seconds}`, value: '20' },
 ];
 
 const AudioPlaybackSettings = () => {
   const { localStorageData } = React.useContext(AppContext);
+  const { t } = useTranslation();
 
   const [seekbarScrollInterval, setSeekbarScrollInterval] = React.useState('5');
 
@@ -45,13 +52,12 @@ const AudioPlaybackSettings = () => {
         <span className="material-icons-round-outlined mr-2">
           slow_motion_video
         </span>
-        Audio Playback
+        {t('settingsPage.audioPlayback')}
       </div>
       <ul className="list-disc pl-6 marker:bg-font-color-highlight dark:marker:bg-dark-font-color-highlight">
         <li className="secondary-container show-remaining-song-duration mb-4">
           <div className="description">
-            Shows the remaining duration of the song instead of the default song
-            duration.
+            {t('settingsPage.showRemainingSongDurationDescription')}
           </div>
           <Checkbox
             id="toggleShowRemainingSongDuration"
@@ -62,18 +68,18 @@ const AudioPlaybackSettings = () => {
             checkedStateUpdateFunction={(state) =>
               storage.preferences.setPreferences('showSongRemainingTime', state)
             }
-            labelContent="Show remaining song duration"
+            labelContent={t('settingsPage.showRemainingSongDuration')}
           />
         </li>
 
         <li className="playback-rate mb-6" id="playbackRateInterval">
           <div className="description">
-            Change the default playback rate of the player.
+            {t('settingsPage.changePlaybackRate')}
           </div>
           <div className="mt-6 flex items-center">
             <div className="flex w-1/2 min-w-[120px] flex-col items-center justify-center">
               <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
-                Playback Rate : {playbackRateInterval} x
+                {t('settingsPage.playbackRate')}: {playbackRateInterval} x
               </span>
               <div className="flex w-full items-center pl-2">
                 <span className="text-sm">0.25x</span>
@@ -98,7 +104,7 @@ const AudioPlaybackSettings = () => {
               </div>
             </div>
             <Button
-              label="Reset to 1x"
+              label={t('settingsPage.resetPlaybackRate')}
               iconName="restart_alt"
               className="ml-6"
               isDisabled={playbackRateInterval === 1}
@@ -112,8 +118,7 @@ const AudioPlaybackSettings = () => {
 
         <li className="seekbar-scroll-interval mb-4">
           <div className="description">
-            Change the increment amount when scrolled over audio seek bar and
-            volume seek bar.
+            {t('settingsPage.seekbarScrollInterval')}
           </div>
           <Dropdown
             className="mt-4"

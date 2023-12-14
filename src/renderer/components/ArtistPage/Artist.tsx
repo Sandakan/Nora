@@ -3,6 +3,7 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import DefaultArtistCover from '../../../../assets/images/webp/artist_cover_default.webp';
@@ -29,6 +30,8 @@ interface ArtistProp {
 export const Artist = (props: ArtistProp) => {
   const { queue, isMultipleSelectionEnabled, multipleSelectionsData } =
     React.useContext(AppContext);
+  const { t } = useTranslation();
+
   const {
     changeCurrentActivePage,
     updateContextMenuData,
@@ -122,7 +125,9 @@ export const Artist = (props: ArtistProp) => {
 
     return [
       {
-        label: isMultipleSelectionsEnabled ? 'Play all Songs' : 'Play All',
+        label: isMultipleSelectionsEnabled
+          ? t(`artist.playAllSongs`)
+          : t(`common.playAll`),
         iconName: 'play_arrow',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled)
@@ -132,8 +137,8 @@ export const Artist = (props: ArtistProp) => {
       },
       {
         label: isMultipleSelectionsEnabled
-          ? 'Shuffle and Play All'
-          : 'Shuffle and Play',
+          ? t(`common.shuffleAndPlayAll`)
+          : t(`common.shuffleAndPlay`),
         iconName: 'shuffle',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled)
@@ -143,8 +148,8 @@ export const Artist = (props: ArtistProp) => {
       },
       {
         label: isMultipleSelectionsEnabled
-          ? 'Add songs to Queue'
-          : 'Add to Queue',
+          ? t(`common.addSongsToQueue`)
+          : t(`common.addToQueue`),
         iconName: 'queue',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) {
@@ -165,11 +170,9 @@ export const Artist = (props: ArtistProp) => {
                   {
                     id: `${uniqueSongIds.length}AddedToQueueFromMultiSelection`,
                     delay: 5000,
-                    content: (
-                      <span>
-                        Added {uniqueSongIds.length} songs to the queue.
-                      </span>
-                    ),
+                    content: t(`notifications.addedToQueue`, {
+                      count: uniqueSongIds.length,
+                    }),
                   },
                 ]);
               });
@@ -184,12 +187,9 @@ export const Artist = (props: ArtistProp) => {
             {
               id: 'addSongsToQueue',
               delay: 5000,
-              content: (
-                <span>
-                  Added {props.songIds.length} song
-                  {props.songIds.length === 1 ? '' : 's'} to the queue.
-                </span>
-              ),
+              content: t(`notifications.addedToQueue`, {
+                count: props.songIds.length,
+              }),
             },
           ]);
         },
@@ -201,17 +201,21 @@ export const Artist = (props: ArtistProp) => {
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
-        label: isMultipleSelectionEnabled
-          ? 'Toggle Like Artists'
-          : isAFavorite
-          ? 'Dislike Artist'
-          : 'Like Artist',
+        label: t(
+          `artist.${
+            isMultipleSelectionEnabled
+              ? 'toggleLikeArtists'
+              : isAFavorite
+                ? 'dislikeArtist'
+                : 'likeArtist'
+          }`,
+        ),
         iconName: 'favorite',
         iconClassName: isMultipleSelectionsEnabled
           ? 'material-icons-round-outlined mr-4 text-xl'
           : isAFavorite
-          ? 'material-icons-round mr-4 text-xl'
-          : 'material-icons-round-outlined mr-4 text-xl',
+            ? 'material-icons-round mr-4 text-xl'
+            : 'material-icons-round-outlined mr-4 text-xl',
         handlerFunction: () => {
           const { multipleSelections: artistIds } = multipleSelectionsData;
 
@@ -234,14 +238,14 @@ export const Artist = (props: ArtistProp) => {
         },
       },
       {
-        label: 'Info',
+        label: t(`common.info`),
         iconName: 'info',
         iconClassName: 'material-icons-round-outlined',
         handlerFunction: goToArtistInfoPage,
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
-        label: isAMultipleSelection ? 'Unselect' : 'Select',
+        label: t(`common.${isAMultipleSelection ? 'unselect' : 'select'}`),
         iconName: 'checklist',
         handlerFunction: () => {
           if (isMultipleSelectionEnabled) {
@@ -267,14 +271,16 @@ export const Artist = (props: ArtistProp) => {
   }, [
     multipleSelectionsData,
     isAMultipleSelection,
+    t,
     isMultipleSelectionEnabled,
     isAFavorite,
     goToArtistInfoPage,
-    props,
     playArtistSongsForMultipleSelections,
     playArtistSongs,
     updateQueueData,
     queue.queue,
+    props.songIds,
+    props.artistId,
     addNewNotifications,
     toggleMultipleSelections,
     updateMultipleSelections,
@@ -286,7 +292,9 @@ export const Artist = (props: ArtistProp) => {
       multipleSelectionsData.selectionType === 'artist' &&
       isAMultipleSelection
         ? {
-            title: `${multipleSelectionsData.multipleSelections.length} selected artists`,
+            title: t(`artist.selectedArtistCount`, {
+              count: multipleSelectionsData.multipleSelections.length,
+            }),
             artworkPath: DefaultArtistCover,
           }
         : {
@@ -295,7 +303,9 @@ export const Artist = (props: ArtistProp) => {
               props?.onlineArtworkPaths?.picture_small ||
               props?.artworkPaths?.optimizedArtworkPath,
             artworkClassName: '!rounded-full',
-            subTitle: `${props.songIds.length} songs`,
+            subTitle: t(`common.songWithCount`, {
+              count: props.songIds.length,
+            }),
           },
     [
       isAMultipleSelection,
@@ -306,6 +316,7 @@ export const Artist = (props: ArtistProp) => {
       props.name,
       props?.onlineArtworkPaths?.picture_small,
       props.songIds.length,
+      t,
     ],
   );
 
@@ -367,6 +378,7 @@ export const Artist = (props: ArtistProp) => {
           fallbackSrc={props.artworkPaths.artworkPath}
           alt="Default song cover"
           className="aspect-square h-full rounded-full object-cover"
+          enableImgFadeIns={!isMultipleSelectionEnabled}
         />
         {isMultipleSelectionEnabled &&
           multipleSelectionsData.selectionType === 'artist' && (

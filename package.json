@@ -157,12 +157,14 @@
   "dependencies": {
     "didyoumean2": "^6.0.1",
     "electron-store": "^8.1.0",
+    "i18next": "^23.7.6",
     "music-metadata": "^7.13.4",
     "node-id3": "^0.2.6",
     "node-vibrant": "^3.2.1-alpha.1",
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",
+    "react-i18next": "^13.5.0",
     "react-window": "^1.8.9",
     "songlyrics": "^2.4.5"
   },
@@ -172,7 +174,6 @@
     "@electron/rebuild": "^3.2.13",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.10",
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.2",
-    "@types/auto-launch": "^5.0.2",
     "@types/dotenv-webpack": "^7.0.4",
     "@types/jest": "^29.5.2",
     "@types/node": "^18.16.3",
@@ -181,7 +182,6 @@
     "@types/react-dom": "^18.2.5",
     "@types/react-test-renderer": "^18.0.0",
     "@types/react-window": "^1.8.5",
-    "@types/react-window-infinite-loader": "^1.0.6",
     "@types/webpack-bundle-analyzer": "^4.6.0",
     "@typescript-eslint/eslint-plugin": "^6.4.0",
     "@typescript-eslint/parser": "^6.4.0",
@@ -195,7 +195,7 @@
     "detect-port": "^1.5.1",
     "dotenv": "^16.3.0",
     "dotenv-webpack": "^8.0.1",
-    "electron": "^27.0.0",
+    "electron": "^27.1.3",
     "electron-builder": "^24.4.0",
     "electron-debug": "^3.2.0",
     "electron-devtools-installer": "^3.2.0",
@@ -216,6 +216,7 @@
     "file-type": "^18.5.0",
     "html-webpack-plugin": "^5.5.3",
     "husky": "^8.0.3",
+    "i18next-parser": "^8.9.0",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.5.0",
     "jest-environment-jsdom": "^29.5.0",
@@ -331,7 +332,8 @@
     "start:main": "cross-env NODE_ENV=development electronmon --inspect=5858 --remote-debugging-port=9223 --trace-warnings -r ts-node/register/transpile-only .",
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
-    "test": "jest"
+    "localize": "i18next 'src/renderer/**/*' -o assets/locales/$LOCALE/$NAMESPACE.json",
+    "test": "jest --collect-coverage"
   },
   "urls": {
     "discord_invite_url": "https://discord.gg/c5rGKnBs4y",

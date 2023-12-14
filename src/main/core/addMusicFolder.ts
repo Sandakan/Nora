@@ -4,9 +4,9 @@ import parseFolderStructuresForSongPaths, {
   doesFolderExistInFolderStructure,
 } from '../fs/parseFolderStructuresForSongPaths';
 import { tryToParseSong } from '../parseSong/parseSong';
-import sortSongs from '../utils/sortSongs';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import { generatePalettes } from '../other/generatePalette';
+import { timeEnd, timeStart } from '../utils/measureTimeUsage';
 
 const removeAlreadyAvailableStructures = (structures: FolderStructure[]) => {
   const parents: FolderStructure[] = [];
@@ -32,9 +32,8 @@ const removeAlreadyAvailableStructures = (structures: FolderStructure[]) => {
 
 const addMusicFromFolderStructures = async (
   structures: FolderStructure[],
-  resultsSortType?: SongSortTypes,
   abortSignal?: AbortSignal,
-): Promise<SongData[]> => {
+) => {
   log('Started the process of linking a music folders to the library.');
 
   log(`Added new song folders to the app.`, {
@@ -46,9 +45,8 @@ const addMusicFromFolderStructures = async (
 
   console.time('parseTime');
 
-  let songs: SongData[] = [];
-
   if (songPaths) {
+    const startTime = timeStart();
     for (let i = 0; i < songPaths.length; i += 1) {
       if (abortSignal?.aborted) {
         log(
@@ -62,13 +60,11 @@ const addMusicFromFolderStructures = async (
       const songPath = songPaths[i];
       try {
         // eslint-disable-next-line no-await-in-loop
-        const data = await tryToParseSong(songPath, false, false, i >= 10);
-        sendMessageToRenderer(
-          `${i + 1} completed out of ${songPaths.length} songs.`,
-          'AUDIO_PARSING_PROCESS_UPDATE',
-          { max: songPaths.length, value: i + 1 },
-        );
-        if (data) songs.push(data);
+        await tryToParseSong(songPath, false, false, i >= 10);
+        sendMessageToRenderer({
+          messageCode: 'AUDIO_PARSING_PROCESS_UPDATE',
+          data: { total: songPaths.length, value: i + 1 },
+        });
       } catch (error) {
         log(
           `Error occurred when parsing '${path.basename(songPath)}'.`,
@@ -77,20 +73,17 @@ const addMusicFromFolderStructures = async (
         );
       }
     }
+    timeEnd(startTime, 'Time to parse the whole folder');
     setTimeout(generatePalettes, 1500);
   } else throw new Error('Failed to get song paths from music folders.');
 
-  if (resultsSortType) songs = sortSongs(songs, resultsSortType);
-
   log(
-    `Successfully parsed ${songs.length} songs from the selected music folders.`,
+    `Successfully parsed ${songPaths.length} songs from the selected music folders.`,
     {
       folderPaths: eligableStructures.map((x) => x.path),
-      timeElapsed: console.timeEnd('parseTime'),
     },
   );
   dataUpdateEvent('userData/musicFolder');
-  return songs;
 };
 
 export default addMusicFromFolderStructures;

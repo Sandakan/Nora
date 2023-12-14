@@ -1,5 +1,6 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import storage from 'renderer/utils/localStorage';
@@ -20,6 +21,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
     changeCurrentActivePage,
     updateCurrentSongData,
   } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const { name = '', artistId = '' } = props;
 
@@ -59,7 +61,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
             </span>
             {i !== arr.length - 1 && (
               <span key={`${arr[i]}=>${arr[i + 1]}`}>
-                {i === arr.length - 2 ? ' and ' : ', '}
+                {i === arr.length - 2 ? ` ${t('common.and')} ` : ', '}
               </span>
             )}
           </>
@@ -69,7 +71,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
       return artists;
     }
     return [];
-  }, [separatedArtistsNames]);
+  }, [separatedArtistsNames, t]);
 
   const separateArtists = React.useCallback(
     (
@@ -96,7 +98,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
 
           return addNewNotifications([
             {
-              content: 'Artist conflict resolved successfully.',
+              content: t('common.artistConflictResolved'),
               iconName: 'done',
               delay: 5000,
               id: 'ArtistDuplicateSuggestion',
@@ -115,6 +117,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
       changeCurrentActivePage,
       currentSongData.songId,
       separatedArtistsNames,
+      t,
       updateCurrentSongData,
     ],
   );
@@ -137,7 +140,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
               <span className="material-icons-round-outlined mr-2 text-2xl">
                 help
               </span>{' '}
-              Suggestion{' '}
+              {t('common.suggestion')}{' '}
             </div>
             <div className="flex items-center">
               <span
@@ -153,9 +156,9 @@ const SeparateArtistsSuggestion = (props: Props) => {
                 iconName={
                   isMessageVisible ? 'arrow_drop_up' : 'arrow_drop_down'
                 }
-                tooltipLabel={
-                  isMessageVisible ? 'Hide suggestion' : 'Show suggestion'
-                }
+                tooltipLabel={`common.${
+                  isMessageVisible ? 'hideSuggestion' : 'showSuggestion'
+                }`}
                 clickHandler={(e) => {
                   e.preventDefault();
                   setIsMessageVisible((state) => !state);
@@ -165,22 +168,23 @@ const SeparateArtistsSuggestion = (props: Props) => {
           </label>
           {isMessageVisible && (
             <div>
-              <div>
-                <p className="mt-2 text-sm">
-                  Are {artistComponents} {separatedArtistsNames.length} separate
-                  artists?
-                </p>
-                <p className="mt-2 text-sm">
-                  If they are, you can organize them by selecting them as
-                  separate artists, or you can ignore this suggestion.
-                </p>
-              </div>
+              <Trans
+                i18nKey="separateArtistsSuggestion.message"
+                values={{ count: separatedArtistsNames.length }}
+                components={{
+                  div: <div />,
+                  span: <span>{artistComponents}</span>,
+                  p: <p className="mt-2 text-sm" />,
+                }}
+              />
               <div className="mt-3 flex items-center">
                 <Button
                   className="!border-0 bg-background-color-1/50 !px-4 !py-2 outline-1 transition-colors hover:bg-background-color-1 hover:!text-font-color-highlight focus-visible:!outline dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:!text-dark-font-color-highlight"
                   iconName="verified"
                   iconClassName="material-icons-round-outlined"
-                  label={`Separate as ${separatedArtistsNames.length} artists`}
+                  label={t('separateArtistsSuggestion.separateAsArtists', {
+                    count: separatedArtistsNames.length,
+                  })}
                   clickHandler={(_, setIsDisabled, setIsPending) =>
                     separateArtists(setIsDisabled, setIsPending)
                   }
@@ -201,7 +205,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
                         iconName: 'do_not_disturb_on',
                         iconClassName: 'material-icons-round-outlined',
                         delay: 5000,
-                        content: `Suggestion ignored.`,
+                        content: t('notifications.suggestionIgnored'),
                       },
                     ]);
                   }}

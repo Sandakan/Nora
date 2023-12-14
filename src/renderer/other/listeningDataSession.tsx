@@ -15,10 +15,10 @@ class ListeningDataSession {
   skipEndRange: ReturnType<typeof calculateTime>;
   listenEndRange: ReturnType<typeof calculateTime>;
   scrobbleEndRange: ReturnType<typeof calculateTime>;
-  intervalId?: NodeJS.Timer;
-  nowPlayingIntervalId?: NodeJS.Timer;
+  intervalId?: NodeJS.Timeout;
+  nowPlayingIntervalId?: NodeJS.Timeout;
   seeks: { position: number; seeks: number }[];
-  recordStartTime: Date;
+  startTime: Date;
 
   constructor(songId: string, duration: number, chosenByUser = false) {
     this.songId = songId;
@@ -36,15 +36,16 @@ class ListeningDataSession {
     this.passedScrobblingRange = false;
     this.seconds = 0;
     this.seeks = [];
-    this.recordStartTime = new Date();
+    this.startTime = new Date();
   }
 
   recordListeningData() {
     console.warn(
-      `Started recording listening data for ${this.songId}`,
+      `Started recording listening data for '${this.songId}'`,
       'duration',
       calculateTime(this.duration),
     );
+
     this.nowPlayingIntervalId = setTimeout(() => {
       window.api.audioLibraryControls.sendNowPlayingSongDataToLastFM(
         this.songId,
@@ -80,9 +81,8 @@ class ListeningDataSession {
         window.api.audioLibraryControls.updateSongListeningData(
           this.songId,
           'fullListens',
-          'increment',
+          1,
         );
-        this.stopRecording();
       }
       // listen for scrobbling event
       if (
@@ -96,7 +96,7 @@ class ListeningDataSession {
         );
         window.api.audioLibraryControls.scrobbleSong(
           this.songId,
-          this.recordStartTime.getTime() / 1000,
+          this.startTime.getTime() / 1000,
         );
       }
       if (!this.isPaused) {
@@ -114,9 +114,21 @@ class ListeningDataSession {
         window.api.audioLibraryControls.updateSongListeningData(
           this.songId,
           'skips',
-          'increment',
+          1,
         );
       }
+
+      const seeks = this.seeks.filter(
+        (seekInstance) => seekInstance.seeks >= 3,
+      );
+      if (seeks.length > 0) {
+        window.api.audioLibraryControls.updateSongListeningData(
+          this.songId,
+          'seeks',
+          seeks,
+        );
+      }
+
       this.abortController.abort();
       clearInterval(this.intervalId);
       clearTimeout(this.nowPlayingIntervalId);
@@ -127,9 +139,11 @@ class ListeningDataSession {
   }
 
   set addSeekPosition(seekPosition: number) {
+    const seekRange = 5;
     for (const seek of this.seeks) {
       const isSeekPositionInRange =
-        seekPosition > seek.position - 4 && seekPosition < seek.position + 4;
+        seekPosition > seek.position - seekRange &&
+        seekPosition < seek.position + seekRange;
       if (isSeekPositionInRange) {
         seek.seeks += 1;
         return;

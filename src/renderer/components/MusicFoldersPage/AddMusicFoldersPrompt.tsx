@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 
 import SelectableFolder from './SelectableFolder';
@@ -92,6 +93,7 @@ const getAllSubDirectories = (
 
 const AddMusicFoldersPrompt = (props: Props) => {
   const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const { sortType, onFailure, onSuccess, onFinally } = props;
 
@@ -168,7 +170,7 @@ const AddMusicFoldersPrompt = (props: Props) => {
         <span className="material-icons-round-outlined mr-2 text-4xl">
           create_new_folder
         </span>{' '}
-        Select Folders to Add
+        {t('addMusicFoldersPrompt.title')}
       </div>
       <div className="mt-8">
         {folderComponents.length > 0 ? (
@@ -179,14 +181,11 @@ const AddMusicFoldersPrompt = (props: Props) => {
               <span className="material-icons-round-outlined mb-4 text-5xl">
                 folder_open
               </span>
-              <p>Seems like you didn't select any folders.</p>
-              <p>
-                Choose some folders from your system, and they will appear here
-                for you to further customize them.
-              </p>
+              <p>{t('addMusicFoldersPrompt.emptyMessage1')}</p>
+              <p>{t('addMusicFoldersPrompt.emptyMessage2')}</p>
             </div>
             <Button
-              label="Choose Folders"
+              label={t('addMusicFoldersPrompt.chooseFolders')}
               iconName="folder"
               iconClassName="material-icons-round-outlined"
               className="!mr-0 mt-4"
@@ -199,24 +198,26 @@ const AddMusicFoldersPrompt = (props: Props) => {
         <div className="mt-10 flex items-center justify-end">
           <div className="folder-info-container mr-8 text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
             <span>
-              {selectedNoOfParentFolders} selected parent folder
-              {selectedNoOfParentFolders === 1 ? '' : 's'}
+              {t('folder.selectedParentFolderCount', {
+                count: selectedNoOfParentFolders,
+              })}
             </span>
             <span className="mx-2">&bull;</span>
             <span>
-              {selectedNoOfDirectories} selected director
-              {selectedNoOfDirectories === 1 ? 'y' : 'ies'}
+              {t('folder.selectedDirectoryCount', {
+                count: selectedNoOfDirectories,
+              })}
             </span>
           </div>
           <div className="buttons-container flex">
             <Button
-              label="Cancel"
+              label={t('common.cancel')}
               iconName="close"
               className="mr-4"
               clickHandler={() => changePromptMenuData(false)}
             />
             <Button
-              label="Add Selected Folders"
+              label={t('addMusicFoldersPrompt.addSelectedFolders')}
               iconName="done"
               className="!bg-background-color-3 !text-font-color-black"
               clickHandler={(_, setIsDisabled, setIsPending) => {
@@ -240,7 +241,7 @@ const AddMusicFoldersPrompt = (props: Props) => {
               isDisabled={isAddFolderButtonDisabled}
               tooltipLabel={
                 isAddFolderButtonDisabled
-                  ? 'No folders selected (Must have one parent folder)'
+                  ? t('addMusicFoldersPrompt.noFoldersSelected')
                   : undefined
               }
             />

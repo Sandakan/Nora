@@ -1,5 +1,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import Button from '../Button';
@@ -9,6 +10,8 @@ export default (props: { songIds: string[] }) => {
   const { currentSongData } = React.useContext(AppContext);
   const { addNewNotifications, changePromptMenuData, clearAudioPlayerData } =
     React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const { songIds } = props;
 
   const [songsData, setSongsData] = React.useState<SongData[]>([]);
@@ -31,20 +34,18 @@ export default (props: { songIds: string[] }) => {
   return (
     <>
       <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
-        Delete{' '}
-        {songsData.length === 1
-          ? `'${songsData[0].title}'`
-          : `${songsData.length} songs`}{' '}
-        from system
+        {t('deleteSongFromSystemConfirmPrompt.title', {
+          count: songsData.length,
+          title: songsData[0].title,
+        })}
       </div>
       <div className="description">
-        You will lose {songsData.length === 1 ? `this song` : `these songs`}{' '}
-        from your system and may not be able to recover{' '}
-        {songsData.length === 1 ? `it` : `them`} again if you select
-        &apos;Permanently delete from system&apos; option.
+        {t('deleteSongFromSystemConfirmPrompt.title', {
+          count: songsData.length,
+        })}
       </div>
       <div className="info-about-affecting-files-container mt-4">
-        <p>Proceeding this action affects these files :</p>
+        <p>{t('deleteSongFromSystemConfirmPrompt.modificationNotice')}</p>
         <ul className="ml-4 list-inside list-disc">
           {songsData.map((song) => (
             <li className="text-sm font-light">{song.path}</li>
@@ -55,11 +56,13 @@ export default (props: { songIds: string[] }) => {
         id="permanentDelete"
         isChecked={isPermanentDelete}
         checkedStateUpdateFunction={setIsPermenanentDelete}
-        labelContent="Permanently delete from the system."
+        labelContent={t(
+          'deleteSongFromSystemConfirmPrompt.permanentlyDeleteFromSystem',
+        )}
       />
       <div className="buttons-container flex items-center justify-end">
         <Button
-          label="Delete Song"
+          label={t('deleteSongFromSystemConfirmPrompt.deleteSong')}
           className="delete-song-confirm-btn danger-btn float-right mt-6 h-10 w-48 cursor-pointer rounded-lg !bg-font-color-crimson font-medium text-font-color-white outline-none ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson"
           clickHandler={() => {
             changePromptMenuData(false);
@@ -83,9 +86,14 @@ export default (props: { songIds: string[] }) => {
                       delay: 5000,
                       content: (
                         <span>
-                          {isPermanentDelete
-                            ? `${songsData.length} songs removed from the system.`
-                            : `${songsData.length} songs moved to the Recycle Bin.`}
+                          {t(
+                            `deleteSongFromSystemConfirmPrompt.${
+                              isPermanentDelete
+                                ? 'songPermanentlyDeleted'
+                                : 'songMovedToBin'
+                            }`,
+                            { count: songsData.length },
+                          )}
                         </span>
                       ),
                       icon: (

@@ -73,7 +73,7 @@ const AllGenreResults = (prop: Props) => {
     >
       {genreData && genreData.length > 0 && (
         <Grid
-          className="appear-from-bottom delay-100"
+          className="appear-from-bottom delay-100 [scrollbar-gutter:stable]"
           columnCount={noOfColumns || 3}
           columnWidth={itemWidth}
           rowCount={noOfRows || 3}

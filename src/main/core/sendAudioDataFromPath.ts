@@ -87,11 +87,9 @@ const sendAudioDataFromPath = async (
             path: data.path,
           });
 
-          sendMessageToRenderer(
-            'You are playing a song outside from your library.',
-            'PLAYBACK_FROM_UNKNOWN_SOURCE',
-            { path: songPath },
-          );
+          sendMessageToRenderer({
+            messageCode: 'PLAYBACK_FROM_UNKNOWN_SOURCE',
+          });
           return data;
         }
         log(`No matching song for songId -${songPath}-`);

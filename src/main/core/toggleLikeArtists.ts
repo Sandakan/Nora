@@ -6,36 +6,34 @@ import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 const dislikeArtist = (artist: SavableArtist) => {
   artist.isAFavorite = false;
   // result.success = true;
-  sendMessageToRenderer(
-    `You disliked '${
-      artist.name.length > 20
-        ? `${artist.name.substring(0, 20).trim()}...`
-        : artist.name
-    }'`,
-    'ARTIST_DISLIKE',
-    {
+  sendMessageToRenderer({
+    messageCode: 'ARTIST_DISLIKE',
+    data: {
+      name:
+        artist.name.length > 20
+          ? `${artist.name.substring(0, 20).trim()}...`
+          : artist.name,
       artworkPath: getArtistArtworkPath(artist.artworkName),
       onlineArtworkPaths: artist.onlineArtworkPaths,
     },
-  );
+  });
   return artist;
 };
 
 const likeArtist = (artist: SavableArtist) => {
   artist.isAFavorite = true;
   // result.success = true;
-  sendMessageToRenderer(
-    `You liked '${
-      artist.name.length > 20
-        ? `${artist.name.substring(0, 20).trim()}...`
-        : artist.name
-    }'`,
-    'ARTIST_LIKE',
-    {
+  sendMessageToRenderer({
+    messageCode: 'ARTIST_LIKE',
+    data: {
+      name:
+        artist.name.length > 20
+          ? `${artist.name.substring(0, 20).trim()}...`
+          : artist.name,
       artworkPath: getArtistArtworkPath(artist.artworkName),
       onlineArtworkPaths: artist.onlineArtworkPaths,
     },
-  );
+  });
   return artist;
 };
 
@@ -54,8 +52,8 @@ const toggleLikeArtists = async (
       isLikeArtist === undefined
         ? 'toggle like'
         : isLikeArtist
-        ? 'like'
-        : 'dislike'
+          ? 'like'
+          : 'dislike'
     } artists with ids -${artistIds.join(', ')}-`,
   );
   if (artists.length > 0) {

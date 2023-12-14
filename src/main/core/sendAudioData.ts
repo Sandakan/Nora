@@ -99,7 +99,7 @@ export const sendAudioData = async (
               isBlacklisted: isSongBlacklisted(song.songId, song.path),
             };
 
-            updateSongListeningData(song.songId, 'listens', 'increment');
+            updateSongListeningData(song.songId, 'listens', 1);
             setCurrentSongPath(song.path);
             return data;
             // return log(`total : ${console.timeEnd('total')}`);

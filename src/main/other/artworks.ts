@@ -9,7 +9,7 @@ import log from '../log';
 import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
 import getAssetPath from '../utils/getAssetPath';
 import { generateRandomId } from '../utils/randomId';
-import { timeEnd, timeStart } from '../utils/measureTimeUsage';
+// import { timeEnd, timeStart } from '../utils/measureTimeUsage';
 
 const createArtworks = async (
   id: string,
@@ -24,8 +24,8 @@ const createArtworks = async (
       artworkType === 'playlist'
         ? 'playlist_cover_default.webp'
         : artworkType === 'album'
-        ? 'album_cover_default.webp'
-        : 'song_cover_default.webp',
+          ? 'album_cover_default.webp'
+          : 'song_cover_default.webp',
     ),
   );
   const defaultArtworkPaths = {
@@ -33,7 +33,7 @@ const createArtworks = async (
     artworkPath: defaultPath,
     optimizedArtworkPath: defaultPath,
   };
-  const start = timeStart();
+  // const start = timeStart();
   if (artwork) {
     const imgPath = path.join(DEFAULT_ARTWORK_SAVE_LOCATION, `${id}.webp`);
     const optimizedImgPath = path.join(
@@ -55,12 +55,12 @@ const createArtworks = async (
           throw err;
         });
 
-      const start1 = timeEnd(start, 'Time to save optimized artwork.');
+      // const start1 = timeEnd(start, 'Time to save optimized artwork.');
 
       sharp(artwork, { animated: true })
         .webp()
         .toFile(imgPath)
-        .then(() => timeEnd(start1, 'Time to save full-resolution artwork.'))
+        // .then(() => timeEnd(start1, 'Time to save full-resolution artwork.'))
         .catch((err) => {
           log(
             `ERROR OCCURRED WHEN CREATING ARTWORK OF A SONG WITH SONGID -${id}- IMAGE USING SHARP PACKAGE.`,
@@ -99,16 +99,16 @@ export const storeArtworks = async (
   artwork?: Buffer | string,
 ): Promise<ArtworkPaths> => {
   try {
-    const start = timeStart();
+    // const start = timeStart();
 
     await checkForDefaultArtworkSaveLocation();
 
-    const start1 = timeEnd(start, 'Time to check for default artwork location');
+    // const start1 = timeEnd(start, 'Time to check for default artwork location');
 
     const result = await createArtworks(id, artworkType, artwork);
 
-    timeEnd(start, 'Time to create artwork');
-    timeEnd(start1, 'Total time to finish artwork storing process');
+    // timeEnd(start, 'Time to create artwork');
+    // timeEnd(start1, 'Total time to finish artwork storing process');
     return result;
   } catch (error) {
     log(`Error occurred when storing artwork.`, { error }, 'ERROR');
@@ -120,59 +120,6 @@ const manageArtworkRemovalErrors = (err: Error) => {
   if ('code' in err && err.code === 'ENOENT') return log(err);
   throw err;
 };
-
-// export const removeArtwork = async (
-//   artworkPaths: ArtworkPaths,
-//   type: QueueTypes = 'songs'
-// ) => {
-//   let retryCount = 0;
-//   let timeOutId: NodeJS.Timeout;
-
-//   const tryToRemoveArtwork = async (artworks: ArtworkPaths) => {
-//     if (timeOutId) clearTimeout(timeOutId);
-//     try {
-//       await fs
-//         .unlink(removeDefaultAppProtocolFromFilePath(artworks.artworkPath))
-//         .catch(manageArtworkRemovalErrors);
-//       await fs
-//         .unlink(
-//           removeDefaultAppProtocolFromFilePath(artworks.optimizedArtworkPath)
-//         )
-//         .catch(manageArtworkRemovalErrors);
-//     } catch (error: any) {
-//       if ('code' in error && error.code === 'EBUSY') {
-//         if (retryCount < 5) {
-//           retryCount += 1;
-//           timeOutId = setTimeout(() => tryToRemoveArtwork(artworkPaths), 300);
-//           log(
-//             `Failed to remove artwork. Starting retry no ${retryCount} in 3 seconds`,
-//             undefined,
-//             'WARN',
-//             { sendToRenderer: true }
-//           );
-//         } else {
-//           log(
-//             `Failed to remove artwork. Failed ${retryCount} out of 5 efforts`,
-//             undefined,
-//             'WARN'
-//           );
-//           throw error;
-//         }
-//       } else throw error;
-//     }
-//   };
-
-//   try {
-//     await tryToRemoveArtwork(artworkPaths);
-//   } catch (error) {
-//     log(
-//       `Error occurred when removing a ${type} artwork.`,
-//       { error, artworkPaths },
-//       'ERROR'
-//     );
-//     throw new Error(`Error occurred when removing a ${type} artwork.`);
-//   }
-// };
 
 export const removeArtwork = async (
   artworkPaths: ArtworkPaths,

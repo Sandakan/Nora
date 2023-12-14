@@ -1,7 +1,8 @@
 /* eslint-disable no-loop-func */
 /* eslint-disable no-await-in-loop */
 import path from 'path';
-import { readFile, stat } from 'fs/promises';
+import { readFile } from 'fs/promises';
+import { statSync } from 'fs';
 import NodeID3 from 'node-id3';
 import sharp from 'sharp';
 
@@ -11,6 +12,7 @@ import {
   getArtistsData,
   getGenresData,
   getSongsData,
+  getUserData,
   setAlbumsData,
   setArtistsData,
   setGenresData,
@@ -24,6 +26,7 @@ import {
 import log from './log';
 import {
   dataUpdateEvent,
+  getCurrentSongPath,
   getSongsOutsideLibraryData,
   sendMessageToRenderer,
   updateSongsOutsideLibraryData,
@@ -35,7 +38,10 @@ import {
   storeArtworks,
 } from './other/artworks';
 import generatePalette from './other/generatePalette';
-import { updateCachedLyrics } from './core/getSongLyrics';
+import {
+  parseLyricsFromID3Format,
+  updateCachedLyrics,
+} from './core/getSongLyrics';
 import parseLyrics from './utils/parseLyrics';
 import convertParsedLyricsToNodeID3Format from './core/convertParsedLyricsToNodeID3Format';
 import sendSongID3Tags from './core/sendSongId3Tags';
@@ -43,8 +49,137 @@ import { isSongBlacklisted } from './utils/isBlacklisted';
 import isPathAWebURL from './utils/isPathAWebUrl';
 
 import { appPreferences } from '../../package.json';
+import saveLyricsToLRCFile from './core/saveLyricsToLrcFile';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
+
+type PendingMetadataUpdates = {
+  songPath: string;
+  tags: NodeID3.Tags;
+  sendUpdatedData?: boolean;
+  isKnownSource?: boolean;
+};
+
+const pendingMetadataUpdates = new Map<string, PendingMetadataUpdates>();
+
+export const isMetadataUpdatesPending = (songPath: string) =>
+  pendingMetadataUpdates.has(songPath);
+
+export const savePendingMetadataUpdates = (
+  currentSongPath = '',
+  forceSave = false,
+) => {
+  const userData = getUserData();
+  const pathExt = path.extname(currentSongPath).replace(/\W/, '');
+  const isASupportedFormat =
+    metadataEditingSupportedExtensions.includes(pathExt);
+
+  if (pendingMetadataUpdates.size === 0)
+    return log('No pending metadata updates found.');
+
+  log(`Started saving pending metadata updates.`, {
+    pendingSongs: pendingMetadataUpdates.keys,
+  });
+
+  const entries = pendingMetadataUpdates.entries();
+
+  for (const [songPath, pendingMetadata] of entries) {
+    const isACurrentlyPlayingSong = songPath === currentSongPath;
+
+    if (forceSave || !isACurrentlyPlayingSong) {
+      try {
+        NodeID3.update(pendingMetadata.tags, songPath);
+
+        if (
+          !isASupportedFormat ||
+          userData.preferences.saveLyricsInLrcFilesForSupportedSongs
+        ) {
+          const {
+            title = '',
+            synchronisedLyrics,
+            unsynchronisedLyrics,
+          } = pendingMetadata.tags;
+
+          const lyrics = parseLyricsFromID3Format(
+            synchronisedLyrics,
+            unsynchronisedLyrics,
+          );
+
+          if (lyrics) {
+            saveLyricsToLRCFile(songPath, {
+              title,
+              source: 'IN_SONG_LYRICS',
+              isOfflineLyricsAvailable: true,
+              lyricsType: synchronisedLyrics ? 'SYNCED' : 'UN_SYNCED',
+              lyrics,
+            });
+          }
+        }
+
+        log(
+          `Successfully saved pending metadata updates of '${pendingMetadata.tags.title}'.`,
+          { songPath },
+          'INFO',
+          {
+            sendToRenderer: {
+              messageCode: 'PENDING_METADATA_UPDATES_SAVED',
+              data: { title: pendingMetadata.tags.title },
+            },
+          },
+        );
+        dataUpdateEvent('songs/artworks');
+        dataUpdateEvent('songs/updatedSong');
+        dataUpdateEvent('artists');
+        dataUpdateEvent('albums');
+        dataUpdateEvent('genres');
+        pendingMetadataUpdates.delete(songPath);
+      } catch (error) {
+        log(
+          `Failed to save pending metadata update of a song. `,
+          { error, songPath },
+          'ERROR',
+        );
+        throw error;
+      }
+
+      try {
+        const stats = statSync(songPath);
+        if (stats?.mtime) {
+          const modifiedDate = stats.mtime.getTime();
+          if (isACurrentlyPlayingSong) return { modifiedDate };
+
+          const songs = getSongsData();
+
+          for (const song of songs) {
+            if (song.path === songPath) song.modifiedDate = modifiedDate;
+          }
+          setSongsData(songs);
+          dataUpdateEvent('songs/updatedSong');
+        }
+      } catch (error) {
+        log(
+          `FAILED TO GET SONG STATS AFTER UPDATING THE SONG WITH NEWER METADATA.`,
+          { error },
+          'ERROR',
+        );
+        throw error;
+      }
+    }
+  }
+  return undefined;
+};
+
+const addMetadataToPendingQueue = (data: PendingMetadataUpdates) => {
+  // Kept to be saved later
+  pendingMetadataUpdates.set(data.songPath, data);
+  const currentSongPath = getCurrentSongPath();
+
+  const isACurrentlyPlayingSong = data.songPath === currentSongPath;
+  if (!isACurrentlyPlayingSong)
+    return savePendingMetadataUpdates(currentSongPath, true);
+
+  return undefined;
+};
 
 export const fetchArtworkBufferFromURL = async (url: string) => {
   try {
@@ -394,20 +529,21 @@ const manageAlbumDataUpdates = (
             );
           }
           if (albums[i].albumId === newSongData.album.albumId) {
-            if (prevSongData.artists && albums[i].artists) {
-              albums[i].artists = albums[i].artists?.filter(
-                (d) =>
-                  !prevSongData.artists?.some((e) => e.artistId === d.artistId),
-              );
-            }
-            if (newSongData.artists) {
-              albums[i].artists?.push(
-                ...newSongData.artists.map((x) => ({
-                  name: x.name,
-                  artistId: x.artistId as string,
-                })),
-              );
-            }
+            // ? These lines are removed because album artists will only be changed if the albumArtist is changed.
+            // if (prevSongData.artists && albums[i].artists) {
+            //   albums[i].artists = albums[i].artists?.filter(
+            //     (d) =>
+            //       !prevSongData.artists?.some((e) => e.artistId === d.artistId),
+            //   );
+            // }
+            // if (newSongData.artists) {
+            //   albums[i].artists?.push(
+            //     ...newSongData.artists.map((x) => ({
+            //       name: x.name,
+            //       artistId: x.artistId as string,
+            //     })),
+            //   );
+            // }
             albums[i].songs.push({ title: prevSongData.title, songId });
             prevSongData.album = {
               name: albums[i].title,
@@ -429,7 +565,7 @@ const manageAlbumDataUpdates = (
         title: newSongData.album.title,
         songs: [{ title: newSongData.title, songId }],
         artworkName: path.basename(songArtworkPaths.artworkPath),
-        artists: prevSongData.artists,
+        artists: prevSongData.albumArtists || prevSongData.artists,
       };
       prevSongData.album = { albumId: newAlbum.albumId, name: newAlbum.title };
       albums.push(newAlbum);
@@ -574,7 +710,7 @@ const manageLyricsUpdates = (
 
   const unsynchronisedLyrics = parsedUnsyncedLyrics
     ? { language: 'ENG', text: parsedUnsyncedLyrics.unparsedLyrics }
-    : prevTags.unsynchronisedLyrics;
+    : undefined;
 
   const synchronisedLyrics = convertParsedLyricsToNodeID3Format(
     parsedSyncedLyrics,
@@ -605,7 +741,6 @@ const manageLyricsUpdates = (
   }
 
   return {
-    // parsedLyrics: parsedSyncedLyrics || parsedUnsyncedLyrics,
     unsynchronisedLyrics,
     synchronisedLyrics,
   };
@@ -625,7 +760,12 @@ const updateSongId3TagsOfUnknownSource = async (
       `Lyrics cannot be saved because current song extension (${pathExt}) is not supported for modifying metadata.`,
       { songPath },
       'ERROR',
-      { sendToRenderer: 'FAILURE' },
+      {
+        sendToRenderer: {
+          messageCode: 'SONG_EXT_NOT_SUPPORTED_FOR_LYRICS_SAVES',
+          data: { ext: pathExt },
+        },
+      },
     );
 
   const songsOutsideLibraryData = getSongsOutsideLibraryData();
@@ -675,16 +815,13 @@ const updateSongId3TagsOfUnknownSource = async (
         unsynchronisedLyrics,
       };
 
-      await NodeID3.Promise.update(id3Tags, songPathWithoutDefaultUrl).catch(
-        (err) => {
-          log(
-            `FAILED TO UPDATE THE SONG FILE WITH THE NEW UPDATES. `,
-            { err },
-            'ERROR',
-          );
-          throw err;
-        },
-      );
+      // Kept to be saved later
+      addMetadataToPendingQueue({
+        songPath: songPathWithoutDefaultUrl,
+        tags: id3Tags,
+        isKnownSource: false,
+        sendUpdatedData,
+      });
 
       if (sendUpdatedData) {
         const updatedData: AudioPlayerData = {
@@ -833,24 +970,17 @@ const updateSongId3Tags = async (
             synchronisedLyrics: synchronisedLyrics || [],
           };
 
-          await NodeID3.Promise.update(id3Tags, song.path).catch((err) => {
-            log(
-              `FAILED TO UPDATE THE SONG FILE WITH THE NEW UPDATES. `,
-              { err },
-              'ERROR',
-            );
-            throw err;
+          // Kept to be saved later
+          const updatedData = addMetadataToPendingQueue({
+            songPath: song.path,
+            tags: id3Tags,
+            isKnownSource: true,
+            sendUpdatedData,
           });
 
-          const stats = await stat(song.path).catch((err) => {
-            log(
-              `FAILED TO GET SONG STATS AFTER UPDATING THE SONG WITH NEWER METADATA.`,
-              { err },
-              'ERROR',
-            );
-            throw err;
-          });
-          if (stats?.mtime) song.modifiedDate = stats.mtime.getTime();
+          if (updatedData) {
+            song.modifiedDate = updatedData.modifiedDate;
+          }
 
           songs[x] = song;
           setSongsData(songs);
@@ -900,7 +1030,10 @@ const updateSongId3Tags = async (
         } catch (err: any) {
           if ('message' in err) {
             result.reason = err.message;
-            sendMessageToRenderer(`Metadata update Failed. ${err.message}`);
+            sendMessageToRenderer({
+              messageCode: 'METADATA_UPDATE_FAILED',
+              data: { message: err.message },
+            });
           }
           log('Song metadata update failed.', { err }, 'ERROR');
           return result;

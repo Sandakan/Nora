@@ -21,6 +21,7 @@ export interface ButtonProps {
   style?: React.CSSProperties;
   onContextMenu?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   removeFocusOnClick?: boolean;
+  children?: string;
 }
 
 const Button = React.memo((props: ButtonProps) => {
@@ -30,9 +31,10 @@ const Button = React.memo((props: ButtonProps) => {
     iconName,
     iconClassName,
     pendingClassName,
-    label,
+    children,
+    label = children,
     clickHandler,
-    tooltipLabel,
+    tooltipLabel = label,
     pendingAnimationOnDisabled = false,
     onContextMenu,
     isDisabled = false,
@@ -103,7 +105,9 @@ const Button = React.memo((props: ButtonProps) => {
       ) : (
         buttonIcons
       )}
-      {label && <span className="button-label-text w-max">{label}</span>}
+      {label && (
+        <span className="button-label-text w-max leading-none">{label}</span>
+      )}
     </button>
   );
 });

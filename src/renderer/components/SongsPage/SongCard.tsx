@@ -2,6 +2,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Img from '../Img';
@@ -49,6 +50,7 @@ const SongCard = (props: SongCardProp) => {
     updateMultipleSelections,
     createQueue,
   } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const {
     title,
@@ -120,14 +122,16 @@ const SongCard = (props: SongCardProp) => {
     multipleSelectionsData.selectionType === 'songs' &&
     isAMultipleSelection
       ? {
-          title: `${multipleSelectionsData.multipleSelections.length} selected songs`,
+          title: t('song.selectedSongCount', {
+            count: multipleSelectionsData.multipleSelections.length,
+          }),
           artworkPath: DefaultSongCover,
         }
       : {
-          title: title || 'Unknown title',
+          title: title || t('common.unknownTitle'),
           subTitle:
             artists?.map((artist) => artist.name).join(', ') ??
-            'Unknown artist',
+            t('common.unknownArtist'),
           artworkPath,
         };
 
@@ -166,7 +170,7 @@ const SongCard = (props: SongCardProp) => {
 
     const items: ContextMenuItem[] = [
       {
-        label: 'Play',
+        label: t('common.play'),
         handlerFunction: () => {
           handlePlayBtnClick();
           toggleMultipleSelections(false);
@@ -175,7 +179,7 @@ const SongCard = (props: SongCardProp) => {
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
-        label: 'Create A Queue',
+        label: t('common.createAQueue'),
         handlerFunction: () => {
           createQueue(songIds, 'songs', false, undefined, true);
           toggleMultipleSelections(false);
@@ -185,9 +189,9 @@ const SongCard = (props: SongCardProp) => {
       },
 
       {
-        label: isMultipleSelectionsEnabled
-          ? 'Add all to Play Next'
-          : 'Play Next',
+        label: t(
+          `common.${isMultipleSelectionsEnabled ? 'playNextAll' : 'playNext'}`,
+        ),
         iconName: 'shortcut',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) {
@@ -220,7 +224,9 @@ const SongCard = (props: SongCardProp) => {
             addNewNotifications([
               {
                 id: `${title}PlayNext`,
-                content: `${songIds.length} songs will be played next.`,
+                content: t('notifications.playingNextSongsWithCount', {
+                  count: songIds.length,
+                }),
                 iconName: 'shortcut',
               },
             ]);
@@ -245,7 +251,7 @@ const SongCard = (props: SongCardProp) => {
             addNewNotifications([
               {
                 id: `${title}PlayNext`,
-                content: `'${title}' will be played next.`,
+                content: t('notifications.playingNext', { title }),
                 iconName: 'shortcut',
               },
             ]);
@@ -254,7 +260,7 @@ const SongCard = (props: SongCardProp) => {
         },
       },
       {
-        label: 'Add to queue',
+        label: t('common.addToQueue'),
         iconName: 'queue',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) {
@@ -262,7 +268,9 @@ const SongCard = (props: SongCardProp) => {
             addNewNotifications([
               {
                 id: `${songIds.length}AddedToQueueFromMultiSelection`,
-                content: `Added ${songIds.length} songs to the queue.`,
+                content: t('notifications.addedToQueue', {
+                  count: songIds.length,
+                }),
                 iconName: 'add',
               },
             ]);
@@ -271,7 +279,9 @@ const SongCard = (props: SongCardProp) => {
             addNewNotifications([
               {
                 id: `${title}AddedToQueue`,
-                content: 'Added 1 song to the queue.',
+                content: t('notifications.addedToQueue', {
+                  count: 1,
+                }),
                 icon: (
                   <Img src={artworkPath} loading="lazy" alt="Song Artwork" />
                 ),
@@ -283,14 +293,14 @@ const SongCard = (props: SongCardProp) => {
       },
       {
         label: isMultipleSelectionsEnabled
-          ? 'Toggle Like/Dislike Songs'
-          : `${isSongAFavorite ? 'Unlike' : 'Like'} the song`,
+          ? t('song.toggleLikeSongs')
+          : t(`song.${isSongAFavorite ? 'unlikeSong' : 'likeSong'}`),
         iconName: `favorite`,
         iconClassName: isMultipleSelectionsEnabled
           ? 'material-icons-round-outlined mr-4 text-xl'
           : isSongAFavorite
-          ? 'material-icons-round mr-4 text-xl'
-          : 'material-icons-round-outlined mr-4 text-xl',
+            ? 'material-icons-round mr-4 text-xl'
+            : 'material-icons-round-outlined mr-4 text-xl',
         handlerFunction: () => {
           window.api.playerControls
             .toggleLikeSongs(
@@ -319,7 +329,7 @@ const SongCard = (props: SongCardProp) => {
         },
       },
       {
-        label: 'Add to Playlists',
+        label: t('song.addToPlaylists'),
         iconName: 'playlist_add',
         handlerFunction: () => {
           changePromptMenuData(
@@ -333,7 +343,7 @@ const SongCard = (props: SongCardProp) => {
         },
       },
       {
-        label: isAMultipleSelection ? 'Unselect' : 'Select',
+        label: t(`common.${isAMultipleSelection ? 'unselect' : 'select'}`),
         iconName: 'checklist',
         handlerFunction: () => {
           if (isMultipleSelectionEnabled) {
@@ -361,7 +371,7 @@ const SongCard = (props: SongCardProp) => {
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
-        label: 'Reveal in File Explorer',
+        label: t('song.revealInFileExplorer'),
         class: 'reveal-file-explorer',
         iconName: 'folder_open',
         handlerFunction: () =>
@@ -369,7 +379,7 @@ const SongCard = (props: SongCardProp) => {
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
-        label: 'Info',
+        label: t('common.info'),
         class: 'info',
         iconName: 'info',
         handlerFunction: () =>
@@ -379,7 +389,7 @@ const SongCard = (props: SongCardProp) => {
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
-        label: 'Go to Album',
+        label: t('song.goToAlbum'),
         iconName: 'album',
         handlerFunction: () =>
           album &&
@@ -389,7 +399,7 @@ const SongCard = (props: SongCardProp) => {
         isDisabled: !album,
       },
       {
-        label: 'Edit song tags',
+        label: t('song.editSongTags'),
         class: 'edit',
         iconName: 'edit',
         handlerFunction: () =>
@@ -401,7 +411,7 @@ const SongCard = (props: SongCardProp) => {
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
-        label: 'Re-parse song',
+        label: t('song.reparseSong'),
         class: 'sync',
         iconName: 'sync',
         handlerFunction: () => window.api.songUpdates.reParseSong(path),
@@ -414,7 +424,9 @@ const SongCard = (props: SongCardProp) => {
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
-        label: isBlacklisted ? 'Restore from Blacklist' : 'Blacklist Song',
+        label: t(`song.${isBlacklisted ? 'deblacklist' : 'blacklistSong'}`, {
+          count: 1,
+        }),
         iconName: isBlacklisted ? 'settings_backup_restore' : 'block',
         handlerFunction: () => {
           if (isBlacklisted)
@@ -429,8 +441,8 @@ const SongCard = (props: SongCardProp) => {
                   {
                     id: `${title}Blacklisted`,
                     delay: 5000,
-                    content: <span>&apos;{title}&apos; blacklisted.</span>,
-                    icon: <span className="material-icons-round">block</span>,
+                    content: t('notifications.songBlacklisted', { title }),
+                    iconName: 'block',
                   },
                 ]),
               )
@@ -445,7 +457,7 @@ const SongCard = (props: SongCardProp) => {
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
-        label: 'Delete from System',
+        label: t('song.delete'),
         iconName: 'delete',
         handlerFunction: () => {
           changePromptMenuData(
@@ -460,6 +472,7 @@ const SongCard = (props: SongCardProp) => {
     ];
     return items;
   }, [
+    t,
     multipleSelectionsData,
     isAMultipleSelection,
     isSongAFavorite,
@@ -513,8 +526,10 @@ const SongCard = (props: SongCardProp) => {
         })
         .flat();
     }
-    return <span className="text-xs font-normal">Unknown Artist</span>;
-  }, [artists]);
+    return (
+      <span className="text-xs font-normal">{t('common.unknownArtist')}</span>
+    );
+  }, [artists, t]);
 
   return (
     <div
@@ -576,6 +591,7 @@ const SongCard = (props: SongCardProp) => {
           className={`h-full w-full object-cover object-center transition-[filter] group-focus-within/songCard:brightness-90 group-hover/songCard:brightness-90 dark:brightness-90 ${
             isBlacklisted && '!brightness-50 dark:!brightness-[.40]'
           }`}
+          enableImgFadeIns={!isMultipleSelectionEnabled}
         />
       </div>
       <div
@@ -590,12 +606,12 @@ const SongCard = (props: SongCardProp) => {
               queue.queue.length > 0 &&
               queue?.queue?.at(queue.currentSongIndex + 1) === songId && (
                 <span className="font-semibold mr-2 last:mr-0 uppercase !text-font-color-white opacity-50 transition-opacity group-hover/songCard:opacity-90">
-                  PLAYING NEXT
+                  {t('song.playingNext')}
                 </span>
               )}
             {currentSongData.songId === songId && (
               <span className="font-semibold mr-2 last:mr-0 uppercase !text-font-color-white opacity-50 transition-opacity group-hover/songCard:opacity-90">
-                PLAYING NOW
+                {t('song.playingNow')}
               </span>
             )}
             {isBlacklisted &&
@@ -607,7 +623,7 @@ const SongCard = (props: SongCardProp) => {
                 currentSongData.songId === songId
               ) && (
                 <span className="font-semibold mr-2 last:mr-0 uppercase !text-font-color-white opacity-50 transition-opacity group-hover/songCard:opacity-90">
-                  BLACKLISTED
+                  {t('song.blacklisted')}
                 </span>
               )}
           </div>
@@ -620,7 +636,9 @@ const SongCard = (props: SongCardProp) => {
                   ? 'material-icons-round'
                   : 'material-icons-round-outlined'
               } !text-2xl !text-font-color-white !leading-none`}
-              tooltipLabel={isSongAFavorite ? 'You liked this song' : undefined}
+              tooltipLabel={
+                isSongAFavorite ? t('song.likedThisSong') : undefined
+              }
               clickHandler={(e) => {
                 e.stopPropagation();
                 handleLikeButtonClick();
@@ -647,7 +665,7 @@ const SongCard = (props: SongCardProp) => {
               title={
                 artists
                   ? artists.map((x) => x.name).join(', ')
-                  : 'Unknown Artist'
+                  : t('common.unknownArtist')
               }
               data-song-id={songId}
             >

@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import Button from '../Button';
@@ -20,6 +21,8 @@ const OtherSongControlsContainer = () => {
     updateVolume,
     updateContextMenuData,
   } = useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const volumeSliderRef = React.useRef<HTMLInputElement>(null);
 
   const volumeBarCssProperties: any = {};
@@ -32,7 +35,7 @@ const OtherSongControlsContainer = () => {
         true,
         [
           {
-            label: 'Equalizer',
+            label: t('settingsPage.equalizer'),
             iconName: 'graphic_eq',
             iconClassName: 'material-icons-round-outlined mr-2',
             handlerFunction: () =>
@@ -41,7 +44,7 @@ const OtherSongControlsContainer = () => {
               }),
           },
           {
-            label: 'Adjust Playback Speed',
+            label: t('player.adjustPlaybackSpeed'),
             iconName: 'avg_pace',
             iconClassName: 'material-icons-round-outlined mr-2',
             handlerFunction: () =>
@@ -50,13 +53,13 @@ const OtherSongControlsContainer = () => {
               }),
           },
           {
-            label: 'Show Current Queue',
+            label: t('player.showCurrentQueue'),
             iconName: 'table_rows',
             iconClassName: 'material-icons-round-outlined mr-2',
             handlerFunction: () => changeCurrentActivePage('CurrentQueue'),
           },
           {
-            label: 'Open Mini Player',
+            label: t('player.showMiniPlayer'),
             iconName: 'pip',
             iconClassName: 'material-icons-round-outlined mr-2',
             handlerFunction: () => updateMiniPlayerStatus(!isMiniPlayer),
@@ -69,6 +72,7 @@ const OtherSongControlsContainer = () => {
     [
       changeCurrentActivePage,
       isMiniPlayer,
+      t,
       updateContextMenuData,
       updateMiniPlayerStatus,
     ],
@@ -81,7 +85,7 @@ const OtherSongControlsContainer = () => {
           currentlyActivePage.pageTitle === 'CurrentQueue' &&
           'after:opacity-100'
         }`}
-        tooltipLabel="Current Queue (Ctrl + Q)"
+        tooltipLabel={t('player.currentQueue')}
         iconName="table_rows"
         iconClassName={`material-icons-round-outlined text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white ${
           currentlyActivePage.pageTitle === 'CurrentQueue' &&
@@ -97,7 +101,7 @@ const OtherSongControlsContainer = () => {
       <Button
         className="mini-player-btn !mr-6 !rounded-none !border-0 !p-0 text-font-color-black text-opacity-60 outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white lg:hidden"
         clickHandler={() => updateMiniPlayerStatus(!isMiniPlayer)}
-        tooltipLabel="Open in Mini player (Ctrl + N)"
+        tooltipLabel={t('player.openInMiniPlayer')}
         iconName="pip"
         iconClassName="material-icons-round-outlined icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"
       />
@@ -106,8 +110,10 @@ const OtherSongControlsContainer = () => {
         className={`volume-btn !mr-2 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:after:bg-dark-font-color-highlight ${
           isMuted && 'after:opacity-100'
         }`}
-        tooltipLabel="Mute/Unmute (Ctrl + M)"
-        iconName={isMuted ? 'volume_off' : 'volume_up'}
+        tooltipLabel={t('player.muteUnmute')}
+        iconName={
+          isMuted ? 'volume_off' : volume > 50 ? 'volume_up' : 'volume_down_alt'
+        }
         iconClassName={`material-icons-round text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white ${
           isMuted &&
           '!text-font-color-highlight !opacity-100 dark:!text-dark-font-color-highlight'
@@ -143,7 +149,7 @@ const OtherSongControlsContainer = () => {
       </div>
       <div className="other-settings-btn mr-4 flex cursor-pointer items-center justify-center text-font-color-black text-opacity-60 dark:text-font-color-white">
         <span
-          title="Other Settings"
+          title={t('player.otherSettings')}
           className="material-icons-round icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"
           onClick={(e) => {
             e.preventDefault();

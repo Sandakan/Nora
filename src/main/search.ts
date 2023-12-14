@@ -220,7 +220,7 @@ const getGenreSearchResults = (
   return [];
 };
 
-let recentSearchesTimeoutId: NodeJS.Timer;
+let recentSearchesTimeoutId: NodeJS.Timeout;
 const search = (
   filter: SearchFilters,
   value: string,
@@ -241,9 +241,7 @@ const search = (
   let playlists: Playlist[] = [];
   let genres: Genre[] = [];
 
-  for (let i = 0; i < keywords.length; i += 1) {
-    const keyword = keywords[i];
-
+  for (const keyword of keywords) {
     const songsResults = getSongSearchResults(
       songsData,
       keyword,
@@ -342,11 +340,11 @@ const search = (
   }
 
   return {
-    songs: songs || [],
-    artists: artists || [],
-    albums: albums || [],
-    playlists: playlists || [],
-    genres: genres || [],
+    songs,
+    artists,
+    albums,
+    playlists,
+    genres,
     availableResults,
   };
 };

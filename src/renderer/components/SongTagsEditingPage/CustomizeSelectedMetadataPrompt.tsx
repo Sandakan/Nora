@@ -1,8 +1,11 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+
 import isLyricsSynced from 'main/utils/isLyricsSynced';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+
 import Button from '../Button';
 import Checkbox from '../Checkbox';
 import Img from '../Img';
@@ -25,6 +28,8 @@ interface SongMetadataResultProp {
 
 const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
   const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const {
     title,
     artists,
@@ -71,8 +76,12 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
             showImgPropsOnTooltip
           />
           <Button
-            label={isSelectedArtwork ? 'SELECTED' : 'SELECT'}
-            className={`!mx-0 mt-4 bg-background-color-2 !py-1 group-hover:bg-background-color-1 dark:bg-dark-background-color-2 dark:group-hover:bg-dark-background-color-1 ${
+            label={t(
+              `customizeSelectedMetadataPrompt.${
+                isSelectedArtwork ? 'selected' : 'select'
+              }`,
+            )}
+            className={`!mx-0 mt-4 bg-background-color-2 !py-1 group-hover:bg-background-color-1 dark:bg-dark-background-color-2 dark:group-hover:bg-dark-background-color-1 uppercase ${
               isSelectedArtwork &&
               '!dark:bg-dark-background-color-3 !dark:text-font-color-black !border-background-color-3 !bg-background-color-3 font-medium !text-font-color-black dark:!border-dark-background-color-3'
             }`}
@@ -86,7 +95,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
         </div>
       );
     });
-  }, [artworkPaths, selectedArtwork]);
+  }, [artworkPaths, selectedArtwork, t]);
 
   const isLyricsSynchronised = React.useMemo(
     () => isLyricsSynced(lyrics || ''),
@@ -248,11 +257,11 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
   return (
     <div>
       <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-        Customize Downloaded Metadata for '{title}'
+        {t('customizeSelectedMetadataPrompt.title', { title })}
       </div>
       <div className="artworks-container">
         <div className="title-container mb-4 text-xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-          Select an artwork
+          {t('customizeSelectedMetadataPrompt.selectArtwork')}
         </div>
         <div className="artworks flex">
           {artworkComponents && artworkComponents.length > 0 ? (
@@ -262,7 +271,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
               <span className="material-icons-round-outlined mb-2 text-3xl">
                 macro_off
               </span>
-              No artworks found
+              {t('customizeSelectedMetadataPrompt.noArtworksFound')}
             </div>
           )}
         </div>
@@ -270,9 +279,11 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
 
       <div className="other-info-container mt-10">
         <div className="title-container mb-4 flex justify-between text-xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-          Customize Other Metadata
+          {t('customizeSelectedMetadataPrompt.customizeOtherMetadata')}
           <Button
-            label={isAllMetadataSelected ? 'Unselect All' : 'Select All'}
+            label={t(
+              `common.${isAllMetadataSelected ? 'unselectAll' : 'selectAll'}`,
+            )}
             className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
             iconName={isAllMetadataSelected ? 'remove_done' : 'checklist'}
             clickHandler={() =>
@@ -307,7 +318,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
                 }`}
               >
                 <div className="title text-xs uppercase opacity-50">
-                  Song Title
+                  {t('common.songTitle')}
                 </div>
                 <div className="data text-lg">{title}</div>
               </div>
@@ -332,7 +343,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
                 }`}
               >
                 <div className="title text-xs uppercase opacity-50">
-                  Song Artists
+                  {t('common.artist_other')}
                 </div>
                 <div className="data text-lg">{artists?.join(', ')}</div>
               </div>
@@ -357,7 +368,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
                 }`}
               >
                 <div className="title text-xs uppercase opacity-50">
-                  Song Album
+                  {t('common.album_one')}
                 </div>
                 <div className="data text-lg">{album}</div>
               </div>
@@ -382,7 +393,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
                 }`}
               >
                 <div className="title text-xs uppercase opacity-50">
-                  Song Genres
+                  {t('common.genre_other')}
                 </div>
                 <div className="data text-lg">{genres?.join(', ')}</div>
               </div>
@@ -407,7 +418,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
                 }`}
               >
                 <div className="title text-xs uppercase opacity-50">
-                  Released Year
+                  {t('common.releasedYear')}
                 </div>
                 <div className="data text-lg">{releasedYear}</div>
               </div>
@@ -432,7 +443,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
                 }`}
               >
                 <div className="title text-xs uppercase opacity-50">
-                  Song Lyrics
+                  {t('common.lyrics')}
                 </div>
                 <div className="data line-clamp-2 overflow-hidden truncate text-lg">
                   <div className="flex ">
@@ -441,8 +452,13 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
                         verified
                       </span>
                     )}{' '}
-                    {isLyricsSynchronised ? 'Synced' : 'Unsynced'} Lyrics
-                    Available
+                    {t(
+                      `customizeSelectedMetadataPrompt.${
+                        isLyricsSynchronised
+                          ? 'syncedLyricsAvailable'
+                          : 'unsyncedLyricsAvailable'
+                      }`,
+                    )}
                     <Button
                       iconName={showLyrics ? 'visibility_off' : 'visibility'}
                       clickHandler={() =>
@@ -466,19 +482,19 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
 
       <div className="buttons-container mt-10 flex items-center justify-end">
         <Button
-          label="Cancel"
+          label={t('common.cancel')}
           iconName="close"
           clickHandler={() => changePromptMenuData(false)}
         />
         <Button
-          label="Add only Selected"
+          label={t('customizeSelectedMetadataPrompt.addOnlySelected')}
           iconName="add"
           className="!bg-background-color-3 px-4 text-lg text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
           clickHandler={updateSelectedMetadata}
           isDisabled={isAtLeastOneSelected}
         />
         <Button
-          label="Add All"
+          label={t('customizeSelectedMetadataPrompt.addAll')}
           iconName="done"
           className="!bg-background-color-3 px-4 text-lg text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
           clickHandler={updateAllMetadata}

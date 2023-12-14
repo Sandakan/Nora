@@ -23,6 +23,7 @@ type ImgProps = {
   tabIndex?: number;
   showAltAsTooltipLabel?: boolean;
   draggable?: boolean;
+  enableImgFadeIns?: boolean;
 };
 
 /* <picture
@@ -71,7 +72,7 @@ type ImgProps = {
   />
 </picture>; */
 
-const Img = (props: ImgProps) => {
+const Img = React.memo((props: ImgProps) => {
   const {
     src,
     alt = '',
@@ -85,23 +86,29 @@ const Img = (props: ImgProps) => {
     tabIndex = -1,
     showAltAsTooltipLabel = false,
     draggable = false,
+    enableImgFadeIns = true,
   } = props;
 
   const imgRef = React.useRef<HTMLImageElement>(null);
   const imgPropsRef = React.useRef<ImgProperties>();
   const errorCountRef = React.useRef(0);
+  const isFirstTimeRef = React.useRef(true);
 
   return (
+    // <div className="inline-block relative">
     <img
       src={src || fallbackSrc}
       alt={alt}
       ref={imgRef}
-      className={`relative outline-1 outline-offset-4 focus-visible:!outline ${className}`}
+      className={`relative outline-1 outline-offset-4 focus-visible:!outline ${
+        enableImgFadeIns && isFirstTimeRef.current
+          ? 'opacity-0 delay-[250ms] transition-opacity'
+          : '!opacity-100 !transition-none'
+      } ${className}`}
       draggable={draggable}
       onError={(e) => {
         if (errorCountRef.current < 3) {
           errorCountRef.current += 1;
-
           if (!noFallbacks && e.currentTarget.src !== fallbackSrc)
             e.currentTarget.src = fallbackSrc;
           else e.currentTarget.src = DefaultImage;
@@ -119,12 +126,16 @@ const Img = (props: ImgProps) => {
         showImgPropsOnTooltip && imgPropsRef.current
           ? `Quality : ${imgPropsRef.current.quality}\nImage width : ${imgPropsRef.current?.width}px\nImage height : ${imgPropsRef.current?.height}px`
           : showAltAsTooltipLabel
-          ? alt
-          : undefined
+            ? alt
+            : undefined
       }
       loading={loading}
       onContextMenu={onContextMenu}
       onLoad={(e) => {
+        if (isFirstTimeRef.current) {
+          isFirstTimeRef.current = false;
+        }
+        e.currentTarget.classList.add('!opacity-100');
         if (showImgPropsOnTooltip) {
           const img = new Image();
           img.onload = () => {
@@ -137,11 +148,10 @@ const Img = (props: ImgProps) => {
                 width >= 1000 || height >= 1000
                   ? 'HIGH QUALITY'
                   : width >= 500 || height >= 500
-                  ? 'MEDIUM QUALITY'
-                  : 'LOW QUALITY',
+                    ? 'MEDIUM QUALITY'
+                    : 'LOW QUALITY',
             };
             imgPropsRef.current = imgProp;
-
             if (imgRef.current !== null && 'dataset' in imgRef.current) {
               const { dataset } = imgRef.current;
               dataset.width = imgProp.width.toString();
@@ -154,7 +164,9 @@ const Img = (props: ImgProps) => {
       }}
       tabIndex={tabIndex}
     />
+    // </div>
   );
-};
+});
 
+Img.displayName = 'Img';
 export default Img;

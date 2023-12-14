@@ -96,10 +96,13 @@ const audioLibraryControls = {
     ),
   getSongListeningData: (songIds: string[]): Promise<SongListeningData[]> =>
     ipcRenderer.invoke('app/getSongListeningData', songIds),
-  updateSongListeningData: (
+  updateSongListeningData: <
+    DataType extends keyof ListeningDataTypes,
+    Value extends ListeningDataTypes[DataType],
+  >(
     songId: string,
-    dataType: ListeningDataTypes,
-    dataUpdateType: ListeningDataUpdateTypes,
+    dataType: DataType,
+    dataUpdateType: Value,
   ): Promise<void> =>
     ipcRenderer.invoke(
       'app/updateSongListeningData',
@@ -256,9 +259,8 @@ const messages = {
   getMessageFromMain: (
     callback: (
       event: unknown,
-      message: string,
-      messageCode?: MessageCodes,
-      data?: Record<string, unknown>,
+      messageCode: MessageCodes,
+      data: Record<string, unknown>,
     ) => void,
   ) => ipcRenderer.on('app/sendMessageToRendererEvent', callback),
   removeMessageToRendererEventListener: (callback: (...args: any[]) => void) =>
@@ -298,10 +300,13 @@ const songUpdates = {
     ipcRenderer.invoke('app/getSongId3Tags', songIdOrPath, isKnownSource),
   getImgFileLocation: (): Promise<string> =>
     ipcRenderer.invoke('app/getImgFileLocation'),
+
   revealSongInFileExplorer: (songId: string): void =>
     ipcRenderer.send('app/revealSongInFileExplorer', songId),
   saveArtworkToSystem: (songId: string, saveName?: string): void =>
     ipcRenderer.send('app/saveArtworkToSystem', songId, saveName),
+  isMetadataUpdatesPending: (songPath: string): Promise<boolean> =>
+    ipcRenderer.invoke('app/isMetadataUpdatesPending', songPath),
 };
 
 // $ FETCH SONG DATA FROM INTERNET
@@ -447,6 +452,8 @@ const playlistsData = {
     artworkPath: string,
   ): Promise<ArtworkPaths | undefined> =>
     ipcRenderer.invoke('app/addArtworkToAPlaylist', playlistId, artworkPath),
+  renameAPlaylist: (playlistId: string, newName: string): Promise<void> =>
+    ipcRenderer.invoke('app/renameAPlaylist', playlistId, newName),
   removeSongFromPlaylist: (
     playlistId: string,
     songId: string,
@@ -497,6 +504,8 @@ const miniPlayer = {
 
 // $ APP SETTINGS HELPER FUNCTIONS
 const settingsHelpers = {
+  getAppLanguage: (lang: LanguageCodes): void =>
+    ipcRenderer.send('app/getAppLanguage', lang),
   openInBrowser: (url: string): void =>
     ipcRenderer.send('app/openInBrowser', url),
   toggleAutoLaunch: (autoLaunchState: boolean): Promise<void> =>
@@ -511,6 +520,8 @@ const settingsHelpers = {
   compareEncryptedData: (): Promise<boolean> =>
     ipcRenderer.invoke('app/compareEncryptedData'),
   loginToLastFmInBrowser: () => ipcRenderer.send('app/loginToLastFmInBrowser'),
+  getFolderLocation: (): Promise<string> =>
+    ipcRenderer.invoke('app/getFolderLocation'),
 };
 
 // $ APP RESTART OR RESET

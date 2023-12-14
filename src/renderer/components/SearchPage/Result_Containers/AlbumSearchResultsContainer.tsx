@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Album } from 'renderer/components/AlbumsPage/Album';
 import Button from 'renderer/components/Button';
 import SecondaryContainer from 'renderer/components/SecondaryContainer';
@@ -24,6 +25,7 @@ const AlbumSearchResultsContainer = (props: Props) => {
     React.useContext(AppContext);
   const { toggleMultipleSelections, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const selectAllHandler = useSelectAllHandler(albums, 'album', 'albumId');
 
@@ -75,21 +77,28 @@ const AlbumSearchResultsContainer = (props: Props) => {
             <div className="other-stats-container ml-12 flex items-center text-xs">
               {albums && albums.length > 0 && (
                 <span className="no-of-songs">
-                  {albums.length} results{' '}
-                  {albums.length > noOfVisibleAlbums &&
-                    `(${noOfVisibleAlbums} shown)`}
+                  {t(
+                    `searchPage.${
+                      albums.length > noOfVisibleAlbums
+                        ? 'resultAndVisibleCount'
+                        : 'resultCount'
+                    }`,
+                    { count: albums.length, noVisible: noOfVisibleAlbums },
+                  )}
                 </span>
               )}
             </div>
           </div>
           <div className="other-controls-container flex">
             <Button
-              label={
-                isMultipleSelectionEnabled &&
-                multipleSelectionsData.selectionType === 'album'
-                  ? 'Unselect All'
-                  : 'Select'
-              }
+              label={t(
+                `common.${
+                  isMultipleSelectionEnabled &&
+                  multipleSelectionsData.selectionType === 'album'
+                    ? 'unselectAll'
+                    : 'select'
+                }`,
+              )}
               className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
               iconName={
                 isMultipleSelectionEnabled &&
@@ -104,13 +113,15 @@ const AlbumSearchResultsContainer = (props: Props) => {
                 isMultipleSelectionEnabled &&
                 multipleSelectionsData.selectionType !== 'album'
               }
-              tooltipLabel={
-                isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
-              }
+              tooltipLabel={t(
+                `common.${
+                  isMultipleSelectionEnabled ? 'unselectAll' : 'select'
+                }`,
+              )}
             />
             {albums.length > noOfVisibleAlbums && (
               <Button
-                label="Show All"
+                label={t('common.showAll')}
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>

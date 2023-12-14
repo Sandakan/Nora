@@ -1,5 +1,6 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 
 import { Artist } from '../ArtistPage/Artist';
@@ -9,6 +10,7 @@ type Props = { mostLovedArtists: Artist[]; noOfVisibleArtists: number };
 
 const MostLovedArtists = (props: Props) => {
   const { mostLovedArtists, noOfVisibleArtists = 5 } = props;
+  const { t } = useTranslation();
 
   const selectAllHandler = useSelectAllHandler(
     mostLovedArtists,
@@ -56,7 +58,7 @@ const MostLovedArtists = (props: Props) => {
         >
           <>
             <div className="title-container mb-4 mt-1 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-              Most Loved Artists
+              {t('homePage.mostLovedArtists')}
             </div>
             <div
               style={{

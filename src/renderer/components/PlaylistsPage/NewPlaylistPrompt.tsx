@@ -3,6 +3,7 @@
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import PlaylistDefaultCover from '../../../../assets/images/webp/playlist_cover_default.webp';
 import Button from '../Button';
@@ -16,6 +17,8 @@ interface NewPlaylistPromptProp {
 export default (props: NewPlaylistPromptProp) => {
   const { changePromptMenuData, addNewNotifications } =
     React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const [input, setInput] = React.useState('');
   const [artworkPath, setArtworkPath] = React.useState('');
 
@@ -31,7 +34,7 @@ export default (props: NewPlaylistPromptProp) => {
               {
                 id: 'playlistCreated',
                 delay: 5000,
-                content: <>Playlist added successfully.</>,
+                content: t('newPlaylistPrompt.addPlaylistSuccess'),
               },
             ]);
           } else {
@@ -50,7 +53,7 @@ export default (props: NewPlaylistPromptProp) => {
         {
           id: 'EmptyPlaylistName',
           delay: 5000,
-          content: <>Playlist name cannot be empty</>,
+          content: t('newPlaylistPrompt.playlistNameEmpty'),
         },
       ]);
   };
@@ -82,13 +85,13 @@ export default (props: NewPlaylistPromptProp) => {
         />
       </div>
       <span className="mb-4 text-center text-2xl font-medium">
-        Add new Playlist{' '}
+        {t('newPlaylistPrompt.addNewPlaylist')}{' '}
       </span>
       <input
         type="text"
         name="playlistName"
         className="playlist-name-input w-fit min-w-[400px] max-w-[75%] rounded-2xl border-[transparent] !bg-background-color-2 px-6 py-3 text-lg text-font-color-black outline-none dark:!bg-dark-background-color-2 dark:text-font-color-white"
-        placeholder="Playlist Name"
+        placeholder={t('renamePlaylistPrompt.playlistName')}
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => {
@@ -98,7 +101,7 @@ export default (props: NewPlaylistPromptProp) => {
         autoFocus
       />
       <Button
-        label="Add Playlist"
+        label={t('playlistsPage.addPlaylist')}
         iconName="add"
         className="!mr-0 mt-6 cursor-pointer justify-center !bg-background-color-3 p-2 !px-8 !py-3 text-lg !text-font-color-black dark:!bg-dark-background-color-3 dark:text-font-color-black"
         clickHandler={() => createNewPlaylist(input)}

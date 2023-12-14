@@ -20,7 +20,9 @@ import {
   OpenDialogOptions,
   powerMonitor,
   SaveDialogOptions,
+  net,
 } from 'electron';
+import debug from 'electron-debug';
 import 'dotenv/config';
 
 // import * as Sentry from '@sentry/electron';
@@ -35,7 +37,10 @@ import {
   setUserData,
 } from './filesystem';
 import { resolveHtmlPath } from './utils/util';
-import updateSongId3Tags from './updateSongId3Tags';
+import updateSongId3Tags, {
+  isMetadataUpdatesPending,
+  savePendingMetadataUpdates,
+} from './updateSongId3Tags';
 import { version, appPreferences } from '../../package.json';
 import search from './search';
 import {
@@ -107,6 +112,8 @@ import scrobbleSong from './other/lastFm/scrobbleSong';
 import getSimilarTracks from './other/lastFm/getSimilarTracks';
 import sendNowPlayingSongDataToLastFM from './other/lastFm/sendNowPlayingSongDataToLastFM';
 import getAlbumInfoFromLastFM from './other/lastFm/getAlbumInfoFromLastFM';
+import renameAPlaylist from './core/renameAPlaylist';
+import { removeDefaultAppProtocolFromFilePath } from './fs/resolveFilePaths';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -148,7 +155,7 @@ const DEFAULT_SAVE_DIALOG_OPTIONS: SaveDialogOptions = {
 export let mainWindow: BrowserWindow;
 let tray: Tray;
 let isMiniPlayer = false;
-let isConnectedToInternet = false;
+// let isConnectedToInternet = false;
 let isAudioPlaying = false;
 let isOnBatteryPower = false;
 let currentSongPath: string;
@@ -180,9 +187,7 @@ saveAbortController('main', abortController);
 //   dsn: process.env.SENTRY_DSN,
 // });
 // ? / / / / / / / / / / / / / / / / / / / / / / /
-
-if (IS_DEVELOPMENT) require('electron-debug')();
-
+debug();
 const APP_INFO = {
   environment: IS_DEVELOPMENT ? 'DEV' : 'PRODUCTION',
   appVersion: `v${version}`,
@@ -216,6 +221,12 @@ const installExtensions = async () => {
     );
 };
 
+const getBackgroundColor = () => {
+  const userData = getUserData();
+  if (userData.theme.isDarkMode) return 'hsla(228, 7%, 14%, 100%)';
+  return 'hsl(0, 0%, 100%)';
+};
+
 const createWindow = async () => {
   if (IS_DEVELOPMENT) installExtensions();
 
@@ -233,7 +244,7 @@ const createWindow = async () => {
     visualEffectState: 'followWindow',
     roundedCorners: true,
     frame: false,
-    backgroundColor: '#212226',
+    backgroundColor: getBackgroundColor(),
     icon: appIcon,
     titleBarStyle: 'hidden',
     show: false,
@@ -332,7 +343,7 @@ app
 
     mainWindow.on('restore', () => recordWindowState('normal'));
 
-    app.setPath('crashDumps', path.join(app.getPath('userData'), 'crashDumps'));
+    // app.setPath('crashDumps', path.join(app.getPath('userData'), 'crashDumps'));
 
     app.on('will-finish-launching', () => {
       crashReporter.start({ uploadToServer: false });
@@ -401,8 +412,8 @@ app
 
       ipcMain.handle(
         'app/addSongsFromFolderStructures',
-        (_, structures: FolderStructure[], sortType: SongSortTypes) =>
-          addSongsFromFolderStructures(structures, sortType),
+        (_, structures: FolderStructure[]) =>
+          addSongsFromFolderStructures(structures),
       );
 
       ipcMain.handle('app/getSong', (_, id: string) => sendAudioData(id));
@@ -506,12 +517,15 @@ app
 
       ipcMain.handle(
         'app/updateSongListeningData',
-        (
-          _,
+        <
+          DataType extends keyof ListeningDataTypes,
+          Value extends ListeningDataTypes[DataType],
+        >(
+          _: unknown,
           songId: string,
-          dataType: ListeningDataTypes,
-          dataUpdateType: ListeningDataUpdateTypes,
-        ) => updateSongListeningData(songId, dataType, dataUpdateType),
+          dataType: DataType,
+          value: Value,
+        ) => updateSongListeningData(songId, dataType, value),
       );
 
       ipcMain.handle('app/generatePalettes', generatePalettes);
@@ -640,6 +654,12 @@ app
           addArtworkToAPlaylist(playlistId, artworkPath),
       );
 
+      ipcMain.handle(
+        'app/renameAPlaylist',
+        (_, playlistId: string, newName: string) =>
+          renameAPlaylist(playlistId, newName),
+      );
+
       ipcMain.handle('app/clearSongHistory', () => clearSongHistory());
 
       ipcMain.handle(
@@ -654,10 +674,7 @@ app
 
       ipcMain.handle('app/resyncSongsLibrary', async () => {
         await checkForNewSongs();
-        sendMessageToRenderer(
-          'Library resync successfull.',
-          'RESYNC_SUCCESSFUL',
-        );
+        sendMessageToRenderer({ messageCode: 'RESYNC_SUCCESSFUL' });
       });
 
       ipcMain.handle('app/getBlacklistData', getBlacklistData);
@@ -683,6 +700,8 @@ app
       );
 
       ipcMain.handle('app/getImgFileLocation', getImagefileLocation);
+
+      ipcMain.handle('app/getFolderLocation', getFolderLocation);
 
       ipcMain.handle(
         'app/getSongId3Tags',
@@ -789,6 +808,12 @@ app
           compare(data, encryptedData),
       );
 
+      ipcMain.handle('app/isMetadataUpdatesPending', (_, songPath: string) =>
+        isMetadataUpdatesPending(
+          removeDefaultAppProtocolFromFilePath(songPath),
+        ),
+      );
+
       ipcMain.handle('app/blacklistFolders', (_, folderPaths: string[]) =>
         blacklistFolders(folderPaths),
       );
@@ -812,7 +837,7 @@ app
               ? `APP CONNECTED TO THE INTERNET SUCCESSFULLY`
               : `APP DISCONNECTED FROM THE INTERNET`,
           );
-          isConnectedToInternet = isConnected;
+          // isConnectedToInternet = isConnected;
         },
       );
 
@@ -898,6 +923,7 @@ function manageWindowFinishLoad() {
 function handleBeforeQuit() {
   mainWindow.webContents.send('app/beforeQuitEvent');
   savePendingSongLyrics(currentSongPath, true);
+  savePendingMetadataUpdates(currentSongPath, true);
   closeAllAbortControllers();
   clearTempArtworkFolder();
   log(
@@ -912,20 +938,17 @@ function toggleOnBatteryPower() {
   mainWindow.webContents.send('app/isOnBatteryPower', isOnBatteryPower);
 }
 
-export function sendMessageToRenderer(
-  message: string,
-  code: MessageCodes = 'INFO',
-  data?: object,
-) {
+export function sendMessageToRenderer(props: MessageToRendererProps) {
+  const { messageCode, data } = props;
+
   mainWindow.webContents.send(
     'app/sendMessageToRendererEvent',
-    message,
-    code,
+    messageCode,
     data,
   );
 }
 
-let dataUpdateEventTimeOutId: NodeJS.Timer;
+let dataUpdateEventTimeOutId: NodeJS.Timeout;
 let dataEventsCache: DataUpdateEvent[] = [];
 export function dataUpdateEvent(
   dataType: DataUpdateEventTypes,
@@ -1013,7 +1036,10 @@ function registerFileProtocol(
 export const setCurrentSongPath = (songPath: string) => {
   currentSongPath = songPath;
   savePendingSongLyrics(currentSongPath, false);
+  savePendingMetadataUpdates(currentSongPath, true);
 };
+
+export const getCurrentSongPath = () => currentSongPath;
 
 function manageAuthServices(url: string) {
   log('URL selected for auth service', { url });
@@ -1108,6 +1134,7 @@ export function restartApp(reason: string, noQuitEvents = false) {
   if (!noQuitEvents) {
     mainWindow.webContents.send('app/beforeQuitEvent');
     savePendingSongLyrics(currentSongPath, true);
+    savePendingMetadataUpdates(currentSongPath, true);
     closeAllAbortControllers();
   }
   app.relaunch();
@@ -1125,7 +1152,7 @@ async function revealSongInFileExplorer(songId: string) {
     `Revealing song file in explorer failed because song couldn't be found in the library.`,
     { songId },
     'WARN',
-    { sendToRenderer: 'FAILURE' },
+    { sendToRenderer: { messageCode: 'SONG_REVEAL_FAILED' } },
   );
 }
 
@@ -1160,14 +1187,22 @@ export const updateSongsOutsideLibraryData = (
 };
 
 async function getImagefileLocation() {
-  const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+  const filePaths = await showOpenDialog({
     title: 'Select an Image',
     buttonLabel: 'Select Image',
     filters: [{ name: 'Images', extensions: ['jpg', 'jpeg', 'webp', 'png'] }],
     properties: ['openFile'],
   });
-  if (canceled) throw new Error('PROMPT_CLOSED_BEFORE_INPUT' as MessageCodes);
   return filePaths[0];
+}
+
+async function getFolderLocation() {
+  const folderPaths = await showOpenDialog({
+    title: 'Select a Folder',
+    buttonLabel: 'Select Folder',
+    properties: ['createDirectory', 'openDirectory'],
+  });
+  return folderPaths[0];
 }
 
 async function resetApp(isRestartApp = true) {
@@ -1179,11 +1214,9 @@ async function resetApp(isRestartApp = true) {
     log(
       `########## SUCCESSFULLY RESETTED THE APP. RESTARTING THE APP NOW. ##########`,
     );
-    sendMessageToRenderer(
-      'Successfully resetted the app. Restarting the app now.',
-    );
+    sendMessageToRenderer({ messageCode: 'RESET_SUCCESSFUL' });
   } catch (error) {
-    sendMessageToRenderer('Resetting the app failed. Reloading the app now.');
+    sendMessageToRenderer({ messageCode: 'RESET_FAILED' });
     log(
       `====== ERROR OCCURRED WHEN RESETTING THE APP. RELOADING THE APP NOW.  ======\nERROR : ${error}`,
     );
@@ -1242,10 +1275,7 @@ function watchForSystemThemeChanges() {
 
   const theme = nativeTheme.shouldUseDarkColors ? 'dark' : 'light';
   if (IS_DEVELOPMENT && useSystemTheme)
-    sendMessageToRenderer(
-      `System theme changed to ${theme}`,
-      'APP_THEME_CHANGE',
-    );
+    sendMessageToRenderer({ messageCode: 'APP_THEME_CHANGE', data: { theme } });
 
   if (useSystemTheme) changeAppTheme('system');
   else log(`System theme changed to ${theme}`);
@@ -1327,4 +1357,4 @@ async function toggleAutoLaunch(autoLaunchState: boolean) {
   saveUserData('preferences.autoLaunchApp', autoLaunchState);
 }
 
-export const checkIfConnectedToInternet = () => isConnectedToInternet;
+export const checkIfConnectedToInternet = () => net.isOnline();

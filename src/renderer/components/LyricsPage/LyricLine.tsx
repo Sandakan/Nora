@@ -2,11 +2,12 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
 import roundTo from 'renderer/utils/roundTo';
-import { syncedLyricsRegex } from './LyricsPage';
+import { delay, syncedLyricsRegex } from './LyricsPage';
 
 interface LyricProp {
   lyric: string | SyncedLyricsLineText;
@@ -23,13 +24,12 @@ const LyricLine = (props: LyricProp) => {
   const { isMiniPlayer } = React.useContext(AppContext);
   const { songPosition } = React.useContext(SongPositionContext);
   const { updateSongPosition } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const lyricsRef = React.useRef(null as HTMLDivElement | null);
   const isTheCurrnetLineRef = React.useRef(false);
 
   const { index, lyric, syncedLyrics, isAutoScrolling = true } = props;
-
-  // substracted 350 milliseconds to keep lyrics in sync with the lyrics line animations.
-  const delay = 0.35;
 
   React.useEffect(() => {
     if (lyricsRef.current && syncedLyrics) {
@@ -51,26 +51,42 @@ const LyricLine = (props: LyricProp) => {
     if (typeof lyric === 'string')
       return lyric.replaceAll(syncedLyricsRegex, '').trim();
 
-    // const { start, end } = syncedLyrics!;
-    const extendedLyricLines = lyric.map((x) => {
+    const extendedLyricLines = lyric.map((extendedText, i) => {
       return (
         <span
-          key={x.text}
+          // eslint-disable-next-line react/no-array-index-key
+          key={`${i}-${extendedText.text}`}
+          onClick={() => updateSongPosition(extendedText.start)}
           className={`mr-2 text-font-color-black last:mr-0 dark:text-font-color-white ${
-            songPosition > x.start - delay && songPosition < x.end - delay
+            songPosition > extendedText.start - delay &&
+            songPosition < extendedText.end - delay
               ? '!text-opacity-90'
               : // : songPosition > start - delay && songPosition < end - delay
                 // ? '!text-opacity-40'
                 '!text-opacity-20 hover:!text-opacity-75'
           }`}
         >
-          {x.text}
+          {extendedText.text}
         </span>
       );
     });
 
     return extendedLyricLines;
-  }, [lyric, songPosition]);
+  }, [lyric, songPosition, updateSongPosition]);
+
+  const lyricDurationBarProperties: any = {};
+  // eslint-disable-next-line dot-notation
+  lyricDurationBarProperties['--duration'] = syncedLyrics
+    ? songPosition < syncedLyrics.start - delay
+      ? '0%'
+      : songPosition > syncedLyrics.end - delay
+        ? '100%'
+        : `${
+            ((songPosition - (syncedLyrics.start - delay)) /
+              (syncedLyrics.end - delay - (syncedLyrics.start - delay))) *
+            100
+          }%`
+    : '0%';
 
   return (
     <div
@@ -79,26 +95,43 @@ const LyricLine = (props: LyricProp) => {
       }}
       title={
         syncedLyrics
-          ? `${roundTo(syncedLyrics.start - delay, 2)} to ${roundTo(
-              syncedLyrics.end - delay,
-              2,
-            )}`
+          ? t(`lyricsEditingPage.fromTo`, {
+              start: roundTo(syncedLyrics.start - delay, 2),
+              end: roundTo(syncedLyrics.end - delay, 2),
+            })
           : undefined
       }
-      className={`appear-from-bottom highlight mb-5 w-fit select-none text-center text-4xl font-medium text-font-color-black transition-[transform,color] duration-250 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
+      className={`highlight ![text-wrap:balance] flex items-center justify-center flex-col text-wrap mb-5 w-fit select-none text-center text-4xl font-medium text-font-color-black transition-[transform,color] duration-250 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
         syncedLyrics
           ? `cursor-pointer ${
               songPosition > syncedLyrics.start - delay &&
               songPosition < syncedLyrics.end - delay
-                ? '!scale-100 text-5xl !text-opacity-90'
+                ? '!scale-100 text-5xl !text-opacity-90 [&>div>span]:!mr-3 [&>div>span]:last:!mr-0'
                 : '!scale-75 !text-opacity-20 hover:!text-opacity-75'
             }`
           : ''
       } ${isMiniPlayer && '!mb-2 !text-2xl !text-font-color-white'}`}
       ref={lyricsRef}
-      onClick={() => syncedLyrics && updateSongPosition(syncedLyrics.start)}
+      onClick={() =>
+        syncedLyrics &&
+        typeof lyric === 'string' &&
+        updateSongPosition(syncedLyrics.start)
+      }
     >
-      {lyricString}
+      <div className="flex flex-wrap flex-row items-center justify-center">
+        {lyricString}
+      </div>
+      <span
+        style={lyricDurationBarProperties}
+        className={`min-w-[2rem] mt-1 max-w-[4rem] w-1/2 h-1 bg-background-color-2 opacity-0 invisible transition-[visibility,opacity] dark:bg-dark-background-color-2 block rounded-md ${
+          syncedLyrics &&
+          songPosition > syncedLyrics.start - delay &&
+          songPosition < syncedLyrics.end - delay &&
+          'dark:!opacity-50 !opacity-100 !visible'
+        }`}
+      >
+        <span className="w-[var(--duration)] h-full block rounded-md duration-300 bg-background-color-dimmed dark:bg-background-color-dimmed transition-[width]" />
+      </span>
     </div>
   );
 };

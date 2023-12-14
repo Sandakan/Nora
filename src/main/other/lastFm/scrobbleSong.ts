@@ -33,6 +33,7 @@ const scrobbleSong = async (songId: string, startTimeInSecs: number) => {
             artist: song.artists?.map((artist) => artist.name).join(', ') || '',
             timestamp: Math.floor(startTimeInSecs),
             album: song.album?.name,
+            albumArtist: song?.albumArtist?.name,
             trackNumber: song.trackNo,
             duration: Math.ceil(song.duration),
           };

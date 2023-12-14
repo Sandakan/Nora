@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import Checkbox from '../../Checkbox';
@@ -6,17 +7,18 @@ import Checkbox from '../../Checkbox';
 const StartupSettings = () => {
   const { userData } = React.useContext(AppContext);
   const { updateUserData } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   return (
     <li className="main-container startup-settings-container mb-16">
       <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         <span className="material-icons-round-outlined mr-2">restart_alt</span>
-        Startup and Window Customization
+        {t('settingsPage.startupAndWindowCustomization')}
       </div>
       <ul className="list-disc pl-6 marker:bg-background-color-3 dark:marker:bg-background-color-3">
         <li className="auto-launch-at-startup-checkbox-container mb-4">
           <div className="description">
-            Enabling this setting will automatically launch this app when you
-            log in to your computer.
+            {t('settingsPage.autoLaunchAtStartDescription')}
           </div>
           <Checkbox
             id="toggleAppAutoLaunch"
@@ -38,7 +40,7 @@ const StartupSettings = () => {
                 }),
               )
             }
-            labelContent="Auto launch at startup"
+            labelContent={t('settingsPage.autoLaunchAtStart')}
           />
         </li>
         <li
@@ -54,8 +56,7 @@ const StartupSettings = () => {
           }
         >
           <div className="description">
-            Configure how the window should behave when you log in to your
-            computer.
+            {t('settingsPage.hideWindowAtStartDescription')}
           </div>
           <Checkbox
             id="hideWindowOnStartup"
@@ -83,12 +84,12 @@ const StartupSettings = () => {
                   }),
                 )
             }
-            labelContent="Launch app with the window hidden on startup"
+            labelContent={t('settingsPage.hideWindowAtStart')}
           />
         </li>
         <li className="hide-window-on-close-checkbox-container">
           <div className="description">
-            Configure how the window should behave when you close the window.
+            {t('settingsPage.hideWindowOnCloseDescription')}
           </div>
           <Checkbox
             id="hideWindowOnClose"
@@ -112,7 +113,7 @@ const StartupSettings = () => {
                   }),
                 )
             }
-            labelContent="Hide window to the system tray when close button is clicked."
+            labelContent={t('settingsPage.hideWindowOnClose')}
           />
         </li>
       </ul>

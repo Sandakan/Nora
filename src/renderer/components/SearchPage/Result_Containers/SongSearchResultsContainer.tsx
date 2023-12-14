@@ -4,6 +4,7 @@ import SecondaryContainer from 'renderer/components/SecondaryContainer';
 import Song from 'renderer/components/SongsPage/Song';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   songs: SongData[];
@@ -30,6 +31,7 @@ const SongSearchResultsContainer = (props: Props) => {
     createQueue,
     playSong,
   } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const handleSongPlayBtnClick = React.useCallback(
     (currSongId: string) => {
@@ -99,21 +101,28 @@ const SongSearchResultsContainer = (props: Props) => {
             <div className="other-stats-container ml-12 flex items-center text-xs">
               {songs && songs.length > 0 && (
                 <span className="no-of-songs">
-                  {songs.length} results{' '}
-                  {songs.length > noOfVisibleSongs &&
-                    `(${noOfVisibleSongs} shown)`}
+                  {t(
+                    `searchPage.${
+                      songs.length > noOfVisibleSongs
+                        ? 'resultAndVisibleCount'
+                        : 'resultCount'
+                    }`,
+                    { count: songs.length, noVisible: noOfVisibleSongs },
+                  )}
                 </span>
               )}
             </div>
           </div>
           <div className="other-controls-container flex">
             <Button
-              label={
-                isMultipleSelectionEnabled &&
-                multipleSelectionsData.selectionType === 'songs'
-                  ? 'Unselect All'
-                  : 'Select'
-              }
+              label={t(
+                `common.${
+                  isMultipleSelectionEnabled &&
+                  multipleSelectionsData.selectionType === 'songs'
+                    ? 'unselectAll'
+                    : 'select'
+                }`,
+              )}
               className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
               iconName={
                 isMultipleSelectionEnabled &&
@@ -128,13 +137,15 @@ const SongSearchResultsContainer = (props: Props) => {
                 isMultipleSelectionEnabled &&
                 multipleSelectionsData.selectionType !== 'songs'
               }
-              tooltipLabel={
-                isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
-              }
+              tooltipLabel={t(
+                `common.${
+                  isMultipleSelectionEnabled ? 'unselectAll' : 'select'
+                }`,
+              )}
             />
             {songs.length > noOfVisibleSongs && (
               <Button
-                label="Show All"
+                label={t('common.showAll')}
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>

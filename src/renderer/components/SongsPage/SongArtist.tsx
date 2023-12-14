@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 
 interface SongArtistProp {
@@ -13,7 +13,8 @@ interface SongArtistProp {
 function SongArtist(props: SongArtistProp) {
   const { updateContextMenuData, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
-  const { currentSongData } = React.useContext(AppContext);
+  const { t } = useTranslation();
+
   const {
     artistId,
     name,
@@ -24,12 +25,11 @@ function SongArtist(props: SongArtistProp) {
 
   const showArtistInfoPage = React.useCallback(
     (artistName: string, id: string) =>
-      currentSongData.artists &&
       changeCurrentActivePage('ArtistInfo', {
         artistName,
         artistId: id,
       }),
-    [changeCurrentActivePage, currentSongData.artists],
+    [changeCurrentActivePage],
   );
 
   return (
@@ -55,7 +55,7 @@ function SongArtist(props: SongArtistProp) {
             true,
             [
               {
-                label: 'Info',
+                label: t('common.info'),
                 iconName: 'info',
                 handlerFunction: () => showArtistInfoPage(name, artistId),
               },

@@ -49,11 +49,9 @@ const saveArtworkToSystem = async (artworkPath: string, saveName?: string) => {
 
       if (artwork) {
         await sharp(artwork, { animated: true }).toFile(savePath);
-        return sendMessageToRenderer(
-          'Saved the artwork to the request location.',
-        );
+        return sendMessageToRenderer({ messageCode: 'ARTWORK_SAVED' });
       }
-    } else sendMessageToRenderer('No save destination selected.');
+    } else sendMessageToRenderer({ messageCode: 'DESTINATION_NOT_SELECTED' });
 
     return undefined;
   } catch (error) {
@@ -62,7 +60,7 @@ const saveArtworkToSystem = async (artworkPath: string, saveName?: string) => {
       { error },
       'ERROR',
     );
-    sendMessageToRenderer('Failed to save the song artwork.');
+    sendMessageToRenderer({ messageCode: 'ARTWORK_SAVE_FAILED' });
     return undefined;
   }
 };

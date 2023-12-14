@@ -1,5 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 import React, { useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { VariableSizeList as List } from 'react-window';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
@@ -13,45 +14,7 @@ import MainContainer from '../MainContainer';
 
 import PlaylistInfoAndImgContainer from './PlaylistInfoAndImgContainer';
 import TitleContainer from '../TitleContainer';
-
-const dropdownOptions: { label: string; value: SongSortTypes }[] = [
-  { label: 'Added Order', value: 'addedOrder' },
-  { label: 'A to Z', value: 'aToZ' },
-  { label: 'Z to A', value: 'zToA' },
-  { label: 'Newest', value: 'dateAddedAscending' },
-  { label: 'Oldest', value: 'dateAddedDescending' },
-  { label: 'Released Year (Ascending)', value: 'releasedYearAscending' },
-  { label: 'Released Year (Descending)', value: 'releasedYearDescending' },
-  {
-    label: 'Most Listened (All Time)',
-    value: 'allTimeMostListened',
-  },
-  {
-    label: 'Least Listened (All Time)',
-    value: 'allTimeLeastListened',
-  },
-  {
-    label: 'Most Listened (This Month)',
-    value: 'monthlyMostListened',
-  },
-  {
-    label: 'Least Listened (This Month)',
-    value: 'monthlyLeastListened',
-  },
-  {
-    label: 'Artist Name (A to Z)',
-    value: 'artistNameAscending',
-  },
-  {
-    label: 'Artist Name (Z to A)',
-    value: 'artistNameDescending',
-  },
-  { label: 'Album Name (A to Z)', value: 'albumNameAscending' },
-  {
-    label: 'Album Name (Z to A)',
-    value: 'albumNameDescending',
-  },
-];
+import { songSortOptions } from '../SongsPage/SongsPage';
 
 const PlaylistInfoPage = () => {
   const { currentlyActivePage, queue, localStorageData } =
@@ -64,11 +27,14 @@ const PlaylistInfoPage = () => {
     updateCurrentlyActivePageData,
     playSong,
   } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const [playlistData, setPlaylistData] = React.useState({} as Playlist);
   const [playlistSongs, setPlaylistSongs] = React.useState([] as SongData[]);
   const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>(
-    currentlyActivePage?.data?.sortingOrder || 'addedOrder',
+    currentlyActivePage?.data?.sortingOrder ||
+      localStorageData.sortingStates?.songsPage ||
+      'addedOrder',
   );
   const songsContainerRef = React.useRef<HTMLDivElement>(null);
   const { width, height } = useResizeObserver(songsContainerRef);
@@ -211,7 +177,7 @@ const PlaylistInfoPage = () => {
               onPlayClick={handleSongPlayBtnClick}
               additionalContextMenuItems={[
                 {
-                  label: 'Remove from this Playlist',
+                  label: t('playlistsPage.removeFromThisPlaylist'),
                   iconName: 'playlist_remove',
                   handlerFunction: () =>
                     window.api.playlistsData
@@ -226,11 +192,12 @@ const PlaylistInfoPage = () => {
                             {
                               id: `${song.songId}Removed`,
                               delay: 5000,
-                              content: (
-                                <span>
-                                  '{song.title}' removed from '
-                                  {playlistData.name}' playlist successfully.
-                                </span>
+                              content: t(
+                                'playlistsPage.removeSongFromPlaylistSuccess',
+                                {
+                                  title: song.title,
+                                  playlistName: playlistData.name,
+                                },
                               ),
                             },
                           ]),
@@ -258,6 +225,7 @@ const PlaylistInfoPage = () => {
       playlistData.playlistId,
       playlistSongs,
       selectAllHandler,
+      t,
     ],
   );
 
@@ -265,10 +233,10 @@ const PlaylistInfoPage = () => {
     changePromptMenuData(
       true,
       <SensitiveActionConfirmPrompt
-        title="Confrim the action to clear Song History"
-        content={`You wouldn't be able to see what you have listened previously if you decide to continue this action.`}
+        title={t('settingsPage.confirmSongHistoryDeletion')}
+        content={t('settingsPage.songHistoryDeletionDisclaimer')}
         confirmButton={{
-          label: 'Clear History',
+          label: t('settingsPage.clearHistory'),
           clickHandler: () =>
             window.api.audioLibraryControls
               .clearSongHistory()
@@ -279,9 +247,7 @@ const PlaylistInfoPage = () => {
                     {
                       id: 'queueCleared',
                       delay: 5000,
-                      content: (
-                        <span>Cleared the song history successfully.</span>
-                      ),
+                      content: t('settingsPage.songHistoryDeletionSuccess'),
                     },
                   ]),
               )
@@ -289,7 +255,7 @@ const PlaylistInfoPage = () => {
         }}
       />,
     );
-  }, [addNewNotifications, changePromptMenuData]);
+  }, [addNewNotifications, changePromptMenuData, t]);
 
   const addSongsToQueue = React.useCallback(() => {
     const validSongIds = playlistSongs
@@ -300,14 +266,12 @@ const PlaylistInfoPage = () => {
       {
         id: `addedToQueue`,
         delay: 5000,
-        content: `
-            Added ${validSongIds.length} song${
-              validSongIds.length === 1 ? '' : 's'
-            } to the queue.
-         `,
+        content: t('notifications.addedToQueue', {
+          count: validSongIds.length,
+        }),
       },
     ]);
-  }, [addNewNotifications, playlistSongs, queue.queue, updateQueueData]);
+  }, [addNewNotifications, playlistSongs, queue.queue, t, updateQueueData]);
 
   const shuffleAndPlaySongs = React.useCallback(
     () =>
@@ -358,26 +322,26 @@ const PlaylistInfoPage = () => {
         className="pr-4"
         buttons={[
           {
-            label: 'Clear History',
+            label: t('settingsPage.clearHistory'),
             iconName: 'clear',
             clickHandler: clearSongHistory,
             isVisible: playlistData.playlistId === 'History',
             isDisabled: !(playlistData.songs && playlistData.songs.length > 0),
           },
           {
-            label: 'Play All',
+            label: t('common.playAll'),
             iconName: 'play_arrow',
             clickHandler: playAllSongs,
             isDisabled: !(playlistData.songs && playlistData.songs.length > 0),
           },
           {
-            tooltipLabel: 'Shuffle and Play',
+            tooltipLabel: t('common.shuffleAndPlay'),
             iconName: 'shuffle',
             clickHandler: shuffleAndPlaySongs,
             isDisabled: !(playlistData.songs && playlistData.songs.length > 0),
           },
           {
-            tooltipLabel: 'Add to Queue',
+            tooltipLabel: t('common.addToQueue'),
             iconName: 'add',
             clickHandler: addSongsToQueue,
             isDisabled: !(playlistData.songs && playlistData.songs.length > 0),
@@ -386,7 +350,9 @@ const PlaylistInfoPage = () => {
         dropdown={{
           name: 'PlaylistPageSortDropdown',
           value: sortingOrder,
-          options: dropdownOptions,
+          options: songSortOptions.concat([
+            { label: t('sortTypes.addedOrder'), value: 'addedOrder' },
+          ]),
           onChange: (e) => {
             const order = e.currentTarget.value as SongSortTypes;
             updateCurrentlyActivePageData((currentPageData) => ({
@@ -407,7 +373,7 @@ const PlaylistInfoPage = () => {
               width={width || '100%'}
               height={height || 450}
               overscanCount={10}
-              className="appear-from-bottom h-full pb-4 delay-100"
+              className="appear-from-bottom h-full pb-4 delay-100 [scrollbar-gutter:stable]"
               initialScrollOffset={
                 currentlyActivePage.data?.scrollTopOffset ?? 0
               }
@@ -433,7 +399,7 @@ const PlaylistInfoPage = () => {
           <span className="material-icons-round-outlined mb-4 text-5xl">
             brightness_empty
           </span>
-          Seems like this playlist is empty.
+          {t('playlist.empty')}
         </div>
       )}
     </MainContainer>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import log from 'renderer/utils/log';
@@ -9,6 +10,8 @@ import Hyperlink from '../Hyperlink';
 const MusixmatchSettingsPrompt = () => {
   const { userData } = React.useContext(AppContext);
   const { updateUserData } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const [token, setToken] = React.useState('');
   const [showToken, setShowToken] = React.useState(false);
   const [successState, setSuccessState] = React.useState<
@@ -27,25 +30,18 @@ const MusixmatchSettingsPrompt = () => {
   return (
     <div>
       <div className="title-container mb-4 text-2xl font-medium uppercase text-font-color-black dark:text-font-color-white">
-        Musixmatch Settings
+        {t('musixmatchSettingsPrompt.title')}
       </div>
       <ul className="list-inside list-disc font-light">
-        <li>
-          Musixmatch requires a user token to provide its service properly.
-        </li>
-        <li>
-          Musixmatch can sometimes fail to show lyrics due to prolonged use of
-          the service from the same token.
-        </li>
-        <li>
-          Follow the guide from{' '}
-          <Hyperlink
-            label="Spicetify Wiki"
-            linkTitle="Spicetify WiKi"
-            link="https://spicetify.app/docs/faq#sometimes-popup-lyrics-andor-lyrics-plus-seem-to-not-work"
-          />{' '}
-          to get a new Musixmatch token.
-        </li>
+        <Trans
+          i18nKey="musixmatchSettingsPrompt.message"
+          components={{
+            li: <li />,
+            Hyperlink: (
+              <Hyperlink link="https://spicetify.app/docs/faq#sometimes-popup-lyrics-andor-lyrics-plus-seem-to-not-work" />
+            ),
+          }}
+        />
       </ul>
 
       <br />
@@ -69,13 +65,15 @@ const MusixmatchSettingsPrompt = () => {
         />
         <Button
           iconName={showToken ? 'visibility_off' : 'visibility'}
-          tooltipLabel={showToken ? 'Hide Token' : 'Show Token'}
+          tooltipLabel={t(
+            `musixmatchSettingsPrompt.${showToken ? 'hideToken' : 'showToken'}`,
+          )}
           className="!m-0 !border-0 !p-0"
           clickHandler={() => setShowToken((prevState) => !prevState)}
           isDisabled={token === '' || !!userData?.customMusixmatchUserToken}
         />
         <Button
-          label="Update Token"
+          label={t('musixmatchSettingsPrompt.updateToken')}
           className="ml-4"
           isDisabled={!isAValidToken || successState === 'success'}
           clickHandler={(_e, setIsDisabled, setIsPending) => {
@@ -105,47 +103,49 @@ const MusixmatchSettingsPrompt = () => {
         />
       </div>
 
+      <br />
+
       <ul className="empty:mt-0 ml-4 mt-4 list-disc text-sm font-medium text-font-color-crimson">
         {successState === 'success' && (
           <li className="flex text-green-500">
             <span className="material-icons-round mr-2 text-xl">done</span>{' '}
-            Token updated successfully.
+            {t('musixmatchSettingsPrompt.tokenUpdateSuccess')}
           </li>
         )}
         {successState === 'failure' && (
           <li className="flex text-font-color-crimson">
             <span className="material-icons-round mr-2 text-xl">error</span>{' '}
-            Failed to update the token.
+            {t('musixmatchSettingsPrompt.tokenUpdateFailed')}
           </li>
         )}
         {token.trim().length !== 54 && token.trim().length !== 0 && (
           <li>
-            TOKEN should be a string with{' '}
-            <span className="font-semibold uppercase">54 characters</span>. (
-            {54 - token.trim().length} more characters required.)
+            {t('musixmatchSettingsPrompt.tokenMissingCharacters', {
+              count: 54 - token.trim().length,
+            })}
           </li>
         )}
         {/\W/gm.test(token.trim()) && (
-          <li>TOKEN should only contain alpha-numeric characters.</li>
+          <li> {t('musixmatchSettingsPrompt.tokenIncorrectCharacters')}</li>
         )}
       </ul>
 
       {isSavedTokenAvailable && (
         <div className="mt-2 text-green-500">
-          <p className="flex uppercase font-semibold items-center">
-            <span className="material-icons-round-outlined text-xl mr-2">
-              done
-            </span>{' '}
-            A saved token available.
-          </p>
-          <p className="text-sm">
-            A valid Musixmatch token saved by the user is already available in
-            Nora.
-          </p>
-          <p className="text-sm">
-            You only need to change the token if the service is not functioning
-            properly.
-          </p>
+          <Trans
+            i18nKey="musixmatchSettingsPrompt.savedTokenAvailableMessage"
+            components={{
+              Title: (
+                <p className="flex uppercase font-semibold items-center" />
+              ),
+              span: (
+                <span className="material-icons-round-outlined text-xl mr-2">
+                  done
+                </span>
+              ),
+              p: <p className="text-sm" />,
+            }}
+          />
         </div>
       )}
     </div>

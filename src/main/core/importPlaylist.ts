@@ -85,7 +85,11 @@ const importPlaylist = async () => {
               undefined,
               'INFO',
               {
-                sendToRenderer: 'FAILURE',
+                sendToRenderer: {
+                  messageCode:
+                    'PLAYLIST_IMPORT_FAILED_DUE_TO_SONGS_OUTSIDE_LIBRARY',
+                  data: { count: unavailableSongPaths.length },
+                },
               },
             );
 
@@ -110,14 +114,27 @@ const importPlaylist = async () => {
                   `Imported ${availSongIdsForPlaylist.length} songs to the existing '${availablePlaylist.name}' playlist.`,
                   { playlistName },
                   'ERROR',
-                  { sendToRenderer: 'FAILURE' },
+                  {
+                    sendToRenderer: {
+                      messageCode: 'PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST',
+                      data: {
+                        count: availSongIdsForPlaylist.length,
+                        name: availablePlaylist.name,
+                      },
+                    },
+                  },
                 );
               } catch (error: any) {
                 return log(
                   'Error occurred when importing songs to an existing playlist.',
                   { playlistName },
                   'ERROR',
-                  { sendToRenderer: 'FAILURE' },
+                  {
+                    sendToRenderer: {
+                      messageCode:
+                        'PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST_FAILED',
+                    },
+                  },
                 );
               }
             } else {
@@ -132,14 +149,17 @@ const importPlaylist = async () => {
                   undefined,
                   'INFO',
                   {
-                    sendToRenderer: 'SUCCESS',
+                    sendToRenderer: {
+                      messageCode: 'PLAYLIST_IMPORT_SUCCESS',
+                      data: { name: fileName },
+                    },
                   },
                 );
               return log(
                 res.message || 'Failed to create a playlist',
                 { res },
                 'ERROR',
-                { sendToRenderer: 'FAILURE' },
+                { sendToRenderer: { messageCode: 'PLAYLIST_CREATION_FAILED' } },
               );
             }
           }
@@ -149,7 +169,9 @@ const importPlaylist = async () => {
           { filePath, firstLine: textArr[0] },
           'ERROR',
           {
-            sendToRenderer: 'FAILURE',
+            sendToRenderer: {
+              messageCode: 'PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_DATA',
+            },
           },
         );
       }
@@ -158,7 +180,9 @@ const importPlaylist = async () => {
         { filePath },
         'ERROR',
         {
-          sendToRenderer: 'FAILURE',
+          sendToRenderer: {
+            messageCode: 'PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_EXTENSION',
+          },
         },
       );
     }
@@ -167,12 +191,12 @@ const importPlaylist = async () => {
       undefined,
       'WARN',
       {
-        sendToRenderer: 'FAILURE',
+        sendToRenderer: { messageCode: 'DESTINATION_NOT_SELECTED' },
       },
     );
   } catch (error) {
     return log(`Failed to import the playlist.`, { error }, 'ERROR', {
-      sendToRenderer: 'FAILURE',
+      sendToRenderer: { messageCode: 'PLAYLIST_IMPORT_FAILED' },
     });
   }
 };

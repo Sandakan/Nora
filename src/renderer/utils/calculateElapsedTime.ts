@@ -1,3 +1,5 @@
+import i18n from 'renderer/i18n';
+
 type ElapsedDateTypes = 'second' | 'minute' | 'hour' | 'day' | 'month' | 'year';
 
 interface DateRounderResult {
@@ -7,8 +9,10 @@ interface DateRounderResult {
   elapsedString: string;
 }
 
-const generateElapsedString = (elapsed: number, type: ElapsedDateTypes) =>
-  `${elapsed} ${type}${elapsed === 1 ? '' : 's'} ago`;
+const generateElapsedString = (
+  elapsed: number,
+  type: ElapsedDateTypes,
+): string => i18n.t(`elapsedTime.${type}`, { count: elapsed });
 
 const calculateElapsed = (
   currentDateInMs: number,

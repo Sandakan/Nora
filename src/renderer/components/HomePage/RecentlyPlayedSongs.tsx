@@ -1,5 +1,6 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 
@@ -13,6 +14,7 @@ type Props = { recentlyPlayedSongs: SongData[]; noOfVisibleSongs: number };
 
 const RecentlyPlayedSongs = (props: Props) => {
   const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const { recentlyPlayedSongs, noOfVisibleSongs = 3 } = props;
   const MAX_SONG_LIMIT = 15;
@@ -62,10 +64,11 @@ const RecentlyPlayedSongs = (props: Props) => {
         >
           <>
             <div className="title-container mb-4 mt-1 flex items-center justify-between text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-              Recently Played Songs
+              {t('homePage.recentlyPlayedSongs')}
+
               <Button
-                label="Show All"
-                tooltipLabel="Opens 'Songs' with 'Newest' sort option."
+                label={t('common.showAll')}
+                tooltipLabel={t('homePage.openPlaybackHistory')}
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>

@@ -1,6 +1,7 @@
 import NodeID3 from 'node-id3';
 import { ReactElement, ReactNode } from 'react';
 import { ButtonProps } from 'renderer/components/Button';
+import { DropdownOption } from 'renderer/components/Dropdown';
 import { api } from '../main/preload';
 import { LastFMSessionData } from './last_fm_api';
 import { SimilarArtist, Tag } from './last_fm_artist_info_api';
@@ -79,9 +80,10 @@ declare global {
     artists?: { artistId: string; name: string }[];
     album?: { albumId: string; name: string };
     genres?: { genreId: string; name: string }[];
-    albumArtist?: string;
+    albumArtists?: { artistId: string; name: string }[];
     bitrate?: number;
     trackNo?: number;
+    diskNo?: number;
     noOfChannels?: number;
     year?: number;
     sampleRate?: number;
@@ -189,21 +191,23 @@ declare global {
     inNoOfPlaylists?: number;
     /** an array of listening records for each year. */
     listens: YearlyListeningRate[];
+    /** an array of listening records for each year. */
+    seeks?: SongSeek[];
   }
 
+  interface SongSeek {
+    position: number;
+    seeks: number;
+  }
   interface YearlyListeningRate {
     year: number;
     /** [Date in milliseconds, No of listens in that day] [] */
     listens: [number, number][];
   }
 
-  type ListeningDataTypes =
-    | 'skips'
-    | 'fullListens'
-    | 'noOfPlaylists'
-    | 'listens';
-
-  type ListeningDataUpdateTypes = 'increment' | 'decrement';
+  interface ListeningDataTypes extends Omit<SongListeningData, 'listens'> {
+    listens: number;
+  }
 
   // ? Audio player and lyrics related types
 
@@ -347,6 +351,7 @@ declare global {
 
   type UserDataTypes =
     | 'theme'
+    | 'language'
     | 'currentSong.songId'
     | 'currentSong.stoppedPosition'
     | 'volume.value'
@@ -370,7 +375,9 @@ declare global {
     | 'preferences.sendSongScrobblingDataToLastFM'
     | 'preferences.sendSongFavoritesDataToLastFM'
     | 'preferences.sendNowPlayingSongDataToLastFM'
+    | 'preferences.saveLyricsInLrcFilesForSupportedSongs'
     | 'customMusixmatchUserToken'
+    | 'customLrcFilesSaveLocation'
     | 'lastFmSessionData'
     | 'storageMetrics'
     | PageSortTypes;
@@ -389,6 +396,7 @@ declare global {
   }
 
   interface UserData {
+    language: LanguageCodes;
     theme: AppThemeData;
     musicFolders: FolderStructure[];
     preferences: {
@@ -401,6 +409,7 @@ declare global {
       sendSongScrobblingDataToLastFM: boolean;
       sendSongFavoritesDataToLastFM: boolean;
       sendNowPlayingSongDataToLastFM: boolean;
+      saveLyricsInLrcFilesForSupportedSongs: boolean;
     };
     windowPositions: {
       mainWindow?: WindowCordinates;
@@ -415,7 +424,10 @@ declare global {
     customMusixmatchUserToken?: string;
     lastFmSessionData?: LastFMSessionData;
     storageMetrics?: StorageMetrics;
+    customLrcFilesSaveLocation?: string;
   }
+
+  type LanguageCodes = 'en' | 'fr';
 
   interface AppThemeData {
     isDarkMode: boolean;
@@ -489,13 +501,72 @@ declare global {
     playbackRate: number;
   }
 
-  interface Equalizer {
-    sixtyHertz: number;
-    hundredFiftyHertz: number;
-    fourHundredHertz: number;
-    oneKiloHertz: number;
-    twoPointFourKiloHertz: number;
-    fifteenKiloHertz: number;
+  type EqualizerBandFilters =
+    | 'thirtyTwoHertzFilter'
+    | 'sixtyFourHertzFilter'
+    | 'hundredTwentyFiveHertzFilter'
+    | 'twoHundredFiftyHertzFilter'
+    | 'fiveHundredHertzFilter'
+    | 'thousandHertzFilter'
+    | 'twoThousandHertzFilter'
+    | 'fourThousandHertzFilter'
+    | 'eightThousandHertzFilter'
+    | 'sixteenThousandHertzFilter';
+
+  type EqualierPresetDropdownOptionValues =
+    | 'custom'
+    | 'flat'
+    | 'acoustic'
+    | 'bassBooster'
+    | 'bassReducer'
+    | 'classical'
+    | 'club'
+    | 'dance'
+    | 'deep'
+    | 'electronic'
+    | 'hipHop'
+    | 'jazz'
+    | 'latin'
+    | 'live'
+    | 'loudness'
+    | 'lounge'
+    | 'metal'
+    | 'piano'
+    | 'pop'
+    | 'reggae'
+    | 'rnb'
+    | 'rock'
+    | 'ska'
+    | 'smallSpeakers'
+    | 'soft'
+    | 'softRock'
+    | 'spokenWord'
+    | 'techno'
+    | 'trebleBooster'
+    | 'trebleReducer'
+    | 'vocalBooster';
+
+  interface Equalizer extends Record<EqualizerBandFilters, number> {
+    thirtyTwoHertzFilter: number;
+    sixtyFourHertzFilter: number;
+    hundredTwentyFiveHertzFilter: number;
+    twoHundredFiftyHertzFilter: number;
+    fiveHundredHertzFilter: number;
+    thousandHertzFilter: number;
+    twoThousandHertzFilter: number;
+    fourThousandHertzFilter: number;
+    eightThousandHertzFilter: number;
+    sixteenThousandHertzFilter: number;
+  }
+
+  type EqualizerPresetsData = {
+    title: EqualierPresetDropdownOptionValues;
+    preset: Equalizer;
+  }[];
+
+  interface EqualizerPresetDropdownOptions
+    extends DropdownOption<EqualierPresetDropdownOptionValues> {
+    preset?: Equalizer;
   }
 
   interface IgnoredDuplicates {
@@ -510,7 +581,7 @@ declare global {
     playlistsPage?: PlaylistSortTypes;
     albumsPage?: AlbumSortTypes;
     genresPage?: GenreSortTypes;
-    musicFoldersPage?: SongSortTypes;
+    musicFoldersPage?: FolderSortTypes;
   }
 
   interface LyricsEditorSettings {
@@ -702,6 +773,29 @@ declare global {
     | 'CREATE_TEMP_ARTWORK_FAILED'
     | 'READING_MODIFICATIONS_FAILED'
     | 'FOLDER_MODIFICATIONS_CHECK_FAILED'
+    | 'SONG_EXT_NOT_SUPPORTED_FOR_LYRICS_SAVES'
+    | 'RESET_FAILED'
+    | 'MUSIC_FOLDER_DELETED'
+    | 'EMPTY_MUSIC_FOLDER_DELETED'
+    | 'SONG_REVEAL_FAILED'
+    | 'LYRICS_FIND_FAILED'
+    | 'METADATA_UPDATE_FAILED'
+    | 'DESTINATION_NOT_SELECTED'
+    | 'ARTWORK_SAVE_FAILED'
+    | 'APPDATA_EXPORT_FAILED'
+    | 'PLAYLIST_EXPORT_FAILED'
+    | 'APPDATA_IMPORT_FAILED'
+    | 'APPDATA_IMPORT_FAILED_DUE_TO_MISSING_FILES'
+    | 'PLAYLIST_IMPORT_FAILED'
+    | 'PLAYLIST_IMPORT_FAILED_DUE_TO_SONGS_OUTSIDE_LIBRARY'
+    | 'PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST_FAILED'
+    | 'PLAYLIST_CREATION_FAILED'
+    | 'PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_DATA'
+    | 'PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_EXTENSION'
+    | 'PLAYLIST_NOT_FOUND'
+    | 'SONG_REPARSE_FAILED'
+    | 'WHITELISTING_FOLDER_FAILED_DUE_TO_BLACKLISTED_PARENT_FOLDER'
+    | 'WHITELISTING_SONG_FAILED_DUE_TO_BLACKLISTED_DIRECTORY'
     | 'UNSUPPORTED_FILE_EXTENSION';
 
   type MessageCodes =
@@ -715,21 +809,46 @@ declare global {
     | 'PARSE_FAILED'
     | 'PARSE_SUCCESSFUL'
     | 'SONG_DELETED'
-    | 'MUSIC_FOLDER_DELETED'
     | 'NO_NETWORK_CONNECTION'
     | 'NETWORK_DISCONNECTED'
     | 'NETWORK_CONNECTED'
     | 'APP_THEME_CHANGE'
     | 'PLAYBACK_FROM_UNKNOWN_SOURCE'
     | 'AUDIO_PARSING_PROCESS_UPDATE'
-    | 'SONG_PALETTE_GENERAING_PROCESS_UPDATE'
-    | 'GENRE_PALETTE_GENERAING_PROCESS_UPDATE'
+    | 'SONG_PALETTE_GENERATING_PROCESS_UPDATE'
+    | 'GENRE_PALETTE_GENERATING_PROCESS_UPDATE'
     | 'SONG_REMOVE_PROCESS_UPDATE'
+    | 'NO_MORE_SONG_PALETTES'
+    | 'NO_MORE_GENRE_PALETTES'
     | 'SONG_BLACKLISTED'
     | 'SONG_WHITELISTED'
     | 'FOLDER_BLACKLISTED'
     | 'FOLDER_WHITELISTED'
+    | 'PENDING_METADATA_UPDATES_SAVED'
+    | 'FOLDER_PARSED_FOR_DIRECTORIES'
+    | 'RESET_SUCCESSFUL'
+    | 'LYRICS_SAVE_QUEUED'
+    | 'LYRICS_SAVED_IN_LRC_FILE'
+    | 'PENDING_LYRICS_SAVED'
+    | 'LASTFM_LOGIN_SUCCESS'
+    | 'APPDATA_EXPORT_STARTED'
+    | 'APPDATA_IMPORT_STARTED'
+    | 'APPDATA_EXPORT_SUCCESS'
+    | 'APPDATA_IMPORT_SUCCESS'
+    | 'APPDATA_IMPORT_SUCCESS_WITH_PENDING_RESTART'
+    | 'PLAYLIST_EXPORT_SUCCESS'
+    | 'PLAYLIST_IMPORT_SUCCESS'
+    | 'PLAYLIST_RENAME_SUCCESS'
+    | 'PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST'
+    | 'SONG_REPARSE_SUCCESS'
+    | 'ADDED_SONGS_TO_PLAYLIST'
+    | 'ARTWORK_SAVED'
     | 'RESYNC_SUCCESSFUL';
+
+  type MessageToRendererProps = {
+    messageCode: MessageCodes;
+    data?: Record<string, unknown>;
+  };
 
   interface NotificationPanelData {
     notifications: AppNotification[];
@@ -748,7 +867,7 @@ declare global {
     buttons?: ButtonProps[];
     type?: NotificationTypes;
     progressBarData?: {
-      max: number;
+      total: number;
       value: number;
     };
   }
@@ -1016,6 +1135,7 @@ declare global {
   interface SongTags {
     title: string;
     artists?: SongTagsArtistData[];
+    albumArtists?: SongTagsArtistData[];
     album?: SongTagsAlbumData;
     trackNumber?: number;
     releasedYear?: number;
@@ -1026,6 +1146,7 @@ declare global {
     artworkPath?: string;
     duration: number;
     isLyricsSavePending?: boolean;
+    isMetadataSavePending?: boolean;
   }
 
   interface SongOutsideLibraryData {
@@ -1060,16 +1181,16 @@ declare global {
     releaseDate: string;
     importantNotes?: string[];
     artwork?: string;
-    notes: Notes;
+    notes: ChangelogNoteTypes;
   }
 
-  export interface Notes {
-    new: Fixed[];
-    fixed: Fixed[];
-    knownIssues: Fixed[];
+  export interface ChangelogNoteTypes {
+    new: ChangelogNote[];
+    fixed: ChangelogNote[];
+    knownIssues: ChangelogNote[];
   }
 
-  export interface Fixed {
+  export interface ChangelogNote {
     note: string;
   }
 

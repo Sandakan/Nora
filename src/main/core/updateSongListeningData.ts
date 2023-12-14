@@ -6,18 +6,9 @@ import {
 import log from '../log';
 import { dataUpdateEvent } from '../main';
 
-const incrementListeningDataProperties = (
-  dataUpdateType: ListeningDataUpdateTypes,
-  data = 0,
-) => {
-  const value = dataUpdateType === 'increment' ? 1 : -1;
-  if (data + value < 0) return 0;
-  return data + value;
-};
-
 const updateSongListensArray = (
-  updateType: ListeningDataUpdateTypes,
   yearlyListens: YearlyListeningRate[],
+  updateValue: number,
 ) => {
   const currentDate = new Date();
   const currentNow = currentDate.getTime();
@@ -25,12 +16,10 @@ const updateSongListensArray = (
   const currentMonth = currentDate.getMonth();
   const currentDay = currentDate.getDate();
 
-  const updateValue = updateType === 'increment' ? 1 : -1;
-
   for (const yearlyListen of yearlyListens) {
     if (yearlyListen.year === currentYear) {
       for (const listenData of yearlyListen.listens) {
-        const date = listenData[0];
+        const [date] = listenData;
 
         if (typeof date === 'number' && typeof listenData[1] === 'number') {
           const songDate = new Date(date);
@@ -43,46 +32,72 @@ const updateSongListensArray = (
           }
         }
       }
-      yearlyListen.listens.push([
-        currentNow,
-        updateType === 'increment' ? 1 : 0,
-      ]);
+      yearlyListen.listens.push([currentNow, updateValue]);
       return yearlyListens;
     }
   }
   yearlyListens.push({
     year: currentYear,
-    listens: [[currentNow, updateType === 'increment' ? 1 : 0]],
+    listens: [[currentNow, updateValue]],
   });
   return yearlyListens;
 };
 
-const updateListeningData = (
-  dataType: ListeningDataTypes,
-  listeningData: SongListeningData,
-  updateType: ListeningDataUpdateTypes,
+const updateSeeksArray = (
+  availableSeeks = [] as SongSeek[],
+  newSeeks: SongSeek[],
 ) => {
-  if (dataType === 'fullListens') {
-    listeningData.fullListens = incrementListeningDataProperties(
-      updateType,
+  const seekRange = 5;
+
+  for (const newSeek of newSeeks) {
+    for (const availableSeek of availableSeeks) {
+      if (
+        newSeek.position < availableSeek.position + seekRange &&
+        newSeek.position > availableSeek.position - seekRange
+      )
+        availableSeek.seeks += newSeek.seeks;
+    }
+    availableSeeks.push(newSeek);
+  }
+  return availableSeeks;
+};
+
+const updateListeningDataProperties = (data = 0, value = 0) => {
+  if (data + value < 0) return 0;
+  return data + value;
+};
+
+const updateListeningData = <
+  DataType extends keyof ListeningDataTypes,
+  Value extends ListeningDataTypes[DataType],
+>(
+  dataType: DataType,
+  listeningData: SongListeningData,
+  value: Value,
+) => {
+  if (dataType === 'listens' && typeof value === 'number')
+    listeningData.listens = updateSongListensArray(
+      listeningData.listens,
+      value,
+    );
+  else if (dataType === 'fullListens' && typeof value === 'number')
+    listeningData.fullListens = updateListeningDataProperties(
       listeningData.fullListens,
+      value,
     );
-  } else if (dataType === 'skips') {
-    listeningData.skips = incrementListeningDataProperties(
-      updateType,
+  else if (dataType === 'skips' && typeof value === 'number')
+    listeningData.skips = updateListeningDataProperties(
       listeningData.skips,
+      value,
     );
-  } else if (dataType === 'noOfPlaylists') {
-    listeningData.inNoOfPlaylists = incrementListeningDataProperties(
-      updateType,
+  else if (dataType === 'inNoOfPlaylists' && typeof value === 'number')
+    listeningData.inNoOfPlaylists = updateListeningDataProperties(
+      value,
       listeningData.inNoOfPlaylists,
     );
-  } else if (dataType === 'listens') {
-    listeningData.listens = updateSongListensArray(
-      updateType,
-      listeningData.listens,
-    );
-  } else {
+  else if (dataType === 'seeks' && Array.isArray(value))
+    listeningData.seeks = updateSeeksArray(listeningData.seeks, value);
+  else {
     log(
       `Requested to update song listening data with unknown data type of ${dataType}.`,
       undefined,
@@ -97,23 +112,32 @@ const updateListeningData = (
     dataType === 'listens'
       ? 'songs/listeningData/listens'
       : dataType === 'fullListens'
-      ? 'songs/listeningData/fullSongListens'
-      : dataType === 'skips'
-      ? 'songs/listeningData/skips'
-      : 'songs/listeningData/inNoOfPlaylists',
+        ? 'songs/listeningData/fullSongListens'
+        : dataType === 'skips'
+          ? 'songs/listeningData/skips'
+          : 'songs/listeningData/inNoOfPlaylists',
     [listeningData.songId],
   );
   return listeningData;
 };
 
-const updateSongListeningData = (
+const updateSongListeningData = <
+  DataType extends keyof ListeningDataTypes,
+  Value extends ListeningDataTypes[DataType],
+>(
   songId: string,
-  dataType: ListeningDataTypes,
-  updateType: ListeningDataUpdateTypes,
+  dataType: DataType,
+  value: Value,
 ) => {
   try {
     log(
-      `Requested to ${updateType} ${dataType} of the '${songId}' song's listening data.`,
+      `Requested to ${
+        typeof value === 'number'
+          ? value >= 0
+            ? 'increment'
+            : 'decrement'
+          : 'update'
+      } ${dataType} of the '${songId}' song's listening data.`,
     );
     const listeningData = getListeningData([songId]);
 
@@ -123,7 +147,7 @@ const updateSongListeningData = (
           const updatedListeningData = updateListeningData(
             dataType,
             listeningData[i],
-            updateType,
+            value,
           );
           return setListeningData(updatedListeningData);
         }
@@ -136,7 +160,7 @@ const updateSongListeningData = (
       const updatedListeningData = updateListeningData(
         dataType,
         newListeningData,
-        updateType,
+        value,
       );
       return setListeningData(updatedListeningData);
     }

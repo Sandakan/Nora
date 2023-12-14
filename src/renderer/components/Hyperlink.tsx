@@ -5,16 +5,24 @@ import OpenLinkConfirmPrompt from './OpenLinkConfirmPrompt';
 
 interface HyperlinkProp {
   link: string;
-  linkTitle: string;
+  linkTitle?: string;
   noValidityCheck?: boolean;
-  label: string | React.ReactElement;
+  children?: string | React.ReactElement;
+  label?: string | React.ReactElement;
   className?: string;
 }
 
 const Hyperlink = (props: HyperlinkProp) => {
   const { localStorageData } = React.useContext(AppContext);
   const { changePromptMenuData } = React.useContext(AppUpdateContext);
-  const { link, linkTitle, label, className, noValidityCheck } = props;
+  const {
+    link,
+    children,
+    label = children,
+    linkTitle = label,
+    className,
+    noValidityCheck,
+  } = props;
 
   const openLinkConfirmPrompt = React.useCallback(() => {
     if (
@@ -25,7 +33,10 @@ const Hyperlink = (props: HyperlinkProp) => {
     } else
       changePromptMenuData(
         true,
-        <OpenLinkConfirmPrompt link={link} title={linkTitle} />,
+        <OpenLinkConfirmPrompt
+          link={link}
+          title={typeof linkTitle === 'string' ? linkTitle : undefined}
+        />,
         'confirm-link-direct',
       );
   }, [

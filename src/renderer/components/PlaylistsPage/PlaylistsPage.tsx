@@ -1,4 +1,5 @@
 import React, { CSSProperties, useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FixedSizeGrid as Grid } from 'react-window';
 
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
@@ -6,12 +7,26 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 import storage from 'renderer/utils/localStorage';
+import i18n from 'renderer/i18n';
 
 import { Playlist } from './Playlist';
 import NewPlaylistPrompt from './NewPlaylistPrompt';
 import Button from '../Button';
 import MainContainer from '../MainContainer';
-import Dropdown from '../Dropdown';
+import Dropdown, { DropdownOption } from '../Dropdown';
+
+const playlistSortOptions: DropdownOption<PlaylistSortTypes>[] = [
+  { label: i18n.t('sortTypes.aToZ'), value: 'aToZ' },
+  { label: i18n.t('sortTypes.zToA'), value: 'zToA' },
+  {
+    label: i18n.t('sortTypes.noOfSongsDescending'),
+    value: 'noOfSongsDescending',
+  },
+  {
+    label: i18n.t('sortTypes.noOfSongsAscending'),
+    value: 'noOfSongsAscending',
+  },
+];
 
 const PlaylistsPage = () => {
   const {
@@ -26,6 +41,8 @@ const PlaylistsPage = () => {
     updateCurrentlyActivePageData,
     toggleMultipleSelections,
   } = useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const [playlists, setPlaylists] = React.useState([] as Playlist[]);
   const [sortingOrder, setSortingOrder] = React.useState<PlaylistSortTypes>(
     currentlyActivePage?.data?.sortingOrder ||
@@ -137,12 +154,12 @@ const PlaylistsPage = () => {
           true,
           [
             {
-              label: 'Create New Playlist',
+              label: t('playlistsPage.createNewPlaylist'),
               handlerFunction: createNewPlaylist,
               iconName: 'add',
             },
             {
-              label: 'Import Playlist',
+              label: t('playlistsPage.importPlaylist'),
               iconName: 'publish',
               handlerFunction: () =>
                 window.api.playlistsData
@@ -165,17 +182,19 @@ const PlaylistsPage = () => {
       <>
         <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           <div className="container flex">
-            Playlists{' '}
+            {t('common.playlist_other')}{' '}
             <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
               {isMultipleSelectionEnabled ? (
                 <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
-                  {multipleSelectionsData.multipleSelections.length} selections
+                  {t('common.selectionWithCount', {
+                    count: multipleSelectionsData.multipleSelections.length,
+                  })}
                 </div>
               ) : (
                 playlists.length > 0 && (
-                  <span className="no-of-artists">{`${
-                    playlists.length
-                  } playlist${playlists.length === 1 ? '' : 's'}`}</span>
+                  <span className="no-of-artists">
+                    {t('common.playlistWithCount', { count: playlists.length })}
+                  </span>
                 )
               )}
             </div>
@@ -193,12 +212,14 @@ const PlaylistsPage = () => {
                     'playlist',
                   )
                 }
-                tooltipLabel={
-                  isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
-                }
+                tooltipLabel={t(
+                  `common.${
+                    isMultipleSelectionEnabled ? 'unselectAll' : 'select'
+                  }`,
+                )}
               />
               <Button
-                label="Import Playlist"
+                label={t(`playlistsPage.importPlaylist`)}
                 className="import-playlist-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                 iconName="publish"
                 clickHandler={(_, setIsDisabled, setIsPending) => {
@@ -215,7 +236,7 @@ const PlaylistsPage = () => {
                 }}
               />
               <Button
-                label="Add Playlist"
+                label={t(`playlistsPage.addPlaylist`)}
                 className="add-new-playlist-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                 iconName="add"
                 clickHandler={createNewPlaylist}
@@ -223,14 +244,7 @@ const PlaylistsPage = () => {
               <Dropdown
                 name="playlistsSortDropdown"
                 value={sortingOrder}
-                options={
-                  [
-                    { label: 'A to Z', value: 'aToZ' },
-                    { label: 'Z to A', value: 'zToA' },
-                    { label: 'High Song Count', value: 'noOfSongsDescending' },
-                    { label: 'Low Song Count', value: 'noOfSongsAscending' },
-                  ] as { label: string; value: ArtistSortTypes }[]
-                }
+                options={playlistSortOptions}
                 onChange={(e) => {
                   const playlistSortType = e.currentTarget
                     .value as PlaylistSortTypes;
@@ -251,7 +265,7 @@ const PlaylistsPage = () => {
         >
           {playlists && playlists.length > 0 && (
             <Grid
-              className="appear-from-bottom delay-100"
+              className="appear-from-bottom delay-100 [scrollbar-gutter:stable]"
               columnCount={noOfColumns || 5}
               columnWidth={itemWidth}
               rowCount={noOfRows || 5}

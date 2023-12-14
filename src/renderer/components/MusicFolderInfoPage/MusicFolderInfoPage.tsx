@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { FixedSizeList as List } from 'react-window';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
@@ -10,6 +11,7 @@ import Button from '../Button';
 import Dropdown from '../Dropdown';
 import MainContainer from '../MainContainer';
 import Song from '../SongsPage/Song';
+import { songSortOptions } from '../SongsPage/SongsPage';
 
 const MusicFolderInfoPage = () => {
   const {
@@ -25,6 +27,7 @@ const MusicFolderInfoPage = () => {
     updateContextMenuData,
     playSong,
   } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const [folderInfo, setFolderInfo] = React.useState<MusicFolder>();
   const [folderSongs, setFolderSongs] = React.useState<SongData[]>([]);
@@ -116,46 +119,8 @@ const MusicFolderInfoPage = () => {
   }, [fetchFolderSongs]);
 
   React.useEffect(() => {
-    storage.sortingStates.setSortingStates('musicFoldersPage', sortingOrder);
+    storage.sortingStates.setSortingStates('songsPage', sortingOrder);
   }, [sortingOrder]);
-
-  const dropdownOptions: { label: string; value: SongSortTypes }[] = [
-    { label: 'A to Z', value: 'aToZ' },
-    { label: 'Z to A', value: 'zToA' },
-    { label: 'Newest', value: 'dateAddedAscending' },
-    { label: 'Oldest', value: 'dateAddedDescending' },
-    { label: 'Released Year (Ascending)', value: 'releasedYearAscending' },
-    { label: 'Released Year (Descending)', value: 'releasedYearDescending' },
-    {
-      label: 'Most Listened (All Time)',
-      value: 'allTimeMostListened',
-    },
-    {
-      label: 'Least Listened (All Time)',
-      value: 'allTimeLeastListened',
-    },
-    {
-      label: 'Most Listened (This Month)',
-      value: 'monthlyMostListened',
-    },
-    {
-      label: 'Least Listened (This Month)',
-      value: 'monthlyLeastListened',
-    },
-    {
-      label: 'Artist Name (A to Z)',
-      value: 'artistNameAscending',
-    },
-    {
-      label: 'Artist Name (Z to A)',
-      value: 'artistNameDescending',
-    },
-    { label: 'Album Name (A to Z)', value: 'albumNameAscending' },
-    {
-      label: 'Album Name (Z to A)',
-      value: 'albumNameDescending',
-    },
-  ];
 
   const selectAllHandler = useSelectAllHandler(folderSongs, 'songs', 'songId');
 
@@ -237,13 +202,13 @@ const MusicFolderInfoPage = () => {
   const otherOptions = React.useMemo(
     () => [
       {
-        label: 'Resync library',
+        label: t('settingsPage.resyncLibrary'),
         iconName: 'sync',
         handlerFunction: () =>
           window.api.audioLibraryControls.resyncSongsLibrary(),
       },
     ],
-    [],
+    [t],
   );
 
   return (
@@ -259,18 +224,24 @@ const MusicFolderInfoPage = () => {
     >
       <>
         <div className="title-container mb-8 mt-2 flex items-center justify-between pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-          '{folderName}' Folder
-          <div className="other-stats-container flex items-center text-xs text-font-color-black dark:text-font-color-white">
-            {isMultipleSelectionEnabled ? (
-              <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
-                {multipleSelectionsData.multipleSelections.length} selections
-              </div>
-            ) : (
-              folderSongs &&
-              folderSongs.length > 0 && (
-                <span className="no-of-songs">{folderSongs.length} songs</span>
-              )
-            )}
+          <div className="container flex">
+            '{folderName}' {t('common.folder_one')}
+            <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
+              {isMultipleSelectionEnabled ? (
+                <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
+                  {t('common.selectionWithCount', {
+                    count: multipleSelectionsData.multipleSelections.length,
+                  })}
+                </div>
+              ) : (
+                folderSongs &&
+                folderSongs.length > 0 && (
+                  <span className="no-of-songs">
+                    {t('common.folderWithCount', { count: folderSongs.length })}
+                  </span>
+                )
+              )}
+            </div>
           </div>
           {folderInfo && (
             <div className="buttons-container flex text-sm">
@@ -284,7 +255,7 @@ const MusicFolderInfoPage = () => {
                   const { x, y } = button.getBoundingClientRect();
                   updateContextMenuData(true, otherOptions, x + 10, y + 50);
                 }}
-                tooltipLabel="More Options"
+                tooltipLabel={t('common.moreOptions')}
                 onContextMenu={(e) => {
                   e.preventDefault();
                   updateContextMenuData(true, otherOptions, e.pageX, e.pageY);
@@ -299,13 +270,15 @@ const MusicFolderInfoPage = () => {
                 clickHandler={() =>
                   toggleMultipleSelections(!isMultipleSelectionEnabled, 'songs')
                 }
-                tooltipLabel={
-                  isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
-                }
+                tooltipLabel={t(
+                  `common.${
+                    isMultipleSelectionEnabled ? 'unselectAll' : 'select'
+                  }`,
+                )}
               />
               <Button
                 key={2}
-                tooltipLabel="Play All"
+                tooltipLabel={t('common.playAll')}
                 className="play-all-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                 iconName="play_arrow"
                 clickHandler={() =>
@@ -314,7 +287,7 @@ const MusicFolderInfoPage = () => {
               />
               <Button
                 key={3}
-                tooltipLabel="Shuffle and Play"
+                tooltipLabel={t('common.shuffleAndPlay')}
                 className="shuffle-and-play-all-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                 iconName="shuffle"
                 clickHandler={() =>
@@ -324,7 +297,7 @@ const MusicFolderInfoPage = () => {
               <Dropdown
                 name="musicFolderSortDropdown"
                 value={sortingOrder ?? ''}
-                options={dropdownOptions}
+                options={songSortOptions}
                 onChange={(e) => {
                   updateCurrentlyActivePageData((currentPageData) => ({
                     ...currentPageData,
@@ -342,7 +315,7 @@ const MusicFolderInfoPage = () => {
         >
           {folderSongs && folderSongs.length > 0 && (
             <List
-              className="appear-from-bottom delay-100"
+              className="appear-from-bottom delay-100 [scrollbar-gutter:stable]"
               itemCount={folderSongs.length}
               itemSize={60}
               width={width || '100%'}

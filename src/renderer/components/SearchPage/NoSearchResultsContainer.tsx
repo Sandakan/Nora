@@ -1,5 +1,6 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import Img from '../Img';
 
 import NoResultsImage from '../../../../assets/images/svg/Sad face_Monochromatic.svg';
@@ -13,6 +14,8 @@ type Props = {
 };
 
 const NoSearchResultsContainer = (props: Props) => {
+  const { t } = useTranslation();
+
   const { searchInput, searchResults, updateSearchInput } = props;
   const { albums, artists, genres, playlists, songs } = searchResults;
 
@@ -57,7 +60,7 @@ const NoSearchResultsContainer = (props: Props) => {
               alt="Flying kite"
             />
             <div className="description text-xl text-font-color-black dark:text-font-color-white">
-              Hmm... There&apos;s nothing that matches with what you look for.
+              {t('searchPage.noResults')}
             </div>
             <div className="recent-search-results-container mt-2 flex flex-wrap items-center justify-center px-[15%]">
               {availableSearchResultComponents}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import log from 'renderer/utils/log';
@@ -23,6 +24,7 @@ const AllSearchResultsPage = () => {
     React.useContext(AppContext);
   const { toggleMultipleSelections } = React.useContext(AppUpdateContext);
   const data = currentlyActivePage.data as AllSearchResultProp;
+  const { t } = useTranslation();
 
   const [searchResults, setSearchResults] = React.useState({
     albums: [],
@@ -105,24 +107,36 @@ const AllSearchResultsPage = () => {
       <>
         <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
           <div className="container flex">
-            Showing results for{' '}
-            <span className="search-query mx-2 text-font-color-highlight dark:text-dark-font-color-highlight">
-              &apos;
-              {data.searchQuery}
-              &apos;
-            </span>{' '}
-            {(data.searchFilter as SearchFilters) !== 'All' && (
-              <>
-                on{' '}
-                <span className="search-filter mx-2 text-font-color-highlight dark:text-dark-font-color-highlight">
-                  {data.searchFilter}
-                </span>
-              </>
-            )}
+            <Trans
+              i18nKey={`searchPage.${
+                data.searchFilter === 'All'
+                  ? 'showingResultsFor'
+                  : 'showingResultsForWithFilter'
+              }`}
+              values={{
+                query: data.searchQuery,
+                filter: t(
+                  `common.${
+                    selectedType === undefined || selectedType === 'songs'
+                      ? 'song'
+                      : selectedType
+                  }_other`,
+                ),
+              }}
+              components={{
+                span: (
+                  <span className="search-query mx-2 text-font-color-highlight dark:text-dark-font-color-highlight" />
+                ),
+              }}
+            />
           </div>
           <div className="other-controls-container flex">
             <Button
-              label={isMultipleSelectionEnabled ? 'Unselect All' : 'Select'}
+              label={t(
+                `common.${
+                  isMultipleSelectionEnabled ? 'unselectAll' : 'select'
+                }`,
+              )}
               className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
               iconName={
                 isMultipleSelectionEnabled ? 'remove_done' : 'checklist'
@@ -134,9 +148,11 @@ const AllSearchResultsPage = () => {
                 );
               }}
               isDisabled={selectedType === undefined}
-              tooltipLabel={
-                isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
-              }
+              tooltipLabel={t(
+                `common.${
+                  isMultipleSelectionEnabled ? 'unselectAll' : 'select'
+                }`,
+              )}
             />
           </div>
         </div>

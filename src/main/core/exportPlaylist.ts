@@ -47,7 +47,10 @@ const createM3u8FileForPlaylist = async (playlist: SavablePlaylist) => {
         undefined,
         'INFO',
         {
-          sendToRenderer: 'SUCCESS',
+          sendToRenderer: {
+            messageCode: 'PLAYLIST_EXPORT_SUCCESS',
+            data: { name },
+          },
         },
       );
     }
@@ -56,7 +59,7 @@ const createM3u8FileForPlaylist = async (playlist: SavablePlaylist) => {
       { name, playlistId },
       'WARN',
       {
-        sendToRenderer: 'FAILURE',
+        sendToRenderer: { messageCode: 'DESTINATION_NOT_SELECTED' },
       },
     );
   } catch (error) {
@@ -65,7 +68,10 @@ const createM3u8FileForPlaylist = async (playlist: SavablePlaylist) => {
       { error, name, playlistId },
       'ERROR',
       {
-        sendToRenderer: 'FAILURE',
+        sendToRenderer: {
+          messageCode: 'PLAYLIST_EXPORT_FAILED',
+          data: { name },
+        },
       },
     );
   }

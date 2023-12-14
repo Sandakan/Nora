@@ -2,6 +2,7 @@
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 
 import Img from 'renderer/components/Img';
@@ -12,6 +13,7 @@ import HomeImgLightDark from '../../../../../assets/images/webp/home-skeleton-li
 
 const ThemeSettings = () => {
   const { userData } = React.useContext(AppContext);
+  const { t } = useTranslation();
 
   const [theme, setTheme] = React.useState(userData?.theme);
 
@@ -63,14 +65,11 @@ const ThemeSettings = () => {
     <li className="main-container appearance-settings-container mb-16">
       <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         <span className="material-icons-round-outlined mr-2">dark_mode</span>
-        Appearance
+        {t('settingsPage.appearance')}
       </div>
       <ul className="list-disc pl-6 marker:bg-font-color-highlight dark:marker:bg-dark-font-color-highlight">
         <li>
-          <div className="description">
-            Change the of the application as you need. We don&apos;t judge you
-            for it.
-          </div>
+          <div className="description">{t('settingsPage.changeTheme')}</div>
           <div className="theme-change-radio-btns flex max-w-3xl items-center justify-between pl-4 pt-4">
             <label
               htmlFor="lightThemeRadioBtn"
@@ -94,10 +93,10 @@ const ThemeSettings = () => {
               <Img
                 loading="eager"
                 src={HomeImgLight}
-                className="w-40 shadow-md"
+                className="h-24 w-40 shadow-md"
               />
               <span className="mt-4 peer-checked:!text-font-color-black dark:peer-checked:!text-font-color-black">
-                Light Theme
+                {t('settingsPage.lightTheme')}
               </span>
             </label>
 
@@ -123,10 +122,10 @@ const ThemeSettings = () => {
               <Img
                 loading="eager"
                 src={HomeImgDark}
-                className="w-40 shadow-md"
+                className="h-24 w-40 shadow-md"
               />
               <span className="mt-4 peer-checked:!text-font-color-black dark:peer-checked:!text-font-color-black">
-                Dark Theme
+                {t('settingsPage.darkTheme')}
               </span>
             </label>
 
@@ -151,10 +150,10 @@ const ThemeSettings = () => {
               <Img
                 loading="eager"
                 src={HomeImgLightDark}
-                className="w-40 shadow-md"
+                className="h-24 w-40 shadow-md"
               />
               <span className="mt-4 peer-checked:!text-font-color-black dark:peer-checked:!text-font-color-black">
-                System Theme
+                {t('settingsPage.systemTheme')}
               </span>
             </label>
           </div>

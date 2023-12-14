@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 
 import Img from '../Img';
@@ -20,6 +21,7 @@ export interface MostRelevantResultProp {
 export const MostRelevantResult = (props: MostRelevantResultProp) => {
   const { playSong, updateContextMenuData, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const {
     id,
@@ -118,7 +120,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
           </div>
         )}
         <div className="result-type mt-3 w-fit -translate-x-1 overflow-hidden text-ellipsis whitespace-nowrap rounded-2xl bg-background-color-3 px-3 py-1 font-medium uppercase text-font-color-black group-hover:bg-background-color-1 group-hover:text-font-color-black dark:bg-dark-background-color-3 dark:text-font-color-black dark:group-hover:bg-dark-background-color-1 dark:group-hover:text-font-color-white">
-          {resultType.toUpperCase()}
+          {t(`common.${resultType}_one`)}
         </div>
       </div>
     </div>

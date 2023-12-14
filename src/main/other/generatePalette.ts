@@ -34,7 +34,6 @@ const generatePalette = async (
   sendAdditionalData = true,
 ): Promise<NodeVibrantPalette | undefined> => {
   if (artwork) {
-    const start = timeStart();
     const palette = await nodeVibrant
       .from(artwork)
       .getPalette()
@@ -45,8 +44,6 @@ const generatePalette = async (
           'ERROR',
         );
       });
-
-    timeEnd(start, 'Time to generate the nodeVibrant palette');
 
     if (palette) {
       const generatePaletteSwatch = <T extends typeof palette.DarkMuted>(
@@ -87,7 +84,6 @@ const generatePalette = async (
         DarkMuted: generatePaletteSwatch(palette.DarkMuted),
       };
 
-      timeEnd(start, 'Time to finish generating the palette');
       return outputPalette;
     }
     log('GENERATED ARTWORK PALETTE EMPTY.', undefined, 'ERROR');
@@ -108,6 +104,8 @@ const generatePalettesForSongs = async () => {
     );
 
     if (noOfNoPaletteSongs > 0) {
+      const start = timeStart();
+
       for (let i = 0; i < songs.length; i += 1) {
         if (!songs[i].palette) {
           const metadata = await musicMetaData.parseFile(songs[i].path);
@@ -130,17 +128,16 @@ const generatePalettesForSongs = async () => {
           songs[i].palette = swatch;
           x += 1;
 
-          sendMessageToRenderer(
-            `Generating palettes for ${x} out of ${noOfNoPaletteSongs} songs.`,
-            'SONG_PALETTE_GENERAING_PROCESS_UPDATE',
-            { max: noOfNoPaletteSongs, value: x },
-          );
+          sendMessageToRenderer({
+            messageCode: 'SONG_PALETTE_GENERATING_PROCESS_UPDATE',
+            data: { total: noOfNoPaletteSongs, value: x },
+          });
         }
       }
-
+      timeEnd(start, 'Time to finish generating palettes for songs');
       setSongsData(songs);
       dataUpdateEvent('songs/palette');
-    } else sendMessageToRenderer(`No more palettes for songs to be generated.`);
+    } else sendMessageToRenderer({ messageCode: 'NO_MORE_SONG_PALETTES' });
   }
 };
 
@@ -161,6 +158,8 @@ const generatePalettesForGenres = async () => {
     );
 
     if (noOfNoPaletteGenres > 0) {
+      const start = timeStart();
+
       for (let i = 0; i < genres.length; i += 1) {
         const genreArtworkName = genres[i].artworkName;
         if (!genres[i]?.backgroundColor) {
@@ -188,18 +187,17 @@ const generatePalettesForGenres = async () => {
             x += 1;
           }
 
-          sendMessageToRenderer(
-            `Generating palettes for ${x} out of ${noOfNoPaletteGenres} genres.`,
-            'GENRE_PALETTE_GENERAING_PROCESS_UPDATE',
-            { max: noOfNoPaletteGenres, value: x },
-          );
+          sendMessageToRenderer({
+            messageCode: 'SONG_PALETTE_GENERATING_PROCESS_UPDATE',
+            data: { total: noOfNoPaletteGenres, value: x },
+          });
         }
       }
+      timeEnd(start, 'Time to finish generating palettes for genres');
 
       setGenresData(genres);
       dataUpdateEvent('genres/backgroundColor');
-    } else
-      sendMessageToRenderer(`No more palettes for genres to be generated.`);
+    } else sendMessageToRenderer({ messageCode: 'NO_MORE_SONG_PALETTES' });
   }
 };
 

@@ -1,9 +1,12 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
+
 import Button from '../Button';
 
 const WindowControlsContainer = () => {
   const { userData, bodyBackgroundImage } = React.useContext(AppContext);
+  const { t } = useTranslation();
 
   const close = React.useCallback(() => {
     if (userData && userData.preferences.hideWindowOnClose)
@@ -30,7 +33,7 @@ const WindowControlsContainer = () => {
           bodyBackgroundImage && '!text-font-color-white'
         } `}
         clickHandler={minimize}
-        tooltipLabel="Minimize"
+        tooltipLabel={t('titleBar.minimize')}
         iconName="minimize"
         iconClassName="h-fit text-xl !font-light transition-[background] ease-in-out"
       />
@@ -39,7 +42,7 @@ const WindowControlsContainer = () => {
           bodyBackgroundImage && '!text-font-color-white'
         } `}
         clickHandler={maximize}
-        tooltipLabel="Maximize"
+        tooltipLabel={t('titleBar.maximize')}
         iconClassName="material-icons-round-outlined h-fit text-lg !font-light transition-[background] ease-in-out"
         iconName="crop_square"
       />
@@ -48,7 +51,7 @@ const WindowControlsContainer = () => {
           bodyBackgroundImage && '!text-font-color-white'
         } `}
         clickHandler={close}
-        tooltipLabel="Close"
+        tooltipLabel={t('titleBar.close')}
         iconName="close"
         iconClassName="h-fit text-xl !font-light transition-[background] ease-in-out"
       />

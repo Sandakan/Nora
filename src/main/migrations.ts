@@ -154,6 +154,15 @@ export const genreMigrations = {
 };
 
 export const userDataMigrations = {
+  '2.5.0-stable': (store: Conf<{ version?: string; userData: UserData }>) => {
+    log('Starting the userData.json migration process.', {
+      version: '2.5.0-stable;',
+    });
+    const userData = store.get('userData');
+    userData.language = 'en';
+
+    store.set('userData', userData);
+  },
   '2.4.0-stable': (store: Conf<{ version?: string; userData: UserData }>) => {
     log('Starting the userData.json migration process.', {
       version: '2.4.0-stable;',

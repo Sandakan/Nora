@@ -7,62 +7,81 @@ const manageAlbumsOfParsedSong = (
   songInfo: SavableSongData,
   songArtworkPaths?: ArtworkPaths,
 ) => {
-  const relevantAlbums: SavableAlbum[] = [];
-  const { title, songId, artists, year, album: songAlbum } = songInfo;
+  let relevantAlbum: SavableAlbum | undefined;
+  let newAlbum: SavableAlbum | undefined;
+  const {
+    title,
+    songId,
+    albumArtists = [],
+    artists = [],
+    year,
+    album: songAlbum,
+  } = songInfo;
+
   const songAlbumName = songAlbum?.name.trim();
+  const relevantAlbumArtists: { artistId: string; name: string }[] = [];
+
+  if (albumArtists.length > 0) relevantAlbumArtists.push(...albumArtists);
+  else if (artists.length > 0) relevantAlbumArtists.push(...artists);
 
   if (songAlbumName) {
     if (Array.isArray(allAlbumsData)) {
-      const isAlbumAvailable = allAlbumsData.some(
-        //  album.title doesn't need trimming they are already trimmed when adding them to the database.
+      const availableAlbum = allAlbumsData.find(
+        //  album.title doesn't need trimming because they are already trimmed when adding them to the database.
         (album) => album.title === songAlbumName,
+        // &&
+        // // to prevent mixing songs from same album names with different album artists
+        // (albumArtists.length > 0 &&
+        // Array.isArray(album.artists) &&
+        // album.artists.length > 0
+        //   ? album.artists.every((artist) =>
+        //       albumArtists.some(
+        //         (albumArtist) => albumArtist.name === artist.name,
+        //       ),
+        //     )
+        //   : true),
       );
 
-      if (isAlbumAvailable) {
-        const updatedAlbums = allAlbumsData.map((album) => {
-          if (album.title === songAlbumName) {
-            album.songs.push({
-              title,
-              songId,
-            });
-            relevantAlbums.push(album);
-            return album;
-          }
-          return album;
+      if (availableAlbum) {
+        availableAlbum.songs.push({
+          title,
+          songId,
         });
-        return { updatedAlbums, relevantAlbums, newAlbums: [] };
-      }
-      const newAlbum: SavableAlbum = {
-        title: songAlbumName,
-        artworkName:
-          songArtworkPaths && !songArtworkPaths.isDefaultArtwork
-            ? path.basename(songArtworkPaths.artworkPath)
-            : undefined,
-        year,
-        albumId: generateRandomId(),
-        artists,
-        songs: [
-          {
-            songId,
-            title,
-          },
-        ],
-      };
+        relevantAlbum = availableAlbum;
+      } else {
+        const newAlbumData: SavableAlbum = {
+          title: songAlbumName,
+          artworkName:
+            songArtworkPaths && !songArtworkPaths.isDefaultArtwork
+              ? path.basename(songArtworkPaths.artworkPath)
+              : undefined,
+          year,
+          albumId: generateRandomId(),
+          artists: relevantAlbumArtists,
+          songs: [
+            {
+              songId,
+              title,
+            },
+          ],
+        };
 
-      allAlbumsData.push(newAlbum);
-      relevantAlbums.push(newAlbum);
+        allAlbumsData.push(newAlbumData);
+        relevantAlbum = newAlbumData;
+        newAlbum = newAlbumData;
+      }
       return {
         updatedAlbums: allAlbumsData,
-        relevantAlbums,
-        newAlbums: [newAlbum],
+        relevantAlbum,
+        newAlbum,
       };
     }
-    return { updatedAlbums: [], relevantAlbums, newAlbums: [] };
+    return { updatedAlbums: [], relevantAlbum, newAlbum };
   }
   return {
     updatedAlbums: allAlbumsData || [],
-    relevantAlbums: [],
-    newAlbums: [],
+    relevantAlbum,
+    newAlbum,
   };
 };
 

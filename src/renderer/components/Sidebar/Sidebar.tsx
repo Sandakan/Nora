@@ -8,6 +8,8 @@
 import React, { useContext } from 'react';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
+import i18n from 'renderer/i18n';
+
 import ErrorBoundary from '../ErrorBoundary';
 import SideBarItem from './SideBarItem';
 
@@ -15,55 +17,55 @@ const linkData = [
   {
     parentClassName: 'home active',
     icon: 'home',
-    content: 'Home',
+    content: i18n.t('sideBar.home'),
     isActive: true,
   },
   {
     parentClassName: 'search',
     icon: 'search',
-    content: 'Search',
+    content: i18n.t('sideBar.search'),
     isActive: false,
   },
   {
     parentClassName: 'songs',
     icon: 'music_note',
-    content: 'Songs',
+    content: i18n.t('common.song_other'),
     isActive: false,
   },
   {
     parentClassName: 'playlists',
     icon: 'queue_music',
-    content: 'Playlists',
+    content: i18n.t('common.playlist_other'),
     isActive: false,
   },
   {
     parentClassName: 'folders',
     icon: 'folder',
-    content: 'Folders',
+    content: i18n.t('common.folder_other'),
     isActive: false,
   },
   {
     parentClassName: 'artists',
     icon: 'people',
-    content: 'Artists',
+    content: i18n.t('common.artist_other'),
     isActive: false,
   },
   {
     parentClassName: 'albums',
     icon: 'album',
-    content: 'Albums',
+    content: i18n.t('common.album_other'),
     isActive: false,
   },
   {
     parentClassName: 'genres',
     icon: 'track_changes',
-    content: 'Genres',
+    content: i18n.t('common.genre_other'),
     isActive: false,
   },
   {
     parentClassName: 'settings',
     icon: 'settings',
-    content: 'Settings',
+    content: i18n.t('settingsPage.settings'),
     isActive: false,
   },
 ];

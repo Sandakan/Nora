@@ -26,6 +26,7 @@ export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(
 export const DEFAULT_FILE_URL = 'nora://localFiles/';
 
 export const USER_DATA_TEMPLATE: UserData = {
+  language: 'en',
   theme: { isDarkMode: false, useSystemTheme: true },
   musicFolders: [],
   preferences: {
@@ -38,12 +39,14 @@ export const USER_DATA_TEMPLATE: UserData = {
     sendSongScrobblingDataToLastFM: false,
     sendSongFavoritesDataToLastFM: false,
     sendNowPlayingSongDataToLastFM: false,
+    saveLyricsInLrcFilesForSupportedSongs: false,
   },
   windowPositions: {},
   windowDiamensions: {},
   windowState: 'normal',
   recentSearches: [],
 };
+
 export const HISTORY_PLAYLIST_TEMPLATE: SavablePlaylist = {
   name: 'History',
   playlistId: 'History',
@@ -261,6 +264,8 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
       userData.theme = data as typeof userData.theme;
     else if (dataType === 'musicFolders' && Array.isArray(data)) {
       userData.musicFolders = data;
+    } else if (dataType === 'language' && typeof data === 'string') {
+      userData.language = data as LanguageCodes;
     } else if (
       dataType === 'windowPositions.mainWindow' &&
       typeof data === 'object'
@@ -306,6 +311,11 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
     ) {
       userData.preferences.hideWindowOnClose = data;
     } else if (
+      dataType === 'preferences.saveLyricsInLrcFilesForSupportedSongs' &&
+      typeof data === 'boolean'
+    ) {
+      userData.preferences.saveLyricsInLrcFilesForSupportedSongs = data;
+    } else if (
       dataType === 'preferences.openWindowAsHiddenOnSystemStart' &&
       typeof data === 'boolean'
     ) {
@@ -331,6 +341,11 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
     ) {
       const encryptedToken = encrypt(data);
       userData.customMusixmatchUserToken = encryptedToken;
+    } else if (
+      dataType === 'customLrcFilesSaveLocation' &&
+      typeof data === 'string'
+    ) {
+      userData.customLrcFilesSaveLocation = data;
     } else if (dataType === 'lastFmSessionData' && typeof data === 'object') {
       userData.lastFmSessionData = data as LastFMSessionData;
     } else if (dataType === 'storageMetrics' && typeof data === 'object') {
@@ -438,6 +453,7 @@ export const createNewListeningDataInstance = (songId: string) => {
     fullListens: 0,
     inNoOfPlaylists: 0,
     listens: [{ year: currentYear, listens: [] }],
+    seeks: [],
   };
   return newListeningData;
 };
@@ -464,14 +480,22 @@ export const getListeningData = (
   }
 
   const listeningData: SongListeningData[] = results.map((x) => {
-    const { songId, skips, fullListens, inNoOfPlaylists, listens } = x;
+    const {
+      songId,
+      skips = 0,
+      fullListens = 0,
+      inNoOfPlaylists = 0,
+      listens,
+      seeks = [],
+    } = x;
 
     return {
       songId,
-      skips: skips ?? 0,
-      fullListens: fullListens ?? 0,
-      inNoOfPlaylists: inNoOfPlaylists ?? 0,
+      skips,
+      fullListens,
+      inNoOfPlaylists,
       listens,
+      seeks,
     };
   });
 
@@ -495,6 +519,7 @@ export const setListeningData = (data: SongListeningData) => {
       results[i].fullListens = data.fullListens;
       results[i].inNoOfPlaylists = data.inNoOfPlaylists;
       results[i].listens = data.listens;
+      results[i].seeks = data.seeks;
 
       break;
     }

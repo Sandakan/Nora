@@ -17,13 +17,14 @@ const restoreBlacklistedFolders = async (blacklistedFolderPaths: string[]) => {
     );
 
     if (isParentBlacklisted && isParentNotInFolderPaths)
-      sendMessageToRenderer(
-        `Couldn't whitelist '${path.basename(
-          blacklistedFolderPath,
-        )}' folder because its parent folder '${path.basename(
-          path.dirname(blacklistedFolderPath),
-        )}' is also blacklisted. Whitelist the parent folder to whitelist this folder.`,
-      );
+      sendMessageToRenderer({
+        messageCode:
+          'WHITELISTING_FOLDER_FAILED_DUE_TO_BLACKLISTED_PARENT_FOLDER',
+        data: {
+          folderName: path.basename(blacklistedFolderPath),
+          parentFolderName: path.dirname(blacklistedFolderPath),
+        },
+      });
   }
 
   blacklist.folderBlacklist = blacklist.folderBlacklist.filter(

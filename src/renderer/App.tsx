@@ -1,5 +1,6 @@
 /* eslint-disable no-use-before-define */
 import React, { ReactNode, Suspense } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import 'tailwindcss/tailwind.css';
 import '../../assets/styles/styles.css';
 import packageFile from '../../package.json';
@@ -39,8 +40,9 @@ import SongUnplayableErrorPrompt, {
 } from './components/SongUnplayableErrorPrompt';
 import shuffleQueueRandomly from './other/shuffleQueueRandomly';
 import toggleSongIsFavorite from './other/toggleSongIsFavorite';
-import UnsupportedFileMessagePrompt from './other/UnsupportedFileMessagePrompt';
+import UnsupportedFileMessagePrompt from './components/UnsupportedFileMessagePrompt';
 import SuspenseLoader from './components/SuspenseLoader';
+import { equalizerBandHertzData } from './other/equalizerData';
 
 const MiniPlayer = React.lazy(
   () => import('./components/MiniPlayer/MiniPlayer'),
@@ -50,56 +52,42 @@ const player = new Audio();
 let repetitivePlaybackErrorsCount = 0;
 const lowResponseTimeRequiredPages: PageTitles[] = ['Lyrics', 'LyricsEditor'];
 
+// ? / / / / / / /  EQUALIZER INITIALIZATION / / / / / / / / / / / / / /
 const context = new window.AudioContext();
-const source = context.createMediaElementSource(player);
-const sixtyHertzFilter = context.createBiquadFilter(); // 60Hz
-const hundredFiftyHertzFilter = context.createBiquadFilter(); // 150Hz
-const fourHundredHertzFilter = context.createBiquadFilter(); // 400Hz
-const thousandHertzFilter = context.createBiquadFilter(); // 1000Hz
-const twoThousandHertzFilter = context.createBiquadFilter(); // 2000Hz
-const fifteenThousandHertzFilter = context.createBiquadFilter(); // 15000Hz
+const equalizerBands = new Map<EqualizerBandFilters, BiquadFilterNode>();
 
-source.connect(sixtyHertzFilter);
-sixtyHertzFilter.connect(hundredFiftyHertzFilter);
-hundredFiftyHertzFilter.connect(fourHundredHertzFilter);
-fourHundredHertzFilter.connect(thousandHertzFilter);
-thousandHertzFilter.connect(twoThousandHertzFilter);
-twoThousandHertzFilter.connect(fifteenThousandHertzFilter);
-fifteenThousandHertzFilter.connect(context.destination);
+for (const [filterName, hertzValue] of Object.entries(equalizerBandHertzData)) {
+  const equalizerFilterName = filterName as EqualizerBandFilters;
+  const equalizerBand = context.createBiquadFilter();
+
+  equalizerBand.type = 'peaking';
+  equalizerBand.frequency.value = hertzValue;
+  equalizerBand.Q.value = 1;
+  equalizerBand.gain.value = 0;
+
+  equalizerBands.set(equalizerFilterName, equalizerBand);
+}
+
+const source = context.createMediaElementSource(player);
+const filterMapKeys = [...equalizerBands.keys()];
+
+equalizerBands.forEach((filter, key, map) => {
+  const currentFilterIndex = filterMapKeys.indexOf(key);
+  const isTheFirstFilter = currentFilterIndex === 0;
+  const isTheLastFilter = currentFilterIndex === filterMapKeys.length - 1;
+
+  if (isTheFirstFilter) source.connect(filter);
+  else {
+    const prevFilter = map.get(filterMapKeys[currentFilterIndex - 1]);
+    if (prevFilter) prevFilter.connect(filter);
+
+    if (isTheLastFilter) filter.connect(context.destination);
+  }
+});
 
 // ? / / / / / / /  PLAYER DEFAULT OPTIONS / / / / / / / / / / / / / /
 player.preload = 'auto';
 player.defaultPlaybackRate = 1.0;
-
-sixtyHertzFilter.type = 'peaking';
-sixtyHertzFilter.frequency.value = 60;
-sixtyHertzFilter.Q.value = 1;
-sixtyHertzFilter.gain.value = 0;
-
-hundredFiftyHertzFilter.type = 'peaking';
-hundredFiftyHertzFilter.frequency.value = 150;
-hundredFiftyHertzFilter.Q.value = 1;
-hundredFiftyHertzFilter.gain.value = 0;
-
-fourHundredHertzFilter.type = 'peaking';
-fourHundredHertzFilter.frequency.value = 400;
-fourHundredHertzFilter.Q.value = 1;
-fourHundredHertzFilter.gain.value = 0;
-
-thousandHertzFilter.type = 'peaking';
-thousandHertzFilter.frequency.value = 1000;
-thousandHertzFilter.Q.value = 1;
-thousandHertzFilter.gain.value = 0;
-
-twoThousandHertzFilter.type = 'peaking';
-twoThousandHertzFilter.frequency.value = 2400;
-twoThousandHertzFilter.Q.value = 1;
-twoThousandHertzFilter.gain.value = 0;
-
-fifteenThousandHertzFilter.type = 'peaking';
-fifteenThousandHertzFilter.frequency.value = 15000;
-fifteenThousandHertzFilter.Q.value = 1;
-fifteenThousandHertzFilter.gain.value = 0;
 
 player.addEventListener('player/trackchange', (e) => {
   if ('detail' in e) {
@@ -122,6 +110,8 @@ storage.checkLocalStorage();
 // console.log('Command line args', window.api.properties.commandLineArgs);
 
 export default function App() {
+  const { t } = useTranslation();
+
   const [content, dispatch] = React.useReducer(reducer, DEFAULT_REDUCER_DATA);
   // Had to use a Ref in parallel with the Reducer to avoid an issue that happens when using content.* not giving the intended data in useCallback functions even though it was added as a dependency of that function.
   const contentRef = React.useRef(DEFAULT_REDUCER_DATA);
@@ -183,16 +173,19 @@ export default function App() {
         <ErrorPrompt
           reason="ERROR_IN_PLAYER"
           message={
-            <>
-              An error ocurred in the player.
-              <br />
-              This could be a result of trying to play a corrupted song.
-              <details className="mt-4">
-                {playerErrorData
-                  ? `CODE ${playerErrorData.code} : ${playerErrorData.message}`
-                  : 'No error message generated.'}
-              </details>
-            </>
+            <Trans
+              i18nKey="player.errorMessage"
+              components={{
+                br: <br />,
+                details: (
+                  <details className="mt-4">
+                    {playerErrorData
+                      ? `CODE ${playerErrorData.code} : ${playerErrorData.message}`
+                      : t('player.noErrorMessage')}
+                  </details>
+                ),
+              }}
+            />
           }
           showSendFeedbackBtn
         />
@@ -224,7 +217,7 @@ export default function App() {
       }
       return undefined;
     },
-    [changePromptMenuData],
+    [changePromptMenuData, t],
   );
 
   const AUDIO_FADE_INTERVAL = 50;
@@ -402,21 +395,14 @@ export default function App() {
 
   React.useEffect(() => {
     if (content.localStorage.equalizerPreset) {
-      const {
-        fifteenKiloHertz,
-        fourHundredHertz,
-        hundredFiftyHertz,
-        oneKiloHertz,
-        sixtyHertz,
-        twoPointFourKiloHertz,
-      } = content.localStorage.equalizerPreset;
+      const filters = content.localStorage.equalizerPreset;
+      for (const filter of Object.entries(filters)) {
+        const filterName = filter[0] as EqualizerBandFilters;
+        const gainValue: number = filter[1];
 
-      sixtyHertzFilter.gain.value = sixtyHertz;
-      hundredFiftyHertzFilter.gain.value = hundredFiftyHertz;
-      fourHundredHertzFilter.gain.value = fourHundredHertz;
-      thousandHertzFilter.gain.value = oneKiloHertz;
-      twoThousandHertzFilter.gain.value = twoPointFourKiloHertz;
-      fifteenThousandHertzFilter.gain.value = fifteenKiloHertz;
+        const equalizerFilter = equalizerBands.get(filterName);
+        if (equalizerFilter) equalizerFilter.gain.value = gainValue;
+      }
     }
   }, [content.localStorage.equalizerPreset]);
 
@@ -556,7 +542,7 @@ export default function App() {
       data?.isLowResponseRequired ||
       content.player.isMiniPlayer;
 
-    const duration = isLowResponseRequired ? 200 : 1000;
+    const duration = isLowResponseRequired ? 100 : 1000;
 
     const intervalId = setInterval(() => {
       if (!player.paused) {
@@ -814,31 +800,18 @@ export default function App() {
         addNewNotifications([
           {
             id: 'noSongToPlay',
-            content: <span>Please select a song to play.</span>,
-            icon: (
-              <span className="material-icons-round-outlined text-lg">
-                error
-              </span>
-            ),
+            content: t('notifications.selectASongToPlay'),
+            iconName: 'error',
           },
         ]);
       return undefined;
     },
-    [managePlaybackErrors, addNewNotifications, fadeOutAudio, fadeInAudio],
+    [addNewNotifications, t, fadeOutAudio, fadeInAudio, managePlaybackErrors],
   );
 
   const displayMessageFromMain = React.useCallback(
-    (
-      _: unknown,
-      message: string,
-      messageCode?: MessageCodes,
-      data?: Record<string, unknown>,
-    ) => {
-      const notification = parseNotificationFromMain(
-        message,
-        messageCode,
-        data,
-      );
+    (_: unknown, messageCode: MessageCodes, data?: Record<string, unknown>) => {
+      const notification = parseNotificationFromMain(messageCode, data);
 
       addNewNotifications([notification]);
     },
@@ -884,8 +857,8 @@ export default function App() {
       (contentRef.current.player.isRepeating === 'false'
         ? 'repeat'
         : contentRef.current.player.isRepeating === 'repeat'
-        ? 'repeat-1'
-        : 'false');
+          ? 'repeat-1'
+          : 'false');
     contentRef.current.player.isRepeating = repeatState;
     dispatch({
       type: 'UPDATE_IS_REPEATING_STATE',
@@ -896,8 +869,12 @@ export default function App() {
   const recordRef = React.useRef<ListeningDataSession>();
 
   const recordListeningData = React.useCallback(
-    (songId: string, duration: number) => {
-      if (recordRef?.current?.songId !== songId) {
+    (songId: string, duration: number, isRepeating = false) => {
+      if (recordRef?.current?.songId !== songId || isRepeating) {
+        if (isRepeating)
+          console.warn(
+            `Added another song record instance for the repetition of ${songId}`,
+          );
         if (recordRef.current) recordRef.current.stopRecording();
 
         const listeningDataSession = new ListeningDataSession(songId, duration);
@@ -983,16 +960,23 @@ export default function App() {
         true,
         <ErrorPrompt
           reason="SONG_ID_UNDEFINED"
-          message={`An error ocurred when trying to play a song.\nERROR : SONG_ID_UNDEFINED`}
+          message={`${t('player.errorTitle')}\nERROR : SONG_ID_UNDEFINED`}
         />,
       );
       return log(
-        `======= ERROR OCCURRED WHEN TRYING TO PLAY A S0NG. =======\nERROR : Song id is of unknown type; SONGIDTYPE : ${typeof songId}`,
+        'ERROR OCCURRED WHEN TRYING TO PLAY A S0NG.',
+        {
+          error: 'Song id is of unknown type',
+          songIdType: typeof songId,
+          songId,
+        },
+        'ERROR',
       );
     },
     [
       addNewNotifications,
       changePromptMenuData,
+      t,
       toggleSongPlayback,
       recordListeningData,
     ],
@@ -1047,9 +1031,10 @@ export default function App() {
     if (player.currentTime > 5) {
       player.currentTime = 0;
     } else if (typeof currentSongIndex === 'number') {
-      if (currentSongIndex === 0)
-        changeQueueCurrentSongIndex(refQueue.current.queue.length - 1);
-      else changeQueueCurrentSongIndex(currentSongIndex - 1);
+      if (currentSongIndex === 0) {
+        if (refQueue.current.queue.length > 0)
+          changeQueueCurrentSongIndex(refQueue.current.queue.length - 1);
+      } else changeQueueCurrentSongIndex(currentSongIndex - 1);
     } else changeQueueCurrentSongIndex(0);
   }, [changeQueueCurrentSongIndex]);
 
@@ -1062,10 +1047,16 @@ export default function App() {
       ) {
         player.currentTime = 0;
         toggleSongPlayback(true);
+        recordListeningData(
+          contentRef.current.currentSongData.songId,
+          contentRef.current.currentSongData.duration,
+          true,
+        );
+
         window.api.audioLibraryControls.updateSongListeningData(
           contentRef.current.currentSongData.songId,
           'listens',
-          'increment',
+          1,
         );
       } else if (typeof currentSongIndex === 'number') {
         if (refQueue.current.queue.length > 0) {
@@ -1077,7 +1068,7 @@ export default function App() {
       } else if (refQueue.current.queue.length > 0)
         changeQueueCurrentSongIndex(0);
     },
-    [toggleSongPlayback, changeQueueCurrentSongIndex],
+    [changeQueueCurrentSongIndex, recordListeningData, toggleSongPlayback],
   );
 
   React.useEffect(() => {
@@ -1095,10 +1086,11 @@ export default function App() {
         ? contentRef.current.currentSongData.artists
             .map((artist) => artist.name)
             .join(', ')
-        : `Unknown Artist`,
+        : t('common.unknownArtist'),
       album: contentRef.current.currentSongData.album
-        ? contentRef.current.currentSongData.album.name || 'Unknown Album'
-        : 'Unknown Album',
+        ? contentRef.current.currentSongData.album.name ||
+          t('common.unknownAlbum')
+        : t('common.unknownAlbum'),
       artwork: [
         {
           // src: `http://nora.app/local/${contentRef.current.currentSongData.artworkPath}`,
@@ -1148,6 +1140,7 @@ export default function App() {
     content.player.isCurrentSongPlaying,
     handleSkipBackwardClick,
     handleSkipForwardClick,
+    t,
     toggleSongPlayback,
   ]);
 
@@ -1451,13 +1444,13 @@ export default function App() {
       } else
         addNewNotifications([
           {
-            content: 'You are already in the current page.',
+            content: t('notifications.alreadyInPage'),
             id: 'alreadyInCurrentPage',
             delay: 2500,
           },
         ]);
     },
-    [addNewNotifications, toggleMultipleSelections],
+    [addNewNotifications, t, toggleMultipleSelections],
   );
 
   const updateMiniPlayerStatus = React.useCallback(
@@ -1596,12 +1589,16 @@ export default function App() {
         if (updatedPlaybackRate + 0.05 > 4) updatedPlaybackRate = 4;
         else updatedPlaybackRate += 0.05;
 
+        updatedPlaybackRate = parseFloat(updatedPlaybackRate.toFixed(2));
+
         storage.setItem('playback', 'playbackRate', updatedPlaybackRate);
         addNewNotifications([
           {
             id: 'playbackRate',
-            icon: <span className="material-icons-round">avg_pace</span>,
-            content: `Playback Rate Changed to ${updatedPlaybackRate} x`,
+            iconName: 'avg_pace',
+            content: t('notifications.playbackRateChanged', {
+              val: updatedPlaybackRate,
+            }),
           },
         ]);
       } else if (e.ctrlKey && e.key === '[') {
@@ -1611,12 +1608,16 @@ export default function App() {
         if (updatedPlaybackRate - 0.05 < 0.25) updatedPlaybackRate = 0.25;
         else updatedPlaybackRate -= 0.05;
 
+        updatedPlaybackRate = parseFloat(updatedPlaybackRate.toFixed(2));
+
         storage.setItem('playback', 'playbackRate', updatedPlaybackRate);
         addNewNotifications([
           {
             id: 'playbackRate',
-            icon: <span className="material-icons-round">avg_pace</span>,
-            content: `Playback Rate Changed to ${updatedPlaybackRate} x`,
+            iconName: 'avg_pace',
+            content: t('notifications.playbackRateChanged', {
+              val: updatedPlaybackRate,
+            }),
           },
         ]);
       } else if (e.ctrlKey && e.key === '\\') {
@@ -1624,12 +1625,13 @@ export default function App() {
         addNewNotifications([
           {
             id: 'playbackRate',
-            icon: <span className="material-icons-round">avg_pace</span>,
-            content: `Playback Rate Resetted to 1x`,
+            iconName: 'avg_pace',
+            content: t('notifications.playbackRateReset'),
           },
         ]);
       }
       // default combinations
+      else if (e.code === 'Escape') toggleMultipleSelections(false);
       else if (e.code === 'Space') toggleSongPlayback();
       // shift combinations
       else if (e.shiftKey && e.key === 'ArrowLeft') {
@@ -1664,10 +1666,12 @@ export default function App() {
       content.navigationHistory.history,
       content.navigationHistory.pageHistoryIndex,
       content.localStorage.playback.playbackRate,
+      changeCurrentActivePage,
+      toggleMultipleSelections,
       toggleSongPlayback,
       updatePageHistoryIndex,
-      changeCurrentActivePage,
       addNewNotifications,
+      t,
     ],
   );
 
@@ -1783,12 +1787,13 @@ export default function App() {
       {
         id: 'songPausedOnDelete',
         delay: 7500,
-        content: 'Current song playback paused because the song was deleted.',
+        content: t('notifications.playbackPausedDueToSongDeletion'),
       },
     ]);
   }, [
     addNewNotifications,
     content.currentSongData.songId,
+    t,
     toggleSongPlayback,
     updateQueueData,
   ]);
@@ -1961,7 +1966,7 @@ export default function App() {
                   : 'bg-background-color-1'
               } ${
                 isReducedMotion
-                  ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
+                  ? 'reduced-motion animate-none transition-none !duration-[0] !delay-0 [&.dialog-menu]:!backdrop-blur-none'
                   : ''
               } grid !h-screen w-full grid-rows-[auto_1fr_auto] items-center overflow-y-hidden after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc]  [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
               ref={AppRef}

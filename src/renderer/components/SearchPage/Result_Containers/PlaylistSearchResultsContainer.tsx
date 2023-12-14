@@ -5,6 +5,7 @@ import SecondaryContainer from 'renderer/components/SecondaryContainer';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   playlists: Playlist[];
@@ -24,6 +25,7 @@ const PlaylistSearchResultsContainer = (props: Props) => {
     React.useContext(AppContext);
   const { toggleMultipleSelections, changeCurrentActivePage } =
     React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const selectAllHandler = useSelectAllHandler(
     playlists,
@@ -77,21 +79,31 @@ const PlaylistSearchResultsContainer = (props: Props) => {
             <div className="other-stats-container ml-12 flex items-center text-xs">
               {playlists && playlists.length > 0 && (
                 <span className="no-of-songs">
-                  {playlists.length} results{' '}
-                  {playlists.length > noOfVisiblePlaylists &&
-                    `(${noOfVisiblePlaylists} shown)`}
+                  {t(
+                    `searchPage.${
+                      playlists.length > noOfVisiblePlaylists
+                        ? 'resultAndVisibleCount'
+                        : 'resultCount'
+                    }`,
+                    {
+                      count: playlists.length,
+                      noVisible: noOfVisiblePlaylists,
+                    },
+                  )}
                 </span>
               )}
             </div>
           </div>
           <div className="other-controls-container flex">
             <Button
-              label={
-                isMultipleSelectionEnabled &&
-                multipleSelectionsData.selectionType === 'playlist'
-                  ? 'Unselect All'
-                  : 'Select'
-              }
+              label={t(
+                `common.${
+                  isMultipleSelectionEnabled &&
+                  multipleSelectionsData.selectionType === 'playlist'
+                    ? 'unselectAll'
+                    : 'select'
+                }`,
+              )}
               className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
               iconName={
                 isMultipleSelectionEnabled &&
@@ -109,13 +121,15 @@ const PlaylistSearchResultsContainer = (props: Props) => {
                 isMultipleSelectionEnabled &&
                 multipleSelectionsData.selectionType !== 'playlist'
               }
-              tooltipLabel={
-                isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
-              }
+              tooltipLabel={t(
+                `common.${
+                  isMultipleSelectionEnabled ? 'unselectAll' : 'select'
+                }`,
+              )}
             />
             {playlists.length > noOfVisiblePlaylists && (
               <Button
-                label="Show All"
+                label={t('common.showAll')}
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>

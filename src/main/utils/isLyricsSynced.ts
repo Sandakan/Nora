@@ -1,7 +1,8 @@
 export const syncedLyricsRegex =
   /^(\[(?:la:)?(?<lang>\w{2,3})])?(?<timestamp>\[\d+:\d{1,2}\.\d{1,3}])(\[(?:la:)?(?:\w{2,3})])?(?=(?<lyric>.+$))/gm;
 export const extendedSyncedLyricsLineRegex =
-  /(?<extSyncTimeStamp><\d+:\d{1,2}\.\d{1,3}>) ?(?=(?<lyric>[^<>\n]+))/gm;
+  // eslint-disable-next-line no-useless-escape
+  /(?<extSyncTimeStamp>[\[<]\d+:\d{1,2}\.\d{1,3}[\]>]) ?(?=(?<lyric>[^<>\n]+))/gm;
 
 const isLyricsSynced = (lyrics: string) => {
   const bool = syncedLyricsRegex.test(lyrics);

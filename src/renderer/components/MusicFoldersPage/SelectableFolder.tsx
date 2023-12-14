@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import Img from '../Img';
 import { SelectableFolderStructure } from './AddMusicFoldersPrompt';
 import FolderImg from '../../../../assets/images/webp/empty-folder.webp';
@@ -11,6 +12,8 @@ interface Props {
 }
 
 const SelectableFolder = (props: Props) => {
+  const { t } = useTranslation();
+
   const { structure, updateFolders } = props;
   const { isSelected, path, subFolders } = structure;
 
@@ -51,8 +54,11 @@ const SelectableFolder = (props: Props) => {
           <div className="ml-4">
             <p className="">{folderName}</p>
             <p className=" text-xs opacity-50">
-              {subFolders.length} sub-folders &bull; {structure.noOfSongs ?? 0}{' '}
-              songs
+              {t('common.subFolderWithCount', { count: subFolders.length })}
+              &bull;
+              {t('common.songWithCount', {
+                count: structure.noOfSongs ?? 0,
+              })}
             </p>
           </div>
         </div>
@@ -62,7 +68,10 @@ const SelectableFolder = (props: Props) => {
             iconClassName="!text-2xl !leading-none"
             id={`${structure.path}RevealBtn`}
             iconName={isSubFoldersVisible ? 'arrow_drop_up' : 'arrow_drop_down'}
-            clickHandler={() => setIsSubFoldersVisible((state) => !state)}
+            clickHandler={(e) => {
+              e.preventDefault();
+              setIsSubFoldersVisible((state) => !state);
+            }}
           />
         )}
       </label>

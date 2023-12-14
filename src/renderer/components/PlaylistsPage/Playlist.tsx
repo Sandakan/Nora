@@ -3,14 +3,16 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
-import ConfirmDeletePlaylists from './ConfirmDeletePlaylists';
+import ConfirmDeletePlaylists from './ConfirmDeletePlaylistsPrompt';
 import DefaultPlaylistCover from '../../../../assets/images/webp/playlist_cover_default.webp';
 import Button from '../Button';
 import MultipleArtworksCover from './MultipleArtworksCover';
+import RenamePlaylistPrompt from './RenamePlaylistPrompt';
 
 interface PlaylistProp extends Playlist {
   // eslint-disable-next-line react/no-unused-prop-types
@@ -35,6 +37,7 @@ export const Playlist = (props: PlaylistProp) => {
     updateMultipleSelections,
     addNewNotifications,
   } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const openPlaylistInfoPage = React.useCallback(
     () =>
@@ -104,9 +107,9 @@ export const Playlist = (props: PlaylistProp) => {
               {
                 id: `${songIds.length}AddedToQueueFromMultiSelection`,
                 delay: 5000,
-                content: (
-                  <span>Added {songIds.length} songs to the queue.</span>
-                ),
+                content: t(`notifications.addedToQueue`, {
+                  count: songIds.length,
+                }),
               },
             ]);
           }
@@ -114,7 +117,7 @@ export const Playlist = (props: PlaylistProp) => {
         })
         .catch((err) => console.error(err));
     },
-    [addNewNotifications, createQueue, multipleSelectionsData],
+    [addNewNotifications, createQueue, multipleSelectionsData, t],
   );
 
   const addToQueueForMultipleSelections = React.useCallback(() => {
@@ -148,7 +151,9 @@ export const Playlist = (props: PlaylistProp) => {
             {
               id: 'newSongsToQueue',
               delay: 5000,
-              content: <span>Added {songs.length} songs to the queue.</span>,
+              content: t(`notifications.addedToQueue`, {
+                count: songs.length,
+              }),
             },
           ]);
         }
@@ -159,6 +164,7 @@ export const Playlist = (props: PlaylistProp) => {
     addNewNotifications,
     multipleSelectionsData,
     queue.queue,
+    t,
     updateQueueData,
   ]);
 
@@ -171,7 +177,7 @@ export const Playlist = (props: PlaylistProp) => {
 
     return [
       {
-        label: isMultipleSelectionsEnabled ? 'Play All' : 'Play',
+        label: t(`common.${isMultipleSelectionsEnabled ? 'playAll' : 'play'}`),
         iconName: 'play_arrow',
         handlerFunction: () => {
           if (isMultipleSelectionEnabled) playAllSongsForMultipleSelections();
@@ -181,8 +187,8 @@ export const Playlist = (props: PlaylistProp) => {
       },
       {
         label: isMultipleSelectionsEnabled
-          ? 'Shuffle and Play All'
-          : 'Shuffle and Play',
+          ? t(`common.shuffleAndPlayAll`)
+          : t(`common.shuffleAndPlay`),
         iconName: 'shuffle',
         handlerFunction: () => {
           if (isMultipleSelectionEnabled)
@@ -192,7 +198,7 @@ export const Playlist = (props: PlaylistProp) => {
         },
       },
       {
-        label: 'Add to Queue',
+        label: t(`common.addToQueue`),
         iconName: 'queue',
         handlerFunction: () => {
           if (isMultipleSelectionsEnabled) addToQueueForMultipleSelections();
@@ -203,9 +209,9 @@ export const Playlist = (props: PlaylistProp) => {
               {
                 id: 'newSongsToQueue',
                 delay: 5000,
-                content: (
-                  <span>Added {props.songs.length} songs to the queue.</span>
-                ),
+                content: t(`notifications.addedToQueue`, {
+                  count: props.songs.length,
+                }),
               },
             ]);
           }
@@ -218,7 +224,9 @@ export const Playlist = (props: PlaylistProp) => {
         handlerFunction: () => true,
       },
       {
-        label: props.isArtworkAvailable ? 'Change artwork' : 'Add artwork',
+        label: `playlist.${
+          props.isArtworkAvailable ? 'changeArtwork' : 'addArtwork'
+        }`,
         iconName: 'photo_camera',
         handlerFunction: () => {
           window.api.songUpdates
@@ -235,7 +243,7 @@ export const Playlist = (props: PlaylistProp) => {
             .then(() => {
               return addNewNotifications([
                 {
-                  content: 'Updated playlist artwork successfully.',
+                  content: t('playlist.playlistArtworkUpdateSuccess'),
                   icon: <span className="material-icons-round">done</span>,
                   delay: 5000,
                   id: 'PlaylistArtworkUpdateSuccessful',
@@ -249,7 +257,20 @@ export const Playlist = (props: PlaylistProp) => {
           : props.playlistId === 'History' || props.playlistId === 'Favorites',
       },
       {
-        label: isAMultipleSelection ? 'Unselect' : 'Select',
+        label: t('playlist.renamePlaylist'),
+        iconName: 'edit',
+        handlerFunction: () => {
+          changePromptMenuData(
+            true,
+            <RenamePlaylistPrompt playlistData={props} />,
+          );
+        },
+        isDisabled: isMultipleSelectionsEnabled
+          ? false
+          : props.playlistId === 'History' || props.playlistId === 'Favorites',
+      },
+      {
+        label: t(`common.${isAMultipleSelection ? 'unselect' : 'select'}`),
         iconName: 'checklist',
         handlerFunction: () => {
           if (isMultipleSelectionEnabled) {
@@ -265,7 +286,7 @@ export const Playlist = (props: PlaylistProp) => {
         },
       },
       {
-        label: 'Export Playlist',
+        label: t('playlist.exportPlaylist'),
         iconName: 'upload',
         handlerFunction: () =>
           window.api.playlistsData.exportPlaylist(props.playlistId),
@@ -279,7 +300,7 @@ export const Playlist = (props: PlaylistProp) => {
       //     props.selectAllHandler && props.selectAllHandler(),
       // },
       {
-        label: 'Info',
+        label: t('common.info'),
         iconName: 'info',
         handlerFunction: openPlaylistInfoPage,
         isDisabled: isMultipleSelectionsEnabled,
@@ -293,9 +314,13 @@ export const Playlist = (props: PlaylistProp) => {
           : props.playlistId === 'History' || props.playlistId === 'Favorites',
       },
       {
-        label: isMultipleSelectionsEnabled
-          ? 'Delete Selected Playlists'
-          : 'Delete Playlist',
+        label: t(
+          `playlist.${
+            isMultipleSelectionsEnabled
+              ? 'deleteSelectedPlaylists'
+              : 'deletePlaylist_one'
+          }`,
+        ),
         iconName: 'delete_outline',
         handlerFunction: () => {
           changePromptMenuData(
@@ -326,6 +351,7 @@ export const Playlist = (props: PlaylistProp) => {
     playAllSongsForMultipleSelections,
     props,
     queue.queue,
+    t,
     toggleMultipleSelections,
     updateMultipleSelections,
     updateQueueData,
@@ -337,13 +363,15 @@ export const Playlist = (props: PlaylistProp) => {
       multipleSelectionsData.selectionType === 'playlist' &&
       isAMultipleSelection
         ? {
-            title: `${multipleSelectionsData.multipleSelections.length} selected playlists`,
+            title: t('playlist.selectedPlaylistCount', {
+              count: multipleSelectionsData.multipleSelections.length,
+            }),
             artworkPath: DefaultPlaylistCover,
           }
         : {
             title: props.name,
             artworkPath: props?.artworkPaths?.optimizedArtworkPath,
-            subTitle: `${props.songs.length} songs`,
+            subTitle: t('common.songWithCount', { count: props.songs.length }),
           },
     [
       isAMultipleSelection,
@@ -353,6 +381,7 @@ export const Playlist = (props: PlaylistProp) => {
       props?.artworkPaths?.optimizedArtworkPath,
       props.name,
       props.songs.length,
+      t,
     ],
   );
 
@@ -422,12 +451,14 @@ export const Playlist = (props: PlaylistProp) => {
               <MultipleArtworksCover
                 songIds={props.songs}
                 className="aspect-square w-full"
+                enableImgFadeIns={!isMultipleSelectionEnabled}
               />
               <Img
                 src={props.artworkPaths.artworkPath}
                 alt="Playlist Cover"
                 loading="lazy"
                 className="!absolute bottom-1 left-1 h-8 w-8 !rounded-md"
+                enableImgFadeIns={!isMultipleSelectionEnabled}
               />
             </div>
           ) : (
@@ -436,6 +467,7 @@ export const Playlist = (props: PlaylistProp) => {
               alt="Playlist Cover"
               loading="lazy"
               className="h-full w-full"
+              enableImgFadeIns={!isMultipleSelectionEnabled}
             />
           )}
         </div>
@@ -459,9 +491,9 @@ export const Playlist = (props: PlaylistProp) => {
           }
           label={props.name}
         />
-        <div className="playlist-no-of-songs text-sm font-light">{`${
-          props.songs.length
-        } song${props.songs.length === 1 ? '' : 's'}`}</div>
+        <div className="playlist-no-of-songs text-sm font-light">
+          {t('common.songWithCount', { count: props.songs.length })}
+        </div>
       </div>
     </div>
   );

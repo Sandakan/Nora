@@ -9,10 +9,10 @@ export const changeAppTheme = (theme?: AppTheme) => {
     theme === undefined
       ? !themeData.isDarkMode
       : theme === 'light'
-      ? false
-      : theme === 'dark'
-      ? true
-      : nativeTheme.shouldUseDarkColors;
+        ? false
+        : theme === 'dark'
+          ? true
+          : nativeTheme.shouldUseDarkColors;
   const useSystemTheme = theme === 'system';
 
   if (mainWindow?.webContents)

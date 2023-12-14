@@ -10,6 +10,9 @@
   <a href="https://github.com/Sandakan/Nora/blob/master/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/Sandakan/Nora?style=for-the-badge"></a>
   <a href="https://github.com/Sandakan/Nora/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/Sandakan/Oto-Music-for-Desktop?style=for-the-badge"></a>
   <img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/Sandakan/Nora/build.yml?branch=master&style=for-the-badge">
+  <br/>
+  <br/>
+  <a title="Crowdin" target="_blank" href="https://crowdin.com/project/nora"><img src="https://badges.crowdin.net/nora/localized.svg"></a>
  </div>
 
  <br/>
@@ -58,7 +61,7 @@ It packs a horizon of features including,
 
 <br>
 
-![Latest Version Artwork](/assets/other/release%20artworks/whats-new-v2.4.0-stable.webp)
+![Latest Version Artwork](/assets/other/release%20artworks/whats-new-v2.5.0-stable.webp)
 
 Visit the [release notes](/changelog.md) to see what's new on the latest release.</p>
 

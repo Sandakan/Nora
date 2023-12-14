@@ -2,6 +2,7 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 
@@ -43,6 +44,7 @@ const Folder = (props: FolderProps) => {
     className,
     subFolders = [],
   } = props;
+  const { t } = useTranslation();
 
   const { length: noOfSongs } = songIds;
 
@@ -105,7 +107,9 @@ const Folder = (props: FolderProps) => {
 
     return [
       {
-        label: isAMultipleSelection ? 'Unselect' : 'Select',
+        label: t(
+          `common.${isMultipleSelectionEnabled ? 'unselect' : 'select'}`,
+        ),
         iconName: 'checklist',
         handlerFunction: () => {
           if (isMultipleSelectionEnabled) {
@@ -127,13 +131,13 @@ const Folder = (props: FolderProps) => {
       //   handlerFunction: () => selectAllHandler && selectAllHandler(),
       // },
       {
-        label: 'Info',
+        label: t('common.info'),
         iconName: 'info',
         handlerFunction: openMusicFolderInfoPage,
         isDisabled: isMultipleSelectionsEnabled,
       },
       {
-        label: 'Reveal in File Explorer',
+        label: t('song.revealInFileExplorer'),
         class: 'reveal-file-explorer',
         iconName: 'folder_open',
         handlerFunction: () =>
@@ -145,16 +149,18 @@ const Folder = (props: FolderProps) => {
         handlerFunction: null,
       },
       {
-        label: isMultipleSelectionEnabled
-          ? 'Toggle blacklist Folder'
-          : isBlacklisted
-          ? 'Restore from Blacklist'
-          : 'Blacklist Folder',
+        label: t(
+          isMultipleSelectionEnabled
+            ? 'folder.toggleBlacklistFolder'
+            : isBlacklisted
+              ? 'song.deblacklist'
+              : 'folder.blacklistFolder',
+        ),
         iconName: isMultipleSelectionEnabled
           ? 'settings_backup_restore'
           : isBlacklisted
-          ? 'settings_backup_restore'
-          : 'block',
+            ? 'settings_backup_restore'
+            : 'block',
         handlerFunction: () => {
           if (isMultipleSelectionEnabled) {
             window.api.folderData
@@ -201,6 +207,7 @@ const Folder = (props: FolderProps) => {
     isMultipleSelectionEnabled,
     multipleSelectionsData,
     openMusicFolderInfoPage,
+    t,
     toggleMultipleSelections,
     updateMultipleSelections,
   ]);
@@ -211,7 +218,9 @@ const Folder = (props: FolderProps) => {
       multipleSelectionsData.selectionType === 'folder' &&
       isAMultipleSelection
         ? {
-            title: `${multipleSelectionsData.multipleSelections.length} selected folders`,
+            title: t('folder.selectedFolderCount', {
+              count: multipleSelectionsData.multipleSelections.length,
+            }),
             artworkClassName: '!w-6',
             artworkPath: FolderImg,
           }
@@ -219,7 +228,11 @@ const Folder = (props: FolderProps) => {
             title: folderName || 'Unknown Folder',
             artworkPath: FolderImg,
             artworkClassName: '!w-6',
-            subTitle: `${songIds.length} songs`,
+            subTitle: t('common.songWithCount', { count: noOfSongs }),
+            subTitle2:
+              subFolders.length > 0
+                ? t('common.subFolderWithCount', { count: subFolders.length })
+                : undefined,
           },
     [
       folderName,
@@ -227,16 +240,16 @@ const Folder = (props: FolderProps) => {
       isMultipleSelectionEnabled,
       multipleSelectionsData.multipleSelections.length,
       multipleSelectionsData.selectionType,
-      songIds.length,
+      noOfSongs,
+      subFolders.length,
+      t,
     ],
   );
 
   return (
-    <div
-      className={`group mb-2 flex w-full flex-col justify-between ${className}`}
-    >
+    <div className={`mb-2 flex w-full flex-col justify-between ${className}`}>
       <div
-        className={`flex w-full cursor-pointer items-center justify-between rounded-md px-4 py-2 outline-1 -outline-offset-2 transition-colors focus-visible:!outline dark:text-font-color-white ${
+        className={`group flex w-full cursor-pointer items-center justify-between rounded-md px-4 py-2 outline-1 -outline-offset-2 transition-colors focus-visible:!outline dark:text-font-color-white ${
           isAMultipleSelection
             ? '!bg-background-color-3/90 !text-font-color-black dark:!bg-dark-background-color-3/90 dark:!text-font-color-black'
             : 'hover:!bg-background-color-2 dark:hover:!bg-dark-background-color-2'
@@ -269,7 +282,11 @@ const Folder = (props: FolderProps) => {
         }}
         onKeyDown={(e) => e.key === 'Enter' && openMusicFolderInfoPage()}
         tabIndex={0}
-        title={isBlacklisted ? `'${folderName}' is blacklisted.` : undefined}
+        title={
+          isBlacklisted
+            ? t('notifications.songBlacklisted', { title: folderName })
+            : undefined
+        }
         onContextMenu={(e) =>
           updateContextMenuData(
             true,
@@ -299,8 +316,18 @@ const Folder = (props: FolderProps) => {
               {folderName}
             </span>
             <div className="flex items-center opacity-75">
+              {subFolders.length > 0 && (
+                <>
+                  <span className="no-of-sub-folders text-xs font-thin">
+                    {t('common.subFolderWithCount', {
+                      count: subFolders.length,
+                    })}
+                  </span>
+                  <span className="mx-1">&bull;</span>
+                </>
+              )}
               <span className="no-of-songs mr-2 text-xs font-thin">
-                {noOfSongs} song{noOfSongs === 1 ? '' : 's'}
+                {t('common.songWithCount', { count: noOfSongs })}
               </span>
               <span className="invisible text-xs font-thin opacity-0 transition-[visibility,opacity] group-hover:visible group-hover:opacity-100">
                 &bull;

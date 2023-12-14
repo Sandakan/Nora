@@ -1,20 +1,35 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
 import React, { CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FixedSizeGrid as Grid } from 'react-window';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 import storage from 'renderer/utils/localStorage';
+import i18n from 'renderer/i18n';
 
 import { Album } from './Album';
 import MainContainer from '../MainContainer';
-import Dropdown from '../Dropdown';
+import Dropdown, { DropdownOption } from '../Dropdown';
 import Img from '../Img';
 import Button from '../Button';
 
 import NoAlbumsImage from '../../../../assets/images/svg/Easter bunny_Monochromatic.svg';
+
+const albumSortOptions: DropdownOption<AlbumSortTypes>[] = [
+  { label: i18n.t('sortTypes.aToZ'), value: 'aToZ' },
+  { label: i18n.t('sortTypes.zToA'), value: 'zToA' },
+  {
+    label: i18n.t('sortTypes.noOfSongsDescending'),
+    value: 'noOfSongsDescending',
+  },
+  {
+    label: i18n.t('sortTypes.noOfSongsAscending'),
+    value: 'noOfSongsAscending',
+  },
+];
 
 const AlbumsPage = () => {
   const {
@@ -25,6 +40,7 @@ const AlbumsPage = () => {
   } = React.useContext(AppContext);
   const { updateCurrentlyActivePageData, toggleMultipleSelections } =
     React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const [albumsData, setAlbumsData] = React.useState([] as Album[]);
   const [sortingOrder, setSortingOrder] = React.useState<AlbumSortTypes>(
@@ -131,25 +147,30 @@ const AlbumsPage = () => {
         {albumsData.length > 0 && (
           <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
             <div className="container flex">
-              Albums{' '}
+              {t('common.album_one')}{' '}
               <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
                 {isMultipleSelectionEnabled ? (
                   <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
-                    {multipleSelectionsData.multipleSelections.length}{' '}
-                    selections
+                    {t('common.selectionWithCount', {
+                      count: multipleSelectionsData.multipleSelections.length,
+                    })}
                   </div>
                 ) : (
                   albumsData.length > 0 && (
-                    <span className="no-of-albums">{`${
-                      albumsData.length
-                    } album${albumsData.length === 1 ? '' : 's'}`}</span>
+                    <span className="no-of-albums">
+                      {t('common.albumWithCount', { count: albumsData.length })}
+                    </span>
                   )
                 )}
               </div>
             </div>
             <div className="other-controls-container flex">
               <Button
-                label={isMultipleSelectionEnabled ? 'Unselect All' : 'Select'}
+                label={t(
+                  `common.${
+                    isMultipleSelectionEnabled ? 'unselectAll' : 'select'
+                  }`,
+                )}
                 className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                 iconName={
                   isMultipleSelectionEnabled ? 'remove_done' : 'checklist'
@@ -157,21 +178,11 @@ const AlbumsPage = () => {
                 clickHandler={() =>
                   toggleMultipleSelections(!isMultipleSelectionEnabled, 'album')
                 }
-                tooltipLabel={
-                  isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
-                }
               />
               <Dropdown
                 name="albumSortDropdown"
                 value={sortingOrder}
-                options={
-                  [
-                    { label: 'A to Z', value: 'aToZ' },
-                    { label: 'Z to A', value: 'zToA' },
-                    { label: 'High Song Count', value: 'noOfSongsDescending' },
-                    { label: 'Low Song Count', value: 'noOfSongsAscending' },
-                  ] as { label: string; value: AlbumSortTypes }[]
-                }
+                options={albumSortOptions}
                 onChange={(e) => {
                   const albumSortTypes = e.currentTarget
                     .value as AlbumSortTypes;
@@ -193,7 +204,7 @@ const AlbumsPage = () => {
         >
           {albumsData && albumsData.length > 0 && (
             <Grid
-              className="appear-from-bottom delay-100"
+              className="appear-from-bottom delay-100 [scrollbar-gutter:stable]"
               columnCount={noOfColumns || 5}
               columnWidth={itemWidth}
               rowCount={noOfRows || 5}
@@ -237,7 +248,7 @@ const AlbumsPage = () => {
               alt="No songs available."
               className="mb-8 w-60"
             />
-            <div>Even the bunny can&apos;t find them. How can we ?</div>
+            <div>{t('albumsPage.empty')}</div>
           </div>
         )}
       </>

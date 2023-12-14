@@ -3,6 +3,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 
@@ -10,14 +11,13 @@ import Img from '../Img';
 import SongArtist from '../SongsPage/SongArtist';
 
 import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
-import Button from '../Button';
 import AddSongsToPlaylists from '../SongsPage/AddSongsToPlaylists';
 import BlacklistSongConfrimPrompt from '../SongsPage/BlacklistSongConfirmPrompt';
 import DeleteSongsFromSystemConfrimPrompt from '../SongsPage/DeleteSongsFromSystemConfrimPrompt';
+import UpNextSongPopup from './UpNextSongPopup';
 
 const CurrentlyPlayingSongInfoContainer = () => {
-  const { currentSongData, queue, localStorageData } =
-    React.useContext(AppContext);
+  const { currentSongData, localStorageData } = React.useContext(AppContext);
   const {
     changeCurrentActivePage,
     updateContextMenuData,
@@ -25,47 +25,10 @@ const CurrentlyPlayingSongInfoContainer = () => {
     toggleMultipleSelections,
     addNewNotifications,
   } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
-  const [upNextSongData, setUpNextSongData] = React.useState<SongData>();
-  const upNextSongDataCache = React.useRef<SongData>();
-
-  React.useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    let timeIntervalId: NodeJS.Timeout;
-    if (queue.queue.length > 1 && queue.currentSongIndex) {
-      setUpNextSongData(undefined);
-      const nextSongIndex = queue.queue[queue.currentSongIndex + 1];
-
-      if (nextSongIndex) {
-        timeoutId = setTimeout(
-          () =>
-            window.api.audioLibraryControls
-              .getSongInfo([nextSongIndex])
-              .then((res) => {
-                if (res && res[0]) {
-                  const [nextSongData] = res;
-                  upNextSongDataCache.current = nextSongData;
-                  // setUpNextSongData(upNextSongDataCache.current);
-
-                  timeIntervalId = setInterval(() => {
-                    setUpNextSongData(upNextSongDataCache.current);
-                    setTimeout(() => setUpNextSongData(undefined), 10000);
-                  }, 40000);
-                }
-
-                return undefined;
-              })
-              .catch((err) => console.error(err)),
-          5000,
-        );
-      }
-    }
-
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-      if (timeIntervalId) clearInterval(timeIntervalId);
-    };
-  }, [queue.currentSongIndex, queue.queue]);
+  const [isNextSongPopupVisible, setIsNextSongPopupVisible] =
+    React.useState(false);
 
   const songArtistsImages = React.useMemo(() => {
     if (
@@ -154,10 +117,12 @@ const CurrentlyPlayingSongInfoContainer = () => {
           })
           .flat();
       }
-      return <span className="text-xs font-normal">Unknown Artist</span>;
+      return (
+        <span className="text-xs font-normal">{t('common.unknownArtist')}</span>
+      );
     }
     return '';
-  }, [currentSongData]);
+  }, [currentSongData, t]);
 
   const contextMenuCurrentSongData =
     React.useMemo((): ContextMenuAdditionalData => {
@@ -166,10 +131,11 @@ const CurrentlyPlayingSongInfoContainer = () => {
         title,
         artworkPath: artworkPath ?? DefaultSongCover,
         subTitle:
-          artists?.map((artist) => artist.name).join(', ') || 'Unknown artist',
+          artists?.map((artist) => artist.name).join(', ') ||
+          t('common.unknownArtist'),
         subTitle2: album?.name,
       };
-    }, [currentSongData]);
+    }, [currentSongData, t]);
 
   const contextMenuItems = React.useMemo((): ContextMenuItem[] => {
     const {
@@ -184,7 +150,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
 
     return [
       {
-        label: 'Add to Playlists',
+        label: t('song.addToPlaylists'),
         iconName: 'playlist_add',
         handlerFunction: () => {
           changePromptMenuData(
@@ -200,26 +166,26 @@ const CurrentlyPlayingSongInfoContainer = () => {
         handlerFunction: () => true,
       },
       {
-        label: 'Reveal in File Explorer',
+        label: t('song.revealInFileExplorer'),
         class: 'reveal-file-explorer',
         iconName: 'folder_open',
         handlerFunction: () =>
           window.api.songUpdates.revealSongInFileExplorer(songId),
       },
       {
-        label: 'Info',
+        label: t('common.info'),
         iconName: 'info',
         handlerFunction: () => showSongInfoPage(songId),
         isDisabled: !isKnownSource,
       },
       {
-        label: 'Go to Album',
+        label: t('song.goToAlbum'),
         iconName: 'album',
         handlerFunction: gotToSongAlbumPage,
         isDisabled: !isKnownSource || !album,
       },
       {
-        label: 'Edit song tags',
+        label: t('song.editSongTags'),
         class: 'edit',
         iconName: 'edit',
         handlerFunction: () =>
@@ -231,7 +197,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
           }),
       },
       {
-        label: 'Save Song Artwork',
+        label: t('common.saveArtwork'),
         class: 'edit',
         iconName: 'image',
         iconClassName: 'material-icons-round-outlined',
@@ -249,7 +215,9 @@ const CurrentlyPlayingSongInfoContainer = () => {
         handlerFunction: () => true,
       },
       {
-        label: isBlacklisted ? 'Restore from Blacklist' : 'Blacklist Song',
+        label: t(`song.${isBlacklisted ? 'deblacklist' : 'blacklistSong'}`, {
+          count: 1,
+        }),
         iconName: isBlacklisted ? 'settings_backup_restore' : 'block',
         handlerFunction: () => {
           if (isBlacklisted)
@@ -264,7 +232,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
                   {
                     id: `${title}Blacklisted`,
                     delay: 5000,
-                    content: <span>&apos;{title}&apos; blacklisted.</span>,
+                    content: t('notifications.songBlacklisted', { title }),
                     icon: <span className="material-icons-round">block</span>,
                   },
                 ]),
@@ -279,7 +247,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
         },
       },
       {
-        label: 'Delete from System',
+        label: t('song.delete'),
         iconName: 'delete',
         handlerFunction: () => {
           changePromptMenuData(
@@ -298,6 +266,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
     gotToSongAlbumPage,
     localStorageData?.preferences.doNotShowBlacklistSongConfirm,
     showSongInfoPage,
+    t,
     toggleMultipleSelections,
   ]);
 
@@ -365,7 +334,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
             )}
           </div>
         )}
-        {!upNextSongData && (
+        {!isNextSongPopupVisible && (
           <div
             className="song-artists appear-from-bottom flex w-full items-center truncate"
             id="currentSongArtists"
@@ -386,62 +355,9 @@ const CurrentlyPlayingSongInfoContainer = () => {
             </span>
           </div>
         )}
-        {upNextSongData && (
-          <div className="next-song appear-from-bottom group/nextSong relative flex max-w-full items-center rounded-full bg-background-color-2 px-3 py-1 text-xs dark:bg-dark-background-color-2">
-            <p className="truncate">
-              <span className="font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
-                Up Next
-              </span>{' '}
-              <span
-                className="cursor-pointer outline-1 outline-offset-1 hover:underline focus-visible:!outline"
-                onClick={() => showSongInfoPage(upNextSongData.songId)}
-                onKeyDown={(e) =>
-                  e.key === 'Enter' && showSongInfoPage(upNextSongData.songId)
-                }
-              >
-                {upNextSongData.title}
-              </span>
-              {upNextSongData.artists && upNextSongData.artists.length > 0 && (
-                <>
-                  {' '}
-                  <span className="font-light text-font-color-highlight dark:text-dark-font-color-highlight">
-                    by
-                  </span>{' '}
-                  <span
-                    className="cursor-pointer outline-1 outline-offset-1 hover:underline focus-visible:!outline"
-                    onClick={() =>
-                      upNextSongData?.artists![0] &&
-                      changeCurrentActivePage('ArtistInfo', {
-                        artistId: upNextSongData.artists[0].artistId,
-                      })
-                    }
-                    onKeyDown={(e) =>
-                      e.key === 'Enter' &&
-                      upNextSongData?.artists![0] &&
-                      changeCurrentActivePage('ArtistInfo', {
-                        artistId: upNextSongData.artists[0].artistId,
-                      })
-                    }
-                  >
-                    {upNextSongData.artists[0].name}
-                  </span>
-                  {upNextSongData.artists.length - 1 > 0 && (
-                    <span className="opacity-80">
-                      {' '}
-                      +{upNextSongData.artists.length - 1}
-                    </span>
-                  )}
-                </>
-              )}
-            </p>
-            <Button
-              iconName="close"
-              tooltipLabel="Close Up Next"
-              className="!m-0 !hidden !border-none !py-0 !pl-1 !pr-0 !text-base !text-font-color-highlight outline-1 outline-offset-1 focus-visible:!outline group-hover/nextSong:!flex dark:!text-dark-font-color-highlight"
-              clickHandler={() => setUpNextSongData(undefined)}
-            />
-          </div>
-        )}
+        <UpNextSongPopup
+          onPopupAppears={(isVisible) => setIsNextSongPopupVisible(isVisible)}
+        />
       </div>
     </div>
   );

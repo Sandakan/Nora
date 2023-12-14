@@ -1,10 +1,12 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import storage from 'renderer/utils/localStorage';
 import Checkbox from '../../Checkbox';
 
 const AccessibilitySettings = () => {
   const { localStorageData } = React.useContext(AppContext);
+  const { t } = useTranslation();
 
   return (
     <li className="main-container accessibility-settings-container mb-16">
@@ -12,17 +14,16 @@ const AccessibilitySettings = () => {
         <span className="material-icons-round-outlined mr-2">
           settings_accessibility
         </span>
-        Accessibility
+        {t('settingsPage.accessibility')}
       </div>
       <ul className="list-disc pl-6 marker:bg-background-color-3 dark:marker:bg-background-color-3">
         <li className="secondary-container toggle-reduced-motion mb-4">
           <div className="description">
-            Removes animation that appears in the app. This will also reduce the
-            smoothness of the app.
+            {t('settingsPage.reducedMotionDescription')}
           </div>
           <Checkbox
             id="enableReducedMotion"
-            labelContent="Enable reduced motion"
+            labelContent={t('settingsPage.enableReducedMotion')}
             isChecked={
               localStorageData !== undefined &&
               localStorageData.preferences.isReducedMotion

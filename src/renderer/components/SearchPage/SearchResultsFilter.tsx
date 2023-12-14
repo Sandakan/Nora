@@ -5,43 +5,29 @@
 import React from 'react';
 import Button from '../Button';
 
-interface SearchResultsFilterProp {
-  filterType: SearchFilters;
+export interface SearchResultFilter {
+  label: string;
+  icon: string;
+  value: SearchFilters;
+}
+interface SearchResultsFilterProp extends SearchResultFilter {
   isCurrentActiveFilter: boolean;
   changeActiveFilter: (_filterType: SearchFilters) => void;
 }
 
 const SearchResultsFilter = React.memo((props: SearchResultsFilterProp) => {
-  const icon = React.useMemo(() => {
-    switch (props.filterType) {
-      case 'All':
-        return 'select_all';
-      case 'Songs':
-        return 'music_note';
-      case 'Artists':
-        return 'people';
-      case 'Albums':
-        return 'album';
-      case 'Genres':
-        return 'track_changes';
-      case 'Playlists':
-        return 'queue_music';
-      default:
-        return '';
-    }
-  }, [props.filterType]);
+  const { label, value, icon, isCurrentActiveFilter, changeActiveFilter } =
+    props;
 
   return (
     <Button
       className={`appear-from-bottom mr-3 flex w-fit cursor-pointer list-none items-center !border-0 px-4 py-1 text-font-color-black outline-1 outline-offset-1 transition-[width,background,color] duration-200 focus-visible:!outline ${
-        props.isCurrentActiveFilter
+        isCurrentActiveFilter
           ? 'active bg-background-color-3 dark:bg-dark-background-color-3 dark:!text-font-color-black'
           : 'bg-background-color-2 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:hover:!text-font-color-black'
       }`}
-      clickHandler={() =>
-        props.changeActiveFilter(props.filterType as SearchFilters)
-      }
-      label={props.filterType}
+      clickHandler={() => changeActiveFilter(value)}
+      label={label}
       iconName={icon}
     />
   );

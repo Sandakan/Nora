@@ -3,20 +3,35 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable react/no-array-index-key */
 import React, { CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FixedSizeGrid as Grid } from 'react-window';
 import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
 import storage from 'renderer/utils/localStorage';
+import i18n from 'renderer/i18n';
 
-import Dropdown from '../Dropdown';
+import Dropdown, { DropdownOption } from '../Dropdown';
 import MainContainer from '../MainContainer';
 import Genre from './Genre';
 import Img from '../Img';
 import Button from '../Button';
 
 import NoSongsImage from '../../../../assets/images/svg/Summer landscape_Monochromatic.svg';
+
+const genreSortTypes: DropdownOption<GenreSortTypes>[] = [
+  { label: i18n.t('sortTypes.aToZ'), value: 'aToZ' },
+  { label: i18n.t('sortTypes.zToA'), value: 'zToA' },
+  {
+    label: i18n.t('sortTypes.noOfSongsDescending'),
+    value: 'noOfSongsDescending',
+  },
+  {
+    label: i18n.t('sortTypes.noOfSongsAscending'),
+    value: 'noOfSongsAscending',
+  },
+];
 
 const GenresPage = () => {
   const {
@@ -27,6 +42,7 @@ const GenresPage = () => {
   } = React.useContext(AppContext);
   const { updateCurrentlyActivePageData, toggleMultipleSelections } =
     React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
   const [genresData, setGenresData] = React.useState([] as Genre[] | null);
   const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
@@ -138,26 +154,31 @@ const GenresPage = () => {
         {genresData && genresData.length > 0 && (
           <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
             <div className="container flex">
-              Genres{' '}
+              {t('common.genre_other')}{' '}
               <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
                 {isMultipleSelectionEnabled ? (
                   <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
-                    {multipleSelectionsData.multipleSelections.length}{' '}
-                    selections
+                    {t('common.selectionWithCount', {
+                      count: multipleSelectionsData.multipleSelections.length,
+                    })}
                   </div>
                 ) : (
                   genresData &&
                   genresData.length > 0 && (
-                    <div className="no-of-genres">{`${genresData.length} genre${
-                      genresData.length === 1 ? '' : 's'
-                    }`}</div>
+                    <div className="no-of-genres">
+                      {t('common.genreWithCount', { count: genresData.length })}
+                    </div>
                   )
                 )}
               </div>
             </div>
             <div className="other-controls-container flex">
               <Button
-                label={isMultipleSelectionEnabled ? 'Unselect All' : 'Select'}
+                label={t(
+                  `common.${
+                    isMultipleSelectionEnabled ? 'unselectAll' : 'select'
+                  }`,
+                )}
                 className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                 iconName={
                   isMultipleSelectionEnabled ? 'remove_done' : 'checklist'
@@ -165,19 +186,11 @@ const GenresPage = () => {
                 clickHandler={() =>
                   toggleMultipleSelections(!isMultipleSelectionEnabled, 'genre')
                 }
-                tooltipLabel={
-                  isMultipleSelectionEnabled ? 'Unselect All' : 'Select'
-                }
               />
               <Dropdown
                 name="genreSortDropdown"
                 value={sortingOrder}
-                options={[
-                  { label: 'A to Z', value: 'aToZ' },
-                  { label: 'Z to A', value: 'zToA' },
-                  { label: 'High Song Count', value: 'noOfSongsDescending' },
-                  { label: 'Low Song Count', value: 'noOfSongsAscending' },
-                ]}
+                options={genreSortTypes}
                 onChange={(e) => {
                   updateCurrentlyActivePageData((currentData) => ({
                     ...currentData,
@@ -197,7 +210,7 @@ const GenresPage = () => {
         >
           {genresData && genresData.length > 0 && (
             <Grid
-              className="appear-from-bottom delay-100"
+              className="appear-from-bottom delay-100 [scrollbar-gutter:stable]"
               columnCount={noOfColumns || 3}
               columnWidth={itemWidth}
               rowCount={noOfRows || 3}
@@ -231,7 +244,7 @@ const GenresPage = () => {
               alt="No songs available."
               className="mb-8 w-60"
             />
-            <span>Songs without genres. Yeah, we know it isn't ideal.</span>
+            <span>{t('genresPage.empty')}</span>
           </div>
         )}
       </>

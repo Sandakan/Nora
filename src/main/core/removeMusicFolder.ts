@@ -98,15 +98,16 @@ const removeMusicFolder = async (folderPath: string): Promise<boolean> => {
           log(
             `Deleted ${pathBaseName} folder from the filesystem.\nDIRECTORY : ${folderPath}`,
           );
-          sendMessageToRenderer(
-            `'${pathBaseName}' folder got deleted from the system. ${
+          sendMessageToRenderer({
+            messageCode:
               songPathsRelatedToFolders.length > 0
-                ? `${songPathsRelatedToFolders.length} songs related to that folder will be removed from the library.`
-                : 'No songs found related to the folder. Library will be unaffected.'
-            }`,
-            'MUSIC_FOLDER_DELETED',
-            { path: folderPath },
-          );
+                ? 'MUSIC_FOLDER_DELETED'
+                : 'EMPTY_MUSIC_FOLDER_DELETED',
+            data: {
+              name: pathBaseName,
+              count: songPathsRelatedToFolders.length,
+            },
+          });
         } catch (error) {
           log(
             `ERROR OCCURRED WHEN TRYING TO REMOVE SONG FROM A MUSIC FOLDER  `,

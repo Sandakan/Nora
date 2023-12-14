@@ -176,7 +176,7 @@ const importAppData = async () => {
     const missingEntries: string[] = [];
 
     log('Started to import app data. Please wait...', undefined, undefined, {
-      sendToRenderer: 'LOADING',
+      sendToRenderer: { messageCode: 'APPDATA_IMPORT_STARTED' },
     });
 
     if (Array.isArray(destinations) && destinations.length > 0) {
@@ -204,7 +204,7 @@ const importAppData = async () => {
         await importRequiredData(importDir);
 
         log('Successfully imported app data.', undefined, undefined, {
-          sendToRenderer: 'SUCCESS',
+          sendToRenderer: { messageCode: 'APPDATA_IMPORT_SUCCESS' },
         });
 
         if (localStorageData) {
@@ -213,7 +213,9 @@ const importAppData = async () => {
             undefined,
             'WARN',
             {
-              sendToRenderer: 'FAILURE',
+              sendToRenderer: {
+                messageCode: 'APPDATA_IMPORT_SUCCESS_WITH_PENDING_RESTART',
+              },
             },
           );
           setTimeout(restartFunc, 5000);
@@ -225,7 +227,11 @@ const importAppData = async () => {
         'Failed to import app data. Missing required files in the selected folder.',
         { missingEntries },
         'WARN',
-        { sendToRenderer: 'FAILURE' },
+        {
+          sendToRenderer: {
+            messageCode: 'APPDATA_IMPORT_FAILED_DUE_TO_MISSING_FILES',
+          },
+        },
       );
     }
     return log(
@@ -235,7 +241,7 @@ const importAppData = async () => {
     );
   } catch (error) {
     return log('Failed to import app data.', { error }, 'ERROR', {
-      sendToRenderer: 'FAILURE',
+      sendToRenderer: { messageCode: 'APPDATA_IMPORT_FAILED' },
     });
   }
 };

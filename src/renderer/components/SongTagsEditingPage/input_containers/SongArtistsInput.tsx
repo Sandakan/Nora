@@ -1,5 +1,7 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+
 import Button from 'renderer/components/Button';
 import Img from 'renderer/components/Img';
 import SongArtistInputResult from './SongArtistInputResult';
@@ -30,6 +32,7 @@ const SongArtistsInput = (props: Props) => {
     artistResults,
     updateArtistKeyword,
   } = props;
+  const { t } = useTranslation();
 
   const artistResultComponents = React.useMemo(() => {
     if (artistResults.length > 0)
@@ -46,7 +49,9 @@ const SongArtistsInput = (props: Props) => {
 
   return (
     <div className="tag-input flex min-w-[10rem] max-w-2xl flex-col">
-      <label htmlFor="song-artists-id3-tag">Song Artists</label>
+      <label htmlFor="song-artists-id3-tag">
+        {t('songTagsEditingPage.songArtists')}
+      </label>
       <div className="mt-2 w-[90%] rounded-xl border-2 border-background-color-2 p-2 dark:border-dark-background-color-2">
         <div className="artists-container flex flex-wrap p-2 empty:py-2 empty:after:h-full empty:after:w-full empty:after:text-center empty:after:text-[#ccc] empty:after:content-['No_artists_selected_for_this_song.'] dark:empty:after:text-[#ccc]">
           {songArtists &&
@@ -84,7 +89,7 @@ const SongArtistsInput = (props: Props) => {
           type="search"
           id="song-artists-id3-tag"
           className="mt-4 w-full rounded-xl border-2 border-transparent bg-background-color-2 p-2 transition-colors focus:border-font-color-highlight dark:bg-dark-background-color-2 dark:focus:border-dark-font-color-highlight"
-          placeholder="Search for artists here."
+          placeholder={t('songTagsEditingPage.searchForArtists')}
           value={artistKeyword}
           onChange={(e) => {
             const { value } = e.target;
@@ -99,7 +104,9 @@ const SongArtistsInput = (props: Props) => {
         )}
         {artistKeyword.trim() && (
           <Button
-            label={`Add new artist '${artistKeyword}'`}
+            label={t('songTagsEditingPage.addNewArtist', {
+              name: artistKeyword,
+            })}
             className="mt-4 !w-full !bg-background-color-2 hover:!bg-background-color-3 hover:text-font-color-black dark:!bg-dark-background-color-2 hover:dark:!bg-dark-background-color-3 hover:dark:text-font-color-black"
             clickHandler={() => {
               updateSongInfo((prevData) => {

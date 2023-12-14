@@ -345,11 +345,10 @@ const removeSongsFromLibrary = async (
     isPlaylistRemoved = data.isPlaylistRemoved;
     isGenreRemoved = data.isGenreRemoved;
 
-    sendMessageToRenderer(
-      `Removed ${index} out of ${songPaths.length} songs.`,
-      'SONG_REMOVE_PROCESS_UPDATE',
-      { max: songPaths.length, value: index },
-    );
+    sendMessageToRenderer({
+      messageCode: 'SONG_REMOVE_PROCESS_UPDATE',
+      data: { total: songPaths.length, value: index },
+    });
   }
 
   if (updatedSongs && artists && albums) {

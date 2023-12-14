@@ -187,20 +187,20 @@ export const getPlaylistArtworkPath = (
           getAssetPath('images', 'webp', 'history-playlist-icon.webp'),
         ) + timestampStr
       : playlistId === 'Favorites'
-      ? path.join(
-          DEFAULT_FILE_URL,
-          getAssetPath('images', 'webp', 'favorites-playlist-icon.webp'),
-        ) + timestampStr
-      : isArtworkAvailable
-      ? path.join(
-          DEFAULT_FILE_URL,
-          DEFAULT_ARTWORK_SAVE_LOCATION,
-          `${playlistId}.webp`,
-        ) + timestampStr
-      : path.join(
-          DEFAULT_FILE_URL,
-          getAssetPath('images', 'webp', 'playlist_cover_default.webp'),
-        ) + timestampStr;
+        ? path.join(
+            DEFAULT_FILE_URL,
+            getAssetPath('images', 'webp', 'favorites-playlist-icon.webp'),
+          ) + timestampStr
+        : isArtworkAvailable
+          ? path.join(
+              DEFAULT_FILE_URL,
+              DEFAULT_ARTWORK_SAVE_LOCATION,
+              `${playlistId}.webp`,
+            ) + timestampStr
+          : path.join(
+              DEFAULT_FILE_URL,
+              getAssetPath('images', 'webp', 'playlist_cover_default.webp'),
+            ) + timestampStr;
   return {
     isDefaultArtwork: !isArtworkAvailable,
     artworkPath,

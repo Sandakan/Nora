@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
 import Img from '../Img';
@@ -13,17 +14,15 @@ type Props = {
 
 const PlaylistInfoAndImgContainer = (props: Props) => {
   const { localStorageData } = React.useContext(AppContext);
+  const { t } = useTranslation();
+
   const { playlist, songs } = props;
 
   const totalPlaylistDuration = React.useMemo(() => {
-    const { hours, minutes, seconds } = calculateTimeFromSeconds(
+    const { timeString } = calculateTimeFromSeconds(
       songs.reduce((prev, current) => prev + current.duration, 0),
     );
-    return `${
-      hours >= 1 ? `${hours} hour${hours === 1 ? '' : 's'} ` : ''
-    }${minutes} minute${minutes === 1 ? '' : 's'} ${seconds} second${
-      seconds === 1 ? '' : 's'
-    }`;
+    return timeString;
   }, [songs]);
 
   return (
@@ -60,16 +59,14 @@ const PlaylistInfoAndImgContainer = (props: Props) => {
             )}
           </div>
           <div className="playlist-info-container ml-8 text-font-color-black dark:text-font-color-white">
-            <div className="font-semibold tracking-wider opacity-50">
-              PLAYLIST
+            <div className="font-semibold tracking-wider opacity-50 uppercase">
+              {t('common.playlist_one')}
             </div>
             <div className="playlist-name mb-2 w-full overflow-hidden text-ellipsis whitespace-nowrap text-5xl text-font-color-highlight dark:text-dark-font-color-highlight">
               {playlist.name}
             </div>
             <div className="playlist-no-of-songs w-full overflow-hidden text-ellipsis whitespace-nowrap text-base">
-              {`${playlist.songs.length} song${
-                playlist.songs.length === 1 ? '' : 's'
-              }`}
+              {t('common.songWithCount', { count: playlist.songs.length })}
             </div>
             {songs.length > 0 && (
               <div className="playlist-total-duration">
@@ -77,7 +74,17 @@ const PlaylistInfoAndImgContainer = (props: Props) => {
               </div>
             )}
             <div className="playlist-created-date">
-              {`Created on ${new Date(playlist.createdDate).toUTCString()}`}
+              {t('playlistsPage.createdOn', {
+                val: new Date(playlist.createdDate),
+                formatParams: {
+                  val: {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  },
+                },
+              })}
             </div>
           </div>
         </div>

@@ -1,9 +1,12 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
+
 import Button from 'renderer/components/Button';
 import { AppContext } from 'renderer/contexts/AppContext';
 
 const ChangeThemeBtn = () => {
   const { isDarkMode, bodyBackgroundImage } = React.useContext(AppContext);
+  const { t } = useTranslation();
 
   return (
     <Button
@@ -12,7 +15,7 @@ const ChangeThemeBtn = () => {
         '!text-font-color-white hover:!text-font-color-highlight'
       }`}
       clickHandler={() => window.api.theme.changeAppTheme()}
-      tooltipLabel="Change Theme (Ctrl + Y)"
+      tooltipLabel={t('titleBar.changeTheme')}
       iconName={isDarkMode ? 'wb_sunny' : 'dark_mode'}
       iconClassName="material-icons-round icon text-center text-xl leading-none transition-[background] ease-in-out"
     />

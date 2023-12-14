@@ -121,7 +121,7 @@ const getArtistArtworksFromNet = async (artist: SavableArtist) => {
 };
 
 const getArtistDataFromSavableArtistData = (artist: SavableArtist): Artist => {
-  const artworkPaths = getArtistArtworkPath(artist.name);
+  const artworkPaths = getArtistArtworkPath(artist.artworkName);
   return { ...artist, artworkPaths };
 };
 

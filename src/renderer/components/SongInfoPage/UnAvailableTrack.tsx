@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { ParsedSimilarTrack } from '../../../@types/last_fm_similar_tracks_api';
 import OpenLinkConfirmPrompt from '../OpenLinkConfirmPrompt';
@@ -9,6 +10,8 @@ type Props = Omit<ParsedSimilarTrack, 'songData' | 'match'> & {
 
 const UnAvailableTrack = (props: Props) => {
   const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
   const { title, artists = [], url, index } = props;
 
   const handleButtonClick = React.useCallback(() => {
@@ -23,7 +26,7 @@ const UnAvailableTrack = (props: Props) => {
     <button
       type="button"
       className="bg-background-color-2 dark:bg-dark-background-color-2 mr-3 last:mr-0 mb-2 dark:text-font-color-white flex items-center px-4 py-1 rounded-3xl"
-      title={`View '${title}' in Last.Fm`}
+      title={t('artistInfoPage.viewInLastFm', { name: title })}
       onClick={handleButtonClick}
     >
       <span className="material-icons-round-outlined mr-2 text-lg text-font-color-highlight dark:text-dark-font-color-highlight">
@@ -37,13 +40,16 @@ const UnAvailableTrack = (props: Props) => {
         )}
         <span className="title">{title}</span>
         {artists.length > 0 && (
-          <>
-            <span className="text-font-color-highlight dark:text-dark-font-color-highlight">
-              {' '}
-              by{' '}
-            </span>
-            <span>{artists.join(', ')}</span>
-          </>
+          <Trans
+            i18nKey="songInfoPage.byArtists"
+            values={{ val: artists }}
+            components={{
+              By: (
+                <span className="text-font-color-highlight dark:text-dark-font-color-highlight" />
+              ),
+              span: <span />,
+            }}
+          />
         )}
       </p>
     </button>

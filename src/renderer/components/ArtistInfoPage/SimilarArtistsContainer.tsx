@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 
 import { Artist } from '../ArtistPage/Artist';
@@ -9,6 +10,8 @@ type Props = { similarArtists: SimilarArtistInfo };
 
 const SimilarArtistsContainer = (props: Props) => {
   const { bodyBackgroundImage } = React.useContext(AppContext);
+  const { t } = useTranslation();
+
   const { similarArtists } = props;
   //   const [similarArtists, setSimilarArtists] = React.useState<SimilarArtistInfo>(
   //     { availableArtists: [], unAvailableArtists: [] },
@@ -63,7 +66,7 @@ const SimilarArtistsContainer = (props: Props) => {
       {availArtistComponents.length > 0 && (
         <>
           <TitleContainer
-            title="Similar Artists In the Library"
+            title={t('artistInfoPage.similarArtistsInLibrary')}
             titleClassName="!text-2xl text-font-color-black !font-normal dark:text-font-color-white"
             className={`title-container ${
               bodyBackgroundImage
@@ -77,7 +80,7 @@ const SimilarArtistsContainer = (props: Props) => {
       {unAvailArtistComponents.length > 0 && (
         <>
           <TitleContainer
-            title="Other Similar Artists"
+            title={t('artistInfoPage.otherSimilarArtists')}
             titleClassName="!text-2xl text-font-color-black !font-normal dark:text-font-color-white"
             className={`title-container ${
               bodyBackgroundImage

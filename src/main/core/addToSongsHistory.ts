@@ -10,24 +10,20 @@ export const addToSongsHistory = (songId: string) => {
   log(
     `Requested a song with id -${songId}- to be added to the History playlist.`,
   );
-  let playlists = getPlaylistData();
+  const playlists = getPlaylistData();
   if (playlists && Array.isArray(playlists)) {
-    if (
-      playlists.some(
-        (playlist) =>
-          playlist.name === 'History' && playlist.playlistId === 'History',
-      )
-    ) {
-      playlists = playlists.map((playlist) => {
-        if (playlist.name === 'History' && playlist.playlistId === 'History') {
-          if (playlist.songs.length + 1 > 50) playlist.songs.pop();
-          if (playlist.songs.some((song) => song === songId))
-            playlist.songs = playlist.songs.filter((song) => song !== songId);
-          playlist.songs.unshift(songId);
-          return playlist;
-        }
-        return playlist;
-      });
+    const selectedPlaylist = playlists.find(
+      (playlist) =>
+        playlist.name === 'History' && playlist.playlistId === 'History',
+    );
+
+    if (selectedPlaylist) {
+      if (selectedPlaylist.songs.length + 1 > 50) selectedPlaylist.songs.pop();
+      if (selectedPlaylist.songs.some((song) => song === songId))
+        selectedPlaylist.songs = selectedPlaylist.songs.filter(
+          (song) => song !== songId,
+        );
+      selectedPlaylist.songs.unshift(songId);
 
       setPlaylistData(playlists);
     } else {

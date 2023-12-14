@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import calculateTime from 'renderer/utils/calculateTime';
@@ -15,11 +16,25 @@ const { metadataEditingSupportedExtensions } = appPreferences;
 type Props = {
   lyricsLines: ExtendedEditingLyricsLineData[];
   currentSongData: AudioPlayerData;
+  isEditingEnhancedSyncedLyrics: boolean;
+};
+
+const generateTimestamp = (start = 0, format: '[]' | '<>' = '[]') => {
+  const { minutes, seconds } = calculateTime(start, false);
+  const [secsStr, milliSecsStr = '00'] = seconds.toString().split('.');
+
+  const timestampContents = `${minutes.length > 1 ? minutes : `0${minutes}`}:${
+    secsStr.length > 1 ? secsStr : `0${secsStr}`
+  }.${milliSecsStr.length > 1 ? milliSecsStr : `0${milliSecsStr}`}`;
+
+  if (format === '[]') return `[${timestampContents}]`;
+  return `<${timestampContents}>`;
 };
 
 const convertLyricsStrToObj = (
   lyricsLines: ExtendedEditingLyricsLineData[],
   currentSongData: AudioPlayerData,
+  isEditingEnhancedSyncedLyrics: boolean,
 ) => {
   const metadataLines: string[] = [];
 
@@ -34,13 +49,21 @@ const convertLyricsStrToObj = (
   metadataLines.push('');
 
   const lines = lyricsLines.map((lineData) => {
-    const { line, start = 0 } = lineData;
-    const { minutes, seconds } = calculateTime(start, false);
-    const [secsStr, milliSecsStr = '00'] = seconds.toString().split('.');
+    const { text, start = 0 } = lineData;
 
-    return `[${minutes.length > 1 ? minutes : `0${minutes}`}:${
-      secsStr.length > 1 ? secsStr : `0${secsStr}`
-    }.${milliSecsStr.length > 1 ? milliSecsStr : `0${milliSecsStr}`}] ${line}`;
+    if (isEditingEnhancedSyncedLyrics && Array.isArray(text))
+      return text
+        .map((textData, i) => {
+          const timestamp = generateTimestamp(
+            textData.start,
+            i === 0 ? '[]' : '<>',
+          );
+          return `${timestamp} ${textData.text}`;
+        })
+        .join(' ');
+
+    const timestamp = generateTimestamp(start, '[]');
+    return `${timestamp} ${text}`;
   });
 
   const lyrics = metadataLines.concat(lines).join('\n');
@@ -50,7 +73,9 @@ const convertLyricsStrToObj = (
     lyricsLines.length > 0
       ? lyricsLines.map((line) => {
           return {
-            text: line.line,
+            text: Array.isArray(line.text)
+              ? line.text.map((textLine) => textLine.text).join(' ')
+              : line.text,
             start: line.start || 0,
             end: line.end || 0,
           };
@@ -75,11 +100,18 @@ const convertLyricsStrToObj = (
 const LyricsEditorSavePrompt = (props: Props) => {
   const { addNewNotifications, changePromptMenuData } =
     React.useContext(AppUpdateContext);
-  const { lyricsLines, currentSongData } = props;
+  const { t } = useTranslation();
+
+  const { lyricsLines, currentSongData, isEditingEnhancedSyncedLyrics } = props;
 
   const parsedLyrics = React.useMemo(
-    () => convertLyricsStrToObj(lyricsLines, currentSongData),
-    [currentSongData, lyricsLines],
+    () =>
+      convertLyricsStrToObj(
+        lyricsLines,
+        currentSongData,
+        isEditingEnhancedSyncedLyrics,
+      ),
+    [currentSongData, isEditingEnhancedSyncedLyrics, lyricsLines],
   );
 
   const pathExt = React.useMemo(
@@ -140,12 +172,8 @@ const LyricsEditorSavePrompt = (props: Props) => {
               {
                 id: 'lyricsUpdateSuccessful',
                 delay: 5000,
-                content: <span>Lyrics successfully updated.</span>,
-                icon: (
-                  <span className="material-icons-round-outlined !text-xl">
-                    check
-                  </span>
-                ),
+                content: t('lyricsEditorSavePrompt.lyricsUpdateSuccess'),
+                iconName: 'check',
               },
             ]);
           })
@@ -163,6 +191,7 @@ const LyricsEditorSavePrompt = (props: Props) => {
       currentSongData.title,
       isSaveLyricsBtnDisabled,
       parsedLyrics,
+      t,
     ],
   );
 
@@ -172,7 +201,7 @@ const LyricsEditorSavePrompt = (props: Props) => {
         <span className="material-icons-round-outlined mr-2 text-4xl">
           save
         </span>{' '}
-        Save Edited Lyrics
+        {t('lyricsEditorSavePrompt.saveEditedLyrics')}
       </div>
       <textarea
         className="h-[40vh] max-h-full min-h-[10rem] w-full overflow-y-auto rounded-lg bg-background-color-2 p-4 dark:bg-dark-background-color-2"
@@ -182,32 +211,38 @@ const LyricsEditorSavePrompt = (props: Props) => {
       </textarea>
       <div className="mt-6 flex items-center justify-center">
         <Button
-          label="Copy lyrics"
+          label={t('lyricsEditorSavePrompt.copyLyrics')}
           iconName="content_copy"
           iconClassName="material-icons-round-outlined"
           clickHandler={copyLyrics}
         />
         <Button
-          label="Save lyrics to the song"
+          label={t('lyricsEditorSavePrompt.saveLyricsToSong')}
           iconName="save"
           iconClassName="material-icons-round-outlined"
           clickHandler={saveLyricsToSong}
           isDisabled={isSaveLyricsBtnDisabled}
           tooltipLabel={
             isSaveLyricsBtnDisabled
-              ? `Nora currently doesn't support saving lyrics to songs in '${pathExt}' audio format.`
+              ? t('lyricsEditorSavePrompt.saveLyricsNotSupported', {
+                  format: pathExt,
+                })
               : undefined
           }
         />
       </div>
       <p className="mt-2 text-xs font-light">
-        * Lyrics are saved in{' '}
-        <Hyperlink
-          link="https://wikipedia.org/wiki/LRC_(file_format)"
-          linkTitle="Read more about LRC format"
-          label="LRC format."
+        <Trans
+          i18nKey="lyricsEditorSavePrompt.saveLyricsFormatInfo"
+          components={{
+            Hyperlink: (
+              <Hyperlink
+                link="https://wikipedia.org/wiki/LRC_(file_format)"
+                linkTitle={t('lyricsEditorSavePrompt.readAboutLrcFormat')}
+              />
+            ),
+          }}
         />
-        .
       </p>
     </div>
   );
