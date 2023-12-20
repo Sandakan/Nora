@@ -558,7 +558,7 @@
     "editLyrics": "Edit Lyrics in Lyrics Editor",
     "showOnlineLyrics": "Show Online Lyrics",
     "refreshOnlineLyrics": "Refresh Online Lyrics",
-    "showSavedLyrics": "Show Online Lyrics",
+    "showSavedLyrics": "Show Saved Lyrics",
     "lyricsLoading": "Looking for lyrics",
     "lyricsLoadingDescription": "Hang on... We are looking everywhere",
     "noInternet": "No internet connection",
@@ -743,7 +743,7 @@
   },
 
   "deleteSongFromSystemConfirmPrompt": {
-    "title_one": "Delete {{title}} from system",
+    "title_one": "Delete '{{title}}' from system",
     "title_other": "Delete $t(common.songWithCount, {\"count\":{{count}}}) from system",
     "permanentlyDeleteFromSystem": "Permanently delete from the system",
     "message_one": "You will lose this song from your system and may not be able to recover it again if you select '$t(deleteSongFromSystemConfirmPrompt.permanentlyDeleteFromSystem)' from system option.",

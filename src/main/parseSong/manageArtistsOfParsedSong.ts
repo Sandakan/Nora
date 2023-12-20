@@ -33,6 +33,7 @@ const manageArtistsOfParsedSong = (
                 ? path.basename(songArtworkPaths.artworkPath)
                 : undefined,
             isAFavorite: false,
+            albums: [],
           };
           relevantArtists.push(artist);
           newArtists.push(artist);

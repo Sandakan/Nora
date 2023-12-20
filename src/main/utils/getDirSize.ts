@@ -23,7 +23,7 @@ const getDirSize = async (dir: string) => {
     });
 
     const sizesOfPaths = await Promise.all(paths);
-    const flatSizes = sizesOfPaths.flat(Infinity);
+    const flatSizes = sizesOfPaths.flat(Number.POSITIVE_INFINITY);
     const reducedSizes = flatSizes.reduce((i, size) => i + size, 0);
 
     return reducedSizes;

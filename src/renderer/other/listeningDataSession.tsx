@@ -11,6 +11,7 @@ class ListeningDataSession {
   passedSkipRange: boolean;
   passedFullListenRange: boolean;
   passedScrobblingRange: boolean;
+  isKnownSource: boolean;
   seconds: number;
   skipEndRange: ReturnType<typeof calculateTime>;
   listenEndRange: ReturnType<typeof calculateTime>;
@@ -20,9 +21,15 @@ class ListeningDataSession {
   seeks: { position: number; seeks: number }[];
   startTime: Date;
 
-  constructor(songId: string, duration: number, chosenByUser = false) {
+  constructor(
+    songId: string,
+    duration: number,
+    chosenByUser = false,
+    isKnownSource = true,
+  ) {
     this.songId = songId;
     this.duration = duration;
+    this.isKnownSource = isKnownSource;
 
     this.skipEndRange = calculateTime((duration * 10) / 100);
     this.listenEndRange = calculateTime((duration * 90) / 100);
@@ -78,11 +85,12 @@ class ListeningDataSession {
       if (!this.passedFullListenRange && this.seconds > fullListenRange) {
         this.passedFullListenRange = true;
         console.warn(`User listened to 90% of ${this.songId}`);
-        window.api.audioLibraryControls.updateSongListeningData(
-          this.songId,
-          'fullListens',
-          1,
-        );
+        if (this.isKnownSource)
+          window.api.audioLibraryControls.updateSongListeningData(
+            this.songId,
+            'fullListens',
+            1,
+          );
       }
       // listen for scrobbling event
       if (
@@ -111,17 +119,18 @@ class ListeningDataSession {
         console.warn(`User skipped ${this.songId} before 90% completion.`);
       if (!this.passedSkipRange) {
         console.warn(`User skipped ${this.songId}. before 10% completion.`);
-        window.api.audioLibraryControls.updateSongListeningData(
-          this.songId,
-          'skips',
-          1,
-        );
+        if (this.isKnownSource)
+          window.api.audioLibraryControls.updateSongListeningData(
+            this.songId,
+            'skips',
+            1,
+          );
       }
 
       const seeks = this.seeks.filter(
         (seekInstance) => seekInstance.seeks >= 3,
       );
-      if (seeks.length > 0) {
+      if (seeks.length > 0 && this.isKnownSource) {
         window.api.audioLibraryControls.updateSongListeningData(
           this.songId,
           'seeks',

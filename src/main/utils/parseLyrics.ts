@@ -49,7 +49,7 @@ const getSecondsFromExtendedTimeStamp = (text: string) => {
 };
 
 const getLyricEndTime = (lyricsArr: string[], index: number) => {
-  if (lyricsArr.length - 1 === index) return Infinity;
+  if (lyricsArr.length - 1 === index) return Number.POSITIVE_INFINITY;
 
   if (lyricsArr[index + 1])
     return getSecondsFromLyricsLine(lyricsArr[index + 1]);
@@ -218,7 +218,7 @@ const getNextTimestamp = (
   start: number,
   index: number,
 ) => {
-  if (arr.length - 1 === index) return Infinity;
+  if (arr.length - 1 === index) return Number.POSITIVE_INFINITY;
 
   for (let i = 0; i < arr.length - index; i += 1) {
     if (arr[index + i]) {

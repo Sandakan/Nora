@@ -157,8 +157,9 @@ const LyricsPage = () => {
         const syncedLyricsLines = syncedLyrics.map((lyric, index) => {
           const start = lyric.start + offset;
           const end =
-            (lyric.end === Infinity ? currentSongData.duration : lyric.end) +
-            offset;
+            (lyric.end === Number.POSITIVE_INFINITY
+              ? currentSongData.duration
+              : lyric.end) + offset;
 
           return (
             <LyricLine

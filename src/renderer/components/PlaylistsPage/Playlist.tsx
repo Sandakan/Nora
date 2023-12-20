@@ -224,9 +224,11 @@ export const Playlist = (props: PlaylistProp) => {
         handlerFunction: () => true,
       },
       {
-        label: `playlist.${
-          props.isArtworkAvailable ? 'changeArtwork' : 'addArtwork'
-        }`,
+        label: t(
+          `playlist.${
+            props.isArtworkAvailable ? 'changeArtwork' : 'addArtwork'
+          }`,
+        ),
         iconName: 'photo_camera',
         handlerFunction: () => {
           window.api.songUpdates

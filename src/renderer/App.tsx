@@ -869,7 +869,12 @@ export default function App() {
   const recordRef = React.useRef<ListeningDataSession>();
 
   const recordListeningData = React.useCallback(
-    (songId: string, duration: number, isRepeating = false) => {
+    (
+      songId: string,
+      duration: number,
+      isRepeating = false,
+      isKnownSource = true,
+    ) => {
       if (recordRef?.current?.songId !== songId || isRepeating) {
         if (isRepeating)
           console.warn(
@@ -877,7 +882,11 @@ export default function App() {
           );
         if (recordRef.current) recordRef.current.stopRecording();
 
-        const listeningDataSession = new ListeningDataSession(songId, duration);
+        const listeningDataSession = new ListeningDataSession(
+          songId,
+          duration,
+          isKnownSource,
+        );
         listeningDataSession.recordListeningData();
 
         player.addEventListener(
@@ -997,10 +1006,17 @@ export default function App() {
           player.src = audioPlayerData.path;
           refStartPlay.current = isStartPlay;
           if (isStartPlay) toggleSongPlayback();
+
+          recordListeningData(
+            audioPlayerData.songId,
+            audioPlayerData.duration,
+            undefined,
+            false,
+          );
         }
       }
     },
-    [playSong, toggleSongPlayback],
+    [playSong, recordListeningData, toggleSongPlayback],
   );
 
   const fetchSongFromUnknownSource = React.useCallback(

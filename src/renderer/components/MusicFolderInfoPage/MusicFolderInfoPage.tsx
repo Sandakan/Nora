@@ -237,7 +237,7 @@ const MusicFolderInfoPage = () => {
                 folderSongs &&
                 folderSongs.length > 0 && (
                   <span className="no-of-songs">
-                    {t('common.folderWithCount', { count: folderSongs.length })}
+                    {t('common.songWithCount', { count: folderSongs.length })}
                   </span>
                 )
               )}

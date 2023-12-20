@@ -36,12 +36,13 @@ export default (props: { songIds: string[] }) => {
       <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
         {t('deleteSongFromSystemConfirmPrompt.title', {
           count: songsData.length,
-          title: songsData[0].title,
+          title: songsData[0]?.title,
         })}
       </div>
       <div className="description">
         {t('deleteSongFromSystemConfirmPrompt.title', {
           count: songsData.length,
+          title: songsData[0]?.title,
         })}
       </div>
       <div className="info-about-affecting-files-container mt-4">
