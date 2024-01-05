@@ -13,12 +13,13 @@ import NavigationControlsContainer from './NavigationControlsContainer';
 import WindowControlsContainer from './WindowControlsContainer';
 
 import LightModeLogo from '../../../../assets/images/webp/logo_light_mode.webp';
+import GoToMainPlayerBtn from './special_controls/GoToMainPlayerBtn';
 
 const appReleasePhase =
   getVersionInfoFromString(version)?.releasePhase || 'stable';
 
 const TitleBar = React.memo(() => {
-  const { bodyBackgroundImage } = React.useContext(AppContext);
+  const { bodyBackgroundImage, playerType } = React.useContext(AppContext);
 
   return (
     <header
@@ -51,7 +52,7 @@ const TitleBar = React.memo(() => {
             </span>
           </span>
         </div>
-        <NavigationControlsContainer />
+        {playerType !== 'full' && <NavigationControlsContainer />}
       </div>
       <div className="window-controls-and-special-controls-and-indicators-container flex h-full flex-row">
         <div className="special-controls-and-indicators-container mr-2 flex items-center justify-between py-1">
@@ -60,8 +61,9 @@ const TitleBar = React.memo(() => {
             <NewUpdateIndicator />
             <NetworkIndicator />
           </div>
-          <div className="special-controls-container">
+          <div className="special-controls-container flex flex-row">
             {window.api.properties.isInDevelopment && <ChangeThemeBtn />}
+            {playerType === 'full' && <GoToMainPlayerBtn />}
           </div>
         </div>
         <WindowControlsContainer />

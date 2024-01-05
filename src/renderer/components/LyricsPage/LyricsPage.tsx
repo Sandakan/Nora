@@ -458,17 +458,13 @@ const LyricsPage = () => {
                   {lyrics?.lyrics?.isSynced && (
                     <Button
                       key={5}
-                      tooltipLabel={
-                        lyrics && lyrics.source !== 'IN_SONG_LYRICS'
-                          ? t(
-                              `currentQueuePage.${
-                                isAutoScrolling
-                                  ? 'disableAutoScrolling'
-                                  : 'enableAutoScrolling'
-                              }`,
-                            )
-                          : undefined
-                      }
+                      tooltipLabel={t(
+                        `currentQueuePage.${
+                          isAutoScrolling
+                            ? 'disableAutoScrolling'
+                            : 'enableAutoScrolling'
+                        }`,
+                      )}
                       pendingAnimationOnDisabled
                       className="show-online-lyrics-btn !text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                       iconName={isAutoScrolling ? 'flash_off' : 'flash_on'}

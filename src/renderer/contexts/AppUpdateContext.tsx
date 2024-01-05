@@ -62,7 +62,7 @@ export interface AppUpdateContextType {
     clearPreviousQueueData?: boolean,
   ) => void;
   changeQueueCurrentSongIndex: (currentSongIndex: number) => void;
-  updateMiniPlayerStatus: (isVisible: boolean) => void;
+  updatePlayerType: (type: PlayerTypes) => void;
   clearAudioPlayerData: () => void;
   updateBodyBackgroundImage: (isVisible: boolean, src?: string) => void;
   updateMultipleSelections: (

@@ -14,6 +14,7 @@ export interface AppReducer {
   multipleSelectionsData: MultipleSelectionData;
   appUpdatesState: AppUpdatesState;
   isOnBatteryPower: boolean;
+  playerType: PlayerTypes;
 }
 
 type AppReducerStateActions =
@@ -32,7 +33,7 @@ type AppReducerStateActions =
   | { type: 'CONTEXT_MENU_VISIBILITY_CHANGE'; data: boolean }
   | { type: 'CURRENT_ACTIVE_PAGE_DATA_UPDATE'; data: PageData }
   | { type: 'UPDATE_NAVIGATION_HISTORY'; data: NavigationHistoryData }
-  | { type: 'UPDATE_MINI_PLAYER_STATE'; data: boolean }
+  | { type: 'UPDATE_PLAYER_TYPE'; data: PlayerTypes }
   | {
       type: 'UPDATE_VOLUME';
       data: PlayerVolume;
@@ -230,22 +231,17 @@ const reducer = (
               : state.player.isPlayerStalled,
         },
       };
-    case 'UPDATE_MINI_PLAYER_STATE':
-      window.api.miniPlayer.toggleMiniPlayer(
-        typeof action.data === 'boolean'
-          ? action.data
-          : state.player.isMiniPlayer,
-      );
+    case 'UPDATE_PLAYER_TYPE': {
+      const type =
+        typeof action.data === 'string' ? action.data : state.playerType;
+
+      if (type !== 'full') window.api.windowControls.changePlayerType(type);
+
       return {
         ...state,
-        player: {
-          ...state.player,
-          isMiniPlayer:
-            typeof action.data === 'boolean'
-              ? action.data
-              : state.player.isMiniPlayer,
-        },
+        playerType: type,
       };
+    }
     case 'UPDATE_SONG_POSITION':
       return {
         ...state,
@@ -410,13 +406,13 @@ export const USER_DATA_TEMPLATE: UserData = {
 
 export const DEFAULT_REDUCER_DATA: AppReducer = {
   isDarkMode: false,
+  playerType: 'normal',
   player: {
     isCurrentSongPlaying: false,
     volume: { isMuted: false, value: 50 },
     isRepeating: 'false',
     isShuffling: false,
     songPosition: 0,
-    isMiniPlayer: false,
     isPlayerStalled: false,
     playbackRate: 1.0,
   },

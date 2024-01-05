@@ -38,12 +38,13 @@ export interface AppStateContextType {
   multipleSelectionsData: MultipleSelectionData;
   isMultipleSelectionEnabled: boolean;
   // MINI PLAYER
-  isMiniPlayer: boolean;
+  // isMiniPlayer: boolean;
   // APP UPDATES DATA
   appUpdatesState: AppUpdatesState;
   // OTHER
   bodyBackgroundImage?: string;
   isPlayerStalled: boolean;
+  playerType: PlayerTypes;
 }
 
 export const AppContext = createContext({} as AppStateContextType);

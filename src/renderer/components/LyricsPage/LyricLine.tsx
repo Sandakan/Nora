@@ -21,7 +21,7 @@ const lyricsScrollIntoViewEvent = new CustomEvent('lyrics/scrollIntoView', {
 });
 
 const LyricLine = (props: LyricProp) => {
-  const { isMiniPlayer } = React.useContext(AppContext);
+  const { playerType } = React.useContext(AppContext);
   const { songPosition } = React.useContext(SongPositionContext);
   const { updateSongPosition } = React.useContext(AppUpdateContext);
   const { t } = useTranslation();
@@ -61,9 +61,11 @@ const LyricLine = (props: LyricProp) => {
             songPosition > extendedText.start - delay &&
             songPosition < extendedText.end - delay
               ? '!text-opacity-90'
-              : // : songPosition > start - delay && songPosition < end - delay
-                // ? '!text-opacity-40'
-                '!text-opacity-20 hover:!text-opacity-75'
+              : syncedLyrics &&
+                  songPosition > syncedLyrics.start - delay &&
+                  songPosition < syncedLyrics.end - delay
+                ? '!text-opacity-50'
+                : '!text-opacity-20 hover:!text-opacity-75'
           }`}
         >
           {extendedText.text}
@@ -72,7 +74,7 @@ const LyricLine = (props: LyricProp) => {
     });
 
     return extendedLyricLines;
-  }, [lyric, songPosition, updateSongPosition]);
+  }, [lyric, songPosition, syncedLyrics, updateSongPosition]);
 
   const lyricDurationBarProperties: any = {};
   // eslint-disable-next-line dot-notation
@@ -101,16 +103,19 @@ const LyricLine = (props: LyricProp) => {
             })
           : undefined
       }
-      className={`highlight ![text-wrap:balance] flex items-center justify-center flex-col text-wrap mb-5 w-fit select-none text-center text-4xl font-medium text-font-color-black transition-[transform,color] duration-250 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
+      className={`highlight text-balance flex items-center justify-center flex-col mb-5 w-fit select-none text-center text-5xl font-medium text-font-color-black transition-[transform,color,filter] duration-250 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
         syncedLyrics
           ? `cursor-pointer ${
               songPosition > syncedLyrics.start - delay &&
               songPosition < syncedLyrics.end - delay
-                ? '!scale-100 text-5xl !text-opacity-90 [&>div>span]:!mr-3 [&>div>span]:last:!mr-0'
-                : '!scale-75 !text-opacity-20 hover:!text-opacity-75'
+                ? '!scale-100 !text-opacity-90 [&>div>span]:!mr-3 !blur-0'
+                : 'scale-[.7] !text-opacity-20 hover:!text-opacity-75'
             }`
           : ''
-      } ${isMiniPlayer && '!mb-2 !text-2xl !text-font-color-white'}`}
+      } ${playerType === 'mini' && '!mb-2 !text-2xl !text-font-color-white'} ${
+        playerType === 'full' &&
+        '!text-font-color-white !text-left !text-6xl origin-left !mb-6 !items-start !justify-start blur-[1px]'
+      }`}
       ref={lyricsRef}
       onClick={() =>
         syncedLyrics &&
@@ -118,7 +123,11 @@ const LyricLine = (props: LyricProp) => {
         updateSongPosition(syncedLyrics.start)
       }
     >
-      <div className="flex flex-wrap flex-row items-center justify-center">
+      <div
+        className={`flex flex-wrap flex-row ${
+          playerType !== 'full' && 'items-center justify-center'
+        }`}
+      >
         {lyricString}
       </div>
       <span

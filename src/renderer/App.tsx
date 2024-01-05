@@ -47,6 +47,9 @@ import { equalizerBandHertzData } from './other/equalizerData';
 const MiniPlayer = React.lazy(
   () => import('./components/MiniPlayer/MiniPlayer'),
 );
+const FullScreenPlayer = React.lazy(
+  () => import('./components/FullScreenPlayer/FullScreenPlayer'),
+);
 
 const player = new Audio();
 let repetitivePlaybackErrorsCount = 0;
@@ -540,7 +543,8 @@ export default function App() {
     const isLowResponseRequired =
       lowResponseTimeRequiredPages.includes(currentPage) ||
       data?.isLowResponseRequired ||
-      content.player.isMiniPlayer;
+      content.playerType === 'mini' ||
+      content.playerType === 'full';
 
     const duration = isLowResponseRequired ? 100 : 1000;
 
@@ -572,7 +576,7 @@ export default function App() {
   }, [
     content.navigationHistory.history,
     content.navigationHistory.pageHistoryIndex,
-    content.player.isMiniPlayer,
+    content.playerType,
   ]);
 
   // VOLUME RELATED SETTINGS
@@ -1469,14 +1473,14 @@ export default function App() {
     [addNewNotifications, t, toggleMultipleSelections],
   );
 
-  const updateMiniPlayerStatus = React.useCallback(
-    (isVisible: boolean) => {
-      if (content.player.isMiniPlayer !== isVisible) {
-        dispatch({ type: 'UPDATE_MINI_PLAYER_STATE', data: isVisible });
-        contentRef.current.player.isMiniPlayer = isVisible;
+  const updatePlayerType = React.useCallback(
+    (type: PlayerTypes) => {
+      if (content.playerType !== type) {
+        dispatch({ type: 'UPDATE_PLAYER_TYPE', data: type });
+        contentRef.current.playerType = type;
       }
     },
-    [content.player.isMiniPlayer],
+    [content.playerType],
   );
 
   const toggleIsFavorite = React.useCallback(
@@ -1588,7 +1592,7 @@ export default function App() {
           changeCurrentActivePage('Home');
         else changeCurrentActivePage('Lyrics');
       } else if (e.ctrlKey && e.key === 'n')
-        updateMiniPlayerStatus(!content.player.isMiniPlayer);
+        updatePlayerType(content.playerType === 'mini' ? 'normal' : 'mini');
       else if (e.ctrlKey && e.key === 'q') {
         const currentlyActivePage =
           content.navigationHistory.history[
@@ -1677,8 +1681,8 @@ export default function App() {
       toggleShuffling,
       toggleRepeat,
       toggleIsFavorite,
-      updateMiniPlayerStatus,
-      content.player.isMiniPlayer,
+      updatePlayerType,
+      content.playerType,
       content.navigationHistory.history,
       content.navigationHistory.pageHistoryIndex,
       content.localStorage.playback.playbackRate,
@@ -1856,7 +1860,6 @@ export default function App() {
       isCurrentSongPlaying: content.player.isCurrentSongPlaying,
       noOfPagesInHistory: content.navigationHistory.history.length - 1,
       pageHistoryIndex: content.navigationHistory.pageHistoryIndex,
-      isMiniPlayer: content.player.isMiniPlayer,
       volume: content.player.volume.value,
       isMuted: content.player.volume.isMuted,
       isRepeating: content.player.isRepeating,
@@ -1867,27 +1870,28 @@ export default function App() {
       multipleSelectionsData: content.multipleSelectionsData,
       appUpdatesState: content.appUpdatesState,
       equalizerOptions: content.localStorage.equalizerPreset,
+      playerType: content.playerType,
     }),
     [
-      content.promptMenuData,
-      content.appUpdatesState,
-      content.bodyBackgroundImage,
-      content.contextMenuData,
-      content.currentSongData,
       content.isDarkMode,
-      content.localStorage,
-      content.multipleSelectionsData,
-      content.navigationHistory.history.length,
+      content.contextMenuData,
+      content.promptMenuData,
+      content.currentSongData,
       content.navigationHistory.pageHistoryIndex,
+      content.navigationHistory.history.length,
       content.notificationPanelData,
+      content.userData,
+      content.localStorage,
       content.player.isCurrentSongPlaying,
-      content.player.isMiniPlayer,
-      content.player.isPlayerStalled,
+      content.player.volume.value,
+      content.player.volume.isMuted,
       content.player.isRepeating,
       content.player.isShuffling,
-      content.player.volume.isMuted,
-      content.player.volume.value,
-      content.userData,
+      content.player.isPlayerStalled,
+      content.bodyBackgroundImage,
+      content.multipleSelectionsData,
+      content.appUpdatesState,
+      content.playerType,
     ],
   );
 
@@ -1906,7 +1910,7 @@ export default function App() {
       updatePageHistoryIndex,
       changeQueueCurrentSongIndex,
       updateCurrentSongPlaybackState,
-      updateMiniPlayerStatus,
+      updatePlayerType,
       handleSkipBackwardClick,
       handleSkipForwardClick,
       updateSongPosition,
@@ -1947,7 +1951,7 @@ export default function App() {
       updateCurrentSongPlaybackState,
       updateCurrentlyActivePageData,
       updateEqualizerOptions,
-      updateMiniPlayerStatus,
+      updatePlayerType,
       updateMultipleSelections,
       updateNotifications,
       updatePageHistoryIndex,
@@ -1974,7 +1978,7 @@ export default function App() {
     <ErrorBoundary>
       <AppContext.Provider value={appContextStateValues}>
         <AppUpdateContext.Provider value={appUpdateContextValues}>
-          {!content.player.isMiniPlayer && (
+          {content.playerType === 'normal' ? (
             <div
               className={`App select-none ${
                 content.isDarkMode
@@ -1984,7 +1988,7 @@ export default function App() {
                 isReducedMotion
                   ? 'reduced-motion animate-none transition-none !duration-[0] !delay-0 [&.dialog-menu]:!backdrop-blur-none'
                   : ''
-              } grid !h-screen w-full grid-rows-[auto_1fr_auto] items-center overflow-y-hidden after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc]  [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
+              } grid !h-screen w-full grid-rows-[auto_1fr_auto] items-center overflow-y-hidden after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc] [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
               ref={AppRef}
               onDragEnter={addSongDropPlaceholder}
               onDragLeave={removeSongDropPlaceholder}
@@ -2013,22 +2017,27 @@ export default function App() {
                 <SongControlsContainer />
               </SongPositionContext.Provider>
             </div>
-          )}
-          <SongPositionContext.Provider value={songPositionContextValues}>
-            {content.player.isMiniPlayer && (
+          ) : (
+            <SongPositionContext.Provider value={songPositionContextValues}>
               <ErrorBoundary>
-                <Suspense fallback={<SuspenseLoader />}>
-                  <MiniPlayer
-                    className={`${
-                      isReducedMotion
-                        ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
-                        : ''
-                    }`}
-                  />
-                </Suspense>
+                {content.playerType === 'mini' ? (
+                  <Suspense fallback={<SuspenseLoader />}>
+                    <MiniPlayer
+                      className={`${
+                        isReducedMotion
+                          ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
+                          : ''
+                      }`}
+                    />
+                  </Suspense>
+                ) : (
+                  <Suspense fallback={<SuspenseLoader />}>
+                    <FullScreenPlayer />
+                  </Suspense>
+                )}
               </ErrorBoundary>
-            )}
-          </SongPositionContext.Provider>
+            </SongPositionContext.Provider>
+          )}
         </AppUpdateContext.Provider>
       </AppContext.Provider>
     </ErrorBoundary>

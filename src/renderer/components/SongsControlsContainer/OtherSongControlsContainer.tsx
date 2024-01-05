@@ -7,16 +7,11 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import Button from '../Button';
 
 const OtherSongControlsContainer = () => {
-  const {
-    currentlyActivePage,
-    isMiniPlayer,
-    isMuted,
-    volume,
-    localStorageData,
-  } = useContext(AppContext);
+  const { currentlyActivePage, isMuted, volume, localStorageData } =
+    useContext(AppContext);
   const {
     changeCurrentActivePage,
-    updateMiniPlayerStatus,
+    updatePlayerType,
     toggleMutedState,
     updateVolume,
     updateContextMenuData,
@@ -62,20 +57,20 @@ const OtherSongControlsContainer = () => {
             label: t('player.showMiniPlayer'),
             iconName: 'pip',
             iconClassName: 'material-icons-round-outlined mr-2',
-            handlerFunction: () => updateMiniPlayerStatus(!isMiniPlayer),
+            handlerFunction: () => updatePlayerType('mini'),
+          },
+          {
+            label: t('player.openInFullScreen'),
+            iconName: 'fullscreen',
+            iconClassName: 'material-icons-round-outlined mr-2',
+            handlerFunction: () => updatePlayerType('full'),
           },
         ],
         pageX,
         pageY,
       );
     },
-    [
-      changeCurrentActivePage,
-      isMiniPlayer,
-      t,
-      updateContextMenuData,
-      updateMiniPlayerStatus,
-    ],
+    [changeCurrentActivePage, t, updateContextMenuData, updatePlayerType],
   );
 
   return (
@@ -100,10 +95,18 @@ const OtherSongControlsContainer = () => {
 
       <Button
         className="mini-player-btn !mr-6 !rounded-none !border-0 !p-0 text-font-color-black text-opacity-60 outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white lg:hidden"
-        clickHandler={() => updateMiniPlayerStatus(!isMiniPlayer)}
+        clickHandler={() => updatePlayerType('mini')}
         tooltipLabel={t('player.openInMiniPlayer')}
         iconName="pip"
         iconClassName="material-icons-round-outlined icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"
+      />
+
+      <Button
+        className="queue-btn !mr-6 !rounded-none !border-0 !p-0 text-font-color-black text-opacity-60 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:text-font-color-white dark:after:bg-dark-font-color-highlight lg:hidden"
+        tooltipLabel={t('player.openInFullScreen')}
+        iconName="fullscreen"
+        iconClassName="material-icons-round-outlined text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"
+        clickHandler={() => updatePlayerType('full')}
       />
 
       <Button

@@ -117,6 +117,7 @@
   "player": {
     "goToMainPlayer": "Go to Main Player (Ctrl + N)",
     "openInMiniPlayer": "Open in Mini player (Ctrl + N)",
+    "openInFullScreen": "Open in Fullscreen",
     "likeDislike": "Like/Dislike (Ctrl + H)",
     "likeDislikeDisabled": "Liking/Disliking songs is disabled because current playing song is from an unknown source and it doesn't support likes.",
     "prevSong": "Previous Song (Ctrl + Left Arrow)",

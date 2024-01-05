@@ -16,6 +16,8 @@ const windowControls = {
   closeApp: (): void => ipcRenderer.send('app/close'),
   hideApp: (): void => ipcRenderer.send('app/hide'),
   showApp: (): void => ipcRenderer.send('app/show'),
+  changePlayerType: (type: PlayerTypes): Promise<void> =>
+    ipcRenderer.invoke('app/changePlayerType', type),
   onWindowFocus: (callback: (e: any) => void) =>
     ipcRenderer.on('app/focused', callback),
   onWindowBlur: (callback: (e: any) => void) =>
@@ -491,8 +493,6 @@ const log = {
 
 // $ APP MINI PLAYER CONTROLS
 const miniPlayer = {
-  toggleMiniPlayer: (isMiniPlayerActive: boolean): Promise<void> =>
-    ipcRenderer.invoke('app/toggleMiniPlayer', isMiniPlayerActive),
   toggleMiniPlayerAlwaysOnTop: (
     isMiniPlayerAlwaysOnTop: boolean,
   ): Promise<void> =>

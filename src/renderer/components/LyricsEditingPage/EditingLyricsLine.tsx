@@ -291,7 +291,7 @@ const EditingLyricsLine = (props: Props) => {
               iconName="step_out"
               clickHandler={() =>
                 updateLineData((prevLineData) => {
-                  const pos = index - 1 < 0 ? 0 : index - 1;
+                  const pos = index - 1 < 0 ? 0 : index;
                   prevLineData.splice(pos, 0, {
                     index: 0,
                     isActive: false,

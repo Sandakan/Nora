@@ -46,7 +46,7 @@ const SimilarArtistsContainer = (props: Props) => {
         const unAvailableArtistsComponents = unAvailableArtists.map(
           (unAvailArtist) => {
             const { name, url } = unAvailArtist;
-            return <UnAvailableArtist name={name} url={url} />;
+            return <UnAvailableArtist key={url} name={name} url={url} />;
           },
         );
 
