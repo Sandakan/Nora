@@ -421,7 +421,7 @@ const LyricsPage = () => {
   return (
     <MainContainer
       noDefaultStyles
-      className={`lyrics-container ![overflow-anchor:none] appear-from-bottom relative flex h-full flex-col ${
+      className={`lyrics-container appear-from-bottom relative flex h-full flex-col ![overflow-anchor:none] ${
         lyrics && isOnline ? 'justify-start' : 'items-center justify-center'
       }`}
     >

@@ -18,7 +18,7 @@ import LanguageSettings from './Settings/LanguageSettings';
 const SettingsPage = () => {
   const { t } = useTranslation();
   return (
-    <MainContainer className="main-container settings-container appear-from-bottom !mb-0 !h-fit pb-8 pr-8 text-font-color-black dark:text-font-color-white [scrollbar-gutter:stable]">
+    <MainContainer className="main-container settings-container appear-from-bottom !mb-0 !h-fit pb-8 pr-8 text-font-color-black [scrollbar-gutter:stable] dark:text-font-color-white">
       <>
         <div className="title-container mb-4 mt-1 flex items-center justify-between text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
           {t('settingsPage.settings')}

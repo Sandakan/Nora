@@ -81,7 +81,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
                 isSelectedArtwork ? 'selected' : 'select'
               }`,
             )}
-            className={`!mx-0 mt-4 bg-background-color-2 !py-1 group-hover:bg-background-color-1 dark:bg-dark-background-color-2 dark:group-hover:bg-dark-background-color-1 uppercase ${
+            className={`!mx-0 mt-4 bg-background-color-2 !py-1 uppercase group-hover:bg-background-color-1 dark:bg-dark-background-color-2 dark:group-hover:bg-dark-background-color-1 ${
               isSelectedArtwork &&
               '!dark:bg-dark-background-color-3 !dark:text-font-color-black !border-background-color-3 !bg-background-color-3 font-medium !text-font-color-black dark:!border-dark-background-color-3'
             }`}

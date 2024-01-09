@@ -98,7 +98,7 @@ const SongArtistsInput = (props: Props) => {
           onKeyDown={(e) => e.stopPropagation()}
         />
         {artistResults.length > 0 && (
-          <div className="artists-results-container mt-4 rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2 max-h-60 overflow-y-auto">
+          <div className="artists-results-container mt-4 max-h-60 overflow-y-auto rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2">
             {artistResultComponents}
           </div>
         )}

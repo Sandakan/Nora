@@ -104,7 +104,7 @@ const ListeningActivityBarGraph = (props: Props) => {
                     })}
                   />
                 </div>
-                <div className="order-2 flex w-full flex-col grow-0 pt-1 text-font-color  dark:text-font-color-white">
+                <div className="order-2 flex w-full grow-0 flex-col pt-1 text-font-color  dark:text-font-color-white">
                   <span className="font-thin">{month.listens}</span>
                   <span className="truncate px-2">{month.month}</span>
                 </div>

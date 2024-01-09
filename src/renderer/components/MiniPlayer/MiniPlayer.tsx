@@ -6,85 +6,39 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
-import debounce from 'renderer/utils/debounce';
 import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 import Button from '../Button';
 import Img from '../Img';
-import LyricLine from '../LyricsPage/LyricLine';
 import UpNextSongPopup from '../SongsControlsContainer/UpNextSongPopup';
+import LyricsContainer from './containers/LyricsContainer';
+import SeekBarSlider from '../SeekBarSlider';
+import TitleBarContainer from './containers/TitleBarContainer';
+import VolumeSlider from '../VolumeSlider';
 
 type MiniPlayerProps = {
   className?: string;
 };
 
 export default function MiniPlayer(props: MiniPlayerProps) {
-  const {
-    currentSongData,
-    isCurrentSongPlaying,
-    userData,
-    isMuted,
-    volume,
-    localStorageData,
-  } = React.useContext(AppContext);
+  const { currentSongData, isCurrentSongPlaying, isMuted, localStorageData } =
+    React.useContext(AppContext);
   const {
     toggleSongPlayback,
     updatePlayerType,
     handleSkipBackwardClick,
     handleSkipForwardClick,
-    updateUserData,
-    updateSongPosition,
     toggleIsFavorite,
     toggleMutedState,
-    updateVolume,
   } = React.useContext(AppUpdateContext);
 
   const { className } = props;
 
-  const { songPosition } = React.useContext(SongPositionContext);
   const { t } = useTranslation();
 
-  const [songPos, setSongPos] = React.useState(0);
   const [isNextSongPopupVisible, setIsNextSongPopupVisible] =
     React.useState(false);
 
-  const isMouseDownRef = React.useRef(false);
-  const isMouseScrollRef = React.useRef(false);
-  const seekbarRef = React.useRef(null as HTMLInputElement | null);
-
   const [isLyricsVisible, setIsLyricsVisible] = React.useState(false);
-  const [lyrics, setLyrics] = React.useState<SongLyrics | null | undefined>(
-    null,
-  );
-
-  const volumeSliderRef = React.useRef<HTMLInputElement>(null);
-
-  const volumeBarCssProperties: any = {};
-  volumeBarCssProperties['--volume-before-width'] = `${volume}%`;
-
-  React.useEffect(() => {
-    if (isLyricsVisible) {
-      setLyrics(null);
-      window.api.lyrics
-        .getSongLyrics({
-          songTitle: currentSongData.title,
-          songArtists: Array.isArray(currentSongData.artists)
-            ? currentSongData.artists.map((artist) => artist.name)
-            : [],
-          songPath: currentSongData.path,
-          duration: currentSongData.duration,
-        })
-        .then((res) => setLyrics(res))
-        .catch((err) => console.error(err));
-    }
-  }, [
-    currentSongData.artists,
-    currentSongData.duration,
-    currentSongData.path,
-    currentSongData.songId,
-    currentSongData.title,
-    isLyricsVisible,
-  ]);
 
   const manageKeyboardShortcuts = React.useCallback(
     (e: KeyboardEvent) => {
@@ -103,112 +57,14 @@ export default function MiniPlayer(props: MiniPlayerProps) {
     };
   }, [manageKeyboardShortcuts]);
 
-  const seekBarCssProperties: any = {};
-
-  seekBarCssProperties['--seek-before-width'] = `${
-    (songPos / currentSongData.duration) * 100
-  }%`;
-
-  React.useEffect(() => {
-    if (
-      seekbarRef.current &&
-      !isMouseDownRef.current &&
-      !isMouseScrollRef.current
-    ) {
-      setSongPos(songPosition);
-    }
-  }, [songPosition]);
-
-  React.useEffect(() => {
-    const seekBar = seekbarRef?.current;
-    if (seekBar) {
-      const handleSeekbarMouseDown = () => {
-        isMouseDownRef.current = true;
-      };
-      const handleSeekbarMouseUp = () => {
-        isMouseDownRef.current = false;
-        updateSongPosition(seekBar?.valueAsNumber ?? 0);
-      };
-      seekBar.addEventListener('mousedown', () => handleSeekbarMouseDown());
-      seekBar.addEventListener('mouseup', () => handleSeekbarMouseUp());
-      return () => {
-        seekBar?.removeEventListener('mouseup', handleSeekbarMouseUp);
-        seekBar?.removeEventListener('mousedown', handleSeekbarMouseDown);
-      };
-    }
-    return undefined;
-  }, [updateSongPosition]);
-
-  const lyricsComponents = React.useMemo(() => {
-    if (lyrics && lyrics?.lyrics) {
-      const {
-        isSynced,
-        lyrics: unsyncedLyrics,
-        syncedLyrics,
-        offset = 0,
-      } = lyrics.lyrics;
-
-      if (syncedLyrics) {
-        const syncedLyricsLines = syncedLyrics.map((lyric, index) => {
-          const { text, end, start } = lyric;
-          return (
-            <LyricLine
-              key={index}
-              index={index}
-              lyric={text}
-              syncedLyrics={{ start, end }}
-            />
-          );
-        });
-
-        const firstLine = (
-          <LyricLine
-            key="..."
-            index={0}
-            lyric="•••"
-            syncedLyrics={{
-              start: 0,
-              end: (syncedLyrics[0]?.start || 0) + offset,
-            }}
-          />
-        );
-
-        if ((syncedLyrics[0]?.start || 0) !== 0)
-          syncedLyricsLines.unshift(firstLine);
-
-        return syncedLyricsLines;
-      }
-      if (!isSynced) {
-        return unsyncedLyrics.map((line, index) => {
-          return <LyricLine key={index} index={index} lyric={line} />;
-        });
-      }
-    }
-    return [];
-  }, [lyrics]);
-
   const handleSkipForwardClickWithParams = React.useCallback(
     () => handleSkipForwardClick('USER_SKIP'),
     [handleSkipForwardClick],
   );
 
-  const toggleAlwaysOnTop = React.useCallback(() => {
-    if (userData) {
-      const state = !userData?.preferences.isMiniPlayerAlwaysOnTop;
-      return window.api.miniPlayer.toggleMiniPlayerAlwaysOnTop(state).then(() =>
-        updateUserData((prevUserData) => {
-          if (prevUserData?.preferences)
-            prevUserData.preferences.isMiniPlayerAlwaysOnTop = state;
-          return prevUserData as UserData;
-        }),
-      );
-    }
-    return undefined;
-  }, [updateUserData, userData]);
-
   return (
     <div
-      className={`mini-player dark group h-full !transition-none select-none overflow-hidden delay-100 !bg-dark-background-color-1 ${
+      className={`mini-player dark group h-full select-none overflow-hidden !bg-dark-background-color-1 !transition-none delay-100 ${
         !isCurrentSongPlaying && 'paused'
       } ${
         localStorageData?.preferences?.isReducedMotion ? 'reduced-motion' : ''
@@ -229,101 +85,14 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           }`}
         />
       </div>
-      <div
-        className={`mini-player-lyrics-container absolute top-0 flex h-full w-full select-none flex-col items-center overflow-hidden px-4 py-12 transition-[filter] group-focus-within:blur-sm group-focus-within:brightness-50 group-hover:blur-sm group-hover:brightness-50 ${
-          !isCurrentSongPlaying ? 'blur-sm brightness-50' : ''
-        }`}
-        id="miniPlayerLyricsContainer"
-      >
-        {isLyricsVisible &&
-          lyricsComponents.length > 0 &&
-          lyrics &&
-          lyrics.lyrics.isSynced &&
-          lyricsComponents}
-        {isLyricsVisible && lyrics && !lyrics.lyrics.isSynced && (
-          <div className="flex h-full w-full items-center justify-center text-font-color-white opacity-75">
-            {t('lyricsPage.noSyncedLyrics')}
-          </div>
-        )}
-        {isLyricsVisible && lyrics === undefined && (
-          <div className="flex h-full w-full items-center justify-center text-font-color-white">
-            {t('lyricsPage.noLyrics')}
-          </div>
-        )}
-      </div>
+      <LyricsContainer isLyricsVisible={isLyricsVisible} />
       <div
         className={`container absolute top-0 flex h-full flex-col items-center justify-between overflow-hidden ${
           !isLyricsVisible &&
           'bg-[linear-gradient(180deg,_rgba(2,_0,_36,_0)_0%,_rgba(33,_34,_38,_0.9)_90%)]'
         }`}
       >
-        <div
-          className={`mini-player-title-bar z-10 flex h-[15%] max-h-[2.25rem] w-full select-none justify-end opacity-0 transition-[visibility,opacity] group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100 ${
-            !isCurrentSongPlaying ? 'visible opacity-100' : ''
-          }`}
-        >
-          <div
-            className={`special-controls-container flex transition-[visibility,opacity] ${
-              isLyricsVisible
-                ? 'invisible opacity-0 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100'
-                : ''
-            } ${!isCurrentSongPlaying ? '!visible !opacity-100' : ''}`}
-          >
-            <Button
-              className="go-to-main-player-btn !mr-0 !mt-1 !rounded-md !border-0 !p-2 text-font-color-white outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white"
-              tooltipLabel={t('player.goToMainPlayer')}
-              iconName="pip_exit"
-              iconClassName="material-icons-round-outlined !text-xl"
-              clickHandler={() => updatePlayerType('normal')}
-              removeFocusOnClick
-            />
-            <Button
-              className={`always-on-top-btn !mr-0 !mt-1 !rounded-md !border-0 !p-2 text-font-color-white outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white ${
-                userData?.preferences.isMiniPlayerAlwaysOnTop
-                  ? 'bg-dark-background-color-2 dark:bg-dark-background-color-2'
-                  : ''
-              }`}
-              iconName={
-                userData?.preferences &&
-                userData.preferences.isMiniPlayerAlwaysOnTop
-                  ? 'move_down'
-                  : 'move_up'
-              }
-              iconClassName="material-icons-round text-xl"
-              tooltipLabel={t(
-                `miniPlayer.${
-                  userData?.preferences.isMiniPlayerAlwaysOnTop
-                    ? 'alwaysOnTopEnabled'
-                    : 'alwaysOnTopDisabled'
-                }`,
-              )}
-              removeFocusOnClick
-              clickHandler={toggleAlwaysOnTop}
-            />
-          </div>
-          <div className="window-controls-container flex">
-            <Button
-              className="minimize-btn !m-0 flex h-full items-center justify-center !rounded-none !border-0 !px-2 text-center text-xl outline-1 -outline-offset-2 transition-[background] ease-in-out hover:!bg-[hsla(0deg,0%,80%,0.5)] focus-visible:!outline"
-              clickHandler={() => window.api.windowControls.minimizeApp()}
-              tooltipLabel={t('titleBar.minimize')}
-              iconName="minimize"
-              iconClassName="material-icons-round icon flex h-fit cursor-pointer items-center justify-center text-center text-xl !font-light transition-[background] ease-in-out"
-              removeFocusOnClick
-            />
-            <Button
-              className="close-btn !m-0 flex h-full items-center justify-center !rounded-none !border-0 !px-2 text-center text-xl outline-1 -outline-offset-2 transition-[background] ease-in-out hover:!bg-font-color-crimson hover:!text-font-color-white focus-visible:!outline"
-              clickHandler={() => {
-                if (userData && userData.preferences.hideWindowOnClose)
-                  window.api.windowControls.hideApp();
-                else window.api.windowControls.closeApp();
-              }}
-              tooltipLabel={t('titleBar.close')}
-              iconName="close"
-              iconClassName="material-icons-round icon flex h-fit  cursor-pointer items-center justify-center text-center text-xl !font-light transition-[background] ease-in-out"
-              removeFocusOnClick
-            />
-          </div>
-        </div>
+        <TitleBarContainer isLyricsVisible={isLyricsVisible} />
         <div
           className={`song-controls-container delay-50 absolute left-1/2 top-[45%] flex h-fit -translate-x-1/2 -translate-y-1/2 items-center justify-center  bg-[transparent] shadow-none transition-[visibility,opacity] dark:bg-[transparent] ${
             !isCurrentSongPlaying
@@ -332,7 +101,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           }`}
         >
           <Button
-            className={`favorite-btn !m-0 h-fit -translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white dark:after:bg-dark-font-color-highlight after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity ${
+            className={`favorite-btn !m-0 h-fit -translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white dark:after:bg-dark-font-color-highlight ${
               currentSongData.isAFavorite && 'after:opacity-100'
             }`}
             iconClassName={`!text-xl ${
@@ -369,7 +138,6 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             iconName={isCurrentSongPlaying ? 'pause_circle' : 'play_circle'}
             removeFocusOnClick
           />
-
           <Button
             className="skip-backward-btn !mr-4 h-fit translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
             tooltipLabel={t('player.nextSong')}
@@ -379,7 +147,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             removeFocusOnClick
           />
           <Button
-            className={`lyrics-btn !m-0 h-fit translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity dark:after:bg-dark-font-color-highlight ${
+            className={`lyrics-btn !m-0 h-fit translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white dark:after:bg-dark-font-color-highlight ${
               isLyricsVisible &&
               '!text-dark-background-color-3 after:opacity-100'
             }`}
@@ -389,6 +157,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             tooltipLabel={t('player.lyrics')}
             removeFocusOnClick
           />
+          Title
         </div>
         <div
           className={`song-info-container group/info flex h-1/2 w-full flex-col items-center justify-center px-4 text-center text-font-color-white transition-[visibility,opacity] ${
@@ -442,67 +211,17 @@ export default function MiniPlayer(props: MiniPlayerProps) {
               clickHandler={() => toggleMutedState(!isMuted)}
               removeFocusOnClick
             />
-            <input
-              type="range"
+            <VolumeSlider
+              name="mini-player-volume-slider"
               id="volumeSlider"
               className="relative float-left m-0 h-6 w-full appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--volume-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
-              min="0"
-              max="100"
-              value={volume}
-              onChange={(e) => updateVolume(Number(e.target.value))}
-              aria-label="Volume slider"
-              style={volumeBarCssProperties}
-              title={Math.round(volume).toString()}
-              onWheel={(e) => {
-                const scrollIncrement =
-                  localStorageData.preferences.seekbarScrollInterval;
-                const incrementValue =
-                  e.deltaY > 0 ? -scrollIncrement : scrollIncrement;
-                let value = volume + incrementValue;
-
-                if (value > 100) value = 100;
-                if (value < 0) value = 0;
-                updateVolume(value);
-              }}
-              ref={volumeSliderRef}
             />
           </div>
         </div>
-        <input
-          type="range"
+        <SeekBarSlider
           name="mini-player-seek-slider"
           id="miniPlayerSeekSlider"
           className="seek-slider absolute bottom-0 float-left m-0 h-fit w-full appearance-none bg-background-color-3/25 p-0 outline-none outline-1 outline-offset-1 backdrop-blur-sm transition-[width,height,transform] ease-in-out before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-background-color-3 before:transition-[width,height,transform] before:ease-in-out before:content-[''] focus-visible:!outline group-focus-within:-translate-y-3 group-focus-within:scale-x-95 group-focus-within:before:h-3 group-hover:-translate-y-3 group-hover:scale-x-95 group-hover:before:h-3"
-          min={0}
-          readOnly
-          max={currentSongData.duration || 0}
-          value={songPos || 0}
-          onChange={(e) => {
-            setSongPos(e.currentTarget.valueAsNumber ?? 0);
-          }}
-          ref={seekbarRef}
-          style={seekBarCssProperties}
-          title={Math.round(songPosition).toString()}
-          onWheel={(e) => {
-            isMouseScrollRef.current = true;
-
-            const max = parseInt(e.currentTarget.max);
-            const scrollIncrement =
-              localStorageData.preferences.seekbarScrollInterval;
-
-            const incrementValue =
-              e.deltaY > 0 ? -scrollIncrement : scrollIncrement;
-            let value = (songPos || 0) + incrementValue;
-
-            if (value > max) value = max;
-            if (value < 0) value = 0;
-            setSongPos(value);
-
-            debounce(() => {
-              isMouseScrollRef.current = false;
-              updateSongPosition(value ?? 0);
-            }, 250);
-          }}
         />
       </div>
     </div>

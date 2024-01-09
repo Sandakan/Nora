@@ -239,6 +239,7 @@ const reducer = (
 
       return {
         ...state,
+        bodyBackgroundImage: undefined,
         playerType: type,
       };
     }

@@ -670,7 +670,7 @@ const Song = React.forwardRef(
             (trackNo &&
               localStorageData.preferences.showTrackNumberAsSongIndex) ? (
             <div
-              className={`relative mx-1 flex items-center py-1 justify-center rounded-2xl bg-background-color-1 px-3 text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1 text-center ${
+              className={`relative mx-1 flex items-center justify-center rounded-2xl bg-background-color-1 px-3 py-1 text-center text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1 ${
                 index < 10
                   ? 'min-w-[1.75rem]'
                   : index < 100
@@ -719,7 +719,7 @@ const Song = React.forwardRef(
           </div>
         </div>
         <div
-          className={`song-info-container grid grow grid-cols-[35%_2fr_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] items-center gap-3 text-font-color-black dark:text-font-color-white lg:grid-cols-[40%_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] lg:!gap-0 sm:grid-cols-[45%_1fr_minmax(4.5rem,6rem)] sm:gap-2 ${
+          className={`song-info-container grid grow grid-cols-[35%_2fr_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] items-center gap-3 text-font-color-black lg:grid-cols-[40%_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] lg:!gap-0 sm:grid-cols-[45%_1fr_minmax(4.5rem,6rem)] sm:gap-2 dark:text-font-color-white ${
             (currentSongData.songId === songId || isAMultipleSelection) &&
             'dark:!text-font-color-black'
           }`}

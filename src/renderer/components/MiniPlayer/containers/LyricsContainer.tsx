@@ -2,18 +2,17 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
-import LyricLine from '../../LyricsPage/LyricLine';
 
-type Props = {
-  isLyricsVisible: boolean;
-  setIsLyricsAvailable: (state: boolean) => void;
-};
+import LyricLine from 'renderer/components/LyricsPage/LyricLine';
+
+type Props = { isLyricsVisible: boolean };
 
 const LyricsContainer = (props: Props) => {
   const { currentSongData, isCurrentSongPlaying } =
     React.useContext(AppContext);
-  const { isLyricsVisible, setIsLyricsAvailable } = props;
   const { t } = useTranslation();
+
+  const { isLyricsVisible } = props;
 
   const [lyrics, setLyrics] = React.useState<SongLyrics | null | undefined>(
     null,
@@ -31,10 +30,7 @@ const LyricsContainer = (props: Props) => {
           songPath: currentSongData.path,
           duration: currentSongData.duration,
         })
-        .then((res) => {
-          setIsLyricsAvailable(res?.lyrics?.isSynced ?? false);
-          return setLyrics(res);
-        })
+        .then((res) => setLyrics(res))
         .catch((err) => console.error(err));
     }
   }, [
@@ -44,7 +40,6 @@ const LyricsContainer = (props: Props) => {
     currentSongData.songId,
     currentSongData.title,
     isLyricsVisible,
-    setIsLyricsAvailable,
   ]);
 
   const lyricsComponents = React.useMemo(() => {
@@ -97,7 +92,7 @@ const LyricsContainer = (props: Props) => {
 
   return (
     <div
-      className={`mini-player-lyrics-container appear-from-bottom w-ful absolute top-0 flex h-full !max-h-screen w-full !max-w-full select-none flex-col items-start overflow-auto pb-[25%] pl-20 pr-[20%] pt-20 transition-[filter] delay-200 group-focus-within/fullScreenPlayer:blur-sm group-focus-within:brightness-50 group-hover/fullScreenPlayer:blur-sm group-hover/fullScreenPlayer:brightness-50 ${
+      className={`mini-player-lyrics-container absolute top-0 flex h-full w-full select-none flex-col items-center overflow-hidden px-4 py-12 transition-[filter] group-focus-within:blur-sm group-focus-within:brightness-50 group-hover:blur-sm group-hover:brightness-50 ${
         !isCurrentSongPlaying ? 'blur-sm brightness-50' : ''
       }`}
       id="miniPlayerLyricsContainer"
@@ -108,18 +103,12 @@ const LyricsContainer = (props: Props) => {
         lyrics.lyrics.isSynced &&
         lyricsComponents}
       {isLyricsVisible && lyrics && !lyrics.lyrics.isSynced && (
-        <div className="flex h-full w-full flex-col justify-center text-2xl text-font-color-white opacity-50">
-          <span className="material-icons-round-outlined mb-2 text-5xl">
-            brightness_alert
-          </span>
+        <div className="flex h-full w-full items-center justify-center text-font-color-white opacity-75">
           {t('lyricsPage.noSyncedLyrics')}
         </div>
       )}
       {isLyricsVisible && lyrics === undefined && (
-        <div className="flex h-full w-full flex-col justify-center text-2xl text-font-color-white opacity-50">
-          <span className="material-icons-round-outlined mb-2 text-5xl">
-            brightness_alert
-          </span>
+        <div className="flex h-full w-full items-center justify-center text-font-color-white">
           {t('lyricsPage.noLyrics')}
         </div>
       )}

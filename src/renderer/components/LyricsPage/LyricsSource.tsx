@@ -33,7 +33,7 @@ const LyricsSource = (props: LyricsSourceProp) => {
         )}
       </div>
       {copyright && (
-        <div className="text-sm text-font-color-dimmed text-balance">
+        <div className="text-balance text-sm text-font-color-dimmed">
           &copy; {copyright}
         </div>
       )}

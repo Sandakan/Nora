@@ -2,10 +2,9 @@ import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
 import calculateTime from 'renderer/utils/calculateTime';
-import debounce from 'renderer/utils/debounce';
 import Button from '../Button';
+import SeekBarSlider from '../SeekBarSlider';
 
 const SongControlsAndSeekbarContainer = () => {
   const {
@@ -27,60 +26,10 @@ const SongControlsAndSeekbarContainer = () => {
     toggleSongPlayback,
     handleSkipForwardClick,
     handleSkipBackwardClick,
-    updateSongPosition,
   } = useContext(AppUpdateContext);
-  const { songPosition } = useContext(SongPositionContext);
   const { t } = useTranslation();
 
   const [songPos, setSongPos] = React.useState(0);
-  const isMouseDownRef = React.useRef(false);
-  const isMouseScrollRef = React.useRef(false);
-  const seekbarRef = React.useRef(null as HTMLInputElement | null);
-
-  const seekBarCssProperties: any = {};
-
-  seekBarCssProperties['--seek-before-width'] = `${
-    (songPos /
-      ((currentSongData.duration || 0) >= songPos
-        ? currentSongData.duration || 0
-        : songPos)) *
-    100
-  }%`;
-
-  React.useEffect(() => {
-    if (
-      seekbarRef.current &&
-      !isMouseDownRef.current &&
-      !isMouseScrollRef.current
-    ) {
-      setSongPos(songPosition);
-    }
-  }, [songPosition]);
-
-  React.useEffect(() => {
-    const seekBar = seekbarRef.current;
-
-    if (seekbarRef.current) {
-      const handleSeekbarMouseDown = () => {
-        isMouseDownRef.current = true;
-      };
-      const handleSeekbarMouseUp = () => {
-        isMouseDownRef.current = false;
-        updateSongPosition(seekbarRef.current?.valueAsNumber ?? 0);
-      };
-      seekbarRef.current.addEventListener('mousedown', () =>
-        handleSeekbarMouseDown(),
-      );
-      seekbarRef.current.addEventListener('mouseup', () =>
-        handleSeekbarMouseUp(),
-      );
-      return () => {
-        seekBar?.removeEventListener('mouseup', handleSeekbarMouseUp);
-        seekBar?.removeEventListener('mousedown', handleSeekbarMouseDown);
-      };
-    }
-    return undefined;
-  }, [updateSongPosition]);
 
   const handleQueueShuffle = () => {
     if (isShuffling) {
@@ -107,8 +56,8 @@ const SongControlsAndSeekbarContainer = () => {
   const currentSongPosition = calculateTime(songPos);
   const songDuration =
     localStorageData && localStorageData.preferences.showSongRemainingTime
-      ? currentSongData.duration - Math.floor(songPosition) >= 0
-        ? calculateTime(currentSongData.duration - Math.floor(songPosition))
+      ? currentSongData.duration - Math.floor(songPos) >= 0
+        ? calculateTime(currentSongData.duration - Math.floor(songPos))
         : calculateTime(0)
       : calculateTime(currentSongData.duration);
 
@@ -218,44 +167,10 @@ const SongControlsAndSeekbarContainer = () => {
           {currentSongPosition.minutes}:{currentSongPosition.seconds}
         </div>
         <div className="seek-bar relative flex h-fit w-4/5 items-center rounded-md">
-          <input
-            type="range"
-            name="seek-bar-slider"
+          <SeekBarSlider
             id="seek-bar-slider"
-            className="seek-bar-slider relative float-left m-0 h-6 w-full appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
-            min={0}
-            max={
-              (currentSongData.duration || 0) >= songPos
-                ? currentSongData.duration || 0
-                : songPos
-            }
-            value={songPos || 0}
-            onChange={(e) => {
-              setSongPos(e.currentTarget.valueAsNumber ?? 0);
-            }}
-            onWheel={(e) => {
-              isMouseScrollRef.current = true;
-
-              const max = parseInt(e.currentTarget.max);
-              const scrollIncrement =
-                localStorageData.preferences.seekbarScrollInterval;
-
-              const incrementValue =
-                e.deltaY > 0 ? -scrollIncrement : scrollIncrement;
-              let value = (songPos || 0) + incrementValue;
-
-              if (value > max) value = max;
-              if (value < 0) value = 0;
-              setSongPos(value);
-
-              debounce(() => {
-                isMouseScrollRef.current = false;
-                updateSongPosition(value ?? 0);
-              }, 250);
-            }}
-            ref={seekbarRef}
-            style={seekBarCssProperties}
-            title={`${currentSongPosition.minutes}:${currentSongPosition.seconds}`}
+            name="seek-bar-slider"
+            onSeek={(currentPosition) => setSongPos(currentPosition)}
           />
         </div>
         <div className="full-song-duration w-16 text-center text-sm font-light">

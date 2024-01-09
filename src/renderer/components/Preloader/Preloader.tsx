@@ -34,7 +34,7 @@ const Preloader = () => {
         <div className="preloader visible absolute z-40 flex h-full w-full items-center justify-center bg-background-color-1 opacity-100 transition-[visibility,opacity] delay-700 dark:bg-dark-background-color-1">
           <Img
             src={AppIcon}
-            className="h-20 w-20 rounded-lg shadow-2xl !opacity-100"
+            className="h-20 w-20 rounded-lg !opacity-100 shadow-2xl"
             loading="eager"
           />
         </div>

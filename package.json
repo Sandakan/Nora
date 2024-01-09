@@ -214,7 +214,7 @@
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "file-loader": "^6.2.0",
-    "file-type": "^18.5.0",
+    "file-type": "^19.0.0",
     "html-webpack-plugin": "^5.5.3",
     "husky": "^8.0.3",
     "i18next-parser": "^8.9.0",

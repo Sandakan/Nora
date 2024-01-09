@@ -20,7 +20,7 @@ const NoLyrics = (props: NoLyricsProp) => {
 
   return (
     <div className="no-lyrics-container flex h-full flex-col items-center justify-center text-center text-font-color-black/75 dark:text-font-color-white/60">
-      <span className="material-icons-round-outlined text-6xl mb-4">
+      <span className="material-icons-round-outlined mb-4 text-6xl">
         {iconName}
       </span>
       <p className="mb-2 text-2xl">{title}</p>

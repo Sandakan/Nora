@@ -272,12 +272,18 @@ input[type='range'].vertical::-webkit-slider-runnable-track {
 input[type='range']:hover::-webkit-slider-thumb {
   opacity: 1;
   background: var(--text-color-highlight);
+  backdrop-filter: blur(4px);
   border-color: var(--text-color-highlight);
   transform: scale(1);
   -webkit-transform: scale(1);
   -moz-transform: scale(1);
   -ms-transform: scale(1);
   -o-transform: scale(1);
+}
+
+input[type='range'].full-screen-player-seek-slider:hover::-webkit-slider-thumb {
+  background: var(--background-color-1);
+  border-color: var(--background-color-1);
 }
 
 input[type='range']:active::-webkit-slider-thumb {

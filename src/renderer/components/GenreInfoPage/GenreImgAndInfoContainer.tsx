@@ -33,7 +33,7 @@ const GenreImgAndInfoContainer = (props: Props) => {
             loading="eager"
           />
           <div className="genre-info-container flex-grow">
-            <div className="font-semibold tracking-wider opacity-50 uppercase">
+            <div className="font-semibold uppercase tracking-wider opacity-50">
               {t('common.genre_one')}
             </div>
             <div className="genre-title h-fit max-w-[80%] overflow-hidden text-ellipsis whitespace-nowrap pb-2 text-6xl text-font-color-highlight dark:text-dark-font-color-highlight">
