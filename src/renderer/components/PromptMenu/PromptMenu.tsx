@@ -84,7 +84,7 @@ const PromptMenu = () => {
         key={0}
         className="prompt-menu-close-btn absolute right-4 top-4 !m-0 !rounded-none !border-0 !p-0 text-font-color-black outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white"
         iconName="close"
-        tooltipLabel={t('common.close')}
+        tooltipLabel={t('titleBar.close')}
         iconClassName="!leading-none !text-xl"
         clickHandler={(e) => {
           e.stopPropagation();

@@ -9,6 +9,7 @@ import Button from '../Button';
 type Props = {
   onPopupAppears: (isVisible: boolean) => void;
   isSemiTransparent?: boolean;
+  className?: string;
 };
 
 const UpNextSongPopup = (props: Props) => {
@@ -16,7 +17,7 @@ const UpNextSongPopup = (props: Props) => {
   const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const { onPopupAppears, isSemiTransparent = false } = props;
+  const { onPopupAppears, isSemiTransparent = false, className } = props;
 
   const [upNextSongData, setUpNextSongData] = React.useState<SongData>();
   const upNextSongDataCache = React.useRef<SongData>();
@@ -75,11 +76,11 @@ const UpNextSongPopup = (props: Props) => {
 
   return upNextSongData ? (
     <div
-      className={`next-song px-3 py-1 text-xs appear-from-bottom group/nextSong relative flex max-w-full items-center rounded-full ${
+      className={`next-song appear-from-bottom group/nextSong relative flex max-w-full items-center rounded-full px-3 py-1 text-xs ${
         isSemiTransparent
-          ? 'bg-background-color-2/75 dark:bg-dark-background-color-2/75 backdrop-blur-sm'
+          ? 'bg-background-color-2/75 backdrop-blur-sm dark:bg-dark-background-color-2/75'
           : 'bg-background-color-2 dark:bg-dark-background-color-2'
-      }`}
+      } ${className}`}
     >
       <p className="truncate">
         <span className="font-medium text-font-color-highlight dark:text-dark-font-color-highlight">

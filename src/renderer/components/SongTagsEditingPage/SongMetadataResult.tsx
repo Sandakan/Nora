@@ -206,7 +206,7 @@ function SongMetadataResult(props: SongMetadataResultProp) {
         />
         <Button
           key={0}
-          className="more-options-btn text-sm hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3 md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+          className="more-options-btn text-sm hover:!border-background-color-3 md:text-lg dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3 md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
           iconName="tune"
           clickHandler={() => {
             changePromptMenuData(

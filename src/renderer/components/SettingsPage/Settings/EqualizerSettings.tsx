@@ -145,7 +145,7 @@ const EqualizerSettings = () => {
 
         <div
           id="equalizer"
-          className="equalizer relative mt-4 flex items-center justify-around max-w-6xl mx-auto px-8"
+          className="equalizer relative mx-auto mt-4 flex max-w-6xl items-center justify-around px-8"
         >
           <span className="zero-line absolute mb-8 ml-12 !h-[.125rem] !w-[85%] bg-background-color-2 opacity-75 dark:bg-dark-background-color-2" />
           <div className="section flex !h-full flex-col px-2 py-4 text-xs opacity-80">

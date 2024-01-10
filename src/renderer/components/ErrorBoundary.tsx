@@ -30,10 +30,10 @@ const ErrorBoundaryFallbackUi = (props: ErrorBoundaryStates) => {
           style={{ whiteSpace: 'pre-wrap' }}
           className="mx-auto max-w-[80%] text-sm font-light"
         >
-          <summary className="cursor-pointer underline px-4 py-2">
+          <summary className="cursor-pointer px-4 py-2 underline">
             {t('common.details')}
           </summary>
-          <p className="p-4 rounded-2xl mt-4 bg-background-color-2 dark:bg-dark-background-color-2">
+          <p className="mt-4 rounded-2xl bg-background-color-2 p-4 dark:bg-dark-background-color-2">
             {error && error.toString()}
             <br />
             {errorInfo?.componentStack}

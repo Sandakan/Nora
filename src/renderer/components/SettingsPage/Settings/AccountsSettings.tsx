@@ -32,22 +32,22 @@ const AccountsSettings = () => {
             {' '}
             {t('settingsPage.integrateLastFm')}
           </div>
-          <div className="p-4 pb-0 flex">
+          <div className="flex p-4 pb-0">
             <img
               src={LastFMIcon}
               alt={t('settingsPage.lastFmLogo')}
-              className={`rounded-md w-16 mr-4 h-16 ${
-                !isLastFmConnected && 'grayscale brightness-90'
+              className={`mr-4 h-16 w-16 rounded-md ${
+                !isLastFmConnected && 'brightness-90 grayscale'
               }`}
             />
             <div className="flex-grow-0">
               <p
-                className={`uppercase font-semibold flex items-center ${
+                className={`flex items-center font-semibold uppercase ${
                   isLastFmConnected ? 'text-green-500' : 'text-red-500'
                 } `}
               >
                 {' '}
-                <span className="material-icons-round-outlined text-xl mr-2">
+                <span className="material-icons-round-outlined mr-2 text-xl">
                   {isLastFmConnected ? 'done' : 'close'}
                 </span>{' '}
                 {t(
@@ -61,7 +61,7 @@ const AccountsSettings = () => {
                     userData.lastFmSessionData.name
                   })`}
               </p>
-              <ul className="list-disc text-sm list-inside">
+              <ul className="list-inside list-disc text-sm">
                 <li>{t('settingsPage.lastFmDescription1')}</li>
                 <li>{t('settingsPage.lastFmDescription2')}</li>
                 <li>{t('settingsPage.lastFmDescription3')}</li>
@@ -81,7 +81,7 @@ const AccountsSettings = () => {
               />
             </div>
           </div>
-          <ul className="list-disc mt-4 pl-8 marker:bg-background-color-3 dark:marker:bg-background-color-3">
+          <ul className="mt-4 list-disc pl-8 marker:bg-background-color-3 dark:marker:bg-background-color-3">
             <li
               className={`last-fm-integration mb-4 transition-opacity ${
                 !isLastFmConnected && 'cursor-not-allowed opacity-50'

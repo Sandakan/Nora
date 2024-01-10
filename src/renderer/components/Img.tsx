@@ -102,7 +102,7 @@ const Img = React.memo((props: ImgProps) => {
       ref={imgRef}
       className={`relative outline-1 outline-offset-4 focus-visible:!outline ${
         enableImgFadeIns && isFirstTimeRef.current
-          ? 'opacity-0 delay-[250ms] transition-opacity'
+          ? 'opacity-0 transition-opacity delay-[250ms]'
           : '!opacity-100 !transition-none'
       } ${className}`}
       draggable={draggable}

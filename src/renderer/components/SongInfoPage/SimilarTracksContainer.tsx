@@ -173,7 +173,7 @@ const SimilarTracksContainer = (props: Props) => {
                 : 'text-font-color-black dark:text-font-color-white'
             } !mt-8 mb-4`}
           />
-          <div className="flex flex-wrap my-2">
+          <div className="my-2 flex flex-wrap">
             {availableSimilarTrackComponents}
           </div>
         </>

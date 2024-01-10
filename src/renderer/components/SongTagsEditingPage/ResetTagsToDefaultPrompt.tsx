@@ -18,7 +18,7 @@ const ResetTagsToDefaultPrompt = (props: Props) => {
   const entries = (dataEntries.filter((x) => x[1]) ?? []).map(([x]) => (
     <div>
       {x.toUpperCase()} :
-      <span className="ml-2 font-medium text-font-color-crimson uppercase">
+      <span className="ml-2 font-medium uppercase text-font-color-crimson">
         {t('resetTagsToDefaultPrompt.changed')}
       </span>
     </div>

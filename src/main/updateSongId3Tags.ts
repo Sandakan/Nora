@@ -776,7 +776,9 @@ const updateSongId3TagsOfUnknownSource = async (
         removeDefaultAppProtocolFromFilePath(songPath);
 
       const oldSongTags = await sendSongID3Tags(songPath, false);
-      const oldNodeID3Tags = await NodeID3.Promise.read(songPath);
+      const oldNodeID3Tags = await NodeID3.Promise.read(
+        songPathWithoutDefaultUrl,
+      );
 
       // ?  /////////// ARTWORK DATA FOR SONGS FROM UNKNOWN SOURCES /////////////////
 

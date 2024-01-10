@@ -5,29 +5,17 @@ import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from 'renderer/contexts/AppContext';
 import Button from '../Button';
+import VolumeSlider from '../VolumeSlider';
 
 const OtherSongControlsContainer = () => {
-  const {
-    currentlyActivePage,
-    isMiniPlayer,
-    isMuted,
-    volume,
-    localStorageData,
-  } = useContext(AppContext);
+  const { currentlyActivePage, isMuted, volume } = useContext(AppContext);
   const {
     changeCurrentActivePage,
-    updateMiniPlayerStatus,
+    updatePlayerType,
     toggleMutedState,
-    updateVolume,
     updateContextMenuData,
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
-
-  const volumeSliderRef = React.useRef<HTMLInputElement>(null);
-
-  const volumeBarCssProperties: any = {};
-
-  volumeBarCssProperties['--volume-before-width'] = `${volume}%`;
 
   const openOtherSettingsContextMenu = React.useCallback(
     (pageX: number, pageY: number) => {
@@ -62,20 +50,20 @@ const OtherSongControlsContainer = () => {
             label: t('player.showMiniPlayer'),
             iconName: 'pip',
             iconClassName: 'material-icons-round-outlined mr-2',
-            handlerFunction: () => updateMiniPlayerStatus(!isMiniPlayer),
+            handlerFunction: () => updatePlayerType('mini'),
+          },
+          {
+            label: t('player.openInFullScreen'),
+            iconName: 'fullscreen',
+            iconClassName: 'material-icons-round-outlined mr-2',
+            handlerFunction: () => updatePlayerType('full'),
           },
         ],
         pageX,
         pageY,
       );
     },
-    [
-      changeCurrentActivePage,
-      isMiniPlayer,
-      t,
-      updateContextMenuData,
-      updateMiniPlayerStatus,
-    ],
+    [changeCurrentActivePage, t, updateContextMenuData, updatePlayerType],
   );
 
   return (
@@ -100,10 +88,18 @@ const OtherSongControlsContainer = () => {
 
       <Button
         className="mini-player-btn !mr-6 !rounded-none !border-0 !p-0 text-font-color-black text-opacity-60 outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white lg:hidden"
-        clickHandler={() => updateMiniPlayerStatus(!isMiniPlayer)}
+        clickHandler={() => updatePlayerType('mini')}
         tooltipLabel={t('player.openInMiniPlayer')}
         iconName="pip"
         iconClassName="material-icons-round-outlined icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"
+      />
+
+      <Button
+        className="queue-btn !mr-6 !rounded-none !border-0 !p-0 text-font-color-black text-opacity-60 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:text-font-color-white dark:after:bg-dark-font-color-highlight lg:hidden"
+        tooltipLabel={t('player.openInFullScreen')}
+        iconName="fullscreen"
+        iconClassName="material-icons-round-outlined text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"
+        clickHandler={() => updatePlayerType('full')}
       />
 
       <Button
@@ -122,29 +118,10 @@ const OtherSongControlsContainer = () => {
       />
 
       <div className="volume-slider-container mr-4 min-w-[4rem] max-w-[6rem] lg:mr-4">
-        <input
-          type="range"
+        <VolumeSlider
+          name="player-volume-slider"
           id="volumeSlider"
           className="relative float-left m-0 h-6 w-full appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--volume-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
-          min="0"
-          max="100"
-          value={volume}
-          onChange={(e) => updateVolume(Number(e.target.value))}
-          aria-label="Volume slider"
-          style={volumeBarCssProperties}
-          title={Math.round(volume).toString()}
-          onWheel={(e) => {
-            const scrollIncrement =
-              localStorageData?.preferences?.seekbarScrollInterval;
-            const incrementValue =
-              e.deltaY > 0 ? -scrollIncrement : scrollIncrement;
-            let value = volume + incrementValue;
-
-            if (value > 100) value = 100;
-            if (value < 0) value = 0;
-            updateVolume(value);
-          }}
-          ref={volumeSliderRef}
         />
       </div>
       <div className="other-settings-btn mr-4 flex cursor-pointer items-center justify-center text-font-color-black text-opacity-60 dark:text-font-color-white">

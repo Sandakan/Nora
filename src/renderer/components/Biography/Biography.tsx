@@ -57,7 +57,7 @@ const Biography = (props: Props) => {
           : `bg-background-color-2 dark:bg-dark-background-color-2`
       }`}
     >
-      <h3 className="mb-2 font-medium text-xl text-font-color-highlight dark:text-dark-font-color-highlight">
+      <h3 className="mb-2 text-xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         <Trans
           i18nKey="biography.aboutName"
           components={{

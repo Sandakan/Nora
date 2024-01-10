@@ -213,6 +213,8 @@ declare global {
 
   type RepeatTypes = 'false' | 'repeat' | 'repeat-1';
 
+  type PlayerTypes = 'normal' | 'mini' | 'full';
+
   type PlayerVolume = { isMuted: boolean; value: number };
   interface Player {
     isCurrentSongPlaying: boolean;
@@ -220,7 +222,6 @@ declare global {
     isRepeating: RepeatTypes;
     songPosition: number;
     isShuffling: boolean;
-    isMiniPlayer: boolean;
     isPlayerStalled: boolean;
     playbackRate: number;
   }

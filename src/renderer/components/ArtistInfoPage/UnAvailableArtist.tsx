@@ -22,7 +22,7 @@ const UnAvailableArtist = (props: Omit<SimilarArtist, 'artistData'>) => {
   return (
     <button
       type="button"
-      className="bg-background-color-2 dark:bg-dark-background-color-2 mr-3 last:mr-0 mb-2 dark:text-font-color-white flex items-center px-4 py-1 rounded-3xl"
+      className="mb-2 mr-3 flex items-center rounded-3xl bg-background-color-2 px-4 py-1 last:mr-0 dark:bg-dark-background-color-2 dark:text-font-color-white"
       title={t('artistInfoPage.viewInLastFm', { name })}
       onClick={handleButtonClick}
     >

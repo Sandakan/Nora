@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Main",
+      "name": "Main - attach",
       "port": 5858,
       "request": "attach",
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
@@ -19,7 +19,7 @@
       "outFiles": ["${workspaceFolder}/**/*.js", "!**/node_modules/**"]
     },
     {
-      "name": "Renderer",
+      "name": "Renderer - attach",
       "type": "chrome",
       "request": "attach",
       "port": 9223,

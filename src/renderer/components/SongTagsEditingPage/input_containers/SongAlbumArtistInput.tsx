@@ -102,8 +102,8 @@ const SongAlbumArtistsInput = (props: Props) => {
           {albumArtistComponents.length === 0 &&
             songAlbum &&
             songAlbum?.albumId && (
-              <p className="appear-from-bottom ml-2 mb-2 text-sm font-medium flex items-center text-font-color-highlight dark:text-dark-font-color-highlight">
-                <span className="material-icons-round-outlined text-xl mr-2">
+              <p className="appear-from-bottom mb-2 ml-2 flex items-center text-sm font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+                <span className="material-icons-round-outlined mr-2 text-xl">
                   error
                 </span>{' '}
                 {t('songTagsEditingPage.albumArtistNotMentioned', {
@@ -120,8 +120,8 @@ const SongAlbumArtistsInput = (props: Props) => {
                 (albumArtist) => albumArtist.name === artist,
               ),
             ) && (
-              <p className="appear-from-bottom ml-2 mt-2 text-sm font-medium flex items-center text-font-color-highlight dark:text-dark-font-color-highlight">
-                <span className="material-icons-round-outlined text-xl mr-2">
+              <p className="appear-from-bottom ml-2 mt-2 flex items-center text-sm font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+                <span className="material-icons-round-outlined mr-2 text-xl">
                   error
                 </span>{' '}
                 {t('songTagsEditingPage.songAlbumArtistMismatch', {
@@ -147,7 +147,7 @@ const SongAlbumArtistsInput = (props: Props) => {
           onKeyDown={(e) => e.stopPropagation()}
         />
         {artistResults.length > 0 && (
-          <div className="artists-results-container mt-4 rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2 max-h-60 overflow-y-auto">
+          <div className="artists-results-container mt-4 max-h-60 overflow-y-auto rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2">
             {albumArtistResultComponents}
           </div>
         )}

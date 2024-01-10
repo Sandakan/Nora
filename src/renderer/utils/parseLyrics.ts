@@ -24,7 +24,7 @@ const getSecondsFromLyricsLine = (lyric: string) => {
 };
 
 const getLyricEndTime = (lyricsArr: string[], index: number) => {
-  if (lyricsArr.length - 1 === index) return Infinity;
+  if (lyricsArr.length - 1 === index) return Number.POSITIVE_INFINITY;
 
   if (lyricsArr[index + 1])
     return getSecondsFromLyricsLine(lyricsArr[index + 1]);

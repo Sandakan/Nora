@@ -527,7 +527,7 @@ function SongTagsEditingPage() {
               <hr className="horizontal-rule col-span-2 h-[0.1rem] w-[95%] border-0 bg-background-color-2 dark:bg-dark-background-color-2" />
             </div>
 
-            <div className="id3-control-buttons-container flex mt-4 p-4">
+            <div className="id3-control-buttons-container mt-4 flex p-4">
               <Button
                 key={0}
                 label={t('songTagsEditingPage.saveTags')}
@@ -547,16 +547,16 @@ function SongTagsEditingPage() {
               />
             </div>
             {isEditingCurrentlyPlayingSong && areThereDataChanges && (
-              <p className="appear-from-bottom ml-2 mb-2 text-sm font-medium flex items-center text-font-color-highlight dark:text-dark-font-color-highlight">
-                <span className="material-icons-round-outlined text-xl mr-2">
+              <p className="appear-from-bottom mb-2 ml-2 flex items-center text-sm font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+                <span className="material-icons-round-outlined mr-2 text-xl">
                   error
                 </span>{' '}
                 {t('songTagsEditingPage.updateAddedToBeSavedLater')}
               </p>
             )}
             {isMetadataUpdatesPending && (
-              <p className="appear-from-bottom ml-2 mb-2 text-sm font-medium flex items-center text-font-color-highlight dark:text-dark-font-color-highlight">
-                <span className="material-icons-round-outlined text-xl mr-2">
+              <p className="appear-from-bottom mb-2 ml-2 flex items-center text-sm font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+                <span className="material-icons-round-outlined mr-2 text-xl">
                   error
                 </span>{' '}
                 {t('songTagsEditingPage.pendingUpdateAvailable')}

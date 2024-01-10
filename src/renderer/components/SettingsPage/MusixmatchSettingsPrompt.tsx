@@ -105,7 +105,7 @@ const MusixmatchSettingsPrompt = () => {
 
       <br />
 
-      <ul className="empty:mt-0 ml-4 mt-4 list-disc text-sm font-medium text-font-color-crimson">
+      <ul className="ml-4 mt-4 list-disc text-sm font-medium text-font-color-crimson empty:mt-0">
         {successState === 'success' && (
           <li className="flex text-green-500">
             <span className="material-icons-round mr-2 text-xl">done</span>{' '}
@@ -136,10 +136,10 @@ const MusixmatchSettingsPrompt = () => {
             i18nKey="musixmatchSettingsPrompt.savedTokenAvailableMessage"
             components={{
               Title: (
-                <p className="flex uppercase font-semibold items-center" />
+                <p className="flex items-center font-semibold uppercase" />
               ),
               span: (
-                <span className="material-icons-round-outlined text-xl mr-2">
+                <span className="material-icons-round-outlined mr-2 text-xl">
                   done
                 </span>
               ),

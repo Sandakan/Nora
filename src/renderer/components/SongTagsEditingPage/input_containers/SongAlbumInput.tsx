@@ -68,7 +68,7 @@ const SongAlbumInput = (props: Props) => {
                 <div className="ml-4 flex flex-col text-left leading-none">
                   <span className="font-medium">{songAlbum.title}</span>
                   <span>
-                    <span className="font-medium text-xs">
+                    <span className="text-xs font-medium">
                       {songAlbum.artists?.join(', ') ||
                         t('common.unknownArtist')}
                     </span>
@@ -110,7 +110,7 @@ const SongAlbumInput = (props: Props) => {
           onKeyDown={(e) => e.stopPropagation()}
         />
         {albumResults.length > 0 && (
-          <div className="album-results-container mt-4 rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2 max-h-60 overflow-y-auto">
+          <div className="album-results-container mt-4 max-h-60 overflow-y-auto rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2">
             {albumResults.map((x) => (
               <SongAlbumInputResult
                 albumData={x}

@@ -21,7 +21,7 @@ const lyricsScrollIntoViewEvent = new CustomEvent('lyrics/scrollIntoView', {
 });
 
 const LyricLine = (props: LyricProp) => {
-  const { isMiniPlayer } = React.useContext(AppContext);
+  const { playerType } = React.useContext(AppContext);
   const { songPosition } = React.useContext(SongPositionContext);
   const { updateSongPosition } = React.useContext(AppUpdateContext);
   const { t } = useTranslation();
@@ -61,9 +61,11 @@ const LyricLine = (props: LyricProp) => {
             songPosition > extendedText.start - delay &&
             songPosition < extendedText.end - delay
               ? '!text-opacity-90'
-              : // : songPosition > start - delay && songPosition < end - delay
-                // ? '!text-opacity-40'
-                '!text-opacity-20 hover:!text-opacity-75'
+              : syncedLyrics &&
+                  songPosition > syncedLyrics.start - delay &&
+                  songPosition < syncedLyrics.end - delay
+                ? '!text-opacity-50'
+                : '!text-opacity-20 hover:!text-opacity-75'
           }`}
         >
           {extendedText.text}
@@ -72,7 +74,7 @@ const LyricLine = (props: LyricProp) => {
     });
 
     return extendedLyricLines;
-  }, [lyric, songPosition, updateSongPosition]);
+  }, [lyric, songPosition, syncedLyrics, updateSongPosition]);
 
   const lyricDurationBarProperties: any = {};
   // eslint-disable-next-line dot-notation
@@ -101,16 +103,19 @@ const LyricLine = (props: LyricProp) => {
             })
           : undefined
       }
-      className={`highlight ![text-wrap:balance] flex items-center justify-center flex-col text-wrap mb-5 w-fit select-none text-center text-4xl font-medium text-font-color-black transition-[transform,color] duration-250 first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
+      className={`highlight duration-250 mb-5 flex w-fit select-none flex-col items-center justify-center text-balance text-center text-5xl font-medium text-font-color-black transition-[transform,color,filter] first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
         syncedLyrics
           ? `cursor-pointer ${
               songPosition > syncedLyrics.start - delay &&
               songPosition < syncedLyrics.end - delay
-                ? '!scale-100 text-5xl !text-opacity-90 [&>div>span]:!mr-3 [&>div>span]:last:!mr-0'
-                : '!scale-75 !text-opacity-20 hover:!text-opacity-75'
+                ? '!scale-100 !text-opacity-90 !blur-0 [&>div>span]:!mr-3'
+                : 'scale-[.7] !text-opacity-20 hover:!text-opacity-75'
             }`
-          : ''
-      } ${isMiniPlayer && '!mb-2 !text-2xl !text-font-color-white'}`}
+          : '!text-4xl'
+      } ${playerType === 'mini' && '!mb-2 !text-2xl !text-font-color-white'} ${
+        playerType === 'full' &&
+        '!mb-6 origin-left !items-start !justify-start !text-left !text-6xl !text-font-color-white blur-[1px]'
+      }`}
       ref={lyricsRef}
       onClick={() =>
         syncedLyrics &&
@@ -118,19 +123,23 @@ const LyricLine = (props: LyricProp) => {
         updateSongPosition(syncedLyrics.start)
       }
     >
-      <div className="flex flex-wrap flex-row items-center justify-center">
+      <div
+        className={`flex flex-row flex-wrap ${
+          playerType !== 'full' && 'items-center justify-center'
+        }`}
+      >
         {lyricString}
       </div>
       <span
         style={lyricDurationBarProperties}
-        className={`min-w-[2rem] mt-1 max-w-[4rem] w-1/2 h-1 bg-background-color-2 opacity-0 invisible transition-[visibility,opacity] dark:bg-dark-background-color-2 block rounded-md ${
+        className={`invisible mt-1 block h-1 w-1/2 min-w-[2rem] max-w-[4rem] rounded-md bg-background-color-2 opacity-0 transition-[visibility,opacity] dark:bg-dark-background-color-2 ${
           syncedLyrics &&
           songPosition > syncedLyrics.start - delay &&
           songPosition < syncedLyrics.end - delay &&
-          'dark:!opacity-50 !opacity-100 !visible'
+          '!visible !opacity-100 dark:!opacity-50'
         }`}
       >
-        <span className="w-[var(--duration)] h-full block rounded-md duration-300 bg-background-color-dimmed dark:bg-background-color-dimmed transition-[width]" />
+        <span className="block h-full w-[var(--duration)] rounded-md bg-background-color-dimmed transition-[width] duration-300 dark:bg-background-color-dimmed" />
       </span>
     </div>
   );

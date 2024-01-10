@@ -46,7 +46,7 @@ const SimilarArtistsContainer = (props: Props) => {
         const unAvailableArtistsComponents = unAvailableArtists.map(
           (unAvailArtist) => {
             const { name, url } = unAvailArtist;
-            return <UnAvailableArtist name={name} url={url} />;
+            return <UnAvailableArtist key={url} name={name} url={url} />;
           },
         );
 
@@ -72,9 +72,9 @@ const SimilarArtistsContainer = (props: Props) => {
               bodyBackgroundImage
                 ? 'text-font-color-white'
                 : 'text-font-color-black dark:text-font-color-white'
-            } mb-4 mt-1 text-2xl pr-4`}
+            } mb-4 mt-1 pr-4 text-2xl`}
           />
-          <div className="flex flex-wrap my-2">{availArtistComponents}</div>
+          <div className="my-2 flex flex-wrap">{availArtistComponents}</div>
         </>
       )}
       {unAvailArtistComponents.length > 0 && (
@@ -86,7 +86,7 @@ const SimilarArtistsContainer = (props: Props) => {
               bodyBackgroundImage
                 ? 'text-font-color-white'
                 : 'text-font-color-black dark:text-font-color-white'
-            } mb-4 mt-1 text-2xl pr-4`}
+            } mb-4 mt-1 pr-4 text-2xl`}
           />
           <div className="flex flex-wrap ">{unAvailArtistComponents}</div>
         </>

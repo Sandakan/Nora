@@ -6,7 +6,7 @@ import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import Button from 'renderer/components/Button';
 import Hyperlink from 'renderer/components/Hyperlink';
-import { EditingLyricsLineData } from 'renderer/components/LyricsEditingPage/LyricsEditingPage';
+import { LyricData } from 'renderer/components/LyricsEditingPage/LyricsEditingPage';
 import { syncedLyricsRegex } from 'renderer/components/LyricsPage/LyricsPage';
 import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
 import parseLyrics from 'renderer/utils/parseLyrics';
@@ -215,7 +215,7 @@ const SongLyricsEditorInput = (props: Props) => {
         currentLyricsType === 'synced'
           ? synchronizedLyrics
           : unsynchronizedLyrics;
-      let lines: EditingLyricsLineData[] = [];
+      let lines: LyricData[] = [];
       const { isSynced, syncedLyrics, unsyncedLyrics } = parseLyrics(
         lyrics as string,
       );
@@ -329,16 +329,16 @@ const SongLyricsEditorInput = (props: Props) => {
         )}
 
         {synchronizedLyrics && !isSynchronizedLyricsSynced && (
-          <p className="ml-2 mt-2 text-sm font-medium flex items-center text-font-color-highlight dark:text-dark-font-color-highlight">
-            <span className="material-icons-round-outlined text-xl mr-2">
+          <p className="ml-2 mt-2 flex items-center text-sm font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+            <span className="material-icons-round-outlined mr-2 text-xl">
               error
             </span>{' '}
             {t('songTagsEditingPage.avoidUnsyncedOnSyncedLyricsTab')}
           </p>
         )}
         {unsynchronizedLyrics && isUnsynchronizedLyricsSynced && (
-          <p className="ml-2 mt-2 text-sm font-medium flex text-font-color-highlight dark:text-dark-font-color-highlight">
-            <span className="material-icons-round-outlined text-xl mr-2">
+          <p className="ml-2 mt-2 flex text-sm font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+            <span className="material-icons-round-outlined mr-2 text-xl">
               error
             </span>{' '}
             {t('songTagsEditingPage.avoidSyncedOnUnsyncedLyricsTab')}
@@ -346,8 +346,8 @@ const SongLyricsEditorInput = (props: Props) => {
         )}
 
         {isLyricsSavingPending && (
-          <p className="ml-2 mt-2 text-sm font-medium flex items-center text-font-color-highlight dark:text-dark-font-color-highlight">
-            <span className="material-icons-round-outlined text-xl mr-2">
+          <p className="ml-2 mt-2 flex items-center text-sm font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+            <span className="material-icons-round-outlined mr-2 text-xl">
               error
             </span>{' '}
             {t('songTagsEditingPage.pendingLyricsSavesAvailable')}

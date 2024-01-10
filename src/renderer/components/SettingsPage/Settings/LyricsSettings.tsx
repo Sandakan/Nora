@@ -120,7 +120,7 @@ const LyricsSettings = () => {
           <div className="description">
             {t('settingsPage.saveLyricsAutomaticallyDescription')}
           </div>
-          <div className="flex items-center flex-row mt-4">
+          <div className="mt-4 flex flex-row items-center">
             <Dropdown
               name="lyricsAutomaticallySaveState"
               value={lyricsAutomaticallySaveState}
@@ -136,7 +136,7 @@ const LyricsSettings = () => {
               }}
             />
             <span
-              className="material-icons-round-outlined ml-4 text-2xl cursor-pointer text-font-color-highlight dark:text-dark-font-color-highlight"
+              className="material-icons-round-outlined ml-4 cursor-pointer text-2xl text-font-color-highlight dark:text-dark-font-color-highlight"
               title={t('settingsPage.saveLyricsAutomaticallyInfo')}
             >
               help
@@ -168,7 +168,7 @@ const LyricsSettings = () => {
           <div className="description">
             {t('settingsPage.lrcFileCustomSaveLocationDescription')}
           </div>
-          <div className="flex-row mt-4 text-sm ml-2">
+          <div className="ml-2 mt-4 flex-row text-sm">
             {userData?.customLrcFilesSaveLocation && (
               <>
                 <span>{t('settingsPage.selectedCustomLocation')}: </span>
@@ -178,7 +178,7 @@ const LyricsSettings = () => {
               </>
             )}
           </div>
-          <div className="flex items-center flex-row mt-4">
+          <div className="mt-4 flex flex-row items-center">
             <Button
               label={t('settingsPage.setCustomLocation')}
               iconName="location_on"

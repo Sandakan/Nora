@@ -95,7 +95,7 @@ const Notification = (props: AppNotification) => {
     <div
       className={`notification ${
         type !== 'WITH_PROGRESS_BAR' && 'appear-from-bottom'
-      } group mt-4 first:!mt-0 flex h-fit max-h-32 min-h-[50px] w-fit min-w-[300px] max-w-sm justify-between rounded-2xl bg-context-menu-background py-2 text-sm font-light text-font-color-black shadow-[5px_25px_50px_0px_rgba(0,0,0,0.2)] backdrop-blur-sm transition-[opacity,transform,visibility] ease-in-out dark:bg-dark-context-menu-background dark:text-font-color-white ${
+      } group mt-4 flex h-fit max-h-32 min-h-[50px] w-fit min-w-[300px] max-w-sm justify-between rounded-2xl bg-context-menu-background py-2 text-sm font-light text-font-color-black shadow-[5px_25px_50px_0px_rgba(0,0,0,0.2)] backdrop-blur-sm transition-[opacity,transform,visibility] ease-in-out first:!mt-0 dark:bg-dark-context-menu-background dark:text-font-color-white ${
         progressBarData && 'duration-0'
       }`}
       id="notificationPanelsContainer"

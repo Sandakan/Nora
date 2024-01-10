@@ -157,8 +157,9 @@ const LyricsPage = () => {
         const syncedLyricsLines = syncedLyrics.map((lyric, index) => {
           const start = lyric.start + offset;
           const end =
-            (lyric.end === Infinity ? currentSongData.duration : lyric.end) +
-            offset;
+            (lyric.end === Number.POSITIVE_INFINITY
+              ? currentSongData.duration
+              : lyric.end) + offset;
 
           return (
             <LyricLine
@@ -420,7 +421,7 @@ const LyricsPage = () => {
   return (
     <MainContainer
       noDefaultStyles
-      className={`lyrics-container ![overflow-anchor:none] appear-from-bottom relative flex h-full flex-col ${
+      className={`lyrics-container appear-from-bottom relative flex h-full flex-col ![overflow-anchor:none] ${
         lyrics && isOnline ? 'justify-start' : 'items-center justify-center'
       }`}
     >
@@ -457,17 +458,13 @@ const LyricsPage = () => {
                   {lyrics?.lyrics?.isSynced && (
                     <Button
                       key={5}
-                      tooltipLabel={
-                        lyrics && lyrics.source !== 'IN_SONG_LYRICS'
-                          ? t(
-                              `currentQueuePage.${
-                                isAutoScrolling
-                                  ? 'disableAutoScrolling'
-                                  : 'enableAutoScrolling'
-                              }`,
-                            )
-                          : undefined
-                      }
+                      tooltipLabel={t(
+                        `currentQueuePage.${
+                          isAutoScrolling
+                            ? 'disableAutoScrolling'
+                            : 'enableAutoScrolling'
+                        }`,
+                      )}
                       pendingAnimationOnDisabled
                       className="show-online-lyrics-btn !text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                       iconName={isAutoScrolling ? 'flash_off' : 'flash_on'}

@@ -63,7 +63,7 @@ const AlbumImgAndInfoContainer = (props: Props) => {
             albumData.artists &&
             albumData.artists.length > 0 && (
               <div className="album-info-container max-w-[70%] text-font-color-black dark:text-font-color-white">
-                <div className="font-semibold tracking-wider opacity-50 uppercase">
+                <div className="font-semibold uppercase tracking-wider opacity-50">
                   {t(`common.album_one`)}
                 </div>
                 <div className="album-title h-fit w-full overflow-hidden text-ellipsis whitespace-nowrap py-2 text-5xl text-font-color-highlight dark:text-dark-font-color-highlight">

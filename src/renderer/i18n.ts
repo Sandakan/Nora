@@ -11,6 +11,7 @@ i18n.use(initReactI18next).init({
   resources,
   lng: 'en',
   fallbackLng: 'en',
+  interpolation: { escapeValue: false }, // React is safe from xss attacks
 });
 
 export default i18n;

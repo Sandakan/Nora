@@ -117,6 +117,7 @@
   "player": {
     "goToMainPlayer": "Go to Main Player (Ctrl + N)",
     "openInMiniPlayer": "Open in Mini player (Ctrl + N)",
+    "openInFullScreen": "Open in Fullscreen",
     "likeDislike": "Like/Dislike (Ctrl + H)",
     "likeDislikeDisabled": "Liking/Disliking songs is disabled because current playing song is from an unknown source and it doesn't support likes.",
     "prevSong": "Previous song (Ctrl + Left Arrow)",
@@ -559,6 +560,7 @@
     "showOnlineLyrics": "Show online lyrics",
     "refreshOnlineLyrics": "Refresh online lyrics",
     "showSavedLyrics": "Show online lyrics",
+
     "lyricsLoading": "Looking for lyrics",
     "lyricsLoadingDescription": "Hang on... We're looking everywhere...",
     "noInternet": "No internet connection",
@@ -744,6 +746,7 @@
 
   "deleteSongFromSystemConfirmPrompt": {
     "title_one": "Delete `{{title}}` from system",
+
     "title_other": "Delete $t(common.songWithCount, {\"count\":{{count}}}) from system",
     "permanentlyDeleteFromSystem": "Permanently delete from the system",
     "message_one": "You will lose this song from your system and may not be able to recover it again if you select '$t(deleteSongFromSystemConfirmPrompt.permanentlyDeleteFromSystem)' from system option.",

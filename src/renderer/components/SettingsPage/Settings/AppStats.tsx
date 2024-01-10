@@ -111,7 +111,7 @@ const AppStats = () => {
             <span className="text-xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
               {valueRounder(value)}
             </span>
-            <span className="opacity-75 lowercase">{keyName}</span>
+            <span className="lowercase opacity-75">{keyName}</span>
           </span>
         );
       }),

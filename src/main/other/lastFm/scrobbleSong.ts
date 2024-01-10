@@ -20,46 +20,48 @@ const scrobbleSong = async (songId: string, startTimeInSecs: number) => {
 
     if (isScrobblingEnabled && isConnectedToInternet) {
       const songs = getSongsData();
+      const song = songs.find((x) => x.songId === songId);
 
-      for (const song of songs) {
-        if (song.songId === songId) {
-          const authData = getLastFmAuthData();
+      if (song) {
+        const authData = getLastFmAuthData();
 
-          const url = new URL('http://ws.audioscrobbler.com/2.0/');
-          url.searchParams.set('format', 'json');
+        const url = new URL('http://ws.audioscrobbler.com/2.0/');
+        url.searchParams.set('format', 'json');
 
-          const params: ScrobbleParams = {
-            track: song.title,
-            artist: song.artists?.map((artist) => artist.name).join(', ') || '',
-            timestamp: Math.floor(startTimeInSecs),
-            album: song.album?.name,
-            albumArtist: song?.albumArtist?.name,
-            trackNumber: song.trackNo,
-            duration: Math.ceil(song.duration),
-          };
+        const params: ScrobbleParams = {
+          track: song.title,
+          artist: song.artists?.map((artist) => artist.name).join(', ') || '',
+          timestamp: Math.floor(startTimeInSecs),
+          album: song.album?.name,
+          albumArtist: song?.albumArtists
+            ?.map((artist) => artist.name)
+            .join(', '),
+          trackNumber: song.trackNo,
+          duration: Math.ceil(song.duration),
+        };
 
-          const body = generateApiRequestBodyForLastFMPostRequests({
-            method: 'track.scrobble',
-            authData,
-            params,
-          });
+        const body = generateApiRequestBodyForLastFMPostRequests({
+          method: 'track.scrobble',
+          authData,
+          params,
+        });
 
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body,
-          });
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body,
+        });
 
-          if (res.status === 200)
-            return log(`Scrobbled song ${songId} accepted.`);
+        if (res.status === 200)
+          return log(`Scrobbled song ${songId} accepted.`);
 
-          const json: LastFMScrobblePostResponse = await res.json();
-          return log('Failed to scrobble song to LastFM', { json }, 'WARN');
-        }
+        const json: LastFMScrobblePostResponse = await res.json();
+        return log('Failed to scrobble song to LastFM', { json }, 'WARN');
       }
     }
+
     return log('Scrobble song request ignored', {
       isScrobblingEnabled,
       isConnectedToInternet,
