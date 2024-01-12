@@ -326,12 +326,12 @@ const SongInfoPage = () => {
 
         {listeningData && (
           <SecondaryContainer className="secondary-container song-stats-container mt-8 flex h-fit flex-row flex-wrap items-center justify-center rounded-2xl p-2">
-            <div className="grid w-full max-w-5xl grid-cols-[1fr_minmax(50%,55%)] grid-rows-none gap-4 py-4 xl:grid-cols-1 xl:grid-rows-2 xl:justify-items-center">
+            <div className="grid w-full grid-flow-col place-content-center gap-4 py-4 pr-4 xl:grid-flow-row">
               <ListeningActivityBarGraph
                 listeningData={listeningData}
                 className="xl:order-2"
               />
-              <div className="stat-cards grid w-fit grid-cols-2 flex-wrap gap-4 xl:order-1 xl:mt-4 xl:grid-cols-3 xl:grid-rows-2 ">
+              <div className="stat-cards grid max-h-full w-fit min-w-[32rem] grid-cols-2 flex-wrap items-center justify-center gap-4 place-self-center xl:order-1 xl:mt-4 xl:flex xl:max-h-none xl:grid-cols-3 xl:grid-rows-2 ">
                 <SongStat
                   key={0}
                   title={t('songInfoPage.allTimeListens')}

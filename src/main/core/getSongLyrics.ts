@@ -216,6 +216,23 @@ const saveLyricsAutomaticallyIfAsked = async (
   return undefined;
 };
 
+const fetchOfflineLyrics = async (songPath: string) => {
+  const audioSourceLyrics = fetchLyricsFromAudioSource(songPath);
+
+  if (audioSourceLyrics) {
+    log('Serving audio source lyrics.');
+    return audioSourceLyrics;
+  }
+
+  const lrcFileLyrics = await fetchLyricsFromLRCFile(songPath);
+  if (lrcFileLyrics) {
+    log('Serving lrc file lyrics.');
+    return lrcFileLyrics;
+  }
+
+  return undefined;
+};
+
 const getSongLyrics = async (
   trackInfo: LyricsRequestTrackInfo,
   lyricsType: LyricsTypes = 'ANY',
@@ -235,9 +252,7 @@ const getSongLyrics = async (
 
   log(`Fetching lyrics for '${songTitle} - ${songArtists.join(',')}'.`);
 
-  const offlineLyrics =
-    fetchLyricsFromAudioSource(songPath) ||
-    (await fetchLyricsFromLRCFile(songPath));
+  const offlineLyrics = await fetchOfflineLyrics(songPath);
 
   if (offlineLyrics) isOfflineLyricsAvailable = true;
 

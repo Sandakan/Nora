@@ -25,7 +25,7 @@ const fetchSongInfoFromLastFM = async (
       const res = await fetch(url);
       if (res.ok) {
         const data = (await res.json()) as LastFMTrackInfoApi;
-        if (data.error) {
+        if ('error' in data) {
           log(
             `====== ERROR OCCURRED FETCHING DATA FROM LAST_FM API ABOUT SONG INFORMATION. ======\nERROR : ${data.error} => ${data.message}`,
           );

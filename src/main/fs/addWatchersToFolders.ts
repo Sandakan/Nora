@@ -46,7 +46,7 @@ const checkForFolderUpdates = async (folder: FolderStructure) => {
 
 const folderWatcherFunction = async (
   eventType: WatchEventType,
-  filename: string,
+  filename: string | null | undefined,
   folder: MusicFolderData,
   abortSignal: AbortSignal,
 ) => {

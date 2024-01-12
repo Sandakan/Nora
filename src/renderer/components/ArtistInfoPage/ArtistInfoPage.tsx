@@ -663,27 +663,24 @@ const ArtistInfoPage = () => {
                   : 'text-font-color-black dark:text-font-color-white'
               } mb-4 mt-1 pr-4 text-2xl`}
               otherItems={[
-                isMultipleSelectionEnabled &&
-                multipleSelectionsData.selectionType === 'songs' ? (
-                  <p className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
-                    {t('common.selectionWithCount', {
-                      count: multipleSelectionsData.multipleSelections.length,
-                    })}
-                  </p>
-                ) : (
-                  <p className="text-xs text-font-color-highlight dark:text-dark-font-color-highlight">
-                    {t('common.songWithCount', { count: songs.length })}
-                    {songs.length > 5 && !isAllSongsVisible && (
-                      <> ({t('common.shownWithCount', { count: 5 })})</>
-                    )}
-                  </p>
-                ),
+                <p className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
+                  {isMultipleSelectionEnabled &&
+                  multipleSelectionsData.selectionType === 'songs'
+                    ? t('common.selectionWithCount', {
+                        count: multipleSelectionsData.multipleSelections.length,
+                      })
+                    : `${t('common.songWithCount', { count: songs.length })} ${
+                        songs.length > 5 &&
+                        !isAllSongsVisible &&
+                        t('common.shownWithCount', { count: 5 })
+                      }`}
+                </p>,
               ]}
               buttons={[
                 {
                   tooltipLabel: t('common.moreOptions'),
                   className:
-                    'more-options-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0',
+                    'more-options-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0 !bg-background-color-1/40 dark:!bg-dark-background-color-1/40',
                   iconName: 'more_horiz',
                   clickHandler: (e) => {
                     e.stopPropagation();
@@ -746,7 +743,8 @@ const ArtistInfoPage = () => {
                 {
                   label: t('common.showAll'),
                   iconName: 'apps',
-                  className: 'show-all-btn text-sm font-normal',
+                  className:
+                    'show-all-btn text-sm font-normal !bg-background-color-1/40 dark:!bg-dark-background-color-1/40',
                   clickHandler: () => setIsAllSongsVisible(true),
                   isVisible: songs.length > 5 && !isAllSongsVisible,
                 },

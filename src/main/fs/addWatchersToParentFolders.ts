@@ -10,7 +10,7 @@ const fileNameRegex = /^.{1,}\.\w{1,}$/;
 
 const parentFolderWatcherFunction = async (
   eventType: WatchEventType,
-  filename: string,
+  filename?: string | null,
 ) => {
   if (filename) {
     if (eventType === 'rename') {
@@ -24,7 +24,7 @@ const parentFolderWatcherFunction = async (
     }
   } else {
     log(
-      'ERROR OCCURRED WHEN TRYING TO WATCH PARENT FOLDERS. FILE WATCHER FUNCTION SENT A FILENAME OF undefined.',
+      'ERROR OCCURRED WHEN TRYING TO WATCH PARENT FOLDERS. FILE WATCHER FUNCTION SENT A FILENAME OF undefined or null.',
       undefined,
       'ERROR',
     );

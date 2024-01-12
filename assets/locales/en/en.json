@@ -950,7 +950,7 @@
 
   "unsupportedFileMessagePrompt": {
     "title": "Unsupported audio file",
-    "description": "You are trying to open a file with an<span/> extension, which is not supported by this app.<br/> Currently, we only support following audio formats. <div/>"
+    "description": "You are trying to open a file with a <span/> extension, which is not supported by this app.<br/> Currently, we only support following audio formats. <div/>"
   },
 
   "duplicateArtistsSuggestion": {

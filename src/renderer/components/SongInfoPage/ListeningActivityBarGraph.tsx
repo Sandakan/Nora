@@ -1,6 +1,8 @@
-import React from 'react';
+import { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import useResizeObserver from 'renderer/hooks/useResizeObserver';
 import i18n from 'renderer/i18n';
+import ListeningActivityBar from './ListeningActivityBar';
 
 type Props = {
   listeningData: SongListeningData | undefined;
@@ -40,99 +42,87 @@ function getLastNoOfMonths<T>(
   return arr;
 }
 
-const VISIBLE_NO_OF_MONTHS = 7;
+const MIN_VISIBLE_NO_OF_MONTHS = 6;
+const MIN_MONTH_ACTIVITY_BAR_WIDTH = 70;
 
 const ListeningActivityBarGraph = (props: Props) => {
   const { t } = useTranslation();
 
   const { listeningData, className } = props;
 
-  const { currentYear } = React.useMemo(() => {
-    const currentDate = new Date();
-    return {
-      currentYear: currentDate.getFullYear(),
-    };
-  }, []);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { width } = useResizeObserver(containerRef, 100);
 
-  const lastSixMonthsListeningActivity = React.useMemo(() => {
+  const visibleNoOfMonths = useMemo(() => {
+    const noOfMonths = Math.floor(width / MIN_MONTH_ACTIVITY_BAR_WIDTH);
+
+    if (noOfMonths > 12) return 12;
+    if (noOfMonths <= 0) return MIN_VISIBLE_NO_OF_MONTHS;
+    return noOfMonths;
+  }, [width]);
+
+  const lastSixMonthsListeningActivity = useMemo(() => {
     if (listeningData) {
-      for (const listen of listeningData.listens) {
-        if (listen.year === currentYear) {
-          const monthsWithNames: { listens: number; month: string }[] = [];
+      const listensData = listeningData.listens
+        .map((listen) => listen.listens)
+        .flat();
+      const monthsWithNames: { listens: number; month: string }[] = [];
 
-          for (let i = 0; i < monthNames.length; i += 1) {
-            const listens = listen.listens
-              .map((x) => {
-                const [now, noOfListens] = x;
-                const month = new Date(now).getMonth();
+      for (let i = 0; i < monthNames.length; i += 1) {
+        const listens = listensData
+          .map((x) => {
+            const [date, noOfListens] = x;
+            const month = new Date(date).getMonth();
 
-                if (i === month) return noOfListens;
-                return 0;
-              })
-              .reduce((prevValue, currValue) => prevValue + currValue, 0);
+            if (i === month) return noOfListens;
+            return 0;
+          })
+          .reduce((prevValue, currValue) => prevValue + currValue, 0);
 
-            monthsWithNames.push({ listens, month: monthNames[i] });
-          }
-
-          const lastMonths = getLastNoOfMonths(
-            monthsWithNames,
-            new Date().getMonth(),
-            VISIBLE_NO_OF_MONTHS,
-          );
-
-          const max = Math.max(...lastMonths.map((x) => x.listens));
-
-          return lastMonths.map((month, index) => {
-            return (
-              <div
-                key={month.month}
-                className="relative flex h-full flex-col items-center justify-end"
-              >
-                <div className="flex h-full items-end rounded-2xl bg-background-color-1/25 dark:bg-dark-background-color-1/25">
-                  <div
-                    className="order-1 w-[10px] rounded-2xl bg-font-color-highlight transition-[height] dark:bg-dark-font-color-highlight"
-                    style={{
-                      height: `${
-                        month.listens === 0
-                          ? '10px'
-                          : `${(month.listens / max) * 90}%`
-                      }`,
-                      transitionDelay: `${index * 50 + 500}`,
-                    }}
-                    title={t('songInfoPage.listensCount', {
-                      count: month.listens,
-                    })}
-                  />
-                </div>
-                <div className="order-2 flex w-full grow-0 flex-col pt-1 text-font-color  dark:text-font-color-white">
-                  <span className="font-thin">{month.listens}</span>
-                  <span className="truncate px-2">{month.month}</span>
-                </div>
-              </div>
-            );
-          });
-        }
+        monthsWithNames.push({ listens, month: monthNames[i] });
       }
+
+      const lastMonths = getLastNoOfMonths(
+        monthsWithNames,
+        new Date().getMonth(),
+        visibleNoOfMonths,
+      );
+
+      const max = Math.max(...lastMonths.map((x) => x.listens));
+
+      return lastMonths.map((month, index) => {
+        return (
+          <ListeningActivityBar
+            // eslint-disable-next-line react/no-array-index-key
+            key={index}
+            index={index}
+            monthName={month.month}
+            noOfListens={month.listens}
+            maxNoOfListens={max}
+          />
+        );
+      });
     }
     return [];
-  }, [listeningData, currentYear, t]);
+  }, [listeningData, visibleNoOfMonths]);
 
   return (
     <div
-      className={`appear-from-bottom flex h-full min-h-[18rem] w-full max-w-lg flex-col rounded-md bg-background-color-2/70 py-2 text-center backdrop-blur-md dark:bg-dark-background-color-2/70 ${className}`}
+      className={`appear-from-bottom flex h-full min-h-[18rem] w-fit max-w-[60rem] flex-col rounded-md bg-background-color-2/70 py-2 text-center backdrop-blur-md dark:bg-dark-background-color-2/70 ${className}`}
       title="Bar graph about no of listens per day"
     >
-      <div className="pb-1 font-thin text-font-color dark:text-font-color-white">
+      <div className="px-2 pb-1 font-thin text-font-color dark:text-font-color-white">
         {t('songInfoPage.listeningActivityInLastMonths', {
-          count: VISIBLE_NO_OF_MONTHS,
+          count: visibleNoOfMonths,
         })}
       </div>
 
       <div
         style={{
-          gridTemplateColumns: `repeat(${VISIBLE_NO_OF_MONTHS}, minmax(0, 1fr))`,
+          gridTemplateColumns: `repeat(${visibleNoOfMonths}, minmax(0, 1fr))`,
         }}
         className="grid h-full items-center justify-around"
+        ref={containerRef}
       >
         {lastSixMonthsListeningActivity}
       </div>
