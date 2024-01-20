@@ -12,11 +12,10 @@ const NotificationPanel = () => {
   const { notificationPanelData } = useContext(AppContext);
 
   const notifications = React.useMemo(() => {
-    if (
-      Array.isArray(notificationPanelData.notifications) &&
-      notificationPanelData.notifications.length > 0
-    ) {
-      return notificationPanelData.notifications.map((data) => {
+    const notificationData = notificationPanelData.notifications;
+
+    if (notificationData.length > 0) {
+      return notificationData.map((data) => {
         const {
           content,
           delay,
@@ -52,8 +51,8 @@ const NotificationPanel = () => {
   return (
     <>
       {Array.isArray(notifications) && notifications.length > 0 && (
-        <div className="notifications-container absolute right-0 top-6 z-20 flex max-h-full flex-col items-end px-8">
-          {notifications}
+        <div className="notifications-container absolute bottom-6 right-0 z-20 flex max-h-full flex-col-reverse items-end px-8">
+          {notifications.reverse()}
           {notifications.length > 0 && <NotificationClearAllButton />}
         </div>
       )}

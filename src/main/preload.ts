@@ -534,6 +534,9 @@ const appControls = {
     ipcRenderer.removeAllListeners('app/beforeQuitEvent');
     ipcRenderer.send('app/resetApp');
   },
+  stopScreenSleeping: () => ipcRenderer.send('app/stopScreenSleeping'),
+
+  allowScreenSleeping: () => ipcRenderer.send('app/allowScreenSleeping'),
 };
 
 // $ OTHER

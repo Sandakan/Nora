@@ -20,6 +20,7 @@ import {
   powerMonitor,
   SaveDialogOptions,
   net,
+  powerSaveBlocker,
 } from 'electron';
 import debug from 'electron-debug';
 import 'dotenv/config';
@@ -100,6 +101,7 @@ let playerType: PlayerTypes = 'normal';
 let isAudioPlaying = false;
 let isOnBatteryPower = false;
 let currentSongPath: string;
+let powerSaveBlockerId: number | null;
 
 // / / / / / / INITIALIZATION / / / / / / /
 
@@ -822,3 +824,17 @@ export async function toggleAutoLaunch(autoLaunchState: boolean) {
 }
 
 export const checkIfConnectedToInternet = () => net.isOnline();
+
+export function allowScreenSleeping() {
+  log('Requested to allow screen sleeping.');
+  if (powerSaveBlockerId) {
+    powerSaveBlocker.stop(powerSaveBlockerId);
+    powerSaveBlockerId = null;
+  }
+}
+
+export function stopScreenSleeping() {
+  allowScreenSleeping();
+  powerSaveBlockerId = powerSaveBlocker.start('prevent-display-sleep');
+  log('Screen sleeping prevented.', { powerSaveBlockerId });
+}

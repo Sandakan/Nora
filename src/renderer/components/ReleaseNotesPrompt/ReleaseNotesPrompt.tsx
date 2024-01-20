@@ -118,9 +118,12 @@ const ReleaseNotesPrompt = () => {
 
   const latestVersionImportantNotes = React.useMemo(() => {
     if (latestUpdatedInfo.importantNotes) {
-      const notes = latestUpdatedInfo.importantNotes.map((note) => {
+      const notes = latestUpdatedInfo.importantNotes.map((note, index) => {
         return (
-          <li className="latest-version-important-note mb-2 max-w-[90%] font-medium">
+          <li
+            key={`important note ${index + 1}`}
+            className="latest-version-important-note mb-2 max-w-[90%] font-medium"
+          >
             {note}
           </li>
         );

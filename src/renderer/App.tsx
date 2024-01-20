@@ -152,19 +152,28 @@ export default function App() {
   );
 
   const changePromptMenuData = React.useCallback(
-    (isVisible = false, contentData?: ReactNode, className = '') => {
+    (isVisible = false, prompt?: ReactNode, className = '') => {
+      const promptData: PromptMenuData = { prompt, className };
+
+      const data = {
+        isVisible,
+        currentActiveIndex:
+          prompt && isVisible
+            ? content.promptMenuNavigationData.prompts.length
+            : 0,
+        prompts:
+          prompt && isVisible
+            ? content.promptMenuNavigationData.prompts.concat(promptData)
+            : [],
+      };
+
+      contentRef.current.promptMenuNavigationData = data;
       dispatch({
         type: 'PROMPT_MENU_DATA_CHANGE',
-        data: {
-          isVisible,
-          content: isVisible
-            ? contentData ?? content.promptMenuData.content
-            : content.promptMenuData.content,
-          className: className ?? content.promptMenuData.className,
-        },
+        data,
       });
     },
-    [content.promptMenuData.className, content.promptMenuData.content],
+    [content.promptMenuNavigationData.prompts],
   );
 
   const managePlaybackErrors = React.useCallback(
@@ -806,6 +815,7 @@ export default function App() {
             id: 'noSongToPlay',
             content: t('notifications.selectASongToPlay'),
             iconName: 'error',
+            iconClassName: 'material-icons-round-outlined',
           },
         ]);
       return undefined;
@@ -1375,6 +1385,41 @@ export default function App() {
     [],
   );
 
+  const updatePromptMenuHistoryIndex = React.useCallback(
+    (type: 'increment' | 'decrement' | 'home') => {
+      const { prompts, currentActiveIndex } =
+        contentRef.current.promptMenuNavigationData;
+      if (type === 'decrement' && currentActiveIndex - 1 >= 0) {
+        const newPageHistoryIndex = currentActiveIndex - 1;
+        const data = {
+          isVisible: true,
+          currentActiveIndex: newPageHistoryIndex,
+          prompts,
+        };
+        contentRef.current.promptMenuNavigationData = data;
+        return dispatch({
+          type: 'PROMPT_MENU_DATA_CHANGE',
+          data,
+        });
+      }
+      if (type === 'increment' && currentActiveIndex + 1 < prompts.length) {
+        const newPageHistoryIndex = currentActiveIndex + 1;
+        const data = {
+          isVisible: true,
+          currentActiveIndex: newPageHistoryIndex,
+          prompts,
+        };
+        contentRef.current.promptMenuNavigationData = data;
+        return dispatch({
+          type: 'PROMPT_MENU_DATA_CHANGE',
+          data,
+        });
+      }
+      return undefined;
+    },
+    [],
+  );
+
   const updateMultipleSelections = React.useCallback(
     (id: string, selectionType: QueueTypes, type: 'add' | 'remove') => {
       if (
@@ -1838,11 +1883,24 @@ export default function App() {
     storage.equalizerPreset.setEqualizerPreset(options);
   }, []);
 
+  const promptMenuData = React.useMemo(() => {
+    const { currentActiveIndex, isVisible, prompts } =
+      content.promptMenuNavigationData;
+
+    return {
+      isVisible,
+      prompt: prompts?.at(currentActiveIndex)?.prompt,
+      className: prompts?.at(currentActiveIndex)?.className,
+      noOfPrompts: prompts.length,
+      currentActiveIndex,
+    };
+  }, [content.promptMenuNavigationData]);
+
   const appContextStateValues: AppStateContextType = React.useMemo(
     () => ({
       isDarkMode: content.isDarkMode,
       contextMenuData: content.contextMenuData,
-      promptMenuData: content.promptMenuData,
+      promptMenuData,
       currentSongData: {
         ...content.currentSongData,
         duration: player.duration || content.currentSongData.duration,
@@ -1873,7 +1931,6 @@ export default function App() {
     [
       content.isDarkMode,
       content.contextMenuData,
-      content.promptMenuData,
       content.currentSongData,
       content.navigationHistory.pageHistoryIndex,
       content.navigationHistory.history.length,
@@ -1890,6 +1947,7 @@ export default function App() {
       content.multipleSelectionsData,
       content.appUpdatesState,
       content.playerType,
+      promptMenuData,
     ],
   );
 
@@ -1899,6 +1957,7 @@ export default function App() {
       updateCurrentSongData,
       updateContextMenuData,
       changePromptMenuData,
+      updatePromptMenuHistoryIndex,
       playSong,
       changeCurrentActivePage,
       updateCurrentlyActivePageData,
@@ -1927,36 +1986,37 @@ export default function App() {
       updateEqualizerOptions,
     }),
     [
-      addNewNotifications,
-      changeCurrentActivePage,
+      updateUserData,
+      updateCurrentSongData,
+      updateContextMenuData,
       changePromptMenuData,
-      changeQueueCurrentSongIndex,
-      clearAudioPlayerData,
+      updatePromptMenuHistoryIndex,
+      playSong,
+      changeCurrentActivePage,
+      updateCurrentlyActivePageData,
+      addNewNotifications,
+      updateNotifications,
       createQueue,
+      updatePageHistoryIndex,
+      changeQueueCurrentSongIndex,
+      updateCurrentSongPlaybackState,
+      updatePlayerType,
       handleSkipBackwardClick,
       handleSkipForwardClick,
-      playSong,
-      toggleIsFavorite,
-      toggleMultipleSelections,
+      updateSongPosition,
+      updateVolume,
       toggleMutedState,
       toggleRepeat,
       toggleShuffling,
+      toggleIsFavorite,
       toggleSongPlayback,
-      updateAppUpdatesState,
-      updateBodyBackgroundImage,
-      updateContextMenuData,
-      updateCurrentSongData,
-      updateCurrentSongPlaybackState,
-      updateCurrentlyActivePageData,
-      updateEqualizerOptions,
-      updatePlayerType,
-      updateMultipleSelections,
-      updateNotifications,
-      updatePageHistoryIndex,
       updateQueueData,
-      updateSongPosition,
-      updateUserData,
-      updateVolume,
+      clearAudioPlayerData,
+      updateBodyBackgroundImage,
+      updateMultipleSelections,
+      toggleMultipleSelections,
+      updateAppUpdatesState,
+      updateEqualizerOptions,
     ],
   );
 

@@ -1,6 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { AppContext } from 'renderer/contexts/AppContext';
 import useMouseActiveState from 'renderer/hooks/useMouseActiveState';
 
@@ -31,6 +31,19 @@ const FullScreenPlayer = () =>
       fullScreenPlayerContainerRef,
       { idleTimeout: 4000, range: 50, idleOnMouseOut: true },
     );
+
+    useEffect(() => {
+      if (
+        localStorageData.preferences.allowToPreventScreenSleeping &&
+        !localStorageData.preferences.removeAnimationsOnBatteryPower
+      )
+        window.api.appControls.stopScreenSleeping();
+      else window.api.appControls.allowScreenSleeping();
+      return () => window.api.appControls.allowScreenSleeping();
+    }, [
+      localStorageData?.preferences.allowToPreventScreenSleeping,
+      localStorageData?.preferences.removeAnimationsOnBatteryPower,
+    ]);
 
     const imgPath = useMemo(() => {
       const selectedArtist = currentSongData?.artists?.find(

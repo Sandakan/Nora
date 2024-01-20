@@ -20,6 +20,10 @@ export interface AppUpdateContextType {
     content?: ReactNode,
     className?: string,
   ) => void;
+  updatePromptMenuHistoryIndex: (
+    type: 'increment' | 'decrement' | 'home',
+    promptIndex?: number,
+  ) => void;
   addNewNotifications: (newNotifications: AppNotification[]) => void;
   updateNotifications: (
     callback: (currentNotifications: AppNotification[]) => AppNotification[],

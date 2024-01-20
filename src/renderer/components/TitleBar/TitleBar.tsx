@@ -29,8 +29,8 @@ const TitleBar = React.memo(() => {
         'bg-background-color-1/50 !text-font-color-white backdrop-blur-md dark:bg-dark-background-color-1/70'
       }`}
     >
-      <div className="logo-and-app-name-container ml-2 flex h-full w-fit items-center">
-        <div className="flex items-center">
+      <div className="logo-and-app-name-and-navigation-controls-container ml-2 flex h-full w-fit items-center gap-12">
+        <div className="logo-and-app-name-container flex items-center">
           <span className="logo-container">
             <Img
               className="mr-2 h-7 rounded-md p-1 shadow-md"

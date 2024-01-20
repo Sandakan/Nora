@@ -14,8 +14,8 @@ const LyricsSource = (props: LyricsSourceProp) => {
   const { source, copyright, link } = props;
   return (
     <div className="source-name mt-12 flex flex-col items-center justify-center text-center text-[#ccc]">
-      <div>
-        {source !== 'IN_SONG_LYRICS' && (
+      {source !== 'IN_SONG_LYRICS' && (
+        <div>
           <Trans
             i18nKey="lyricsPage.lyricsProvidedBy"
             components={{
@@ -30,8 +30,8 @@ const LyricsSource = (props: LyricsSourceProp) => {
               ),
             }}
           />
-        )}
-      </div>
+        </div>
+      )}
       {copyright && (
         <div className="text-balance text-sm text-font-color-dimmed">
           &copy; {copyright}

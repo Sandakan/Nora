@@ -11,6 +11,8 @@ import {
   restartRenderer,
   revealSongInFileExplorer,
   sendMessageToRenderer,
+  stopScreenSleeping,
+  allowScreenSleeping,
   toggleAudioPlayingState,
   toggleAutoLaunch,
   toggleMiniPlayerAlwaysOnTop,
@@ -114,6 +116,9 @@ export function initializeIPC(
       'app/player/songPlaybackStateChange',
       (_: unknown, isPlaying: boolean) => toggleAudioPlayingState(isPlaying),
     );
+
+    ipcMain.on('app/stopScreenSleeping', stopScreenSleeping);
+    ipcMain.on('app/allowScreenSleeping', allowScreenSleeping);
 
     ipcMain.handle('app/checkForStartUpSongs', () => checkForStartUpSongs());
 

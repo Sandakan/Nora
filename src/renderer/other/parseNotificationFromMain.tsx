@@ -158,7 +158,7 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
     update({ messageCode }) {
       this.iconClassName =
         messageCode === 'ARTIST_DISLIKE'
-          ? 'material-icons-round-outlined text-font-color-crimson'
+          ? 'material-icons-round-outlined text-font-color-crimson dark:text-font-color-crimson'
           : '';
 
       return this;
@@ -166,20 +166,16 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
   },
   {
     trigger: ['SONG_LIKE', 'SONG_DISLIKE'],
+    iconName: 'favorite',
     validate({ data }) {
       if (data) return 'artworkPath' in data;
       return false;
     },
     update({ messageCode }) {
-      this.icon = (
-        <span
-          className={`material-icons-round ${
-            messageCode === 'SONG_DISLIKE' ? '-outlined' : ''
-          } text-font-color-crimson dark:text-font-color-crimson`}
-        >
-          favorite
-        </span>
-      );
+      this.iconClassName =
+        messageCode === 'SONG_DISLIKE'
+          ? 'material-icons-round-outlined text-font-color-crimson dark:text-font-color-crimson'
+          : '';
       return this;
     },
   },

@@ -90,6 +90,7 @@ const convertLyricsStrToObj = (
       unparsedLyrics: lyrics,
       lyrics: lines,
       syncedLyrics,
+      offset: 0,
     },
     lyricsType: isSynced ? 'SYNCED' : 'UN_SYNCED',
     isOfflineLyricsAvailable: false,

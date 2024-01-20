@@ -93,6 +93,19 @@ const LyricsPage = () => {
   );
 
   React.useEffect(() => {
+    if (
+      localStorageData.preferences.allowToPreventScreenSleeping &&
+      !localStorageData.preferences.removeAnimationsOnBatteryPower
+    )
+      window.api.appControls.stopScreenSleeping();
+    else window.api.appControls.allowScreenSleeping();
+    return () => window.api.appControls.allowScreenSleeping();
+  }, [
+    localStorageData?.preferences.allowToPreventScreenSleeping,
+    localStorageData?.preferences.removeAnimationsOnBatteryPower,
+  ]);
+
+  React.useEffect(() => {
     window.addEventListener('keydown', manageLyricsPageKeyboardShortcuts);
     return () => {
       window.removeEventListener('keydown', manageLyricsPageKeyboardShortcuts);

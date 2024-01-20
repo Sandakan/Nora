@@ -1,7 +1,9 @@
 /* eslint-disable react/no-array-index-key */
-import React from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
+
+import LyricsSource from 'renderer/components/LyricsPage/LyricsSource';
 import LyricLine from '../../LyricsPage/LyricLine';
 
 type Props = {
@@ -10,16 +12,13 @@ type Props = {
 };
 
 const LyricsContainer = (props: Props) => {
-  const { currentSongData, isCurrentSongPlaying } =
-    React.useContext(AppContext);
+  const { currentSongData, isCurrentSongPlaying } = useContext(AppContext);
   const { isLyricsVisible, setIsLyricsAvailable } = props;
   const { t } = useTranslation();
 
-  const [lyrics, setLyrics] = React.useState<SongLyrics | null | undefined>(
-    null,
-  );
+  const [lyrics, setLyrics] = useState<SongLyrics | null | undefined>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isLyricsVisible) {
       setLyrics(null);
       window.api.lyrics
@@ -47,7 +46,7 @@ const LyricsContainer = (props: Props) => {
     setIsLyricsAvailable,
   ]);
 
-  const lyricsComponents = React.useMemo(() => {
+  const lyricsComponents = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {
       const {
         isSynced,
@@ -95,6 +94,15 @@ const LyricsContainer = (props: Props) => {
     return [];
   }, [lyrics]);
 
+  const lyricsSource = React.useMemo(() => {
+    if (lyrics && lyrics?.lyrics) {
+      const { source, copyright, link } = lyrics;
+
+      return <LyricsSource source={source} copyright={copyright} link={link} />;
+    }
+    return undefined;
+  }, [lyrics]);
+
   return (
     <div
       className={`mini-player-lyrics-container appear-from-bottom w-ful absolute top-0 flex h-full !max-h-screen w-full !max-w-full select-none flex-col items-start overflow-auto pb-[25%] pl-20 pr-[20%] pt-20 transition-[filter] delay-200 group-focus-within/fullScreenPlayer:blur-sm group-focus-within:brightness-50 group-hover/fullScreenPlayer:blur-sm group-hover/fullScreenPlayer:brightness-50 ${
@@ -105,8 +113,12 @@ const LyricsContainer = (props: Props) => {
       {isLyricsVisible &&
         lyricsComponents.length > 0 &&
         lyrics &&
-        lyrics.lyrics.isSynced &&
-        lyricsComponents}
+        lyrics.lyrics.isSynced && (
+          <>
+            {lyricsComponents}
+            {lyricsSource}
+          </>
+        )}
       {isLyricsVisible && lyrics && !lyrics.lyrics.isSynced && (
         <div className="flex h-full w-full flex-col justify-center text-2xl text-font-color-white opacity-50">
           <span className="material-icons-round-outlined mb-2 text-5xl">

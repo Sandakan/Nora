@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import { createContext } from 'react';
+import { ReactNode, createContext } from 'react';
 
 export interface AppStateContextType {
   // THEME
@@ -8,9 +8,11 @@ export interface AppStateContextType {
   contextMenuData: ContextMenuData;
   // PROMPT MENU
   promptMenuData: {
-    content: any;
+    prompt?: ReactNode;
     isVisible: boolean;
-    className: string;
+    className?: string;
+    currentActiveIndex: number;
+    noOfPrompts: number;
   };
   // NOTIFICATION PANEL
   notificationPanelData: NotificationPanelData;

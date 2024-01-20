@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "es2021",
     "module": "CommonJS",
-    "lib": ["DOM", "ES2022"],
+    "lib": ["dom", "es2021"],
     "declaration": true,
     "declarationMap": true,
     "jsx": "react-jsx",
@@ -14,7 +14,7 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "node",
+    "moduleResolution": "Node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,

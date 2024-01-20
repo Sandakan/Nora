@@ -7,6 +7,7 @@ import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
 import Button from '../Button';
 import MainContainer from '../MainContainer';
+import PromptMenuNavigationControlsContainer from './PromptMenuNavigationControlsContainer';
 
 const PromptMenu = () => {
   const { promptMenuData } = React.useContext(AppContext);
@@ -67,7 +68,7 @@ const PromptMenu = () => {
 
   return (
     <dialog
-      className={`dialog-menu relative left-1/2 top-1/2 h-fit max-h-[80%] min-h-[300px] w-[80%] min-w-[800px] max-w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-background-color-1 py-10 shadow-[rgba(100,100,111,0.2)_0px_7px_29px_0px] transition-[transform,visibility,opacity] ease-in-out open:backdrop:transition-[background,backdrop-filter] dark:bg-dark-background-color-1 
+      className={`dialog-menu relative left-1/2 top-1/2 h-fit max-h-[80%] min-h-[300px] w-[80%] min-w-[800px] max-w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-background-color-1 pb-10 shadow-[rgba(100,100,111,0.2)_0px_7px_29px_0px] transition-[transform,visibility,opacity] ease-in-out open:backdrop:transition-[background,backdrop-filter] dark:bg-dark-background-color-1 
       ${
         promptMenuData.isVisible
           ? 'open:animate-dialog-appear-ease-in-out open:backdrop:bg-[hsla(228deg,7%,14%,0.75)] open:backdrop:dark:bg-[hsla(228deg,7%,14%,0.75)]'
@@ -80,23 +81,26 @@ const PromptMenu = () => {
       }}
       ref={promptMenuRef}
     >
-      <Button
-        key={0}
-        className="prompt-menu-close-btn absolute right-4 top-4 !m-0 !rounded-none !border-0 !p-0 text-font-color-black outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white"
-        iconName="close"
-        tooltipLabel={t('titleBar.close')}
-        iconClassName="!leading-none !text-xl"
-        clickHandler={(e) => {
-          e.stopPropagation();
-          changePromptMenuData(false, undefined, '');
-        }}
-      />
+      <div className="my-4 flex w-full items-center justify-between px-6">
+        <PromptMenuNavigationControlsContainer />
+        <Button
+          key={0}
+          className="prompt-menu-close-btn previousPageBtn !m-0 flex h-fit !rounded-md !border-0 !p-0 !px-2 !py-1 outline-1 outline-offset-1 !transition-[background,transform,visibility,opacity] hover:bg-background-color-2 hover:text-font-color-highlight dark:hover:bg-dark-background-color-2 dark:hover:text-dark-font-color-highlight"
+          iconName="close"
+          tooltipLabel={t('titleBar.close')}
+          iconClassName="!leading-none !text-xl"
+          clickHandler={(e) => {
+            e.stopPropagation();
+            changePromptMenuData(false, undefined, '');
+          }}
+        />
+      </div>
       <MainContainer
         className={`prompt-menu-inner relative max-h-full px-8 pb-2 text-font-color-black dark:text-font-color-white ${
           promptMenuData.className ?? ''
         }`}
       >
-        {isContentVisible && promptMenuData.content}
+        {isContentVisible && promptMenuData.prompt}
       </MainContainer>
     </dialog>
   );

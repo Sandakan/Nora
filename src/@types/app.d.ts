@@ -272,7 +272,7 @@ declare global {
     syncedLyrics?: SyncedLyricLine[];
     unparsedLyrics: string;
     copyright?: string;
-    offset?: number;
+    offset: number;
   }
 
   // node-id3 synchronisedLyrics types.
@@ -481,6 +481,7 @@ declare global {
     isPredictiveSearchEnabled: boolean;
     lyricsAutomaticallySaveState: AutomaticallySaveLyricsTypes;
     showTrackNumberAsSongIndex: boolean;
+    allowToPreventScreenSleeping: boolean;
   }
 
   interface CurrentSong {
@@ -753,9 +754,14 @@ declare global {
   // ? Prompt menu related types
 
   interface PromptMenuData {
+    prompt: ReactNode;
+    className?: string;
+    isOneTime?: boolean;
+  }
+  interface PromptMenuNavigationHistoryData {
     isVisible: boolean;
-    content: ReactNode;
-    className: string;
+    prompts: PromptMenuData[];
+    currentActiveIndex: number;
   }
 
   // ? Notification panel related
@@ -887,6 +893,7 @@ declare global {
   interface PageData extends Record<string, unknown> {
     scrollTopOffset?: number;
     isLowResponseRequired?: boolean;
+    preventScreenSleeping?: boolean;
   }
 
   interface NavigationHistoryData {

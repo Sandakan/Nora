@@ -59,7 +59,7 @@ const isLatestVersion = (
     const { preRelease: LvPreRelease } = latestVersion;
     const { preRelease: CvPreRelease } = currentVersion;
 
-    console.log('Version details', { latestVersion, currentVersion });
+    // console.log('Version details', { latestVersion, currentVersion });
 
     if (LvPreRelease === CvPreRelease)
       return compareMajorMinorAndPatch(latestVersion, currentVersion);

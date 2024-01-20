@@ -5,7 +5,7 @@ export interface AppReducer {
   isDarkMode: boolean;
   localStorage: LocalStorage;
   currentSongData: AudioPlayerData;
-  promptMenuData: PromptMenuData;
+  promptMenuNavigationData: PromptMenuNavigationHistoryData;
   notificationPanelData: NotificationPanelData;
   contextMenuData: ContextMenuData;
   navigationHistory: NavigationHistoryData;
@@ -26,7 +26,7 @@ type AppReducerStateActions =
     }
   | { type: 'CURRENT_SONG_DATA_CHANGE'; data: AudioPlayerData | {} }
   | { type: 'CURRENT_SONG_PLAYBACK_STATE'; data: boolean }
-  | { type: 'PROMPT_MENU_DATA_CHANGE'; data: PromptMenuData }
+  | { type: 'PROMPT_MENU_DATA_CHANGE'; data: PromptMenuNavigationHistoryData }
   | { type: 'ADD_NEW_NOTIFICATIONS'; data: AppNotification[] }
   | { type: 'UPDATE_NOTIFICATIONS'; data: AppNotification[] }
   | { type: 'CONTEXT_MENU_DATA_CHANGE'; data: ContextMenuData }
@@ -60,11 +60,10 @@ const reducer = (
 ): AppReducer => {
   switch (action.type) {
     case 'APP_THEME_CHANGE': {
-      const theme = (
+      const theme =
         typeof action.data === 'object'
           ? action.data
-          : { isDarkMode: false, useSystemTheme: true }
-      ) as typeof state.userData.theme;
+          : { isDarkMode: false, useSystemTheme: true };
       return {
         ...state,
         isDarkMode: theme.isDarkMode,
@@ -75,9 +74,7 @@ const reducer = (
       return {
         ...state,
         userData:
-          typeof action.data === 'object'
-            ? (action.data as UserData)
-            : state.userData,
+          typeof action.data === 'object' ? action.data : state.userData,
       };
     case 'TOGGLE_REDUCED_MOTION':
       return {
@@ -85,18 +82,18 @@ const reducer = (
         localStorage:
           typeof action.data === 'boolean'
             ? {
-                ...(state.localStorage as LocalStorage),
+                ...state.localStorage,
                 preferences: {
-                  ...(state.localStorage as LocalStorage).preferences,
+                  ...state.localStorage.preferences,
                   isReducedMotion: action.data,
                 },
               }
             : {
-                ...(state.localStorage as LocalStorage),
+                ...state.localStorage,
                 preferences: {
-                  ...(state.localStorage as LocalStorage).preferences,
-                  isReducedMotion: (state.localStorage as LocalStorage)
-                    .preferences.isReducedMotion,
+                  ...state.localStorage.preferences,
+                  isReducedMotion:
+                    state.localStorage.preferences.isReducedMotion,
                 },
               },
       };
@@ -106,18 +103,18 @@ const reducer = (
         localStorage:
           typeof action.data === 'boolean'
             ? {
-                ...(state.localStorage as LocalStorage),
+                ...state.localStorage,
                 preferences: {
-                  ...(state.localStorage as LocalStorage).preferences,
+                  ...state.localStorage.preferences,
                   isSongIndexingEnabled: action.data,
                 },
               }
             : {
-                ...(state.localStorage as LocalStorage),
+                ...state.localStorage,
                 preferences: {
-                  ...(state.localStorage as LocalStorage).preferences,
-                  isSongIndexingEnabled: (state.localStorage as LocalStorage)
-                    .preferences.isSongIndexingEnabled,
+                  ...state.localStorage.preferences,
+                  isSongIndexingEnabled:
+                    state.localStorage.preferences.isSongIndexingEnabled,
                 },
               },
       };
@@ -127,32 +124,27 @@ const reducer = (
         localStorage:
           typeof action.data === 'boolean'
             ? {
-                ...(state.localStorage as LocalStorage),
+                ...state.localStorage,
                 preferences: {
-                  ...(state.localStorage as LocalStorage).preferences,
+                  ...state.localStorage.preferences,
                   showSongRemainingTime: action.data,
                 },
               }
             : {
-                ...(state.localStorage as LocalStorage),
+                ...state.localStorage,
                 preferences: {
-                  ...(state.localStorage as LocalStorage).preferences,
-                  showSongRemainingTime: (state.localStorage as LocalStorage)
-                    .preferences.showSongRemainingTime,
+                  ...state.localStorage.preferences,
+                  showSongRemainingTime:
+                    state.localStorage.preferences.showSongRemainingTime,
                 },
               },
       };
     case 'PROMPT_MENU_DATA_CHANGE':
       return {
         ...state,
-        promptMenuData: action.data
-          ? (action.data as PromptMenuData).isVisible
-            ? (action.data as PromptMenuData)
-            : {
-                ...(action.data as PromptMenuData),
-                content: state.promptMenuData.content,
-              }
-          : state.promptMenuData,
+        promptMenuNavigationData: action.data
+          ? action.data
+          : state.promptMenuNavigationData,
       };
     case 'ADD_NEW_NOTIFICATIONS':
       return {
@@ -160,9 +152,8 @@ const reducer = (
         notificationPanelData: {
           ...state.notificationPanelData,
           notifications:
-            (action.data as AppNotification[]) ||
-            state.notificationPanelData.notifications,
-        } as NotificationPanelData,
+            action.data || state.notificationPanelData.notifications,
+        },
       };
     case 'UPDATE_NOTIFICATIONS':
       return {
@@ -170,15 +161,13 @@ const reducer = (
         notificationPanelData: {
           ...state.notificationPanelData,
           notifications:
-            (action.data as AppNotification[]) ??
-            state.notificationPanelData.notifications,
-        } as NotificationPanelData,
+            action.data || state.notificationPanelData.notifications,
+        },
       };
     case 'CONTEXT_MENU_DATA_CHANGE':
       return {
         ...state,
-        contextMenuData:
-          (action.data as ContextMenuData) || state.contextMenuData,
+        contextMenuData: action.data || state.contextMenuData,
       };
     case 'CONTEXT_MENU_VISIBILITY_CHANGE':
       return {
@@ -194,7 +183,7 @@ const reducer = (
     case 'CURRENT_ACTIVE_PAGE_DATA_UPDATE':
       state.navigationHistory.history[
         state.navigationHistory.pageHistoryIndex
-      ].data = action.data as PageData;
+      ].data = action.data;
       return {
         ...state,
         navigationHistory: state.navigationHistory,
@@ -261,7 +250,7 @@ const reducer = (
           ...state.player,
           isRepeating:
             typeof action.data === 'string'
-              ? (action.data as RepeatTypes)
+              ? action.data
               : state.player.isRepeating,
         },
       };
@@ -340,16 +329,14 @@ const reducer = (
         ...state,
         multipleSelectionsData:
           typeof action.data === 'object'
-            ? (action.data as MultipleSelectionData)
+            ? action.data
             : state.multipleSelectionsData,
       };
     case 'CHANGE_APP_UPDATES_DATA':
       return {
         ...state,
         appUpdatesState:
-          typeof action.data === 'string'
-            ? (action.data as AppUpdatesState)
-            : state.appUpdatesState,
+          typeof action.data === 'string' ? action.data : state.appUpdatesState,
       };
     case 'PLAYER_WAITING_STATUS':
       return {
@@ -366,16 +353,14 @@ const reducer = (
       return {
         ...state,
         localStorage:
-          typeof action.data === 'object'
-            ? (action.data as LocalStorage)
-            : state.localStorage,
+          typeof action.data === 'object' ? action.data : state.localStorage,
       };
     case 'UPDATE_BATTERY_POWER_STATE':
       return {
         ...state,
         isOnBatteryPower:
           typeof action.data === 'boolean'
-            ? (action.data as boolean)
+            ? action.data
             : state.isOnBatteryPower,
       };
     default:
@@ -438,10 +423,10 @@ export const DEFAULT_REDUCER_DATA: AppReducer = {
   notificationPanelData: {
     notifications: [],
   },
-  promptMenuData: {
+  promptMenuNavigationData: {
     isVisible: false,
-    content: <span />,
-    className: '',
+    prompts: [],
+    currentActiveIndex: 0,
   },
   multipleSelectionsData: { isEnabled: false, multipleSelections: [] },
   appUpdatesState: 'UNKNOWN',

@@ -29,7 +29,11 @@
     "appId": "com.sandakannipunajith.nora",
     "artifactName": "${productName} Setup ${version}-${os}-${arch}.${ext}",
     "asar": true,
-    "asarUnpack": "**\\*.{node,dll}",
+    "asarUnpack": [
+      "**\\*.{node,dll}",
+      "**/node_modules/sharp/**/*",
+      "**/node_modules/@img/**/*"
+    ],
     "copyright": "Copyright © 2023 Sandakan Nipunajith",
     "directories": {
       "app": "release/app",

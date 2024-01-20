@@ -109,5 +109,15 @@ module.exports = {
         },
       );
     }),
+    plugin(({ matchUtilities, theme }) => {
+      matchUtilities(
+        {
+          'animate-delay': (value) => ({
+            animationDelay: value,
+          }),
+        },
+        { values: theme('transitionDelay') },
+      );
+    }),
   ],
 };

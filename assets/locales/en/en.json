@@ -424,6 +424,8 @@
     "performance": "Performance",
     "removeAnimationOnBatteryDescription": "Removes the animations in the app when your system is on battery power.",
     "removeAnimationOnBattery": "Remove animations when on battery power.",
+    "allowToPreventScreenSleepingDescription": "Allow Nora to prevent the display from going to sleep in situations with no user activity like displaying lyrics.",
+    "allowToPreventScreenSleeping": "Allow preventing the display from going to sleep.",
 
     "startupAndWindowCustomization": "Startup and Windows settings",
     "autoLaunchAtStartDescription": "Enabling this setting will automatically launch Nora when you login to your computer.",
@@ -559,7 +561,7 @@
     "editLyrics": "Edit lyrics in the editor",
     "showOnlineLyrics": "Show online lyrics",
     "refreshOnlineLyrics": "Refresh online lyrics",
-    "showSavedLyrics": "Show online lyrics",
+    "showSavedLyrics": "Show saved lyrics",
 
     "lyricsLoading": "Looking for lyrics",
     "lyricsLoadingDescription": "Hang on... We're looking everywhere...",
@@ -573,7 +575,7 @@
     "listeningActivityInLastMonths": "Listening activity in the Last {{count}} Months",
     "similarTracksInLibrary": "Similar tracks in your library",
     "otherSimilarTracks": "Other similar tracks",
-    "additionalSongInfo": "Additional song onformation",
+    "additionalSongInfo": "Additional song information",
     "allTimeListens": "All time listens",
     "listensThisMonth": "Listens this month",
     "listensThisYear": "Listens this year",

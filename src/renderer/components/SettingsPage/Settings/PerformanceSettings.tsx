@@ -36,6 +36,25 @@ const PerformanceSettings = () => {
             }
           />
         </li>
+        <li className="secondary-container toggle-allow-to-prevent-screen-sleeping mb-4">
+          <div className="description">
+            {t('settingsPage.allowToPreventScreenSleepingDescription')}
+          </div>
+          <Checkbox
+            id="allowToPreventScreenSleeping"
+            labelContent={t('settingsPage.allowToPreventScreenSleeping')}
+            isChecked={
+              localStorageData !== undefined &&
+              localStorageData.preferences.allowToPreventScreenSleeping
+            }
+            checkedStateUpdateFunction={(state) =>
+              storage.preferences.setPreferences(
+                'allowToPreventScreenSleeping',
+                state,
+              )
+            }
+          />
+        </li>
       </ul>
     </li>
   );
