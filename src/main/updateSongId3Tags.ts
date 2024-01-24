@@ -293,8 +293,8 @@ const manageArtistDataUpdates = (
   // these artists are available in the library and already linked to the song.
   const linkedArtists =
     artistsWithIds.length > 0 && Array.isArray(prevSongData.artists)
-      ? artistsWithIds.filter(
-          (a) => prevSongData.artists?.some((b) => a.artistId === b.artistId),
+      ? artistsWithIds.filter((a) =>
+          prevSongData.artists?.some((b) => a.artistId === b.artistId),
         )
       : [];
   //  these artists are available in the library and recently linked to the song.
@@ -422,8 +422,8 @@ const manageGenreDataUpdates = (
   // these Genres are available in the library and already linked to the song.
   const linkedGenres =
     genresWithIds.length > 0 && Array.isArray(prevSongData.genres)
-      ? genresWithIds.filter(
-          (a) => prevSongData.genres?.some((b) => a.genreId === b.genreId),
+      ? genresWithIds.filter((a) =>
+          prevSongData.genres?.some((b) => a.genreId === b.genreId),
         )
       : [];
   //  these Genres are available in the library and recently linked to the song.
@@ -1000,8 +1000,8 @@ const updateSongId3Tags = async (
 
           if (sendUpdatedData) {
             const songArtists = artists
-              .filter(
-                (z) => song.artists?.some((y) => y.artistId === z.artistId),
+              .filter((z) =>
+                song.artists?.some((y) => y.artistId === z.artistId),
               )
               .map((z) => ({
                 artistId: z.artistId,

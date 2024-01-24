@@ -1,0 +1,14 @@
+{
+  "files": [
+    {
+      "path": "src/renderer/other/appReducer.tsx",
+      "bookmarks": [
+        {
+          "line": 226,
+          "column": 14,
+          "label": "Remove this on producton"
+        }
+      ]
+    }
+  ]
+}

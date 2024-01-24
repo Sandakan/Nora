@@ -10,6 +10,7 @@ import log from '../log';
 import getArtistInfoFromNet from './getArtistInfoFromNet';
 import addToSongsHistory from './addToSongsHistory';
 import updateSongListeningData from './updateSongListeningData';
+import { setDiscordRpcActivity } from '../other/discordRPC';
 import { setCurrentSongPath } from '../main';
 
 const IS_DEVELOPMENT =
@@ -100,6 +101,16 @@ export const sendAudioData = async (
             };
 
             updateSongListeningData(song.songId, 'listens', 1);
+
+            const now = Date.now();
+            setDiscordRpcActivity({
+              details: `Listening to '${data.title}'`,
+              state: `By ${data.artists?.map((artist) => artist.name).join(', ')}`,
+              largeImageKey: 'nora_logo',
+              smallImageKey: 'song_artwork',
+              startTimestamp: now,
+              endTimestamp: now + data.duration * 1000,
+            });
             setCurrentSongPath(song.path);
             return data;
             // return log(`total : ${console.timeEnd('total')}`);

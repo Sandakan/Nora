@@ -152,7 +152,7 @@ export default function App() {
   );
 
   const changePromptMenuData = React.useCallback(
-    (isVisible = false, prompt?: ReactNode, className = '') => {
+    (isVisible = false, prompt?: ReactNode | null, className = '') => {
       const promptData: PromptMenuData = { prompt, className };
 
       const data = {
@@ -160,11 +160,15 @@ export default function App() {
         currentActiveIndex:
           prompt && isVisible
             ? content.promptMenuNavigationData.prompts.length
-            : 0,
+            : prompt === null && isVisible === false
+              ? 0
+              : content.promptMenuNavigationData.currentActiveIndex,
         prompts:
           prompt && isVisible
             ? content.promptMenuNavigationData.prompts.concat(promptData)
-            : [],
+            : prompt === null && isVisible === false
+              ? []
+              : content.promptMenuNavigationData.prompts,
       };
 
       contentRef.current.promptMenuNavigationData = data;
@@ -173,7 +177,10 @@ export default function App() {
         data,
       });
     },
-    [content.promptMenuNavigationData.prompts],
+    [
+      content.promptMenuNavigationData.currentActiveIndex,
+      content.promptMenuNavigationData.prompts,
+    ],
   );
 
   const managePlaybackErrors = React.useCallback(
@@ -2058,7 +2065,12 @@ export default function App() {
             >
               <Preloader />
               {content.bodyBackgroundImage && (
-                <div className="body-background-image-container absolute h-full w-full animate-bg-image-appear overflow-hidden bg-center transition-[filter] duration-500">
+                <div
+                  className={`body-background-image-container absolute h-full w-full overflow-hidden bg-center opacity-100 blur-0 brightness-100 transition-[filter,opacity] duration-500 ${
+                    content.bodyBackgroundImage &&
+                    '!opacity-100 !blur-sm !brightness-75'
+                  }`}
+                >
                   <Img
                     className="w-full bg-cover"
                     loading="eager"

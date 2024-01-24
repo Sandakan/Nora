@@ -27,11 +27,32 @@ const AccountsSettings = () => {
         {t('settingsPage.accounts')}
       </div>
       <ul className="list-disc pl-6 marker:bg-background-color-3 dark:marker:bg-background-color-3">
-        <li className="last-fm-integration mb-4">
+        <li className="discord-rpc-integration mb-4">
           <div className="description">
-            {' '}
-            {t('settingsPage.integrateLastFm')}
+            {t('settingsPage.enableDiscordRpcDescription')}
           </div>
+          <Checkbox
+            id="enableDiscordRpc"
+            isChecked={userData?.preferences.enableDiscordRPC ?? false}
+            checkedStateUpdateFunction={(state) =>
+              window.api.userData
+                .saveUserData('preferences.enableDiscordRPC', state)
+                .then(() =>
+                  updateUserData((prevData) => ({
+                    ...prevData,
+                    preferences: {
+                      ...prevData.preferences,
+                      enableDiscordRPC: state,
+                    },
+                  })),
+                )
+                .catch((err) => console.error(err))
+            }
+            labelContent={t('settingsPage.enableDiscordRpc')}
+          />
+        </li>
+        <li className="last-fm-integration mb-4">
+          <div className="description">{t('settingsPage.integrateLastFm')}</div>
           <div className="flex p-4 pb-0">
             <img
               src={LastFMIcon}

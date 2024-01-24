@@ -51,7 +51,7 @@ const NotificationPanel = () => {
   return (
     <>
       {Array.isArray(notifications) && notifications.length > 0 && (
-        <div className="notifications-container absolute bottom-6 right-0 z-20 flex max-h-full flex-col-reverse items-end px-8">
+        <div className="notifications-container absolute bottom-6 right-8 z-20 flex max-h-full flex-col-reverse items-end">
           {notifications.reverse()}
           {notifications.length > 0 && <NotificationClearAllButton />}
         </div>

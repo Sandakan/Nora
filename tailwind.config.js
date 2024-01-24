@@ -64,7 +64,6 @@ module.exports = {
         'spin-ease': 'spin 1000ms ease-in-out infinite',
         'dialog-appear-ease-in-out': 'dialogAppear 100ms ease-out',
         'dialog-dissappear-ease-in-out': 'dialogDisappear 100ms ease-in',
-        'bg-image-appear': 'appearBackgroundImage 500ms ease forwards',
       },
       boxShadow: {
         'inner-sm': 'inset 0 1px 2px 0 rgb(0 0 0 / 0.05)',
@@ -110,6 +109,14 @@ module.exports = {
       );
     }),
     plugin(({ matchUtilities, theme }) => {
+      matchUtilities(
+        {
+          'animate-duration': (value) => ({
+            animationDuration: value,
+          }),
+        },
+        { values: theme('transitionDuration') },
+      );
       matchUtilities(
         {
           'animate-delay': (value) => ({

@@ -56,6 +56,7 @@ import { clearTempArtworkFolder } from './other/artworks';
 import manageLastFmAuth from './auth/manageLastFmAuth';
 import { initializeIPC } from './ipc';
 import checkForUpdates from './update';
+import { clearDiscordRpcActivity } from './other/discordRPC';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -371,6 +372,7 @@ function handleBeforeQuit() {
   savePendingMetadataUpdates(currentSongPath, true);
   closeAllAbortControllers();
   clearTempArtworkFolder();
+  clearDiscordRpcActivity();
   log(
     `QUITING NORA`,
     { uptime: `${Math.floor(process.uptime())} seconds` },

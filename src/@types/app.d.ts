@@ -377,6 +377,7 @@ declare global {
     | 'preferences.sendSongFavoritesDataToLastFM'
     | 'preferences.sendNowPlayingSongDataToLastFM'
     | 'preferences.saveLyricsInLrcFilesForSupportedSongs'
+    | 'preferences.enableDiscordRPC'
     | 'customMusixmatchUserToken'
     | 'customLrcFilesSaveLocation'
     | 'lastFmSessionData'
@@ -411,6 +412,7 @@ declare global {
       sendSongFavoritesDataToLastFM: boolean;
       sendNowPlayingSongDataToLastFM: boolean;
       saveLyricsInLrcFilesForSupportedSongs: boolean;
+      enableDiscordRPC: boolean;
     };
     windowPositions: {
       mainWindow?: WindowCordinates;

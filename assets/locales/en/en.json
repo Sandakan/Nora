@@ -380,6 +380,8 @@
     "sendFavoritesToLastFm": "Send favorites data",
     "sendNowPlayingToLastFmDescription": "Send the currently playing song data to Last.fm automatically when you start to play a song.",
     "sendNowPlayingToLastFm": "Send currently playing song data",
+    "enableDiscordRpcDescription": "Integrate Discord Rich Presence with Nora",
+    "enableDiscordRpc": "Enable Discord Rich Presence",
 
     "doNotSaveLyricsAutomatically": "Don't save lyrics automatically",
     "syncedLyricsOnly": "Synced lyrics only",

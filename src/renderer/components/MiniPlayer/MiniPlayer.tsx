@@ -157,7 +157,6 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             tooltipLabel={t('player.lyrics')}
             removeFocusOnClick
           />
-          Title
         </div>
         <div
           className={`song-info-container group/info flex h-1/2 w-full flex-col items-center justify-center px-4 text-center text-font-color-white transition-[visibility,opacity] ${

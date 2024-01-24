@@ -17,52 +17,41 @@ const PromptMenu = () => {
   const promptMenuRef =
     React.useRef() as React.MutableRefObject<HTMLDialogElement>;
 
-  const [isContentVisible, setIsContentVisible] = React.useState(false);
-
   React.useEffect(() => {
-    if (promptMenuData.isVisible) setIsContentVisible(true);
+    const dialog = promptMenuRef.current;
+
+    if (promptMenuData.isVisible && dialog && !dialog.open) dialog.showModal();
   }, [promptMenuData.isVisible]);
 
   React.useEffect(() => {
-    if (promptMenuData && promptMenuRef.current) {
-      const { isVisible } = promptMenuData;
-      if (isVisible) {
-        if (!promptMenuRef.current.open) promptMenuRef.current.showModal();
-      }
-    }
-  }, [promptMenuData]);
-
-  React.useEffect(() => {
     const dialog = promptMenuRef.current;
+
     const manageDialogClose = (e: MouseEvent) => {
       const rect = dialog.getBoundingClientRect();
-      const isInDialog =
+      const isCursorInDialogBoundary =
         rect.top <= e.clientY &&
         e.clientY <= rect.top + rect.height &&
         rect.left <= e.clientX &&
         e.clientX <= rect.left + rect.width;
-      if (!isInDialog) changePromptMenuData(false, undefined, '');
+
+      if (!isCursorInDialogBoundary) changePromptMenuData(false);
     };
 
     const manageDialogAnimationEnd = () => {
-      if (dialog && !promptMenuData.isVisible) {
+      if (!promptMenuData.isVisible) {
         dialog.close();
-        setIsContentVisible(false);
+        changePromptMenuData(false, null);
       }
     };
 
-    if (promptMenuRef.current) {
-      promptMenuRef.current.addEventListener('click', manageDialogClose);
-      promptMenuRef.current.addEventListener(
-        'animationend',
-        manageDialogAnimationEnd,
-      );
+    if (dialog) {
+      dialog.addEventListener('click', manageDialogClose);
+      dialog.addEventListener('animationend', manageDialogAnimationEnd);
     }
+
     return () => {
-      if (dialog) {
-        dialog.removeEventListener('click', manageDialogClose);
-        dialog.removeEventListener('animationend', manageDialogAnimationEnd);
-      }
+      dialog?.removeEventListener('click', manageDialogClose);
+      dialog?.removeEventListener('animationend', manageDialogAnimationEnd);
     };
   }, [promptMenuData.isVisible, changePromptMenuData]);
 
@@ -91,7 +80,7 @@ const PromptMenu = () => {
           iconClassName="!leading-none !text-xl"
           clickHandler={(e) => {
             e.stopPropagation();
-            changePromptMenuData(false, undefined, '');
+            changePromptMenuData(false);
           }}
         />
       </div>
@@ -100,7 +89,7 @@ const PromptMenu = () => {
           promptMenuData.className ?? ''
         }`}
       >
-        {isContentVisible && promptMenuData.prompt}
+        {promptMenuData.prompt}
       </MainContainer>
     </dialog>
   );

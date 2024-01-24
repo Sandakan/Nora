@@ -71,7 +71,6 @@
   --transition-duration-0_2s: 0.2s;
   --transition-duration-0_25s: 0.25s;
   --transition-duration-0_3s: 0.3s;
-  --bg-image-brightness: 0.8;
   --slider-opacity: 0.5;
 }
 
@@ -190,7 +189,6 @@ body * {
   --context-menu-background: hsla(228, 7%, 14%, 90%);
   --context-menu-list-hover: hsl(224, 8%, 28%);
   --seekbar-background-color: hsl(240, 1%, 83%);
-  --bg-image-brightness: 0.7;
   --slider-opacity: 0.25;
 }
 
@@ -337,13 +335,13 @@ input[type='checkbox']:checked ~ .checkmark .icon {
 .appear-from-bottom {
   opacity: 0;
   transform: translateY(2rem);
-  animation: appearFromBottom var(--transition-duration-0_25s) ease forwards;
+  animation: appearFromBottom var(--transition-duration-0_25s) ease forwards !important;
 }
 
 .disappear-to-bottom {
   opacity: 1;
   transform: translateY(0rem);
-  animation: disappearToBottom var(--transition-duration-0_25s) ease forwards;
+  animation: disappearToBottom var(--transition-duration-0_25s) ease forwards !important;
 }
 
 .appear-from-top-and-dissappear {
@@ -458,14 +456,12 @@ input[type='checkbox']:checked ~ .checkmark .icon {
   }
 }
 
-@keyframes appearBackgroundImage {
+@keyframes widthFillAnimation {
   from {
-    opacity: 0%;
-    filter: blur(0) brightness(0);
+    width: 0%;
   }
 
   to {
-    opacity: 100%;
-    filter: blur(12px) brightness(var(--bg-image-brightness));
+    width: 100%;
   }
 }

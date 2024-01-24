@@ -40,6 +40,7 @@ export const USER_DATA_TEMPLATE: UserData = {
     sendSongFavoritesDataToLastFM: false,
     sendNowPlayingSongDataToLastFM: false,
     saveLyricsInLrcFilesForSupportedSongs: false,
+    enableDiscordRPC: false,
   },
   windowPositions: {},
   windowDiamensions: {},
@@ -335,6 +336,11 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
       typeof data === 'boolean'
     ) {
       userData.preferences.sendNowPlayingSongDataToLastFM = data;
+    } else if (
+      dataType === 'preferences.enableDiscordRPC' &&
+      typeof data === 'boolean'
+    ) {
+      userData.preferences.enableDiscordRPC = data;
     } else if (
       dataType === 'customMusixmatchUserToken' &&
       typeof data === 'string'

@@ -7,7 +7,7 @@ const Notification = (props: AppNotification) => {
   const {
     id,
     content,
-    delay,
+    delay = 5000,
     buttons,
     icon,
     iconName = 'info',
@@ -22,13 +22,14 @@ const Notification = (props: AppNotification) => {
   const notificationTimeoutIdRef = React.useRef(
     undefined as NodeJS.Timeout | undefined,
   );
-  const [dimensions, setDimensions] = React.useState({ width: 0, height: 0 });
+  // const [dimensions, setDimensions] = React.useState({ width: 0, height: 0 });
 
   const notificationPanelStyles: any = {};
-  notificationPanelStyles['--loading-bar-width'] = `${dimensions.width - 35}px`;
+  // notificationPanelStyles['--loading-bar-width'] = `${dimensions.width - 35}px`;
   notificationPanelStyles['--loading-bar-progress'] = `${
     (progressBarData.value / progressBarData.total) * 100
   }%`;
+  notificationPanelStyles['--notification-duration'] = `${delay}ms`;
 
   const removeNotification = React.useCallback(() => {
     const isNotificationAnimationDisabled =
@@ -59,14 +60,11 @@ const Notification = (props: AppNotification) => {
   React.useLayoutEffect(() => {
     const notification = notificationRef.current;
     if (notification) {
-      setDimensions({
-        width: notification.offsetWidth,
-        height: notification.offsetHeight,
-      });
-      notificationTimeoutIdRef.current = setTimeout(
-        removeNotification,
-        delay ?? 5000,
-      );
+      // setDimensions({
+      //   width: notification.offsetWidth,
+      //   height: notification.offsetHeight,
+      // });
+      notificationTimeoutIdRef.current = setTimeout(removeNotification, delay);
     }
     return () => {
       if (notificationTimeoutIdRef.current)
@@ -85,7 +83,7 @@ const Notification = (props: AppNotification) => {
     if (iconName)
       return (
         <span
-          className={`text-xl text-font-color-highlight dark:text-dark-font-color-highlight ${
+          className={`animate-dur text-xl text-font-color-highlight dark:text-dark-font-color-highlight ${
             iconClassName ?? 'material-icons-round'
           }`}
         >
@@ -97,16 +95,28 @@ const Notification = (props: AppNotification) => {
 
   return (
     <div
-      className={`notification appear-from-bottom group relative mt-2 flex h-fit max-h-32 min-h-[50px] w-fit max-w-md justify-between rounded-full bg-context-menu-background text-sm font-light text-font-color-black shadow-[5px_25px_50px_0px_rgba(0,0,0,0.2)] backdrop-blur-sm transition-[opacity,transform,visibility] ease-in-out first-of-type:mt-2 dark:bg-dark-context-menu-background dark:text-font-color-white ${
-        progressBarData && 'duration-0'
-      }`}
+      className="notification appear-from-bottom group relative mt-2 flex h-fit max-h-32 min-h-[50px] w-fit max-w-md justify-between rounded-full bg-context-menu-background text-sm font-light text-font-color-black shadow-[5px_25px_50px_0px_rgba(0,0,0,0.2)] backdrop-blur-sm transition-[opacity,transform,visibility] ease-in-out first-of-type:mt-2 dark:bg-dark-context-menu-background dark:text-font-color-white"
       id="notificationPanelsContainer"
       ref={notificationRef}
       style={notificationPanelStyles}
     >
-      <div className="close-button-container invisible absolute top-1/2 -z-10 flex -translate-x-10 -translate-y-1/2 flex-col items-center justify-center overflow-hidden opacity-0 transition-[transform,visibility,opacity] delay-200 group-hover:visible group-hover:-translate-x-14 group-hover:opacity-100">
+      <div
+        className={`progress-bar-container absolute h-full w-full overflow-hidden rounded-full before:absolute before:h-full before:w-0 before:rounded-sm before:bg-font-color-highlight/25 before:opacity-0 before:transition-[opacity,width] before:content-[''] dark:before:bg-dark-font-color-highlight/25 ${
+          type === 'WITH_PROGRESS_BAR' &&
+          progressBarData &&
+          progressBarData.total !== progressBarData.value &&
+          `before:!w-[var(--loading-bar-progress,0%)] before:!opacity-100`
+        } ${
+          type !== 'WITH_PROGRESS_BAR' ||
+          (type === 'WITH_PROGRESS_BAR' &&
+            progressBarData.total === progressBarData.value)
+            ? `before:!animate-[widthFillAnimation_var(--notification-duration)_ease-in-out] before:!opacity-40 dark:before:!opacity-15`
+            : 'before:!animate-none'
+        }`}
+      />
+      <div className="close-button-container invisible absolute top-1/2 flex -translate-x-10 -translate-y-1/2 flex-col items-center justify-center overflow-hidden opacity-0 transition-[transform,visibility,opacity] delay-200 group-hover:visible group-hover:-translate-x-14 group-hover:opacity-100">
         <span
-          className="material-icons-round icon relative my-2 ml-2 mr-8 rounded-full bg-context-menu-background p-2 text-xl hover:text-[crimson] dark:bg-dark-context-menu-background dark:hover:bg-dark-context-menu-background dark:hover:text-[crimson]"
+          className="material-icons-round icon relative my-2 ml-2 mr-8 rounded-full bg-context-menu-background p-2 text-xl shadow-md hover:text-[crimson] dark:bg-dark-context-menu-background dark:hover:bg-dark-context-menu-background dark:hover:text-[crimson]"
           onClick={removeNotification}
           onKeyDown={removeNotification}
           role="button"
@@ -116,7 +126,7 @@ const Notification = (props: AppNotification) => {
         </span>
       </div>
       <div
-        className={`notification-info-and-buttons-container flex w-fit flex-col px-5 py-3 ${
+        className={`notification-info-and-buttons-container flex w-full flex-col px-5 py-3 ${
           !(Array.isArray(buttons) && buttons.length > 0) &&
           'items-center justify-center'
         }`}
@@ -125,7 +135,7 @@ const Notification = (props: AppNotification) => {
           <div className="icon-container relative flex h-6 w-fit items-center justify-center [&>img]:aspect-square [&>img]:h-4">
             {notificationIcon}
           </div>
-          <div className="message-container text overflow-hidden text-ellipsis py-1 text-justify">
+          <div className="message-container text overflow-hidden text-ellipsis py-1 text-justify leading-none">
             {content}
           </div>
         </div>
@@ -147,9 +157,9 @@ const Notification = (props: AppNotification) => {
           </div>
         )}
       </div>
-      {type === 'WITH_PROGRESS_BAR' && progressBarData && (
-        <div className="notification-loading-bar absolute bottom-0 left-1/2 h-1 w-[85%] flex-grow -translate-x-1/2 overflow-hidden rounded-sm bg-font-color-highlight/10 before:absolute before:h-1 before:w-[var(--loading-bar-progress)] before:rounded-sm before:bg-font-color-highlight/50 before:content-[''] dark:bg-dark-font-color-highlight/20 dark:before:bg-dark-font-color-highlight" />
-      )}
+      {/* {type === 'WITH_PROGRESS_BAR' && progressBarData && (
+        <div className="notification-loading-bar absolute bottom-0 left-1/2 h-1 w-[85%] flex-grow -translate-x-1/2 overflow-hidden rounded-sm bg-font-color-highlight/10 before:absolute before:h-1 before:w-[var(--loading-bar-progress,0%)] before:rounded-sm before:bg-font-color-highlight/50 before:content-[''] dark:bg-dark-font-color-highlight/20 dark:before:bg-dark-font-color-highlight" />
+      )}   */}
     </div>
   );
 };

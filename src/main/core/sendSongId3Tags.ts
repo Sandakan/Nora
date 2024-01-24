@@ -81,23 +81,18 @@ const sendSongID3Tags = async (
             (val) => val.albumId === song.album?.albumId,
           );
           const songArtists = song.artists
-            ? artists.filter(
-                (artist) =>
-                  song.artists?.some((x) => x.artistId === artist.artistId),
+            ? artists.filter((artist) =>
+                song.artists?.some((x) => x.artistId === artist.artistId),
               )
             : undefined;
           const songAlbumArtists = song.albumArtists
-            ? artists.filter(
-                (artist) =>
-                  song.albumArtists?.some(
-                    (x) => x.artistId === artist.artistId,
-                  ),
+            ? artists.filter((artist) =>
+                song.albumArtists?.some((x) => x.artistId === artist.artistId),
               )
             : undefined;
           const songGenres = song.genres
-            ? genres.filter(
-                (artist) =>
-                  song.genres?.some((x) => x.genreId === artist.genreId),
+            ? genres.filter((artist) =>
+                song.genres?.some((x) => x.genreId === artist.genreId),
               )
             : undefined;
           const songTags = await getSongId3Tags(song.path);

@@ -7,7 +7,6 @@ const properties = {
   isInDevelopment:
     process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true',
   commandLineArgs: process.argv,
-  DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
 };
 
 const windowControls = {
