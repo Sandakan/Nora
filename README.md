@@ -1,4 +1,4 @@
- <h1 align="center">
+<h1 align="center">
    <img class="logo" src="assets/other/nora_logo_banner.webp">
    <!-- <p>Nora Player</p> -->
  </h1>
@@ -42,6 +42,9 @@ Inspired from <a href="https://play.google.com/store/apps/details?id=com.piyush.
 With simplicity and design in mind, this app was made to overcome problems when using default music apps on platforms that lack essential features.
 
 <br>
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FSandakan%2FNora.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FSandakan%2FNora?ref=badge_large)
 
 ## App features
 
@@ -163,6 +166,7 @@ This project is built using [Electron React Boilerplate](https://github.com/elec
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=Sandakan/Nora&type=Date)](https://star-history.com/#Sandakan/Nora&Date)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FSandakan%2FNora.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FSandakan%2FNora?ref=badge_shield)
 
 ## Feedback
 
