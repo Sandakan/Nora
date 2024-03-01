@@ -7,11 +7,11 @@ import calculateTime from 'renderer/utils/calculateTime';
 import Button from 'renderer/components/Button';
 import Img from 'renderer/components/Img';
 import UpNextSongPopup from 'renderer/components/SongsControlsContainer/UpNextSongPopup';
-import SeekBarSlider from 'renderer/components/SeekBarSlider';
 
 import DefaultSongCover from '../../../../../assets/images/webp/song_cover_default.webp';
 
 type Props = {
+  songPos: number;
   isLyricsVisible: boolean;
   isLyricsAvailable: boolean;
   setIsLyricsVisible: (callback: (state: boolean) => boolean) => void;
@@ -28,9 +28,9 @@ const SongInfoContainer = (props: Props) => {
   } = React.useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const { isLyricsVisible, setIsLyricsVisible, isLyricsAvailable } = props;
+  const { songPos, isLyricsVisible, setIsLyricsVisible, isLyricsAvailable } =
+    props;
 
-  const [songPos, setSongPos] = React.useState(0);
   const [isNextSongPopupVisible, setIsNextSongPopupVisible] =
     React.useState(false);
 
@@ -71,7 +71,7 @@ const SongInfoContainer = (props: Props) => {
 
   return (
     <div
-      className={`song-info-container group flex max-h-80 w-full max-w-full flex-col gap-2 px-12 py-16 transition-[visibility,opacity] delay-200 ${
+      className={`song-info-container peer/songInfoContainer group box-border flex max-h-80 w-full max-w-full flex-col gap-2 px-12 py-16 transition-[visibility,opacity] delay-200 ${
         isLyricsVisible && isLyricsAvailable
           ? 'invisible opacity-0 group-hover/fullScreenPlayer:visible group-hover/fullScreenPlayer:opacity-100'
           : 'visible opacity-100'
@@ -213,13 +213,6 @@ const SongInfoContainer = (props: Props) => {
           </div>
         </div>
       </div>
-      <SeekBarSlider
-        name="full-screen-player-seek-slider"
-        id="fullScreenPlayerSeekSlider"
-        sliderOpacity={0.25}
-        onSeek={(currentPosition) => setSongPos(currentPosition)}
-        className={`full-screen-player-seek-slider relative h-fit w-full appearance-none bg-transparent py-4 outline-none outline-1 outline-offset-1 transition-[width,height,transform] ease-in-out before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--seek-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-background-color-1/75 before:backdrop-blur-lg before:transition-[width,height,transform] before:ease-in-out before:content-[''] focus-visible:!outline group-hover:before:h-3`}
-      />
     </div>
   );
 };

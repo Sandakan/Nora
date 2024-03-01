@@ -55,7 +55,7 @@ const SelectableFolder = (props: Props) => {
             <p className="">{folderName}</p>
             <p className=" text-xs opacity-50">
               {t('common.subFolderWithCount', { count: subFolders.length })}
-              &bull;
+              <span className="mx-1">&bull;</span>
               {t('common.songWithCount', {
                 count: structure.noOfSongs ?? 0,
               })}

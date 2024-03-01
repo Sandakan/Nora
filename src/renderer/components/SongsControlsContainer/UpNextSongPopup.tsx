@@ -14,7 +14,10 @@ type Props = {
 
 const UpNextSongPopup = (props: Props) => {
   const { queue, currentSongData } = React.useContext(AppContext);
-  const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
+  const {
+    changeCurrentActivePage,
+    // changeUpNextSongData
+  } = React.useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { onPopupAppears, isSemiTransparent = false, className } = props;
@@ -42,7 +45,7 @@ const UpNextSongPopup = (props: Props) => {
                 if (res && res[0]) {
                   const [nextSongData] = res;
                   upNextSongDataCache.current = nextSongData;
-                  // setUpNextSongData(upNextSongDataCache.current);
+                  // changeUpNextSongData(upNextSongDataCache.current);
 
                   timeIntervalId = setInterval(() => {
                     setUpNextSongData(upNextSongDataCache.current);

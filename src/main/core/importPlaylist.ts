@@ -37,21 +37,13 @@ const isASongPath = (text: string) => {
 
 const getSongDataFromSongPath = (songPath: string) => {
   const songs = getSongsData();
-  for (const song of songs) {
-    if (song.path === songPath) return song;
-  }
-  return undefined;
+  return songs.find((song) => song.path === songPath);
 };
 
 const checkPlaylist = (playlistName: string) => {
   const playlistData = getPlaylistData();
 
-  for (const playlist of playlistData) {
-    if (playlist.name === playlistName) {
-      return playlist;
-    }
-  }
-  return undefined;
+  return playlistData.find((playlist) => playlist.name === playlistName);
 };
 
 const importPlaylist = async () => {

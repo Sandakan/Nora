@@ -23,19 +23,19 @@ const convertToBytes = (val: number, dataType: DataType = 'B') => {
 
 const getRootSize = (
   appPath: string,
-): Promise<{ freeSpace: number; size: number }> =>
+): Promise<{ freeSpace: number; size: number; rootDir: string }> =>
   new Promise((resolve, reject) => {
     try {
-      const output = { freeSpace: 0, size: 0 };
+      const output = { rootDir: '', freeSpace: 0, size: 0 };
       const platform = os.platform();
 
       if (platform === 'win32') {
         const { root } = path.parse(appPath);
-        const rootDir = root.replaceAll(path.sep, '');
+        output.rootDir = root.replaceAll(path.sep, '');
         childProcess.execFile(
           'cmd.exe',
           ['/c', 'wmic logicaldisk get Name, Size, FreeSpace'],
-          (error, stdout) => {
+          (error: unknown, stdout) => {
             if (error) {
               reject(new Error(`exec error: ${error}`));
             }
@@ -46,7 +46,7 @@ const getRootSize = (
               if (
                 groups &&
                 'name' in groups &&
-                groups.name === rootDir &&
+                groups.name === output.rootDir &&
                 'freeSpace' in groups &&
                 'size' in groups
               ) {

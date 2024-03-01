@@ -5,9 +5,10 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from 'renderer/contexts/AppContext';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
+// import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
 import roundTo from 'renderer/utils/roundTo';
 import { delay, syncedLyricsRegex } from './LyricsPage';
+import LyricsProgressBar from './LyricsProgressBar';
 
 interface LyricProp {
   lyric: string | SyncedLyricsLineText;
@@ -22,8 +23,8 @@ const lyricsScrollIntoViewEvent = new CustomEvent('lyrics/scrollIntoView', {
 
 const LyricLine = (props: LyricProp) => {
   const { playerType } = React.useContext(AppContext);
-  const { songPosition } = React.useContext(SongPositionContext);
   const { updateSongPosition } = React.useContext(AppUpdateContext);
+  const [isInRange, setIsInRange] = React.useState(false);
   const { t } = useTranslation();
 
   const lyricsRef = React.useRef(null as HTMLDivElement | null);
@@ -31,21 +32,43 @@ const LyricLine = (props: LyricProp) => {
 
   const { index, lyric, syncedLyrics, isAutoScrolling = true } = props;
 
-  React.useEffect(() => {
-    if (lyricsRef.current && syncedLyrics) {
-      const { start, end } = syncedLyrics;
-      if (songPosition > start - delay && songPosition < end - delay) {
-        if (!isTheCurrnetLineRef.current && isAutoScrolling) {
-          isTheCurrnetLineRef.current = true;
-          lyricsRef.current?.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-          });
-          document.dispatchEvent(lyricsScrollIntoViewEvent);
+  const handleLyricsActivity = React.useCallback(
+    (e: Event) => {
+      if ('detail' in e && !Number.isNaN(e.detail)) {
+        const songPosition = e.detail as number;
+
+        if (lyricsRef.current && syncedLyrics) {
+          const { start, end } = syncedLyrics;
+          if (songPosition > start - delay && songPosition < end - delay) {
+            if (!isTheCurrnetLineRef.current && isAutoScrolling) {
+              isTheCurrnetLineRef.current = true;
+              setIsInRange(true);
+              lyricsRef.current?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+              });
+
+              document.dispatchEvent(lyricsScrollIntoViewEvent);
+            }
+          } else {
+            isTheCurrnetLineRef.current = false;
+            setIsInRange(false);
+          }
         }
-      } else isTheCurrnetLineRef.current = false;
-    }
-  }, [syncedLyrics, songPosition, isAutoScrolling]);
+      }
+    },
+    [isAutoScrolling, syncedLyrics],
+  );
+
+  React.useEffect(() => {
+    document.addEventListener('player/positionChange', handleLyricsActivity);
+
+    return () =>
+      document.removeEventListener(
+        'player/positionChange',
+        handleLyricsActivity,
+      );
+  }, [handleLyricsActivity]);
 
   const lyricString = React.useMemo(() => {
     if (typeof lyric === 'string')
@@ -58,12 +81,9 @@ const LyricLine = (props: LyricProp) => {
           key={`${i}-${extendedText.text}`}
           onClick={() => updateSongPosition(extendedText.start)}
           className={`mr-2 text-font-color-black last:mr-0 dark:text-font-color-white ${
-            songPosition > extendedText.start - delay &&
-            songPosition < extendedText.end - delay
+            isInRange
               ? '!text-opacity-90'
-              : syncedLyrics &&
-                  songPosition > syncedLyrics.start - delay &&
-                  songPosition < syncedLyrics.end - delay
+              : syncedLyrics && isInRange
                 ? '!text-opacity-50'
                 : '!text-opacity-20 hover:!text-opacity-75'
           }`}
@@ -74,21 +94,7 @@ const LyricLine = (props: LyricProp) => {
     });
 
     return extendedLyricLines;
-  }, [lyric, songPosition, syncedLyrics, updateSongPosition]);
-
-  const lyricDurationBarProperties: any = {};
-  // eslint-disable-next-line dot-notation
-  lyricDurationBarProperties['--duration'] = syncedLyrics
-    ? songPosition < syncedLyrics.start - delay
-      ? '0%'
-      : songPosition > syncedLyrics.end - delay
-        ? '100%'
-        : `${
-            ((songPosition - (syncedLyrics.start - delay)) /
-              (syncedLyrics.end - delay - (syncedLyrics.start - delay))) *
-            100
-          }%`
-    : '0%';
+  }, [isInRange, lyric, syncedLyrics, updateSongPosition]);
 
   return (
     <div
@@ -106,8 +112,7 @@ const LyricLine = (props: LyricProp) => {
       className={`highlight duration-250 mb-5 flex w-fit select-none flex-col items-center justify-center text-balance text-center text-5xl font-medium text-font-color-black transition-[transform,color,filter] first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
         syncedLyrics
           ? `cursor-pointer ${
-              songPosition > syncedLyrics.start - delay &&
-              songPosition < syncedLyrics.end - delay
+              isInRange
                 ? '!scale-100 !text-opacity-90 !blur-0 [&>div>span]:!mr-3'
                 : 'scale-[.7] !text-opacity-20 hover:!text-opacity-75'
             }`
@@ -130,17 +135,9 @@ const LyricLine = (props: LyricProp) => {
       >
         {lyricString}
       </div>
-      <span
-        style={lyricDurationBarProperties}
-        className={`invisible mt-1 block h-1 w-1/2 min-w-[2rem] max-w-[4rem] rounded-md bg-background-color-2 opacity-0 transition-[visibility,opacity] dark:bg-dark-background-color-2 ${
-          syncedLyrics &&
-          songPosition > syncedLyrics.start - delay &&
-          songPosition < syncedLyrics.end - delay &&
-          '!visible !opacity-100 dark:!opacity-50'
-        }`}
-      >
-        <span className="block h-full w-[var(--duration)] rounded-md bg-background-color-dimmed transition-[width] duration-300 dark:bg-background-color-dimmed" />
-      </span>
+      {syncedLyrics && isInRange && (
+        <LyricsProgressBar delay={delay} syncedLyrics={syncedLyrics} />
+      )}
     </div>
   );
 };

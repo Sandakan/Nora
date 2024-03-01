@@ -43,6 +43,7 @@ import toggleSongIsFavorite from './other/toggleSongIsFavorite';
 import UnsupportedFileMessagePrompt from './components/UnsupportedFileMessagePrompt';
 import SuspenseLoader from './components/SuspenseLoader';
 import { equalizerBandHertzData } from './other/equalizerData';
+import throttle from './utils/throttle';
 
 const MiniPlayer = React.lazy(
   () => import('./components/MiniPlayer/MiniPlayer'),
@@ -53,7 +54,7 @@ const FullScreenPlayer = React.lazy(
 
 const player = new Audio();
 let repetitivePlaybackErrorsCount = 0;
-const lowResponseTimeRequiredPages: PageTitles[] = ['Lyrics', 'LyricsEditor'];
+// const lowResponseTimeRequiredPages: PageTitles[] = ['Lyrics', 'LyricsEditor'];
 
 // ? / / / / / / /  EQUALIZER INITIALIZATION / / / / / / / / / / / / / /
 const context = new window.AudioContext();
@@ -553,47 +554,46 @@ export default function App() {
   }, []);
 
   React.useEffect(() => {
-    const index = content.navigationHistory.pageHistoryIndex;
-    const { pageTitle: currentPage, data } =
-      content.navigationHistory.history[index];
-    const isLowResponseRequired =
-      lowResponseTimeRequiredPages.includes(currentPage) ||
-      data?.isLowResponseRequired ||
-      content.playerType === 'mini' ||
-      content.playerType === 'full';
+    // const index = content.navigationHistory.pageHistoryIndex;
+    // const { pageTitle: currentPage, data } =
+    //   content.navigationHistory.history[index];
+    // // const isLowResponseRequired =
+    // //   lowResponseTimeRequiredPages.includes(currentPage) ||
+    // //   data?.isLowResponseRequired ||
+    // //   content.playerType === 'mini' ||
+    // //   content.playerType === 'full';
 
-    const duration = isLowResponseRequired ? 100 : 1000;
+    const LOW_RESPONSE_DURATION = 100;
+    const DURATION = 1000;
 
-    const intervalId = setInterval(() => {
+    const lowResponseIntervalId = setInterval(() => {
       if (!player.paused) {
         const currentPosition = contentRef.current.player.songPosition;
 
         const playerPositionChange = new CustomEvent('player/positionChange', {
           detail: currentPosition,
         });
-        player.dispatchEvent(playerPositionChange);
+        document.dispatchEvent(playerPositionChange);
+      }
+    }, LOW_RESPONSE_DURATION);
 
-        if (isLowResponseRequired)
+    const intervalId = setInterval(() => {
+      const currentPosition = contentRef.current.player.songPosition;
+      if (!player.paused) {
+        startTransition(() =>
           dispatch({
             type: 'UPDATE_SONG_POSITION',
             data: currentPosition,
-          });
-        else
-          startTransition(() =>
-            dispatch({
-              type: 'UPDATE_SONG_POSITION',
-              data: currentPosition,
-            }),
-          );
+          }),
+        );
       }
-    }, duration);
+    }, DURATION);
 
-    return () => clearInterval(intervalId);
-  }, [
-    content.navigationHistory.history,
-    content.navigationHistory.pageHistoryIndex,
-    content.playerType,
-  ]);
+    return () => {
+      clearInterval(intervalId);
+      clearInterval(lowResponseIntervalId);
+    };
+  }, []);
 
   // VOLUME RELATED SETTINGS
   React.useEffect(() => {
@@ -832,9 +832,14 @@ export default function App() {
 
   const displayMessageFromMain = React.useCallback(
     (_: unknown, messageCode: MessageCodes, data?: Record<string, unknown>) => {
-      const notification = parseNotificationFromMain(messageCode, data);
+      // const isNotificationWithProgress = data && 'total' in data && 'value' in data;
 
-      addNewNotifications([notification]);
+      // if(!isNotificationWithProgress)
+      throttle(() => {
+        const notification = parseNotificationFromMain(messageCode, data);
+
+        addNewNotifications([notification]);
+      }, 1000)();
     },
     [addNewNotifications],
   );
@@ -1890,6 +1895,14 @@ export default function App() {
     storage.equalizerPreset.setEqualizerPreset(options);
   }, []);
 
+  const changeUpNextSongData = React.useCallback(
+    (upNextSongData?: AudioPlayerData) => {
+      // dispatch({ type: 'UP_NEXT_SONG_DATA_CHANGE', data: upNextSongData });
+      contentRef.current.upNextSongData = upNextSongData;
+    },
+    [],
+  );
+
   const promptMenuData = React.useMemo(() => {
     const { currentActiveIndex, isVisible, prompts } =
       content.promptMenuNavigationData;
@@ -1912,6 +1925,7 @@ export default function App() {
         ...content.currentSongData,
         duration: player.duration || content.currentSongData.duration,
       },
+      upNextSongData: contentRef.current.upNextSongData,
       currentlyActivePage:
         contentRef.current.navigationHistory.history[
           content.navigationHistory.pageHistoryIndex
@@ -1964,6 +1978,7 @@ export default function App() {
       updateCurrentSongData,
       updateContextMenuData,
       changePromptMenuData,
+      changeUpNextSongData,
       updatePromptMenuHistoryIndex,
       playSong,
       changeCurrentActivePage,
@@ -1997,6 +2012,7 @@ export default function App() {
       updateCurrentSongData,
       updateContextMenuData,
       changePromptMenuData,
+      changeUpNextSongData,
       updatePromptMenuHistoryIndex,
       playSong,
       changeCurrentActivePage,

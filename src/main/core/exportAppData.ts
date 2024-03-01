@@ -110,7 +110,7 @@ const exportAppData = async (localStorageData: string) => {
         genreDataString,
       );
 
-      // LISTENING DATA
+      // USER DATA
       const userData = getUserData();
       const userDataString = JSON.stringify({ userData });
 

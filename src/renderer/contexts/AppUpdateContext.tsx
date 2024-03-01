@@ -20,6 +20,7 @@ export interface AppUpdateContextType {
     content?: ReactNode,
     className?: string,
   ) => void;
+  changeUpNextSongData: (upNextSongData?: AudioPlayerData) => void;
   updatePromptMenuHistoryIndex: (
     type: 'increment' | 'decrement' | 'home',
     promptIndex?: number,

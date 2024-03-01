@@ -106,6 +106,7 @@ const sendFavoritesDataToLastFM = async (
 
 export const addAFavoriteToLastFM = (title: string, artists: string[] = []) =>
   sendFavoritesDataToLastFM('track.love', title, artists);
+
 export const removeAFavoriteFromLastFM = (
   title: string,
   artists: string[] = [],

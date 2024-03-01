@@ -135,7 +135,7 @@ const Notification = (props: AppNotification) => {
           <div className="icon-container relative flex h-6 w-fit items-center justify-center [&>img]:aspect-square [&>img]:h-4">
             {notificationIcon}
           </div>
-          <div className="message-container text overflow-hidden text-ellipsis py-1 text-justify leading-none">
+          <div className="message-container text overflow-hidden text-ellipsis py-1 leading-none">
             {content}
           </div>
         </div>

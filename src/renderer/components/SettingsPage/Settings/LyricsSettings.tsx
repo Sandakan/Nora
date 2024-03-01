@@ -155,10 +155,20 @@ const LyricsSettings = () => {
               userData?.preferences.saveLyricsInLrcFilesForSupportedSongs
             }
             checkedStateUpdateFunction={(state) =>
-              window.api.userData.saveUserData(
-                'preferences.saveLyricsInLrcFilesForSupportedSongs',
-                state,
-              )
+              window.api.userData
+                .saveUserData(
+                  'preferences.saveLyricsInLrcFilesForSupportedSongs',
+                  state,
+                )
+                .then(() =>
+                  updateUserData((prevUserData) => ({
+                    ...prevUserData,
+                    preferences: {
+                      ...prevUserData.preferences,
+                      saveLyricsInLrcFilesForSupportedSongs: state,
+                    },
+                  })),
+                )
             }
             labelContent={t('settingsPage.saveLyricsInLrcFiles')}
           />

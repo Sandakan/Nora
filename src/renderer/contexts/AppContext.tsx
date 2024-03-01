@@ -25,6 +25,7 @@ export interface AppStateContextType {
   noOfPagesInHistory: number;
   // AUDIO PLAYBACK
   currentSongData: AudioPlayerData;
+  upNextSongData?: AudioPlayerData;
   userData: UserData | undefined;
   isCurrentSongPlaying: boolean;
   volume: number;

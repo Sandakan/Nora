@@ -176,6 +176,7 @@ body * {
 
 /* ? APP DARK THEME STYLES */
 .App.dark,
+.full-screen-player.dark,
 .mini-player.dark {
   --background-color-1: rgb(33, 34, 38);
   --background-color-2: hsla(225, 8%, 20%, 100%);

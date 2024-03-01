@@ -21,6 +21,8 @@ import {
   SaveDialogOptions,
   net,
   powerSaveBlocker,
+  screen,
+  Display,
 } from 'electron';
 import debug from 'electron-debug';
 import 'dotenv/config';
@@ -201,6 +203,7 @@ const createWindow = async () => {
       checkForNewSongs();
       addWatchersToFolders();
       addWatchersToParentFolders();
+      manageWindowPositionInMonitor();
     }
   });
   mainWindow.webContents.setWindowOpenHandler((edata: { url: string }) => {
@@ -806,6 +809,26 @@ export function changePlayerType(type: PlayerTypes) {
       mainWindow.setFullScreen(true);
     }
   }
+}
+
+function manageWindowOnDisplayMetricsChange(primaryDisplay: Display) {
+  const currentDisplay = screen.getDisplayMatching(mainWindow.getBounds());
+  if (!currentDisplay || currentDisplay.id !== primaryDisplay.id) {
+    mainWindow.setPosition(
+      primaryDisplay.workArea.x,
+      primaryDisplay.workArea.y,
+    );
+  }
+}
+
+function manageWindowPositionInMonitor() {
+  const primaryDisplay = screen.getPrimaryDisplay();
+  manageWindowOnDisplayMetricsChange(primaryDisplay);
+
+  // Event listener for display change events
+  screen.on('display-metrics-changed', () =>
+    manageWindowOnDisplayMetricsChange(primaryDisplay),
+  );
 }
 
 export async function toggleAutoLaunch(autoLaunchState: boolean) {

@@ -9,6 +9,16 @@
           "label": "Remove this on producton"
         }
       ]
+    },
+    {
+      "path": "src/renderer/components/NotificationPanel/Notification.tsx",
+      "bookmarks": [
+        {
+          "line": 63,
+          "column": 15,
+          "label": "Unwanted comments"
+        }
+      ]
     }
   ]
 }

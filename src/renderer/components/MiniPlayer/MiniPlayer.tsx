@@ -64,7 +64,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
 
   return (
     <div
-      className={`mini-player dark group h-full select-none overflow-hidden !bg-dark-background-color-1 !transition-none delay-100 ${
+      className={`mini-player dark group h-full select-none overflow-hidden !bg-dark-background-color-1 !transition-none delay-100 dark:!bg-dark-background-color-1 ${
         !isCurrentSongPlaying && 'paused'
       } ${
         localStorageData?.preferences?.isReducedMotion ? 'reduced-motion' : ''

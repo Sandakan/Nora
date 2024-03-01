@@ -82,7 +82,16 @@ const getStorageUsage = async (forceRefresh = false) => {
 
     log(`appPath to be used to generate storage usage - ${appPath}`);
 
-    const rootSizes = await getRootSize(appPath);
+    const appRootSize = await getRootSize(appPath);
+    const dataRootSize = await getRootSize(appPath);
+
+    const rootSizes: Omit<typeof appRootSize, 'rootDir'> =
+      appRootSize.rootDir === dataRootSize.rootDir
+        ? appRootSize
+        : {
+            size: appRootSize.size + dataRootSize.size,
+            freeSpace: appRootSize.freeSpace + dataRootSize.freeSpace,
+          };
 
     console.time('appFolder');
     const appFolderSize = await getDirSize(appFolderPath);

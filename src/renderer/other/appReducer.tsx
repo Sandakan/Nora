@@ -5,6 +5,7 @@ export interface AppReducer {
   isDarkMode: boolean;
   localStorage: LocalStorage;
   currentSongData: AudioPlayerData;
+  upNextSongData?: AudioPlayerData;
   promptMenuNavigationData: PromptMenuNavigationHistoryData;
   notificationPanelData: NotificationPanelData;
   contextMenuData: ContextMenuData;
@@ -25,6 +26,7 @@ type AppReducerStateActions =
       data: AppThemeData;
     }
   | { type: 'CURRENT_SONG_DATA_CHANGE'; data: AudioPlayerData | {} }
+  | { type: 'UP_NEXT_SONG_DATA_CHANGE'; data?: AudioPlayerData }
   | { type: 'CURRENT_SONG_PLAYBACK_STATE'; data: boolean }
   | { type: 'PROMPT_MENU_DATA_CHANGE'; data: PromptMenuNavigationHistoryData }
   | { type: 'ADD_NEW_NOTIFICATIONS'; data: AppNotification[] }
@@ -198,6 +200,14 @@ const reducer = (
             : state.navigationHistory,
       };
     case 'CURRENT_SONG_DATA_CHANGE':
+      return {
+        ...state,
+        currentSongData:
+          typeof action.data === 'object'
+            ? (action.data as AudioPlayerData)
+            : state.currentSongData,
+      };
+    case 'UP_NEXT_SONG_DATA_CHANGE':
       return {
         ...state,
         currentSongData:
@@ -383,6 +393,7 @@ export const USER_DATA_TEMPLATE: UserData = {
     sendSongFavoritesDataToLastFM: false,
     sendNowPlayingSongDataToLastFM: false,
     saveLyricsInLrcFilesForSupportedSongs: false,
+    enableDiscordRPC: false,
   },
   windowPositions: {},
   windowDiamensions: {},
@@ -404,6 +415,7 @@ export const DEFAULT_REDUCER_DATA: AppReducer = {
   },
   userData: USER_DATA_TEMPLATE,
   currentSongData: {} as AudioPlayerData,
+  upNextSongData: {} as AudioPlayerData,
   localStorage: LOCAL_STORAGE_DEFAULT_TEMPLATE,
   navigationHistory: {
     pageHistoryIndex: 0,

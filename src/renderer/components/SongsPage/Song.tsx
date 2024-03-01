@@ -680,7 +680,7 @@ const Song = React.forwardRef(
                       : 'min-w-[3.75rem]'
               }`}
             >
-              <span className="text-sm leading-[.9]">
+              <span className="text-sm leading-none">
                 {trackNo ?? index + 1}
               </span>
             </div>

@@ -93,7 +93,7 @@ const updateStructure = (
     if (folder.path === structure.path) {
       folder.stats = structure.stats;
 
-      folder.subFolders = folder.subFolders.filter(
+      const filteredFolderSubFolders = folder.subFolders.filter(
         (folderSubFolder) =>
           !structure.subFolders.some(
             (structureSubFolder) =>
@@ -101,7 +101,8 @@ const updateStructure = (
           ),
       );
 
-      folder.subFolders.push(...structure.subFolders);
+      filteredFolderSubFolders.push(...structure.subFolders);
+      folder.subFolders = filteredFolderSubFolders;
       isFound = true;
       break;
     }

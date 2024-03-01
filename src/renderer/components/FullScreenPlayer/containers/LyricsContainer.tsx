@@ -98,7 +98,14 @@ const LyricsContainer = (props: Props) => {
     if (lyrics && lyrics?.lyrics) {
       const { source, copyright, link } = lyrics;
 
-      return <LyricsSource source={source} copyright={copyright} link={link} />;
+      return (
+        <LyricsSource
+          source={source}
+          copyright={copyright}
+          link={link}
+          className="!items-start !text-left"
+        />
+      );
     }
     return undefined;
   }, [lyrics]);

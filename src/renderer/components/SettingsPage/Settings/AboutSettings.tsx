@@ -366,7 +366,7 @@ const AboutSettings = () => {
           <Button
             label={t('settingsPage.importAppData')}
             iconName="publish"
-            className="mb-4 rounded-2xl"
+            className="!mr-0 mb-4 rounded-2xl"
             clickHandler={(_, setIsDisabled, setIsPending) => {
               setIsDisabled(true);
               setIsPending(true);

@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
@@ -11,7 +11,8 @@ import PromptMenuNavigationControlsContainer from './PromptMenuNavigationControl
 
 const PromptMenu = () => {
   const { promptMenuData } = React.useContext(AppContext);
-  const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { changePromptMenuData, updatePromptMenuHistoryIndex } =
+    React.useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const promptMenuRef =
@@ -54,6 +55,27 @@ const PromptMenu = () => {
       dialog?.removeEventListener('animationend', manageDialogAnimationEnd);
     };
   }, [promptMenuData.isVisible, changePromptMenuData]);
+
+  const manageKeyboardShortcuts = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.altKey) {
+        if (e.code === 'ArrowLeft' || e.code === 'ArrowRight')
+          e.stopPropagation();
+        if (e.code === 'ArrowRight') updatePromptMenuHistoryIndex('increment');
+        if (e.code === 'ArrowLeft') updatePromptMenuHistoryIndex('decrement');
+      }
+    },
+    [updatePromptMenuHistoryIndex],
+  );
+
+  useEffect(() => {
+    const promptMenu = promptMenuRef.current;
+
+    promptMenu?.addEventListener('keydown', manageKeyboardShortcuts);
+    return () => {
+      promptMenu?.removeEventListener('keydown', manageKeyboardShortcuts);
+    };
+  }, [manageKeyboardShortcuts]);
 
   return (
     <dialog
