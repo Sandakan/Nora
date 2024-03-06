@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
-import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
+import { AppContext } from '../../contexts/AppContext';
+import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
 import Img from '../Img';
 
 import MultipleArtworksCover from '../PlaylistsPage/MultipleArtworksCover';

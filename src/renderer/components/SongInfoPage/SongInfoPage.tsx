@@ -1,10 +1,10 @@
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
-import log from 'renderer/utils/log';
-import { valueRounder } from 'renderer/utils/valueRounder';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
+import log from '../../utils/log';
+import { valueRounder } from '../../utils/valueRounder';
 
 import Button from '../Button';
 import Img from '../Img';

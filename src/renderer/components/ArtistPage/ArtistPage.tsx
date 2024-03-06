@@ -2,13 +2,13 @@ import React, { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FixedSizeGrid as Grid } from 'react-window';
 
-import useResizeObserver from 'renderer/hooks/useResizeObserver';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import debounce from 'renderer/utils/debounce';
-import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
-import storage from 'renderer/utils/localStorage';
-import i18n from 'renderer/i18n';
+import useResizeObserver from '../../hooks/useResizeObserver';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import debounce from '../../utils/debounce';
+import useSelectAllHandler from '../../hooks/useSelectAllHandler';
+import storage from '../../utils/localStorage';
+import i18n from '../../i18n';
 
 import { Artist } from './Artist';
 import Dropdown, { DropdownOption } from '../Dropdown';
@@ -194,9 +194,7 @@ const ArtistPage = () => {
             <div className="other-control-container flex">
               <Button
                 label={t(
-                  `common.${
-                    isMultipleSelectionEnabled ? 'unselectAll' : 'select'
-                  }`,
+                  `common.${isMultipleSelectionEnabled ? 'unselectAll' : 'select'}`,
                 )}
                 className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                 iconName={
@@ -227,9 +225,7 @@ const ArtistPage = () => {
           </div>
         )}
         <div
-          className={`artists-container flex !h-full flex-wrap ${
-            !(artistsData && artistsData.length > 0) && 'hidden'
-          }`}
+          className={`artists-container flex !h-full flex-wrap ${!(artistsData && artistsData.length > 0) && 'hidden'}`}
           ref={containerRef}
         >
           {artistsData && artistsData.length > 0 && (

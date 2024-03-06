@@ -1,5 +1,5 @@
 import { Trans, useTranslation } from 'react-i18next';
-import toCapitalCase from 'renderer/utils/toCapitalCase';
+import toCapitalCase from '../../utils/toCapitalCase';
 import Hyperlink from '../Hyperlink';
 
 interface LyricsSourceProp {

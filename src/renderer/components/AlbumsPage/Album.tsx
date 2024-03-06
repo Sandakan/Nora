@@ -4,8 +4,8 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import SongArtist from '../SongsPage/SongArtist';

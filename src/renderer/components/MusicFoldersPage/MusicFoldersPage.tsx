@@ -1,12 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 // import { FixedSizeList as List } from 'react-window';
-// import useResizeObserver from 'renderer/hooks/useResizeObserver';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
-import storage from 'renderer/utils/localStorage';
-import i18n from 'renderer/i18n';
+// import useResizeObserver from '../../hooks/useResizeObserver';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import useSelectAllHandler from '../../hooks/useSelectAllHandler';
+import storage from '../../utils/localStorage';
+import i18n from '../../i18n';
 
 import Button from '../Button';
 import Dropdown, { DropdownOption } from '../Dropdown';
@@ -239,9 +239,7 @@ const MusicFoldersPage = () => {
                     )
                   }
                   tooltipLabel={t(
-                    `common.${
-                      isMultipleSelectionEnabled ? 'unselectAll' : 'select'
-                    }`,
+                    `common.${isMultipleSelectionEnabled ? 'unselectAll' : 'select'}`,
                   )}
                 />
                 <Button

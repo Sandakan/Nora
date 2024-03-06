@@ -3,12 +3,12 @@
 import React, { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FixedSizeGrid as Grid } from 'react-window';
-import useResizeObserver from 'renderer/hooks/useResizeObserver';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
-import storage from 'renderer/utils/localStorage';
-import i18n from 'renderer/i18n';
+import useResizeObserver from '../../hooks/useResizeObserver';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import useSelectAllHandler from '../../hooks/useSelectAllHandler';
+import storage from '../../utils/localStorage';
+import i18n from '../../i18n';
 
 import { Album } from './Album';
 import MainContainer from '../MainContainer';
@@ -167,9 +167,7 @@ const AlbumsPage = () => {
             <div className="other-controls-container flex">
               <Button
                 label={t(
-                  `common.${
-                    isMultipleSelectionEnabled ? 'unselectAll' : 'select'
-                  }`,
+                  `common.${isMultipleSelectionEnabled ? 'unselectAll' : 'select'}`,
                 )}
                 className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                 iconName={
@@ -197,9 +195,7 @@ const AlbumsPage = () => {
           </div>
         )}
         <div
-          className={`albums-container h-full w-full flex-grow ${
-            !(albumsData && albumsData.length > 0) && 'hidden'
-          }`}
+          className={`albums-container h-full w-full flex-grow ${!(albumsData && albumsData.length > 0) && 'hidden'}`}
           ref={containerRef}
         >
           {albumsData && albumsData.length > 0 && (

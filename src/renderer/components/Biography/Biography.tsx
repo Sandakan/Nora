@@ -1,6 +1,6 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext } from '../../contexts/AppContext';
 import Hyperlink from '../Hyperlink';
 import HashTag from './HashTag';
 import { Tag } from '../../../@types/last_fm_artist_info_api';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { valueRounder } from 'renderer/utils/valueRounder';
+import { valueRounder } from '../../../utils/valueRounder';
 
 const AppStats = () => {
   const { t } = useTranslation();

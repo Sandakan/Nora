@@ -9,11 +9,11 @@ import {
   Droppable,
   DragDropContext,
 } from 'react-beautiful-dnd';
-import useResizeObserver from 'renderer/hooks/useResizeObserver';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
-import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
+import useResizeObserver from '../../hooks/useResizeObserver';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import useSelectAllHandler from '../../hooks/useSelectAllHandler';
+import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
 
 import Button from '../Button';
 import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
@@ -200,7 +200,9 @@ const CurrentQueuePage = () => {
                     folderName
                       ? 'currentQueuePage.folderWithName'
                       : 'common.unknownFolder',
-                    { name: folderName },
+                    {
+                      name: folderName,
+                    },
                   ),
                 };
               });
@@ -377,7 +379,7 @@ const CurrentQueuePage = () => {
               isDisabled={queue.queue.length > 0 === false}
               clickHandler={(e) => {
                 e.stopPropagation();
-                const button = e.currentTarget || e.target;
+                const button = e.currentTarget;
                 const { x, y } = button.getBoundingClientRect();
                 updateContextMenuData(
                   true,
@@ -408,9 +410,7 @@ const CurrentQueuePage = () => {
               }
               isDisabled={queue.queue.length > 0 === false}
               tooltipLabel={t(
-                `common.${
-                  isMultipleSelectionEnabled ? 'unselectAll' : 'select'
-                }`,
+                `common.${isMultipleSelectionEnabled ? 'unselectAll' : 'select'}`,
               )}
             />
             <Button
@@ -420,11 +420,7 @@ const CurrentQueuePage = () => {
               clickHandler={() => setIsAutoScrolling((state) => !state)}
               isDisabled={queue.queue.length > 0 === false}
               tooltipLabel={t(
-                `currentQueuePage.${
-                  isAutoScrolling
-                    ? 'disableAutoScrolling'
-                    : 'enableAutoScrolling'
-                }`,
+                `currentQueuePage.${isAutoScrolling ? 'disableAutoScrolling' : 'enableAutoScrolling'}`,
               )}
             />
             <Button
@@ -507,9 +503,7 @@ const CurrentQueuePage = () => {
           </div>
         )}
         <div
-          className={`songs-container overflow-auto ${
-            queuedSongs.length > 0 ? 'h-full' : 'h-0'
-          }`}
+          className={`songs-container overflow-auto ${queuedSongs.length > 0 ? 'h-full' : 'h-0'}`}
           ref={containerRef}
         >
           {queuedSongs.length > 0 && (

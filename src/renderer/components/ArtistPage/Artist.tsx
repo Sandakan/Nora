@@ -4,8 +4,8 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import DefaultArtistCover from '../../../../assets/images/webp/artist_cover_default.webp';
 import Button from '../Button';
 import Img from '../Img';
@@ -202,13 +202,7 @@ export const Artist = (props: ArtistProp) => {
       },
       {
         label: t(
-          `artist.${
-            isMultipleSelectionEnabled
-              ? 'toggleLikeArtists'
-              : isAFavorite
-                ? 'dislikeArtist'
-                : 'likeArtist'
-          }`,
+          `artist.${isMultipleSelectionEnabled ? 'toggleLikeArtists' : isAFavorite ? 'dislikeArtist' : 'likeArtist'}`,
         ),
         iconName: 'favorite',
         iconClassName: isMultipleSelectionsEnabled
@@ -325,11 +319,7 @@ export const Artist = (props: ArtistProp) => {
       // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
       className={`artist appear-from-bottom mr-2 flex h-44 w-40 cursor-pointer flex-col justify-between overflow-hidden rounded-lg p-4 hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50 ${
         props.className
-      } ${
-        isAMultipleSelection
-          ? '!bg-background-color-3 dark:!bg-dark-background-color-3'
-          : ''
-      }`}
+      } ${isAMultipleSelection ? '!bg-background-color-3 dark:!bg-dark-background-color-3' : ''}`}
       onContextMenu={(e) => {
         e.stopPropagation();
         updateContextMenuData(

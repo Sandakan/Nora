@@ -1,12 +1,11 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
 import Button from '../Button';
 import Checkbox from '../Checkbox';
 
-export default (props: { songIds: string[] }) => {
+const DeleteSongFromSystemConfirmPrompt = (props: { songIds: string[] }) => {
   const { currentSongData } = React.useContext(AppContext);
   const { addNewNotifications, changePromptMenuData, clearAudioPlayerData } =
     React.useContext(AppUpdateContext);
@@ -49,7 +48,9 @@ export default (props: { songIds: string[] }) => {
         <p>{t('deleteSongFromSystemConfirmPrompt.modificationNotice')}</p>
         <ul className="ml-4 list-inside list-disc">
           {songsData.map((song) => (
-            <li className="text-sm font-light">{song.path}</li>
+            <li key={song.songId} className="text-sm font-light">
+              {song.path}
+            </li>
           ))}
         </ul>
       </div>
@@ -113,3 +114,5 @@ export default (props: { songIds: string[] }) => {
     </>
   );
 };
+
+export default DeleteSongFromSystemConfirmPrompt;

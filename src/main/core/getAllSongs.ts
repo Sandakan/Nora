@@ -38,7 +38,7 @@ const getAllSongs = async (
         addedDate: songInfo.addedDate,
         isAFavorite: songInfo.isAFavorite,
         isBlacklisted,
-      } satisfies AudioInfo;
+      } as AudioInfo;
     });
 
     result = paginateData(audioData, sortType, paginatingData);

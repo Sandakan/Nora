@@ -1,8 +1,8 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { AppContext } from 'renderer/contexts/AppContext';
-import log from 'renderer/utils/log';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
+import log from '../../utils/log';
 
 import Button from '../Button';
 import MainContainer from '../MainContainer';

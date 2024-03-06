@@ -1,5 +1,5 @@
 /* eslint-disable lines-between-class-members */
-import calculateTime from 'renderer/utils/calculateTime';
+import calculateTime from '../utils/calculateTime';
 
 class ListeningDataSession {
   songId: string;

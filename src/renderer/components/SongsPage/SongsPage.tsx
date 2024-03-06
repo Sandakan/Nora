@@ -3,12 +3,12 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FixedSizeList as List } from 'react-window';
 // import InfiniteLoader from 'react-window-infinite-loader';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { AppContext } from 'renderer/contexts/AppContext';
-import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
-import storage from 'renderer/utils/localStorage';
-import debounce from 'renderer/utils/debounce';
-import i18n from 'renderer/i18n';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
+import useSelectAllHandler from '../../hooks/useSelectAllHandler';
+import storage from '../../utils/localStorage';
+import debounce from '../../utils/debounce';
+import i18n from '../../i18n';
 
 import Song from './Song';
 import Button from '../Button';
@@ -349,7 +349,7 @@ const SongsPage = () => {
                 iconName="more_horiz"
                 clickHandler={(e) => {
                   e.stopPropagation();
-                  const button = e.currentTarget || e.target;
+                  const button = e.currentTarget;
                   const { x, y } = button.getBoundingClientRect();
                   updateContextMenuData(
                     true,

@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { isAnErrorWithCode } from './isAnErrorWithCode';
 
 const getDirSize = async (dir: string) => {
   try {
@@ -28,8 +29,7 @@ const getDirSize = async (dir: string) => {
 
     return reducedSizes;
   } catch (error) {
-    if (error instanceof Error && 'code' in error && error.code === 'ENOENT')
-      return 0;
+    if (isAnErrorWithCode(error) && error.code === 'ENOENT') return 0;
     console.log(
       'Error occurred when resolving promise to calculate dir size of a directory.',
     );

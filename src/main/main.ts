@@ -2,7 +2,7 @@
 /* eslint-disable default-param-last */
 /* eslint-disable no-use-before-define */
 /* eslint-disable global-require */
-import path from 'path';
+// import path from 'path';
 import os from 'os';
 import {
   app,
@@ -26,6 +26,7 @@ import {
 } from 'electron';
 import debug from 'electron-debug';
 import 'dotenv/config';
+// import { pathToFileURL } from 'url';
 
 // import * as Sentry from '@sentry/electron';
 import log from './log';
@@ -36,7 +37,7 @@ import {
   resetAppCache,
   setUserData,
 } from './filesystem';
-import { resolveHtmlPath } from './utils/util';
+// import { resolveHtmlPath } from './utils/util';
 import { version, appPreferences } from '../../package.json';
 import { savePendingMetadataUpdates } from './updateSongId3Tags';
 import addWatchersToFolders from './fs/addWatchersToFolders';
@@ -61,6 +62,9 @@ import checkForUpdates from './update';
 import { clearDiscordRpcActivity } from './other/discordRPC';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
+declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
+declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
+
 const DEFAULT_APP_PROTOCOL = 'nora';
 
 const MAIN_WINDOW_MIN_SIZE_X = 700;
@@ -107,6 +111,9 @@ let currentSongPath: string;
 let powerSaveBlockerId: number | null;
 
 // / / / / / / INITIALIZATION / / / / / / /
+if (require('electron-squirrel-startup')) {
+  app.quit();
+}
 
 // Behaviour on second instance for parent process
 const hasSingleInstanceLock = app.requestSingleInstanceLock();
@@ -142,30 +149,26 @@ const APP_INFO = {
     os: os.release(),
     architechture: os.arch(),
     platform: os.platform(),
-    totalMemory: `${os.totalmem()} (~${Math.floor(
-      os.totalmem() / (1024 * 1024 * 1024),
-    )} GB)`,
+    totalMemory: `${os.totalmem()} (~${Math.floor(os.totalmem() / (1024 * 1024 * 1024))} GB)`,
   },
 };
 
 log(`STARTING UP NORA`, APP_INFO, 'WARN');
 
-const installExtensions = async () => {
-  const installer = require('electron-devtools-installer');
-  const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-  const extensions = ['REACT_DEVELOPER_TOOLS'];
+// const installExtensions = async () => {
+// 	const installer = require('electron-devtools-installer');
+// 	const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
+// 	const extensions = ['REACT_DEVELOPER_TOOLS'];
 
-  return installer
-    .default(
-      extensions.map((name) => installer[name]),
-      forceDownload,
-    )
-    .catch((err: unknown) =>
-      log(
-        `====== ERROR OCCURRED WHEN TRYING TO INSTALL EXTENSIONS TO DEVTOOLS ======\nERROR : ${err}`,
-      ),
-    );
-};
+// 	return installer
+// 		.default(
+// 			extensions.map((name) => installer[name]),
+// 			forceDownload
+// 		)
+// 		.catch((err: unknown) =>
+// 			log(`====== ERROR OCCURRED WHEN TRYING TO INSTALL EXTENSIONS TO DEVTOOLS ======\nERROR : ${err}`)
+// 		);
+// };
 
 const getBackgroundColor = () => {
   const userData = getUserData();
@@ -174,7 +177,7 @@ const getBackgroundColor = () => {
 };
 
 const createWindow = async () => {
-  if (IS_DEVELOPMENT) installExtensions();
+  // if (IS_DEVELOPMENT) installExtensions();
 
   mainWindow = new BrowserWindow({
     width: 1280,
@@ -183,9 +186,7 @@ const createWindow = async () => {
     minWidth: 700,
     title: 'Nora',
     webPreferences: {
-      preload: app.isPackaged
-        ? path.join(__dirname, 'preload.js')
-        : path.join(__dirname, '../../.erb/dll/preload.js'),
+      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
     visualEffectState: 'followWindow',
     roundedCorners: true,
@@ -196,7 +197,7 @@ const createWindow = async () => {
     show: false,
   });
 
-  mainWindow.loadURL(resolveHtmlPath('index.html'));
+  mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
   mainWindow.once('ready-to-show', () => {
     if (app.hasSingleInstanceLock()) {
       log('Started checking for new songs during the application start.');
@@ -206,8 +207,8 @@ const createWindow = async () => {
       manageWindowPositionInMonitor();
     }
   });
-  mainWindow.webContents.setWindowOpenHandler((edata: { url: string }) => {
-    shell.openExternal(edata.url);
+  mainWindow.webContents.setWindowOpenHandler((data: { url: string }) => {
+    shell.openExternal(data.url);
     return { action: 'deny' };
   });
 };
@@ -216,11 +217,11 @@ const createWindow = async () => {
 //   {
 //     scheme: 'nora',
 //     privileges: {
-//       // standard: true,
-//       // secure: true,
-//       stream: true, // Add this if you intend to use the protocol for streaming i.e. in video/audio html tags.
-//       // supportFetchAPI: true, // Add this if you want to use fetch with this protocol.
-//       // corsEnabled: true, // Add this if you need to enable cors for this protocol.
+//       standard: true,
+//       secure: true,
+//       supportFetchAPI: true,
+//       stream: true,
+//       bypassCSP: true,
 //     },
 //   },
 // ]);
@@ -245,6 +246,29 @@ app
 
     // protocol.handle('nora', registerFileProtocol);
 
+    // protocol.handle('nora', async (req) => {
+    //   const { href } = new URL(req.url);
+
+    //   const urlWithQueries = href.replace(
+    //     /nora:[/\\]{1,2}localfiles[/\\]{1,2}/gm,
+    //     '',
+    //   );
+
+    //   try {
+    //     const [url] = urlWithQueries.split('?');
+    //     const res = await net.fetch(pathToFileURL(url).toString());
+    //     console.log('c');
+    //     return res;
+    //   } catch (error) {
+    //     log(
+    //       `====== ERROR OCCURRED WHEN TRYING TO LOCATE A RESOURCE IN THE SYSTEM. =======\nREQUEST : ${urlWithQueries}\nERROR : ${error}`,
+    //     );
+    //     return new Response('bad', {
+    //       status: 400,
+    //       headers: { 'content-type': 'text/html' },
+    //     });
+    //   }
+    // });
     protocol.registerFileProtocol('nora', registerFileProtocol);
 
     tray = new Tray(appIcon);
@@ -295,9 +319,7 @@ app
     app.on('will-finish-launching', () => {
       crashReporter.start({ uploadToServer: false });
       log(
-        `APP STARTUP COMMAND LINE ARGUMENTS\nARGS : [ ${process.argv.join(
-          ', ',
-        )} ]`,
+        `APP STARTUP COMMAND LINE ARGUMENTS\nARGS : [ ${process.argv.join(', ')} ]`,
       );
     });
 
@@ -413,11 +435,9 @@ export function dataUpdateEvent(
 ) {
   if (dataUpdateEventTimeOutId) clearTimeout(dataUpdateEventTimeOutId);
   log(
-    `Data update event fired with updated '${dataType}'.${
-      data.length > 0 || message ? '\n' : ''
-    }${data.length > 0 ? `DATA : ${data}; ` : ''}${
-      message ? `MESSAGE : ${data}; ` : ''
-    }`,
+    `Data update event fired with updated '${dataType}'.${data.length > 0 || message ? '\n' : ''}${
+      data.length > 0 ? `DATA : ${data}; ` : ''
+    }${message ? `MESSAGE : ${data}; ` : ''}`,
   );
   addEventsToCache(dataType, data, message);
   dataUpdateEventTimeOutId = setTimeout(() => {
@@ -445,10 +465,12 @@ function addEventsToCache(
       return undefined;
     }
   }
-  return dataEventsCache.push({
+
+  const obj = {
     dataType,
     eventData: data.length > 0 || message ? [{ data, message }] : [],
-  } satisfies DataUpdateEvent);
+  } as DataUpdateEvent;
+  return dataEventsCache.push(obj);
 }
 
 // async function registerFileProtocol(req: Request) {
@@ -634,7 +656,7 @@ export const addToSongsOutsideLibraryData = (data: SongOutsideLibraryData) =>
 export const updateSongsOutsideLibraryData = (
   songidOrPath: string,
   data: SongOutsideLibraryData,
-) => {
+): void => {
   for (let i = 0; i < songsOutsideLibraryData.length; i += 1) {
     if (
       songsOutsideLibraryData[i].path === songidOrPath ||

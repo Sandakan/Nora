@@ -1,6 +1,6 @@
 // import React from 'react';
-// import { AppContext } from 'renderer/contexts/AppContext';
-// import useBooleanStateChange from 'renderer/hooks/useBooleanStateChange';
+// import { AppContext } from '../../contexts/AppContext';
+// import useBooleanStateChange from '../../hooks/useBooleanStateChange';
 
 // const ThrottlingIndicator = () => {
 //   const { isThrottling } = React.useContext(AppContext);

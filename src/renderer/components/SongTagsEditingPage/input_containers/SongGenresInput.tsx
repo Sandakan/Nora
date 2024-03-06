@@ -3,7 +3,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useTranslation } from 'react-i18next';
 
-import Button from 'renderer/components/Button';
+import Button from '../../Button';
 
 type Props = {
   songGenres?: {

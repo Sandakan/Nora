@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppUpdateContext } from '../contexts/AppUpdateContext';
 
 import Button, { ButtonProps } from './Button';
 

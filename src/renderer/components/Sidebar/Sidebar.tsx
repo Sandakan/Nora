@@ -6,9 +6,9 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable import/prefer-default-export */
 import React, { useContext } from 'react';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { AppContext } from 'renderer/contexts/AppContext';
-import i18n from 'renderer/i18n';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
+import i18n from '../../i18n';
 
 import ErrorBoundary from '../ErrorBoundary';
 import SideBarItem from './SideBarItem';
@@ -99,7 +99,7 @@ const Sidebar = React.memo(() => {
   }, []);
 
   const clickHandler = React.useCallback(
-    (id: string, pageData?: any) => {
+    (id: string, pageData?: PageData) => {
       changeCurrentActivePage(id as PageTitles, pageData);
       addActiveToSidebarItem(id);
     },

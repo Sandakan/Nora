@@ -1,6 +1,6 @@
 import React from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
 
 const Notification = (props: AppNotification) => {
@@ -26,9 +26,8 @@ const Notification = (props: AppNotification) => {
 
   const notificationPanelStyles: any = {};
   // notificationPanelStyles['--loading-bar-width'] = `${dimensions.width - 35}px`;
-  notificationPanelStyles['--loading-bar-progress'] = `${
-    (progressBarData.value / progressBarData.total) * 100
-  }%`;
+  notificationPanelStyles['--loading-bar-progress'] =
+    `${(progressBarData.value / progressBarData.total) * 100}%`;
   notificationPanelStyles['--notification-duration'] = `${delay}ms`;
 
   const removeNotification = React.useCallback(() => {

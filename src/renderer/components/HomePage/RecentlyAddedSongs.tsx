@@ -1,8 +1,8 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import React, { ForwardedRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import SongCard from '../SongsPage/SongCard';
 import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 import SecondaryContainer from '../SecondaryContainer';
@@ -84,9 +84,7 @@ const RecentlyAddedSongs = React.forwardRef(
             </div>
             <div
               style={{
-                gridTemplateColumns: `repeat(${Math.floor(
-                  noOfVisibleSongs / 2,
-                )},1fr)`,
+                gridTemplateColumns: `repeat(${Math.floor(noOfVisibleSongs / 2)},1fr)`,
               }}
               className="songs-container grid max-w-full grid-rows-2 gap-2 pr-2"
             >

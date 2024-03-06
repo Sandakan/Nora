@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext } from '../../contexts/AppContext';
 
 import Img from '../Img';
 
@@ -59,9 +59,11 @@ const MultipleArtworksCover = (props: Props) => {
 
           return (
             <Img
-              className={`inline shadow-xl ${
-                type === 1 ? 'rounded-md' : 'rounded-sm'
-              } ${cond && 'col-span-2 row-span-2 !rounded-md'} ${imgClassName}`}
+              // eslint-disable-next-line react/no-array-index-key
+              key={i}
+              className={`inline shadow-xl ${type === 1 ? 'rounded-md' : 'rounded-sm'} ${
+                cond && 'col-span-2 row-span-2 !rounded-md'
+              } ${imgClassName}`}
               src={artwork}
               fallbackSrc={DefaultImgCover}
               enableImgFadeIns={enableImgFadeIns}

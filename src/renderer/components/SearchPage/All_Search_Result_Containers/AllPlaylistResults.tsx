@@ -1,11 +1,11 @@
 import React, { CSSProperties } from 'react';
 import { FixedSizeGrid as Grid } from 'react-window';
-import useResizeObserver from 'renderer/hooks/useResizeObserver';
-import { Playlist } from 'renderer/components/PlaylistsPage/Playlist';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
-import SecondaryContainer from 'renderer/components/SecondaryContainer';
+import useResizeObserver from '../../../hooks/useResizeObserver';
+import { Playlist } from '../../PlaylistsPage/Playlist';
+import { AppContext } from '../../../contexts/AppContext';
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
+import SecondaryContainer from '../../SecondaryContainer';
 
 type Props = { playlistData: Playlist[] };
 

@@ -1,9 +1,9 @@
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext } from '../../../contexts/AppContext';
 
-import LyricLine from 'renderer/components/LyricsPage/LyricLine';
+import LyricLine from '../../LyricsPage/LyricLine';
 
 type Props = { isLyricsVisible: boolean };
 

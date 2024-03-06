@@ -2,11 +2,11 @@
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { VariableSizeList as List } from 'react-window';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { AppContext } from 'renderer/contexts/AppContext';
-import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
-import useResizeObserver from 'renderer/hooks/useResizeObserver';
-import debounce from 'renderer/utils/debounce';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
+import useSelectAllHandler from '../../hooks/useSelectAllHandler';
+import useResizeObserver from '../../hooks/useResizeObserver';
+import debounce from '../../utils/debounce';
 
 import Song from '../SongsPage/Song';
 import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';

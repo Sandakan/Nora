@@ -3,10 +3,10 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-// import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
-import roundTo from 'renderer/utils/roundTo';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+// import { SongPositionContext } from '../../contexts/SongPositionContext';
+import roundTo from '../../utils/roundTo';
 import { delay, syncedLyricsRegex } from './LyricsPage';
 import LyricsProgressBar from './LyricsProgressBar';
 
@@ -33,7 +33,7 @@ const LyricLine = (props: LyricProp) => {
   const { index, lyric, syncedLyrics, isAutoScrolling = true } = props;
 
   const handleLyricsActivity = React.useCallback(
-    (e: Event) => {
+    (e: CustomEvent) => {
       if ('detail' in e && !Number.isNaN(e.detail)) {
         const songPosition = e.detail as number;
 
@@ -129,9 +129,7 @@ const LyricLine = (props: LyricProp) => {
       }
     >
       <div
-        className={`flex flex-row flex-wrap ${
-          playerType !== 'full' && 'items-center justify-center'
-        }`}
+        className={`flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'}`}
       >
         {lyricString}
       </div>

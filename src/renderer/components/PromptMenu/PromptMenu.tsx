@@ -3,7 +3,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
 import Button from '../Button';
 import MainContainer from '../MainContainer';

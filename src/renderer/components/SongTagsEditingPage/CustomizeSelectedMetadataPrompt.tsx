@@ -3,8 +3,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import isLyricsSynced from 'main/utils/isLyricsSynced';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import isLyricsSynced from '../../../common/isLyricsSynced';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import Button from '../Button';
 import Checkbox from '../Checkbox';
@@ -55,11 +55,13 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
   const [showLyrics, setShowLyrics] = React.useState(false);
 
   const artworkComponents = React.useMemo(() => {
-    return artworkPaths?.map((artwork) => {
+    return artworkPaths?.map((artwork, i) => {
       const isSelectedArtwork = selectedArtwork === artwork;
 
       return (
         <div
+          // eslint-disable-next-line react/no-array-index-key
+          key={i}
           className={`group mr-4 flex cursor-pointer flex-col items-center rounded-lg p-4 hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50 ${
             isSelectedArtwork &&
             'bg-background-color-2 shadow-lg dark:bg-dark-background-color-2'

@@ -1,9 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import Dropdown, { DropdownOption } from 'renderer/components/Dropdown';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import i18n from 'renderer/i18n';
+import Dropdown, { DropdownOption } from '../../Dropdown';
+import { AppContext } from '../../../contexts/AppContext';
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import i18n from '../../../i18n';
 
 const supportedLanguagesDropdownOptions: DropdownOption<LanguageCodes>[] = [
   { label: `English`, value: 'en' },

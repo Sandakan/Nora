@@ -1,11 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Artist } from 'renderer/components/ArtistPage/Artist';
-import Button from 'renderer/components/Button';
-import SecondaryContainer from 'renderer/components/SecondaryContainer';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { AppContext } from 'renderer/contexts/AppContext';
-import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import { Artist } from '../../ArtistPage/Artist';
+import Button from '../../Button';
+import SecondaryContainer from '../../SecondaryContainer';
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import { AppContext } from '../../../contexts/AppContext';
+import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 
 type Props = {
   artists: Artist[];

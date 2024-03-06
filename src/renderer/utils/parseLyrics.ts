@@ -2,7 +2,7 @@ import isLyricsSynced, {
   extendedSyncedLyricsLineRegex,
   isAnExtendedSyncedLyricsLine,
   syncedLyricsRegex,
-} from 'main/utils/isLyricsSynced';
+} from '../../common/isLyricsSynced';
 import roundTo from './roundTo';
 
 const isNotALyricsMetadataLine = (line: string) =>

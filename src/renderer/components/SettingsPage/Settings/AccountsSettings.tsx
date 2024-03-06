@@ -1,10 +1,10 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppContext } from '../../../contexts/AppContext';
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 
-import Button from 'renderer/components/Button';
-import Checkbox from 'renderer/components/Checkbox';
+import Button from '../../Button';
+import Checkbox from '../../Checkbox';
 
 import LastFMIcon from '../../../../../assets/images/webp/last-fm-logo.webp';
 

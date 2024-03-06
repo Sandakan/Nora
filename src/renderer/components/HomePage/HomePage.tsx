@@ -1,9 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import useResizeObserver from 'renderer/hooks/useResizeObserver';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import useResizeObserver from '../../hooks/useResizeObserver';
 
-import roundTo from 'renderer/utils/roundTo';
+import roundTo from '../../utils/roundTo';
 import storage from '../../utils/localStorage';
 
 import ErrorPrompt from '../ErrorPrompt';
@@ -373,10 +373,7 @@ const HomePage = () => {
                   {
                     id: Math.random().toString(),
                     delay: 5 * 60 * 1000,
-                    content: `This is a notification with a number ${roundTo(
-                      Math.random(),
-                      2,
-                    )}`,
+                    content: `This is a notification with a number ${roundTo(Math.random(), 2)}`,
                     iconName: 'notifications_active',
                     type: 'WITH_PROGRESS_BAR',
                   },

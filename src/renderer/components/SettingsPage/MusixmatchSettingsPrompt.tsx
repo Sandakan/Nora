@@ -1,8 +1,8 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import log from 'renderer/utils/log';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import log from '../../utils/log';
 
 import Button from '../Button';
 import Hyperlink from '../Hyperlink';

@@ -1,9 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext } from '../../contexts/AppContext';
 
-import storage from 'renderer/utils/localStorage';
-import debounce from 'renderer/utils/debounce';
+import storage from '../../utils/localStorage';
+import debounce from '../../utils/debounce';
 
 import Checkbox from '../Checkbox';
 

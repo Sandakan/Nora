@@ -2,8 +2,8 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
 import Button from '../Button';
 import VolumeSlider from '../VolumeSlider';
 
@@ -131,7 +131,7 @@ const OtherSongControlsContainer = () => {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            const element = e.currentTarget || e.target;
+            const element = e.currentTarget;
             const coords = element.getBoundingClientRect();
             openOtherSettingsContextMenu(coords.x, coords.y);
           }}

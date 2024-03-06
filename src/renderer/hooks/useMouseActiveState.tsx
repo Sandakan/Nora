@@ -1,5 +1,5 @@
 import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
-import debounce from 'renderer/utils/debounce';
+import debounce from '../utils/debounce';
 
 const defaultOptions = {
   idleTimeout: 5000,

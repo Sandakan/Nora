@@ -2,9 +2,9 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import Dropdown, { DropdownOption } from 'renderer/components/Dropdown';
-import { AppContext } from 'renderer/contexts/AppContext';
-import storage from 'renderer/utils/localStorage';
+import Dropdown, { DropdownOption } from '../../Dropdown';
+import { AppContext } from '../../../contexts/AppContext';
+import storage from '../../../utils/localStorage';
 
 import Button from '../../Button';
 import Checkbox from '../../Checkbox';

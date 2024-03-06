@@ -1,9 +1,8 @@
 /* eslint-disable react/no-unescaped-entities */
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import storage from 'renderer/utils/localStorage';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import storage from '../../utils/localStorage';
 import Button from '../Button';
 import Checkbox from '../Checkbox';
 

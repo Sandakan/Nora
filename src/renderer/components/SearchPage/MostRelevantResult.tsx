@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import Img from '../Img';
 import Button from '../Button';

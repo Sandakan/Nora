@@ -1,11 +1,11 @@
 /* eslint-disable promise/catch-or-return */
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
-import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
-import hasDataChanged, { isDataChanged } from 'renderer/utils/hasDataChanged';
+import useNetworkConnectivity from '../../hooks/useNetworkConnectivity';
+import hasDataChanged, { isDataChanged } from '../../utils/hasDataChanged';
 
 import Button from '../Button';
 import MainContainer from '../MainContainer';

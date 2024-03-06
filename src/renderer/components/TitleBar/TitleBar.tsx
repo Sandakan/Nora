@@ -1,6 +1,5 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
-import { getVersionInfoFromString } from 'renderer/utils/isLatestVersion';
+import { getVersionInfoFromString } from '../../utils/isLatestVersion';
 import { AppContext } from '../../contexts/AppContext';
 
 import { version } from '../../../../package.json';

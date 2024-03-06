@@ -2,7 +2,7 @@
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import Button from '../Button';
 import Img from '../Img';

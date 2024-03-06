@@ -1,15 +1,14 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import Button from 'renderer/components/Button';
-import Hyperlink from 'renderer/components/Hyperlink';
-import { LyricData } from 'renderer/components/LyricsEditingPage/LyricsEditingPage';
-import { syncedLyricsRegex } from 'renderer/components/LyricsPage/LyricsPage';
-import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
-import parseLyrics from 'renderer/utils/parseLyrics';
+import { AppContext } from '../../../contexts/AppContext';
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import Button from '../../Button';
+import Hyperlink from '../../Hyperlink';
+import { LyricData } from '../../LyricsEditingPage/LyricsEditingPage';
+import { syncedLyricsRegex } from '../../LyricsPage/LyricsPage';
+import useNetworkConnectivity from '../../../hooks/useNetworkConnectivity';
+import parseLyrics from '../../../utils/parseLyrics';
 
 type CurrentLyricsTYpe = 'synced' | 'unsynced';
 

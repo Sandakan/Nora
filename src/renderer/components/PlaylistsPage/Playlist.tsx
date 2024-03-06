@@ -4,8 +4,8 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import ConfirmDeletePlaylists from './ConfirmDeletePlaylistsPrompt';
@@ -225,9 +225,7 @@ export const Playlist = (props: PlaylistProp) => {
       },
       {
         label: t(
-          `playlist.${
-            props.isArtworkAvailable ? 'changeArtwork' : 'addArtwork'
-          }`,
+          `playlist.${props.isArtworkAvailable ? 'changeArtwork' : 'addArtwork'}`,
         ),
         iconName: 'photo_camera',
         handlerFunction: () => {
@@ -317,11 +315,7 @@ export const Playlist = (props: PlaylistProp) => {
       },
       {
         label: t(
-          `playlist.${
-            isMultipleSelectionsEnabled
-              ? 'deleteSelectedPlaylists'
-              : 'deletePlaylist_one'
-          }`,
+          `playlist.${isMultipleSelectionsEnabled ? 'deleteSelectedPlaylists' : 'deletePlaylist_one'}`,
         ),
         iconName: 'delete_outline',
         handlerFunction: () => {

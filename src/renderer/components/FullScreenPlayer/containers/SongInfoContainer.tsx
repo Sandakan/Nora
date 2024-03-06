@@ -1,12 +1,12 @@
 import React from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
 import { useTranslation } from 'react-i18next';
-import calculateTime from 'renderer/utils/calculateTime';
+import { AppContext } from '../../../contexts/AppContext';
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import calculateTime from '../../../utils/calculateTime';
 
-import Button from 'renderer/components/Button';
-import Img from 'renderer/components/Img';
-import UpNextSongPopup from 'renderer/components/SongsControlsContainer/UpNextSongPopup';
+import Button from '../../Button';
+import Img from '../../Img';
+import UpNextSongPopup from '../../SongsControlsContainer/UpNextSongPopup';
 
 import DefaultSongCover from '../../../../../assets/images/webp/song_cover_default.webp';
 

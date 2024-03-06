@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppContext } from '../contexts/AppContext';
+import { AppUpdateContext } from '../contexts/AppUpdateContext';
 
 const slice = (arr: string[], start: number, end: number) => {
   if (start > end) {

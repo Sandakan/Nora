@@ -4,8 +4,8 @@
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import Img from '../Img';
 import SongArtist from '../SongsPage/SongArtist';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { ParsedSimilarTrack } from '../../../@types/last_fm_similar_tracks_api';
 import OpenLinkConfirmPrompt from '../OpenLinkConfirmPrompt';
 

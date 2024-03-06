@@ -1,7 +1,7 @@
 /* eslint-disable react/destructuring-assignment */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import log from 'renderer/utils/log';
+import log from '../utils/log';
 import BugImg from '../../../assets/images/svg/Bug Fixed_Monochromatic.svg';
 import Button from './Button';
 

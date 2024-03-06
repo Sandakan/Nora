@@ -1,5 +1,5 @@
 import React, { Suspense, useContext } from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext } from '../contexts/AppContext';
 import SuspenseLoader from './SuspenseLoader';
 
 const HomePage = React.lazy(() => import('./HomePage/HomePage'));

@@ -1,9 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import Img from 'renderer/components/Img';
-import SecondaryContainer from 'renderer/components/SecondaryContainer';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { AppContext } from 'renderer/contexts/AppContext';
+import Img from '../../Img';
+import SecondaryContainer from '../../SecondaryContainer';
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import { AppContext } from '../../../contexts/AppContext';
 import { MostRelevantResult } from '../MostRelevantResult';
 
 type Props = { searchResults: SearchResult };

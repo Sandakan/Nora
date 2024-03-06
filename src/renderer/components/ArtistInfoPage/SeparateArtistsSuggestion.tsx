@@ -1,9 +1,9 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import storage from 'renderer/utils/localStorage';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import storage from '../../utils/localStorage';
 
 import Button from '../Button';
 
@@ -156,9 +156,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
                 iconName={
                   isMessageVisible ? 'arrow_drop_up' : 'arrow_drop_down'
                 }
-                tooltipLabel={`common.${
-                  isMessageVisible ? 'hideSuggestion' : 'showSuggestion'
-                }`}
+                tooltipLabel={`common.${isMessageVisible ? 'hideSuggestion' : 'showSuggestion'}`}
                 clickHandler={(e) => {
                   e.preventDefault();
                   setIsMessageVisible((state) => !state);

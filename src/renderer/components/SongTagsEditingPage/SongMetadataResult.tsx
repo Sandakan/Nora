@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import isLyricsSynced from 'main/utils/isLyricsSynced';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import isLyricsSynced from '../../../common/isLyricsSynced';
 
 import Button from '../Button';
 import Img from '../Img';
@@ -160,7 +160,6 @@ function SongMetadataResult(props: SongMetadataResultProp) {
   ]);
 
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
     <div className="mb-2 flex h-32 min-h-[5rem] w-full cursor-pointer items-center justify-between rounded-md bg-background-color-2/70 p-1 backdrop-blur-md hover:bg-background-color-2 dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2">
       <div className="flex h-full max-w-[70%]">
         <div className="img-container m-1 mr-4 overflow-hidden rounded-md">

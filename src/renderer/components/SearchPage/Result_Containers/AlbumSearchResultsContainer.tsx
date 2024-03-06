@@ -1,11 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Album } from 'renderer/components/AlbumsPage/Album';
-import Button from 'renderer/components/Button';
-import SecondaryContainer from 'renderer/components/SecondaryContainer';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { AppContext } from 'renderer/contexts/AppContext';
-import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import { Album } from '../../AlbumsPage/Album';
+import Button from '../../Button';
+import SecondaryContainer from '../../SecondaryContainer';
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import { AppContext } from '../../../contexts/AppContext';
+import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 
 type Props = {
   albums: Album[];

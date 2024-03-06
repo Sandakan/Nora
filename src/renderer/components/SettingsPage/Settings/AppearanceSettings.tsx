@@ -3,9 +3,9 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext } from '../../../contexts/AppContext';
 
-import Img from 'renderer/components/Img';
+import Img from '../../Img';
 
 import HomeImgLight from '../../../../../assets/images/webp/home-skeleton-light.webp';
 import HomeImgDark from '../../../../../assets/images/webp/home-skeleton-dark.webp';

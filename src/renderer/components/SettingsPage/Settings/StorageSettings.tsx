@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import Button from 'renderer/components/Button';
-import calculateElapsedTime from 'renderer/utils/calculateElapsedTime';
-import parseByteSizes from 'renderer/utils/parseByteSizes';
+import Button from '../../Button';
+import calculateElapsedTime from '../../../utils/calculateElapsedTime';
+import parseByteSizes from '../../../utils/parseByteSizes';
 
 const StorageSettings = () => {
   const { t } = useTranslation();

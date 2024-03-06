@@ -4,7 +4,7 @@ import isLyricsSynced, {
   extendedSyncedLyricsLineRegex,
   isAnExtendedSyncedLyricsLine,
   syncedLyricsRegex,
-} from './isLyricsSynced';
+} from '../../common/isLyricsSynced';
 
 export type SyncedLyricsInput = NonNullable<
   NodeID3Tags['synchronisedLyrics']

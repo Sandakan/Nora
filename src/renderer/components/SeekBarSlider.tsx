@@ -1,9 +1,9 @@
 import React from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
-import calculateTime from 'renderer/utils/calculateTime';
-import debounce from 'renderer/utils/debounce';
+import { AppContext } from '../contexts/AppContext';
+import { AppUpdateContext } from '../contexts/AppUpdateContext';
+import { SongPositionContext } from '../contexts/SongPositionContext';
+import calculateTime from '../utils/calculateTime';
+import debounce from '../utils/debounce';
 
 type Props = {
   id: string;

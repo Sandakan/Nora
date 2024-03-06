@@ -1,12 +1,12 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { AppContext } from 'renderer/contexts/AppContext';
-import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
+import useNetworkConnectivity from '../../hooks/useNetworkConnectivity';
 
-import isLatestVersion from 'renderer/utils/isLatestVersion';
-import storage from 'renderer/utils/localStorage';
+import isLatestVersion from '../../utils/isLatestVersion';
+import storage from '../../utils/localStorage';
 
 import Version from './Version';
 import Checkbox from '../Checkbox';
@@ -23,7 +23,7 @@ const ReleaseNotesPrompt = () => {
 
   const { isOnline } = useNetworkConnectivity();
   const [releaseNotes, setReleaseNotes] = React.useState<Changelog>(
-    localReleseNotes satisfies Changelog,
+    localReleseNotes as Changelog,
   );
 
   const latestUpdatedInfo = React.useMemo(() => {

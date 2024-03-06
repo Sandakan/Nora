@@ -9,6 +9,7 @@ import log from '../log';
 import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
 import getAssetPath from '../utils/getAssetPath';
 import { generateRandomId } from '../utils/randomId';
+import { isAnErrorWithCode } from '../utils/isAnErrorWithCode';
 // import { timeEnd, timeStart } from '../utils/measureTimeUsage';
 
 const createArtworks = async (
@@ -117,7 +118,7 @@ export const storeArtworks = async (
 };
 
 const manageArtworkRemovalErrors = (err: Error) => {
-  if ('code' in err && err.code === 'ENOENT') return log(err);
+  if (isAnErrorWithCode(err) && err.code === 'ENOENT') return log(err);
   throw err;
 };
 

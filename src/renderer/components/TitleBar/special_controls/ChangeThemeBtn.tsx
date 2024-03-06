@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import Button from 'renderer/components/Button';
-import { AppContext } from 'renderer/contexts/AppContext';
+import Button from '../../Button';
+import { AppContext } from '../../../contexts/AppContext';
 
 const ChangeThemeBtn = () => {
   const { isDarkMode, bodyBackgroundImage } = React.useContext(AppContext);

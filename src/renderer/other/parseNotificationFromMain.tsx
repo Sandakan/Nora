@@ -1,4 +1,4 @@
-import i18n from 'renderer/i18n';
+import i18n from '../i18n';
 
 interface AppNotificationConfig extends Partial<AppNotification> {
   // to prevent having an empty array of triggers

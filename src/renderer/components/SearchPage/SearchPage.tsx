@@ -1,12 +1,12 @@
 /* eslint-disable jsx-a11y/no-autofocus */
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { AppContext } from 'renderer/contexts/AppContext';
-import useResizeObserver from 'renderer/hooks/useResizeObserver';
-import debounce from 'renderer/utils/debounce';
-import storage from 'renderer/utils/localStorage';
-import i18n from 'renderer/i18n';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
+import useResizeObserver from '../../hooks/useResizeObserver';
+import debounce from '../../utils/debounce';
+import storage from '../../utils/localStorage';
+import i18n from '../../i18n';
 
 import SearchResultsFilter, { SearchResultFilter } from './SearchResultsFilter';
 import MainContainer from '../MainContainer';

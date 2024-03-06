@@ -1,4 +1,4 @@
-import Img from 'renderer/components/Img';
+import Img from '../../Img';
 
 import DefaultAlbumArtwork from '../../../../../assets/images/webp/album_cover_default.webp';
 

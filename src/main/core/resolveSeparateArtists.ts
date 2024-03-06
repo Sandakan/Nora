@@ -106,7 +106,7 @@ export const resolveSeparateArtists = async (
                   artworkPath: getArtistArtworkPath(x.artworkName).artworkPath,
                   onlineArtworkPaths: x.onlineArtworkPaths,
                 };
-              }) satisfies typeof songTags.artists),
+              }) as typeof songTags.artists),
             );
           }
 

@@ -1,14 +1,12 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import { AppContext } from '../../../contexts/AppContext';
 
-import calculateElapsedTime from 'renderer/utils/calculateElapsedTime';
-import storage from 'renderer/utils/localStorage';
+import calculateElapsedTime from '../../../utils/calculateElapsedTime';
+import storage from '../../../utils/localStorage';
 
-import OpenLinkConfirmPrompt from 'renderer/components/OpenLinkConfirmPrompt';
+import OpenLinkConfirmPrompt from '../../OpenLinkConfirmPrompt';
 import {
   version,
   author,

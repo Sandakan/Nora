@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import Button from 'renderer/components/Button';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import Button from '../../Button';
+import { AppContext } from '../../../contexts/AppContext';
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 
 type Props = { isLyricsVisible: boolean };
 
@@ -63,11 +63,7 @@ const TitleBarContainer = (props: Props) => {
           }
           iconClassName="material-icons-round text-xl"
           tooltipLabel={t(
-            `miniPlayer.${
-              userData?.preferences.isMiniPlayerAlwaysOnTop
-                ? 'alwaysOnTopEnabled'
-                : 'alwaysOnTopDisabled'
-            }`,
+            `miniPlayer.${userData?.preferences.isMiniPlayerAlwaysOnTop ? 'alwaysOnTopEnabled' : 'alwaysOnTopDisabled'}`,
           )}
           removeFocusOnClick
           clickHandler={toggleAlwaysOnTop}

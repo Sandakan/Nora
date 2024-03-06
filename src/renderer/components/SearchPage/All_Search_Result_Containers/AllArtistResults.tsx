@@ -1,11 +1,11 @@
 import React, { CSSProperties } from 'react';
 import { FixedSizeGrid as Grid } from 'react-window';
-import useResizeObserver from 'renderer/hooks/useResizeObserver';
-import { Artist } from 'renderer/components/ArtistPage/Artist';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
-import SecondaryContainer from 'renderer/components/SecondaryContainer';
+import useResizeObserver from '../../../hooks/useResizeObserver';
+import { Artist } from '../../ArtistPage/Artist';
+import { AppContext } from '../../../contexts/AppContext';
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
+import SecondaryContainer from '../../SecondaryContainer';
 
 type Props = { artistData: Artist[] };
 

@@ -5,12 +5,12 @@
 import React, { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FixedSizeGrid as Grid } from 'react-window';
-import useResizeObserver from 'renderer/hooks/useResizeObserver';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { AppContext } from 'renderer/contexts/AppContext';
-import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
-import storage from 'renderer/utils/localStorage';
-import i18n from 'renderer/i18n';
+import useResizeObserver from '../../hooks/useResizeObserver';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
+import useSelectAllHandler from '../../hooks/useSelectAllHandler';
+import storage from '../../utils/localStorage';
+import i18n from '../../i18n';
 
 import Dropdown, { DropdownOption } from '../Dropdown';
 import MainContainer from '../MainContainer';
@@ -175,9 +175,7 @@ const GenresPage = () => {
             <div className="other-controls-container flex">
               <Button
                 label={t(
-                  `common.${
-                    isMultipleSelectionEnabled ? 'unselectAll' : 'select'
-                  }`,
+                  `common.${isMultipleSelectionEnabled ? 'unselectAll' : 'select'}`,
                 )}
                 className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                 iconName={
@@ -203,9 +201,7 @@ const GenresPage = () => {
           </div>
         )}
         <div
-          className={`genres-container flex h-full flex-wrap ${
-            !(genresData && genresData.length > 0) && 'hidden'
-          }`}
+          className={`genres-container flex h-full flex-wrap ${!(genresData && genresData.length > 0) && 'hidden'}`}
           ref={containerRef}
         >
           {genresData && genresData.length > 0 && (

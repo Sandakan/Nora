@@ -1,13 +1,13 @@
 import React from 'react';
 import { useTranslation, Trans } from 'react-i18next';
-import storage from 'renderer/utils/localStorage';
+import storage from '../../../utils/localStorage';
 
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import { AppContext } from '../../../contexts/AppContext';
 
-import Button from 'renderer/components/Button';
-import Checkbox from 'renderer/components/Checkbox';
-import Dropdown, { DropdownOption } from 'renderer/components/Dropdown';
+import Button from '../../Button';
+import Checkbox from '../../Checkbox';
+import Dropdown, { DropdownOption } from '../../Dropdown';
 import MusixmatchSettingsPrompt from '../MusixmatchSettingsPrompt';
 import MusixmatchDisclaimerPrompt from '../MusixmatchDisclaimerPrompt';
 import i18n from '../../../i18n';

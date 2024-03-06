@@ -1,10 +1,9 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable react/no-array-index-key */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/self-closing-comp */
 import React, { useContext } from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext } from '../../contexts/AppContext';
 import Notification from './Notification';
 import NotificationClearAllButton from './NotificationClearAllButton';
 

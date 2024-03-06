@@ -1,8 +1,8 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import Button from 'renderer/components/Button';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import Button from './Button';
+import { AppUpdateContext } from '../contexts/AppUpdateContext';
 
 import packageFile from '../../../package.json';
 
@@ -10,7 +10,7 @@ type Props = { filePath: string };
 const { supportedMusicExtensions } = packageFile.appPreferences;
 
 const supportedExtensionComponents = supportedMusicExtensions.map((ext) => (
-  <span className="mx-2">
+  <span className="mx-2" key={ext}>
     &bull; <span className="hover:underline">{ext}</span>
   </span>
 ));

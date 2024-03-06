@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import i18n from 'renderer/i18n';
+import i18n from '../../i18n';
 
 import ShortcutButton from './ShortcutButton';
 
@@ -184,10 +184,10 @@ const AppShortcutsPrompt = () => {
 
   const shortcutCategoryComponents = React.useMemo(
     () =>
-      shortcutData.map((category) => {
+      shortcutData.map((category, categoryIndex) => {
         const { shortcutCategoryTitle, shortcuts } = category;
 
-        const shortcutComponents = shortcuts.map((shortcut) => {
+        const shortcutComponents = shortcuts.map((shortcut, i) => {
           const { label, keys } = shortcut;
 
           const shortcutKeyComponents = keys.map((key, index) => (
@@ -201,7 +201,11 @@ const AppShortcutsPrompt = () => {
           ));
 
           return (
-            <div className="shortcut mb-4 flex w-[45%] items-center justify-between p-2">
+            <div
+              // eslint-disable-next-line react/no-array-index-key
+              key={i}
+              className="shortcut mb-4 flex w-[45%] items-center justify-between p-2"
+            >
               <div className="shortcut-label opacity-75">{label}</div>
               <div className="shortcut-keys flex items-center">
                 {shortcutKeyComponents}
@@ -211,7 +215,8 @@ const AppShortcutsPrompt = () => {
         });
 
         return (
-          <li className="shortcut-category mt-8">
+          // eslint-disable-next-line react/no-array-index-key
+          <li key={categoryIndex} className="shortcut-category mt-8">
             <div className="shortcut-category-title text-2xl text-font-color-highlight dark:text-dark-font-color-highlight">
               {shortcutCategoryTitle}
             </div>

@@ -1,5 +1,6 @@
 import { MakeDirectoryOptions, Mode, PathLike, mkdirSync } from 'fs';
 import { mkdir } from 'fs/promises';
+import { isAnErrorWithCode } from './isAnErrorWithCode';
 
 type MkDirOptions =
   | Mode
@@ -13,7 +14,7 @@ export const makeDirSync = (dir: PathLike, options?: MkDirOptions) => {
     mkdirSync(dir, options);
     return { exist: false };
   } catch (error) {
-    if (error instanceof Error && 'code' in error && error.code === 'EEXIST')
+    if (isAnErrorWithCode(error) && error.code === 'EEXIST')
       return { exist: true };
     throw error;
   }
@@ -25,7 +26,7 @@ const makeDir = async (dir: PathLike, options?: MkDirOptions) => {
 
     return { exist: false };
   } catch (error) {
-    if (error instanceof Error && 'code' in error && error.code === 'EEXIST')
+    if (isAnErrorWithCode(error) && error.code === 'EEXIST')
       return { exist: true };
     throw error;
   }

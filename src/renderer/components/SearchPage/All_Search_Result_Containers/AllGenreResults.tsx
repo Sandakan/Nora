@@ -1,11 +1,11 @@
 import React, { CSSProperties } from 'react';
 import { FixedSizeGrid as Grid } from 'react-window';
-import Genre from 'renderer/components/GenresPage/Genre';
-import SecondaryContainer from 'renderer/components/SecondaryContainer';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import useResizeObserver from 'renderer/hooks/useResizeObserver';
-import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import Genre from '../../GenresPage/Genre';
+import SecondaryContainer from '../../SecondaryContainer';
+import { AppContext } from '../../../contexts/AppContext';
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import useResizeObserver from '../../../hooks/useResizeObserver';
+import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 
 type Props = { genreData: Genre[] };
 

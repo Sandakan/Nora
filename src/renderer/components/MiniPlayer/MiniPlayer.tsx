@@ -1,11 +1,9 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable no-nested-ternary */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import DefaultSongCover from '../../../../assets/images/webp/song_cover_default.webp';
 import Button from '../Button';
 import Img from '../Img';
@@ -78,11 +76,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           alt="Song Cover"
           className={`h-full w-full object-cover transition-[filter] delay-100 duration-200 ease-in-out group-focus-within:blur-[2px] group-focus-within:brightness-75 group-hover:blur-[2px] group-hover:brightness-75 group-focus:blur-[4px] group-focus:brightness-75 ${
             isLyricsVisible ? '!blur-[2px] !brightness-[.25]' : ''
-          } ${
-            !isCurrentSongPlaying
-              ? 'blur-[2px] brightness-75'
-              : 'blur-0 brightness-100'
-          }`}
+          } ${!isCurrentSongPlaying ? 'blur-[2px] brightness-75' : 'blur-0 brightness-100'}`}
         />
       </div>
       <LyricsContainer isLyricsVisible={isLyricsVisible} />

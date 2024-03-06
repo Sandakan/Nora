@@ -78,7 +78,7 @@ const getArtistArtworksFromNet = async (artist: SavableArtist) => {
           matchPath: ['name'],
           returnType: ReturnTypeEnums.FIRST_CLOSEST_MATCH,
         },
-      ) as DeezerArtistInfo | null;
+      ) as unknown as DeezerArtistInfo | null;
 
       if (closestResult) {
         const picture_xl = getAValidDeezerArtistImage(

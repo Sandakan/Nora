@@ -1,11 +1,11 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { FixedSizeList as List } from 'react-window';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import useResizeObserver from 'renderer/hooks/useResizeObserver';
-import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
-import storage from 'renderer/utils/localStorage';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import useResizeObserver from '../../hooks/useResizeObserver';
+import useSelectAllHandler from '../../hooks/useSelectAllHandler';
+import storage from '../../utils/localStorage';
 
 import Button from '../Button';
 import Dropdown from '../Dropdown';
@@ -251,7 +251,7 @@ const MusicFolderInfoPage = () => {
                 iconName="more_horiz"
                 clickHandler={(e) => {
                   e.stopPropagation();
-                  const button = e.currentTarget || e.target;
+                  const button = e.currentTarget;
                   const { x, y } = button.getBoundingClientRect();
                   updateContextMenuData(true, otherOptions, x + 10, y + 50);
                 }}
@@ -271,9 +271,7 @@ const MusicFolderInfoPage = () => {
                   toggleMultipleSelections(!isMultipleSelectionEnabled, 'songs')
                 }
                 tooltipLabel={t(
-                  `common.${
-                    isMultipleSelectionEnabled ? 'unselectAll' : 'select'
-                  }`,
+                  `common.${isMultipleSelectionEnabled ? 'unselectAll' : 'select'}`,
                 )}
               />
               <Button

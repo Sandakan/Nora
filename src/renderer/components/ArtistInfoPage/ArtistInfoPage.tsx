@@ -2,12 +2,12 @@
 import React, { CSSProperties, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FixedSizeList as List, FixedSizeGrid as Grid } from 'react-window';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import calculateTimeFromSeconds from 'renderer/utils/calculateTimeFromSeconds';
-import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
-import useResizeObserver from 'renderer/hooks/useResizeObserver';
-import clamp from 'renderer/utils/clamp';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
+import useSelectAllHandler from '../../hooks/useSelectAllHandler';
+import useResizeObserver from '../../hooks/useResizeObserver';
+import clamp from '../../utils/clamp';
 
 import { Album } from '../AlbumsPage/Album';
 import Song from '../SongsPage/Song';
@@ -490,10 +490,10 @@ const ArtistInfoPage = () => {
           <Button
             className="absolute bottom-4 right-2 !m-0 flex rounded-full !border-0 bg-background-color-1 !p-3 shadow-xl outline-1 -outline-offset-[6px] focus-visible:!outline dark:bg-dark-background-color-2"
             tooltipLabel={t(
-              `artistInfoPage.${
-                artistData?.isAFavorite ? `dislikeArtist` : `likeArtist`
-              }`,
-              { name: artistData?.name },
+              `artistInfoPage.${artistData?.isAFavorite ? `dislikeArtist` : `likeArtist`}`,
+              {
+                name: artistData?.name,
+              },
             )}
             iconName="favorite"
             iconClassName={`!text-3xl !leading-none ${
@@ -663,6 +663,7 @@ const ArtistInfoPage = () => {
                   : 'text-font-color-black dark:text-font-color-white'
               } mb-4 mt-1 pr-4 text-2xl`}
               otherItems={[
+                // eslint-disable-next-line react/jsx-key
                 <p className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
                   {isMultipleSelectionEnabled &&
                   multipleSelectionsData.selectionType === 'songs'
@@ -684,7 +685,7 @@ const ArtistInfoPage = () => {
                   iconName: 'more_horiz',
                   clickHandler: (e) => {
                     e.stopPropagation();
-                    const button = e.currentTarget || e.target;
+                    const button = e.currentTarget;
                     const { x, y } = button.getBoundingClientRect();
                     updateContextMenuData(
                       true,
@@ -727,11 +728,7 @@ const ArtistInfoPage = () => {
                               'songs',
                             ),
                           label: t(
-                            `common.${
-                              isMultipleSelectionEnabled
-                                ? 'unselectAll'
-                                : 'select'
-                            }`,
+                            `common.${isMultipleSelectionEnabled ? 'unselectAll' : 'select'}`,
                           ),
                         },
                       ],

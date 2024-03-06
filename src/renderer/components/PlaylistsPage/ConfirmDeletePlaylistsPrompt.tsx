@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
 
 interface ConfirmDeletePlaylistProp {
@@ -75,7 +75,9 @@ const ConfirmDeletePlaylists = (props: ConfirmDeletePlaylistProp) => {
           <p>{t('confirmDeletePlaylistsPrompt.modificationNotice')}</p>
           <ul className="ml-4 list-inside list-disc">
             {playlistsData.map((playlist) => (
-              <li className="text-sm font-light">{playlist.name}</li>
+              <li className="text-sm font-light" key={playlist.playlistId}>
+                {playlist.name}
+              </li>
             ))}
           </ul>
         </div>

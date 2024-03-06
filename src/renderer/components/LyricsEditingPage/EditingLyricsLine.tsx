@@ -1,8 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
+import { SongPositionContext } from '../../contexts/SongPositionContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import {
   EditingLyricsLineData,
@@ -120,14 +120,11 @@ const EditingLyricsLine = (props: Props) => {
     <span
       className={`scale-75 cursor-pointer text-center text-5xl font-medium opacity-50 transition-[opacity,transform] ${
         shouldHighlight ? '!scale-100 !opacity-100 group-hover:opacity-75' : ''
-      } ${
-        typeof content.text === 'object' &&
-        'flex flex-wrap items-center justify-center text-wrap'
-      }`}
+      } ${typeof content.text === 'object' && 'flex flex-wrap items-center justify-center text-wrap'}`}
     >
       {typeof content.text === 'string'
         ? content.text
-        : content.text.map((word) => {
+        : content.text.map((word, i) => {
             const {
               text: wordText,
               end: wordEnd = 0,
@@ -144,6 +141,8 @@ const EditingLyricsLine = (props: Props) => {
               wordEnd > position;
             return (
               <div
+                // eslint-disable-next-line react/no-array-index-key
+                key={i}
                 className={`mr-3 flex flex-col items-start opacity-50 hover:opacity-100 ${
                   ((isPlaying && isWordInRange) ||
                     (!isPlaying && isWordActive)) &&

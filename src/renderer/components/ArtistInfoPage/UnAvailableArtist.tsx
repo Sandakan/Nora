@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import OpenLinkConfirmPrompt from '../OpenLinkConfirmPrompt';
 import { SimilarArtist } from '../../../@types/last_fm_artist_info_api';
 

@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import calculateTime from 'renderer/utils/calculateTime';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import calculateTime from '../../utils/calculateTime';
 import Button from '../Button';
 import SeekBarSlider from '../SeekBarSlider';
 

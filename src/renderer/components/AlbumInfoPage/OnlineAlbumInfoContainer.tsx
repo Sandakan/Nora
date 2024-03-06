@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext } from '../../contexts/AppContext';
 import Biography from '../Biography/Biography';
 import { LastFMAlbumInfo } from '../../../@types/last_fm_album_info_api';
 import TitleContainer from '../TitleContainer';

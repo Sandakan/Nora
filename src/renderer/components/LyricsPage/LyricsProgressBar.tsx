@@ -10,7 +10,7 @@ const LyricsProgressBar = (props: Props) => {
   const [progress, setProgress] = React.useState('0%');
 
   const handleLyricsActivity = React.useCallback(
-    (e: Event) => {
+    (e: CustomEvent) => {
       if ('detail' in e && typeof e.detail === 'number') {
         const songPosition = e.detail as number;
         setProgress(

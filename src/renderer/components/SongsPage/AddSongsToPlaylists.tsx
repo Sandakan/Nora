@@ -2,7 +2,7 @@
 /* eslint-disable react/no-unescaped-entities */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Checkbox from '../Checkbox';
 import Button from '../Button';
 import Img from '../Img';
@@ -118,7 +118,6 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
         .addSongsToPlaylist(playlist.playlistId, songIds)
         .catch((err) => console.error(err));
     });
-    // eslint-disable-next-line promise/catch-or-return
     Promise.all(promises)
       .then((res) => {
         console.log(res);

@@ -2,8 +2,8 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Img from '../Img';
 import DefaultGenreCover from '../../../../assets/images/webp/genre-cover-default.webp';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
@@ -310,14 +310,9 @@ const Genre = (props: GenreProp) => {
         isMultipleSelectionEnabled &&
         multipleSelectionsData.selectionType === 'genre' &&
         'border-4 border-transparent'
-      } ${
-        isAMultipleSelection &&
-        '!border-font-color-highlight dark:!border-dark-font-color-highlight'
-      }`}
+      } ${isAMultipleSelection && '!border-font-color-highlight dark:!border-dark-font-color-highlight'}`}
       style={{
-        backgroundColor: `rgb(${
-          backgroundColor ? backgroundColor.rgb.join(',') : '23,23,23'
-        })`,
+        backgroundColor: `rgb(${backgroundColor ? backgroundColor.rgb.join(',') : '23,23,23'})`,
       }}
       onClick={(e) => {
         if (e.getModifierState('Shift') === true && selectAllHandler)

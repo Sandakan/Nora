@@ -1,9 +1,9 @@
 /* eslint-disable react/no-array-index-key */
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext } from '../../../contexts/AppContext';
 
-import LyricsSource from 'renderer/components/LyricsPage/LyricsSource';
+import LyricsSource from '../../LyricsPage/LyricsSource';
 import LyricLine from '../../LyricsPage/LyricLine';
 
 type Props = {

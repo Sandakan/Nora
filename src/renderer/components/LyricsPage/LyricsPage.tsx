@@ -2,11 +2,11 @@
 /* eslint-disable react/no-array-index-key */
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import debounce from 'renderer/utils/debounce';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
-import { AppContext } from 'renderer/contexts/AppContext';
-import useNetworkConnectivity from 'renderer/hooks/useNetworkConnectivity';
+import debounce from '../../utils/debounce';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { SongPositionContext } from '../../contexts/SongPositionContext';
+import { AppContext } from '../../contexts/AppContext';
+import useNetworkConnectivity from '../../hooks/useNetworkConnectivity';
 
 import LyricLine from './LyricLine';
 import LyricsSource from './LyricsSource';
@@ -472,11 +472,7 @@ const LyricsPage = () => {
                     <Button
                       key={5}
                       tooltipLabel={t(
-                        `currentQueuePage.${
-                          isAutoScrolling
-                            ? 'disableAutoScrolling'
-                            : 'enableAutoScrolling'
-                        }`,
+                        `currentQueuePage.${isAutoScrolling ? 'disableAutoScrolling' : 'enableAutoScrolling'}`,
                       )}
                       pendingAnimationOnDisabled
                       className="show-online-lyrics-btn !text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"

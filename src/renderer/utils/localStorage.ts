@@ -1,4 +1,4 @@
-import localStorageMigrationData from 'renderer/other/localStorageMigrations';
+import localStorageMigrationData from '../other/localStorageMigrations';
 import debounce from './debounce';
 
 import { version } from '../../../package.json';

@@ -1,11 +1,11 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { SongPositionContext } from 'renderer/contexts/SongPositionContext';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { SongPositionContext } from '../../contexts/SongPositionContext';
 
-import roundTo from 'renderer/utils/roundTo';
+import roundTo from '../../utils/roundTo';
 
 import MainContainer from '../MainContainer';
 import EditingLyricsLine from './EditingLyricsLine';
@@ -386,7 +386,7 @@ const LyricsEditingPage = () => {
             isDisabled={!isTheEditingSongTheCurrSong}
             clickHandler={(e) => {
               e.stopPropagation();
-              const button = e.currentTarget || e.target;
+              const button = e.currentTarget;
               const { x, y } = button.getBoundingClientRect();
               updateContextMenuData(
                 true,
@@ -425,9 +425,7 @@ const LyricsEditingPage = () => {
           />
           <Button
             label={t(
-              `lyricsEditingPage.${
-                isPlaying ? 'stopAndEditLyrics' : 'playLyrics'
-              }`,
+              `lyricsEditingPage.${isPlaying ? 'stopAndEditLyrics' : 'playLyrics'}`,
             )}
             className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
             iconName={isPlaying ? 'edit' : 'play_arrow'}

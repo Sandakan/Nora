@@ -1,6 +1,6 @@
 import { Trans, useTranslation } from 'react-i18next';
 
-import Hyperlink from 'renderer/components/Hyperlink';
+import Hyperlink from '../Hyperlink';
 
 const MusixmatchDisclaimerPrompt = () => {
   const { t } = useTranslation();

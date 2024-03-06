@@ -4,7 +4,7 @@
 /* eslint-disable react/destructuring-assignment */
 
 import React from 'react';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 const ContextMenuItem = (props: ContextMenuItem) => {
   const { updateContextMenuData } = React.useContext(AppUpdateContext);

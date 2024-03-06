@@ -1,12 +1,12 @@
 import React from 'react';
 import { FixedSizeList as List } from 'react-window';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import useResizeObserver from 'renderer/hooks/useResizeObserver';
-import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import { AppContext } from '../../../contexts/AppContext';
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import useResizeObserver from '../../../hooks/useResizeObserver';
+import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 
-import Song from 'renderer/components/SongsPage/Song';
-import SecondaryContainer from 'renderer/components/SecondaryContainer';
+import Song from '../../SongsPage/Song';
+import SecondaryContainer from '../../SecondaryContainer';
 
 type Props = { songData: SongData[] };
 

@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppContext } from '../contexts/AppContext';
+import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import Checkbox from './Checkbox';
 
 type Props = {

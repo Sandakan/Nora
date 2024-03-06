@@ -1,4 +1,4 @@
-import Img from 'renderer/components/Img';
+import Img from '../../Img';
 
 import DefaultArtistArtwork from '../../../../../assets/images/webp/artist_cover_default.webp';
 

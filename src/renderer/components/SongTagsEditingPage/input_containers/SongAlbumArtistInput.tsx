@@ -1,9 +1,8 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 
-import Button from 'renderer/components/Button';
-import Img from 'renderer/components/Img';
+import Button from '../../Button';
+import Img from '../../Img';
 import SongArtistInputResult from './SongArtistInputResult';
 
 type Props = {

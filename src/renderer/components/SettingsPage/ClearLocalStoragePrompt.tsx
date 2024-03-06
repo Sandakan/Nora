@@ -1,10 +1,10 @@
 import { Trans, useTranslation } from 'react-i18next';
 
-import storage from 'renderer/utils/localStorage';
+import storage from '../../utils/localStorage';
 
 import Button from '../Button';
 
-export default () => {
+const ClearLocalStoragePrompt = () => {
   const { t } = useTranslation();
 
   const { resetLocalStorage } = storage;
@@ -44,3 +44,5 @@ export default () => {
     </>
   );
 };
+
+export default ClearLocalStoragePrompt;

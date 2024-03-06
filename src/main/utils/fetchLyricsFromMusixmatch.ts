@@ -7,7 +7,7 @@ import {
   MusixmatchLyricsMetadata,
 } from '../../@types/musixmatch_lyrics_api';
 import log from '../log';
-import isLyricsSynced from './isLyricsSynced';
+import isLyricsSynced from '../../common/isLyricsSynced';
 import { repository, version } from '../../../package.json';
 import parseSongMetadataFromMusixmatchApiData from './parseSongMetadataFromMusixmatchApiData';
 
@@ -61,9 +61,7 @@ export const parseMusicmatchDataFromLyrics = async (
       if (metadata.album) output.push(`[al:${metadata.album}]`);
       // [length:How long the song is]
       output.push(
-        `[length:${Math.floor(metadata.duration / 60)}:${
-          metadata.duration % 60
-        }]`,
+        `[length:${Math.floor(metadata.duration / 60)}:${metadata.duration % 60}]`,
       );
     }
 
@@ -87,10 +85,7 @@ export const parseMusicmatchDataFromLyrics = async (
         if (subtitle_language) output.push(`[lang:${subtitle_language}]`);
         if (lyrics_copyright) {
           output.push(
-            `[copyright:Musixmatch Lyrics. ${lyrics_copyright.replaceAll(
-              '\n',
-              '',
-            )}]`,
+            `[copyright:Musixmatch Lyrics. ${lyrics_copyright.replaceAll('\n', '')}]`,
           );
           metadata.copyright = lyrics_copyright;
         }

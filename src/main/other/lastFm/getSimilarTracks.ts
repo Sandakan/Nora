@@ -36,7 +36,7 @@ export const getAudioInfoFromSavableSongData = (
     addedDate: song.addedDate,
     isAFavorite: song.isAFavorite,
     isBlacklisted,
-  } satisfies AudioInfo;
+  } as AudioInfo;
 };
 
 const parseSimilarTracks = (

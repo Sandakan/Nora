@@ -1,9 +1,9 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import SecondaryContainer from '../SecondaryContainer';
 import SongCard from '../SongsPage/SongCard';

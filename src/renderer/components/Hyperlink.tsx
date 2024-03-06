@@ -1,6 +1,6 @@
 import React from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppContext } from '../contexts/AppContext';
+import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import OpenLinkConfirmPrompt from './OpenLinkConfirmPrompt';
 
 interface HyperlinkProp {

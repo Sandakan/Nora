@@ -1,16 +1,16 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import Button from 'renderer/components/Button';
-import Dropdown from 'renderer/components/Dropdown';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import hasDataChanged from 'renderer/utils/hasDataChanged';
+import Button from '../../Button';
+import Dropdown from '../../Dropdown';
+import { AppContext } from '../../../contexts/AppContext';
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import hasDataChanged from '../../../utils/hasDataChanged';
 import {
   equalizerBandHertzData,
   equalizerPresetsData,
-} from 'renderer/other/equalizerData';
-import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from 'renderer/utils/localStorage';
-import i18n from 'renderer/i18n';
+} from '../../../other/equalizerData';
+import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '../../../utils/localStorage';
+import i18n from '../../../i18n';
 
 import EqualierBand from './EqualierBand';
 
@@ -34,7 +34,7 @@ const equalizerPresets: EqualizerPresetDropdownOptions[] = [
 ];
 
 type Action =
-  | { type?: undefined; data: Equalizer }
+  | { type: undefined; data: Equalizer }
   | { type: keyof Equalizer; data: number };
 
 function reducer(state: Equalizer, action: Action): Equalizer {
@@ -125,7 +125,7 @@ const EqualizerSettings = () => {
 
               for (const preset of equalizerPresets) {
                 if (preset.value === presetValue && preset.preset) {
-                  dispatch({ data: preset.preset });
+                  dispatch({ type: undefined, data: preset.preset });
                 }
               }
             }}
@@ -137,7 +137,7 @@ const EqualizerSettings = () => {
             clickHandler={() => {
               const defaultPreset = equalizerPresets[1].preset;
               if (defaultPreset) {
-                dispatch({ data: defaultPreset });
+                dispatch({ type: undefined, data: defaultPreset });
               }
             }}
           />

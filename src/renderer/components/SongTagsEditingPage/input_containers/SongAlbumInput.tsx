@@ -1,8 +1,7 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import { useTranslation } from 'react-i18next';
 
-import Button from 'renderer/components/Button';
-import Img from 'renderer/components/Img';
+import Button from '../../Button';
+import Img from '../../Img';
 import SongAlbumInputResult from './SongAlbumInputResult';
 
 import DefaultSongArtwork from '../../../../../assets/images/webp/song_cover_default.webp';
@@ -113,6 +112,7 @@ const SongAlbumInput = (props: Props) => {
           <div className="album-results-container mt-4 max-h-60 overflow-y-auto rounded-xl border-2 border-background-color-2 dark:border-dark-background-color-2">
             {albumResults.map((x) => (
               <SongAlbumInputResult
+                key={x.albumId}
                 albumData={x}
                 updateAlbumKeyword={updateAlbumKeyword}
                 updateSongInfo={updateSongInfo}

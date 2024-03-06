@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import storage from 'renderer/utils/localStorage';
-import { AppContext } from 'renderer/contexts/AppContext';
+import storage from '../../../utils/localStorage';
+import { AppContext } from '../../../contexts/AppContext';
 import Dropdown from '../../Dropdown';
 
 const DefaultPageSettings = () => {

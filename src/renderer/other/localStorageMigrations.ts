@@ -1,7 +1,7 @@
 import {
   LOCAL_STORAGE_DEFAULT_TEMPLATE,
   MigrationData,
-} from 'renderer/utils/localStorage';
+} from '../utils/localStorage';
 
 const localStorageMigrationData: MigrationData = {
   '2.4.2-stable': (storage) => {

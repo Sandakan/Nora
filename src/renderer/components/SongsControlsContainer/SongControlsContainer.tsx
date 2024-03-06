@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext } from '../../contexts/AppContext';
 import ErrorBoundary from '../ErrorBoundary';
 import CurrentlyPlayingSongInfoContainer from './CurrentlyPlayingSongInfoContainer';
 import OtherSongControlsContainer from './OtherSongControlsContainer';

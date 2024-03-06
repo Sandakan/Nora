@@ -1,7 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppContext } from '../../contexts/AppContext';
 
+// eslint-disable-next-line import/namespace
 import { Artist } from '../ArtistPage/Artist';
 import UnAvailableArtist from './UnAvailableArtist';
 import TitleContainer from '../TitleContainer';

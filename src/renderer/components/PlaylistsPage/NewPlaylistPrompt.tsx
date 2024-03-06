@@ -4,7 +4,7 @@
 /* eslint-disable promise/catch-or-return */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import PlaylistDefaultCover from '../../../../assets/images/webp/playlist_cover_default.webp';
 import Button from '../Button';
 import Img from '../Img';
@@ -14,7 +14,7 @@ interface NewPlaylistPromptProp {
   currentPlaylists: Playlist[];
 }
 
-export default (props: NewPlaylistPromptProp) => {
+const NewPlaylistPrompt = (props: NewPlaylistPromptProp) => {
   const { changePromptMenuData, addNewNotifications } =
     React.useContext(AppUpdateContext);
   const { t } = useTranslation();
@@ -109,3 +109,5 @@ export default (props: NewPlaylistPromptProp) => {
     </div>
   );
 };
+
+export default NewPlaylistPrompt;

@@ -1,7 +1,7 @@
 /* eslint-disable react/no-array-index-key */
 import { useTranslation } from 'react-i18next';
 
-import calculateElapsedTime from 'renderer/utils/calculateElapsedTime';
+import calculateElapsedTime from '../../utils/calculateElapsedTime';
 
 import packageFile from '../../../../package.json';
 import VersionNote, { VersionNoteProps } from './VersionNote';

@@ -3,8 +3,8 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import AddSongsToPlaylists from './AddSongsToPlaylists';

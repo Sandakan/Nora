@@ -1,12 +1,12 @@
 /* eslint-disable react/no-array-index-key */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import Button from 'renderer/components/Button';
-import Genre from 'renderer/components/GenresPage/Genre';
-import SecondaryContainer from 'renderer/components/SecondaryContainer';
-import { AppContext } from 'renderer/contexts/AppContext';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import useSelectAllHandler from 'renderer/hooks/useSelectAllHandler';
+import Button from '../../Button';
+import Genre from '../../GenresPage/Genre';
+import SecondaryContainer from '../../SecondaryContainer';
+import { AppContext } from '../../../contexts/AppContext';
+import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 
 type Props = {
   genres: Genre[];

@@ -1,9 +1,9 @@
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import calculateTime from 'renderer/utils/calculateTime';
-import isLyricsSynced from 'main/utils/isLyricsSynced';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import calculateTime from '../../utils/calculateTime';
+import isLyricsSynced from '../../../common/isLyricsSynced';
 
 import { ExtendedEditingLyricsLineData } from './LyricsEditingPage';
 import Button from '../Button';

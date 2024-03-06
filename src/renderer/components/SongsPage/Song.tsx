@@ -5,8 +5,8 @@
 import React, { ForwardedRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DraggableProvided } from 'react-beautiful-dnd';
-import { AppUpdateContext } from 'renderer/contexts/AppUpdateContext';
-import { AppContext } from 'renderer/contexts/AppContext';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import AddSongsToPlaylists from './AddSongsToPlaylists';

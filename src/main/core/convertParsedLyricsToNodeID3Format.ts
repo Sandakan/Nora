@@ -33,7 +33,7 @@ const convertParsedLyricsToNodeID3Format = (
           shortText,
           synchronisedText,
         },
-      ] satisfies SynchronisedLyrics;
+      ] as SynchronisedLyrics;
       return convertedLyrics;
     }
     return prevSyncedLyrics;
