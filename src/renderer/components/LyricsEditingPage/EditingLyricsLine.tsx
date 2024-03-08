@@ -1,7 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
-import { SongPositionContext } from '../../contexts/SongPositionContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import {
@@ -10,6 +9,7 @@ import {
   LyricsLineData,
 } from './LyricsEditingPage';
 import Button from '../Button';
+import EditingLyricWord from './EditingLyricWord';
 
 interface Props extends ExtendedEditingLyricsLineData {
   isPlaying: boolean;
@@ -46,7 +46,6 @@ const reducerFunction = (
 };
 
 const EditingLyricsLine = (props: Props) => {
-  const { songPosition } = React.useContext(SongPositionContext);
   const { localStorageData } = React.useContext(AppContext);
   const { updateSongPosition } = React.useContext(AppUpdateContext);
   const { t } = useTranslation();
@@ -66,6 +65,7 @@ const EditingLyricsLine = (props: Props) => {
     end,
   } as EditingLyricsLineData);
   const [isEditing, setIsEditing] = React.useState(false);
+  const [shouldHighlight, setShouldHighlight] = React.useState(false);
 
   const lineRef = React.useRef<HTMLDivElement>(null);
   const isActiveRef = React.useRef(false);
@@ -91,30 +91,50 @@ const EditingLyricsLine = (props: Props) => {
     });
   }, [end, text, start]);
 
-  const isInRange =
-    start !== 0 && end !== 0 && start < songPosition && end > songPosition;
+  const handleLyricsActivity = React.useCallback(
+    (e: Event) => {
+      if ('detail' in e && !Number.isNaN(e.detail)) {
+        const songPosition = e.detail as number;
 
-  const shouldBeScrolledWhenPlaying = isPlaying && isInRange;
-  const shouldBeScrolledWhenActive = !isPlaying && isActive;
+        const isInRange =
+          start !== 0 &&
+          end !== 0 &&
+          start < songPosition &&
+          end > songPosition;
 
-  const shouldHighlight =
-    (!isPlaying && isActive) || shouldBeScrolledWhenPlaying;
+        const shouldBeScrolledWhenPlaying = isPlaying && isInRange;
+        const shouldBeScrolledWhenActive = !isPlaying && isActive;
+        const shouldBeHighlighted =
+          (!isPlaying && isActive) || shouldBeScrolledWhenPlaying;
+
+        setShouldHighlight(shouldBeHighlighted);
+        if (
+          lineRef.current &&
+          (shouldBeScrolledWhenPlaying || shouldBeScrolledWhenActive)
+        ) {
+          if (!isActiveRef.current) {
+            isActiveRef.current = true;
+            lineRef.current.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+              inline: 'center',
+            });
+          }
+        } else isActiveRef.current = false;
+      }
+    },
+    [end, isActive, isPlaying, start],
+  );
 
   React.useEffect(() => {
-    if (
-      lineRef.current &&
-      (shouldBeScrolledWhenPlaying || shouldBeScrolledWhenActive)
-    ) {
-      if (!isActiveRef.current) {
-        isActiveRef.current = true;
-        lineRef.current.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-          inline: 'center',
-        });
-      }
-    } else isActiveRef.current = false;
-  }, [shouldBeScrolledWhenActive, shouldBeScrolledWhenPlaying]);
+    document.addEventListener('player/positionChange', handleLyricsActivity);
+
+    return () =>
+      document.removeEventListener(
+        'player/positionChange',
+        handleLyricsActivity,
+      );
+  }, [handleLyricsActivity]);
 
   const lyricsLineComponent = !isEditing ? (
     <span
@@ -124,36 +144,10 @@ const EditingLyricsLine = (props: Props) => {
     >
       {typeof content.text === 'string'
         ? content.text
-        : content.text.map((word, i) => {
-            const {
-              text: wordText,
-              end: wordEnd = 0,
-              start: wordStart = 0,
-              isActive: isWordActive,
-            } = word;
-
-            const TRANSITION_DURATION = 0;
-            const position = songPosition - TRANSITION_DURATION;
-            const isWordInRange =
-              wordStart !== 0 &&
-              wordEnd !== 0 &&
-              wordStart < position &&
-              wordEnd > position;
-            return (
-              <div
-                // eslint-disable-next-line react/no-array-index-key
-                key={i}
-                className={`mr-3 flex flex-col items-start opacity-50 hover:opacity-100 ${
-                  ((isPlaying && isWordInRange) ||
-                    (!isPlaying && isWordActive)) &&
-                  '!opacity-100'
-                }`}
-              >
-                <span className="text-xs">{wordStart}</span>
-                <span>{wordText}</span>
-              </div>
-            );
-          })}
+        : content.text.map((word, i) => (
+            // eslint-disable-next-line react/no-array-index-key
+            <EditingLyricWord isPlaying={isPlaying} wordData={word} key={i} />
+          ))}
     </span>
   ) : undefined;
 

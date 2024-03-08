@@ -2,7 +2,7 @@
 /* eslint-disable default-param-last */
 /* eslint-disable no-use-before-define */
 /* eslint-disable global-require */
-// import path from 'path';
+import path from 'path';
 import os from 'os';
 import {
   app,
@@ -37,7 +37,7 @@ import {
   resetAppCache,
   setUserData,
 } from './filesystem';
-// import { resolveHtmlPath } from './utils/util';
+import { resolveHtmlPath } from './utils/util';
 import { version, appPreferences } from '../../package.json';
 import { savePendingMetadataUpdates } from './updateSongId3Tags';
 import addWatchersToFolders from './fs/addWatchersToFolders';
@@ -111,9 +111,6 @@ let currentSongPath: string;
 let powerSaveBlockerId: number | null;
 
 // / / / / / / INITIALIZATION / / / / / / /
-if (require('electron-squirrel-startup')) {
-  app.quit();
-}
 
 // Behaviour on second instance for parent process
 const hasSingleInstanceLock = app.requestSingleInstanceLock();
@@ -155,20 +152,22 @@ const APP_INFO = {
 
 log(`STARTING UP NORA`, APP_INFO, 'WARN');
 
-// const installExtensions = async () => {
-// 	const installer = require('electron-devtools-installer');
-// 	const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-// 	const extensions = ['REACT_DEVELOPER_TOOLS'];
+const installExtensions = async () => {
+  const installer = require('electron-devtools-installer');
+  const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
+  const extensions = ['REACT_DEVELOPER_TOOLS'];
 
-// 	return installer
-// 		.default(
-// 			extensions.map((name) => installer[name]),
-// 			forceDownload
-// 		)
-// 		.catch((err: unknown) =>
-// 			log(`====== ERROR OCCURRED WHEN TRYING TO INSTALL EXTENSIONS TO DEVTOOLS ======\nERROR : ${err}`)
-// 		);
-// };
+  return installer
+    .default(
+      extensions.map((name) => installer[name]),
+      forceDownload,
+    )
+    .catch((err: unknown) =>
+      log(
+        `====== ERROR OCCURRED WHEN TRYING TO INSTALL EXTENSIONS TO DEVTOOLS ======\nERROR : ${err}`,
+      ),
+    );
+};
 
 const getBackgroundColor = () => {
   const userData = getUserData();
@@ -177,7 +176,7 @@ const getBackgroundColor = () => {
 };
 
 const createWindow = async () => {
-  // if (IS_DEVELOPMENT) installExtensions();
+  if (IS_DEVELOPMENT) installExtensions();
 
   mainWindow = new BrowserWindow({
     width: 1280,
@@ -186,7 +185,9 @@ const createWindow = async () => {
     minWidth: 700,
     title: 'Nora',
     webPreferences: {
-      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      preload: app.isPackaged
+        ? path.join(__dirname, 'preload.js')
+        : path.join(__dirname, '../../.erb/dll/preload.js'),
     },
     visualEffectState: 'followWindow',
     roundedCorners: true,
@@ -197,7 +198,7 @@ const createWindow = async () => {
     show: false,
   });
 
-  mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+  mainWindow.loadURL(resolveHtmlPath('index.html'));
   mainWindow.once('ready-to-show', () => {
     if (app.hasSingleInstanceLock()) {
       log('Started checking for new songs during the application start.');
@@ -211,6 +212,11 @@ const createWindow = async () => {
     shell.openExternal(data.url);
     return { action: 'deny' };
   });
+
+  // mainWindow.on('closed', () => {
+  //   // Dereference the window object
+  //   mainWindow = null;
+  // });
 };
 
 // protocol.registerSchemesAsPrivileged([

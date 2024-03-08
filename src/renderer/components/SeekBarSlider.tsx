@@ -1,7 +1,6 @@
 import React from 'react';
 import { AppContext } from '../contexts/AppContext';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
-import { SongPositionContext } from '../contexts/SongPositionContext';
 import calculateTime from '../utils/calculateTime';
 import debounce from '../utils/debounce';
 
@@ -16,7 +15,6 @@ type Props = {
 const SeekBarSlider = (props: Props) => {
   const { localStorageData, currentSongData } = React.useContext(AppContext);
   const { updateSongPosition } = React.useContext(AppUpdateContext);
-  const { songPosition } = React.useContext(SongPositionContext);
 
   const { id, name, className, sliderOpacity, onSeek } = props;
 
@@ -24,6 +22,7 @@ const SeekBarSlider = (props: Props) => {
   const isMouseDownRef = React.useRef(false);
   const isMouseScrollRef = React.useRef(false);
   const seekbarRef = React.useRef(null as HTMLInputElement | null);
+  const lowResponseSongPositionRef = React.useRef(0);
 
   const seekBarCssProperties: any = {};
   seekBarCssProperties['--seek-before-width'] = `${
@@ -36,18 +35,55 @@ const SeekBarSlider = (props: Props) => {
   if (sliderOpacity !== undefined)
     seekBarCssProperties['--slider-opacity'] = `${sliderOpacity}`;
 
-  React.useEffect(() => {
-    if (
-      seekbarRef.current &&
-      !isMouseDownRef.current &&
-      !isMouseScrollRef.current
-    ) {
-      setSongPos(songPosition);
-      if (onSeek) onSeek(songPosition);
+  const handleSongPositionChange = React.useCallback((e: Event) => {
+    if ('detail' in e && typeof e.detail === 'number') {
+      const songPosition = e.detail as number;
+
+      lowResponseSongPositionRef.current = songPosition;
     }
-    //  ? Adding onSeek as a dependency makes the slider unresponsive while sliding for short times.
+  }, []);
+
+  React.useEffect(() => {
+    document.addEventListener(
+      'player/positionChange',
+      handleSongPositionChange,
+    );
+
+    return () =>
+      document.removeEventListener(
+        'player/positionChange',
+        handleSongPositionChange,
+      );
+  }, [handleSongPositionChange]);
+
+  React.useEffect(() => {
+    const intervalId = setInterval(() => {
+      if (
+        seekbarRef.current &&
+        !isMouseDownRef.current &&
+        !isMouseScrollRef.current
+      ) {
+        setSongPos(lowResponseSongPositionRef.current);
+        if (onSeek) onSeek(lowResponseSongPositionRef.current);
+      }
+    }, 500);
+
+    return () => clearInterval(intervalId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [songPosition]);
+  }, []);
+
+  // React.useEffect(() => {
+  //   if (
+  //     seekbarRef.current &&
+  //     !isMouseDownRef.current &&
+  //     !isMouseScrollRef.current
+  //   ) {
+  //     setSongPos(songPosition);
+  //     if (onSeek) onSeek(songPosition);
+  //   }
+  //   //  ? Adding onSeek as a dependency makes the slider unresponsive while sliding for short times.
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [songPosition]);
 
   React.useEffect(() => {
     const seekBar = seekbarRef.current;

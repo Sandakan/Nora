@@ -4,7 +4,6 @@ import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import debounce from '../../utils/debounce';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { SongPositionContext } from '../../contexts/SongPositionContext';
 import { AppContext } from '../../contexts/AppContext';
 import useNetworkConnectivity from '../../hooks/useNetworkConnectivity';
 
@@ -31,7 +30,6 @@ document.addEventListener('lyrics/scrollIntoView', () => {
 });
 
 const LyricsPage = () => {
-  const { songPosition } = React.useContext(SongPositionContext);
   const { currentSongData, localStorageData } = useContext(AppContext);
   const {
     addNewNotifications,
@@ -67,21 +65,31 @@ const LyricsPage = () => {
             { start: 0, end: syncedLyrics[0].start, text: '...' },
             ...syncedLyrics,
           ];
-          for (let i = 0; i < lyricsLines.length; i += 1) {
-            const { start, end } = lyricsLines[i];
-            const isInRange =
-              songPosition > start - delay && songPosition < end - delay;
-            if (isInRange) {
-              if (option === 'next' && lyricsLines[i + 1])
-                updateSongPosition(lyricsLines[i + 1].start);
-              else if (option === 'previous' && lyricsLines[i - 1])
-                updateSongPosition(lyricsLines[i - 1].start);
-            }
-          }
+          document.addEventListener(
+            'player/positionChange',
+            (e) => {
+              if ('detail' in e && !Number.isNaN(e.detail)) {
+                const songPosition = e.detail as number;
+
+                for (let i = 0; i < lyricsLines.length; i += 1) {
+                  const { start, end } = lyricsLines[i];
+                  const isInRange =
+                    songPosition > start - delay && songPosition < end - delay;
+                  if (isInRange) {
+                    if (option === 'next' && lyricsLines[i + 1])
+                      updateSongPosition(lyricsLines[i + 1].start);
+                    else if (option === 'previous' && lyricsLines[i - 1])
+                      updateSongPosition(lyricsLines[i - 1].start);
+                  }
+                }
+              }
+            },
+            { once: true },
+          );
         }
       }
     },
-    [lyrics?.lyrics, songPosition, updateSongPosition],
+    [lyrics?.lyrics, updateSongPosition],
   );
 
   const manageLyricsPageKeyboardShortcuts = React.useCallback(

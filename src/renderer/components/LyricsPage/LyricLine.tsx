@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
@@ -5,10 +6,10 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-// import { SongPositionContext } from '../../contexts/SongPositionContext';
 import roundTo from '../../utils/roundTo';
 import { delay, syncedLyricsRegex } from './LyricsPage';
 import LyricsProgressBar from './LyricsProgressBar';
+import EnhancedSyncedLyricWord from '../LyricsEditingPage/EnhancedSyncedLyricWord';
 
 interface LyricProp {
   lyric: string | SyncedLyricsLineText;
@@ -33,7 +34,7 @@ const LyricLine = (props: LyricProp) => {
   const { index, lyric, syncedLyrics, isAutoScrolling = true } = props;
 
   const handleLyricsActivity = React.useCallback(
-    (e: CustomEvent) => {
+    (e: Event) => {
       if ('detail' in e && !Number.isNaN(e.detail)) {
         const songPosition = e.detail as number;
 
@@ -76,25 +77,19 @@ const LyricLine = (props: LyricProp) => {
 
     const extendedLyricLines = lyric.map((extendedText, i) => {
       return (
-        <span
-          // eslint-disable-next-line react/no-array-index-key
-          key={`${i}-${extendedText.text}`}
-          onClick={() => updateSongPosition(extendedText.start)}
-          className={`mr-2 text-font-color-black last:mr-0 dark:text-font-color-white ${
-            isInRange
-              ? '!text-opacity-90'
-              : syncedLyrics && isInRange
-                ? '!text-opacity-50'
-                : '!text-opacity-20 hover:!text-opacity-75'
-          }`}
-        >
-          {extendedText.text}
-        </span>
+        <EnhancedSyncedLyricWord
+          key={i}
+          isActive={isInRange}
+          start={extendedText.start}
+          end={extendedText.end}
+          text={extendedText.text}
+          delay={delay}
+        />
       );
     });
 
     return extendedLyricLines;
-  }, [isInRange, lyric, syncedLyrics, updateSongPosition]);
+  }, [isInRange, lyric]);
 
   return (
     <div

@@ -10,7 +10,7 @@ import {
   AppUpdateContext,
   AppUpdateContextType,
 } from './contexts/AppUpdateContext';
-import { SongPositionContext } from './contexts/SongPositionContext';
+// import { SongPositionContext } from './contexts/SongPositionContext';
 
 import useNetworkConnectivity from './hooks/useNetworkConnectivity';
 
@@ -564,7 +564,7 @@ export default function App() {
     // //   content.playerType === 'full';
 
     const LOW_RESPONSE_DURATION = 100;
-    const DURATION = 1000;
+    // const DURATION = 1000;
 
     const lowResponseIntervalId = setInterval(() => {
       if (!player.paused) {
@@ -577,20 +577,20 @@ export default function App() {
       }
     }, LOW_RESPONSE_DURATION);
 
-    const intervalId = setInterval(() => {
-      const currentPosition = contentRef.current.player.songPosition;
-      if (!player.paused) {
-        startTransition(() =>
-          dispatch({
-            type: 'UPDATE_SONG_POSITION',
-            data: currentPosition,
-          }),
-        );
-      }
-    }, DURATION);
+    // const intervalId = setInterval(() => {
+    //   const currentPosition = contentRef.current.player.songPosition;
+    //   if (!player.paused) {
+    //     startTransition(() =>
+    //       dispatch({
+    //         type: 'UPDATE_SONG_POSITION',
+    //         data: currentPosition,
+    //       }),
+    //     );
+    //   }
+    // }, DURATION);
 
     return () => {
-      clearInterval(intervalId);
+      // clearInterval(intervalId);
       clearInterval(lowResponseIntervalId);
     };
   }, []);
@@ -2043,12 +2043,12 @@ export default function App() {
     ],
   );
 
-  const songPositionContextValues = React.useMemo(
-    () => ({
-      songPosition: content.player.songPosition,
-    }),
-    [content.player.songPosition],
-  );
+  // const songPositionContextValues = React.useMemo(
+  //   () => ({
+  //     songPosition: content.player.songPosition,
+  //   }),
+  //   [content.player.songPosition],
+  // );
 
   const isReducedMotion =
     content.localStorage.preferences.isReducedMotion ||
@@ -2098,31 +2098,27 @@ export default function App() {
               <ContextMenu />
               <PromptMenu />
               <TitleBar />
-              <SongPositionContext.Provider value={songPositionContextValues}>
-                <BodyAndSideBarContainer />
-                <SongControlsContainer />
-              </SongPositionContext.Provider>
+              <BodyAndSideBarContainer />
+              <SongControlsContainer />
             </div>
           ) : (
-            <SongPositionContext.Provider value={songPositionContextValues}>
-              <ErrorBoundary>
-                {content.playerType === 'mini' ? (
-                  <Suspense fallback={<SuspenseLoader />}>
-                    <MiniPlayer
-                      className={`${
-                        isReducedMotion
-                          ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
-                          : ''
-                      }`}
-                    />
-                  </Suspense>
-                ) : (
-                  <Suspense fallback={<SuspenseLoader />}>
-                    <FullScreenPlayer />
-                  </Suspense>
-                )}
-              </ErrorBoundary>
-            </SongPositionContext.Provider>
+            <ErrorBoundary>
+              {content.playerType === 'mini' ? (
+                <Suspense fallback={<SuspenseLoader />}>
+                  <MiniPlayer
+                    className={`${
+                      isReducedMotion
+                        ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
+                        : ''
+                    }`}
+                  />
+                </Suspense>
+              ) : (
+                <Suspense fallback={<SuspenseLoader />}>
+                  <FullScreenPlayer />
+                </Suspense>
+              )}
+            </ErrorBoundary>
           )}
         </AppUpdateContext.Provider>
       </AppContext.Provider>

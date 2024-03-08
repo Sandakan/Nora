@@ -3,7 +3,6 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { SongPositionContext } from '../../contexts/SongPositionContext';
 
 import roundTo from '../../utils/roundTo';
 
@@ -15,6 +14,7 @@ import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';
 import LyricsEditorSettingsPrompt from './LyricsEditorSettingsPrompt';
 import LyricsEditorSavePrompt from './LyricsEditorSavePrompt';
 import PageFocusPrompt from './PageFocusPrompt';
+import LyricsEditingPageDurationCounter from './LyricsEditingPageDurationCounter';
 
 export interface LyricData {
   text: string | Omit<SyncedLyricsLineText, 'unparsedText'>;
@@ -48,7 +48,6 @@ const LyricsEditingPage = () => {
     updateCurrentlyActivePageData,
     updateContextMenuData,
   } = React.useContext(AppUpdateContext);
-  const { songPosition } = React.useContext(SongPositionContext);
   const { t } = useTranslation();
 
   const [isPlaying, setIsPlaying] = React.useState(false);
@@ -61,7 +60,7 @@ const LyricsEditingPage = () => {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const offset = localStorageData.lyricsEditorSettings.offset || 0;
-  const roundedSongPostion = roundTo(songPosition + offset, 2);
+  // const roundedSongPostion = roundTo(songPosition + offset, 2);
 
   const { songId, lyrics, songTitle } = React.useMemo(() => {
     const { data } = currentlyActivePage;
@@ -140,6 +139,7 @@ const LyricsEditingPage = () => {
     <T extends { isActive: boolean; end?: number; start?: number }>(
       textLine: T[],
       shiftKeyEnabled: boolean,
+      roundedSongPosition: number,
     ) => {
       const slicedPrevTextLine = textLine.slice();
       const lastActiveTextIndex = textLine.findIndex((val) => val.isActive);
@@ -159,19 +159,19 @@ const LyricsEditingPage = () => {
         if (lastActiveTextIndex !== -1) {
           slicedPrevTextLine[lastActiveTextIndex].isActive =
             !slicedPrevTextLine[lastActiveTextIndex].isActive;
-          slicedPrevTextLine[lastActiveTextIndex].end = roundedSongPostion;
+          slicedPrevTextLine[lastActiveTextIndex].end = roundedSongPosition;
         }
         if (lastActiveTextIndex + 1 !== slicedPrevTextLine.length) {
           slicedPrevTextLine[lastActiveTextIndex + 1].isActive =
             !slicedPrevTextLine[lastActiveTextIndex + 1].isActive;
           slicedPrevTextLine[lastActiveTextIndex + 1].start =
-            roundedSongPostion;
+            roundedSongPosition;
         }
       }
 
       return slicedPrevTextLine;
     },
-    [roundedSongPostion],
+    [],
   );
 
   const handleShortcuts = React.useCallback(
@@ -179,93 +179,111 @@ const LyricsEditingPage = () => {
       if (e.key === 'Enter') {
         e.stopPropagation();
 
-        return setLyricsLines((prevLines) => {
-          // updateTextActiveStatus(prevLines, e.shiftKey);
+        document.addEventListener(
+          'player/positionChange',
+          (ev) => {
+            if ('detail' in ev && !Number.isNaN(ev.detail)) {
+              const songPosition = ev.detail as number;
+              const roundedSongPostion = roundTo(songPosition + offset, 2);
 
-          const slicedPrevLines = prevLines.slice();
-          const lastActiveLineIndex = prevLines.findIndex(
-            (val) => val.isActive,
-          );
+              setLyricsLines((prevLines) => {
+                // updateTextActiveStatus(prevLines, e.shiftKey);
 
-          // // Is a main line active
-          // if (lastActiveLineIndex === -1) {
-          //   // Make the first main line active
-          //   slicedPrevLines[0].isActive = true;
+                const slicedPrevLines = prevLines.slice();
+                const lastActiveLineIndex = prevLines.findIndex(
+                  (val) => val.isActive,
+                );
 
-          //   // has text blocks
-          //   if (Array.isArray(slicedPrevLines[0]?.text)) {
-          //     // make the first text block active
-          //     const textLine = slicedPrevLines[0].text;
-          //     const slicedPrevTextLine = textLine.slice();
-          //     slicedPrevTextLine[0].isActive = true;
+                // // Is a main line active
+                // if (lastActiveLineIndex === -1) {
+                //   // Make the first main line active
+                //   slicedPrevLines[0].isActive = true;
 
-          //     slicedPrevLines[0].text = slicedPrevTextLine;
-          //   }
-          //   // Is the active main line the last line?
-          // } else if (lastActiveLineIndex === slicedPrevLines.length - 1) {
-          //   // Remove active from the last main line
-          //   slicedPrevLines[lastActiveLineIndex].isActive = false;
-          // } else if (
-          //   Array.isArray(slicedPrevLines[lastActiveLineIndex]?.text)
-          // ) {
-          //   const textLine = slicedPrevLines[lastActiveLineIndex]
-          //     ?.text as LyricsLineData[];
-          //   const lastActiveTextIndex = textLine.findIndex(
-          //     (val) => val.isActive,
-          //   );
+                //   // has text blocks
+                //   if (Array.isArray(slicedPrevLines[0]?.text)) {
+                //     // make the first text block active
+                //     const textLine = slicedPrevLines[0].text;
+                //     const slicedPrevTextLine = textLine.slice();
+                //     slicedPrevTextLine[0].isActive = true;
 
-          //   if (lastActiveTextIndex === -1) textLine[0].isActive = true;
-          //   else if (lastActiveTextIndex === textLine.length - 1) {
-          //     textLine[lastActiveTextIndex].isActive = false;
-          //     textLine[lastActiveTextIndex + 1].isActive = true;
-          //   } else {
-          //     // Make the next main line active
-          //   }
-          // } else {
-          //   // Make the next main line active
-          // }
-          const textLine = slicedPrevLines[lastActiveLineIndex]?.text;
-          if (Array.isArray(textLine) && !textLine.at(-1)?.isActive) {
-            slicedPrevLines[lastActiveLineIndex].text = updateTextActiveStatus(
-              textLine,
-              e.shiftKey,
-            );
-          } else {
-            if (e.shiftKey) {
-              if (lastActiveLineIndex !== -1) {
-                slicedPrevLines[lastActiveLineIndex].isActive =
-                  !slicedPrevLines[lastActiveLineIndex].isActive;
-              }
-              if (lastActiveLineIndex - 1 >= 0) {
-                slicedPrevLines[lastActiveLineIndex - 1].isActive =
-                  !slicedPrevLines[lastActiveLineIndex - 1].isActive;
-              }
-            } else {
-              if (lastActiveLineIndex !== -1) {
-                slicedPrevLines[lastActiveLineIndex].isActive =
-                  !slicedPrevLines[lastActiveLineIndex].isActive;
-                slicedPrevLines[lastActiveLineIndex].end = roundedSongPostion;
-              }
-              if (lastActiveLineIndex + 1 !== slicedPrevLines.length) {
-                slicedPrevLines[lastActiveLineIndex + 1].isActive =
-                  !slicedPrevLines[lastActiveLineIndex + 1].isActive;
-                slicedPrevLines[lastActiveLineIndex + 1].start =
-                  roundedSongPostion;
-              }
+                //     slicedPrevLines[0].text = slicedPrevTextLine;
+                //   }
+                //   // Is the active main line the last line?
+                // } else if (lastActiveLineIndex === slicedPrevLines.length - 1) {
+                //   // Remove active from the last main line
+                //   slicedPrevLines[lastActiveLineIndex].isActive = false;
+                // } else if (
+                //   Array.isArray(slicedPrevLines[lastActiveLineIndex]?.text)
+                // ) {
+                //   const textLine = slicedPrevLines[lastActiveLineIndex]
+                //     ?.text as LyricsLineData[];
+                //   const lastActiveTextIndex = textLine.findIndex(
+                //     (val) => val.isActive,
+                //   );
+
+                //   if (lastActiveTextIndex === -1) textLine[0].isActive = true;
+                //   else if (lastActiveTextIndex === textLine.length - 1) {
+                //     textLine[lastActiveTextIndex].isActive = false;
+                //     textLine[lastActiveTextIndex + 1].isActive = true;
+                //   } else {
+                //     // Make the next main line active
+                //   }
+                // } else {
+                //   // Make the next main line active
+                // }
+                const textLine = slicedPrevLines[lastActiveLineIndex]?.text;
+                if (Array.isArray(textLine) && !textLine.at(-1)?.isActive) {
+                  slicedPrevLines[lastActiveLineIndex].text =
+                    updateTextActiveStatus(
+                      textLine,
+                      e.shiftKey,
+                      roundedSongPostion,
+                    );
+                } else {
+                  if (e.shiftKey) {
+                    if (lastActiveLineIndex !== -1) {
+                      slicedPrevLines[lastActiveLineIndex].isActive =
+                        !slicedPrevLines[lastActiveLineIndex].isActive;
+                    }
+                    if (lastActiveLineIndex - 1 >= 0) {
+                      slicedPrevLines[lastActiveLineIndex - 1].isActive =
+                        !slicedPrevLines[lastActiveLineIndex - 1].isActive;
+                    }
+                  } else {
+                    if (lastActiveLineIndex !== -1) {
+                      slicedPrevLines[lastActiveLineIndex].isActive =
+                        !slicedPrevLines[lastActiveLineIndex].isActive;
+                      slicedPrevLines[lastActiveLineIndex].end =
+                        roundedSongPostion;
+                    }
+                    if (lastActiveLineIndex + 1 !== slicedPrevLines.length) {
+                      slicedPrevLines[lastActiveLineIndex + 1].isActive =
+                        !slicedPrevLines[lastActiveLineIndex + 1].isActive;
+                      slicedPrevLines[lastActiveLineIndex + 1].start =
+                        roundedSongPostion;
+                    }
+                  }
+
+                  if (Array.isArray(textLine))
+                    slicedPrevLines[lastActiveLineIndex].text =
+                      updateTextActiveStatus(
+                        textLine,
+                        e.shiftKey,
+                        roundedSongPostion,
+                      );
+                }
+
+                return slicedPrevLines;
+              });
             }
-
-            if (Array.isArray(textLine))
-              slicedPrevLines[lastActiveLineIndex].text =
-                updateTextActiveStatus(textLine, e.shiftKey);
-          }
-
-          return slicedPrevLines;
-        });
+          },
+          { once: true },
+        );
       }
 
       return undefined;
     },
-    [roundedSongPostion, updateTextActiveStatus],
+    [offset, updateTextActiveStatus],
   );
 
   const moreOptionsContextMenuItems = React.useMemo((): ContextMenuItem[] => {
@@ -366,17 +384,7 @@ const LyricsEditingPage = () => {
               {localStorageData.playback.playbackRate}x
             </span>
             <span className="mx-2">&bull;</span>
-            <span className="">
-              {t('lyricsEditingPage.playbackTime')} : {roundedSongPostion}{' '}
-              {localStorageData.lyricsEditorSettings.offset !== 0 && (
-                <span className="font-medium uppercase text-font-color-highlight dark:text-dark-font-color-highlight">
-                  {localStorageData.lyricsEditorSettings.offset > 0 && '+'}{' '}
-                  {t('lyricsEditingPage.offsetWithCount', {
-                    count: localStorageData.lyricsEditorSettings.offset,
-                  })}
-                </span>
-              )}
-            </span>
+            <LyricsEditingPageDurationCounter offset={offset} />
           </div>
         </div>
         <div className="other-controls-container flex">
