@@ -63,6 +63,7 @@
     }
   },
   "scripts": {
+    "test": "jest --collect-coverage",
     "husky-test": "npm run prettier-check && npm run test",
     "lint-fix": "cross-env NODE_ENV=development eslint . --fix --ext .ts,.tsx",
     "lint-save-results": "cross-env NODE_ENV=development eslint . --ext .ts,.tsx -o ./lint_results.txt",
