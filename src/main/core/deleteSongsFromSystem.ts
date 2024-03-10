@@ -9,17 +9,15 @@ import removeSongsFromLibrary from '../removeSongsFromLibrary';
 const deleteSongsFromSystem = async (
   absoluteFilePaths: string[],
   abortSignal: AbortSignal,
-  isPermanentDelete = false,
+  isPermanentDelete = false
 ) => {
   if (abortSignal.aborted) {
     log(`Song deletion process aborted because abort event triggered.`);
-    throw new Error(
-      'Song deletion process aborted because abort event triggered.',
-    );
+    throw new Error('Song deletion process aborted because abort event triggered.');
   }
 
   log(`Started the deletion process of '${absoluteFilePaths.length}' songs.`, {
-    absoluteFilePaths,
+    absoluteFilePaths
   });
 
   const isEveryPathASong = absoluteFilePaths.every((filePath) => {
@@ -31,7 +29,7 @@ const deleteSongsFromSystem = async (
     log(
       `Tried to delete a resource which is recognized as a song.`,
       { path: absoluteFilePaths },
-      'WARN',
+      'WARN'
     );
     throw new Error(`Prevented deleting files which are not songs.`);
   }
@@ -52,14 +50,10 @@ const deleteSongsFromSystem = async (
         isPermanentDelete
           ? `deleted ${absoluteFilePaths.length} songs from the system`
           : `moved ${absoluteFilePaths.length} songs to the recycle bin`
-      }.`,
+      }.`
     };
   } catch (error) {
-    log(
-      `Error occurred when removing a song from the system`,
-      undefined,
-      'ERROR',
-    );
+    log(`Error occurred when removing a song from the system`, undefined, 'ERROR');
     log(error as Error, undefined, 'ERROR');
     throw error;
   }

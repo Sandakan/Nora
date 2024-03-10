@@ -8,8 +8,7 @@ import makeDir from './makeDir';
 async function copyDir(src: string, dest: string) {
   try {
     const { exist } = await makeDir(dest, { recursive: true });
-    if (exist)
-      log(`Directory already exists. Will re-write contents of the directory.`);
+    if (exist) log(`Directory already exists. Will re-write contents of the directory.`);
 
     const entries = await fs.readdir(src, { withFileTypes: true });
 
@@ -21,11 +20,7 @@ async function copyDir(src: string, dest: string) {
       else await fs.copyFile(srcPath, destPath);
     }
   } catch (error) {
-    log(
-      'Error occurred when copying the directory',
-      { error, src, dest },
-      'ERROR',
-    );
+    log('Error occurred when copying the directory', { error, src, dest }, 'ERROR');
     throw error;
   }
 }

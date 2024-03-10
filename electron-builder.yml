@@ -1,0 +1,104 @@
+appId: com.sandakannipunajith.nora
+productName: Nora
+copyright: Copyright © 2024 Sandakan Nipunajith
+
+icon: ./build/icon.ico
+artifactName: ${productName} Setup ${version}-${os}-${arch}.${ext}
+
+directories:
+  buildResources: build
+
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!**/resources/other/*'
+  - '!**/resources/installer_assets/*'
+  - '!**/resources/other/*'
+
+asarUnpack:
+  - resources/**
+
+fileAssociations:
+  - ext: mp3
+    icon: ./build/installer_assets/file_associated_icons/mp3.ico
+    mimeType: audio/mpeg
+    role: Editor
+  - ext: wav
+    icon: ./build/installer_assets/file_associated_icons/wav.ico
+    mimeType: audio/wav
+    role: Editor
+  - ext: ogg
+    icon: ./build/installer_assets/file_associated_icons/ogg.ico
+    mimeType: audio/ogg
+    role: Editor
+  - ext: aac
+    icon: ./build/installer_assets/file_associated_icons/aac.ico
+    mimeType: audio/aac
+    role: Editor
+  - ext: m4r
+    icon: ./build/installer_assets/file_associated_icons/m4r.ico
+    mimeType: audio/x-m4r
+    role: Editor
+  - ext: flac
+    icon: ./build/installer_assets/file_associated_icons/flac.ico
+    mimeType: audio/flac
+    role: Editor
+
+win:
+  executableName: Nora
+
+nsis:
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName} ${version}
+  allowElevation: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  installerIcon: ./build/icon.ico
+  installerSidebar: ./build/installer_assets/sidebar.bmp
+  license: ./LICENSE.txt
+  oneClick: false
+  perMachine: false
+  uninstallerIcon: ./build/icon.ico
+
+mac:
+  category: public.app-category.music
+  darkModeSupport: true
+  entitlementsInherit: build/entitlements.mac.plist
+  gatekeeperAssess: false
+  hardenedRuntime: true
+  icon: ./build/icon.icns
+  extendInfo:
+    - NSCameraUsageDescription: Application requests access to the device's camera.
+    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
+    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
+    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+  notarize: false
+
+dmg:
+  artifactName: ${name}-${version}.${ext}
+
+linux:
+  target:
+    - AppImage
+    - snap
+    - deb
+  category: AudioVideo
+  synopsis: An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar.
+
+npmRebuild: false
+
+protocols:
+  name: nora-protocol
+  schemes:
+    - nora
+
+publish:
+  owner: Sandakan
+  provider: github
+
+electronDownload:
+  mirror: https://npmmirror.com/mirrors/electron/

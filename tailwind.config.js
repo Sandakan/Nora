@@ -4,7 +4,7 @@ const colors = require('tailwindcss/colors');
 const plugin = require('tailwindcss/plugin');
 
 module.exports = {
-  content: ['./src/renderer/**/*.{js,jsx,ts,tsx,ejs}'],
+  content: ['./src/renderer/index.html', './src/renderer/src/**/*.{js,jsx,ts,tsx,ejs}'],
   darkMode: 'class',
   theme: {
     screens: {
@@ -22,7 +22,7 @@ module.exports = {
       md: { max: '900px' },
       // => @media (max-width: 850px) { ... }
 
-      sm: { max: '800px' },
+      sm: { max: '800px' }
       // => @media (max-width: 639px) { ... }
     },
     extend: {
@@ -58,24 +58,21 @@ module.exports = {
         'dark-context-menu-background': 'hsla(228, 7%, 16%, 90%)',
         'dark-context-menu-list-hover': 'hsl(224, 8%, 28%)',
         sky: colors.sky,
-        cyan: colors.cyan,
+        cyan: colors.cyan
       },
       animation: {
         'spin-ease': 'spin 1000ms ease-in-out infinite',
         'dialog-appear-ease-in-out': 'dialogAppear 100ms ease-out',
-        'dialog-dissappear-ease-in-out': 'dialogDisappear 100ms ease-in',
+        'dialog-dissappear-ease-in-out': 'dialogDisappear 100ms ease-in'
       },
       boxShadow: {
         'inner-sm': 'inset 0 1px 2px 0 rgb(0 0 0 / 0.05)',
-        'inner-md':
-          'inset 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-        'inner-lg':
-          'inset 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-        'inner-xl':
-          'inset 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
-        'inner-2xl': 'inset 0 25px 50px -12px rgb(0 0 0 / 0.25)',
-      },
-    },
+        'inner-md': 'inset 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+        'inner-lg': 'inset 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+        'inner-xl': 'inset 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+        'inner-2xl': 'inset 0 25px 50px -12px rgb(0 0 0 / 0.25)'
+      }
+    }
   },
   plugins: [
     plugin(({ matchVariant }) => {
@@ -88,9 +85,9 @@ module.exports = {
           values: {
             1: '1',
             2: '2',
-            3: '3',
-          },
-        },
+            3: '3'
+          }
+        }
       );
     }),
     plugin(({ matchVariant }) => {
@@ -103,28 +100,28 @@ module.exports = {
           values: {
             1: '1',
             2: '2',
-            3: '3',
-          },
-        },
+            3: '3'
+          }
+        }
       );
     }),
     plugin(({ matchUtilities, theme }) => {
       matchUtilities(
         {
           'animate-duration': (value) => ({
-            animationDuration: value,
-          }),
+            animationDuration: value
+          })
         },
-        { values: theme('transitionDuration') },
+        { values: theme('transitionDuration') }
       );
       matchUtilities(
         {
           'animate-delay': (value) => ({
-            animationDelay: value,
-          }),
+            animationDelay: value
+          })
         },
-        { values: theme('transitionDelay') },
+        { values: theme('transitionDelay') }
       );
-    }),
-  ],
+    })
+  ]
 };

@@ -7,13 +7,13 @@ import {
   getPlaylistData,
   getUserData,
   setUserData,
-  getBlacklistData,
+  getBlacklistData
 } from './filesystem';
 import {
   getAlbumArtworkPath,
   getArtistArtworkPath,
   getPlaylistArtworkPath,
-  getSongArtworkPath,
+  getSongArtworkPath
 } from './fs/resolveFilePaths';
 import log from './log';
 import filterUniqueObjects from './utils/filterUniqueObjects';
@@ -22,26 +22,18 @@ const getSongSearchResults = (
   songs: SavableSongData[],
   keyword: string,
   filter: SearchFilters,
-  isPredictiveSearchEnabled = true,
+  isPredictiveSearchEnabled = true
 ): SongData[] => {
-  if (
-    Array.isArray(songs) &&
-    songs.length > 0 &&
-    (filter === 'Songs' || filter === 'All')
-  ) {
+  if (Array.isArray(songs) && songs.length > 0 && (filter === 'Songs' || filter === 'All')) {
     const { songBlacklist } = getBlacklistData();
     let returnValue: SavableSongData[] = [];
 
     if (isPredictiveSearchEnabled)
-      returnValue = stringSimilarity(
-        keyword,
-        songs as unknown as Record<string, unknown>[],
-        {
-          caseSensitive: false,
-          matchPath: ['title'],
-          returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
-        },
-      ) as unknown as SavableSongData[];
+      returnValue = stringSimilarity(keyword, songs as unknown as Record<string, unknown>[], {
+        caseSensitive: false,
+        matchPath: ['title'],
+        returnType: ReturnTypeEnums.ALL_SORTED_MATCHES
+      }) as unknown as SavableSongData[];
 
     if (returnValue.length === 0) {
       const regex = new RegExp(keyword, 'gim');
@@ -61,7 +53,7 @@ const getSongSearchResults = (
       return {
         ...x,
         artworkPaths: getSongArtworkPath(x.songId, x.isArtworkAvailable),
-        isBlacklisted,
+        isBlacklisted
       };
     });
   }
@@ -72,35 +64,25 @@ const getArtistSearchResults = (
   artists: SavableArtist[],
   keyword: string,
   filter: SearchFilters,
-  isPredictiveSearchEnabled = true,
+  isPredictiveSearchEnabled = true
 ): Artist[] => {
-  if (
-    Array.isArray(artists) &&
-    artists.length > 0 &&
-    (filter === 'Artists' || filter === 'All')
-  ) {
+  if (Array.isArray(artists) && artists.length > 0 && (filter === 'Artists' || filter === 'All')) {
     let returnValue: SavableArtist[] = [];
 
     if (isPredictiveSearchEnabled)
-      returnValue = stringSimilarity(
-        keyword,
-        artists as unknown as Record<string, unknown>[],
-        {
-          caseSensitive: false,
-          matchPath: ['name'],
-          returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
-        },
-      ) as unknown as SavableArtist[];
+      returnValue = stringSimilarity(keyword, artists as unknown as Record<string, unknown>[], {
+        caseSensitive: false,
+        matchPath: ['name'],
+        returnType: ReturnTypeEnums.ALL_SORTED_MATCHES
+      }) as unknown as SavableArtist[];
 
     if (returnValue.length === 0) {
-      returnValue = artists.filter((artist) =>
-        new RegExp(keyword, 'gim').test(artist.name),
-      );
+      returnValue = artists.filter((artist) => new RegExp(keyword, 'gim').test(artist.name));
     }
 
     return returnValue.map((x) => ({
       ...x,
-      artworkPaths: getArtistArtworkPath(x.artworkName),
+      artworkPaths: getArtistArtworkPath(x.artworkName)
     }));
   }
   return [];
@@ -110,35 +92,25 @@ const getAlbumSearchResults = (
   albums: SavableAlbum[],
   keyword: string,
   filter: SearchFilters,
-  isPredictiveSearchEnabled = true,
+  isPredictiveSearchEnabled = true
 ): Album[] => {
-  if (
-    Array.isArray(albums) &&
-    albums.length > 0 &&
-    (filter === 'Albums' || filter === 'All')
-  ) {
+  if (Array.isArray(albums) && albums.length > 0 && (filter === 'Albums' || filter === 'All')) {
     let returnValue: SavableAlbum[] = [];
 
     if (isPredictiveSearchEnabled)
-      returnValue = stringSimilarity(
-        keyword,
-        albums as unknown as Record<string, unknown>[],
-        {
-          caseSensitive: false,
-          matchPath: ['title'],
-          returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
-        },
-      ) as unknown as SavableAlbum[];
+      returnValue = stringSimilarity(keyword, albums as unknown as Record<string, unknown>[], {
+        caseSensitive: false,
+        matchPath: ['title'],
+        returnType: ReturnTypeEnums.ALL_SORTED_MATCHES
+      }) as unknown as SavableAlbum[];
 
     if (returnValue.length === 0) {
-      returnValue = albums.filter((album) =>
-        new RegExp(keyword, 'gim').test(album.title),
-      );
+      returnValue = albums.filter((album) => new RegExp(keyword, 'gim').test(album.title));
     }
 
     return returnValue.map((x) => ({
       ...x,
-      artworkPaths: getAlbumArtworkPath(x.artworkName),
+      artworkPaths: getAlbumArtworkPath(x.artworkName)
     }));
   }
   return [];
@@ -148,7 +120,7 @@ const getPlaylistSearchResults = (
   playlists: SavablePlaylist[],
   keyword: string,
   filter: SearchFilters,
-  isPredictiveSearchEnabled = true,
+  isPredictiveSearchEnabled = true
 ): Playlist[] => {
   if (
     Array.isArray(playlists) &&
@@ -158,25 +130,19 @@ const getPlaylistSearchResults = (
     let returnValue: SavablePlaylist[] = [];
 
     if (isPredictiveSearchEnabled)
-      returnValue = stringSimilarity(
-        keyword,
-        playlists as unknown as Record<string, unknown>[],
-        {
-          caseSensitive: false,
-          matchPath: ['name'],
-          returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
-        },
-      ) as unknown as SavablePlaylist[];
+      returnValue = stringSimilarity(keyword, playlists as unknown as Record<string, unknown>[], {
+        caseSensitive: false,
+        matchPath: ['name'],
+        returnType: ReturnTypeEnums.ALL_SORTED_MATCHES
+      }) as unknown as SavablePlaylist[];
 
     if (returnValue.length === 0) {
-      returnValue = playlists.filter((playlist) =>
-        new RegExp(keyword, 'gim').test(playlist.name),
-      );
+      returnValue = playlists.filter((playlist) => new RegExp(keyword, 'gim').test(playlist.name));
     }
 
     return returnValue.map((x) => ({
       ...x,
-      artworkPaths: getPlaylistArtworkPath(x.playlistId, x.isArtworkAvailable),
+      artworkPaths: getPlaylistArtworkPath(x.playlistId, x.isArtworkAvailable)
     }));
   }
   return [];
@@ -186,35 +152,25 @@ const getGenreSearchResults = (
   genres: SavableGenre[],
   keyword: string,
   filter: SearchFilters,
-  isPredictiveSearchEnabled = true,
+  isPredictiveSearchEnabled = true
 ): Genre[] => {
-  if (
-    Array.isArray(genres) &&
-    genres.length > 0 &&
-    (filter === 'Genres' || filter === 'All')
-  ) {
+  if (Array.isArray(genres) && genres.length > 0 && (filter === 'Genres' || filter === 'All')) {
     let returnValue: SavableGenre[] = [];
 
     if (isPredictiveSearchEnabled)
-      returnValue = stringSimilarity(
-        keyword,
-        genres as unknown as Record<string, unknown>[],
-        {
-          caseSensitive: false,
-          matchPath: ['name'],
-          returnType: ReturnTypeEnums.ALL_SORTED_MATCHES,
-        },
-      ) as unknown as SavableGenre[];
+      returnValue = stringSimilarity(keyword, genres as unknown as Record<string, unknown>[], {
+        caseSensitive: false,
+        matchPath: ['name'],
+        returnType: ReturnTypeEnums.ALL_SORTED_MATCHES
+      }) as unknown as SavableGenre[];
 
     if (returnValue.length === 0) {
-      returnValue = genres.filter((genre) =>
-        new RegExp(keyword, 'gim').test(genre.name),
-      );
+      returnValue = genres.filter((genre) => new RegExp(keyword, 'gim').test(genre.name));
     }
 
     return returnValue.map((x) => ({
       ...x,
-      artworkPaths: getAlbumArtworkPath(x.artworkName),
+      artworkPaths: getAlbumArtworkPath(x.artworkName)
     }));
   }
   return [];
@@ -225,7 +181,7 @@ const search = (
   filter: SearchFilters,
   value: string,
   updateSearchHistory = true,
-  isIsPredictiveSearchEnabled = true,
+  isIsPredictiveSearchEnabled = true
 ): SearchResult => {
   const songsData = getSongsData();
   const artistsData = getArtistsData();
@@ -246,31 +202,31 @@ const search = (
       songsData,
       keyword,
       filter,
-      isIsPredictiveSearchEnabled,
+      isIsPredictiveSearchEnabled
     );
     const artistsResults = getArtistSearchResults(
       artistsData,
       keyword,
       filter,
-      isIsPredictiveSearchEnabled,
+      isIsPredictiveSearchEnabled
     );
     const albumsResults = getAlbumSearchResults(
       albumsData,
       keyword,
       filter,
-      isIsPredictiveSearchEnabled,
+      isIsPredictiveSearchEnabled
     );
     const playlistsResults = getPlaylistSearchResults(
       playlistData,
       keyword,
       filter,
-      isIsPredictiveSearchEnabled,
+      isIsPredictiveSearchEnabled
     );
     const genresResults = getGenreSearchResults(
       genresData,
       keyword,
       filter,
-      isIsPredictiveSearchEnabled,
+      isIsPredictiveSearchEnabled
     );
 
     songs.push(...songsResults);
@@ -295,7 +251,7 @@ const search = (
       artists.length
     } artists results, ${albums.length} albums results, ${
       playlists.length
-    } playlists results and ${genres.length} genres results.`,
+    } playlists results and ${genres.length} genres results.`
   );
 
   if (updateSearchHistory) {
@@ -345,7 +301,7 @@ const search = (
     albums,
     playlists,
     genres,
-    availableResults,
+    availableResults
   };
 };
 

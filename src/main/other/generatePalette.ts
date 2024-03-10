@@ -3,15 +3,10 @@ import nodeVibrant from 'node-vibrant';
 import * as musicMetaData from 'music-metadata';
 import { timeEnd, timeStart } from '../utils/measureTimeUsage';
 import log from '../log';
-import {
-  getGenresData,
-  getSongsData,
-  setGenresData,
-  setSongsData,
-} from '../filesystem';
+import { getGenresData, getSongsData, setGenresData, setSongsData } from '../filesystem';
 import {
   generateCoverBuffer,
-  getDefaultSongCoverImgBuffer,
+  getDefaultSongCoverImgBuffer
 } from '../parseSong/generateCoverBuffer';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 
@@ -31,7 +26,7 @@ const getDefaultPalette = async () => {
 
 const generatePalette = async (
   artwork?: Buffer | string,
-  sendAdditionalData = true,
+  sendAdditionalData = true
 ): Promise<NodeVibrantPalette | undefined> => {
   if (artwork) {
     const palette = await nodeVibrant
@@ -41,17 +36,17 @@ const generatePalette = async (
         return log(
           `ERROR OCCURRED WHEN PARSING A SONG ARTWORK TO GET A COLOR PALETTE.`,
           { err },
-          'ERROR',
+          'ERROR'
         );
       });
 
     if (palette) {
       const generatePaletteSwatch = <T extends typeof palette.DarkMuted>(
-        nodeVibrantSwatch: T,
+        nodeVibrantSwatch: T
       ): NodeVibrantPaletteSwatch | undefined => {
         if (nodeVibrantSwatch) {
           const data = {
-            rgb: nodeVibrantSwatch.rgb,
+            rgb: nodeVibrantSwatch.rgb
           };
 
           if (sendAdditionalData) {
@@ -60,11 +55,9 @@ const generatePalette = async (
               hex: nodeVibrantSwatch.hex,
               hsl: nodeVibrantSwatch.hsl,
               bodyTextColor:
-                nodeVibrantSwatch.bodyTextColor ||
-                nodeVibrantSwatch.getBodyTextColor(),
+                nodeVibrantSwatch.bodyTextColor || nodeVibrantSwatch.getBodyTextColor(),
               titleTextColor:
-                nodeVibrantSwatch.titleTextColor ||
-                nodeVibrantSwatch.getTitleTextColor(),
+                nodeVibrantSwatch.titleTextColor || nodeVibrantSwatch.getTitleTextColor()
             };
 
             Object.assign(data, additionalData);
@@ -81,7 +74,7 @@ const generatePalette = async (
         DarkVibrant: generatePaletteSwatch(palette.DarkVibrant),
         Muted: generatePaletteSwatch(palette.Muted),
         LightMuted: generatePaletteSwatch(palette.LightMuted),
-        DarkMuted: generatePaletteSwatch(palette.DarkMuted),
+        DarkMuted: generatePaletteSwatch(palette.DarkMuted)
       };
 
       return outputPalette;
@@ -98,10 +91,7 @@ const generatePalettesForSongs = async () => {
 
   if (Array.isArray(songs) && songs.length > 0) {
     let x = 0;
-    const noOfNoPaletteSongs = songs.reduce(
-      (acc, song) => (!song.palette ? acc + 1 : acc),
-      0,
-    );
+    const noOfNoPaletteSongs = songs.reduce((acc, song) => (!song.palette ? acc + 1 : acc), 0);
 
     if (noOfNoPaletteSongs > 0) {
       const start = timeStart();
@@ -110,10 +100,7 @@ const generatePalettesForSongs = async () => {
         if (!songs[i].palette) {
           const metadata = await musicMetaData.parseFile(songs[i].path);
 
-          const coverBuffer = await generateCoverBuffer(
-            metadata?.common?.picture,
-            true,
-          );
+          const coverBuffer = await generateCoverBuffer(metadata?.common?.picture, true);
 
           const palette = await generatePalette(coverBuffer);
 
@@ -121,7 +108,7 @@ const generatePalettesForSongs = async () => {
             palette && palette.DarkVibrant && palette.LightVibrant
               ? {
                   DarkVibrant: palette.DarkVibrant,
-                  LightVibrant: palette.LightVibrant,
+                  LightVibrant: palette.LightVibrant
                 }
               : undefined;
 
@@ -130,7 +117,7 @@ const generatePalettesForSongs = async () => {
 
           sendMessageToRenderer({
             messageCode: 'SONG_PALETTE_GENERATING_PROCESS_UPDATE',
-            data: { total: noOfNoPaletteSongs, value: x },
+            data: { total: noOfNoPaletteSongs, value: x }
           });
         }
       }
@@ -145,16 +132,11 @@ const generatePalettesForGenres = async () => {
   const genres = getGenresData();
   const songs = getSongsData();
 
-  if (
-    Array.isArray(songs) &&
-    Array.isArray(genres) &&
-    songs.length > 0 &&
-    genres.length > 0
-  ) {
+  if (Array.isArray(songs) && Array.isArray(genres) && songs.length > 0 && genres.length > 0) {
     let x = 0;
     const noOfNoPaletteGenres = genres.reduce(
       (acc, genre) => (!genre?.backgroundColor ? acc + 1 : acc),
-      0,
+      0
     );
 
     if (noOfNoPaletteGenres > 0) {
@@ -176,10 +158,7 @@ const generatePalettesForGenres = async () => {
               }
             }
           } else {
-            const coverBuffer = await generateCoverBuffer(
-              genreArtworkName,
-              true,
-            );
+            const coverBuffer = await generateCoverBuffer(genreArtworkName, true);
 
             const palette = await generatePalette(coverBuffer);
 
@@ -189,7 +168,7 @@ const generatePalettesForGenres = async () => {
 
           sendMessageToRenderer({
             messageCode: 'SONG_PALETTE_GENERATING_PROCESS_UPDATE',
-            data: { total: noOfNoPaletteGenres, value: x },
+            data: { total: noOfNoPaletteGenres, value: x }
           });
         }
       }
@@ -207,9 +186,7 @@ export const generatePalettes = async () => {
       setTimeout(generatePalettesForGenres, 1000);
       return undefined;
     })
-    .catch((error) =>
-      log('Error occurred when generating palettes.', { error }, 'ERROR'),
-    );
+    .catch((error) => log('Error occurred when generating palettes.', { error }, 'ERROR'));
 };
 
 export default generatePalette;

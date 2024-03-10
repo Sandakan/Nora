@@ -1,7 +1,7 @@
 {
   "files": [
     {
-      "path": "src/renderer/other/appReducer.tsx",
+      "path": "src/renderer/src/other/appReducer.tsx",
       "bookmarks": [
         {
           "line": 226,
@@ -11,7 +11,7 @@
       ]
     },
     {
-      "path": "src/renderer/components/NotificationPanel/Notification.tsx",
+      "path": "src/renderer/src/components/NotificationPanel/Notification.tsx",
       "bookmarks": [
         {
           "line": 63,

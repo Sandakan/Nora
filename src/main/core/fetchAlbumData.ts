@@ -5,7 +5,7 @@ import sortAlbums from '../utils/sortAlbums';
 
 const fetchAlbumData = async (
   albumTitlesOrIds: string[] = [],
-  sortType?: AlbumSortTypes,
+  sortType?: AlbumSortTypes
 ): Promise<Album[]> => {
   if (albumTitlesOrIds) {
     log(`Requested albums data for ids '${albumTitlesOrIds.join(',')}'`);
@@ -30,8 +30,8 @@ const fetchAlbumData = async (
         (x) =>
           ({
             ...x,
-            artworkPaths: getAlbumArtworkPath(x.artworkName),
-          }) satisfies Album,
+            artworkPaths: getAlbumArtworkPath(x.artworkName)
+          }) satisfies Album
       );
       if (sortType) return sortAlbums(output, sortType);
       return output;

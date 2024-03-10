@@ -13,8 +13,7 @@ import updateSongListeningData from './updateSongListeningData';
 import { setDiscordRpcActivity } from '../other/discordRPC';
 import { setCurrentSongPath } from '../main';
 
-const IS_DEVELOPMENT =
-  !app.isPackaged || process.env.NODE_ENV === 'development';
+const IS_DEVELOPMENT = !app.isPackaged || import.meta.env.MAIN_VITE_NODE_ENV === 'development';
 
 const getArtworkData = (artworkData?: Buffer) => {
   if (artworkData === undefined) return undefined;
@@ -27,7 +26,7 @@ const getRelevantArtistData = (
   songArtists?: {
     artistId: string;
     name: string;
-  }[],
+  }[]
 ) => {
   const artists = getArtistsData();
   const relevantArtists: {
@@ -50,7 +49,7 @@ const getRelevantArtistData = (
             artistId,
             name,
             artworkName,
-            onlineArtworkPaths,
+            onlineArtworkPaths
           });
         }
       }
@@ -60,9 +59,7 @@ const getRelevantArtistData = (
   return relevantArtists;
 };
 
-export const sendAudioData = async (
-  audioId: string,
-): Promise<AudioPlayerData> => {
+export const sendAudioData = async (audioId: string): Promise<AudioPlayerData> => {
   log(`Fetching song data for song id -${audioId}-`);
   try {
     const songs = getSongsData();
@@ -87,17 +84,14 @@ export const sendAudioData = async (
               duration: song.duration,
               // artwork: await getArtworkLink(artworkData),
               artwork: getArtworkData(artworkData),
-              artworkPath: getSongArtworkPath(
-                song.songId,
-                song.isArtworkAvailable,
-              ).artworkPath,
+              artworkPath: getSongArtworkPath(song.songId, song.isArtworkAvailable).artworkPath,
               path: path.join(DEFAULT_FILE_URL, song.path),
               songId: song.songId,
               isAFavorite: song.isAFavorite,
               album: song.album,
               palette: song.palette,
               isKnownSource: true,
-              isBlacklisted: isSongBlacklisted(song.songId, song.path),
+              isBlacklisted: isSongBlacklisted(song.songId, song.path)
             };
 
             updateSongListeningData(song.songId, 'listens', 1);
@@ -109,20 +103,14 @@ export const sendAudioData = async (
               largeImageKey: 'nora_logo',
               smallImageKey: 'song_artwork',
               startTimestamp: now,
-              endTimestamp: now + data.duration * 1000,
+              endTimestamp: now + data.duration * 1000
             });
             setCurrentSongPath(song.path);
             return data;
             // return log(`total : ${console.timeEnd('total')}`);
           }
-          log(
-            `ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA`,
-            undefined,
-            'ERROR',
-          );
-          throw new Error(
-            'ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA',
-          );
+          log(`ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA`, undefined, 'ERROR');
+          throw new Error('ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA');
         }
       }
       log(`No matching song for songId -${audioId}-`);
@@ -131,7 +119,7 @@ export const sendAudioData = async (
     log(
       `ERROR OCCURRED WHEN READING data.json TO GET SONGS DATA. data.json FILE DOESN'T EXIST OR SONGS ARRAY IS EMPTY.`,
       undefined,
-      'ERROR',
+      'ERROR'
     );
     throw new Error('EMPTY_SONG_ARRAY' as ErrorCodes);
   } catch (err) {

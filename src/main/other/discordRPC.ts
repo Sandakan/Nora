@@ -22,7 +22,7 @@ export const initializeDiscordRPC = async () => {
     if (client) return { initialized: true };
 
     // eslint-disable-next-line prefer-destructuring
-    const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
+    const DISCORD_CLIENT_ID = import.meta.env.MAIN_VITE_DISCORD_CLIENT_ID;
     if (!DISCORD_CLIENT_ID) throw new Error('Discord Client ID not found.');
 
     const rpcClient = new discordRPC.Client();
@@ -39,16 +39,14 @@ export const initializeDiscordRPC = async () => {
   }
 };
 
-export const setDiscordRpcActivity = async (
-  options: DiscordRpcActivityOptions,
-) => {
+export const setDiscordRpcActivity = async (options: DiscordRpcActivityOptions) => {
   try {
     const userData = getUserData();
     const { enableDiscordRPC } = userData.preferences;
 
     if (!enableDiscordRPC)
       return log('Discord Rich Presence skipped.', {
-        reason: { enableDiscordRPC },
+        reason: { enableDiscordRPC }
       });
 
     const { initialized } = await initializeDiscordRPC();

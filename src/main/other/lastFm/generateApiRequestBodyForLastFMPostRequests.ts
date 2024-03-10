@@ -3,7 +3,7 @@ import {
   AuthData,
   LoveParams,
   ScrobbleParams,
-  updateNowPlayingParams,
+  updateNowPlayingParams
 } from '../../../@types/last_fm_api';
 
 type LastFMApi = (
@@ -22,7 +22,7 @@ const generateApiSignatureForLastFmPostRequests = (data: LastFMApi) => {
   const sigComponents: [string, string | number][] = [
     ['method', method],
     ['api_key', LAST_FM_API_KEY],
-    ['sk', SESSION_KEY],
+    ['sk', SESSION_KEY]
   ];
 
   for (const [prop, value] of Object.entries(params)) {
@@ -32,9 +32,7 @@ const generateApiSignatureForLastFmPostRequests = (data: LastFMApi) => {
   //   Signature parameters should be sorted alphabetically
   sigComponents.sort((a, b) => (a[0] > b[0] ? 1 : a[0] < b[0] ? -1 : 0));
   //   Lastly, the SHARED_SECRET should be appended to the end of the signature.
-  const jointSigComponents = sigComponents.map((components) =>
-    components.join(''),
-  );
+  const jointSigComponents = sigComponents.map((components) => components.join(''));
   jointSigComponents.push(LAST_FM_SHARED_SECRET);
 
   const sig = jointSigComponents.join('');
@@ -42,9 +40,7 @@ const generateApiSignatureForLastFmPostRequests = (data: LastFMApi) => {
   return hashedSig;
 };
 
-export const generateApiRequestBodyForLastFMPostRequests = (
-  data: LastFMApi,
-) => {
+export const generateApiRequestBodyForLastFMPostRequests = (data: LastFMApi) => {
   const { authData, method, params } = data;
   const { LAST_FM_API_KEY, SESSION_KEY } = authData;
 
@@ -54,17 +50,14 @@ export const generateApiRequestBodyForLastFMPostRequests = (
     ['method', method],
     ['api_key', LAST_FM_API_KEY],
     ['sk', SESSION_KEY],
-    ['api_sig', API_SIGNATURE],
+    ['api_sig', API_SIGNATURE]
   ];
 
   for (const [prop, value] of Object.entries(params)) {
-    if (value !== undefined)
-      bodyComponents.push([prop, encodeURIComponent(value)]);
+    if (value !== undefined) bodyComponents.push([prop, encodeURIComponent(value)]);
   }
 
-  const jointBodyComponents = bodyComponents.map((bodyComponent) =>
-    bodyComponent.join('='),
-  );
+  const jointBodyComponents = bodyComponents.map((bodyComponent) => bodyComponent.join('='));
   const body = jointBodyComponents.join('&');
   return body;
 };

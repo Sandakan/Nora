@@ -4,10 +4,7 @@ import sharp from 'sharp';
 import log from '../log';
 import { sendMessageToRenderer, showSaveDialog } from '../main';
 import isPathAWebURL from '../utils/isPathAWebUrl';
-import {
-  fetchArtworkBufferFromURL,
-  generateLocalArtworkBuffer,
-} from '../updateSongId3Tags';
+import { fetchArtworkBufferFromURL, generateLocalArtworkBuffer } from '../updateSongId3Tags';
 import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
 
 const getSaveOptions = (saveName?: string) => {
@@ -18,11 +15,11 @@ const getSaveOptions = (saveName?: string) => {
     filters: [
       {
         extensions: ['png', 'jpeg', 'webp', 'avif', 'tiff', 'gif'],
-        name: 'Image files',
-      },
+        name: 'Image files'
+      }
     ],
     properties: ['createDirectory', 'showOverwriteConfirmation'],
-    nameFieldLabel: 'artwork',
+    nameFieldLabel: 'artwork'
   };
 
   if (saveName) {
@@ -40,11 +37,10 @@ const saveArtworkToSystem = async (artworkPath: string, saveName?: string) => {
     if (savePath) {
       const isArtworkPathAWebURL = isPathAWebURL(artworkPath);
 
-      if (isArtworkPathAWebURL)
-        artwork = await fetchArtworkBufferFromURL(artworkPath);
+      if (isArtworkPathAWebURL) artwork = await fetchArtworkBufferFromURL(artworkPath);
       else
         artwork = await generateLocalArtworkBuffer(
-          removeDefaultAppProtocolFromFilePath(artworkPath),
+          removeDefaultAppProtocolFromFilePath(artworkPath)
         );
 
       if (artwork) {
@@ -58,7 +54,7 @@ const saveArtworkToSystem = async (artworkPath: string, saveName?: string) => {
     log(
       'Error occurred when trying to fulfil the user request to save a song artwork.',
       { error },
-      'ERROR',
+      'ERROR'
     );
     sendMessageToRenderer({ messageCode: 'ARTWORK_SAVE_FAILED' });
     return undefined;

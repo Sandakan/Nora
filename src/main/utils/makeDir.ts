@@ -14,8 +14,7 @@ export const makeDirSync = (dir: PathLike, options?: MkDirOptions) => {
     mkdirSync(dir, options);
     return { exist: false };
   } catch (error) {
-    if (isAnErrorWithCode(error) && error.code === 'EEXIST')
-      return { exist: true };
+    if (isAnErrorWithCode(error) && error.code === 'EEXIST') return { exist: true };
     throw error;
   }
 };
@@ -26,8 +25,7 @@ const makeDir = async (dir: PathLike, options?: MkDirOptions) => {
 
     return { exist: false };
   } catch (error) {
-    if (isAnErrorWithCode(error) && error.code === 'EEXIST')
-      return { exist: true };
+    if (isAnErrorWithCode(error) && error.code === 'EEXIST') return { exist: true };
     throw error;
   }
 };

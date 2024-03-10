@@ -13,42 +13,23 @@ const getAppDataStorageMetrics = async () => {
 
   const appDataSize = await getDirSize(appDataPath);
 
-  const artworkCacheSize = await getDirSize(
-    path.join(appDataPath, 'song_covers'),
-  );
-  const tempArtworkCacheSize = await getDirSize(
-    path.join(appDataPath, 'temp_artworks'),
-  );
+  const artworkCacheSize = await getDirSize(path.join(appDataPath, 'song_covers'));
+  const tempArtworkCacheSize = await getDirSize(path.join(appDataPath, 'temp_artworks'));
 
   const totalArtworkCacheSize = artworkCacheSize + tempArtworkCacheSize;
 
   const logSize = await getDirSize(path.join(appDataPath, 'logs'));
 
   const songDataSize = await getFileSize(path.join(appDataPath, 'songs.json'));
-  const artistDataSize = await getFileSize(
-    path.join(appDataPath, 'artists.json'),
-  );
-  const albumDataSize = await getFileSize(
-    path.join(appDataPath, 'albums.json'),
-  );
-  const genreDataSize = await getFileSize(
-    path.join(appDataPath, 'genres.json'),
-  );
-  const playlistDataSize = await getFileSize(
-    path.join(appDataPath, 'playlists.json'),
-  );
-  const userDataSize = await getFileSize(
-    path.join(appDataPath, 'userData.json'),
-  );
+  const artistDataSize = await getFileSize(path.join(appDataPath, 'artists.json'));
+  const albumDataSize = await getFileSize(path.join(appDataPath, 'albums.json'));
+  const genreDataSize = await getFileSize(path.join(appDataPath, 'genres.json'));
+  const playlistDataSize = await getFileSize(path.join(appDataPath, 'playlists.json'));
+  const userDataSize = await getFileSize(path.join(appDataPath, 'userData.json'));
 
   const librarySize =
-    songDataSize +
-    artistDataSize +
-    albumDataSize +
-    genreDataSize +
-    playlistDataSize;
-  const totalKnownItemsSize =
-    librarySize + totalArtworkCacheSize + userDataSize + logSize;
+    songDataSize + artistDataSize + albumDataSize + genreDataSize + playlistDataSize;
+  const totalKnownItemsSize = librarySize + totalArtworkCacheSize + userDataSize + logSize;
 
   const otherSize = appDataSize - totalKnownItemsSize;
 
@@ -66,7 +47,7 @@ const getAppDataStorageMetrics = async () => {
     userDataSize,
     librarySize,
     totalKnownItemsSize,
-    otherSize,
+    otherSize
   };
 };
 
@@ -90,7 +71,7 @@ const getStorageUsage = async (forceRefresh = false) => {
         ? appRootSize
         : {
             size: appRootSize.size + dataRootSize.size,
-            freeSpace: appRootSize.freeSpace + dataRootSize.freeSpace,
+            freeSpace: appRootSize.freeSpace + dataRootSize.freeSpace
           };
 
     console.time('appFolder');
@@ -111,7 +92,7 @@ const getStorageUsage = async (forceRefresh = false) => {
       appFolderSize,
       appDataSizes,
       totalSize,
-      generatedDate: new Date().toISOString(),
+      generatedDate: new Date().toISOString()
     };
 
     setUserData('storageMetrics', storageMetrics);

@@ -26,10 +26,10 @@
 > **Pull requests that directly modify the `main` branch should only fill below checklist items.** > **Delete if it's not the case.**
 
 - [ ] Create a version artwork (if the update is a minor or major update).
-  - [ ] Paste the artwork to the [/assets/images/other/release artworks/](https://github.com/Sandakan/Nora/tree/master/assets/other/release%20artworks) directory.
+  - [ ] Paste the artwork to the [/resources/images/other/release artworks/](https://github.com/Sandakan/Nora/tree/master/resources/other/release%20artworks) directory.
   - [ ] Paste the artwork to the top of this PR.
   - [ ] Link the artwork to the [readme.md](https://github.com/Sandakan/Nora/tree/master/readme.md) in the project root.
-- [ ] Create and paste the artwork for the installer to the [/assets/installer_assets/sidebar.bmp](https://github.com/Sandakan/Nora/tree/master/assets/installer_assets/sidebar.bmp) directory.
+- [ ] Create and paste the artwork for the installer to the [/resources/installer_resources/sidebar.bmp](https://github.com/Sandakan/Nora/tree/master/resources/installer_resources/sidebar.bmp) directory.
 - [ ] Update the `version` entry in `package.json` and `package-lock.json` files in [/](https://github.com/Sandakan/Nora/tree/master/), [/release](https://github.com/Sandakan/Nora/tree/master/release/) and [/release/app](https://github.com/Sandakan/Nora/tree/master/release/app) directories.
 - [ ] Manage the changelog of this release
   - [ ] Copy the release notes from this PR and paste them to the [changelog.md](https://github.com/Sandakan/Nora/tree/master/changelog.md) file.

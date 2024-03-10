@@ -8,7 +8,7 @@ import {
   getSongsData,
   setAlbumsData,
   setArtistsData,
-  setSongsData,
+  setSongsData
 } from '../filesystem';
 import { generateRandomId } from '../utils/randomId';
 import { getSelectedArtist } from './resolveDuplicates';
@@ -17,7 +17,7 @@ import sendSongID3Tags from './sendSongId3Tags';
 /* eslint-disable import/prefer-default-export */
 export const resolveSeparateArtists = async (
   separateArtistId: string,
-  separateArtistNames: string[],
+  separateArtistNames: string[]
 ) => {
   let updatedData: UpdateSongDataResult | undefined;
 
@@ -26,9 +26,7 @@ export const resolveSeparateArtists = async (
   const albumsData = getAlbumsData();
 
   const selectedArtistData = getSelectedArtist(separateArtistId);
-  const selectedArtistSongIds = selectedArtistData?.artist?.songs.map(
-    (x) => x.songId,
-  );
+  const selectedArtistSongIds = selectedArtistData?.artist?.songs.map((x) => x.songId);
 
   if (selectedArtistData) {
     const selectedArtist = selectedArtistData.artist;
@@ -50,13 +48,11 @@ export const resolveSeparateArtists = async (
           name: artistName,
           songs: selectedArtist?.songs,
           artworkName: selectedArtist.artworkName,
-          albums: selectedArtist.albums,
+          albums: selectedArtist.albums
         });
     }
 
-    artistsData = artistsData.filter(
-      (x) => x.artistId !== selectedArtist.artistId,
-    );
+    artistsData = artistsData.filter((x) => x.artistId !== selectedArtist.artistId);
 
     artistsData.push(...newArtists);
 
@@ -70,9 +66,7 @@ export const resolveSeparateArtists = async (
         });
 
         album.artists!.push(
-          ...newArtists
-            .concat(availArtists)
-            .map((x) => ({ artistId: x.artistId, name: x.name })),
+          ...newArtists.concat(availArtists).map((x) => ({ artistId: x.artistId, name: x.name }))
         );
       }
     }
@@ -85,16 +79,14 @@ export const resolveSeparateArtists = async (
 
           song.artists = song.artists!.filter((x) => {
             if (x.artistId === selectedArtist.artistId) return false;
-            if (availArtists.some((y) => y.artistId === x.artistId))
-              return false;
+            if (availArtists.some((y) => y.artistId === x.artistId)) return false;
             return true;
           });
 
           if (songTags.artists) {
             songTags.artists = songTags.artists.filter((x) => {
               if (x.artistId === selectedArtist.artistId) return false;
-              if (availArtists.some((y) => y.artistId === x.artistId))
-                return false;
+              if (availArtists.some((y) => y.artistId === x.artistId)) return false;
               return true;
             });
 
@@ -104,25 +96,20 @@ export const resolveSeparateArtists = async (
                   name: x.name,
                   artistId: x.artistId,
                   artworkPath: getArtistArtworkPath(x.artworkName).artworkPath,
-                  onlineArtworkPaths: x.onlineArtworkPaths,
+                  onlineArtworkPaths: x.onlineArtworkPaths
                 };
-              }) as typeof songTags.artists),
+              }) as typeof songTags.artists)
             );
           }
 
           song.artists!.push(
             ...newArtists.concat(availArtists).map((x) => ({
               artistId: x.artistId,
-              name: x.name,
-            })),
+              name: x.name
+            }))
           );
 
-          updatedData = await updateSongId3Tags(
-            song.songId,
-            songTags,
-            true,
-            true,
-          );
+          updatedData = await updateSongId3Tags(song.songId, songTags, true, true);
         }
       }
     }

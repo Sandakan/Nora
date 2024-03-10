@@ -3,7 +3,7 @@ import log from '../log';
 
 const convertParsedLyricsToNodeID3Format = (
   parsedLyrics?: LyricsData,
-  prevSyncedLyrics: SynchronisedLyrics = [],
+  prevSyncedLyrics: SynchronisedLyrics = []
 ): SynchronisedLyrics => {
   try {
     if (parsedLyrics && parsedLyrics.isSynced && parsedLyrics.syncedLyrics) {
@@ -17,7 +17,7 @@ const convertParsedLyricsToNodeID3Format = (
         return {
           text,
           // to convert seconds to milliseconds
-          timeStamp: Math.round(line.start * 1000),
+          timeStamp: Math.round(line.start * 1000)
         };
       });
       // lyrics metadata like copyright info is stored on the shortText.
@@ -31,8 +31,8 @@ const convertParsedLyricsToNodeID3Format = (
           timeStampFormat: TagConstants.TimeStampFormat.MILLISECONDS,
           language: 'ENG',
           shortText,
-          synchronisedText,
-        },
+          synchronisedText
+        }
       ] as SynchronisedLyrics;
       return convertedLyrics;
     }
@@ -41,7 +41,7 @@ const convertParsedLyricsToNodeID3Format = (
     log(
       `Error occurred when converting parsed lyrics to NodeID3 Synchronised Lyrics format.`,
       { error },
-      'WARN',
+      'WARN'
     );
     return prevSyncedLyrics;
   }
