@@ -11,7 +11,7 @@ const getFileSize = async (filePath: string) => {
     log(
       'Error occurred when trying to calculate file size of a file.',
       { error, filePath },
-      'ERROR',
+      'ERROR'
     );
   }
   return 0;

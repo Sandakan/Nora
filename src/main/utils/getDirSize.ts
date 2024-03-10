@@ -16,9 +16,7 @@ const getDirSize = async (dir: string) => {
           return size;
         }
       } catch (error) {
-        console.log(
-          'Error occurred when trying to calculate dir size of a directory.',
-        );
+        console.log('Error occurred when trying to calculate dir size of a directory.');
       }
       return 0;
     });
@@ -30,9 +28,7 @@ const getDirSize = async (dir: string) => {
     return reducedSizes;
   } catch (error) {
     if (isAnErrorWithCode(error) && error.code === 'ENOENT') return 0;
-    console.log(
-      'Error occurred when resolving promise to calculate dir size of a directory.',
-    );
+    console.log('Error occurred when resolving promise to calculate dir size of a directory.');
   }
   return 0;
 };

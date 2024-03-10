@@ -5,7 +5,7 @@ import { generateRandomId } from '../utils/randomId';
 const manageArtistsOfParsedSong = (
   allArtists: SavableArtist[],
   songInfo: SavableSongData,
-  songArtworkPaths?: ArtworkPaths,
+  songArtworkPaths?: ArtworkPaths
 ) => {
   const newArtists: SavableArtist[] = [];
   const relevantArtists: SavableArtist[] = [];
@@ -16,9 +16,7 @@ const manageArtistsOfParsedSong = (
       for (const newArtist of songArtists) {
         const newArtistName = newArtist.name.trim();
 
-        const availableArtist = allArtists.find(
-          (artist) => artist.name === newArtistName,
-        );
+        const availableArtist = allArtists.find((artist) => artist.name === newArtistName);
 
         if (availableArtist) {
           availableArtist.songs.push({ title, songId });
@@ -33,7 +31,7 @@ const manageArtistsOfParsedSong = (
                 ? path.basename(songArtworkPaths.artworkPath)
                 : undefined,
             isAFavorite: false,
-            albums: [],
+            albums: []
           };
           relevantArtists.push(artist);
           newArtists.push(artist);

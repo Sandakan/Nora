@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable import/first */
 /* eslint-disable default-param-last */
 /* eslint-disable no-use-before-define */
 /* eslint-disable global-require */
-import path from 'path';
+import { join } from 'path';
 import os from 'os';
 import {
   app,
@@ -22,10 +23,9 @@ import {
   net,
   powerSaveBlocker,
   screen,
-  Display,
+  Display
 } from 'electron';
 import debug from 'electron-debug';
-import 'dotenv/config';
 // import { pathToFileURL } from 'url';
 
 // import * as Sentry from '@sentry/electron';
@@ -35,24 +35,19 @@ import {
   getUserData,
   setUserData as saveUserData,
   resetAppCache,
-  setUserData,
+  setUserData
 } from './filesystem';
-import { resolveHtmlPath } from './utils/util';
 import { version, appPreferences } from '../../package.json';
 import { savePendingMetadataUpdates } from './updateSongId3Tags';
 import addWatchersToFolders from './fs/addWatchersToFolders';
 
-import getAssetPath from './utils/getAssetPath';
 import addWatchersToParentFolders from './fs/addWatchersToParentFolders';
 import manageTaskbarPlaybackButtonControls from './core/manageTaskbarPlaybackButtonControls';
 import checkForStartUpSongs from './core/checkForStartUpSongs';
 import checkForNewSongs from './core/checkForNewSongs';
 import { changeAppTheme } from './core/changeAppTheme';
 import { savePendingSongLyrics } from './saveLyricsToSong';
-import {
-  closeAllAbortControllers,
-  saveAbortController,
-} from './fs/controlAbortControllers';
+import { closeAllAbortControllers, saveAbortController } from './fs/controlAbortControllers';
 import resetAppData from './resetAppData';
 import { clearTempArtworkFolder } from './other/artworks';
 
@@ -60,11 +55,11 @@ import manageLastFmAuth from './auth/manageLastFmAuth';
 import { initializeIPC } from './ipc';
 import checkForUpdates from './update';
 import { clearDiscordRpcActivity } from './other/discordRPC';
+import { is } from '@electron-toolkit/utils';
+
+import noraAppIcon from '../../resources/logo_light_mode.png?asset';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
-declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
-declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
-
 const DEFAULT_APP_PROTOCOL = 'nora';
 
 const MAIN_WINDOW_MIN_SIZE_X = 700;
@@ -88,15 +83,15 @@ const DEFAULT_OPEN_DIALOG_OPTIONS: OpenDialogOptions = {
   filters: [
     {
       name: 'Audio Files',
-      extensions: appPreferences.supportedMusicExtensions,
-    },
+      extensions: appPreferences.supportedMusicExtensions
+    }
   ],
-  properties: ['openDirectory', 'multiSelections'],
+  properties: ['openDirectory', 'multiSelections']
 };
 const DEFAULT_SAVE_DIALOG_OPTIONS: SaveDialogOptions = {
   title: 'Select the destination to Save',
   buttonLabel: 'Save',
-  properties: ['createDirectory', 'showOverwriteConfirmation'],
+  properties: ['createDirectory', 'showOverwriteConfirmation']
 };
 
 // / / / / / / VARIABLES / / / / / / /
@@ -115,26 +110,19 @@ let powerSaveBlockerId: number | null;
 // Behaviour on second instance for parent process
 const hasSingleInstanceLock = app.requestSingleInstanceLock();
 if (!hasSingleInstanceLock) {
-  log(
-    'Another app instance is currently active. Quitting this instance.',
-    undefined,
-    'WARN',
-  );
+  log('Another app instance is currently active. Quitting this instance.', undefined, 'WARN');
   app.quit();
 } else app.on('second-instance', handleSecondInstances);
 
-export const IS_DEVELOPMENT =
-  !app.isPackaged || process.env.NODE_ENV === 'development';
+export const IS_DEVELOPMENT = !app.isPackaged || process.env.NODE_ENV === 'development';
 
-const appIcon = nativeImage.createFromPath(
-  getAssetPath('images', 'logo_light_mode.png'),
-);
+const appIcon = nativeImage.createFromPath(noraAppIcon);
 
 // dotenv.config({ debug: true });
 saveAbortController('main', abortController);
 
 // Sentry.init({
-//   dsn: process.env.SENTRY_DSN,
+//   dsn: import.meta.env.MAIN_VITE_SENTRY_DSN,
 // });
 // ? / / / / / / / / / / / / / / / / / / / / / / /
 debug();
@@ -146,8 +134,8 @@ const APP_INFO = {
     os: os.release(),
     architechture: os.arch(),
     platform: os.platform(),
-    totalMemory: `${os.totalmem()} (~${Math.floor(os.totalmem() / (1024 * 1024 * 1024))} GB)`,
-  },
+    totalMemory: `${os.totalmem()} (~${Math.floor(os.totalmem() / (1024 * 1024 * 1024))} GB)`
+  }
 };
 
 log(`STARTING UP NORA`, APP_INFO, 'WARN');
@@ -160,12 +148,12 @@ const installExtensions = async () => {
   return installer
     .default(
       extensions.map((name) => installer[name]),
-      forceDownload,
+      forceDownload
     )
     .catch((err: unknown) =>
       log(
-        `====== ERROR OCCURRED WHEN TRYING TO INSTALL EXTENSIONS TO DEVTOOLS ======\nERROR : ${err}`,
-      ),
+        `====== ERROR OCCURRED WHEN TRYING TO INSTALL EXTENSIONS TO DEVTOOLS ======\nERROR : ${err}`
+      )
     );
 };
 
@@ -185,9 +173,7 @@ const createWindow = async () => {
     minWidth: 700,
     title: 'Nora',
     webPreferences: {
-      preload: app.isPackaged
-        ? path.join(__dirname, 'preload.js')
-        : path.join(__dirname, '../../.erb/dll/preload.js'),
+      preload: join(__dirname, '../preload/index.js')
     },
     visualEffectState: 'followWindow',
     roundedCorners: true,
@@ -195,10 +181,14 @@ const createWindow = async () => {
     backgroundColor: getBackgroundColor(),
     icon: appIcon,
     titleBarStyle: 'hidden',
-    show: false,
+    show: false
   });
 
-  mainWindow.loadURL(resolveHtmlPath('index.html'));
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
+  } else {
+    mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
+  }
   mainWindow.once('ready-to-show', () => {
     if (app.hasSingleInstanceLock()) {
       log('Started checking for new songs during the application start.');
@@ -227,10 +217,10 @@ const createWindow = async () => {
 //       secure: true,
 //       supportFetchAPI: true,
 //       stream: true,
-//       bypassCSP: true,
-//     },
-//   },
-// ]);
+//       bypassCSP: true
+//     }
+//   }
+// ])
 
 app
   .whenReady()
@@ -242,39 +232,35 @@ app
     if (userData.windowState === 'maximized') mainWindow.maximize();
 
     if (!app.isDefaultProtocolClient(DEFAULT_APP_PROTOCOL)) {
-      log(
-        'No default protocol registered. Starting the default protocol registration process.',
-      );
+      log('No default protocol registered. Starting the default protocol registration process.');
       const res = app.setAsDefaultProtocolClient(DEFAULT_APP_PROTOCOL);
       if (res) log('Default protocol registered successfully.');
       else log('Default protocol registration failed.');
     }
 
-    // protocol.handle('nora', registerFileProtocol);
+    // protocol.handle('nora', registerFileProtocol)
 
     // protocol.handle('nora', async (req) => {
-    //   const { href } = new URL(req.url);
+    //   const { href } = new URL(req.url)
 
-    //   const urlWithQueries = href.replace(
-    //     /nora:[/\\]{1,2}localfiles[/\\]{1,2}/gm,
-    //     '',
-    //   );
+    //   const urlWithQueries = href.replace(/nora:[/\\]{1,2}localfiles[/\\]{1,2}/gm, '')
+    //   const [url] = urlWithQueries.split('?')
+    //   const fileUrl = pathToFileURL(url).toString()
 
     //   try {
-    //     const [url] = urlWithQueries.split('?');
-    //     const res = await net.fetch(pathToFileURL(url).toString());
-    //     console.log('c');
-    //     return res;
+    //     const res = await net.fetch(url)
+    //     console.log('c')
+    //     return res
     //   } catch (error) {
     //     log(
-    //       `====== ERROR OCCURRED WHEN TRYING TO LOCATE A RESOURCE IN THE SYSTEM. =======\nREQUEST : ${urlWithQueries}\nERROR : ${error}`,
-    //     );
+    //       `====== ERROR OCCURRED WHEN TRYING TO LOCATE A RESOURCE IN THE SYSTEM. =======\nREQUEST : ${urlWithQueries}\nFILE URL : ${fileUrl}\nERROR : ${error}`
+    //     )
     //     return new Response('bad', {
     //       status: 400,
-    //       headers: { 'content-type': 'text/html' },
-    //     });
+    //       headers: { 'content-type': 'text/html' }
+    //     })
     //   }
-    // });
+    // })
     protocol.registerFileProtocol('nora', registerFileProtocol);
 
     tray = new Tray(appIcon);
@@ -282,12 +268,11 @@ app
       {
         label: 'Show/Hide Nora',
         type: 'normal',
-        click: () =>
-          mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show(),
-        role: 'hide',
+        click: () => (mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()),
+        role: 'hide'
       },
       { type: 'separator' },
-      { label: 'Exit', type: 'normal', click: () => app.quit(), role: 'close' },
+      { label: 'Exit', type: 'normal', click: () => app.quit(), role: 'close' }
     ]);
 
     tray.setContextMenu(trayContextMenu);
@@ -324,13 +309,11 @@ app
 
     app.on('will-finish-launching', () => {
       crashReporter.start({ uploadToServer: false });
-      log(
-        `APP STARTUP COMMAND LINE ARGUMENTS\nARGS : [ ${process.argv.join(', ')} ]`,
-      );
+      log(`APP STARTUP COMMAND LINE ARGUMENTS\nARGS : [ ${process.argv.join(', ')} ]`);
     });
 
     mainWindow.webContents.addListener('zoom-changed', (_, dir) =>
-      log(`Renderer zoomed ${dir}. ${mainWindow.webContents.getZoomLevel()}`),
+      log(`Renderer zoomed ${dir}. ${mainWindow.webContents.getZoomLevel()}`)
     );
 
     // ? / / / / / / / / /  IPC RENDERER EVENTS  / / / / / / / / / / / /
@@ -347,9 +330,7 @@ app
       // });
 
       globalShortcut.register('F12', () => {
-        log(
-          'USER REQUESTED FOR DEVTOOLS USING GLOBAL SHORTCUT. - REQUEST WONT BE SERVED.',
-        );
+        log('USER REQUESTED FOR DEVTOOLS USING GLOBAL SHORTCUT. - REQUEST WONT BE SERVED.');
         // mainWindow.webContents.openDevTools({ mode: 'detach', activate: true });
       });
     }
@@ -375,17 +356,12 @@ function manageWindowFinishLoad() {
 
   if (windowDiamensions.mainWindow) {
     const { x, y } = windowDiamensions.mainWindow;
-    mainWindow.setSize(
-      x || MAIN_WINDOW_DEFAULT_SIZE_X,
-      y || MAIN_WINDOW_DEFAULT_SIZE_Y,
-      true,
-    );
+    mainWindow.setSize(x || MAIN_WINDOW_DEFAULT_SIZE_X, y || MAIN_WINDOW_DEFAULT_SIZE_Y, true);
   }
 
   mainWindow.show();
 
-  if (IS_DEVELOPMENT)
-    mainWindow.webContents.openDevTools({ mode: 'detach', activate: true });
+  if (IS_DEVELOPMENT) mainWindow.webContents.openDevTools({ mode: 'detach', activate: true });
 
   log(`STARTING UP THE RENDERER.`, undefined, 'WARN');
 
@@ -404,11 +380,7 @@ function handleBeforeQuit() {
   closeAllAbortControllers();
   clearTempArtworkFolder();
   clearDiscordRpcActivity();
-  log(
-    `QUITING NORA`,
-    { uptime: `${Math.floor(process.uptime())} seconds` },
-    'WARN',
-  );
+  log(`QUITING NORA`, { uptime: `${Math.floor(process.uptime())} seconds` }, 'WARN');
 }
 
 export function toggleAudioPlayingState(isPlaying: boolean) {
@@ -425,11 +397,7 @@ export function toggleOnBatteryPower() {
 export function sendMessageToRenderer(props: MessageToRendererProps) {
   const { messageCode, data } = props;
 
-  mainWindow.webContents.send(
-    'app/sendMessageToRendererEvent',
-    messageCode,
-    data,
-  );
+  mainWindow.webContents.send('app/sendMessageToRendererEvent', messageCode, data);
 }
 
 let dataUpdateEventTimeOutId: NodeJS.Timeout;
@@ -437,32 +405,23 @@ let dataEventsCache: DataUpdateEvent[] = [];
 export function dataUpdateEvent(
   dataType: DataUpdateEventTypes,
   data = [] as string[],
-  message?: string,
+  message?: string
 ) {
   if (dataUpdateEventTimeOutId) clearTimeout(dataUpdateEventTimeOutId);
   log(
     `Data update event fired with updated '${dataType}'.${data.length > 0 || message ? '\n' : ''}${
       data.length > 0 ? `DATA : ${data}; ` : ''
-    }${message ? `MESSAGE : ${data}; ` : ''}`,
+    }${message ? `MESSAGE : ${data}; ` : ''}`
   );
   addEventsToCache(dataType, data, message);
   dataUpdateEventTimeOutId = setTimeout(() => {
     console.log(dataEventsCache);
-    mainWindow.webContents.send(
-      'app/dataUpdateEvent',
-      dataEventsCache,
-      data,
-      message,
-    );
+    mainWindow.webContents.send('app/dataUpdateEvent', dataEventsCache, data, message);
     dataEventsCache = [];
   }, 1000);
 }
 
-function addEventsToCache(
-  dataType: DataUpdateEventTypes,
-  data = [] as string[],
-  message?: string,
-) {
+function addEventsToCache(dataType: DataUpdateEventTypes, data = [] as string[], message?: string) {
   for (let i = 0; i < dataEventsCache.length; i += 1) {
     if (dataEventsCache[i].dataType === dataType) {
       if (data.length > 0 || message) {
@@ -474,36 +433,15 @@ function addEventsToCache(
 
   const obj = {
     dataType,
-    eventData: data.length > 0 || message ? [{ data, message }] : [],
+    eventData: data.length > 0 || message ? [{ data, message }] : []
   } as DataUpdateEvent;
   return dataEventsCache.push(obj);
 }
 
-// async function registerFileProtocol(req: Request) {
-//   const urlWithQueries = decodeURI(req.url).replace(
-//     /nora:[/\\]{1,2}localFiles[/\\]{1,2}/gm,
-//     ''
-//   );
-
-//   try {
-//     const [url] = urlWithQueries.split('?');
-//     const res = await net.fetch(url);
-//     return res;
-//   } catch (error) {
-//     log(
-//       `====== ERROR OCCURRED WHEN TRYING TO LOCATE A RESOURCE IN THE SYSTEM. =======\nREQUEST : ${urlWithQueries}\nERROR : ${error}`
-//     );
-//     return new Response('404', { status: 404 });
-//   }
-// }
-
-function registerFileProtocol(
-  request: { url: string },
-  callback: (arg: string) => void,
-) {
+function registerFileProtocol(request: { url: string }, callback: (arg: string) => void) {
   const urlWithQueries = decodeURI(request.url).replace(
-    /nora:[/\\]{1,2}localFiles[/\\]{1,2}/gm,
-    '',
+    /nora:[/\\]{1,2}localfiles[/\\]{1,2}/gm,
+    ''
   );
 
   try {
@@ -511,7 +449,7 @@ function registerFileProtocol(
     return callback(url);
   } catch (error) {
     log(
-      `====== ERROR OCCURRED WHEN TRYING TO LOCATE A RESOURCE IN THE SYSTEM. =======\nREQUEST : ${urlWithQueries}\nERROR : ${error}`,
+      `====== ERROR OCCURRED WHEN TRYING TO LOCATE A RESOURCE IN THE SYSTEM. =======\nREQUEST : ${urlWithQueries}\nERROR : ${error}`
     );
     return callback('404');
   }
@@ -538,13 +476,8 @@ function manageAuthServices(url: string) {
   return undefined;
 }
 
-export async function showOpenDialog(
-  openDialogOptions = DEFAULT_OPEN_DIALOG_OPTIONS,
-) {
-  const { canceled, filePaths } = await dialog.showOpenDialog(
-    mainWindow,
-    openDialogOptions,
-  );
+export async function showOpenDialog(openDialogOptions = DEFAULT_OPEN_DIALOG_OPTIONS) {
+  const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, openDialogOptions);
 
   if (canceled) {
     log('User cancelled the folder selection popup.');
@@ -553,13 +486,8 @@ export async function showOpenDialog(
   return filePaths;
 }
 
-export async function showSaveDialog(
-  saveDialogOptions = DEFAULT_SAVE_DIALOG_OPTIONS,
-) {
-  const { canceled, filePath } = await dialog.showSaveDialog(
-    mainWindow,
-    saveDialogOptions,
-  );
+export async function showSaveDialog(saveDialogOptions = DEFAULT_SAVE_DIALOG_OPTIONS) {
+  const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, saveDialogOptions);
 
   if (canceled) {
     log('User cancelled the folder selection popup.');
@@ -577,12 +505,10 @@ function manageAppMoveEvent() {
         : playerType === 'full'
           ? 'full-screen-player'
           : 'main-player'
-    } window to (x: ${x}, y: ${y}) coordinates.`,
+    } window to (x: ${x}, y: ${y}) coordinates.`
   );
-  if (playerType === 'mini')
-    saveUserData('windowPositions.miniPlayer', { x, y });
-  else if (playerType === 'normal')
-    saveUserData('windowPositions.mainWindow', { x, y });
+  if (playerType === 'mini') saveUserData('windowPositions.miniPlayer', { x, y });
+  else if (playerType === 'normal') saveUserData('windowPositions.mainWindow', { x, y });
 }
 
 function manageAppResizeEvent() {
@@ -594,12 +520,10 @@ function manageAppResizeEvent() {
         : playerType === 'full'
           ? 'full-screen-player'
           : 'main-player'
-    } to (x: ${x}, y: ${y}) diamensions.`,
+    } to (x: ${x}, y: ${y}) diamensions.`
   );
-  if (playerType === 'mini')
-    saveUserData('windowDiamensions.miniPlayer', { x, y });
-  else if (playerType === 'normal')
-    saveUserData('windowDiamensions.mainWindow', { x, y });
+  if (playerType === 'mini') saveUserData('windowDiamensions.miniPlayer', { x, y });
+  else if (playerType === 'normal') saveUserData('windowDiamensions.mainWindow', { x, y });
 }
 
 async function handleSecondInstances(_: unknown, argv: string[]) {
@@ -611,10 +535,7 @@ async function handleSecondInstances(_: unknown, argv: string[]) {
   process.argv = argv;
 
   manageSecondInstanceArgs(argv);
-  mainWindow?.webContents.send(
-    'app/playSongFromUnknownSource',
-    await checkForStartUpSongs(),
-  );
+  mainWindow?.webContents.send('app/playSongFromUnknownSource', await checkForStartUpSongs());
 }
 
 function manageSecondInstanceArgs(args: string[]) {
@@ -641,14 +562,13 @@ export async function revealSongInFileExplorer(songId: string) {
   const songs = getSongsData();
 
   for (let x = 0; x < songs.length; x += 1) {
-    if (songs[x].songId === songId)
-      return shell.showItemInFolder(songs[x].path);
+    if (songs[x].songId === songId) return shell.showItemInFolder(songs[x].path);
   }
   return log(
     `Revealing song file in explorer failed because song couldn't be found in the library.`,
     { songId },
     'WARN',
-    { sendToRenderer: { messageCode: 'SONG_REVEAL_FAILED' } },
+    { sendToRenderer: { messageCode: 'SONG_REVEAL_FAILED' } }
   );
 }
 
@@ -661,7 +581,7 @@ export const addToSongsOutsideLibraryData = (data: SongOutsideLibraryData) =>
 
 export const updateSongsOutsideLibraryData = (
   songidOrPath: string,
-  data: SongOutsideLibraryData,
+  data: SongOutsideLibraryData
 ): void => {
   for (let i = 0; i < songsOutsideLibraryData.length; i += 1) {
     if (
@@ -672,14 +592,8 @@ export const updateSongsOutsideLibraryData = (
       return undefined;
     }
   }
-  log(
-    `songIdOrPath ${songidOrPath} does't exist on songsOutsideLibraryData.`,
-    undefined,
-    'ERROR',
-  );
-  throw new Error(
-    `songIdOrPath ${songidOrPath} does't exist on songsOutsideLibraryData.`,
-  );
+  log(`songIdOrPath ${songidOrPath} does't exist on songsOutsideLibraryData.`, undefined, 'ERROR');
+  throw new Error(`songIdOrPath ${songidOrPath} does't exist on songsOutsideLibraryData.`);
 };
 
 export async function getImagefileLocation() {
@@ -687,7 +601,7 @@ export async function getImagefileLocation() {
     title: 'Select an Image',
     buttonLabel: 'Select Image',
     filters: [{ name: 'Images', extensions: ['jpg', 'jpeg', 'webp', 'png'] }],
-    properties: ['openFile'],
+    properties: ['openFile']
   });
   return filePaths[0];
 }
@@ -696,7 +610,7 @@ export async function getFolderLocation() {
   const folderPaths = await showOpenDialog({
     title: 'Select a Folder',
     buttonLabel: 'Select Folder',
-    properties: ['createDirectory', 'openDirectory'],
+    properties: ['createDirectory', 'openDirectory']
   });
   return folderPaths[0];
 }
@@ -707,14 +621,12 @@ export async function resetApp(isRestartApp = true) {
     await mainWindow.webContents.session.clearStorageData();
     resetAppCache();
     await resetAppData();
-    log(
-      `########## SUCCESSFULLY RESETTED THE APP. RESTARTING THE APP NOW. ##########`,
-    );
+    log(`########## SUCCESSFULLY RESETTED THE APP. RESTARTING THE APP NOW. ##########`);
     sendMessageToRenderer({ messageCode: 'RESET_SUCCESSFUL' });
   } catch (error) {
     sendMessageToRenderer({ messageCode: 'RESET_FAILED' });
     log(
-      `====== ERROR OCCURRED WHEN RESETTING THE APP. RELOADING THE APP NOW.  ======\nERROR : ${error}`,
+      `====== ERROR OCCURRED WHEN RESETTING THE APP. RELOADING THE APP NOW.  ======\nERROR : ${error}`
     );
   } finally {
     log(`====== RELOADING THE ${isRestartApp ? 'APP' : 'RENDERER'} ======`);
@@ -725,12 +637,8 @@ export async function resetApp(isRestartApp = true) {
 
 export function toggleMiniPlayerAlwaysOnTop(isMiniPlayerAlwaysOnTop: boolean) {
   if (mainWindow) {
-    if (playerType === 'mini')
-      mainWindow.setAlwaysOnTop(isMiniPlayerAlwaysOnTop);
-    saveUserData(
-      'preferences.isMiniPlayerAlwaysOnTop',
-      isMiniPlayerAlwaysOnTop,
-    );
+    if (playerType === 'mini') mainWindow.setAlwaysOnTop(isMiniPlayerAlwaysOnTop);
+    saveUserData('preferences.isMiniPlayerAlwaysOnTop', isMiniPlayerAlwaysOnTop);
   }
 }
 
@@ -739,7 +647,7 @@ export async function getRendererLogs(
   data?: Record<string, unknown>,
   messageType: LogMessageTypes = 'INFO',
   forceWindowRestart = false,
-  forceMainRestart = false,
+  forceMainRestart = false
 ) {
   log(mes, data, messageType, undefined, 'UI');
 
@@ -792,12 +700,7 @@ export function changePlayerType(type: PlayerTypes) {
       if (windowDiamensions.miniPlayer) {
         const { x, y } = windowDiamensions.miniPlayer;
         mainWindow.setSize(x, y, true);
-      } else
-        mainWindow.setSize(
-          MINI_PLAYER_MIN_SIZE_X,
-          MINI_PLAYER_MIN_SIZE_Y,
-          true,
-        );
+      } else mainWindow.setSize(MINI_PLAYER_MIN_SIZE_X, MINI_PLAYER_MIN_SIZE_Y, true);
       if (windowPositions.miniPlayer) {
         const { x, y } = windowPositions.miniPlayer;
         mainWindow.setPosition(x, y, true);
@@ -816,12 +719,7 @@ export function changePlayerType(type: PlayerTypes) {
       if (windowDiamensions.mainWindow) {
         const { x, y } = windowDiamensions.mainWindow;
         mainWindow.setSize(x, y, true);
-      } else
-        mainWindow.setSize(
-          MAIN_WINDOW_DEFAULT_SIZE_X,
-          MAIN_WINDOW_DEFAULT_SIZE_Y,
-          true,
-        );
+      } else mainWindow.setSize(MAIN_WINDOW_DEFAULT_SIZE_X, MAIN_WINDOW_DEFAULT_SIZE_Y, true);
       if (windowPositions.mainWindow) {
         const { x, y } = windowPositions.mainWindow;
         mainWindow.setPosition(x, y, true);
@@ -842,10 +740,7 @@ export function changePlayerType(type: PlayerTypes) {
 function manageWindowOnDisplayMetricsChange(primaryDisplay: Display) {
   const currentDisplay = screen.getDisplayMatching(mainWindow.getBounds());
   if (!currentDisplay || currentDisplay.id !== primaryDisplay.id) {
-    mainWindow.setPosition(
-      primaryDisplay.workArea.x,
-      primaryDisplay.workArea.y,
-    );
+    mainWindow.setPosition(primaryDisplay.workArea.x, primaryDisplay.workArea.y);
   }
 }
 
@@ -854,23 +749,20 @@ function manageWindowPositionInMonitor() {
   manageWindowOnDisplayMetricsChange(primaryDisplay);
 
   // Event listener for display change events
-  screen.on('display-metrics-changed', () =>
-    manageWindowOnDisplayMetricsChange(primaryDisplay),
-  );
+  screen.on('display-metrics-changed', () => manageWindowOnDisplayMetricsChange(primaryDisplay));
 }
 
 export async function toggleAutoLaunch(autoLaunchState: boolean) {
   const options = app.getLoginItemSettings();
   const userData = getUserData();
-  const openAsHidden =
-    userData?.preferences?.openWindowAsHiddenOnSystemStart ?? false;
+  const openAsHidden = userData?.preferences?.openWindowAsHiddenOnSystemStart ?? false;
 
   log(`AUTO LAUNCH STATE : ${options.openAtLogin}`);
 
   app.setLoginItemSettings({
     openAtLogin: autoLaunchState,
     name: 'Nora',
-    openAsHidden,
+    openAsHidden
   });
 
   saveUserData('preferences.autoLaunchApp', autoLaunchState);

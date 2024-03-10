@@ -2,7 +2,7 @@ import NodeID3 from 'node-id3';
 import { ReactElement, ReactNode } from 'react';
 import { ButtonProps } from 'renderer/components/Button';
 import { DropdownOption } from 'renderer/components/Dropdown';
-import { api } from '../main/preload';
+import { api } from '../preload/preload';
 import { LastFMSessionData } from './last_fm_api';
 import { SimilarArtist, Tag } from './last_fm_artist_info_api';
 
@@ -162,7 +162,7 @@ declare global {
 
   type PaginatingData = { start: number; end: number };
 
-  interface PaginatedResult<DataType extends unknown, SortType extends string> {
+  interface PaginatedResult<DataType, SortType extends string> {
     data: DataType[];
     sortType: SortType;
     start: number;
@@ -336,13 +336,7 @@ declare global {
     songId: string;
   }
 
-  type QueueTypes =
-    | 'album'
-    | 'playlist'
-    | 'artist'
-    | 'songs'
-    | 'genre'
-    | 'folder';
+  type QueueTypes = 'album' | 'playlist' | 'artist' | 'songs' | 'genre' | 'folder';
 
   // ? User data related types
 
@@ -736,13 +730,7 @@ declare global {
 
   // ? Search related types
 
-  type SearchFilters =
-    | 'All'
-    | 'Artists'
-    | 'Albums'
-    | 'Songs'
-    | 'Playlists'
-    | 'Genres';
+  type SearchFilters = 'All' | 'Artists' | 'Albums' | 'Songs' | 'Playlists' | 'Genres';
 
   interface SearchResult {
     songs: SongData[];
@@ -886,10 +874,7 @@ declare global {
   interface NavigationHistory {
     pageTitle: PageTitles;
     data?: PageData;
-    onPageChange?: (
-      changedPageTitle: PageTitles,
-      changedPageData?: any,
-    ) => void;
+    onPageChange?: (changedPageTitle: PageTitles, changedPageData?: any) => void;
   }
 
   interface PageData extends Record<string, unknown> {
@@ -981,23 +966,11 @@ declare global {
     | 'mostLovedAscending'
     | 'mostLovedDescending';
 
-  type PlaylistSortTypes =
-    | 'aToZ'
-    | 'zToA'
-    | 'noOfSongsAscending'
-    | 'noOfSongsDescending';
+  type PlaylistSortTypes = 'aToZ' | 'zToA' | 'noOfSongsAscending' | 'noOfSongsDescending';
 
-  type AlbumSortTypes =
-    | 'aToZ'
-    | 'zToA'
-    | 'noOfSongsAscending'
-    | 'noOfSongsDescending';
+  type AlbumSortTypes = 'aToZ' | 'zToA' | 'noOfSongsAscending' | 'noOfSongsDescending';
 
-  type GenreSortTypes =
-    | 'aToZ'
-    | 'zToA'
-    | 'noOfSongsAscending'
-    | 'noOfSongsDescending';
+  type GenreSortTypes = 'aToZ' | 'zToA' | 'noOfSongsAscending' | 'noOfSongsDescending';
 
   type FolderSortTypes =
     | 'aToZ'
@@ -1212,12 +1185,7 @@ declare global {
 
   // ? Song metadata results related types
 
-  export type SongMetadataSource =
-    | 'LAST_FM'
-    | 'GENIUS'
-    | 'DEEZER'
-    | 'ITUNES'
-    | 'MUSIXMATCH';
+  export type SongMetadataSource = 'LAST_FM' | 'GENIUS' | 'DEEZER' | 'ITUNES' | 'MUSIXMATCH';
 
   interface SongMetadataResultFromInternet {
     title: string;

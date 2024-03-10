@@ -6,24 +6,13 @@ import { DEFAULT_FILE_URL, getSongsData } from '../filesystem';
 import log from '../log';
 import { sendMessageToRenderer, addToSongsOutsideLibraryData } from '../main';
 import { generateRandomId } from '../utils/randomId';
-import getAssetPath from '../utils/getAssetPath';
 import sendAudioData from './sendAudioData';
 
-const defaultSongCoverPath = getAssetPath(
-  'images',
-  'webp',
-  'song_cover_default.webp',
-);
+import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_default.webp?asset';
 
-const sendAudioDataFromPath = async (
-  songPath: string,
-): Promise<AudioPlayerData> => {
+const sendAudioDataFromPath = async (songPath: string): Promise<AudioPlayerData> => {
   log(`Parsing song data from song path -${songPath}-`);
-  if (
-    appPreferences.supportedMusicExtensions.some((ext) =>
-      path.extname(songPath).includes(ext),
-    )
-  ) {
+  if (appPreferences.supportedMusicExtensions.some((ext) => path.extname(songPath).includes(ext))) {
     const songs = getSongsData();
 
     try {
@@ -42,34 +31,28 @@ const sendAudioDataFromPath = async (
           }
         }
         if (metadata) {
-          const artworkData = metadata.common.picture
-            ? metadata.common.picture[0].data
-            : '';
+          const artworkData = metadata.common.picture ? metadata.common.picture[0].data : '';
 
           const tempArtworkPath = path.join(
             DEFAULT_FILE_URL,
             metadata.common.picture
-              ? (await createTempArtwork(metadata.common.picture[0].data).catch(
-                  (err) => {
-                    log(
-                      `Artwork creation failed for song from an unknown source.\nPATH : ${songPath}; ERROR : ${err}`,
-                    );
-                    return defaultSongCoverPath;
-                  },
-                )) ?? defaultSongCoverPath
-              : defaultSongCoverPath,
+              ? (await createTempArtwork(metadata.common.picture[0].data).catch((err) => {
+                  log(
+                    `Artwork creation failed for song from an unknown source.\nPATH : ${songPath}; ERROR : ${err}`
+                  );
+                  return songCoverImage;
+                })) ?? songCoverImage
+              : songCoverImage
           );
 
           const title =
-            metadata.common.title ||
-            path.basename(songPath).split('.')[0] ||
-            'Unknown Title';
+            metadata.common.title || path.basename(songPath).split('.')[0] || 'Unknown Title';
 
           const data: AudioPlayerData = {
             title,
             artists: metadata.common.artists?.map((artistName) => ({
               artistId: '',
-              name: artistName,
+              name: artistName
             })),
             duration: metadata.format.duration ?? 0,
             artwork: Buffer.from(artworkData).toString('base64') || undefined,
@@ -78,7 +61,7 @@ const sendAudioDataFromPath = async (
             songId: generateRandomId(),
             isAFavorite: false,
             isKnownSource: false,
-            isBlacklisted: false,
+            isBlacklisted: false
           };
 
           addToSongsOutsideLibraryData({
@@ -86,11 +69,11 @@ const sendAudioDataFromPath = async (
             songId: data.songId,
             artworkPath: data.artworkPath,
             duration: data.duration,
-            path: data.path,
+            path: data.path
           });
 
           sendMessageToRenderer({
-            messageCode: 'PLAYBACK_FROM_UNKNOWN_SOURCE',
+            messageCode: 'PLAYBACK_FROM_UNKNOWN_SOURCE'
           });
           return data;
         }
@@ -98,20 +81,15 @@ const sendAudioDataFromPath = async (
         throw new Error('SONG_NOT_FOUND' as ErrorCodes);
       }
       log(
-        `ERROR OCCURRED WHEN READING data.json TO GET SONGS DATA. data.json didn't return an array.`,
+        `ERROR OCCURRED WHEN READING data.json TO GET SONGS DATA. data.json didn't return an array.`
       );
       throw new Error('SONG_DATA_SEND_FAILED' as ErrorCodes);
     } catch (err) {
-      log(
-        `ERROR OCCURRED WHEN TRYING TO SEND SONGS DATA FROM AN UNPARSED SOURCE.`,
-        { err },
-      );
+      log(`ERROR OCCURRED WHEN TRYING TO SEND SONGS DATA FROM AN UNPARSED SOURCE.`, { err });
       throw new Error('SONG_DATA_SEND_FAILED' as ErrorCodes);
     }
   } else {
-    log(
-      `USER TRIED TO OPEN A FILE WITH AN UNSUPPORTED EXTENSION '${path.extname(songPath)}'.`,
-    );
+    log(`USER TRIED TO OPEN A FILE WITH AN UNSUPPORTED EXTENSION '${path.extname(songPath)}'.`);
     throw new Error('UNSUPPORTED_FILE_EXTENSION' as ErrorCodes);
   }
 };

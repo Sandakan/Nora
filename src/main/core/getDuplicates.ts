@@ -28,8 +28,8 @@ export const getArtistDuplicates = (artistName: string) => {
   const duplicateArtists = duplicates.map(
     (artist): Artist => ({
       ...artist,
-      artworkPaths: getArtistArtworkPath(artist.artworkName),
-    }),
+      artworkPaths: getArtistArtworkPath(artist.artworkName)
+    })
   );
 
   return duplicateArtists;

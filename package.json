@@ -1,4 +1,41 @@
 {
+  "name": "nora",
+  "version": "2.5.0-stable",
+  "description": "An Electron application with React and TypeScript",
+  "keywords": [
+    "music",
+    "electron",
+    "react",
+    "typescript",
+    "music-player",
+    "lyrics",
+    "windows",
+    "desktop"
+  ],
+  "main": "./out/main/main.js",
+  "author": {
+    "email": "adsandakannipunajith2003@outlook.com",
+    "name": "Sandakan Nipunajith",
+    "url": "https://github.com/Sandakan"
+  },
+  "homepage": "https://github.com/Sandakan/Nora",
+  "urls": {
+    "discord_invite_url": "https://discord.gg/c5rGKnBs4y",
+    "raw_repository_url": "https://raw.githubusercontent.com/Sandakan/Nora/",
+    "website_url": "https://noramusic.netlify.app/"
+  },
+  "bugs": {
+    "email": "sandakannipunajith@gmail.com",
+    "url": "https://github.com/Sandakan/Nora/issues"
+  },
+  "releaseNotes": {
+    "json": "https://raw.githubusercontent.com/Sandakan/Nora/master/release-notes.json",
+    "md": "https://raw.githubusercontent.com/Sandakan/Nora/master/changelog.md"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sandakan/Nora"
+  },
   "appPreferences": {
     "metadataEditingSupportedExtensions": [
       "mp3"
@@ -14,289 +51,7 @@
       "flac"
     ]
   },
-  "author": {
-    "email": "adsandakannipunajith2003@outlook.com",
-    "name": "Sandakan Nipunajith",
-    "url": "https://github.com/Sandakan"
-  },
-  "browserslist": [],
-  "bugs": {
-    "email": "sandakannipunajith@gmail.com",
-    "url": "https://github.com/Sandakan/Nora/issues"
-  },
-  "build": {
-    "afterSign": ".erb/scripts/notarize.js",
-    "appId": "com.sandakannipunajith.nora",
-    "artifactName": "${productName} Setup ${version}-${os}-${arch}.${ext}",
-    "asar": true,
-    "asarUnpack": [
-      "**\\*.{node,dll}",
-      "**/node_modules/sharp/**/*",
-      "**/node_modules/@img/**/*"
-    ],
-    "copyright": "Copyright © 2023 Sandakan Nipunajith",
-    "directories": {
-      "app": "release/app",
-      "buildResources": "assets",
-      "output": "release/build"
-    },
-    "dmg": {
-      "contents": [
-        {
-          "x": 130,
-          "y": 220
-        },
-        {
-          "path": "/Applications",
-          "type": "link",
-          "x": 410,
-          "y": 220
-        }
-      ]
-    },
-    "extraResources": [
-      "./assets/**",
-      "!**/assets/images/other/*",
-      "!**/assets/installer_assets/*",
-      "!**/assets/other/*",
-      "!**/assets/*.ts"
-    ],
-    "fileAssociations": [
-      {
-        "ext": "mp3",
-        "icon": "./assets/installer_assets/file_associated_icons/mp3.ico",
-        "mimeType": "audio/mpeg",
-        "role": "Editor"
-      },
-      {
-        "ext": "wav",
-        "icon": "./assets/installer_assets/file_associated_icons/wav.ico",
-        "mimeType": "audio/wav",
-        "role": "Editor"
-      },
-      {
-        "ext": "ogg",
-        "icon": "./assets/installer_assets/file_associated_icons/ogg.ico",
-        "mimeType": "audio/ogg",
-        "role": "Editor"
-      },
-      {
-        "ext": "aac",
-        "icon": "./assets/installer_assets/file_associated_icons/aac.ico",
-        "mimeType": "audio/aac",
-        "role": "Editor"
-      },
-      {
-        "ext": "m4r",
-        "icon": "./assets/installer_assets/file_associated_icons/m4r.ico",
-        "mimeType": "audio/x-m4r",
-        "role": "Editor"
-      },
-      {
-        "ext": "flac",
-        "icon": "./assets/installer_assets/file_associated_icons/flac.ico",
-        "mimeType": "audio/flac",
-        "role": "Editor"
-      }
-    ],
-    "files": [
-      "dist",
-      "node_modules",
-      "package.json"
-    ],
-    "icon": "./assets/icon.ico",
-    "linux": {
-      "category": "AudioVideo",
-      "synopsis": "An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar.",
-      "target": [
-        "AppImage",
-        "deb"
-      ]
-    },
-    "mac": {
-      "category": "public.app-category.music",
-      "darkModeSupport": true,
-      "entitlements": "assets/entitlements.mac.plist",
-      "entitlementsInherit": "assets/entitlements.mac.plist",
-      "gatekeeperAssess": false,
-      "hardenedRuntime": true,
-      "icon": "./assets/icon.icns",
-      "target": {
-        "arch": [
-          "arm64",
-          "x64"
-        ],
-        "target": "default"
-      },
-      "type": "distribution"
-    },
-    "nsis": {
-      "allowElevation": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "installerIcon": "./assets/icon.ico",
-      "installerSidebar": "./assets/installer_assets/sidebar.bmp",
-      "license": "./LICENSE.txt",
-      "oneClick": false,
-      "perMachine": false,
-      "uninstallerIcon": "./assets/icon.ico"
-    },
-    "productName": "Nora",
-    "protocols": {
-      "name": "nora-protocol",
-      "schemes": [
-        "nora"
-      ]
-    },
-    "publish": {
-      "owner": "Sandakan",
-      "provider": "github"
-    },
-    "win": {
-      "target": [
-        "nsis"
-      ]
-    }
-  },
-  "dependencies": {
-    "didyoumean2": "^6.0.1",
-    "discord-rpc-revamp": "^2.0.3",
-    "electron-store": "^8.1.0",
-    "electron-updater": "^6.1.7",
-    "i18next": "^23.7.6",
-    "music-metadata": "^7.13.4",
-    "node-id3": "^0.2.6",
-    "node-vibrant": "^3.2.1-alpha.1",
-    "react": "^18.2.0",
-    "react-beautiful-dnd": "^13.1.1",
-    "react-dom": "^18.2.0",
-    "react-i18next": "^14.0.0",
-    "react-window": "^1.8.9",
-    "songlyrics": "^2.4.5"
-  },
-  "description": "An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar.",
-  "devDependencies": {
-    "@electron/notarize": "^2.1.0",
-    "@electron/rebuild": "^3.2.13",
-    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.10",
-    "@teamsupercell/typings-for-css-modules-loader": "^2.5.2",
-    "@types/dotenv-webpack": "^7.0.4",
-    "@types/jest": "^29.5.2",
-    "@types/node": "^18.16.3",
-    "@types/react": "^18.2.61",
-    "@types/react-beautiful-dnd": "^13.1.4",
-    "@types/react-dom": "^18.2.5",
-    "@types/react-test-renderer": "^18.0.0",
-    "@types/react-window": "^1.8.5",
-    "@types/webpack-bundle-analyzer": "^4.6.0",
-    "@typescript-eslint/eslint-plugin": "^6.4.0",
-    "@typescript-eslint/parser": "^6.4.0",
-    "autoprefixer": "^10.4.14",
-    "browserslist-config-erb": "^0.0.3",
-    "chalk": "^4.1.2",
-    "concurrently": "^8.2.0",
-    "cross-env": "^7.0.3",
-    "css-loader": "^6.8.1",
-    "css-minimizer-webpack-plugin": "^6.0.0",
-    "detect-port": "^1.5.1",
-    "dotenv": "^16.3.0",
-    "dotenv-webpack": "^8.0.1",
-    "electron": "^27.1.3",
-    "electron-builder": "^24.4.0",
-    "electron-debug": "^3.2.0",
-    "electron-devtools-installer": "^3.2.0",
-    "electronmon": "^2.0.2",
-    "eslint": "^8.43.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-erb": "^4.0.6",
-    "eslint-import-resolver-typescript": "^3.5.5",
-    "eslint-import-resolver-webpack": "^0.13.2",
-    "eslint-plugin-compat": "^4.1.4",
-    "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-jest": "^27.2.1",
-    "eslint-plugin-jsx-a11y": "^6.7.1",
-    "eslint-plugin-promise": "^6.1.1",
-    "eslint-plugin-react": "^7.32.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "file-loader": "^6.2.0",
-    "file-type": "^19.0.0",
-    "html-webpack-plugin": "^5.5.3",
-    "husky": "^9.0.11",
-    "i18next-parser": "^8.9.0",
-    "identity-obj-proxy": "^3.0.0",
-    "jest": "^29.5.0",
-    "jest-environment-jsdom": "^29.5.0",
-    "mini-css-extract-plugin": "^2.7.6",
-    "postcss": "^8.4.24",
-    "postcss-loader": "^8.0.0",
-    "prettier": "^3.0.0",
-    "prettier-plugin-tailwindcss": "^0.5.3",
-    "react-refresh": "^0.14.0",
-    "rimraf": "^3.0.2",
-    "style-loader": "^3.3.3",
-    "tailwindcss": "^3.3.2",
-    "terser-webpack-plugin": "^5.3.9",
-    "ts-jest": "^29.1.0",
-    "ts-loader": "^9.4.3",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.1.3",
-    "url-loader": "^4.1.1",
-    "webpack": "^5.87.0",
-    "webpack-bundle-analyzer": "^4.9.0",
-    "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.0.2",
-    "webpack-merge": "^5.9.0"
-  },
-  "devEngines": {
-    "node": ">=14.x",
-    "npm": ">=7.x"
-  },
-  "electronmon": {
-    "patterns": [
-      "!**/**",
-      "src/main/**"
-    ]
-  },
-  "homepage": "https://github.com/Sandakan/Nora",
-  "jest": {
-    "transform": {
-      "\\.(ts|tsx|js|jsx)$": "ts-jest"
-    }
-  },
-  "keywords": [
-    "music",
-    "electron",
-    "react",
-    "typescript",
-    "music-player",
-    "lyrics",
-    "windows",
-    "desktop"
-  ],
-  "license": "MIT",
-  "lint-staged": {
-    "*.json,.{eslintrc,prettierrc}": [
-      "prettier --ignore-path .eslintignore --parser json --write"
-    ],
-    "*.{css,scss}": [
-      "prettier --ignore-path .eslintignore --single-quote --write"
-    ],
-    "*.{html,md,yml}": [
-      "prettier --ignore-path .eslintignore --single-quote --write"
-    ],
-    "*.{js,jsx,ts,tsx}": [
-      "cross-env NODE_ENV=development eslint --cache"
-    ]
-  },
-  "main": "./src/main/main.ts",
-  "name": "nora",
   "overrides": {
-    "electron": {
-      "@electron/get": "^2.0.0"
-    },
-    "json5": "^2.2.2",
-    "loader-utils": "^1.4.2",
-    "minimatch": "^3.0.5",
     "node-vibrant": {
       "@vibrant/image-node": {
         "@jimp/types": {
@@ -305,49 +60,73 @@
           }
         }
       }
-    },
-    "semver": ">=7.5.3",
-    "xml2js": "^0.5.0",
-    "yaml": ">=2.2.2",
-    "@pmmmwh/react-refresh-webpack-plugin": {
-      "webpack-dev-server": "^5.0.2"
     }
   },
-  "productName": "Nora",
-  "releaseNotes": {
-    "json": "https://raw.githubusercontent.com/Sandakan/Nora/master/release-notes.json",
-    "md": "https://raw.githubusercontent.com/Sandakan/Nora/master/changelog.md"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Sandakan/Nora"
-  },
   "scripts": {
-    "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
-    "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.prod.ts",
-    "build:renderer": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.prod.ts",
     "husky-test": "npm run prettier-check && npm run test",
-    "lint": "cross-env NODE_ENV=development eslint . --ext .ts,.tsx",
     "lint-fix": "cross-env NODE_ENV=development eslint . --fix --ext .ts,.tsx",
     "lint-save-results": "cross-env NODE_ENV=development eslint . --ext .ts,.tsx -o ./lint_results.txt",
-    "package": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --publish never",
-    "package-linux": "ts-node ./.erb/scripts/clean.js dist && npm run build && electron-builder build --linux --publish never",
-    "postinstall": "ts-node .erb/scripts/check-native-dep.js && electron-builder install-app-deps && cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.renderer.dev.dll.ts",
     "prepare": "husky install",
     "prettier-check": "prettier --check .",
     "prettier-write": "prettier --write .",
-    "rebuild": "electron-rebuild --parallel --types prod,dev,optional --module-dir release/app",
-    "start": "ts-node ./.erb/scripts/check-port-in-use.js && npm run start:renderer",
-    "start:main": "cross-env NODE_ENV=development electronmon --inspect=5858 --remote-debugging-port=9223 --trace-warnings -r ts-node/register/transpile-only .",
-    "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
-    "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
-    "localize": "i18next 'src/renderer/**/*' -o assets/locales/$LOCALE/$NAMESPACE.json",
-    "test": "jest --collect-coverage"
+    "format": "prettier --write .",
+    "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
+    "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
+    "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
+    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "start": "electron-vite preview",
+    "dev": "electron-vite dev --inspect",
+    "build": "electron-vite build",
+    "postinstall": "electron-builder install-app-deps",
+    "build:unpack": "npm run build && electron-builder --dir",
+    "build:win": "npm run build && electron-builder --win",
+    "build:mac": "electron-vite build && electron-builder --mac",
+    "build:linux": "electron-vite build && electron-builder --linux"
   },
-  "urls": {
-    "discord_invite_url": "https://discord.gg/c5rGKnBs4y",
-    "raw_repository_url": "https://raw.githubusercontent.com/Sandakan/Nora/",
-    "website_url": "https://noramusic.netlify.app/"
+  "dependencies": {
+    "@electron-toolkit/preload": "^3.0.0",
+    "@electron-toolkit/utils": "^3.0.0",
+    "didyoumean2": "^6.0.1",
+    "discord-rpc-revamp": "^2.0.3",
+    "electron-store": "^8.1.0",
+    "electron-updater": "^6.1.7",
+    "i18next": "^23.7.6",
+    "music-metadata": "^7.13.4",
+    "node-id3": "^0.2.6",
+    "node-vibrant": "^3.2.1-alpha.1",
+    "react-beautiful-dnd": "^13.1.1",
+    "react-i18next": "^14.0.0",
+    "react-window": "^1.8.9",
+    "sharp": "^0.33.2",
+    "songlyrics": "^2.4.5"
   },
-  "version": "2.5.0-stable"
+  "devDependencies": {
+    "@electron-toolkit/eslint-config-prettier": "^2.0.0",
+    "@electron-toolkit/eslint-config-ts": "^1.0.1",
+    "@electron-toolkit/tsconfig": "^1.0.1",
+    "@types/node": "^20.11.25",
+    "@types/react": "^18.2.48",
+    "@types/react-dom": "^18.2.18",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.18",
+    "electron": "^29.1.1",
+    "electron-builder": "^24.4.0",
+    "electron-debug": "^3.2.0",
+    "electron-devtools-installer": "^3.2.0",
+    "electron-vite": "^2.0.0",
+    "eslint": "^8.56.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "postcss": "^8.4.35",
+    "prettier": "^3.2.4",
+    "prettier-plugin-tailwindcss": "^0.5.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwindcss": "^3.3.2",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.12"
+  }
 }

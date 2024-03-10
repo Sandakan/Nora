@@ -1,19 +1,13 @@
 /* eslint-disable no-await-in-loop */
 import path from 'path';
 import fsSync from 'fs';
-import {
-  getUserData,
-  setUserData,
-  supportedMusicExtensions,
-} from '../filesystem';
+import { getUserData, setUserData, supportedMusicExtensions } from '../filesystem';
 import log from '../log';
 import { closeAbortController } from './controlAbortControllers';
 import addWatchersToFolders from './addWatchersToFolders';
 import { sendMessageToRenderer } from '../main';
 
-export const getAllFoldersFromFolderStructures = (
-  folderStructures: FolderStructure[],
-) => {
+export const getAllFoldersFromFolderStructures = (folderStructures: FolderStructure[]) => {
   const folderData: MusicFolderData[] = [];
 
   for (const structure of folderStructures) {
@@ -21,9 +15,7 @@ export const getAllFoldersFromFolderStructures = (
     folderData.push({ path: folderPath, stats });
 
     if (structure.subFolders.length > 0) {
-      const subFolders = getAllFoldersFromFolderStructures(
-        structure.subFolders,
-      );
+      const subFolders = getAllFoldersFromFolderStructures(structure.subFolders);
       folderData.push(...subFolders);
     }
   }
@@ -41,31 +33,22 @@ export const getAllFilePathsFromFolder = (folderPath: string) => {
     return filePaths;
   } catch (error) {
     log(
-      `Error occurred when getting file paths from '${path.basename(
-        folderPath,
-      )}' folder`,
+      `Error occurred when getting file paths from '${path.basename(folderPath)}' folder`,
       { error },
-      'ERROR',
+      'ERROR'
     );
     return [];
   }
 };
 
-export const getAllFilesFromFolderStructures = (
-  folderStructures: FolderStructure[],
-) => {
+export const getAllFilesFromFolderStructures = (folderStructures: FolderStructure[]) => {
   const allFolders = getAllFoldersFromFolderStructures(folderStructures);
-  const allFiles = allFolders
-    .map((folder) => getAllFilePathsFromFolder(folder.path))
-    .flat();
+  const allFiles = allFolders.map((folder) => getAllFilePathsFromFolder(folder.path)).flat();
 
   return allFiles;
 };
 
-export const doesFolderExistInFolderStructure = (
-  dir: string,
-  folders?: FolderStructure[],
-) => {
+export const doesFolderExistInFolderStructure = (dir: string, folders?: FolderStructure[]) => {
   let musicFolders: FolderStructure[] = [];
   if (folders === undefined) musicFolders = getUserData().musicFolders;
   else musicFolders = folders;
@@ -73,10 +56,7 @@ export const doesFolderExistInFolderStructure = (
   for (const folder of musicFolders) {
     if (folder.path === dir) return true;
     if (folder.subFolders.length > 0) {
-      const isFolderExistInSubDirs = doesFolderExistInFolderStructure(
-        dir,
-        folder.subFolders,
-      );
+      const isFolderExistInSubDirs = doesFolderExistInFolderStructure(dir, folder.subFolders);
       if (isFolderExistInSubDirs) return true;
     }
   }
@@ -85,7 +65,7 @@ export const doesFolderExistInFolderStructure = (
 
 const updateStructure = (
   structure: FolderStructure,
-  musicFolders: FolderStructure[],
+  musicFolders: FolderStructure[]
 ): FolderStructure[] => {
   let isFound = false;
 
@@ -96,9 +76,8 @@ const updateStructure = (
       const filteredFolderSubFolders = folder.subFolders.filter(
         (folderSubFolder) =>
           !structure.subFolders.some(
-            (structureSubFolder) =>
-              structureSubFolder.path === folderSubFolder.path,
-          ),
+            (structureSubFolder) => structureSubFolder.path === folderSubFolder.path
+          )
       );
 
       filteredFolderSubFolders.push(...structure.subFolders);
@@ -130,7 +109,7 @@ const clearAllFolderWatches = () => {
 
 export const saveFolderStructures = async (
   structures: FolderStructure[],
-  resetWatchers = false,
+  resetWatchers = false
 ) => {
   let musicFolders = [...getUserData().musicFolders];
 
@@ -145,27 +124,22 @@ export const saveFolderStructures = async (
   return undefined;
 };
 
-const parseFolderStructuresForSongPaths = async (
-  folderStructures: FolderStructure[],
-) => {
-  const foldersWithStatData =
-    getAllFoldersFromFolderStructures(folderStructures);
+const parseFolderStructuresForSongPaths = async (folderStructures: FolderStructure[]) => {
+  const foldersWithStatData = getAllFoldersFromFolderStructures(folderStructures);
 
   sendMessageToRenderer({
     messageCode: 'FOLDER_PARSED_FOR_DIRECTORIES',
     data: {
       count: foldersWithStatData.length,
-      folderCount: folderStructures.length,
-    },
+      folderCount: folderStructures.length
+    }
   });
   log(
-    `${foldersWithStatData.length} directories found in ${folderStructures.length} selected folders.`,
+    `${foldersWithStatData.length} directories found in ${folderStructures.length} selected folders.`
   );
 
   const allFiles = getAllFilesFromFolderStructures(folderStructures);
-  log(
-    `${allFiles.length} files found in the directory ${folderStructures.length}`,
-  );
+  log(`${allFiles.length} files found in the directory ${folderStructures.length}`);
 
   await saveFolderStructures(folderStructures, true);
 
@@ -174,9 +148,7 @@ const parseFolderStructuresForSongPaths = async (
     return supportedMusicExtensions.includes(fileExtension);
   });
 
-  log(
-    `${allSongPaths.length} songs found in the directory ${folderStructures.length}`,
-  );
+  log(`${allSongPaths.length} songs found in the directory ${folderStructures.length}`);
   return allSongPaths;
 };
 

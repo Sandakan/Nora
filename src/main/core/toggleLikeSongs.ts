@@ -1,6 +1,6 @@
 import {
   addAFavoriteToLastFM,
-  removeAFavoriteFromLastFM,
+  removeAFavoriteFromLastFM
 } from '../other/lastFm/sendFavoritesDataToLastFM';
 import { getSongsData, setSongsData } from '../filesystem';
 import { getSongArtworkPath } from '../fs/resolveFilePaths';
@@ -20,13 +20,9 @@ const likeTheSong = (song: SavableSongData, preventLogging = false) => {
       sendMessageToRenderer({
         messageCode: 'SONG_LIKE',
         data: {
-          name:
-            song.title.length > 20
-              ? `${song.title.substring(0, 20).trim()}...`
-              : song.title,
-          artworkPath: getSongArtworkPath(song.songId, song.isArtworkAvailable)
-            .artworkPath,
-        },
+          name: song.title.length > 20 ? `${song.title.substring(0, 20).trim()}...` : song.title,
+          artworkPath: getSongArtworkPath(song.songId, song.isArtworkAvailable).artworkPath
+        }
       });
     song.isAFavorite = true;
     return song;
@@ -46,13 +42,9 @@ const dislikeTheSong = (song: SavableSongData, preventLogging = false) => {
       sendMessageToRenderer({
         messageCode: 'SONG_DISLIKE',
         data: {
-          name:
-            song.title.length > 20
-              ? `${song.title.substring(0, 20).trim()}...`
-              : song.title,
-          artworkPath: getSongArtworkPath(song.songId, song.isArtworkAvailable)
-            .artworkPath,
-        },
+          name: song.title.length > 20 ? `${song.title.substring(0, 20).trim()}...` : song.title,
+          artworkPath: getSongArtworkPath(song.songId, song.isArtworkAvailable).artworkPath
+        }
       });
     return song;
   }
@@ -63,17 +55,13 @@ const toggleLikeSongs = async (songIds: string[], isLikeSong?: boolean) => {
   const songs = getSongsData();
   const result: ToggleLikeSongReturnValue = {
     likes: [],
-    dislikes: [],
+    dislikes: []
   };
 
   log(
     `Requested to ${
-      isLikeSong !== undefined
-        ? isLikeSong
-          ? 'like'
-          : 'dislike'
-        : 'toggle like'
-    } ${songIds.length} songs.`,
+      isLikeSong !== undefined ? (isLikeSong ? 'like' : 'dislike') : 'toggle like'
+    } ${songIds.length} songs.`
   );
 
   if (songs.length > 0) {

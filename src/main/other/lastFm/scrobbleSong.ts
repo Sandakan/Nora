@@ -2,10 +2,7 @@
 /* eslint-disable no-await-in-loop */
 import { getSongsData, getUserData } from '../../filesystem';
 import log from '../../log';
-import {
-  LastFMScrobblePostResponse,
-  ScrobbleParams,
-} from '../../../@types/last_fm_api';
+import { LastFMScrobblePostResponse, ScrobbleParams } from '../../../@types/last_fm_api';
 import { checkIfConnectedToInternet } from '../../main';
 import { generateApiRequestBodyForLastFMPostRequests } from './generateApiRequestBodyForLastFMPostRequests';
 import getLastFmAuthData from './getLastFMAuthData';
@@ -15,8 +12,7 @@ const scrobbleSong = async (songId: string, startTimeInSecs: number) => {
     const userData = getUserData();
     const isConnectedToInternet = checkIfConnectedToInternet();
 
-    const isScrobblingEnabled =
-      userData.preferences.sendSongScrobblingDataToLastFM;
+    const isScrobblingEnabled = userData.preferences.sendSongScrobblingDataToLastFM;
 
     if (isScrobblingEnabled && isConnectedToInternet) {
       const songs = getSongsData();
@@ -33,29 +29,26 @@ const scrobbleSong = async (songId: string, startTimeInSecs: number) => {
           artist: song.artists?.map((artist) => artist.name).join(', ') || '',
           timestamp: Math.floor(startTimeInSecs),
           album: song.album?.name,
-          albumArtist: song?.albumArtists
-            ?.map((artist) => artist.name)
-            .join(', '),
+          albumArtist: song?.albumArtists?.map((artist) => artist.name).join(', '),
           trackNumber: song.trackNo,
-          duration: Math.ceil(song.duration),
+          duration: Math.ceil(song.duration)
         };
 
         const body = generateApiRequestBodyForLastFMPostRequests({
           method: 'track.scrobble',
           authData,
-          params,
+          params
         });
 
         const res = await fetch(url, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/x-www-form-urlencoded'
           },
-          body,
+          body
         });
 
-        if (res.status === 200)
-          return log(`Scrobbled song ${songId} accepted.`);
+        if (res.status === 200) return log(`Scrobbled song ${songId} accepted.`);
 
         const json: LastFMScrobblePostResponse = await res.json();
         return log('Failed to scrobble song to LastFM', { json }, 'WARN');
@@ -64,11 +57,11 @@ const scrobbleSong = async (songId: string, startTimeInSecs: number) => {
 
     return log('Scrobble song request ignored', {
       isScrobblingEnabled,
-      isConnectedToInternet,
+      isConnectedToInternet
     });
   } catch (error) {
     return log('Error occurred when scrobbling song data to LastFM.', {
-      error,
+      error
     });
   }
 };

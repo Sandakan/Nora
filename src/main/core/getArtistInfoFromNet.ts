@@ -15,9 +15,7 @@ import { SimilarArtist } from '../../@types/last_fm_artist_info_api';
 
 const DEEZER_BASE_URL = 'https://api.deezer.com/';
 
-const getArtistInfoFromDeezer = async (
-  artistName: string,
-): Promise<DeezerArtistInfo[]> => {
+const getArtistInfoFromDeezer = async (artistName: string): Promise<DeezerArtistInfo[]> => {
   const isConnectedToInternet = checkIfConnectedToInternet();
   if (isConnectedToInternet) {
     try {
@@ -39,7 +37,7 @@ const getArtistInfoFromDeezer = async (
       log(
         `ERROR OCCURRED PARSING JSON DATA FETCHED FROM DEEZER API ABOUT ARTISTS ARTWORKS.`,
         { error },
-        'ERROR',
+        'ERROR'
       );
       throw new Error(error as string);
     }
@@ -47,7 +45,7 @@ const getArtistInfoFromDeezer = async (
     log(
       `ERROR OCCURRED WHEN TRYING TO FETCH FROM DEEZER API ABOUT ARTISTS ARTWORKS. APP IS NOT CONNECTED TO THE INTERNET.`,
       undefined,
-      'ERROR',
+      'ERROR'
     );
     throw new Error('NO_NETWORK_CONNECTION' as MessageCodes);
   }
@@ -76,44 +74,39 @@ const getArtistArtworksFromNet = async (artist: SavableArtist) => {
         {
           caseSensitive: false,
           matchPath: ['name'],
-          returnType: ReturnTypeEnums.FIRST_CLOSEST_MATCH,
-        },
+          returnType: ReturnTypeEnums.FIRST_CLOSEST_MATCH
+        }
       ) as unknown as DeezerArtistInfo | null;
 
       if (closestResult) {
-        const picture_xl = getAValidDeezerArtistImage(
-          closestResult?.picture_xl,
-        );
+        const picture_xl = getAValidDeezerArtistImage(closestResult?.picture_xl);
         const picture_small = getAValidDeezerArtistImage(
           closestResult?.picture_small ||
             closestResult?.picture_medium ||
             closestResult?.picture_big ||
-            closestResult?.picture_xl,
+            closestResult?.picture_xl
         );
         const picture_medium = getAValidDeezerArtistImage(
           closestResult?.picture_medium ||
             closestResult?.picture_big ||
             closestResult?.picture_xl ||
-            closestResult?.picture_small,
+            closestResult?.picture_small
         );
 
         if (picture_small && picture_medium)
           return {
             picture_small,
             picture_medium,
-            picture_xl,
+            picture_xl
           };
-        log(
-          `Artist artwork for ${artist.artistId} from deezer is a placeholder image.`,
-          {
-            images: [
-              closestResult?.picture_small,
-              closestResult?.picture_medium,
-              closestResult?.picture_big,
-              closestResult?.picture_xl,
-            ],
-          },
-        );
+        log(`Artist artwork for ${artist.artistId} from deezer is a placeholder image.`, {
+          images: [
+            closestResult?.picture_small,
+            closestResult?.picture_medium,
+            closestResult?.picture_big,
+            closestResult?.picture_xl
+          ]
+        });
       }
     }
   }
@@ -127,10 +120,7 @@ const getArtistDataFromSavableArtistData = (artist: SavableArtist): Artist => {
 
 type ArtistInfoPayload = Awaited<ReturnType<typeof getArtistInfoFromLastFM>>;
 
-const getSimilarArtistsFromArtistInfo = (
-  data: ArtistInfoPayload,
-  artists: SavableArtist[],
-) => {
+const getSimilarArtistsFromArtistInfo = (data: ArtistInfoPayload, artists: SavableArtist[]) => {
   const unparsedsimilarArtistData = data.artist?.similar?.artist;
   const availableArtists: SimilarArtist[] = [];
   const unAvailableArtists: SimilarArtist[] = [];
@@ -142,7 +132,7 @@ const getSimilarArtistsFromArtistInfo = (
           availableArtists.push({
             name: artist.name,
             url: unparsedSimilarArtist.url,
-            artistData: getArtistDataFromSavableArtistData(artist),
+            artistData: getArtistDataFromSavableArtistData(artist)
           });
           // eslint-disable-next-line no-continue
           continue similarArtistLoop;
@@ -150,7 +140,7 @@ const getSimilarArtistsFromArtistInfo = (
       }
       unAvailableArtists.push({
         name: unparsedSimilarArtist.name,
-        url: unparsedSimilarArtist.url,
+        url: unparsedSimilarArtist.url
       });
     }
   }
@@ -158,12 +148,8 @@ const getSimilarArtistsFromArtistInfo = (
   return { availableArtists, unAvailableArtists };
 };
 
-const getArtistInfoFromNet = async (
-  artistId: string,
-): Promise<ArtistInfoFromNet> => {
-  log(
-    `Requested artist information related to an artist with id ${artistId} from the internet`,
-  );
+const getArtistInfoFromNet = async (artistId: string): Promise<ArtistInfoFromNet> => {
+  log(`Requested artist information related to an artist with id ${artistId} from the internet`);
   const artists = getArtistsData();
   if (Array.isArray(artists) && artists.length > 0) {
     for (let x = 0; x < artists.length; x += 1) {
@@ -172,13 +158,8 @@ const getArtistInfoFromNet = async (
         const artistArtworks = await getArtistArtworksFromNet(artist);
         const artistInfo = await getArtistInfoFromLastFM(artist.name);
         if (artistArtworks && artistInfo) {
-          const artistPalette = await generatePalette(
-            artistArtworks.picture_medium,
-          );
-          const similarArtists = getSimilarArtistsFromArtistInfo(
-            artistInfo,
-            artists,
-          );
+          const artistPalette = await generatePalette(artistArtworks.picture_medium);
+          const similarArtists = getSimilarArtistsFromArtistInfo(artistInfo, artists);
 
           if (!artist.onlineArtworkPaths) {
             artists[x].onlineArtworkPaths = artistArtworks;
@@ -190,24 +171,24 @@ const getArtistInfoFromNet = async (
             artistBio: artistInfo.artist.bio.summary,
             artistPalette,
             similarArtists,
-            tags: artistInfo.artist?.tags?.tag || [],
+            tags: artistInfo.artist?.tags?.tag || []
           };
         }
         log(
-          `ERROR OCCURRED WHEN FETCHING ARTIST ARTWORKS FROM DEEZER NETWORK OR FETCHING ARTIST INFO FROM LAST_FM NETWORK.`,
+          `ERROR OCCURRED WHEN FETCHING ARTIST ARTWORKS FROM DEEZER NETWORK OR FETCHING ARTIST INFO FROM LAST_FM NETWORK.`
         );
         throw new Error(
-          'ERROR OCCURRED WHEN FETCHING ARTIST ARTWORKS FROM DEEZER NETWORK OR FETCHING ARTIST INFO FROM LAST_FM NETWORK.',
+          'ERROR OCCURRED WHEN FETCHING ARTIST ARTWORKS FROM DEEZER NETWORK OR FETCHING ARTIST INFO FROM LAST_FM NETWORK.'
         );
       }
     }
     log(
-      `No artists found with the given name ${artistId} when trying to fetch artist info from the internet.`,
+      `No artists found with the given name ${artistId} when trying to fetch artist info from the internet.`
     );
     throw new Error(`no artists found with the given name ${artistId}`);
   }
   log(
-    `ERROR OCCURRED WHEN SEARCHING FOR ARTISTS IN getArtistInfoFromNet FUNCTION. ARTISTS ARRAY IS EMPTY.`,
+    `ERROR OCCURRED WHEN SEARCHING FOR ARTISTS IN getArtistInfoFromNet FUNCTION. ARTISTS ARRAY IS EMPTY.`
   );
   throw new Error('NO_ARTISTS_FOUND' as MessageCodes);
 };

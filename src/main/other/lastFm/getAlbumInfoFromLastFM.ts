@@ -8,7 +8,7 @@ import {
   AlbumInfo,
   ParsedAlbumTrack,
   LastFMAlbumInfo,
-  Tag,
+  Tag
 } from '../../../@types/last_fm_album_info_api';
 import { getAudioInfoFromSavableSongData } from './getSimilarTracks';
 
@@ -33,7 +33,7 @@ const getParsedAlbumTags = (tags?: Tag | Tag[]) => {
 
 const parseAlbumInfoFromLastFM = (
   lastFmAlbumInfo: AlbumInfo,
-  album: SavableAlbum,
+  album: SavableAlbum
 ): LastFMAlbumInfo => {
   const { tracks, tags, wiki } = lastFmAlbumInfo;
   const songs = getSongsData();
@@ -54,7 +54,7 @@ const parseAlbumInfoFromLastFM = (
               artists: song.artists?.map((artist) => artist.name),
               songData: getAudioInfoFromSavableSongData(song),
               url: track.url,
-              rank: track['@attr'].rank,
+              rank: track['@attr'].rank
             });
           } else {
             availableTracksUnlinkedToAlbum.push({
@@ -62,7 +62,7 @@ const parseAlbumInfoFromLastFM = (
               artists: song.artists?.map((artist) => artist.name),
               songData: getAudioInfoFromSavableSongData(song),
               url: track.url,
-              rank: track['@attr'].rank,
+              rank: track['@attr'].rank
             });
           }
           continue trackLoop;
@@ -72,14 +72,12 @@ const parseAlbumInfoFromLastFM = (
         title: track.name,
         artists: [track.artist.name],
         url: track.url,
-        rank: track['@attr'].rank,
+        rank: track['@attr'].rank
       });
     }
 
-    const sortedAvailAlbumTracks =
-      availableTracksLinkedToAlbum.sort(sortTracks);
-    const sortedAvailNonAlbumTracks =
-      availableTracksUnlinkedToAlbum.sort(sortTracks);
+    const sortedAvailAlbumTracks = availableTracksLinkedToAlbum.sort(sortTracks);
+    const sortedAvailNonAlbumTracks = availableTracksUnlinkedToAlbum.sort(sortTracks);
     const sortedUnAvailAlbumTracks = unAvailableTracks.sort(sortTracks);
     const sortedAllAlbumTracks = availableTracksLinkedToAlbum
       .concat(unAvailableTracks)
@@ -97,7 +95,7 @@ const parseAlbumInfoFromLastFM = (
       sortedAvailNonAlbumTracks,
       sortedUnAvailAlbumTracks,
       tags: getParsedAlbumTags(tags?.tag),
-      wiki: albumWiki,
+      wiki: albumWiki
     };
   }
   return {
@@ -106,18 +104,16 @@ const parseAlbumInfoFromLastFM = (
     sortedAvailAlbumTracks: [],
     sortedAvailNonAlbumTracks: [],
     sortedUnAvailAlbumTracks: [],
-    tags: getParsedAlbumTags(tags?.tag),
+    tags: getParsedAlbumTags(tags?.tag)
   };
 };
 
-const getAlbumInfoFromLastFM = async (
-  albumId: string,
-): Promise<LastFMAlbumInfo | undefined> => {
+const getAlbumInfoFromLastFM = async (albumId: string): Promise<LastFMAlbumInfo | undefined> => {
   try {
     const albums = getAlbumsData();
 
     // eslint-disable-next-line prefer-destructuring
-    const LAST_FM_API_KEY = process.env.LAST_FM_API_KEY;
+    const LAST_FM_API_KEY = import.meta.env.MAIN_VITE_LAST_FM_API_KEY;
     if (!LAST_FM_API_KEY) throw new Error('LastFM api key not found.');
 
     const isOnline = checkIfConnectedToInternet();
@@ -142,10 +138,7 @@ const getAlbumInfoFromLastFM = async (
       if ('error' in data) throw new Error(`${data.error} - ${data.message}`);
 
       const downloadedAlbumData = data.album;
-      const parsedAlbumData = parseAlbumInfoFromLastFM(
-        downloadedAlbumData,
-        selectedAlbum,
-      );
+      const parsedAlbumData = parseAlbumInfoFromLastFM(downloadedAlbumData, selectedAlbum);
       return parsedAlbumData;
     }
     return undefined;
@@ -153,7 +146,7 @@ const getAlbumInfoFromLastFM = async (
     log(
       'Error occurred when trying to get album info of an album from LastFM.',
       { error },
-      'ERROR',
+      'ERROR'
     );
     return undefined;
   }

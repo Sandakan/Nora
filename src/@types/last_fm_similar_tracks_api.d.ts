@@ -48,7 +48,7 @@ export enum Size {
   Large = 'large',
   Medium = 'medium',
   Mega = 'mega',
-  Small = 'small',
+  Small = 'small'
 }
 export interface Image {
   '#text': string;
