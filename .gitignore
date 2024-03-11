@@ -7,3 +7,4 @@ out
 thunder-tests
 coverage/
 *.m3u
+.npmrc

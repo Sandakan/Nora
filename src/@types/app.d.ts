@@ -1,13 +1,15 @@
 import NodeID3 from 'node-id3';
 import { ReactElement, ReactNode } from 'react';
-import { ButtonProps } from 'renderer/components/Button';
-import { DropdownOption } from 'renderer/components/Dropdown';
-import { api } from '../preload/preload';
+import { ButtonProps } from '../renderer/src/components/Button';
+import { DropdownOption } from '../renderer/src/components/Dropdown';
+import { api } from '../preload/index';
 import { LastFMSessionData } from './last_fm_api';
 import { SimilarArtist, Tag } from './last_fm_artist_info_api';
+import { ElectronAPI } from '@electron-toolkit/preload';
 
 declare global {
   interface Window {
+    electron: ElectronAPI;
     api: typeof api;
   }
 

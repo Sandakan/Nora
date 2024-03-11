@@ -25,6 +25,22 @@
       "presentation": {
         "hidden": true
       }
+    },
+    {
+      "name": "Main - attach",
+      "port": 5858,
+      "request": "attach",
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+      "type": "node",
+      "timeout": 15000,
+      "restart": {
+        "delay": 1000,
+        "maxAttempts": 10
+      },
+      "showAsyncStacks": true,
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/out/**/*.js", "!**/node_modules/**"]
     }
   ],
   "compounds": [

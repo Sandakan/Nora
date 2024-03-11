@@ -21,11 +21,11 @@ describe('hasDataChanged function check', () => {
 
   test('Complex comparisons with boolean returns', () => {
     const obj1 = {
-      songs: [{ songId: 'GsEGhFOgMA', title: 'Love Like This' }],
+      songs: [{ songId: 'GsEGhFOgMA', title: 'Love Like This' }]
     };
 
     const obj2 = {
-      songs: [{ songId: 'GsEGhFOgMA', title: 'Love Like This' }],
+      songs: [{ songId: 'GsEGhFOgMA', title: 'Love Like This' }]
     };
 
     const obj3 = {
@@ -43,9 +43,9 @@ describe('hasDataChanged function check', () => {
             picture_medium:
               'https://e-cdns-images.dzcdn.net/images/artist/2c54c5a0b0593a1c454def8cf6f31902/250x250-000000-80-0-0.jpg',
             picture_xl:
-              'https://e-cdns-images.dzcdn.net/images/artist/2c54c5a0b0593a1c454def8cf6f31902/1000x1000-000000-80-0-0.jpg',
-          },
-        },
+              'https://e-cdns-images.dzcdn.net/images/artist/2c54c5a0b0593a1c454def8cf6f31902/1000x1000-000000-80-0-0.jpg'
+          }
+        }
       ],
       album: {
         title: 'Love Like This',
@@ -56,7 +56,7 @@ describe('hasDataChanged function check', () => {
         songs: [{ songId: 'GsEGhFOgMA', title: 'Love Like This' }],
         noOfSongs: 1,
         artworkPath:
-          'nora:\\localFiles\\C:\\Users\\adsan\\AppData\\Roaming\\Nora\\song_covers\\GsEGhFOgMA.webp?ts=1699108835053',
+          'nora:\\localFiles\\C:\\Users\\adsan\\AppData\\Roaming\\Nora\\song_covers\\GsEGhFOgMA.webp?ts=1699108835053'
       },
       genres: [],
       releasedYear: 2020,
@@ -67,7 +67,7 @@ describe('hasDataChanged function check', () => {
       duration: 182.47,
       trackNumber: 1,
       isLyricsSavePending: false,
-      isMetadataSavePending: false,
+      isMetadataSavePending: false
     };
     const obj4 = {
       title: 'Love Like This',
@@ -84,9 +84,9 @@ describe('hasDataChanged function check', () => {
             picture_medium:
               'https://e-cdns-images.dzcdn.net/images/artist/2c54c5a0b0593a1c454def8cf6f31902/250x250-000000-80-0-0.jpg',
             picture_xl:
-              'https://e-cdns-images.dzcdn.net/images/artist/2c54c5a0b0593a1c454def8cf6f31902/1000x1000-000000-80-0-0.jpg',
-          },
-        },
+              'https://e-cdns-images.dzcdn.net/images/artist/2c54c5a0b0593a1c454def8cf6f31902/1000x1000-000000-80-0-0.jpg'
+          }
+        }
       ],
       album: {
         title: 'Love Like This',
@@ -97,7 +97,7 @@ describe('hasDataChanged function check', () => {
         songs: [{ songId: 'GsEGhFOgMA', title: 'Love Like This' }],
         noOfSongs: 1,
         artworkPath:
-          'nora:\\localFiles\\C:\\Users\\adsan\\AppData\\Roaming\\Nora\\song_covers\\GsEGhFOgMA.webp?ts=1699108835053',
+          'nora:\\localFiles\\C:\\Users\\adsan\\AppData\\Roaming\\Nora\\song_covers\\GsEGhFOgMA.webp?ts=1699108835053'
       },
       genres: [],
       releasedYear: 2020,
@@ -108,11 +108,11 @@ describe('hasDataChanged function check', () => {
       duration: 182.47,
       trackNumber: 1,
       isLyricsSavePending: false,
-      isMetadataSavePending: false,
+      isMetadataSavePending: false
     };
 
     const output1 = {
-      songs: false,
+      songs: false
     };
 
     const output2 = {
@@ -126,7 +126,7 @@ describe('hasDataChanged function check', () => {
       releasedYear: false,
       synchronizedLyrics: false,
       title: false,
-      trackNumber: false,
+      trackNumber: false
     };
 
     expect(hasDataChanged(obj1, obj1)).toStrictEqual(output1);
