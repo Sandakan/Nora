@@ -6,7 +6,7 @@ import {
   getArtistsData,
   getSongsData,
   setAlbumsData,
-  setSongsData,
+  setSongsData
 } from '../filesystem';
 import sendSongID3Tags from './sendSongId3Tags';
 
@@ -22,10 +22,7 @@ export const getSelectedArtist = (artistIdOrName: string) => {
   return undefined;
 };
 
-export const resolveArtistDuplicates = async (
-  selectedArtistId: string,
-  duplicateIds: string[],
-) => {
+export const resolveArtistDuplicates = async (selectedArtistId: string, duplicateIds: string[]) => {
   let updatedData: UpdateSongDataResult | undefined;
 
   const artists = getArtistsData();
@@ -49,25 +46,25 @@ export const resolveArtistDuplicates = async (
         for (const album of albums) {
           // check if the albums are linked to the duplicate artist
           const isAlbumLinkedToDuplicateArtist = artistAlbums.some(
-            (artistAlbum) => artistAlbum.albumId === album.albumId,
+            (artistAlbum) => artistAlbum.albumId === album.albumId
           );
           if (isAlbumLinkedToDuplicateArtist) {
             if (album.artists) {
               album.artists = album.artists!.filter(
-                (songArtist) => songArtist.artistId !== artist.artistId,
+                (songArtist) => songArtist.artistId !== artist.artistId
               );
             } else album.artists = [];
 
             album.artists?.push({
               artistId: selectedArtist.artistId,
-              name: selectedArtist.name,
+              name: selectedArtist.name
             });
 
             if (selectedArtist.albums === undefined) selectedArtist.albums = [];
 
             selectedArtist.albums?.push({
               albumId: album.albumId,
-              title: album.title,
+              title: album.title
             });
           }
         }
@@ -75,28 +72,21 @@ export const resolveArtistDuplicates = async (
         // loop through songs
         for (const song of songs) {
           // check if the songs are linked to a duplicate artist
-          if (
-            artistSongs.some((artistSong) => artistSong.songId === song.songId)
-          ) {
+          if (artistSongs.some((artistSong) => artistSong.songId === song.songId)) {
             // get song tags
             const songTags = await sendSongID3Tags(song.songId, true);
 
             if (songTags.artists) {
               songTags.artists = songTags.artists.filter(
-                (songArtist) => songArtist.artistId !== artist.artistId,
+                (songArtist) => songArtist.artistId !== artist.artistId
               );
             } else songTags.artists = [];
 
             songTags.artists?.push({
-              ...selectedArtist,
+              ...selectedArtist
             });
 
-            updatedData = await updateSongId3Tags(
-              song.songId,
-              songTags,
-              true,
-              true,
-            );
+            updatedData = await updateSongId3Tags(song.songId, songTags, true, true);
           }
         }
       }

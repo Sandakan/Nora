@@ -13,15 +13,13 @@ const resourcePaths = [
   'userData.json',
   'listening_data.json',
   'blacklist.json',
-  'song_covers',
+  'song_covers'
 ];
 const userDataPath = app.getPath('userData');
 
 const manageErrors = (err: any) => {
   if ('code' in err && err.code === 'ENOENT') {
-    return log(
-      `A RECOVERABLE ERROR OCURRED WHEN RESETTING AN APP DATA MODULE.\nERROR : ${err}`,
-    );
+    return log(`A RECOVERABLE ERROR OCURRED WHEN RESETTING AN APP DATA MODULE.\nERROR : ${err}`);
   }
   throw err;
 };
@@ -34,20 +32,13 @@ const resetAppData = async () => {
       if (isResourcePathADirectory)
         await fs
           .rm(path.join(userDataPath, resourcePath), {
-            recursive: true,
+            recursive: true
           })
           .catch(manageErrors);
-      else
-        await fs
-          .unlink(path.join(userDataPath, resourcePath))
-          .catch(manageErrors);
+      else await fs.unlink(path.join(userDataPath, resourcePath)).catch(manageErrors);
     }
   } catch (error) {
-    log(
-      `AN UNRECOVERABLE ERROR OCCURRED WHEN RESETTING THE APP.`,
-      { error },
-      'ERROR',
-    );
+    log(`AN UNRECOVERABLE ERROR OCCURRED WHEN RESETTING THE APP.`, { error }, 'ERROR');
     throw error;
   }
 };

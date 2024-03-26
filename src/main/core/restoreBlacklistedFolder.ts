@@ -9,27 +9,23 @@ const restoreBlacklistedFolders = async (blacklistedFolderPaths: string[]) => {
   const blacklist = getBlacklistData();
 
   for (const blacklistedFolderPath of blacklistedFolderPaths) {
-    const isParentBlacklisted = isParentFolderBlacklisted(
-      blacklistedFolderPath,
-    );
+    const isParentBlacklisted = isParentFolderBlacklisted(blacklistedFolderPath);
     const isParentNotInFolderPaths = !blacklistedFolderPaths.includes(
-      path.dirname(blacklistedFolderPath),
+      path.dirname(blacklistedFolderPath)
     );
 
     if (isParentBlacklisted && isParentNotInFolderPaths)
       sendMessageToRenderer({
-        messageCode:
-          'WHITELISTING_FOLDER_FAILED_DUE_TO_BLACKLISTED_PARENT_FOLDER',
+        messageCode: 'WHITELISTING_FOLDER_FAILED_DUE_TO_BLACKLISTED_PARENT_FOLDER',
         data: {
           folderName: path.basename(blacklistedFolderPath),
-          parentFolderName: path.dirname(blacklistedFolderPath),
-        },
+          parentFolderName: path.dirname(blacklistedFolderPath)
+        }
       });
   }
 
   blacklist.folderBlacklist = blacklist.folderBlacklist.filter(
-    (blacklistedFolderPath) =>
-      !blacklistedFolderPaths.includes(blacklistedFolderPath),
+    (blacklistedFolderPath) => !blacklistedFolderPaths.includes(blacklistedFolderPath)
   );
 
   setBlacklist(blacklist);
@@ -37,7 +33,7 @@ const restoreBlacklistedFolders = async (blacklistedFolderPaths: string[]) => {
   log(
     'Folder blacklist updated because some songs got removed from the blacklist.',
     { blacklistedFolderPaths },
-    'INFO',
+    'INFO'
   );
 };
 

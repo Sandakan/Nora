@@ -16,15 +16,11 @@ export const changeAppTheme = (theme?: AppTheme) => {
   const useSystemTheme = theme === 'system';
 
   if (mainWindow?.webContents)
-    mainWindow.webContents.send(
-      'app/systemThemeChange',
-      isDarkMode,
-      useSystemTheme,
-    );
+    mainWindow.webContents.send('app/systemThemeChange', isDarkMode, useSystemTheme);
 
   setUserData('theme', {
     isDarkMode,
-    useSystemTheme,
+    useSystemTheme
   });
   dataUpdateEvent('userData/theme', [theme ?? 'system']);
 };

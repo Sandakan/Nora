@@ -22,15 +22,11 @@ const convertLyricsToLrcFormat = (songLyrics: SongLyrics) => {
   return songLyrics.lyrics.unparsedLyrics;
 };
 
-const getLrcFileSaveDirectory = (
-  songPathWithoutProtocol: string,
-  lrcFileName: string,
-) => {
+const getLrcFileSaveDirectory = (songPathWithoutProtocol: string, lrcFileName: string) => {
   const userData = getUserData();
   let saveDirectory: string;
 
-  if (userData.customLrcFilesSaveLocation)
-    saveDirectory = userData.customLrcFilesSaveLocation;
+  if (userData.customLrcFilesSaveLocation) saveDirectory = userData.customLrcFilesSaveLocation;
   else {
     const songContainingFolderPath = path.dirname(songPathWithoutProtocol);
     saveDirectory = songContainingFolderPath;
@@ -39,15 +35,9 @@ const getLrcFileSaveDirectory = (
   return path.join(saveDirectory, `${lrcFileName}.lrc`);
 };
 
-const saveLyricsToLRCFile = async (
-  songPathWithoutProtocol: string,
-  songLyrics: SongLyrics,
-) => {
+const saveLyricsToLRCFile = async (songPathWithoutProtocol: string, songLyrics: SongLyrics) => {
   const songFileName = path.basename(songPathWithoutProtocol);
-  const lrcFilePath = getLrcFileSaveDirectory(
-    songPathWithoutProtocol,
-    songFileName,
-  );
+  const lrcFilePath = getLrcFileSaveDirectory(songPathWithoutProtocol, songFileName);
 
   const lrcFormattedLyrics = convertLyricsToLrcFormat(songLyrics);
 

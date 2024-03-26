@@ -3,10 +3,7 @@ import log from '../log';
 import { removeArtwork, storeArtworks } from '../other/artworks';
 import { getPlaylistData, setPlaylistData } from '../filesystem';
 import { dataUpdateEvent } from '../main';
-import {
-  getPlaylistArtworkPath,
-  resetArtworkCache,
-} from '../fs/resolveFilePaths';
+import { getPlaylistArtworkPath, resetArtworkCache } from '../fs/resolveFilePaths';
 
 const removePreviousArtwork = async (playlistId: string) => {
   const artworkPaths = getPlaylistArtworkPath(playlistId, true);
@@ -20,14 +17,9 @@ export default async (playlistId: string, artworkPath: string) => {
   for (let i = 0; i < playlists.length; i += 1) {
     if (playlists[i].playlistId === playlistId) {
       try {
-        if (playlists[i].isArtworkAvailable)
-          await removePreviousArtwork(playlistId);
+        if (playlists[i].isArtworkAvailable) await removePreviousArtwork(playlistId);
 
-        const artworkPaths = await storeArtworks(
-          playlistId,
-          'playlist',
-          artworkPath,
-        );
+        const artworkPaths = await storeArtworks(playlistId, 'playlist', artworkPath);
 
         playlists[i].isArtworkAvailable = !artworkPaths.isDefaultArtwork;
 

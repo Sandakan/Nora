@@ -6,7 +6,7 @@ import log from '../log';
 const featArtistsRegex = /\(? ?feat.? (?<featArtists>[\w&, À-ÿ\d]+)\)?/gm;
 
 const getArtist = (
-  name: string,
+  name: string
 ): {
   name: string;
   artistId?: string;
@@ -15,8 +15,7 @@ const getArtist = (
   const lowerCasedName = name.toLowerCase();
 
   for (const artist of artists) {
-    if (artist.name.toLowerCase() === lowerCasedName)
-      return { name, artistId: artist.artistId };
+    if (artist.name.toLowerCase() === lowerCasedName) return { name, artistId: artist.artistId };
   }
   return { name };
 };
@@ -24,13 +23,13 @@ const getArtist = (
 const resolveFeaturingArtists = async (
   songId: string,
   featArtistNames: string[],
-  removeFeatInfoInTitle = false,
+  removeFeatInfoInTitle = false
 ): Promise<UpdateSongDataResult> => {
   try {
     const songTags = await sendSongID3Tags(songId, true);
 
-    const featArtists: SongTagsArtistData[] = featArtistNames.map(
-      (featArtistName) => getArtist(featArtistName),
+    const featArtists: SongTagsArtistData[] = featArtistNames.map((featArtistName) =>
+      getArtist(featArtistName)
     );
 
     if (songTags?.artists) songTags?.artists.push(...featArtists);
@@ -45,16 +44,15 @@ const resolveFeaturingArtists = async (
 
     const updatedData = await updateSongId3Tags(songId, songTags, true, true);
 
-    log(
-      `Resolved suggestion of adding featured artists to the song '${songTags.title}'.`,
-    );
+    log(`Resolved suggestion of adding featured artists to the song '${songTags.title}'.`);
 
     return updatedData;
   } catch (error) {
-    log(
-      `Error occurred when resolving featuring artists suggestion for for a song`,
-      { songId, removeFeatInfoInTitle, error },
-    );
+    log(`Error occurred when resolving featuring artists suggestion for for a song`, {
+      songId,
+      removeFeatInfoInTitle,
+      error
+    });
     throw error;
   }
 };

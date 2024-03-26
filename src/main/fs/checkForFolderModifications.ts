@@ -11,7 +11,7 @@ const checkForFolderModifications = (foldername: string) => {
   const folders = getAllFoldersFromFolderStructures(musicFolders);
   const musicFolderPaths = folders.map((folder) => folder.path);
   const foldersWithDeletedFolderName = musicFolderPaths.filter(
-    (dir) => path.basename(dir) === path.basename(foldername),
+    (dir) => path.basename(dir) === path.basename(foldername)
   );
   if (foldersWithDeletedFolderName.length > 0) {
     for (let i = 0; i < foldersWithDeletedFolderName.length; i += 1) {
@@ -21,11 +21,7 @@ const checkForFolderModifications = (foldername: string) => {
 
         if (!folderExists) removeMusicFolder(folderPath);
       } catch (error) {
-        log(
-          'Error occurred when checking for folder modifications.',
-          { error },
-          'ERROR',
-        );
+        log('Error occurred when checking for folder modifications.', { error }, 'ERROR');
       }
     }
   }

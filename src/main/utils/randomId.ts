@@ -1,9 +1,6 @@
-import nanoid from 'nanoid';
+import { customAlphabet } from 'nanoid';
 
 export const generateRandomId = () => {
-  const id = nanoid.customAlphabet(
-    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
-    10,
-  );
+  const id = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 10);
   return id();
 };

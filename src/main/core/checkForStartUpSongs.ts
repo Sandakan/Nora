@@ -13,9 +13,7 @@ const checkForStartUpSongs = async () => {
     const argPath = process.argv[i];
     if (
       typeof argPath === 'string' &&
-      appPreferences.supportedMusicExtensions.some((ext) =>
-        path.extname(argPath).includes(ext),
-      )
+      appPreferences.supportedMusicExtensions.some((ext) => path.extname(argPath).includes(ext))
     ) {
       try {
         const stats = statSync(argPath);
@@ -25,20 +23,19 @@ const checkForStartUpSongs = async () => {
         }
       } catch (error) {
         log(
-          `ERROR OCCURRED WHEN VALIDATING PROCESS ARGUMENTS FOR STARTUP SONG PLAYBACK REQUESTS.\nERROR : ${error}`,
+          `ERROR OCCURRED WHEN VALIDATING PROCESS ARGUMENTS FOR STARTUP SONG PLAYBACK REQUESTS.\nERROR : ${error}`
         );
       }
     }
   }
   log(
-    `User request ${songsOnStartUp.length} number of songs to be played on startup.\nsongsOnStartUp : [ ${songsOnStartUp} ]`,
+    `User request ${songsOnStartUp.length} number of songs to be played on startup.\nsongsOnStartUp : [ ${songsOnStartUp} ]`
   );
   if (songsOnStartUp.length > 0) {
-    const audioData = await sendAudioDataFromPath(songsOnStartUp[0]).catch(
-      (err) =>
-        log(
-          `====== ERROR OCCURRED WHEN TRYING TO READ SONG DATA FROM PATH. =====\nPATH : ${songsOnStartUp[0]}\nERROR : ${err}`,
-        ),
+    const audioData = await sendAudioDataFromPath(songsOnStartUp[0]).catch((err) =>
+      log(
+        `====== ERROR OCCURRED WHEN TRYING TO READ SONG DATA FROM PATH. =====\nPATH : ${songsOnStartUp[0]}\nERROR : ${err}`
+      )
     );
     if (audioData) {
       return audioData;

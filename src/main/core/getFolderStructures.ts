@@ -28,20 +28,16 @@ export const generateFolderStructure = async (dir: string) => {
         lastModifiedDate: stats.mtime,
         lastChangedDate: stats.ctime,
         fileCreatedDate: stats.birthtime,
-        lastParsedDate: new Date(),
+        lastParsedDate: new Date()
       },
       subFolders: [],
-      noOfSongs: getSongPathsInAFolder(dir).length,
+      noOfSongs: getSongPathsInAFolder(dir).length
     };
 
     const subDirs = await getDirectories(dir);
     if (Array.isArray(subDirs) && subDirs.length > 0) {
-      const subDirsStructurePromise = subDirs.map((subDir) =>
-        generateFolderStructure(subDir),
-      );
-      const { fulfilled: subDirsStructures } = await getAllSettledPromises(
-        subDirsStructurePromise,
-      );
+      const subDirsStructurePromise = subDirs.map((subDir) => generateFolderStructure(subDir));
+      const { fulfilled: subDirsStructures } = await getAllSettledPromises(subDirsStructurePromise);
 
       structure.subFolders.push(...subDirsStructures);
 
@@ -63,7 +59,7 @@ export const getFolderStructures = async () => {
   const musicFolderPaths = await showOpenDialog();
 
   const { fulfilled: folderStructures } = await getAllSettledPromises(
-    musicFolderPaths.map((folderPath) => generateFolderStructure(folderPath)),
+    musicFolderPaths.map((folderPath) => generateFolderStructure(folderPath))
   );
 
   return folderStructures;

@@ -8,7 +8,7 @@ const getArtistInfoFromLastFM = async (artistName: string) => {
   const isConnectedToInternet = checkIfConnectedToInternet();
   if (isConnectedToInternet) {
     // eslint-disable-next-line prefer-destructuring
-    const LAST_FM_API_KEY = process.env.LAST_FM_API_KEY;
+    const LAST_FM_API_KEY = import.meta.env.MAIN_VITE_LAST_FM_API_KEY;
     try {
       if (typeof LAST_FM_API_KEY !== 'string') {
         log('undefined LAST_FM_API_KEY.', { LAST_FM_API_KEY }, 'WARN');
@@ -27,11 +27,9 @@ const getArtistInfoFromLastFM = async (artistName: string) => {
         const data = (await res.json()) as LastFmArtistInfoAPI;
         if ('error' in data) {
           log(
-            `Artist info of '${artistName}' not found in the internet.\nRESPONSE : ${data.error} => ${data.message}`,
+            `Artist info of '${artistName}' not found in the internet.\nRESPONSE : ${data.error} => ${data.message}`
           );
-          throw new Error(
-            `Artist info of '${artistName}' not found in the internet.`,
-          );
+          throw new Error(`Artist info of '${artistName}' not found in the internet.`);
         }
         return data;
       }
@@ -42,17 +40,15 @@ const getArtistInfoFromLastFM = async (artistName: string) => {
       log(
         `ERROR OCCURRED PARSING FETCHED DATA FROM LAST_FM API ABOUT ARTISTS INFORMATION.`,
         { error },
-        'ERROR',
+        'ERROR'
       );
-      throw new Error(
-        `An error occurred when parsing fetched data. error : ${error}`,
-      );
+      throw new Error(`An error occurred when parsing fetched data. error : ${error}`);
     }
   } else {
     log(
       `ERROR OCCURRED WHEN TRYING TO FETCH FROM DEEZER API ABOUT ARTIST INFORMATION. APP IS NOT CONNECTED TO THE INTERNET.`,
       undefined,
-      'ERROR',
+      'ERROR'
     );
     throw new Error('NO_NETWORK_CONNECTION' as MessageCodes);
   }

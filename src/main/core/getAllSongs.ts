@@ -4,22 +4,16 @@ import { getSongArtworkPath } from '../fs/resolveFilePaths';
 import log from '../log';
 import sortSongs from '../utils/sortSongs';
 import paginateData from '../utils/paginateData';
+import { getSelectedPaletteData } from '../other/generatePalette';
 
-const getAllSongs = async (
-  sortType = 'aToZ' as SongSortTypes,
-  paginatingData?: PaginatingData,
-) => {
+const getAllSongs = async (sortType = 'aToZ' as SongSortTypes, paginatingData?: PaginatingData) => {
   const songsData = getSongsData();
   const listeningData = getListeningData();
 
   let result = paginateData([] as AudioInfo[], sortType, paginatingData);
 
   if (songsData && songsData.length > 0) {
-    const audioData: AudioInfo[] = sortSongs(
-      songsData,
-      sortType,
-      listeningData,
-    ).map((songInfo) => {
+    const audioData: AudioInfo[] = sortSongs(songsData, sortType, listeningData).map((songInfo) => {
       const isBlacklisted = isSongBlacklisted(songInfo.songId, songInfo.path);
 
       return {
@@ -27,25 +21,22 @@ const getAllSongs = async (
         artists: songInfo.artists,
         album: songInfo.album,
         duration: songInfo.duration,
-        artworkPaths: getSongArtworkPath(
-          songInfo.songId,
-          songInfo.isArtworkAvailable,
-        ),
+        artworkPaths: getSongArtworkPath(songInfo.songId, songInfo.isArtworkAvailable),
         path: songInfo.path,
         year: songInfo.year,
         songId: songInfo.songId,
-        palette: songInfo.palette,
+        paletteData: getSelectedPaletteData(songInfo.paletteId),
         addedDate: songInfo.addedDate,
         isAFavorite: songInfo.isAFavorite,
-        isBlacklisted,
-      } satisfies AudioInfo;
+        isBlacklisted
+      } as AudioInfo;
     });
 
     result = paginateData(audioData, sortType, paginatingData);
   }
 
   log(
-    `Sending data related to all the songs with filters of sortType=${sortType} start=${result.start} end=${result.end}`,
+    `Sending data related to all the songs with filters of sortType=${sortType} start=${result.start} end=${result.end}`
   );
   return result;
 };

@@ -6,8 +6,7 @@ import path from 'path';
 import log from '../log';
 
 // using the comman > wmic logicaldisk get Name, Size, FreeSpace
-const winRootRegex =
-  /^(?<freeSpace>\d+) {0,}(?<name>\w+:) {0,}(?<size>\d+) {0,}$/gm;
+const winRootRegex = /^(?<freeSpace>\d+) {0,}(?<name>\w+:) {0,}(?<size>\d+) {0,}$/gm;
 
 // uses the command > df -h
 const linuxRootRegex =
@@ -22,20 +21,20 @@ const convertToBytes = (val: number, dataType: DataType = 'B') => {
 };
 
 const getRootSize = (
-  appPath: string,
-): Promise<{ freeSpace: number; size: number }> =>
+  appPath: string
+): Promise<{ freeSpace: number; size: number; rootDir: string }> =>
   new Promise((resolve, reject) => {
     try {
-      const output = { freeSpace: 0, size: 0 };
+      const output = { rootDir: '', freeSpace: 0, size: 0 };
       const platform = os.platform();
 
       if (platform === 'win32') {
         const { root } = path.parse(appPath);
-        const rootDir = root.replaceAll(path.sep, '');
+        output.rootDir = root.replaceAll(path.sep, '');
         childProcess.execFile(
           'cmd.exe',
           ['/c', 'wmic logicaldisk get Name, Size, FreeSpace'],
-          (error, stdout) => {
+          (error: unknown, stdout) => {
             if (error) {
               reject(new Error(`exec error: ${error}`));
             }
@@ -46,7 +45,7 @@ const getRootSize = (
               if (
                 groups &&
                 'name' in groups &&
-                groups.name === rootDir &&
+                groups.name === output.rootDir &&
                 'freeSpace' in groups &&
                 'size' in groups
               ) {
@@ -56,42 +55,35 @@ const getRootSize = (
               }
             }
             return resolve(output);
-          },
+          }
         );
       } else if (platform === 'linux')
-        childProcess.execFile(
-          '/bin/sh',
-          [`-c`, `df -h "${appPath}"`],
-          (error, stdout) => {
-            if (error) {
-              reject(new Error(`exec error: ${error}`));
-            }
+        childProcess.execFile('/bin/sh', [`-c`, `df -h "${appPath}"`], (error, stdout) => {
+          if (error) {
+            reject(new Error(`exec error: ${error}`));
+          }
 
-            const drives = stdout.matchAll(linuxRootRegex);
-            for (const drive of drives) {
-              const { groups } = drive;
-              if (
-                groups &&
-                'name' in groups &&
-                'size' in groups &&
-                'sizeType' in groups &&
-                'avail' in groups &&
-                'availType' in groups
-              ) {
-                output.size = convertToBytes(
-                  parseInt(groups.size),
-                  groups.sizeType as DataType,
-                );
-                output.freeSpace = convertToBytes(
-                  parseInt(groups.avail),
-                  groups.availType as DataType,
-                );
-                return resolve(output);
-              }
+          const drives = stdout.matchAll(linuxRootRegex);
+          for (const drive of drives) {
+            const { groups } = drive;
+            if (
+              groups &&
+              'name' in groups &&
+              'size' in groups &&
+              'sizeType' in groups &&
+              'avail' in groups &&
+              'availType' in groups
+            ) {
+              output.size = convertToBytes(parseInt(groups.size), groups.sizeType as DataType);
+              output.freeSpace = convertToBytes(
+                parseInt(groups.avail),
+                groups.availType as DataType
+              );
+              return resolve(output);
             }
-            return resolve(output);
-          },
-        );
+          }
+          return resolve(output);
+        });
       else log(`No support for getting root size in ${platform}.`);
     } catch (error) {
       log('Error occurred when calculating root size', { error }, 'ERROR');

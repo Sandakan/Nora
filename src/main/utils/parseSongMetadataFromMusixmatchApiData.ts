@@ -1,21 +1,14 @@
 import log from '../log';
-import {
-  MusixmatchLyricsAPI,
-  MusixmatchLyricsMetadata,
-} from '../../@types/musixmatch_lyrics_api';
+import { MusixmatchLyricsAPI, MusixmatchLyricsMetadata } from '../../@types/musixmatch_lyrics_api';
 import fetchSongArtworksFromSpotify from './fetchSongArtworksFromSpotify';
 
 async function parseSongMetadataFromMusixmatchApiData(
   data: MusixmatchLyricsAPI,
-  spotifyArtworks = false,
+  spotifyArtworks = false
 ) {
-  if (
-    data.message.body.macro_calls['matcher.track.get'].message.header
-      .status_code === 200
-  ) {
+  if (data.message.body.macro_calls['matcher.track.get'].message.header.status_code === 200) {
     const metadata = {} as MusixmatchLyricsMetadata;
-    const trackData =
-      data.message.body.macro_calls['matcher.track.get'].message.body.track;
+    const trackData = data.message.body.macro_calls['matcher.track.get'].message.body.track;
     // Track name
     if (trackData.track_name) {
       metadata.title = trackData.track_name;
@@ -37,8 +30,9 @@ async function parseSongMetadataFromMusixmatchApiData(
     if (trackData.album_coverart_800x800)
       metadata.album_artwork_urls.push(trackData.album_coverart_800x800);
     if (spotifyArtworks && trackData.track_spotify_id) {
-      const { highResArtworkUrl, lowResArtworkUrl } =
-        await fetchSongArtworksFromSpotify(trackData.track_spotify_id);
+      const { highResArtworkUrl, lowResArtworkUrl } = await fetchSongArtworksFromSpotify(
+        trackData.track_spotify_id
+      );
 
       metadata.album_artwork_urls.push(lowResArtworkUrl, highResArtworkUrl);
     }

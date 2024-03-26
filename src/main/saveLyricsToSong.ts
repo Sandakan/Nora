@@ -20,22 +20,15 @@ type PendingSongLyrics = {
 
 const pendingSongLyrics = new Map<string, PendingSongLyrics>();
 
-const saveLyricsToSong = async (
-  songPathWithProtocol: string,
-  lyrics: SongLyrics,
-) => {
+const saveLyricsToSong = async (songPathWithProtocol: string, lyrics: SongLyrics) => {
   const userData = getUserData();
   const songPath = removeDefaultAppProtocolFromFilePath(songPathWithProtocol);
 
   if (lyrics && lyrics.lyrics.lyrics.length > 0) {
     const pathExt = path.extname(songPath).replace(/\W/, '');
-    const isASupportedFormat =
-      metadataEditingSupportedExtensions.includes(pathExt);
+    const isASupportedFormat = metadataEditingSupportedExtensions.includes(pathExt);
 
-    if (
-      !isASupportedFormat ||
-      userData.preferences.saveLyricsInLrcFilesForSupportedSongs
-    )
+    if (!isASupportedFormat || userData.preferences.saveLyricsInLrcFilesForSupportedSongs)
       saveLyricsToLRCFile(songPath, lyrics);
 
     if (isASupportedFormat) {
@@ -45,7 +38,7 @@ const saveLyricsToSong = async (
       const unsynchronisedLyrics: UnsynchronisedLyrics = !isSynced
         ? {
             language: 'ENG',
-            text: lyrics.lyrics.unparsedLyrics,
+            text: lyrics.lyrics.unparsedLyrics
           }
         : prevTags.unsynchronisedLyrics;
 
@@ -57,7 +50,7 @@ const saveLyricsToSong = async (
         const updatingTags = {
           title: lyrics.title,
           unsynchronisedLyrics,
-          synchronisedLyrics: synchronisedLyrics || [],
+          synchronisedLyrics: synchronisedLyrics || []
         };
         // Kept to be saved later
         pendingSongLyrics.set(songPath, updatingTags);
@@ -67,29 +60,25 @@ const saveLyricsToSong = async (
             return {
               ...prevLyrics,
               source: 'IN_SONG_LYRICS',
-              isOfflineLyricsAvailable: true,
+              isOfflineLyricsAvailable: true
             };
           return undefined;
         });
         return log(
           `Lyrics for '${lyrics.title}' will be saved automatically.`,
           {
-            songPath,
+            songPath
           },
           'INFO',
           {
             sendToRenderer: {
               messageCode: 'LYRICS_SAVE_QUEUED',
-              data: { title: lyrics.title },
-            },
-          },
+              data: { title: lyrics.title }
+            }
+          }
         );
       } catch (error) {
-        log(
-          `FAILED TO UPDATE THE SONG FILE WITH THE NEW UPDATES. `,
-          { error },
-          'ERROR',
-        );
+        log(`FAILED TO UPDATE THE SONG FILE WITH THE NEW UPDATES. `, { error }, 'ERROR');
         throw error;
       }
     } else {
@@ -100,9 +89,9 @@ const saveLyricsToSong = async (
         {
           sendToRenderer: {
             messageCode: 'LYRICS_SAVED_IN_LRC_FILE',
-            data: { ext: pathExt },
-          },
-        },
+            data: { ext: pathExt }
+          }
+        }
       );
     }
   }
@@ -110,17 +99,13 @@ const saveLyricsToSong = async (
   throw new Error('no lyrics found to be saved to the song.');
 };
 
-export const isLyricsSavePending = (songPath: string) =>
-  pendingSongLyrics.has(songPath);
+export const isLyricsSavePending = (songPath: string) => pendingSongLyrics.has(songPath);
 
-export const savePendingSongLyrics = (
-  currentSongPath = '',
-  forceSave = false,
-) => {
+export const savePendingSongLyrics = (currentSongPath = '', forceSave = false) => {
   if (pendingSongLyrics.size === 0) return log('No pending song lyrics found.');
 
   log(`Started saving pending song lyrics.`, {
-    pendingSongs: pendingSongLyrics.keys,
+    pendingSongs: pendingSongLyrics.keys
   });
 
   const entries = pendingSongLyrics.entries();
@@ -132,25 +117,16 @@ export const savePendingSongLyrics = (
       try {
         NodeID3.update(updatingTags, songPath);
 
-        log(
-          `Successfully saved pending lyrics of '${updatingTags.title}'.`,
-          { songPath },
-          'INFO',
-          {
-            sendToRenderer: {
-              messageCode: 'PENDING_LYRICS_SAVED',
-              data: { title: updatingTags.title },
-            },
-          },
-        );
+        log(`Successfully saved pending lyrics of '${updatingTags.title}'.`, { songPath }, 'INFO', {
+          sendToRenderer: {
+            messageCode: 'PENDING_LYRICS_SAVED',
+            data: { title: updatingTags.title }
+          }
+        });
         dataUpdateEvent('songs/lyrics');
         pendingSongLyrics.delete(songPath);
       } catch (error) {
-        log(
-          `Failed to save pending song lyrics of a song. `,
-          { error, songPath },
-          'ERROR',
-        );
+        log(`Failed to save pending song lyrics of a song. `, { error, songPath }, 'ERROR');
         throw error;
       }
     }

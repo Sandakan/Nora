@@ -1,0 +1,123 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+import React, { useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import { AppContext } from '../../contexts/AppContext';
+import Button from '../Button';
+import MainContainer from '../MainContainer';
+import PromptMenuNavigationControlsContainer from './PromptMenuNavigationControlsContainer';
+
+const PromptMenu = () => {
+  const { promptMenuData } = React.useContext(AppContext);
+  const { changePromptMenuData, updatePromptMenuHistoryIndex } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
+
+  const promptMenuRef = React.useRef() as React.MutableRefObject<HTMLDialogElement>;
+
+  React.useEffect(() => {
+    const dialog = promptMenuRef.current;
+
+    if (promptMenuData.isVisible && dialog && !dialog.open) dialog.showModal();
+  }, [promptMenuData.isVisible]);
+
+  React.useEffect(() => {
+    const dialog = promptMenuRef.current;
+
+    const manageDialogClose = (e: MouseEvent) => {
+      const rect = dialog.getBoundingClientRect();
+      const isCursorInDialogBoundary =
+        rect.top <= e.clientY &&
+        e.clientY <= rect.top + rect.height &&
+        rect.left <= e.clientX &&
+        e.clientX <= rect.left + rect.width;
+
+      if (!isCursorInDialogBoundary) changePromptMenuData(false);
+    };
+
+    const manageDialogAnimationEnd = () => {
+      if (!promptMenuData.isVisible) {
+        dialog.close();
+        changePromptMenuData(false, null);
+      }
+    };
+
+    if (dialog) {
+      dialog.addEventListener('click', manageDialogClose);
+      dialog.addEventListener('animationend', manageDialogAnimationEnd);
+    }
+
+    return () => {
+      dialog?.removeEventListener('click', manageDialogClose);
+      dialog?.removeEventListener('animationend', manageDialogAnimationEnd);
+    };
+  }, [promptMenuData.isVisible, changePromptMenuData]);
+
+  const manageKeyboardShortcuts = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.altKey) {
+        if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') e.stopPropagation();
+        if (e.code === 'ArrowRight') updatePromptMenuHistoryIndex('increment');
+        if (e.code === 'ArrowLeft') updatePromptMenuHistoryIndex('decrement');
+      }
+    },
+    [updatePromptMenuHistoryIndex]
+  );
+
+  const manageDialogCloseEvent = React.useCallback(() => {
+    changePromptMenuData(false, null);
+  }, [changePromptMenuData]);
+
+  useEffect(() => {
+    const promptMenu = promptMenuRef.current;
+
+    promptMenu?.addEventListener('close', manageDialogCloseEvent);
+    promptMenu?.addEventListener('keydown', manageKeyboardShortcuts);
+    return () => {
+      promptMenu?.removeEventListener('keydown', manageKeyboardShortcuts);
+      promptMenu?.removeEventListener('close', manageDialogCloseEvent);
+    };
+  }, [manageDialogCloseEvent, manageKeyboardShortcuts]);
+
+  return (
+    <dialog
+      className={`dialog-menu relative left-1/2 top-1/2 h-fit max-h-[80%] min-h-[300px] w-[80%] min-w-[800px] max-w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-background-color-1 pb-10 shadow-[rgba(100,100,111,0.2)_0px_7px_29px_0px] transition-[transform,visibility,opacity] ease-in-out open:backdrop:transition-[background,backdrop-filter] dark:bg-dark-background-color-1 
+      ${
+        promptMenuData.isVisible
+          ? 'open:animate-dialog-appear-ease-in-out open:backdrop:bg-[hsla(228deg,7%,14%,0.75)] open:backdrop:dark:bg-[hsla(228deg,7%,14%,0.75)]'
+          : 'animate-dialog-dissappear-ease-in-out backdrop:bg-[hsla(228deg,7%,14%,0)] backdrop:dark:bg-[hsla(228deg,7%,14%,0)]'
+      }
+      `}
+      id="prompt-menu"
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
+      ref={promptMenuRef}
+    >
+      <div className="my-4 flex w-full items-center justify-between px-6">
+        <PromptMenuNavigationControlsContainer />
+        <Button
+          key={0}
+          className="prompt-menu-close-btn previousPageBtn !m-0 flex h-fit !rounded-md !border-0 !p-0 !px-2 !py-1 outline-1 outline-offset-1 !transition-[background,transform,visibility,opacity] hover:bg-background-color-2 hover:text-font-color-highlight dark:hover:bg-dark-background-color-2 dark:hover:text-dark-font-color-highlight"
+          iconName="close"
+          tooltipLabel={t('titleBar.close')}
+          iconClassName="!leading-none !text-xl"
+          clickHandler={(e) => {
+            e.stopPropagation();
+            changePromptMenuData(false);
+          }}
+        />
+      </div>
+      <MainContainer
+        className={`prompt-menu-inner relative max-h-full px-8 pb-2 text-font-color-black dark:text-font-color-white ${
+          promptMenuData.className ?? ''
+        }`}
+      >
+        {promptMenuData.prompt}
+      </MainContainer>
+    </dialog>
+  );
+};
+
+export default PromptMenu;

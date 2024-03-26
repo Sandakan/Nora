@@ -1,5 +1,5 @@
  <h1 align="center">
-   <img class="logo" src="assets/other/nora_logo_banner.webp">
+   <img class="logo" src="resources/other/nora_logo_banner.webp">
    <!-- <p>Nora Player</p> -->
  </h1>
 
@@ -35,7 +35,7 @@ Inspired from <a href="https://play.google.com/store/apps/details?id=com.piyush.
 
 <br/>
 
-![Nora Banner Artwork](/assets/other/artwork%200.webp)
+![Nora Banner Artwork](/resources/other/artwork%200.webp)
 
 <br/>
 
@@ -61,29 +61,29 @@ It packs a horizon of features including,
 
 <br>
 
-![Latest Version Artwork](/assets/other/release%20artworks/whats-new-v2.5.0-stable.webp)
+![Latest Version Artwork](/resources/other/release%20artworks/whats-new-v2.5.0-stable.webp)
 
 Visit the [release notes](/changelog.md) to see what's new on the latest release.</p>
 
 <br>
 
-![Support for Online and Offline Lyrics Artwork](/assets/other/artwork%201.webp)
+![Support for Online and Offline Lyrics Artwork](/resources/other/artwork%201.webp)
 
-![Switch between Dark and Light Modes Artwork](/assets/other/artwork%202.webp)
+![Switch between Dark and Light Modes Artwork](/resources/other/artwork%202.webp)
 
-![Support for Last.FM Scrobbling](/assets/other/artwork%209.webp)
+![Support for Last.FM Scrobbling](/resources/other/artwork%209.webp)
 
-![Organize your music library with ease Artwork](/assets/other/artwork%203.webp)
+![Organize your music library with ease Artwork](/resources/other/artwork%203.webp)
 
-![See how your favorite artists appear on songs and albums Artwork](/assets/other/artwork%204.webp)
+![See how your favorite artists appear on songs and albums Artwork](/resources/other/artwork%204.webp)
 
-![Keep your favorites closer to you Artwork](/assets/other/artwork%205.webp)
+![Keep your favorites closer to you Artwork](/resources/other/artwork%205.webp)
 
-![Search through your music library easily and efficiently Artwork](/assets/other/artwork%206.webp)
+![Search through your music library easily and efficiently Artwork](/resources/other/artwork%206.webp)
 
-![Edit song metadata and organize your library Artwork](/assets/other/artwork%207.webp)
+![Edit song metadata and organize your library Artwork](/resources/other/artwork%207.webp)
 
-![Listen with the mini player Artwork](/assets/other/artwork%208.webp)
+![Listen with the mini player Artwork](/resources/other/artwork%208.webp)
 
 <br/>
 
@@ -154,9 +154,9 @@ Run
   npm start
 ```
 
-<br>
+<!-- <br>
 
-This project is built using [Electron React Boilerplate](https://github.com/electron-react-boilerplate/electron-react-boilerplate).
+This project is built using [Electron React Boilerplate](https://github.com/electron-react-boilerplate/electron-react-boilerplate). -->
 
 <br>
 

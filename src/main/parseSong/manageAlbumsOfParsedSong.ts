@@ -5,18 +5,11 @@ import { generateRandomId } from '../utils/randomId';
 const manageAlbumsOfParsedSong = (
   allAlbumsData: SavableAlbum[],
   songInfo: SavableSongData,
-  songArtworkPaths?: ArtworkPaths,
+  songArtworkPaths?: ArtworkPaths
 ) => {
   let relevantAlbum: SavableAlbum | undefined;
   let newAlbum: SavableAlbum | undefined;
-  const {
-    title,
-    songId,
-    albumArtists = [],
-    artists = [],
-    year,
-    album: songAlbum,
-  } = songInfo;
+  const { title, songId, albumArtists = [], artists = [], year, album: songAlbum } = songInfo;
 
   const songAlbumName = songAlbum?.name.trim();
   const relevantAlbumArtists: { artistId: string; name: string }[] = [];
@@ -28,7 +21,7 @@ const manageAlbumsOfParsedSong = (
     if (Array.isArray(allAlbumsData)) {
       const availableAlbum = allAlbumsData.find(
         //  album.title doesn't need trimming because they are already trimmed when adding them to the database.
-        (album) => album.title === songAlbumName,
+        (album) => album.title === songAlbumName
         // &&
         // // to prevent mixing songs from same album names with different album artists
         // (albumArtists.length > 0 &&
@@ -45,7 +38,7 @@ const manageAlbumsOfParsedSong = (
       if (availableAlbum) {
         availableAlbum.songs.push({
           title,
-          songId,
+          songId
         });
         relevantAlbum = availableAlbum;
       } else {
@@ -61,9 +54,9 @@ const manageAlbumsOfParsedSong = (
           songs: [
             {
               songId,
-              title,
-            },
-          ],
+              title
+            }
+          ]
         };
 
         allAlbumsData.push(newAlbumData);
@@ -73,7 +66,7 @@ const manageAlbumsOfParsedSong = (
       return {
         updatedAlbums: allAlbumsData,
         relevantAlbum,
-        newAlbum,
+        newAlbum
       };
     }
     return { updatedAlbums: [], relevantAlbum, newAlbum };
@@ -81,7 +74,7 @@ const manageAlbumsOfParsedSong = (
   return {
     updatedAlbums: allAlbumsData || [],
     relevantAlbum,
-    newAlbum,
+    newAlbum
   };
 };
 

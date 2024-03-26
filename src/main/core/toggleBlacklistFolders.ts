@@ -7,15 +7,12 @@ interface toggleBlacklistFoldersReturnValue {
   whitelists: string[];
 }
 
-const toggleBlacklistFolders = async (
-  folderPaths: string[],
-  isBlacklistFolder?: boolean,
-) => {
+const toggleBlacklistFolders = async (folderPaths: string[], isBlacklistFolder?: boolean) => {
   const blacklist = getBlacklistData();
 
   const result: toggleBlacklistFoldersReturnValue = {
     blacklists: [],
-    whitelists: [],
+    whitelists: []
   };
   log(
     `Requested to ${
@@ -25,7 +22,7 @@ const toggleBlacklistFolders = async (
           : 'whilelist'
         : 'toggle blacklist'
     } ${folderPaths.length} folders.`,
-    { folderPaths },
+    { folderPaths }
   );
 
   for (const folderPath of folderPaths) {
@@ -34,7 +31,7 @@ const toggleBlacklistFolders = async (
     if (isBlacklistFolder === undefined) {
       if (isFolderBlacklisted) {
         blacklist.folderBlacklist = blacklist.folderBlacklist.filter(
-          (blacklistedFolderPath) => blacklistedFolderPath !== folderPath,
+          (blacklistedFolderPath) => blacklistedFolderPath !== folderPath
         );
         result.whitelists.push(folderPath);
       } else {
@@ -49,26 +46,23 @@ const toggleBlacklistFolders = async (
         log(
           `Request to blacklist a folder but it is already blacklisted.`,
           { folderPath, isFolderBlacklisted, isBlacklistFolder },
-          'ERROR',
+          'ERROR'
         );
     } else if (isFolderBlacklisted) {
       blacklist.folderBlacklist = blacklist.folderBlacklist.filter(
-        (blacklistedFolderPath) => blacklistedFolderPath !== folderPath,
+        (blacklistedFolderPath) => blacklistedFolderPath !== folderPath
       );
       result.whitelists.push(folderPath);
     } else
       log(
         `Request to whitelist a folder but it is already whitelisted.`,
         { folderPath, isFolderBlacklisted, isBlacklistFolder },
-        'ERROR',
+        'ERROR'
       );
   }
 
   setBlacklist(blacklist);
-  dataUpdateEvent('blacklist/folderBlacklist', [
-    ...result.blacklists,
-    ...result.whitelists,
-  ]);
+  dataUpdateEvent('blacklist/folderBlacklist', [...result.blacklists, ...result.whitelists]);
   return result;
 };
 

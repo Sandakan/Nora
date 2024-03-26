@@ -4,14 +4,11 @@ import path from 'path';
 import * as musicMetaData from 'music-metadata';
 
 import { removeArtwork, storeArtworks } from '../other/artworks';
-import {
-  getSongArtworkPath,
-  removeDefaultAppProtocolFromFilePath,
-} from '../fs/resolveFilePaths';
+import { getSongArtworkPath, removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
 import {
   removeDeletedAlbumDataOfSong,
   removeDeletedArtistDataOfSong,
-  removeDeletedGenreDataOfSong,
+  removeDeletedGenreDataOfSong
 } from '../removeSongsFromLibrary';
 import {
   getAlbumsData,
@@ -21,7 +18,7 @@ import {
   setAlbumsData,
   setArtistsData,
   setGenresData,
-  setSongsData,
+  setSongsData
 } from '../filesystem';
 import { dataUpdateEvent } from '../main';
 import log from '../log';
@@ -29,7 +26,7 @@ import {
   getAlbumInfoFromSong,
   getArtistNamesFromSong,
   getGenreInfoFromSong,
-  getSongDurationFromSong,
+  getSongDurationFromSong
 } from './parseSong';
 import manageAlbumsOfParsedSong from './manageAlbumsOfParsedSong';
 import manageArtistsOfParsedSong from './manageArtistsOfParsedSong';
@@ -60,13 +57,11 @@ const reParseSong = async (filePath: string) => {
           const songArtworkPaths = await storeArtworks(
             songId,
             'songs',
-            metadata.common?.picture?.at(0)?.data,
+            metadata.common?.picture?.at(0)?.data
           );
 
           song.title =
-            metadata.common.title ||
-            path.basename(songPath).split('.')[0] ||
-            'Unknown Title';
+            metadata.common.title || path.basename(songPath).split('.')[0] || 'Unknown Title';
           song.year = metadata.common?.year;
           song.isArtworkAvailable = !songArtworkPaths.isDefaultArtwork;
           song.sampleRate = metadata.format.sampleRate;
@@ -77,14 +72,20 @@ const reParseSong = async (filePath: string) => {
           song.modifiedDate = stats ? stats.mtime.getTime() : undefined;
           song.duration = getSongDurationFromSong(metadata.format.duration);
 
-          const { updatedArtists: updatedArtistsFromDeletedData } =
-            removeDeletedArtistDataOfSong(artists, song);
+          const { updatedArtists: updatedArtistsFromDeletedData } = removeDeletedArtistDataOfSong(
+            artists,
+            song
+          );
 
-          const { updatedAlbums: updatedAlbumsFromDeletedData } =
-            removeDeletedAlbumDataOfSong(albums, song);
+          const { updatedAlbums: updatedAlbumsFromDeletedData } = removeDeletedAlbumDataOfSong(
+            albums,
+            song
+          );
 
-          const { updatedGenres: updatedGenresFromDeletedData } =
-            removeDeletedGenreDataOfSong(genres, song);
+          const { updatedGenres: updatedGenresFromDeletedData } = removeDeletedGenreDataOfSong(
+            genres,
+            song
+          );
 
           song.artists = getArtistNamesFromSong(metadata.common.artist);
           song.album = getAlbumInfoFromSong(metadata.common.album);
@@ -93,54 +94,48 @@ const reParseSong = async (filePath: string) => {
           const { updatedAlbums, relevantAlbum } = manageAlbumsOfParsedSong(
             updatedAlbumsFromDeletedData,
             song,
-            songArtworkPaths,
+            songArtworkPaths
           );
 
           if (song.album && relevantAlbum)
             song.album = {
               name: relevantAlbum.title,
-              albumId: relevantAlbum.albumId,
+              albumId: relevantAlbum.albumId
             };
 
-          const { updatedArtists: updatedSongArtists, relevantArtists } =
-            manageArtistsOfParsedSong(
-              updatedArtistsFromDeletedData,
-              song,
-              songArtworkPaths,
-            );
+          const { updatedArtists: updatedSongArtists, relevantArtists } = manageArtistsOfParsedSong(
+            updatedArtistsFromDeletedData,
+            song,
+            songArtworkPaths
+          );
 
-          const { relevantAlbumArtists, updatedArtists } =
-            manageAlbumArtistOfParsedSong(
-              updatedSongArtists,
-              song,
-              songArtworkPaths,
-              relevantAlbum,
-            );
+          const { relevantAlbumArtists, updatedArtists } = manageAlbumArtistOfParsedSong(
+            updatedSongArtists,
+            song,
+            songArtworkPaths,
+            relevantAlbum
+          );
 
           if (song.artists && relevantArtists.length > 0) {
             song.artists = relevantArtists.map((artist) => ({
               artistId: artist.artistId,
-              name: artist.name,
+              name: artist.name
             }));
           }
 
           if (relevantAlbumArtists.length > 0) {
             song.albumArtists = relevantAlbumArtists.map((albumArtist) => ({
               artistId: albumArtist.artistId,
-              name: albumArtist.name,
+              name: albumArtist.name
             }));
           }
 
           if (relevantAlbum) {
-            const allRelevantArtists =
-              relevantArtists.concat(relevantAlbumArtists);
+            const allRelevantArtists = relevantArtists.concat(relevantAlbumArtists);
 
             for (const relevantArtist of allRelevantArtists) {
               relevantAlbum.artists?.forEach((artist) => {
-                if (
-                  artist.name === relevantArtist.name &&
-                  artist.artistId.length === 0
-                )
+                if (artist.name === relevantArtist.name && artist.artistId.length === 0)
                   artist.artistId = relevantArtist.artistId;
               });
             }
@@ -150,7 +145,7 @@ const reParseSong = async (filePath: string) => {
             updatedGenresFromDeletedData,
             song,
             songArtworkPaths,
-            song.palette?.DarkVibrant,
+            song.palette?.DarkVibrant
           );
 
           song.genres = relevantGenres.map((genre) => {
@@ -160,15 +155,15 @@ const reParseSong = async (filePath: string) => {
           log(
             `Successfully reparsed '${song.title}'.`,
             {
-              songPath: song?.path,
+              songPath: song?.path
             },
             'INFO',
             {
               sendToRenderer: {
                 messageCode: 'SONG_REPARSE_SUCCESS',
-                data: { title: song.title },
-              },
-            },
+                data: { title: song.title }
+              }
+            }
           );
 
           setSongsData(songs);
@@ -189,7 +184,7 @@ const reParseSong = async (filePath: string) => {
     return undefined;
   } catch (error) {
     return log('Error occurred when re-parsing the song.', { error }, 'ERROR', {
-      sendToRenderer: { messageCode: 'SONG_REPARSE_FAILED' },
+      sendToRenderer: { messageCode: 'SONG_REPARSE_FAILED' }
     });
   }
 };

@@ -9,13 +9,10 @@ const dislikeArtist = (artist: SavableArtist) => {
   sendMessageToRenderer({
     messageCode: 'ARTIST_DISLIKE',
     data: {
-      name:
-        artist.name.length > 20
-          ? `${artist.name.substring(0, 20).trim()}...`
-          : artist.name,
+      name: artist.name.length > 20 ? `${artist.name.substring(0, 20).trim()}...` : artist.name,
       artworkPath: getArtistArtworkPath(artist.artworkName),
-      onlineArtworkPaths: artist.onlineArtworkPaths,
-    },
+      onlineArtworkPaths: artist.onlineArtworkPaths
+    }
   });
   return artist;
 };
@@ -26,35 +23,25 @@ const likeArtist = (artist: SavableArtist) => {
   sendMessageToRenderer({
     messageCode: 'ARTIST_LIKE',
     data: {
-      name:
-        artist.name.length > 20
-          ? `${artist.name.substring(0, 20).trim()}...`
-          : artist.name,
+      name: artist.name.length > 20 ? `${artist.name.substring(0, 20).trim()}...` : artist.name,
       artworkPath: getArtistArtworkPath(artist.artworkName),
-      onlineArtworkPaths: artist.onlineArtworkPaths,
-    },
+      onlineArtworkPaths: artist.onlineArtworkPaths
+    }
   });
   return artist;
 };
 
-const toggleLikeArtists = async (
-  artistIds: string[],
-  isLikeArtist?: boolean,
-) => {
+const toggleLikeArtists = async (artistIds: string[], isLikeArtist?: boolean) => {
   const artists = getArtistsData();
   const result: ToggleLikeSongReturnValue = {
     likes: [],
-    dislikes: [],
+    dislikes: []
   };
 
   log(
     `Requested to ${
-      isLikeArtist === undefined
-        ? 'toggle like'
-        : isLikeArtist
-          ? 'like'
-          : 'dislike'
-    } artists with ids -${artistIds.join(', ')}-`,
+      isLikeArtist === undefined ? 'toggle like' : isLikeArtist ? 'like' : 'dislike'
+    } artists with ids -${artistIds.join(', ')}-`
   );
   if (artists.length > 0) {
     const updatedArtists = artists.map((artist) => {
@@ -66,7 +53,7 @@ const toggleLikeArtists = async (
             return updatedArtist;
           }
           log(
-            `Tried to like an artist with a artist id -${artist.artistId}- that has been already been liked.`,
+            `Tried to like an artist with a artist id -${artist.artistId}- that has been already been liked.`
           );
           return artist;
         }
@@ -77,7 +64,7 @@ const toggleLikeArtists = async (
           return updatedArtist;
         }
         log(
-          `Tried to dislike an artist with a artist id -${artist.artistId}- that has been already been disliked.`,
+          `Tried to dislike an artist with a artist id -${artist.artistId}- that has been already been disliked.`
         );
         return artist;
       }

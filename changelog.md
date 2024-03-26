@@ -4,7 +4,7 @@
 
 <br>
 
-![Nora v2.3.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.5.0-stable.webp)
+![Nora v2.3.0-stable version artwork](resources/other/release%20artworks/whats-new-v2.5.0-stable.webp)
 
 <br>
 
@@ -139,7 +139,7 @@
 
 <br>
 
-![Nora v2.3.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.4.0-stable.webp)
+![Nora v2.3.0-stable version artwork](resources/other/release%20artworks/whats-new-v2.4.0-stable.webp)
 
 <br>
 
@@ -199,7 +199,7 @@
 
 <br>
 
-![Nora v2.2.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.2.0-stable.webp)
+![Nora v2.2.0-stable version artwork](resources/other/release%20artworks/whats-new-v2.2.0-stable.webp)
 
 <br>
 
@@ -230,7 +230,7 @@
 
 <br>
 
-![Nora v2.1.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.1.0-stable.webp)
+![Nora v2.1.0-stable version artwork](resources/other/release%20artworks/whats-new-v2.1.0-stable.webp)
 
 <br>
 
@@ -286,7 +286,7 @@
 
 <br>
 
-![Nora v2.0.0-stable version artwork](assets/other/release%20artworks/whats-new-v2.0.0-stable.webp)
+![Nora v2.0.0-stable version artwork](resources/other/release%20artworks/whats-new-v2.0.0-stable.webp)
 
 <br>
 
@@ -392,7 +392,7 @@
 
 <br>
 
-![Nora v1.2.0-stable version artwork](assets/other/release%20artworks/whats-new-v1.2.0-stable.webp)
+![Nora v1.2.0-stable version artwork](resources/other/release%20artworks/whats-new-v1.2.0-stable.webp)
 
 <br>
 
@@ -435,7 +435,7 @@
 
 <br>
 
-![Nora v1.1.0-stable version artwork](assets/other/release%20artworks/whats-new-v1.1.0-stable.webp)
+![Nora v1.1.0-stable version artwork](resources/other/release%20artworks/whats-new-v1.1.0-stable.webp)
 
 <br>
 
@@ -477,7 +477,7 @@
 
 <br>
 
-![Nora v1.0.0-stable version artwork](assets/other/release%20artworks/whats-new-v1.0.0-stable.webp)
+![Nora v1.0.0-stable version artwork](resources/other/release%20artworks/whats-new-v1.0.0-stable.webp)
 
 <br>
 
@@ -599,7 +599,7 @@
 
 <br>
 
-![Nora v0.8.0-alpha version artwork](assets/other/release%20artworks/whats-new-v0.8.0-alpha.webp)
+![Nora v0.8.0-alpha version artwork](resources/other/release%20artworks/whats-new-v0.8.0-alpha.webp)
 
 <br>
 
@@ -637,7 +637,7 @@
 
 <br>
 
-![Nora v0.7.0-alpha version artwork](assets/other/release%20artworks/whats-new-v0.7.0-alpha.webp)
+![Nora v0.7.0-alpha version artwork](resources/other/release%20artworks/whats-new-v0.7.0-alpha.webp)
 
 <br>
 

@@ -1,6 +1,6 @@
 {
   "latestVersion": {
-    "artwork": "/assets/other/release artworks/whats-new-v2.5.0-stable.webp",
+    "artwork": "/resources/other/release artworks/whats-new-v2.5.0-stable.webp",
     "importantNotes": [
       "This update some most requested features such as 10-band equalizer, localization support, reading/writing lyrics from LRC files and a lot of bug fixes."
     ],
@@ -10,7 +10,7 @@
   },
   "versions": [
     {
-      "artwork": "/assets/other/release artworks/whats-new-v2.5.0-stable.webp",
+      "artwork": "/resources/other/release artworks/whats-new-v2.5.0-stable.webp",
       "importantNotes": [
         "This update some most requested features such as 10-band equalizer, localization support, reading/writing lyrics from LRC files and a lot of bug fixes."
       ],
@@ -150,7 +150,7 @@
       "version": "2.5.0-stable"
     },
     {
-      "artwork": "/assets/other/release artworks/whats-new-v2.4.0-stable.webp",
+      "artwork": "/resources/other/release artworks/whats-new-v2.4.0-stable.webp",
       "importantNotes": [
         "This update includes a few fixes for some reported vulnerabilities from app dependencies."
       ],
@@ -171,7 +171,7 @@
       "version": "2.4.3-stable"
     },
     {
-      "artwork": "/assets/other/release artworks/whats-new-v2.4.0-stable.webp",
+      "artwork": "/resources/other/release artworks/whats-new-v2.4.0-stable.webp",
       "importantNotes": [
         "This update fixes Last.Fm and Musixmatch activation issues. Sorry for too much updates. 🙏"
       ],
@@ -198,7 +198,7 @@
       "version": "2.4.2-stable"
     },
     {
-      "artwork": "/assets/other/release artworks/whats-new-v2.4.0-stable.webp",
+      "artwork": "/resources/other/release artworks/whats-new-v2.4.0-stable.webp",
       "importantNotes": [
         "This update fixes the bug where Nora crashes saying 'ENCRYPTION_SECRET not found'."
       ],
@@ -219,7 +219,7 @@
       "version": "2.4.1-stable"
     },
     {
-      "artwork": "/assets/other/release artworks/whats-new-v2.4.0-stable.webp",
+      "artwork": "/resources/other/release artworks/whats-new-v2.4.0-stable.webp",
       "importantNotes": [
         "This update adds support for Last.FM Integration and fixes a random bug where the player skips the song early after saving metadata."
       ],
@@ -349,7 +349,7 @@
       "version": "2.4.0-stable"
     },
     {
-      "artwork": "/assets/other/release artworks/whats-new-v2.3.0-stable.webp",
+      "artwork": "/resources/other/release artworks/whats-new-v2.3.0-stable.webp",
       "importantNotes": [
         "This new update includes importing and exporting app data and playlists, support for enhanced synced lyrics and editing song lyrics and many more fixes and improvements."
       ],
@@ -503,7 +503,7 @@
       "version": "2.3.0-stable"
     },
     {
-      "artwork": "/assets/other/release artworks/whats-new-v2.2.0-stable.webp",
+      "artwork": "/resources/other/release artworks/whats-new-v2.2.0-stable.webp",
       "importantNotes": [
         "This update fixes the new update notification bug.",
         "From this update onwards, I will add Linux installers for Nora. Keep in mind that even though Nora is stable on Windows, it may not be stable on Linux. Since I won't be able to test Linux builds on my machine, I will be relying on user feedback for Linux build improvements."
@@ -556,7 +556,7 @@
       "version": "2.2.0-stable"
     },
     {
-      "artwork": "/assets/other/release artworks/whats-new-v2.1.0-stable.webp",
+      "artwork": "/resources/other/release artworks/whats-new-v2.1.0-stable.webp",
       "importantNotes": [
         "This update includes fixes for app responsiveness no different screen sizes.",
         "Welcome to a new design for Song Cards in Home page."
@@ -693,7 +693,7 @@
       "version": "2.1.0-stable"
     },
     {
-      "artwork": "/assets/other/release artworks/whats-new-v2.0.0-stable.webp",
+      "artwork": "/resources/other/release artworks/whats-new-v2.0.0-stable.webp",
       "importantNotes": [
         "Installing this update would RESET the app to provide support for new features."
       ],
@@ -942,10 +942,8 @@
       "version": "2.0.0-stable"
     },
     {
-      "artwork": "/assets/other/release artworks/whats-new-v1.2.0-stable.webp",
-      "importantNotes": [
-        "This release provides accessibility improvements throughout Nora."
-      ],
+      "artwork": "/resources/other/release artworks/whats-new-v1.2.0-stable.webp",
+      "importantNotes": ["This release provides accessibility improvements throughout Nora."],
       "notes": {
         "fixed": [
           {
@@ -1033,7 +1031,7 @@
       "version": "1.2.0-stable"
     },
     {
-      "artwork": "/assets/other/release artworks/whats-new-v1.1.0-stable.webp",
+      "artwork": "/resources/other/release artworks/whats-new-v1.1.0-stable.webp",
       "notes": {
         "fixed": [
           {
@@ -1133,7 +1131,7 @@
       "version": "1.1.0-stable"
     },
     {
-      "artwork": "/assets/other/release artworks/whats-new-v1.0.0-stable.webp",
+      "artwork": "/resources/other/release artworks/whats-new-v1.0.0-stable.webp",
       "notes": {
         "fixed": [
           {
@@ -1440,7 +1438,7 @@
       "version": "1.0.0-stable"
     },
     {
-      "artwork": "/assets/other/release artworks/whats-new-v0.8.0-alpha.webp",
+      "artwork": "/resources/other/release artworks/whats-new-v0.8.0-alpha.webp",
       "notes": {
         "fixed": [
           {
@@ -1507,7 +1505,7 @@
       "version": "0.8.0-alpha"
     },
     {
-      "artwork": "/assets/other/release artworks/whats-new-v0.7.0-alpha.webp",
+      "artwork": "/resources/other/release artworks/whats-new-v0.7.0-alpha.webp",
       "notes": {
         "fixed": [
           {

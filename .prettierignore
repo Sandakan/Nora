@@ -1,7 +1,7 @@
-**/.git
-**/.svn
-**/.hg
-**/node_modules
-**/.erb/dll
+out
+dist
+pnpm-lock.yaml
+LICENSE.md
+tsconfig.json
+tsconfig.*.json
 **/thunder-tests
-**/release

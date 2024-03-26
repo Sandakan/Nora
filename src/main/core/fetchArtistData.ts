@@ -6,14 +6,14 @@ import sortArtists from '../utils/sortArtists';
 const fetchArtistData = async (
   artistIdsOrNames: string[] = [],
   sortType?: ArtistSortTypes,
-  limit = 0,
+  limit = 0
 ): Promise<Artist[]> => {
   if (artistIdsOrNames) {
     log(
       `Requested artists data for ${artistIdsOrNames.length} ids ${
         sortType ? `with ${sortType}` : 'without'
       } sorting.`,
-      { sortType, limit },
+      { sortType, limit }
     );
     const artists = getArtistsData();
     if (artists.length > 0) {
@@ -39,7 +39,7 @@ const fetchArtistData = async (
         .filter((_, index) => index < maxResults)
         .map((x) => ({
           ...x,
-          artworkPaths: getArtistArtworkPath(x.artworkName),
+          artworkPaths: getArtistArtworkPath(x.artworkName)
         }));
     }
   }
