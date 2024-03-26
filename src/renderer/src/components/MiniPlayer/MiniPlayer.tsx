@@ -154,7 +154,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
               : ''
           } ${!isCurrentSongPlaying ? '!visible !opacity-100' : ''}`}
         >
-          <div className="relative flex w-full flex-col items-center justify-center transition-[filter,opacity] delay-200 group-focus-within/info:pointer-events-none group-focus-within/info:opacity-50 group-focus-within/info:blur-sm group-focus-within/info:delay-0 group-hover/info:pointer-events-none group-hover/info:opacity-50 group-hover/info:blur-sm">
+          <div className="relative flex w-full flex-col items-center justify-center transition-[filter,opacity] delay-200 text-font-color-highlight group-focus-within/info:pointer-events-none group-focus-within/info:opacity-50 group-focus-within/info:blur-sm group-focus-within/info:delay-0 group-hover/info:pointer-events-none group-hover/info:opacity-50 group-hover/info:blur-sm">
             <div
               className="song-title max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-xl font-medium"
               title={currentSongData.title}

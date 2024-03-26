@@ -7,15 +7,18 @@ import sharp from 'sharp';
 import log from '../log';
 import { DEFAULT_ARTWORK_SAVE_LOCATION } from '../filesystem';
 
-import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_default.webp?asset';
+import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_default.webp?asset&asarUnpack';
 
+console.log('songCoverImage', songCoverImage);
 let defaultSongCoverImgBuffer: Buffer;
 
 export const getDefaultSongCoverImgBuffer = async () => {
   if (defaultSongCoverImgBuffer) return defaultSongCoverImgBuffer;
 
   try {
-    const buffer = await sharp(songCoverImage).png().toBuffer();
+    const webpBuffer = await fs.readFile(songCoverImage);
+    const buffer = await sharp(webpBuffer).png().toBuffer();
+
     defaultSongCoverImgBuffer = buffer;
     return buffer;
   } catch (error) {

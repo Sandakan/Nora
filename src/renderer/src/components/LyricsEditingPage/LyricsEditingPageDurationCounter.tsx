@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import roundTo from '../../utils/roundTo';
+import roundTo from '../../../../common/roundTo';
 
 type Props = { offset: number };
 

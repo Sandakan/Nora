@@ -4,6 +4,7 @@ import { getSongArtworkPath } from '../fs/resolveFilePaths';
 import log from '../log';
 import sortSongs from '../utils/sortSongs';
 import paginateData from '../utils/paginateData';
+import { getSelectedPaletteData } from '../other/generatePalette';
 
 const getAllSongs = async (sortType = 'aToZ' as SongSortTypes, paginatingData?: PaginatingData) => {
   const songsData = getSongsData();
@@ -24,7 +25,7 @@ const getAllSongs = async (sortType = 'aToZ' as SongSortTypes, paginatingData?: 
         path: songInfo.path,
         year: songInfo.year,
         songId: songInfo.songId,
-        palette: songInfo.palette,
+        paletteData: getSelectedPaletteData(songInfo.paletteId),
         addedDate: songInfo.addedDate,
         isAFavorite: songInfo.isAFavorite,
         isBlacklisted

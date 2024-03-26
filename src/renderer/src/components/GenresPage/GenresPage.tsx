@@ -98,7 +98,7 @@ const GenresPage = () => {
       const { columnIndex, rowIndex, style } = props;
       const index = rowIndex * noOfColumns + columnIndex;
       if (genresData && index < genresData.length) {
-        const { genreId, name, songs, backgroundColor, artworkPaths } = genresData[index];
+        const { genreId, name, songs, paletteData, artworkPaths } = genresData[index];
         return (
           <div style={{ ...style, display: 'flex', justifyContent: 'center' }}>
             <Genre
@@ -106,7 +106,7 @@ const GenresPage = () => {
               artworkPaths={artworkPaths}
               genreId={genreId}
               title={name}
-              backgroundColor={backgroundColor}
+              paletteData={paletteData}
               songIds={songs.map((song) => song.songId)}
               selectAllHandler={selectAllHandler}
             />

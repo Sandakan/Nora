@@ -1,6 +1,7 @@
 import { getGenresData } from '../filesystem';
 import { getGenreArtworkPath } from '../fs/resolveFilePaths';
 import log from '../log';
+import { getSelectedPaletteData } from '../other/generatePalette';
 import sortGenres from '../utils/sortGenres';
 
 const getGenresInfo = async (
@@ -28,10 +29,13 @@ const getGenresInfo = async (
           : ` Found ${results.length} results.`
       }`
     );
-    results = results.map((x) => ({
-      ...x,
-      artworkPaths: getGenreArtworkPath(x.artworkName)
-    })) as Genre[];
+    results = results.map((x): Genre => {
+      return {
+        ...x,
+        artworkPaths: getGenreArtworkPath(x.artworkName),
+        paletteData: getSelectedPaletteData(x.paletteId)
+      };
+    });
     if (sortType) sortGenres(results, sortType);
     return results as Genre[];
   }

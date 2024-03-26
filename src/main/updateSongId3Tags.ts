@@ -11,11 +11,13 @@ import {
   getAlbumsData,
   getArtistsData,
   getGenresData,
+  getPaletteData,
   getSongsData,
   getUserData,
   setAlbumsData,
   setArtistsData,
   setGenresData,
+  setPaletteData,
   setSongsData
 } from './filesystem';
 import {
@@ -382,7 +384,7 @@ const manageGenreDataUpdates = (
         name: genreData.name,
         songs: [{ title: prevSongData.title, songId }],
         artworkName: path.basename(songArtworkPaths.artworkPath),
-        backgroundColor: prevSongData.palette?.DarkVibrant
+        paletteId: prevSongData.paletteId
       };
       prevSongData.genres.push({
         genreId: newGenre.genreId,
@@ -546,6 +548,11 @@ const manageArtworkUpdates = async (prevSongData: SavableSongData, newSongData: 
       });
     }
     if (artworkBuffer) {
+      const palettes = getPaletteData();
+      const updatedPalettes =
+        prevSongData.paletteId === 'DEFAULT_PALETTE'
+          ? palettes
+          : palettes.filter((palette) => palette.paletteId !== prevSongData.paletteId);
       const palette = await generatePalette(artworkBuffer);
 
       const artworkPaths = await storeArtworks(songId, 'songs', artworkBuffer);
@@ -553,12 +560,10 @@ const manageArtworkUpdates = async (prevSongData: SavableSongData, newSongData: 
         prevSongData.isArtworkAvailable = !artworkPaths.isDefaultArtwork;
       }
 
-      if (palette && palette.DarkVibrant && palette.LightVibrant) {
-        prevSongData.palette = {
-          DarkVibrant: palette.DarkVibrant,
-          LightVibrant: palette.LightVibrant
-        };
-      } else prevSongData.palette = undefined;
+      prevSongData.paletteId = palette?.paletteId;
+
+      if (palette) updatedPalettes.push(palette);
+      setPaletteData(updatedPalettes);
     }
   }
   return {

@@ -1,7 +1,7 @@
 /* eslint-disable no-labels */
 /* eslint-disable camelcase */
 /* eslint-disable no-await-in-loop */
-import stringSimilarity, { ReturnTypeEnums } from 'didyoumean2';
+const { default: stringSimilarity, ReturnTypeEnums } = require('didyoumean2');
 
 import { getArtistsData, setArtistsData } from '../filesystem';
 import log from '../log';

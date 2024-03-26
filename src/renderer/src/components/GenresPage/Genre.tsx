@@ -16,14 +16,13 @@ interface GenreProp {
   title: string;
   songIds: string[];
   artworkPaths: ArtworkPaths;
-  backgroundColor?: { rgb: [number, number, number] };
+  paletteData?: PaletteData;
   className?: string;
   selectAllHandler?: (_upToId?: string) => void;
 }
 
 const Genre = (props: GenreProp) => {
-  const { genreId, songIds, title, artworkPaths, backgroundColor, className, selectAllHandler } =
-    props;
+  const { genreId, songIds, title, artworkPaths, paletteData, className, selectAllHandler } = props;
   const { queue, isMultipleSelectionEnabled, multipleSelectionsData } =
     React.useContext(AppContext);
   const {
@@ -44,6 +43,16 @@ const Genre = (props: GenreProp) => {
       }),
     [changeCurrentActivePage, genreId]
   );
+
+  const backgroundColor = React.useMemo(() => {
+    const swatch = paletteData?.DarkVibrant;
+    if (swatch?.hsl) {
+      const { hsl } = swatch;
+
+      return `hsl(${hsl[0] * 360} ${hsl[1] * 100}% ${hsl[2] * 100}%)`;
+    }
+    return 'hsl(0 0% 0%)';
+  }, [paletteData?.DarkVibrant]);
 
   const playGenreSongs = React.useCallback(
     (isShuffle = false) => {
@@ -283,7 +292,7 @@ const Genre = (props: GenreProp) => {
         'border-4 border-transparent'
       } ${isAMultipleSelection && '!border-font-color-highlight dark:!border-dark-font-color-highlight'}`}
       style={{
-        backgroundColor: `rgb(${backgroundColor ? backgroundColor.rgb.join(',') : '23,23,23'})`
+        backgroundColor
       }}
       onClick={(e) => {
         if (e.getModifierState('Shift') === true && selectAllHandler) selectAllHandler(genreId);

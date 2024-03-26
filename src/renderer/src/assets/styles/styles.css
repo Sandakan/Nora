@@ -5,6 +5,9 @@
 
   * This file previously had 3200+ lines.
 */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* ? POPPINS FONT CONFIG */
 @font-face {
@@ -52,26 +55,43 @@
 
 /* ? ROOT STYLES */
 :root {
-  --background-color-1: hsl(0, 0%, 100%);
-  --background-color-2: hsl(212, 48%, 94%);
-  --background-color-3: hsl(213, 80%, 88%);
-  --side-bar-background: hsl(212, 50%, 94%);
-  --background-color-dimmed: hsla(0, 0%, 30%, 0.5);
+  --background-color-1: 0 0% 100%; /* hsl(0 0% 100%) */
+  --background-color-2: 212 48% 94%; /* hsl(212 48% 94%) */
+  --background-color-3: 213 80% 88%; /* hsl(213 80% 88%) */
+  --side-bar-background: 212 50% 94%; /* hsl(212 50% 94%) */
+  --background-color-dimmed: 0 0% 30%; /* hsl(0 0% 30% / 50%) */
   --song-background-color: var(--background-color-1);
-  --text-color: #000;
-  --text-color-dimmed: hsl(0, 0%, 50%);
-  --text-color-white: #fff;
-  --font-color-crimson: hsl(348, 83%, 47%);
-  --text-color-highlight: hsl(203, 39%, 44%);
-  --text-color-highlight-2: hsl(247, 74%, 63%);
-  --context-menu-background: hsla(0, 0%, 100%, 0.9);
-  --context-menu-list-hover: hsla(198, 18%, 89%, 0.75);
-  --seekbar-background-color: hsl(0, 0%, 20%);
-  --foreground-color-1: hsl(247, 74%, 65%);
+  --text-color: 0 0% 0%; /* hsl(0 0% 0%) */
+  --text-color-dimmed: 0 0% 50%; /* hsl(0 0% 50%) */
+  --text-color-white: 0 0% 100%; /* hsl(0 0% 100%) */
+  --text-color-black: 0 0% 0%; /* hsl(0 0% 0%) */
+  --text-color-crimson: 348 83% 47%; /* hsl(348 83% 47%) */
+  --text-color-highlight: 203 39% 44%; /* hsl(203 39% 44%) */
+  --text-color-highlight-2: 247 74% 63%; /* hsl(247 74% 63%) */
+  --context-menu-background: 0 0% 100%; /* hsl(0 0% 100% / 90%) */
+  --context-menu-list-hover: 198 18% 89%; /* hsl(198 18% 89% / 75%) */
+  --seekbar-background-color: 0 0% 20%; /* hsl(0 0% 20%) */
+  --seekbar-track-background-color: 0 0% 80%; /* hsl(0 0% 80%) */
+  --foreground-color-1: 247 74% 65%; /* hsl(247 74% 65%) */
   --transition-duration-0_2s: 0.2s;
   --transition-duration-0_25s: 0.25s;
   --transition-duration-0_3s: 0.3s;
   --slider-opacity: 0.5;
+
+  /* Dark colors */
+  --dark-background-color-1: 228 7% 14%; /* hsl(228 7% 14%) */
+  --dark-background-color-2: 225 8% 20%; /* hsl(225 8% 20%) */
+  --dark-background-color-3: 213 80% 88%; /* hsl(213 80% 88%) */
+  --dark-song-background-color: var(--background-color-2);
+  --dark-side-bar-background: 228 7% 20%; /* hsl(228 7% 20%) */
+  --dark-text-color: 0 0% 100%; /* hsl(0 0% 100%) */
+  --dark-text-color-dimmed: 0 0% 50%; /* hsl(0 0% 50%) */
+  --dark-text-color-highlight: 213 80% 88%; /* hsl(213 80% 88%) */
+  --dark-text-color-highlight-2: 244 98% 80%; /* hsl(244 98% 80%) */
+  --dark-context-menu-background: 228 7% 14%; /* hsla(228 7% 14% / 90%) */
+  --dark-context-menu-list-hover: 224 8% 28%; /* hsl(224 8% 28%) */
+  --dark-seekbar-background-color: 240 1% 83%; /* hsl(240 1% 83%) */
+  --dark-slider-opacity: 0.25;
 }
 
 /* ? BASIC STYLING */
@@ -178,19 +198,19 @@ body * {
 .App.dark,
 .full-screen-player.dark,
 .mini-player.dark {
-  --background-color-1: rgb(33, 34, 38);
-  --background-color-2: hsla(225, 8%, 20%, 100%);
-  --background-color-3: hsla(213, 80%, 88%, 100%);
-  --song-background-color: var(--background-color-2);
-  --side-bar-background: hsla(228, 7%, 20%, 100%);
-  --text-color: hsl(0, 0%, 100%);
-  --text-color-dimmed: hsl(0, 0%, 50%);
-  --text-color-highlight: hsl(213, 80%, 88%);
-  --text-color-highlight-2: hsl(244, 98%, 80%);
-  --context-menu-background: hsla(228, 7%, 14%, 90%);
-  --context-menu-list-hover: hsl(224, 8%, 28%);
-  --seekbar-background-color: hsl(240, 1%, 83%);
-  --slider-opacity: 0.25;
+  --background-color-1: var(--dark-background-color-1);
+  --background-color-2: var(--dark-background-color-2);
+  --background-color-3: var(--dark-background-color-3);
+  --song-background-color: var(--dark-song-background-color);
+  --side-bar-background: var(--dark-side-bar-background);
+  --text-color: var(--dark-text-color);
+  --text-color-dimmed: var(--dark-text-color-dimmed);
+  --text-color-highlight: var(--dark-text-color-highlight);
+  --text-color-highlight-2: var(--dark-text-color-highlight-2);
+  --context-menu-background: var(--dark-context-menu-background);
+  --context-menu-list-hover: var(--dark-context-menu-list-hover);
+  --seekbar-background-color: var(--dark-seekbar-background-color);
+  --slider-opacity: var(--dark-slider-opacity);
 }
 
 /* ? APP REDUCED MOTION STYLES */
@@ -231,7 +251,7 @@ input[type='range']::-webkit-slider-runnable-track {
   width: 100%;
   height: 0.25rem;
   cursor: pointer;
-  background: rgba(204, 204, 204, var(--slider-opacity));
+  background: hsl(var(--seekbar-track-background-color) / var(--slider-opacity));
   border-radius: 5rem;
 }
 
@@ -244,11 +264,11 @@ input[type='range'].vertical::-webkit-slider-runnable-track {
   position: relative;
   -webkit-appearance: none;
   box-sizing: content-box;
-  border: 0.15rem solid var(--seekbar-background-color);
+  border: 0.15rem solid hsl(var(--seekbar-background-color));
   height: 0.75rem;
   width: 0.75rem;
   border-radius: 50%;
-  background-color: var(--seekbar-background-color);
+  background-color: hsl(var(--seekbar-background-color));
   cursor: pointer;
   margin: -7px 0 0 0;
   opacity: 0;
@@ -269,9 +289,9 @@ input[type='range'].vertical::-webkit-slider-runnable-track {
 
 input[type='range']:hover::-webkit-slider-thumb {
   opacity: 1;
-  background: var(--text-color-highlight);
+  background: hsl(var(--text-color-highlight));
   backdrop-filter: blur(4px);
-  border-color: var(--text-color-highlight);
+  border-color: hsl(var(--text-color-highlight));
   transform: scale(1);
   -webkit-transform: scale(1);
   -moz-transform: scale(1);
@@ -280,8 +300,8 @@ input[type='range']:hover::-webkit-slider-thumb {
 }
 
 input[type='range'].full-screen-player-seek-slider:hover::-webkit-slider-thumb {
-  background: var(--background-color-1);
-  border-color: var(--background-color-1);
+  background: hsl(var(--background-color-3));
+  border-color: hsl(var(--background-color-3));
 }
 
 input[type='range']:active::-webkit-slider-thumb {
@@ -300,16 +320,16 @@ input[type='checkbox']:checked ~ .checkmark .icon {
 /* ? THEME RADIO BUTTONS STYLES */
 .theme-change-radio-btns > .theme-change-radio-btn input[type='radio']:checked + *::before {
   background: radial-gradient(
-    var(--text-color-highlight) 0%,
-    var(--text-color-highlight) 40%,
+    hsl(var(--text-color-highlight) / 0%),
+    hsl(var(--text-color-highlight) / 40%),
     transparent 50%,
     transparent
   );
-  border-color: var(--text-color-highlight);
+  border-color: hsl(var(--text-color-highlight));
 }
 
 .theme-change-radio-btns > .theme-change-radio-btn input[type='radio']:checked + * {
-  color: var(--text-color-highlight);
+  color: hsl(var(--text-color-highlight));
 }
 
 /* ? MINI PLAYER STYLES */

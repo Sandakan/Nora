@@ -84,15 +84,17 @@ const SongCard = (props: SongCardProp) => {
     });
   }, [currentSongData, isCurrentSongPlaying, songId]);
 
-  const [r, g, b] = React.useMemo(
-    () =>
-      palette && palette.LightVibrant && palette.DarkVibrant
-        ? palette.LightVibrant.rgb
-        : [47, 49, 55],
-    [palette]
-  );
+  const [h, s, l] = React.useMemo(() => {
+    const swatch = palette?.LightVibrant;
+    if (swatch?.hsl) {
+      const { hsl } = swatch;
 
-  const background = `linear-gradient(to top,rgba(${r},${g},${b},0.3) 0%,rgba(${r},${g},${b},0.15) 40%), linear-gradient(to top,rgba(0,0,0,0.8)0%,rgba(0,0,0,0.1) 60%)`;
+      return [`${hsl[0] * 360}`, `${hsl[1] * 100}%`, `${hsl[2] * 100}%`];
+    }
+    return ['0', '0%', '0%'];
+  }, [palette?.LightVibrant]);
+
+  const background = `linear-gradient(to top,hsl(${h} ${s} ${l} / 0.3) 0%, hsl(${h} ${s} ${l} / 0.15) 40%), linear-gradient(to top,rgba(0,0,0,0.8)0%,rgba(0,0,0,0.1) 60%)`;
 
   const handlePlayBtnClick = React.useCallback(() => {
     playSong(songId);

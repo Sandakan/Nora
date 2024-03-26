@@ -40,6 +40,7 @@ const StorageSettings = () => {
         albumDataSize,
         genreDataSize,
         playlistDataSize,
+        paletteDataSize,
         userDataSize
         // totalKnownItemsSize,
         // otherSize,
@@ -52,8 +53,9 @@ const StorageSettings = () => {
         artistDataSizeWidth: (artistDataSize / rootSizes.size) * 100,
         albumDataSizeWidth: (albumDataSize / rootSizes.size) * 100,
         genreDataSizeWidth: (genreDataSize / rootSizes.size) * 100,
-        playlistDataSizeWidth: (playlistDataSize / rootSizes.size) * 100,
         userDataSizeWidth: (userDataSize / rootSizes.size) * 100,
+        playlistDataSizeWidth: (playlistDataSize / rootSizes.size) * 100,
+        paletteDataSizeWidth: (paletteDataSize / rootSizes.size) * 100,
         appFolderSizeWidth: (appFolderSize / rootSizes.size) * 100,
         otherApplicationSizesWidth:
           ((rootSizes.size - rootSizes.freeSpace - totalSize) / rootSizes.size) * 100
@@ -71,6 +73,7 @@ const StorageSettings = () => {
         albumDataSize,
         genreDataSize,
         playlistDataSize,
+        paletteDataSize,
         librarySize
       } = appDataSizes;
 
@@ -79,7 +82,8 @@ const StorageSettings = () => {
         artistDataSizeWidth: (artistDataSize / librarySize) * 100,
         albumDataSizeWidth: (albumDataSize / librarySize) * 100,
         genreDataSizeWidth: (genreDataSize / librarySize) * 100,
-        playlistDataSizeWidth: (playlistDataSize / librarySize) * 100
+        playlistDataSizeWidth: (playlistDataSize / librarySize) * 100,
+        paletteDataSizeWidth: (paletteDataSize / librarySize) * 100
       };
     }
     return undefined;
@@ -110,6 +114,9 @@ const StorageSettings = () => {
   appStorageBarCssProperties['--playlist-data-size-storage-bar-width'] = `${
     appStorageBarWidths?.playlistDataSizeWidth || 0
   }%`;
+  appStorageBarCssProperties['--palette-data-size-storage-bar-width'] = `${
+    appStorageBarWidths?.paletteDataSizeWidth || 0
+  }%`;
   appStorageBarCssProperties['--genre-data-size-storage-bar-width'] = `${
     appStorageBarWidths?.genreDataSizeWidth || 0
   }%`;
@@ -131,6 +138,9 @@ const StorageSettings = () => {
   }%`;
   appDataStorageBarCssProperties['--playlist-data-size-storage-bar-width'] = `${
     appDataStorageBarWidths?.playlistDataSizeWidth || 0
+  }%`;
+  appDataStorageBarCssProperties['--palette-data-size-storage-bar-width'] = `${
+    appDataStorageBarWidths?.paletteDataSizeWidth || 0
   }%`;
   appDataStorageBarCssProperties['--genre-data-size-storage-bar-width'] = `${
     appDataStorageBarWidths?.genreDataSizeWidth || 0
@@ -191,6 +201,10 @@ const StorageSettings = () => {
                 title={t('settingsPage.playlistsData')}
               />
               <div
+                className="!h-full w-[var(--palette-data-size-storage-bar-width)] cursor-pointer bg-[#badc58] opacity-75 transition-opacity hover:opacity-100"
+                title={t('settingsPage.palettesData')}
+              />
+              <div
                 className="!h-full w-[var(--genre-data-size-storage-bar-width)] cursor-pointer bg-[#e17055] opacity-75 transition-opacity hover:opacity-100"
                 title={t('settingsPage.genresData')}
               />
@@ -232,6 +246,10 @@ const StorageSettings = () => {
               <div
                 className="!h-full w-[var(--playlist-data-size-storage-bar-width)] cursor-pointer bg-[#fdcb6e] opacity-75 transition-opacity hover:opacity-100"
                 title={t('settingsPage.playlistsData')}
+              />
+              <div
+                className="!h-full w-[var(--palette-data-size-storage-bar-width)] cursor-pointer bg-[#badc58] opacity-75 transition-opacity hover:opacity-100"
+                title={t('settingsPage.palettesData')}
               />
               <div
                 className="!h-full w-[var(--genre-data-size-storage-bar-width)] cursor-pointer bg-[#e17055] opacity-75 transition-opacity hover:opacity-100"
@@ -303,6 +321,13 @@ const StorageSettings = () => {
               {t('settingsPage.playlistsData')}{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                 {parseByteSizes(storageMetrics?.appDataSizes.playlistDataSize)?.size}
+              </span>
+            </li>
+            <li className="mb-4 mr-8 flex items-center">
+              <div className="mr-4 h-4 w-4 rounded-full bg-[#badc58]" />
+              {t('settingsPage.palettesData')}{' '}
+              <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
+                {parseByteSizes(storageMetrics?.appDataSizes.paletteDataSize)?.size}
               </span>
             </li>
             <li className="mb-4 mr-8 flex items-center">

@@ -89,7 +89,7 @@ declare global {
     noOfChannels?: number;
     year?: number;
     sampleRate?: number;
-    palette?: NodeVibrantPalette;
+    paletteId?: string;
     isAFavorite: boolean;
     isArtworkAvailable: boolean;
     path: string;
@@ -107,6 +107,11 @@ declare global {
   interface SongData extends SavableSongData {
     artworkPaths: ArtworkPaths;
     isBlacklisted: boolean;
+    paletteData?: PaletteData;
+  }
+
+  interface PaletteData extends NodeVibrantPalette {
+    paletteId: string;
   }
 
   interface NodeVibrantPalette {
@@ -118,12 +123,12 @@ declare global {
     Vibrant?: NodeVibrantPaletteSwatch;
   }
   interface NodeVibrantPaletteSwatch {
-    rgb: [number, number, number];
-    hsl?: [number, number, number];
-    hex?: string;
-    bodyTextColor?: string;
-    titleTextColor?: string;
-    population?: number;
+    hsl: [number, number, number];
+    hex: string;
+    population: number;
+    // rgb: [number, number, number];
+    // bodyTextColor?: string;
+    // titleTextColor?: string;
   }
 
   interface AudioPlayerData {
@@ -141,7 +146,7 @@ declare global {
     path: string;
     isAFavorite: boolean;
     album?: { albumId: string; name: string };
-    palette?: NodeVibrantPalette;
+    paletteData?: PaletteData;
     isKnownSource: boolean;
     isBlacklisted: boolean;
   }
@@ -157,7 +162,7 @@ declare global {
     addedDate: number;
     isAFavorite: boolean;
     year?: number;
-    palette?: NodeVibrantPalette;
+    paletteData?: PaletteData;
     isBlacklisted: boolean;
     trackNo?: number;
   }
@@ -480,6 +485,7 @@ declare global {
     lyricsAutomaticallySaveState: AutomaticallySaveLyricsTypes;
     showTrackNumberAsSongIndex: boolean;
     allowToPreventScreenSleeping: boolean;
+    enableImageBasedDynamicThemes: boolean;
   }
 
   interface CurrentSong {
@@ -626,11 +632,12 @@ declare global {
       songId: string;
     }[];
     artworkName?: string;
-    backgroundColor?: { rgb: NodeVibrantPaletteSwatch['rgb'] };
+    paletteId?: string;
   }
 
   interface Genre extends SavableGenre {
     artworkPaths: ArtworkPaths;
+    paletteData?: PaletteData;
   }
 
   // ? Albums related types
@@ -690,7 +697,7 @@ declare global {
 
   interface ArtistInfoFromNet {
     artistArtworks?: OnlineArtistArtworks;
-    artistPalette?: NodeVibrantPalette;
+    artistPalette?: PaletteData;
     artistBio?: string;
     similarArtists: SimilarArtistInfo;
     tags: Tag[];
@@ -715,6 +722,7 @@ declare global {
     albumDataSize: number;
     genreDataSize: number;
     playlistDataSize: number;
+    paletteDataSize: number;
     userDataSize: number;
     librarySize: number;
     totalKnownItemsSize: number;

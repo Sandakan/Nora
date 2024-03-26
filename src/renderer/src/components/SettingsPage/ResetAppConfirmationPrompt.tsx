@@ -1,7 +1,7 @@
 import { Trans, useTranslation } from 'react-i18next';
 import Button from '../Button';
 
-export default () => {
+export const ResetAppConfirmationPrompt = () => {
   const { t } = useTranslation();
   return (
     <>
@@ -28,3 +28,5 @@ export default () => {
     </>
   );
 };
+
+export default ResetAppConfirmationPrompt;

@@ -53,7 +53,6 @@ win:
 
 nsis:
   shortcutName: ${productName}
-  uninstallDisplayName: ${productName} ${version}
   allowElevation: false
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
@@ -99,6 +98,3 @@ protocols:
 publish:
   owner: Sandakan
   provider: github
-
-electronDownload:
-  mirror: https://npmmirror.com/mirrors/electron/

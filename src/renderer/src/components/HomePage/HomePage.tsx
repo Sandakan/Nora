@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useResizeObserver from '../../hooks/useResizeObserver';
 
-import roundTo from '../../utils/roundTo';
+import roundTo from '../../../../common/roundTo';
 import storage from '../../utils/localStorage';
 
 import ErrorPrompt from '../ErrorPrompt';
@@ -214,10 +214,19 @@ const HomePage = () => {
   }, [content.mostLovedSongs, noOfRecentandLovedArtists]);
 
   React.useEffect(() => {
+    console.log('fetchLatestSongs');
     fetchLatestSongs();
+  }, [fetchLatestSongs]);
+
+  React.useEffect(() => {
+    console.log('fetchRecentlyPlayedSongs');
     fetchRecentlyPlayedSongs();
+  }, [fetchRecentlyPlayedSongs]);
+
+  React.useEffect(() => {
+    console.log('fetchMostLovedSongs');
     fetchMostLovedSongs();
-  }, [fetchLatestSongs, fetchMostLovedSongs, fetchRecentlyPlayedSongs]);
+  }, [fetchMostLovedSongs]);
 
   React.useEffect(() => {
     const manageDataUpdatesInHomePage = (e: Event) => {
@@ -280,7 +289,7 @@ const HomePage = () => {
               songId: song.songId,
               artists: song.artists,
               duration: song.duration,
-              palette: song.palette,
+              palette: song.paletteData,
               path: song.path,
               artworkPaths: song.artworkPaths,
               addedDate: song.addedDate,

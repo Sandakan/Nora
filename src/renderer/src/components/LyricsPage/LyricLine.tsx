@@ -6,7 +6,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import roundTo from '../../utils/roundTo';
+import roundTo from '../../../../common/roundTo';
 import { delay, syncedLyricsRegex } from './LyricsPage';
 import LyricsProgressBar from './LyricsProgressBar';
 import EnhancedSyncedLyricWord from '../LyricsEditingPage/EnhancedSyncedLyricWord';
@@ -41,13 +41,14 @@ const LyricLine = (props: LyricProp) => {
         if (lyricsRef.current && syncedLyrics) {
           const { start, end } = syncedLyrics;
           if (songPosition > start - delay && songPosition < end - delay) {
-            if (!isTheCurrnetLineRef.current && isAutoScrolling) {
+            if (!isTheCurrnetLineRef.current) {
               isTheCurrnetLineRef.current = true;
               setIsInRange(true);
-              lyricsRef.current?.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center'
-              });
+              if (isAutoScrolling)
+                lyricsRef.current?.scrollIntoView({
+                  behavior: 'smooth',
+                  block: 'center'
+                });
 
               document.dispatchEvent(lyricsScrollIntoViewEvent);
             }
@@ -103,7 +104,7 @@ const LyricLine = (props: LyricProp) => {
         syncedLyrics
           ? `cursor-pointer ${
               isInRange
-                ? '!scale-100 !text-opacity-90 !blur-0 [&>div>span]:!mr-3'
+                ? '!scale-100 !text-opacity-90 !blur-0 [&>div>span]:!mr-3 text-font-color-highlight dark:!text-dark-font-color-highlight'
                 : 'scale-[.7] !text-opacity-20 hover:!text-opacity-75'
             }`
           : '!text-4xl'

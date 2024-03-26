@@ -14,9 +14,9 @@
     "baseUrl": ".",
     "resolveJsonModule": true,
     "paths": {
-      "@renderer/*": [
-        "src/renderer/src/*"
-      ]
+      // "@renderer/*": [
+      //   "src/renderer/src/*"
+      // ]
     },
     "types": ["vite/client"]
   }

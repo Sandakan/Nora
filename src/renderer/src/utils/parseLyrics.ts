@@ -3,7 +3,7 @@ import isLyricsSynced, {
   isAnExtendedSyncedLyricsLine,
   syncedLyricsRegex
 } from '../../../common/isLyricsSynced';
-import roundTo from './roundTo';
+import roundTo from '../../../common/roundTo';
 
 const isNotALyricsMetadataLine = (line: string) => !/^\[\w+:.{1,}\]$/gm.test(line);
 

@@ -349,6 +349,9 @@
     "darkTheme": "Dark theme",
     "systemTheme": "System theme",
 
+    "enableImageBasedDynamicThemes": "Enable Dynamic Themes",
+    "enableImageBasedDynamicThemesDescription": "Change app theme dynamically based on the theme of the current playing song cover image",
+
     "language": "Language",
     "languageDescription": "Select the language you want Nora to be displayed in.",
 
@@ -450,6 +453,7 @@
     "artistsData": "Artist data",
     "albumsData": "Album data",
     "playlistsData": "Playlist data",
+    "palettesData": "Palette data",
     "genresData": "Genre data",
     "appLogs": "Application logs",
     "userData": "User data",

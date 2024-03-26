@@ -26,7 +26,7 @@ function Dropdown<T extends string>(props: DropdownProp<T>) {
           key={option.value}
           value={option.value}
           disabled={option.isDisabled}
-          className="!bg-context-menu-background !text-font-color-black dark:!bg-dark-context-menu-background dark:!text-font-color-white"
+          className="!bg-context-menu-background/90 !text-font-color-black dark:!bg-dark-context-menu-background/90 dark:!text-font-color-white"
         >
           {option.label}
         </option>

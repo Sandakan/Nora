@@ -1,7 +1,6 @@
 /* eslint-disable no-use-before-define */
 import React, { ReactNode, Suspense } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import 'tailwindcss/tailwind.css';
 import './assets/styles/styles.css';
 import packageFile from '../../../package.json';
 
@@ -22,7 +21,7 @@ import Img from './components/Img';
 import Preloader from './components/Preloader/Preloader';
 
 import isLatestVersion from './utils/isLatestVersion';
-import roundTo from './utils/roundTo';
+import roundTo from '../../common/roundTo';
 import storage from './utils/localStorage';
 import { isDataChanged } from './utils/hasDataChanged';
 import log from './utils/log';
@@ -806,6 +805,87 @@ export default function App() {
     []
   );
 
+  const setDynamicThemesFromSongPalette = React.useCallback((palette?: NodeVibrantPalette) => {
+    const manageBrightness = (
+      values: [number, number, number],
+      defaultValue = 0.9
+    ): [number, number, number] => {
+      const [h, s, l] = values;
+
+      const updatedL = l >= defaultValue ? l : defaultValue;
+      return [h, s, updatedL];
+    };
+
+    const generateColor = (values: [number, number, number]) => {
+      const [lh, ls, ll] = values;
+      const color = `${lh * 360} ${ls * 100}% ${ll * 100}%`;
+      return color;
+    };
+
+    const resetStyles = () => {
+      const root = document.getElementById('root');
+
+      if (root) {
+        root.style.removeProperty('--side-bar-background');
+        root.style.removeProperty('--background-color-2');
+        // root.style.removeProperty('--dark-background-color-2', lightVibrant, 'important');
+        root.style.removeProperty('--background-color-3');
+        root.style.removeProperty('--dark-background-color-3');
+        root.style.removeProperty('--text-color-highlight');
+        root.style.removeProperty('--dark-text-color-highlight');
+      }
+    };
+
+    const root = document.getElementById('root');
+    if (root) {
+      if (palette) {
+        if (
+          palette?.LightVibrant &&
+          palette?.DarkVibrant &&
+          palette?.LightMuted &&
+          palette?.DarkMuted &&
+          palette?.Vibrant &&
+          palette?.Muted
+        ) {
+          const highLightVibrant = generateColor(manageBrightness(palette.LightVibrant.hsl));
+          const lightVibrant = generateColor(palette.LightVibrant.hsl);
+          const darkVibrant = generateColor(palette.DarkVibrant.hsl);
+          const lightMuted = generateColor(palette.LightMuted.hsl);
+          const darkMuted = generateColor(palette.DarkMuted.hsl);
+          const vibrant = generateColor(palette.Vibrant.hsl);
+          const muted = generateColor(palette.Muted.hsl);
+
+          root.style.setProperty('--side-bar-background', highLightVibrant, 'important');
+          root.style.setProperty('--background-color-2', highLightVibrant, 'important');
+          // root.style.setProperty('--dark-background-color-2', lightVibrant, 'important');
+          root.style.setProperty('--background-color-3', vibrant, 'important');
+          root.style.setProperty('--dark-background-color-3', lightVibrant, 'important');
+          root.style.setProperty('--text-color-highlight', darkVibrant, 'important');
+          root.style.setProperty('--dark-text-color-highlight', lightVibrant, 'important');
+        }
+      } else resetStyles();
+    }
+    return resetStyles;
+  }, []);
+
+  React.useEffect(() => {
+    const isDynamicThemesEnabled =
+      content.localStorage.preferences.enableImageBasedDynamicThemes &&
+      content.currentSongData.paletteData;
+
+    const resetStyles = setDynamicThemesFromSongPalette(
+      isDynamicThemesEnabled ? content.currentSongData.paletteData : undefined
+    );
+
+    return () => {
+      resetStyles();
+    };
+  }, [
+    content.currentSongData.paletteData,
+    content.localStorage.preferences.enableImageBasedDynamicThemes,
+    setDynamicThemesFromSongPalette
+  ]);
+
   const playSong = React.useCallback(
     (songId: string, isStartPlay = true, playAsCurrentSongIndex = false) => {
       repetitivePlaybackErrorsCount = 0;
@@ -835,6 +915,8 @@ export default function App() {
               refStartPlay.current = isStartPlay;
 
               if (isStartPlay) toggleSongPlayback();
+
+              if (songData.paletteData) setDynamicThemesFromSongPalette(songData.paletteData);
 
               recordListeningData(songId, songData.duration);
 
@@ -870,7 +952,14 @@ export default function App() {
         'ERROR'
       );
     },
-    [addNewNotifications, changePromptMenuData, t, toggleSongPlayback, recordListeningData]
+    [
+      addNewNotifications,
+      changePromptMenuData,
+      t,
+      toggleSongPlayback,
+      setDynamicThemesFromSongPalette,
+      recordListeningData
+    ]
   );
 
   const playSongFromUnknownSource = React.useCallback(

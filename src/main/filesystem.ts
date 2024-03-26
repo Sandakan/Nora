@@ -18,6 +18,7 @@ import {
 } from './migrations';
 import { encrypt } from './utils/safeStorage';
 import { LastFMSessionData } from '../@types/last_fm_api';
+import { DEFAULT_SONG_PALETTE } from './other/generatePalette';
 
 export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(app.getPath('userData'), 'song_covers');
 export const DEFAULT_FILE_URL = 'nora://localfiles/';
@@ -68,6 +69,8 @@ export const BLACKLIST_TEMPLATE: Blacklist = {
   songBlacklist: [],
   folderBlacklist: []
 };
+
+export const PALETTE_DATA_TEMPLATE: PaletteData[] = [DEFAULT_SONG_PALETTE];
 
 const songStore = new Store({
   name: 'songs',
@@ -207,6 +210,22 @@ const blacklistStore = new Store({
   migrations: blacklistMigrations
 });
 
+const paletteStore = new Store({
+  name: 'palettes',
+  defaults: {
+    version,
+    palettes: []
+  },
+  schema: {
+    version: { type: ['string', 'null'] },
+    palettes: {
+      type: 'array'
+    }
+  }
+  // beforeEachMigration: (_, context) => generateMigrationMessage('songs.json', context),
+  // migrations: songMigrations
+});
+
 const songStoreVersion = songStore.get('version');
 log('song store version', { songStoreVersion }, 'WARN');
 
@@ -223,6 +242,7 @@ let cachedPlaylistsData = playlistDataStore.get(
 let cachedUserData: UserData = userDataStore.get('userData', USER_DATA_TEMPLATE) as UserData;
 let cachedListeningData = listeningDataStore.get('listeningData', []) as SongListeningData[];
 let cachedBlacklist = blacklistStore.get('blacklist', BLACKLIST_TEMPLATE) as Blacklist;
+let cachedPaletteData = paletteStore.get('palettes', PALETTE_DATA_TEMPLATE) as PaletteData[];
 
 // ? USER DATA GETTERS AND SETTERS
 
@@ -335,6 +355,20 @@ export const getSongsData = () => {
 export const setSongsData = (updatedSongs: SavableSongData[]) => {
   cachedSongsData = updatedSongs;
   songStore.set('songs', updatedSongs);
+};
+
+// ? PALETTE DATA GETTERS AND SETTERS
+
+export const getPaletteData = () => {
+  if (Array.isArray(cachedPaletteData) && cachedPaletteData.length !== 0) {
+    return cachedPaletteData;
+  }
+  return paletteStore.get('palettes', PALETTE_DATA_TEMPLATE) as PaletteData[];
+};
+
+export const setPaletteData = (updatedPalette: PaletteData[]) => {
+  cachedPaletteData = updatedPalette;
+  paletteStore.set('palettes', updatedPalette);
 };
 
 // ? ARTIST DATA GETTERS AND SETTERS

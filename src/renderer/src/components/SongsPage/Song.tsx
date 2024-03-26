@@ -4,6 +4,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { ForwardedRef } from 'react';
 import { useTranslation } from 'react-i18next';
+// eslint-disable-next-line import/named
 import { DraggableProvided } from 'react-beautiful-dnd';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';

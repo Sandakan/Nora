@@ -1,4 +1,4 @@
-import roundTo from './roundTo';
+import roundTo from '../../../common/roundTo';
 
 /* eslint-disable no-param-reassign */
 const calculateTime = (secs: number = 0, roundOutput = true) => {

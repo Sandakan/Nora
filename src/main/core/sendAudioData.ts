@@ -12,8 +12,9 @@ import addToSongsHistory from './addToSongsHistory';
 import updateSongListeningData from './updateSongListeningData';
 import { setDiscordRpcActivity } from '../other/discordRPC';
 import { setCurrentSongPath } from '../main';
+import { getSelectedPaletteData } from '../other/generatePalette';
 
-const IS_DEVELOPMENT = !app.isPackaged || import.meta.env.MAIN_VITE_NODE_ENV === 'development';
+const IS_DEVELOPMENT = !app.isPackaged || process.env.NODE_ENV === 'development';
 
 const getArtworkData = (artworkData?: Buffer) => {
   if (artworkData === undefined) return undefined;
@@ -89,7 +90,7 @@ export const sendAudioData = async (audioId: string): Promise<AudioPlayerData> =
               songId: song.songId,
               isAFavorite: song.isAFavorite,
               album: song.album,
-              palette: song.palette,
+              paletteData: getSelectedPaletteData(song.paletteId),
               isKnownSource: true,
               isBlacklisted: isSongBlacklisted(song.songId, song.path)
             };

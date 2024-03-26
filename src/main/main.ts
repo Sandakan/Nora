@@ -195,7 +195,6 @@ const createWindow = async () => {
       checkForNewSongs();
       addWatchersToFolders();
       addWatchersToParentFolders();
-      manageWindowPositionInMonitor();
     }
   });
   mainWindow.webContents.setWindowOpenHandler((data: { url: string }) => {
@@ -360,6 +359,7 @@ function manageWindowFinishLoad() {
   }
 
   mainWindow.show();
+  manageWindowPositionInMonitor();
 
   if (IS_DEVELOPMENT) mainWindow.webContents.openDevTools({ mode: 'detach', activate: true });
 
@@ -374,13 +374,17 @@ function manageWindowFinishLoad() {
 }
 
 function handleBeforeQuit() {
-  mainWindow.webContents.send('app/beforeQuitEvent');
-  savePendingSongLyrics(currentSongPath, true);
-  savePendingMetadataUpdates(currentSongPath, true);
-  closeAllAbortControllers();
-  clearTempArtworkFolder();
-  clearDiscordRpcActivity();
-  log(`QUITING NORA`, { uptime: `${Math.floor(process.uptime())} seconds` }, 'WARN');
+  try {
+    savePendingSongLyrics(currentSongPath, true);
+    savePendingMetadataUpdates(currentSongPath, true);
+    closeAllAbortControllers();
+    clearTempArtworkFolder();
+    clearDiscordRpcActivity();
+    mainWindow.webContents.send('app/beforeQuitEvent');
+    log(`QUITING NORA`, { uptime: `${Math.floor(process.uptime())} seconds` }, 'WARN');
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 export function toggleAudioPlayingState(isPlaying: boolean) {

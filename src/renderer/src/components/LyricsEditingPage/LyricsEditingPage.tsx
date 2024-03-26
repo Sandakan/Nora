@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
-import roundTo from '../../utils/roundTo';
+import roundTo from '../../../../common/roundTo';
 
 import MainContainer from '../MainContainer';
 import EditingLyricsLine from './EditingLyricsLine';

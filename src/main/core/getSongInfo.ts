@@ -3,6 +3,7 @@ import { getListeningData, getSongsData } from '../filesystem';
 import { getSongArtworkPath } from '../fs/resolveFilePaths';
 import log from '../log';
 import sortSongs from '../utils/sortSongs';
+import { getSelectedPaletteData } from '../other/generatePalette';
 
 const getSongInfo = async (
   songIds: string[],
@@ -41,10 +42,12 @@ const getSongInfo = async (
       if (results.length > 0) {
         let updatedResults: SongData[] = results.map((x) => {
           const isBlacklisted = isSongBlacklisted(x.songId, x.path);
+          const paletteData = getSelectedPaletteData(x.paletteId);
 
           return {
             ...x,
             artworkPaths: getSongArtworkPath(x.songId, x.isArtworkAvailable),
+            paletteData,
             isBlacklisted
           };
         });

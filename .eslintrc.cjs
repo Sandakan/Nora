@@ -7,6 +7,7 @@ module.exports = {
     '@electron-toolkit/eslint-config-ts/recommended',
     // '@electron-toolkit/eslint-config-prettier',
     'plugin:import/recommended',
+    'plugin:jsx-a11y/recommended',
     'plugin:promise/recommended'
   ],
   rules: {

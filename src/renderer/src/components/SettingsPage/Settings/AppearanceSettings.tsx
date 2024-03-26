@@ -4,15 +4,17 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../../contexts/AppContext';
+import storage from '../../../utils/localStorage';
 
 import Img from '../../Img';
 
 import HomeImgLight from '../../../assets/images/webp/home-skeleton-light.webp';
 import HomeImgDark from '../../../assets/images/webp/home-skeleton-dark.webp';
 import HomeImgLightDark from '../../../assets/images/webp/home-skeleton-light-dark.webp';
+import Checkbox from '../../Checkbox';
 
 const ThemeSettings = () => {
-  const { userData } = React.useContext(AppContext);
+  const { userData, localStorageData, currentSongData } = React.useContext(AppContext);
   const { t } = useTranslation();
 
   const [theme, setTheme] = React.useState(userData?.theme);
@@ -134,6 +136,68 @@ const ThemeSettings = () => {
               </span>
             </label>
           </div>
+        </li>
+        <li className="secondary-container enable-image-based-dynamic-themes mb-4">
+          <div className="description">
+            {t('settingsPage.enableImageBasedDynamicThemesDescription')}
+          </div>
+          <Checkbox
+            id="toggleEnableImageBasedDynamicThemes"
+            isChecked={
+              localStorageData !== undefined &&
+              localStorageData.preferences.enableImageBasedDynamicThemes
+            }
+            checkedStateUpdateFunction={(state) =>
+              storage.preferences.setPreferences('enableImageBasedDynamicThemes', state)
+            }
+            labelContent={t('settingsPage.enableImageBasedDynamicThemes')}
+          />
+          {localStorageData.preferences.enableImageBasedDynamicThemes && (
+            <div className="flex gap-4 mt-4">
+              <span className="text-xs text-center flex flex-col gap-2 items-center justify-center">
+                <span
+                  className="w-20 h-12 rounded-md"
+                  style={{ backgroundColor: currentSongData.paletteData?.DarkVibrant?.hex }}
+                />
+                <span>Dark Vibrant</span>
+              </span>
+              <span className="text-xs text-center flex flex-col gap-2 items-center justify-center">
+                <span
+                  className="w-20 h-12 rounded-md"
+                  style={{ backgroundColor: currentSongData.paletteData?.LightVibrant?.hex }}
+                />
+                <span>Light Vibrant</span>
+              </span>
+              <span className="text-xs text-center flex flex-col gap-2 items-center justify-center">
+                <span
+                  className="w-20 h-12 rounded-md"
+                  style={{ backgroundColor: currentSongData.paletteData?.DarkMuted?.hex }}
+                />
+                <span>Dark Muted</span>
+              </span>
+              <span className="text-xs text-center flex flex-col gap-2 items-center justify-center">
+                <span
+                  className="w-20 h-12 rounded-md"
+                  style={{ backgroundColor: currentSongData.paletteData?.LightMuted?.hex }}
+                />
+                <span>Light Muted</span>
+              </span>
+              <span className="text-xs text-center flex flex-col gap-2 items-center justify-center">
+                <span
+                  className="w-20 h-12 rounded-md"
+                  style={{ backgroundColor: currentSongData.paletteData?.Vibrant?.hex }}
+                />
+                <span>Vibrant</span>
+              </span>
+              <span className="text-xs text-center flex flex-col gap-2 items-center justify-center">
+                <span
+                  className="w-20 h-12 rounded-md"
+                  style={{ backgroundColor: currentSongData.paletteData?.Muted?.hex }}
+                />
+                <span>Muted</span>
+              </span>
+            </div>
+          )}
         </li>
       </ul>
     </li>

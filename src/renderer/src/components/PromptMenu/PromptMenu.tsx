@@ -65,14 +65,20 @@ const PromptMenu = () => {
     [updatePromptMenuHistoryIndex]
   );
 
+  const manageDialogCloseEvent = React.useCallback(() => {
+    changePromptMenuData(false, null);
+  }, [changePromptMenuData]);
+
   useEffect(() => {
     const promptMenu = promptMenuRef.current;
 
+    promptMenu?.addEventListener('close', manageDialogCloseEvent);
     promptMenu?.addEventListener('keydown', manageKeyboardShortcuts);
     return () => {
       promptMenu?.removeEventListener('keydown', manageKeyboardShortcuts);
+      promptMenu?.removeEventListener('close', manageDialogCloseEvent);
     };
-  }, [manageKeyboardShortcuts]);
+  }, [manageDialogCloseEvent, manageKeyboardShortcuts]);
 
   return (
     <dialog

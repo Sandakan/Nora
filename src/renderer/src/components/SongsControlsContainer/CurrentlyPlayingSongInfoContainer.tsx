@@ -270,7 +270,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
         {currentSongData.title && (
           <div className="song-title flex w-full items-center">
             <div
-              className={`w-fit max-w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-2xl font-medium outline-1 outline-offset-1 focus-visible:!outline ${
+              className={`w-fit max-w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-2xl text-font-color-highlight font-medium outline-1 outline-offset-1 focus-visible:!outline ${
                 currentSongData.isKnownSource && 'hover:underline'
               }`}
               id="currentSongTitle"

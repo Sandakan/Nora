@@ -377,9 +377,9 @@ const ArtistInfoPage = () => {
       artistData.artistPalette?.LightVibrant
     ) {
       const { LightVibrant, LightMuted } = artistData.artistPalette;
-      const [r, g, b] = isDarkMode ? LightVibrant.rgb : LightMuted.rgb;
+      const [h, s, l] = isDarkMode ? LightVibrant.hsl : LightMuted.hsl;
 
-      return `rgb(${r},${g},${b})`;
+      return `hsl(${h * 360} ${s * 100} ${l * 100})`;
     }
     return undefined;
   }, [artistData?.artistPalette, isDarkMode]);
@@ -592,9 +592,9 @@ const ArtistInfoPage = () => {
                         count: multipleSelectionsData.multipleSelections.length
                       })
                     : `${t('common.songWithCount', { count: songs.length })} ${
-                        songs.length > 5 &&
-                        !isAllSongsVisible &&
-                        t('common.shownWithCount', { count: 5 })
+                        songs.length > 5 && !isAllSongsVisible
+                          ? t('common.shownWithCount', { count: 5 })
+                          : ''
                       }`}
                 </p>
               ]}

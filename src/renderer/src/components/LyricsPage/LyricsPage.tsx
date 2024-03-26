@@ -528,7 +528,7 @@ const LyricsPage = () => {
                   debounce(() => {
                     if (isScrollingByCode) {
                       isScrollingByCode = false;
-                      console.log('scrolling by code');
+                      // console.log('scrolling by code');
                     } else console.log('user scrolling');
                   }, 100)
                 }

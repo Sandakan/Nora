@@ -64,6 +64,7 @@
   },
   "scripts": {
     "test": "jest --collect-coverage",
+    "check-types": "tsc --noEmit",
     "husky-test": "npm run prettier-check && npm run test",
     "lint-fix": "cross-env NODE_ENV=development eslint . --fix --ext .ts,.tsx",
     "lint-save-results": "cross-env NODE_ENV=development eslint . --ext .ts,.tsx -o ./lint_results.txt",
@@ -108,6 +109,7 @@
     "@types/jest": "^29.5.12",
     "@types/node": "^20.11.25",
     "@types/react": "^18.2.48",
+    "@types/react-beautiful-dnd": "^13.1.8",
     "@types/react-dom": "^18.2.18",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.18",
@@ -119,6 +121,7 @@
     "eslint": "^8.56.0",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
