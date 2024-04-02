@@ -1,4 +1,4 @@
-import isLatestVersion from '../src/renderer/utils/isLatestVersion';
+import isLatestVersion from '../src/renderer/src/utils/isLatestVersion';
 
 describe('App versions check', () => {
   test('Basic version checks', () => {

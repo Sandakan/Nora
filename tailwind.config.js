@@ -40,6 +40,8 @@ module.exports = {
         'font-color-highlight': 'hsl(var(--text-color-highlight) / <alpha-value>)',
         'font-color-crimson': 'hsl(var(--text-color-crimson) / <alpha-value>)',
         'seekbar-background-color': 'hsl(var(--seekbar-background-color) / <alpha-value>)',
+        'seekbar-track-background-color':
+          'hsl(var(--seekbar-track-background-color) / <alpha-value>)',
         'dark-font-color-highlight': 'hsl(var(--dark-text-color-highlight) / <alpha-value>)',
         'font-color-highlight-2': 'hsl(var(--text-color-highlight-2) / <alpha-value>)',
         'dark-font-color-highlight-2': 'hsl(var(--dark-text-color-highlight-2) / <alpha-value>)',
@@ -52,6 +54,8 @@ module.exports = {
         'dark-song-background-color': 'hsl(var(--background-color-2) / <alpha-value>)',
         'dark-seekbar-background-color':
           'hsl(var(--dark-seekbar-background-color) / <alpha-value>)',
+        'dark-seekbar-track-background-color':
+          'hsl(var(--dark-seekbar-track-background-color) / <alpha-value>)',
         'dark-side-bar-background': 'hsl(var(--dark-side-bar-background) / <alpha-value>)',
         'dark-font-color': 'hsl(var(--dark-text-color) / <alpha-value>)',
         'dark-font-color-dimmed': 'hsl(var(--dark-text-color-dimmed) / <alpha-value>)',

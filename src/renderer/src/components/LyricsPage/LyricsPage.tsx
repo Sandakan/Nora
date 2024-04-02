@@ -432,7 +432,7 @@ const LyricsPage = () => {
             <>
               <div className="title-container relative flex w-full items-center justify-between py-2 pl-8 pr-2 text-2xl text-font-color-highlight dark:text-dark-font-color-highlight">
                 <div className="flex max-w-[40%] items-center">
-                  <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+                  <span className="overflow-hidden font-medium text-ellipsis whitespace-nowrap">
                     {lyrics.source === 'IN_SONG_LYRICS' ? 'Offline' : 'Online'}{' '}
                     {t('lyricsPage.lyricsForSong', {
                       title: currentSongData.title
@@ -542,6 +542,23 @@ const LyricsPage = () => {
               iconName="release_alert"
               title={t('lyricsPage.noLyrics')}
               description={t('lyricsPage.noLyricsDescription')}
+              buttons={[
+                {
+                  label: t('lyricsPage.refreshOnlineLyrics'),
+                  pendingAnimationOnDisabled: true,
+                  className:
+                    'refresh-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0',
+                  iconName: 'refresh',
+                  clickHandler: refreshOnlineLyrics
+                },
+                {
+                  label: t('lyricsPage.editLyrics'),
+                  className:
+                    'edit-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0',
+                  iconName: 'edit',
+                  clickHandler: goToLyricsEditor
+                }
+              ]}
             />
           ) : (
             <NoLyrics

@@ -12,7 +12,7 @@ const ContextMenuItem = (props: ContextMenuItem) => {
     <div
       className={`menu-item ${
         props.class || ''
-      } flex cursor-pointer flex-row items-center px-4 py-1 text-sm font-light text-font-color-black hover:bg-context-menu-list-hover/75 dark:text-font-color-white dark:hover:bg-dark-context-menu-list-hover`}
+      } flex cursor-pointer flex-row items-center px-4 py-1 text-sm font-light text-font-color-black hover:bg-context-menu-list-hover/75 dark:text-font-color-white dark:hover:bg-dark-context-menu-list-hover/25`}
       onClick={() => {
         if (!props.isContextMenuItemSeperator && props.handlerFunction) {
           props.handlerFunction();

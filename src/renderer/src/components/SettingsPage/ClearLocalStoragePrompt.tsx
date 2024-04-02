@@ -11,7 +11,7 @@ const ClearLocalStoragePrompt = () => {
 
   return (
     <>
-      <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
+      <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         {t('clearLocalStoragePrompt.title')}
       </div>
       <p>{t('clearLocalStoragePrompt.description')}</p>

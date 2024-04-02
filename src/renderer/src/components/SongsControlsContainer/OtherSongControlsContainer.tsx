@@ -110,11 +110,7 @@ const OtherSongControlsContainer = () => {
       />
 
       <div className="volume-slider-container mr-4 min-w-[4rem] max-w-[6rem] lg:mr-4">
-        <VolumeSlider
-          name="player-volume-slider"
-          id="volumeSlider"
-          className="relative float-left m-0 h-6 w-full appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--volume-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
-        />
+        <VolumeSlider name="player-volume-slider" id="volumeSlider" />
       </div>
       <div className="other-settings-btn mr-4 flex cursor-pointer items-center justify-center text-font-color-black text-opacity-60 dark:text-font-color-white">
         <span

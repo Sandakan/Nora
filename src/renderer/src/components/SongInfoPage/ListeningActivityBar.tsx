@@ -13,7 +13,7 @@ const ListeningActivityBar = (props: Props) => {
 
   return (
     <div className="relative flex h-full flex-col items-center justify-end">
-      <div className="flex h-full items-end rounded-2xl bg-background-color-1/25 dark:bg-dark-background-color-1/25">
+      <div className="flex h-full items-end rounded-2xl bg-seekbar-track-background-color/20 dark:bg-dark-seekbar-track-background-color/20">
         <div
           className="order-1 w-[10px] rounded-2xl bg-font-color-highlight transition-[height] delay-200 duration-300 ease-in-out dark:bg-dark-font-color-highlight"
           style={{

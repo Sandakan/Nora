@@ -79,7 +79,7 @@ const UpNextSongPopup = (props: Props) => {
 
   return upNextSongData ? (
     <div
-      className={`next-song appear-from-bottom group/nextSong relative flex max-w-full items-center rounded-full px-3 py-1 text-xs ${
+      className={`next-song appear-from-bottom group/nextSong text-font-color-black dark:text-font-color-white relative flex max-w-full items-center rounded-full px-3 py-1 text-xs ${
         isSemiTransparent
           ? 'bg-background-color-2/75 backdrop-blur-sm dark:bg-dark-background-color-2/75'
           : 'bg-background-color-2 dark:bg-dark-background-color-2'
@@ -99,7 +99,7 @@ const UpNextSongPopup = (props: Props) => {
         {upNextSongData.artists && upNextSongData.artists.length > 0 && (
           <>
             {' '}
-            <span className="font-light text-font-color-highlight dark:text-dark-font-color-highlight">
+            <span className="font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
               {t('player.by')}
             </span>{' '}
             <span

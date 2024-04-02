@@ -135,7 +135,7 @@ const AlbumsPage = () => {
         {albumsData.length > 0 && (
           <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
             <div className="container flex">
-              {t('common.album_one')}{' '}
+              {t('common.album_other')}{' '}
               <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
                 {isMultipleSelectionEnabled ? (
                   <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">

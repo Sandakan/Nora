@@ -27,7 +27,7 @@ const ArtistInfoPage = () => {
   const {
     currentlyActivePage,
     // queue,
-    isDarkMode,
+    // isDarkMode,
     bodyBackgroundImage,
     localStorageData,
     multipleSelectionsData,
@@ -370,19 +370,19 @@ const ArtistInfoPage = () => {
     ]
   );
 
-  const fontColor = React.useMemo(() => {
-    if (
-      artistData?.artistPalette &&
-      artistData.artistPalette?.LightMuted &&
-      artistData.artistPalette?.LightVibrant
-    ) {
-      const { LightVibrant, LightMuted } = artistData.artistPalette;
-      const [h, s, l] = isDarkMode ? LightVibrant.hsl : LightMuted.hsl;
+  // const fontColor = React.useMemo(() => {
+  //   if (
+  //     artistData?.artistPalette &&
+  //     artistData.artistPalette?.LightMuted &&
+  //     artistData.artistPalette?.LightVibrant
+  //   ) {
+  //     const { LightVibrant, LightMuted } = artistData.artistPalette;
+  //     const [h, s, l] = isDarkMode ? LightVibrant.hsl : LightMuted.hsl;
 
-      return `hsl(${h * 360} ${s * 100} ${l * 100})`;
-    }
-    return undefined;
-  }, [artistData?.artistPalette, isDarkMode]);
+  //     return `hsl(${h * 360} ${s * 100} ${l * 100})`;
+  //   }
+  //   return undefined;
+  // }, [artistData?.artistPalette, isDarkMode]);
 
   return (
     <MainContainer
@@ -466,13 +466,13 @@ const ArtistInfoPage = () => {
         >
           <div
             className="artist-name mb-2 text-5xl text-font-color-highlight dark:text-dark-font-color-highlight"
-            style={
-              fontColor
-                ? {
-                    color: fontColor
-                  }
-                : undefined
-            }
+            // style={
+            //   fontColor
+            //     ? {
+            //         color: fontColor
+            //       }
+            //     : undefined
+            // }
           >
             {artistData?.name || t('common.unknownArtist')}
           </div>
@@ -508,7 +508,7 @@ const ArtistInfoPage = () => {
           <>
             <TitleContainer
               title={t('artistInfoPage.appearsInAlbums')}
-              titleClassName="!text-2xl text-font-color-black !font-normal dark:text-font-color-white"
+              titleClassName="!text-2xl text-font-color-black dark:text-font-color-white"
               className={`title-container ${
                 bodyBackgroundImage
                   ? 'text-font-color-white'
@@ -578,7 +578,7 @@ const ArtistInfoPage = () => {
           <>
             <TitleContainer
               title={t('artistInfoPage.appearsInSongs')}
-              titleClassName="!text-2xl text-font-color-black !font-normal dark:text-font-color-white"
+              titleClassName="!text-2xl text-font-color-black dark:text-font-color-white"
               className={`title-container ${
                 bodyBackgroundImage
                   ? 'text-font-color-white'
@@ -593,7 +593,7 @@ const ArtistInfoPage = () => {
                       })
                     : `${t('common.songWithCount', { count: songs.length })} ${
                         songs.length > 5 && !isAllSongsVisible
-                          ? t('common.shownWithCount', { count: 5 })
+                          ? `(${t('common.shownWithCount', { count: 5 })})`
                           : ''
                       }`}
                 </p>

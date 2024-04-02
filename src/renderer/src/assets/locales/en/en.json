@@ -559,6 +559,7 @@
     "noLyrics": "Lyrics not found.",
     "noLyricsDescription": "We couldn't find any lyrics for this song. You can add your own in the Tag Editor.",
     "noSyncedLyrics": "No synced lyrics found.",
+    "noSyncedLyricsDescription": "We couldn't find any synced lyrics for this song.",
     "noOnlineLyrics": "No online lyrics found.",
     "noOfflineLyrics": "No offline lyrics found.",
     "noSavedLyrics": "No saved lyrics found.",

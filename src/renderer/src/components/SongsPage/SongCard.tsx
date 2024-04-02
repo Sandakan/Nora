@@ -94,7 +94,7 @@ const SongCard = (props: SongCardProp) => {
     return ['0', '0%', '0%'];
   }, [palette?.LightVibrant]);
 
-  const background = `linear-gradient(to top,hsl(${h} ${s} ${l} / 0.3) 0%, hsl(${h} ${s} ${l} / 0.15) 40%), linear-gradient(to top,rgba(0,0,0,0.8)0%,rgba(0,0,0,0.1) 60%)`;
+  const background = `linear-gradient(to top,hsl(${h} ${s} ${l} / 0.35) 0%, hsl(${h} ${s} ${l} / 0.15) 40%), linear-gradient(to top,rgba(0,0,0,0.8)0%,rgba(0,0,0,0.1) 60%)`;
 
   const handlePlayBtnClick = React.useCallback(() => {
     playSong(songId);

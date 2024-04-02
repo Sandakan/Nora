@@ -808,11 +808,12 @@ export default function App() {
   const setDynamicThemesFromSongPalette = React.useCallback((palette?: NodeVibrantPalette) => {
     const manageBrightness = (
       values: [number, number, number],
-      defaultValue = 0.9
+      min = 0.9
+      // max = 1
     ): [number, number, number] => {
       const [h, s, l] = values;
 
-      const updatedL = l >= defaultValue ? l : defaultValue;
+      const updatedL = l >= min ? l : min;
       return [h, s, updatedL];
     };
 
@@ -833,6 +834,18 @@ export default function App() {
         root.style.removeProperty('--dark-background-color-3');
         root.style.removeProperty('--text-color-highlight');
         root.style.removeProperty('--dark-text-color-highlight');
+        root.style.removeProperty('--seekbar-background-color');
+        root.style.removeProperty('--dark-seekbar-background-color');
+        root.style.removeProperty('--scrollbar-thumb-background-color');
+        root.style.removeProperty('--dark-scrollbar-thumb-background-color');
+        root.style.removeProperty('--seekbar-track-background-color');
+        root.style.removeProperty('--dark-seekbar-track-background-color');
+        root.style.removeProperty('--text-color-highlight-2');
+        root.style.removeProperty('--dark-text-color-highlight-2');
+        root.style.removeProperty('--slider-opacity');
+        root.style.removeProperty('--dark-slider-opacity');
+        root.style.removeProperty('--context-menu-list-hover');
+        root.style.removeProperty('--dark-context-menu-list-hover');
       }
     };
 
@@ -848,20 +861,57 @@ export default function App() {
           palette?.Muted
         ) {
           const highLightVibrant = generateColor(manageBrightness(palette.LightVibrant.hsl));
+          const mediumLightVibrant = generateColor(
+            manageBrightness(palette.LightVibrant.hsl, 0.75)
+          );
           const lightVibrant = generateColor(palette.LightVibrant.hsl);
           const darkVibrant = generateColor(palette.DarkVibrant.hsl);
           const lightMuted = generateColor(palette.LightMuted.hsl);
           const darkMuted = generateColor(palette.DarkMuted.hsl);
           const vibrant = generateColor(palette.Vibrant.hsl);
+          const highVibrant = generateColor(manageBrightness(palette.Vibrant.hsl, 0.7));
           const muted = generateColor(palette.Muted.hsl);
 
           root.style.setProperty('--side-bar-background', highLightVibrant, 'important');
           root.style.setProperty('--background-color-2', highLightVibrant, 'important');
+
+          root.style.setProperty('--context-menu-list-hover', highLightVibrant, 'important');
+          root.style.setProperty('--dark-context-menu-list-hover', highLightVibrant, 'important');
+
           // root.style.setProperty('--dark-background-color-2', lightVibrant, 'important');
-          root.style.setProperty('--background-color-3', vibrant, 'important');
+
+          root.style.setProperty('--background-color-3', highVibrant, 'important');
           root.style.setProperty('--dark-background-color-3', lightVibrant, 'important');
+
           root.style.setProperty('--text-color-highlight', darkVibrant, 'important');
           root.style.setProperty('--dark-text-color-highlight', lightVibrant, 'important');
+
+          root.style.setProperty('--seekbar-background-color', darkVibrant, 'important');
+          root.style.setProperty('--dark-seekbar-background-color', lightVibrant, 'important');
+
+          root.style.setProperty(
+            '--scrollbar-thumb-background-color',
+            mediumLightVibrant,
+            'important'
+          );
+          root.style.setProperty(
+            '--dark-scrollbar-thumb-background-color',
+            mediumLightVibrant,
+            'important'
+          );
+
+          root.style.setProperty('--seekbar-track-background-color', darkVibrant, 'important');
+          root.style.setProperty(
+            '--dark-seekbar-track-background-color',
+            lightVibrant,
+            'important'
+          );
+
+          root.style.setProperty('--slider-opacity', '0.25', 'important');
+          root.style.setProperty('--dark-slider-opacity', '0.35', 'important');
+
+          root.style.setProperty('--text-color-highlight-2', darkVibrant, 'important');
+          root.style.setProperty('--dark-text-color-highlight-2', lightVibrant, 'important');
         }
       } else resetStyles();
     }

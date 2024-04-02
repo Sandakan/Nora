@@ -44,11 +44,14 @@ const FullScreenPlayer = () =>
     ]);
 
     const imgPath = useMemo(() => {
+      const isArtistBackgroundsEnabled = false;
+
       const selectedArtist = currentSongData?.artists?.find(
         (artist) => !!artist.onlineArtworkPaths?.picture_xl
       );
 
-      if (selectedArtist) return selectedArtist.onlineArtworkPaths?.picture_xl;
+      if (isArtistBackgroundsEnabled && selectedArtist)
+        return selectedArtist.onlineArtworkPaths?.picture_xl;
       return currentSongData.artworkPath;
     }, [currentSongData?.artists, currentSongData?.artworkPath]);
 

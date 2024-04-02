@@ -313,7 +313,7 @@ export const Artist = (props: ArtistProp) => {
       <div className="artist-img-container relative flex h-3/4 items-center justify-center">
         {isAFavorite && (
           <span
-            className={`material-icons-round absolute -bottom-1 left-2 z-10 flex rounded-full bg-background-color-1 p-2 text-2xl !text-font-color-crimson shadow-lg dark:bg-dark-background-color-2 ${
+            className={`material-icons-round absolute -bottom-1 left-2 z-10 flex rounded-full bg-background-color-1 p-2 text-2xl !text-font-color-highlight dark:!text-dark-font-color-highlight shadow-lg dark:bg-dark-background-color-2 ${
               isAMultipleSelection && '!bg-background-color-3 dark:!bg-dark-background-color-3'
             }`}
           >

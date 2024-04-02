@@ -1,6 +1,6 @@
 {
   "name": "nora",
-  "version": "2.5.0-stable",
+  "version": "3.0.0-stable",
   "description": "An Electron application with React and TypeScript",
   "keywords": [
     "music",

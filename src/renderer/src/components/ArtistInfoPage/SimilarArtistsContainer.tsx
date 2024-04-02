@@ -62,7 +62,7 @@ const SimilarArtistsContainer = (props: Props) => {
         <>
           <TitleContainer
             title={t('artistInfoPage.similarArtistsInLibrary')}
-            titleClassName="!text-2xl text-font-color-black !font-normal dark:text-font-color-white"
+            titleClassName="!text-2xl text-font-color-black dark:text-font-color-white"
             className={`title-container ${
               bodyBackgroundImage
                 ? 'text-font-color-white'
