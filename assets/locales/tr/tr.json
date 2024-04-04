@@ -499,6 +499,7 @@
     "noLyrics": "Şarkı sözleri bulunamadı.",
     "noLyricsDescription": "Bu şarkının sözlerini bulamadık.",
     "noSyncedLyrics": "Eşitlenmiş Şarkı Sözü bulunamadı.",
+    "noSyncedLyricsDescription": "Bu şarkı için herhangi bir senkronize şarkı sözü bulunamadı.",
     "noOnlineLyrics": "Çevrimiçi Şarkı Sözü bulunamadı.",
     "noOfflineLyrics": "Çevrimdışı Şarkı Sözü bulunamadı.",
     "noSavedLyrics": "Kaydedilmiş şarkı bulunamadı.",
