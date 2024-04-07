@@ -88,10 +88,12 @@ const songStore = new Store({
   migrations: songMigrations
 });
 
-import Database from 'better-sqlite3';
+import better_sqlite3, { Database } from 'better-sqlite3';
+import { initializeDatabase } from './database/model';
 
-const db = new Database(path.resolve(app.getPath('userData'), 'foobar.db'));
+export const db: Database = new better_sqlite3(path.resolve(app.getPath('userData'), 'Nora.db'));
 db.pragma('journal_mode = WAL');
+initializeDatabase(db);
 
 const artistStore = new Store({
   name: 'artists',
