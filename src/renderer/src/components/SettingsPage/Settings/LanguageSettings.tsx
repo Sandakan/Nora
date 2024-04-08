@@ -1,14 +1,9 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import Dropdown, { DropdownOption } from '../../Dropdown';
+import Dropdown from '../../Dropdown';
 import { AppContext } from '../../../contexts/AppContext';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import i18n from '../../../i18n';
-
-const supportedLanguagesDropdownOptions: DropdownOption<LanguageCodes>[] = [
-  { label: `English`, value: 'en' }
-  // { label: `Francais`, value: 'fr' },
-];
+import i18n, { LanguageCodes, supportedLanguagesDropdownOptions } from '../../../i18n';
 
 const LanguageSettings = () => {
   const { t } = useTranslation();
@@ -33,24 +28,26 @@ const LanguageSettings = () => {
             onChange={(e) => {
               const val = e.currentTarget.value as LanguageCodes;
 
-              if (i18n.languages.includes(val))
-                return i18n
-                  .changeLanguage(val, (err) => {
-                    if (err) return console.warn(err);
-                    return window.api.userData.saveUserData('language', val);
-                  })
-                  .then(() =>
-                    addNewNotifications([
-                      {
-                        id: 'languageChanged',
-                        content: t('notifications.languageChanged'),
-                        iconName: 'translate'
-                      }
-                    ])
-                  );
-              return console.error(`App doesn't support the selected language '${val}'`, {
-                supportedLanguages: i18n.languages
-              });
+              i18n.reloadResources();
+              // if (i18n.languages.includes(val))
+              return i18n
+                .changeLanguage(val, (err) => {
+                  if (err) return console.warn(err);
+                  window.api.userData.saveUserData('language', val);
+                  return window.api.appControls.restartRenderer(`App language changed to ${val}`);
+                })
+                .then(() =>
+                  addNewNotifications([
+                    {
+                      id: 'languageChanged',
+                      content: t('notifications.languageChanged'),
+                      iconName: 'translate'
+                    }
+                  ])
+                );
+              // return console.error(`App doesn't support the selected language '${val}'`, {
+              //   supportedLanguages: i18n.languages
+              // });
             }}
           />
         </li>

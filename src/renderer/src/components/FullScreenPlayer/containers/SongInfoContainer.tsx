@@ -140,7 +140,7 @@ const SongInfoContainer = (props: Props) => {
             {currentSongData.title && (
               <div className="song-title relative grid w-full max-w-full items-center">
                 <div
-                  className="w-fit max-w-full cursor-pointer overflow-hidden text-ellipsis text-font-color-highlight whitespace-nowrap py-2 text-5xl font-medium outline-1 outline-offset-1 focus-visible:!outline"
+                  className="w-fit max-w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap py-2 text-5xl font-medium text-font-color-highlight outline-1 outline-offset-1 focus-visible:!outline"
                   id="currentSongTitle"
                   title={currentSongData.title}
                 >

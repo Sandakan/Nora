@@ -264,7 +264,7 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
     else if (dataType === 'musicFolders' && Array.isArray(data)) {
       userData.musicFolders = data;
     } else if (dataType === 'language' && typeof data === 'string') {
-      userData.language = data as LanguageCodes;
+      userData.language = data;
     } else if (dataType === 'windowPositions.mainWindow' && typeof data === 'object') {
       userData.windowPositions.mainWindow = data as WindowCordinates;
     } else if (dataType === 'windowPositions.miniPlayer' && typeof data === 'object') {

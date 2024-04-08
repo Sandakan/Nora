@@ -104,7 +104,7 @@ const LyricLine = (props: LyricProp) => {
         syncedLyrics
           ? `cursor-pointer ${
               isInRange
-                ? '!scale-100 !text-opacity-90 !blur-0 [&>div>span]:!mr-3 text-font-color-highlight dark:!text-dark-font-color-highlight'
+                ? '!scale-100 text-font-color-highlight !text-opacity-90 !blur-0 dark:!text-dark-font-color-highlight [&>div>span]:!mr-3'
                 : 'scale-[.7] !text-opacity-20 hover:!text-opacity-75'
             }`
           : '!text-4xl'

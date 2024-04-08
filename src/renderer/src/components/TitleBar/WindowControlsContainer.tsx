@@ -22,7 +22,7 @@ const WindowControlsContainer = () => {
       id="window-controls-container"
     >
       <Button
-        className={`minimize-btn !m-0 h-full !rounded-none !border-0 !px-3 text-xl outline-1 -outline-offset-2 transition-[background] ease-in-out hover:!bg-[hsla(0deg,0%,80%,0.5)] focus-visible:!outline ${
+        className={`minimize-btn !m-0 h-full !rounded-none !border-0 bg-transparent !px-3 text-xl outline-1 -outline-offset-2 transition-[background] ease-in-out hover:!bg-[hsla(0deg,0%,80%,0.5)] focus-visible:!outline dark:bg-transparent ${
           bodyBackgroundImage && '!text-font-color-white'
         } `}
         clickHandler={minimize}
@@ -31,7 +31,7 @@ const WindowControlsContainer = () => {
         iconClassName="h-fit text-xl !font-light transition-[background] ease-in-out"
       />
       <Button
-        className={`maximize-btn !m-0 h-full !rounded-none !border-0 !px-3 text-xl outline-1 -outline-offset-2 transition-[background] ease-in-out hover:!bg-[hsla(0deg,0%,80%,0.5)] focus-visible:!outline ${
+        className={`maximize-btn !m-0 h-full !rounded-none !border-0 bg-transparent !px-3 text-xl outline-1 -outline-offset-2 transition-[background] ease-in-out hover:!bg-[hsla(0deg,0%,80%,0.5)] focus-visible:!outline dark:bg-transparent ${
           bodyBackgroundImage && '!text-font-color-white'
         } `}
         clickHandler={maximize}
@@ -40,7 +40,7 @@ const WindowControlsContainer = () => {
         iconName="crop_square"
       />
       <Button
-        className={`close-btn !m-0 h-full !rounded-none !border-0 !px-3 text-xl outline-1 -outline-offset-2 transition-[background] ease-in-out hover:!bg-font-color-crimson hover:!text-font-color-white focus-visible:!outline ${
+        className={`close-btn !m-0 h-full !rounded-none !border-0 bg-transparent !px-3 text-xl outline-1 -outline-offset-2 transition-[background] ease-in-out hover:!bg-font-color-crimson hover:!text-font-color-white focus-visible:!outline dark:bg-transparent ${
           bodyBackgroundImage && '!text-font-color-white'
         } `}
         clickHandler={close}

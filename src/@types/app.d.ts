@@ -6,6 +6,7 @@ import { api } from '../preload/index';
 import { LastFMSessionData } from './last_fm_api';
 import { SimilarArtist, Tag } from './last_fm_artist_info_api';
 import { ElectronAPI } from '@electron-toolkit/preload';
+import { resources } from 'src/renderer/src/i18n';
 
 declare global {
   interface Window {
@@ -431,7 +432,7 @@ declare global {
     customLrcFilesSaveLocation?: string;
   }
 
-  type LanguageCodes = 'en' | 'fr';
+  type LanguageCodes = NoInfer<keyof typeof resources>;
 
   interface AppThemeData {
     isDarkMode: boolean;
@@ -786,6 +787,7 @@ declare global {
     | 'EMPTY_MUSIC_FOLDER_DELETED'
     | 'SONG_REVEAL_FAILED'
     | 'LYRICS_FIND_FAILED'
+    | 'LYRICS_TRANSLATION_FAILED'
     | 'METADATA_UPDATE_FAILED'
     | 'DESTINATION_NOT_SELECTED'
     | 'ARTWORK_SAVE_FAILED'
@@ -837,6 +839,7 @@ declare global {
     | 'LYRICS_SAVE_QUEUED'
     | 'LYRICS_SAVED_IN_LRC_FILE'
     | 'PENDING_LYRICS_SAVED'
+    | 'LYRICS_TRANSLATION_SUCCESS'
     | 'LASTFM_LOGIN_SUCCESS'
     | 'APPDATA_EXPORT_STARTED'
     | 'APPDATA_IMPORT_STARTED'

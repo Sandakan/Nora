@@ -86,6 +86,7 @@ import {
 import changeAppTheme from './core/changeAppTheme';
 import checkForStartUpSongs from './core/checkForStartUpSongs';
 import checkForNewSongs from './core/checkForNewSongs';
+import getTranslatedLyrics from './utils/getTranslatedLyrics';
 
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   if (mainWindow) {
@@ -187,6 +188,10 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
         lyricsRequestType?: LyricsRequestTypes,
         saveLyricsAutomatically?: AutomaticallySaveLyricsTypes
       ) => getSongLyrics(trackInfo, lyricsType, lyricsRequestType, saveLyricsAutomatically)
+    );
+
+    ipcMain.handle('app/getTranslatedLyrics', (_, languageCode: LanguageCodes) =>
+      getTranslatedLyrics(languageCode as string)
     );
 
     ipcMain.handle('app/saveLyricsToSong', (_, songPath: string, lyrics: SongLyrics) =>

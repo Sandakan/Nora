@@ -17,10 +17,12 @@ const { metadataEditingSupportedExtensions } = appPreferences;
 
 let cachedLyrics = undefined as SongLyrics | undefined;
 
-export const updateCachedLyrics = (
+export const getCachedLyrics = () => cachedLyrics;
+
+export const updateCachedLyrics = async (
   callback: (prevLyrics: typeof cachedLyrics) => SongLyrics | undefined
 ) => {
-  const lyrics = callback(cachedLyrics);
+  const lyrics = await callback(cachedLyrics);
   if (lyrics) cachedLyrics = lyrics;
 };
 
@@ -72,6 +74,17 @@ const fetchLyricsFromAudioSource = (songPath: string) => {
   }
 };
 
+const readFileData = async (path: string) => {
+  try {
+    const data = await fs.readFile(path, {
+      encoding: 'utf-8'
+    });
+    return data;
+  } catch (error) {
+    return undefined;
+  }
+};
+
 const fetchLyricsFromLRCFile = async (songPath: string) => {
   const userData = getUserData();
   const defaultLrcFilePath = `${songPath}.lrc`;
@@ -80,18 +93,14 @@ const fetchLyricsFromLRCFile = async (songPath: string) => {
     : undefined;
 
   try {
-    const lyricsInLrcFormat = await fs
-      .readFile(defaultLrcFilePath, {
-        encoding: 'utf-8'
-      })
-      .catch((err) => {
-        if (userData.customLrcFilesSaveLocation) {
-          return fs.readFile(defaultLrcFilePath, {
-            encoding: 'utf-8'
-          });
-        }
-        throw err;
-      });
+    const lyricsInLrcFormat =
+      (await readFileData(defaultLrcFilePath)) ??
+      (userData.customLrcFilesSaveLocation && customLrcFilePath
+        ? await readFileData(customLrcFilePath)
+        : undefined);
+
+    if (!lyricsInLrcFormat) throw Error('No lrc lyrics files found.');
+
     const parsedLyrics = parseLyrics(lyricsInLrcFormat);
     return parsedLyrics;
   } catch (error) {
@@ -201,17 +210,16 @@ const saveLyricsAutomaticallyIfAsked = async (
 };
 
 const fetchOfflineLyrics = async (songPath: string) => {
-  const audioSourceLyrics = fetchLyricsFromAudioSource(songPath);
-
-  if (audioSourceLyrics) {
-    log('Serving audio source lyrics.');
-    return audioSourceLyrics;
-  }
-
   const lrcFileLyrics = await fetchLyricsFromLRCFile(songPath);
   if (lrcFileLyrics) {
     log('Serving lrc file lyrics.');
     return lrcFileLyrics;
+  }
+
+  const audioSourceLyrics = fetchLyricsFromAudioSource(songPath);
+  if (audioSourceLyrics) {
+    log('Serving audio source lyrics.');
+    return audioSourceLyrics;
   }
 
   return undefined;

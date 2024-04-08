@@ -153,45 +153,45 @@ const ThemeSettings = () => {
             labelContent={t('settingsPage.enableImageBasedDynamicThemes')}
           />
           {localStorageData.preferences.enableImageBasedDynamicThemes && (
-            <div className="flex gap-4 mt-4">
-              <span className="text-xs text-center flex flex-col gap-2 items-center justify-center">
+            <div className="mt-4 flex gap-4">
+              <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
                 <span
-                  className="w-20 h-12 rounded-md"
+                  className="h-12 w-20 rounded-md"
                   style={{ backgroundColor: currentSongData.paletteData?.DarkVibrant?.hex }}
                 />
                 <span>Dark Vibrant</span>
               </span>
-              <span className="text-xs text-center flex flex-col gap-2 items-center justify-center">
+              <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
                 <span
-                  className="w-20 h-12 rounded-md"
+                  className="h-12 w-20 rounded-md"
                   style={{ backgroundColor: currentSongData.paletteData?.LightVibrant?.hex }}
                 />
                 <span>Light Vibrant</span>
               </span>
-              <span className="text-xs text-center flex flex-col gap-2 items-center justify-center">
+              <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
                 <span
-                  className="w-20 h-12 rounded-md"
+                  className="h-12 w-20 rounded-md"
                   style={{ backgroundColor: currentSongData.paletteData?.DarkMuted?.hex }}
                 />
                 <span>Dark Muted</span>
               </span>
-              <span className="text-xs text-center flex flex-col gap-2 items-center justify-center">
+              <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
                 <span
-                  className="w-20 h-12 rounded-md"
+                  className="h-12 w-20 rounded-md"
                   style={{ backgroundColor: currentSongData.paletteData?.LightMuted?.hex }}
                 />
                 <span>Light Muted</span>
               </span>
-              <span className="text-xs text-center flex flex-col gap-2 items-center justify-center">
+              <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
                 <span
-                  className="w-20 h-12 rounded-md"
+                  className="h-12 w-20 rounded-md"
                   style={{ backgroundColor: currentSongData.paletteData?.Vibrant?.hex }}
                 />
                 <span>Vibrant</span>
               </span>
-              <span className="text-xs text-center flex flex-col gap-2 items-center justify-center">
+              <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
                 <span
-                  className="w-20 h-12 rounded-md"
+                  className="h-12 w-20 rounded-md"
                   style={{ backgroundColor: currentSongData.paletteData?.Muted?.hex }}
                 />
                 <span>Muted</span>

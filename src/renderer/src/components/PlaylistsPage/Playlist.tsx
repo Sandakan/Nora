@@ -384,7 +384,7 @@ export const Playlist = (props: PlaylistProp) => {
           />
         ) : (
           <Button
-            className="absolute bottom-2 right-2 z-10 !m-0 translate-y-10 scale-90 !rounded-none !border-0 !p-0 text-font-color-white opacity-0 outline-1 outline-offset-1 transition-[opacity,transform] delay-100 duration-200 ease-in-out focus-visible:!outline group-focus-within:translate-y-0 group-focus-within:scale-100 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 dark:!text-font-color-white"
+            className="absolute bottom-2 right-2 z-10 !m-0 translate-y-10 scale-90 !rounded-none !border-0 bg-transparent !p-0 text-font-color-white opacity-0 outline-1 outline-offset-1 transition-[opacity,transform] delay-100 duration-200 ease-in-out hover:bg-transparent focus-visible:!outline group-focus-within:translate-y-0 group-focus-within:scale-100 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 dark:bg-transparent dark:!text-font-color-white dark:hover:bg-transparent"
             clickHandler={() => playAllSongs()}
             iconName="play_circle"
             iconClassName="!text-4xl !leading-none !text-inherit"
@@ -419,7 +419,7 @@ export const Playlist = (props: PlaylistProp) => {
       </div>
       <div className="playlist-info-container mt-2">
         <Button
-          className={`playlist-title !m-0 !block w-full truncate !rounded-none !border-0 !p-0 !text-left !text-xl outline-1 outline-offset-1 hover:underline focus-visible:!outline ${
+          className={`playlist-title !m-0 !block w-full truncate !rounded-none !border-0 bg-transparent !p-0 !text-left !text-xl outline-1 outline-offset-1 hover:bg-transparent hover:underline focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
             isAMultipleSelection && '!text-font-color-black dark:!text-font-color-black'
           }`}
           tooltipLabel={props.name}

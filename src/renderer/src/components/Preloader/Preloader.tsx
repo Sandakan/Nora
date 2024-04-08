@@ -15,7 +15,7 @@ window.addEventListener('load', () => {
     }
   }, 1000);
 
-  console.log('contentLoad', window.performance.now() - contentLoadStart);
+  console.warn('contentLoad', window.performance.now() - contentLoadStart);
 });
 
 const Preloader = () => {

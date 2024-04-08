@@ -316,7 +316,7 @@ const Genre = (props: GenreProp) => {
       </div>
       <div className="genre-info-container w-3/5 flex-grow-0">
         <Button
-          className="genre-title !m-0 !block w-full truncate !rounded-none !border-0 !p-0 !text-left !text-2xl text-font-color-white outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white"
+          className="genre-title !m-0 !block w-full truncate !rounded-none !border-0 bg-transparent !p-0 !text-left !text-2xl text-font-color-white outline-1 outline-offset-1 hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:text-font-color-white dark:hover:bg-transparent"
           label={title}
           clickHandler={goToGenreInfoPage}
         />

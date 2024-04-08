@@ -50,7 +50,7 @@ const SongControlsAndSeekbarContainer = () => {
     <div className="song-controls-and-seekbar-container flex flex-col items-center justify-center py-2">
       <div className="controls-container flex w-2/3 max-w-sm items-center justify-around px-2 lg:w-4/5 lg:p-0 [&>div.active_span.icon]:!text-font-color-highlight [&>div.active_span.icon]:opacity-100 dark:[&>div.active_span.icon]:!text-dark-font-color-highlight">
         <Button
-          className={`like-btn !mr-0 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:after:bg-dark-font-color-highlight ${
+          className={`like-btn !mr-0 !rounded-none !border-0 bg-transparent !p-0 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:after:bg-dark-font-color-highlight dark:hover:bg-transparent ${
             currentSongData.isAFavorite && 'active after:opacity-100'
           } ${!currentSongData.isKnownSource && '!cursor-none brightness-50'}`}
           tooltipLabel={
@@ -70,7 +70,7 @@ const SongControlsAndSeekbarContainer = () => {
         />
 
         <Button
-          className={`shuffle-btn !m-0 flex items-center justify-center !rounded-none !border-0 !p-0 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:after:bg-dark-font-color-highlight ${
+          className={`shuffle-btn !m-0 flex items-center justify-center !rounded-none !border-0 bg-transparent !p-0 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:after:bg-dark-font-color-highlight dark:hover:bg-transparent ${
             isShuffling && 'active after:opacity-100'
           }`}
           tooltipLabel={t('player.shuffle')}
@@ -83,7 +83,7 @@ const SongControlsAndSeekbarContainer = () => {
         />
 
         <Button
-          className="skip-back-btn !m-0 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 focus-visible:!outline"
+          className="skip-back-btn !m-0 !rounded-none !border-0 bg-transparent !p-0 outline-1 outline-offset-1 hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent"
           tooltipLabel={t('player.prevSong')}
           iconName="skip_previous"
           iconClassName="material-icons-round !text-2xl opacity-60 transition-opacity hover:opacity-80"
@@ -91,7 +91,7 @@ const SongControlsAndSeekbarContainer = () => {
         />
 
         <Button
-          className={`play-pause-btn relative !m-0 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 focus-visible:!outline ${
+          className={`play-pause-btn relative !m-0 !rounded-none !border-0 bg-transparent !p-0 outline-1 outline-offset-1 hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
             isPlayerStalled &&
             `after:absolute after:h-5 after:w-5 after:animate-spin-ease after:rounded-full after:border-2 after:border-[transparent] after:border-t-font-color-black after:content-[''] dark:after:border-t-font-color-white`
           }`}
@@ -104,7 +104,7 @@ const SongControlsAndSeekbarContainer = () => {
         />
 
         <Button
-          className="skip-forward-btn !m-0 flex !rounded-none !border-0 !p-0 outline-1 outline-offset-1 focus-visible:!outline"
+          className="skip-forward-btn !m-0 flex !rounded-none !border-0 bg-transparent !p-0 outline-1 outline-offset-1 hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent"
           tooltipLabel={t('player.nextSong')}
           iconName="skip_next"
           iconClassName="material-icons-round !text-2xl opacity-60 transition-opacity hover:opacity-80"
@@ -112,7 +112,7 @@ const SongControlsAndSeekbarContainer = () => {
         />
 
         <Button
-          className={`repeat-btn !m-0 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:after:bg-dark-font-color-highlight ${
+          className={`repeat-btn !m-0 !rounded-none !border-0 bg-transparent !p-0 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:after:bg-dark-font-color-highlight dark:hover:bg-transparent ${
             isRepeating !== 'false' && 'active after:opacity-100'
           }`}
           tooltipLabel={t('player.repeat')}
@@ -125,7 +125,7 @@ const SongControlsAndSeekbarContainer = () => {
         />
 
         <Button
-          className={`lyrics-btn !m-0 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:after:bg-dark-font-color-highlight ${
+          className={`lyrics-btn !m-0 !rounded-none !border-0 bg-transparent !p-0 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:after:bg-dark-font-color-highlight dark:hover:bg-transparent ${
             currentlyActivePage.pageTitle === 'Lyrics' && 'active after:opacity-100'
           }`}
           tooltipLabel={t('player.lyrics')}

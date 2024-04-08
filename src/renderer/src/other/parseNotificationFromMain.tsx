@@ -76,6 +76,11 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
     iconClassName: 'material-icons-round-outlined'
   },
   {
+    trigger: ['LYRICS_TRANSLATION_SUCCESS', 'LYRICS_TRANSLATION_FAILED'],
+    iconName: 'translate',
+    iconClassName: 'material-icons-round-outlined'
+  },
+  {
     trigger: [
       'INFO',
       'SONG_EXT_NOT_SUPPORTED_FOR_LYRICS_SAVES',

@@ -580,7 +580,7 @@ const SongCard = (props: SongCardProp) => {
           </div>
           <div className="state-icons flex">
             <Button
-              className="order-2 !m-0 !rounded-none !border-0 !p-1 !text-inherit opacity-50 outline-1 outline-offset-1 transition-opacity focus-visible:!outline group-focus-within/songCard:opacity-100 group-hover/songCard:opacity-100"
+              className="order-2 !m-0 !rounded-none !border-0 bg-transparent !p-1 !text-inherit opacity-50 outline-1 outline-offset-1 transition-opacity hover:bg-transparent focus-visible:!outline group-focus-within/songCard:opacity-100 group-hover/songCard:opacity-100 dark:bg-transparent dark:hover:bg-transparent"
               iconName="favorite"
               iconClassName={`${
                 isSongAFavorite ? 'material-icons-round' : 'material-icons-round-outlined'
@@ -622,7 +622,7 @@ const SongCard = (props: SongCardProp) => {
               )
             ) : (
               <Button
-                className={`!m-0 !rounded-none !border-0 !p-0 opacity-60 outline-1 outline-offset-1 transition-opacity focus-visible:!outline ${
+                className={`!m-0 !rounded-none !border-0 bg-transparent !p-0 opacity-60 outline-1 outline-offset-1 transition-opacity hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
                   currentSongData.songId === songId && '!opacity-100'
                 } group-focus-within/songCard:opacity-100 group-hover/songCard:opacity-100`}
                 iconName={isSongPlaying ? 'pause_circle' : 'play_circle'}

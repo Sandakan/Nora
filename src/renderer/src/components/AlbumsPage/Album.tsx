@@ -342,7 +342,7 @@ export const Album = (props: AlbumProp) => {
           />
         ) : (
           <Button
-            className="absolute bottom-[5%] right-[5%] z-[1] !m-0 !rounded-none !border-0 !p-0 !text-font-color-white opacity-0 outline-1 outline-offset-1 transition-opacity hover:!opacity-100 focus-visible:!opacity-100 focus-visible:!outline group-focus-within:opacity-75 group-hover:opacity-75"
+            className="absolute bottom-[5%] right-[5%] z-[1] !m-0 !rounded-none !border-0 bg-transparent !p-0 !text-font-color-white opacity-0 outline-1 outline-offset-1 transition-opacity hover:bg-transparent hover:!opacity-100 focus-visible:!opacity-100 focus-visible:!outline group-focus-within:opacity-75 group-hover:opacity-75 dark:bg-transparent dark:hover:bg-transparent"
             iconName="play_circle"
             iconClassName="!text-5xl !leading-none"
             clickHandler={(e) => {
@@ -368,7 +368,7 @@ export const Album = (props: AlbumProp) => {
         }`}
       >
         <Button
-          className={`album-title pointer !m-0 !block w-full truncate !rounded-none !border-0 !p-0 !text-left text-xl outline-1 outline-offset-1 hover:underline focus-visible:!outline ${
+          className={`album-title pointer !m-0 !block w-full truncate !rounded-none !border-0 bg-transparent !p-0 !text-left text-xl outline-1 outline-offset-1 hover:bg-transparent hover:underline focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
             isAMultipleSelection ? '!text-font-color-black dark:!text-font-color-black' : ''
           }`}
           label={props.title}

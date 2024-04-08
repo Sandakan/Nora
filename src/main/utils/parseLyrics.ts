@@ -36,10 +36,16 @@ const getSecondsFromExtendedTimeStamp = (text: string) => {
   return parseInt(sec) * 60 + parseFloat(ms);
 };
 
-const getLyricEndTime = (lyricsArr: string[], index: number) => {
+const getLyricEndTime = (lyricsArr: string[], index: number, start: number) => {
   if (lyricsArr.length - 1 === index) return Number.POSITIVE_INFINITY;
 
-  if (lyricsArr[index + 1]) return getSecondsFromLyricsLine(lyricsArr[index + 1]);
+  if (lyricsArr[index + 1]) {
+    const end = getSecondsFromLyricsLine(lyricsArr[index + 1]);
+
+    if (start === end && lyricsArr[index + 2])
+      return getSecondsFromLyricsLine(lyricsArr[index + 2]);
+    return end;
+  }
 
   return 0;
 };
@@ -147,7 +153,7 @@ const parseLyrics = (lyricsString: string): LyricsData => {
   if (output.isSynced) {
     output.syncedLyrics = lyricsLines.map((line, index, lyricsLinesArr) => {
       const start = getSecondsFromLyricsLine(line);
-      const end = getLyricEndTime(lyricsLinesArr, index);
+      const end = getLyricEndTime(lyricsLinesArr, index, start);
 
       const parsedLine = parseLyricsText(line, end);
 

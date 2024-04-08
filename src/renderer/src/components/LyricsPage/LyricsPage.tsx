@@ -2,6 +2,8 @@
 /* eslint-disable react/no-array-index-key */
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import i18n from '../../i18n';
 import debounce from '../../utils/debounce';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
@@ -432,7 +434,7 @@ const LyricsPage = () => {
             <>
               <div className="title-container relative flex w-full items-center justify-between py-2 pl-8 pr-2 text-2xl text-font-color-highlight dark:text-dark-font-color-highlight">
                 <div className="flex max-w-[40%] items-center">
-                  <span className="overflow-hidden font-medium text-ellipsis whitespace-nowrap">
+                  <span className="overflow-hidden text-ellipsis whitespace-nowrap font-medium">
                     {lyrics.source === 'IN_SONG_LYRICS' ? 'Offline' : 'Online'}{' '}
                     {t('lyricsPage.lyricsForSong', {
                       title: currentSongData.title
@@ -468,6 +470,22 @@ const LyricsPage = () => {
                       clickHandler={() => setIsAutoScrolling((prevState) => !prevState)}
                     />
                   )}
+
+                  <Button
+                    key={11}
+                    tooltipLabel={t('lyricsPage.translateLyrics')}
+                    // label={t('lyricsPage.translateLyrics')}
+                    className="translate-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                    iconName="translate"
+                    clickHandler={async () => {
+                      const lyricsData = await window.api.lyrics.getTranslatedLyrics(
+                        i18n.language as LanguageCodes
+                      );
+
+                      setLyrics(lyricsData);
+                    }}
+                  />
+
                   {lyrics && lyrics.source === 'IN_SONG_LYRICS' && (
                     <Button
                       key={3}

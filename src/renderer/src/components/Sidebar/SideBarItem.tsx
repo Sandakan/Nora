@@ -5,6 +5,7 @@
 /* eslint-disable import/prefer-default-export */
 
 interface SideBarItems {
+  id: string;
   parentClassName: string;
   icon: string;
   content: string;
@@ -21,8 +22,8 @@ const SideBarItem = (props: SideBarItems) => {
         props.isActive &&
         '!bg-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black'
       } flex-shrink-0  last:!mb-0 last:mt-auto nth-last-2:mb-8`}
-      onClick={() => props.handleClick(props.content)}
-      onKeyDown={(e) => e.key === 'Enter' && props.handleClick(props.content)}
+      onClick={() => props.handleClick(props.id)}
+      onKeyDown={(e) => e.key === 'Enter' && props.handleClick(props.id)}
       tabIndex={0}
     >
       <span className="material-icons-round icon mr-5 text-2xl !font-normal">{props.icon}</span>

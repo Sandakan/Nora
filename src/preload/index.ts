@@ -202,6 +202,9 @@ const lyrics = {
       saveLyricsAutomatically
     ),
 
+  getTranslatedLyrics: (languageCode: LanguageCodes): Promise<SongLyrics | undefined> =>
+    ipcRenderer.invoke('app/getTranslatedLyrics', languageCode),
+
   saveLyricsToSong: (songPath: string, text: SongLyrics) =>
     ipcRenderer.invoke('app/saveLyricsToSong', songPath, text)
 };

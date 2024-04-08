@@ -23,7 +23,7 @@ const NoLyrics = (props: NoLyricsProp) => {
       <span className="material-icons-round-outlined mb-4 text-6xl text-font-color-highlight dark:text-dark-font-color-highlight">
         {iconName}
       </span>
-      <p className="mb-2 font-medium text-2xl text-font-color-highlight dark:text-dark-font-color-highlight">
+      <p className="mb-2 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
         {title}
       </p>
       <p className="text-sm">{description}</p>

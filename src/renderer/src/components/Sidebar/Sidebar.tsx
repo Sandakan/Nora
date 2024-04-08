@@ -5,96 +5,115 @@
 /* eslint-disable react/self-closing-comp */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable import/prefer-default-export */
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
-import i18n from '../../i18n';
+import { useTranslation } from 'react-i18next';
 
 import ErrorBoundary from '../ErrorBoundary';
 import SideBarItem from './SideBarItem';
 
-const linkData = [
-  {
-    parentClassName: 'home active',
-    icon: 'home',
-    content: i18n.t('sideBar.home'),
-    isActive: true
-  },
-  {
-    parentClassName: 'search',
-    icon: 'search',
-    content: i18n.t('sideBar.search'),
-    isActive: false
-  },
-  {
-    parentClassName: 'songs',
-    icon: 'music_note',
-    content: i18n.t('common.song_other'),
-    isActive: false
-  },
-  {
-    parentClassName: 'playlists',
-    icon: 'queue_music',
-    content: i18n.t('common.playlist_other'),
-    isActive: false
-  },
-  {
-    parentClassName: 'folders',
-    icon: 'folder',
-    content: i18n.t('common.folder_other'),
-    isActive: false
-  },
-  {
-    parentClassName: 'artists',
-    icon: 'people',
-    content: i18n.t('common.artist_other'),
-    isActive: false
-  },
-  {
-    parentClassName: 'albums',
-    icon: 'album',
-    content: i18n.t('common.album_other'),
-    isActive: false
-  },
-  {
-    parentClassName: 'genres',
-    icon: 'track_changes',
-    content: i18n.t('common.genre_other'),
-    isActive: false
-  },
-  {
-    parentClassName: 'settings',
-    icon: 'settings',
-    content: i18n.t('settingsPage.settings'),
-    isActive: false
-  }
-];
-
 const Sidebar = React.memo(() => {
   const { currentlyActivePage, bodyBackgroundImage } = useContext(AppContext);
   const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
+  const { t } = useTranslation();
 
-  const [data, setData] = React.useState(linkData);
+  const linkData = useMemo(
+    () => [
+      {
+        id: 'Home',
+        parentClassName: 'home active',
+        icon: 'home',
+        content: t('sideBar.home'),
+        isActive: true
+      },
+      {
+        id: 'Search',
+        parentClassName: 'search',
+        icon: 'search',
+        content: t('sideBar.search'),
+        isActive: false
+      },
+      {
+        id: 'Songs',
+        parentClassName: 'songs',
+        icon: 'music_note',
+        content: t('common.song_other'),
+        isActive: false
+      },
+      {
+        id: 'Playlists',
+        parentClassName: 'playlists',
+        icon: 'queue_music',
+        content: t('common.playlist_other'),
+        isActive: false
+      },
+      {
+        id: 'Folders',
+        parentClassName: 'folders',
+        icon: 'folder',
+        content: t('common.folder_other'),
+        isActive: false
+      },
+      {
+        id: 'Artists',
+        parentClassName: 'artists',
+        icon: 'people',
+        content: t('common.artist_other'),
+        isActive: false
+      },
+      {
+        id: 'Albums',
+        parentClassName: 'albums',
+        icon: 'album',
+        content: t('common.album_other'),
+        isActive: false
+      },
+      {
+        id: 'Genres',
+        parentClassName: 'genres',
+        icon: 'track_changes',
+        content: t('common.genre_other'),
+        isActive: false
+      },
+      {
+        id: 'Settings',
+        parentClassName: 'settings',
+        icon: 'settings',
+        content: t('settingsPage.settings'),
+        isActive: false
+      }
+    ],
+    [t]
+  );
+
+  const [data, setData] = React.useState<typeof linkData>();
+
+  useEffect(() => {
+    setData(linkData);
+  }, [linkData]);
 
   const addActiveToSidebarItem = React.useCallback((id: string) => {
     setData((prevData) => {
-      return prevData.map((link) => {
-        if (link.content === id) {
-          return link.parentClassName.includes('active')
-            ? link
-            : {
-                ...link,
-                isActive: true,
-                parentClassName: `${link.parentClassName} active`
-              };
-        } else {
-          return {
-            ...link,
-            isActive: false,
-            parentClassName: link.parentClassName.replace('active', '').trim()
-          };
-        }
-      });
+      if (prevData)
+        return prevData.map((link) => {
+          if (link.content === id) {
+            return link.parentClassName.includes('active')
+              ? link
+              : {
+                  ...link,
+                  isActive: true,
+                  parentClassName: `${link.parentClassName} active`
+                };
+          } else {
+            return {
+              ...link,
+              isActive: false,
+              parentClassName: link.parentClassName.replace('active', '').trim()
+            };
+          }
+        });
+      return [];
     });
   }, []);
 
@@ -112,16 +131,19 @@ const Sidebar = React.memo(() => {
 
   const sideBarItems = React.useMemo(
     () =>
-      data.map((link, index) => (
-        <SideBarItem
-          key={index}
-          parentClassName={link.parentClassName}
-          icon={link.icon}
-          content={link.content}
-          handleClick={clickHandler}
-          isActive={link.isActive}
-        />
-      )),
+      data
+        ? data.map((link) => (
+            <SideBarItem
+              key={link.id}
+              id={link.id}
+              parentClassName={link.parentClassName}
+              icon={link.icon}
+              content={link.content}
+              handleClick={clickHandler}
+              isActive={link.isActive}
+            />
+          ))
+        : [],
     [data, clickHandler]
   );
 
@@ -134,7 +156,7 @@ const Sidebar = React.memo(() => {
       } delay-200 lg:absolute lg:w-14 lg:hover:w-[30%] lg:hover:shadow-2xl md:hover:w-60`}
     >
       <ErrorBoundary>
-        <ul className="relative flex !h-full flex-col overflow-x-hidden pb-2 pt-4 gap-1">
+        <ul className="relative flex !h-full flex-col gap-1 overflow-x-hidden pb-2 pt-4">
           {sideBarItems}
         </ul>
       </ErrorBoundary>

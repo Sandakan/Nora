@@ -611,7 +611,9 @@ const Song = React.forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement
                     : 'min-w-[3.75rem]'
             }`}
           >
-            <span className="text-sm leading-none">{trackNo ?? index + 1}</span>
+            <span className="min-w-2 text-sm font-medium leading-tight">
+              {trackNo ?? index + 1}
+            </span>
           </div>
         ) : (
           ''
@@ -623,7 +625,7 @@ const Song = React.forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement
         >
           <div className="play-btn-container absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
             <Button
-              className="!m-0 !rounded-none !border-0 !p-0 outline-1 outline-offset-1 focus-visible:!outline"
+              className="!m-0 !rounded-none !border-0 bg-transparent !p-0 outline-1 outline-offset-1 hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent"
               iconClassName={`!text-3xl text-font-color-white text-opacity-0 !leading-none ${
                 currentSongData.songId === songId && 'text-opacity-100'
               } group-focus-within:text-opacity-100 group-hover:text-opacity-100 ${
@@ -645,7 +647,7 @@ const Song = React.forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement
         </div>
       </div>
       <div
-        className={`song-info-container grid grow grid-cols-[35%_2fr_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] items-center gap-3 text-font-color-black dark:text-font-color-white lg:grid-cols-[40%_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] lg:!gap-0 sm:grid-cols-[45%_1fr_minmax(4.5rem,6rem)] sm:gap-2 ${
+        className={`song-info-container grid grow grid-cols-[35%_2fr_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] items-center gap-3 text-font-color-black lg:grid-cols-[40%_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] lg:!gap-0 sm:grid-cols-[45%_1fr_minmax(4.5rem,6rem)] sm:gap-2 dark:text-font-color-white ${
           (currentSongData.songId === songId || isAMultipleSelection) &&
           'dark:!text-font-color-black'
         }`}

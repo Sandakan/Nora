@@ -8,8 +8,8 @@ import storage from '../../../utils/localStorage';
 
 import OpenLinkConfirmPrompt from '../../OpenLinkConfirmPrompt';
 import { version, author, homepage, bugs, urls } from '../../../../../../package.json';
-import openSourceLicenses from '../../../../../../open_source_licenses.txt';
-import appLicense from '../../../../../../LICENSE.txt';
+import openSourceLicenses from '../../../../../../open_source_licenses.txt?raw';
+import appLicense from '../../../../../../LICENSE.txt?raw';
 import localReleaseNotes from '../../../../../../release-notes.json';
 
 import AppIcon from '../../../assets/images/webp/logo_light_mode.webp';
@@ -94,7 +94,7 @@ const AboutSettings = () => {
           </div>
           <div className="flex items-center">
             <Button
-              className="about-link !mr-6 block w-fit cursor-pointer !rounded-none !border-0 !p-0 opacity-70 outline-1 outline-offset-2 transition-opacity hover:opacity-100 focus-visible:!outline"
+              className="about-link !mr-6 block w-fit cursor-pointer !rounded-none !border-0 bg-transparent !p-0 opacity-70 outline-1 outline-offset-2 transition-opacity hover:bg-transparent hover:opacity-100 focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent"
               iconName="language"
               iconClassName="!text-2xl"
               tooltipLabel={t('settingsPage.noraWebsite')}
@@ -166,7 +166,7 @@ const AboutSettings = () => {
               components={{
                 Button: (
                   <Button
-                    className="show-app-licence-btn about-link !inline w-fit cursor-pointer !rounded-none !border-0 !p-0 text-sm text-font-color-highlight-2 !outline-1 outline-offset-1 hover:underline focus:!outline dark:!text-dark-font-color-highlight-2"
+                    className="show-app-licence-btn about-link !inline w-fit cursor-pointer !rounded-none !border-0 bg-transparent !p-0 text-sm text-font-color-highlight-2 !outline-1 outline-offset-1 hover:bg-transparent hover:underline focus:!outline dark:bg-transparent dark:!text-dark-font-color-highlight-2 dark:hover:bg-transparent"
                     clickHandler={() =>
                       changePromptMenuData(
                         true,
@@ -219,32 +219,32 @@ const AboutSettings = () => {
           <Button
             iconName="description"
             iconClassName="material-icons-round-outlined"
-            className="about-link mb-4 block w-fit cursor-pointer"
+            className="about-link mb-4"
             label={t('settingsPage.openLogFile')}
             clickHandler={() => window.api.log.openLogFile()}
           />
           <Button
             label={t('settingsPage.openDevtools')}
             iconName="code"
-            className="mb-4 rounded-2xl"
+            className="mb-4"
             clickHandler={() => window.api.settingsHelpers.openDevtools()}
           />
           <Button
             label={t('settingsPage.resyncLibrary')}
             iconName="sync"
-            className="mb-4 rounded-2xl"
+            className="mb-4"
             clickHandler={() => window.api.audioLibraryControls.resyncSongsLibrary()}
           />
           <Button
             label={t('settingsPage.generatePalettes')}
             iconName="temp_preferences_custom"
-            className="mb-4 rounded-2xl"
+            className="mb-4"
             clickHandler={() => window.api.audioLibraryControls.generatePalettes()}
           />
           <Button
             label={t('settingsPage.appShortcuts')}
             iconName="trail_length_short"
-            className="mb-4 rounded-2xl"
+            className="mb-4"
             iconClassName="material-icons-round-outlined"
             clickHandler={() => changePromptMenuData(true, <AppShortcutsPrompt />)}
           />
@@ -256,7 +256,7 @@ const AboutSettings = () => {
           <Button
             label={t('settingsPage.resetApp')}
             iconName="auto_mode"
-            className="mb-4 rounded-2xl"
+            className="mb-4"
             clickHandler={() =>
               changePromptMenuData(true, <ResetAppConfirmationPrompt />, 'confirm-app-reset')
             }
@@ -264,7 +264,7 @@ const AboutSettings = () => {
           <Button
             label={t('settingsPage.clearOptionalData')}
             iconName="delete"
-            className="mb-4 rounded-2xl"
+            className="mb-4"
             iconClassName="material-icons-round-outlined"
             clickHandler={() =>
               changePromptMenuData(true, <ClearLocalStoragePrompt />, 'confirm-app-reset')
@@ -274,7 +274,7 @@ const AboutSettings = () => {
           <Button
             label={t('settingsPage.clearHistory')}
             iconName="clear"
-            className="mb-4 rounded-2xl"
+            className="mb-4"
             clickHandler={() => {
               changePromptMenuData(
                 true,
@@ -309,7 +309,7 @@ const AboutSettings = () => {
           <Button
             label={t('settingsPage.exportAppData')}
             iconName="file_upload"
-            className="mb-4 rounded-2xl"
+            className="mb-4"
             clickHandler={(_, setIsDisabled, setIsPending) => {
               setIsDisabled(true);
               setIsPending(true);
@@ -327,7 +327,7 @@ const AboutSettings = () => {
           <Button
             label={t('settingsPage.importAppData')}
             iconName="publish"
-            className="!mr-0 mb-4 rounded-2xl"
+            className="!mr-0 mb-4"
             clickHandler={(_, setIsDisabled, setIsPending) => {
               setIsDisabled(true);
               setIsPending(true);
@@ -378,7 +378,7 @@ const AboutSettings = () => {
                   <Hyperlink
                     link={author.url}
                     linkTitle={t('settingsPage.sandakanGithubProfile')}
-                    className="mr-1 font-normal"
+                    className="mr-1"
                   />
                 )
               }}
@@ -392,7 +392,6 @@ const AboutSettings = () => {
                   <Img src={SLFlag} alt="" className="ml-1 inline w-[24px] hover:underline" />
                 </>
               }
-              className="font-normal"
               link="https://www.google.com/search?q=beautiful+sri+lanka"
               linkTitle={t('settingsPage.beautifulSriLanka')}
             />

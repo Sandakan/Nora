@@ -88,6 +88,7 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
     "@electron-toolkit/utils": "^3.0.0",
+    "@vitalets/google-translate-api": "^9.2.0",
     "didyoumean2": "^6.0.1",
     "discord-rpc-revamp": "^2.0.3",
     "electron-store": "^8.1.0",
@@ -100,7 +101,8 @@
     "react-i18next": "^14.0.0",
     "react-window": "^1.8.9",
     "sharp": "^0.33.2",
-    "songlyrics": "^2.4.5"
+    "songlyrics": "^2.4.5",
+    "tailwind-merge": "^2.2.2"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^2.0.0",
