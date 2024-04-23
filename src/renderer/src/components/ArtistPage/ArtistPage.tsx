@@ -39,6 +39,11 @@ const artistSortOptions: DropdownOption<ArtistSortTypes>[] = [
   }
 ];
 
+const artistFilterOptions: DropdownOption<ArtistFilterTypes>[] = [
+  { label: 'Not Selected', value: 'notSelected' },
+  { label: 'Favorites', value: 'favorites' }
+];
+
 const ArtistPage = () => {
   const {
     currentlyActivePage,
@@ -56,6 +61,7 @@ const ArtistPage = () => {
       localStorageData?.sortingStates?.artistsPage ||
       'aToZ'
   );
+  const [filteringOrder, setFilteringOrder] = React.useState<ArtistFilterTypes>('notSelected');
 
   const containerRef = React.useRef(null as HTMLDivElement | null);
   const { height, width } = useResizeObserver(containerRef);
@@ -67,14 +73,14 @@ const ArtistPage = () => {
 
   const fetchArtistsData = React.useCallback(
     () =>
-      window.api.artistsData.getArtistData([], sortingOrder).then((res) => {
+      window.api.artistsData.getArtistData([], sortingOrder, filteringOrder).then((res) => {
         if (res && Array.isArray(res)) {
           if (res.length > 0) return setArtistsData(res);
           return setArtistsData([]);
         }
         return undefined;
       }),
-    [sortingOrder]
+    [filteringOrder, sortingOrder]
   );
 
   React.useEffect(() => {
@@ -176,7 +182,21 @@ const ArtistPage = () => {
                 clickHandler={() => toggleMultipleSelections(!isMultipleSelectionEnabled, 'artist')}
               />
               <Dropdown
+                name="artistPageFilterDropdown"
+                type="Filter By :"
+                value={filteringOrder}
+                options={artistFilterOptions}
+                onChange={(e) => {
+                  updateCurrentlyActivePageData((currentPageData) => ({
+                    ...currentPageData,
+                    filteringOrder: e.currentTarget.value as ArtistFilterTypes
+                  }));
+                  setFilteringOrder(e.currentTarget.value as ArtistFilterTypes);
+                }}
+              />
+              <Dropdown
                 name="artistsSortDropdown"
+                type="Sort By :"
                 value={sortingOrder}
                 options={artistSortOptions}
                 onChange={(e) => {

@@ -50,10 +50,10 @@ const parseListeningData = (listeningData?: SongListeningData) => {
 
 function sortSongs<T extends (SavableSongData | SongData)[]>(
   data: T,
-  sortType: SongSortTypes,
+  sortType?: SongSortTypes,
   listeningData?: SongListeningData[]
 ): T {
-  if (data && data.length > 0) {
+  if (data && data.length > 0 && sortType) {
     if (sortType === 'aToZ')
       return data.sort((a, b) => {
         if (a.title.toLowerCase().replace(/\W/gi, '') > b.title.toLowerCase().replace(/\W/gi, ''))

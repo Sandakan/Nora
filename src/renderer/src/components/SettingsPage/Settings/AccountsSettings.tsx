@@ -63,10 +63,6 @@ const AccountsSettings = () => {
                   isLastFmConnected ? 'text-green-500' : 'text-red-500'
                 } `}
               >
-                {' '}
-                <span className="material-icons-round-outlined mr-2 text-xl">
-                  {isLastFmConnected ? 'done' : 'close'}
-                </span>{' '}
                 {t(
                   isLastFmConnected
                     ? 'settingsPage.lastFmConnected'

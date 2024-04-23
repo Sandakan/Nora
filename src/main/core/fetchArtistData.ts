@@ -1,11 +1,13 @@
 import { getArtistsData } from '../filesystem';
 import { getArtistArtworkPath } from '../fs/resolveFilePaths';
 import log from '../log';
+import filterArtists from '../utils/filterArtists';
 import sortArtists from '../utils/sortArtists';
 
 const fetchArtistData = async (
   artistIdsOrNames: string[] = [],
   sortType?: ArtistSortTypes,
+  filterType?: ArtistFilterTypes,
   limit = 0
 ): Promise<Artist[]> => {
   if (artistIdsOrNames) {
@@ -31,7 +33,8 @@ const fetchArtistData = async (
         }
       }
 
-      if (sortType) sortArtists(results, sortType);
+      if (sortType || filterType)
+        results = sortArtists(filterArtists(results, filterType), sortType);
 
       const maxResults = limit || results.length;
 

@@ -12,6 +12,7 @@ import HomeImgLight from '../../../assets/images/webp/home-skeleton-light.webp';
 import HomeImgDark from '../../../assets/images/webp/home-skeleton-dark.webp';
 import HomeImgLightDark from '../../../assets/images/webp/home-skeleton-light-dark.webp';
 import Checkbox from '../../Checkbox';
+import DynamicThemeSettings from './DynamicThemeSettings';
 
 const ThemeSettings = () => {
   const { userData, localStorageData, currentSongData } = React.useContext(AppContext);
@@ -152,52 +153,10 @@ const ThemeSettings = () => {
             }
             labelContent={t('settingsPage.enableImageBasedDynamicThemes')}
           />
-          {localStorageData.preferences.enableImageBasedDynamicThemes && (
-            <div className="mt-4 flex gap-4">
-              <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
-                <span
-                  className="h-12 w-20 rounded-md"
-                  style={{ backgroundColor: currentSongData.paletteData?.DarkVibrant?.hex }}
-                />
-                <span>Dark Vibrant</span>
-              </span>
-              <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
-                <span
-                  className="h-12 w-20 rounded-md"
-                  style={{ backgroundColor: currentSongData.paletteData?.LightVibrant?.hex }}
-                />
-                <span>Light Vibrant</span>
-              </span>
-              <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
-                <span
-                  className="h-12 w-20 rounded-md"
-                  style={{ backgroundColor: currentSongData.paletteData?.DarkMuted?.hex }}
-                />
-                <span>Dark Muted</span>
-              </span>
-              <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
-                <span
-                  className="h-12 w-20 rounded-md"
-                  style={{ backgroundColor: currentSongData.paletteData?.LightMuted?.hex }}
-                />
-                <span>Light Muted</span>
-              </span>
-              <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
-                <span
-                  className="h-12 w-20 rounded-md"
-                  style={{ backgroundColor: currentSongData.paletteData?.Vibrant?.hex }}
-                />
-                <span>Vibrant</span>
-              </span>
-              <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
-                <span
-                  className="h-12 w-20 rounded-md"
-                  style={{ backgroundColor: currentSongData.paletteData?.Muted?.hex }}
-                />
-                <span>Muted</span>
-              </span>
-            </div>
-          )}
+          {localStorageData.preferences.enableImageBasedDynamicThemes &&
+            currentSongData.paletteData && (
+              <DynamicThemeSettings palette={currentSongData.paletteData} />
+            )}
         </li>
       </ul>
     </li>

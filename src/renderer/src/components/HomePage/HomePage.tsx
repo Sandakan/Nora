@@ -101,7 +101,7 @@ const HomePage = () => {
 
   const fetchLatestSongs = React.useCallback(() => {
     window.api.audioLibraryControls
-      .getAllSongs('dateAddedAscending', {
+      .getAllSongs('dateAddedAscending', undefined, {
         start: 0,
         end: noOfRecentlyAddedSongCards
       })
@@ -129,7 +129,13 @@ const HomePage = () => {
       recentSongs[0].songs.length > 0
     )
       window.api.audioLibraryControls
-        .getSongInfo(recentSongs[0].songs, undefined, noOfRecentandLovedSongCards + 5, true)
+        .getSongInfo(
+          recentSongs[0].songs,
+          undefined,
+          undefined,
+          noOfRecentandLovedSongCards + 5,
+          true
+        )
         .then(
           (res) =>
             Array.isArray(res) &&
@@ -153,7 +159,7 @@ const HomePage = () => {
 
       if (artistIds.length > 0)
         window.api.artistsData
-          .getArtistData(artistIds, undefined, noOfRecentandLovedArtists)
+          .getArtistData(artistIds, undefined, undefined, noOfRecentandLovedArtists)
           .then(
             (res) =>
               Array.isArray(res) &&
@@ -175,6 +181,7 @@ const HomePage = () => {
           return window.api.audioLibraryControls.getSongInfo(
             res[0].songs,
             'allTimeMostListened',
+            undefined,
             noOfRecentandLovedSongCards + 5,
             true
           );
@@ -200,7 +207,7 @@ const HomePage = () => {
         )
       ];
       window.api.artistsData
-        .getArtistData(artistIds, undefined, noOfRecentandLovedArtists)
+        .getArtistData(artistIds, undefined, undefined, noOfRecentandLovedArtists)
         .then(
           (res) =>
             Array.isArray(res) &&

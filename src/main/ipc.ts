@@ -87,6 +87,7 @@ import changeAppTheme from './core/changeAppTheme';
 import checkForStartUpSongs from './core/checkForStartUpSongs';
 import checkForNewSongs from './core/checkForNewSongs';
 import getTranslatedLyrics from './utils/getTranslatedLyrics';
+import { setDiscordRpcActivity } from './other/discordRPC';
 
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   if (mainWindow) {
@@ -106,6 +107,10 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.on('app/player/songPlaybackStateChange', (_: unknown, isPlaying: boolean) =>
       toggleAudioPlayingState(isPlaying)
+    );
+
+    ipcMain.on('app/setDiscordRpcActivity', (_: unknown, options: DiscordRpcActivityOptions) =>
+      setDiscordRpcActivity(options)
     );
 
     ipcMain.on('app/stopScreenSleeping', stopScreenSleeping);
@@ -154,8 +159,12 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.handle(
       'app/getAllSongs',
-      (_, sortType?: SongSortTypes, paginatingData?: PaginatingData) =>
-        getAllSongs(sortType, paginatingData)
+      (
+        _,
+        sortType?: SongSortTypes,
+        filterType?: SongFilterTypes,
+        paginatingData?: PaginatingData
+      ) => getAllSongs(sortType, filterType, paginatingData)
     );
 
     ipcMain.handle('app/saveUserData', (_, dataType: UserDataTypes, data: string) =>
@@ -200,8 +209,14 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.handle(
       'app/getSongInfo',
-      (_, songIds: string[], sortType?: SongSortTypes, limit?: number, preserveIdOrder = false) =>
-        getSongInfo(songIds, sortType, limit, preserveIdOrder)
+      (
+        _,
+        songIds: string[],
+        sortType?: SongSortTypes,
+        filterType?: SongFilterTypes,
+        limit?: number,
+        preserveIdOrder = false
+      ) => getSongInfo(songIds, sortType, filterType, limit, preserveIdOrder)
     );
 
     ipcMain.handle('app/getSimilarTracksForASong', (_, songId: string) => getSimilarTracks(songId));
@@ -254,8 +269,13 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
 
     ipcMain.handle(
       'app/getArtistData',
-      (_, artistIdsOrNames?: string[], sortType?: ArtistSortTypes, limit?: number) =>
-        fetchArtistData(artistIdsOrNames, sortType, limit)
+      (
+        _,
+        artistIdsOrNames?: string[],
+        sortType?: ArtistSortTypes,
+        filterType?: ArtistFilterTypes,
+        limit?: number
+      ) => fetchArtistData(artistIdsOrNames, sortType, filterType, limit)
     );
 
     ipcMain.handle(

@@ -130,7 +130,7 @@ const EditingLyricsLine = (props: Props) => {
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <div
       className={`group mb-2 flex flex-col items-center justify-center rounded-xl py-4 ${
-        isEditing && `w-full bg-background-color-2 shadow-xl dark:bg-dark-background-color-2 `
+        isEditing && `w-full bg-background-color-2/50 shadow-xl dark:bg-dark-background-color-2/50 `
       } `}
       ref={lineRef}
       onKeyDown={(e) => isEditing && e.stopPropagation()}

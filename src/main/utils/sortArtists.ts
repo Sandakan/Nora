@@ -16,8 +16,8 @@ const sortZtoA = <T extends (Artist | SavableArtist)[]>(arr: T) =>
         : 0
   );
 
-export default <T extends (Artist | SavableArtist)[]>(data: T, sortType: ArtistSortTypes) => {
-  if (Array.isArray(data) && data.length > 0) {
+export default <T extends (Artist | SavableArtist)[]>(data: T, sortType?: ArtistSortTypes) => {
+  if (Array.isArray(data) && data.length > 0 && sortType) {
     if (sortType === 'aToZ') return sortAtoZ(data);
     if (sortType === 'zToA') return sortZtoA(data);
     if (sortType === 'noOfSongsDescending')

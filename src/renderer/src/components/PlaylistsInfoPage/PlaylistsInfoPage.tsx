@@ -14,7 +14,7 @@ import MainContainer from '../MainContainer';
 
 import PlaylistInfoAndImgContainer from './PlaylistInfoAndImgContainer';
 import TitleContainer from '../TitleContainer';
-import { songSortOptions } from '../SongsPage/SongsPage';
+import { songFilterOptions, songSortOptions } from '../SongsPage/SongsPage';
 
 const PlaylistInfoPage = () => {
   const { currentlyActivePage, queue, localStorageData } = useContext(AppContext);
@@ -35,6 +35,7 @@ const PlaylistInfoPage = () => {
       localStorageData.sortingStates?.songsPage ||
       'addedOrder'
   );
+  const [filteringOrder, setFilteringOrder] = React.useState<SongFilterTypes>('notSelected');
   const songsContainerRef = React.useRef<HTMLDivElement>(null);
   const { width, height } = useResizeObserver(songsContainerRef);
 
@@ -54,14 +55,20 @@ const PlaylistInfoPage = () => {
     const preserveAddedOrder = sortingOrder === 'addedOrder';
     if (playlistData.songs && playlistData.songs.length > 0) {
       window.api.audioLibraryControls
-        .getSongInfo(playlistData.songs, sortingOrder, undefined, preserveAddedOrder)
+        .getSongInfo(
+          playlistData.songs,
+          sortingOrder,
+          filteringOrder,
+          undefined,
+          preserveAddedOrder
+        )
         .then((songsData) => {
           if (songsData && songsData.length > 0) setPlaylistSongs(songsData);
           return undefined;
         })
         .catch((err) => console.error(err));
     }
-  }, [playlistData.songs, sortingOrder]);
+  }, [filteringOrder, playlistData.songs, sortingOrder]);
 
   React.useEffect(() => {
     fetchPlaylistData();
@@ -302,22 +309,38 @@ const PlaylistInfoPage = () => {
             isDisabled: !(playlistData.songs && playlistData.songs.length > 0)
           }
         ]}
-        dropdown={{
-          name: 'PlaylistPageSortDropdown',
-          value: sortingOrder,
-          options: songSortOptions.concat([
-            { label: t('sortTypes.addedOrder'), value: 'addedOrder' }
-          ]),
-          onChange: (e) => {
-            const order = e.currentTarget.value as SongSortTypes;
-            updateCurrentlyActivePageData((currentPageData) => ({
-              ...currentPageData,
-              sortingOrder: order
-            }));
-            setSortingOrder(order);
+        dropdowns={[
+          {
+            name: 'songsPageFilterDropdown',
+            type: 'Filter By :',
+            value: filteringOrder,
+            options: songFilterOptions,
+            onChange: (e) => {
+              updateCurrentlyActivePageData((currentPageData) => ({
+                ...currentPageData,
+                filteringOrder: e.currentTarget.value as SongFilterTypes
+              }));
+              setFilteringOrder(e.currentTarget.value as SongFilterTypes);
+            }
           },
-          isDisabled: !(playlistData.songs && playlistData.songs.length > 0)
-        }}
+          {
+            name: 'PlaylistPageSortDropdown',
+            type: 'Sort By :',
+            value: sortingOrder,
+            options: songSortOptions.concat([
+              { label: t('sortTypes.addedOrder'), value: 'addedOrder' }
+            ]),
+            onChange: (e) => {
+              const order = e.currentTarget.value as SongSortTypes;
+              updateCurrentlyActivePageData((currentPageData) => ({
+                ...currentPageData,
+                sortingOrder: order
+              }));
+              setSortingOrder(order);
+            },
+            isDisabled: !(playlistData.songs && playlistData.songs.length > 0)
+          }
+        ]}
       />
       <div className="flex h-full flex-col">
         <div className="songs-list-container h-full" ref={songsContainerRef}>

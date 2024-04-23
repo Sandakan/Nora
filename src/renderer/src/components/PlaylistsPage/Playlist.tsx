@@ -59,7 +59,7 @@ export const Playlist = (props: PlaylistProp) => {
   const playAllSongs = React.useCallback(
     (isShuffling = false) => {
       window.api.audioLibraryControls
-        .getSongInfo(props.songs, undefined, undefined, true)
+        .getSongInfo(props.songs, undefined, undefined, undefined, true)
         .then((songs) => {
           if (Array.isArray(songs))
             return createQueue(
@@ -84,7 +84,13 @@ export const Playlist = (props: PlaylistProp) => {
         .then((playlists) => {
           const ids = playlists.map((playlist) => playlist.songs).flat();
 
-          return window.api.audioLibraryControls.getSongInfo(ids, undefined, undefined, true);
+          return window.api.audioLibraryControls.getSongInfo(
+            ids,
+            undefined,
+            undefined,
+            undefined,
+            true
+          );
         })
         .then((songs) => {
           if (Array.isArray(songs)) {
@@ -117,6 +123,7 @@ export const Playlist = (props: PlaylistProp) => {
 
           return window.api.audioLibraryControls.getSongInfo(
             playlistSongIds,
+            undefined,
             undefined,
             undefined,
             true

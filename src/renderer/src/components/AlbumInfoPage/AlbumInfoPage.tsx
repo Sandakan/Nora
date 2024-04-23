@@ -13,9 +13,9 @@ import MainContainer from '../MainContainer';
 import Song from '../SongsPage/Song';
 import TitleContainer from '../TitleContainer';
 import AlbumImgAndInfoContainer from './AlbumImgAndInfoContainer';
-import { LastFMAlbumInfo } from '../../../@types/last_fm_album_info_api';
 import OnlineAlbumInfoContainer from './OnlineAlbumInfoContainer';
 import { songSortOptions } from '../SongsPage/SongsPage';
+import { LastFMAlbumInfo } from 'src/@types/last_fm_album_info_api';
 
 interface AlbumContentReducer {
   albumData: Album;
@@ -268,21 +268,6 @@ const AlbumInfoPage = () => {
         className="pr-4"
         buttons={[
           {
-            label: t('common.playAll'),
-            iconName: 'play_arrow',
-            clickHandler: () =>
-              createQueue(
-                albumContent.songsData
-                  .filter((song) => !song.isBlacklisted)
-                  .map((song) => song.songId),
-                'songs',
-                false,
-                albumContent.albumData.albumId,
-                true
-              ),
-            isDisabled: !(albumContent.songsData.length > 0)
-          },
-          {
             tooltipLabel: t('common.shuffleAndPlay'),
             iconName: 'shuffle',
             clickHandler: () =>
@@ -318,22 +303,39 @@ const AlbumInfoPage = () => {
               ]);
             },
             isDisabled: !(albumContent.songsData.length > 0)
+          },
+          {
+            label: t('common.playAll'),
+            iconName: 'play_arrow',
+            clickHandler: () =>
+              createQueue(
+                albumContent.songsData
+                  .filter((song) => !song.isBlacklisted)
+                  .map((song) => song.songId),
+                'songs',
+                false,
+                albumContent.albumData.albumId,
+                true
+              ),
+            isDisabled: !(albumContent.songsData.length > 0)
           }
         ]}
-        dropdown={{
-          name: 'AlbumInfoPageSortDropdown',
-          value: albumContent.sortingOrder,
-          options: songSortOptions,
-          onChange: (e) => {
-            const order = e.currentTarget.value as SongSortTypes;
-            updateCurrentlyActivePageData((currentPageData) => ({
-              ...currentPageData,
-              sortingOrder: order
-            }));
-            dispatch({ type: 'UPDATE_SORTING_ORDER', data: order });
-          },
-          isDisabled: !(albumContent.songsData.length > 0)
-        }}
+        dropdowns={[
+          {
+            name: 'AlbumInfoPageSortDropdown',
+            value: albumContent.sortingOrder,
+            options: songSortOptions,
+            onChange: (e) => {
+              const order = e.currentTarget.value as SongSortTypes;
+              updateCurrentlyActivePageData((currentPageData) => ({
+                ...currentPageData,
+                sortingOrder: order
+              }));
+              dispatch({ type: 'UPDATE_SORTING_ORDER', data: order });
+            },
+            isDisabled: !(albumContent.songsData.length > 0)
+          }
+        ]}
       />
       <div className="h-full" ref={songsContainerRef}>
         {listItems.length > 0 && (

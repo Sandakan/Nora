@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
@@ -29,6 +29,57 @@ const UpNextSongPopup = (props: Props) => {
     onPopupAppears(!!upNextSongData);
   }, [onPopupAppears, upNextSongData]);
 
+  const showPopup = useCallback(() => {
+    setUpNextSongData(upNextSongDataCache.current);
+    setTimeout(() => setUpNextSongData(undefined), 10000);
+  }, []);
+
+  React.useEffect(() => {
+    let ctrlPressed = false;
+    let lastCtrlPressTime = 0;
+    const abortController = new AbortController();
+
+    document.addEventListener(
+      'keydown',
+      (event) => {
+        if (event.key === 'Control') {
+          const currentTime = new Date().getTime();
+          if (currentTime - lastCtrlPressTime < 300 && ctrlPressed) {
+            // Double Ctrl key press detected
+            console.log('Double Ctrl key press detected');
+            // Add your logic here
+            showPopup();
+
+            // Reset flag and time for next detection
+            ctrlPressed = false;
+            lastCtrlPressTime = 0;
+          } else {
+            // First Ctrl key press or not in quick succession
+            ctrlPressed = true;
+            lastCtrlPressTime = currentTime;
+          }
+        }
+      },
+      { signal: abortController.signal }
+    );
+
+    document.addEventListener(
+      'keyup',
+      (event) => {
+        if (event.key === 'Control') {
+          // Reset flag on Ctrl key release
+          ctrlPressed = false;
+          lastCtrlPressTime = 0;
+        }
+      },
+      { signal: abortController.signal }
+    );
+
+    return () => {
+      abortController.abort();
+    };
+  }, [showPopup]);
+
   React.useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     let timeIntervalId: NodeJS.Timeout;
@@ -47,10 +98,7 @@ const UpNextSongPopup = (props: Props) => {
                   upNextSongDataCache.current = nextSongData;
                   // changeUpNextSongData(upNextSongDataCache.current);
 
-                  timeIntervalId = setInterval(() => {
-                    setUpNextSongData(upNextSongDataCache.current);
-                    setTimeout(() => setUpNextSongData(undefined), 10000);
-                  }, 40000);
+                  timeIntervalId = setInterval(showPopup, 40000);
                 }
 
                 return undefined;
@@ -65,7 +113,7 @@ const UpNextSongPopup = (props: Props) => {
       if (timeoutId) clearTimeout(timeoutId);
       if (timeIntervalId) clearInterval(timeIntervalId);
     };
-  }, [queue.currentSongIndex, queue.queue]);
+  }, [queue.currentSongIndex, queue.queue, showPopup]);
 
   const showSongInfoPage = React.useCallback(
     (songId: string) =>

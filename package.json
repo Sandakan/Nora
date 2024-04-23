@@ -52,6 +52,7 @@
     ]
   },
   "overrides": {
+    "phin": "^3.7.1",
     "node-vibrant": {
       "@vibrant/image-node": {
         "@jimp/types": {
@@ -115,7 +116,7 @@
     "@types/react-dom": "^18.2.18",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.18",
-    "electron": "^29.1.1",
+    "electron": "^30.0.0",
     "electron-builder": "^24.4.0",
     "electron-debug": "^3.2.0",
     "electron-devtools-installer": "^3.2.0",

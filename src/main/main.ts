@@ -173,6 +173,7 @@ const createWindow = async () => {
     minWidth: 700,
     title: 'Nora',
     webPreferences: {
+      zoomFactor: 0.9,
       preload: join(__dirname, '../preload/index.js')
     },
     visualEffectState: 'followWindow',

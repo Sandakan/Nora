@@ -20,22 +20,7 @@ const MusixmatchDisclaimerPrompt = () => {
             }}
           />
         </ul>
-        <br />
-        <p>
-          <Trans
-            i18nKey="musixmatchDisclaimerPrompt.message"
-            components={{
-              Hyperlink: (
-                <Hyperlink
-                  label="MxLRC"
-                  link="https://github.com/fashni/MxLRC"
-                  linkTitle={t('musixmatchDisclaimerPrompt.hyperlinkTitle')}
-                  className="ml-1"
-                />
-              )
-            }}
-          />
-        </p>
+
         <br />
         <p>
           <Trans

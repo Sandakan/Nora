@@ -686,7 +686,7 @@ const Song = React.forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement
         </div>
         <div className="song-duration flex !w-full items-center justify-between pl-2 pr-4 text-center transition-none sm:pr-1">
           <Button
-            className="!mr-0 mt-1 !rounded-none !border-0 !p-0 !text-inherit outline-1 outline-offset-1 focus-visible:!outline"
+            className="!mr-0 mt-1 !rounded-none !border-0 bg-transparent !p-0 !text-inherit outline-1 outline-offset-1 focus-visible:!outline dark:bg-transparent"
             iconName="favorite"
             iconClassName={`${
               isAFavorite ? 'material-icons-round' : 'material-icons-round-outlined'

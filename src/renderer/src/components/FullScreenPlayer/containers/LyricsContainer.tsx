@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../../contexts/AppContext';
 
-import LyricsSource from '../../LyricsPage/LyricsSource';
+import LyricsMetadata from '../../LyricsPage/LyricsMetadata';
 import LyricLine from '../../LyricsPage/LyricLine';
 
 type Props = {
@@ -86,7 +86,7 @@ const LyricsContainer = (props: Props) => {
       const { source, copyright, link } = lyrics;
 
       return (
-        <LyricsSource
+        <LyricsMetadata
           source={source}
           copyright={copyright}
           link={link}

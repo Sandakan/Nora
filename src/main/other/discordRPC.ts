@@ -4,19 +4,6 @@ import log from '../log';
 
 let client: discordRPC.Client;
 
-type ArtAssetKeys =
-  | 'nora_logo'
-  | 'song_artwork'
-  | 'album_artwork'
-  | 'favorites_artwork'
-  | 'genre_artwork'
-  | 'playlist_artwork';
-
-interface DiscordRpcActivityOptions extends discordRPC.Presence {
-  largeImageKey?: ArtAssetKeys;
-  smallImageKey?: ArtAssetKeys;
-}
-
 export const initializeDiscordRPC = async () => {
   try {
     if (client) return { initialized: true };

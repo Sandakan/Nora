@@ -40,6 +40,9 @@ const playerControls = {
   skipBackwardToPreviousSong: (callback: (e: any) => void) =>
     ipcRenderer.on('app/player/skipBackward', callback),
   sendSongPosition: (position: number): void => ipcRenderer.send('app/getSongPosition', position),
+  setDiscordRpcActivity: (options: DiscordRpcActivityOptions): void =>
+    ipcRenderer.send('app/setDiscordRpcActivity', options),
+
   toggleLikeSongs: (
     songIds: string[],
     isLikeSong?: boolean
@@ -67,16 +70,18 @@ const audioLibraryControls = {
     ipcRenderer.invoke('app/getSong', songId, updateListeningRate),
   getAllSongs: (
     sortType?: SongSortTypes,
+    filterType?: SongFilterTypes,
     paginatingData?: PaginatingData
   ): Promise<PaginatedResult<AudioInfo, SongSortTypes>> =>
-    ipcRenderer.invoke('app/getAllSongs', sortType, paginatingData),
+    ipcRenderer.invoke('app/getAllSongs', sortType, filterType, paginatingData),
   getSongInfo: (
     songIds: string[],
     sortType?: SongSortTypes,
+    filterType?: SongFilterTypes,
     limit?: number,
     preserveIdOrder = false
   ): Promise<SongData[] | undefined> =>
-    ipcRenderer.invoke('app/getSongInfo', songIds, sortType, limit, preserveIdOrder),
+    ipcRenderer.invoke('app/getSongInfo', songIds, sortType, filterType, limit, preserveIdOrder),
   getSongListeningData: (songIds: string[]): Promise<SongListeningData[]> =>
     ipcRenderer.invoke('app/getSongListeningData', songIds),
   updateSongListeningData: <
@@ -303,9 +308,10 @@ const artistsData = {
   getArtistData: (
     artistIdsOrNames?: string[],
     sortType?: ArtistSortTypes,
+    filterType?: ArtistFilterTypes,
     limit?: number
   ): Promise<Artist[]> =>
-    ipcRenderer.invoke('app/getArtistData', artistIdsOrNames, sortType, limit),
+    ipcRenderer.invoke('app/getArtistData', artistIdsOrNames, sortType, filterType, limit),
   toggleLikeArtists: (
     artistIds: string[],
     likeArtist?: boolean

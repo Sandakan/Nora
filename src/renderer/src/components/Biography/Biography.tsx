@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import Hyperlink from '../Hyperlink';
 import HashTag from './HashTag';
-import { Tag } from '../../../@types/last_fm_artist_info_api';
+import { Tag } from 'src/@types/last_fm_artist_info_api';
 
 type Props = {
   bioUserName?: string;
@@ -49,7 +49,7 @@ const Biography = (props: Props) => {
 
   return (
     <div
-      className={`"artist-bio-container appear-from-bottom relative z-10 m-4 rounded-lg p-4 text-font-color-black shadow-md  dark:text-font-color-white ${
+      className={`"bio-container appear-from-bottom relative z-10 m-4 rounded-lg p-4 text-font-color-black shadow-md  dark:text-font-color-white ${
         bodyBackgroundImage
           ? `bg-background-color-2/70 backdrop-blur-md dark:bg-dark-background-color-2/70`
           : `bg-background-color-2 dark:bg-dark-background-color-2`

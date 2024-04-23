@@ -11,7 +11,7 @@ import Button from '../Button';
 import Dropdown from '../Dropdown';
 import MainContainer from '../MainContainer';
 import Song from '../SongsPage/Song';
-import { songSortOptions } from '../SongsPage/SongsPage';
+import { songFilterOptions, songSortOptions } from '../SongsPage/SongsPage';
 
 const MusicFolderInfoPage = () => {
   const {
@@ -31,6 +31,7 @@ const MusicFolderInfoPage = () => {
 
   const [folderInfo, setFolderInfo] = React.useState<MusicFolder>();
   const [folderSongs, setFolderSongs] = React.useState<SongData[]>([]);
+  const [filteringOrder, setFilteringOrder] = React.useState<SongFilterTypes>('notSelected');
   const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>(
     localStorageData?.sortingStates?.songsPage || 'aToZ'
   );
@@ -54,14 +55,14 @@ const MusicFolderInfoPage = () => {
   const fetchFolderSongs = React.useCallback(() => {
     if (folderInfo && folderInfo.songIds.length > 0) {
       window.api.audioLibraryControls
-        .getSongInfo(folderInfo.songIds, sortingOrder)
+        .getSongInfo(folderInfo.songIds, sortingOrder, filteringOrder)
         .then((res) => {
           if (res && res.length > 0) return setFolderSongs(res);
           return undefined;
         })
         .catch((err) => console.error(err));
     }
-  }, [folderInfo, sortingOrder]);
+  }, [filteringOrder, folderInfo, sortingOrder]);
 
   React.useEffect(() => {
     fetchFolderInfo();
@@ -260,7 +261,21 @@ const MusicFolderInfoPage = () => {
                 clickHandler={() => handleSongPlayBtnClick(undefined, true, true)}
               />
               <Dropdown
+                name="songsPageFilterDropdown"
+                type="Filter By :"
+                value={filteringOrder}
+                options={songFilterOptions}
+                onChange={(e) => {
+                  updateCurrentlyActivePageData((currentPageData) => ({
+                    ...currentPageData,
+                    filteringOrder: e.currentTarget.value as SongFilterTypes
+                  }));
+                  setFilteringOrder(e.currentTarget.value as SongFilterTypes);
+                }}
+              />
+              <Dropdown
                 name="musicFolderSortDropdown"
+                type="Sort By :"
                 value={sortingOrder ?? ''}
                 options={songSortOptions}
                 onChange={(e) => {

@@ -3,7 +3,8 @@
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FixedSizeList, FixedSizeList as List } from 'react-window';
-import { Draggable, DropResult, Droppable, DragDropContext } from 'react-beautiful-dnd';
+// eslint-disable-next-line import/named
+import { Draggable, Droppable, DragDropContext, DropResult } from 'react-beautiful-dnd';
 import useResizeObserver from '../../hooks/useResizeObserver';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -68,7 +69,7 @@ const CurrentQueuePage = () => {
     (skipSameQueueCheck = false) => {
       if (skipSameQueueCheck || !isTheSameQueue(queue.queue)) {
         window.api.audioLibraryControls
-          .getSongInfo(queue.queue, 'addedOrder', undefined, true)
+          .getSongInfo(queue.queue, 'addedOrder', undefined, undefined, true)
           .then((res) => {
             if (res) {
               setQueuedSongs(res);

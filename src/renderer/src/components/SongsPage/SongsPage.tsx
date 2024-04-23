@@ -24,9 +24,19 @@ import AddMusicFoldersPrompt from '../MusicFoldersPage/AddMusicFoldersPrompt';
 interface SongPageReducer {
   songsData: AudioInfo[];
   sortingOrder: SongSortTypes;
+  filteringOrder: SongFilterTypes;
 }
 
-type SongPageReducerActionTypes = 'SONGS_DATA' | 'SORTING_ORDER';
+type SongPageReducerActionTypes = 'SONGS_DATA' | 'SORTING_ORDER' | 'FILTERING_ORDER';
+
+export const songFilterOptions: DropdownOption<SongFilterTypes>[] = [
+  { label: 'Not Selected', value: 'notSelected' },
+  { label: i18n.t('sortTypes.blacklistedSongs'), value: 'blacklistedSongs' },
+  {
+    label: i18n.t('sortTypes.whitelistedSongs'),
+    value: 'whitelistedSongs'
+  }
+];
 
 export const songSortOptions: DropdownOption<SongSortTypes>[] = [
   { label: i18n.t('sortTypes.aToZ'), value: 'aToZ' },
@@ -101,6 +111,11 @@ const reducer = (
         ...state,
         sortingOrder: action.data
       };
+    case 'FILTERING_ORDER':
+      return {
+        ...state,
+        filteringOrder: action.data
+      };
     default:
       return state;
   }
@@ -128,7 +143,8 @@ const SongsPage = () => {
     sortingOrder:
       currentlyActivePage?.data?.sortingOrder ||
       localStorageData?.sortingStates?.songsPage ||
-      'aToZ'
+      'aToZ',
+    filteringOrder: 'notSelected'
   });
   const songsContainerRef = React.useRef(null as HTMLDivElement | null);
   const { width, height } = useResizeObserver(songsContainerRef);
@@ -137,7 +153,7 @@ const SongsPage = () => {
     console.time('songs');
 
     window.api.audioLibraryControls
-      .getAllSongs(content.sortingOrder)
+      .getAllSongs(content.sortingOrder, content.filteringOrder)
       .then((audioInfoArray) => {
         console.timeEnd('songs');
 
@@ -156,7 +172,7 @@ const SongsPage = () => {
         return undefined;
       })
       .catch((err) => console.error(err));
-  }, [content.sortingOrder]);
+  }, [content.filteringOrder, content.sortingOrder]);
 
   React.useEffect(() => {
     fetchSongsData();
@@ -196,7 +212,6 @@ const SongsPage = () => {
               songId: song.songId,
               artists: song.artists,
               duration: song.duration,
-              palette: song.palette,
               path: song.path,
               artworkPaths: song.artworkPaths,
               addedDate: song.addedDate,
@@ -416,7 +431,24 @@ const SongsPage = () => {
                 }
               />
               <Dropdown
+                name="songsPageFilterDropdown"
+                type="Filter By :"
+                value={content.filteringOrder}
+                options={songFilterOptions}
+                onChange={(e) => {
+                  updateCurrentlyActivePageData((currentPageData) => ({
+                    ...currentPageData,
+                    filteringOrder: e.currentTarget.value as SongFilterTypes
+                  }));
+                  dispatch({
+                    type: 'FILTERING_ORDER',
+                    data: e.currentTarget.value
+                  });
+                }}
+              />
+              <Dropdown
                 name="songsPageSortDropdown"
+                type="Sort By :"
                 value={content.sortingOrder}
                 options={songSortOptions}
                 onChange={(e) => {

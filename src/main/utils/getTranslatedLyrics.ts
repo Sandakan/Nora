@@ -21,6 +21,7 @@ const getTranslatedLyrics = async (languageCode: string) => {
       // });
       const lyrics = parseLyrics(text);
       cachedLyrics.lyrics = lyrics;
+      cachedLyrics.isTranslated = true;
 
       updateCachedLyrics(() => cachedLyrics);
 

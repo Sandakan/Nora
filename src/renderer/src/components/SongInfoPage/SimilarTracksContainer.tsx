@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { SimilarTracksOutput } from '../../../@types/last_fm_similar_tracks_api';
+import { SimilarTracksOutput } from 'src/@types/last_fm_similar_tracks_api';
 import UnAvailableTrack from './UnAvailableTrack';
 import TitleContainer from '../TitleContainer';
 import Song from '../SongsPage/Song';

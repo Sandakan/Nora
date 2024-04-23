@@ -48,7 +48,7 @@ const MusixmatchSettingsPrompt = () => {
       <div className="controls-container ml-2 flex items-center">
         <input
           type={showToken ? 'text' : 'password'}
-          className="mr-4 w-full max-w-[50%] rounded-xl bg-background-color-2 p-2 text-sm dark:bg-dark-background-color-2"
+          className="mr-4 w-full max-w-[50%] rounded-xl bg-background-color-2 p-2 text-sm placeholder:text-font-color-dimmed dark:bg-dark-background-color-2 dark:placeholder:text-dark-font-color-dimmed"
           placeholder="Enter Musixmatch User Token"
           value={token}
           ref={inputRef}

@@ -10,7 +10,7 @@ import { AppContext } from '../../contexts/AppContext';
 import useNetworkConnectivity from '../../hooks/useNetworkConnectivity';
 
 import LyricLine from './LyricLine';
-import LyricsSource from './LyricsSource';
+import LyricsMetadata from './LyricsMetadata';
 import NoLyrics from './NoLyrics';
 import MainContainer from '../MainContainer';
 import Button from '../Button';
@@ -393,8 +393,8 @@ const LyricsPage = () => {
   );
 
   const goToLyricsEditor = React.useCallback(() => {
+    let lines: LyricData[] = [{ text: '' }];
     if (lyrics) {
-      let lines: LyricData[] = [];
       const { isSynced, syncedLyrics, lyrics: unsyncedLyrics } = lyrics.lyrics;
 
       if (isSynced && syncedLyrics)
@@ -405,14 +405,14 @@ const LyricsPage = () => {
       else {
         lines = unsyncedLyrics.map((line) => ({ text: line }));
       }
-
-      changeCurrentActivePage('LyricsEditor', {
-        lyrics: lines,
-        songId: currentSongData.songId,
-        songTitle: currentSongData.title,
-        isEditingEnhancedSyncedLyrics: isSynced && isSynchronizedLyricsEnhancedSynced
-      });
     }
+
+    changeCurrentActivePage('LyricsEditor', {
+      lyrics: lines,
+      songId: currentSongData.songId,
+      songTitle: currentSongData.title,
+      isEditingEnhancedSyncedLyrics: lyrics?.lyrics?.isSynced && isSynchronizedLyricsEnhancedSynced
+    });
   }, [
     changeCurrentActivePage,
     currentSongData.songId,
@@ -552,7 +552,12 @@ const LyricsPage = () => {
                 }
               >
                 {lyricsComponents}
-                <LyricsSource source={lyrics.source} link={lyrics.link} copyright={copyright} />
+                <LyricsMetadata
+                  source={lyrics.source}
+                  link={lyrics.link}
+                  copyright={copyright}
+                  isTranslated={lyrics.isTranslated}
+                />
               </div>
             </>
           ) : lyrics === undefined || lyrics?.lyrics.lyrics.length === 0 ? (

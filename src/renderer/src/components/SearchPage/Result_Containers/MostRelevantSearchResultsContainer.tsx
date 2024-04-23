@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import Img from '../../Img';
 import SecondaryContainer from '../../SecondaryContainer';
@@ -16,7 +16,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
   const { playSong, changeCurrentActivePage, updateQueueData, createQueue, addNewNotifications } =
     React.useContext(AppUpdateContext);
 
-  const MostRelevantResults = [];
+  const MostRelevantResults: ReactNode[] = [];
 
   const [isOverScrolling, setIsOverScrolling] = React.useState(true);
   const mostRelevantResultContainerRef = React.useRef<HTMLDivElement>(null);
@@ -163,6 +163,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
                   firstResult.songs.map((song) => song.songId),
                   undefined,
                   undefined,
+                  undefined,
                   true
                 )
                 .then((songs) => {
@@ -241,6 +242,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
                   firstResult.songs.map((song) => song.songId),
                   undefined,
                   undefined,
+                  undefined,
                   true
                 )
                 .then((songs) => {
@@ -299,7 +301,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             iconName: 'play_arrow',
             handlerFunction: () =>
               window.api.audioLibraryControls
-                .getSongInfo(firstResult.songs, undefined, undefined, true)
+                .getSongInfo(firstResult.songs, undefined, undefined, undefined, true)
                 .then((songs) => {
                   if (Array.isArray(songs))
                     return createQueue(
@@ -337,6 +339,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
               window.api.audioLibraryControls
                 .getSongInfo(
                   firstResult.songs.map((song) => song.songId),
+                  undefined,
                   undefined,
                   undefined,
                   true

@@ -41,6 +41,7 @@ export const Album = (props: AlbumProp) => {
           props.songs.map((song) => song.songId),
           undefined,
           undefined,
+          undefined,
           true
         )
         .then((songs) => {
@@ -74,6 +75,7 @@ export const Album = (props: AlbumProp) => {
               albumSongIds,
               undefined,
               undefined,
+              undefined,
               true
             );
           }
@@ -105,6 +107,7 @@ export const Album = (props: AlbumProp) => {
 
           return window.api.audioLibraryControls.getSongInfo(
             albumSongIds,
+            undefined,
             undefined,
             undefined,
             true

@@ -4,10 +4,12 @@ import { getSongArtworkPath } from '../fs/resolveFilePaths';
 import log from '../log';
 import sortSongs from '../utils/sortSongs';
 import { getSelectedPaletteData } from '../other/generatePalette';
+import filterSongs from '../utils/filterSongs';
 
 const getSongInfo = async (
   songIds: string[],
   sortType?: SongSortTypes,
+  filterType?: SongFilterTypes,
   limit = songIds.length,
   preserveIdOrder = false,
   noBlacklistedSongs = false
@@ -56,10 +58,12 @@ const getSongInfo = async (
           updatedResults = updatedResults.filter((result) => !result.isBlacklisted);
 
         if (limit) {
-          if (typeof sortType === 'string')
-            return sortSongs(updatedResults, sortType, listeningData).filter(
-              (_, index) => index < limit
-            );
+          if (typeof sortType === 'string' || typeof filterType === 'string')
+            return sortSongs(
+              filterSongs(updatedResults, filterType),
+              sortType,
+              listeningData
+            ).filter((_, index) => index < limit);
           return updatedResults.filter((_, index) => index < limit);
         }
         return updatedResults;

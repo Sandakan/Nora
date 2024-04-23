@@ -864,12 +864,13 @@ export default function App() {
           const mediumLightVibrant = generateColor(
             manageBrightness(palette.LightVibrant.hsl, 0.75)
           );
+          const highVibrant = generateColor(manageBrightness(palette.Vibrant.hsl, 0.7));
+
           const lightVibrant = generateColor(palette.LightVibrant.hsl);
           const darkVibrant = generateColor(palette.DarkVibrant.hsl);
           const lightMuted = generateColor(palette.LightMuted.hsl);
           const darkMuted = generateColor(palette.DarkMuted.hsl);
           const vibrant = generateColor(palette.Vibrant.hsl);
-          const highVibrant = generateColor(manageBrightness(palette.Vibrant.hsl, 0.7));
           const muted = generateColor(palette.Muted.hsl);
 
           root.style.setProperty('--side-bar-background', highLightVibrant, 'important');
@@ -1126,6 +1127,25 @@ export default function App() {
         }
       ]
     });
+
+    // if (content.currentSongData) {
+    //   const title = `Listening to '${content.currentSongData.title}'`;
+    //   const artists = `By ${content.currentSongData.artists?.map((artist) => artist.name).join(', ') || 'an unknown artist'}`;
+    //   console.log(title, artists);
+
+    //   const now = Date.now();
+    //   window.api.playerControls.setDiscordRpcActivity({
+    //     details: title,
+    //     state: artists,
+    //     largeImageKey: 'nora_logo',
+    //     smallImageKey: 'song_artwork'
+    //     // largeImageText: 'Nora',
+    //     // smallImageText: 'Playing a song'
+    //     // startTimestamp: now,
+    //     // endTimestamp: now + (player.duration || 0) - (player.currentTime || 0)
+    //   });
+    // }
+
     const handleSkipForwardClickWithParams = () => handleSkipForwardClick('PLAYER_SKIP');
 
     navigator.mediaSession.setActionHandler('pause', () => toggleSongPlayback(false));

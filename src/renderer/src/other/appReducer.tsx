@@ -381,6 +381,7 @@ export const DEFAULT_REDUCER_DATA: AppReducer = {
   },
   notificationPanelData: {
     notifications: []
+    // notificationsMap: new Map()
   },
   promptMenuNavigationData: {
     isVisible: false,

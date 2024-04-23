@@ -390,7 +390,7 @@ const ArtistInfoPage = () => {
       ref={songsContainerRef}
     >
       <div className="artist-img-and-info-container relative mb-12 flex flex-row items-center pl-8 [&>*]:z-10">
-        <div className="artist-img-container relative mr-10 max-h-60 lg:hidden">
+        <div className="artist-img-container relative mr-10 flex max-h-60 items-center justify-center lg:hidden">
           <Img
             src={artistData?.onlineArtworkPaths?.picture_medium}
             fallbackSrc={artistData?.artworkPaths?.artworkPath}
@@ -424,7 +424,7 @@ const ArtistInfoPage = () => {
             }
           />
           <Button
-            className="absolute bottom-4 right-2 !m-0 flex rounded-full !border-0 bg-background-color-1 !p-3 shadow-xl outline-1 -outline-offset-[6px] focus-visible:!outline dark:bg-dark-background-color-2"
+            className="absolute -bottom-5 !m-0 flex rounded-full !border-0 bg-background-color-1 !p-3 text-font-color-highlight shadow-xl outline-1 -outline-offset-[6px] hover:bg-background-color-1 focus-visible:!outline dark:bg-dark-background-color-2 dark:hover:bg-dark-background-color-2"
             tooltipLabel={t(
               `artistInfoPage.${artistData?.isAFavorite ? `dislikeArtist` : `likeArtist`}`,
               {
@@ -432,10 +432,10 @@ const ArtistInfoPage = () => {
               }
             )}
             iconName="favorite"
-            iconClassName={`!text-3xl !leading-none ${
+            iconClassName={`!text-4xl !leading-none ${
               artistData?.isAFavorite
-                ? 'material-icons-round text-font-color-crimson'
-                : 'material-icons-round material-icons-round-outlined !font-medium text-font-color-black/60 dark:text-font-color-white/60'
+                ? 'material-icons-round'
+                : 'material-icons-round material-icons-round-outlined'
             }`}
             clickHandler={() => {
               if (artistData)
@@ -662,12 +662,14 @@ const ArtistInfoPage = () => {
                   isVisible: songs.length > 5 && !isAllSongsVisible
                 }
               ]}
-              dropdown={{
-                name: 'ArtistInfoPageSongsSortDropdown',
-                value: sortingOrder,
-                options: songSortOptions,
-                onChange: (e) => setSortingOrder(e.currentTarget.value as SongSortTypes)
-              }}
+              dropdowns={[
+                {
+                  name: 'ArtistInfoPageSongsSortDropdown',
+                  value: sortingOrder,
+                  options: songSortOptions,
+                  onChange: (e) => setSortingOrder(e.currentTarget.value as SongSortTypes)
+                }
+              ]}
             />
             <div className="songs-container">
               {isAllSongsVisible ? (

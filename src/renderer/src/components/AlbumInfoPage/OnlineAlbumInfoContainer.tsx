@@ -2,9 +2,9 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import Biography from '../Biography/Biography';
-import { LastFMAlbumInfo } from '../../../@types/last_fm_album_info_api';
 import TitleContainer from '../TitleContainer';
 import UnAvailableTrack from '../SongInfoPage/UnAvailableTrack';
+import { LastFMAlbumInfo } from 'src/@types/last_fm_album_info_api';
 
 type Props = {
   albumTitle: string;

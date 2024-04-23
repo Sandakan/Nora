@@ -5,15 +5,24 @@ import log from '../log';
 import sortSongs from '../utils/sortSongs';
 import paginateData from '../utils/paginateData';
 import { getSelectedPaletteData } from '../other/generatePalette';
+import filterSongs from '../utils/filterSongs';
 
-const getAllSongs = async (sortType = 'aToZ' as SongSortTypes, paginatingData?: PaginatingData) => {
+const getAllSongs = async (
+  sortType = 'aToZ' as SongSortTypes,
+  filterType?: SongFilterTypes,
+  paginatingData?: PaginatingData
+) => {
   const songsData = getSongsData();
   const listeningData = getListeningData();
 
   let result = paginateData([] as AudioInfo[], sortType, paginatingData);
 
   if (songsData && songsData.length > 0) {
-    const audioData: AudioInfo[] = sortSongs(songsData, sortType, listeningData).map((songInfo) => {
+    const audioData: AudioInfo[] = sortSongs(
+      filterSongs(songsData, filterType),
+      sortType,
+      listeningData
+    ).map((songInfo) => {
       const isBlacklisted = isSongBlacklisted(songInfo.songId, songInfo.path);
 
       return {

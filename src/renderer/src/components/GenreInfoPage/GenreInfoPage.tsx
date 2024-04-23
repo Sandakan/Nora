@@ -13,7 +13,7 @@ import MainContainer from '../MainContainer';
 import Song from '../SongsPage/Song';
 import TitleContainer from '../TitleContainer';
 import GenreImgAndInfoContainer from './GenreImgAndInfoContainer';
-import { songSortOptions } from '../SongsPage/SongsPage';
+import { songFilterOptions, songSortOptions } from '../SongsPage/SongsPage';
 
 const GenreInfoPage = () => {
   const { currentlyActivePage, queue, localStorageData } = React.useContext(AppContext);
@@ -29,6 +29,7 @@ const GenreInfoPage = () => {
   const [genreData, setGenreData] = React.useState<Genre>();
   const [genreSongs, setGenreSongs] = React.useState<AudioInfo[]>([]);
   const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>('aToZ');
+  const [filteringOrder, setFilteringOrder] = React.useState<SongFilterTypes>('notSelected');
   const songsContainerRef = React.useRef<HTMLDivElement>(null);
   const { width, height } = useResizeObserver(songsContainerRef);
 
@@ -49,7 +50,8 @@ const GenreInfoPage = () => {
       window.api.audioLibraryControls
         .getSongInfo(
           genreData.songs.map((song) => song.songId),
-          sortingOrder
+          sortingOrder,
+          filteringOrder
         )
         .then((res) => {
           if (res) return setGenreSongs(res);
@@ -58,7 +60,7 @@ const GenreInfoPage = () => {
         .catch((err) => console.error(err));
     }
     return undefined;
-  }, [genreData, sortingOrder]);
+  }, [filteringOrder, genreData, sortingOrder]);
 
   React.useEffect(() => {
     fetchGenresData();
@@ -224,20 +226,36 @@ const GenreInfoPage = () => {
             isDisabled: !(genreData && genreSongs.length > 0)
           }
         ]}
-        dropdown={{
-          name: 'songsPageSortDropdown',
-          value: sortingOrder,
-          options: songSortOptions,
-          onChange: (e) => {
-            const order = e.currentTarget.value as SongSortTypes;
-            updateCurrentlyActivePageData((currentPageData) => ({
-              ...currentPageData,
-              sortingOrder: order
-            }));
-            setSortingOrder(order);
+        dropdowns={[
+          {
+            name: 'songsPageFilterDropdown',
+            type: 'Filter By :',
+            value: filteringOrder,
+            options: songFilterOptions,
+            onChange: (e) => {
+              updateCurrentlyActivePageData((currentPageData) => ({
+                ...currentPageData,
+                filteringOrder: e.currentTarget.value as SongFilterTypes
+              }));
+              setFilteringOrder(e.currentTarget.value as SongFilterTypes);
+            }
           },
-          isDisabled: !(genreData && genreSongs.length > 0)
-        }}
+          {
+            name: 'songsPageSortDropdown',
+            type: 'Sort By :',
+            value: sortingOrder,
+            options: songSortOptions,
+            onChange: (e) => {
+              const order = e.currentTarget.value as SongSortTypes;
+              updateCurrentlyActivePageData((currentPageData) => ({
+                ...currentPageData,
+                sortingOrder: order
+              }));
+              setSortingOrder(order);
+            },
+            isDisabled: !(genreData && genreSongs.length > 0)
+          }
+        ]}
       />
       <div className="flex h-full flex-col">
         <div className="songs-list-container h-full" ref={songsContainerRef}>

@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/no-autofocus */
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -338,8 +339,12 @@ const LyricsEditingPage = () => {
     >
       {!isTheEditingSongTheCurrSong && (
         <div className="absolute z-10 flex h-full w-full flex-col items-center justify-center bg-background-color-1/25 pr-8 dark:bg-dark-background-color-1/25">
-          <span className="material-icons-round-outlined text-5xl">error</span>
-          <p className="mt-2 text-3xl font-medium">{t('lyricsEditingPage.incorrectSongTitle')}</p>
+          <span className="material-icons-round-outlined text-5xl text-font-color-highlight dark:text-dark-font-color-highlight">
+            error
+          </span>
+          <p className="mt-2 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+            {t('lyricsEditingPage.incorrectSongTitle')}
+          </p>
           <p>{t('lyricsEditingPage.incorrectSongMessage', { title: songTitle })}</p>
           <Button
             label={t('common.play')}

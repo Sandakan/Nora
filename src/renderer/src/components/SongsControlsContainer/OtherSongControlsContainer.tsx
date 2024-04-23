@@ -70,9 +70,10 @@ const OtherSongControlsContainer = () => {
         }`}
         tooltipLabel={t('player.currentQueue')}
         iconName="table_rows"
-        iconClassName={`material-icons-round-outlined text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white ${
-          currentlyActivePage.pageTitle === 'CurrentQueue' &&
-          '!text-font-color-highlight !opacity-90 dark:!text-dark-font-color-highlight'
+        iconClassName={`text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white ${
+          currentlyActivePage.pageTitle === 'CurrentQueue'
+            ? '!text-font-color-highlight font-medium !opacity-90 dark:!text-dark-font-color-highlight material-icons-round'
+            : 'material-icons-round-outlined'
         } `}
         clickHandler={() =>
           currentlyActivePage.pageTitle === 'CurrentQueue'
@@ -90,7 +91,7 @@ const OtherSongControlsContainer = () => {
       />
 
       <Button
-        className="queue-btn !mr-6 !rounded-none !border-0 bg-transparent !p-0 text-font-color-black text-opacity-60 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:!outline lg:hidden dark:bg-transparent dark:text-font-color-white dark:after:bg-dark-font-color-highlight dark:hover:bg-transparent"
+        className="full-screen-player-btn !mr-6 !rounded-none !border-0 bg-transparent !p-0 text-font-color-black text-opacity-60 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:!outline lg:hidden dark:bg-transparent dark:text-font-color-white dark:after:bg-dark-font-color-highlight dark:hover:bg-transparent"
         tooltipLabel={t('player.openInFullScreen')}
         iconName="fullscreen"
         iconClassName="material-icons-round-outlined text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"

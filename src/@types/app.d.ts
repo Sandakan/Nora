@@ -7,6 +7,7 @@ import { LastFMSessionData } from './last_fm_api';
 import { SimilarArtist, Tag } from './last_fm_artist_info_api';
 import { ElectronAPI } from '@electron-toolkit/preload';
 import { resources } from 'src/renderer/src/i18n';
+import { Presence } from 'discord-rpc-revamp';
 
 declare global {
   interface Window {
@@ -260,6 +261,7 @@ declare global {
     lang?: string;
     copyright?: string;
     isOfflineLyricsAvailable: boolean;
+    isTranslated: boolean;
   }
 
   export type SyncedLyricsLineText = {
@@ -862,6 +864,7 @@ declare global {
 
   interface NotificationPanelData {
     notifications: AppNotification[];
+    // notificationsMap: Map<string, AppNotification>;
   }
 
   type NotificationTypes = 'DEFAULT' | 'WITH_PROGRESS_BAR';
@@ -949,6 +952,8 @@ declare global {
     | 'sortingStates.artistsPage'
     | 'sortingStates.genresPage';
 
+  type SongFilterTypes = 'notSelected' | 'blacklistedSongs' | 'whitelistedSongs';
+
   type SongSortTypes =
     | 'aToZ'
     | 'zToA'
@@ -970,6 +975,8 @@ declare global {
     | 'albumNameDescending'
     | 'blacklistedSongs'
     | 'whitelistedSongs';
+
+  type ArtistFilterTypes = 'notSelected' | 'favorites';
 
   type ArtistSortTypes =
     | 'aToZ'
@@ -1212,5 +1219,18 @@ declare global {
     lyrics?: string;
     source: SongMetadataSource;
     sourceId: string;
+  }
+
+  type ArtAssetKeys =
+    | 'nora_logo'
+    | 'song_artwork'
+    | 'album_artwork'
+    | 'favorites_artwork'
+    | 'genre_artwork'
+    | 'playlist_artwork';
+
+  interface DiscordRpcActivityOptions extends Presence {
+    largeImageKey?: ArtAssetKeys;
+    smallImageKey?: ArtAssetKeys;
   }
 }

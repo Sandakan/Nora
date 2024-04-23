@@ -57,7 +57,7 @@ const Genre = (props: GenreProp) => {
   const playGenreSongs = React.useCallback(
     (isShuffle = false) => {
       return window.api.audioLibraryControls
-        .getSongInfo(songIds, undefined, undefined, true)
+        .getSongInfo(songIds, undefined, undefined, undefined, true)
         .then((songs) => {
           if (Array.isArray(songs))
             return createQueue(
@@ -86,6 +86,7 @@ const Genre = (props: GenreProp) => {
 
             return window.api.audioLibraryControls.getSongInfo(
               genreSongIds,
+              undefined,
               undefined,
               undefined,
               true
@@ -119,6 +120,7 @@ const Genre = (props: GenreProp) => {
 
           return window.api.audioLibraryControls.getSongInfo(
             genreSongIds,
+            undefined,
             undefined,
             undefined,
             true
