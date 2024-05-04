@@ -13,7 +13,7 @@ import MainContainer from '../MainContainer';
 import Song from '../SongsPage/Song';
 import TitleContainer from '../TitleContainer';
 import GenreImgAndInfoContainer from './GenreImgAndInfoContainer';
-import { songFilterOptions, songSortOptions } from '../SongsPage/SongsPage';
+import { songSortOptions, songFilterOptions } from '../SongsPage/SongOptions';
 
 const GenreInfoPage = () => {
   const { currentlyActivePage, queue, localStorageData } = React.useContext(AppContext);

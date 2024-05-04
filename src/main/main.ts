@@ -24,6 +24,7 @@ import {
   powerSaveBlocker,
   screen,
   Display
+  // session
 } from 'electron';
 import debug from 'electron-debug';
 // import { pathToFileURL } from 'url';
@@ -141,20 +142,22 @@ const APP_INFO = {
 log(`STARTING UP NORA`, APP_INFO, 'WARN');
 
 const installExtensions = async () => {
-  const installer = require('electron-devtools-installer');
-  const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
-  const extensions = ['REACT_DEVELOPER_TOOLS'];
-
-  return installer
-    .default(
-      extensions.map((name) => installer[name]),
-      forceDownload
-    )
-    .catch((err: unknown) =>
-      log(
-        `====== ERROR OCCURRED WHEN TRYING TO INSTALL EXTENSIONS TO DEVTOOLS ======\nERROR : ${err}`
-      )
+  try {
+    const { default: installExtension, REACT_DEVELOPER_TOOLS } = await import(
+      'electron-devtools-installer'
     );
+    const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
+
+    const ext = await installExtension(REACT_DEVELOPER_TOOLS, {
+      loadExtensionOptions: { allowFileAccess: true },
+      forceDownload
+    });
+    log(`Added Extension: ${ext}`);
+  } catch (error) {
+    log(
+      `====== ERROR OCCURRED WHEN TRYING TO INSTALL EXTENSIONS TO DEVTOOLS ======\nERROR : ${error}`
+    );
+  }
 };
 
 const getBackgroundColor = () => {
@@ -164,7 +167,7 @@ const getBackgroundColor = () => {
 };
 
 const createWindow = async () => {
-  if (IS_DEVELOPMENT) installExtensions();
+  if (IS_DEVELOPMENT) await installExtensions();
 
   mainWindow = new BrowserWindow({
     width: 1280,
@@ -224,10 +227,10 @@ const createWindow = async () => {
 
 app
   .whenReady()
-  .then(() => {
+  .then(async () => {
     const userData = getUserData();
 
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (BrowserWindow.getAllWindows().length === 0) await createWindow();
 
     if (userData.windowState === 'maximized') mainWindow.maximize();
 

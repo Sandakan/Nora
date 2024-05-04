@@ -14,7 +14,7 @@ import MainContainer from '../MainContainer';
 
 import PlaylistInfoAndImgContainer from './PlaylistInfoAndImgContainer';
 import TitleContainer from '../TitleContainer';
-import { songFilterOptions, songSortOptions } from '../SongsPage/SongsPage';
+import { songSortOptions, songFilterOptions } from '../SongsPage/SongOptions';
 
 const PlaylistInfoPage = () => {
   const { currentlyActivePage, queue, localStorageData } = useContext(AppContext);

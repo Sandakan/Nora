@@ -21,7 +21,7 @@ import DuplicateArtistsSuggestion from './DuplicateArtistsSuggestion';
 import TitleContainer from '../TitleContainer';
 import SimilarArtistsContainer from './SimilarArtistsContainer';
 import Biography from '../Biography/Biography';
-import { songSortOptions } from '../SongsPage/SongsPage';
+import { songSortOptions } from '../SongsPage/SongOptions';
 
 const ArtistInfoPage = () => {
   const {

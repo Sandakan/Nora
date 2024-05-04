@@ -1,25 +1,26 @@
 /* eslint-disable import/prefer-default-export */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FixedSizeList as List } from 'react-window';
+// import { FixedSizeList as List } from 'react-window';
+import { Virtuoso } from 'react-virtuoso';
 // import InfiniteLoader from 'react-window-infinite-loader';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import storage from '../../utils/localStorage';
 import debounce from '../../utils/debounce';
-import i18n from '../../i18n';
 
 import Song from './Song';
 import Button from '../Button';
 import MainContainer from '../MainContainer';
-import Dropdown, { DropdownOption } from '../Dropdown';
+import Dropdown from '../Dropdown';
 import useResizeObserver from '../../hooks/useResizeObserver';
 import Img from '../Img';
 
 import NoSongsImage from '../../assets/images/svg/Empty Inbox _Monochromatic.svg';
 import DataFetchingImage from '../../assets/images/svg/Road trip_Monochromatic.svg';
 import AddMusicFoldersPrompt from '../MusicFoldersPage/AddMusicFoldersPrompt';
+import { songSortOptions, songFilterOptions } from './SongOptions';
 
 interface SongPageReducer {
   songsData: AudioInfo[];
@@ -28,73 +29,6 @@ interface SongPageReducer {
 }
 
 type SongPageReducerActionTypes = 'SONGS_DATA' | 'SORTING_ORDER' | 'FILTERING_ORDER';
-
-export const songFilterOptions: DropdownOption<SongFilterTypes>[] = [
-  { label: 'Not Selected', value: 'notSelected' },
-  { label: i18n.t('sortTypes.blacklistedSongs'), value: 'blacklistedSongs' },
-  {
-    label: i18n.t('sortTypes.whitelistedSongs'),
-    value: 'whitelistedSongs'
-  }
-];
-
-export const songSortOptions: DropdownOption<SongSortTypes>[] = [
-  { label: i18n.t('sortTypes.aToZ'), value: 'aToZ' },
-  { label: i18n.t('sortTypes.zToA'), value: 'zToA' },
-  {
-    label: i18n.t('sortTypes.dateAddedAscending'),
-    value: 'dateAddedAscending'
-  },
-  {
-    label: i18n.t('sortTypes.dateAddedDescending'),
-    value: 'dateAddedDescending'
-  },
-  {
-    label: i18n.t('sortTypes.releasedYearAscending'),
-    value: 'releasedYearAscending'
-  },
-  {
-    label: i18n.t('sortTypes.releasedYearDescending'),
-    value: 'releasedYearDescending'
-  },
-  {
-    label: i18n.t('sortTypes.allTimeMostListened'),
-    value: 'allTimeMostListened'
-  },
-  {
-    label: i18n.t('sortTypes.allTimeLeastListened'),
-    value: 'allTimeLeastListened'
-  },
-  {
-    label: i18n.t('sortTypes.monthlyMostListened'),
-    value: 'monthlyMostListened'
-  },
-  {
-    label: i18n.t('sortTypes.monthlyLeastListened'),
-    value: 'monthlyLeastListened'
-  },
-  {
-    label: i18n.t('sortTypes.artistNameAscending'),
-    value: 'artistNameAscending'
-  },
-  {
-    label: i18n.t('sortTypes.artistNameDescending'),
-    value: 'artistNameDescending'
-  },
-  {
-    label: i18n.t('sortTypes.albumNameAscending'),
-    value: 'albumNameAscending'
-  },
-  {
-    label: i18n.t('sortTypes.albumNameDescending'),
-    value: 'albumNameDescending'
-  },
-  { label: i18n.t('sortTypes.blacklistedSongs'), value: 'blacklistedSongs' },
-  {
-    label: i18n.t('sortTypes.whitelistedSongs'),
-    value: 'whitelistedSongs'
-  }
-];
 
 const reducer = (
   state: SongPageReducer,
@@ -263,51 +197,51 @@ const SongsPage = () => {
     [content.songsData, createQueue, playSong]
   );
 
-  const songs = React.useCallback(
-    (props: { index: number; style: React.CSSProperties }) => {
-      const { index, style } = props;
-      const {
-        songId,
-        title,
-        artists,
-        album,
-        duration,
-        isAFavorite,
-        artworkPaths,
-        year,
-        path,
-        isBlacklisted
-      } = content.songsData[index];
+  // const songs = React.useCallback(
+  //   (props: { index: number; style: React.CSSProperties }) => {
+  //     const { index, style } = props;
+  //     const {
+  //       songId,
+  //       title,
+  //       artists,
+  //       album,
+  //       duration,
+  //       isAFavorite,
+  //       artworkPaths,
+  //       year,
+  //       path,
+  //       isBlacklisted
+  //     } = content.songsData[index];
 
-      return (
-        <div style={style}>
-          <Song
-            key={index}
-            index={index}
-            isIndexingSongs={localStorageData?.preferences.isSongIndexingEnabled}
-            title={title}
-            songId={songId}
-            artists={artists}
-            album={album}
-            artworkPaths={artworkPaths}
-            duration={duration}
-            year={year}
-            path={path}
-            isAFavorite={isAFavorite}
-            isBlacklisted={isBlacklisted}
-            onPlayClick={handleSongPlayBtnClick}
-            selectAllHandler={selectAllHandler}
-          />
-        </div>
-      );
-    },
-    [
-      content.songsData,
-      handleSongPlayBtnClick,
-      localStorageData?.preferences.isSongIndexingEnabled,
-      selectAllHandler
-    ]
-  );
+  //     return (
+  //       <div style={style}>
+  //         <Song
+  //           key={index}
+  //           index={index}
+  //           isIndexingSongs={localStorageData?.preferences.isSongIndexingEnabled}
+  //           title={title}
+  //           songId={songId}
+  //           artists={artists}
+  //           album={album}
+  //           artworkPaths={artworkPaths}
+  //           duration={duration}
+  //           year={year}
+  //           path={path}
+  //           isAFavorite={isAFavorite}
+  //           isBlacklisted={isBlacklisted}
+  //           onPlayClick={handleSongPlayBtnClick}
+  //           selectAllHandler={selectAllHandler}
+  //         />
+  //       </div>
+  //     );
+  //   },
+  //   [
+  //     content.songsData,
+  //     handleSongPlayBtnClick,
+  //     localStorageData?.preferences.isSongIndexingEnabled,
+  //     selectAllHandler
+  //   ]
+  // );
 
   return (
     <MainContainer
@@ -504,28 +438,49 @@ const SongsPage = () => {
             )}
           </InfiniteLoader> */}
           {content.songsData && content.songsData.length > 0 && (
-            <List
-              itemCount={content.songsData.length}
-              itemSize={60}
-              width={width || '100%'}
-              height={height || 450}
-              overscanCount={10}
-              className="appear-from-bottom delay-100 [scrollbar-gutter:stable]"
-              initialScrollOffset={currentlyActivePage.data?.scrollTopOffset ?? 0}
-              onScroll={(data) => {
-                if (!data.scrollUpdateWasRequested && data.scrollOffset !== 0)
-                  debounce(
-                    () =>
-                      updateCurrentlyActivePageData((currentPageData) => ({
-                        ...currentPageData,
-                        scrollTopOffset: data.scrollOffset
-                      })),
-                    500
-                  );
+            <Virtuoso
+              style={{
+                height: `${height || 450}px`,
+                width: `${width}px` || '100%',
+                paddingBottom: '2rem'
               }}
-            >
-              {songs}
-            </List>
+              // className="pb-4"
+              totalCount={content.songsData.length}
+              data={content.songsData}
+              atBottomThreshold={20}
+              fixedItemHeight={60}
+              initialTopMostItemIndex={{ index: currentlyActivePage.data?.scrollTopOffset ?? 0 }}
+              increaseViewportBy={{
+                top: 60 * 5, // to overscan 5 elements
+                bottom: 60 * 5 // to overscan 5 elements
+              }}
+              rangeChanged={(range) => {
+                console.log(range);
+                // if (range.startIndex > 10)
+                debounce(
+                  () =>
+                    updateCurrentlyActivePageData((currentPageData) => ({
+                      ...currentPageData,
+                      scrollTopOffset: range.startIndex <= 5 ? 0 : range.startIndex + 5
+                    })),
+                  500
+                );
+              }}
+              itemContent={(index, song) => {
+                if (song)
+                  return (
+                    <Song
+                      key={index}
+                      index={index}
+                      isIndexingSongs={localStorageData?.preferences.isSongIndexingEnabled}
+                      onPlayClick={handleSongPlayBtnClick}
+                      selectAllHandler={selectAllHandler}
+                      {...song}
+                    />
+                  );
+                return <div>Bad Index</div>;
+              }}
+            />
           )}
         </div>
         {content.songsData && content.songsData.length === 0 && (

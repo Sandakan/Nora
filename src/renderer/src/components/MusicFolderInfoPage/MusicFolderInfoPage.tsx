@@ -11,7 +11,7 @@ import Button from '../Button';
 import Dropdown from '../Dropdown';
 import MainContainer from '../MainContainer';
 import Song from '../SongsPage/Song';
-import { songFilterOptions, songSortOptions } from '../SongsPage/SongsPage';
+import { songSortOptions, songFilterOptions } from '../SongsPage/SongOptions';
 
 const MusicFolderInfoPage = () => {
   const {

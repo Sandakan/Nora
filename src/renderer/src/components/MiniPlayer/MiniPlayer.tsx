@@ -87,12 +87,12 @@ export default function MiniPlayer(props: MiniPlayerProps) {
       >
         <TitleBarContainer isLyricsVisible={isLyricsVisible} />
         <div
-          className={`song-controls-container delay-50 absolute left-1/2 top-[45%] flex h-fit -translate-x-1/2 -translate-y-1/2 items-center justify-center  bg-[transparent] shadow-none transition-[visibility,opacity] dark:bg-[transparent] ${
+          className={`song-controls-container delay-50 absolute left-1/2 top-[45%] flex h-fit -translate-x-1/2 -translate-y-1/2 items-center justify-center  !bg-[transparent] shadow-none transition-[visibility,opacity] dark:!bg-[transparent] ${
             !isCurrentSongPlaying ? 'visible opacity-100' : 'invisible opacity-0'
           }`}
         >
           <Button
-            className={`favorite-btn !m-0 h-fit -translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white dark:after:bg-dark-font-color-highlight ${
+            className={`favorite-btn !m-0 h-fit -translate-x-4 cursor-pointer !rounded-none !border-0 !bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:!bg-[transparent] dark:text-font-color-white dark:after:bg-dark-font-color-highlight ${
               currentSongData.isAFavorite && 'after:opacity-100'
             }`}
             iconClassName={`!text-xl ${
@@ -113,7 +113,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             removeFocusOnClick
           />
           <Button
-            className="skip-backward-btn !mr-0 ml-4 h-fit -translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
+            className="skip-backward-btn !mr-0 ml-4 h-fit -translate-x-4 cursor-pointer !rounded-none !border-0 !bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:!bg-[transparent] dark:text-font-color-white"
             tooltipLabel={t('player.prevSong')}
             iconClassName="!text-3xl"
             clickHandler={handleSkipBackwardClick}
@@ -121,7 +121,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             removeFocusOnClick
           />
           <Button
-            className="play-pause-btn !mx-2 h-fit scale-90 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-6xl text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
+            className="play-pause-btn !mx-2 h-fit scale-90 cursor-pointer !rounded-none !border-0 !bg-[transparent] !p-0 text-6xl text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:!bg-[transparent] dark:text-font-color-white"
             tooltipLabel={t('player.playPause')}
             iconClassName="!text-5xl"
             clickHandler={toggleSongPlayback}
@@ -129,7 +129,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             removeFocusOnClick
           />
           <Button
-            className="skip-backward-btn !mr-4 h-fit translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white"
+            className="skip-backward-btn !mr-4 h-fit translate-x-4 cursor-pointer !rounded-none !border-0 !bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform focus-visible:!outline dark:!bg-[transparent] dark:text-font-color-white"
             tooltipLabel={t('player.nextSong')}
             iconClassName="!text-3xl"
             clickHandler={handleSkipForwardClickWithParams}
@@ -137,7 +137,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             removeFocusOnClick
           />
           <Button
-            className={`lyrics-btn !m-0 h-fit translate-x-4 cursor-pointer !rounded-none !border-0 bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:bg-[transparent] dark:text-font-color-white dark:after:bg-dark-font-color-highlight ${
+            className={`lyrics-btn !m-0 h-fit translate-x-4 cursor-pointer !rounded-none !border-0 !bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:!bg-[transparent] dark:text-font-color-white dark:after:bg-dark-font-color-highlight ${
               isLyricsVisible && '!text-dark-background-color-3 after:opacity-100'
             }`}
             iconClassName="!text-xl"
@@ -195,7 +195,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
             <VolumeSlider
               name="mini-player-volume-slider"
               id="volumeSlider"
-              className="relative float-left m-0 h-6 w-full appearance-none bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--volume-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
+              className="relative float-left m-0 h-6 w-full appearance-none !bg-[transparent] p-0 outline-none outline-1 outline-offset-1 before:absolute before:left-0 before:top-1/2 before:h-1 before:w-[var(--volume-before-width)] before:-translate-y-1/2 before:cursor-pointer before:rounded-3xl before:bg-font-color-black/50 before:transition-[width,background] before:content-[''] hover:before:bg-font-color-highlight focus-visible:!outline dark:before:bg-font-color-white/50 dark:hover:before:bg-dark-font-color-highlight"
             />
           </div>
         </div>

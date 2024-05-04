@@ -1,4 +1,5 @@
 module.exports = {
+  plugins: ['react-refresh'],
   extends: [
     'eslint:recommended',
     'plugin:react/recommended',
@@ -11,6 +12,7 @@ module.exports = {
     'plugin:promise/recommended'
   ],
   rules: {
+    'react-refresh/only-export-components': 'warn',
     '@typescript-eslint/explicit-function-return-type': 'off',
     'import/no-unresolved': 'off',
     '@typescript-eslint/no-explicit-any': 'off',

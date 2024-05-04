@@ -808,13 +808,27 @@ export default function App() {
   const setDynamicThemesFromSongPalette = React.useCallback((palette?: NodeVibrantPalette) => {
     const manageBrightness = (
       values: [number, number, number],
-      min = 0.9
-      // max = 1
+      range?: { min?: number; max?: number }
     ): [number, number, number] => {
+      const max = range?.max || 1;
+      const min = range?.min || 0.9;
+
       const [h, s, l] = values;
 
-      const updatedL = l >= min ? l : min;
+      const updatedL = l >= min ? (l <= max ? l : max) : min;
       return [h, s, updatedL];
+    };
+    const manageSaturation = (
+      values: [number, number, number],
+      range?: { min?: number; max?: number }
+    ): [number, number, number] => {
+      const max = range?.max || 1;
+      const min = range?.min || 0.9;
+
+      const [h, s, l] = values;
+
+      const updatedS = s >= min ? (s <= max ? s : max) : min;
+      return [h, updatedS, l];
     };
 
     const generateColor = (values: [number, number, number]) => {
@@ -862,16 +876,25 @@ export default function App() {
         ) {
           const highLightVibrant = generateColor(manageBrightness(palette.LightVibrant.hsl));
           const mediumLightVibrant = generateColor(
-            manageBrightness(palette.LightVibrant.hsl, 0.75)
+            manageBrightness(palette.LightVibrant.hsl, { min: 0.75 })
           );
-          const highVibrant = generateColor(manageBrightness(palette.Vibrant.hsl, 0.7));
+          const darkLightVibrant = generateColor(
+            manageSaturation(
+              manageBrightness(palette.LightVibrant.hsl, {
+                max: 0.2,
+                min: 0.2
+              }),
+              { max: 0.05, min: 0.05 }
+            )
+          );
+          const highVibrant = generateColor(manageBrightness(palette.Vibrant.hsl, { min: 0.7 }));
 
           const lightVibrant = generateColor(palette.LightVibrant.hsl);
           const darkVibrant = generateColor(palette.DarkVibrant.hsl);
-          const lightMuted = generateColor(palette.LightMuted.hsl);
-          const darkMuted = generateColor(palette.DarkMuted.hsl);
-          const vibrant = generateColor(palette.Vibrant.hsl);
-          const muted = generateColor(palette.Muted.hsl);
+          // const lightMuted = generateColor(palette.LightMuted.hsl);
+          // const darkMuted = generateColor(palette.DarkMuted.hsl);
+          // const vibrant = generateColor(palette.Vibrant.hsl);
+          // const muted = generateColor(palette.Muted.hsl);
 
           root.style.setProperty('--side-bar-background', highLightVibrant, 'important');
           root.style.setProperty('--background-color-2', highLightVibrant, 'important');
@@ -879,7 +902,7 @@ export default function App() {
           root.style.setProperty('--context-menu-list-hover', highLightVibrant, 'important');
           root.style.setProperty('--dark-context-menu-list-hover', highLightVibrant, 'important');
 
-          // root.style.setProperty('--dark-background-color-2', lightVibrant, 'important');
+          root.style.setProperty('--dark-background-color-2', darkLightVibrant, 'important');
 
           root.style.setProperty('--background-color-3', highVibrant, 'important');
           root.style.setProperty('--dark-background-color-3', lightVibrant, 'important');

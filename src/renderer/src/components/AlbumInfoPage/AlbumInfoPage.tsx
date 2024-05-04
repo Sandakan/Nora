@@ -14,7 +14,7 @@ import Song from '../SongsPage/Song';
 import TitleContainer from '../TitleContainer';
 import AlbumImgAndInfoContainer from './AlbumImgAndInfoContainer';
 import OnlineAlbumInfoContainer from './OnlineAlbumInfoContainer';
-import { songSortOptions } from '../SongsPage/SongsPage';
+import { songSortOptions } from '../SongsPage/SongOptions';
 import { LastFMAlbumInfo } from 'src/@types/last_fm_album_info_api';
 
 interface AlbumContentReducer {

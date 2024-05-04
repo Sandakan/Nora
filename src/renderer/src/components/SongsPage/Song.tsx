@@ -587,7 +587,15 @@ const Song = React.forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement
           </div>
         ) : isBlacklisted ? (
           <div
-            className="relative flex h-full items-center justify-center"
+            className={`relative mr-2 flex h-full items-center justify-center ${
+              index < 10
+                ? 'min-w-[1.75rem]'
+                : index < 100
+                  ? 'min-w-[2.5rem]'
+                  : index < 1000
+                    ? 'min-w-[3rem]'
+                    : 'min-w-[3.75rem]'
+            }`}
             title={t('notifications.songBlacklisted', { title })}
           >
             <span
@@ -619,7 +627,7 @@ const Song = React.forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement
           ''
         )}
         <div
-          className={`song-cover-container relative ml-2 mr-4 flex h-[90%] flex-row items-center justify-center overflow-hidden rounded-md ${
+          className={`song-cover-container relative ml-2 mr-4 flex h-[90%] min-w-12 flex-row items-center justify-center overflow-hidden rounded-md ${
             (isIndexingSongs || isMultipleSelectionEnabled || isBlacklisted) && 'sm:hidden'
           }`}
         >
@@ -639,10 +647,10 @@ const Song = React.forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement
             src={artworkPaths?.optimizedArtworkPath || DefaultSongCover}
             loading="eager"
             alt="Song cover"
-            className={`aspect-square max-h-full object-contain py-[0.1rem] transition-[filter] duration-300 group-focus-within:brightness-50 group-hover:brightness-50 ${
+            className={`aspect-square max-h-full min-w-full object-contain py-[0.1rem] transition-[filter] duration-300 group-focus-within:brightness-50 group-hover:brightness-50 ${
               isSongPlaying ? 'brightness-50' : ''
             }`}
-            enableImgFadeIns={!isMultipleSelectionEnabled}
+            enableImgFadeIns={false}
           />
         </div>
       </div>
