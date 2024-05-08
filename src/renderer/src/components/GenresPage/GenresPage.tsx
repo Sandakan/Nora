@@ -2,10 +2,8 @@
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable react/no-array-index-key */
-import React, { CSSProperties } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FixedSizeGrid as Grid } from 'react-window';
-import useResizeObserver from '../../hooks/useResizeObserver';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
@@ -19,6 +17,7 @@ import Img from '../Img';
 import Button from '../Button';
 
 import NoSongsImage from '../../assets/images/svg/Summer landscape_Monochromatic.svg';
+import VirtualizedGrid from '../VirtualizedGrid';
 
 const genreSortTypes: DropdownOption<GenreSortTypes>[] = [
   { label: i18n.t('sortTypes.aToZ'), value: 'aToZ' },
@@ -32,6 +31,8 @@ const genreSortTypes: DropdownOption<GenreSortTypes>[] = [
     value: 'noOfSongsAscending'
   }
 ];
+const MIN_ITEM_WIDTH = 320;
+const MIN_ITEM_HEIGHT = 180;
 
 const GenresPage = () => {
   const {
@@ -45,18 +46,9 @@ const GenresPage = () => {
   const { t } = useTranslation();
 
   const [genresData, setGenresData] = React.useState([] as Genre[] | null);
-  const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
   const [sortingOrder, setSortingOrder] = React.useState<GenreSortTypes>(
     currentlyActivePage?.data?.sortingOrder || localStorageData?.sortingStates?.genresPage || 'aToZ'
   );
-
-  const containerRef = React.useRef(null as HTMLDivElement | null);
-  const { height, width } = useResizeObserver(containerRef);
-  const MIN_ITEM_WIDTH = 320;
-  const MIN_ITEM_HEIGHT = 180;
-  const noOfColumns = Math.floor(width / MIN_ITEM_WIDTH);
-  const noOfRows = Math.ceil((genresData ? genresData.length : 1) / noOfColumns);
-  const itemWidth = MIN_ITEM_WIDTH + ((width % MIN_ITEM_WIDTH) - 10) / noOfColumns;
 
   const fetchGenresData = React.useCallback(() => {
     window.api.genresData
@@ -92,31 +84,6 @@ const GenresPage = () => {
   );
 
   const selectAllHandler = useSelectAllHandler(genresData as Genre[], 'genre', 'genreId');
-
-  const row = React.useCallback(
-    (props: { columnIndex: number; rowIndex: number; style: CSSProperties }) => {
-      const { columnIndex, rowIndex, style } = props;
-      const index = rowIndex * noOfColumns + columnIndex;
-      if (genresData && index < genresData.length) {
-        const { genreId, name, songs, paletteData, artworkPaths } = genresData[index];
-        return (
-          <div style={{ ...style, display: 'flex', justifyContent: 'center' }}>
-            <Genre
-              index={index}
-              artworkPaths={artworkPaths}
-              genreId={genreId}
-              title={name}
-              paletteData={paletteData}
-              songIds={songs.map((song) => song.songId)}
-              selectAllHandler={selectAllHandler}
-            />
-          </div>
-        );
-      }
-      return <div style={style} />;
-    },
-    [genresData, noOfColumns, selectAllHandler]
-  );
 
   return (
     <MainContainer
@@ -175,35 +142,25 @@ const GenresPage = () => {
         )}
         <div
           className={`genres-container flex h-full flex-wrap ${!(genresData && genresData.length > 0) && 'hidden'}`}
-          ref={containerRef}
         >
           {genresData && genresData.length > 0 && (
-            <Grid
-              className="appear-from-bottom delay-100 [scrollbar-gutter:stable]"
-              columnCount={noOfColumns || 3}
-              columnWidth={itemWidth}
-              rowCount={noOfRows || 3}
-              rowHeight={MIN_ITEM_HEIGHT}
-              height={height || 300}
-              width={width || 500}
-              overscanRowCount={2}
-              initialScrollTop={currentlyActivePage.data?.scrollTopOffset ?? 0}
-              onScroll={(data) => {
-                if (scrollOffsetTimeoutIdRef.current)
-                  clearTimeout(scrollOffsetTimeoutIdRef.current);
-                if (!data.scrollUpdateWasRequested && data.scrollTop !== 0)
-                  scrollOffsetTimeoutIdRef.current = setTimeout(
-                    () =>
-                      updateCurrentlyActivePageData((currentPageData) => ({
-                        ...currentPageData,
-                        scrollTopOffset: data.scrollTop
-                      })),
-                    500
-                  );
+            <VirtualizedGrid
+              data={genresData}
+              fixedItemWidth={MIN_ITEM_WIDTH}
+              fixedItemHeight={MIN_ITEM_HEIGHT}
+              scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
+              itemContent={(index, genre) => {
+                return (
+                  <Genre
+                    index={index}
+                    title={genre.name}
+                    songIds={genre.songs.map((song) => song.songId)}
+                    selectAllHandler={selectAllHandler}
+                    {...genre}
+                  />
+                );
               }}
-            >
-              {row}
-            </Grid>
+            />
           )}
         </div>
         {genresData === null && (

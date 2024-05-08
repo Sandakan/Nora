@@ -1,9 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FixedSizeList as List } from 'react-window';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import useResizeObserver from '../../hooks/useResizeObserver';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import storage from '../../utils/localStorage';
 
@@ -12,6 +10,7 @@ import Dropdown from '../Dropdown';
 import MainContainer from '../MainContainer';
 import Song from '../SongsPage/Song';
 import { songSortOptions, songFilterOptions } from '../SongsPage/SongOptions';
+import VirtualizedList from '../VirtualizedList';
 
 const MusicFolderInfoPage = () => {
   const {
@@ -35,9 +34,6 @@ const MusicFolderInfoPage = () => {
   const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>(
     localStorageData?.sortingStates?.songsPage || 'aToZ'
   );
-
-  const songsContainerRef = React.useRef(null as HTMLDivElement | null);
-  const { width, height } = useResizeObserver(songsContainerRef);
 
   const fetchFolderInfo = React.useCallback(() => {
     if (currentlyActivePage?.data && currentlyActivePage?.data?.folderPath) {
@@ -121,51 +117,6 @@ const MusicFolderInfoPage = () => {
       if (currSongId) playSong(currSongId, true);
     },
     [createQueue, folderInfo?.path, folderSongs, playSong]
-  );
-
-  const row = React.useCallback(
-    (props: { index: number; style: React.CSSProperties }) => {
-      const { index, style } = props;
-      const {
-        songId,
-        title,
-        artists,
-        album,
-        duration,
-        isAFavorite,
-        artworkPaths,
-        year,
-        path,
-        isBlacklisted
-      } = folderSongs[index];
-      return (
-        <div style={style}>
-          <Song
-            key={index}
-            index={index}
-            isIndexingSongs={localStorageData?.preferences?.isSongIndexingEnabled}
-            title={title}
-            songId={songId}
-            artists={artists}
-            album={album}
-            artworkPaths={artworkPaths}
-            duration={duration}
-            year={year}
-            path={path}
-            isAFavorite={isAFavorite}
-            isBlacklisted={isBlacklisted}
-            selectAllHandler={selectAllHandler}
-            onPlayClick={handleSongPlayBtnClick}
-          />
-        </div>
-      );
-    },
-    [
-      folderSongs,
-      handleSongPlayBtnClick,
-      localStorageData?.preferences?.isSongIndexingEnabled,
-      selectAllHandler
-    ]
   );
 
   const { folderName } = React.useMemo(() => {
@@ -289,19 +240,27 @@ const MusicFolderInfoPage = () => {
             </div>
           )}
         </div>
-        <div className="songs-container h-full flex-1 pb-2" ref={songsContainerRef}>
+        <div className="songs-container h-full flex-1 pb-2">
           {folderSongs && folderSongs.length > 0 && (
-            <List
-              className="appear-from-bottom delay-100 [scrollbar-gutter:stable]"
-              itemCount={folderSongs.length}
-              itemSize={60}
-              width={width || '100%'}
-              height={height || 450}
-              overscanCount={10}
-              initialScrollOffset={currentlyActivePage.data?.scrollTopOffset ?? 0}
-            >
-              {row}
-            </List>
+            <VirtualizedList
+              data={folderSongs}
+              fixedItemHeight={60}
+              scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
+              itemContent={(index, song) => {
+                if (song)
+                  return (
+                    <Song
+                      key={index}
+                      index={index}
+                      isIndexingSongs={localStorageData?.preferences.isSongIndexingEnabled}
+                      onPlayClick={handleSongPlayBtnClick}
+                      selectAllHandler={selectAllHandler}
+                      {...song}
+                    />
+                  );
+                return <div>Bad Index</div>;
+              }}
+            />
           )}
         </div>
       </>

@@ -1,7 +1,5 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-// import { FixedSizeList as List } from 'react-window';
-// import useResizeObserver from '../../hooks/useResizeObserver';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
@@ -106,28 +104,6 @@ const MusicFoldersPage = () => {
   );
 
   const selectAllHandler = useSelectAllHandler(musicFoldersWithPaths, 'folder', 'folderPath');
-
-  // const folders = React.useCallback(
-  //   (props: { index: number; style: React.CSSProperties }) => {
-  //     const { index, style } = props;
-  //     const { path, songIds, isBlacklisted, subFolders } = musicFolders[index];
-
-  // return (
-  //   <div style={style}>
-  //     <Folder
-  //       key={path}
-  //       folderPath={path}
-  //       subFolders={subFolders}
-  //       index={index}
-  //       isBlacklisted={isBlacklisted}
-  //       songIds={songIds}
-  //       selectAllHandler={selectAllHandler}
-  //     />
-  //   </div>
-  // );
-  //   },
-  //   [musicFolders, selectAllHandler]
-  // );
 
   const folderComponents = React.useMemo(() => {
     return musicFolders.map((musicFolder, index) => {
@@ -251,34 +227,6 @@ const MusicFoldersPage = () => {
           ref={foldersContainerRef}
         >
           {folderComponents}
-          {/* {musicFolders && musicFolders.length > 0 && (
-            <List
-              className="appear-from-bottom h-full delay-100"
-              itemCount={musicFolders.length}
-              itemSize={70}
-              width={width || '100%'}
-              height={height || 450}
-              overscanCount={10}
-              initialScrollOffset={
-                currentlyActivePage.data?.scrollTopOffset ?? 0
-              }
-              onScroll={(data) => {
-                if (scrollOffsetTimeoutIdRef.current)
-                  clearTimeout(scrollOffsetTimeoutIdRef.current);
-                if (!data.scrollUpdateWasRequested && data.scrollOffset !== 0)
-                  scrollOffsetTimeoutIdRef.current = setTimeout(
-                    () =>
-                      updateCurrentlyActivePageData((currentPageData) => ({
-                        ...currentPageData,
-                        scrollTopOffset: data.scrollOffset,
-                      })),
-                    500
-                  );
-              }}
-            >
-              {folders}
-            </List>
-          )} */}
         </div>
 
         {musicFolders.length === 0 && (

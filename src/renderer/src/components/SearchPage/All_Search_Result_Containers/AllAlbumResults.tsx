@@ -1,84 +1,41 @@
-import React, { CSSProperties } from 'react';
-import { FixedSizeGrid as Grid } from 'react-window';
-import useResizeObserver from '../../../hooks/useResizeObserver';
+import React from 'react';
+
 import { Album } from '../../AlbumsPage/Album';
-import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import { AppContext } from '../../../contexts/AppContext';
 import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 import SecondaryContainer from '../../SecondaryContainer';
+import VirtualizedGrid from '../../VirtualizedGrid';
 
 type Props = { albumData: Album[] };
 
+const MIN_ITEM_WIDTH = 220;
+const MIN_ITEM_HEIGHT = 280;
+
 const AllAlbumResults = (prop: Props) => {
   const { currentlyActivePage } = React.useContext(AppContext);
-  const { updateCurrentlyActivePageData } = React.useContext(AppUpdateContext);
   const { albumData } = prop;
-
-  const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
-  const containerRef = React.useRef(null as HTMLDivElement | null);
-  const { height, width } = useResizeObserver(containerRef);
-  const MIN_ITEM_WIDTH = 220;
-  const MIN_ITEM_HEIGHT = 280;
-  const noOfColumns = Math.floor(width / MIN_ITEM_WIDTH);
-  const noOfRows = Math.ceil(albumData.length / noOfColumns);
-  const itemWidth = MIN_ITEM_WIDTH + ((width % MIN_ITEM_WIDTH) - 10) / noOfColumns;
 
   const selectAllHandler = useSelectAllHandler(albumData, 'album', 'albumId');
 
-  const row = React.useCallback(
-    (props: { columnIndex: number; rowIndex: number; style: CSSProperties }) => {
-      const { columnIndex, rowIndex, style } = props;
-      const index = rowIndex * noOfColumns + columnIndex;
-      if (index < albumData.length) {
-        const { albumId, year, artists, title, songs, artworkPaths } = albumData[index];
-        return (
-          <div style={{ ...style, display: 'flex', justifyContent: 'center' }}>
-            <Album
-              index={index}
-              artworkPaths={artworkPaths}
-              albumId={albumId}
-              title={title}
-              year={year}
-              artists={artists}
-              songs={songs}
-              selectAllHandler={selectAllHandler}
-            />
-          </div>
-        );
-      }
-      return <div style={style} />;
-    },
-    [albumData, noOfColumns, selectAllHandler]
-  );
-
   return (
-    <SecondaryContainer className="albums-container h-full w-full flex-grow" ref={containerRef}>
+    <SecondaryContainer className="albums-container h-full w-full flex-grow">
       {albumData && albumData.length > 0 && (
-        <Grid
-          className="appear-from-bottom delay-100 [scrollbar-gutter:stable]"
-          columnCount={noOfColumns || 5}
-          columnWidth={itemWidth}
-          rowCount={noOfRows || 5}
-          rowHeight={MIN_ITEM_HEIGHT}
-          height={height || 300}
-          width={width || 500}
-          overscanRowCount={2}
-          initialScrollTop={currentlyActivePage.data?.scrollTopOffset ?? 0}
-          onScroll={(data) => {
-            if (scrollOffsetTimeoutIdRef.current) clearTimeout(scrollOffsetTimeoutIdRef.current);
-            if (!data.scrollUpdateWasRequested && data.scrollTop !== 0)
-              scrollOffsetTimeoutIdRef.current = setTimeout(
-                () =>
-                  updateCurrentlyActivePageData((currentPageData) => ({
-                    ...currentPageData,
-                    scrollTopOffset: data.scrollTop
-                  })),
-                500
-              );
+        <VirtualizedGrid
+          data={albumData}
+          fixedItemWidth={MIN_ITEM_WIDTH}
+          fixedItemHeight={MIN_ITEM_HEIGHT}
+          scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
+          itemContent={(index, item) => {
+            return (
+              <Album
+                index={index}
+                key={`${item.albumId}-${item.title}`}
+                selectAllHandler={selectAllHandler}
+                {...item}
+              />
+            );
           }}
-        >
-          {row}
-        </Grid>
+        />
       )}
     </SecondaryContainer>
   );

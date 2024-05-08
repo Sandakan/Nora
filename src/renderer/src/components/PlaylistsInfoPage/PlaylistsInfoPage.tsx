@@ -1,12 +1,10 @@
 /* eslint-disable react/no-array-index-key */
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { VariableSizeList as List } from 'react-window';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
-import useResizeObserver from '../../hooks/useResizeObserver';
-import debounce from '../../utils/debounce';
 
 import Song from '../SongsPage/Song';
 import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';
@@ -15,6 +13,7 @@ import MainContainer from '../MainContainer';
 import PlaylistInfoAndImgContainer from './PlaylistInfoAndImgContainer';
 import TitleContainer from '../TitleContainer';
 import { songSortOptions, songFilterOptions } from '../SongsPage/SongOptions';
+import VirtualizedList from '../VirtualizedList';
 
 const PlaylistInfoPage = () => {
   const { currentlyActivePage, queue, localStorageData } = useContext(AppContext);
@@ -36,8 +35,6 @@ const PlaylistInfoPage = () => {
       'addedOrder'
   );
   const [filteringOrder, setFilteringOrder] = React.useState<SongFilterTypes>('notSelected');
-  const songsContainerRef = React.useRef<HTMLDivElement>(null);
-  const { width, height } = useResizeObserver(songsContainerRef);
 
   const fetchPlaylistData = React.useCallback(() => {
     if (currentlyActivePage.data?.playlistId) {
@@ -128,73 +125,6 @@ const PlaylistInfoPage = () => {
     [playlistData, playlistSongs]
   );
 
-  const listComponents = React.useCallback(
-    (props: { index: number; style: React.CSSProperties }) => {
-      const { index, style } = props;
-      const song = listItems[index];
-      return (
-        <div style={style}>
-          {'songId' in song ? (
-            <Song
-              key={index}
-              index={index - 1}
-              isIndexingSongs={localStorageData?.preferences?.isSongIndexingEnabled}
-              title={song.title}
-              artists={song.artists}
-              album={song.album}
-              duration={song.duration}
-              songId={song.songId}
-              artworkPaths={song.artworkPaths}
-              path={song.path}
-              year={song.year}
-              isAFavorite={song.isAFavorite}
-              isBlacklisted={song.isBlacklisted}
-              onPlayClick={handleSongPlayBtnClick}
-              additionalContextMenuItems={[
-                {
-                  label: t('playlistsPage.removeFromThisPlaylist'),
-                  iconName: 'playlist_remove',
-                  handlerFunction: () =>
-                    window.api.playlistsData
-                      .removeSongFromPlaylist(playlistData.playlistId, song.songId)
-                      .then(
-                        (res) =>
-                          res.success &&
-                          addNewNotifications([
-                            {
-                              id: `${song.songId}Removed`,
-                              delay: 5000,
-                              content: t('playlistsPage.removeSongFromPlaylistSuccess', {
-                                title: song.title,
-                                playlistName: playlistData.name
-                              })
-                            }
-                          ])
-                      )
-                      .catch((err) => console.error(err))
-                }
-              ]}
-              selectAllHandler={selectAllHandler}
-            />
-          ) : (
-            <PlaylistInfoAndImgContainer playlist={song} songs={playlistSongs} />
-          )}
-        </div>
-      );
-    },
-    [
-      addNewNotifications,
-      handleSongPlayBtnClick,
-      listItems,
-      localStorageData?.preferences?.isSongIndexingEnabled,
-      playlistData.name,
-      playlistData.playlistId,
-      playlistSongs,
-      selectAllHandler,
-      t
-    ]
-  );
-
   const clearSongHistory = React.useCallback(() => {
     changePromptMenuData(
       true,
@@ -262,11 +192,6 @@ const PlaylistInfoPage = () => {
       ),
     [createQueue, playlistData.playlistId, playlistSongs]
   );
-
-  const getItemSize = React.useCallback((index: number) => {
-    if (index === 0) return 300;
-    return 60;
-  }, []);
 
   return (
     <MainContainer
@@ -342,34 +267,49 @@ const PlaylistInfoPage = () => {
           }
         ]}
       />
-      <div className="flex h-full flex-col">
-        <div className="songs-list-container h-full" ref={songsContainerRef}>
-          {listItems.length > 0 && (
-            <List
-              itemCount={listItems.length}
-              itemSize={getItemSize}
-              width={width || '100%'}
-              height={height || 450}
-              overscanCount={10}
-              className="appear-from-bottom h-full pb-4 delay-100 [scrollbar-gutter:stable]"
-              initialScrollOffset={currentlyActivePage.data?.scrollTopOffset ?? 0}
-              onScroll={(data) => {
-                if (!data.scrollUpdateWasRequested && data.scrollOffset !== 0)
-                  debounce(
-                    () =>
-                      updateCurrentlyActivePageData((currentPageData) => ({
-                        ...currentPageData,
-                        scrollTopOffset: data.scrollOffset
-                      })),
-                    500
-                  );
-              }}
-            >
-              {listComponents}
-            </List>
-          )}
-        </div>
-      </div>
+      <VirtualizedList
+        data={listItems}
+        scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
+        itemContent={(index, item) => {
+          if ('songId' in item)
+            return (
+              <Song
+                key={index}
+                index={index}
+                isIndexingSongs={localStorageData?.preferences.isSongIndexingEnabled}
+                onPlayClick={handleSongPlayBtnClick}
+                selectAllHandler={selectAllHandler}
+                {...item}
+                trackNo={undefined}
+                additionalContextMenuItems={[
+                  {
+                    label: t('playlistsPage.removeFromThisPlaylist'),
+                    iconName: 'playlist_remove',
+                    handlerFunction: () =>
+                      window.api.playlistsData
+                        .removeSongFromPlaylist(playlistData.playlistId, item.songId)
+                        .then(
+                          (res) =>
+                            res.success &&
+                            addNewNotifications([
+                              {
+                                id: `${item.songId}Removed`,
+                                delay: 5000,
+                                content: t('playlistsPage.removeSongFromPlaylistSuccess', {
+                                  title: item.title,
+                                  playlistName: playlistData.name
+                                })
+                              }
+                            ])
+                        )
+                        .catch((err) => console.error(err))
+                  }
+                ]}
+              />
+            );
+          return <PlaylistInfoAndImgContainer playlist={item} songs={playlistSongs} />;
+        }}
+      />
       {playlistSongs.length === 0 && (
         <div className="no-songs-container appear-from-bottom relative flex h-full flex-grow flex-col items-center justify-center text-center text-lg font-light text-font-color-black !opacity-80 dark:text-font-color-white">
           <span className="material-icons-round-outlined mb-4 text-5xl">brightness_empty</span>

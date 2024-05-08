@@ -2,10 +2,8 @@
 /* eslint-disable promise/catch-or-return */
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FixedSizeList, FixedSizeList as List } from 'react-window';
 // eslint-disable-next-line import/named
 import { Draggable, Droppable, DragDropContext, DropResult } from 'react-beautiful-dnd';
-import useResizeObserver from '../../hooks/useResizeObserver';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
@@ -19,6 +17,8 @@ import NoSongsImage from '../../assets/images/svg/Sun_Monochromatic.svg';
 import MainContainer from '../MainContainer';
 import Img from '../Img';
 import Song from '../SongsPage/Song';
+import VirtualizedList from '../VirtualizedList';
+import { VirtuosoHandle } from 'react-virtuoso';
 
 interface QueueInfo {
   artworkPath: string;
@@ -35,28 +35,19 @@ const CurrentQueuePage = () => {
     multipleSelectionsData,
     localStorageData
   } = useContext(AppContext);
-  const {
-    updateQueueData,
-    addNewNotifications,
-    updateCurrentlyActivePageData,
-    updateContextMenuData,
-    toggleMultipleSelections
-  } = React.useContext(AppUpdateContext);
+  const { updateQueueData, addNewNotifications, updateContextMenuData, toggleMultipleSelections } =
+    React.useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const [queuedSongs, setQueuedSongs] = React.useState([] as AudioInfo[]);
   const previousQueueRef = React.useRef<string[]>([]);
-  const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
   const [queueInfo, setQueueInfo] = React.useState({
     artworkPath: DefaultSongCover,
     title: ''
   } as QueueInfo);
   const [isAutoScrolling, setIsAutoScrolling] = React.useState(false);
 
-  const containerRef = React.useRef(null as HTMLDivElement | null);
-  const { width, height } = useResizeObserver(containerRef);
-  const ListRef = React.useRef(null as FixedSizeList | null);
-  const isFirstRenderFinishedRef = React.useRef(false);
+  const ListRef = React.useRef<VirtuosoHandle>(null);
 
   const isTheSameQueue = React.useCallback((newQueueSongIds: string[]) => {
     const prevQueueSongIds = previousQueueRef.current;
@@ -198,88 +189,6 @@ const CurrentQueuePage = () => {
 
   const selectAllHandler = useSelectAllHandler(queuedSongs, 'songs', 'songId');
 
-  const row = React.useCallback(
-    (props: { index: number; style: React.CSSProperties }) => {
-      const { index, style } = props;
-      // eslint-disable-next-line react/jsx-no-useless-fragment
-      if (queuedSongs[index] === undefined) return <></>;
-
-      const {
-        songId,
-        title,
-        artists,
-        album,
-        duration,
-        isAFavorite,
-        artworkPaths,
-        path,
-        year,
-        isBlacklisted
-      } = queuedSongs[index];
-      return (
-        <Draggable draggableId={songId} index={index} key={songId}>
-          {(provided) => {
-            const { multipleSelections: songIds } = multipleSelectionsData;
-            const isMultipleSelectionsEnabled =
-              multipleSelectionsData.selectionType === 'songs' &&
-              multipleSelectionsData.multipleSelections.length !== 1;
-
-            return (
-              <div style={style}>
-                <Song
-                  provided={provided}
-                  key={`${songId}-${index}`}
-                  isDraggable
-                  index={index}
-                  ref={provided.innerRef}
-                  isIndexingSongs={localStorageData?.preferences?.isSongIndexingEnabled}
-                  title={title}
-                  songId={songId}
-                  artists={artists}
-                  album={album}
-                  artworkPaths={artworkPaths}
-                  duration={duration}
-                  path={path}
-                  year={year}
-                  isBlacklisted={isBlacklisted}
-                  isAFavorite={isAFavorite}
-                  selectAllHandler={selectAllHandler}
-                  // no need for onPlayClick because the component is in the currentQueuePage
-                  // onPlayClick={handleSongPlayBtnClick}
-                  additionalContextMenuItems={[
-                    {
-                      label: t('common.removeFromQueue'),
-                      iconName: 'remove_circle_outline',
-                      handlerFunction: () => {
-                        updateQueueData(
-                          undefined,
-                          queue.queue.filter((id) =>
-                            isMultipleSelectionsEnabled ? !songIds.includes(id) : id !== songId
-                          )
-                        );
-                        toggleMultipleSelections(false);
-                      }
-                    }
-                  ]}
-                />
-              </div>
-            );
-          }}
-        </Draggable>
-      );
-    },
-    [
-      localStorageData?.preferences?.isSongIndexingEnabled,
-      multipleSelectionsData,
-      queue.queue,
-      queuedSongs,
-      selectAllHandler,
-      t,
-      toggleMultipleSelections,
-      updateQueueData
-    ]
-  );
-
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return undefined;
     const updatedQueue = Array.from(queue.queue);
@@ -293,14 +202,11 @@ const CurrentQueuePage = () => {
 
   const centerCurrentlyPlayingSong = React.useCallback(() => {
     const index = queue.queue.indexOf(currentSongData.songId);
-    if (ListRef && index >= 0) ListRef.current?.scrollToItem(index, 'center');
+    if (ListRef && index >= 0) ListRef.current?.scrollToIndex({ index, align: 'center' });
   }, [currentSongData.songId, queue.queue]);
 
   React.useEffect(() => {
-    let timeOutId: NodeJS.Timeout;
-    if (isAutoScrolling) {
-      timeOutId = setTimeout(() => centerCurrentlyPlayingSong(), 1000);
-    }
+    const timeOutId = setTimeout(() => centerCurrentlyPlayingSong(), 1000);
 
     return () => {
       if (timeOutId) clearTimeout(timeOutId);
@@ -466,7 +372,6 @@ const CurrentQueuePage = () => {
         )}
         <div
           className={`songs-container overflow-auto ${queuedSongs.length > 0 ? 'h-full' : 'h-0'}`}
-          ref={containerRef}
         >
           {queuedSongs.length > 0 && (
             // $ Enabling React.StrictMode throws an error in the CurrentQueuePage when using react-beautiful-dnd for drag and drop.
@@ -499,48 +404,68 @@ const CurrentQueuePage = () => {
                   );
                 }}
               >
-                {(droppableProvided, snapshot) => (
-                  <List
-                    className="appear-from-bottom delay-100 [scrollbar-gutter:stable]"
-                    height={height}
-                    itemCount={
-                      snapshot.isUsingPlaceholder ? queuedSongs.length : queuedSongs.length + 1
-                    }
-                    itemSize={60}
-                    width={width}
-                    overscanCount={20}
-                    outerRef={droppableProvided.innerRef}
+                {(droppableProvided) => (
+                  <VirtualizedList
+                    data={queuedSongs}
+                    fixedItemHeight={60}
                     ref={ListRef}
-                    onItemsRendered={() => {
-                      if (!isFirstRenderFinishedRef.current) {
-                        setTimeout(() => {
-                          const index = queue?.queue?.indexOf(currentSongData.songId);
-                          if (index >= 0) {
-                            if (ListRef.current) {
-                              ListRef.current.scrollToItem(index, 'smart');
-                            }
-                          }
-                        }, 500);
-                      }
-                      isFirstRenderFinishedRef.current = true;
+                    scrollerRef={droppableProvided.innerRef}
+                    scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
+                    components={{
+                      Item: ({ children, ...props }: { children?: any }) => (
+                        <div {...props} className="height-preserving-container">
+                          {children}
+                        </div>
+                      )
                     }}
-                    initialScrollOffset={currentlyActivePage.data?.scrollTopOffset ?? 0}
-                    onScroll={(data) => {
-                      if (scrollOffsetTimeoutIdRef.current)
-                        clearTimeout(scrollOffsetTimeoutIdRef.current);
-                      if (!data.scrollUpdateWasRequested && data.scrollOffset !== 0)
-                        scrollOffsetTimeoutIdRef.current = setTimeout(
-                          () =>
-                            updateCurrentlyActivePageData((currentPageData) => ({
-                              ...currentPageData,
-                              scrollTopOffset: data.scrollOffset
-                            })),
-                          500
-                        );
+                    itemContent={(index, song) => {
+                      return (
+                        <Draggable draggableId={song.songId} index={index} key={song.songId}>
+                          {(provided) => {
+                            const { multipleSelections: songIds } = multipleSelectionsData;
+                            const isMultipleSelectionsEnabled =
+                              multipleSelectionsData.selectionType === 'songs' &&
+                              multipleSelectionsData.multipleSelections.length !== 1;
+
+                            return (
+                              <Song
+                                provided={provided}
+                                key={`${song.songId}-${index}`}
+                                isDraggable
+                                index={index}
+                                ref={provided.innerRef}
+                                isIndexingSongs={
+                                  localStorageData?.preferences?.isSongIndexingEnabled
+                                }
+                                {...song}
+                                trackNo={undefined}
+                                selectAllHandler={selectAllHandler}
+                                // no need for onPlayClick because the component is in the currentQueuePage
+                                // onPlayClick={handleSongPlayBtnClick}
+                                additionalContextMenuItems={[
+                                  {
+                                    label: t('common.removeFromQueue'),
+                                    iconName: 'remove_circle_outline',
+                                    handlerFunction: () => {
+                                      updateQueueData(
+                                        undefined,
+                                        queue.queue.filter((id) =>
+                                          isMultipleSelectionsEnabled
+                                            ? !songIds.includes(id)
+                                            : id !== song.songId
+                                        )
+                                      );
+                                      toggleMultipleSelections(false);
+                                    }
+                                  }
+                                ]}
+                              />
+                            );
+                          }}
+                        </Draggable>
+                      );
                     }}
-                  >
-                    {row}
-                  </List>
+                  />
                 )}
               </Droppable>
             </DragDropContext>

@@ -1,11 +1,7 @@
-import React, { CSSProperties } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { FixedSizeGrid as Grid } from 'react-window';
-
-import useResizeObserver from '../../hooks/useResizeObserver';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import debounce from '../../utils/debounce';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import storage from '../../utils/localStorage';
 import i18n from '../../i18n';
@@ -17,6 +13,7 @@ import Img from '../Img';
 import Button from '../Button';
 
 import NoArtistImage from '../../assets/images/svg/Sun_Monochromatic.svg';
+import VirtualizedGrid from '../VirtualizedGrid';
 
 const artistSortOptions: DropdownOption<ArtistSortTypes>[] = [
   { label: i18n.t('sortTypes.aToZ'), value: 'aToZ' },
@@ -44,6 +41,9 @@ const artistFilterOptions: DropdownOption<ArtistFilterTypes>[] = [
   { label: 'Favorites', value: 'favorites' }
 ];
 
+const MIN_ITEM_WIDTH = 175;
+const MIN_ITEM_HEIGHT = 200;
+
 const ArtistPage = () => {
   const {
     currentlyActivePage,
@@ -62,14 +62,6 @@ const ArtistPage = () => {
       'aToZ'
   );
   const [filteringOrder, setFilteringOrder] = React.useState<ArtistFilterTypes>('notSelected');
-
-  const containerRef = React.useRef(null as HTMLDivElement | null);
-  const { height, width } = useResizeObserver(containerRef);
-  const MIN_ITEM_WIDTH = 175;
-  const MIN_ITEM_HEIGHT = 200;
-  const noOfColumns = Math.floor(width / MIN_ITEM_WIDTH);
-  const noOfRows = Math.ceil(artistsData.length / noOfColumns);
-  const itemWidth = MIN_ITEM_WIDTH + ((width % MIN_ITEM_WIDTH) - 10) / noOfColumns;
 
   const fetchArtistsData = React.useCallback(
     () =>
@@ -106,37 +98,6 @@ const ArtistPage = () => {
   }, [sortingOrder]);
 
   const selectAllHandler = useSelectAllHandler(artistsData, 'artist', 'artistId');
-
-  const row = React.useCallback(
-    (props: { columnIndex: number; rowIndex: number; style: CSSProperties }) => {
-      const { columnIndex, rowIndex, style } = props;
-      const index = rowIndex * noOfColumns + columnIndex;
-      // eslint-disable-next-line no-console
-      // console.log(index);
-      if (index < artistsData.length) {
-        const { artistId, name, onlineArtworkPaths, songs, artworkPaths, isAFavorite } =
-          artistsData[index];
-        return (
-          <div style={{ ...style, display: 'flex', justifyContent: 'center' }}>
-            <Artist
-              index={index}
-              key={artistId}
-              className="mb-4"
-              artistId={artistId}
-              name={name}
-              artworkPaths={artworkPaths}
-              onlineArtworkPaths={onlineArtworkPaths}
-              songIds={songs.map((song) => song.songId)}
-              isAFavorite={isAFavorite}
-              selectAllHandler={selectAllHandler}
-            />
-          </div>
-        );
-      }
-      return <div style={style} />;
-    },
-    [artistsData, noOfColumns, selectAllHandler]
-  );
 
   console.log('offset', currentlyActivePage?.data);
   return (
@@ -213,35 +174,27 @@ const ArtistPage = () => {
         )}
         <div
           className={`artists-container flex !h-full flex-wrap ${!(artistsData && artistsData.length > 0) && 'hidden'}`}
-          ref={containerRef}
         >
           {artistsData && artistsData.length > 0 && (
-            <Grid
-              className="appear-from-bottom delay-100 [scrollbar-gutter:stable]"
-              columnCount={noOfColumns || 5}
-              columnWidth={itemWidth}
-              rowCount={noOfRows || 5}
-              rowHeight={MIN_ITEM_HEIGHT}
-              height={height || 300}
-              width={width || 500}
-              overscanRowCount={2}
-              initialScrollLeft={currentlyActivePage?.data?.scrollLeftOffset}
-              initialScrollTop={currentlyActivePage?.data?.scrollTopOffset}
-              onScroll={(data) => {
-                if (!data.scrollUpdateWasRequested && data.scrollTop !== 0)
-                  debounce(
-                    () =>
-                      updateCurrentlyActivePageData((currentPageData) => ({
-                        ...currentPageData,
-                        scrollTopOffset: data.scrollTop,
-                        scrollLeftOffset: data.scrollLeft
-                      })),
-                    500
-                  );
+            <VirtualizedGrid
+              data={artistsData}
+              fixedItemWidth={MIN_ITEM_WIDTH}
+              fixedItemHeight={MIN_ITEM_HEIGHT}
+              scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
+              itemContent={(index, artist) => {
+                return (
+                  <Artist
+                    index={index}
+                    key={artist.artistId}
+                    className="mb-4"
+                    songIds={artist.songs.map((song) => song.songId)}
+                    selectAllHandler={selectAllHandler}
+                    appearFromBottom={false}
+                    {...artist}
+                  />
+                );
               }}
-            >
-              {row}
-            </Grid>
+            />
           )}
         </div>
         {/* {artistsData && artistsData.length === 0 && (

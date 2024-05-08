@@ -62,7 +62,7 @@ const Checkbox = React.memo((props: CheckboxProp) => {
         }`}
         htmlFor={id}
       >
-        <span className="material-icons-round icon text-lg text-font-color-white opacity-0 dark:text-font-color-black">
+        <span className="material-icons-round icon text-xl text-font-color-white opacity-0 dark:text-font-color-black">
           check
         </span>
       </label>

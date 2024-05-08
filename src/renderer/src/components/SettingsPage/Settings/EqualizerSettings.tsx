@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../../Button';
 import Dropdown from '../../Dropdown';
@@ -73,7 +73,7 @@ const EqualizerSettings = () => {
   }, [content, updateEqualizerOptions]);
 
   const equalizerBands = React.useMemo(() => {
-    const bands = [];
+    const bands: ReactNode[] = [];
 
     for (const [filterName, filterValue] of Object.entries(content)) {
       const equalizerFilterName = filterName as keyof Equalizer;

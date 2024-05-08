@@ -2,12 +2,9 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { VariableSizeList as List } from 'react-window';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
-import useResizeObserver from '../../hooks/useResizeObserver';
-import debounce from '../../utils/debounce';
 
 import MainContainer from '../MainContainer';
 import Song from '../SongsPage/Song';
@@ -16,6 +13,7 @@ import AlbumImgAndInfoContainer from './AlbumImgAndInfoContainer';
 import OnlineAlbumInfoContainer from './OnlineAlbumInfoContainer';
 import { songSortOptions } from '../SongsPage/SongOptions';
 import { LastFMAlbumInfo } from 'src/@types/last_fm_album_info_api';
+import VirtualizedList from '../VirtualizedList';
 
 interface AlbumContentReducer {
   albumData: Album;
@@ -70,9 +68,6 @@ const AlbumInfoPage = () => {
     playSong
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
-
-  const songsContainerRef = React.useRef<HTMLDivElement>(null);
-  const { width, height } = useResizeObserver(songsContainerRef);
 
   const [albumContent, dispatch] = React.useReducer(reducer, {
     albumData: {} as Album,
@@ -186,72 +181,6 @@ const AlbumInfoPage = () => {
     return items;
   }, [albumContent.albumData, albumContent?.otherAlbumData, albumContent.songsData]);
 
-  const listComponents = React.useCallback(
-    (props: { index: number; style: React.CSSProperties }) => {
-      const { index, style } = props;
-      const song = listItems[index];
-
-      return (
-        <div style={style}>
-          {'songId' in song ? (
-            <Song
-              key={song.songId}
-              index={index - 1}
-              isIndexingSongs={localStorageData?.preferences?.isSongIndexingEnabled}
-              trackNo={
-                localStorageData?.preferences?.showTrackNumberAsSongIndex
-                  ? song.trackNo ?? '--'
-                  : undefined
-              }
-              title={song.title}
-              artists={song.artists}
-              artworkPaths={song.artworkPaths}
-              duration={song.duration}
-              songId={song.songId}
-              path={song.path}
-              album={song.album}
-              isAFavorite={song.isAFavorite}
-              year={song.year}
-              isBlacklisted={song.isBlacklisted}
-              selectAllHandler={selectAllHandler}
-              onPlayClick={handleSongPlayBtnClick}
-            />
-          ) : 'sortedAllTracks' in song ? (
-            <OnlineAlbumInfoContainer
-              albumTitle={albumContent.albumData.title}
-              otherAlbumData={albumContent.otherAlbumData}
-            />
-          ) : (
-            <AlbumImgAndInfoContainer albumData={song} songsData={albumContent.songsData} />
-          )}
-        </div>
-      );
-    },
-    [
-      albumContent.albumData.title,
-      albumContent.otherAlbumData,
-      albumContent.songsData,
-      handleSongPlayBtnClick,
-      listItems,
-      localStorageData?.preferences?.isSongIndexingEnabled,
-      localStorageData?.preferences?.showTrackNumberAsSongIndex,
-      selectAllHandler
-    ]
-  );
-
-  const SONG_COMPONENT_HEIGHT = 60;
-  const ALBUM_INFO_COMPONENT_HEIGHT = 250;
-  const ONLINE_ALBUM_INFO_COMPONENT_HEIGHT = 500;
-  const getItemSize = React.useCallback(
-    (index: number) => {
-      const item = listItems[index];
-      if ('songId' in item) return SONG_COMPONENT_HEIGHT;
-      if ('sortedAllTracks' in item) return ONLINE_ALBUM_INFO_COMPONENT_HEIGHT;
-      return ALBUM_INFO_COMPONENT_HEIGHT;
-    },
-    [listItems]
-  );
-
   return (
     <MainContainer
       className="album-info-page-container appear-from-bottom h-full !pb-0 pl-8 "
@@ -337,32 +266,40 @@ const AlbumInfoPage = () => {
           }
         ]}
       />
-      <div className="h-full" ref={songsContainerRef}>
-        {listItems.length > 0 && (
-          <List
-            itemCount={listItems.length}
-            itemSize={getItemSize}
-            width={width || '100%'}
-            height={height || 450}
-            overscanCount={10}
-            className="appear-from-bottom h-full pb-4 delay-100 [scrollbar-gutter:stable]"
-            initialScrollOffset={currentlyActivePage.data?.scrollTopOffset ?? 0}
-            onScroll={(data) => {
-              if (!data.scrollUpdateWasRequested && data.scrollOffset !== 0)
-                debounce(
-                  () =>
-                    updateCurrentlyActivePageData((currentPageData) => ({
-                      ...currentPageData,
-                      scrollTopOffset: data.scrollOffset
-                    })),
-                  500
-                );
-            }}
-          >
-            {listComponents}
-          </List>
-        )}
-      </div>
+
+      <VirtualizedList
+        data={listItems}
+        fixedItemHeight={60}
+        scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
+        itemContent={(index, item) => {
+          if ('songId' in item)
+            return (
+              <Song
+                key={index}
+                index={index}
+                isIndexingSongs={localStorageData?.preferences.isSongIndexingEnabled}
+                onPlayClick={handleSongPlayBtnClick}
+                selectAllHandler={selectAllHandler}
+                {...item}
+                trackNo={
+                  localStorageData?.preferences?.showTrackNumberAsSongIndex
+                    ? item.trackNo ?? '--'
+                    : undefined
+                }
+              />
+            );
+
+          if ('sortedAllTracks' in item)
+            return (
+              <OnlineAlbumInfoContainer
+                albumTitle={albumContent.albumData.title}
+                otherAlbumData={item}
+              />
+            );
+
+          return <AlbumImgAndInfoContainer albumData={item} songsData={albumContent.songsData} />;
+        }}
+      />
     </MainContainer>
   );
 };

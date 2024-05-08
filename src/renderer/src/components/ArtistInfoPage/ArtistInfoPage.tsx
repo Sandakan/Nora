@@ -1,13 +1,11 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { CSSProperties, useContext } from 'react';
+import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FixedSizeList as List, FixedSizeGrid as Grid } from 'react-window';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import useResizeObserver from '../../hooks/useResizeObserver';
-import clamp from '../../utils/clamp';
 
 import { Album } from '../AlbumsPage/Album';
 import Song from '../SongsPage/Song';
@@ -22,6 +20,9 @@ import TitleContainer from '../TitleContainer';
 import SimilarArtistsContainer from './SimilarArtistsContainer';
 import Biography from '../Biography/Biography';
 import { songSortOptions } from '../SongsPage/SongOptions';
+
+// const MIN_ITEM_WIDTH = 220;
+// const MIN_ITEM_HEIGHT = 280;
 
 const ArtistInfoPage = () => {
   const {
@@ -54,16 +55,10 @@ const ArtistInfoPage = () => {
   const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>('aToZ');
 
   const songsContainerRef = React.useRef(null);
-  const { width, height } = useResizeObserver(songsContainerRef);
+  const { width } = useResizeObserver(songsContainerRef);
 
   const CONTAINER_PADDING = 30;
   const relevantWidth = React.useMemo(() => width - CONTAINER_PADDING, [width]);
-
-  const MIN_ITEM_WIDTH = 220;
-  const MIN_ITEM_HEIGHT = 280;
-  const noOfColumns = Math.floor(relevantWidth / MIN_ITEM_WIDTH);
-  const noOfRows = Math.ceil(albums.length / noOfColumns);
-  const itemWidth = MIN_ITEM_WIDTH + ((relevantWidth % MIN_ITEM_WIDTH) - 10) / noOfColumns;
 
   const noOfVisibleAlbums = React.useMemo(
     () => Math.floor(relevantWidth / 250) || 4,
@@ -230,7 +225,7 @@ const ArtistInfoPage = () => {
   const albumComponents = React.useMemo(
     () =>
       albums
-        .filter((_, i) => i < noOfVisibleAlbums)
+        .filter((_, i) => (isAllAlbumsVisible ? true : i < noOfVisibleAlbums))
         .map((album, index) => {
           return (
             <Album
@@ -247,35 +242,7 @@ const ArtistInfoPage = () => {
             />
           );
         }),
-    [albums, bodyBackgroundImage, noOfVisibleAlbums, selectAllHandlerForAlbums]
-  );
-
-  const albumGridComponents = React.useCallback(
-    (props: { columnIndex: number; rowIndex: number; style: CSSProperties }) => {
-      const { columnIndex, rowIndex, style } = props;
-      const index = rowIndex * noOfColumns + columnIndex;
-      // eslint-disable-next-line no-console
-      if (index < albums.length) {
-        const { albumId, year, artists, title, songs: songsInfo, artworkPaths } = albums[index];
-        return (
-          <div style={{ ...style, display: 'flex', justifyContent: 'center' }}>
-            <Album
-              key={`${albumId}-${title}`}
-              index={index}
-              artworkPaths={artworkPaths}
-              albumId={albumId}
-              title={title}
-              year={year}
-              artists={artists}
-              songs={songsInfo}
-              selectAllHandler={selectAllHandlerForAlbums}
-            />
-          </div>
-        );
-      }
-      return <div style={style} />;
-    },
-    [albums, noOfColumns, selectAllHandlerForAlbums]
+    [albums, bodyBackgroundImage, isAllAlbumsVisible, noOfVisibleAlbums, selectAllHandlerForAlbums]
   );
 
   const selectAllHandlerForSongs = useSelectAllHandler(songs, 'songs', 'songId');
@@ -292,7 +259,7 @@ const ArtistInfoPage = () => {
   const songComponenets = React.useMemo(
     () =>
       songs
-        .filter((_, i) => i < 5)
+        .filter((_, i) => (isAllSongsVisible ? true : i < 5))
         .map((song, index) => {
           return (
             <Song
@@ -316,73 +283,12 @@ const ArtistInfoPage = () => {
         }),
     [
       handleSongPlayBtnClick,
+      isAllSongsVisible,
       localStorageData?.preferences?.isSongIndexingEnabled,
       selectAllHandlerForSongs,
       songs
     ]
   );
-
-  const selectAllHandler = useSelectAllHandler(songs, 'songs', 'songId');
-
-  const songListComponents = React.useCallback(
-    (props: { index: number; style: React.CSSProperties }) => {
-      const { index, style } = props;
-      const {
-        songId,
-        title,
-        artists,
-        album,
-        duration,
-        isAFavorite,
-        artworkPaths,
-        year,
-        path,
-        isBlacklisted
-      } = songs[index];
-
-      return (
-        <div style={style}>
-          <Song
-            key={index}
-            index={index}
-            isIndexingSongs={localStorageData?.preferences.isSongIndexingEnabled}
-            title={title}
-            songId={songId}
-            artists={artists}
-            album={album}
-            artworkPaths={artworkPaths}
-            duration={duration}
-            year={year}
-            path={path}
-            isAFavorite={isAFavorite}
-            isBlacklisted={isBlacklisted}
-            onPlayClick={handleSongPlayBtnClick}
-            selectAllHandler={selectAllHandler}
-          />
-        </div>
-      );
-    },
-    [
-      handleSongPlayBtnClick,
-      localStorageData?.preferences.isSongIndexingEnabled,
-      selectAllHandler,
-      songs
-    ]
-  );
-
-  // const fontColor = React.useMemo(() => {
-  //   if (
-  //     artistData?.artistPalette &&
-  //     artistData.artistPalette?.LightMuted &&
-  //     artistData.artistPalette?.LightVibrant
-  //   ) {
-  //     const { LightVibrant, LightMuted } = artistData.artistPalette;
-  //     const [h, s, l] = isDarkMode ? LightVibrant.hsl : LightMuted.hsl;
-
-  //     return `hsl(${h * 360} ${s * 100} ${l * 100})`;
-  //   }
-  //   return undefined;
-  // }, [artistData?.artistPalette, isDarkMode]);
 
   return (
     <MainContainer
@@ -544,22 +450,7 @@ const ArtistInfoPage = () => {
               ]}
             />
             <div className="albums-container flex flex-wrap overflow-x-hidden">
-              {isAllAlbumsVisible ? (
-                <Grid
-                  className="appear-from-bottom delay-100"
-                  columnCount={noOfColumns || 5}
-                  columnWidth={itemWidth}
-                  rowCount={noOfRows || 5}
-                  rowHeight={MIN_ITEM_HEIGHT}
-                  width={relevantWidth}
-                  height={clamp(300, height || 0, 400)}
-                  overscanRowCount={2}
-                >
-                  {albumGridComponents}
-                </Grid>
-              ) : (
-                albumComponents
-              )}
+              {albumComponents}
             </div>
           </>
         </MainContainer>
@@ -671,22 +562,7 @@ const ArtistInfoPage = () => {
                 }
               ]}
             />
-            <div className="songs-container">
-              {isAllSongsVisible ? (
-                <List
-                  itemCount={songs.length}
-                  itemSize={60}
-                  width={relevantWidth || '100%'}
-                  height={clamp(300, height || 0, 400)}
-                  overscanCount={10}
-                  className="appear-from-bottom delay-100"
-                >
-                  {songListComponents}
-                </List>
-              ) : (
-                songComponenets
-              )}
-            </div>
+            <div className="songs-container">{songComponenets}</div>
           </>
         </MainContainer>
       )}

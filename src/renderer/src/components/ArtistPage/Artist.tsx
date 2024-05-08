@@ -25,6 +25,7 @@ interface ArtistProp {
   };
   isAFavorite: boolean;
   selectAllHandler?: (_upToId?: string) => void;
+  appearFromBottom?: boolean;
 }
 
 export const Artist = (props: ArtistProp) => {
@@ -41,6 +42,8 @@ export const Artist = (props: ArtistProp) => {
     toggleMultipleSelections,
     updateMultipleSelections
   } = React.useContext(AppUpdateContext);
+
+  const { appearFromBottom = true } = props;
 
   const [isAFavorite, setIsAFavorite] = React.useState(props.isAFavorite);
 
@@ -289,7 +292,7 @@ export const Artist = (props: ArtistProp) => {
   return (
     <div
       // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
-      className={`artist appear-from-bottom mr-2 flex h-44 w-40 cursor-pointer flex-col justify-between overflow-hidden rounded-lg p-4 hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50 ${
+      className={`artist ${appearFromBottom && 'appear-from-bottom'} mr-2 flex h-44 w-40 cursor-pointer flex-col justify-between overflow-hidden rounded-lg p-4 hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50 ${
         props.className
       } ${isAMultipleSelection ? '!bg-background-color-3 dark:!bg-dark-background-color-3' : ''}`}
       onContextMenu={(e) => {
@@ -325,7 +328,8 @@ export const Artist = (props: ArtistProp) => {
           fallbackSrc={props.artworkPaths.artworkPath}
           alt="Default song cover"
           className="aspect-square h-full rounded-full object-cover"
-          enableImgFadeIns={!isMultipleSelectionEnabled}
+          // enableImgFadeIns={!isMultipleSelectionEnabled}
+          enableImgFadeIns={false}
         />
         {isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'artist' && (
           <MultipleSelectionCheckbox

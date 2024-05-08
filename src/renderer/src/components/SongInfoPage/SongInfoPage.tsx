@@ -293,8 +293,8 @@ const SongInfoPage = () => {
           updateSongInfo={updateSongInfo}
         />
 
-        {listeningData && (
-          <SecondaryContainer className="secondary-container song-stats-container mt-8 flex h-fit flex-row flex-wrap items-center justify-center rounded-2xl p-2">
+        <SecondaryContainer className="secondary-container song-stats-container mt-8 flex h-fit flex-row flex-wrap items-center justify-center rounded-2xl p-2">
+          {listeningData && (
             <div className="grid w-full grid-flow-col place-content-center gap-4 py-4 pr-4 xl:grid-flow-row">
               <ListeningActivityBarGraph listeningData={listeningData} className="xl:order-2" />
               <div className="stat-cards grid max-h-full w-fit min-w-[32rem] grid-cols-2 flex-wrap items-center justify-center gap-4 place-self-center xl:order-1 xl:mt-4 xl:flex xl:max-h-none xl:grid-cols-3 xl:grid-rows-2 ">
@@ -359,12 +359,12 @@ const SongInfoPage = () => {
                 )}
               </div>
             </div>
-            <SongAdditionalInfoContainer songInfo={songInfo} songDurationStr={songDuration} />
-            {currentlyActivePage.data.songId && (
-              <SimilarTracksContainer songId={currentlyActivePage.data.songId} />
-            )}
-          </SecondaryContainer>
-        )}
+          )}
+          <SongAdditionalInfoContainer songInfo={songInfo} songDurationStr={songDuration} />
+          {currentlyActivePage.data.songId && (
+            <SimilarTracksContainer songId={currentlyActivePage.data.songId} />
+          )}
+        </SecondaryContainer>
       </>
     </MainContainer>
   ) : null;

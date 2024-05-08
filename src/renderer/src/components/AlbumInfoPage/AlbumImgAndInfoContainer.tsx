@@ -44,7 +44,7 @@ const AlbumImgAndInfoContainer = (props: Props) => {
     // eslint-disable-next-line react/jsx-no-useless-fragment
     <>
       {albumData && (
-        <div className="album-img-and-info-container flex flex-row items-center">
+        <div className="album-img-and-info-container flex flex-row items-center pb-6">
           <div className="album-cover-container mr-8">
             {albumData.artworkPaths && (
               <Img

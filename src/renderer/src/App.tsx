@@ -927,12 +927,12 @@ export default function App() {
           root.style.setProperty('--seekbar-track-background-color', darkVibrant, 'important');
           root.style.setProperty(
             '--dark-seekbar-track-background-color',
-            lightVibrant,
+            darkLightVibrant,
             'important'
           );
 
           root.style.setProperty('--slider-opacity', '0.25', 'important');
-          root.style.setProperty('--dark-slider-opacity', '0.35', 'important');
+          root.style.setProperty('--dark-slider-opacity', '1', 'important');
 
           root.style.setProperty('--text-color-highlight-2', darkVibrant, 'important');
           root.style.setProperty('--dark-text-color-highlight-2', lightVibrant, 'important');

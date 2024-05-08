@@ -101,7 +101,6 @@
     "react-beautiful-dnd": "^13.1.1",
     "react-i18next": "^14.0.0",
     "react-virtuoso": "^4.7.10",
-    "react-window": "^1.8.9",
     "sharp": "^0.33.2",
     "songlyrics": "^2.4.5",
     "tailwind-merge": "^2.2.2"
