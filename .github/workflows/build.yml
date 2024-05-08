@@ -25,16 +25,16 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           check-latest: true
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
 
       - name: build-linux
         if: matrix.os == 'ubuntu-latest'
