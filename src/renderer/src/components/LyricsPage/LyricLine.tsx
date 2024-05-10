@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import roundTo from '../../../../common/roundTo';
-import { delay, syncedLyricsRegex } from './LyricsPage';
+import { syncedLyricsRegex } from './LyricsPage';
 import LyricsProgressBar from './LyricsProgressBar';
 import EnhancedSyncedLyricWord from '../LyricsEditingPage/EnhancedSyncedLyricWord';
 
@@ -40,7 +40,7 @@ const LyricLine = (props: LyricProp) => {
 
         if (lyricsRef.current && syncedLyrics) {
           const { start, end } = syncedLyrics;
-          if (songPosition > start - delay && songPosition < end - delay) {
+          if (songPosition > start && songPosition < end) {
             if (!isTheCurrnetLineRef.current) {
               isTheCurrnetLineRef.current = true;
               setIsInRange(true);
@@ -79,7 +79,7 @@ const LyricLine = (props: LyricProp) => {
           start={extendedText.start}
           end={extendedText.end}
           text={extendedText.text}
-          delay={delay}
+          delay={0}
         />
       );
     });
@@ -95,8 +95,8 @@ const LyricLine = (props: LyricProp) => {
       title={
         syncedLyrics
           ? t(`lyricsEditingPage.fromTo`, {
-              start: roundTo(syncedLyrics.start - delay, 2),
-              end: roundTo(syncedLyrics.end - delay, 2)
+              start: roundTo(syncedLyrics.start, 2),
+              end: roundTo(syncedLyrics.end, 2)
             })
           : undefined
       }
@@ -122,7 +122,7 @@ const LyricLine = (props: LyricProp) => {
       >
         {lyricString}
       </div>
-      {syncedLyrics && isInRange && <LyricsProgressBar delay={delay} syncedLyrics={syncedLyrics} />}
+      {syncedLyrics && isInRange && <LyricsProgressBar delay={0} syncedLyrics={syncedLyrics} />}
     </div>
   );
 };

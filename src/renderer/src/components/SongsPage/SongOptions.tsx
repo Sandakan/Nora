@@ -51,19 +51,14 @@ export const songSortOptions: DropdownOption<SongSortTypes>[] = [
   {
     label: i18n.t('sortTypes.albumNameDescending'),
     value: 'albumNameDescending'
-  },
-  { label: i18n.t('sortTypes.blacklistedSongs'), value: 'blacklistedSongs' },
-  {
-    label: i18n.t('sortTypes.whitelistedSongs'),
-    value: 'whitelistedSongs'
   }
 ];
 
 export const songFilterOptions: DropdownOption<SongFilterTypes>[] = [
-  { label: 'Not Selected', value: 'notSelected' },
-  { label: i18n.t('sortTypes.blacklistedSongs'), value: 'blacklistedSongs' },
+  { label: i18n.t('filterTypes.notSelected'), value: 'notSelected' },
+  { label: i18n.t('filterTypes.blacklistedSongs'), value: 'blacklistedSongs' },
   {
-    label: i18n.t('sortTypes.whitelistedSongs'),
+    label: i18n.t('filterTypes.whitelistedSongs'),
     value: 'whitelistedSongs'
   }
 ];

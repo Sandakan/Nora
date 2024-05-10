@@ -72,7 +72,7 @@ const List = <T extends object>(props: Props<T>, ref) => {
 };
 
 const VirtualizedList = forwardRef(List) as <T extends object>(
-  props: Props<T> & { ref?: React.ForwardedRef<VirtuosoHandle> } 
+  props: Props<T> & { ref?: React.ForwardedRef<VirtuosoHandle> }
 ) => ReturnType<typeof List>;
 
 export default VirtualizedList;

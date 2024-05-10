@@ -59,7 +59,8 @@ export interface Relation {
   'type-id': string;
 }
 
-export interface Attribute {}
+// export type Attribute = {}
+export type Attribute = Record<string, never>;
 
 export enum Direction {
   Forward = 'forward'

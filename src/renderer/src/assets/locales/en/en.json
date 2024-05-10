@@ -76,6 +76,8 @@
     "search": "Search",
     "help": "Help",
 
+    "sortBy": "Sort By",
+    "filterBy": "Filter By",
     "moreOptions": "More options",
     "title": "Title",
     "suggestion": "Suggestion",
@@ -156,8 +158,6 @@
     "artistNameDescending": "Artist name (Z to A)",
     "albumNameAscending": "Album name (A to Z)",
     "albumNameDescending": "Album name (Z to A)",
-    "blacklistedSongs": "Blacklisted songs",
-    "whitelistedSongs": "Whitelisted songs",
     "noOfSongsDescending": "Highest amount of songs",
     "noOfSongsAscending": "Lowest amount of songs",
     "blacklistedFolders": "Blacklisted folders",
@@ -167,6 +167,13 @@
     "trackNoAscending": "Track number (Ascending)",
     "trackNoDescending": "Track number (Descending)",
     "addedOrder": "Added order"
+  },
+
+  "filterTypes": {
+    "notSelected": "Not Selected",
+    "blacklistedSongs": "Blacklisted songs",
+    "whitelistedSongs": "Whitelisted songs",
+    "favorites": "Favorites"
   },
 
   "equalizerPresets": {

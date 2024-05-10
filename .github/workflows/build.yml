@@ -30,7 +30,9 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.12.2
+          # Used Node v20.12.2 because the latest v20.13 breaks windows builds.
+          # node-version: 20.12.2
+          node-version: 20
           check-latest: true
 
       - name: Install Dependencies
@@ -45,9 +47,10 @@ jobs:
         run: npm run build:win
 
       - name: release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           draft: true
+          name: Nora Release ${{ github.ref }}
           files: |
             dist/*.exe
             dist/*.zip

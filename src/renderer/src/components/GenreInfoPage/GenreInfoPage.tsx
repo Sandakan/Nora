@@ -181,7 +181,7 @@ const GenreInfoPage = () => {
         dropdowns={[
           {
             name: 'songsPageFilterDropdown',
-            type: 'Filter By :',
+            type: `${t('common.filterBy')} :`,
             value: filteringOrder,
             options: songFilterOptions,
             onChange: (e) => {
@@ -194,7 +194,7 @@ const GenreInfoPage = () => {
           },
           {
             name: 'songsPageSortDropdown',
-            type: 'Sort By :',
+            type: `${t('common.sortBy')} :`,
             value: sortingOrder,
             options: songSortOptions,
             onChange: (e) => {

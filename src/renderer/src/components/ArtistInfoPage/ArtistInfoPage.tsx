@@ -429,13 +429,13 @@ const ArtistInfoPage = () => {
                     })}
                   </p>
                 ) : (
-                  <p className="text-xs text-font-color-highlight dark:text-dark-font-color-highlight">
+                  <p className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
                     {t('common.albumWithCount', { count: albums.length })}{' '}
                     {albums.length > noOfVisibleAlbums &&
                       !isAllAlbumsVisible &&
-                      t('common.shownWithCount', {
-                        count: artistData?.albums?.length || 0
-                      })}
+                      `(${t('common.shownWithCount', {
+                        count: noOfVisibleAlbums || 0
+                      })})`}
                   </p>
                 )
               ]}

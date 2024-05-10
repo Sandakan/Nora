@@ -314,7 +314,7 @@ const SongsPage = () => {
               />
               <Dropdown
                 name="songsPageFilterDropdown"
-                type="Filter By :"
+                type={`${t('common.filterBy')} :`}
                 value={content.filteringOrder}
                 options={songFilterOptions}
                 onChange={(e) => {
@@ -330,7 +330,7 @@ const SongsPage = () => {
               />
               <Dropdown
                 name="songsPageSortDropdown"
-                type="Sort By :"
+                type={`${t('common.sortBy')} :`}
                 value={content.sortingOrder}
                 options={songSortOptions}
                 onChange={(e) => {

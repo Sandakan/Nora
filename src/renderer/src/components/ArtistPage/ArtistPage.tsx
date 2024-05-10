@@ -37,8 +37,8 @@ const artistSortOptions: DropdownOption<ArtistSortTypes>[] = [
 ];
 
 const artistFilterOptions: DropdownOption<ArtistFilterTypes>[] = [
-  { label: 'Not Selected', value: 'notSelected' },
-  { label: 'Favorites', value: 'favorites' }
+  { label: i18n.t('filterTypes.notSelected'), value: 'notSelected' },
+  { label: i18n.t('filterTypes.favorites'), value: 'favorites' }
 ];
 
 const MIN_ITEM_WIDTH = 175;
@@ -144,7 +144,7 @@ const ArtistPage = () => {
               />
               <Dropdown
                 name="artistPageFilterDropdown"
-                type="Filter By :"
+                type={`${t('common.filterBy')} :`}
                 value={filteringOrder}
                 options={artistFilterOptions}
                 onChange={(e) => {
@@ -157,7 +157,7 @@ const ArtistPage = () => {
               />
               <Dropdown
                 name="artistsSortDropdown"
-                type="Sort By :"
+                type={`${t('common.sortBy')} :`}
                 value={sortingOrder}
                 options={artistSortOptions}
                 onChange={(e) => {

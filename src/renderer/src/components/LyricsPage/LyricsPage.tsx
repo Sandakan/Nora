@@ -23,8 +23,8 @@ const { metadataEditingSupportedExtensions } = appPreferences;
 
 export const syncedLyricsRegex = /^\[\d+:\d{1,2}\.\d{1,3}]/gm;
 
-// substracted 350 milliseconds to keep lyrics in sync with the lyrics line animations.
-export const delay = 0.35;
+// // substracted 350 milliseconds to keep lyrics in sync with the lyrics line animations.
+// export const delay = 0.35;
 
 let isScrollingByCode = false;
 document.addEventListener('lyrics/scrollIntoView', () => {
@@ -73,7 +73,7 @@ const LyricsPage = () => {
 
                 for (let i = 0; i < lyricsLines.length; i += 1) {
                   const { start, end } = lyricsLines[i];
-                  const isInRange = songPosition > start - delay && songPosition < end - delay;
+                  const isInRange = songPosition > start && songPosition < end;
                   if (isInRange) {
                     if (option === 'next' && lyricsLines[i + 1])
                       updateSongPosition(lyricsLines[i + 1].start);

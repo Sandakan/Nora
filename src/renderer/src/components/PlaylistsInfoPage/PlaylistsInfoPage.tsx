@@ -237,7 +237,7 @@ const PlaylistInfoPage = () => {
         dropdowns={[
           {
             name: 'songsPageFilterDropdown',
-            type: 'Filter By :',
+            type: `${t('common.filterBy')} :`,
             value: filteringOrder,
             options: songFilterOptions,
             onChange: (e) => {
@@ -250,7 +250,7 @@ const PlaylistInfoPage = () => {
           },
           {
             name: 'PlaylistPageSortDropdown',
-            type: 'Sort By :',
+            type: `${t('common.sortBy')} :`,
             value: sortingOrder,
             options: songSortOptions.concat([
               { label: t('sortTypes.addedOrder'), value: 'addedOrder' }

@@ -106,7 +106,7 @@ export type LastFMScrobblePostResponse =
     }
   | LastFMError;
 
-export type LastFMLoveUnlovePostResponse = {} | LastFMError;
+export type LastFMLoveUnlovePostResponse = Record<string, never> | LastFMError;
 
 export type AuthData = {
   LAST_FM_API_KEY: string;

@@ -151,7 +151,8 @@ interface PurpleInteractions {
   following: boolean;
 }
 
-interface IqByAction {}
+// type IqByAction =  {}
+type IqByAction = Record<string, never>;
 
 interface CustomPerformance {
   label: string;

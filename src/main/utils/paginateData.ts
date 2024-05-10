@@ -1,4 +1,4 @@
-function paginateData<DataType extends unknown, SortingType extends string>(
+function paginateData<DataType extends object, SortingType extends string>(
   data: DataType[],
   sortType: SortingType,
   paginationData?: PaginatingData

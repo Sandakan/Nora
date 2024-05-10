@@ -421,9 +421,9 @@ export default function App() {
     const playSongIfPlayable = () => {
       if (refStartPlay.current) toggleSongPlayback(true);
     };
-    const manageSongPositionUpdate = () => {
-      contentRef.current.player.songPosition = roundTo(player.currentTime, 2);
-    };
+    // const manageSongPositionUpdate = () => {
+    //   contentRef.current.player.songPosition = roundTo(player.currentTime, 2);
+    // };
     const managePlayerStalledStatus = () => {
       dispatch({ type: 'PLAYER_WAITING_STATUS', data: true });
     };
@@ -448,7 +448,7 @@ export default function App() {
     player.addEventListener('play', addSongTitleToTitleBar);
     player.addEventListener('pause', displayDefaultTitleBar);
 
-    player.addEventListener('timeupdate', manageSongPositionUpdate);
+    // player.addEventListener('timeupdate', manageSongPositionUpdate);
 
     return () => {
       toggleSongPlayback(false);
@@ -460,7 +460,7 @@ export default function App() {
       player.removeEventListener('stalled', managePlayerStalledStatus);
       player.removeEventListener('waiting', managePlayerStalledStatus);
       player.removeEventListener('progress', managePlayerStalledStatus);
-      player.removeEventListener('timeupdate', manageSongPositionUpdate);
+      // player.removeEventListener('timeupdate', manageSongPositionUpdate);
       player.removeEventListener('canplay', playSongIfPlayable);
       player.removeEventListener('ended', handleSkipForwardClickWithParams);
       player.removeEventListener('play', addSongTitleToTitleBar);
@@ -484,10 +484,10 @@ export default function App() {
 
     const lowResponseIntervalId = setInterval(() => {
       if (!player.paused) {
-        const currentPosition = contentRef.current.player.songPosition;
+        // const currentPosition = contentRef.current.player.songPosition;
 
         const playerPositionChange = new CustomEvent('player/positionChange', {
-          detail: currentPosition
+          detail: roundTo(player.currentTime, 2)
         });
         document.dispatchEvent(playerPositionChange);
       }
@@ -553,7 +553,7 @@ export default function App() {
 
           const currSongPosition = Number(playback?.currentSong.stoppedPosition);
           player.currentTime = currSongPosition;
-          contentRef.current.player.songPosition = currSongPosition;
+          // contentRef.current.player.songPosition = currSongPosition;
           dispatch({
             type: 'UPDATE_SONG_POSITION',
             data: currSongPosition

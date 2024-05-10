@@ -1,3 +1,4 @@
+/* eslint-disable promise/catch-or-return */
 import React from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -90,7 +91,8 @@ const convertLyricsStrToObj = (
       offset: 0
     },
     lyricsType: isSynced ? 'SYNCED' : 'UN_SYNCED',
-    isOfflineLyricsAvailable: false
+    isOfflineLyricsAvailable: false,
+    isTranslated: false
   };
   return obj;
 };
@@ -195,10 +197,9 @@ const LyricsEditorSavePrompt = (props: Props) => {
       </div>
       <textarea
         className="h-[40vh] max-h-full min-h-[10rem] w-full overflow-y-auto rounded-lg bg-background-color-2 p-4 dark:bg-dark-background-color-2"
+        value={parsedLyrics?.lyrics.unparsedLyrics}
         readOnly
-      >
-        {parsedLyrics?.lyrics.unparsedLyrics}
-      </textarea>
+      />
       <div className="mt-6 flex items-center justify-center">
         <Button
           label={t('lyricsEditorSavePrompt.copyLyrics')}
