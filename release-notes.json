@@ -1,14 +1,123 @@
 {
   "latestVersion": {
-    "artwork": "/resources/other/release artworks/whats-new-v2.5.0-stable.webp",
+    "artwork": "/resources/other/release artworks/whats-new-v3.0.0-stable.webp",
     "importantNotes": [
-      "This update some most requested features such as 10-band equalizer, localization support, reading/writing lyrics from LRC files and a lot of bug fixes."
+      "This update includes a full-screen player, dynamic themes, turkish translations and some bug fixes and major performance improvements. Keep in mind that this major update will reset all previous app data."
     ],
     "phase": "stable",
-    "releaseDate": "2023-12-14T15:30:52.472Z",
-    "version": "2.5.0-stable"
+    "releaseDate": "2024-05-10T17:45:48.625Z",
+    "version": "3.0.0-stable"
   },
   "versions": [
+    {
+      "artwork": "/resources/other/release artworks/whats-new-v3.0.0-stable.webp",
+      "importantNotes": [
+        "This update includes a full-screen player, dynamic themes, turkish translations and some bug fixes and major performance improvements. Keep in mind that this major update will reset all previous app data."
+      ],
+      "notes": {
+        "new": [
+          { "note": "Added an experimental full-screen player mode. Fixes #222." },
+          { "note": "Added support for translating lyrics. Fixes #239." },
+          { "note": "Added support for dynamic themes based on the currently playing song." },
+          { "note": "Added experimental support auto-updating Nora." },
+          { "note": "Added support for navigation between prompts for supported prompts." },
+          {
+            "note": "Greatly reduced unnecessary re-renders in turn improving overall performance."
+          },
+          {
+            "note": "Added a feature to prevent the display from going to sleep in situations with no user activity like displaying lyrics."
+          },
+          { "note": "Moved notifications to the bottom right corner of the window." },
+          { "note": "Added support for Discord Rich Presence." },
+          { "note": "Added a progress bar to the bottom of the full-screen player." },
+          {
+            "note": "Added keyboard shortcuts to control prompt menu back/forward navigation buttons."
+          },
+          { "note": "Added Turkish translations. Thanks @mikropsoft." },
+          { "note": "Added support for filtering songs and artists in selected pages." }
+        ],
+        "fixed": [
+          {
+            "note": "Greatly improved palette generation duration. (90% faster)"
+          },
+          { "note": "Fixed some localization bugs in Nora." },
+          {
+            "note": "Fixed a bug where Nora doesn't send albumArtist data when scrobbling songs."
+          },
+          {
+            "note": "Improved performance when sending scrobbling and now playing data to Last.fm."
+          },
+          {
+            "note": "Fixed a bug where albums related to artists are not shown."
+          },
+          {
+            "note": "Fixed a bug where special characters are not shown when localizing text in Nora."
+          },
+          {
+            "note": "Fixed a bug where metadata updates of songs outside the library fail."
+          },
+          {
+            "note": "Improved animations when displaying lyrics."
+          },
+          {
+            "note": "Fixed a bug where the auto-scrolling button in LyricsPage doesn't have a tooltip label."
+          },
+          {
+            "note": "Fixed a bug where the close button shows an incorrect tooltip label."
+          },
+          {
+            "note": "Updated English translations. Thanks @JustCallMeQuincy."
+          },
+          {
+            "note": "Added a CODE_OF_CONDUCT file to the repository."
+          },
+          {
+            "note": "Fixed a bug where buttons and dropdowns don't have enough contrast to read text when a background image is displayed."
+          },
+          {
+            "note": "ListeningActivityBarGraph now shows ListeningActivityBars according to the available width."
+          },
+          {
+            "note": "Added a possible fix to a missing dependency for Nora when launching in Linux-based operating systems."
+          },
+          { "note": "Improved animations in notifications." },
+          {
+            "note": "Fixed a bug where the app window would be hidden if the monitor it was in got disconnected."
+          },
+          {
+            "note": "Fixed a bug where app storage metrics show incorrect metrics when the app is installed in other than the C: drive."
+          },
+          { "note": "Improved import playlist performance." },
+          {
+            "note": "Fixed a bug where importing the Favorites playlist will make the app unresponsive due to many like/dislike notifications."
+          },
+          {
+            "note": "Fixed a bug where Nora will forget about sub-folders inside parent folders."
+          },
+          {
+            "note": "Improved app performance when displaying synced lyrics."
+          },
+          {
+            "note": "Fixed a bug where lyrics copyright info is positioned incorrectly in the full-screen player."
+          },
+          {
+            "note": "Fixed a bug where Nora doesn't check for LRC files in the custom LRC file path."
+          },
+          {
+            "note": "Fixed a bug where lyrics with the same timestamps don't appear correctly."
+          },
+          {
+            "note": "Fixed a bug where users can't change pages through the sidebar when the app language is changed to other than English."
+          },
+          {
+            "note": "Fixed showing the musixmatch disclaimer twice in the disclaimer dialog."
+          }
+        ],
+        "knownIssues": []
+      },
+      "releaseDate": "2024-05-10T17:45:48.625Z",
+      "version": "3.0.0-stable"
+    },
     {
       "artwork": "/resources/other/release artworks/whats-new-v2.5.0-stable.webp",
       "importantNotes": [

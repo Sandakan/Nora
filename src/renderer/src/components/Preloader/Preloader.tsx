@@ -21,20 +21,20 @@ const eventHandler = () => {
   console.warn('contentLoad', window.performance.now() - contentLoadStart);
 };
 
-window.addEventListener('DOMContentLoaded', eventHandler);
+window.addEventListener('load', eventHandler);
 
 const Preloader = () => {
   const [isPreloaderRemoved, setIsPreloaderRemoved] = React.useState(false);
 
   React.useEffect(() => {
     // console.log(window.performance.now());
-    if (window.performance.now() > 5000) hidePreloader();
+    if (window.performance.now() > 3000) hidePreloader();
     // this removes preloader in 10 seconds no matter what didn't load.
     setTimeout(() => {
       hidePreloader();
       isLoadedOnce = true;
       setIsPreloaderRemoved(true);
-    }, 5000);
+    }, 3000);
   }, []);
 
   return (

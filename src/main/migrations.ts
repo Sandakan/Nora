@@ -21,9 +21,15 @@ export const generateMigrationMessage = (
 };
 
 export const songMigrations = {
+  '3.0.0-stable': (store: Conf<{ version?: string; songs: SavableSongData[] }>) => {
+    log('Starting the songs.json migration process.', {
+      version: '3.0.0-stable'
+    });
+    store.set('songs', []);
+  },
   '2.0.0-stable': (store: Conf<{ version?: string; songs: SavableSongData[] }>) => {
     log('Starting the songs.json migration process.', {
-      version: '2.0.0-stable;'
+      version: '2.0.0-stable'
     });
     store.set('songs', []);
   },
@@ -57,9 +63,15 @@ export const songMigrations = {
 
 export const artistMigrations = {
   // ? This migration is added to fix as a fix to https://github.com/Sandakan/Nora/issues/191
+  '3.0.0-stable': (store: Conf<{ version?: string; artists: SavableArtist[] }>) => {
+    log('Starting the artists.json migration process.', {
+      version: '3.0.0-stable'
+    });
+    store.set('artists', []);
+  },
   '2.4.0-stable': (store: Conf<{ version?: string; artists: SavableArtist[] }>) => {
     log('Starting the artists.json migration process.', {
-      version: '2.4.0-stable;'
+      version: '2.4.0-stable'
     });
 
     const artists = store.get('artists');
@@ -77,7 +89,7 @@ export const artistMigrations = {
   },
   '2.0.0-stable': (store: Conf<{ version?: string; artists: SavableArtist[] }>) => {
     log('Starting the artists.json migration process.', {
-      version: '2.0.0-stable;'
+      version: '2.0.0-stable'
     });
     store.set('artists', []);
   },
@@ -97,36 +109,60 @@ export const artistMigrations = {
 };
 
 export const albumMigrations = {
+  '3.0.0-stable': (store: Conf<{ version?: string; albums: SavableAlbum[] }>) => {
+    log('Starting the albums.json migration process.', {
+      version: '3.0.0-stable'
+    });
+    store.set('albums', []);
+  },
   '2.0.0-stable': (store: Conf<{ version?: string; albums: SavableAlbum[] }>) => {
     log('Starting the albums.json migration process.', {
-      version: '2.0.0-stable;'
+      version: '2.0.0-stable'
     });
     store.set('albums', []);
   }
 };
 
 export const playlistMigrations = {
+  '3.0.0-stable': (store: Conf<{ version?: string; playlists: SavablePlaylist[] }>) => {
+    log('Starting the playlists.json migration process.', {
+      version: '3.0.0-stable'
+    });
+    store.set('playlists', PLAYLIST_DATA_TEMPLATE);
+  },
   '2.0.0-stable': (store: Conf<{ version?: string; playlists: SavablePlaylist[] }>) => {
     log('Starting the playlists.json migration process.', {
-      version: '2.0.0-stable;'
+      version: '2.0.0-stable'
     });
     store.set('playlists', PLAYLIST_DATA_TEMPLATE);
   }
 };
 
 export const genreMigrations = {
+  '3.0.0-stable': (store: Conf<{ version?: string; genres: SavableGenre[] }>) => {
+    log('Starting the genres.json migration process.', {
+      version: '3.0.0-stable'
+    });
+    store.set('genres', []);
+  },
   '2.0.0-stable': (store: Conf<{ version?: string; genres: SavableGenre[] }>) => {
     log('Starting the genres.json migration process.', {
-      version: '2.0.0-stable;'
+      version: '2.0.0-stable'
     });
     store.set('genres', []);
   }
 };
 
 export const userDataMigrations = {
+  '3.0.0-stable': (store: Conf<{ version?: string; userData: UserData }>) => {
+    log('Starting the userData.json migration process.', {
+      version: '3.0.0-stable'
+    });
+    store.set('userData', USER_DATA_TEMPLATE);
+  },
   '2.5.0-stable': (store: Conf<{ version?: string; userData: UserData }>) => {
     log('Starting the userData.json migration process.', {
-      version: '2.5.0-stable;'
+      version: '2.5.0-stable'
     });
     const userData = store.get('userData');
     userData.language = 'en';
@@ -135,7 +171,7 @@ export const userDataMigrations = {
   },
   '2.4.0-stable': (store: Conf<{ version?: string; userData: UserData }>) => {
     log('Starting the userData.json migration process.', {
-      version: '2.4.0-stable;'
+      version: '2.4.0-stable'
     });
 
     const userData = store.get('userData');
@@ -158,25 +194,37 @@ export const userDataMigrations = {
   },
   '2.0.0-stable': (store: Conf<{ version?: string; userData: UserData }>) => {
     log('Starting the userData.json migration process.', {
-      version: '2.0.0-stable;'
+      version: '2.0.0-stable'
     });
     store.set('userData', USER_DATA_TEMPLATE);
   }
 };
 
 export const listeningDataMigrations = {
+  '3.0.0-stable': (store: Conf<{ version?: string; listeningData: SongListeningData[] }>) => {
+    log('Starting the listeningData.json migration process.', {
+      version: '3.0.0-stable'
+    });
+    store.set('listeningData', []);
+  },
   '2.0.0-stable': (store: Conf<{ version?: string; listeningData: SongListeningData[] }>) => {
     log('Starting the listeningData.json migration process.', {
-      version: '2.0.0-stable;'
+      version: '2.0.0-stable'
     });
     store.set('listeningData', []);
   }
 };
 
 export const blacklistMigrations = {
+  '3.0.0-stable': (store: Conf<{ version?: string; blacklist: Blacklist }>) => {
+    log('Starting the blacklist.json migration process.', {
+      version: '3.0.0-stable'
+    });
+    store.set('blacklist', BLACKLIST_TEMPLATE);
+  },
   '2.0.0-stable': (store: Conf<{ version?: string; blacklist: Blacklist }>) => {
     log('Starting the blacklist.json migration process.', {
-      version: '2.0.0-stable;'
+      version: '2.0.0-stable'
     });
     store.set('blacklist', BLACKLIST_TEMPLATE);
   }
