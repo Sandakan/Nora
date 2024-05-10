@@ -14,16 +14,14 @@ import {
   listeningDataMigrations,
   playlistMigrations,
   songMigrations,
-  userDataMigrations,
+  userDataMigrations
 } from './migrations';
 import { encrypt } from './utils/safeStorage';
 import { LastFMSessionData } from '../@types/last_fm_api';
+import { DEFAULT_SONG_PALETTE } from './other/generatePalette';
 
-export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(
-  app.getPath('userData'),
-  'song_covers',
-);
-export const DEFAULT_FILE_URL = 'nora://localFiles/';
+export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(app.getPath('userData'), 'song_covers');
+export const DEFAULT_FILE_URL = 'nora://localfiles/';
 
 export const USER_DATA_TEMPLATE: UserData = {
   language: 'en',
@@ -40,11 +38,12 @@ export const USER_DATA_TEMPLATE: UserData = {
     sendSongFavoritesDataToLastFM: false,
     sendNowPlayingSongDataToLastFM: false,
     saveLyricsInLrcFilesForSupportedSongs: false,
+    enableDiscordRPC: false
   },
   windowPositions: {},
   windowDiamensions: {},
   windowState: 'normal',
-  recentSearches: [],
+  recentSearches: []
 };
 
 export const HISTORY_PLAYLIST_TEMPLATE: SavablePlaylist = {
@@ -52,125 +51,121 @@ export const HISTORY_PLAYLIST_TEMPLATE: SavablePlaylist = {
   playlistId: 'History',
   createdDate: new Date(),
   songs: [],
-  isArtworkAvailable: true,
+  isArtworkAvailable: true
 };
 export const FAVORITES_PLAYLIST_TEMPLATE: SavablePlaylist = {
   name: 'Favorites',
   playlistId: 'Favorites',
   createdDate: new Date(),
   songs: [],
-  isArtworkAvailable: true,
+  isArtworkAvailable: true
 };
 export const PLAYLIST_DATA_TEMPLATE: SavablePlaylist[] = [
   HISTORY_PLAYLIST_TEMPLATE,
-  FAVORITES_PLAYLIST_TEMPLATE,
+  FAVORITES_PLAYLIST_TEMPLATE
 ];
 
 export const BLACKLIST_TEMPLATE: Blacklist = {
   songBlacklist: [],
-  folderBlacklist: [],
+  folderBlacklist: []
 };
+
+export const PALETTE_DATA_TEMPLATE: PaletteData[] = [DEFAULT_SONG_PALETTE];
 
 const songStore = new Store({
   name: 'songs',
   defaults: {
     version,
-    songs: [],
+    songs: []
   },
   schema: {
     version: { type: ['string', 'null'] },
     songs: {
-      type: 'array',
-    },
+      type: 'array'
+    }
   },
-  beforeEachMigration: (_, context) =>
-    generateMigrationMessage('songs.json', context),
-  migrations: songMigrations,
+  beforeEachMigration: (_, context) => generateMigrationMessage('songs.json', context),
+  migrations: songMigrations
 });
 
 const artistStore = new Store({
   name: 'artists',
   defaults: {
     version,
-    artists: [],
+    artists: []
   },
   schema: {
     version: { type: ['string', 'null'] },
     artists: {
-      type: 'array',
-    },
+      type: 'array'
+    }
   },
-  beforeEachMigration: (_, context) =>
-    generateMigrationMessage('artists.json', context),
-  migrations: artistMigrations,
+  beforeEachMigration: (_, context) => generateMigrationMessage('artists.json', context),
+  migrations: artistMigrations
 });
 
 const genreStore = new Store({
   name: 'genres',
   defaults: {
     version,
-    genres: [],
+    genres: []
   },
   schema: {
     version: { type: ['string', 'null'] },
     genres: {
-      type: 'array',
-    },
+      type: 'array'
+    }
   },
-  beforeEachMigration: (_, context) =>
-    generateMigrationMessage('genres.json', context),
-  migrations: genreMigrations,
+  beforeEachMigration: (_, context) => generateMigrationMessage('genres.json', context),
+  migrations: genreMigrations
 });
 
 const albumStore = new Store({
   name: 'albums',
   defaults: {
     version,
-    albums: [],
+    albums: []
   },
   schema: {
     version: { type: ['string', 'null'] },
     albums: {
-      type: 'array',
-    },
+      type: 'array'
+    }
   },
-  beforeEachMigration: (_, context) =>
-    generateMigrationMessage('albums.json', context),
-  migrations: albumMigrations,
+  beforeEachMigration: (_, context) => generateMigrationMessage('albums.json', context),
+  migrations: albumMigrations
 });
 
 const playlistDataStore = new Store({
   name: 'playlists',
   defaults: {
     version,
-    playlists: PLAYLIST_DATA_TEMPLATE,
+    playlists: PLAYLIST_DATA_TEMPLATE
   },
   schema: {
     version: { type: ['string', 'null'] },
     playlists: {
-      type: 'array',
-    },
+      type: 'array'
+    }
   },
-  beforeEachMigration: (_, context) =>
-    generateMigrationMessage('playlists.json', context),
-  migrations: playlistMigrations,
+  beforeEachMigration: (_, context) => generateMigrationMessage('playlists.json', context),
+  migrations: playlistMigrations
 });
 
 const userDataStore = new Store({
   name: 'userData',
   defaults: {
     version,
-    userData: USER_DATA_TEMPLATE,
+    userData: USER_DATA_TEMPLATE
   },
   schema: {
     version: { type: ['string', 'null'] },
     userData: {
-      type: 'object',
-    },
+      type: 'object'
+    }
   },
-  beforeEachMigration: (_, context) =>
-    generateMigrationMessage('userData.json', context),
-  migrations: userDataMigrations,
+  beforeEachMigration: (_, context) => generateMigrationMessage('userData.json', context),
+  migrations: userDataMigrations
 });
 
 const listeningDataStore = new Store({
@@ -178,17 +173,16 @@ const listeningDataStore = new Store({
   clearInvalidConfig: true,
   defaults: {
     version,
-    listeningData: [],
+    listeningData: []
   },
   schema: {
     version: { type: ['string', 'null'] },
     listeningData: {
-      type: 'array',
-    },
+      type: 'array'
+    }
   },
-  beforeEachMigration: (_, context) =>
-    generateMigrationMessage('listening_data.json', context),
-  migrations: listeningDataMigrations,
+  beforeEachMigration: (_, context) => generateMigrationMessage('listening_data.json', context),
+  migrations: listeningDataMigrations
 });
 
 const blacklistStore = new Store({
@@ -196,7 +190,7 @@ const blacklistStore = new Store({
   clearInvalidConfig: true,
   defaults: {
     version,
-    blacklist: BLACKLIST_TEMPLATE,
+    blacklist: BLACKLIST_TEMPLATE
   },
   schema: {
     version: { type: ['string', 'null'] },
@@ -204,24 +198,38 @@ const blacklistStore = new Store({
       type: 'object',
       properties: {
         songBlacklist: {
-          type: 'array',
+          type: 'array'
         },
         folderBlacklist: {
-          type: 'array',
-        },
-      },
-    },
+          type: 'array'
+        }
+      }
+    }
   },
-  beforeEachMigration: (_, context) =>
-    generateMigrationMessage('blacklist.json', context),
-  migrations: blacklistMigrations,
+  beforeEachMigration: (_, context) => generateMigrationMessage('blacklist.json', context),
+  migrations: blacklistMigrations
+});
+
+const paletteStore = new Store({
+  name: 'palettes',
+  defaults: {
+    version,
+    palettes: []
+  },
+  schema: {
+    version: { type: ['string', 'null'] },
+    palettes: {
+      type: 'array'
+    }
+  }
+  // beforeEachMigration: (_, context) => generateMigrationMessage('songs.json', context),
+  // migrations: songMigrations
 });
 
 const songStoreVersion = songStore.get('version');
 log('song store version', { songStoreVersion }, 'WARN');
 
-export const supportedMusicExtensions =
-  appPreferences.supportedMusicExtensions.map((x) => `.${x}`);
+export const supportedMusicExtensions = appPreferences.supportedMusicExtensions.map((x) => `.${x}`);
 
 let cachedSongsData = songStore.get('songs', []) as SavableSongData[];
 let cachedArtistsData = artistStore.get('artists', []) as SavableArtist[];
@@ -229,26 +237,17 @@ let cachedAlbumsData = albumStore.get('albums', []) as SavableAlbum[];
 let cachedGenresData = genreStore.get('genres', []) as SavableGenre[];
 let cachedPlaylistsData = playlistDataStore.get(
   'playlists',
-  PLAYLIST_DATA_TEMPLATE,
+  PLAYLIST_DATA_TEMPLATE
 ) as SavablePlaylist[];
-let cachedUserData: UserData = userDataStore.get(
-  'userData',
-  USER_DATA_TEMPLATE,
-) as UserData;
-let cachedListeningData = listeningDataStore.get(
-  'listeningData',
-  [],
-) as SongListeningData[];
-let cachedBlacklist = blacklistStore.get(
-  'blacklist',
-  BLACKLIST_TEMPLATE,
-) as Blacklist;
+let cachedUserData: UserData = userDataStore.get('userData', USER_DATA_TEMPLATE) as UserData;
+let cachedListeningData = listeningDataStore.get('listeningData', []) as SongListeningData[];
+let cachedBlacklist = blacklistStore.get('blacklist', BLACKLIST_TEMPLATE) as Blacklist;
+let cachedPaletteData = paletteStore.get('palettes', PALETTE_DATA_TEMPLATE) as PaletteData[];
 
 // ? USER DATA GETTERS AND SETTERS
 
 export const getUserData = () => {
-  if (cachedUserData && Object.keys(cachedUserData).length !== 0)
-    return cachedUserData;
+  if (cachedUserData && Object.keys(cachedUserData).length !== 0) return cachedUserData;
   return userDataStore.get('userData', USER_DATA_TEMPLATE) as UserData;
 };
 
@@ -265,50 +264,26 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
     else if (dataType === 'musicFolders' && Array.isArray(data)) {
       userData.musicFolders = data;
     } else if (dataType === 'language' && typeof data === 'string') {
-      userData.language = data as LanguageCodes;
-    } else if (
-      dataType === 'windowPositions.mainWindow' &&
-      typeof data === 'object'
-    ) {
+      userData.language = data;
+    } else if (dataType === 'windowPositions.mainWindow' && typeof data === 'object') {
       userData.windowPositions.mainWindow = data as WindowCordinates;
-    } else if (
-      dataType === 'windowPositions.miniPlayer' &&
-      typeof data === 'object'
-    ) {
+    } else if (dataType === 'windowPositions.miniPlayer' && typeof data === 'object') {
       userData.windowPositions.miniPlayer = data as WindowCordinates;
-    } else if (
-      dataType === 'windowDiamensions.mainWindow' &&
-      typeof data === 'object'
-    ) {
+    } else if (dataType === 'windowDiamensions.mainWindow' && typeof data === 'object') {
       userData.windowDiamensions.mainWindow = data as WindowCordinates;
-    } else if (
-      dataType === 'windowDiamensions.miniPlayer' &&
-      typeof data === 'object'
-    ) {
+    } else if (dataType === 'windowDiamensions.miniPlayer' && typeof data === 'object') {
       userData.windowDiamensions.miniPlayer = data as WindowCordinates;
     } else if (dataType === 'windowState' && typeof data === 'string') {
       userData.windowState = data as WindowState;
     } else if (dataType === 'recentSearches' && Array.isArray(data)) {
       userData.recentSearches = data as string[];
-    } else if (
-      dataType === 'preferences.autoLaunchApp' &&
-      typeof data === 'boolean'
-    ) {
+    } else if (dataType === 'preferences.autoLaunchApp' && typeof data === 'boolean') {
       userData.preferences.autoLaunchApp = data;
-    } else if (
-      dataType === 'preferences.isMusixmatchLyricsEnabled' &&
-      typeof data === 'boolean'
-    ) {
+    } else if (dataType === 'preferences.isMusixmatchLyricsEnabled' && typeof data === 'boolean') {
       userData.preferences.isMusixmatchLyricsEnabled = data;
-    } else if (
-      dataType === 'preferences.isMiniPlayerAlwaysOnTop' &&
-      typeof data === 'boolean'
-    ) {
+    } else if (dataType === 'preferences.isMiniPlayerAlwaysOnTop' && typeof data === 'boolean') {
       userData.preferences.isMiniPlayerAlwaysOnTop = data;
-    } else if (
-      dataType === 'preferences.hideWindowOnClose' &&
-      typeof data === 'boolean'
-    ) {
+    } else if (dataType === 'preferences.hideWindowOnClose' && typeof data === 'boolean') {
       userData.preferences.hideWindowOnClose = data;
     } else if (
       dataType === 'preferences.saveLyricsInLrcFilesForSupportedSongs' &&
@@ -335,25 +310,18 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
       typeof data === 'boolean'
     ) {
       userData.preferences.sendNowPlayingSongDataToLastFM = data;
-    } else if (
-      dataType === 'customMusixmatchUserToken' &&
-      typeof data === 'string'
-    ) {
+    } else if (dataType === 'preferences.enableDiscordRPC' && typeof data === 'boolean') {
+      userData.preferences.enableDiscordRPC = data;
+    } else if (dataType === 'customMusixmatchUserToken' && typeof data === 'string') {
       const encryptedToken = encrypt(data);
       userData.customMusixmatchUserToken = encryptedToken;
-    } else if (
-      dataType === 'customLrcFilesSaveLocation' &&
-      typeof data === 'string'
-    ) {
+    } else if (dataType === 'customLrcFilesSaveLocation' && typeof data === 'string') {
       userData.customLrcFilesSaveLocation = data;
     } else if (dataType === 'lastFmSessionData' && typeof data === 'object') {
       userData.lastFmSessionData = data as LastFMSessionData;
     } else if (dataType === 'storageMetrics' && typeof data === 'object') {
       userData.storageMetrics = data as StorageMetrics;
-    } else
-      return log(
-        'Error occurred in setUserData function due ot invalid dataType or data.',
-      );
+    } else return log('Error occurred in setUserData function due ot invalid dataType or data.');
 
     saveUserData(userData);
 
@@ -363,24 +331,14 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
       dataType === 'windowDiamensions.miniPlayer'
     )
       dataUpdateEvent('userData/windowDiamension');
-    else if (
-      dataType === 'windowPositions.mainWindow' ||
-      dataType === 'windowPositions.miniPlayer'
-    )
+    else if (dataType === 'windowPositions.mainWindow' || dataType === 'windowPositions.miniPlayer')
       dataUpdateEvent('userData/windowPosition');
-    else if (dataType.includes('sortingStates'))
-      dataUpdateEvent('userData/sortingStates');
-    else if (dataType.includes('preferences'))
-      dataUpdateEvent('settings/preferences');
-    else if (dataType === 'recentSearches')
-      dataUpdateEvent('userData/recentSearches');
+    else if (dataType.includes('sortingStates')) dataUpdateEvent('userData/sortingStates');
+    else if (dataType.includes('preferences')) dataUpdateEvent('settings/preferences');
+    else if (dataType === 'recentSearches') dataUpdateEvent('userData/recentSearches');
     else dataUpdateEvent('userData');
   } else {
-    log(
-      `ERROR OCCURRED WHEN READING USER DATA. USER DATA ARRAY IS EMPTY.`,
-      { userData },
-      'ERROR',
-    );
+    log(`ERROR OCCURRED WHEN READING USER DATA. USER DATA ARRAY IS EMPTY.`, { userData }, 'ERROR');
   }
   return undefined;
 }
@@ -397,6 +355,20 @@ export const getSongsData = () => {
 export const setSongsData = (updatedSongs: SavableSongData[]) => {
   cachedSongsData = updatedSongs;
   songStore.set('songs', updatedSongs);
+};
+
+// ? PALETTE DATA GETTERS AND SETTERS
+
+export const getPaletteData = () => {
+  if (Array.isArray(cachedPaletteData) && cachedPaletteData.length !== 0) {
+    return cachedPaletteData;
+  }
+  return paletteStore.get('palettes', PALETTE_DATA_TEMPLATE) as PaletteData[];
+};
+
+export const setPaletteData = (updatedPalette: PaletteData[]) => {
+  cachedPaletteData = updatedPalette;
+  paletteStore.set('palettes', updatedPalette);
 };
 
 // ? ARTIST DATA GETTERS AND SETTERS
@@ -453,41 +425,30 @@ export const createNewListeningDataInstance = (songId: string) => {
     fullListens: 0,
     inNoOfPlaylists: 0,
     listens: [{ year: currentYear, listens: [] }],
-    seeks: [],
+    seeks: []
   };
   return newListeningData;
 };
 
-export const getListeningData = (
-  songIds = [] as string[],
-): SongListeningData[] => {
+export const getListeningData = (songIds = [] as string[]): SongListeningData[] => {
   const data =
     cachedListeningData && cachedListeningData.length > 0
       ? cachedListeningData
       : (listeningDataStore.get('listeningData', []) as SongListeningData[]);
 
   const results =
-    songIds.length === 0
-      ? data
-      : data.filter((x) => songIds.some((songId) => x.songId === songId));
+    songIds.length === 0 ? data : data.filter((x) => songIds.some((songId) => x.songId === songId));
 
   if (results.length === 0) {
     if (songIds.length === 0) return [];
     const defaultOutputs: SongListeningData[] = songIds.map((id) =>
-      createNewListeningDataInstance(id),
+      createNewListeningDataInstance(id)
     );
     return defaultOutputs;
   }
 
   const listeningData: SongListeningData[] = results.map((x) => {
-    const {
-      songId,
-      skips = 0,
-      fullListens = 0,
-      inNoOfPlaylists = 0,
-      listens,
-      seeks = [],
-    } = x;
+    const { songId, skips = 0, fullListens = 0, inNoOfPlaylists = 0, listens, seeks = [] } = x;
 
     return {
       songId,
@@ -495,7 +456,7 @@ export const getListeningData = (
       fullListens,
       inNoOfPlaylists,
       listens,
-      seeks,
+      seeks
     };
   });
 
@@ -569,7 +530,7 @@ export const getBlacklistData = (): Blacklist => {
 
 export const addToBlacklist = (
   str: string,
-  blacklistType: 'SONG_BLACKLIST' | 'FOLDER_BLACKLIST',
+  blacklistType: 'SONG_BLACKLIST' | 'FOLDER_BLACKLIST'
 ) => {
   switch (blacklistType) {
     case 'SONG_BLACKLIST':
@@ -588,9 +549,7 @@ export const addToBlacklist = (
   blacklistStore.set('blacklist', cachedBlacklist);
 };
 
-export const updateBlacklist = (
-  callback: (_prevBlacklist: Blacklist) => Blacklist,
-) => {
+export const updateBlacklist = (callback: (_prevBlacklist: Blacklist) => Blacklist) => {
   const updatedBlacklist = callback(cachedBlacklist);
   cachedBlacklist = updatedBlacklist;
   blacklistStore.set('blacklist', updatedBlacklist);
@@ -611,33 +570,20 @@ export const getDirectories = async (srcpath: string) => {
   try {
     const dirs = await fs.readdir(srcpath, { withFileTypes: true });
     const filteredDirs = dirs.filter((dir) => dir.isDirectory());
-    const dirsWithFullPaths = filteredDirs.map((dir) =>
-      path.join(srcpath, dir.name),
-    );
+    const dirsWithFullPaths = filteredDirs.map((dir) => path.join(srcpath, dir.name));
 
     return dirsWithFullPaths;
   } catch (error) {
-    log(
-      'Error occurred when parsing directories of a path.',
-      { srcpath },
-      'ERROR',
-    );
+    log('Error occurred when parsing directories of a path.', { srcpath }, 'ERROR');
     throw error;
   }
 };
 
-export async function getDirectoriesRecursive(
-  srcpath: string,
-): Promise<string[]> {
+export async function getDirectoriesRecursive(srcpath: string): Promise<string[]> {
   try {
     const dirs = await getDirectories(srcpath);
     if (dirs)
-      return [
-        srcpath,
-        ...flattenPathArrays(
-          await Promise.all(dirs.map(getDirectoriesRecursive)),
-        ),
-      ];
+      return [srcpath, ...flattenPathArrays(await Promise.all(dirs.map(getDirectoriesRecursive)))];
     return [];
   } catch (error) {
     log(`Error occurred when parsing directories.`, { error }, 'ERROR');

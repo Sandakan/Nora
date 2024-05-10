@@ -8,11 +8,12 @@ on:
     branches: ['master']
 
 env:
-  MUSIXMATCH_DEFAULT_USER_TOKEN: ${{ secrets.MUSIXMATCH_DEFAULT_USER_TOKEN }}
-  LAST_FM_API_KEY: ${{ secrets.LAST_FM_API_KEY }}
-  GENIUS_API_KEY: ${{ secrets.GENIUS_API_KEY }}
-  LAST_FM_SHARED_SECRET: ${{ secrets.LAST_FM_SHARED_SECRET }}
-  ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
+  MAIN_VITE_MUSIXMATCH_DEFAULT_USER_TOKEN: ${{ secrets.MUSIXMATCH_DEFAULT_USER_TOKEN }}
+  MAIN_VITE_LAST_FM_API_KEY: ${{ secrets.LAST_FM_API_KEY }}
+  MAIN_VITE_GENIUS_API_KEY: ${{ secrets.GENIUS_API_KEY }}
+  MAIN_VITE_LAST_FM_SHARED_SECRET: ${{ secrets.LAST_FM_SHARED_SECRET }}
+  MAIN_VITE_ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
+  MAIN_VITE_DISCORD_CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
 
 jobs:
   release:
@@ -24,23 +25,42 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          # Used Node v20.12.2 because the latest v20.13 breaks windows builds.
+          # node-version: 20.12.2
+          node-version: 20
           check-latest: true
 
-      - name: Build/release Electron app
-        uses: samuelmeuli/action-electron-builder@v1
-        with:
-          # GitHub token, automatically provided to the action
-          # (No need to define this secret in the repo settings)
-          github_token: ${{ secrets.github_token }}
+      - name: Install Dependencies
+        run: npm ci
 
-          # If the commit is tagged with a version (e.g. "v1.0.0"),
-          # release the app after building
-          # release: true
-          release: ${{ startsWith(github.ref, 'refs/heads/master')}}
-          # release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+      - name: build-linux
+        if: matrix.os == 'ubuntu-latest'
+        run: npm run build:linux
+
+      - name: build-win
+        if: matrix.os == 'windows-latest'
+        run: npm run build:win
+
+      - name: release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          name: Nora Release ${{ github.ref }}
+          files: |
+            dist/*.exe
+            dist/*.zip
+            dist/*.dmg
+            dist/*.AppImage
+            dist/*.snap
+            dist/*.deb
+            dist/*.rpm
+            dist/*.tar.gz
+            dist/*.yml
+            dist/*.blockmap
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}

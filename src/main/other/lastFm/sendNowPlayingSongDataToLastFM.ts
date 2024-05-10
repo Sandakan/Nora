@@ -2,10 +2,7 @@
 /* eslint-disable no-await-in-loop */
 import { getSongsData, getUserData } from '../../filesystem';
 import log from '../../log';
-import {
-  LastFMScrobblePostResponse,
-  updateNowPlayingParams,
-} from '../../../@types/last_fm_api';
+import { LastFMScrobblePostResponse, updateNowPlayingParams } from '../../../@types/last_fm_api';
 import { checkIfConnectedToInternet } from '../../main';
 import generateApiRequestBodyForLastFMPostRequests from './generateApiRequestBodyForLastFMPostRequests';
 import getLastFmAuthData from './getLastFMAuthData';
@@ -15,60 +12,54 @@ const sendNowPlayingSongDataToLastFM = async (songId: string) => {
     const userData = getUserData();
     const isConnectedToInternet = checkIfConnectedToInternet();
 
-    const isScrobblingEnabled =
-      userData.preferences.sendNowPlayingSongDataToLastFM;
+    const isScrobblingEnabled = userData.preferences.sendNowPlayingSongDataToLastFM;
 
     if (isScrobblingEnabled && isConnectedToInternet) {
       const songs = getSongsData();
+      const song = songs.find((x) => x.songId === songId);
 
-      for (const song of songs) {
-        if (song.songId === songId) {
-          const authData = getLastFmAuthData();
+      if (song) {
+        const authData = getLastFmAuthData();
 
-          const url = new URL('http://ws.audioscrobbler.com/2.0/');
-          url.searchParams.set('format', 'json');
+        const url = new URL('http://ws.audioscrobbler.com/2.0/');
+        url.searchParams.set('format', 'json');
 
-          const params: updateNowPlayingParams = {
-            track: song.title,
-            artist: song.artists?.map((artist) => artist.name).join(', ') || '',
-            album: song.album?.name,
-            trackNumber: song.trackNo,
-            duration: Math.ceil(song.duration),
-          };
+        const params: updateNowPlayingParams = {
+          track: song.title,
+          artist: song.artists?.map((artist) => artist.name).join(', ') || '',
+          album: song.album?.name,
+          albumArtist: song?.albumArtists?.map((artist) => artist.name).join(', '),
+          trackNumber: song.trackNo,
+          duration: Math.ceil(song.duration)
+        };
 
-          const body = generateApiRequestBodyForLastFMPostRequests({
-            method: 'track.updateNowPlaying',
-            authData,
-            params,
-          });
+        const body = generateApiRequestBodyForLastFMPostRequests({
+          method: 'track.updateNowPlaying',
+          authData,
+          params
+        });
 
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body,
-          });
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body
+        });
 
-          if (res.status === 200)
-            return log(`Now playing song ${songId} accepted.`);
+        if (res.status === 200) return log(`Now playing song ${songId} accepted.`);
 
-          const json: LastFMScrobblePostResponse = await res.json();
-          return log(
-            'Failed to send now playing song to LastFM',
-            { json },
-            'WARN',
-          );
-        }
+        const json: LastFMScrobblePostResponse = await res.json();
+        return log('Failed to send now playing song to LastFM', { json }, 'WARN');
       }
     }
     return log('Now playing song request ignored', {
       isScrobblingEnabled,
-      isConnectedToInternet,
+      isConnectedToInternet
     });
   } catch (error) {
     return log('Error occurred when sending now playing song data to LastFM.', {
-      error,
+      error
     });
   }
 };

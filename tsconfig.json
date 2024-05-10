@@ -1,25 +1,11 @@
 {
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.node.json" },
+    { "path": "./tsconfig.web.json" },
+    // { "path": "./tsconfig.test.json" }
+  ],
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "CommonJS",
-    "lib": ["DOM", "ES2022"],
-    "declaration": true,
-    "declarationMap": true,
-    "jsx": "react-jsx",
-    "strict": true,
-    "pretty": true,
-    "sourceMap": true,
-    "baseUrl": "./src",
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
-    "allowJs": true,
-    "outDir": "release/app/dist"
-  },
-  "exclude": ["test", "release/build", "release/app/dist", ".erb/dll"]
+   "types": ["electron-vite/node"],
+  }
 }

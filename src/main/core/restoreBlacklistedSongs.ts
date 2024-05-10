@@ -6,11 +6,9 @@ import getSongInfo from './getSongInfo';
 
 const restoreBlacklistedSongs = async (blacklistedSongIds: string[]) => {
   const blacklist = getBlacklistData();
-  const filteredIds = blacklistedSongIds.filter(
-    (id) => !blacklist.songBlacklist.includes(id),
-  );
+  const filteredIds = blacklistedSongIds.filter((id) => !blacklist.songBlacklist.includes(id));
   blacklist.songBlacklist = blacklist.songBlacklist.filter(
-    (blacklistedId) => !blacklistedSongIds.includes(blacklistedId),
+    (blacklistedId) => !blacklistedSongIds.includes(blacklistedId)
   );
 
   if (filteredIds.length > 0) {
@@ -21,21 +19,18 @@ const restoreBlacklistedSongs = async (blacklistedSongIds: string[]) => {
           messageCode: 'WHITELISTING_SONG_FAILED_DUE_TO_BLACKLISTED_DIRECTORY',
           data: {
             songName: songData.title,
-            directoryName:
-              path.basename(path.dirname(songData.path)) || songData.path,
-          },
+            directoryName: path.basename(path.dirname(songData.path)) || songData.path
+          }
         });
     }
   }
 
-  const restoredIds = blacklistedSongIds.filter(
-    (id) => !filteredIds.includes(id),
-  );
+  const restoredIds = blacklistedSongIds.filter((id) => !filteredIds.includes(id));
 
   if (restoredIds.length > 0) {
     sendMessageToRenderer({
       messageCode: 'SONG_WHITELISTED',
-      data: { count: restoredIds.length },
+      data: { count: restoredIds.length }
     });
   }
 
@@ -44,7 +39,7 @@ const restoreBlacklistedSongs = async (blacklistedSongIds: string[]) => {
   log(
     'Song blacklist updated because some songs got removed from the blacklist.',
     { songIds: blacklistedSongIds },
-    'INFO',
+    'INFO'
   );
 };
 

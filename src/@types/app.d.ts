@@ -1,13 +1,17 @@
 import NodeID3 from 'node-id3';
 import { ReactElement, ReactNode } from 'react';
-import { ButtonProps } from 'renderer/components/Button';
-import { DropdownOption } from 'renderer/components/Dropdown';
-import { api } from '../main/preload';
+import { ButtonProps } from '../renderer/src/components/Button';
+import { DropdownOption } from '../renderer/src/components/Dropdown';
+import { api } from '../preload/index';
 import { LastFMSessionData } from './last_fm_api';
 import { SimilarArtist, Tag } from './last_fm_artist_info_api';
+import { ElectronAPI } from '@electron-toolkit/preload';
+import { resources } from 'src/renderer/src/i18n';
+import { Presence } from 'discord-rpc-revamp';
 
 declare global {
   interface Window {
+    electron: ElectronAPI;
     api: typeof api;
   }
 
@@ -87,7 +91,7 @@ declare global {
     noOfChannels?: number;
     year?: number;
     sampleRate?: number;
-    palette?: NodeVibrantPalette;
+    paletteId?: string;
     isAFavorite: boolean;
     isArtworkAvailable: boolean;
     path: string;
@@ -105,6 +109,11 @@ declare global {
   interface SongData extends SavableSongData {
     artworkPaths: ArtworkPaths;
     isBlacklisted: boolean;
+    paletteData?: PaletteData;
+  }
+
+  interface PaletteData extends NodeVibrantPalette {
+    paletteId: string;
   }
 
   interface NodeVibrantPalette {
@@ -116,12 +125,12 @@ declare global {
     Vibrant?: NodeVibrantPaletteSwatch;
   }
   interface NodeVibrantPaletteSwatch {
-    rgb: [number, number, number];
-    hsl?: [number, number, number];
-    hex?: string;
-    bodyTextColor?: string;
-    titleTextColor?: string;
-    population?: number;
+    hsl: [number, number, number];
+    hex: string;
+    population: number;
+    // rgb: [number, number, number];
+    // bodyTextColor?: string;
+    // titleTextColor?: string;
   }
 
   interface AudioPlayerData {
@@ -139,7 +148,7 @@ declare global {
     path: string;
     isAFavorite: boolean;
     album?: { albumId: string; name: string };
-    palette?: NodeVibrantPalette;
+    paletteData?: PaletteData;
     isKnownSource: boolean;
     isBlacklisted: boolean;
   }
@@ -155,14 +164,14 @@ declare global {
     addedDate: number;
     isAFavorite: boolean;
     year?: number;
-    palette?: NodeVibrantPalette;
+    paletteData?: PaletteData;
     isBlacklisted: boolean;
     trackNo?: number;
   }
 
   type PaginatingData = { start: number; end: number };
 
-  interface PaginatedResult<DataType extends unknown, SortType extends string> {
+  interface PaginatedResult<DataType, SortType extends string> {
     data: DataType[];
     sortType: SortType;
     start: number;
@@ -213,6 +222,8 @@ declare global {
 
   type RepeatTypes = 'false' | 'repeat' | 'repeat-1';
 
+  type PlayerTypes = 'normal' | 'mini' | 'full';
+
   type PlayerVolume = { isMuted: boolean; value: number };
   interface Player {
     isCurrentSongPlaying: boolean;
@@ -220,7 +231,6 @@ declare global {
     isRepeating: RepeatTypes;
     songPosition: number;
     isShuffling: boolean;
-    isMiniPlayer: boolean;
     isPlayerStalled: boolean;
     playbackRate: number;
   }
@@ -251,6 +261,7 @@ declare global {
     lang?: string;
     copyright?: string;
     isOfflineLyricsAvailable: boolean;
+    isTranslated: boolean;
   }
 
   export type SyncedLyricsLineText = {
@@ -271,7 +282,7 @@ declare global {
     syncedLyrics?: SyncedLyricLine[];
     unparsedLyrics: string;
     copyright?: string;
-    offset?: number;
+    offset: number;
   }
 
   // node-id3 synchronisedLyrics types.
@@ -335,13 +346,7 @@ declare global {
     songId: string;
   }
 
-  type QueueTypes =
-    | 'album'
-    | 'playlist'
-    | 'artist'
-    | 'songs'
-    | 'genre'
-    | 'folder';
+  type QueueTypes = 'album' | 'playlist' | 'artist' | 'songs' | 'genre' | 'folder';
 
   // ? User data related types
 
@@ -376,6 +381,7 @@ declare global {
     | 'preferences.sendSongFavoritesDataToLastFM'
     | 'preferences.sendNowPlayingSongDataToLastFM'
     | 'preferences.saveLyricsInLrcFilesForSupportedSongs'
+    | 'preferences.enableDiscordRPC'
     | 'customMusixmatchUserToken'
     | 'customLrcFilesSaveLocation'
     | 'lastFmSessionData'
@@ -410,6 +416,7 @@ declare global {
       sendSongFavoritesDataToLastFM: boolean;
       sendNowPlayingSongDataToLastFM: boolean;
       saveLyricsInLrcFilesForSupportedSongs: boolean;
+      enableDiscordRPC: boolean;
     };
     windowPositions: {
       mainWindow?: WindowCordinates;
@@ -427,7 +434,7 @@ declare global {
     customLrcFilesSaveLocation?: string;
   }
 
-  type LanguageCodes = 'en' | 'fr';
+  type LanguageCodes = NoInfer<keyof typeof resources>;
 
   interface AppThemeData {
     isDarkMode: boolean;
@@ -480,6 +487,8 @@ declare global {
     isPredictiveSearchEnabled: boolean;
     lyricsAutomaticallySaveState: AutomaticallySaveLyricsTypes;
     showTrackNumberAsSongIndex: boolean;
+    allowToPreventScreenSleeping: boolean;
+    enableImageBasedDynamicThemes: boolean;
   }
 
   interface CurrentSong {
@@ -626,11 +635,12 @@ declare global {
       songId: string;
     }[];
     artworkName?: string;
-    backgroundColor?: { rgb: NodeVibrantPaletteSwatch['rgb'] };
+    paletteId?: string;
   }
 
   interface Genre extends SavableGenre {
     artworkPaths: ArtworkPaths;
+    paletteData?: PaletteData;
   }
 
   // ? Albums related types
@@ -690,7 +700,7 @@ declare global {
 
   interface ArtistInfoFromNet {
     artistArtworks?: OnlineArtistArtworks;
-    artistPalette?: NodeVibrantPalette;
+    artistPalette?: PaletteData;
     artistBio?: string;
     similarArtists: SimilarArtistInfo;
     tags: Tag[];
@@ -715,6 +725,7 @@ declare global {
     albumDataSize: number;
     genreDataSize: number;
     playlistDataSize: number;
+    paletteDataSize: number;
     userDataSize: number;
     librarySize: number;
     totalKnownItemsSize: number;
@@ -732,13 +743,7 @@ declare global {
 
   // ? Search related types
 
-  type SearchFilters =
-    | 'All'
-    | 'Artists'
-    | 'Albums'
-    | 'Songs'
-    | 'Playlists'
-    | 'Genres';
+  type SearchFilters = 'All' | 'Artists' | 'Albums' | 'Songs' | 'Playlists' | 'Genres';
 
   interface SearchResult {
     songs: SongData[];
@@ -752,9 +757,14 @@ declare global {
   // ? Prompt menu related types
 
   interface PromptMenuData {
+    prompt: ReactNode;
+    className?: string;
+    isOneTime?: boolean;
+  }
+  interface PromptMenuNavigationHistoryData {
     isVisible: boolean;
-    content: ReactNode;
-    className: string;
+    prompts: PromptMenuData[];
+    currentActiveIndex: number;
   }
 
   // ? Notification panel related
@@ -779,6 +789,7 @@ declare global {
     | 'EMPTY_MUSIC_FOLDER_DELETED'
     | 'SONG_REVEAL_FAILED'
     | 'LYRICS_FIND_FAILED'
+    | 'LYRICS_TRANSLATION_FAILED'
     | 'METADATA_UPDATE_FAILED'
     | 'DESTINATION_NOT_SELECTED'
     | 'ARTWORK_SAVE_FAILED'
@@ -830,6 +841,7 @@ declare global {
     | 'LYRICS_SAVE_QUEUED'
     | 'LYRICS_SAVED_IN_LRC_FILE'
     | 'PENDING_LYRICS_SAVED'
+    | 'LYRICS_TRANSLATION_SUCCESS'
     | 'LASTFM_LOGIN_SUCCESS'
     | 'APPDATA_EXPORT_STARTED'
     | 'APPDATA_IMPORT_STARTED'
@@ -852,6 +864,7 @@ declare global {
 
   interface NotificationPanelData {
     notifications: AppNotification[];
+    // notificationsMap: Map<string, AppNotification>;
   }
 
   type NotificationTypes = 'DEFAULT' | 'WITH_PROGRESS_BAR';
@@ -877,15 +890,13 @@ declare global {
   interface NavigationHistory {
     pageTitle: PageTitles;
     data?: PageData;
-    onPageChange?: (
-      changedPageTitle: PageTitles,
-      changedPageData?: any,
-    ) => void;
+    onPageChange?: (changedPageTitle: PageTitles, changedPageData?: any) => void;
   }
 
   interface PageData extends Record<string, unknown> {
     scrollTopOffset?: number;
     isLowResponseRequired?: boolean;
+    preventScreenSleeping?: boolean;
   }
 
   interface NavigationHistoryData {
@@ -941,6 +952,8 @@ declare global {
     | 'sortingStates.artistsPage'
     | 'sortingStates.genresPage';
 
+  type SongFilterTypes = 'notSelected' | 'blacklistedSongs' | 'whitelistedSongs';
+
   type SongSortTypes =
     | 'aToZ'
     | 'zToA'
@@ -963,6 +976,8 @@ declare global {
     | 'blacklistedSongs'
     | 'whitelistedSongs';
 
+  type ArtistFilterTypes = 'notSelected' | 'favorites';
+
   type ArtistSortTypes =
     | 'aToZ'
     | 'zToA'
@@ -971,23 +986,11 @@ declare global {
     | 'mostLovedAscending'
     | 'mostLovedDescending';
 
-  type PlaylistSortTypes =
-    | 'aToZ'
-    | 'zToA'
-    | 'noOfSongsAscending'
-    | 'noOfSongsDescending';
+  type PlaylistSortTypes = 'aToZ' | 'zToA' | 'noOfSongsAscending' | 'noOfSongsDescending';
 
-  type AlbumSortTypes =
-    | 'aToZ'
-    | 'zToA'
-    | 'noOfSongsAscending'
-    | 'noOfSongsDescending';
+  type AlbumSortTypes = 'aToZ' | 'zToA' | 'noOfSongsAscending' | 'noOfSongsDescending';
 
-  type GenreSortTypes =
-    | 'aToZ'
-    | 'zToA'
-    | 'noOfSongsAscending'
-    | 'noOfSongsDescending';
+  type GenreSortTypes = 'aToZ' | 'zToA' | 'noOfSongsAscending' | 'noOfSongsDescending';
 
   type FolderSortTypes =
     | 'aToZ'
@@ -1202,12 +1205,7 @@ declare global {
 
   // ? Song metadata results related types
 
-  export type SongMetadataSource =
-    | 'LAST_FM'
-    | 'GENIUS'
-    | 'DEEZER'
-    | 'ITUNES'
-    | 'MUSIXMATCH';
+  export type SongMetadataSource = 'LAST_FM' | 'GENIUS' | 'DEEZER' | 'ITUNES' | 'MUSIXMATCH';
 
   interface SongMetadataResultFromInternet {
     title: string;
@@ -1221,5 +1219,18 @@ declare global {
     lyrics?: string;
     source: SongMetadataSource;
     sourceId: string;
+  }
+
+  type ArtAssetKeys =
+    | 'nora_logo'
+    | 'song_artwork'
+    | 'album_artwork'
+    | 'favorites_artwork'
+    | 'genre_artwork'
+    | 'playlist_artwork';
+
+  interface DiscordRpcActivityOptions extends Presence {
+    largeImageKey?: ArtAssetKeys;
+    smallImageKey?: ArtAssetKeys;
   }
 }

@@ -59,19 +59,20 @@ export interface Relation {
   'type-id': string;
 }
 
-export interface Attribute {}
+// export type Attribute = {}
+export type Attribute = Record<string, never>;
 
 export enum Direction {
-  Forward = 'forward',
+  Forward = 'forward'
 }
 
 export enum SourceCredit {
   Empty = '',
-  IliraGashi = 'Ilira Gashi',
+  IliraGashi = 'Ilira Gashi'
 }
 
 export enum TargetType {
-  URL = 'url',
+  URL = 'url'
 }
 
 export interface URL {
@@ -91,5 +92,5 @@ export interface ReleaseGroup {
 }
 
 export enum PrimaryType {
-  Single = 'Single',
+  Single = 'Single'
 }

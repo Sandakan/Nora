@@ -1,14 +1,14 @@
-function paginateData<DataType extends unknown, SortingType extends string>(
+function paginateData<DataType extends object, SortingType extends string>(
   data: DataType[],
   sortType: SortingType,
-  paginationData?: PaginatingData,
+  paginationData?: PaginatingData
 ) {
   const result: PaginatedResult<DataType, SortingType> = {
     data,
     total: data.length,
     sortType,
     start: 0,
-    end: data.length,
+    end: data.length
   };
 
   if (paginationData) {

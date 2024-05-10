@@ -4,29 +4,29 @@
 export enum Explicitness {
   Cleaned = 'cleaned',
   Explicit = 'explicit',
-  NotExplicit = 'notExplicit',
+  NotExplicit = 'notExplicit'
 }
 
 export enum ContentAdvisoryRating {
   Clean = 'Clean',
-  Explicit = 'Explicit',
+  Explicit = 'Explicit'
 }
 
 export enum Country {
-  Usa = 'USA',
+  Usa = 'USA'
 }
 
 export enum Currency {
-  Usd = 'USD',
+  Usd = 'USD'
 }
 
 export enum Kind {
   Podcast = 'podcast',
-  Song = 'song',
+  Song = 'song'
 }
 
 export enum WrapperType {
-  Track = 'track',
+  Track = 'track'
 }
 
 export interface Result {

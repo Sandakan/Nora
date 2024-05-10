@@ -6,7 +6,7 @@ const manageAlbumArtistOfParsedSong = (
   allArtists: SavableArtist[],
   songInfo: SavableSongData,
   songArtworkPaths?: ArtworkPaths,
-  relevantAlbum?: SavableAlbum,
+  relevantAlbum?: SavableAlbum
 ) => {
   const newAlbumArtists: SavableArtist[] = [];
   const relevantAlbumArtists: SavableArtist[] = [];
@@ -17,20 +17,18 @@ const manageAlbumArtistOfParsedSong = (
       for (const albumArtist of albumArtists) {
         const albumArtistName = albumArtist.name.trim();
 
-        const availableAlbumArtist = allArtists.find(
-          (artist) => artist.name === albumArtistName,
-        );
+        const availableAlbumArtist = allArtists.find((artist) => artist.name === albumArtistName);
 
         if (availableAlbumArtist) {
           if (relevantAlbum) {
             const isAlbumLinkedToArtist = availableAlbumArtist.albums?.some(
-              (album) => album.albumId === relevantAlbum.albumId,
+              (album) => album.albumId === relevantAlbum.albumId
             );
 
             if (!isAlbumLinkedToArtist)
               availableAlbumArtist.albums?.push({
                 title: relevantAlbum.title,
-                albumId: relevantAlbum.albumId,
+                albumId: relevantAlbum.albumId
               });
           }
           relevantAlbumArtists.push(availableAlbumArtist);
@@ -47,11 +45,11 @@ const manageAlbumArtistOfParsedSong = (
               ? [
                   {
                     title: relevantAlbum.title,
-                    albumId: relevantAlbum.albumId,
-                  },
+                    albumId: relevantAlbum.albumId
+                  }
                 ]
               : [],
-            isAFavorite: false,
+            isAFavorite: false
           };
           relevantAlbumArtists.push(artist);
           newAlbumArtists.push(artist);
@@ -62,13 +60,13 @@ const manageAlbumArtistOfParsedSong = (
     return {
       updatedArtists: allArtists,
       newAlbumArtists,
-      relevantAlbumArtists,
+      relevantAlbumArtists
     };
   }
   return {
     updatedArtists: [],
     newAlbumArtists,
-    relevantAlbumArtists,
+    relevantAlbumArtists
   };
 };
 

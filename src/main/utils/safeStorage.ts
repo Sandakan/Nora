@@ -5,7 +5,7 @@ import log from '../log';
 // Encryption function
 export function encrypt(data: string) {
   try {
-    const ENCRYPTION_SECRET = process.env.ENCRYPTION_SECRET;
+    const ENCRYPTION_SECRET = import.meta.env.MAIN_VITE_ENCRYPTION_SECRET;
     if (!ENCRYPTION_SECRET) throw new Error('ENCRYPTION_SECRET not found.');
 
     const iv = crypto.randomBytes(16); // Generate a random initialization vector
@@ -26,7 +26,7 @@ export function encrypt(data: string) {
 // Decryption function
 export function decrypt(encryptedData: string): string {
   try {
-    const ENCRYPTION_SECRET = process.env.ENCRYPTION_SECRET;
+    const ENCRYPTION_SECRET = import.meta.env.MAIN_VITE_ENCRYPTION_SECRET;
     if (!ENCRYPTION_SECRET) throw new Error('ENCRYPTION_SECRET not found.');
 
     const iv = Buffer.from(encryptedData.slice(0, 32), 'hex'); // Extract the IV from the beginning of the string

@@ -66,9 +66,7 @@ export type LastFMSessionData = {
   key: string;
 };
 
-export type LastFMSessionGetResponse =
-  | { session: LastFMSessionData }
-  | LastFMError;
+export type LastFMSessionGetResponse = { session: LastFMSessionData } | LastFMError;
 
 export interface updateNowPlayingParams {
   artist: string;
@@ -82,7 +80,7 @@ export interface updateNowPlayingParams {
 
 export enum ChosenByUserInput {
   chosenByUser = 1,
-  notChosenByUser = 0,
+  notChosenByUser = 0
 }
 
 export interface ScrobbleParams extends updateNowPlayingParams {
@@ -108,7 +106,7 @@ export type LastFMScrobblePostResponse =
     }
   | LastFMError;
 
-export type LastFMLoveUnlovePostResponse = {} | LastFMError;
+export type LastFMLoveUnlovePostResponse = Record<string, never> | LastFMError;
 
 export type AuthData = {
   LAST_FM_API_KEY: string;

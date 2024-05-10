@@ -6,7 +6,7 @@ import {
   LastFMSimilarTracksAPI,
   ParsedSimilarTrack,
   SimilarTrack,
-  SimilarTracksOutput,
+  SimilarTracksOutput
 } from '../../../@types/last_fm_similar_tracks_api';
 import { checkIfConnectedToInternet } from '../../main';
 import { getSongArtworkPath } from '../../fs/resolveFilePaths';
@@ -18,9 +18,7 @@ const sortSimilarTracks = (a: ParsedSimilarTrack, b: ParsedSimilarTrack) => {
   return 0;
 };
 
-export const getAudioInfoFromSavableSongData = (
-  song: SavableSongData,
-): AudioInfo => {
+export const getAudioInfoFromSavableSongData = (song: SavableSongData): AudioInfo => {
   const isBlacklisted = isSongBlacklisted(song.songId, song.path);
 
   return {
@@ -35,14 +33,11 @@ export const getAudioInfoFromSavableSongData = (
     palette: song.palette,
     addedDate: song.addedDate,
     isAFavorite: song.isAFavorite,
-    isBlacklisted,
-  } satisfies AudioInfo;
+    isBlacklisted
+  } as AudioInfo;
 };
 
-const parseSimilarTracks = (
-  similarTracks: SimilarTrack[],
-  songs: SavableSongData[],
-) => {
+const parseSimilarTracks = (similarTracks: SimilarTrack[], songs: SavableSongData[]) => {
   const availableTracks: ParsedSimilarTrack[] = [];
   const unAvailableTracks: ParsedSimilarTrack[] = [];
 
@@ -54,7 +49,7 @@ const parseSimilarTracks = (
           artists: song.artists?.map((artist) => artist.name),
           songData: getAudioInfoFromSavableSongData(song),
           match: track.match,
-          url: track.url,
+          url: track.url
         });
         continue similarTrackLoop;
       }
@@ -63,7 +58,7 @@ const parseSimilarTracks = (
       title: track.name,
       artists: [track.artist.name],
       match: track.match,
-      url: track.url,
+      url: track.url
     });
   }
 
@@ -80,14 +75,12 @@ const getSelectedSong = (songs: SavableSongData[], songId: string) => {
   throw new Error(`Song with ${songId} does not exist in the library.`);
 };
 
-const getSimilarTracks = async (
-  songId: string,
-): Promise<SimilarTracksOutput> => {
+const getSimilarTracks = async (songId: string): Promise<SimilarTracksOutput> => {
   try {
     const songs = getSongsData();
 
     // eslint-disable-next-line prefer-destructuring
-    const LAST_FM_API_KEY = process.env.LAST_FM_API_KEY;
+    const LAST_FM_API_KEY = import.meta.env.MAIN_VITE_LAST_FM_API_KEY;
     if (!LAST_FM_API_KEY) throw new Error('LastFM api key not found.');
 
     const isOnline = checkIfConnectedToInternet();
@@ -112,20 +105,13 @@ const getSimilarTracks = async (
       if ('error' in data) throw new Error(`${data.error} - ${data.message}`);
 
       const similarTracks = data.similartracks.track;
-      const parsedAndSortedSimilarTracks = parseSimilarTracks(
-        similarTracks,
-        songs,
-      );
+      const parsedAndSortedSimilarTracks = parseSimilarTracks(similarTracks, songs);
 
       return parsedAndSortedSimilarTracks;
     }
     return undefined;
   } catch (error) {
-    log(
-      'Error occurred when trying to get similar tracks of a song.',
-      { error },
-      'ERROR',
-    );
+    log('Error occurred when trying to get similar tracks of a song.', { error }, 'ERROR');
     return undefined;
   }
 };

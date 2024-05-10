@@ -1,36 +1,24 @@
 import { TagConstants } from 'node-id3';
-import log from '../log';
+// import log from '../log';
 import isLyricsSynced, {
   extendedSyncedLyricsLineRegex,
   isAnExtendedSyncedLyricsLine,
-  syncedLyricsRegex,
-} from './isLyricsSynced';
+  syncedLyricsRegex
+} from '../../common/isLyricsSynced';
 
-type Input = {
-  language: string;
-  timeStampFormat: number;
-  contentType: number;
-  shortText?: string | undefined;
-  synchronisedText: {
-    text: string;
-    timeStamp: number;
-  }[];
-};
+export type SyncedLyricsInput = NonNullable<NodeID3Tags['synchronisedLyrics']>[number];
 
 const copyrightMatchRegex = /^\[copyright:(?<copyright>.+)\]$/gm;
 const lyricsOffsetRegex = /^\[offset:(?<lyricsOffset>[+-]?\d+)\]$/gm;
 
-const startTimestampMatchRegex =
-  /(?<extSyncTimeStamp>\[\d+:\d{1,2}\.\d{1,3}\])/gm;
+const startTimestampMatchRegex = /(?<extSyncTimeStamp>\[\d+:\d{1,2}\.\d{1,3}\])/gm;
 
 const getSecondsFromLyricsLine = (lyric: string) => {
   const lyricsStartMatch = lyric.match(syncedLyricsRegex);
   syncedLyricsRegex.lastIndex = 0;
   const replaceRegex = /[[\]]/gm;
   if (Array.isArray(lyricsStartMatch)) {
-    const [sec, ms] = lyricsStartMatch[0]
-      .replaceAll(replaceRegex, '')
-      .split(':');
+    const [sec, ms] = lyricsStartMatch[0].replaceAll(replaceRegex, '').split(':');
     replaceRegex.lastIndex = 0;
 
     return parseInt(sec) * 60 + parseFloat(ms);
@@ -48,11 +36,16 @@ const getSecondsFromExtendedTimeStamp = (text: string) => {
   return parseInt(sec) * 60 + parseFloat(ms);
 };
 
-const getLyricEndTime = (lyricsArr: string[], index: number) => {
-  if (lyricsArr.length - 1 === index) return Infinity;
+const getLyricEndTime = (lyricsArr: string[], index: number, start: number) => {
+  if (lyricsArr.length - 1 === index) return Number.POSITIVE_INFINITY;
 
-  if (lyricsArr[index + 1])
-    return getSecondsFromLyricsLine(lyricsArr[index + 1]);
+  if (lyricsArr[index + 1]) {
+    const end = getSecondsFromLyricsLine(lyricsArr[index + 1]);
+
+    if (start === end && lyricsArr[index + 2])
+      return getSecondsFromLyricsLine(lyricsArr[index + 2]);
+    return end;
+  }
 
   return 0;
 };
@@ -70,48 +63,44 @@ const getSecondsFromExtendedMatch = (match: RegExpMatchArray) => {
 const getExtendedMatchEndTime = (
   matches: RegExpMatchArray[],
   index: number,
-  lineEndTime: number,
+  lineEndTime: number
 ) => {
   if (matches.length - 1 === index) return lineEndTime;
 
-  if (matches[index + 1])
-    return getSecondsFromExtendedMatch(matches[index + 1]);
+  if (matches[index + 1]) return getSecondsFromExtendedMatch(matches[index + 1]);
 
   return 0;
 };
 
 const getExtendedSyncedLineInfo = (
   line: string,
-  lineEndTime: number,
+  lineEndTime: number
 ): string | SyncedLyricsLineText => {
   try {
     const matches = [...line.matchAll(extendedSyncedLyricsLineRegex)];
     extendedSyncedLyricsLineRegex.lastIndex = 0;
 
     if (matches.length > 0) {
-      const extendedSyncLines: SyncedLyricsLineText = matches.map(
-        (match, index, arr) => {
-          const { groups } = match;
-          const res = {
-            text: '',
-            unparsedText: '',
-            start: getSecondsFromExtendedMatch(match),
-            end: getExtendedMatchEndTime(arr, index, lineEndTime),
-          };
+      const extendedSyncLines: SyncedLyricsLineText = matches.map((match, index, arr) => {
+        const { groups } = match;
+        const res = {
+          text: '',
+          unparsedText: '',
+          start: getSecondsFromExtendedMatch(match),
+          end: getExtendedMatchEndTime(arr, index, lineEndTime)
+        };
 
-          // if (match.input) res.unparsedText = match.input.trim();
-          if (groups) {
-            if ('lyric' in groups) {
-              res.text = groups.lyric.trim();
+        // if (match.input) res.unparsedText = match.input.trim();
+        if (groups) {
+          if ('lyric' in groups) {
+            res.text = groups.lyric.trim();
 
-              if ('extSyncTimeStamp' in groups)
-                res.unparsedText =
-                  `${groups.extSyncTimeStamp} ${groups.lyric}`.trim();
-            }
+            if ('extSyncTimeStamp' in groups)
+              res.unparsedText = `${groups.extSyncTimeStamp} ${groups.lyric}`.trim();
           }
-          return res;
-        },
-      );
+        }
+        return res;
+      });
 
       return extendedSyncLines;
     }
@@ -121,73 +110,58 @@ const getExtendedSyncedLineInfo = (
   }
 };
 
-const parseLyricsText = (
-  line: string,
-  lineEndTime: number,
-): string | SyncedLyricsLineText => {
+const parseLyricsText = (line: string, lineEndTime: number): string | SyncedLyricsLineText => {
   const textLine = line.replaceAll(syncedLyricsRegex, '').trim();
   syncedLyricsRegex.lastIndex = 0;
 
   const isAnExtendedSyncedLine = isAnExtendedSyncedLyricsLine(textLine);
 
-  if (isAnExtendedSyncedLine)
-    return getExtendedSyncedLineInfo(line, lineEndTime);
+  if (isAnExtendedSyncedLine) return getExtendedSyncedLineInfo(line, lineEndTime);
 
   return textLine;
 };
 
-const isNotALyricsMetadataLine = (line: string) =>
-  !/^\[\w+:.{1,}\]$/gm.test(line);
+const isNotALyricsMetadataLine = (line: string) => !/^\[\w+:.{1,}\]$/gm.test(line);
 
 // MAIN FUNCTIONS //
 const parseLyrics = (lyricsString: string): LyricsData => {
-  const isSynced = isLyricsSynced(lyricsString);
+  const output: LyricsData = {
+    isSynced: false,
+    lyrics: [],
+    unparsedLyrics: lyricsString,
+    offset: 0
+  };
+
+  output.isSynced = isLyricsSynced(lyricsString);
 
   const copyrightMatch = copyrightMatchRegex.exec(lyricsString);
   copyrightMatchRegex.lastIndex = 0;
+  output.copyright = copyrightMatch?.groups?.copyright || undefined;
 
   const lyricsOffsetMatch = lyricsOffsetRegex.exec(lyricsString);
   lyricsOffsetRegex.lastIndex = 0;
+  output.offset = Number(lyricsOffsetMatch?.groups?.lyricsOffset || 0) / 1000;
 
-  const copyright = copyrightMatch?.groups?.copyright || undefined;
-  const offset = Number(lyricsOffsetMatch?.groups?.lyricsOffset) / 1000 || 0;
   const lines = lyricsString.split('\n');
-  const lyricsLines = lines.filter(
-    (line) => line.trim() !== '' && isNotALyricsMetadataLine(line),
-  );
+  const lyricsLines = lines.filter((line) => line.trim() !== '' && isNotALyricsMetadataLine(line));
 
   const parsedUnsyncedLyricsLines = lyricsLines.map((line) =>
-    line.replaceAll(syncedLyricsRegex, '').trim(),
+    line.replaceAll(syncedLyricsRegex, '').trim()
   );
+  output.lyrics = parsedUnsyncedLyricsLines;
 
-  if (isSynced) {
-    const syncedLyrics: SyncedLyricLine[] = lyricsLines.map(
-      (line, index, lyricsLinesArr) => {
-        const start = getSecondsFromLyricsLine(line);
-        const end = getLyricEndTime(lyricsLinesArr, index);
+  if (output.isSynced) {
+    output.syncedLyrics = lyricsLines.map((line, index, lyricsLinesArr) => {
+      const start = getSecondsFromLyricsLine(line);
+      const end = getLyricEndTime(lyricsLinesArr, index, start);
 
-        const parsedLine = parseLyricsText(line, end);
+      const parsedLine = parseLyricsText(line, end);
 
-        return { text: parsedLine, start, end };
-      },
-    );
-
-    return {
-      isSynced,
-      lyrics: parsedUnsyncedLyricsLines,
-      syncedLyrics,
-      unparsedLyrics: lyricsString,
-      offset,
-      copyright,
-    };
+      return { text: parsedLine, start, end };
+    });
   }
 
-  return {
-    isSynced,
-    lyrics: parsedUnsyncedLyricsLines,
-    unparsedLyrics: lyricsString,
-    copyright,
-  };
+  return output;
 };
 
 const parseMetadataFromShortText = (shortText?: string) => {
@@ -196,14 +170,13 @@ const parseMetadataFromShortText = (shortText?: string) => {
   if (shortText) {
     try {
       const metaFromShortText = JSON.parse(shortText);
-      if ('copyright' in metaFromShortText)
-        metadata.copyright = metaFromShortText.copyright;
+      if ('copyright' in metaFromShortText) metadata.copyright = metaFromShortText.copyright;
     } catch (error) {
-      log(
-        'Error occurred when parsing metadata from shortText attribute in NodeID3 format.',
-        { error },
-        'INFO',
-      );
+      // log(
+      //   'Error occurred when parsing metadata from shortText attribute in NodeID3 format.',
+      //   { error },
+      //   'INFO',
+      // );
       return metadata;
     }
   }
@@ -216,9 +189,9 @@ const getNextTimestamp = (
     timeStamp: number;
   }[],
   start: number,
-  index: number,
+  index: number
 ) => {
-  if (arr.length - 1 === index) return Infinity;
+  if (arr.length - 1 === index) return Number.POSITIVE_INFINITY;
 
   for (let i = 0; i < arr.length - index; i += 1) {
     if (arr[index + i]) {
@@ -230,7 +203,7 @@ const getNextTimestamp = (
 };
 
 export const parseSyncedLyricsFromAudioDataSource = (
-  input: Input,
+  input: SyncedLyricsInput
 ): LyricsData | undefined => {
   const { timeStampFormat, synchronisedText, shortText } = input;
 
@@ -238,23 +211,21 @@ export const parseSyncedLyricsFromAudioDataSource = (
     const lyrics = synchronisedText.map((line) => line.text);
     const metadata = parseMetadataFromShortText(shortText);
 
-    const syncedLyrics: SyncedLyricLine[] = synchronisedText.map(
-      (line, index, arr) => {
-        // timeStamp = start of the line
-        const { text, timeStamp } = line;
+    const syncedLyrics: SyncedLyricLine[] = synchronisedText.map((line, index, arr) => {
+      // timeStamp = start of the line
+      const { text, timeStamp } = line;
 
-        const end = getNextTimestamp(arr, timeStamp, index);
+      const end = getNextTimestamp(arr, timeStamp, index);
 
-        const parsedTextLine = parseLyricsText(text, end / 1000);
+      const parsedTextLine = parseLyricsText(text, end / 1000);
 
-        // divide by 1000 to convert from milliseconds to seconds.
-        return {
-          text: parsedTextLine,
-          start: timeStamp / 1000,
-          end: end / 1000,
-        };
-      },
-    );
+      // divide by 1000 to convert from milliseconds to seconds.
+      return {
+        text: parsedTextLine,
+        start: timeStamp / 1000,
+        end: end / 1000
+      };
+    });
 
     const unparsedLyrics = syncedLyrics
       .map((line) => {
@@ -266,8 +237,7 @@ export const parseSyncedLyricsFromAudioDataSource = (
             : text
                 .map((x) => {
                   startTimestampMatchRegex.lastIndex = 0;
-                  if (startTimestampMatchRegex.test(x.unparsedText))
-                    return x.text;
+                  if (startTimestampMatchRegex.test(x.unparsedText)) return x.text;
                   return x.unparsedText;
                 })
                 .join(' ');
@@ -276,8 +246,8 @@ export const parseSyncedLyricsFromAudioDataSource = (
         const mins = Math.floor(start / 60);
         const minsStr = mins.toString().length > 1 ? mins : `0${mins}`;
         const hundredths = start.toString().includes('.')
-          ? parseInt(start.toString().split('.').at(-1) || '0')
-          : 0;
+          ? start.toString().split('.').at(-1) || '00'
+          : '00';
 
         return `[${minsStr}:${secsStr}.${hundredths}] ${lyricLine}`;
       })
@@ -289,6 +259,7 @@ export const parseSyncedLyricsFromAudioDataSource = (
       lyrics,
       syncedLyrics,
       unparsedLyrics,
+      offset: 0
     };
   }
   return undefined;

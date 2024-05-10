@@ -1,11 +1,12 @@
 import { getGenresData } from '../filesystem';
 import { getGenreArtworkPath } from '../fs/resolveFilePaths';
 import log from '../log';
+import { getSelectedPaletteData } from '../other/generatePalette';
 import sortGenres from '../utils/sortGenres';
 
 const getGenresInfo = async (
   genreNamesOrIds: string[] = [],
-  sortType?: GenreSortTypes,
+  sortType?: GenreSortTypes
 ): Promise<Genre[]> => {
   if (genreNamesOrIds) {
     const genres = getGenresData();
@@ -15,28 +16,26 @@ const getGenresInfo = async (
       else {
         for (let x = 0; x < genres.length; x += 1) {
           for (let y = 0; y < genreNamesOrIds.length; y += 1) {
-            if (
-              genres[x].genreId === genreNamesOrIds[y] ||
-              genres[x].name === genreNamesOrIds[y]
-            )
+            if (genres[x].genreId === genreNamesOrIds[y] || genres[x].name === genreNamesOrIds[y])
               results.push(genres[x]);
           }
         }
       }
     }
     log(
-      `Fetching genres data for genres with ids '${genreNamesOrIds.join(
-        ',',
-      )}'.${
+      `Fetching genres data for genres with ids '${genreNamesOrIds.join(',')}'.${
         genreNamesOrIds.length > 0
           ? ` Found ${results.length} out of ${genreNamesOrIds.length} results.`
           : ` Found ${results.length} results.`
-      }`,
+      }`
     );
-    results = results.map((x) => ({
-      ...x,
-      artworkPaths: getGenreArtworkPath(x.artworkName),
-    })) as Genre[];
+    results = results.map((x): Genre => {
+      return {
+        ...x,
+        artworkPaths: getGenreArtworkPath(x.artworkName),
+        paletteData: getSelectedPaletteData(x.paletteId)
+      };
+    });
     if (sortType) sortGenres(results, sortType);
     return results as Genre[];
   }
