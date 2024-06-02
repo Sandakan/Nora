@@ -5,7 +5,7 @@ const ContextMenuDataItem = (props: { data: ContextMenuAdditionalData }) => {
     data: { title, artworkPath, subTitle, subTitle2, button, artworkClassName }
   } = props;
   return (
-    <div className="context-menu-data-item flex max-w-[16rem] items-center border-b-[1px] border-b-font-color-dimmed/50 px-3  py-2 font-light text-font-color-black dark:text-font-color-white">
+    <div className="context-menu-data-item flex max-w-[18rem] items-center border-b-[1px] border-b-font-color-dimmed/50 px-3 py-2 font-light text-font-color-black dark:text-font-color-white">
       <Img
         className={`mr-2 aspect-square w-8 rounded-sm ${artworkClassName}`}
         src={artworkPath}

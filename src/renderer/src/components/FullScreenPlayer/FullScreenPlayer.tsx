@@ -67,8 +67,9 @@ const FullScreenPlayer = () =>
             fallbackSrc={DefaultSongCover}
             loading="eager"
             alt="Song Cover"
-            className="h-full w-full object-cover !blur-[2px] !brightness-[.25] transition-[filter] delay-100 duration-200 ease-in-out"
+            className="h-full w-full object-cover shadow-lg !blur-[2px] !brightness-[.25] transition-[filter] delay-100 duration-200 ease-in-out"
           />
+          <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-black/50 to-black/5"></div>
         </div>
         <TitleBar />
         <div

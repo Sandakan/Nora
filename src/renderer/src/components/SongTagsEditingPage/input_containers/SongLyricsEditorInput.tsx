@@ -22,6 +22,7 @@ type Props = {
     onlineArtworkPaths?: OnlineArtistArtworks | undefined;
   }[];
   songPath: string;
+  album?: string;
   duration: number;
   synchronizedLyrics?: string;
   unsynchronizedLyrics?: string;
@@ -63,6 +64,7 @@ const SongLyricsEditorInput = (props: Props) => {
     isLyricsSavingPending = false,
     updateSongInfo,
     duration,
+    album,
     songPath
   } = props;
 
@@ -109,6 +111,7 @@ const SongLyricsEditorInput = (props: Props) => {
           {
             songTitle,
             songArtists: songArtists?.map((artist) => artist.name),
+            album,
             duration,
             songPath
           },
@@ -140,7 +143,7 @@ const SongLyricsEditorInput = (props: Props) => {
           console.error(err);
         });
     },
-    [addNewNotifications, duration, songArtists, songPath, songTitle, updateSongInfo]
+    [addNewNotifications, album, duration, songArtists, songPath, songTitle, updateSongInfo]
   );
 
   const downloadSyncedLyrics = React.useCallback(
@@ -156,6 +159,7 @@ const SongLyricsEditorInput = (props: Props) => {
           {
             songTitle,
             songArtists: songArtists?.map((artist) => artist.name),
+            album,
             duration,
             songPath
           },
@@ -186,7 +190,7 @@ const SongLyricsEditorInput = (props: Props) => {
           console.error(err);
         });
     },
-    [addNewNotifications, duration, songArtists, songPath, songTitle, t, updateSongInfo]
+    [addNewNotifications, album, duration, songArtists, songPath, songTitle, t, updateSongInfo]
   );
 
   const goToLyricsEditor = React.useCallback(() => {

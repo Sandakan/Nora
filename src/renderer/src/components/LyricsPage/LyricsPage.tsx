@@ -132,6 +132,7 @@ const LyricsPage = () => {
             songArtists: Array.isArray(currentSongData.artists)
               ? currentSongData.artists.map((artist) => artist.name)
               : [],
+            album: currentSongData.album?.name,
             songPath: currentSongData.path,
             duration: currentSongData.duration
           },
@@ -149,6 +150,7 @@ const LyricsPage = () => {
     }
   }, [
     addNewNotifications,
+    currentSongData.album?.name,
     currentSongData.artists,
     currentSongData.duration,
     currentSongData.path,
@@ -227,6 +229,7 @@ const LyricsPage = () => {
             songArtists: Array.isArray(currentSongData.artists)
               ? currentSongData.artists.map((artist) => artist.name)
               : [],
+            album: currentSongData.album?.name,
             songPath: currentSongData.path,
             duration: currentSongData.duration
           },
@@ -253,6 +256,7 @@ const LyricsPage = () => {
     },
     [
       addNewNotifications,
+      currentSongData.album?.name,
       currentSongData.artists,
       currentSongData.duration,
       currentSongData.path,
@@ -276,6 +280,7 @@ const LyricsPage = () => {
             songArtists: Array.isArray(currentSongData.artists)
               ? currentSongData.artists.map((artist) => artist.name)
               : [],
+            album: currentSongData.album?.name,
             songPath: currentSongData.path,
             duration: currentSongData.duration
           },
@@ -299,6 +304,7 @@ const LyricsPage = () => {
     },
     [
       addNewNotifications,
+      currentSongData.album?.name,
       currentSongData.artists,
       currentSongData.duration,
       currentSongData.path,
@@ -352,6 +358,7 @@ const LyricsPage = () => {
             songArtists: Array.isArray(currentSongData.artists)
               ? currentSongData.artists.map((artist) => artist.name)
               : [],
+            album: currentSongData.album?.name,
             songPath: currentSongData.path,
             duration: currentSongData.duration
           },
@@ -374,6 +381,7 @@ const LyricsPage = () => {
     },
     [
       addNewNotifications,
+      currentSongData.album?.name,
       currentSongData.artists,
       currentSongData.duration,
       currentSongData.path,

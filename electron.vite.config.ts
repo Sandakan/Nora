@@ -5,12 +5,16 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   main: {
     build: {
-      rollupOptions: { input: '/src/main/main.ts' }
+      rollupOptions: { input: '/src/main/main.ts', external: ['sharp'] }
     },
     plugins: [externalizeDepsPlugin()]
   },
   preload: {
-    plugins: [externalizeDepsPlugin()]
+    plugins: [externalizeDepsPlugin()],
+
+    build: {
+      rollupOptions: { output: { format: 'cjs', entryFileNames: '[name].mjs' } }
+    }
   },
   renderer: {
     resolve: {

@@ -3,7 +3,7 @@
 /* eslint-disable default-param-last */
 /* eslint-disable no-use-before-define */
 /* eslint-disable global-require */
-import { join } from 'path';
+import path, { join } from 'path';
 import os from 'os';
 import {
   app,
@@ -177,7 +177,7 @@ const createWindow = async () => {
     title: 'Nora',
     webPreferences: {
       zoomFactor: 0.9,
-      preload: join(__dirname, '../preload/index.js')
+      preload: path.resolve(import.meta.dirname, '../preload/index.mjs')
     },
     visualEffectState: 'followWindow',
     roundedCorners: true,

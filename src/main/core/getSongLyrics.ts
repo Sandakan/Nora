@@ -12,6 +12,7 @@ import { appPreferences } from '../../../package.json';
 import parseLyrics, { parseSyncedLyricsFromAudioDataSource } from '../utils/parseLyrics';
 import saveLyricsToSong from '../saveLyricsToSong';
 import { decrypt } from '../utils/safeStorage';
+import fetchLyricsFromLrclib from '../utils/fetchLyricsFromLrclib';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -88,16 +89,27 @@ const readFileData = async (path: string) => {
 const fetchLyricsFromLRCFile = async (songPath: string) => {
   const userData = getUserData();
   const defaultLrcFilePath = `${songPath}.lrc`;
+  const defaultLrcFilePathWithoutExtension = `${songPath.replaceAll(path.extname(songPath), '')}.lrc`;
   const customLrcFilePath = userData.customLrcFilesSaveLocation
     ? path.join(userData.customLrcFilesSaveLocation, `${path.basename(songPath)}.lrc`)
     : undefined;
+  const customLrcFilePathWithoutExtension = userData.customLrcFilesSaveLocation
+    ? path.join(
+        userData.customLrcFilesSaveLocation,
+        `${path.basename(songPath.replaceAll(path.extname(songPath), ''))}.lrc`
+      )
+    : undefined;
 
   try {
-    const lyricsInLrcFormat =
+    let lyricsInLrcFormat =
       (await readFileData(defaultLrcFilePath)) ??
-      (userData.customLrcFilesSaveLocation && customLrcFilePath
-        ? await readFileData(customLrcFilePath)
-        : undefined);
+      (await readFileData(defaultLrcFilePathWithoutExtension));
+
+    if (!lyricsInLrcFormat && userData.customLrcFilesSaveLocation) {
+      if (customLrcFilePath) lyricsInLrcFormat = await readFileData(customLrcFilePath);
+      if (customLrcFilePathWithoutExtension)
+        lyricsInLrcFormat = await readFileData(customLrcFilePathWithoutExtension);
+    }
 
     if (!lyricsInLrcFormat) throw Error('No lrc lyrics files found.');
 
@@ -106,9 +118,51 @@ const fetchLyricsFromLRCFile = async (songPath: string) => {
   } catch (error) {
     return log(`Lyrics containing LRC file for ${path.basename(songPath)} didn't exist.`, {
       defaultLrcFilePath,
-      customLrcFilePath
+      defaultLrcFilePathWithoutExtension,
+      customLrcFilePath,
+      customLrcFilePathWithoutExtension
     });
   }
+};
+
+const getLyricsFromLrclib = async (
+  trackInfo: LyricsRequestTrackInfo,
+  lyricsType?: LyricsTypes,
+  abortControllerSignal?: AbortSignal
+) => {
+  const { songTitle, songArtists = [], duration, album } = trackInfo;
+
+  try {
+    const lrclibLyrics = await fetchLyricsFromLrclib(
+      {
+        track_name: songTitle,
+        artist_name: songArtists[0] || '',
+        album_name: album,
+        duration: duration.toString()
+      },
+      lyricsType,
+      abortControllerSignal
+    );
+
+    if (lrclibLyrics) {
+      const { lyrics, trackName, lyricsType } = lrclibLyrics;
+      log(`found lyrics for '${trackName}' song from Lrclib.`);
+
+      const parsedLyrics = parseLyrics(lyrics);
+
+      return {
+        lyrics: parsedLyrics,
+        title: songTitle,
+        source: 'LRCLIB',
+        lyricsType
+      };
+    }
+  } catch (error) {
+    log(`Error occurred when trying to fetch lyrics from Lrclib.`, {
+      error
+    });
+  }
+  return undefined;
 };
 
 const getLyricsFromMusixmatch = async (
@@ -268,15 +322,13 @@ const getSongLyrics = async (
 
   if (isConnectedToInternet && lyricsRequestType !== 'OFFLINE_ONLY') {
     try {
-      const musixmatchLyrics = await getLyricsFromMusixmatch(
-        trackInfo,
-        lyricsType,
-        abortControllerSignal
-      );
+      const onlineLyrics =
+        (await getLyricsFromLrclib(trackInfo, lyricsType)) ||
+        (await getLyricsFromMusixmatch(trackInfo, lyricsType, abortControllerSignal));
 
-      if (musixmatchLyrics) {
+      if (onlineLyrics) {
         cachedLyrics = {
-          ...musixmatchLyrics,
+          ...onlineLyrics,
           isOfflineLyricsAvailable,
           isTranslated: false
         };

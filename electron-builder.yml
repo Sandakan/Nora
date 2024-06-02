@@ -47,6 +47,14 @@ fileAssociations:
     icon: ./build/installer_assets/file_associated_icons/flac.ico
     mimeType: audio/flac
     role: Editor
+  - ext: opus
+    icon: ./build/installer_assets/file_associated_icons/opus.ico
+    mimeType: audio/ogg
+    role: Editor
+  - ext: m4a
+    icon: ./build/installer_assets/file_associated_icons/m4a.ico
+    mimeType: audio/mp4
+    role: Editor
 
 win:
   executableName: Nora

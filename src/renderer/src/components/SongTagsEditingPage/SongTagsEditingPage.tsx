@@ -479,6 +479,7 @@ function SongTagsEditingPage() {
                 songId={songId}
                 songArtists={songInfo.artists}
                 songPath={songPath}
+                album={songInfo.album?.title}
                 duration={songInfo.duration}
                 synchronizedLyrics={songInfo.synchronizedLyrics}
                 unsynchronizedLyrics={songInfo.unsynchronizedLyrics}

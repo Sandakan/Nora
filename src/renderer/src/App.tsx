@@ -2,6 +2,7 @@
 import React, { ReactNode, Suspense } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import './assets/styles/styles.css';
+import 'material-symbols/rounded.css';
 import packageFile from '../../../package.json';
 
 import { AppContext, AppStateContextType } from './contexts/AppContext';
@@ -480,18 +481,24 @@ export default function App() {
     // //   content.playerType === 'full';
 
     const LOW_RESPONSE_DURATION = 100;
-    // const DURATION = 1000;
+    const DURATION = 1000;
+
+    const dispatchCurrentSongTime = () => {
+      // const currentPosition = contentRef.current.player.songPosition;
+
+      const playerPositionChange = new CustomEvent('player/positionChange', {
+        detail: roundTo(player.currentTime, 2)
+      });
+      document.dispatchEvent(playerPositionChange);
+    };
 
     const lowResponseIntervalId = setInterval(() => {
-      if (!player.paused) {
-        // const currentPosition = contentRef.current.player.songPosition;
-
-        const playerPositionChange = new CustomEvent('player/positionChange', {
-          detail: roundTo(player.currentTime, 2)
-        });
-        document.dispatchEvent(playerPositionChange);
-      }
+      if (!player.paused) dispatchCurrentSongTime();
     }, LOW_RESPONSE_DURATION);
+
+    const pausedResponseIntervalId = setInterval(() => {
+      if (player.paused) dispatchCurrentSongTime();
+    }, DURATION);
 
     // const intervalId = setInterval(() => {
     //   const currentPosition = contentRef.current.player.songPosition;
@@ -506,8 +513,8 @@ export default function App() {
     // }, DURATION);
 
     return () => {
-      // clearInterval(intervalId);
       clearInterval(lowResponseIntervalId);
+      clearInterval(pausedResponseIntervalId);
     };
   }, []);
 
@@ -979,7 +986,7 @@ export default function App() {
 
               storage.playback.setCurrentSongOptions('songId', songData.songId);
 
-              player.src = songData.path;
+              player.src = `${songData.path}?ts=${Date.now()}`;
 
               const trackChangeEvent = new CustomEvent('player/trackchange', {
                 detail: songId
@@ -1048,7 +1055,7 @@ export default function App() {
             data: audioPlayerData
           });
           contentRef.current.currentSongData = audioPlayerData;
-          player.src = audioPlayerData.path;
+          player.src = `${audioPlayerData.path}?ts=${Date.now()}`;
           refStartPlay.current = isStartPlay;
           if (isStartPlay) toggleSongPlayback();
 

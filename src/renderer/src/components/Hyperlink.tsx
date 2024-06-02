@@ -15,7 +15,14 @@ interface HyperlinkProp {
 const Hyperlink = (props: HyperlinkProp) => {
   const { localStorageData } = React.useContext(AppContext);
   const { changePromptMenuData } = React.useContext(AppUpdateContext);
-  const { link, children, label = children, linkTitle = label, className, noValidityCheck } = props;
+  const {
+    link,
+    children,
+    label = children,
+    linkTitle = label,
+    className,
+    noValidityCheck = false
+  } = props;
 
   const openLinkConfirmPrompt = React.useCallback(() => {
     if (noValidityCheck || localStorageData?.preferences.doNotVerifyWhenOpeningLinks) {
@@ -49,10 +56,6 @@ const Hyperlink = (props: HyperlinkProp) => {
       {label}
     </span>
   );
-};
-
-Hyperlink.defaultProps = {
-  noValidityCheck: false
 };
 
 export default Hyperlink;

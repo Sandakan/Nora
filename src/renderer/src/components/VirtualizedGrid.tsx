@@ -49,20 +49,18 @@ const Grid = <T extends object>(props: Props<T>, ref) => {
             {children}
           </div>
         )
+      ),
+      Item: ({ children, ...props }: { children?: any }) => (
+        <div
+          {...props}
+          style={{
+            justifySelf: 'center',
+            alignSelf: 'center'
+          }}
+        >
+          {children}
+        </div>
       )
-      // Item: ({ children, ...props }: { children?: any }) => (
-      //   <div
-      //     {...props}
-      //     style={{
-      //       padding: '0.5rem',
-      //       display: 'flex',
-      //       alignItems: 'center',
-      //       justifyContent: 'center'
-      //     }}
-      //   >
-      //     {children}
-      //   </div>
-      // )
     }),
     [fixedItemWidth]
   );

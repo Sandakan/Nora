@@ -24,6 +24,7 @@ const LyricsContainer = (props: Props) => {
           songArtists: Array.isArray(currentSongData.artists)
             ? currentSongData.artists.map((artist) => artist.name)
             : [],
+          album: currentSongData.album?.name,
           songPath: currentSongData.path,
           duration: currentSongData.duration
         })
@@ -31,6 +32,7 @@ const LyricsContainer = (props: Props) => {
         .catch((err) => console.error(err));
     }
   }, [
+    currentSongData.album?.name,
     currentSongData.artists,
     currentSongData.duration,
     currentSongData.path,

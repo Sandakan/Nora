@@ -38,6 +38,10 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
+      - name: Install correct Sharp Dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: npm install --cpu=x64 --os=linux sharp
+
       - name: build-linux
         if: matrix.os == 'ubuntu-latest'
         run: npm run build:linux
@@ -50,7 +54,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           draft: true
-          name: Nora Release ${{ github.ref }}
+          name: Nora Release ${{ github.ref }} ${{ github.sha }}
           files: |
             dist/*.exe
             dist/*.zip
@@ -63,4 +67,4 @@ jobs:
             dist/*.yml
             dist/*.blockmap
         env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
