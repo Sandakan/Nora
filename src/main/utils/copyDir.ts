@@ -4,6 +4,7 @@ import fs from 'fs/promises';
 
 import log from '../log';
 import makeDir from './makeDir';
+import isPathADir from './isPathADir';
 
 async function copyDir(src: string, dest: string) {
   try {
@@ -16,7 +17,7 @@ async function copyDir(src: string, dest: string) {
       const srcPath = path.join(src, entry.name);
       const destPath = path.join(dest, entry.name);
 
-      if (entry.isDirectory()) await copyDir(srcPath, destPath);
+      if (isPathADir(entry)) await copyDir(srcPath, destPath);
       else await fs.copyFile(srcPath, destPath);
     }
   } catch (error) {

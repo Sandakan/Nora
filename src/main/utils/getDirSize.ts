@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { isAnErrorWithCode } from './isAnErrorWithCode';
+import isPathADir from './isPathADir';
 
 const getDirSize = async (dir: string) => {
   try {
@@ -10,7 +11,7 @@ const getDirSize = async (dir: string) => {
       try {
         const filepath = path.join(dir, file.name);
 
-        if (file.isDirectory()) return getDirSize(filepath);
+        if (isPathADir(file)) return getDirSize(filepath);
         if (file.isFile()) {
           const { size } = await fs.stat(filepath);
           return size;
