@@ -19,6 +19,7 @@ import {
 import { encrypt } from './utils/safeStorage';
 import { LastFMSessionData } from '../@types/last_fm_api';
 import { DEFAULT_SONG_PALETTE } from './other/generatePalette';
+import isPathADir from './utils/isPathADir';
 
 export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(app.getPath('userData'), 'song_covers');
 export const DEFAULT_FILE_URL = 'nora://localfiles/';
@@ -569,7 +570,7 @@ function flattenPathArrays<Type extends string[][]>(lists: Type) {
 export const getDirectories = async (srcpath: string) => {
   try {
     const dirs = await fs.readdir(srcpath, { withFileTypes: true });
-    const filteredDirs = dirs.filter((dir) => dir.isDirectory());
+    const filteredDirs = dirs.filter((dir) => isPathADir(dir));
     const dirsWithFullPaths = filteredDirs.map((dir) => path.join(srcpath, dir.name));
 
     return dirsWithFullPaths;
