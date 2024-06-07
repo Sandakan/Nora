@@ -1,5 +1,5 @@
 /* eslint-disable react/no-array-index-key */
-import React, { useContext } from 'react';
+import { lazy, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -7,13 +7,14 @@ import { AppContext } from '../../contexts/AppContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 
 import Song from '../SongsPage/Song';
-import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';
 import MainContainer from '../MainContainer';
 
 import PlaylistInfoAndImgContainer from './PlaylistInfoAndImgContainer';
 import TitleContainer from '../TitleContainer';
 import { songSortOptions, songFilterOptions } from '../SongsPage/SongOptions';
 import VirtualizedList from '../VirtualizedList';
+
+const SensitiveActionConfirmPrompt = lazy(() => import('../SensitiveActionConfirmPrompt'));
 
 const PlaylistInfoPage = () => {
   const { currentlyActivePage, queue, localStorageData } = useContext(AppContext);
@@ -24,19 +25,19 @@ const PlaylistInfoPage = () => {
     createQueue,
     updateCurrentlyActivePageData,
     playSong
-  } = React.useContext(AppUpdateContext);
+  } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [playlistData, setPlaylistData] = React.useState({} as Playlist);
-  const [playlistSongs, setPlaylistSongs] = React.useState([] as SongData[]);
-  const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>(
+  const [playlistData, setPlaylistData] = useState({} as Playlist);
+  const [playlistSongs, setPlaylistSongs] = useState([] as SongData[]);
+  const [sortingOrder, setSortingOrder] = useState<SongSortTypes>(
     currentlyActivePage?.data?.sortingOrder ||
       localStorageData.sortingStates?.songsPage ||
       'addedOrder'
   );
-  const [filteringOrder, setFilteringOrder] = React.useState<SongFilterTypes>('notSelected');
+  const [filteringOrder, setFilteringOrder] = useState<SongFilterTypes>('notSelected');
 
-  const fetchPlaylistData = React.useCallback(() => {
+  const fetchPlaylistData = useCallback(() => {
     if (currentlyActivePage.data?.playlistId) {
       window.api.playlistsData
         .getPlaylistData([currentlyActivePage.data.playlistId])
@@ -48,7 +49,7 @@ const PlaylistInfoPage = () => {
     }
   }, [currentlyActivePage.data]);
 
-  const fetchPlaylistSongsData = React.useCallback(() => {
+  const fetchPlaylistSongsData = useCallback(() => {
     const preserveAddedOrder = sortingOrder === 'addedOrder';
     if (playlistData.songs && playlistData.songs.length > 0) {
       window.api.audioLibraryControls
@@ -67,7 +68,7 @@ const PlaylistInfoPage = () => {
     }
   }, [filteringOrder, playlistData.songs, sortingOrder]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchPlaylistData();
     const managePlaylistUpdatesInPlaylistsInfoPage = (e: Event) => {
       if ('detail' in e) {
@@ -84,7 +85,7 @@ const PlaylistInfoPage = () => {
     };
   }, [fetchPlaylistData]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchPlaylistSongsData();
     const managePlaylistSongUpdatesInPlaylistInfoPage = (e: Event) => {
       if ('detail' in e) {
@@ -109,7 +110,7 @@ const PlaylistInfoPage = () => {
 
   const selectAllHandler = useSelectAllHandler(playlistSongs, 'songs', 'songId');
 
-  const handleSongPlayBtnClick = React.useCallback(
+  const handleSongPlayBtnClick = useCallback(
     (currSongId: string) => {
       const queueSongIds = playlistSongs
         .filter((song) => !song.isBlacklisted)
@@ -120,12 +121,9 @@ const PlaylistInfoPage = () => {
     [createQueue, playSong, playlistData.playlistId, playlistSongs]
   );
 
-  const listItems = React.useMemo(
-    () => [playlistData, ...playlistSongs],
-    [playlistData, playlistSongs]
-  );
+  const listItems = useMemo(() => [playlistData, ...playlistSongs], [playlistData, playlistSongs]);
 
-  const clearSongHistory = React.useCallback(() => {
+  const clearSongHistory = useCallback(() => {
     changePromptMenuData(
       true,
       <SensitiveActionConfirmPrompt
@@ -153,7 +151,7 @@ const PlaylistInfoPage = () => {
     );
   }, [addNewNotifications, changePromptMenuData, t]);
 
-  const addSongsToQueue = React.useCallback(() => {
+  const addSongsToQueue = useCallback(() => {
     const validSongIds = playlistSongs
       .filter((song) => !song.isBlacklisted)
       .map((song) => song.songId);
@@ -169,7 +167,7 @@ const PlaylistInfoPage = () => {
     ]);
   }, [addNewNotifications, playlistSongs, queue.queue, t, updateQueueData]);
 
-  const shuffleAndPlaySongs = React.useCallback(
+  const shuffleAndPlaySongs = useCallback(
     () =>
       createQueue(
         playlistSongs.filter((song) => !song.isBlacklisted).map((song) => song.songId),
@@ -181,7 +179,7 @@ const PlaylistInfoPage = () => {
     [createQueue, playlistData.playlistId, playlistSongs]
   );
 
-  const playAllSongs = React.useCallback(
+  const playAllSongs = useCallback(
     () =>
       createQueue(
         playlistSongs.filter((song) => !song.isBlacklisted).map((song) => song.songId),

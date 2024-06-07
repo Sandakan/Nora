@@ -1,15 +1,17 @@
-import React from 'react';
+import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+
 import Button from '../Button';
 
 const PromptMenuNavigationControlsContainer = () => {
-  const { promptMenuData } = React.useContext(AppContext);
-  const { updatePromptMenuHistoryIndex } = React.useContext(AppUpdateContext);
+  const { promptMenuData } = useContext(AppContext);
+  const { updatePromptMenuHistoryIndex } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const { noOfPrompts, promptActiveIndex } = React.useMemo(() => {
+  const { noOfPrompts, promptActiveIndex } = useMemo(() => {
     return {
       promptActiveIndex: promptMenuData.currentActiveIndex + 1,
       noOfPrompts: promptMenuData.noOfPrompts

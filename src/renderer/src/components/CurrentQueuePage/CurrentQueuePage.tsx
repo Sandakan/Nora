@@ -1,6 +1,6 @@
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
-import React, { useContext } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line import/named
 import { Draggable, Droppable, DragDropContext, DropResult } from 'react-beautiful-dnd';
@@ -36,27 +36,27 @@ const CurrentQueuePage = () => {
     localStorageData
   } = useContext(AppContext);
   const { updateQueueData, addNewNotifications, updateContextMenuData, toggleMultipleSelections } =
-    React.useContext(AppUpdateContext);
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [queuedSongs, setQueuedSongs] = React.useState([] as AudioInfo[]);
-  const previousQueueRef = React.useRef<string[]>([]);
-  const [queueInfo, setQueueInfo] = React.useState({
+  const [queuedSongs, setQueuedSongs] = useState([] as AudioInfo[]);
+  const previousQueueRef = useRef<string[]>([]);
+  const [queueInfo, setQueueInfo] = useState({
     artworkPath: DefaultSongCover,
     title: ''
   } as QueueInfo);
-  const [isAutoScrolling, setIsAutoScrolling] = React.useState(false);
+  const [isAutoScrolling, setIsAutoScrolling] = useState(false);
 
-  const ListRef = React.useRef<VirtuosoHandle>(null);
+  const ListRef = useRef<VirtuosoHandle>(null);
 
-  const isTheSameQueue = React.useCallback((newQueueSongIds: string[]) => {
+  const isTheSameQueue = useCallback((newQueueSongIds: string[]) => {
     const prevQueueSongIds = previousQueueRef.current;
     const isSameQueue = prevQueueSongIds.every((id) => newQueueSongIds.includes(id));
 
     return isSameQueue;
   }, []);
 
-  const fetchAllSongsData = React.useCallback(
+  const fetchAllSongsData = useCallback(
     (skipSameQueueCheck = false) => {
       if (skipSameQueueCheck || !isTheSameQueue(queue.queue)) {
         window.api.audioLibraryControls
@@ -72,7 +72,7 @@ const CurrentQueuePage = () => {
     [isTheSameQueue, queue.queue]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchAllSongsData(true);
     const manageSongUpdatesInCurrentQueue = (e: Event) => {
       if ('detail' in e) {
@@ -95,7 +95,7 @@ const CurrentQueuePage = () => {
     };
   }, [fetchAllSongsData]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (queue.queueType) {
       if (queue.queueType === 'songs') {
         setQueueInfo((prevData) => {
@@ -200,12 +200,12 @@ const CurrentQueuePage = () => {
     return updateQueueData();
   };
 
-  const centerCurrentlyPlayingSong = React.useCallback(() => {
+  const centerCurrentlyPlayingSong = useCallback(() => {
     const index = queue.queue.indexOf(currentSongData.songId);
     if (ListRef && index >= 0) ListRef.current?.scrollToIndex({ index, align: 'center' });
   }, [currentSongData.songId, queue.queue]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const timeOutId = setTimeout(() => centerCurrentlyPlayingSong(), 1000);
 
     return () => {
@@ -213,7 +213,7 @@ const CurrentQueuePage = () => {
     };
   }, [centerCurrentlyPlayingSong, isAutoScrolling]);
 
-  const moreOptionsContextMenuItems = React.useMemo(
+  const moreOptionsContextMenuItems = useMemo(
     () => [
       {
         label: t('currentQueuePage.scrollToCurrentPlayingSong'),
@@ -224,14 +224,14 @@ const CurrentQueuePage = () => {
     [centerCurrentlyPlayingSong, t]
   );
 
-  const queueDuration = React.useMemo(
+  const queueDuration = useMemo(
     () =>
       calculateTimeFromSeconds(queuedSongs.reduce((prev, current) => prev + current.duration, 0))
         .timeString,
     [queuedSongs]
   );
 
-  const completedQueueDuration = React.useMemo(
+  const completedQueueDuration = useMemo(
     () =>
       calculateTimeFromSeconds(
         queuedSongs
@@ -282,7 +282,7 @@ const CurrentQueuePage = () => {
               tooltipLabel={t(`common.${isMultipleSelectionEnabled ? 'unselectAll' : 'select'}`)}
             />
             <Button
-              key={1}
+              key={2}
               className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
               iconName={isAutoScrolling ? 'flash_off' : 'flash_on'}
               clickHandler={() => setIsAutoScrolling((state) => !state)}
@@ -292,7 +292,7 @@ const CurrentQueuePage = () => {
               )}
             />
             <Button
-              key={2}
+              key={3}
               className="shuffle-all-button text-sm"
               iconName="shuffle"
               tooltipLabel={t('currentQueuePage.shuffleQueue')}
@@ -311,7 +311,7 @@ const CurrentQueuePage = () => {
               }}
             />
             <Button
-              key={3}
+              key={4}
               label={t('currentQueuePage.clearQueue')}
               className="clear-queue-button text-sm"
               iconName="clear"
@@ -374,7 +374,7 @@ const CurrentQueuePage = () => {
           className={`songs-container overflow-auto ${queuedSongs.length > 0 ? 'h-full' : 'h-0'}`}
         >
           {queuedSongs.length > 0 && (
-            // $ Enabling React.StrictMode throws an error in the CurrentQueuePage when using react-beautiful-dnd for drag and drop.
+            // $ Enabling StrictMode throws an error in the CurrentQueuePage when using react-beautiful-dnd for drag and drop.
 
             <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable

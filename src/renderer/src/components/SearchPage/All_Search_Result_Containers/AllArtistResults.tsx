@@ -1,4 +1,4 @@
-import React from 'react';
+import { useContext } from 'react';
 
 import { Artist } from '../../ArtistPage/Artist';
 import { AppContext } from '../../../contexts/AppContext';
@@ -12,7 +12,7 @@ const MIN_ITEM_WIDTH = 175;
 const MIN_ITEM_HEIGHT = 200;
 
 const AllArtistResults = (prop: Props) => {
-  const { currentlyActivePage } = React.useContext(AppContext);
+  const { currentlyActivePage } = useContext(AppContext);
 
   const { artistData } = prop;
 

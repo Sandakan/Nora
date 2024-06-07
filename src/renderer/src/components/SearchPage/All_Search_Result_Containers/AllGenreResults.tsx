@@ -1,4 +1,4 @@
-import React from 'react';
+import { useContext } from 'react';
 
 import Genre from '../../GenresPage/Genre';
 import SecondaryContainer from '../../SecondaryContainer';
@@ -12,7 +12,7 @@ const MIN_ITEM_WIDTH = 320;
 const MIN_ITEM_HEIGHT = 180;
 
 const AllGenreResults = (prop: Props) => {
-  const { currentlyActivePage } = React.useContext(AppContext);
+  const { currentlyActivePage } = useContext(AppContext);
   const { genreData } = prop;
 
   const selectAllHandler = useSelectAllHandler(genreData, 'genre', 'genreId');

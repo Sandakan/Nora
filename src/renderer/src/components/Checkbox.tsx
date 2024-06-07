@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
-import React from 'react';
+import { KeyboardEvent, memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface CheckboxProp {
@@ -15,7 +15,7 @@ interface CheckboxProp {
   tooltipLabel?: string;
 }
 
-const Checkbox = React.memo((props: CheckboxProp) => {
+const Checkbox = memo((props: CheckboxProp) => {
   const { t } = useTranslation();
 
   const {
@@ -28,7 +28,7 @@ const Checkbox = React.memo((props: CheckboxProp) => {
     tooltipLabel
   } = props;
 
-  const focusInput = React.useCallback((e: React.KeyboardEvent<HTMLLabelElement>) => {
+  const focusInput = useCallback((e: KeyboardEvent<HTMLLabelElement>) => {
     if (e.key === 'Enter') {
       e.stopPropagation();
       const inputId = e.currentTarget.htmlFor;

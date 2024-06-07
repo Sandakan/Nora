@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -20,13 +20,13 @@ import SimilarTracksContainer from './SimilarTracksContainer';
 const SongInfoPage = () => {
   const { currentlyActivePage, bodyBackgroundImage } = useContext(AppContext);
   const { changeCurrentActivePage, updateBodyBackgroundImage, updateContextMenuData } =
-    React.useContext(AppUpdateContext);
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [songInfo, setSongInfo] = React.useState<SongData>();
-  const [listeningData, setListeningData] = React.useState<SongListeningData>();
+  const [songInfo, setSongInfo] = useState<SongData>();
+  const [listeningData, setListeningData] = useState<SongListeningData>();
 
-  const { currentMonth, currentYear } = React.useMemo(() => {
+  const { currentMonth, currentYear } = useMemo(() => {
     const currentDate = new Date();
     return {
       currentDate,
@@ -36,13 +36,13 @@ const SongInfoPage = () => {
     };
   }, []);
 
-  const songDuration = React.useMemo(() => {
+  const songDuration = useMemo(() => {
     const { timeString } = calculateTimeFromSeconds(songInfo?.duration ?? 0);
 
     return timeString;
   }, [songInfo]);
 
-  const updateSongInfo = React.useCallback((callback: (prevData: SongData) => SongData) => {
+  const updateSongInfo = useCallback((callback: (prevData: SongData) => SongData) => {
     setSongInfo((prevData) => {
       if (prevData) {
         const updatedSongData = callback(prevData);
@@ -52,7 +52,7 @@ const SongInfoPage = () => {
     });
   }, []);
 
-  const fetchSongInfo = React.useCallback(() => {
+  const fetchSongInfo = useCallback(() => {
     if (currentlyActivePage.data && currentlyActivePage.data.songId) {
       console.time('fetchTime');
 
@@ -82,7 +82,7 @@ const SongInfoPage = () => {
     }
   }, [currentlyActivePage.data, updateBodyBackgroundImage]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchSongInfo();
     const manageSongInfoUpdatesInSongInfoPage = (e: Event) => {
       if ('detail' in e) {
@@ -107,7 +107,7 @@ const SongInfoPage = () => {
       document.removeEventListener('app/dataUpdates', manageSongInfoUpdatesInSongInfoPage);
     };
   }, [fetchSongInfo]);
-  const songArtists = React.useMemo(() => {
+  const songArtists = useMemo(() => {
     const artists = songInfo?.artists;
     if (Array.isArray(artists) && artists.length > 0) {
       return artists
@@ -135,7 +135,7 @@ const SongInfoPage = () => {
     return <span className="text-xs font-normal">{t('common.unknownArtist')}</span>;
   }, [bodyBackgroundImage, songInfo?.artists, t]);
 
-  const { allTimeListens, thisYearListens, thisMonthListens } = React.useMemo(() => {
+  const { allTimeListens, thisYearListens, thisMonthListens } = useMemo(() => {
     let allTime = 0;
     let thisYearNoofListens = 0;
     let thisMonthNoOfListens = 0;
@@ -173,7 +173,7 @@ const SongInfoPage = () => {
   }, [currentMonth, currentYear, listeningData]);
 
   const { totalSongFullListens, totalSongSkips, maxSongSeekPosition, maxSongSeekFrequency } =
-    React.useMemo(() => {
+    useMemo(() => {
       if (listeningData) {
         const { fullListens = 0, skips = 0, seeks = [] } = listeningData;
 
@@ -297,7 +297,7 @@ const SongInfoPage = () => {
           {listeningData && (
             <div className="grid w-full grid-flow-col place-content-center gap-4 py-4 pr-4 xl:grid-flow-row">
               <ListeningActivityBarGraph listeningData={listeningData} className="xl:order-2" />
-              <div className="stat-cards grid max-h-full w-fit min-w-[32rem] grid-cols-2 flex-wrap items-center justify-center gap-4 place-self-center xl:order-1 xl:mt-4 xl:flex xl:max-h-none xl:grid-cols-3 xl:grid-rows-2 ">
+              <div className="stat-cards grid max-h-full w-fit min-w-[32rem] grid-cols-2 flex-wrap items-center justify-center gap-4 place-self-center xl:order-1 xl:mt-4 xl:flex xl:max-h-none xl:grid-cols-3 xl:grid-rows-2">
                 <SongStat
                   key={0}
                   title={t('songInfoPage.allTimeListens')}

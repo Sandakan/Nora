@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo, useContext } from 'react';
 import { getVersionInfoFromString } from '../../utils/isLatestVersion';
 import { AppContext } from '../../contexts/AppContext';
 
@@ -16,8 +16,8 @@ import GoToMainPlayerBtn from './special_controls/GoToMainPlayerBtn';
 
 const appReleasePhase = getVersionInfoFromString(version)?.releasePhase || 'stable';
 
-const TitleBar = React.memo(() => {
-  const { bodyBackgroundImage, playerType } = React.useContext(AppContext);
+const TitleBar = memo(() => {
+  const { bodyBackgroundImage, playerType } = useContext(AppContext);
 
   return (
     <header

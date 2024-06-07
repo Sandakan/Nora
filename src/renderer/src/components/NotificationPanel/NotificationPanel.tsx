@@ -2,7 +2,7 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/self-closing-comp */
-import React, { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 import { AppContext } from '../../contexts/AppContext';
 import Notification from './Notification';
 import NotificationClearAllButton from './NotificationClearAllButton';
@@ -10,7 +10,7 @@ import NotificationClearAllButton from './NotificationClearAllButton';
 const NotificationPanel = () => {
   const { notificationPanelData } = useContext(AppContext);
 
-  const notifications = React.useMemo(() => {
+  const notifications = useMemo(() => {
     const notificationData = notificationPanelData.notifications;
 
     if (notificationData.length > 0) {

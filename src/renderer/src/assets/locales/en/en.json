@@ -616,7 +616,7 @@
     "pendingUpdateAvailable": "A metadata update of this song is pending to be saved.",
     "saveTagsNotSupportedTitle": "Not Supported",
     "saveTagsNotSupportedDescription": "<P1>Nora currently doesn't support editing song metadata in <Format/> format.</P1><P2>Currently only <SupportedFormat/> format is supported.",
-    "albumArtistNotMentioned": "Song already has an album named `{{title}}` but its artists(s) '{{artists}}' are not specified as album artists for this song.",
+    "albumArtistNotMentioned": "Song is already part of the album named `{{title}}` but its artist(s) '{{artists}}' is/are not specified as the album artist(s) for this song.",
     "songAlbumArtistMismatch": "Selected album artist(s) '{{albumArtists}}' don't match with the selected album '{{albumTitle}}' artist(s) '{{songAlbumArtists}}'.",
     "searchForArtists": "Search for artists here",
     "searchForAlbums": "Search for albums here",
@@ -714,7 +714,7 @@
 
   "newPlaylistPrompt": {
     "addPlaylistSuccess": "Playlist added successfully.",
-    "playlistNameEmpty": "Playlist name cannot be empty",
+    "playlistNameEmpty": "Playlist name is required",
     "addNewPlaylist": "Add new playlist"
   },
 
@@ -723,12 +723,12 @@
     "confirmPlaylistDeleteWithCount": "Confirm deleting $t(common.playlistWithCount, {\"count\":{{count}}})",
     "message_one": "Removing this playlist will remove the connection between songs that you organized into this playlist. You won't be able to access this playlist again if you decide to delete it.",
     "message_other": "Removing these playlists will remove the connection between songs that you organized into these playlists. You won't be able to access these playlists again if you decide to delete it.",
-    "modificationNotice": "Proceeding this action affects these files: "
+    "modificationNotice": "Performing this action will affect these files: "
   },
 
   "resetAppConfirmationPrompt": {
     "confirmAppReset": "Confirm app reset",
-    "message": "Resetting the app will remove all of your user data including data about songs, data about favorites, data about your preferences, applied settings data etc; but NOT the songs in this system. Keep in mind that this process will be <span>IRREVERSIBLE</span>.",
+    "message": "Resetting the app removes all user data, including data related to songs, favorites, preferences, applied settings, etc., but NOT the songs themselves. Please note that this action is <span>IRREVERSIBLE</span>.",
     "restartAfterReset": "Nora will restart after the reset.",
     "systemPlaylistsRemovalProhibited": "You cannot remove playlists like History or Favorites."
   },
@@ -745,7 +745,7 @@
     "message_other": "You are about to blacklist these songs from the library. You can restore them again by right-clicking and clicking '$t(song.deblacklist)'. Your data related to these songs won't be affected by this action.",
     "effectTitle": "What blacklisting a song does",
     "effect1": "Will appear greyed-out in the library with a '<span/>' symbol.",
-    "effect2": "Won't be added to the queue automatically, even through <span>'$t(common.shuffleAndPlay)'</span> or<span>'$t(common.playAll)'</span>, unless you explicitly add them.",
+    "effect2": "Won't be added to the queue automatically, not even through <span>'$t(common.shuffleAndPlay)'</span> or<span>'$t(common.playAll)'</span>, unless you explicitly add them.",
     "effect3": "Can still be played by double-clicking, or by using either <span>'$t(common.play)'</span> or <span>'$t(common.playNext)'.</span>",
     "songsBlacklisted": "$t(common.songWithCount, {\"count\":{{count}}}) blacklisted and removed from the library"
   },
@@ -768,7 +768,7 @@
     "permanentlyDeleteFromSystem": "Permanently delete from the system",
     "message_one": "You will lose this song from your system and may not be able to recover it again if you select '$t(deleteSongFromSystemConfirmPrompt.permanentlyDeleteFromSystem)' from system option.",
     "message_other": "You will lose these songs from your system and may not be able to recover them again if you select '$t(deleteSongFromSystemConfirmPrompt.permanentlyDeleteFromSystem)' from system option.",
-    "modificationNotice": "Proceeding this action affects these files : ",
+    "modificationNotice": "Proceeding this action affects these files :",
     "deleteSong": "Delete song",
     "songPermanentlyDeleted": "$t(common.songWithCount, {\"count\":{{count}}}) removed from the system.",
     "songMovedToBin": "$t(common.songWithCount, {\"count\":{{count}}}) moved to the recycle Bin."
@@ -894,7 +894,7 @@
     "downArrowKey": "Down arrow",
 
     "mouseClick": "Mouse click",
-    "doubleClick": "Double click"
+    "doubleClick": "Double-click"
   },
 
   "clearLocalStoragePrompt": {
@@ -941,7 +941,7 @@
   "resetTagsToDefaultPrompt": {
     "changed": "Changed",
     "title": "Confirm before resetting song data to default",
-    "description": "Are you sure you want to reset the song data. You will lose the data you edited on this screen.",
+    "description": "Are you sure you want to reset the song data? You will lose the data you edited on this screen.",
     "resetToDefault": "Reset to default"
   },
 

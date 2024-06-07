@@ -1,13 +1,14 @@
-import React from 'react';
+import { lazy, useContext } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import Button from '../Button';
 import ShortcutButton from '../SettingsPage/ShortcutButton';
-import AppShortcutsPrompt from '../SettingsPage/AppShortcutsPrompt';
+
+const AppShortcutsPrompt = lazy(() => import('../SettingsPage/AppShortcutsPrompt'));
 
 const LyricsEditorHelpPrompt = () => {
-  const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   return (

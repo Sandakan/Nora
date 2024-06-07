@@ -1,4 +1,4 @@
-import React from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../../Button';
 import SecondaryContainer from '../../SecondaryContainer';
@@ -16,12 +16,12 @@ type Props = {
 const SongSearchResultsContainer = (props: Props) => {
   const { searchInput, songs, noOfVisibleSongs = 5, isPredictiveSearchEnabled } = props;
   const { isMultipleSelectionEnabled, multipleSelectionsData, localStorageData } =
-    React.useContext(AppContext);
+    useContext(AppContext);
   const { toggleMultipleSelections, changeCurrentActivePage, createQueue, playSong } =
-    React.useContext(AppUpdateContext);
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const handleSongPlayBtnClick = React.useCallback(
+  const handleSongPlayBtnClick = useCallback(
     (currSongId: string) => {
       const queueSongIds = songs.filter((song) => !song.isBlacklisted).map((song) => song.songId);
       createQueue(queueSongIds, 'songs', false, undefined, false);
@@ -30,7 +30,7 @@ const SongSearchResultsContainer = (props: Props) => {
     [createQueue, playSong, songs]
   );
 
-  const songResults = React.useMemo(
+  const songResults = useMemo(
     () =>
       songs.length > 0
         ? songs

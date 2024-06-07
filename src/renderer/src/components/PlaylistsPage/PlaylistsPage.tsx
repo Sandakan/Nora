@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { lazy, useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -8,11 +8,12 @@ import storage from '../../utils/localStorage';
 import i18n from '../../i18n';
 
 import { Playlist } from './Playlist';
-import NewPlaylistPrompt from './NewPlaylistPrompt';
 import Button from '../Button';
 import MainContainer from '../MainContainer';
 import Dropdown, { DropdownOption } from '../Dropdown';
 import VirtualizedGrid from '../VirtualizedGrid';
+
+const NewPlaylistPrompt = lazy(() => import('./NewPlaylistPrompt'));
 
 const playlistSortOptions: DropdownOption<PlaylistSortTypes>[] = [
   { label: i18n.t('sortTypes.aToZ'), value: 'aToZ' },
@@ -45,14 +46,14 @@ const PlaylistsPage = () => {
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [playlists, setPlaylists] = React.useState([] as Playlist[]);
-  const [sortingOrder, setSortingOrder] = React.useState<PlaylistSortTypes>(
+  const [playlists, setPlaylists] = useState([] as Playlist[]);
+  const [sortingOrder, setSortingOrder] = useState<PlaylistSortTypes>(
     currentlyActivePage?.data?.sortingOrder ||
       localStorageData?.sortingStates?.playlistsPage ||
       'aToZ'
   );
 
-  const fetchPlaylistData = React.useCallback(
+  const fetchPlaylistData = useCallback(
     () =>
       window.api.playlistsData.getPlaylistData([], sortingOrder).then((res) => {
         if (res && res.length > 0) setPlaylists(res);
@@ -61,7 +62,7 @@ const PlaylistsPage = () => {
     [sortingOrder]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchPlaylistData();
     const managePlaylistDataUpdatesInPlaylistsPage = (e: Event) => {
       if ('detail' in e) {
@@ -78,13 +79,13 @@ const PlaylistsPage = () => {
     };
   }, [fetchPlaylistData]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     storage.sortingStates.setSortingStates('playlistsPage', sortingOrder);
   }, [sortingOrder]);
 
   const selectAllHandler = useSelectAllHandler(playlists, 'playlist', 'playlistId');
 
-  const createNewPlaylist = React.useCallback(
+  const createNewPlaylist = useCallback(
     () =>
       changePromptMenuData(
         true,

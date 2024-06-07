@@ -1,4 +1,4 @@
-import React from 'react';
+import { useCallback, useContext } from 'react';
 import { AppContext } from '../../../contexts/AppContext';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
@@ -10,14 +10,14 @@ import VirtualizedList from '../../VirtualizedList';
 type Props = { songData: SongData[] };
 
 const AllSongResults = (prop: Props) => {
-  const { currentlyActivePage, localStorageData } = React.useContext(AppContext);
-  const { createQueue, playSong } = React.useContext(AppUpdateContext);
+  const { currentlyActivePage, localStorageData } = useContext(AppContext);
+  const { createQueue, playSong } = useContext(AppUpdateContext);
 
   const { songData } = prop;
 
   const selectAllHandler = useSelectAllHandler(songData, 'songs', 'songId');
 
-  const handleSongPlayBtnClick = React.useCallback(
+  const handleSongPlayBtnClick = useCallback(
     (currSongId: string) => {
       const queueSongIds = songData
         .filter((song) => !song.isBlacklisted)

@@ -1,4 +1,4 @@
-import React from 'react';
+import { useContext } from 'react';
 
 import { Playlist } from '../../PlaylistsPage/Playlist';
 import { AppContext } from '../../../contexts/AppContext';
@@ -11,7 +11,7 @@ const MIN_ITEM_WIDTH = 175;
 const MIN_ITEM_HEIGHT = 220;
 
 const AllPlaylistResults = (prop: Props) => {
-  const { currentlyActivePage } = React.useContext(AppContext);
+  const { currentlyActivePage } = useContext(AppContext);
   const { playlistData } = prop;
 
   const selectAllHandler = useSelectAllHandler(playlistData, 'playlist', 'playlistId');

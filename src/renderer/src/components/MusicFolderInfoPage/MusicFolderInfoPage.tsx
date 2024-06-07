@@ -1,4 +1,4 @@
-import React from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -18,24 +18,24 @@ const MusicFolderInfoPage = () => {
     multipleSelectionsData,
     isMultipleSelectionEnabled,
     localStorageData
-  } = React.useContext(AppContext);
+  } = useContext(AppContext);
   const {
     updateCurrentlyActivePageData,
     createQueue,
     toggleMultipleSelections,
     updateContextMenuData,
     playSong
-  } = React.useContext(AppUpdateContext);
+  } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [folderInfo, setFolderInfo] = React.useState<MusicFolder>();
-  const [folderSongs, setFolderSongs] = React.useState<SongData[]>([]);
-  const [filteringOrder, setFilteringOrder] = React.useState<SongFilterTypes>('notSelected');
-  const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>(
+  const [folderInfo, setFolderInfo] = useState<MusicFolder>();
+  const [folderSongs, setFolderSongs] = useState<SongData[]>([]);
+  const [filteringOrder, setFilteringOrder] = useState<SongFilterTypes>('notSelected');
+  const [sortingOrder, setSortingOrder] = useState<SongSortTypes>(
     localStorageData?.sortingStates?.songsPage || 'aToZ'
   );
 
-  const fetchFolderInfo = React.useCallback(() => {
+  const fetchFolderInfo = useCallback(() => {
     if (currentlyActivePage?.data && currentlyActivePage?.data?.folderPath) {
       window.api.folderData
         .getFolderData([currentlyActivePage?.data?.folderPath])
@@ -48,7 +48,7 @@ const MusicFolderInfoPage = () => {
     return undefined;
   }, [currentlyActivePage?.data]);
 
-  const fetchFolderSongs = React.useCallback(() => {
+  const fetchFolderSongs = useCallback(() => {
     if (folderInfo && folderInfo.songIds.length > 0) {
       window.api.audioLibraryControls
         .getSongInfo(folderInfo.songIds, sortingOrder, filteringOrder)
@@ -60,7 +60,7 @@ const MusicFolderInfoPage = () => {
     }
   }, [filteringOrder, folderInfo, sortingOrder]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchFolderInfo();
     const manageFolderInfoUpdatesInMusicFolderInfoPage = (e: Event) => {
       if ('detail' in e) {
@@ -77,7 +77,7 @@ const MusicFolderInfoPage = () => {
     };
   }, [fetchFolderInfo]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchFolderSongs();
     const manageSongUpdatesInMusicFolderInfoPage = (e: Event) => {
       if ('detail' in e) {
@@ -101,13 +101,13 @@ const MusicFolderInfoPage = () => {
     };
   }, [fetchFolderSongs]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     storage.sortingStates.setSortingStates('songsPage', sortingOrder);
   }, [sortingOrder]);
 
   const selectAllHandler = useSelectAllHandler(folderSongs, 'songs', 'songId');
 
-  const handleSongPlayBtnClick = React.useCallback(
+  const handleSongPlayBtnClick = useCallback(
     (currSongId?: string, shuffleQueue = false, startPlaying = false) => {
       const queueSongIds = folderSongs
         .filter((song) => !song.isBlacklisted)
@@ -119,7 +119,7 @@ const MusicFolderInfoPage = () => {
     [createQueue, folderInfo?.path, folderSongs, playSong]
   );
 
-  const { folderName } = React.useMemo(() => {
+  const { folderName } = useMemo(() => {
     if (folderInfo) {
       const { path } = folderInfo;
       const name = path.split('\\').pop() || path;
@@ -129,7 +129,7 @@ const MusicFolderInfoPage = () => {
     return { folderPath: undefined, folderName: undefined };
   }, [folderInfo]);
 
-  const otherOptions = React.useMemo(
+  const otherOptions = useMemo(
     () => [
       {
         label: t('settingsPage.resyncLibrary'),

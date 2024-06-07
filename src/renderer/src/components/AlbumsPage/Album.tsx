@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
-import React from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -21,7 +21,7 @@ interface AlbumProp extends Album {
 
 export const Album = (props: AlbumProp) => {
   const { currentlyActivePage, queue, isMultipleSelectionEnabled, multipleSelectionsData } =
-    React.useContext(AppContext);
+    useContext(AppContext);
 
   const {
     changeCurrentActivePage,
@@ -31,10 +31,10 @@ export const Album = (props: AlbumProp) => {
     addNewNotifications,
     updateMultipleSelections,
     toggleMultipleSelections
-  } = React.useContext(AppUpdateContext);
+  } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const playAlbumSongs = React.useCallback(
+  const playAlbumSongs = useCallback(
     (isShuffle = false) => {
       return window.api.audioLibraryControls
         .getSongInfo(
@@ -59,7 +59,7 @@ export const Album = (props: AlbumProp) => {
     [createQueue, props.albumId, props.songs]
   );
 
-  const playAlbumSongsForMultipleSelections = React.useCallback(
+  const playAlbumSongsForMultipleSelections = useCallback(
     (isShuffle = false) => {
       const { multipleSelections: albumIds } = multipleSelectionsData;
 
@@ -97,7 +97,7 @@ export const Album = (props: AlbumProp) => {
     [createQueue, multipleSelectionsData]
   );
 
-  const addToQueueForMultipleSelections = React.useCallback(() => {
+  const addToQueueForMultipleSelections = useCallback(() => {
     const { multipleSelections: albumIds } = multipleSelectionsData;
     window.api.genresData
       .getGenresData(albumIds)
@@ -134,7 +134,7 @@ export const Album = (props: AlbumProp) => {
       .catch((err) => console.error(err));
   }, [addNewNotifications, multipleSelectionsData, queue.queue, t, updateQueueData]);
 
-  const showAlbumInfoPage = React.useCallback(
+  const showAlbumInfoPage = useCallback(
     () =>
       currentlyActivePage?.data?.albumId !== props.albumId &&
       changeCurrentActivePage('AlbumInfo', {
@@ -143,7 +143,7 @@ export const Album = (props: AlbumProp) => {
     [changeCurrentActivePage, currentlyActivePage?.data, props.albumId]
   );
 
-  const isAMultipleSelection = React.useMemo(() => {
+  const isAMultipleSelection = useMemo(() => {
     if (!multipleSelectionsData.isEnabled) return false;
     if (multipleSelectionsData.selectionType !== 'album') return false;
     if (multipleSelectionsData.multipleSelections.length <= 0) return false;
@@ -154,7 +154,7 @@ export const Album = (props: AlbumProp) => {
     return false;
   }, [multipleSelectionsData, props.albumId]);
 
-  const albumArtists = React.useMemo(() => {
+  const albumArtists = useMemo(() => {
     const { artists } = props;
     if (Array.isArray(artists) && artists.length > 0) {
       return artists
@@ -184,7 +184,7 @@ export const Album = (props: AlbumProp) => {
     return <span className="text-xs font-normal">{t('common.unknownArtist')}</span>;
   }, [isAMultipleSelection, props, t]);
 
-  const contextMenuItems: ContextMenuItem[] = React.useMemo(() => {
+  const contextMenuItems: ContextMenuItem[] = useMemo(() => {
     const isMultipleSelectionsEnabled =
       multipleSelectionsData.selectionType === 'album' &&
       multipleSelectionsData.multipleSelections.length !== 1 &&
@@ -282,7 +282,7 @@ export const Album = (props: AlbumProp) => {
     updateQueueData
   ]);
 
-  const contextMenuItemData = React.useMemo(
+  const contextMenuItemData = useMemo(
     (): ContextMenuAdditionalData =>
       isMultipleSelectionEnabled &&
       multipleSelectionsData.selectionType === 'album' &&

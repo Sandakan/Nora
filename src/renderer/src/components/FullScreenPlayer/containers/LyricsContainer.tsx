@@ -1,5 +1,5 @@
 /* eslint-disable react/no-array-index-key */
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../../contexts/AppContext';
 
@@ -83,7 +83,7 @@ const LyricsContainer = (props: Props) => {
     return [];
   }, [lyrics]);
 
-  const lyricsSource = React.useMemo(() => {
+  const lyricsSource = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {
       const { source, copyright, link } = lyrics;
 

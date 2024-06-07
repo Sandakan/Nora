@@ -1,4 +1,4 @@
-import React from 'react';
+import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../../contexts/AppContext';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
@@ -18,14 +18,14 @@ type Props = {
 };
 
 const SongInfoContainer = (props: Props) => {
-  const { localStorageData, currentSongData, isCurrentSongPlaying } = React.useContext(AppContext);
+  const { localStorageData, currentSongData, isCurrentSongPlaying } = useContext(AppContext);
   const { toggleIsFavorite, handleSkipBackwardClick, handleSkipForwardClick, toggleSongPlayback } =
-    React.useContext(AppUpdateContext);
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { songPos, isLyricsVisible, setIsLyricsVisible, isLyricsAvailable } = props;
 
-  const [isNextSongPopupVisible, setIsNextSongPopupVisible] = React.useState(false);
+  const [isNextSongPopupVisible, setIsNextSongPopupVisible] = useState(false);
 
   const songDuration =
     localStorageData && localStorageData.preferences.showSongRemainingTime
@@ -34,7 +34,7 @@ const SongInfoContainer = (props: Props) => {
         : calculateTime(0)
       : calculateTime(songPos);
 
-  const songArtistsImages = React.useMemo(() => {
+  const songArtistsImages = useMemo(() => {
     if (
       currentSongData.songId &&
       Array.isArray(currentSongData.artists) &&
@@ -57,7 +57,7 @@ const SongInfoContainer = (props: Props) => {
     return undefined;
   }, [currentSongData.artists, currentSongData.songId]);
 
-  const handleSkipForwardClickWithParams = React.useCallback(
+  const handleSkipForwardClickWithParams = useCallback(
     () => handleSkipForwardClick('USER_SKIP'),
     [handleSkipForwardClick]
   );
@@ -126,7 +126,7 @@ const SongInfoContainer = (props: Props) => {
               removeFocusOnClick
             />
             <Button
-              className={`lyrics-btn h-fit cursor-pointer !border-0 !bg-background-color-3/15 !p-3 text-font-color-white outline-1 outline-offset-1 !backdrop-blur-lg transition-[background] after:absolute after:h-1 hover:!bg-background-color-3/30 focus-visible:!outline dark:text-font-color-white  ${
+              className={`lyrics-btn h-fit cursor-pointer !border-0 !bg-background-color-3/15 !p-3 text-font-color-white outline-1 outline-offset-1 !backdrop-blur-lg transition-[background] after:absolute after:h-1 hover:!bg-background-color-3/30 focus-visible:!outline dark:text-font-color-white ${
                 isLyricsVisible && '!text-dark-background-color-3 after:opacity-100'
               }`}
               iconClassName="!text-2xl"

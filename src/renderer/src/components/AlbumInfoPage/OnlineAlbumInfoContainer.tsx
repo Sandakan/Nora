@@ -1,4 +1,4 @@
-import React from 'react';
+import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import Biography from '../Biography/Biography';
@@ -12,12 +12,12 @@ type Props = {
 };
 
 const OnlineAlbumInfoContainer = (props: Props) => {
-  const { bodyBackgroundImage } = React.useContext(AppContext);
+  const { bodyBackgroundImage } = useContext(AppContext);
   const { t } = useTranslation();
 
   const { albumTitle: title, otherAlbumData } = props;
 
-  const unAvailableAlbumTrackComponents = React.useMemo(() => {
+  const unAvailableAlbumTrackComponents = useMemo(() => {
     if (otherAlbumData) {
       return otherAlbumData.sortedUnAvailAlbumTracks.map((track) => (
         <UnAvailableTrack

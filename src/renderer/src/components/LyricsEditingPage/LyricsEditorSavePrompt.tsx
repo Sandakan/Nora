@@ -1,5 +1,5 @@
 /* eslint-disable promise/catch-or-return */
-import React from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -98,27 +98,27 @@ const convertLyricsStrToObj = (
 };
 
 const LyricsEditorSavePrompt = (props: Props) => {
-  const { addNewNotifications, changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { addNewNotifications, changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { lyricsLines, currentSongData, isEditingEnhancedSyncedLyrics } = props;
 
-  const parsedLyrics = React.useMemo(
+  const parsedLyrics = useMemo(
     () => convertLyricsStrToObj(lyricsLines, currentSongData, isEditingEnhancedSyncedLyrics),
     [currentSongData, isEditingEnhancedSyncedLyrics, lyricsLines]
   );
 
-  const pathExt = React.useMemo(
+  const pathExt = useMemo(
     () => window.api.utils.getExtension(currentSongData.path),
     [currentSongData.path]
   );
 
-  const isSaveLyricsBtnDisabled = React.useMemo(
+  const isSaveLyricsBtnDisabled = useMemo(
     () => !metadataEditingSupportedExtensions.includes(pathExt),
     [pathExt]
   );
 
-  const copyLyrics = React.useCallback(
+  const copyLyrics = useCallback(
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
@@ -144,7 +144,7 @@ const LyricsEditorSavePrompt = (props: Props) => {
     [parsedLyrics]
   );
 
-  const saveLyricsToSong = React.useCallback(
+  const saveLyricsToSong = useCallback(
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,

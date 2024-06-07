@@ -1,4 +1,4 @@
-import React from 'react';
+import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../../contexts/AppContext';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
@@ -9,11 +9,11 @@ import Checkbox from '../../Checkbox';
 import LastFMIcon from '../../../assets/images/webp/last-fm-logo.webp';
 
 const AccountsSettings = () => {
-  const { userData } = React.useContext(AppContext);
-  const { updateUserData } = React.useContext(AppUpdateContext);
+  const { userData } = useContext(AppContext);
+  const { updateUserData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const isLastFmConnected = React.useMemo(
+  const isLastFmConnected = useMemo(
     () => !!userData?.lastFmSessionData,
     [userData?.lastFmSessionData]
   );

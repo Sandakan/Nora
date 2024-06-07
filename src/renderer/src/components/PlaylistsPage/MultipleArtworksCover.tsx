@@ -1,4 +1,4 @@
-import React from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { AppContext } from '../../contexts/AppContext';
 
 import Img from '../Img';
@@ -15,7 +15,7 @@ type Props = {
 };
 
 const MultipleArtworksCover = (props: Props) => {
-  const { localStorageData } = React.useContext(AppContext);
+  const { localStorageData } = useContext(AppContext);
   const {
     className,
     songIds,
@@ -25,16 +25,16 @@ const MultipleArtworksCover = (props: Props) => {
     enableImgFadeIns = true
   } = props;
 
-  const [artworks, setArtworks] = React.useState<string[]>([]);
+  const [artworks, setArtworks] = useState<string[]>([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     window.api.playlistsData
       .getArtworksForMultipleArtworksCover(songIds)
       .then((res) => setArtworks(res))
       .catch((err) => console.error(err));
   }, [songIds]);
 
-  const images = React.useMemo(() => {
+  const images = useMemo(() => {
     if (artworks.length > 1) {
       const repeatedArtworks: string[] = [];
 

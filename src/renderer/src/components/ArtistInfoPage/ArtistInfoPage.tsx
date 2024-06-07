@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useContext } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -44,28 +44,25 @@ const ArtistInfoPage = () => {
     updateContextMenuData,
     toggleMultipleSelections,
     playSong
-  } = React.useContext(AppUpdateContext);
+  } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [artistData, setArtistData] = React.useState<ArtistInfo>();
-  const [albums, setAlbums] = React.useState<Album[]>([]);
-  const [songs, setSongs] = React.useState<SongData[]>([]);
-  const [isAllAlbumsVisible, setIsAllAlbumsVisible] = React.useState(false);
-  const [isAllSongsVisible, setIsAllSongsVisible] = React.useState(false);
-  const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>('aToZ');
+  const [artistData, setArtistData] = useState<ArtistInfo>();
+  const [albums, setAlbums] = useState<Album[]>([]);
+  const [songs, setSongs] = useState<SongData[]>([]);
+  const [isAllAlbumsVisible, setIsAllAlbumsVisible] = useState(false);
+  const [isAllSongsVisible, setIsAllSongsVisible] = useState(false);
+  const [sortingOrder, setSortingOrder] = useState<SongSortTypes>('aToZ');
 
-  const songsContainerRef = React.useRef(null);
+  const songsContainerRef = useRef(null);
   const { width } = useResizeObserver(songsContainerRef);
 
   const CONTAINER_PADDING = 30;
-  const relevantWidth = React.useMemo(() => width - CONTAINER_PADDING, [width]);
+  const relevantWidth = useMemo(() => width - CONTAINER_PADDING, [width]);
 
-  const noOfVisibleAlbums = React.useMemo(
-    () => Math.floor(relevantWidth / 250) || 4,
-    [relevantWidth]
-  );
+  const noOfVisibleAlbums = useMemo(() => Math.floor(relevantWidth / 250) || 4, [relevantWidth]);
 
-  const fetchArtistsData = React.useCallback(() => {
+  const fetchArtistsData = useCallback(() => {
     if (currentlyActivePage?.data?.artistId) {
       window.api.artistsData
         .getArtistData([currentlyActivePage.data.artistId])
@@ -81,7 +78,7 @@ const ArtistInfoPage = () => {
     }
   }, [currentlyActivePage.data, updateBodyBackgroundImage]);
 
-  const fetchArtistArtworks = React.useCallback(() => {
+  const fetchArtistArtworks = useCallback(() => {
     if (artistData?.artistId) {
       window.api.artistsData
         .getArtistArtworks(artistData.artistId)
@@ -109,7 +106,7 @@ const ArtistInfoPage = () => {
     }
   }, [artistData?.artistId, updateBodyBackgroundImage]);
 
-  const fetchSongsData = React.useCallback(() => {
+  const fetchSongsData = useCallback(() => {
     if (artistData?.songs && artistData.songs.length > 0) {
       window.api.audioLibraryControls
         .getSongInfo(
@@ -125,7 +122,7 @@ const ArtistInfoPage = () => {
     return setSongs([]);
   }, [artistData?.songs, sortingOrder]);
 
-  const fetchAlbumsData = React.useCallback(() => {
+  const fetchAlbumsData = useCallback(() => {
     if (artistData?.albums && artistData.albums.length > 0) {
       window.api.albumsData
         .getAlbumData(artistData.albums.map((album) => album.albumId))
@@ -138,7 +135,7 @@ const ArtistInfoPage = () => {
     return setAlbums([]);
   }, [artistData?.albums]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchArtistsData();
     const manageArtistDataUpdatesInArtistInfoPage = (e: Event) => {
       const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
@@ -155,7 +152,7 @@ const ArtistInfoPage = () => {
     };
   }, [fetchArtistsData]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchArtistArtworks();
     const manageArtistArtworkUpdatesInArtistInfoPage = (e: Event) => {
       const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
@@ -172,7 +169,7 @@ const ArtistInfoPage = () => {
     };
   }, [fetchArtistArtworks]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchSongsData();
     const manageSongDataUpdatesInArtistInfoPage = (e: Event) => {
       const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
@@ -195,7 +192,7 @@ const ArtistInfoPage = () => {
     };
   }, [fetchSongsData]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchAlbumsData();
     const manageAlbumDataUpdatesInArtistInfoPage = (e: Event) => {
       const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
@@ -213,7 +210,7 @@ const ArtistInfoPage = () => {
     };
   }, [fetchAlbumsData]);
 
-  const artistSongsDuration = React.useMemo(
+  const artistSongsDuration = useMemo(
     () =>
       calculateTimeFromSeconds(songs.reduce((prev, current) => prev + current.duration, 0))
         .timeString,
@@ -222,7 +219,7 @@ const ArtistInfoPage = () => {
 
   const selectAllHandlerForAlbums = useSelectAllHandler(albums, 'album', 'albumId');
 
-  const albumComponents = React.useMemo(
+  const albumComponents = useMemo(
     () =>
       albums
         .filter((_, i) => (isAllAlbumsVisible ? true : i < noOfVisibleAlbums))
@@ -247,7 +244,7 @@ const ArtistInfoPage = () => {
 
   const selectAllHandlerForSongs = useSelectAllHandler(songs, 'songs', 'songId');
 
-  const handleSongPlayBtnClick = React.useCallback(
+  const handleSongPlayBtnClick = useCallback(
     (currSongId: string) => {
       const queueSongIds = songs.filter((song) => !song.isBlacklisted).map((song) => song.songId);
       createQueue(queueSongIds, 'artist', false, artistData?.artistId, false);
@@ -256,7 +253,7 @@ const ArtistInfoPage = () => {
     [artistData?.artistId, createQueue, playSong, songs]
   );
 
-  const songComponenets = React.useMemo(
+  const songComponenets = useMemo(
     () =>
       songs
         .filter((_, i) => (isAllSongsVisible ? true : i < 5))
@@ -413,14 +410,14 @@ const ArtistInfoPage = () => {
         >
           <>
             <TitleContainer
+              key="appearsInAlbums"
               title={t('artistInfoPage.appearsInAlbums')}
               titleClassName="!text-2xl text-font-color-black dark:text-font-color-white"
               className={`title-container ${
                 bodyBackgroundImage
                   ? 'text-font-color-white'
                   : 'text-font-color-black dark:text-font-color-white'
-              } mb-4 mt-1
-                  text-2xl`}
+              } mb-4 mt-1 text-2xl`}
               otherItems={[
                 isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'album' ? (
                   <p className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
@@ -468,6 +465,7 @@ const ArtistInfoPage = () => {
         >
           <>
             <TitleContainer
+              key="appearsInSongs"
               title={t('artistInfoPage.appearsInSongs')}
               titleClassName="!text-2xl text-font-color-black dark:text-font-color-white"
               className={`title-container ${

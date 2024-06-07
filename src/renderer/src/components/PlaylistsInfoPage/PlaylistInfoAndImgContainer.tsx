@@ -1,4 +1,3 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
@@ -6,6 +5,7 @@ import Img from '../Img';
 
 import MultipleArtworksCover from '../PlaylistsPage/MultipleArtworksCover';
 import DefaultPlaylistCover from '../../assets/images/webp/playlist_cover_default.webp';
+import { useContext, useMemo } from 'react';
 
 type Props = {
   playlist: Playlist;
@@ -13,12 +13,12 @@ type Props = {
 };
 
 const PlaylistInfoAndImgContainer = (props: Props) => {
-  const { localStorageData } = React.useContext(AppContext);
+  const { localStorageData } = useContext(AppContext);
   const { t } = useTranslation();
 
   const { playlist, songs } = props;
 
-  const totalPlaylistDuration = React.useMemo(() => {
+  const totalPlaylistDuration = useMemo(() => {
     const { timeString } = calculateTimeFromSeconds(
       songs.reduce((prev, current) => prev + current.duration, 0)
     );

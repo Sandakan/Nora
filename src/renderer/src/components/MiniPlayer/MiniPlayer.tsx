@@ -1,6 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable no-nested-ternary */
-import React from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -19,7 +19,7 @@ type MiniPlayerProps = {
 
 export default function MiniPlayer(props: MiniPlayerProps) {
   const { currentSongData, isCurrentSongPlaying, isMuted, localStorageData } =
-    React.useContext(AppContext);
+    useContext(AppContext);
   const {
     toggleSongPlayback,
     updatePlayerType,
@@ -27,17 +27,17 @@ export default function MiniPlayer(props: MiniPlayerProps) {
     handleSkipForwardClick,
     toggleIsFavorite,
     toggleMutedState
-  } = React.useContext(AppUpdateContext);
+  } = useContext(AppUpdateContext);
 
   const { className } = props;
 
   const { t } = useTranslation();
 
-  const [isNextSongPopupVisible, setIsNextSongPopupVisible] = React.useState(false);
+  const [isNextSongPopupVisible, setIsNextSongPopupVisible] = useState(false);
 
-  const [isLyricsVisible, setIsLyricsVisible] = React.useState(false);
+  const [isLyricsVisible, setIsLyricsVisible] = useState(false);
 
-  const manageKeyboardShortcuts = React.useCallback(
+  const manageKeyboardShortcuts = useCallback(
     (e: KeyboardEvent) => {
       if (e.ctrlKey) {
         if (e.key === 'l') setIsLyricsVisible((prevState) => !prevState);
@@ -47,14 +47,14 @@ export default function MiniPlayer(props: MiniPlayerProps) {
     [updatePlayerType]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     window.addEventListener('keydown', manageKeyboardShortcuts);
     return () => {
       window.removeEventListener('keydown', manageKeyboardShortcuts);
     };
   }, [manageKeyboardShortcuts]);
 
-  const handleSkipForwardClickWithParams = React.useCallback(
+  const handleSkipForwardClickWithParams = useCallback(
     () => handleSkipForwardClick('USER_SKIP'),
     [handleSkipForwardClick]
   );
@@ -87,7 +87,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
       >
         <TitleBarContainer isLyricsVisible={isLyricsVisible} />
         <div
-          className={`song-controls-container delay-50 absolute left-1/2 top-[45%] flex h-fit -translate-x-1/2 -translate-y-1/2 items-center justify-center  !bg-[transparent] shadow-none transition-[visibility,opacity] dark:!bg-[transparent] ${
+          className={`song-controls-container delay-50 absolute left-1/2 top-[45%] flex h-fit -translate-x-1/2 -translate-y-1/2 items-center justify-center !bg-[transparent] shadow-none transition-[visibility,opacity] dark:!bg-[transparent] ${
             !isCurrentSongPlaying ? 'visible opacity-100' : 'invisible opacity-0'
           }`}
         >

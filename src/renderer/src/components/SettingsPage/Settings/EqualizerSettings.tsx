@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import { ReactNode, useContext, useEffect, useMemo, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../../Button';
 import Dropdown from '../../Dropdown';
@@ -54,25 +54,25 @@ const getPresetName = (equalizer: Equalizer): string => {
 };
 
 const EqualizerSettings = () => {
-  const { equalizerOptions } = React.useContext(AppContext);
-  const { updateEqualizerOptions } = React.useContext(AppUpdateContext);
+  const { equalizerOptions } = useContext(AppContext);
+  const { updateEqualizerOptions } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [content, dispatch] = React.useReducer(
+  const [content, dispatch] = useReducer(
     reducer,
     equalizerOptions || LOCAL_STORAGE_DEFAULT_TEMPLATE.equalizerPreset
   );
 
-  const [selectedPreset, setSelectedPreset] = React.useState<string>('flat');
+  const [selectedPreset, setSelectedPreset] = useState<string>('flat');
 
-  const isTheDefaultPreset = React.useMemo(() => selectedPreset === 'flat', [selectedPreset]);
+  const isTheDefaultPreset = useMemo(() => selectedPreset === 'flat', [selectedPreset]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     updateEqualizerOptions(content);
     setSelectedPreset(getPresetName(content));
   }, [content, updateEqualizerOptions]);
 
-  const equalizerBands = React.useMemo(() => {
+  const equalizerBands = useMemo(() => {
     const bands: ReactNode[] = [];
 
     for (const [filterName, filterValue] of Object.entries(content)) {

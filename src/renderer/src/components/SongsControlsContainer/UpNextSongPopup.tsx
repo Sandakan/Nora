@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
-import React, { useCallback } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
@@ -13,19 +13,19 @@ type Props = {
 };
 
 const UpNextSongPopup = (props: Props) => {
-  const { queue, currentSongData } = React.useContext(AppContext);
+  const { queue, currentSongData } = useContext(AppContext);
   const {
     changeCurrentActivePage
     // changeUpNextSongData
-  } = React.useContext(AppUpdateContext);
+  } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { onPopupAppears, isSemiTransparent = false, className } = props;
 
-  const [upNextSongData, setUpNextSongData] = React.useState<SongData>();
-  const upNextSongDataCache = React.useRef<SongData>();
+  const [upNextSongData, setUpNextSongData] = useState<SongData>();
+  const upNextSongDataCache = useRef<SongData>();
 
-  React.useEffect(() => {
+  useEffect(() => {
     onPopupAppears(!!upNextSongData);
   }, [onPopupAppears, upNextSongData]);
 
@@ -34,7 +34,7 @@ const UpNextSongPopup = (props: Props) => {
     setTimeout(() => setUpNextSongData(undefined), 10000);
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     let ctrlPressed = false;
     let lastCtrlPressTime = 0;
     const abortController = new AbortController();
@@ -80,7 +80,7 @@ const UpNextSongPopup = (props: Props) => {
     };
   }, [showPopup]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     let timeIntervalId: NodeJS.Timeout;
     if (queue.queue.length > 1 && queue.currentSongIndex !== null) {
@@ -115,7 +115,7 @@ const UpNextSongPopup = (props: Props) => {
     };
   }, [queue.currentSongIndex, queue.queue, showPopup]);
 
-  const showSongInfoPage = React.useCallback(
+  const showSongInfoPage = useCallback(
     (songId: string) =>
       currentSongData.isKnownSource
         ? changeCurrentActivePage('SongInfo', {

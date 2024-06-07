@@ -1,5 +1,5 @@
 import path from 'path';
-import fs from 'fs/promises';
+import { readFile } from 'fs/promises';
 import NodeID3 from 'node-id3';
 import songlyrics from 'songlyrics';
 
@@ -75,11 +75,14 @@ const fetchLyricsFromAudioSource = (songPath: string) => {
   }
 };
 
-const readFileData = async (path: string) => {
+const readFileData = async (path?: string) => {
+  if (!path) return undefined;
+
   try {
-    const data = await fs.readFile(path, {
+    const data = await readFile(path, {
       encoding: 'utf-8'
     });
+
     return data;
   } catch (error) {
     return undefined;
@@ -106,9 +109,9 @@ const fetchLyricsFromLRCFile = async (songPath: string) => {
       (await readFileData(defaultLrcFilePathWithoutExtension));
 
     if (!lyricsInLrcFormat && userData.customLrcFilesSaveLocation) {
-      if (customLrcFilePath) lyricsInLrcFormat = await readFileData(customLrcFilePath);
-      if (customLrcFilePathWithoutExtension)
-        lyricsInLrcFormat = await readFileData(customLrcFilePathWithoutExtension);
+      lyricsInLrcFormat =
+        (await readFileData(customLrcFilePath)) ??
+        (await readFileData(customLrcFilePathWithoutExtension));
     }
 
     if (!lyricsInLrcFormat) throw Error('No lrc lyrics files found.');

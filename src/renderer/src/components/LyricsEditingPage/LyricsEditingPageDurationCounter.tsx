@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import roundTo from '../../../../common/roundTo';
 
@@ -10,7 +10,7 @@ const LyricsEditingPageDurationCounter = (props: Props) => {
 
   const { offset = 0 } = props;
 
-  const handleSongPositionChange = React.useCallback(
+  const handleSongPositionChange = useCallback(
     (e: Event) => {
       if ('detail' in e && !Number.isNaN(e.detail)) {
         const songPosition = e.detail as number;
@@ -21,7 +21,7 @@ const LyricsEditingPageDurationCounter = (props: Props) => {
     [offset]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.addEventListener('player/positionChange', handleSongPositionChange);
 
     return () => document.removeEventListener('player/positionChange', handleSongPositionChange);

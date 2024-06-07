@@ -1,50 +1,69 @@
 /* eslint-disable no-use-before-define */
-import React, { ReactNode, Suspense } from 'react';
+// ? BASE IMPORTS
+import {
+  DragEvent,
+  ReactNode,
+  Suspense,
+  lazy,
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useTransition
+} from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import './assets/styles/styles.css';
 import 'material-symbols/rounded.css';
-import packageFile from '../../../package.json';
+import { releaseNotes, version, appPreferences } from '../../../package.json';
 
+// ? CONTEXTS
 import { AppContext, AppStateContextType } from './contexts/AppContext';
 import { AppUpdateContext, AppUpdateContextType } from './contexts/AppUpdateContext';
 // import { SongPositionContext } from './contexts/SongPositionContext';
 
+// ? HOOKS
 import useNetworkConnectivity from './hooks/useNetworkConnectivity';
 
+// ? MAIN APP COMPONENTS
 import TitleBar from './components/TitleBar/TitleBar';
 import SongControlsContainer from './components/SongsControlsContainer/SongControlsContainer';
 import BodyAndSideBarContainer from './components/BodyAndSidebarContainer';
 import PromptMenu from './components/PromptMenu/PromptMenu';
 import ContextMenu from './components/ContextMenu/ContextMenu';
 import ErrorPrompt from './components/ErrorPrompt';
-import ReleaseNotesPrompt from './components/ReleaseNotesPrompt/ReleaseNotesPrompt';
 import Img from './components/Img';
 import Preloader from './components/Preloader/Preloader';
+import ErrorBoundary from './components/ErrorBoundary';
+import toggleSongIsFavorite from './other/toggleSongIsFavorite';
+import SuspenseLoader from './components/SuspenseLoader';
 
+// ? PROMPTS
+const ReleaseNotesPrompt = lazy(() => import('./components/ReleaseNotesPrompt/ReleaseNotesPrompt'));
+const UnsupportedFileMessagePrompt = lazy(
+  () => import('./components/UnsupportedFileMessagePrompt')
+);
+const SongUnplayableErrorPrompt = lazy(() => import('./components/SongUnplayableErrorPrompt'));
+
+// ? SCREENS
+const MiniPlayer = lazy(() => import('./components/MiniPlayer/MiniPlayer'));
+const FullScreenPlayer = lazy(() => import('./components/FullScreenPlayer/FullScreenPlayer'));
+
+// ? UTILS
 import isLatestVersion from './utils/isLatestVersion';
 import roundTo from '../../common/roundTo';
 import storage from './utils/localStorage';
 import { isDataChanged } from './utils/hasDataChanged';
 import log from './utils/log';
-
-import ErrorBoundary from './components/ErrorBoundary';
+import throttle from './utils/throttle';
 import parseNotificationFromMain from './other/parseNotificationFromMain';
 import reducer, { DEFAULT_REDUCER_DATA } from './other/appReducer';
 import ListeningDataSession from './other/listeningDataSession';
 import updateQueueOnSongPlay from './other/updateQueueOnSongPlay';
-import SongUnplayableErrorPrompt, {
-  unplayableSongNotificationConfig
-} from './components/SongUnplayableErrorPrompt';
 import shuffleQueueRandomly from './other/shuffleQueueRandomly';
-import toggleSongIsFavorite from './other/toggleSongIsFavorite';
-import UnsupportedFileMessagePrompt from './components/UnsupportedFileMessagePrompt';
-import SuspenseLoader from './components/SuspenseLoader';
 import { equalizerBandHertzData } from './other/equalizerData';
-import throttle from './utils/throttle';
 
-const MiniPlayer = React.lazy(() => import('./components/MiniPlayer/MiniPlayer'));
-const FullScreenPlayer = React.lazy(() => import('./components/FullScreenPlayer/FullScreenPlayer'));
-
+// ? INITIALIZE PLAYER
 const player = new Audio();
 let repetitivePlaybackErrorsCount = 0;
 // const lowResponseTimeRequiredPages: PageTitles[] = ['Lyrics', 'LyricsEditor'];
@@ -106,15 +125,15 @@ storage.checkLocalStorage();
 export default function App() {
   const { t } = useTranslation();
 
-  const [content, dispatch] = React.useReducer(reducer, DEFAULT_REDUCER_DATA);
+  const [content, dispatch] = useReducer(reducer, DEFAULT_REDUCER_DATA);
   // Had to use a Ref in parallel with the Reducer to avoid an issue that happens when using content.* not giving the intended data in useCallback functions even though it was added as a dependency of that function.
-  const contentRef = React.useRef(DEFAULT_REDUCER_DATA);
+  const contentRef = useRef(DEFAULT_REDUCER_DATA);
 
-  const AppRef = React.useRef(null as HTMLDivElement | null);
+  const AppRef = useRef(null as HTMLDivElement | null);
 
-  const [, startTransition] = React.useTransition();
-  const refStartPlay = React.useRef(false);
-  const refQueue = React.useRef({
+  const [, startTransition] = useTransition();
+  const refStartPlay = useRef(false);
+  const refQueue = useRef({
     currentSongIndex: null,
     queue: [],
     queueBeforeShuffle: [],
@@ -123,19 +142,19 @@ export default function App() {
 
   const { isOnline } = useNetworkConnectivity();
 
-  const addSongDropPlaceholder = React.useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  const addSongDropPlaceholder = useCallback((e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.relatedTarget === null) AppRef.current?.classList.add('song-drop');
   }, []);
 
-  const removeSongDropPlaceholder = React.useCallback((e: React.DragEvent<HTMLDivElement>) => {
+  const removeSongDropPlaceholder = useCallback((e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.relatedTarget === null) AppRef.current?.classList.remove('song-drop');
   }, []);
 
-  const changePromptMenuData = React.useCallback(
+  const changePromptMenuData = useCallback(
     (isVisible = false, prompt?: ReactNode | null, className = '') => {
       const promptData: PromptMenuData = { prompt, className };
 
@@ -164,7 +183,7 @@ export default function App() {
     [content.promptMenuNavigationData.currentActiveIndex, content.promptMenuNavigationData.prompts]
   );
 
-  const managePlaybackErrors = React.useCallback(
+  const managePlaybackErrors = useCallback(
     (appError: unknown) => {
       const playerErrorData = player.error;
       console.error(appError, playerErrorData);
@@ -218,9 +237,9 @@ export default function App() {
 
   const AUDIO_FADE_INTERVAL = 50;
   const AUDIO_FADE_DURATION = 250;
-  const fadeOutIntervalId = React.useRef(undefined as NodeJS.Timeout | undefined);
-  const fadeInIntervalId = React.useRef(undefined as NodeJS.Timeout | undefined);
-  const fadeOutAudio = React.useCallback(() => {
+  const fadeOutIntervalId = useRef(undefined as NodeJS.Timeout | undefined);
+  const fadeInIntervalId = useRef(undefined as NodeJS.Timeout | undefined);
+  const fadeOutAudio = useCallback(() => {
     if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
     if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
     fadeOutIntervalId.current = setInterval(() => {
@@ -237,7 +256,7 @@ export default function App() {
     }, AUDIO_FADE_INTERVAL);
   }, []);
 
-  const fadeInAudio = React.useCallback(() => {
+  const fadeInAudio = useCallback(() => {
     if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
     if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
     fadeInIntervalId.current = setInterval(() => {
@@ -254,32 +273,29 @@ export default function App() {
     }, AUDIO_FADE_INTERVAL);
   }, []);
 
-  const handleBeforeQuitEvent = React.useCallback(async () => {
+  const handleBeforeQuitEvent = useCallback(async () => {
     storage.playback.setCurrentSongOptions('stoppedPosition', player.currentTime);
     storage.playback.setPlaybackOptions('isRepeating', contentRef.current.player.isRepeating);
     storage.playback.setPlaybackOptions('isShuffling', contentRef.current.player.isShuffling);
     storage.queue.setQueue(refQueue.current);
   }, []);
 
-  const updateAppUpdatesState = React.useCallback((state: AppUpdatesState) => {
+  const updateAppUpdatesState = useCallback((state: AppUpdatesState) => {
     contentRef.current.appUpdatesState = state;
     dispatch({ type: 'CHANGE_APP_UPDATES_DATA', data: state });
   }, []);
 
-  const checkForAppUpdates = React.useCallback(() => {
+  const checkForAppUpdates = useCallback(() => {
     if (navigator.onLine) {
       updateAppUpdatesState('CHECKING');
 
-      fetch(packageFile.releaseNotes.json)
+      fetch(releaseNotes.json)
         .then((res) => {
           if (res.status === 200) return res.json();
           throw new Error('response status is not 200');
         })
         .then((res: Changelog) => {
-          const isThereAnAppUpdate = !isLatestVersion(
-            res.latestVersion.version,
-            packageFile.version
-          );
+          const isThereAnAppUpdate = !isLatestVersion(res.latestVersion.version, version);
 
           updateAppUpdatesState(isThereAnAppUpdate ? 'OLD' : 'LATEST');
 
@@ -312,7 +328,7 @@ export default function App() {
     }
   }, [changePromptMenuData, updateAppUpdatesState]);
 
-  React.useEffect(
+  useEffect(
     () => {
       // check for app updates on app startup after 5 seconds.
       setTimeout(checkForAppUpdates, 5000);
@@ -326,7 +342,7 @@ export default function App() {
     [isOnline]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     const watchForSystemThemeChanges = (
       _: unknown,
       isDarkMode: boolean,
@@ -356,7 +372,7 @@ export default function App() {
     };
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (content.localStorage.equalizerPreset) {
       const filters = content.localStorage.equalizerPreset;
       for (const filter of Object.entries(filters)) {
@@ -369,14 +385,14 @@ export default function App() {
     }
   }, [content.localStorage.equalizerPreset]);
 
-  const manageWindowBlurOrFocus = React.useCallback((state: 'blur' | 'focus') => {
+  const manageWindowBlurOrFocus = useCallback((state: 'blur' | 'focus') => {
     if (AppRef.current) {
       if (state === 'blur') AppRef.current.classList.add('blurred');
       if (state === 'focus') AppRef.current.classList.remove('blurred');
     }
   }, []);
 
-  const manageWindowFullscreen = React.useCallback((state: 'fullscreen' | 'windowed') => {
+  const manageWindowFullscreen = useCallback((state: 'fullscreen' | 'windowed') => {
     if (AppRef.current) {
       if (state === 'fullscreen') return AppRef.current.classList.add('fullscreen');
       if (state === 'windowed') return AppRef.current.classList.remove('fullscreen');
@@ -384,7 +400,7 @@ export default function App() {
     return undefined;
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     player.addEventListener('error', (err) => managePlaybackErrors(err));
     player.addEventListener('play', () => {
       dispatch({
@@ -414,7 +430,7 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const displayDefaultTitleBar = () => {
       document.title = `Nora`;
       storage.playback.setCurrentSongOptions('stoppedPosition', player.currentTime);
@@ -470,7 +486,7 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     // const index = content.navigationHistory.pageHistoryIndex;
     // const { pageTitle: currentPage, data } =
     //   content.navigationHistory.history[index];
@@ -519,12 +535,12 @@ export default function App() {
   }, []);
 
   // VOLUME RELATED SETTINGS
-  React.useEffect(() => {
+  useEffect(() => {
     player.volume = content.player.volume.value / 100;
     player.muted = content.player.volume.isMuted;
   }, [content.player.volume]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     // LOCAL STORAGE
     const { playback, preferences, queue } = storage.getAllItems();
 
@@ -597,7 +613,7 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     window.api.userData
       .getUserData()
       .then((res) => {
@@ -629,7 +645,7 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const noticeDataUpdateEvents = (_: unknown, dataEvents: DataUpdateEvent[]) => {
       const event = new CustomEvent('app/dataUpdates', { detail: dataEvents });
       document.dispatchEvent(event);
@@ -642,7 +658,7 @@ export default function App() {
     };
   }, []);
 
-  const addNewNotifications = React.useCallback((newNotifications: AppNotification[]) => {
+  const addNewNotifications = useCallback((newNotifications: AppNotification[]) => {
     if (newNotifications.length > 0) {
       const maxNotifications = 4;
       const currentNotifications = contentRef.current.notificationPanelData.notifications;
@@ -662,7 +678,7 @@ export default function App() {
     }
   }, []);
 
-  const updateNotifications = React.useCallback(
+  const updateNotifications = useCallback(
     (callback: (currentNotifications: AppNotification[]) => AppNotification[]) => {
       const currentNotifications = content.notificationPanelData.notifications;
       const updatedNotifications = callback(currentNotifications);
@@ -672,7 +688,7 @@ export default function App() {
     [content.notificationPanelData.notifications]
   );
 
-  const toggleSongPlayback = React.useCallback(
+  const toggleSongPlayback = useCallback(
     (startPlay?: boolean) => {
       if (contentRef.current.currentSongData?.songId) {
         if (typeof startPlay !== 'boolean' || startPlay === player.paused) {
@@ -717,7 +733,7 @@ export default function App() {
     [addNewNotifications, t, fadeOutAudio, fadeInAudio, managePlaybackErrors]
   );
 
-  const displayMessageFromMain = React.useCallback(
+  const displayMessageFromMain = useCallback(
     (_: unknown, messageCode: MessageCodes, data?: Record<string, unknown>) => {
       // const isNotificationWithProgress = data && 'total' in data && 'value' in data;
 
@@ -731,14 +747,14 @@ export default function App() {
     [addNewNotifications]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     window.api.messages.getMessageFromMain(displayMessageFromMain);
     return () => {
       window.api.messages.removeMessageToRendererEventListener(displayMessageFromMain);
     };
   }, [displayMessageFromMain]);
 
-  const handleContextMenuVisibilityUpdate = React.useCallback(() => {
+  const handleContextMenuVisibilityUpdate = useCallback(() => {
     if (contentRef.current.contextMenuData.isVisible) {
       dispatch({
         type: 'CONTEXT_MENU_VISIBILITY_CHANGE',
@@ -748,7 +764,7 @@ export default function App() {
     }
   }, []);
 
-  const addSongTitleToTitleBar = React.useCallback(() => {
+  const addSongTitleToTitleBar = useCallback(() => {
     if (contentRef.current.currentSongData.title && contentRef.current.currentSongData.artists)
       document.title = `${contentRef.current.currentSongData.title} - ${
         Array.isArray(contentRef.current.currentSongData.artists) &&
@@ -756,7 +772,7 @@ export default function App() {
       }`;
   }, []);
 
-  const toggleRepeat = React.useCallback((newState?: RepeatTypes) => {
+  const toggleRepeat = useCallback((newState?: RepeatTypes) => {
     const repeatState =
       newState ||
       // eslint-disable-next-line no-nested-ternary
@@ -772,9 +788,9 @@ export default function App() {
     });
   }, []);
 
-  const recordRef = React.useRef<ListeningDataSession>();
+  const recordRef = useRef<ListeningDataSession>();
 
-  const recordListeningData = React.useCallback(
+  const recordListeningData = useCallback(
     (songId: string, duration: number, isRepeating = false, isKnownSource = true) => {
       if (recordRef?.current?.songId !== songId || isRepeating) {
         if (isRepeating)
@@ -812,7 +828,7 @@ export default function App() {
     []
   );
 
-  const setDynamicThemesFromSongPalette = React.useCallback((palette?: NodeVibrantPalette) => {
+  const setDynamicThemesFromSongPalette = useCallback((palette?: NodeVibrantPalette) => {
     const manageBrightness = (
       values: [number, number, number],
       range?: { min?: number; max?: number }
@@ -949,7 +965,7 @@ export default function App() {
     return resetStyles;
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const isDynamicThemesEnabled =
       content.localStorage.preferences.enableImageBasedDynamicThemes &&
       content.currentSongData.paletteData;
@@ -967,7 +983,7 @@ export default function App() {
     setDynamicThemesFromSongPalette
   ]);
 
-  const playSong = React.useCallback(
+  const playSong = useCallback(
     (songId: string, isStartPlay = true, playAsCurrentSongIndex = false) => {
       repetitivePlaybackErrorsCount = 0;
       if (typeof songId === 'string') {
@@ -1011,11 +1027,11 @@ export default function App() {
           })
           .catch((err) => {
             console.error(err);
-            addNewNotifications([unplayableSongNotificationConfig]);
+            // addNewNotifications([unplayableSongNotificationConfig]);
             changePromptMenuData(true, <SongUnplayableErrorPrompt err={err} />);
           });
       }
-      addNewNotifications([unplayableSongNotificationConfig]);
+      // addNewNotifications([unplayableSongNotificationConfig]);
       changePromptMenuData(
         true,
         <ErrorPrompt
@@ -1034,7 +1050,6 @@ export default function App() {
       );
     },
     [
-      addNewNotifications,
       changePromptMenuData,
       t,
       toggleSongPlayback,
@@ -1043,7 +1058,7 @@ export default function App() {
     ]
   );
 
-  const playSongFromUnknownSource = React.useCallback(
+  const playSongFromUnknownSource = useCallback(
     (audioPlayerData: AudioPlayerData, isStartPlay = true) => {
       if (audioPlayerData) {
         const { isKnownSource } = audioPlayerData;
@@ -1066,21 +1081,20 @@ export default function App() {
     [playSong, recordListeningData, toggleSongPlayback]
   );
 
-  const fetchSongFromUnknownSource = React.useCallback(
+  const fetchSongFromUnknownSource = useCallback(
     (songPath: string) => {
       window.api.unknownSource
         .getSongFromUnknownSource(songPath)
         .then((res) => playSongFromUnknownSource(res, true))
         .catch((err) => {
           console.error(err);
-          addNewNotifications([unplayableSongNotificationConfig]);
           changePromptMenuData(true, <SongUnplayableErrorPrompt err={err} />);
         });
     },
-    [playSongFromUnknownSource, addNewNotifications, changePromptMenuData]
+    [playSongFromUnknownSource, changePromptMenuData]
   );
 
-  const changeQueueCurrentSongIndex = React.useCallback(
+  const changeQueueCurrentSongIndex = useCallback(
     (currentSongIndex: number, isPlaySong = true) => {
       console.log('currentSongIndex', currentSongIndex);
       refQueue.current.currentSongIndex = currentSongIndex;
@@ -1089,7 +1103,7 @@ export default function App() {
     [playSong]
   );
 
-  const handleSkipBackwardClick = React.useCallback(() => {
+  const handleSkipBackwardClick = useCallback(() => {
     const { currentSongIndex } = refQueue.current;
     if (player.currentTime > 5) {
       player.currentTime = 0;
@@ -1101,7 +1115,7 @@ export default function App() {
     } else changeQueueCurrentSongIndex(0);
   }, [changeQueueCurrentSongIndex]);
 
-  const handleSkipForwardClick = React.useCallback(
+  const handleSkipForwardClick = useCallback(
     (reason: SongSkipReason = 'USER_SKIP') => {
       const { currentSongIndex } = refQueue.current;
       if (contentRef.current.player.isRepeating === 'repeat-1' && reason !== 'USER_SKIP') {
@@ -1129,7 +1143,7 @@ export default function App() {
     [changeQueueCurrentSongIndex, recordListeningData, toggleSongPlayback]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     const { isInDevelopment } = window.api.properties;
     let artworkPath: string | undefined;
 
@@ -1157,24 +1171,6 @@ export default function App() {
         }
       ]
     });
-
-    // if (content.currentSongData) {
-    //   const title = `Listening to '${content.currentSongData.title}'`;
-    //   const artists = `By ${content.currentSongData.artists?.map((artist) => artist.name).join(', ') || 'an unknown artist'}`;
-    //   console.log(title, artists);
-
-    //   const now = Date.now();
-    //   window.api.playerControls.setDiscordRpcActivity({
-    //     details: title,
-    //     state: artists,
-    //     largeImageKey: 'nora_logo',
-    //     smallImageKey: 'song_artwork'
-    //     // largeImageText: 'Nora',
-    //     // smallImageText: 'Playing a song'
-    //     // startTimestamp: now,
-    //     // endTimestamp: now + (player.duration || 0) - (player.currentTime || 0)
-    //   });
-    // }
 
     const handleSkipForwardClickWithParams = () => handleSkipForwardClick('PLAYER_SKIP');
 
@@ -1205,13 +1201,50 @@ export default function App() {
     toggleSongPlayback
   ]);
 
-  const toggleShuffling = React.useCallback((isShuffling?: boolean) => {
+  const setDiscordRpcActivity = useCallback(() => {
+    if (content.currentSongData) {
+      const title = `Listening to '${content.currentSongData?.title ?? 'an untitled song'}'`;
+      const artists = `By ${content.currentSongData.artists?.map((artist) => artist.name).join(', ') || 'an unknown artist'}`;
+
+      const now = Date.now();
+      // console.log(title, artists, {
+      //   now,
+      //   duration: player.duration ?? 0,
+      //   currentTime: player.currentTime ?? 0,
+      //   result: now + ((player.duration ?? 0) - (player.currentTime ?? 0)) * 1000
+      // });
+      window.api.playerControls.setDiscordRpcActivity({
+        details: title,
+        state: artists,
+        largeImageKey: 'nora_logo',
+        smallImageKey: 'song_artwork',
+        largeImageText: 'Nora',
+        smallImageText: 'Playing a song',
+        startTimestamp: player.paused ? undefined : now,
+        endTimestamp: player.paused
+          ? undefined
+          : now + ((player.duration ?? 0) - (player.currentTime ?? 0)) * 1000
+      });
+    }
+  }, [content.currentSongData]);
+
+  useEffect(() => {
+    player.addEventListener('play', setDiscordRpcActivity);
+    player.addEventListener('pause', setDiscordRpcActivity);
+
+    return () => {
+      player.removeEventListener('play', setDiscordRpcActivity);
+      player.removeEventListener('pause', setDiscordRpcActivity);
+    };
+  }, [setDiscordRpcActivity]);
+
+  const toggleShuffling = useCallback((isShuffling?: boolean) => {
     dispatch({ type: 'TOGGLE_SHUFFLE_STATE', data: isShuffling });
     if (isShuffling !== undefined) contentRef.current.player.isShuffling = isShuffling;
     else contentRef.current.player.isShuffling = !contentRef.current.player.isShuffling;
   }, []);
 
-  const shuffleQueue = React.useCallback(
+  const shuffleQueue = useCallback(
     (songIds: string[], currentSongIndex?: number) => {
       toggleShuffling(true);
       return shuffleQueueRandomly(songIds, currentSongIndex);
@@ -1219,7 +1252,7 @@ export default function App() {
     [toggleShuffling]
   );
 
-  const createQueue = React.useCallback(
+  const createQueue = useCallback(
     (
       newQueue: string[],
       queueType: QueueTypes,
@@ -1249,7 +1282,7 @@ export default function App() {
     [changeQueueCurrentSongIndex, content.player.isShuffling, shuffleQueue, toggleShuffling]
   );
 
-  const updateQueueData = React.useCallback(
+  const updateQueueData = useCallback(
     (
       currentSongIndex?: number | null,
       newQueue?: string[],
@@ -1283,7 +1316,7 @@ export default function App() {
     [playSong, shuffleQueue]
   );
 
-  const updateCurrentSongPlaybackState = React.useCallback(
+  const updateCurrentSongPlaybackState = useCallback(
     (isPlaying: boolean) => {
       if (isPlaying !== content.player.isCurrentSongPlaying)
         dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: isPlaying });
@@ -1291,7 +1324,7 @@ export default function App() {
     [content.player.isCurrentSongPlaying]
   );
 
-  const updateContextMenuData = React.useCallback(
+  const updateContextMenuData = useCallback(
     (
       isVisible: boolean,
       menuItems: ContextMenuItem[] = [],
@@ -1316,7 +1349,7 @@ export default function App() {
     []
   );
 
-  const updateBodyBackgroundImage = React.useCallback((isVisible: boolean, src?: string) => {
+  const updateBodyBackgroundImage = useCallback((isVisible: boolean, src?: string) => {
     let image: string | undefined;
     const disableBackgroundArtworks = storage.preferences.getPreferences(
       'disableBackgroundArtworks'
@@ -1331,7 +1364,7 @@ export default function App() {
     });
   }, []);
 
-  const updateCurrentlyActivePageData = React.useCallback(
+  const updateCurrentlyActivePageData = useCallback(
     (callback: (currentPageData: PageData) => PageData) => {
       const { navigationHistory } = contentRef.current;
       const updatedData = callback(
@@ -1350,7 +1383,7 @@ export default function App() {
     []
   );
 
-  const updatePageHistoryIndex = React.useCallback((type: 'increment' | 'decrement' | 'home') => {
+  const updatePageHistoryIndex = useCallback((type: 'increment' | 'decrement' | 'home') => {
     const { history, pageHistoryIndex } = contentRef.current.navigationHistory;
     if (type === 'decrement' && pageHistoryIndex - 1 >= 0) {
       const newPageHistoryIndex = pageHistoryIndex - 1;
@@ -1390,41 +1423,38 @@ export default function App() {
     return undefined;
   }, []);
 
-  const updatePromptMenuHistoryIndex = React.useCallback(
-    (type: 'increment' | 'decrement' | 'home') => {
-      const { prompts, currentActiveIndex } = contentRef.current.promptMenuNavigationData;
-      if (type === 'decrement' && currentActiveIndex - 1 >= 0) {
-        const newPageHistoryIndex = currentActiveIndex - 1;
-        const data = {
-          isVisible: true,
-          currentActiveIndex: newPageHistoryIndex,
-          prompts
-        };
-        contentRef.current.promptMenuNavigationData = data;
-        return dispatch({
-          type: 'PROMPT_MENU_DATA_CHANGE',
-          data
-        });
-      }
-      if (type === 'increment' && currentActiveIndex + 1 < prompts.length) {
-        const newPageHistoryIndex = currentActiveIndex + 1;
-        const data = {
-          isVisible: true,
-          currentActiveIndex: newPageHistoryIndex,
-          prompts
-        };
-        contentRef.current.promptMenuNavigationData = data;
-        return dispatch({
-          type: 'PROMPT_MENU_DATA_CHANGE',
-          data
-        });
-      }
-      return undefined;
-    },
-    []
-  );
+  const updatePromptMenuHistoryIndex = useCallback((type: 'increment' | 'decrement' | 'home') => {
+    const { prompts, currentActiveIndex } = contentRef.current.promptMenuNavigationData;
+    if (type === 'decrement' && currentActiveIndex - 1 >= 0) {
+      const newPageHistoryIndex = currentActiveIndex - 1;
+      const data = {
+        isVisible: true,
+        currentActiveIndex: newPageHistoryIndex,
+        prompts
+      };
+      contentRef.current.promptMenuNavigationData = data;
+      return dispatch({
+        type: 'PROMPT_MENU_DATA_CHANGE',
+        data
+      });
+    }
+    if (type === 'increment' && currentActiveIndex + 1 < prompts.length) {
+      const newPageHistoryIndex = currentActiveIndex + 1;
+      const data = {
+        isVisible: true,
+        currentActiveIndex: newPageHistoryIndex,
+        prompts
+      };
+      contentRef.current.promptMenuNavigationData = data;
+      return dispatch({
+        type: 'PROMPT_MENU_DATA_CHANGE',
+        data
+      });
+    }
+    return undefined;
+  }, []);
 
-  const updateMultipleSelections = React.useCallback(
+  const updateMultipleSelections = useCallback(
     (id: string, selectionType: QueueTypes, type: 'add' | 'remove') => {
       if (
         contentRef.current.multipleSelectionsData.selectionType &&
@@ -1454,7 +1484,7 @@ export default function App() {
     []
   );
 
-  const toggleMultipleSelections = React.useCallback(
+  const toggleMultipleSelections = useCallback(
     (
       isEnabled?: boolean,
       selectionType?: QueueTypes,
@@ -1484,7 +1514,7 @@ export default function App() {
     []
   );
 
-  const changeCurrentActivePage = React.useCallback(
+  const changeCurrentActivePage = useCallback(
     (pageClass: PageTitles, data?: PageData) => {
       const { navigationHistory } = contentRef.current;
       const { pageTitle, onPageChange } =
@@ -1530,7 +1560,7 @@ export default function App() {
     [addNewNotifications, t, toggleMultipleSelections]
   );
 
-  const updatePlayerType = React.useCallback(
+  const updatePlayerType = useCallback(
     (type: PlayerTypes) => {
       if (content.playerType !== type) {
         dispatch({ type: 'UPDATE_PLAYER_TYPE', data: type });
@@ -1540,7 +1570,7 @@ export default function App() {
     [content.playerType]
   );
 
-  const toggleIsFavorite = React.useCallback(
+  const toggleIsFavorite = useCallback(
     (isFavorite?: boolean, onlyChangeCurrentSongData = false) => {
       toggleSongIsFavorite(
         contentRef.current.currentSongData.songId,
@@ -1563,7 +1593,7 @@ export default function App() {
     []
   );
 
-  const updateVolume = React.useCallback((volume: number) => {
+  const updateVolume = useCallback((volume: number) => {
     if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
     if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
 
@@ -1575,11 +1605,11 @@ export default function App() {
     });
   }, []);
 
-  const updateSongPosition = React.useCallback((position: number) => {
+  const updateSongPosition = useCallback((position: number) => {
     if (position >= 0 && position <= player.duration) player.currentTime = position;
   }, []);
 
-  const toggleMutedState = React.useCallback(
+  const toggleMutedState = useCallback(
     (isMute?: boolean) => {
       if (isMute !== undefined) {
         if (isMute !== content.player.volume.isMuted) {
@@ -1594,7 +1624,7 @@ export default function App() {
     [content.player.volume.isMuted]
   );
 
-  const manageKeyboardShortcuts = React.useCallback(
+  const manageKeyboardShortcuts = useCallback(
     (e: KeyboardEvent) => {
       const ctrlCombinations = [
         'ArrowUp',
@@ -1740,7 +1770,7 @@ export default function App() {
     ]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     window.addEventListener('click', handleContextMenuVisibilityUpdate);
     window.addEventListener('keydown', manageKeyboardShortcuts);
     return () => {
@@ -1749,7 +1779,7 @@ export default function App() {
     };
   }, [handleContextMenuVisibilityUpdate, manageKeyboardShortcuts]);
 
-  const updateUserData = React.useCallback(
+  const updateUserData = useCallback(
     async (callback: (prevState: UserData) => UserData | Promise<UserData> | void) => {
       try {
         const updatedUserData = await callback(contentRef.current.userData);
@@ -1764,7 +1794,7 @@ export default function App() {
     []
   );
 
-  const fetchUserData = React.useCallback(
+  const fetchUserData = useCallback(
     () =>
       window.api.userData
         .getUserData()
@@ -1773,7 +1803,7 @@ export default function App() {
     [updateUserData]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchUserData();
     const manageUserDataUpdates = (e: Event) => {
       if ('detail' in e) {
@@ -1791,12 +1821,12 @@ export default function App() {
     };
   }, [fetchUserData]);
 
-  const onSongDrop = React.useCallback(
-    (e: React.DragEvent<HTMLDivElement>) => {
+  const onSongDrop = useCallback(
+    (e: DragEvent<HTMLDivElement>) => {
       console.log(e.dataTransfer.files);
       if (e.dataTransfer.files.length > 0) {
-        const isASupportedAudioFormat = packageFile.appPreferences.supportedMusicExtensions.some(
-          (type) => e.dataTransfer.files[0].path.endsWith(type)
+        const isASupportedAudioFormat = appPreferences.supportedMusicExtensions.some((type) =>
+          e.dataTransfer.files[0].path.endsWith(type)
         );
 
         if (isASupportedAudioFormat) fetchSongFromUnknownSource(e.dataTransfer.files[0].path);
@@ -1813,7 +1843,7 @@ export default function App() {
     [changePromptMenuData, fetchSongFromUnknownSource]
   );
 
-  const updateCurrentSongData = React.useCallback(
+  const updateCurrentSongData = useCallback(
     (callback: (prevData: AudioPlayerData) => AudioPlayerData) => {
       const updatedData = callback(contentRef.current.currentSongData);
       if (updatedData) {
@@ -1824,7 +1854,7 @@ export default function App() {
     []
   );
 
-  const clearAudioPlayerData = React.useCallback(() => {
+  const clearAudioPlayerData = useCallback(() => {
     toggleSongPlayback(false);
 
     player.currentTime = 0;
@@ -1847,16 +1877,16 @@ export default function App() {
     ]);
   }, [addNewNotifications, content.currentSongData.songId, t, toggleSongPlayback, updateQueueData]);
 
-  const updateEqualizerOptions = React.useCallback((options: Equalizer) => {
+  const updateEqualizerOptions = useCallback((options: Equalizer) => {
     storage.equalizerPreset.setEqualizerPreset(options);
   }, []);
 
-  const changeUpNextSongData = React.useCallback((upNextSongData?: AudioPlayerData) => {
+  const changeUpNextSongData = useCallback((upNextSongData?: AudioPlayerData) => {
     // dispatch({ type: 'UP_NEXT_SONG_DATA_CHANGE', data: upNextSongData });
     contentRef.current.upNextSongData = upNextSongData;
   }, []);
 
-  const promptMenuData = React.useMemo(() => {
+  const promptMenuData = useMemo(() => {
     const { currentActiveIndex, isVisible, prompts } = content.promptMenuNavigationData;
 
     return {
@@ -1868,7 +1898,7 @@ export default function App() {
     };
   }, [content.promptMenuNavigationData]);
 
-  const appContextStateValues: AppStateContextType = React.useMemo(
+  const appContextStateValues: AppStateContextType = useMemo(
     () => ({
       isDarkMode: content.isDarkMode,
       contextMenuData: content.contextMenuData,
@@ -1922,7 +1952,7 @@ export default function App() {
     ]
   );
 
-  const appUpdateContextValues: AppUpdateContextType = React.useMemo(
+  const appUpdateContextValues: AppUpdateContextType = useMemo(
     () => ({
       updateUserData,
       updateCurrentSongData,
@@ -1993,7 +2023,7 @@ export default function App() {
     ]
   );
 
-  // const songPositionContextValues = React.useMemo(
+  // const songPositionContextValues = useMemo(
   //   () => ({
   //     songPosition: content.player.songPosition,
   //   }),

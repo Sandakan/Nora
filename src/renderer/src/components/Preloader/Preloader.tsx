@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-no-useless-fragment */
-import React from 'react';
+import { useEffect, useState } from 'react';
 
 import Img from '../Img';
 
@@ -24,9 +24,9 @@ const eventHandler = () => {
 window.addEventListener('load', eventHandler);
 
 const Preloader = () => {
-  const [isPreloaderRemoved, setIsPreloaderRemoved] = React.useState(false);
+  const [isPreloaderRemoved, setIsPreloaderRemoved] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     // console.log(window.performance.now());
     if (window.performance.now() > 3000) hidePreloader();
     // this removes preloader in 10 seconds no matter what didn't load.

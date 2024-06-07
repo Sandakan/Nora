@@ -1,4 +1,4 @@
-import React from 'react';
+import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 
@@ -10,15 +10,15 @@ import TitleContainer from '../TitleContainer';
 type Props = { similarArtists: SimilarArtistInfo };
 
 const SimilarArtistsContainer = (props: Props) => {
-  const { bodyBackgroundImage } = React.useContext(AppContext);
+  const { bodyBackgroundImage } = useContext(AppContext);
   const { t } = useTranslation();
 
   const { similarArtists } = props;
-  //   const [similarArtists, setSimilarArtists] = React.useState<SimilarArtistInfo>(
+  //   const [similarArtists, setSimilarArtists] = useState<SimilarArtistInfo>(
   //     { availableArtists: [], unAvailableArtists: [] },
   //   );
 
-  const { availArtistComponents, unAvailArtistComponents } = React.useMemo(() => {
+  const { availArtistComponents, unAvailArtistComponents } = useMemo(() => {
     if (similarArtists) {
       const { availableArtists = [], unAvailableArtists = [] } = similarArtists;
 
@@ -83,7 +83,7 @@ const SimilarArtistsContainer = (props: Props) => {
                 : 'text-font-color-black dark:text-font-color-white'
             } mb-4 mt-1 pr-4 text-2xl`}
           />
-          <div className="flex flex-wrap ">{unAvailArtistComponents}</div>
+          <div className="flex flex-wrap">{unAvailArtistComponents}</div>
         </>
       )}
     </div>

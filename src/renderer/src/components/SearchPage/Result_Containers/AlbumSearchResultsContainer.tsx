@@ -1,4 +1,4 @@
-import React from 'react';
+import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Album } from '../../AlbumsPage/Album';
 import Button from '../../Button';
@@ -16,13 +16,13 @@ type Props = {
 
 const AlbumSearchResultsContainer = (props: Props) => {
   const { albums, searchInput, noOfVisibleAlbums = 4, isPredictiveSearchEnabled } = props;
-  const { isMultipleSelectionEnabled, multipleSelectionsData } = React.useContext(AppContext);
-  const { toggleMultipleSelections, changeCurrentActivePage } = React.useContext(AppUpdateContext);
+  const { isMultipleSelectionEnabled, multipleSelectionsData } = useContext(AppContext);
+  const { toggleMultipleSelections, changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const selectAllHandler = useSelectAllHandler(albums, 'album', 'albumId');
 
-  const albumResults = React.useMemo(
+  const albumResults = useMemo(
     () =>
       albums.length > 0
         ? albums

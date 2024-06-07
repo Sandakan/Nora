@@ -2,7 +2,7 @@
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable no-nested-ternary */
 /* eslint-disable react/no-array-index-key */
-import React from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
@@ -40,17 +40,16 @@ const GenresPage = () => {
     localStorageData,
     isMultipleSelectionEnabled,
     multipleSelectionsData
-  } = React.useContext(AppContext);
-  const { updateCurrentlyActivePageData, toggleMultipleSelections } =
-    React.useContext(AppUpdateContext);
+  } = useContext(AppContext);
+  const { updateCurrentlyActivePageData, toggleMultipleSelections } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [genresData, setGenresData] = React.useState([] as Genre[] | null);
-  const [sortingOrder, setSortingOrder] = React.useState<GenreSortTypes>(
+  const [genresData, setGenresData] = useState([] as Genre[] | null);
+  const [sortingOrder, setSortingOrder] = useState<GenreSortTypes>(
     currentlyActivePage?.data?.sortingOrder || localStorageData?.sortingStates?.genresPage || 'aToZ'
   );
 
-  const fetchGenresData = React.useCallback(() => {
+  const fetchGenresData = useCallback(() => {
     window.api.genresData
       .getGenresData([], sortingOrder)
       .then((genres) => {
@@ -61,7 +60,7 @@ const GenresPage = () => {
       .catch((err) => console.error(err));
   }, [sortingOrder]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchGenresData();
     const manageGenreDataUpdatesInGenresPage = (e: Event) => {
       if ('detail' in e) {
@@ -78,7 +77,7 @@ const GenresPage = () => {
     };
   }, [fetchGenresData]);
 
-  React.useEffect(
+  useEffect(
     () => storage.sortingStates.setSortingStates('genresPage', sortingOrder),
     [sortingOrder]
   );

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext, useRef } from 'react';
 import { AppContext } from '../contexts/AppContext';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 
@@ -15,7 +15,7 @@ const VolumeSlider = (props: Props) => {
   const { updateVolume } = useContext(AppUpdateContext);
   const { id, name, className, sliderOpacity, onSeek } = props;
 
-  const volumeSliderRef = React.useRef<HTMLInputElement>(null);
+  const volumeSliderRef = useRef<HTMLInputElement>(null);
 
   const volumeBarCssProperties: any = {};
   volumeBarCssProperties['--volume-before-width'] = `${volume}%`;

@@ -3,11 +3,11 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/destructuring-assignment */
 
-import React from 'react';
+import { useContext } from 'react';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 const ContextMenuItem = (props: ContextMenuItem) => {
-  const { updateContextMenuData } = React.useContext(AppUpdateContext);
+  const { updateContextMenuData } = useContext(AppUpdateContext);
   return (
     <div
       className={`menu-item ${

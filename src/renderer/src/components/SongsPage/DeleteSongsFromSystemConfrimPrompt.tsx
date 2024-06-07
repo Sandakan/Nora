@@ -1,22 +1,24 @@
-import React from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
+
 import Button from '../Button';
 import Checkbox from '../Checkbox';
 
 const DeleteSongFromSystemConfirmPrompt = (props: { songIds: string[] }) => {
-  const { currentSongData } = React.useContext(AppContext);
+  const { currentSongData } = useContext(AppContext);
   const { addNewNotifications, changePromptMenuData, clearAudioPlayerData } =
-    React.useContext(AppUpdateContext);
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { songIds } = props;
 
-  const [songsData, setSongsData] = React.useState<SongData[]>([]);
-  const [isPermanentDelete, setIsPermenanentDelete] = React.useState(false);
+  const [songsData, setSongsData] = useState<SongData[]>([]);
+  const [isPermanentDelete, setIsPermenanentDelete] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (songIds.length > 0) {
       window.api.audioLibraryControls
         .getSongInfo(songIds)

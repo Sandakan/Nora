@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useContext } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -69,13 +69,13 @@ const AlbumInfoPage = () => {
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [albumContent, dispatch] = React.useReducer(reducer, {
+  const [albumContent, dispatch] = useReducer(reducer, {
     albumData: {} as Album,
     songsData: [] as SongData[],
     sortingOrder: 'trackNoAscending' as SongSortTypes
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (currentlyActivePage.data.albumId)
       window.api.albumsData
         .getAlbumInfoFromLastFM(currentlyActivePage.data.albumId)
@@ -86,7 +86,7 @@ const AlbumInfoPage = () => {
         .catch((err) => console.error(err));
   }, [currentlyActivePage.data.albumId]);
 
-  const fetchAlbumData = React.useCallback(() => {
+  const fetchAlbumData = useCallback(() => {
     if (currentlyActivePage.data.albumId) {
       window.api.albumsData
         .getAlbumData([currentlyActivePage.data.albumId as string])
@@ -100,7 +100,7 @@ const AlbumInfoPage = () => {
     }
   }, [currentlyActivePage.data.albumId]);
 
-  const fetchAlbumSongs = React.useCallback(() => {
+  const fetchAlbumSongs = useCallback(() => {
     if (albumContent.albumData.songs && albumContent.albumData.songs.length > 0) {
       window.api.audioLibraryControls
         .getSongInfo(
@@ -117,7 +117,7 @@ const AlbumInfoPage = () => {
     }
   }, [albumContent.albumData, albumContent.sortingOrder]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchAlbumData();
     const manageDataUpdatesInAlbumsInfoPage = (e: Event) => {
       if ('detail' in e) {
@@ -134,7 +134,7 @@ const AlbumInfoPage = () => {
     };
   }, [fetchAlbumData]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchAlbumSongs();
     const manageAlbumSongUpdatesInAlbumInfoPage = (e: Event) => {
       const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
@@ -159,7 +159,7 @@ const AlbumInfoPage = () => {
 
   const selectAllHandler = useSelectAllHandler(albumContent.songsData, 'songs', 'songId');
 
-  const handleSongPlayBtnClick = React.useCallback(
+  const handleSongPlayBtnClick = useCallback(
     (currSongId: string) => {
       const queueSongIds = albumContent.songsData
         .filter((song) => !song.isBlacklisted)
@@ -170,7 +170,7 @@ const AlbumInfoPage = () => {
     [albumContent.songsData, albumContent.albumData.albumId, createQueue, playSong]
   );
 
-  const listItems = React.useMemo(() => {
+  const listItems = useMemo(() => {
     const items: (Album | SongData | LastFMAlbumInfo)[] = [
       albumContent.albumData,
       ...albumContent.songsData
@@ -183,7 +183,7 @@ const AlbumInfoPage = () => {
 
   return (
     <MainContainer
-      className="album-info-page-container appear-from-bottom h-full !pb-0 pl-8 "
+      className="album-info-page-container appear-from-bottom h-full !pb-0 pl-8"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {

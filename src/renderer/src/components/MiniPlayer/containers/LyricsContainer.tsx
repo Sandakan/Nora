@@ -1,5 +1,5 @@
 /* eslint-disable react/no-array-index-key */
-import React from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../../contexts/AppContext';
 
@@ -8,14 +8,14 @@ import LyricLine from '../../LyricsPage/LyricLine';
 type Props = { isLyricsVisible: boolean };
 
 const LyricsContainer = (props: Props) => {
-  const { currentSongData, isCurrentSongPlaying } = React.useContext(AppContext);
+  const { currentSongData, isCurrentSongPlaying } = useContext(AppContext);
   const { t } = useTranslation();
 
   const { isLyricsVisible } = props;
 
-  const [lyrics, setLyrics] = React.useState<SongLyrics | null | undefined>(null);
+  const [lyrics, setLyrics] = useState<SongLyrics | null | undefined>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isLyricsVisible) {
       setLyrics(null);
       window.api.lyrics
@@ -41,7 +41,7 @@ const LyricsContainer = (props: Props) => {
     isLyricsVisible
   ]);
 
-  const lyricsComponents = React.useMemo(() => {
+  const lyricsComponents = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {
       const { isSynced, lyrics: unsyncedLyrics, syncedLyrics, offset = 0 } = lyrics.lyrics;
 

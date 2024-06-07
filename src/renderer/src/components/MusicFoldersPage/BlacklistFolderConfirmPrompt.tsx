@@ -1,18 +1,20 @@
 /* eslint-disable react/no-unescaped-entities */
-import React from 'react';
+import { useContext, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+
 // import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+
 import Button from '../Button';
 import Checkbox from '../Checkbox';
 
 const BlacklistFolderConfrimPrompt = (props: { folderPaths: string[]; folderName?: string }) => {
-  // const { isMultipleSelectionEnabled } = React.useContext(AppContext);
-  const { addNewNotifications, changePromptMenuData } = React.useContext(AppUpdateContext);
+  // const { isMultipleSelectionEnabled } = useContext(AppContext);
+  const { addNewNotifications, changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { folderPaths, folderName } = props;
-  const [isDoNotShowAgain, setIsDoNotShowAgain] = React.useState(false);
+  const [isDoNotShowAgain, setIsDoNotShowAgain] = useState(false);
   return (
     <>
       <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">

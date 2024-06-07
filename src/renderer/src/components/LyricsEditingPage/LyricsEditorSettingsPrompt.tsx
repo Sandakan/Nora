@@ -1,4 +1,4 @@
-import React from 'react';
+import { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 
@@ -8,10 +8,10 @@ import debounce from '../../utils/debounce';
 import Checkbox from '../Checkbox';
 
 const LyricsEditorSettingsPrompt = () => {
-  const { localStorageData } = React.useContext(AppContext);
+  const { localStorageData } = useContext(AppContext);
   const { t } = useTranslation();
 
-  const [offset, setOffset] = React.useState(localStorageData.lyricsEditorSettings.offset || 0);
+  const [offset, setOffset] = useState(localStorageData.lyricsEditorSettings.offset || 0);
 
   return (
     <div>

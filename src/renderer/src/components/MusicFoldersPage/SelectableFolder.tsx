@@ -1,10 +1,12 @@
-import React from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import Img from '../Img';
 import { SelectableFolderStructure } from './AddMusicFoldersPrompt';
-import FolderImg from '../../assets/images/webp/empty-folder.webp';
+
+import Img from '../Img';
 import Button from '../Button';
 import Checkbox from '../Checkbox';
+
+import FolderImg from '../../assets/images/webp/empty-folder.webp';
 
 interface Props {
   structure: SelectableFolderStructure;
@@ -17,11 +19,11 @@ const SelectableFolder = (props: Props) => {
   const { structure, updateFolders } = props;
   const { isSelected, path, subFolders } = structure;
 
-  const [isSubFoldersVisible, setIsSubFoldersVisible] = React.useState(false);
+  const [isSubFoldersVisible, setIsSubFoldersVisible] = useState(false);
 
   const folderName = window.api.utils.getBaseName(path);
 
-  const subFoldersComponents = React.useMemo(
+  const subFoldersComponents = useMemo(
     () =>
       structure.subFolders.map((x) => (
         <SelectableFolder key={x.path} structure={x} updateFolders={updateFolders} />
@@ -47,7 +49,7 @@ const SelectableFolder = (props: Props) => {
           <Img src={FolderImg} className="ml-2 h-8 w-8" loading="eager" />
           <div className="ml-4">
             <p className="">{folderName}</p>
-            <p className=" text-xs opacity-50">
+            <p className="text-xs opacity-50">
               {t('common.subFolderWithCount', { count: subFolders.length })}
               <span className="mx-1">&bull;</span>
               {t('common.songWithCount', {

@@ -1,4 +1,4 @@
-import React from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import Button from '../../Button';
@@ -27,7 +27,7 @@ const SongArtistsInput = (props: Props) => {
   const { songArtists, updateSongInfo, artistKeyword, artistResults, updateArtistKeyword } = props;
   const { t } = useTranslation();
 
-  const artistResultComponents = React.useMemo(() => {
+  const artistResultComponents = useMemo(() => {
     if (artistResults.length > 0)
       return artistResults.map((x) => (
         <SongArtistInputResult
@@ -67,7 +67,7 @@ const SongArtistsInput = (props: Props) => {
                 <Img
                   src={artist.onlineArtworkPaths?.picture_small}
                   fallbackSrc={artist.artworkPath}
-                  className="!absolute mr-2 aspect-square w-6 rounded-full opacity-100 transition-[visibility,opacity]  group-focus-within:invisible group-focus-within:opacity-0 group-hover:invisible group-hover:opacity-0"
+                  className="!absolute mr-2 aspect-square w-6 rounded-full opacity-100 transition-[visibility,opacity] group-focus-within:invisible group-focus-within:opacity-0 group-hover:invisible group-hover:opacity-0"
                   alt=""
                 />{' '}
                 {artist.name}

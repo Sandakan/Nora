@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useContext } from 'react';
+import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
@@ -13,7 +13,7 @@ const OtherSongControlsContainer = () => {
     useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const openOtherSettingsContextMenu = React.useCallback(
+  const openOtherSettingsContextMenu = useCallback(
     (pageX: number, pageY: number) => {
       updateContextMenuData(
         true,

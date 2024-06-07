@@ -1,15 +1,17 @@
-import React from 'react';
+import { lazy, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
 
 import Img from '../Img';
+import Button from '../Button';
+
+const RemoveFolderConfirmationPrompt = lazy(() => import('./RemoveFolderConfirmationPrompt'));
+const MultipleSelectionCheckbox = lazy(() => import('../MultipleSelectionCheckbox'));
+const BlacklistFolderConfrimPrompt = lazy(() => import('./BlacklistFolderConfirmPrompt'));
 
 import FolderImg from '../../assets/images/webp/empty-folder.webp';
-import RemoveFolderConfirmationPrompt from './RemoveFolderConfirmationPrompt';
-import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
-import BlacklistFolderConfrimPrompt from './BlacklistFolderConfirmPrompt';
-import Button from '../Button';
 
 type FolderProps = {
   folderPath: string;
@@ -22,14 +24,14 @@ type FolderProps = {
 };
 
 const Folder = (props: FolderProps) => {
-  const { isMultipleSelectionEnabled, multipleSelectionsData } = React.useContext(AppContext);
+  const { isMultipleSelectionEnabled, multipleSelectionsData } = useContext(AppContext);
   const {
     changeCurrentActivePage,
     updateContextMenuData,
     changePromptMenuData,
     updateMultipleSelections,
     toggleMultipleSelections
-  } = React.useContext(AppUpdateContext);
+  } = useContext(AppUpdateContext);
 
   const {
     folderPath,
@@ -44,9 +46,9 @@ const Folder = (props: FolderProps) => {
 
   const { length: noOfSongs } = songIds;
 
-  const [isSubFoldersVisible, setIsSubFoldersVisible] = React.useState(false);
+  const [isSubFoldersVisible, setIsSubFoldersVisible] = useState(false);
 
-  const { folderName, prevDir } = React.useMemo(() => {
+  const { folderName, prevDir } = useMemo(() => {
     if (folderPath) {
       const path = folderPath.split('\\');
       const name = path.pop() || folderPath;
@@ -56,7 +58,7 @@ const Folder = (props: FolderProps) => {
     return { prevDir: undefined, folderName: undefined };
   }, [folderPath]);
 
-  const subFoldersComponents = React.useMemo(() => {
+  const subFoldersComponents = useMemo(() => {
     if (Array.isArray(subFolders) && subFolders.length > 0) {
       return subFolders.map((subFolder, i) => (
         <Folder
@@ -73,7 +75,7 @@ const Folder = (props: FolderProps) => {
     return [];
   }, [className, subFolders]);
 
-  const isAMultipleSelection = React.useMemo(() => {
+  const isAMultipleSelection = useMemo(() => {
     if (!multipleSelectionsData.isEnabled) return false;
     if (multipleSelectionsData.selectionType !== 'folder') return false;
     if (multipleSelectionsData.multipleSelections.length <= 0) return false;
@@ -82,7 +84,7 @@ const Folder = (props: FolderProps) => {
     return false;
   }, [multipleSelectionsData, folderPath]);
 
-  const openMusicFolderInfoPage = React.useCallback(() => {
+  const openMusicFolderInfoPage = useCallback(() => {
     if (folderPath) {
       changeCurrentActivePage('MusicFolderInfo', {
         folderPath
@@ -90,7 +92,7 @@ const Folder = (props: FolderProps) => {
     }
   }, [changeCurrentActivePage, folderPath]);
 
-  const contextMenuItems = React.useMemo((): ContextMenuItem[] => {
+  const contextMenuItems = useMemo((): ContextMenuItem[] => {
     const { multipleSelections: folderPaths } = multipleSelectionsData;
     const isMultipleSelectionsEnabled =
       multipleSelectionsData.selectionType === 'folder' &&
@@ -191,7 +193,7 @@ const Folder = (props: FolderProps) => {
     updateMultipleSelections
   ]);
 
-  const contextMenuItemData = React.useMemo(
+  const contextMenuItemData = useMemo(
     (): ContextMenuAdditionalData =>
       isMultipleSelectionEnabled &&
       multipleSelectionsData.selectionType === 'folder' &&

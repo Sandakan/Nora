@@ -1,7 +1,9 @@
 /* eslint-disable react/no-unescaped-entities */
-import React from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+
 import Button from '../Button';
 
 interface ConfirmDeletePlaylistProp {
@@ -9,15 +11,15 @@ interface ConfirmDeletePlaylistProp {
   playlistName?: string;
 }
 
-const ConfirmDeletePlaylists = (props: ConfirmDeletePlaylistProp) => {
-  const { addNewNotifications, changePromptMenuData } = React.useContext(AppUpdateContext);
+const ConfirmDeletePlaylistsPrompt = (props: ConfirmDeletePlaylistProp) => {
+  const { addNewNotifications, changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { playlistIds, playlistName } = props;
 
-  const [playlistsData, setPlaylistsData] = React.useState<Playlist[]>([]);
+  const [playlistsData, setPlaylistsData] = useState<Playlist[]>([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (playlistIds.length > 0) {
       window.api.playlistsData
         .getPlaylistData(playlistIds)
@@ -31,13 +33,13 @@ const ConfirmDeletePlaylists = (props: ConfirmDeletePlaylistProp) => {
     }
   }, [playlistIds]);
 
-  const arePlaylistsRemovable = React.useMemo(() => {
+  const arePlaylistsRemovable = useMemo(() => {
     const unRemovablePlaylistIds = ['History', 'Favorites'];
 
     return !playlistIds.some((playlistId) => unRemovablePlaylistIds.includes(playlistId));
   }, [playlistIds]);
 
-  const removePlaylists = React.useCallback(() => {
+  const removePlaylists = useCallback(() => {
     window.api.playlistsData
       .removePlaylists(playlistIds)
       .then(() => {
@@ -99,4 +101,4 @@ const ConfirmDeletePlaylists = (props: ConfirmDeletePlaylistProp) => {
   );
 };
 
-export default ConfirmDeletePlaylists;
+export default ConfirmDeletePlaylistsPrompt;

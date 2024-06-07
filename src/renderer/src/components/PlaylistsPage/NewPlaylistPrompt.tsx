@@ -2,12 +2,15 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
-import React from 'react';
+import { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import PlaylistDefaultCover from '../../assets/images/webp/playlist_cover_default.webp';
+
 import Button from '../Button';
 import Img from '../Img';
+
+import PlaylistDefaultCover from '../../assets/images/webp/playlist_cover_default.webp';
 
 interface NewPlaylistPromptProp {
   updatePlaylists: (_updatedPlaylist: Playlist[]) => void;
@@ -15,11 +18,11 @@ interface NewPlaylistPromptProp {
 }
 
 const NewPlaylistPrompt = (props: NewPlaylistPromptProp) => {
-  const { changePromptMenuData, addNewNotifications } = React.useContext(AppUpdateContext);
+  const { changePromptMenuData, addNewNotifications } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [input, setInput] = React.useState('');
-  const [artworkPath, setArtworkPath] = React.useState('');
+  const [input, setInput] = useState('');
+  const [artworkPath, setArtworkPath] = useState('');
 
   const createNewPlaylist = (playlistName: string) => {
     if (playlistName !== '') {

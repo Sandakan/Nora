@@ -1,20 +1,21 @@
-import React from 'react';
+import { ReactElement, lazy, useCallback, useContext } from 'react';
 import { AppContext } from '../contexts/AppContext';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
-import OpenLinkConfirmPrompt from './OpenLinkConfirmPrompt';
+
+const OpenLinkConfirmPrompt = lazy(() => import('./OpenLinkConfirmPrompt'));
 
 interface HyperlinkProp {
   link: string;
   linkTitle?: string;
   noValidityCheck?: boolean;
-  children?: string | React.ReactElement;
-  label?: string | React.ReactElement;
+  children?: string | ReactElement;
+  label?: string | ReactElement;
   className?: string;
 }
 
 const Hyperlink = (props: HyperlinkProp) => {
-  const { localStorageData } = React.useContext(AppContext);
-  const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { localStorageData } = useContext(AppContext);
+  const { changePromptMenuData } = useContext(AppUpdateContext);
   const {
     link,
     children,
@@ -24,7 +25,7 @@ const Hyperlink = (props: HyperlinkProp) => {
     noValidityCheck = false
   } = props;
 
-  const openLinkConfirmPrompt = React.useCallback(() => {
+  const openLinkConfirmPrompt = useCallback(() => {
     if (noValidityCheck || localStorageData?.preferences.doNotVerifyWhenOpeningLinks) {
       window.api.settingsHelpers.openInBrowser(link);
     } else

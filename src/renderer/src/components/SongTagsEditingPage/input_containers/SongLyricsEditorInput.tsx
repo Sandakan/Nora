@@ -1,4 +1,4 @@
-import React from 'react';
+import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppContext } from '../../../contexts/AppContext';
@@ -49,8 +49,8 @@ export const isLyricsEnhancedSynced = (syncedLyricsString: string) => {
 };
 
 const SongLyricsEditorInput = (props: Props) => {
-  const { userData } = React.useContext(AppContext);
-  const { addNewNotifications, changeCurrentActivePage } = React.useContext(AppUpdateContext);
+  const { userData } = useContext(AppContext);
+  const { addNewNotifications, changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { isOnline } = useNetworkConnectivity();
@@ -68,7 +68,7 @@ const SongLyricsEditorInput = (props: Props) => {
     songPath
   } = props;
 
-  const [currentLyricsType, setCurrentLyricsType] = React.useState<CurrentLyricsTYpe>(
+  const [currentLyricsType, setCurrentLyricsType] = useState<CurrentLyricsTYpe>(
     synchronizedLyrics ? 'synced' : 'unsynced'
   );
 
@@ -76,7 +76,7 @@ const SongLyricsEditorInput = (props: Props) => {
     isSynchronizedLyricsSynced,
     isUnsynchronizedLyricsSynced,
     isSynchronizedLyricsEnhancedSynced
-  } = React.useMemo(() => {
+  } = useMemo(() => {
     let isSyncedLyricsSynced = false;
     let isSyncedLyricsEnhancedSynced = false;
     let isUnsyncedLyricsSynced = false;
@@ -94,11 +94,11 @@ const SongLyricsEditorInput = (props: Props) => {
     };
   }, [synchronizedLyrics, unsynchronizedLyrics]);
 
-  // React.useEffect(() => {
+  // useEffect(() => {
   //   setCurrentLyricsType(synchronizedLyrics ? 'synced' : 'unsynced');
   // }, [synchronizedLyrics]);
 
-  const downloadLyrics = React.useCallback(
+  const downloadLyrics = useCallback(
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
@@ -146,7 +146,7 @@ const SongLyricsEditorInput = (props: Props) => {
     [addNewNotifications, album, duration, songArtists, songPath, songTitle, updateSongInfo]
   );
 
-  const downloadSyncedLyrics = React.useCallback(
+  const downloadSyncedLyrics = useCallback(
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
@@ -193,7 +193,7 @@ const SongLyricsEditorInput = (props: Props) => {
     [addNewNotifications, album, duration, songArtists, songPath, songTitle, t, updateSongInfo]
   );
 
-  const goToLyricsEditor = React.useCallback(() => {
+  const goToLyricsEditor = useCallback(() => {
     if (synchronizedLyrics || unsynchronizedLyrics) {
       const lyrics = currentLyricsType === 'synced' ? synchronizedLyrics : unsynchronizedLyrics;
       let lines: LyricData[] = [];

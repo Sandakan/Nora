@@ -1,5 +1,6 @@
-import React from 'react';
+import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import SelectableFolder from './SelectableFolder';
@@ -85,14 +86,14 @@ const getAllSubDirectories = (
 };
 
 const AddMusicFoldersPrompt = (props: Props) => {
-  const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { sortType, onFailure, onSuccess, onFinally } = props;
 
-  const [folders, setFolders] = React.useState<SelectableFolderStructure[]>([]);
+  const [folders, setFolders] = useState<SelectableFolderStructure[]>([]);
 
-  const getFolderInfo = React.useCallback(
+  const getFolderInfo = useCallback(
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
@@ -118,7 +119,7 @@ const AddMusicFoldersPrompt = (props: Props) => {
     []
   );
 
-  const updateFolders = React.useCallback(
+  const updateFolders = useCallback(
     (state: boolean, structure: SelectableFolderStructure) =>
       setFolders((data) => {
         const updatedFolders = updateFolderSelectedState(data.slice(), state, structure);
@@ -127,7 +128,7 @@ const AddMusicFoldersPrompt = (props: Props) => {
     []
   );
 
-  const folderComponents = React.useMemo(() => {
+  const folderComponents = useMemo(() => {
     if (folders.length > 0) {
       return folders.map((x) => (
         <SelectableFolder key={x.path} structure={x} updateFolders={updateFolders} />
@@ -136,12 +137,12 @@ const AddMusicFoldersPrompt = (props: Props) => {
     return [];
   }, [folders, updateFolders]);
 
-  const selectedNoOfParentFolders = React.useMemo(
+  const selectedNoOfParentFolders = useMemo(
     () => folders.filter((x) => x.isSelected).length,
     [folders]
   );
 
-  const selectedNoOfDirectories = React.useMemo(() => {
+  const selectedNoOfDirectories = useMemo(() => {
     const subDirs = getAllSubDirectories(folders);
     const selectedSubDirs = subDirs.filter((subDir) => subDir.isSelected);
 

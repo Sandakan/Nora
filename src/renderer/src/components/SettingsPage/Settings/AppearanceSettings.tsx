@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import React from 'react';
+import { KeyboardEvent, useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../../contexts/AppContext';
 import storage from '../../../utils/localStorage';
@@ -15,12 +15,12 @@ import Checkbox from '../../Checkbox';
 import DynamicThemeSettings from './DynamicThemeSettings';
 
 const ThemeSettings = () => {
-  const { userData, localStorageData, currentSongData } = React.useContext(AppContext);
+  const { userData, localStorageData, currentSongData } = useContext(AppContext);
   const { t } = useTranslation();
 
-  const [theme, setTheme] = React.useState(userData?.theme);
+  const [theme, setTheme] = useState(userData?.theme);
 
-  const fetchUserData = React.useCallback(
+  const fetchUserData = useCallback(
     () =>
       window.api.userData
         .getUserData()
@@ -29,7 +29,7 @@ const ThemeSettings = () => {
     []
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchUserData();
     const manageUserDataUpdatesInSettingsPage = (e: Event) => {
       if ('detail' in e) {
@@ -46,7 +46,7 @@ const ThemeSettings = () => {
     };
   }, [fetchUserData]);
 
-  const focusInput = React.useCallback((e: React.KeyboardEvent<HTMLLabelElement>) => {
+  const focusInput = useCallback((e: KeyboardEvent<HTMLLabelElement>) => {
     if (e.key === 'Enter') {
       const inputId = e.currentTarget.htmlFor;
       const inputElement = document.getElementById(inputId);
@@ -67,7 +67,7 @@ const ThemeSettings = () => {
             <label
               htmlFor="lightThemeRadioBtn"
               tabIndex={0}
-              className={`theme-change-radio-btn mb-2 flex cursor-pointer flex-col items-center rounded-md bg-background-color-2/75  p-6 outline-2 outline-offset-1 focus-within:!outline hover:bg-background-color-2 dark:bg-dark-background-color-2/75 dark:hover:bg-dark-background-color-2 ${
+              className={`theme-change-radio-btn mb-2 flex cursor-pointer flex-col items-center rounded-md bg-background-color-2/75 p-6 outline-2 outline-offset-1 focus-within:!outline hover:bg-background-color-2 dark:bg-dark-background-color-2/75 dark:hover:bg-dark-background-color-2 ${
                 !theme.useSystemTheme &&
                 !theme.isDarkMode &&
                 '!bg-background-color-3 dark:!bg-dark-background-color-3'
@@ -92,7 +92,7 @@ const ThemeSettings = () => {
             <label
               htmlFor="darkThemeRadioBtn"
               tabIndex={0}
-              className={`theme-change-radio-btn mb-2 flex cursor-pointer flex-col items-center rounded-md bg-background-color-2/75  p-6 outline-2 outline-offset-1 focus-within:!outline hover:bg-background-color-2 dark:bg-dark-background-color-2/75 dark:hover:bg-dark-background-color-2 ${
+              className={`theme-change-radio-btn mb-2 flex cursor-pointer flex-col items-center rounded-md bg-background-color-2/75 p-6 outline-2 outline-offset-1 focus-within:!outline hover:bg-background-color-2 dark:bg-dark-background-color-2/75 dark:hover:bg-dark-background-color-2 ${
                 !theme.useSystemTheme &&
                 theme.isDarkMode &&
                 '!bg-background-color-3 dark:!bg-dark-background-color-3'

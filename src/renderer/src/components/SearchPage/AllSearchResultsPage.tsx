@@ -1,4 +1,4 @@
-import React from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
@@ -20,12 +20,12 @@ type AllSearchResultProp = {
 };
 
 const AllSearchResultsPage = () => {
-  const { currentlyActivePage, isMultipleSelectionEnabled } = React.useContext(AppContext);
-  const { toggleMultipleSelections } = React.useContext(AppUpdateContext);
+  const { currentlyActivePage, isMultipleSelectionEnabled } = useContext(AppContext);
+  const { toggleMultipleSelections } = useContext(AppUpdateContext);
   const data = currentlyActivePage.data as AllSearchResultProp;
   const { t } = useTranslation();
 
-  const [searchResults, setSearchResults] = React.useState({
+  const [searchResults, setSearchResults] = useState({
     albums: [],
     artists: [],
     songs: [],
@@ -34,7 +34,7 @@ const AllSearchResultsPage = () => {
     availableResults: []
   } as SearchResult);
 
-  const selectedType = React.useMemo((): QueueTypes | undefined => {
+  const selectedType = useMemo((): QueueTypes | undefined => {
     if (data.searchFilter === 'Songs') return 'songs';
     if (data.searchFilter === 'Artists') return 'artist';
     if (data.searchFilter === 'Playlists') return 'playlist';
@@ -43,7 +43,7 @@ const AllSearchResultsPage = () => {
     return undefined;
   }, [data.searchFilter]);
 
-  const fetchSearchResults = React.useCallback(() => {
+  const fetchSearchResults = useCallback(() => {
     if (data.searchQuery.trim() !== '') {
       window.api.search
         .search(data.searchFilter, data.searchQuery, false, data.isPredictiveSearchEnabled)
@@ -62,7 +62,7 @@ const AllSearchResultsPage = () => {
       });
   }, [data]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchSearchResults();
     const manageSearchResultsUpdatesInAllSearchResultsPage = (e: Event) => {
       if ('detail' in e) {

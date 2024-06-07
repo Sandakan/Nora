@@ -1,28 +1,31 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useCallback, useEffect } from 'react';
+import { MutableRefObject, Suspense, useCallback, useContext, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
+
 import Button from '../Button';
 import MainContainer from '../MainContainer';
 import PromptMenuNavigationControlsContainer from './PromptMenuNavigationControlsContainer';
+import SuspenseLoader from '../SuspenseLoader';
 
 const PromptMenu = () => {
-  const { promptMenuData } = React.useContext(AppContext);
-  const { changePromptMenuData, updatePromptMenuHistoryIndex } = React.useContext(AppUpdateContext);
+  const { promptMenuData } = useContext(AppContext);
+  const { changePromptMenuData, updatePromptMenuHistoryIndex } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const promptMenuRef = React.useRef() as React.MutableRefObject<HTMLDialogElement>;
+  const promptMenuRef = useRef() as MutableRefObject<HTMLDialogElement>;
 
-  React.useEffect(() => {
+  useEffect(() => {
     const dialog = promptMenuRef.current;
 
     if (promptMenuData.isVisible && dialog && !dialog.open) dialog.showModal();
   }, [promptMenuData.isVisible]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const dialog = promptMenuRef.current;
 
     const manageDialogClose = (e: MouseEvent) => {
@@ -65,7 +68,7 @@ const PromptMenu = () => {
     [updatePromptMenuHistoryIndex]
   );
 
-  const manageDialogCloseEvent = React.useCallback(() => {
+  const manageDialogCloseEvent = useCallback(() => {
     changePromptMenuData(false, null);
   }, [changePromptMenuData]);
 
@@ -82,13 +85,11 @@ const PromptMenu = () => {
 
   return (
     <dialog
-      className={`dialog-menu relative left-1/2 top-1/2 h-fit max-h-[80%] min-h-[300px] w-[80%] min-w-[800px] max-w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-background-color-1 pb-10 shadow-[rgba(100,100,111,0.2)_0px_7px_29px_0px] transition-[transform,visibility,opacity] ease-in-out open:backdrop:transition-[background,backdrop-filter] dark:bg-dark-background-color-1 
-      ${
+      className={`dialog-menu relative left-1/2 top-1/2 h-fit max-h-[80%] min-h-[300px] w-[80%] min-w-[800px] max-w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-background-color-1 pb-10 shadow-[rgba(100,100,111,0.2)_0px_7px_29px_0px] transition-[transform,visibility,opacity] ease-in-out open:backdrop:transition-[background,backdrop-filter] dark:bg-dark-background-color-1 ${
         promptMenuData.isVisible
           ? 'open:animate-dialog-appear-ease-in-out open:backdrop:bg-[hsla(228deg,7%,14%,0.75)] open:backdrop:dark:bg-[hsla(228deg,7%,14%,0.75)]'
           : 'animate-dialog-dissappear-ease-in-out backdrop:bg-[hsla(228deg,7%,14%,0)] backdrop:dark:bg-[hsla(228deg,7%,14%,0)]'
-      }
-      `}
+      } `}
       id="prompt-menu"
       onClick={(e) => {
         e.stopPropagation();
@@ -114,7 +115,7 @@ const PromptMenu = () => {
           promptMenuData.className ?? ''
         }`}
       >
-        {promptMenuData.prompt}
+        <Suspense fallback={<SuspenseLoader />}>{promptMenuData.prompt}</Suspense>
       </MainContainer>
     </dialog>
   );

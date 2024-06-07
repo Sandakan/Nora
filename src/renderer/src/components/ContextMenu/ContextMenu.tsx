@@ -1,15 +1,15 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React from 'react';
+import { memo, useContext, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import ContextMenuItem from './ContextMenuItem';
 import { AppContext } from '../../contexts/AppContext';
 import ContextMenuDataItem from './ContextMenuDataItem';
 
-const ContextMenu = React.memo(() => {
-  const { contextMenuData } = React.useContext(AppContext);
+const ContextMenu = memo(() => {
+  const { contextMenuData } = useContext(AppContext);
   const { isVisible, menuItems, data } = contextMenuData;
 
-  const contextMenuRef = React.useRef(null as null | HTMLDivElement);
-  const [dimensions, setDimensions] = React.useState({
+  const contextMenuRef = useRef(null as null | HTMLDivElement);
+  const [dimensions, setDimensions] = useState({
     width: 0,
     height: 0,
     positionX: 0,
@@ -22,7 +22,7 @@ const ContextMenu = React.memo(() => {
   contextMenuStyles['--position-y'] = `${dimensions.positionY}px`;
   contextMenuStyles['--transform-origin'] = `${dimensions.transformOrigin}`;
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     const { pageX, pageY } = contextMenuData;
 
     if (contextMenuRef.current) {
@@ -51,7 +51,7 @@ const ContextMenu = React.memo(() => {
     }
   }, [contextMenuData]);
 
-  const contextMenuItems = React.useMemo(
+  const contextMenuItems = useMemo(
     () =>
       menuItems
         .filter((menuItem) => !menuItem.isDisabled)
@@ -83,7 +83,7 @@ const ContextMenu = React.memo(() => {
         isVisible ? 'scale-100 opacity-100' : 'invisible scale-75 opacity-0'
       } ${
         !data && 'pt-2'
-      } absolute z-50 h-fit w-fit min-w-[13.75rem] origin-top-left overflow-hidden overflow-y-auto rounded-lg bg-context-menu-background/90 pb-1 pt-1 text-font-color-black shadow-[10px_0px_53px_0px_rgba(0,0,0,0.22)] backdrop-blur-sm transition-[opacity,transform,visibility,width,height] dark:bg-dark-context-menu-background/90 dark:text-font-color-white `}
+      } absolute z-50 h-fit w-fit min-w-[13.75rem] origin-top-left overflow-hidden overflow-y-auto rounded-lg bg-context-menu-background/90 pb-1 pt-1 text-font-color-black shadow-[10px_0px_53px_0px_rgba(0,0,0,0.22)] backdrop-blur-sm transition-[opacity,transform,visibility,width,height] dark:bg-dark-context-menu-background/90 dark:text-font-color-white`}
       onClick={(e) => e.stopPropagation()}
       style={{
         top: dimensions.positionY,

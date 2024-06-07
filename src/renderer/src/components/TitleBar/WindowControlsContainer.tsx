@@ -1,20 +1,20 @@
-import React from 'react';
+import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 
 import Button from '../Button';
 
 const WindowControlsContainer = () => {
-  const { userData, bodyBackgroundImage } = React.useContext(AppContext);
+  const { userData, bodyBackgroundImage } = useContext(AppContext);
   const { t } = useTranslation();
 
-  const close = React.useCallback(() => {
+  const close = useCallback(() => {
     if (userData && userData.preferences.hideWindowOnClose) window.api.windowControls.hideApp();
     else window.api.windowControls.closeApp();
   }, [userData]);
 
-  const minimize = React.useCallback(() => window.api.windowControls.minimizeApp(), []);
-  const maximize = React.useCallback(() => window.api.windowControls.toggleMaximizeApp(), []);
+  const minimize = useCallback(() => window.api.windowControls.minimizeApp(), []);
+  const maximize = useCallback(() => window.api.windowControls.toggleMaximizeApp(), []);
 
   return (
     <div

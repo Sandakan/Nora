@@ -1,4 +1,4 @@
-import React from 'react';
+import { lazy, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -7,11 +7,12 @@ import storage from '../../utils/localStorage';
 import i18n from '../../i18n';
 
 import Button from '../Button';
-import Dropdown, { DropdownOption } from '../Dropdown';
 import Img from '../Img';
-import MainContainer from '../MainContainer';
-import AddMusicFoldersPrompt from './AddMusicFoldersPrompt';
 import Folder from './Folder';
+import Dropdown, { DropdownOption } from '../Dropdown';
+import MainContainer from '../MainContainer';
+
+const AddMusicFoldersPrompt = lazy(() => import('./AddMusicFoldersPrompt'));
 
 import NoFoldersImage from '../../assets/images/svg/Empty Inbox _Monochromatic.svg';
 
@@ -43,23 +44,23 @@ const MusicFoldersPage = () => {
     multipleSelectionsData,
     currentlyActivePage,
     localStorageData
-  } = React.useContext(AppContext);
+  } = useContext(AppContext);
   const { updateCurrentlyActivePageData, toggleMultipleSelections, changePromptMenuData } =
-    React.useContext(AppUpdateContext);
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [musicFolders, setMusicFolders] = React.useState<MusicFolder[]>([]);
-  const [sortingOrder, setSortingOrder] = React.useState<FolderSortTypes>(
+  const [musicFolders, setMusicFolders] = useState<MusicFolder[]>([]);
+  const [sortingOrder, setSortingOrder] = useState<FolderSortTypes>(
     currentlyActivePage?.data?.sortingOrder ||
       localStorageData?.sortingStates?.musicFoldersPage ||
       'aToZ'
   );
 
-  // const scrollOffsetTimeoutIdRef = React.useRef(null as NodeJS.Timeout | null);
-  const foldersContainerRef = React.useRef(null as HTMLDivElement | null);
+  // const scrollOffsetTimeoutIdRef = useRef(null as NodeJS.Timeout | null);
+  const foldersContainerRef = useRef(null as HTMLDivElement | null);
   // const { width, height } = useResizeObserver(foldersContainerRef);
 
-  const fetchFoldersData = React.useCallback(
+  const fetchFoldersData = useCallback(
     () =>
       window.api.folderData
         .getFolderData([], sortingOrder)
@@ -71,7 +72,7 @@ const MusicFoldersPage = () => {
     [sortingOrder]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchFoldersData();
     const manageFolderDataUpdatesInMusicFoldersPage = (e: Event) => {
       if ('detail' in e) {
@@ -94,18 +95,18 @@ const MusicFoldersPage = () => {
     };
   }, [fetchFoldersData]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     storage.sortingStates.setSortingStates('musicFoldersPage', sortingOrder);
   }, [sortingOrder]);
 
-  const musicFoldersWithPaths = React.useMemo(
+  const musicFoldersWithPaths = useMemo(
     () => musicFolders.map((x) => ({ ...x, folderPath: x.path })),
     [musicFolders]
   );
 
   const selectAllHandler = useSelectAllHandler(musicFoldersWithPaths, 'folder', 'folderPath');
 
-  const folderComponents = React.useMemo(() => {
+  const folderComponents = useMemo(() => {
     return musicFolders.map((musicFolder, index) => {
       const { path, songIds, isBlacklisted, subFolders } = musicFolder;
       return (
@@ -122,11 +123,11 @@ const MusicFoldersPage = () => {
     });
   }, [musicFolders, selectAllHandler]);
 
-  const addNewFolder = React.useCallback(() => {
+  const addNewFolder = useCallback(() => {
     changePromptMenuData(true, <AddMusicFoldersPrompt onFailure={(err) => console.error(err)} />);
   }, [changePromptMenuData]);
 
-  const importAppData = React.useCallback(
+  const importAppData = useCallback(
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,

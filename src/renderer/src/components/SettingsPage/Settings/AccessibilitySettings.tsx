@@ -1,11 +1,11 @@
-import React from 'react';
+import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../../contexts/AppContext';
 import storage from '../../../utils/localStorage';
 import Checkbox from '../../Checkbox';
 
 const AccessibilitySettings = () => {
-  const { localStorageData } = React.useContext(AppContext);
+  const { localStorageData } = useContext(AppContext);
   const { t } = useTranslation();
 
   return (

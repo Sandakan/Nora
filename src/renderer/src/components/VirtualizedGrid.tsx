@@ -1,4 +1,4 @@
-import React, { CSSProperties, ReactNode, forwardRef, useContext, useMemo } from 'react';
+import { CSSProperties, ForwardedRef, ReactNode, forwardRef, useContext, useMemo } from 'react';
 import { GridComponents, VirtuosoGrid, VirtuosoHandle } from 'react-virtuoso';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import debounce from '../utils/debounce';
@@ -98,7 +98,7 @@ const Grid = <T extends object>(props: Props<T>, ref) => {
 };
 
 const VirtualizedGrid = forwardRef(Grid) as <T extends object>(
-  props: Props<T> & { ref?: React.ForwardedRef<VirtuosoHandle> }
+  props: Props<T> & { ref?: ForwardedRef<VirtuosoHandle> }
 ) => ReturnType<typeof Grid>;
 
 export default VirtualizedGrid;

@@ -1,5 +1,5 @@
 /* eslint-disable react/destructuring-assignment */
-import React from 'react';
+import { Component, ErrorInfo, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import log from '../utils/log';
 import BugImg from '../assets/images/svg/Bug Fixed_Monochromatic.svg';
@@ -8,12 +8,12 @@ import Button from './Button';
 const { isInDevelopment } = window.api.properties;
 
 interface ErrorBoundaryProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 interface ErrorBoundaryStates {
   error: Error | null;
-  errorInfo: React.ErrorInfo | null;
+  errorInfo: ErrorInfo | null;
 }
 
 const ErrorBoundaryFallbackUi = (props: ErrorBoundaryStates) => {
@@ -51,13 +51,13 @@ const ErrorBoundaryFallbackUi = (props: ErrorBoundaryStates) => {
 };
 
 // Error Boundary is written in Class Component because React Error boundaries currently only support on Class Components.
-class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryStates> {
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryStates> {
   constructor(props: ErrorBoundaryProps | Readonly<ErrorBoundaryProps>) {
     super(props);
     this.state = { error: null, errorInfo: null };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Catch errors in any components below and re-render with error message
     this.setState({
       error,

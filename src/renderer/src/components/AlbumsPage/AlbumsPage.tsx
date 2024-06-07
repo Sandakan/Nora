@@ -1,6 +1,6 @@
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
-import React from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -38,17 +38,16 @@ const AlbumsPage = () => {
     localStorageData,
     isMultipleSelectionEnabled,
     multipleSelectionsData
-  } = React.useContext(AppContext);
-  const { updateCurrentlyActivePageData, toggleMultipleSelections } =
-    React.useContext(AppUpdateContext);
+  } = useContext(AppContext);
+  const { updateCurrentlyActivePageData, toggleMultipleSelections } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [albumsData, setAlbumsData] = React.useState([] as Album[]);
-  const [sortingOrder, setSortingOrder] = React.useState<AlbumSortTypes>(
+  const [albumsData, setAlbumsData] = useState([] as Album[]);
+  const [sortingOrder, setSortingOrder] = useState<AlbumSortTypes>(
     currentlyActivePage?.data?.sortingOrder || localStorageData?.sortingStates?.albumsPage || 'aToZ'
   );
 
-  const fetchAlbumData = React.useCallback(
+  const fetchAlbumData = useCallback(
     () =>
       window.api.albumsData.getAlbumData([], sortingOrder).then((res) => {
         if (res && Array.isArray(res)) {
@@ -60,7 +59,7 @@ const AlbumsPage = () => {
     [sortingOrder]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchAlbumData();
     const manageDataUpdatesInAlbumsPage = (e: Event) => {
       if ('detail' in e) {
@@ -78,7 +77,7 @@ const AlbumsPage = () => {
     };
   }, [fetchAlbumData]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     storage.sortingStates.setSortingStates('albumsPage', sortingOrder);
   }, [sortingOrder]);
 

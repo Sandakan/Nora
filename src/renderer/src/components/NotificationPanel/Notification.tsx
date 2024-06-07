@@ -1,4 +1,4 @@
-import React from 'react';
+import { useCallback, useContext, useLayoutEffect, useMemo, useRef } from 'react';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
@@ -15,12 +15,12 @@ const Notification = (props: AppNotification) => {
     type = 'DEFAULT',
     progressBarData = { total: 100, value: 50 }
   } = props;
-  const { localStorageData } = React.useContext(AppContext);
-  const { updateNotifications } = React.useContext(AppUpdateContext);
+  const { localStorageData } = useContext(AppContext);
+  const { updateNotifications } = useContext(AppUpdateContext);
 
-  const notificationRef = React.useRef(null as HTMLDivElement | null);
-  const notificationTimeoutIdRef = React.useRef(undefined as NodeJS.Timeout | undefined);
-  // const [dimensions, setDimensions] = React.useState({ width: 0, height: 0 });
+  const notificationRef = useRef(null as HTMLDivElement | null);
+  const notificationTimeoutIdRef = useRef(undefined as NodeJS.Timeout | undefined);
+  // const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   const notificationPanelStyles: any = {};
   // notificationPanelStyles['--loading-bar-width'] = `${dimensions.width - 35}px`;
@@ -28,7 +28,7 @@ const Notification = (props: AppNotification) => {
     `${(progressBarData.value / progressBarData.total) * 100}%`;
   notificationPanelStyles['--notification-duration'] = `${delay}ms`;
 
-  const removeNotification = React.useCallback(() => {
+  const removeNotification = useCallback(() => {
     const isNotificationAnimationDisabled =
       localStorageData?.preferences?.isReducedMotion || type === 'WITH_PROGRESS_BAR';
 
@@ -42,7 +42,7 @@ const Notification = (props: AppNotification) => {
     } else updateNotifications((currNotifications) => currNotifications.filter((x) => x.id !== id));
   }, [id, localStorageData?.preferences?.isReducedMotion, type, updateNotifications]);
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     const notification = notificationRef.current;
     if (notification) {
       // setDimensions({
@@ -60,7 +60,7 @@ const Notification = (props: AppNotification) => {
     };
   }, [delay, id, removeNotification, updateNotifications]);
 
-  const notificationIcon = React.useMemo(() => {
+  const notificationIcon = useMemo(() => {
     if (icon) return icon;
     if (iconName)
       return (

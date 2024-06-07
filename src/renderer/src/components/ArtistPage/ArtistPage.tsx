@@ -1,4 +1,4 @@
-import React from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -50,20 +50,19 @@ const ArtistPage = () => {
     localStorageData,
     isMultipleSelectionEnabled,
     multipleSelectionsData
-  } = React.useContext(AppContext);
-  const { updateCurrentlyActivePageData, toggleMultipleSelections } =
-    React.useContext(AppUpdateContext);
+  } = useContext(AppContext);
+  const { updateCurrentlyActivePageData, toggleMultipleSelections } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [artistsData, setArtistsData] = React.useState([] as Artist[]);
-  const [sortingOrder, setSortingOrder] = React.useState<ArtistSortTypes>(
+  const [artistsData, setArtistsData] = useState([] as Artist[]);
+  const [sortingOrder, setSortingOrder] = useState<ArtistSortTypes>(
     currentlyActivePage?.data?.sortingOrder ||
       localStorageData?.sortingStates?.artistsPage ||
       'aToZ'
   );
-  const [filteringOrder, setFilteringOrder] = React.useState<ArtistFilterTypes>('notSelected');
+  const [filteringOrder, setFilteringOrder] = useState<ArtistFilterTypes>('notSelected');
 
-  const fetchArtistsData = React.useCallback(
+  const fetchArtistsData = useCallback(
     () =>
       window.api.artistsData.getArtistData([], sortingOrder, filteringOrder).then((res) => {
         if (res && Array.isArray(res)) {
@@ -75,7 +74,7 @@ const ArtistPage = () => {
     [filteringOrder, sortingOrder]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchArtistsData();
     const manageArtistDataUpdatesInArtistsPage = (e: Event) => {
       if ('detail' in e) {
@@ -93,7 +92,7 @@ const ArtistPage = () => {
     };
   }, [fetchArtistsData]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     storage.sortingStates.setSortingStates('artistsPage', sortingOrder);
   }, [sortingOrder]);
 

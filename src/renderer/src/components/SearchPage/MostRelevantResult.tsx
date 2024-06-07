@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React from 'react';
+import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
@@ -19,8 +19,7 @@ export interface MostRelevantResultProp {
 }
 
 export const MostRelevantResult = (props: MostRelevantResultProp) => {
-  const { playSong, updateContextMenuData, changeCurrentActivePage } =
-    React.useContext(AppUpdateContext);
+  const { playSong, updateContextMenuData, changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const {
@@ -34,7 +33,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
     onlineArtworkPath
   } = props;
 
-  const goToSongInfoPage = React.useCallback(
+  const goToSongInfoPage = useCallback(
     (songId: string) =>
       changeCurrentActivePage('SongInfo', {
         songId
@@ -42,7 +41,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
     [changeCurrentActivePage]
   );
 
-  const goToArtistInfoPage = React.useCallback(
+  const goToArtistInfoPage = useCallback(
     (artistName: string, artistId: string) =>
       changeCurrentActivePage('ArtistInfo', {
         artistName,
@@ -51,7 +50,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
     [changeCurrentActivePage]
   );
 
-  const goToAlbumInfoPage = React.useCallback(
+  const goToAlbumInfoPage = useCallback(
     (albumId: string) =>
       changeCurrentActivePage('AlbumInfo', {
         albumId
@@ -59,7 +58,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
     [changeCurrentActivePage]
   );
 
-  const goToGenreInfoPage = React.useCallback(
+  const goToGenreInfoPage = useCallback(
     (genreId: string) =>
       changeCurrentActivePage('GenreInfo', {
         genreId

@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable react/no-array-index-key */
-import React, { useContext } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import i18n from '../../i18n';
@@ -21,6 +21,7 @@ import { LyricData } from '../LyricsEditingPage/LyricsEditingPage';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const syncedLyricsRegex = /^\[\d+:\d{1,2}\.\d{1,3}]/gm;
 
 // // substracted 350 milliseconds to keep lyrics in sync with the lyrics line animations.
@@ -38,24 +39,24 @@ const LyricsPage = () => {
     updateCurrentlyActivePageData,
     changeCurrentActivePage,
     updateSongPosition
-  } = React.useContext(AppUpdateContext);
+  } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [lyrics, setLyrics] = React.useState(null as SongLyrics | undefined | null);
+  const [lyrics, setLyrics] = useState(null as SongLyrics | undefined | null);
 
-  const lyricsLinesContainerRef = React.useRef<HTMLDivElement>(null);
-  const [isAutoScrolling, setIsAutoScrolling] = React.useState(true);
+  const lyricsLinesContainerRef = useRef<HTMLDivElement>(null);
+  const [isAutoScrolling, setIsAutoScrolling] = useState(true);
   // const [isOfflineLyricAvailable, setIsOfflineLyricsAvailable] =
-  React.useState(false);
+  useState(false);
   const { isOnline } = useNetworkConnectivity();
 
-  const copyright = React.useMemo(() => {
+  const copyright = useMemo(() => {
     if (lyrics?.copyright) return lyrics.copyright;
     if (lyrics?.lyrics?.copyright) return lyrics?.lyrics?.copyright;
     return undefined;
   }, [lyrics]);
 
-  const skipLyricsLines = React.useCallback(
+  const skipLyricsLines = useCallback(
     (option: 'previous' | 'next' = 'next') => {
       if (lyrics?.lyrics.isSynced) {
         const { syncedLyrics } = lyrics.lyrics;
@@ -91,7 +92,7 @@ const LyricsPage = () => {
     [lyrics?.lyrics, updateSongPosition]
   );
 
-  const manageLyricsPageKeyboardShortcuts = React.useCallback(
+  const manageLyricsPageKeyboardShortcuts = useCallback(
     (e: KeyboardEvent) => {
       if (e.altKey && e.key === 'ArrowUp') skipLyricsLines('previous');
       else if (e.altKey && e.key === 'ArrowDown') skipLyricsLines('next');
@@ -99,7 +100,7 @@ const LyricsPage = () => {
     [skipLyricsLines]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (
       localStorageData.preferences.allowToPreventScreenSleeping &&
       !localStorageData.preferences.removeAnimationsOnBatteryPower
@@ -112,16 +113,16 @@ const LyricsPage = () => {
     localStorageData?.preferences.removeAnimationsOnBatteryPower
   ]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     window.addEventListener('keydown', manageLyricsPageKeyboardShortcuts);
     return () => {
       window.removeEventListener('keydown', manageLyricsPageKeyboardShortcuts);
     };
   }, [manageLyricsPageKeyboardShortcuts]);
 
-  const requestedLyricsTitle = React.useRef<string>();
+  const requestedLyricsTitle = useRef<string>();
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (requestedLyricsTitle.current !== currentSongData.title) {
       requestedLyricsTitle.current = currentSongData.title;
       setLyrics(null);
@@ -159,13 +160,13 @@ const LyricsPage = () => {
     localStorageData.preferences.lyricsAutomaticallySaveState
   ]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     updateCurrentlyActivePageData((prevData) => {
       return { ...prevData, isLowResponseRequired: lyrics?.lyrics.isSynced };
     });
   }, [lyrics?.lyrics.isSynced, updateCurrentlyActivePageData]);
 
-  const lyricsComponents = React.useMemo(() => {
+  const lyricsComponents = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {
       const { isSynced, lyrics: unsyncedLyrics, syncedLyrics, offset = 0 } = lyrics.lyrics;
 
@@ -214,7 +215,7 @@ const LyricsPage = () => {
     return [];
   }, [currentSongData?.duration, isAutoScrolling, lyrics]);
 
-  const showOnlineLyrics = React.useCallback(
+  const showOnlineLyrics = useCallback(
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
@@ -265,12 +266,12 @@ const LyricsPage = () => {
     ]
   );
 
-  const pathExt = React.useMemo(
+  const pathExt = useMemo(
     () => window.api.utils.getExtension(currentSongData.path),
     [currentSongData.path]
   );
 
-  const showOfflineLyrics = React.useCallback(
+  const showOfflineLyrics = useCallback(
     (_: unknown, setIsDisabled: (state: boolean) => void) => {
       setIsDisabled(true);
       window.api.lyrics
@@ -314,7 +315,7 @@ const LyricsPage = () => {
     ]
   );
 
-  const saveOnlineLyrics = React.useCallback(
+  const saveOnlineLyrics = useCallback(
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
@@ -348,7 +349,7 @@ const LyricsPage = () => {
     [currentSongData.path, lyrics]
   );
 
-  const refreshOnlineLyrics = React.useCallback(
+  const refreshOnlineLyrics = useCallback(
     (_: unknown, setIsDisabled: (state: boolean) => void) => {
       setIsDisabled(true);
       window.api.lyrics
@@ -390,17 +391,17 @@ const LyricsPage = () => {
     ]
   );
 
-  const isSaveLyricsBtnDisabled = React.useMemo(
+  const isSaveLyricsBtnDisabled = useMemo(
     () => !metadataEditingSupportedExtensions.includes(pathExt),
     [pathExt]
   );
 
-  const isSynchronizedLyricsEnhancedSynced = React.useMemo(
+  const isSynchronizedLyricsEnhancedSynced = useMemo(
     () => lyrics && lyrics.lyrics.isSynced && isLyricsEnhancedSynced(lyrics?.lyrics.unparsedLyrics),
     [lyrics]
   );
 
-  const goToLyricsEditor = React.useCallback(() => {
+  const goToLyricsEditor = useCallback(() => {
     let lines: LyricData[] = [{ text: '' }];
     if (lyrics) {
       const { isSynced, syncedLyrics, lyrics: unsyncedLyrics } = lyrics.lyrics;

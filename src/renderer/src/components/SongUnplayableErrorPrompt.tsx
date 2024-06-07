@@ -1,4 +1,4 @@
-import React from 'react';
+import { useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 
@@ -6,16 +6,20 @@ import Button from './Button';
 
 type Props = { err?: Error };
 
-export const unplayableSongNotificationConfig = {
-  id: 'unplayableSong',
-  delay: 10000,
-  content: `Seems like we can't play that song.`,
-  iconName: 'error_outline'
-};
-
 const SongUnplayableErrorPrompt = (props: Props) => {
-  const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { changePromptMenuData, addNewNotifications } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+
+  useEffect(() => {
+    addNewNotifications([
+      {
+        id: 'unplayableSong',
+        delay: 10000,
+        content: t('songUnplayableErrorPrompt.title'),
+        iconName: 'error_outline'
+      }
+    ]);
+  }, [addNewNotifications, t]);
 
   const { err } = props;
   return (

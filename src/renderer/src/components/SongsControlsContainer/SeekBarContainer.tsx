@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { AppContext } from '../../contexts/AppContext';
 import calculateTime from '../../utils/calculateTime';
 import SeekBarSlider from '../SeekBarSlider';
@@ -6,7 +6,7 @@ import SeekBarSlider from '../SeekBarSlider';
 const SeekBarContainer = () => {
   const { localStorageData, currentSongData } = useContext(AppContext);
 
-  const [songPos, setSongPos] = React.useState(0);
+  const [songPos, setSongPos] = useState(0);
 
   const currentSongPosition = calculateTime(songPos);
   const songDuration =

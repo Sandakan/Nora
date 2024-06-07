@@ -1,4 +1,12 @@
-import React from 'react';
+import {
+  ChangeEvent,
+  WheelEvent,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
 import { AppContext } from '../contexts/AppContext';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import calculateTime from '../utils/calculateTime';
@@ -13,16 +21,16 @@ type Props = {
 };
 
 const SeekBarSlider = (props: Props) => {
-  const { localStorageData, currentSongData } = React.useContext(AppContext);
-  const { updateSongPosition } = React.useContext(AppUpdateContext);
+  const { localStorageData, currentSongData } = useContext(AppContext);
+  const { updateSongPosition } = useContext(AppUpdateContext);
 
   const { id, name, className, sliderOpacity, onSeek } = props;
 
-  const [songPos, setSongPos] = React.useState(0);
-  const isMouseDownRef = React.useRef(false);
-  const isMouseScrollRef = React.useRef(false);
-  const seekbarRef = React.useRef(null as HTMLInputElement | null);
-  const lowResponseSongPositionRef = React.useRef(0);
+  const [songPos, setSongPos] = useState(0);
+  const isMouseDownRef = useRef(false);
+  const isMouseScrollRef = useRef(false);
+  const seekbarRef = useRef(null as HTMLInputElement | null);
+  const lowResponseSongPositionRef = useRef(0);
 
   const seekBarCssProperties: any = {};
   seekBarCssProperties['--seek-before-width'] = `${
@@ -32,7 +40,7 @@ const SeekBarSlider = (props: Props) => {
   }%`;
   if (sliderOpacity !== undefined) seekBarCssProperties['--slider-opacity'] = `${sliderOpacity}`;
 
-  const handleSongPositionChange = React.useCallback((e: Event) => {
+  const handleSongPositionChange = useCallback((e: Event) => {
     if ('detail' in e && typeof e.detail === 'number') {
       const songPosition = e.detail as number;
 
@@ -40,13 +48,13 @@ const SeekBarSlider = (props: Props) => {
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.addEventListener('player/positionChange', handleSongPositionChange);
 
     return () => document.removeEventListener('player/positionChange', handleSongPositionChange);
   }, [handleSongPositionChange]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const intervalId = setInterval(() => {
       if (seekbarRef.current && !isMouseDownRef.current && !isMouseScrollRef.current) {
         setSongPos(lowResponseSongPositionRef.current);
@@ -58,7 +66,7 @@ const SeekBarSlider = (props: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // React.useEffect(() => {
+  // useEffect(() => {
   //   if (
   //     seekbarRef.current &&
   //     !isMouseDownRef.current &&
@@ -71,7 +79,7 @@ const SeekBarSlider = (props: Props) => {
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, [songPosition]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const seekBar = seekbarRef.current;
 
     if (seekbarRef.current) {
@@ -94,13 +102,13 @@ const SeekBarSlider = (props: Props) => {
 
   const currentSongPosition = calculateTime(songPos);
 
-  const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
     const pos = e.currentTarget.valueAsNumber;
     setSongPos(pos);
     if (onSeek) onSeek(pos);
   };
 
-  const handleOnWheel = (e: React.WheelEvent<HTMLInputElement>) => {
+  const handleOnWheel = (e: WheelEvent<HTMLInputElement>) => {
     isMouseScrollRef.current = true;
 
     const max = parseInt(e.currentTarget.max);

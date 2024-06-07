@@ -1,5 +1,6 @@
-import React from 'react';
+import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import Button from '../Button';
@@ -10,7 +11,7 @@ type Props = {
 };
 
 const ResetTagsToDefaultPrompt = (props: Props) => {
-  const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { resetButtonHandler, dataEntries } = props;

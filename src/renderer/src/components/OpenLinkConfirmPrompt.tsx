@@ -1,5 +1,5 @@
 /* eslint-disable react/require-default-props */
-import React from 'react';
+import { useContext, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { AppContext } from '../contexts/AppContext';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
@@ -16,11 +16,11 @@ interface OpenLinkConfirmPromptProps {
 
 const OpenLinkConfirmPrompt = (props: OpenLinkConfirmPromptProps) => {
   const { title, link, buttonClassName } = props;
-  const { localStorageData } = React.useContext(AppContext);
-  const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { localStorageData } = useContext(AppContext);
+  const { changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [checkboxState, setCheckboxState] = React.useState(
+  const [checkboxState, setCheckboxState] = useState(
     (localStorageData && localStorageData.preferences.doNotVerifyWhenOpeningLinks) ?? false
   );
 

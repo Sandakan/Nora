@@ -1,5 +1,5 @@
 /* eslint-disable react/no-array-index-key */
-import React, { useEffect, useMemo, useRef } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { AppContext } from '../../contexts/AppContext';
 import useMouseActiveState from '../../hooks/useMouseActiveState';
 
@@ -13,15 +13,16 @@ import SeekBarSlider from '../SeekBarSlider';
 
 // type Props = {};
 
+const isArtistBackgroundsEnabled = true;
+
 const FullScreenPlayer = () =>
   // (props: Props)
   {
-    const { isCurrentSongPlaying, localStorageData, currentSongData } =
-      React.useContext(AppContext);
+    const { isCurrentSongPlaying, localStorageData, currentSongData } = useContext(AppContext);
 
-    const [isLyricsVisible, setIsLyricsVisible] = React.useState(true);
-    const [isLyricsAvailable, setIsLyricsAvailable] = React.useState(true);
-    const [songPos, setSongPos] = React.useState(0);
+    const [isLyricsVisible, setIsLyricsVisible] = useState(true);
+    const [isLyricsAvailable, setIsLyricsAvailable] = useState(true);
+    const [songPos, setSongPos] = useState(0);
 
     const fullScreenPlayerContainerRef = useRef<HTMLDivElement>(null);
     const { isMouseActive } = useMouseActiveState(fullScreenPlayerContainerRef, {
@@ -44,8 +45,6 @@ const FullScreenPlayer = () =>
     ]);
 
     const imgPath = useMemo(() => {
-      const isArtistBackgroundsEnabled = false;
-
       const selectedArtist = currentSongData?.artists?.find(
         (artist) => !!artist.onlineArtworkPaths?.picture_xl
       );

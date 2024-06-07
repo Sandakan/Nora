@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/no-autofocus */
-import React, { useContext } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
@@ -39,18 +39,18 @@ const GENRE_WIDTH = 300;
 
 const SearchPage = () => {
   const { currentlyActivePage, localStorageData } = useContext(AppContext);
-  const { updateCurrentlyActivePageData } = React.useContext(AppUpdateContext);
+  const { updateCurrentlyActivePageData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [searchInput, setSearchInput] = React.useState(currentlyActivePage?.data?.keyword || '');
-  const [isPredictiveSearchEnabled, setIsPredictiveSearchEnabled] = React.useState(
+  const [searchInput, setSearchInput] = useState(currentlyActivePage?.data?.keyword || '');
+  const [isPredictiveSearchEnabled, setIsPredictiveSearchEnabled] = useState(
     localStorageData?.preferences?.isPredictiveSearchEnabled ?? true
   );
 
-  const searchContainerRef = React.useRef(null);
+  const searchContainerRef = useRef(null);
   const { width } = useResizeObserver(searchContainerRef);
 
-  const [searchResults, setSearchResults] = React.useState({
+  const [searchResults, setSearchResults] = useState({
     albums: [],
     artists: [],
     songs: [],
@@ -58,9 +58,9 @@ const SearchPage = () => {
     genres: [],
     availableResults: []
   } as SearchResult);
-  const [activeFilter, setActiveFilter] = React.useState('All' as SearchFilters);
+  const [activeFilter, setActiveFilter] = useState('All' as SearchFilters);
 
-  const { noOfArtists, noOfPlaylists, noOfAlbums, noOfGenres } = React.useMemo(() => {
+  const { noOfArtists, noOfPlaylists, noOfAlbums, noOfGenres } = useMemo(() => {
     return {
       noOfPlaylists: Math.floor(width / PLAYLIST_WIDTH) || 4,
       noOfArtists: Math.floor(width / ARTIST_WIDTH) || 5,
@@ -69,7 +69,7 @@ const SearchPage = () => {
     };
   }, [width]);
 
-  const changeActiveFilter = React.useCallback(
+  const changeActiveFilter = useCallback(
     (filterType: SearchFilters) => setActiveFilter(filterType),
     []
   );
@@ -87,8 +87,8 @@ const SearchPage = () => {
     );
   });
 
-  const timeOutIdRef = React.useRef(undefined as NodeJS.Timeout | undefined);
-  const fetchSearchResults = React.useCallback(() => {
+  const timeOutIdRef = useRef(undefined as NodeJS.Timeout | undefined);
+  const fetchSearchResults = useCallback(() => {
     if (searchInput.trim() !== '') {
       if (timeOutIdRef.current) clearTimeout(timeOutIdRef.current);
       timeOutIdRef.current = setTimeout(
@@ -111,7 +111,7 @@ const SearchPage = () => {
       });
   }, [activeFilter, searchInput, timeOutIdRef, isPredictiveSearchEnabled]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchSearchResults();
     const manageSearchResultsUpdatesInSearchPage = (e: Event) => {
       if ('detail' in e) {
@@ -138,7 +138,7 @@ const SearchPage = () => {
     };
   }, [fetchSearchResults]);
 
-  const updateSearchInput = React.useCallback((input: string) => setSearchInput(input), []);
+  const updateSearchInput = useCallback((input: string) => setSearchInput(input), []);
 
   return (
     <MainContainer className="!h-full !pb-0 [scrollbar-gutter:stable]" ref={searchContainerRef}>

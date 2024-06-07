@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import calculateElapsedTime from '../../utils/calculateElapsedTime';
 
-import packageFile from '../../../../../package.json';
+import { version as appVersion } from '../../../../../package.json';
 import VersionNote, { VersionNoteProps } from './VersionNote';
 
 interface VersionProp {
@@ -27,7 +27,7 @@ const Version = (props: VersionProp) => {
     <div key={version} className="app-version group mb-8 px-4 pb-4 last:pb-8">
       <div className="version-info mb-4 flex justify-between text-lg font-medium">
         <span className="version text-font-color-highlight dark:text-dark-font-color-highlight">
-          v{version} {version === packageFile.version && `(${t('releaseNotesPrompt.current')})`}
+          v{version} {version === appVersion && `(${t('releaseNotesPrompt.current')})`}
         </span>
         <span className="release-date">
           {elapsed && !elapsed.isFuture ? (

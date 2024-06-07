@@ -1,4 +1,4 @@
-import React from 'react';
+import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import Button from '../../Button';
@@ -6,8 +6,8 @@ import { AppContext } from '../../../contexts/AppContext';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 
 const GoToMainPlayerBtn = () => {
-  const { bodyBackgroundImage } = React.useContext(AppContext);
-  const { updatePlayerType } = React.useContext(AppUpdateContext);
+  const { bodyBackgroundImage } = useContext(AppContext);
+  const { updatePlayerType } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   return (

@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import { ReactNode, useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Img from '../../Img';
 import SecondaryContainer from '../../SecondaryContainer';
@@ -10,18 +10,18 @@ type Props = { searchResults: SearchResult };
 
 const MostRelevantSearchResultsContainer = (props: Props) => {
   const { searchResults } = props;
-  const { currentSongData, queue } = React.useContext(AppContext);
+  const { currentSongData, queue } = useContext(AppContext);
   const { t } = useTranslation();
 
   const { playSong, changeCurrentActivePage, updateQueueData, createQueue, addNewNotifications } =
-    React.useContext(AppUpdateContext);
+    useContext(AppUpdateContext);
 
   const MostRelevantResults: ReactNode[] = [];
 
-  const [isOverScrolling, setIsOverScrolling] = React.useState(true);
-  const mostRelevantResultContainerRef = React.useRef<HTMLDivElement>(null);
+  const [isOverScrolling, setIsOverScrolling] = useState(true);
+  const mostRelevantResultContainerRef = useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const { albums, artists, genres, playlists, songs } = searchResults;
     const totalResults =
       albums.length + artists.length + genres.length + playlists.length + songs.length;

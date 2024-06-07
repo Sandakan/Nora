@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import React from 'react';
+import { lazy, useCallback, useContext, useEffect, useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
@@ -11,12 +11,14 @@ import Button from '../Button';
 import MainContainer from '../MainContainer';
 import Dropdown from '../Dropdown';
 import Img from '../Img';
-
-import NoSongsImage from '../../assets/images/svg/Empty Inbox _Monochromatic.svg';
-import DataFetchingImage from '../../assets/images/svg/Road trip_Monochromatic.svg';
-import AddMusicFoldersPrompt from '../MusicFoldersPage/AddMusicFoldersPrompt';
-import { songSortOptions, songFilterOptions } from './SongOptions';
 import VirtualizedList from '../VirtualizedList';
+
+import { songSortOptions, songFilterOptions } from './SongOptions';
+
+import DataFetchingImage from '../../assets/images/svg/Road trip_Monochromatic.svg';
+import NoSongsImage from '../../assets/images/svg/Empty Inbox _Monochromatic.svg';
+
+const AddMusicFoldersPrompt = lazy(() => import('../MusicFoldersPage/AddMusicFoldersPrompt'));
 
 interface SongPageReducer {
   songsData: AudioInfo[];
@@ -57,7 +59,7 @@ const SongsPage = () => {
     localStorageData,
     isMultipleSelectionEnabled,
     multipleSelectionsData
-  } = React.useContext(AppContext);
+  } = useContext(AppContext);
   const {
     createQueue,
     playSong,
@@ -65,10 +67,10 @@ const SongsPage = () => {
     toggleMultipleSelections,
     updateContextMenuData,
     changePromptMenuData
-  } = React.useContext(AppUpdateContext);
+  } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [content, dispatch] = React.useReducer(reducer, {
+  const [content, dispatch] = useReducer(reducer, {
     songsData: [],
     sortingOrder:
       currentlyActivePage?.data?.sortingOrder ||
@@ -77,7 +79,7 @@ const SongsPage = () => {
     filteringOrder: 'notSelected'
   });
 
-  const fetchSongsData = React.useCallback(() => {
+  const fetchSongsData = useCallback(() => {
     console.time('songs');
 
     window.api.audioLibraryControls
@@ -102,7 +104,7 @@ const SongsPage = () => {
       .catch((err) => console.error(err));
   }, [content.filteringOrder, content.sortingOrder]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchSongsData();
     const manageSongsDataUpdatesInSongsPage = (e: Event) => {
       if ('detail' in e) {
@@ -125,11 +127,11 @@ const SongsPage = () => {
     };
   }, [fetchSongsData]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     storage.sortingStates.setSortingStates('songsPage', content.sortingOrder);
   }, [content.sortingOrder]);
 
-  const addNewSongs = React.useCallback(() => {
+  const addNewSongs = useCallback(() => {
     changePromptMenuData(
       true,
       <AddMusicFoldersPrompt
@@ -154,7 +156,7 @@ const SongsPage = () => {
     );
   }, [changePromptMenuData]);
 
-  const importAppData = React.useCallback(
+  const importAppData = useCallback(
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
@@ -180,7 +182,7 @@ const SongsPage = () => {
 
   const selectAllHandler = useSelectAllHandler(content.songsData, 'songs', 'songId');
 
-  const handleSongPlayBtnClick = React.useCallback(
+  const handleSongPlayBtnClick = useCallback(
     (currSongId: string) => {
       const queueSongIds = content.songsData
         .filter((song) => !song.isBlacklisted)

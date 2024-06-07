@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import { useCallback, useContext } from 'react';
 import { AppContext } from '../contexts/AppContext';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 
@@ -17,8 +17,8 @@ const useSelectAllHandler = <Obj extends Record<string, any>>(
     { [Prop in keyof Obj]: Obj[Prop] extends string ? Prop : never }[keyof Obj]
   >
 ) => {
-  const { multipleSelectionsData } = React.useContext(AppContext);
-  const { toggleMultipleSelections } = React.useContext(AppUpdateContext);
+  const { multipleSelectionsData } = useContext(AppContext);
+  const { toggleMultipleSelections } = useContext(AppUpdateContext);
 
   const selectAllHandler = useCallback(
     (upToId?: string) => {

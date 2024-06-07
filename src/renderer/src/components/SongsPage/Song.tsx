@@ -2,19 +2,36 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { ForwardedRef } from 'react';
+import {
+  CSSProperties,
+  ForwardedRef,
+  forwardRef,
+  lazy,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line import/named
 import { DraggableProvided } from 'react-beautiful-dnd';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { AppContext } from '../../contexts/AppContext';
+
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
-import AddSongsToPlaylists from './AddSongsToPlaylists';
-import BlacklistSongConfrimPrompt from './BlacklistSongConfirmPrompt';
+
+const AddSongsToPlaylistsPrompt = lazy(() => import('./AddSongsToPlaylistsPrompt'));
+const BlacklistSongConfrimPrompt = lazy(() => import('./BlacklistSongConfirmPrompt'));
+const DeleteSongsFromSystemConfrimPrompt = lazy(
+  () => import('./DeleteSongsFromSystemConfrimPrompt')
+);
+
 import SongArtist from './SongArtist';
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
-import DeleteSongsFromSystemConfrimPrompt from './DeleteSongsFromSystemConfrimPrompt';
 import Button from '../Button';
 
 import { appPreferences } from '../../../../../package.json';
@@ -36,13 +53,13 @@ interface SongProp {
   isAFavorite: boolean;
   className?: string;
   onPlayClick?: (currSongId: string) => void;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
   isDraggable?: boolean;
   provided?: DraggableProvided;
   selectAllHandler?: (_upToId?: string) => void;
 }
 
-const Song = React.forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => {
+const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => {
   const {
     currentSongData,
     queue,
@@ -52,7 +69,7 @@ const Song = React.forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement
     isMultipleSelectionEnabled,
     multipleSelectionsData,
     currentlyActivePage
-  } = React.useContext(AppContext);
+  } = useContext(AppContext);
   const {
     playSong,
     updateContextMenuData,
@@ -64,7 +81,7 @@ const Song = React.forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement
     toggleMultipleSelections,
     updateMultipleSelections,
     createQueue
-  } = React.useContext(AppUpdateContext);
+  } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const {
@@ -87,11 +104,11 @@ const Song = React.forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement
     onPlayClick
   } = props;
 
-  const [isAFavorite, setIsAFavorite] = React.useState(props.isAFavorite);
-  const [isSongPlaying, setIsSongPlaying] = React.useState(false);
-  const clickTimeoutRef = React.useRef<NodeJS.Timeout>();
+  const [isAFavorite, setIsAFavorite] = useState(props.isAFavorite);
+  const [isSongPlaying, setIsSongPlaying] = useState(false);
+  const clickTimeoutRef = useRef<NodeJS.Timeout>();
 
-  React.useEffect(() => {
+  useEffect(() => {
     setIsSongPlaying(() => currentSongData?.songId === songId && isCurrentSongPlaying);
     setIsAFavorite((prevState) => {
       if (currentSongData?.songId === songId) return currentSongData.isAFavorite;
@@ -99,12 +116,12 @@ const Song = React.forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement
     });
   }, [currentSongData.songId, currentSongData.isAFavorite, isCurrentSongPlaying, songId]);
 
-  const handlePlayBtnClick = React.useCallback(() => {
+  const handlePlayBtnClick = useCallback(() => {
     if (onPlayClick) return onPlayClick(songId);
     return playSong(songId);
   }, [onPlayClick, playSong, songId]);
 
-  const handleLikeButtonClick = React.useCallback(() => {
+  const handleLikeButtonClick = useCallback(() => {
     window.api.playerControls
       .toggleLikeSongs([songId], !isAFavorite)
       .then((res) => {
@@ -119,7 +136,7 @@ const Song = React.forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement
       .catch((err) => console.error(err));
   }, [currentSongData.isAFavorite, currentSongData.songId, isAFavorite, songId, toggleIsFavorite]);
 
-  const { minutes, seconds } = React.useMemo(() => {
+  const { minutes, seconds } = useMemo(() => {
     const addZero = (num: number) => {
       if (num < 10) return `0${num}`;
       return num.toString();
@@ -134,7 +151,7 @@ const Song = React.forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement
     };
   }, [duration]);
 
-  const isAMultipleSelection = React.useMemo(() => {
+  const isAMultipleSelection = useMemo(() => {
     if (!multipleSelectionsData.isEnabled) return false;
     if (multipleSelectionsData.selectionType !== 'songs') return false;
     if (multipleSelectionsData.multipleSelections.length <= 0) return false;
@@ -143,7 +160,7 @@ const Song = React.forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement
     return false;
   }, [multipleSelectionsData, songId]);
 
-  const songArtists = React.useMemo(() => {
+  const songArtists = useMemo(() => {
     if (Array.isArray(artists) && artists.length > 0) {
       return artists
         .map((artist, i) => {
@@ -169,7 +186,7 @@ const Song = React.forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [artists, currentSongData.songId, isAMultipleSelection, songId]);
 
-  const goToSongInfoPage = React.useCallback(() => {
+  const goToSongInfoPage = useCallback(() => {
     if (
       currentlyActivePage.pageTitle !== 'SongInfo' &&
       currentlyActivePage?.data?.songId !== songId
@@ -184,7 +201,7 @@ const Song = React.forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement
     songId
   ]);
 
-  const goToAlbumInfoPage = React.useCallback(() => {
+  const goToAlbumInfoPage = useCallback(() => {
     if (
       album?.albumId &&
       currentlyActivePage.pageTitle !== 'AlbumInfo' &&
@@ -200,7 +217,7 @@ const Song = React.forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement
     currentlyActivePage.pageTitle
   ]);
 
-  const contextMenuItems: ContextMenuItem[] = React.useMemo(() => {
+  const contextMenuItems: ContextMenuItem[] = useMemo(() => {
     const isMultipleSelectionsEnabled =
       multipleSelectionsData.selectionType === 'songs' &&
       multipleSelectionsData.multipleSelections.length !== 1 &&
@@ -361,7 +378,7 @@ const Song = React.forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement
         handlerFunction: () => {
           changePromptMenuData(
             true,
-            <AddSongsToPlaylists
+            <AddSongsToPlaylistsPrompt
               songIds={isAMultipleSelection ? songIds : [songId]}
               title={title}
             />

@@ -1,6 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable no-console */
-import React from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -14,22 +14,22 @@ import { songSortOptions, songFilterOptions } from '../SongsPage/SongOptions';
 import VirtualizedList from '../VirtualizedList';
 
 const GenreInfoPage = () => {
-  const { currentlyActivePage, queue, localStorageData } = React.useContext(AppContext);
+  const { currentlyActivePage, queue, localStorageData } = useContext(AppContext);
   const {
     createQueue,
     updateQueueData,
     addNewNotifications,
     updateCurrentlyActivePageData,
     playSong
-  } = React.useContext(AppUpdateContext);
+  } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [genreData, setGenreData] = React.useState<Genre>();
-  const [genreSongs, setGenreSongs] = React.useState<AudioInfo[]>([]);
-  const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>('aToZ');
-  const [filteringOrder, setFilteringOrder] = React.useState<SongFilterTypes>('notSelected');
+  const [genreData, setGenreData] = useState<Genre>();
+  const [genreSongs, setGenreSongs] = useState<AudioInfo[]>([]);
+  const [sortingOrder, setSortingOrder] = useState<SongSortTypes>('aToZ');
+  const [filteringOrder, setFilteringOrder] = useState<SongFilterTypes>('notSelected');
 
-  const fetchGenresData = React.useCallback(() => {
+  const fetchGenresData = useCallback(() => {
     if (currentlyActivePage.data) {
       window.api.genresData
         .getGenresData([currentlyActivePage.data.genreId])
@@ -41,7 +41,7 @@ const GenreInfoPage = () => {
     }
   }, [currentlyActivePage.data]);
 
-  const fetchSongsData = React.useCallback(() => {
+  const fetchSongsData = useCallback(() => {
     if (genreData && genreData.songs && genreData.songs.length > 0) {
       window.api.audioLibraryControls
         .getSongInfo(
@@ -58,7 +58,7 @@ const GenreInfoPage = () => {
     return undefined;
   }, [filteringOrder, genreData, sortingOrder]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchGenresData();
     const manageGenreUpdatesInGenresInfoPage = (e: Event) => {
       if ('detail' in e) {
@@ -75,7 +75,7 @@ const GenreInfoPage = () => {
     };
   }, [fetchGenresData]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchSongsData();
     const manageSongUpdatesInGenreInfoPage = (e: Event) => {
       if ('detail' in e) {
@@ -100,7 +100,7 @@ const GenreInfoPage = () => {
 
   const selectAllHandler = useSelectAllHandler(genreSongs, 'songs', 'songId');
 
-  const handleSongPlayBtnClick = React.useCallback(
+  const handleSongPlayBtnClick = useCallback(
     (currSongId: string) => {
       const queueSongIds = genreSongs
         .filter((song) => !song.isBlacklisted)
@@ -111,7 +111,7 @@ const GenreInfoPage = () => {
     [createQueue, genreData?.genreId, genreSongs, playSong]
   );
 
-  const listItems = React.useMemo(
+  const listItems = useMemo(
     () => [genreData, ...genreSongs].filter((x) => x !== undefined) as (Genre | AudioInfo)[],
     [genreData, genreSongs]
   );

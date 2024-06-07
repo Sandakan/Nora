@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable import/prefer-default-export */
-import React from 'react';
+import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -29,8 +29,7 @@ interface ArtistProp {
 }
 
 export const Artist = (props: ArtistProp) => {
-  const { queue, isMultipleSelectionEnabled, multipleSelectionsData } =
-    React.useContext(AppContext);
+  const { queue, isMultipleSelectionEnabled, multipleSelectionsData } = useContext(AppContext);
   const { t } = useTranslation();
 
   const {
@@ -41,20 +40,20 @@ export const Artist = (props: ArtistProp) => {
     addNewNotifications,
     toggleMultipleSelections,
     updateMultipleSelections
-  } = React.useContext(AppUpdateContext);
+  } = useContext(AppUpdateContext);
 
   const { appearFromBottom = true } = props;
 
-  const [isAFavorite, setIsAFavorite] = React.useState(props.isAFavorite);
+  const [isAFavorite, setIsAFavorite] = useState(props.isAFavorite);
 
-  const goToArtistInfoPage = React.useCallback(() => {
+  const goToArtistInfoPage = useCallback(() => {
     changeCurrentActivePage('ArtistInfo', {
       artistName: props.name,
       artistId: props.artistId
     });
   }, [changeCurrentActivePage, props.artistId, props.name]);
 
-  const playArtistSongs = React.useCallback(
+  const playArtistSongs = useCallback(
     (isShuffle = false) =>
       window.api.audioLibraryControls
         .getSongInfo(props.songIds, undefined, undefined, undefined, true)
@@ -72,7 +71,7 @@ export const Artist = (props: ArtistProp) => {
     [createQueue, props.artistId, props.songIds]
   );
 
-  const playArtistSongsForMultipleSelections = React.useCallback(
+  const playArtistSongsForMultipleSelections = useCallback(
     (isShuffling = false) => {
       const { multipleSelections: artistIds } = multipleSelectionsData;
 
@@ -101,7 +100,7 @@ export const Artist = (props: ArtistProp) => {
     [createQueue, multipleSelectionsData, props.artistId]
   );
 
-  const isAMultipleSelection = React.useMemo(() => {
+  const isAMultipleSelection = useMemo(() => {
     if (!multipleSelectionsData.isEnabled) return false;
     if (multipleSelectionsData.selectionType !== 'artist') return false;
     if (multipleSelectionsData.multipleSelections.length <= 0) return false;
@@ -114,7 +113,7 @@ export const Artist = (props: ArtistProp) => {
     return false;
   }, [multipleSelectionsData, props.artistId]);
 
-  const artistContextMenus: ContextMenuItem[] = React.useMemo(() => {
+  const artistContextMenus: ContextMenuItem[] = useMemo(() => {
     const isMultipleSelectionsEnabled =
       multipleSelectionsData.selectionType === 'artist' &&
       multipleSelectionsData.multipleSelections.length !== 1 &&
@@ -256,7 +255,7 @@ export const Artist = (props: ArtistProp) => {
     updateMultipleSelections
   ]);
 
-  const contextMenuItemData = React.useMemo(
+  const contextMenuItemData = useMemo(
     (): ContextMenuAdditionalData =>
       isMultipleSelectionEnabled &&
       multipleSelectionsData.selectionType === 'artist' &&

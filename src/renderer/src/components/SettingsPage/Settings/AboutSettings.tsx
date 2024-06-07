@@ -1,12 +1,17 @@
-import React from 'react';
+import { lazy, useContext, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import { AppContext } from '../../../contexts/AppContext';
+
+import Img from '../../Img';
+import Hyperlink from '../../Hyperlink';
+import Button from '../../Button';
+import AppStats from './AppStats';
 
 import calculateElapsedTime from '../../../utils/calculateElapsedTime';
 import storage from '../../../utils/localStorage';
 
-import OpenLinkConfirmPrompt from '../../OpenLinkConfirmPrompt';
 import { version, author, homepage, bugs, urls } from '../../../../../../package.json';
 import openSourceLicenses from '../../../../../../open_source_licenses.txt?raw';
 import appLicense from '../../../../../../LICENSE.txt?raw';
@@ -18,22 +23,20 @@ import GithubLightIcon from '../../../assets/images/svg/github-white.svg';
 import DiscordDarkIcon from '../../../assets/images/svg/discord_light_mode.svg';
 import DiscordLightIcon from '../../../assets/images/svg/discord_dark_mode.svg';
 import SLFlag from '../../../assets/images/webp/sl-flag.webp';
-import Img from '../../Img';
-import ReleaseNotesPrompt from '../../ReleaseNotesPrompt/ReleaseNotesPrompt';
-import Hyperlink from '../../Hyperlink';
-import Button from '../../Button';
-import ResetAppConfirmationPrompt from '../ResetAppConfirmationPrompt';
-import SensitiveActionConfirmPrompt from '../../SensitiveActionConfirmPrompt';
-import AppShortcutsPrompt from '../AppShortcutsPrompt';
-import AppStats from './AppStats';
-import ClearLocalStoragePrompt from '../ClearLocalStoragePrompt';
+
+const ReleaseNotesPrompt = lazy(() => import('../../ReleaseNotesPrompt/ReleaseNotesPrompt'));
+const ResetAppConfirmationPrompt = lazy(() => import('../ResetAppConfirmationPrompt'));
+const SensitiveActionConfirmPrompt = lazy(() => import('../../SensitiveActionConfirmPrompt'));
+const AppShortcutsPrompt = lazy(() => import('../AppShortcutsPrompt'));
+const ClearLocalStoragePrompt = lazy(() => import('../ClearLocalStoragePrompt'));
+const OpenLinkConfirmPrompt = lazy(() => import('../../OpenLinkConfirmPrompt'));
 
 const AboutSettings = () => {
-  const { isDarkMode } = React.useContext(AppContext);
-  const { changePromptMenuData, addNewNotifications } = React.useContext(AppUpdateContext);
+  const { isDarkMode } = useContext(AppContext);
+  const { changePromptMenuData, addNewNotifications } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const currentVersionReleasedDate = React.useMemo(() => {
+  const currentVersionReleasedDate = useMemo(() => {
     const { versions } = localReleaseNotes;
 
     for (let i = 0; i < versions.length; i += 1) {
@@ -44,7 +47,7 @@ const AboutSettings = () => {
     return undefined;
   }, []);
 
-  const elapsed = React.useMemo(() => {
+  const elapsed = useMemo(() => {
     if (currentVersionReleasedDate) {
       return calculateElapsedTime(currentVersionReleasedDate);
     }

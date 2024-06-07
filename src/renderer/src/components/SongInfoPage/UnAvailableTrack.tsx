@@ -1,20 +1,23 @@
-import React from 'react';
+import { lazy, useCallback, useContext } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { ParsedSimilarTrack } from '../../../@types/last_fm_similar_tracks_api';
-import OpenLinkConfirmPrompt from '../OpenLinkConfirmPrompt';
+
+import { ParsedSimilarTrack } from '../../../../@types/last_fm_similar_tracks_api';
+
+const OpenLinkConfirmPrompt = lazy(() => import('../OpenLinkConfirmPrompt'));
 
 type Props = Omit<ParsedSimilarTrack, 'songData' | 'match'> & {
   index?: number;
 };
 
 const UnAvailableTrack = (props: Props) => {
-  const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { title, artists = [], url, index } = props;
 
-  const handleButtonClick = React.useCallback(() => {
+  const handleButtonClick = useCallback(() => {
     return changePromptMenuData(
       true,
       <OpenLinkConfirmPrompt link={url} title={`View '${title}' in Last.Fm`} />,

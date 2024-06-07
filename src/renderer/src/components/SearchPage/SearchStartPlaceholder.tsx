@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable react/no-array-index-key */
-import React from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
@@ -18,14 +18,14 @@ type Props = {
 };
 
 const SearchStartPlaceholder = (props: Props) => {
-  const { updateCurrentlyActivePageData } = React.useContext(AppUpdateContext);
+  const { updateCurrentlyActivePageData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { searchResults, searchInput, updateSearchInput } = props;
 
-  const [recentSearchResults, setRecentSearchResults] = React.useState([] as string[]);
+  const [recentSearchResults, setRecentSearchResults] = useState([] as string[]);
 
-  const fetchRecentSearchResults = React.useCallback(() => {
+  const fetchRecentSearchResults = useCallback(() => {
     window.api.userData
       .getUserData()
       .then((data) => {
@@ -36,7 +36,7 @@ const SearchStartPlaceholder = (props: Props) => {
       .catch((err) => console.error(err));
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchRecentSearchResults();
     const manageSearchResultsUpdatesInSearchPage = (e: Event) => {
       if ('detail' in e) {
@@ -53,9 +53,9 @@ const SearchStartPlaceholder = (props: Props) => {
     };
   }, [fetchRecentSearchResults]);
 
-  React.useEffect(() => fetchRecentSearchResults(), [fetchRecentSearchResults]);
+  useEffect(() => fetchRecentSearchResults(), [fetchRecentSearchResults]);
 
-  const recentSearchResultComponents = React.useMemo(
+  const recentSearchResultComponents = useMemo(
     () =>
       recentSearchResults.length > 0
         ? recentSearchResults.map((result, index) => (

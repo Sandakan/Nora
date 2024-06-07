@@ -1,4 +1,4 @@
-import React from 'react';
+import { useContext } from 'react';
 
 import { Album } from '../../AlbumsPage/Album';
 import { AppContext } from '../../../contexts/AppContext';
@@ -12,7 +12,7 @@ const MIN_ITEM_WIDTH = 220;
 const MIN_ITEM_HEIGHT = 280;
 
 const AllAlbumResults = (prop: Props) => {
-  const { currentlyActivePage } = React.useContext(AppContext);
+  const { currentlyActivePage } = useContext(AppContext);
   const { albumData } = prop;
 
   const selectAllHandler = useSelectAllHandler(albumData, 'album', 'albumId');

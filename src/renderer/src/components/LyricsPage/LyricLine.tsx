@@ -2,7 +2,7 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -23,17 +23,17 @@ const lyricsScrollIntoViewEvent = new CustomEvent('lyrics/scrollIntoView', {
 });
 
 const LyricLine = (props: LyricProp) => {
-  const { playerType } = React.useContext(AppContext);
-  const { updateSongPosition } = React.useContext(AppUpdateContext);
-  const [isInRange, setIsInRange] = React.useState(false);
+  const { playerType } = useContext(AppContext);
+  const { updateSongPosition } = useContext(AppUpdateContext);
+  const [isInRange, setIsInRange] = useState(false);
   const { t } = useTranslation();
 
-  const lyricsRef = React.useRef(null as HTMLDivElement | null);
-  const isTheCurrnetLineRef = React.useRef(false);
+  const lyricsRef = useRef(null as HTMLDivElement | null);
+  const isTheCurrnetLineRef = useRef(false);
 
   const { index, lyric, syncedLyrics, isAutoScrolling = true } = props;
 
-  const handleLyricsActivity = React.useCallback(
+  const handleLyricsActivity = useCallback(
     (e: Event) => {
       if ('detail' in e && !Number.isNaN(e.detail)) {
         const songPosition = e.detail as number;
@@ -62,13 +62,13 @@ const LyricLine = (props: LyricProp) => {
     [isAutoScrolling, syncedLyrics]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.addEventListener('player/positionChange', handleLyricsActivity);
 
     return () => document.removeEventListener('player/positionChange', handleLyricsActivity);
   }, [handleLyricsActivity]);
 
-  const lyricString = React.useMemo(() => {
+  const lyricString = useMemo(() => {
     if (typeof lyric === 'string') return lyric.replaceAll(syncedLyricsRegex, '').trim();
 
     const extendedLyricLines = lyric.map((extendedText, i) => {

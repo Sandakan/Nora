@@ -1,17 +1,20 @@
 /* eslint-disable react/no-unescaped-entities */
-import React from 'react';
+import { useContext, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import storage from '../../utils/localStorage';
+
 import Button from '../Button';
 import Checkbox from '../Checkbox';
 
+import storage from '../../utils/localStorage';
+
 const BlacklistSongConfrimPrompt = (props: { songIds: string[]; title?: string }) => {
-  const { addNewNotifications, changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { addNewNotifications, changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { songIds, title } = props;
-  const [isDoNotShowAgain, setIsDoNotShowAgain] = React.useState(false);
+  const [isDoNotShowAgain, setIsDoNotShowAgain] = useState(false);
   return (
     <>
       <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
