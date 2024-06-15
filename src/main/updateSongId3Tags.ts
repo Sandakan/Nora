@@ -90,6 +90,7 @@ export const savePendingMetadataUpdates = (currentSongPath = '', forceSave = fal
               source: 'IN_SONG_LYRICS',
               isOfflineLyricsAvailable: true,
               lyricsType: synchronisedLyrics ? 'SYNCED' : 'UN_SYNCED',
+              isTranslated: false,
               lyrics
             });
           }

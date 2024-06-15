@@ -62,11 +62,11 @@ import ListeningDataSession from './other/listeningDataSession';
 import updateQueueOnSongPlay from './other/updateQueueOnSongPlay';
 import shuffleQueueRandomly from './other/shuffleQueueRandomly';
 import { equalizerBandHertzData } from './other/equalizerData';
+import AudioPlayer from './other/player';
 
 // ? INITIALIZE PLAYER
-const player = new Audio();
+const player = new AudioPlayer();
 let repetitivePlaybackErrorsCount = 0;
-// const lowResponseTimeRequiredPages: PageTitles[] = ['Lyrics', 'LyricsEditor'];
 
 // ? / / / / / / /  EQUALIZER INITIALIZATION / / / / / / / / / / / / / /
 const context = new window.AudioContext();
@@ -235,44 +235,6 @@ export default function App() {
     [changePromptMenuData, t]
   );
 
-  const AUDIO_FADE_INTERVAL = 50;
-  const AUDIO_FADE_DURATION = 250;
-  const fadeOutIntervalId = useRef(undefined as NodeJS.Timeout | undefined);
-  const fadeInIntervalId = useRef(undefined as NodeJS.Timeout | undefined);
-  const fadeOutAudio = useCallback(() => {
-    if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
-    if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
-    fadeOutIntervalId.current = setInterval(() => {
-      if (player.volume > 0) {
-        const rate =
-          contentRef.current.player.volume.value /
-          (100 * (AUDIO_FADE_DURATION / AUDIO_FADE_INTERVAL));
-        if (player.volume - rate <= 0) player.volume = 0;
-        else player.volume -= rate;
-      } else {
-        player.pause();
-        if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
-      }
-    }, AUDIO_FADE_INTERVAL);
-  }, []);
-
-  const fadeInAudio = useCallback(() => {
-    if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
-    if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
-    fadeInIntervalId.current = setInterval(() => {
-      if (player.volume < contentRef.current.player.volume.value / 100) {
-        const rate =
-          (contentRef.current.player.volume.value / 100 / AUDIO_FADE_INTERVAL) *
-          (AUDIO_FADE_DURATION / AUDIO_FADE_INTERVAL);
-        if (player.volume + rate >= contentRef.current.player.volume.value / 100)
-          player.volume = contentRef.current.player.volume.value / 100;
-        else player.volume += rate;
-      } else if (fadeInIntervalId.current) {
-        clearInterval(fadeInIntervalId.current);
-      }
-    }, AUDIO_FADE_INTERVAL);
-  }, []);
-
   const handleBeforeQuitEvent = useCallback(async () => {
     storage.playback.setCurrentSongOptions('stoppedPosition', player.currentTime);
     storage.playback.setPlaybackOptions('isRepeating', contentRef.current.player.isRepeating);
@@ -438,9 +400,6 @@ export default function App() {
     const playSongIfPlayable = () => {
       if (refStartPlay.current) toggleSongPlayback(true);
     };
-    // const manageSongPositionUpdate = () => {
-    //   contentRef.current.player.songPosition = roundTo(player.currentTime, 2);
-    // };
     const managePlayerStalledStatus = () => {
       dispatch({ type: 'PLAYER_WAITING_STATUS', data: true });
     };
@@ -465,8 +424,6 @@ export default function App() {
     player.addEventListener('play', addSongTitleToTitleBar);
     player.addEventListener('pause', displayDefaultTitleBar);
 
-    // player.addEventListener('timeupdate', manageSongPositionUpdate);
-
     return () => {
       toggleSongPlayback(false);
       player.removeEventListener('canplay', managePlayerNotStalledStatus);
@@ -477,7 +434,6 @@ export default function App() {
       player.removeEventListener('stalled', managePlayerStalledStatus);
       player.removeEventListener('waiting', managePlayerStalledStatus);
       player.removeEventListener('progress', managePlayerStalledStatus);
-      // player.removeEventListener('timeupdate', manageSongPositionUpdate);
       player.removeEventListener('canplay', playSongIfPlayable);
       player.removeEventListener('ended', handleSkipForwardClickWithParams);
       player.removeEventListener('play', addSongTitleToTitleBar);
@@ -487,21 +443,10 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    // const index = content.navigationHistory.pageHistoryIndex;
-    // const { pageTitle: currentPage, data } =
-    //   content.navigationHistory.history[index];
-    // // const isLowResponseRequired =
-    // //   lowResponseTimeRequiredPages.includes(currentPage) ||
-    // //   data?.isLowResponseRequired ||
-    // //   content.playerType === 'mini' ||
-    // //   content.playerType === 'full';
-
     const LOW_RESPONSE_DURATION = 100;
     const DURATION = 1000;
 
     const dispatchCurrentSongTime = () => {
-      // const currentPosition = contentRef.current.player.songPosition;
-
       const playerPositionChange = new CustomEvent('player/positionChange', {
         detail: roundTo(player.currentTime, 2)
       });
@@ -515,18 +460,6 @@ export default function App() {
     const pausedResponseIntervalId = setInterval(() => {
       if (player.paused) dispatchCurrentSongTime();
     }, DURATION);
-
-    // const intervalId = setInterval(() => {
-    //   const currentPosition = contentRef.current.player.songPosition;
-    //   if (!player.paused) {
-    //     startTransition(() =>
-    //       dispatch({
-    //         type: 'UPDATE_SONG_POSITION',
-    //         data: currentPosition,
-    //       }),
-    //     );
-    //   }
-    // }, DURATION);
 
     return () => {
       clearInterval(lowResponseIntervalId);
@@ -701,7 +634,7 @@ export default function App() {
                   return player.dispatchEvent(playbackChange);
                 })
                 .catch((err) => managePlaybackErrors(err));
-              return fadeInAudio();
+              return player.play();
             }
             if (player.ended) {
               player.currentTime = 0;
@@ -712,11 +645,11 @@ export default function App() {
                   return player.dispatchEvent(playbackChange);
                 })
                 .catch((err) => managePlaybackErrors(err));
-              return fadeInAudio();
+              return player.play();
             }
             const playbackChange = new CustomEvent('player/playbackChange');
             player.dispatchEvent(playbackChange);
-            return fadeOutAudio();
+            return player.pause();
           }
         }
       } else
@@ -730,7 +663,7 @@ export default function App() {
         ]);
       return undefined;
     },
-    [addNewNotifications, t, fadeOutAudio, fadeInAudio, managePlaybackErrors]
+    [addNewNotifications, t, managePlaybackErrors]
   );
 
   const displayMessageFromMain = useCallback(
@@ -866,7 +799,7 @@ export default function App() {
       if (root) {
         root.style.removeProperty('--side-bar-background');
         root.style.removeProperty('--background-color-2');
-        // root.style.removeProperty('--dark-background-color-2', lightVibrant, 'important');
+        root.style.removeProperty('--dark-background-color-2');
         root.style.removeProperty('--background-color-3');
         root.style.removeProperty('--dark-background-color-3');
         root.style.removeProperty('--text-color-highlight');
@@ -1027,11 +960,9 @@ export default function App() {
           })
           .catch((err) => {
             console.error(err);
-            // addNewNotifications([unplayableSongNotificationConfig]);
             changePromptMenuData(true, <SongUnplayableErrorPrompt err={err} />);
           });
       }
-      // addNewNotifications([unplayableSongNotificationConfig]);
       changePromptMenuData(
         true,
         <ErrorPrompt
@@ -1144,13 +1075,16 @@ export default function App() {
   );
 
   useEffect(() => {
-    const { isInDevelopment } = window.api.properties;
     let artworkPath: string | undefined;
 
-    if (!isInDevelopment && contentRef.current.currentSongData.artwork) {
-      const blob = new Blob([contentRef.current.currentSongData.artwork]);
-      artworkPath = URL.createObjectURL(blob);
-    }
+    if (contentRef.current.currentSongData.artwork !== undefined) {
+      if (typeof contentRef.current.currentSongData.artwork === 'object') {
+        const blob = new Blob([contentRef.current.currentSongData.artwork]);
+        artworkPath = URL.createObjectURL(blob);
+      } else {
+        artworkPath = `data:;base64,${contentRef.current.currentSongData.artwork}`;
+      }
+    } else artworkPath = '';
 
     navigator.mediaSession.metadata = new MediaMetadata({
       title: contentRef.current.currentSongData.title,
@@ -1162,10 +1096,7 @@ export default function App() {
         : t('common.unknownAlbum'),
       artwork: [
         {
-          // src: `http://nora.app/local/${contentRef.current.currentSongData.artworkPath}`,
-          // src: `data:;base64,${contentRef.current.currentSongData.artwork}`,
-          src: artworkPath || `data:;base64,${contentRef.current.currentSongData.artwork}`,
-          // src: contentRef.current.currentSongData.artworkPath || '',
+          src: artworkPath,
           sizes: '1000x1000',
           type: 'image/webp'
         }
@@ -1207,12 +1138,6 @@ export default function App() {
       const artists = `By ${content.currentSongData.artists?.map((artist) => artist.name).join(', ') || 'an unknown artist'}`;
 
       const now = Date.now();
-      // console.log(title, artists, {
-      //   now,
-      //   duration: player.duration ?? 0,
-      //   currentTime: player.currentTime ?? 0,
-      //   result: now + ((player.duration ?? 0) - (player.currentTime ?? 0)) * 1000
-      // });
       window.api.playerControls.setDiscordRpcActivity({
         details: title,
         state: artists,
@@ -1594,9 +1519,6 @@ export default function App() {
   );
 
   const updateVolume = useCallback((volume: number) => {
-    if (fadeInIntervalId.current) clearInterval(fadeInIntervalId.current);
-    if (fadeOutIntervalId.current) clearInterval(fadeOutIntervalId.current);
-
     storage.playback.setVolumeOptions('value', volume);
     contentRef.current.player.volume.value = volume;
     dispatch({
@@ -1882,7 +1804,6 @@ export default function App() {
   }, []);
 
   const changeUpNextSongData = useCallback((upNextSongData?: AudioPlayerData) => {
-    // dispatch({ type: 'UP_NEXT_SONG_DATA_CHANGE', data: upNextSongData });
     contentRef.current.upNextSongData = upNextSongData;
   }, []);
 
@@ -2023,16 +1944,14 @@ export default function App() {
     ]
   );
 
-  // const songPositionContextValues = useMemo(
-  //   () => ({
-  //     songPosition: content.player.songPosition,
-  //   }),
-  //   [content.player.songPosition],
-  // );
-
   const isReducedMotion =
     content.localStorage.preferences.isReducedMotion ||
     (content.isOnBatteryPower && content.localStorage.preferences.removeAnimationsOnBatteryPower);
+
+  useEffect(() => {
+    if (content.isDarkMode) document.body.classList.add('dark');
+    else document.body.classList.remove('dark');
+  }, [content.isDarkMode]);
 
   return (
     <ErrorBoundary>

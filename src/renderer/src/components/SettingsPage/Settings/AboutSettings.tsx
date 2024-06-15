@@ -95,11 +95,11 @@ const AboutSettings = () => {
               </span>
             </div>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center justify-center gap-6">
             <Button
-              className="about-link !mr-6 block w-fit cursor-pointer !rounded-none !border-0 bg-transparent !p-0 opacity-70 outline-1 outline-offset-2 transition-opacity hover:bg-transparent hover:opacity-100 focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent"
+              className="about-link !mr-0 block w-fit cursor-pointer !rounded-none !border-0 bg-transparent !p-0 leading-[0] opacity-70 outline-1 outline-offset-2 transition-opacity hover:bg-transparent hover:opacity-100 focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent"
               iconName="language"
-              iconClassName="!text-2xl"
+              iconClassName="!text-2xl !leading-none"
               tooltipLabel={t('settingsPage.noraWebsite')}
               clickHandler={() =>
                 changePromptMenuData(
@@ -114,7 +114,7 @@ const AboutSettings = () => {
             />
             <Img
               src={isDarkMode ? DiscordLightIcon : DiscordDarkIcon}
-              className="mr-6 w-6 cursor-pointer !opacity-70 !transition-opacity hover:!opacity-100"
+              className="w-6 cursor-pointer !opacity-70 !transition-opacity hover:!opacity-100"
               alt={t('settingsPage.noraDiscordServer')}
               showAltAsTooltipLabel
               onClick={() =>

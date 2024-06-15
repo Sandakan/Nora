@@ -1,9 +1,8 @@
 appId: com.sandakannipunajith.nora
 productName: Nora
 copyright: Copyright © 2024 Sandakan Nipunajith
-
 icon: ./build/icon.ico
-artifactName: ${productName} Setup ${version}-${os}-${arch}.${ext}
+artifactName: '${productName} Setup ${version}-${os}-${arch}.${ext}'
 
 directories:
   buildResources: build
@@ -58,9 +57,14 @@ fileAssociations:
 
 win:
   executableName: Nora
+  target:
+    - target: nsis
+      arch:
+        - x64
+        - arm64
 
 nsis:
-  shortcutName: ${productName}
+  shortcutName: '${productName}'
   allowElevation: false
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
@@ -79,22 +83,29 @@ mac:
   hardenedRuntime: true
   icon: ./build/icon.icns
   extendInfo:
-    - NSCameraUsageDescription: Application requests access to the device's camera.
-    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
-    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+    - NSCameraUsageDescription: "Application requests access to the device's camera."
+    - NSMicrophoneUsageDescription: "Application requests access to the device's microphone."
+    - NSDocumentsFolderUsageDescription: "Application requests access to the user's Documents folder."
+    - NSDownloadsFolderUsageDescription: "Application requests access to the user's Downloads folder."
   notarize: false
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
 
 dmg:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: '${name}-${version}.${ext}'
 
 linux:
   target:
     - AppImage
     - snap
     - deb
+    - rpm
+    - flatpak
   category: AudioVideo
-  synopsis: An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar.
+  synopsis: 'An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar.'
 
 npmRebuild: false
 

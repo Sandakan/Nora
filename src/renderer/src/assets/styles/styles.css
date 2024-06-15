@@ -92,7 +92,7 @@
   --dark-context-menu-background: 228 7% 14%; /* hsla(228 7% 14% / 90%) */
   --dark-context-menu-list-hover: 224 8% 28%; /* hsl(224 8% 28%) */
   --dark-seekbar-background-color: 240 1% 83%; /* hsl(240 1% 83%) */
-  --dark-seekbar-track-background-color: var(--seekbar-track-background-color);
+  --dark-seekbar-track-background-color: 0 0% 25%;
   --dark-scrollbar-thumb-background-color: 212 48% 94%; /* hsl(212, 48%, 94%) */
   --dark-slider-opacity: 0.25;
 }

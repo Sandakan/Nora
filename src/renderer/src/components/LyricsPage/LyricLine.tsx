@@ -24,7 +24,7 @@ const lyricsScrollIntoViewEvent = new CustomEvent('lyrics/scrollIntoView', {
 
 const LyricLine = (props: LyricProp) => {
   const { playerType } = useContext(AppContext);
-  const { updateSongPosition } = useContext(AppUpdateContext);
+  const { updateSongPosition, updateContextMenuData } = useContext(AppUpdateContext);
   const [isInRange, setIsInRange] = useState(false);
   const { t } = useTranslation();
 
@@ -116,6 +116,29 @@ const LyricLine = (props: LyricProp) => {
       onClick={() =>
         syncedLyrics && typeof lyric === 'string' && updateSongPosition(syncedLyrics.start)
       }
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        updateContextMenuData(
+          true,
+          [
+            {
+              label: t('common.copy'),
+              class: 'sync',
+              iconName: 'content_copy',
+              iconClassName: 'material-icons-round-outlined',
+              handlerFunction: () =>
+                window.navigator.clipboard.writeText(
+                  typeof lyric === 'string'
+                    ? lyric.replaceAll(syncedLyricsRegex, '').trim()
+                    : lyric.map((x) => x.text).join(' ')
+                )
+            }
+          ],
+          e.pageX,
+          e.pageY
+        );
+      }}
     >
       <div
         className={`flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'}`}

@@ -337,7 +337,7 @@ const SongInfoPage = () => {
                 {maxSongSeekPosition !== undefined && (
                   <SongStat
                     key={6}
-                    title={t('songInfoPage.mostSeekedPosition')}
+                    title={t('songInfoPage.mostSoughtPosition')}
                     value={
                       <span className="flex flex-col">
                         <span className="text-2xl">{maxSongSeekPosition.toFixed(1)}</span>
@@ -353,7 +353,7 @@ const SongInfoPage = () => {
                 {maxSongSeekFrequency !== undefined && (
                   <SongStat
                     key={7}
-                    title={t('songInfoPage.mostSeekedFrequency')}
+                    title={t('songInfoPage.mostSoughtFrequency')}
                     value={maxSongSeekFrequency}
                   />
                 )}

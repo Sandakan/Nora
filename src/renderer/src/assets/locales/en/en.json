@@ -75,6 +75,7 @@
     "cancel": "Cancel",
     "search": "Search",
     "help": "Help",
+    "copy": "Copy",
 
     "sortBy": "Sort By",
     "filterBy": "Filter By",
@@ -121,7 +122,7 @@
     "openInMiniPlayer": "Open in Mini player (Ctrl + N)",
     "openInFullScreen": "Open in Fullscreen",
     "likeDislike": "Like/Dislike (Ctrl + H)",
-    "likeDislikeDisabled": "Liking/Disliking songs is disabled because current playing song is from an unknown source and it doesn't support likes.",
+    "likeDislikeDisabled": "Like/dislike songs is disabled because the song currently playing is from an unknown source and doesn't support likes.",
     "prevSong": "Previous song (Ctrl + Left Arrow)",
     "playPause": "Play/Pause (Space)",
     "nextSong": "Next song (Ctrl + Right Arrow)",
@@ -403,10 +404,10 @@
     "enableMusixmatch": "Enable Musixmatch Lyrics",
     "musixmatchEnabled": "Musixmatch Lyrics is enabled",
     "saveLyricsAutomaticallyDescription": "Select an option to save song lyrics automatically when fetched in lyrics page.",
-    "saveLyricsAutomaticallyInfo": "Automatically downloaded songs will be saved after the current song is finished to prevent any corruption from happening.",
-    "saveLyricsInLrcFilesDescription": "Enable saving lyrics in LRC files for songs that support metadata editing. Nora will save lyrics in a LRC file if the song file doesn't support metadata editing.",
+    "saveLyricsAutomaticallyInfo": "Automatically downloaded lyrics will be saved after the current song is finished to prevent any corruption from happening.",
+    "saveLyricsInLrcFilesDescription": "Enable saving lyrics in LRC files for songs that support metadata editing. Nora will save lyrics in an LRC file if the song file doesn't support metadata editing.",
     "saveLyricsInLrcFiles": "Also save lyrics in LRC files for supported songs",
-    "lrcFileCustomSaveLocationDescription": "Select a custom location to save LRC files of songs if you don't want to save them in the same folder of the relative song.",
+    "lrcFileCustomSaveLocationDescription": "Select a custom location to save LRC files of songs if you don't want to save them in the same folder as the relative song.",
     "selectedCustomLocation": "Selected custom location",
     "setCustomLocation": "Set custom location",
 
@@ -596,8 +597,8 @@
     "listensThisYear": "Listens this year",
     "totalSongSkips": "Total song skips",
     "fullSongListens": "Full song listens",
-    "mostSeekedPosition": "Most seeked position",
-    "mostSeekedFrequency": "Most seeked frequency",
+    "mostSoughtPosition": "Most sought position",
+    "mostSoughtFrequency": "Most sought frequency",
     "lovedSong": "You loved this song",
     "unlovedSong": "You didn't like this song",
     "byArtists": " <By>by</By> <span>{{val, list}}</span>"
@@ -721,8 +722,8 @@
   "confirmDeletePlaylistsPrompt": {
     "playlistsDeletedWithCount": "$t(common.playlistWithCount, {\"count\":{{count}}}) deleted.",
     "confirmPlaylistDeleteWithCount": "Confirm deleting $t(common.playlistWithCount, {\"count\":{{count}}})",
-    "message_one": "Removing this playlist will remove the connection between songs that you organized into this playlist. You won't be able to access this playlist again if you decide to delete it.",
-    "message_other": "Removing these playlists will remove the connection between songs that you organized into these playlists. You won't be able to access these playlists again if you decide to delete it.",
+    "message_one": "Removing this playlist will remove the connection between songs that you organized into this playlist. You won't be able to access this playlist again if you decide to delete them.",
+    "message_other": "Removing these playlists will remove the connection between songs that you organized into these playlists. You won't be able to access these playlists again if you decide to delete them.",
     "modificationNotice": "Performing this action will affect these files: "
   },
 
@@ -752,8 +753,8 @@
 
   "blacklistFolderConfirmPrompt": {
     "title": "Confirm blacklisting $t(common.folderWithCount, {\"count\":{{count}}}) from the library",
-    "message_one": "You are about to blacklist this folder. You can restore it again from the Folders page by right clicking and selecting '$t(song.deblacklist)'. Your data related to this folder won't be affected by this action.",
-    "message_other": "You are about to blacklist these folders. You can restore them again from the Folders page by right clicking and selecting '$t(song.deblacklist)'. Your data related to these folders won't be affected by this action.",
+    "message_one": "You are about to blacklist this folder. You can restore it again from the Folders page by right-clicking and selecting '$t(song.deblacklist)'. Your data related to this folder won't be affected by this action.",
+    "message_other": "You are about to blacklist these folders. You can restore them again from the Folders page by right-clicking and selecting '$t(song.deblacklist)'. Your data related to these folders won't be affected by this action.",
     "effectTitle": "What blacklisting a folder does",
     "effect1": "Will appear greyed out in the library with '<span/>' symbol.",
     "effect2": "Songs linked to this folder will also be blacklisted.",
@@ -1016,7 +1017,7 @@
 
   "backend": {
     "RESYNC_SUCCESSFUL": "Library resync successfull.",
-    "RESET_SUCCESSFUL": "Successfully resetted the app. Restarting the app now.",
+    "RESET_SUCCESSFUL": "App reset successfully, now restarting.",
     "RESET_FAILED": "Resetting the app failed. Reloading the app now.",
     "APP_THEME_CHANGE": "System theme changed to {{theme}}",
     "SONG_REMOVE_PROCESS_UPDATE": "Removed {{value}} out of {{total}} songs.",
@@ -1051,7 +1052,7 @@
     "PARSE_FAILED": "`{{name}}` failed when trying to add the song to the library. Go to settings to resync the library.",
     "PARSE_SUCCESSFUL": "`{{name}}` song added to the library.",
     "LYRICS_SAVE_QUEUED": "Lyrics for `{{title}}` will be saved automatically.",
-    "LYRICS_SAVED_IN_LRC_FILE": "`Lyrics for this song with '{{ext}}' extension will be saved in a LRC file.",
+    "LYRICS_SAVED_IN_LRC_FILE": "`Lyrics for this song with '{{ext}}' extension will be saved in an LRC file.",
     "PENDING_LYRICS_SAVED": "Successfully saved pending lyrics of `{{title}}`.",
     "ADDED_SONGS_TO_PLAYLIST": "Added $t(common.songWithCount, {\"count\":{{count}}}) to `{{name}}` successfully.",
     "APPDATA_IMPORT_STARTED": "Started to import app data. Please wait...",
@@ -1068,7 +1069,7 @@
     "PLAYLIST_IMPORT_FAILED": "Failed to import the playlist.",
     "PLAYLIST_IMPORT_FAILED_DUE_TO_SONGS_OUTSIDE_LIBRARY": "Found $t(common.songWithCount, {\"count\":{{count}}}) outside the library when importing a playlist which is not supported.",
     "PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_DATA": "Failed to import the playlist because user selected a file with invalid file data.",
-    "PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_EXTENSION": "Failed to import the playlist user selected a file with a different extension other than 'm3u8'.",
+    "PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_EXTENSION": "Playlist import failed because the selected file type wasn't '.m3u8'.",
     "PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST": "Imported $t(common.songWithCount, {\"count\":{{count}}}) to the existing `{{name}}` playlist.",
     "PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST_FAILED": "Error occurred when importing songs to an existing playlist.",
     "PLAYLIST_CREATION_FAILED": "Failed to create a playlist.",
