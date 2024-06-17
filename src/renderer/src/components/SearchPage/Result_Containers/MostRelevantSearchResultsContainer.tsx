@@ -118,7 +118,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             }
           },
           {
-            label: t('song.revealInFileExplorer'),
+            label: t('song.showInFileExplorer'),
             class: 'reveal-file-explorer',
             iconName: 'folder_open',
             handlerFunction: () =>

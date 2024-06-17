@@ -408,7 +408,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         isDisabled: isMultipleSelectionsEnabled
       },
       {
-        label: t('song.revealInFileExplorer'),
+        label: t('song.showInFileExplorer'),
         class: 'reveal-file-explorer',
         iconName: 'folder_open',
         handlerFunction: () => window.api.songUpdates.revealSongInFileExplorer(songId),

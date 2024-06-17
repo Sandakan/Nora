@@ -212,7 +212,7 @@
   },
 
   "song": {
-    "revealInFileExplorer": "Show in File Explorer",
+    "showInFileExplorer": "Show in File Explorer",
     "artwork": "Song artwork",
     "selectedSongCount": "{{count}} selected $t(common.song, {\"count\":{{count}}})",
     "likeSong": "Add to favorites",
@@ -722,8 +722,8 @@
   "confirmDeletePlaylistsPrompt": {
     "playlistsDeletedWithCount": "$t(common.playlistWithCount, {\"count\":{{count}}}) deleted.",
     "confirmPlaylistDeleteWithCount": "Confirm deleting $t(common.playlistWithCount, {\"count\":{{count}}})",
-    "message_one": "Removing this playlist will remove the connection between songs that you organized into this playlist. You won't be able to access this playlist again if you decide to delete them.",
-    "message_other": "Removing these playlists will remove the connection between songs that you organized into these playlists. You won't be able to access these playlists again if you decide to delete them.",
+    "message_one": "Removing this playlist will remove the connection between songs that you organized into this playlist. You won't be able to access this playlist again if you decide to delete it.",
+    "message_other": "Removing these playlists will remove the connection between songs that you organized into these playlists. You won't be able to access these playlists again if you decide to delete it.",
     "modificationNotice": "Performing this action will affect these files: "
   },
 
@@ -1021,7 +1021,7 @@
     "RESET_FAILED": "Resetting the app failed. Reloading the app now.",
     "APP_THEME_CHANGE": "System theme changed to {{theme}}",
     "SONG_REMOVE_PROCESS_UPDATE": "Removed {{value}} out of {{total}} songs.",
-    "SONG_REVEAL_FAILED": "Revealing song file in explorer failed because song couldn't be found in the library.",
+    "OPEN_SONG_IN_EXPLORER_FAILED": "Opening song file in explorer failed because song couldn't be found in the library.",
     "PENDING_METADATA_UPDATES_SAVED": "Successfully saved pending metadata updates of `{{title}}`.",
     "METADATA_UPDATE_FAILED": "Metadata update failed. {{message}}",
     "SONG_EXT_NOT_SUPPORTED_FOR_LYRICS_SAVES": "Lyrics cannot be saved because current song extension ({{ext}}) is not supported for modifying metadata.",

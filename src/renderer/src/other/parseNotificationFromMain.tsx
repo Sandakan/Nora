@@ -51,7 +51,7 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
     trigger: [
       'FAILURE',
       'RESET_FAILED',
-      'SONG_REVEAL_FAILED',
+      'OPEN_SONG_IN_EXPLORER_FAILED',
       'METADATA_UPDATE_FAILED',
       'LYRICS_FIND_FAILED',
       'ARTWORK_SAVE_FAILED',

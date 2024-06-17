@@ -86,8 +86,8 @@
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
-    "build:mac": "electron-vite build && electron-builder --mac",
-    "build:linux": "electron-vite build && electron-builder --linux"
+    "build:mac": "npm run build && electron-builder --mac",
+    "build:linux": "npm run build && electron-builder --linux"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
@@ -95,7 +95,7 @@
     "@vitalets/google-translate-api": "^9.2.0",
     "didyoumean2": "^6.0.1",
     "discord-rpc-revamp": "^2.0.3",
-    "electron-store": "^9.0.0",
+    "electron-store": "^10.0.0",
     "electron-updater": "^6.1.7",
     "i18next": "^23.7.6",
     "music-metadata": "^8.3.0",

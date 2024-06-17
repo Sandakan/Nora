@@ -576,7 +576,7 @@ export async function revealSongInFileExplorer(songId: string) {
     `Revealing song file in explorer failed because song couldn't be found in the library.`,
     { songId },
     'WARN',
-    { sendToRenderer: { messageCode: 'SONG_REVEAL_FAILED' } }
+    { sendToRenderer: { messageCode: 'OPEN_SONG_IN_EXPLORER_FAILED' } }
   );
 }
 
