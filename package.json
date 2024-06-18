@@ -41,7 +41,7 @@
     "metadataEditingSupportedExtensions": [
       "mp3"
     ],
-    "removeReactStrictMode": false,
+    "removeReactStrictMode": true,
     "showSongIdInsteadOfSongYear": false,
     "supportedMusicExtensions": [
       "mp3",
