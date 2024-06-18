@@ -14,7 +14,8 @@ import {
   setGenresData,
   setBlacklist,
   saveListeningData,
-  saveUserData
+  saveUserData,
+  setPaletteData
 } from '../filesystem';
 
 const requiredItemsForImport = [
@@ -42,6 +43,12 @@ const importRequiredData = async (importDir: string) => {
       encoding: 'utf-8'
     });
     const songData: SavableSongData[] = JSON.parse(songDataString).songs;
+
+    // PALETTE DATA
+    const paletteDataString = await fs.readFile(path.join(importDir, 'palettes.json'), {
+      encoding: 'utf-8'
+    });
+    const paletteData: PaletteData[] = JSON.parse(paletteDataString).palettes;
 
     // ARTIST DATA
     const artistDataString = await fs.readFile(path.join(importDir, 'artists.json'), {
@@ -78,6 +85,7 @@ const importRequiredData = async (importDir: string) => {
 
     // SAVING IMPORTED DATA
     setSongsData(songData);
+    setPaletteData(paletteData);
     setArtistsData(artistData);
     setPlaylistData(playlistData);
     setAlbumsData(albumData);

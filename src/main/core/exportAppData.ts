@@ -10,7 +10,8 @@ import {
   getPlaylistData,
   getSongsData,
   getBlacklistData,
-  getUserData
+  getUserData,
+  getPaletteData
 } from '../filesystem';
 import { showOpenDialog } from '../main';
 import log from '../log';
@@ -61,6 +62,12 @@ const exportAppData = async (localStorageData: string) => {
       const songDataString = JSON.stringify({ songs: songData });
 
       await fs.writeFile(path.join(destination, 'songs.json'), songDataString);
+
+      // PALETTE DATA
+      const paletteData = getPaletteData();
+      const paletteDataString = JSON.stringify({ palettes: paletteData });
+
+      await fs.writeFile(path.join(destination, 'palettes.json'), paletteDataString);
 
       // BLACKLIST DATA
       const blacklistData = getBlacklistData();
