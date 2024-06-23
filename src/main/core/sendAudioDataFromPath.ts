@@ -64,13 +64,7 @@ const sendAudioDataFromPath = async (songPath: string): Promise<AudioPlayerData>
             isBlacklisted: false
           };
 
-          addToSongsOutsideLibraryData({
-            title: data.title,
-            songId: data.songId,
-            artworkPath: data.artworkPath,
-            duration: data.duration,
-            path: data.path
-          });
+          addToSongsOutsideLibraryData(data);
 
           sendMessageToRenderer({
             messageCode: 'PLAYBACK_FROM_UNKNOWN_SOURCE'

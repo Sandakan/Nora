@@ -580,16 +580,16 @@ export async function revealSongInFileExplorer(songId: string) {
   );
 }
 
-const songsOutsideLibraryData: SongOutsideLibraryData[] = [];
+const songsOutsideLibraryData: AudioPlayerData[] = [];
 
 export const getSongsOutsideLibraryData = () => songsOutsideLibraryData;
 
-export const addToSongsOutsideLibraryData = (data: SongOutsideLibraryData) =>
+export const addToSongsOutsideLibraryData = (data: AudioPlayerData) =>
   songsOutsideLibraryData.push(data);
 
 export const updateSongsOutsideLibraryData = (
   songidOrPath: string,
-  data: SongOutsideLibraryData
+  data: AudioPlayerData
 ): void => {
   for (let i = 0; i < songsOutsideLibraryData.length; i += 1) {
     if (

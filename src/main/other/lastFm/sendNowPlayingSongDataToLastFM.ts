@@ -3,7 +3,7 @@
 import { getSongsData, getUserData } from '../../filesystem';
 import log from '../../log';
 import { LastFMScrobblePostResponse, updateNowPlayingParams } from '../../../@types/last_fm_api';
-import { checkIfConnectedToInternet } from '../../main';
+import { checkIfConnectedToInternet, getSongsOutsideLibraryData } from '../../main';
 import generateApiRequestBodyForLastFMPostRequests from './generateApiRequestBodyForLastFMPostRequests';
 import getLastFmAuthData from './getLastFMAuthData';
 
@@ -16,7 +16,20 @@ const sendNowPlayingSongDataToLastFM = async (songId: string) => {
 
     if (isScrobblingEnabled && isConnectedToInternet) {
       const songs = getSongsData();
-      const song = songs.find((x) => x.songId === songId);
+      let song = songs.find((x) => x.songId === songId);
+
+      if (song === undefined) {
+        const songsOutsideLibrary = getSongsOutsideLibraryData();
+        const data = songsOutsideLibrary.find((x) => x.songId === songId);
+        if (data)
+          song = {
+            ...data,
+            albumArtists: [],
+            trackNo: undefined,
+            isArtworkAvailable: !!data.artworkPath,
+            addedDate: Date.now()
+          };
+      }
 
       if (song) {
         const authData = getLastFmAuthData();
@@ -29,7 +42,7 @@ const sendNowPlayingSongDataToLastFM = async (songId: string) => {
           artist: song.artists?.map((artist) => artist.name).join(', ') || '',
           album: song.album?.name,
           albumArtist: song?.albumArtists?.map((artist) => artist.name).join(', '),
-          trackNumber: song.trackNo,
+          trackNumber: song?.trackNo,
           duration: Math.ceil(song.duration)
         };
 

@@ -47,17 +47,17 @@ With simplicity and design in mind, this app was made to overcome problems when 
 
 It packs a horizon of features including,
 
-- Organize your songs, artists, albums, and playlists with ease.
-- Create playlists that meet your needs.
-- Sing along with song lyrics[^1].
-- Support for synced lyrics.
-- Keep your favorite songs and artists close to you.
-- Read your favorite artist's biography.
-- Personalized music shuffling[^2].(Upcoming)
-- Change between Light and Dark themes with ease.
-- A mini-player to help focus on what matters at the moment.
-- Edit the metadata of your songs easily and conveniently [^3].
-- Search through your library with the help of song filters.
+- [x] Organize your songs, artists, albums, and playlists with ease.
+- [x] Create playlists that meet your needs.
+- [x] Sing along with song lyrics[^1].
+- [x] Support for synced lyrics.
+- [x] Keep your favorite songs and artists close to you.
+- [x] Read your favorite artist's biography.
+- [ ] Personalized music shuffling[^2].(Upcoming)
+- [x] Change between Light and Dark themes with ease.
+- [x] A mini-player to help focus on what matters at the moment.
+- [x] Edit the metadata of your songs easily and conveniently [^3].
+- [x] Search through your library with the help of song filters.
 
 <br>
 
