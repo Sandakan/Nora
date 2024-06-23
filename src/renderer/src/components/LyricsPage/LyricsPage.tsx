@@ -16,8 +16,8 @@ import MainContainer from '../MainContainer';
 import Button from '../Button';
 
 import { appPreferences } from '../../../../../package.json';
-import { isLyricsEnhancedSynced } from '../SongTagsEditingPage/input_containers/SongLyricsEditorInput';
 import { LyricData } from '../LyricsEditingPage/LyricsEditingPage';
+import { isLyricsEnhancedSynced } from '../../../../common/isLyricsSynced';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 

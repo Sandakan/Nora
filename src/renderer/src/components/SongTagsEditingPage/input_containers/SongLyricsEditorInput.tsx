@@ -6,9 +6,9 @@ import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import Button from '../../Button';
 import Hyperlink from '../../Hyperlink';
 import { LyricData } from '../../LyricsEditingPage/LyricsEditingPage';
-import { syncedLyricsRegex } from '../../LyricsPage/LyricsPage';
 import useNetworkConnectivity from '../../../hooks/useNetworkConnectivity';
 import parseLyrics from '../../../utils/parseLyrics';
+import isLyricsSynced, { isLyricsEnhancedSynced } from '../../../../../common/isLyricsSynced';
 
 type CurrentLyricsTYpe = 'synced' | 'unsynced';
 
@@ -29,23 +29,6 @@ type Props = {
   isLyricsSavingPending?: boolean;
   // eslint-disable-next-line no-unused-vars
   updateSongInfo: (callback: (prevSongInfo: SongTags) => SongTags) => void;
-};
-
-export const extendedSyncedLyricsLineRegex =
-  /(?<extSyncTimeStamp><\d+:\d{1,2}\.\d{1,3}>) ?(?=(?<lyric>[^<>\n]+))/gm;
-
-const isLyricsSynchronized = (lyrics: string) => {
-  const isSynced = syncedLyricsRegex.test(lyrics);
-  syncedLyricsRegex.lastIndex = 0;
-
-  return isSynced;
-};
-
-export const isLyricsEnhancedSynced = (syncedLyricsString: string) => {
-  const isEnhancedSynced = extendedSyncedLyricsLineRegex.test(syncedLyricsString);
-  extendedSyncedLyricsLineRegex.lastIndex = 0;
-
-  return isEnhancedSynced;
 };
 
 const SongLyricsEditorInput = (props: Props) => {
@@ -82,10 +65,10 @@ const SongLyricsEditorInput = (props: Props) => {
     let isUnsyncedLyricsSynced = false;
 
     if (synchronizedLyrics) {
-      isSyncedLyricsSynced = isLyricsSynchronized(synchronizedLyrics);
+      isSyncedLyricsSynced = isLyricsSynced(synchronizedLyrics);
       isSyncedLyricsEnhancedSynced = isLyricsEnhancedSynced(synchronizedLyrics);
     }
-    if (unsynchronizedLyrics) isUnsyncedLyricsSynced = isLyricsSynchronized(unsynchronizedLyrics);
+    if (unsynchronizedLyrics) isUnsyncedLyricsSynced = isLyricsSynced(unsynchronizedLyrics);
 
     return {
       isSynchronizedLyricsSynced: isSyncedLyricsSynced,

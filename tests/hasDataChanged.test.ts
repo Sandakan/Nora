@@ -1,4 +1,4 @@
-import hasDataChanged from '../src/renderer/utils/hasDataChanged';
+import hasDataChanged from '../src/renderer/src/utils/hasDataChanged';
 
 describe('hasDataChanged function check', () => {
   test('Basic comparisons with boolean returns', () => {

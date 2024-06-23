@@ -21,7 +21,7 @@ const isPathADir = (pathOrDir: string | Dirent) => {
 
     if (!pathOrDir.isSymbolicLink()) return false;
 
-    const symlinkPath = path.join(pathOrDir.path, pathOrDir.name);
+    const symlinkPath = path.join(pathOrDir.parentPath, pathOrDir.name);
 
     const symlinkStat = fs.statSync(symlinkPath);
 
@@ -32,4 +32,3 @@ const isPathADir = (pathOrDir: string | Dirent) => {
 };
 
 export default isPathADir;
-

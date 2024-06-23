@@ -7,7 +7,7 @@ import storage from '../../utils/localStorage';
 
 import Button from '../Button';
 import Checkbox from '../Checkbox';
-import { separateArtistsRegex } from '../ArtistInfoPage/SeparateArtistsSuggestion';
+import splitFeaturingArtists from '../../utils/splitFeaturingArtists';
 
 type Props = {
   songTitle?: string;
@@ -47,7 +47,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
     if (featArtistsExec && featArtistsExec.groups?.featArtists) {
       const { featArtists: featArtistsStr } = featArtistsExec.groups;
 
-      const featArtists = featArtistsStr.split(separateArtistsRegex);
+      const featArtists = splitFeaturingArtists(featArtistsStr);
       const filteredFeatArtists = featArtists.filter((featArtistName) => {
         const isArtistAvailable = artistNames.some(
           (name) => name.toLowerCase().trim() === featArtistName.toLowerCase().trim()

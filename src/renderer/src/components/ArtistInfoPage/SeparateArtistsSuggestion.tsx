@@ -6,12 +6,12 @@ import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import storage from '../../utils/localStorage';
 
 import Button from '../Button';
+import splitFeaturingArtists from '../../utils/splitFeaturingArtists';
 
 type Props = {
   name?: string;
   artistId?: string;
 };
-export const separateArtistsRegex = / and | [Ff](?:ea)?t\. |&|,|;|·| ?\| | ?\/ | ?\\ /gm;
 
 const SeparateArtistsSuggestion = (props: Props) => {
   const { bodyBackgroundImage, currentSongData } = useContext(AppContext);
@@ -34,7 +34,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
   }, [artistId, ignoredArtists]);
 
   const separatedArtistsNames = useMemo(() => {
-    const artists = name.split(separateArtistsRegex);
+    const artists = splitFeaturingArtists(name);
     const filterArtists = artists.filter((x) => x !== undefined && x.trim() !== '');
     const trimmedArtists = filterArtists.map((x) => x.trim());
 
