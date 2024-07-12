@@ -87,6 +87,16 @@ const LyricsEditingPage = () => {
   );
 
   useEffect(() => {
+    if (
+      changePromptMenuData &&
+      !localStorageData?.preferences?.doNotShowHelpPageOnLyricsEditorStartUp
+    ) {
+      changePromptMenuData(true, <LyricsEditorHelpPrompt showDoNotShowAgainCheckbox />);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     if (lyrics) {
       const lines: ExtendedEditingLyricsLineData[] = lyrics.map((lineData, index) => ({
         ...lineData,

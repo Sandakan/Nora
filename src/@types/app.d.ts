@@ -477,6 +477,7 @@ declare global {
     doNotShowBlacklistSongConfirm: boolean;
     isReducedMotion: boolean;
     doNotVerifyWhenOpeningLinks: boolean;
+    doNotShowHelpPageOnLyricsEditorStartUp: boolean;
     showSongRemainingTime: boolean;
     showArtistArtworkNearSongControls: boolean;
     disableBackgroundArtworks: boolean;

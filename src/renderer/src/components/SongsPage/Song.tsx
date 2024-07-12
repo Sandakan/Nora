@@ -418,6 +418,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         label: t('common.info'),
         class: 'info',
         iconName: 'info',
+        iconClassName: 'material-icons-round-outlined',
         handlerFunction: goToSongInfoPage,
         isDisabled: isMultipleSelectionsEnabled
       },

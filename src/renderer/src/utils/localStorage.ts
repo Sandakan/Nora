@@ -26,7 +26,8 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     lyricsAutomaticallySaveState: 'NONE',
     showTrackNumberAsSongIndex: true,
     allowToPreventScreenSleeping: true,
-    enableImageBasedDynamicThemes: false
+    enableImageBasedDynamicThemes: false,
+    doNotShowHelpPageOnLyricsEditorStartUp: false
   },
   playback: {
     currentSong: {

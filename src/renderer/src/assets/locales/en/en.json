@@ -89,7 +89,7 @@
     "goBack": "Go back",
     "saveArtwork": "Save artwork",
     "readMoreAboutTitle": "Read more about the `{{title}}`",
-    "doNotShowThisMessageAgain": "Do not show this message again.",
+    "doNotShowThisMessageAgain": "Do not show again.",
     "artistConflictResolved": "Artist conflict resolved successfully.",
     "featArtistSuggestionResolved": "Featuring artists suggestion resolved successfully.",
     "hasInternet": "You are connected to internet.",

@@ -41,7 +41,7 @@
     "metadataEditingSupportedExtensions": [
       "mp3"
     ],
-    "removeReactStrictMode": true,
+    "removeReactStrictMode": false,
     "showSongIdInsteadOfSongYear": false,
     "supportedMusicExtensions": [
       "mp3",
@@ -98,7 +98,7 @@
     "electron-store": "^10.0.0",
     "electron-updater": "^6.1.7",
     "i18next": "^23.7.6",
-    "music-metadata": "^8.3.0",
+    "music-metadata": "^9.0.0",
     "node-id3": "^0.2.6",
     "node-vibrant": "^3.2.1-alpha.1",
     "react-beautiful-dnd": "^13.1.1",
@@ -134,7 +134,7 @@
     "eslint-plugin-react-refresh": "^0.4.6",
     "husky": "^9.0.11",
     "jest": "^29.7.0",
-    "material-symbols": "^0.20.0",
+    "material-symbols": "^0.21.0",
     "postcss": "^8.4.35",
     "prettier": "^3.2.4",
     "prettier-plugin-tailwindcss": "^0.6.1",

@@ -100,17 +100,17 @@ const LyricLine = (props: LyricProp) => {
             })
           : undefined
       }
-      className={`highlight duration-250 mb-5 flex w-fit select-none flex-col items-center justify-center text-balance text-center text-5xl font-medium text-font-color-black transition-[transform,color,filter] first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
+      className={`highlight duration-250 z-0 mb-5 flex w-fit select-none flex-col items-center justify-center text-balance text-center text-5xl font-medium text-font-color-black transition-[transform,color,filter] first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
         syncedLyrics
-          ? `cursor-pointer ${
+          ? `cursor-pointer blur-[1px] ${
               isInRange
                 ? '!scale-100 text-font-color-highlight !text-opacity-90 !blur-0 dark:!text-dark-font-color-highlight [&>div>span]:!mr-3'
                 : 'scale-[.7] !text-opacity-20 hover:!text-opacity-75'
             }`
           : '!text-4xl'
-      } ${playerType === 'mini' && '!mb-2 !text-2xl !text-font-color-white'} ${
+      } ${playerType === 'mini' && '!mb-2 !text-2xl !text-font-color-white blur-[1px]'} ${
         playerType === 'full' &&
-        '!mb-6 origin-left !items-start !justify-start !text-left !text-6xl !text-font-color-white blur-[1px]'
+        '!mb-6 origin-left !items-start !justify-start !text-left !text-6xl !text-font-color-white blur-[2px]'
       }`}
       ref={lyricsRef}
       onClick={() =>
