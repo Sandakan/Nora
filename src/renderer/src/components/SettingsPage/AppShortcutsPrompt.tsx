@@ -174,6 +174,7 @@ const shortcutData: ShortcutCategory[] = [
         label: i18n.t('appShortcutsPrompt.reload'),
         keys: [ctrlKey, 'R']
       },
+      { label: i18n.t('appShortcutsPrompt.openAppShortcutsPrompt'), keys: [ctrlKey, '/'] },
       { label: i18n.t('appShortcutsPrompt.openDevtools'), keys: ['F12'] }
     ]
   }

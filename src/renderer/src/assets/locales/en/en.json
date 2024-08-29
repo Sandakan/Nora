@@ -882,6 +882,7 @@
     "toggleMiniPlayerAlwaysOnTop": "Toggle Mini Player always on top",
     "reload": "Reload",
     "openDevtools": "Open devtools",
+    "openAppShortcutsPrompt": "Open App Shortcuts prompt",
 
     "enterKey": "Enter",
     "spaceKey": "Space",

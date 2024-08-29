@@ -44,6 +44,7 @@ const UnsupportedFileMessagePrompt = lazy(
   () => import('./components/UnsupportedFileMessagePrompt')
 );
 const SongUnplayableErrorPrompt = lazy(() => import('./components/SongUnplayableErrorPrompt'));
+const AppShortcutsPrompt = lazy(() => import('./components/SettingsPage/AppShortcutsPrompt'));
 
 // ? SCREENS
 const MiniPlayer = lazy(() => import('./components/MiniPlayer/MiniPlayer'));
@@ -1563,7 +1564,8 @@ export default function App() {
         'f',
         '[',
         ']',
-        '\\'
+        '\\',
+        '/'
       ];
       const shiftCombinations = ['ArrowRight', 'ArrowLeft'];
       const altCombinations = ['ArrowRight', 'ArrowLeft', 'Home'];
@@ -1648,7 +1650,7 @@ export default function App() {
             content: t('notifications.playbackRateReset')
           }
         ]);
-      }
+      } else if (e.ctrlKey && e.key === '/') changePromptMenuData(true, <AppShortcutsPrompt />);
       // default combinations
       else if (e.code === 'Escape') toggleMultipleSelections(false);
       else if (e.code === 'Space') toggleSongPlayback();
@@ -1684,6 +1686,7 @@ export default function App() {
       content.navigationHistory.pageHistoryIndex,
       content.localStorage.playback.playbackRate,
       changeCurrentActivePage,
+      changePromptMenuData,
       toggleMultipleSelections,
       toggleSongPlayback,
       updatePageHistoryIndex,

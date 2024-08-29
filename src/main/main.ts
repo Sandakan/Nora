@@ -162,8 +162,8 @@ const installExtensions = async () => {
 
 const getBackgroundColor = () => {
   const userData = getUserData();
-  if (userData.theme.isDarkMode) return 'hsla(228, 7%, 14%, 100%)';
-  return 'hsl(0, 0%, 100%)';
+  if (userData.theme.isDarkMode) return '#212226';
+  return '#FFFFFF';
 };
 
 const createWindow = async () => {

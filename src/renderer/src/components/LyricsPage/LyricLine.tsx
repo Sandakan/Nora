@@ -108,9 +108,9 @@ const LyricLine = (props: LyricProp) => {
                 : 'scale-[.7] !text-opacity-20 hover:!text-opacity-75'
             }`
           : '!text-4xl'
-      } ${playerType === 'mini' && '!mb-2 !text-2xl !text-font-color-white blur-[1px]'} ${
+      } ${playerType === 'mini' && '!mb-2 !text-2xl !text-font-color-white'} ${
         playerType === 'full' &&
-        '!mb-6 origin-left !items-start !justify-start !text-left !text-6xl !text-font-color-white blur-[2px]'
+        '!mb-6 origin-left !items-start !justify-start !text-left !text-6xl !text-font-color-white'
       }`}
       ref={lyricsRef}
       onClick={() =>

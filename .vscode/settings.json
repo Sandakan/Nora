@@ -75,7 +75,7 @@
     }
   ],
   "editor.tokenColorCustomizations": {
-    "comments": "#00b894",
+    "comments": "",
     "textMateRules": []
   },
   "typescript.tsdk": "node_modules\\typescript\\lib"
