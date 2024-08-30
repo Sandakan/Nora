@@ -9,7 +9,7 @@ import { DropdownOption } from './components/Dropdown';
 export const resources = {
   en: { translation: en },
   tr: { translation: tr },
-  vi: { translation: vi },
+  vi: { translation: vi }
 } as const;
 
 // export type LanguageCodes = keyof typeof resources;
@@ -17,7 +17,7 @@ export const resources = {
 export const supportedLanguagesDropdownOptions: DropdownOption<LanguageCodes>[] = [
   { label: `English`, value: 'en' },
   { label: `Turkish`, value: 'tr' },
-  { label: `Vietnamese`, value: 'vi' },
+  { label: `Vietnamese`, value: 'vi' }
   // { label: `Francais`, value: 'fr' },
 ];
 
