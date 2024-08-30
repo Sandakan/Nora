@@ -1,0 +1,1082 @@
+{
+  "common": {
+    "song_one": "bài hát",
+    "song_other": "Bài hát",
+    "playlist_one": "danh sách phát",
+    "playlist_other": "Danh sách phát",
+    "artist_one": "nghệ sĩ",
+    "artist_other": "Nghệ sĩ",
+    "album_one": "album",
+    "album_other": "Album",
+    "genre_one": "thể loại",
+    "genre_other": "Thể loại",
+    "folder_one": "thư mục",
+    "folder_other": "Thư mục",
+    "songWithCount_one": "{{count}} bài hát",
+    "songWithCount_other": "{{count}} bài hát",
+    "playlistWithCount_one": "{{count}} danh sách phát",
+    "playlistWithCount_other": "{{count}} danh sách phát",
+    "artistWithCount_one": "{{count}} nghệ sĩ",
+    "artistWithCount_other": "{{count}} nghệ sĩ",
+    "albumWithCount_one": "{{count}} album",
+    "albumWithCount_other": "{{count}} album",
+    "genreWithCount_one": "{{count}} thể loại",
+    "genreWithCount_other": "{{count}} thể loại",
+    "folderWithCount_one": "{{count}} thư mục",
+    "folderWithCount_other": "{{count}} thư mục",
+    "subFolderWithCount_one": "{{count}} thư mục con",
+    "subFolderWithCount_other": "{{count}} thư mục con",
+
+    "selectionWithCount_one": "{{count}} đã chọn",
+    "selectionWithCount_other": "{{count}} đã chọn",
+
+    "shownWithCount": "hiện {{count}}",
+
+    "unknownTitle": "Tiêu đề không rõ",
+    "unknownArtist": "Nghệ sĩ không rõ",
+    "unknownAlbum": "Album không rõ",
+    "unknownGenre": "Thể loại không rõ",
+    "unknownFolder": "Thư mục không rõ",
+    "unknownLyricsProvider": "Nhà cung cấp lời bài hát không rõ",
+
+    "songTitle": "Tên bài hát",
+    "duration": "Thời lượng",
+    "albumArtists": "Nghệ sĩ album",
+    "albumTrackNo": "Số thứ tự trong album",
+    "releasedYear": "Năm phát hành",
+    "songAddedOn": "Được thêm vào",
+    "lastModifiedOn": "Sửa lần cuối vào",
+    "sampleRate": "Tốc độ lấy mẫu",
+    "bitRate": "Tốc độ bit",
+    "noOfAudioChannels": "Số kênh âm thanh",
+    "channelWithCount_one": "{{count}} kênh (Mono)",
+    "channelWithCount_other": "{{count}} kênh (Stereo)",
+    "songLocation": "Vị trí bài hát",
+    "lyrics": "Lời bài hát",
+    "syncedLyrics": "Lời bài hát đồng bộ",
+    "unsyncedLyrics": "Lời bài hát không đồng bộ",
+
+    "play": "Phát",
+    "playNext": "Phát tiếp theo",
+    "playNextAll": "Thêm tất cả vào danh sách phát tiếp theo",
+    "shuffleAndPlay": "Trộn bài và phát",
+    "shuffleAndPlayAll": "Trộn bài và phát tất cả",
+    "playAll": "Phát tất cả",
+    "addToQueue": "Thêm vào hàng đợi",
+    "removeFromQueue": "Xoá khỏi hàng đợi",
+    "addSongsToQueue": "Thêm bài hát vào hàng đợi",
+    "createAQueue": "Tạo hàng đợi",
+    "info": "Thông tin",
+    "select": "Chọn",
+    "unselect": "Bỏ chọn",
+    "selectAll": "Chọn tất cả",
+    "unselectAll": "Bỏ chọn tất cả",
+    "showAll": "Hiện tất cả",
+    "cancel": "Hủy",
+    "search": "Tìm kiếm",
+    "help": "Trợ giúp",
+    "copy": "Sao chép",
+
+    "sortBy": "Sắp xếp theo",
+    "filterBy": "Lọc theo",
+    "moreOptions": "Tùy chọn khác",
+    "title": "Tiêu đề",
+    "suggestion": "Gợi ý",
+    "hideSuggestion": "Ẩn gợi ý",
+    "showSuggestion": "Hiện gợi ý",
+    "and": "và",
+    "ignore": "Bỏ qua",
+    "goBack": "Quay lại",
+    "saveArtwork": "Lưu ảnh",
+    "readMoreAboutTitle": "Đọc thêm về '{{title}}'",
+    "doNotShowThisMessageAgain": "Không hiển thị nữa.",
+    "artistConflictResolved": "Giải quyết xung đột nghệ sĩ thành công.",
+    "featArtistSuggestionResolved": "Giải quyết gợi ý nghệ sĩ nổi bật thành công.",
+    "hasInternet": "Đã kết nối với Internet.",
+    "noInternet": "Không có kết nối Internet.",
+    "newUpdateAvailable": "Có bản cập nhật mới.",
+    "checkingForUpdates": "Đang kiểm tra cập nhật...",
+    "updateCheckError": "Đã xảy ra lỗi khi kiểm tra cập nhật.",
+    "updateCheckErrorNoInternet": "$t(common.updateCheckError) $(common.noInternet)",
+    "optionDisabled": "Tùy chọn này đã bị vô hiệu hoá.",
+    "somethingWentWrong": "Đã xảy ra lỗi.",
+    "details": "Chi tiết",
+    "restartApp": "Khởi động lại ứng dụng",
+    "ok": "Đồng ý",
+    "loading": "Đang tải"
+  },
+
+  "titleBar": {
+    "changeTheme": "Thay đổi giao diện",
+    "goBack": "Quay lại (Alt + Mũi tên trái)",
+    "goHome": "Về Trang chủ (Alt + Home)",
+    "goForward": "Tiếp (Alt + Mũi tên phải)",
+
+    "minimize": "Thu nhỏ xuống khay",
+    "maximize": "Phóng to",
+    "close": "Đóng"
+  },
+
+  "player": {
+    "goToMainPlayer": "Đến Trình phát chính (Ctrl + N)",
+    "openInMiniPlayer": "Mở trong Trình phát thu nhỏ (Ctrl + N)",
+    "openInFullScreen": "Mở trong Chế độ toàn màn hình",
+    "likeDislike": "Thích/Không thích (Ctrl + H)",
+    "likeDislikeDisabled": "Không thể thích/không thích bài hát vì bài hát đang phát hiện không rõ nguồn gốc và không hỗ trợ tính năng thích.",
+    "prevSong": "Bài trước (Ctrl + Mũi tên trái)",
+    "playPause": "Phát/Tạm dừng (Space)",
+    "nextSong": "Bài tiếp (Ctrl + Mũi tên phải)",
+    "lyrics": "Lời bài hát (Ctrl + L)",
+    "shuffle": "Trộn bài (Ctrl + S)",
+    "repeat": "Lặp lại (Ctrl + T)",
+    "muteUnmute": "Tắt/Bật tiếng (Ctrl + M)",
+    "currentQueue": "Hàng đợi (Ctrl + Q)",
+    "adjustPlaybackSpeed": "Chỉnh tốc độ phát",
+    "showCurrentQueue": "Hiện hàng đợi",
+    "showMiniPlayer": "Hiện Trình phát thu nhỏ",
+    "otherSettings": "Cài đặt khác",
+    "upNext": "TIẾP THEO: ",
+    "closeUpNext": "Đóng 'TIẾP THEO'",
+    "by": "bởi",
+
+    "errorTitle": "Đã xảy ra lỗi trong trình phát.",
+    "errorMessage": "$t(player.errorTitle)<br /> Điều này có thể là kết quả của việc phát một tệp bài hát bị lỗi. <details/>",
+    "noErrorMessage": "Không có thông báo lỗi được tạo ra"
+  },
+
+  "sortTypes": {
+    "aToZ": "A đến Z",
+    "zToA": "Z đến A",
+    "dateAddedAscending": "Mới nhất",
+    "dateAddedDescending": "Cũ nhất",
+    "releasedYearAscending": "Năm phát hành (Tăng dần)",
+    "releasedYearDescending": "Năm phát hành (Giảm dần)",
+    "allTimeMostListened": "Nghe nhiều nhất (Từ trước đến nay)",
+    "allTimeLeastListened": "Nghe ít nhất (Từ trước đến nay)",
+    "monthlyMostListened": "Nghe nhiều nhất (Tháng này)",
+    "monthlyLeastListened": "Nghe ít nhất (Tháng này)",
+    "artistNameAscending": "Tên nghệ sĩ (A đến Z)",
+    "artistNameDescending": "Tên nghệ sĩ (Z đến A)",
+    "albumNameAscending": "Tên album (A đến Z)",
+    "albumNameDescending": "Tên album (Z đến A)",
+    "noOfSongsDescending": "Số lượng bài hát nhiều nhất",
+    "noOfSongsAscending": "Số lượng bài hát ít nhất",
+    "blacklistedFolders": "Thư mục trong danh sách đen",
+    "whitelistedFolders": "Thư mục ngoài danh sách đen",
+    "mostLovedDescending": "Nhiều lượt thích nhất",
+    "mostLovedAscending": "Ít lượt thích nhất",
+    "trackNoAscending": "Số thứ tự bài hát (Tăng dần)",
+    "trackNoDescending": "Số thứ tự bài hát (Giảm dần)",
+    "addedOrder": "Thứ tự thêm"
+  },
+
+  "filterTypes": {
+    "notSelected": "Chưa chọn",
+    "blacklistedSongs": "Bài hát trong danh sách đen",
+    "whitelistedSongs": "Bài hát ngoài danh sách đen",
+    "favorites": "Đã thích"
+  },
+
+  "equalizerPresets": {
+    "custom": "Tùy chỉnh",
+    "flat": "Phẳng",
+    "acoustic": "Acoustic",
+    "bassBooster": "Tăng âm trầm",
+    "bassReducer": "Giảm âm trầm",
+    "classical": "Cổ điển",
+    "club": "Club",
+    "dance": "Dance",
+    "deep": "Deep",
+    "electronic": "Điện tử",
+    "hipHop": "Hip Hop",
+    "jazz": "Jazz",
+    "latin": "Latin",
+    "live": "Live",
+    "loudness": "Độ lớn",
+    "lounge": "Lounge",
+    "metal": "Metal",
+    "piano": "Piano",
+    "pop": "Pop",
+    "reggae": "Reggae",
+    "rnb": "RnB",
+    "rock": "Rock",
+    "ska": "Ska",
+    "smallSpeakers": "Loa nhỏ",
+    "soft": "Soft",
+    "softRock": "Soft rock",
+    "spokenWord": "Lời nói",
+    "techno": "Techno",
+    "trebleBooster": "Tăng âm treble",
+    "trebleReducer": "Giảm âm treble",
+    "vocalBooster": "Tăng tiếng hát"
+  },
+
+  "song": {
+    "showInFileExplorer": "Hiển thị trong File Explorer",
+    "artwork": "Ảnh bài hát",
+    "selectedSongCount": "Đã chọn {{count}} $t(common.song, {\"count\":{{count}}})",
+    "likeSong": "Thêm vào danh sách đã thích",
+    "unlikeSong": "Xoá khỏi danh sách đã thích",
+    "toggleLikeSongs": "Thay đổi trạng thái thích của bài hát",
+    "addToPlaylists": "Thêm vào danh sách phát",
+    "goToAlbum": "Đi đến album",
+    "editSongTags": "Chỉnh sửa thông tin bài hát",
+    "reparseSong": "Phân tích lại bài hát",
+    "blacklistSong_one": "Thêm vào danh sách đen",
+    "blacklistSong_other": "Thêm vào danh sách đen",
+    "deblacklist": "Loại khỏi danh sách đen",
+    "delete": "Xoá khỏi hệ thống",
+    "playingNext": "Phát tiếp",
+    "playingNow": "Đang phát",
+    "blacklisted": "Đã thêm vào danh sách đen",
+    "likedThisSong": "Bạn đã thích bài hát này",
+    "dislikedThisSong": "Bạn không thích bài hát này"
+  },
+
+  "artist": {
+    "playAllSongs": "Phát tất cả bài hát",
+    "toggleLikeArtists": "Thay đổi trạng thái thích của nghệ sĩ",
+    "likeArtist": "Thêm vào danh sách yêu thích",
+    "dislikeArtist": "Xoá khỏi danh sách yêu thích",
+    "selectedArtistCount": "Đã chọn {{count}} $t(common.artist, {\"count\":{{count}}})"
+  },
+
+  "folder": {
+    "toggleBlacklistFolder": "Đổi trạng thái danh sách đen của thư mục",
+    "blacklistFolder": "Thêm vào danh sách đen",
+    "selectedFolderCount": "Đã chọn {{count}} $t(common.folder, {\"count\":{{count}}})",
+    "selectedParentFolderCount_one": "Đã chọn {{count}} thư mục mẹ",
+    "selectedParentFolderCount_other": "Đã chọn {{count}} thư mục mẹ",
+    "directoryCount_one": "{{count}} thư mục",
+    "directoryCount_other": "{{count}} thư mục",
+    "selectedDirectoryCount_one": "Đã chọn {{count}} thư mục",
+    "selectedDirectoryCount_other": "Đã chọn {{count}} thư mục"
+  },
+
+  "playlist": {
+    "changeArtwork": "Thay đổi ảnh",
+    "addArtwork": "Thêm ảnh",
+    "playlistArtworkUpdateSuccess": "Cập nhật hình ảnh danh sách phát thành công.",
+    "renamePlaylist": "Đổi tên danh sách phát",
+    "exportPlaylist": "Xuất danh sách phát",
+    "deleteSelectedPlaylists": "Xoá danh sách phát đã chọn",
+    "deletePlaylist_one": "Xoá danh sách phát",
+    "deletePlaylist_other": "Xoá danh sách phát",
+    "selectedPlaylistCount": "Đã chọn {{count}} $t(common.playlist, {\"count\":{{count}}})",
+    "empty": "Danh sách phát này không có bài hát nào."
+  },
+
+  "album": {
+    "selectedAlbumCount": "Đã chọn {{count}} $t(common.album, {\"count\":{{count}}})"
+  },
+
+  "genre": {
+    "selectedGenreCount": "Đã chọn {{count}} $t(common.genre, {\"count\":{{count}}})"
+  },
+
+  "homePage": {
+    "empty": "Không có gì ở đây...",
+    "loading": "Vui lòng chờ, chúng tôi đang chuẩn bị mọi thứ cho bạn...",
+    "listenMoreToShowMetrics": "Nghe nhiều bài hát hơn để hiển thị thêm số liệu.",
+
+    "recentlyAddedSongs": "Bài hát được thêm gần đây",
+    "recentlyPlayedSongs": "Bài hát được phát gần đây",
+    "recentArtists": "Nghệ sĩ gần đây",
+    "mostLovedSongs": "Bài hát được yêu thích nhất",
+    "mostLovedArtists": "Nghệ sĩ được yêu thích nhất",
+
+    "openSongsWithNewestSortOption": "Mở 'Bài hát' với tùy chọn sắp xếp 'Mới nhất'.",
+    "openPlaybackHistory": "Mở danh sách phát 'Lịch sử' với tùy chọn sắp xếp 'Thứ tự thêm'",
+    "openFavoritesWithAllTimeMostListenedSortOption": "Mở danh sách phát 'Đã thích' với tùy chọn sắp xếp 'Nghe nhiều nhất (Từ trước đến nay)'",
+
+    "noSongsAvailable": "Không có bài hát nào",
+    "stayCalm": "Giữ bình tĩnh"
+  },
+
+  "searchPage": {
+    "addFolder": "Thêm thư mục",
+    "enablePredictiveSearch": "Bật dự đoán tìm kiếm",
+    "disablePredictiveSearch": "Tắt dự đoán tìm kiếm",
+    "searchForAnything": "Tìm bất cứ gì",
+    "searchForAnythingInLibrary": "Tìm bất cứ gì trong thư viện của bạn",
+    "separateKeywords": "Sử dụng ' ; ' để tách các từ khoá khi tìm kiếm.",
+    "allFilter": "Tất cả",
+    "mostRelevant": "Phù hợp nhất",
+    "resultCount_one": "{{count}} kết quả",
+    "resultCount_other": "{{count}} kết quả",
+    "resultAndVisibleCount_other": "{{count}} kết quả ($t(common.shownWithCount, {\"count\":{{noVisible}}}))",
+    "noResults": "Không có gì phù hợp với điều bạn đang tìm kiếm.",
+    "recentSearchResultTooltipLabel": "Tìm kiếm '{{value}}'",
+    "showingResultsFor": "Kết quả tìm kiếm của <span>'{{query}}'</span>",
+    "showingResultsForWithFilter": "Kết quả tìm kiếm <span>{{filter}}</span> của <span>'{{query}}'</span>",
+
+    "a": "Tìm kiếm bất cứ điều gì"
+  },
+
+  "songsPage": {
+    "loading": "Vui lòng chờ, chúng tôi đang chuẩn bị mọi thứ cho bạn...",
+    "empty": "Không có gì ở đây..."
+  },
+
+  "artistsPage": {
+    "empty": "Không có gì ở đây..."
+  },
+
+  "foldersPage": {
+    "addFolder": "Thêm thư mục",
+    "musicFolders": "Thư mục nhạc",
+    "empty": "Không có thư mục nào được thêm vào thư viện của bạn."
+  },
+
+  "playlistsPage": {
+    "createNewPlaylist": "Tạo danh sách phát mới",
+    "importPlaylist": "Nhập danh sách phát",
+    "addPlaylist": "Thêm danh sách phát",
+    "removeFromThisPlaylist": "Xoá khỏi danh sách phát này",
+    "removeSongFromPlaylistSuccess": "Đã xoá '{{title}}' khỏi danh sách phát '{{playlistName}}'",
+    "createdOn": "Được tạo vào {{val, datetime}}",
+    "clearSongHistoryConfirm": "Xoá lịch sử bài hát",
+    "clearSongHistoryConfirmNotice": "Bạn có chắc chắn muốn xoá lịch sử bài hát của bạn không? Hành động này không thể hoàn tác.",
+    "clearSongHistorySuccess": "Đã xoá thành công lịch sử bài hát của bạn."
+  },
+
+  "albumsPage": {
+    "empty": "Không có gì ở đây..."
+  },
+
+  "genresPage": {
+    "empty": "Không có gì ở đây..."
+  },
+
+  "settingsPage": {
+    "settings": "Cài đặt",
+
+    "appearance": "Giao diện",
+    "changeTheme": "Thay đổi giao diện của ứng dụng theo ý bạn.",
+    "lightTheme": "Giao diện sáng",
+    "darkTheme": "Giao diện tối",
+    "systemTheme": "Theo cài đặt của hệ thống",
+
+    "enableImageBasedDynamicThemes": "Bật chủ đề động",
+    "enableImageBasedDynamicThemesDescription": "Thay đổi chủ đề ứng dụng dựa trên chủ đề của ảnh bìa bài hát đang phát",
+
+    "language": "Ngôn ngữ",
+    "languageDescription": "Chọn ngôn ngữ bạn muốn Nora hiển thị.",
+
+    "audioPlayback": "Phát lại",
+    "showRemainingSongDuration": "Hiện thời gian còn lại",
+    "showRemainingSongDurationDescription": "Hiển thị thời gian còn lại của bài hát đang phát thay vì thời lượng mặc định của bài hát.",
+    "playbackRate": "Tốc độ phát",
+    "changePlaybackRate": "Thay đổi tốc độ phát mặc định của trình phát.",
+    "resetPlaybackRate": "Đặt lại thành 1x",
+    "seekbarScrollInterval": "Thay đổi số lượng giây khi cuộn chuột trên thanh thời gian và thanh âm lượng.",
+    "second": "giây",
+    "second_other": "giây",
+
+    "accounts": "Tài khoản",
+    "integrateLastFm": "Tích hợp Last.fm với Nora.",
+    "lastFmLogo": "Logo LastFM",
+    "lastFmConnected": "Đã kết nối LastFM",
+    "lastFmNotConnected": "Chưa kết nối LastFM",
+    "loggedInAs": "Dưới tên",
+    "lastFmDescription1": "Kết nối với Last.fm để bật tính năng Scrobbling.",
+    "lastFmDescription2": "Scrobbling là một cách để gửi thông tin về âm nhạc mà một người dùng nghe.",
+    "lastFmDescription3": "Mỗi khi bạn nghe một bài hát, Last.fm sẽ \"Scrobble\" bài hát đó và thêm vào tài khoản của bạn.",
+    "lastFmDescription4": "Tính năng này yêu cầu kết nối Internet.",
+    "authenticateAgain": "Xác thực lại",
+    "loginInBrowser": "Đăng nhập qua trình duyệt",
+    "scrobblingDescription": "Kích hoạt Last.fm Scrobbling để gửi dữ liệu liên quan đến việc bạn nghe nhạc.",
+    "enableScrobbling": "Kích hoạt Last.fm Scrobbling",
+    "sendFavoritesToLastFmDescription": "Gửi dữ liệu thích đến Last.fm khi bạn thích/không thích bài hát.",
+    "sendFavoritesToLastFm": "Gửi dữ liệu thích",
+    "sendNowPlayingToLastFmDescription": "Tự động gửi dữ liệu bài hát hiện tại đến Last.fm khi bạn bắt đầu phát một bài hát.",
+    "sendNowPlayingToLastFm": "Gửi dữ liệu bài hát hiện tại",
+    "enableDiscordRpcDescription": "Tích hợp Discord Rich Presence với Nora",
+    "enableDiscordRpc": "Kích hoạt Discord Rich Presence",
+
+    "doNotSaveLyricsAutomatically": "Không tự động lưu lời bài hát",
+    "syncedLyricsOnly": "Chỉ lời đồng bộ",
+    "saveEitherLyrics": "Lời đồng bộ hoặc không đồng bộ",
+    "lyrics": "Lời bài hát",
+    "enableMusixmatchLyricsDescription": "Kích hoạt Musixmatch Lyrics để cung cấp lời bài hát đồng bộ và không đồng bộ cho các bài hát của bạn khi bạn xem lời bài hát.",
+    "musixmatchDisclaimerNotice": "Kích hoạt và sử dụng tính năng này có nghĩa là bạn đồng ý và chấp nhận <Button>Miễn trừ trách nhiệm Musixmatch Lyrics</Button>.",
+    "editMusixmatchSettings": "Chỉnh sửa cài đặt Musixmatch",
+    "enableMusixmatch": "Kích hoạt Musixmatch Lyrics",
+    "musixmatchEnabled": "Musixmatch Lyrics đã được kích hoạt",
+    "saveLyricsAutomaticallyDescription": "Chọn một tùy chọn để tự động lưu lời bài hát khi nội dung trang lời bài hát được tải.",
+    "saveLyricsAutomaticallyInfo": "Lời bài hát được tải về tự động sẽ được lưu sau khi bài hát hiện tại kết thúc để tránh bất kỳ sự hỏng hóc nào xảy ra.",
+    "saveLyricsInLrcFilesDescription": "Kích hoạt lưu lời bài hát vào tệp LRC cho các bài hát hỗ trợ chỉnh sửa thông tin. Nora sẽ lưu lời bài hát trong tệp LRC nếu tệp bài hát không hỗ trợ chỉnh sửa thông tin.",
+    "saveLyricsInLrcFiles": "Lưu lời bài hát trong tệp LRC cho các bài hát được hỗ trợ",
+    "lrcFileCustomSaveLocationDescription": "Chọn một vị trí tùy chỉnh để lưu tệp LRC của bài hát, nếu bạn không muốn lưu chúng trong cùng thư mục của bài hát tương ứng.",
+    "selectedCustomLocation": "Vị trí tùy chỉnh đã chọn",
+    "setCustomLocation": "Đặt vị trí tùy chỉnh",
+
+    "equalizer": "Bộ chỉnh âm",
+    "reset": "Đặt lại",
+
+    "defaultPage": "Trang mặc định",
+    "changeDefaultPageDescription": "Thay đổi trang mặc định bạn muốn xem khi mở ứng dụng.",
+
+    "preferences": "Tùy chọn",
+    "songIndexingDescription": "Cho phép chỉ mục hoá bài hát trong các trang, thêm số cho mỗi bài hát trong tab Bài hát.",
+    "enableSongIndexing": "Kích hoạt chỉ mục hoá bài hát",
+    "showTrackNumberAsSongIndexDescription": "Hiển thị số thứ tự bài hát trước tên bài hát khi ở trang album.",
+    "showTrackNumberAsSongIndex": "Hiển thị số thứ tự bài hát như chỉ mục bài hát",
+    "showArtistArtworkNearSongControlsDescription": "Hiển thị ảnh nghệ sĩ bên cạnh tên nghệ sĩ gần tiêu đề của bài hát trên bảng điều khiển bài hát.",
+    "showArtistArtworkNearSongControls": "Hiển thị ảnh nghệ sĩ có sẵn bên cạnh tên của họ (góc dưới bên trái).",
+    "disableBackgroundArtworksDescription": "Vô hiệu hoá ảnh nền lớn trên một số trang.",
+    "disableBackgroundArtworks": "Vô hiệu hoá ảnh nền",
+    "playlistArtworksDescription": "Thay đổi cách hoạt động của ảnh được tạo từ ảnh bìa bài hát.",
+    "enablePlaylistArtworks": "Kích hoạt ảnh được tạo từ ảnh bìa bài hát trong danh sách phát",
+    "shuffleArtworkFromSongCovers": "Kích hoạt trộn ảnh tạo từ ảnh bìa bài hát. (Ảnh sẽ được trộn mỗi khi làm mới trang.)",
+
+    "accessibility": "Tiếp cận",
+    "reducedMotionDescription": "Loại bỏ hiệu ứng động xuất hiện trong ứng dụng. Điều này cũng sẽ làm giảm độ mượt mà của ứng dụng.",
+    "enableReducedMotion": "Giảm hiệu ứng động",
+
+    "performance": "Hiệu suất",
+    "removeAnimationOnBatteryDescription": "Loại bỏ các hiệu ứng động trong ứng dụng khi hệ thống của bạn sử dụng pin.",
+    "removeAnimationOnBattery": "Loại bỏ hiệu ứng động khi sử dụng pin.",
+    "allowToPreventScreenSleepingDescription": "Cho phép Nora ngăn màn hình tắt trong các tình huống không có hoạt động người dùng như hiện lời bài hát.",
+    "allowToPreventScreenSleeping": "Cho phép ngăn màn hình tắt.",
+
+    "startupAndWindowCustomization": "Cài đặt khởi động và Windows",
+    "autoLaunchAtStartDescription": "Bật tùy chọn này sẽ tự động khởi chạy Nora khi bạn đăng nhập vào máy tính của bạn.",
+    "autoLaunchAtStart": "Tự động khởi chạy khi bật máy",
+    "hideWindowAtStartDescription": "Cấu hình xem Nora có nên hiện khi khởi động hay không.",
+    "hideWindowAtStart": "Khởi chạy Nora trong khay hệ thống khi khởi động",
+    "hideWindowOnCloseDescription": "Cấu hình cách Nora hoạt động khi bạn nhấp vào nút Đóng.",
+    "hideWindowOnClose": "Ẩn Nora vào khay hệ thống khi nhấp vào nút Đóng.",
+
+    "storage": "Lưu trữ",
+    "storageDescription": "Xem cách Nora quản lý thư viện của bạn và sử dụng bộ nhớ của bạn.",
+
+    "fullStorageSpace": "Toàn bộ dung lượng lưu trữ",
+    "fullStorageOutOfUsage": "{{value}} trên tổng số {{total}}",
+    "freeSpace": "Không gian trống",
+    "otherApplications": "Ứng dụng khác",
+    "artworkCache": "Bộ nhớ đệm ảnh",
+    "tempArtworkCache": "Bộ nhớ đệm ảnh tạm thời",
+    "songsData": "Dữ liệu bài hát",
+    "artistsData": "Dũ liệu nghệ sĩ",
+    "albumsData": "Dữ liệu album",
+    "playlistsData": "Dữ liệu danh sách phát",
+    "palettesData": "Dữ liệu bảng màu",
+    "genresData": "Dữ liệu thể loại",
+    "appLogs": "Nhật ký ứng dụng",
+    "userData": "Dữ liệu người dùng",
+    "internalAppFiles": "Tệp nội bộ của ứng dụng",
+    "storageUseForLibraryData": "Bộ nhớ sử dụng cho dữ liệu thư viện",
+    "otherAppFiles": "Tệp ứng dụng khác",
+    "generated": "Đã tạo",
+    "generateStorageMetrics": "Tạo số liệu lưu trữ",
+    "generateStorageMetricsAgain": "Tạo lại số liệu lưu trữ",
+    "noStorageMetrics": "Có vẻ như không có số liệu lưu trữ nào được tạo.",
+    "storageMetricsGenerationDisclaimer": "Tạo số liệu lưu trữ yêu cầu tính toán tương đối nhiều, Nora có thể tạm thời không phản hồi. Hãy kiên nhẫn...",
+    "storageMetricsGenerationError": "Có vẻ như có gì đó không ổn ở phía chúng tôi. Vui lòng báo cáo vấn đề này với nhà phát triển.",
+
+    "about": "Về ứng dụng",
+    "releasedOn": "Phát hành vào {{val, datetime}}",
+    "noraWebsite": "Trang web chính thức của Nora",
+    "noraDiscordServer": "Máy chủ Discord chính thức của Nora",
+    "noraGithubRepo": "kho mã nguồn của Nora trên GitHub",
+    "noraDescription": "Nora là một trình phát nhạc thanh lịch được xây dựng bằng Electron và React.",
+    "noraInspiration": "Lấy cảm hứng từ <Hyperlink>Oto Music cho Android</Hyperlink> bởi Piyush Mamidwar.",
+    "otoMusicOnPlayStore": "Oto Music trên Cửa hàng Play",
+    "noraLicenseNotice": "Sản phẩm này được cấp phép dưới <Button>giấy phép mã nguồn mở MIT.</Button>",
+    "appLicense": "Giấy phép ứng dụng",
+    "releaseNotes": "Ghi chú phát hành",
+    "openSourceLicenses": "Giấy phép mã nguồn mở",
+    "openLogFile": "Mở tệp nhật lý",
+    "openDevtools": "Mở DevTools",
+    "resyncLibrary": "Đồng bộ lại thư viện",
+    "generatePalettes": "Tạo bảng màu",
+    "appShortcuts": "Phím tắt",
+
+    "resetApp": "Đặt lại ứng dụng", 
+    "clearOptionalData": "Xoá dữ liệu tùy chọn",
+    "clearHistory": "Xoá lịch sử",
+    "confirmSongHistoryDeletion": "Xoá lịch sử bài hát",
+    "songHistoryDeletionDisclaimer": "Bạn có chắc chắn muốn xoá lịch sử bài hát của mình không? Hành động này không thể hoàn tác.",
+    "songHistoryDeletionSuccess": "Lịch sử bài hát của bạn đã được xoá.",
+    "exportAppData": "Xuất dữ liệu ứng dụng",
+    "importAppData": "Nhập dữ liệu ứng dụng",
+    "createIssueOnNoraGithubRepo": "tạo issue mới trong $t(settingsPage.noraGithubRepo)",
+    "contact": "Nếu bạn có bất kỳ phản hồi nào liên quan đến lỗi, yêu cầu tính năng mới,... về ứng dụng, vui lòng <Hyperlink>$t(settingsPage.createIssueOnNoraGithubRepo)</Hyperlink>",
+    "emailContact": "hoặc liên hệ tôi qua email.",
+    "loveNora": "Được tạo ra với tất cả <span>❤</span> của <Hyperlink>Sandakan Nipunajith</Hyperlink>và những người đóng góp.",
+    "sandakanGithubProfile": "Trang cá nhân của Sandakan trên GitHub",
+    "beautifulSriLanka": "Sri Lanka Tuyệt Đẹp"
+  },
+
+  "artistInfoPage": {
+    "likeArtist": "Thêm '{{name}}' vào danh sách yêu thích",
+    "dislikeArtist": "Thêm '{{name}}' vào danh sách không thích",
+    "appearsInAlbums": "Xuất hiện trong album",
+    "appearsInSongs": "Xuất hiện trong bài hát",
+    "similarArtistsInLibrary": "Nghệ sĩ tương tự trong thư viện",
+    "otherSimilarArtists": "Nghệ sĩ tương tự khác",
+    "viewInLastFm": "Xem '{{name}}' trên Last.fm"
+  },
+
+  "albumInfoPage": {
+    "unavailableTracks": "Các bài hát không khả dụng trong album này"
+  },
+
+  "currentQueuePage": {
+    "queue": "Hàng đợi hiện tại",
+    "folderWithName": "Thư mục {{name}}",
+    "enableAutoScrolling": "Bật cuộn tự động",
+    "disableAutoScrolling": "Tắt cuộn tự động",
+    "scrollToCurrentPlayingSong": "Cuộn đến bài hát đang phát",
+    "shuffleQueue": "Trộn hàng đợi",
+    "queueShuffleSuccess": "Đã trộn hàng đợi.",
+    "clearQueue": "Dọn hàng đợi",
+    "queueCleared": "Đã xoá nhạc trong hàng đợi.",
+    "durationRemaining": "Còn lại {{duration}}",
+    "empty": "Hàng đợi trống."
+  },
+
+  "lyricsEditingPage": {
+    "lyricsText": "Nội dung lời bài hát",
+    "startInSeconds": "Bắt đầu (giây)",
+    "endInSeconds": "Kết thúc (giây)",
+    "fromTo": "Từ {{start}} đến {{end}}",
+    "deleteLine": "Xoá dòng",
+    "addLineAbove": "Thêm dòng phía trên",
+    "addLineBelow": "Thêm dòng phía dưới",
+    "addInstrumentalLineBelow": "Thêm dòng không lời phía dưới",
+    "editLine": "Sửa dòng",
+    "finishEditing": "Hoàn tất",
+    "resetLyrics": "Đặt lại lời bài hát",
+    "resetLyricsConfirm": "Bạn có chắc chắn muốn đặt lại lời bài hát không?",
+    "resetLyricsConfirmMessage": "<p>Bạn sẽ mất <span>các dòng lời đã chỉnh sửa gần đây</span> và <span>dữ liệu thời gian bắt đầu/kết thúc</span> nếu bạn tiếp tục hành động này.</p> <br/> <p>Hành động này không thể hoàn tác.</p>",
+    "incorrectSongTitle": "Không ở trong đúng bài",
+    "incorrectSongMessage": "Để bắt đầu chỉnh sửa, hãy phát bài '{{title}}'.",
+    "lyricsEditor": "Trình chỉnh sửa lời",
+    "playbackSpeed": "Tốc độ phát",
+    "playbackTime": "Thời gian",
+    "offsetWithCount": "{{count}} độ lệch",
+    "saveLyrics": "Lưu lời bài hát",
+    "stopAndEditLyrics": "Dừng và chỉnh sửa lời bài hát",
+    "playLyrics": "Phát lời bài hát",
+    "configure": "Cấu hình"
+  },
+
+  "lyricsPage": {
+    "noLyrics": "Không tìm thấy lời bài hát.",
+    "noLyricsDescription": "Chúng tôi không tìm thấy bất kỳ lời bài hát nào cho bài hát này. Bạn có thể thêm lời bài hát của riêng bạn trong Trình chỉnh sửa thông tin.",
+    "noSyncedLyrics": "Không tìm thấy lời bài hát đồng bộ.",
+    "noSyncedLyricsDescription": "Chúng tôi không tìm thấy bất kỳ lời bài hát đồng bộ nào cho bài hát này.",
+    "noOnlineLyrics": "Không tìm thấy lời bài hát trực tuyến.",
+    "noOfflineLyrics": "Không tìm thấy lời bài hát ngoại tuyến.",
+    "noSavedLyrics": "Không tìm thấy lời bài hát đã lưu.",
+    "onlineLyricsRefreshFailed": "Không thể làm mới lời bài hát trực tuyến.",
+    "lyricsForSong": "lời bài hát của '{{title}}'",
+    "editLyrics": "Sửa lời bài hát",
+    "translateLyrics": "Dịch lời bài hát",
+    "showOnlineLyrics": "Hiện lời trực tuyến",
+    "refreshOnlineLyrics": "Làm mới lời trực tuyến",
+    "showSavedLyrics": "Hiện lời đã lưu",
+
+    "lyricsLoading": "Đang tìm lời bài hát",
+    "lyricsLoadingDescription": "Chờ chút... Chúng tôi đang tìm kiếm khắp nơi...",
+    "noInternet": "Không có kết nối Internet",
+    "noInternetDescription": "Không có lời bài hát ngoại tuyến cho bài hát này. Bạn cần kết nối với Internet để kiểm tra lời bài hát trực tuyến.",
+    "lyricsProvidedBy": "Lời bài hát được cung cấp bởi <Hyperlink/>"
+  },
+
+  "songInfoPage": {
+    "listensCount": "{{count}} lượt nghe",
+    "listeningActivityInLastMonths": "Hoạt động nghe trong {{count}} tháng gần đây",
+    "similarTracksInLibrary": "Bài hát tương tự trong thư viện của bạn",
+    "otherSimilarTracks": "Bài hát tương tự khác",
+    "additionalSongInfo": "Thông tin bổ sung",
+    "allTimeListens": "Lượt nghe từ trước đến nay",
+    "listensThisMonth": "Lượt nghe trong tháng này",
+    "listensThisYear": "Lượt nghe trong năm nay",
+    "totalSongSkips": "Số lượt bỏ qua bài",
+    "fullSongListens": "Số lượt nghe hết bài",
+    "mostSoughtPosition": "Vị trí được tua đến nhiều nhất",
+    "mostSoughtFrequency": "Tần suất tua nhiều nhất",
+    "lovedSong": "Bạn đã thích bài hát này",
+    "unlovedSong": "Bạn chưa thích bài hát này",
+    "byArtists": " <By>bởi</By> <span>{{val, list}}</span>"
+  },
+
+  "songTagsEditingPage": {
+    "editArtwork": "Chỉnh sửa ảnh",
+    "removeArtwork": "Xoá ảnh",
+    "lyricsIncluded": "Bao gồm lời bài hát",
+    "addToMetadata": "Thêm vào siêu dữ liệu",
+    "customizeMetadata": "Tùy chỉnh siêu dữ liệu",
+    "songMetadataEditor": "Trình chỉnh sửa thông tin bài hát",
+    "searchMetadataOnInternet": "Tìm kiếm thông tin trên Internet",
+    "saveTags": "Lưu thông tin",
+    "updateAddedToBeSavedLater": "Thông tin đã cập nhật của bài hát đang phát sẽ được lưu lại sau khi phát xong.",
+    "pendingUpdateAvailable": "Bài hát này có thông tin đã thay đổi đang chờ được lưu.",
+    "saveTagsNotSupportedTitle": "Không được hỗ trợ",
+    "saveTagsNotSupportedDescription": "<P1>Hiện tại Nora không hỗ trợ chỉnh sửa thông tin bài hát có định dạng <Format/>.</P1><P2>Hiện tại chỉ định dạng <SupportedFormat/> được hỗ trợ.",
+    "albumArtistNotMentioned": "Bài hát đã nằm trong album '{{title}}' nhưng nghệ sĩ '{{artists}}' không được chỉ định là nghệ sĩ album của bài hát này.",
+    "songAlbumArtistMismatch": "Nghệ sĩ album đã chọn '{{albumArtists}}' không khớp với nghệ sĩ của album '{{albumTitle}}' đã chọn: '{{songAlbumArtists}}'.",
+    "searchForArtists": "Tìm kiếm nghệ sĩ ở đây",
+    "searchForAlbums": "Tìm kiếm album ở đây",
+    "searchForGenres": "Tìm kiếm thể loại ở đây",
+    "addNewArtist": "Thêm nghệ sĩ mới '{{name}}'",
+    "addNewAlbum": "Thêm album mới '{{name}}'",
+    "addNewGenre": "Thêm thể loại mới '{{name}}'",
+    "albumName": "Tên album",
+    "songArtists": "Nghệ sĩ bài hát",
+    "songName": "Tên bài hát",
+    "composer": "Nhạc sĩ",
+    "syncedLyricsFetchFailed": "Đã xảy ra lỗi khi tải lời đồng bộ.",
+    "lyricsEnhancedSynced": "Lời bài hát là lời đồng bộ từ.",
+    "lyricsNotEnhancedSynced": "Lời bài hát không phải là lời đồng bộ từ.",
+    "enhancedLyricsSupported": "Lời đồng bộ từ được hỗ trợ.",
+    "readMoreAboutLrc": "$t(common.readMoreAboutTitle, {\"title\": \"Định dạng LRC\"})",
+    "avoidUnsyncedOnSyncedLyricsTab": "Tránh nhập lời không đồng bộ vào tab lời đồng bộ.",
+    "avoidSyncedOnUnsyncedLyricsTab": "Tránh nhập lời đồng bộ vào tab lời không đồng bộ.",
+    "pendingLyricsSavesAvailable": "Bài này có lời đang chờ lưu. Lời sẽ được lưu và hiển thị ở đây sau khi bài hát hiện tại phát xong.",
+    "downloadLyrics": "Tải lời bài hát",
+    "downloadSyncedLyrics": "Tải lời đồng bộ",
+    "musixmatchNotEnabled": "Bạn phải kích hoạt Musixmatch Lyrics trong phần Cài đặt để dùng tính năng này."
+  },
+
+  "miniPlayer": {
+    "alwaysOnTopEnabled": "Luôn trên cùng: BẬT",
+    "alwaysOnTopDisabled": "Luôn trên cùng: TẮT"
+  },
+
+  "time": {
+    "second_one": "giây",
+    "second_other": "giây",
+    "minute_one": "phút",
+    "minute_other": "phút",
+    "hour_one": "giờ",
+    "hour_other": "giờ",
+    "day_one": "ngày",
+    "day_other": "ngày",
+    "month_one": "tháng",
+    "month_other": "tháng",
+    "year_one": "năm",
+    "year_other": "năm",
+    "secondWithCount": "{{count}} $t(time.second, {\"count\":{{count}}})",
+    "minuteWithCount": "{{count}} $t(time.minute, {\"count\":{{count}}})",
+    "hourWithCount": "{{count}} $t(time.hour, {\"count\":{{count}}})",
+    "dayWithCount": "{{count}} $t(time.day, {\"count\":{{count}}})",
+    "monthWithCount": "{{count}} $t(time.month, {\"count\":{{count}}})",
+    "yearWithCount": "{{count}} $t(time.year, {\"count\":{{count}}})"
+  },
+
+  "elapsedTime": {
+    "second_one": "{{count}} giây trước",
+    "second_other": "{{count}} giây trước",
+    "minute_one": "{{count}} phút trước",
+    "minute_other": "{{count}} phút trước",
+    "hour_one": "{{count}} giờ trước",
+    "hour_other": "{{count}} giờ trước",
+    "day_one": "{{count}} ngày trước",
+    "day_other": "{{count}} ngày trước",
+    "month_one": "{{count}} tháng trước",
+    "month_other": "{{count}} tháng trước",
+    "year_one": "{{count}} năm trước",
+    "year_other": "{{count}} năm trước"
+  },
+
+  "month": {
+    "january": "Tháng 1",
+    "february": "Tháng 2",
+    "march": "Tháng 3",
+    "april": "Tháng 4",
+    "may": "Tháng 5",
+    "june": "Tháng 6",
+    "july": "Tháng 7",
+    "august": "Tháng 8",
+    "september": "Tháng 9",
+    "october": "Tháng 10",
+    "november": "Tháng 11",
+    "december": "Tháng 12"
+  },
+
+  "data": {
+    "byteWithCount_one": "{{count}} byte",
+    "byteWithCount_other": "{{count}} byte"
+  },
+
+  "sideBar": {
+    "home": "Trang chủ",
+    "search": "Tìm kiếm"
+  },
+
+  "renamePlaylistPrompt": {
+    "renamePlaylistWithName": "Đổi tên danh sách phát '{{name}}'",
+    "playlistName": "Tên danh sách phát"
+  },
+
+  "newPlaylistPrompt": {
+    "addPlaylistSuccess": "Thêm danh sách phát thành công.",
+    "playlistNameEmpty": "Tên danh sách phát trống",
+    "addNewPlaylist": "Thêm danh sách phát mới"
+  },
+
+  "confirmDeletePlaylistsPrompt": {
+    "playlistsDeletedWithCount": "$t(common.playlistWithCount, {\"count\":{{count}}}) đã bị xoá.",
+    "confirmPlaylistDeleteWithCount": "Xác nhận xoá $t(common.playlistWithCount, {\"count\":{{count}}})",
+    "message_one": "Xoá danh sách phát này sẽ xoá liên kết giữa các bài hát bạn đã thêm vào danh sách phát này. Bạn sẽ không thể truy cập lại danh sách phát này nếu bạn quyết định xoá nó.",
+    "message_other": "Xoá các danh sách phát này sẽ xoá liên kết giữa các bài hát bạn đã thêm vào các danh sách phát này. Bạn sẽ không thể truy cập lại các danh sách phát này nếu bạn quyết định xoá chúng.",
+    "modificationNotice": "Thực hiện hành động này ảnh hưởng đến các tệp sau: "
+  },
+
+  "resetAppConfirmationPrompt": {
+    "confirmAppReset": "Xác nhận đặt lại ứng dụng",
+    "message": "Đặt lại ứng dụng sẽ xoá tất cả dữ liệu người dùng, bao gồm dữ liệu về bài hát, trạng thái thích, cấu hình, cài đặt đã áp dụng, v.v.; nhưng KHÔNG bao gồm các bài hát. Hãy nhớ rằng quá trình này <span>KHÔNG THỂ ĐẢO NGƯỢC</span>.",
+    "restartAfterReset": "Nora sẽ khởi động lại sau khi đặt lại.",
+    "systemPlaylistsRemovalProhibited": "Bạn không thể xoá các danh sách phát như Lịch sử hoặc Đã thích."
+  },
+
+  "addSongsToPlaylistsPrompt": {
+    "songsAddedToPlaylists": "Đã thêm $t(common.songWithCount, {\"count\":{{count}}}) vào $t(common.playlistWithCount, {\"count\":{{playlistCount}}})",
+    "selectPlaylistsToAdd": "Chọn danh sách phát để thêm $t(common.songWithCount, {\"count\":{{count}}})",
+    "duplicationNotice": "Khi thêm nhiều bài hát vào danh sách phát, các bài hát đã có trong danh sách phát đã chọn sẽ bị bỏ qua."
+  },
+
+  "blacklistSongConfirmPrompt": {
+    "title": "Xác nhận đưa $t(common.songWithCount, {\"count\":{{count}}}) vào danh sách đen từ thư viện",
+    "message_one": "Bạn đang chuẩn bị đưa bài hát này vào danh sách đen từ thư viện. Bạn có thể khôi phục lại bằng cách nhấp chuột phải vào nó và nhấp vào '$t(song.deblacklist)'. Dữ liệu liên quan đến bài hát này sẽ không bị ảnh hưởng bởi hành động này.",
+    "message_other": "Bạn đang chuẩn bị đưa các bài hát này vào danh sách đen từ thư viện. Bạn có thể khôi phục lại chúng bằng cách nhấp chuột phải và nhấp vào '$t(song.deblacklist)'. Dữ liệu liên quan đến các bài hát này sẽ không bị ảnh hưởng bởi hành động này.",
+    "effectTitle": "Những gì xảy ra khi đưa một bài hát vào danh sách đen",
+    "effect1": "Bị xám đi trong thư viện với biểu tượng '<span/>'.",
+    "effect2": "Không được tự động thêm vào hàng đợi, ngay cả khi dùng <span>'$t(common.shuffleAndPlay)'</span> hoặc <span>'$t(common.playAll)'</span>, trừ khi bạn thêm chúng thủ công.",
+    "effect3": "Vẫn có thể phát bằng cách nhấp đúp, hoặc bằng cách dùng <span>'$t(common.play)'</span> hoặc <span>'$t(common.playNext)'.</span>",
+    "songsBlacklisted": "$t(common.songWithCount, {\"count\":{{count}}}) đã được đưa vào danh sách đen và đã bị xoá khỏi thư viện"
+  },
+
+  "blacklistFolderConfirmPrompt": {
+    "title": "Xác nhận đưa $t(common.folderWithCount, {\"count\":{{count}}}) vào danh sách đen từ thư viện",
+    "message_one": "Bạn đang chuẩn bị đưa thư mục này vào danh sách đen. Bạn có thể khôi phục lại từ trang Thư mục bằng cách nhấp chuột phải và chọn '$t(song.deblacklist)'. Dữ liệu liên quan đến thư mục này sẽ không bị ảnh hưởng bởi hành động này.",
+    "message_other": "Bạn đang chuẩn bị đưa các thư mục này vào danh sách đen. Bạn có thể khôi phục lại chúng từ trang Thư mục bằng cách nhấp chuột phải và chọn '$t(song.deblacklist)'. Dữ liệu liên quan đến các thư mục này sẽ không bị ảnh hưởng bởi hành động này.",
+    "effectTitle": "Những gì xảy ra khi đưa một thư mục vào danh sách đen",
+    "effect1": "Bị xám đi trong thư viện với biểu tượng '<span/>'.",
+    "effect2": "Các bài hát liên kết với thư mục này cũng sẽ bị đưa vào danh sách đen.",
+    "effectTitle2": "Những gì xảy ra với các bài hát liên kết với một thư mục bị đưa vào danh sách đen",
+    "folderBlacklisted": "$t(common.folderWithCount, {\"count\":{{count}}}) đã được đưa vào danh sách đen."
+  },
+
+  "deleteSongFromSystemConfirmPrompt": {
+    "title_one": "Xoá '{{title}}' khỏi hệ thống",
+
+    "title_other": "Xoá $t(common.songWithCount, {\"count\":{{count}}}) khỏi hệ thống",
+    "permanentlyDeleteFromSystem": "Xoá vĩnh viễn khỏi hệ thống",
+    "message_one": "Bạn sẽ mất bài hát này và có thể không thể khôi phục lại nếu bạn chọn '$t(deleteSongFromSystemConfirmPrompt.permanentlyDeleteFromSystem)' từ tùy chọn hệ thống.",
+    "message_other": "Bạn sẽ mất các bài hát này và có thể không thể khôi phục lại chúng nếu bạn chọn '$t(deleteSongFromSystemConfirmPrompt.permanentlyDeleteFromSystem)' từ tùy chọn hệ thống.",
+    "modificationNotice": "Thực hiện hành động này ảnh hưởng đến các tệp sau: ",
+    "deleteSong": "Xoá bài hát",
+    "songPermanentlyDeleted": "$t(common.songWithCount, {\"count\":{{count}}}) đã bị xoá khỏi hệ thống.",
+    "songMovedToBin": "$t(common.songWithCount, {\"count\":{{count}}}) đã được chuyển vào Thùng rác."
+  },
+
+  "addMusicFoldersPrompt": {
+    "title": "Chọn thư mục để thêm",
+    "emptyMessage1": "Có vẻ như bạn chưa chọn thư mục nào.",
+    "emptyMessage2": "Chọn một số thư mục từ hệ thống của bạn, và chúng sẽ xuất hiện ở đây để bạn tùy chỉnh thêm.",
+    "chooseFolders": "Chọn thư mục",
+    "addSelectedFolders": "Thêm các thư mục đã chọn",
+    "noFoldersSelected": "Không có thư mục nào được chọn. (Phải có ít nhất một thư mục mẹ)"
+  },
+
+  "removeFolderConfirmationPrompt": {
+    "title": "Xác nhận xoá thư mục '{{folderName}}'",
+    "message": "Bạn có chắc chắn muốn xoá thư mục này khỏi thư viện? Điều này sẽ xoá tất cả dữ liệu liên quan đến thư mục này, bao gồm dữ liệu bài hát từ thư viện. Các tệp trên hệ thống của bạn sẽ không bị ảnh hưởng.",
+    "removeFolder": "Xoá thư mục"
+  },
+
+  "lyricsEditorHelpPrompt": {
+    "title": "Cách sử dụng Trình soạn thảo lời của Nora",
+    "subTitle1": "Làm thế nào để bắt đầu sử dụng trình soạn thảo?",
+    "subTitle1Message": " <ol><li>Phát bài hát bạn muốn chỉnh sửa lời bài hát. (Nếu bạn đang không phát đúng bài, ứng dụng sẽ ngăn không cho phép thêm dữ liệu không chính xác vào các dòng lời bài hát.)</li><li>Click vào khu vực trang để tập trung vào trang. (Tập trung trang là cần thiết để các phím tắt cụ thể của trang hoạt động.)</li><li>Bắt đầu bài hát từ đầu. Nếu bạn muốn có thêm kiểm soát về phát lại, đặt chế độ phát thành lặp lại bài hát hiện tại.</li><li>Khi ca sĩ đang hát một dòng lời bài hát, nhấn <ShortcutButton>$t(appShortcutsPrompt.enterKey)</ShortcutButton> để đánh dấu dòng lời tiếp theo và thêm thời gian hiện tại vào thời gian bắt đầu.</li><li>Tiếp tục cho đến dòng lời cuối cùng.</li></ol>",
+    "subTitle2": "Có những phím tắt nào tôi có thể sử dụng trong Trình soạn thảo lời?",
+    "subTitle2Message": "Đến phần <Button>Phím tắt</Button> để xem các phím tắt liên quan có thể được sử dụng trong Trình soạn thảo lời.",
+    "subTitle3": "Tôi phải làm gì khi bỏ lỡ một dòng lời bài hát?",
+    "subTitle3Message": "<ol><li>Tạm dừng bài hát.</li><li>Định vị dòng lời bài hát liên quan.</li><li>Click vào nút <ShortcutButton>Sửa dòng</ShortcutButton> bên dưới dòng đó và thực hiện các chỉnh sửa cần thiết.</li><li>Sau khi chỉnh sửa, click <ShortcutButton>$t(lyricsEditingPage.finishEditing)</ShortcutButton> để hoàn thành các chỉnh sửa.</li></ol>",
+    "subTitle4": "Tôi phải làm gì khi lỡ thêm sai dữ liệu vào dòng sai?"
+  },
+
+  "lyricsEditorSavePrompt": {
+    "lyricsUpdateSuccess": "Cập nhật lời thành công.",
+    "saveEditedLyrics": "Lưu lời đã sửa",
+    "copyLyrics": "Sao chép lời",
+    "saveLyricsToSong": "Lưu lời vào bài hát",
+    "saveLyricsNotSupported": "Hiện tại, Nora không hỗ trợ lưu lời vào các bài hát trong định dạng âm thanh '{{format}}'.",
+    "saveLyricsFormatInfo": "* Lời bài hát được lưu dưới <Hyperlink>định dạng LRC</Hyperlink>.",
+    "readAboutLrcFormat": "Đọc thêm về định dạng LRC"
+  },
+
+  "lyricsEditorSettingsPrompt": {
+    "lyricsEditorSettings": "Cài đặt trình soạn thảo lời",
+    "editNextAndCurrentStartAndEndTagsAutomaticallyDescription": "Tự động thay đổi thời gian bắt đầu của dòng lời bài hát tiếp theo khi bạn chỉnh sửa thời gian kết thúc của dòng lời bài hát hiện tại và ngược lại.",
+    "editNextAndCurrentStartAndEndTagsAutomatically": "Tự động chỉnh sửa thẻ bắt đầu của dòng tiếp theo với thẻ kết thúc của dòng hiện tại và ngược lại.",
+    "lyricOffsetInputDescription": "Chọn một độ lệch âm hoặc dương để thêm vào các dòng lời bài hát khi tự động chỉnh sửa chúng.",
+    "lyricOffsetInput": "Độ lệch (+ hoặc -)"
+  },
+
+  "pageFocusPrompt": { "pageNotFocused": "Trang không được tập trung." },
+
+  "releaseNotesPrompt": {
+    "latestVersion": "Bạn đang dùng phiên bản mới nhất.",
+    "oldVersion": "<br/><span>Đã có phiên bản mới.</span> <Hyperlink>Cập nhật ngay</Hyperlink>",
+    "outdatedChangelogNotice": "Bạn có thể đang xem nhật ký thay đổi đã lỗi thời.",
+    "versionCheckError": "<br/><span>Không thể kiểm tra cập nhật. Có lỗi xảy ra ở phía chúng tôi.<div>$t(releaseNotesPrompt.outdatedChangelogNotice)</div></span>",
+    "versionCheckNetworkError": "<br/><span>Chúng tôi không thể kiểm tra cập nhật. Kiểm tra lại kết nối mạng của bạn và thử lại.<div>$t(releaseNotesPrompt.outdatedChangelogNotice)</div></span>",
+    "noraReleases": "Các bản phát hành của Nora",
+    "changelog": "Nhật ký thay đổi",
+    "doNotRemindThisVersionUpdate": "Đừng nhắc tôi về bản cập nhật này của ứng dụng nữa.",
+    "current": "Hiện tại",
+    "latest": "Mới nhất",
+    "newFeaturesAndUpdates": "Tính năng mới và cập nhật",
+    "fixesAndImprovements": "Sửa lỗi và cải thiện",
+    "issuesAndBugs": "Vấn đề và lỗi đã biết"
+  },
+
+  "appShortcutsPrompt": {
+    "inAppShortcuts": "Phím tắt trong ứng dụng",
+
+    "mediaPlayback": "Phát lại",
+    "playPause": "Phát / Tạm dừng",
+    "toggleMute": "Bật / Tắt âm",
+    "nextSong": "Bài tiếp",
+    "prevSong": "Bài trước",
+    "tenSecondsForward": "Tua 10 giây",
+    "tenSecondsBackward": "Tua lùi 10 giây",
+    "upVolume": "Tăng âm lượng",
+    "downVolume": "Giảm âm lượng",
+    "toggleShuffle": "Bật / Tắt trộn hàng đợi",
+    "toggleRepeat": "Bật / Tắt lặp lại hàng đợi",
+    "toggleFavorite": "Thích / Không thích",
+    "upPlaybackRate": "Tăng tốc độ phát 0.05x",
+    "downPlaybackRate": "Giảm tốc độ phát 0.05x",
+    "resetPlaybackRate": "Đặt lại tốc độ phát về 1x",
+
+    "navigation": "Điều hướng",
+    "goHome": "Về Trang chủ",
+    "goBack": "Quay lại",
+    "goForward": "Tiếp",
+    "openMiniPlayer": "Mở Trình phát thu nhỏ",
+    "goToLyrics": "Đi đến Lời bài hát",
+    "goToQueue": "Đi đến Hàng đợi hiện tại",
+    "goToSearch": "Đi đến Tìm kiếm",
+
+    "selections": "Lựa chọn",
+    "selectMultipleItems": "Chọn nhiều mục",
+
+    "lyrics": "Lời bài hát",
+    "playNextLyricsLine": "Phát dòng lời tiếp theo",
+    "playPrevLyricsLine": "Phát dòng lời trước đó",
+
+    "lyricsEditor": "Trình soạn thảo lời",
+    "selectNextLyricsLine": "Chọn dòng lời tiếp theo",
+    "selectPrevLyricsLine": "Chọn dòng lời trước đó",
+    "selectCustomLyricsLine": "Chọn một dòng lời tùy chỉnh",
+
+    "otherShortcuts": "Phím tắt khác",
+    "toggleTheme": "Đổi chủ đề ứng dụng",
+    "toggleMiniPlayerAlwaysOnTop": "Bật / Tắt Trình phát thu nhỏ luôn trên cùng",
+    "reload": "Tải lại",
+    "openDevtools": "Mở DevTools",
+    "openAppShortcutsPrompt": "Mở hộp thoại Phím tắt ứng dụng",
+
+    "enterKey": "Enter",
+    "spaceKey": "Phím cách",
+    "ctrlKey": "Ctrl",
+    "shiftKey": "Shift",
+    "altKey": "Alt",
+    "homeKey": "Home",
+    "rightArrowKey": "Mũi tên phải",
+    "leftArrowKey": "Mũi tên trái",
+    "upArrowKey": "Mũi tên lên",
+    "downArrowKey": "Mũi tên xuống",
+
+    "mouseClick": "Nhấp chuột",
+    "doubleClick": "Nhấp đúp chuột"
+  },
+
+  "clearLocalStoragePrompt": {
+    "title": "Xác nhận xoá dữ liệu lưu trữ cục bộ",
+    "description": "Quá trình này sẽ xoá bất kỳ dữ liệu lưu trữ cục bộ bị hỏng nào trong Nora và đưa nó trở lại cài đặt mặc định.",
+    "effect": "<p>Thực hiện hành động này sẽ ảnh hưởng đến các dữ liệu sau: </p><ul><li>Hầu hết các cài đặt trong Nora</li><li>Các cài đặt phát lại như bài hát đang phát, âm lượng, v.v.</li><li>Dữ liệu hàng đợi hiện tại</li><li>Dữ liệu gợi ý bị bỏ qua như nghệ sĩ nổi bật, phân tách nghệ sĩ và nghệ sĩ bị trùng lặp</li><li>Dữ liệu sắp xếp trang</li><li>Dữ liệu Bộ chỉnh âm</li><li>Cài đặt trình soạn thảo lời</li></ul>",
+    "restartNotice": "Nora sẽ khởi động lại sau quá trình này."
+  },
+
+  "musixmatchDisclaimerPrompt": {
+    "title": "Tuyên bố miễn trừ trách nhiệm - Musixmatch Lyrics",
+    "message": "<li> Musixmatch Lyrics được thêm vào như một tính năng thử nghiệm cho phần mềm này và có thể bị xoá bất kỳ lúc nào.</li><li>Nora không có mối liên kết, được ủy quyền, duy trì, tài trợ hoặc được tài trợ bởi Musixmatch hoặc bất kỳ công ty liên kết hoặc chi nhánh nào của họ.</li><li>Người quản lý và đóng góp của ứng dụng này kêu gọi người dùng có trách nhiệm cá nhân trong việc sử dụng tính năng này một cách công bằng, vì tính năng này được sử dụng theo mục đích tuân thủ bản quyền do Musixmatch thực hiện.</li>",
+    "implementationNotice": "Implementation from Fashni's <Hyperlink/>.",
+    "hyperlinkTitle": "Kho lưu trữ GitHub của MxLRC",
+    "contactAboutComplaints": "Nếu bạn có bất kỳ khiếu nại nào, bạn có thể liên hệ với tôi qua máy chủ Discord của Nora, hoặc qua <Hyperlink>email</Hyperlink> của tôi."
+  },
+
+  "musixmatchSettingsPrompt": {
+    "title": "Cài đặt Musixmatch",
+    "message": "<li>Musixmatch yêu cầu một user token để cung cấp dịch vụ một cách chuẩn xác.</li><li>Musixmatch đôi khi không thể hiển thị lời bài hát do việc sử dụng dịch vụ từ cùng token trong thời gian dài.</li><li>Làm theo hướng dẫn từ <Hyperlink>Wiki của Spicetify</Hyperlink> để lấy token Musixmatch mới.</li>",
+    "showToken": "Hiển thị token",
+    "hideToken": "Ẩn token",
+    "updateToken": "Cập nhật token",
+    "tokenUpdateSuccess": "Cập nhật token thành công.",
+    "tokenUpdateFailed": "Không thể cập nhật token.",
+    "tokenMissingCharacters": "TOKEN phải là một chuỗi có 54 ký tự. (Cần thêm {{count}} ký tự).",
+    "tokenIncorrectCharacters": "TOKEN chỉ được chứa các ký tự chữ và số.",
+    "savedTokenAvailableMessage": "<Title><span/> Token đã lưu có sẵn.</Title><p> Một token Musixmatch hợp lệ đã được lưu bởi người dùng trong Nora.</p> <p> Bạn chỉ cần thay đổi token nếu dịch vụ không hoạt động đúng.</p>"
+  },
+
+  "customizeSelectedMetadataPrompt": {
+    "selected": "Đã chọn",
+    "select": "Chọn",
+    "title": "Tùy chỉnh siêu dữ liệu đã tải xuống cho '{{title}}'",
+    "selectArtwork": "Chọn một ảnh bìa",
+    "noArtworksFound": "Không tìm thấy ảnh",
+    "customizeOtherMetadata": "Tùy chỉnh siêu dữ liệu khác",
+    "syncedLyricsAvailable": "Có lời bài hát đồng bộ",
+    "unsyncedLyricsAvailable": "Có lời bài hát không đồng bộ",
+    "addOnlySelected": "Chỉ thêm đã chọn",
+    "addAll": "Thêm tất cả"
+  },
+
+  "resetTagsToDefaultPrompt": {
+    "changed": "Đã thay đổi",
+    "title": "Xác nhận trước khi đặt lại dữ liệu bài hát về mặc định",
+    "description": "Bạn có chắc chắn muốn đặt lại dữ liệu bài hát không? Bạn sẽ mất dữ liệu đã chỉnh sửa trên màn hình này.",
+    "resetToDefault": "Đặt lại về mặc định"
+  },
+
+  "songMetadataResultSelectPrompt": {
+    "title": "Kết quả liên quan đến <span/>"
+  },
+
+  "errorPrompt": {
+    "title": "Đã xảy ra lỗi",
+    "sendErrorInfo": "Vui lòng gửi <Hyperlink1>phản hồi</Hyperlink1> cho chúng tôi để cải thiện ứng dụng hoặc <Hyperlink2>tạo một issue</Hyperlink2> trên GitHub."
+  },
+
+  "openLinkConfirmPrompt": {
+    "description": "Bạn đang cố gắng mở một liên kết sẽ đưa bạn đến <span/>.<br/> Liên kết này sẽ được mở trong trình duyệt mặc định của bạn.",
+    "doNotVerifyLink": "Không xác minh khi cố gắng mở một liên kết.",
+    "openLink": "Mở liên kết"
+  },
+
+  "songUnplayableErrorPrompt": {
+    "title": "Không thể phát bài hát",
+    "description": "Có vẻ như chúng tôi không thể phát bài hát đó. Vui lòng kiểm tra xem bài hát đã chọn có sẵn trong hệ thống của bạn và có thể được ứng dụng truy cập hay không."
+  },
+
+  "unsupportedFileMessagePrompt": {
+    "title": "Tệp âm thanh không được hỗ trợ",
+    "description": "Bạn đang cố gắng mở một tệp có phần mở rộng <span/> và nó không được hỗ trợ bởi ứng dụng này.<br/> Hiện tại, chúng tôi chỉ hỗ trợ các định dạng âm thanh sau: <div/>"
+  },
+
+  "duplicateArtistsSuggestion": {
+    "message": "<div><p>Liệu <span/> có phải là cùng một nghệ sĩ không?</p><p>Nếu có, bạn có thể liên kết nội dung của họ thành một nghệ sĩ duy nhất, hoặc bạn có thể bỏ qua gợi ý này.</p></div>",
+    "linkToArtist": "Liên kết nghệ sĩ {{name}}"
+  },
+
+  "separateArtistsSuggestion": {
+    "message": "<div><p>Liệu <span/> có phải là {{count}} nghệ sĩ riêng biệt không?</p><p>Nếu có, bạn có thể sắp xếp họ bằng cách chọn họ như các nghệ sĩ riêng biệt, hoặc bạn có thể bỏ qua gợi ý này.</p></div>",
+    "separateAsArtists": "Tách nghệ sĩ thành {{count}} nghệ sĩ"
+  },
+
+  "featArtistsSuggestion": {
+    "message_one": "<p>Liệu <span/> có phải là nghệ sĩ xuất hiện trong bài hát này không?</p><p>Nếu có, bạn có thể thêm nghệ sĩ đó làm nghệ sĩ của bài hát, hoặc bạn có thể bỏ qua gợi ý này.</p>",
+    "message_other": "<p>Liệu có {{count}} nghệ sĩ <span/> xuất hiện trong bài hát này không?</p><p>Nếu có, bạn có thể thêm họ làm nghệ sĩ của bài hát, hoặc bạn có thể bỏ qua gợi ý này.</p>",
+    "featArtistsTitleReset": "Xoá thông tin nghệ sĩ xuất hiện trong tiêu đề bài hát sau khi thêm nghệ sĩ vào bài hát.",
+    "addArtistsToSong": "Thêm $t(common.artistWithCount, {\"count\":{{count}}}) vào bài hát",
+    "editInMetadataEditingPage": "Chỉnh sửa trong trang chỉnh sửa thông tin",
+    "modificationNotice": "Hãy nhớ rằng việc thêm nghệ sĩ xuất hiện vào bài hát sẽ cập nhật dữ liệu bài hát trong thư viện cũng như siêu dữ liệu của bài hát."
+  },
+
+  "biography": {
+    "readMore": "Đọc thêm...",
+    "readMoreInLastFm": "Đọc thêm trên LastFM",
+    "aboutName": "Về <span/>",
+    "goToTagInLastFm": "Đến {{name}} trên LastFM"
+  },
+
+  "notifications": {
+    "clearAll": "Xoá tất cả",
+    "playingNext": "'{{title}}' sẽ được phát tiếp theo.",
+    "songBlacklisted": "'{{title}}' đã bị đưa vào danh sách đen.",
+    "playingNextSongsWithCount": "$t(common.songWithCount, {\"count\":{{count}}}) sẽ được phát tiếp theo.",
+    "addedToQueue": "Đã thêm $t(common.songWithCount, {\"count\":{{count}}}) vào hàng đợi",
+    "suggestionIgnored": "Đề xuất đã bị bỏ qua.",
+    "songRestoreSuccess": "Khôi phục bài hát thành công.",
+    "songDataUpdateFailed": "Cập nhật dữ liệu bài hát thất bại.",
+    "noSongDataEdits": "Bạn chưa thay đổi bất kỳ dữ liệu bài hát nào.",
+    "selectASongToPlay": "Chọn một bài hát để phát",
+    "alreadyInPage": "Trang hiện tại đã là trang bạn muốn đến.",
+    "playbackRateChanged": "Tốc độ phát đã được thay đổi thành {{val}} x",
+    "playbackRateReset": "Tốc độ phát đã được đặt lại thành 1x",
+    "playbackPausedDueToSongDeletion": "Đã tạm dừng bài hát hiện tại vì nó đã bị xoá.",
+    "languageChanged": "Thay đổi ngôn ngữ ứng dụng thành công."
+  },
+
+  "backend": {
+    "RESYNC_SUCCESSFUL": "Đồng bộ thư viện thành công.",
+    "RESET_SUCCESSFUL": "Đặt lại ứng dụng thành công, hiện đang khởi động lại ứng dụng.",
+    "RESET_FAILED": "Đặt lại ứng dụng thất bại. Đang tải lại ứng dụng.",
+    "APP_THEME_CHANGE": "Chủ đề hệ thống đã được thay đổi thành {{theme}}",
+    "SONG_REMOVE_PROCESS_UPDATE": "Đã xoá {{value}} trong tổng số {{total}} bài hát.",
+    "SONG_REVEAL_FAILED": "Hiện tệp bài hát trong File Explorer thất bại vì không tìm thấy bài hát trong thư viện.",
+    "PENDING_METADATA_UPDATES_SAVED": "Đã lưu thành công dữ liệu mới chờ xử lý của '{{title}}'.",
+    "METADATA_UPDATE_FAILED": "Cập nhật dữ liệu không thành công. {{message}}",
+    "SONG_EXT_NOT_SUPPORTED_FOR_LYRICS_SAVES": "Không thể lưu lời bài hát vì phần mở rộng hiện tại của bài hát ({{ext}}) không được hỗ trợ chỉnh sửa thông tin.",
+    "LASTFM_LOGIN_SUCCESS": "Bạn đã đăng nhập LastFM thành công.",
+    "AUDIO_PARSING_PROCESS_UPDATE": "{{value}} đã hoàn thành trong tổng số {{total}} bài hát.",
+    "SONG_PALETTE_GENERATING_PROCESS_UPDATE": "Đang tạo bảng màu cho {{value}} trong tổng số {{total}} bài hát.",
+    "GENRE_PALETTE_GENERATING_PROCESS_UPDATE": "Đang tạo bảng màu cho {{value}} trong tổng số {{total}} thể loại.",
+    "LYRICS_FIND_FAILED": "Chúng tôi không thể tìm thấy lời cho '{{title}}'",
+    "LYRICS_TRANSLATION_SUCCESS": "Dịch lời thành công",
+    "LYRICS_TRANSLATION_FAILED": "Dịch lời thất bại",
+    "MUSIC_FOLDER_DELETED": "Thư mục '{{name}}' đã bị xoá khỏi hệ thống. $t(common.songWithCount, {\"count\":{{count}}}) liên quan đến thư mục đó sẽ bị xoá khỏi thư viện.",
+    "EMPTY_MUSIC_FOLDER_DELETED": "Thư mục '{{name}}' đã bị xoá khỏi hệ thống. Không tìm thấy bài hát nào liên quan đến thư mục đó. Thư viện sẽ không bị ảnh hưởng.",
+    "WHITELISTING_FOLDER_FAILED_DUE_TO_BLACKLISTED_PARENT_FOLDER": "Không thể loại thư mục '{{folderName}}' khỏi danh sách đen vì thư mục mẹ '{{parentFolderName}}' đã có trong danh sách đen. Hãy loại thư mục mẹ ra khỏi danh sách đen để loại thư mục này ra khỏi danh sách đen.",
+    "WHITELISTING_SONG_FAILED_DUE_TO_BLACKLISTED_DIRECTORY": "'{{songName}}' không thể được loại khỏi danh sách đen vì thư mục '{{directoryName}}' đã có trong danh sách đen. Hãy loại thư mục ra khỏi danh sách đen để loại bài hát này khỏi danh sách đen.",
+    "SONG_WHITELISTED": "$t(common.songWithCount, {\"count\":{{count}}}) đã được loại khỏi danh sách đen.",
+    "ARTWORK_SAVED": "Đã lưu ảnh vào vị trí yêu cầu.",
+    "DESTINATION_NOT_SELECTED": "Không có vị trí lưu được chọn.",
+    "ARTWORK_SAVE_FAILED": "Không thể lưu ảnh.",
+    "PLAYBACK_FROM_UNKNOWN_SOURCE": "Bạn đang phát một bài hát ngoài thư viện của bạn.",
+    "ARTIST_DISLIKE": "'{{name}}' đã bị xoá khỏi danh sách yêu thích.",
+    "ARTIST_LIKE": "'{{name}}' đã được thêm vào danh sách yêu thích.",
+    "SONG_DISLIKE": "'{{name}}' đã bị xoá khỏi danh sách yêu thích.",
+    "SONG_LIKE": "'{{name}}' đã được thêm vào danh sách yêu thích.",
+    "SONG_DELETED": "Bài hát '{{name}}' đã bị xoá khỏi hệ thống.",
+    "FOLDER_PARSED_FOR_DIRECTORIES": "$t(folder.directoryCount, {\"count\":{{count}}}) được tìm thấy trong $t(folder.selectedFolderCount, {\"count\":{{folderCount}}}).",
+    "NO_MORE_SONG_PALETTES": "Không còn bảng màu nào cho bài hát để tạo.",
+    "NO_MORE_GENRE_PALETTES": "Không còn bảng màu nào cho thể loại để tạo.",
+    "PARSE_FAILED": "'{{name}}' đã gặp lỗi khi thêm bài hát vào thư viện. Điều chỉnh lại thư viện trong cài đặt.",
+    "PARSE_SUCCESSFUL": "Bài hát '{{name}}' đã được thêm vào thư viện.",
+    "LYRICS_SAVE_QUEUED": "Lời cho '{{title}}' sẽ được lưu tự động.",
+    "LYRICS_SAVED_IN_LRC_FILE": "'Lời cho bài hát này với phần mở rộng '{{ext}}' sẽ được lưu trong một tệp LRC.",
+    "PENDING_LYRICS_SAVED": "Đã lưu thành công lời chờ xử lý của '{{title}}'.",
+    "ADDED_SONGS_TO_PLAYLIST": "Đã thêm $t(common.songWithCount, {\"count\":{{count}}}) vào danh sách phát '{{name}}' thành công.",
+    "APPDATA_IMPORT_STARTED": "Bắt đầu nhập dữ liệu ứng dụng. Vui lòng đợi...",
+    "APPDATA_IMPORT_SUCCESS": "Nhập dữ liệu ứng dụng thành công.",
+    "APPDATA_IMPORT_SUCCESS_WITH_PENDING_RESTART": "$t(backend.APPDATA_IMPORT_SUCCESS) Khởi động lại ứng dụng trong 5 giây.",
+    "APPDATA_IMPORT_FAILED": "Không thể nhập dữ liệu ứng dụng.",
+    "APPDATA_IMPORT_FAILED_DUE_TO_MISSING_FILES": "$t(backend.APPDATA_IMPORT_FAILED) Thiếu các tệp yêu cầu trong thư mục đã chọn.",
+    "APPDATA_EXPORT_STARTED": "Bắt đầu xuất dữ liệu ứng dụng. Vui lòng đợi...",
+    "APPDATA_EXPORT_SUCCESS": "Đã xuất dữ liệu ứng dụng thành công.",
+    "APPDATA_EXPORT_FAILED": "Đã xảy ra lỗi khi xuất dữ liệu ứng dụng.",
+    "PLAYLIST_EXPORT_SUCCESS": "Đã xuất danh sách phát '{{name}}' thành công.",
+    "PLAYLIST_EXPORT_FAILED": "Đã xảy ra lỗi khi xuất danh sách phát '{{name}}'.",
+    "PLAYLIST_IMPORT_SUCCESS": "Đã nhập danh sách phát '{{name}}' thành công.",
+    "PLAYLIST_IMPORT_FAILED": "Không thể nhập danh sách phát.",
+    "PLAYLIST_IMPORT_FAILED_DUE_TO_SONGS_OUTSIDE_LIBRARY": "Đã tìm thấy $t(common.songWithCount, {\"count\":{{count}}}) ngoài thư viện khi nhập danh sách phát, điều này không được hỗ trợ.",
+    "PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_DATA": "Không thể nhập danh sách phát vì người dùng đã chọn một tệp với dữ liệu tệp không hợp lệ.",
+    "PLAYLIST_IMPORT_FAILED_DUE_TO_INVALID_FILE_EXTENSION": "Không thể nhập danh sách phát vì người dùng đã chọn một tệp với phần mở rộng khác 'm3u8'.",
+    "PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST": "Đã nhập $t(common.songWithCount, {\"count\":{{count}}}) vào danh sách phát '{{name}}' hiện có.",
+    "PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST_FAILED": "Đã xảy ra lỗi khi nhập bài hát vào danh sách phát hiện có.",
+    "PLAYLIST_CREATION_FAILED": "Không thể tạo danh sách phát.",
+    "PLAYLIST_RENAME_SUCCESS": "Đổi tên danh sách phát thành công.",
+    "PLAYLIST_NOT_FOUND": "Không tìm thấy danh sách phát.",
+    "SONG_REPARSE_SUCCESS": "Đã phân tích lại thành công '{{title}}'.",
+    "SONG_REPARSE_FAILED": "Đã xảy ra lỗi khi phân tích lại bài hát."
+  }
+}
