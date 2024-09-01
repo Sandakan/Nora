@@ -18,6 +18,7 @@ import Button from '../Button';
 import { appPreferences } from '../../../../../package.json';
 import { LyricData } from '../LyricsEditingPage/LyricsEditingPage';
 import { isLyricsEnhancedSynced } from '../../../../common/isLyricsSynced';
+import useSkipLyricsLines from '../../hooks/useSkipLyricsLines';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -34,91 +35,24 @@ document.addEventListener('lyrics/scrollIntoView', () => {
 
 const LyricsPage = () => {
   const { currentSongData, localStorageData } = useContext(AppContext);
-  const {
-    addNewNotifications,
-    updateCurrentlyActivePageData,
-    changeCurrentActivePage,
-    updateSongPosition
-  } = useContext(AppUpdateContext);
+  const { addNewNotifications, updateCurrentlyActivePageData, changeCurrentActivePage } =
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const [lyrics, setLyrics] = useState(null as SongLyrics | undefined | null);
 
   const lyricsLinesContainerRef = useRef<HTMLDivElement>(null);
   const [isAutoScrolling, setIsAutoScrolling] = useState(true);
-  // const [isOfflineLyricAvailable, setIsOfflineLyricsAvailable] =
-  useState(false);
+
+  useSkipLyricsLines(lyrics);
   const { isOnline } = useNetworkConnectivity();
+  // const [isOfflineLyricAvailable, setIsOfflineLyricsAvailable] = useState(false);
 
   const copyright = useMemo(() => {
     if (lyrics?.copyright) return lyrics.copyright;
     if (lyrics?.lyrics?.copyright) return lyrics?.lyrics?.copyright;
     return undefined;
   }, [lyrics]);
-
-  const skipLyricsLines = useCallback(
-    (option: 'previous' | 'next' = 'next') => {
-      if (lyrics?.lyrics.isSynced) {
-        const { syncedLyrics } = lyrics.lyrics;
-
-        if (syncedLyrics) {
-          const lyricsLines: typeof syncedLyrics = [
-            { start: 0, end: syncedLyrics[0].start, text: '...' },
-            ...syncedLyrics
-          ];
-          document.addEventListener(
-            'player/positionChange',
-            (e) => {
-              if ('detail' in e && !Number.isNaN(e.detail)) {
-                const songPosition = e.detail as number;
-
-                for (let i = 0; i < lyricsLines.length; i += 1) {
-                  const { start, end } = lyricsLines[i];
-                  const isInRange = songPosition > start && songPosition < end;
-                  if (isInRange) {
-                    if (option === 'next' && lyricsLines[i + 1])
-                      updateSongPosition(lyricsLines[i + 1].start);
-                    else if (option === 'previous' && lyricsLines[i - 1])
-                      updateSongPosition(lyricsLines[i - 1].start);
-                  }
-                }
-              }
-            },
-            { once: true }
-          );
-        }
-      }
-    },
-    [lyrics?.lyrics, updateSongPosition]
-  );
-
-  const manageLyricsPageKeyboardShortcuts = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.altKey && e.key === 'ArrowUp') skipLyricsLines('previous');
-      else if (e.altKey && e.key === 'ArrowDown') skipLyricsLines('next');
-    },
-    [skipLyricsLines]
-  );
-
-  useEffect(() => {
-    if (
-      localStorageData.preferences.allowToPreventScreenSleeping &&
-      !localStorageData.preferences.removeAnimationsOnBatteryPower
-    )
-      window.api.appControls.stopScreenSleeping();
-    else window.api.appControls.allowScreenSleeping();
-    return () => window.api.appControls.allowScreenSleeping();
-  }, [
-    localStorageData?.preferences.allowToPreventScreenSleeping,
-    localStorageData?.preferences.removeAnimationsOnBatteryPower
-  ]);
-
-  useEffect(() => {
-    window.addEventListener('keydown', manageLyricsPageKeyboardShortcuts);
-    return () => {
-      window.removeEventListener('keydown', manageLyricsPageKeyboardShortcuts);
-    };
-  }, [manageLyricsPageKeyboardShortcuts]);
 
   const requestedLyricsTitle = useRef<string>();
 
@@ -444,10 +378,14 @@ const LyricsPage = () => {
               <div className="title-container relative flex w-full items-center justify-between py-2 pl-8 pr-2 text-2xl text-font-color-highlight dark:text-dark-font-color-highlight">
                 <div className="flex max-w-[40%] items-center">
                   <span className="overflow-hidden text-ellipsis whitespace-nowrap font-medium">
-                    {lyrics.source === 'IN_SONG_LYRICS' ? 'Offline' : 'Online'}{' '}
-                    {t('lyricsPage.lyricsForSong', {
-                      title: currentSongData.title
-                    })}
+                    {t(
+                      lyrics.source === 'IN_SONG_LYRICS'
+                        ? 'lyricsPage.offlineLyricsForSong'
+                        : 'lyricsPage.onlineLyricsForSong',
+                      {
+                        title: currentSongData.title
+                      }
+                    )}
                   </span>
                   {!lyrics.isOfflineLyricsAvailable && (
                     <span

@@ -84,6 +84,7 @@ const FullScreenPlayer = () =>
             isLyricsVisible={isLyricsVisible}
             setIsLyricsVisible={setIsLyricsVisible}
             isLyricsAvailable={isLyricsAvailable}
+            isMouseActive={isMouseActive}
           />
           <SeekBarSlider
             name="full-screen-player-seek-slider"

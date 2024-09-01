@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { AppContext } from '../../../contexts/AppContext';
 
 import LyricLine from '../../LyricsPage/LyricLine';
+import useSkipLyricsLines from '../../../hooks/useSkipLyricsLines';
 
 type Props = { isLyricsVisible: boolean };
 
@@ -14,6 +15,7 @@ const LyricsContainer = (props: Props) => {
   const { isLyricsVisible } = props;
 
   const [lyrics, setLyrics] = useState<SongLyrics | null | undefined>(null);
+  useSkipLyricsLines(lyrics);
 
   useEffect(() => {
     if (isLyricsVisible) {

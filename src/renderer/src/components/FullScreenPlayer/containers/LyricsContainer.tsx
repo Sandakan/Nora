@@ -5,6 +5,7 @@ import { AppContext } from '../../../contexts/AppContext';
 
 import LyricsMetadata from '../../LyricsPage/LyricsMetadata';
 import LyricLine from '../../LyricsPage/LyricLine';
+import useSkipLyricsLines from '../../../hooks/useSkipLyricsLines';
 
 type Props = {
   isLyricsVisible: boolean;
@@ -13,10 +14,12 @@ type Props = {
 
 const LyricsContainer = (props: Props) => {
   const { currentSongData, isCurrentSongPlaying } = useContext(AppContext);
+
   const { isLyricsVisible, setIsLyricsAvailable } = props;
   const { t } = useTranslation();
 
   const [lyrics, setLyrics] = useState<SongLyrics | null | undefined>(null);
+  useSkipLyricsLines(lyrics);
 
   useEffect(() => {
     if (isLyricsVisible) {

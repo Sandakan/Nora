@@ -118,7 +118,7 @@ const parseLyricsText = (line: string, lineEndTime: number): string | SyncedLyri
 
   if (isAnExtendedSyncedLine) return getExtendedSyncedLineInfo(line, lineEndTime);
 
-  return textLine;
+  return textLine || '♪';
 };
 
 const isNotALyricsMetadataLine = (line: string) => !/^\[\w+:.{1,}\]$/gm.test(line);
@@ -145,8 +145,8 @@ const parseLyrics = (lyricsString: string): LyricsData => {
   const lines = lyricsString.split('\n');
   const lyricsLines = lines.filter((line) => line.trim() !== '' && isNotALyricsMetadataLine(line));
 
-  const parsedUnsyncedLyricsLines = lyricsLines.map((line) =>
-    line.replaceAll(syncedLyricsRegex, '').trim()
+  const parsedUnsyncedLyricsLines = lyricsLines.map(
+    (line) => line.replaceAll(syncedLyricsRegex, '').trim() || '♪'
   );
   output.lyrics = parsedUnsyncedLyricsLines;
 
