@@ -378,10 +378,14 @@ const LyricsPage = () => {
               <div className="title-container relative flex w-full items-center justify-between py-2 pl-8 pr-2 text-2xl text-font-color-highlight dark:text-dark-font-color-highlight">
                 <div className="flex max-w-[40%] items-center">
                   <span className="overflow-hidden text-ellipsis whitespace-nowrap font-medium">
-                    {lyrics.source === 'IN_SONG_LYRICS' ? 'Offline' : 'Online'}{' '}
-                    {t('lyricsPage.lyricsForSong', {
-                      title: currentSongData.title
-                    })}
+                    {t(
+                      lyrics.source === 'IN_SONG_LYRICS'
+                        ? 'lyricsPage.offlineLyricsForSong'
+                        : 'lyricsPage.onlineLyricsForSong',
+                      {
+                        title: currentSongData.title
+                      }
+                    )}
                   </span>
                   {!lyrics.isOfflineLyricsAvailable && (
                     <span
