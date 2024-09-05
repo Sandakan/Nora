@@ -49,31 +49,26 @@ const CurrentQueuePage = () => {
 
   const ListRef = useRef<VirtuosoHandle>(null);
 
-  const isTheSameQueue = useCallback((newQueueSongIds: string[]) => {
-    const prevQueueSongIds = previousQueueRef.current;
-    const isSameQueue = prevQueueSongIds.every((id) => newQueueSongIds.includes(id));
+  // const isTheSameQueue = useCallback((newQueueSongIds: string[]) => {
+  //   const prevQueueSongIds = previousQueueRef.current;
+  //   const isSameQueue = prevQueueSongIds.every((id) => newQueueSongIds.includes(id));
 
-    return isSameQueue;
-  }, []);
+  //   return isSameQueue;
+  // }, []);
 
-  const fetchAllSongsData = useCallback(
-    (skipSameQueueCheck = false) => {
-      if (skipSameQueueCheck || !isTheSameQueue(queue.queue)) {
-        window.api.audioLibraryControls
-          .getSongInfo(queue.queue, 'addedOrder', undefined, undefined, true)
-          .then((res) => {
-            if (res) {
-              setQueuedSongs(res);
-              previousQueueRef.current = queue.queue.slice();
-            }
-          });
-      }
-    },
-    [isTheSameQueue, queue.queue]
-  );
+  const fetchAllSongsData = useCallback(() => {
+    window.api.audioLibraryControls
+      .getSongInfo(queue.queue, 'addedOrder', undefined, undefined, true)
+      .then((res) => {
+        if (res) {
+          setQueuedSongs(res);
+          previousQueueRef.current = queue.queue.slice();
+        }
+      });
+  }, [queue.queue]);
 
   useEffect(() => {
-    fetchAllSongsData(true);
+    fetchAllSongsData();
     const manageSongUpdatesInCurrentQueue = (e: Event) => {
       if ('detail' in e) {
         const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
@@ -83,7 +78,7 @@ const CurrentQueuePage = () => {
             event.dataType.includes('songs') ||
             event.dataType === 'userData/queue' ||
             event.dataType === 'blacklist/songBlacklist' ||
-            (event.dataType === 'songs/likes' && event.eventData.length > 1)
+            event.dataType === 'songs/likes'
           )
             fetchAllSongsData();
         }
@@ -299,7 +294,7 @@ const CurrentQueuePage = () => {
               isDisabled={queue.queue.length > 0 === false}
               clickHandler={() => {
                 updateQueueData(undefined, queue.queue, true);
-                fetchAllSongsData(true);
+                fetchAllSongsData();
                 addNewNotifications([
                   {
                     id: 'shuffleQueue',

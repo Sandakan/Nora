@@ -90,7 +90,6 @@ export const savePendingMetadataUpdates = (currentSongPath = '', forceSave = fal
               source: 'IN_SONG_LYRICS',
               isOfflineLyricsAvailable: true,
               lyricsType: synchronisedLyrics ? 'SYNCED' : 'UN_SYNCED',
-              isTranslated: false,
               lyrics
             });
           }
@@ -644,7 +643,7 @@ const manageLyricsUpdates = (
 
           cachedLyrics.lyrics = lyrics;
           cachedLyrics.lyricsType = lyricsType;
-          cachedLyrics.copyright = lyrics.copyright;
+          cachedLyrics.lyrics.copyright = lyrics.copyright;
           cachedLyrics.source = 'IN_SONG_LYRICS';
           cachedLyrics.isOfflineLyricsAvailable = true;
 

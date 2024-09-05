@@ -7,13 +7,14 @@ interface LyricsSourceProp {
   link?: string;
   copyright?: string;
   className?: string;
+  textClassName?: string;
   isTranslated?: boolean;
 }
 
 const LyricsMetadata = (props: LyricsSourceProp) => {
   const { t } = useTranslation();
 
-  const { source, copyright, link, className, isTranslated } = props;
+  const { source, copyright, link, className, textClassName, isTranslated } = props;
   return (
     <div
       className={`source-name mt-12 flex flex-col items-center justify-center gap-2 text-center text-[#ccc] ${className}`}
@@ -35,10 +36,12 @@ const LyricsMetadata = (props: LyricsSourceProp) => {
         </div>
       )}
       {copyright && (
-        <div className="text-balance text-sm text-font-color-dimmed">&copy; {copyright}</div>
+        <div className={`text-balance text-sm text-font-color-dimmed ${textClassName}`}>
+          &copy; {copyright}
+        </div>
       )}
       {isTranslated && (
-        <div className="text-balance text-sm text-font-color-dimmed">
+        <div className={`text-balance text-sm text-font-color-dimmed ${textClassName}`}>
           Lyrics translated using Google Translate
         </div>
       )}

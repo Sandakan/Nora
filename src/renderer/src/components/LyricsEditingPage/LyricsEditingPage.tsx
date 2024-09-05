@@ -28,7 +28,7 @@ const LyricsEditorSavePrompt = lazy(() => import('./LyricsEditorSavePrompt'));
 const PageFocusPrompt = lazy(() => import('./PageFocusPrompt'));
 
 export interface LyricData {
-  text: string | Omit<SyncedLyricsLineText, 'unparsedText'>;
+  text: string | Omit<SyncedLyricsLineWord, 'unparsedText'>[];
   start?: number;
   end?: number;
 }

@@ -16,7 +16,7 @@ class AudioPlayer extends Audio {
       if (this.fadeOutIntervalId) clearInterval(this.fadeOutIntervalId);
 
       this.fadeOutIntervalId = setInterval(() => {
-        console.log(super.volume);
+        // console.log(super.volume);
         if (super.volume > 0) {
           const rate = this.currentVolume / (100 * (AUDIO_FADE_DURATION / AUDIO_FADE_INTERVAL));
           if (super.volume - rate <= 0) super.volume = 0;
@@ -36,7 +36,7 @@ class AudioPlayer extends Audio {
       if (this.fadeOutIntervalId) clearInterval(this.fadeOutIntervalId);
 
       this.fadeInIntervalId = setInterval(() => {
-        console.log(super.volume);
+        // console.log(super.volume);
         if (super.volume < this.currentVolume / 100) {
           const rate =
             (this.currentVolume / 100 / AUDIO_FADE_INTERVAL) *

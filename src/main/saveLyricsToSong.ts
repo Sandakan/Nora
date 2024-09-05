@@ -20,35 +20,35 @@ type PendingSongLyrics = {
 
 const pendingSongLyrics = new Map<string, PendingSongLyrics>();
 
-const saveLyricsToSong = async (songPathWithProtocol: string, lyrics: SongLyrics) => {
+const saveLyricsToSong = async (songPathWithProtocol: string, songLyrics: SongLyrics) => {
   const userData = getUserData();
   const songPath = removeDefaultAppProtocolFromFilePath(songPathWithProtocol);
 
-  if (lyrics && lyrics.lyrics.lyrics.length > 0) {
+  if (songLyrics && songLyrics.lyrics.parsedLyrics.length > 0) {
     const pathExt = path.extname(songPath).replace(/\W/, '');
     const isASupportedFormat = metadataEditingSupportedExtensions.includes(pathExt);
 
     if (!isASupportedFormat || userData.preferences.saveLyricsInLrcFilesForSupportedSongs)
-      saveLyricsToLRCFile(songPath, lyrics);
+      saveLyricsToLRCFile(songPath, songLyrics);
 
     if (isASupportedFormat) {
       const prevTags = await NodeID3.Promise.read(songPath);
 
-      const { isSynced } = lyrics.lyrics;
+      const { isSynced } = songLyrics.lyrics;
       const unsynchronisedLyrics: UnsynchronisedLyrics = !isSynced
         ? {
             language: 'ENG',
-            text: lyrics.lyrics.unparsedLyrics
+            text: songLyrics.lyrics.unparsedLyrics
           }
         : prevTags.unsynchronisedLyrics;
 
       const synchronisedLyrics = isSynced
-        ? convertParsedLyricsToNodeID3Format(lyrics.lyrics)
+        ? convertParsedLyricsToNodeID3Format(songLyrics.lyrics)
         : prevTags.synchronisedLyrics;
 
       try {
         const updatingTags = {
-          title: lyrics.title,
+          title: songLyrics.title,
           unsynchronisedLyrics,
           synchronisedLyrics: synchronisedLyrics || []
         };
@@ -65,7 +65,7 @@ const saveLyricsToSong = async (songPathWithProtocol: string, lyrics: SongLyrics
           return undefined;
         });
         return log(
-          `Lyrics for '${lyrics.title}' will be saved automatically.`,
+          `Lyrics for '${songLyrics.title}' will be saved automatically.`,
           {
             songPath
           },
@@ -73,7 +73,7 @@ const saveLyricsToSong = async (songPathWithProtocol: string, lyrics: SongLyrics
           {
             sendToRenderer: {
               messageCode: 'LYRICS_SAVE_QUEUED',
-              data: { title: lyrics.title }
+              data: { title: songLyrics.title }
             }
           }
         );

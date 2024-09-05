@@ -148,6 +148,35 @@ const AboutSettings = () => {
             />
           </div>
         </div>
+        <div className="mb-4 flex items-center gap-4">
+          <img
+            alt="GitHub all releases"
+            src="https://img.shields.io/github/downloads/Sandakan/Nora/total?label=all%20time%20downloads"
+          />
+          <img
+            alt="GitHub release (latest by date)"
+            src={`https://img.shields.io/github/downloads/Sandakan/Nora/v${version}/total`}
+          />
+          <Hyperlink
+            linkTitle={t('settingsPage.noraGithubIssues')}
+            link="https://github.com/Sandakan/Nora/issues"
+          >
+            <img
+              alt="GitHub issues"
+              src="https://img.shields.io/github/issues/Sandakan/Oto-Music-for-Desktop"
+            />
+          </Hyperlink>
+
+          <Hyperlink
+            linkTitle={t('settingsPage.noraLocalizationStatus')}
+            link="https://crowdin.com/project/nora"
+          >
+            <img
+              src="https://badges.crowdin.net/nora/localized.svg"
+              alt={t('settingsPage.noraLocalizationStatus')}
+            />
+          </Hyperlink>
+        </div>
         <ul className="mb-4 list-disc pl-4 text-sm">
           <li>{t('settingsPage.noraDescription')}</li>
           <li>

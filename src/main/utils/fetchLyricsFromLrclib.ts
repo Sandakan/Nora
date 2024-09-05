@@ -44,13 +44,25 @@ const parseLrclibResponseData = (
 ): ParsedLrclibLyrics | undefined => {
   if ('statusCode' in data) return undefined;
 
+  const lyricsArr: string[] = [];
+  lyricsArr.push(`[re:Nora (https://github.com/Sandakan/Nora)]`);
+  lyricsArr.push(`[ve:${version}]`);
+  lyricsArr.push(`[ti:${data.trackName}]`);
+  lyricsArr.push(`[ar:${data.artistName}]`);
+  lyricsArr.push(`[al:${data.albumName}]`);
+  lyricsArr.push(`[length:${Math.floor(data.duration / 60)}:${data.duration % 60}]`);
+  lyricsArr.push(`[offset:0]`);
+  // lyricsArr.push(`[lang:en]`);
+  lyricsArr.push(`[copyright:Lyrics by Lrclib (${LRCLIB_BASE_URL})]`);
+  lyricsArr.push(data.syncedLyrics || data.plainLyrics);
+
   const output: ParsedLrclibLyrics = {
     lrclibId: data.id,
     trackName: data.trackName,
     artistName: data.artistName,
     albumName: data.albumName,
     duration: data.duration,
-    lyrics: data.syncedLyrics || data.plainLyrics,
+    lyrics: lyricsArr.join('\n'),
     lyricsType: 'syncedLyrics' in data ? 'SYNCED' : 'UN_SYNCED'
   };
 

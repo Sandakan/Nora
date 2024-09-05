@@ -480,6 +480,8 @@
     "noraWebsite": "Nora's official website",
     "noraDiscordServer": "Nora's official Discord server",
     "noraGithubRepo": "Nora's Github repository",
+    "noraGithubIssues": "Nora's Github issues",
+    "noraLocalizationStatus": "Nora localization status",
     "noraDescription": "Nora is an elegant music player built using Electron and React.",
     "noraInspiration": "Inspired by <Hyperlink>Oto Music for Android</Hyperlink> by Piyush Mamidwar.",
     "otoMusicOnPlayStore": "Oto Music for Android on the Play Store",
