@@ -67,32 +67,33 @@ const convertLyricsStrToObj = (
   const lyrics = metadataLines.concat(lines).join('\n');
 
   const isSynced = isLyricsSynced(lyrics);
-  const syncedLyrics: SyncedLyricLine[] | undefined =
+  const parsedLyrics: LyricLine[] | undefined =
     lyricsLines.length > 0
       ? lyricsLines.map((line) => {
           return {
-            text: Array.isArray(line.text)
+            originalText: Array.isArray(line.text)
               ? line.text.map((textLine) => textLine.text).join(' ')
               : line.text,
+            translatedTexts: [],
+            isEnhancedSynced: false,
             start: line.start || 0,
             end: line.end || 0
           };
         })
-      : undefined;
+      : [];
 
   const obj: SongLyrics = {
     title,
     source: 'IN_SONG_LYRICS',
     lyrics: {
+      isTranslated: false,
       isSynced,
       unparsedLyrics: lyrics,
-      lyrics: lines,
-      syncedLyrics,
+      parsedLyrics,
       offset: 0
     },
     lyricsType: isSynced ? 'SYNCED' : 'UN_SYNCED',
-    isOfflineLyricsAvailable: false,
-    isTranslated: false
+    isOfflineLyricsAvailable: false
   };
   return obj;
 };

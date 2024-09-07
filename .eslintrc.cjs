@@ -15,6 +15,7 @@ module.exports = {
     'react-refresh/only-export-components': 'warn',
     '@typescript-eslint/explicit-function-return-type': 'off',
     'import/no-unresolved': 'off',
+    'import/named': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     'react/no-unescaped-entities': 'off',
     '@typescript-eslint/no-unused-vars': 'warn'

@@ -114,7 +114,10 @@ const fetchLyricsFromLRCFile = async (songPath: string) => {
         (await readFileData(customLrcFilePathWithoutExtension));
     }
 
-    if (!lyricsInLrcFormat) throw Error('No lrc lyrics files found.');
+    if (!lyricsInLrcFormat) {
+      log('No lrc lyrics files found.');
+      return undefined;
+    }
 
     const parsedLyrics = parseLyrics(lyricsInLrcFormat);
     return parsedLyrics;
