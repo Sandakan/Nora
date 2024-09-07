@@ -37,7 +37,7 @@ import { generateRandomId } from './utils/randomId';
 import { createTempArtwork, removeArtwork, storeArtworks } from './other/artworks';
 import generatePalette from './other/generatePalette';
 import { parseLyricsFromID3Format, updateCachedLyrics } from './core/getSongLyrics';
-import parseLyrics from './utils/parseLyrics';
+import parseLyrics from '../common/parseLyrics';
 import convertParsedLyricsToNodeID3Format from './core/convertParsedLyricsToNodeID3Format';
 import sendSongID3Tags from './core/sendSongId3Tags';
 import { isSongBlacklisted } from './utils/isBlacklisted';

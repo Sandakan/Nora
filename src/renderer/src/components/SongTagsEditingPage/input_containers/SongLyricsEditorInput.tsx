@@ -7,7 +7,7 @@ import Button from '../../Button';
 import Hyperlink from '../../Hyperlink';
 import { LyricData } from '../../LyricsEditingPage/LyricsEditingPage';
 import useNetworkConnectivity from '../../../hooks/useNetworkConnectivity';
-import parseLyrics from '../../../utils/parseLyrics';
+import parseLyrics from '../../../../../common/parseLyrics';
 import isLyricsSynced, { isLyricsEnhancedSynced } from '../../../../../common/isLyricsSynced';
 
 type CurrentLyricsTYpe = 'synced' | 'unsynced';
@@ -180,12 +180,13 @@ const SongLyricsEditorInput = (props: Props) => {
     if (synchronizedLyrics || unsynchronizedLyrics) {
       const lyrics = currentLyricsType === 'synced' ? synchronizedLyrics : unsynchronizedLyrics;
       let lines: LyricData[] = [];
-      const { isSynced, syncedLyrics, unsyncedLyrics } = parseLyrics(lyrics as string);
+      const { parsedLyrics } = parseLyrics(lyrics as string);
 
-      if (isSynced) lines = syncedLyrics;
-      else {
-        lines = unsyncedLyrics.map((line) => ({ text: line }));
-      }
+      lines = parsedLyrics.map((lyric) => ({
+        text: lyric.originalText,
+        start: lyric.start,
+        end: lyric.end
+      }));
 
       changeCurrentActivePage('LyricsEditor', {
         lyrics: lines,
@@ -238,7 +239,9 @@ const SongLyricsEditorInput = (props: Props) => {
           name="lyrics"
           placeholder={t('common.lyrics')}
           value={
-            currentLyricsType === 'synced' ? synchronizedLyrics ?? '' : unsynchronizedLyrics ?? ''
+            currentLyricsType === 'synced'
+              ? (synchronizedLyrics ?? '')
+              : (unsynchronizedLyrics ?? '')
           }
           onKeyDown={(e) => e.stopPropagation()}
           onChange={(e) => {

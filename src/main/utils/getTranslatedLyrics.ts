@@ -1,6 +1,6 @@
 import { translate } from '@vitalets/google-translate-api';
 import { getCachedLyrics, updateCachedLyrics } from '../core/getSongLyrics';
-import parseLyrics, { INSTRUMENTAL_LYRIC_IDENTIFIER } from './parseLyrics';
+import parseLyrics, { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
 import { sendMessageToRenderer } from '../main';
 import { version } from '../../../package.json';
 import log from '../log';

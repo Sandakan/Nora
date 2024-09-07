@@ -1,61 +1,61 @@
 import { TagConstants } from 'node-id3';
 // import log from '../log';
 import isLyricsSynced, {
-  extendedSyncedLyricsLineRegex,
-  isAnExtendedSyncedLyricsLine,
-  syncedLyricsRegex
-} from '../../common/isLyricsSynced';
+  EXTENDED_SYNCED_LYRICS_LINE_REGEX,
+  LYRICS_LINE_REGEX,
+  SYNCED_LYRICS_REGEX,
+  isAnExtendedSyncedLyricsLine
+} from './isLyricsSynced';
 
 export type SyncedLyricsInput = NonNullable<NodeID3Tags['synchronisedLyrics']>[number];
 
 export const INSTRUMENTAL_LYRIC_IDENTIFIER = '♪';
-const titleMatchRegex = /^\[ti:(?<title>.+)\]$/gm;
-const artistMatchRegex = /^\[ar:(?<artist>.+)\]$/gm;
-const albumMatchRegex = /^\[al:(?<album>.+)\]$/gm;
-const durationMatchRegex = /^\[length:(?<duration>.+)\]$/gm;
-const langMatchRegex = /^\[lang:(?<lang>.+)\]$/gm;
-const copyrightMatchRegex = /^\[copyright:(?<copyright>.+)\]$/gm;
-const lyricLinelangMatchRegex = /\[lang:(?<lang>.+)\](.+)$/gm;
-const lyricsOffsetRegex = /^\[offset:(?<lyricsOffset>[+-]?\d+)\]$/gm;
-
-const startTimestampMatchRegex = /(?<extSyncTimeStamp>\[\d+:\d{1,2}\.\d{1,3}\])/gm;
+const TITLE_MATCH_REGEX = /^\[ti:(?<title>.+)\]$/gm;
+const ARTIST_MATCH_REGEX = /^\[ar:(?<artist>.+)\]$/gm;
+const ALBUM_MATCH_REGEX = /^\[al:(?<album>.+)\]$/gm;
+const DURATION_MATCH_REGEX = /^\[length:(?<duration>.+)\]$/gm;
+const LANG_MATCH_REGEX = /^\[lang:(?<lang>.+)\]$/gm;
+const COPYRIGHT_MATCH_REGEX = /^\[copyright:(?<copyright>.+)\]$/gm;
+const LYRIC_LINE_LANG_MATCH_REGEX = /\[lang:(?<lang>.+)\](.+)$/gm;
+const LYRIC_OFFSET_MATCH_REGEX = /^\[offset:(?<lyricsOffset>[+-]?\d+)\]$/gm;
+const START_TIMESTAMP_MATCH_REGEX = /(?<extSyncTimeStamp>\[\d+:\d{1,2}\.\d{1,3}\])/gm;
 
 export const getTitleFromLyricsString = (lyricsString: string) => {
-  const titleMatch = titleMatchRegex.exec(lyricsString);
-  titleMatchRegex.lastIndex = 0;
+  const titleMatch = TITLE_MATCH_REGEX.exec(lyricsString);
+  TITLE_MATCH_REGEX.lastIndex = 0;
 
   return titleMatch?.groups?.title;
 };
 
 export const getArtistFromLyricsString = (lyricsString: string) => {
-  const artistMatch = artistMatchRegex.exec(lyricsString);
-  artistMatchRegex.lastIndex = 0;
+  const artistMatch = ARTIST_MATCH_REGEX.exec(lyricsString);
+  ARTIST_MATCH_REGEX.lastIndex = 0;
 
   return artistMatch?.groups?.artist;
 };
 
 export const getAlbumFromLyricsString = (lyricsString: string) => {
-  const albumMatch = albumMatchRegex.exec(lyricsString);
-  albumMatchRegex.lastIndex = 0;
+  const albumMatch = ALBUM_MATCH_REGEX.exec(lyricsString);
+  ALBUM_MATCH_REGEX.lastIndex = 0;
 
   return albumMatch?.groups?.album;
 };
 
 export const getDurationFromLyricsString = (lyricsString: string) => {
-  const durationMatch = durationMatchRegex.exec(lyricsString);
-  durationMatchRegex.lastIndex = 0;
+  const durationMatch = DURATION_MATCH_REGEX.exec(lyricsString);
+  DURATION_MATCH_REGEX.lastIndex = 0;
 
   return durationMatch?.groups?.duration;
 };
 
 export const getCopyrightInfoFromLyricsString = (lyricsString: string) => {
-  const copyrightMatch = copyrightMatchRegex.exec(lyricsString);
-  copyrightMatchRegex.lastIndex = 0;
+  const copyrightMatch = COPYRIGHT_MATCH_REGEX.exec(lyricsString);
+  COPYRIGHT_MATCH_REGEX.lastIndex = 0;
 
   return copyrightMatch?.groups?.copyright;
 };
 
-export const getLanguageFromLyricsString = (lyricsString: string, regex = langMatchRegex) => {
+export const getLanguageFromLyricsString = (lyricsString: string, regex = LANG_MATCH_REGEX) => {
   const langMatch = regex.exec(lyricsString);
   regex.lastIndex = 0;
 
@@ -63,21 +63,20 @@ export const getLanguageFromLyricsString = (lyricsString: string, regex = langMa
 };
 
 export const getOffsetFromLyricsString = (lyricsString: string) => {
-  const offsetMatch = lyricsOffsetRegex.exec(lyricsString);
-  lyricsOffsetRegex.lastIndex = 0;
+  const offsetMatch = LYRIC_OFFSET_MATCH_REGEX.exec(lyricsString);
+  LYRIC_OFFSET_MATCH_REGEX.lastIndex = 0;
 
   return Number(offsetMatch?.groups?.lyricsOffset || 0) / 1000;
 };
 
 const getSecondsFromLyricsLine = (lyric: string) => {
-  const lyricsStartMatch = lyric.match(syncedLyricsRegex);
-  syncedLyricsRegex.lastIndex = 0;
-  const replaceRegex = /[[\]]/gm;
-  if (Array.isArray(lyricsStartMatch)) {
-    const [sec, ms] = lyricsStartMatch[0].replaceAll(replaceRegex, '').split(':');
-    replaceRegex.lastIndex = 0;
+  const lyricsStartMatch = SYNCED_LYRICS_REGEX.exec(lyric);
+  SYNCED_LYRICS_REGEX.lastIndex = 0;
 
-    return parseInt(sec) * 60 + parseFloat(ms);
+  if (lyricsStartMatch && lyricsStartMatch?.groups) {
+    const { sec, ms } = lyricsStartMatch.groups;
+
+    return parseInt(sec.trim()) * 60 + parseFloat(ms.trim());
   }
   return 0;
 };
@@ -92,14 +91,11 @@ const getSecondsFromExtendedTimeStamp = (text: string) => {
   return parseInt(sec) * 60 + parseFloat(ms);
 };
 
-const getLyricEndTime = (lyricsArr: string[], index: number, start: number) => {
+const getLyricEndTime = (lyricsArr: string[], index: number) => {
   if (lyricsArr.length - 1 === index) return Number.POSITIVE_INFINITY;
 
   if (lyricsArr[index + 1]) {
     const end = getSecondsFromLyricsLine(lyricsArr[index + 1]);
-
-    if (start === end && lyricsArr[index + 2])
-      return getSecondsFromLyricsLine(lyricsArr[index + 2]);
     return end;
   }
 
@@ -133,8 +129,8 @@ const getExtendedSyncedLineInfo = (
   lineEndTime: number
 ): string | SyncedLyricsLineWord[] => {
   try {
-    const matches = [...line.matchAll(extendedSyncedLyricsLineRegex)];
-    extendedSyncedLyricsLineRegex.lastIndex = 0;
+    const matches = [...line.matchAll(EXTENDED_SYNCED_LYRICS_LINE_REGEX)];
+    EXTENDED_SYNCED_LYRICS_LINE_REGEX.lastIndex = 0;
 
     if (matches.length > 0) {
       const extendedSyncLines: SyncedLyricsLineWord[] = matches.map((match, index, arr) => {
@@ -167,8 +163,8 @@ const getExtendedSyncedLineInfo = (
 };
 
 const parseLyricsText = (line: string, lineEndTime: number): string | SyncedLyricsLineWord[] => {
-  const textLine = line.replaceAll(syncedLyricsRegex, '').trim();
-  syncedLyricsRegex.lastIndex = 0;
+  const textLine = line.replaceAll(SYNCED_LYRICS_REGEX, '').trim();
+  SYNCED_LYRICS_REGEX.lastIndex = 0;
 
   const isAnExtendedSyncedLine = isAnExtendedSyncedLyricsLine(textLine);
 
@@ -178,30 +174,73 @@ const parseLyricsText = (line: string, lineEndTime: number): string | SyncedLyri
 };
 
 const isNotALyricsMetadataLine = (line: string) => !/^\[\w+:.{1,}\]$/gm.test(line);
-const groupLyricsByTime = (lyricsLines: string[]) => {
-  const groupedLines: { [key: string]: string[] } = {};
-  lyricsLines.forEach((line) => {
-    const time = getSecondsFromLyricsLine(line).toString();
-    if (!groupedLines[time]) groupedLines[time] = [];
-    groupedLines[time].push(line);
-  });
 
-  return Object.entries(groupedLines).map(([start, lines]) => {
+const partiallyParseLrcLyricLine = (line: string) => {
+  const match = LYRICS_LINE_REGEX.exec(line);
+  LYRICS_LINE_REGEX.lastIndex = 0;
+
+  if (match?.groups) {
+    const { timestamp, lang, lyric } = match.groups;
+
     return {
-      start,
-      originalText: lines[0],
-      translatedText: lines.length > 1 ? lines.slice(1) : []
+      input: line,
+      timestamp,
+      lang,
+      lyric
     };
-  });
+  }
+
+  return undefined;
+};
+
+const groupOriginalAndTranslatedLyricLines = (lyricsLines: string[], isSynced: boolean) => {
+  const partiallyParsedLines = lyricsLines
+    .map((line) => partiallyParseLrcLyricLine(line))
+    .filter((line) => line !== undefined);
+
+  if (isSynced) {
+    const groupedLines: { [key: string]: typeof partiallyParsedLines } = {};
+
+    partiallyParsedLines.forEach((line) => {
+      const time = getSecondsFromLyricsLine(line.input).toString();
+
+      if (!groupedLines[time]) groupedLines[time] = [];
+      groupedLines[time].push(line);
+    });
+
+    return Object.entries(groupedLines).map(([, lines]) => {
+      return {
+        original: lines[0],
+        translated: lines.length > 1 ? lines.slice(1) : []
+      };
+    });
+  } else {
+    const groupedLines: { [key: string]: typeof partiallyParsedLines } = {};
+    let lineCount = -1;
+
+    partiallyParsedLines.forEach((line) => {
+      if (line.lang === undefined) lineCount++;
+
+      if (!groupedLines[lineCount]) groupedLines[lineCount] = [];
+      groupedLines[lineCount].push(line);
+    });
+
+    return Object.entries(groupedLines).map(([, lines]) => {
+      return {
+        original: lines[0],
+        translated: lines.length > 1 ? lines.slice(1) : []
+      };
+    });
+  }
 };
 
 const parseTranslatedLyricsText = (lines: string[]): TranslatedLyricLine[] => {
   return lines.map((line, i): TranslatedLyricLine => {
-    const start = getSecondsFromLyricsLine(line);
-    const end = getLyricEndTime(lines, i, start);
+    // const start = getSecondsFromLyricsLine(line);
+    const end = getLyricEndTime(lines, i);
 
     return {
-      lang: getLanguageFromLyricsString(line, lyricLinelangMatchRegex) || 'en',
+      lang: getLanguageFromLyricsString(line, LYRIC_LINE_LANG_MATCH_REGEX) || 'en',
       text: parseLyricsText(line, end)
     };
   });
@@ -224,35 +263,54 @@ const parseLyrics = (lrcString: string): LyricsData => {
     .split('\n')
     .filter((line) => line.trim() !== '' && isNotALyricsMetadataLine(line));
 
-  const groupedLines = groupLyricsByTime(lines);
-  const originalLyricsLines = groupedLines.map((line) => line.originalText);
+  const groupedLines = groupOriginalAndTranslatedLyricLines(lines, output.isSynced);
+  const originalLyricsLines = groupedLines.map((line) => line.original.input);
 
   output.parsedLyrics = groupedLines.map((line, index) => {
-    const start = getSecondsFromLyricsLine(line.originalText);
-    const end = getLyricEndTime(originalLyricsLines, index, start);
+    if (output.isSynced) {
+      const start = getSecondsFromLyricsLine(line.original.input);
+      const end = getLyricEndTime(originalLyricsLines, index);
 
-    const parsedLine = parseLyricsText(line.originalText, end);
-    const isEnhancedSynced = typeof parsedLine !== 'string';
+      const parsedLine = parseLyricsText(line.original.input, end);
+      const isEnhancedSynced = typeof parsedLine !== 'string';
 
-    const translatedTexts = parseTranslatedLyricsText(line.translatedText);
-    if (translatedTexts.length > 0) output.isTranslated = true;
+      const translatedTexts = parseTranslatedLyricsText(line.translated.map((t) => t.input));
+      if (translatedTexts.length > 0) output.isTranslated = true;
 
-    translatedTexts.forEach((t) => {
+      translatedTexts.forEach((t) => {
+        if (output.translatedLanguages && !output.translatedLanguages.includes(t.lang))
+          output.translatedLanguages.push(t.lang);
+      });
+
+      return {
+        originalText: parsedLine,
+        translatedTexts,
+        isEnhancedSynced,
+        start,
+        end
+      };
+    }
+
+    const translatedTexts = line.translated.map((t) => {
       if (output.translatedLanguages && !output.translatedLanguages.includes(t.lang))
         output.translatedLanguages.push(t.lang);
+
+      return { lang: t.lang, text: t.lyric.trim() };
     });
+    if (translatedTexts.length > 0) output.isTranslated = true;
 
     return {
-      originalText: parsedLine,
+      originalText: line.original.lyric.trim(),
       translatedTexts,
-      isEnhancedSynced,
-      start,
-      end
+      isEnhancedSynced: false,
+      start: undefined,
+      end: undefined
     };
   });
 
   return output;
 };
+
 const parseMetadataFromShortText = (shortText?: string) => {
   const metadata: LyricsMetadataFromShortText = { copyright: undefined };
 
@@ -326,8 +384,8 @@ export const parseSyncedLyricsFromAudioDataSource = (
             ? text
             : text
                 .map((x) => {
-                  startTimestampMatchRegex.lastIndex = 0;
-                  if (startTimestampMatchRegex.test(x.unparsedText)) return x.text;
+                  START_TIMESTAMP_MATCH_REGEX.lastIndex = 0;
+                  if (START_TIMESTAMP_MATCH_REGEX.test(x.unparsedText)) return x.text;
                   return x.unparsedText;
                 })
                 .join(' ');
@@ -349,6 +407,8 @@ export const parseSyncedLyricsFromAudioDataSource = (
       copyright: metadata.copyright,
       parsedLyrics: lyrics,
       unparsedLyrics,
+      originalLanguage: undefined,
+      translatedLanguages: [],
       offset: 0
     };
   }

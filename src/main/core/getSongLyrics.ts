@@ -9,7 +9,7 @@ import log from '../log';
 import { checkIfConnectedToInternet, sendMessageToRenderer } from '../main';
 import fetchLyricsFromMusixmatch from '../utils/fetchLyricsFromMusixmatch';
 import { appPreferences } from '../../../package.json';
-import parseLyrics, { parseSyncedLyricsFromAudioDataSource } from '../utils/parseLyrics';
+import parseLyrics, { parseSyncedLyricsFromAudioDataSource } from '../../common/parseLyrics';
 import saveLyricsToSong from '../saveLyricsToSong';
 import { decrypt } from '../utils/safeStorage';
 import fetchLyricsFromLrclib from '../utils/fetchLyricsFromLrclib';

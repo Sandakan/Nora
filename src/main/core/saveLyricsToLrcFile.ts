@@ -12,7 +12,7 @@ import {
   getLanguageFromLyricsString,
   getOffsetFromLyricsString,
   getTitleFromLyricsString
-} from '../utils/parseLyrics';
+} from '../../common/parseLyrics';
 
 export const getLrcLyricsMetadata = (songLyrics: SongLyrics) => {
   const { unparsedLyrics } = songLyrics.lyrics;
