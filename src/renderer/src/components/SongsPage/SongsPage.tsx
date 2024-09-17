@@ -1,6 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import { lazy, useCallback, useContext, useEffect, useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import storage from '../../utils/localStorage';
@@ -17,12 +18,11 @@ import { songSortOptions, songFilterOptions } from './SongOptions';
 import DataFetchingImage from '../../assets/images/svg/Road trip_Monochromatic.svg';
 import NoSongsImage from '../../assets/images/svg/Empty Inbox _Monochromatic.svg';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '../../store';
 
 const AddMusicFoldersPrompt = lazy(() => import('../MusicFoldersPage/AddMusicFoldersPrompt'));
 
 interface SongPageReducer {
-  songsData: AudioInfo[];
   sortingOrder: SongSortTypes;
   filteringOrder: SongFilterTypes;
 }
@@ -34,11 +34,6 @@ const reducer = (
   action: { type: SongPageReducerActionTypes; data: any }
 ): SongPageReducer => {
   switch (action.type) {
-    case 'SONGS_DATA':
-      return {
-        ...state,
-        songsData: action.data
-      };
     case 'SORTING_ORDER':
       return {
         ...state,
@@ -72,9 +67,9 @@ const SongsPage = () => {
     changePromptMenuData
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
 
   const [content, dispatch] = useReducer(reducer, {
-    songsData: [],
     sortingOrder:
       (currentlyActivePage?.data?.sortingOrder as SongSortTypes) ||
       localStorageData?.sortingStates?.songsPage ||
@@ -82,33 +77,21 @@ const SongsPage = () => {
     filteringOrder: 'notSelected'
   });
 
-  const fetchSongsData = useCallback(() => {
-    console.time('songs');
-
-    window.api.audioLibraryControls
-      .getAllSongs(content.sortingOrder, content.filteringOrder)
-      .then((audioInfoArray) => {
-        console.timeEnd('songs');
-
-        if (audioInfoArray) {
-          if (audioInfoArray.data.length === 0)
-            dispatch({
-              type: 'SONGS_DATA',
-              data: null
-            });
-          else
-            dispatch({
-              type: 'SONGS_DATA',
-              data: audioInfoArray.data
-            });
-        }
-        return undefined;
-      })
-      .catch((err) => console.error(err));
-  }, [content.filteringOrder, content.sortingOrder]);
+  const {
+    data: songs,
+    isSuccess,
+    isFetching
+  } = useQuery({
+    queryKey: ['songs', content.sortingOrder, content.filteringOrder],
+    initialData: [],
+    queryFn: () =>
+      window.api.audioLibraryControls
+        .getAllSongs(content.sortingOrder, content.filteringOrder)
+        .then((res) => res.data)
+  });
 
   useEffect(() => {
-    fetchSongsData();
+    queryClient.invalidateQueries({ queryKey: ['songs'] });
     const manageSongsDataUpdatesInSongsPage = (e: Event) => {
       if ('detail' in e) {
         const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
@@ -120,7 +103,7 @@ const SongsPage = () => {
             event.dataType === 'blacklist/songBlacklist' ||
             (event.dataType === 'songs/likes' && event.eventData.length > 1)
           )
-            fetchSongsData();
+            queryClient.invalidateQueries({ queryKey: ['songs'] });
         }
       }
     };
@@ -128,7 +111,7 @@ const SongsPage = () => {
     return () => {
       document.removeEventListener('app/dataUpdates', manageSongsDataUpdatesInSongsPage);
     };
-  }, [fetchSongsData]);
+  }, [queryClient]);
 
   useEffect(() => {
     storage.sortingStates.setSortingStates('songsPage', content.sortingOrder);
@@ -183,28 +166,16 @@ const SongsPage = () => {
     []
   );
 
-  const selectAllHandler = useSelectAllHandler(content.songsData, 'songs', 'songId');
+  const selectAllHandler = useSelectAllHandler(songs, 'songs', 'songId');
 
   const handleSongPlayBtnClick = useCallback(
     (currSongId: string) => {
-      const queueSongIds = content.songsData
-        .filter((song) => !song.isBlacklisted)
-        .map((song) => song.songId);
+      const queueSongIds = songs.filter((song) => !song.isBlacklisted).map((song) => song.songId);
       createQueue(queueSongIds, 'songs', false, undefined, false);
       playSong(currSongId, true);
     },
-    [content.songsData, createQueue, playSong]
+    [songs, createQueue, playSong]
   );
-
-  // const parentRef = useRef<HTMLDivElement>(null);
-
-  // const rowVirtualizer = useVirtualizer({
-  //   count: content.songsData?.length || 0,
-  //   getScrollElement: () => parentRef.current,
-  //   estimateSize: () => 60,
-  //   overscan: 10,
-  //   debug: true
-  // });
 
   return (
     <MainContainer
@@ -218,7 +189,7 @@ const SongsPage = () => {
       }}
     >
       <>
-        {content.songsData && content.songsData.length > 0 && (
+        {songs.length > 0 && (
           <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
             <div className="container flex">
               {t('common.song_other')}{' '}
@@ -230,11 +201,10 @@ const SongsPage = () => {
                     })}
                   </div>
                 ) : (
-                  content.songsData &&
-                  content.songsData.length > 0 && (
+                  songs.length > 0 && (
                     <span className="no-of-songs">
                       {t('common.songWithCount', {
-                        count: content.songsData.length
+                        count: songs.length
                       })}
                     </span>
                   )
@@ -300,9 +270,7 @@ const SongsPage = () => {
                 iconName="play_arrow"
                 clickHandler={() =>
                   createQueue(
-                    content.songsData
-                      .filter((song) => !song.isBlacklisted)
-                      .map((song) => song.songId),
+                    songs.filter((song) => !song.isBlacklisted).map((song) => song.songId),
                     'songs',
                     false,
                     undefined,
@@ -317,9 +285,7 @@ const SongsPage = () => {
                 iconName="shuffle"
                 clickHandler={() =>
                   createQueue(
-                    content.songsData
-                      .filter((song) => !song.isBlacklisted)
-                      .map((song) => song.songId),
+                    songs.filter((song) => !song.isBlacklisted).map((song) => song.songId),
                     'songs',
                     true,
                     undefined,
@@ -375,7 +341,7 @@ const SongsPage = () => {
               <List
                 ref={ref}
                 onItemsRendered={onItemsRendered}
-                itemCount={content.songsData.length}
+                itemCount={songs.length}
                 itemSize={60}
                 width={width || '100%'}
                 height={height || 450}
@@ -400,9 +366,9 @@ const SongsPage = () => {
               </List>
             )}
           </InfiniteLoader> */}
-          {content.songsData && content.songsData.length > 0 && (
+          {isSuccess && songs.length > 0 && (
             <VirtualizedList
-              data={content.songsData}
+              data={songs}
               fixedItemHeight={60}
               scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
               itemContent={(index, song) => {
@@ -422,13 +388,13 @@ const SongsPage = () => {
             />
           )}
         </div>
-        {content.songsData && content.songsData.length === 0 && (
+        {isFetching && (
           <div className="no-songs-container my-[10%] flex h-full w-full flex-col items-center justify-center text-center text-xl text-font-color-black dark:text-font-color-white">
             <Img src={DataFetchingImage} alt="" className="mb-8 w-60" />
             <span>{t('songsPage.loading')}</span>
           </div>
         )}
-        {content.songsData === null && (
+        {isSuccess && songs.length === 0 && (
           <div className="no-songs-container my-[8%] flex h-full w-full flex-col items-center justify-center text-center text-xl text-font-color-black dark:text-font-color-white">
             <Img src={NoSongsImage} alt="" className="mb-8 w-60" />
             <span>{t('songsPage.empty')}</span>
