@@ -1,6 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import storage from '../../utils/localStorage';
@@ -11,14 +10,19 @@ import MainContainer from '../MainContainer';
 import Song from '../SongsPage/Song';
 import { songSortOptions, songFilterOptions } from '../SongsPage/SongOptions';
 import VirtualizedList from '../VirtualizedList';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const MusicFolderInfoPage = () => {
-  const {
-    currentlyActivePage,
-    multipleSelectionsData,
-    isMultipleSelectionEnabled,
-    localStorageData
-  } = useContext(AppContext);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const sortingStates = useStore(store, (state) => state.localStorage.sortingStates);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const {
     updateCurrentlyActivePageData,
     createQueue,
@@ -32,13 +36,13 @@ const MusicFolderInfoPage = () => {
   const [folderSongs, setFolderSongs] = useState<SongData[]>([]);
   const [filteringOrder, setFilteringOrder] = useState<SongFilterTypes>('notSelected');
   const [sortingOrder, setSortingOrder] = useState<SongSortTypes>(
-    localStorageData?.sortingStates?.songsPage || 'aToZ'
+    sortingStates?.songsPage || 'aToZ'
   );
 
   const fetchFolderInfo = useCallback(() => {
     if (currentlyActivePage?.data && currentlyActivePage?.data?.folderPath) {
       window.api.folderData
-        .getFolderData([currentlyActivePage?.data?.folderPath])
+        .getFolderData([currentlyActivePage?.data?.folderPath as string])
         .then((res) => {
           if (res) return setFolderInfo(res[0]);
           return undefined;
@@ -252,7 +256,7 @@ const MusicFolderInfoPage = () => {
                     <Song
                       key={index}
                       index={index}
-                      isIndexingSongs={localStorageData?.preferences.isSongIndexingEnabled}
+                      isIndexingSongs={preferences.isSongIndexingEnabled}
                       onPlayClick={handleSongPlayBtnClick}
                       selectAllHandler={selectAllHandler}
                       {...song}

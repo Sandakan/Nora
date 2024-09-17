@@ -1,10 +1,9 @@
-import { useContext } from 'react';
-
 import { Album } from '../../AlbumsPage/Album';
-import { AppContext } from '../../../contexts/AppContext';
 import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 import SecondaryContainer from '../../SecondaryContainer';
 import VirtualizedGrid from '../../VirtualizedGrid';
+import { store } from '@renderer/store';
+import { useStore } from '@tanstack/react-store';
 
 type Props = { albumData: Album[] };
 
@@ -12,7 +11,7 @@ const MIN_ITEM_WIDTH = 220;
 const MIN_ITEM_HEIGHT = 280;
 
 const AllAlbumResults = (prop: Props) => {
-  const { currentlyActivePage } = useContext(AppContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
   const { albumData } = prop;
 
   const selectAllHandler = useSelectAllHandler(albumData, 'album', 'albumId');

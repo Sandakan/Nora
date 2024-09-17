@@ -1,16 +1,21 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { SimilarTracksOutput } from 'src/@types/last_fm_similar_tracks_api';
 import UnAvailableTrack from './UnAvailableTrack';
 import TitleContainer from '../TitleContainer';
 import Song from '../SongsPage/Song';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = { songId: string };
 
 const SimilarTracksContainer = (props: Props) => {
-  const { bodyBackgroundImage, localStorageData, queue, currentSongData } = useContext(AppContext);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const { createQueue, playSong, updateQueueData, addNewNotifications } =
     useContext(AppUpdateContext);
   const { t } = useTranslation();
@@ -98,7 +103,7 @@ const SimilarTracksContainer = (props: Props) => {
           <Song
             key={song.songId}
             index={index}
-            isIndexingSongs={localStorageData?.preferences?.isSongIndexingEnabled}
+            isIndexingSongs={preferences?.isSongIndexingEnabled}
             title={song.title}
             artists={song.artists}
             album={song.album}
@@ -113,11 +118,7 @@ const SimilarTracksContainer = (props: Props) => {
           />
         );
       }),
-    [
-      handleSongPlayBtnClick,
-      localStorageData?.preferences?.isSongIndexingEnabled,
-      similarTracks.sortedAvailTracks
-    ]
+    [handleSongPlayBtnClick, preferences?.isSongIndexingEnabled, similarTracks.sortedAvailTracks]
   );
 
   const unAvailableSimilarTrackComponents = useMemo(

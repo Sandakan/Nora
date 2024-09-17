@@ -2,7 +2,6 @@ import { ReactNode, useContext, useEffect, useMemo, useReducer, useState } from 
 import { useTranslation } from 'react-i18next';
 import Button from '../../Button';
 import Dropdown from '../../Dropdown';
-import { AppContext } from '../../../contexts/AppContext';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import hasDataChanged from '../../../utils/hasDataChanged';
 import { equalizerBandHertzData, equalizerPresetsData } from '../../../other/equalizerData';
@@ -10,6 +9,8 @@ import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '../../../utils/localStorage';
 import i18n from '../../../i18n';
 
 import EqualierBand from './EqualierBand';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const presets: EqualizerPresetDropdownOptions[] = equalizerPresetsData.map((presetData) => {
   return {
@@ -54,7 +55,8 @@ const getPresetName = (equalizer: Equalizer): string => {
 };
 
 const EqualizerSettings = () => {
-  const { equalizerOptions } = useContext(AppContext);
+  const equalizerOptions = useStore(store, (state) => state.localStorage.equalizerPreset);
+
   const { updateEqualizerOptions } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 

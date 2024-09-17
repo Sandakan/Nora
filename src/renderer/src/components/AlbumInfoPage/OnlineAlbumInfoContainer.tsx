@@ -1,10 +1,11 @@
-import { useContext, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import Biography from '../Biography/Biography';
 import TitleContainer from '../TitleContainer';
 import UnAvailableTrack from '../SongInfoPage/UnAvailableTrack';
 import { LastFMAlbumInfo } from 'src/@types/last_fm_album_info_api';
+import { useStore } from '@tanstack/react-store';
+import { store } from '../../store';
 
 type Props = {
   albumTitle: string;
@@ -12,7 +13,7 @@ type Props = {
 };
 
 const OnlineAlbumInfoContainer = (props: Props) => {
-  const { bodyBackgroundImage } = useContext(AppContext);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
   const { t } = useTranslation();
 
   const { albumTitle: title, otherAlbumData } = props;

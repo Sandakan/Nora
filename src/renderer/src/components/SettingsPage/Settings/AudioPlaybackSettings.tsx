@@ -1,14 +1,15 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Dropdown, { DropdownOption } from '../../Dropdown';
-import { AppContext } from '../../../contexts/AppContext';
 import storage from '../../../utils/localStorage';
 
 import Button from '../../Button';
 import Checkbox from '../../Checkbox';
 import i18n from '../../../i18n';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const second = i18n.t('settingsPage.second');
 const seconds = i18n.t('settingsPage.second_other');
@@ -23,7 +24,8 @@ const seekbarScrollIntervals: DropdownOption<string>[] = [
 ];
 
 const AudioPlaybackSettings = () => {
-  const { localStorageData } = useContext(AppContext);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const { t } = useTranslation();
 
   const [seekbarScrollInterval, setSeekbarScrollInterval] = useState('5');
@@ -57,9 +59,7 @@ const AudioPlaybackSettings = () => {
           </div>
           <Checkbox
             id="toggleShowRemainingSongDuration"
-            isChecked={
-              localStorageData !== undefined && localStorageData.preferences.showSongRemainingTime
-            }
+            isChecked={preferences?.showSongRemainingTime}
             checkedStateUpdateFunction={(state) =>
               storage.preferences.setPreferences('showSongRemainingTime', state)
             }

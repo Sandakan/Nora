@@ -1,17 +1,16 @@
-import { useContext } from 'react';
-
 import { Playlist } from '../../PlaylistsPage/Playlist';
-import { AppContext } from '../../../contexts/AppContext';
 import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 import SecondaryContainer from '../../SecondaryContainer';
 import VirtualizedGrid from '../../VirtualizedGrid';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = { playlistData: Playlist[] };
 const MIN_ITEM_WIDTH = 175;
 const MIN_ITEM_HEIGHT = 220;
 
 const AllPlaylistResults = (prop: Props) => {
-  const { currentlyActivePage } = useContext(AppContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
   const { playlistData } = prop;
 
   const selectAllHandler = useSelectAllHandler(playlistData, 'playlist', 'playlistId');

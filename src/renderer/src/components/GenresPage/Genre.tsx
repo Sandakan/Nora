@@ -2,12 +2,13 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Img from '../Img';
 import DefaultGenreCover from '../../assets/images/webp/genre-cover-default.webp';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import Button from '../Button';
+import { store } from '@renderer/store';
+import { useStore } from '@tanstack/react-store';
 
 interface GenreProp {
   // eslint-disable-next-line react/no-unused-prop-types
@@ -23,7 +24,13 @@ interface GenreProp {
 
 const Genre = (props: GenreProp) => {
   const { genreId, songIds, title, artworkPaths, paletteData, className, selectAllHandler } = props;
-  const { queue, isMultipleSelectionEnabled, multipleSelectionsData } = useContext(AppContext);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+
   const {
     changeCurrentActivePage,
     createQueue,

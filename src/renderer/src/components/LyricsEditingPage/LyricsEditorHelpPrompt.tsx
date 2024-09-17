@@ -5,8 +5,9 @@ import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
 import ShortcutButton from '../SettingsPage/ShortcutButton';
 import Checkbox from '../Checkbox';
-import { AppContext } from '../../contexts/AppContext';
 import storage from '../../../src/utils/localStorage';
+import { store } from '@renderer/store';
+import { useStore } from '@tanstack/react-store';
 
 const AppShortcutsPrompt = lazy(() => import('../SettingsPage/AppShortcutsPrompt'));
 
@@ -15,7 +16,7 @@ type Props = {
 };
 
 const LyricsEditorHelpPrompt = (props: Props) => {
-  const { localStorageData } = useContext(AppContext);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
   const { changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
@@ -34,10 +35,7 @@ const LyricsEditorHelpPrompt = (props: Props) => {
             id="doNotShowHelpPageOnLyricsEditorStartUpCheckbox"
             className="no-blacklist-song-confirm-checkbox-container my-8"
             labelContent={t('common.doNotShowThisMessageAgain')}
-            isChecked={
-              localStorageData &&
-              (localStorageData.preferences?.doNotShowHelpPageOnLyricsEditorStartUp || false)
-            }
+            isChecked={preferences?.doNotShowHelpPageOnLyricsEditorStartUp || false}
             checkedStateUpdateFunction={(state) => {
               storage.preferences.setPreferences('doNotShowHelpPageOnLyricsEditorStartUp', state);
             }}

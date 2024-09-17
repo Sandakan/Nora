@@ -1,12 +1,13 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import storage from '../../utils/localStorage';
 
 import Button from '../Button';
 import splitFeaturingArtists from '../../utils/splitFeaturingArtists';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   name?: string;
@@ -14,7 +15,9 @@ type Props = {
 };
 
 const SeparateArtistsSuggestion = (props: Props) => {
-  const { bodyBackgroundImage, currentSongData } = useContext(AppContext);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+
   const { addNewNotifications, changeCurrentActivePage, updateCurrentSongData } =
     useContext(AppUpdateContext);
   const { t } = useTranslation();

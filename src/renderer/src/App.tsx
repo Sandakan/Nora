@@ -8,17 +8,16 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useReducer,
   useRef,
   useTransition
 } from 'react';
+import { useStore } from '@tanstack/react-store';
 import { Trans, useTranslation } from 'react-i18next';
 import './assets/styles/styles.css';
 import 'material-symbols/rounded.css';
 import { releaseNotes, version, appPreferences } from '../../../package.json';
 
 // ? CONTEXTS
-import { AppContext, AppStateContextType } from './contexts/AppContext';
 import { AppUpdateContext, AppUpdateContextType } from './contexts/AppUpdateContext';
 // import { SongPositionContext } from './contexts/SongPositionContext';
 
@@ -58,54 +57,18 @@ import { isDataChanged } from './utils/hasDataChanged';
 import log from './utils/log';
 import throttle from './utils/throttle';
 import parseNotificationFromMain from './other/parseNotificationFromMain';
-import reducer, { DEFAULT_REDUCER_DATA } from './other/appReducer';
 import ListeningDataSession from './other/listeningDataSession';
 import updateQueueOnSongPlay from './other/updateQueueOnSongPlay';
 import shuffleQueueRandomly from './other/shuffleQueueRandomly';
-import { equalizerBandHertzData } from './other/equalizerData';
 import AudioPlayer from './other/player';
+import { dispatch, store } from './store';
+import { AppReducer } from './other/appReducer';
 
 // ? INITIALIZE PLAYER
 const player = new AudioPlayer();
 let repetitivePlaybackErrorsCount = 0;
 
-// ? / / / / / / /  EQUALIZER INITIALIZATION / / / / / / / / / / / / / /
-const context = new window.AudioContext();
-const equalizerBands = new Map<EqualizerBandFilters, BiquadFilterNode>();
-
-for (const [filterName, hertzValue] of Object.entries(equalizerBandHertzData)) {
-  const equalizerFilterName = filterName as EqualizerBandFilters;
-  const equalizerBand = context.createBiquadFilter();
-
-  equalizerBand.type = 'peaking';
-  equalizerBand.frequency.value = hertzValue;
-  equalizerBand.Q.value = 1;
-  equalizerBand.gain.value = 0;
-
-  equalizerBands.set(equalizerFilterName, equalizerBand);
-}
-
-const source = context.createMediaElementSource(player);
-const filterMapKeys = [...equalizerBands.keys()];
-
-equalizerBands.forEach((filter, key, map) => {
-  const currentFilterIndex = filterMapKeys.indexOf(key);
-  const isTheFirstFilter = currentFilterIndex === 0;
-  const isTheLastFilter = currentFilterIndex === filterMapKeys.length - 1;
-
-  if (isTheFirstFilter) source.connect(filter);
-  else {
-    const prevFilter = map.get(filterMapKeys[currentFilterIndex - 1]);
-    if (prevFilter) prevFilter.connect(filter);
-
-    if (isTheLastFilter) filter.connect(context.destination);
-  }
-});
-
 // ? / / / / / / /  PLAYER DEFAULT OPTIONS / / / / / / / / / / / / / /
-player.preload = 'auto';
-player.defaultPlaybackRate = 1.0;
-
 player.addEventListener('player/trackchange', (e) => {
   if ('detail' in e) {
     console.log(`player track changed to ${(e as DetailAvailableEvent<string>).detail}.`);
@@ -126,20 +89,15 @@ storage.checkLocalStorage();
 export default function App() {
   const { t } = useTranslation();
 
-  const [content, dispatch] = useReducer(reducer, DEFAULT_REDUCER_DATA);
-  // Had to use a Ref in parallel with the Reducer to avoid an issue that happens when using content.* not giving the intended data in useCallback functions even though it was added as a dependency of that function.
-  const contentRef = useRef(DEFAULT_REDUCER_DATA);
+  // const [content, dispatch] = useReducer(reducer, DEFAULT_REDUCER_DATA);
+  // // Had to use a Ref in parallel with the Reducer to avoid an issue that happens when using content.* not giving the intended data in useCallback functions even though it was added as a dependency of that function.
+  // const contentRef = useRef(DEFAULT_REDUCER_DATA);
 
   const AppRef = useRef(null as HTMLDivElement | null);
+  const storeRef = useRef<AppReducer>();
 
   const [, startTransition] = useTransition();
   const refStartPlay = useRef(false);
-  const refQueue = useRef({
-    currentSongIndex: null,
-    queue: [],
-    queueBeforeShuffle: [],
-    queueType: 'songs'
-  } as Queue);
 
   const { isOnline } = useNetworkConnectivity();
 
@@ -163,25 +121,21 @@ export default function App() {
         isVisible,
         currentActiveIndex:
           prompt && isVisible
-            ? content.promptMenuNavigationData.prompts.length
+            ? store.state.promptMenuNavigationData.prompts.length
             : prompt === null && isVisible === false
               ? 0
-              : content.promptMenuNavigationData.currentActiveIndex,
+              : store.state.promptMenuNavigationData.currentActiveIndex,
         prompts:
           prompt && isVisible
-            ? content.promptMenuNavigationData.prompts.concat(promptData)
+            ? store.state.promptMenuNavigationData.prompts.concat(promptData)
             : prompt === null && isVisible === false
               ? []
-              : content.promptMenuNavigationData.prompts
+              : store.state.promptMenuNavigationData.prompts
       };
 
-      contentRef.current.promptMenuNavigationData = data;
-      dispatch({
-        type: 'PROMPT_MENU_DATA_CHANGE',
-        data
-      });
+      dispatch({ type: 'PROMPT_MENU_DATA_CHANGE', data });
     },
-    [content.promptMenuNavigationData.currentActiveIndex, content.promptMenuNavigationData.prompts]
+    []
   );
 
   const managePlaybackErrors = useCallback(
@@ -238,14 +192,17 @@ export default function App() {
 
   const handleBeforeQuitEvent = useCallback(async () => {
     storage.playback.setCurrentSongOptions('stoppedPosition', player.currentTime);
-    storage.playback.setPlaybackOptions('isRepeating', contentRef.current.player.isRepeating);
-    storage.playback.setPlaybackOptions('isShuffling', contentRef.current.player.isShuffling);
-    storage.queue.setQueue(refQueue.current);
+    storage.playback.setPlaybackOptions('isRepeating', store.state.player.isRepeating);
+    storage.playback.setPlaybackOptions('isShuffling', store.state.player.isShuffling);
   }, []);
 
   const updateAppUpdatesState = useCallback((state: AppUpdatesState) => {
-    contentRef.current.appUpdatesState = state;
-    dispatch({ type: 'CHANGE_APP_UPDATES_DATA', data: state });
+    store.setState((prevData) => {
+      return {
+        ...prevData,
+        appUpdatesState: state
+      };
+    });
   }, []);
 
   const checkForAppUpdates = useCallback(() => {
@@ -320,7 +277,6 @@ export default function App() {
         type: 'APP_THEME_CHANGE',
         data: theme
       });
-      contentRef.current.userData.theme = theme;
     };
 
     const watchPowerChanges = (_: unknown, isOnBatteryPower: boolean) => {
@@ -334,19 +290,6 @@ export default function App() {
       window.api.battery.stopListeningForBatteryPowerStateChanges(watchPowerChanges);
     };
   }, []);
-
-  useEffect(() => {
-    if (content.localStorage.equalizerPreset) {
-      const filters = content.localStorage.equalizerPreset;
-      for (const filter of Object.entries(filters)) {
-        const filterName = filter[0] as EqualizerBandFilters;
-        const gainValue: number = filter[1];
-
-        const equalizerFilter = equalizerBands.get(filterName);
-        if (equalizerFilter) equalizerFilter.gain.value = gainValue;
-      }
-    }
-  }, [content.localStorage.equalizerPreset]);
 
   const manageWindowBlurOrFocus = useCallback((state: 'blur' | 'focus') => {
     if (AppRef.current) {
@@ -468,12 +411,6 @@ export default function App() {
     };
   }, []);
 
-  // VOLUME RELATED SETTINGS
-  useEffect(() => {
-    player.volume = content.player.volume.value / 100;
-    player.muted = content.player.volume.isMuted;
-  }, [content.player.volume]);
-
   useEffect(() => {
     // LOCAL STORAGE
     const { playback, preferences, queue } = storage.getAllItems();
@@ -482,9 +419,6 @@ export default function App() {
       const allItems = storage.getAllItems();
       dispatch({ type: 'UPDATE_LOCAL_STORAGE', data: allItems });
 
-      if (player.playbackRate !== allItems.playback.playbackRate)
-        player.playbackRate = allItems.playback.playbackRate;
-
       console.log('local storage updated');
     };
 
@@ -492,10 +426,11 @@ export default function App() {
 
     if (playback?.volume) {
       dispatch({ type: 'UPDATE_VOLUME', data: playback.volume });
-      contentRef.current.player.volume = playback.volume;
     }
 
-    if (content.navigationHistory.history.at(-1)?.pageTitle !== preferences?.defaultPageOnStartUp)
+    if (
+      store.state.navigationHistory.history.at(-1)?.pageTitle !== preferences?.defaultPageOnStartUp
+    )
       changeCurrentActivePage(preferences?.defaultPageOnStartUp);
 
     toggleShuffling(playback?.isShuffling);
@@ -510,7 +445,7 @@ export default function App() {
 
           const currSongPosition = Number(playback?.currentSong.stoppedPosition);
           player.currentTime = currSongPosition;
-          // contentRef.current.player.songPosition = currSongPosition;
+          // store.sta.player.songPosition = currSongPosition;
           dispatch({
             type: 'UPDATE_SONG_POSITION',
             data: currSongPosition
@@ -520,14 +455,17 @@ export default function App() {
       })
       .catch((err) => console.error(err));
 
-    if (queue)
-      refQueue.current = {
-        ...refQueue.current,
+    if (queue) {
+      const updatedQueue = {
+        ...store.state.localStorage.queue,
         queue: queue.queue || [],
         queueType: queue.queueType,
         queueId: queue.queueId
       };
-    else {
+
+      // dispatch({ type: 'UPDATE_QUEUE', data: updatedQueue });
+      storage.queue.setQueue(updatedQueue);
+    } else {
       window.api.audioLibraryControls
         .getAllSongs()
         .then((audioData) => {
@@ -542,7 +480,7 @@ export default function App() {
     }
 
     return () => {
-      document.removeEventListener('localStorage', syncLocalStorage);
+      // document.removeEventListener('localStorage', syncLocalStorage);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -554,7 +492,6 @@ export default function App() {
         if (!res) return undefined;
 
         dispatch({ type: 'USER_DATA_CHANGE', data: res });
-        contentRef.current.userData = res;
         dispatch({ type: 'APP_THEME_CHANGE', data: res.theme });
         return undefined;
       })
@@ -595,13 +532,12 @@ export default function App() {
   const addNewNotifications = useCallback((newNotifications: AppNotification[]) => {
     if (newNotifications.length > 0) {
       const maxNotifications = 4;
-      const currentNotifications = contentRef.current.notificationPanelData.notifications;
+      const currentNotifications = store.state.notificationPanelData.notifications;
       const newNotificationIds = newNotifications.map((x) => x.id);
       const resultNotifications = currentNotifications.filter(
         (x, index) => !newNotificationIds.some((y) => y === x.id) && index < maxNotifications
       );
       resultNotifications.unshift(...newNotifications);
-      contentRef.current.notificationPanelData.notifications = resultNotifications;
 
       startTransition(() =>
         dispatch({
@@ -614,17 +550,17 @@ export default function App() {
 
   const updateNotifications = useCallback(
     (callback: (currentNotifications: AppNotification[]) => AppNotification[]) => {
-      const currentNotifications = content.notificationPanelData.notifications;
+      const currentNotifications = store.state.notificationPanelData.notifications;
       const updatedNotifications = callback(currentNotifications);
-      contentRef.current.notificationPanelData.notifications = updatedNotifications;
+
       dispatch({ type: 'UPDATE_NOTIFICATIONS', data: updatedNotifications });
     },
-    [content.notificationPanelData.notifications]
+    []
   );
 
   const toggleSongPlayback = useCallback(
     (startPlay?: boolean) => {
-      if (contentRef.current.currentSongData?.songId) {
+      if (store.state.currentSongData?.songId) {
         if (typeof startPlay !== 'boolean' || startPlay === player.paused) {
           if (player.readyState > 0) {
             if (player.paused) {
@@ -689,20 +625,20 @@ export default function App() {
   }, [displayMessageFromMain]);
 
   const handleContextMenuVisibilityUpdate = useCallback(() => {
-    if (contentRef.current.contextMenuData.isVisible) {
+    if (store.state.contextMenuData.isVisible) {
       dispatch({
         type: 'CONTEXT_MENU_VISIBILITY_CHANGE',
         data: false
       });
-      contentRef.current.contextMenuData.isVisible = false;
+      store.state.contextMenuData.isVisible = false;
     }
   }, []);
 
   const addSongTitleToTitleBar = useCallback(() => {
-    if (contentRef.current.currentSongData.title && contentRef.current.currentSongData.artists)
-      document.title = `${contentRef.current.currentSongData.title} - ${
-        Array.isArray(contentRef.current.currentSongData.artists) &&
-        contentRef.current.currentSongData.artists.map((artist) => artist.name).join(', ')
+    if (store.state.currentSongData.title && store.state.currentSongData.artists)
+      document.title = `${store.state.currentSongData.title} - ${
+        Array.isArray(store.state.currentSongData.artists) &&
+        store.state.currentSongData.artists.map((artist) => artist.name).join(', ')
       }`;
   }, []);
 
@@ -710,12 +646,12 @@ export default function App() {
     const repeatState =
       newState ||
       // eslint-disable-next-line no-nested-ternary
-      (contentRef.current.player.isRepeating === 'false'
+      (store.state.player.isRepeating === 'false'
         ? 'repeat'
-        : contentRef.current.player.isRepeating === 'repeat'
+        : store.state.player.isRepeating === 'repeat'
           ? 'repeat-1'
           : 'false');
-    contentRef.current.player.isRepeating = repeatState;
+
     dispatch({
       type: 'UPDATE_IS_REPEATING_STATE',
       data: repeatState
@@ -901,27 +837,23 @@ export default function App() {
 
   useEffect(() => {
     const isDynamicThemesEnabled =
-      content.localStorage.preferences.enableImageBasedDynamicThemes &&
-      content.currentSongData.paletteData;
+      store.state.localStorage.preferences.enableImageBasedDynamicThemes &&
+      store.state.currentSongData.paletteData;
 
     const resetStyles = setDynamicThemesFromSongPalette(
-      isDynamicThemesEnabled ? content.currentSongData.paletteData : undefined
+      isDynamicThemesEnabled ? store.state.currentSongData.paletteData : undefined
     );
 
     return () => {
       resetStyles();
     };
-  }, [
-    content.currentSongData.paletteData,
-    content.localStorage.preferences.enableImageBasedDynamicThemes,
-    setDynamicThemesFromSongPalette
-  ]);
+  }, [setDynamicThemesFromSongPalette]);
 
   const playSong = useCallback(
     (songId: string, isStartPlay = true, playAsCurrentSongIndex = false) => {
       repetitivePlaybackErrorsCount = 0;
       if (typeof songId === 'string') {
-        if (contentRef.current.currentSongData.songId === songId) return toggleSongPlayback();
+        if (store.state.currentSongData.songId === songId) return toggleSongPlayback();
         console.time('timeForSongFetch');
 
         return window.api.audioLibraryControls
@@ -932,7 +864,6 @@ export default function App() {
               console.log('playSong', songId, songData.path);
 
               dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: songData });
-              contentRef.current.currentSongData = songData;
 
               storage.playback.setCurrentSongOptions('songId', songData.songId);
 
@@ -951,10 +882,20 @@ export default function App() {
 
               recordListeningData(songId, songData.duration);
 
-              refQueue.current = updateQueueOnSongPlay(
-                refQueue.current,
-                songData.songId,
-                playAsCurrentSongIndex
+              // dispatch({
+              //   type: 'UPDATE_QUEUE',
+              //   data: updateQueueOnSongPlay(
+              //     store.state.localStorage.queue,
+              //     songData.songId,
+              //     playAsCurrentSongIndex
+              //   )
+              // });
+              storage.queue.setQueue(
+                updateQueueOnSongPlay(
+                  store.state.localStorage.queue,
+                  songData.songId,
+                  playAsCurrentSongIndex
+                )
               );
             } else console.log(songData);
             return undefined;
@@ -1001,7 +942,6 @@ export default function App() {
             type: 'CURRENT_SONG_DATA_CHANGE',
             data: audioPlayerData
           });
-          contentRef.current.currentSongData = audioPlayerData;
           player.src = `${audioPlayerData.path}?ts=${Date.now()}`;
           refStartPlay.current = isStartPlay;
           if (isStartPlay) toggleSongPlayback();
@@ -1029,48 +969,53 @@ export default function App() {
   const changeQueueCurrentSongIndex = useCallback(
     (currentSongIndex: number, isPlaySong = true) => {
       console.log('currentSongIndex', currentSongIndex);
-      refQueue.current.currentSongIndex = currentSongIndex;
-      if (isPlaySong) playSong(refQueue.current.queue[currentSongIndex]);
+      // dispatch({ type: 'UPDATE_QUEUE_CURRENT_SONG_INDEX', data: currentSongIndex });
+
+      storage.queue.setCurrentSongIndex(currentSongIndex);
+
+      if (isPlaySong) playSong(store.state.localStorage.queue.queue[currentSongIndex]);
     },
     [playSong]
   );
 
   const handleSkipBackwardClick = useCallback(() => {
-    const { currentSongIndex } = refQueue.current;
+    const queue = store.state.localStorage.queue;
+    const { currentSongIndex } = queue;
     if (player.currentTime > 5) {
       player.currentTime = 0;
     } else if (typeof currentSongIndex === 'number') {
       if (currentSongIndex === 0) {
-        if (refQueue.current.queue.length > 0)
-          changeQueueCurrentSongIndex(refQueue.current.queue.length - 1);
+        if (queue.queue.length > 0) changeQueueCurrentSongIndex(queue.queue.length - 1);
       } else changeQueueCurrentSongIndex(currentSongIndex - 1);
     } else changeQueueCurrentSongIndex(0);
   }, [changeQueueCurrentSongIndex]);
 
   const handleSkipForwardClick = useCallback(
     (reason: SongSkipReason = 'USER_SKIP') => {
-      const { currentSongIndex } = refQueue.current;
-      if (contentRef.current.player.isRepeating === 'repeat-1' && reason !== 'USER_SKIP') {
+      const queue = store.state.localStorage.queue;
+
+      const { currentSongIndex } = queue;
+      if (store.state.player.isRepeating === 'repeat-1' && reason !== 'USER_SKIP') {
         player.currentTime = 0;
         toggleSongPlayback(true);
         recordListeningData(
-          contentRef.current.currentSongData.songId,
-          contentRef.current.currentSongData.duration,
+          store.state.currentSongData.songId,
+          store.state.currentSongData.duration,
           true
         );
 
         window.api.audioLibraryControls.updateSongListeningData(
-          contentRef.current.currentSongData.songId,
+          store.state.currentSongData.songId,
           'listens',
           1
         );
       } else if (typeof currentSongIndex === 'number') {
-        if (refQueue.current.queue.length > 0) {
-          if (refQueue.current.queue.length - 1 === currentSongIndex) {
-            if (contentRef.current.player.isRepeating === 'repeat') changeQueueCurrentSongIndex(0);
+        if (queue.queue.length > 0) {
+          if (queue.queue.length - 1 === currentSongIndex) {
+            if (store.state.player.isRepeating === 'repeat') changeQueueCurrentSongIndex(0);
           } else changeQueueCurrentSongIndex(currentSongIndex + 1);
         } else console.log('Queue is empty.');
-      } else if (refQueue.current.queue.length > 0) changeQueueCurrentSongIndex(0);
+      } else if (queue.queue.length > 0) changeQueueCurrentSongIndex(0);
     },
     [changeQueueCurrentSongIndex, recordListeningData, toggleSongPlayback]
   );
@@ -1078,22 +1023,22 @@ export default function App() {
   useEffect(() => {
     let artworkPath: string | undefined;
 
-    if (contentRef.current.currentSongData.artwork !== undefined) {
-      if (typeof contentRef.current.currentSongData.artwork === 'object') {
-        const blob = new Blob([contentRef.current.currentSongData.artwork]);
+    if (store.state.currentSongData.artwork !== undefined) {
+      if (typeof store.state.currentSongData.artwork === 'object') {
+        const blob = new Blob([store.state.currentSongData.artwork]);
         artworkPath = URL.createObjectURL(blob);
       } else {
-        artworkPath = `data:;base64,${contentRef.current.currentSongData.artwork}`;
+        artworkPath = `data:;base64,${store.state.currentSongData.artwork}`;
       }
     } else artworkPath = '';
 
     navigator.mediaSession.metadata = new MediaMetadata({
-      title: contentRef.current.currentSongData.title,
-      artist: Array.isArray(contentRef.current.currentSongData.artists)
-        ? contentRef.current.currentSongData.artists.map((artist) => artist.name).join(', ')
+      title: store.state.currentSongData.title,
+      artist: Array.isArray(store.state.currentSongData.artists)
+        ? store.state.currentSongData.artists.map((artist) => artist.name).join(', ')
         : t('common.unknownArtist'),
-      album: contentRef.current.currentSongData.album
-        ? contentRef.current.currentSongData.album.name || t('common.unknownAlbum')
+      album: store.state.currentSongData.album
+        ? store.state.currentSongData.album.name || t('common.unknownAlbum')
         : t('common.unknownAlbum'),
       artwork: [
         {
@@ -1110,7 +1055,7 @@ export default function App() {
     navigator.mediaSession.setActionHandler('play', () => toggleSongPlayback(true));
     navigator.mediaSession.setActionHandler('previoustrack', handleSkipBackwardClick);
     navigator.mediaSession.setActionHandler(`nexttrack`, handleSkipForwardClickWithParams);
-    navigator.mediaSession.playbackState = content.player.isCurrentSongPlaying
+    navigator.mediaSession.playbackState = store.state.player.isCurrentSongPlaying
       ? 'playing'
       : 'paused';
     return () => {
@@ -1124,19 +1069,12 @@ export default function App() {
       navigator.mediaSession.setActionHandler('previoustrack', null);
       navigator.mediaSession.setActionHandler('nexttrack', null);
     };
-  }, [
-    content.currentSongData,
-    content.player.isCurrentSongPlaying,
-    handleSkipBackwardClick,
-    handleSkipForwardClick,
-    t,
-    toggleSongPlayback
-  ]);
+  }, [handleSkipBackwardClick, handleSkipForwardClick, t, toggleSongPlayback]);
 
   const setDiscordRpcActivity = useCallback(() => {
-    if (content.currentSongData) {
-      const title = `Listening to '${content.currentSongData?.title ?? 'an untitled song'}'`;
-      const artists = `By ${content.currentSongData.artists?.map((artist) => artist.name).join(', ') || 'an unknown artist'}`;
+    if (store.state.currentSongData) {
+      const title = `Listening to '${store.state.currentSongData?.title ?? 'an untitled song'}'`;
+      const artists = `By ${store.state.currentSongData.artists?.map((artist) => artist.name).join(', ') || 'an unknown artist'}`;
 
       const now = Date.now();
       window.api.playerControls.setDiscordRpcActivity({
@@ -1152,7 +1090,7 @@ export default function App() {
           : now + ((player.duration ?? 0) - (player.currentTime ?? 0)) * 1000
       });
     }
-  }, [content.currentSongData]);
+  }, []);
 
   useEffect(() => {
     player.addEventListener('play', setDiscordRpcActivity);
@@ -1166,8 +1104,6 @@ export default function App() {
 
   const toggleShuffling = useCallback((isShuffling?: boolean) => {
     dispatch({ type: 'TOGGLE_SHUFFLE_STATE', data: isShuffling });
-    if (isShuffling !== undefined) contentRef.current.player.isShuffling = isShuffling;
-    else contentRef.current.player.isShuffling = !contentRef.current.player.isShuffling;
   }, []);
 
   const shuffleQueue = useCallback(
@@ -1182,7 +1118,7 @@ export default function App() {
     (
       newQueue: string[],
       queueType: QueueTypes,
-      isShuffleQueue = content.player.isShuffling,
+      isShuffleQueue = store.state.player.isShuffling,
       queueId?: string,
       startPlaying = false
     ) => {
@@ -1202,10 +1138,9 @@ export default function App() {
       } else toggleShuffling(false);
 
       storage.queue.setQueue(queue);
-      refQueue.current = queue;
       if (startPlaying) changeQueueCurrentSongIndex(0);
     },
-    [changeQueueCurrentSongIndex, content.player.isShuffling, shuffleQueue, toggleShuffling]
+    [changeQueueCurrentSongIndex, shuffleQueue, toggleShuffling]
   );
 
   const updateQueueData = useCallback(
@@ -1216,39 +1151,37 @@ export default function App() {
       playCurrentSongIndex = true,
       clearPreviousQueueData = false
     ) => {
+      const currentQueue = store.state.localStorage.queue;
       const queue: Queue = {
-        ...refQueue.current,
+        ...currentQueue,
         currentSongIndex:
           typeof currentSongIndex === 'number' || currentSongIndex === null
             ? currentSongIndex
-            : refQueue.current.currentSongIndex,
-        queue: newQueue ?? refQueue.current.queue
+            : currentQueue.currentSongIndex,
+        queue: newQueue ?? currentQueue.queue
       };
       if (clearPreviousQueueData) queue.queueBeforeShuffle = [];
       if (Array.isArray(newQueue) && newQueue.length > 1 && isShuffleQueue) {
         const { shuffledQueue, positions } = shuffleQueue(
           queue.queue,
-          queue.currentSongIndex ?? refQueue.current.currentSongIndex ?? undefined
+          queue.currentSongIndex ?? currentQueue.currentSongIndex ?? undefined
         );
         queue.queue = shuffledQueue;
         if (positions.length > 0) queue.queueBeforeShuffle = positions;
         queue.currentSongIndex = 0;
       }
+
       storage.queue.setQueue(queue);
-      refQueue.current = queue;
       if (playCurrentSongIndex && typeof currentSongIndex === 'number')
-        playSong(refQueue.current.queue[currentSongIndex]);
+        playSong(currentQueue.queue[currentSongIndex]);
     },
     [playSong, shuffleQueue]
   );
 
-  const updateCurrentSongPlaybackState = useCallback(
-    (isPlaying: boolean) => {
-      if (isPlaying !== content.player.isCurrentSongPlaying)
-        dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: isPlaying });
-    },
-    [content.player.isCurrentSongPlaying]
-  );
+  const updateCurrentSongPlaybackState = useCallback((isPlaying: boolean) => {
+    if (isPlaying !== store.state.player.isCurrentSongPlaying)
+      dispatch({ type: 'CURRENT_SONG_PLAYBACK_STATE', data: isPlaying });
+  }, []);
 
   const updateContextMenuData = useCallback(
     (
@@ -1261,16 +1194,15 @@ export default function App() {
       const menuData: ContextMenuData = {
         isVisible,
         data: contextMenuData,
-        menuItems: menuItems.length > 0 ? menuItems : contentRef.current.contextMenuData.menuItems,
-        pageX: pageX !== undefined ? pageX : contentRef.current.contextMenuData.pageX,
-        pageY: pageY !== undefined ? pageY : contentRef.current.contextMenuData.pageY
+        menuItems: menuItems.length > 0 ? menuItems : store.state.contextMenuData.menuItems,
+        pageX: pageX !== undefined ? pageX : store.state.contextMenuData.pageX,
+        pageY: pageY !== undefined ? pageY : store.state.contextMenuData.pageY
       };
 
       dispatch({
         type: 'CONTEXT_MENU_DATA_CHANGE',
         data: menuData
       });
-      contentRef.current.contextMenuData = menuData;
     },
     []
   );
@@ -1283,7 +1215,6 @@ export default function App() {
 
     if (!disableBackgroundArtworks && isVisible && src) image = src;
 
-    contentRef.current.bodyBackgroundImage = image;
     return dispatch({
       type: 'UPDATE_BODY_BACKGROUND_IMAGE',
       data: image
@@ -1292,15 +1223,12 @@ export default function App() {
 
   const updateCurrentlyActivePageData = useCallback(
     (callback: (currentPageData: PageData) => PageData) => {
-      const { navigationHistory } = contentRef.current;
+      const { navigationHistory } = store.state;
       const updatedData = callback(
         navigationHistory.history[navigationHistory.pageHistoryIndex].data ?? {
           scrollTopOffset: 0
         }
       );
-      contentRef.current.navigationHistory.history[
-        contentRef.current.navigationHistory.pageHistoryIndex
-      ].data = updatedData;
       dispatch({
         type: 'CURRENT_ACTIVE_PAGE_DATA_UPDATE',
         data: updatedData
@@ -1310,14 +1238,14 @@ export default function App() {
   );
 
   const updatePageHistoryIndex = useCallback((type: 'increment' | 'decrement' | 'home') => {
-    const { history, pageHistoryIndex } = contentRef.current.navigationHistory;
+    const { history, pageHistoryIndex } = store.state.navigationHistory;
     if (type === 'decrement' && pageHistoryIndex - 1 >= 0) {
       const newPageHistoryIndex = pageHistoryIndex - 1;
       const data = {
         pageHistoryIndex: newPageHistoryIndex,
         history
       } as NavigationHistoryData;
-      contentRef.current.navigationHistory = data;
+
       return dispatch({
         type: 'UPDATE_NAVIGATION_HISTORY',
         data
@@ -1329,7 +1257,7 @@ export default function App() {
         pageHistoryIndex: newPageHistoryIndex,
         history
       } as NavigationHistoryData;
-      contentRef.current.navigationHistory = data;
+
       return dispatch({
         type: 'UPDATE_NAVIGATION_HISTORY',
         data
@@ -1340,7 +1268,7 @@ export default function App() {
         history: [{ pageTitle: 'Home' }],
         pageHistoryIndex: 0
       };
-      contentRef.current.navigationHistory = data;
+
       return dispatch({
         type: 'UPDATE_NAVIGATION_HISTORY',
         data
@@ -1350,7 +1278,7 @@ export default function App() {
   }, []);
 
   const updatePromptMenuHistoryIndex = useCallback((type: 'increment' | 'decrement' | 'home') => {
-    const { prompts, currentActiveIndex } = contentRef.current.promptMenuNavigationData;
+    const { prompts, currentActiveIndex } = store.state.promptMenuNavigationData;
     if (type === 'decrement' && currentActiveIndex - 1 >= 0) {
       const newPageHistoryIndex = currentActiveIndex - 1;
       const data = {
@@ -1358,7 +1286,7 @@ export default function App() {
         currentActiveIndex: newPageHistoryIndex,
         prompts
       };
-      contentRef.current.promptMenuNavigationData = data;
+
       return dispatch({
         type: 'PROMPT_MENU_DATA_CHANGE',
         data
@@ -1371,7 +1299,7 @@ export default function App() {
         currentActiveIndex: newPageHistoryIndex,
         prompts
       };
-      contentRef.current.promptMenuNavigationData = data;
+
       return dispatch({
         type: 'PROMPT_MENU_DATA_CHANGE',
         data
@@ -1383,11 +1311,11 @@ export default function App() {
   const updateMultipleSelections = useCallback(
     (id: string, selectionType: QueueTypes, type: 'add' | 'remove') => {
       if (
-        contentRef.current.multipleSelectionsData.selectionType &&
-        selectionType !== contentRef.current.multipleSelectionsData.selectionType
+        store.state.multipleSelectionsData.selectionType &&
+        selectionType !== store.state.multipleSelectionsData.selectionType
       )
         return;
-      let { multipleSelections } = contentRef.current.multipleSelectionsData;
+      let { multipleSelections } = store.state.multipleSelectionsData;
       if (type === 'add') {
         if (multipleSelections.includes(id)) return;
         multipleSelections.push(id);
@@ -1396,12 +1324,10 @@ export default function App() {
         multipleSelections = multipleSelections.filter((selection) => selection !== id);
       }
 
-      contentRef.current.multipleSelectionsData.multipleSelections = multipleSelections;
-      contentRef.current.multipleSelectionsData.selectionType = selectionType;
       dispatch({
         type: 'UPDATE_MULTIPLE_SELECTIONS_DATA',
         data: {
-          ...contentRef.current.multipleSelectionsData,
+          ...store.state.multipleSelectionsData,
           selectionType,
           multipleSelections
         } as MultipleSelectionData
@@ -1417,22 +1343,26 @@ export default function App() {
       addSelections?: string[],
       replaceSelections = false
     ) => {
+      const updatedSelectionData = store.state.multipleSelectionsData;
+
       if (typeof isEnabled === 'boolean') {
-        contentRef.current.multipleSelectionsData.selectionType = selectionType;
+        updatedSelectionData.selectionType = selectionType;
+
         if (Array.isArray(addSelections) && isEnabled === true)
           if (replaceSelections) {
-            contentRef.current.multipleSelectionsData.multipleSelections = addSelections;
-          } else
-            contentRef.current.multipleSelectionsData.multipleSelections.push(...addSelections);
+            updatedSelectionData.multipleSelections = addSelections;
+          } else updatedSelectionData.multipleSelections.push(...addSelections);
+
         if (isEnabled === false) {
-          contentRef.current.multipleSelectionsData.multipleSelections = [];
-          contentRef.current.multipleSelectionsData.selectionType = undefined;
+          updatedSelectionData.multipleSelections = [];
+          updatedSelectionData.selectionType = undefined;
         }
-        contentRef.current.multipleSelectionsData.isEnabled = isEnabled;
+        updatedSelectionData.isEnabled = isEnabled;
+
         dispatch({
           type: 'UPDATE_MULTIPLE_SELECTIONS_DATA',
           data: {
-            ...contentRef.current.multipleSelectionsData
+            ...updatedSelectionData
           } as MultipleSelectionData
         });
       }
@@ -1442,7 +1372,7 @@ export default function App() {
 
   const changeCurrentActivePage = useCallback(
     (pageClass: PageTitles, data?: PageData) => {
-      const { navigationHistory } = contentRef.current;
+      const navigationHistory = { ...store.state.navigationHistory };
       const { pageTitle, onPageChange } =
         navigationHistory.history[navigationHistory.pageHistoryIndex];
 
@@ -1464,7 +1394,7 @@ export default function App() {
         );
         navigationHistory.history.push(pageData);
         navigationHistory.pageHistoryIndex += 1;
-        contentRef.current.navigationHistory = navigationHistory;
+
         toggleMultipleSelections(false);
         log(`User navigated to '${pageClass}'`);
 
@@ -1486,27 +1416,23 @@ export default function App() {
     [addNewNotifications, t, toggleMultipleSelections]
   );
 
-  const updatePlayerType = useCallback(
-    (type: PlayerTypes) => {
-      if (content.playerType !== type) {
-        dispatch({ type: 'UPDATE_PLAYER_TYPE', data: type });
-        contentRef.current.playerType = type;
-      }
-    },
-    [content.playerType]
-  );
+  const updatePlayerType = useCallback((type: PlayerTypes) => {
+    if (store.state.playerType !== type) {
+      dispatch({ type: 'UPDATE_PLAYER_TYPE', data: type });
+    }
+  }, []);
 
   const toggleIsFavorite = useCallback(
     (isFavorite?: boolean, onlyChangeCurrentSongData = false) => {
       toggleSongIsFavorite(
-        contentRef.current.currentSongData.songId,
-        contentRef.current.currentSongData.isAFavorite,
+        store.state.currentSongData.songId,
+        store.state.currentSongData.isAFavorite,
         isFavorite,
         onlyChangeCurrentSongData
       )
         .then((newFavorite) => {
           if (typeof newFavorite === 'boolean') {
-            contentRef.current.currentSongData.isAFavorite = newFavorite;
+            store.state.currentSongData.isAFavorite = newFavorite;
             return dispatch({
               type: 'TOGGLE_IS_FAVORITE_STATE',
               data: newFavorite
@@ -1521,7 +1447,7 @@ export default function App() {
 
   const updateVolume = useCallback((volume: number) => {
     storage.playback.setVolumeOptions('value', volume);
-    contentRef.current.player.volume.value = volume;
+
     dispatch({
       type: 'UPDATE_VOLUME_VALUE',
       data: volume
@@ -1532,20 +1458,15 @@ export default function App() {
     if (position >= 0 && position <= player.duration) player.currentTime = position;
   }, []);
 
-  const toggleMutedState = useCallback(
-    (isMute?: boolean) => {
-      if (isMute !== undefined) {
-        if (isMute !== content.player.volume.isMuted) {
-          dispatch({ type: 'UPDATE_MUTED_STATE', data: isMute });
-          contentRef.current.player.volume.isMuted = isMute;
-        }
-      } else {
-        dispatch({ type: 'UPDATE_MUTED_STATE' });
-        contentRef.current.player.volume.isMuted = !contentRef.current.player.volume.isMuted;
+  const toggleMutedState = useCallback((isMute?: boolean) => {
+    if (isMute !== undefined) {
+      if (isMute !== store.state.player.volume.isMuted) {
+        dispatch({ type: 'UPDATE_MUTED_STATE', data: isMute });
       }
-    },
-    [content.player.volume.isMuted]
-  );
+    } else {
+      dispatch({ type: 'UPDATE_MUTED_STATE' });
+    }
+  }, []);
 
   const manageKeyboardShortcuts = useCallback(
     (e: KeyboardEvent) => {
@@ -1584,8 +1505,7 @@ export default function App() {
         updateVolume(player.volume + 0.05 <= 1 ? player.volume * 100 + 5 : 100);
       else if (e.ctrlKey && e.key === 'ArrowDown')
         updateVolume(player.volume - 0.05 >= 0 ? player.volume * 100 - 5 : 0);
-      else if (e.ctrlKey && e.key === 'm')
-        toggleMutedState(!contentRef.current.player.volume.isMuted);
+      else if (e.ctrlKey && e.key === 'm') toggleMutedState(!store.state.player.volume.isMuted);
       else if (e.ctrlKey && e.key === 'ArrowRight') handleSkipForwardClick();
       else if (e.ctrlKey && e.key === 'ArrowLeft') handleSkipBackwardClick();
       else if (e.ctrlKey && e.key === 's') toggleShuffling();
@@ -1594,19 +1514,19 @@ export default function App() {
       else if (e.ctrlKey && e.key === 'y') window.api.theme.changeAppTheme();
       else if (e.ctrlKey && e.key === 'l') {
         const currentlyActivePage =
-          content.navigationHistory.history[content.navigationHistory.pageHistoryIndex];
+          store.state.navigationHistory.history[store.state.navigationHistory.pageHistoryIndex];
         if (currentlyActivePage.pageTitle === 'Lyrics') changeCurrentActivePage('Home');
         else changeCurrentActivePage('Lyrics');
       } else if (e.ctrlKey && e.key === 'n')
-        updatePlayerType(content.playerType === 'mini' ? 'normal' : 'mini');
+        updatePlayerType(store.state.playerType === 'mini' ? 'normal' : 'mini');
       else if (e.ctrlKey && e.key === 'q') {
         const currentlyActivePage =
-          content.navigationHistory.history[content.navigationHistory.pageHistoryIndex];
+          store.state.navigationHistory.history[store.state.navigationHistory.pageHistoryIndex];
         if (currentlyActivePage.pageTitle === 'CurrentQueue') changeCurrentActivePage('Home');
         else changeCurrentActivePage('CurrentQueue');
       } else if (e.ctrlKey && e.key === 'f') changeCurrentActivePage('Search');
       else if (e.ctrlKey && e.key === ']') {
-        let updatedPlaybackRate = content.localStorage.playback.playbackRate || 1;
+        let updatedPlaybackRate = store.state.localStorage.playback.playbackRate || 1;
 
         if (updatedPlaybackRate + 0.05 > 4) updatedPlaybackRate = 4;
         else updatedPlaybackRate += 0.05;
@@ -1624,7 +1544,7 @@ export default function App() {
           }
         ]);
       } else if (e.ctrlKey && e.key === '[') {
-        let updatedPlaybackRate = content.localStorage.playback.playbackRate || 1;
+        let updatedPlaybackRate = store.state.localStorage.playback.playbackRate || 1;
 
         if (updatedPlaybackRate - 0.05 < 0.25) updatedPlaybackRate = 0.25;
         else updatedPlaybackRate -= 0.05;
@@ -1681,10 +1601,6 @@ export default function App() {
       toggleRepeat,
       toggleIsFavorite,
       updatePlayerType,
-      content.playerType,
-      content.navigationHistory.history,
-      content.navigationHistory.pageHistoryIndex,
-      content.localStorage.playback.playbackRate,
       changeCurrentActivePage,
       changePromptMenuData,
       toggleMultipleSelections,
@@ -1707,10 +1623,10 @@ export default function App() {
   const updateUserData = useCallback(
     async (callback: (prevState: UserData) => UserData | Promise<UserData> | void) => {
       try {
-        const updatedUserData = await callback(contentRef.current.userData);
+        const updatedUserData = await callback(store.state.userData);
+
         if (typeof updatedUserData === 'object') {
           dispatch({ type: 'USER_DATA_CHANGE', data: updatedUserData });
-          contentRef.current.userData = updatedUserData;
         }
       } catch (error) {
         console.error(error);
@@ -1770,9 +1686,8 @@ export default function App() {
 
   const updateCurrentSongData = useCallback(
     (callback: (prevData: AudioPlayerData) => AudioPlayerData) => {
-      const updatedData = callback(contentRef.current.currentSongData);
+      const updatedData = callback(store.state.currentSongData);
       if (updatedData) {
-        contentRef.current.currentSongData = updatedData;
         dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: updatedData });
       }
     },
@@ -1785,13 +1700,12 @@ export default function App() {
     player.currentTime = 0;
     player.pause();
 
-    const updatedQueue = refQueue.current.queue.filter(
-      (songId) => songId !== content.currentSongData.songId
+    const updatedQueue = store.state.localStorage.queue.queue.filter(
+      (songId) => songId !== store.state.currentSongData.songId
     );
     updateQueueData(null, updatedQueue);
 
     dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: {} });
-    contentRef.current.currentSongData = {} as AudioPlayerData;
 
     addNewNotifications([
       {
@@ -1800,81 +1714,60 @@ export default function App() {
         content: t('notifications.playbackPausedDueToSongDeletion')
       }
     ]);
-  }, [addNewNotifications, content.currentSongData.songId, t, toggleSongPlayback, updateQueueData]);
+  }, [addNewNotifications, t, toggleSongPlayback, updateQueueData]);
 
   const updateEqualizerOptions = useCallback((options: Equalizer) => {
     storage.equalizerPreset.setEqualizerPreset(options);
   }, []);
 
   const changeUpNextSongData = useCallback((upNextSongData?: AudioPlayerData) => {
-    contentRef.current.upNextSongData = upNextSongData;
+    dispatch({ type: 'UP_NEXT_SONG_DATA_CHANGE', data: upNextSongData });
   }, []);
 
-  const promptMenuData = useMemo(() => {
-    const { currentActiveIndex, isVisible, prompts } = content.promptMenuNavigationData;
+  // const appContextStateValues: AppStateContextType = useStore(store, (state) => {
+  //   const { currentActiveIndex, isVisible, prompts } = store.state.promptMenuNavigationData;
 
-    return {
-      isVisible,
-      prompt: prompts?.at(currentActiveIndex)?.prompt,
-      className: prompts?.at(currentActiveIndex)?.className,
-      noOfPrompts: prompts.length,
-      currentActiveIndex
-    };
-  }, [content.promptMenuNavigationData]);
+  //   const promptMenuData = {
+  //     isVisible,
+  //     prompt: prompts?.at(currentActiveIndex)?.prompt,
+  //     className: prompts?.at(currentActiveIndex)?.className,
+  //     noOfPrompts: prompts.length,
+  //     currentActiveIndex
+  //   };
 
-  const appContextStateValues: AppStateContextType = useMemo(
-    () => ({
-      isDarkMode: content.isDarkMode,
-      contextMenuData: content.contextMenuData,
-      promptMenuData,
-      currentSongData: {
-        ...content.currentSongData,
-        duration: player.duration || content.currentSongData.duration
-      },
-      upNextSongData: contentRef.current.upNextSongData,
-      currentlyActivePage:
-        contentRef.current.navigationHistory.history[content.navigationHistory.pageHistoryIndex],
-      notificationPanelData: content.notificationPanelData,
-      userData: content.userData,
-      localStorageData: content.localStorage,
-      queue: refQueue.current,
-      isCurrentSongPlaying: content.player.isCurrentSongPlaying,
-      noOfPagesInHistory: content.navigationHistory.history.length - 1,
-      pageHistoryIndex: content.navigationHistory.pageHistoryIndex,
-      volume: content.player.volume.value,
-      isMuted: content.player.volume.isMuted,
-      isRepeating: content.player.isRepeating,
-      isShuffling: content.player.isShuffling,
-      isPlayerStalled: content.player.isPlayerStalled,
-      bodyBackgroundImage: content.bodyBackgroundImage,
-      isMultipleSelectionEnabled: content.multipleSelectionsData.isEnabled,
-      multipleSelectionsData: content.multipleSelectionsData,
-      appUpdatesState: content.appUpdatesState,
-      equalizerOptions: content.localStorage.equalizerPreset,
-      playerType: content.playerType
-    }),
-    [
-      content.isDarkMode,
-      content.contextMenuData,
-      content.currentSongData,
-      content.navigationHistory.pageHistoryIndex,
-      content.navigationHistory.history.length,
-      content.notificationPanelData,
-      content.userData,
-      content.localStorage,
-      content.player.isCurrentSongPlaying,
-      content.player.volume.value,
-      content.player.volume.isMuted,
-      content.player.isRepeating,
-      content.player.isShuffling,
-      content.player.isPlayerStalled,
-      content.bodyBackgroundImage,
-      content.multipleSelectionsData,
-      content.appUpdatesState,
-      content.playerType,
-      promptMenuData
-    ]
-  );
+  //   tempRef.current = state;
+
+  //   return {
+  //     isDarkMode: state.isDarkMode,
+  //     contextMenuData: state.contextMenuData,
+  //     promptMenuData,
+  //     currentSongData: {
+  //       ...state.currentSongData,
+  //       duration: player.duration || state.currentSongData.duration
+  //     },
+  //     upNextSongData: store.state.upNextSongData,
+  //     currentlyActivePage:
+  //       store.state.navigationHistory.history[state.navigationHistory.pageHistoryIndex],
+  //     notificationPanelData: state.notificationPanelData,
+  //     userData: state.userData,
+  //     localStorageData: state.localStorage,
+  //     queue: state.localStorage.queue,
+  //     isCurrentSongPlaying: state.player.isCurrentSongPlaying,
+  //     noOfPagesInHistory: state.navigationHistory.history.length - 1,
+  //     pageHistoryIndex: state.navigationHistory.pageHistoryIndex,
+  //     volume: state.player.volume.value,
+  //     isMuted: state.player.volume.isMuted,
+  //     isRepeating: state.player.isRepeating,
+  //     isShuffling: state.player.isShuffling,
+  //     isPlayerStalled: state.player.isPlayerStalled,
+  //     bodyBackgroundImage: state.bodyBackgroundImage,
+  //     isMultipleSelectionEnabled: state.multipleSelectionsData.isEnabled,
+  //     multipleSelectionsData: state.multipleSelectionsData,
+  //     appUpdatesState: state.appUpdatesState,
+  //     equalizerOptions: state.localStorage.equalizerPreset,
+  //     playerType: state.playerType
+  //   };
+  // });
 
   const appUpdateContextValues: AppUpdateContextType = useMemo(
     () => ({
@@ -1947,79 +1840,80 @@ export default function App() {
     ]
   );
 
-  const isReducedMotion =
-    content.localStorage.preferences.isReducedMotion ||
-    (content.isOnBatteryPower && content.localStorage.preferences.removeAnimationsOnBatteryPower);
+  const isReducedMotion = useStore(store, (state) => {
+    storeRef.current = state;
+
+    return (
+      state.localStorage.preferences.isReducedMotion ||
+      (state.isOnBatteryPower && state.localStorage.preferences.removeAnimationsOnBatteryPower)
+    );
+  });
+  const isDarkMode = useStore(store, (state) => state.isDarkMode);
+  const playerType = useStore(store, (state) => state.playerType);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
 
   useEffect(() => {
-    if (content.isDarkMode) document.body.classList.add('dark');
+    if (isDarkMode) document.body.classList.add('dark');
     else document.body.classList.remove('dark');
-  }, [content.isDarkMode]);
+  }, [isDarkMode]);
 
   return (
     <ErrorBoundary>
-      <AppContext.Provider value={appContextStateValues}>
-        <AppUpdateContext.Provider value={appUpdateContextValues}>
-          {content.playerType === 'normal' ? (
-            <div
-              className={`App select-none ${
-                content.isDarkMode ? 'dark bg-dark-background-color-1' : 'bg-background-color-1'
-              } ${
-                isReducedMotion
-                  ? 'reduced-motion animate-none transition-none !delay-0 !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
-                  : ''
-              } grid !h-screen w-full grid-rows-[auto_1fr_auto] items-center overflow-y-hidden after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc] [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
-              ref={AppRef}
-              onDragEnter={addSongDropPlaceholder}
-              onDragLeave={removeSongDropPlaceholder}
-              onDragOver={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              onDrop={onSongDrop}
-            >
-              <Preloader />
-              {content.bodyBackgroundImage && (
-                <div
-                  className={`body-background-image-container absolute h-full w-full overflow-hidden bg-center opacity-100 blur-0 brightness-100 transition-[filter,opacity] duration-500 ${
-                    content.bodyBackgroundImage && '!opacity-100 !blur-sm !brightness-75'
+      <AppUpdateContext.Provider value={appUpdateContextValues}>
+        {playerType === 'normal' ? (
+          <div
+            className={`App select-none ${
+              isDarkMode ? 'dark bg-dark-background-color-1' : 'bg-background-color-1'
+            } ${
+              isReducedMotion
+                ? 'reduced-motion animate-none transition-none !delay-0 !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
+                : ''
+            } grid !h-screen w-full grid-rows-[auto_1fr_auto] items-center overflow-y-hidden after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:text-font-color-white after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] dark:after:text-font-color-white [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc] [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
+            ref={AppRef}
+            onDragEnter={addSongDropPlaceholder}
+            onDragLeave={removeSongDropPlaceholder}
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onDrop={onSongDrop}
+          >
+            <Preloader />
+            {bodyBackgroundImage && (
+              <div
+                className={`body-background-image-container absolute h-full w-full overflow-hidden bg-center opacity-100 blur-0 brightness-100 transition-[filter,opacity] duration-500 ${
+                  bodyBackgroundImage && '!opacity-100 !blur-sm !brightness-75'
+                }`}
+              >
+                <Img className="w-full bg-cover" loading="eager" src={bodyBackgroundImage} alt="" />
+              </div>
+            )}
+            <ContextMenu />
+            <PromptMenu />
+            <TitleBar />
+            <BodyAndSideBarContainer />
+            <SongControlsContainer />
+          </div>
+        ) : (
+          <ErrorBoundary>
+            {playerType === 'mini' ? (
+              <Suspense fallback={<SuspenseLoader />}>
+                <MiniPlayer
+                  className={`${
+                    isReducedMotion
+                      ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
+                      : ''
                   }`}
-                >
-                  <Img
-                    className="w-full bg-cover"
-                    loading="eager"
-                    src={content.bodyBackgroundImage}
-                    alt=""
-                  />
-                </div>
-              )}
-              <ContextMenu />
-              <PromptMenu />
-              <TitleBar />
-              <BodyAndSideBarContainer />
-              <SongControlsContainer />
-            </div>
-          ) : (
-            <ErrorBoundary>
-              {content.playerType === 'mini' ? (
-                <Suspense fallback={<SuspenseLoader />}>
-                  <MiniPlayer
-                    className={`${
-                      isReducedMotion
-                        ? 'reduced-motion animate-none transition-none !duration-[0] [&.dialog-menu]:!backdrop-blur-none'
-                        : ''
-                    }`}
-                  />
-                </Suspense>
-              ) : (
-                <Suspense fallback={<SuspenseLoader />}>
-                  <FullScreenPlayer />
-                </Suspense>
-              )}
-            </ErrorBoundary>
-          )}
-        </AppUpdateContext.Provider>
-      </AppContext.Provider>
+                />
+              </Suspense>
+            ) : (
+              <Suspense fallback={<SuspenseLoader />}>
+                <FullScreenPlayer />
+              </Suspense>
+            )}
+          </ErrorBoundary>
+        )}
+      </AppUpdateContext.Provider>
     </ErrorBoundary>
   );
 }

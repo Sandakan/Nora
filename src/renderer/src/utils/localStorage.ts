@@ -185,10 +185,8 @@ const setAllItems = (storage: LocalStorage) => {
     const updatedStorageString = JSON.stringify(storage);
     localStorage.setItem('localStorage', updatedStorageString);
 
-    debounce(() => {
-      const customEvent = new CustomEvent('localStorage');
-      document.dispatchEvent(customEvent);
-    }, 100);
+    const customEvent = new CustomEvent('localStorage');
+    document.dispatchEvent(customEvent);
   } catch (error) {
     console.error(error);
   }

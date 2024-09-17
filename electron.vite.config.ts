@@ -1,4 +1,7 @@
-// import { resolve } from 'path';
+/**
+ * @type {import('electron-vite').UserConfig}
+ */
+import { resolve } from 'path';
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite';
 import react from '@vitejs/plugin-react';
 
@@ -19,7 +22,7 @@ export default defineConfig({
   renderer: {
     resolve: {
       alias: {
-        // '@renderer': resolve('src/renderer/src')
+        '@renderer': resolve(import.meta.dirname, './src/renderer/src')
       }
     },
     plugins: [react()]

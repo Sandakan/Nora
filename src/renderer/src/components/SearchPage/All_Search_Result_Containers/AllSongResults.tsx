@@ -1,16 +1,19 @@
 import { useCallback, useContext } from 'react';
-import { AppContext } from '../../../contexts/AppContext';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 
 import Song from '../../SongsPage/Song';
 import SecondaryContainer from '../../SecondaryContainer';
 import VirtualizedList from '../../VirtualizedList';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = { songData: SongData[] };
 
 const AllSongResults = (prop: Props) => {
-  const { currentlyActivePage, localStorageData } = useContext(AppContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const { createQueue, playSong } = useContext(AppUpdateContext);
 
   const { songData } = prop;
@@ -50,7 +53,7 @@ const AllSongResults = (prop: Props) => {
                 <Song
                   key={index}
                   index={index}
-                  isIndexingSongs={localStorageData?.preferences.isSongIndexingEnabled}
+                  isIndexingSongs={preferences?.isSongIndexingEnabled}
                   onPlayClick={handleSongPlayBtnClick}
                   selectAllHandler={selectAllHandler}
                   {...song}

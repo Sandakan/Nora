@@ -4,12 +4,13 @@
 /* eslint-disable import/prefer-default-export */
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import DefaultArtistCover from '../../assets/images/webp/artist_cover_default.webp';
 import Button from '../Button';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 interface ArtistProp {
   // eslint-disable-next-line react/no-unused-prop-types
@@ -29,7 +30,13 @@ interface ArtistProp {
 }
 
 export const Artist = (props: ArtistProp) => {
-  const { queue, isMultipleSelectionEnabled, multipleSelectionsData } = useContext(AppContext);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+
   const { t } = useTranslation();
 
   const {

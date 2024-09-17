@@ -1,6 +1,7 @@
 import { useCallback, useContext } from 'react';
-import { AppContext } from '../contexts/AppContext';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
+import { useStore } from '@tanstack/react-store';
+import { store } from '../store';
 
 const slice = (arr: string[], start: number, end: number) => {
   if (start > end) {
@@ -17,7 +18,8 @@ const useSelectAllHandler = <Obj extends Record<string, any>>(
     { [Prop in keyof Obj]: Obj[Prop] extends string ? Prop : never }[keyof Obj]
   >
 ) => {
-  const { multipleSelectionsData } = useContext(AppContext);
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+
   const { toggleMultipleSelections } = useContext(AppUpdateContext);
 
   const selectAllHandler = useCallback(

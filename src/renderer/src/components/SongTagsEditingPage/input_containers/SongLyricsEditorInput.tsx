@@ -1,7 +1,6 @@
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppContext } from '../../../contexts/AppContext';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import Button from '../../Button';
 import Hyperlink from '../../Hyperlink';
@@ -9,6 +8,8 @@ import { LyricData } from '../../LyricsEditingPage/LyricsEditingPage';
 import useNetworkConnectivity from '../../../hooks/useNetworkConnectivity';
 import parseLyrics from '../../../../../common/parseLyrics';
 import isLyricsSynced, { isLyricsEnhancedSynced } from '../../../../../common/isLyricsSynced';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type CurrentLyricsTYpe = 'synced' | 'unsynced';
 
@@ -32,7 +33,8 @@ type Props = {
 };
 
 const SongLyricsEditorInput = (props: Props) => {
-  const { userData } = useContext(AppContext);
+  const userData = useStore(store, (state) => state.userData);
+
   const { addNewNotifications, changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 

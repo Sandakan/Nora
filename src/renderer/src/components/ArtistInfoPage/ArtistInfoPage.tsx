@@ -1,7 +1,6 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
@@ -20,20 +19,22 @@ import TitleContainer from '../TitleContainer';
 import SimilarArtistsContainer from './SimilarArtistsContainer';
 import Biography from '../Biography/Biography';
 import { songSortOptions } from '../SongsPage/SongOptions';
+import { store } from '@renderer/store';
+import { useStore } from '@tanstack/react-store';
 
 // const MIN_ITEM_WIDTH = 220;
 // const MIN_ITEM_HEIGHT = 280;
 
 const ArtistInfoPage = () => {
-  const {
-    currentlyActivePage,
-    // queue,
-    // isDarkMode,
-    bodyBackgroundImage,
-    localStorageData,
-    multipleSelectionsData,
-    isMultipleSelectionEnabled
-  } = useContext(AppContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const {
     createQueue,
     updateBodyBackgroundImage,
@@ -262,7 +263,7 @@ const ArtistInfoPage = () => {
             <Song
               key={song.songId}
               index={index}
-              isIndexingSongs={localStorageData?.preferences?.isSongIndexingEnabled}
+              isIndexingSongs={preferences?.isSongIndexingEnabled}
               title={song.title}
               artists={song.artists}
               album={song.album}
@@ -281,7 +282,7 @@ const ArtistInfoPage = () => {
     [
       handleSongPlayBtnClick,
       isAllSongsVisible,
-      localStorageData?.preferences?.isSongIndexingEnabled,
+      preferences?.isSongIndexingEnabled,
       selectAllHandlerForSongs,
       songs
     ]

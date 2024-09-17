@@ -1,9 +1,8 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import { KeyboardEvent, useCallback, useContext, useEffect, useState } from 'react';
+import { KeyboardEvent, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../../contexts/AppContext';
 import storage from '../../../utils/localStorage';
 
 import Img from '../../Img';
@@ -13,9 +12,14 @@ import HomeImgDark from '../../../assets/images/webp/home-skeleton-dark.webp';
 import HomeImgLightDark from '../../../assets/images/webp/home-skeleton-light-dark.webp';
 import Checkbox from '../../Checkbox';
 import DynamicThemeSettings from './DynamicThemeSettings';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const ThemeSettings = () => {
-  const { userData, localStorageData, currentSongData } = useContext(AppContext);
+  const userData = useStore(store, (state) => state.userData);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const { t } = useTranslation();
 
   const [theme, setTheme] = useState(userData?.theme);
@@ -144,19 +148,15 @@ const ThemeSettings = () => {
           </div>
           <Checkbox
             id="toggleEnableImageBasedDynamicThemes"
-            isChecked={
-              localStorageData !== undefined &&
-              localStorageData.preferences.enableImageBasedDynamicThemes
-            }
+            isChecked={preferences?.enableImageBasedDynamicThemes}
             checkedStateUpdateFunction={(state) =>
               storage.preferences.setPreferences('enableImageBasedDynamicThemes', state)
             }
             labelContent={t('settingsPage.enableImageBasedDynamicThemes')}
           />
-          {localStorageData.preferences.enableImageBasedDynamicThemes &&
-            currentSongData.paletteData && (
-              <DynamicThemeSettings palette={currentSongData.paletteData} />
-            )}
+          {preferences?.enableImageBasedDynamicThemes && currentSongData.paletteData && (
+            <DynamicThemeSettings palette={currentSongData.paletteData} />
+          )}
         </li>
       </ul>
     </li>

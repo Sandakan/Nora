@@ -1,16 +1,18 @@
-import { useContext, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 
 // eslint-disable-next-line import/namespace
 import { Artist } from '../ArtistPage/Artist';
 import UnAvailableArtist from './UnAvailableArtist';
 import TitleContainer from '../TitleContainer';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = { similarArtists: SimilarArtistInfo };
 
 const SimilarArtistsContainer = (props: Props) => {
-  const { bodyBackgroundImage } = useContext(AppContext);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+
   const { t } = useTranslation();
 
   const { similarArtists } = props;

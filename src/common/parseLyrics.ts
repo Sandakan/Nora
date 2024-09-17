@@ -202,7 +202,7 @@ const groupOriginalAndTranslatedLyricLines = (lyricsLines: string[], isSynced: b
     const groupedLines: { [key: string]: typeof partiallyParsedLines } = {};
 
     partiallyParsedLines.forEach((line) => {
-      const time = getSecondsFromLyricsLine(line.input).toString();
+      const time = getSecondsFromLyricsLine(line.input).toFixed(2);
 
       if (!groupedLines[time]) groupedLines[time] = [];
       groupedLines[time].push(line);

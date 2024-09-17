@@ -2,7 +2,6 @@
 import { lazy, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import useNetworkConnectivity from '../../hooks/useNetworkConnectivity';
@@ -23,6 +22,8 @@ import SongAlbumArtistsInput from './input_containers/SongAlbumArtistInput';
 
 import hasDataChanged, { isDataChanged } from '../../utils/hasDataChanged';
 import { appPreferences } from '../../../../../package.json';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const SongMetadataResultsSelectPage = lazy(() => import('./SongMetadataResultsSelectPrompt'));
 const ResetTagsToDefaultPrompt = lazy(() => import('./ResetTagsToDefaultPrompt'));
@@ -53,7 +54,9 @@ type GenreResult = { genreId?: string; name: string; artworkPath?: string };
 const { metadataEditingSupportedExtensions } = appPreferences;
 
 function SongTagsEditingPage() {
-  const { currentlyActivePage, currentSongData } = useContext(AppContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+
   const {
     addNewNotifications,
     changePromptMenuData,
@@ -87,9 +90,9 @@ function SongTagsEditingPage() {
 
   const { songId, songPath, isKnownSource } = useMemo(
     () => ({
-      songId: currentlyActivePage.data.songId as string,
-      songPath: currentlyActivePage.data.songPath as string,
-      isKnownSource: (currentlyActivePage.data.isKnownSource as boolean) ?? true
+      songId: currentlyActivePage.data?.songId as string,
+      songPath: currentlyActivePage.data?.songPath as string,
+      isKnownSource: (currentlyActivePage.data?.isKnownSource as boolean) ?? true
     }),
     [currentlyActivePage.data]
   );

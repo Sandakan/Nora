@@ -4,8 +4,9 @@ import { Album } from '../../AlbumsPage/Album';
 import Button from '../../Button';
 import SecondaryContainer from '../../SecondaryContainer';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { AppContext } from '../../../contexts/AppContext';
 import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
+import { store } from '@renderer/store';
+import { useStore } from '@tanstack/react-store';
 
 type Props = {
   albums: Album[];
@@ -16,7 +17,11 @@ type Props = {
 
 const AlbumSearchResultsContainer = (props: Props) => {
   const { albums, searchInput, noOfVisibleAlbums = 4, isPredictiveSearchEnabled } = props;
-  const { isMultipleSelectionEnabled, multipleSelectionsData } = useContext(AppContext);
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
   const { toggleMultipleSelections, changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 

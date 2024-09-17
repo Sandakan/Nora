@@ -11,7 +11,6 @@ import {
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import roundTo from '../../../../common/roundTo';
@@ -20,6 +19,8 @@ import MainContainer from '../MainContainer';
 import EditingLyricsLine from './EditingLyricsLine';
 import Button from '../Button';
 import LyricsEditingPageDurationCounter from './LyricsEditingPageDurationCounter';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const LyricsEditorHelpPrompt = lazy(() => import('./LyricsEditorHelpPrompt'));
 const SensitiveActionConfirmPrompt = lazy(() => import('../SensitiveActionConfirmPrompt'));
@@ -51,7 +52,12 @@ export interface ExtendedEditingLyricsLineData extends EditingLyricsLineData {
   isActive: boolean;
 }
 const LyricsEditingPage = () => {
-  const { currentlyActivePage, currentSongData, localStorageData } = useContext(AppContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const lyricsEditorSettings = useStore(store, (state) => state.localStorage.lyricsEditorSettings);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+  const playback = useStore(store, (state) => state.localStorage.playback);
+
   const { changePromptMenuData, playSong, updateCurrentlyActivePageData, updateContextMenuData } =
     useContext(AppUpdateContext);
   const { t } = useTranslation();
@@ -64,20 +70,20 @@ const LyricsEditingPage = () => {
   const [lyricsLines, setLyricsLines] = useState<ExtendedEditingLyricsLineData[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const offset = localStorageData.lyricsEditorSettings.offset || 0;
+  const offset = lyricsEditorSettings.offset || 0;
   // const roundedSongPostion = roundTo(songPosition + offset, 2);
 
   const { songId, lyrics, songTitle } = useMemo(() => {
     const { data } = currentlyActivePage;
 
-    setIsEditingEnhancedSyncedLyrics(
-      typeof data.lyrics === 'object' && !!data.isEditingEnhancedSyncedLyrics
-    );
+    const isEnhancedSynced =
+      !!data && typeof data.lyrics === 'object' && !!data.isEditingEnhancedSyncedLyrics;
+    setIsEditingEnhancedSyncedLyrics(isEnhancedSynced);
 
     return {
-      songId: data.songId as string | undefined,
-      lyrics: (data.lyrics || []) as LyricData[],
-      songTitle: data.songTitle as string | undefined
+      songId: data?.songId as string | undefined,
+      lyrics: (data?.lyrics || []) as LyricData[],
+      songTitle: data?.songTitle as string | undefined
     };
   }, [currentlyActivePage]);
 
@@ -87,10 +93,7 @@ const LyricsEditingPage = () => {
   );
 
   useEffect(() => {
-    if (
-      changePromptMenuData &&
-      !localStorageData?.preferences?.doNotShowHelpPageOnLyricsEditorStartUp
-    ) {
+    if (changePromptMenuData && !preferences?.doNotShowHelpPageOnLyricsEditorStartUp) {
       changePromptMenuData(true, <LyricsEditorHelpPrompt showDoNotShowAgainCheckbox />);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -389,7 +392,7 @@ const LyricsEditingPage = () => {
           {t('lyricsEditingPage.lyricsEditor')}{' '}
           <div className="other-stats-container truncate text-xs text-font-color-black dark:text-font-color-white">
             <span>
-              {t('lyricsEditingPage.playbackSpeed')} : {localStorageData.playback.playbackRate}x
+              {t('lyricsEditingPage.playbackSpeed')} : {playback.playbackRate}x
             </span>
             <span className="mx-2">&bull;</span>
             <LyricsEditingPageDurationCounter offset={offset} />

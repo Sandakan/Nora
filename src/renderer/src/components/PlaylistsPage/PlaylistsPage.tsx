@@ -2,7 +2,6 @@ import { lazy, useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { AppContext } from '../../contexts/AppContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import storage from '../../utils/localStorage';
 import i18n from '../../i18n';
@@ -12,6 +11,8 @@ import Button from '../Button';
 import MainContainer from '../MainContainer';
 import Dropdown, { DropdownOption } from '../Dropdown';
 import VirtualizedGrid from '../VirtualizedGrid';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const NewPlaylistPrompt = lazy(() => import('./NewPlaylistPrompt'));
 
@@ -32,12 +33,14 @@ const MIN_ITEM_WIDTH = 175;
 const MIN_ITEM_HEIGHT = 220;
 
 const PlaylistsPage = () => {
-  const {
-    currentlyActivePage,
-    localStorageData,
-    isMultipleSelectionEnabled,
-    multipleSelectionsData
-  } = useContext(AppContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const sortingStates = useStore(store, (state) => state.localStorage.sortingStates);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+
   const {
     changePromptMenuData,
     updateContextMenuData,
@@ -48,8 +51,8 @@ const PlaylistsPage = () => {
 
   const [playlists, setPlaylists] = useState([] as Playlist[]);
   const [sortingOrder, setSortingOrder] = useState<PlaylistSortTypes>(
-    currentlyActivePage?.data?.sortingOrder ||
-      localStorageData?.sortingStates?.playlistsPage ||
+    (currentlyActivePage?.data?.sortingOrder as PlaylistSortTypes) ||
+      sortingStates?.playlistsPage ||
       'aToZ'
   );
 

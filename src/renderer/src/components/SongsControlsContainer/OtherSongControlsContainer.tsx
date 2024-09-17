@@ -3,14 +3,18 @@
 import { lazy, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { AppContext } from '../../contexts/AppContext';
 import Button from '../Button';
 import VolumeSlider from '../VolumeSlider';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const AppShortcutsPrompt = lazy(() => import('../SettingsPage/AppShortcutsPrompt'));
 
 const OtherSongControlsContainer = () => {
-  const { currentlyActivePage, isMuted, volume } = useContext(AppContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const isMuted = useStore(store, (state) => state.player.volume.isMuted);
+  const volume = useStore(store, (state) => state.player.volume.value);
+
   const {
     changeCurrentActivePage,
     updatePlayerType,

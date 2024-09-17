@@ -1,7 +1,8 @@
 import { useContext, useMemo } from 'react';
-import { AppContext } from '../contexts/AppContext';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import Checkbox from './Checkbox';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   id: string;
@@ -11,7 +12,8 @@ type Props = {
 
 const MultipleSelectionCheckbox = (props: Props) => {
   const { id, selectionType, className = '' } = props;
-  const { multipleSelectionsData } = useContext(AppContext);
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+
   const { updateMultipleSelections } = useContext(AppUpdateContext);
 
   const isChecked = useMemo(() => {

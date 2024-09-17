@@ -5,7 +5,6 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { AppContext } from '../../contexts/AppContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import storage from '../../utils/localStorage';
 import i18n from '../../i18n';
@@ -18,6 +17,8 @@ import Button from '../Button';
 
 import NoSongsImage from '../../assets/images/svg/Summer landscape_Monochromatic.svg';
 import VirtualizedGrid from '../VirtualizedGrid';
+import { store } from '@renderer/store';
+import { useStore } from '@tanstack/react-store';
 
 const genreSortTypes: DropdownOption<GenreSortTypes>[] = [
   { label: i18n.t('sortTypes.aToZ'), value: 'aToZ' },
@@ -35,18 +36,22 @@ const MIN_ITEM_WIDTH = 320;
 const MIN_ITEM_HEIGHT = 180;
 
 const GenresPage = () => {
-  const {
-    currentlyActivePage,
-    localStorageData,
-    isMultipleSelectionEnabled,
-    multipleSelectionsData
-  } = useContext(AppContext);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const sortingStates = useStore(store, (state) => state.localStorage.sortingStates);
+
   const { updateCurrentlyActivePageData, toggleMultipleSelections } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const [genresData, setGenresData] = useState([] as Genre[] | null);
   const [sortingOrder, setSortingOrder] = useState<GenreSortTypes>(
-    currentlyActivePage?.data?.sortingOrder || localStorageData?.sortingStates?.genresPage || 'aToZ'
+    (currentlyActivePage?.data?.sortingOrder as GenreSortTypes) ||
+      sortingStates?.genresPage ||
+      'aToZ'
   );
 
   const fetchGenresData = useCallback(() => {

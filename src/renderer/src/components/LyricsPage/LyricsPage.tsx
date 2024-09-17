@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import i18n from '../../i18n';
 import debounce from '../../utils/debounce';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { AppContext } from '../../contexts/AppContext';
 import useNetworkConnectivity from '../../hooks/useNetworkConnectivity';
 
 import LyricLine from './LyricLine';
@@ -19,6 +18,8 @@ import { appPreferences } from '../../../../../package.json';
 import { LyricData } from '../LyricsEditingPage/LyricsEditingPage';
 import { isLyricsEnhancedSynced } from '../../../../common/isLyricsSynced';
 import useSkipLyricsLines from '../../hooks/useSkipLyricsLines';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -34,7 +35,9 @@ document.addEventListener('lyrics/scrollIntoView', () => {
 });
 
 const LyricsPage = () => {
-  const { currentSongData, localStorageData } = useContext(AppContext);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+
   const { addNewNotifications, updateCurrentlyActivePageData, changeCurrentActivePage } =
     useContext(AppUpdateContext);
   const { t } = useTranslation();
@@ -69,7 +72,7 @@ const LyricsPage = () => {
           },
           undefined,
           undefined,
-          localStorageData.preferences.lyricsAutomaticallySaveState
+          preferences.lyricsAutomaticallySaveState
         )
         .then((res) => {
           setLyrics(res);
@@ -88,7 +91,7 @@ const LyricsPage = () => {
     currentSongData.path,
     currentSongData.songId,
     currentSongData.title,
-    localStorageData.preferences.lyricsAutomaticallySaveState
+    preferences.lyricsAutomaticallySaveState
   ]);
 
   useEffect(() => {
@@ -226,7 +229,7 @@ const LyricsPage = () => {
           },
           'ANY',
           'OFFLINE_ONLY',
-          localStorageData.preferences.lyricsAutomaticallySaveState
+          preferences.lyricsAutomaticallySaveState
         )
         .then((res) => {
           if (res) return setLyrics(res);
@@ -249,7 +252,7 @@ const LyricsPage = () => {
       currentSongData.duration,
       currentSongData.path,
       currentSongData.title,
-      localStorageData.preferences.lyricsAutomaticallySaveState,
+      preferences.lyricsAutomaticallySaveState,
       t
     ]
   );

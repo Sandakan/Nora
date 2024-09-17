@@ -1,9 +1,9 @@
-import { Suspense, useContext, lazy, memo, useEffect, useRef } from 'react';
-
-import { AppContext } from '../contexts/AppContext';
+import { Suspense, lazy, memo, useEffect, useRef } from 'react';
 
 import SuspenseLoader from './SuspenseLoader';
 import ErrorBoundary from './ErrorBoundary';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const HomePage = lazy(() => import('./HomePage/HomePage'));
 const ArtistPage = lazy(() => import('./ArtistPage/ArtistPage'));
@@ -26,8 +26,12 @@ const SongsPage = lazy(() => import('./SongsPage/SongsPage'));
 const MusicFoldersPage = lazy(() => import('./MusicFoldersPage/MusicFoldersPage'));
 const MusicFolderInfoPage = lazy(() => import('./MusicFolderInfoPage/MusicFolderInfoPage'));
 
+const isPageDataEmpty = (pageData: PageData | undefined) =>
+  !pageData || Object.keys(pageData).length === 0;
+
 const Body = memo(() => {
-  const { currentlyActivePage } = useContext(AppContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+
   const bodyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -80,15 +84,13 @@ const Body = memo(() => {
           {currentlyActivePage.pageTitle === 'CurrentQueue' && <CurrentQueuePage />}
           {currentlyActivePage.pageTitle === 'SongInfo' && <SongInfoPage />}
           {currentlyActivePage.pageTitle === 'ArtistInfo' && <ArtistInfoPage />}
-          {currentlyActivePage.pageTitle === 'AlbumInfo' && currentlyActivePage.data !== '' && (
-            <AlbumInfoPage />
-          )}
-          {currentlyActivePage.pageTitle === 'PlaylistInfo' && currentlyActivePage.data !== '' && (
-            <PlaylistsInfoPage />
-          )}
+          {currentlyActivePage.pageTitle === 'AlbumInfo' &&
+            !isPageDataEmpty(currentlyActivePage.data) && <AlbumInfoPage />}
+          {currentlyActivePage.pageTitle === 'PlaylistInfo' &&
+            !isPageDataEmpty(currentlyActivePage.data) && <PlaylistsInfoPage />}
           {currentlyActivePage.pageTitle === 'GenreInfo' && <GenreInfoPage />}
           {currentlyActivePage.pageTitle === 'MusicFolderInfo' &&
-            currentlyActivePage.data !== '' && <MusicFolderInfoPage />}
+            !isPageDataEmpty(currentlyActivePage.data) && <MusicFolderInfoPage />}
           {currentlyActivePage.pageTitle === 'SongTagsEditor' && <SongTagsEditingPage />}
           {currentlyActivePage.pageTitle === 'LyricsEditor' && <LyricsEditingPage />}
         </Suspense>
