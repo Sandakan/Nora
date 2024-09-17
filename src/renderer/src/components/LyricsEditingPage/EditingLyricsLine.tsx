@@ -1,6 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import {
@@ -10,6 +9,8 @@ import {
 } from './LyricsEditingPage';
 import Button from '../Button';
 import EditingLyricWord from './EditingLyricWord';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 interface Props extends ExtendedEditingLyricsLineData {
   isPlaying: boolean;
@@ -44,7 +45,8 @@ const reducerFunction = (
 };
 
 const EditingLyricsLine = (props: Props) => {
-  const { localStorageData } = useContext(AppContext);
+  const lyricsEditorSettings = useStore(store, (state) => state.localStorage.lyricsEditorSettings);
+
   const { updateSongPosition } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
@@ -338,10 +340,7 @@ const EditingLyricsLine = (props: Props) => {
                     lineData.end = content.end || end;
                   }
 
-                  if (
-                    localStorageData.lyricsEditorSettings
-                      .editNextAndCurrentStartAndEndTagsAutomatically
-                  ) {
+                  if (lyricsEditorSettings.editNextAndCurrentStartAndEndTagsAutomatically) {
                     if (prevLineData[index - 1]) prevLineData[index - 1].end = content.start;
                     if (prevLineData[index + 1]) prevLineData[index + 1].start = content.end;
                   }

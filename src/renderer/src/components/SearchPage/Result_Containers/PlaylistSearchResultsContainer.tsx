@@ -4,8 +4,9 @@ import Button from '../../Button';
 import { Playlist } from '../../PlaylistsPage/Playlist';
 import SecondaryContainer from '../../SecondaryContainer';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { AppContext } from '../../../contexts/AppContext';
 import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   playlists: Playlist[];
@@ -16,7 +17,11 @@ type Props = {
 
 const PlaylistSearchResultsContainer = (props: Props) => {
   const { playlists, searchInput, noOfVisiblePlaylists = 4, isPredictiveSearchEnabled } = props;
-  const { isMultipleSelectionEnabled, multipleSelectionsData } = useContext(AppContext);
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
   const { toggleMultipleSelections, changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 

@@ -1,10 +1,9 @@
-import { useContext } from 'react';
-
 import { Artist } from '../../ArtistPage/Artist';
-import { AppContext } from '../../../contexts/AppContext';
 import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 import SecondaryContainer from '../../SecondaryContainer';
 import VirtualizedGrid from '../../VirtualizedGrid';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = { artistData: Artist[] };
 
@@ -12,7 +11,7 @@ const MIN_ITEM_WIDTH = 175;
 const MIN_ITEM_HEIGHT = 200;
 
 const AllArtistResults = (prop: Props) => {
-  const { currentlyActivePage } = useContext(AppContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
 
   const { artistData } = prop;
 

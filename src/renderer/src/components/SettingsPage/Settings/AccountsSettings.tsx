@@ -1,15 +1,16 @@
 import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../../contexts/AppContext';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 
 import Button from '../../Button';
 import Checkbox from '../../Checkbox';
 
 import LastFMIcon from '../../../assets/images/webp/last-fm-logo.webp';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const AccountsSettings = () => {
-  const { userData } = useContext(AppContext);
+  const userData = useStore(store, (state) => state.userData);
   const { updateUserData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 

@@ -7,14 +7,17 @@
 /* eslint-disable import/prefer-default-export */
 import { memo, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { AppContext } from '../../contexts/AppContext';
 import { useTranslation } from 'react-i18next';
 
 import ErrorBoundary from '../ErrorBoundary';
 import SideBarItem from './SideBarItem';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const Sidebar = memo(() => {
-  const { currentlyActivePage, bodyBackgroundImage } = useContext(AppContext);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+
   const { changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 

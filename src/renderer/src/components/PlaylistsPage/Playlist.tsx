@@ -5,7 +5,6 @@
 import { lazy, useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import Img from '../Img';
@@ -13,6 +12,8 @@ import Button from '../Button';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import DefaultPlaylistCover from '../../assets/images/webp/playlist_cover_default.webp';
 import MultipleArtworksCover from './MultipleArtworksCover';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const ConfirmDeletePlaylistsPrompt = lazy(() => import('./ConfirmDeletePlaylistsPrompt'));
 const RenamePlaylistPrompt = lazy(() => import('./RenamePlaylistPrompt'));
@@ -24,8 +25,14 @@ interface PlaylistProp extends Playlist {
 }
 
 export const Playlist = (props: PlaylistProp) => {
-  const { queue, multipleSelectionsData, isMultipleSelectionEnabled, localStorageData } =
-    useContext(AppContext);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+
   const {
     updateQueueData,
     updateContextMenuData,
@@ -401,7 +408,7 @@ export const Playlist = (props: PlaylistProp) => {
           />
         )}
         <div className="playlist-cover-container h-full cursor-pointer overflow-hidden">
-          {localStorageData?.preferences.enableArtworkFromSongCovers && props.songs.length > 2 ? (
+          {preferences?.enableArtworkFromSongCovers && props.songs.length > 2 ? (
             <div className="relative aspect-square w-full">
               <MultipleArtworksCover
                 songIds={props.songs}

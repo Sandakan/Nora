@@ -7,10 +7,11 @@ import {
   useRef,
   useState
 } from 'react';
-import { AppContext } from '../contexts/AppContext';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import calculateTime from '../utils/calculateTime';
 import debounce from '../utils/debounce';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   id: string;
@@ -21,7 +22,9 @@ type Props = {
 };
 
 const SeekBarSlider = (props: Props) => {
-  const { localStorageData, currentSongData } = useContext(AppContext);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const { updateSongPosition } = useContext(AppUpdateContext);
 
   const { id, name, className, sliderOpacity, onSeek } = props;
@@ -112,7 +115,7 @@ const SeekBarSlider = (props: Props) => {
     isMouseScrollRef.current = true;
 
     const max = parseInt(e.currentTarget.max);
-    const scrollIncrement = localStorageData.preferences.seekbarScrollInterval;
+    const scrollIncrement = preferences.seekbarScrollInterval;
 
     const incrementValue = e.deltaY > 0 ? -scrollIncrement : scrollIncrement;
     let value = (songPos || 0) + incrementValue;

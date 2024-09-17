@@ -904,7 +904,7 @@ declare global {
     onPageChange?: (changedPageTitle: PageTitles, changedPageData?: any) => void;
   }
 
-  interface PageData extends Record<string, unknown> {
+  interface PageData<R = any> extends Record<string, R> {
     scrollTopOffset?: number;
     isLowResponseRequired?: boolean;
     preventScreenSleeping?: boolean;

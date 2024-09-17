@@ -1,11 +1,13 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import { memo, useContext, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { memo, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import ContextMenuItem from './ContextMenuItem';
-import { AppContext } from '../../contexts/AppContext';
 import ContextMenuDataItem from './ContextMenuDataItem';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const ContextMenu = memo(() => {
-  const { contextMenuData } = useContext(AppContext);
+  const contextMenuData = useStore(store, (state) => state.contextMenuData);
+
   const { isVisible, menuItems, data } = contextMenuData;
 
   const contextMenuRef = useRef(null as null | HTMLDivElement);

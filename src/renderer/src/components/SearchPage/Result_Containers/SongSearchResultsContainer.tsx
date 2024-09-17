@@ -4,7 +4,8 @@ import Button from '../../Button';
 import SecondaryContainer from '../../SecondaryContainer';
 import Song from '../../SongsPage/Song';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { AppContext } from '../../../contexts/AppContext';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   songs: SongData[];
@@ -15,8 +16,13 @@ type Props = {
 
 const SongSearchResultsContainer = (props: Props) => {
   const { searchInput, songs, noOfVisibleSongs = 5, isPredictiveSearchEnabled } = props;
-  const { isMultipleSelectionEnabled, multipleSelectionsData, localStorageData } =
-    useContext(AppContext);
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const { toggleMultipleSelections, changeCurrentActivePage, createQueue, playSong } =
     useContext(AppUpdateContext);
   const { t } = useTranslation();
@@ -40,7 +46,7 @@ const SongSearchResultsContainer = (props: Props) => {
                   <Song
                     key={song.songId}
                     index={index}
-                    isIndexingSongs={localStorageData?.preferences?.isSongIndexingEnabled}
+                    isIndexingSongs={preferences?.isSongIndexingEnabled}
                     title={song.title}
                     artists={song.artists}
                     album={song.album}
@@ -58,12 +64,7 @@ const SongSearchResultsContainer = (props: Props) => {
             })
             .filter((song) => song !== undefined)
         : [],
-    [
-      handleSongPlayBtnClick,
-      localStorageData?.preferences?.isSongIndexingEnabled,
-      noOfVisibleSongs,
-      songs
-    ]
+    [handleSongPlayBtnClick, preferences?.isSongIndexingEnabled, noOfVisibleSongs, songs]
   );
 
   return (

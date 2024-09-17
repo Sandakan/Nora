@@ -19,7 +19,6 @@ import { useTranslation } from 'react-i18next';
 import { DraggableProvided } from 'react-beautiful-dnd';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { AppContext } from '../../contexts/AppContext';
 
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
@@ -35,6 +34,8 @@ import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import Button from '../Button';
 
 import { appPreferences } from '../../../../../package.json';
+import { useStore } from '@tanstack/react-store';
+import { store } from '../../store';
 
 interface SongProp {
   songId: string;
@@ -60,16 +61,18 @@ interface SongProp {
 }
 
 const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => {
-  const {
-    currentSongData,
-    queue,
-    isCurrentSongPlaying,
-    localStorageData,
-    bodyBackgroundImage,
-    isMultipleSelectionEnabled,
-    multipleSelectionsData,
-    currentlyActivePage
-  } = useContext(AppContext);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+  const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
+  const localStorageData = useStore(store, (state) => state.localStorage);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+
   const {
     playSong,
     updateContextMenuData,
@@ -708,7 +711,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         <div className="song-year flex items-center justify-center text-center text-xs transition-none sm:hidden">
           {window.api.properties.isInDevelopment && appPreferences.showSongIdInsteadOfSongYear
             ? songId
-            : year ?? '----'}
+            : (year ?? '----')}
         </div>
         <div className="song-duration flex !w-full items-center justify-between pl-2 pr-4 text-center transition-none sm:pr-1">
           <Button

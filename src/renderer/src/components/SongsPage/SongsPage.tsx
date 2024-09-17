@@ -2,7 +2,6 @@
 import { lazy, useCallback, useContext, useEffect, useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { AppContext } from '../../contexts/AppContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import storage from '../../utils/localStorage';
 
@@ -17,6 +16,8 @@ import { songSortOptions, songFilterOptions } from './SongOptions';
 
 import DataFetchingImage from '../../assets/images/svg/Road trip_Monochromatic.svg';
 import NoSongsImage from '../../assets/images/svg/Empty Inbox _Monochromatic.svg';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const AddMusicFoldersPrompt = lazy(() => import('../MusicFoldersPage/AddMusicFoldersPrompt'));
 
@@ -54,12 +55,14 @@ const reducer = (
 };
 
 const SongsPage = () => {
-  const {
-    currentlyActivePage,
-    localStorageData,
-    isMultipleSelectionEnabled,
-    multipleSelectionsData
-  } = useContext(AppContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const localStorageData = useStore(store, (state) => state.localStorage);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+
   const {
     createQueue,
     playSong,
@@ -73,7 +76,7 @@ const SongsPage = () => {
   const [content, dispatch] = useReducer(reducer, {
     songsData: [],
     sortingOrder:
-      currentlyActivePage?.data?.sortingOrder ||
+      (currentlyActivePage?.data?.sortingOrder as SongSortTypes) ||
       localStorageData?.sortingStates?.songsPage ||
       'aToZ',
     filteringOrder: 'notSelected'
@@ -192,6 +195,16 @@ const SongsPage = () => {
     },
     [content.songsData, createQueue, playSong]
   );
+
+  // const parentRef = useRef<HTMLDivElement>(null);
+
+  // const rowVirtualizer = useVirtualizer({
+  //   count: content.songsData?.length || 0,
+  //   getScrollElement: () => parentRef.current,
+  //   estimateSize: () => 60,
+  //   overscan: 10,
+  //   debug: true
+  // });
 
   return (
     <MainContainer

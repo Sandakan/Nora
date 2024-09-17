@@ -4,12 +4,13 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import roundTo from '../../../../common/roundTo';
 import { syncedLyricsRegex } from './LyricsPage';
 import LyricsProgressBar from './LyricsProgressBar';
 import EnhancedSyncedLyricWord from '../LyricsEditingPage/EnhancedSyncedLyricWord';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 interface LyricProp {
   lyric: string | SyncedLyricsLineWord[];
@@ -24,7 +25,8 @@ const lyricsScrollIntoViewEvent = new CustomEvent('lyrics/scrollIntoView', {
 });
 
 const LyricLine = (props: LyricProp) => {
-  const { playerType } = useContext(AppContext);
+  const playerType = useStore(store, (state) => state.playerType);
+
   const { updateSongPosition, updateContextMenuData } = useContext(AppUpdateContext);
   const [isInRange, setIsInRange] = useState(false);
   const { t } = useTranslation();

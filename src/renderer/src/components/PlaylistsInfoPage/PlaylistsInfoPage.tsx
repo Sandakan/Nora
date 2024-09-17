@@ -3,7 +3,6 @@ import { lazy, useCallback, useContext, useEffect, useMemo, useState } from 'rea
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { AppContext } from '../../contexts/AppContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 
 import Song from '../SongsPage/Song';
@@ -13,11 +12,16 @@ import PlaylistInfoAndImgContainer from './PlaylistInfoAndImgContainer';
 import TitleContainer from '../TitleContainer';
 import { songSortOptions, songFilterOptions } from '../SongsPage/SongOptions';
 import VirtualizedList from '../VirtualizedList';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const SensitiveActionConfirmPrompt = lazy(() => import('../SensitiveActionConfirmPrompt'));
 
 const PlaylistInfoPage = () => {
-  const { currentlyActivePage, queue, localStorageData } = useContext(AppContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+  const sortingStates = useStore(store, (state) => state.localStorage.sortingStates);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
   const {
     updateQueueData,
     changePromptMenuData,
@@ -31,8 +35,8 @@ const PlaylistInfoPage = () => {
   const [playlistData, setPlaylistData] = useState({} as Playlist);
   const [playlistSongs, setPlaylistSongs] = useState([] as SongData[]);
   const [sortingOrder, setSortingOrder] = useState<SongSortTypes>(
-    currentlyActivePage?.data?.sortingOrder ||
-      localStorageData.sortingStates?.songsPage ||
+    (currentlyActivePage?.data?.sortingOrder as SongSortTypes) ||
+      sortingStates?.songsPage ||
       'addedOrder'
   );
   const [filteringOrder, setFilteringOrder] = useState<SongFilterTypes>('notSelected');
@@ -40,7 +44,7 @@ const PlaylistInfoPage = () => {
   const fetchPlaylistData = useCallback(() => {
     if (currentlyActivePage.data?.playlistId) {
       window.api.playlistsData
-        .getPlaylistData([currentlyActivePage.data.playlistId])
+        .getPlaylistData([currentlyActivePage.data.playlistId as string])
         .then((res) => {
           if (res && res.length > 0 && res[0]) setPlaylistData(res[0]);
           return undefined;
@@ -267,6 +271,7 @@ const PlaylistInfoPage = () => {
       />
       <VirtualizedList
         data={listItems}
+        fixedItemHeight={60}
         scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
         itemContent={(index, item) => {
           if ('songId' in item)
@@ -274,7 +279,7 @@ const PlaylistInfoPage = () => {
               <Song
                 key={index}
                 index={index}
-                isIndexingSongs={localStorageData?.preferences.isSongIndexingEnabled}
+                isIndexingSongs={preferences.isSongIndexingEnabled}
                 onPlayClick={handleSongPlayBtnClick}
                 selectAllHandler={selectAllHandler}
                 {...item}

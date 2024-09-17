@@ -1,6 +1,5 @@
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../../contexts/AppContext';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import calculateTime from '../../../utils/calculateTime';
 
@@ -10,6 +9,8 @@ import UpNextSongPopup from '../../SongsControlsContainer/UpNextSongPopup';
 
 import DefaultSongCover from '../../../assets/images/webp/song_cover_default.webp';
 import VolumeSlider from '../../VolumeSlider';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   songPos: number;
@@ -20,8 +21,12 @@ type Props = {
 };
 
 const SongInfoContainer = (props: Props) => {
-  const { localStorageData, currentSongData, isCurrentSongPlaying, isMuted, volume } =
-    useContext(AppContext);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
+  const isMuted = useStore(store, (state) => state.player.volume.isMuted);
+  const volume = useStore(store, (state) => state.player.volume.value);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const {
     toggleIsFavorite,
     handleSkipBackwardClick,
@@ -35,12 +40,11 @@ const SongInfoContainer = (props: Props) => {
 
   const [isNextSongPopupVisible, setIsNextSongPopupVisible] = useState(false);
 
-  const songDuration =
-    localStorageData && localStorageData.preferences.showSongRemainingTime
-      ? currentSongData.duration - Math.floor(songPos) >= 0
-        ? calculateTime(currentSongData.duration - Math.floor(songPos))
-        : calculateTime(0)
-      : calculateTime(songPos);
+  const songDuration = preferences.showSongRemainingTime
+    ? currentSongData.duration - Math.floor(songPos) >= 0
+      ? calculateTime(currentSongData.duration - Math.floor(songPos))
+      : calculateTime(0)
+    : calculateTime(songPos);
 
   const songArtistsImages = useMemo(() => {
     if (
@@ -184,7 +188,7 @@ const SongInfoContainer = (props: Props) => {
                 className="song-artists appear-from-bottom flex items-center text-lg leading-none text-font-color-white/80"
                 title={currentSongData.artists?.map((artist) => artist.name).join(', ')}
               >
-                {localStorageData?.preferences.showArtistArtworkNearSongControls &&
+                {preferences?.showArtistArtworkNearSongControls &&
                   songArtistsImages &&
                   songArtistsImages.length > 0 && (
                     <span
@@ -209,7 +213,7 @@ const SongInfoContainer = (props: Props) => {
             />
           </div>
           <div className="song-duration opacity-75">
-            {localStorageData && localStorageData.preferences.showSongRemainingTime ? '-' : ''}
+            {preferences?.showSongRemainingTime ? '-' : ''}
             {songDuration.minutes}:{songDuration.seconds}
           </div>
         </div>

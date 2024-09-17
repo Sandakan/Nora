@@ -4,7 +4,6 @@ import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'r
 import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line import/named
 import { Draggable, Droppable, DragDropContext, DropResult } from 'react-beautiful-dnd';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
@@ -19,6 +18,8 @@ import Img from '../Img';
 import Song from '../SongsPage/Song';
 import VirtualizedList from '../VirtualizedList';
 import { VirtuosoHandle } from 'react-virtuoso';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 interface QueueInfo {
   artworkPath: string;
@@ -27,14 +28,16 @@ interface QueueInfo {
 }
 
 const CurrentQueuePage = () => {
-  const {
-    queue,
-    currentSongData,
-    currentlyActivePage,
-    isMultipleSelectionEnabled,
-    multipleSelectionsData,
-    localStorageData
-  } = useContext(AppContext);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const { updateQueueData, addNewNotifications, updateContextMenuData, toggleMultipleSelections } =
     useContext(AppUpdateContext);
   const { t } = useTranslation();
@@ -384,7 +387,7 @@ const CurrentQueuePage = () => {
                       isDraggable
                       index={rubric.source.index}
                       ref={provided.innerRef}
-                      isIndexingSongs={localStorageData?.preferences?.isSongIndexingEnabled}
+                      isIndexingSongs={preferences?.isSongIndexingEnabled}
                       title={data.title}
                       songId={data.songId}
                       artists={data.artists}
@@ -429,9 +432,7 @@ const CurrentQueuePage = () => {
                                 isDraggable
                                 index={index}
                                 ref={provided.innerRef}
-                                isIndexingSongs={
-                                  localStorageData?.preferences?.isSongIndexingEnabled
-                                }
+                                isIndexingSongs={preferences?.isSongIndexingEnabled}
                                 {...song}
                                 trackNo={undefined}
                                 selectAllHandler={selectAllHandler}

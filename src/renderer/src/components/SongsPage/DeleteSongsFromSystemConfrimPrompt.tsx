@@ -2,13 +2,15 @@ import { useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { AppContext } from '../../contexts/AppContext';
 
 import Button from '../Button';
 import Checkbox from '../Checkbox';
+import { useStore } from '@tanstack/react-store';
+import { store } from '../../store';
 
 const DeleteSongFromSystemConfirmPrompt = (props: { songIds: string[] }) => {
-  const { currentSongData } = useContext(AppContext);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+
   const { addNewNotifications, changePromptMenuData, clearAudioPlayerData } =
     useContext(AppUpdateContext);
   const { t } = useTranslation();

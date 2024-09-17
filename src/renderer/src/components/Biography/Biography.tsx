@@ -1,9 +1,10 @@
-import { useContext, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import Hyperlink from '../Hyperlink';
 import HashTag from './HashTag';
 import { Tag } from 'src/@types/last_fm_artist_info_api';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   bioUserName?: string;
@@ -16,7 +17,8 @@ type Props = {
 };
 
 const Biography = (props: Props) => {
-  const { bodyBackgroundImage } = useContext(AppContext);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+
   const { t } = useTranslation();
 
   const {

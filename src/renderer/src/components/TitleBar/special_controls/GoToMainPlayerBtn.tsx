@@ -2,11 +2,13 @@ import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import Button from '../../Button';
-import { AppContext } from '../../../contexts/AppContext';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const GoToMainPlayerBtn = () => {
-  const { bodyBackgroundImage } = useContext(AppContext);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+
   const { updatePlayerType } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 

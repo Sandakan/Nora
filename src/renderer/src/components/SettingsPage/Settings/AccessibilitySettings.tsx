@@ -1,11 +1,11 @@
-import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../../contexts/AppContext';
 import storage from '../../../utils/localStorage';
 import Checkbox from '../../Checkbox';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const AccessibilitySettings = () => {
-  const { localStorageData } = useContext(AppContext);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
   const { t } = useTranslation();
 
   return (
@@ -20,9 +20,7 @@ const AccessibilitySettings = () => {
           <Checkbox
             id="enableReducedMotion"
             labelContent={t('settingsPage.enableReducedMotion')}
-            isChecked={
-              localStorageData !== undefined && localStorageData.preferences.isReducedMotion
-            }
+            isChecked={preferences?.isReducedMotion}
             checkedStateUpdateFunction={(state) =>
               storage.preferences.setPreferences('isReducedMotion', state)
             }

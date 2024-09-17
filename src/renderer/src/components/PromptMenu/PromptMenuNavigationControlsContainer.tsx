@@ -1,13 +1,14 @@
 import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import Button from '../Button';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const PromptMenuNavigationControlsContainer = () => {
-  const { promptMenuData } = useContext(AppContext);
+  const promptMenuData = useStore(store, (state) => state.promptMenuData);
   const { updatePromptMenuHistoryIndex } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 

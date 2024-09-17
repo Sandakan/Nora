@@ -4,7 +4,6 @@
 import { lazy, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import Img from '../Img';
@@ -19,6 +18,8 @@ const DeleteSongsFromSystemConfrimPrompt = lazy(
 );
 
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
+import { useStore } from '@tanstack/react-store';
+import { store } from '../../store';
 
 interface SongCardProp {
   index: number;
@@ -36,14 +37,16 @@ interface SongCardProp {
 }
 
 const SongCard = (props: SongCardProp) => {
-  const {
-    currentSongData,
-    queue,
-    isCurrentSongPlaying,
-    localStorageData,
-    isMultipleSelectionEnabled,
-    multipleSelectionsData
-  } = useContext(AppContext);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+  const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+
   const {
     playSong,
     updateContextMenuData,
@@ -414,7 +417,7 @@ const SongCard = (props: SongCardProp) => {
             window.api.audioLibraryControls
               .restoreBlacklistedSongs([songId])
               .catch((err) => console.error(err));
-          else if (localStorageData?.preferences.doNotShowBlacklistSongConfirm)
+          else if (preferences.doNotShowBlacklistSongConfirm)
             window.api.audioLibraryControls
               .blacklistSongs([songId])
               .then(() =>
@@ -477,7 +480,7 @@ const SongCard = (props: SongCardProp) => {
     updateMultipleSelections,
     changeCurrentActivePage,
     path,
-    localStorageData?.preferences.doNotShowBlacklistSongConfirm
+    preferences.doNotShowBlacklistSongConfirm
   ]);
 
   const songArtistComponents = useMemo(() => {

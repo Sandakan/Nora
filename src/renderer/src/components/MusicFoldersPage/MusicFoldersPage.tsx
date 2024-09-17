@@ -1,6 +1,5 @@
 import { lazy, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import storage from '../../utils/localStorage';
@@ -15,6 +14,8 @@ import MainContainer from '../MainContainer';
 const AddMusicFoldersPrompt = lazy(() => import('./AddMusicFoldersPrompt'));
 
 import NoFoldersImage from '../../assets/images/svg/Empty Inbox _Monochromatic.svg';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const folderDropdownOptions: DropdownOption<FolderSortTypes>[] = [
   { label: i18n.t('sortTypes.aToZ'), value: 'aToZ' },
@@ -38,21 +39,22 @@ const folderDropdownOptions: DropdownOption<FolderSortTypes>[] = [
 ];
 
 const MusicFoldersPage = () => {
-  const {
-    isMultipleSelectionEnabled,
-    // currentlyActivePage,
-    multipleSelectionsData,
-    currentlyActivePage,
-    localStorageData
-  } = useContext(AppContext);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const sortingStates = useStore(store, (state) => state.localStorage.sortingStates);
+
   const { updateCurrentlyActivePageData, toggleMultipleSelections, changePromptMenuData } =
     useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const [musicFolders, setMusicFolders] = useState<MusicFolder[]>([]);
   const [sortingOrder, setSortingOrder] = useState<FolderSortTypes>(
-    currentlyActivePage?.data?.sortingOrder ||
-      localStorageData?.sortingStates?.musicFoldersPage ||
+    (currentlyActivePage?.data?.sortingOrder as FolderSortTypes) ||
+      sortingStates?.musicFoldersPage ||
       'aToZ'
   );
 

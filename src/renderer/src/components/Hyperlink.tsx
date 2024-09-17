@@ -1,6 +1,7 @@
 import { ReactElement, lazy, useCallback, useContext } from 'react';
-import { AppContext } from '../contexts/AppContext';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const OpenLinkConfirmPrompt = lazy(() => import('./OpenLinkConfirmPrompt'));
 
@@ -14,7 +15,7 @@ interface HyperlinkProp {
 }
 
 const Hyperlink = (props: HyperlinkProp) => {
-  const { localStorageData } = useContext(AppContext);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
   const { changePromptMenuData } = useContext(AppUpdateContext);
   const {
     link,
@@ -26,7 +27,7 @@ const Hyperlink = (props: HyperlinkProp) => {
   } = props;
 
   const openLinkConfirmPrompt = useCallback(() => {
-    if (noValidityCheck || localStorageData?.preferences.doNotVerifyWhenOpeningLinks) {
+    if (noValidityCheck || preferences.doNotVerifyWhenOpeningLinks) {
       window.api.settingsHelpers.openInBrowser(link);
     } else
       changePromptMenuData(
@@ -41,7 +42,7 @@ const Hyperlink = (props: HyperlinkProp) => {
     changePromptMenuData,
     link,
     linkTitle,
-    localStorageData?.preferences.doNotVerifyWhenOpeningLinks,
+    preferences.doNotVerifyWhenOpeningLinks,
     noValidityCheck
   ]);
 

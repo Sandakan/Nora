@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
 import Img from '../Img';
 
 import MultipleArtworksCover from '../PlaylistsPage/MultipleArtworksCover';
 import DefaultPlaylistCover from '../../assets/images/webp/playlist_cover_default.webp';
-import { useContext, useMemo } from 'react';
+import { useMemo } from 'react';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   playlist: Playlist;
@@ -13,7 +14,7 @@ type Props = {
 };
 
 const PlaylistInfoAndImgContainer = (props: Props) => {
-  const { localStorageData } = useContext(AppContext);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
   const { t } = useTranslation();
 
   const { playlist, songs } = props;
@@ -31,8 +32,7 @@ const PlaylistInfoAndImgContainer = (props: Props) => {
       {playlist?.songs && (
         <div className="playlist-img-and-info-container mb-8 flex flex-row items-center justify-start">
           <div className="playlist-cover-container mt-2 overflow-hidden">
-            {localStorageData?.preferences.enableArtworkFromSongCovers &&
-            playlist.songs.length > 1 ? (
+            {preferences.enableArtworkFromSongCovers && playlist.songs.length > 1 ? (
               <div className="relative h-60 w-60">
                 <MultipleArtworksCover songIds={playlist.songs} className="h-60 w-60" type={1} />
                 <Img

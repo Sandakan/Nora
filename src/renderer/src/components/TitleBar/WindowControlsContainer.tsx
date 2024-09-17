@@ -1,11 +1,14 @@
-import { useCallback, useContext } from 'react';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 
 import Button from '../Button';
+import { useStore } from '@tanstack/react-store';
+import { store } from '../../store';
 
 const WindowControlsContainer = () => {
-  const { userData, bodyBackgroundImage } = useContext(AppContext);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+  const userData = useStore(store, (state) => state.userData);
+
   const { t } = useTranslation();
 
   const close = useCallback(() => {

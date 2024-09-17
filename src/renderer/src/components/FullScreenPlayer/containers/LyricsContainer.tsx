@@ -1,11 +1,12 @@
 /* eslint-disable react/no-array-index-key */
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../../contexts/AppContext';
 
 import LyricsMetadata from '../../LyricsPage/LyricsMetadata';
 import LyricLine from '../../LyricsPage/LyricLine';
 import useSkipLyricsLines from '../../../hooks/useSkipLyricsLines';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   isLyricsVisible: boolean;
@@ -13,7 +14,8 @@ type Props = {
 };
 
 const LyricsContainer = (props: Props) => {
-  const { currentSongData, isCurrentSongPlaying } = useContext(AppContext);
+  const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
 
   const { isLyricsVisible, setIsLyricsAvailable } = props;
   const { t } = useTranslation();

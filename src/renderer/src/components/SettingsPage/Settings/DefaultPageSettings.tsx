@@ -1,11 +1,12 @@
-import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import storage from '../../../utils/localStorage';
-import { AppContext } from '../../../contexts/AppContext';
 import Dropdown from '../../Dropdown';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const DefaultPageSettings = () => {
-  const { localStorageData } = useContext(AppContext);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const { t } = useTranslation();
 
   return (
@@ -21,7 +22,7 @@ const DefaultPageSettings = () => {
           <Dropdown
             name="defaultPageDropdown"
             className="mt-4"
-            value={localStorageData?.preferences?.defaultPageOnStartUp || 'Home'}
+            value={preferences?.defaultPageOnStartUp || 'Home'}
             options={[
               { label: t('sideBar.home'), value: 'Home' },
               { label: t('sideBar.search'), value: 'Search' },

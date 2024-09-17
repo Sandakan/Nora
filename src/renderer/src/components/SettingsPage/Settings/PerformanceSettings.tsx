@@ -1,11 +1,12 @@
-import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../../contexts/AppContext';
 import storage from '../../../utils/localStorage';
 import Checkbox from '../../Checkbox';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const PerformanceSettings = () => {
-  const { localStorageData } = useContext(AppContext);
+  const localStorageData = useStore(store, (state) => state.localStorage);
+
   const { t } = useTranslation();
 
   return (
