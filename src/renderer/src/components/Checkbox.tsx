@@ -45,7 +45,7 @@ const Checkbox = memo((props: CheckboxProp) => {
       } ${className}`}
       tabIndex={isDisabled ? -1 : 0}
       onKeyDown={focusInput}
-      title={tooltipLabel ?? isDisabled ? t('common.optionDisabled') : undefined}
+      title={(tooltipLabel ?? isDisabled) ? t('common.optionDisabled') : undefined}
     >
       <input
         type="checkbox"
