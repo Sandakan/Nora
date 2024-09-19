@@ -1073,8 +1073,11 @@ export default function App() {
 
   const setDiscordRpcActivity = useCallback(() => {
     if (store.state.currentSongData) {
-      const title = `${t('discordrpc.listeningTo')} '${store.state.currentSongData?.title ?? t('discordrpc.untitledSong')}'`;
-      const artists = `${t('discordrpc.by')} ${store.state.currentSongData.artists?.map((artist) => artist.name).join(', ') || t('discordrpc.unknownArtist')}`;
+      const truncateText = (text: string, maxLength: number) => {
+        return text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
+      };
+      const title = truncateText(`${t('discordrpc.listeningTo')} '${store.state.currentSongData?.title ?? t('discordrpc.untitledSong')}'`, 128);
+      const artists = truncateText(`${t('discordrpc.by')} ${store.state.currentSongData.artists?.map((artist) => artist.name).join(', ') || t('discordrpc.unknownArtist')}`, 128);
 
       const now = Date.now();
       window.api.playerControls.setDiscordRpcActivity({
