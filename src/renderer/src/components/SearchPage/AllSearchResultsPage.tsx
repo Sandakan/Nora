@@ -1,7 +1,6 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { AppContext } from '../../contexts/AppContext';
 import log from '../../utils/log';
 
 import Button from '../Button';
@@ -12,6 +11,8 @@ import AllArtistResults from './All_Search_Result_Containers/AllArtistResults';
 import AllPlaylistResults from './All_Search_Result_Containers/AllPlaylistResults';
 import AllAlbumResults from './All_Search_Result_Containers/AllAlbumResults';
 import AllGenreResults from './All_Search_Result_Containers/AllGenreResults';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type AllSearchResultProp = {
   searchQuery: string;
@@ -20,7 +21,12 @@ type AllSearchResultProp = {
 };
 
 const AllSearchResultsPage = () => {
-  const { currentlyActivePage, isMultipleSelectionEnabled } = useContext(AppContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+
   const { toggleMultipleSelections } = useContext(AppUpdateContext);
   const data = currentlyActivePage.data as AllSearchResultProp;
   const { t } = useTranslation();

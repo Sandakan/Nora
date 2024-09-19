@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '../utils/localStorage';
 
 export interface AppReducer {
@@ -7,9 +8,17 @@ export interface AppReducer {
   currentSongData: AudioPlayerData;
   upNextSongData?: AudioPlayerData;
   promptMenuNavigationData: PromptMenuNavigationHistoryData;
+  promptMenuData: {
+    prompt?: ReactNode;
+    isVisible: boolean;
+    className?: string;
+    currentActiveIndex: number;
+    noOfPrompts: number;
+  };
   notificationPanelData: NotificationPanelData;
   contextMenuData: ContextMenuData;
   navigationHistory: NavigationHistoryData;
+  currentlyActivePage: NavigationHistory;
   player: Player;
   bodyBackgroundImage?: string;
   multipleSelectionsData: MultipleSelectionData;
@@ -18,7 +27,7 @@ export interface AppReducer {
   playerType: PlayerTypes;
 }
 
-type AppReducerStateActions =
+export type AppReducerStateActions =
   | { type: 'USER_DATA_CHANGE'; data: UserData }
   | { type: 'START_PLAY_STATE_CHANGE'; data: unknown }
   | {
@@ -47,6 +56,8 @@ type AppReducerStateActions =
   | { type: 'TOGGLE_IS_FAVORITE_STATE'; data?: boolean }
   | { type: 'TOGGLE_SHUFFLE_STATE'; data?: boolean }
   | { type: 'UPDATE_VOLUME_VALUE'; data: number }
+  | { type: 'UPDATE_QUEUE'; data: Queue }
+  | { type: 'UPDATE_QUEUE_CURRENT_SONG_INDEX'; data: number }
   | { type: 'TOGGLE_REDUCED_MOTION'; data?: boolean }
   | { type: 'TOGGLE_SONG_INDEXING'; data?: boolean }
   | { type: 'PLAYER_WAITING_STATUS'; data: boolean }
@@ -57,7 +68,7 @@ type AppReducerStateActions =
   | { type: 'UPDATE_BATTERY_POWER_STATE'; data: boolean }
   | { type: 'TOGGLE_SHOW_SONG_REMAINING_DURATION'; data?: boolean };
 
-const reducer = (state: AppReducer, action: AppReducerStateActions): AppReducer => {
+export const reducer = (state: AppReducer, action: AppReducerStateActions): AppReducer => {
   switch (action.type) {
     case 'APP_THEME_CHANGE': {
       const theme =
@@ -133,11 +144,24 @@ const reducer = (state: AppReducer, action: AppReducerStateActions): AppReducer 
                 }
               }
       };
-    case 'PROMPT_MENU_DATA_CHANGE':
+    case 'PROMPT_MENU_DATA_CHANGE': {
+      const promptMenuNavigationData = action.data ? action.data : state.promptMenuNavigationData;
+      const promptMenuData = {
+        isVisible: promptMenuNavigationData?.isVisible,
+        prompt: promptMenuNavigationData.prompts?.at(promptMenuNavigationData.currentActiveIndex)
+          ?.prompt,
+        className: promptMenuNavigationData.prompts?.at(promptMenuNavigationData.currentActiveIndex)
+          ?.className,
+        noOfPrompts: promptMenuNavigationData.prompts.length,
+        currentActiveIndex: promptMenuNavigationData.currentActiveIndex
+      };
+
       return {
         ...state,
-        promptMenuNavigationData: action.data ? action.data : state.promptMenuNavigationData
+        promptMenuNavigationData,
+        promptMenuData
       };
+    }
     case 'ADD_NEW_NOTIFICATIONS':
       return {
         ...state,
@@ -172,17 +196,19 @@ const reducer = (state: AppReducer, action: AppReducerStateActions): AppReducer 
       state.navigationHistory.history[state.navigationHistory.pageHistoryIndex].data = action.data;
       return {
         ...state,
-        navigationHistory: state.navigationHistory
+        navigationHistory: state.navigationHistory,
+        currentlyActivePage:
+          state.navigationHistory.history[state.navigationHistory.pageHistoryIndex]
       };
-    case 'UPDATE_NAVIGATION_HISTORY':
+    case 'UPDATE_NAVIGATION_HISTORY': {
+      const navigationHistory = { ...action.data };
       return {
         ...state,
         bodyBackgroundImage: undefined,
-        navigationHistory:
-          typeof action.data === 'object'
-            ? { ...state.navigationHistory, ...action.data }
-            : state.navigationHistory
+        navigationHistory,
+        currentlyActivePage: navigationHistory.history[navigationHistory.pageHistoryIndex]
       };
+    }
     case 'CURRENT_SONG_DATA_CHANGE':
       return {
         ...state,
@@ -284,6 +310,14 @@ const reducer = (state: AppReducer, action: AppReducerStateActions): AppReducer 
           }
         }
       };
+    case 'UPDATE_QUEUE':
+      return {
+        ...state,
+        localStorage: {
+          ...state.localStorage,
+          queue: typeof action.data === 'object' ? action.data : state.localStorage.queue
+        }
+      };
     case 'UPDATE_BODY_BACKGROUND_IMAGE':
       return {
         ...state,
@@ -373,6 +407,10 @@ export const DEFAULT_REDUCER_DATA: AppReducer = {
       }
     ]
   },
+  currentlyActivePage: {
+    pageTitle: 'Home',
+    data: undefined
+  },
   contextMenuData: {
     isVisible: false,
     menuItems: [],
@@ -387,6 +425,13 @@ export const DEFAULT_REDUCER_DATA: AppReducer = {
     isVisible: false,
     prompts: [],
     currentActiveIndex: 0
+  },
+  promptMenuData: {
+    isVisible: false,
+    prompt: undefined,
+    className: undefined,
+    currentActiveIndex: 0,
+    noOfPrompts: 0
   },
   multipleSelectionsData: { isEnabled: false, multipleSelections: [] },
   appUpdatesState: 'UNKNOWN',

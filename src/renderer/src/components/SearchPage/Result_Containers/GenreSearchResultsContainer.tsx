@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next';
 import Button from '../../Button';
 import Genre from '../../GenresPage/Genre';
 import SecondaryContainer from '../../SecondaryContainer';
-import { AppContext } from '../../../contexts/AppContext';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   genres: Genre[];
@@ -16,7 +17,11 @@ type Props = {
 };
 
 const GenreSearchResultsContainer = (props: Props) => {
-  const { isMultipleSelectionEnabled, multipleSelectionsData } = useContext(AppContext);
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
   const { toggleMultipleSelections, changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 

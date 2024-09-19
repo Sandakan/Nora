@@ -19,7 +19,7 @@ const SecondaryContainer = forwardRef(
         <div
           className={`secondary-container mb-4 h-fit w-full ${className}`}
           onKeyDown={onKeyDown}
-          role={role ?? focusable ? 'none' : undefined}
+          role={(role ?? focusable) ? 'none' : undefined}
           // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
           tabIndex={focusable ? 1 : undefined}
           ref={ref}

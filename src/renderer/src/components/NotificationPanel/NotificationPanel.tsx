@@ -2,13 +2,14 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable react/destructuring-assignment */
 /* eslint-disable react/self-closing-comp */
-import { useContext, useMemo } from 'react';
-import { AppContext } from '../../contexts/AppContext';
+import { useMemo } from 'react';
 import Notification from './Notification';
 import NotificationClearAllButton from './NotificationClearAllButton';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const NotificationPanel = () => {
-  const { notificationPanelData } = useContext(AppContext);
+  const notificationPanelData = useStore(store, (state) => state.notificationPanelData);
 
   const notifications = useMemo(() => {
     const notificationData = notificationPanelData.notifications;

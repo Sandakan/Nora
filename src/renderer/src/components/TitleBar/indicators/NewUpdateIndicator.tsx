@@ -2,14 +2,16 @@
 import { lazy, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { AppContext } from '../../../contexts/AppContext';
 
 import Button from '../../Button';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const ReleaseNotesPrompt = lazy(() => import('../../ReleaseNotesPrompt/ReleaseNotesPrompt'));
 
 const NewUpdateIndicator = () => {
-  const { appUpdatesState } = useContext(AppContext);
+  const appUpdatesState = useStore(store, (state) => state.appUpdatesState);
+
   const { changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 

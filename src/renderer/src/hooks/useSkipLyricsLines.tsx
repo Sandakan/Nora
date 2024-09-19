@@ -7,27 +7,24 @@ const useSkipLyricsLines = (lyrics?: SongLyrics | null) => {
   const skipLyricsLines = useCallback(
     (option: 'previous' | 'next' = 'next') => {
       if (lyrics?.lyrics.isSynced) {
-        const { syncedLyrics } = lyrics.lyrics;
+        const { isSynced, parsedLyrics } = lyrics.lyrics;
 
-        if (syncedLyrics) {
-          const lyricsLines: typeof syncedLyrics = [
-            { start: 0, end: syncedLyrics[0].start, text: '...' },
-            ...syncedLyrics
-          ];
+        if (isSynced) {
           document.addEventListener(
             'player/positionChange',
             (e) => {
               if ('detail' in e && !Number.isNaN(e.detail)) {
                 const songPosition = e.detail as number;
 
-                for (let i = 0; i < lyricsLines.length; i += 1) {
-                  const { start, end } = lyricsLines[i];
+                for (let i = 0; i < parsedLyrics.length; i += 1) {
+                  const { start = 0, end = 0 } = parsedLyrics[i];
+
                   const isInRange = songPosition > start && songPosition < end;
                   if (isInRange) {
-                    if (option === 'next' && lyricsLines[i + 1])
-                      updateSongPosition(lyricsLines[i + 1].start);
-                    else if (option === 'previous' && lyricsLines[i - 1])
-                      updateSongPosition(lyricsLines[i - 1].start);
+                    if (option === 'next' && parsedLyrics[i + 1])
+                      updateSongPosition(parsedLyrics[i + 1].start || 0);
+                    else if (option === 'previous' && parsedLyrics[i - 1])
+                      updateSongPosition(parsedLyrics[i - 1].start || 0);
                   }
                 }
               }

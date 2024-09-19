@@ -2,7 +2,6 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { AppContext } from '../../contexts/AppContext';
 import useNetworkConnectivity from '../../hooks/useNetworkConnectivity';
 
 import isLatestVersion from '../../utils/isLatestVersion';
@@ -15,9 +14,12 @@ import Img from '../Img';
 import { version, releaseNotes as currentReleaseNotes, urls } from '../../../../../package.json';
 import localReleseNotes from '../../../../../release-notes.json';
 import ReleaseNotesAppUpdateInfo from './ReleaseNotesAppUpdateInfo';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const ReleaseNotesPrompt = () => {
-  const { appUpdatesState, localStorageData } = useContext(AppContext);
+  const appUpdatesState = useStore(store, (state) => state.appUpdatesState);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
   const { updateAppUpdatesState } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
@@ -48,9 +50,8 @@ const ReleaseNotesPrompt = () => {
   }, [releaseNotes.latestVersion, releaseNotes.versions]);
 
   const noNewUpdateInform = useMemo(
-    () =>
-      localStorageData?.preferences?.noUpdateNotificationForNewUpdate === latestUpdatedInfo.version,
-    [latestUpdatedInfo.version, localStorageData?.preferences?.noUpdateNotificationForNewUpdate]
+    () => preferences?.noUpdateNotificationForNewUpdate === latestUpdatedInfo.version,
+    [latestUpdatedInfo.version, preferences?.noUpdateNotificationForNewUpdate]
   );
 
   const updateNoNewUpdateInform = useCallback(

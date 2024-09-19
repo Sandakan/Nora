@@ -3,14 +3,18 @@ import { useTranslation } from 'react-i18next';
 import Img from '../../Img';
 import SecondaryContainer from '../../SecondaryContainer';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { AppContext } from '../../../contexts/AppContext';
 import { MostRelevantResult } from '../MostRelevantResult';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = { searchResults: SearchResult };
 
 const MostRelevantSearchResultsContainer = (props: Props) => {
   const { searchResults } = props;
-  const { currentSongData, queue } = useContext(AppContext);
+
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+
   const { t } = useTranslation();
 
   const { playSong, changeCurrentActivePage, updateQueueData, createQueue, addNewNotifications } =

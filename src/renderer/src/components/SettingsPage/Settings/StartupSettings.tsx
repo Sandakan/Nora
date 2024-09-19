@@ -1,11 +1,13 @@
 import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { AppContext } from '../../../contexts/AppContext';
 import Checkbox from '../../Checkbox';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const StartupSettings = () => {
-  const { userData } = useContext(AppContext);
+  const userData = useStore(store, (state) => state.userData);
+
   const { updateUserData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 

@@ -3,13 +3,14 @@ import { useTranslation, Trans } from 'react-i18next';
 import storage from '../../../utils/localStorage';
 
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { AppContext } from '../../../contexts/AppContext';
 
 import Button from '../../Button';
 import Checkbox from '../../Checkbox';
 import Dropdown, { DropdownOption } from '../../Dropdown';
 
 import i18n from '../../../i18n';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const MusixmatchSettingsPrompt = lazy(() => import('../MusixmatchSettingsPrompt'));
 const MusixmatchDisclaimerPrompt = lazy(() => import('../MusixmatchDisclaimerPrompt'));
@@ -27,7 +28,8 @@ const automaticallySaveLyricsOptions: DropdownOption<AutomaticallySaveLyricsType
 ];
 
 const LyricsSettings = () => {
-  const { userData } = useContext(AppContext);
+  const userData = useStore(store, (state) => state.userData);
+
   const { changePromptMenuData, updateUserData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 

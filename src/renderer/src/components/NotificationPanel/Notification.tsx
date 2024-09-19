@@ -1,7 +1,8 @@
 import { useCallback, useContext, useLayoutEffect, useMemo, useRef } from 'react';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const Notification = (props: AppNotification) => {
   const {
@@ -15,7 +16,7 @@ const Notification = (props: AppNotification) => {
     type = 'DEFAULT',
     progressBarData = { total: 100, value: 50 }
   } = props;
-  const { localStorageData } = useContext(AppContext);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
   const { updateNotifications } = useContext(AppUpdateContext);
 
   const notificationRef = useRef(null as HTMLDivElement | null);
@@ -30,7 +31,7 @@ const Notification = (props: AppNotification) => {
 
   const removeNotification = useCallback(() => {
     const isNotificationAnimationDisabled =
-      localStorageData?.preferences?.isReducedMotion || type === 'WITH_PROGRESS_BAR';
+      preferences?.isReducedMotion || type === 'WITH_PROGRESS_BAR';
 
     if (notificationTimeoutIdRef.current) clearTimeout(notificationTimeoutIdRef.current);
 
@@ -40,7 +41,7 @@ const Notification = (props: AppNotification) => {
         updateNotifications((currNotifications) => currNotifications.filter((x) => x.id !== id))
       );
     } else updateNotifications((currNotifications) => currNotifications.filter((x) => x.id !== id));
-  }, [id, localStorageData?.preferences?.isReducedMotion, type, updateNotifications]);
+  }, [id, preferences?.isReducedMotion, type, updateNotifications]);
 
   useLayoutEffect(() => {
     const notification = notificationRef.current;

@@ -5,7 +5,7 @@ import { AppUpdateContext } from '../contexts/AppUpdateContext';
 
 type Props<T extends object> = {
   data: T[];
-  fixedItemHeight?: number;
+  fixedItemHeight: number;
   scrollTopOffset?: number;
   itemContent: (index: number, item: T) => ReactNode;
   components?: Components<T>;
@@ -51,10 +51,10 @@ const List = <T extends object>(props: Props<T>, ref) => {
       ref={ref}
       initialTopMostItemIndex={{ index: scrollTopOffset ?? 0 }}
       scrollerRef={scrollerRef}
-      // increaseViewportBy={{
-      //   top: fixedItemHeight * 5, // to overscan 5 elements
-      //   bottom: fixedItemHeight * 5 // to overscan 5 elements
-      // }}
+      increaseViewportBy={{
+        top: fixedItemHeight * 5, // to overscan 5 elements
+        bottom: fixedItemHeight * 5 // to overscan 5 elements
+      }}
       rangeChanged={(range) => {
         if (!noRangeUpdates)
           debounce(

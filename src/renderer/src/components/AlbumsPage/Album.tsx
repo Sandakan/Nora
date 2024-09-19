@@ -4,13 +4,14 @@
 /* eslint-disable import/prefer-default-export */
 import { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import SongArtist from '../SongsPage/SongArtist';
 import DefaultAlbumCover from '../../assets/images/webp/album_cover_default.webp';
 import Button from '../Button';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 interface AlbumProp extends Album {
   // eslint-disable-next-line react/no-unused-prop-types
@@ -20,8 +21,13 @@ interface AlbumProp extends Album {
 }
 
 export const Album = (props: AlbumProp) => {
-  const { currentlyActivePage, queue, isMultipleSelectionEnabled, multipleSelectionsData } =
-    useContext(AppContext);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
 
   const {
     changeCurrentActivePage,

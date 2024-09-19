@@ -9,7 +9,7 @@ import log from '../log';
 import { checkIfConnectedToInternet, sendMessageToRenderer } from '../main';
 import fetchLyricsFromMusixmatch from '../utils/fetchLyricsFromMusixmatch';
 import { appPreferences } from '../../../package.json';
-import parseLyrics, { parseSyncedLyricsFromAudioDataSource } from '../utils/parseLyrics';
+import parseLyrics, { parseSyncedLyricsFromAudioDataSource } from '../../common/parseLyrics';
 import saveLyricsToSong from '../saveLyricsToSong';
 import { decrypt } from '../utils/safeStorage';
 import fetchLyricsFromLrclib from '../utils/fetchLyricsFromLrclib';
@@ -114,7 +114,10 @@ const fetchLyricsFromLRCFile = async (songPath: string) => {
         (await readFileData(customLrcFilePathWithoutExtension));
     }
 
-    if (!lyricsInLrcFormat) throw Error('No lrc lyrics files found.');
+    if (!lyricsInLrcFormat) {
+      log('No lrc lyrics files found.');
+      return undefined;
+    }
 
     const parsedLyrics = parseLyrics(lyricsInLrcFormat);
     return parsedLyrics;
@@ -316,8 +319,7 @@ const getSongLyrics = async (
         source: 'IN_SONG_LYRICS',
         lyricsType: type,
         lyrics: offlineLyrics,
-        isOfflineLyricsAvailable,
-        isTranslated: false
+        isOfflineLyricsAvailable
       };
       return cachedLyrics;
     }
@@ -332,8 +334,7 @@ const getSongLyrics = async (
       if (onlineLyrics) {
         cachedLyrics = {
           ...onlineLyrics,
-          isOfflineLyricsAvailable,
-          isTranslated: false
+          isOfflineLyricsAvailable
         };
 
         if (saveLyricsAutomatically !== 'NONE')
@@ -349,7 +350,7 @@ const getSongLyrics = async (
       if (lyricsType !== 'SYNCED') {
         const unsyncedLyrics = await fetchUnsyncedLyrics(songTitle, songArtists);
         if (unsyncedLyrics) {
-          cachedLyrics = { ...unsyncedLyrics, isOfflineLyricsAvailable, isTranslated: false };
+          cachedLyrics = { ...unsyncedLyrics, isOfflineLyricsAvailable };
 
           if (saveLyricsAutomatically === 'SYNCED_OR_UN_SYNCED')
             await saveLyricsAutomaticallyIfAsked(

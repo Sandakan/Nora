@@ -2,7 +2,6 @@
 /* eslint-disable no-nested-ternary */
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import Button from '../Button';
@@ -12,14 +11,19 @@ import LyricsContainer from './containers/LyricsContainer';
 import SeekBarSlider from '../SeekBarSlider';
 import TitleBarContainer from './containers/TitleBarContainer';
 import VolumeSlider from '../VolumeSlider';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type MiniPlayerProps = {
   className?: string;
 };
 
 export default function MiniPlayer(props: MiniPlayerProps) {
-  const { currentSongData, isCurrentSongPlaying, isMuted, localStorageData } =
-    useContext(AppContext);
+  const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const isMuted = useStore(store, (state) => state.player.volume.isMuted);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const {
     toggleSongPlayback,
     updatePlayerType,
@@ -64,7 +68,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
       className={`mini-player dark group h-full select-none overflow-hidden !bg-dark-background-color-1 !transition-none delay-100 dark:!bg-dark-background-color-1 ${
         !isCurrentSongPlaying && 'paused'
       } ${
-        localStorageData?.preferences?.isReducedMotion ? 'reduced-motion' : ''
+        preferences?.isReducedMotion ? 'reduced-motion' : ''
       } [&:focus-within>.container>.song-controls-container>button]:translate-x-0 [&:focus-within>.container>.song-controls-container>button]:scale-100 [&:focus-within>.container>.song-controls-container]:visible [&:focus-within>.container>.song-controls-container]:opacity-100 [&:hover>.container>.song-controls-container>button]:translate-x-0 [&:hover>.container>.song-controls-container>button]:scale-100 [&:hover>.container>.song-controls-container]:visible [&:hover>.container>.song-controls-container]:opacity-100 ${className}`}
     >
       <div className="background-cover-img-container h-full overflow-hidden">

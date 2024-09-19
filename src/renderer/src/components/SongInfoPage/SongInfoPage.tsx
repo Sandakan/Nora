@@ -1,6 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
 import log from '../../utils/log';
@@ -16,9 +15,13 @@ import SongStat from './SongStat';
 import SongsWithFeaturingArtistsSuggestion from './SongsWithFeaturingArtistSuggestion';
 import SongAdditionalInfoContainer from './SongAdditionalInfoContainer';
 import SimilarTracksContainer from './SimilarTracksContainer';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const SongInfoPage = () => {
-  const { currentlyActivePage, bodyBackgroundImage } = useContext(AppContext);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+
   const { changeCurrentActivePage, updateBodyBackgroundImage, updateContextMenuData } =
     useContext(AppUpdateContext);
   const { t } = useTranslation();
@@ -57,7 +60,7 @@ const SongInfoPage = () => {
       console.time('fetchTime');
 
       // eslint-disable-next-line prefer-destructuring
-      const songId = currentlyActivePage.data.songId;
+      const songId = currentlyActivePage.data.songId as string;
 
       window.api.audioLibraryControls
         .getSongInfo([songId])
@@ -361,8 +364,8 @@ const SongInfoPage = () => {
             </div>
           )}
           <SongAdditionalInfoContainer songInfo={songInfo} songDurationStr={songDuration} />
-          {currentlyActivePage.data.songId && (
-            <SimilarTracksContainer songId={currentlyActivePage.data.songId} />
+          {(currentlyActivePage.data?.songId as string) && (
+            <SimilarTracksContainer songId={currentlyActivePage.data?.songId as string} />
           )}
         </SecondaryContainer>
       </>

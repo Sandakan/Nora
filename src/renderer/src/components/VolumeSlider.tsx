@@ -1,6 +1,7 @@
 import { useContext, useRef } from 'react';
-import { AppContext } from '../contexts/AppContext';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
+import { useStore } from '@tanstack/react-store';
+import { store } from '../store';
 
 type Props = {
   id: string;
@@ -11,7 +12,9 @@ type Props = {
 };
 
 const VolumeSlider = (props: Props) => {
-  const { volume, localStorageData } = useContext(AppContext);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+  const volume = useStore(store, (state) => state.player.volume.value);
+
   const { updateVolume } = useContext(AppUpdateContext);
   const { id, name, className, sliderOpacity, onSeek } = props;
 
@@ -40,7 +43,7 @@ const VolumeSlider = (props: Props) => {
       style={volumeBarCssProperties}
       title={Math.round(volume).toString()}
       onWheel={(e) => {
-        const scrollIncrement = localStorageData?.preferences?.seekbarScrollInterval;
+        const scrollIncrement = preferences?.seekbarScrollInterval;
         const incrementValue = e.deltaY > 0 ? -scrollIncrement : scrollIncrement;
         let value = volume + incrementValue;
 

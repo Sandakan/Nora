@@ -2,7 +2,6 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { AppContext } from '../../contexts/AppContext';
 import useResizeObserver from '../../hooks/useResizeObserver';
 import debounce from '../../utils/debounce';
 import storage from '../../utils/localStorage';
@@ -19,6 +18,8 @@ import ArtistsSearchResultsContainer from './Result_Containers/ArtistsSearchResu
 import NoSearchResultsContainer from './NoSearchResultsContainer';
 import SearchStartPlaceholder from './SearchStartPlaceholder';
 import Button from '../Button';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const searchFilter: SearchResultFilter[] = [
   { label: i18n.t('searchPage.allFilter'), icon: 'select_all', value: 'All' },
@@ -38,13 +39,17 @@ const PLAYLIST_WIDTH = 160;
 const GENRE_WIDTH = 300;
 
 const SearchPage = () => {
-  const { currentlyActivePage, localStorageData } = useContext(AppContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const { updateCurrentlyActivePageData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [searchInput, setSearchInput] = useState(currentlyActivePage?.data?.keyword || '');
+  const [searchInput, setSearchInput] = useState(
+    (currentlyActivePage?.data?.keyword as string) || ''
+  );
   const [isPredictiveSearchEnabled, setIsPredictiveSearchEnabled] = useState(
-    localStorageData?.preferences?.isPredictiveSearchEnabled ?? true
+    preferences?.isPredictiveSearchEnabled ?? true
   );
 
   const searchContainerRef = useRef(null);

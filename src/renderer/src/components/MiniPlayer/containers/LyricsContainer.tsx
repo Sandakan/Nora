@@ -1,15 +1,19 @@
 /* eslint-disable react/no-array-index-key */
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../../contexts/AppContext';
 
 import LyricLine from '../../LyricsPage/LyricLine';
 import useSkipLyricsLines from '../../../hooks/useSkipLyricsLines';
+import LyricsMetadata from '../../LyricsPage/LyricsMetadata';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = { isLyricsVisible: boolean };
 
 const LyricsContainer = (props: Props) => {
-  const { currentSongData, isCurrentSongPlaying } = useContext(AppContext);
+  const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+
   const { t } = useTranslation();
 
   const { isLyricsVisible } = props;
@@ -42,15 +46,22 @@ const LyricsContainer = (props: Props) => {
     currentSongData.title,
     isLyricsVisible
   ]);
-
   const lyricsComponents = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {
-      const { isSynced, lyrics: unsyncedLyrics, syncedLyrics, offset = 0 } = lyrics.lyrics;
+      const { isSynced, parsedLyrics, offset = 0 } = lyrics.lyrics;
 
-      if (syncedLyrics) {
-        const syncedLyricsLines = syncedLyrics.map((lyric, index) => {
-          const { text, end, start } = lyric;
-          return <LyricLine key={index} index={index} lyric={text} syncedLyrics={{ start, end }} />;
+      if (isSynced) {
+        const syncedLyricsLines = parsedLyrics.map((lyric, index) => {
+          const { originalText: text, end = 0, start = 0 } = lyric;
+          return (
+            <LyricLine
+              key={index}
+              index={index}
+              lyric={text}
+              syncedLyrics={{ start, end }}
+              translatedLyricLines={lyric.translatedTexts}
+            />
+          );
         });
 
         const firstLine = (
@@ -60,22 +71,46 @@ const LyricsContainer = (props: Props) => {
             lyric="•••"
             syncedLyrics={{
               start: 0,
-              end: (syncedLyrics[0]?.start || 0) + offset
+              end: (parsedLyrics[0]?.start || 0) + offset
             }}
           />
         );
 
-        if ((syncedLyrics[0]?.start || 0) !== 0) syncedLyricsLines.unshift(firstLine);
+        if ((parsedLyrics[0]?.start || 0) !== 0) syncedLyricsLines.unshift(firstLine);
 
         return syncedLyricsLines;
       }
       if (!isSynced) {
-        return unsyncedLyrics.map((line, index) => {
-          return <LyricLine key={index} index={index} lyric={line} />;
+        return parsedLyrics.map((line, index) => {
+          return (
+            <LyricLine
+              key={index}
+              index={index}
+              lyric={line.originalText}
+              translatedLyricLines={line.translatedTexts}
+            />
+          );
         });
       }
     }
     return [];
+  }, [lyrics]);
+
+  const lyricsSource = useMemo(() => {
+    if (lyrics && lyrics?.lyrics) {
+      const { source, link } = lyrics;
+
+      return (
+        <LyricsMetadata
+          source={source}
+          copyright={lyrics.lyrics.copyright}
+          link={link}
+          className="!mt-2"
+          textClassName="!text-xs"
+        />
+      );
+    }
+    return undefined;
   }, [lyrics]);
 
   return (
@@ -85,11 +120,12 @@ const LyricsContainer = (props: Props) => {
       }`}
       id="miniPlayerLyricsContainer"
     >
-      {isLyricsVisible &&
-        lyricsComponents.length > 0 &&
-        lyrics &&
-        lyrics.lyrics.isSynced &&
-        lyricsComponents}
+      {isLyricsVisible && lyricsComponents.length > 0 && lyrics && lyrics.lyrics.isSynced && (
+        <>
+          {lyricsComponents}
+          {lyricsSource}
+        </>
+      )}
       {isLyricsVisible && lyrics && !lyrics.lyrics.isSynced && (
         <div className="flex h-full w-full items-center justify-center text-font-color-white opacity-75">
           {t('lyricsPage.noSyncedLyrics')}

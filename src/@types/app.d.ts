@@ -5,7 +5,6 @@ import { DropdownOption } from '../renderer/src/components/Dropdown';
 import { api } from '../preload';
 import { LastFMSessionData } from './last_fm_api';
 import { SimilarArtist, Tag } from './last_fm_artist_info_api';
-import { ElectronAPI } from '@electron-toolkit/preload';
 import { resources } from 'src/renderer/src/i18n';
 import { Presence } from 'discord-rpc-revamp';
 
@@ -87,7 +86,7 @@ declare global {
     albumArtists?: { artistId: string; name: string }[];
     bitrate?: number;
     trackNo?: number;
-    diskNo?: number;
+    discNo?: number;
     noOfChannels?: number;
     year?: number;
     sampleRate?: number;
@@ -239,18 +238,44 @@ declare global {
 
   type AutomaticallySaveLyricsTypes = 'SYNCED' | 'SYNCED_OR_UN_SYNCED' | 'NONE';
 
-  type LyricsTypes = 'SYNCED' | 'UN_SYNCED' | 'ANY';
+  type LyricsTypes = 'ENHANCED_SYNCED' | 'SYNCED' | 'UN_SYNCED' | 'ANY';
 
   type LyricsRequestTypes = 'ONLINE_ONLY' | 'OFFLINE_ONLY' | 'ANY';
 
   type LyricsSource = 'IN_SONG_LYRICS' | 'MUSIXMATCH' | string;
 
-  interface LyricsRequestTrackInfo {
-    songTitle: string;
-    songArtists?: string[];
-    album?: string;
-    songPath: string;
-    duration: number;
+  export type SyncedLyricsLineWord = {
+    text: string;
+    start: number;
+    end: number;
+    unparsedText: string;
+  };
+
+  // Represents a single translation of a lyric line in a specific language
+  interface TranslatedLyricLine {
+    lang: string; // Language code of the translation
+    text: string | SyncedLyricsLineWord[]; // Translated text or synced lyrics
+  }
+
+  // Represents a single line of lyrics, either synced or unsynced
+  interface LyricLine {
+    originalText: string | SyncedLyricsLineWord[]; // Original text of the lyric line
+    translatedTexts: TranslatedLyricLine[]; // Array of translations in different languages
+    start?: number; // Timing start (for synced lyrics only)
+    end?: number; // Timing end (for synced lyrics only)
+    isEnhancedSynced: boolean; // Indicates if the original text is enhanced synced lyrics
+  }
+
+  // Holds all the lyrics data, whether synced or unsynced
+  interface LyricsData {
+    isSynced: boolean;
+    isTranslated: boolean;
+    parsedLyrics: LyricLine[]; // Array of original lyric lines (both synced and unsynced
+    unparsedLyrics: string;
+    offset?: number;
+    originalLanguage?: string; // Language of the original lyrics (optional)
+    translatedLanguages?: string[]; // Array of language codes of the translated lyrics (optional)
+    copyright?: string;
   }
 
   interface SongLyrics {
@@ -258,32 +283,16 @@ declare global {
     source: LyricsSource;
     lyricsType: LyricsTypes;
     link?: string;
-    lyrics: LyricsData;
-    lang?: string;
-    copyright?: string;
+    lyrics: LyricsData; // original and translated lyrics data
     isOfflineLyricsAvailable: boolean;
-    isTranslated: boolean;
   }
 
-  export type SyncedLyricsLineText = {
-    text: string;
-    start: number;
-    end: number;
-    unparsedText: string;
-  }[];
-  interface SyncedLyricLine {
-    text: string | SyncedLyricsLineText;
-    start: number;
-    end: number;
-  }
-
-  interface LyricsData {
-    isSynced: boolean;
-    lyrics: string[];
-    syncedLyrics?: SyncedLyricLine[];
-    unparsedLyrics: string;
-    copyright?: string;
-    offset: number;
+  interface LyricsRequestTrackInfo {
+    songTitle: string;
+    songArtists?: string[];
+    album?: string;
+    songPath: string;
+    duration: number;
   }
 
   // node-id3 synchronisedLyrics types.
@@ -895,7 +904,7 @@ declare global {
     onPageChange?: (changedPageTitle: PageTitles, changedPageData?: any) => void;
   }
 
-  interface PageData extends Record<string, unknown> {
+  interface PageData<R = any> extends Record<string, R> {
     scrollTopOffset?: number;
     isLowResponseRequired?: boolean;
     preventScreenSleeping?: boolean;

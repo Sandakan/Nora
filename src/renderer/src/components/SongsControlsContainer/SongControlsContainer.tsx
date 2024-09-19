@@ -1,12 +1,12 @@
-import { useContext } from 'react';
-import { AppContext } from '../../contexts/AppContext';
 import ErrorBoundary from '../ErrorBoundary';
 import CurrentlyPlayingSongInfoContainer from './CurrentlyPlayingSongInfoContainer';
 import OtherSongControlsContainer from './OtherSongControlsContainer';
 import SongControlsAndSeekbarContainer from './SongControlsAndSeekbarContainer';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const SongControlsContainer = () => {
-  const { bodyBackgroundImage } = useContext(AppContext);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
 
   return (
     <footer

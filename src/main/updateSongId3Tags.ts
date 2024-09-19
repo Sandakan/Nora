@@ -37,7 +37,7 @@ import { generateRandomId } from './utils/randomId';
 import { createTempArtwork, removeArtwork, storeArtworks } from './other/artworks';
 import generatePalette from './other/generatePalette';
 import { parseLyricsFromID3Format, updateCachedLyrics } from './core/getSongLyrics';
-import parseLyrics from './utils/parseLyrics';
+import parseLyrics from '../common/parseLyrics';
 import convertParsedLyricsToNodeID3Format from './core/convertParsedLyricsToNodeID3Format';
 import sendSongID3Tags from './core/sendSongId3Tags';
 import { isSongBlacklisted } from './utils/isBlacklisted';
@@ -90,7 +90,6 @@ export const savePendingMetadataUpdates = (currentSongPath = '', forceSave = fal
               source: 'IN_SONG_LYRICS',
               isOfflineLyricsAvailable: true,
               lyricsType: synchronisedLyrics ? 'SYNCED' : 'UN_SYNCED',
-              isTranslated: false,
               lyrics
             });
           }
@@ -644,7 +643,7 @@ const manageLyricsUpdates = (
 
           cachedLyrics.lyrics = lyrics;
           cachedLyrics.lyricsType = lyricsType;
-          cachedLyrics.copyright = lyrics.copyright;
+          cachedLyrics.lyrics.copyright = lyrics.copyright;
           cachedLyrics.source = 'IN_SONG_LYRICS';
           cachedLyrics.isOfflineLyricsAvailable = true;
 

@@ -4,15 +4,17 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import roundTo from '../../../../common/roundTo';
 import { syncedLyricsRegex } from './LyricsPage';
 import LyricsProgressBar from './LyricsProgressBar';
 import EnhancedSyncedLyricWord from '../LyricsEditingPage/EnhancedSyncedLyricWord';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 interface LyricProp {
-  lyric: string | SyncedLyricsLineText;
+  lyric: string | SyncedLyricsLineWord[];
+  translatedLyricLines?: TranslatedLyricLine[];
   index: number;
   syncedLyrics?: { start: number; end: number };
   isAutoScrolling?: boolean;
@@ -23,7 +25,8 @@ const lyricsScrollIntoViewEvent = new CustomEvent('lyrics/scrollIntoView', {
 });
 
 const LyricLine = (props: LyricProp) => {
-  const { playerType } = useContext(AppContext);
+  const playerType = useStore(store, (state) => state.playerType);
+
   const { updateSongPosition, updateContextMenuData } = useContext(AppUpdateContext);
   const [isInRange, setIsInRange] = useState(false);
   const { t } = useTranslation();
@@ -31,7 +34,7 @@ const LyricLine = (props: LyricProp) => {
   const lyricsRef = useRef(null as HTMLDivElement | null);
   const isTheCurrnetLineRef = useRef(false);
 
-  const { index, lyric, syncedLyrics, isAutoScrolling = true } = props;
+  const { index, lyric, translatedLyricLines = [], syncedLyrics, isAutoScrolling = true } = props;
 
   const handleLyricsActivity = useCallback(
     (e: Event) => {
@@ -87,6 +90,29 @@ const LyricLine = (props: LyricProp) => {
     return extendedLyricLines;
   }, [isInRange, lyric]);
 
+  const translatedLyricString = useMemo(() => {
+    if (translatedLyricLines.length === 0) return undefined;
+
+    const translatedLyric = translatedLyricLines[0].text;
+    if (typeof translatedLyric === 'string')
+      return translatedLyric.replaceAll(syncedLyricsRegex, '').trim();
+
+    const extendedLyricLines = translatedLyric.map((extendedText, i) => {
+      return (
+        <EnhancedSyncedLyricWord
+          key={i}
+          isActive={isInRange}
+          start={extendedText.start}
+          end={extendedText.end}
+          text={extendedText.text}
+          delay={0}
+        />
+      );
+    });
+
+    return extendedLyricLines;
+  }, [isInRange, translatedLyricLines]);
+
   return (
     <div
       style={{
@@ -141,10 +167,13 @@ const LyricLine = (props: LyricProp) => {
       }}
     >
       <div
-        className={`flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'}`}
+        className={`flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'} ${translatedLyricString ? (syncedLyrics && isInRange ? '!text-xl !text-font-color-black/50 dark:!text-font-color-white/50' : '!text-xl') : ''}`}
       >
         {lyricString}
       </div>
+      {translatedLyricString && (
+        <div className="translated-lyric-line">{translatedLyricString}</div>
+      )}
       {syncedLyrics && isInRange && <LyricsProgressBar delay={0} syncedLyrics={syncedLyrics} />}
     </div>
   );

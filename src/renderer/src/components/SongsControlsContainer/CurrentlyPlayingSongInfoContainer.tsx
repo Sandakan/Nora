@@ -4,7 +4,6 @@
 /* eslint-disable react/no-array-index-key */
 import { lazy, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import Img from '../Img';
@@ -12,6 +11,8 @@ import SongArtist from '../SongsPage/SongArtist';
 
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import UpNextSongPopup from './UpNextSongPopup';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const AddSongsToPlaylistsPrompt = lazy(() => import('../SongsPage/AddSongsToPlaylistsPrompt'));
 const BlacklistSongConfrimPrompt = lazy(() => import('../SongsPage/BlacklistSongConfirmPrompt'));
@@ -20,7 +21,9 @@ const DeleteSongsFromSystemConfrimPrompt = lazy(
 );
 
 const CurrentlyPlayingSongInfoContainer = () => {
-  const { currentSongData, localStorageData } = useContext(AppContext);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const {
     changeCurrentActivePage,
     updateContextMenuData,
@@ -202,7 +205,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
             window.api.audioLibraryControls
               .restoreBlacklistedSongs([songId])
               .catch((err) => console.error(err));
-          else if (localStorageData?.preferences.doNotShowBlacklistSongConfirm)
+          else if (preferences?.doNotShowBlacklistSongConfirm)
             window.api.audioLibraryControls
               .blacklistSongs([songId])
               .then(() =>
@@ -239,7 +242,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
     changePromptMenuData,
     currentSongData,
     gotToSongAlbumPage,
-    localStorageData?.preferences.doNotShowBlacklistSongConfirm,
+    preferences?.doNotShowBlacklistSongConfirm,
     showSongInfoPage,
     t,
     toggleMultipleSelections
@@ -312,7 +315,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
             className="song-artists appear-from-bottom flex w-full items-center truncate"
             id="currentSongArtists"
           >
-            {localStorageData?.preferences.showArtistArtworkNearSongControls &&
+            {preferences?.showArtistArtworkNearSongControls &&
               songArtistsImages &&
               songArtistsImages.length > 0 && (
                 <span

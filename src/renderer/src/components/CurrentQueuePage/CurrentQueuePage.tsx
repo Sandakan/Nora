@@ -4,7 +4,6 @@ import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'r
 import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line import/named
 import { Draggable, Droppable, DragDropContext, DropResult } from 'react-beautiful-dnd';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
@@ -19,6 +18,8 @@ import Img from '../Img';
 import Song from '../SongsPage/Song';
 import VirtualizedList from '../VirtualizedList';
 import { VirtuosoHandle } from 'react-virtuoso';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 interface QueueInfo {
   artworkPath: string;
@@ -27,14 +28,16 @@ interface QueueInfo {
 }
 
 const CurrentQueuePage = () => {
-  const {
-    queue,
-    currentSongData,
-    currentlyActivePage,
-    isMultipleSelectionEnabled,
-    multipleSelectionsData,
-    localStorageData
-  } = useContext(AppContext);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const { updateQueueData, addNewNotifications, updateContextMenuData, toggleMultipleSelections } =
     useContext(AppUpdateContext);
   const { t } = useTranslation();
@@ -49,31 +52,26 @@ const CurrentQueuePage = () => {
 
   const ListRef = useRef<VirtuosoHandle>(null);
 
-  const isTheSameQueue = useCallback((newQueueSongIds: string[]) => {
-    const prevQueueSongIds = previousQueueRef.current;
-    const isSameQueue = prevQueueSongIds.every((id) => newQueueSongIds.includes(id));
+  // const isTheSameQueue = useCallback((newQueueSongIds: string[]) => {
+  //   const prevQueueSongIds = previousQueueRef.current;
+  //   const isSameQueue = prevQueueSongIds.every((id) => newQueueSongIds.includes(id));
 
-    return isSameQueue;
-  }, []);
+  //   return isSameQueue;
+  // }, []);
 
-  const fetchAllSongsData = useCallback(
-    (skipSameQueueCheck = false) => {
-      if (skipSameQueueCheck || !isTheSameQueue(queue.queue)) {
-        window.api.audioLibraryControls
-          .getSongInfo(queue.queue, 'addedOrder', undefined, undefined, true)
-          .then((res) => {
-            if (res) {
-              setQueuedSongs(res);
-              previousQueueRef.current = queue.queue.slice();
-            }
-          });
-      }
-    },
-    [isTheSameQueue, queue.queue]
-  );
+  const fetchAllSongsData = useCallback(() => {
+    window.api.audioLibraryControls
+      .getSongInfo(queue.queue, 'addedOrder', undefined, undefined, true)
+      .then((res) => {
+        if (res) {
+          setQueuedSongs(res);
+          previousQueueRef.current = queue.queue.slice();
+        }
+      });
+  }, [queue.queue]);
 
   useEffect(() => {
-    fetchAllSongsData(true);
+    fetchAllSongsData();
     const manageSongUpdatesInCurrentQueue = (e: Event) => {
       if ('detail' in e) {
         const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
@@ -83,7 +81,7 @@ const CurrentQueuePage = () => {
             event.dataType.includes('songs') ||
             event.dataType === 'userData/queue' ||
             event.dataType === 'blacklist/songBlacklist' ||
-            (event.dataType === 'songs/likes' && event.eventData.length > 1)
+            event.dataType === 'songs/likes'
           )
             fetchAllSongsData();
         }
@@ -299,7 +297,7 @@ const CurrentQueuePage = () => {
               isDisabled={queue.queue.length > 0 === false}
               clickHandler={() => {
                 updateQueueData(undefined, queue.queue, true);
-                fetchAllSongsData(true);
+                fetchAllSongsData();
                 addNewNotifications([
                   {
                     id: 'shuffleQueue',
@@ -389,7 +387,7 @@ const CurrentQueuePage = () => {
                       isDraggable
                       index={rubric.source.index}
                       ref={provided.innerRef}
-                      isIndexingSongs={localStorageData?.preferences?.isSongIndexingEnabled}
+                      isIndexingSongs={preferences?.isSongIndexingEnabled}
                       title={data.title}
                       songId={data.songId}
                       artists={data.artists}
@@ -434,9 +432,7 @@ const CurrentQueuePage = () => {
                                 isDraggable
                                 index={index}
                                 ref={provided.innerRef}
-                                isIndexingSongs={
-                                  localStorageData?.preferences?.isSongIndexingEnabled
-                                }
+                                isIndexingSongs={preferences?.isSongIndexingEnabled}
                                 {...song}
                                 trackNo={undefined}
                                 selectAllHandler={selectAllHandler}

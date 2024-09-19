@@ -1,20 +1,20 @@
 import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
 import SeekBarContainer from './SeekBarContainer';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const SongControlsAndSeekbarContainer = () => {
-  const {
-    currentSongData,
-    currentlyActivePage,
-    queue,
-    isShuffling,
-    isRepeating,
-    isCurrentSongPlaying,
-    isPlayerStalled
-  } = useContext(AppContext);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+  const isShuffling = useStore(store, (state) => state.player.isShuffling);
+  const isRepeating = useStore(store, (state) => state.player.isRepeating);
+  const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
+  const isPlayerStalled = useStore(store, (state) => state.player.isPlayerStalled);
+
   const {
     changeCurrentActivePage,
     updateQueueData,

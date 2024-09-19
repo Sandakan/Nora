@@ -1,14 +1,15 @@
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppContext } from '../../../contexts/AppContext';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import Button from '../../Button';
 import Hyperlink from '../../Hyperlink';
 import { LyricData } from '../../LyricsEditingPage/LyricsEditingPage';
 import useNetworkConnectivity from '../../../hooks/useNetworkConnectivity';
-import parseLyrics from '../../../utils/parseLyrics';
+import parseLyrics from '../../../../../common/parseLyrics';
 import isLyricsSynced, { isLyricsEnhancedSynced } from '../../../../../common/isLyricsSynced';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type CurrentLyricsTYpe = 'synced' | 'unsynced';
 
@@ -32,7 +33,8 @@ type Props = {
 };
 
 const SongLyricsEditorInput = (props: Props) => {
-  const { userData } = useContext(AppContext);
+  const userData = useStore(store, (state) => state.userData);
+
   const { addNewNotifications, changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
@@ -180,12 +182,13 @@ const SongLyricsEditorInput = (props: Props) => {
     if (synchronizedLyrics || unsynchronizedLyrics) {
       const lyrics = currentLyricsType === 'synced' ? synchronizedLyrics : unsynchronizedLyrics;
       let lines: LyricData[] = [];
-      const { isSynced, syncedLyrics, unsyncedLyrics } = parseLyrics(lyrics as string);
+      const { parsedLyrics } = parseLyrics(lyrics as string);
 
-      if (isSynced) lines = syncedLyrics;
-      else {
-        lines = unsyncedLyrics.map((line) => ({ text: line }));
-      }
+      lines = parsedLyrics.map((lyric) => ({
+        text: lyric.originalText,
+        start: lyric.start,
+        end: lyric.end
+      }));
 
       changeCurrentActivePage('LyricsEditor', {
         lyrics: lines,
@@ -238,7 +241,9 @@ const SongLyricsEditorInput = (props: Props) => {
           name="lyrics"
           placeholder={t('common.lyrics')}
           value={
-            currentLyricsType === 'synced' ? synchronizedLyrics ?? '' : unsynchronizedLyrics ?? ''
+            currentLyricsType === 'synced'
+              ? (synchronizedLyrics ?? '')
+              : (unsynchronizedLyrics ?? '')
           }
           onKeyDown={(e) => e.stopPropagation()}
           onChange={(e) => {

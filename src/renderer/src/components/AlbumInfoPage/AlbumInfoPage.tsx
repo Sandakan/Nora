@@ -2,10 +2,8 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
-
 import MainContainer from '../MainContainer';
 import Song from '../SongsPage/Song';
 import TitleContainer from '../TitleContainer';
@@ -14,6 +12,8 @@ import OnlineAlbumInfoContainer from './OnlineAlbumInfoContainer';
 import { songSortOptions } from '../SongsPage/SongOptions';
 import { LastFMAlbumInfo } from 'src/@types/last_fm_album_info_api';
 import VirtualizedList from '../VirtualizedList';
+import { useStore } from '@tanstack/react-store';
+import { store } from '../../store';
 
 interface AlbumContentReducer {
   albumData: Album;
@@ -59,7 +59,10 @@ const reducer = (
 };
 
 const AlbumInfoPage = () => {
-  const { currentlyActivePage, queue, localStorageData } = useContext(AppContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const preferences = useStore(store, (state) => state?.localStorage?.preferences);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+
   const {
     createQueue,
     updateQueueData,
@@ -75,21 +78,26 @@ const AlbumInfoPage = () => {
     sortingOrder: 'trackNoAscending' as SongSortTypes
   });
 
+  const albumId = useMemo(
+    () => currentlyActivePage?.data?.albumId as string,
+    [currentlyActivePage?.data?.albumId]
+  );
+
   useEffect(() => {
-    if (currentlyActivePage.data.albumId)
+    if (albumId)
       window.api.albumsData
-        .getAlbumInfoFromLastFM(currentlyActivePage.data.albumId)
+        .getAlbumInfoFromLastFM(albumId)
         .then((res) => {
           if (res) dispatch({ type: 'OTHER_ALBUM_DATA_UPDATE', data: res });
           return undefined;
         })
         .catch((err) => console.error(err));
-  }, [currentlyActivePage.data.albumId]);
+  }, [albumId]);
 
   const fetchAlbumData = useCallback(() => {
-    if (currentlyActivePage.data.albumId) {
+    if (albumId) {
       window.api.albumsData
-        .getAlbumData([currentlyActivePage.data.albumId as string])
+        .getAlbumData([albumId as string])
         .then((res) => {
           if (res && res.length > 0 && res[0]) {
             dispatch({ type: 'ALBUM_DATA_UPDATE', data: res[0] });
@@ -98,7 +106,7 @@ const AlbumInfoPage = () => {
         })
         .catch((err) => console.error(err));
     }
-  }, [currentlyActivePage.data.albumId]);
+  }, [albumId]);
 
   const fetchAlbumSongs = useCallback(() => {
     if (albumContent.albumData.songs && albumContent.albumData.songs.length > 0) {
@@ -277,14 +285,12 @@ const AlbumInfoPage = () => {
               <Song
                 key={index}
                 index={index}
-                isIndexingSongs={localStorageData?.preferences.isSongIndexingEnabled}
+                isIndexingSongs={preferences?.isSongIndexingEnabled}
                 onPlayClick={handleSongPlayBtnClick}
                 selectAllHandler={selectAllHandler}
                 {...item}
                 trackNo={
-                  localStorageData?.preferences?.showTrackNumberAsSongIndex
-                    ? item.trackNo ?? '--'
-                    : undefined
+                  preferences?.showTrackNumberAsSongIndex ? (item.trackNo ?? '--') : undefined
                 }
               />
             );

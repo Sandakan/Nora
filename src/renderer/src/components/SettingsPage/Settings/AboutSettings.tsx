@@ -2,7 +2,6 @@ import { lazy, useContext, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { AppContext } from '../../../contexts/AppContext';
 
 import Img from '../../Img';
 import Hyperlink from '../../Hyperlink';
@@ -23,6 +22,8 @@ import GithubLightIcon from '../../../assets/images/svg/github-white.svg';
 import DiscordDarkIcon from '../../../assets/images/svg/discord_light_mode.svg';
 import DiscordLightIcon from '../../../assets/images/svg/discord_dark_mode.svg';
 import SLFlag from '../../../assets/images/webp/sl-flag.webp';
+import { store } from '@renderer/store';
+import { useStore } from '@tanstack/react-store';
 
 const ReleaseNotesPrompt = lazy(() => import('../../ReleaseNotesPrompt/ReleaseNotesPrompt'));
 const ResetAppConfirmationPrompt = lazy(() => import('../ResetAppConfirmationPrompt'));
@@ -32,7 +33,7 @@ const ClearLocalStoragePrompt = lazy(() => import('../ClearLocalStoragePrompt'))
 const OpenLinkConfirmPrompt = lazy(() => import('../../OpenLinkConfirmPrompt'));
 
 const AboutSettings = () => {
-  const { isDarkMode } = useContext(AppContext);
+  const isDarkMode = useStore(store, (state) => state.isDarkMode);
   const { changePromptMenuData, addNewNotifications } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
@@ -147,6 +148,35 @@ const AboutSettings = () => {
               tabIndex={0}
             />
           </div>
+        </div>
+        <div className="mb-4 flex items-center gap-4">
+          <img
+            alt="GitHub all releases"
+            src="https://img.shields.io/github/downloads/Sandakan/Nora/total?label=all%20time%20downloads"
+          />
+          <img
+            alt="GitHub release (latest by date)"
+            src={`https://img.shields.io/github/downloads/Sandakan/Nora/v${version}/total`}
+          />
+          <Hyperlink
+            linkTitle={t('settingsPage.noraGithubIssues')}
+            link="https://github.com/Sandakan/Nora/issues"
+          >
+            <img
+              alt="GitHub issues"
+              src="https://img.shields.io/github/issues/Sandakan/Oto-Music-for-Desktop"
+            />
+          </Hyperlink>
+
+          <Hyperlink
+            linkTitle={t('settingsPage.noraLocalizationStatus')}
+            link="https://crowdin.com/project/nora"
+          >
+            <img
+              src="https://badges.crowdin.net/nora/localized.svg"
+              alt={t('settingsPage.noraLocalizationStatus')}
+            />
+          </Hyperlink>
         </div>
         <ul className="mb-4 list-disc pl-4 text-sm">
           <li>{t('settingsPage.noraDescription')}</li>

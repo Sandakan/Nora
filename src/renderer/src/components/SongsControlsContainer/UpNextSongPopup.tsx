@@ -1,10 +1,12 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { AppContext } from '../../contexts/AppContext';
 
 import Button from '../Button';
+import { useStore } from '@tanstack/react-store';
+import { store } from '../../store';
 
 type Props = {
   onPopupAppears: (isVisible: boolean) => void;
@@ -13,7 +15,9 @@ type Props = {
 };
 
 const UpNextSongPopup = (props: Props) => {
-  const { queue, currentSongData } = useContext(AppContext);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+
   const {
     changeCurrentActivePage
     // changeUpNextSongData

@@ -5,15 +5,16 @@ import { MutableRefObject, Suspense, useCallback, useContext, useEffect, useRef 
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { AppContext } from '../../contexts/AppContext';
 
 import Button from '../Button';
 import MainContainer from '../MainContainer';
 import PromptMenuNavigationControlsContainer from './PromptMenuNavigationControlsContainer';
 import SuspenseLoader from '../SuspenseLoader';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const PromptMenu = () => {
-  const { promptMenuData } = useContext(AppContext);
+  const promptMenuData = useStore(store, (state) => state.promptMenuData);
   const { changePromptMenuData, updatePromptMenuHistoryIndex } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 

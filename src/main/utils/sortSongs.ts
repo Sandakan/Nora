@@ -99,9 +99,9 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
           })
           // sort with the disk number
           .sort((a, b) => {
-            if (a.diskNo !== undefined && b.diskNo !== undefined) {
-              if (a.diskNo > b.diskNo) return 1;
-              if (a.diskNo < b.diskNo) return -1;
+            if (a.discNo !== undefined && b.discNo !== undefined) {
+              if (a.discNo > b.discNo) return 1;
+              if (a.discNo < b.discNo) return -1;
             }
             return 0;
           })
@@ -116,9 +116,9 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
           return 0;
         })
         .sort((a, b) => {
-          if (a.diskNo !== undefined && b.diskNo !== undefined) {
-            if (a.diskNo < b.diskNo) return 1;
-            if (a.diskNo > b.diskNo) return -1;
+          if (a.discNo !== undefined && b.discNo !== undefined) {
+            if (a.discNo < b.discNo) return 1;
+            if (a.discNo > b.discNo) return -1;
           }
           return 0;
         });

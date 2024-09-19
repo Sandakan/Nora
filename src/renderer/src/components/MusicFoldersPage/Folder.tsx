@@ -2,7 +2,6 @@ import { lazy, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { AppContext } from '../../contexts/AppContext';
 
 import Img from '../Img';
 import Button from '../Button';
@@ -12,6 +11,8 @@ const MultipleSelectionCheckbox = lazy(() => import('../MultipleSelectionCheckbo
 const BlacklistFolderConfrimPrompt = lazy(() => import('./BlacklistFolderConfirmPrompt'));
 
 import FolderImg from '../../assets/images/webp/empty-folder.webp';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type FolderProps = {
   folderPath: string;
@@ -24,7 +25,12 @@ type FolderProps = {
 };
 
 const Folder = (props: FolderProps) => {
-  const { isMultipleSelectionEnabled, multipleSelectionsData } = useContext(AppContext);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+
   const {
     changeCurrentActivePage,
     updateContextMenuData,

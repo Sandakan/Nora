@@ -1,11 +1,12 @@
 /* eslint-disable react/no-array-index-key */
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../../contexts/AppContext';
 
 import LyricsMetadata from '../../LyricsPage/LyricsMetadata';
 import LyricLine from '../../LyricsPage/LyricLine';
 import useSkipLyricsLines from '../../../hooks/useSkipLyricsLines';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   isLyricsVisible: boolean;
@@ -13,7 +14,8 @@ type Props = {
 };
 
 const LyricsContainer = (props: Props) => {
-  const { currentSongData, isCurrentSongPlaying } = useContext(AppContext);
+  const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
 
   const { isLyricsVisible, setIsLyricsAvailable } = props;
   const { t } = useTranslation();
@@ -53,12 +55,20 @@ const LyricsContainer = (props: Props) => {
 
   const lyricsComponents = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {
-      const { isSynced, lyrics: unsyncedLyrics, syncedLyrics, offset = 0 } = lyrics.lyrics;
+      const { isSynced, parsedLyrics, offset = 0 } = lyrics.lyrics;
 
-      if (syncedLyrics) {
-        const syncedLyricsLines = syncedLyrics.map((lyric, index) => {
-          const { text, end, start } = lyric;
-          return <LyricLine key={index} index={index} lyric={text} syncedLyrics={{ start, end }} />;
+      if (isSynced) {
+        const syncedLyricsLines = parsedLyrics.map((lyric, index) => {
+          const { originalText: text, end = 0, start = 0 } = lyric;
+          return (
+            <LyricLine
+              key={index}
+              index={index}
+              lyric={text}
+              syncedLyrics={{ start, end }}
+              translatedLyricLines={lyric.translatedTexts}
+            />
+          );
         });
 
         const firstLine = (
@@ -68,18 +78,25 @@ const LyricsContainer = (props: Props) => {
             lyric="•••"
             syncedLyrics={{
               start: 0,
-              end: (syncedLyrics[0]?.start || 0) + offset
+              end: (parsedLyrics[0]?.start || 0) + offset
             }}
           />
         );
 
-        if ((syncedLyrics[0]?.start || 0) !== 0) syncedLyricsLines.unshift(firstLine);
+        if ((parsedLyrics[0]?.start || 0) !== 0) syncedLyricsLines.unshift(firstLine);
 
         return syncedLyricsLines;
       }
       if (!isSynced) {
-        return unsyncedLyrics.map((line, index) => {
-          return <LyricLine key={index} index={index} lyric={line} />;
+        return parsedLyrics.map((line, index) => {
+          return (
+            <LyricLine
+              key={index}
+              index={index}
+              lyric={line.originalText}
+              translatedLyricLines={line.translatedTexts}
+            />
+          );
         });
       }
     }
@@ -88,12 +105,12 @@ const LyricsContainer = (props: Props) => {
 
   const lyricsSource = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {
-      const { source, copyright, link } = lyrics;
+      const { source, link } = lyrics;
 
       return (
         <LyricsMetadata
           source={source}
-          copyright={copyright}
+          copyright={lyrics.lyrics.copyright}
           link={link}
           className="!items-start !text-left"
         />

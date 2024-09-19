@@ -1,11 +1,12 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import storage from '../../utils/localStorage';
 
 import Button from '../Button';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   name?: string;
@@ -13,7 +14,10 @@ type Props = {
 };
 
 const DuplicateArtistsSuggestion = (props: Props) => {
-  const { bodyBackgroundImage, currentlyActivePage, currentSongData } = useContext(AppContext);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+
   const { addNewNotifications, changeCurrentActivePage, updateCurrentSongData } =
     useContext(AppUpdateContext);
   const { t } = useTranslation();

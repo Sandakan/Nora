@@ -2,7 +2,6 @@
 /* eslint-disable no-console */
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 
@@ -12,9 +11,14 @@ import TitleContainer from '../TitleContainer';
 import GenreImgAndInfoContainer from './GenreImgAndInfoContainer';
 import { songSortOptions, songFilterOptions } from '../SongsPage/SongOptions';
 import VirtualizedList from '../VirtualizedList';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const GenreInfoPage = () => {
-  const { currentlyActivePage, queue, localStorageData } = useContext(AppContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const {
     createQueue,
     updateQueueData,
@@ -22,6 +26,7 @@ const GenreInfoPage = () => {
     updateCurrentlyActivePageData,
     playSong
   } = useContext(AppUpdateContext);
+
   const { t } = useTranslation();
 
   const [genreData, setGenreData] = useState<Genre>();
@@ -32,7 +37,7 @@ const GenreInfoPage = () => {
   const fetchGenresData = useCallback(() => {
     if (currentlyActivePage.data) {
       window.api.genresData
-        .getGenresData([currentlyActivePage.data.genreId])
+        .getGenresData([currentlyActivePage.data.genreId as string])
         .then((res) => {
           if (res && res.length > 0 && res[0]) setGenreData(res[0]);
           return undefined;
@@ -212,6 +217,7 @@ const GenreInfoPage = () => {
 
       <VirtualizedList
         data={listItems}
+        fixedItemHeight={60}
         scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
         itemContent={(index, item) => {
           if ('songId' in item)
@@ -219,7 +225,7 @@ const GenreInfoPage = () => {
               <Song
                 key={index}
                 index={index}
-                isIndexingSongs={localStorageData?.preferences.isSongIndexingEnabled}
+                isIndexingSongs={preferences?.isSongIndexingEnabled}
                 onPlayClick={handleSongPlayBtnClick}
                 selectAllHandler={selectAllHandler}
                 {...item}

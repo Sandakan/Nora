@@ -1,9 +1,10 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
-import { AppContext } from '../../contexts/AppContext';
+import { useEffect, useMemo, useState } from 'react';
 
 import Img from '../Img';
 
 import DefaultImgCover from '../../assets/images/webp/song_cover_default.webp';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   className?: string;
@@ -15,7 +16,7 @@ type Props = {
 };
 
 const MultipleArtworksCover = (props: Props) => {
-  const { localStorageData } = useContext(AppContext);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
   const {
     className,
     songIds,
@@ -42,7 +43,7 @@ const MultipleArtworksCover = (props: Props) => {
         repeatedArtworks.push(...artworks);
       }
 
-      if (localStorageData?.preferences.shuffleArtworkFromSongCovers) {
+      if (preferences?.shuffleArtworkFromSongCovers) {
         for (let i = repeatedArtworks.length - 1; i > 0; i -= 1) {
           const randomIndex = Math.floor(Math.random() * (i + 1));
           [repeatedArtworks[i], repeatedArtworks[randomIndex]] = [
@@ -72,13 +73,7 @@ const MultipleArtworksCover = (props: Props) => {
         });
     }
     return [];
-  }, [
-    artworks,
-    enableImgFadeIns,
-    imgClassName,
-    localStorageData?.preferences.shuffleArtworkFromSongCovers,
-    type
-  ]);
+  }, [artworks, enableImgFadeIns, imgClassName, preferences?.shuffleArtworkFromSongCovers, type]);
 
   return (
     <div className={`relative overflow-hidden rounded-lg shadow-md ${className}`}>
