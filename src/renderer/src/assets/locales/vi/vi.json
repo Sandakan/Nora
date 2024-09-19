@@ -480,6 +480,8 @@
     "noraWebsite": "Trang web chính thức của Nora",
     "noraDiscordServer": "Máy chủ Discord chính thức của Nora",
     "noraGithubRepo": "kho mã nguồn của Nora trên GitHub",
+    "noraGithubIssues": "Trang issue của Nora trên GitHub",
+    "noraLocalizationStatus": "Trạng thái dịch thuật của Nora",
     "noraDescription": "Nora là một trình phát nhạc thanh lịch được xây dựng bằng Electron và React.",
     "noraInspiration": "Lấy cảm hứng từ <Hyperlink>Oto Music cho Android</Hyperlink> bởi Piyush Mamidwar.",
     "otoMusicOnPlayStore": "Oto Music trên Cửa hàng Play",
