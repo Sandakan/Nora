@@ -1081,5 +1081,13 @@
     "PLAYLIST_NOT_FOUND": "Playlist not found.",
     "SONG_REPARSE_SUCCESS": "Successfully reparsed `{{title}}`.",
     "SONG_REPARSE_FAILED": "Error occurred when re-parsing the song."
+  },
+
+  "discordrpc": {
+    "listeningTo": "Listening to",
+    "untitledSong": "an untitled song",
+    "by": "By",
+    "unknownArtist": "an unknown artist",
+    "playingASong": "Playing a song"
   }
 }

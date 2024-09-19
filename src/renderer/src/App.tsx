@@ -1073,8 +1073,8 @@ export default function App() {
 
   const setDiscordRpcActivity = useCallback(() => {
     if (store.state.currentSongData) {
-      const title = `Listening to '${store.state.currentSongData?.title ?? 'an untitled song'}'`;
-      const artists = `By ${store.state.currentSongData.artists?.map((artist) => artist.name).join(', ') || 'an unknown artist'}`;
+      const title = `${t('discordrpc.listeningTo')} '${store.state.currentSongData?.title ?? t('discordrpc.untitledSong')}'`;
+      const artists = `${t('discordrpc.by')} ${store.state.currentSongData.artists?.map((artist) => artist.name).join(', ') || t('discordrpc.unknownArtist')}`;
 
       const now = Date.now();
       window.api.playerControls.setDiscordRpcActivity({
@@ -1083,8 +1083,8 @@ export default function App() {
         largeImageKey: 'nora_logo',
         smallImageKey: 'song_artwork',
         largeImageText: 'Nora',
-        smallImageText: 'Playing a song',
-        startTimestamp: player.paused ? undefined : now,
+        smallImageText: t('discordrpc.playingASong'),
+        startTimestamp: player.paused ? undefined : now - (player.currentTime ?? 0) * 1000,
         endTimestamp: player.paused
           ? undefined
           : now + ((player.duration ?? 0) - (player.currentTime ?? 0)) * 1000
@@ -1095,10 +1095,12 @@ export default function App() {
   useEffect(() => {
     player.addEventListener('play', setDiscordRpcActivity);
     player.addEventListener('pause', setDiscordRpcActivity);
+    player.addEventListener('seeked', setDiscordRpcActivity);
 
     return () => {
       player.removeEventListener('play', setDiscordRpcActivity);
       player.removeEventListener('pause', setDiscordRpcActivity);
+      player.removeEventListener('seeked', setDiscordRpcActivity);
     };
   }, [setDiscordRpcActivity]);
 

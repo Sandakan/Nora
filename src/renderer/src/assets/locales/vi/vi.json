@@ -1081,5 +1081,13 @@
     "PLAYLIST_NOT_FOUND": "Không tìm thấy danh sách phát.",
     "SONG_REPARSE_SUCCESS": "Đã phân tích lại thành công '{{title}}'.",
     "SONG_REPARSE_FAILED": "Đã xảy ra lỗi khi phân tích lại bài hát."
+  },
+
+  "discordrpc": {
+    "listeningTo": "Đang nghe bài",
+    "untitledSong": "không tên",
+    "by": "Bởi",
+    "unknownArtist": "nghệ sĩ không rõ",
+    "playingASong": "Đang phát"
   }
 }
