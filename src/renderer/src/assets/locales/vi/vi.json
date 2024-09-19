@@ -355,7 +355,7 @@
     "changeTheme": "Thay đổi giao diện của ứng dụng theo ý bạn.",
     "lightTheme": "Giao diện sáng",
     "darkTheme": "Giao diện tối",
-    "systemTheme": "Theo cài đặt của hệ thống",
+    "systemTheme": "Theo cài đặt hệ thống",
 
     "enableImageBasedDynamicThemes": "Bật chủ đề động",
     "enableImageBasedDynamicThemesDescription": "Thay đổi chủ đề ứng dụng dựa trên chủ đề của ảnh bìa bài hát đang phát",
