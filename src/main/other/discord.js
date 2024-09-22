@@ -60,12 +60,15 @@ function loginRPC() {
 }
 
 function setDiscordRPC(data) {
-  if (discord.user && data) {
-    (data.instance = true), (data.type = ActivityType.Listening);
+  if (discord.user) {
     var payload = {
       pid: process.pid,
       activity: data
     };
+    if (data) {
+      data.instance = true;
+      data.type = ActivityType.Listening;
+    }
     lastPayload = payload;
     console.log(JSON.stringify(payload, null, 2));
     discord.request('SET_ACTIVITY', payload); //send raw payload to discord RPC server
