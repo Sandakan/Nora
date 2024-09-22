@@ -1076,16 +1076,26 @@ export default function App() {
       const truncateText = (text: string, maxLength: number) => {
         return text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
       };
-      const title = truncateText(store.state.currentSongData?.title ?? t('discordrpc.untitledSong'), 128);
-      const artists = truncateText(`${t('discordrpc.by')} ${store.state.currentSongData.artists?.map((artist) => artist.name).join(', ') || t('discordrpc.unknownArtist')}`, 128);
+      const title = truncateText(
+        store.state.currentSongData?.title ?? t('discordrpc.untitledSong'),
+        128
+      );
+      const artists = truncateText(
+        `${t('discordrpc.by')} ${store.state.currentSongData.artists?.map((artist) => artist.name).join(', ') || t('discordrpc.unknownArtist')}`,
+        128
+      );
 
       const now = Date.now();
-      const firstArtistWithArtwork = store.state.currentSongData?.artists?.find((artist) => artist.onlineArtworkPaths !== undefined);
+      const firstArtistWithArtwork = store.state.currentSongData?.artists?.find(
+        (artist) => artist.onlineArtworkPaths !== undefined
+      );
       const onlineArtworkLink = firstArtistWithArtwork?.onlineArtworkPaths?.picture_small;
       window.api.playerControls.setDiscordRpcActivity({
         timestamps: {
           start: player.paused ? undefined : now - (player.currentTime ?? 0) * 1000,
-          end: player.paused ? undefined : now + ((player.duration ?? 0) - (player.currentTime ?? 0)) * 1000
+          end: player.paused
+            ? undefined
+            : now + ((player.duration ?? 0) - (player.currentTime ?? 0)) * 1000
         },
         details: title,
         state: artists,
@@ -1093,7 +1103,9 @@ export default function App() {
           large_image: 'nora_logo',
           //large_text: 'Nora', //Large text will also be displayed as the 3rd line (state) so I skipped it for now
           small_image: onlineArtworkLink ?? 'song_artwork',
-          small_text: firstArtistWithArtwork ? firstArtistWithArtwork.name : t('discordrpc.playingASong')
+          small_text: firstArtistWithArtwork
+            ? firstArtistWithArtwork.name
+            : t('discordrpc.playingASong')
         },
         buttons: [
           {

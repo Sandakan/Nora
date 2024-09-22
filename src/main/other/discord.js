@@ -1,4 +1,4 @@
-import { Client } from 'discord-rpc'
+import { Client } from 'discord-rpc';
 
 const ActivityType = {
   Game: 0,
@@ -12,9 +12,8 @@ const ActivityType = {
 const defaultPayload = {
   pid: process.pid,
   activity: {
-    timestamps: 
-    {
-      start: Date.now(),
+    timestamps: {
+      start: Date.now()
       //end: Date.now() + 100000
     },
     details: 'Nora',
@@ -22,7 +21,7 @@ const defaultPayload = {
     assets: {
       large_image: 'nora_logo',
       //large_text: 'Nora',
-      small_image: 'song_artwork',
+      small_image: 'song_artwork'
       //small_text: ''
     },
     // buttons: [
@@ -41,41 +40,36 @@ let discord;
 let lastPayload;
 
 function Initialize() {
-  if (discord) 
-    return;
+  if (discord) return;
   discord = new Client({ transport: 'ipc' });
   discord.on('ready', async () => {
     discord.request('SET_ACTIVITY', lastPayload ?? defaultPayload);
-  })
+  });
   discord.on('disconnected', () => {
-    console.log("aaaaaa");
-    setTimeout(() => loginRPC(), 1000).unref()
-  })
+    setTimeout(() => loginRPC(), 1000).unref();
+  });
   loginRPC();
 }
 
 function loginRPC() {
-  console.log("1234567");
   const DISCORD_CLIENT_ID = import.meta.env.MAIN_VITE_DISCORD_CLIENT_ID;
   if (!DISCORD_CLIENT_ID) throw new Error('Discord Client ID not found.');
   discord.login({ clientId: DISCORD_CLIENT_ID }).catch(() => {
-    setTimeout(() => loginRPC(), 5000).unref()
-  })
+    setTimeout(() => loginRPC(), 5000).unref();
+  });
 }
 
 function setDiscordRPC(data) {
   if (discord.user && data) {
-    data.instance = true,
-    data.type = ActivityType.Listening;
+    (data.instance = true), (data.type = ActivityType.Listening);
     var payload = {
       pid: process.pid,
-      activity: data,
-    }
+      activity: data
+    };
     lastPayload = payload;
-    console.log(JSON.stringify(payload));
+    console.log(JSON.stringify(payload, null, 2));
     discord.request('SET_ACTIVITY', payload); //send raw payload to discord RPC server
   }
 }
 
-export { Initialize, setDiscordRPC }
-  
+export { Initialize, setDiscordRPC };
