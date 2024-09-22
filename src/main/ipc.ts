@@ -109,7 +109,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       toggleAudioPlayingState(isPlaying)
     );
 
-    ipcMain.on('app/setDiscordRpcActivity', (_: unknown, options: DiscordRpcActivityOptions) =>
+    ipcMain.on('app/setDiscordRpcActivity', (_: unknown, options: any) =>
       setDiscordRpcActivity(options)
     );
 

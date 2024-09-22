@@ -41,7 +41,7 @@ const playerControls = {
   skipBackwardToPreviousSong: (callback: (e: any) => void) =>
     ipcRenderer.on('app/player/skipBackward', callback),
   sendSongPosition: (position: number): void => ipcRenderer.send('app/getSongPosition', position),
-  setDiscordRpcActivity: (options: DiscordRpcActivityOptions): void =>
+  setDiscordRpcActivity: (options: any): void =>
     ipcRenderer.send('app/setDiscordRpcActivity', options),
 
   toggleLikeSongs: (

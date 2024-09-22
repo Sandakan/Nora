@@ -6,7 +6,6 @@ import { api } from '../preload';
 import { LastFMSessionData } from './last_fm_api';
 import { SimilarArtist, Tag } from './last_fm_artist_info_api';
 import { resources } from 'src/renderer/src/i18n';
-import { Presence } from 'discord-rpc-revamp';
 
 declare global {
   interface Window {
@@ -1239,9 +1238,4 @@ declare global {
     | 'favorites_artwork'
     | 'genre_artwork'
     | 'playlist_artwork';
-
-  interface DiscordRpcActivityOptions extends Presence {
-    largeImageKey?: ArtAssetKeys;
-    smallImageKey?: ArtAssetKeys;
-  }
 }

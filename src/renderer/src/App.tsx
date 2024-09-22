@@ -1076,21 +1076,31 @@ export default function App() {
       const truncateText = (text: string, maxLength: number) => {
         return text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
       };
-      const title = truncateText(`${t('discordrpc.listeningTo')} '${store.state.currentSongData?.title ?? t('discordrpc.untitledSong')}'`, 128);
+      const title = truncateText(store.state.currentSongData?.title ?? t('discordrpc.untitledSong'), 128);
       const artists = truncateText(`${t('discordrpc.by')} ${store.state.currentSongData.artists?.map((artist) => artist.name).join(', ') || t('discordrpc.unknownArtist')}`, 128);
 
       const now = Date.now();
+      const firstArtistWithArtwork = store.state.currentSongData?.artists?.find((artist) => artist.onlineArtworkPaths !== undefined);
+      const onlineArtworkLink = firstArtistWithArtwork?.onlineArtworkPaths?.picture_small;
       window.api.playerControls.setDiscordRpcActivity({
+        timestamps: {
+          start: player.paused ? undefined : now - (player.currentTime ?? 0) * 1000,
+          end: player.paused ? undefined : now + ((player.duration ?? 0) - (player.currentTime ?? 0)) * 1000
+        },
         details: title,
         state: artists,
-        largeImageKey: 'nora_logo',
-        smallImageKey: 'song_artwork',
-        largeImageText: 'Nora',
-        smallImageText: t('discordrpc.playingASong'),
-        startTimestamp: player.paused ? undefined : now - (player.currentTime ?? 0) * 1000,
-        endTimestamp: player.paused
-          ? undefined
-          : now + ((player.duration ?? 0) - (player.currentTime ?? 0)) * 1000
+        assets: {
+          large_image: 'nora_logo',
+          //large_text: 'Nora', //Large text will also be displayed as the 3rd line (state) so I skipped it for now
+          small_image: onlineArtworkLink ?? 'song_artwork',
+          small_text: firstArtistWithArtwork ? firstArtistWithArtwork.name : t('discordrpc.playingASong')
+        },
+        buttons: [
+          {
+            label: t('discordrpc.noraOnGitHub'),
+            url: 'https://github.com/Sandakan/Nora/'
+          }
+        ]
       });
     }
   }, []);
