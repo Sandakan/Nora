@@ -7,7 +7,8 @@ import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store';
 
 const SongControlsAndSeekbarContainer = () => {
-  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const isAFavorite = useStore(store, (state) => state.currentSongData.isAFavorite);
+  const isKnownSource = useStore(store, (state) => state.currentSongData.isKnownSource);
   const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
   const queue = useStore(store, (state) => state.localStorage.queue);
   const isShuffling = useStore(store, (state) => state.player.isShuffling);
@@ -51,22 +52,16 @@ const SongControlsAndSeekbarContainer = () => {
       <div className="controls-container flex w-2/3 max-w-sm items-center justify-around px-2 lg:w-4/5 lg:p-0 [&>div.active_span.icon]:!text-font-color-highlight [&>div.active_span.icon]:opacity-100 dark:[&>div.active_span.icon]:!text-dark-font-color-highlight">
         <Button
           className={`like-btn !mr-0 !rounded-none !border-0 bg-transparent !p-0 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:after:bg-dark-font-color-highlight dark:hover:bg-transparent ${
-            currentSongData.isAFavorite && 'active after:opacity-100'
-          } ${!currentSongData.isKnownSource && '!cursor-none brightness-50'}`}
-          tooltipLabel={
-            currentSongData.isKnownSource
-              ? t('player.likeDislike')
-              : t('player.likeDislikeDisabled')
-          }
+            isAFavorite && 'active after:opacity-100'
+          } ${!isKnownSource && '!cursor-none brightness-50'}`}
+          tooltipLabel={isKnownSource ? t('player.likeDislike') : t('player.likeDislikeDisabled')}
           iconName="favorite"
           iconClassName={`${
-            currentSongData.isAFavorite
+            isAFavorite
               ? 'material-icons-round !text-font-color-highlight dark:!text-dark-font-color-highlight !opacity-100'
               : 'material-icons-round-outlined'
           } icon cursor-pointer !text-2xl leading-none text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white`}
-          clickHandler={() =>
-            currentSongData.isKnownSource && toggleIsFavorite(!currentSongData.isAFavorite)
-          }
+          clickHandler={() => isKnownSource && toggleIsFavorite(!isAFavorite)}
         />
 
         <Button

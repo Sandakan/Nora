@@ -5,12 +5,12 @@ import Dropdown from '../../Dropdown';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import hasDataChanged from '../../../utils/hasDataChanged';
 import { equalizerBandHertzData, equalizerPresetsData } from '../../../other/equalizerData';
-import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '../../../utils/localStorage';
 import i18n from '../../../i18n';
 
 import EqualierBand from './EqualierBand';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store';
+import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '@renderer/other/appReducer';
 
 const presets: EqualizerPresetDropdownOptions[] = equalizerPresetsData.map((presetData) => {
   return {
