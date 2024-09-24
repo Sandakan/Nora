@@ -578,6 +578,7 @@
     "onlineLyricsForSong": "Online lyrics for `{{title}}`",
     "editLyrics": "Edit lyrics in the editor",
     "translateLyrics": "Translate lyrics",
+    "romanizeLyrics": "Romanize lyrics",
     "showOnlineLyrics": "Show online lyrics",
     "refreshOnlineLyrics": "Refresh online lyrics",
     "showSavedLyrics": "Show saved lyrics",

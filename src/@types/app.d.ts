@@ -261,6 +261,7 @@ declare global {
   interface LyricLine {
     originalText: string | SyncedLyricsLineWord[]; // Original text of the lyric line
     translatedTexts: TranslatedLyricLine[]; // Array of translations in different languages
+    romanizedLyrics: string | SyncedLyricsLineWord[];
     start?: number; // Timing start (for synced lyrics only)
     end?: number; // Timing end (for synced lyrics only)
     isEnhancedSynced: boolean; // Indicates if the original text is enhanced synced lyrics
@@ -270,6 +271,8 @@ declare global {
   interface LyricsData {
     isSynced: boolean;
     isTranslated: boolean;
+    isJapanese: boolean;
+    isRomanized: boolean;
     parsedLyrics: LyricLine[]; // Array of original lyric lines (both synced and unsynced
     unparsedLyrics: string;
     offset?: number;

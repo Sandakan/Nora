@@ -210,6 +210,10 @@ const lyrics = {
 
   getTranslatedLyrics: (languageCode: LanguageCodes): Promise<SongLyrics | undefined> =>
     ipcRenderer.invoke('app/getTranslatedLyrics', languageCode),
+  
+  isLyricsJapanese: (): Promise<boolean> => ipcRenderer.invoke('app/isLyricsJapanese'),
+
+  romanizeLyrics: (): Promise<SongLyrics | undefined> => ipcRenderer.invoke('app/romanizeLyrics'),
 
   saveLyricsToSong: (songPath: string, text: SongLyrics) =>
     ipcRenderer.invoke('app/saveLyricsToSong', songPath, text)

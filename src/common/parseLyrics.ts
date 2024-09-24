@@ -6,6 +6,7 @@ import isLyricsSynced, {
   SYNCED_LYRICS_REGEX,
   isAnExtendedSyncedLyricsLine
 } from './isLyricsSynced';
+import Kuroshiro from 'kuroshiro';
 
 export type SyncedLyricsInput = NonNullable<NodeID3Tags['synchronisedLyrics']>[number];
 
@@ -248,9 +249,18 @@ const parseTranslatedLyricsText = (lines: string[]): TranslatedLyricLine[] => {
 
 // MAIN FUNCTIONS //
 const parseLyrics = (lrcString: string): LyricsData => {
+  var isJapanese = false;
+  for (let i = 0; i < lrcString.length; i++) {
+    if (Kuroshiro.Util.isJapanese(lrcString.charAt(i))) {
+      isJapanese = true;
+      break;
+    }
+  }
   const output: LyricsData = {
     isSynced: isLyricsSynced(lrcString),
     isTranslated: false,
+    isRomanized: false,
+    isJapanese,
     parsedLyrics: [],
     unparsedLyrics: lrcString,
     copyright: getCopyrightInfoFromLyricsString(lrcString),
@@ -287,7 +297,9 @@ const parseLyrics = (lrcString: string): LyricsData => {
         translatedTexts,
         isEnhancedSynced,
         start,
-        end
+        end,
+        romanizedLyrics: '',
+        isJapanese,
       };
     }
 
@@ -304,7 +316,9 @@ const parseLyrics = (lrcString: string): LyricsData => {
       translatedTexts,
       isEnhancedSynced: false,
       start: undefined,
-      end: undefined
+      end: undefined,
+      romanizedLyrics: '',
+      isJapanese,
     };
   });
 
@@ -371,7 +385,8 @@ export const parseSyncedLyricsFromAudioDataSource = (
         translatedTexts: [],
         start: timeStamp / 1000,
         end: end / 1000,
-        isEnhancedSynced: typeof parsedTextLine !== 'string'
+        isEnhancedSynced: typeof parsedTextLine !== 'string',
+        romanizedLyrics: '',
       };
     });
 
@@ -383,12 +398,12 @@ export const parseSyncedLyricsFromAudioDataSource = (
           typeof text === 'string'
             ? text
             : text
-                .map((x) => {
-                  START_TIMESTAMP_MATCH_REGEX.lastIndex = 0;
-                  if (START_TIMESTAMP_MATCH_REGEX.test(x.unparsedText)) return x.text;
-                  return x.unparsedText;
-                })
-                .join(' ');
+              .map((x) => {
+                START_TIMESTAMP_MATCH_REGEX.lastIndex = 0;
+                if (START_TIMESTAMP_MATCH_REGEX.test(x.unparsedText)) return x.text;
+                return x.unparsedText;
+              })
+              .join(' ');
         const secs = Math.floor(start % 60);
         const secsStr = secs.toString().length > 1 ? secs : `0${secs}`;
         const mins = Math.floor(start / 60);
@@ -401,6 +416,13 @@ export const parseSyncedLyricsFromAudioDataSource = (
       })
       .join('\n');
 
+    var isJapanese = false;
+    for (let i = 0; i < unparsedLyrics.length; i++) {
+      if (Kuroshiro.Util.isJapanese(unparsedLyrics.charAt(i))) {
+        isJapanese = true;
+        break;
+      }
+    }
     return {
       isSynced: true,
       isTranslated: false,
@@ -409,7 +431,9 @@ export const parseSyncedLyricsFromAudioDataSource = (
       unparsedLyrics,
       originalLanguage: undefined,
       translatedLanguages: [],
-      offset: 0
+      offset: 0,
+      isRomanized: false,
+      isJapanese
     };
   }
   return undefined;
