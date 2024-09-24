@@ -120,6 +120,7 @@ const LyricsPage = () => {
               translatedLyricLines={lyric.translatedTexts}
               syncedLyrics={{ start, end }}
               isAutoScrolling={isAutoScrolling}
+              romanizedLyric={lyric.romanizedLyrics}
             />
           );
         });
@@ -149,6 +150,7 @@ const LyricsPage = () => {
               index={index}
               lyric={line.originalText}
               isAutoScrolling={isAutoScrolling}
+              romanizedLyric={line.romanizedLyrics}
             />
           );
         });
@@ -437,6 +439,19 @@ const LyricsPage = () => {
                       setLyrics(lyricsData);
                     }}
                   />
+
+                  {lyrics && lyrics.lyrics.isJapanese && (
+                    <Button
+                      key={12}
+                      tooltipLabel={t('lyricsPage.romanizeLyrics')}
+                      className="romanize-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                      iconName="language_japanese_kana"
+                      clickHandler={async () => {
+                        const lyricsData = await window.api.lyrics.romanizeLyrics();
+                        setLyrics(lyricsData);
+                      }}
+                    />
+                  )}
 
                   {lyrics && lyrics.source === 'IN_SONG_LYRICS' && (
                     <Button

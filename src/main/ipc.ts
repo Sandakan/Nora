@@ -88,6 +88,7 @@ import checkForStartUpSongs from './core/checkForStartUpSongs';
 import checkForNewSongs from './core/checkForNewSongs';
 import getTranslatedLyrics from './utils/getTranslatedLyrics';
 import { setDiscordRpcActivity } from './other/discordRPC';
+import * as Romanizer from './utils/romanizeLyrics'
 
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   if (mainWindow) {
@@ -202,6 +203,10 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     ipcMain.handle('app/getTranslatedLyrics', (_, languageCode: LanguageCodes) =>
       getTranslatedLyrics(languageCode as string)
     );
+
+    ipcMain.handle('app/isLyricsJapanese', () => Romanizer.isJapanese());
+
+    ipcMain.handle('app/romanizeLyrics', async() => await Romanizer.romanizeLyrics());
 
     ipcMain.handle('app/saveLyricsToSong', (_, songPath: string, lyrics: SongLyrics) =>
       saveLyricsToSong(songPath, lyrics)
