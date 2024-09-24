@@ -314,8 +314,7 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
       userData.preferences.sendNowPlayingSongDataToLastFM = data;
     } else if (dataType === 'preferences.enableDiscordRPC' && typeof data === 'boolean') {
       userData.preferences.enableDiscordRPC = data;
-      if (!data)
-        clearDiscordRpcActivity();
+      if (!data) clearDiscordRpcActivity();
     } else if (dataType === 'customMusixmatchUserToken' && typeof data === 'string') {
       const encryptedToken = encrypt(data);
       userData.customMusixmatchUserToken = encryptedToken;

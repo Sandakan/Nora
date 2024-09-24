@@ -37,7 +37,7 @@ declare class Kuroshiro {
       romajiSystem?: RomanizationSystem;
       delimiter_start?: string;
       delimiter_end?: string;
-    },
+    }
   ): Promise<string>;
 }
 
@@ -152,10 +152,7 @@ declare namespace Util {
    * @param {string} system To which romanization system the given string is converted
    * @return {string} Romaji string
    */
-  export function toRawRomaji(
-    str: string,
-    system: RomanizationSystem,
-  ): string;
+  export function toRawRomaji(str: string, system: RomanizationSystem): string;
   /**
    * Convert kana to hiragana
    *
@@ -177,10 +174,7 @@ declare namespace Util {
    * @param {string} system To which romanization system the given string is converted. ["nippon"|"passport"|"hepburn"]
    * @return {string} Romaji string
    */
-  export function kanaToRomaji(
-    str: string,
-    system: RomanizationSystem,
-  ): string;
+  export function kanaToRomaji(str: string, system: RomanizationSystem): string;
 }
 
 declare module 'kuroshiro' {

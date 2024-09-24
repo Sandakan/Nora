@@ -66,7 +66,7 @@ const getTranslatedLyrics = async (languageCode: string) => {
       cachedLyrics.lyrics.isTranslated = true;
 
       const translatedLyrics = parseLyrics(lyricsArr.join('\n'));
-      var romanizedLyrics = cachedLyrics.lyrics.parsedLyrics.map((line) => line.romanizedLyrics);
+      const romanizedLyrics = cachedLyrics.lyrics.parsedLyrics.map((line) => line.romanizedLyrics);
       cachedLyrics.lyrics = translatedLyrics;
       cachedLyrics.lyrics.parsedLyrics.map((line, index) => {
         line.romanizedLyrics = romanizedLyrics[index];

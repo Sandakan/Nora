@@ -249,7 +249,7 @@ const parseTranslatedLyricsText = (lines: string[]): TranslatedLyricLine[] => {
 
 // MAIN FUNCTIONS //
 const parseLyrics = (lrcString: string): LyricsData => {
-  var isJapanese = false;
+  let isJapanese = false;
   for (let i = 0; i < lrcString.length; i++) {
     if (Kuroshiro.Util.isJapanese(lrcString.charAt(i))) {
       isJapanese = true;
@@ -299,7 +299,7 @@ const parseLyrics = (lrcString: string): LyricsData => {
         start,
         end,
         romanizedLyrics: '',
-        isJapanese,
+        isJapanese
       };
     }
 
@@ -318,7 +318,7 @@ const parseLyrics = (lrcString: string): LyricsData => {
       start: undefined,
       end: undefined,
       romanizedLyrics: '',
-      isJapanese,
+      isJapanese
     };
   });
 
@@ -386,7 +386,7 @@ export const parseSyncedLyricsFromAudioDataSource = (
         start: timeStamp / 1000,
         end: end / 1000,
         isEnhancedSynced: typeof parsedTextLine !== 'string',
-        romanizedLyrics: '',
+        romanizedLyrics: ''
       };
     });
 
@@ -398,12 +398,12 @@ export const parseSyncedLyricsFromAudioDataSource = (
           typeof text === 'string'
             ? text
             : text
-              .map((x) => {
-                START_TIMESTAMP_MATCH_REGEX.lastIndex = 0;
-                if (START_TIMESTAMP_MATCH_REGEX.test(x.unparsedText)) return x.text;
-                return x.unparsedText;
-              })
-              .join(' ');
+                .map((x) => {
+                  START_TIMESTAMP_MATCH_REGEX.lastIndex = 0;
+                  if (START_TIMESTAMP_MATCH_REGEX.test(x.unparsedText)) return x.text;
+                  return x.unparsedText;
+                })
+                .join(' ');
         const secs = Math.floor(start % 60);
         const secsStr = secs.toString().length > 1 ? secs : `0${secs}`;
         const mins = Math.floor(start / 60);
@@ -416,7 +416,7 @@ export const parseSyncedLyricsFromAudioDataSource = (
       })
       .join('\n');
 
-    var isJapanese = false;
+    let isJapanese = false;
     for (let i = 0; i < unparsedLyrics.length; i++) {
       if (Kuroshiro.Util.isJapanese(unparsedLyrics.charAt(i))) {
         isJapanese = true;

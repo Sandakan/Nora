@@ -260,7 +260,7 @@ declare global {
   interface LyricLine {
     originalText: string | SyncedLyricsLineWord[]; // Original text of the lyric line
     translatedTexts: TranslatedLyricLine[]; // Array of translations in different languages
-    romanizedLyrics: string | SyncedLyricsLineWord[];
+    romanizedLyrics: string | SyncedLyricsLineWord[]; // Romanized lyrics
     start?: number; // Timing start (for synced lyrics only)
     end?: number; // Timing end (for synced lyrics only)
     isEnhancedSynced: boolean; // Indicates if the original text is enhanced synced lyrics
@@ -803,6 +803,7 @@ declare global {
     | 'OPEN_SONG_IN_EXPLORER_FAILED'
     | 'LYRICS_FIND_FAILED'
     | 'LYRICS_TRANSLATION_FAILED'
+    | 'LYRICS_ROMANIZATION_FAILED'
     | 'METADATA_UPDATE_FAILED'
     | 'DESTINATION_NOT_SELECTED'
     | 'ARTWORK_SAVE_FAILED'
@@ -855,6 +856,7 @@ declare global {
     | 'LYRICS_SAVED_IN_LRC_FILE'
     | 'PENDING_LYRICS_SAVED'
     | 'LYRICS_TRANSLATION_SUCCESS'
+    | 'LYRICS_ROMANIZATION_SUCCESS'
     | 'LASTFM_LOGIN_SUCCESS'
     | 'APPDATA_EXPORT_STARTED'
     | 'APPDATA_IMPORT_STARTED'

@@ -8,7 +8,7 @@ declare class KuromojiAnalyzer {
    * @param {Object} [options] JSON object which have key-value pairs settings
    * @param {string} [options.dictPath] Path of the dictionary files
    */
-  constructor({ dictPath: string }: { dictPath?: string; } = {});
+  constructor({ dictPath: string }: { dictPath?: string } = {});
 
   /**
    * Initialize the analyzer
