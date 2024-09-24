@@ -19,7 +19,7 @@ const getTranslatedLyrics = async (languageCode: string) => {
       const lines = parsedLyrics.map((line) => {
         if (typeof line.originalText === 'string') return line.originalText.trim();
         return line.originalText
-          .map((x) => x.unparsedText)
+          .map((x) => x.text)
           .join(' ')
           .trim();
       });
