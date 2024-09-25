@@ -467,9 +467,22 @@ const LyricsPage = () => {
                     />
                   )}
 
-                  {lyrics && (lyrics.lyrics.isTranslated || lyrics.lyrics.isConvertedToRomaji || lyrics.lyrics.isConvertedToPinyin) && (
+                  {lyrics && lyrics.lyrics.isKorean && !lyrics.lyrics.isConvertedToRomaja && (
                     <Button
                       key={14}
+                      tooltipLabel={t('lyricsPage.convertLyricsToRomaja')}
+                      className="convert-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                      iconName="language_korean_latin"
+                      clickHandler={async () => {
+                        const lyricsData = await window.api.lyrics.convertLyricsToRomaja();
+                        setLyrics(lyricsData);
+                      }}
+                    />
+                  )}
+
+                  {lyrics && (lyrics.lyrics.isTranslated || lyrics.lyrics.isConvertedToRomaji || lyrics.lyrics.isConvertedToPinyin || lyrics.lyrics.isConvertedToRomaja) && (
+                    <Button
+                      key={15}
                       tooltipLabel={t('lyricsPage.resetLyrics')}
                       className="reset-converted-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                       iconName="restart_alt"

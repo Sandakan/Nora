@@ -4,22 +4,18 @@ import { sendMessageToRenderer } from '../main';
 import { getLrcLyricsMetadata } from '../core/saveLyricsToLrcFile';
 import { version } from '../../../package.json';
 import { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
-import pinyin from "pinyin";
-import detectChinese from '@neos21/detect-chinese';
+import { romanize } from 'romaja/src/romanize.js';
+import isHangul from 'romaja/src/hangul/isHangul.js';
 
-const hasChineseCharacter = async (str: string) => {
+const hasKoreanCharacter = (str: string) => {
   if (!str) return false;
-  var detection = detectChinese.detect(str);
-  if (detection.language === 'cn')
-    return true;
-  for (let i = 0; i < str.length; i++) {
-    if (pinyin.pinyin(str[i])[0][0] != str[i])
-      return true;
+  for (const c of str) {
+    if (isHangul(c)) return true;
   }
   return false;
 }
 
-const convertLyricsToPinyin = () => {
+const convertLyricsToRomaja = () => {
   const cachedLyrics = getCachedLyrics();
   try {
     if (!cachedLyrics) return undefined;
@@ -32,18 +28,18 @@ const convertLyricsToPinyin = () => {
         .trim();
     });
 
-    const pinyinLyrics: string[] = [];
+    const koreanLyrics: string[] = [];
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      if (!hasChineseCharacter(line)) pinyinLyrics.push('');
+      if (!hasKoreanCharacter(line)) koreanLyrics.push('');
       else {
-        const strsToReplace = [' , ', ' . ', ' ? ', ' ! ', ' ; ', ' ) ', ' ( '];
-        const strsReplace = [', ', '. ', '? ', '! ', '; ', ') ', ' ('];
-        let pinyinLyric = pinyin.pinyin(line).map(s => s[0]).join(' ');
-        for (let j = 0; j < strsToReplace.length; j++) {
-          pinyinLyric = pinyinLyric.replaceAll(strsToReplace[j], strsReplace[j]);
-        }
-        pinyinLyrics.push(pinyinLyric);
+        // const strsToReplace = [' , ', ' . ', ' ? ', ' ! ', ' ; ', ' ) ', ' ( '];
+        // const strsReplace = [', ', '. ', '? ', '! ', '; ', ') ', ' ('];
+        let koreanLyric = romanize(line);
+        // for (let j = 0; j < strsToReplace.length; j++) {
+        //   koreanLyric = koreanLyric.replaceAll(strsToReplace[j], strsReplace[j]);
+        // }
+        koreanLyrics.push(koreanLyric);
       }
     }
 
@@ -64,10 +60,10 @@ const convertLyricsToPinyin = () => {
 
     for (let i = 0; i < parsedLyrics.length; i++) {
       const lyric = parsedLyrics[i];
-      const pinyinLyric = pinyinLyrics.at(i);
+      const koreanLyric = koreanLyrics.at(i);
 
-      if (pinyinLyric) {
-        const convertedText = pinyinLyric.trim();
+      if (koreanLyric) {
+        const convertedText = koreanLyric.trim();
         if (convertedText !== INSTRUMENTAL_LYRIC_IDENTIFIER)
           lyric.convertedLyrics = convertedText.replaceAll('\n', '');
       }
@@ -75,9 +71,9 @@ const convertLyricsToPinyin = () => {
         lyric.convertedLyrics = '';
     }
 
-    cachedLyrics.lyrics.isConvertedToPinyin = true;
+    cachedLyrics.lyrics.isConvertedToRomaja = true;
+    cachedLyrics.lyrics.isConvertedToPinyin = false;
     cachedLyrics.lyrics.isConvertedToRomaji = false;
-    cachedLyrics.lyrics.isConvertedToRomaja = false;
     cachedLyrics.lyrics.parsedLyrics = parsedLyrics;
 
     updateCachedLyrics(() => cachedLyrics);
@@ -96,4 +92,4 @@ const convertLyricsToPinyin = () => {
   return undefined;
 }
 
-export default convertLyricsToPinyin;
+export default convertLyricsToRomaja;

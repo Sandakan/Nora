@@ -8,6 +8,7 @@ const resetLyrics = () => {
     if (!cachedLyrics) return undefined;
     cachedLyrics.lyrics.isConvertedToPinyin = false;
     cachedLyrics.lyrics.isConvertedToRomaji = false;
+    cachedLyrics.lyrics.isConvertedToRomaja = false;
     cachedLyrics.lyrics.translatedLanguages = [];
     cachedLyrics.lyrics.isTranslated = false;
     cachedLyrics.lyrics.parsedLyrics.forEach((line) => {

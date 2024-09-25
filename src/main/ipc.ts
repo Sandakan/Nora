@@ -88,8 +88,9 @@ import checkForStartUpSongs from './core/checkForStartUpSongs';
 import checkForNewSongs from './core/checkForNewSongs';
 import getTranslatedLyrics from './utils/getTranslatedLyrics';
 import { setDiscordRpcActivity } from './other/discordRPC';
-import * as Romanizer from './utils/romanizeLyrics';
-import * as Pinyin from './utils/convertToPinyin';
+import romanizeLyrics from './utils/romanizeLyrics';
+import convertLyricsToPinyin from './utils/convertToPinyin';
+import convertLyricsToRomaja from './utils/convertToRomaja';
 import resetLyrics from './utils/resetLyrics';
 
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
@@ -206,9 +207,11 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       getTranslatedLyrics(languageCode as string)
     );
 
-    ipcMain.handle('app/romanizeLyrics', async () => await Romanizer.romanizeLyrics());
+    ipcMain.handle('app/romanizeLyrics', async () => await romanizeLyrics());
 
-    ipcMain.handle('app/convertLyricsToPinyin', () => Pinyin.convertLyricsToPinyin());
+    ipcMain.handle('app/convertLyricsToPinyin', () => convertLyricsToPinyin());
+
+    ipcMain.handle('app/convertLyricsToRomaja', () => convertLyricsToRomaja());
 
     ipcMain.handle('app/resetLyrics', () => resetLyrics());
 

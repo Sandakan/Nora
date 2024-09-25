@@ -3,6 +3,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 import { LastFMTrackInfoApi } from '../@types/last_fm_api';
 import { SimilarTracksOutput } from '../@types/last_fm_similar_tracks_api';
 import { LastFMAlbumInfo } from '../@types/last_fm_album_info_api';
+import { ipcHelper } from '@electron-toolkit/utils';
 
 const properties = {
   isInDevelopment: process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true',
@@ -215,6 +216,8 @@ const lyrics = {
 
   convertLyricsToPinyin: (): Promise<SongLyrics | undefined> =>
     ipcRenderer.invoke('app/convertLyricsToPinyin'),
+
+  convertLyricsToRomaja: (): Promise<SongLyrics | undefined> => ipcRenderer.invoke('app/convertLyricsToRomaja'),
 
   resetLyrics: (): Promise<SongLyrics> => ipcRenderer.invoke('app/resetLyrics'),
 

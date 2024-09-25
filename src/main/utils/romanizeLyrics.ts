@@ -20,7 +20,7 @@ const hasJapaneseCharacter = (str: string) => {
   return false;
 };
 
-export const romanizeLyrics = async () => {
+const romanizeLyrics = async () => {
   const cachedLyrics = getCachedLyrics();
   try {
     if (!cachedLyrics) return undefined;
@@ -88,6 +88,7 @@ export const romanizeLyrics = async () => {
 
     cachedLyrics.lyrics.isConvertedToRomaji = true;
     cachedLyrics.lyrics.isConvertedToPinyin = false;
+    cachedLyrics.lyrics.isConvertedToRomaja = false;
     cachedLyrics.lyrics.parsedLyrics = parsedLyrics;
 
     updateCachedLyrics(() => cachedLyrics);
@@ -105,3 +106,5 @@ export const romanizeLyrics = async () => {
 
   return undefined;
 };
+
+export default romanizeLyrics;

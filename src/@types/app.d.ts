@@ -272,8 +272,10 @@ declare global {
     isTranslated: boolean;
     isJapanese: boolean;
     isChinese: boolean;
+    isKorean: boolean;
     isConvertedToRomaji: boolean;
     isConvertedToPinyin: boolean;
+    isConvertedToRomaja: boolean;
     parsedLyrics: LyricLine[]; // Array of original lyric lines (both synced and unsynced
     unparsedLyrics: string;
     offset?: number;

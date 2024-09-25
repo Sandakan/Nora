@@ -580,6 +580,7 @@
     "translateLyrics": "Translate lyrics",
     "romanizeLyrics": "Romanize Japanese lyrics",
     "convertLyricsToPinyin": "Convert Chinese lyrics to Pinyin",
+    "convertLyricsToRomaja": "Convert Korean lyrics to Romaja",
     "resetLyrics":"Reset Lyrics",
     "showOnlineLyrics": "Show online lyrics",
     "refreshOnlineLyrics": "Refresh online lyrics",
