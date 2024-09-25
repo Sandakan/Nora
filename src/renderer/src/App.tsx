@@ -1081,7 +1081,7 @@ export default function App() {
         128
       );
       const artists = truncateText(
-        `${t('discordrpc.by')} ${store.state.currentSongData.artists?.map((artist) => artist.name).join(', ') || t('discordrpc.unknownArtist')}`,
+        `${store.state.currentSongData.artists?.map((artist) => artist.name).join(', ') || t('discordrpc.unknownArtist')}`,
         128
       );
 
