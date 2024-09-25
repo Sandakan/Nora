@@ -211,9 +211,12 @@ const lyrics = {
   getTranslatedLyrics: (languageCode: LanguageCodes): Promise<SongLyrics | undefined> =>
     ipcRenderer.invoke('app/getTranslatedLyrics', languageCode),
 
-  isLyricsJapanese: (): Promise<boolean> => ipcRenderer.invoke('app/isLyricsJapanese'),
-
   romanizeLyrics: (): Promise<SongLyrics | undefined> => ipcRenderer.invoke('app/romanizeLyrics'),
+
+  convertLyricsToPinyin: (): Promise<SongLyrics | undefined> =>
+    ipcRenderer.invoke('app/convertLyricsToPinyin'),
+
+  resetLyrics: (): Promise<SongLyrics> => ipcRenderer.invoke('app/resetLyrics'),
 
   saveLyricsToSong: (songPath: string, text: SongLyrics) =>
     ipcRenderer.invoke('app/saveLyricsToSong', songPath, text)

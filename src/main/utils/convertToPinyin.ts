@@ -4,23 +4,22 @@ import { sendMessageToRenderer } from '../main';
 import { getLrcLyricsMetadata } from '../core/saveLyricsToLrcFile';
 import { version } from '../../../package.json';
 import { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
-import Kuroshiro from 'kuroshiro';
-import KuromojiAnalyzer from 'kuroshiro-analyzer-kuromoji';
-import Wanakana from 'wanakana';
+import pinyin from "pinyin";
+import detectChinese from '@neos21/detect-chinese';
 
-const kuroshiro = new Kuroshiro();
-await kuroshiro.init(new KuromojiAnalyzer());
-
-const hasJapaneseCharacter = (str: string) => {
+const isChineseString = async (str: string) => {
   if (!str) return false;
-  for (const c of str) {
-    if (Kuroshiro.Util.isJapanese(c)) 
+  var detection = detectChinese.detect(str);
+  if (detection.language === 'cn')
+    return true;
+  for (let i = 0; i < str.length; i++) {
+    if (pinyin.pinyin(str[i])[0][0] != str[i])
       return true;
   }
   return false;
-};
+}
 
-export const romanizeLyrics = async () => {
+export const convertLyricsToPinyin = () => {
   const cachedLyrics = getCachedLyrics();
   try {
     if (!cachedLyrics) return undefined;
@@ -33,28 +32,18 @@ export const romanizeLyrics = async () => {
         .trim();
     });
 
-    const romanizedLyrics: string[] = [];
+    const pinyinLyrics: string[] = [];
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      if (!hasJapaneseCharacter(line)) romanizedLyrics.push('');
+      if (!isChineseString(line)) pinyinLyrics.push('');
       else {
         const strsToReplace = [' , ', ' . ', ' ? ', ' ! ', ' ; ', ' ) ', ' ( '];
         const strsReplace = [', ', '. ', '? ', '! ', '; ', ') ', ' ('];
-        // var romanized = ' ' + (await kuroshiro.convert(line, { to: 'romaji', mode: 'spaced' })) + ' ';
-        // for (let j = 0; j < strsToReplace.length; j++) {
-        //   romanized = romanized.replaceAll(strsToReplace[j], strsReplace[j]);
-        // }
-        // romanizedLyrics.push(romanized.trim());
-
-        //convert lyrics to katakana then to romaji
-        const kana = await kuroshiro.convert(line, { to: 'katakana', mode: 'spaced' });
-
-        let romanized =
-          ' ' + Wanakana.toRomaji(kana, { customRomajiMapping: { '「': '「', '」': '」' } }) + ' ';
+        let pinyinLyric = pinyin.pinyin(line).map(s => s[0]).join(' ');
         for (let j = 0; j < strsToReplace.length; j++) {
-          romanized = romanized.replaceAll(strsToReplace[j], strsReplace[j]);
+          pinyinLyric = pinyinLyric.replaceAll(strsToReplace[j], strsReplace[j]);
         }
-        romanizedLyrics.push(romanized.trim());
+        pinyinLyrics.push(pinyinLyric);
       }
     }
 
@@ -71,23 +60,23 @@ export const romanizeLyrics = async () => {
     if (lang) lyricsArr.push(`[lang:${lang}]`);
     if (length) lyricsArr.push(`[length:${length}]`);
     if (typeof offset === 'number') lyricsArr.push(`[offset:${offset}]`);
-    if (copyright) lyricsArr.push(`[copyright:${copyright}. Lyrics romanized using Kuroshiro.]`);
+    if (copyright) lyricsArr.push(`[copyright:${copyright}]`);
 
     for (let i = 0; i < parsedLyrics.length; i++) {
       const lyric = parsedLyrics[i];
-      const romanizedLyric = romanizedLyrics.at(i);
+      const pinyinLyric = pinyinLyrics.at(i);
 
-      if (romanizedLyric) {
-        const romanizedText = romanizedLyric.trim();
-        if (romanizedText !== INSTRUMENTAL_LYRIC_IDENTIFIER)
-          lyric.convertedLyrics = romanizedText.replaceAll('\n', '');
+      if (pinyinLyric) {
+        const convertedText = pinyinLyric.trim();
+        if (convertedText !== INSTRUMENTAL_LYRIC_IDENTIFIER)
+          lyric.convertedLyrics = convertedText.replaceAll('\n', '');
       }
       else 
         lyric.convertedLyrics = '';
     }
 
-    cachedLyrics.lyrics.isConvertedToRomaji = true;
-    cachedLyrics.lyrics.isConvertedToPinyin = false;
+    cachedLyrics.lyrics.isConvertedToPinyin = true;
+    cachedLyrics.lyrics.isConvertedToRomaji = false;
     cachedLyrics.lyrics.parsedLyrics = parsedLyrics;
 
     updateCachedLyrics(() => cachedLyrics);
@@ -96,12 +85,12 @@ export const romanizeLyrics = async () => {
       messageCode: 'LYRICS_CONVERT_SUCCESS'
     });
     return cachedLyrics;
-  } catch (error) {
+  }
+  catch (error) {
     log('Error occurred when converting lyrics.', { error }, 'ERROR');
     sendMessageToRenderer({
       messageCode: 'LYRICS_CONVERT_FAILED'
     });
   }
-
   return undefined;
-};
+}

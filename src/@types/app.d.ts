@@ -260,7 +260,7 @@ declare global {
   interface LyricLine {
     originalText: string | SyncedLyricsLineWord[]; // Original text of the lyric line
     translatedTexts: TranslatedLyricLine[]; // Array of translations in different languages
-    romanizedLyrics: string | SyncedLyricsLineWord[]; // Romanized lyrics
+    convertedLyrics: string | SyncedLyricsLineWord[]; // Converted lyrics 
     start?: number; // Timing start (for synced lyrics only)
     end?: number; // Timing end (for synced lyrics only)
     isEnhancedSynced: boolean; // Indicates if the original text is enhanced synced lyrics
@@ -271,7 +271,9 @@ declare global {
     isSynced: boolean;
     isTranslated: boolean;
     isJapanese: boolean;
-    isRomanized: boolean;
+    isChinese: boolean;
+    isConvertedToRomaji: boolean;
+    isConvertedToPinyin: boolean;
     parsedLyrics: LyricLine[]; // Array of original lyric lines (both synced and unsynced
     unparsedLyrics: string;
     offset?: number;
@@ -803,7 +805,8 @@ declare global {
     | 'OPEN_SONG_IN_EXPLORER_FAILED'
     | 'LYRICS_FIND_FAILED'
     | 'LYRICS_TRANSLATION_FAILED'
-    | 'LYRICS_ROMANIZATION_FAILED'
+    | 'LYRICS_CONVERT_FAILED'
+    | 'RESET_CONVERTED_LYRICS_FAILED'
     | 'METADATA_UPDATE_FAILED'
     | 'DESTINATION_NOT_SELECTED'
     | 'ARTWORK_SAVE_FAILED'
@@ -856,7 +859,8 @@ declare global {
     | 'LYRICS_SAVED_IN_LRC_FILE'
     | 'PENDING_LYRICS_SAVED'
     | 'LYRICS_TRANSLATION_SUCCESS'
-    | 'LYRICS_ROMANIZATION_SUCCESS'
+    | 'LYRICS_CONVERT_SUCCESS'
+    | 'RESET_CONVERTED_LYRICS_SUCCESS'
     | 'LASTFM_LOGIN_SUCCESS'
     | 'APPDATA_EXPORT_STARTED'
     | 'APPDATA_IMPORT_STARTED'

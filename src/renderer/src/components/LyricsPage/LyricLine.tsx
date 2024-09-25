@@ -15,7 +15,7 @@ import { store } from '@renderer/store';
 interface LyricProp {
   lyric: string | SyncedLyricsLineWord[];
   translatedLyricLines?: TranslatedLyricLine[];
-  romanizedLyric?: string | SyncedLyricsLineWord[];
+  convertedLyric?: string | SyncedLyricsLineWord[];
   index: number;
   syncedLyrics?: { start: number; end: number };
   isAutoScrolling?: boolean;
@@ -39,7 +39,7 @@ const LyricLine = (props: LyricProp) => {
     index,
     lyric,
     translatedLyricLines = [],
-    romanizedLyric,
+    convertedLyric,
     syncedLyrics,
     isAutoScrolling = true
   } = props;
@@ -121,12 +121,12 @@ const LyricLine = (props: LyricProp) => {
     return extendedLyricLines;
   }, [isInRange, translatedLyricLines]);
 
-  const romanizedLyricString = useMemo(() => {
-    if (!romanizedLyric || romanizedLyric.length === 0) return undefined;
-    if (typeof romanizedLyric === 'string')
-      return romanizedLyric.replaceAll(syncedLyricsRegex, '').trim();
+  const convertedLyricString = useMemo(() => {
+    if (!convertedLyric || convertedLyric.length === 0) return undefined;
+    if (typeof convertedLyric === 'string')
+      return convertedLyric.replaceAll(syncedLyricsRegex, '').trim();
 
-    const extendedLyricLines = romanizedLyric.map((extendedText, i) => {
+    const extendedLyricLines = convertedLyric.map((extendedText, i) => {
       return (
         <EnhancedSyncedLyricWord
           key={i}
@@ -140,7 +140,7 @@ const LyricLine = (props: LyricProp) => {
     });
 
     return extendedLyricLines;
-  }, [isInRange, romanizedLyric]);
+  }, [isInRange, convertedLyric]);
 
   return (
     <div
@@ -195,11 +195,11 @@ const LyricLine = (props: LyricProp) => {
         );
       }}
     >
-      {romanizedLyricString && (
+      {convertedLyric && (
         <div
           className={`flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'} ${syncedLyrics && isInRange ? '!text-xl !text-font-color-black/50 dark:!text-font-color-white/50' : '!text-xl'}`}
         >
-          {romanizedLyricString}
+          {convertedLyricString}
         </div>
       )}
       <div

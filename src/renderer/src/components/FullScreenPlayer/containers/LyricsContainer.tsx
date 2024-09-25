@@ -67,7 +67,7 @@ const LyricsContainer = (props: Props) => {
               lyric={text}
               syncedLyrics={{ start, end }}
               translatedLyricLines={lyric.translatedTexts}
-              romanizedLyric={lyric.romanizedLyrics}
+              convertedLyric={lyric.convertedLyrics}
             />
           );
         });
@@ -96,7 +96,7 @@ const LyricsContainer = (props: Props) => {
               index={index}
               lyric={line.originalText}
               translatedLyricLines={line.translatedTexts}
-              romanizedLyric={line.romanizedLyrics}
+              convertedLyric={line.convertedLyrics}
             />
           );
         });

@@ -120,7 +120,7 @@ const LyricsPage = () => {
               translatedLyricLines={lyric.translatedTexts}
               syncedLyrics={{ start, end }}
               isAutoScrolling={isAutoScrolling}
-              romanizedLyric={lyric.romanizedLyrics}
+              convertedLyric={lyric.convertedLyrics}
             />
           );
         });
@@ -150,7 +150,7 @@ const LyricsPage = () => {
               index={index}
               lyric={line.originalText}
               isAutoScrolling={isAutoScrolling}
-              romanizedLyric={line.romanizedLyrics}
+              convertedLyric={line.convertedLyrics}
             />
           );
         });
@@ -423,31 +423,58 @@ const LyricsPage = () => {
                       clickHandler={() => setIsAutoScrolling((prevState) => !prevState)}
                     />
                   )}
+                  {lyrics && !lyrics.lyrics.isTranslated && (
+                    <Button
+                      key={11}
+                      tooltipLabel={t('lyricsPage.translateLyrics')}
+                      // label={t('lyricsPage.translateLyrics')}
+                      className="translate-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                      iconName="translate"
+                      clickHandler={async () => {
+                        const lyricsData = await window.api.lyrics.getTranslatedLyrics(
+                          i18n.language as LanguageCodes
+                        );
 
-                  <Button
-                    key={11}
-                    tooltipLabel={t('lyricsPage.translateLyrics')}
-                    // label={t('lyricsPage.translateLyrics')}
-                    className="translate-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-                    iconName="translate"
-                    clickHandler={async () => {
-                      const lyricsData = await window.api.lyrics.getTranslatedLyrics(
-                        i18n.language as LanguageCodes
-                      );
+                        // console.log(lyricsData);
+                        setLyrics(lyricsData);
+                      }}
+                    />
+                  )}
 
-                      // console.log(lyricsData);
-                      setLyrics(lyricsData);
-                    }}
-                  />
-
-                  {lyrics && lyrics.lyrics.isJapanese && (
+                  {lyrics && lyrics.lyrics.isChinese && !lyrics.lyrics.isConvertedToPinyin && (
                     <Button
                       key={12}
+                      tooltipLabel={t('lyricsPage.convertLyricsToPinyin')}
+                      className="convert-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                      iconName="language_chinese_pinyin"
+                      clickHandler={async () => {
+                        const lyricsData = await window.api.lyrics.convertLyricsToPinyin();
+                        setLyrics(lyricsData);
+                      }}
+                    />
+                  )}
+
+                  {lyrics && lyrics.lyrics.isJapanese && !lyrics.lyrics.isConvertedToRomaji && (
+                    <Button
+                      key={13}
                       tooltipLabel={t('lyricsPage.romanizeLyrics')}
-                      className="romanize-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                      className="convert-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                       iconName="language_japanese_kana"
                       clickHandler={async () => {
                         const lyricsData = await window.api.lyrics.romanizeLyrics();
+                        setLyrics(lyricsData);
+                      }}
+                    />
+                  )}
+
+                  {lyrics && (lyrics.lyrics.isTranslated || lyrics.lyrics.isConvertedToRomaji || lyrics.lyrics.isConvertedToPinyin) && (
+                    <Button
+                      key={14}
+                      tooltipLabel={t('lyricsPage.resetLyrics')}
+                      className="reset-converted-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                      iconName="restart_alt"
+                      clickHandler={async () => {
+                        const lyricsData = await window.api.lyrics.resetLyrics();
                         setLyrics(lyricsData);
                       }}
                     />
