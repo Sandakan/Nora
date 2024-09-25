@@ -12,6 +12,9 @@ class AudioPlayer extends Audio {
 
   fadeOutIntervalId: NodeJS.Timeout | undefined;
   fadeInIntervalId: NodeJS.Timeout | undefined;
+
+  unsubscribeFunc: () => void;
+
   constructor() {
     super();
 
@@ -23,8 +26,12 @@ class AudioPlayer extends Audio {
 
     this.currentVolume = super.volume;
 
-    this.subscribeToStoreEvents();
+    this.unsubscribeFunc = this.subscribeToStoreEvents();
     this.initializeEqualizer();
+  }
+
+  unsubscribeFromStoreEvents() {
+    if (this.unsubscribeFunc) this.unsubscribeFunc();
   }
 
   private fadeOutAudio(): Promise<void> {

@@ -39,7 +39,10 @@ interface SongCardProp {
 const SongCard = (props: SongCardProp) => {
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const queue = useStore(store, (state) => state.localStorage.queue);
-  const preferences = useStore(store, (state) => state.localStorage.preferences);
+  const doNotShowBlacklistSongConfirm = useStore(
+    store,
+    (state) => state.localStorage.preferences.doNotShowBlacklistSongConfirm
+  );
   const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
   const isMultipleSelectionEnabled = useStore(
     store,
@@ -417,7 +420,7 @@ const SongCard = (props: SongCardProp) => {
             window.api.audioLibraryControls
               .restoreBlacklistedSongs([songId])
               .catch((err) => console.error(err));
-          else if (preferences.doNotShowBlacklistSongConfirm)
+          else if (doNotShowBlacklistSongConfirm)
             window.api.audioLibraryControls
               .blacklistSongs([songId])
               .then(() =>
@@ -480,7 +483,7 @@ const SongCard = (props: SongCardProp) => {
     updateMultipleSelections,
     changeCurrentActivePage,
     path,
-    preferences.doNotShowBlacklistSongConfirm
+    doNotShowBlacklistSongConfirm
   ]);
 
   const songArtistComponents = useMemo(() => {
