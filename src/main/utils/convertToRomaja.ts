@@ -33,12 +33,7 @@ const convertLyricsToRomaja = () => {
       const line = lines[i];
       if (!hasKoreanCharacter(line)) koreanLyrics.push('');
       else {
-        // const strsToReplace = [' , ', ' . ', ' ? ', ' ! ', ' ; ', ' ) ', ' ( '];
-        // const strsReplace = [', ', '. ', '? ', '! ', '; ', ') ', ' ('];
         const koreanLyric = romanize(line);
-        // for (let j = 0; j < strsToReplace.length; j++) {
-        //   koreanLyric = koreanLyric.replaceAll(strsToReplace[j], strsReplace[j]);
-        // }
         koreanLyrics.push(koreanLyric);
       }
     }
