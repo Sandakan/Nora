@@ -64,16 +64,20 @@ import AudioPlayer from './other/player';
 import { dispatch, store } from './store';
 import { AppReducer } from './other/appReducer';
 
+// ? CONSTANTS
+const LOW_RESPONSE_DURATION = 100;
+const DURATION = 1000;
+
 // ? INITIALIZE PLAYER
 const player = new AudioPlayer();
 let repetitivePlaybackErrorsCount = 0;
 
 // ? / / / / / / /  PLAYER DEFAULT OPTIONS / / / / / / / / / / / / / /
-player.addEventListener('player/trackchange', (e) => {
-  if ('detail' in e) {
-    console.log(`player track changed to ${(e as DetailAvailableEvent<string>).detail}.`);
-  }
-});
+// player.addEventListener('player/trackchange', (e) => {
+//   if ('detail' in e) {
+//     console.log(`player track changed to ${(e as DetailAvailableEvent<string>).detail}.`);
+//   }
+// });
 // / / / / / / / /
 
 const updateNetworkStatus = () => window.api.settingsHelpers.networkStatusChange(navigator.onLine);
@@ -81,8 +85,6 @@ const updateNetworkStatus = () => window.api.settingsHelpers.networkStatusChange
 updateNetworkStatus();
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
-
-storage.checkLocalStorage();
 
 // console.log('Command line args', window.api.properties.commandLineArgs);
 
@@ -387,9 +389,6 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const LOW_RESPONSE_DURATION = 100;
-    const DURATION = 1000;
-
     const dispatchCurrentSongTime = () => {
       const playerPositionChange = new CustomEvent('player/positionChange', {
         detail: roundTo(player.currentTime, 2)
@@ -424,9 +423,9 @@ export default function App() {
 
     document.addEventListener('localStorage', syncLocalStorage);
 
-    if (playback?.volume) {
-      dispatch({ type: 'UPDATE_VOLUME', data: playback.volume });
-    }
+    // if (playback?.volume) {
+    //   dispatch({ type: 'UPDATE_VOLUME', data: playback.volume });
+    // }
 
     if (
       store.state.navigationHistory.history.at(-1)?.pageTitle !== preferences?.defaultPageOnStartUp
@@ -835,10 +834,15 @@ export default function App() {
     return resetStyles;
   }, []);
 
+  const isImageBasedDynamicThemesEnabled = useStore(
+    store,
+    (state) => state.localStorage.preferences.enableImageBasedDynamicThemes
+  );
+
   useEffect(() => {
+    setDynamicThemesFromSongPalette(undefined);
     const isDynamicThemesEnabled =
-      store.state.localStorage.preferences.enableImageBasedDynamicThemes &&
-      store.state.currentSongData.paletteData;
+      isImageBasedDynamicThemesEnabled && store.state.currentSongData.paletteData;
 
     const resetStyles = setDynamicThemesFromSongPalette(
       isDynamicThemesEnabled ? store.state.currentSongData.paletteData : undefined
@@ -847,7 +851,7 @@ export default function App() {
     return () => {
       resetStyles();
     };
-  }, [setDynamicThemesFromSongPalette]);
+  }, [isImageBasedDynamicThemesEnabled, setDynamicThemesFromSongPalette]);
 
   const playSong = useCallback(
     (songId: string, isStartPlay = true, playAsCurrentSongIndex = false) => {
@@ -878,7 +882,8 @@ export default function App() {
 
               if (isStartPlay) toggleSongPlayback();
 
-              if (songData.paletteData) setDynamicThemesFromSongPalette(songData.paletteData);
+              if (songData.paletteData && isImageBasedDynamicThemesEnabled)
+                setDynamicThemesFromSongPalette(songData.paletteData);
 
               recordListeningData(songId, songData.duration);
 
@@ -926,6 +931,7 @@ export default function App() {
       changePromptMenuData,
       t,
       toggleSongPlayback,
+      isImageBasedDynamicThemesEnabled,
       setDynamicThemesFromSongPalette,
       recordListeningData
     ]
@@ -1732,7 +1738,7 @@ export default function App() {
     );
     updateQueueData(null, updatedQueue);
 
-    dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: {} });
+    dispatch({ type: 'CURRENT_SONG_DATA_CHANGE', data: {} as AudioPlayerData });
 
     addNewNotifications([
       {

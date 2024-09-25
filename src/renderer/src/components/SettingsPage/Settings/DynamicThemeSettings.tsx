@@ -56,90 +56,93 @@ const DynamicThemeSettings = (props: Props) => {
   const darkVibrant = generateColor(palette.DarkVibrant?.hsl || [0, 0, 0]);
 
   return (
-    <div className="mt-4 flex flex-col gap-4">
-      <div className="flex gap-4">
-        <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
+    <div className="mt-8 flex flex-col gap-6">
+      <div className="flex gap-6">
+        <span className="flex w-24 flex-col items-center text-center text-xs">
           <span
-            className="h-12 w-20 rounded-md"
+            className="h-12 w-full rounded-md"
             style={{ backgroundColor: palette?.DarkVibrant?.hex }}
           />
-          <span>Dark Vibrant</span>
+          <span className="mt-2">Dark Vibrant</span>
         </span>
-        <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
+        <span className="flex w-24 flex-col items-center text-center text-xs">
           <span
-            className="h-12 w-20 rounded-md"
+            className="h-12 w-full rounded-md"
             style={{ backgroundColor: palette?.LightVibrant?.hex }}
           />
-          <span>Light Vibrant</span>
+          <span className="mt-2">Light Vibrant</span>
         </span>
-        <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
+        <span className="flex w-24 flex-col items-center text-center text-xs">
           <span
-            className="h-12 w-20 rounded-md"
+            className="h-12 w-full rounded-md"
             style={{ backgroundColor: palette?.DarkMuted?.hex }}
           />
-          <span>Dark Muted</span>
+          <span className="mt-2">Dark Muted</span>
         </span>
-        <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
+        <span className="flex w-24 flex-col items-center text-center text-xs">
           <span
-            className="h-12 w-20 rounded-md"
+            className="h-12 w-full rounded-md"
             style={{ backgroundColor: palette?.LightMuted?.hex }}
           />
-          <span>Light Muted</span>
+          <span className="mt-2">Light Muted</span>
         </span>
-        <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
+        <span className="flex w-24 flex-col items-center text-center text-xs">
           <span
-            className="h-12 w-20 rounded-md"
+            className="h-12 w-full rounded-md"
             style={{ backgroundColor: palette?.Vibrant?.hex }}
           />
-          <span>Vibrant</span>
+          <span className="mt-2">Vibrant</span>
         </span>
-        <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
-          <span className="h-12 w-20 rounded-md" style={{ backgroundColor: palette?.Muted?.hex }} />
-          <span>Muted</span>
+        <span className="flex w-24 flex-col items-center text-center text-xs">
+          <span
+            className="h-12 w-full rounded-md"
+            style={{ backgroundColor: palette?.Muted?.hex }}
+          />
+          <span className="mt-2">Muted</span>
         </span>
       </div>
-      <div className="flex gap-4">
-        <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
+      <div className="flex flex-wrap gap-6">
+        <span className="flex w-24 flex-col items-center text-center text-xs">
           <span
-            className="h-12 w-20 rounded-md"
+            className="h-12 w-full rounded-md"
             style={{ backgroundColor: `hsl(${highLightVibrant})` }}
           />
-          <span>highLightVibrant</span>
+          <span className="mt-2">High Light Vibrant</span>
         </span>
-        <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
+        <span className="flex w-24 flex-col items-center text-center text-xs">
           <span
-            className="h-12 w-20 rounded-md"
+            className="h-12 w-full rounded-md"
             style={{ backgroundColor: `hsl(${mediumLightVibrant})` }}
           />
-          <span>mediumLightVibrant</span>
+          <span className="mt-2">Medium Light Vibrant</span>
         </span>
-        <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
+        <span className="flex w-24 flex-col items-center text-center text-xs">
           <span
-            className="h-12 w-20 rounded-md"
+            className="h-12 w-full rounded-md"
             style={{ backgroundColor: `hsl(${highVibrant})` }}
           />
-          <span>highVibrant</span>
+          <span className="mt-2">High Vibrant</span>
         </span>
-        <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
+        <span className="flex w-24 flex-col items-center text-center text-xs">
           <span
-            className="h-12 w-20 rounded-md"
+            className="h-12 w-full rounded-md"
             style={{ backgroundColor: `hsl(${lightVibrant})` }}
           />
-          <span>lightVibrant</span>
+          <span className="mt-2">Light Vibrant</span>
         </span>
-        <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
+        <span className="flex w-24 flex-col items-center text-center text-xs">
           <span
-            className="h-12 w-20 rounded-md"
+            className="h-12 w-full rounded-md"
             style={{ backgroundColor: `hsl(${darkVibrant})` }}
           />
-          <span>darkVibrant</span>
+          <span className="mt-2">Dark Vibrant</span>
         </span>
-        <span className="flex flex-col items-center justify-center gap-2 text-center text-xs">
+        <span className="flex w-24 flex-col items-center text-center text-xs">
           <span
-            className="h-12 w-20 rounded-md"
+            className="h-12 w-full rounded-md"
             style={{ backgroundColor: `hsl(${darkLightVibrant})` }}
           />
-          <span>darkLightVibrant</span>
+          <span className="mt-2">Dark Light Vibrant</span>
         </span>
       </div>
     </div>
