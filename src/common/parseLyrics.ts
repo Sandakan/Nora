@@ -254,35 +254,31 @@ const isJapaneseString = (str: string) => {
   if (!str) return false;
   let count = 0;
   for (const c of str) {
-    if (Kuroshiro.Util.isJapanese(c)) 
-      count++;
+    if (Kuroshiro.Util.isJapanese(c)) count++;
   }
   return count / str.length > 0.5;
 };
 
 const isChineseString = (str: string) => {
   if (!str) return false;
-  var detection = detectChinese.detect(str);
-  if (detection.language === 'cn')
-    return true;
+  const detection = detectChinese.detect(str);
+  if (detection.language === 'cn') return true;
   let count = 0;
   for (let i = 0; i < str.length; i++) {
-    if (pinyin.pinyin(str[i])[0][0] != str[i])
-      count++;
+    if (pinyin.pinyin(str[i])[0][0] != str[i]) count++;
   }
   return count / str.length > 0.5;
-}
+};
 
 const isKoreanString = (str: string) => {
   if (!str) return false;
   str = str.replaceAll(' ', '');
   let count = 0;
   for (const c of str) {
-    if (isHangul(c)) 
-      count++;
+    if (isHangul(c)) count++;
   }
   return count / str.length > 0.5;
-}
+};
 
 // MAIN FUNCTIONS //
 const parseLyrics = (lrcString: string): LyricsData => {
@@ -310,19 +306,22 @@ const parseLyrics = (lrcString: string): LyricsData => {
   const groupedLines = groupOriginalAndTranslatedLyricLines(lines, output.isSynced);
   const originalLyricsLines = groupedLines.map((line) => line.original.input);
 
-  var plainLyrics = originalLyricsLines.join('');
+  let plainLyrics = originalLyricsLines.join('');
   let isJP = false;
   let isCN = false;
   let isKR = false;
 
   if (output.isSynced) {
-    plainLyrics = groupedLines.map((line) => {
-      var lrcLine = parseLyricsText(line.original.input, getSecondsFromLyricsLine(line.original.input));
-      if (typeof lrcLine == 'string')
-        return lrcLine as string;
-      else
-        return lrcLine.map((x) => x.text).join('');
-    }).join('');
+    plainLyrics = groupedLines
+      .map((line) => {
+        const lrcLine = parseLyricsText(
+          line.original.input,
+          getSecondsFromLyricsLine(line.original.input)
+        );
+        if (typeof lrcLine == 'string') return lrcLine as string;
+        else return lrcLine.map((x) => x.text).join('');
+      })
+      .join('');
   }
   isJP = isJapaneseString(plainLyrics);
   isCN = isChineseString(plainLyrics);
@@ -454,12 +453,12 @@ export const parseSyncedLyricsFromAudioDataSource = (
           typeof text === 'string'
             ? text
             : text
-              .map((x) => {
-                START_TIMESTAMP_MATCH_REGEX.lastIndex = 0;
-                if (START_TIMESTAMP_MATCH_REGEX.test(x.unparsedText)) return x.text;
-                return x.unparsedText;
-              })
-              .join(' ');
+                .map((x) => {
+                  START_TIMESTAMP_MATCH_REGEX.lastIndex = 0;
+                  if (START_TIMESTAMP_MATCH_REGEX.test(x.unparsedText)) return x.text;
+                  return x.unparsedText;
+                })
+                .join(' ');
         const secs = Math.floor(start % 60);
         const secsStr = secs.toString().length > 1 ? secs : `0${secs}`;
         const mins = Math.floor(start / 60);
@@ -472,10 +471,14 @@ export const parseSyncedLyricsFromAudioDataSource = (
       })
       .join('\n');
 
-    const plainLyrics = lyrics.map((line) => {line.originalText}).join('');
-    let isJapanese = isJapaneseString(plainLyrics);
-    let isChinese = isChineseString(plainLyrics);
-    let isKorean = isKoreanString(plainLyrics);
+    const plainLyrics = lyrics
+      .map((line) => {
+        line.originalText;
+      })
+      .join('');
+    const isJapanese = isJapaneseString(plainLyrics);
+    const isChinese = isChineseString(plainLyrics);
+    const isKorean = isKoreanString(plainLyrics);
     return {
       isSynced: true,
       isTranslated: false,

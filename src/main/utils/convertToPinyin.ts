@@ -4,20 +4,18 @@ import { sendMessageToRenderer } from '../main';
 import { getLrcLyricsMetadata } from '../core/saveLyricsToLrcFile';
 import { version } from '../../../package.json';
 import { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
-import pinyin from "pinyin";
+import pinyin from 'pinyin';
 import detectChinese from '@neos21/detect-chinese';
 
 const hasChineseCharacter = async (str: string) => {
   if (!str) return false;
-  var detection = detectChinese.detect(str);
-  if (detection.language === 'cn')
-    return true;
+  const detection = detectChinese.detect(str);
+  if (detection.language === 'cn') return true;
   for (let i = 0; i < str.length; i++) {
-    if (pinyin.pinyin(str[i])[0][0] != str[i])
-      return true;
+    if (pinyin.pinyin(str[i])[0][0] != str[i]) return true;
   }
   return false;
-}
+};
 
 const convertLyricsToPinyin = () => {
   const cachedLyrics = getCachedLyrics();
@@ -39,7 +37,10 @@ const convertLyricsToPinyin = () => {
       else {
         const strsToReplace = [' , ', ' . ', ' ? ', ' ! ', ' ; ', ' ) ', ' ( '];
         const strsReplace = [', ', '. ', '? ', '! ', '; ', ') ', ' ('];
-        let pinyinLyric = pinyin.pinyin(line).map(s => s[0]).join(' ');
+        let pinyinLyric = pinyin
+          .pinyin(line)
+          .map((s) => s[0])
+          .join(' ');
         for (let j = 0; j < strsToReplace.length; j++) {
           pinyinLyric = pinyinLyric.replaceAll(strsToReplace[j], strsReplace[j]);
         }
@@ -70,9 +71,7 @@ const convertLyricsToPinyin = () => {
         const convertedText = pinyinLyric.trim();
         if (convertedText !== INSTRUMENTAL_LYRIC_IDENTIFIER)
           lyric.convertedLyrics = convertedText.replaceAll('\n', '');
-      }
-      else 
-        lyric.convertedLyrics = '';
+      } else lyric.convertedLyrics = '';
     }
 
     cachedLyrics.lyrics.isConvertedToPinyin = true;
@@ -86,14 +85,13 @@ const convertLyricsToPinyin = () => {
       messageCode: 'LYRICS_CONVERT_SUCCESS'
     });
     return cachedLyrics;
-  }
-  catch (error) {
+  } catch (error) {
     log('Error occurred when converting lyrics.', { error }, 'ERROR');
     sendMessageToRenderer({
       messageCode: 'LYRICS_CONVERT_FAILED'
     });
   }
   return undefined;
-}
+};
 
 export default convertLyricsToPinyin;

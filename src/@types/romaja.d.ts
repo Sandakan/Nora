@@ -18,7 +18,7 @@ declare module 'romaja/src/romanize.js' {
    * @param {boolean} [options.hyphenate] - Whether to hyphenate the romanized syllables.
    * @returns {string} - The romanized word.
    */
-  function romanizeWord(word: string, options?: { method?: string, hyphenate?: boolean }): string;
+  function romanizeWord(word: string, options?: { method?: string; hyphenate?: boolean }): string;
 
   export { romanize, romanizeWord };
 }

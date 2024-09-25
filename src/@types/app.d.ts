@@ -260,7 +260,7 @@ declare global {
   interface LyricLine {
     originalText: string | SyncedLyricsLineWord[]; // Original text of the lyric line
     translatedTexts: TranslatedLyricLine[]; // Array of translations in different languages
-    convertedLyrics: string | SyncedLyricsLineWord[]; // Converted lyrics 
+    convertedLyrics: string | SyncedLyricsLineWord[]; // Converted lyrics
     start?: number; // Timing start (for synced lyrics only)
     end?: number; // Timing end (for synced lyrics only)
     isEnhancedSynced: boolean; // Indicates if the original text is enhanced synced lyrics

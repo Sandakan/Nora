@@ -20,14 +20,13 @@ const resetLyrics = () => {
       messageCode: 'RESET_CONVERTED_LYRICS_SUCCESS'
     });
     return cachedLyrics;
-  }
-  catch (error) {
+  } catch (error) {
     log('Error occurred when reseting converted lyrics.', { error }, 'ERROR');
     sendMessageToRenderer({
       messageCode: 'RESET_CONVERTED_LYRICS_FAILED'
     });
   }
   return undefined;
-}
+};
 
 export default resetLyrics;

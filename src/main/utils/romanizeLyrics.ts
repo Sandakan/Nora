@@ -14,8 +14,7 @@ await kuroshiro.init(new KuromojiAnalyzer());
 const hasJapaneseCharacter = (str: string) => {
   if (!str) return false;
   for (const c of str) {
-    if (Kuroshiro.Util.isJapanese(c)) 
-      return true;
+    if (Kuroshiro.Util.isJapanese(c)) return true;
   }
   return false;
 };
@@ -81,9 +80,7 @@ const romanizeLyrics = async () => {
         const romanizedText = romanizedLyric.trim();
         if (romanizedText !== INSTRUMENTAL_LYRIC_IDENTIFIER)
           lyric.convertedLyrics = romanizedText.replaceAll('\n', '');
-      }
-      else 
-        lyric.convertedLyrics = '';
+      } else lyric.convertedLyrics = '';
     }
 
     cachedLyrics.lyrics.isConvertedToRomaji = true;

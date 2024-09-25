@@ -217,7 +217,8 @@ const lyrics = {
   convertLyricsToPinyin: (): Promise<SongLyrics | undefined> =>
     ipcRenderer.invoke('app/convertLyricsToPinyin'),
 
-  convertLyricsToRomaja: (): Promise<SongLyrics | undefined> => ipcRenderer.invoke('app/convertLyricsToRomaja'),
+  convertLyricsToRomaja: (): Promise<SongLyrics | undefined> =>
+    ipcRenderer.invoke('app/convertLyricsToRomaja'),
 
   resetLyrics: (): Promise<SongLyrics> => ipcRenderer.invoke('app/resetLyrics'),
 

@@ -13,7 +13,7 @@ const hasKoreanCharacter = (str: string) => {
     if (isHangul(c)) return true;
   }
   return false;
-}
+};
 
 const convertLyricsToRomaja = () => {
   const cachedLyrics = getCachedLyrics();
@@ -35,7 +35,7 @@ const convertLyricsToRomaja = () => {
       else {
         // const strsToReplace = [' , ', ' . ', ' ? ', ' ! ', ' ; ', ' ) ', ' ( '];
         // const strsReplace = [', ', '. ', '? ', '! ', '; ', ') ', ' ('];
-        let koreanLyric = romanize(line);
+        const koreanLyric = romanize(line);
         // for (let j = 0; j < strsToReplace.length; j++) {
         //   koreanLyric = koreanLyric.replaceAll(strsToReplace[j], strsReplace[j]);
         // }
@@ -66,9 +66,7 @@ const convertLyricsToRomaja = () => {
         const convertedText = koreanLyric.trim();
         if (convertedText !== INSTRUMENTAL_LYRIC_IDENTIFIER)
           lyric.convertedLyrics = convertedText.replaceAll('\n', '');
-      }
-      else 
-        lyric.convertedLyrics = '';
+      } else lyric.convertedLyrics = '';
     }
 
     cachedLyrics.lyrics.isConvertedToRomaja = true;
@@ -82,14 +80,13 @@ const convertLyricsToRomaja = () => {
       messageCode: 'LYRICS_CONVERT_SUCCESS'
     });
     return cachedLyrics;
-  }
-  catch (error) {
+  } catch (error) {
     log('Error occurred when converting lyrics.', { error }, 'ERROR');
     sendMessageToRenderer({
       messageCode: 'LYRICS_CONVERT_FAILED'
     });
   }
   return undefined;
-}
+};
 
 export default convertLyricsToRomaja;
