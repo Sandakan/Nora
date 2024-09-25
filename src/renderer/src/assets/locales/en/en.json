@@ -586,7 +586,8 @@
     "lyricsLoadingDescription": "Hang on... We're looking everywhere...",
     "noInternet": "No internet connection",
     "noInternetDescription": "There are no offline lyrics for this song. You need an internet connection to check for online lyrics.",
-    "lyricsProvidedBy": "Lyrics provided by <Hyperlink/>"
+    "lyricsProvidedBy": "Lyrics provided by <Hyperlink/>",
+    "lyricsTranslatedBy": "Lyrics translated using Google Translate"
   },
 
   "songInfoPage": {

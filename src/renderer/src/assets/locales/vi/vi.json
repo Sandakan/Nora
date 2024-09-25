@@ -586,7 +586,8 @@
     "lyricsLoadingDescription": "Chờ chút... Chúng tôi đang tìm kiếm khắp nơi...",
     "noInternet": "Không có kết nối Internet",
     "noInternetDescription": "Không có lời bài hát ngoại tuyến cho bài hát này. Bạn cần kết nối với Internet để kiểm tra lời bài hát trực tuyến.",
-    "lyricsProvidedBy": "Lời bài hát được cung cấp bởi <Hyperlink/>"
+    "lyricsProvidedBy": "Lời bài hát được cung cấp bởi <Hyperlink/>",
+    "lyricsTranslatedBy": "Lời bài hát được dịch bởi Google Dịch"
   },
 
   "songInfoPage": {
