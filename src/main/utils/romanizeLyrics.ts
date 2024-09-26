@@ -70,7 +70,7 @@ const romanizeLyrics = async () => {
     if (lang) lyricsArr.push(`[lang:${lang}]`);
     if (length) lyricsArr.push(`[length:${length}]`);
     if (typeof offset === 'number') lyricsArr.push(`[offset:${offset}]`);
-    if (copyright) lyricsArr.push(`[copyright:${copyright}. Lyrics romanized using Kuroshiro.]`);
+    if (copyright) lyricsArr.push(`[copyright:${copyright}]`);
 
     for (let i = 0; i < parsedLyrics.length; i++) {
       const lyric = parsedLyrics[i];
