@@ -80,7 +80,7 @@ const LyricsPage = () => {
 
           if (lyricsLinesContainerRef.current) lyricsLinesContainerRef.current.scrollTop = 0;
 
-          if (preferences.autoTranslateLyrics && !lyrics?.lyrics.isTranslated) {
+          if (preferences.autoTranslateLyrics && !res?.lyrics.isTranslated) {
             window.api.lyrics.getTranslatedLyrics(i18n.language as LanguageCodes).then(setLyrics);
           }
           if (
