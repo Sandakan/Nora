@@ -171,32 +171,6 @@ const LyricsSettings = () => {
           />
         </li>
 
-        <li className="secondary-container auto-translate-lyrics mb-4">
-          <div className="description">{t('settingsPage.autoTranslateLyricsDescription')}</div>
-          <Checkbox
-            id="autoTranslateLyrics"
-            isChecked={userData !== undefined && autoTranslateLyrics}
-            checkedStateUpdateFunction={(state) => {
-              setAutoTranslateLyrics(state);
-              storage.preferences.setPreferences('autoTranslateLyrics', state);
-            }}
-            labelContent={t('settingsPage.autoTranslateLyrics')}
-          />
-        </li>
-
-        <li className="secondary-container auto-convert-lyrics mb-4">
-          <div className="description">{t('settingsPage.autoConvertLyricsDescription')}</div>
-          <Checkbox
-            id="autoConvertLyrics"
-            isChecked={userData !== undefined && autoConvertLyrics}
-            checkedStateUpdateFunction={(state) => {
-              setAutoConvertLyrics(state);
-              storage.preferences.setPreferences('autoConvertLyrics', state);
-            }}
-            labelContent={t('settingsPage.autoConvertLyrics')}
-          />
-        </li>
-
         <li className="lrc-files-custom-save-location mb-4">
           <div className="description">
             {t('settingsPage.lrcFileCustomSaveLocationDescription')}
@@ -234,6 +208,33 @@ const LyricsSettings = () => {
             />
           </div>
         </li>
+
+        <li className="secondary-container auto-translate-lyrics mb-4">
+          <div className="description">{t('settingsPage.autoTranslateLyricsDescription')}</div>
+          <Checkbox
+            id="autoTranslateLyrics"
+            isChecked={userData !== undefined && autoTranslateLyrics}
+            checkedStateUpdateFunction={(state) => {
+              setAutoTranslateLyrics(state);
+              storage.preferences.setPreferences('autoTranslateLyrics', state);
+            }}
+            labelContent={t('settingsPage.autoTranslateLyrics')}
+          />
+        </li>
+
+        <li className="secondary-container auto-convert-lyrics mb-4">
+          <div className="description">{t('settingsPage.autoConvertLyricsDescription')}</div>
+          <Checkbox
+            id="autoConvertLyrics"
+            isChecked={userData !== undefined && autoConvertLyrics}
+            checkedStateUpdateFunction={(state) => {
+              setAutoConvertLyrics(state);
+              storage.preferences.setPreferences('autoConvertLyrics', state);
+            }}
+            labelContent={t('settingsPage.autoConvertLyrics')}
+          />
+        </li>
+
       </ul>
     </li>
   );
