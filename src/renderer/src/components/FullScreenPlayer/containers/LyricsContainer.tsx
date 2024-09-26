@@ -7,6 +7,7 @@ import LyricLine from '../../LyricsPage/LyricLine';
 import useSkipLyricsLines from '../../../hooks/useSkipLyricsLines';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store';
+import i18n from '../../../i18n';
 
 type Props = {
   isLyricsVisible: boolean;
@@ -16,6 +17,7 @@ type Props = {
 const LyricsContainer = (props: Props) => {
   const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
   const currentSongData = useStore(store, (state) => state.currentSongData);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
 
   const { isLyricsVisible, setIsLyricsAvailable } = props;
   const { t } = useTranslation();
@@ -38,7 +40,26 @@ const LyricsContainer = (props: Props) => {
         })
         .then((res) => {
           setIsLyricsAvailable(res?.lyrics?.isSynced ?? false);
-          return setLyrics(res);
+          setLyrics(res);
+
+          if (preferences.autoTranslateLyrics && !res?.lyrics.isTranslated) {
+            window.api.lyrics.getTranslatedLyrics(i18n.language as LanguageCodes).then(setLyrics);
+          }
+          if (
+            preferences.autoConvertLyrics &&
+            !(
+              res?.lyrics.isConvertedToPinyin ||
+              res?.lyrics.isConvertedToRomaji ||
+              res?.lyrics.isConvertedToRomaja
+            )
+          ) {
+            if (res?.lyrics.isChinese) window.api.lyrics.convertLyricsToPinyin().then(setLyrics);
+            else if (res?.lyrics.isJapanese) window.api.lyrics.romanizeLyrics().then(setLyrics);
+            else if (res?.lyrics.isKorean)
+              window.api.lyrics.convertLyricsToRomaja().then(setLyrics);
+          }
+
+          return undefined;
         })
         .catch((err) => console.error(err));
     }
