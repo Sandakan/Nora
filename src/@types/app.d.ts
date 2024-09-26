@@ -397,6 +397,8 @@ declare global {
     | 'preferences.sendSongFavoritesDataToLastFM'
     | 'preferences.sendNowPlayingSongDataToLastFM'
     | 'preferences.saveLyricsInLrcFilesForSupportedSongs'
+    | 'preferences.autoTranslateLyrics'
+    | 'preferences.autoConvertLyrics'
     | 'preferences.enableDiscordRPC'
     | 'customMusixmatchUserToken'
     | 'customLrcFilesSaveLocation'
@@ -506,6 +508,8 @@ declare global {
     showTrackNumberAsSongIndex: boolean;
     allowToPreventScreenSleeping: boolean;
     enableImageBasedDynamicThemes: boolean;
+    autoTranslateLyrics: boolean;
+    autoConvertLyrics: boolean;
   }
 
   interface CurrentSong {

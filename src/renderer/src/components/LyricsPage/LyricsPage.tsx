@@ -79,6 +79,24 @@ const LyricsPage = () => {
           // console.log(res);
 
           if (lyricsLinesContainerRef.current) lyricsLinesContainerRef.current.scrollTop = 0;
+
+          if (preferences.autoTranslateLyrics && !lyrics?.lyrics.isTranslated) {
+            window.api.lyrics.getTranslatedLyrics(i18n.language as LanguageCodes).then(setLyrics);
+          }
+          if (
+            preferences.autoConvertLyrics &&
+            !(
+              res?.lyrics.isConvertedToPinyin ||
+              res?.lyrics.isConvertedToRomaji ||
+              res?.lyrics.isConvertedToRomaja
+            )
+          ) {
+            if (res?.lyrics.isChinese) window.api.lyrics.convertLyricsToPinyin().then(setLyrics);
+            else if (res?.lyrics.isJapanese) window.api.lyrics.romanizeLyrics().then(setLyrics);
+            else if (res?.lyrics.isKorean)
+              window.api.lyrics.convertLyricsToRomaja().then(setLyrics);
+          }
+
           return undefined;
         })
         .catch((err) => console.error(err));

@@ -413,7 +413,9 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     showTrackNumberAsSongIndex: true,
     allowToPreventScreenSleeping: true,
     enableImageBasedDynamicThemes: false,
-    doNotShowHelpPageOnLyricsEditorStartUp: false
+    doNotShowHelpPageOnLyricsEditorStartUp: false,
+    autoTranslateLyrics: false,
+    autoConvertLyrics: false
   },
   playback: {
     currentSong: {
