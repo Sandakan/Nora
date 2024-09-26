@@ -234,7 +234,6 @@ const LyricsSettings = () => {
             labelContent={t('settingsPage.autoConvertLyrics')}
           />
         </li>
-
       </ul>
     </li>
   );
