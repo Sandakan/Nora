@@ -43,9 +43,68 @@ in these config files.
 const exportAppData = async (localStorageData: string) => {
   const destinations = await showOpenDialog(DEFAULT_EXPORT_DIALOG_OPTIONS);
 
-  log('Started to export app data. Please wait...', undefined, undefined, {
-    sendToRenderer: { messageCode: 'APPDATA_EXPORT_STARTED' }
-  });
+  const operations = [
+    // SONG DATA
+    {
+      filename: 'songs.json',
+      dataString: JSON.stringify({ songs: getSongsData() })
+    },
+    // PALETTE DATA
+    {
+      filename: 'palettes.json',
+      dataString: JSON.stringify({ palettes: getPaletteData() })
+    },
+    // BLACKLIST DATA
+    {
+      filename: 'blacklist.json',
+      dataString: JSON.stringify({ blacklists: getBlacklistData() })
+    },
+    // ARTIST DATA
+    {
+      filename: 'artists.json',
+      dataString: JSON.stringify({ artists: getArtistsData() })
+    },
+    // PLAYLIST DATA
+    {
+      filename: 'playlists.json',
+      dataString: JSON.stringify({ playlists: getPlaylistData() })
+    },
+    // ALBUM DATA
+    {
+      filename: 'albums.json',
+      dataString: JSON.stringify({ albums: getAlbumsData() })
+    },
+    // GENRE DATA
+    {
+      filename: 'genres.json',
+      dataString: JSON.stringify({ genres: getGenresData() })
+    },
+    // USER DATA
+    {
+      filename: 'userData.json',
+      dataString: JSON.stringify({ userData: getUserData() })
+    },
+    // LISTENING DATA
+    {
+      filename: 'listening_data.json',
+      dataString: JSON.stringify({ listeningData: getListeningData() })
+    },
+    // LOCAL STORAGE DATA
+    {
+      filename: 'localStorageData.json',
+      dataString: localStorageData
+    },
+    // WARNING MESSAGE
+    {
+      filename: 'IMPORTANT - DO NOT EDIT CONTENTS IN THIS DIRECTORY.txt',
+      dataString: warningMessage
+    },
+    // SONG COVERS
+    {
+      filename: 'song_covers',
+      directory: songCoversFolderPath
+    }
+  ];
 
   try {
     if (Array.isArray(destinations) && destinations.length > 0) {
@@ -57,71 +116,21 @@ const exportAppData = async (localStorageData: string) => {
 
       if (exist) log(`'Nora exports' folder already exists. Will re-write contents of the folder.`);
 
-      // SONG DATA
-      const songData = getSongsData();
-      const songDataString = JSON.stringify({ songs: songData });
+      for (let i = 0; i < operations.length; i++) {
+        const operation = operations[i];
 
-      await fs.writeFile(path.join(destination, 'songs.json'), songDataString);
+        if (operation.directory) await copyDir(operation.directory, destination);
+        else if (operation.dataString)
+          await fs.writeFile(path.join(destination, operation.filename), operation.dataString);
+        else throw new Error('Invalid operation');
 
-      // PALETTE DATA
-      const paletteData = getPaletteData();
-      const paletteDataString = JSON.stringify({ palettes: paletteData });
-
-      await fs.writeFile(path.join(destination, 'palettes.json'), paletteDataString);
-
-      // BLACKLIST DATA
-      const blacklistData = getBlacklistData();
-      const blacklistDataString = JSON.stringify({ blacklists: blacklistData });
-
-      await fs.writeFile(path.join(destination, 'blacklist.json'), blacklistDataString);
-
-      // ARTIST DATA
-      const artistData = getArtistsData();
-      const artistDataString = JSON.stringify({ artists: artistData });
-
-      await fs.writeFile(path.join(destination, 'artists.json'), artistDataString);
-
-      // PLAYLIST DATA
-      const playlistData = getPlaylistData();
-      const playlistDataString = JSON.stringify({ playlists: playlistData });
-
-      await fs.writeFile(path.join(destination, 'playlists.json'), playlistDataString);
-
-      // ALBUM DATA
-      const albumData = getAlbumsData();
-      const albumDataString = JSON.stringify({ albums: albumData });
-
-      await fs.writeFile(path.join(destination, 'albums.json'), albumDataString);
-
-      // GENRE DATA
-      const genreData = getGenresData();
-      const genreDataString = JSON.stringify({ genres: genreData });
-
-      await fs.writeFile(path.join(destination, 'genres.json'), genreDataString);
-
-      // USER DATA
-      const userData = getUserData();
-      const userDataString = JSON.stringify({ userData });
-
-      await fs.writeFile(path.join(destination, 'userData.json'), userDataString);
-
-      // LISTENING DATA
-      const listeningData = getListeningData();
-      const listeningDataString = JSON.stringify({ listeningData });
-
-      await fs.writeFile(path.join(destination, 'listening_data.json'), listeningDataString);
-
-      // LOCAL STORAGE DATA
-      await fs.writeFile(path.join(destination, 'localStorageData.json'), localStorageData);
-
-      // SONG ARTWORKS
-      await copyDir(songCoversFolderPath, path.join(destination, 'song_covers'));
-
-      // WARNING TEXT MESSAGE
-      await fs.writeFile(
-        path.join(destination, 'IMPORTANT - DO NOT EDIT CONTENTS IN THIS DIRECTORY.txt'),
-        warningMessage
-      );
+        log('Exporting app data. Please wait...', undefined, undefined, {
+          sendToRenderer: {
+            messageCode: 'APPDATA_EXPORT_STARTED',
+            data: { total: operations.length, value: i + 1 }
+          }
+        });
+      }
 
       return log('Exported app data successfully.', undefined, 'INFO', {
         sendToRenderer: { messageCode: 'APPDATA_EXPORT_SUCCESS' }

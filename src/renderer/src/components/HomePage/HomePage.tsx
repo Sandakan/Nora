@@ -368,7 +368,7 @@ const HomePage = () => {
                 addNewNotifications([
                   {
                     id: Math.random().toString(),
-                    delay: 5 * 60 * 1000,
+                    duration: 5 * 60 * 1000,
                     content: `This is a notification with a number ${roundTo(Math.random(), 2)}`,
                     iconName: 'notifications_active',
                     type: 'WITH_PROGRESS_BAR'

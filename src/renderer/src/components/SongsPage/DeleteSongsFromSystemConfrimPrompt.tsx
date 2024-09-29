@@ -83,7 +83,7 @@ const DeleteSongFromSystemConfirmPrompt = (props: { songIds: string[] }) => {
                   addNewNotifications([
                     {
                       id: `songRemoved`,
-                      delay: 5000,
+                      duration: 5000,
                       content: (
                         <span>
                           {t(

@@ -8,7 +8,7 @@ const Notification = (props: AppNotification) => {
   const {
     id,
     content,
-    delay = 5000,
+    duration = 5000,
     buttons,
     icon,
     iconName = 'info',
@@ -21,13 +21,11 @@ const Notification = (props: AppNotification) => {
 
   const notificationRef = useRef(null as HTMLDivElement | null);
   const notificationTimeoutIdRef = useRef(undefined as NodeJS.Timeout | undefined);
-  // const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   const notificationPanelStyles: any = {};
-  // notificationPanelStyles['--loading-bar-width'] = `${dimensions.width - 35}px`;
   notificationPanelStyles['--loading-bar-progress'] =
     `${(progressBarData.value / progressBarData.total) * 100}%`;
-  notificationPanelStyles['--notification-duration'] = `${delay}ms`;
+  notificationPanelStyles['--notification-duration'] = `${duration}ms`;
 
   const removeNotification = useCallback(() => {
     const isNotificationAnimationDisabled =
@@ -46,12 +44,9 @@ const Notification = (props: AppNotification) => {
   useLayoutEffect(() => {
     const notification = notificationRef.current;
     if (notification) {
-      // setDimensions({
-      //   width: notification.offsetWidth,
-      //   height: notification.offsetHeight,
-      // });
-      notificationTimeoutIdRef.current = setTimeout(removeNotification, delay);
+      notificationTimeoutIdRef.current = setTimeout(removeNotification, duration);
     }
+
     return () => {
       if (notificationTimeoutIdRef.current) clearTimeout(notificationTimeoutIdRef.current);
       if (notification?.classList.contains('disappear-to-bottom')) {
@@ -59,7 +54,7 @@ const Notification = (props: AppNotification) => {
         updateNotifications((currNotifications) => currNotifications.filter((x) => x.id !== id));
       }
     };
-  }, [delay, id, removeNotification, updateNotifications]);
+  }, [duration, id, removeNotification, updateNotifications]);
 
   const notificationIcon = useMemo(() => {
     if (icon) return icon;
@@ -138,9 +133,6 @@ const Notification = (props: AppNotification) => {
           </div>
         )}
       </div>
-      {/* {type === 'WITH_PROGRESS_BAR' && progressBarData && (
-        <div className="notification-loading-bar absolute bottom-0 left-1/2 h-1 w-[85%] flex-grow -translate-x-1/2 overflow-hidden rounded-sm bg-font-color-highlight/10 before:absolute before:h-1 before:w-[var(--loading-bar-progress,0%)] before:rounded-sm before:bg-font-color-highlight/50 before:content-[''] dark:bg-dark-font-color-highlight/20 dark:before:bg-dark-font-color-highlight" />
-      )}   */}
     </div>
   );
 };

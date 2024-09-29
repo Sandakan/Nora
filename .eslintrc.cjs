@@ -16,6 +16,7 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     'import/no-unresolved': 'off',
     'import/named': 'off',
+    'promise/always-return': ['warn', { ignoreLastCallback: true }],
     '@typescript-eslint/no-explicit-any': 'off',
     'react/no-unescaped-entities': 'off',
     '@typescript-eslint/no-unused-vars': 'warn'

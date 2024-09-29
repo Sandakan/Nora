@@ -77,7 +77,7 @@ const SimilarTracksContainer = (props: Props) => {
     addNewNotifications([
       {
         id: `${queueSongIds.length}PlayNext`,
-        delay: 5000,
+        duration: 5000,
         content: t('notifications.playingNextSongsWithCount', {
           count: queueSongIds.length
         }),

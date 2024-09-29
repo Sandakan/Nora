@@ -90,7 +90,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
             {
               content: t('common.artistConflictResolved'),
               iconName: 'done',
-              delay: 5000,
+              duration: 5000,
               id: 'ArtistDuplicateSuggestion'
             }
           ]);
@@ -186,7 +186,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
                         id: 'suggestionIgnored',
                         iconName: 'do_not_disturb_on',
                         iconClassName: 'material-icons-round-outlined',
-                        delay: 5000,
+                        duration: 5000,
                         content: t('notifications.suggestionIgnored')
                       }
                     ]);

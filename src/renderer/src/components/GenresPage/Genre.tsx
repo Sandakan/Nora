@@ -143,7 +143,7 @@ const Genre = (props: GenreProp) => {
           addNewNotifications([
             {
               id: 'newSongsToQueue',
-              delay: 5000,
+              duration: 5000,
               content: t(`notifications.addedToQueue`, {
                 count: songs.length
               })
@@ -202,7 +202,7 @@ const Genre = (props: GenreProp) => {
             addNewNotifications([
               {
                 id: 'newSongsToQueue',
-                delay: 5000,
+                duration: 5000,
                 content: t(`notifications.addedToQueue`, {
                   count: songIds.length
                 })

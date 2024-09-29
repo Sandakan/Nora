@@ -14,7 +14,7 @@ const SongUnplayableErrorPrompt = (props: Props) => {
     addNewNotifications([
       {
         id: 'unplayableSong',
-        delay: 10000,
+        duration: 10000,
         content: t('songUnplayableErrorPrompt.title'),
         iconName: 'error_outline'
       }

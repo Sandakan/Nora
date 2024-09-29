@@ -74,23 +74,7 @@ const log = (
   const options: LogOptions = { ...defaultLogOptions, ...logOptions };
   const seperator = messageType === 'ERROR' ? '======' : messageType === 'WARN' ? '######' : '';
 
-  if (options.sendToRenderer) {
-    // const rendererMsgOptions = {
-    //   code: (messageType === 'INFO' ? 'INFO' : 'FAILURE') as MessageCodes,
-    //   data: undefined as Object | undefined,
-    // };
-
-    // if (typeof options.sendToRenderer === 'object') {
-    //   const { messageCode, data: rendererData } = options.sendToRenderer;
-
-    //   if (code) rendererMsgOptions.code = code;
-    //   rendererMsgOptions.data = rendererData;
-    // }
-    // if (typeof options.sendToRenderer === 'string')
-    //   rendererMsgOptions.code = options.sendToRenderer;
-
-    sendMessageToRenderer(options.sendToRenderer);
-  }
+  if (options.sendToRenderer) sendMessageToRenderer(options.sendToRenderer);
 
   if (messageType !== 'INFO') mes = mes.toUpperCase();
   const str = `\n[${new Date().toUTCString()}] [${logType}] = ${seperator} ${mes} ${seperator}\n\t${objectToString(

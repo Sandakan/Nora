@@ -47,7 +47,7 @@ const ConfirmDeletePlaylistsPrompt = (props: ConfirmDeletePlaylistProp) => {
         return addNewNotifications([
           {
             id: `playlistsDeleted`,
-            delay: 5000,
+            duration: 5000,
             content: t('confirmDeletePlaylistsPrompt.playlistsDeletedWithCount', {
               count: playlistIds.length
             })

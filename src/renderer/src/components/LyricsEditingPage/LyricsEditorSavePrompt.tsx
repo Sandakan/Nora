@@ -166,7 +166,7 @@ const LyricsEditorSavePrompt = (props: Props) => {
             return addNewNotifications([
               {
                 id: 'lyricsUpdateSuccessful',
-                delay: 5000,
+                duration: 5000,
                 content: t('lyricsEditorSavePrompt.lyricsUpdateSuccess'),
                 iconName: 'check'
               }

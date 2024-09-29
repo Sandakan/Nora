@@ -109,7 +109,7 @@ export const Playlist = (props: PlaylistProp) => {
             return addNewNotifications([
               {
                 id: `${songIds.length}AddedToQueueFromMultiSelection`,
-                delay: 5000,
+                duration: 5000,
                 content: t(`notifications.addedToQueue`, {
                   count: songIds.length
                 })
@@ -150,7 +150,7 @@ export const Playlist = (props: PlaylistProp) => {
           addNewNotifications([
             {
               id: 'newSongsToQueue',
-              delay: 5000,
+              duration: 5000,
               content: t(`notifications.addedToQueue`, {
                 count: songs.length
               })
@@ -201,7 +201,7 @@ export const Playlist = (props: PlaylistProp) => {
             addNewNotifications([
               {
                 id: 'newSongsToQueue',
-                delay: 5000,
+                duration: 5000,
                 content: t(`notifications.addedToQueue`, {
                   count: props.songs.length
                 })
@@ -236,7 +236,7 @@ export const Playlist = (props: PlaylistProp) => {
                 {
                   content: t('playlist.playlistArtworkUpdateSuccess'),
                   icon: <span className="material-icons-round">done</span>,
-                  delay: 5000,
+                  duration: 5000,
                   id: 'PlaylistArtworkUpdateSuccessful'
                 }
               ]);

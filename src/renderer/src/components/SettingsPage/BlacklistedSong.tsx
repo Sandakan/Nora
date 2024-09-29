@@ -41,7 +41,7 @@ const BlacklistedSong = (props: BlacklistedSongProp) => {
             addNewNotifications([
               {
                 id: `${title}RestoreSuccess`,
-                delay: 5000,
+                duration: 5000,
                 content: t('notifications.songRestoreSuccess'),
                 icon: <span className="material-icons-round icon">check</span>
               }

@@ -103,7 +103,7 @@ const BlacklistFolderConfrimPrompt = (props: { folderPaths: string[]; folderName
               addNewNotifications([
                 {
                   id: `${folderName}Blacklisted`,
-                  delay: 5000,
+                  duration: 5000,
                   content: t('blacklistFolderConfirmPrompt.folderBlacklisted', {
                     count: folderPaths.length
                   }),

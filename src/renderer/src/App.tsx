@@ -81,8 +81,20 @@ let repetitivePlaybackErrorsCount = 0;
 // / / / / / / / /
 
 const updateNetworkStatus = () => window.api.settingsHelpers.networkStatusChange(navigator.onLine);
+const syncUserData = () =>
+  window.api.userData
+    .getUserData()
+    .then((res) => {
+      if (!res) return undefined;
+
+      dispatch({ type: 'USER_DATA_CHANGE', data: res });
+      dispatch({ type: 'APP_THEME_CHANGE', data: res.theme });
+      return res;
+    })
+    .catch((err) => console.error(err));
 
 updateNetworkStatus();
+syncUserData();
 window.addEventListener('online', updateNetworkStatus);
 window.addEventListener('offline', updateNetworkStatus);
 
@@ -485,16 +497,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    window.api.userData
-      .getUserData()
-      .then((res) => {
-        if (!res) return undefined;
-
-        dispatch({ type: 'USER_DATA_CHANGE', data: res });
-        dispatch({ type: 'APP_THEME_CHANGE', data: res.theme });
-        return undefined;
-      })
-      .catch((err) => console.error(err));
+    syncUserData();
 
     const handleToggleSongPlayback = () => toggleSongPlayback();
     const handlePlaySongFromUnknownSource = (_: unknown, data: AudioPlayerData) =>
@@ -1415,7 +1418,7 @@ export default function App() {
             iconName: 'info',
             iconClassName: 'material-icons-round-outlined',
             id: 'alreadyInCurrentPage',
-            delay: 2500
+            duration: 2500
           }
         ]);
     },
@@ -1716,7 +1719,7 @@ export default function App() {
     addNewNotifications([
       {
         id: 'songPausedOnDelete',
-        delay: 7500,
+        duration: 7500,
         content: t('notifications.playbackPausedDueToSongDeletion')
       }
     ]);
@@ -1729,51 +1732,6 @@ export default function App() {
   const changeUpNextSongData = useCallback((upNextSongData?: AudioPlayerData) => {
     dispatch({ type: 'UP_NEXT_SONG_DATA_CHANGE', data: upNextSongData });
   }, []);
-
-  // const appContextStateValues: AppStateContextType = useStore(store, (state) => {
-  //   const { currentActiveIndex, isVisible, prompts } = store.state.promptMenuNavigationData;
-
-  //   const promptMenuData = {
-  //     isVisible,
-  //     prompt: prompts?.at(currentActiveIndex)?.prompt,
-  //     className: prompts?.at(currentActiveIndex)?.className,
-  //     noOfPrompts: prompts.length,
-  //     currentActiveIndex
-  //   };
-
-  //   tempRef.current = state;
-
-  //   return {
-  //     isDarkMode: state.isDarkMode,
-  //     contextMenuData: state.contextMenuData,
-  //     promptMenuData,
-  //     currentSongData: {
-  //       ...state.currentSongData,
-  //       duration: player.duration || state.currentSongData.duration
-  //     },
-  //     upNextSongData: store.state.upNextSongData,
-  //     currentlyActivePage:
-  //       store.state.navigationHistory.history[state.navigationHistory.pageHistoryIndex],
-  //     notificationPanelData: state.notificationPanelData,
-  //     userData: state.userData,
-  //     localStorageData: state.localStorage,
-  //     queue: state.localStorage.queue,
-  //     isCurrentSongPlaying: state.player.isCurrentSongPlaying,
-  //     noOfPagesInHistory: state.navigationHistory.history.length - 1,
-  //     pageHistoryIndex: state.navigationHistory.pageHistoryIndex,
-  //     volume: state.player.volume.value,
-  //     isMuted: state.player.volume.isMuted,
-  //     isRepeating: state.player.isRepeating,
-  //     isShuffling: state.player.isShuffling,
-  //     isPlayerStalled: state.player.isPlayerStalled,
-  //     bodyBackgroundImage: state.bodyBackgroundImage,
-  //     isMultipleSelectionEnabled: state.multipleSelectionsData.isEnabled,
-  //     multipleSelectionsData: state.multipleSelectionsData,
-  //     appUpdatesState: state.appUpdatesState,
-  //     equalizerOptions: state.localStorage.equalizerPreset,
-  //     playerType: state.playerType
-  //   };
-  // });
 
   const appUpdateContextValues: AppUpdateContextType = useMemo(
     () => ({

@@ -130,7 +130,7 @@ export const Album = (props: AlbumProp) => {
           addNewNotifications([
             {
               id: 'newSongsToQueue',
-              delay: 5000,
+              duration: 5000,
               content: t('notifications.addedToQueue', { count: songs.length })
             }
           ]);
@@ -227,7 +227,7 @@ export const Album = (props: AlbumProp) => {
             addNewNotifications([
               {
                 id: 'newSongsToQueue',
-                delay: 5000,
+                duration: 5000,
                 content: t(`notifications.addedToQueue`, {
                   count: props.songs.length
                 })

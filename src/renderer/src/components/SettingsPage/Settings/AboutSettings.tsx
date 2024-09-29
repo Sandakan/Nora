@@ -324,7 +324,7 @@ const AboutSettings = () => {
                             addNewNotifications([
                               {
                                 id: 'songHistoryCleared',
-                                delay: 5000,
+                                duration: 5000,
                                 content: <span>{t('settingsPage.songHistoryDeletionSuccess')}</span>
                               }
                             ]);
