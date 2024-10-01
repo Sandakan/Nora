@@ -42,7 +42,9 @@ const LyricsMetadata = (props: LyricsSourceProp) => {
       )}
       {isTranslated && (
         <div className={`text-balance text-sm text-font-color-dimmed ${textClassName}`}>
-          Lyrics translated using Google Translate
+          <Trans
+            i18nKey="lyricsPage.lyricsTranslatedBy"
+          />
         </div>
       )}
     </div>
