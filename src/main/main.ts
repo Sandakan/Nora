@@ -160,7 +160,7 @@ const installExtensions = async () => {
   }
 };
 
-const getBackgroundColor = () => {
+export const getBackgroundColor = () => {
   const userData = getUserData();
   if (userData.theme.isDarkMode) return '#212226';
   return '#FFFFFF';
