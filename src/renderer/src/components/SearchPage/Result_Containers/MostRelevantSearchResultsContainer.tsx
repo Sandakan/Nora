@@ -84,7 +84,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
               addNewNotifications([
                 {
                   id: `${firstResult.title}PlayNext`,
-                  delay: 5000,
+                  duration: 5000,
                   content: (
                     <span>
                       {t('notifications.playingNext', {
@@ -106,7 +106,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
                 [
                   {
                     id: `${firstResult.title}AddedToQueue`,
-                    delay: 5000,
+                    duration: 5000,
                     content: <span>{t('notifications.addedToQueue', { count: 1 })}</span>,
                     icon: (
                       <Img
@@ -202,7 +202,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
               addNewNotifications([
                 {
                   id: `${firstResult.name}AddedToQueue`,
-                  delay: 5000,
+                  duration: 5000,
                   content: (
                     <span>
                       {t('notifications.addedToQueue', {
@@ -270,7 +270,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
               addNewNotifications([
                 {
                   id: 'addedToQueue',
-                  delay: 5000,
+                  duration: 5000,
                   content: (
                     <span>
                       {t('notifications.addedToQueue', {

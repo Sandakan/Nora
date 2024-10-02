@@ -35,7 +35,7 @@ const NewPlaylistPrompt = (props: NewPlaylistPromptProp) => {
             addNewNotifications([
               {
                 id: 'playlistCreated',
-                delay: 5000,
+                duration: 5000,
                 content: t('newPlaylistPrompt.addPlaylistSuccess')
               }
             ]);
@@ -43,7 +43,7 @@ const NewPlaylistPrompt = (props: NewPlaylistPromptProp) => {
             addNewNotifications([
               {
                 id: 'playlistCreateFailed',
-                delay: 5000,
+                duration: 5000,
                 // eslint-disable-next-line react/jsx-no-useless-fragment
                 content: <>{res.message}</>
               }
@@ -54,7 +54,7 @@ const NewPlaylistPrompt = (props: NewPlaylistPromptProp) => {
       addNewNotifications([
         {
           id: 'EmptyPlaylistName',
-          delay: 5000,
+          duration: 5000,
           content: t('newPlaylistPrompt.playlistNameEmpty')
         }
       ]);

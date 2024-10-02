@@ -232,7 +232,7 @@ const AlbumInfoPage = () => {
               addNewNotifications([
                 {
                   id: albumContent.albumData.albumId,
-                  delay: 5000,
+                  duration: 5000,
                   content: t('notifications.addedToQueue', {
                     count: albumContent.songsData.length
                   })

@@ -160,7 +160,7 @@ export const Artist = (props: ArtistProp) => {
               return addNewNotifications([
                 {
                   id: `${uniqueSongIds.length}AddedToQueueFromMultiSelection`,
-                  delay: 5000,
+                  duration: 5000,
                   content: t(`notifications.addedToQueue`, {
                     count: uniqueSongIds.length
                   })
@@ -172,7 +172,7 @@ export const Artist = (props: ArtistProp) => {
           return addNewNotifications([
             {
               id: 'addSongsToQueue',
-              delay: 5000,
+              duration: 5000,
               content: t(`notifications.addedToQueue`, {
                 count: props.songIds.length
               })

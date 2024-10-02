@@ -882,9 +882,14 @@ declare global {
     | 'ARTWORK_SAVED'
     | 'RESYNC_SUCCESSFUL';
 
+  interface MessageToRendererData extends Record<string, unknown> {
+    total?: number;
+    value?: number;
+  }
+
   type MessageToRendererProps = {
     messageCode: MessageCodes;
-    data?: Record<string, unknown>;
+    data?: MessageToRendererData;
   };
 
   interface NotificationPanelData {
@@ -895,7 +900,7 @@ declare global {
   type NotificationTypes = 'DEFAULT' | 'WITH_PROGRESS_BAR';
 
   interface AppNotification {
-    delay?: number;
+    duration?: number;
     id: string;
     order?: number;
     content: ReactNode;

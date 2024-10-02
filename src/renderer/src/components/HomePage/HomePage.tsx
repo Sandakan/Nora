@@ -364,16 +364,19 @@ const HomePage = () => {
             {
               label: 'Show Notification',
               iconName: 'notifications_active',
-              handlerFunction: () =>
+              handlerFunction: () => {
+                const duration = Math.random() * 10000;
                 addNewNotifications([
                   {
-                    id: Math.random().toString(),
-                    delay: 5 * 60 * 1000,
+                    id: duration.toString(),
+                    duration: 5 * 60 * 1000,
+                    // duration,
                     content: `This is a notification with a number ${roundTo(Math.random(), 2)}`,
                     iconName: 'notifications_active',
                     type: 'WITH_PROGRESS_BAR'
                   }
-                ])
+                ]);
+              }
             }
           ]
         : [],

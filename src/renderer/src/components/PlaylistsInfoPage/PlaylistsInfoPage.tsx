@@ -144,7 +144,7 @@ const PlaylistInfoPage = () => {
                   addNewNotifications([
                     {
                       id: 'queueCleared',
-                      delay: 5000,
+                      duration: 5000,
                       content: t('settingsPage.songHistoryDeletionSuccess')
                     }
                   ])
@@ -163,7 +163,7 @@ const PlaylistInfoPage = () => {
     addNewNotifications([
       {
         id: `addedToQueue`,
-        delay: 5000,
+        duration: 5000,
         content: t('notifications.addedToQueue', {
           count: validSongIds.length
         })
@@ -297,7 +297,7 @@ const PlaylistInfoPage = () => {
                             addNewNotifications([
                               {
                                 id: `${item.songId}Removed`,
-                                delay: 5000,
+                                duration: 5000,
                                 content: t('playlistsPage.removeSongFromPlaylistSuccess', {
                                   title: item.title,
                                   playlistName: playlistData.name

@@ -120,7 +120,7 @@ const SongInfoPage = () => {
               key={artist.artistId}
               artistId={artist.artistId}
               name={artist.name}
-              className={`ml-1 !text-base ${bodyBackgroundImage && '!text-white'}`}
+              className={`ml-1 !text-base first:!ml-0 ${bodyBackgroundImage && '!text-white'}`}
             />
           ];
 

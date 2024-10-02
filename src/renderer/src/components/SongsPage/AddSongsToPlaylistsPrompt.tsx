@@ -117,7 +117,7 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
         return addNewNotifications([
           {
             id: 'songAddedtoPlaylists',
-            delay: 5000,
+            duration: 5000,
             iconName: 'playlist_add',
             content: t('addSongsToPlaylistsPrompt.songsAddedToPlaylists', {
               count: songIds.length,

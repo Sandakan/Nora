@@ -108,10 +108,6 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
     iconName: 'download'
   },
   {
-    trigger: ['APPDATA_EXPORT_STARTED'],
-    iconName: 'publish'
-  },
-  {
     trigger: ['MUSIC_FOLDER_DELETED', 'EMPTY_MUSIC_FOLDER_DELETED', 'SONG_DELETED'],
     iconName: 'delete',
     iconClassName: 'material-icons-round-outlined'
@@ -132,7 +128,7 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
   },
   {
     trigger: ['PARSE_FAILED'],
-    delay: 15000,
+    duration: 15000,
     buttons: [
       {
         label: i18n.t('settingsPage.resyncLibrary'),
@@ -144,7 +140,7 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
   },
   {
     trigger: ['PLAYBACK_FROM_UNKNOWN_SOURCE'],
-    delay: 15000,
+    duration: 15000,
     iconName: 'error',
     iconClassName: 'material-icons-round-outlined',
     validate({ data }) {
@@ -181,7 +177,7 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
   },
   {
     trigger: ['SONG_REMOVE_PROCESS_UPDATE', 'AUDIO_PARSING_PROCESS_UPDATE'],
-    delay: 10000,
+    duration: 10000,
     iconClassName: 'material-icons-round-outlined',
     type: 'WITH_PROGRESS_BAR',
     validate({ data }) {
@@ -199,8 +195,27 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
     }
   },
   {
+    trigger: ['APPDATA_EXPORT_STARTED'],
+    iconName: 'publish',
+    duration: 10000,
+    iconClassName: 'material-icons-round-outlined',
+    type: 'WITH_PROGRESS_BAR',
+    validate({ data }) {
+      if (data) return 'total' in data && 'value' in data;
+      return false;
+    },
+    update({ data }) {
+      this.progressBarData = {
+        total: (data?.total as number) || 0,
+        value: (data?.value as number) || 0
+      };
+
+      return this;
+    }
+  },
+  {
     trigger: ['SONG_PALETTE_GENERATING_PROCESS_UPDATE', 'GENRE_PALETTE_GENERATING_PROCESS_UPDATE'],
-    delay: 10000,
+    duration: 10000,
     iconName: 'magic_button',
     iconClassName: 'material-icons-round-outlined',
     type: 'WITH_PROGRESS_BAR',
@@ -219,7 +234,7 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
         this.progressBarData.total !== 0 &&
         this.progressBarData.total === this.progressBarData.value
       )
-        this.delay = 5000;
+        this.duration = 5000;
       return this;
     }
   }
@@ -247,38 +262,41 @@ const parseNotificationFromMain = (
 
     for (const config of notificationsFromMainConfig) {
       const { trigger, validate = () => true, update } = config;
-      const validateFunc = validate.bind(config);
 
-      if (trigger.includes(messageCode) && validateFunc(obj)) {
-        let configData = config;
-        if (update) configData = update.bind(configData, obj)();
+      if (trigger.includes(messageCode)) {
+        const validateFunc = validate.bind(config);
 
-        const {
-          id,
-          delay,
-          buttons,
-          progressBarData,
-          type,
-          content: notificationContent,
-          order,
-          icon,
-          iconName,
-          iconClassName
-        } = configData;
+        if (validateFunc(obj)) {
+          let configData = config;
+          if (update) configData = update.bind(configData, obj)();
 
-        if (id) notificationData.id = id;
-        if (delay) notificationData.delay = delay;
-        if (buttons) notificationData.buttons = buttons;
-        if (type) notificationData.type = type;
-        if (order) notificationData.order = order;
-        if (notificationContent) notificationData.content = notificationContent;
-        if (progressBarData) notificationData.progressBarData = progressBarData;
+          const {
+            id,
+            duration,
+            buttons,
+            progressBarData,
+            type,
+            content: notificationContent,
+            order,
+            icon,
+            iconName,
+            iconClassName
+          } = configData;
 
-        if (icon) notificationData.icon = icon;
-        if (iconName) notificationData.iconName = iconName;
-        if (iconClassName) notificationData.iconClassName = iconClassName;
+          if (id) notificationData.id = id;
+          if (duration) notificationData.duration = duration;
+          if (buttons) notificationData.buttons = buttons;
+          if (type) notificationData.type = type;
+          if (order) notificationData.order = order;
+          if (notificationContent) notificationData.content = notificationContent;
+          if (progressBarData) notificationData.progressBarData = progressBarData;
 
-        break;
+          if (icon) notificationData.icon = icon;
+          if (iconName) notificationData.iconName = iconName;
+          if (iconClassName) notificationData.iconClassName = iconClassName;
+
+          break;
+        }
       }
     }
   }

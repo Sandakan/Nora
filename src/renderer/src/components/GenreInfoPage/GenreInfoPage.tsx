@@ -173,7 +173,7 @@ const GenreInfoPage = () => {
               addNewNotifications([
                 {
                   id: genreData?.genreId || '',
-                  delay: 5000,
+                  duration: 5000,
                   content: t('notifications.addedToQueue', {
                     count: genreSongs.length
                   })

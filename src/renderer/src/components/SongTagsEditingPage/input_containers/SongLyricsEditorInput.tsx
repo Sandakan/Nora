@@ -120,7 +120,7 @@ const SongLyricsEditorInput = (props: Props) => {
           addNewNotifications([
             {
               id: `fetchUnsyncedLyricsFailed`,
-              delay: 5000,
+              duration: 5000,
               content: <span>Failed to fetch un-synced lyrics.</span>,
               icon: <span className="material-icons-round icon">warning</span>
             }
@@ -166,7 +166,7 @@ const SongLyricsEditorInput = (props: Props) => {
           addNewNotifications([
             {
               id: `fetchSyncedLyricsFailed`,
-              delay: 5000,
+              duration: 5000,
               content: t('songTagsEditingPage.syncedLyricsFetchFailed'),
               iconName: 'warning'
             }

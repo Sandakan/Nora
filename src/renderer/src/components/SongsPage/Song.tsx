@@ -477,7 +477,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
                 addNewNotifications([
                   {
                     id: `${title}Blacklisted`,
-                    delay: 5000,
+                    duration: 5000,
                     content: t('notifications.songBlacklisted', { title }),
                     iconName: 'block'
                   }

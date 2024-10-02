@@ -301,7 +301,7 @@ const CurrentQueuePage = () => {
                 addNewNotifications([
                   {
                     id: 'shuffleQueue',
-                    delay: 5000,
+                    duration: 5000,
                     content: t('currentQueuePage.queueShuffleSuccess'),
                     iconName: 'shuffle'
                   }
@@ -319,7 +319,7 @@ const CurrentQueuePage = () => {
                 addNewNotifications([
                   {
                     id: 'clearQueue',
-                    delay: 5000,
+                    duration: 5000,
                     content: t('currentQueuePage.queueCleared'),
                     iconName: 'check'
                   }

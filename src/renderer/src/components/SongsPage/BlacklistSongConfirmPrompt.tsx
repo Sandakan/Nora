@@ -83,7 +83,7 @@ const BlacklistSongConfrimPrompt = (props: { songIds: string[]; title?: string }
                 return addNewNotifications([
                   {
                     id: `${title}Blacklisted`,
-                    delay: 5000,
+                    duration: 5000,
                     content: t('blacklistSongConfirmPrompt.songsBlacklisted', {
                       count: songIds.length
                     }),

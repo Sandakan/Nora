@@ -18,7 +18,7 @@ const NotificationPanel = () => {
       return notificationData.map((data) => {
         const {
           content,
-          delay,
+          duration,
           id,
           buttons,
           icon,
@@ -37,7 +37,7 @@ const NotificationPanel = () => {
             icon={icon}
             iconName={iconName}
             iconClassName={iconClassName}
-            delay={delay}
+            duration={duration}
             order={order}
             type={type}
             progressBarData={progressBarData}

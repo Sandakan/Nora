@@ -212,7 +212,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
                 addNewNotifications([
                   {
                     id: `${title}Blacklisted`,
-                    delay: 5000,
+                    duration: 5000,
                     content: t('notifications.songBlacklisted', { title }),
                     icon: <span className="material-icons-round">block</span>
                   }

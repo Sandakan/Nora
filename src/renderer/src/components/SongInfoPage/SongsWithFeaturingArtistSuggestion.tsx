@@ -118,7 +118,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
             {
               content: t('common.featArtistSuggestionResolved'),
               iconName: 'done',
-              delay: 5000,
+              duration: 5000,
               id: 'FeatArtistsSuggestion'
             }
           ]);
@@ -150,7 +150,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
         id: 'suggestionIgnored',
         iconName: 'do_not_disturb_on',
         iconClassName: 'material-icons-round-outlined',
-        delay: 5000,
+        duration: 5000,
         content: t('notifications.suggestionIgnored')
       }
     ]);
