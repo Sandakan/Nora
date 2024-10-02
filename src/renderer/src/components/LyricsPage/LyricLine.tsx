@@ -142,6 +142,16 @@ const LyricLine = (props: LyricProp) => {
     return extendedLyricLines;
   }, [isInRange, convertedLyric]);
 
+  //TODO: Let user choose what line should display what
+  var lyricStringLinePrimary = lyricString;
+  var lyricStringLineSecondaryLower = translatedLyricString;
+  var lyricStringLineSecondaryUpper = convertedLyricString;
+  if (translatedLyricString) {
+    lyricStringLinePrimary = translatedLyricString;
+    lyricStringLineSecondaryLower = convertedLyricString ?? lyricString;
+    lyricStringLineSecondaryUpper = undefined;
+  }
+
   return (
     <div
       style={{
@@ -195,23 +205,23 @@ const LyricLine = (props: LyricProp) => {
         );
       }}
     >
-      {convertedLyric && (
+      {lyricStringLineSecondaryUpper && (
         <div
           className={`flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'} ${syncedLyrics && isInRange ? '!text-xl !text-font-color-black/50 dark:!text-font-color-white/50' : '!text-xl'}`}
         >
-          {convertedLyricString}
+          {lyricStringLineSecondaryUpper}
         </div>
       )}
       <div
         className={`flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'}`}
       >
-        {lyricString}
+        {lyricStringLinePrimary}
       </div>
-      {translatedLyricString && (
+      {lyricStringLineSecondaryLower && (
         <div
-          className={`translated-lyric-line flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'} ${syncedLyrics && isInRange ? '!text-xl !text-font-color-black/50 dark:!text-font-color-white/50' : '!text-xl'}`}
+          className={`flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'} ${syncedLyrics && isInRange ? '!text-xl !text-font-color-black/50 dark:!text-font-color-white/50' : '!text-xl'}`}
         >
-          {translatedLyricString}
+          {lyricStringLineSecondaryLower}
         </div>
       )}
       {syncedLyrics && isInRange && <LyricsProgressBar delay={0} syncedLyrics={syncedLyrics} />}
