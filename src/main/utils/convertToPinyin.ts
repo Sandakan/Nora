@@ -104,8 +104,8 @@ const convertLyricsToPinyin = async () => {
       }
     }
 
-    cachedLyrics.lyrics.isConvertedToRomaji = true;
-    cachedLyrics.lyrics.isConvertedToPinyin = false;
+    cachedLyrics.lyrics.isConvertedToRomaji = false;
+    cachedLyrics.lyrics.isConvertedToPinyin = true;
     cachedLyrics.lyrics.isConvertedToRomaja = false;
     cachedLyrics.lyrics.parsedLyrics = parsedLyrics;
 

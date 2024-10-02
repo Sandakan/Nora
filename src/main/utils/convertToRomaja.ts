@@ -97,9 +97,9 @@ const convertLyricsToRomaja = async () => {
       }
     }
 
-    cachedLyrics.lyrics.isConvertedToRomaji = true;
+    cachedLyrics.lyrics.isConvertedToRomaji = false;
     cachedLyrics.lyrics.isConvertedToPinyin = false;
-    cachedLyrics.lyrics.isConvertedToRomaja = false;
+    cachedLyrics.lyrics.isConvertedToRomaja = true;
     cachedLyrics.lyrics.parsedLyrics = parsedLyrics;
 
     updateCachedLyrics(() => cachedLyrics);
