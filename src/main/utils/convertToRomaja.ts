@@ -7,34 +7,49 @@ import { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
 import { romanize } from 'romaja/src/romanize.js';
 import isHangul from 'romaja/src/hangul/isHangul.js';
 
-const hasKoreanCharacter = (str: string) => {
+const hasConvertibleCharacter = (str: string) => {
   if (!str) return false;
-  for (const c of str) {
-    if (isHangul(c)) return true;
-  }
+  for (const c of str) if (isHangul(c)) return true;
   return false;
 };
 
-const convertLyricsToRomaja = () => {
+const convertText = (str: string) => {
+  //const strsToReplace = [' , ', ' . ', ' ? ', ' ! ', ' ; ', ' ) ', ' ( '];
+  //const strsReplace = [', ', '. ', '? ', '! ', '; ', ') ', ' ('];
+  const convertedText = romanize(str);
+  //for (let j = 0; j < strsToReplace.length; j++)
+  //convertedText = convertedText.replaceAll(strsToReplace[j], strsReplace[j]);
+  return convertedText.trim();
+};
+
+const convertLyricsToRomaja = async () => {
   const cachedLyrics = getCachedLyrics();
   try {
     if (!cachedLyrics) return undefined;
     const { parsedLyrics } = cachedLyrics.lyrics;
-    const lines = parsedLyrics.map((line) => {
-      if (typeof line.originalText === 'string') return line.originalText.trim();
-      return line.originalText
-        .map((x) => x.text)
-        .join(' ')
-        .trim();
-    });
+    const lines: (string | SyncedLyricsLineWord[])[] = parsedLyrics.map(
+      (line) => line.originalText
+    );
 
-    const koreanLyrics: string[] = [];
+    const convertedLyrics: string[][] = [];
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      if (!hasKoreanCharacter(line)) koreanLyrics.push('');
-      else {
-        const koreanLyric = romanize(line);
-        koreanLyrics.push(koreanLyric);
+      if (typeof line === 'string') {
+        if (!hasConvertibleCharacter(line)) convertedLyrics.push([]);
+        else convertedLyrics.push([convertText(line)]);
+      } else {
+        const convertedSyncedWords: string[] = [];
+        let convertedWordsCount = 0;
+        for (let j = 0; j < line.length; j++) {
+          const word = line[j];
+          if (!hasConvertibleCharacter(word.text)) convertedSyncedWords.push(word.text.trim());
+          else {
+            convertedSyncedWords.push(convertText(word.text));
+            convertedWordsCount++;
+          }
+        }
+        if (convertedWordsCount > 0) convertedLyrics.push(convertedSyncedWords);
+        else convertedLyrics.push([]);
       }
     }
 
@@ -55,18 +70,36 @@ const convertLyricsToRomaja = () => {
 
     for (let i = 0; i < parsedLyrics.length; i++) {
       const lyric = parsedLyrics[i];
-      const koreanLyric = koreanLyrics.at(i);
-
-      if (koreanLyric) {
-        const convertedText = koreanLyric.trim();
+      const convertedLyric = convertedLyrics.at(i);
+      if (!convertedLyric || convertedLyric.length === 0) {
+        lyric.convertedLyrics = '';
+        continue;
+      }
+      if (lyric.isEnhancedSynced) {
+        const enhancedLyrics: SyncedLyricsLineWord[] = new Array<SyncedLyricsLineWord>(
+          lyric.originalText.length
+        );
+        for (let j = 0; j < enhancedLyrics.length; j++) {
+          const originalEnhancedLyric = lyric.originalText.at(j) as SyncedLyricsLineWord;
+          const enhancedLyric = {
+            text: convertedLyric[j].trim().replaceAll('\n', ''),
+            start: originalEnhancedLyric.start,
+            end: originalEnhancedLyric.end,
+            unparsedText: originalEnhancedLyric.unparsedText
+          };
+          enhancedLyrics[j] = enhancedLyric;
+        }
+        lyric.convertedLyrics = enhancedLyrics;
+      } else {
+        const convertedText = convertedLyric[0].trim();
         if (convertedText !== INSTRUMENTAL_LYRIC_IDENTIFIER)
           lyric.convertedLyrics = convertedText.replaceAll('\n', '');
-      } else lyric.convertedLyrics = '';
+      }
     }
 
-    cachedLyrics.lyrics.isConvertedToRomaja = true;
+    cachedLyrics.lyrics.isConvertedToRomaji = true;
     cachedLyrics.lyrics.isConvertedToPinyin = false;
-    cachedLyrics.lyrics.isConvertedToRomaji = false;
+    cachedLyrics.lyrics.isConvertedToRomaja = false;
     cachedLyrics.lyrics.parsedLyrics = parsedLyrics;
 
     updateCachedLyrics(() => cachedLyrics);
@@ -81,6 +114,7 @@ const convertLyricsToRomaja = () => {
       messageCode: 'LYRICS_CONVERT_FAILED'
     });
   }
+
   return undefined;
 };
 

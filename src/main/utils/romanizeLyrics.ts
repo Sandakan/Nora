@@ -11,7 +11,7 @@ import Wanakana from 'wanakana';
 const kuroshiro = new Kuroshiro();
 await kuroshiro.init(new KuromojiAnalyzer());
 
-const hasJapaneseCharacter = (str: string) => {
+const hasConvertibleCharacter = (str: string) => {
   if (!str) return false;
   for (const c of str) {
     if (Kuroshiro.Util.isJapanese(c)) return true;
@@ -19,41 +19,45 @@ const hasJapaneseCharacter = (str: string) => {
   return false;
 };
 
+const convertText = async (str: string) => {
+  const strsToReplace = [' , ', ' . ', ' ? ', ' ! ', ' ; ', ' ) ', ' ( '];
+  const strsReplace = [', ', '. ', '? ', '! ', '; ', ') ', ' ('];
+  const kana = await kuroshiro.convert(str, { to: 'katakana', mode: 'spaced' });
+  let convertedText =
+    ' ' + Wanakana.toRomaji(kana, { customRomajiMapping: { '「': '「', '」': '」' } }) + ' ';
+  for (let j = 0; j < strsToReplace.length; j++)
+    convertedText = convertedText.replaceAll(strsToReplace[j], strsReplace[j]);
+  return convertedText.trim();
+};
+
 const romanizeLyrics = async () => {
   const cachedLyrics = getCachedLyrics();
   try {
     if (!cachedLyrics) return undefined;
     const { parsedLyrics } = cachedLyrics.lyrics;
-    const lines = parsedLyrics.map((line) => {
-      if (typeof line.originalText === 'string') return line.originalText.trim();
-      return line.originalText
-        .map((x) => x.text)
-        .join(' ')
-        .trim();
-    });
+    const lines: (string | SyncedLyricsLineWord[])[] = parsedLyrics.map(
+      (line) => line.originalText
+    );
 
-    const romanizedLyrics: string[] = [];
+    const convertedLyrics: string[][] = [];
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      if (!hasJapaneseCharacter(line)) romanizedLyrics.push('');
-      else {
-        const strsToReplace = [' , ', ' . ', ' ? ', ' ! ', ' ; ', ' ) ', ' ( '];
-        const strsReplace = [', ', '. ', '? ', '! ', '; ', ') ', ' ('];
-        // var romanized = ' ' + (await kuroshiro.convert(line, { to: 'romaji', mode: 'spaced' })) + ' ';
-        // for (let j = 0; j < strsToReplace.length; j++) {
-        //   romanized = romanized.replaceAll(strsToReplace[j], strsReplace[j]);
-        // }
-        // romanizedLyrics.push(romanized.trim());
-
-        //convert lyrics to katakana then to romaji
-        const kana = await kuroshiro.convert(line, { to: 'katakana', mode: 'spaced' });
-
-        let romanized =
-          ' ' + Wanakana.toRomaji(kana, { customRomajiMapping: { '「': '「', '」': '」' } }) + ' ';
-        for (let j = 0; j < strsToReplace.length; j++) {
-          romanized = romanized.replaceAll(strsToReplace[j], strsReplace[j]);
+      if (typeof line === 'string') {
+        if (!hasConvertibleCharacter(line)) convertedLyrics.push([]);
+        else convertedLyrics.push([await convertText(line)]);
+      } else {
+        const convertedSyncedWords: string[] = [];
+        let convertedWordsCount = 0;
+        for (let j = 0; j < line.length; j++) {
+          const word = line[j];
+          if (!hasConvertibleCharacter(word.text)) convertedSyncedWords.push(word.text.trim());
+          else {
+            convertedSyncedWords.push(await convertText(word.text));
+            convertedWordsCount++;
+          }
         }
-        romanizedLyrics.push(romanized.trim());
+        if (convertedWordsCount > 0) convertedLyrics.push(convertedSyncedWords);
+        else convertedLyrics.push([]);
       }
     }
 
@@ -74,13 +78,31 @@ const romanizeLyrics = async () => {
 
     for (let i = 0; i < parsedLyrics.length; i++) {
       const lyric = parsedLyrics[i];
-      const romanizedLyric = romanizedLyrics.at(i);
-
-      if (romanizedLyric) {
-        const romanizedText = romanizedLyric.trim();
-        if (romanizedText !== INSTRUMENTAL_LYRIC_IDENTIFIER)
-          lyric.convertedLyrics = romanizedText.replaceAll('\n', '');
-      } else lyric.convertedLyrics = '';
+      const convertedLyric = convertedLyrics.at(i);
+      if (!convertedLyric || convertedLyric.length === 0) {
+        lyric.convertedLyrics = '';
+        continue;
+      }
+      if (lyric.isEnhancedSynced) {
+        const enhancedLyrics: SyncedLyricsLineWord[] = new Array<SyncedLyricsLineWord>(
+          lyric.originalText.length
+        );
+        for (let j = 0; j < enhancedLyrics.length; j++) {
+          const originalEnhancedLyric = lyric.originalText.at(j) as SyncedLyricsLineWord;
+          const enhancedLyric = {
+            text: convertedLyric[j].trim().replaceAll('\n', ''),
+            start: originalEnhancedLyric.start,
+            end: originalEnhancedLyric.end,
+            unparsedText: originalEnhancedLyric.unparsedText
+          };
+          enhancedLyrics[j] = enhancedLyric;
+        }
+        lyric.convertedLyrics = enhancedLyrics;
+      } else {
+        const convertedText = convertedLyric[0].trim();
+        if (convertedText !== INSTRUMENTAL_LYRIC_IDENTIFIER)
+          lyric.convertedLyrics = convertedText.replaceAll('\n', '');
+      }
     }
 
     cachedLyrics.lyrics.isConvertedToRomaji = true;
