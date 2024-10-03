@@ -7,5 +7,6 @@
   ],
   "compilerOptions": {
    "types": ["electron-vite/node"],
+   "allowJs": true,
   }
 }

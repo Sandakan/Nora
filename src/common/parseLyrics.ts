@@ -6,6 +6,10 @@ import isLyricsSynced, {
   SYNCED_LYRICS_REGEX,
   isAnExtendedSyncedLyricsLine
 } from './isLyricsSynced';
+import Kuroshiro from 'kuroshiro';
+import detectChinese from '@neos21/detect-chinese';
+import pinyin from 'pinyin';
+import isHangul from 'romaja/src/hangul/isHangul.js';
 
 export type SyncedLyricsInput = NonNullable<NodeID3Tags['synchronisedLyrics']>[number];
 
@@ -246,11 +250,47 @@ const parseTranslatedLyricsText = (lines: string[]): TranslatedLyricLine[] => {
   });
 };
 
+const isJapaneseString = (str: string) => {
+  if (!str) return false;
+  let count = 0;
+  for (const c of str) {
+    if (Kuroshiro.Util.isJapanese(c)) count++;
+  }
+  return count / str.length > 0.5;
+};
+
+const isChineseString = (str: string) => {
+  if (!str) return false;
+  const detection = detectChinese.detect(str);
+  if (detection.language === 'cn') return true;
+  let count = 0;
+  for (let i = 0; i < str.length; i++) {
+    if (pinyin.pinyin(str[i])[0][0] != str[i]) count++;
+  }
+  return count / str.length > 0.5;
+};
+
+const isKoreanString = (str: string) => {
+  if (!str) return false;
+  str = str.replaceAll(' ', '');
+  let count = 0;
+  for (const c of str) {
+    if (isHangul(c)) count++;
+  }
+  return count / str.length > 0.5;
+};
+
 // MAIN FUNCTIONS //
 const parseLyrics = (lrcString: string): LyricsData => {
   const output: LyricsData = {
     isSynced: isLyricsSynced(lrcString),
     isTranslated: false,
+    isConvertedToRomaji: false,
+    isConvertedToPinyin: false,
+    isConvertedToRomaja: false,
+    isJapanese: false,
+    isChinese: false,
+    isKorean: false,
     parsedLyrics: [],
     unparsedLyrics: lrcString,
     copyright: getCopyrightInfoFromLyricsString(lrcString),
@@ -265,6 +305,27 @@ const parseLyrics = (lrcString: string): LyricsData => {
 
   const groupedLines = groupOriginalAndTranslatedLyricLines(lines, output.isSynced);
   const originalLyricsLines = groupedLines.map((line) => line.original.input);
+
+  let plainLyrics = originalLyricsLines.join('');
+  let isJP = false;
+  let isCN = false;
+  let isKR = false;
+
+  if (output.isSynced) {
+    plainLyrics = groupedLines
+      .map((line) => {
+        const lrcLine = parseLyricsText(
+          line.original.input,
+          getSecondsFromLyricsLine(line.original.input)
+        );
+        if (typeof lrcLine == 'string') return lrcLine as string;
+        else return lrcLine.map((x) => x.text).join('');
+      })
+      .join('');
+  }
+  isJP = isJapaneseString(plainLyrics);
+  isCN = isChineseString(plainLyrics);
+  isKR = isKoreanString(plainLyrics);
 
   output.parsedLyrics = groupedLines.map((line, index) => {
     if (output.isSynced) {
@@ -287,7 +348,8 @@ const parseLyrics = (lrcString: string): LyricsData => {
         translatedTexts,
         isEnhancedSynced,
         start,
-        end
+        end,
+        convertedLyrics: ''
       };
     }
 
@@ -304,10 +366,17 @@ const parseLyrics = (lrcString: string): LyricsData => {
       translatedTexts,
       isEnhancedSynced: false,
       start: undefined,
-      end: undefined
+      end: undefined,
+      isJapanese: isJP,
+      isChinese: isCN,
+      isKorean: isKR,
+      convertedLyrics: ''
     };
   });
 
+  output.isJapanese = isJP;
+  output.isChinese = isCN;
+  output.isKorean = isKR;
   return output;
 };
 
@@ -371,7 +440,8 @@ export const parseSyncedLyricsFromAudioDataSource = (
         translatedTexts: [],
         start: timeStamp / 1000,
         end: end / 1000,
-        isEnhancedSynced: typeof parsedTextLine !== 'string'
+        isEnhancedSynced: typeof parsedTextLine !== 'string',
+        convertedLyrics: ''
       };
     });
 
@@ -401,6 +471,14 @@ export const parseSyncedLyricsFromAudioDataSource = (
       })
       .join('\n');
 
+    const plainLyrics = lyrics
+      .map((line) => {
+        line.originalText;
+      })
+      .join('');
+    const isJapanese = isJapaneseString(plainLyrics);
+    const isChinese = isChineseString(plainLyrics);
+    const isKorean = isKoreanString(plainLyrics);
     return {
       isSynced: true,
       isTranslated: false,
@@ -409,7 +487,13 @@ export const parseSyncedLyricsFromAudioDataSource = (
       unparsedLyrics,
       originalLanguage: undefined,
       translatedLanguages: [],
-      offset: 0
+      offset: 0,
+      isConvertedToRomaji: false,
+      isJapanese,
+      isConvertedToPinyin: false,
+      isChinese,
+      isConvertedToRomaja: false,
+      isKorean
     };
   }
   return undefined;
