@@ -70,8 +70,10 @@ const getTranslatedLyrics = async (languageCode: string) => {
 
       const isJapanese = cachedLyrics.lyrics.isJapanese;
       const isChinese = cachedLyrics.lyrics.isChinese;
+      const isKorean = cachedLyrics.lyrics.isKorean;
       const isConvertedToRomaji = cachedLyrics.lyrics.isConvertedToRomaji;
       const isConvertedToPinyin = cachedLyrics.lyrics.isConvertedToPinyin;
+      const isConvertedToRomaja = cachedLyrics.lyrics.isConvertedToRomaja;
 
       cachedLyrics.lyrics = translatedLyrics;
       cachedLyrics.lyrics.parsedLyrics.map((line, index) => {
@@ -80,8 +82,10 @@ const getTranslatedLyrics = async (languageCode: string) => {
 
       cachedLyrics.lyrics.isJapanese = isJapanese;
       cachedLyrics.lyrics.isChinese = isChinese;
+      cachedLyrics.lyrics.isKorean = isKorean;
       cachedLyrics.lyrics.isConvertedToRomaji = isConvertedToRomaji;
       cachedLyrics.lyrics.isConvertedToPinyin = isConvertedToPinyin;
+      cachedLyrics.lyrics.isConvertedToRomaja = isConvertedToRomaja;
 
       updateCachedLyrics(() => cachedLyrics);
 
