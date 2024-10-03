@@ -144,9 +144,9 @@ const LyricLine = (props: LyricProp) => {
     return extendedLyricLines;
   }, [isInRange, convertedLyric]);
 
-  var lyricStringLinePrimary = lyricString;
-  var lyricStringLineSecondaryLower = translatedLyricString;
-  var lyricStringLineSecondaryUpper = convertedLyricString;
+  let lyricStringLinePrimary = lyricString;
+  let lyricStringLineSecondaryLower = translatedLyricString;
+  let lyricStringLineSecondaryUpper = convertedLyricString;
   if (preferences.compactLyrics) {
     lyricStringLinePrimary = translatedLyricString ?? convertedLyricString ?? lyricString;
     lyricStringLineSecondaryLower = lyricStringLineSecondaryUpper = undefined;
@@ -179,7 +179,9 @@ const LyricLine = (props: LyricProp) => {
       }`}
       ref={lyricsRef}
       onClick={() =>
-        syncedLyrics && typeof lyric === 'string' && updateSongPosition(syncedLyrics.start)
+        syncedLyrics &&
+        (typeof lyric === 'string' || (translatedLyricString && preferences.compactLyrics)) &&
+        updateSongPosition(syncedLyrics.start)
       }
       onContextMenu={(e) => {
         e.preventDefault();
@@ -220,6 +222,9 @@ const LyricLine = (props: LyricProp) => {
       {lyricStringLineSecondaryLower && (
         <div
           className={`flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'} ${syncedLyrics && isInRange ? '!text-xl !text-font-color-black/50 dark:!text-font-color-white/50' : '!text-xl'}`}
+          onClick={() =>
+            syncedLyrics && updateSongPosition(syncedLyrics.start)
+          }
         >
           {lyricStringLineSecondaryLower}
         </div>

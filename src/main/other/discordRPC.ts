@@ -2,7 +2,7 @@ import { getUserData } from '../filesystem';
 import log from '../log';
 import { Initialize, setDiscordRPC } from './discord';
 
-var dataQueue: any[] = [];
+let dataQueue: any[] = [];
 
 export const setDiscordRpcActivity = (data: any) => {
   try {
