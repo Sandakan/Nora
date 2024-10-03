@@ -411,6 +411,8 @@
     "autoTranslateLyrics": "Auto translate lyrics",
     "autoConvertLyricsDescription": "Enable automatic conversion of supported lyrics to Latin characters. Currently, Nora supports converting Japanese, Chinese, and Korean lyrics to their respective Romanization systems.",
     "autoConvertLyrics": "Auto convert lyrics",
+    "compactLyricsDescription": "Enable compact lyrics to only show lyrics in 1 line in the following availablity order: translated lyrics => converted lyrics => original lyrics.",
+    "compactLyrics": "Compact lyrics",
     "lrcFileCustomSaveLocationDescription": "Select a custom location to save LRC files of songs if you don't want to save them in the same folder as the relative song.",
     "selectedCustomLocation": "Selected custom location",
     "setCustomLocation": "Set custom location",

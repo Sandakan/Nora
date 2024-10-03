@@ -58,6 +58,14 @@ const LyricsSettings = () => {
     setAutoConvertLyrics(autoConvertLyrics);
   }, []);
 
+  const [compactLyrics, setCompactLyrics] = useState(true);
+
+  useEffect(() => {
+    const compactLyrics = storage.preferences.getPreferences('compactLyrics');
+
+    setCompactLyrics(compactLyrics);
+  }, []);
+
   return (
     <li className="main-container audio-playback-settings-container mb-16">
       <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
@@ -213,7 +221,7 @@ const LyricsSettings = () => {
           <div className="description">{t('settingsPage.autoTranslateLyricsDescription')}</div>
           <Checkbox
             id="autoTranslateLyrics"
-            isChecked={userData !== undefined && autoTranslateLyrics}
+            isChecked={autoTranslateLyrics}
             checkedStateUpdateFunction={(state) => {
               setAutoTranslateLyrics(state);
               storage.preferences.setPreferences('autoTranslateLyrics', state);
@@ -226,12 +234,25 @@ const LyricsSettings = () => {
           <div className="description">{t('settingsPage.autoConvertLyricsDescription')}</div>
           <Checkbox
             id="autoConvertLyrics"
-            isChecked={userData !== undefined && autoConvertLyrics}
+            isChecked={autoConvertLyrics}
             checkedStateUpdateFunction={(state) => {
               setAutoConvertLyrics(state);
               storage.preferences.setPreferences('autoConvertLyrics', state);
             }}
             labelContent={t('settingsPage.autoConvertLyrics')}
+          />
+        </li>
+
+        <li className="secondary-container expand-lyrics mb-4">
+          <div className="description">{t('settingsPage.compactLyricsDescription')}</div>
+          <Checkbox
+            id="compactLyrics"
+            isChecked={compactLyrics}
+            checkedStateUpdateFunction={(state) => {
+              setCompactLyrics(state);
+              storage.preferences.setPreferences('compactLyrics', state);
+            }}
+            labelContent={t('settingsPage.compactLyrics')}
           />
         </li>
       </ul>

@@ -35,6 +35,8 @@ const LyricLine = (props: LyricProp) => {
   const lyricsRef = useRef(null as HTMLDivElement | null);
   const isTheCurrnetLineRef = useRef(false);
 
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const {
     index,
     lyric,
@@ -142,14 +144,12 @@ const LyricLine = (props: LyricProp) => {
     return extendedLyricLines;
   }, [isInRange, convertedLyric]);
 
-  //TODO: Let user choose what line should display what
   var lyricStringLinePrimary = lyricString;
   var lyricStringLineSecondaryLower = translatedLyricString;
   var lyricStringLineSecondaryUpper = convertedLyricString;
-  if (translatedLyricString) {
-    lyricStringLinePrimary = translatedLyricString;
-    lyricStringLineSecondaryLower = convertedLyricString ?? lyricString;
-    lyricStringLineSecondaryUpper = undefined;
+  if (preferences.compactLyrics) {
+    lyricStringLinePrimary = translatedLyricString ?? convertedLyricString ?? lyricString;
+    lyricStringLineSecondaryLower = lyricStringLineSecondaryUpper = undefined;
   }
 
   return (

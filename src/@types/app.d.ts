@@ -399,6 +399,7 @@ declare global {
     | 'preferences.saveLyricsInLrcFilesForSupportedSongs'
     | 'preferences.autoTranslateLyrics'
     | 'preferences.autoConvertLyrics'
+    | 'preferences.compactLyrics'
     | 'preferences.enableDiscordRPC'
     | 'customMusixmatchUserToken'
     | 'customLrcFilesSaveLocation'
@@ -510,6 +511,7 @@ declare global {
     enableImageBasedDynamicThemes: boolean;
     autoTranslateLyrics: boolean;
     autoConvertLyrics: boolean;
+    compactLyrics: boolean;
   }
 
   interface CurrentSong {
