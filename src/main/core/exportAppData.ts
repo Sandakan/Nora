@@ -119,8 +119,9 @@ const exportAppData = async (localStorageData: string) => {
       for (let i = 0; i < operations.length; i++) {
         const operation = operations[i];
 
-        if (operation.directory) await copyDir(operation.directory, destination);
-        else if (operation.dataString)
+        if (operation?.directory)
+          await copyDir(operation.directory, path.join(destination, 'song_covers'));
+        else if (operation?.dataString)
           await fs.writeFile(path.join(destination, operation.filename), operation.dataString);
         else throw new Error('Invalid operation');
 
