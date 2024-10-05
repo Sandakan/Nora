@@ -42,11 +42,11 @@ const LyricsContainer = (props: Props) => {
           setIsLyricsAvailable(res?.lyrics?.isSynced ?? false);
           setLyrics(res);
 
-          if (preferences.autoTranslateLyrics && !res?.lyrics.isTranslated) {
+          if (preferences.autoTranslateLyrics && !res?.lyrics.isReset && !res?.lyrics.isTranslated) {
             window.api.lyrics.getTranslatedLyrics(i18n.language as LanguageCodes).then(setLyrics);
           }
           if (
-            preferences.autoConvertLyrics &&
+            preferences.autoConvertLyrics  && !res?.lyrics.isReset &&
             !(
               res?.lyrics.isConvertedToPinyin ||
               res?.lyrics.isConvertedToRomaji ||

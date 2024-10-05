@@ -276,6 +276,7 @@ declare global {
     isConvertedToRomaji: boolean;
     isConvertedToPinyin: boolean;
     isConvertedToRomaja: boolean;
+    isReset: boolean;
     parsedLyrics: LyricLine[]; // Array of original lyric lines (both synced and unsynced
     unparsedLyrics: string;
     offset?: number;

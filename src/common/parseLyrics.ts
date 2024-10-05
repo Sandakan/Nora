@@ -291,6 +291,7 @@ const parseLyrics = (lrcString: string): LyricsData => {
     isJapanese: false,
     isChinese: false,
     isKorean: false,
+    isReset: false,
     parsedLyrics: [],
     unparsedLyrics: lrcString,
     copyright: getCopyrightInfoFromLyricsString(lrcString),
@@ -500,7 +501,8 @@ export const parseSyncedLyricsFromAudioDataSource = (
       isConvertedToPinyin: false,
       isChinese,
       isConvertedToRomaja: false,
-      isKorean
+      isKorean,
+      isReset: false
     };
   }
   return undefined;

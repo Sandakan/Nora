@@ -10,6 +10,7 @@ const resetLyrics = () => {
     cachedLyrics.lyrics.isConvertedToRomaji = false;
     cachedLyrics.lyrics.isConvertedToRomaja = false;
     cachedLyrics.lyrics.translatedLanguages = [];
+    cachedLyrics.lyrics.isReset = true;
     cachedLyrics.lyrics.isTranslated = false;
     cachedLyrics.lyrics.parsedLyrics.forEach((line) => {
       line.convertedLyrics = '';
