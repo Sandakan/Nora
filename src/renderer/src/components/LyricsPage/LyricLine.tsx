@@ -144,13 +144,10 @@ const LyricLine = (props: LyricProp) => {
     return extendedLyricLines;
   }, [isInRange, convertedLyric]);
 
-  let lyricStringLinePrimary = lyricString;
-  let lyricStringLineSecondaryLower = translatedLyricString;
-  let lyricStringLineSecondaryUpper = convertedLyricString;
-  if (preferences.compactLyrics) {
-    lyricStringLinePrimary = translatedLyricString ?? convertedLyricString ?? lyricString;
-    lyricStringLineSecondaryLower = lyricStringLineSecondaryUpper = undefined;
-  }
+  const lyricStringLinePrimary = translatedLyricString ?? convertedLyricString ?? lyricString;
+  let lyricStringLineSecondaryUpper;
+  if (!preferences.compactLyrics && translatedLyricString)
+    lyricStringLineSecondaryUpper = convertedLyricString ?? lyricString;
 
   return (
     <div
@@ -219,16 +216,6 @@ const LyricLine = (props: LyricProp) => {
       >
         {lyricStringLinePrimary}
       </div>
-      {lyricStringLineSecondaryLower && (
-        <div
-          className={`flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'} ${syncedLyrics && isInRange ? '!text-xl !text-font-color-black/50 dark:!text-font-color-white/50' : '!text-xl'}`}
-          onClick={() =>
-            syncedLyrics && updateSongPosition(syncedLyrics.start)
-          }
-        >
-          {lyricStringLineSecondaryLower}
-        </div>
-      )}
       {syncedLyrics && isInRange && <LyricsProgressBar delay={0} syncedLyrics={syncedLyrics} />}
     </div>
   );

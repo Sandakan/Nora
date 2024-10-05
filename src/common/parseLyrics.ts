@@ -323,9 +323,16 @@ const parseLyrics = (lrcString: string): LyricsData => {
       })
       .join('');
   }
-  isJP = isJapaneseString(plainLyrics);
-  isCN = isChineseString(plainLyrics);
-  isKR = isKoreanString(plainLyrics);
+  if (output.originalLanguage) {
+    isJP = output.originalLanguage === 'ja';
+    isCN = output.originalLanguage === 'zh';
+    isKR = output.originalLanguage === 'ko';
+  } else {
+    isJP = isJapaneseString(plainLyrics);
+    isCN = isChineseString(plainLyrics);
+    isKR = isKoreanString(plainLyrics);
+    output.originalLanguage = isCN ? 'zh' : isJP ? 'ja' : isKR ? 'ko' : '';
+  }
 
   output.parsedLyrics = groupedLines.map((line, index) => {
     if (output.isSynced) {
