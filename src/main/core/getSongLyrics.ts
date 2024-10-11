@@ -35,9 +35,11 @@ export const parseLyricsFromID3Format = (
     const reversedForLatestLyricsStore = synchronisedLyrics.reverse();
 
     for (const syncedLyricsData of reversedForLatestLyricsStore) {
-      const parsedSyncedLyrics = parseSyncedLyricsFromAudioDataSource(syncedLyricsData);
+      if (syncedLyricsData.synchronisedText.length > 0) {
+        const parsedSyncedLyrics = parseSyncedLyricsFromAudioDataSource(syncedLyricsData);
 
-      if (parsedSyncedLyrics) return parsedSyncedLyrics;
+        if (parsedSyncedLyrics) return parsedSyncedLyrics;
+      }
     }
   }
 

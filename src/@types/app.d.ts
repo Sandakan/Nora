@@ -142,7 +142,7 @@ declare global {
       onlineArtworkPaths?: OnlineArtistArtworks;
     }[];
     duration: number;
-    artwork?: string | Buffer;
+    artwork?: string | Buffer | Uint8Array;
     artworkPath?: string;
     path: string;
     isAFavorite: boolean;

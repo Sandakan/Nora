@@ -16,7 +16,7 @@ import { getSelectedPaletteData } from '../other/generatePalette';
 
 const IS_DEVELOPMENT = !app.isPackaged || process.env.NODE_ENV === 'development';
 
-const getArtworkData = (artworkData?: Buffer) => {
+const getArtworkData = (artworkData?: Buffer | Uint8Array) => {
   if (artworkData === undefined) return undefined;
 
   if (IS_DEVELOPMENT) return Buffer.from(artworkData).toString('base64');
