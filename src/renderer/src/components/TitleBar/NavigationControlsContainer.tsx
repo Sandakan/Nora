@@ -1,15 +1,20 @@
-import React from 'react';
+import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
+import { useStore } from '@tanstack/react-store';
+import { store } from '../../store';
 
 type Props = { disableHomeButton?: boolean };
 
 const NavigationControlsContainer = (props: Props) => {
-  const { pageHistoryIndex, noOfPagesInHistory, bodyBackgroundImage } =
-    React.useContext(AppContext);
-  const { updatePageHistoryIndex } = React.useContext(AppUpdateContext);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+  const navigationHistory = useStore(store, (state) => state.navigationHistory);
+
+  const pageHistoryIndex = navigationHistory.pageHistoryIndex;
+  const noOfPagesInHistory = navigationHistory.history.length - 1;
+
+  const { updatePageHistoryIndex } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { disableHomeButton = false } = props;

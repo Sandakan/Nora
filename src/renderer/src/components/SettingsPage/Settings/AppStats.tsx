@@ -1,11 +1,11 @@
-import React from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { valueRounder } from '../../../utils/valueRounder';
 
 const AppStats = () => {
   const { t } = useTranslation();
 
-  const [stats, setStats] = React.useState({
+  const [stats, setStats] = useState({
     songs: 0,
     artists: 0,
     albums: 0,
@@ -13,7 +13,7 @@ const AppStats = () => {
     genres: 0
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     window.api.audioLibraryControls
       .getAllSongs()
       .then((res) => {
@@ -75,7 +75,7 @@ const AppStats = () => {
       .catch((err) => console.error(err));
   }, []);
 
-  const statComponents = React.useMemo(
+  const statComponents = useMemo(
     () =>
       Object.entries(stats).map(([key, value]) => {
         const statKey = key as keyof typeof stats;

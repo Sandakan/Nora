@@ -1,13 +1,13 @@
-import React from 'react';
+import { useContext } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import Button from './Button';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 
-import packageFile from '../../../../package.json';
+import { appPreferences } from '../../../../package.json';
 
 type Props = { filePath: string };
-const { supportedMusicExtensions } = packageFile.appPreferences;
+const { supportedMusicExtensions } = appPreferences;
 
 const supportedExtensionComponents = supportedMusicExtensions.map((ext) => (
   <span className="mx-2" key={ext}>
@@ -16,7 +16,7 @@ const supportedExtensionComponents = supportedMusicExtensions.map((ext) => (
 ));
 
 const UnsupportedFileMessagePrompt = (props: Props) => {
-  const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { filePath } = props;

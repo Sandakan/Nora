@@ -3,7 +3,7 @@
 /* eslint-disable default-param-last */
 /* eslint-disable no-use-before-define */
 /* eslint-disable global-require */
-import { join } from 'path';
+import path, { join } from 'path';
 import os from 'os';
 import {
   app,
@@ -160,10 +160,10 @@ const installExtensions = async () => {
   }
 };
 
-const getBackgroundColor = () => {
+export const getBackgroundColor = () => {
   const userData = getUserData();
-  if (userData.theme.isDarkMode) return 'hsla(228, 7%, 14%, 100%)';
-  return 'hsl(0, 0%, 100%)';
+  if (userData.theme.isDarkMode) return '#212226';
+  return '#FFFFFF';
 };
 
 const createWindow = async () => {
@@ -177,7 +177,7 @@ const createWindow = async () => {
     title: 'Nora',
     webPreferences: {
       zoomFactor: 0.9,
-      preload: join(__dirname, '../preload/index.js')
+      preload: path.resolve(import.meta.dirname, '../preload/index.mjs')
     },
     visualEffectState: 'followWindow',
     roundedCorners: true,
@@ -576,20 +576,20 @@ export async function revealSongInFileExplorer(songId: string) {
     `Revealing song file in explorer failed because song couldn't be found in the library.`,
     { songId },
     'WARN',
-    { sendToRenderer: { messageCode: 'SONG_REVEAL_FAILED' } }
+    { sendToRenderer: { messageCode: 'OPEN_SONG_IN_EXPLORER_FAILED' } }
   );
 }
 
-const songsOutsideLibraryData: SongOutsideLibraryData[] = [];
+const songsOutsideLibraryData: AudioPlayerData[] = [];
 
 export const getSongsOutsideLibraryData = () => songsOutsideLibraryData;
 
-export const addToSongsOutsideLibraryData = (data: SongOutsideLibraryData) =>
+export const addToSongsOutsideLibraryData = (data: AudioPlayerData) =>
   songsOutsideLibraryData.push(data);
 
 export const updateSongsOutsideLibraryData = (
   songidOrPath: string,
-  data: SongOutsideLibraryData
+  data: AudioPlayerData
 ): void => {
   for (let i = 0; i < songsOutsideLibraryData.length; i += 1) {
     if (

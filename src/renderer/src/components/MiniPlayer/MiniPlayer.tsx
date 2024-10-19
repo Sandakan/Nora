@@ -1,8 +1,7 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable no-nested-ternary */
-import React from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import Button from '../Button';
@@ -12,14 +11,19 @@ import LyricsContainer from './containers/LyricsContainer';
 import SeekBarSlider from '../SeekBarSlider';
 import TitleBarContainer from './containers/TitleBarContainer';
 import VolumeSlider from '../VolumeSlider';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type MiniPlayerProps = {
   className?: string;
 };
 
 export default function MiniPlayer(props: MiniPlayerProps) {
-  const { currentSongData, isCurrentSongPlaying, isMuted, localStorageData } =
-    React.useContext(AppContext);
+  const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const isMuted = useStore(store, (state) => state.player.volume.isMuted);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const {
     toggleSongPlayback,
     updatePlayerType,
@@ -27,17 +31,17 @@ export default function MiniPlayer(props: MiniPlayerProps) {
     handleSkipForwardClick,
     toggleIsFavorite,
     toggleMutedState
-  } = React.useContext(AppUpdateContext);
+  } = useContext(AppUpdateContext);
 
   const { className } = props;
 
   const { t } = useTranslation();
 
-  const [isNextSongPopupVisible, setIsNextSongPopupVisible] = React.useState(false);
+  const [isNextSongPopupVisible, setIsNextSongPopupVisible] = useState(false);
 
-  const [isLyricsVisible, setIsLyricsVisible] = React.useState(false);
+  const [isLyricsVisible, setIsLyricsVisible] = useState(false);
 
-  const manageKeyboardShortcuts = React.useCallback(
+  const manageKeyboardShortcuts = useCallback(
     (e: KeyboardEvent) => {
       if (e.ctrlKey) {
         if (e.key === 'l') setIsLyricsVisible((prevState) => !prevState);
@@ -47,14 +51,14 @@ export default function MiniPlayer(props: MiniPlayerProps) {
     [updatePlayerType]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     window.addEventListener('keydown', manageKeyboardShortcuts);
     return () => {
       window.removeEventListener('keydown', manageKeyboardShortcuts);
     };
   }, [manageKeyboardShortcuts]);
 
-  const handleSkipForwardClickWithParams = React.useCallback(
+  const handleSkipForwardClickWithParams = useCallback(
     () => handleSkipForwardClick('USER_SKIP'),
     [handleSkipForwardClick]
   );
@@ -64,7 +68,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
       className={`mini-player dark group h-full select-none overflow-hidden !bg-dark-background-color-1 !transition-none delay-100 dark:!bg-dark-background-color-1 ${
         !isCurrentSongPlaying && 'paused'
       } ${
-        localStorageData?.preferences?.isReducedMotion ? 'reduced-motion' : ''
+        preferences?.isReducedMotion ? 'reduced-motion' : ''
       } [&:focus-within>.container>.song-controls-container>button]:translate-x-0 [&:focus-within>.container>.song-controls-container>button]:scale-100 [&:focus-within>.container>.song-controls-container]:visible [&:focus-within>.container>.song-controls-container]:opacity-100 [&:hover>.container>.song-controls-container>button]:translate-x-0 [&:hover>.container>.song-controls-container>button]:scale-100 [&:hover>.container>.song-controls-container]:visible [&:hover>.container>.song-controls-container]:opacity-100 ${className}`}
     >
       <div className="background-cover-img-container h-full overflow-hidden">
@@ -74,8 +78,8 @@ export default function MiniPlayer(props: MiniPlayerProps) {
           loading="eager"
           alt="Song Cover"
           className={`h-full w-full object-cover transition-[filter] delay-100 duration-200 ease-in-out group-focus-within:blur-[2px] group-focus-within:brightness-75 group-hover:blur-[2px] group-hover:brightness-75 group-focus:blur-[4px] group-focus:brightness-75 ${
-            isLyricsVisible ? '!blur-[2px] !brightness-[.25]' : ''
-          } ${!isCurrentSongPlaying ? 'blur-[2px] brightness-75' : 'blur-0 brightness-100'}`}
+            isLyricsVisible ? '!blur-[1rem] !brightness-[.25]' : ''
+          } ${!isCurrentSongPlaying ? 'blur-[1rem] brightness-75' : 'blur-0 brightness-100'}`}
         />
       </div>
       <LyricsContainer isLyricsVisible={isLyricsVisible} />
@@ -87,7 +91,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
       >
         <TitleBarContainer isLyricsVisible={isLyricsVisible} />
         <div
-          className={`song-controls-container delay-50 absolute left-1/2 top-[45%] flex h-fit -translate-x-1/2 -translate-y-1/2 items-center justify-center  !bg-[transparent] shadow-none transition-[visibility,opacity] dark:!bg-[transparent] ${
+          className={`song-controls-container delay-50 absolute left-1/2 top-[45%] flex h-fit -translate-x-1/2 -translate-y-1/2 items-center justify-center !bg-[transparent] shadow-none transition-[visibility,opacity] dark:!bg-[transparent] ${
             !isCurrentSongPlaying ? 'visible opacity-100' : 'invisible opacity-0'
           }`}
         >

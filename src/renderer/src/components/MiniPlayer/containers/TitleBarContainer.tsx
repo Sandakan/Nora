@@ -1,19 +1,22 @@
-import React from 'react';
+import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../../Button';
-import { AppContext } from '../../../contexts/AppContext';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import { store } from '@renderer/store';
+import { useStore } from '@tanstack/react-store';
 
 type Props = { isLyricsVisible: boolean };
 
 const TitleBarContainer = (props: Props) => {
-  const { isCurrentSongPlaying, userData } = React.useContext(AppContext);
-  const { updatePlayerType, updateUserData } = React.useContext(AppUpdateContext);
+  const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
+  const userData = useStore(store, (state) => state.userData);
+
+  const { updatePlayerType, updateUserData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { isLyricsVisible } = props;
 
-  const toggleAlwaysOnTop = React.useCallback(() => {
+  const toggleAlwaysOnTop = useCallback(() => {
     if (userData) {
       const state = !userData?.preferences.isMiniPlayerAlwaysOnTop;
       return window.api.miniPlayer.toggleMiniPlayerAlwaysOnTop(state).then(() =>

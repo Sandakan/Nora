@@ -1,11 +1,12 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../../contexts/AppContext';
 import storage from '../../../utils/localStorage';
 import Checkbox from '../../Checkbox';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const PreferencesSettings = () => {
-  const { userData, localStorageData } = React.useContext(AppContext);
+  const userData = useStore(store, (state) => state.userData);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
   const { t } = useTranslation();
 
   return (
@@ -20,9 +21,7 @@ const PreferencesSettings = () => {
             <div className="description">{t('settingsPage.songIndexingDescription')}</div>
             <Checkbox
               id="isSongIndexingEnabled"
-              isChecked={
-                localStorageData !== undefined && localStorageData.preferences.isSongIndexingEnabled
-              }
+              isChecked={preferences?.isSongIndexingEnabled}
               checkedStateUpdateFunction={(state) =>
                 storage.preferences.setPreferences('isSongIndexingEnabled', state)
               }
@@ -38,10 +37,7 @@ const PreferencesSettings = () => {
             </div>
             <Checkbox
               id="showTrackNumberAsSongIndex"
-              isChecked={
-                localStorageData !== undefined &&
-                localStorageData.preferences.showTrackNumberAsSongIndex
-              }
+              isChecked={preferences?.showTrackNumberAsSongIndex}
               checkedStateUpdateFunction={(state) =>
                 storage.preferences.setPreferences('showTrackNumberAsSongIndex', state)
               }
@@ -57,10 +53,7 @@ const PreferencesSettings = () => {
             </div>
             <Checkbox
               id="showArtistArtworkNearSongControls"
-              isChecked={
-                userData !== undefined &&
-                localStorageData.preferences.showArtistArtworkNearSongControls
-              }
+              isChecked={userData !== undefined && preferences?.showArtistArtworkNearSongControls}
               checkedStateUpdateFunction={(state) =>
                 storage.preferences.setPreferences('showArtistArtworkNearSongControls', state)
               }
@@ -76,10 +69,7 @@ const PreferencesSettings = () => {
             </div>
             <Checkbox
               id="disableBackgroundArtwork"
-              isChecked={
-                localStorageData !== undefined &&
-                localStorageData.preferences.disableBackgroundArtworks
-              }
+              isChecked={preferences?.disableBackgroundArtworks}
               checkedStateUpdateFunction={(state) =>
                 storage.preferences.setPreferences('disableBackgroundArtworks', state)
               }
@@ -94,10 +84,7 @@ const PreferencesSettings = () => {
             <Checkbox
               id="enableArtworkFromSongCovers"
               className="mb-2"
-              isChecked={
-                localStorageData !== undefined &&
-                localStorageData.preferences.enableArtworkFromSongCovers
-              }
+              isChecked={preferences?.enableArtworkFromSongCovers}
               checkedStateUpdateFunction={(state) =>
                 storage.preferences.setPreferences('enableArtworkFromSongCovers', state)
               }
@@ -105,16 +92,8 @@ const PreferencesSettings = () => {
             />
             <Checkbox
               id="shuffleArtworkFromSongCovers"
-              isDisabled={
-                !(
-                  localStorageData !== undefined &&
-                  localStorageData.preferences.enableArtworkFromSongCovers
-                )
-              }
-              isChecked={
-                localStorageData !== undefined &&
-                localStorageData.preferences.shuffleArtworkFromSongCovers
-              }
+              isDisabled={!preferences?.enableArtworkFromSongCovers}
+              isChecked={preferences?.shuffleArtworkFromSongCovers}
               checkedStateUpdateFunction={(state) =>
                 storage.preferences.setPreferences('shuffleArtworkFromSongCovers', state)
               }

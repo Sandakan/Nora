@@ -155,7 +155,7 @@ const createTempFolder = async (folderPath: string) => {
   }
 };
 
-export const createTempArtwork = async (artwork: Buffer | string): Promise<string> => {
+export const createTempArtwork = async (artwork: Uint8Array | Buffer | string): Promise<string> => {
   try {
     const tempFolder = path.join(app.getPath('userData'), 'temp_artworks');
     await createTempFolder(tempFolder);

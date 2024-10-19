@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import SongAdditionalInfoItem from './SongAdditionalInfoItem';
 import Button from '../Button';
@@ -10,7 +10,7 @@ const SongAdditionalInfoContainer = (props: Props) => {
 
   const { songInfo, songDurationStr } = props;
 
-  const [isDataVisible, setIsDataVisible] = React.useState(false);
+  const [isDataVisible, setIsDataVisible] = useState(false);
 
   return (
     <div className="other-cards appear-from-bottom mr-4 mt-4 w-full max-w-full rounded-xl bg-background-color-2/70 p-4 backdrop-blur-sm dark:bg-dark-background-color-2/70 dark:text-font-color-white">

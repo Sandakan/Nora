@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/no-autofocus */
-import React from 'react';
+import { useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
@@ -10,14 +10,14 @@ type Props = { playlistData: Playlist };
 
 const RenamePlaylistPrompt = (props: Props) => {
   const { playlistData } = props;
-  const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { name, playlistId, artworkPaths } = playlistData;
 
-  const [input, setInput] = React.useState(name);
+  const [input, setInput] = useState(name);
 
-  const renamePlaylist = React.useCallback(
+  const renamePlaylist = useCallback(
     (newName: string) =>
       window.api.playlistsData
         .renameAPlaylist(playlistId, newName)

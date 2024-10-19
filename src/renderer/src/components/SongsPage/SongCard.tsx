@@ -1,18 +1,25 @@
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React from 'react';
+import { lazy, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
-import AddSongsToPlaylists from './AddSongsToPlaylists';
-import BlacklistSongConfrimPrompt from './BlacklistSongConfirmPrompt';
 import SongArtist from './SongArtist';
-import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
-import DeleteSongsFromSystemConfrimPrompt from './DeleteSongsFromSystemConfrimPrompt';
 import Button from '../Button';
+
+const AddSongsToPlaylistsPrompt = lazy(() => import('./AddSongsToPlaylistsPrompt'));
+const BlacklistSongConfrimPrompt = lazy(() => import('./BlacklistSongConfirmPrompt'));
+const DeleteSongsFromSystemConfrimPrompt = lazy(
+  () => import('./DeleteSongsFromSystemConfrimPrompt')
+);
+
+import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
+import { useStore } from '@tanstack/react-store';
+import { store } from '../../store';
 
 interface SongCardProp {
   index: number;
@@ -30,14 +37,19 @@ interface SongCardProp {
 }
 
 const SongCard = (props: SongCardProp) => {
-  const {
-    currentSongData,
-    queue,
-    isCurrentSongPlaying,
-    localStorageData,
-    isMultipleSelectionEnabled,
-    multipleSelectionsData
-  } = React.useContext(AppContext);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+  const doNotShowBlacklistSongConfirm = useStore(
+    store,
+    (state) => state.localStorage.preferences.doNotShowBlacklistSongConfirm
+  );
+  const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+
   const {
     playSong,
     updateContextMenuData,
@@ -49,7 +61,7 @@ const SongCard = (props: SongCardProp) => {
     toggleMultipleSelections,
     updateMultipleSelections,
     createQueue
-  } = React.useContext(AppUpdateContext);
+  } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const {
@@ -67,13 +79,13 @@ const SongCard = (props: SongCardProp) => {
     selectAllHandler
   } = props;
 
-  const [isSongAFavorite, setIsSongAFavorite] = React.useState(
+  const [isSongAFavorite, setIsSongAFavorite] = useState(
     songId === currentSongData.songId ? currentSongData.isAFavorite : isAFavorite
   );
-  const [isSongPlaying, setIsSongPlaying] = React.useState(
+  const [isSongPlaying, setIsSongPlaying] = useState(
     currentSongData ? currentSongData.songId === songId && isCurrentSongPlaying : false
   );
-  React.useEffect(() => {
+  useEffect(() => {
     setIsSongPlaying(() => {
       if (currentSongData) return currentSongData.songId === songId && isCurrentSongPlaying;
       return false;
@@ -84,7 +96,7 @@ const SongCard = (props: SongCardProp) => {
     });
   }, [currentSongData, isCurrentSongPlaying, songId]);
 
-  const [h, s, l] = React.useMemo(() => {
+  const [h, s, l] = useMemo(() => {
     const swatch = palette?.LightVibrant;
     if (swatch?.hsl) {
       const { hsl } = swatch;
@@ -96,11 +108,11 @@ const SongCard = (props: SongCardProp) => {
 
   const background = `linear-gradient(to top,hsl(${h} ${s} ${l} / 0.35) 0%, hsl(${h} ${s} ${l} / 0.15) 40%), linear-gradient(to top,rgba(0,0,0,0.8)0%,rgba(0,0,0,0.1) 60%)`;
 
-  const handlePlayBtnClick = React.useCallback(() => {
+  const handlePlayBtnClick = useCallback(() => {
     playSong(songId);
   }, [playSong, songId]);
 
-  const isAMultipleSelection = React.useMemo(() => {
+  const isAMultipleSelection = useMemo(() => {
     if (!multipleSelectionsData.isEnabled) return false;
     if (multipleSelectionsData.selectionType !== 'songs') return false;
     if (multipleSelectionsData.multipleSelections.length <= 0) return false;
@@ -130,7 +142,7 @@ const SongCard = (props: SongCardProp) => {
       songId
     });
 
-  const handleLikeButtonClick = React.useCallback(() => {
+  const handleLikeButtonClick = useCallback(() => {
     window.api.playerControls
       .toggleLikeSongs([songId], !isSongAFavorite)
       .then((res) => {
@@ -150,7 +162,7 @@ const SongCard = (props: SongCardProp) => {
     toggleIsFavorite
   ]);
 
-  const contextMenuItems: ContextMenuItem[] = React.useMemo(() => {
+  const contextMenuItems: ContextMenuItem[] = useMemo(() => {
     const isMultipleSelectionsEnabled =
       multipleSelectionsData.selectionType === 'songs' &&
       multipleSelectionsData.multipleSelections.length !== 1 &&
@@ -312,7 +324,7 @@ const SongCard = (props: SongCardProp) => {
         handlerFunction: () => {
           changePromptMenuData(
             true,
-            <AddSongsToPlaylists
+            <AddSongsToPlaylistsPrompt
               songIds={isAMultipleSelection ? songIds : [songId]}
               title={title}
             />
@@ -347,7 +359,7 @@ const SongCard = (props: SongCardProp) => {
         isDisabled: isMultipleSelectionsEnabled
       },
       {
-        label: t('song.revealInFileExplorer'),
+        label: t('song.showInFileExplorer'),
         class: 'reveal-file-explorer',
         iconName: 'folder_open',
         handlerFunction: () => window.api.songUpdates.revealSongInFileExplorer(songId),
@@ -408,14 +420,14 @@ const SongCard = (props: SongCardProp) => {
             window.api.audioLibraryControls
               .restoreBlacklistedSongs([songId])
               .catch((err) => console.error(err));
-          else if (localStorageData?.preferences.doNotShowBlacklistSongConfirm)
+          else if (doNotShowBlacklistSongConfirm)
             window.api.audioLibraryControls
               .blacklistSongs([songId])
               .then(() =>
                 addNewNotifications([
                   {
                     id: `${title}Blacklisted`,
-                    delay: 5000,
+                    duration: 5000,
                     content: t('notifications.songBlacklisted', { title }),
                     iconName: 'block'
                   }
@@ -471,10 +483,10 @@ const SongCard = (props: SongCardProp) => {
     updateMultipleSelections,
     changeCurrentActivePage,
     path,
-    localStorageData?.preferences.doNotShowBlacklistSongConfirm
+    doNotShowBlacklistSongConfirm
   ]);
 
-  const songArtistComponents = React.useMemo(() => {
+  const songArtistComponents = useMemo(() => {
     if (Array.isArray(artists) && artists.length > 0) {
       return artists
         .map((artist, i) => {
@@ -550,7 +562,7 @@ const SongCard = (props: SongCardProp) => {
         data-song-id={songId}
         style={{ background }}
       >
-        <div className="song-states-container flex items-center justify-between ">
+        <div className="song-states-container flex items-center justify-between">
           <div className="state-info flex">
             {typeof queue.currentSongIndex === 'number' &&
               Array.isArray(queue.queue) &&

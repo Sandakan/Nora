@@ -1,4 +1,4 @@
-import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '../utils/localStorage';
+import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from './appReducer';
 
 export const equalizerBandHertzData: Record<EqualizerBandFilters, number> = {
   thirtyTwoHertzFilter: 32,

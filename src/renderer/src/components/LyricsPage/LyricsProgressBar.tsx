@@ -1,4 +1,4 @@
-import React from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 type Props = {
   syncedLyrics: { start: number; end: number };
@@ -7,9 +7,9 @@ type Props = {
 
 const LyricsProgressBar = (props: Props) => {
   const { syncedLyrics, delay } = props;
-  const myElementRef = React.useRef<HTMLSpanElement>(null);
+  const myElementRef = useRef<HTMLSpanElement>(null);
 
-  const handleLyricsActivity = React.useCallback(
+  const handleLyricsActivity = useCallback(
     (e: Event) => {
       if ('detail' in e && typeof e.detail === 'number') {
         const songPosition = e.detail as number;
@@ -32,7 +32,7 @@ const LyricsProgressBar = (props: Props) => {
     [delay, syncedLyrics.end, syncedLyrics.start]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.addEventListener('player/positionChange', handleLyricsActivity);
 
     return () => document.removeEventListener('player/positionChange', handleLyricsActivity);

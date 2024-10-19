@@ -1,4 +1,4 @@
-import React from 'react';
+import { useMemo } from 'react';
 import Button, { ButtonProps } from '../Button';
 
 interface NoLyricsProp {
@@ -11,7 +11,7 @@ interface NoLyricsProp {
 const NoLyrics = (props: NoLyricsProp) => {
   const { title, iconName, description, buttons = [] } = props;
 
-  const buttonComponents = React.useMemo(() => {
+  const buttonComponents = useMemo(() => {
     return buttons.map((button, i) => {
       // eslint-disable-next-line react/jsx-props-no-spreading
       return <Button key={i} {...button} />;

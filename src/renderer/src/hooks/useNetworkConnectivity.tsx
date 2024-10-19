@@ -1,9 +1,9 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 
 const useNetworkConnectivity = () => {
-  const [isOnline, setIsOnline] = React.useState(false);
+  const [isOnline, setIsOnline] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const controller = new AbortController();
     setIsOnline(navigator.onLine);
     window.addEventListener('online', () => setIsOnline(true), {

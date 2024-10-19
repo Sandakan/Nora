@@ -1,4 +1,4 @@
-import React from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import i18n from '../../i18n';
@@ -174,6 +174,7 @@ const shortcutData: ShortcutCategory[] = [
         label: i18n.t('appShortcutsPrompt.reload'),
         keys: [ctrlKey, 'R']
       },
+      { label: i18n.t('appShortcutsPrompt.openAppShortcutsPrompt'), keys: [ctrlKey, '/'] },
       { label: i18n.t('appShortcutsPrompt.openDevtools'), keys: ['F12'] }
     ]
   }
@@ -182,7 +183,7 @@ const shortcutData: ShortcutCategory[] = [
 const AppShortcutsPrompt = () => {
   const { t } = useTranslation();
 
-  const shortcutCategoryComponents = React.useMemo(
+  const shortcutCategoryComponents = useMemo(
     () =>
       shortcutData.map((category, categoryIndex) => {
         const { shortcutCategoryTitle, shortcuts } = category;

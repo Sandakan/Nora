@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 type Props = {
@@ -12,11 +12,11 @@ type Props = {
 };
 
 const EnhancedSyncedLyricWord = (props: Props) => {
-  const { updateSongPosition } = React.useContext(AppUpdateContext);
+  const { updateSongPosition } = useContext(AppUpdateContext);
   const { isActive, start, end, delay, text } = props;
   const [isInRange, setIsInRange] = useState(false);
 
-  const handleSongPositionChange = React.useCallback(
+  const handleSongPositionChange = useCallback(
     (e: Event) => {
       if ('detail' in e && !Number.isNaN(e.detail)) {
         const songPosition = e.detail as number;
@@ -27,7 +27,7 @@ const EnhancedSyncedLyricWord = (props: Props) => {
     [delay, end, start]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isActive) {
       document.addEventListener('player/positionChange', handleSongPositionChange);
     } else {

@@ -6,7 +6,7 @@ import path from 'path';
 import log from '../log';
 
 // using the comman > wmic logicaldisk get Name, Size, FreeSpace
-const winRootRegex = /^(?<freeSpace>\d+) {0,}(?<name>\w+:) {0,}(?<size>\d+) {0,}$/gm;
+const winRootRegex = /^(?<name>\w+:) {0,}(?<size>\d+) {0,}(?<freeSpace>\d+) {0,}$/gm;
 
 // uses the command > df -h
 const linuxRootRegex =
@@ -32,8 +32,11 @@ const getRootSize = (
         const { root } = path.parse(appPath);
         output.rootDir = root.replaceAll(path.sep, '');
         childProcess.execFile(
-          'cmd.exe',
-          ['/c', 'wmic logicaldisk get Name, Size, FreeSpace'],
+          'powershell.exe',
+          [
+            '-command',
+            'Get-CimInstance -ClassName Win32_LogicalDisk | Select-Object DeviceID, Size, FreeSpace'
+          ],
           (error: unknown, stdout) => {
             if (error) {
               reject(new Error(`exec error: ${error}`));

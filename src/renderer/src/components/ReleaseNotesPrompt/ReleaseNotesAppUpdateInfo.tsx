@@ -1,5 +1,5 @@
 import { Trans, useTranslation } from 'react-i18next';
-import packageFile from '../../../../../package.json';
+import { repository } from '../../../../../package.json';
 import Hyperlink from '../Hyperlink';
 
 const ReleaseNotesAppUpdateInfo = (props: { state: AppUpdatesState }) => {
@@ -26,7 +26,7 @@ const ReleaseNotesAppUpdateInfo = (props: { state: AppUpdatesState }) => {
           Hyperlink: (
             <Hyperlink
               className="font-base text-sm text-font-color-highlight-2 underline dark:text-dark-font-color-highlight-2"
-              link={`${packageFile.repository.url}/releases`}
+              link={`${repository.url}/releases`}
               linkTitle={t('releaseNotesPrompt.noraReleases')}
             />
           )

@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import React, { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 import Button, { ButtonProps } from './Button';
 import Dropdown, { DropdownProp } from './Dropdown';
 // import useResizeObserver from '../hooks/useResizeObserver';
@@ -57,13 +57,13 @@ const TitleContainer = (props: Props) => {
   //   }
   // }, [width]);
 
-  const dropdownComponent = React.useMemo(() => {
+  const dropdownComponent = useMemo(() => {
     if (dropdowns.length > 0)
       return dropdowns.map((dropdown) => <Dropdown key={dropdown.name} {...dropdown} />);
     return undefined;
   }, [dropdowns]);
 
-  const buttonComponents = React.useMemo(() => {
+  const buttonComponents = useMemo(() => {
     if (buttons.length > 0) {
       const filteredButtons = buttons.filter((button) => {
         const { isVisible = true } = button;
@@ -80,7 +80,7 @@ const TitleContainer = (props: Props) => {
 
   return (
     <div
-      className={`title-container mb-4 mt-1 flex items-center justify-between text-font-color-black dark:text-font-color-white  ${className}`}
+      className={`title-container mb-4 mt-1 flex items-center justify-between text-font-color-black dark:text-font-color-white ${className}`}
       // ref={containerRef}
     >
       <div className="grid grid-flow-col items-center gap-5">

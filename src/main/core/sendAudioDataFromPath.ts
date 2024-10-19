@@ -36,12 +36,12 @@ const sendAudioDataFromPath = async (songPath: string): Promise<AudioPlayerData>
           const tempArtworkPath = path.join(
             DEFAULT_FILE_URL,
             metadata.common.picture
-              ? (await createTempArtwork(metadata.common.picture[0].data).catch((err) => {
+              ? ((await createTempArtwork(metadata.common.picture[0].data).catch((err) => {
                   log(
                     `Artwork creation failed for song from an unknown source.\nPATH : ${songPath}; ERROR : ${err}`
                   );
                   return songCoverImage;
-                })) ?? songCoverImage
+                })) ?? songCoverImage)
               : songCoverImage
           );
 
@@ -64,13 +64,7 @@ const sendAudioDataFromPath = async (songPath: string): Promise<AudioPlayerData>
             isBlacklisted: false
           };
 
-          addToSongsOutsideLibraryData({
-            title: data.title,
-            songId: data.songId,
-            artworkPath: data.artworkPath,
-            duration: data.duration,
-            path: data.path
-          });
+          addToSongsOutsideLibraryData(data);
 
           sendMessageToRenderer({
             messageCode: 'PLAYBACK_FROM_UNKNOWN_SOURCE'

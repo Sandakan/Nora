@@ -151,7 +151,7 @@ export const parseSong = async (
       const songArtworkPaths = await storeArtworks(
         songId,
         'songs',
-        metadata.common?.picture?.at(0)?.data
+        metadata.common?.picture?.at(0) ? Buffer.from(metadata.common.picture[0].data) : undefined
       );
 
       // const start6 = timeEnd(start4, 'Time to generate store artwork');
@@ -178,7 +178,7 @@ export const parseSong = async (
         sampleRate: metadata.format.sampleRate,
         bitrate: metadata?.format?.bitrate,
         noOfChannels: metadata?.format?.numberOfChannels,
-        diskNo: metadata?.common?.disk?.no ?? undefined,
+        discNo: metadata?.common?.disk?.no ?? undefined,
         trackNo: metadata?.common?.track?.no ?? undefined,
         addedDate: new Date().getTime(),
         createdDate: stats ? stats.birthtime.getTime() : undefined,
@@ -252,8 +252,7 @@ export const parseSong = async (
       const { updatedGenres, relevantGenres, newGenres } = manageGenresOfParsedSong(
         genres,
         songInfo,
-        songArtworkPaths,
-        songInfo.palette?.DarkVibrant
+        songArtworkPaths
       );
 
       // const start13 = timeEnd(start12, 'Time to manage genres');

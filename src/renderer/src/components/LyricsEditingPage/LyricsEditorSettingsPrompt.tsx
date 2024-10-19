@@ -1,17 +1,18 @@
-import React from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 
 import storage from '../../utils/localStorage';
 import debounce from '../../utils/debounce';
 
 import Checkbox from '../Checkbox';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const LyricsEditorSettingsPrompt = () => {
-  const { localStorageData } = React.useContext(AppContext);
+  const lyricsEditorSettings = useStore(store, (state) => state.localStorage.lyricsEditorSettings);
   const { t } = useTranslation();
 
-  const [offset, setOffset] = React.useState(localStorageData.lyricsEditorSettings.offset || 0);
+  const [offset, setOffset] = useState(lyricsEditorSettings.offset || 0);
 
   return (
     <div>
@@ -28,10 +29,7 @@ const LyricsEditorSettingsPrompt = () => {
           </p>
           <Checkbox
             id="editNextAndCurrentStartAndEndTagsAutomatically"
-            isChecked={
-              localStorageData !== undefined &&
-              localStorageData.lyricsEditorSettings.editNextAndCurrentStartAndEndTagsAutomatically
-            }
+            isChecked={lyricsEditorSettings.editNextAndCurrentStartAndEndTagsAutomatically}
             checkedStateUpdateFunction={(state) =>
               storage.lyricsEditorSettings.setLyricsEditorSettings(
                 'editNextAndCurrentStartAndEndTagsAutomatically',

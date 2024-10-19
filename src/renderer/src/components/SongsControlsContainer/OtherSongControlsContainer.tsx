@@ -1,23 +1,41 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useContext } from 'react';
+import { lazy, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { AppContext } from '../../contexts/AppContext';
 import Button from '../Button';
 import VolumeSlider from '../VolumeSlider';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
+
+const AppShortcutsPrompt = lazy(() => import('../SettingsPage/AppShortcutsPrompt'));
 
 const OtherSongControlsContainer = () => {
-  const { currentlyActivePage, isMuted, volume } = useContext(AppContext);
-  const { changeCurrentActivePage, updatePlayerType, toggleMutedState, updateContextMenuData } =
-    useContext(AppUpdateContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const isMuted = useStore(store, (state) => state.player.volume.isMuted);
+  const volume = useStore(store, (state) => state.player.volume.value);
+
+  const {
+    changeCurrentActivePage,
+    updatePlayerType,
+    toggleMutedState,
+    updateContextMenuData,
+    changePromptMenuData
+  } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const openOtherSettingsContextMenu = React.useCallback(
+  const openOtherSettingsContextMenu = useCallback(
     (pageX: number, pageY: number) => {
       updateContextMenuData(
         true,
         [
+          {
+            label: t('settingsPage.appShortcuts'),
+            iconName: 'trail_length_short',
+            iconClassName: 'material-icons-round-outlined mr-2',
+            handlerFunction: () => changePromptMenuData(true, <AppShortcutsPrompt />)
+          },
+          { label: '', isContextMenuItemSeperator: true, handlerFunction: () => true },
           {
             label: t('settingsPage.equalizer'),
             iconName: 'graphic_eq',
@@ -36,12 +54,14 @@ const OtherSongControlsContainer = () => {
                 scrollToId: '#playbackRateInterval'
               })
           },
+          { label: '', isContextMenuItemSeperator: true, handlerFunction: () => true },
           {
             label: t('player.showCurrentQueue'),
             iconName: 'table_rows',
             iconClassName: 'material-icons-round-outlined mr-2',
             handlerFunction: () => changeCurrentActivePage('CurrentQueue')
           },
+          { label: '', isContextMenuItemSeperator: true, handlerFunction: () => true },
           {
             label: t('player.showMiniPlayer'),
             iconName: 'pip',
@@ -59,7 +79,7 @@ const OtherSongControlsContainer = () => {
         pageY
       );
     },
-    [changeCurrentActivePage, t, updateContextMenuData, updatePlayerType]
+    [changeCurrentActivePage, changePromptMenuData, t, updateContextMenuData, updatePlayerType]
   );
 
   return (

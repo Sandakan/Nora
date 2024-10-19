@@ -1,16 +1,19 @@
-import React from 'react';
+import { lazy, useContext, useEffect, useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import storage from '../../../utils/localStorage';
 
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { AppContext } from '../../../contexts/AppContext';
 
 import Button from '../../Button';
 import Checkbox from '../../Checkbox';
 import Dropdown, { DropdownOption } from '../../Dropdown';
-import MusixmatchSettingsPrompt from '../MusixmatchSettingsPrompt';
-import MusixmatchDisclaimerPrompt from '../MusixmatchDisclaimerPrompt';
+
 import i18n from '../../../i18n';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
+
+const MusixmatchSettingsPrompt = lazy(() => import('../MusixmatchSettingsPrompt'));
+const MusixmatchDisclaimerPrompt = lazy(() => import('../MusixmatchDisclaimerPrompt'));
 
 const automaticallySaveLyricsOptions: DropdownOption<AutomaticallySaveLyricsTypes>[] = [
   {
@@ -25,14 +28,15 @@ const automaticallySaveLyricsOptions: DropdownOption<AutomaticallySaveLyricsType
 ];
 
 const LyricsSettings = () => {
-  const { userData } = React.useContext(AppContext);
-  const { changePromptMenuData, updateUserData } = React.useContext(AppUpdateContext);
+  const userData = useStore(store, (state) => state.userData);
+
+  const { changePromptMenuData, updateUserData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const [lyricsAutomaticallySaveState, setLyricsAutomaticallySaveState] =
-    React.useState<AutomaticallySaveLyricsTypes>('NONE');
+    useState<AutomaticallySaveLyricsTypes>('NONE');
 
-  React.useEffect(() => {
+  useEffect(() => {
     const lyricsSaveState = storage.preferences.getPreferences('lyricsAutomaticallySaveState');
 
     setLyricsAutomaticallySaveState(lyricsSaveState);
@@ -159,7 +163,7 @@ const LyricsSettings = () => {
             {userData?.customLrcFilesSaveLocation && (
               <>
                 <span>{t('settingsPage.selectedCustomLocation')}: </span>
-                <span className="mr-4  text-font-color-highlight dark:text-dark-font-color-highlight">
+                <span className="mr-4 text-font-color-highlight dark:text-dark-font-color-highlight">
                   {userData.customLrcFilesSaveLocation}
                 </span>
               </>

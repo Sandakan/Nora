@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-no-useless-fragment */
-import React from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Img from '../Img';
 
@@ -19,7 +19,7 @@ const NoSearchResultsContainer = (props: Props) => {
   const { searchInput, searchResults, updateSearchInput } = props;
   const { albums, artists, genres, playlists, songs } = searchResults;
 
-  const availableSearchResultComponents = React.useMemo(
+  const availableSearchResultComponents = useMemo(
     () =>
       searchResults.availableResults.length > 0
         ? searchResults.availableResults.map((result, index) => (

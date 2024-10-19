@@ -2,34 +2,40 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable react/no-array-index-key */
-import React from 'react';
+import { lazy, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import Img from '../Img';
 import SongArtist from '../SongsPage/SongArtist';
 
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
-import AddSongsToPlaylists from '../SongsPage/AddSongsToPlaylists';
-import BlacklistSongConfrimPrompt from '../SongsPage/BlacklistSongConfirmPrompt';
-import DeleteSongsFromSystemConfrimPrompt from '../SongsPage/DeleteSongsFromSystemConfrimPrompt';
 import UpNextSongPopup from './UpNextSongPopup';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
+
+const AddSongsToPlaylistsPrompt = lazy(() => import('../SongsPage/AddSongsToPlaylistsPrompt'));
+const BlacklistSongConfrimPrompt = lazy(() => import('../SongsPage/BlacklistSongConfirmPrompt'));
+const DeleteSongsFromSystemConfrimPrompt = lazy(
+  () => import('../SongsPage/DeleteSongsFromSystemConfrimPrompt')
+);
 
 const CurrentlyPlayingSongInfoContainer = () => {
-  const { currentSongData, localStorageData } = React.useContext(AppContext);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const {
     changeCurrentActivePage,
     updateContextMenuData,
     changePromptMenuData,
     toggleMultipleSelections,
     addNewNotifications
-  } = React.useContext(AppUpdateContext);
+  } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [isNextSongPopupVisible, setIsNextSongPopupVisible] = React.useState(false);
+  const [isNextSongPopupVisible, setIsNextSongPopupVisible] = useState(false);
 
-  const songArtistsImages = React.useMemo(() => {
+  const songArtistsImages = useMemo(() => {
     if (
       currentSongData.songId &&
       Array.isArray(currentSongData.artists) &&
@@ -58,7 +64,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
     return undefined;
   }, [changeCurrentActivePage, currentSongData.artists, currentSongData.songId]);
 
-  const showSongInfoPage = React.useCallback(
+  const showSongInfoPage = useCallback(
     (songId: string) =>
       currentSongData.isKnownSource
         ? changeCurrentActivePage('SongInfo', {
@@ -68,7 +74,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
     [changeCurrentActivePage, currentSongData.isKnownSource]
   );
 
-  const gotToSongAlbumPage = React.useCallback(
+  const gotToSongAlbumPage = useCallback(
     () =>
       currentSongData.isKnownSource && currentSongData.album
         ? changeCurrentActivePage('AlbumInfo', {
@@ -78,7 +84,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
     [changeCurrentActivePage, currentSongData.album, currentSongData.isKnownSource]
   );
 
-  const songArtists = React.useMemo(() => {
+  const songArtists = useMemo(() => {
     const { songId, artists, isKnownSource } = currentSongData;
 
     if (songId && Array.isArray(artists)) {
@@ -110,7 +116,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
     return '';
   }, [currentSongData, t]);
 
-  const contextMenuCurrentSongData = React.useMemo((): ContextMenuAdditionalData => {
+  const contextMenuCurrentSongData = useMemo((): ContextMenuAdditionalData => {
     const { title, artworkPath, artists, album } = currentSongData;
     return {
       title,
@@ -120,7 +126,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
     };
   }, [currentSongData, t]);
 
-  const contextMenuItems = React.useMemo((): ContextMenuItem[] => {
+  const contextMenuItems = useMemo((): ContextMenuItem[] => {
     const { title, songId, album, artworkPath, isBlacklisted, isKnownSource, path } =
       currentSongData;
 
@@ -129,7 +135,10 @@ const CurrentlyPlayingSongInfoContainer = () => {
         label: t('song.addToPlaylists'),
         iconName: 'playlist_add',
         handlerFunction: () => {
-          changePromptMenuData(true, <AddSongsToPlaylists songIds={[songId]} title={title} />);
+          changePromptMenuData(
+            true,
+            <AddSongsToPlaylistsPrompt songIds={[songId]} title={title} />
+          );
           toggleMultipleSelections(false);
         }
       },
@@ -139,7 +148,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
         handlerFunction: () => true
       },
       {
-        label: t('song.revealInFileExplorer'),
+        label: t('song.showInFileExplorer'),
         class: 'reveal-file-explorer',
         iconName: 'folder_open',
         handlerFunction: () => window.api.songUpdates.revealSongInFileExplorer(songId)
@@ -196,14 +205,14 @@ const CurrentlyPlayingSongInfoContainer = () => {
             window.api.audioLibraryControls
               .restoreBlacklistedSongs([songId])
               .catch((err) => console.error(err));
-          else if (localStorageData?.preferences.doNotShowBlacklistSongConfirm)
+          else if (preferences?.doNotShowBlacklistSongConfirm)
             window.api.audioLibraryControls
               .blacklistSongs([songId])
               .then(() =>
                 addNewNotifications([
                   {
                     id: `${title}Blacklisted`,
-                    delay: 5000,
+                    duration: 5000,
                     content: t('notifications.songBlacklisted', { title }),
                     icon: <span className="material-icons-round">block</span>
                   }
@@ -233,7 +242,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
     changePromptMenuData,
     currentSongData,
     gotToSongAlbumPage,
-    localStorageData?.preferences.doNotShowBlacklistSongConfirm,
+    preferences?.doNotShowBlacklistSongConfirm,
     showSongInfoPage,
     t,
     toggleMultipleSelections
@@ -306,7 +315,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
             className="song-artists appear-from-bottom flex w-full items-center truncate"
             id="currentSongArtists"
           >
-            {localStorageData?.preferences.showArtistArtworkNearSongControls &&
+            {preferences?.showArtistArtworkNearSongControls &&
               songArtistsImages &&
               songArtistsImages.length > 0 && (
                 <span

@@ -1,4 +1,4 @@
-import React from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import Button from '../../Button';
@@ -42,7 +42,7 @@ const SongAlbumArtistsInput = (props: Props) => {
     updateAlbumArtistKeyword
   } = props;
 
-  const albumArtistResultComponents = React.useMemo(() => {
+  const albumArtistResultComponents = useMemo(() => {
     if (artistResults.length > 0)
       return artistResults.map((x) => (
         <SongArtistInputResult
@@ -56,7 +56,7 @@ const SongAlbumArtistsInput = (props: Props) => {
     return [];
   }, [artistResults, updateAlbumArtistKeyword, updateSongInfo]);
 
-  const albumArtistComponents = React.useMemo(() => {
+  const albumArtistComponents = useMemo(() => {
     if (songAlbumArtists)
       return songAlbumArtists.map((artist) => (
         <span
@@ -79,7 +79,7 @@ const SongAlbumArtistsInput = (props: Props) => {
           <Img
             src={artist.onlineArtworkPaths?.picture_small}
             fallbackSrc={artist.artworkPath}
-            className="!absolute mr-2 aspect-square w-6 rounded-full opacity-100 transition-[visibility,opacity]  group-focus-within:invisible group-focus-within:opacity-0 group-hover:invisible group-hover:opacity-0"
+            className="!absolute mr-2 aspect-square w-6 rounded-full opacity-100 transition-[visibility,opacity] group-focus-within:invisible group-focus-within:opacity-0 group-hover:invisible group-hover:opacity-0"
             alt=""
           />{' '}
           {artist.name}

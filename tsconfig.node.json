@@ -12,6 +12,8 @@
     "types": [
       "electron-vite/node"
     ],
+    "paths": {
+      "@main/*": ["./src/main/*"],},
     "noImplicitAny": true
   }
 }

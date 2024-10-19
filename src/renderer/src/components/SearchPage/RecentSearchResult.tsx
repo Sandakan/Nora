@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
@@ -8,8 +8,8 @@ interface RecentSearchResultProp {
   clickHandler: () => void;
 }
 
-const RecentSearchResult = React.memo((props: RecentSearchResultProp) => {
-  const { updateContextMenuData } = React.useContext(AppUpdateContext);
+const RecentSearchResult = memo((props: RecentSearchResultProp) => {
+  const { updateContextMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const recentSearchContextItems: ContextMenuItem[] = [

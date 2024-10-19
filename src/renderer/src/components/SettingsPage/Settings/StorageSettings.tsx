@@ -1,4 +1,4 @@
-import React from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../../Button';
 import calculateElapsedTime from '../../../utils/calculateElapsedTime';
@@ -7,9 +7,9 @@ import parseByteSizes from '../../../utils/parseByteSizes';
 const StorageSettings = () => {
   const { t } = useTranslation();
 
-  const [storageMetrics, setStorageMetrics] = React.useState<StorageMetrics | null | undefined>();
+  const [storageMetrics, setStorageMetrics] = useState<StorageMetrics | null | undefined>();
 
-  const fetchStorageUsageData = React.useCallback((forceRefresh = false) => {
+  const fetchStorageUsageData = useCallback((forceRefresh = false) => {
     return window.api.storageData
       .getStorageUsage(forceRefresh)
       .then((res) => {
@@ -22,11 +22,11 @@ const StorageSettings = () => {
       });
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchStorageUsageData();
   }, [fetchStorageUsageData]);
 
-  const appStorageBarWidths = React.useMemo(() => {
+  const appStorageBarWidths = useMemo(() => {
     if (storageMetrics) {
       const { appDataSizes, totalSize, appFolderSize, rootSizes } = storageMetrics;
       const {
@@ -64,7 +64,7 @@ const StorageSettings = () => {
     return undefined;
   }, [storageMetrics]);
 
-  const appDataStorageBarWidths = React.useMemo(() => {
+  const appDataStorageBarWidths = useMemo(() => {
     if (storageMetrics) {
       const { appDataSizes } = storageMetrics;
       const {

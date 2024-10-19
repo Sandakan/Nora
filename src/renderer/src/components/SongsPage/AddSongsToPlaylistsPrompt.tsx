@@ -1,9 +1,11 @@
 /* eslint-disable promise/catch-or-return */
 /* eslint-disable no-console */
 /* eslint-disable react/no-unescaped-entities */
-import React from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+
 import Checkbox from '../Checkbox';
 import Button from '../Button';
 import Img from '../Img';
@@ -71,14 +73,14 @@ interface SelectPlaylist extends Playlist {
   isSelected: boolean;
 }
 
-const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
-  const { changePromptMenuData, addNewNotifications } = React.useContext(AppUpdateContext);
+const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
+  const { changePromptMenuData, addNewNotifications } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const { songIds, title } = props;
-  const [playlists, setPlaylists] = React.useState([] as SelectPlaylist[]);
+  const { songIds } = props;
+  const [playlists, setPlaylists] = useState([] as SelectPlaylist[]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     window.api.playlistsData
       .getPlaylistData([], undefined, true)
       .then((res) => {
@@ -98,7 +100,7 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
       .catch((err) => console.error(err));
   }, [songIds]);
 
-  const addSongsToPlaylists = React.useCallback(() => {
+  const addSongsToPlaylists = useCallback(() => {
     const selectedPlaylists = playlists.filter((playlist) => playlist.isSelected);
     const promises = selectedPlaylists.map(async (playlist) => {
       if (playlist.playlistId === 'Favorites')
@@ -115,7 +117,7 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
         return addNewNotifications([
           {
             id: 'songAddedtoPlaylists',
-            delay: 5000,
+            duration: 5000,
             iconName: 'playlist_add',
             content: t('addSongsToPlaylistsPrompt.songsAddedToPlaylists', {
               count: songIds.length,
@@ -130,7 +132,7 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
       });
   }, [playlists, songIds, addNewNotifications, t, changePromptMenuData]);
 
-  const playlistComponents = React.useMemo(
+  const playlistComponents = useMemo(
     () =>
       playlists.length > 0
         ? playlists.map((playlist) => {
@@ -160,15 +162,15 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
     [playlists]
   );
 
-  const noOfSelectedPlaylists = React.useMemo(
+  const noOfSelectedPlaylists = useMemo(
     () => playlists.filter((playlist) => playlist.isSelected).length,
     [playlists]
   );
 
   return (
     <>
-      <div className="title-container mb-4 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
-        Select playlists to add {songIds.length > 1 ? `${songIds.length} songs` : `'${title}' song`}
+      <div className="title-container mb-4 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        {t('addSongsToPlaylistsPrompt.selectPlaylistsToAdd', { count: songIds.length })}
       </div>
       {songIds.length > 1 && <p>&bull; {t('addSongsToPlaylistsPrompt.duplicationNotice')}</p>}
       {playlistComponents.length > 0 && (
@@ -188,7 +190,7 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
             label={t('song.addToPlaylists')}
             iconName="playlist_add"
             clickHandler={addSongsToPlaylists}
-            className="!bg-background-color-3 px-6  text-font-color-black dark:!bg-dark-background-color-3 dark:!text-font-color-black"
+            className="!bg-background-color-3 px-6 text-font-color-black dark:!bg-dark-background-color-3 dark:!text-font-color-black"
           />
         </div>
       </div>
@@ -196,4 +198,4 @@ const AddSongsToPlaylists = (props: AddSongsToPlaylistProp) => {
   );
 };
 
-export default AddSongsToPlaylists;
+export default AddSongsToPlaylistsPrompt;

@@ -1,16 +1,15 @@
 /* eslint-disable promise/catch-or-return */
-import React from 'react';
+import { lazy, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import useNetworkConnectivity from '../../hooks/useNetworkConnectivity';
-import hasDataChanged, { isDataChanged } from '../../utils/hasDataChanged';
 
 import Button from '../Button';
 import MainContainer from '../MainContainer';
-import SongMetadataResultsSelectPage from './SongMetadataResultsSelectPrompt';
 import SongArtwork from './SongArtwork';
+
 import SongNameInput from './input_containers/SongNameInput';
 import SongYearInput from './input_containers/SongYearInput';
 import SongArtistsInput from './input_containers/SongArtistsInput';
@@ -18,11 +17,16 @@ import SongAlbumInput from './input_containers/SongAlbumInput';
 import SongGenresInput from './input_containers/SongGenresInput';
 import SongComposerInput from './input_containers/SongComposerInput';
 import SongLyricsEditorInput from './input_containers/SongLyricsEditorInput';
-
-import { appPreferences } from '../../../../../package.json';
 import SongTrackNumberInput from './input_containers/SongTrackNumberInput';
-import ResetTagsToDefaultPrompt from './ResetTagsToDefaultPrompt';
 import SongAlbumArtistsInput from './input_containers/SongAlbumArtistInput';
+
+import hasDataChanged, { isDataChanged } from '../../utils/hasDataChanged';
+import { appPreferences } from '../../../../../package.json';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
+
+const SongMetadataResultsSelectPage = lazy(() => import('./SongMetadataResultsSelectPrompt'));
+const ResetTagsToDefaultPrompt = lazy(() => import('./ResetTagsToDefaultPrompt'));
 
 export interface MetadataKeywords {
   albumKeyword?: string;
@@ -50,56 +54,58 @@ type GenreResult = { genreId?: string; name: string; artworkPath?: string };
 const { metadataEditingSupportedExtensions } = appPreferences;
 
 function SongTagsEditingPage() {
-  const { currentlyActivePage, currentSongData } = React.useContext(AppContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+
   const {
     addNewNotifications,
     changePromptMenuData,
     updateCurrentSongData,
     updatePageHistoryIndex
-  } = React.useContext(AppUpdateContext);
+  } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { isOnline } = useNetworkConnectivity();
 
-  const [songInfo, setSongInfo] = React.useState({
+  const [songInfo, setSongInfo] = useState({
     title: ''
   } as SongTags);
-  const [defaultValues, setDefaultValues] = React.useState({
+  const [defaultValues, setDefaultValues] = useState({
     title: ''
   } as SongTags);
 
-  const [artistKeyword, setArtistKeyword] = React.useState('');
-  const [artistResults, setArtistResults] = React.useState<ArtistResult[]>([]);
+  const [artistKeyword, setArtistKeyword] = useState('');
+  const [artistResults, setArtistResults] = useState<ArtistResult[]>([]);
 
-  const [albumKeyword, setAlbumKeyword] = React.useState('');
-  const [albumResults, setAlbumResults] = React.useState<AlbumResult[]>([]);
+  const [albumKeyword, setAlbumKeyword] = useState('');
+  const [albumResults, setAlbumResults] = useState<AlbumResult[]>([]);
 
-  const [albumArtistKeyword, setAlbumArtistKeyword] = React.useState('');
-  const [albumArtistResults, setAlbumArtistResults] = React.useState<ArtistResult[]>([]);
+  const [albumArtistKeyword, setAlbumArtistKeyword] = useState('');
+  const [albumArtistResults, setAlbumArtistResults] = useState<ArtistResult[]>([]);
 
-  const [genreKeyword, setGenreKeyword] = React.useState('');
-  const [genreResults, setGenreResults] = React.useState<GenreResult[]>([]);
+  const [genreKeyword, setGenreKeyword] = useState('');
+  const [genreResults, setGenreResults] = useState<GenreResult[]>([]);
 
-  const [isMetadataUpdatesPending, setIsMetadataUpdatesPending] = React.useState(false);
+  const [isMetadataUpdatesPending, setIsMetadataUpdatesPending] = useState(false);
 
-  const { songId, songPath, isKnownSource } = React.useMemo(
+  const { songId, songPath, isKnownSource } = useMemo(
     () => ({
-      songId: currentlyActivePage.data.songId as string,
-      songPath: currentlyActivePage.data.songPath as string,
-      isKnownSource: (currentlyActivePage.data.isKnownSource as boolean) ?? true
+      songId: currentlyActivePage.data?.songId as string,
+      songPath: currentlyActivePage.data?.songPath as string,
+      isKnownSource: (currentlyActivePage.data?.isKnownSource as boolean) ?? true
     }),
     [currentlyActivePage.data]
   );
 
-  const pathExt = React.useMemo(() => window.api.utils.getExtension(songPath), [songPath]);
+  const pathExt = useMemo(() => window.api.utils.getExtension(songPath), [songPath]);
 
-  const isMetadataEditingSupported = React.useMemo(() => {
+  const isMetadataEditingSupported = useMemo(() => {
     const isASupportedFormat = metadataEditingSupportedExtensions.includes(pathExt);
 
     return isASupportedFormat;
   }, [pathExt]);
 
-  const getSongId3Tags = React.useCallback(() => {
+  const getSongId3Tags = useCallback(() => {
     if (songId)
       window.api.songUpdates
         .getSongId3Tags(isKnownSource ? songId : songPath, isKnownSource)
@@ -120,11 +126,11 @@ function SongTagsEditingPage() {
         .catch((err) => console.error(err));
   }, [isKnownSource, songId, songPath]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     getSongId3Tags();
   }, [getSongId3Tags]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const manageMetadataUpdatesInSongsTagsEditingPage = (e: Event) => {
       if ('detail' in e) {
         const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
@@ -146,7 +152,7 @@ function SongTagsEditingPage() {
     };
   }, [getSongId3Tags, songPath]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (artistKeyword.trim()) {
       window.api.search
         .search('Artists', artistKeyword, false, false)
@@ -170,7 +176,7 @@ function SongTagsEditingPage() {
     } else setArtistResults([]);
   }, [artistKeyword]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (albumKeyword.trim()) {
       window.api.search
         .search('Albums', albumKeyword, false, false)
@@ -194,7 +200,7 @@ function SongTagsEditingPage() {
     } else setAlbumResults([]);
   }, [albumKeyword]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (albumArtistKeyword.trim()) {
       window.api.search
         .search('Artists', albumArtistKeyword, false, false)
@@ -218,7 +224,7 @@ function SongTagsEditingPage() {
     } else setAlbumArtistResults([]);
   }, [albumArtistKeyword]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (genreKeyword.trim()) {
       window.api.search
         .search('Genres', genreKeyword, false, false)
@@ -241,7 +247,7 @@ function SongTagsEditingPage() {
     } else setGenreResults([]);
   }, [genreKeyword]);
 
-  const updateSongInfo = React.useCallback(
+  const updateSongInfo = useCallback(
     (callback: (prevData: SongTags) => SongTags) => {
       const updatedData = callback(songInfo);
       setSongInfo(updatedData);
@@ -249,15 +255,15 @@ function SongTagsEditingPage() {
     [songInfo]
   );
 
-  const updateArtistKeyword = React.useCallback((keyword: string) => setArtistKeyword(keyword), []);
-  const updateAlbumKeyword = React.useCallback((keyword: string) => setAlbumKeyword(keyword), []);
-  const updateAlbumArtistKeyword = React.useCallback(
+  const updateArtistKeyword = useCallback((keyword: string) => setArtistKeyword(keyword), []);
+  const updateAlbumKeyword = useCallback((keyword: string) => setAlbumKeyword(keyword), []);
+  const updateAlbumArtistKeyword = useCallback(
     (keyword: string) => setAlbumArtistKeyword(keyword),
     []
   );
-  const updateGenreKeyword = React.useCallback((keyword: string) => setGenreKeyword(keyword), []);
+  const updateGenreKeyword = useCallback((keyword: string) => setGenreKeyword(keyword), []);
 
-  const fetchSongDataFromNet = React.useCallback(() => {
+  const fetchSongDataFromNet = useCallback(() => {
     if (songInfo.title) {
       changePromptMenuData(
         true,
@@ -361,12 +367,12 @@ function SongTagsEditingPage() {
       ]);
   };
 
-  const areThereDataChanges = React.useMemo(
+  const areThereDataChanges = useMemo(
     () => isDataChanged(defaultValues, songInfo),
     [defaultValues, songInfo]
   );
 
-  const songNameFromPath = React.useMemo(() => {
+  const songNameFromPath = useMemo(() => {
     if (songPath) {
       const fileName = songPath.split('\\').at(-1);
       if (fileName) return fileName?.replace(/\.\w{3,5}$/gm, '');
@@ -374,7 +380,7 @@ function SongTagsEditingPage() {
     return t('common.unknownTitle');
   }, [songPath, t]);
 
-  const isEditingCurrentlyPlayingSong = React.useMemo(
+  const isEditingCurrentlyPlayingSong = useMemo(
     () => currentSongData.songId === songId,
     [currentSongData.songId, songId]
   );
@@ -426,10 +432,7 @@ function SongTagsEditingPage() {
                 />
               </div>
             </div>
-            <div
-              className="inputs-container grid grid-flow-row grid-cols-2 content-around gap-8 text-font-color-black 
-            dark:text-font-color-white"
-            >
+            <div className="inputs-container grid grid-flow-row grid-cols-2 content-around gap-8 text-font-color-black dark:text-font-color-white">
               <SongNameInput songTitle={songInfo.title} updateSongInfo={updateSongInfo} />
               <SongYearInput songYear={songInfo.releasedYear} updateSongInfo={updateSongInfo} />
               {/* ? SONG ARTSITS */}
@@ -479,6 +482,7 @@ function SongTagsEditingPage() {
                 songId={songId}
                 songArtists={songInfo.artists}
                 songPath={songPath}
+                album={songInfo.album?.title}
                 duration={songInfo.duration}
                 synchronizedLyrics={songInfo.synchronizedLyrics}
                 unsynchronizedLyrics={songInfo.unsynchronizedLyrics}

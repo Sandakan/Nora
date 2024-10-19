@@ -1,4 +1,4 @@
-import React from 'react';
+import { CSSProperties, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
@@ -7,16 +7,16 @@ interface SongArtistProp {
   name: string;
   isFromKnownSource?: boolean;
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 }
 
 function SongArtist(props: SongArtistProp) {
-  const { updateContextMenuData, changeCurrentActivePage } = React.useContext(AppUpdateContext);
+  const { updateContextMenuData, changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { artistId, name, className = '', isFromKnownSource = true, style } = props;
 
-  const showArtistInfoPage = React.useCallback(
+  const showArtistInfoPage = useCallback(
     (artistName: string, id: string) =>
       changeCurrentActivePage('ArtistInfo', {
         artistName,

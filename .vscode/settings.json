@@ -3,6 +3,7 @@
     "acoustid",
     "aeiou",
     "apic",
+    "armv",
     "Brainz",
     "Deezer",
     "ecfg",
@@ -12,10 +13,12 @@
     "horiz",
     "isrc",
     "lastfm",
+    "LRCLIB",
     "Mamidwar",
     "mbid",
     "Motrix's",
     "nsis",
+    "phin",
     "pmmmwh",
     "pyong",
     "Resyncing",
@@ -31,6 +34,7 @@
     "Unmute",
     "unsynced",
     "USLT",
+    "vite",
     "webm",
     "xmark",
     "Yosef",
@@ -71,7 +75,7 @@
     }
   ],
   "editor.tokenColorCustomizations": {
-    "comments": "#00b894",
+    "comments": "",
     "textMateRules": []
   },
   "typescript.tsdk": "node_modules\\typescript\\lib"

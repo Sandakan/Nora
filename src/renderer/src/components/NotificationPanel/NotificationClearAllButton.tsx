@@ -1,10 +1,10 @@
-import React from 'react';
+import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
 
 const NotificationClearAllButton = () => {
-  const { updateNotifications } = React.useContext(AppUpdateContext);
+  const { updateNotifications } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   return (

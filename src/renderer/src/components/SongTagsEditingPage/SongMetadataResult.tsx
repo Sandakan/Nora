@@ -1,4 +1,4 @@
-import React from 'react';
+import { lazy, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -6,9 +6,16 @@ import isLyricsSynced from '../../../../common/isLyricsSynced';
 
 import Button from '../Button';
 import Img from '../Img';
-import CustomizeSelectedMetadataPrompt from './CustomizeSelectedMetadataPrompt';
 
 import DefaultSongImage from '../../assets/images/webp/song_cover_default.webp';
+import {
+  manageArtworks,
+  manageAlbumData,
+  manageArtistsData,
+  manageGenresData
+} from '../../utils/manageMetadataResults';
+
+const CustomizeSelectedMetadataPrompt = lazy(() => import('./CustomizeSelectedMetadataPrompt'));
 
 interface SongMetadataResultProp {
   title: string;
@@ -21,88 +28,14 @@ interface SongMetadataResultProp {
   updateSongInfo: (callback: (prevData: SongTags) => SongTags) => void;
 }
 
-export const manageAlbumData = (
-  albumData: Album[],
-  album?: string,
-  songArtwork?: string
-): SongTagsAlbumData | undefined => {
-  if (albumData.length > 0)
-    return {
-      title: albumData[0].title,
-      albumId: albumData[0].albumId,
-      artists: albumData[0].artists?.map((x) => x.artistId),
-      artworkPath: albumData[0].artworkPaths.artworkPath,
-      noOfSongs: albumData[0].songs.length
-    };
-
-  if (album) return { title: album, artworkPath: songArtwork, noOfSongs: 1 };
-  return undefined;
-};
-
-export const manageArtistsData = (
-  artistData: Artist[],
-  artists: string[]
-):
-  | {
-      artistId?: string;
-      name: string;
-      artworkPath?: string;
-      onlineArtworkPaths?: OnlineArtistArtworks;
-    }[]
-  | undefined => {
-  const artistsInfo: ReturnType<typeof manageArtistsData> = artistData.map((data) => ({
-    name: data.name,
-    artistId: data.artistId,
-    artworkPath: data.artworkPaths.optimizedArtworkPath,
-    onlineArtworkPaths: data.onlineArtworkPaths
-  }));
-
-  for (const artistName of artists) {
-    if (!artistsInfo.some((x) => x.name === artistName)) artistsInfo.push({ name: artistName });
-  }
-
-  return artistsInfo;
-};
-
-export const manageGenresData = (
-  genreData: Genre[],
-  genres?: string[]
-):
-  | {
-      genreId?: string | undefined;
-      name: string;
-      artworkPath?: string | undefined;
-    }[]
-  | undefined => {
-  if (genres) {
-    const genresInfo: ReturnType<typeof manageGenresData> = genreData.map((data) => ({
-      name: data.name,
-      genreId: data.genreId,
-      artworkPath: data.artworkPaths.optimizedArtworkPath
-    }));
-
-    for (const genreName of genres) {
-      if (!genresInfo.some((x) => x.name === genreName)) genresInfo.push({ name: genreName });
-    }
-
-    return genresInfo;
-  }
-  return undefined;
-};
-
-export const manageArtworks = (prevData: SongTags, artworkPaths?: string[]) =>
-  Array.isArray(artworkPaths) && artworkPaths.length > 0
-    ? artworkPaths.at(-1) || artworkPaths[0]
-    : prevData.artworkPath;
-
 function SongMetadataResult(props: SongMetadataResultProp) {
-  const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { title, artists, genres, artworkPaths, album, lyrics, releasedYear, updateSongInfo } =
     props;
 
-  const addToMetadata = React.useCallback(async () => {
+  const addToMetadata = useCallback(async () => {
     const albumData = album ? await window.api.albumsData.getAlbumData([album]) : [];
     const artistData = await window.api.artistsData.getArtistData(artists);
     const genreData = genres ? await window.api.genresData.getGenresData(genres) : [];

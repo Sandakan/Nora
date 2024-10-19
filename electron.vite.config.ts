@@ -1,21 +1,28 @@
-// import { resolve } from 'path';
+/**
+ * @type {import('electron-vite').UserConfig}
+ */
+import { resolve } from 'path';
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   main: {
     build: {
-      rollupOptions: { input: '/src/main/main.ts' }
+      rollupOptions: { input: '/src/main/main.ts', external: ['sharp'] }
     },
     plugins: [externalizeDepsPlugin()]
   },
   preload: {
-    plugins: [externalizeDepsPlugin()]
+    plugins: [externalizeDepsPlugin()],
+
+    build: {
+      rollupOptions: { output: { format: 'cjs', entryFileNames: '[name].mjs' } }
+    }
   },
   renderer: {
     resolve: {
       alias: {
-        // '@renderer': resolve('src/renderer/src')
+        '@renderer': resolve(import.meta.dirname, './src/renderer/src')
       }
     },
     plugins: [react()]

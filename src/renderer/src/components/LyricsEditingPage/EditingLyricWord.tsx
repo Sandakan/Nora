@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { LyricsLineData } from './LyricsEditingPage';
 
 type Props = {
@@ -17,7 +17,7 @@ const EditingLyricWord = (props: Props) => {
   } = wordData;
   const [isWordInRange, setIsWordInRange] = useState(false);
 
-  const handleSongPositionChange = React.useCallback(
+  const handleSongPositionChange = useCallback(
     (e: Event) => {
       if ('detail' in e && !Number.isNaN(e.detail)) {
         const songPosition = e.detail as number;
@@ -31,7 +31,7 @@ const EditingLyricWord = (props: Props) => {
     [wordEnd, wordStart]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isWordActive) {
       document.addEventListener('player/positionChange', handleSongPositionChange);
     } else {

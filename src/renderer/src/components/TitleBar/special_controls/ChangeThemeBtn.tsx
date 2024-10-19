@@ -1,11 +1,13 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import Button from '../../Button';
-import { AppContext } from '../../../contexts/AppContext';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const ChangeThemeBtn = () => {
-  const { isDarkMode, bodyBackgroundImage } = React.useContext(AppContext);
+  const isDarkMode = useStore(store, (state) => state.isDarkMode);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+
   const { t } = useTranslation();
 
   return (

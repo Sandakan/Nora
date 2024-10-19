@@ -1,4 +1,4 @@
-import React from 'react';
+import { useId } from 'react';
 import Img from '../Img';
 
 export interface VersionNoteProps {
@@ -8,7 +8,7 @@ export interface VersionNoteProps {
 
 const VersionNote = (props: VersionNoteProps) => {
   const { note, artworkPath } = props;
-  const key = React.useId();
+  const key = useId();
   return (
     <li className="mb-1 font-normal last:mb-4 dark:font-light" key={key}>
       {note}

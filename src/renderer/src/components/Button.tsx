@@ -1,4 +1,12 @@
-import React from 'react';
+import {
+  CSSProperties,
+  KeyboardEvent,
+  MouseEvent as ReactMouseEvent,
+  memo,
+  useEffect,
+  useMemo,
+  useState
+} from 'react';
 import { twMerge } from 'tailwind-merge';
 
 export interface ButtonProps {
@@ -9,7 +17,7 @@ export interface ButtonProps {
   iconClassName?: string;
   pendingClassName?: string;
   clickHandler: (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent> | React.KeyboardEvent<HTMLButtonElement>,
+    e: ReactMouseEvent<HTMLButtonElement, MouseEvent> | KeyboardEvent<HTMLButtonElement>,
     setIsDisabled: (state: boolean) => void,
     setIsPending: (state: boolean) => void
   ) => void;
@@ -17,13 +25,13 @@ export interface ButtonProps {
   isVisible?: boolean;
   tooltipLabel?: string;
   pendingAnimationOnDisabled?: boolean;
-  style?: React.CSSProperties;
-  onContextMenu?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  style?: CSSProperties;
+  onContextMenu?: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void;
   removeFocusOnClick?: boolean;
   children?: string;
 }
 
-const Button = React.memo((props: ButtonProps) => {
+const Button = memo((props: ButtonProps) => {
   const {
     id,
     className,
@@ -42,17 +50,17 @@ const Button = React.memo((props: ButtonProps) => {
     removeFocusOnClick = true
   } = props;
 
-  const [isButtonDisabled, setIsButtonDisabled] = React.useState(isDisabled);
-  const [isStatusPending, setIsStatusPending] = React.useState(pendingAnimationOnDisabled);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(isDisabled);
+  const [isStatusPending, setIsStatusPending] = useState(pendingAnimationOnDisabled);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setIsButtonDisabled(isDisabled);
   }, [isDisabled]);
 
   const updateIsDisabled = (state: boolean) => setIsButtonDisabled(state);
   const updateIsPending = (state: boolean) => setIsStatusPending(state);
 
-  const buttonIcons = React.useMemo(() => {
+  const buttonIcons = useMemo(() => {
     if (iconName) {
       const iconNames = iconName.split(';');
       return iconNames.map((name, index) => {
@@ -61,7 +69,7 @@ const Button = React.memo((props: ButtonProps) => {
             key={name}
             className={`material-icons-round icon relative flex items-center justify-center text-lg !leading-none ${
               label && iconNames.length - 1 === index && 'mr-3'
-            } ${iconClassName} ${isStatusPending && isButtonDisabled && `h-4 w-4 `}`}
+            } ${iconClassName} ${isStatusPending && isButtonDisabled && `h-4 w-4`}`}
           >
             {isStatusPending && isButtonDisabled ? '' : name}
           </span>
@@ -95,8 +103,7 @@ const Button = React.memo((props: ButtonProps) => {
     >
       {isStatusPending && isButtonDisabled ? (
         <span
-          className={`material-icons-round icon relative flex h-4 w-4 items-center justify-center text-lg after:absolute after:mx-auto after:block after:h-4 after:w-4 after:animate-spin-ease after:items-center after:justify-center after:rounded-full after:border-2 after:border-[transparent] after:border-t-font-color-black after:content-[''] dark:after:border-t-font-color-white
-         ${(!isStatusPending || label) && 'mr-2'} ${pendingClassName}`}
+          className={`material-icons-round icon relative flex h-4 w-4 items-center justify-center text-lg after:absolute after:mx-auto after:block after:h-4 after:w-4 after:animate-spin-ease after:items-center after:justify-center after:rounded-full after:border-2 after:border-[transparent] after:border-t-font-color-black after:content-[''] dark:after:border-t-font-color-white ${(!isStatusPending || label) && 'mr-2'} ${pendingClassName}`}
         >
           {isStatusPending ? '' : iconName}
         </span>

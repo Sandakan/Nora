@@ -1,6 +1,5 @@
-import React from 'react';
+import { memo } from 'react';
 import { getVersionInfoFromString } from '../../utils/isLatestVersion';
-import { AppContext } from '../../contexts/AppContext';
 
 import { version } from '../../../../../package.json';
 
@@ -13,11 +12,14 @@ import WindowControlsContainer from './WindowControlsContainer';
 
 import LightModeLogo from '../../assets/images/webp/logo_light_mode.webp';
 import GoToMainPlayerBtn from './special_controls/GoToMainPlayerBtn';
+import { useStore } from '@tanstack/react-store';
+import { store } from '../../store';
 
 const appReleasePhase = getVersionInfoFromString(version)?.releasePhase || 'stable';
 
-const TitleBar = React.memo(() => {
-  const { bodyBackgroundImage, playerType } = React.useContext(AppContext);
+const TitleBar = memo(() => {
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+  const playerType = useStore(store, (state) => state.playerType);
 
   return (
     <header

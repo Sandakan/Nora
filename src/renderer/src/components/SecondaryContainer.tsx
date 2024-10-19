@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable react/require-default-props */
-import React, { ForwardedRef, ReactNode } from 'react';
+import { ForwardedRef, ReactNode, forwardRef } from 'react';
 import ErrorBoundary from './ErrorBoundary';
 
 interface SecondaryContainerProp {
@@ -11,7 +11,7 @@ interface SecondaryContainerProp {
   focusable?: boolean;
 }
 
-const SecondaryContainer = React.forwardRef(
+const SecondaryContainer = forwardRef(
   (props: SecondaryContainerProp, ref: ForwardedRef<HTMLDivElement>) => {
     const { children, className, onKeyDown, role, focusable = false } = props;
     return (
@@ -19,7 +19,7 @@ const SecondaryContainer = React.forwardRef(
         <div
           className={`secondary-container mb-4 h-fit w-full ${className}`}
           onKeyDown={onKeyDown}
-          role={role ?? focusable ? 'none' : undefined}
+          role={(role ?? focusable) ? 'none' : undefined}
           // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
           tabIndex={focusable ? 1 : undefined}
           ref={ref}

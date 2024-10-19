@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import { ReactElement, memo } from 'react';
 
 interface SongStatProp {
   title: string;
@@ -6,7 +6,7 @@ interface SongStatProp {
   className?: string;
 }
 
-const SongStat = React.memo((props: SongStatProp) => {
+const SongStat = memo((props: SongStatProp) => {
   const { title, value, className } = props;
 
   return (

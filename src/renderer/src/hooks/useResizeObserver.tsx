@@ -1,13 +1,13 @@
-import React from 'react';
+import { MutableRefObject, useLayoutEffect, useRef, useState } from 'react';
 import debounce from '../utils/debounce';
 
 export default function useResizeObserver(
-  elRef: React.MutableRefObject<HTMLElement | null | undefined>,
+  elRef: MutableRefObject<HTMLElement | null | undefined>,
   debounceTimeout?: number
 ) {
-  const [breakSize, setBreakSize] = React.useState({ width: 0, height: 0 });
+  const [breakSize, setBreakSize] = useState({ width: 0, height: 0 });
 
-  const observer = React.useRef(
+  const observer = useRef(
     new ResizeObserver((entries) => {
       // Only care about the first element, we expect one element to be watched
       const { width, height } = entries[0].contentRect;
@@ -16,7 +16,7 @@ export default function useResizeObserver(
     })
   );
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     const currentObserver = observer.current;
     if (elRef && elRef.current) {
       observer.current.observe(elRef.current);

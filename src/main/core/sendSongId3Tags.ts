@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import path from 'path';
 import NodeID3 from 'node-id3';
-import { parseSyncedLyricsFromAudioDataSource } from '../utils/parseLyrics';
+import { parseSyncedLyricsFromAudioDataSource } from '../../common/parseLyrics';
 import { getAlbumsData, getArtistsData, getGenresData, getSongsData } from '../filesystem';
 import {
   getAlbumArtworkPath,

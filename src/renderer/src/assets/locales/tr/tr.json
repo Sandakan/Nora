@@ -190,7 +190,7 @@
     "vocalBooster": "Vokal Güçlendirici"
   },
   "song": {
-    "revealInFileExplorer": "Dosya Gezgininde Göster",
+    "showInFileExplorer": "Dosya Gezgininde Göster",
     "artwork": "Şarkı Sanatı",
     "selectedSongCount": "{{count}} seçildi $t(common.song, {{\" count \": {{count}}})",
     "likeSong": "Şarkıyı beğen",
@@ -904,7 +904,7 @@
     "RESET_FAILED": "Uygulama sıfırlanamadı. Uygulamayı şimdi yeniden yüklüyoruz.",
     "APP_THEME_CHANGE": "Sistem teması {{theme}} olarak değiştirildi",
     "SONG_REMOVE_PROCESS_UPDATE": "{{total}} şarkıdan {{value}} tanesi kaldırıldı.",
-    "SONG_REVEAL_FAILED": "Şarkı kütüphanede bulunamadığı için explorer'da şarkı dosyası gösterilemedi.",
+    "OPEN_SONG_IN_EXPLORER_FAILED": "Şarkı kütüphanede bulunamadığı için explorer'da şarkı dosyası gösterilemedi.",
     "PENDING_METADATA_UPDATES_SAVED": "'{{ title }}' için bekleyen meta veri güncellemeleri başarıyla kaydedildi.",
     "METADATA_UPDATE_FAILED": "Meta veri güncellemesi başarısız oldu. {{message}}",
     "SONG_EXT_NOT_SUPPORTED_FOR_LYRICS_SAVES": "Mevcut şarkı uzantısı ({{ext}}) meta verileri değiştirmek için desteklenmediğinden şarkı sözleri kaydedilemiyor.",

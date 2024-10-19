@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
+// const { contextBridge, ipcRenderer } = require('electron');
 import { LastFMTrackInfoApi } from '../@types/last_fm_api';
 import { SimilarTracksOutput } from '../@types/last_fm_similar_tracks_api';
 import { LastFMAlbumInfo } from '../@types/last_fm_album_info_api';

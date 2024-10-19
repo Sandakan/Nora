@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import { ReactNode, useContext } from 'react';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 
 import Button, { ButtonProps } from './Button';
@@ -11,7 +11,7 @@ interface SensitiveActionConfrimPromptProp {
 }
 
 const SensitiveActionConfirmPrompt = (props: SensitiveActionConfrimPromptProp) => {
-  const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { changePromptMenuData } = useContext(AppUpdateContext);
   const { title, confirmButton, content, closePromptOnButtonClick = true } = props;
   return (
     <>

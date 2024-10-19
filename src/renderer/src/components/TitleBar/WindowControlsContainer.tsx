@@ -1,20 +1,23 @@
-import React from 'react';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 
 import Button from '../Button';
+import { useStore } from '@tanstack/react-store';
+import { store } from '../../store';
 
 const WindowControlsContainer = () => {
-  const { userData, bodyBackgroundImage } = React.useContext(AppContext);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+  const userData = useStore(store, (state) => state.userData);
+
   const { t } = useTranslation();
 
-  const close = React.useCallback(() => {
+  const close = useCallback(() => {
     if (userData && userData.preferences.hideWindowOnClose) window.api.windowControls.hideApp();
     else window.api.windowControls.closeApp();
   }, [userData]);
 
-  const minimize = React.useCallback(() => window.api.windowControls.minimizeApp(), []);
-  const maximize = React.useCallback(() => window.api.windowControls.toggleMaximizeApp(), []);
+  const minimize = useCallback(() => window.api.windowControls.minimizeApp(), []);
+  const maximize = useCallback(() => window.api.windowControls.toggleMaximizeApp(), []);
 
   return (
     <div

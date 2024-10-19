@@ -15,6 +15,8 @@ module.exports = {
     'react-refresh/only-export-components': 'warn',
     '@typescript-eslint/explicit-function-return-type': 'off',
     'import/no-unresolved': 'off',
+    'import/named': 'off',
+    'promise/always-return': ['warn', { ignoreLastCallback: true }],
     '@typescript-eslint/no-explicit-any': 'off',
     'react/no-unescaped-entities': 'off',
     '@typescript-eslint/no-unused-vars': 'warn'
@@ -22,6 +24,9 @@ module.exports = {
   settings: {
     'import/parsers': {
       '@typescript-eslint/parser': ['.ts', '.tsx']
+    },
+    react: {
+      version: 'detect'
     }
   }
 };

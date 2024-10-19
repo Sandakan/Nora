@@ -1,27 +1,29 @@
-import React from 'react';
+import { useContext, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import log from '../../utils/log';
 
 import Button from '../Button';
 import Hyperlink from '../Hyperlink';
 
+import log from '../../utils/log';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
+
 const MusixmatchSettingsPrompt = () => {
-  const { userData } = React.useContext(AppContext);
-  const { updateUserData } = React.useContext(AppUpdateContext);
+  const userData = useStore(store, (state) => state.userData);
+
+  const { updateUserData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [token, setToken] = React.useState('');
-  const [showToken, setShowToken] = React.useState(false);
-  const [successState, setSuccessState] = React.useState<'unknown' | 'success' | 'failure'>(
-    'unknown'
-  );
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const [token, setToken] = useState('');
+  const [showToken, setShowToken] = useState(false);
+  const [successState, setSuccessState] = useState<'unknown' | 'success' | 'failure'>('unknown');
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const isAValidToken = token.trim().length === 54 && !/\W/gm.test(token.trim());
 
-  const isSavedTokenAvailable = React.useMemo(
+  const isSavedTokenAvailable = useMemo(
     () => !!userData?.customMusixmatchUserToken,
     [userData?.customMusixmatchUserToken]
   );

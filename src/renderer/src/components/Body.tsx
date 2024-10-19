@@ -1,34 +1,40 @@
-import React, { Suspense, useContext } from 'react';
-import { AppContext } from '../contexts/AppContext';
+import { Suspense, lazy, memo, useEffect, useRef } from 'react';
+
 import SuspenseLoader from './SuspenseLoader';
 import ErrorBoundary from './ErrorBoundary';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
-const HomePage = React.lazy(() => import('./HomePage/HomePage'));
-const ArtistPage = React.lazy(() => import('./ArtistPage/ArtistPage'));
-const AlbumsPage = React.lazy(() => import('./AlbumsPage/AlbumsPage'));
-const PlaylistsPage = React.lazy(() => import('./PlaylistsPage/PlaylistsPage'));
-const SearchPage = React.lazy(() => import('./SearchPage/SearchPage'));
-const SettingsPage = React.lazy(() => import('./SettingsPage/SettingsPage'));
-const LyricsPage = React.lazy(() => import('./LyricsPage/LyricsPage'));
-const SongInfoPage = React.lazy(() => import('./SongInfoPage/SongInfoPage'));
-const ArtistInfoPage = React.lazy(() => import('./ArtistInfoPage/ArtistInfoPage'));
-const AlbumInfoPage = React.lazy(() => import('./AlbumInfoPage/AlbumInfoPage'));
-const PlaylistsInfoPage = React.lazy(() => import('./PlaylistsInfoPage/PlaylistsInfoPage'));
-const CurrentQueuePage = React.lazy(() => import('./CurrentQueuePage/CurrentQueuePage'));
-const AllSearchResultsPage = React.lazy(() => import('./SearchPage/AllSearchResultsPage'));
-const GenresPage = React.lazy(() => import('./GenresPage/GenresPage'));
-const GenreInfoPage = React.lazy(() => import('./GenreInfoPage/GenreInfoPage'));
-const SongTagsEditingPage = React.lazy(() => import('./SongTagsEditingPage/SongTagsEditingPage'));
-const LyricsEditingPage = React.lazy(() => import('./LyricsEditingPage/LyricsEditingPage'));
-const SongsPage = React.lazy(() => import('./SongsPage/SongsPage'));
-const MusicFoldersPage = React.lazy(() => import('./MusicFoldersPage/MusicFoldersPage'));
-const MusicFolderInfoPage = React.lazy(() => import('./MusicFolderInfoPage/MusicFolderInfoPage'));
+const HomePage = lazy(() => import('./HomePage/HomePage'));
+const ArtistPage = lazy(() => import('./ArtistPage/ArtistPage'));
+const AlbumsPage = lazy(() => import('./AlbumsPage/AlbumsPage'));
+const PlaylistsPage = lazy(() => import('./PlaylistsPage/PlaylistsPage'));
+const SearchPage = lazy(() => import('./SearchPage/SearchPage'));
+const SettingsPage = lazy(() => import('./SettingsPage/SettingsPage'));
+const LyricsPage = lazy(() => import('./LyricsPage/LyricsPage'));
+const SongInfoPage = lazy(() => import('./SongInfoPage/SongInfoPage'));
+const ArtistInfoPage = lazy(() => import('./ArtistInfoPage/ArtistInfoPage'));
+const AlbumInfoPage = lazy(() => import('./AlbumInfoPage/AlbumInfoPage'));
+const PlaylistsInfoPage = lazy(() => import('./PlaylistsInfoPage/PlaylistsInfoPage'));
+const CurrentQueuePage = lazy(() => import('./CurrentQueuePage/CurrentQueuePage'));
+const AllSearchResultsPage = lazy(() => import('./SearchPage/AllSearchResultsPage'));
+const GenresPage = lazy(() => import('./GenresPage/GenresPage'));
+const GenreInfoPage = lazy(() => import('./GenreInfoPage/GenreInfoPage'));
+const SongTagsEditingPage = lazy(() => import('./SongTagsEditingPage/SongTagsEditingPage'));
+const LyricsEditingPage = lazy(() => import('./LyricsEditingPage/LyricsEditingPage'));
+const SongsPage = lazy(() => import('./SongsPage/SongsPage'));
+const MusicFoldersPage = lazy(() => import('./MusicFoldersPage/MusicFoldersPage'));
+const MusicFolderInfoPage = lazy(() => import('./MusicFolderInfoPage/MusicFolderInfoPage'));
 
-const Body = React.memo(() => {
-  const { currentlyActivePage } = useContext(AppContext);
-  const bodyRef = React.useRef<HTMLDivElement>(null);
+const isPageDataEmpty = (pageData: PageData | undefined) =>
+  !pageData || Object.keys(pageData).length === 0;
 
-  React.useEffect(() => {
+const Body = memo(() => {
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
     if (typeof currentlyActivePage.data?.scrollToId === 'string') {
       const { scrollToId } = currentlyActivePage.data;
       let retryCount = 0;
@@ -78,15 +84,13 @@ const Body = React.memo(() => {
           {currentlyActivePage.pageTitle === 'CurrentQueue' && <CurrentQueuePage />}
           {currentlyActivePage.pageTitle === 'SongInfo' && <SongInfoPage />}
           {currentlyActivePage.pageTitle === 'ArtistInfo' && <ArtistInfoPage />}
-          {currentlyActivePage.pageTitle === 'AlbumInfo' && currentlyActivePage.data !== '' && (
-            <AlbumInfoPage />
-          )}
-          {currentlyActivePage.pageTitle === 'PlaylistInfo' && currentlyActivePage.data !== '' && (
-            <PlaylistsInfoPage />
-          )}
+          {currentlyActivePage.pageTitle === 'AlbumInfo' &&
+            !isPageDataEmpty(currentlyActivePage.data) && <AlbumInfoPage />}
+          {currentlyActivePage.pageTitle === 'PlaylistInfo' &&
+            !isPageDataEmpty(currentlyActivePage.data) && <PlaylistsInfoPage />}
           {currentlyActivePage.pageTitle === 'GenreInfo' && <GenreInfoPage />}
           {currentlyActivePage.pageTitle === 'MusicFolderInfo' &&
-            currentlyActivePage.data !== '' && <MusicFolderInfoPage />}
+            !isPageDataEmpty(currentlyActivePage.data) && <MusicFolderInfoPage />}
           {currentlyActivePage.pageTitle === 'SongTagsEditor' && <SongTagsEditingPage />}
           {currentlyActivePage.pageTitle === 'LyricsEditor' && <LyricsEditingPage />}
         </Suspense>
