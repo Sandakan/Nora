@@ -115,7 +115,7 @@ const EditingLyricsLine = (props: Props) => {
 
   const lyricsLineComponent = !isEditing ? (
     <span
-      className={`scale-75 cursor-pointer text-center text-5xl font-medium opacity-50 transition-[opacity,transform] ${
+      className={`scale-75 cursor-pointer text-center text-5xl font-medium opacity-50 transition-[opacity,transform] ${shouldHighlight && 'text-font-color-highlight dark:text-dark-font-color-highlight'} ${
         shouldHighlight ? '!scale-100 !opacity-100 group-hover:opacity-75' : ''
       } ${typeof content.text === 'object' && 'flex flex-wrap items-center justify-center text-wrap'}`}
     >

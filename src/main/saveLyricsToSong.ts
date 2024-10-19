@@ -59,6 +59,7 @@ const saveLyricsToSong = async (songPathWithProtocol: string, songLyrics: SongLy
           if (prevLyrics)
             return {
               ...prevLyrics,
+              ...songLyrics,
               source: 'IN_SONG_LYRICS',
               isOfflineLyricsAvailable: true
             };
