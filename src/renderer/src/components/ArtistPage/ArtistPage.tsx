@@ -180,7 +180,7 @@ const ArtistPage = () => {
               data={artistsData}
               fixedItemWidth={MIN_ITEM_WIDTH}
               fixedItemHeight={MIN_ITEM_HEIGHT}
-              scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
+              scrollTopOffset={currentlyActivePage.data?.gridState}
               itemContent={(index, artist) => {
                 return (
                   <Artist

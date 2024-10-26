@@ -1,5 +1,5 @@
 import { nativeTheme } from 'electron';
-import { dataUpdateEvent, mainWindow } from '../main';
+import { dataUpdateEvent, getBackgroundColor, mainWindow } from '../main';
 import { getUserData, setUserData } from '../filesystem';
 
 export const changeAppTheme = (theme?: AppTheme) => {
@@ -22,6 +22,7 @@ export const changeAppTheme = (theme?: AppTheme) => {
     isDarkMode,
     useSystemTheme
   });
+  mainWindow?.setBackgroundColor(getBackgroundColor());
   dataUpdateEvent('userData/theme', [theme ?? 'system']);
 };
 
