@@ -1338,7 +1338,7 @@ export default function App() {
         data: {
           ...store.state.multipleSelectionsData,
           selectionType,
-          multipleSelections
+          multipleSelections: [...multipleSelections]
         } as MultipleSelectionData
       });
     },

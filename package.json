@@ -139,7 +139,7 @@
     "eslint-plugin-react-refresh": "^0.4.6",
     "husky": "^9.0.11",
     "jest": "^29.7.0",
-    "material-symbols": "^0.25.0",
+    "material-symbols": "^0.26.0",
     "postcss": "^8.4.35",
     "prettier": "^3.2.4",
     "prettier-plugin-tailwindcss": "^0.6.1",

@@ -161,7 +161,12 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
     if (multipleSelectionsData.multipleSelections.some((selectionId) => selectionId === songId))
       return true;
     return false;
-  }, [multipleSelectionsData, songId]);
+  }, [
+    multipleSelectionsData.isEnabled,
+    multipleSelectionsData.selectionType,
+    multipleSelectionsData.multipleSelections,
+    songId
+  ]);
 
   const songArtists = useMemo(() => {
     if (Array.isArray(artists) && artists.length > 0) {
