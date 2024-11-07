@@ -265,11 +265,12 @@ export default function App() {
   useEffect(
     () => {
       // check for app updates on app startup after 5 seconds.
-      setTimeout(checkForAppUpdates, 5000);
+      const timeoutId = setTimeout(checkForAppUpdates, 5000);
       // checks for app updates every 10 minutes.
-      const id = setInterval(checkForAppUpdates, 1000 * 60 * 15);
+      const intervalId = setInterval(checkForAppUpdates, 1000 * 60 * 15);
       return () => {
-        clearInterval(id);
+        clearTimeout(timeoutId);
+        clearInterval(intervalId);
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -321,21 +322,25 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    player.addEventListener('error', (err) => managePlaybackErrors(err));
-    player.addEventListener('play', () => {
+    const handlePlayerErrorEvent = (err: unknown) => managePlaybackErrors(err);
+    const handlePlayerPlayEvent = () => {
       dispatch({
         type: 'CURRENT_SONG_PLAYBACK_STATE',
         data: true
       });
       window.api.playerControls.songPlaybackStateChange(true);
-    });
-    player.addEventListener('pause', () => {
+    };
+    const handlePlayerPauseEvent = () => {
       dispatch({
         type: 'CURRENT_SONG_PLAYBACK_STATE',
         data: false
       });
       window.api.playerControls.songPlaybackStateChange(false);
-    });
+    };
+
+    player.addEventListener('error', handlePlayerErrorEvent);
+    player.addEventListener('play', handlePlayerPlayEvent);
+    player.addEventListener('pause', handlePlayerPauseEvent);
     window.api.quitEvent.beforeQuitEvent(handleBeforeQuitEvent);
 
     window.api.windowControls.onWindowBlur(() => manageWindowBlurOrFocus('blur'));
@@ -345,10 +350,14 @@ export default function App() {
     window.api.fullscreen.onLeaveFullscreen(() => manageWindowFullscreen('windowed'));
 
     return () => {
+      player.removeEventListener('error', handlePlayerErrorEvent);
+      player.removeEventListener('play', handlePlayerPlayEvent);
+      player.removeEventListener('pause', handlePlayerPauseEvent);
       window.api.quitEvent.removeBeforeQuitEventListener(handleBeforeQuitEvent);
     };
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [manageWindowBlurOrFocus, manageWindowFullscreen, handleBeforeQuitEvent]);
 
   useEffect(() => {
     const displayDefaultTitleBar = () => {
@@ -491,7 +500,7 @@ export default function App() {
     }
 
     return () => {
-      // document.removeEventListener('localStorage', syncLocalStorage);
+      document.removeEventListener('localStorage', syncLocalStorage);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

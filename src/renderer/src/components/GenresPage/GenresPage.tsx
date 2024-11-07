@@ -152,7 +152,7 @@ const GenresPage = () => {
               data={genresData}
               fixedItemWidth={MIN_ITEM_WIDTH}
               fixedItemHeight={MIN_ITEM_HEIGHT}
-              scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
+              // scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
               itemContent={(index, genre) => {
                 return (
                   <Genre

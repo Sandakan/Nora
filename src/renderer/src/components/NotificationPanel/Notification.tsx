@@ -35,8 +35,11 @@ const Notification = (props: AppNotification) => {
 
     if (notificationRef.current && !isNotificationAnimationDisabled) {
       notificationRef.current.classList.add('disappear-to-bottom');
-      notificationRef.current.addEventListener('animationend', () =>
-        updateNotifications((currNotifications) => currNotifications.filter((x) => x.id !== id))
+      notificationRef.current.addEventListener(
+        'animationend',
+        () =>
+          updateNotifications((currNotifications) => currNotifications.filter((x) => x.id !== id)),
+        { once: true }
       );
     } else updateNotifications((currNotifications) => currNotifications.filter((x) => x.id !== id));
   }, [id, preferences?.isReducedMotion, type, updateNotifications]);
