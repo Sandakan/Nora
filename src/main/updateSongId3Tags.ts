@@ -114,7 +114,6 @@ export const savePendingMetadataUpdates = (currentSongPath = '', forceSave = fal
         pendingMetadataUpdates.delete(songPath);
       } catch (error) {
         log(`Failed to save pending metadata update of a song. `, { error, songPath }, 'ERROR');
-        throw error;
       }
 
       try {
@@ -137,7 +136,6 @@ export const savePendingMetadataUpdates = (currentSongPath = '', forceSave = fal
           { error },
           'ERROR'
         );
-        throw error;
       }
     }
   }

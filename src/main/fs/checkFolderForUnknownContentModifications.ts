@@ -35,7 +35,7 @@ const getFullPathsOfFolderDirs = async (folderPath: string) => {
     return fullPaths;
   } catch (error) {
     log(`ERROR OCCURRED WHEN TRYING TO READ THE DIRECTORY.`, { error }, 'ERROR');
-    throw error;
+    return [];
   }
 };
 

@@ -53,7 +53,7 @@ const resolveFeaturingArtists = async (
       removeFeatInfoInTitle,
       error
     });
-    throw error;
+    return { success: false };
   }
 };
 

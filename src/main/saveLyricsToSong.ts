@@ -80,7 +80,6 @@ const saveLyricsToSong = async (songPathWithProtocol: string, songLyrics: SongLy
         );
       } catch (error) {
         log(`FAILED TO UPDATE THE SONG FILE WITH THE NEW UPDATES. `, { error }, 'ERROR');
-        throw error;
       }
     } else {
       return log(
@@ -97,7 +96,7 @@ const saveLyricsToSong = async (songPathWithProtocol: string, songLyrics: SongLy
     }
   }
 
-  throw new Error('no lyrics found to be saved to the song.');
+  throw new Error('No lyrics found to be saved to the song.');
 };
 
 export const isLyricsSavePending = (songPath: string) => pendingSongLyrics.has(songPath);
@@ -128,7 +127,6 @@ export const savePendingSongLyrics = (currentSongPath = '', forceSave = false) =
         pendingSongLyrics.delete(songPath);
       } catch (error) {
         log(`Failed to save pending song lyrics of a song. `, { error, songPath }, 'ERROR');
-        throw error;
       }
     }
   }

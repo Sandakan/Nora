@@ -82,7 +82,8 @@ const checkForDefaultArtworkSaveLocation = async () => {
   } catch (error) {
     if ('code' in (error as any) && (error as any).code === 'ENOENT') {
       await fs.mkdir(DEFAULT_ARTWORK_SAVE_LOCATION);
-    } else throw error;
+    } else
+      log(`Error occurred when checking for default artwork save location.`, { error }, 'ERROR');
   }
 };
 
@@ -151,11 +152,12 @@ const createTempFolder = async (folderPath: string) => {
       await fs.mkdir(folderPath);
       return true;
     }
-    throw error;
+    log(`Error occurred when creating temp folder.`, { error }, 'ERROR');
+    return false;
   }
 };
 
-export const createTempArtwork = async (artwork: Uint8Array | Buffer | string): Promise<string> => {
+export const createTempArtwork = async (artwork: Uint8Array | Buffer | string) => {
   try {
     const tempFolder = path.join(app.getPath('userData'), 'temp_artworks');
     await createTempFolder(tempFolder);
@@ -165,7 +167,7 @@ export const createTempArtwork = async (artwork: Uint8Array | Buffer | string): 
     return artworkPath;
   } catch (error) {
     log(`FAILED TO CREATE A TEMPORARY ARTWORK.`, { error }, 'ERROR');
-    throw new Error(`CREATE_TEMP_ARTWORK_FAILED` as MessageCodes);
+    return undefined;
   }
 };
 

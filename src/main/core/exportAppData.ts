@@ -147,7 +147,6 @@ const exportAppData = async (localStorageData: string) => {
     log('Error occurred when exporting app data.', { err, destinations }, 'ERROR', {
       sendToRenderer: { messageCode: 'APPDATA_EXPORT_FAILED' }
     });
-    throw err;
   }
 };
 

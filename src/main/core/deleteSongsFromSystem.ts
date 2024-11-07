@@ -53,9 +53,8 @@ const deleteSongsFromSystem = async (
       }.`
     };
   } catch (error) {
-    log(`Error occurred when removing a song from the system`, undefined, 'ERROR');
-    log(error as Error, undefined, 'ERROR');
-    throw error;
+    log(`Error occurred when removing a song from the system`, { error }, 'ERROR');
+    return { success: false };
   }
 };
 

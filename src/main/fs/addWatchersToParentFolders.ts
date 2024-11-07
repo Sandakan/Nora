@@ -50,7 +50,6 @@ const addWatcherToParentFolder = (parentFolderPath: string) => {
     saveAbortController(parentFolderPath, abortController);
   } catch (error) {
     log(`ERROR OCCURRED WHEN WATCHING A FOLDER.`, { error }, 'ERROR');
-    throw error;
   }
 };
 

@@ -17,7 +17,7 @@ const resetLocalStorage = () => {
 
     dispatch({ type: 'UPDATE_LOCAL_STORAGE', data: LOCAL_STORAGE_DEFAULT_TEMPLATE });
   } catch (error) {
-    console.error(error);
+    log('An error occurred while resetting the local storage.', { error }, 'ERROR');
   }
 };
 
@@ -51,21 +51,12 @@ const migrateLocalStorage = (migrationData: MigrationData, storage: LocalStorage
 };
 
 const repairInvalidLocalStorage = (isASupportedStoreVersion: boolean, store: string | null) => {
-  try {
-    log(
-      'Inavalid or outdated local storage found. Resetting the local storage to default properties.',
-      { isASupportedStoreVersion, store },
-      'WARN'
-    );
-    return resetLocalStorage();
-  } catch (error) {
-    log(
-      'Error occurred when trying to save default templated for local storage.',
-      { error },
-      'WARN'
-    );
-    throw error;
-  }
+  log(
+    'Inavalid or outdated local storage found. Resetting the local storage to default properties.',
+    { isASupportedStoreVersion, store },
+    'WARN'
+  );
+  return resetLocalStorage();
 };
 
 const checkLocalStorage = () => {

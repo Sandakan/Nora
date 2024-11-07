@@ -82,7 +82,6 @@ export const addWatcherToFolder = async (folder: MusicFolderData) => {
     saveAbortController(folder.path, abortController);
   } catch (error) {
     log(`ERROR OCCURRED WHEN WATCHING A FOLDER.`, { error }, 'ERROR');
-    throw error;
   }
 };
 

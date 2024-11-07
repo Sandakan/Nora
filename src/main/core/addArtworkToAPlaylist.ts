@@ -11,7 +11,7 @@ const removePreviousArtwork = async (playlistId: string) => {
   return log('Successfully removed previous playlist artwork.');
 };
 
-export default async (playlistId: string, artworkPath: string) => {
+const addArtworkToAPlaylist = async (playlistId: string, artworkPath: string) => {
   const playlists = getPlaylistData();
 
   for (let i = 0; i < playlists.length; i += 1) {
@@ -23,16 +23,17 @@ export default async (playlistId: string, artworkPath: string) => {
 
         playlists[i].isArtworkAvailable = !artworkPaths.isDefaultArtwork;
 
-        resetArtworkCache('playlists');
+        resetArtworkCache('playlistArtworks');
         setPlaylistData(playlists);
         dataUpdateEvent('playlists');
 
         return artworkPaths;
       } catch (error) {
         log('Error occurred when adding an artwork to a playlist.', { error });
-        throw error;
       }
     }
   }
   return undefined;
 };
+
+export default addArtworkToAPlaylist;

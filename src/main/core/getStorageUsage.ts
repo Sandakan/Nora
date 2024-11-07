@@ -107,7 +107,7 @@ const getStorageUsage = async (forceRefresh = false) => {
     return storageMetrics;
   } catch (error) {
     log('Error occurred when generating storage usage.', { error }, 'ERROR');
-    throw error;
+    return undefined;
   }
 };
 

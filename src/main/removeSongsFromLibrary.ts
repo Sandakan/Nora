@@ -208,7 +208,8 @@ const removeSong = async (
   try {
     await removeDeletedArtworkDataOfSong(song);
   } catch (error) {
-    throw new Error(`Error occurred when trying to remove artwork of ${song.title}`);
+    log(`Error occurred when trying to remove artwork of ${song.title}`, { error }, 'ERROR');
+    return;
   }
 
   // LISTENING DATA UPDATES
@@ -266,6 +267,12 @@ const removeSongsFromLibrary = async (
     } else index += 1;
 
     const data = await removeSong(song, artists, albums, playlists, genres, listeningData);
+    if (!data)
+      return {
+        success: false,
+        message: `Error occurred when trying to remove the song '${path.basename(song.path)}' from the library.`
+      };
+
     artists = data.artists;
     albums = data.albums;
     playlists = data.playlists;
