@@ -20,6 +20,7 @@ import { encrypt } from './utils/safeStorage';
 import { LastFMSessionData } from '../@types/last_fm_api';
 import { DEFAULT_SONG_PALETTE } from './other/generatePalette';
 import isPathADir from './utils/isPathADir';
+import { clearDiscordRpcActivity } from './other/discordRPC';
 
 export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(app.getPath('userData'), 'song_covers');
 export const DEFAULT_FILE_URL = 'nora://localfiles/';
@@ -313,6 +314,7 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
       userData.preferences.sendNowPlayingSongDataToLastFM = data;
     } else if (dataType === 'preferences.enableDiscordRPC' && typeof data === 'boolean') {
       userData.preferences.enableDiscordRPC = data;
+      if (!data) clearDiscordRpcActivity();
     } else if (dataType === 'customMusixmatchUserToken' && typeof data === 'string') {
       const encryptedToken = encrypt(data);
       userData.customMusixmatchUserToken = encryptedToken;

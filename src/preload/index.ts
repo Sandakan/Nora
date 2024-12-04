@@ -3,6 +3,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 import { LastFMTrackInfoApi } from '../@types/last_fm_api';
 import { SimilarTracksOutput } from '../@types/last_fm_similar_tracks_api';
 import { LastFMAlbumInfo } from '../@types/last_fm_album_info_api';
+import { ipcHelper } from '@electron-toolkit/utils';
 
 const properties = {
   isInDevelopment: process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true',
@@ -41,7 +42,7 @@ const playerControls = {
   skipBackwardToPreviousSong: (callback: (e: any) => void) =>
     ipcRenderer.on('app/player/skipBackward', callback),
   sendSongPosition: (position: number): void => ipcRenderer.send('app/getSongPosition', position),
-  setDiscordRpcActivity: (options: DiscordRpcActivityOptions): void =>
+  setDiscordRpcActivity: (options: any): void =>
     ipcRenderer.send('app/setDiscordRpcActivity', options),
 
   toggleLikeSongs: (
@@ -210,6 +211,16 @@ const lyrics = {
 
   getTranslatedLyrics: (languageCode: LanguageCodes): Promise<SongLyrics | undefined> =>
     ipcRenderer.invoke('app/getTranslatedLyrics', languageCode),
+
+  romanizeLyrics: (): Promise<SongLyrics | undefined> => ipcRenderer.invoke('app/romanizeLyrics'),
+
+  convertLyricsToPinyin: (): Promise<SongLyrics | undefined> =>
+    ipcRenderer.invoke('app/convertLyricsToPinyin'),
+
+  convertLyricsToRomaja: (): Promise<SongLyrics | undefined> =>
+    ipcRenderer.invoke('app/convertLyricsToRomaja'),
+
+  resetLyrics: (): Promise<SongLyrics> => ipcRenderer.invoke('app/resetLyrics'),
 
   saveLyricsToSong: (songPath: string, text: SongLyrics) =>
     ipcRenderer.invoke('app/saveLyricsToSong', songPath, text)

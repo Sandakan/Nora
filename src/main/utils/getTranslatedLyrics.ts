@@ -19,7 +19,7 @@ const getTranslatedLyrics = async (languageCode: string) => {
       const lines = parsedLyrics.map((line) => {
         if (typeof line.originalText === 'string') return line.originalText.trim();
         return line.originalText
-          .map((x) => x.unparsedText)
+          .map((x) => x.text)
           .join(' ')
           .trim();
       });
@@ -66,8 +66,14 @@ const getTranslatedLyrics = async (languageCode: string) => {
       cachedLyrics.lyrics.isTranslated = true;
 
       const translatedLyrics = parseLyrics(lyricsArr.join('\n'));
-      cachedLyrics.lyrics = translatedLyrics;
+      const convertedLyrics = cachedLyrics.lyrics.parsedLyrics.map((line) => line.romanizedText);
+      const isRomanized = cachedLyrics.lyrics.isRomanized;
 
+      cachedLyrics.lyrics = translatedLyrics;
+      cachedLyrics.lyrics.parsedLyrics.map((line, index) => {
+        line.romanizedText = convertedLyrics[index];
+      });
+      cachedLyrics.lyrics.isRomanized = isRomanized;
       updateCachedLyrics(() => cachedLyrics);
 
       sendMessageToRenderer({

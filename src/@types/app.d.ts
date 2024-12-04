@@ -6,7 +6,6 @@ import { api } from '../preload';
 import { LastFMSessionData } from './last_fm_api';
 import { SimilarArtist, Tag } from './last_fm_artist_info_api';
 import { resources } from 'src/renderer/src/i18n';
-import { Presence } from 'discord-rpc-revamp';
 
 declare global {
   interface Window {
@@ -260,7 +259,9 @@ declare global {
   // Represents a single line of lyrics, either synced or unsynced
   interface LyricLine {
     originalText: string | SyncedLyricsLineWord[]; // Original text of the lyric line
+    romanizedText?: string | SyncedLyricsLineWord[]; // Romanized text of the lyric line (optional)
     translatedTexts: TranslatedLyricLine[]; // Array of translations in different languages
+    //convertedLyrics: string | SyncedLyricsLineWord[]; // Converted lyrics
     start?: number; // Timing start (for synced lyrics only)
     end?: number; // Timing end (for synced lyrics only)
     isEnhancedSynced: boolean; // Indicates if the original text is enhanced synced lyrics
@@ -269,8 +270,17 @@ declare global {
   // Holds all the lyrics data, whether synced or unsynced
   interface LyricsData {
     isSynced: boolean;
-    isTranslated: boolean;
-    parsedLyrics: LyricLine[]; // Array of original lyric lines (both synced and unsynced
+    isRomanized: boolean; // Indicates if the lyrics have been romanized
+    isTranslated: boolean; // Indicates if translations are available
+    // isTranslated: boolean;
+    // isJapanese: boolean;
+    // isChinese: boolean;
+    // isKorean: boolean;
+    // isConvertedToRomaji: boolean;
+    // isConvertedToPinyin: boolean;
+    // isConvertedToRomaja: boolean;
+    isReset: boolean;
+    parsedLyrics: LyricLine[]; // Array of original lyric lines (both synced and unsynced)
     unparsedLyrics: string;
     offset?: number;
     originalLanguage?: string; // Language of the original lyrics (optional)
@@ -391,6 +401,8 @@ declare global {
     | 'preferences.sendSongFavoritesDataToLastFM'
     | 'preferences.sendNowPlayingSongDataToLastFM'
     | 'preferences.saveLyricsInLrcFilesForSupportedSongs'
+    | 'preferences.autoTranslateLyrics'
+    | 'preferences.autoConvertLyrics'
     | 'preferences.enableDiscordRPC'
     | 'customMusixmatchUserToken'
     | 'customLrcFilesSaveLocation'
@@ -500,6 +512,8 @@ declare global {
     showTrackNumberAsSongIndex: boolean;
     allowToPreventScreenSleeping: boolean;
     enableImageBasedDynamicThemes: boolean;
+    autoTranslateLyrics: boolean;
+    autoConvertLyrics: boolean;
   }
 
   interface CurrentSong {
@@ -801,6 +815,8 @@ declare global {
     | 'OPEN_SONG_IN_EXPLORER_FAILED'
     | 'LYRICS_FIND_FAILED'
     | 'LYRICS_TRANSLATION_FAILED'
+    | 'LYRICS_CONVERT_FAILED'
+    | 'RESET_CONVERTED_LYRICS_FAILED'
     | 'METADATA_UPDATE_FAILED'
     | 'DESTINATION_NOT_SELECTED'
     | 'ARTWORK_SAVE_FAILED'
@@ -853,6 +869,8 @@ declare global {
     | 'LYRICS_SAVED_IN_LRC_FILE'
     | 'PENDING_LYRICS_SAVED'
     | 'LYRICS_TRANSLATION_SUCCESS'
+    | 'LYRICS_CONVERT_SUCCESS'
+    | 'RESET_CONVERTED_LYRICS_SUCCESS'
     | 'LASTFM_LOGIN_SUCCESS'
     | 'APPDATA_EXPORT_STARTED'
     | 'APPDATA_IMPORT_STARTED'
@@ -1244,9 +1262,4 @@ declare global {
     | 'favorites_artwork'
     | 'genre_artwork'
     | 'playlist_artwork';
-
-  interface DiscordRpcActivityOptions extends Presence {
-    largeImageKey?: ArtAssetKeys;
-    smallImageKey?: ArtAssetKeys;
-  }
 }

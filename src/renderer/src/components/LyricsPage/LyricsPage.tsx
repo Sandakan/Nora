@@ -79,6 +79,23 @@ const LyricsPage = () => {
           // console.log(res);
 
           if (lyricsLinesContainerRef.current) lyricsLinesContainerRef.current.scrollTop = 0;
+
+          if (
+            preferences.autoTranslateLyrics &&
+            !res?.lyrics.isReset &&
+            !res?.lyrics.isTranslated
+          ) {
+            window.api.lyrics.getTranslatedLyrics(i18n.language as LanguageCodes).then(setLyrics);
+          }
+          if (preferences.autoConvertLyrics && !res?.lyrics.isReset && !res?.lyrics.isRomanized) {
+            if (res?.lyrics.originalLanguage == 'zh')
+              window.api.lyrics.convertLyricsToPinyin().then(setLyrics);
+            else if (res?.lyrics.originalLanguage == 'ja')
+              window.api.lyrics.romanizeLyrics().then(setLyrics);
+            else if (res?.lyrics.originalLanguage == 'ko')
+              window.api.lyrics.convertLyricsToRomaja().then(setLyrics);
+          }
+
           return undefined;
         })
         .catch((err) => console.error(err));
@@ -120,6 +137,7 @@ const LyricsPage = () => {
               translatedLyricLines={lyric.translatedTexts}
               syncedLyrics={{ start, end }}
               isAutoScrolling={isAutoScrolling}
+              convertedLyric={lyric.romanizedText}
             />
           );
         });
@@ -149,6 +167,7 @@ const LyricsPage = () => {
               index={index}
               lyric={line.originalText}
               isAutoScrolling={isAutoScrolling}
+              convertedLyric={line.romanizedText}
             />
           );
         });
@@ -421,22 +440,78 @@ const LyricsPage = () => {
                       clickHandler={() => setIsAutoScrolling((prevState) => !prevState)}
                     />
                   )}
+                  {lyrics && !lyrics.lyrics.isTranslated && (
+                    <Button
+                      key={11}
+                      tooltipLabel={t('lyricsPage.translateLyrics')}
+                      className="translate-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                      iconName="translate"
+                      clickHandler={async () => {
+                        const lyricsData = await window.api.lyrics.getTranslatedLyrics(
+                          i18n.language as LanguageCodes
+                        );
+                        setLyrics(lyricsData);
+                      }}
+                    />
+                  )}
 
-                  <Button
-                    key={11}
-                    tooltipLabel={t('lyricsPage.translateLyrics')}
-                    // label={t('lyricsPage.translateLyrics')}
-                    className="translate-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
-                    iconName="translate"
-                    clickHandler={async () => {
-                      const lyricsData = await window.api.lyrics.getTranslatedLyrics(
-                        i18n.language as LanguageCodes
-                      );
+                  {lyrics &&
+                    !lyrics.lyrics.isRomanized &&
+                    lyrics.lyrics.originalLanguage == 'zh' && (
+                      <Button
+                        key={12}
+                        tooltipLabel={t('lyricsPage.convertLyricsToPinyin')}
+                        className="convert-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                        iconName="language_chinese_pinyin"
+                        clickHandler={async () => {
+                          const lyricsData = await window.api.lyrics.convertLyricsToPinyin();
+                          setLyrics(lyricsData);
+                        }}
+                      />
+                    )}
 
-                      // console.log(lyricsData);
-                      setLyrics(lyricsData);
-                    }}
-                  />
+                  {lyrics &&
+                    !lyrics.lyrics.isRomanized &&
+                    lyrics.lyrics.originalLanguage == 'ja' && (
+                      <Button
+                        key={13}
+                        tooltipLabel={t('lyricsPage.romanizeLyrics')}
+                        className="convert-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                        iconName="language_japanese_kana"
+                        clickHandler={async () => {
+                          const lyricsData = await window.api.lyrics.romanizeLyrics();
+                          setLyrics(lyricsData);
+                        }}
+                      />
+                    )}
+
+                  {lyrics &&
+                    !lyrics.lyrics.isRomanized &&
+                    lyrics.lyrics.originalLanguage == 'ko' && (
+                      <Button
+                        key={14}
+                        tooltipLabel={t('lyricsPage.convertLyricsToRomaja')}
+                        className="convert-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                        iconName="language_korean_latin"
+                        clickHandler={async () => {
+                          const lyricsData = await window.api.lyrics.convertLyricsToRomaja();
+                          setLyrics(lyricsData);
+                        }}
+                      />
+                    )}
+
+                  {lyrics && (lyrics.lyrics.isTranslated || lyrics.lyrics.isRomanized) && (
+                    <Button
+                      key={15}
+                      tooltipLabel={t('lyricsPage.resetLyrics')}
+                      className="reset-converted-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                      iconName="restart_alt"
+                      clickHandler={async () => {
+                        const lyricsData = await window.api.lyrics.resetLyrics();
+                        setLyrics(lyricsData);
+                      }}
+                    />
+                  )}
 
                   {lyrics && lyrics.source === 'IN_SONG_LYRICS' && (
                     <Button

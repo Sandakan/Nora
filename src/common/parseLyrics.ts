@@ -6,6 +6,10 @@ import isLyricsSynced, {
   SYNCED_LYRICS_REGEX,
   isAnExtendedSyncedLyricsLine
 } from './isLyricsSynced';
+import Kuroshiro from 'kuroshiro';
+import detectChinese from '@neos21/detect-chinese';
+import pinyin from 'pinyin';
+import isHangul from 'romaja/src/hangul/isHangul.js';
 
 export type SyncedLyricsInput = NonNullable<NodeID3Tags['synchronisedLyrics']>[number];
 
@@ -246,11 +250,43 @@ const parseTranslatedLyricsText = (lines: string[]): TranslatedLyricLine[] => {
   });
 };
 
+const getPrecentageJP = (str: string) => {
+  if (!str) return 0;
+  let count = 0;
+  for (const c of str) {
+    if (Kuroshiro.Util.isJapanese(c)) count++;
+  }
+  return count / str.length;
+};
+
+const getPrecentageCN = (str: string) => {
+  if (!str) return 0;
+  const detection = detectChinese.detect(str);
+  if (detection.language === 'cn') return 1;
+  let count = 0;
+  for (let i = 0; i < str.length; i++) {
+    if (pinyin.pinyin(str[i])[0][0] != str[i]) count++;
+  }
+  return count / str.length;
+};
+
+const getPrecentageKR = (str: string) => {
+  if (!str) return 0;
+  str = str.replaceAll(' ', '');
+  let count = 0;
+  for (const c of str) {
+    if (isHangul(c)) count++;
+  }
+  return count / str.length;
+};
+
 // MAIN FUNCTIONS //
 const parseLyrics = (lrcString: string): LyricsData => {
   const output: LyricsData = {
     isSynced: isLyricsSynced(lrcString),
     isTranslated: false,
+    isRomanized: false,
+    isReset: false,
     parsedLyrics: [],
     unparsedLyrics: lrcString,
     copyright: getCopyrightInfoFromLyricsString(lrcString),
@@ -265,6 +301,32 @@ const parseLyrics = (lrcString: string): LyricsData => {
 
   const groupedLines = groupOriginalAndTranslatedLyricLines(lines, output.isSynced);
   const originalLyricsLines = groupedLines.map((line) => line.original.input);
+
+  let plainLyrics = originalLyricsLines.join('');
+  if (output.isSynced) {
+    plainLyrics = groupedLines
+      .map((line) => {
+        const lrcLine = parseLyricsText(
+          line.original.input,
+          getSecondsFromLyricsLine(line.original.input)
+        );
+        if (typeof lrcLine == 'string') return lrcLine as string;
+        else return lrcLine.map((x) => x.text).join('');
+      })
+      .join('');
+  }
+  if (!output.originalLanguage) {
+    const japanesePercentage = getPrecentageJP(plainLyrics);
+    const chinesePercentage = getPrecentageCN(plainLyrics);
+    const koreanPercentage = getPrecentageKR(plainLyrics);
+    if (koreanPercentage > 0.5) output.originalLanguage = 'ko';
+    else if (chinesePercentage > 0 && japanesePercentage > 0) {
+      if (chinesePercentage >= japanesePercentage && chinesePercentage > 0.5)
+        output.originalLanguage = 'zh';
+      else if (japanesePercentage > chinesePercentage && japanesePercentage > 0.5)
+        output.originalLanguage = 'ja';
+    }
+  }
 
   output.parsedLyrics = groupedLines.map((line, index) => {
     if (output.isSynced) {
@@ -287,7 +349,8 @@ const parseLyrics = (lrcString: string): LyricsData => {
         translatedTexts,
         isEnhancedSynced,
         start,
-        end
+        end,
+        convertedLyrics: ''
       };
     }
 
@@ -304,10 +367,10 @@ const parseLyrics = (lrcString: string): LyricsData => {
       translatedTexts,
       isEnhancedSynced: false,
       start: undefined,
-      end: undefined
+      end: undefined,
+      convertedLyrics: ''
     };
   });
-
   return output;
 };
 
@@ -371,7 +434,8 @@ export const parseSyncedLyricsFromAudioDataSource = (
         translatedTexts: [],
         start: timeStamp / 1000,
         end: end / 1000,
-        isEnhancedSynced: typeof parsedTextLine !== 'string'
+        isEnhancedSynced: typeof parsedTextLine !== 'string',
+        convertedLyrics: ''
       };
     });
 
@@ -401,15 +465,33 @@ export const parseSyncedLyricsFromAudioDataSource = (
       })
       .join('\n');
 
+    const plainLyrics = lyrics
+      .map((line) => {
+        line.originalText;
+      })
+      .join('');
+    let originalLanguage: string | undefined;
+    const japanesePercentage = getPrecentageJP(plainLyrics);
+    const chinesePercentage = getPrecentageCN(plainLyrics);
+    const koreanPercentage = getPrecentageKR(plainLyrics);
+    if (koreanPercentage > 0.5) originalLanguage = 'ko';
+    else if (chinesePercentage > 0 && japanesePercentage > 0) {
+      if (chinesePercentage >= japanesePercentage && chinesePercentage > 0.5)
+        originalLanguage = 'zh';
+      else if (japanesePercentage > chinesePercentage && japanesePercentage > 0.5)
+        originalLanguage = 'ja';
+    }
     return {
       isSynced: true,
       isTranslated: false,
       copyright: metadata.copyright,
       parsedLyrics: lyrics,
       unparsedLyrics,
-      originalLanguage: undefined,
+      originalLanguage,
       translatedLanguages: [],
-      offset: 0
+      offset: 0,
+      isRomanized: false,
+      isReset: false
     };
   }
   return undefined;

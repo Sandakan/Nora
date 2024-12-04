@@ -15,6 +15,7 @@ import { store } from '@renderer/store';
 interface LyricProp {
   lyric: string | SyncedLyricsLineWord[];
   translatedLyricLines?: TranslatedLyricLine[];
+  convertedLyric?: string | SyncedLyricsLineWord[];
   index: number;
   syncedLyrics?: { start: number; end: number };
   isAutoScrolling?: boolean;
@@ -34,7 +35,16 @@ const LyricLine = (props: LyricProp) => {
   const lyricsRef = useRef(null as HTMLDivElement | null);
   const isTheCurrnetLineRef = useRef(false);
 
-  const { index, lyric, translatedLyricLines = [], syncedLyrics, isAutoScrolling = true } = props;
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
+  const {
+    index,
+    lyric,
+    translatedLyricLines = [],
+    convertedLyric,
+    syncedLyrics,
+    isAutoScrolling = true
+  } = props;
 
   const handleLyricsActivity = useCallback(
     (e: Event) => {
@@ -113,6 +123,29 @@ const LyricLine = (props: LyricProp) => {
     return extendedLyricLines;
   }, [isInRange, translatedLyricLines]);
 
+  const convertedLyricString = useMemo(() => {
+    if (!convertedLyric || convertedLyric.length === 0) return undefined;
+    if (typeof convertedLyric === 'string')
+      return convertedLyric.replaceAll(syncedLyricsRegex, '').trim();
+
+    const extendedLyricLines = convertedLyric.map((extendedText, i) => {
+      return (
+        <EnhancedSyncedLyricWord
+          key={i}
+          isActive={isInRange}
+          start={extendedText.start}
+          end={extendedText.end}
+          text={extendedText.text}
+          delay={0}
+        />
+      );
+    });
+
+    return extendedLyricLines;
+  }, [isInRange, convertedLyric]);
+
+  const lyricStringLine = translatedLyricString ?? convertedLyricString ?? lyricString;
+
   return (
     <div
       style={{
@@ -140,7 +173,9 @@ const LyricLine = (props: LyricProp) => {
       }`}
       ref={lyricsRef}
       onClick={() =>
-        syncedLyrics && typeof lyric === 'string' && updateSongPosition(syncedLyrics.start)
+        syncedLyrics &&
+        (typeof lyric === 'string' || translatedLyricString) &&
+        updateSongPosition(syncedLyrics.start)
       }
       onContextMenu={(e) => {
         e.preventDefault();
@@ -167,13 +202,10 @@ const LyricLine = (props: LyricProp) => {
       }}
     >
       <div
-        className={`flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'} ${translatedLyricString ? (syncedLyrics && isInRange ? '!text-xl !text-font-color-black/50 dark:!text-font-color-white/50' : '!text-xl') : ''}`}
+        className={`flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'}`}
       >
-        {lyricString}
+        {lyricStringLine}
       </div>
-      {translatedLyricString && (
-        <div className="translated-lyric-line">{translatedLyricString}</div>
-      )}
       {syncedLyrics && isInRange && <LyricsProgressBar delay={0} syncedLyrics={syncedLyrics} />}
     </div>
   );

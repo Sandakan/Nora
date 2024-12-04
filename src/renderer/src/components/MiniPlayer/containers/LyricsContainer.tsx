@@ -1,6 +1,7 @@
 /* eslint-disable react/no-array-index-key */
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '../../../i18n';
 
 import LyricLine from '../../LyricsPage/LyricLine';
 import useSkipLyricsLines from '../../../hooks/useSkipLyricsLines';
@@ -13,6 +14,7 @@ type Props = { isLyricsVisible: boolean };
 const LyricsContainer = (props: Props) => {
   const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
   const currentSongData = useStore(store, (state) => state.currentSongData);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
 
   const { t } = useTranslation();
 
@@ -34,7 +36,25 @@ const LyricsContainer = (props: Props) => {
           songPath: currentSongData.path,
           duration: currentSongData.duration
         })
-        .then((res) => setLyrics(res))
+        .then((res) => {
+          setLyrics(res);
+
+          if (
+            preferences.autoTranslateLyrics &&
+            !res?.lyrics.isReset &&
+            !res?.lyrics.isTranslated
+          ) {
+            window.api.lyrics.getTranslatedLyrics(i18n.language as LanguageCodes).then(setLyrics);
+          }
+          if (preferences.autoConvertLyrics && !res?.lyrics.isReset && !res?.lyrics.isRomanized) {
+            if (res?.lyrics.originalLanguage == 'zh')
+              window.api.lyrics.convertLyricsToPinyin().then(setLyrics);
+            else if (res?.lyrics.originalLanguage == 'ja')
+              window.api.lyrics.romanizeLyrics().then(setLyrics);
+            else if (res?.lyrics.originalLanguage == 'ko')
+              window.api.lyrics.convertLyricsToRomaja().then(setLyrics);
+          }
+        })
         .catch((err) => console.error(err));
     }
   }, [
@@ -60,6 +80,7 @@ const LyricsContainer = (props: Props) => {
               lyric={text}
               syncedLyrics={{ start, end }}
               translatedLyricLines={lyric.translatedTexts}
+              convertedLyric={lyric.romanizedText}
             />
           );
         });
@@ -88,6 +109,7 @@ const LyricsContainer = (props: Props) => {
               index={index}
               lyric={line.originalText}
               translatedLyricLines={line.translatedTexts}
+              convertedLyric={line.romanizedText}
             />
           );
         });

@@ -88,6 +88,10 @@ import checkForStartUpSongs from './core/checkForStartUpSongs';
 import checkForNewSongs from './core/checkForNewSongs';
 import getTranslatedLyrics from './utils/getTranslatedLyrics';
 import { setDiscordRpcActivity } from './other/discordRPC';
+import romanizeLyrics from './utils/romanizeLyrics';
+import convertLyricsToPinyin from './utils/convertToPinyin';
+import convertLyricsToRomaja from './utils/convertToRomaja';
+import resetLyrics from './utils/resetLyrics';
 
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   if (mainWindow) {
@@ -109,7 +113,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       toggleAudioPlayingState(isPlaying)
     );
 
-    ipcMain.on('app/setDiscordRpcActivity', (_: unknown, options: DiscordRpcActivityOptions) =>
+    ipcMain.on('app/setDiscordRpcActivity', (_: unknown, options: any) =>
       setDiscordRpcActivity(options)
     );
 
@@ -202,6 +206,14 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     ipcMain.handle('app/getTranslatedLyrics', (_, languageCode: LanguageCodes) =>
       getTranslatedLyrics(languageCode as string)
     );
+
+    ipcMain.handle('app/romanizeLyrics', async () => await romanizeLyrics());
+
+    ipcMain.handle('app/convertLyricsToPinyin', () => convertLyricsToPinyin());
+
+    ipcMain.handle('app/convertLyricsToRomaja', () => convertLyricsToRomaja());
+
+    ipcMain.handle('app/resetLyrics', () => resetLyrics());
 
     ipcMain.handle('app/saveLyricsToSong', (_, songPath: string, lyrics: SongLyrics) =>
       saveLyricsToSong(songPath, lyrics)
