@@ -83,17 +83,10 @@ const LyricsPage = () => {
           if (preferences.autoTranslateLyrics && !res?.lyrics.isReset && !res?.lyrics.isTranslated) {
             window.api.lyrics.getTranslatedLyrics(i18n.language as LanguageCodes).then(setLyrics);
           }
-          if (
-            preferences.autoConvertLyrics && !res?.lyrics.isReset &&
-            !(
-              res?.lyrics.isConvertedToPinyin ||
-              res?.lyrics.isConvertedToRomaji ||
-              res?.lyrics.isConvertedToRomaja
-            )
-          ) {
-            if (res?.lyrics.isChinese) window.api.lyrics.convertLyricsToPinyin().then(setLyrics);
-            else if (res?.lyrics.isJapanese) window.api.lyrics.romanizeLyrics().then(setLyrics);
-            else if (res?.lyrics.isKorean)
+          if (preferences.autoConvertLyrics && !res?.lyrics.isReset && !res?.lyrics.isRomanized) {
+            if (res?.lyrics.originalLanguage == 'zh') window.api.lyrics.convertLyricsToPinyin().then(setLyrics);
+            else if (res?.lyrics.originalLanguage == 'ja') window.api.lyrics.romanizeLyrics().then(setLyrics);
+            else if (res?.lyrics.originalLanguage == 'ko')
               window.api.lyrics.convertLyricsToRomaja().then(setLyrics);
           }
 
@@ -138,7 +131,7 @@ const LyricsPage = () => {
               translatedLyricLines={lyric.translatedTexts}
               syncedLyrics={{ start, end }}
               isAutoScrolling={isAutoScrolling}
-              convertedLyric={lyric.convertedLyrics}
+              convertedLyric={lyric.romanizedText}
             />
           );
         });
@@ -168,7 +161,7 @@ const LyricsPage = () => {
               index={index}
               lyric={line.originalText}
               isAutoScrolling={isAutoScrolling}
-              convertedLyric={line.convertedLyrics}
+              convertedLyric={line.romanizedText}
             />
           );
         });
@@ -445,21 +438,18 @@ const LyricsPage = () => {
                     <Button
                       key={11}
                       tooltipLabel={t('lyricsPage.translateLyrics')}
-                      // label={t('lyricsPage.translateLyrics')}
                       className="translate-lyrics-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                       iconName="translate"
                       clickHandler={async () => {
                         const lyricsData = await window.api.lyrics.getTranslatedLyrics(
                           i18n.language as LanguageCodes
                         );
-
-                        // console.log(lyricsData);
                         setLyrics(lyricsData);
                       }}
                     />
                   )}
 
-                  {lyrics && lyrics.lyrics.isChinese && !lyrics.lyrics.isConvertedToPinyin && (
+                  {lyrics && !lyrics.lyrics.isRomanized && lyrics.lyrics.originalLanguage == 'zh' && (
                     <Button
                       key={12}
                       tooltipLabel={t('lyricsPage.convertLyricsToPinyin')}
@@ -472,7 +462,7 @@ const LyricsPage = () => {
                     />
                   )}
 
-                  {lyrics && lyrics.lyrics.isJapanese && !lyrics.lyrics.isConvertedToRomaji && (
+                  {lyrics && !lyrics.lyrics.isRomanized && lyrics.lyrics.originalLanguage == 'ja' && (
                     <Button
                       key={13}
                       tooltipLabel={t('lyricsPage.romanizeLyrics')}
@@ -485,7 +475,7 @@ const LyricsPage = () => {
                     />
                   )}
 
-                  {lyrics && lyrics.lyrics.isKorean && !lyrics.lyrics.isConvertedToRomaja && (
+                  {lyrics && !lyrics.lyrics.isRomanized && lyrics.lyrics.originalLanguage == 'ko' && (
                     <Button
                       key={14}
                       tooltipLabel={t('lyricsPage.convertLyricsToRomaja')}
@@ -499,10 +489,7 @@ const LyricsPage = () => {
                   )}
 
                   {lyrics &&
-                    (lyrics.lyrics.isTranslated ||
-                      lyrics.lyrics.isConvertedToRomaji ||
-                      lyrics.lyrics.isConvertedToPinyin ||
-                      lyrics.lyrics.isConvertedToRomaja) && (
+                    (lyrics.lyrics.isTranslated || lyrics.lyrics.isRomanized) && (
                       <Button
                         key={15}
                         tooltipLabel={t('lyricsPage.resetLyrics')}

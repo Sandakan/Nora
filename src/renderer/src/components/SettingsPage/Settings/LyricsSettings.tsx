@@ -58,14 +58,6 @@ const LyricsSettings = () => {
     setAutoConvertLyrics(autoConvertLyrics);
   }, []);
 
-  const [compactLyrics, setCompactLyrics] = useState(true);
-
-  useEffect(() => {
-    const compactLyrics = storage.preferences.getPreferences('compactLyrics');
-
-    setCompactLyrics(compactLyrics);
-  }, []);
-
   return (
     <li className="main-container audio-playback-settings-container mb-16">
       <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
@@ -240,19 +232,6 @@ const LyricsSettings = () => {
               storage.preferences.setPreferences('autoConvertLyrics', state);
             }}
             labelContent={t('settingsPage.autoConvertLyrics')}
-          />
-        </li>
-
-        <li className="secondary-container expand-lyrics mb-4">
-          <div className="description">{t('settingsPage.compactLyricsDescription')}</div>
-          <Checkbox
-            id="compactLyrics"
-            isChecked={compactLyrics}
-            checkedStateUpdateFunction={(state) => {
-              setCompactLyrics(state);
-              storage.preferences.setPreferences('compactLyrics', state);
-            }}
-            labelContent={t('settingsPage.compactLyrics')}
           />
         </li>
       </ul>

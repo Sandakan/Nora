@@ -45,17 +45,10 @@ const LyricsContainer = (props: Props) => {
           if (preferences.autoTranslateLyrics && !res?.lyrics.isReset && !res?.lyrics.isTranslated) {
             window.api.lyrics.getTranslatedLyrics(i18n.language as LanguageCodes).then(setLyrics);
           }
-          if (
-            preferences.autoConvertLyrics  && !res?.lyrics.isReset &&
-            !(
-              res?.lyrics.isConvertedToPinyin ||
-              res?.lyrics.isConvertedToRomaji ||
-              res?.lyrics.isConvertedToRomaja
-            )
-          ) {
-            if (res?.lyrics.isChinese) window.api.lyrics.convertLyricsToPinyin().then(setLyrics);
-            else if (res?.lyrics.isJapanese) window.api.lyrics.romanizeLyrics().then(setLyrics);
-            else if (res?.lyrics.isKorean)
+          if (preferences.autoConvertLyrics  && !res?.lyrics.isReset && !res?.lyrics.isRomanized) {
+            if (res?.lyrics.originalLanguage == 'zh') window.api.lyrics.convertLyricsToPinyin().then(setLyrics);
+            else if (res?.lyrics.originalLanguage == 'ja') window.api.lyrics.romanizeLyrics().then(setLyrics);
+            else if (res?.lyrics.originalLanguage == 'ko')
               window.api.lyrics.convertLyricsToRomaja().then(setLyrics);
           }
 
@@ -88,7 +81,7 @@ const LyricsContainer = (props: Props) => {
               lyric={text}
               syncedLyrics={{ start, end }}
               translatedLyricLines={lyric.translatedTexts}
-              convertedLyric={lyric.convertedLyrics}
+              convertedLyric={lyric.romanizedText}
             />
           );
         });
@@ -117,7 +110,7 @@ const LyricsContainer = (props: Props) => {
               index={index}
               lyric={line.originalText}
               translatedLyricLines={line.translatedTexts}
-              convertedLyric={line.convertedLyrics}
+              convertedLyric={line.romanizedText}
             />
           );
         });

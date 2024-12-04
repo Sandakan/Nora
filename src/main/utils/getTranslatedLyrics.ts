@@ -66,27 +66,14 @@ const getTranslatedLyrics = async (languageCode: string) => {
       cachedLyrics.lyrics.isTranslated = true;
 
       const translatedLyrics = parseLyrics(lyricsArr.join('\n'));
-      const convertedLyrics = cachedLyrics.lyrics.parsedLyrics.map((line) => line.convertedLyrics);
-
-      const isJapanese = cachedLyrics.lyrics.isJapanese;
-      const isChinese = cachedLyrics.lyrics.isChinese;
-      const isKorean = cachedLyrics.lyrics.isKorean;
-      const isConvertedToRomaji = cachedLyrics.lyrics.isConvertedToRomaji;
-      const isConvertedToPinyin = cachedLyrics.lyrics.isConvertedToPinyin;
-      const isConvertedToRomaja = cachedLyrics.lyrics.isConvertedToRomaja;
+      const convertedLyrics = cachedLyrics.lyrics.parsedLyrics.map((line) => line.romanizedText);
+      const isRomanized = cachedLyrics.lyrics.isRomanized;
 
       cachedLyrics.lyrics = translatedLyrics;
       cachedLyrics.lyrics.parsedLyrics.map((line, index) => {
-        line.convertedLyrics = convertedLyrics[index];
+        line.romanizedText = convertedLyrics[index];
       });
-
-      cachedLyrics.lyrics.isJapanese = isJapanese;
-      cachedLyrics.lyrics.isChinese = isChinese;
-      cachedLyrics.lyrics.isKorean = isKorean;
-      cachedLyrics.lyrics.isConvertedToRomaji = isConvertedToRomaji;
-      cachedLyrics.lyrics.isConvertedToPinyin = isConvertedToPinyin;
-      cachedLyrics.lyrics.isConvertedToRomaja = isConvertedToRomaja;
-
+      cachedLyrics.lyrics.isRomanized = isRomanized;
       updateCachedLyrics(() => cachedLyrics);
 
       sendMessageToRenderer({

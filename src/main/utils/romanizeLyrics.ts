@@ -80,7 +80,7 @@ const romanizeLyrics = async () => {
       const lyric = parsedLyrics[i];
       const convertedLyric = convertedLyrics.at(i);
       if (!convertedLyric || convertedLyric.length === 0) {
-        lyric.convertedLyrics = '';
+        lyric.romanizedText = '';
         continue;
       }
       if (lyric.isEnhancedSynced) {
@@ -97,17 +97,14 @@ const romanizeLyrics = async () => {
           };
           enhancedLyrics[j] = enhancedLyric;
         }
-        lyric.convertedLyrics = enhancedLyrics;
+        lyric.romanizedText = enhancedLyrics;
       } else {
         const convertedText = convertedLyric[0].trim();
         if (convertedText !== INSTRUMENTAL_LYRIC_IDENTIFIER)
-          lyric.convertedLyrics = convertedText.replaceAll('\n', '');
+          lyric.romanizedText = convertedText.replaceAll('\n', '');
       }
     }
-
-    cachedLyrics.lyrics.isConvertedToRomaji = true;
-    cachedLyrics.lyrics.isConvertedToPinyin = false;
-    cachedLyrics.lyrics.isConvertedToRomaja = false;
+    cachedLyrics.lyrics.isRomanized = true;
     cachedLyrics.lyrics.parsedLyrics = parsedLyrics;
 
     updateCachedLyrics(() => cachedLyrics);

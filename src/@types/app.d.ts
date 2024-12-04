@@ -259,8 +259,9 @@ declare global {
   // Represents a single line of lyrics, either synced or unsynced
   interface LyricLine {
     originalText: string | SyncedLyricsLineWord[]; // Original text of the lyric line
+    romanizedText?: string | SyncedLyricsLineWord[]; // Romanized text of the lyric line (optional)
     translatedTexts: TranslatedLyricLine[]; // Array of translations in different languages
-    convertedLyrics: string | SyncedLyricsLineWord[]; // Converted lyrics
+    //convertedLyrics: string | SyncedLyricsLineWord[]; // Converted lyrics
     start?: number; // Timing start (for synced lyrics only)
     end?: number; // Timing end (for synced lyrics only)
     isEnhancedSynced: boolean; // Indicates if the original text is enhanced synced lyrics
@@ -269,15 +270,17 @@ declare global {
   // Holds all the lyrics data, whether synced or unsynced
   interface LyricsData {
     isSynced: boolean;
-    isTranslated: boolean;
-    isJapanese: boolean;
-    isChinese: boolean;
-    isKorean: boolean;
-    isConvertedToRomaji: boolean;
-    isConvertedToPinyin: boolean;
-    isConvertedToRomaja: boolean;
+    isRomanized: boolean; // Indicates if the lyrics have been romanized
+    isTranslated: boolean; // Indicates if translations are available
+    // isTranslated: boolean;
+    // isJapanese: boolean;
+    // isChinese: boolean;
+    // isKorean: boolean;
+    // isConvertedToRomaji: boolean;
+    // isConvertedToPinyin: boolean;
+    // isConvertedToRomaja: boolean;
     isReset: boolean;
-    parsedLyrics: LyricLine[]; // Array of original lyric lines (both synced and unsynced
+    parsedLyrics: LyricLine[]; // Array of original lyric lines (both synced and unsynced)
     unparsedLyrics: string;
     offset?: number;
     originalLanguage?: string; // Language of the original lyrics (optional)
@@ -400,7 +403,6 @@ declare global {
     | 'preferences.saveLyricsInLrcFilesForSupportedSongs'
     | 'preferences.autoTranslateLyrics'
     | 'preferences.autoConvertLyrics'
-    | 'preferences.compactLyrics'
     | 'preferences.enableDiscordRPC'
     | 'customMusixmatchUserToken'
     | 'customLrcFilesSaveLocation'
@@ -512,7 +514,6 @@ declare global {
     enableImageBasedDynamicThemes: boolean;
     autoTranslateLyrics: boolean;
     autoConvertLyrics: boolean;
-    compactLyrics: boolean;
   }
 
   interface CurrentSong {

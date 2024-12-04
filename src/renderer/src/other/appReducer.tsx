@@ -415,8 +415,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
     enableImageBasedDynamicThemes: false,
     doNotShowHelpPageOnLyricsEditorStartUp: false,
     autoTranslateLyrics: false,
-    autoConvertLyrics: false,
-    compactLyrics: true
+    autoConvertLyrics: false
   },
   playback: {
     currentSong: {

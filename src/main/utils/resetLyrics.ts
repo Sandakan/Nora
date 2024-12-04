@@ -6,14 +6,12 @@ const resetLyrics = () => {
   const cachedLyrics = getCachedLyrics();
   try {
     if (!cachedLyrics) return undefined;
-    cachedLyrics.lyrics.isConvertedToPinyin = false;
-    cachedLyrics.lyrics.isConvertedToRomaji = false;
-    cachedLyrics.lyrics.isConvertedToRomaja = false;
+    cachedLyrics.lyrics.isRomanized = false;
     cachedLyrics.lyrics.translatedLanguages = [];
     cachedLyrics.lyrics.isReset = true;
     cachedLyrics.lyrics.isTranslated = false;
     cachedLyrics.lyrics.parsedLyrics.forEach((line) => {
-      line.convertedLyrics = '';
+      line.romanizedText = '';
       line.translatedTexts = [];
     });
     updateCachedLyrics(() => cachedLyrics);
