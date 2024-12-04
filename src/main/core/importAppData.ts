@@ -93,7 +93,6 @@ const importRequiredData = async (importDir: string) => {
     saveUserData(userData as UserData);
   } catch (error) {
     log('Error occurred when copying required data from import destination', { error }, 'ERROR');
-    throw error;
   }
 };
 const importOptionalData = async (

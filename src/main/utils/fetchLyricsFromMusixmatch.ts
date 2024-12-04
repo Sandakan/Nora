@@ -168,7 +168,7 @@ const fetchLyricsFromMusixmatch = async (
     );
   } catch (error) {
     log('Error ocurred when fetching lyrics', { error }, 'ERROR');
-    throw error;
+    return undefined;
   }
 };
 

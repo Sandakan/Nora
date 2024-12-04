@@ -39,7 +39,6 @@ const resetAppData = async () => {
     }
   } catch (error) {
     log(`AN UNRECOVERABLE ERROR OCCURRED WHEN RESETTING THE APP.`, { error }, 'ERROR');
-    throw error;
   }
 };
 

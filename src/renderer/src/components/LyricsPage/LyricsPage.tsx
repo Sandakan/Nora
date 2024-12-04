@@ -30,9 +30,9 @@ export const syncedLyricsRegex = /^\[\d+:\d{1,2}\.\d{1,3}]/gm;
 // export const delay = 0.35;
 
 let isScrollingByCode = false;
-document.addEventListener('lyrics/scrollIntoView', () => {
-  isScrollingByCode = true;
-});
+// document.addEventListener('lyrics/scrollIntoView', () => {
+//   isScrollingByCode = true;
+// });
 
 const LyricsPage = () => {
   const preferences = useStore(store, (state) => state.localStorage.preferences);

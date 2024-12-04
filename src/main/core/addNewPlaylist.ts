@@ -19,7 +19,7 @@ const createNewPlaylist = async (name: string, songIds?: string[], artworkPath?:
     return { newPlaylist, newPlaylistArtworkPaths: artworkPaths };
   } catch (error) {
     log('Error occurred when creating a new playlist.', { error }, 'WARN');
-    throw error;
+    return;
   }
 };
 
@@ -30,6 +30,7 @@ const addNewPlaylist = async (
 ): Promise<{ success: boolean; message?: string; playlist?: Playlist }> => {
   log(`Requested a creation of new playlist with a name ${name}`);
   const playlists = getPlaylistData();
+
   if (playlists && Array.isArray(playlists)) {
     if (playlists.some((playlist) => playlist.name === name)) {
       log(`Request failed because there is already a playlist named '${name}'.`);
@@ -39,28 +40,26 @@ const addNewPlaylist = async (
       };
     }
 
-    try {
-      const { newPlaylist, newPlaylistArtworkPaths } = await createNewPlaylist(
-        name,
-        songIds,
-        artworkPath
-      );
+    const newPlaylistData = await createNewPlaylist(name, songIds, artworkPath);
+    if (!newPlaylistData) return { success: false };
 
-      playlists.push(newPlaylist);
-      setPlaylistData(playlists);
-      dataUpdateEvent('playlists/newPlaylist');
+    const { newPlaylist, newPlaylistArtworkPaths } = newPlaylistData;
 
-      return {
-        success: true,
-        playlist: { ...newPlaylist, artworkPaths: newPlaylistArtworkPaths }
-      };
-    } catch (error) {
-      log(`Error occurred when adding a new playlist.`);
-      throw new Error('Playlists is not an array.');
-    }
+    playlists.push(newPlaylist);
+    setPlaylistData(playlists);
+    dataUpdateEvent('playlists/newPlaylist');
+
+    return {
+      success: true,
+      playlist: { ...newPlaylist, artworkPaths: newPlaylistArtworkPaths }
+    };
   }
-  log(`ERROR OCCURRED WHEN TRYING TO ADD A SONG TO THE FAVORITES. PLAYLIST DATA ARE EMPTY.`);
-  throw new Error('Playlists is not an array.');
+  log(
+    `ERROR OCCURRED WHEN TRYING TO ADD A SONG TO THE FAVORITES. PLAYLIST IS NOT AN ARRAY.`,
+    { playlistsType: typeof playlists },
+    'ERROR'
+  );
+  return { success: false };
 };
 
 export default addNewPlaylist;

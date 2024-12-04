@@ -103,7 +103,7 @@ const fetchLyricsFromLrclib = async (
     );
   } catch (error) {
     log('Error ocurred when fetching lyrics from Lrclib', { error }, 'ERROR');
-    throw error;
+    return undefined;
   }
 };
 

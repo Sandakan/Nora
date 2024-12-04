@@ -578,7 +578,7 @@ export const getDirectories = async (srcpath: string) => {
     return dirsWithFullPaths;
   } catch (error) {
     log('Error occurred when parsing directories of a path.', { srcpath }, 'ERROR');
-    throw error;
+    return [];
   }
 };
 
