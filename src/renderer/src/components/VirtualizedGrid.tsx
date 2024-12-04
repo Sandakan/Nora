@@ -1,11 +1,5 @@
 import { CSSProperties, ForwardedRef, ReactNode, forwardRef, useContext, useMemo } from 'react';
-import {
-  GridComponents,
-  GridStateSnapshot,
-  LogLevel,
-  VirtuosoGrid,
-  VirtuosoHandle
-} from 'react-virtuoso';
+import { GridComponents, VirtuosoGrid, VirtuosoHandle } from 'react-virtuoso';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import debounce from '../utils/debounce';
 
@@ -13,7 +7,7 @@ type Props<T extends object> = {
   data: T[];
   fixedItemHeight: number;
   fixedItemWidth: number;
-  scrollTopOffset?: GridStateSnapshot;
+  scrollTopOffset?: number;
   itemContent: (index: number, item: T) => ReactNode;
   components?: GridComponents<T>;
   scrollerRef?: any;
@@ -22,14 +16,12 @@ type Props<T extends object> = {
   noRangeUpdates?: boolean;
 };
 
-// const OVERSCAN_COUNT = 5;
-
 const Grid = <T extends object>(props: Props<T>, ref) => {
   const { updateCurrentlyActivePageData } = useContext(AppUpdateContext);
 
   const {
     data,
-    // fixedItemHeight,
+    fixedItemHeight,
     fixedItemWidth,
     scrollTopOffset,
     itemContent,
@@ -83,34 +75,19 @@ const Grid = <T extends object>(props: Props<T>, ref) => {
       }}
       // className="pb-4"
       data={data}
-      // overscan={fixedItemHeight * OVERSCAN_COUNT}
+      overscan={fixedItemHeight * 5}
       useWindowScroll={useWindowScroll}
       components={{ ...gridComponents, ...components }}
       ref={ref}
-      restoreStateFrom={scrollTopOffset}
-      stateChanged={(state) => {
-        if (!noRangeUpdates)
-          debounce(
-            () =>
-              updateCurrentlyActivePageData((currentPageData) => ({
-                ...currentPageData,
-                scrollTopOffset: state.scrollTop,
-                gridState: state
-              })),
-            500
-          );
-      }}
-      // initialTopMostItemIndex={scrollTopOffset ? { index: scrollTopOffset } : undefined}
+      initialTopMostItemIndex={{ index: scrollTopOffset ?? 0 }}
       scrollerRef={scrollerRef}
-      logLevel={LogLevel.DEBUG}
       rangeChanged={(range) => {
         if (!noRangeUpdates)
           debounce(
             () =>
               updateCurrentlyActivePageData((currentPageData) => ({
                 ...currentPageData,
-                scrollTopOffset: range.startIndex
-                // scrollTopOffset: range.startIndex <= OVERSCAN_COUNT ? 0 : range.startIndex + OVERSCAN_COUNT
+                scrollTopOffset: range.startIndex <= 5 ? 0 : range.startIndex + 5
               })),
             500
           );

@@ -322,7 +322,7 @@ export const Album = (props: AlbumProp) => {
   return (
     <div
       // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
-      className={`album appear-from-bottom h-68 group mb-2 mr-6 flex w-48 flex-col justify-between overflow-hidden rounded-md p-4 ${
+      className={`album h-68 group mb-2 mr-6 flex w-48 flex-col justify-between overflow-hidden rounded-md p-4 ${
         props.className ?? ''
       } ${
         isAMultipleSelection

@@ -23,8 +23,8 @@ const FullScreenPlayer = () =>
     const currentSongData = useStore(store, (state) => state.currentSongData);
     const preferences = useStore(store, (state) => state.localStorage.preferences);
 
-    const [isLyricsVisible, setIsLyricsVisible] = useState(true);
-    const [isLyricsAvailable, setIsLyricsAvailable] = useState(true);
+    const [isLyricsVisible, setIsLyricsVisible] = useState(false);
+    const [isLyricsAvailable, setIsLyricsAvailable] = useState(false);
     const [songPos, setSongPos] = useState(0);
 
     const fullScreenPlayerContainerRef = useRef<HTMLDivElement>(null);
