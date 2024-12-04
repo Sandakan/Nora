@@ -316,13 +316,11 @@ const parseLyrics = (lrcString: string): LyricsData => {
       .join('');
   }
   if (!output.originalLanguage) {
-    let japanesePercentage = getPrecentageJP(plainLyrics);
-    let chinesePercentage = getPrecentageCN(plainLyrics);
-    let koreanPercentage = getPrecentageKR(plainLyrics);
-    if (koreanPercentage > 0.5)
-      output.originalLanguage = 'ko';
-    else if (chinesePercentage > 0 && japanesePercentage > 0)
-    {
+    const japanesePercentage = getPrecentageJP(plainLyrics);
+    const chinesePercentage = getPrecentageCN(plainLyrics);
+    const koreanPercentage = getPrecentageKR(plainLyrics);
+    if (koreanPercentage > 0.5) output.originalLanguage = 'ko';
+    else if (chinesePercentage > 0 && japanesePercentage > 0) {
       if (chinesePercentage >= japanesePercentage && chinesePercentage > 0.5)
         output.originalLanguage = 'zh';
       else if (japanesePercentage > chinesePercentage && japanesePercentage > 0.5)
@@ -472,19 +470,17 @@ export const parseSyncedLyricsFromAudioDataSource = (
         line.originalText;
       })
       .join('');
-    var originalLanguage : string | undefined;
-    let japanesePercentage = getPrecentageJP(plainLyrics);
-    let chinesePercentage = getPrecentageCN(plainLyrics);
-    let koreanPercentage = getPrecentageKR(plainLyrics);
-    if (koreanPercentage > 0.5)
-      originalLanguage = 'ko';
-    else if (chinesePercentage > 0 && japanesePercentage > 0)
-      {
-        if (chinesePercentage >= japanesePercentage && chinesePercentage > 0.5)
-          originalLanguage = 'zh';
-        else if (japanesePercentage > chinesePercentage && japanesePercentage > 0.5)
-          originalLanguage = 'ja';
-      }
+    let originalLanguage: string | undefined;
+    const japanesePercentage = getPrecentageJP(plainLyrics);
+    const chinesePercentage = getPrecentageCN(plainLyrics);
+    const koreanPercentage = getPrecentageKR(plainLyrics);
+    if (koreanPercentage > 0.5) originalLanguage = 'ko';
+    else if (chinesePercentage > 0 && japanesePercentage > 0) {
+      if (chinesePercentage >= japanesePercentage && chinesePercentage > 0.5)
+        originalLanguage = 'zh';
+      else if (japanesePercentage > chinesePercentage && japanesePercentage > 0.5)
+        originalLanguage = 'ja';
+    }
     return {
       isSynced: true,
       isTranslated: false,

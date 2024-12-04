@@ -18,8 +18,8 @@ const hasConvertibleCharacter = async (str: string) => {
 };
 
 const convertText = (str: string) => {
-  const strsToReplace = [' , ', ' . ', ' ? ', ' ! ', ' ; ', ' ) ', ' ( '];
-  const strsReplace = [', ', '. ', '? ', '! ', '; ', ') ', ' ('];
+  const strsToReplace = [' , ', ' . ', ' ... ', ' ? ', ' ! ', ' ; ', ' ) ', ' ( '];
+  const strsReplace = [', ', '. ', '... ', '? ', '! ', '; ', ') ', ' ('];
   let convertedText = pinyin
     .pinyin(str)
     .map((s) => s[0])
@@ -99,8 +99,7 @@ const convertLyricsToPinyin = async () => {
         lyric.romanizedText = enhancedLyrics;
       } else {
         const convertedText = convertedLyric[0].trim();
-        if (convertedText !== INSTRUMENTAL_LYRIC_IDENTIFIER)
-          lyric.romanizedText = convertedText;
+        if (convertedText !== INSTRUMENTAL_LYRIC_IDENTIFIER) lyric.romanizedText = convertedText;
       }
     }
     cachedLyrics.lyrics.isRomanized = true;

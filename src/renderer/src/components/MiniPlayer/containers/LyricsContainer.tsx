@@ -39,12 +39,18 @@ const LyricsContainer = (props: Props) => {
         .then((res) => {
           setLyrics(res);
 
-          if (preferences.autoTranslateLyrics && !res?.lyrics.isReset && !res?.lyrics.isTranslated) {
+          if (
+            preferences.autoTranslateLyrics &&
+            !res?.lyrics.isReset &&
+            !res?.lyrics.isTranslated
+          ) {
             window.api.lyrics.getTranslatedLyrics(i18n.language as LanguageCodes).then(setLyrics);
           }
           if (preferences.autoConvertLyrics && !res?.lyrics.isReset && !res?.lyrics.isRomanized) {
-            if (res?.lyrics.originalLanguage == 'zh') window.api.lyrics.convertLyricsToPinyin().then(setLyrics);
-            else if (res?.lyrics.originalLanguage == 'ja') window.api.lyrics.romanizeLyrics().then(setLyrics);
+            if (res?.lyrics.originalLanguage == 'zh')
+              window.api.lyrics.convertLyricsToPinyin().then(setLyrics);
+            else if (res?.lyrics.originalLanguage == 'ja')
+              window.api.lyrics.romanizeLyrics().then(setLyrics);
             else if (res?.lyrics.originalLanguage == 'ko')
               window.api.lyrics.convertLyricsToRomaja().then(setLyrics);
           }

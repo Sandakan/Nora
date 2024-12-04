@@ -14,12 +14,7 @@ const hasConvertibleCharacter = (str: string) => {
 };
 
 const convertText = (str: string) => {
-  //const strsToReplace = [' , ', ' . ', ' ? ', ' ! ', ' ; ', ' ) ', ' ( '];
-  //const strsReplace = [', ', '. ', '? ', '! ', '; ', ') ', ' ('];
-  const convertedText = romanize(str);
-  //for (let j = 0; j < strsToReplace.length; j++)
-  //convertedText = convertedText.replaceAll(strsToReplace[j], strsReplace[j]);
-  return convertedText.trim();
+  return romanize(str).trim();
 };
 
 const convertLyricsToRomaja = async () => {
