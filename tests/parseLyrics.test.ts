@@ -58,10 +58,15 @@ describe('Check the full output of parseLyrics function', () => {
     // console.log('Parsed Enhanced Synced Lyrics : \n', JSON.stringify(parsedLyrics));
 
     expect(parsedLyrics).toEqual({
+      copyright: undefined,
+      isReset: false,
+      isRomanized: false,
+      originalLanguage: undefined,
       isSynced: true,
       isTranslated: false,
       parsedLyrics: [
         {
+          convertedLyrics: "",
           originalText: [
             { text: 'This', unparsedText: '[00:14.871] This', start: 14.871, end: 15.138 },
             { text: 'party', unparsedText: '<00:15.138> party', start: 15.138, end: 16.273 },
@@ -75,6 +80,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: 18.113
         },
         {
+          convertedLyrics: "",
           originalText: [
             { text: 'I', unparsedText: '[00:18.113] I', start: 18.113, end: 18.365 },
             { text: 'see', unparsedText: '<00:18.365> see', start: 18.365, end: 18.817 },
@@ -101,11 +107,14 @@ describe('Check the full output of parseLyrics function', () => {
     // console.log('Parsed Synced Lyrics Without Song Metadata : \n', JSON.stringify(parsedLyrics));
 
     expect(parsedLyrics).toEqual({
+      isReset: false,
+      isRomanized: false,
       isSynced: true,
       isTranslated: false,
       copyright: undefined,
       parsedLyrics: [
         {
+          convertedLyrics: "",
           originalText: 'Waiting for the time to pass you by',
           translatedTexts: [],
           isEnhancedSynced: false,
@@ -113,6 +122,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: 14.06
         },
         {
+          convertedLyrics: "",
           originalText: 'Hope the winds of change will change your mind',
           translatedTexts: [],
           isEnhancedSynced: false,
@@ -120,6 +130,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: 19.11
         },
         {
+          convertedLyrics: "",
           originalText: 'I could give a thousand reasons why',
           translatedTexts: [],
           isEnhancedSynced: false,
@@ -142,11 +153,14 @@ describe('Check the full output of parseLyrics function', () => {
     );
 
     expect(parsedLyrics).toEqual({
+      isReset: false,
+      isRomanized: false,
       isSynced: true,
       isTranslated: true,
       copyright: undefined,
       parsedLyrics: [
         {
+          convertedLyrics: "",
           originalText: 'Waiting for the time to pass you by',
           translatedTexts: [{ lang: 'en', text: 'Waiting for the time to pass you by' }],
           isEnhancedSynced: false,
@@ -154,6 +168,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: 14.06
         },
         {
+          convertedLyrics: "",
           originalText: 'Hope the winds of change will change your mind',
           translatedTexts: [{ lang: 'en', text: 'Hope the winds of change will change your mind' }],
           isEnhancedSynced: false,
@@ -161,6 +176,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: 19.11
         },
         {
+          convertedLyrics: "",
           originalText: 'I could give a thousand reasons why',
           translatedTexts: [{ lang: 'en', text: 'I could give a thousand reasons why' }],
           isEnhancedSynced: false,
@@ -180,11 +196,14 @@ describe('Check the full output of parseLyrics function', () => {
     // console.log('Parsed Unsynced Lyrics : \n', JSON.stringify(parsedLyrics));
 
     expect(parsedLyrics).toEqual({
+      isReset: false,
+      isRomanized: false,
       isSynced: false,
       isTranslated: false,
       copyright: undefined,
       parsedLyrics: [
         {
+          convertedLyrics: "",
           originalText: 'Waiting for the time to pass you by',
           translatedTexts: [],
           isEnhancedSynced: false,
@@ -192,6 +211,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: undefined
         },
         {
+          convertedLyrics: "",
           originalText: 'Hope the winds of change will change your mind',
           translatedTexts: [],
           isEnhancedSynced: false,
@@ -199,6 +219,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: undefined
         },
         {
+          convertedLyrics: "",
           originalText: 'I could give a thousand reasons why',
           translatedTexts: [],
           isEnhancedSynced: false,
@@ -221,11 +242,14 @@ describe('Check the full output of parseLyrics function', () => {
     );
 
     expect(parsedLyrics).toEqual({
+      isReset: false,
+      isRomanized: false,
       isSynced: false,
       isTranslated: true,
       copyright: undefined,
       parsedLyrics: [
         {
+          convertedLyrics: "",
           originalText: 'Waiting for the time to pass you by',
           translatedTexts: [{ lang: 'en', text: 'Waiting for the time to pass you by' }],
           isEnhancedSynced: false,
@@ -233,6 +257,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: undefined
         },
         {
+          convertedLyrics: "",
           originalText: 'Hope the winds of change will change your mind',
           translatedTexts: [{ lang: 'en', text: 'Hope the winds of change will change your mind' }],
           isEnhancedSynced: false,
@@ -240,6 +265,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: undefined
         },
         {
+          convertedLyrics: "",
           originalText: 'I could give a thousand reasons why',
           translatedTexts: [{ lang: 'en', text: 'I could give a thousand reasons why' }],
           isEnhancedSynced: false,
@@ -259,11 +285,14 @@ describe('Check the full output of parseLyrics function', () => {
     // console.log('Parsed Synced Lyrics from Audio Source : \n', JSON.stringify(parsedLyrics));
 
     expect(parsedLyrics).toEqual({
+      isReset: false,
+      isRomanized: false,
       isSynced: true,
       isTranslated: false,
       copyright: undefined,
       parsedLyrics: [
         {
+          convertedLyrics: "",
           originalText: 'Waiting for the time to pass you by',
           translatedTexts: [],
           isEnhancedSynced: false,
@@ -271,6 +300,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: 14.06
         },
         {
+          convertedLyrics: "",
           originalText: 'Hope the winds of change will change your mind',
           translatedTexts: [],
           isEnhancedSynced: false,
@@ -278,6 +308,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: 19.11
         },
         {
+          convertedLyrics: "",
           originalText: 'I could give a thousand reasons why',
           translatedTexts: [],
           isEnhancedSynced: false,
