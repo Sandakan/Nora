@@ -4,7 +4,7 @@ import { sendMessageToRenderer } from '../main';
 import { getLrcLyricsMetadata } from '../core/saveLyricsToLrcFile';
 import { version } from '../../../package.json';
 import { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
-import pinyin from 'pinyin';
+import { pinyin } from "pinyin-pro";
 import detectChinese from '@neos21/detect-chinese';
 
 const hasConvertibleCharacter = async (str: string) => {
@@ -12,18 +12,15 @@ const hasConvertibleCharacter = async (str: string) => {
   const detection = detectChinese.detect(str);
   if (detection.language === 'cn') return true;
   for (let i = 0; i < str.length; i++) {
-    if (pinyin.pinyin(str[i])[0][0] != str[i]) return true;
+    if (pinyin(str[i]) != str[i]) return true;
   }
   return false;
 };
 
 const convertText = (str: string) => {
-  const strsToReplace = [' , ', ' . ', ' ... ', ' ? ', ' ! ', ' ; ', ' ) ', ' ( '];
-  const strsReplace = [', ', '. ', '... ', '? ', '! ', '; ', ') ', ' ('];
-  let convertedText = pinyin
-    .pinyin(str)
-    .map((s) => s[0])
-    .join(' ');
+  const strsToReplace = [' ,', ' .', ' ?', ' !', ' ;', ' )', '( '];
+  const strsReplace = [',', '.', '?', '!', ';', ')', '('];
+  let convertedText = pinyin(str);
   for (let j = 0; j < strsToReplace.length; j++)
     convertedText = convertedText.replaceAll(strsToReplace[j], strsReplace[j]);
   return convertedText.trim();
