@@ -263,7 +263,9 @@ const StorageSettings = () => {
           <ul className="mt-10 flex flex-wrap items-center justify-center px-8">
             <li className="mb-4 mr-8 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#ffbe76]" />
-              {t('settingsPage.otherAppFiles')} :{' '}
+              {t(
+                'settingsPage.otherAppFiles'
+              )} :{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                 {
                   parseByteSizes(
@@ -276,21 +278,27 @@ const StorageSettings = () => {
             </li>
             <li className="mb-4 mr-8 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#4834d4]" />
-              {t('settingsPage.internalAppFiles')} :{' '}
+              {t(
+                'settingsPage.internalAppFiles'
+              )} :{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                 {parseByteSizes(storageMetrics?.appFolderSize)?.size}
               </span>
             </li>
             <li className="mb-4 mr-8 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#55efc4]" />
-              {t('settingsPage.artworkCache')} :{' '}
+              {t(
+                'settingsPage.artworkCache'
+              )} :{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                 {parseByteSizes(storageMetrics?.appDataSizes.artworkCacheSize)?.size}
               </span>
             </li>
             <li className="mb-4 mr-8 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#00b894]" />
-              {t('settingsPage.tempArtworkCache')} :{' '}
+              {t(
+                'settingsPage.tempArtworkCache'
+              )} :{' '}
               <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                 {parseByteSizes(storageMetrics?.appDataSizes.tempArtworkCacheSize)?.size}
               </span>

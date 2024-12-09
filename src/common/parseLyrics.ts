@@ -8,7 +8,7 @@ import isLyricsSynced, {
 } from './isLyricsSynced';
 import Kuroshiro from 'kuroshiro';
 import detectChinese from '@neos21/detect-chinese';
-import * as pinyin from 'pinyin';
+import { pinyin } from 'pinyin-pro';
 import isHangul from 'romaja/src/hangul/isHangul.js';
 
 export type SyncedLyricsInput = NonNullable<NodeID3Tags['synchronisedLyrics']>[number];
@@ -265,7 +265,7 @@ const getPrecentageCN = (str: string) => {
   if (detection.language === 'cn') return 1;
   let count = 0;
   for (let i = 0; i < str.length; i++) {
-    if (pinyin.default(str[i])[0][0] != str[i]) count++;
+    if (pinyin(str[i]) != str[i]) count++;
   }
   return count / str.length;
 };
