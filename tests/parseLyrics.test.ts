@@ -66,7 +66,7 @@ describe('Check the full output of parseLyrics function', () => {
       isTranslated: false,
       parsedLyrics: [
         {
-          convertedLyrics: "",
+          convertedLyrics: '',
           originalText: [
             { text: 'This', unparsedText: '[00:14.871] This', start: 14.871, end: 15.138 },
             { text: 'party', unparsedText: '<00:15.138> party', start: 15.138, end: 16.273 },
@@ -80,7 +80,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: 18.113
         },
         {
-          convertedLyrics: "",
+          convertedLyrics: '',
           originalText: [
             { text: 'I', unparsedText: '[00:18.113] I', start: 18.113, end: 18.365 },
             { text: 'see', unparsedText: '<00:18.365> see', start: 18.365, end: 18.817 },
@@ -114,7 +114,7 @@ describe('Check the full output of parseLyrics function', () => {
       copyright: undefined,
       parsedLyrics: [
         {
-          convertedLyrics: "",
+          convertedLyrics: '',
           originalText: 'Waiting for the time to pass you by',
           translatedTexts: [],
           isEnhancedSynced: false,
@@ -122,7 +122,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: 14.06
         },
         {
-          convertedLyrics: "",
+          convertedLyrics: '',
           originalText: 'Hope the winds of change will change your mind',
           translatedTexts: [],
           isEnhancedSynced: false,
@@ -130,7 +130,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: 19.11
         },
         {
-          convertedLyrics: "",
+          convertedLyrics: '',
           originalText: 'I could give a thousand reasons why',
           translatedTexts: [],
           isEnhancedSynced: false,
@@ -160,7 +160,7 @@ describe('Check the full output of parseLyrics function', () => {
       copyright: undefined,
       parsedLyrics: [
         {
-          convertedLyrics: "",
+          convertedLyrics: '',
           originalText: 'Waiting for the time to pass you by',
           translatedTexts: [{ lang: 'en', text: 'Waiting for the time to pass you by' }],
           isEnhancedSynced: false,
@@ -168,7 +168,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: 14.06
         },
         {
-          convertedLyrics: "",
+          convertedLyrics: '',
           originalText: 'Hope the winds of change will change your mind',
           translatedTexts: [{ lang: 'en', text: 'Hope the winds of change will change your mind' }],
           isEnhancedSynced: false,
@@ -176,7 +176,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: 19.11
         },
         {
-          convertedLyrics: "",
+          convertedLyrics: '',
           originalText: 'I could give a thousand reasons why',
           translatedTexts: [{ lang: 'en', text: 'I could give a thousand reasons why' }],
           isEnhancedSynced: false,
@@ -203,7 +203,7 @@ describe('Check the full output of parseLyrics function', () => {
       copyright: undefined,
       parsedLyrics: [
         {
-          convertedLyrics: "",
+          convertedLyrics: '',
           originalText: 'Waiting for the time to pass you by',
           translatedTexts: [],
           isEnhancedSynced: false,
@@ -211,7 +211,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: undefined
         },
         {
-          convertedLyrics: "",
+          convertedLyrics: '',
           originalText: 'Hope the winds of change will change your mind',
           translatedTexts: [],
           isEnhancedSynced: false,
@@ -219,7 +219,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: undefined
         },
         {
-          convertedLyrics: "",
+          convertedLyrics: '',
           originalText: 'I could give a thousand reasons why',
           translatedTexts: [],
           isEnhancedSynced: false,
@@ -249,7 +249,7 @@ describe('Check the full output of parseLyrics function', () => {
       copyright: undefined,
       parsedLyrics: [
         {
-          convertedLyrics: "",
+          convertedLyrics: '',
           originalText: 'Waiting for the time to pass you by',
           translatedTexts: [{ lang: 'en', text: 'Waiting for the time to pass you by' }],
           isEnhancedSynced: false,
@@ -257,7 +257,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: undefined
         },
         {
-          convertedLyrics: "",
+          convertedLyrics: '',
           originalText: 'Hope the winds of change will change your mind',
           translatedTexts: [{ lang: 'en', text: 'Hope the winds of change will change your mind' }],
           isEnhancedSynced: false,
@@ -265,7 +265,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: undefined
         },
         {
-          convertedLyrics: "",
+          convertedLyrics: '',
           originalText: 'I could give a thousand reasons why',
           translatedTexts: [{ lang: 'en', text: 'I could give a thousand reasons why' }],
           isEnhancedSynced: false,
@@ -292,7 +292,7 @@ describe('Check the full output of parseLyrics function', () => {
       copyright: undefined,
       parsedLyrics: [
         {
-          convertedLyrics: "",
+          convertedLyrics: '',
           originalText: 'Waiting for the time to pass you by',
           translatedTexts: [],
           isEnhancedSynced: false,
@@ -300,7 +300,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: 14.06
         },
         {
-          convertedLyrics: "",
+          convertedLyrics: '',
           originalText: 'Hope the winds of change will change your mind',
           translatedTexts: [],
           isEnhancedSynced: false,
@@ -308,7 +308,7 @@ describe('Check the full output of parseLyrics function', () => {
           end: 19.11
         },
         {
-          convertedLyrics: "",
+          convertedLyrics: '',
           originalText: 'I could give a thousand reasons why',
           translatedTexts: [],
           isEnhancedSynced: false,

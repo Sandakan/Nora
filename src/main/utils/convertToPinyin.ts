@@ -4,7 +4,7 @@ import { sendMessageToRenderer } from '../main';
 import { getLrcLyricsMetadata } from '../core/saveLyricsToLrcFile';
 import { version } from '../../../package.json';
 import { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
-import { pinyin } from "pinyin-pro";
+import { pinyin } from 'pinyin-pro';
 import detectChinese from '@neos21/detect-chinese';
 
 const hasConvertibleCharacter = async (str: string) => {

@@ -8,7 +8,7 @@ import isLyricsSynced, {
 } from './isLyricsSynced';
 import Kuroshiro from 'kuroshiro';
 import detectChinese from '@neos21/detect-chinese';
-import { pinyin } from "pinyin-pro";
+import { pinyin } from 'pinyin-pro';
 import isHangul from 'romaja/src/hangul/isHangul.js';
 
 export type SyncedLyricsInput = NonNullable<NodeID3Tags['synchronisedLyrics']>[number];
