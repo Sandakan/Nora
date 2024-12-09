@@ -20,8 +20,8 @@ const hasConvertibleCharacter = (str: string) => {
 };
 
 const convertText = async (str: string) => {
-  const strsToReplace = [' ,', ' .', ' ?', ' !', ' ;', ' )', '( '];
-  const strsReplace = [',', '.', '?', '!', ';', ')', '('];
+  const strsToReplace = ['  ', ' ,', ' .', ' ?', ' !', ' ;', ' )', '( '];
+  const strsReplace = [' ', ',', '.', '?', '!', ';', ')', '('];
   const kana = await kuroshiro.convert(str, { to: 'katakana', mode: 'spaced' });
   let convertedText =
     ' ' + Wanakana.toRomaji(kana, { customRomajiMapping: { '「': '「', '」': '」' } }) + ' ';
