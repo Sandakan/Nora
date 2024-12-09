@@ -18,9 +18,9 @@ const hasConvertibleCharacter = async (str: string) => {
 };
 
 const convertText = (str: string) => {
-  const strsToReplace = [' ,', ' .', ' ?', ' !', ' ;', ' )', '( '];
-  const strsReplace = [',', '.', '?', '!', ';', ')', '('];
-  let convertedText = pinyin(str);
+  const strsToReplace = ['  ', ' ,', ' .', ' ?', ' !', ' ;', ' )', '( '];
+  const strsReplace = [' ', ',', '.', '?', '!', ';', ')', '('];
+  let convertedText = pinyin(str, { nonZh: 'consecutive' });
   for (let j = 0; j < strsToReplace.length; j++)
     convertedText = convertedText.replaceAll(strsToReplace[j], strsReplace[j]);
   return convertedText.trim();
