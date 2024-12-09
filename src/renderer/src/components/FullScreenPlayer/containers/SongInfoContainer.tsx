@@ -130,7 +130,7 @@ const SongInfoContainer = (props: Props) => {
               removeFocusOnClick
             />
             <Button
-              className="skip-backward-btn h-fit cursor-pointer !border-0 !bg-background-color-3/15 !p-2 text-font-color-white outline-1 outline-offset-1 !backdrop-blur-lg transition-[background] hover:!bg-background-color-3/30 focus-visible:!outline dark:text-font-color-white"
+              className="skip-next-btn h-fit cursor-pointer !border-0 !bg-background-color-3/15 !p-2 text-font-color-white outline-1 outline-offset-1 !backdrop-blur-lg transition-[background] hover:!bg-background-color-3/30 focus-visible:!outline dark:text-font-color-white"
               tooltipLabel={t('player.nextSong')}
               iconClassName="!text-3xl material-icons-round-outlined"
               clickHandler={handleSkipForwardClickWithParams}

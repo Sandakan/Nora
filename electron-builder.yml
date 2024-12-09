@@ -20,6 +20,7 @@ files:
 
 asarUnpack:
   - resources/**
+  - node_modules/sharp/**/*
 
 fileAssociations:
   - ext: mp3
