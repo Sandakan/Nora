@@ -6,7 +6,7 @@ import { version } from '../../../package.json';
 import { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
 import Kuroshiro from 'kuroshiro';
 import KuromojiAnalyzer from 'kuroshiro-analyzer-kuromoji';
-import Wanakana from 'wanakana';
+import { toRomaji } from 'wanakana';
 
 const kuroshiro = new Kuroshiro();
 await kuroshiro.init(new KuromojiAnalyzer());
@@ -24,7 +24,7 @@ const convertText = async (str: string) => {
   const strsReplace = [' ', ',', '.', '?', '!', ';', ')', '('];
   const kana = await kuroshiro.convert(str, { to: 'katakana', mode: 'spaced' });
   let convertedText =
-    ' ' + Wanakana.toRomaji(kana, { customRomajiMapping: { '「': '「', '」': '」' } }) + ' ';
+    ' ' + toRomaji(kana, { customRomajiMapping: { '「': '「', '」': '」' } }) + ' ';
   for (let j = 0; j < strsToReplace.length; j++)
     convertedText = convertedText.replaceAll(strsToReplace[j], strsReplace[j]);
   return convertedText.trim();

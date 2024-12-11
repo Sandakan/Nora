@@ -15,7 +15,7 @@
 ## Checklist:
 
 - [ ] Have you checked to ensure there aren't other open [Pull Requests](https://github.com/Sandakan/Nora/pulls) for the same update/change?
-- [ ] Have you linted your code locally before submission with `npm lint` and `npm run prettier-write` commands?
+- [ ] Have you linted your code locally before submission with `npm run lint` and `npm run prettier-write` commands?
 - [ ] Have you successfully run the app with your changes locally with `npm run dev`?
 
 > [!IMPORTANT] > **Fill below checklist items to,**
