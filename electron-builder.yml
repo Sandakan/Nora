@@ -21,6 +21,7 @@ files:
 asarUnpack:
   - resources/**
   - node_modules/sharp/**/*
+  - node_modules/@img/**/*
 
 fileAssociations:
   - ext: mp3
