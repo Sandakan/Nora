@@ -4,8 +4,8 @@ import { sendMessageToRenderer } from '../main';
 import { getLrcLyricsMetadata } from '../core/saveLyricsToLrcFile';
 import { version } from '../../../package.json';
 import { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
-import Kuroshiro from 'kuroshiro';
-import KuromojiAnalyzer from 'kuroshiro-analyzer-kuromoji';
+import Kuroshiro from '@sglkc/kuroshiro';
+import KuromojiAnalyzer from '@sglkc/kuroshiro-analyzer-kuromoji';
 import { toRomaji } from 'wanakana';
 
 const kuroshiro = new Kuroshiro();

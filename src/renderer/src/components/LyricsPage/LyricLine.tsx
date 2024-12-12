@@ -35,8 +35,6 @@ const LyricLine = (props: LyricProp) => {
   const lyricsRef = useRef(null as HTMLDivElement | null);
   const isTheCurrnetLineRef = useRef(false);
 
-  const preferences = useStore(store, (state) => state.localStorage.preferences);
-
   const {
     index,
     lyric,

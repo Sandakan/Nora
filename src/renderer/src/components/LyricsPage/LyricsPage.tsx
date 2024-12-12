@@ -74,7 +74,7 @@ const LyricsPage = () => {
           undefined,
           preferences.lyricsAutomaticallySaveState
         )
-        .then((res) => {
+        .then(async (res) => {
           setLyrics(res);
           // console.log(res);
 
@@ -85,15 +85,15 @@ const LyricsPage = () => {
             !res?.lyrics.isReset &&
             !res?.lyrics.isTranslated
           ) {
-            window.api.lyrics.getTranslatedLyrics(i18n.language as LanguageCodes).then(setLyrics);
+            setLyrics(await window.api.lyrics.getTranslatedLyrics(i18n.language as LanguageCodes));
           }
           if (preferences.autoConvertLyrics && !res?.lyrics.isReset && !res?.lyrics.isRomanized) {
             if (res?.lyrics.originalLanguage == 'zh')
-              window.api.lyrics.convertLyricsToPinyin().then(setLyrics);
+              setLyrics(await window.api.lyrics.convertLyricsToPinyin());
             else if (res?.lyrics.originalLanguage == 'ja')
-              window.api.lyrics.romanizeLyrics().then(setLyrics);
+              setLyrics(await window.api.lyrics.romanizeLyrics());
             else if (res?.lyrics.originalLanguage == 'ko')
-              window.api.lyrics.convertLyricsToRomaja().then(setLyrics);
+              setLyrics(await window.api.lyrics.convertLyricsToRomaja());
           }
 
           return undefined;
@@ -108,7 +108,9 @@ const LyricsPage = () => {
     currentSongData.path,
     currentSongData.songId,
     currentSongData.title,
-    preferences.lyricsAutomaticallySaveState
+    preferences.lyricsAutomaticallySaveState,
+    preferences.autoTranslateLyrics,
+    preferences.autoConvertLyrics,
   ]);
 
   useEffect(() => {
