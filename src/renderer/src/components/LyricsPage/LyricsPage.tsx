@@ -110,7 +110,7 @@ const LyricsPage = () => {
     currentSongData.title,
     preferences.lyricsAutomaticallySaveState,
     preferences.autoTranslateLyrics,
-    preferences.autoConvertLyrics,
+    preferences.autoConvertLyrics
   ]);
 
   useEffect(() => {
