@@ -38,7 +38,7 @@ const LyricsContainer = (props: Props) => {
           songPath: currentSongData.path,
           duration: currentSongData.duration
         })
-        .then((res) => {
+        .then(async (res) => {
           setIsLyricsAvailable(res?.lyrics?.isSynced ?? false);
           setLyrics(res);
 
@@ -47,15 +47,15 @@ const LyricsContainer = (props: Props) => {
             !res?.lyrics.isReset &&
             !res?.lyrics.isTranslated
           ) {
-            window.api.lyrics.getTranslatedLyrics(i18n.language as LanguageCodes).then(setLyrics);
+            setLyrics(await window.api.lyrics.getTranslatedLyrics(i18n.language as LanguageCodes));
           }
           if (preferences.autoConvertLyrics && !res?.lyrics.isReset && !res?.lyrics.isRomanized) {
             if (res?.lyrics.originalLanguage == 'zh')
-              window.api.lyrics.convertLyricsToPinyin().then(setLyrics);
+              setLyrics(await window.api.lyrics.convertLyricsToPinyin());
             else if (res?.lyrics.originalLanguage == 'ja')
-              window.api.lyrics.romanizeLyrics().then(setLyrics);
+              setLyrics(await window.api.lyrics.romanizeLyrics());
             else if (res?.lyrics.originalLanguage == 'ko')
-              window.api.lyrics.convertLyricsToRomaja().then(setLyrics);
+              setLyrics(await window.api.lyrics.convertLyricsToRomaja());
           }
 
           return undefined;
@@ -70,6 +70,8 @@ const LyricsContainer = (props: Props) => {
     currentSongData.songId,
     currentSongData.title,
     isLyricsVisible,
+    preferences.autoTranslateLyrics,
+    preferences.autoConvertLyrics,
     setIsLyricsAvailable
   ]);
 

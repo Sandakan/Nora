@@ -6,7 +6,7 @@ import isLyricsSynced, {
   SYNCED_LYRICS_REGEX,
   isAnExtendedSyncedLyricsLine
 } from './isLyricsSynced';
-import Kuroshiro from 'kuroshiro';
+import Kuroshiro from '@sglkc/kuroshiro';
 import detectChinese from '@neos21/detect-chinese';
 import { pinyin } from 'pinyin-pro';
 import isHangul from 'romaja/src/hangul/isHangul.js';
