@@ -1041,51 +1041,78 @@ export default function App() {
   useEffect(() => {
     let artworkPath: string | undefined;
 
-    if (store.state.currentSongData.artwork !== undefined) {
-      if (typeof store.state.currentSongData.artwork === 'object') {
-        const blob = new Blob([store.state.currentSongData.artwork]);
-        artworkPath = URL.createObjectURL(blob);
-      } else {
-        artworkPath = `data:;base64,${store.state.currentSongData.artwork}`;
-      }
-    } else artworkPath = '';
-
-    navigator.mediaSession.metadata = new MediaMetadata({
-      title: store.state.currentSongData.title,
-      artist: Array.isArray(store.state.currentSongData.artists)
-        ? store.state.currentSongData.artists.map((artist) => artist.name).join(', ')
-        : t('common.unknownArtist'),
-      album: store.state.currentSongData.album
-        ? store.state.currentSongData.album.name || t('common.unknownAlbum')
-        : t('common.unknownAlbum'),
-      artwork: [
-        {
-          src: artworkPath,
-          sizes: '1000x1000',
-          type: 'image/webp'
+    const updateMediaSessionMetaData = () => {
+      if (store.state.currentSongData.artwork !== undefined) {
+        if (typeof store.state.currentSongData.artwork === 'object') {
+          const blob = new Blob([store.state.currentSongData.artwork]);
+          artworkPath = URL.createObjectURL(blob);
+        } else {
+          artworkPath = `data:;base64,${store.state.currentSongData.artwork}`;
         }
-      ]
-    });
+      } else artworkPath = '';
 
-    const handleSkipForwardClickWithParams = () => handleSkipForwardClick('PLAYER_SKIP');
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: store.state.currentSongData.title,
+        artist: Array.isArray(store.state.currentSongData.artists)
+          ? store.state.currentSongData.artists.map((artist) => artist.name).join(', ')
+          : t('common.unknownArtist'),
+        album: store.state.currentSongData.album
+          ? store.state.currentSongData.album.name || t('common.unknownAlbum')
+          : t('common.unknownAlbum'),
+        artwork: [
+          {
+            src: artworkPath,
+            sizes: '1000x1000',
+            type: 'image/webp'
+          }
+        ]
+      });
+      navigator.mediaSession.setPositionState({
+        duration: player.duration,
+        playbackRate: player.playbackRate,
+        position: player.currentTime
+      });
 
-    navigator.mediaSession.setActionHandler('pause', () => toggleSongPlayback(false));
-    navigator.mediaSession.setActionHandler('play', () => toggleSongPlayback(true));
-    navigator.mediaSession.setActionHandler('previoustrack', handleSkipBackwardClick);
-    navigator.mediaSession.setActionHandler(`nexttrack`, handleSkipForwardClickWithParams);
-    navigator.mediaSession.playbackState = store.state.player.isCurrentSongPlaying
-      ? 'playing'
-      : 'paused';
+      navigator.mediaSession.setActionHandler('pause', () => toggleSongPlayback(false));
+      navigator.mediaSession.setActionHandler('play', () => toggleSongPlayback(true));
+      navigator.mediaSession.setActionHandler('previoustrack', handleSkipBackwardClick);
+      navigator.mediaSession.setActionHandler(`nexttrack`, () =>
+        handleSkipForwardClick('PLAYER_SKIP')
+      );
+      navigator.mediaSession.setActionHandler('seekbackward', () => {
+        /* Code excerpted. */
+      });
+      navigator.mediaSession.setActionHandler('seekforward', () => {
+        /* Code excerpted. */
+      });
+      navigator.mediaSession.setActionHandler('seekto', () => {
+        /* Code excerpted. */
+      });
+      navigator.mediaSession.playbackState = store.state.player.isCurrentSongPlaying
+        ? 'playing'
+        : 'paused';
+    };
+
+    player.addEventListener('play', updateMediaSessionMetaData);
+    player.addEventListener('pause', updateMediaSessionMetaData);
+
     return () => {
       if (artworkPath) URL.revokeObjectURL(artworkPath);
       navigator.mediaSession.metadata = null;
       navigator.mediaSession.playbackState = 'none';
+      navigator.mediaSession.setPositionState(undefined);
       navigator.mediaSession.setActionHandler('play', null);
       navigator.mediaSession.setActionHandler('pause', null);
       navigator.mediaSession.setActionHandler('seekbackward', null);
       navigator.mediaSession.setActionHandler('seekforward', null);
       navigator.mediaSession.setActionHandler('previoustrack', null);
       navigator.mediaSession.setActionHandler('nexttrack', null);
+      navigator.mediaSession.setActionHandler('seekforward', null);
+      navigator.mediaSession.setActionHandler('seekbackward', null);
+      navigator.mediaSession.setActionHandler('seekto', null);
+
+      player.removeEventListener('play', updateMediaSessionMetaData);
+      player.removeEventListener('pause', updateMediaSessionMetaData);
     };
   }, [handleSkipBackwardClick, handleSkipForwardClick, t, toggleSongPlayback]);
 
@@ -1133,6 +1160,7 @@ export default function App() {
         ]
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
