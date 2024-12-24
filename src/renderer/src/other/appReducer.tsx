@@ -34,7 +34,6 @@ export type AppReducerStateActions =
       type: 'APP_THEME_CHANGE';
       data: AppThemeData;
     }
-  // eslint-disable-next-line @typescript-eslint/ban-types
   | { type: 'CURRENT_SONG_DATA_CHANGE'; data: AudioPlayerData }
   | { type: 'UP_NEXT_SONG_DATA_CHANGE'; data?: AudioPlayerData }
   | { type: 'CURRENT_SONG_PLAYBACK_STATE'; data: boolean }
