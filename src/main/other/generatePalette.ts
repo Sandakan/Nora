@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import nodeVibrant from 'node-vibrant';
+import { Vibrant } from 'node-vibrant/node';
 import { timeEnd, timeStart } from '../utils/measureTimeUsage';
 import log from '../log';
 import {
@@ -51,8 +51,7 @@ export const DEFAULT_SONG_PALETTE: PaletteData = {
 
 const generatePalette = async (artwork?: Buffer | string): Promise<PaletteData | undefined> => {
   if (artwork) {
-    const palette = await nodeVibrant
-      .from(artwork)
+    const palette = await Vibrant.from(artwork)
       .getPalette()
       .catch((err) => {
         return log(

@@ -56,6 +56,7 @@
   },
   "overrides": {
     "phin": "^3.7.1",
+    "cross-spawn": "^6.0.5",
     "node-vibrant": {
       "@vibrant/image-node": {
         "@jimp/types": {
@@ -106,10 +107,10 @@
     "discord-rpc": "^4.0.1",
     "electron-store": "^10.0.0",
     "electron-updater": "^6.2.1",
-    "i18next": "^23.7.6",
+    "i18next": "^24.2.0",
     "music-metadata": "^10.0.1",
     "node-id3": "^0.2.6",
-    "node-vibrant": "^3.2.1-alpha.1",
+    "node-vibrant": "^4.0.0-alpha.5",
     "pinyin-pro": "^3.26.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-i18next": "^15.0.2",
@@ -139,7 +140,7 @@
     "electron": "^33.0.0",
     "electron-builder": "^25.1.8",
     "electron-debug": "^4.0.0",
-    "electron-devtools-installer": "^3.2.0",
+    "electron-devtools-installer": "^4.0.0",
     "electron-vite": "^2.0.0",
     "eslint": "^9.12.0",
     "eslint-import-resolver-typescript": "^3.6.1",
@@ -156,8 +157,8 @@
     "postcss": "^8.4.35",
     "prettier": "^3.2.4",
     "prettier-plugin-tailwindcss": "^0.6.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
     "tailwindcss": "^3.3.2",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
