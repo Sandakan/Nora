@@ -465,11 +465,7 @@ export const parseSyncedLyricsFromAudioDataSource = (
       })
       .join('\n');
 
-    const plainLyrics = lyrics
-      .map((line) => {
-        line.originalText;
-      })
-      .join('');
+    const plainLyrics = lyrics.map((line) => line.originalText).join('');
     let originalLanguage: string | undefined;
     const japanesePercentage = getPrecentageJP(plainLyrics);
     const chinesePercentage = getPrecentageCN(plainLyrics);

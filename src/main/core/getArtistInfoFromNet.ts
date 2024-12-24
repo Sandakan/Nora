@@ -1,6 +1,7 @@
 /* eslint-disable no-labels */
 /* eslint-disable camelcase */
 /* eslint-disable no-await-in-loop */
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { default: stringSimilarity, ReturnTypeEnums } = require('didyoumean2');
 
 import { getArtistsData, setArtistsData } from '../filesystem';

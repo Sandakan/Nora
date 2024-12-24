@@ -61,7 +61,7 @@ const generateLrcLyricLine = (text: string | SyncedLyricsLineWord[], start = 0, 
       return `[${lrcTime}]${language} ${text || '♪'}`;
     }
     // lyrics is unsynced
-    return `${language} text` || '♪';
+    return language ? `${language} text` : '♪';
   }
 
   // lyrics is enhanced synced
