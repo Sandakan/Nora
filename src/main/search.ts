@@ -1,6 +1,6 @@
 // using require because an error is displayed saying 'stringSimilarity' is not a function when using import.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { default: stringSimilarity, ReturnTypeEnums } = require('didyoumean2');
+import { default as stringSimilarity, ReturnTypeEnums } from 'didyoumean2';
 import {
   getAlbumsData,
   getArtistsData,

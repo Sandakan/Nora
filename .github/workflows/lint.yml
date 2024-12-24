@@ -32,5 +32,7 @@ jobs:
       - name: Run linters
         uses: wearerequired/lint-action@v2
         with:
-          eslint: true
+          # TODO Disabled until eslint v9 is supported
+          # https://github.com/wearerequired/lint-action/issues/788
+          eslint: false
           prettier: false
