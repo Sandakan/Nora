@@ -8,6 +8,8 @@
     "src/@types/*.d.ts"
   ],
   "compilerOptions": {
+    "module": "ES2022",
+    "moduleResolution": "bundler",
     "composite": true,
     "types": [
       "electron-vite/node"
