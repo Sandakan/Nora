@@ -65,7 +65,8 @@ export const generateCoverBuffer = async (
       }
     }
 
-    return cover[0].data;
+    // return cover[0].data;
+    return Buffer.from(cover[0].data.buffer, 0, cover[0].data.length);
   }
 
   return getDefaultSongCoverImgBuffer();
