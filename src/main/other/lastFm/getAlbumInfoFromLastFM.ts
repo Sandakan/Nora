@@ -1,8 +1,6 @@
-/* eslint-disable no-continue */
-/* eslint-disable no-labels */
 import { checkIfConnectedToInternet } from '../../main';
 import { getAlbumsData, getSongsData } from '../../filesystem';
-import log from '../../log';
+import logger from '../../logger';
 import {
   LastFMAlbumInfoAPI,
   AlbumInfo,
@@ -112,7 +110,6 @@ const getAlbumInfoFromLastFM = async (albumId: string): Promise<LastFMAlbumInfo 
   try {
     const albums = getAlbumsData();
 
-    // eslint-disable-next-line prefer-destructuring
     const LAST_FM_API_KEY = import.meta.env.MAIN_VITE_LAST_FM_API_KEY;
     if (!LAST_FM_API_KEY) throw new Error('LastFM api key not found.');
 
@@ -143,11 +140,7 @@ const getAlbumInfoFromLastFM = async (albumId: string): Promise<LastFMAlbumInfo 
     }
     return undefined;
   } catch (error) {
-    log(
-      'Error occurred when trying to get album info of an album from LastFM.',
-      { error },
-      'ERROR'
-    );
+    logger.error('Failed to try to get album info of an album from LastFM.', { error });
     return undefined;
   }
 };

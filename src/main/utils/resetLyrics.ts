@@ -1,5 +1,5 @@
 import { getCachedLyrics, updateCachedLyrics } from '../core/getSongLyrics';
-import log from '../log';
+import logger from '../logger';
 import { sendMessageToRenderer } from '../main';
 
 const resetLyrics = () => {
@@ -20,7 +20,7 @@ const resetLyrics = () => {
     });
     return cachedLyrics;
   } catch (error) {
-    log('Error occurred when reseting converted lyrics.', { error }, 'ERROR');
+    logger.error('Failed to reset converted lyrics.', { error });
     sendMessageToRenderer({
       messageCode: 'RESET_CONVERTED_LYRICS_FAILED'
     });

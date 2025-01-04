@@ -1,7 +1,7 @@
 import { isSongBlacklisted } from '../utils/isBlacklisted';
 import { getListeningData, getSongsData } from '../filesystem';
 import { getSongArtworkPath } from '../fs/resolveFilePaths';
-import log from '../log';
+import logger from '../logger';
 import sortSongs from '../utils/sortSongs';
 import paginateData from '../utils/paginateData';
 import { getSelectedPaletteData } from '../other/generatePalette';
@@ -44,9 +44,12 @@ const getAllSongs = async (
     result = paginateData(audioData, sortType, paginatingData);
   }
 
-  log(
-    `Sending data related to all the songs with filters of sortType=${sortType} start=${result.start} end=${result.end}`
-  );
+  logger.debug(`Sending data related to all the songs`, {
+    sortType,
+    filterType,
+    start: result.start,
+    end: result.end
+  });
   return result;
 };
 

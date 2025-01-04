@@ -1,9 +1,9 @@
 import { getPlaylistData, setPlaylistData } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 import { dataUpdateEvent } from '../main';
 
 const clearSongHistory = () => {
-  log('Started the cleaning process of the song history.');
+  logger.debug('Started the cleaning process of the song history.');
 
   const playlistData = getPlaylistData();
 
@@ -14,13 +14,14 @@ const clearSongHistory = () => {
 
     dataUpdateEvent('playlists/history');
     setPlaylistData(playlistData);
-    log('Finished the song history cleaning process successfully.');
+    logger.debug('Finished the song history cleaning process successfully.');
     return true;
   }
-  log(
-    `======= ERROR OCCURRED WHEN TRYING TO CLEAR THE SONG HISTORY. =======\nERROR: PLAYLIST DATA IS EMPTY OR NOT AN ARRAY`
-  );
-  throw new Error('Empty playlist data array.');
+  return logger.error(
+    `Failed to clear the song history because playlist data is empty or not an array`
+  )({
+    throwNewError: true
+  });
 };
 
 export default clearSongHistory;

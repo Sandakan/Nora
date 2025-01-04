@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-import log from '../log';
+import logger from '../logger';
 import { getDirectories, supportedMusicExtensions } from '../filesystem';
 import { showOpenDialog } from '../main';
 import getAllSettledPromises from '../utils/getAllSettledPromises';
@@ -52,7 +52,7 @@ export const generateFolderStructure = async (dir: string) => {
     }
     return structure;
   } catch (error) {
-    log('Error occurred when analysing folder structure.', { error }, 'ERROR');
+    logger.error('Failed to analyse folder structure.', { error, dir });
     return undefined;
   }
 };

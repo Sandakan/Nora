@@ -1,7 +1,7 @@
 import updateSongId3Tags from '../updateSongId3Tags';
 import sendSongID3Tags from './sendSongId3Tags';
 import { getArtistsData } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 
 const featArtistsRegex = /\(? ?feat.? (?<featArtists>[\w&, À-ÿ\d]+)\)?/gm;
 
@@ -44,11 +44,16 @@ const resolveFeaturingArtists = async (
 
     const updatedData = await updateSongId3Tags(songId, songTags, true, true);
 
-    log(`Resolved suggestion of adding featured artists to the song '${songTags.title}'.`);
+    logger.info(`Resolved suggestion of adding featured artists to the song`, {
+      songId,
+      songTitle: songTags.title,
+      featArtists,
+      removeFeatInfoInTitle
+    });
 
     return updatedData;
   } catch (error) {
-    log(`Error occurred when resolving featuring artists suggestion for for a song`, {
+    logger.debug(`Error occurred when resolving featuring artists suggestion for for a song`, {
       songId,
       removeFeatInfoInTitle,
       error

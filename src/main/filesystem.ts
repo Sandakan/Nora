@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { app } from 'electron';
 import Store from 'electron-store';
-import log from './log';
+import logger from './logger';
 import { dataUpdateEvent } from './main';
 import { appPreferences, version } from '../../package.json';
 import {
@@ -229,7 +229,7 @@ const paletteStore = new Store({
 });
 
 const songStoreVersion = songStore.get('version');
-log('song store version', { songStoreVersion }, 'WARN');
+logger.debug('song store version', { songStoreVersion });
 
 export const supportedMusicExtensions = appPreferences.supportedMusicExtensions.map((x) => `.${x}`);
 
@@ -324,7 +324,11 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
       userData.lastFmSessionData = data as LastFMSessionData;
     } else if (dataType === 'storageMetrics' && typeof data === 'object') {
       userData.storageMetrics = data as StorageMetrics;
-    } else return log('Error occurred in setUserData function due ot invalid dataType or data.');
+    } else
+      return logger.error('Failed to set user data due to invalid dataType or data.', {
+        dataType,
+        data
+      });
 
     saveUserData(userData);
 
@@ -341,7 +345,7 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
     else if (dataType === 'recentSearches') dataUpdateEvent('userData/recentSearches');
     else dataUpdateEvent('userData');
   } else {
-    log(`ERROR OCCURRED WHEN READING USER DATA. USER DATA ARRAY IS EMPTY.`, { userData }, 'ERROR');
+    logger.error(`Failed to read user data because array is empty.`, { userData });
   }
   return undefined;
 }
@@ -497,7 +501,7 @@ export const setListeningData = (data: SongListeningData) => {
 // ? PLAYLIST DATA GETTERS AND SETTERS
 
 export const getPlaylistData = (playlistIds = [] as string[]) => {
-  log(`Requesting playlist data for ids '${playlistIds.join(',')}'`);
+  logger.debug(`Requesting playlist data for ids`, { playlistIds });
   if (Array.isArray(cachedPlaylistsData) && cachedPlaylistsData.length !== 0) {
     if (playlistIds && playlistIds.length === 0) return cachedPlaylistsData;
     const results: SavablePlaylist[] = [];
@@ -513,7 +517,7 @@ export const getPlaylistData = (playlistIds = [] as string[]) => {
 };
 
 export const setPlaylistData = (updatedPlaylists: SavablePlaylist[]) => {
-  log('Updating Playlist Data.');
+  logger.debug('Updating Playlist Data.');
   dataUpdateEvent('playlists');
   cachedPlaylistsData = updatedPlaylists;
   playlistDataStore.set('playlists', updatedPlaylists);
@@ -577,7 +581,7 @@ export const getDirectories = async (srcpath: string) => {
 
     return dirsWithFullPaths;
   } catch (error) {
-    log('Error occurred when parsing directories of a path.', { srcpath }, 'ERROR');
+    logger.error('Failed to parse directories of a path.', { error, srcpath });
     return [];
   }
 };
@@ -589,7 +593,7 @@ export async function getDirectoriesRecursive(srcpath: string): Promise<string[]
       return [srcpath, ...flattenPathArrays(await Promise.all(dirs.map(getDirectoriesRecursive)))];
     return [];
   } catch (error) {
-    log(`Error occurred when parsing directories.`, { error }, 'ERROR');
+    logger.error('Failed to parse directories.', { error, srcpath });
     return [];
   }
 }
@@ -607,5 +611,5 @@ export const resetAppCache = () => {
   genreStore.store = { version, genres: [] };
   userDataStore.store = { version, userData: USER_DATA_TEMPLATE };
   playlistDataStore.store = { version, playlists: PLAYLIST_DATA_TEMPLATE };
-  log(`In-app cache cleared successfully.`);
+  logger.info(`In-app cache reset successfully.`);
 };

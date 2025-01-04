@@ -1,9 +1,5 @@
-/* eslint-disable camelcase */
-/* eslint-disable prefer-destructuring */
-/* eslint-disable no-async-promise-executor */
-
 import { AppleITunesMusicAPI } from '../../@types/apple_itunes_music_api.d';
-import log from '../log';
+import logger from '../logger';
 import { LastFMHitCache, LastFMTrackInfoApi } from '../../@types/last_fm_api';
 
 import { GeniusLyricsAPI, GeniusSongMetadataResponse } from '../../@types/genius_lyrics_api';
@@ -22,8 +18,8 @@ const MUSIXMATCH_BASE_URL = 'https://apic-desktop.musixmatch.com/';
 async function fetchSongMetadataFromMusixmatch(songTitle: string, songArtist?: string) {
   const MUSIXMATCH_USER_TOKEN = import.meta.env.MAIN_VITE_MUSIXMATCH_DEFAULT_USER_TOKEN;
   if (typeof MUSIXMATCH_USER_TOKEN !== 'string') {
-    log('undefined MUSIXMATCH_USER_TOKEN.', { MUSIXMATCH_USER_TOKEN }, 'WARN');
-    throw new Error('undefined MUSIXMATCH_USER_TOKEN');
+    logger.debug('MUSIXMATCH_USER_TOKEN not found.', { MUSIXMATCH_USER_TOKEN });
+    throw new Error('MUSIXMATCH_USER_TOKEN not found');
   }
 
   const headers = {
@@ -68,14 +64,13 @@ async function fetchSongMetadataFromMusixmatch(songTitle: string, songArtist?: s
         return [result];
       }
     }
-    log(
-      `Error occurred when fetching song metadata from Musixmatch.\nHTTP Error Code : ${res.status} - ${res.statusText}`,
-      undefined,
-      'WARN'
-    );
+    logger.warn(`Failed to fetch song metadata from Musixmatch`, {
+      status: res.status,
+      statusText: res.statusText
+    });
     return [];
   } catch (error) {
-    log(`Error occurred when fetching song metadata from Musixmatch`, { error }, 'ERROR');
+    logger.error(`Failed to fetch song metadata from Musixmatch`, { error });
     return [];
   }
 }
@@ -122,10 +117,12 @@ async function fetchSongMetadataResultsFromITunes(
       itunesHitsCache = outputResults;
       return outputResults;
     }
-    log(`ERROR : ${data?.errorMessage}`, undefined, 'WARN');
+    logger.warn(`Failed to fetch song metadata from itunes api.`, { songArtist, songTitle });
   }
-  const errStr = `Request to fetch song metadata results from LastFM failed.\nHTTP Error Code : ${res.status} - ${res.statusText}`;
-  log(errStr, undefined, 'WARN');
+  logger.error('Failed to fetch song metadata results from LastFM', {
+    status: res.status,
+    statusText: res.statusText
+  });
   return [];
 }
 
@@ -134,7 +131,8 @@ const fetchSongMetadataFromItunes = (sourceId: string) => {
     const hit = itunesHitsCache[i];
     if (hit.sourceId === sourceId) return hit;
   }
-  log(`No hit found for the given sourceId '${sourceId}'.`, { sourceId }, 'WARN');
+
+  logger.warn(`No hit found for the given sourceId.`, { sourceId });
   return undefined;
 };
 
@@ -148,8 +146,8 @@ async function fetchSongMetadataResultsFromLastFM(
   const LAST_FM_API_KEY = import.meta.env.MAIN_VITE_LAST_FM_API_KEY;
 
   if (typeof LAST_FM_API_KEY !== 'string') {
-    log('undefined LAST_FM_API_KEY.', { LAST_FM_API_KEY }, 'WARN');
-    throw new Error('undefined LAST_FM_API_KEY');
+    logger.error('LAST_FM_API_KEY not found.', { LAST_FM_API_KEY });
+    throw new Error('LAST_FM_API_KEY not found');
   }
 
   const url = new URL(LAST_FM_API_URL);
@@ -182,10 +180,12 @@ async function fetchSongMetadataResultsFromLastFM(
 
       return [result];
     }
-    log(`ERROR : ${data?.error} : ${data?.message}`, undefined, 'WARN');
   }
-  const errStr = `Request to fetch song metadata results from LastFM failed.\nHTTP Error Code : ${res.status} - ${res.statusText}`;
-  log(errStr, undefined, 'WARN');
+
+  logger.warn('Failed to fetch song metadata results from LastFM.', {
+    status: res.status,
+    statusText: res.statusText
+  });
   return [];
 }
 
@@ -197,8 +197,8 @@ async function searchSongMetadataResultsInGenius(
 ): Promise<SongMetadataResultFromInternet[]> {
   const GENIUS_API_KEY = import.meta.env.MAIN_VITE_GENIUS_API_KEY;
   if (typeof GENIUS_API_KEY !== 'string') {
-    log('unknown GENIUS_API_KEY.', { GENIUS_API_KEY }, 'WARN');
-    throw new Error('unknown GENIUS_API_KEY.');
+    logger.error('GENIUS_API_KEY not found.', { GENIUS_API_KEY });
+    throw new Error('GENIUS_API_KEY not found.');
   }
 
   const query = `${songTitle}${songArtists ? ` ${songArtists}` : ''}`;
@@ -250,17 +250,12 @@ async function searchSongMetadataResultsInGenius(
       }
       return results;
     }
-    log(
-      `Request to fetch song metadata results from Genius failed.\nERR_CODE : ${data?.meta?.status} => ${data.meta.message}`,
-      undefined,
-      'WARN'
-    );
   }
-  log(
-    `Request to fetch song metadata results from Genius failed.\nHTTP Error Code : ${res.status} - ${res.statusText}`,
-    undefined,
-    'WARN'
-  );
+
+  logger.warn('Failed to fetch song metadata results from Genius.', {
+    status: res.status,
+    statusText: res.statusText
+  });
   return [];
 }
 
@@ -270,8 +265,8 @@ async function fetchSongMetadataFromGenius(
   const GENIUS_API_KEY = import.meta.env.MAIN_VITE_GENIUS_API_KEY;
 
   if (typeof GENIUS_API_KEY !== 'string') {
-    log('undefined GENIUS_API_KEY.', { GENIUS_API_KEY }, 'WARN');
-    throw new Error('undefined GENIUS_API_KEY.');
+    logger.debug('GENIUS_API_KEY not found.', { GENIUS_API_KEY });
+    throw new Error('GENIUS_API_KEY not found.');
   }
 
   const url = new URL('/songs', GENIUS_API_BASE_URL);
@@ -301,11 +296,11 @@ async function fetchSongMetadataFromGenius(
     }
     throw new Error(`ERROR : ${data?.meta?.status} : ${data.meta.message}`);
   }
-  log(
-    `Error occurred when fetching song metadata from Genius.\nHTTP Error Code : ${res.status} - ${res.statusText}`,
-    undefined,
-    'ERROR'
-  );
+
+  logger.warn('Failed to fetch song metadata from Genius.', {
+    status: res.status,
+    statusText: res.statusText
+  });
   return undefined;
 }
 
@@ -359,13 +354,12 @@ async function searchSongMetadataResultsInDeezer(
       }
       return results;
     }
-    throw new Error(`No search results found for the query in Deezer.`);
+    throw new Error(`No results found for the query in Deezer.`);
   }
-  log(
-    `Error occurred when fetching song metadata results from Deezer.\nHTTP Error Code : ${res.status} - ${res.statusText}`,
-    undefined,
-    'WARN'
-  );
+  logger.warn(`Failed to fetch song metadata results from Deezer`, {
+    status: res.status,
+    statusText: res.statusText
+  });
   return [];
 }
 
@@ -408,13 +402,12 @@ async function fetchSongMetadataFromDeezer(
         sourceId: id.toString()
       };
     }
-    throw new Error(`Error ocurred when fetching track meta data from Deezer.`);
+    throw new Error(`Failed to fetch track meta data from Deezer.`);
   }
-  log(
-    `Error occurred when fetching song metadata from Deezer.\nHTTP Error Code : ${res.status} - ${res.statusText}`,
-    undefined,
-    'WARN'
-  );
+  logger.warn(`Failed to fetch song metadata from Deezer`, {
+    status: res.status,
+    statusText: res.statusText
+  });
   return undefined;
 }
 
@@ -426,32 +419,26 @@ export const searchSongMetadataResultsInInternet = async (
   const itunesHits = fetchSongMetadataResultsFromITunes(
     songTitle,
     songArtsits ? songArtsits.join(' ') : undefined
-  ).catch((err) =>
-    log(`Error ocurred when fetching song metadata hits from iTunes API.`, { err }, 'WARN')
-  );
+  ).catch((error) => logger.warn(`Failed to fetch song metadata hits from iTunes API.`, { error }));
   const geniusHits = searchSongMetadataResultsInGenius(
     songTitle,
     songArtsits ? songArtsits.join(' ') : undefined
-  ).catch((err) =>
-    log(`Error ocurred when fetching song metadata hits from Genius API.`, { err }, 'WARN')
-  );
+  ).catch((error) => logger.warn(`Failed to fetch song metadata hits from Genius API.`, { error }));
   const lastFMHits = fetchSongMetadataResultsFromLastFM(
     songTitle,
     songArtsits ? songArtsits.join(' ') : undefined
-  ).catch((err) =>
-    log(`Error ocurred when fetching song metadata hits from LastFM API.`, { err }, 'WARN')
-  );
+  ).catch((error) => logger.warn(`Failed to fetch song metadata hits from LastFM API.`, { error }));
   const musixmatchHits = fetchSongMetadataFromMusixmatch(
     songTitle,
     songArtsits ? songArtsits.join(' ') : undefined
-  ).catch((err) =>
-    log(`Error ocurred when fetching song metadata hits from Musixmatch API.`, { err }, 'WARN')
+  ).catch((error) =>
+    logger.warn(`Failed to fetch song metadata hits from Musixmatch API.`, { error })
   );
   const deezerHits = searchSongMetadataResultsInDeezer(
     songTitle,
     songArtsits ? songArtsits.join(' ') : undefined
-  ).catch((err) =>
-    log(`Error ocurred when fetching song metadata hits from Deezer API.;`, { err }, 'WARN')
+  ).catch((error) =>
+    logger.warn(`Failed to fetch song metadata hits from Deezer API.;`, { error })
   );
 
   const hits = await Promise.all([musixmatchHits, itunesHits, geniusHits, deezerHits, lastFMHits]);
@@ -473,22 +460,25 @@ export const fetchSongMetadataFromInternet = async (
   if (source === 'ITUNES') {
     const metadata = fetchSongMetadataFromItunes(sourceId);
     if (metadata) return metadata;
-    log(`Error ocurred when fetching song metadata from itunes api hit cache.`, undefined, 'WARN');
+
+    logger.debug(`Failed to fetch song metadata from itunes api hit cache.`);
     return undefined;
   }
 
   if (source === 'GENIUS') {
-    const metadata = await fetchSongMetadataFromGenius(sourceId).catch((err) =>
-      log(`Error ocurred when fetching song metadata from Genius API.`, { err }, 'WARN')
+    const metadata = await fetchSongMetadataFromGenius(sourceId).catch((error) =>
+      logger.debug(`Failed to fetch song metadata from Genius API.`, { error })
     );
+
     if (metadata) return metadata;
     return undefined;
   }
 
   if (source === 'DEEZER') {
-    const metadata = await fetchSongMetadataFromDeezer(sourceId).catch((err) =>
-      log(`Error ocurred when fetching song metadata from Deezer API.`, { err }, 'WARN')
+    const metadata = await fetchSongMetadataFromDeezer(sourceId).catch((error) =>
+      logger.debug(`Failed to fetch song metadata from Deezer API.`, { error })
     );
+
     if (metadata) return metadata;
     return undefined;
   }

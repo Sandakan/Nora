@@ -8,5 +8,6 @@
   "compilerOptions": {
    "types": ["electron-vite/node"],
    "allowJs": true,
+   "useUnknownInCatchVariables": true
   }
 }

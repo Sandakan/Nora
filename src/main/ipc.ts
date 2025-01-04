@@ -1,5 +1,4 @@
 import { BrowserWindow, app, ipcMain, powerMonitor, shell } from 'electron';
-import log, { logFilePath } from './log';
 import {
   IS_DEVELOPMENT,
   changePlayerType,
@@ -92,6 +91,7 @@ import romanizeLyrics from './utils/romanizeLyrics';
 import convertLyricsToPinyin from './utils/convertToPinyin';
 import convertLyricsToRomaja from './utils/convertToRomaja';
 import resetLyrics from './utils/resetLyrics';
+import logger, { logFilePath } from './logger';
 
 export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSignal) {
   if (mainWindow) {
@@ -113,7 +113,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
       toggleAudioPlayingState(isPlaying)
     );
 
-    ipcMain.on('app/setDiscordRpcActivity', (_: unknown, options: any) =>
+    ipcMain.on('app/setDiscordRpcActivity', (_: unknown, options: unknown) =>
       setDiscordRpcActivity(options)
     );
 
@@ -129,11 +129,11 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     mainWindow.on('blur', () => mainWindow.webContents.send('app/blurred'));
 
     mainWindow.on('enter-full-screen', () => {
-      console.log('Entered full screen');
+      logger.debug('Entered full screen');
       mainWindow.webContents.send('app/enteredFullscreen');
     });
     mainWindow.on('leave-full-screen', () => {
-      console.log('Left full screen');
+      logger.debug('Left full screen');
       mainWindow.webContents.send('app/leftFullscreen');
     });
     powerMonitor.addListener('on-ac', toggleOnBatteryPower);
@@ -486,10 +486,10 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     );
 
     ipcMain.on('app/networkStatusChange', (_: unknown, isConnected: boolean) => {
-      log(
+      logger.info(
         isConnected
-          ? `APP CONNECTED TO THE INTERNET SUCCESSFULLY`
-          : `APP DISCONNECTED FROM THE INTERNET`
+          ? `App connected to the internet successfully`
+          : `App disconnected from the internet`
       );
       // isConnectedToInternet = isConnected;
     });
@@ -499,7 +499,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     );
 
     ipcMain.on('app/openDevTools', () => {
-      log('USER REQUESTED FOR DEVTOOLS.');
+      logger.info('User requested for devtools.');
       mainWindow.webContents.openDevTools({
         mode: 'detach',
         activate: true
@@ -507,7 +507,7 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
     });
 
     ipcMain.on('app/restartRenderer', (_: unknown, reason: string) => {
-      log(`RENDERER REQUESTED A RENDERER REFRESH.\nREASON : ${reason}`);
+      logger.info(`Renderer requested a renderer refresh.`, { reason });
       restartRenderer();
     });
 

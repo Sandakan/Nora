@@ -2,8 +2,8 @@ import fs from 'fs/promises';
 import path from 'path';
 import { OpenDialogOptions } from 'electron';
 
-import { restartApp, showOpenDialog } from '../main';
-import log from '../log';
+import { restartApp, sendMessageToRenderer, showOpenDialog } from '../main';
+import logger from '../logger';
 import copyDir from '../utils/copyDir';
 import { songCoversFolderPath } from './exportAppData';
 import {
@@ -92,7 +92,7 @@ const importRequiredData = async (importDir: string) => {
     setGenresData(genreData);
     saveUserData(userData as UserData);
   } catch (error) {
-    log('Error occurred when copying required data from import destination', { error }, 'ERROR');
+    logger.error('Failed to copy required data from import destination', { error, importDir });
   }
 };
 const importOptionalData = async (
@@ -131,7 +131,7 @@ const importOptionalData = async (
     }
     return undefined;
   } catch (error) {
-    log('Error occurred when copying optional data from import destination', { error }, 'ERROR');
+    logger.error('Failed to copy optional data from import destination', { error, importDir });
     return undefined;
   }
 };
@@ -143,9 +143,8 @@ const importAppData = async () => {
     const destinations = await showOpenDialog(DEFAULT_EXPORT_DIALOG_OPTIONS);
     const missingEntries: string[] = [];
 
-    log('Started to import app data. Please wait...', undefined, undefined, {
-      sendToRenderer: { messageCode: 'APPDATA_IMPORT_STARTED' }
-    });
+    logger.debug('Started to import app data.');
+    sendMessageToRenderer({ messageCode: 'APPDATA_IMPORT_STARTED' });
 
     if (Array.isArray(destinations) && destinations.length > 0) {
       const importDir = destinations[0];
@@ -168,41 +167,26 @@ const importAppData = async () => {
           localStorageData = await importOptionalData(availableOptionalEntries, importDir);
         await importRequiredData(importDir);
 
-        log('Successfully imported app data.', undefined, undefined, {
-          sendToRenderer: { messageCode: 'APPDATA_IMPORT_SUCCESS' }
-        });
+        logger.info('Successfully imported app data.');
+        sendMessageToRenderer({ messageCode: 'APPDATA_IMPORT_SUCCESS' });
 
         if (localStorageData) {
-          log('Successfully imported app data. Restarting app in 5 seconds', undefined, 'WARN', {
-            sendToRenderer: {
-              messageCode: 'APPDATA_IMPORT_SUCCESS_WITH_PENDING_RESTART'
-            }
-          });
+          logger.info('Successfully imported app data. Restarting app in 5 seconds');
+          sendMessageToRenderer({ messageCode: 'APPDATA_IMPORT_SUCCESS_WITH_PENDING_RESTART' });
           setTimeout(restartFunc, 5000);
           return localStorageData;
         }
         return restartFunc();
       }
-      return log(
-        'Failed to import app data. Missing required files in the selected folder.',
-        { missingEntries },
-        'WARN',
-        {
-          sendToRenderer: {
-            messageCode: 'APPDATA_IMPORT_FAILED_DUE_TO_MISSING_FILES'
-          }
-        }
-      );
+      logger.error('Failed to import app data. Missing required files in the selected folder.', {
+        missingEntries
+      });
+      return sendMessageToRenderer({ messageCode: 'APPDATA_IMPORT_FAILED_DUE_TO_MISSING_FILES' });
     }
-    return log(
-      'Failed to import data because user cancelled the prompt to select the import data.',
-      undefined,
-      'WARN'
-    );
+    return logger.debug('User cancelled the prompt to select the import data.');
   } catch (error) {
-    return log('Failed to import app data.', { error }, 'ERROR', {
-      sendToRenderer: { messageCode: 'APPDATA_IMPORT_FAILED' }
-    });
+    logger.error('Failed to import app data.', { error });
+    return sendMessageToRenderer({ messageCode: 'APPDATA_IMPORT_FAILED' });
   }
 };
 

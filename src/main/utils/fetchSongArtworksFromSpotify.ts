@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 // ? SPOTIFY ARTWORKS URL BREAKDOWN
 // ? /// COMMON URL /// | /// UNKNOWN VARIABLE ID /// | /// QUALITY /// | //// IMG ID /////
 // https://i.scdn.co/image/ | ab67616d0000 | 1e02 | 3bd8eaea54f3e7f41d6a4990
@@ -9,7 +8,7 @@
 
 // https://i.scdn.co/image/ ab6761670000 ecd483b611804e9de647b18110be
 
-import log from '../log';
+import logger from '../logger';
 import { SpotifyEmbedApi } from '../../@types/spotify_embed_api';
 
 const SPOTIFY_EMBED_BASE_URL =
@@ -37,15 +36,13 @@ const fetchSongArtworksFromSpotify = async (spotifySongId: string) => {
         const lowResArtworkUrl = thumbnail_url;
         const highResArtworkUrl = SPOTIFY_IMAGE_BASE_URL + spotifyReqId + HIGH_RES + spotifyImgId;
 
-        // console.log(highResArtworkUrl, lowResArtworkUrl);
+        // consolelogger.debug(highResArtworkUrl, lowResArtworkUrl);
         return { highResArtworkUrl, lowResArtworkUrl };
       }
     }
-    throw new Error(
-      `Error occurred when fetching artwork from url.\nHTTP Error code ${res.status} - ${res.statusText}`
-    );
+    throw new Error(`Failed to fetch artwork from url.`);
   } catch (error) {
-    log(`Error occurred when fetching artwork from url.`, { error }, 'ERROR');
+    logger.debug(`Failed to fetch artwork from url.`, { error, spotifySongId });
     return undefined;
   }
 };

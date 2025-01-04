@@ -1,9 +1,9 @@
 import { getPlaylistData, HISTORY_PLAYLIST_TEMPLATE, setPlaylistData } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 import { dataUpdateEvent } from '../main';
 
 export const addToSongsHistory = (songId: string) => {
-  log(`Requested a song with id -${songId}- to be added to the History playlist.`);
+  logger.debug(`Requested a song to be added to the History playlist.`, { songId });
   const playlists = getPlaylistData();
   if (playlists && Array.isArray(playlists)) {
     const selectedPlaylist = playlists.find(
@@ -25,8 +25,14 @@ export const addToSongsHistory = (songId: string) => {
     dataUpdateEvent('userData/recentlyPlayedSongs');
     return true;
   }
-  log(`ERROR OCCURRED WHEN TRYING TO ADD A SONG TO THE FAVORITES. PLAYLIST DATA ARE EMPTY.`);
-  throw new Error('Playlists is not an array.');
+  logger.error(
+    `Failed to add song to the history playlist because the playlist data is not an array.`,
+    {
+      playlists,
+      songId
+    }
+  )({ throwNewError: true });
+  return false;
 };
 
 export default addToSongsHistory;

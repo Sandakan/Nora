@@ -1,4 +1,4 @@
-import log from '../log';
+import logger from '../logger';
 import { getBlacklistData, setBlacklist } from '../filesystem';
 import { dataUpdateEvent } from '../main';
 
@@ -14,16 +14,7 @@ const toggleBlacklistFolders = async (folderPaths: string[], isBlacklistFolder?:
     blacklists: [],
     whitelists: []
   };
-  log(
-    `Requested to ${
-      isBlacklistFolder !== undefined
-        ? isBlacklistFolder
-          ? 'blacklist'
-          : 'whilelist'
-        : 'toggle blacklist'
-    } ${folderPaths.length} folders.`,
-    { folderPaths }
-  );
+  logger.debug(`Requested to modify folder blacklist status`, { folderPaths, isBlacklistFolder });
 
   for (const folderPath of folderPaths) {
     const isFolderBlacklisted = blacklist.folderBlacklist.includes(folderPath);
@@ -43,22 +34,22 @@ const toggleBlacklistFolders = async (folderPaths: string[], isBlacklistFolder?:
         blacklist.folderBlacklist.push(folderPath);
         result.blacklists.push(folderPath);
       } else
-        log(
-          `Request to blacklist a folder but it is already blacklisted.`,
-          { folderPath, isFolderBlacklisted, isBlacklistFolder },
-          'ERROR'
-        );
+        logger.error(`Request to blacklist a folder but it is already blacklisted.`, {
+          folderPath,
+          isFolderBlacklisted,
+          isBlacklistFolder
+        });
     } else if (isFolderBlacklisted) {
       blacklist.folderBlacklist = blacklist.folderBlacklist.filter(
         (blacklistedFolderPath) => blacklistedFolderPath !== folderPath
       );
       result.whitelists.push(folderPath);
     } else
-      log(
-        `Request to whitelist a folder but it is already whitelisted.`,
-        { folderPath, isFolderBlacklisted, isBlacklistFolder },
-        'ERROR'
-      );
+      logger.error(`Request to whitelist a folder but it is already whitelisted.`, {
+        folderPath,
+        isFolderBlacklisted,
+        isBlacklistFolder
+      });
   }
 
   setBlacklist(blacklist);

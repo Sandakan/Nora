@@ -1,5 +1,5 @@
 import { TagConstants } from 'node-id3';
-import log from '../log';
+import logger from '../logger';
 
 const convertParsedLyricsToNodeID3Format = (
   parsedLyrics?: LyricsData,
@@ -40,11 +40,9 @@ const convertParsedLyricsToNodeID3Format = (
     }
     return prevSyncedLyrics;
   } catch (error) {
-    log(
-      `Error occurred when converting parsed lyrics to NodeID3 Synchronised Lyrics format.`,
-      { error },
-      'WARN'
-    );
+    logger.error(`Failed to convert parsed lyrics to NodeID3 Synchronised Lyrics format.`, {
+      error
+    });
     return prevSyncedLyrics;
   }
 };

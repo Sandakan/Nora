@@ -1,11 +1,7 @@
-/* eslint-disable no-labels */
-/* eslint-disable camelcase */
-/* eslint-disable no-await-in-loop */
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 import { default as stringSimilarity, ReturnTypeEnums } from 'didyoumean2';
 
 import { getArtistsData, setArtistsData } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 import generatePalette from '../other/generatePalette';
 import { checkIfConnectedToInternet, dataUpdateEvent } from '../main';
 import { getArtistArtworkPath } from '../fs/resolveFilePaths';
@@ -27,28 +23,27 @@ const getArtistInfoFromDeezer = async (artistName: string): Promise<DeezerArtist
       if (res.ok) {
         const data = (await res.json()) as DeezerArtistInfoApi;
         if (data.total > 0) return data.data;
-        const errStr = `No artists results found on internet with the name '${artistName}'.`;
-        log(errStr);
-        throw new Error(errStr);
+
+        logger.info('No matching artists results on Deezer', { artistName });
+        return [];
       }
-      const errStr = `Request to fetch artist info from Deezer failed.\nERR_CODE : ${res.status}`;
-      log(errStr);
-      throw new Error(errStr);
+      logger.warn('Failed to fetch artist info from Deezer', {
+        status: res.status,
+        statusText: res.statusText
+      });
+      return [];
     } catch (error) {
-      log(
-        `ERROR OCCURRED PARSING JSON DATA FETCHED FROM DEEZER API ABOUT ARTISTS ARTWORKS.`,
-        { error },
-        'ERROR'
-      );
-      throw new Error(error as string);
+      logger.error(`Failed to parse json data fetched from deezer api about artists artworks.`, {
+        error
+      });
+      return [];
     }
   } else {
-    log(
-      `ERROR OCCURRED WHEN TRYING TO FETCH FROM DEEZER API ABOUT ARTISTS ARTWORKS. APP IS NOT CONNECTED TO THE INTERNET.`,
-      undefined,
-      'ERROR'
+    logger.warn(
+      `Failed to fetch from deezer api about artists artworks. App is not connected to the internet.`,
+      { isConnectedToInternet }
     );
-    throw new Error('NO_NETWORK_CONNECTION' as MessageCodes);
+    return [];
   }
 };
 
@@ -100,7 +95,7 @@ const getArtistArtworksFromNet = async (artist: SavableArtist) => {
             picture_medium,
             picture_xl
           };
-        log(`Artist artwork for ${artist.artistId} from deezer is a placeholder image.`, {
+        logger.debug(`Artist artwork for ${artist.artistId} from deezer is a placeholder image.`, {
           images: [
             closestResult?.picture_small,
             closestResult?.picture_medium,
@@ -135,7 +130,6 @@ const getSimilarArtistsFromArtistInfo = (data: ArtistInfoPayload, artists: Savab
             url: unparsedSimilarArtist.url,
             artistData: getArtistDataFromSavableArtistData(artist)
           });
-          // eslint-disable-next-line no-continue
           continue similarArtistLoop;
         }
       }
@@ -150,7 +144,9 @@ const getSimilarArtistsFromArtistInfo = (data: ArtistInfoPayload, artists: Savab
 };
 
 const getArtistInfoFromNet = async (artistId: string): Promise<ArtistInfoFromNet> => {
-  log(`Requested artist information related to an artist with id ${artistId} from the internet`);
+  logger.debug(
+    `Requested artist information related to an artist with id ${artistId} from the internet`
+  );
   const artists = getArtistsData();
   if (Array.isArray(artists) && artists.length > 0) {
     for (let x = 0; x < artists.length; x += 1) {
@@ -175,7 +171,7 @@ const getArtistInfoFromNet = async (artistId: string): Promise<ArtistInfoFromNet
             tags: artistInfo.artist?.tags?.tag || []
           };
         }
-        log(
+        logger.debug(
           `ERROR OCCURRED WHEN FETCHING ARTIST ARTWORKS FROM DEEZER NETWORK OR FETCHING ARTIST INFO FROM LAST_FM NETWORK.`
         );
         throw new Error(
@@ -183,12 +179,12 @@ const getArtistInfoFromNet = async (artistId: string): Promise<ArtistInfoFromNet
         );
       }
     }
-    log(
+    logger.debug(
       `No artists found with the given name ${artistId} when trying to fetch artist info from the internet.`
     );
     throw new Error(`no artists found with the given name ${artistId}`);
   }
-  log(
+  logger.debug(
     `ERROR OCCURRED WHEN SEARCHING FOR ARTISTS IN getArtistInfoFromNet FUNCTION. ARTISTS ARRAY IS EMPTY.`
   );
   throw new Error('NO_ARTISTS_FOUND' as MessageCodes);

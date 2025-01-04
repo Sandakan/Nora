@@ -1,9 +1,9 @@
 import { getUserData, setUserData } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 import { dataUpdateEvent } from '../main';
 
 const clearSearchHistoryResults = (resultsToRemove = [] as string[]) => {
-  log(
+  logger.debug(
     `User request to remove ${
       resultsToRemove.length > 0 ? resultsToRemove.length : 'all'
     } results from the search history.`
@@ -20,7 +20,7 @@ const clearSearchHistoryResults = (resultsToRemove = [] as string[]) => {
     }
   }
   dataUpdateEvent('userData/recentSearches');
-  log('Finished the cleaning process of the search history.');
+  logger.debug('Finished the cleaning process of the search history.');
   return true;
 };
 

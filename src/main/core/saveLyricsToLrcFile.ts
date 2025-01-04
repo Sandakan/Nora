@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs/promises';
 
-import log from '../log';
+import logger from '../logger';
 import { getUserData } from '../filesystem';
 import { version } from '../../../package.json';
 import {
@@ -138,7 +138,7 @@ const saveLyricsToLRCFile = async (songPathWithoutProtocol: string, songLyrics: 
   const lrcFormattedLyrics = convertLyricsToLrcFormat(songLyrics);
 
   await fs.writeFile(lrcFilePath, lrcFormattedLyrics);
-  log(`Lyrics saved in ${lrcFilePath}.`, { title: songLyrics.title });
+  logger.debug(`Lyrics saved in LRC file successfully.`, { title: songLyrics.title, lrcFilePath });
 };
 
 export default saveLyricsToLRCFile;

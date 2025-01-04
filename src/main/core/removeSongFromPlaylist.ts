@@ -1,16 +1,15 @@
 import { getPlaylistData, setPlaylistData } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 import { dataUpdateEvent } from '../main';
 import toggleLikeSongs from './toggleLikeSongs';
 
 const removeSongFromPlaylist = async (playlistId: string, songId: string) => {
-  log(
-    `Requested a song with id -${songId}- to be removed from a playlist with id '${playlistId}'.`
-  );
+  logger.debug(`Requested to remove a song from playlist.`, { playlistId, songId });
+
   let playlistsData = getPlaylistData([]);
   let isSongFound = false;
   if (playlistId === 'Favorites') {
-    log(
+    logger.debug(
       'User requested to remove a song from the Favorites playlist. Request handed over to toggleLikeSongs.'
     );
     return toggleLikeSongs([songId], false);
@@ -30,15 +29,13 @@ const removeSongFromPlaylist = async (playlistId: string, songId: string) => {
     if (isSongFound) {
       dataUpdateEvent('playlists/deletedSong');
       setPlaylistData(playlistsData);
-      return log(`song '${songId}' removed from the playlist '${playlistId}' successfully.`);
+      return logger.info(`song removed from playlist successfully.`, { playlistId, songId });
     }
-    log(
-      `Request failed because a song with an id '${songId}' cannot be found in the playlist of id ${playlistId}.`
-    );
+    logger.error(`Selected song cannot be found in the playlist`, { playlistId, songId });
     throw new Error(`'${songId}' cannot be found in the playlist of id ${playlistId}.`);
   }
-  log(`Request failed because a playlist data is undefined.`);
-  throw new Error(`Request failed because a playlist data is undefined.`);
+  logger.error(`Request failed because playlist data is undefined.`);
+  throw new Error(`Request failed because playlist data is undefined.`);
 };
 
 export default removeSongFromPlaylist;

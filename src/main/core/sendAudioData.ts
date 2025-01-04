@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop */
 import path from 'path';
 import { app } from 'electron';
 import * as musicMetaData from 'music-metadata';
@@ -6,7 +5,7 @@ import * as musicMetaData from 'music-metadata';
 import { isSongBlacklisted } from '../utils/isBlacklisted';
 import { DEFAULT_FILE_URL, getArtistsData, getSongsData } from '../filesystem';
 import { getSongArtworkPath } from '../fs/resolveFilePaths';
-import log from '../log';
+import logger from '../logger';
 import getArtistInfoFromNet from './getArtistInfoFromNet';
 import addToSongsHistory from './addToSongsHistory';
 import updateSongListeningData from './updateSongListeningData';
@@ -42,7 +41,9 @@ const getRelevantArtistData = (
       for (const artist of artists) {
         if (artist.artistId === songArtist.artistId) {
           if (!artist.onlineArtworkPaths)
-            getArtistInfoFromNet(artist.artistId).catch((err) => log(err));
+            getArtistInfoFromNet(artist.artistId).catch((error) =>
+              logger.warn('Failed to get artist info from net', { err: error })
+            );
 
           const { artistId, name, artworkName, onlineArtworkPaths } = artist;
 
@@ -61,7 +62,7 @@ const getRelevantArtistData = (
 };
 
 export const sendAudioData = async (audioId: string): Promise<AudioPlayerData> => {
-  log(`Fetching song data for song id -${audioId}-`);
+  logger.debug(`Fetching song data for song id -${audioId}-`);
   try {
     const songs = getSongsData();
 
@@ -69,6 +70,7 @@ export const sendAudioData = async (audioId: string): Promise<AudioPlayerData> =
       for (let x = 0; x < songs.length; x += 1) {
         if (songs[x].songId === audioId) {
           const song = songs[x];
+          // TODO: Unknown type error
           const metadata = await musicMetaData.parseFile(song.path);
 
           if (metadata) {
@@ -108,23 +110,23 @@ export const sendAudioData = async (audioId: string): Promise<AudioPlayerData> =
             // });
             setCurrentSongPath(song.path);
             return data;
-            // return log(`total : ${console.timeEnd('total')}`);
+            // returnlogger.debug(`total : ${console.timeEnd('total')}`);
           }
-          log(`ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA`, undefined, 'ERROR');
+          logger.error(`Failed to parse the song to get metadata`, { audioId });
           throw new Error('ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA');
         }
       }
-      log(`No matching song for songId -${audioId}-`);
+      logger.error(`No matching song to send audio data`, { audioId });
       throw new Error('SONG_NOT_FOUND' as ErrorCodes);
     }
-    log(
-      `ERROR OCCURRED WHEN READING data.json TO GET SONGS DATA. data.json FILE DOESN'T EXIST OR SONGS ARRAY IS EMPTY.`,
-      undefined,
-      'ERROR'
-    );
+    logger.error(`Failed to read data.json because it doesn't exist or is empty.`, {
+      audioId,
+      songs: typeof songs,
+      isArray: Array.isArray(songs)
+    });
     throw new Error('EMPTY_SONG_ARRAY' as ErrorCodes);
-  } catch (err) {
-    log(`ERROR OCCURRED WHEN TRYING TO SEND SONGS DATA.`, { err }, 'WARN');
+  } catch (error) {
+    logger.error(`Failed to send songs data.`, { err: error });
     throw new Error('SONG_DATA_SEND_FAILED' as ErrorCodes);
   }
 };

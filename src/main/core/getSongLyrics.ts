@@ -5,7 +5,7 @@ import songlyrics from 'songlyrics';
 
 import { getUserData } from '../filesystem';
 import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
-import log from '../log';
+import logger from '../logger';
 import { checkIfConnectedToInternet, sendMessageToRenderer } from '../main';
 import fetchLyricsFromMusixmatch from '../utils/fetchLyricsFromMusixmatch';
 import { appPreferences } from '../../../package.json';
@@ -60,19 +60,14 @@ const fetchLyricsFromAudioSource = (songPath: string) => {
       const { unsynchronisedLyrics, synchronisedLyrics } = songData;
       return parseLyricsFromID3Format(synchronisedLyrics, unsynchronisedLyrics);
     }
-    log(
-      `Nora doesn't support reading lyrics metadata from songs in ${songExt} format.`,
-      { songPath },
-      'ERROR'
-    );
+    logger.warn(`Nora doesn't support reading lyrics metadata from songs in ${songExt} format.`, {
+      songPath,
+      songExt
+    });
     // No lyrics found on the audio_source.
     return undefined;
   } catch (error) {
-    log(
-      'Error occurred when trying to fetch lyrics from the audio source.',
-      { songPath, error },
-      'ERROR'
-    );
+    logger.error('Failed to fetch lyrics from the audio source.', { songPath, error });
     return undefined;
   }
 };
@@ -117,14 +112,16 @@ const fetchLyricsFromLRCFile = async (songPath: string) => {
     }
 
     if (!lyricsInLrcFormat) {
-      log('No lrc lyrics files found.');
+      logger.info('No LRC lyrics files found.');
       return undefined;
     }
 
     const parsedLyrics = parseLyrics(lyricsInLrcFormat);
     return parsedLyrics;
   } catch (error) {
-    return log(`Lyrics containing LRC file for ${path.basename(songPath)} didn't exist.`, {
+    return logger.info(`LRC file for ${path.basename(songPath)} didn't exist.`, {
+      error,
+      songPath,
       defaultLrcFilePath,
       defaultLrcFilePathWithoutExtension,
       customLrcFilePath,
@@ -154,7 +151,7 @@ const getLyricsFromLrclib = async (
 
     if (lrclibLyrics) {
       const { lyrics, trackName, lyricsType } = lrclibLyrics;
-      log(`found lyrics for '${trackName}' song from Lrclib.`);
+      logger.info(`found lyrics for '${trackName}' song from Lrclib.`);
 
       const parsedLyrics = parseLyrics(lyrics);
 
@@ -166,8 +163,10 @@ const getLyricsFromLrclib = async (
       };
     }
   } catch (error) {
-    log(`Error occurred when trying to fetch lyrics from Lrclib.`, {
-      error
+    logger.error(`Failed to fetch lyrics from Lrclib.`, {
+      error,
+      lyricsType,
+      trackInfo
     });
   }
   return undefined;
@@ -207,7 +206,7 @@ const getLyricsFromMusixmatch = async (
 
       if (musixmatchLyrics) {
         const { lyrics, metadata, lyricsType: lyricsSyncState } = musixmatchLyrics;
-        log(`found musixmatch lyrics for '${metadata.title}' song.`);
+        logger.info(`Found musixmatch lyrics for '${metadata.title}' song.`);
 
         const parsedLyrics = parseLyrics(lyrics);
 
@@ -222,7 +221,9 @@ const getLyricsFromMusixmatch = async (
         };
       }
     } catch (error) {
-      log(`Error occurred when trying to fetch lyrics from musixmatch.`, {
+      logger.error(`Failed to fetch lyrics from musixmatch.`, {
+        trackInfo,
+        lyricsType,
         error
       });
     }
@@ -236,7 +237,7 @@ const fetchUnsyncedLyrics = async (songTitle: string, songArtists: string[]) => 
   const lyricsData = await songlyrics(str);
   if (lyricsData) {
     const { lyrics, source } = lyricsData;
-    log(`Found a lyrics result named '${lyricsData?.source.name}'.`);
+    logger.info(`Found unsynced lyrics result named '${lyricsData?.source.name}'.`);
 
     const parsedLyrics = parseLyrics(lyrics);
 
@@ -248,7 +249,7 @@ const fetchUnsyncedLyrics = async (songTitle: string, songArtists: string[]) => 
       link: source.url
     };
   }
-  log(`No lyrics found in the internet for the requested query.`);
+  logger.info(`No unsynced lyrics found for the requested query.`);
   sendMessageToRenderer({
     messageCode: 'LYRICS_FIND_FAILED',
     data: { title: songTitle }
@@ -274,13 +275,13 @@ const saveLyricsAutomaticallyIfAsked = async (
 const fetchOfflineLyrics = async (songPath: string) => {
   const lrcFileLyrics = await fetchLyricsFromLRCFile(songPath);
   if (lrcFileLyrics) {
-    log('Serving lrc file lyrics.');
+    logger.debug('Serving lrc file lyrics.');
     return lrcFileLyrics;
   }
 
   const audioSourceLyrics = fetchLyricsFromAudioSource(songPath);
   if (audioSourceLyrics) {
-    log('Serving audio source lyrics.');
+    logger.debug('Serving audio source lyrics.');
     return audioSourceLyrics;
   }
 
@@ -300,7 +301,12 @@ const getSongLyrics = async (
   const isConnectedToInternet = checkIfConnectedToInternet();
   let isOfflineLyricsAvailable = false;
 
-  log(`Fetching lyrics for '${songTitle} - ${songArtists.join(',')}'.`);
+  logger.debug(`Fetching lyrics for song.`, {
+    songTitle,
+    songArtists,
+    lyricsType,
+    lyricsRequestType
+  });
 
   const offlineLyrics = await fetchOfflineLyrics(songPath);
 
@@ -308,7 +314,7 @@ const getSongLyrics = async (
 
   if (lyricsRequestType !== 'ONLINE_ONLY') {
     if (lyricsRequestType !== 'OFFLINE_ONLY' && cachedLyrics && cachedLyrics.title === songTitle) {
-      log('Serving cached lyrics.');
+      logger.debug('Serving cached lyrics.');
       return cachedLyrics;
     }
 
@@ -365,7 +371,7 @@ const getSongLyrics = async (
         }
       }
     } catch (error) {
-      log(`No lyrics found in the internet for the requested query.\nERROR : ${error}`);
+      logger.info(`No lyrics found in the internet for the requested query.`, { error });
       sendMessageToRenderer({
         messageCode: 'LYRICS_FIND_FAILED',
         data: { title: songTitle }

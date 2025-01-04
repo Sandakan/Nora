@@ -1,8 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-/* eslint-disable import/first */
-/* eslint-disable default-param-last */
-/* eslint-disable no-use-before-define */
-/* eslint-disable global-require */
 import path, { join } from 'path';
 import os from 'os';
 import {
@@ -30,7 +25,6 @@ import debug from 'electron-debug';
 // import { pathToFileURL } from 'url';
 
 // import * as Sentry from '@sentry/electron';
-import log from './log';
 import {
   getSongsData,
   getUserData,
@@ -59,6 +53,7 @@ import { clearDiscordRpcActivity } from './other/discordRPC';
 import { is } from '@electron-toolkit/utils';
 
 import noraAppIcon from '../../resources/logo_light_mode.png?asset';
+import logger from './logger';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -96,7 +91,6 @@ const DEFAULT_SAVE_DIALOG_OPTIONS: SaveDialogOptions = {
 };
 
 // / / / / / / VARIABLES / / / / / / /
-// eslint-disable-next-line import/no-mutable-exports
 export let mainWindow: BrowserWindow;
 let tray: Tray;
 let playerType: PlayerTypes = 'normal';
@@ -111,7 +105,7 @@ let powerSaveBlockerId: number | null;
 // Behaviour on second instance for parent process
 const hasSingleInstanceLock = app.requestSingleInstanceLock();
 if (!hasSingleInstanceLock) {
-  log('Another app instance is currently active. Quitting this instance.', undefined, 'WARN');
+  logger.warn('Another app instance is currently active. Quitting this instance.');
   app.quit();
 } else app.on('second-instance', handleSecondInstances);
 
@@ -139,7 +133,7 @@ const APP_INFO = {
   }
 };
 
-log(`STARTING UP NORA`, APP_INFO, 'WARN');
+logger.debug(`Starting up Nora`, { APP_INFO });
 
 const installExtensions = async () => {
   try {
@@ -152,11 +146,9 @@ const installExtensions = async () => {
       loadExtensionOptions: { allowFileAccess: true },
       forceDownload
     });
-    log(`Added Extension: ${ext}`);
+    logger.debug(`Added Extension: ${ext}`);
   } catch (error) {
-    log(
-      `====== ERROR OCCURRED WHEN TRYING TO INSTALL EXTENSIONS TO DEVTOOLS ======\nERROR : ${error}`
-    );
+    logger.error(`Failed to install extensions to devtools`, { error });
   }
 };
 
@@ -195,7 +187,7 @@ const createWindow = async () => {
   }
   mainWindow.once('ready-to-show', () => {
     if (app.hasSingleInstanceLock()) {
-      log('Started checking for new songs during the application start.');
+      logger.info('Started checking for new songs during the application start.');
       checkForNewSongs();
       addWatchersToFolders();
       addWatchersToParentFolders();
@@ -235,10 +227,13 @@ app
     if (userData.windowState === 'maximized') mainWindow.maximize();
 
     if (!app.isDefaultProtocolClient(DEFAULT_APP_PROTOCOL)) {
-      log('No default protocol registered. Starting the default protocol registration process.');
+      logger.info(
+        'No default protocol registered. Starting the default protocol registration process.'
+      );
       const res = app.setAsDefaultProtocolClient(DEFAULT_APP_PROTOCOL);
-      if (res) log('Default protocol registered successfully.');
-      else log('Default protocol registration failed.');
+
+      if (res) logger.info('Default protocol registered successfully.');
+      else logger.warn('Default protocol registration failed.');
     }
 
     // protocol.handle('nora', registerFileProtocol)
@@ -252,10 +247,10 @@ app
 
     //   try {
     //     const res = await net.fetch(url)
-    //     console.log('c')
+    //     console.logger('c')
     //     return res
     //   } catch (error) {
-    //     log(
+    //     logger(
     //       `====== ERROR OCCURRED WHEN TRYING TO LOCATE A RESOURCE IN THE SYSTEM. =======\nREQUEST : ${urlWithQueries}\nFILE URL : ${fileUrl}\nERROR : ${error}`
     //     )
     //     return new Response('bad', {
@@ -312,11 +307,11 @@ app
 
     app.on('will-finish-launching', () => {
       crashReporter.start({ uploadToServer: false });
-      log(`APP STARTUP COMMAND LINE ARGUMENTS\nARGS : [ ${process.argv.join(', ')} ]`);
+      logger.debug(`App startup command line arguments`, { args: process.argv });
     });
 
     mainWindow.webContents.addListener('zoom-changed', (_, dir) =>
-      log(`Renderer zoomed ${dir}. ${mainWindow.webContents.getZoomLevel()}`)
+      logger.debug(`Renderer zoomed ${dir}. ${mainWindow.webContents.getZoomLevel()}`)
     );
 
     // ? / / / / / / / / /  IPC RENDERER EVENTS  / / / / / / / / / / / /
@@ -326,20 +321,20 @@ app
       //  / / / / / / / / / / / GLOBAL SHORTCUTS / / / / / / / / / / / / / /
       // globalShortcut.register('F5', () => {
       //   const isFocused = mainWindow.isFocused();
-      //   log('USER REQUESTED RENDERER REFRESH USING GLOBAL SHORTCUT.', {
+      //   logger('USER REQUESTED RENDERER REFRESH USING GLOBAL SHORTCUT.', {
       //     isFocused,
       //   });
       //   if (isFocused) restartRenderer();
       // });
 
       globalShortcut.register('F12', () => {
-        log('USER REQUESTED FOR DEVTOOLS USING GLOBAL SHORTCUT. - REQUEST WONT BE SERVED.');
+        logger.debug('User requested for devtools using global shortcut. Request wont be served.');
         // mainWindow.webContents.openDevTools({ mode: 'detach', activate: true });
       });
     }
     return undefined;
   })
-  .catch((err) => console.log(err));
+  .catch((error) => logger.error('Error occurred when starting the app.', { error }));
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
@@ -367,7 +362,7 @@ function manageWindowFinishLoad() {
 
   if (IS_DEVELOPMENT) mainWindow.webContents.openDevTools({ mode: 'detach', activate: true });
 
-  log(`STARTING UP THE RENDERER.`, undefined, 'WARN');
+  logger.debug(`Starting up the renderer.`);
 
   manageTaskbarPlaybackButtonControls(mainWindow, true, false);
 
@@ -385,14 +380,14 @@ function handleBeforeQuit() {
     clearTempArtworkFolder();
     clearDiscordRpcActivity();
     mainWindow.webContents.send('app/beforeQuitEvent');
-    log(`QUITING NORA`, { uptime: `${Math.floor(process.uptime())} seconds` }, 'WARN');
+    logger.debug(`Quiting Nora`, { uptime: `${Math.floor(process.uptime())} seconds` });
   } catch (error) {
-    console.log(error);
+    logger.error('Error occurred when quiting the app.', { error });
   }
 }
 
 export function toggleAudioPlayingState(isPlaying: boolean) {
-  console.log(`Player playback status : ${isPlaying}`);
+  console.debug(`Player playback status : ${isPlaying}`);
   isAudioPlaying = isPlaying;
   manageTaskbarPlaybackButtonControls(mainWindow, true, isPlaying);
 }
@@ -416,14 +411,10 @@ export function dataUpdateEvent(
   message?: string
 ) {
   if (dataUpdateEventTimeOutId) clearTimeout(dataUpdateEventTimeOutId);
-  log(
-    `Data update event fired with updated '${dataType}'.${data.length > 0 || message ? '\n' : ''}${
-      data.length > 0 ? `DATA : ${data}; ` : ''
-    }${message ? `MESSAGE : ${data}; ` : ''}`
-  );
+  logger.debug(`Data update event fired.`, { dataType, data, message });
   addEventsToCache(dataType, data, message);
   dataUpdateEventTimeOutId = setTimeout(() => {
-    console.log(dataEventsCache);
+    logger.trace('Data Events Cache', { dataEventsCache });
     mainWindow.webContents.send('app/dataUpdateEvent', dataEventsCache, data, message);
     dataEventsCache = [];
   }, 1000);
@@ -456,9 +447,7 @@ function registerFileProtocol(request: { url: string }, callback: (arg: string) 
     const [url] = urlWithQueries.split('?');
     return callback(url);
   } catch (error) {
-    log(
-      `====== ERROR OCCURRED WHEN TRYING TO LOCATE A RESOURCE IN THE SYSTEM. =======\nREQUEST : ${urlWithQueries}\nERROR : ${error}`
-    );
+    logger.error(`Failed to locate a resource in the system.`, { urlWithQueries, error });
     return callback('404');
   }
 }
@@ -472,7 +461,7 @@ export const setCurrentSongPath = (songPath: string) => {
 export const getCurrentSongPath = () => currentSongPath;
 
 function manageAuthServices(url: string) {
-  log('URL selected for auth service', { url });
+  logger.debug('URL selected for auth service', { url });
   const { searchParams } = new URL(url);
 
   if (searchParams.has('service')) {
@@ -488,7 +477,7 @@ export async function showOpenDialog(openDialogOptions = DEFAULT_OPEN_DIALOG_OPT
   const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, openDialogOptions);
 
   if (canceled) {
-    log('User cancelled the folder selection popup.');
+    logger.debug('User cancelled the folder selection popup.');
     throw new Error('PROMPT_CLOSED_BEFORE_INPUT' as MessageCodes);
   }
   return filePaths;
@@ -498,7 +487,7 @@ export async function showSaveDialog(saveDialogOptions = DEFAULT_SAVE_DIALOG_OPT
   const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, saveDialogOptions);
 
   if (canceled) {
-    log('User cancelled the folder selection popup.');
+    logger.debug('User cancelled the folder selection popup.');
     throw new Error('PROMPT_CLOSED_BEFORE_INPUT' as MessageCodes);
   }
   return filePath;
@@ -506,36 +495,20 @@ export async function showSaveDialog(saveDialogOptions = DEFAULT_SAVE_DIALOG_OPT
 
 function manageAppMoveEvent() {
   const [x, y] = mainWindow.getPosition();
-  log(
-    `User moved the ${
-      playerType === 'mini'
-        ? 'mini-player'
-        : playerType === 'full'
-          ? 'full-screen-player'
-          : 'main-player'
-    } window to (x: ${x}, y: ${y}) coordinates.`
-  );
+  logger.debug(`User moved the player`, { playerType, coordinates: { x, y } });
   if (playerType === 'mini') saveUserData('windowPositions.miniPlayer', { x, y });
   else if (playerType === 'normal') saveUserData('windowPositions.mainWindow', { x, y });
 }
 
 function manageAppResizeEvent() {
   const [x, y] = mainWindow.getSize();
-  log(
-    `User resized the ${
-      playerType === 'mini'
-        ? 'mini-player'
-        : playerType === 'full'
-          ? 'full-screen-player'
-          : 'main-player'
-    } to (x: ${x}, y: ${y}) diamensions.`
-  );
+  logger.debug(`User resized the player`, { playerType, coordinates: { x, y } });
   if (playerType === 'mini') saveUserData('windowDiamensions.miniPlayer', { x, y });
   else if (playerType === 'normal') saveUserData('windowDiamensions.mainWindow', { x, y });
 }
 
 async function handleSecondInstances(_: unknown, argv: string[]) {
-  log('User requested for a second instance of the app.');
+  logger.debug('User requested for a second instance of the app.');
   if (app.hasSingleInstanceLock()) {
     if (mainWindow?.isMinimized()) mainWindow?.restore();
     mainWindow?.focus();
@@ -554,7 +527,7 @@ function manageSecondInstanceArgs(args: string[]) {
 }
 
 export function restartApp(reason: string, noQuitEvents = false) {
-  log(`REQUESTED A FULL APP REFRESH.\nREASON : ${reason}`);
+  logger.debug(`Requested a full app refresh.`, { reason });
 
   if (!noQuitEvents) {
     mainWindow.webContents.send('app/beforeQuitEvent');
@@ -572,12 +545,12 @@ export async function revealSongInFileExplorer(songId: string) {
   for (let x = 0; x < songs.length; x += 1) {
     if (songs[x].songId === songId) return shell.showItemInFolder(songs[x].path);
   }
-  return log(
+
+  logger.warn(
     `Revealing song file in explorer failed because song couldn't be found in the library.`,
-    { songId },
-    'WARN',
-    { sendToRenderer: { messageCode: 'OPEN_SONG_IN_EXPLORER_FAILED' } }
+    { songId }
   );
+  return sendMessageToRenderer({ messageCode: 'OPEN_SONG_IN_EXPLORER_FAILED' });
 }
 
 const songsOutsideLibraryData: AudioPlayerData[] = [];
@@ -600,8 +573,10 @@ export const updateSongsOutsideLibraryData = (
       return undefined;
     }
   }
-  log(`songIdOrPath ${songidOrPath} does't exist on songsOutsideLibraryData.`, undefined, 'ERROR');
-  throw new Error(`songIdOrPath ${songidOrPath} does't exist on songsOutsideLibraryData.`);
+  logger.error(`songIdOrPath didn't exist on songsOutsideLibraryData.`, {
+    songidOrPath,
+    songsOutsideLibraryData
+  })({ throwNewError: true });
 };
 
 export async function getImagefileLocation() {
@@ -624,21 +599,19 @@ export async function getFolderLocation() {
 }
 
 export async function resetApp(isRestartApp = true) {
-  log('!-!-!-!-!-!  STARTED THE RESETTING PROCESS OF THE APP.  !-!-!-!-!-!');
+  logger.debug('Started the resetting process of the app.');
   try {
     await mainWindow.webContents.session.clearStorageData();
     resetAppCache();
     await resetAppData();
-    log(`########## SUCCESSFULLY RESETTED THE APP. RESTARTING THE APP NOW. ##########`);
+    logger.debug(`Successfully reset the app. Restarting the app now.`);
     sendMessageToRenderer({ messageCode: 'RESET_SUCCESSFUL' });
   } catch (error) {
     sendMessageToRenderer({ messageCode: 'RESET_FAILED' });
-    log(
-      `====== ERROR OCCURRED WHEN RESETTING THE APP. RELOADING THE APP NOW.  ======\nERROR : ${error}`
-    );
+    logger.error(`Error occurred when resetting the app. Reloading the app now.`, { error });
   } finally {
-    log(`====== RELOADING THE ${isRestartApp ? 'APP' : 'RENDERER'} ======`);
-    if (isRestartApp) restartApp('App resetted.');
+    logger.debug(`Reloading the ${isRestartApp ? 'app' : 'renderer'}`);
+    if (isRestartApp) restartApp('App reset.');
     else mainWindow.webContents.reload();
   }
 }
@@ -657,7 +630,8 @@ export async function getRendererLogs(
   forceWindowRestart = false,
   forceMainRestart = false
 ) {
-  log(mes, data, messageType, undefined, 'UI');
+  // TODO: Implement renderer logs
+  logger.debug('UI', { data, mes, messageType, forceWindowRestart, forceMainRestart });
 
   if (forceWindowRestart) return mainWindow.reload();
   if (forceMainRestart) {
@@ -668,7 +642,7 @@ export async function getRendererLogs(
 }
 
 function recordWindowState(state: WindowState) {
-  log(`Window state changed`, { state });
+  logger.debug(`Window state changed`, { state });
   setUserData('windowState', state);
 }
 
@@ -677,7 +651,7 @@ export function restartRenderer() {
   mainWindow.reload();
   if (playerType !== 'normal') {
     changePlayerType('normal');
-    log('APP TOGGLED BACK TO THE MAIN WINDOW DUE TO AN APP REFRESH.');
+    logger.debug('App toggled back to the main window due to an app refresh.');
   }
 }
 
@@ -691,12 +665,12 @@ function watchForSystemThemeChanges() {
     sendMessageToRenderer({ messageCode: 'APP_THEME_CHANGE', data: { theme } });
 
   if (useSystemTheme) changeAppTheme('system');
-  else log(`System theme changed to ${theme}`);
+  else logger.debug(`System theme changed`, { theme });
 }
 
 export function changePlayerType(type: PlayerTypes) {
   if (mainWindow) {
-    log(`Changed to '${type}-player' type.`);
+    logger.debug(`Changed player type.`, { type });
     playerType = type;
     const { windowPositions, windowDiamensions, preferences } = getUserData();
     if (type === 'mini') {
@@ -765,7 +739,7 @@ export async function toggleAutoLaunch(autoLaunchState: boolean) {
   const userData = getUserData();
   const openAsHidden = userData?.preferences?.openWindowAsHiddenOnSystemStart ?? false;
 
-  log(`AUTO LAUNCH STATE : ${options.openAtLogin}`);
+  logger.debug(`Auto launch state changed`, { openAtLogin: options.openAtLogin });
 
   app.setLoginItemSettings({
     openAtLogin: autoLaunchState,
@@ -779,7 +753,7 @@ export async function toggleAutoLaunch(autoLaunchState: boolean) {
 export const checkIfConnectedToInternet = () => net.isOnline();
 
 export function allowScreenSleeping() {
-  log('Requested to allow screen sleeping.');
+  logger.debug('Requested to allow screen sleeping.');
   if (powerSaveBlockerId) {
     powerSaveBlocker.stop(powerSaveBlockerId);
     powerSaveBlockerId = null;
@@ -789,5 +763,5 @@ export function allowScreenSleeping() {
 export function stopScreenSleeping() {
   allowScreenSleeping();
   powerSaveBlockerId = powerSaveBlocker.start('prevent-display-sleep');
-  log('Screen sleeping prevented.', { powerSaveBlockerId });
+  logger.debug('Screen sleeping prevented.', { powerSaveBlockerId });
 }

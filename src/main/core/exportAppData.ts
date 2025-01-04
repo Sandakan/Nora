@@ -13,8 +13,8 @@ import {
   getUserData,
   getPaletteData
 } from '../filesystem';
-import { showOpenDialog } from '../main';
-import log from '../log';
+import { sendMessageToRenderer, showOpenDialog } from '../main';
+import logger from '../logger';
 import copyDir from '../utils/copyDir';
 import makeDir from '../utils/makeDir';
 
@@ -114,7 +114,8 @@ const exportAppData = async (localStorageData: string) => {
           : path.join(destinations[0], 'Nora exports');
       const { exist } = await makeDir(destination);
 
-      if (exist) log(`'Nora exports' folder already exists. Will re-write contents of the folder.`);
+      if (exist)
+        logger.debug(`'Nora exports' folder already exists. Will re-write contents of the folder.`);
 
       for (let i = 0; i < operations.length; i++) {
         const operation = operations[i];
@@ -125,28 +126,21 @@ const exportAppData = async (localStorageData: string) => {
           await fs.writeFile(path.join(destination, operation.filename), operation.dataString);
         else throw new Error('Invalid operation');
 
-        log('Exporting app data. Please wait...', undefined, undefined, {
-          sendToRenderer: {
-            messageCode: 'APPDATA_EXPORT_STARTED',
-            data: { total: operations.length, value: i + 1 }
-          }
+        logger.debug('Exporting app data. Please wait');
+        sendMessageToRenderer({
+          messageCode: 'APPDATA_EXPORT_STARTED',
+          data: { total: operations.length, value: i + 1 }
         });
       }
 
-      return log('Exported app data successfully.', undefined, 'INFO', {
-        sendToRenderer: { messageCode: 'APPDATA_EXPORT_SUCCESS' }
-      });
+      logger.debug('Exported app data successfully.');
+      return sendMessageToRenderer({ messageCode: 'APPDATA_EXPORT_SUCCESS' });
     }
-    return log(
-      `Failed to export app data because user didn't select a destination.`,
-      undefined,
-      'WARN',
-      { sendToRenderer: { messageCode: 'DESTINATION_NOT_SELECTED' } }
-    );
+    logger.warn(`Failed to export app data because user didn't select a destination.`);
+    return sendMessageToRenderer({ messageCode: 'DESTINATION_NOT_SELECTED' });
   } catch (err) {
-    log('Error occurred when exporting app data.', { err, destinations }, 'ERROR', {
-      sendToRenderer: { messageCode: 'APPDATA_EXPORT_FAILED' }
-    });
+    logger.error('Failed to export app data.', { err, destinations });
+    sendMessageToRenderer({ messageCode: 'APPDATA_EXPORT_FAILED' });
   }
 };
 

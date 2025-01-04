@@ -1,5 +1,5 @@
 import { createNewListeningDataInstance, getListeningData, setListeningData } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 import { dataUpdateEvent } from '../main';
 
 const updateSongListensArray = (yearlyListens: YearlyListeningRate[], updateValue: number) => {
@@ -79,11 +79,7 @@ const updateListeningData = <
   else if (dataType === 'seeks' && Array.isArray(value))
     listeningData.seeks = updateSeeksArray(listeningData.seeks, value);
   else {
-    log(
-      `Requested to update song listening data with unknown data type of ${dataType}.`,
-      undefined,
-      'WARN'
-    );
+    logger.error(`Requested to update song listening data with unknown data type`, { dataType });
     throw new Error(
       `Requested to update song listening data with unknown data type of ${dataType}.`
     );
@@ -111,11 +107,7 @@ const updateSongListeningData = <
   value: Value
 ) => {
   try {
-    log(
-      `Requested to ${
-        typeof value === 'number' ? (value >= 0 ? 'increment' : 'decrement') : 'update'
-      } ${dataType} of the '${songId}' song's listening data.`
-    );
+    logger.debug(`Requested to update listening data.`, { songId, dataType, value });
     const listeningData = getListeningData([songId]);
 
     if (listeningData.length > 0) {
@@ -126,18 +118,21 @@ const updateSongListeningData = <
         }
       }
 
-      log(`No listening data found for songId ${songId}. Creating a new listening data instance.`);
+      logger.debug(
+        `No listening data found for songId ${songId}. Creating a new listening data instance.`
+      );
       const newListeningData = createNewListeningDataInstance(songId);
       const updatedListeningData = updateListeningData(dataType, newListeningData, value);
       return setListeningData(updatedListeningData);
     }
-    return log('Listening data array empty');
+    return logger.error('Listening data array empty');
   } catch (error) {
-    return log(
-      `Error occurred when trying to update song listening data for the song with id ${songId}`,
-      { error },
-      'ERROR'
-    );
+    return logger.error(`Failed to update song listening data for a song`, {
+      error,
+      songId,
+      dataType,
+      value
+    });
   }
 };
 

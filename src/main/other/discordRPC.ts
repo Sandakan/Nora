@@ -1,16 +1,18 @@
 import { getUserData } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 import { Initialize, setDiscordRPC } from './discord';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let dataQueue: any[] = [];
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const setDiscordRpcActivity = (data: any) => {
   try {
     const userData = getUserData();
     const { enableDiscordRPC } = userData.preferences;
 
     if (!enableDiscordRPC)
-      return log('Discord Rich Presence skipped.', {
+      return logger.debug('Discord Rich Presence skipped.', {
         reason: { enableDiscordRPC }
       });
     Initialize();
@@ -18,18 +20,18 @@ export const setDiscordRpcActivity = (data: any) => {
       setDiscordRPC(data);
       setTimeout(() => {
         if (dataQueue.length > 1) {
-          log('Send last activity in the queue.');
+          logger.debug('Send last activity in the queue.');
           setDiscordRPC(dataQueue.pop());
         }
-        log('Clear activity queue.');
+        logger.debug('Clear activity queue.');
         dataQueue = [];
       }, 3000);
-      log('Discord rich presence activity accepted.');
+      logger.debug('Discord rich presence activity accepted.');
     }
     dataQueue.push(data);
-    return log('Pushed activity to queue.');
+    return logger.debug('Pushed activity to queue.');
   } catch (error) {
-    return log('Failed to set discord rich presence activity.', { error });
+    logger.error('Failed to set discord rich presence activity.', { error });
   }
 };
 

@@ -16,6 +16,8 @@
     ],
     "paths": {
       "@main/*": ["./src/main/*"],},
-    "noImplicitAny": true
+    "noImplicitAny": true,
+   "useUnknownInCatchVariables": true
+
   }
 }

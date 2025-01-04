@@ -1,12 +1,9 @@
-/* eslint-disable no-use-before-define */
-
-// import { createReadStream } from 'fs';
 import fs from 'fs/promises';
 import path from 'path';
 import * as musicMetaData from 'music-metadata';
 
 import { generateRandomId } from '../utils/randomId';
-import log from '../log';
+import logger from '../logger';
 import {
   getAlbumsData,
   getArtistsData,
@@ -47,7 +44,7 @@ export const tryToParseSong = (
     const tryParseSong = async (errRetryCount = 0): Promise<void> => {
       try {
         await parseSong(songPath, reparseToSync, noRendererMessages);
-        log(`'${songFileName}' song added to the library.`);
+        logger.debug(`song added to the library.`, { songPath });
         if (generatePalettesAfterParsing) setTimeout(generatePalettes, 1500);
 
         dataUpdateEvent('songs/newSong');
@@ -56,15 +53,14 @@ export const tryToParseSong = (
         if (errRetryCount < 5) {
           // THIS ERROR OCCURRED WHEN THE APP STARTS READING DATA WHILE THE SONG IS STILL WRITING TO THE DISK. POSSIBLE SOLUTION IS TO SET A TIMEOUT AND REDO THE PROCESS.
           if (timeOutId) clearTimeout(timeOutId);
-          log(
-            'ERROR OCCURRED WHEN TRYING TO PARSE SONG DATA. RETRYING IN 5 SECONDS. (ERROR: READ ERROR)'
-          );
-          setTimeout(() => tryParseSong(errRetryCount + 1), 5000);
+          logger.debug('Failed to parse song data. Retrying in 5 seconds. (error: read error)', {
+            error
+          });
+          timeOutId = setTimeout(() => tryParseSong(errRetryCount + 1), 5000);
         } else {
-          log(
-            `ERROR OCCURRED WHEN PARSING A NEWLY ADDED SONG WHILE THE APP IS OPEN. FAILED 5 OF 5 RETRY EFFORTS.`,
-            { error },
-            'ERROR'
+          logger.debug(
+            `Failed to parse a newly added song while the app is open. Failed 5 of 5 retry efforts.`,
+            { error }
           );
           sendMessageToRenderer({
             messageCode: 'PARSE_FAILED',
@@ -77,16 +73,12 @@ export const tryToParseSong = (
 
     return tryParseSong();
   }
-  log(
-    'Song is not added for parsing because it is not eligible for parsing.',
-    {
-      songPath,
-      reason: {
-        isSongInPathsQueue
-      }
-    },
-    'WARN'
-  );
+  logger.info('Song parsing ignored because it is not eligible.', {
+    songPath,
+    reason: {
+      isSongInPathsQueue
+    }
+  });
   return undefined;
 };
 
@@ -98,7 +90,8 @@ export const parseSong = async (
   noRendererMessages = false
 ): Promise<SongData | undefined> => {
   // const start = timeStart();
-  log(`Starting the parsing process of song '${path.basename(absoluteFilePath)}'.`);
+  logger.debug(`Starting the parsing process of song '${path.basename(absoluteFilePath)}'.`);
+
   const songs = getSongsData();
   const artists = getArtistsData();
   const albums = getAlbumsData();
@@ -110,12 +103,12 @@ export const parseSong = async (
     // const songFileStream = createReadStream(absoluteFilePath);
 
     // songFileStream.on('error', (err) => {
-    //   log(err);
+    //  logger.debug(err);
     //   throw err;
     // });
 
     // if (!songFileStream.readable)
-    //   log('song stream not readable', undefined, 'ERROR');
+    //  logger.debug('song stream not readable', undefined, 'ERROR');
 
     const stats = await fs.stat(absoluteFilePath);
     const metadata = await musicMetaData.parseFile(absoluteFilePath);
@@ -161,7 +154,7 @@ export const parseSong = async (
       // const start7 = timeEnd(start6, 'Time to generate palette');
 
       // if (metadata.common.lyrics)
-      //   console.log(metadata.common.title, metadata.common.lyrics);
+      //   consolelogger.debug(metadata.common.title, metadata.common.lyrics);
 
       const songInfo: SavableSongData = {
         songId,
@@ -267,14 +260,13 @@ export const parseSong = async (
       // );
 
       songs.push(songInfo);
-      log(
-        `Finished the parsing process of song with name '${
-          songInfo.title
-        }'. Updated ${relevantArtists.length} artists, ${relevantAlbum ? '1' : '0'}  albums, ${
-          relevantGenres.length
-        } genres in the process of parsing song.`,
-        undefined
-      );
+      logger.debug(`Song parsing completed successfully.`, {
+        songId,
+        title: songTitle,
+        artistCount: updatedArtists.length,
+        albumCount: updatedAlbums.length,
+        genreCount: updatedGenres.length
+      });
       setSongsData(songs);
       setArtistsData(updatedArtists);
       setAlbumsData(updatedAlbums);
@@ -329,21 +321,17 @@ export const parseSong = async (
         isBlacklisted: isSongBlacklisted(songId, absoluteFilePath)
       };
     }
-    log(
-      'Song not eligable for parsing.',
-      {
-        absoluteFilePath,
-        reason: {
-          isSongArrayAvailable: Array.isArray(songs),
-          isSongInParseQueue
-        }
-      },
-      'WARN'
-    );
+    logger.debug('Song not eligable for parsing.', {
+      absoluteFilePath,
+      reason: {
+        isSongArrayAvailable: Array.isArray(songs),
+        isSongInParseQueue
+      }
+    });
     return undefined;
-  } catch (err) {
-    log(`Error occurred when parsing a song.`, { err }, 'ERROR');
-    throw err;
+  } catch (error) {
+    logger.error(`Error occurred when parsing a song.`, { error, absoluteFilePath });
+    throw error;
   } finally {
     parseQueue = parseQueue.filter((dir) => dir !== absoluteFilePath);
   }

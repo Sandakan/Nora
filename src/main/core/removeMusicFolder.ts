@@ -1,8 +1,7 @@
-/* eslint-disable no-await-in-loop */
 import path from 'path';
 import { closeAbortController, saveAbortController } from '../fs/controlAbortControllers';
 import { getSongsData, getUserData, setUserData } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 import { sendMessageToRenderer } from '../main';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
 import { getAllFoldersFromFolderStructures } from '../fs/parseFolderStructuresForSongPaths';
@@ -48,16 +47,15 @@ const removeFoldersFromStructure = (folderPaths: string[]) => {
 
   for (const folderPath of folderPaths) {
     musicFolders = removeFolderFromStructure(folderPath, undefined, musicFolders);
-    log(`Folder ${path.basename(folderPath)} removed successfully.`, {
-      folderPath
-    });
+    logger.info(`Folder removed successfully.`, { folderPath });
   }
 
   return musicFolders;
 };
 
 const removeMusicFolder = async (folderPath: string): Promise<boolean> => {
-  log(`STARTED THE PROCESS OF REMOVING '${folderPath}' FROM THE SYSTEM.`, undefined, 'WARN');
+  logger.debug(`Started the process of removing a folder from the library.`, { folderPath });
+
   const pathBaseName = path.basename(folderPath);
   const { musicFolders } = getUserData();
   const folders = getAllFoldersFromFolderStructures(musicFolders);
@@ -70,15 +68,22 @@ const removeMusicFolder = async (folderPath: string): Promise<boolean> => {
     );
     if (relatedFolderPaths.length > 0) {
       const songPathsRelatedToFolders = getSongPathsRelatedToFolders(relatedFolderPaths);
-      log(
+      logger.debug(
         `${relatedFolderPaths.length} sub-directories found inside the '${pathBaseName}' directory. ${songPathsRelatedToFolders.length} files inside these directories will be deleted too.`,
-        { subDirectories: relatedFolderPaths }
+        {
+          subDirectories: relatedFolderPaths,
+          pathBaseName,
+          songCount: songPathsRelatedToFolders.length
+        }
       );
 
       if (songPathsRelatedToFolders) {
         try {
           await removeSongsFromLibrary(songPathsRelatedToFolders, abortController.signal);
-          log(`Deleted ${pathBaseName} folder from the filesystem.\nDIRECTORY : ${folderPath}`);
+          logger.debug(`Deleted folder from the library`, {
+            folderPath,
+            songPathsRelatedToFoldersCount: songPathsRelatedToFolders.length
+          });
           sendMessageToRenderer({
             messageCode:
               songPathsRelatedToFolders.length > 0
@@ -90,11 +95,7 @@ const removeMusicFolder = async (folderPath: string): Promise<boolean> => {
             }
           });
         } catch (error) {
-          log(
-            `ERROR OCCURRED WHEN TRYING TO REMOVE SONG FROM A MUSIC FOLDER  `,
-            { error },
-            'ERROR'
-          );
+          logger.error(`Failed to delete folder from the library.`, { error, folderPath });
         }
       }
     }
@@ -104,7 +105,7 @@ const removeMusicFolder = async (folderPath: string): Promise<boolean> => {
     setUserData('musicFolders', updatedMusicFolders);
     closeAbortController(folderPath);
 
-    log(`Deleted ${relatedFolderPaths.length} directories.`, {
+    logger.debug(`Deleted ${relatedFolderPaths.length} directories.`, {
       relatedFolders: relatedFolderPaths
     });
     return true;

@@ -1,4 +1,4 @@
-import log from '../log';
+import logger from '../logger';
 import { MusixmatchLyricsAPI, MusixmatchLyricsMetadata } from '../../@types/musixmatch_lyrics_api';
 import fetchSongArtworksFromSpotify from './fetchSongArtworksFromSpotify';
 
@@ -39,13 +39,11 @@ async function parseSongMetadataFromMusixmatchApiData(
     }
 
     // Link to Track lyrics on Musixmatch
-    if (trackData.track_share_url)
-      // eslint-disable-next-line prefer-destructuring
-      metadata.link = trackData.track_share_url.split(/[?#]/)[0];
+    if (trackData.track_share_url) metadata.link = trackData.track_share_url.split(/[?#]/)[0];
 
     return metadata;
   }
-  log('No song metadata found.');
+  logger.warn('No song metadata found.');
   return undefined;
 }
 

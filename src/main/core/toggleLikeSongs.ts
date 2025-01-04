@@ -4,7 +4,7 @@ import {
 } from '../other/lastFm/sendFavoritesDataToLastFM';
 import { getSongsData, setSongsData } from '../filesystem';
 import { getSongArtworkPath } from '../fs/resolveFilePaths';
-import log from '../log';
+import logger from '../logger';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import addToFavorites from './addToFavorites';
 import removeFromFavorites from './removeFromFavorites';
@@ -58,11 +58,7 @@ const toggleLikeSongs = async (songIds: string[], isLikeSong?: boolean) => {
     dislikes: []
   };
 
-  log(
-    `Requested to ${
-      isLikeSong !== undefined ? (isLikeSong ? 'like' : 'dislike') : 'toggle like'
-    } ${songIds.length} songs.`
-  );
+  logger.info(`Requested to like/dislike song(s).`, { songIds, isLikeSong });
 
   if (songs.length > 0) {
     const preventNotifications = songIds.length > 5;
