@@ -10,6 +10,6 @@ export const timeEnd = (start: ReturnType<typeof timeStart>, title?: string) => 
   const [seconds, nanoseconds] = process.hrtime(start);
   const elapsedTime = (seconds + nanoseconds / NANOSECONDS_PER_SECOND).toFixed(3);
 
-  logger.trace(`Time elapsed${title ? `: ${title}` : ''}`, { elapsedTime });
+  logger.verbose(`Time elapsed${title ? `: ${title}` : ''}`, { elapsedTime });
   return process.hrtime();
 };

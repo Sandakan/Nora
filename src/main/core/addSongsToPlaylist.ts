@@ -1,4 +1,4 @@
-import { sendMessageToRenderer } from '@main/main';
+import { sendMessageToRenderer } from '../main';
 import { getPlaylistData, setPlaylistData } from '../filesystem';
 import logger from '../logger';
 

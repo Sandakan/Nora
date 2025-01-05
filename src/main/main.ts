@@ -414,7 +414,7 @@ export function dataUpdateEvent(
   logger.debug(`Data update event fired.`, { dataType, data, message });
   addEventsToCache(dataType, data, message);
   dataUpdateEventTimeOutId = setTimeout(() => {
-    logger.trace('Data Events Cache', { dataEventsCache });
+    logger.verbose('Data Events Cache', { dataEventsCache });
     mainWindow.webContents.send('app/dataUpdateEvent', dataEventsCache, data, message);
     dataEventsCache = [];
   }, 1000);

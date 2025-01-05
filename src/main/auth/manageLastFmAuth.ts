@@ -34,7 +34,7 @@ const manageLastFmAuth = async (token: string) => {
     const res = await fetch(url);
     const json: LastFMSessionGetResponse = await res.json();
 
-    logger.trace('LastFM JSON result', { json });
+    logger.verbose('LastFM JSON result', { json });
     if ('session' in json) {
       const { key, name } = json.session;
       const encryptedKey = encrypt(key);

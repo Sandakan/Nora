@@ -1,10 +1,8 @@
 import path from 'path';
 import { app } from 'electron';
+import winston from 'winston';
 // import { sendMessageToRenderer } from './main';
 import { makeDirSync } from './utils/makeDir';
-import pino from 'pino';
-import { PinoPretty } from 'pino-pretty';
-import { createWriteStream } from 'fs';
 
 const IS_DEVELOPMENT = !app.isPackaged || process.env.NODE_ENV === 'development';
 
@@ -60,18 +58,23 @@ const getLogFilePath = () => {
 };
 
 export const logFilePath = getLogFilePath();
-const streams = [{ stream: createWriteStream(logFilePath) }, { stream: PinoPretty() }];
-const pinoLogger = pino(
-  {
-    base: undefined,
-    timestamp: pino.stdTimeFunctions.isoTime
-  },
-  pino.multistream(streams)
-);
-const mainLogger = pinoLogger.child({ process: 'MAIN' });
-// const rendererLogger = pinoLogger.child({ process: 'UI' });
 
-// const log = (
+const log = winston.createLogger({
+  level: 'debug',
+  transports: [
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.timestamp({
+          format: 'YYYY-MM-DD hh:mm:ss.SSS A'
+        }),
+        winston.format.json({ deterministic: true }),
+        winston.format.colorize({ all: true }),
+        winston.format.simple()
+      )
+    }),
+    new winston.transports.File({ filename: logFilePath })
+  ]
+});
 //   message: Error | string,
 //   data?: Record<string, unknown>,
 //   messageType: LogMessageTypes = 'INFO',
@@ -99,19 +102,18 @@ const mainLogger = pinoLogger.child({ process: 'MAIN' });
 // };
 
 const logger = {
-  info: (message: string, data = {} as object) => mainLogger.info(data, message),
+  info: (message: string, data = {} as object) => log.info(message, { data }),
   error: (message: string, data = {} as object) => {
-    mainLogger.error(data, message);
+    log.error(message, { data });
     return (options?: { throwNewError: boolean; errorMessage?: string }) => {
       if (options) {
         if (options.throwNewError) throw new Error(message ?? options.errorMessage);
       }
     };
   },
-  warn: (message: string, data = {} as object) => mainLogger.warn(data, message),
-  debug: (message: string, data = {} as object) => mainLogger.debug(data, message),
-  fatal: (message: string, data = {} as object) => mainLogger.fatal(data, message),
-  trace: (message: string, data = {} as object) => mainLogger.trace(data, message)
+  warn: (message: string, data = {} as object) => log.warn(message, { data }),
+  debug: (message: string, data = {} as object) => log.debug(message, { data }),
+  verbose: (message: string, data = {} as object) => log.verbose(message, { data })
 };
 
 export default logger;

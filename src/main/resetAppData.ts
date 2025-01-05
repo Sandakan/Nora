@@ -39,7 +39,7 @@ const resetAppData = async () => {
       else await fs.unlink(path.join(userDataPath, resourcePath)).catch(manageErrors);
     }
   } catch (error) {
-    logger.fatal(`An unrecoverable error occurred when resetting the app.`, { error });
+    logger.error(`An unrecoverable error occurred when resetting the app.`, { error });
   }
 };
 

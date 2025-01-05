@@ -111,8 +111,6 @@
     "music-metadata": "^10.0.1",
     "node-id3": "^0.2.6",
     "node-vibrant": "^4.0.0",
-    "pino": "^9.6.0",
-    "pino-pretty": "^13.0.0",
     "pinyin-pro": "^3.26.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-i18next": "^15.0.2",
@@ -122,7 +120,8 @@
     "sharp": "^0.33.2",
     "songlyrics": "^2.4.5",
     "tailwind-merge": "^2.2.2",
-    "wanakana": "^5.3.1"
+    "wanakana": "^5.3.1",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-ts": "^2.0.0",

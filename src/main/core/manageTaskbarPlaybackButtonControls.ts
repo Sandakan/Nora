@@ -32,7 +32,7 @@ const manageTaskbarPlaybackButtonControls = (
         icon: isDarkMode ? skipBackLightIcon : skipBackDarkIcon,
         flags: isPlaybackSupported ? undefined : ['disabled'],
         click() {
-          logger.trace('Skip back button clicked');
+          logger.verbose('Skip back button clicked');
           mainWindow.webContents.send('app/player/skipBackward');
         }
       },
@@ -47,7 +47,7 @@ const manageTaskbarPlaybackButtonControls = (
             : playDarkIcon,
         flags: isPlaybackSupported ? undefined : ['disabled'],
         click: () => {
-          logger.trace('Play button clicked');
+          logger.verbose('Play button clicked');
           mainWindow.webContents.send('app/player/toggleSongPlaybackState');
         }
       },
@@ -56,7 +56,7 @@ const manageTaskbarPlaybackButtonControls = (
         icon: isDarkMode ? skipForwardLightIcon : skipForwardDarkIcon,
         flags: isPlaybackSupported ? undefined : ['disabled'],
         click() {
-          logger.trace('Skip forward button clicked');
+          logger.verbose('Skip forward button clicked');
           mainWindow.webContents.send('app/player/skipForward');
         }
       }

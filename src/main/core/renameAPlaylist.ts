@@ -1,6 +1,6 @@
 import logger from '../logger';
 import { getPlaylistData, setPlaylistData } from '../filesystem';
-import { sendMessageToRenderer } from '@main/main';
+import { sendMessageToRenderer } from '../main';
 
 export default async (playlistId: string, newName: string) => {
   const playlists = getPlaylistData();
