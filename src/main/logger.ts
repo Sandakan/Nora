@@ -3,7 +3,7 @@ import { app } from 'electron';
 import winston from 'winston';
 // import { sendMessageToRenderer } from './main';
 
-const IS_DEVELOPMENT = !app.isPackaged || process.env.NODE_ENV === 'development';
+const IS_DEVELOPMENT = app?.isPackaged || process.env.NODE_ENV === 'development';
 
 export interface LogOptions {
   preventLoggingToConsole?: boolean;
@@ -39,7 +39,7 @@ const getMinTwoWidthNums = (num: number) => {
 };
 
 const getLogFilePath = () => {
-  const logSaveFolder = path.join(app.getPath('userData'), 'logs');
+  const logSaveFolder = path?.join(app?.getPath('userData'), 'logs');
 
   const date = new Date();
   const month = date.getMonth() + 1;
@@ -50,7 +50,7 @@ const getLogFilePath = () => {
   const appState = IS_DEVELOPMENT ? 'dev' : 'prod';
   const logFileName = `${formattedDate}.${appState}.log.txt`;
 
-  const logFilePath = path.join(logSaveFolder, logFileName);
+  const logFilePath = path?.join(logSaveFolder, logFileName);
   return logFilePath;
 };
 
@@ -99,11 +99,21 @@ const log = winston.createLogger({
 // };
 
 const logger = {
-  info: (message: string, data = {} as object) => log.info(message, { data }),
-  error: (message: string, data = {} as object) => log.error(message, { data }),
-  warn: (message: string, data = {} as object) => log.warn(message, { data }),
-  debug: (message: string, data = {} as object) => log.debug(message, { data }),
-  verbose: (message: string, data = {} as object) => log.verbose(message, { data })
+  info: (message: string, data = {} as object) => {
+    log.info(message, { data });
+  },
+  error: (message: string, data = {} as object) => {
+    log.error(message, { data });
+  },
+  warn: (message: string, data = {} as object) => {
+    log.warn(message, { data });
+  },
+  debug: (message: string, data = {} as object) => {
+    log.debug(message, { data });
+  },
+  verbose: (message: string, data = {} as object) => {
+    log.verbose(message, { data });
+  }
 };
 
 export default logger;

@@ -152,8 +152,11 @@ const getArtistInfoFromNet = async (artistId: string): Promise<ArtistInfoFromNet
     for (let x = 0; x < artists.length; x += 1) {
       if (artists[x].artistId === artistId) {
         const artist = artists[x];
-        const artistArtworks = await getArtistArtworksFromNet(artist);
-        const artistInfo = await getArtistInfoFromLastFM(artist.name);
+        const [artistArtworks, artistInfo] = await Promise.all([
+          getArtistArtworksFromNet(artist),
+          getArtistInfoFromLastFM(artist.name)
+        ]);
+
         if (artistArtworks && artistInfo) {
           const artistPalette = await generatePalette(artistArtworks.picture_medium);
           const similarArtists = getSimilarArtistsFromArtistInfo(artistInfo, artists);
@@ -171,12 +174,10 @@ const getArtistInfoFromNet = async (artistId: string): Promise<ArtistInfoFromNet
             tags: artistInfo.artist?.tags?.tag || []
           };
         }
-        logger.debug(
-          `ERROR OCCURRED WHEN FETCHING ARTIST ARTWORKS FROM DEEZER NETWORK OR FETCHING ARTIST INFO FROM LAST_FM NETWORK.`
-        );
-        throw new Error(
-          'ERROR OCCURRED WHEN FETCHING ARTIST ARTWORKS FROM DEEZER NETWORK OR FETCHING ARTIST INFO FROM LAST_FM NETWORK.'
-        );
+
+        const errMessage = `Failed to fetch artist info or artworks from deezer network from last-fm network.`;
+        logger.error(errMessage, { artistId, artistInfo, artistArtworks });
+        throw new Error(errMessage);
       }
     }
     logger.debug(

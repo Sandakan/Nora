@@ -1,3 +1,14 @@
+jest.mock('../src/main/logger', () => ({
+  __esModule: true, // this property makes it work
+  default: {
+    info: jest.fn((...data) => console.log(...data)),
+    error: jest.fn((...data) => console.error(...data)),
+    warn: jest.fn((...data) => console.warn(...data)),
+    debug: jest.fn((...data) => console.debug(...data)),
+    verbose: jest.fn((...data) => console.debug(...data))
+  }
+}));
+
 import { TagConstants } from 'node-id3';
 import parseLyrics, {
   SyncedLyricsInput,
