@@ -5,6 +5,7 @@ import { dataUpdateEvent } from '../main';
 export const addToSongsHistory = (songId: string) => {
   logger.debug(`Requested a song to be added to the History playlist.`, { songId });
   const playlists = getPlaylistData();
+
   if (playlists && Array.isArray(playlists)) {
     const selectedPlaylist = playlists.find(
       (playlist) => playlist.name === 'History' && playlist.playlistId === 'History'
@@ -25,14 +26,11 @@ export const addToSongsHistory = (songId: string) => {
     dataUpdateEvent('userData/recentlyPlayedSongs');
     return true;
   }
-  logger.error(
-    `Failed to add song to the history playlist because the playlist data is not an array.`,
-    {
-      playlists,
-      songId
-    }
-  )({ throwNewError: true });
-  return false;
+
+  const errMessage =
+    'Failed to add song to the history playlist because the playlist data is not an array.';
+  logger.error(errMessage, { playlists, songId });
+  throw new Error(errMessage);
 };
 
 export default addToSongsHistory;

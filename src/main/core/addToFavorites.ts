@@ -32,11 +32,10 @@ const addToFavorites = (songId: string) => {
     dataUpdateEvent('playlists/favorites');
     return { success: true };
   }
-  logger.error(`Failed to add to favorites because the playlist data is not an array.`, {
-    playlists: typeof playlists,
-    songId
-  })({ throwNewError: true });
-  return undefined;
+
+  const message = `Failed to add to favorites because the playlist data is not an array.`;
+  logger.error(message, { playlists: typeof playlists, songId });
+  throw new Error(message);
 };
 
 export default addToFavorites;

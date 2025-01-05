@@ -35,11 +35,16 @@ const addSongsToPlaylist = (playlistId: string, songIds: string[]) => {
       }
     }
 
-    logger.error(`Request failed because a playlist cannot be found.`, {
+    const errMessage = 'Request failed because a playlist cannot be found.';
+    logger.error(errMessage, {
       playlistId
-    })({ throwNewError: true });
+    });
+    throw new Error(errMessage);
   }
-  logger.error('Request failed because the playlists array is empty.')({ throwNewError: true });
+
+  const errMessage = 'Request failed because the playlists array is empty.';
+  logger.error(errMessage);
+  throw new Error(errMessage);
 };
 
 export default addSongsToPlaylist;

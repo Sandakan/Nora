@@ -42,9 +42,12 @@ const manageLastFmAuth = async (token: string) => {
       setUserData('lastFmSessionData', { name, key: encryptedKey });
       return sendMessageToRenderer({ messageCode: 'LASTFM_LOGIN_SUCCESS' });
     }
-    return logger.error('Session not found in LastFM response.', { json })({ throwNewError: true });
+
+    const errMessage = 'Session not found in LastFM response.';
+    logger.error(errMessage, { json });
+    throw new Error(errMessage);
   } catch (error) {
-    return logger.error('Error occurred when authenticating LastFM user data.', { error })();
+    return logger.error('Error occurred when authenticating LastFM user data.', { error });
   }
 };
 

@@ -2,7 +2,6 @@ import path from 'path';
 import { app } from 'electron';
 import winston from 'winston';
 // import { sendMessageToRenderer } from './main';
-import { makeDirSync } from './utils/makeDir';
 
 const IS_DEVELOPMENT = !app.isPackaged || process.env.NODE_ENV === 'development';
 
@@ -50,8 +49,6 @@ const getLogFilePath = () => {
 
   const appState = IS_DEVELOPMENT ? 'dev' : 'prod';
   const logFileName = `${formattedDate}.${appState}.log.txt`;
-
-  makeDirSync(logSaveFolder);
 
   const logFilePath = path.join(logSaveFolder, logFileName);
   return logFilePath;
@@ -103,14 +100,7 @@ const log = winston.createLogger({
 
 const logger = {
   info: (message: string, data = {} as object) => log.info(message, { data }),
-  error: (message: string, data = {} as object) => {
-    log.error(message, { data });
-    return (options?: { throwNewError: boolean; errorMessage?: string }) => {
-      if (options) {
-        if (options.throwNewError) throw new Error(message ?? options.errorMessage);
-      }
-    };
-  },
+  error: (message: string, data = {} as object) => log.error(message, { data }),
   warn: (message: string, data = {} as object) => log.warn(message, { data }),
   debug: (message: string, data = {} as object) => log.debug(message, { data }),
   verbose: (message: string, data = {} as object) => log.verbose(message, { data })

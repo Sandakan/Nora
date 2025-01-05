@@ -17,11 +17,9 @@ const clearSongHistory = () => {
     logger.debug('Finished the song history cleaning process successfully.');
     return true;
   }
-  return logger.error(
-    `Failed to clear the song history because playlist data is empty or not an array`
-  )({
-    throwNewError: true
-  });
+
+  const errorMessage = `Failed to clear the song history because playlist data is empty or not an array`;
+  return logger.error(errorMessage, { playlistData });
 };
 
 export default clearSongHistory;

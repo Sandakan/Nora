@@ -54,6 +54,7 @@ import { is } from '@electron-toolkit/utils';
 
 import noraAppIcon from '../../resources/logo_light_mode.png?asset';
 import logger from './logger';
+import roundTo from '../common/roundTo';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -121,15 +122,16 @@ saveAbortController('main', abortController);
 // });
 // ? / / / / / / / / / / / / / / / / / / / / / / /
 debug();
+const BYTES_TO_GB = 1024 * 1024 * 1024;
 const APP_INFO = {
   environment: IS_DEVELOPMENT ? 'DEV' : 'PRODUCTION',
   appVersion: `v${version}`,
   systemInfo: {
-    cpu: os.cpus()[0].model,
+    cpu: os.cpus()[0].model.trim(),
     os: os.release(),
     architechture: os.arch(),
     platform: os.platform(),
-    totalMemory: `${os.totalmem()} (~${Math.floor(os.totalmem() / (1024 * 1024 * 1024))} GB)`
+    totalMemory: `${os.totalmem()} (${roundTo(os.totalmem() / BYTES_TO_GB, 2)} GB)`
   }
 };
 
@@ -573,10 +575,10 @@ export const updateSongsOutsideLibraryData = (
       return undefined;
     }
   }
-  logger.error(`songIdOrPath didn't exist on songsOutsideLibraryData.`, {
-    songidOrPath,
-    songsOutsideLibraryData
-  })({ throwNewError: true });
+
+  const errMessage = `songIdOrPath didn't exist on songsOutsideLibraryData.`;
+  logger.error(errMessage, { songidOrPath, songsOutsideLibraryData });
+  throw new Error(errMessage);
 };
 
 export async function getImagefileLocation() {

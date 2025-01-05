@@ -86,7 +86,9 @@ const saveLyricsToSong = async (songPathWithProtocol: string, songLyrics: SongLy
     }
   }
 
-  logger.error('No lyrics found to be saved to the song.')({ throwNewError: true });
+  const errorMessage = 'No lyrics found to be saved to the song.';
+  logger.error(errorMessage, { songPath });
+  throw new Error(errorMessage);
 };
 
 export const isLyricsSavePending = (songPath: string) => pendingSongLyrics.has(songPath);

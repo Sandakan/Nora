@@ -25,9 +25,11 @@ const deleteSongsFromSystem = async (
   });
 
   if (!isEveryPathASong) {
-    return logger.error(`Tried to delete a resource which is recognized as a song.`, {
+    const errMessage = `Tried to delete a resource which is recognized as a song.`;
+    logger.error(errMessage, {
       path: absoluteFilePaths
-    })({ throwNewError: true });
+    });
+    throw new Error(errMessage);
   }
 
   try {
