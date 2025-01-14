@@ -1,4 +1,5 @@
 import path, { join } from 'path';
+import fs from 'fs';
 import os from 'os';
 import {
   app,
@@ -22,6 +23,7 @@ import {
   // session
 } from 'electron';
 import debug from 'electron-debug';
+import mime from 'mime/lite';
 // import { pathToFileURL } from 'url';
 
 // import * as Sentry from '@sentry/electron';
@@ -55,6 +57,7 @@ import { is } from '@electron-toolkit/utils';
 import noraAppIcon from '../../resources/logo_light_mode.png?asset';
 import logger from './logger';
 import roundTo from '../common/roundTo';
+import { isAnErrorWithCode } from './utils/isAnErrorWithCode';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -261,7 +264,8 @@ app
     //     })
     //   }
     // })
-    protocol.registerFileProtocol('nora', registerFileProtocol);
+    // protocol.registerFileProtocol('nora', registerFileProtocol);
+    protocol.handle('nora', handleFileProtocol);
 
     tray = new Tray(appIcon);
     const trayContextMenu = Menu.buildFromTemplate([
@@ -439,20 +443,93 @@ function addEventsToCache(dataType: DataUpdateEventTypes, data = [] as string[],
   return dataEventsCache.push(obj);
 }
 
-function registerFileProtocol(request: { url: string }, callback: (arg: string) => void) {
-  const urlWithQueries = decodeURI(request.url).replace(
-    /nora:[/\\]{1,2}localfiles[/\\]{1,2}/gm,
-    ''
-  );
+// function registerFileProtocol(request: { url: string }, callback: (arg: string) => void) {
+//   const urlWithQueries = decodeURI(request.url).replace(
+//     /nora:[/\\]{1,2}localfiles[/\\]{1,2}/gm,
+//     ''
+//   );
 
+//   try {
+//     const [url] = urlWithQueries.split('?');
+//     return callback(url);
+//   } catch (error) {
+//     logger.error(`Failed to locate a resource in the system.`, { urlWithQueries, error });
+//     return callback('404');
+//   }
+// }
+
+const handleFileProtocol = async (request: GlobalRequest): Promise<GlobalResponse> => {
   try {
-    const [url] = urlWithQueries.split('?');
-    return callback(url);
+    const urlWithQueries = decodeURI(request.url).replace(
+      /nora:[/\\]{1,2}localfiles[/\\]{1,2}/gm,
+      ''
+    );
+    const [filePath] = urlWithQueries.split('?');
+
+    logger.verbose('Serving file from nora://', { filePath });
+
+    if (!fs.existsSync(filePath)) {
+      logger.error(`File not found: ${filePath}`);
+      return new Response('File not found', { status: 404 });
+    }
+
+    const fileStat = fs.statSync(filePath);
+    const range = request.headers.get('range');
+    let start = 0,
+      end = fileStat.size - 1;
+
+    if (range) {
+      const match = range.match(/bytes=(\d*)-(\d*)/);
+      if (match) {
+        start = match[1] ? parseInt(match[1], 10) : start;
+        end = match[2] ? parseInt(match[2], 10) : end;
+      }
+    }
+
+    const chunkSize = end - start + 1;
+    logger.verbose(`Serving range: ${start}-${end}/${fileStat.size}`);
+
+    const mimeType = mime.getType(filePath) || 'application/octet-stream';
+
+    // Create a readable stream with proper event handling
+    const stream = new ReadableStream({
+      start(controller) {
+        const fileStream = fs.createReadStream(filePath, { start, end });
+
+        fileStream.on('data', (chunk) => {
+          try {
+            controller.enqueue(chunk);
+          } catch (error) {
+            if (isAnErrorWithCode(error) && error.code !== 'ERR_INVALID_STATE')
+              logger.warn('Attempted to enqueue after stream closed:', { error });
+          }
+        });
+
+        fileStream.on('end', () => {
+          if (controller.desiredSize) {
+            controller.close();
+          }
+        });
+
+        fileStream.on('error', (err) => {
+          logger.error('Stream error:', err);
+          controller.error(err);
+        });
+      }
+    });
+
+    const headers = new Headers();
+    headers.set('Content-Type', mimeType);
+    headers.set('Content-Range', `bytes ${start}-${end}/${fileStat.size}`);
+    headers.set('Accept-Ranges', 'bytes');
+    headers.set('Content-Length', chunkSize.toString());
+
+    return new Response(stream, { headers });
   } catch (error) {
-    logger.error(`Failed to locate a resource in the system.`, { urlWithQueries, error });
-    return callback('404');
+    logger.error('Error handling media protocol:', { error });
+    return new Response('Internal Server Error', { status: 500 });
   }
-}
+};
 
 export const setCurrentSongPath = (songPath: string) => {
   currentSongPath = songPath;

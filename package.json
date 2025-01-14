@@ -108,6 +108,7 @@
     "electron-store": "^10.0.0",
     "electron-updater": "^6.2.1",
     "i18next": "^24.2.0",
+    "mime": "^4.0.6",
     "music-metadata": "^10.0.1",
     "node-id3": "^0.2.6",
     "node-vibrant": "^4.0.0",

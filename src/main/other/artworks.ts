@@ -136,16 +136,12 @@ export const removeSongArtworkFromUnknownSource = async (artworkPath: string) =>
   }
 };
 
-const isError = (error: unknown): error is Error => {
-  return error instanceof Error;
-};
-
 const createTempFolder = async (folderPath: string) => {
   try {
     await fs.stat(folderPath);
     return true;
   } catch (error) {
-    if (isError(error) && 'code' in error && error.code === 'ENOENT') {
+    if (isAnErrorWithCode(error) && error.code === 'ENOENT') {
       await fs.mkdir(folderPath);
       return true;
     }
