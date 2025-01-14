@@ -100,19 +100,19 @@ const log = winston.createLogger({
 
 const logger = {
   info: (message: string, data = {} as object) => {
-    log.info(message, { data });
+    log.info(message, { process: 'MAIN', data });
   },
   error: (message: string, data = {} as object) => {
-    log.error(message, { data });
+    log.error(message, { process: 'MAIN', data });
   },
   warn: (message: string, data = {} as object) => {
-    log.warn(message, { data });
+    log.warn(message, { process: 'MAIN', data });
   },
   debug: (message: string, data = {} as object) => {
-    log.debug(message, { data });
+    log.debug(message, { process: 'MAIN', data });
   },
   verbose: (message: string, data = {} as object) => {
-    log.verbose(message, { data });
+    log.verbose(message, { process: 'MAIN', data });
   }
 };
 

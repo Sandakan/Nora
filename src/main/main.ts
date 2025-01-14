@@ -632,8 +632,10 @@ export async function getRendererLogs(
   forceWindowRestart = false,
   forceMainRestart = false
 ) {
-  // TODO: Implement renderer logs
-  logger.debug('UI', { data, mes, messageType, forceWindowRestart, forceMainRestart });
+  const message = typeof mes === 'string' ? mes : mes.message;
+  const type = messageType.toLowerCase() as Lowercase<LogMessageTypes>;
+
+  logger[type](message, { data });
 
   if (forceWindowRestart) return mainWindow.reload();
   if (forceMainRestart) {
