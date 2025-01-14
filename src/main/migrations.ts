@@ -1,7 +1,7 @@
-import type Conf from 'conf/dist/source/index';
-import log from './log';
+import type Conf from 'conf';
 import { BLACKLIST_TEMPLATE, PLAYLIST_DATA_TEMPLATE, USER_DATA_TEMPLATE } from './filesystem';
 import { encrypt } from './utils/safeStorage';
+import logger from './logger';
 
 type StoreNames =
   | 'songs.json'
@@ -17,24 +17,26 @@ export const generateMigrationMessage = (
   storeName: StoreNames,
   context: { fromVersion: string; toVersion: string }
 ) => {
-  log(`Migrating ${storeName} from app versions ${context.fromVersion} → ${context.toVersion}`);
+  logger.debug(
+    `Migrating ${storeName} from app versions ${context.fromVersion} → ${context.toVersion}`
+  );
 };
 
 export const songMigrations = {
   '3.0.0-stable': (store: Conf<{ version?: string; songs: SavableSongData[] }>) => {
-    log('Starting the songs.json migration process.', {
+    logger.debug('Starting the songs.json migration process.', {
       version: '3.0.0-stable'
     });
     store.set('songs', []);
   },
   '2.0.0-stable': (store: Conf<{ version?: string; songs: SavableSongData[] }>) => {
-    log('Starting the songs.json migration process.', {
+    logger.debug('Starting the songs.json migration process.', {
       version: '2.0.0-stable'
     });
     store.set('songs', []);
   },
   '1.0.0-alpha': (store: Conf<{ version?: string; songs: SavableSongData[] }>) => {
-    log('Starting the songs.json migration process.', {
+    logger.debug('Starting the songs.json migration process.', {
       version: '>=1.0.0-alpha;'
     });
     const songs = store.get('songs') as SavableSongData[];
@@ -64,13 +66,13 @@ export const songMigrations = {
 export const artistMigrations = {
   // ? This migration is added to fix as a fix to https://github.com/Sandakan/Nora/issues/191
   '3.0.0-stable': (store: Conf<{ version?: string; artists: SavableArtist[] }>) => {
-    log('Starting the artists.json migration process.', {
+    logger.debug('Starting the artists.json migration process.', {
       version: '3.0.0-stable'
     });
     store.set('artists', []);
   },
   '2.4.0-stable': (store: Conf<{ version?: string; artists: SavableArtist[] }>) => {
-    log('Starting the artists.json migration process.', {
+    logger.debug('Starting the artists.json migration process.', {
       version: '2.4.0-stable'
     });
 
@@ -88,13 +90,15 @@ export const artistMigrations = {
     store.set('artists', artists);
   },
   '2.0.0-stable': (store: Conf<{ version?: string; artists: SavableArtist[] }>) => {
-    log('Starting the artists.json migration process.', {
+    logger.debug('Starting the artists.json migration process.', {
       version: '2.0.0-stable'
     });
     store.set('artists', []);
   },
   '0.8.0-alpha+2022091400': (store: Conf<{ version?: string; artists: SavableArtist[] }>) => {
-    log('Starting the artists.json migration process.\nVERSION :>=0.8.0-alpha+2022091400;');
+    logger.debug(
+      'Starting the artists.json migration process.\nVERSION :>=0.8.0-alpha+2022091400;'
+    );
     const artists = store.get('artists') as SavableArtist[];
     if (Array.isArray(artists) && artists.length > 0) {
       const updatedArtists: SavableArtist[] = artists.map((artist) => {
@@ -110,13 +114,13 @@ export const artistMigrations = {
 
 export const albumMigrations = {
   '3.0.0-stable': (store: Conf<{ version?: string; albums: SavableAlbum[] }>) => {
-    log('Starting the albums.json migration process.', {
+    logger.debug('Starting the albums.json migration process.', {
       version: '3.0.0-stable'
     });
     store.set('albums', []);
   },
   '2.0.0-stable': (store: Conf<{ version?: string; albums: SavableAlbum[] }>) => {
-    log('Starting the albums.json migration process.', {
+    logger.debug('Starting the albums.json migration process.', {
       version: '2.0.0-stable'
     });
     store.set('albums', []);
@@ -125,13 +129,13 @@ export const albumMigrations = {
 
 export const playlistMigrations = {
   '3.0.0-stable': (store: Conf<{ version?: string; playlists: SavablePlaylist[] }>) => {
-    log('Starting the playlists.json migration process.', {
+    logger.debug('Starting the playlists.json migration process.', {
       version: '3.0.0-stable'
     });
     store.set('playlists', PLAYLIST_DATA_TEMPLATE);
   },
   '2.0.0-stable': (store: Conf<{ version?: string; playlists: SavablePlaylist[] }>) => {
-    log('Starting the playlists.json migration process.', {
+    logger.debug('Starting the playlists.json migration process.', {
       version: '2.0.0-stable'
     });
     store.set('playlists', PLAYLIST_DATA_TEMPLATE);
@@ -140,13 +144,13 @@ export const playlistMigrations = {
 
 export const genreMigrations = {
   '3.0.0-stable': (store: Conf<{ version?: string; genres: SavableGenre[] }>) => {
-    log('Starting the genres.json migration process.', {
+    logger.debug('Starting the genres.json migration process.', {
       version: '3.0.0-stable'
     });
     store.set('genres', []);
   },
   '2.0.0-stable': (store: Conf<{ version?: string; genres: SavableGenre[] }>) => {
-    log('Starting the genres.json migration process.', {
+    logger.debug('Starting the genres.json migration process.', {
       version: '2.0.0-stable'
     });
     store.set('genres', []);
@@ -155,13 +159,13 @@ export const genreMigrations = {
 
 export const userDataMigrations = {
   '3.0.0-stable': (store: Conf<{ version?: string; userData: UserData }>) => {
-    log('Starting the userData.json migration process.', {
+    logger.debug('Starting the userData.json migration process.', {
       version: '3.0.0-stable'
     });
     store.set('userData', USER_DATA_TEMPLATE);
   },
   '2.5.0-stable': (store: Conf<{ version?: string; userData: UserData }>) => {
-    log('Starting the userData.json migration process.', {
+    logger.debug('Starting the userData.json migration process.', {
       version: '2.5.0-stable'
     });
     const userData = store.get('userData');
@@ -170,7 +174,7 @@ export const userDataMigrations = {
     store.set('userData', userData);
   },
   '2.4.0-stable': (store: Conf<{ version?: string; userData: UserData }>) => {
-    log('Starting the userData.json migration process.', {
+    logger.debug('Starting the userData.json migration process.', {
       version: '2.4.0-stable'
     });
 
@@ -184,7 +188,7 @@ export const userDataMigrations = {
       if (userData.customMusixmatchUserToken && userData.customMusixmatchUserToken.length === 54)
         userData.customMusixmatchUserToken = encrypt(userData.customMusixmatchUserToken);
     } catch (error) {
-      log('Error occurred when encrypting customMusixmatchUserToken', {
+      logger.debug('Error occurred when encrypting customMusixmatchUserToken', {
         error
       });
       userData.customMusixmatchUserToken = undefined;
@@ -193,7 +197,7 @@ export const userDataMigrations = {
     store.set('userData', userData);
   },
   '2.0.0-stable': (store: Conf<{ version?: string; userData: UserData }>) => {
-    log('Starting the userData.json migration process.', {
+    logger.debug('Starting the userData.json migration process.', {
       version: '2.0.0-stable'
     });
     store.set('userData', USER_DATA_TEMPLATE);
@@ -202,13 +206,13 @@ export const userDataMigrations = {
 
 export const listeningDataMigrations = {
   '3.0.0-stable': (store: Conf<{ version?: string; listeningData: SongListeningData[] }>) => {
-    log('Starting the listeningData.json migration process.', {
+    logger.debug('Starting the listeningData.json migration process.', {
       version: '3.0.0-stable'
     });
     store.set('listeningData', []);
   },
   '2.0.0-stable': (store: Conf<{ version?: string; listeningData: SongListeningData[] }>) => {
-    log('Starting the listeningData.json migration process.', {
+    logger.debug('Starting the listeningData.json migration process.', {
       version: '2.0.0-stable'
     });
     store.set('listeningData', []);
@@ -217,13 +221,13 @@ export const listeningDataMigrations = {
 
 export const blacklistMigrations = {
   '3.0.0-stable': (store: Conf<{ version?: string; blacklist: Blacklist }>) => {
-    log('Starting the blacklist.json migration process.', {
+    logger.debug('Starting the blacklist.json migration process.', {
       version: '3.0.0-stable'
     });
     store.set('blacklist', BLACKLIST_TEMPLATE);
   },
   '2.0.0-stable': (store: Conf<{ version?: string; blacklist: Blacklist }>) => {
-    log('Starting the blacklist.json migration process.', {
+    logger.debug('Starting the blacklist.json migration process.', {
       version: '2.0.0-stable'
     });
     store.set('blacklist', BLACKLIST_TEMPLATE);

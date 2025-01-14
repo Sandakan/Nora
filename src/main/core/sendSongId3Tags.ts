@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop */
 import path from 'path';
 import NodeID3 from 'node-id3';
 import { parseSyncedLyricsFromAudioDataSource } from '../../common/parseLyrics';
@@ -9,7 +8,7 @@ import {
   removeDefaultAppProtocolFromFilePath
 } from '../fs/resolveFilePaths';
 import { isLyricsSavePending } from '../saveLyricsToSong';
-import log from '../log';
+import logger from '../logger';
 import { getSongsOutsideLibraryData } from '../main';
 import { isMetadataUpdatesPending } from '../updateSongId3Tags';
 
@@ -40,11 +39,7 @@ const getSynchronizedLyricsFromSongID3Tags = (songID3Tags: NodeID3.Tags) => {
 };
 
 const sendSongID3Tags = async (songIdOrPath: string, isKnownSource = true): Promise<SongTags> => {
-  log(
-    `Requested song ID3 tags for the song -${songIdOrPath}- ${
-      isKnownSource ? 'from the library' : 'outside the library'
-    }.`
-  );
+  logger.debug(`Requested song ID3 tags for a song`, { songIdOrPath, isKnownSource });
 
   if (isKnownSource) {
     const songId = songIdOrPath;
@@ -129,8 +124,8 @@ const sendSongID3Tags = async (songIdOrPath: string, isKnownSource = true): Prom
             };
             return res;
           }
-          log(`====== ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA ======`);
-          throw new Error('ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA');
+          logger.debug(`Failed parse song metadata`, { songIdOrPath, isKnownSource });
+          throw new Error('Failed parse song metadata');
         }
       }
       throw new Error('SONG_NOT_FOUND' as MessageCodes);
@@ -170,19 +165,14 @@ const sendSongID3Tags = async (songIdOrPath: string, isKnownSource = true): Prom
           return res;
         }
       }
+      logger.error(`Song couldn't be found in the songsOutsideLibraryData array.`, { songPath });
       throw new Error(`Song couldn't be found in the songsOutsideLibraryData array.`);
     } catch (error) {
-      log(
-        'Error occurred when trying to send ID3 tags of a song outside the library.',
-        { error },
-        'ERROR'
-      );
-      throw new Error('Error occurred when trying to send ID3 tags of a song outside the library.');
+      logger.debug('Failed to send ID3 tags of a song outside the library.', { error, songPath });
+      throw new Error('Failed to send ID3 tags of a song outside the library.');
     }
   }
-  log(
-    `====== ERROR OCCURRED WHEN TRYING TO READ DATA FROM data.json. FILE IS INACCESSIBLE, CORRUPTED OR EMPTY. ======`
-  );
+  logger.debug(`Failed to read data.json because it doesn't exist or is empty `);
   throw new Error('DATA_FILE_ERROR' as MessageCodes);
 };
 

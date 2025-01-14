@@ -1,6 +1,6 @@
 import { getArtistsData } from '../filesystem';
 import { getArtistArtworkPath } from '../fs/resolveFilePaths';
-import log from '../log';
+import logger from '../logger';
 import filterArtists from '../utils/filterArtists';
 import sortArtists from '../utils/sortArtists';
 
@@ -11,12 +11,11 @@ const fetchArtistData = async (
   limit = 0
 ): Promise<Artist[]> => {
   if (artistIdsOrNames) {
-    log(
-      `Requested artists data for ${artistIdsOrNames.length} ids ${
-        sortType ? `with ${sortType}` : 'without'
-      } sorting.`,
-      { sortType, limit }
-    );
+    logger.debug(`Requested artists data`, {
+      artistIdsOrNamesCount: artistIdsOrNames.length,
+      sortType,
+      limit
+    });
     const artists = getArtistsData();
     if (artists.length > 0) {
       let results: SavableArtist[] = [];

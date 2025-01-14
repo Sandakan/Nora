@@ -1,4 +1,5 @@
 import { Client } from 'discord-rpc';
+import logger from '../logger';
 
 const ActivityType = {
   Game: 0,
@@ -70,7 +71,7 @@ function setDiscordRPC(data) {
       data.type = ActivityType.Listening;
     }
     lastPayload = payload;
-    console.log(JSON.stringify(payload, null, 2));
+    logger.trace(JSON.stringify(payload, null, 2));
     discord.request('SET_ACTIVITY', payload); //send raw payload to discord RPC server
   }
 }

@@ -3,7 +3,7 @@ import * as musicMetaData from 'music-metadata';
 import { appPreferences } from '../../../package.json';
 import { createTempArtwork } from '../other/artworks';
 import { DEFAULT_FILE_URL, getSongsData } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 import { sendMessageToRenderer, addToSongsOutsideLibraryData } from '../main';
 import { generateRandomId } from '../utils/randomId';
 import sendAudioData from './sendAudioData';
@@ -11,18 +11,19 @@ import sendAudioData from './sendAudioData';
 import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_default.webp?asset';
 
 const sendAudioDataFromPath = async (songPath: string): Promise<AudioPlayerData> => {
-  log(`Parsing song data from song path -${songPath}-`);
+  logger.debug(`Parsing song data from path`, { songPath });
+
   if (appPreferences.supportedMusicExtensions.some((ext) => path.extname(songPath).includes(ext))) {
     const songs = getSongsData();
 
     try {
+      // TODO: Unknown type error
       const metadata = await musicMetaData.parseFile(songPath);
 
       if (Array.isArray(songs)) {
         if (songs.length > 0) {
           for (let x = 0; x < songs.length; x += 1) {
             if (songs[x].path === songPath) {
-              // eslint-disable-next-line no-await-in-loop
               const audioData = await sendAudioData(songs[x].songId);
 
               if (audioData) return audioData;
@@ -36,10 +37,11 @@ const sendAudioDataFromPath = async (songPath: string): Promise<AudioPlayerData>
           const tempArtworkPath = path.join(
             DEFAULT_FILE_URL,
             metadata.common.picture
-              ? ((await createTempArtwork(metadata.common.picture[0].data).catch((err) => {
-                  log(
-                    `Artwork creation failed for song from an unknown source.\nPATH : ${songPath}; ERROR : ${err}`
-                  );
+              ? ((await createTempArtwork(metadata.common.picture[0].data).catch((error) => {
+                  logger.error(`Failed to create song artwork from an unknown source.`, {
+                    error,
+                    songPath
+                  });
                   return songCoverImage;
                 })) ?? songCoverImage)
               : songCoverImage
@@ -71,19 +73,17 @@ const sendAudioDataFromPath = async (songPath: string): Promise<AudioPlayerData>
           });
           return data;
         }
-        log(`No matching song for songId -${songPath}-`);
+        logger.error(`No matching song for songId -${songPath}-`);
         throw new Error('SONG_NOT_FOUND' as ErrorCodes);
       }
-      log(
-        `ERROR OCCURRED WHEN READING data.json TO GET SONGS DATA. data.json didn't return an array.`
-      );
+      logger.error(`Failed to read data.json because it doesn't exist or is empty.`);
       throw new Error('SONG_DATA_SEND_FAILED' as ErrorCodes);
-    } catch (err) {
-      log(`ERROR OCCURRED WHEN TRYING TO SEND SONGS DATA FROM AN UNPARSED SOURCE.`, { err });
+    } catch (error) {
+      logger.debug(`Failed to send songs data from an unparsed source.`, { error });
       throw new Error('SONG_DATA_SEND_FAILED' as ErrorCodes);
     }
   } else {
-    log(`USER TRIED TO OPEN A FILE WITH AN UNSUPPORTED EXTENSION '${path.extname(songPath)}'.`);
+    logger.debug(`User tried to open a file with an unsupported extension.`, { songPath });
     throw new Error('UNSUPPORTED_FILE_EXTENSION' as ErrorCodes);
   }
 };

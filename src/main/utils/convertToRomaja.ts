@@ -1,5 +1,5 @@
 import { getCachedLyrics, updateCachedLyrics } from '../core/getSongLyrics';
-import log from '../log';
+import logger from '../logger';
 import { sendMessageToRenderer } from '../main';
 import { getLrcLyricsMetadata } from '../core/saveLyricsToLrcFile';
 import { version } from '../../../package.json';
@@ -101,7 +101,7 @@ const convertLyricsToRomaja = async () => {
     });
     return cachedLyrics;
   } catch (error) {
-    log('Error occurred when converting lyrics.', { error }, 'ERROR');
+    logger.debug('Failed to convert lyrics to romaja.', { error });
     sendMessageToRenderer({
       messageCode: 'LYRICS_CONVERT_FAILED'
     });

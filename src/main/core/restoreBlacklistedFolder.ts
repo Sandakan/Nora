@@ -2,7 +2,7 @@ import path from 'path';
 
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import { getBlacklistData, setBlacklist } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 import { isParentFolderBlacklisted } from '../utils/isBlacklisted';
 
 const restoreBlacklistedFolders = async (blacklistedFolderPaths: string[]) => {
@@ -30,11 +30,9 @@ const restoreBlacklistedFolders = async (blacklistedFolderPaths: string[]) => {
 
   setBlacklist(blacklist);
   dataUpdateEvent('blacklist/folderBlacklist');
-  log(
-    'Folder blacklist updated because some songs got removed from the blacklist.',
-    { blacklistedFolderPaths },
-    'INFO'
-  );
+  logger.info('Folder blacklist updated because some songs got removed from the blacklist.', {
+    blacklistedFolderPaths
+  });
 };
 
 export default restoreBlacklistedFolders;

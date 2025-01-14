@@ -3,7 +3,7 @@ import { getCachedLyrics, updateCachedLyrics } from '../core/getSongLyrics';
 import parseLyrics, { INSTRUMENTAL_LYRIC_IDENTIFIER } from '../../common/parseLyrics';
 import { sendMessageToRenderer } from '../main';
 import { version } from '../../../package.json';
-import log from '../log';
+import logger from '../logger';
 import {
   getLrcLyricLinesFromParsedLyrics,
   getLrcLyricsMetadata
@@ -82,7 +82,7 @@ const getTranslatedLyrics = async (languageCode: string) => {
     }
     return cachedLyrics;
   } catch (error) {
-    log('Error occurred when translating lyrics.', { error }, 'ERROR');
+    logger.debug('Failed to translate lyrics.', { error });
     sendMessageToRenderer({
       messageCode: 'LYRICS_TRANSLATION_FAILED'
     });

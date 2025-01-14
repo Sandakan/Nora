@@ -1,8 +1,7 @@
-/* eslint-disable no-await-in-loop */
 import fs from 'fs/promises';
 import path from 'path';
 import { app } from 'electron';
-import log from './log';
+import logger from './logger';
 
 const resourcePaths = [
   'songs.json',
@@ -17,11 +16,13 @@ const resourcePaths = [
 ];
 const userDataPath = app.getPath('userData');
 
-const manageErrors = (err: any) => {
-  if ('code' in err && err.code === 'ENOENT') {
-    return log(`A RECOVERABLE ERROR OCURRED WHEN RESETTING AN APP DATA MODULE.\nERROR : ${err}`);
+const manageErrors = (error: Error) => {
+  if ('code' in error && error.code === 'ENOENT') {
+    return logger.error(`A recoverable error occurred when resetting an app data module.`, {
+      error
+    });
   }
-  throw err;
+  throw error;
 };
 
 const resetAppData = async () => {
@@ -38,7 +39,7 @@ const resetAppData = async () => {
       else await fs.unlink(path.join(userDataPath, resourcePath)).catch(manageErrors);
     }
   } catch (error) {
-    log(`AN UNRECOVERABLE ERROR OCCURRED WHEN RESETTING THE APP.`, { error }, 'ERROR');
+    logger.error(`An unrecoverable error occurred when resetting the app.`, { error });
   }
 };
 

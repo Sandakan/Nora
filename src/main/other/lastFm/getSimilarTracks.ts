@@ -1,6 +1,4 @@
-/* eslint-disable no-continue */
-/* eslint-disable no-labels */
-import log from '../../log';
+import logger from '../../logger';
 import { getSongsData } from '../../filesystem';
 import {
   LastFMSimilarTracksAPI,
@@ -11,6 +9,7 @@ import {
 import { checkIfConnectedToInternet } from '../../main';
 import { getSongArtworkPath } from '../../fs/resolveFilePaths';
 import { isSongBlacklisted } from '../../utils/isBlacklisted';
+import { getSelectedPaletteData } from '../generatePalette';
 
 const sortSimilarTracks = (a: ParsedSimilarTrack, b: ParsedSimilarTrack) => {
   if (a.match > b.match) return -1;
@@ -30,11 +29,11 @@ export const getAudioInfoFromSavableSongData = (song: SavableSongData): AudioInf
     path: song.path,
     year: song.year,
     songId: song.songId,
-    palette: song.palette,
+    paletteData: getSelectedPaletteData(song.paletteId),
     addedDate: song.addedDate,
     isAFavorite: song.isAFavorite,
     isBlacklisted
-  } as AudioInfo;
+  };
 };
 
 const parseSimilarTracks = (similarTracks: SimilarTrack[], songs: SavableSongData[]) => {
@@ -79,7 +78,6 @@ const getSimilarTracks = async (songId: string): Promise<SimilarTracksOutput> =>
   try {
     const songs = getSongsData();
 
-    // eslint-disable-next-line prefer-destructuring
     const LAST_FM_API_KEY = import.meta.env.MAIN_VITE_LAST_FM_API_KEY;
     if (!LAST_FM_API_KEY) throw new Error('LastFM api key not found.');
 
@@ -111,7 +109,7 @@ const getSimilarTracks = async (songId: string): Promise<SimilarTracksOutput> =>
     }
     return undefined;
   } catch (error) {
-    log('Error occurred when trying to get similar tracks of a song.', { error }, 'ERROR');
+    logger.error('Failed to get similar tracks of a song.', { error, songId });
     return undefined;
   }
 };

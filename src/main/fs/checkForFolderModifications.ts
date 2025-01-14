@@ -2,16 +2,16 @@ import path from 'path';
 import { getUserData } from '../filesystem';
 import removeMusicFolder from '../core/removeMusicFolder';
 import { dirExistsSync } from '../utils/dirExists';
-import log from '../log';
+import logger from '../logger';
 import { getAllFoldersFromFolderStructures } from './parseFolderStructuresForSongPaths';
 
-const checkForFolderModifications = (foldername: string) => {
+const checkForFolderModifications = (folderName: string) => {
   const { musicFolders } = getUserData();
 
   const folders = getAllFoldersFromFolderStructures(musicFolders);
   const musicFolderPaths = folders.map((folder) => folder.path);
   const foldersWithDeletedFolderName = musicFolderPaths.filter(
-    (dir) => path.basename(dir) === path.basename(foldername)
+    (dir) => path.basename(dir) === path.basename(folderName)
   );
   if (foldersWithDeletedFolderName.length > 0) {
     for (let i = 0; i < foldersWithDeletedFolderName.length; i += 1) {
@@ -21,7 +21,7 @@ const checkForFolderModifications = (foldername: string) => {
 
         if (!folderExists) removeMusicFolder(folderPath);
       } catch (error) {
-        log('Error occurred when checking for folder modifications.', { error }, 'ERROR');
+        logger.error('Failed to check for folder modifications.', { error, folderName });
       }
     }
   }

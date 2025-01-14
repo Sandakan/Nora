@@ -1,8 +1,7 @@
-/* eslint-disable no-await-in-loop */
 import path from 'path';
 import fs from 'fs/promises';
 import { getBlacklistData, getSongsData, supportedMusicExtensions } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
 import { tryToParseSong } from '../parseSong/parseSong';
 import { saveAbortController } from './controlAbortControllers';
@@ -34,7 +33,7 @@ const getFullPathsOfFolderDirs = async (folderPath: string) => {
     const fullPaths = supportedDirs.map((filePath) => path.join(folderPath, filePath));
     return fullPaths;
   } catch (error) {
-    log(`ERROR OCCURRED WHEN TRYING TO READ THE DIRECTORY.`, { error }, 'ERROR');
+    logger.error(`Failed to read directory.`, { error, folderPath });
     return [];
   }
 };
@@ -46,7 +45,7 @@ const removeDeletedSongsFromLibrary = async (
   try {
     await removeSongsFromLibrary(deletedSongPaths, abortSignal);
   } catch (error) {
-    log(`ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA`, { error }, 'ERROR');
+    logger.error(`Failed to remove deleted songs from library.`, { error, deletedSongPaths });
   }
 };
 
@@ -55,21 +54,26 @@ const addNewlyAddedSongsToLibrary = async (
   abortSignal: AbortSignal
 ) => {
   for (let i = 0; i < newlyAddedSongPaths.length; i += 1) {
+    const newlyAddedSongPath = newlyAddedSongPaths[i];
+
     if (abortSignal?.aborted) {
-      log(
-        'Parsing songs in the music folder aborted by an abortController signal.',
-        { reason: abortSignal?.reason },
-        'WARN'
-      );
+      logger.warn('Parsing songs in the music folder aborted by an abortController signal.', {
+        reason: abortSignal?.reason,
+        newlyAddedSongPath
+      });
       break;
     }
 
-    const newlyAddedSongPath = newlyAddedSongPaths[i];
     try {
       await tryToParseSong(newlyAddedSongPath, false, false);
-      log(`${path.basename(newlyAddedSongPath)} song added.`);
+      logger.debug(`${path.basename(newlyAddedSongPath)} song added.`, {
+        songPath: newlyAddedSongPath
+      });
     } catch (error) {
-      log(`ERROR OCCURRED WHEN PARSING SONGS ADDED BEFORE APPLICATION LAUNCH `, { error }, 'ERROR');
+      logger.error(`Failed to parse song added before application launch`, {
+        error,
+        newlyAddedSongPath
+      });
     }
   }
   if (newlyAddedSongPaths.length > 0) setTimeout(generatePalettes, 1500);
@@ -91,15 +95,13 @@ const checkFolderForUnknownModifications = async (folderPath: string) => {
         (songPath) => !dirs.some((dir) => dir === songPath)
       );
 
-      log(
-        `${newlyAddedSongPaths.length} newly added songs found. ${
-          deletedSongPaths.length
-        } song deletions found.${
-          newlyAddedSongPaths.length > 0 || deletedSongPaths.length > 0
-            ? `\nNewSongs : '${newlyAddedSongPaths}';\n DeletedSongs : '${deletedSongPaths}';`
-            : ''
-        }`
-      );
+      logger.debug(`New song additions/deletions detected.`, {
+        newlyAddedSongPathsCount: newlyAddedSongPaths.length,
+        deletedSongPathsCount: deletedSongPaths.length,
+        newlyAddedSongPaths,
+        deletedSongPaths,
+        folderPath
+      });
 
       // Prioritises deleting songs before adding new songs to prevent data clashes.
       if (deletedSongPaths.length > 0) {

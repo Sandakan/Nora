@@ -5,7 +5,7 @@ import fsExtra from 'fs-extra';
 import sharp from 'sharp';
 
 import { DEFAULT_ARTWORK_SAVE_LOCATION, DEFAULT_FILE_URL } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 import { removeDefaultAppProtocolFromFilePath } from '../fs/resolveFilePaths';
 import { generateRandomId } from '../utils/randomId';
 import { isAnErrorWithCode } from '../utils/isAnErrorWithCode';
@@ -39,13 +39,9 @@ const createArtworks = async (id: string, artworkType: QueueTypes, artwork?: Buf
         .webp({ quality: 50, effort: 0 })
         .resize(50, 50)
         .toFile(optimizedImgPath)
-        .catch((err) => {
-          log(
-            `ERROR OCCURRED WHEN OPTIMIZING ARTWORK OF A SONG WITH SONGID -${id}- IMAGE USING SHARP PACKAGE.`,
-            { err },
-            'ERROR'
-          );
-          throw err;
+        .catch((error) => {
+          logger.error(`Failed to create an optimized song artwork.`, { error, optimizedImgPath });
+          throw error;
         });
 
       // const start1 = timeEnd(start, 'Time to save optimized artwork.');
@@ -54,13 +50,12 @@ const createArtworks = async (id: string, artworkType: QueueTypes, artwork?: Buf
         .webp()
         .toFile(imgPath)
         // .then(() => timeEnd(start1, 'Time to save full-resolution artwork.'))
-        .catch((err) => {
-          log(
-            `ERROR OCCURRED WHEN CREATING ARTWORK OF A SONG WITH SONGID -${id}- IMAGE USING SHARP PACKAGE.`,
-            { err },
-            'ERROR'
-          );
-          throw err;
+        .catch((error) => {
+          logger.error(`Failed to create an full-resolution song artwork.`, {
+            error,
+            optimizedImgPath
+          });
+          throw error;
         });
 
       return {
@@ -69,7 +64,7 @@ const createArtworks = async (id: string, artworkType: QueueTypes, artwork?: Buf
         optimizedArtworkPath: path.join(DEFAULT_FILE_URL, optimizedImgPath)
       };
     } catch (error) {
-      log(`Error occurred when creating artwork.`, { error }, 'ERROR');
+      logger.error(`Failed to create a song artwork.`, { error });
       return defaultArtworkPaths;
     }
   }
@@ -80,10 +75,11 @@ const checkForDefaultArtworkSaveLocation = async () => {
   try {
     await fs.stat(DEFAULT_ARTWORK_SAVE_LOCATION);
   } catch (error) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ('code' in (error as any) && (error as any).code === 'ENOENT') {
       await fs.mkdir(DEFAULT_ARTWORK_SAVE_LOCATION);
     } else
-      log(`Error occurred when checking for default artwork save location.`, { error }, 'ERROR');
+      logger.error(`Error occurred when checking for default artwork save location.`, { error });
   }
 };
 
@@ -105,14 +101,15 @@ export const storeArtworks = async (
     // timeEnd(start1, 'Total time to finish artwork storing process');
     return result;
   } catch (error) {
-    log(`Error occurred when storing artwork.`, { error }, 'ERROR');
+    logger.error(`Failed to store song artwork.`, { error });
     throw error;
   }
 };
 
-const manageArtworkRemovalErrors = (err: Error) => {
-  if (isAnErrorWithCode(err) && err.code === 'ENOENT') return log(err);
-  throw err;
+const manageArtworkRemovalErrors = (error: Error) => {
+  if (isAnErrorWithCode(error) && error.code === 'ENOENT')
+    return logger.error('Failed to remove artwork.', { error });
+  throw error;
 };
 
 export const removeArtwork = async (artworkPaths: ArtworkPaths, type: QueueTypes = 'songs') => {
@@ -124,7 +121,7 @@ export const removeArtwork = async (artworkPaths: ArtworkPaths, type: QueueTypes
       .unlink(removeDefaultAppProtocolFromFilePath(artworkPaths.optimizedArtworkPath))
       .catch(manageArtworkRemovalErrors);
   } catch (error) {
-    log(`Error occurred when removing a ${type} artwork.`, { error, artworkPaths }, 'ERROR');
+    logger.error(`Failed to remove a ${type} artwork.`, { error, artworkPaths });
     throw new Error(`Error occurred when removing a ${type} artwork.`);
   }
 };
@@ -134,13 +131,13 @@ export const removeSongArtworkFromUnknownSource = async (artworkPath: string) =>
     await fs.unlink(removeDefaultAppProtocolFromFilePath(artworkPath));
     return true;
   } catch (error) {
-    log(
-      'Error occurred when removing artwork of a song from an unknown source.',
-      { artworkPath },
-      'ERROR'
-    );
+    logger.error('Failed to remove artwork of a song from an unknown source.', { artworkPath });
     throw new Error('Error occurred when removing artwork of a song from an unknown source.');
   }
+};
+
+const isError = (error: unknown): error is Error => {
+  return error instanceof Error;
 };
 
 const createTempFolder = async (folderPath: string) => {
@@ -148,11 +145,11 @@ const createTempFolder = async (folderPath: string) => {
     await fs.stat(folderPath);
     return true;
   } catch (error) {
-    if ('code' in (error as any) && (error as any).code === 'ENOENT') {
+    if (isError(error) && 'code' in error && error.code === 'ENOENT') {
       await fs.mkdir(folderPath);
       return true;
     }
-    log(`Error occurred when creating temp folder.`, { error }, 'ERROR');
+    logger.error(`Failed to create temp folder.`, { error });
     return false;
   }
 };
@@ -166,7 +163,7 @@ export const createTempArtwork = async (artwork: Uint8Array | Buffer | string) =
     await sharp(artwork).toFile(artworkPath);
     return artworkPath;
   } catch (error) {
-    log(`FAILED TO CREATE A TEMPORARY ARTWORK.`, { error }, 'ERROR');
+    logger.error(`Failed to create a temporary artwork.`, { error });
     return undefined;
   }
 };
@@ -177,15 +174,11 @@ export const clearTempArtworkFolder = () => {
   try {
     if (fsExtra.pathExistsSync(tempFolder)) {
       fsExtra.emptyDirSync(tempFolder);
-      return log('Successfully cleared the contents in the temp_folder.');
+      return logger.debug('Successfully cleared the contents in the temp_folder.');
     }
     return undefined;
   } catch (error) {
-    log(
-      'Error occurred when trying to clear contents in the temp_artwork folder.',
-      { error },
-      'ERROR'
-    );
+    logger.error('Failed to clear contents in the temp_artwork folder.', { error });
     return undefined;
   }
 };

@@ -1,7 +1,7 @@
 import fsSync, { WatchEventType } from 'fs';
 import path from 'path';
 import { getUserData } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 import getParentFolderPaths from './getParentFolderPaths';
 import checkForFolderModifications from './checkForFolderModifications';
 import { saveAbortController } from './controlAbortControllers';
@@ -20,11 +20,10 @@ const parentFolderWatcherFunction = async (eventType: WatchEventType, filename?:
       }
     }
   } else {
-    log(
-      'ERROR OCCURRED WHEN TRYING TO WATCH PARENT FOLDERS. FILE WATCHER FUNCTION SENT A FILENAME OF undefined or null.',
-      undefined,
-      'ERROR'
-    );
+    logger.warn('Failed to watch parent folders because watcher sent an undefined filename', {
+      eventType,
+      filename
+    });
   }
 };
 
@@ -35,21 +34,22 @@ const addWatcherToParentFolder = (parentFolderPath: string) => {
       parentFolderPath,
       {
         signal: abortController.signal,
-        // ! TODO - recursive mode won't work on linux
+        // TODO - recursive mode won't work on linux
         recursive: true
       },
       (eventType, filename) => parentFolderWatcherFunction(eventType, filename)
     );
-    log('Added watcher to a parent folder successfully.', { parentFolderPath }, 'WARN');
-    watcher.addListener('error', (e) =>
-      log(`ERROR OCCURRED WHEN WATCHING A FOLDER.`, { e }, 'ERROR')
+    logger.debug('Added watcher to a parent folder successfully.', { parentFolderPath });
+
+    watcher.addListener('error', (error) =>
+      logger.error(`Error occurred when watching a folder.`, { error, parentFolderPath })
     );
     watcher.addListener('close', () =>
-      log(`Successfully closed the parent folder watcher.`, { parentFolderPath }, 'WARN')
+      logger.debug(`Successfully closed the parent folder watcher.`, { parentFolderPath })
     );
     saveAbortController(parentFolderPath, abortController);
   } catch (error) {
-    log(`ERROR OCCURRED WHEN WATCHING A FOLDER.`, { error }, 'ERROR');
+    logger.error(`Error occurred when watching a folder.`, { error, parentFolderPath });
   }
 };
 
@@ -59,28 +59,24 @@ const addWatchersToParentFolders = async () => {
 
   const musicFolderPaths = musicFolders.map((folder) => folder.path);
   const parentFolderPaths = getParentFolderPaths(musicFolderPaths);
-  log(`${parentFolderPaths.length} parent folders of music folders found.`);
+  logger.debug(`${parentFolderPaths.length} parent folders of music folders found.`);
 
   if (Array.isArray(parentFolderPaths) && parentFolderPaths.length > 0) {
     for (const parentFolderPath of parentFolderPaths) {
       try {
         addWatcherToParentFolder(parentFolderPath);
       } catch (error) {
-        log(
-          `ERROR OCCURRED WHEN ADDING WATCHER TO '${path.basename(
-            parentFolderPath
-          )}' PARENT FOLDER.`,
-          { error },
-          'ERROR'
+        logger.error(
+          `Failed to add watcher to '${path.basename(parentFolderPath)}' parent folder.`,
+          { error, parentFolderPath }
         );
       }
     }
     return;
   }
-  log(
-    `ERROR OCCURRED WHEN TRYING TO ADD WATCHERS TO PARENT FOLDERS OF MUSIC FOLDERS. NO PARENT FOLDERS FOUND.`,
-    undefined,
-    'ERROR'
+  logger.warn(
+    `Failed to add watchers to parent folders of music folders. No parent folders found.`,
+    { parentFolderPaths, musicFolderPaths }
   );
 };
 

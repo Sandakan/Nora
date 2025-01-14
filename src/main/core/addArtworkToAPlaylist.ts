@@ -1,14 +1,13 @@
-/* eslint-disable no-await-in-loop */
-import log from '../log';
 import { removeArtwork, storeArtworks } from '../other/artworks';
 import { getPlaylistData, setPlaylistData } from '../filesystem';
 import { dataUpdateEvent } from '../main';
 import { getPlaylistArtworkPath, resetArtworkCache } from '../fs/resolveFilePaths';
+import logger from '../logger';
 
 const removePreviousArtwork = async (playlistId: string) => {
   const artworkPaths = getPlaylistArtworkPath(playlistId, true);
   removeArtwork(artworkPaths, 'playlist');
-  return log('Successfully removed previous playlist artwork.');
+  return logger.debug('Successfully removed previous playlist artwork.');
 };
 
 const addArtworkToAPlaylist = async (playlistId: string, artworkPath: string) => {
@@ -29,7 +28,7 @@ const addArtworkToAPlaylist = async (playlistId: string, artworkPath: string) =>
 
         return artworkPaths;
       } catch (error) {
-        log('Error occurred when adding an artwork to a playlist.', { error });
+        logger.error('Failed to add an artwork to a playlist.', { error });
       }
     }
   }

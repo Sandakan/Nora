@@ -1,5 +1,5 @@
 import { getBlacklistData, setBlacklist } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 import { dataUpdateEvent } from '../main';
 
 const blacklistSongs = (songIds: string[]) => {
@@ -9,7 +9,7 @@ const blacklistSongs = (songIds: string[]) => {
   setBlacklist(blacklist);
 
   dataUpdateEvent('blacklist/songBlacklist');
-  log('Song blacklist updated because a new songs got blacklisted.', { songIds }, 'INFO');
+  logger.debug('Song blacklist updated because a new songs got blacklisted.', { songIds });
 };
 
 export default blacklistSongs;

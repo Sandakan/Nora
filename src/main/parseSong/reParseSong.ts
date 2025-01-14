@@ -1,4 +1,3 @@
-/* eslint-disable no-await-in-loop */
 import fs from 'fs/promises';
 import path from 'path';
 import * as musicMetaData from 'music-metadata';
@@ -20,8 +19,8 @@ import {
   setGenresData,
   setSongsData
 } from '../filesystem';
-import { dataUpdateEvent } from '../main';
-import log from '../log';
+import { dataUpdateEvent, sendMessageToRenderer } from '../main';
+import logger from '../logger';
 import {
   getAlbumInfoFromSong,
   getArtistNamesFromSong,
@@ -144,27 +143,21 @@ const reParseSong = async (filePath: string) => {
           const { updatedGenres, relevantGenres } = manageGenresOfParsedSong(
             updatedGenresFromDeletedData,
             song,
-            songArtworkPaths,
-            song.palette?.DarkVibrant
+            songArtworkPaths
+            // song.palette?.DarkVibrant
           );
 
           song.genres = relevantGenres.map((genre) => {
             return { name: genre.name, genreId: genre.genreId };
           });
 
-          log(
-            `Successfully reparsed '${song.title}'.`,
-            {
-              songPath: song?.path
-            },
-            'INFO',
-            {
-              sendToRenderer: {
-                messageCode: 'SONG_REPARSE_SUCCESS',
-                data: { title: song.title }
-              }
-            }
-          );
+          logger.debug(`Song reparsed successfully.`, {
+            songPath: song?.path
+          });
+          sendMessageToRenderer({
+            messageCode: 'SONG_REPARSE_SUCCESS',
+            data: { title: song.title }
+          });
 
           setSongsData(songs);
           setArtistsData(updatedArtists);
@@ -183,9 +176,8 @@ const reParseSong = async (filePath: string) => {
     }
     return undefined;
   } catch (error) {
-    return log('Error occurred when re-parsing the song.', { error }, 'ERROR', {
-      sendToRenderer: { messageCode: 'SONG_REPARSE_FAILED' }
-    });
+    logger.error('Error occurred when re-parsing the song.', { error, filePath });
+    return sendMessageToRenderer({ messageCode: 'SONG_REPARSE_FAILED' });
   }
 };
 

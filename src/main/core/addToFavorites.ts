@@ -1,9 +1,9 @@
 import { FAVORITES_PLAYLIST_TEMPLATE, getPlaylistData, setPlaylistData } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 import { dataUpdateEvent } from '../main';
 
-const addToFavorites = (songId: string): { success: boolean; message?: string } => {
-  log(`Requested a song with id -${songId}- to be added to the favorites.`);
+const addToFavorites = (songId: string) => {
+  logger.debug(`Requested a song to be added to the favorites.`, { songId });
   const playlists = getPlaylistData();
   if (playlists && Array.isArray(playlists)) {
     if (playlists.length > 0) {
@@ -12,8 +12,9 @@ const addToFavorites = (songId: string): { success: boolean; message?: string } 
       );
       if (selectedPlaylist) {
         if (selectedPlaylist.songs.some((playlistSongId: string) => playlistSongId === songId)) {
-          log(
-            `Request failed for the song with id ${songId} to be added to the Favorites because it was already in the Favorites.`
+          logger.debug(
+            `Request failed for the song to be added to the Favorites because it was already in the Favorites.`,
+            { songId }
           );
           return {
             success: false,
@@ -31,8 +32,10 @@ const addToFavorites = (songId: string): { success: boolean; message?: string } 
     dataUpdateEvent('playlists/favorites');
     return { success: true };
   }
-  log(`ERROR OCCURRED WHEN TRYING TO ADD A SONG TO THE FAVORITES. PLAYLIST DATA ARE EMPTY.`);
-  throw new Error('Playlists is not an array.');
+
+  const message = `Failed to add to favorites because the playlist data is not an array.`;
+  logger.error(message, { playlists: typeof playlists, songId });
+  throw new Error(message);
 };
 
 export default addToFavorites;

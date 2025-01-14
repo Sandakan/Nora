@@ -6,7 +6,7 @@ import { getUserData, setUserData } from '../filesystem';
 import getRootSize from '../utils/getRootSize';
 import getDirSize from '../utils/getDirSize';
 import getFileSize from '../utils/getFileSize';
-import log from '../log';
+import logger from '../logger';
 
 const getAppDataStorageMetrics = async () => {
   const appDataPath = app.getPath('userData');
@@ -68,7 +68,7 @@ const getStorageUsage = async (forceRefresh = false) => {
     const appPath = app.getAppPath();
     const { dir: appFolderPath } = path.parse(appPath);
 
-    log(`appPath to be used to generate storage usage - ${appPath}`);
+    logger.debug(`appPath to generate storage usage`, { appPath });
 
     const appRootSize = await getRootSize(appPath);
     const dataRootSize = await getRootSize(appPath);
@@ -106,7 +106,7 @@ const getStorageUsage = async (forceRefresh = false) => {
 
     return storageMetrics;
   } catch (error) {
-    log('Error occurred when generating storage usage.', { error }, 'ERROR');
+    logger.error('Failed to generate storage usage.', { error });
     return undefined;
   }
 };

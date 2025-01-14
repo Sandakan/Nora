@@ -1,8 +1,7 @@
-/* eslint-disable no-await-in-loop */
 import path from 'path';
 import fsSync from 'fs';
 import { getUserData, setUserData, supportedMusicExtensions } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 import { closeAbortController } from './controlAbortControllers';
 import addWatchersToFolders from './addWatchersToFolders';
 import { sendMessageToRenderer } from '../main';
@@ -32,11 +31,7 @@ export const getAllFilePathsFromFolder = (folderPath: string) => {
 
     return filePaths;
   } catch (error) {
-    log(
-      `Error occurred when getting file paths from '${path.basename(folderPath)}' folder`,
-      { error },
-      'ERROR'
-    );
+    logger.error(`Failed to get file paths from a folder`, { error, folderPath });
     return [];
   }
 };
@@ -104,7 +99,7 @@ const clearAllFolderWatches = () => {
   for (const folderPath of folderPaths) {
     closeAbortController(folderPath.path);
   }
-  log('Closed all folders watches successfully.');
+  logger.info('Closed all folders watches successfully.');
 };
 
 export const saveFolderStructures = async (
@@ -134,12 +129,8 @@ const parseFolderStructuresForSongPaths = async (folderStructures: FolderStructu
       folderCount: folderStructures.length
     }
   });
-  log(
-    `${foldersWithStatData.length} directories found in ${folderStructures.length} selected folders.`
-  );
 
   const allFiles = getAllFilesFromFolderStructures(folderStructures);
-  log(`${allFiles.length} files found in the directory ${folderStructures.length}`);
 
   await saveFolderStructures(folderStructures, true);
 
@@ -148,7 +139,13 @@ const parseFolderStructuresForSongPaths = async (folderStructures: FolderStructu
     return supportedMusicExtensions.includes(fileExtension);
   });
 
-  log(`${allSongPaths.length} songs found in the directory ${folderStructures.length}`);
+  logger.info(`Parsed selected folders successfully.`, {
+    songCount: allSongPaths.length,
+    totalFileCount: allFiles.length,
+    subFolderCount: foldersWithStatData.length,
+    selectedFolderCount: folderStructures.length
+  });
+
   return allSongPaths;
 };
 

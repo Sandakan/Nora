@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs/promises';
-import log from '../log';
+import logger from '../logger';
 import { sendMessageToRenderer } from '../main';
 import { tryToParseSong } from '../parseSong/parseSong';
 import { getSongsData, supportedMusicExtensions } from '../filesystem';
@@ -14,7 +14,7 @@ const getFolderDirs = async (folderPath: string) => {
     );
     return supportedDirs;
   } catch (error) {
-    log(`ERROR OCCURRED WHEN READING DIRECTORY '${folderPath}'.`, { error }, 'ERROR');
+    logger.error(`Failed to read directory.`, { error, folderPath });
     return undefined;
   }
 };
@@ -32,7 +32,7 @@ const tryToRemoveSongFromLibrary = async (
       data: { name: filename }
     });
   } catch (error) {
-    log(`Error occurred when removing a song.`, { error }, 'ERROR');
+    logger.error(`Failed to remove a song.`, { error, folderPath, filename });
   }
 };
 
@@ -41,7 +41,7 @@ const checkFolderForContentModifications = async (
   filename: string,
   abortSignal: AbortSignal
 ) => {
-  log('Started checking folder for modifications.');
+  logger.debug('Started checking folder for modifications.');
 
   const dirs = await getFolderDirs(folderPath);
   const songs = getSongsData();

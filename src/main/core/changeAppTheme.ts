@@ -1,10 +1,12 @@
 import { nativeTheme } from 'electron';
 import { dataUpdateEvent, getBackgroundColor, mainWindow } from '../main';
 import { getUserData, setUserData } from '../filesystem';
+import logger from '../logger';
 
 export const changeAppTheme = (theme?: AppTheme) => {
   const { theme: themeData } = getUserData();
-  console.log(`Theme update requested : theme : ${theme}`);
+  logger.debug(`Theme update requested`, { theme });
+
   const isDarkMode =
     theme === undefined
       ? !themeData.isDarkMode

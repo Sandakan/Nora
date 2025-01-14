@@ -1,6 +1,6 @@
 import { Vibrant } from 'node-vibrant/node';
 import { timeEnd, timeStart } from '../utils/measureTimeUsage';
-import log from '../log';
+import logger from '../logger';
 import {
   getGenresData,
   getPaletteData,
@@ -52,12 +52,10 @@ const generatePalette = async (artwork?: Buffer | string): Promise<PaletteData |
   if (artwork) {
     const palette = await Vibrant.from(artwork)
       .getPalette()
-      .catch((err) => {
-        return log(
-          `ERROR OCCURRED WHEN PARSING A SONG ARTWORK TO GET A COLOR PALETTE.`,
-          { err },
-          'ERROR'
-        );
+      .catch((error) => {
+        logger.error(`Failed to parse a song artwork to get a color palette.`, {
+          error
+        });
       });
 
     if (palette) {
@@ -90,10 +88,10 @@ const generatePalette = async (artwork?: Buffer | string): Promise<PaletteData |
 
       return outputPalette;
     }
-    log('GENERATED ARTWORK PALETTE EMPTY.', undefined, 'ERROR');
+    logger.warn('Generated artwork palette empty.');
     return undefined;
   }
-  log('EMPTY INPUT TO GENERATE A PALETTE.', undefined, 'WARN');
+  logger.warn('Empty input to generate a palette.');
   return DEFAULT_SONG_PALETTE;
 };
 
@@ -138,7 +136,9 @@ const generatePalettesForSongs = async () => {
           });
         }
       }
+
       timeEnd(start, 'Time to finish generating palettes for songs');
+
       setSongsData(songs);
       setPaletteData(palettes);
       dataUpdateEvent('songs/palette');
@@ -216,7 +216,7 @@ export const generatePalettes = async () => {
       setTimeout(generatePalettesForGenres, 1000);
       return undefined;
     })
-    .catch((error) => log('Error occurred when generating palettes.', { error }, 'ERROR'));
+    .catch((error) => logger.error('Failed to generating palettes.', { error }));
 };
 
 export default generatePalette;

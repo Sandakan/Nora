@@ -1,5 +1,5 @@
 import { version, repository } from '../../../package.json';
-import log from '../log';
+import logger from '../logger';
 
 interface LrclibTrackInfoStructure {
   track_name: string;
@@ -98,11 +98,9 @@ const fetchLyricsFromLrclib = async (
 
       return lyrics;
     }
-    throw new Error(
-      `Error occurred when fetching lyrics from Lrclib.\nError : ${res.status} - ${res.statusText}`
-    );
+    throw new Error(`Error occurred when fetching lyrics from Lrclib.`);
   } catch (error) {
-    log('Error ocurred when fetching lyrics from Lrclib', { error }, 'ERROR');
+    logger.error('Failed to fetch lyrics from Lrclib', { error });
     return undefined;
   }
 };
