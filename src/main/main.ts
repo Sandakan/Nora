@@ -1,5 +1,7 @@
 import path, { join } from 'path';
 import os from 'os';
+import fs from 'fs';
+import mime from 'mime';
 import {
   app,
   BrowserWindow,
@@ -55,6 +57,8 @@ import { is } from '@electron-toolkit/utils';
 import noraAppIcon from '../../resources/logo_light_mode.png?asset';
 import logger from './logger';
 import roundTo from '../common/roundTo';
+import { pathToFileURL } from 'url';
+import { stat } from 'fs/promises';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -206,18 +210,18 @@ const createWindow = async () => {
   // });
 };
 
-// protocol.registerSchemesAsPrivileged([
-//   {
-//     scheme: 'nora',
-//     privileges: {
-//       standard: true,
-//       secure: true,
-//       supportFetchAPI: true,
-//       stream: true,
-//       bypassCSP: true
-//     }
-//   }
-// ])
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'nora',
+    privileges: {
+      standard: true,
+      secure: true,
+      supportFetchAPI: true,
+      stream: true,
+      bypassCSP: true
+    }
+  }
+]);
 
 app
   .whenReady()
@@ -238,29 +242,6 @@ app
       else logger.warn('Default protocol registration failed.');
     }
 
-    // protocol.handle('nora', registerFileProtocol)
-
-    // protocol.handle('nora', async (req) => {
-    //   const { href } = new URL(req.url)
-
-    //   const urlWithQueries = href.replace(/nora:[/\\]{1,2}localfiles[/\\]{1,2}/gm, '')
-    //   const [url] = urlWithQueries.split('?')
-    //   const fileUrl = pathToFileURL(url).toString()
-
-    //   try {
-    //     const res = await net.fetch(url)
-    //     console.logger('c')
-    //     return res
-    //   } catch (error) {
-    //     logger(
-    //       `====== ERROR OCCURRED WHEN TRYING TO LOCATE A RESOURCE IN THE SYSTEM. =======\nREQUEST : ${urlWithQueries}\nFILE URL : ${fileUrl}\nERROR : ${error}`
-    //     )
-    //     return new Response('bad', {
-    //       status: 400,
-    //       headers: { 'content-type': 'text/html' }
-    //     })
-    //   }
-    // })
     protocol.registerFileProtocol('nora', registerFileProtocol);
     // protocol.handle('nora', handleFileProtocol);
 
@@ -499,6 +480,35 @@ function registerFileProtocol(request: { url: string }, callback: (arg: string) 
 //         'Content-Length': chunkSize
 //       }
 //     });
+//   } catch (error) {
+//     logger.error('Error handling media protocol:', { error });
+//     return new Response('Internal Server Error', { status: 500 });
+//   }
+// };
+
+// const handleFileProtocol = async (req: GlobalRequest) => {
+//   try {
+//     const { pathname } = new URL(req.url);
+//     const filePath = decodeURI(pathname).replace(/^[/\\]{1,2}/gm, '');
+
+//     const pathToServe = path.resolve(import.meta.dirname, filePath);
+//     // const relativePath = path.relative(import.meta.dirname, pathToServe);
+//     // const isSafe = relativePath && !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
+
+//     // if (!isSafe) {
+//     //   return new Response('bad', {
+//     //     status: 400,
+//     //     headers: { 'content-type': 'text/html' }
+//     //   });
+//     // }
+
+//     const fileUrl = pathToFileURL(pathToServe).toString();
+//     const stats = await stat(pathToServe);
+//     // req.headers.append('Content-Length', stats.size.toString());
+//     const res = await net.fetch(fileUrl, req);
+//     res.headers.append('Content-Length', stats.size.toString());
+
+//     return res;
 //   } catch (error) {
 //     logger.error('Error handling media protocol:', { error });
 //     return new Response('Internal Server Error', { status: 500 });

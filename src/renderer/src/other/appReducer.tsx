@@ -216,8 +216,8 @@ export const reducer = (state: AppReducer, action: AppReducerStateActions): AppR
         ...state,
         player: {
           ...state.player,
-          isCurrentSongPlaying: action.data ?? !state.player.isCurrentSongPlaying,
-          isPlayerStalled: action.data ? false : state.player.isPlayerStalled
+          isCurrentSongPlaying: action.data ?? !state.player.isCurrentSongPlaying
+          // isPlayerStalled: action.data ? false : state.player.isPlayerStalled
         }
       };
     }

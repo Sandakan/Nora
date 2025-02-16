@@ -367,24 +367,24 @@ export default function App() {
     const playSongIfPlayable = () => {
       if (refStartPlay.current) toggleSongPlayback(true);
     };
-    const managePlayerStalledStatus = () => {
-      dispatch({ type: 'PLAYER_WAITING_STATUS', data: true });
-    };
-    const managePlayerNotStalledStatus = () => {
-      dispatch({ type: 'PLAYER_WAITING_STATUS', data: false });
-    };
+    // const managePlayerStalledStatus = () => {
+    //   dispatch({ type: 'PLAYER_WAITING_STATUS', data: true });
+    // };
+    // const managePlayerNotStalledStatus = () => {
+    //   dispatch({ type: 'PLAYER_WAITING_STATUS', data: false });
+    // };
 
     const handleSkipForwardClickWithParams = () => handleSkipForwardClick('PLAYER_SKIP');
 
-    player.addEventListener('canplay', managePlayerNotStalledStatus);
-    player.addEventListener('canplaythrough', managePlayerNotStalledStatus);
-    player.addEventListener('loadeddata', managePlayerNotStalledStatus);
-    player.addEventListener('loadedmetadata', managePlayerNotStalledStatus);
+    // player.addEventListener('canplay', managePlayerNotStalledStatus);
+    // player.addEventListener('canplaythrough', managePlayerNotStalledStatus);
+    // player.addEventListener('loadeddata', managePlayerNotStalledStatus);
+    // player.addEventListener('loadedmetadata', managePlayerNotStalledStatus);
 
-    player.addEventListener('suspend', managePlayerStalledStatus);
-    player.addEventListener('stalled', managePlayerStalledStatus);
-    player.addEventListener('waiting', managePlayerStalledStatus);
-    player.addEventListener('progress', managePlayerStalledStatus);
+    // player.addEventListener('suspend', managePlayerStalledStatus);
+    // player.addEventListener('stalled', managePlayerStalledStatus);
+    // player.addEventListener('waiting', managePlayerStalledStatus);
+    // player.addEventListener('progress', managePlayerStalledStatus);
 
     player.addEventListener('canplay', playSongIfPlayable);
     player.addEventListener('ended', handleSkipForwardClickWithParams);
@@ -393,14 +393,16 @@ export default function App() {
 
     return () => {
       toggleSongPlayback(false);
-      player.removeEventListener('canplay', managePlayerNotStalledStatus);
-      player.removeEventListener('canplaythrough', managePlayerNotStalledStatus);
-      player.removeEventListener('loadeddata', managePlayerNotStalledStatus);
-      player.removeEventListener('loadedmetadata', managePlayerNotStalledStatus);
-      player.removeEventListener('suspend', managePlayerStalledStatus);
-      player.removeEventListener('stalled', managePlayerStalledStatus);
-      player.removeEventListener('waiting', managePlayerStalledStatus);
-      player.removeEventListener('progress', managePlayerStalledStatus);
+      // player.removeEventListener('canplay', managePlayerNotStalledStatus);
+      // player.removeEventListener('canplaythrough', managePlayerNotStalledStatus);
+      // player.removeEventListener('loadeddata', managePlayerNotStalledStatus);
+      // player.removeEventListener('loadedmetadata', managePlayerNotStalledStatus);
+
+      // player.removeEventListener('suspend', managePlayerStalledStatus);
+      // player.removeEventListener('stalled', managePlayerStalledStatus);
+      // player.removeEventListener('waiting', managePlayerStalledStatus);
+      // player.removeEventListener('progress', managePlayerStalledStatus);
+
       player.removeEventListener('canplay', playSongIfPlayable);
       player.removeEventListener('ended', handleSkipForwardClickWithParams);
       player.removeEventListener('play', addSongTitleToTitleBar);
