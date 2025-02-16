@@ -1,7 +1,7 @@
 import path, { join } from 'path';
 import os from 'os';
-import fs from 'fs';
-import mime from 'mime';
+// import fs from 'fs';
+// import mime from 'mime';
 import {
   app,
   BrowserWindow,
@@ -57,8 +57,8 @@ import { is } from '@electron-toolkit/utils';
 import noraAppIcon from '../../resources/logo_light_mode.png?asset';
 import logger from './logger';
 import roundTo from '../common/roundTo';
-import { pathToFileURL } from 'url';
-import { stat } from 'fs/promises';
+// import { pathToFileURL } from 'url';
+// import { stat } from 'fs/promises';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -189,7 +189,7 @@ const createWindow = async () => {
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
+    mainWindow.loadFile(join(import.meta.dirname, '../renderer/index.html'));
   }
   mainWindow.once('ready-to-show', () => {
     if (app.hasSingleInstanceLock()) {

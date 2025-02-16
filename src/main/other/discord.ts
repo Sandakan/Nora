@@ -36,9 +36,10 @@ const defaultPayload = {
   }
 };
 
-let discord;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let discord: any;
 
-let lastPayload;
+let lastPayload: typeof defaultPayload;
 
 function Initialize() {
   if (discord) return;
@@ -60,9 +61,9 @@ function loginRPC() {
   });
 }
 
-function setDiscordRPC(data) {
+function setDiscordRPC(data: typeof defaultPayload.activity) {
   if (discord.user) {
-    var payload = {
+    const payload = {
       pid: process.pid,
       activity: data
     };
@@ -71,7 +72,7 @@ function setDiscordRPC(data) {
       data.type = ActivityType.Listening;
     }
     lastPayload = payload;
-    logger.trace(JSON.stringify(payload, null, 2));
+    logger.debug(JSON.stringify(payload, null, 2));
     discord.request('SET_ACTIVITY', payload); //send raw payload to discord RPC server
   }
 }
