@@ -2,15 +2,15 @@
  * @type {import('electron-vite').UserConfig}
  */
 import { resolve } from 'path';
-import { defineConfig, externalizeDepsPlugin } from 'electron-vite';
+import { defineConfig, externalizeDepsPlugin, swcPlugin } from 'electron-vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   main: {
     build: {
-      rollupOptions: { input: '/src/main/main.ts', external: ['sharp'] }
+      rollupOptions: { input: '/src/main/main.ts' }
     },
-    plugins: [externalizeDepsPlugin()]
+    plugins: [externalizeDepsPlugin(), swcPlugin()]
   },
   preload: {
     plugins: [externalizeDepsPlugin()],
