@@ -1,5 +1,5 @@
 import { TagConstants } from 'node-id3';
-import logger from '../main/logger';
+// import logger from '../main/logger';
 import isLyricsSynced, {
   EXTENDED_SYNCED_LYRICS_LINE_REGEX,
   LYRICS_LINE_REGEX,
@@ -382,7 +382,7 @@ const parseMetadataFromShortText = (shortText?: string) => {
       const metaFromShortText = JSON.parse(shortText);
       if ('copyright' in metaFromShortText) metadata.copyright = metaFromShortText.copyright;
     } catch (error) {
-      logger.error(
+      console.error(
         'Error occurred when parsing metadata from shortText attribute in NodeID3 format.',
         { error }
       );
