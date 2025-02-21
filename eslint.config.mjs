@@ -9,7 +9,7 @@ import tsLint from 'typescript-eslint';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
-import electronToolkit from '@electron-toolkit/eslint-config-ts/recommended.js';
+import electronToolkit from '@electron-toolkit/eslint-config-ts';
 import importPlugin from 'eslint-plugin-import';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import promiseConfigs from 'eslint-plugin-promise';
@@ -27,14 +27,14 @@ export default tsLint.config(
     ignores: [...data.ignores, 'prettier.config.cjs', 'postcss.config.cjs', 'eslint.config.mjs']
   },
   eslint.configs.recommended,
+  electronToolkit.configs.recommended,
   {
     files: ['**/**/*.{js,ts,jsx,tsx}'],
     plugins: {
       'react-refresh': reactRefresh,
       'jsx-a11y': jsxA11y,
       react: react,
-      'react-hooks': reactHooks,
-      'electron-toolkit': electronToolkit
+      'react-hooks': reactHooks
     },
     extends: [importPlugin.flatConfigs.recommended],
     settings: {

@@ -8,6 +8,8 @@
 
 - ### 🔨 Fixes and Improvements
 
+- ### 🚀 Development updates
+
 - ### 🐜 Known Issues and Bugs
 
 ## Other Issues:
