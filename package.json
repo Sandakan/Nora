@@ -133,14 +133,14 @@
     "@types/discord-rpc": "^4.0.1",
     "@types/electron-store": "^1.3.1",
     "@types/jest": "^29.5.12",
-    "@types/node": "^20.11.25",
+    "@types/node": "^22.13.4",
     "@types/pinyin": "^2.10.2",
     "@types/react": "^18.2.48",
     "@types/react-beautiful-dnd": "^13.1.8",
     "@types/react-dom": "^18.2.18",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.18",
-    "electron": "^32.3.0",
+    "electron": "^34.2.0",
     "electron-builder": "^25.1.8",
     "electron-debug": "^4.0.0",
     "electron-devtools-installer": "^4.0.0",
@@ -167,6 +167,6 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3",
     "typescript-eslint": "^8.18.2",
-    "vite": "5.4"
+    "vite": "^6.1.1"
   }
 }

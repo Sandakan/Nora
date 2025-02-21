@@ -1,10 +1,9 @@
-import path from 'path';
 import { app } from 'electron';
-import * as musicMetaData from 'music-metadata';
+import { parseFile } from 'music-metadata';
 
 import { isSongBlacklisted } from '../utils/isBlacklisted';
-import { DEFAULT_FILE_URL, getArtistsData, getSongsData } from '../filesystem';
-import { getSongArtworkPath } from '../fs/resolveFilePaths';
+import { getArtistsData, getSongsData } from '../filesystem';
+import { getSongArtworkPath, resolveSongFilePath } from '../fs/resolveFilePaths';
 import logger from '../logger';
 import getArtistInfoFromNet from './getArtistInfoFromNet';
 import addToSongsHistory from './addToSongsHistory';
@@ -71,7 +70,7 @@ export const sendAudioData = async (audioId: string): Promise<AudioPlayerData> =
         if (songs[x].songId === audioId) {
           const song = songs[x];
           // TODO: Unknown type error
-          const metadata = await musicMetaData.parseFile(song.path);
+          const metadata = await parseFile(song.path);
 
           if (metadata) {
             const artworkData = metadata.common.picture
@@ -88,7 +87,7 @@ export const sendAudioData = async (audioId: string): Promise<AudioPlayerData> =
               // artwork: await getArtworkLink(artworkData),
               artwork: getArtworkData(artworkData),
               artworkPath: getSongArtworkPath(song.songId, song.isArtworkAvailable).artworkPath,
-              path: path.join(DEFAULT_FILE_URL, song.path),
+              path: resolveSongFilePath(song.path),
               songId: song.songId,
               isAFavorite: song.isAFavorite,
               album: song.album,

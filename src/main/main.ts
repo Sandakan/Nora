@@ -1,7 +1,6 @@
 import path, { join } from 'path';
 import os from 'os';
-// import fs from 'fs';
-// import mime from 'mime';
+import mime from 'mime';
 import {
   app,
   BrowserWindow,
@@ -21,12 +20,8 @@ import {
   powerSaveBlocker,
   screen,
   Display
-  // session
 } from 'electron';
-import debug from 'electron-debug';
-// import { pathToFileURL } from 'url';
 
-// import * as Sentry from '@sentry/electron';
 import {
   getSongsData,
   getUserData,
@@ -57,8 +52,7 @@ import { is } from '@electron-toolkit/utils';
 import noraAppIcon from '../../resources/logo_light_mode.png?asset';
 import logger from './logger';
 import roundTo from '../common/roundTo';
-// import { pathToFileURL } from 'url';
-// import { stat } from 'fs/promises';
+import { createReadStream, existsSync, statSync } from 'fs';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -125,7 +119,7 @@ saveAbortController('main', abortController);
 //   dsn: import.meta.env.MAIN_VITE_SENTRY_DSN,
 // });
 // ? / / / / / / / / / / / / / / / / / / / / / / /
-debug();
+// debug();
 const BYTES_TO_GB = 1024 * 1024 * 1024;
 const APP_INFO = {
   environment: IS_DEVELOPMENT ? 'DEV' : 'PRODUCTION',
@@ -242,8 +236,8 @@ app
       else logger.warn('Default protocol registration failed.');
     }
 
-    protocol.registerFileProtocol('nora', registerFileProtocol);
-    // protocol.handle('nora', handleFileProtocol);
+    // protocol.registerFileProtocol('nora', registerFileProtocol);
+    protocol.handle('nora', handleFileProtocol);
 
     tray = new Tray(appIcon);
     const trayContextMenu = Menu.buildFromTemplate([
@@ -421,73 +415,75 @@ function addEventsToCache(dataType: DataUpdateEventTypes, data = [] as string[],
   return dataEventsCache.push(obj);
 }
 
-function registerFileProtocol(request: { url: string }, callback: (arg: string) => void) {
-  const urlWithQueries = decodeURI(request.url).replace(
-    /nora:[/\\]{1,2}localfiles[/\\]{1,2}/gm,
-    ''
-  );
+// function registerFileProtocol(request: { url: string }, callback: (arg: string) => void) {
+//   const urlWithQueries = decodeURI(request.url).replace(
+//     /nora:[/\\]{1,2}localfiles[/\\]{1,2}/gm,
+//     ''
+//   );
 
-  try {
-    const [url] = urlWithQueries.split('?');
-    return callback(url);
-  } catch (error) {
-    logger.error(`Failed to locate a resource in the system.`, { urlWithQueries, error });
-    return callback('404');
-  }
-}
-
-// const handleFileProtocol = async (request: GlobalRequest): Promise<GlobalResponse> => {
 //   try {
-//     const urlWithQueries = decodeURI(request.url).replace(
-//       /nora:[/\\]{1,2}localfiles[/\\]{1,2}/gm,
-//       ''
-//     );
-//     const [filePath] = urlWithQueries.split('?');
-
-//     logger.verbose('Serving file from nora://', { filePath });
-
-//     if (!fs.existsSync(filePath)) {
-//       logger.error(`File not found: ${filePath}`);
-//       return new Response('File not found', { status: 404 });
-//     }
-
-//     const fileStat = fs.statSync(filePath);
-//     const range = request.headers.get('range');
-//     let start = 0,
-//       end = fileStat.size - 1;
-
-//     if (range) {
-//       const match = range.match(/bytes=(\d*)-(\d*)/);
-//       if (match) {
-//         start = match[1] ? parseInt(match[1], 10) : start;
-//         end = match[2] ? parseInt(match[2], 10) : end;
-//       }
-//     }
-
-//     const chunkSize = end - start + 1;
-//     logger.verbose(`Serving range: ${start}-${end}/${fileStat.size}`);
-
-//     const mimeType = mime.getType(filePath) || 'application/octet-stream';
-
-//     logger.info(`Serving range: ${start}-${end}/${fileStat.size}`);
-//     const stream = fs.createReadStream(filePath, { start, end });
-//     return new Response(stream, {
-//       status: range ? 206 : 200,
-//       headers: {
-//         'Content-Type': mimeType,
-//         'Content-Range': `bytes ${start}-${end}/${fileStat.size}`,
-//         'Accept-Ranges': 'bytes',
-//         'Content-Length': chunkSize
-//       }
-//     });
+//     const [url] = urlWithQueries.split('?');
+//     return callback(url);
 //   } catch (error) {
-//     logger.error('Error handling media protocol:', { error });
-//     return new Response('Internal Server Error', { status: 500 });
+//     logger.error(`Failed to locate a resource in the system.`, { urlWithQueries, error });
+//     return callback('404');
 //   }
-// };
+// }
+
+const handleFileProtocol = async (request: GlobalRequest): Promise<GlobalResponse> => {
+  try {
+    const urlWithQueries = decodeURI(request.url).replace(
+      /nora:[/\\]{1,2}localfiles[/\\]{1,2}/gm,
+      ''
+    );
+    const [filePath] = urlWithQueries.split('?');
+
+    logger.verbose('Serving file from nora://', { filePath });
+
+    if (!existsSync(filePath)) {
+      logger.error(`File not found: ${filePath}`);
+      return new Response('File not found', { status: 404 });
+    }
+
+    const fileStat = statSync(filePath);
+    const range = request.headers.get('range');
+    let start = 0,
+      end = fileStat.size - 1;
+
+    if (range) {
+      const match = range.match(/bytes=(\d*)-(\d*)/);
+      if (match) {
+        start = match[1] ? parseInt(match[1], 10) : start;
+        end = match[2] ? parseInt(match[2], 10) : end;
+      }
+    }
+
+    const chunkSize = end - start + 1;
+    logger.verbose(`Serving range: ${start}-${end}/${fileStat.size}`);
+
+    const mimeType = mime.getType(filePath) || 'application/octet-stream';
+
+    logger.info(`Serving range: ${start}-${end}/${fileStat.size}`);
+    const stream = createReadStream(filePath, { start, end });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return new Response(stream as any, {
+      status: range ? 206 : 200,
+      headers: {
+        'Content-Type': mimeType,
+        'Content-Range': `bytes ${start}-${end}/${fileStat.size}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunkSize.toString()
+      }
+    });
+  } catch (error) {
+    logger.error('Error handling media protocol:', { error });
+    return new Response('Internal Server Error', { status: 500 });
+  }
+};
 
 // const handleFileProtocol = async (req: GlobalRequest) => {
 //   try {
+//     logger.debug('Serving file from nora://', { url: req.url });
 //     const { pathname } = new URL(req.url);
 //     const filePath = decodeURI(pathname).replace(/^[/\\]{1,2}/gm, '');
 
