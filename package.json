@@ -94,7 +94,7 @@
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
-    "@electron-toolkit/utils": "^3.0.0",
+    "@hello-pangea/dnd": "^18.0.1",
     "@neos21/detect-chinese": "^0.0.2",
     "@sglkc/kuroshiro": "^1.0.1",
     "@sglkc/kuroshiro-analyzer-kuromoji": "^1.0.1",
@@ -113,7 +113,6 @@
     "node-id3": "^0.2.6",
     "node-vibrant": "^4.0.0",
     "pinyin-pro": "^3.26.0",
-    "react-beautiful-dnd": "^13.1.1",
     "react-i18next": "^15.0.2",
     "react-virtuoso": "^4.10.4",
     "romaja": "^0.2.9",
@@ -125,8 +124,9 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
-    "@electron-toolkit/eslint-config-ts": "^2.0.0",
+    "@electron-toolkit/eslint-config-ts": "^3.0.0",
     "@electron-toolkit/tsconfig": "^1.0.1",
+    "@electron-toolkit/utils": "^4.0.0",
     "@eslint/compat": "^1.2.4",
     "@eslint/eslintrc": "^3.2.0",
     "@swc/core": "^1.10.16",

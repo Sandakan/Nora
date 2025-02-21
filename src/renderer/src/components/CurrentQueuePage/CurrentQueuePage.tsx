@@ -3,7 +3,7 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line import/named
-import { Draggable, Droppable, DragDropContext, DropResult } from 'react-beautiful-dnd';
+import { Draggable, Droppable, DragDropContext, DropResult } from '@hello-pangea/dnd';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';

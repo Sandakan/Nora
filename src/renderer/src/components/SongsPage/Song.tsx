@@ -16,7 +16,7 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line import/named
-import { DraggableProvided } from 'react-beautiful-dnd';
+import { DraggableProvided } from '@hello-pangea/dnd';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
