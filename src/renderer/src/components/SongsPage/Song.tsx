@@ -109,7 +109,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
 
   const [isAFavorite, setIsAFavorite] = useState(props.isAFavorite);
   const [isSongPlaying, setIsSongPlaying] = useState(false);
-  const clickTimeoutRef = useRef<NodeJS.Timeout>();
+  const clickTimeoutRef = useRef<NodeJS.Timeout>(undefined);
 
   useEffect(() => {
     setIsSongPlaying(() => currentSongData?.songId === songId && isCurrentSongPlaying);
