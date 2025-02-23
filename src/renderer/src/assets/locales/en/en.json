@@ -1047,6 +1047,7 @@
     "LYRICS_CONVERT_SUCCESS": "Lyrics converted successfully",
     "RESET_CONVERTED_LYRICS_SUCCESS": "Reset lyrics successfully",
     "LYRICS_TRANSLATION_FAILED": "Failed to translate lyrics",
+    "LYRICS_TRANSLATION_TO_SAME_SOURCE_LANGUAGE": "Lyrics were requested to be translated to the same source language '{{language}}'",
     "LYRICS_CONVERT_FAILED": "Failed to convert lyrics",
     "RESET_CONVERTED_LYRICS_FAILED": "Failed to reset lyrics",
     "MUSIC_FOLDER_DELETED": "`{{name}}` folder got deleted from the system. $t(common.songWithCount, {\"count\":{{count}}}) related to that folder will be removed from the library.",

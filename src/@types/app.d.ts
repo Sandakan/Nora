@@ -869,6 +869,7 @@ declare global {
     | 'LYRICS_SAVED_IN_LRC_FILE'
     | 'PENDING_LYRICS_SAVED'
     | 'LYRICS_TRANSLATION_SUCCESS'
+    | 'LYRICS_TRANSLATION_TO_SAME_SOURCE_LANGUAGE'
     | 'LYRICS_CONVERT_SUCCESS'
     | 'RESET_CONVERTED_LYRICS_SUCCESS'
     | 'LASTFM_LOGIN_SUCCESS'
@@ -908,7 +909,7 @@ declare global {
     id: string;
     order?: number;
     content: ReactNode;
-    icon?: ReactElement<any, any>;
+    icon?: ReactElement;
     iconName?: string;
     iconClassName?: string;
     buttons?: ButtonProps[];
@@ -924,10 +925,10 @@ declare global {
   interface NavigationHistory {
     pageTitle: PageTitles;
     data?: PageData;
-    onPageChange?: (changedPageTitle: PageTitles, changedPageData?: any) => void;
+    onPageChange?: (changedPageTitle: PageTitles, changedPageData?: PageData) => void;
   }
 
-  interface PageData<R = any> extends Record<string, R> {
+  interface PageData<R = unknown> extends Record<string, R> {
     scrollTopOffset?: number;
     isLowResponseRequired?: boolean;
     preventScreenSleeping?: boolean;

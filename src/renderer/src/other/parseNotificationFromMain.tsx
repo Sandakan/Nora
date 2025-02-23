@@ -89,7 +89,8 @@ const notificationsFromMainConfig: AppNotificationConfig[] = [
       'NO_MORE_GENRE_PALETTES',
       'NO_MORE_SONG_PALETTES',
       'PLAYLIST_IMPORT_TO_EXISTING_PLAYLIST',
-      'PLAYLIST_NOT_FOUND'
+      'PLAYLIST_NOT_FOUND',
+      'LYRICS_TRANSLATION_TO_SAME_SOURCE_LANGUAGE'
     ],
     iconName: 'info',
     iconClassName: 'material-icons-round-outlined'
@@ -244,6 +245,7 @@ const parseNotificationFromMain = (
   messageCode: MessageCodes = 'INFO',
   data?: Record<string, unknown>
 ) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const messageKey: any = `backend.${messageCode}`;
 
   const message = i18n.exists(messageKey)

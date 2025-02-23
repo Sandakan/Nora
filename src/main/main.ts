@@ -365,7 +365,7 @@ function handleBeforeQuit() {
 }
 
 export function toggleAudioPlayingState(isPlaying: boolean) {
-  console.debug(`Player playback status : ${isPlaying}`);
+  logger.debug(`Player playback status : ${isPlaying}`, { isPlaying });
   isAudioPlaying = isPlaying;
   manageTaskbarPlaybackButtonControls(mainWindow, true, isPlaying);
 }

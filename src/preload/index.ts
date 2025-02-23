@@ -232,7 +232,8 @@ const messages = {
   getMessageFromMain: (
     callback: (event: unknown, messageCode: MessageCodes, data: Record<string, unknown>) => void
   ) => ipcRenderer.on('app/sendMessageToRendererEvent', callback),
-  removeMessageToRendererEventListener: (callback: (...args: unknown[]) => void) =>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  removeMessageToRendererEventListener: (callback: (...args: any[]) => void) =>
     ipcRenderer.removeListener('app/sendMessageToRendererEvent', callback)
 };
 

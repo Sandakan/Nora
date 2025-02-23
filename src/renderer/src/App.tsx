@@ -1,4 +1,3 @@
-/* eslint-disable no-use-before-define */
 // ? BASE IMPORTS
 import {
   DragEvent,
@@ -108,7 +107,7 @@ export default function App() {
   // const contentRef = useRef(DEFAULT_REDUCER_DATA);
 
   const AppRef = useRef(null as HTMLDivElement | null);
-  const storeRef = useRef<AppReducer>();
+  const storeRef = useRef<AppReducer>(undefined);
 
   const [, startTransition] = useTransition();
   const refStartPlay = useRef(false);
@@ -511,6 +510,7 @@ export default function App() {
     syncUserData();
 
     const handleToggleSongPlayback = () => toggleSongPlayback();
+    const handleSkipForwardClickListener = () => handleSkipForwardClick('PLAYER_SKIP');
     const handlePlaySongFromUnknownSource = (_: unknown, data: AudioPlayerData) =>
       playSongFromUnknownSource(data, true);
 
@@ -518,12 +518,12 @@ export default function App() {
 
     window.api.playerControls.toggleSongPlayback(handleToggleSongPlayback);
     window.api.playerControls.skipBackwardToPreviousSong(handleSkipBackwardClick);
-    window.api.playerControls.skipForwardToNextSong(handleSkipForwardClick);
+    window.api.playerControls.skipForwardToNextSong(handleSkipForwardClickListener);
     return () => {
       window.api.unknownSource.removePlaySongFromUnknownSourceEvent(handleToggleSongPlayback);
       window.api.playerControls.removeTogglePlaybackStateEvent(handleToggleSongPlayback);
       window.api.playerControls.removeSkipBackwardToPreviousSongEvent(handleSkipBackwardClick);
-      window.api.playerControls.removeSkipForwardToNextSongEvent(handleSkipForwardClick);
+      window.api.playerControls.removeSkipForwardToNextSongEvent(handleSkipForwardClickListener);
       window.api.dataUpdates.removeDataUpdateEventListeners();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -658,7 +658,6 @@ export default function App() {
   const toggleRepeat = useCallback((newState?: RepeatTypes) => {
     const repeatState =
       newState ||
-      // eslint-disable-next-line no-nested-ternary
       (store.state.player.isRepeating === 'false'
         ? 'repeat'
         : store.state.player.isRepeating === 'repeat'
@@ -671,7 +670,7 @@ export default function App() {
     });
   }, []);
 
-  const recordRef = useRef<ListeningDataSession>();
+  const recordRef = useRef<ListeningDataSession>(undefined);
 
   const recordListeningData = useCallback(
     (songId: string, duration: number, isRepeating = false, isKnownSource = true) => {

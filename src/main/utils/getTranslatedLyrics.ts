@@ -8,6 +8,26 @@ import {
   getLrcLyricLinesFromParsedLyrics,
   getLrcLyricsMetadata
 } from '../core/saveLyricsToLrcFile';
+import { RawResponse } from '@vitalets/google-translate-api/dist/cjs/types';
+
+const getTranslatedLyricLines = (raw: RawResponse, translatedLang: string) => {
+  if (translatedLang === raw.src) {
+    // Lyrics were requested to be translated to the same source language
+    sendMessageToRenderer({
+      messageCode: 'LYRICS_TRANSLATION_TO_SAME_SOURCE_LANGUAGE',
+      data: { language: translatedLang }
+    });
+
+    const first = raw.sentences.at(0);
+    if (raw.sentences.length === 1 && first && 'trans' in first) {
+      const translatedText = first.trans;
+
+      return translatedText.split('\n').map((line) => ({ trans: line }));
+    }
+  }
+
+  return raw.sentences;
+};
 
 const getTranslatedLyrics = async (languageCode: string) => {
   const cachedLyrics = getCachedLyrics();
@@ -44,7 +64,7 @@ const getTranslatedLyrics = async (languageCode: string) => {
 
       for (let i = 0; i < parsedLyrics.length; i++) {
         const lyric = parsedLyrics[i];
-        const translatedLyric = raw.sentences.at(i);
+        const translatedLyric = getTranslatedLyricLines(raw, translatedLang).at(i);
 
         if (translatedLyric && 'trans' in translatedLyric) {
           const translatedText = translatedLyric.trans.trim();
