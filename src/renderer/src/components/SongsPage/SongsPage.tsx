@@ -84,6 +84,7 @@ const SongsPage = () => {
   } = useQuery({
     queryKey: ['songs', content.sortingOrder, content.filteringOrder],
     initialData: [],
+    placeholderData: [],
     queryFn: () =>
       window.api.audioLibraryControls
         .getAllSongs(content.sortingOrder, content.filteringOrder)
@@ -330,6 +331,7 @@ const SongsPage = () => {
         )}
         <div
           className="songs-container appear-from-bottom h-full flex-1 delay-100"
+          data-count={songs.length}
           // ref={songsContainerRef}
         >
           {/* <InfiniteLoader
@@ -375,7 +377,7 @@ const SongsPage = () => {
                 if (song)
                   return (
                     <Song
-                      key={index}
+                      key={song.songId}
                       index={index}
                       isIndexingSongs={localStorageData?.preferences.isSongIndexingEnabled}
                       onPlayClick={handleSongPlayBtnClick}
