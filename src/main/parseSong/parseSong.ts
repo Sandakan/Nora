@@ -111,7 +111,7 @@ export const parseSong = async (
     //  logger.debug('song stream not readable', undefined, 'ERROR');
 
     const stats = await fs.stat(absoluteFilePath);
-    const metadata = await musicMetaData.parseFile(absoluteFilePath);
+    const metadata: musicMetaData.IAudioMetadata = await musicMetaData.parseFile(absoluteFilePath);
 
     // songFileStream.close();
 
@@ -131,7 +131,9 @@ export const parseSong = async (
       // timeEnd(start2, 'Time to start organizing metadata');
 
       const songTitle =
-        metadata.common.title || path.basename(absoluteFilePath).split('.')[0] || 'Unknown Title';
+        metadata.common.title ||
+        path.basename(absoluteFilePath, path.extname(absoluteFilePath)) ||
+        'Unknown Title';
 
       // const start3 = timeStart();
 
