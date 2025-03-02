@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import Hyperlink from '../Hyperlink';
 import HashTag from './HashTag';
-import { type Tag } from 'src/@types/last_fm_artist_info_api';
+import { type Tag } from '../../../../types/last_fm_artist_info_api';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store';
 

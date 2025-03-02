@@ -1,6 +1,6 @@
 import { lazy, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { type SimilarArtist } from '../../../../@types/last_fm_artist_info_api';
+import type { SimilarArtist } from 'src/types/last_fm_artist_info_api';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 

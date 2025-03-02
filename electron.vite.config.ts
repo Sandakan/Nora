@@ -27,7 +27,8 @@ export default defineConfig({
     },
     resolve: {
       alias: {
-        '@renderer': resolve(import.meta.dirname, './src/renderer/src')
+        '@renderer': resolve(import.meta.dirname, './src/renderer/src'),
+        '@types': resolve(import.meta.dirname, './src/@types')
       }
     },
     plugins: [react()]

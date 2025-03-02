@@ -1,6 +1,6 @@
 import logger from '../logger';
 import { checkIfConnectedToInternet } from '../main';
-import { LastFMTrackInfoApi } from '../../@types/last_fm_api';
+import { LastFMTrackInfoApi } from '../../types/last_fm_api';
 
 const LAST_FM_BASE_URL = 'http://ws.audioscrobbler.com/2.0/';
 

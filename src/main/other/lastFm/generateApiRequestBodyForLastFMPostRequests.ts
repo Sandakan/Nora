@@ -4,7 +4,7 @@ import {
   LoveParams,
   ScrobbleParams,
   updateNowPlayingParams
-} from '../../../@types/last_fm_api';
+} from '../../../types/last_fm_api';
 
 type LastFMApi = (
   | { method: 'track.scrobble'; params: ScrobbleParams }

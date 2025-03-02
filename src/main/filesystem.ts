@@ -17,7 +17,7 @@ import {
   userDataMigrations
 } from './migrations';
 import { encrypt } from './utils/safeStorage';
-import { LastFMSessionData } from '../@types/last_fm_api';
+import { LastFMSessionData } from '../types/last_fm_api';
 import { DEFAULT_SONG_PALETTE } from './other/generatePalette';
 import isPathADir from './utils/isPathADir';
 import { clearDiscordRpcActivity } from './other/discordRPC';

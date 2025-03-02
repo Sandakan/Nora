@@ -5,7 +5,7 @@ import {
   ParsedSimilarTrack,
   SimilarTrack,
   SimilarTracksOutput
-} from '../../../@types/last_fm_similar_tracks_api';
+} from '../../../types/last_fm_similar_tracks_api';
 import { checkIfConnectedToInternet } from '../../main';
 import { getSongArtworkPath } from '../../fs/resolveFilePaths';
 import { isSongBlacklisted } from '../../utils/isBlacklisted';

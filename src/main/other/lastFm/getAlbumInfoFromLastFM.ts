@@ -7,7 +7,7 @@ import {
   ParsedAlbumTrack,
   LastFMAlbumInfo,
   Tag
-} from '../../../@types/last_fm_album_info_api';
+} from '../../../types/last_fm_album_info_api';
 import { getAudioInfoFromSavableSongData } from './getSimilarTracks';
 
 const getSelectedAlbum = (albums: SavableAlbum[], albumId: string) => {

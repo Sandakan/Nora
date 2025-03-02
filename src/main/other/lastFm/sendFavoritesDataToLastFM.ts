@@ -1,7 +1,7 @@
 import { getUserData } from '../../filesystem';
 import logger from '../../logger';
 import hashText from '../../utils/hashText';
-import { AuthData, LastFMLoveUnlovePostResponse, LoveParams } from '../../../@types/last_fm_api';
+import { AuthData, LastFMLoveUnlovePostResponse, LoveParams } from '../../../types/last_fm_api';
 import { checkIfConnectedToInternet } from '../../main';
 import getLastFmAuthData from './getLastFMAuthData';
 

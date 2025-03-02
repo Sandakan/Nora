@@ -1,10 +1,10 @@
-import { AppleITunesMusicAPI } from '../../@types/apple_itunes_music_api.d';
+import { AppleITunesMusicAPI } from '../../types/apple_itunes_music_api';
 import logger from '../logger';
-import { LastFMHitCache, LastFMTrackInfoApi } from '../../@types/last_fm_api';
+import { LastFMHitCache, LastFMTrackInfoApi } from '../../types/last_fm_api';
 
-import { GeniusLyricsAPI, GeniusSongMetadataResponse } from '../../@types/genius_lyrics_api';
-import { DeezerTrackDataAPI, DeezerTrackResultsAPI } from '../../@types/deezer_api';
-import { MusixmatchHitCache, MusixmatchLyricsAPI } from '../../@types/musixmatch_lyrics_api';
+import { GeniusLyricsAPI, GeniusSongMetadataResponse } from '../../types/genius_lyrics_api';
+import { DeezerTrackDataAPI, DeezerTrackResultsAPI } from '../../types/deezer_api';
+import { MusixmatchHitCache, MusixmatchLyricsAPI } from '../../types/musixmatch_lyrics_api';
 import parseSongMetadataFromMusixmatchApiData from './parseSongMetadataFromMusixmatchApiData';
 import { parseMusicmatchDataFromLyrics } from './fetchLyricsFromMusixmatch';
 

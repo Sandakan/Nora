@@ -3,7 +3,7 @@ import {
   MusixmatchLyricsAPI,
   MusixmatchLyricsLine,
   MusixmatchLyricsMetadata
-} from '../../@types/musixmatch_lyrics_api';
+} from '../../types/musixmatch_lyrics_api';
 import logger from '../logger';
 import isLyricsSynced from '../../common/isLyricsSynced';
 import { repository, version } from '../../../package.json';

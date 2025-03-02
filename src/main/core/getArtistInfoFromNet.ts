@@ -7,8 +7,8 @@ import { checkIfConnectedToInternet, dataUpdateEvent } from '../main';
 import { getArtistArtworkPath } from '../fs/resolveFilePaths';
 import getArtistInfoFromLastFM from '../other/lastFm/getArtistInfoFromLastFM';
 
-import { DeezerArtistInfo, DeezerArtistInfoApi } from '../../@types/deezer_api';
-import { SimilarArtist } from '../../@types/last_fm_artist_info_api';
+import { DeezerArtistInfo, DeezerArtistInfoApi } from '../../types/deezer_api';
+import { SimilarArtist } from '../../types/last_fm_artist_info_api';
 
 const DEEZER_BASE_URL = 'https://api.deezer.com/';
 
