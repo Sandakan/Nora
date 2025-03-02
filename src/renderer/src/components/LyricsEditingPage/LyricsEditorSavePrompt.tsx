@@ -6,7 +6,7 @@ import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import calculateTime from '../../utils/calculateTime';
 import isLyricsSynced from '../../../../common/isLyricsSynced';
 
-import { ExtendedEditingLyricsLineData } from './LyricsEditingPage';
+import { type ExtendedEditingLyricsLineData } from './LyricsEditingPage';
 import Button from '../Button';
 import Hyperlink from '../Hyperlink';
 
@@ -90,7 +90,9 @@ const convertLyricsStrToObj = (
       isSynced,
       unparsedLyrics: lyrics,
       parsedLyrics,
-      offset: 0
+      offset: 0,
+      isReset: false,
+      isRomanized: false
     },
     lyricsType: isSynced ? 'SYNCED' : 'UN_SYNCED',
     isOfflineLyricsAvailable: false

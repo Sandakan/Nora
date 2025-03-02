@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import { MouseEvent as ReactMouseEvent, memo, useRef } from 'react';
+import { type MouseEvent as ReactMouseEvent, memo, useRef } from 'react';
 import log from '../utils/log';
 import DefaultImage from '../assets/images/webp/song_cover_default.webp';
 

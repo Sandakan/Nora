@@ -6,7 +6,7 @@ import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 
 import Button from '../../Button';
 import Checkbox from '../../Checkbox';
-import Dropdown, { DropdownOption } from '../../Dropdown';
+import Dropdown, { type DropdownOption } from '../../Dropdown';
 
 import i18n from '../../../i18n';
 import { useStore } from '@tanstack/react-store';

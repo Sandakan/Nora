@@ -9,7 +9,7 @@ import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import storage from '../../utils/localStorage';
 import i18n from '../../i18n';
 
-import Dropdown, { DropdownOption } from '../Dropdown';
+import Dropdown, { type DropdownOption } from '../Dropdown';
 import MainContainer from '../MainContainer';
 import Genre from './Genre';
 import Img from '../Img';

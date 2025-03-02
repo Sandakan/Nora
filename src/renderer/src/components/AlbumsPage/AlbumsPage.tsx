@@ -9,7 +9,7 @@ import i18n from '../../i18n';
 
 import { Album } from './Album';
 import MainContainer from '../MainContainer';
-import Dropdown, { DropdownOption } from '../Dropdown';
+import Dropdown, { type DropdownOption } from '../Dropdown';
 import Img from '../Img';
 import Button from '../Button';
 

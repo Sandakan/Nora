@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import Button, { ButtonProps } from '../Button';
+import Button, { type ButtonProps } from '../Button';
 
 interface NoLyricsProp {
   title: string;

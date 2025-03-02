@@ -1,4 +1,4 @@
-import { CSSProperties, useCallback, useContext } from 'react';
+import { type CSSProperties, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 

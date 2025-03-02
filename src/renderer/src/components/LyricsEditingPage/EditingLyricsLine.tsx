@@ -2,7 +2,7 @@ import { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useSta
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
-import {
+import type {
   EditingLyricsLineData,
   ExtendedEditingLyricsLineData,
   LyricsLineData

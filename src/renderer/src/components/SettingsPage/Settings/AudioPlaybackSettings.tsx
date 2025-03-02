@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import Dropdown, { DropdownOption } from '../../Dropdown';
+import Dropdown, { type DropdownOption } from '../../Dropdown';
 import storage from '../../../utils/localStorage';
 
 import Button from '../../Button';

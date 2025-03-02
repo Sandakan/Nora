@@ -3,8 +3,8 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import {
-  CSSProperties,
-  ForwardedRef,
+  type CSSProperties,
+  type ForwardedRef,
   forwardRef,
   lazy,
   useCallback,
@@ -16,7 +16,7 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line import/named
-import { DraggableProvided } from '@hello-pangea/dnd';
+import { type DraggableProvided } from '@hello-pangea/dnd';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 

@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { createContext, ReactNode } from 'react';
+import { createContext, type ReactNode } from 'react';
 
 export interface AppUpdateContextType {
   updateUserData: (callback: (prevState: UserData) => UserData | Promise<UserData> | void) => void;

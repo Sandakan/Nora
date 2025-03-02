@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import { ReactNode, createContext } from 'react';
+import { type ReactNode, createContext } from 'react';
 
 export interface AppStateContextType {
   // THEME

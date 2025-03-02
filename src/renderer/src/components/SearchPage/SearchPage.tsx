@@ -7,7 +7,7 @@ import debounce from '../../utils/debounce';
 import storage from '../../utils/localStorage';
 import i18n from '../../i18n';
 
-import SearchResultsFilter, { SearchResultFilter } from './SearchResultsFilter';
+import SearchResultsFilter, { type SearchResultFilter } from './SearchResultsFilter';
 import MainContainer from '../MainContainer';
 import GenreSearchResultsContainer from './Result_Containers/GenreSearchResultsContainer';
 import PlaylistSearchResultsContainer from './Result_Containers/PlaylistSearchResultsContainer';

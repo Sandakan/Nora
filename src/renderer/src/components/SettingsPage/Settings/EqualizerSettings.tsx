@@ -1,4 +1,4 @@
-import { ReactNode, useContext, useEffect, useMemo, useReducer, useState } from 'react';
+import { type ReactNode, useContext, useEffect, useMemo, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../../Button';
 import Dropdown from '../../Dropdown';

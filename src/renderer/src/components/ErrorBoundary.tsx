@@ -1,5 +1,5 @@
 /* eslint-disable react/destructuring-assignment */
-import { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import log from '../utils/log';
 import BugImg from '../assets/images/svg/Bug Fixed_Monochromatic.svg';

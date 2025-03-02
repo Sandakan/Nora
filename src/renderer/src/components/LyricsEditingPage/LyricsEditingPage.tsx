@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-autofocus */
 import {
-  KeyboardEvent,
+  type KeyboardEvent,
   lazy,
   useCallback,
   useContext,

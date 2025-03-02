@@ -1,5 +1,5 @@
 import { getLocalStorage } from '@renderer/utils/localStorage';
-import { ReactNode } from 'react';
+import { type ReactNode } from 'react';
 
 export interface AppReducer {
   userData: UserData;

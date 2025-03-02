@@ -1,4 +1,4 @@
-import { ReactElement, memo } from 'react';
+import { type ReactElement, memo } from 'react';
 
 interface SongStatProp {
   title: string;

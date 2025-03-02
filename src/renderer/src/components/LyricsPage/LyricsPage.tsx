@@ -15,7 +15,7 @@ import MainContainer from '../MainContainer';
 import Button from '../Button';
 
 import { appPreferences } from '../../../../../package.json';
-import { LyricData } from '../LyricsEditingPage/LyricsEditingPage';
+import { type LyricData } from '../LyricsEditingPage/LyricsEditingPage';
 import { isLyricsEnhancedSynced } from '../../../../common/isLyricsSynced';
 import useSkipLyricsLines from '../../hooks/useSkipLyricsLines';
 import { useStore } from '@tanstack/react-store';

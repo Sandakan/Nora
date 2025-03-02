@@ -1,6 +1,6 @@
 import {
-  ChangeEvent,
-  WheelEvent,
+  type ChangeEvent,
+  type WheelEvent,
   useCallback,
   useContext,
   useEffect,

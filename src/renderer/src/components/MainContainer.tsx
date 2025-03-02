@@ -3,14 +3,14 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import {
-  AriaRole,
-  CSSProperties,
-  FocusEvent,
-  ForwardedRef,
-  KeyboardEvent,
-  MouseEvent,
-  ReactNode,
-  UIEvent,
+  type AriaRole,
+  type CSSProperties,
+  type FocusEvent,
+  type ForwardedRef,
+  type KeyboardEvent,
+  type MouseEvent,
+  type ReactNode,
+  type UIEvent,
   forwardRef
 } from 'react';
 import ErrorBoundary from './ErrorBoundary';

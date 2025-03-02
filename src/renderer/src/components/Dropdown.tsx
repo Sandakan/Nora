@@ -1,4 +1,4 @@
-import { ChangeEvent, useMemo } from 'react';
+import { type ChangeEvent, useMemo } from 'react';
 
 export interface DropdownOption<T extends string> {
   label: string;

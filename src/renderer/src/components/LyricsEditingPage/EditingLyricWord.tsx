@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { LyricsLineData } from './LyricsEditingPage';
+import { type LyricsLineData } from './LyricsEditingPage';
 
 type Props = {
   isPlaying: boolean;

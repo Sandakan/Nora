@@ -9,7 +9,7 @@ import i18n from '../../i18n';
 import { Playlist } from './Playlist';
 import Button from '../Button';
 import MainContainer from '../MainContainer';
-import Dropdown, { DropdownOption } from '../Dropdown';
+import Dropdown, { type DropdownOption } from '../Dropdown';
 import VirtualizedGrid from '../VirtualizedGrid';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store';

@@ -8,7 +8,7 @@ import i18n from '../../i18n';
 import Button from '../Button';
 import Img from '../Img';
 import Folder from './Folder';
-import Dropdown, { DropdownOption } from '../Dropdown';
+import Dropdown, { type DropdownOption } from '../Dropdown';
 import MainContainer from '../MainContainer';
 
 const AddMusicFoldersPrompt = lazy(() => import('./AddMusicFoldersPrompt'));

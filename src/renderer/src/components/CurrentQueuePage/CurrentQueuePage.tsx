@@ -3,7 +3,7 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line import/named
-import { Draggable, Droppable, DragDropContext, DropResult } from '@hello-pangea/dnd';
+import { Draggable, Droppable, DragDropContext, type DropResult } from '@hello-pangea/dnd';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
@@ -17,7 +17,7 @@ import MainContainer from '../MainContainer';
 import Img from '../Img';
 import Song from '../SongsPage/Song';
 import VirtualizedList from '../VirtualizedList';
-import { VirtuosoHandle } from 'react-virtuoso';
+import { type VirtuosoHandle } from 'react-virtuoso';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store';
 

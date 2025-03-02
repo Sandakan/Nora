@@ -1,5 +1,12 @@
-import { CSSProperties, ForwardedRef, ReactNode, forwardRef, useContext, useMemo } from 'react';
-import { GridComponents, VirtuosoGrid, VirtuosoHandle } from 'react-virtuoso';
+import {
+  type CSSProperties,
+  type ForwardedRef,
+  type ReactNode,
+  forwardRef,
+  useContext,
+  useMemo
+} from 'react';
+import { type GridComponents, VirtuosoGrid, type VirtuosoHandle } from 'react-virtuoso';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import debounce from '../utils/debounce';
 

@@ -6,7 +6,7 @@ import storage from '../../utils/localStorage';
 import i18n from '../../i18n';
 
 import { Artist } from './Artist';
-import Dropdown, { DropdownOption } from '../Dropdown';
+import Dropdown, { type DropdownOption } from '../Dropdown';
 import MainContainer from '../MainContainer';
 import Img from '../Img';
 import Button from '../Button';

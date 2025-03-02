@@ -2,7 +2,7 @@
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
-import { KeyboardEvent, memo, useCallback } from 'react';
+import { type KeyboardEvent, memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface CheckboxProp {

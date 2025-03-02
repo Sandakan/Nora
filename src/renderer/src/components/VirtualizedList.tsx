@@ -1,5 +1,5 @@
-import { CSSProperties, ReactNode, forwardRef, useContext } from 'react';
-import { Virtuoso, Components, VirtuosoHandle } from 'react-virtuoso';
+import { type CSSProperties, type ReactNode, forwardRef, useContext } from 'react';
+import { Virtuoso, type Components, type VirtuosoHandle } from 'react-virtuoso';
 import debounce from '../utils/debounce';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 
