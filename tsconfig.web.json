@@ -20,6 +20,8 @@
         "src/renderer/src/*"
       ]
     },
-    "types": ["vite/client"]
+    "types": [ "vite/client" ],
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true
   }
 }

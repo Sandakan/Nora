@@ -1,4 +1,4 @@
-import { MigrationData } from '../utils/localStorage';
+import type { MigrationData } from '../utils/localStorage';
 import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from './appReducer';
 
 const localStorageMigrationData: MigrationData = {

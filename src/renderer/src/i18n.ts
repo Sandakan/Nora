@@ -4,7 +4,7 @@ import { initReactI18next } from 'react-i18next';
 import en from './assets/locales/en/en.json';
 import tr from './assets/locales/tr/tr.json';
 import vi from './assets/locales/vi/vi.json';
-import { DropdownOption } from './components/Dropdown';
+import type { DropdownOption } from './components/Dropdown';
 
 export const resources = {
   en: { translation: en },

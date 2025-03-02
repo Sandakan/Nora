@@ -1,6 +1,6 @@
 import { Store } from '@tanstack/store';
 import {
-  AppReducerStateActions,
+  type AppReducerStateActions,
   DEFAULT_REDUCER_DATA,
   reducer as appReducer
 } from './other/appReducer';

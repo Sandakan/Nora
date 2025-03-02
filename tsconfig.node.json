@@ -15,9 +15,10 @@
       "electron-vite/node"
     ],
     "paths": {
-      "@main/*": ["./src/main/*"],},
+      "@main/*": [ "./src/main/*" ], },
     "noImplicitAny": true,
-   "useUnknownInCatchVariables": true
-
+    "useUnknownInCatchVariables": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true
   }
 }

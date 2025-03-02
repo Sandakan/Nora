@@ -1,13 +1,15 @@
 {
-  "files": [],
+  "files": [ ],
   "references": [
     { "path": "./tsconfig.node.json" },
     { "path": "./tsconfig.web.json" },
     // { "path": "./tsconfig.test.json" }
   ],
   "compilerOptions": {
-   "types": ["electron-vite/node"],
-   "allowJs": true,
-   "useUnknownInCatchVariables": true
+    "types": [ "electron-vite/node" ],
+    "allowJs": true,
+    "useUnknownInCatchVariables": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true
   }
 }

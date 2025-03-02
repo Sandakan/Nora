@@ -1,7 +1,7 @@
 // ? BASE IMPORTS
 import {
-  DragEvent,
-  ReactNode,
+  type DragEvent,
+  type ReactNode,
   Suspense,
   lazy,
   useCallback,
@@ -17,7 +17,7 @@ import 'material-symbols/rounded.css';
 import { releaseNotes, version, appPreferences } from '../../../package.json';
 
 // ? CONTEXTS
-import { AppUpdateContext, AppUpdateContextType } from './contexts/AppUpdateContext';
+import { AppUpdateContext, type AppUpdateContextType } from './contexts/AppUpdateContext';
 // import { SongPositionContext } from './contexts/SongPositionContext';
 
 // ? HOOKS
@@ -61,7 +61,7 @@ import updateQueueOnSongPlay from './other/updateQueueOnSongPlay';
 import shuffleQueueRandomly from './other/shuffleQueueRandomly';
 import AudioPlayer from './other/player';
 import { dispatch, store } from './store';
-import { AppReducer } from './other/appReducer';
+import { type AppReducer } from './other/appReducer';
 
 // ? CONSTANTS
 const LOW_RESPONSE_DURATION = 100;
