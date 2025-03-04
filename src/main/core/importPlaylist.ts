@@ -1,6 +1,6 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
-import { OpenDialogOptions } from 'electron';
+import type { OpenDialogOptions } from 'electron';
 
 import { sendMessageToRenderer, showOpenDialog } from '../main';
 import logger from '../logger';

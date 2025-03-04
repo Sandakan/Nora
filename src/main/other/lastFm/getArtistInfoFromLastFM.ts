@@ -1,4 +1,4 @@
-import { LastFmArtistInfoAPI } from '../../../types/last_fm_artist_info_api';
+import type { LastFmArtistInfoAPI } from '../../../types/last_fm_artist_info_api';
 import logger from '../../logger';
 import { checkIfConnectedToInternet } from '../../main';
 

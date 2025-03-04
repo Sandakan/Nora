@@ -9,7 +9,7 @@
     "types": [ "electron-vite/node" ],
     "allowJs": true,
     "useUnknownInCatchVariables": true,
-    // "verbatimModuleSyntax": true,
-    // "erasableSyntaxOnly": true
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true
   }
 }

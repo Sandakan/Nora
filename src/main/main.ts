@@ -13,13 +13,13 @@ import {
   Tray,
   Menu,
   nativeImage,
-  OpenDialogOptions,
   powerMonitor,
-  SaveDialogOptions,
   net,
   powerSaveBlocker,
   screen,
-  Display
+  type OpenDialogOptions,
+  type SaveDialogOptions,
+  type Display
 } from 'electron';
 
 import {
@@ -433,7 +433,7 @@ function addEventsToCache(dataType: DataUpdateEventTypes, data = [] as string[],
 const handleFileProtocol = async (request: GlobalRequest): Promise<GlobalResponse> => {
   try {
     const urlWithQueries = decodeURI(request.url).replace(
-      /^(nora:[\/\\]{1,2}localfiles[\/\\]{1,2})|(\?ts\=\d+)?$/gm,
+      /(nora:[\/\\]{1,2}localfiles[\/\\]{1,2})|(\?ts\=\d+$)?/gm,
       ''
     );
     const [filePath] = urlWithQueries.split('?');

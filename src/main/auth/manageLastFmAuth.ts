@@ -1,5 +1,5 @@
 import { setUserData } from '../filesystem';
-import { LastFMSessionGetResponse } from '../../types/last_fm_api';
+import type { LastFMSessionGetResponse } from '../../types/last_fm_api';
 import hashText from '../utils/hashText';
 import { encrypt } from '../utils/safeStorage';
 import { sendMessageToRenderer } from '../main';

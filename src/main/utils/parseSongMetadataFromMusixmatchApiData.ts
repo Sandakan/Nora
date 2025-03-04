@@ -1,5 +1,8 @@
 import logger from '../logger';
-import { MusixmatchLyricsAPI, MusixmatchLyricsMetadata } from '../../types/musixmatch_lyrics_api';
+import type {
+  MusixmatchLyricsAPI,
+  MusixmatchLyricsMetadata
+} from '../../types/musixmatch_lyrics_api';
 import fetchSongArtworksFromSpotify from './fetchSongArtworksFromSpotify';
 
 async function parseSongMetadataFromMusixmatchApiData(

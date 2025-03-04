@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs/promises';
-import fsSync, { WatchEventType } from 'fs';
+import fsSync, { type WatchEventType } from 'fs';
 import { getUserData, supportedMusicExtensions } from '../filesystem';
 import logger from '../logger';
 import checkFolderForUnknownModifications from './checkFolderForUnknownContentModifications';

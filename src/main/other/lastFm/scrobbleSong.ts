@@ -1,6 +1,6 @@
 import { getSongsData, getUserData } from '../../filesystem';
 import logger from '../../logger';
-import { LastFMScrobblePostResponse, ScrobbleParams } from '../../../types/last_fm_api';
+import type { LastFMScrobblePostResponse, ScrobbleParams } from '../../../types/last_fm_api';
 import { checkIfConnectedToInternet } from '../../main';
 import { generateApiRequestBodyForLastFMPostRequests } from './generateApiRequestBodyForLastFMPostRequests';
 import getLastFmAuthData from './getLastFMAuthData';

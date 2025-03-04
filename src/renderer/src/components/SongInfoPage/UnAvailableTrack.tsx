@@ -3,7 +3,7 @@ import { Trans, useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
-import { type ParsedSimilarTrack } from '../../../../types/last_fm_similar_tracks_api';
+import type { ParsedSimilarTrack } from '../../../../types/last_fm_similar_tracks_api';
 
 const OpenLinkConfirmPrompt = lazy(() => import('../OpenLinkConfirmPrompt'));
 

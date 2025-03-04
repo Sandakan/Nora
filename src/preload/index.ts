@@ -446,7 +446,7 @@ const utils = {
     join: (...args: string[]) => args.join('/')
   },
   getExtension: (dir: string) => {
-    const regex = /(?<name>.+)\.(?<ext>\w+)(?<search>.+)$/;
+    const regex = /(?<name>.+)\.(?<ext>[\w\d]+)(?<search>\?.+)?$/;
     const match = dir.match(regex);
     const ext = match?.groups?.ext || '';
     return ext;

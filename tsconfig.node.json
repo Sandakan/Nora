@@ -18,7 +18,7 @@
       "@main/*": [ "./src/main/*" ], },
     "noImplicitAny": true,
     "useUnknownInCatchVariables": true,
-    // "verbatimModuleSyntax": true,
-    // "erasableSyntaxOnly": true
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true
   }
 }

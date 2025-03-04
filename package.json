@@ -77,7 +77,7 @@
     "prettier-check": "prettier --check .",
     "prettier-write": "prettier --write .",
     "format": "prettier --write .",
-    "lint": "eslint . && tsc --noEmit",
+    "lint": "eslint .",
     "eslint-inspector": "npx @eslint/config-inspector@latest",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",

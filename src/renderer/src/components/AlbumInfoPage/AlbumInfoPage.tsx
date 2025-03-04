@@ -10,7 +10,7 @@ import TitleContainer from '../TitleContainer';
 import AlbumImgAndInfoContainer from './AlbumImgAndInfoContainer';
 import OnlineAlbumInfoContainer from './OnlineAlbumInfoContainer';
 import { songSortOptions } from '../SongsPage/SongOptions';
-import { type LastFMAlbumInfo } from 'src/types/last_fm_album_info_api';
+import type { LastFMAlbumInfo } from 'src/types/last_fm_album_info_api';
 import VirtualizedList from '../VirtualizedList';
 import { useStore } from '@tanstack/react-store';
 import { store } from '../../store';

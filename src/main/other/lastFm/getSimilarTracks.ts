@@ -1,6 +1,6 @@
 import logger from '../../logger';
 import { getSongsData } from '../../filesystem';
-import {
+import type {
   LastFMSimilarTracksAPI,
   ParsedSimilarTrack,
   SimilarTrack,

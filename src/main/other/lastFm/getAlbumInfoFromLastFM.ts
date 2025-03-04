@@ -1,7 +1,7 @@
 import { checkIfConnectedToInternet } from '../../main';
 import { getAlbumsData, getSongsData } from '../../filesystem';
 import logger from '../../logger';
-import {
+import type {
   LastFMAlbumInfoAPI,
   AlbumInfo,
   ParsedAlbumTrack,

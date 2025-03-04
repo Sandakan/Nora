@@ -8,7 +8,7 @@ import {
   getLrcLyricLinesFromParsedLyrics,
   getLrcLyricsMetadata
 } from '../core/saveLyricsToLrcFile';
-import { RawResponse } from '@vitalets/google-translate-api/dist/cjs/types';
+import type { RawResponse } from '@vitalets/google-translate-api/dist/cjs/types';
 
 const getTranslatedLyricLines = (raw: RawResponse, translatedLang: string) => {
   if (translatedLang === raw.src) {

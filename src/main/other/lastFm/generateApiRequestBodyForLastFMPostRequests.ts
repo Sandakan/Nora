@@ -1,5 +1,5 @@
 import hashText from '../../utils/hashText';
-import {
+import type {
   AuthData,
   LoveParams,
   ScrobbleParams,

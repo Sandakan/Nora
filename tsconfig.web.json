@@ -19,12 +19,9 @@
       "@renderer/*": [
         "src/renderer/src/*"
       ],
-      "@types/*": [
-        "src/types/*"
-      ]
     },
     "types": [ "vite/client" ],
-    // "verbatimModuleSyntax": true,
-    // "erasableSyntaxOnly": true
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true
   }
 }

@@ -1,4 +1,4 @@
-import { SaveDialogOptions } from 'electron';
+import type { SaveDialogOptions } from 'electron';
 import sharp from 'sharp';
 
 import logger from '../logger';

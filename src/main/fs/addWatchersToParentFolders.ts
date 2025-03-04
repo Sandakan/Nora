@@ -1,4 +1,4 @@
-import fsSync, { WatchEventType } from 'fs';
+import fsSync, { type WatchEventType } from 'fs';
 import path from 'path';
 import { getUserData } from '../filesystem';
 import logger from '../logger';
