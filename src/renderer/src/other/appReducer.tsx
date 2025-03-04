@@ -396,7 +396,7 @@ export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
   preferences: {
     seekbarScrollInterval: 5,
     isSongIndexingEnabled: false,
-    disableBackgroundArtworks: false,
+    disableBackgroundArtworks: true,
     doNotShowBlacklistSongConfirm: false,
     doNotVerifyWhenOpeningLinks: false,
     isReducedMotion: false,
