@@ -1910,11 +1910,17 @@ export default function App() {
             <Preloader />
             {bodyBackgroundImage && (
               <div
-                className={`body-background-image-container absolute h-full w-full overflow-hidden bg-center opacity-100 blur-0 brightness-100 transition-[filter,opacity] duration-500 ${
-                  bodyBackgroundImage && '!opacity-100 !blur-sm !brightness-75'
-                }`}
+                className={`body-background-image-container absolute h-full w-full overflow-hidden !bg-dark-background-color-1 bg-center`}
               >
-                <Img className="w-full bg-cover" loading="eager" src={bodyBackgroundImage} alt="" />
+                <Img
+                  className={`w-full bg-cover opacity-100 blur-0 brightness-100 transition-[filter,opacity] duration-500 ${
+                    bodyBackgroundImage &&
+                    '!opacity-100 !blur-[1.5rem] !brightness-[.75] dark:!brightness-[.5]'
+                  }`}
+                  loading="eager"
+                  src={bodyBackgroundImage}
+                  alt=""
+                />
               </div>
             )}
             <ContextMenu />
