@@ -1,7 +1,3 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable import/prefer-default-export */
 import { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -14,7 +10,6 @@ import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store';
 
 interface AlbumProp extends Album {
-  // eslint-disable-next-line react/no-unused-prop-types
   index: number;
   className?: string;
   selectAllHandler?: (_upToId?: string) => void;
@@ -366,7 +361,7 @@ export const Album = (props: AlbumProp) => {
             fallbackSrc={DefaultAlbumCover}
             loading="lazy"
             alt="Album Cover"
-            className="h-full max-h-full w-full object-cover object-center"
+            className="aspect-square h-full max-h-full w-full object-cover object-center"
             enableImgFadeIns={!isMultipleSelectionEnabled}
           />
         </div>
