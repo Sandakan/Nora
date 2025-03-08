@@ -479,6 +479,10 @@
     "storageMetricsGenerationDisclaimer": "Generating storage metrics is a relatively demanding computational task, this means Nora may become unresponsive temporarily. Please be patient...",
     "storageMetricsGenerationError": "Seems like something went wrong on our end. Please report this to the developer.",
 
+    "advanced": "Advanced",
+    "saveVerboseLogsDescription": "Save verbose logs for debugging purposes. This will increase the size of the logs.",
+    "saveVerboseLogs": "Save verbose logs",
+
     "about": "About",
     "releasedOn": "Released on {{val, datetime}}",
     "noraWebsite": "Nora's official website",

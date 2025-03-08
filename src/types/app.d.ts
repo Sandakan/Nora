@@ -404,6 +404,7 @@ declare global {
     | 'preferences.autoTranslateLyrics'
     | 'preferences.autoConvertLyrics'
     | 'preferences.enableDiscordRPC'
+    | 'preferences.saveVerboseLogs'
     | 'customMusixmatchUserToken'
     | 'customLrcFilesSaveLocation'
     | 'lastFmSessionData'
@@ -439,6 +440,7 @@ declare global {
       sendNowPlayingSongDataToLastFM: boolean;
       saveLyricsInLrcFilesForSupportedSongs: boolean;
       enableDiscordRPC: boolean;
+      saveVerboseLogs: boolean;
     };
     windowPositions: {
       mainWindow?: WindowCordinates;

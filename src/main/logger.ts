@@ -56,21 +56,29 @@ const getLogFilePath = () => {
 
 export const logFilePath = getLogFilePath();
 
+const DEFAULT_LOGGER_LEVEL = IS_DEVELOPMENT ? 'verbose' : 'debug';
+
+const transports = {
+  console: new winston.transports.Console({
+    level: DEFAULT_LOGGER_LEVEL,
+    format: winston.format.combine(
+      winston.format.timestamp({
+        format: 'YYYY-MM-DD hh:mm:ss.SSS A'
+      }),
+      winston.format.json({ deterministic: true }),
+      winston.format.colorize({ all: true }),
+      winston.format.simple()
+    )
+  }),
+  file: new winston.transports.File({
+    level: DEFAULT_LOGGER_LEVEL,
+    filename: logFilePath
+  })
+};
+
 const log = winston.createLogger({
-  level: 'debug',
-  transports: [
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.timestamp({
-          format: 'YYYY-MM-DD hh:mm:ss.SSS A'
-        }),
-        winston.format.json({ deterministic: true }),
-        winston.format.colorize({ all: true }),
-        winston.format.simple()
-      )
-    }),
-    new winston.transports.File({ filename: logFilePath })
-  ]
+  level: DEFAULT_LOGGER_LEVEL,
+  transports: [transports.console, transports.file]
 });
 //   message: Error | string,
 //   data?: Record<string, unknown>,
@@ -97,6 +105,23 @@ const log = winston.createLogger({
 //     else pinoLogger.info(str);
 //   }
 // };
+
+export const toggleVerboseLogs = (isEnabled: boolean) => {
+  // Object.values(transports).forEach((transport) => {
+  //   if (isEnabled) {
+  //     transport.level = 'verbose';
+  //   } else {
+  //     transport.level = DEFAULT_LOGGER_LEVEL;
+  //   }
+  // });
+  if (isEnabled) {
+    transports.console.level = 'verbose';
+    transports.file.level = 'verbose';
+  } else {
+    transports.console.level = DEFAULT_LOGGER_LEVEL;
+    transports.file.level = DEFAULT_LOGGER_LEVEL;
+  }
+};
 
 const logger = {
   info: (message: string, data = {} as object) => {

@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { app } from 'electron';
 import Store from 'electron-store';
-import logger from './logger';
+import logger, { toggleVerboseLogs } from './logger';
 import { dataUpdateEvent } from './main';
 import { appPreferences, version } from '../../package.json';
 import {
@@ -40,7 +40,8 @@ export const USER_DATA_TEMPLATE: UserData = {
     sendSongFavoritesDataToLastFM: false,
     sendNowPlayingSongDataToLastFM: false,
     saveLyricsInLrcFilesForSupportedSongs: false,
-    enableDiscordRPC: false
+    enableDiscordRPC: false,
+    saveVerboseLogs: false
   },
   windowPositions: {},
   windowDiamensions: {},
@@ -253,6 +254,13 @@ export const getUserData = () => {
   return userDataStore.get('userData', USER_DATA_TEMPLATE) as UserData;
 };
 
+const initUserDataRelatedUpdates = () => {
+  const { preferences } = getUserData();
+
+  toggleVerboseLogs(preferences.saveVerboseLogs);
+};
+initUserDataRelatedUpdates();
+
 export const saveUserData = (userData: UserData) => {
   cachedUserData = userData;
   userDataStore.set('userData', userData);
@@ -315,6 +323,9 @@ export function setUserData(dataType: UserDataTypes, data: unknown) {
     } else if (dataType === 'preferences.enableDiscordRPC' && typeof data === 'boolean') {
       userData.preferences.enableDiscordRPC = data;
       if (!data) clearDiscordRpcActivity();
+    } else if (dataType === 'preferences.saveVerboseLogs' && typeof data === 'boolean') {
+      userData.preferences.saveVerboseLogs = data;
+      toggleVerboseLogs(data);
     } else if (dataType === 'customMusixmatchUserToken' && typeof data === 'string') {
       const encryptedToken = encrypt(data);
       userData.customMusixmatchUserToken = encryptedToken;
