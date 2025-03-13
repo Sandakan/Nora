@@ -1,8 +1,12 @@
 appId: com.sandakannipunajith.nora
 productName: Nora
+executableName: Nora
 copyright: Copyright © 2024 Sandakan Nipunajith
 icon: ./build/icon.ico
 artifactName: '${productName} v${version}-${os}-${arch}.${ext}'
+
+extraMetadata:
+  description: Nora
 
 directories:
   buildResources: build

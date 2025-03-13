@@ -28,11 +28,11 @@ export default tsLint.config(
   },
   eslint.configs.recommended,
   electronToolkit.configs.recommended,
+  jsxA11y.flatConfigs.recommended,
   {
     files: ['**/**/*.{js,ts,jsx,tsx}'],
     plugins: {
       'react-refresh': reactRefresh,
-      'jsx-a11y': jsxA11y,
       react: react,
       'react-hooks': reactHooks
     },

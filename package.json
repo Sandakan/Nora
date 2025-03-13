@@ -2,7 +2,7 @@
   "name": "nora",
   "version": "3.1.0-stable",
   "type": "module",
-  "description": "An Electron application with React and TypeScript",
+  "description": "Nora",
   "keywords": [
     "music",
     "electron",
@@ -144,7 +144,7 @@
     "electron-builder": "^25.1.8",
     "electron-debug": "^4.0.0",
     "electron-devtools-installer": "^4.0.0",
-    "electron-vite": "^3.0.0-beta.0",
+    "electron-vite": "^3.1.0-beta.0",
     "eslint": "^9.12.0",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "^2.31.0",
