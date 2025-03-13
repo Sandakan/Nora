@@ -9,7 +9,7 @@ export default defineConfig({
   main: {
     build: {
       sourcemap: true,
-      rollupOptions: { input: '/src/main/main.ts' }
+      rollupOptions: { input: '/src/main/main.ts', external: ['sharp'] }
     },
     plugins: [externalizeDepsPlugin(), swcPlugin()]
   },

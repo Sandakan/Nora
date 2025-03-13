@@ -35,11 +35,20 @@ jobs:
           check-latest: true
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm ci --include=optional
 
       - name: Install correct Sharp Dependencies
         if: matrix.os == 'ubuntu-latest'
-        run: npm install --cpu=x64 --os=linux sharp
+        run: |
+          npm install --cpu=x64 --os=linux sharp
+          npm install --cpu=x64 --os=linux --libc=glibc sharp
+          npm install --cpu=x64 --os=linux --libc=musl sharp
+
+      - name: Install correct Sharp Dependencies
+        if: matrix.os == 'macos-latest'
+        run: |
+          npm install --cpu=x64 --os=darwin sharp
+          npm install --cpu=arm64 --os=darwin sharp
 
       - name: build-linux
         if: matrix.os == 'ubuntu-latest'
