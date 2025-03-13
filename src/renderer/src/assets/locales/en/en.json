@@ -97,7 +97,7 @@
     "newUpdateAvailable": "New app update available.",
     "checkingForUpdates": "Checking for app updates...",
     "updateCheckError": "Error occurred when checking for app updates.",
-    "updateCheckErrorNoInternet": "$t(common.updateCheckError) $(common.noInternet)",
+    "updateCheckErrorNoInternet": "$t(common.updateCheckError) $t(common.noInternet)",
     "optionDisabled": "This option is disabled.",
     "somethingWentWrong": "Something went wrong.",
     "details": "Details",

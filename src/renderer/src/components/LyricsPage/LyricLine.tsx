@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -23,7 +25,7 @@ const lyricsScrollIntoViewEvent = new CustomEvent('lyrics/scrollIntoView', {
 
 const LyricLine = (props: LyricProp) => {
   const playerType = useStore(store, (state) => state.playerType);
-  const preferences = useStore(store, (state) => state.localStorage.preferences);
+  // const preferences = useStore(store, (state) => state.localStorage.preferences);
 
   const { updateSongPosition, updateContextMenuData } = useContext(AppUpdateContext);
   const [isInRange, setIsInRange] = useState(false);
