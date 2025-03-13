@@ -110,7 +110,7 @@ linux:
   category: AudioVideo
   synopsis: 'An elegant music player built using Electron and React. Inspired by Oto Music for Android by Piyush Mamidwar.'
 
-npmRebuild: false
+npmRebuild: true
 
 protocols:
   name: nora-protocol
