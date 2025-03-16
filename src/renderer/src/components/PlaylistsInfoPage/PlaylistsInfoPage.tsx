@@ -20,7 +20,10 @@ const SensitiveActionConfirmPrompt = lazy(() => import('../SensitiveActionConfir
 const PlaylistInfoPage = () => {
   const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
   const queue = useStore(store, (state) => state.localStorage.queue);
-  const sortingStates = useStore(store, (state) => state.localStorage.sortingStates);
+  const playlistSortingState = useStore(
+    store,
+    (state) => state.localStorage.sortingStates?.songsPage || 'addedOrder'
+  );
   const preferences = useStore(store, (state) => state.localStorage.preferences);
   const {
     updateQueueData,
@@ -35,9 +38,7 @@ const PlaylistInfoPage = () => {
   const [playlistData, setPlaylistData] = useState({} as Playlist);
   const [playlistSongs, setPlaylistSongs] = useState([] as SongData[]);
   const [sortingOrder, setSortingOrder] = useState<SongSortTypes>(
-    (currentlyActivePage?.data?.sortingOrder as SongSortTypes) ||
-      sortingStates?.songsPage ||
-      'addedOrder'
+    (currentlyActivePage?.data?.sortingOrder as SongSortTypes) || playlistSortingState
   );
   const [filteringOrder, setFilteringOrder] = useState<SongFilterTypes>('notSelected');
 
@@ -278,7 +279,8 @@ const PlaylistInfoPage = () => {
             return (
               <Song
                 key={index}
-                index={index}
+                // # Since the first element is the PlaylistInfoAndImgContainer, we need to subtract 1
+                index={index - 1}
                 isIndexingSongs={preferences.isSongIndexingEnabled}
                 onPlayClick={handleSongPlayBtnClick}
                 selectAllHandler={selectAllHandler}
