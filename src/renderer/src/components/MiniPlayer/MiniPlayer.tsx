@@ -1,5 +1,3 @@
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable no-nested-ternary */
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -20,6 +18,7 @@ type MiniPlayerProps = {
 
 export default function MiniPlayer(props: MiniPlayerProps) {
   const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
+  const isAFavorite = useStore(store, (state) => state.currentSongData.isAFavorite);
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const isMuted = useStore(store, (state) => state.player.volume.isMuted);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
@@ -97,10 +96,10 @@ export default function MiniPlayer(props: MiniPlayerProps) {
         >
           <Button
             className={`favorite-btn !m-0 h-fit -translate-x-4 cursor-pointer !rounded-none !border-0 !bg-[transparent] !p-0 text-font-color-white outline-1 outline-offset-1 transition-transform after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity focus-visible:!outline dark:!bg-[transparent] dark:text-font-color-white dark:after:bg-dark-font-color-highlight ${
-              currentSongData.isAFavorite && 'after:opacity-100'
+              isAFavorite && 'after:opacity-100'
             }`}
             iconClassName={`!text-xl ${
-              currentSongData.isAFavorite
+              isAFavorite
                 ? 'meterial-icons-round !text-dark-background-color-3'
                 : 'material-icons-round-outlined'
             }`}
@@ -110,9 +109,7 @@ export default function MiniPlayer(props: MiniPlayerProps) {
                 ? t('player.likeDislike')
                 : t('player.likeDislikeDisabled')
             }
-            clickHandler={() =>
-              currentSongData.isKnownSource && toggleIsFavorite(!currentSongData.isAFavorite)
-            }
+            clickHandler={() => currentSongData.isKnownSource && toggleIsFavorite(!isAFavorite)}
             iconName="favorite"
             removeFocusOnClick
           />

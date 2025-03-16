@@ -26,4 +26,7 @@ dispatch({
 
 store.subscribe(() => {
   storage.setLocalStorage(store.state.localStorage);
+  if (window.api.properties.isInDevelopment) {
+    console.debug('store state changed:', store.state);
+  }
 });

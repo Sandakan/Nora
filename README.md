@@ -43,6 +43,10 @@ With simplicity and design in mind, this app was made to overcome problems when 
 
 <br>
 
+## How do I download Nora?
+
+Go to **[Releases page](https://github.com/Sandakan/Nora/releases) > Assets > and choose the appropriate download** or [just click here to download the latest version of Nora](https://github.com/Sandakan/Nora/releases/latest).
+
 ## App features
 
 It packs a horizon of features including,
