@@ -1223,7 +1223,7 @@ export default function App() {
       newQueue?: string[],
       isShuffleQueue = false,
       playCurrentSongIndex = true,
-      clearPreviousQueueData = false
+      restoreAndClearPreviousQueue = false
     ) => {
       const currentQueue = store.state.localStorage.queue;
       const queue: Queue = {
@@ -1234,22 +1234,42 @@ export default function App() {
             : currentQueue.currentSongIndex,
         queue: newQueue ?? currentQueue.queue
       };
-      if (clearPreviousQueueData) queue.queueBeforeShuffle = [];
-      if (Array.isArray(newQueue) && newQueue.length > 1 && isShuffleQueue) {
+
+      if (
+        restoreAndClearPreviousQueue &&
+        Array.isArray(queue.queueBeforeShuffle) &&
+        queue.queueBeforeShuffle.length > 0
+      ) {
+        const currentQueuePlayingSong = queue.queue.at(currentQueue.currentSongIndex ?? 0);
+        const restoredQueue: string[] = [];
+
+        for (let i = 0; i < queue.queueBeforeShuffle.length; i += 1) {
+          restoredQueue.push(queue.queue[queue.queueBeforeShuffle[i]]);
+        }
+
+        queue.queue = restoredQueue;
+        queue.queueBeforeShuffle = [];
+        if (currentQueuePlayingSong)
+          queue.currentSongIndex = queue.queue.indexOf(currentQueuePlayingSong);
+      }
+
+      if (queue.queue.length > 1 && isShuffleQueue) {
+        // toggleShuffling will be called in the shuffleQueue function
         const { shuffledQueue, positions } = shuffleQueue(
-          queue.queue,
+          // Clone the songIds array because tanstack store thinks its values aren't changed if we don't do this
+          [...queue.queue],
           queue.currentSongIndex ?? currentQueue.currentSongIndex ?? undefined
         );
         queue.queue = shuffledQueue;
         if (positions.length > 0) queue.queueBeforeShuffle = positions;
         queue.currentSongIndex = 0;
-      }
+      } else toggleShuffling(false);
 
       storage.queue.setQueue(queue);
       if (playCurrentSongIndex && typeof currentSongIndex === 'number')
         playSong(currentQueue.queue[currentSongIndex]);
     },
-    [playSong, shuffleQueue]
+    [playSong, shuffleQueue, toggleShuffling]
   );
 
   const updateCurrentSongPlaybackState = useCallback((isPlaying: boolean) => {

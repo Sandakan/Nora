@@ -48,7 +48,7 @@ export interface AppUpdateContextType {
     queue?: string[],
     isShuffleQueue?: boolean,
     playCurrentSongIndex?: boolean,
-    clearPreviousQueueData?: boolean
+    restoreAndClearPreviousQueue?: boolean
   ) => void;
   changeQueueCurrentSongIndex: (currentSongIndex: number) => void;
   updatePlayerType: (type: PlayerTypes) => void;

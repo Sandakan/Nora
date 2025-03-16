@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
@@ -10,7 +10,6 @@ const SongControlsAndSeekbarContainer = () => {
   const isAFavorite = useStore(store, (state) => state.currentSongData.isAFavorite);
   const isKnownSource = useStore(store, (state) => state.currentSongData.isKnownSource);
   const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
-  const queue = useStore(store, (state) => state.localStorage.queue);
   const isShuffling = useStore(store, (state) => state.player.isShuffling);
   const isRepeating = useStore(store, (state) => state.player.isRepeating);
   const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
@@ -21,31 +20,16 @@ const SongControlsAndSeekbarContainer = () => {
     updateQueueData,
     toggleIsFavorite,
     toggleRepeat,
-    toggleShuffling,
     toggleSongPlayback,
     handleSkipForwardClick,
     handleSkipBackwardClick
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const handleQueueShuffle = () => {
-    if (isShuffling) {
-      const newQueue: string[] = [];
-      if (Array.isArray(queue.queueBeforeShuffle) && queue.queueBeforeShuffle.length > 0) {
-        for (let i = 0; i < queue.queueBeforeShuffle.length; i += 1) {
-          newQueue.push(queue.queue[queue.queueBeforeShuffle[i]]);
-        }
-      }
-      updateQueueData(
-        undefined,
-        newQueue.length > 0 ? newQueue : queue.queue,
-        true,
-        undefined,
-        true
-      );
-    }
-    toggleShuffling();
-  };
+  const handleQueueShuffle = useCallback(() => {
+    if (isShuffling) updateQueueData(undefined, undefined, false, false, true);
+    else updateQueueData(undefined, undefined, true, undefined, false);
+  }, [isShuffling, updateQueueData]);
 
   return (
     <div className="song-controls-and-seekbar-container flex flex-col items-center justify-center py-2">

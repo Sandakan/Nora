@@ -36,6 +36,7 @@ const CurrentQueuePage = () => {
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
   const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
   const queue = useStore(store, (state) => state.localStorage.queue);
+  const currentQueue = useStore(store, (state) => state.localStorage.queue.queue);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
 
   const { updateQueueData, addNewNotifications, updateContextMenuData, toggleMultipleSelections } =
@@ -61,14 +62,14 @@ const CurrentQueuePage = () => {
 
   const fetchAllSongsData = useCallback(() => {
     window.api.audioLibraryControls
-      .getSongInfo(queue.queue, 'addedOrder', undefined, undefined, true)
+      .getSongInfo(currentQueue, 'addedOrder', undefined, undefined, true)
       .then((res) => {
         if (res) {
           setQueuedSongs(res);
-          previousQueueRef.current = queue.queue.slice();
+          previousQueueRef.current = currentQueue.slice();
         }
       });
-  }, [queue.queue]);
+  }, [currentQueue]);
 
   useEffect(() => {
     fetchAllSongsData();
@@ -189,7 +190,7 @@ const CurrentQueuePage = () => {
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return undefined;
-    const updatedQueue = Array.from(queue.queue);
+    const updatedQueue = Array.from(currentQueue);
     const [item] = updatedQueue.splice(result.source.index, 1);
     updatedQueue.splice(result.destination.index, 0, item);
 
@@ -199,9 +200,9 @@ const CurrentQueuePage = () => {
   };
 
   const centerCurrentlyPlayingSong = useCallback(() => {
-    const index = queue.queue.indexOf(currentSongData.songId);
+    const index = currentQueue.indexOf(currentSongData.songId);
     if (ListRef && index >= 0) ListRef.current?.scrollToIndex({ index, align: 'center' });
-  }, [currentSongData.songId, queue.queue]);
+  }, [currentSongData.songId, currentQueue]);
 
   useEffect(() => {
     const timeOutId = setTimeout(() => centerCurrentlyPlayingSong(), 1000);
@@ -258,7 +259,7 @@ const CurrentQueuePage = () => {
               key={0}
               className="more-options-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
               iconName="more_horiz"
-              isDisabled={queue.queue.length > 0 === false}
+              isDisabled={currentQueue.length > 0 === false}
               clickHandler={(e) => {
                 e.stopPropagation();
                 const button = e.currentTarget;
@@ -276,7 +277,7 @@ const CurrentQueuePage = () => {
               className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
               iconName={isMultipleSelectionEnabled ? 'remove_done' : 'checklist'}
               clickHandler={() => toggleMultipleSelections(!isMultipleSelectionEnabled, 'songs')}
-              isDisabled={queue.queue.length > 0 === false}
+              isDisabled={currentQueue.length > 0 === false}
               tooltipLabel={t(`common.${isMultipleSelectionEnabled ? 'unselectAll' : 'select'}`)}
             />
             <Button
@@ -284,7 +285,7 @@ const CurrentQueuePage = () => {
               className="select-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
               iconName={isAutoScrolling ? 'flash_off' : 'flash_on'}
               clickHandler={() => setIsAutoScrolling((state) => !state)}
-              isDisabled={queue.queue.length > 0 === false}
+              isDisabled={currentQueue.length > 0 === false}
               tooltipLabel={t(
                 `currentQueuePage.${isAutoScrolling ? 'disableAutoScrolling' : 'enableAutoScrolling'}`
               )}
@@ -294,9 +295,9 @@ const CurrentQueuePage = () => {
               className="shuffle-all-button text-sm"
               iconName="shuffle"
               tooltipLabel={t('currentQueuePage.shuffleQueue')}
-              isDisabled={queue.queue.length > 0 === false}
+              isDisabled={currentQueue.length > 0 === false}
               clickHandler={() => {
-                updateQueueData(undefined, queue.queue, true);
+                updateQueueData(undefined, currentQueue, true);
                 fetchAllSongsData();
                 addNewNotifications([
                   {
@@ -313,7 +314,7 @@ const CurrentQueuePage = () => {
               label={t('currentQueuePage.clearQueue')}
               className="clear-queue-button text-sm"
               iconName="clear"
-              isDisabled={queue.queue.length > 0 === false}
+              isDisabled={currentQueue.length > 0 === false}
               clickHandler={() => {
                 updateQueueData(undefined, []);
                 addNewNotifications([
@@ -328,7 +329,7 @@ const CurrentQueuePage = () => {
             />
           </div>
         </div>
-        {queue.queue.length > 0 && (
+        {currentQueue.length > 0 && (
           <div className="queue-info-container mb-6 ml-8 flex items-center text-font-color-black dark:text-font-color-white">
             <div className="cover-img-container mr-8">
               <Img
@@ -445,7 +446,7 @@ const CurrentQueuePage = () => {
                                     handlerFunction: () => {
                                       updateQueueData(
                                         undefined,
-                                        queue.queue.filter((id) =>
+                                        currentQueue.filter((id) =>
                                           isMultipleSelectionsEnabled
                                             ? !songIds.includes(id)
                                             : id !== song.songId
@@ -467,7 +468,7 @@ const CurrentQueuePage = () => {
             </DragDropContext>
           )}
         </div>
-        {queue.queue.length === 0 && (
+        {currentQueue.length === 0 && (
           <div className="no-songs-container flex h-full w-full flex-col items-center justify-center text-center text-2xl text-[#ccc]">
             <Img src={NoSongsImage} className="mb-8 w-60" alt="" /> {t('currentQueuePage.empty')}
           </div>

@@ -266,7 +266,7 @@ export const reducer = (state: AppReducer, action: AppReducerStateActions): AppR
         }
       };
     case 'TOGGLE_SHUFFLE_STATE': {
-      const isShuffling = action.data ?? state.player.isShuffling;
+      const isShuffling = action.data ?? !state.player.isShuffling;
       return {
         ...state,
         player: {
@@ -478,7 +478,8 @@ export const USER_DATA_TEMPLATE: UserData = {
     sendSongFavoritesDataToLastFM: false,
     sendNowPlayingSongDataToLastFM: false,
     saveLyricsInLrcFilesForSupportedSongs: false,
-    enableDiscordRPC: false
+    enableDiscordRPC: false,
+    saveVerboseLogs: false
   },
   windowPositions: {},
   windowDiamensions: {},
