@@ -10,6 +10,8 @@ import {
 } from '../core/saveLyricsToLrcFile';
 import type { RawResponse } from '@vitalets/google-translate-api/dist/cjs/types';
 
+const GOOGLE_TRANSLATE_COPYRIGHT_STRING = ' Lyrics translated using Google Translate.';
+
 const getTranslatedLyricLines = (raw: RawResponse, translatedLang: string) => {
   if (translatedLang === raw.src) {
     // Lyrics were requested to be translated to the same source language
@@ -60,15 +62,23 @@ const getTranslatedLyrics = async (languageCode: string) => {
       if (length) lyricsArr.push(`[length:${length}]`);
       if (typeof offset === 'number') lyricsArr.push(`[offset:${offset}]`);
       if (copyright)
-        lyricsArr.push(`[copyright:${copyright}. Lyrics translated using Google Translate.]`);
+        lyricsArr.push(
+          `[copyright:${copyright}.${!copyright.includes(GOOGLE_TRANSLATE_COPYRIGHT_STRING) ? GOOGLE_TRANSLATE_COPYRIGHT_STRING : ''}]`
+        );
+
+      const googleTranslateLyrics = getTranslatedLyricLines(raw, translatedLang);
 
       for (let i = 0; i < parsedLyrics.length; i++) {
         const lyric = parsedLyrics[i];
-        const translatedLyric = getTranslatedLyricLines(raw, translatedLang).at(i);
+        const translatedLyric = googleTranslateLyrics.at(i);
 
         if (translatedLyric && 'trans' in translatedLyric) {
           const translatedText = translatedLyric.trans.trim();
-          if (translatedText !== INSTRUMENTAL_LYRIC_IDENTIFIER)
+
+          if (
+            translatedText !== INSTRUMENTAL_LYRIC_IDENTIFIER &&
+            lyric.originalText !== translatedText
+          )
             lyric.translatedTexts.push({
               lang: translatedLang,
               text: translatedText.replaceAll('\n', '')
