@@ -242,7 +242,7 @@ const CurrentQueuePage = () => {
 
   return (
     <MainContainer
-      className="current-queue-container appear-from-bottom relative !h-full overflow-hidden !pb-0"
+      className="current-queue-container appear-from-bottom relative h-full! overflow-hidden pb-0!"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {
@@ -335,7 +335,7 @@ const CurrentQueuePage = () => {
               <Img
                 className={`h-20 w-20 rounded-md shadow-lg ${
                   queue.queueType === 'artist'
-                    ? 'artist-img !rounded-full'
+                    ? 'artist-img rounded-full!'
                     : `${queue.queueType}-img`
                 }`}
                 src={queueInfo.onlineArtworkPath}

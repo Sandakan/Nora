@@ -64,14 +64,14 @@ const OpenLinkConfirmPrompt = (props: OpenLinkConfirmPromptProps) => {
       <div className="buttons-container mt-12 flex justify-end">
         <Button
           label={t('common.cancel')}
-          className={`remove-song-from-library-btn w-[10rem] !py-3 text-font-color-black hover:border-background-color-3 dark:text-font-color-white dark:hover:border-background-color-3 ${buttonClassName}`}
+          className={`remove-song-from-library-btn w-[10rem] py-3! text-font-color-black hover:border-background-color-3 dark:text-font-color-white dark:hover:border-background-color-3 ${buttonClassName}`}
           clickHandler={() => {
             changePromptMenuData(false);
           }}
         />
         <Button
           label={t('openLinkConfirmPrompt.openLink')}
-          className={`remove-song-from-library-btn w-[10rem] !bg-background-color-3 !py-3 text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3 ${buttonClassName}`}
+          className={`remove-song-from-library-btn w-[10rem] bg-background-color-3! py-3! text-font-color-black hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3 ${buttonClassName}`}
           clickHandler={() => {
             storage.preferences.setPreferences('doNotVerifyWhenOpeningLinks', checkboxState);
             window.api.settingsHelpers.openInBrowser(link);

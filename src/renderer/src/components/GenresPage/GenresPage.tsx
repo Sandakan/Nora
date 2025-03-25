@@ -91,7 +91,7 @@ const GenresPage = () => {
 
   return (
     <MainContainer
-      className="genres-list-container appear-from-bottom !h-full overflow-hidden !pb-0 text-font-color-black dark:text-font-color-white"
+      className="genres-list-container appear-from-bottom h-full! overflow-hidden pb-0! text-font-color-black dark:text-font-color-white"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {

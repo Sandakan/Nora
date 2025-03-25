@@ -10,7 +10,7 @@ let isLoadedOnce = false;
 
 const hidePreloader = () => {
   const preloader = document.querySelector('.preloader');
-  const isHidable = preloader && !preloader.classList.contains('!invisible');
+  const isHidable = preloader && !preloader.classList.contains('invisible!');
   console.warn('hide preloader requested', {
     time: window.performance.now() - contentLoadStart,
     state: document.readyState,
@@ -18,7 +18,7 @@ const hidePreloader = () => {
   });
 
   if (isHidable) {
-    preloader.classList.add('!invisible', '!opacity-0');
+    preloader.classList.add('invisible!', 'opacity-0!');
     console.warn(
       'preloader hidden',
       window.performance.now() - contentLoadStart,
@@ -59,7 +59,7 @@ const Preloader = () => {
         <div className="preloader visible absolute z-40 flex h-full w-full items-center justify-center bg-background-color-1 opacity-100 transition-[visibility,opacity] delay-700 dark:bg-dark-background-color-1">
           <Img
             src={AppIcon}
-            className="h-20 w-20 rounded-lg !opacity-100 shadow-2xl"
+            className="h-20 w-20 rounded-lg opacity-100! shadow-2xl"
             loading="eager"
           />
         </div>

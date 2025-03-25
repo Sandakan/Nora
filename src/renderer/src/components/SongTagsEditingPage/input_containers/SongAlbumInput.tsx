@@ -73,8 +73,8 @@ const SongAlbumInput = (props: Props) => {
               </div>
               <Button
                 iconName="close"
-                iconClassName="leading-none dark:!text-font-color-black"
-                className="float-right !mr-0 !border-0 !p-1 outline-1 outline-offset-1 focus-visible:!outline"
+                iconClassName="leading-none dark:text-font-color-black!"
+                className="float-right mr-0! border-0! p-1! outline-1 outline-offset-1 focus-visible:outline!"
                 clickHandler={() => {
                   updateSongInfo((prevData) => {
                     return {
@@ -114,7 +114,7 @@ const SongAlbumInput = (props: Props) => {
         {albumKeyword.trim() && (
           <Button
             label={t('songTagsEditingPage.addNewAlbum', { name: albumKeyword })}
-            className="mt-4 !w-full !bg-background-color-2 hover:!bg-background-color-3 hover:text-font-color-black dark:!bg-dark-background-color-2 hover:dark:!bg-dark-background-color-3 hover:dark:text-font-color-black"
+            className="mt-4 w-full! bg-background-color-2! hover:bg-background-color-3! hover:text-font-color-black dark:bg-dark-background-color-2! dark:hover:bg-dark-background-color-3! dark:hover:text-font-color-black"
             clickHandler={() => {
               updateSongInfo((prevData) => {
                 if (

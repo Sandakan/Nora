@@ -20,7 +20,7 @@ const SongArtistInputResult = (props: Props) => {
     <button
       type="button"
       key={artistData.artistId ?? artistData.name}
-      className="flex w-full cursor-pointer border-b-[1px] border-background-color-2 px-4 py-2 font-light outline-1 outline-offset-1 last:border-b-0 only:border-b-0 odd:bg-background-color-2/10 hover:bg-background-color-2 focus-visible:!outline dark:border-dark-background-color-2 dark:odd:bg-dark-background-color-2/10 dark:hover:bg-dark-background-color-2"
+      className="flex w-full cursor-pointer border-b-[1px] border-background-color-2 px-4 py-2 font-light outline-1 outline-offset-1 last:border-b-0 only:border-b-0 odd:bg-background-color-2/10 hover:bg-background-color-2 focus-visible:outline! dark:border-dark-background-color-2 dark:odd:bg-dark-background-color-2/10 dark:hover:bg-dark-background-color-2"
       onClick={() => {
         updateSongInfo((prevData) => {
           if (isAnAlbumArtist) {

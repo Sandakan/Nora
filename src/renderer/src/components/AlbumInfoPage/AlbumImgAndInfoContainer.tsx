@@ -28,7 +28,7 @@ const AlbumImgAndInfoContainer = (props: Props) => {
               key={artist.artistId}
               artistId={artist.artistId}
               name={artist.name}
-              className="!text-lg"
+              className="text-lg!"
             />
           ];
 

@@ -67,7 +67,7 @@ const DeleteSongFromSystemConfirmPrompt = (props: { songIds: string[] }) => {
       <div className="buttons-container flex items-center justify-end">
         <Button
           label={t('deleteSongFromSystemConfirmPrompt.deleteSong')}
-          className="delete-song-confirm-btn danger-btn float-right mt-6 h-10 w-48 cursor-pointer rounded-lg !bg-font-color-crimson font-medium text-font-color-white outline-none ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson"
+          className="delete-song-confirm-btn danger-btn float-right mt-6 h-10 w-48 cursor-pointer rounded-lg bg-font-color-crimson! font-medium text-font-color-white outline-hidden ease-in-out hover:border-font-color-crimson dark:bg-font-color-crimson! dark:text-font-color-white dark:hover:border-font-color-crimson"
           clickHandler={() => {
             changePromptMenuData(false);
             return window.api.audioLibraryControls

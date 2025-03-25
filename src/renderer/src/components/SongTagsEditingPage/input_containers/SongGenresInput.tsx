@@ -34,8 +34,8 @@ const SongGenresInput = (props: Props) => {
               >
                 <Button
                   iconName="close"
-                  className="material-icons-round !mr-[.375rem] !border-0 !p-[.125rem] outline-1 outline-offset-1 transition-[visibility,opacity] focus-visible:!outline"
-                  iconClassName="leading-none dark:!text-font-color-black"
+                  className="material-icons-round mr-[.375rem]! border-0! p-[.125rem]! outline-1 outline-offset-1 transition-[visibility,opacity] focus-visible:outline!"
+                  iconClassName="leading-none dark:text-font-color-black!"
                   clickHandler={() => {
                     updateSongInfo((prevData) => {
                       return {
@@ -90,7 +90,7 @@ const SongGenresInput = (props: Props) => {
         {genreKeyword.trim() && (
           <Button
             label={t('songTagsEditingPage.addNewGenre')}
-            className="mt-4 !w-full !bg-background-color-2 hover:!bg-background-color-3 hover:text-font-color-black dark:!bg-dark-background-color-2 hover:dark:!bg-dark-background-color-3 hover:dark:text-font-color-black"
+            className="mt-4 w-full! bg-background-color-2! hover:bg-background-color-3! hover:text-font-color-black dark:bg-dark-background-color-2! dark:hover:bg-dark-background-color-3! dark:hover:text-font-color-black"
             clickHandler={() => {
               updateSongInfo((prevData) => {
                 const genres =

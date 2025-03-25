@@ -58,7 +58,7 @@ const AccountsSettings = () => {
                 !isLastFmConnected && 'brightness-90 grayscale'
               }`}
             />
-            <div className="flex-grow-0">
+            <div className="grow-0">
               <p
                 className={`flex items-center font-semibold uppercase ${
                   isLastFmConnected ? 'text-green-500' : 'text-red-500'

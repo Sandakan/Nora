@@ -39,7 +39,7 @@ const PlaylistInfoAndImgContainer = (props: Props) => {
                   src={playlist.artworkPaths.artworkPath}
                   alt="Playlist Cover"
                   loading="eager"
-                  className="!absolute bottom-4 right-4 h-16 w-16 !rounded-lg"
+                  className="absolute! bottom-4 right-4 h-16 w-16 rounded-lg!"
                 />
               </div>
             ) : (

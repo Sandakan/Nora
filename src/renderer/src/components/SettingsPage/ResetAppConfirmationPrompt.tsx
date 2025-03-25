@@ -21,7 +21,7 @@ export const ResetAppConfirmationPrompt = () => {
       <div className="buttons-container flex items-center justify-end">
         <Button
           label={t('settingsPage.resetApp')}
-          className="confirm-app-reset-btn danger-btn float-right mt-6 h-10 w-48 cursor-pointer rounded-lg !bg-font-color-crimson text-font-color-white outline-none ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson"
+          className="confirm-app-reset-btn danger-btn float-right mt-6 h-10 w-48 cursor-pointer rounded-lg bg-font-color-crimson! text-font-color-white outline-hidden ease-in-out hover:border-font-color-crimson dark:bg-font-color-crimson! dark:text-font-color-white dark:hover:border-font-color-crimson"
           clickHandler={() => window.api.appControls.resetApp()}
         />
       </div>

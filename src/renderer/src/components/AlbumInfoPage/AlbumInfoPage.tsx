@@ -191,7 +191,7 @@ const AlbumInfoPage = () => {
 
   return (
     <MainContainer
-      className="album-info-page-container appear-from-bottom h-full !pb-0 pl-8"
+      className="album-info-page-container appear-from-bottom h-full pb-0! pl-8"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {

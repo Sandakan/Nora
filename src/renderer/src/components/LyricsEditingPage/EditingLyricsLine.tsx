@@ -116,7 +116,7 @@ const EditingLyricsLine = (props: Props) => {
   const lyricsLineComponent = !isEditing ? (
     <span
       className={`scale-75 cursor-pointer text-center text-5xl font-medium opacity-50 transition-[opacity,transform] ${shouldHighlight && 'text-font-color-highlight dark:text-dark-font-color-highlight'} ${
-        shouldHighlight ? '!scale-100 !opacity-100 group-hover:opacity-75' : ''
+        shouldHighlight ? 'scale-100! opacity-100! group-hover:opacity-75' : ''
       } ${typeof content.text === 'object' && 'flex flex-wrap items-center justify-center text-wrap'}`}
     >
       {typeof content.text === 'string'
@@ -218,7 +218,7 @@ const EditingLyricsLine = (props: Props) => {
             <Button
               className={`my-2 text-xs opacity-75 ${
                 isEditing &&
-                '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
+                'border-background-color-1! hover:border-background-color-3! dark:border-dark-background-color-1! dark:hover:border-dark-background-color-3!'
               }`}
               label={t('settingsPage.reset')}
               iconName="restart_alt"
@@ -232,7 +232,7 @@ const EditingLyricsLine = (props: Props) => {
             <Button
               className={`my-2 text-xs opacity-75 ${
                 isEditing &&
-                '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
+                'border-background-color-1! hover:border-background-color-3! dark:border-dark-background-color-1! dark:hover:border-dark-background-color-3!'
               }`}
               label={t('lyricsEditingPage.deleteLine')}
               iconName="delete"
@@ -251,7 +251,7 @@ const EditingLyricsLine = (props: Props) => {
             <Button
               className={`my-2 text-xs opacity-75 ${
                 isEditing &&
-                '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
+                'border-background-color-1! hover:border-background-color-3! dark:border-dark-background-color-1! dark:hover:border-dark-background-color-3!'
               }`}
               label={t('lyricsEditingPage.addLineAbove')}
               iconName="step_out"
@@ -274,7 +274,7 @@ const EditingLyricsLine = (props: Props) => {
             <Button
               className={`my-2 text-xs opacity-75 ${
                 isEditing &&
-                '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
+                'border-background-color-1! hover:border-background-color-3! dark:border-dark-background-color-1! dark:hover:border-dark-background-color-3!'
               }`}
               label={t('lyricsEditingPage.addLineBelow')}
               iconName="step_into"
@@ -300,7 +300,7 @@ const EditingLyricsLine = (props: Props) => {
           <Button
             className={`my-2 text-xs opacity-75 ${
               isEditing &&
-              '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
+              'border-background-color-1! hover:border-background-color-3! dark:border-dark-background-color-1! dark:hover:border-dark-background-color-3!'
             }`}
             label={t('lyricsEditingPage.addInstrumentalLineBelow')}
             iconName="music_note"
@@ -324,7 +324,7 @@ const EditingLyricsLine = (props: Props) => {
         <Button
           className={`my-2 !mr-0 text-xs opacity-75 ${
             isEditing &&
-            '!border-background-color-1 hover:!border-background-color-3 dark:!border-dark-background-color-1 dark:hover:!border-dark-background-color-3'
+            'border-background-color-1! hover:border-background-color-3! dark:border-dark-background-color-1! dark:hover:border-dark-background-color-3!'
           }`}
           label={t(`lyricsEditingPage.${isEditing ? 'finishEditing' : 'editLine'}`)}
           iconName={isEditing ? 'done' : 'edit'}

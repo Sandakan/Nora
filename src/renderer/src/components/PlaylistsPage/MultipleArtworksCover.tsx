@@ -62,8 +62,8 @@ const MultipleArtworksCover = (props: Props) => {
             <Img
               // eslint-disable-next-line react/no-array-index-key
               key={i}
-              className={`inline shadow-xl ${type === 1 ? 'rounded-md' : 'rounded-sm'} ${
-                cond && 'col-span-2 row-span-2 !rounded-md'
+              className={`inline shadow-xl ${type === 1 ? 'rounded-md' : 'rounded-xs'} ${
+                cond && 'col-span-2 row-span-2 rounded-md!'
               } ${imgClassName}`}
               src={artwork}
               fallbackSrc={DefaultImgCover}

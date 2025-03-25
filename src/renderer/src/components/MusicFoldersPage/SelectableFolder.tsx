@@ -41,7 +41,7 @@ const SelectableFolder = (props: Props) => {
       >
         <div className="flex items-center">
           <Checkbox
-            className="!mx-2 !my-0"
+            className="mx-2! my-0!"
             id={structure.path}
             isChecked={structure.isSelected ?? false}
             checkedStateUpdateFunction={(state) => updateFolders(state, structure)}
@@ -60,8 +60,8 @@ const SelectableFolder = (props: Props) => {
         </div>
         {subFolders.length > 0 && (
           <Button
-            className="!rounded-full !border-none !p-1 group-hover:bg-background-color-1 dark:group-hover:bg-dark-background-color-1"
-            iconClassName="!text-2xl !leading-none"
+            className="rounded-full! border-none! p-1! group-hover:bg-background-color-1 dark:group-hover:bg-dark-background-color-1"
+            iconClassName="text-2xl! leading-none!"
             id={`${structure.path}RevealBtn`}
             iconName={isSubFoldersVisible ? 'arrow_drop_up' : 'arrow_drop_down'}
             clickHandler={(e) => {

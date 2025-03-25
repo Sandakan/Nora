@@ -41,7 +41,7 @@ const ResetTagsToDefaultPrompt = (props: Props) => {
         />
         <Button
           label={t('resetTagsToDefaultPrompt.resetToDefault')}
-          className="w-[12rem] !bg-background-color-3 !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
+          className="w-[12rem] bg-background-color-3! text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black dark:hover:border-background-color-3"
           clickHandler={resetButtonHandler}
         />
       </div>

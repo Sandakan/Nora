@@ -162,7 +162,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
         <div
           className={`appear-from-bottom mx-auto mt-8 w-[90%] rounded-lg p-4 text-black shadow-md transition-[width,height] dark:text-white ${
             bodyBackgroundImage
-              ? 'bg-background-color-2/75 backdrop-blur-sm dark:bg-dark-background-color-2/75'
+              ? 'bg-background-color-2/75 backdrop-blur-xs dark:bg-dark-background-color-2/75'
               : 'bg-background-color-2 dark:bg-dark-background-color-2'
           } `}
         >
@@ -183,8 +183,8 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
               </span>
               <Button
                 id="toggleSuggestionBox"
-                className="!m-0 !border-0 !p-0 outline-1 outline-offset-1 hover:bg-background-color-1/50 focus-visible:!outline hover:dark:bg-dark-background-color-1/50"
-                iconClassName="!leading-none !text-3xl"
+                className="m-0! border-0! p-0! outline-1 outline-offset-1 hover:bg-background-color-1/50 focus-visible:outline! dark:hover:bg-dark-background-color-1/50"
+                iconClassName="leading-none! text-3xl!"
                 iconName={isMessageVisible ? 'arrow_drop_up' : 'arrow_drop_down'}
                 tooltipLabel={`common.${isMessageVisible ? 'hideSuggestion' : 'showSuggestion'}`}
                 clickHandler={(e) => {
@@ -208,14 +208,14 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
                 <Checkbox
                   id="featArtistsTitleReset"
                   labelContent={t('featArtistsSuggestion.featArtistsTitleReset')}
-                  className="my-4 !text-sm"
+                  className="my-4 text-sm!"
                   isChecked={isRemovingFeatInfoFromTitle}
                   checkedStateUpdateFunction={(state) => setIsRemovingFeatInfoFromTitle(state)}
                 />
               </div>
               <div className="mt-3 flex items-center">
                 <Button
-                  className="!border-0 bg-background-color-1/50 !px-4 !py-2 outline-1 transition-colors hover:bg-background-color-1 hover:!text-font-color-highlight focus-visible:!outline dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:!text-dark-font-color-highlight"
+                  className="border-0! bg-background-color-1/50 px-4! py-2! outline-1 transition-colors hover:bg-background-color-1 hover:text-font-color-highlight! focus-visible:outline! dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:text-dark-font-color-highlight!"
                   iconName="verified"
                   iconClassName="material-icons-round-outlined"
                   label={t('featArtistsSuggestion.addArtistsToSong', {
@@ -226,7 +226,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
                   }
                 />
                 <Button
-                  className="!border-0 bg-background-color-1/50 !px-4 !py-2 outline-1 transition-colors hover:bg-background-color-1 hover:!text-font-color-highlight focus-visible:!outline dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:!text-dark-font-color-highlight"
+                  className="border-0! bg-background-color-1/50 px-4! py-2! outline-1 transition-colors hover:bg-background-color-1 hover:text-font-color-highlight! focus-visible:outline! dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:text-dark-font-color-highlight!"
                   iconName="edit"
                   iconClassName="material-icons-round-outlined"
                   label={t('featArtistsSuggestion.editInMetadataEditingPage')}
@@ -239,7 +239,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
                   }
                 />
                 <Button
-                  className="!mr-0 !border-0 bg-background-color-1/50 !px-4 !py-2 outline-1 transition-colors hover:bg-background-color-1 hover:!text-font-color-highlight focus-visible:!outline dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:!text-dark-font-color-highlight"
+                  className="mr-0! border-0! bg-background-color-1/50 px-4! py-2! outline-1 transition-colors hover:bg-background-color-1 hover:text-font-color-highlight! focus-visible:outline! dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:text-dark-font-color-highlight!"
                   iconName="do_not_disturb_on"
                   iconClassName="material-icons-round-outlined"
                   label={t('common.ignore')}

@@ -123,7 +123,7 @@ const GenreInfoPage = () => {
 
   return (
     <MainContainer
-      className="appear-from-bottom genre-info-page-container !h-full !pb-0"
+      className="appear-from-bottom genre-info-page-container h-full! pb-0!"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {

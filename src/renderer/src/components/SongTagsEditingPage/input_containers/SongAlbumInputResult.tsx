@@ -20,7 +20,7 @@ const SongAlbumInputResult = (props: Props) => {
     <button
       type="button"
       key={albumData.albumId ?? albumData.title}
-      className="flex w-full cursor-pointer border-b-[1px] border-background-color-2 px-4 py-2 text-left font-light outline-1 outline-offset-1 last:border-b-0 only:border-b-0 hover:bg-background-color-2 focus-visible:!outline dark:border-dark-background-color-2 dark:hover:bg-dark-background-color-2"
+      className="flex w-full cursor-pointer border-b-[1px] border-background-color-2 px-4 py-2 text-left font-light outline-1 outline-offset-1 last:border-b-0 only:border-b-0 hover:bg-background-color-2 focus-visible:outline! dark:border-dark-background-color-2 dark:hover:bg-dark-background-color-2"
       onClick={() => {
         updateSongInfo((prevData) => {
           return {
@@ -39,7 +39,7 @@ const SongAlbumInputResult = (props: Props) => {
       <Img
         src={albumData?.artworkPath}
         fallbackSrc={DefaultAlbumArtwork}
-        className="mr-4 aspect-square w-6 rounded-sm"
+        className="mr-4 aspect-square w-6 rounded-xs"
         alt=""
       />
       {albumData.title}

@@ -214,8 +214,8 @@ const SongLyricsEditorInput = (props: Props) => {
           <Button
             className={`mr-3 flex w-fit cursor-pointer list-none items-center !border-0 px-4 py-2 text-font-color-black outline-1 outline-offset-1 transition-[background,color] duration-200 focus-visible:!outline ${
               currentLyricsType === 'synced'
-                ? 'bg-background-color-3 dark:bg-dark-background-color-3 dark:!text-font-color-black'
-                : 'bg-background-color-2 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:hover:!text-font-color-black'
+                ? 'bg-background-color-3 dark:bg-dark-background-color-3 dark:text-font-color-black!'
+                : 'bg-background-color-2 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:hover:text-font-color-black!'
             }`}
             clickHandler={() => setCurrentLyricsType('synced')}
             label={t('common.syncedLyrics')}
@@ -225,8 +225,8 @@ const SongLyricsEditorInput = (props: Props) => {
           <Button
             className={`mr-3 flex w-fit cursor-pointer list-none items-center !border-0 px-4 py-2 text-font-color-black outline-1 outline-offset-1 transition-[background,color] duration-200 focus-visible:!outline ${
               currentLyricsType === 'unsynced'
-                ? 'bg-background-color-3 dark:bg-dark-background-color-3 dark:!text-font-color-black'
-                : 'bg-background-color-2 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:hover:!text-font-color-black'
+                ? 'bg-background-color-3 dark:bg-dark-background-color-3 dark:text-font-color-black!'
+                : 'bg-background-color-2 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:hover:text-font-color-black!'
             }`}
             clickHandler={() => setCurrentLyricsType('unsynced')}
             label={t('common.unsyncedLyrics')}

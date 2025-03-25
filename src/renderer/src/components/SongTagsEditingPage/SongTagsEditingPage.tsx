@@ -527,7 +527,7 @@ function SongTagsEditingPage() {
         )}
 
         {!isMetadataEditingSupported && (
-          <div className="flex !h-full flex-col items-center justify-center dark:text-white/80">
+          <div className="flex h-full! flex-col items-center justify-center dark:text-white/80">
             <span className="material-icons-round-outlined text-6xl">campaign</span>
             <p className="mt-2 text-2xl">{t('songTagsEditingPage.saveTagsNotSupportedTitle')}</p>
             <p

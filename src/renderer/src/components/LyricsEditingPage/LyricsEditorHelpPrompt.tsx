@@ -52,7 +52,7 @@ const LyricsEditorHelpPrompt = (props: Props) => {
               components={{
                 ol: <ol className="list-outside list-decimal pl-4" />,
                 li: <li className="mb-2" />,
-                ShortcutButton: <ShortcutButton className="!mr-1 !inline" />
+                ShortcutButton: <ShortcutButton className="mr-1! inline!" />
               }}
             />
           </div>
@@ -67,7 +67,7 @@ const LyricsEditorHelpPrompt = (props: Props) => {
                 components={{
                   Button: (
                     <Button
-                      className="!mr-0 !inline !border-0 !p-0 !text-base !text-font-color-highlight-2 hover:underline dark:!text-dark-font-color-highlight-2"
+                      className="mr-0! inline! border-0! p-0! text-base! text-font-color-highlight-2! hover:underline dark:text-dark-font-color-highlight-2!"
                       clickHandler={() => changePromptMenuData(true, <AppShortcutsPrompt />)}
                     />
                   )
@@ -85,7 +85,7 @@ const LyricsEditorHelpPrompt = (props: Props) => {
               components={{
                 ol: <ol className="list-outside list-decimal pl-4" />,
                 li: <li className="mb-2" />,
-                ShortcutButton: <ShortcutButton className="!mr-1 !inline" />
+                ShortcutButton: <ShortcutButton className="mr-1! inline!" />
               }}
             />
           </div>
@@ -99,7 +99,7 @@ const LyricsEditorHelpPrompt = (props: Props) => {
               components={{
                 ol: <ol className="list-outside list-decimal pl-4" />,
                 li: <li className="mb-2" />,
-                ShortcutButton: <ShortcutButton className="!mr-1 !inline" />
+                ShortcutButton: <ShortcutButton className="mr-1! inline!" />
               }}
             />
           </div>

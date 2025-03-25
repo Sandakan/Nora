@@ -4,6 +4,7 @@
 import { resolve } from 'path';
 import { defineConfig, externalizeDepsPlugin, swcPlugin } from 'electron-vite';
 import react from '@vitejs/plugin-react-swc';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   main: {
@@ -31,6 +32,6 @@ export default defineConfig({
         '@types': resolve(import.meta.dirname, './src/@types')
       }
     },
-    plugins: [react()]
+    plugins: [react(), tailwindcss()]
   }
 });

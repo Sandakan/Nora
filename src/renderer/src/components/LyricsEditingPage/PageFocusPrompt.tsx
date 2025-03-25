@@ -17,7 +17,7 @@ const PageFocusPrompt = (props: Props) => {
         !isFocused &&
         isTheEditingSongTheCurrSong &&
         !isPlaying &&
-        '!visible !-translate-y-6 !scale-100 !opacity-100'
+        'visible! -translate-y-6! scale-100! opacity-100!'
       }`}
       title="Page focus is required for the page-specific shortcuts to work. Click on this page to gain focus."
     >

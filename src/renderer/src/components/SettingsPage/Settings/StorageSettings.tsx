@@ -173,51 +173,51 @@ const StorageSettings = () => {
               title={t('settingsPage.freeSpace')}
             >
               <div
-                className="!h-full w-[var(--other-applications-size-storage-bar-width)] cursor-pointer bg-[#ffbe76] opacity-75 transition-opacity hover:opacity-100"
+                className="h-full! w-[var(--other-applications-size-storage-bar-width)] cursor-pointer bg-[#ffbe76] opacity-75 transition-opacity hover:opacity-100"
                 title={t('settingsPage.otherApplications')}
               />
               <div
-                className="!h-full w-[var(--artwork-cache-size-storage-bar-width)] cursor-pointer bg-[#55efc4] opacity-75 transition-opacity hover:opacity-100"
+                className="h-full! w-[var(--artwork-cache-size-storage-bar-width)] cursor-pointer bg-[#55efc4] opacity-75 transition-opacity hover:opacity-100"
                 title={t('settingsPage.artworkCache')}
               />
               <div
-                className="!h-full w-[var(--temp-artwork-cache-size-storage-bar-width)] cursor-pointer bg-[#00b894] opacity-75 transition-opacity hover:opacity-100"
+                className="h-full! w-[var(--temp-artwork-cache-size-storage-bar-width)] cursor-pointer bg-[#00b894] opacity-75 transition-opacity hover:opacity-100"
                 title={t('settingsPage.tempArtworkCache')}
               />
               <div
-                className="!h-full w-[var(--song-data-size-storage-bar-width)] cursor-pointer bg-[#00cec9] opacity-75 transition-opacity hover:opacity-100"
+                className="h-full! w-[var(--song-data-size-storage-bar-width)] cursor-pointer bg-[#00cec9] opacity-75 transition-opacity hover:opacity-100"
                 title={t('settingsPage.songsData')}
               />
               <div
-                className="!h-full w-[var(--artist-data-size-storage-bar-width)] cursor-pointer bg-[#0984e3] opacity-75 transition-opacity hover:opacity-100"
+                className="h-full! w-[var(--artist-data-size-storage-bar-width)] cursor-pointer bg-[#0984e3] opacity-75 transition-opacity hover:opacity-100"
                 title={t('settingsPage.artistsData')}
               />
               <div
-                className="!h-full w-[var(--album-data-size-storage-bar-width)] cursor-pointer bg-[#6c5ce7] opacity-75 transition-opacity hover:opacity-100"
+                className="h-full! w-[var(--album-data-size-storage-bar-width)] cursor-pointer bg-[#6c5ce7] opacity-75 transition-opacity hover:opacity-100"
                 title={t('settingsPage.albumsData')}
               />
               <div
-                className="!h-full w-[var(--playlist-data-size-storage-bar-width)] cursor-pointer bg-[#fdcb6e] opacity-75 transition-opacity hover:opacity-100"
+                className="h-full! w-[var(--playlist-data-size-storage-bar-width)] cursor-pointer bg-[#fdcb6e] opacity-75 transition-opacity hover:opacity-100"
                 title={t('settingsPage.playlistsData')}
               />
               <div
-                className="!h-full w-[var(--palette-data-size-storage-bar-width)] cursor-pointer bg-[#badc58] opacity-75 transition-opacity hover:opacity-100"
+                className="h-full! w-[var(--palette-data-size-storage-bar-width)] cursor-pointer bg-[#badc58] opacity-75 transition-opacity hover:opacity-100"
                 title={t('settingsPage.palettesData')}
               />
               <div
-                className="!h-full w-[var(--genre-data-size-storage-bar-width)] cursor-pointer bg-[#e17055] opacity-75 transition-opacity hover:opacity-100"
+                className="h-full! w-[var(--genre-data-size-storage-bar-width)] cursor-pointer bg-[#e17055] opacity-75 transition-opacity hover:opacity-100"
                 title={t('settingsPage.genresData')}
               />
               <div
-                className="!h-full w-[var(--log-size-storage-bar-width)] cursor-pointer bg-[#e84393] opacity-75 transition-opacity hover:opacity-100"
+                className="h-full! w-[var(--log-size-storage-bar-width)] cursor-pointer bg-[#e84393] opacity-75 transition-opacity hover:opacity-100"
                 title={t('settingsPage.appLogs')}
               />
               <div
-                className="!h-full w-[var(--user-data-size-storage-bar-width)] cursor-pointer bg-[#d63031] opacity-75 transition-opacity hover:opacity-100"
+                className="h-full! w-[var(--user-data-size-storage-bar-width)] cursor-pointer bg-[#d63031] opacity-75 transition-opacity hover:opacity-100"
                 title={t('settingsPage.userData')}
               />
               <div
-                className="!h-full w-[var(--app-folder-size-storage-bar-width)] cursor-pointer bg-[#4834d4] opacity-75 transition-opacity hover:opacity-100"
+                className="h-full! w-[var(--app-folder-size-storage-bar-width)] cursor-pointer bg-[#4834d4] opacity-75 transition-opacity hover:opacity-100"
                 title={t('settingsPage.internalAppFiles')}
               />
             </div>
@@ -232,31 +232,31 @@ const StorageSettings = () => {
               style={appDataStorageBarCssProperties}
             >
               <div
-                className="!h-full w-[var(--song-data-size-storage-bar-width)] cursor-pointer bg-[#00cec9] opacity-75 transition-opacity hover:opacity-100"
+                className="h-full! w-[var(--song-data-size-storage-bar-width)] cursor-pointer bg-[#00cec9] opacity-75 transition-opacity hover:opacity-100"
                 title={t('settingsPage.songsData')}
               />
               <div
-                className="!h-full w-[var(--artist-data-size-storage-bar-width)] cursor-pointer bg-[#0984e3] opacity-75 transition-opacity hover:opacity-100"
+                className="h-full! w-[var(--artist-data-size-storage-bar-width)] cursor-pointer bg-[#0984e3] opacity-75 transition-opacity hover:opacity-100"
                 title={t('settingsPage.artistsData')}
               />
               <div
-                className="!h-full w-[var(--album-data-size-storage-bar-width)] cursor-pointer bg-[#6c5ce7] opacity-75 transition-opacity hover:opacity-100"
+                className="h-full! w-[var(--album-data-size-storage-bar-width)] cursor-pointer bg-[#6c5ce7] opacity-75 transition-opacity hover:opacity-100"
                 title={t('settingsPage.albumsData')}
               />
               <div
-                className="!h-full w-[var(--playlist-data-size-storage-bar-width)] cursor-pointer bg-[#fdcb6e] opacity-75 transition-opacity hover:opacity-100"
+                className="h-full! w-[var(--playlist-data-size-storage-bar-width)] cursor-pointer bg-[#fdcb6e] opacity-75 transition-opacity hover:opacity-100"
                 title={t('settingsPage.playlistsData')}
               />
               <div
-                className="!h-full w-[var(--palette-data-size-storage-bar-width)] cursor-pointer bg-[#badc58] opacity-75 transition-opacity hover:opacity-100"
+                className="h-full! w-[var(--palette-data-size-storage-bar-width)] cursor-pointer bg-[#badc58] opacity-75 transition-opacity hover:opacity-100"
                 title={t('settingsPage.palettesData')}
               />
               <div
-                className="!h-full w-[var(--genre-data-size-storage-bar-width)] cursor-pointer bg-[#e17055] opacity-75 transition-opacity hover:opacity-100"
+                className="h-full! w-[var(--genre-data-size-storage-bar-width)] cursor-pointer bg-[#e17055] opacity-75 transition-opacity hover:opacity-100"
                 title={t('settingsPage.genresData')}
               />
-              {/* <div className="!h-full w-[var(--log-size-storage-bar-width)] bg-[#e84393]" /> */}
-              {/* <div className="!h-full w-[var(--user_data-size-storage-bar-width)] bg-[#d63031]" /> */}
+              {/* <div className="h-full! w-[var(--log-size-storage-bar-width)] bg-[#e84393]" /> */}
+              {/* <div className="h-full! w-[var(--user_data-size-storage-bar-width)] bg-[#d63031]" /> */}
             </div>
           </div>
 
@@ -360,7 +360,7 @@ const StorageSettings = () => {
             </span>
             <span className="mx-2">&bull;</span>
             <Button
-              className="!m-0 !rounded-none !border-0 !p-0 !text-xs uppercase outline-1 outline-offset-2 hover:underline focus-visible:!outline"
+              className="m-0! rounded-none! border-0! p-0! text-xs! uppercase outline-1 outline-offset-2 hover:underline focus-visible:outline!"
               label={t('settingsPage.generateStorageMetricsAgain')}
               clickHandler={(_, setIsDisabled, setIsPending) => {
                 setIsDisabled(true);
@@ -385,7 +385,7 @@ const StorageSettings = () => {
             {t('settingsPage.storageMetricsGenerationDisclaimer')}
           </p>
           <Button
-            className="!mr-0 mt-4"
+            className="mr-0! mt-4"
             label={t('settingsPage.generateStorageMetrics')}
             iconName="hourglass_empty"
             clickHandler={(_, setIsDisabled, setIsPending) => {
@@ -407,7 +407,7 @@ const StorageSettings = () => {
           <span className="material-icons-round text-4xl">running_with_errors</span>
           <p className="mt-4">{t('settingsPage.storageMetricsGenerationError')}</p>
           <Button
-            className="!mr-0 mt-4 !rounded-none !border-0 !p-0 !text-xs uppercase outline-1 outline-offset-2 hover:underline focus-visible:!outline"
+            className="mr-0! mt-4 rounded-none! border-0! p-0! text-xs! uppercase outline-1 outline-offset-2 hover:underline focus-visible:outline!"
             label={t('settingsPage.generateStorageMetricsAgain')}
             clickHandler={(_, setIsDisabled, setIsPending) => {
               setIsDisabled(true);

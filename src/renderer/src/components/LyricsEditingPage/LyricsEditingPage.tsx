@@ -362,7 +362,7 @@ const LyricsEditingPage = () => {
 
   return (
     <MainContainer
-      className="appear-from-bottom relative !h-full overflow-hidden !pb-0 text-font-color-black dark:text-font-color-white"
+      className="appear-from-bottom relative h-full! overflow-hidden pb-0! text-font-color-black dark:text-font-color-white"
       onKeyDown={handleShortcuts}
       onFocus={() => setIsFocused(true)}
       onBlur={() => setIsFocused(false)}
@@ -382,7 +382,7 @@ const LyricsEditingPage = () => {
           <Button
             label={t('common.play')}
             iconName="play_arrow"
-            className="!mr-0 mt-4"
+            className="mr-0! mt-4"
             clickHandler={() => songId && playSong(songId)}
           />
         </div>

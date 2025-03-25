@@ -34,7 +34,7 @@ const BlacklistedSong = (props: BlacklistedSongProp) => {
         {songPath}
       </span>
       <Button
-        className="blacklisted-song-restore-btn mr-0 rounded-none border-none text-base font-medium hover:!text-font-color-highlight dark:hover:!text-dark-font-color-highlight"
+        className="blacklisted-song-restore-btn mr-0 rounded-none border-none text-base font-medium hover:text-font-color-highlight! dark:hover:text-dark-font-color-highlight!"
         label="RESTORE"
         clickHandler={() =>
           window.api.audioLibraryControls.restoreBlacklistedSongs([songId]).then(() =>

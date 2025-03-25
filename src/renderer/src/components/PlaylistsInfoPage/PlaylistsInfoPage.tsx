@@ -198,7 +198,7 @@ const PlaylistInfoPage = () => {
 
   return (
     <MainContainer
-      className="main-container playlist-info-page-container !h-full px-8 !pb-0 !pr-0"
+      className="main-container playlist-info-page-container h-full! px-8 pb-0! pr-0!"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {
@@ -316,7 +316,7 @@ const PlaylistInfoPage = () => {
         }}
       />
       {playlistSongs.length === 0 && (
-        <div className="no-songs-container appear-from-bottom relative flex h-full flex-grow flex-col items-center justify-center text-center text-lg font-light text-font-color-black !opacity-80 dark:text-font-color-white">
+        <div className="no-songs-container appear-from-bottom relative flex h-full grow flex-col items-center justify-center text-center text-lg font-light text-font-color-black opacity-80! dark:text-font-color-white">
           <span className="material-icons-round-outlined mb-4 text-5xl">brightness_empty</span>
           {t('playlist.empty')}
         </div>

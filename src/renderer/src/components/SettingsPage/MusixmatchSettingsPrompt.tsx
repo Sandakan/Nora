@@ -66,7 +66,7 @@ const MusixmatchSettingsPrompt = () => {
         <Button
           iconName={showToken ? 'visibility_off' : 'visibility'}
           tooltipLabel={t(`musixmatchSettingsPrompt.${showToken ? 'hideToken' : 'showToken'}`)}
-          className="!m-0 !border-0 !p-0"
+          className="m-0! border-0! p-0!"
           clickHandler={() => setShowToken((prevState) => !prevState)}
           isDisabled={token === '' || !!userData?.customMusixmatchUserToken}
         />

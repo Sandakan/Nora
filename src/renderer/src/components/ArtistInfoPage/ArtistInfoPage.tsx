@@ -235,7 +235,7 @@ const ArtistInfoPage = () => {
               songs={album.songs}
               title={album.title}
               year={album.year}
-              className={bodyBackgroundImage ? '[&_:not(.icon)]:!text-font-color-white' : ''}
+              className={bodyBackgroundImage ? '[&_:not(.icon)]:text-font-color-white!' : ''}
               selectAllHandler={selectAllHandlerForAlbums}
             />
           );
@@ -293,12 +293,12 @@ const ArtistInfoPage = () => {
       className="artist-info-page-container appear-from-bottom relative overflow-y-auto rounded-tl-lg pb-2 pl-2 pr-2 pt-8 [scrollbar-gutter:stable]"
       ref={songsContainerRef}
     >
-      <div className="artist-img-and-info-container relative mb-12 flex flex-row items-center pl-8 [&>*]:z-10">
+      <div className="artist-img-and-info-container relative mb-12 flex flex-row items-center pl-8 *:z-10">
         <div className="artist-img-container relative mr-10 flex max-h-60 items-center justify-center lg:hidden">
           <Img
             src={artistData?.onlineArtworkPaths?.picture_medium}
             fallbackSrc={artistData?.artworkPaths?.artworkPath}
-            className="!aspect-square h-60 w-[15rem] rounded-full object-cover"
+            className="aspect-square! h-60 w-[15rem] rounded-full object-cover"
             loading="eager"
             alt="Album Cover"
             onContextMenu={(e) =>
@@ -328,7 +328,7 @@ const ArtistInfoPage = () => {
             }
           />
           <Button
-            className="absolute -bottom-5 !m-0 flex rounded-full !border-0 bg-background-color-1 !p-3 text-font-color-highlight shadow-xl outline-1 -outline-offset-[6px] hover:bg-background-color-1 focus-visible:!outline dark:bg-dark-background-color-2 dark:hover:bg-dark-background-color-2"
+            className="absolute -bottom-5 m-0! flex rounded-full border-0! bg-background-color-1 p-3! text-font-color-highlight shadow-xl outline-1 -outline-offset-[6px] hover:bg-background-color-1 focus-visible:outline! dark:bg-dark-background-color-2 dark:hover:bg-dark-background-color-2"
             tooltipLabel={t(
               `artistInfoPage.${artistData?.isAFavorite ? `dislikeArtist` : `likeArtist`}`,
               {
@@ -366,7 +366,7 @@ const ArtistInfoPage = () => {
             bodyBackgroundImage
               ? 'text-font-color-white'
               : 'text-font-color-black dark:text-font-color-white'
-          } [&>*]:z-10`}
+          } *:z-10`}
         >
           <div
             className="artist-name mb-2 text-5xl text-font-color-highlight dark:text-dark-font-color-highlight"
@@ -400,7 +400,7 @@ const ArtistInfoPage = () => {
 
       {albums && albums.length > 0 && (
         <MainContainer
-          className="main-container albums-list-container relative [&>*]:z-10"
+          className="main-container albums-list-container relative *:z-10"
           focusable
           onKeyDown={(e) => {
             if (e.ctrlKey && e.key === 'a') {
@@ -413,7 +413,7 @@ const ArtistInfoPage = () => {
             <TitleContainer
               key="appearsInAlbums"
               title={t('artistInfoPage.appearsInAlbums')}
-              titleClassName="!text-2xl text-font-color-black dark:text-font-color-white"
+              titleClassName="text-2xl! text-font-color-black dark:text-font-color-white"
               className={`title-container ${
                 bodyBackgroundImage
                   ? 'text-font-color-white'
@@ -455,7 +455,7 @@ const ArtistInfoPage = () => {
       )}
       {songs && songs.length > 0 && (
         <MainContainer
-          className="main-container songs-list-container relative h-full pb-4 [&>*]:z-10"
+          className="main-container songs-list-container relative h-full pb-4 *:z-10"
           focusable
           onKeyDown={(e) => {
             if (e.ctrlKey && e.key === 'a') {
@@ -468,7 +468,7 @@ const ArtistInfoPage = () => {
             <TitleContainer
               key="appearsInSongs"
               title={t('artistInfoPage.appearsInSongs')}
-              titleClassName="!text-2xl text-font-color-black dark:text-font-color-white"
+              titleClassName="text-2xl! text-font-color-black dark:text-font-color-white"
               className={`title-container ${
                 bodyBackgroundImage
                   ? 'text-font-color-white'
@@ -492,7 +492,7 @@ const ArtistInfoPage = () => {
                 {
                   tooltipLabel: t('common.moreOptions'),
                   className:
-                    'more-options-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0 !bg-background-color-1/40 dark:!bg-dark-background-color-1/40',
+                    'more-options-btn text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0 bg-background-color-1/40! dark:bg-dark-background-color-1/40!',
                   iconName: 'more_horiz',
                   clickHandler: (e) => {
                     e.stopPropagation();
@@ -547,7 +547,7 @@ const ArtistInfoPage = () => {
                   label: t('common.showAll'),
                   iconName: 'apps',
                   className:
-                    'show-all-btn text-sm font-normal !bg-background-color-1/40 dark:!bg-dark-background-color-1/40',
+                    'show-all-btn text-sm font-normal bg-background-color-1/40! dark:bg-dark-background-color-1/40!',
                   clickHandler: () => setIsAllSongsVisible(true),
                   isVisible: songs.length > 5 && !isAllSongsVisible
                 }

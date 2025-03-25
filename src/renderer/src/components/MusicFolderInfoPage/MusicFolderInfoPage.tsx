@@ -146,7 +146,7 @@ const MusicFolderInfoPage = () => {
 
   return (
     <MainContainer
-      className="appear-from-bottom !h-full !pb-0"
+      className="appear-from-bottom h-full! pb-0!"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {

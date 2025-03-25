@@ -26,7 +26,7 @@ const TitleBar = memo(() => {
       id="title-bar"
       className={`relative top-0 z-40 flex h-10 w-full items-center justify-between overflow-hidden bg-transparent text-font-color-black transition-opacity dark:text-font-color-white ${
         bodyBackgroundImage &&
-        'bg-background-color-1/50 !text-font-color-white backdrop-blur-md dark:bg-dark-background-color-1/70'
+        'bg-background-color-1/50 text-font-color-white! backdrop-blur-md dark:bg-dark-background-color-1/70'
       }`}
     >
       <div className="logo-and-app-name-and-navigation-controls-container ml-2 flex h-full w-fit items-center gap-12">
@@ -43,7 +43,7 @@ const TitleBar = memo(() => {
               Nora
               <sup
                 className={`app-version ml-1 cursor-pointer text-[0.6rem] font-semibold uppercase text-font-color-highlight dark:text-dark-font-color-highlight ${
-                  bodyBackgroundImage && '!text-dark-font-color-highlight'
+                  bodyBackgroundImage && 'text-dark-font-color-highlight!'
                 } `}
                 title={`v${version}`}
               >

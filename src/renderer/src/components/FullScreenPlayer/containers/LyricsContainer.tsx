@@ -136,7 +136,7 @@ const LyricsContainer = (props: Props) => {
           source={source}
           copyright={lyrics.lyrics.copyright}
           link={link}
-          className="!items-start !text-left"
+          className="items-start! text-left!"
         />
       );
     }
@@ -145,8 +145,8 @@ const LyricsContainer = (props: Props) => {
 
   return (
     <div
-      className={`mini-player-lyrics-container appear-from-bottom w-ful absolute top-0 flex h-full !max-h-screen w-full !max-w-full select-none flex-col items-start overflow-auto pb-[25%] pl-20 pr-[20%] pt-20 transition-[filter] delay-200 group-focus-within/fullScreenPlayer:blur-sm group-focus-within:brightness-50 group-hover/fullScreenPlayer:blur-sm group-hover/fullScreenPlayer:brightness-50 ${
-        !isCurrentSongPlaying ? 'blur-sm brightness-50' : ''
+      className={`mini-player-lyrics-container appear-from-bottom w-ful absolute top-0 flex h-full !max-h-screen w-full !max-w-full select-none flex-col items-start overflow-auto pb-[25%] pl-20 pr-[20%] pt-20 transition-[filter] delay-200 group-focus-within/fullScreenPlayer:blur-xs group-focus-within:brightness-50 group-hover/fullScreenPlayer:blur-xs group-hover/fullScreenPlayer:brightness-50 ${
+        !isCurrentSongPlaying ? 'blur-xs brightness-50' : ''
       }`}
       id="miniPlayerLyricsContainer"
     >

@@ -146,15 +146,15 @@ const SearchPage = () => {
   const updateSearchInput = useCallback((input: string) => setSearchInput(input), []);
 
   return (
-    <MainContainer className="!h-full !pb-0 [scrollbar-gutter:stable]" ref={searchContainerRef}>
+    <MainContainer className="h-full! pb-0! [scrollbar-gutter:stable]" ref={searchContainerRef}>
       <div className="search-controls-container">
         <div className="search-input-container appear-from-bottom mb-4 flex items-center">
           <div className="search-bar-container flex w-1/2 min-w-[25rem] max-w-xl items-center rounded-3xl bg-background-color-2 px-2 py-1 dark:bg-dark-background-color-2">
             <Button
               className={`!my-1 !ml-1 !mr-2 !rounded-3xl border-none !px-4 !py-2 shadow-sm outline-1 outline-offset-1 focus-visible:!outline ${
                 isPredictiveSearchEnabled
-                  ? 'bg-background-color-3 !text-black dark:bg-dark-background-color-3'
-                  : 'bg-background-color-1/50 !text-font-color-highlight hover:bg-background-color-1 focus-visible:bg-background-color-1 dark:bg-dark-background-color-1/50 dark:!text-dark-font-color-highlight dark:hover:bg-dark-background-color-1 dark:focus-visible:bg-dark-background-color-1'
+                  ? 'bg-background-color-3 text-black! dark:bg-dark-background-color-3'
+                  : 'bg-background-color-1/50 text-font-color-highlight! hover:bg-background-color-1 focus-visible:bg-background-color-1 dark:bg-dark-background-color-1/50 dark:text-dark-font-color-highlight! dark:hover:bg-dark-background-color-1 dark:focus-visible:bg-dark-background-color-1'
               }`}
               iconName={isPredictiveSearchEnabled ? 'auto_fix' : 'auto_fix_off'}
               tooltipLabel={t(
@@ -175,7 +175,7 @@ const SearchPage = () => {
               type="search"
               name="search"
               id="searchBar"
-              className="h-full w-full border-2 border-[transparent] bg-[transparent] text-font-color-black outline-none placeholder:text-font-color-highlight dark:text-font-color-white dark:placeholder:text-dark-font-color-highlight"
+              className="h-full w-full border-2 border-[transparent] bg-[transparent] text-font-color-black outline-hidden placeholder:text-font-color-highlight dark:text-font-color-white dark:placeholder:text-dark-font-color-highlight"
               aria-label="Search"
               placeholder={t('searchPage.searchForAnything')}
               value={searchInput}
@@ -206,7 +206,7 @@ const SearchPage = () => {
           <ul className="flex items-center">{filters}</ul>
         </div>
       </div>
-      <div className="search-results-container relative !h-full">
+      <div className="search-results-container relative h-full!">
         {/* MOST RELEVANT SEARCH RESULTS */}
         <MostRelevantSearchResultsContainer searchResults={searchResults} />
         {/* SONG SEARCH RESULTS */}

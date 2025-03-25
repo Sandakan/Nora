@@ -99,7 +99,7 @@ const AllSearchResultsPage = () => {
   }, [fetchSearchResults]);
 
   return (
-    <MainContainer className="main-container all-search-results-container !h-full !pb-0">
+    <MainContainer className="main-container all-search-results-container h-full! pb-0!">
       <>
         <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
           <div className="container flex">

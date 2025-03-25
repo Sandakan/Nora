@@ -48,7 +48,7 @@ const Hyperlink = (props: HyperlinkProp) => {
 
   return (
     <span
-      className={`about-link w-fit cursor-pointer font-medium text-font-color-highlight-2 underline outline-1 outline-offset-1 focus:!outline dark:text-dark-font-color-highlight-2 ${className}`}
+      className={`about-link w-fit cursor-pointer font-medium text-font-color-highlight-2 underline outline-1 outline-offset-1 focus:outline! dark:text-dark-font-color-highlight-2 ${className}`}
       title={link}
       onClick={openLinkConfirmPrompt}
       role="link"

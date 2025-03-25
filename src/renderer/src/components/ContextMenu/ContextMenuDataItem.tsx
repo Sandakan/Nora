@@ -7,7 +7,7 @@ const ContextMenuDataItem = (props: { data: ContextMenuAdditionalData }) => {
   return (
     <div className="context-menu-data-item flex max-w-[18rem] items-center border-b-[1px] border-b-font-color-dimmed/50 px-3 py-2 font-light text-font-color-black dark:text-font-color-white">
       <Img
-        className={`mr-2 aspect-square w-8 rounded-sm ${artworkClassName}`}
+        className={`mr-2 aspect-square w-8 rounded-xs ${artworkClassName}`}
         src={artworkPath}
         loading="eager"
         alt="Context menu data item artwork"

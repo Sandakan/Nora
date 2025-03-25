@@ -152,14 +152,14 @@ const Sidebar = memo(() => {
 
   return (
     <nav
-      className={`side-bar relative z-20 order-1 !h-full w-[30%] !max-w-[18rem] flex-grow rounded-tr-2xl transition-[width] ${
+      className={`side-bar relative z-20 order-1 !h-full w-[30%] !max-w-[18rem] grow rounded-tr-2xl transition-[width] ${
         bodyBackgroundImage
           ? 'bg-side-bar-background/50 backdrop-blur-md dark:bg-dark-background-color-2/50'
           : 'bg-side-bar-background dark:bg-dark-background-color-2'
       } delay-200 lg:absolute lg:w-14 lg:hover:w-[30%] lg:hover:shadow-2xl md:hover:w-60`}
     >
       <ErrorBoundary>
-        <ul className="relative flex !h-full flex-col gap-1 overflow-x-hidden pb-2 pt-4">
+        <ul className="relative flex h-full! flex-col gap-1 overflow-x-hidden pb-2 pt-4">
           {sideBarItems}
         </ul>
       </ErrorBoundary>

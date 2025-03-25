@@ -74,7 +74,7 @@ const Folder = (props: FolderProps) => {
           subFolders={subFolder.subFolders}
           isBlacklisted={subFolder.isBlacklisted}
           songIds={subFolder.songIds}
-          className={`!w-full ${className}`}
+          className={`w-full! ${className}`}
         />
       ));
     }
@@ -208,13 +208,13 @@ const Folder = (props: FolderProps) => {
             title: t('folder.selectedFolderCount', {
               count: multipleSelectionsData.multipleSelections.length
             }),
-            artworkClassName: '!w-6',
+            artworkClassName: 'w-6!',
             artworkPath: FolderImg
           }
         : {
             title: folderName || 'Unknown Folder',
             artworkPath: FolderImg,
-            artworkClassName: '!w-6',
+            artworkClassName: 'w-6!',
             subTitle: t('common.songWithCount', { count: noOfSongs }),
             subTitle2:
               subFolders.length > 0
@@ -239,12 +239,12 @@ const Folder = (props: FolderProps) => {
         role="button"
         className={`group flex w-full cursor-pointer items-center justify-between rounded-md px-4 py-2 outline-1 -outline-offset-2 transition-colors focus-visible:!outline dark:text-font-color-white ${
           isAMultipleSelection
-            ? '!bg-background-color-3/90 !text-font-color-black dark:!bg-dark-background-color-3/90 dark:!text-font-color-black'
-            : 'hover:!bg-background-color-2 dark:hover:!bg-dark-background-color-2'
-        } ${isBlacklisted && '!opacity-50'} ${
+            ? 'bg-background-color-3/90! text-font-color-black! dark:bg-dark-background-color-3/90! dark:text-font-color-black!'
+            : 'hover:bg-background-color-2! dark:hover:bg-dark-background-color-2!'
+        } ${isBlacklisted && 'opacity-50!'} ${
           (index + 1) % 2 === 1
             ? 'bg-background-color-2/50 dark:bg-dark-background-color-2/40'
-            : '!bg-background-color-1 dark:!bg-dark-background-color-1'
+            : 'bg-background-color-1! dark:bg-dark-background-color-1!'
         }`}
         onClick={(e) => {
           e.stopPropagation();
@@ -312,8 +312,8 @@ const Folder = (props: FolderProps) => {
           )}
           {subFolders.length > 0 && (
             <Button
-              className="ml-4 !rounded-full !border-none !p-1 group-hover:bg-background-color-1 dark:group-hover:bg-dark-background-color-1"
-              iconClassName="!text-2xl !leading-none"
+              className="ml-4 rounded-full! border-none! p-1! group-hover:bg-background-color-1 dark:group-hover:bg-dark-background-color-1"
+              iconClassName="text-2xl! leading-none!"
               iconName={isSubFoldersVisible ? 'arrow_drop_up' : 'arrow_drop_down'}
               clickHandler={(e) => {
                 e.stopPropagation();

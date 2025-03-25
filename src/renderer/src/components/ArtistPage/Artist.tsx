@@ -277,7 +277,7 @@ export const Artist = (props: ArtistProp) => {
             title: props.name,
             artworkPath:
               props?.onlineArtworkPaths?.picture_small || props?.artworkPaths?.optimizedArtworkPath,
-            artworkClassName: '!rounded-full',
+            artworkClassName: 'rounded-full!',
             subTitle: t(`common.songWithCount`, {
               count: props.songIds.length
             })
@@ -300,7 +300,7 @@ export const Artist = (props: ArtistProp) => {
       // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
       className={`artist ${appearFromBottom && 'appear-from-bottom'} mr-2 flex h-44 w-40 cursor-pointer flex-col justify-between overflow-hidden rounded-lg p-4 hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50 ${
         props.className
-      } ${isAMultipleSelection ? '!bg-background-color-3 dark:!bg-dark-background-color-3' : ''}`}
+      } ${isAMultipleSelection ? 'bg-background-color-3! dark:bg-dark-background-color-3!' : ''}`}
       onContextMenu={(e) => {
         e.stopPropagation();
         updateContextMenuData(true, artistContextMenus, e.pageX, e.pageY, contextMenuItemData);
@@ -323,7 +323,7 @@ export const Artist = (props: ArtistProp) => {
         {isAFavorite && (
           <span
             className={`material-icons-round absolute -bottom-2 z-10 flex rounded-full bg-background-color-1 p-2 text-2xl !text-font-color-highlight shadow-lg dark:bg-dark-background-color-2 dark:!text-dark-font-color-highlight ${
-              isAMultipleSelection && '!bg-background-color-3 dark:!bg-dark-background-color-3'
+              isAMultipleSelection && 'bg-background-color-3! dark:bg-dark-background-color-3!'
             }`}
           >
             favorite
@@ -348,7 +348,7 @@ export const Artist = (props: ArtistProp) => {
       <div className="artist-info-container max-h-1/5 relative">
         <Button
           className={`name-container !m-0 !block !w-full !max-w-full truncate !rounded-none !border-0 bg-transparent !p-0 text-center !text-lg outline-1 outline-offset-1 hover:bg-transparent hover:underline focus-visible:!outline lg:text-base dark:bg-transparent dark:hover:bg-transparent ${
-            isAMultipleSelection && '!text-font-color-black dark:!text-font-color-black'
+            isAMultipleSelection && 'text-font-color-black! dark:text-font-color-black!'
           }`}
           label={props.name === '' ? 'Unknown Artist' : props.name}
           clickHandler={goToArtistInfoPage}

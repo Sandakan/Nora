@@ -41,7 +41,7 @@ const LyricsProgressBar = (props: Props) => {
   return (
     <span
       ref={myElementRef}
-      className="!visible mt-1 block h-1 w-1/2 min-w-[2rem] max-w-[4rem] rounded-md bg-font-color-highlight/25 !opacity-100 transition-[visibility,opacity] dark:bg-dark-font-color-highlight/25"
+      className="visible! mt-1 block h-1 w-1/2 min-w-[2rem] max-w-[4rem] rounded-md bg-font-color-highlight/25 opacity-100! transition-[visibility,opacity] dark:bg-dark-font-color-highlight/25"
     >
       <span className="block h-full w-[var(--duration)] rounded-md bg-font-color-highlight/40 transition-[width] duration-300 dark:bg-dark-font-color-highlight/50" />
     </span>

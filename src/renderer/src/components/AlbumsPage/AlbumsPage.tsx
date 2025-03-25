@@ -88,7 +88,7 @@ const AlbumsPage = () => {
 
   return (
     <MainContainer
-      className="appear-from-bottom albums-list-container !h-full overflow-hidden !pb-0"
+      className="appear-from-bottom albums-list-container h-full! overflow-hidden pb-0!"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {
@@ -142,7 +142,7 @@ const AlbumsPage = () => {
           </div>
         )}
         <div
-          className={`albums-container h-full w-full flex-grow ${!(albumsData && albumsData.length > 0) && 'hidden'}`}
+          className={`albums-container h-full w-full grow ${!(albumsData && albumsData.length > 0) && 'hidden'}`}
         >
           {albumsData && albumsData.length > 0 && (
             <VirtualizedGrid

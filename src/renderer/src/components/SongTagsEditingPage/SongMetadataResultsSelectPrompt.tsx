@@ -117,7 +117,7 @@ const SongMetadataResultsSelectPage = (props: SongMetadataResultsSelectPageProp)
           clickHandler={() =>
             fetchSongResults(songData.songTitle, songData.songArtists.split(', '))
           }
-          className="!w-32 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:hover:border-background-color-3"
+          className="w-32! bg-background-color-3! px-8 text-lg text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:hover:border-background-color-3"
         />
       </div>
 

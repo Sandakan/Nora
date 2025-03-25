@@ -41,7 +41,7 @@ const Checkbox = memo((props: CheckboxProp) => {
     <label
       htmlFor={id}
       className={`checkbox-and-labels-container ml-2 mt-4 flex !w-fit items-center outline-1 outline-offset-1 transition-opacity focus-visible:!outline ${
-        isDisabled && '!cursor-not-allowed opacity-50'
+        isDisabled && 'cursor-not-allowed! opacity-50'
       } ${className}`}
       tabIndex={isDisabled ? -1 : 0}
       onKeyDown={focusInput}
@@ -58,7 +58,7 @@ const Checkbox = memo((props: CheckboxProp) => {
       />
       <label
         className={`checkmark flex h-5 w-5 cursor-pointer items-center justify-center rounded-md border-2 border-font-color-highlight bg-[transparent] shadow-lg peer-checked:bg-font-color-highlight dark:border-dark-font-color-highlight dark:peer-checked:bg-dark-font-color-highlight ${
-          isDisabled && '!cursor-not-allowed'
+          isDisabled && 'cursor-not-allowed!'
         }`}
         htmlFor={id}
       >
@@ -69,7 +69,7 @@ const Checkbox = memo((props: CheckboxProp) => {
       {labelContent && (
         <label
           htmlFor={id}
-          className={`info ml-4 cursor-pointer ${isDisabled && '!cursor-not-allowed'}`}
+          className={`info ml-4 cursor-pointer ${isDisabled && 'cursor-not-allowed!'}`}
         >
           {labelContent}
         </label>

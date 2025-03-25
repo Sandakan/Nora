@@ -42,10 +42,10 @@ const EnhancedSyncedLyricWord = (props: Props) => {
       onClick={() => updateSongPosition(start)}
       className={`mr-2 text-font-color-black last:mr-0 dark:text-font-color-white ${
         isInRange
-          ? '!text-opacity-90'
+          ? 'text-opacity-90!'
           : isActive
-            ? '!text-opacity-50'
-            : '!text-opacity-20 hover:!text-opacity-75'
+            ? 'text-opacity-50!'
+            : 'text-opacity-20! hover:text-opacity-75!'
       }`}
     >
       {text}

@@ -76,22 +76,22 @@ const Notification = (props: AppNotification) => {
 
   return (
     <div
-      className="notification appear-from-bottom group relative mt-2 flex h-fit max-h-32 min-h-[50px] w-fit max-w-md justify-between rounded-full bg-context-menu-background/90 text-sm font-light text-font-color-black shadow-[5px_25px_50px_0px_rgba(0,0,0,0.2)] backdrop-blur-sm transition-[opacity,transform,visibility] ease-in-out first-of-type:mt-2 dark:bg-dark-context-menu-background/90 dark:text-font-color-white"
+      className="notification appear-from-bottom group relative mt-2 flex h-fit max-h-32 min-h-[50px] w-fit max-w-md justify-between rounded-full bg-context-menu-background/90 text-sm font-light text-font-color-black shadow-[5px_25px_50px_0px_rgba(0,0,0,0.2)] backdrop-blur-xs transition-[opacity,transform,visibility] ease-in-out first-of-type:mt-2 dark:bg-dark-context-menu-background/90 dark:text-font-color-white"
       id="notificationPanelsContainer"
       ref={notificationRef}
       style={notificationPanelStyles}
     >
       <div
-        className={`progress-bar-container absolute h-full w-full overflow-hidden rounded-full before:absolute before:h-full before:w-0 before:rounded-sm before:bg-font-color-highlight/25 before:opacity-0 before:transition-[opacity,width] before:content-[''] dark:before:bg-dark-font-color-highlight/25 ${
+        className={`progress-bar-container absolute h-full w-full overflow-hidden rounded-full before:absolute before:h-full before:w-0 before:rounded-xs before:bg-font-color-highlight/25 before:opacity-0 before:transition-[opacity,width] before:content-[''] dark:before:bg-dark-font-color-highlight/25 ${
           type === 'WITH_PROGRESS_BAR' &&
           progressBarData &&
           progressBarData.total !== progressBarData.value &&
-          `before:!w-[var(--loading-bar-progress,0%)] before:!opacity-100`
+          `before:w-(--loading-bar-progress,0%)! before:opacity-100!`
         } ${
           type !== 'WITH_PROGRESS_BAR' ||
           (type === 'WITH_PROGRESS_BAR' && progressBarData.total === progressBarData.value)
-            ? `before:!animate-[widthFillAnimation_var(--notification-duration)_ease-in-out] before:!opacity-40 dark:before:!opacity-15`
-            : 'before:!animate-none'
+            ? `before:animate-[widthFillAnimation_var(--notification-duration)_ease-in-out]! before:opacity-40! dark:before:opacity-15!`
+            : 'before:animate-none!'
         }`}
       />
       <div className="close-button-container invisible absolute top-1/2 flex -translate-x-10 -translate-y-1/2 flex-col items-center justify-center overflow-hidden opacity-0 transition-[transform,visibility,opacity] delay-200 group-hover:visible group-hover:-translate-x-14 group-hover:opacity-100">

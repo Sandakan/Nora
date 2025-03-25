@@ -9,7 +9,7 @@ const NetworkIndicator = () => {
   return (
     <div
       className={`network-indicator group mr-1 flex cursor-pointer items-center justify-center rounded-md bg-background-color-2 px-3 py-1 text-center transition-[background] dark:bg-dark-background-color-2 ${
-        isOnline && 'invisible hidden !transition-[visibility] delay-[2500ms] duration-150'
+        isOnline && 'invisible hidden transition-[visibility]! delay-[2500ms] duration-150'
       }`}
       title={t(`common.${isOnline ? 'hasInternet' : 'noInternet'}`)}
     >

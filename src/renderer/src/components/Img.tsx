@@ -27,7 +27,7 @@ type ImgProps = {
 };
 
 /* <picture
-  className={`outline-1 outline-offset-4 focus-visible:!outline ${className}`}
+  className={`outline-1 outline-offset-4 focus-visible:outline! ${className}`}
   tabIndex={tabIndex}
 >
   <source srcSet={src} />
@@ -103,7 +103,7 @@ const Img = memo((props: ImgProps) => {
       className={`relative outline-1 outline-offset-4 focus-visible:!outline ${
         enableImgFadeIns && isFirstTimeRef.current
           ? 'opacity-0 transition-opacity delay-[250ms]'
-          : '!opacity-100 !transition-none'
+          : 'opacity-100! transition-none!'
       } ${className}`}
       draggable={draggable}
       onError={(e) => {
@@ -135,7 +135,7 @@ const Img = memo((props: ImgProps) => {
         if (isFirstTimeRef.current) {
           isFirstTimeRef.current = false;
         }
-        e.currentTarget.classList.add('!opacity-100');
+        e.currentTarget.classList.add('opacity-100!');
         if (showImgPropsOnTooltip) {
           const img = new Image();
           img.onload = () => {

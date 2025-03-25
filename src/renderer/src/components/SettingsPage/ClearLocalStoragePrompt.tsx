@@ -22,7 +22,7 @@ const ClearLocalStoragePrompt = () => {
           components={{
             p: <p className="mb-1" />,
             ul: (
-              <ul className="ml-4 list-inside list-disc marker:text-font-color-highlight marker:dark:text-dark-font-color-highlight" />
+              <ul className="ml-4 list-inside list-disc marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight" />
             ),
             li: <li className="text-sm font-light" />
           }}
@@ -34,7 +34,7 @@ const ClearLocalStoragePrompt = () => {
       <div className="buttons-container flex items-center justify-end">
         <Button
           label={t('settingsPage.clearOptionalData')}
-          className="confirm-app-reset-btn danger-btn float-right mt-6 h-10 w-48 cursor-pointer rounded-lg !bg-font-color-crimson text-font-color-white outline-none ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson"
+          className="confirm-app-reset-btn danger-btn float-right mt-6 h-10 w-48 cursor-pointer rounded-lg bg-font-color-crimson! text-font-color-white outline-hidden ease-in-out hover:border-font-color-crimson dark:bg-font-color-crimson! dark:text-font-color-white dark:hover:border-font-color-crimson"
           clickHandler={() => {
             resetLocalStorage();
             window.api.appControls.restartRenderer('LOCAL_STORAGE_CLEARED');

@@ -88,8 +88,8 @@ const PromptMenu = () => {
     <dialog
       className={`dialog-menu relative left-1/2 top-1/2 h-fit max-h-[80%] min-h-[300px] w-[80%] min-w-[800px] max-w-[90%] -translate-x-1/2 -translate-y-1/2 rounded-3xl bg-background-color-1 pb-10 shadow-[rgba(100,100,111,0.2)_0px_7px_29px_0px] transition-[transform,visibility,opacity] ease-in-out open:backdrop:transition-[background,backdrop-filter] dark:bg-dark-background-color-1 ${
         promptMenuData.isVisible
-          ? 'open:animate-dialog-appear-ease-in-out open:backdrop:bg-[hsla(228deg,7%,14%,0.75)] open:backdrop:dark:bg-[hsla(228deg,7%,14%,0.75)]'
-          : 'animate-dialog-dissappear-ease-in-out backdrop:bg-[hsla(228deg,7%,14%,0)] backdrop:dark:bg-[hsla(228deg,7%,14%,0)]'
+          ? 'open:animate-dialog-appear-ease-in-out open:backdrop:bg-[hsla(228deg,7%,14%,0.75)] dark:open:backdrop:bg-[hsla(228deg,7%,14%,0.75)]'
+          : 'animate-dialog-dissappear-ease-in-out backdrop:bg-[hsla(228deg,7%,14%,0)] dark:backdrop:bg-[hsla(228deg,7%,14%,0)]'
       } `}
       id="prompt-menu"
       onClick={(e) => {
@@ -101,10 +101,10 @@ const PromptMenu = () => {
         <PromptMenuNavigationControlsContainer />
         <Button
           key={0}
-          className="prompt-menu-close-btn previousPageBtn !m-0 flex h-fit !rounded-md !border-0 !p-0 !px-2 !py-1 outline-1 outline-offset-1 !transition-[background,transform,visibility,opacity] hover:bg-background-color-2 hover:text-font-color-highlight dark:hover:bg-dark-background-color-2 dark:hover:text-dark-font-color-highlight"
+          className="prompt-menu-close-btn previousPageBtn m-0! flex h-fit rounded-md! border-0! p-0! px-2! py-1! outline-1 outline-offset-1 transition-[background,transform,visibility,opacity]! hover:bg-background-color-2 hover:text-font-color-highlight dark:hover:bg-dark-background-color-2 dark:hover:text-dark-font-color-highlight"
           iconName="close"
           tooltipLabel={t('titleBar.close')}
-          iconClassName="!leading-none !text-xl"
+          iconClassName="leading-none! text-xl!"
           clickHandler={(e) => {
             e.stopPropagation();
             changePromptMenuData(false);

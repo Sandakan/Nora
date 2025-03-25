@@ -31,7 +31,7 @@ const GenreImgAndInfoContainer = (props: Props) => {
             className="mr-8 aspect-square max-w-[14rem] rounded-lg"
             loading="eager"
           />
-          <div className="genre-info-container flex-grow">
+          <div className="genre-info-container grow">
             <div className="font-semibold uppercase tracking-wider opacity-50">
               {t('common.genre_one')}
             </div>

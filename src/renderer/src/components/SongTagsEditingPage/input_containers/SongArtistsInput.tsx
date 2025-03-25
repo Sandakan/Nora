@@ -53,8 +53,8 @@ const SongArtistsInput = (props: Props) => {
               >
                 <Button
                   iconName="close"
-                  className="material-icons-round mr-2 !border-0 !p-[.125rem] opacity-0 outline-1 outline-offset-1 transition-[visibility,opacity] focus-visible:!outline group-focus-within:opacity-100 group-hover:opacity-100"
-                  iconClassName="leading-none dark:!text-font-color-black"
+                  className="material-icons-round mr-2 border-0! p-[.125rem]! opacity-0 outline-1 outline-offset-1 transition-[visibility,opacity] focus-visible:outline! group-focus-within:opacity-100 group-hover:opacity-100"
+                  iconClassName="leading-none dark:text-font-color-black!"
                   clickHandler={() => {
                     updateSongInfo((prevData) => {
                       return {
@@ -67,7 +67,7 @@ const SongArtistsInput = (props: Props) => {
                 <Img
                   src={artist.onlineArtworkPaths?.picture_small}
                   fallbackSrc={artist.artworkPath}
-                  className="!absolute mr-2 aspect-square w-6 rounded-full opacity-100 transition-[visibility,opacity] group-focus-within:invisible group-focus-within:opacity-0 group-hover:invisible group-hover:opacity-0"
+                  className="absolute! mr-2 aspect-square w-6 rounded-full opacity-100 transition-[visibility,opacity] group-focus-within:invisible group-focus-within:opacity-0 group-hover:invisible group-hover:opacity-0"
                   alt=""
                 />{' '}
                 {artist.name}
@@ -96,7 +96,7 @@ const SongArtistsInput = (props: Props) => {
             label={t('songTagsEditingPage.addNewArtist', {
               name: artistKeyword
             })}
-            className="mt-4 !w-full !bg-background-color-2 hover:!bg-background-color-3 hover:text-font-color-black dark:!bg-dark-background-color-2 hover:dark:!bg-dark-background-color-3 hover:dark:text-font-color-black"
+            className="mt-4 w-full! bg-background-color-2! hover:bg-background-color-3! hover:text-font-color-black dark:bg-dark-background-color-2! dark:hover:bg-dark-background-color-3! dark:hover:text-font-color-black"
             clickHandler={() => {
               updateSongInfo((prevData) => {
                 const artists =

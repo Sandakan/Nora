@@ -133,7 +133,7 @@ const UpNextSongPopup = (props: Props) => {
     <div
       className={`next-song appear-from-bottom group/nextSong relative flex max-w-full items-center rounded-full px-3 py-1 text-xs text-font-color-black dark:text-font-color-white ${
         isSemiTransparent
-          ? 'bg-background-color-2/75 backdrop-blur-sm dark:bg-dark-background-color-2/75'
+          ? 'bg-background-color-2/75 backdrop-blur-xs dark:bg-dark-background-color-2/75'
           : 'bg-background-color-2 dark:bg-dark-background-color-2'
       } ${className}`}
     >
@@ -142,7 +142,7 @@ const UpNextSongPopup = (props: Props) => {
           {t('player.upNext')}
         </span>{' '}
         <span
-          className="cursor-pointer outline-1 outline-offset-1 hover:underline focus-visible:!outline"
+          className="cursor-pointer outline-1 outline-offset-1 hover:underline focus-visible:outline!"
           onClick={() => showSongInfoPage(upNextSongData.songId)}
           onKeyDown={(e) => e.key === 'Enter' && showSongInfoPage(upNextSongData.songId)}
         >
@@ -155,7 +155,7 @@ const UpNextSongPopup = (props: Props) => {
               {t('player.by')}
             </span>{' '}
             <span
-              className="cursor-pointer outline-1 outline-offset-1 hover:underline focus-visible:!outline"
+              className="cursor-pointer outline-1 outline-offset-1 hover:underline focus-visible:outline!"
               onClick={() =>
                 upNextSongData?.artists![0] &&
                 changeCurrentActivePage('ArtistInfo', {
@@ -181,7 +181,7 @@ const UpNextSongPopup = (props: Props) => {
       <Button
         iconName="close"
         tooltipLabel={t('player.closeUpNext')}
-        className="!m-0 !hidden !border-none !py-0 !pl-1 !pr-0 !text-base !text-font-color-highlight outline-1 outline-offset-1 focus-visible:!outline group-hover/nextSong:!flex dark:!text-dark-font-color-highlight"
+        className="m-0! hidden! border-none! py-0! pl-1! pr-0! text-base! text-font-color-highlight! outline-1 outline-offset-1 focus-visible:outline! group-hover/nextSong:flex! dark:text-dark-font-color-highlight!"
         clickHandler={() => setUpNextSongData(undefined)}
       />
     </div>

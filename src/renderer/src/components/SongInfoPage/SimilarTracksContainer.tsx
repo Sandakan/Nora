@@ -141,16 +141,16 @@ const SimilarTracksContainer = (props: Props) => {
                 label: t('common.play'),
                 clickHandler: () => handleSongPlayBtnClick(),
                 iconName: 'play_arrow',
-                className: '!bg-background-color-1/40 dark:!bg-dark-background-color-1/40'
+                className: 'bg-background-color-1/40! dark:bg-dark-background-color-1/40!'
               },
               {
                 label: t('common.playNextAll'),
                 clickHandler: addSongsToPlayNext,
                 iconName: 'shortcut',
-                className: '!bg-background-color-1/40 dark:!bg-dark-background-color-1/40'
+                className: 'bg-background-color-1/40! dark:bg-dark-background-color-1/40!'
               }
             ]}
-            titleClassName="!text-xl text-font-color-black !font-normal dark:text-font-color-white"
+            titleClassName="text-xl! text-font-color-black font-normal! dark:text-font-color-white"
             className={`title-container ${
               bodyBackgroundImage
                 ? 'text-font-color-white'
@@ -164,7 +164,7 @@ const SimilarTracksContainer = (props: Props) => {
         <>
           <TitleContainer
             title={t('songInfoPage.otherSimilarTracks')}
-            titleClassName="!text-xl text-font-color-black !font-normal dark:text-font-color-white"
+            titleClassName="text-xl! text-font-color-black font-normal! dark:text-font-color-white"
             className={`title-container ${
               bodyBackgroundImage
                 ? 'text-font-color-white'

@@ -102,7 +102,7 @@ const ArtistPage = () => {
   console.log('offset', currentlyActivePage?.data);
   return (
     <MainContainer
-      className="appear-from-bottom artists-list-container !h-full overflow-hidden !pb-0"
+      className="appear-from-bottom artists-list-container h-full! overflow-hidden pb-0!"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {
@@ -173,7 +173,7 @@ const ArtistPage = () => {
           </div>
         )}
         <div
-          className={`artists-container flex !h-full flex-wrap ${!(artistsData && artistsData.length > 0) && 'hidden'}`}
+          className={`artists-container flex h-full! flex-wrap ${!(artistsData && artistsData.length > 0) && 'hidden'}`}
         >
           {artistsData && artistsData.length > 0 && (
             <VirtualizedGrid

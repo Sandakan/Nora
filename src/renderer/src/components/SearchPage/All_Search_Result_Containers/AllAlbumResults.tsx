@@ -17,7 +17,7 @@ const AllAlbumResults = (prop: Props) => {
   const selectAllHandler = useSelectAllHandler(albumData, 'album', 'albumId');
 
   return (
-    <SecondaryContainer className="albums-container h-full w-full flex-grow">
+    <SecondaryContainer className="albums-container h-full w-full grow">
       {albumData && albumData.length > 0 && (
         <VirtualizedGrid
           data={albumData}

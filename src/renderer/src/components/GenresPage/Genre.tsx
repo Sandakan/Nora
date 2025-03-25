@@ -298,7 +298,7 @@ const Genre = (props: GenreProp) => {
         isMultipleSelectionEnabled &&
         multipleSelectionsData.selectionType === 'genre' &&
         'border-4 border-transparent'
-      } ${isAMultipleSelection && '!border-font-color-highlight dark:!border-dark-font-color-highlight'}`}
+      } ${isAMultipleSelection && 'border-font-color-highlight! dark:border-dark-font-color-highlight!'}`}
       style={{
         backgroundColor
       }}
@@ -322,9 +322,9 @@ const Genre = (props: GenreProp) => {
           enableImgFadeIns={!isMultipleSelectionEnabled}
         />
       </div>
-      <div className="genre-info-container w-3/5 flex-grow-0">
+      <div className="genre-info-container w-3/5 grow-0">
         <Button
-          className="genre-title !m-0 !block w-full truncate !rounded-none !border-0 bg-transparent !p-0 !text-left !text-2xl text-font-color-white outline-1 outline-offset-1 hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:text-font-color-white dark:hover:bg-transparent"
+          className="genre-title m-0! block! w-full truncate rounded-none! border-0! bg-transparent p-0! text-left! text-2xl! text-font-color-white outline-1 outline-offset-1 hover:bg-transparent focus-visible:outline! dark:bg-transparent dark:text-font-color-white dark:hover:bg-transparent"
           label={title}
           clickHandler={goToGenreInfoPage}
         />
@@ -334,7 +334,7 @@ const Genre = (props: GenreProp) => {
           })}
         </div>
         {isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'genre' && (
-          <MultipleSelectionCheckbox id={genreId} selectionType="genre" className="z-10 !mt-2" />
+          <MultipleSelectionCheckbox id={genreId} selectionType="genre" className="z-10 mt-2!" />
         )}
       </div>
     </div>

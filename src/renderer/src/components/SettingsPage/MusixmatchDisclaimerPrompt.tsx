@@ -8,7 +8,7 @@ const MusixmatchDisclaimerPrompt = () => {
   return (
     <div className="">
       <div className="mb-4 flex items-center text-3xl font-semibold uppercase">
-        <span className="material-icons-round-outlined mr-2 text-4xl !leading-none">error</span>{' '}
+        <span className="material-icons-round-outlined mr-2 text-4xl leading-none!">error</span>{' '}
         <p>{t('musixmatchDisclaimerPrompt.title')}</p>
       </div>
       <div className="description px-4">

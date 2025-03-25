@@ -16,7 +16,7 @@ const RemoveFolderConfrimationPrompt = (props: { folderName: string; absolutePat
       <div className="description">{t('removeFolderConfirmationPrompt.message')}</div>
       <div className="buttons-container flex items-center justify-end">
         <Button
-          className="remove-folder-confirm-btn danger-btn float-right mt-8 h-10 w-48 cursor-pointer rounded-lg !bg-font-color-crimson font-medium text-font-color-white outline-none ease-in-out hover:border-font-color-crimson dark:!bg-font-color-crimson dark:text-font-color-white dark:hover:border-font-color-crimson"
+          className="remove-folder-confirm-btn danger-btn float-right mt-8 h-10 w-48 cursor-pointer rounded-lg bg-font-color-crimson! font-medium text-font-color-white outline-hidden ease-in-out hover:border-font-color-crimson dark:bg-font-color-crimson! dark:text-font-color-white dark:hover:border-font-color-crimson"
           label={t('removeFolderConfirmationPrompt.removeFolder')}
           clickHandler={() => {
             window.api.folderData

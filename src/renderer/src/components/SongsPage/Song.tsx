@@ -179,7 +179,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
               name={artist.name}
               className={`${
                 (currentSongData.songId === songId || isAMultipleSelection) &&
-                'dark:!text-font-color-black'
+                'dark:text-font-color-black!'
               }`}
             />
           ];
@@ -575,13 +575,13 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
             ? `bg-background-color-3/70 text-font-color-black shadow-lg backdrop-blur-md dark:bg-dark-background-color-3/70`
             : 'bg-background-color-3 text-font-color-black shadow-lg dark:bg-dark-background-color-3'
           : bodyBackgroundImage
-            ? `bg-background-color-2/70 backdrop-blur-md hover:!bg-background-color-2 dark:bg-dark-background-color-2/70 dark:hover:!bg-dark-background-color-2`
+            ? `bg-background-color-2/70 backdrop-blur-md hover:bg-background-color-2! dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2!`
             : `odd:bg-background-color-2/70 hover:!bg-background-color-2 dark:odd:bg-dark-background-color-2/50 dark:hover:!bg-dark-background-color-2 ${
                 (index + 1) % 2 === 1
-                  ? '!bg-background-color-2/70 dark:!bg-dark-background-color-2/50'
-                  : '!bg-background-color-1 dark:!bg-dark-background-color-1'
+                  ? 'bg-background-color-2/70! dark:bg-dark-background-color-2/50!'
+                  : 'bg-background-color-1! dark:bg-dark-background-color-1!'
               }`
-      } ${!isAMultipleSelection && isBlacklisted && '!opacity-30'}`}
+      } ${!isAMultipleSelection && isBlacklisted && 'opacity-30!'}`}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -604,7 +604,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
     >
       <div
         className={`song-cover-and-play-btn-container flex w-[clamp(6rem,15%,9rem)] shrink-0 items-center justify-center ${
-          !isIndexingSongs && '!w-[clamp(4rem,10%,6rem)]'
+          !isIndexingSongs && 'w-[clamp(4rem,10%,6rem)]!'
         }`}
       >
         {isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'songs' ? (
@@ -626,7 +626,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
           >
             <span
               className={`material-icons-round mx-2 text-2xl text-font-color-black dark:text-font-color-white ${
-                currentSongData.songId === songId && 'dark:!text-font-color-black'
+                currentSongData.songId === songId && 'dark:text-font-color-black!'
               } `}
             >
               block
@@ -659,11 +659,11 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         >
           <div className="play-btn-container absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
             <Button
-              className="!m-0 !rounded-none !border-0 bg-transparent !p-0 outline-1 outline-offset-1 hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent"
+              className="m-0! rounded-none! border-0! bg-transparent p-0! outline-1 outline-offset-1 hover:bg-transparent focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent"
               iconClassName={`!text-3xl text-font-color-white text-opacity-0 !leading-none ${
                 currentSongData.songId === songId && 'text-opacity-100'
               } group-focus-within:text-opacity-100 group-hover:text-opacity-100 ${
-                isSongPlaying && '!text-font-color-white/75'
+                isSongPlaying && 'text-font-color-white/75!'
               }`}
               clickHandler={handlePlayBtnClick}
               iconName={isSongPlaying ? 'pause_circle' : 'play_circle'}
@@ -683,11 +683,11 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
       <div
         className={`song-info-container grid grow grid-cols-[35%_2fr_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] items-center gap-3 text-font-color-black lg:grid-cols-[40%_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] lg:!gap-0 sm:grid-cols-[45%_1fr_minmax(4.5rem,6rem)] sm:gap-2 dark:text-font-color-white ${
           (currentSongData.songId === songId || isAMultipleSelection) &&
-          'dark:!text-font-color-black'
+          'dark:text-font-color-black!'
         }`}
       >
         <div
-          className="song-title truncate text-base font-normal outline-1 outline-offset-1 transition-none focus-visible:!outline"
+          className="song-title truncate text-base font-normal outline-1 outline-offset-1 transition-none focus-visible:outline!"
           tabIndex={0}
           onKeyDown={(e) => e.key === 'Enter' && goToSongInfoPage()}
           title={title}
@@ -700,7 +700,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         <div className="song-album w-full truncate text-xs transition-none lg:hidden md:hidden sm:hidden">
           {album?.name ? (
             <span
-              className="cursor-pointer outline-1 -outline-offset-1 hover:underline focus-visible:!outline"
+              className="cursor-pointer outline-1 -outline-offset-1 hover:underline focus-visible:outline!"
               tabIndex={0}
               title={album.name}
               role="button"
@@ -718,20 +718,20 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
             ? songId
             : (year ?? '----')}
         </div>
-        <div className="song-duration flex !w-full items-center justify-between pl-2 pr-4 text-center transition-none sm:pr-1">
+        <div className="song-duration flex w-full! items-center justify-between pl-2 pr-4 text-center transition-none sm:pr-1">
           <Button
-            className="!mr-0 mt-1 !rounded-none !border-0 bg-transparent !p-0 !text-inherit outline-1 outline-offset-1 focus-visible:!outline dark:bg-transparent"
+            className="mr-0! mt-1 rounded-none! border-0! bg-transparent p-0! text-inherit! outline-1 outline-offset-1 focus-visible:outline! dark:bg-transparent"
             iconName="favorite"
             iconClassName={`${
               isAFavorite ? 'material-icons-round' : 'material-icons-round-outlined'
             } !leading-none !text-xl !font-light md:hidden ${
               isAFavorite
                 ? currentSongData.songId === songId || isAMultipleSelection
-                  ? '!text-font-color-black dark:!text-font-color-black'
-                  : '!text-font-color-highlight dark:!text-dark-background-color-3'
+                  ? 'text-font-color-black! dark:text-font-color-black!'
+                  : 'text-font-color-highlight! dark:text-dark-background-color-3!'
                 : currentSongData.songId === songId || isAMultipleSelection
-                  ? '!text-font-color-black dark:!text-font-color-black'
-                  : '!text-font-color-highlight dark:!text-dark-background-color-3'
+                  ? 'text-font-color-black! dark:text-font-color-black!'
+                  : 'text-font-color-highlight! dark:text-dark-background-color-3!'
             }`}
             tooltipLabel={t(`song.${isAFavorite ? 'likedThisSong' : 'dislikedThisSong'}`)}
             clickHandler={(e) => {

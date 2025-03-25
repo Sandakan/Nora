@@ -385,7 +385,7 @@ const HomePage = () => {
 
   return (
     <MainContainer
-      className="home-page relative !h-full overflow-y-auto !pl-0 [scrollbar-gutter:stable]"
+      className="home-page relative h-full! overflow-y-auto pl-0! [scrollbar-gutter:stable]"
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -434,13 +434,13 @@ const HomePage = () => {
                 label={t('foldersPage.addFolder')}
                 iconName="create_new_folder"
                 iconClassName="material-icons-round-outlined"
-                className="mt-4 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
+                className="mt-4 bg-background-color-3! px-8 text-lg text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3"
                 clickHandler={addNewSongs}
               />
               <Button
                 label={t('settingsPage.importAppData')}
                 iconName="publish"
-                className="mt-4 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
+                className="mt-4 bg-background-color-3! px-8 text-lg text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3"
                 clickHandler={importAppData}
               />
             </div>

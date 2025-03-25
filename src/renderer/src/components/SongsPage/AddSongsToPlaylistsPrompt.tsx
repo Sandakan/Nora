@@ -30,8 +30,8 @@ const SelectablePlaylist = (props: SelectablePlaylistProp) => {
     <div
       className={`playlist appear-from-bottom group ${playlistId} mb-6 mr-4 flex h-52 w-[9.5rem] flex-col justify-between rounded-xl p-4 text-font-color-black dark:text-font-color-white ${
         isChecked
-          ? 'bg-background-color-3 !text-font-color-black dark:bg-dark-background-color-3 dark:!text-font-color-black'
-          : 'hover:bg-background-color-2 hover:dark:bg-dark-background-color-2'
+          ? 'bg-background-color-3 text-font-color-black! dark:bg-dark-background-color-3 dark:text-font-color-black!'
+          : 'hover:bg-background-color-2 dark:hover:bg-dark-background-color-2'
       }`}
       onClick={() => playlistCheckedStateUpdateFunc(!isChecked)}
       onKeyDown={() => playlistCheckedStateUpdateFunc(!isChecked)}
@@ -56,7 +56,7 @@ const SelectablePlaylist = (props: SelectablePlaylistProp) => {
       </div>
       <div className="playlist-info-container">
         <div
-          className="title playlist-title w-full overflow-hidden overflow-ellipsis whitespace-nowrap text-xl"
+          className="title playlist-title w-full overflow-hidden text-ellipsis whitespace-nowrap text-xl"
           title={name}
         >
           {name}
@@ -190,7 +190,7 @@ const AddSongsToPlaylistsPrompt = (props: AddSongsToPlaylistProp) => {
             label={t('song.addToPlaylists')}
             iconName="playlist_add"
             clickHandler={addSongsToPlaylists}
-            className="!bg-background-color-3 px-6 text-font-color-black dark:!bg-dark-background-color-3 dark:!text-font-color-black"
+            className="bg-background-color-3! px-6 text-font-color-black dark:bg-dark-background-color-3! dark:text-font-color-black!"
           />
         </div>
       </div>

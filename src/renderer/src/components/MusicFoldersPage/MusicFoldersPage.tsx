@@ -155,7 +155,7 @@ const MusicFoldersPage = () => {
 
   return (
     <MainContainer
-      className="music-folders-page appear-from-bottom relative !h-full !pb-0 !pr-4"
+      className="music-folders-page appear-from-bottom relative h-full! pb-0! pr-4!"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {
@@ -241,7 +241,7 @@ const MusicFoldersPage = () => {
             <div className="flex items-center justify-between">
               <Button
                 label={t('foldersPage.addFolder')}
-                className="mt-4 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:text-font-color-black dark:hover:border-background-color-3"
+                className="mt-4 bg-background-color-3! px-8 text-lg text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black dark:hover:border-background-color-3"
                 iconName="create_new_folder"
                 pendingAnimationOnDisabled
                 iconClassName="material-icons-round-outlined"
@@ -250,7 +250,7 @@ const MusicFoldersPage = () => {
               <Button
                 label={t('settingsPage.importAppData')}
                 iconName="upload"
-                className="mt-4 !bg-background-color-3 px-8 text-lg !text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
+                className="mt-4 bg-background-color-3! px-8 text-lg text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3"
                 clickHandler={importAppData}
               />
             </div>

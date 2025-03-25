@@ -72,7 +72,7 @@ const BlacklistSongConfrimPrompt = (props: { songIds: string[]; title?: string }
       <div className="buttons-container flex items-center justify-end">
         <Button
           label={t('song.blacklistSong', { count: songIds.length })}
-          className="blacklist-song-btn mt-4 !bg-background-color-3 px-8 text-lg text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
+          className="blacklist-song-btn mt-4 bg-background-color-3! px-8 text-lg text-font-color-black hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3"
           clickHandler={() =>
             window.api.audioLibraryControls
               .blacklistSongs(songIds)

@@ -208,7 +208,7 @@ const LyricsPage = () => {
               id: 'lyricsUpdateFailed',
               content: t('lyricsPage.noOnlineLyrics'),
               iconName: 'warning',
-              iconClassName: 'material-icons-round-outlined !text-xl'
+              iconClassName: 'material-icons-round-outlined text-xl!'
             }
           ]);
         })
@@ -259,7 +259,7 @@ const LyricsPage = () => {
               id: 'offlineLyricsFetchFailed',
               content: t('lyricsPage.noOfflineLyrics'),
               iconName: 'warning',
-              iconClassName: 'material-icons-round-outlined !text-xl'
+              iconClassName: 'material-icons-round-outlined text-xl!'
             }
           ]);
         })
@@ -336,7 +336,7 @@ const LyricsPage = () => {
               id: 'OnlineLyricsRefreshFailed',
               content: t('lyricsPage.onlineLyricsRefreshFailed'),
               iconName: 'warning',
-              iconClassName: 'material-icons-round-outlined !text-xl'
+              iconClassName: 'material-icons-round-outlined text-xl!'
             }
           ]);
         })
@@ -437,7 +437,7 @@ const LyricsPage = () => {
                         `currentQueuePage.${isAutoScrolling ? 'disableAutoScrolling' : 'enableAutoScrolling'}`
                       )}
                       pendingAnimationOnDisabled
-                      className="show-online-lyrics-btn !text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+                      className="show-online-lyrics-btn text-sm! md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                       iconName={isAutoScrolling ? 'flash_off' : 'flash_on'}
                       clickHandler={() => setIsAutoScrolling((prevState) => !prevState)}
                     />
@@ -569,7 +569,7 @@ const LyricsPage = () => {
                 </div>
               </div>
               <div
-                className="lyrics-lines-container flex h-full !w-full flex-col items-center overflow-y-auto px-8 py-[10vh] [scrollbar-gutter:stable]"
+                className="lyrics-lines-container flex h-full w-full! flex-col items-center overflow-y-auto px-8 py-[10vh] [scrollbar-gutter:stable]"
                 ref={lyricsLinesContainerRef}
                 onScroll={() =>
                   debounce(() => {

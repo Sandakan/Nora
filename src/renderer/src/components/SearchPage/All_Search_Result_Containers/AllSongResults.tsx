@@ -33,7 +33,7 @@ const AllSongResults = (prop: Props) => {
 
   return (
     <SecondaryContainer
-      className="songs-container !mb-0 h-full flex-1"
+      className="songs-container mb-0! h-full flex-1"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {

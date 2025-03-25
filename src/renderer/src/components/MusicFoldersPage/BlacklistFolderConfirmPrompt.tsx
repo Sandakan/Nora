@@ -97,7 +97,7 @@ const BlacklistFolderConfrimPrompt = (props: { folderPaths: string[]; folderName
       <div className="buttons-container flex items-center justify-end">
         <Button
           label={`Blacklist Folder${folderPaths.length !== 1 ? 's' : ''}`}
-          className="blacklist-folders-btn mt-4 !bg-background-color-3 px-8 text-lg text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
+          className="blacklist-folders-btn mt-4 bg-background-color-3! px-8 text-lg text-font-color-black hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3"
           clickHandler={() => {
             return window.api.folderData.blacklistFolders(folderPaths).then(() => {
               addNewNotifications([

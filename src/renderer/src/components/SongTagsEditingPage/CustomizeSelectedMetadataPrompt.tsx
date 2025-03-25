@@ -67,7 +67,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
             )}
             className={`!mx-0 mt-4 bg-background-color-2 !py-1 uppercase group-hover:bg-background-color-1 dark:bg-dark-background-color-2 dark:group-hover:bg-dark-background-color-1 ${
               isSelectedArtwork &&
-              '!dark:bg-dark-background-color-3 !dark:text-font-color-black !border-background-color-3 !bg-background-color-3 font-medium !text-font-color-black dark:!border-dark-background-color-3'
+              '!dark:bg-dark-background-color-3 !dark:text-font-color-black border-background-color-3! bg-background-color-3! font-medium text-font-color-black! dark:border-dark-background-color-3!'
             }`}
             clickHandler={(e) => {
               e.stopPropagation();
@@ -251,11 +251,11 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
         </div>
         <div className="other-infos pl-2">
           {title && (
-            <div className="other-info mb-4 flex items-center rounded-lg p-2 odd:bg-background-color-2/50 odd:dark:bg-dark-background-color-2/50">
+            <div className="other-info mb-4 flex items-center rounded-lg p-2 odd:bg-background-color-2/50 dark:odd:bg-dark-background-color-2/50">
               <Checkbox
                 isChecked={selectedMetadata.isTitleSelected}
                 id="songTitle"
-                className="!ml-4 !mr-6 !mt-0"
+                className="ml-4! mr-6! mt-0!"
                 checkedStateUpdateFunction={() =>
                   setSelectedMetadata((prevData) => ({
                     ...prevData,
@@ -265,7 +265,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
               />
               <div
                 className={`info transition-opacity ${
-                  !selectedMetadata.isTitleSelected && '!opacity-50'
+                  !selectedMetadata.isTitleSelected && 'opacity-50!'
                 }`}
               >
                 <div className="title text-xs uppercase opacity-50">{t('common.songTitle')}</div>
@@ -274,11 +274,11 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
             </div>
           )}
           {artists && artists.length > 0 && (
-            <div className="other-info mb-4 flex items-center rounded-lg p-2 odd:bg-background-color-2/50 odd:dark:bg-dark-background-color-2/50">
+            <div className="other-info mb-4 flex items-center rounded-lg p-2 odd:bg-background-color-2/50 dark:odd:bg-dark-background-color-2/50">
               <Checkbox
                 isChecked={selectedMetadata.isArtistsSelected}
                 id="songArtist"
-                className="!ml-4 !mr-6 !mt-0"
+                className="ml-4! mr-6! mt-0!"
                 checkedStateUpdateFunction={() =>
                   setSelectedMetadata((prevData) => ({
                     ...prevData,
@@ -288,7 +288,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
               />
               <div
                 className={`info transition-opacity ${
-                  !selectedMetadata.isArtistsSelected && '!opacity-50'
+                  !selectedMetadata.isArtistsSelected && 'opacity-50!'
                 }`}
               >
                 <div className="title text-xs uppercase opacity-50">{t('common.artist_other')}</div>
@@ -297,11 +297,11 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
             </div>
           )}
           {album && (
-            <div className="other-info mb-4 flex items-center rounded-lg p-2 odd:bg-background-color-2/50 odd:dark:bg-dark-background-color-2/50">
+            <div className="other-info mb-4 flex items-center rounded-lg p-2 odd:bg-background-color-2/50 dark:odd:bg-dark-background-color-2/50">
               <Checkbox
                 isChecked={selectedMetadata.isAlbumSelected}
                 id="songAlbum"
-                className="!ml-4 !mr-6 !mt-0"
+                className="ml-4! mr-6! mt-0!"
                 checkedStateUpdateFunction={() =>
                   setSelectedMetadata((prevData) => ({
                     ...prevData,
@@ -311,7 +311,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
               />
               <div
                 className={`info transition-opacity ${
-                  !selectedMetadata.isAlbumSelected && '!opacity-50'
+                  !selectedMetadata.isAlbumSelected && 'opacity-50!'
                 }`}
               >
                 <div className="title text-xs uppercase opacity-50">{t('common.album_one')}</div>
@@ -320,11 +320,11 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
             </div>
           )}
           {genres && genres?.length > 0 && (
-            <div className="other-info mb-4 flex items-center rounded-lg p-2 odd:bg-background-color-2/50 odd:dark:bg-dark-background-color-2/50">
+            <div className="other-info mb-4 flex items-center rounded-lg p-2 odd:bg-background-color-2/50 dark:odd:bg-dark-background-color-2/50">
               <Checkbox
                 isChecked={selectedMetadata.isGenresSelected}
                 id="songGenres"
-                className="!ml-4 !mr-6 !mt-0"
+                className="ml-4! mr-6! mt-0!"
                 checkedStateUpdateFunction={() =>
                   setSelectedMetadata((prevData) => ({
                     ...prevData,
@@ -334,7 +334,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
               />
               <div
                 className={`info transition-opacity ${
-                  !selectedMetadata.isGenresSelected && '!opacity-50'
+                  !selectedMetadata.isGenresSelected && 'opacity-50!'
                 }`}
               >
                 <div className="title text-xs uppercase opacity-50">{t('common.genre_other')}</div>
@@ -343,11 +343,11 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
             </div>
           )}
           {releasedYear && (
-            <div className="other-info mb-4 flex items-center rounded-lg p-2 odd:bg-background-color-2/50 odd:dark:bg-dark-background-color-2/50">
+            <div className="other-info mb-4 flex items-center rounded-lg p-2 odd:bg-background-color-2/50 dark:odd:bg-dark-background-color-2/50">
               <Checkbox
                 isChecked={selectedMetadata.isReleasedYearSelected}
                 id="songReleasedYear"
-                className="!ml-4 !mr-6 !mt-0"
+                className="ml-4! mr-6! mt-0!"
                 checkedStateUpdateFunction={() =>
                   setSelectedMetadata((prevData) => ({
                     ...prevData,
@@ -357,7 +357,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
               />
               <div
                 className={`info transition-opacity ${
-                  !selectedMetadata.isReleasedYearSelected && '!opacity-50'
+                  !selectedMetadata.isReleasedYearSelected && 'opacity-50!'
                 }`}
               >
                 <div className="title text-xs uppercase opacity-50">{t('common.releasedYear')}</div>
@@ -366,11 +366,11 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
             </div>
           )}
           {lyrics && (
-            <div className="other-info mb-4 flex items-center overflow-hidden rounded-lg p-2 odd:bg-background-color-2/50 odd:dark:bg-dark-background-color-2/50">
+            <div className="other-info mb-4 flex items-center overflow-hidden rounded-lg p-2 odd:bg-background-color-2/50 dark:odd:bg-dark-background-color-2/50">
               <Checkbox
                 isChecked={selectedMetadata.isLyricsSelected}
                 id="songLyrics"
-                className="!ml-4 !mr-6 !mt-0"
+                className="ml-4! mr-6! mt-0!"
                 checkedStateUpdateFunction={() =>
                   setSelectedMetadata((prevData) => ({
                     ...prevData,
@@ -380,7 +380,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
               />
               <div
                 className={`info transition-opacity ${
-                  !selectedMetadata.isLyricsSelected && '!opacity-50'
+                  !selectedMetadata.isLyricsSelected && 'opacity-50!'
                 }`}
               >
                 <div className="title text-xs uppercase opacity-50">{t('common.lyrics')}</div>
@@ -399,7 +399,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
                     <Button
                       iconName={showLyrics ? 'visibility_off' : 'visibility'}
                       clickHandler={() => setShowLyrics((prevState) => !prevState)}
-                      className="!my-0 !ml-4 !mr-0 !border-0 !p-0"
+                      className="my-0! ml-4! mr-0! border-0! p-0!"
                     />
                   </div>
 
@@ -424,14 +424,14 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
         <Button
           label={t('customizeSelectedMetadataPrompt.addOnlySelected')}
           iconName="add"
-          className="!bg-background-color-3 px-4 text-lg text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
+          className="bg-background-color-3! px-4 text-lg text-font-color-black hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3"
           clickHandler={updateSelectedMetadata}
           isDisabled={isAtLeastOneSelected}
         />
         <Button
           label={t('customizeSelectedMetadataPrompt.addAll')}
           iconName="done"
-          className="!bg-background-color-3 px-4 text-lg text-font-color-black hover:border-background-color-3 dark:!bg-dark-background-color-3 dark:!text-font-color-black dark:hover:border-background-color-3"
+          className="bg-background-color-3! px-4 text-lg text-font-color-black hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3"
           clickHandler={updateAllMetadata}
         />
       </div>

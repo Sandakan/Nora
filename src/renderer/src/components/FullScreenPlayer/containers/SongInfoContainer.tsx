@@ -80,7 +80,7 @@ const SongInfoContainer = (props: Props) => {
         isLyricsVisible && isLyricsAvailable
           ? 'invisible opacity-0 group-hover/fullScreenPlayer:visible group-hover/fullScreenPlayer:opacity-100'
           : 'visible opacity-100'
-      } ${!isCurrentSongPlaying && isLyricsVisible && '!visible !opacity-100'}`}
+      } ${!isCurrentSongPlaying && isLyricsVisible && 'visible! opacity-100!'}`}
     >
       <div className="song-img-controls-and-info-container relative grid grid-cols-[12rem_1fr] flex-row items-center gap-8 text-font-color-white lg:ml-4 lg:w-full">
         <Img
@@ -93,10 +93,10 @@ const SongInfoContainer = (props: Props) => {
         <div className="song-controls-and-info-container flex h-full flex-col justify-between">
           <div className="song-controls-container flex h-fit items-center">
             <Button
-              className="favorite-btn h-fit cursor-pointer !border-0 !bg-background-color-3/15 !p-3 text-font-color-white outline-1 outline-offset-1 !backdrop-blur-lg transition-[background] hover:!bg-background-color-3/30 focus-visible:!outline dark:text-font-color-white dark:after:bg-dark-font-color-highlight"
+              className="favorite-btn h-fit cursor-pointer border-0! bg-background-color-3/15! p-3! text-font-color-white outline-1 outline-offset-1 backdrop-blur-lg! transition-[background] hover:bg-background-color-3/30! focus-visible:outline! dark:text-font-color-white dark:after:bg-dark-font-color-highlight"
               iconClassName={`!text-2xl ${
                 currentSongData.isAFavorite
-                  ? 'meterial-icons-round !text-font-color-highlight dark:!text-dark-font-color-highlight'
+                  ? 'meterial-icons-round text-font-color-highlight! dark:text-dark-font-color-highlight!'
                   : 'material-icons-round-outlined'
               }`}
               isDisabled={!currentSongData.isKnownSource}
@@ -112,15 +112,15 @@ const SongInfoContainer = (props: Props) => {
               removeFocusOnClick
             />
             <Button
-              className="skip-backward-btn h-fit cursor-pointer !border-0 !bg-background-color-3/15 !p-2 text-font-color-white outline-1 outline-offset-1 !backdrop-blur-lg transition-[background] hover:!bg-background-color-3/30 focus-visible:!outline dark:text-font-color-white"
+              className="skip-backward-btn h-fit cursor-pointer border-0! bg-background-color-3/15! p-2! text-font-color-white outline-1 outline-offset-1 backdrop-blur-lg! transition-[background] hover:bg-background-color-3/30! focus-visible:outline! dark:text-font-color-white"
               tooltipLabel={t('player.prevSong')}
-              iconClassName="!text-3xl material-icons-round-outlined"
+              iconClassName="text-3xl! material-icons-round-outlined"
               clickHandler={handleSkipBackwardClick}
               iconName="skip_previous"
               removeFocusOnClick
             />
             <Button
-              className="play-pause-btn h-fit scale-90 cursor-pointer !border-0 !bg-background-color-3/15 !p-2 text-font-color-white outline-1 outline-offset-1 !backdrop-blur-lg transition-[background] hover:!bg-background-color-3/30 focus-visible:!outline dark:text-font-color-white"
+              className="play-pause-btn h-fit scale-90 cursor-pointer border-0! bg-background-color-3/15! p-2! text-font-color-white outline-1 outline-offset-1 backdrop-blur-lg! transition-[background] hover:bg-background-color-3/30! focus-visible:outline! dark:text-font-color-white"
               tooltipLabel={t('player.playPause')}
               iconClassName={`!text-4xl ${
                 isCurrentSongPlaying ? 'material-icons-round' : 'material-icons-round-outlined'
@@ -130,18 +130,18 @@ const SongInfoContainer = (props: Props) => {
               removeFocusOnClick
             />
             <Button
-              className="skip-next-btn h-fit cursor-pointer !border-0 !bg-background-color-3/15 !p-2 text-font-color-white outline-1 outline-offset-1 !backdrop-blur-lg transition-[background] hover:!bg-background-color-3/30 focus-visible:!outline dark:text-font-color-white"
+              className="skip-next-btn h-fit cursor-pointer border-0! bg-background-color-3/15! p-2! text-font-color-white outline-1 outline-offset-1 backdrop-blur-lg! transition-[background] hover:bg-background-color-3/30! focus-visible:outline! dark:text-font-color-white"
               tooltipLabel={t('player.nextSong')}
-              iconClassName="!text-3xl material-icons-round-outlined"
+              iconClassName="text-3xl! material-icons-round-outlined"
               clickHandler={handleSkipForwardClickWithParams}
               iconName="skip_next"
               removeFocusOnClick
             />
             <Button
               className={`lyrics-btn h-fit cursor-pointer !border-0 !bg-background-color-3/15 !p-3 text-font-color-white outline-1 outline-offset-1 !backdrop-blur-lg transition-[background] after:absolute after:h-1 hover:!bg-background-color-3/30 focus-visible:!outline dark:text-font-color-white ${
-                isLyricsVisible && '!text-dark-background-color-3 after:opacity-100'
+                isLyricsVisible && 'text-dark-background-color-3! after:opacity-100'
               }`}
-              iconClassName="!text-2xl"
+              iconClassName="text-2xl!"
               clickHandler={() => setIsLyricsVisible((prevState) => !prevState)}
               iconName="notes"
               tooltipLabel={t('player.lyrics')}
@@ -149,10 +149,10 @@ const SongInfoContainer = (props: Props) => {
             />
             <Button
               className={`volume-btn h-fit cursor-pointer !border-0 !bg-background-color-3/15 !p-3 text-font-color-white outline-1 outline-offset-1 !backdrop-blur-lg transition-[background] after:absolute after:h-1 hover:!bg-background-color-3/30 focus-visible:!outline dark:text-font-color-white ${
-                isMuted && '!text-dark-background-color-3 after:opacity-100'
+                isMuted && 'text-dark-background-color-3! after:opacity-100'
               }`}
               tooltipLabel={t('player.muteUnmute')}
-              iconClassName="!text-2xl"
+              iconClassName="text-2xl!"
               iconName={isMuted ? 'volume_off' : volume > 50 ? 'volume_up' : 'volume_down_alt'}
               clickHandler={() => toggleMutedState(!isMuted)}
             />
@@ -167,7 +167,7 @@ const SongInfoContainer = (props: Props) => {
             {currentSongData.title && (
               <div className="song-title relative grid w-full max-w-full items-center">
                 <div
-                  className="w-fit max-w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap py-2 text-5xl font-medium text-font-color-highlight outline-1 outline-offset-1 focus-visible:!outline"
+                  className="w-fit max-w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap py-2 text-5xl font-medium text-font-color-highlight outline-1 outline-offset-1 focus-visible:outline!"
                   id="currentSongTitle"
                   title={currentSongData.title}
                 >
@@ -208,7 +208,7 @@ const SongInfoContainer = (props: Props) => {
             )}
             <UpNextSongPopup
               onPopupAppears={(isVisible) => setIsNextSongPopupVisible(isVisible)}
-              className="!text-md w-fit"
+              className="text-md! w-fit"
               isSemiTransparent
             />
           </div>

@@ -19,7 +19,7 @@ const AllArtistResults = (prop: Props) => {
 
   return (
     <SecondaryContainer
-      className="artists-container !mb-0 flex !h-full flex-wrap"
+      className="artists-container mb-0! flex h-full! flex-wrap"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {
