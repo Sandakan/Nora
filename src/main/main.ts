@@ -438,7 +438,7 @@ const handleFileProtocol = async (request: GlobalRequest): Promise<GlobalRespons
     );
     const [filePath] = urlWithQueries.split('?');
 
-    logger.verbose('Serving file from nora://', { filePath });
+    // logger.verbose('Serving file from nora://', { filePath });
 
     if (!existsSync(filePath)) {
       logger.error(`File not found: ${filePath}`);
@@ -459,11 +459,10 @@ const handleFileProtocol = async (request: GlobalRequest): Promise<GlobalRespons
     }
 
     const chunkSize = end - start + 1;
-    logger.verbose(`Serving range: ${start}-${end}/${fileStat.size}`);
+    // logger.verbose(`Serving range: ${start}-${end}/${fileStat.size}`);
 
     const mimeType = mime.getType(filePath) || 'application/octet-stream';
 
-    logger.info(`Serving range: ${start}-${end}/${fileStat.size}`);
     const stream = createReadStream(filePath, { start, end });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return new Response(stream as any, {

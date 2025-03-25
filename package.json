@@ -146,7 +146,7 @@
     "electron-devtools-installer": "^4.0.0",
     "electron-vite": "^3.1.0-beta.0",
     "eslint": "^9.12.0",
-    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-import-resolver-typescript": "^4.1.1",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jsx-a11y": "^6.8.0",
     "eslint-plugin-promise": "^7.1.0",
