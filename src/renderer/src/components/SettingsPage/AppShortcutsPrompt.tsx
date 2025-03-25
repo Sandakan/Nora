@@ -109,7 +109,6 @@ const AppShortcutsPrompt = () => {
           <div className="shortcuts-container ml-4 flex flex-row flex-wrap justify-between">
             {category.shortcuts.map((shortcut, shortcutIndex) => {
               const isEditing = editingShortcut === shortcut.label;
-              console.log(editingShortcut === shortcut.label)
               // const elementId = `${categoryIndex}-${shortcutIndex}`;
 
               return (

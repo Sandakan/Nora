@@ -190,17 +190,11 @@ export function updateShortcutKeys(
     newKeys: string[]
   ): ShortcutCategory[] {
     const currentData = getShortcuts();
-    
-    console.log("Current Data:", currentData); // Debug
-    console.log("Label to update:", label); // Debug
-    console.log("New Keys:", newKeys); // Debug
   
     const updatedData = currentData.map(category => ({
       ...category,
       shortcuts: category.shortcuts.map(shortcut => {
-        console.log(`Comparing "${shortcut.label}" with "${label}"`); // Debug
         if (shortcut.label === label) {
-          console.log(`Updated: ${shortcut.label} -> ${newKeys}`); // Debug
           return { ...shortcut, keys: newKeys };
         }
         return shortcut;
