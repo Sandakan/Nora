@@ -40,7 +40,7 @@ const Checkbox = memo((props: CheckboxProp) => {
   return (
     <label
       htmlFor={id}
-      className={`checkbox-and-labels-container ml-2 mt-4 flex !w-fit items-center outline-1 outline-offset-1 transition-opacity focus-visible:!outline ${
+      className={`checkbox-and-labels-container mt-4 ml-2 flex !w-fit items-center outline outline-offset-1 transition-opacity focus-visible:!outline ${
         isDisabled && 'cursor-not-allowed! opacity-50'
       } ${className}`}
       tabIndex={isDisabled ? -1 : 0}
@@ -57,12 +57,12 @@ const Checkbox = memo((props: CheckboxProp) => {
         onChange={(e) => checkedStateUpdateFunction(e.currentTarget.checked)}
       />
       <label
-        className={`checkmark flex h-5 w-5 cursor-pointer items-center justify-center rounded-md border-2 border-font-color-highlight bg-[transparent] shadow-lg peer-checked:bg-font-color-highlight dark:border-dark-font-color-highlight dark:peer-checked:bg-dark-font-color-highlight ${
+        className={`checkmark border-font-color-highlight peer-checked:bg-font-color-highlight dark:border-dark-font-color-highlight dark:peer-checked:bg-dark-font-color-highlight flex h-5 w-5 cursor-pointer items-center justify-center rounded-md border-2 bg-[transparent] shadow-lg ${
           isDisabled && 'cursor-not-allowed!'
         }`}
         htmlFor={id}
       >
-        <span className="material-icons-round icon text-xl text-font-color-white opacity-0 dark:text-font-color-black">
+        <span className="material-icons-round icon text-font-color-white dark:text-font-color-black text-xl opacity-0">
           check
         </span>
       </label>

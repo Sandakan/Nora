@@ -569,13 +569,13 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
       data-index={index}
       {...provided?.draggableProps}
       {...provided?.dragHandleProps}
-      className={`${songId} group relative mb-2 mr-4 flex h-[3.25rem] w-[98%] overflow-hidden rounded-lg p-[0.2rem] px-2 outline-1 -outline-offset-2 transition-[background,color,opacity] ease-in-out focus-visible:!outline ${
+      className={`${songId} group relative mr-4 mb-2 flex h-[3.25rem] w-[98%] overflow-hidden rounded-lg p-[0.2rem] px-2 outline -outline-offset-2 transition-[background,color,opacity] ease-in-out focus-visible:!outline ${
         currentSongData.songId === songId || isAMultipleSelection
           ? bodyBackgroundImage
-            ? `bg-background-color-3/70 text-font-color-black shadow-lg backdrop-blur-md dark:bg-dark-background-color-3/70`
-            : 'bg-background-color-3 text-font-color-black shadow-lg dark:bg-dark-background-color-3'
+            ? `bg-background-color-3/70 text-font-color-black dark:bg-dark-background-color-3/70 shadow-lg backdrop-blur-md`
+            : 'bg-background-color-3 text-font-color-black dark:bg-dark-background-color-3 shadow-lg'
           : bodyBackgroundImage
-            ? `bg-background-color-2/70 backdrop-blur-md hover:bg-background-color-2! dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2!`
+            ? `bg-background-color-2/70 hover:bg-background-color-2! dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2! backdrop-blur-md`
             : `odd:bg-background-color-2/70 hover:!bg-background-color-2 dark:odd:bg-dark-background-color-2/50 dark:hover:!bg-dark-background-color-2 ${
                 (index + 1) % 2 === 1
                   ? 'bg-background-color-2/70! dark:bg-dark-background-color-2/50!'
@@ -608,7 +608,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         }`}
       >
         {isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'songs' ? (
-          <div className="relative mx-1 flex h-fit items-center rounded-lg bg-background-color-1 p-1 text-font-color-highlight dark:bg-dark-background-color-1 dark:text-dark-background-color-3">
+          <div className="bg-background-color-1 text-font-color-highlight dark:bg-dark-background-color-1 dark:text-dark-background-color-3 relative mx-1 flex h-fit items-center rounded-lg p-1">
             <MultipleSelectionCheckbox id={songId} selectionType="songs" />
           </div>
         ) : isBlacklisted ? (
@@ -625,7 +625,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
             title={t('notifications.songBlacklisted', { title })}
           >
             <span
-              className={`material-icons-round mx-2 text-2xl text-font-color-black dark:text-font-color-white ${
+              className={`material-icons-round text-font-color-black dark:text-font-color-white mx-2 text-2xl ${
                 currentSongData.songId === songId && 'dark:text-font-color-black!'
               } `}
             >
@@ -635,7 +635,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         ) : isIndexingSongs ||
           (trackNo && localStorageData.preferences.showTrackNumberAsSongIndex) ? (
           <div
-            className={`relative mx-1 flex items-center justify-center rounded-2xl bg-background-color-1 px-3 py-1 text-center text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1 ${
+            className={`bg-background-color-1 text-font-color-highlight group-even:bg-background-color-2/75 group-hover:bg-background-color-1 dark:bg-dark-background-color-1 dark:text-dark-background-color-3 dark:group-even:bg-dark-background-color-2/50 dark:group-hover:bg-dark-background-color-1 relative mx-1 flex items-center justify-center rounded-2xl px-3 py-1 text-center ${
               index < 10
                 ? 'min-w-[1.75rem]'
                 : index < 100
@@ -645,7 +645,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
                     : 'min-w-[3.75rem]'
             }`}
           >
-            <span className="min-w-2 text-sm font-medium leading-tight">
+            <span className="min-w-2 text-sm leading-tight font-medium">
               {trackNo ?? index + 1}
             </span>
           </div>
@@ -653,13 +653,13 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
           ''
         )}
         <div
-          className={`song-cover-container relative ml-2 mr-4 flex h-[90%] min-w-12 flex-row items-center justify-center overflow-hidden rounded-md ${
+          className={`song-cover-container relative mr-4 ml-2 flex h-[90%] min-w-12 flex-row items-center justify-center overflow-hidden rounded-md ${
             (isIndexingSongs || isMultipleSelectionEnabled || isBlacklisted) && 'sm:hidden'
           }`}
         >
-          <div className="play-btn-container absolute left-1/2 top-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
+          <div className="play-btn-container absolute top-1/2 left-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
             <Button
-              className="m-0! rounded-none! border-0! bg-transparent p-0! outline-1 outline-offset-1 hover:bg-transparent focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent"
+              className="m-0! rounded-none! border-0! bg-transparent p-0! outline outline-offset-1 hover:bg-transparent focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent"
               iconClassName={`!text-3xl text-font-color-white text-opacity-0 !leading-none ${
                 currentSongData.songId === songId && 'text-opacity-100'
               } group-focus-within:text-opacity-100 group-hover:text-opacity-100 ${
@@ -681,13 +681,13 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         </div>
       </div>
       <div
-        className={`song-info-container grid grow grid-cols-[35%_2fr_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] items-center gap-3 text-font-color-black lg:grid-cols-[40%_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] lg:!gap-0 sm:grid-cols-[45%_1fr_minmax(4.5rem,6rem)] sm:gap-2 dark:text-font-color-white ${
+        className={`song-info-container text-font-color-black dark:text-font-color-white grid grow grid-cols-[35%_2fr_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] items-center gap-3 sm:grid-cols-[45%_1fr_minmax(4.5rem,6rem)] sm:gap-2 lg:grid-cols-[40%_1fr_minmax(4rem,5rem)_minmax(4.5rem,6.5rem)] lg:!gap-0 ${
           (currentSongData.songId === songId || isAMultipleSelection) &&
           'dark:text-font-color-black!'
         }`}
       >
         <div
-          className="song-title truncate text-base font-normal outline-1 outline-offset-1 transition-none focus-visible:outline!"
+          className="song-title truncate text-base font-normal outline outline-offset-1 transition-none focus-visible:outline!"
           tabIndex={0}
           onKeyDown={(e) => e.key === 'Enter' && goToSongInfoPage()}
           title={title}
@@ -697,10 +697,10 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         <div className="song-artists w-full truncate text-xs font-normal transition-none">
           {songArtists}
         </div>
-        <div className="song-album w-full truncate text-xs transition-none lg:hidden md:hidden sm:hidden">
+        <div className="song-album w-full truncate text-xs transition-none sm:hidden md:hidden lg:hidden">
           {album?.name ? (
             <span
-              className="cursor-pointer outline-1 -outline-offset-1 hover:underline focus-visible:outline!"
+              className="cursor-pointer outline -outline-offset-1 hover:underline focus-visible:outline!"
               tabIndex={0}
               title={album.name}
               role="button"
@@ -718,9 +718,9 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
             ? songId
             : (year ?? '----')}
         </div>
-        <div className="song-duration flex w-full! items-center justify-between pl-2 pr-4 text-center transition-none sm:pr-1">
+        <div className="song-duration flex w-full! items-center justify-between pr-4 pl-2 text-center transition-none sm:pr-1">
           <Button
-            className="mr-0! mt-1 rounded-none! border-0! bg-transparent p-0! text-inherit! outline-1 outline-offset-1 focus-visible:outline! dark:bg-transparent"
+            className="mt-1 mr-0! rounded-none! border-0! bg-transparent p-0! text-inherit! outline outline-offset-1 focus-visible:outline! dark:bg-transparent"
             iconName="favorite"
             iconClassName={`${
               isAFavorite ? 'material-icons-round' : 'material-icons-round-outlined'

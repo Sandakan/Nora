@@ -298,7 +298,7 @@ export const Artist = (props: ArtistProp) => {
   return (
     <div
       // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
-      className={`artist ${appearFromBottom && 'appear-from-bottom'} mr-2 flex h-44 w-40 cursor-pointer flex-col justify-between overflow-hidden rounded-lg p-4 hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50 ${
+      className={`artist ${appearFromBottom && 'appear-from-bottom'} hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50 mr-2 flex h-44 w-40 cursor-pointer flex-col justify-between overflow-hidden rounded-lg p-4 ${
         props.className
       } ${isAMultipleSelection ? 'bg-background-color-3! dark:bg-dark-background-color-3!' : ''}`}
       onContextMenu={(e) => {
@@ -322,7 +322,7 @@ export const Artist = (props: ArtistProp) => {
       <div className="artist-img-container relative flex h-3/4 items-center justify-center">
         {isAFavorite && (
           <span
-            className={`material-icons-round absolute -bottom-2 z-10 flex rounded-full bg-background-color-1 p-2 text-2xl !text-font-color-highlight shadow-lg dark:bg-dark-background-color-2 dark:!text-dark-font-color-highlight ${
+            className={`material-icons-round bg-background-color-1 !text-font-color-highlight dark:bg-dark-background-color-2 dark:!text-dark-font-color-highlight absolute -bottom-2 z-10 flex rounded-full p-2 text-2xl shadow-lg ${
               isAMultipleSelection && 'bg-background-color-3! dark:bg-dark-background-color-3!'
             }`}
           >
@@ -341,13 +341,13 @@ export const Artist = (props: ArtistProp) => {
           <MultipleSelectionCheckbox
             id={props.artistId}
             selectionType="artist"
-            className="absolute bottom-3 right-3 z-10"
+            className="absolute right-3 bottom-3 z-10"
           />
         )}
       </div>
-      <div className="artist-info-container max-h-1/5 relative">
+      <div className="artist-info-container relative max-h-1/5">
         <Button
-          className={`name-container !m-0 !block !w-full !max-w-full truncate !rounded-none !border-0 bg-transparent !p-0 text-center !text-lg outline-1 outline-offset-1 hover:bg-transparent hover:underline focus-visible:!outline lg:text-base dark:bg-transparent dark:hover:bg-transparent ${
+          className={`name-container !m-0 !block !w-full !max-w-full truncate !rounded-none !border-0 bg-transparent !p-0 text-center !text-lg outline outline-offset-1 hover:bg-transparent hover:underline focus-visible:!outline lg:text-base dark:bg-transparent dark:hover:bg-transparent ${
             isAMultipleSelection && 'text-font-color-black! dark:text-font-color-black!'
           }`}
           label={props.name === '' ? 'Unknown Artist' : props.name}

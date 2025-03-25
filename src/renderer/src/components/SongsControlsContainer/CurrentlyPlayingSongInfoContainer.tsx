@@ -47,7 +47,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
             src={artist.onlineArtworkPaths?.picture_small}
             fallbackSrc={artist.artworkPath}
             loading="eager"
-            className={`absolute aspect-square w-6 rounded-full border-2 border-background-color-1 dark:border-dark-background-color-1 ${
+            className={`border-background-color-1 dark:border-dark-background-color-1 absolute aspect-square w-6 rounded-full border-2 ${
               index === 0 ? 'z-2' : '-translate-x-2'
             }`}
             onClick={() => {
@@ -277,7 +277,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
         {currentSongData.title && (
           <div className="song-title flex w-full items-center">
             <div
-              className={`w-fit max-w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-2xl font-medium text-font-color-highlight outline-1 outline-offset-1 focus-visible:!outline ${
+              className={`text-font-color-highlight w-fit max-w-full cursor-pointer overflow-hidden text-2xl font-medium text-ellipsis whitespace-nowrap outline outline-offset-1 focus-visible:!outline ${
                 currentSongData.isKnownSource && 'hover:underline'
               }`}
               id="currentSongTitle"
@@ -300,7 +300,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
             </div>
             {!currentSongData.isKnownSource && (
               <span
-                className="material-icons-round-outlined ml-2 cursor-pointer text-xl font-light text-font-color-highlight hover:underline dark:text-dark-font-color-highlight"
+                className="material-icons-round-outlined text-font-color-highlight dark:text-dark-font-color-highlight ml-2 cursor-pointer text-xl font-light hover:underline"
                 title="You are playing from an unknown source. Some features are disabled."
               >
                 error
@@ -324,7 +324,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
                   {songArtistsImages}
                 </span>
               )}
-            <span className="flex w-3/4 grow-0 text-xs text-font-color-black/90 dark:text-font-color-white/90">
+            <span className="text-font-color-black/90 dark:text-font-color-white/90 flex w-3/4 grow-0 text-xs">
               {songArtists}
             </span>
           </div>

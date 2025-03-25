@@ -148,7 +148,7 @@ const StorageSettings = () => {
 
   return (
     <li className="main-container storage-settings-container mb-16">
-      <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">hard_drive</span>
         {t('settingsPage.storage')}
       </div>
@@ -168,7 +168,7 @@ const StorageSettings = () => {
             </div>
 
             <div
-              className="mt-2 flex h-4 overflow-hidden rounded-md bg-background-color-2 dark:bg-dark-background-color-2/75"
+              className="bg-background-color-2 dark:bg-dark-background-color-2/75 mt-2 flex h-4 overflow-hidden rounded-md"
               style={appStorageBarCssProperties}
               title={t('settingsPage.freeSpace')}
             >
@@ -228,7 +228,7 @@ const StorageSettings = () => {
             </div>
 
             <div
-              className="mt-2 flex h-4 overflow-hidden rounded-md bg-background-color-2 dark:bg-dark-background-color-2/75"
+              className="bg-background-color-2 dark:bg-dark-background-color-2/75 mt-2 flex h-4 overflow-hidden rounded-md"
               style={appDataStorageBarCssProperties}
             >
               <div
@@ -261,10 +261,10 @@ const StorageSettings = () => {
           </div>
 
           <ul className="mt-10 flex flex-wrap items-center justify-center px-8">
-            <li className="mb-4 mr-8 flex items-center">
+            <li className="mr-8 mb-4 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#ffbe76]" />
               {t('settingsPage.otherAppFiles')} :{' '}
-              <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
+              <span className="text-font-color-highlight dark:text-dark-font-color-highlight ml-2">
                 {
                   parseByteSizes(
                     storageMetrics.rootSizes.size -
@@ -274,80 +274,80 @@ const StorageSettings = () => {
                 }
               </span>
             </li>
-            <li className="mb-4 mr-8 flex items-center">
+            <li className="mr-8 mb-4 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#4834d4]" />
               {t('settingsPage.internalAppFiles')} :{' '}
-              <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
+              <span className="text-font-color-highlight dark:text-dark-font-color-highlight ml-2">
                 {parseByteSizes(storageMetrics?.appFolderSize)?.size}
               </span>
             </li>
-            <li className="mb-4 mr-8 flex items-center">
+            <li className="mr-8 mb-4 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#55efc4]" />
               {t('settingsPage.artworkCache')} :{' '}
-              <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
+              <span className="text-font-color-highlight dark:text-dark-font-color-highlight ml-2">
                 {parseByteSizes(storageMetrics?.appDataSizes.artworkCacheSize)?.size}
               </span>
             </li>
-            <li className="mb-4 mr-8 flex items-center">
+            <li className="mr-8 mb-4 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#00b894]" />
               {t('settingsPage.tempArtworkCache')} :{' '}
-              <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
+              <span className="text-font-color-highlight dark:text-dark-font-color-highlight ml-2">
                 {parseByteSizes(storageMetrics?.appDataSizes.tempArtworkCacheSize)?.size}
               </span>
             </li>
-            <li className="mb-4 mr-8 flex items-center">
+            <li className="mr-8 mb-4 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#00cec9]" />
               {t('settingsPage.songsData')}{' '}
-              <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
+              <span className="text-font-color-highlight dark:text-dark-font-color-highlight ml-2">
                 {parseByteSizes(storageMetrics?.appDataSizes.songDataSize)?.size}
               </span>
             </li>
-            <li className="mb-4 mr-8 flex items-center">
+            <li className="mr-8 mb-4 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#0984e3]" />
               {t('settingsPage.artistsData')}{' '}
-              <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
+              <span className="text-font-color-highlight dark:text-dark-font-color-highlight ml-2">
                 {parseByteSizes(storageMetrics?.appDataSizes.artistDataSize)?.size}
               </span>
             </li>
-            <li className="mb-4 mr-8 flex items-center">
+            <li className="mr-8 mb-4 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#6c5ce7]" />
               {t('settingsPage.albumsData')}{' '}
-              <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
+              <span className="text-font-color-highlight dark:text-dark-font-color-highlight ml-2">
                 {parseByteSizes(storageMetrics?.appDataSizes.albumDataSize)?.size}
               </span>
             </li>
-            <li className="mb-4 mr-8 flex items-center">
+            <li className="mr-8 mb-4 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#fdcb6e]" />
               {t('settingsPage.playlistsData')}{' '}
-              <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
+              <span className="text-font-color-highlight dark:text-dark-font-color-highlight ml-2">
                 {parseByteSizes(storageMetrics?.appDataSizes.playlistDataSize)?.size}
               </span>
             </li>
-            <li className="mb-4 mr-8 flex items-center">
+            <li className="mr-8 mb-4 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#badc58]" />
               {t('settingsPage.palettesData')}{' '}
-              <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
+              <span className="text-font-color-highlight dark:text-dark-font-color-highlight ml-2">
                 {parseByteSizes(storageMetrics?.appDataSizes.paletteDataSize)?.size}
               </span>
             </li>
-            <li className="mb-4 mr-8 flex items-center">
+            <li className="mr-8 mb-4 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#e17055]" />
               {t('settingsPage.genresData')}{' '}
-              <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
+              <span className="text-font-color-highlight dark:text-dark-font-color-highlight ml-2">
                 {parseByteSizes(storageMetrics?.appDataSizes.genreDataSize)?.size}
               </span>
             </li>
-            <li className="mb-4 mr-8 flex items-center">
+            <li className="mr-8 mb-4 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#d63031]" />
               {t('settingsPage.userData')}{' '}
-              <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
+              <span className="text-font-color-highlight dark:text-dark-font-color-highlight ml-2">
                 {parseByteSizes(storageMetrics?.appDataSizes.userDataSize)?.size}
               </span>
             </li>
-            <li className="mb-4 mr-8 flex items-center">
+            <li className="mr-8 mb-4 flex items-center">
               <div className="mr-4 h-4 w-4 rounded-full bg-[#e84393]" />
               {t('settingsPage.appLogs')}{' '}
-              <span className="ml-2 text-font-color-highlight dark:text-dark-font-color-highlight">
+              <span className="text-font-color-highlight dark:text-dark-font-color-highlight ml-2">
                 {parseByteSizes(storageMetrics?.appDataSizes.logSize)?.size}
               </span>
             </li>
@@ -360,7 +360,7 @@ const StorageSettings = () => {
             </span>
             <span className="mx-2">&bull;</span>
             <Button
-              className="m-0! rounded-none! border-0! p-0! text-xs! uppercase outline-1 outline-offset-2 hover:underline focus-visible:outline!"
+              className="m-0! rounded-none! border-0! p-0! text-xs! uppercase outline outline-offset-2 hover:underline focus-visible:outline!"
               label={t('settingsPage.generateStorageMetricsAgain')}
               clickHandler={(_, setIsDisabled, setIsPending) => {
                 setIsDisabled(true);
@@ -385,7 +385,7 @@ const StorageSettings = () => {
             {t('settingsPage.storageMetricsGenerationDisclaimer')}
           </p>
           <Button
-            className="mr-0! mt-4"
+            className="mt-4 mr-0!"
             label={t('settingsPage.generateStorageMetrics')}
             iconName="hourglass_empty"
             clickHandler={(_, setIsDisabled, setIsPending) => {
@@ -407,7 +407,7 @@ const StorageSettings = () => {
           <span className="material-icons-round text-4xl">running_with_errors</span>
           <p className="mt-4">{t('settingsPage.storageMetricsGenerationError')}</p>
           <Button
-            className="mr-0! mt-4 rounded-none! border-0! p-0! text-xs! uppercase outline-1 outline-offset-2 hover:underline focus-visible:outline!"
+            className="mt-4 mr-0! rounded-none! border-0! p-0! text-xs! uppercase outline outline-offset-2 hover:underline focus-visible:outline!"
             label={t('settingsPage.generateStorageMetricsAgain')}
             clickHandler={(_, setIsDisabled, setIsPending) => {
               setIsDisabled(true);

@@ -27,7 +27,7 @@ function SongArtist(props: SongArtistProp) {
 
   return (
     <span
-      className={`text-xs font-normal outline-1 -outline-offset-1 focus-visible:!outline ${
+      className={`text-xs font-normal outline -outline-offset-1 focus-visible:!outline ${
         isFromKnownSource && 'hover:underline'
       } ${className}`}
       key={artistId}

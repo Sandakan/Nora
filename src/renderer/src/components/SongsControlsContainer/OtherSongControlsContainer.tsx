@@ -85,7 +85,7 @@ const OtherSongControlsContainer = () => {
   return (
     <div className="other-controls-container flex items-center justify-end">
       <Button
-        className={`queue-btn !mr-6 !rounded-none !border-0 bg-transparent !p-0 text-font-color-black text-opacity-60 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:!outline lg:hidden dark:bg-transparent dark:text-font-color-white dark:after:bg-dark-font-color-highlight dark:hover:bg-transparent ${
+        className={`queue-btn text-font-color-black text-opacity-60 after:bg-font-color-highlight dark:text-font-color-white dark:after:bg-dark-font-color-highlight !mr-6 !rounded-none !border-0 bg-transparent !p-0 outline outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:!outline lg:hidden dark:bg-transparent dark:hover:bg-transparent ${
           currentlyActivePage.pageTitle === 'CurrentQueue' && 'after:opacity-100'
         }`}
         tooltipLabel={t('player.currentQueue')}
@@ -103,7 +103,7 @@ const OtherSongControlsContainer = () => {
       />
 
       <Button
-        className="mini-player-btn mr-6! rounded-none! border-0! bg-transparent p-0! text-font-color-black text-opacity-60 outline-1 outline-offset-1 hover:bg-transparent focus-visible:outline! lg:hidden dark:bg-transparent dark:text-font-color-white dark:hover:bg-transparent"
+        className="mini-player-btn text-font-color-black text-opacity-60 dark:text-font-color-white mr-6! rounded-none! border-0! bg-transparent p-0! outline outline-offset-1 hover:bg-transparent focus-visible:outline! lg:hidden dark:bg-transparent dark:hover:bg-transparent"
         clickHandler={() => updatePlayerType('mini')}
         tooltipLabel={t('player.openInMiniPlayer')}
         iconName="pip"
@@ -111,7 +111,7 @@ const OtherSongControlsContainer = () => {
       />
 
       <Button
-        className="full-screen-player-btn mr-6! rounded-none! border-0! bg-transparent p-0! text-font-color-black text-opacity-60 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:outline! lg:hidden dark:bg-transparent dark:text-font-color-white dark:after:bg-dark-font-color-highlight dark:hover:bg-transparent"
+        className="full-screen-player-btn text-font-color-black text-opacity-60 after:bg-font-color-highlight dark:text-font-color-white dark:after:bg-dark-font-color-highlight mr-6! rounded-none! border-0! bg-transparent p-0! outline outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:outline! lg:hidden dark:bg-transparent dark:hover:bg-transparent"
         tooltipLabel={t('player.openInFullScreen')}
         iconName="fullscreen"
         iconClassName="material-icons-round-outlined text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"
@@ -119,7 +119,7 @@ const OtherSongControlsContainer = () => {
       />
 
       <Button
-        className={`volume-btn !mr-2 !rounded-none !border-0 bg-transparent !p-0 outline-1 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:bg-font-color-highlight after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:after:bg-dark-font-color-highlight dark:hover:bg-transparent ${
+        className={`volume-btn after:bg-font-color-highlight dark:after:bg-dark-font-color-highlight !mr-2 !rounded-none !border-0 bg-transparent !p-0 outline outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
           isMuted && 'after:opacity-100'
         }`}
         tooltipLabel={t('player.muteUnmute')}
@@ -130,13 +130,13 @@ const OtherSongControlsContainer = () => {
         clickHandler={() => toggleMutedState(!isMuted)}
       />
 
-      <div className="volume-slider-container mr-4 min-w-[4rem] max-w-[6rem] lg:mr-4">
+      <div className="volume-slider-container mr-4 max-w-[6rem] min-w-[4rem] lg:mr-4">
         <VolumeSlider name="player-volume-slider" id="volumeSlider" />
       </div>
-      <div className="other-settings-btn mr-4 flex cursor-pointer items-center justify-center text-font-color-black text-opacity-60 dark:text-font-color-white">
+      <div className="other-settings-btn text-font-color-black text-opacity-60 dark:text-font-color-white mr-4 flex cursor-pointer items-center justify-center">
         <span
           title={t('player.otherSettings')}
-          className="material-icons-round icon cursor-pointer text-xl text-font-color-black opacity-60 transition-opacity hover:opacity-80 dark:text-font-color-white"
+          className="material-icons-round icon text-font-color-black dark:text-font-color-white cursor-pointer text-xl opacity-60 transition-opacity hover:opacity-80"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();

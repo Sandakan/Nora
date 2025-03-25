@@ -68,7 +68,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
 
   return (
     <div
-      className={`result appear-from-bottom group most-relevant-${resultType.toLowerCase()} active mr-4 grid h-40 w-fit min-w-[20rem] max-w-md cursor-pointer grid-cols-[10rem_1fr] items-center rounded-lg bg-background-color-2 py-3 pl-3 pr-4 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:hover:bg-dark-background-color-3`}
+      className={`result appear-from-bottom group most-relevant-${resultType.toLowerCase()} active bg-background-color-2 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:hover:bg-dark-background-color-3 mr-4 grid h-40 w-fit max-w-md min-w-[20rem] cursor-pointer grid-cols-[10rem_1fr] items-center rounded-lg py-3 pr-4 pl-3`}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -86,7 +86,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
       <div className="result-img-container relative mr-4 flex h-full w-fit items-center justify-center overflow-hidden">
         {resultType.toLowerCase() !== 'artist' && (
           <Button
-            className="absolute z-10 m-0! rounded-none! border-0! p-0! opacity-75 outline-1 outline-offset-1 transition-opacity hover:opacity-100 focus-visible:outline! group-hover:opacity-100"
+            className="absolute z-10 m-0! rounded-none! border-0! p-0! opacity-75 outline outline-offset-1 transition-opacity group-hover:opacity-100 hover:opacity-100 focus-visible:outline!"
             iconName="play_circle"
             iconClassName="text-4xl! leading-none! text-font-color-white"
             clickHandler={(e) => {
@@ -102,21 +102,21 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
           className={`max-h-full ${resultType === 'artist' ? 'rounded-full' : 'rounded-md'}`}
         />
       </div>
-      <div className="result-info-container max-w-[50%] text-font-color-black group-hover:text-font-color-black dark:text-font-color-white dark:group-hover:text-font-color-black">
-        <div className="title overflow-hidden text-ellipsis whitespace-nowrap text-2xl">
+      <div className="result-info-container text-font-color-black group-hover:text-font-color-black dark:text-font-color-white dark:group-hover:text-font-color-black max-w-[50%]">
+        <div className="title overflow-hidden text-2xl text-ellipsis whitespace-nowrap">
           {title}
         </div>
         {infoType1 && (
-          <div className="info-type-1 overflow-hidden text-ellipsis whitespace-nowrap text-base">
+          <div className="info-type-1 overflow-hidden text-base text-ellipsis whitespace-nowrap">
             {infoType1}
           </div>
         )}
         {infoType2 && (
-          <div className="info-type-2 overflow-hidden text-ellipsis whitespace-nowrap text-sm">
+          <div className="info-type-2 overflow-hidden text-sm text-ellipsis whitespace-nowrap">
             {infoType2}
           </div>
         )}
-        <div className="result-type mt-3 w-fit -translate-x-1 overflow-hidden text-ellipsis whitespace-nowrap rounded-2xl bg-background-color-3 px-3 py-1 font-medium uppercase text-font-color-black group-hover:bg-background-color-1 group-hover:text-font-color-black dark:bg-dark-background-color-3 dark:text-font-color-black dark:group-hover:bg-dark-background-color-1 dark:group-hover:text-font-color-white">
+        <div className="result-type bg-background-color-3 text-font-color-black group-hover:bg-background-color-1 group-hover:text-font-color-black dark:bg-dark-background-color-3 dark:text-font-color-black dark:group-hover:bg-dark-background-color-1 dark:group-hover:text-font-color-white mt-3 w-fit -translate-x-1 overflow-hidden rounded-2xl px-3 py-1 font-medium text-ellipsis whitespace-nowrap uppercase">
           {t(`common.${resultType}_one`)}
         </div>
       </div>

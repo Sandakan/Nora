@@ -290,7 +290,7 @@ const ArtistInfoPage = () => {
 
   return (
     <MainContainer
-      className="artist-info-page-container appear-from-bottom relative overflow-y-auto rounded-tl-lg pb-2 pl-2 pr-2 pt-8 [scrollbar-gutter:stable]"
+      className="artist-info-page-container appear-from-bottom relative overflow-y-auto rounded-tl-lg pt-8 pr-2 pb-2 pl-2 [scrollbar-gutter:stable]"
       ref={songsContainerRef}
     >
       <div className="artist-img-and-info-container relative mb-12 flex flex-row items-center pl-8 *:z-10">
@@ -328,7 +328,7 @@ const ArtistInfoPage = () => {
             }
           />
           <Button
-            className="absolute -bottom-5 m-0! flex rounded-full border-0! bg-background-color-1 p-3! text-font-color-highlight shadow-xl outline-1 -outline-offset-[6px] hover:bg-background-color-1 focus-visible:outline! dark:bg-dark-background-color-2 dark:hover:bg-dark-background-color-2"
+            className="bg-background-color-1 text-font-color-highlight hover:bg-background-color-1 dark:bg-dark-background-color-2 dark:hover:bg-dark-background-color-2 absolute -bottom-5 m-0! flex rounded-full border-0! p-3! shadow-xl outline -outline-offset-[6px] focus-visible:outline!"
             tooltipLabel={t(
               `artistInfoPage.${artistData?.isAFavorite ? `dislikeArtist` : `likeArtist`}`,
               {
@@ -369,7 +369,7 @@ const ArtistInfoPage = () => {
           } *:z-10`}
         >
           <div
-            className="artist-name mb-2 text-5xl text-font-color-highlight dark:text-dark-font-color-highlight"
+            className="artist-name text-font-color-highlight dark:text-dark-font-color-highlight mb-2 text-5xl"
             // style={
             //   fontColor
             //     ? {
@@ -418,16 +418,16 @@ const ArtistInfoPage = () => {
                 bodyBackgroundImage
                   ? 'text-font-color-white'
                   : 'text-font-color-black dark:text-font-color-white'
-              } mb-4 mt-1 text-2xl`}
+              } mt-1 mb-4 text-2xl`}
               otherItems={[
                 isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'album' ? (
-                  <p className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
+                  <p className="text-font-color-highlight dark:text-dark-font-color-highlight text-sm">
                     {t('common.selectionWithCount', {
                       count: multipleSelectionsData.multipleSelections.length
                     })}
                   </p>
                 ) : (
-                  <p className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
+                  <p className="text-font-color-highlight dark:text-dark-font-color-highlight text-sm">
                     {t('common.albumWithCount', { count: albums.length })}{' '}
                     {albums.length > noOfVisibleAlbums &&
                       !isAllAlbumsVisible &&
@@ -473,10 +473,10 @@ const ArtistInfoPage = () => {
                 bodyBackgroundImage
                   ? 'text-font-color-white'
                   : 'text-font-color-black dark:text-font-color-white'
-              } mb-4 mt-1 pr-4 text-2xl`}
+              } mt-1 mb-4 pr-4 text-2xl`}
               otherItems={[
                 // eslint-disable-next-line react/jsx-key
-                <p className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
+                <p className="text-font-color-highlight dark:text-dark-font-color-highlight text-sm">
                   {isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'songs'
                     ? t('common.selectionWithCount', {
                         count: multipleSelectionsData.multipleSelections.length

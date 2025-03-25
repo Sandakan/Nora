@@ -149,11 +149,11 @@ const SearchPage = () => {
     <MainContainer className="h-full! pb-0! [scrollbar-gutter:stable]" ref={searchContainerRef}>
       <div className="search-controls-container">
         <div className="search-input-container appear-from-bottom mb-4 flex items-center">
-          <div className="search-bar-container flex w-1/2 min-w-[25rem] max-w-xl items-center rounded-3xl bg-background-color-2 px-2 py-1 dark:bg-dark-background-color-2">
+          <div className="search-bar-container bg-background-color-2 dark:bg-dark-background-color-2 flex w-1/2 max-w-xl min-w-[25rem] items-center rounded-3xl px-2 py-1">
             <Button
-              className={`!my-1 !ml-1 !mr-2 !rounded-3xl border-none !px-4 !py-2 shadow-sm outline-1 outline-offset-1 focus-visible:!outline ${
+              className={`!my-1 !mr-2 !ml-1 !rounded-3xl border-none !px-4 !py-2 shadow-sm outline outline-offset-1 focus-visible:!outline ${
                 isPredictiveSearchEnabled
-                  ? 'bg-background-color-3 text-black! dark:bg-dark-background-color-3'
+                  ? 'bg-background-color-3 dark:bg-dark-background-color-3 text-black!'
                   : 'bg-background-color-1/50 text-font-color-highlight! hover:bg-background-color-1 focus-visible:bg-background-color-1 dark:bg-dark-background-color-1/50 dark:text-dark-font-color-highlight! dark:hover:bg-dark-background-color-1 dark:focus-visible:bg-dark-background-color-1'
               }`}
               iconName={isPredictiveSearchEnabled ? 'auto_fix' : 'auto_fix_off'}
@@ -175,7 +175,7 @@ const SearchPage = () => {
               type="search"
               name="search"
               id="searchBar"
-              className="h-full w-full border-2 border-[transparent] bg-[transparent] text-font-color-black outline-hidden placeholder:text-font-color-highlight dark:text-font-color-white dark:placeholder:text-dark-font-color-highlight"
+              className="text-font-color-black placeholder:text-font-color-highlight dark:text-font-color-white dark:placeholder:text-dark-font-color-highlight h-full w-full border-2 border-[transparent] bg-[transparent] outline-hidden"
               aria-label="Search"
               placeholder={t('searchPage.searchForAnything')}
               value={searchInput}
@@ -195,7 +195,7 @@ const SearchPage = () => {
             />
           </div>
           <span
-            className="material-icons-round-outlined ml-4 cursor-help text-2xl text-font-color-highlight dark:text-dark-font-color-highlight"
+            className="material-icons-round-outlined text-font-color-highlight dark:text-dark-font-color-highlight ml-4 cursor-help text-2xl"
             title={t('searchPage.separateKeywords')}
           >
             help

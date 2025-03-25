@@ -367,7 +367,7 @@ export const Playlist = (props: PlaylistProp) => {
     <div
       className={`playlist group hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50 ${
         props.playlistId
-      } mb-8 mr-12 flex h-fit max-h-52 min-h-[12rem] w-36 flex-col justify-between rounded-md p-4 text-font-color-black dark:text-font-color-white ${
+      } text-font-color-black dark:text-font-color-white mr-12 mb-8 flex h-fit max-h-52 min-h-[12rem] w-36 flex-col justify-between rounded-md p-4 ${
         isAMultipleSelection
           ? 'bg-background-color-3! text-font-color-black! dark:bg-dark-background-color-3! dark:text-font-color-black!'
           : ''
@@ -397,11 +397,11 @@ export const Playlist = (props: PlaylistProp) => {
           <MultipleSelectionCheckbox
             id={props.playlistId}
             selectionType="playlist"
-            className="absolute bottom-3 right-3 z-10"
+            className="absolute right-3 bottom-3 z-10"
           />
         ) : (
           <Button
-            className="absolute bottom-2 right-2 z-10 m-0! translate-y-10 scale-90 rounded-none! border-0! bg-transparent p-0! text-font-color-white opacity-0 outline-1 outline-offset-1 transition-[opacity,transform] delay-100 duration-200 ease-in-out hover:bg-transparent focus-visible:outline! group-focus-within:translate-y-0 group-focus-within:scale-100 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 dark:bg-transparent dark:text-font-color-white! dark:hover:bg-transparent"
+            className="text-font-color-white dark:text-font-color-white! absolute right-2 bottom-2 z-10 m-0! translate-y-10 scale-90 rounded-none! border-0! bg-transparent p-0! opacity-0 outline outline-offset-1 transition-[opacity,transform] delay-100 duration-200 ease-in-out group-focus-within:translate-y-0 group-focus-within:scale-100 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:scale-100 group-hover:opacity-100 hover:bg-transparent focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent"
             clickHandler={() => playAllSongs()}
             iconName="play_circle"
             iconClassName="text-4xl! leading-none! text-inherit!"
@@ -436,7 +436,7 @@ export const Playlist = (props: PlaylistProp) => {
       </div>
       <div className="playlist-info-container mt-2">
         <Button
-          className={`playlist-title !m-0 !block w-full truncate !rounded-none !border-0 bg-transparent !p-0 !text-left !text-xl outline-1 outline-offset-1 hover:bg-transparent hover:underline focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
+          className={`playlist-title !m-0 !block w-full truncate !rounded-none !border-0 bg-transparent !p-0 !text-left !text-xl outline outline-offset-1 hover:bg-transparent hover:underline focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
             isAMultipleSelection && 'text-font-color-black! dark:text-font-color-black!'
           }`}
           tooltipLabel={props.name}

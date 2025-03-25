@@ -27,7 +27,7 @@ type ImgProps = {
 };
 
 /* <picture
-  className={`outline-1 outline-offset-4 focus-visible:outline! ${className}`}
+  className={`outline outline-offset-4 focus-visible:outline! ${className}`}
   tabIndex={tabIndex}
 >
   <source srcSet={src} />
@@ -100,7 +100,7 @@ const Img = memo((props: ImgProps) => {
       src={src || fallbackSrc}
       alt={alt}
       ref={imgRef}
-      className={`relative outline-1 outline-offset-4 focus-visible:!outline ${
+      className={`relative outline outline-offset-4 focus-visible:!outline ${
         enableImgFadeIns && isFirstTimeRef.current
           ? 'opacity-0 transition-opacity delay-[250ms]'
           : 'opacity-100! transition-none!'

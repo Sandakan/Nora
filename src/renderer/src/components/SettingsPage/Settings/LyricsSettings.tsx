@@ -60,21 +60,21 @@ const LyricsSettings = () => {
 
   return (
     <li className="main-container audio-playback-settings-container mb-16">
-      <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">notes</span>
         {t('settingsPage.lyrics')}
       </div>
-      <ul className="list-disc pl-6 marker:bg-font-color-highlight dark:marker:bg-dark-font-color-highlight">
+      <ul className="marker:bg-font-color-highlight dark:marker:bg-dark-font-color-highlight list-disc pl-6">
         <li className="secondary-container enable-musixmatch-lyrics mb-4">
           <div className="description">
             {t('settingsPage.enableMusixmatchLyricsDescription')}
-            <div className="ml-2 mt-1 text-sm font-light">
+            <div className="mt-1 ml-2 text-sm font-light">
               <Trans
                 i18nKey="settingsPage.musixmatchDisclaimerNotice"
                 components={{
                   Button: (
                     <Button
-                      className="m-0! inline! rounded-none! border-0! bg-transparent! p-0! px-2 text-font-color-highlight-2! outline-1 outline-offset-1 hover:underline focus-visible:outline! dark:bg-transparent! dark:text-dark-font-color-highlight-2!"
+                      className="text-font-color-highlight-2! dark:text-dark-font-color-highlight-2! m-0! inline! rounded-none! border-0! bg-transparent! p-0! px-2 outline outline-offset-1 hover:underline focus-visible:outline! dark:bg-transparent!"
                       clickHandler={() => {
                         changePromptMenuData(true, <MusixmatchDisclaimerPrompt />);
                       }}
@@ -139,7 +139,7 @@ const LyricsSettings = () => {
               }}
             />
             <span
-              className="material-icons-round-outlined ml-4 cursor-pointer text-2xl text-font-color-highlight dark:text-dark-font-color-highlight"
+              className="material-icons-round-outlined text-font-color-highlight dark:text-dark-font-color-highlight ml-4 cursor-pointer text-2xl"
               title={t('settingsPage.saveLyricsAutomaticallyInfo')}
             >
               help
@@ -175,11 +175,11 @@ const LyricsSettings = () => {
           <div className="description">
             {t('settingsPage.lrcFileCustomSaveLocationDescription')}
           </div>
-          <div className="ml-2 mt-4 flex-row text-sm">
+          <div className="mt-4 ml-2 flex-row text-sm">
             {userData?.customLrcFilesSaveLocation && (
               <>
                 <span>{t('settingsPage.selectedCustomLocation')}: </span>
-                <span className="mr-4 text-font-color-highlight dark:text-dark-font-color-highlight">
+                <span className="text-font-color-highlight dark:text-dark-font-color-highlight mr-4">
                   {userData.customLrcFilesSaveLocation}
                 </span>
               </>

@@ -294,7 +294,7 @@ const Genre = (props: GenreProp) => {
 
   return (
     <div
-      className={`genre group relative mb-6 mr-10 flex h-36 w-72 cursor-pointer items-center gap-4 overflow-hidden rounded-2xl p-4 text-background-color-2 transition-[border,border-color] dark:text-dark-background-color-2 ${className} ${
+      className={`genre group text-background-color-2 dark:text-dark-background-color-2 relative mr-10 mb-6 flex h-36 w-72 cursor-pointer items-center gap-4 overflow-hidden rounded-2xl p-4 transition-[border,border-color] ${className} ${
         isMultipleSelectionEnabled &&
         multipleSelectionsData.selectionType === 'genre' &&
         'border-4 border-transparent'
@@ -324,11 +324,11 @@ const Genre = (props: GenreProp) => {
       </div>
       <div className="genre-info-container w-3/5 grow-0">
         <Button
-          className="genre-title m-0! block! w-full truncate rounded-none! border-0! bg-transparent p-0! text-left! text-2xl! text-font-color-white outline-1 outline-offset-1 hover:bg-transparent focus-visible:outline! dark:bg-transparent dark:text-font-color-white dark:hover:bg-transparent"
+          className="genre-title text-font-color-white dark:text-font-color-white m-0! block! w-full truncate rounded-none! border-0! bg-transparent p-0! text-left! text-2xl! outline outline-offset-1 hover:bg-transparent focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent"
           label={title}
           clickHandler={goToGenreInfoPage}
         />
-        <div className="genre-no-of-songs text-sm text-font-color-white/75 dark:text-font-color-white/75">
+        <div className="genre-no-of-songs text-font-color-white/75 dark:text-font-color-white/75 text-sm">
           {t(`common.songWithCount`, {
             count: songIds.length
           })}

@@ -317,7 +317,7 @@ export const Album = (props: AlbumProp) => {
   return (
     <div
       // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
-      className={`album h-68 group mb-2 mr-6 flex w-48 flex-col justify-between overflow-hidden rounded-md p-4 ${
+      className={`album group mr-6 mb-2 flex h-68 w-48 flex-col justify-between overflow-hidden rounded-md p-4 ${
         props.className ?? ''
       } ${
         isAMultipleSelection
@@ -342,11 +342,11 @@ export const Album = (props: AlbumProp) => {
           <MultipleSelectionCheckbox
             id={props.albumId}
             selectionType="album"
-            className="absolute bottom-3 right-3 z-10"
+            className="absolute right-3 bottom-3 z-10"
           />
         ) : (
           <Button
-            className="absolute bottom-[5%] right-[5%] z-1 m-0! rounded-none! border-0! bg-transparent p-0! text-font-color-white! opacity-0 outline-1 outline-offset-1 transition-opacity hover:bg-transparent hover:opacity-100! focus-visible:opacity-100! focus-visible:outline! group-focus-within:opacity-75 group-hover:opacity-75 dark:bg-transparent dark:hover:bg-transparent"
+            className="text-font-color-white! absolute right-[5%] bottom-[5%] z-1 m-0! rounded-none! border-0! bg-transparent p-0! opacity-0 outline outline-offset-1 transition-opacity group-focus-within:opacity-75 group-hover:opacity-75 hover:bg-transparent hover:opacity-100! focus-visible:opacity-100! focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent"
             iconName="play_circle"
             iconClassName="text-5xl! leading-none!"
             clickHandler={(e) => {
@@ -367,12 +367,12 @@ export const Album = (props: AlbumProp) => {
         </div>
       </div>
       <div
-        className={`album-info-container mt-2 h-fit w-full pl-2 text-font-color-black dark:text-font-color-white ${
+        className={`album-info-container text-font-color-black dark:text-font-color-white mt-2 h-fit w-full pl-2 ${
           isAMultipleSelection && 'text-font-color-black! dark:text-font-color-black!'
         }`}
       >
         <Button
-          className={`album-title pointer !m-0 !block w-full truncate !rounded-none !border-0 bg-transparent !p-0 !text-left text-xl outline-1 outline-offset-1 hover:bg-transparent hover:underline focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
+          className={`album-title pointer !m-0 !block w-full truncate !rounded-none !border-0 bg-transparent !p-0 !text-left text-xl outline outline-offset-1 hover:bg-transparent hover:underline focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
             isAMultipleSelection ? 'text-font-color-black! dark:text-font-color-black!' : ''
           }`}
           label={props.title}
@@ -386,7 +386,7 @@ export const Album = (props: AlbumProp) => {
             {albumArtists}
           </div>
         )}
-        <div className="album-no-of-songs w-full overflow-hidden text-ellipsis whitespace-nowrap text-xs">
+        <div className="album-no-of-songs w-full overflow-hidden text-xs text-ellipsis whitespace-nowrap">
           {t('common.songWithCount', { count: props.songs.length })}
         </div>
       </div>

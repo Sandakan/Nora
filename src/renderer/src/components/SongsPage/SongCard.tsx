@@ -522,7 +522,7 @@ const SongCard = (props: SongCardProp) => {
         currentSongData.songId === songId && 'current-song'
       } ${
         isSongPlaying && 'playing'
-      } group/songCard relative mb-2 mr-2 aspect-2/1 min-w-[15rem] max-w-[24rem] overflow-hidden rounded-2xl border-[transparent] border-background-color-2 shadow-xl transition-[border-color] ease-in-out dark:border-dark-background-color-2 ${
+      } group/songCard border-background-color-2 dark:border-dark-background-color-2 relative mr-2 mb-2 aspect-2/1 max-w-[24rem] min-w-[15rem] overflow-hidden rounded-2xl border-[transparent] shadow-xl transition-[border-color] ease-in-out ${
         className || ''
       } ${
         isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'songs' && 'border-4'
@@ -568,12 +568,12 @@ const SongCard = (props: SongCardProp) => {
               Array.isArray(queue.queue) &&
               queue.queue.length > 0 &&
               queue?.queue?.at(queue.currentSongIndex + 1) === songId && (
-                <span className="mr-2 font-semibold uppercase text-font-color-white! opacity-50 transition-opacity last:mr-0 group-hover/songCard:opacity-90">
+                <span className="text-font-color-white! mr-2 font-semibold uppercase opacity-50 transition-opacity group-hover/songCard:opacity-90 last:mr-0">
                   {t('song.playingNext')}
                 </span>
               )}
             {currentSongData.songId === songId && (
-              <span className="mr-2 font-semibold uppercase text-font-color-white! opacity-50 transition-opacity last:mr-0 group-hover/songCard:opacity-90">
+              <span className="text-font-color-white! mr-2 font-semibold uppercase opacity-50 transition-opacity group-hover/songCard:opacity-90 last:mr-0">
                 {t('song.playingNow')}
               </span>
             )}
@@ -585,14 +585,14 @@ const SongCard = (props: SongCardProp) => {
                 queue?.queue?.at(queue.currentSongIndex + 1) === songId &&
                 currentSongData.songId === songId
               ) && (
-                <span className="mr-2 font-semibold uppercase text-font-color-white! opacity-50 transition-opacity last:mr-0 group-hover/songCard:opacity-90">
+                <span className="text-font-color-white! mr-2 font-semibold uppercase opacity-50 transition-opacity group-hover/songCard:opacity-90 last:mr-0">
                   {t('song.blacklisted')}
                 </span>
               )}
           </div>
           <div className="state-icons flex">
             <Button
-              className="order-2 m-0! rounded-none! border-0! bg-transparent p-1! text-inherit! opacity-50 outline-1 outline-offset-1 transition-opacity hover:bg-transparent focus-visible:outline! group-focus-within/songCard:opacity-100 group-hover/songCard:opacity-100 dark:bg-transparent dark:hover:bg-transparent"
+              className="order-2 m-0! rounded-none! border-0! bg-transparent p-1! text-inherit! opacity-50 outline outline-offset-1 transition-opacity group-focus-within/songCard:opacity-100 group-hover/songCard:opacity-100 hover:bg-transparent focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent"
               iconName="favorite"
               iconClassName={`${
                 isSongAFavorite ? 'material-icons-round' : 'material-icons-round-outlined'
@@ -606,9 +606,9 @@ const SongCard = (props: SongCardProp) => {
           </div>
         </div>
         <div className="song-info-and-play-btn-container flex w-full items-center justify-between">
-          <div className="song-info-container max-w-[75%] text-font-color-white dark:text-font-color-white">
+          <div className="song-info-container text-font-color-white dark:text-font-color-white max-w-[75%]">
             <div
-              className="song-title cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-xl font-normal outline-1 outline-offset-1 transition-none hover:underline focus-visible:outline!"
+              className="song-title cursor-pointer overflow-hidden text-xl font-normal text-ellipsis whitespace-nowrap outline outline-offset-1 transition-none hover:underline focus-visible:outline!"
               title={title}
               onClick={(e) => {
                 e.stopPropagation();
@@ -634,7 +634,7 @@ const SongCard = (props: SongCardProp) => {
               )
             ) : (
               <Button
-                className={`!m-0 !rounded-none !border-0 bg-transparent !p-0 opacity-60 outline-1 outline-offset-1 transition-opacity hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
+                className={`!m-0 !rounded-none !border-0 bg-transparent !p-0 opacity-60 outline outline-offset-1 transition-opacity hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
                   currentSongData.songId === songId && 'opacity-100!'
                 } group-focus-within/songCard:opacity-100 group-hover/songCard:opacity-100`}
                 iconName={isSongPlaying ? 'pause_circle' : 'play_circle'}
