@@ -19,7 +19,7 @@ const NewUpdateIndicator = () => {
     <>
       {!(appUpdatesState === 'UNKNOWN') && (
         <Button
-          className={`new-update-indicator bg-background-color-2 hover:text-font-color-highlight dark:bg-dark-background-color-2 dark:hover:text-dark-font-color-highlight !mr-1 flex cursor-pointer items-center justify-center rounded-md !border-0 !px-3 !py-1 text-center outline outline-offset-1 transition-[background] focus-visible:!outline ${
+          className={`new-update-indicator bg-background-color-2 hover:text-font-color-highlight dark:bg-dark-background-color-2 dark:hover:text-dark-font-color-highlight !mr-1 flex cursor-pointer items-center justify-center rounded-md !border-0 !px-3 !py-1 text-center outline-offset-1 transition-[background] focus-visible:!outline ${
             appUpdatesState === 'LATEST' && 'hidden'
           }`}
           iconClassName="material-icons-round-outlined"

@@ -53,7 +53,7 @@ const SongArtistsInput = (props: Props) => {
               >
                 <Button
                   iconName="close"
-                  className="material-icons-round mr-2 border-0! p-[.125rem]! opacity-0 outline outline-offset-1 transition-[visibility,opacity] group-focus-within:opacity-100 group-hover:opacity-100 focus-visible:outline!"
+                  className="material-icons-round mr-2 border-0! p-[.125rem]! opacity-0 outline-offset-1 transition-[visibility,opacity] group-focus-within:opacity-100 group-hover:opacity-100 focus-visible:outline!"
                   iconClassName="leading-none dark:text-font-color-black!"
                   clickHandler={() => {
                     updateSongInfo((prevData) => {

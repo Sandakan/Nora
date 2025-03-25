@@ -40,7 +40,7 @@ const Checkbox = memo((props: CheckboxProp) => {
   return (
     <label
       htmlFor={id}
-      className={`checkbox-and-labels-container mt-4 ml-2 flex !w-fit items-center outline outline-offset-1 transition-opacity focus-visible:!outline ${
+      className={`checkbox-and-labels-container mt-4 ml-2 flex !w-fit items-center outline-offset-1 transition-opacity focus-visible:!outline ${
         isDisabled && 'cursor-not-allowed! opacity-50'
       } ${className}`}
       tabIndex={isDisabled ? -1 : 0}

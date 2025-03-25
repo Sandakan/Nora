@@ -360,7 +360,7 @@ const StorageSettings = () => {
             </span>
             <span className="mx-2">&bull;</span>
             <Button
-              className="m-0! rounded-none! border-0! p-0! text-xs! uppercase outline outline-offset-2 hover:underline focus-visible:outline!"
+              className="m-0! rounded-none! border-0! p-0! text-xs! uppercase outline-offset-2 hover:underline focus-visible:outline!"
               label={t('settingsPage.generateStorageMetricsAgain')}
               clickHandler={(_, setIsDisabled, setIsPending) => {
                 setIsDisabled(true);
@@ -407,7 +407,7 @@ const StorageSettings = () => {
           <span className="material-icons-round text-4xl">running_with_errors</span>
           <p className="mt-4">{t('settingsPage.storageMetricsGenerationError')}</p>
           <Button
-            className="mt-4 mr-0! rounded-none! border-0! p-0! text-xs! uppercase outline outline-offset-2 hover:underline focus-visible:outline!"
+            className="mt-4 mr-0! rounded-none! border-0! p-0! text-xs! uppercase outline-offset-2 hover:underline focus-visible:outline!"
             label={t('settingsPage.generateStorageMetricsAgain')}
             clickHandler={(_, setIsDisabled, setIsPending) => {
               setIsDisabled(true);

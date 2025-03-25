@@ -101,7 +101,7 @@ const PromptMenu = () => {
         <PromptMenuNavigationControlsContainer />
         <Button
           key={0}
-          className="prompt-menu-close-btn previousPageBtn hover:bg-background-color-2 hover:text-font-color-highlight dark:hover:bg-dark-background-color-2 dark:hover:text-dark-font-color-highlight m-0! flex h-fit rounded-md! border-0! p-0! px-2! py-1! outline outline-offset-1 transition-[background,transform,visibility,opacity]!"
+          className="prompt-menu-close-btn previousPageBtn hover:bg-background-color-2 hover:text-font-color-highlight dark:hover:bg-dark-background-color-2 dark:hover:text-dark-font-color-highlight m-0! flex h-fit rounded-md! border-0! p-0! px-2! py-1! outline-offset-1 transition-[background,transform,visibility,opacity]!"
           iconName="close"
           tooltipLabel={t('titleBar.close')}
           iconClassName="leading-none! text-xl!"

@@ -592,7 +592,7 @@ const SongCard = (props: SongCardProp) => {
           </div>
           <div className="state-icons flex">
             <Button
-              className="order-2 m-0! rounded-none! border-0! bg-transparent p-1! text-inherit! opacity-50 outline outline-offset-1 transition-opacity group-focus-within/songCard:opacity-100 group-hover/songCard:opacity-100 hover:bg-transparent focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent"
+              className="order-2 m-0! rounded-none! border-0! bg-transparent p-1! text-inherit! opacity-50 outline-offset-1 transition-opacity group-focus-within/songCard:opacity-100 group-hover/songCard:opacity-100 hover:bg-transparent focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent"
               iconName="favorite"
               iconClassName={`${
                 isSongAFavorite ? 'material-icons-round' : 'material-icons-round-outlined'
@@ -608,7 +608,7 @@ const SongCard = (props: SongCardProp) => {
         <div className="song-info-and-play-btn-container flex w-full items-center justify-between">
           <div className="song-info-container text-font-color-white dark:text-font-color-white max-w-[75%]">
             <div
-              className="song-title cursor-pointer overflow-hidden text-xl font-normal text-ellipsis whitespace-nowrap outline outline-offset-1 transition-none hover:underline focus-visible:outline!"
+              className="song-title cursor-pointer overflow-hidden text-xl font-normal text-ellipsis whitespace-nowrap outline-offset-1 transition-none hover:underline focus-visible:outline!"
               title={title}
               onClick={(e) => {
                 e.stopPropagation();
@@ -634,7 +634,7 @@ const SongCard = (props: SongCardProp) => {
               )
             ) : (
               <Button
-                className={`!m-0 !rounded-none !border-0 bg-transparent !p-0 opacity-60 outline outline-offset-1 transition-opacity hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
+                className={`!m-0 !rounded-none !border-0 bg-transparent !p-0 opacity-60 outline-offset-1 transition-opacity hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
                   currentSongData.songId === songId && 'opacity-100!'
                 } group-focus-within/songCard:opacity-100 group-hover/songCard:opacity-100`}
                 iconName={isSongPlaying ? 'pause_circle' : 'play_circle'}

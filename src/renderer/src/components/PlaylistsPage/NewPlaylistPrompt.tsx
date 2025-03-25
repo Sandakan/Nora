@@ -70,7 +70,7 @@ const NewPlaylistPrompt = (props: NewPlaylistPromptProp) => {
           className="aspect-square w-full max-w-[15rem] rounded-xl shadow-lg"
         />
         <Button
-          className="artwork-update-btn bg-background-color-3! hover:bg-font-color-highlight! dark:bg-dark-background-color-2! dark:hover:bg-dark-background-color-3! dark:hover:text-font-color-black absolute -right-8 -bottom-4 mr-0 aspect-square rounded-full border-none outline outline-offset-1 transition-[background] focus-visible:outline!"
+          className="artwork-update-btn bg-background-color-3! hover:bg-font-color-highlight! dark:bg-dark-background-color-2! dark:hover:bg-dark-background-color-3! dark:hover:text-font-color-black absolute -right-8 -bottom-4 mr-0 aspect-square rounded-full border-none outline-offset-1 transition-[background] focus-visible:outline!"
           iconName="edit"
           iconClassName="group:hover:text-font-color-black dark:group:hover:text-font-color-black mr-0"
           clickHandler={() =>

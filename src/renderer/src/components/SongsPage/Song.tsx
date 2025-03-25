@@ -569,7 +569,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
       data-index={index}
       {...provided?.draggableProps}
       {...provided?.dragHandleProps}
-      className={`${songId} group relative mr-4 mb-2 flex h-[3.25rem] w-[98%] overflow-hidden rounded-lg p-[0.2rem] px-2 outline -outline-offset-2 transition-[background,color,opacity] ease-in-out focus-visible:!outline ${
+      className={`${songId} group relative mr-4 mb-2 flex h-[3.25rem] w-[98%] overflow-hidden rounded-lg p-[0.2rem] px-2 -outline-offset-2 transition-[background,color,opacity] ease-in-out focus-visible:!outline ${
         currentSongData.songId === songId || isAMultipleSelection
           ? bodyBackgroundImage
             ? `bg-background-color-3/70 text-font-color-black dark:bg-dark-background-color-3/70 shadow-lg backdrop-blur-md`
@@ -659,7 +659,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         >
           <div className="play-btn-container absolute top-1/2 left-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
             <Button
-              className="m-0! rounded-none! border-0! bg-transparent p-0! outline outline-offset-1 hover:bg-transparent focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent"
+              className="m-0! rounded-none! border-0! bg-transparent p-0! outline-offset-1 hover:bg-transparent focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent"
               iconClassName={`!text-3xl text-font-color-white text-opacity-0 !leading-none ${
                 currentSongData.songId === songId && 'text-opacity-100'
               } group-focus-within:text-opacity-100 group-hover:text-opacity-100 ${
@@ -687,7 +687,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         }`}
       >
         <div
-          className="song-title truncate text-base font-normal outline outline-offset-1 transition-none focus-visible:outline!"
+          className="song-title truncate text-base font-normal outline-offset-1 transition-none focus-visible:outline!"
           tabIndex={0}
           onKeyDown={(e) => e.key === 'Enter' && goToSongInfoPage()}
           title={title}
@@ -700,7 +700,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         <div className="song-album w-full truncate text-xs transition-none sm:hidden md:hidden lg:hidden">
           {album?.name ? (
             <span
-              className="cursor-pointer outline -outline-offset-1 hover:underline focus-visible:outline!"
+              className="cursor-pointer -outline-offset-1 hover:underline focus-visible:outline!"
               tabIndex={0}
               title={album.name}
               role="button"
@@ -720,7 +720,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         </div>
         <div className="song-duration flex w-full! items-center justify-between pr-4 pl-2 text-center transition-none sm:pr-1">
           <Button
-            className="mt-1 mr-0! rounded-none! border-0! bg-transparent p-0! text-inherit! outline outline-offset-1 focus-visible:outline! dark:bg-transparent"
+            className="mt-1 mr-0! rounded-none! border-0! bg-transparent p-0! text-inherit! outline-offset-1 focus-visible:outline! dark:bg-transparent"
             iconName="favorite"
             iconClassName={`${
               isAFavorite ? 'material-icons-round' : 'material-icons-round-outlined'

@@ -347,7 +347,7 @@ export const Artist = (props: ArtistProp) => {
       </div>
       <div className="artist-info-container relative max-h-1/5">
         <Button
-          className={`name-container !m-0 !block !w-full !max-w-full truncate !rounded-none !border-0 bg-transparent !p-0 text-center !text-lg outline outline-offset-1 hover:bg-transparent hover:underline focus-visible:!outline lg:text-base dark:bg-transparent dark:hover:bg-transparent ${
+          className={`name-container !m-0 !block !w-full !max-w-full truncate !rounded-none !border-0 bg-transparent !p-0 text-center !text-lg outline-offset-1 hover:bg-transparent hover:underline focus-visible:!outline lg:text-base dark:bg-transparent dark:hover:bg-transparent ${
             isAMultipleSelection && 'text-font-color-black! dark:text-font-color-black!'
           }`}
           label={props.name === '' ? 'Unknown Artist' : props.name}

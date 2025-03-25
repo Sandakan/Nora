@@ -328,7 +328,7 @@ const ArtistInfoPage = () => {
             }
           />
           <Button
-            className="bg-background-color-1 text-font-color-highlight hover:bg-background-color-1 dark:bg-dark-background-color-2 dark:hover:bg-dark-background-color-2 absolute -bottom-5 m-0! flex rounded-full border-0! p-3! shadow-xl outline -outline-offset-[6px] focus-visible:outline!"
+            className="bg-background-color-1 text-font-color-highlight hover:bg-background-color-1 dark:bg-dark-background-color-2 dark:hover:bg-dark-background-color-2 absolute -bottom-5 m-0! flex rounded-full border-0! p-3! shadow-xl -outline-offset-[6px] focus-visible:outline!"
             tooltipLabel={t(
               `artistInfoPage.${artistData?.isAFavorite ? `dislikeArtist` : `likeArtist`}`,
               {

@@ -93,7 +93,7 @@ const SongInfoContainer = (props: Props) => {
         <div className="song-controls-and-info-container flex h-full flex-col justify-between">
           <div className="song-controls-container flex h-fit items-center">
             <Button
-              className="favorite-btn bg-background-color-3/15! text-font-color-white hover:bg-background-color-3/30! dark:text-font-color-white dark:after:bg-dark-font-color-highlight h-fit cursor-pointer border-0! p-3! outline outline-offset-1 backdrop-blur-lg! transition-[background] focus-visible:outline!"
+              className="favorite-btn bg-background-color-3/15! text-font-color-white hover:bg-background-color-3/30! dark:text-font-color-white dark:after:bg-dark-font-color-highlight h-fit cursor-pointer border-0! p-3! outline-offset-1 backdrop-blur-lg! transition-[background] focus-visible:outline!"
               iconClassName={`!text-2xl ${
                 currentSongData.isAFavorite
                   ? 'meterial-icons-round text-font-color-highlight! dark:text-dark-font-color-highlight!'
@@ -112,7 +112,7 @@ const SongInfoContainer = (props: Props) => {
               removeFocusOnClick
             />
             <Button
-              className="skip-backward-btn bg-background-color-3/15! text-font-color-white hover:bg-background-color-3/30! dark:text-font-color-white h-fit cursor-pointer border-0! p-2! outline outline-offset-1 backdrop-blur-lg! transition-[background] focus-visible:outline!"
+              className="skip-backward-btn bg-background-color-3/15! text-font-color-white hover:bg-background-color-3/30! dark:text-font-color-white h-fit cursor-pointer border-0! p-2! outline-offset-1 backdrop-blur-lg! transition-[background] focus-visible:outline!"
               tooltipLabel={t('player.prevSong')}
               iconClassName="text-3xl! material-icons-round-outlined"
               clickHandler={handleSkipBackwardClick}
@@ -120,7 +120,7 @@ const SongInfoContainer = (props: Props) => {
               removeFocusOnClick
             />
             <Button
-              className="play-pause-btn bg-background-color-3/15! text-font-color-white hover:bg-background-color-3/30! dark:text-font-color-white h-fit scale-90 cursor-pointer border-0! p-2! outline outline-offset-1 backdrop-blur-lg! transition-[background] focus-visible:outline!"
+              className="play-pause-btn bg-background-color-3/15! text-font-color-white hover:bg-background-color-3/30! dark:text-font-color-white h-fit scale-90 cursor-pointer border-0! p-2! outline-offset-1 backdrop-blur-lg! transition-[background] focus-visible:outline!"
               tooltipLabel={t('player.playPause')}
               iconClassName={`!text-4xl ${
                 isCurrentSongPlaying ? 'material-icons-round' : 'material-icons-round-outlined'
@@ -130,7 +130,7 @@ const SongInfoContainer = (props: Props) => {
               removeFocusOnClick
             />
             <Button
-              className="skip-next-btn bg-background-color-3/15! text-font-color-white hover:bg-background-color-3/30! dark:text-font-color-white h-fit cursor-pointer border-0! p-2! outline outline-offset-1 backdrop-blur-lg! transition-[background] focus-visible:outline!"
+              className="skip-next-btn bg-background-color-3/15! text-font-color-white hover:bg-background-color-3/30! dark:text-font-color-white h-fit cursor-pointer border-0! p-2! outline-offset-1 backdrop-blur-lg! transition-[background] focus-visible:outline!"
               tooltipLabel={t('player.nextSong')}
               iconClassName="text-3xl! material-icons-round-outlined"
               clickHandler={handleSkipForwardClickWithParams}
@@ -138,7 +138,7 @@ const SongInfoContainer = (props: Props) => {
               removeFocusOnClick
             />
             <Button
-              className={`lyrics-btn !bg-background-color-3/15 text-font-color-white hover:!bg-background-color-3/30 dark:text-font-color-white h-fit cursor-pointer !border-0 !p-3 outline outline-offset-1 !backdrop-blur-lg transition-[background] after:absolute after:h-1 focus-visible:!outline ${
+              className={`lyrics-btn !bg-background-color-3/15 text-font-color-white hover:!bg-background-color-3/30 dark:text-font-color-white h-fit cursor-pointer !border-0 !p-3 outline-offset-1 !backdrop-blur-lg transition-[background] after:absolute after:h-1 focus-visible:!outline ${
                 isLyricsVisible && 'text-dark-background-color-3! after:opacity-100'
               }`}
               iconClassName="text-2xl!"
@@ -148,7 +148,7 @@ const SongInfoContainer = (props: Props) => {
               removeFocusOnClick
             />
             <Button
-              className={`volume-btn !bg-background-color-3/15 text-font-color-white hover:!bg-background-color-3/30 dark:text-font-color-white h-fit cursor-pointer !border-0 !p-3 outline outline-offset-1 !backdrop-blur-lg transition-[background] after:absolute after:h-1 focus-visible:!outline ${
+              className={`volume-btn !bg-background-color-3/15 text-font-color-white hover:!bg-background-color-3/30 dark:text-font-color-white h-fit cursor-pointer !border-0 !p-3 outline-offset-1 !backdrop-blur-lg transition-[background] after:absolute after:h-1 focus-visible:!outline ${
                 isMuted && 'text-dark-background-color-3! after:opacity-100'
               }`}
               tooltipLabel={t('player.muteUnmute')}
@@ -167,7 +167,7 @@ const SongInfoContainer = (props: Props) => {
             {currentSongData.title && (
               <div className="song-title relative grid w-full max-w-full items-center">
                 <div
-                  className="text-font-color-highlight w-fit max-w-full cursor-pointer overflow-hidden py-2 text-5xl font-medium text-ellipsis whitespace-nowrap outline outline-offset-1 focus-visible:outline!"
+                  className="text-font-color-highlight w-fit max-w-full cursor-pointer overflow-hidden py-2 text-5xl font-medium text-ellipsis whitespace-nowrap outline-offset-1 focus-visible:outline!"
                   id="currentSongTitle"
                   title={currentSongData.title}
                 >

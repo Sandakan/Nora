@@ -34,7 +34,7 @@ const SongGenresInput = (props: Props) => {
               >
                 <Button
                   iconName="close"
-                  className="material-icons-round mr-[.375rem]! border-0! p-[.125rem]! outline outline-offset-1 transition-[visibility,opacity] focus-visible:outline!"
+                  className="material-icons-round mr-[.375rem]! border-0! p-[.125rem]! outline-offset-1 transition-[visibility,opacity] focus-visible:outline!"
                   iconClassName="leading-none dark:text-font-color-black!"
                   clickHandler={() => {
                     updateSongInfo((prevData) => {

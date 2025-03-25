@@ -103,7 +103,7 @@ const SearchStartPlaceholder = (props: Props) => {
           {recentSearchResultComponents.length > 0 && (
             <Button
               label="clear search history"
-              className="text-font-color-highlight! dark:text-dark-font-color-highlight/75! m-0! mt-4! rounded-none! border-0! p-0! outline outline-offset-1 hover:underline focus-visible:outline!"
+              className="text-font-color-highlight! dark:text-dark-font-color-highlight/75! m-0! mt-4! rounded-none! border-0! p-0! outline-offset-1 hover:underline focus-visible:outline!"
               clickHandler={(_, setIsDisabled) => {
                 setIsDisabled(true);
                 window.api.search.clearSearchHistory().catch((err) => {

@@ -22,7 +22,7 @@ const RecentSearchResult = memo((props: RecentSearchResultProp) => {
 
   return (
     <Button
-      className="bg-background-color-2! hover:text-font-color-highlight-2 dark:bg-dark-background-color-2/75! dark:hover:text-dark-font-color-highlight-2 mt-3! mr-2! border-0! px-4! py-2! outline outline-offset-0 focus-visible:outline!"
+      className="bg-background-color-2! hover:text-font-color-highlight-2 dark:bg-dark-background-color-2/75! dark:hover:text-dark-font-color-highlight-2 mt-3! mr-2! border-0! px-4! py-2! outline-offset-0 focus-visible:outline!"
       label={props.result.length > 20 ? props.result.substring(0, 20).concat('...') : props.result}
       tooltipLabel={t('searchPage.recentSearchResultTooltipLabel', {
         value: props.result

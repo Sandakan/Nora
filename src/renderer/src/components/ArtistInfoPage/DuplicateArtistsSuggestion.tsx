@@ -155,7 +155,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
               </span>
               <Button
                 id="toggleSuggestionBox"
-                className="hover:bg-background-color-1/50 dark:hover:bg-dark-background-color-1/50 m-0! border-0! p-0! outline outline-offset-1 focus-visible:outline!"
+                className="hover:bg-background-color-1/50 dark:hover:bg-dark-background-color-1/50 m-0! border-0! p-0! outline-offset-1 focus-visible:outline!"
                 iconClassName="leading-none! text-3xl!"
                 iconName={isMessageVisible ? 'arrow_drop_up' : 'arrow_drop_down'}
                 tooltipLabel={`common.${isMessageVisible ? 'hideSuggestion' : 'showSuggestion'}`}
@@ -180,7 +180,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
                 {duplicateArtists.map((artist) => (
                   <Button
                     key={artist.name}
-                    className="bg-background-color-1/50 hover:bg-background-color-1 hover:text-font-color-highlight! dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:text-dark-font-color-highlight! border-0! px-4! py-2! outline transition-colors focus-visible:outline!"
+                    className="bg-background-color-1/50 hover:bg-background-color-1 hover:text-font-color-highlight! dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:text-dark-font-color-highlight! border-0! px-4! py-2! transition-colors focus-visible:outline!"
                     iconName="verified"
                     iconClassName="material-icons-round-outlined"
                     label={t('duplicateArtistsSuggestion.linkToArtist', {
@@ -192,7 +192,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
                   />
                 ))}
                 <Button
-                  className="bg-background-color-1/50 hover:bg-background-color-1 hover:text-font-color-highlight! dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:text-dark-font-color-highlight! mr-0! border-0! px-4! py-2! outline transition-colors focus-visible:outline!"
+                  className="bg-background-color-1/50 hover:bg-background-color-1 hover:text-font-color-highlight! dark:bg-dark-background-color-1/50 dark:hover:bg-dark-background-color-1 dark:hover:text-dark-font-color-highlight! mr-0! border-0! px-4! py-2! transition-colors focus-visible:outline!"
                   iconName="do_not_disturb_on"
                   iconClassName="material-icons-round-outlined"
                   label={t('common.ignore')}

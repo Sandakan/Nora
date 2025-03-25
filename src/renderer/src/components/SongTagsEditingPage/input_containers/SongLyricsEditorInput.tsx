@@ -212,7 +212,7 @@ const SongLyricsEditorInput = (props: Props) => {
         {/* <label htmlFor="song-lyrics-id3-tag">Lyrics</label> */}
         <div className="flex items-center">
           <Button
-            className={`text-font-color-black mr-3 flex w-fit cursor-pointer list-none items-center !border-0 px-4 py-2 outline outline-offset-1 transition-[background,color] duration-200 focus-visible:!outline ${
+            className={`text-font-color-black mr-3 flex w-fit cursor-pointer list-none items-center !border-0 px-4 py-2 outline-offset-1 transition-[background,color] duration-200 focus-visible:!outline ${
               currentLyricsType === 'synced'
                 ? 'bg-background-color-3 dark:bg-dark-background-color-3 dark:text-font-color-black!'
                 : 'bg-background-color-2 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:hover:text-font-color-black!'
@@ -223,7 +223,7 @@ const SongLyricsEditorInput = (props: Props) => {
             iconClassName="material-icons-round-outlined"
           />
           <Button
-            className={`text-font-color-black mr-3 flex w-fit cursor-pointer list-none items-center !border-0 px-4 py-2 outline outline-offset-1 transition-[background,color] duration-200 focus-visible:!outline ${
+            className={`text-font-color-black mr-3 flex w-fit cursor-pointer list-none items-center !border-0 px-4 py-2 outline-offset-1 transition-[background,color] duration-200 focus-visible:!outline ${
               currentLyricsType === 'unsynced'
                 ? 'bg-background-color-3 dark:bg-dark-background-color-3 dark:text-font-color-black!'
                 : 'bg-background-color-2 hover:bg-background-color-3 dark:bg-dark-background-color-2 dark:text-font-color-white dark:hover:bg-dark-background-color-3 dark:hover:text-font-color-black!'

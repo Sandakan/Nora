@@ -25,7 +25,7 @@ const SongAdditionalInfoContainer = (props: Props) => {
         <div className="flex items-center">
           <Button
             id="songAdditionalInfo"
-            className="hover:bg-background-color-1/50 dark:hover:bg-dark-background-color-1/50 m-0! border-0! p-0! outline outline-offset-1 focus-visible:outline!"
+            className="hover:bg-background-color-1/50 dark:hover:bg-dark-background-color-1/50 m-0! border-0! p-0! outline-offset-1 focus-visible:outline!"
             iconClassName="leading-none! text-3xl!"
             iconName={isDataVisible ? 'arrow_drop_up' : 'arrow_drop_down'}
             tooltipLabel={t(`common.${isDataVisible ? 'hideSuggestion' : 'showSuggestion'}`)}

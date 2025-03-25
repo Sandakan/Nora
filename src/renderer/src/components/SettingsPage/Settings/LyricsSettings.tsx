@@ -74,7 +74,7 @@ const LyricsSettings = () => {
                 components={{
                   Button: (
                     <Button
-                      className="text-font-color-highlight-2! dark:text-dark-font-color-highlight-2! m-0! inline! rounded-none! border-0! bg-transparent! p-0! px-2 outline outline-offset-1 hover:underline focus-visible:outline! dark:bg-transparent!"
+                      className="text-font-color-highlight-2! dark:text-dark-font-color-highlight-2! m-0! inline! rounded-none! border-0! bg-transparent! p-0! px-2 outline-offset-1 hover:underline focus-visible:outline! dark:bg-transparent!"
                       clickHandler={() => {
                         changePromptMenuData(true, <MusixmatchDisclaimerPrompt />);
                       }}

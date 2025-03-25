@@ -74,7 +74,7 @@ const SongAlbumInput = (props: Props) => {
               <Button
                 iconName="close"
                 iconClassName="leading-none dark:text-font-color-black!"
-                className="float-right mr-0! border-0! p-1! outline outline-offset-1 focus-visible:outline!"
+                className="float-right mr-0! border-0! p-1! outline-offset-1 focus-visible:outline!"
                 clickHandler={() => {
                   updateSongInfo((prevData) => {
                     return {

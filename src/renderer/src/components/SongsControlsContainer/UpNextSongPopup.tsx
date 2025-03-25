@@ -142,7 +142,7 @@ const UpNextSongPopup = (props: Props) => {
           {t('player.upNext')}
         </span>{' '}
         <span
-          className="cursor-pointer outline outline-offset-1 hover:underline focus-visible:outline!"
+          className="cursor-pointer outline-offset-1 hover:underline focus-visible:outline!"
           onClick={() => showSongInfoPage(upNextSongData.songId)}
           onKeyDown={(e) => e.key === 'Enter' && showSongInfoPage(upNextSongData.songId)}
         >
@@ -155,7 +155,7 @@ const UpNextSongPopup = (props: Props) => {
               {t('player.by')}
             </span>{' '}
             <span
-              className="cursor-pointer outline outline-offset-1 hover:underline focus-visible:outline!"
+              className="cursor-pointer outline-offset-1 hover:underline focus-visible:outline!"
               onClick={() =>
                 upNextSongData?.artists![0] &&
                 changeCurrentActivePage('ArtistInfo', {
@@ -181,7 +181,7 @@ const UpNextSongPopup = (props: Props) => {
       <Button
         iconName="close"
         tooltipLabel={t('player.closeUpNext')}
-        className="text-font-color-highlight! dark:text-dark-font-color-highlight! m-0! hidden! border-none! py-0! pr-0! pl-1! text-base! outline outline-offset-1 group-hover/nextSong:flex! focus-visible:outline!"
+        className="text-font-color-highlight! dark:text-dark-font-color-highlight! m-0! hidden! border-none! py-0! pr-0! pl-1! text-base! outline-offset-1 group-hover/nextSong:flex! focus-visible:outline!"
         clickHandler={() => setUpNextSongData(undefined)}
       />
     </div>

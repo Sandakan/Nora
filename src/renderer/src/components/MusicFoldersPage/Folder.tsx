@@ -237,7 +237,7 @@ const Folder = (props: FolderProps) => {
     <div className={`mb-2 flex w-full flex-col justify-between ${className}`}>
       <div
         role="button"
-        className={`group dark:text-font-color-white flex w-full cursor-pointer items-center justify-between rounded-md px-4 py-2 outline -outline-offset-2 transition-colors focus-visible:!outline ${
+        className={`group dark:text-font-color-white flex w-full cursor-pointer items-center justify-between rounded-md px-4 py-2 -outline-offset-2 transition-colors focus-visible:!outline ${
           isAMultipleSelection
             ? 'bg-background-color-3/90! text-font-color-black! dark:bg-dark-background-color-3/90! dark:text-font-color-black!'
             : 'hover:bg-background-color-2! dark:hover:bg-dark-background-color-2!'
