@@ -159,17 +159,17 @@ const LyricLine = (props: LyricProp) => {
             })
           : undefined
       }
-      className={`highlight duration-250 z-0 mb-5 flex w-fit select-none flex-col items-center justify-center text-balance text-center text-5xl font-medium text-font-color-black transition-[transform,color,filter] first:mt-8 last:mb-4 empty:mb-16 dark:text-font-color-white ${
+      className={`highlight text-font-color-black/20 dark:text-font-color-white/20 z-0 mb-5 flex w-fit flex-col items-center justify-center text-center text-5xl font-medium text-balance transition-[transform,translate,scale,color,filter] duration-250 select-none first:mt-8 last:mb-4 empty:mb-16 ${
         syncedLyrics
           ? `cursor-pointer blur-[1px] ${
               isInRange
-                ? 'scale-100! font-medium text-font-color-highlight text-opacity-90! blur-0! dark:text-dark-font-color-highlight! [&>div>span]:mr-3!'
-                : 'scale-[.7] text-opacity-20! hover:text-opacity-75!'
+                ? 'text-font-color-highlight/100! dark:text-dark-font-color-highlight/100! scale-100! font-medium blur-none! [&>div>span]:mr-3!'
+                : 'scale-75!'
             }`
           : 'text-4xl!'
-      } ${playerType === 'mini' && 'mb-2! text-2xl! text-font-color-white!'} ${
+      } ${playerType === 'mini' && 'text-font-color-white/20! mb-2! text-2xl!'} ${
         playerType === 'full' &&
-        'mb-6! origin-left items-start! justify-start! text-left! text-7xl! text-font-color-white!'
+        'text-font-color-white/20! mb-6! origin-left items-start! justify-start! text-left! text-7xl!'
       }`}
       ref={lyricsRef}
       onClick={() =>
@@ -203,7 +203,7 @@ const LyricLine = (props: LyricProp) => {
     >
       {lyricStringLineSecondaryUpper && (
         <div
-          className={`flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'} ${syncedLyrics && isInRange ? 'text-xl! text-font-color-black/50! dark:text-font-color-white/50!' : 'text-xl!'}`}
+          className={`flex flex-row flex-wrap ${playerType !== 'full' && 'items-center justify-center'} ${syncedLyrics && isInRange ? 'text-font-color-black/50! dark:text-font-color-white/50! text-xl!' : 'text-xl!'}`}
         >
           {lyricStringLineSecondaryUpper}
         </div>

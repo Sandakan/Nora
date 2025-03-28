@@ -196,7 +196,7 @@ body,
   background-color: var(--background-color-1);
 }
 
-body,
+/* body,
 body * {
   transition:
     color var(--transition-duration-0_2s) linear,
@@ -213,7 +213,7 @@ body * {
   -o-transition:
     color var(--transition-duration-0_2s) linear,
     background-color var(--transition-duration-0_2s) linear;
-}
+} */
 
 /* ? APP DARK THEME STYLES */
 .App.dark,
