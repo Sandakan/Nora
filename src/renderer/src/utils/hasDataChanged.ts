@@ -23,7 +23,7 @@ const hasArrayChanged = (oldArr: unknown[], newArr: unknown[]) => {
  *@param newObj New object to be compared to
  */
 
-function hasDataChanged<T extends object>(oldObj: T, newObj: T, returnBoolean = false) {
+function hasDataChanged(oldObj: object, newObj: object, returnBoolean = false) {
   try {
     const oldObjEntries = Object.keys(oldObj);
     const newObjEntries = Object.keys(newObj);
