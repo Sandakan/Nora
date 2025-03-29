@@ -1,14 +1,14 @@
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ShortcutButton from './ShortcutButton';
-import { getShortcuts, resetShortcutsToDefaults, updateShortcutKeys, type Shortcut } from '@renderer/other/appShortcuts';
 import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';
 import Button from '../Button';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import storage from '../../utils/localStorage';
 
 const AppShortcutsPrompt = () => {
   const { t } = useTranslation();
-  const [shortcuts, setShortcuts] = React.useState(getShortcuts());
+  const [shortcuts, setShortcuts] = React.useState(storage.keyboardShortcuts.getKeyboardShortcuts());
   const [newShortcut, setNewShortcut] = useState<Shortcut | null>(null);
   const [newKeys, setNewKeys] = useState<string[]>([]);
   const [editingShortcut, setEditingShortcut] = React.useState<string | null>(null);
@@ -65,7 +65,7 @@ const AppShortcutsPrompt = () => {
         el => !el.contains(e.target)
       );
 
-      const allShortcuts = getShortcuts().flatMap(category => category.shortcuts);
+      const allShortcuts = storage.keyboardShortcuts.getKeyboardShortcuts().flatMap(category => category.shortcuts);
       const duplicate = allShortcuts.some(shortcut =>
         shortcut.label !== editingShortcut &&
         JSON.stringify(shortcut.keys) === JSON.stringify(newKeys)
@@ -86,8 +86,8 @@ const AppShortcutsPrompt = () => {
   
       if (clickedOutside) {
         if (newShortcut && !duplicate) {
-          updateShortcutKeys(newShortcut.label, newShortcut.keys);
-          setShortcuts(getShortcuts());
+          storage.keyboardShortcuts.setKeyboardShortcuts(newShortcut.label, newShortcut.keys);
+          setShortcuts(storage.keyboardShortcuts.getKeyboardShortcuts());
         }
         setEditingShortcut(null);
       }
@@ -143,25 +143,16 @@ const AppShortcutsPrompt = () => {
                             )}
                           </Fragment>
                         ))}
-                        <button
-                          onClick={() => {
-                            setEditingShortcut(shortcut.label);
-                            setNewKeys(shortcut.keys);
-                          }}
-                          className="ml-2 p-1 hover:bg-background-color-3/75 dark:hover:bg-dark-background-color-3/25 rounded"
-                          disabled={!!editingShortcut}
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                          >
-                            <path d="M13.5 5.5L15 4L16.5 5.5L20 2L22 4L18.5 7.5L20 9L18.5 10.5L13.5 5.5Z" />
-                            <path d="M13.5 5.5L4 15L3 21L9 20L18.5 10.5L13.5 5.5Z" />
-                          </svg>
-                        </button>
+                        <Button
+                            className="m-0 ml-4 p-2"
+                            clickHandler={() => {
+                              setEditingShortcut(shortcut.label);
+                              setNewKeys(shortcut.keys);
+                            }}
+                            isDisabled={!!editingShortcut}
+                            iconName="edit"
+                            iconClassName="material-icons-round-outlined"
+                          />
                       </>
                     )}
                   </div>
@@ -199,7 +190,7 @@ const AppShortcutsPrompt = () => {
               confirmButton={{
                 label: "RESET",
                 clickHandler: () => {
-                  resetShortcutsToDefaults();
+                  storage.keyboardShortcuts.resetShortcutsToDefaults();
                   addNewNotifications([
                     {
                       id: 'shortcutsReset',

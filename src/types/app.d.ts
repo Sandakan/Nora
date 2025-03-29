@@ -625,6 +625,18 @@ declare global {
     editNextAndCurrentStartAndEndTagsAutomatically: boolean;
   }
 
+  interface Shortcut {
+    label: string;
+    keys: string[];
+  }
+
+  interface ShortcutCategory {
+    shortcutCategoryTitle: string;
+    shortcuts: Shortcut[];
+  }
+
+  type ShortcutCategoryList = ShortcutCategory[];
+
   interface LocalStorage {
     preferences: Preferences;
     playback: Playback;
@@ -635,6 +647,7 @@ declare global {
     sortingStates: SortingStates;
     equalizerPreset: Equalizer;
     lyricsEditorSettings: LyricsEditorSettings;
+    keyboardShortcuts: ShortcutCategoryList;
   }
 
   // ? Playlists related types

@@ -6,6 +6,7 @@ import addMissingPropsToAnObject from './addMissingPropsToAnObject';
 import isLatestVersion from './isLatestVersion';
 import { dispatch, store } from '@renderer/store';
 import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '@renderer/other/appReducer';
+
 // import isLatestVersion from './isLatestVersion';
 
 const resetLocalStorage = () => {
@@ -200,6 +201,35 @@ const getItem = <ItemType extends keyof LocalStorage, Type extends keyof LocalSt
   );
 };
 
+const resetItem = <
+  ItemType extends keyof LocalStorage,
+  Type extends keyof LocalStorage[ItemType] | never
+>(
+  itemType: ItemType,
+  type?: Type
+): void => {
+  const storage = { ...getAllItems() };
+
+  try {
+    if (type) {
+      if (
+        itemType in LOCAL_STORAGE_DEFAULT_TEMPLATE &&
+        type in LOCAL_STORAGE_DEFAULT_TEMPLATE[itemType]
+      ) {
+        storage[itemType][type] = structuredClone(LOCAL_STORAGE_DEFAULT_TEMPLATE[itemType][type]);
+      }
+    } else {
+      if (itemType in LOCAL_STORAGE_DEFAULT_TEMPLATE) {
+        storage[itemType] = structuredClone(LOCAL_STORAGE_DEFAULT_TEMPLATE[itemType]);
+      }
+    }
+
+    setAllItems(storage);
+  } catch (error) {
+    console.error(`Reset failed for ${String(itemType)}${type ? `.${String(type)}` : ''}:`, error);
+  }
+};
+
 // PREFERENCES
 
 const setPreferences = <Type extends keyof Preferences, Data extends Preferences[Type]>(
@@ -321,6 +351,34 @@ const setLyricsEditorSettings = <
 const getLyricsEditorSettings = <Type extends keyof LyricsEditorSettings>(type: Type) =>
   getItem('lyricsEditorSettings', type);
 
+// KEYBOARD SHORTCUTS
+const resetShortcutsToDefaults = (): void => resetItem('keyboardShortcuts');
+
+const getKeyboardShortcuts = (): ShortcutCategoryList => getFullItem('keyboardShortcuts');
+
+const setKeyboardShortcuts = (label: string, newKeys: string[]): void => {
+  const currentData: ShortcutCategoryList = getKeyboardShortcuts();
+
+  const updatedData = currentData.map((category) => ({
+    ...category,
+    shortcuts: category.shortcuts.map((shortcut) => {
+      if (shortcut.label === label) {
+        return { ...shortcut, keys: newKeys };
+      }
+      return shortcut;
+    })
+  }));
+
+  try {
+    setAllItems({
+      ...getAllItems(),
+      keyboardShortcuts: updatedData
+    });
+  } catch (error) {
+    console.error('Failed to update keyboard shortcuts:', error);
+  }
+};
+
 // / / / / / / / / / /
 
 export default {
@@ -344,6 +402,7 @@ export default {
   sortingStates: { setSortingStates, getSortingStates },
   equalizerPreset: { setEqualizerPreset, getEqualizerPreset },
   lyricsEditorSettings: { setLyricsEditorSettings, getLyricsEditorSettings },
+  keyboardShortcuts: { resetShortcutsToDefaults, getKeyboardShortcuts, setKeyboardShortcuts },
   checkLocalStorage,
   getLocalStorage,
   setLocalStorage,
