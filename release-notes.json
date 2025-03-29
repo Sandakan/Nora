@@ -1,14 +1,122 @@
 {
   "latestVersion": {
-    "artwork": "/resources/other/release artworks/whats-new-v3.0.0-stable.webp",
+    "artwork": "/resources/other/release artworks/whats-new-v3.1.0-stable.webp",
     "importantNotes": [
-      "This update includes a full-screen player, dynamic themes, turkish translations and some bug fixes and major performance improvements. Keep in mind that this major update will reset all previous app data."
+      "This update includes experimental support for m4a and opus playback, LRCLIB lyrics, lyrics translations, bug fixes, and major performance improvements."
     ],
     "phase": "stable",
-    "releaseDate": "2024-05-10T17:45:48.625Z",
-    "version": "3.0.0-stable"
+    "releaseDate": "2025-03-29T10:47:26.654Z",
+    "version": "3.1.0-stable"
   },
   "versions": [
+    {
+      "artwork": "/resources/other/release artworks/whats-new-v3.1.0-stable.webp",
+      "importantNotes": [
+        "This update includes experimental support for m4a and opus playback, LRCLIB lyrics, lyrics translations, bug fixes, and major performance improvements."
+      ],
+      "notes": {
+        "new": [
+          { "note": "Added experimental playback support for m4a and opus songs." },
+          { "note": "Added support for fetching lyrics from LRCLIB." },
+          { "note": "Added Vietnamese translation. Thanks @ElectroHeavenVN." },
+          { "note": "Added full translation support for lyrics." },
+          { "note": "Original lyric will now be shown along with the translated lyric." },
+          { "note": "Added support for reading LRC files without the relevant song extension." },
+          { "note": "Added support for symbolic links in file paths. Thanks @Brunight." },
+          { "note": "Configured to build Nora in the rpm package" },
+          { "note": "Configured to build Nora for arm systems." },
+          { "note": "Added support for copying lyrics lines." },
+          { "note": "Added a blurred background for the full and mini player." },
+          {
+            "note": "Added a \"how to use\" prompt when visiting the lyrics editor for the first time."
+          },
+          { "note": "Added a new shortcut to open the shortcuts prompt" },
+          { "note": "Added skip lyrics lines functionality to the mini and full-screen player" },
+          { "note": "Added volume control to full-screen player." },
+          {
+            "note": "Added support for lyrics romanization for supported languages. Thanks @ElectroHeavenVN."
+          }
+        ],
+        "fixed": [
+          {
+            "note": "Fixed a bug where the correct lyrics line won't scroll to the center of the screen if the song is paused."
+          },
+          {
+            "note": "Fixed a bug where items in ArtistPage, AlbumPage, PlaylistPage, and GenrePage are not centered in their grid cells."
+          },
+          {
+            "note": "Fixed a bug where Discord Presence doesn't update as the player state changes."
+          },
+          {
+            "note": "Fixed a bug where the sidebar shows a dynamic theme color in dark mode even though dynamic themes are disabled."
+          },
+          {
+            "note": "Fixed a bug where some views show light mode even though the dark mode is selected."
+          },
+          {
+            "note": "Fixed a bug where some buttons in the About section of the Settings page are misaligned."
+          },
+          { "note": "Fixed a bug where non-library songs were not showing in Last.FM." },
+          {
+            "note": "Fixed localization issue in LyricsPage title, not allowing changing lyrics offline/online status."
+          },
+          {
+            "note": "Fixed a bug where lyric metadata are lost when saving lyrics from lrclib to lrc files."
+          },
+          {
+            "note": "Fixed a bug where the first metadata line in LRC lyrics is considered a lyric line."
+          },
+          {
+            "note": "Fixed a bug where the app starts with the white splash even though the app is in dark mode."
+          },
+          { "note": "Updated hyperlinks always to be underlined." },
+          {
+            "note": "Fixed lyrics that were not updated on LyricsPage right after modifying them in LyricsEditingPage."
+          },
+          { "note": "Fixed lyrics lines in LyricsEditingPage don't follow dynamic theme colors." },
+          { "note": "Fixed app name showing \"Electron\" instead of Nora." },
+          { "note": "Removed full-screen player that starts with lyrics showing." },
+          {
+            "note": "Updated discord-rich-presence to display the current song position. Thanks @ElectroHeavenVN."
+          },
+          { "note": "Fixed song filenames cut off at periods." },
+          {
+            "note": "Added a fix for file names with special characters that cannot be played in Nora player."
+          },
+          {
+            "note": "Set true to disable background artworks as default to improve app accessibility and to maintain text contrast."
+          },
+          { "note": "Update font-family stack in styles.css for improved typography consistency." },
+          {
+            "note": "Added an advanced settings section with an experimental setting to toggle saving verbose logs."
+          },
+          { "note": "Fixed translated lyrics do not show their original lyric above them." },
+          { "note": "Added a fix for image alignment issues." },
+          {
+            "note": "Added a fix for the app description shown when Nora is viewed in Task Manager."
+          },
+          { "note": "Fixed the like button not working in the mini-player." },
+          { "note": "Fixed incorrect song ordering in playlists." },
+          { "note": "Fixed the shuffle button not working and some shuffling issues." }
+        ],
+        "knownIssues": [
+          { "note": "Artist names are split when the name has a comma." },
+          {
+            "note": "Bigger song libraries make the interface unresponsive and halt the song parsing process."
+          }
+        ],
+        "developerUpdates": [
+          { "note": "Nora was fully converted to an ESM-packaged app." },
+          { "note": "Fixed some localization errors in the en.json file." },
+          {
+            "note": "Updated the build workflow to fix a bug for the Nora app that is missing sharp dependencies in Linux environments."
+          },
+          { "note": "Updated app dependencies." }
+        ]
+      },
+      "releaseDate": "2025-03-29T10:47:26.654Z",
+      "version": "3.1.0-stable"
+    },
     {
       "artwork": "/resources/other/release artworks/whats-new-v3.0.0-stable.webp",
       "importantNotes": [

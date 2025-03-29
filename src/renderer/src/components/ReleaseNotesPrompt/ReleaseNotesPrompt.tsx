@@ -38,6 +38,7 @@ const ReleaseNotesPrompt = () => {
     const latestVersion = sortedReleaseNotes[0];
 
     // ! / / / / TO BE DEPRECATED CODE / / /
+    // TODO: Will be deprectated in the next major release
     /** @deprecated  */
     if (releaseNotes.latestVersion) {
       latestVersion.artwork ||= releaseNotes.latestVersion.artwork;
