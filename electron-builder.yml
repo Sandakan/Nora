@@ -116,7 +116,6 @@ protocols:
   name: nora-protocol
   schemes:
     - nora
-
-publish:
-  owner: Sandakan
-  provider: github
+# publish:
+#   owner: Sandakan
+#   provider: github
