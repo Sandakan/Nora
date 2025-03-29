@@ -1,5 +1,3 @@
-/* eslint-disable no-loop-func */
-/* eslint-disable no-await-in-loop */
 import path from 'path';
 import { readFile } from 'fs/promises';
 import { statSync } from 'fs';
@@ -25,7 +23,6 @@ import {
   getSongArtworkPath,
   removeDefaultAppProtocolFromFilePath
 } from './fs/resolveFilePaths';
-import log from './log';
 import {
   dataUpdateEvent,
   getCurrentSongPath,
@@ -37,7 +34,7 @@ import { generateRandomId } from './utils/randomId';
 import { createTempArtwork, removeArtwork, storeArtworks } from './other/artworks';
 import generatePalette from './other/generatePalette';
 import { parseLyricsFromID3Format, updateCachedLyrics } from './core/getSongLyrics';
-import parseLyrics from './utils/parseLyrics';
+import parseLyrics from '../common/parseLyrics';
 import convertParsedLyricsToNodeID3Format from './core/convertParsedLyricsToNodeID3Format';
 import sendSongID3Tags from './core/sendSongId3Tags';
 import { isSongBlacklisted } from './utils/isBlacklisted';
@@ -45,6 +42,7 @@ import isPathAWebURL from './utils/isPathAWebUrl';
 
 import { appPreferences } from '../../package.json';
 import saveLyricsToLRCFile from './core/saveLyricsToLrcFile';
+import logger from './logger';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
@@ -64,9 +62,9 @@ export const savePendingMetadataUpdates = (currentSongPath = '', forceSave = fal
   const pathExt = path.extname(currentSongPath).replace(/\W/, '');
   const isASupportedFormat = metadataEditingSupportedExtensions.includes(pathExt);
 
-  if (pendingMetadataUpdates.size === 0) return log('No pending metadata updates found.');
+  if (pendingMetadataUpdates.size === 0) return logger.debug('No pending metadata updates found.');
 
-  log(`Started saving pending metadata updates.`, {
+  logger.debug(`Started saving pending metadata updates.`, {
     pendingSongs: pendingMetadataUpdates.keys
   });
 
@@ -95,17 +93,14 @@ export const savePendingMetadataUpdates = (currentSongPath = '', forceSave = fal
           }
         }
 
-        log(
+        logger.info(
           `Successfully saved pending metadata updates of '${pendingMetadata.tags.title}'.`,
-          { songPath },
-          'INFO',
-          {
-            sendToRenderer: {
-              messageCode: 'PENDING_METADATA_UPDATES_SAVED',
-              data: { title: pendingMetadata.tags.title }
-            }
-          }
+          { songPath }
         );
+        sendMessageToRenderer({
+          messageCode: 'PENDING_METADATA_UPDATES_SAVED',
+          data: { title: pendingMetadata.tags.title }
+        });
         dataUpdateEvent('songs/artworks');
         dataUpdateEvent('songs/updatedSong');
         dataUpdateEvent('artists');
@@ -113,8 +108,7 @@ export const savePendingMetadataUpdates = (currentSongPath = '', forceSave = fal
         dataUpdateEvent('genres');
         pendingMetadataUpdates.delete(songPath);
       } catch (error) {
-        log(`Failed to save pending metadata update of a song. `, { error, songPath }, 'ERROR');
-        throw error;
+        logger.error(`Failed to save pending metadata update of a song. `, { error, songPath });
       }
 
       try {
@@ -132,12 +126,9 @@ export const savePendingMetadataUpdates = (currentSongPath = '', forceSave = fal
           dataUpdateEvent('songs/updatedSong');
         }
       } catch (error) {
-        log(
-          `FAILED TO GET SONG STATS AFTER UPDATING THE SONG WITH NEWER METADATA.`,
-          { error },
-          'ERROR'
-        );
-        throw error;
+        logger.error(`FAILED TO GET SONG STATS AFTER UPDATING THE SONG WITH NEWER METADATA.`, {
+          error
+        });
       }
     }
   }
@@ -160,21 +151,25 @@ export const fetchArtworkBufferFromURL = async (url: string) => {
     const res = await fetch(url);
     if (res.ok && res.body) return Buffer.from(await res.arrayBuffer());
 
-    log(
-      `Error occurred when fetching artwork from url. HTTP Error Code:${res.status} - ${res.statusText}`,
-      undefined,
-      'ERROR'
-    );
+    logger.warn(`Error occurred when fetching artwork from url.`, {
+      status: res.status,
+      statusText: res.statusText,
+      url
+    });
+
     return undefined;
   } catch (error) {
-    log('Error occurred when fetching artwork from url', { error }, 'ERROR');
+    logger.error('Error occurred when fetching artwork from url', { error, url });
     return undefined;
   }
 };
 
 export const generateLocalArtworkBuffer = (filePath: string) =>
   readFile(filePath).catch((err) => {
-    log(`ERROR OCCURRED WHEN TRYING TO GENERATE BUFFER OF THE SONG ARTWORK.`, { err }, 'ERROR');
+    logger.error(`Error occurred when trying to generate buffer of the song artwork.`, {
+      err,
+      filePath
+    });
     return undefined;
   });
 
@@ -184,12 +179,10 @@ const generateArtworkBuffer = async (artworkPath?: string) => {
 
     if (isArtworkPathAWebURL) {
       const onlineArtworkBuffer = await fetchArtworkBufferFromURL(artworkPath).catch((err) => {
-        log(
-          `ERROR OCCURRED WHEN FETCHING ONLINE ARTWORK BUFFER, NEWLY ADDED TO THE SONG.`,
-          { err },
-          'ERROR'
-        );
-        return undefined;
+        return logger.warn(`Failed to fetch online artwork buffer newly added to the song.`, {
+          err,
+          artworkPath
+        });
       });
       return onlineArtworkBuffer;
     }
@@ -201,7 +194,7 @@ const generateArtworkBuffer = async (artworkPath?: string) => {
 
 const parseImgDataForNodeID3 = async (
   artworkPaths: ArtworkPaths,
-  artworkBuffer?: Buffer
+  artworkBuffer?: Buffer | void
 ): Promise<
   | {
       mime: string;
@@ -246,7 +239,6 @@ const manageArtistDataUpdates = (
     : [];
   //  these artists are available in the library and recently unlinked from the song.
   const unlinkedArtists =
-    // eslint-disable-next-line no-nested-ternary
     Array.isArray(artistsWithIds) && Array.isArray(prevSongData.artists)
       ? prevSongData.artists.length > 0 && artistsWithIds.length === 0
         ? prevSongData.artists
@@ -268,7 +260,9 @@ const manageArtistDataUpdates = (
   prevSongData.artists = [];
 
   if (artistsWithoutIds.length > 0) {
-    log(`User created ${artistsWithoutIds.length} no of artists when updating a song.`);
+    logger.debug(`User created ${artistsWithoutIds.length} no of artists when updating a song.`, {
+      artistsWithoutIds
+    });
     for (let e = 0; e < artistsWithoutIds.length; e += 1) {
       const artistData = artistsWithoutIds[e];
       const songArtworkPaths = getSongArtworkPath(
@@ -297,8 +291,9 @@ const manageArtistDataUpdates = (
         unlinkedArtists.some((unlinkedArtist) => unlinkedArtist.artistId === artists[i].artistId)
       ) {
         if (artists[i].songs.length === 1 && artists[i].songs[0].songId === prevSongData.songId) {
-          log(
-            `'${artists[i].name}' got removed because user removed the only link it has with a song.`
+          logger.debug(
+            `'${artists[i].name}' got removed because user removed the only link it has with a song.`,
+            { artistId: artists[i].artistId }
           );
           artists.splice(i, 1);
         } else {
@@ -324,7 +319,7 @@ const manageArtistDataUpdates = (
     prevSongData.artists.push(
       ...availArtists.map((artist) => {
         if (artist.artistId === undefined)
-          log(`ARTIST WITHOUT AN ID FOUND.`, { ARTIST_NAME: artist.name }, 'ERROR');
+          logger.warn(`Artist without an id found.`, { ARTIST_NAME: artist.name });
         return {
           artistId: artist.artistId as string,
           name: artist.name
@@ -397,8 +392,9 @@ const manageGenreDataUpdates = (
     for (let i = 0; i < genres.length; i += 1) {
       if (unlinkedGenres.some((unlinkedGenre) => unlinkedGenre.genreId === genres[i].genreId)) {
         if (genres[i].songs.length === 1 && genres[i].songs[0].songId === songId) {
-          log(
-            `'${genres[i].name}' got removed because user removed the only link it has with a song.`
+          logger.debug(
+            `'${genres[i].name}' got removed because user removed the only link it has with a song.`,
+            { genreId: genres[i].genreId }
           );
           genres.splice(i, 1);
         } else {
@@ -421,7 +417,7 @@ const manageGenreDataUpdates = (
     prevSongData.genres.push(
       ...availGenres.map((genre) => {
         if (genre.genreId === undefined)
-          log(`GENRE WITHOUT AN ID FOUND.`, { GENRE_NAME: genre.name }, 'ERROR');
+          logger.warn(`Genre without an id found.`, { genreName: genre.name });
         return { genreId: genre.genreId as string, name: genre.name };
       })
     );
@@ -535,7 +531,7 @@ const manageArtworkUpdates = async (prevSongData: SavableSongData, newSongData: 
   );
 
   if (songPrevArtworkPaths.artworkPath !== newArtworkPath) {
-    log(`User changed the artwork of the song '${songId}'`);
+    logger.debug(`User changed the artwork of the song`, { songId });
     isArtworkChanged = true;
     // check whether song had an artwork before
     if (prevSongData.isArtworkAvailable) {
@@ -543,7 +539,7 @@ const manageArtworkUpdates = async (prevSongData: SavableSongData, newSongData: 
       prevSongData.isArtworkAvailable = false;
 
       await removeArtwork(songPrevArtworkPaths).catch((err) => {
-        log(`ERROR OCCURRED WHEN TRYING TO REMOVE SONG ARTWORK OF '${songId}'.`, { err }, 'ERROR');
+        logger.error(`Failed to remove the artwork of a song`, { err, songId });
         throw err;
       });
     }
@@ -643,7 +639,7 @@ const manageLyricsUpdates = (
 
           cachedLyrics.lyrics = lyrics;
           cachedLyrics.lyricsType = lyricsType;
-          cachedLyrics.copyright = lyrics.copyright;
+          cachedLyrics.lyrics.copyright = lyrics.copyright;
           cachedLyrics.source = 'IN_SONG_LYRICS';
           cachedLyrics.isOfflineLyricsAvailable = true;
 
@@ -668,18 +664,16 @@ const updateSongId3TagsOfUnknownSource = async (
   const pathExt = path.extname(songPath).replace(/\W/, '');
   const isASupporedFormat = metadataEditingSupportedExtensions.includes(pathExt);
 
-  if (!isASupporedFormat)
-    return log(
+  if (!isASupporedFormat) {
+    logger.warn(
       `Lyrics cannot be saved because current song extension (${pathExt}) is not supported for modifying metadata.`,
-      { songPath },
-      'ERROR',
-      {
-        sendToRenderer: {
-          messageCode: 'SONG_EXT_NOT_SUPPORTED_FOR_LYRICS_SAVES',
-          data: { ext: pathExt }
-        }
-      }
+      { songPath }
     );
+    return sendMessageToRenderer({
+      messageCode: 'SONG_EXT_NOT_SUPPORTED_FOR_LYRICS_SAVES',
+      data: { ext: pathExt }
+    });
+  }
 
   const songsOutsideLibraryData = getSongsOutsideLibraryData();
 
@@ -781,11 +775,11 @@ const updateSongId3Tags = async (
 
       return result;
     } catch (error) {
-      log(
-        'Error occurred when updating song id3 tags of a song from unknown source.',
-        { error, songIdOrPath },
-        'ERROR'
-      );
+      logger.error('Failed to update id3 tags of a song from unknown source.', {
+        error,
+        songIdOrPath,
+        sendUpdatedData
+      });
       return result;
     }
   }
@@ -795,7 +789,7 @@ const updateSongId3Tags = async (
     for (let x = 0; x < songs.length; x += 1) {
       if (songs[x].songId === songId) {
         try {
-          log(`Started the song data updating procees of the song '${songId}'`);
+          logger.debug(`Started the song data updating procees of the song '${songId}'`);
           let song = songs[x];
           const prevTags = await NodeID3.Promise.read(song.path);
 
@@ -902,8 +896,9 @@ const updateSongId3Tags = async (
             };
             result.updatedData = data;
           }
-          log(`'${id3Tags.title}' song data update successfull.`);
+          logger.debug(`song data updated successfully`, { songId });
           return result;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
           if ('message' in err) {
             result.reason = err.message;
@@ -912,15 +907,15 @@ const updateSongId3Tags = async (
               data: { message: err.message }
             });
           }
-          log('Song metadata update failed.', { err }, 'ERROR');
+          logger.error('Song metadata update failed.', { err });
           return result;
         }
       }
     }
     return result;
   }
-  log('FAILED TO UPDATE SONGSDATA. SONGS ARRAY IS EMPTY.', undefined, 'ERROR');
-  throw new Error('Called songDataUpdatedFunction without data in the songs array.');
+  logger.error('Failed to update songsdata. Songs array is empty.', { songs });
+  throw new Error('Failed to update songsdata. Songs array is empty.');
 };
 
 export default updateSongId3Tags;

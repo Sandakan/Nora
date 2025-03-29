@@ -1,18 +1,20 @@
-import React, { useContext } from 'react';
+import { lazy, useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { AppContext } from '../../contexts/AppContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import storage from '../../utils/localStorage';
 import i18n from '../../i18n';
 
 import { Playlist } from './Playlist';
-import NewPlaylistPrompt from './NewPlaylistPrompt';
 import Button from '../Button';
 import MainContainer from '../MainContainer';
-import Dropdown, { DropdownOption } from '../Dropdown';
+import Dropdown, { type DropdownOption } from '../Dropdown';
 import VirtualizedGrid from '../VirtualizedGrid';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
+
+const NewPlaylistPrompt = lazy(() => import('./NewPlaylistPrompt'));
 
 const playlistSortOptions: DropdownOption<PlaylistSortTypes>[] = [
   { label: i18n.t('sortTypes.aToZ'), value: 'aToZ' },
@@ -31,12 +33,14 @@ const MIN_ITEM_WIDTH = 175;
 const MIN_ITEM_HEIGHT = 220;
 
 const PlaylistsPage = () => {
-  const {
-    currentlyActivePage,
-    localStorageData,
-    isMultipleSelectionEnabled,
-    multipleSelectionsData
-  } = useContext(AppContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const sortingStates = useStore(store, (state) => state.localStorage.sortingStates);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+
   const {
     changePromptMenuData,
     updateContextMenuData,
@@ -45,14 +49,14 @@ const PlaylistsPage = () => {
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [playlists, setPlaylists] = React.useState([] as Playlist[]);
-  const [sortingOrder, setSortingOrder] = React.useState<PlaylistSortTypes>(
-    currentlyActivePage?.data?.sortingOrder ||
-      localStorageData?.sortingStates?.playlistsPage ||
+  const [playlists, setPlaylists] = useState([] as Playlist[]);
+  const [sortingOrder, setSortingOrder] = useState<PlaylistSortTypes>(
+    (currentlyActivePage?.data?.sortingOrder as PlaylistSortTypes) ||
+      sortingStates?.playlistsPage ||
       'aToZ'
   );
 
-  const fetchPlaylistData = React.useCallback(
+  const fetchPlaylistData = useCallback(
     () =>
       window.api.playlistsData.getPlaylistData([], sortingOrder).then((res) => {
         if (res && res.length > 0) setPlaylists(res);
@@ -61,7 +65,7 @@ const PlaylistsPage = () => {
     [sortingOrder]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchPlaylistData();
     const managePlaylistDataUpdatesInPlaylistsPage = (e: Event) => {
       if ('detail' in e) {
@@ -78,13 +82,13 @@ const PlaylistsPage = () => {
     };
   }, [fetchPlaylistData]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     storage.sortingStates.setSortingStates('playlistsPage', sortingOrder);
   }, [sortingOrder]);
 
   const selectAllHandler = useSelectAllHandler(playlists, 'playlist', 'playlistId');
 
-  const createNewPlaylist = React.useCallback(
+  const createNewPlaylist = useCallback(
     () =>
       changePromptMenuData(
         true,
@@ -203,7 +207,7 @@ const PlaylistsPage = () => {
               data={playlists}
               fixedItemWidth={MIN_ITEM_WIDTH}
               fixedItemHeight={MIN_ITEM_HEIGHT}
-              scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
+              // scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
               itemContent={(index, playlist) => {
                 return <Playlist index={index} selectAllHandler={selectAllHandler} {...playlist} />;
               }}

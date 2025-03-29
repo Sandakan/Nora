@@ -1,5 +1,4 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-import React from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 
@@ -17,7 +16,7 @@ const RecentlyPlayedArtists = (props: Props) => {
 
   const selectAllHandler = useSelectAllHandler(recentlyPlayedSongArtists, 'artist', 'artistId');
 
-  const recentlyPlayedSongArtistsComponents = React.useMemo(
+  const recentlyPlayedSongArtistsComponents = useMemo(
     () =>
       recentlyPlayedSongArtists
         .filter((_, i) => i < (noOfVisibleArtists || 5))

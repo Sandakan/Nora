@@ -1,5 +1,4 @@
-// using require because an error is displayed saying 'stringSimilarity' is not a function when using import.
-const { default: stringSimilarity, ReturnTypeEnums } = require('didyoumean2');
+import { default as stringSimilarity, ReturnTypeEnums } from 'didyoumean2';
 import {
   getAlbumsData,
   getArtistsData,
@@ -16,8 +15,8 @@ import {
   getPlaylistArtworkPath,
   getSongArtworkPath
 } from './fs/resolveFilePaths';
-import log from './log';
 import filterUniqueObjects from './utils/filterUniqueObjects';
+import logger from './logger';
 
 const getSongSearchResults = (
   songs: SavableSongData[],
@@ -243,17 +242,17 @@ const search = (
   playlists = filterUniqueObjects(playlists, 'playlistId');
   genres = filterUniqueObjects(genres, 'genreId');
 
-  log(
-    `Searching for results about '${value}' with ${filter} filter with Predictive Search ${
-      isIsPredictiveSearchEnabled ? 'enabled' : 'disabled'
-    }. Found ${
-      songs.length + artists.length + albums.length + playlists.length
-    } total results, ${songs.length} songs results, ${
-      artists.length
-    } artists results, ${albums.length} albums results, ${
-      playlists.length
-    } playlists results and ${genres.length} genres results.`
-  );
+  logger.debug(`Searching for results.`, {
+    keyword: value,
+    filter,
+    isIsPredictiveSearchEnabled,
+    totalResults: songs.length + artists.length + albums.length + playlists.length,
+    songsResults: songs.length,
+    artistsResults: artists.length,
+    albumsResults: albums.length,
+    playlistsResults: playlists.length,
+    genresResults: genres.length
+  });
 
   if (updateSearchHistory) {
     if (recentSearchesTimeoutId) clearTimeout(recentSearchesTimeoutId);

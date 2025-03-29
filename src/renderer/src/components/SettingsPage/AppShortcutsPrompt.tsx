@@ -1,4 +1,4 @@
-import React from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import i18n from '../../i18n';
@@ -174,6 +174,7 @@ const shortcutData: ShortcutCategory[] = [
         label: i18n.t('appShortcutsPrompt.reload'),
         keys: [ctrlKey, 'R']
       },
+      { label: i18n.t('appShortcutsPrompt.openAppShortcutsPrompt'), keys: [ctrlKey, '/'] },
       { label: i18n.t('appShortcutsPrompt.openDevtools'), keys: ['F12'] }
     ]
   }
@@ -182,7 +183,7 @@ const shortcutData: ShortcutCategory[] = [
 const AppShortcutsPrompt = () => {
   const { t } = useTranslation();
 
-  const shortcutCategoryComponents = React.useMemo(
+  const shortcutCategoryComponents = useMemo(
     () =>
       shortcutData.map((category, categoryIndex) => {
         const { shortcutCategoryTitle, shortcuts } = category;
@@ -192,18 +193,13 @@ const AppShortcutsPrompt = () => {
 
           const shortcutKeyComponents = keys.map((key, index) => (
             <>
-              {/*  eslint-disable-next-line react/no-array-index-key */}
               <ShortcutButton shortcutKey={key} key={index} />
               {index !== keys.length - 1 && <span className="mx-2 text-font-color-dimmed">+</span>}
             </>
           ));
 
           return (
-            <div
-              // eslint-disable-next-line react/no-array-index-key
-              key={i}
-              className="shortcut mb-4 flex w-[45%] items-center justify-between p-2"
-            >
+            <div key={i} className="shortcut mb-4 flex w-[45%] items-center justify-between p-2">
               <div className="shortcut-label opacity-75">{label}</div>
               <div className="shortcut-keys flex items-center">{shortcutKeyComponents}</div>
             </div>
@@ -211,7 +207,6 @@ const AppShortcutsPrompt = () => {
         });
 
         return (
-          // eslint-disable-next-line react/no-array-index-key
           <li key={categoryIndex} className="shortcut-category mt-8">
             <div className="shortcut-category-title text-2xl text-font-color-highlight dark:text-dark-font-color-highlight">
               {shortcutCategoryTitle}

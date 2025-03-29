@@ -1,5 +1,5 @@
 import fs from 'fs/promises';
-import log from '../log';
+import logger from '../logger';
 import { isAnErrorWithCode } from './isAnErrorWithCode';
 
 const getFileSize = async (filePath: string) => {
@@ -8,11 +8,7 @@ const getFileSize = async (filePath: string) => {
     return stats.size;
   } catch (error) {
     if (isAnErrorWithCode(error) && error.code === 'ENOENT') return 0;
-    log(
-      'Error occurred when trying to calculate file size of a file.',
-      { error, filePath },
-      'ERROR'
-    );
+    logger.error('Failed to calculate file size of a file.', { error, filePath });
   }
   return 0;
 };

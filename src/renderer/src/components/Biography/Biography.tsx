@@ -1,9 +1,10 @@
-import React from 'react';
+import { useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import Hyperlink from '../Hyperlink';
 import HashTag from './HashTag';
-import { Tag } from 'src/@types/last_fm_artist_info_api';
+import type { Tag } from '../../../../types/last_fm_artist_info_api';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   bioUserName?: string;
@@ -16,7 +17,8 @@ type Props = {
 };
 
 const Biography = (props: Props) => {
-  const { bodyBackgroundImage } = React.useContext(AppContext);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+
   const { t } = useTranslation();
 
   const {
@@ -29,7 +31,7 @@ const Biography = (props: Props) => {
     tags = []
   } = props;
 
-  const { bioUrl, sanitizedBio } = React.useMemo(() => {
+  const { bioUrl, sanitizedBio } = useMemo(() => {
     if (bio) {
       const bioAnchor = bio.match(/<a .*<\/a>/gm);
       const bioAnchorUrl = bioAnchor ? bioAnchor[0].match(/".*"/gm) : [''];
@@ -41,15 +43,14 @@ const Biography = (props: Props) => {
     return { sanitizedBio: '', bioUrl: '' };
   }, [bio]);
 
-  const tagComponents = React.useMemo(
-    // eslint-disable-next-line react/jsx-props-no-spreading
+  const tagComponents = useMemo(
     () => tags.map((tag) => <HashTag key={tag.url} {...tag} />),
     [tags]
   );
 
   return (
     <div
-      className={`"bio-container appear-from-bottom relative z-10 m-4 rounded-lg p-4 text-font-color-black shadow-md  dark:text-font-color-white ${
+      className={`"bio-container appear-from-bottom relative z-10 m-4 rounded-lg p-4 text-font-color-black shadow-md dark:text-font-color-white ${
         bodyBackgroundImage
           ? `bg-background-color-2/70 backdrop-blur-md dark:bg-dark-background-color-2/70`
           : `bg-background-color-2 dark:bg-dark-background-color-2`

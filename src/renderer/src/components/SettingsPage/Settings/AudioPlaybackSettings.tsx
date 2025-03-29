@@ -1,14 +1,13 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-import React from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
-import Dropdown, { DropdownOption } from '../../Dropdown';
-import { AppContext } from '../../../contexts/AppContext';
+import Dropdown, { type DropdownOption } from '../../Dropdown';
 import storage from '../../../utils/localStorage';
 
 import Button from '../../Button';
 import Checkbox from '../../Checkbox';
 import i18n from '../../../i18n';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const second = i18n.t('settingsPage.second');
 const seconds = i18n.t('settingsPage.second_other');
@@ -23,14 +22,15 @@ const seekbarScrollIntervals: DropdownOption<string>[] = [
 ];
 
 const AudioPlaybackSettings = () => {
-  const { localStorageData } = React.useContext(AppContext);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const { t } = useTranslation();
 
-  const [seekbarScrollInterval, setSeekbarScrollInterval] = React.useState('5');
+  const [seekbarScrollInterval, setSeekbarScrollInterval] = useState('5');
 
-  const [playbackRateInterval, setPlaybackRateInterval] = React.useState(1);
+  const [playbackRateInterval, setPlaybackRateInterval] = useState(1);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const interval = storage.preferences.getPreferences('seekbarScrollInterval');
     const playbackRate = storage.playback.getPlaybackOptions('playbackRate');
 
@@ -38,7 +38,7 @@ const AudioPlaybackSettings = () => {
     setSeekbarScrollInterval(interval.toString());
   }, []);
 
-  const playbackRateSeekBarCssProperties: any = {};
+  const playbackRateSeekBarCssProperties: CSSProperties = {};
 
   playbackRateSeekBarCssProperties['--seek-before-width'] = `${
     ((playbackRateInterval - 0.25) / (4 - 0.25)) * 100
@@ -57,9 +57,7 @@ const AudioPlaybackSettings = () => {
           </div>
           <Checkbox
             id="toggleShowRemainingSongDuration"
-            isChecked={
-              localStorageData !== undefined && localStorageData.preferences.showSongRemainingTime
-            }
+            isChecked={preferences?.showSongRemainingTime}
             checkedStateUpdateFunction={(state) =>
               storage.preferences.setPreferences('showSongRemainingTime', state)
             }

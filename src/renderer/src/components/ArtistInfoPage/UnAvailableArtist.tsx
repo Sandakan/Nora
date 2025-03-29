@@ -1,17 +1,18 @@
-import React from 'react';
+import { lazy, useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { SimilarArtist } from 'src/types/last_fm_artist_info_api';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import OpenLinkConfirmPrompt from '../OpenLinkConfirmPrompt';
-import { SimilarArtist } from '../../../@types/last_fm_artist_info_api';
+
+const OpenLinkConfirmPrompt = lazy(() => import('../OpenLinkConfirmPrompt'));
 
 const UnAvailableArtist = (props: Omit<SimilarArtist, 'artistData'>) => {
-  const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { name, url } = props;
 
-  const handleButtonClick = React.useCallback(() => {
+  const handleButtonClick = useCallback(() => {
     return changePromptMenuData(
       true,
       <OpenLinkConfirmPrompt link={url} title={`View '${name}' in Last.Fm`} />,

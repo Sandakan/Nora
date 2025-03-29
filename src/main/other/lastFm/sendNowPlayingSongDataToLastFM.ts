@@ -1,9 +1,10 @@
-/* eslint-disable prefer-destructuring */
-/* eslint-disable no-await-in-loop */
 import { getSongsData, getUserData } from '../../filesystem';
-import log from '../../log';
-import { LastFMScrobblePostResponse, updateNowPlayingParams } from '../../../@types/last_fm_api';
-import { checkIfConnectedToInternet } from '../../main';
+import logger from '../../logger';
+import type {
+  LastFMScrobblePostResponse,
+  updateNowPlayingParams
+} from '../../../types/last_fm_api';
+import { checkIfConnectedToInternet, getSongsOutsideLibraryData } from '../../main';
 import generateApiRequestBodyForLastFMPostRequests from './generateApiRequestBodyForLastFMPostRequests';
 import getLastFmAuthData from './getLastFMAuthData';
 
@@ -16,7 +17,20 @@ const sendNowPlayingSongDataToLastFM = async (songId: string) => {
 
     if (isScrobblingEnabled && isConnectedToInternet) {
       const songs = getSongsData();
-      const song = songs.find((x) => x.songId === songId);
+      let song = songs.find((x) => x.songId === songId);
+
+      if (song === undefined) {
+        const songsOutsideLibrary = getSongsOutsideLibraryData();
+        const data = songsOutsideLibrary.find((x) => x.songId === songId);
+        if (data)
+          song = {
+            ...data,
+            albumArtists: [],
+            trackNo: undefined,
+            isArtworkAvailable: !!data.artworkPath,
+            addedDate: Date.now()
+          };
+      }
 
       if (song) {
         const authData = getLastFmAuthData();
@@ -29,7 +43,7 @@ const sendNowPlayingSongDataToLastFM = async (songId: string) => {
           artist: song.artists?.map((artist) => artist.name).join(', ') || '',
           album: song.album?.name,
           albumArtist: song?.albumArtists?.map((artist) => artist.name).join(', '),
-          trackNumber: song.trackNo,
+          trackNumber: song?.trackNo,
           duration: Math.ceil(song.duration)
         };
 
@@ -47,18 +61,19 @@ const sendNowPlayingSongDataToLastFM = async (songId: string) => {
           body
         });
 
-        if (res.status === 200) return log(`Now playing song ${songId} accepted.`);
+        if (res.status === 200)
+          return logger.debug(`Now playing song data accepted in LastFM.`, { songId });
 
         const json: LastFMScrobblePostResponse = await res.json();
-        return log('Failed to send now playing song to LastFM', { json }, 'WARN');
+        return logger.warn('Failed to send now playing song to LastFM', { json, songId });
       }
     }
-    return log('Now playing song request ignored', {
+    return logger.debug('Now playing song request ignored', {
       isScrobblingEnabled,
       isConnectedToInternet
     });
   } catch (error) {
-    return log('Error occurred when sending now playing song data to LastFM.', {
+    return logger.error('Failed to send now playing song data to LastFM.', {
       error
     });
   }

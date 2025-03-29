@@ -1,14 +1,14 @@
-/* eslint-disable no-await-in-loop */
 import path from 'path';
 import fs from 'fs/promises';
 
-import log from '../log';
+import logger from '../logger';
 import makeDir from './makeDir';
+import isPathADir from './isPathADir';
 
 async function copyDir(src: string, dest: string) {
   try {
     const { exist } = await makeDir(dest, { recursive: true });
-    if (exist) log(`Directory already exists. Will re-write contents of the directory.`);
+    if (exist) logger.info(`Directory already exists. Will re-write contents of the directory.`);
 
     const entries = await fs.readdir(src, { withFileTypes: true });
 
@@ -16,11 +16,11 @@ async function copyDir(src: string, dest: string) {
       const srcPath = path.join(src, entry.name);
       const destPath = path.join(dest, entry.name);
 
-      if (entry.isDirectory()) await copyDir(srcPath, destPath);
+      if (isPathADir(entry)) await copyDir(srcPath, destPath);
       else await fs.copyFile(srcPath, destPath);
     }
   } catch (error) {
-    log('Error occurred when copying the directory', { error, src, dest }, 'ERROR');
+    logger.error('Failed to copy the directory', { error, src, dest });
     throw error;
   }
 }

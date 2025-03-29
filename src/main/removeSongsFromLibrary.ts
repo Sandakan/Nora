@@ -1,5 +1,3 @@
-/* eslint-disable no-continue */
-/* eslint-disable no-await-in-loop */
 import path from 'path';
 import { removeArtwork } from './other/artworks';
 import {
@@ -15,9 +13,9 @@ import {
   setPlaylistData,
   setSongsData
 } from './filesystem';
-import log from './log';
 import { dataUpdateEvent, sendMessageToRenderer } from './main';
 import { getSongArtworkPath } from './fs/resolveFilePaths';
+import logger from './logger';
 
 export const removeDeletedArtistDataOfSong = (artists: SavableArtist[], song: SavableSongData) => {
   let isArtistRemoved = false;
@@ -37,13 +35,21 @@ export const removeDeletedArtistDataOfSong = (artists: SavableArtist[], song: Sa
         if (artists[x].name === songArtist.name) {
           if (artists[x].songs.length > 1) {
             artists[x].songs = artists[x].songs.filter((y) => y.songId !== song.songId);
-            log(`Data related to '${song.title}' in artist '${artists[x].name}' removed.`);
+            logger.debug(
+              `Data related to '${song.title}' in artist '${artists[x].name}' removed.`,
+              { songId: song.songId, artistId: artists[x].artistId }
+            );
           } else {
             if (artists[x].songs.length === 1 && artists[x].songs[0].songId === song.songId)
-              log(
-                `Artist '${artists[x].name}' related to '${song.title}' removed because of it doesn't contain any other songs.`
+              logger.debug(
+                `Artist '${artists[x].name}' related to '${song.title}' removed because of it doesn't contain any other songs.`,
+                { songId: song.songId, artistId: artists[x].artistId }
               );
-            else log(`Artist '${artists[x].name}' removed because it doesn't have any songs.`);
+            else
+              logger.debug(
+                `Artist '${artists[x].name}' removed because it doesn't have any songs.`,
+                { artistId: artists[x].artistId }
+              );
             artists.splice(x, 1);
             isArtistRemoved = true;
           }
@@ -65,13 +71,20 @@ export const removeDeletedAlbumDataOfSong = (albums: SavableAlbum[], song: Savab
       if (song.album && albums[x].albumId === song.album.albumId) {
         if (albums[x].songs.length > 1) {
           albums[x].songs = albums[x].songs.filter((y) => y.songId !== song.songId);
-          log(`Data related to '${song.title}' in album '${albums[x].title}' removed.`);
+          logger.debug(`Data related to '${song.title}' in album '${albums[x].title}' removed.`, {
+            songId: song.songId,
+            albumId: albums[x].albumId
+          });
         } else {
           if (albums[x].songs.length === 1 && albums[x].songs[0].songId === song.songId)
-            log(
-              `Album '${albums[x].title}' related to '${song.title}' removed because of it doesn't contain any other songs.`
+            logger.debug(
+              `Album '${albums[x].title}' related to '${song.title}' removed because of it doesn't contain any other songs.`,
+              { songId: song.songId, albumId: albums[x].albumId }
             );
-          else log(`Album '${albums[x].title}' removed because it doesn't have any songs.`);
+          else
+            logger.debug(`Album '${albums[x].title}' removed because it doesn't have any songs.`, {
+              albumId: albums[x].albumId
+            });
           albums.splice(x, 1);
           isAlbumRemoved = true;
         }
@@ -94,9 +107,17 @@ export const removeDeletedPlaylistDataOfSong = (
     for (let x = 0; x < playlists.length; x += 1) {
       if (playlists[x].songs.length > 0 && playlists[x].songs.some((y) => y === song.songId)) {
         playlists[x].songs.splice(playlists[x].songs.indexOf(song.songId), 1);
-        log(`Data related to '${song.title}' in playlist '${playlists[x].name}' removed.`);
+        logger.debug(
+          `Data related to '${song.title}' in playlist '${playlists[x].name}' removed.`,
+          {
+            songId: song.songId,
+            playlistId: playlists[x].playlistId
+          }
+        );
       } else {
-        log(`Playlist '${playlists[x].name}' removed because it doesn't have any songs.`);
+        logger.debug(`Playlist '${playlists[x].name}' removed because it doesn't have any songs.`, {
+          playlistId: playlists[x].playlistId
+        });
         isPlaylistRemoved = true;
       }
     }
@@ -121,13 +142,20 @@ export const removeDeletedGenreDataOfSong = (genres: SavableGenre[], song: Savab
         if (genres[x].name === songGenre.name) {
           if (genres[x].songs.length > 1) {
             genres[x].songs = genres[x].songs.filter((y) => y.songId !== song.songId);
-            log(`Data related to '${song.title}' in genre '${genres[x].name}' removed.`);
+            logger.debug(`Data related to '${song.title}' in genre '${genres[x].name}' removed.`, {
+              songId: song.songId,
+              genreId: genres[x].genreId
+            });
           } else {
             if (genres[x].songs.length === 1 && genres[x].songs[0].songId === song.songId)
-              log(
-                `Genre '${genres[x].name}' related to '${song.title}' removed because of it doesn't contain any other songs.`
+              logger.debug(
+                `Genre '${genres[x].name}' related to '${song.title}' removed because of it doesn't contain any other songs.`,
+                { songId: song.songId, genreId: genres[x].genreId }
               );
-            else log(`Genre '${genres[x].name}' removed because it doesn't have any songs.`);
+            else
+              logger.debug(`Genre '${genres[x].name}' removed because it doesn't have any songs.`, {
+                genreId: genres[x].genreId
+              });
             genres.splice(x, 1);
             isGenreRemoved = true;
           }
@@ -144,11 +172,9 @@ export const removeDeletedArtworkDataOfSong = async (song: SavableSongData) => {
     try {
       await removeArtwork(artworkPaths);
     } catch (error) {
-      log(
-        `Error occurred when removing artworks of a song marked for removal from the library.`,
-        { error },
-        'ERROR'
-      );
+      logger.error(`Failed to remove artworks of a song marked for removal from the library.`, {
+        error
+      });
     }
   }
 };
@@ -182,7 +208,10 @@ const removeSong = async (
   let isPlaylistRemoved = false;
   let isGenreRemoved = false;
 
-  log(`Started the deletion process of the song '${path.basename(song.path)}'`);
+  logger.debug(`Started the deletion process of the song '${path.basename(song.path)}'`, {
+    songId: song.songId,
+    path: song.path
+  });
 
   //   ARTIST DATA UPDATES
   const updatedArtistData = removeDeletedArtistDataOfSong(artists, song);
@@ -208,14 +237,18 @@ const removeSong = async (
   try {
     await removeDeletedArtworkDataOfSong(song);
   } catch (error) {
-    throw new Error(`Error occurred when trying to remove artwork of ${song.title}`);
+    logger.error(`Error occurred when trying to remove artwork of ${song.title}`, {
+      error,
+      path: song.path
+    });
+    return;
   }
 
   // LISTENING DATA UPDATES
   const { updatedListeningData } = removeDeletedListeningDataOfSong(listeningData, song);
   listeningData = updatedListeningData;
 
-  log(`'${path.basename(song.path)}' song removed from the library.`);
+  logger.debug(`'${path.basename(song.path)}' song removed from the library.`);
   return {
     song,
     artists,
@@ -250,11 +283,9 @@ const removeSongsFromLibrary = async (
   let index = 0;
   for (let i = 0; i < songs.length; i += 1) {
     if (abortSignal?.aborted) {
-      log(
-        'Removing songs in the music folder aborted by an abortController signal.',
-        { reason: abortSignal?.reason },
-        'WARN'
-      );
+      logger.warn('Removing songs in the music folder aborted by an abortController signal.', {
+        reason: abortSignal?.reason
+      });
       break;
     }
 
@@ -266,6 +297,12 @@ const removeSongsFromLibrary = async (
     } else index += 1;
 
     const data = await removeSong(song, artists, albums, playlists, genres, listeningData);
+    if (!data)
+      return {
+        success: false,
+        message: `Error occurred when trying to remove the song '${path.basename(song.path)}' from the library.`
+      };
+
     artists = data.artists;
     albums = data.albums;
     playlists = data.playlists;

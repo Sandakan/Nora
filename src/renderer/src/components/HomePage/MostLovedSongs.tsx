@@ -1,5 +1,4 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-import React from 'react';
+import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 
@@ -14,14 +13,14 @@ import Button from '../Button';
 type Props = { mostLovedSongs: AudioInfo[]; noOfVisibleSongs: number };
 
 const MostLovedSongs = (props: Props) => {
-  const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
+  const { changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { mostLovedSongs, noOfVisibleSongs = 3 } = props;
   const MAX_SONG_LIMIT = 15;
 
   const selectAllHandler = useSelectAllHandler(mostLovedSongs, 'songs', 'songId');
-  const mostLovedSongComponents = React.useMemo(
+  const mostLovedSongComponents = useMemo(
     () =>
       mostLovedSongs
         .filter((_, i) => i < (noOfVisibleSongs || MAX_SONG_LIMIT))

@@ -1,47 +1,49 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-import React from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import storage from '../../utils/localStorage';
 
 import Button from '../Button';
+import splitFeaturingArtists from '../../utils/splitFeaturingArtists';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   name?: string;
   artistId?: string;
 };
-export const separateArtistsRegex = / and | [Ff](?:ea)?t\. |&|,|;|·| ?\| | ?\/ | ?\\ /gm;
 
 const SeparateArtistsSuggestion = (props: Props) => {
-  const { bodyBackgroundImage, currentSongData } = React.useContext(AppContext);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+
   const { addNewNotifications, changeCurrentActivePage, updateCurrentSongData } =
-    React.useContext(AppUpdateContext);
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { name = '', artistId = '' } = props;
 
-  const [isIgnored, setIsIgnored] = React.useState(false);
-  const [isMessageVisible, setIsMessageVisible] = React.useState(true);
+  const [isIgnored, setIsIgnored] = useState(false);
+  const [isMessageVisible, setIsMessageVisible] = useState(true);
 
-  const ignoredArtists = React.useMemo(
+  const ignoredArtists = useMemo(
     () => storage.ignoredSeparateArtists.getIgnoredSeparateArtists(),
     []
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (ignoredArtists.length > 0) setIsIgnored(ignoredArtists.includes(artistId));
   }, [artistId, ignoredArtists]);
 
-  const separatedArtistsNames = React.useMemo(() => {
-    const artists = name.split(separateArtistsRegex);
+  const separatedArtistsNames = useMemo(() => {
+    const artists = splitFeaturingArtists(name);
     const filterArtists = artists.filter((x) => x !== undefined && x.trim() !== '');
     const trimmedArtists = filterArtists.map((x) => x.trim());
 
     return [...new Set(trimmedArtists)];
   }, [name]);
 
-  const artistComponents = React.useMemo(() => {
+  const artistComponents = useMemo(() => {
     if (separatedArtistsNames.length > 0) {
       const artists = separatedArtistsNames.map((artist, i, arr) => {
         return (
@@ -66,7 +68,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
     return [];
   }, [separatedArtistsNames, t]);
 
-  const separateArtists = React.useCallback(
+  const separateArtists = useCallback(
     (setIsDisabled: (_state: boolean) => void, setIsPending: (_state: boolean) => void) => {
       setIsDisabled(true);
       setIsPending(true);
@@ -87,7 +89,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
             {
               content: t('common.artistConflictResolved'),
               iconName: 'done',
-              delay: 5000,
+              duration: 5000,
               id: 'ArtistDuplicateSuggestion'
             }
           ]);
@@ -183,7 +185,7 @@ const SeparateArtistsSuggestion = (props: Props) => {
                         id: 'suggestionIgnored',
                         iconName: 'do_not_disturb_on',
                         iconClassName: 'material-icons-round-outlined',
-                        delay: 5000,
+                        duration: 5000,
                         content: t('notifications.suggestionIgnored')
                       }
                     ]);

@@ -1,10 +1,12 @@
 import { nativeTheme } from 'electron';
-import { dataUpdateEvent, mainWindow } from '../main';
+import { dataUpdateEvent, getBackgroundColor, mainWindow } from '../main';
 import { getUserData, setUserData } from '../filesystem';
+import logger from '../logger';
 
-export const changeAppTheme = (theme?: AppTheme) => {
+const changeAppTheme = (theme?: AppTheme) => {
   const { theme: themeData } = getUserData();
-  console.log(`Theme update requested : theme : ${theme}`);
+  logger.debug(`Theme update requested`, { theme });
+
   const isDarkMode =
     theme === undefined
       ? !themeData.isDarkMode
@@ -22,6 +24,7 @@ export const changeAppTheme = (theme?: AppTheme) => {
     isDarkMode,
     useSystemTheme
   });
+  mainWindow?.setBackgroundColor(getBackgroundColor());
   dataUpdateEvent('userData/theme', [theme ?? 'system']);
 };
 

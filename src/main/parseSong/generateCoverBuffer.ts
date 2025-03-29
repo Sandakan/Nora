@@ -4,12 +4,11 @@ import fs from 'fs/promises';
 import * as musicMetaData from 'music-metadata';
 import sharp from 'sharp';
 
-import log from '../log';
+import logger from '../logger';
 import { DEFAULT_ARTWORK_SAVE_LOCATION } from '../filesystem';
 
 import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_default.webp?asset&asarUnpack';
 
-console.log('songCoverImage', songCoverImage);
 let defaultSongCoverImgBuffer: Buffer;
 
 export const getDefaultSongCoverImgBuffer = async () => {
@@ -22,11 +21,7 @@ export const getDefaultSongCoverImgBuffer = async () => {
     defaultSongCoverImgBuffer = buffer;
     return buffer;
   } catch (error) {
-    log(
-      `ERROR OCCURRED WHEN READING A FILE OF NAME 'song_cover_default.webp'.`,
-      { error },
-      'ERROR'
-    );
+    logger.error(`Failed to read 'song_cover_default.webp'`, { error });
     return undefined;
   }
 };
@@ -50,7 +45,7 @@ export const generateCoverBuffer = async (
 
         return buffer;
       } catch (error) {
-        log(`ERROR OCCURRED WHEN TRYING TO GENERATE ARTWORK BUFFER.`, { error }, 'ERROR');
+        logger.error(`Failed to generate artwork buffer.`, { error });
         return getDefaultSongCoverImgBuffer();
       }
     }
@@ -60,12 +55,13 @@ export const generateCoverBuffer = async (
         const buffer = await sharp(cover[0].data).png().toBuffer();
         return buffer;
       } catch (error) {
-        log('Error occurred when trying to get artwork buffer of a song.', { error }, 'WARN');
+        logger.debug('Failed to get artwork buffer of a song.', { error });
         return getDefaultSongCoverImgBuffer();
       }
     }
 
-    return cover[0].data;
+    // return cover[0].data;
+    return Buffer.from(cover[0].data.buffer, 0, cover[0].data.length);
   }
 
   return getDefaultSongCoverImgBuffer();

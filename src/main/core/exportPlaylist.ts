@@ -1,10 +1,10 @@
 import { writeFile } from 'fs/promises';
 import { basename } from 'path';
-import { SaveDialogOptions } from 'electron';
+import type { SaveDialogOptions } from 'electron';
 
-import log from '../log';
+import logger from '../logger';
 import { getPlaylistData, getSongsData } from '../filesystem';
-import { showSaveDialog } from '../main';
+import { sendMessageToRenderer, showSaveDialog } from '../main';
 
 const generateSaveDialogOptions = (playlistName: string) => {
   const saveOptions: SaveDialogOptions = {
@@ -42,28 +42,17 @@ const createM3u8FileForPlaylist = async (playlist: SavablePlaylist) => {
 
       await writeFile(destination, m3u8FileData);
 
-      return log(`Exported '${name}' playlist successfully.`, undefined, 'INFO', {
-        sendToRenderer: {
-          messageCode: 'PLAYLIST_EXPORT_SUCCESS',
-          data: { name }
-        }
-      });
+      logger.debug(`Exported playlist successfully.`, { playlistId, name });
+      return sendMessageToRenderer({ messageCode: 'PLAYLIST_EXPORT_SUCCESS', data: { name } });
     }
-    return log(
-      `Failed to export '${name}' playlist because user didn't select a destination.`,
-      { name, playlistId },
-      'WARN',
-      {
-        sendToRenderer: { messageCode: 'DESTINATION_NOT_SELECTED' }
-      }
-    );
-  } catch (error) {
-    return log(`Failed to export '${name}' playlist.`, { error, name, playlistId }, 'ERROR', {
-      sendToRenderer: {
-        messageCode: 'PLAYLIST_EXPORT_FAILED',
-        data: { name }
-      }
+    logger.warn(`Failed to export playlist because user didn't select a destination.`, {
+      name,
+      playlistId
     });
+    return sendMessageToRenderer({ messageCode: 'DESTINATION_NOT_SELECTED' });
+  } catch (error) {
+    logger.debug(`Failed to export playlist.`, { error, name, playlistId });
+    return sendMessageToRenderer({ messageCode: 'PLAYLIST_EXPORT_FAILED', data: { name } });
   }
 };
 
@@ -74,11 +63,9 @@ const exportPlaylist = (playlistId: string) => {
     if (playlist.playlistId === playlistId) return createM3u8FileForPlaylist(playlist);
   }
 
-  return log(
-    "Failed to export playlist because requested playlist didn't exist.",
-    { playlistId },
-    'ERROR'
-  );
+  return logger.warn("Failed to export playlist because requested playlist didn't exist.", {
+    playlistId
+  });
 };
 
 export default exportPlaylist;

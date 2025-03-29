@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React from 'react';
+import { type MouseEvent as ReactMouseEvent, memo, useRef } from 'react';
 import log from '../utils/log';
 import DefaultImage from '../assets/images/webp/song_cover_default.webp';
 
@@ -16,9 +16,9 @@ type ImgProps = {
   alt?: string;
   noFallbacks?: boolean;
   className?: string;
-  onClick?: (_e: React.MouseEvent<HTMLImageElement, MouseEvent>) => void;
+  onClick?: (_e: ReactMouseEvent<HTMLImageElement, MouseEvent>) => void;
   loading?: 'eager' | 'lazy';
-  onContextMenu?: (_e: React.MouseEvent<HTMLImageElement, MouseEvent>) => void;
+  onContextMenu?: (_e: ReactMouseEvent<HTMLImageElement, MouseEvent>) => void;
   showImgPropsOnTooltip?: boolean;
   tabIndex?: number;
   showAltAsTooltipLabel?: boolean;
@@ -72,7 +72,7 @@ type ImgProps = {
   />
 </picture>; */
 
-const Img = React.memo((props: ImgProps) => {
+const Img = memo((props: ImgProps) => {
   const {
     src,
     alt = '',
@@ -89,10 +89,10 @@ const Img = React.memo((props: ImgProps) => {
     enableImgFadeIns = true
   } = props;
 
-  const imgRef = React.useRef<HTMLImageElement>(null);
-  const imgPropsRef = React.useRef<ImgProperties>();
-  const errorCountRef = React.useRef(0);
-  const isFirstTimeRef = React.useRef(true);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const imgPropsRef = useRef<ImgProperties>();
+  const errorCountRef = useRef(0);
+  const isFirstTimeRef = useRef(true);
 
   return (
     // <div className="inline-block relative">

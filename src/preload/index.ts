@@ -1,7 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { LastFMTrackInfoApi } from '../@types/last_fm_api';
-import { SimilarTracksOutput } from '../@types/last_fm_similar_tracks_api';
-import { LastFMAlbumInfo } from '../@types/last_fm_album_info_api';
+// const { contextBridge, ipcRenderer } = require('electron');
+import type { LastFMTrackInfoApi } from '../types/last_fm_api';
+import type { SimilarTracksOutput } from '../types/last_fm_similar_tracks_api';
+import type { LastFMAlbumInfo } from '../types/last_fm_album_info_api';
 
 const properties = {
   isInDevelopment: process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true',
@@ -16,31 +17,31 @@ const windowControls = {
   showApp: (): void => ipcRenderer.send('app/show'),
   changePlayerType: (type: PlayerTypes): Promise<void> =>
     ipcRenderer.invoke('app/changePlayerType', type),
-  onWindowFocus: (callback: (e: any) => void) => ipcRenderer.on('app/focused', callback),
-  onWindowBlur: (callback: (e: any) => void) => ipcRenderer.on('app/blurred', callback)
+  onWindowFocus: (callback: (e: unknown) => void) => ipcRenderer.on('app/focused', callback),
+  onWindowBlur: (callback: (e: unknown) => void) => ipcRenderer.on('app/blurred', callback)
 };
 
 const theme = {
   listenForSystemThemeChanges: (
-    callback: (e: any, isDarkMode: boolean, usingSystemTheme: boolean) => void
+    callback: (e: unknown, isDarkMode: boolean, usingSystemTheme: boolean) => void
   ) => ipcRenderer.on('app/systemThemeChange', callback),
   changeAppTheme: (appTheme?: AppTheme): void => ipcRenderer.send('app/changeAppTheme', appTheme),
   stoplisteningForSystemThemeChanges: (
-    callback: (e: any, isDarkMode: boolean, usingSystemTheme: boolean) => void
+    callback: (e: unknown, isDarkMode: boolean, usingSystemTheme: boolean) => void
   ) => ipcRenderer.removeListener('app/systemThemeChange', callback)
 };
 
 const playerControls = {
   songPlaybackStateChange: (isPlaying: boolean): void =>
     ipcRenderer.send('app/player/songPlaybackStateChange', isPlaying),
-  toggleSongPlayback: (callback: (e: any) => void) =>
+  toggleSongPlayback: (callback: (e: unknown) => void) =>
     ipcRenderer.on('app/player/toggleSongPlaybackState', callback),
-  skipForwardToNextSong: (callback: (e: any) => void) =>
+  skipForwardToNextSong: (callback: (e: unknown) => void) =>
     ipcRenderer.on('app/player/skipForward', callback),
-  skipBackwardToPreviousSong: (callback: (e: any) => void) =>
+  skipBackwardToPreviousSong: (callback: (e: unknown) => void) =>
     ipcRenderer.on('app/player/skipBackward', callback),
   sendSongPosition: (position: number): void => ipcRenderer.send('app/getSongPosition', position),
-  setDiscordRpcActivity: (options: DiscordRpcActivityOptions): void =>
+  setDiscordRpcActivity: (options: unknown): void =>
     ipcRenderer.send('app/setDiscordRpcActivity', options),
 
   toggleLikeSongs: (
@@ -49,11 +50,11 @@ const playerControls = {
   ): Promise<ToggleLikeSongReturnValue | undefined> =>
     ipcRenderer.invoke('app/toggleLikeSongs', songIds, isLikeSong),
 
-  removeTogglePlaybackStateEvent: (callback: (e: any) => void) =>
+  removeTogglePlaybackStateEvent: (callback: (e: unknown) => void) =>
     ipcRenderer.removeListener('app/player/toggleSongPlaybackState', callback),
-  removeSkipBackwardToPreviousSongEvent: (callback: (e: any) => void) =>
+  removeSkipBackwardToPreviousSongEvent: (callback: (e: unknown) => void) =>
     ipcRenderer.removeListener('app/player/skipBackward', callback),
-  removeSkipForwardToNextSongEvent: (callback: (e: any) => void) =>
+  removeSkipForwardToNextSongEvent: (callback: (e: unknown) => void) =>
     ipcRenderer.removeListener('app/player/skipForward', callback)
 };
 
@@ -157,25 +158,27 @@ const unknownSource = {
 
 // $ QUIT EVENT HANDLING
 const quitEvent = {
-  beforeQuitEvent: (callback: (e: any) => void) => ipcRenderer.on('app/beforeQuitEvent', callback),
-  removeBeforeQuitEventListener: (callback: (...args: any[]) => void) =>
+  beforeQuitEvent: (callback: (e: unknown) => void) =>
+    ipcRenderer.on('app/beforeQuitEvent', callback),
+  removeBeforeQuitEventListener: (callback: (...args: unknown[]) => void) =>
     ipcRenderer.removeListener('app/beforeQuitEvent', callback)
 };
 
 // $ SYSTEM BATTERY RELATED EVENTS
 const battery = {
-  listenForBatteryPowerStateChanges: (callback: (_: any, isOnBatteryPower: boolean) => void) =>
+  listenForBatteryPowerStateChanges: (callback: (_: unknown, isOnBatteryPower: boolean) => void) =>
     ipcRenderer.on('app/isOnBatteryPower', callback),
   stopListeningForBatteryPowerStateChanges: (
-    callback: (_: any, isOnBatteryPower: boolean) => void
+    callback: (_: unknown, isOnBatteryPower: boolean) => void
   ) => ipcRenderer.removeListener('app/isOnBatteryPower', callback)
 };
 
 // $ APP FULL-SCREEN EVENTS
 const fullscreen = {
-  onEnterFullscreen: (callback: (e: any) => void) =>
+  onEnterFullscreen: (callback: (e: unknown) => void) =>
     ipcRenderer.on('app/enteredFullscreen', callback),
-  onLeaveFullscreen: (callback: (e: any) => void) => ipcRenderer.on('app/leftFullscreen', callback)
+  onLeaveFullscreen: (callback: (e: unknown) => void) =>
+    ipcRenderer.on('app/leftFullscreen', callback)
 };
 
 // $ APP SEARCH
@@ -210,6 +213,16 @@ const lyrics = {
   getTranslatedLyrics: (languageCode: LanguageCodes): Promise<SongLyrics | undefined> =>
     ipcRenderer.invoke('app/getTranslatedLyrics', languageCode),
 
+  romanizeLyrics: (): Promise<SongLyrics | undefined> => ipcRenderer.invoke('app/romanizeLyrics'),
+
+  convertLyricsToPinyin: (): Promise<SongLyrics | undefined> =>
+    ipcRenderer.invoke('app/convertLyricsToPinyin'),
+
+  convertLyricsToRomaja: (): Promise<SongLyrics | undefined> =>
+    ipcRenderer.invoke('app/convertLyricsToRomaja'),
+
+  resetLyrics: (): Promise<SongLyrics> => ipcRenderer.invoke('app/resetLyrics'),
+
   saveLyricsToSong: (songPath: string, text: SongLyrics) =>
     ipcRenderer.invoke('app/saveLyricsToSong', songPath, text)
 };
@@ -219,6 +232,7 @@ const messages = {
   getMessageFromMain: (
     callback: (event: unknown, messageCode: MessageCodes, data: Record<string, unknown>) => void
   ) => ipcRenderer.on('app/sendMessageToRendererEvent', callback),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   removeMessageToRendererEventListener: (callback: (...args: any[]) => void) =>
     ipcRenderer.removeListener('app/sendMessageToRendererEvent', callback)
 };
@@ -377,7 +391,7 @@ const log = {
     logToConsoleType: LogMessageTypes = 'INFO',
     forceWindowRestart = false,
     forceMainRestart = false
-  ): Promise<any> => {
+  ): Promise<unknown> => {
     return ipcRenderer.invoke(
       'app/getRendererLogs',
       mes,
@@ -432,7 +446,9 @@ const utils = {
     join: (...args: string[]) => args.join('/')
   },
   getExtension: (dir: string) => {
-    const ext = dir.split('.').at(-1) || '';
+    const regex = /(?<name>.+)\.(?<ext>[\w\d]+)(?<search>\?.+)?$/;
+    const match = dir.match(regex);
+    const ext = match?.groups?.ext || '';
     return ext;
   },
   getBaseName: (dir: string) => {

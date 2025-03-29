@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { type MutableRefObject, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import debounce from '../utils/debounce';
 
 const defaultOptions = {
@@ -14,7 +14,7 @@ const isValuesInRange = (prevValue: number, newValue: number, range: number) =>
   Math.abs(newValue - prevValue) >= range;
 
 const useMouseActiveState = (
-  elementRef: React.MutableRefObject<HTMLElement | null | undefined>,
+  elementRef: MutableRefObject<HTMLElement | null | undefined>,
   options = defaultOptions as Partial<typeof defaultOptions>
 ) => {
   const { idleTimeout, activeTimeout, range, idleOnMouseOut } = options;

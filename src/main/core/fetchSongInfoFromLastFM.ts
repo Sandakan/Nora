@@ -1,6 +1,6 @@
-import log from '../log';
+import logger from '../logger';
 import { checkIfConnectedToInternet } from '../main';
-import { LastFMTrackInfoApi } from '../../@types/last_fm_api';
+import type { LastFMTrackInfoApi } from '../../types/last_fm_api';
 
 const LAST_FM_BASE_URL = 'http://ws.audioscrobbler.com/2.0/';
 
@@ -10,7 +10,6 @@ const fetchSongInfoFromLastFM = async (
 ): Promise<LastFMTrackInfoApi> => {
   if (checkIfConnectedToInternet()) {
     try {
-      // eslint-disable-next-line prefer-destructuring
       const LAST_FM_API_KEY = import.meta.env.MAIN_VITE_LAST_FM_API_KEY;
       if (!LAST_FM_API_KEY) throw new Error('LastFM api key not found.');
 
@@ -26,9 +25,7 @@ const fetchSongInfoFromLastFM = async (
       if (res.ok) {
         const data = (await res.json()) as LastFMTrackInfoApi;
         if ('error' in data) {
-          log(
-            `====== ERROR OCCURRED FETCHING DATA FROM LAST_FM API ABOUT SONG INFORMATION. ======\nERROR : ${data.error} => ${data.message}`
-          );
+          logger.error(`Failed to fetch data from LastFM API about song information.`, { data });
           throw new Error(
             `An error occurred when fetching data. Error code : ${
               data.error
@@ -37,18 +34,18 @@ const fetchSongInfoFromLastFM = async (
         }
         return data;
       }
-      const errStr = `Request to fetch song info from LastFM failed.\nERR_CODE : ${res.status} - ${res.statusText}`;
-      log(errStr);
+      const errStr = `Failed to fetch song info from LastFM`;
+      logger.error(errStr, { status: res.status, statusText: res.statusText });
       throw new Error(errStr);
     } catch (error) {
-      log(
-        `====== ERROR OCCURRED PARSING FETCHED DATA FROM LAST_FM API ABOUT ARTISTS INFORMATION. ======\nERROR : ${error}`
-      );
+      logger.error(`Failed to parse fetched data from last-fm api about artists information`, {
+        error
+      });
       throw new Error(`An error occurred when parsing fetched data. error : ${error}`);
     }
   } else {
-    log(
-      `====== ERROR OCCURRED WHEN TRYING TO FETCH FROM DEEZER API ABOUT ARTIST INFORMATION. APP IS NOT CONNECTED TO THE INTERNET. ======\nERROR : ERR_CONNECTION_FAILED`
+    logger.warn(
+      `Failed to fetch from deezer api about artist information. App is not connected to the internet.`
     );
     throw new Error('NO_NETWORK_CONNECTION' as MessageCodes);
   }

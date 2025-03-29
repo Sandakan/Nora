@@ -1,5 +1,4 @@
-/* eslint-disable react/require-default-props */
-import React from 'react';
+import { type ChangeEvent, useMemo } from 'react';
 
 export interface DropdownOption<T extends string> {
   label: string;
@@ -12,7 +11,7 @@ export interface DropdownProp<T extends string> {
   className?: string;
   options: DropdownOption<T>[];
   value: T;
-  onChange: (_e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onChange: (_e: ChangeEvent<HTMLSelectElement>) => void;
   isDisabled?: boolean;
   type?: string;
 }
@@ -20,7 +19,7 @@ export interface DropdownProp<T extends string> {
 function Dropdown<T extends string>(props: DropdownProp<T>) {
   const { className, name, value, onChange, options, isDisabled = false, type = '' } = props;
 
-  const optionComponents = React.useMemo(
+  const optionComponents = useMemo(
     () =>
       options.map((option) => (
         <option

@@ -1,15 +1,17 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-import React from 'react';
+import { lazy, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { AppContext } from '../../../contexts/AppContext';
 
 import Button from '../../Button';
-import ReleaseNotesPrompt from '../../ReleaseNotesPrompt/ReleaseNotesPrompt';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
+
+const ReleaseNotesPrompt = lazy(() => import('../../ReleaseNotesPrompt/ReleaseNotesPrompt'));
 
 const NewUpdateIndicator = () => {
-  const { appUpdatesState } = React.useContext(AppContext);
-  const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const appUpdatesState = useStore(store, (state) => state.appUpdatesState);
+
+  const { changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   return (

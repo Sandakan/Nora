@@ -1,9 +1,9 @@
 import { getPlaylistData, setPlaylistData } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 import { dataUpdateEvent } from '../main';
 
 const removeFromFavorites = (songId: string): { success: boolean; message?: string } => {
-  log(`Requested a song with id -${songId}- to be removed to the favorites.`);
+  logger.debug(`Requested to remove a song from the favorites.`, { songId });
   const playlists = getPlaylistData();
 
   if (playlists && Array.isArray(playlists)) {
@@ -29,12 +29,10 @@ const removeFromFavorites = (songId: string): { success: boolean; message?: stri
       dataUpdateEvent('playlists/favorites');
       return { success: true };
     }
-    log(
-      `Request failed for the song with id ${songId} to be removed to the Favorites because it is already unavailable in the Favorites.`
-    );
+    logger.warn(`Failed to remove a song from Favorites because it is unavailable.`);
     return { success: false };
   }
-  log(`ERROR OCCURRED WHEN TRYING TO REMOVE A SONG TO THE FAVORITES. PLAYLIST DATA ARE EMPTY.`);
+  logger.error(`Failed to remove a song from favorites. playlist data are empty.`);
   throw new Error('Playlists is not an array.');
 };
 

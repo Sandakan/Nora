@@ -1,16 +1,19 @@
-import React from 'react';
+import { lazy, useContext, useEffect, useState } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import storage from '../../../utils/localStorage';
 
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { AppContext } from '../../../contexts/AppContext';
 
 import Button from '../../Button';
 import Checkbox from '../../Checkbox';
-import Dropdown, { DropdownOption } from '../../Dropdown';
-import MusixmatchSettingsPrompt from '../MusixmatchSettingsPrompt';
-import MusixmatchDisclaimerPrompt from '../MusixmatchDisclaimerPrompt';
+import Dropdown, { type DropdownOption } from '../../Dropdown';
+
 import i18n from '../../../i18n';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
+
+const MusixmatchSettingsPrompt = lazy(() => import('../MusixmatchSettingsPrompt'));
+const MusixmatchDisclaimerPrompt = lazy(() => import('../MusixmatchDisclaimerPrompt'));
 
 const automaticallySaveLyricsOptions: DropdownOption<AutomaticallySaveLyricsTypes>[] = [
   {
@@ -25,17 +28,34 @@ const automaticallySaveLyricsOptions: DropdownOption<AutomaticallySaveLyricsType
 ];
 
 const LyricsSettings = () => {
-  const { userData } = React.useContext(AppContext);
-  const { changePromptMenuData, updateUserData } = React.useContext(AppUpdateContext);
+  const userData = useStore(store, (state) => state.userData);
+
+  const { changePromptMenuData, updateUserData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const [lyricsAutomaticallySaveState, setLyricsAutomaticallySaveState] =
-    React.useState<AutomaticallySaveLyricsTypes>('NONE');
+    useState<AutomaticallySaveLyricsTypes>('NONE');
 
-  React.useEffect(() => {
+  useEffect(() => {
     const lyricsSaveState = storage.preferences.getPreferences('lyricsAutomaticallySaveState');
 
     setLyricsAutomaticallySaveState(lyricsSaveState);
+  }, []);
+
+  const [autoTranslateLyrics, setAutoTranslateLyrics] = useState(false);
+
+  useEffect(() => {
+    const autoTranslateLyrics = storage.preferences.getPreferences('autoTranslateLyrics');
+
+    setAutoTranslateLyrics(autoTranslateLyrics);
+  }, []);
+
+  const [autoConvertLyrics, setAutoConvertLyrics] = useState(false);
+
+  useEffect(() => {
+    const autoConvertLyrics = storage.preferences.getPreferences('autoConvertLyrics');
+
+    setAutoConvertLyrics(autoConvertLyrics);
   }, []);
 
   return (
@@ -159,7 +179,7 @@ const LyricsSettings = () => {
             {userData?.customLrcFilesSaveLocation && (
               <>
                 <span>{t('settingsPage.selectedCustomLocation')}: </span>
-                <span className="mr-4  text-font-color-highlight dark:text-dark-font-color-highlight">
+                <span className="mr-4 text-font-color-highlight dark:text-dark-font-color-highlight">
                   {userData.customLrcFilesSaveLocation}
                 </span>
               </>
@@ -187,6 +207,32 @@ const LyricsSettings = () => {
               }
             />
           </div>
+        </li>
+
+        <li className="secondary-container auto-translate-lyrics mb-4">
+          <div className="description">{t('settingsPage.autoTranslateLyricsDescription')}</div>
+          <Checkbox
+            id="autoTranslateLyrics"
+            isChecked={autoTranslateLyrics}
+            checkedStateUpdateFunction={(state) => {
+              setAutoTranslateLyrics(state);
+              storage.preferences.setPreferences('autoTranslateLyrics', state);
+            }}
+            labelContent={t('settingsPage.autoTranslateLyrics')}
+          />
+        </li>
+
+        <li className="secondary-container auto-convert-lyrics mb-4">
+          <div className="description">{t('settingsPage.autoConvertLyricsDescription')}</div>
+          <Checkbox
+            id="autoConvertLyrics"
+            isChecked={autoConvertLyrics}
+            checkedStateUpdateFunction={(state) => {
+              setAutoConvertLyrics(state);
+              storage.preferences.setPreferences('autoConvertLyrics', state);
+            }}
+            labelContent={t('settingsPage.autoConvertLyrics')}
+          />
         </li>
       </ul>
     </li>

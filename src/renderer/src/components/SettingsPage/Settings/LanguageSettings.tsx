@@ -1,14 +1,16 @@
-import React from 'react';
+import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import Dropdown from '../../Dropdown';
-import { AppContext } from '../../../contexts/AppContext';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import i18n, { LanguageCodes, supportedLanguagesDropdownOptions } from '../../../i18n';
+import i18n, { supportedLanguagesDropdownOptions } from '../../../i18n';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const LanguageSettings = () => {
   const { t } = useTranslation();
-  const { userData } = React.useContext(AppContext);
-  const { addNewNotifications } = React.useContext(AppUpdateContext);
+  const userData = useStore(store, (state) => state.userData);
+
+  const { addNewNotifications } = useContext(AppUpdateContext);
   const appLang = userData?.language || 'en';
 
   return (

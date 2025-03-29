@@ -1,6 +1,6 @@
 import { getAlbumsData } from '../filesystem';
 import { getAlbumArtworkPath } from '../fs/resolveFilePaths';
-import log from '../log';
+import logger from '../logger';
 import sortAlbums from '../utils/sortAlbums';
 
 const fetchAlbumData = async (
@@ -8,7 +8,7 @@ const fetchAlbumData = async (
   sortType?: AlbumSortTypes
 ): Promise<Album[]> => {
   if (albumTitlesOrIds) {
-    log(`Requested albums data for ids '${albumTitlesOrIds.join(',')}'`);
+    logger.debug(`Requested albums data for ids`, { albumTitlesOrIds });
     const albums = getAlbumsData();
 
     if (albums.length > 0) {

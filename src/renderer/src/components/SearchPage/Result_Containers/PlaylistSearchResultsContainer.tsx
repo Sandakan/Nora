@@ -1,11 +1,12 @@
-import React from 'react';
+import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../../Button';
 import { Playlist } from '../../PlaylistsPage/Playlist';
 import SecondaryContainer from '../../SecondaryContainer';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { AppContext } from '../../../contexts/AppContext';
 import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   playlists: Playlist[];
@@ -16,13 +17,17 @@ type Props = {
 
 const PlaylistSearchResultsContainer = (props: Props) => {
   const { playlists, searchInput, noOfVisiblePlaylists = 4, isPredictiveSearchEnabled } = props;
-  const { isMultipleSelectionEnabled, multipleSelectionsData } = React.useContext(AppContext);
-  const { toggleMultipleSelections, changeCurrentActivePage } = React.useContext(AppUpdateContext);
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const { toggleMultipleSelections, changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const selectAllHandler = useSelectAllHandler(playlists, 'playlist', 'playlistId');
 
-  const playlistResults = React.useMemo(
+  const playlistResults = useMemo(
     () =>
       playlists.length > 0
         ? playlists
@@ -121,7 +126,7 @@ const PlaylistSearchResultsContainer = (props: Props) => {
             )}
           </div>
         </div>
-        <div className="playlists-container  flex h-full flex-wrap">{playlistResults}</div>
+        <div className="playlists-container flex h-full flex-wrap">{playlistResults}</div>
       </>
     </SecondaryContainer>
   );

@@ -1,6 +1,7 @@
-import React, { useCallback } from 'react';
-import { AppContext } from '../contexts/AppContext';
+import { useCallback, useContext } from 'react';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
+import { useStore } from '@tanstack/react-store';
+import { store } from '../store';
 
 const slice = (arr: string[], start: number, end: number) => {
   if (start > end) {
@@ -9,6 +10,7 @@ const slice = (arr: string[], start: number, end: number) => {
   return arr.slice(start, end + 1);
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const useSelectAllHandler = <Obj extends Record<string, any>>(
   arr: Obj[],
   selectionType: QueueTypes,
@@ -17,8 +19,9 @@ const useSelectAllHandler = <Obj extends Record<string, any>>(
     { [Prop in keyof Obj]: Obj[Prop] extends string ? Prop : never }[keyof Obj]
   >
 ) => {
-  const { multipleSelectionsData } = React.useContext(AppContext);
-  const { toggleMultipleSelections } = React.useContext(AppUpdateContext);
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+
+  const { toggleMultipleSelections } = useContext(AppUpdateContext);
 
   const selectAllHandler = useCallback(
     (upToId?: string) => {

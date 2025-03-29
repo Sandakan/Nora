@@ -1,23 +1,20 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable react/self-closing-comp */
-import React, { useContext } from 'react';
-import { AppContext } from '../../contexts/AppContext';
+import { useMemo } from 'react';
 import Notification from './Notification';
 import NotificationClearAllButton from './NotificationClearAllButton';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const NotificationPanel = () => {
-  const { notificationPanelData } = useContext(AppContext);
+  const notificationPanelData = useStore(store, (state) => state.notificationPanelData);
 
-  const notifications = React.useMemo(() => {
+  const notifications = useMemo(() => {
     const notificationData = notificationPanelData.notifications;
 
     if (notificationData.length > 0) {
       return notificationData.map((data) => {
         const {
           content,
-          delay,
+          duration,
           id,
           buttons,
           icon,
@@ -36,7 +33,7 @@ const NotificationPanel = () => {
             icon={icon}
             iconName={iconName}
             iconClassName={iconClassName}
-            delay={delay}
+            duration={duration}
             order={order}
             type={type}
             progressBarData={progressBarData}

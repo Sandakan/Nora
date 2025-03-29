@@ -1,11 +1,11 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-import React from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import storage from '../../utils/localStorage';
 
 import Button from '../Button';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   name?: string;
@@ -13,24 +13,26 @@ type Props = {
 };
 
 const DuplicateArtistsSuggestion = (props: Props) => {
-  const { bodyBackgroundImage, currentlyActivePage, currentSongData } =
-    React.useContext(AppContext);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+
   const { addNewNotifications, changeCurrentActivePage, updateCurrentSongData } =
-    React.useContext(AppUpdateContext);
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { name = '', artistId = '' } = props;
 
-  const [isVisible, setIsVisible] = React.useState(true);
-  const [duplicateArtists, setDuplicateArtists] = React.useState<Artist[]>([]);
-  const [isMessageVisible, setIsMessageVisible] = React.useState(true);
+  const [isVisible, setIsVisible] = useState(true);
+  const [duplicateArtists, setDuplicateArtists] = useState<Artist[]>([]);
+  const [isMessageVisible, setIsMessageVisible] = useState(true);
 
-  const ignoredDuplicateArtists = React.useMemo(
+  const ignoredDuplicateArtists = useMemo(
     () => storage.ignoredDuplicates.getIgnoredDuplicates('artists'),
     []
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     const isIgnored =
       ignoredDuplicateArtists.length > 0 && ignoredDuplicateArtists.some((x) => x.includes(name));
 
@@ -44,7 +46,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
     }
   }, [ignoredDuplicateArtists, name]);
 
-  const duplicateArtistComponents = React.useMemo(() => {
+  const duplicateArtistComponents = useMemo(() => {
     if (duplicateArtists.length > 0) {
       const artists = duplicateArtists.map((artist, i, arr) => {
         return (
@@ -74,7 +76,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
     return [];
   }, [artistId, changeCurrentActivePage, duplicateArtists, t]);
 
-  const linkToArtist = React.useCallback(
+  const linkToArtist = useCallback(
     (
       selectedId: string,
       setIsDisabled: (_state: boolean) => void,
@@ -103,7 +105,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
             {
               content: t('common.artistConflictResolved'),
               iconName: 'done',
-              delay: 5000,
+              duration: 5000,
               id: 'ArtistDuplicateSuggestion'
             }
           ]);
@@ -201,7 +203,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
                         id: 'suggestionIgnored',
                         iconClassName: '!material-icons-round-outlined',
                         iconName: 'do_not_disturb_on',
-                        delay: 5000,
+                        duration: 5000,
                         content: t('notifications.suggestionIgnored')
                       }
                     ]);

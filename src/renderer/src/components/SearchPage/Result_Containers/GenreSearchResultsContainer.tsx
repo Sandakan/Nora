@@ -1,12 +1,12 @@
-/* eslint-disable react/no-array-index-key */
-import React from 'react';
+import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../../Button';
 import Genre from '../../GenresPage/Genre';
 import SecondaryContainer from '../../SecondaryContainer';
-import { AppContext } from '../../../contexts/AppContext';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   genres: Genre[];
@@ -16,15 +16,19 @@ type Props = {
 };
 
 const GenreSearchResultsContainer = (props: Props) => {
-  const { isMultipleSelectionEnabled, multipleSelectionsData } = React.useContext(AppContext);
-  const { toggleMultipleSelections, changeCurrentActivePage } = React.useContext(AppUpdateContext);
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const { toggleMultipleSelections, changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { genres, searchInput, noOfVisibleGenres = 3, isPredictiveSearchEnabled } = props;
 
   const selectAllHandler = useSelectAllHandler(genres, 'genre', 'genreId');
 
-  const genreResults = React.useMemo(
+  const genreResults = useMemo(
     () =>
       genres.length > 0
         ? genres
@@ -38,7 +42,7 @@ const GenreSearchResultsContainer = (props: Props) => {
                     genreId={genre.genreId}
                     songIds={genre.songs.map((song) => song.songId)}
                     artworkPaths={genre.artworkPaths}
-                    backgroundColor={genre.backgroundColor}
+                    paletteData={genre.paletteData}
                     selectAllHandler={selectAllHandler}
                   />
                 );

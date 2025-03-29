@@ -1,6 +1,6 @@
 import { getPlaylistData } from '../filesystem';
 import { getPlaylistArtworkPath } from '../fs/resolveFilePaths';
-import log from '../log';
+import logger from '../logger';
 import sortPlaylists from '../utils/sortPlaylists';
 
 const sendPlaylistData = (
@@ -11,7 +11,7 @@ const sendPlaylistData = (
   const playlists = getPlaylistData();
   if (playlistIds && playlists && Array.isArray(playlists)) {
     let results: SavablePlaylist[] = [];
-    log(`Requested playlists data for ids '${playlistIds.join(',')}'`);
+    logger.debug(`Requested playlists data`, { playlistIds });
     if (playlistIds.length === 0) results = playlists;
     else {
       for (let x = 0; x < playlists.length; x += 1) {

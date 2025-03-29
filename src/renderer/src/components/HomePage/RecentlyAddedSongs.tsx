@@ -1,5 +1,4 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-import React, { ForwardedRef } from 'react';
+import { type ForwardedRef, forwardRef, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
@@ -10,8 +9,8 @@ import Button from '../Button';
 
 type Props = { latestSongs: AudioInfo[]; noOfVisibleSongs: number };
 
-const RecentlyAddedSongs = React.forwardRef((props: Props, ref: ForwardedRef<HTMLDivElement>) => {
-  const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
+const RecentlyAddedSongs = forwardRef((props: Props, ref: ForwardedRef<HTMLDivElement>) => {
+  const { changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { latestSongs, noOfVisibleSongs = 6 } = props;
@@ -19,7 +18,7 @@ const RecentlyAddedSongs = React.forwardRef((props: Props, ref: ForwardedRef<HTM
 
   const selectAllHandler = useSelectAllHandler(latestSongs, 'songs', 'songId');
 
-  const latestSongComponents = React.useMemo(
+  const latestSongComponents = useMemo(
     () =>
       latestSongs.length > 0 && latestSongs[0] !== null
         ? latestSongs

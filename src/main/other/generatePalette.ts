@@ -1,7 +1,6 @@
-/* eslint-disable no-await-in-loop */
-import nodeVibrant from 'node-vibrant';
+import { Vibrant } from 'node-vibrant/node';
 import { timeEnd, timeStart } from '../utils/measureTimeUsage';
-import log from '../log';
+import logger from '../logger';
 import {
   getGenresData,
   getPaletteData,
@@ -19,47 +18,44 @@ export const DEFAULT_SONG_PALETTE: PaletteData = {
   paletteId: 'DEFAULT_PALETTE',
   DarkMuted: {
     hex: '#104888',
-    hsl: [0.5891472868217055, 0.7889908256880734, 0.3],
+    hsl: [0.589, 0.789, 0.3],
     population: 0
   },
   DarkVibrant: {
     hex: '#0d3e76',
-    hsl: [0.5891472868217055, 0.7889908256880733, 0.26],
+    hsl: [0.589, 0.789, 0.26],
     population: 0
   },
   LightMuted: {
     hex: '#154383',
-    hsl: [0.5972222222222222, 0.7164179104477614, 0.3],
+    hsl: [0.597, 0.716, 0.3],
     population: 0
   },
   LightVibrant: {
     hex: '#8cb4ec',
-    hsl: [0.5972222222222222, 0.7164179104477613, 0.7372549019607844],
+    hsl: [0.597, 0.716, 0.737],
     population: 8
   },
   Muted: {
     hex: '#104888',
-    hsl: [0.5891472868217055, 0.7889908256880734, 0.3],
+    hsl: [0.589, 0.789, 0.3],
     population: 0
   },
   Vibrant: {
     hex: '#3c8ce8',
-    hsl: [0.5891472868217055, 0.7889908256880733, 0.5725490196078431],
+    hsl: [0.589, 0.789, 0.576],
     population: 2
   }
 };
 
 const generatePalette = async (artwork?: Buffer | string): Promise<PaletteData | undefined> => {
   if (artwork) {
-    const palette = await nodeVibrant
-      .from(artwork)
+    const palette = await Vibrant.from(artwork)
       .getPalette()
-      .catch((err) => {
-        return log(
-          `ERROR OCCURRED WHEN PARSING A SONG ARTWORK TO GET A COLOR PALETTE.`,
-          { err },
-          'ERROR'
-        );
+      .catch((error) => {
+        logger.error(`Failed to parse a song artwork to get a color palette.`, {
+          error
+        });
       });
 
     if (palette) {
@@ -92,10 +88,10 @@ const generatePalette = async (artwork?: Buffer | string): Promise<PaletteData |
 
       return outputPalette;
     }
-    log('GENERATED ARTWORK PALETTE EMPTY.', undefined, 'ERROR');
+    logger.warn('Generated artwork palette empty.');
     return undefined;
   }
-  log('EMPTY INPUT TO GENERATE A PALETTE.', undefined, 'WARN');
+  logger.warn('Empty input to generate a palette.');
   return DEFAULT_SONG_PALETTE;
 };
 
@@ -140,7 +136,9 @@ const generatePalettesForSongs = async () => {
           });
         }
       }
+
       timeEnd(start, 'Time to finish generating palettes for songs');
+
       setSongsData(songs);
       setPaletteData(palettes);
       dataUpdateEvent('songs/palette');
@@ -218,7 +216,7 @@ export const generatePalettes = async () => {
       setTimeout(generatePalettesForGenres, 1000);
       return undefined;
     })
-    .catch((error) => log('Error occurred when generating palettes.', { error }, 'ERROR'));
+    .catch((error) => logger.error('Failed to generating palettes.', { error }));
 };
 
 export default generatePalette;

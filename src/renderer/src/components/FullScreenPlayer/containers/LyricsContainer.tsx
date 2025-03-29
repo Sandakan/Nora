@@ -1,10 +1,12 @@
-/* eslint-disable react/no-array-index-key */
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../../contexts/AppContext';
 
 import LyricsMetadata from '../../LyricsPage/LyricsMetadata';
 import LyricLine from '../../LyricsPage/LyricLine';
+import useSkipLyricsLines from '../../../hooks/useSkipLyricsLines';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
+import i18n from '../../../i18n';
 
 type Props = {
   isLyricsVisible: boolean;
@@ -12,11 +14,15 @@ type Props = {
 };
 
 const LyricsContainer = (props: Props) => {
-  const { currentSongData, isCurrentSongPlaying } = useContext(AppContext);
+  const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const { isLyricsVisible, setIsLyricsAvailable } = props;
   const { t } = useTranslation();
 
   const [lyrics, setLyrics] = useState<SongLyrics | null | undefined>(null);
+  useSkipLyricsLines(lyrics);
 
   useEffect(() => {
     if (isLyricsVisible) {
@@ -27,33 +33,64 @@ const LyricsContainer = (props: Props) => {
           songArtists: Array.isArray(currentSongData.artists)
             ? currentSongData.artists.map((artist) => artist.name)
             : [],
+          album: currentSongData.album?.name,
           songPath: currentSongData.path,
           duration: currentSongData.duration
         })
-        .then((res) => {
+        .then(async (res) => {
           setIsLyricsAvailable(res?.lyrics?.isSynced ?? false);
-          return setLyrics(res);
+          setLyrics(res);
+
+          if (
+            preferences.autoTranslateLyrics &&
+            !res?.lyrics.isReset &&
+            !res?.lyrics.isTranslated
+          ) {
+            setLyrics(await window.api.lyrics.getTranslatedLyrics(i18n.language as LanguageCodes));
+          }
+          if (preferences.autoConvertLyrics && !res?.lyrics.isReset && !res?.lyrics.isRomanized) {
+            if (res?.lyrics.originalLanguage == 'zh')
+              setLyrics(await window.api.lyrics.convertLyricsToPinyin());
+            else if (res?.lyrics.originalLanguage == 'ja')
+              setLyrics(await window.api.lyrics.romanizeLyrics());
+            else if (res?.lyrics.originalLanguage == 'ko')
+              setLyrics(await window.api.lyrics.convertLyricsToRomaja());
+          }
+
+          return undefined;
         })
         .catch((err) => console.error(err));
     }
   }, [
+    currentSongData.album?.name,
     currentSongData.artists,
     currentSongData.duration,
     currentSongData.path,
     currentSongData.songId,
     currentSongData.title,
     isLyricsVisible,
+    preferences.autoTranslateLyrics,
+    preferences.autoConvertLyrics,
     setIsLyricsAvailable
   ]);
 
   const lyricsComponents = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {
-      const { isSynced, lyrics: unsyncedLyrics, syncedLyrics, offset = 0 } = lyrics.lyrics;
+      const { isSynced, parsedLyrics, offset = 0 } = lyrics.lyrics;
 
-      if (syncedLyrics) {
-        const syncedLyricsLines = syncedLyrics.map((lyric, index) => {
-          const { text, end, start } = lyric;
-          return <LyricLine key={index} index={index} lyric={text} syncedLyrics={{ start, end }} />;
+      if (isSynced) {
+        const syncedLyricsLines = parsedLyrics.map((lyric, index) => {
+          const { originalText: text, end = 0, start = 0 } = lyric;
+          return (
+            <LyricLine
+              key={index}
+              index={index}
+              lyric={text}
+              syncedLyrics={{ start, end }}
+              translatedLyricLines={lyric.translatedTexts}
+              convertedLyric={lyric.romanizedText}
+            />
+          );
         });
 
         const firstLine = (
@@ -63,32 +100,40 @@ const LyricsContainer = (props: Props) => {
             lyric="•••"
             syncedLyrics={{
               start: 0,
-              end: (syncedLyrics[0]?.start || 0) + offset
+              end: (parsedLyrics[0]?.start || 0) + offset
             }}
           />
         );
 
-        if ((syncedLyrics[0]?.start || 0) !== 0) syncedLyricsLines.unshift(firstLine);
+        if ((parsedLyrics[0]?.start || 0) !== 0) syncedLyricsLines.unshift(firstLine);
 
         return syncedLyricsLines;
       }
       if (!isSynced) {
-        return unsyncedLyrics.map((line, index) => {
-          return <LyricLine key={index} index={index} lyric={line} />;
+        return parsedLyrics.map((line, index) => {
+          return (
+            <LyricLine
+              key={index}
+              index={index}
+              lyric={line.originalText}
+              translatedLyricLines={line.translatedTexts}
+              convertedLyric={line.romanizedText}
+            />
+          );
         });
       }
     }
     return [];
   }, [lyrics]);
 
-  const lyricsSource = React.useMemo(() => {
+  const lyricsSource = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {
-      const { source, copyright, link } = lyrics;
+      const { source, link } = lyrics;
 
       return (
         <LyricsMetadata
           source={source}
-          copyright={copyright}
+          copyright={lyrics.lyrics.copyright}
           link={link}
           className="!items-start !text-left"
         />
@@ -114,14 +159,14 @@ const LyricsContainer = (props: Props) => {
         <div className="flex h-full w-full flex-col justify-center text-2xl text-font-color-highlight opacity-50">
           <span className="material-icons-round-outlined mb-2 text-5xl">brightness_alert</span>
           {t('lyricsPage.noSyncedLyrics')}
-          <p className="mt-4 text-sm">{t('lyricsPage.noSyncedLyricsDescription')}</p>
+          <p className="mt-4 text-base">{t('lyricsPage.noSyncedLyricsDescription')}</p>
         </div>
       )}
       {isLyricsVisible && lyrics === undefined && (
         <div className="flex h-full w-full flex-col justify-center text-2xl text-font-color-highlight opacity-50">
           <span className="material-icons-round-outlined mb-2 text-5xl">brightness_alert</span>
           <p>{t('lyricsPage.noLyrics')}</p>
-          <p className="mt-4 text-sm">{t('lyricsPage.noLyricsDescription')}</p>
+          <p className="mt-4 text-base">{t('lyricsPage.noLyricsDescription')}</p>
         </div>
       )}
     </div>

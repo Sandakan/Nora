@@ -1,6 +1,8 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { isAnErrorWithCode } from './isAnErrorWithCode';
+import isPathADir from './isPathADir';
+import logger from '../logger';
 
 const getDirSize = async (dir: string) => {
   try {
@@ -10,13 +12,13 @@ const getDirSize = async (dir: string) => {
       try {
         const filepath = path.join(dir, file.name);
 
-        if (file.isDirectory()) return getDirSize(filepath);
+        if (isPathADir(file)) return getDirSize(filepath);
         if (file.isFile()) {
           const { size } = await fs.stat(filepath);
           return size;
         }
       } catch (error) {
-        console.log('Error occurred when trying to calculate dir size of a directory.');
+        logger.error('Failed to calculate dir size of a directory.');
       }
       return 0;
     });
@@ -28,9 +30,9 @@ const getDirSize = async (dir: string) => {
     return reducedSizes;
   } catch (error) {
     if (isAnErrorWithCode(error) && error.code === 'ENOENT') return 0;
-    console.log('Error occurred when resolving promise to calculate dir size of a directory.');
+    logger.error('Failed to resolving promise to calculate dir size of a directory.');
+    return 0;
   }
-  return 0;
 };
 
 export default getDirSize;

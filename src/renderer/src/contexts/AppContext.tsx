@@ -1,5 +1,4 @@
-/* eslint-disable import/prefer-default-export */
-import { ReactNode, createContext } from 'react';
+import { type ReactNode, createContext } from 'react';
 
 export interface AppStateContextType {
   // THEME
@@ -19,7 +18,7 @@ export interface AppStateContextType {
   // CURRENTLY ACTVIE PAGE AND NAVIGATION HISTORY
   currentlyActivePage: {
     pageTitle: PageTitles;
-    data?: any;
+    data?: unknown;
   };
   pageHistoryIndex: number;
   noOfPagesInHistory: number;

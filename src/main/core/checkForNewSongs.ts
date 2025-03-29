@@ -1,7 +1,6 @@
-import path from 'path';
 import checkFolderForUnknownModifications from '../fs/checkFolderForUnknownContentModifications';
 import { getSongsData, getUserData } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 import { getAllFoldersFromFolderStructures } from '../fs/parseFolderStructuresForSongPaths';
 
 const checkForNewSongs = async () => {
@@ -13,25 +12,19 @@ const checkForNewSongs = async () => {
   if (Array.isArray(musicFolders) && Array.isArray(songs)) {
     for (const folder of folders) {
       try {
-        // eslint-disable-next-line no-await-in-loop
         await checkFolderForUnknownModifications(folder.path);
       } catch (error) {
-        log(
-          `Error occurred when trying to check for unknown modifications of '${path.basename(
-            folder.path
-          )}'.`,
-          { error },
-          'ERROR'
-        );
+        logger.error(`Failed to check for unknown modifications of a path.`, {
+          error,
+          path: folder.path
+        });
       }
     }
     return;
   }
-  log(
-    `ERROR OCCURRED WHEN TRYING TO READ MUSIC FOLDERS ARRAY IN USER DATA. IT WAS POSSIBLY EMPTY.`,
-    undefined,
-    'ERROR'
-  );
+  logger.error(`Failed to read music folders array in user data. it was possibly empty.`, {
+    musicFolders
+  });
 };
 
 export default checkForNewSongs;

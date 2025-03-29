@@ -2,7 +2,77 @@
 
 > [!TIP]
 >
-> ### The latest version, **( v3.0.0-stable )** contains a lot of new features and improvements. As always expect some bugs in the app.
+> ### The latest version, **( v3.1.0-stable )** contains a lot of new features and improvements. As always expect some bugs in the app.
+
+<br>
+
+![Nora v3.1.0-stable version artwork](resources/other/release%20artworks/whats-new-v3.1.0-stable.webp)
+
+<br>
+
+- ### **v3.1.0-stable - ( 29<sup>th</sup> of March 2025 )**
+
+- ### 🎉 New Features and Updates
+  - Added experimental playback support for m4a and opus songs. Fixes [#247](https://github.com/Sandakan/Nora/issues/247) [#242](https://github.com/Sandakan/Nora/issues/242).
+  - Added support for fetching lyrics from LRCLIB. Fixes [#252](https://github.com/Sandakan/Nora/issues/252).
+  - Added Vietnamese translation. Thanks @ElectroHeavenVN.
+  - Added full translation support for lyrics.
+  - Original lyric will now be shown along with the translated lyric.
+  - Added support for reading LRC files without the relevant song extension.
+  - Added support for symbolic links in file paths. Thanks @Brunight.
+  - Configured to build Nora in the rpm package. Fixes [#261](https://github.com/Sandakan/Nora/issues/261).
+  - Configured to build Nora for arm systems. Fixes [#268](https://github.com/Sandakan/Nora/issues/268).
+  - Added support for copying lyrics lines. Fixes [#253](https://github.com/Sandakan/Nora/issues/253).
+  - Added a blurred background for the full and mini player.
+  - Added a `how to use` prompt when visiting the lyrics editor for the first time.
+  - Added a new shortcut to open the shortcuts prompt
+  - Added skip lyrics lines functionality to the mini and full-screen player
+  - Added volume control to full-screen player.
+  - Added support for lyrics romanization for supported languages. Thanks @ElectroHeavenVN.
+- ### 🔨 Fixes and Improvements
+
+  - Fixed a bug where the correct lyrics line won't scroll to the center of the screen if the song is paused.
+  - Fixed a bug where items in ArtistPage, AlbumPage, PlaylistPage, and GenrePage are not centered in their grid cells.
+  - Fixed a bug where Discord Presence doesn't update as the player state changes. Fixes [#244](https://github.com/Sandakan/Nora/issues/244).
+  - Fixed a bug where the sidebar shows a dynamic theme color in dark mode even though dynamic themes are disabled.
+  - Fixed a bug where some views show light mode even though the dark mode is selected.
+  - Fixed a bug where some buttons in the About section of the Settings page are misaligned.
+  - Fixed a bug where non-library songs were not showing in Last.FM.
+  - Fixed localization issue in LyricsPage title, not allowing changing lyrics offline/online status.
+  - Fixed a bug where lyric metadata are lost when saving lyrics from lrclib to lrc files.
+  - Fixed a bug where the first metadata line in LRC lyrics is considered a lyric line.
+  - Fixed a bug where the app starts with the white splash even though the app is in dark mode. Fixes [#272](https://github.com/Sandakan/Nora/issues/272).
+  - Updated hyperlinks always to be underlined.
+  - Fixed lyrics that were not updated on LyricsPage right after modifying them in LyricsEditingPage.
+  - Fixed lyrics lines in LyricsEditingPage don't follow dynamic theme colors.
+  - Fixed app name showing "Electron" instead of Nora. Fixes [#288](https://github.com/Sandakan/Nora/issues/288).
+  - Removed full-screen player that starts with lyrics showing.
+  - Updated discord-rich-presence to display the current song position. Thanks @ElectroHeavenVN.
+  - Fixed song filenames cut off at periods. Fixes [#308](https://github.com/Sandakan/Nora/issues/308).
+  - Added a fix for file names with special characters that cannot be played in Nora player. Fixes [#323](https://github.com/Sandakan/Nora/issues/323).
+  - Set true to disable background artworks as default to improve app accessibility and to maintain text contrast.
+  - Update font-family stack in styles.css for improved typography consistency.
+  - Added an advanced settings section with an experimental setting to toggle saving verbose logs.
+  - Fixed translated lyrics do not show their original lyric above them.
+  - Added a fix for image alignment issues. Fixes [#307](https://github.com/Sandakan/Nora/issues/307).
+  - Added a fix for the app description shown when Nora is viewed in Task Manager. Fixes [#333](https://github.com/Sandakan/Nora/issues/333).
+  - Fixed the like button not working in the mini-player. Fixes [#341](https://github.com/Sandakan/Nora/issues/341).
+  - Fixed incorrect song ordering in playlists. Fixes [#342](https://github.com/Sandakan/Nora/issues/342).
+  - Fixed the shuffle button not working and some shuffling issues. Fixes [#343](https://github.com/Sandakan/Nora/issues/343).
+
+- ### 🚀 Development updates
+
+  - Migrated to [@tanstack/store](https://tanstack.com/store/latest) for efficient app state management reducing unnecessary re-renders and resource usage.
+  - Nora was fully converted to an ESM-packaged app.
+  - Fixed some localization errors in the en.json file.
+  - Updated the build workflow to fix a bug for the Nora app that is missing sharp dependencies in Linux environments.
+  - Updated app dependencies.
+
+- ### 🐜 Known Issues and Bugs
+  - Artist names are split when the name has a comma. [#321](https://github.com/Sandakan/Nora/issues/321).
+  - Bigger song libraries make the interface unresponsive and halt the song parsing process. [#313](https://github.com/Sandakan/Nora/issues/313).
+
+<br>
 
 <br>
 

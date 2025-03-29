@@ -1,27 +1,31 @@
-import React, { ReactNode } from 'react';
+import { type ReactNode, useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Img from '../../Img';
 import SecondaryContainer from '../../SecondaryContainer';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { AppContext } from '../../../contexts/AppContext';
 import { MostRelevantResult } from '../MostRelevantResult';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = { searchResults: SearchResult };
 
 const MostRelevantSearchResultsContainer = (props: Props) => {
   const { searchResults } = props;
-  const { currentSongData, queue } = React.useContext(AppContext);
+
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+
   const { t } = useTranslation();
 
   const { playSong, changeCurrentActivePage, updateQueueData, createQueue, addNewNotifications } =
-    React.useContext(AppUpdateContext);
+    useContext(AppUpdateContext);
 
   const MostRelevantResults: ReactNode[] = [];
 
-  const [isOverScrolling, setIsOverScrolling] = React.useState(true);
-  const mostRelevantResultContainerRef = React.useRef<HTMLDivElement>(null);
+  const [isOverScrolling, setIsOverScrolling] = useState(true);
+  const mostRelevantResultContainerRef = useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const { albums, artists, genres, playlists, songs } = searchResults;
     const totalResults =
       albums.length + artists.length + genres.length + playlists.length + songs.length;
@@ -80,7 +84,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
               addNewNotifications([
                 {
                   id: `${firstResult.title}PlayNext`,
-                  delay: 5000,
+                  duration: 5000,
                   content: (
                     <span>
                       {t('notifications.playingNext', {
@@ -102,7 +106,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
                 [
                   {
                     id: `${firstResult.title}AddedToQueue`,
-                    delay: 5000,
+                    duration: 5000,
                     content: <span>{t('notifications.addedToQueue', { count: 1 })}</span>,
                     icon: (
                       <Img
@@ -118,7 +122,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
             }
           },
           {
-            label: t('song.revealInFileExplorer'),
+            label: t('song.showInFileExplorer'),
             class: 'reveal-file-explorer',
             iconName: 'folder_open',
             handlerFunction: () =>
@@ -198,7 +202,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
               addNewNotifications([
                 {
                   id: `${firstResult.name}AddedToQueue`,
-                  delay: 5000,
+                  duration: 5000,
                   content: (
                     <span>
                       {t('notifications.addedToQueue', {
@@ -266,7 +270,7 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
               addNewNotifications([
                 {
                   id: 'addedToQueue',
-                  delay: 5000,
+                  duration: 5000,
                   content: (
                     <span>
                       {t('notifications.addedToQueue', {

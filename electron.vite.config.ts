@@ -1,21 +1,34 @@
-// import { resolve } from 'path';
-import { defineConfig, externalizeDepsPlugin } from 'electron-vite';
-import react from '@vitejs/plugin-react';
+/**
+ * @type {import('electron-vite').UserConfig}
+ */
+import { resolve } from 'path';
+import { defineConfig, externalizeDepsPlugin, swcPlugin } from 'electron-vite';
+import react from '@vitejs/plugin-react-swc';
 
 export default defineConfig({
   main: {
     build: {
-      rollupOptions: { input: '/src/main/main.ts' }
+      sourcemap: true,
+      rollupOptions: { input: '/src/main/main.ts', external: ['sharp'] }
     },
-    plugins: [externalizeDepsPlugin()]
+    plugins: [externalizeDepsPlugin(), swcPlugin()]
   },
   preload: {
-    plugins: [externalizeDepsPlugin()]
+    plugins: [externalizeDepsPlugin()],
+
+    build: {
+      sourcemap: true,
+      rollupOptions: { output: { format: 'cjs', entryFileNames: '[name].mjs' } }
+    }
   },
   renderer: {
+    build: {
+      sourcemap: true
+    },
     resolve: {
       alias: {
-        // '@renderer': resolve('src/renderer/src')
+        '@renderer': resolve(import.meta.dirname, './src/renderer/src'),
+        '@types': resolve(import.meta.dirname, './src/@types')
       }
     },
     plugins: [react()]

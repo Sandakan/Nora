@@ -1,15 +1,16 @@
-import React, { ReactNode } from 'react';
+import { type ReactNode, useContext, useEffect, useMemo, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../../Button';
 import Dropdown from '../../Dropdown';
-import { AppContext } from '../../../contexts/AppContext';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import hasDataChanged from '../../../utils/hasDataChanged';
 import { equalizerBandHertzData, equalizerPresetsData } from '../../../other/equalizerData';
-import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '../../../utils/localStorage';
 import i18n from '../../../i18n';
 
 import EqualierBand from './EqualierBand';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
+import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '@renderer/other/appReducer';
 
 const presets: EqualizerPresetDropdownOptions[] = equalizerPresetsData.map((presetData) => {
   return {
@@ -54,25 +55,26 @@ const getPresetName = (equalizer: Equalizer): string => {
 };
 
 const EqualizerSettings = () => {
-  const { equalizerOptions } = React.useContext(AppContext);
-  const { updateEqualizerOptions } = React.useContext(AppUpdateContext);
+  const equalizerOptions = useStore(store, (state) => state.localStorage.equalizerPreset);
+
+  const { updateEqualizerOptions } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [content, dispatch] = React.useReducer(
+  const [content, dispatch] = useReducer(
     reducer,
     equalizerOptions || LOCAL_STORAGE_DEFAULT_TEMPLATE.equalizerPreset
   );
 
-  const [selectedPreset, setSelectedPreset] = React.useState<string>('flat');
+  const [selectedPreset, setSelectedPreset] = useState<string>('flat');
 
-  const isTheDefaultPreset = React.useMemo(() => selectedPreset === 'flat', [selectedPreset]);
+  const isTheDefaultPreset = useMemo(() => selectedPreset === 'flat', [selectedPreset]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     updateEqualizerOptions(content);
     setSelectedPreset(getPresetName(content));
   }, [content, updateEqualizerOptions]);
 
-  const equalizerBands = React.useMemo(() => {
+  const equalizerBands = useMemo(() => {
     const bands: ReactNode[] = [];
 
     for (const [filterName, filterValue] of Object.entries(content)) {

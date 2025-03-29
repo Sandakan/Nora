@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           check-latest: true
@@ -32,5 +32,7 @@ jobs:
       - name: Run linters
         uses: wearerequired/lint-action@v2
         with:
-          eslint: true
-          # prettier: true
+          # TODO Disabled until eslint v9 is supported
+          # https://github.com/wearerequired/lint-action/issues/788
+          eslint: false
+          prettier: false

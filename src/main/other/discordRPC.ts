@@ -1,51 +1,38 @@
-import discordRPC from 'discord-rpc-revamp';
 import { getUserData } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
+import { Initialize, setDiscordRPC } from './discord';
 
-let client: discordRPC.Client;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let dataQueue: any[] = [];
 
-export const initializeDiscordRPC = async () => {
-  try {
-    if (client) return { initialized: true };
-
-    // eslint-disable-next-line prefer-destructuring
-    const DISCORD_CLIENT_ID = import.meta.env.MAIN_VITE_DISCORD_CLIENT_ID;
-    if (!DISCORD_CLIENT_ID) throw new Error('Discord Client ID not found.');
-
-    const rpcClient = new discordRPC.Client();
-    await rpcClient.connect({ clientId: DISCORD_CLIENT_ID });
-
-    log(`Discord Rich Presence initialization successful.`);
-
-    client = rpcClient;
-
-    return { initialized: true };
-  } catch (error) {
-    log(`Failed to initialize Discord Rich Presence.`, { error });
-    return { initialized: false };
-  }
-};
-
-export const setDiscordRpcActivity = async (options: DiscordRpcActivityOptions) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const setDiscordRpcActivity = (data: any) => {
   try {
     const userData = getUserData();
     const { enableDiscordRPC } = userData.preferences;
 
     if (!enableDiscordRPC)
-      return log('Discord Rich Presence skipped.', {
+      return logger.debug('Discord Rich Presence skipped.', {
         reason: { enableDiscordRPC }
       });
-
-    const { initialized } = await initializeDiscordRPC();
-
-    if (initialized) {
-      await client.setActivity({ ...options });
-      return log('Discord rich presence activity accepted.');
+    Initialize();
+    if (dataQueue.length == 0) {
+      setDiscordRPC(data);
+      setTimeout(() => {
+        if (dataQueue.length > 1) {
+          logger.debug('Send last activity in the queue.');
+          setDiscordRPC(dataQueue.pop());
+        }
+        logger.debug('Clear activity queue.');
+        dataQueue = [];
+      }, 3000);
+      logger.debug('Discord rich presence activity accepted.');
     }
-    throw new Error('Discord Rich Presence initialization failed');
+    dataQueue.push(data);
+    return logger.debug('Pushed activity to queue.');
   } catch (error) {
-    return log('Failed to set discord rich presence activity.', { error });
+    logger.error('Failed to set discord rich presence activity.', { error });
   }
 };
 
-export const clearDiscordRpcActivity = async () => client?.clearActivity();
+export const clearDiscordRpcActivity = async () => setDiscordRPC(null);

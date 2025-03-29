@@ -1,8 +1,5 @@
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable import/prefer-default-export */
-import React from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import storage from '../../utils/localStorage';
@@ -10,12 +7,14 @@ import i18n from '../../i18n';
 
 import { Album } from './Album';
 import MainContainer from '../MainContainer';
-import Dropdown, { DropdownOption } from '../Dropdown';
+import Dropdown, { type DropdownOption } from '../Dropdown';
 import Img from '../Img';
 import Button from '../Button';
 
 import NoAlbumsImage from '../../assets/images/svg/Easter bunny_Monochromatic.svg';
 import VirtualizedGrid from '../VirtualizedGrid';
+import { store } from '@renderer/store';
+import { useStore } from '@tanstack/react-store';
 
 const albumSortOptions: DropdownOption<AlbumSortTypes>[] = [
   { label: i18n.t('sortTypes.aToZ'), value: 'aToZ' },
@@ -33,22 +32,23 @@ const MIN_ITEM_WIDTH = 220;
 const MIN_ITEM_HEIGHT = 280;
 
 const AlbumsPage = () => {
-  const {
-    currentlyActivePage,
-    localStorageData,
-    isMultipleSelectionEnabled,
-    multipleSelectionsData
-  } = React.useContext(AppContext);
-  const { updateCurrentlyActivePageData, toggleMultipleSelections } =
-    React.useContext(AppUpdateContext);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const sortingStates = useStore(store, (state) => state.localStorage.sortingStates);
+
+  const { updateCurrentlyActivePageData, toggleMultipleSelections } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [albumsData, setAlbumsData] = React.useState([] as Album[]);
-  const [sortingOrder, setSortingOrder] = React.useState<AlbumSortTypes>(
-    currentlyActivePage?.data?.sortingOrder || localStorageData?.sortingStates?.albumsPage || 'aToZ'
+  const [albumsData, setAlbumsData] = useState([] as Album[]);
+  const [sortingOrder, setSortingOrder] = useState<AlbumSortTypes>(
+    currentlyActivePage?.data?.sortingOrder || sortingStates?.albumsPage || 'aToZ'
   );
 
-  const fetchAlbumData = React.useCallback(
+  const fetchAlbumData = useCallback(
     () =>
       window.api.albumsData.getAlbumData([], sortingOrder).then((res) => {
         if (res && Array.isArray(res)) {
@@ -60,7 +60,7 @@ const AlbumsPage = () => {
     [sortingOrder]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchAlbumData();
     const manageDataUpdatesInAlbumsPage = (e: Event) => {
       if ('detail' in e) {
@@ -78,7 +78,7 @@ const AlbumsPage = () => {
     };
   }, [fetchAlbumData]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     storage.sortingStates.setSortingStates('albumsPage', sortingOrder);
   }, [sortingOrder]);
 
@@ -147,7 +147,7 @@ const AlbumsPage = () => {
               data={albumsData}
               fixedItemWidth={MIN_ITEM_WIDTH}
               fixedItemHeight={MIN_ITEM_HEIGHT}
-              scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
+              // scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
               itemContent={(index, item) => {
                 return (
                   <Album

@@ -1,7 +1,7 @@
-import { SaveDialogOptions } from 'electron';
+import type { SaveDialogOptions } from 'electron';
 import sharp from 'sharp';
 
-import log from '../log';
+import logger from '../logger';
 import { sendMessageToRenderer, showSaveDialog } from '../main';
 import isPathAWebURL from '../utils/isPathAWebUrl';
 import { fetchArtworkBufferFromURL, generateLocalArtworkBuffer } from '../updateSongId3Tags';
@@ -51,11 +51,11 @@ const saveArtworkToSystem = async (artworkPath: string, saveName?: string) => {
 
     return undefined;
   } catch (error) {
-    log(
-      'Error occurred when trying to fulfil the user request to save a song artwork.',
-      { error },
-      'ERROR'
-    );
+    logger.debug('Failed to save a song artwork.', {
+      error,
+      artwork,
+      saveName
+    });
     sendMessageToRenderer({ messageCode: 'ARTWORK_SAVE_FAILED' });
     return undefined;
   }

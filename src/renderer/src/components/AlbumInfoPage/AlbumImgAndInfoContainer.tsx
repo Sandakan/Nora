@@ -1,4 +1,4 @@
-import React from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
 import Img from '../Img';
@@ -11,14 +11,14 @@ const AlbumImgAndInfoContainer = (props: Props) => {
 
   const { albumData, songsData } = props;
 
-  const albumDuration = React.useMemo(
+  const albumDuration = useMemo(
     () =>
       calculateTimeFromSeconds(songsData.reduce((prev, current) => prev + current.duration, 0))
         .timeString,
     [songsData]
   );
 
-  const albumArtistComponents = React.useMemo(() => {
+  const albumArtistComponents = useMemo(() => {
     const artists = albumData?.artists;
     if (Array.isArray(artists) && artists.length > 0)
       return artists
@@ -41,7 +41,6 @@ const AlbumImgAndInfoContainer = (props: Props) => {
   }, [albumData?.artists, t]);
 
   return (
-    // eslint-disable-next-line react/jsx-no-useless-fragment
     <>
       {albumData && (
         <div className="album-img-and-info-container flex flex-row items-center pb-6">

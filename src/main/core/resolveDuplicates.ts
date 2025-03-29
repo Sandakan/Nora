@@ -1,5 +1,3 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable import/prefer-default-export */
 import updateSongId3Tags from '../updateSongId3Tags';
 import {
   getAlbumsData,

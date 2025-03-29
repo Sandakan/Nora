@@ -1,5 +1,4 @@
-/* eslint-disable no-unused-vars */
-import { createContext, ReactNode } from 'react';
+import { createContext, type ReactNode } from 'react';
 
 export interface AppUpdateContextType {
   updateUserData: (callback: (prevState: UserData) => UserData | Promise<UserData> | void) => void;
@@ -48,7 +47,7 @@ export interface AppUpdateContextType {
     queue?: string[],
     isShuffleQueue?: boolean,
     playCurrentSongIndex?: boolean,
-    clearPreviousQueueData?: boolean
+    restoreAndClearPreviousQueue?: boolean
   ) => void;
   changeQueueCurrentSongIndex: (currentSongIndex: number) => void;
   updatePlayerType: (type: PlayerTypes) => void;

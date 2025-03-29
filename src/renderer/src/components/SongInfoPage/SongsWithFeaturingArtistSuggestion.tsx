@@ -1,13 +1,13 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-import React from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import storage from '../../utils/localStorage';
 
 import Button from '../Button';
 import Checkbox from '../Checkbox';
-import { separateArtistsRegex } from '../ArtistInfoPage/SeparateArtistsSuggestion';
+import splitFeaturingArtists from '../../utils/splitFeaturingArtists';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   songTitle?: string;
@@ -19,35 +19,37 @@ type Props = {
 const featArtistsRegex = /\(? ?feat.? (?<featArtists>[^\n\t()]+)\)?/gm;
 
 const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
-  const { bodyBackgroundImage, currentSongData } = React.useContext(AppContext);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+
   const { addNewNotifications, changeCurrentActivePage, updateCurrentSongData } =
-    React.useContext(AppUpdateContext);
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { songTitle = '', songId = '', artistNames, path, updateSongInfo } = props;
 
-  const [isIgnored, setIsIgnored] = React.useState(false);
-  const [isRemovingFeatInfoFromTitle, setIsRemovingFeatInfoFromTitle] = React.useState(true);
-  const [isMessageVisible, setIsMessageVisible] = React.useState(true);
-  const [separatedFeatArtistsNames, setSeparatedFeatArtistsNames] = React.useState<string[]>([]);
+  const [isIgnored, setIsIgnored] = useState(false);
+  const [isRemovingFeatInfoFromTitle, setIsRemovingFeatInfoFromTitle] = useState(true);
+  const [isMessageVisible, setIsMessageVisible] = useState(true);
+  const [separatedFeatArtistsNames, setSeparatedFeatArtistsNames] = useState<string[]>([]);
 
-  const ignoredSongs = React.useMemo(
+  const ignoredSongs = useMemo(
     () => storage.ignoredSongsWithFeatArtists.getIgnoredSongsWithFeatArtists(),
     []
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isIgnored === false && ignoredSongs.length > 0) setIsIgnored(ignoredSongs.includes(songId));
   }, [songId, ignoredSongs, songTitle, isIgnored]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const featArtistsExec = featArtistsRegex.exec(songTitle);
     featArtistsRegex.lastIndex = 0;
 
     if (featArtistsExec && featArtistsExec.groups?.featArtists) {
       const { featArtists: featArtistsStr } = featArtistsExec.groups;
 
-      const featArtists = featArtistsStr.split(separateArtistsRegex);
+      const featArtists = splitFeaturingArtists(featArtistsStr);
       const filteredFeatArtists = featArtists.filter((featArtistName) => {
         const isArtistAvailable = artistNames.some(
           (name) => name.toLowerCase().trim() === featArtistName.toLowerCase().trim()
@@ -61,7 +63,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
     } else setSeparatedFeatArtistsNames([]);
   }, [artistNames, songTitle]);
 
-  const artistComponents = React.useMemo(() => {
+  const artistComponents = useMemo(() => {
     if (separatedFeatArtistsNames.length > 0) {
       const artists = separatedFeatArtistsNames.map((artist, i, arr) => {
         return (
@@ -81,7 +83,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
     return [];
   }, [separatedFeatArtistsNames, t]);
 
-  const addFeatArtistsToSong = React.useCallback(
+  const addFeatArtistsToSong = useCallback(
     (setIsDisabled: (_state: boolean) => void, setIsPending: (_state: boolean) => void) => {
       setIsDisabled(true);
       setIsPending(true);
@@ -115,7 +117,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
             {
               content: t('common.featArtistSuggestionResolved'),
               iconName: 'done',
-              delay: 5000,
+              duration: 5000,
               id: 'FeatArtistsSuggestion'
             }
           ]);
@@ -138,7 +140,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
     ]
   );
 
-  const ignoreSuggestion = React.useCallback(() => {
+  const ignoreSuggestion = useCallback(() => {
     storage.ignoredSongsWithFeatArtists.setIgnoredSongsWithFeatArtists([songId]);
 
     setIsIgnored(true);
@@ -147,7 +149,7 @@ const SongsWithFeaturingArtistsSuggestion = (props: Props) => {
         id: 'suggestionIgnored',
         iconName: 'do_not_disturb_on',
         iconClassName: 'material-icons-round-outlined',
-        delay: 5000,
+        duration: 5000,
         content: t('notifications.suggestionIgnored')
       }
     ]);

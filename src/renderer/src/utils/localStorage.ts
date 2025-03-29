@@ -1,79 +1,12 @@
 import localStorageMigrationData from '../other/localStorageMigrations';
-import debounce from './debounce';
 
 import { version } from '../../../../package.json';
 import log from './log';
 import addMissingPropsToAnObject from './addMissingPropsToAnObject';
 import isLatestVersion from './isLatestVersion';
+import { dispatch, store } from '@renderer/store';
+import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '@renderer/other/appReducer';
 // import isLatestVersion from './isLatestVersion';
-
-export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
-  preferences: {
-    seekbarScrollInterval: 5,
-    isSongIndexingEnabled: false,
-    disableBackgroundArtworks: false,
-    doNotShowBlacklistSongConfirm: false,
-    doNotVerifyWhenOpeningLinks: false,
-    isReducedMotion: false,
-    showArtistArtworkNearSongControls: false,
-    showSongRemainingTime: false,
-    noUpdateNotificationForNewUpdate: '',
-    defaultPageOnStartUp: 'Home',
-    enableArtworkFromSongCovers: false,
-    shuffleArtworkFromSongCovers: false,
-    removeAnimationsOnBatteryPower: false,
-    isPredictiveSearchEnabled: true,
-    lyricsAutomaticallySaveState: 'NONE',
-    showTrackNumberAsSongIndex: true,
-    allowToPreventScreenSleeping: true,
-    enableImageBasedDynamicThemes: false
-  },
-  playback: {
-    currentSong: {
-      songId: '',
-      stoppedPosition: 0
-    },
-    isRepeating: 'false',
-    isShuffling: false,
-    volume: {
-      isMuted: false,
-      value: 50
-    },
-    playbackRate: 1.0
-  },
-  queue: { currentSongIndex: null, queue: [], queueType: 'songs' },
-  ignoredSeparateArtists: [],
-  ignoredSongsWithFeatArtists: [],
-  ignoredDuplicates: {
-    albums: [],
-    artists: [],
-    genres: []
-  },
-  sortingStates: {
-    albumsPage: 'aToZ',
-    artistsPage: 'aToZ',
-    genresPage: 'aToZ',
-    playlistsPage: 'aToZ',
-    songsPage: 'aToZ',
-    musicFoldersPage: 'aToZ'
-  },
-  equalizerPreset: {
-    thirtyTwoHertzFilter: 0,
-    sixtyFourHertzFilter: 0,
-    hundredTwentyFiveHertzFilter: 0,
-    twoHundredFiftyHertzFilter: 0,
-    fiveHundredHertzFilter: 0,
-    thousandHertzFilter: 0,
-    twoThousandHertzFilter: 0,
-    fourThousandHertzFilter: 0,
-    eightThousandHertzFilter: 0,
-    sixteenThousandHertzFilter: 0
-  },
-  lyricsEditorSettings: {
-    offset: 0,
-    editNextAndCurrentStartAndEndTagsAutomatically: true
-  }
-};
 
 const resetLocalStorage = () => {
   try {
@@ -82,12 +15,9 @@ const resetLocalStorage = () => {
     localStorage.setItem('version', version);
     localStorage.setItem('localStorage', template);
 
-    debounce(() => {
-      const customEvent = new CustomEvent('localStorage');
-      document.dispatchEvent(customEvent);
-    }, 100);
+    dispatch({ type: 'UPDATE_LOCAL_STORAGE', data: LOCAL_STORAGE_DEFAULT_TEMPLATE });
   } catch (error) {
-    console.error(error);
+    log('An error occurred while resetting the local storage.', { error }, 'ERROR');
   }
 };
 
@@ -121,22 +51,12 @@ const migrateLocalStorage = (migrationData: MigrationData, storage: LocalStorage
 };
 
 const repairInvalidLocalStorage = (isASupportedStoreVersion: boolean, store: string | null) => {
-  try {
-    localStorage.setItem('version', version);
-    localStorage.setItem('localStorage', JSON.stringify(LOCAL_STORAGE_DEFAULT_TEMPLATE));
-    return log(
-      'Inavalid or outdated local storage found. Resetting the local storage to default properties.',
-      { isASupportedStoreVersion, store },
-      'WARN'
-    );
-  } catch (error) {
-    log(
-      'Error occurred when trying to save default templated for local storage.',
-      { error },
-      'WARN'
-    );
-    throw error;
-  }
+  log(
+    'Inavalid or outdated local storage found. Resetting the local storage to default properties.',
+    { isASupportedStoreVersion, store },
+    'WARN'
+  );
+  return resetLocalStorage();
 };
 
 const checkLocalStorage = () => {
@@ -166,7 +86,7 @@ const checkLocalStorage = () => {
   return console.log('local storage check successful.');
 };
 
-const getAllItems = (): LocalStorage => {
+const getLocalStorage = (): LocalStorage => {
   const storageString = localStorage.getItem('localStorage');
   if (storageString) {
     try {
@@ -179,15 +99,23 @@ const getAllItems = (): LocalStorage => {
   return LOCAL_STORAGE_DEFAULT_TEMPLATE;
 };
 
-const setAllItems = (storage: LocalStorage) => {
+const setLocalStorage = (storage: LocalStorage) => {
   try {
     const updatedStorageString = JSON.stringify(storage);
     localStorage.setItem('localStorage', updatedStorageString);
+  } catch (error) {
+    console.error(error);
+  }
+};
 
-    debounce(() => {
-      const customEvent = new CustomEvent('localStorage');
-      document.dispatchEvent(customEvent);
-    }, 100);
+const getAllItems = (): LocalStorage => {
+  return store.state.localStorage;
+};
+
+const setAllItems = (storage: LocalStorage) => {
+  try {
+    setLocalStorage(storage);
+    dispatch({ type: 'UPDATE_LOCAL_STORAGE', data: { ...storage } });
   } catch (error) {
     console.error(error);
   }
@@ -235,7 +163,7 @@ const setItem = <
   type: Type,
   data: Data
 ) => {
-  const storage = getAllItems();
+  const storage = { ...getAllItems() };
   try {
     if (
       (itemType in storage && type in storage[itemType]) ||
@@ -277,7 +205,10 @@ const getItem = <ItemType extends keyof LocalStorage, Type extends keyof LocalSt
 const setPreferences = <Type extends keyof Preferences, Data extends Preferences[Type]>(
   type: Type,
   data: Data
-) => setItem('preferences', type, data);
+) => {
+  const preferences = { ...getFullItem('preferences'), [type]: data };
+  dispatch({ type: 'UPDATE_LOCAL_STORAGE_PREFERENCES', data: preferences });
+};
 
 const getPreferences = <Type extends keyof Preferences>(type: Type) => getItem('preferences', type);
 
@@ -414,6 +345,8 @@ export default {
   equalizerPreset: { setEqualizerPreset, getEqualizerPreset },
   lyricsEditorSettings: { setLyricsEditorSettings, getLyricsEditorSettings },
   checkLocalStorage,
+  getLocalStorage,
+  setLocalStorage,
   resetLocalStorage,
   getAllItems,
   setAllItems,

@@ -1,8 +1,6 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-import React from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { AppContext } from '../../contexts/AppContext';
 import useNetworkConnectivity from '../../hooks/useNetworkConnectivity';
 
 import isLatestVersion from '../../utils/isLatestVersion';
@@ -12,19 +10,22 @@ import Version from './Version';
 import Checkbox from '../Checkbox';
 import Img from '../Img';
 
-import packageFile from '../../../../../package.json';
+import { version, releaseNotes as currentReleaseNotes, urls } from '../../../../../package.json';
 import localReleseNotes from '../../../../../release-notes.json';
 import ReleaseNotesAppUpdateInfo from './ReleaseNotesAppUpdateInfo';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const ReleaseNotesPrompt = () => {
-  const { appUpdatesState, localStorageData } = React.useContext(AppContext);
-  const { updateAppUpdatesState } = React.useContext(AppUpdateContext);
+  const appUpdatesState = useStore(store, (state) => state.appUpdatesState);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+  const { updateAppUpdatesState } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { isOnline } = useNetworkConnectivity();
-  const [releaseNotes, setReleaseNotes] = React.useState<Changelog>(localReleseNotes as Changelog);
+  const [releaseNotes, setReleaseNotes] = useState<Changelog>(localReleseNotes as Changelog);
 
-  const latestUpdatedInfo = React.useMemo(() => {
+  const latestUpdatedInfo = useMemo(() => {
     const sortedReleaseNotes = releaseNotes.versions.sort((versionA, versionB) => {
       const dateNowOfA = new Date(versionA.releaseDate).getTime();
       const dateNowOfB = new Date(versionB.releaseDate).getTime();
@@ -37,6 +38,7 @@ const ReleaseNotesPrompt = () => {
     const latestVersion = sortedReleaseNotes[0];
 
     // ! / / / / TO BE DEPRECATED CODE / / /
+    // TODO: Will be deprectated in the next major release
     /** @deprecated  */
     if (releaseNotes.latestVersion) {
       latestVersion.artwork ||= releaseNotes.latestVersion.artwork;
@@ -47,25 +49,24 @@ const ReleaseNotesPrompt = () => {
     return latestVersion;
   }, [releaseNotes.latestVersion, releaseNotes.versions]);
 
-  const noNewUpdateInform = React.useMemo(
-    () =>
-      localStorageData?.preferences?.noUpdateNotificationForNewUpdate === latestUpdatedInfo.version,
-    [latestUpdatedInfo.version, localStorageData?.preferences?.noUpdateNotificationForNewUpdate]
+  const noNewUpdateInform = useMemo(
+    () => preferences?.noUpdateNotificationForNewUpdate === latestUpdatedInfo.version,
+    [latestUpdatedInfo.version, preferences?.noUpdateNotificationForNewUpdate]
   );
 
-  const updateNoNewUpdateInform = React.useCallback(
+  const updateNoNewUpdateInform = useCallback(
     (state: boolean) => {
-      const result = state ? latestUpdatedInfo.version : packageFile.version;
+      const result = state ? latestUpdatedInfo.version : version;
       storage.preferences.setPreferences('noUpdateNotificationForNewUpdate', result);
     },
     [latestUpdatedInfo.version]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOnline) {
       updateAppUpdatesState('CHECKING');
 
-      fetch(packageFile.releaseNotes.json)
+      fetch(currentReleaseNotes.json)
         .then((res) => {
           if (res.status === 200) return res.json();
           throw new Error('response status is not 200');
@@ -81,16 +82,16 @@ const ReleaseNotesPrompt = () => {
     } else updateAppUpdatesState('NO_NETWORK_CONNECTION');
   }, [isOnline, updateAppUpdatesState]);
 
-  const isAppLatestVersion = React.useMemo(
-    () => isLatestVersion(latestUpdatedInfo.version, packageFile.version),
+  const isAppLatestVersion = useMemo(
+    () => isLatestVersion(latestUpdatedInfo.version, version),
     [latestUpdatedInfo.version]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOnline) updateAppUpdatesState(isAppLatestVersion ? 'LATEST' : 'OLD');
   }, [isAppLatestVersion, isOnline, updateAppUpdatesState]);
 
-  const appVersionComponents = React.useMemo(
+  const appVersionComponents = useMemo(
     () =>
       releaseNotes.versions.map((version) => (
         <Version
@@ -104,7 +105,7 @@ const ReleaseNotesPrompt = () => {
     [latestUpdatedInfo.version, releaseNotes.versions]
   );
 
-  const latestVersionImportantNotes = React.useMemo(() => {
+  const latestVersionImportantNotes = useMemo(() => {
     if (latestUpdatedInfo.importantNotes) {
       const notes = latestUpdatedInfo.importantNotes.map((note, index) => {
         return (
@@ -149,7 +150,7 @@ const ReleaseNotesPrompt = () => {
             {isOnline && latestUpdatedInfo.artwork && (
               <div className="version-artwork-container mb-4 p-4 empty:mb-0 empty:p-0">
                 <Img
-                  src={`${packageFile.urls.raw_repository_url}master${latestUpdatedInfo.artwork}`}
+                  src={`${urls.raw_repository_url}master${latestUpdatedInfo.artwork}`}
                   fallbackSrc={latestUpdatedInfo.artwork}
                   className="mx-auto rounded-lg"
                   alt=""

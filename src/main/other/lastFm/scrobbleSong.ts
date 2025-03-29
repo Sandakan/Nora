@@ -1,10 +1,8 @@
-/* eslint-disable prefer-destructuring */
-/* eslint-disable no-await-in-loop */
 import { getSongsData, getUserData } from '../../filesystem';
-import log from '../../log';
-import { LastFMScrobblePostResponse, ScrobbleParams } from '../../../@types/last_fm_api';
+import logger from '../../logger';
+import type { LastFMScrobblePostResponse, ScrobbleParams } from '../../../types/last_fm_api';
 import { checkIfConnectedToInternet } from '../../main';
-import { generateApiRequestBodyForLastFMPostRequests } from './generateApiRequestBodyForLastFMPostRequests';
+import generateApiRequestBodyForLastFMPostRequests from './generateApiRequestBodyForLastFMPostRequests';
 import getLastFmAuthData from './getLastFMAuthData';
 
 const scrobbleSong = async (songId: string, startTimeInSecs: number) => {
@@ -48,19 +46,20 @@ const scrobbleSong = async (songId: string, startTimeInSecs: number) => {
           body
         });
 
-        if (res.status === 200) return log(`Scrobbled song ${songId} accepted.`);
+        if (res.status === 200)
+          return logger.debug(`Scrobbled song accepted.`, { songId: song.songId });
 
         const json: LastFMScrobblePostResponse = await res.json();
-        return log('Failed to scrobble song to LastFM', { json }, 'WARN');
+        return logger.warn('Failed to scrobble song to LastFM', { json });
       }
     }
 
-    return log('Scrobble song request ignored', {
+    return logger.debug('Scrobble song request ignored', {
       isScrobblingEnabled,
       isConnectedToInternet
     });
   } catch (error) {
-    return log('Error occurred when scrobbling song data to LastFM.', {
+    return logger.error('Failed to scrobble song data to LastFM.', {
       error
     });
   }

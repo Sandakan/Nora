@@ -1,8 +1,5 @@
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable no-console */
-import React from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 
@@ -12,27 +9,33 @@ import TitleContainer from '../TitleContainer';
 import GenreImgAndInfoContainer from './GenreImgAndInfoContainer';
 import { songSortOptions, songFilterOptions } from '../SongsPage/SongOptions';
 import VirtualizedList from '../VirtualizedList';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const GenreInfoPage = () => {
-  const { currentlyActivePage, queue, localStorageData } = React.useContext(AppContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const {
     createQueue,
     updateQueueData,
     addNewNotifications,
     updateCurrentlyActivePageData,
     playSong
-  } = React.useContext(AppUpdateContext);
+  } = useContext(AppUpdateContext);
+
   const { t } = useTranslation();
 
-  const [genreData, setGenreData] = React.useState<Genre>();
-  const [genreSongs, setGenreSongs] = React.useState<AudioInfo[]>([]);
-  const [sortingOrder, setSortingOrder] = React.useState<SongSortTypes>('aToZ');
-  const [filteringOrder, setFilteringOrder] = React.useState<SongFilterTypes>('notSelected');
+  const [genreData, setGenreData] = useState<Genre>();
+  const [genreSongs, setGenreSongs] = useState<AudioInfo[]>([]);
+  const [sortingOrder, setSortingOrder] = useState<SongSortTypes>('aToZ');
+  const [filteringOrder, setFilteringOrder] = useState<SongFilterTypes>('notSelected');
 
-  const fetchGenresData = React.useCallback(() => {
+  const fetchGenresData = useCallback(() => {
     if (currentlyActivePage.data) {
       window.api.genresData
-        .getGenresData([currentlyActivePage.data.genreId])
+        .getGenresData([currentlyActivePage.data.genreId as string])
         .then((res) => {
           if (res && res.length > 0 && res[0]) setGenreData(res[0]);
           return undefined;
@@ -41,7 +44,7 @@ const GenreInfoPage = () => {
     }
   }, [currentlyActivePage.data]);
 
-  const fetchSongsData = React.useCallback(() => {
+  const fetchSongsData = useCallback(() => {
     if (genreData && genreData.songs && genreData.songs.length > 0) {
       window.api.audioLibraryControls
         .getSongInfo(
@@ -58,7 +61,7 @@ const GenreInfoPage = () => {
     return undefined;
   }, [filteringOrder, genreData, sortingOrder]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchGenresData();
     const manageGenreUpdatesInGenresInfoPage = (e: Event) => {
       if ('detail' in e) {
@@ -75,7 +78,7 @@ const GenreInfoPage = () => {
     };
   }, [fetchGenresData]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchSongsData();
     const manageSongUpdatesInGenreInfoPage = (e: Event) => {
       if ('detail' in e) {
@@ -100,7 +103,7 @@ const GenreInfoPage = () => {
 
   const selectAllHandler = useSelectAllHandler(genreSongs, 'songs', 'songId');
 
-  const handleSongPlayBtnClick = React.useCallback(
+  const handleSongPlayBtnClick = useCallback(
     (currSongId: string) => {
       const queueSongIds = genreSongs
         .filter((song) => !song.isBlacklisted)
@@ -111,7 +114,7 @@ const GenreInfoPage = () => {
     [createQueue, genreData?.genreId, genreSongs, playSong]
   );
 
-  const listItems = React.useMemo(
+  const listItems = useMemo(
     () => [genreData, ...genreSongs].filter((x) => x !== undefined) as (Genre | AudioInfo)[],
     [genreData, genreSongs]
   );
@@ -168,7 +171,7 @@ const GenreInfoPage = () => {
               addNewNotifications([
                 {
                   id: genreData?.genreId || '',
-                  delay: 5000,
+                  duration: 5000,
                   content: t('notifications.addedToQueue', {
                     count: genreSongs.length
                   })
@@ -212,6 +215,7 @@ const GenreInfoPage = () => {
 
       <VirtualizedList
         data={listItems}
+        fixedItemHeight={60}
         scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
         itemContent={(index, item) => {
           if ('songId' in item)
@@ -219,7 +223,7 @@ const GenreInfoPage = () => {
               <Song
                 key={index}
                 index={index}
-                isIndexingSongs={localStorageData?.preferences.isSongIndexingEnabled}
+                isIndexingSongs={preferences?.isSongIndexingEnabled}
                 onPlayClick={handleSongPlayBtnClick}
                 selectAllHandler={selectAllHandler}
                 {...item}

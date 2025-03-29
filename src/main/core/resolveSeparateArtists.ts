@@ -1,6 +1,5 @@
-/* eslint-disable no-await-in-loop */
 import { getArtistArtworkPath } from '../fs/resolveFilePaths';
-import log from '../log';
+import logger from '../logger';
 import updateSongId3Tags from '../updateSongId3Tags';
 import {
   getAlbumsData,
@@ -14,7 +13,6 @@ import { generateRandomId } from '../utils/randomId';
 import { getSelectedArtist } from './resolveDuplicates';
 import sendSongID3Tags from './sendSongId3Tags';
 
-/* eslint-disable import/prefer-default-export */
 export const resolveSeparateArtists = async (
   separateArtistId: string,
   separateArtistNames: string[]
@@ -118,7 +116,10 @@ export const resolveSeparateArtists = async (
     setSongsData(songsData);
     setAlbumsData(albumsData);
 
-    log(`Resolved suggestion to separate artist ${selectedArtist.name}`);
+    logger.debug(`Resolved suggestion to separate artist`, {
+      separateArtistId,
+      separateArtistNames
+    });
   }
   return updatedData;
 };

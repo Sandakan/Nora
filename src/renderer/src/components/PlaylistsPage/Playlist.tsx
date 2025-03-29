@@ -1,28 +1,36 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable import/prefer-default-export */
-import React from 'react';
+
+import { lazy, useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+
 import Img from '../Img';
-import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
-import ConfirmDeletePlaylists from './ConfirmDeletePlaylistsPrompt';
-import DefaultPlaylistCover from '../../assets/images/webp/playlist_cover_default.webp';
 import Button from '../Button';
+import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
+import DefaultPlaylistCover from '../../assets/images/webp/playlist_cover_default.webp';
 import MultipleArtworksCover from './MultipleArtworksCover';
-import RenamePlaylistPrompt from './RenamePlaylistPrompt';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
+
+const ConfirmDeletePlaylistsPrompt = lazy(() => import('./ConfirmDeletePlaylistsPrompt'));
+const RenamePlaylistPrompt = lazy(() => import('./RenamePlaylistPrompt'));
 
 interface PlaylistProp extends Playlist {
-  // eslint-disable-next-line react/no-unused-prop-types
   index: number;
   selectAllHandler?: (_upToId?: string) => void;
 }
 
 export const Playlist = (props: PlaylistProp) => {
-  const { queue, multipleSelectionsData, isMultipleSelectionEnabled, localStorageData } =
-    React.useContext(AppContext);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+
   const {
     updateQueueData,
     updateContextMenuData,
@@ -32,10 +40,10 @@ export const Playlist = (props: PlaylistProp) => {
     toggleMultipleSelections,
     updateMultipleSelections,
     addNewNotifications
-  } = React.useContext(AppUpdateContext);
+  } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const openPlaylistInfoPage = React.useCallback(
+  const openPlaylistInfoPage = useCallback(
     () =>
       changeCurrentActivePage('PlaylistInfo', {
         playlistId: props.playlistId
@@ -43,7 +51,7 @@ export const Playlist = (props: PlaylistProp) => {
     [changeCurrentActivePage, props.playlistId]
   );
 
-  const isAMultipleSelection = React.useMemo(() => {
+  const isAMultipleSelection = useMemo(() => {
     if (!multipleSelectionsData.isEnabled) return false;
     if (multipleSelectionsData.selectionType !== 'playlist') return false;
     if (multipleSelectionsData.multipleSelections.length <= 0) return false;
@@ -56,7 +64,7 @@ export const Playlist = (props: PlaylistProp) => {
     return false;
   }, [multipleSelectionsData, props.playlistId]);
 
-  const playAllSongs = React.useCallback(
+  const playAllSongs = useCallback(
     (isShuffling = false) => {
       window.api.audioLibraryControls
         .getSongInfo(props.songs, undefined, undefined, undefined, true)
@@ -76,7 +84,7 @@ export const Playlist = (props: PlaylistProp) => {
     [createQueue, props.playlistId, props.songs]
   );
 
-  const playAllSongsForMultipleSelections = React.useCallback(
+  const playAllSongsForMultipleSelections = useCallback(
     (isShuffling = false) => {
       const { multipleSelections: playlistIds } = multipleSelectionsData;
       window.api.playlistsData
@@ -99,7 +107,7 @@ export const Playlist = (props: PlaylistProp) => {
             return addNewNotifications([
               {
                 id: `${songIds.length}AddedToQueueFromMultiSelection`,
-                delay: 5000,
+                duration: 5000,
                 content: t(`notifications.addedToQueue`, {
                   count: songIds.length
                 })
@@ -113,7 +121,7 @@ export const Playlist = (props: PlaylistProp) => {
     [addNewNotifications, createQueue, multipleSelectionsData, t]
   );
 
-  const addToQueueForMultipleSelections = React.useCallback(() => {
+  const addToQueueForMultipleSelections = useCallback(() => {
     const { multipleSelections: playlistIds } = multipleSelectionsData;
     window.api.playlistsData
       .getPlaylistData(playlistIds)
@@ -140,7 +148,7 @@ export const Playlist = (props: PlaylistProp) => {
           addNewNotifications([
             {
               id: 'newSongsToQueue',
-              delay: 5000,
+              duration: 5000,
               content: t(`notifications.addedToQueue`, {
                 count: songs.length
               })
@@ -152,7 +160,7 @@ export const Playlist = (props: PlaylistProp) => {
       .catch((err) => console.error(err));
   }, [addNewNotifications, multipleSelectionsData, queue.queue, t, updateQueueData]);
 
-  const contextMenus: ContextMenuItem[] = React.useMemo(() => {
+  const contextMenus: ContextMenuItem[] = useMemo(() => {
     const { multipleSelections: playlistIds } = multipleSelectionsData;
     const isMultipleSelectionsEnabled =
       multipleSelectionsData.selectionType === 'playlist' &&
@@ -191,7 +199,7 @@ export const Playlist = (props: PlaylistProp) => {
             addNewNotifications([
               {
                 id: 'newSongsToQueue',
-                delay: 5000,
+                duration: 5000,
                 content: t(`notifications.addedToQueue`, {
                   count: props.songs.length
                 })
@@ -226,7 +234,7 @@ export const Playlist = (props: PlaylistProp) => {
                 {
                   content: t('playlist.playlistArtworkUpdateSuccess'),
                   icon: <span className="material-icons-round">done</span>,
-                  delay: 5000,
+                  duration: 5000,
                   id: 'PlaylistArtworkUpdateSuccessful'
                 }
               ]);
@@ -295,7 +303,7 @@ export const Playlist = (props: PlaylistProp) => {
         handlerFunction: () => {
           changePromptMenuData(
             true,
-            <ConfirmDeletePlaylists
+            <ConfirmDeletePlaylistsPrompt
               playlistIds={isMultipleSelectionsEnabled ? playlistIds : [props.playlistId]}
               playlistName={props.name}
             />
@@ -325,7 +333,7 @@ export const Playlist = (props: PlaylistProp) => {
     updateQueueData
   ]);
 
-  const contextMenuItemData = React.useMemo(
+  const contextMenuItemData = useMemo(
     (): ContextMenuAdditionalData =>
       isMultipleSelectionEnabled &&
       multipleSelectionsData.selectionType === 'playlist' &&
@@ -355,7 +363,7 @@ export const Playlist = (props: PlaylistProp) => {
 
   return (
     <div
-      className={`playlist group hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50  ${
+      className={`playlist group hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50 ${
         props.playlistId
       } mb-8 mr-12 flex h-fit max-h-52 min-h-[12rem] w-36 flex-col justify-between rounded-md p-4 text-font-color-black dark:text-font-color-white ${
         isAMultipleSelection
@@ -398,7 +406,7 @@ export const Playlist = (props: PlaylistProp) => {
           />
         )}
         <div className="playlist-cover-container h-full cursor-pointer overflow-hidden">
-          {localStorageData?.preferences.enableArtworkFromSongCovers && props.songs.length > 2 ? (
+          {preferences?.enableArtworkFromSongCovers && props.songs.length > 2 ? (
             <div className="relative aspect-square w-full">
               <MultipleArtworksCover
                 songIds={props.songs}

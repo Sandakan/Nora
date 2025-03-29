@@ -1,23 +1,25 @@
 import { TagConstants } from 'node-id3';
-import log from '../log';
+import logger from '../logger';
 
 const convertParsedLyricsToNodeID3Format = (
   parsedLyrics?: LyricsData,
   prevSyncedLyrics: SynchronisedLyrics = []
 ): SynchronisedLyrics => {
   try {
-    if (parsedLyrics && parsedLyrics.isSynced && parsedLyrics.syncedLyrics) {
-      const { syncedLyrics, copyright } = parsedLyrics;
+    if (parsedLyrics && parsedLyrics.isSynced) {
+      const { parsedLyrics: syncedLyrics, copyright } = parsedLyrics;
       const synchronisedText = syncedLyrics.map((line) => {
+        const { originalText, start = 0 } = line;
+
         const text =
-          typeof line.text === 'string'
-            ? line.text
-            : line.text.map((x) => x.unparsedText).join(' ');
+          typeof originalText === 'string'
+            ? originalText
+            : originalText.map((x) => x.unparsedText).join(' ');
 
         return {
           text,
           // to convert seconds to milliseconds
-          timeStamp: Math.round(line.start * 1000)
+          timeStamp: Math.round(start * 1000)
         };
       });
       // lyrics metadata like copyright info is stored on the shortText.
@@ -38,11 +40,9 @@ const convertParsedLyricsToNodeID3Format = (
     }
     return prevSyncedLyrics;
   } catch (error) {
-    log(
-      `Error occurred when converting parsed lyrics to NodeID3 Synchronised Lyrics format.`,
-      { error },
-      'WARN'
-    );
+    logger.error(`Failed to convert parsed lyrics to NodeID3 Synchronised Lyrics format.`, {
+      error
+    });
     return prevSyncedLyrics;
   }
 };

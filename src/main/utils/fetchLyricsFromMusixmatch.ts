@@ -1,12 +1,10 @@
-/* eslint-disable camelcase */
-
-import {
+import type {
   MusixmatchLyrics,
   MusixmatchLyricsAPI,
   MusixmatchLyricsLine,
   MusixmatchLyricsMetadata
-} from '../../@types/musixmatch_lyrics_api';
-import log from '../log';
+} from '../../types/musixmatch_lyrics_api';
+import logger from '../logger';
 import isLyricsSynced from '../../common/isLyricsSynced';
 import { repository, version } from '../../../package.json';
 import parseSongMetadataFromMusixmatchApiData from './parseSongMetadataFromMusixmatchApiData';
@@ -134,7 +132,6 @@ const MUSIXMATCH_BASE_URL = 'https://apic-desktop.musixmatch.com/';
 const fetchLyricsFromMusixmatch = async (
   trackInfo: TrackInfo,
   usertoken: string,
-  // eslint-disable-next-line default-param-last
   lyricsType: LyricsTypes = 'ANY',
   abortSignal?: AbortSignal
 ): Promise<MusixmatchLyrics | undefined> => {
@@ -150,7 +147,6 @@ const fetchLyricsFromMusixmatch = async (
   url.searchParams.set('format', 'json');
   url.searchParams.set('usertoken', usertoken);
 
-  // eslint-disable-next-line no-restricted-syntax
   for (const [key, value] of Object.entries(trackInfo)) {
     if (typeof value === 'string') url.searchParams.set(key, value);
   }
@@ -167,8 +163,8 @@ const fetchLyricsFromMusixmatch = async (
       `Error occurred when fetching lyrics.\nHTTP Error Code : ${res.status} - ${res.statusText}`
     );
   } catch (error) {
-    log('Error ocurred when fetching lyrics', { error }, 'ERROR');
-    throw error;
+    logger.error('Failed to fetch lyrics from Musixmatch', { error, trackInfo, lyricsType });
+    return undefined;
   }
 };
 

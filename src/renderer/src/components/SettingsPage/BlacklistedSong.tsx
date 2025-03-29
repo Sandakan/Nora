@@ -1,4 +1,4 @@
-import React from 'react';
+import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -13,13 +13,13 @@ interface BlacklistedSongProp {
 }
 
 const BlacklistedSong = (props: BlacklistedSongProp) => {
-  const { addNewNotifications } = React.useContext(AppUpdateContext);
+  const { addNewNotifications } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { title, index, songId, songPath } = props;
 
   return (
-    <div className="blacklisted-song mb-2 flex w-full items-center justify-between rounded-md px-4 py-2 last:mb-0 only:mb-0 hover:bg-background-color-2 dark:hover:bg-dark-background-color-2 ">
+    <div className="blacklisted-song mb-2 flex w-full items-center justify-between rounded-md px-4 py-2 last:mb-0 only:mb-0 hover:bg-background-color-2 dark:hover:bg-dark-background-color-2">
       <span
         className="blacklisted-song-name w-1/4 overflow-hidden text-ellipsis whitespace-nowrap"
         title={title}
@@ -41,7 +41,7 @@ const BlacklistedSong = (props: BlacklistedSongProp) => {
             addNewNotifications([
               {
                 id: `${title}RestoreSuccess`,
-                delay: 5000,
+                duration: 5000,
                 content: t('notifications.songRestoreSuccess'),
                 icon: <span className="material-icons-round icon">check</span>
               }

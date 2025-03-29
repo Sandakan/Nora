@@ -1,4 +1,5 @@
-import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '../utils/localStorage';
+import storage from '@renderer/utils/localStorage';
+import { type ReactNode } from 'react';
 
 export interface AppReducer {
   userData: UserData;
@@ -7,9 +8,17 @@ export interface AppReducer {
   currentSongData: AudioPlayerData;
   upNextSongData?: AudioPlayerData;
   promptMenuNavigationData: PromptMenuNavigationHistoryData;
+  promptMenuData: {
+    prompt?: ReactNode;
+    isVisible: boolean;
+    className?: string;
+    currentActiveIndex: number;
+    noOfPrompts: number;
+  };
   notificationPanelData: NotificationPanelData;
   contextMenuData: ContextMenuData;
   navigationHistory: NavigationHistoryData;
+  currentlyActivePage: NavigationHistory;
   player: Player;
   bodyBackgroundImage?: string;
   multipleSelectionsData: MultipleSelectionData;
@@ -18,15 +27,14 @@ export interface AppReducer {
   playerType: PlayerTypes;
 }
 
-type AppReducerStateActions =
+export type AppReducerStateActions =
   | { type: 'USER_DATA_CHANGE'; data: UserData }
   | { type: 'START_PLAY_STATE_CHANGE'; data: unknown }
   | {
       type: 'APP_THEME_CHANGE';
       data: AppThemeData;
     }
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  | { type: 'CURRENT_SONG_DATA_CHANGE'; data: AudioPlayerData | {} }
+  | { type: 'CURRENT_SONG_DATA_CHANGE'; data: AudioPlayerData }
   | { type: 'UP_NEXT_SONG_DATA_CHANGE'; data?: AudioPlayerData }
   | { type: 'CURRENT_SONG_PLAYBACK_STATE'; data: boolean }
   | { type: 'PROMPT_MENU_DATA_CHANGE'; data: PromptMenuNavigationHistoryData }
@@ -47,6 +55,8 @@ type AppReducerStateActions =
   | { type: 'TOGGLE_IS_FAVORITE_STATE'; data?: boolean }
   | { type: 'TOGGLE_SHUFFLE_STATE'; data?: boolean }
   | { type: 'UPDATE_VOLUME_VALUE'; data: number }
+  | { type: 'UPDATE_QUEUE'; data: Queue }
+  | { type: 'UPDATE_QUEUE_CURRENT_SONG_INDEX'; data: number }
   | { type: 'TOGGLE_REDUCED_MOTION'; data?: boolean }
   | { type: 'TOGGLE_SONG_INDEXING'; data?: boolean }
   | { type: 'PLAYER_WAITING_STATUS'; data: boolean }
@@ -55,13 +65,17 @@ type AppReducerStateActions =
   | { type: 'CHANGE_APP_UPDATES_DATA'; data: AppUpdatesState }
   | { type: 'UPDATE_LOCAL_STORAGE'; data: LocalStorage }
   | { type: 'UPDATE_BATTERY_POWER_STATE'; data: boolean }
-  | { type: 'TOGGLE_SHOW_SONG_REMAINING_DURATION'; data?: boolean };
+  | { type: 'TOGGLE_SHOW_SONG_REMAINING_DURATION'; data?: boolean }
+  | { type: 'UPDATE_LOCAL_STORAGE_PREFERENCES'; data: LocalStorage['preferences'] }
+  | {
+      type: 'UPDATE_LOCAL_STORAGE_PREFERENCE_ITEM';
+      data: { item: string; value: LocalStorage['preferences'] };
+    };
 
-const reducer = (state: AppReducer, action: AppReducerStateActions): AppReducer => {
+export const reducer = (state: AppReducer, action: AppReducerStateActions): AppReducer => {
   switch (action.type) {
     case 'APP_THEME_CHANGE': {
-      const theme =
-        typeof action.data === 'object' ? action.data : { isDarkMode: false, useSystemTheme: true };
+      const theme = action.data ?? USER_DATA_TEMPLATE.theme;
       return {
         ...state,
         isDarkMode: theme.isDarkMode,
@@ -71,73 +85,62 @@ const reducer = (state: AppReducer, action: AppReducerStateActions): AppReducer 
     case 'USER_DATA_CHANGE':
       return {
         ...state,
-        userData: typeof action.data === 'object' ? action.data : state.userData
+        userData: action.data ?? state.userData
       };
     case 'TOGGLE_REDUCED_MOTION':
       return {
         ...state,
-        localStorage:
-          typeof action.data === 'boolean'
-            ? {
-                ...state.localStorage,
-                preferences: {
-                  ...state.localStorage.preferences,
-                  isReducedMotion: action.data
-                }
-              }
-            : {
-                ...state.localStorage,
-                preferences: {
-                  ...state.localStorage.preferences,
-                  isReducedMotion: state.localStorage.preferences.isReducedMotion
-                }
-              }
+        localStorage: {
+          ...state.localStorage,
+          preferences: {
+            ...state.localStorage.preferences,
+            isReducedMotion: action.data ?? state.localStorage.preferences.isReducedMotion
+          }
+        }
       };
     case 'TOGGLE_SONG_INDEXING':
       return {
         ...state,
-        localStorage:
-          typeof action.data === 'boolean'
-            ? {
-                ...state.localStorage,
-                preferences: {
-                  ...state.localStorage.preferences,
-                  isSongIndexingEnabled: action.data
-                }
-              }
-            : {
-                ...state.localStorage,
-                preferences: {
-                  ...state.localStorage.preferences,
-                  isSongIndexingEnabled: state.localStorage.preferences.isSongIndexingEnabled
-                }
-              }
+        localStorage: {
+          ...state.localStorage,
+          preferences: {
+            ...state.localStorage.preferences,
+            isSongIndexingEnabled:
+              action.data ?? state.localStorage.preferences.isSongIndexingEnabled
+          }
+        }
       };
     case 'TOGGLE_SHOW_SONG_REMAINING_DURATION':
       return {
         ...state,
-        localStorage:
-          typeof action.data === 'boolean'
-            ? {
-                ...state.localStorage,
-                preferences: {
-                  ...state.localStorage.preferences,
-                  showSongRemainingTime: action.data
-                }
-              }
-            : {
-                ...state.localStorage,
-                preferences: {
-                  ...state.localStorage.preferences,
-                  showSongRemainingTime: state.localStorage.preferences.showSongRemainingTime
-                }
-              }
+        localStorage: {
+          ...state.localStorage,
+          preferences: {
+            ...state.localStorage.preferences,
+            showSongRemainingTime:
+              action.data ?? state.localStorage.preferences.showSongRemainingTime
+          }
+        }
       };
-    case 'PROMPT_MENU_DATA_CHANGE':
+    case 'PROMPT_MENU_DATA_CHANGE': {
+      const promptMenuNavigationData = action.data ? action.data : state.promptMenuNavigationData;
+
+      const promptMenuData = {
+        isVisible: promptMenuNavigationData?.isVisible,
+        prompt: promptMenuNavigationData.prompts?.at(promptMenuNavigationData.currentActiveIndex)
+          ?.prompt,
+        className: promptMenuNavigationData.prompts?.at(promptMenuNavigationData.currentActiveIndex)
+          ?.className,
+        noOfPrompts: promptMenuNavigationData.prompts.length,
+        currentActiveIndex: promptMenuNavigationData.currentActiveIndex
+      };
+
       return {
         ...state,
-        promptMenuNavigationData: action.data ? action.data : state.promptMenuNavigationData
+        promptMenuNavigationData,
+        promptMenuData
       };
+    }
     case 'ADD_NEW_NOTIFICATIONS':
       return {
         ...state,
@@ -164,50 +167,62 @@ const reducer = (state: AppReducer, action: AppReducerStateActions): AppReducer 
         ...state,
         contextMenuData: {
           ...state.contextMenuData,
-          isVisible:
-            typeof action.data === 'boolean' ? action.data : state.contextMenuData.isVisible
+          isVisible: action.data ?? state.contextMenuData.isVisible
         }
       };
     case 'CURRENT_ACTIVE_PAGE_DATA_UPDATE':
       state.navigationHistory.history[state.navigationHistory.pageHistoryIndex].data = action.data;
       return {
         ...state,
-        navigationHistory: state.navigationHistory
+        navigationHistory: state.navigationHistory,
+        currentlyActivePage:
+          state.navigationHistory.history[state.navigationHistory.pageHistoryIndex]
       };
-    case 'UPDATE_NAVIGATION_HISTORY':
+    case 'UPDATE_NAVIGATION_HISTORY': {
+      const navigationHistory = { ...action.data };
       return {
         ...state,
         bodyBackgroundImage: undefined,
-        navigationHistory:
-          typeof action.data === 'object'
-            ? { ...state.navigationHistory, ...action.data }
-            : state.navigationHistory
+        navigationHistory,
+        currentlyActivePage: navigationHistory.history[navigationHistory.pageHistoryIndex]
       };
+    }
     case 'CURRENT_SONG_DATA_CHANGE':
       return {
         ...state,
         currentSongData:
-          typeof action.data === 'object' ? (action.data as AudioPlayerData) : state.currentSongData
+          typeof action.data === 'object'
+            ? (action.data as AudioPlayerData)
+            : state.currentSongData,
+        localStorage: {
+          ...state.localStorage,
+          playback: {
+            ...state.localStorage.playback,
+            currentSong: {
+              ...state.localStorage.playback.currentSong,
+              songId: action.data.songId ?? state.currentSongData.songId,
+              stoppedPosition: 0
+            }
+          }
+        }
       };
     case 'UP_NEXT_SONG_DATA_CHANGE':
       return {
         ...state,
-        currentSongData:
-          typeof action.data === 'object' ? (action.data as AudioPlayerData) : state.currentSongData
+        currentSongData: action.data ?? state.currentSongData
       };
-    case 'CURRENT_SONG_PLAYBACK_STATE':
+    case 'CURRENT_SONG_PLAYBACK_STATE': {
       return {
         ...state,
         player: {
           ...state.player,
-          isCurrentSongPlaying:
-            typeof action.data === 'boolean' ? action.data : !state.player.isCurrentSongPlaying,
-          isPlayerStalled:
-            typeof action.data === 'boolean' && action.data ? false : state.player.isPlayerStalled
+          isCurrentSongPlaying: action.data ?? !state.player.isCurrentSongPlaying
+          // isPlayerStalled: action.data ? false : state.player.isPlayerStalled
         }
       };
+    }
     case 'UPDATE_PLAYER_TYPE': {
-      const type = typeof action.data === 'string' ? action.data : state.playerType;
+      const type = action.data ?? state.playerType;
 
       if (type !== 'full') window.api.windowControls.changePlayerType(type);
 
@@ -222,106 +237,229 @@ const reducer = (state: AppReducer, action: AppReducerStateActions): AppReducer 
         ...state,
         player: {
           ...state.player,
-          songPosition: typeof action.data === 'number' ? action.data : state.player.songPosition
+          songPosition: action.data ?? state.player.songPosition
         }
       };
-    case 'UPDATE_IS_REPEATING_STATE':
+    case 'UPDATE_IS_REPEATING_STATE': {
+      const isRepeating = action.data ?? state.player.isRepeating;
       return {
         ...state,
         player: {
           ...state.player,
-          isRepeating: typeof action.data === 'string' ? action.data : state.player.isRepeating
+          isRepeating
+        },
+        localStorage: {
+          ...state.localStorage,
+          playback: {
+            ...state.localStorage.playback,
+            isRepeating
+          }
         }
       };
+    }
     case 'TOGGLE_IS_FAVORITE_STATE':
       return {
         ...state,
         currentSongData: {
           ...state.currentSongData,
-          isAFavorite:
-            typeof action.data === 'boolean' ? action.data : !state.currentSongData.isAFavorite
+          isAFavorite: action.data ?? !state.currentSongData.isAFavorite
         }
       };
-    case 'TOGGLE_SHUFFLE_STATE':
+    case 'TOGGLE_SHUFFLE_STATE': {
+      const isShuffling = action.data ?? !state.player.isShuffling;
       return {
         ...state,
         player: {
           ...state.player,
-          isShuffling: typeof action.data === 'boolean' ? action.data : !state.player.isShuffling
+          isShuffling
+        },
+        localStorage: {
+          ...state.localStorage,
+          playback: {
+            ...state.localStorage.playback,
+            isShuffling
+          }
         }
       };
-    case 'UPDATE_VOLUME':
+    }
+    case 'UPDATE_VOLUME': {
+      const volume = action.data ?? state.player.volume;
       return {
         ...state,
         player: {
           ...state.player,
-          volume:
-            typeof action.data === 'object'
-              ? { ...state.player.volume, ...action.data }
-              : state.player.volume
+          volume
+        },
+        localStorage: {
+          ...state.localStorage,
+          playback: {
+            ...state.localStorage.playback,
+            volume
+          }
         }
       };
-    case 'UPDATE_VOLUME_VALUE':
+    }
+    case 'UPDATE_VOLUME_VALUE': {
+      const volume = action.data ?? state.player.volume.value;
+      return {
+        ...state,
+        player: {
+          ...state.player,
+          volume: {
+            value: volume,
+            isMuted: volume === 0
+          }
+        }
+      };
+    }
+    case 'UPDATE_MUTED_STATE': {
+      const isMuted = action.data ?? state.player.volume.isMuted;
       return {
         ...state,
         player: {
           ...state.player,
           volume: {
             ...state.player.volume,
-            value: typeof action.data === 'number' ? action.data : state.player.volume.value,
-            isMuted: typeof action.data === 'number' && action.data === 0
+            isMuted
+          }
+        },
+        localStorage: {
+          ...state.localStorage,
+          playback: {
+            ...state.localStorage.playback,
+            volume: {
+              ...state.localStorage.playback.volume,
+              isMuted
+            }
           }
         }
       };
-    case 'UPDATE_MUTED_STATE':
+    }
+    case 'UPDATE_QUEUE':
       return {
         ...state,
-        player: {
-          ...state.player,
-          volume: {
-            ...state.player.volume,
-            isMuted: typeof action.data === 'boolean' ? action.data : !state.player.volume.isMuted
-          }
+        localStorage: {
+          ...state.localStorage,
+          queue: action.data ?? state.localStorage.queue
         }
       };
     case 'UPDATE_BODY_BACKGROUND_IMAGE':
       return {
         ...state,
-        bodyBackgroundImage:
-          typeof action.data === 'string' ? action.data : state.bodyBackgroundImage
+        bodyBackgroundImage: action.data ?? state.bodyBackgroundImage
       };
     case 'UPDATE_MULTIPLE_SELECTIONS_DATA':
       return {
         ...state,
-        multipleSelectionsData:
-          typeof action.data === 'object' ? action.data : state.multipleSelectionsData
+        multipleSelectionsData: action.data ?? state.multipleSelectionsData
       };
     case 'CHANGE_APP_UPDATES_DATA':
       return {
         ...state,
-        appUpdatesState: typeof action.data === 'string' ? action.data : state.appUpdatesState
+        appUpdatesState: action.data ?? state.appUpdatesState
       };
     case 'PLAYER_WAITING_STATUS':
       return {
         ...state,
         player: {
           ...state.player,
-          isPlayerStalled:
-            typeof action.data === 'boolean' ? action.data : state.player.isPlayerStalled
+          isPlayerStalled: action.data ?? state.player.isPlayerStalled
         }
       };
+    // ####### LOCAL STORAGE ENTRIES #######
     case 'UPDATE_LOCAL_STORAGE':
       return {
         ...state,
         localStorage: typeof action.data === 'object' ? action.data : state.localStorage
       };
+    case 'UPDATE_LOCAL_STORAGE_PREFERENCES':
+      return {
+        ...state,
+        localStorage: {
+          ...state.localStorage,
+          preferences:
+            typeof action.data === 'object' ? action.data : state.localStorage.preferences
+        }
+      };
+    // #####################################
     case 'UPDATE_BATTERY_POWER_STATE':
       return {
         ...state,
-        isOnBatteryPower: typeof action.data === 'boolean' ? action.data : state.isOnBatteryPower
+        isOnBatteryPower: action.data ?? state.isOnBatteryPower
       };
     default:
       return state;
+  }
+};
+
+export const LOCAL_STORAGE_DEFAULT_TEMPLATE: LocalStorage = {
+  preferences: {
+    seekbarScrollInterval: 5,
+    isSongIndexingEnabled: false,
+    disableBackgroundArtworks: true,
+    doNotShowBlacklistSongConfirm: false,
+    doNotVerifyWhenOpeningLinks: false,
+    isReducedMotion: false,
+    showArtistArtworkNearSongControls: false,
+    showSongRemainingTime: false,
+    noUpdateNotificationForNewUpdate: '',
+    defaultPageOnStartUp: 'Home',
+    enableArtworkFromSongCovers: false,
+    shuffleArtworkFromSongCovers: false,
+    removeAnimationsOnBatteryPower: false,
+    isPredictiveSearchEnabled: true,
+    lyricsAutomaticallySaveState: 'NONE',
+    showTrackNumberAsSongIndex: true,
+    allowToPreventScreenSleeping: true,
+    enableImageBasedDynamicThemes: false,
+    doNotShowHelpPageOnLyricsEditorStartUp: false,
+    autoTranslateLyrics: false,
+    autoConvertLyrics: false
+  },
+  playback: {
+    currentSong: {
+      songId: '',
+      stoppedPosition: 0
+    },
+    isRepeating: 'false',
+    isShuffling: false,
+    volume: {
+      isMuted: false,
+      value: 50
+    },
+    playbackRate: 1.0
+  },
+  queue: { currentSongIndex: null, queue: [], queueType: 'songs' },
+  ignoredSeparateArtists: [],
+  ignoredSongsWithFeatArtists: [],
+  ignoredDuplicates: {
+    albums: [],
+    artists: [],
+    genres: []
+  },
+  sortingStates: {
+    albumsPage: 'aToZ',
+    artistsPage: 'aToZ',
+    genresPage: 'aToZ',
+    playlistsPage: 'aToZ',
+    songsPage: 'aToZ',
+    musicFoldersPage: 'aToZ'
+  },
+  equalizerPreset: {
+    thirtyTwoHertzFilter: 0,
+    sixtyFourHertzFilter: 0,
+    hundredTwentyFiveHertzFilter: 0,
+    twoHundredFiftyHertzFilter: 0,
+    fiveHundredHertzFilter: 0,
+    thousandHertzFilter: 0,
+    twoThousandHertzFilter: 0,
+    fourThousandHertzFilter: 0,
+    eightThousandHertzFilter: 0,
+    sixteenThousandHertzFilter: 0
+  },
+  lyricsEditorSettings: {
+    offset: 0,
+    editNextAndCurrentStartAndEndTagsAutomatically: true
   }
 };
 
@@ -340,7 +478,8 @@ export const USER_DATA_TEMPLATE: UserData = {
     sendSongFavoritesDataToLastFM: false,
     sendNowPlayingSongDataToLastFM: false,
     saveLyricsInLrcFilesForSupportedSongs: false,
-    enableDiscordRPC: false
+    enableDiscordRPC: false,
+    saveVerboseLogs: false
   },
   windowPositions: {},
   windowDiamensions: {},
@@ -348,22 +487,24 @@ export const USER_DATA_TEMPLATE: UserData = {
   recentSearches: []
 };
 
+const localStorage = storage.getLocalStorage();
+
 export const DEFAULT_REDUCER_DATA: AppReducer = {
   isDarkMode: false,
   playerType: 'normal',
   player: {
     isCurrentSongPlaying: false,
-    volume: { isMuted: false, value: 50 },
-    isRepeating: 'false',
-    isShuffling: false,
+    volume: localStorage.playback.volume,
+    isRepeating: localStorage.playback.isRepeating,
+    isShuffling: localStorage.playback.isShuffling,
     songPosition: 0,
     isPlayerStalled: false,
-    playbackRate: 1.0
+    playbackRate: localStorage.playback.playbackRate
   },
   userData: USER_DATA_TEMPLATE,
   currentSongData: {} as AudioPlayerData,
   upNextSongData: {} as AudioPlayerData,
-  localStorage: LOCAL_STORAGE_DEFAULT_TEMPLATE,
+  localStorage,
   navigationHistory: {
     pageHistoryIndex: 0,
     history: [
@@ -372,6 +513,10 @@ export const DEFAULT_REDUCER_DATA: AppReducer = {
         data: undefined
       }
     ]
+  },
+  currentlyActivePage: {
+    pageTitle: 'Home',
+    data: undefined
   },
   contextMenuData: {
     isVisible: false,
@@ -387,6 +532,13 @@ export const DEFAULT_REDUCER_DATA: AppReducer = {
     isVisible: false,
     prompts: [],
     currentActiveIndex: 0
+  },
+  promptMenuData: {
+    isVisible: false,
+    prompt: undefined,
+    className: undefined,
+    currentActiveIndex: 0,
+    noOfPrompts: 0
   },
   multipleSelectionsData: { isEnabled: false, multipleSelections: [] },
   appUpdatesState: 'UNKNOWN',

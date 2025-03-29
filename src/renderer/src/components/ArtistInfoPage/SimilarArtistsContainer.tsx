@@ -1,24 +1,25 @@
-import React from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 
-// eslint-disable-next-line import/namespace
 import { Artist } from '../ArtistPage/Artist';
 import UnAvailableArtist from './UnAvailableArtist';
 import TitleContainer from '../TitleContainer';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = { similarArtists: SimilarArtistInfo };
 
 const SimilarArtistsContainer = (props: Props) => {
-  const { bodyBackgroundImage } = React.useContext(AppContext);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+
   const { t } = useTranslation();
 
   const { similarArtists } = props;
-  //   const [similarArtists, setSimilarArtists] = React.useState<SimilarArtistInfo>(
+  //   const [similarArtists, setSimilarArtists] = useState<SimilarArtistInfo>(
   //     { availableArtists: [], unAvailableArtists: [] },
   //   );
 
-  const { availArtistComponents, unAvailArtistComponents } = React.useMemo(() => {
+  const { availArtistComponents, unAvailArtistComponents } = useMemo(() => {
     if (similarArtists) {
       const { availableArtists = [], unAvailableArtists = [] } = similarArtists;
 
@@ -83,7 +84,7 @@ const SimilarArtistsContainer = (props: Props) => {
                 : 'text-font-color-black dark:text-font-color-white'
             } mb-4 mt-1 pr-4 text-2xl`}
           />
-          <div className="flex flex-wrap ">{unAvailArtistComponents}</div>
+          <div className="flex flex-wrap">{unAvailArtistComponents}</div>
         </>
       )}
     </div>

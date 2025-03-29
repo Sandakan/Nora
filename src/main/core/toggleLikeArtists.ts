@@ -1,6 +1,6 @@
 import { getArtistsData, setArtistsData } from '../filesystem';
 import { getArtistArtworkPath } from '../fs/resolveFilePaths';
-import log from '../log';
+import logger from '../logger';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 
 const dislikeArtist = (artist: SavableArtist) => {
@@ -38,7 +38,7 @@ const toggleLikeArtists = async (artistIds: string[], isLikeArtist?: boolean) =>
     dislikes: []
   };
 
-  log(
+  logger.debug(
     `Requested to ${
       isLikeArtist === undefined ? 'toggle like' : isLikeArtist ? 'like' : 'dislike'
     } artists with ids -${artistIds.join(', ')}-`
@@ -52,7 +52,7 @@ const toggleLikeArtists = async (artistIds: string[], isLikeArtist?: boolean) =>
             result.dislikes.push(updatedArtist.artistId);
             return updatedArtist;
           }
-          log(
+          logger.debug(
             `Tried to like an artist with a artist id -${artist.artistId}- that has been already been liked.`
           );
           return artist;
@@ -63,7 +63,7 @@ const toggleLikeArtists = async (artistIds: string[], isLikeArtist?: boolean) =>
           result.likes.push(updatedArtist.artistId);
           return updatedArtist;
         }
-        log(
+        logger.debug(
           `Tried to dislike an artist with a artist id -${artist.artistId}- that has been already been disliked.`
         );
         return artist;

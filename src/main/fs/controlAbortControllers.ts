@@ -1,4 +1,4 @@
-import log from '../log';
+import logger from '../logger';
 
 const watcherInstances: { id: string; controller: AbortController }[] = [];
 
@@ -9,10 +9,9 @@ export const closeAbortController = (pathOrId?: string) => {
       return watcherInstance.controller.abort();
     }
   }
-  return log(
-    `Error occurred when trying to close a watcher. Watcher instance not found in watcherInstances array.`,
-    { watcherPath: pathOrId },
-    'ERROR'
+  return logger.warn(
+    `Failed to close a watcher. Watcher instance not found in watcherInstances array.`,
+    { watcherPath: pathOrId }
   );
 };
 
@@ -22,11 +21,9 @@ export const closeAllAbortControllers = () => {
     const watcherInstance = watcherInstances[i];
     watcherInstance.controller.abort();
   }
-  return log(
-    `Closed all abort controllers successfully.`,
-    { closedAbortControllerIds: abortControllerIds },
-    'WARN'
-  );
+  return logger.debug(`Closed all abort controllers successfully.`, {
+    closedAbortControllerIds: abortControllerIds
+  });
 };
 
 export const saveAbortController = (IdOrPath: string, controller: AbortController) => {

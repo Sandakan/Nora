@@ -1,4 +1,4 @@
-import log from '../log';
+import logger from '../logger';
 
 const NANOSECONDS_PER_SECOND = 1e9;
 
@@ -10,6 +10,6 @@ export const timeEnd = (start: ReturnType<typeof timeStart>, title?: string) => 
   const [seconds, nanoseconds] = process.hrtime(start);
   const elapsedTime = (seconds + nanoseconds / NANOSECONDS_PER_SECOND).toFixed(3);
 
-  log(`${title || 'Time elapsed'}: ${elapsedTime} seconds`);
+  logger.verbose(`Time elapsed${title ? `: ${title}` : ''}`, { elapsedTime });
   return process.hrtime();
 };

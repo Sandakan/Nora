@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 export const calculateTime = (secs: number) => {
   const minutes = Math.floor(secs / 60);
   const seconds = Math.floor(secs % 60);

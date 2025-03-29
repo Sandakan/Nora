@@ -1,5 +1,5 @@
 import i18n from '../../i18n';
-import { DropdownOption } from '../Dropdown';
+import { type DropdownOption } from '../Dropdown';
 
 export const songSortOptions: DropdownOption<SongSortTypes>[] = [
   { label: i18n.t('sortTypes.aToZ'), value: 'aToZ' },

@@ -1,11 +1,12 @@
-import React from 'react';
+import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Album } from '../../AlbumsPage/Album';
 import Button from '../../Button';
 import SecondaryContainer from '../../SecondaryContainer';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { AppContext } from '../../../contexts/AppContext';
 import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
+import { store } from '@renderer/store';
+import { useStore } from '@tanstack/react-store';
 
 type Props = {
   albums: Album[];
@@ -16,13 +17,17 @@ type Props = {
 
 const AlbumSearchResultsContainer = (props: Props) => {
   const { albums, searchInput, noOfVisibleAlbums = 4, isPredictiveSearchEnabled } = props;
-  const { isMultipleSelectionEnabled, multipleSelectionsData } = React.useContext(AppContext);
-  const { toggleMultipleSelections, changeCurrentActivePage } = React.useContext(AppUpdateContext);
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const { toggleMultipleSelections, changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const selectAllHandler = useSelectAllHandler(albums, 'album', 'albumId');
 
-  const albumResults = React.useMemo(
+  const albumResults = useMemo(
     () =>
       albums.length > 0
         ? albums

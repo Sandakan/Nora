@@ -1,19 +1,20 @@
-import React from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 import storage from '../../utils/localStorage';
 import i18n from '../../i18n';
 
 import { Artist } from './Artist';
-import Dropdown, { DropdownOption } from '../Dropdown';
+import Dropdown, { type DropdownOption } from '../Dropdown';
 import MainContainer from '../MainContainer';
 import Img from '../Img';
 import Button from '../Button';
 
 import NoArtistImage from '../../assets/images/svg/Sun_Monochromatic.svg';
 import VirtualizedGrid from '../VirtualizedGrid';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 const artistSortOptions: DropdownOption<ArtistSortTypes>[] = [
   { label: i18n.t('sortTypes.aToZ'), value: 'aToZ' },
@@ -45,25 +46,24 @@ const MIN_ITEM_WIDTH = 175;
 const MIN_ITEM_HEIGHT = 200;
 
 const ArtistPage = () => {
-  const {
-    currentlyActivePage,
-    localStorageData,
-    isMultipleSelectionEnabled,
-    multipleSelectionsData
-  } = React.useContext(AppContext);
-  const { updateCurrentlyActivePageData, toggleMultipleSelections } =
-    React.useContext(AppUpdateContext);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const sortingStates = useStore(store, (state) => state.localStorage.sortingStates);
+
+  const { updateCurrentlyActivePageData, toggleMultipleSelections } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [artistsData, setArtistsData] = React.useState([] as Artist[]);
-  const [sortingOrder, setSortingOrder] = React.useState<ArtistSortTypes>(
-    currentlyActivePage?.data?.sortingOrder ||
-      localStorageData?.sortingStates?.artistsPage ||
-      'aToZ'
+  const [artistsData, setArtistsData] = useState([] as Artist[]);
+  const [sortingOrder, setSortingOrder] = useState<ArtistSortTypes>(
+    currentlyActivePage?.data?.sortingOrder || sortingStates?.artistsPage || 'aToZ'
   );
-  const [filteringOrder, setFilteringOrder] = React.useState<ArtistFilterTypes>('notSelected');
+  const [filteringOrder, setFilteringOrder] = useState<ArtistFilterTypes>('notSelected');
 
-  const fetchArtistsData = React.useCallback(
+  const fetchArtistsData = useCallback(
     () =>
       window.api.artistsData.getArtistData([], sortingOrder, filteringOrder).then((res) => {
         if (res && Array.isArray(res)) {
@@ -75,7 +75,7 @@ const ArtistPage = () => {
     [filteringOrder, sortingOrder]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchArtistsData();
     const manageArtistDataUpdatesInArtistsPage = (e: Event) => {
       if ('detail' in e) {
@@ -93,7 +93,7 @@ const ArtistPage = () => {
     };
   }, [fetchArtistsData]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     storage.sortingStates.setSortingStates('artistsPage', sortingOrder);
   }, [sortingOrder]);
 
@@ -180,7 +180,7 @@ const ArtistPage = () => {
               data={artistsData}
               fixedItemWidth={MIN_ITEM_WIDTH}
               fixedItemHeight={MIN_ITEM_HEIGHT}
-              scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
+              scrollTopOffset={currentlyActivePage.data?.gridState}
               itemContent={(index, artist) => {
                 return (
                   <Artist

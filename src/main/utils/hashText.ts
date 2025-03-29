@@ -1,4 +1,4 @@
-import { BinaryToTextEncoding, createHash } from 'crypto';
+import { type BinaryToTextEncoding, createHash } from 'crypto';
 
 type HashingAlgorithm = 'md5' | 'sha256' | 'sha512';
 

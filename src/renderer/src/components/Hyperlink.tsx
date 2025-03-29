@@ -1,24 +1,33 @@
-import React from 'react';
-import { AppContext } from '../contexts/AppContext';
+import { type ReactElement, lazy, useCallback, useContext } from 'react';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
-import OpenLinkConfirmPrompt from './OpenLinkConfirmPrompt';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
+
+const OpenLinkConfirmPrompt = lazy(() => import('./OpenLinkConfirmPrompt'));
 
 interface HyperlinkProp {
   link: string;
   linkTitle?: string;
   noValidityCheck?: boolean;
-  children?: string | React.ReactElement;
-  label?: string | React.ReactElement;
+  children?: string | ReactElement;
+  label?: string | ReactElement;
   className?: string;
 }
 
 const Hyperlink = (props: HyperlinkProp) => {
-  const { localStorageData } = React.useContext(AppContext);
-  const { changePromptMenuData } = React.useContext(AppUpdateContext);
-  const { link, children, label = children, linkTitle = label, className, noValidityCheck } = props;
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+  const { changePromptMenuData } = useContext(AppUpdateContext);
+  const {
+    link,
+    children,
+    label = children,
+    linkTitle = label,
+    className,
+    noValidityCheck = false
+  } = props;
 
-  const openLinkConfirmPrompt = React.useCallback(() => {
-    if (noValidityCheck || localStorageData?.preferences.doNotVerifyWhenOpeningLinks) {
+  const openLinkConfirmPrompt = useCallback(() => {
+    if (noValidityCheck || preferences.doNotVerifyWhenOpeningLinks) {
       window.api.settingsHelpers.openInBrowser(link);
     } else
       changePromptMenuData(
@@ -33,13 +42,13 @@ const Hyperlink = (props: HyperlinkProp) => {
     changePromptMenuData,
     link,
     linkTitle,
-    localStorageData?.preferences.doNotVerifyWhenOpeningLinks,
+    preferences.doNotVerifyWhenOpeningLinks,
     noValidityCheck
   ]);
 
   return (
     <span
-      className={`about-link w-fit cursor-pointer font-medium text-font-color-highlight-2 outline-1 outline-offset-1 hover:underline focus:!outline dark:text-dark-font-color-highlight-2 ${className}`}
+      className={`about-link w-fit cursor-pointer font-medium text-font-color-highlight-2 underline outline-1 outline-offset-1 focus:!outline dark:text-dark-font-color-highlight-2 ${className}`}
       title={link}
       onClick={openLinkConfirmPrompt}
       role="link"
@@ -49,10 +58,6 @@ const Hyperlink = (props: HyperlinkProp) => {
       {label}
     </span>
   );
-};
-
-Hyperlink.defaultProps = {
-  noValidityCheck: false
 };
 
 export default Hyperlink;

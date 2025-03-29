@@ -8,6 +8,7 @@ import skipBackDarkIconPath from '../../../resources/taskbar buttons/baseline_sk
 import playDarkIconPath from '../../../resources/taskbar buttons/baseline_play_arrow_black_24dp.png?asset';
 import pauseDarkIconPath from '../../../resources/taskbar buttons/outline_pause_black_24dp.png?asset';
 import skipForwardDarkIconPath from '../../../resources/taskbar buttons/baseline_skip_next_black_24dp.png?asset';
+import logger from '../logger';
 
 const skipBackLightIcon = nativeImage.createFromPath(skipBackLightIconPath);
 const playLightIcon = nativeImage.createFromPath(playLightIconPath);
@@ -31,13 +32,12 @@ const manageTaskbarPlaybackButtonControls = (
         icon: isDarkMode ? skipBackLightIcon : skipBackDarkIcon,
         flags: isPlaybackSupported ? undefined : ['disabled'],
         click() {
-          console.log('Skip back button clicked');
+          logger.verbose('Skip back button clicked');
           mainWindow.webContents.send('app/player/skipBackward');
         }
       },
       {
         tooltip: isPlaying ? 'Pause' : 'Play',
-        // eslint-disable-next-line no-nested-ternary
         icon: isDarkMode
           ? isPlaying
             ? pauseLightIcon
@@ -47,7 +47,7 @@ const manageTaskbarPlaybackButtonControls = (
             : playDarkIcon,
         flags: isPlaybackSupported ? undefined : ['disabled'],
         click: () => {
-          console.log('Play button clicked');
+          logger.verbose('Play button clicked');
           mainWindow.webContents.send('app/player/toggleSongPlaybackState');
         }
       },
@@ -56,7 +56,7 @@ const manageTaskbarPlaybackButtonControls = (
         icon: isDarkMode ? skipForwardLightIcon : skipForwardDarkIcon,
         flags: isPlaybackSupported ? undefined : ['disabled'],
         click() {
-          console.log('Skip forward button clicked');
+          logger.verbose('Skip forward button clicked');
           mainWindow.webContents.send('app/player/skipForward');
         }
       }

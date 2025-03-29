@@ -1,4 +1,4 @@
-import React from 'react';
+import { lazy, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useResizeObserver from '../../hooks/useResizeObserver';
@@ -6,7 +6,6 @@ import useResizeObserver from '../../hooks/useResizeObserver';
 import roundTo from '../../../../common/roundTo';
 import storage from '../../utils/localStorage';
 
-import ErrorPrompt from '../ErrorPrompt';
 import MainContainer from '../MainContainer';
 import Button from '../Button';
 import Img from '../Img';
@@ -15,7 +14,9 @@ import RecentlyPlayedSongs from './RecentlyPlayedSongs';
 import RecentlyPlayedArtists from './RecentlyPlayedArtists';
 import MostLovedSongs from './MostLovedSongs';
 import MostLovedArtists from './MostLovedArtists';
-import AddMusicFoldersPrompt from '../MusicFoldersPage/AddMusicFoldersPrompt';
+
+const ErrorPrompt = lazy(() => import('../ErrorPrompt'));
+const AddMusicFoldersPrompt = lazy(() => import('../MusicFoldersPage/AddMusicFoldersPrompt'));
 
 import NoSongsImage from '../../assets/images/svg/Empty Inbox _Monochromatic.svg';
 import DataFetchingImage from '../../assets/images/svg/Umbrella_Monochromatic.svg';
@@ -37,6 +38,7 @@ type HomePageReducerActionTypes =
 
 const reducer = (
   state: HomePageReducer,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   action: { type: HomePageReducerActionTypes; data?: any }
 ): HomePageReducer => {
   switch (action.type) {
@@ -72,10 +74,10 @@ const reducer = (
 
 const HomePage = () => {
   const { updateContextMenuData, changePromptMenuData, addNewNotifications } =
-    React.useContext(AppUpdateContext);
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [content, dispatch] = React.useReducer(reducer, {
+  const [content, dispatch] = useReducer(reducer, {
     latestSongs: [],
     recentlyPlayedSongs: [],
     recentSongArtists: [],
@@ -86,10 +88,10 @@ const HomePage = () => {
   const SONG_CARD_MIN_WIDTH = 280;
   const ARTIST_WIDTH = 175;
 
-  const recentlyAddedSongsContainerRef = React.useRef<HTMLDivElement>(null);
+  const recentlyAddedSongsContainerRef = useRef<HTMLDivElement>(null);
   const recentlyAddedSongsContainerDiamensions = useResizeObserver(recentlyAddedSongsContainerRef);
   const { noOfRecentlyAddedSongCards, noOfRecentandLovedArtists, noOfRecentandLovedSongCards } =
-    React.useMemo(() => {
+    useMemo(() => {
       const { width } = recentlyAddedSongsContainerDiamensions;
 
       return {
@@ -99,7 +101,7 @@ const HomePage = () => {
       };
     }, [recentlyAddedSongsContainerDiamensions]);
 
-  const fetchLatestSongs = React.useCallback(() => {
+  const fetchLatestSongs = useCallback(() => {
     window.api.audioLibraryControls
       .getAllSongs('dateAddedAscending', undefined, {
         start: 0,
@@ -118,7 +120,7 @@ const HomePage = () => {
       .catch((err) => console.error(err));
   }, [noOfRecentlyAddedSongCards]);
 
-  const fetchRecentlyPlayedSongs = React.useCallback(async () => {
+  const fetchRecentlyPlayedSongs = useCallback(async () => {
     const recentSongs = await window.api.playlistsData
       .getPlaylistData(['History'])
       .catch((err) => console.error(err));
@@ -147,7 +149,7 @@ const HomePage = () => {
         .catch((err) => console.error(err));
   }, [noOfRecentandLovedSongCards]);
 
-  const fetchRecentArtistsData = React.useCallback(() => {
+  const fetchRecentArtistsData = useCallback(() => {
     if (content.recentlyPlayedSongs.length > 0) {
       const artistIds = [
         ...new Set(
@@ -173,7 +175,7 @@ const HomePage = () => {
   }, [content.recentlyPlayedSongs, noOfRecentandLovedArtists]);
 
   // ? Most loved songs are fetched after the user have made at least one favorite song from the library.
-  const fetchMostLovedSongs = React.useCallback(() => {
+  const fetchMostLovedSongs = useCallback(() => {
     window.api.playlistsData
       .getPlaylistData(['Favorites'])
       .then((res) => {
@@ -197,7 +199,7 @@ const HomePage = () => {
       .catch((err) => console.error(err));
   }, [noOfRecentandLovedSongCards]);
 
-  const fetchMostLovedArtists = React.useCallback(() => {
+  const fetchMostLovedArtists = useCallback(() => {
     if (content.mostLovedSongs.length > 0) {
       const artistIds = [
         ...new Set(
@@ -220,22 +222,22 @@ const HomePage = () => {
     }
   }, [content.mostLovedSongs, noOfRecentandLovedArtists]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     console.log('fetchLatestSongs');
     fetchLatestSongs();
   }, [fetchLatestSongs]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     console.log('fetchRecentlyPlayedSongs');
     fetchRecentlyPlayedSongs();
   }, [fetchRecentlyPlayedSongs]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     console.log('fetchMostLovedSongs');
     fetchMostLovedSongs();
   }, [fetchMostLovedSongs]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const manageDataUpdatesInHomePage = (e: Event) => {
       if ('detail' in e) {
         const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
@@ -282,10 +284,10 @@ const HomePage = () => {
     fetchRecentlyPlayedSongs
   ]);
 
-  React.useEffect(() => fetchRecentArtistsData(), [fetchRecentArtistsData]);
-  React.useEffect(() => fetchMostLovedArtists(), [fetchMostLovedArtists]);
+  useEffect(() => fetchRecentArtistsData(), [fetchRecentArtistsData]);
+  useEffect(() => fetchMostLovedArtists(), [fetchMostLovedArtists]);
 
-  const addNewSongs = React.useCallback(() => {
+  const addNewSongs = useCallback(() => {
     changePromptMenuData(
       true,
       <AddMusicFoldersPrompt
@@ -311,7 +313,7 @@ const HomePage = () => {
     );
   }, [changePromptMenuData]);
 
-  const importAppData = React.useCallback(
+  const importAppData = useCallback(
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
@@ -335,7 +337,7 @@ const HomePage = () => {
     []
   );
 
-  const homePageContextMenus: ContextMenuItem[] = React.useMemo(
+  const homePageContextMenus: ContextMenuItem[] = useMemo(
     () =>
       window.api.properties.isInDevelopment
         ? [
@@ -363,16 +365,19 @@ const HomePage = () => {
             {
               label: 'Show Notification',
               iconName: 'notifications_active',
-              handlerFunction: () =>
+              handlerFunction: () => {
+                const duration = Math.random() * 10000;
                 addNewNotifications([
                   {
-                    id: Math.random().toString(),
-                    delay: 5 * 60 * 1000,
+                    id: duration.toString(),
+                    duration: 5 * 60 * 1000,
+                    // duration,
                     content: `This is a notification with a number ${roundTo(Math.random(), 2)}`,
                     iconName: 'notifications_active',
                     type: 'WITH_PROGRESS_BAR'
                   }
-                ])
+                ]);
+              }
             }
           ]
         : [],

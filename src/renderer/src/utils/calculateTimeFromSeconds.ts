@@ -1,7 +1,6 @@
 import i18n from '../i18n';
 
 const calculateTimeFromSeconds = (secs = 0) => {
-  // eslint-disable-next-line no-param-reassign
   if (typeof secs !== 'number' && secs < 0) secs = 0;
 
   const totalYears = Math.floor(secs / (60 * 60 * 24 * 30 * 12));

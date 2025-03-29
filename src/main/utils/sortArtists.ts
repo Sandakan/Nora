@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 const sortAtoZ = <T extends (Artist | SavableArtist)[]>(arr: T) =>
   arr.sort((a, b) =>
     a.name.toLowerCase().replace(/\W/gi, '') > b.name.toLowerCase().replace(/\W/gi, '')

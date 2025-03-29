@@ -1,10 +1,11 @@
-import React from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../../Button';
 import SecondaryContainer from '../../SecondaryContainer';
 import Song from '../../SongsPage/Song';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { AppContext } from '../../../contexts/AppContext';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   songs: SongData[];
@@ -15,13 +16,18 @@ type Props = {
 
 const SongSearchResultsContainer = (props: Props) => {
   const { searchInput, songs, noOfVisibleSongs = 5, isPredictiveSearchEnabled } = props;
-  const { isMultipleSelectionEnabled, multipleSelectionsData, localStorageData } =
-    React.useContext(AppContext);
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const { toggleMultipleSelections, changeCurrentActivePage, createQueue, playSong } =
-    React.useContext(AppUpdateContext);
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const handleSongPlayBtnClick = React.useCallback(
+  const handleSongPlayBtnClick = useCallback(
     (currSongId: string) => {
       const queueSongIds = songs.filter((song) => !song.isBlacklisted).map((song) => song.songId);
       createQueue(queueSongIds, 'songs', false, undefined, false);
@@ -30,7 +36,7 @@ const SongSearchResultsContainer = (props: Props) => {
     [createQueue, playSong, songs]
   );
 
-  const songResults = React.useMemo(
+  const songResults = useMemo(
     () =>
       songs.length > 0
         ? songs
@@ -40,7 +46,7 @@ const SongSearchResultsContainer = (props: Props) => {
                   <Song
                     key={song.songId}
                     index={index}
-                    isIndexingSongs={localStorageData?.preferences?.isSongIndexingEnabled}
+                    isIndexingSongs={preferences?.isSongIndexingEnabled}
                     title={song.title}
                     artists={song.artists}
                     album={song.album}
@@ -58,12 +64,7 @@ const SongSearchResultsContainer = (props: Props) => {
             })
             .filter((song) => song !== undefined)
         : [],
-    [
-      handleSongPlayBtnClick,
-      localStorageData?.preferences?.isSongIndexingEnabled,
-      noOfVisibleSongs,
-      songs
-    ]
+    [handleSongPlayBtnClick, preferences?.isSongIndexingEnabled, noOfVisibleSongs, songs]
   );
 
   return (

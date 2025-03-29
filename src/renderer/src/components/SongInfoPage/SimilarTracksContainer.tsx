@@ -1,29 +1,33 @@
-import React from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { SimilarTracksOutput } from 'src/@types/last_fm_similar_tracks_api';
+import type { SimilarTracksOutput } from 'src/types/last_fm_similar_tracks_api';
 import UnAvailableTrack from './UnAvailableTrack';
 import TitleContainer from '../TitleContainer';
 import Song from '../SongsPage/Song';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = { songId: string };
 
 const SimilarTracksContainer = (props: Props) => {
-  const { bodyBackgroundImage, localStorageData, queue, currentSongData } =
-    React.useContext(AppContext);
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
   const { createQueue, playSong, updateQueueData, addNewNotifications } =
-    React.useContext(AppUpdateContext);
+    useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { songId } = props;
 
-  const [similarTracks, setSimilarTracks] = React.useState<NonNullable<SimilarTracksOutput>>({
+  const [similarTracks, setSimilarTracks] = useState<NonNullable<SimilarTracksOutput>>({
     sortedAvailTracks: [],
     sortedUnAvailTracks: []
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     window.api.audioLibraryControls
       .getSimilarTracksForASong(songId)
       .then((res) => {
@@ -33,7 +37,7 @@ const SimilarTracksContainer = (props: Props) => {
       .catch((err) => console.log(err));
   }, [songId]);
 
-  const handleSongPlayBtnClick = React.useCallback(
+  const handleSongPlayBtnClick = useCallback(
     (startSongId?: string) => {
       const songs = similarTracks.sortedAvailTracks.map((song) => song.songData!);
       const queueSongIds = songs.filter((song) => !song.isBlacklisted).map((song) => song.songId);
@@ -44,7 +48,7 @@ const SimilarTracksContainer = (props: Props) => {
     [similarTracks.sortedAvailTracks, createQueue, playSong]
   );
 
-  const addSongsToPlayNext = React.useCallback(() => {
+  const addSongsToPlayNext = useCallback(() => {
     const songs = similarTracks.sortedAvailTracks.map((song) => song.songData!);
     const queueSongIds = songs.filter((song) => !song.isBlacklisted).map((song) => song.songId);
 
@@ -73,7 +77,7 @@ const SimilarTracksContainer = (props: Props) => {
     addNewNotifications([
       {
         id: `${queueSongIds.length}PlayNext`,
-        delay: 5000,
+        duration: 5000,
         content: t('notifications.playingNextSongsWithCount', {
           count: queueSongIds.length
         }),
@@ -90,7 +94,7 @@ const SimilarTracksContainer = (props: Props) => {
     t
   ]);
 
-  const availableSimilarTrackComponents = React.useMemo(
+  const availableSimilarTrackComponents = useMemo(
     () =>
       similarTracks.sortedAvailTracks.map((track, index) => {
         const { songData } = track;
@@ -99,7 +103,7 @@ const SimilarTracksContainer = (props: Props) => {
           <Song
             key={song.songId}
             index={index}
-            isIndexingSongs={localStorageData?.preferences?.isSongIndexingEnabled}
+            isIndexingSongs={preferences?.isSongIndexingEnabled}
             title={song.title}
             artists={song.artists}
             album={song.album}
@@ -114,14 +118,10 @@ const SimilarTracksContainer = (props: Props) => {
           />
         );
       }),
-    [
-      handleSongPlayBtnClick,
-      localStorageData?.preferences?.isSongIndexingEnabled,
-      similarTracks.sortedAvailTracks
-    ]
+    [handleSongPlayBtnClick, preferences?.isSongIndexingEnabled, similarTracks.sortedAvailTracks]
   );
 
-  const unAvailableSimilarTrackComponents = React.useMemo(
+  const unAvailableSimilarTrackComponents = useMemo(
     () =>
       similarTracks.sortedUnAvailTracks.map((track) => {
         const { title, url, artists } = track;
@@ -171,7 +171,7 @@ const SimilarTracksContainer = (props: Props) => {
                 : 'text-font-color-black dark:text-font-color-white'
             } !my-4`}
           />
-          <div className="flex flex-wrap ">{unAvailableSimilarTrackComponents}</div>
+          <div className="flex flex-wrap">{unAvailableSimilarTrackComponents}</div>
         </>
       )}
     </div>

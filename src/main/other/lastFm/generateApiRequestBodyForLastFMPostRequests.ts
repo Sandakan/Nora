@@ -1,10 +1,10 @@
 import hashText from '../../utils/hashText';
-import {
+import type {
   AuthData,
   LoveParams,
   ScrobbleParams,
   updateNowPlayingParams
-} from '../../../@types/last_fm_api';
+} from '../../../types/last_fm_api';
 
 type LastFMApi = (
   | { method: 'track.scrobble'; params: ScrobbleParams }
@@ -40,7 +40,7 @@ const generateApiSignatureForLastFmPostRequests = (data: LastFMApi) => {
   return hashedSig;
 };
 
-export const generateApiRequestBodyForLastFMPostRequests = (data: LastFMApi) => {
+const generateApiRequestBodyForLastFMPostRequests = (data: LastFMApi) => {
   const { authData, method, params } = data;
   const { LAST_FM_API_KEY, SESSION_KEY } = authData;
 

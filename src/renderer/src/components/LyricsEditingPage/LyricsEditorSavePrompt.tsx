@@ -1,12 +1,12 @@
 /* eslint-disable promise/catch-or-return */
-import React from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import calculateTime from '../../utils/calculateTime';
 import isLyricsSynced from '../../../../common/isLyricsSynced';
 
-import { ExtendedEditingLyricsLineData } from './LyricsEditingPage';
+import { type ExtendedEditingLyricsLineData } from './LyricsEditingPage';
 import Button from '../Button';
 import Hyperlink from '../Hyperlink';
 
@@ -67,58 +67,61 @@ const convertLyricsStrToObj = (
   const lyrics = metadataLines.concat(lines).join('\n');
 
   const isSynced = isLyricsSynced(lyrics);
-  const syncedLyrics: SyncedLyricLine[] | undefined =
+  const parsedLyrics: LyricLine[] | undefined =
     lyricsLines.length > 0
       ? lyricsLines.map((line) => {
           return {
-            text: Array.isArray(line.text)
+            originalText: Array.isArray(line.text)
               ? line.text.map((textLine) => textLine.text).join(' ')
               : line.text,
+            translatedTexts: [],
+            isEnhancedSynced: false,
             start: line.start || 0,
             end: line.end || 0
           };
         })
-      : undefined;
+      : [];
 
   const obj: SongLyrics = {
     title,
     source: 'IN_SONG_LYRICS',
     lyrics: {
+      isTranslated: false,
       isSynced,
       unparsedLyrics: lyrics,
-      lyrics: lines,
-      syncedLyrics,
-      offset: 0
+      parsedLyrics,
+      offset: 0,
+      isReset: false,
+      isRomanized: false
     },
     lyricsType: isSynced ? 'SYNCED' : 'UN_SYNCED',
-    isOfflineLyricsAvailable: false,
-    isTranslated: false
+    isOfflineLyricsAvailable: false
   };
   return obj;
 };
 
 const LyricsEditorSavePrompt = (props: Props) => {
-  const { addNewNotifications, changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { addNewNotifications, changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { lyricsLines, currentSongData, isEditingEnhancedSyncedLyrics } = props;
 
-  const parsedLyrics = React.useMemo(
+  const parsedLyrics = useMemo(
     () => convertLyricsStrToObj(lyricsLines, currentSongData, isEditingEnhancedSyncedLyrics),
     [currentSongData, isEditingEnhancedSyncedLyrics, lyricsLines]
   );
 
-  const pathExt = React.useMemo(
+  const pathExt = useMemo(
     () => window.api.utils.getExtension(currentSongData.path),
     [currentSongData.path]
   );
 
-  const isSaveLyricsBtnDisabled = React.useMemo(
+  const isSaveLyricsBtnDisabled = useMemo(
     () => !metadataEditingSupportedExtensions.includes(pathExt),
     [pathExt]
   );
 
-  const copyLyrics = React.useCallback(
+  const copyLyrics = useCallback(
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
@@ -144,7 +147,7 @@ const LyricsEditorSavePrompt = (props: Props) => {
     [parsedLyrics]
   );
 
-  const saveLyricsToSong = React.useCallback(
+  const saveLyricsToSong = useCallback(
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
@@ -165,7 +168,7 @@ const LyricsEditorSavePrompt = (props: Props) => {
             return addNewNotifications([
               {
                 id: 'lyricsUpdateSuccessful',
-                delay: 5000,
+                duration: 5000,
                 content: t('lyricsEditorSavePrompt.lyricsUpdateSuccess'),
                 iconName: 'check'
               }

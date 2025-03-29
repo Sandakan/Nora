@@ -25,7 +25,7 @@ const ListeningActivityBar = (props: Props) => {
           })}
         />
       </div>
-      <div className="order-2 flex w-full grow-0 flex-col pt-1 text-font-color  dark:text-font-color-white">
+      <div className="order-2 flex w-full grow-0 flex-col pt-1 text-font-color dark:text-font-color-white">
         <span className="font-thin">{noOfListens}</span>
         <span className="truncate px-2">{monthName}</span>
       </div>

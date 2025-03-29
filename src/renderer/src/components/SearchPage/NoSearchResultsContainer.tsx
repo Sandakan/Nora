@@ -1,5 +1,4 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-import React from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Img from '../Img';
 
@@ -9,7 +8,7 @@ import RecentSearchResult from './RecentSearchResult';
 type Props = {
   searchResults: SearchResult;
   searchInput: string;
-  // eslint-disable-next-line no-unused-vars
+
   updateSearchInput: (input: string) => void;
 };
 
@@ -19,12 +18,11 @@ const NoSearchResultsContainer = (props: Props) => {
   const { searchInput, searchResults, updateSearchInput } = props;
   const { albums, artists, genres, playlists, songs } = searchResults;
 
-  const availableSearchResultComponents = React.useMemo(
+  const availableSearchResultComponents = useMemo(
     () =>
       searchResults.availableResults.length > 0
         ? searchResults.availableResults.map((result, index) => (
             <RecentSearchResult
-              // eslint-disable-next-line react/no-array-index-key
               key={index}
               result={result}
               clickHandler={() => {

@@ -1,15 +1,20 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React from 'react';
+import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import isLyricsSynced from '../../../../common/isLyricsSynced';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+
+import isLyricsSynced from '../../../../common/isLyricsSynced';
 
 import Button from '../Button';
 import Checkbox from '../Checkbox';
 import Img from '../Img';
-import { manageAlbumData, manageArtistsData, manageGenresData } from './SongMetadataResult';
+import {
+  manageAlbumData,
+  manageArtistsData,
+  manageGenresData
+} from '../../utils/manageMetadataResults';
 
 interface SongMetadataResultProp {
   title: string;
@@ -23,14 +28,14 @@ interface SongMetadataResultProp {
 }
 
 const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
-  const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { title, artists, genres, artworkPaths, album, lyrics, releasedYear, updateSongInfo } =
     props;
 
-  const [selectedArtwork, setSelectedArtwork] = React.useState(artworkPaths?.at(-1));
-  const [selectedMetadata, setSelectedMetadata] = React.useState({
+  const [selectedArtwork, setSelectedArtwork] = useState(artworkPaths?.at(-1));
+  const [selectedMetadata, setSelectedMetadata] = useState({
     isTitleSelected: true,
     isArtistsSelected: true,
     isAlbumSelected: true,
@@ -38,15 +43,14 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
     isGenresSelected: true,
     isLyricsSelected: true
   });
-  const [showLyrics, setShowLyrics] = React.useState(false);
+  const [showLyrics, setShowLyrics] = useState(false);
 
-  const artworkComponents = React.useMemo(() => {
+  const artworkComponents = useMemo(() => {
     return artworkPaths?.map((artwork, i) => {
       const isSelectedArtwork = selectedArtwork === artwork;
 
       return (
         <div
-          // eslint-disable-next-line react/no-array-index-key
           key={i}
           className={`group mr-4 flex cursor-pointer flex-col items-center rounded-lg p-4 hover:bg-background-color-2/50 dark:hover:bg-dark-background-color-2/50 ${
             isSelectedArtwork && 'bg-background-color-2 shadow-lg dark:bg-dark-background-color-2'
@@ -74,9 +78,9 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
     });
   }, [artworkPaths, selectedArtwork, t]);
 
-  const isLyricsSynchronised = React.useMemo(() => isLyricsSynced(lyrics || ''), [lyrics]);
+  const isLyricsSynchronised = useMemo(() => isLyricsSynced(lyrics || ''), [lyrics]);
 
-  const updateSelectedMetadata = React.useCallback(async () => {
+  const updateSelectedMetadata = useCallback(async () => {
     changePromptMenuData(false, undefined, '');
 
     const {
@@ -140,7 +144,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
     updateSongInfo
   ]);
 
-  const updateAllMetadata = React.useCallback(async () => {
+  const updateAllMetadata = useCallback(async () => {
     changePromptMenuData(false, undefined, '');
 
     const albumData = album ? await window.api.albumsData.getAlbumData([album]) : [];
@@ -175,7 +179,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
     updateSongInfo
   ]);
 
-  const isAtLeastOneSelected = React.useMemo(
+  const isAtLeastOneSelected = useMemo(
     () =>
       !(
         (Array.isArray(artworkPaths) && artworkPaths.length > 0 && selectedArtwork) ||
@@ -199,7 +203,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
     ]
   );
 
-  const isAllMetadataSelected = React.useMemo(
+  const isAllMetadataSelected = useMemo(
     () => Object.values(selectedMetadata).every((bool) => bool),
     [selectedMetadata]
   );
@@ -380,7 +384,7 @@ const CustomizeSelectedMetadataPrompt = (props: SongMetadataResultProp) => {
               >
                 <div className="title text-xs uppercase opacity-50">{t('common.lyrics')}</div>
                 <div className="data line-clamp-2 overflow-hidden truncate text-lg">
-                  <div className="flex ">
+                  <div className="flex">
                     {isLyricsSynchronised && (
                       <span className="material-icons-round-outlined mr-2 text-font-color-highlight dark:text-dark-font-color-highlight">
                         verified

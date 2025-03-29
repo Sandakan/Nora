@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-import log from '../log';
+import logger from '../logger';
 import { getDirectories, supportedMusicExtensions } from '../filesystem';
 import { showOpenDialog } from '../main';
 import getAllSettledPromises from '../utils/getAllSettledPromises';
@@ -37,11 +37,13 @@ export const generateFolderStructure = async (dir: string) => {
     const subDirs = await getDirectories(dir);
     if (Array.isArray(subDirs) && subDirs.length > 0) {
       const subDirsStructurePromise = subDirs.map((subDir) => generateFolderStructure(subDir));
+
       const { fulfilled: subDirsStructures } = await getAllSettledPromises(subDirsStructurePromise);
+      const filteredSubDirsStructures = subDirsStructures.filter((x) => x !== undefined);
 
-      structure.subFolders.push(...subDirsStructures);
+      structure.subFolders.push(...filteredSubDirsStructures);
 
-      const subDirNoOfSongs = subDirsStructures
+      const subDirNoOfSongs = filteredSubDirsStructures
         .map((x) => x.noOfSongs || 0)
         .reduce((prevValue, currValue) => prevValue + currValue, 0);
 
@@ -50,8 +52,8 @@ export const generateFolderStructure = async (dir: string) => {
     }
     return structure;
   } catch (error) {
-    log('Error occurred when analysing folder structure.', { error }, 'ERROR');
-    throw error;
+    logger.error('Failed to analyse folder structure.', { error, dir });
+    return undefined;
   }
 };
 

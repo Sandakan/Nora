@@ -1,15 +1,16 @@
-import React from 'react';
+import { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
-import {
+import type {
   EditingLyricsLineData,
   ExtendedEditingLyricsLineData,
   LyricsLineData
 } from './LyricsEditingPage';
 import Button from '../Button';
 import EditingLyricWord from './EditingLyricWord';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 interface Props extends ExtendedEditingLyricsLineData {
   isPlaying: boolean;
@@ -44,30 +45,31 @@ const reducerFunction = (
 };
 
 const EditingLyricsLine = (props: Props) => {
-  const { localStorageData } = React.useContext(AppContext);
-  const { updateSongPosition } = React.useContext(AppUpdateContext);
+  const lyricsEditorSettings = useStore(store, (state) => state.localStorage.lyricsEditorSettings);
+
+  const { updateSongPosition } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { text, index, isActive, end = 0, start = 0, updateLineData, isPlaying } = props;
-  const [content, dispatch] = React.useReducer(reducerFunction, {
+  const [content, dispatch] = useReducer(reducerFunction, {
     text,
     start,
     end
   } as EditingLyricsLineData);
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [shouldHighlight, setShouldHighlight] = React.useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [shouldHighlight, setShouldHighlight] = useState(false);
 
-  const lineRef = React.useRef<HTMLDivElement>(null);
-  const isActiveRef = React.useRef(false);
-  const resetLineDataRef = React.useRef<EditingLyricsLineData>({
+  const lineRef = useRef<HTMLDivElement>(null);
+  const isActiveRef = useRef(false);
+  const resetLineDataRef = useRef<EditingLyricsLineData>({
     text,
     start,
     end
   });
 
-  const isEditingEnhancedSyncedLyrics = React.useMemo(() => typeof text !== 'string', [text]);
+  const isEditingEnhancedSyncedLyrics = useMemo(() => typeof text !== 'string', [text]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     dispatch({
       type: 'UPDATE_ALL_CONTENT',
       payload: {
@@ -78,7 +80,7 @@ const EditingLyricsLine = (props: Props) => {
     });
   }, [end, text, start]);
 
-  const handleLyricsActivity = React.useCallback(
+  const handleLyricsActivity = useCallback(
     (e: Event) => {
       if ('detail' in e && !Number.isNaN(e.detail)) {
         const songPosition = e.detail as number;
@@ -105,7 +107,7 @@ const EditingLyricsLine = (props: Props) => {
     [end, isActive, isPlaying, start]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.addEventListener('player/positionChange', handleLyricsActivity);
 
     return () => document.removeEventListener('player/positionChange', handleLyricsActivity);
@@ -113,14 +115,13 @@ const EditingLyricsLine = (props: Props) => {
 
   const lyricsLineComponent = !isEditing ? (
     <span
-      className={`scale-75 cursor-pointer text-center text-5xl font-medium opacity-50 transition-[opacity,transform] ${
+      className={`scale-75 cursor-pointer text-center text-5xl font-medium opacity-50 transition-[opacity,transform] ${shouldHighlight && 'text-font-color-highlight dark:text-dark-font-color-highlight'} ${
         shouldHighlight ? '!scale-100 !opacity-100 group-hover:opacity-75' : ''
       } ${typeof content.text === 'object' && 'flex flex-wrap items-center justify-center text-wrap'}`}
     >
       {typeof content.text === 'string'
         ? content.text
         : content.text.map((word, i) => (
-            // eslint-disable-next-line react/no-array-index-key
             <EditingLyricWord isPlaying={isPlaying} wordData={word} key={i} />
           ))}
     </span>
@@ -130,7 +131,7 @@ const EditingLyricsLine = (props: Props) => {
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <div
       className={`group mb-2 flex flex-col items-center justify-center rounded-xl py-4 ${
-        isEditing && `w-full bg-background-color-2/50 shadow-xl dark:bg-dark-background-color-2/50 `
+        isEditing && `w-full bg-background-color-2/50 shadow-xl dark:bg-dark-background-color-2/50`
       } `}
       ref={lineRef}
       onKeyDown={(e) => isEditing && e.stopPropagation()}
@@ -239,7 +240,10 @@ const EditingLyricsLine = (props: Props) => {
                   const filteredLineData = prevLineData.filter(
                     (lineData) => lineData.index !== index
                   );
-                  return filteredLineData;
+                  return filteredLineData.map((lineData, i) => {
+                    lineData.index = i;
+                    return lineData;
+                  });
                 })
               }
             />
@@ -327,22 +331,20 @@ const EditingLyricsLine = (props: Props) => {
             setIsEditing((isEditingState) => {
               if (isEditingState === true)
                 updateLineData((prevLineData) => {
-                  prevLineData[index] = {
-                    ...prevLineData[index],
-                    text: content.text || text,
-                    start: content.start || start,
-                    end: content.end || end
-                  };
+                  const lineData = prevLineData.find((line) => line.index === index);
 
-                  if (
-                    localStorageData.lyricsEditorSettings
-                      .editNextAndCurrentStartAndEndTagsAutomatically
-                  ) {
+                  if (lineData) {
+                    lineData.text = content.text || text;
+                    lineData.start = content.start || start;
+                    lineData.end = content.end || end;
+                  }
+
+                  if (lyricsEditorSettings.editNextAndCurrentStartAndEndTagsAutomatically) {
                     if (prevLineData[index - 1]) prevLineData[index - 1].end = content.start;
                     if (prevLineData[index + 1]) prevLineData[index + 1].start = content.end;
                   }
 
-                  return prevLineData;
+                  return prevLineData.slice();
                 });
               return !isEditingState;
             });

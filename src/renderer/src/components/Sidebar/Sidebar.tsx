@@ -1,21 +1,17 @@
-/* eslint-disable react/no-unused-prop-types */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable no-else-return */
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable react/self-closing-comp */
-/* eslint-disable no-nested-ternary */
-/* eslint-disable import/prefer-default-export */
-import React, { useContext, useEffect, useMemo } from 'react';
+import { memo, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import { AppContext } from '../../contexts/AppContext';
 import { useTranslation } from 'react-i18next';
 
 import ErrorBoundary from '../ErrorBoundary';
 import SideBarItem from './SideBarItem';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
-const Sidebar = React.memo(() => {
-  const { currentlyActivePage, bodyBackgroundImage } = useContext(AppContext);
-  const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
+const Sidebar = memo(() => {
+  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+
+  const { changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const linkData = useMemo(
@@ -87,13 +83,13 @@ const Sidebar = React.memo(() => {
     [t]
   );
 
-  const [data, setData] = React.useState<typeof linkData>();
+  const [data, setData] = useState<typeof linkData>();
 
   useEffect(() => {
     setData(linkData);
   }, [linkData]);
 
-  const addActiveToSidebarItem = React.useCallback((id: string) => {
+  const addActiveToSidebarItem = useCallback((id: string) => {
     setData((prevData) => {
       if (prevData)
         return prevData.map((link) => {
@@ -117,7 +113,7 @@ const Sidebar = React.memo(() => {
     });
   }, []);
 
-  const clickHandler = React.useCallback(
+  const clickHandler = useCallback(
     (id: string, pageData?: PageData) => {
       changeCurrentActivePage(id as PageTitles, pageData);
       addActiveToSidebarItem(id);
@@ -125,11 +121,11 @@ const Sidebar = React.memo(() => {
     [addActiveToSidebarItem, changeCurrentActivePage]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     addActiveToSidebarItem(currentlyActivePage.pageTitle);
   }, [addActiveToSidebarItem, currentlyActivePage]);
 
-  const sideBarItems = React.useMemo(
+  const sideBarItems = useMemo(
     () =>
       data
         ? data.map((link) => (

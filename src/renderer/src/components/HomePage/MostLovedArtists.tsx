@@ -1,5 +1,4 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-import React from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
 
@@ -13,7 +12,7 @@ const MostLovedArtists = (props: Props) => {
   const { t } = useTranslation();
 
   const selectAllHandler = useSelectAllHandler(mostLovedArtists, 'artist', 'artistId');
-  const mostLovedArtistComponents = React.useMemo(
+  const mostLovedArtistComponents = useMemo(
     () =>
       mostLovedArtists
         .filter((_, i) => i < noOfVisibleArtists)

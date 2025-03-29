@@ -1,22 +1,22 @@
-import React from 'react';
+import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import Button from '../Button';
 
 type Props = {
-  dataEntries: [string, any][];
+  dataEntries: [string, unknown][];
   resetButtonHandler: () => void;
 };
 
 const ResetTagsToDefaultPrompt = (props: Props) => {
-  const { changePromptMenuData } = React.useContext(AppUpdateContext);
+  const { changePromptMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { resetButtonHandler, dataEntries } = props;
 
   const entries = (dataEntries.filter((x) => x[1]) ?? []).map(([x], i) => (
-    // eslint-disable-next-line react/no-array-index-key
     <div key={i}>
       {x.toUpperCase()} :
       <span className="ml-2 font-medium uppercase text-font-color-crimson">

@@ -1,14 +1,15 @@
-import { CSSProperties, ReactNode, forwardRef, useContext } from 'react';
-import { Virtuoso, Components, VirtuosoHandle } from 'react-virtuoso';
+import { type CSSProperties, type ReactNode, forwardRef, useContext } from 'react';
+import { Virtuoso, type Components, type VirtuosoHandle } from 'react-virtuoso';
 import debounce from '../utils/debounce';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 
 type Props<T extends object> = {
   data: T[];
-  fixedItemHeight?: number;
+  fixedItemHeight: number;
   scrollTopOffset?: number;
   itemContent: (index: number, item: T) => ReactNode;
   components?: Components<T>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   scrollerRef?: any;
   useWindowScroll?: boolean;
   style?: CSSProperties;
@@ -51,10 +52,10 @@ const List = <T extends object>(props: Props<T>, ref) => {
       ref={ref}
       initialTopMostItemIndex={{ index: scrollTopOffset ?? 0 }}
       scrollerRef={scrollerRef}
-      // increaseViewportBy={{
-      //   top: fixedItemHeight * 5, // to overscan 5 elements
-      //   bottom: fixedItemHeight * 5 // to overscan 5 elements
-      // }}
+      increaseViewportBy={{
+        top: fixedItemHeight * 5, // to overscan 5 elements
+        bottom: fixedItemHeight * 5 // to overscan 5 elements
+      }}
       rangeChanged={(range) => {
         if (!noRangeUpdates)
           debounce(

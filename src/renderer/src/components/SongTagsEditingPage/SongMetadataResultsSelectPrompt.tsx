@@ -1,5 +1,4 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
-import React from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
 import Button from '../Button';
@@ -18,14 +17,14 @@ const SongMetadataResultsSelectPage = (props: SongMetadataResultsSelectPageProp)
 
   const { songTitle, songArtists, updateSongInfo } = props;
 
-  const [songData, setSongData] = React.useState({
+  const [songData, setSongData] = useState({
     songTitle: '',
     songArtists: ''
   });
-  const [loadingStates, setLoadingStates] = React.useState('FETCH_START' as DataLoadingStates);
-  const [songResults, setSongResults] = React.useState([] as SongMetadataResultFromInternet[]);
+  const [loadingStates, setLoadingStates] = useState('FETCH_START' as DataLoadingStates);
+  const [songResults, setSongResults] = useState([] as SongMetadataResultFromInternet[]);
 
-  const fetchSongResults = React.useCallback((title: string, artists: string[]) => {
+  const fetchSongResults = useCallback((title: string, artists: string[]) => {
     setLoadingStates('PENDING');
     if (title) {
       window.api.songDataFromInternet
@@ -42,12 +41,12 @@ const SongMetadataResultsSelectPage = (props: SongMetadataResultsSelectPageProp)
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setSongData({ songTitle, songArtists: songArtists.join(', ') });
     fetchSongResults(songTitle, songArtists);
   }, [songTitle, songArtists, fetchSongResults]);
 
-  const songResultComponents = React.useMemo(() => {
+  const songResultComponents = useMemo(() => {
     return songResults.length > 0
       ? songResults.map((x) => (
           <SongMetadataResult
@@ -123,7 +122,6 @@ const SongMetadataResultsSelectPage = (props: SongMetadataResultsSelectPageProp)
 
       <div
         className={`song-results-container flex min-h-[15rem] flex-col items-center justify-center overflow-y-auto ${
-          // eslint-disable-next-line no-nested-ternary
           loadingStates === 'PENDING'
             ? `after:absolute after:h-5 after:w-5 after:animate-spin-ease after:rounded-full after:border-2 after:border-[transparent] after:border-t-font-color-black after:content-[''] dark:after:border-t-font-color-white`
             : loadingStates === 'EMPTY'

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Tag } from '../../../@types/last_fm_artist_info_api';
+import type { Tag } from '../../../../types/last_fm_artist_info_api';
 import Hyperlink from '../Hyperlink';
 
 const HashTag = (props: Tag) => {

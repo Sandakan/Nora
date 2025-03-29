@@ -12,6 +12,7 @@ import AboutSettings from './Settings/AboutSettings';
 import StorageSettings from './Settings/StorageSettings';
 import EqualizerSettings from './Settings/EqualizerSettings';
 import PerformanceSettings from './Settings/PerformanceSettings';
+import AdvancedSettings from './Settings/AdvancedSettings';
 import AccountsSettings from './Settings/AccountsSettings';
 import LanguageSettings from './Settings/LanguageSettings';
 
@@ -60,6 +61,9 @@ const SettingsPage = () => {
 
           {/* STARTUP SETTINGS */}
           <StorageSettings />
+
+          {/* ADVANCED SETTINGS */}
+          <AdvancedSettings />
 
           {/* ABOUT SETTINGS */}
           <AboutSettings />

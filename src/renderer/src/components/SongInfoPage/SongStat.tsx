@@ -1,12 +1,12 @@
-import React, { ReactElement } from 'react';
+import { type ReactElement, memo } from 'react';
 
 interface SongStatProp {
   title: string;
-  value: number | string | ReactElement<any, any>;
+  value: number | string | ReactElement;
   className?: string;
 }
 
-const SongStat = React.memo((props: SongStatProp) => {
+const SongStat = memo((props: SongStatProp) => {
   const { title, value, className } = props;
 
   return (

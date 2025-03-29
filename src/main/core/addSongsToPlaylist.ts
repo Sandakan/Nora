@@ -1,12 +1,12 @@
+import { sendMessageToRenderer } from '../main';
 import { getPlaylistData, setPlaylistData } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 
 const addSongsToPlaylist = (playlistId: string, songIds: string[]) => {
-  log(
-    `Requested a song with ids -${songIds.join(
-      ','
-    )}- to be added to a playlist with id '${playlistId}'.`
-  );
+  logger.debug(`Requested to add songs to a playlist.`, {
+    playlistId,
+    songIds
+  });
   const playlists = getPlaylistData();
   const addedIds: string[] = [];
   const existingIds: string[] = [];
@@ -23,28 +23,28 @@ const addSongsToPlaylist = (playlistId: string, songIds: string[]) => {
           } else existingIds.push(songId);
         }
         setPlaylistData(playlists);
-        return log(
-          `Added ${addedIds.length} songs to '${playlist.name}' successfully. ${
-            existingIds.length > 0
-              ? `Ignored ${existingIds.length} existing songs in the playlist.`
-              : ''
-          }`,
-          undefined,
-          'INFO',
-          {
-            sendToRenderer: {
-              messageCode: 'ADDED_SONGS_TO_PLAYLIST',
-              data: { count: addedIds.length, name: playlist.name }
-            }
-          }
-        );
+        logger.debug(`Successfully added ${addedIds.length} songs to the playlist.`, {
+          addedIds,
+          existingIds,
+          playlistId
+        });
+        return sendMessageToRenderer({
+          messageCode: 'ADDED_SONGS_TO_PLAYLIST',
+          data: { count: addedIds.length, name: playlist.name }
+        });
       }
     }
 
-    log(`Request failed because a playlist with an id '${playlistId}' cannot be found.`);
-    throw new Error(`playlist with an id ${playlistId} couldn't be found.`);
+    const errMessage = 'Request failed because a playlist cannot be found.';
+    logger.error(errMessage, {
+      playlistId
+    });
+    throw new Error(errMessage);
   }
-  throw new Error('Empty playlists array.');
+
+  const errMessage = 'Request failed because the playlists array is empty.';
+  logger.error(errMessage);
+  throw new Error(errMessage);
 };
 
 export default addSongsToPlaylist;

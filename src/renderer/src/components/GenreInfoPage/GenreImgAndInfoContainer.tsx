@@ -1,4 +1,4 @@
-import React from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
 
@@ -14,7 +14,7 @@ const GenreImgAndInfoContainer = (props: Props) => {
 
   const { genreData, genreSongs } = props;
 
-  const totalGenreSongsDuration = React.useMemo(
+  const totalGenreSongsDuration = useMemo(
     () =>
       calculateTimeFromSeconds(genreSongs.reduce((prev, current) => prev + current.duration, 0))
         .timeString,
@@ -22,7 +22,6 @@ const GenreImgAndInfoContainer = (props: Props) => {
   );
 
   return (
-    // eslint-disable-next-line react/jsx-no-useless-fragment
     <>
       {genreData && genreData.genreId && (
         <div className="genre-img-and-info-container flex flex-row items-center pb-8 text-font-color-black dark:text-font-color-white">

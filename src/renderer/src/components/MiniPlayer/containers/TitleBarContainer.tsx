@@ -1,30 +1,38 @@
-import React from 'react';
+import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../../Button';
-import { AppContext } from '../../../contexts/AppContext';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
+import { store } from '@renderer/store';
+import { useStore } from '@tanstack/react-store';
 
 type Props = { isLyricsVisible: boolean };
 
 const TitleBarContainer = (props: Props) => {
-  const { isCurrentSongPlaying, userData } = React.useContext(AppContext);
-  const { updatePlayerType, updateUserData } = React.useContext(AppUpdateContext);
+  const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
+  const isMiniPlayerAlwaysOnTop = useStore(
+    store,
+    (state) => state.userData.preferences.isMiniPlayerAlwaysOnTop
+  );
+  const hideWindowOnClose = useStore(
+    store,
+    (state) => state.userData.preferences.hideWindowOnClose
+  );
+
+  const { updatePlayerType, updateUserData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { isLyricsVisible } = props;
 
-  const toggleAlwaysOnTop = React.useCallback(() => {
-    if (userData) {
-      const state = !userData?.preferences.isMiniPlayerAlwaysOnTop;
-      return window.api.miniPlayer.toggleMiniPlayerAlwaysOnTop(state).then(() =>
-        updateUserData((prevUserData) => {
-          if (prevUserData?.preferences) prevUserData.preferences.isMiniPlayerAlwaysOnTop = state;
-          return prevUserData as UserData;
-        })
-      );
-    }
-    return undefined;
-  }, [updateUserData, userData]);
+  const toggleAlwaysOnTop = useCallback(() => {
+    const state = !isMiniPlayerAlwaysOnTop;
+
+    return window.api.miniPlayer.toggleMiniPlayerAlwaysOnTop(state).then(() =>
+      updateUserData((prevUserData) => {
+        if (prevUserData?.preferences) prevUserData.preferences.isMiniPlayerAlwaysOnTop = state;
+        return prevUserData;
+      })
+    );
+  }, [isMiniPlayerAlwaysOnTop, updateUserData]);
 
   return (
     <div
@@ -49,18 +57,14 @@ const TitleBarContainer = (props: Props) => {
         />
         <Button
           className={`always-on-top-btn !mr-0 !mt-1 !rounded-md !border-0 !bg-[transparent] !p-2 text-font-color-white outline-1 outline-offset-1 focus-visible:!outline dark:text-font-color-white ${
-            userData?.preferences.isMiniPlayerAlwaysOnTop
+            isMiniPlayerAlwaysOnTop
               ? '!bg-dark-background-color-2 dark:!bg-dark-background-color-2'
               : ''
           }`}
-          iconName={
-            userData?.preferences && userData.preferences.isMiniPlayerAlwaysOnTop
-              ? 'move_down'
-              : 'move_up'
-          }
+          iconName={isMiniPlayerAlwaysOnTop ? 'move_down' : 'move_up'}
           iconClassName="material-icons-round text-xl"
           tooltipLabel={t(
-            `miniPlayer.${userData?.preferences.isMiniPlayerAlwaysOnTop ? 'alwaysOnTopEnabled' : 'alwaysOnTopDisabled'}`
+            `miniPlayer.${isMiniPlayerAlwaysOnTop ? 'alwaysOnTopEnabled' : 'alwaysOnTopDisabled'}`
           )}
           removeFocusOnClick
           clickHandler={toggleAlwaysOnTop}
@@ -78,8 +82,7 @@ const TitleBarContainer = (props: Props) => {
         <Button
           className="close-btn !m-0 flex h-full items-center justify-center !rounded-none !border-0 !bg-[transparent] !px-2 text-center text-xl outline-1 -outline-offset-2 transition-[background] ease-in-out hover:!bg-font-color-crimson hover:!text-font-color-white focus-visible:!outline"
           clickHandler={() => {
-            if (userData && userData.preferences.hideWindowOnClose)
-              window.api.windowControls.hideApp();
+            if (hideWindowOnClose) window.api.windowControls.hideApp();
             else window.api.windowControls.closeApp();
           }}
           tooltipLabel={t('titleBar.close')}

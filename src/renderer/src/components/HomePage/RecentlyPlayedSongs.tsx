@@ -1,5 +1,4 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-import React from 'react';
+import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
@@ -13,14 +12,14 @@ import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 type Props = { recentlyPlayedSongs: SongData[]; noOfVisibleSongs: number };
 
 const RecentlyPlayedSongs = (props: Props) => {
-  const { changeCurrentActivePage } = React.useContext(AppUpdateContext);
+  const { changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { recentlyPlayedSongs, noOfVisibleSongs = 3 } = props;
   const MAX_SONG_LIMIT = 15;
 
   const selectAllHandler = useSelectAllHandler(recentlyPlayedSongs, 'songs', 'songId');
-  const recentlyPlayedSongComponents = React.useMemo(
+  const recentlyPlayedSongComponents = useMemo(
     () =>
       recentlyPlayedSongs
         .filter((_, i) => i < (noOfVisibleSongs || MAX_SONG_LIMIT))

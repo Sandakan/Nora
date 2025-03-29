@@ -1,16 +1,16 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Img from '../Img';
 import DefaultGenreCover from '../../assets/images/webp/genre-cover-default.webp';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import Button from '../Button';
+import { store } from '@renderer/store';
+import { useStore } from '@tanstack/react-store';
 
 interface GenreProp {
-  // eslint-disable-next-line react/no-unused-prop-types
   index: number;
   genreId: string;
   title: string;
@@ -23,8 +23,13 @@ interface GenreProp {
 
 const Genre = (props: GenreProp) => {
   const { genreId, songIds, title, artworkPaths, paletteData, className, selectAllHandler } = props;
-  const { queue, isMultipleSelectionEnabled, multipleSelectionsData } =
-    React.useContext(AppContext);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+
   const {
     changeCurrentActivePage,
     createQueue,
@@ -33,10 +38,10 @@ const Genre = (props: GenreProp) => {
     updateContextMenuData,
     toggleMultipleSelections,
     updateMultipleSelections
-  } = React.useContext(AppUpdateContext);
+  } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const goToGenreInfoPage = React.useCallback(
+  const goToGenreInfoPage = useCallback(
     () =>
       changeCurrentActivePage('GenreInfo', {
         genreId
@@ -44,7 +49,7 @@ const Genre = (props: GenreProp) => {
     [changeCurrentActivePage, genreId]
   );
 
-  const backgroundColor = React.useMemo(() => {
+  const backgroundColor = useMemo(() => {
     const swatch = paletteData?.DarkVibrant;
     if (swatch?.hsl) {
       const { hsl } = swatch;
@@ -54,7 +59,7 @@ const Genre = (props: GenreProp) => {
     return 'hsl(0 0% 0%)';
   }, [paletteData?.DarkVibrant]);
 
-  const playGenreSongs = React.useCallback(
+  const playGenreSongs = useCallback(
     (isShuffle = false) => {
       return window.api.audioLibraryControls
         .getSongInfo(songIds, undefined, undefined, undefined, true)
@@ -73,7 +78,7 @@ const Genre = (props: GenreProp) => {
     [createQueue, genreId, songIds]
   );
 
-  const playGenreSongsForMultipleSelections = React.useCallback(
+  const playGenreSongsForMultipleSelections = useCallback(
     (isShuffle = false) => {
       const { multipleSelections: genreIds } = multipleSelectionsData;
       window.api.genresData
@@ -110,7 +115,7 @@ const Genre = (props: GenreProp) => {
     [createQueue, multipleSelectionsData]
   );
 
-  const addToQueueForMultipleSelections = React.useCallback(() => {
+  const addToQueueForMultipleSelections = useCallback(() => {
     const { multipleSelections: genreIds } = multipleSelectionsData;
     window.api.genresData
       .getGenresData(genreIds)
@@ -137,7 +142,7 @@ const Genre = (props: GenreProp) => {
           addNewNotifications([
             {
               id: 'newSongsToQueue',
-              delay: 5000,
+              duration: 5000,
               content: t(`notifications.addedToQueue`, {
                 count: songs.length
               })
@@ -149,7 +154,7 @@ const Genre = (props: GenreProp) => {
       .catch((err) => console.error(err));
   }, [addNewNotifications, multipleSelectionsData, queue.queue, t, updateQueueData]);
 
-  const isAMultipleSelection = React.useMemo(() => {
+  const isAMultipleSelection = useMemo(() => {
     if (!multipleSelectionsData.isEnabled) return false;
     if (multipleSelectionsData.selectionType !== 'genre') return false;
     if (multipleSelectionsData.multipleSelections.length <= 0) return false;
@@ -158,7 +163,7 @@ const Genre = (props: GenreProp) => {
     return false;
   }, [multipleSelectionsData, genreId]);
 
-  const contextMenuItems: ContextMenuItem[] = React.useMemo(() => {
+  const contextMenuItems: ContextMenuItem[] = useMemo(() => {
     const isMultipleSelectionsEnabled =
       multipleSelectionsData.selectionType === 'genre' &&
       multipleSelectionsData.multipleSelections.length !== 1 &&
@@ -196,7 +201,7 @@ const Genre = (props: GenreProp) => {
             addNewNotifications([
               {
                 id: 'newSongsToQueue',
-                delay: 5000,
+                duration: 5000,
                 content: t(`notifications.addedToQueue`, {
                   count: songIds.length
                 })
@@ -258,7 +263,7 @@ const Genre = (props: GenreProp) => {
     updateMultipleSelections
   ]);
 
-  const contextMenuItemData = React.useMemo(
+  const contextMenuItemData = useMemo(
     () =>
       isMultipleSelectionEnabled &&
       multipleSelectionsData.selectionType === 'genre' &&

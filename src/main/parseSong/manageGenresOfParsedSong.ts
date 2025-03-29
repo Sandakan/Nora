@@ -2,11 +2,10 @@ import path from 'path';
 
 import { generateRandomId } from '../utils/randomId';
 
-export const manageGenresOfParsedSong = (
+const manageGenresOfParsedSong = (
   allGenres: SavableGenre[],
   songInfo: SavableSongData,
-  songArtworkPaths?: ArtworkPaths,
-  darkVibrantBgColor?: { rgb: [number, number, number] }
+  songArtworkPaths?: ArtworkPaths
 ) => {
   const newGenres: SavableGenre[] = [];
   const relevantGenres: SavableGenre[] = [];
@@ -23,7 +22,6 @@ export const manageGenresOfParsedSong = (
           songArtworkPaths && !songArtworkPaths.isDefaultArtwork
             ? path.basename(songArtworkPaths.artworkPath)
             : availableGenre.artworkName || undefined;
-        availableGenre.backgroundColor = darkVibrantBgColor || availableGenre.backgroundColor;
         availableGenre.songs.push({ songId, title });
         relevantGenres.push(availableGenre);
 
@@ -49,8 +47,7 @@ export const manageGenresOfParsedSong = (
           artworkName:
             songArtworkPaths && !songArtworkPaths.isDefaultArtwork
               ? path.basename(songArtworkPaths.artworkPath)
-              : undefined,
-          backgroundColor: darkVibrantBgColor
+              : undefined
         };
         relevantGenres.push(newGenre);
         newGenres.push(newGenre);

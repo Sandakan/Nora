@@ -1,5 +1,4 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-import React from 'react';
+import { useEffect, useState } from 'react';
 
 import Img from '../Img';
 
@@ -10,31 +9,47 @@ let isLoadedOnce = false;
 
 const hidePreloader = () => {
   const preloader = document.querySelector('.preloader');
-  if (preloader) {
+  const isHidable = preloader && !preloader.classList.contains('!invisible');
+  console.warn('hide preloader requested', {
+    time: window.performance.now() - contentLoadStart,
+    state: document.readyState,
+    isHidable
+  });
+
+  if (isHidable) {
     preloader.classList.add('!invisible', '!opacity-0');
+    console.warn(
+      'preloader hidden',
+      window.performance.now() - contentLoadStart,
+      document.readyState
+    );
   }
 };
 
-const eventHandler = () => {
-  setTimeout(hidePreloader, 1000);
+window.addEventListener(
+  'load',
+  () => {
+    setTimeout(hidePreloader, 1000);
 
-  console.warn('contentLoad', window.performance.now() - contentLoadStart);
-};
-
-window.addEventListener('load', eventHandler);
+    console.warn('contentLoad', window.performance.now() - contentLoadStart, document.readyState);
+  },
+  { once: true }
+);
 
 const Preloader = () => {
-  const [isPreloaderRemoved, setIsPreloaderRemoved] = React.useState(false);
+  const [isPreloaderRemoved, setIsPreloaderRemoved] = useState(false);
 
-  React.useEffect(() => {
-    // console.log(window.performance.now());
-    if (window.performance.now() > 3000) hidePreloader();
-    // this removes preloader in 10 seconds no matter what didn't load.
-    setTimeout(() => {
+  useEffect(() => {
+    // this removes preloader in 5 seconds no matter what didn't load.
+    const timeoutId = setTimeout(() => {
       hidePreloader();
       isLoadedOnce = true;
       setIsPreloaderRemoved(true);
-    }, 3000);
+    }, 5000);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   return (

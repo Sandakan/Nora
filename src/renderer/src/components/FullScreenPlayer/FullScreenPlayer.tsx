@@ -1,6 +1,4 @@
-/* eslint-disable react/no-array-index-key */
-import React, { useEffect, useMemo, useRef } from 'react';
-import { AppContext } from '../../contexts/AppContext';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import useMouseActiveState from '../../hooks/useMouseActiveState';
 
 import TitleBar from '../TitleBar/TitleBar';
@@ -10,18 +8,23 @@ import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import LyricsContainer from './containers/LyricsContainer';
 import SongInfoContainer from './containers/SongInfoContainer';
 import SeekBarSlider from '../SeekBarSlider';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 // type Props = {};
+
+const isArtistBackgroundsEnabled = false;
 
 const FullScreenPlayer = () =>
   // (props: Props)
   {
-    const { isCurrentSongPlaying, localStorageData, currentSongData } =
-      React.useContext(AppContext);
+    const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
+    const currentSongData = useStore(store, (state) => state.currentSongData);
+    const preferences = useStore(store, (state) => state.localStorage.preferences);
 
-    const [isLyricsVisible, setIsLyricsVisible] = React.useState(true);
-    const [isLyricsAvailable, setIsLyricsAvailable] = React.useState(true);
-    const [songPos, setSongPos] = React.useState(0);
+    const [isLyricsVisible, setIsLyricsVisible] = useState(false);
+    const [isLyricsAvailable, setIsLyricsAvailable] = useState(false);
+    const [songPos, setSongPos] = useState(0);
 
     const fullScreenPlayerContainerRef = useRef<HTMLDivElement>(null);
     const { isMouseActive } = useMouseActiveState(fullScreenPlayerContainerRef, {
@@ -31,21 +34,13 @@ const FullScreenPlayer = () =>
     });
 
     useEffect(() => {
-      if (
-        localStorageData.preferences.allowToPreventScreenSleeping &&
-        !localStorageData.preferences.removeAnimationsOnBatteryPower
-      )
+      if (preferences.allowToPreventScreenSleeping && !preferences.removeAnimationsOnBatteryPower)
         window.api.appControls.stopScreenSleeping();
       else window.api.appControls.allowScreenSleeping();
       return () => window.api.appControls.allowScreenSleeping();
-    }, [
-      localStorageData?.preferences.allowToPreventScreenSleeping,
-      localStorageData?.preferences.removeAnimationsOnBatteryPower
-    ]);
+    }, [preferences.allowToPreventScreenSleeping, preferences.removeAnimationsOnBatteryPower]);
 
     const imgPath = useMemo(() => {
-      const isArtistBackgroundsEnabled = false;
-
       const selectedArtist = currentSongData?.artists?.find(
         (artist) => !!artist.onlineArtworkPaths?.picture_xl
       );
@@ -58,7 +53,7 @@ const FullScreenPlayer = () =>
     return (
       <div
         className={`full-screen-player dark relative !bg-dark-background-color-1 ${!isCurrentSongPlaying && 'paused'} ${
-          localStorageData?.preferences?.isReducedMotion ? 'reduced-motion' : ''
+          preferences?.isReducedMotion ? 'reduced-motion' : ''
         } grid !h-screen w-full grid-rows-[auto_1fr] overflow-y-hidden`}
       >
         <div className="background-cover-img-container absolute left-0 top-0 h-full w-full">
@@ -67,8 +62,9 @@ const FullScreenPlayer = () =>
             fallbackSrc={DefaultSongCover}
             loading="eager"
             alt="Song Cover"
-            className="h-full w-full object-cover !blur-[2px] !brightness-[.25] transition-[filter] delay-100 duration-200 ease-in-out"
+            className={`h-full w-full object-cover shadow-lg blur-none !brightness-[.25] transition-[filter] delay-100 duration-200 ease-in-out ${isLyricsVisible ? '!blur-[2rem]' : '!blur-[2rem]'}`}
           />
+          {/* <div className="absolute inset-0 h-full w-full bg-gradient-to-r from-black/50 to-black/5"></div> */}
         </div>
         <TitleBar />
         <div
@@ -84,6 +80,7 @@ const FullScreenPlayer = () =>
             isLyricsVisible={isLyricsVisible}
             setIsLyricsVisible={setIsLyricsVisible}
             isLyricsAvailable={isLyricsAvailable}
+            isMouseActive={isMouseActive}
           />
           <SeekBarSlider
             name="full-screen-player-seek-slider"

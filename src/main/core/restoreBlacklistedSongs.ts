@@ -1,7 +1,7 @@
 import path from 'path';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import { getBlacklistData, setBlacklist } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 import getSongInfo from './getSongInfo';
 
 const restoreBlacklistedSongs = async (blacklistedSongIds: string[]) => {
@@ -36,11 +36,9 @@ const restoreBlacklistedSongs = async (blacklistedSongIds: string[]) => {
 
   setBlacklist(blacklist);
   dataUpdateEvent('blacklist/songBlacklist', restoredIds);
-  log(
-    'Song blacklist updated because some songs got removed from the blacklist.',
-    { songIds: blacklistedSongIds },
-    'INFO'
-  );
+  logger.info('Song blacklist updated because some songs got removed from the blacklist.', {
+    songIds: blacklistedSongIds
+  });
 };
 
 export default restoreBlacklistedSongs;

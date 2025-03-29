@@ -1,8 +1,11 @@
-/* eslint-disable prefer-destructuring */
 import { getUserData } from '../../filesystem';
-import log from '../../log';
+import logger from '../../logger';
 import hashText from '../../utils/hashText';
-import { AuthData, LastFMLoveUnlovePostResponse, LoveParams } from '../../../@types/last_fm_api';
+import type {
+  AuthData,
+  LastFMLoveUnlovePostResponse,
+  LoveParams
+} from '../../../types/last_fm_api';
 import { checkIfConnectedToInternet } from '../../main';
 import getLastFmAuthData from './getLastFMAuthData';
 
@@ -61,29 +64,29 @@ const sendFavoritesDataToLastFM = async (method: Method, title: string, artists:
         body
       });
 
-      if (res.status === 200) return log('Love/Unlove song request accepted.');
+      if (res.status === 200)
+        return logger.debug('Love/Unlove song request accepted.', { method, title, artists });
+
       const json: LastFMLoveUnlovePostResponse = await res.json();
 
-      return log(
-        'Failed the request to LastFM about love/unlove song.',
-        {
-          json
-        },
-        'WARN'
-      );
+      return logger.warn('Failed the request to LastFM about love/unlove song.', {
+        json,
+        method,
+        title,
+        artists
+      });
     }
-    return log('Request to Love/Unlove song ignored', {
+    return logger.debug('Request to Love/Unlove song ignored', {
       isSendingLoveEnabled,
       isConnectedToInternet
     });
   } catch (error) {
-    return log(
-      'Failed to send data about making a song a favorite to LastFM.',
-      {
-        error
-      },
-      'ERROR'
-    );
+    return logger.error('Failed to send data about making a song a favorite to LastFM.', {
+      error,
+      method,
+      title,
+      artists
+    });
   }
 };
 

@@ -1,9 +1,8 @@
-/* eslint-disable no-await-in-loop */
 import path from 'path';
 import fs from 'fs/promises';
 import { shell } from 'electron';
 import { supportedMusicExtensions } from '../filesystem';
-import log from '../log';
+import logger from '../logger';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
 
 const deleteSongsFromSystem = async (
@@ -12,11 +11,11 @@ const deleteSongsFromSystem = async (
   isPermanentDelete = false
 ) => {
   if (abortSignal.aborted) {
-    log(`Song deletion process aborted because abort event triggered.`);
+    logger.debug(`Song deletion process aborted because abort event triggered.`);
     throw new Error('Song deletion process aborted because abort event triggered.');
   }
 
-  log(`Started the deletion process of '${absoluteFilePaths.length}' songs.`, {
+  logger.debug(`Started the deletion process of '${absoluteFilePaths.length}' songs.`, {
     absoluteFilePaths
   });
 
@@ -26,12 +25,11 @@ const deleteSongsFromSystem = async (
   });
 
   if (!isEveryPathASong) {
-    log(
-      `Tried to delete a resource which is recognized as a song.`,
-      { path: absoluteFilePaths },
-      'WARN'
-    );
-    throw new Error(`Prevented deleting files which are not songs.`);
+    const errMessage = `Tried to delete a resource which is recognized as a song.`;
+    logger.error(errMessage, {
+      path: absoluteFilePaths
+    });
+    throw new Error(errMessage);
   }
 
   try {
@@ -53,9 +51,8 @@ const deleteSongsFromSystem = async (
       }.`
     };
   } catch (error) {
-    log(`Error occurred when removing a song from the system`, undefined, 'ERROR');
-    log(error as Error, undefined, 'ERROR');
-    throw error;
+    logger.error(`Failed to remove a song from the system`, { error });
+    return { success: false };
   }
 };
 

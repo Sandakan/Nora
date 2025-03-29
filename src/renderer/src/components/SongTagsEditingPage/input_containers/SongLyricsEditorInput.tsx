@@ -1,14 +1,15 @@
-import React from 'react';
+import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { AppContext } from '../../../contexts/AppContext';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import Button from '../../Button';
 import Hyperlink from '../../Hyperlink';
-import { LyricData } from '../../LyricsEditingPage/LyricsEditingPage';
-import { syncedLyricsRegex } from '../../LyricsPage/LyricsPage';
+import { type LyricData } from '../../LyricsEditingPage/LyricsEditingPage';
 import useNetworkConnectivity from '../../../hooks/useNetworkConnectivity';
-import parseLyrics from '../../../utils/parseLyrics';
+import parseLyrics from '../../../../../common/parseLyrics';
+import isLyricsSynced, { isLyricsEnhancedSynced } from '../../../../../common/isLyricsSynced';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type CurrentLyricsTYpe = 'synced' | 'unsynced';
 
@@ -22,34 +23,19 @@ type Props = {
     onlineArtworkPaths?: OnlineArtistArtworks | undefined;
   }[];
   songPath: string;
+  album?: string;
   duration: number;
   synchronizedLyrics?: string;
   unsynchronizedLyrics?: string;
   isLyricsSavingPending?: boolean;
-  // eslint-disable-next-line no-unused-vars
+
   updateSongInfo: (callback: (prevSongInfo: SongTags) => SongTags) => void;
 };
 
-export const extendedSyncedLyricsLineRegex =
-  /(?<extSyncTimeStamp><\d+:\d{1,2}\.\d{1,3}>) ?(?=(?<lyric>[^<>\n]+))/gm;
-
-const isLyricsSynchronized = (lyrics: string) => {
-  const isSynced = syncedLyricsRegex.test(lyrics);
-  syncedLyricsRegex.lastIndex = 0;
-
-  return isSynced;
-};
-
-export const isLyricsEnhancedSynced = (syncedLyricsString: string) => {
-  const isEnhancedSynced = extendedSyncedLyricsLineRegex.test(syncedLyricsString);
-  extendedSyncedLyricsLineRegex.lastIndex = 0;
-
-  return isEnhancedSynced;
-};
-
 const SongLyricsEditorInput = (props: Props) => {
-  const { userData } = React.useContext(AppContext);
-  const { addNewNotifications, changeCurrentActivePage } = React.useContext(AppUpdateContext);
+  const userData = useStore(store, (state) => state.userData);
+
+  const { addNewNotifications, changeCurrentActivePage } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { isOnline } = useNetworkConnectivity();
@@ -63,10 +49,11 @@ const SongLyricsEditorInput = (props: Props) => {
     isLyricsSavingPending = false,
     updateSongInfo,
     duration,
+    album,
     songPath
   } = props;
 
-  const [currentLyricsType, setCurrentLyricsType] = React.useState<CurrentLyricsTYpe>(
+  const [currentLyricsType, setCurrentLyricsType] = useState<CurrentLyricsTYpe>(
     synchronizedLyrics ? 'synced' : 'unsynced'
   );
 
@@ -74,16 +61,16 @@ const SongLyricsEditorInput = (props: Props) => {
     isSynchronizedLyricsSynced,
     isUnsynchronizedLyricsSynced,
     isSynchronizedLyricsEnhancedSynced
-  } = React.useMemo(() => {
+  } = useMemo(() => {
     let isSyncedLyricsSynced = false;
     let isSyncedLyricsEnhancedSynced = false;
     let isUnsyncedLyricsSynced = false;
 
     if (synchronizedLyrics) {
-      isSyncedLyricsSynced = isLyricsSynchronized(synchronizedLyrics);
+      isSyncedLyricsSynced = isLyricsSynced(synchronizedLyrics);
       isSyncedLyricsEnhancedSynced = isLyricsEnhancedSynced(synchronizedLyrics);
     }
-    if (unsynchronizedLyrics) isUnsyncedLyricsSynced = isLyricsSynchronized(unsynchronizedLyrics);
+    if (unsynchronizedLyrics) isUnsyncedLyricsSynced = isLyricsSynced(unsynchronizedLyrics);
 
     return {
       isSynchronizedLyricsSynced: isSyncedLyricsSynced,
@@ -92,11 +79,11 @@ const SongLyricsEditorInput = (props: Props) => {
     };
   }, [synchronizedLyrics, unsynchronizedLyrics]);
 
-  // React.useEffect(() => {
+  // useEffect(() => {
   //   setCurrentLyricsType(synchronizedLyrics ? 'synced' : 'unsynced');
   // }, [synchronizedLyrics]);
 
-  const downloadLyrics = React.useCallback(
+  const downloadLyrics = useCallback(
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
@@ -109,6 +96,7 @@ const SongLyricsEditorInput = (props: Props) => {
           {
             songTitle,
             songArtists: songArtists?.map((artist) => artist.name),
+            album,
             duration,
             songPath
           },
@@ -132,7 +120,7 @@ const SongLyricsEditorInput = (props: Props) => {
           addNewNotifications([
             {
               id: `fetchUnsyncedLyricsFailed`,
-              delay: 5000,
+              duration: 5000,
               content: <span>Failed to fetch un-synced lyrics.</span>,
               icon: <span className="material-icons-round icon">warning</span>
             }
@@ -140,10 +128,10 @@ const SongLyricsEditorInput = (props: Props) => {
           console.error(err);
         });
     },
-    [addNewNotifications, duration, songArtists, songPath, songTitle, updateSongInfo]
+    [addNewNotifications, album, duration, songArtists, songPath, songTitle, updateSongInfo]
   );
 
-  const downloadSyncedLyrics = React.useCallback(
+  const downloadSyncedLyrics = useCallback(
     (
       _: unknown,
       setIsDisabled: (state: boolean) => void,
@@ -156,6 +144,7 @@ const SongLyricsEditorInput = (props: Props) => {
           {
             songTitle,
             songArtists: songArtists?.map((artist) => artist.name),
+            album,
             duration,
             songPath
           },
@@ -177,7 +166,7 @@ const SongLyricsEditorInput = (props: Props) => {
           addNewNotifications([
             {
               id: `fetchSyncedLyricsFailed`,
-              delay: 5000,
+              duration: 5000,
               content: t('songTagsEditingPage.syncedLyricsFetchFailed'),
               iconName: 'warning'
             }
@@ -186,19 +175,20 @@ const SongLyricsEditorInput = (props: Props) => {
           console.error(err);
         });
     },
-    [addNewNotifications, duration, songArtists, songPath, songTitle, t, updateSongInfo]
+    [addNewNotifications, album, duration, songArtists, songPath, songTitle, t, updateSongInfo]
   );
 
-  const goToLyricsEditor = React.useCallback(() => {
+  const goToLyricsEditor = useCallback(() => {
     if (synchronizedLyrics || unsynchronizedLyrics) {
       const lyrics = currentLyricsType === 'synced' ? synchronizedLyrics : unsynchronizedLyrics;
       let lines: LyricData[] = [];
-      const { isSynced, syncedLyrics, unsyncedLyrics } = parseLyrics(lyrics as string);
+      const { parsedLyrics } = parseLyrics(lyrics as string);
 
-      if (isSynced) lines = syncedLyrics;
-      else {
-        lines = unsyncedLyrics.map((line) => ({ text: line }));
-      }
+      lines = parsedLyrics.map((lyric) => ({
+        text: lyric.originalText,
+        start: lyric.start,
+        end: lyric.end
+      }));
 
       changeCurrentActivePage('LyricsEditor', {
         lyrics: lines,
@@ -251,7 +241,9 @@ const SongLyricsEditorInput = (props: Props) => {
           name="lyrics"
           placeholder={t('common.lyrics')}
           value={
-            currentLyricsType === 'synced' ? synchronizedLyrics ?? '' : unsynchronizedLyrics ?? ''
+            currentLyricsType === 'synced'
+              ? (synchronizedLyrics ?? '')
+              : (unsynchronizedLyrics ?? '')
           }
           onKeyDown={(e) => e.stopPropagation()}
           onChange={(e) => {

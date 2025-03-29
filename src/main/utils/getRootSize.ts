@@ -1,12 +1,11 @@
-/* eslint-disable no-useless-escape */
 import os from 'os';
 import childProcess from 'node:child_process';
 import path from 'path';
 
-import log from '../log';
+import logger from '../logger';
 
 // using the comman > wmic logicaldisk get Name, Size, FreeSpace
-const winRootRegex = /^(?<freeSpace>\d+) {0,}(?<name>\w+:) {0,}(?<size>\d+) {0,}$/gm;
+const winRootRegex = /^(?<name>\w+:) {0,}(?<size>\d+) {0,}(?<freeSpace>\d+) {0,}$/gm;
 
 // uses the command > df -h
 const linuxRootRegex =
@@ -32,8 +31,11 @@ const getRootSize = (
         const { root } = path.parse(appPath);
         output.rootDir = root.replaceAll(path.sep, '');
         childProcess.execFile(
-          'cmd.exe',
-          ['/c', 'wmic logicaldisk get Name, Size, FreeSpace'],
+          'powershell.exe',
+          [
+            '-command',
+            'Get-CimInstance -ClassName Win32_LogicalDisk | Select-Object DeviceID, Size, FreeSpace'
+          ],
           (error: unknown, stdout) => {
             if (error) {
               reject(new Error(`exec error: ${error}`));
@@ -84,9 +86,9 @@ const getRootSize = (
           }
           return resolve(output);
         });
-      else log(`No support for getting root size in ${platform}.`);
+      else logger.debug(`System platform not supported to calculate root size.`, { platform });
     } catch (error) {
-      log('Error occurred when calculating root size', { error }, 'ERROR');
+      logger.debug('Failed to calculate root size', { error, appPath });
       reject(error);
     }
   });

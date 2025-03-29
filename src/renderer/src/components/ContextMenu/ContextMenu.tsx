@@ -1,15 +1,17 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import React from 'react';
+import { memo, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import ContextMenuItem from './ContextMenuItem';
-import { AppContext } from '../../contexts/AppContext';
 import ContextMenuDataItem from './ContextMenuDataItem';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
-const ContextMenu = React.memo(() => {
-  const { contextMenuData } = React.useContext(AppContext);
+const ContextMenu = memo(() => {
+  const contextMenuData = useStore(store, (state) => state.contextMenuData);
+
   const { isVisible, menuItems, data } = contextMenuData;
 
-  const contextMenuRef = React.useRef(null as null | HTMLDivElement);
-  const [dimensions, setDimensions] = React.useState({
+  const contextMenuRef = useRef(null as null | HTMLDivElement);
+  const [dimensions, setDimensions] = useState({
     width: 0,
     height: 0,
     positionX: 0,
@@ -17,12 +19,12 @@ const ContextMenu = React.memo(() => {
     transformOrigin: 'top left'
   });
 
-  const contextMenuStyles: any = {};
+  const contextMenuStyles: CSSProperties = {};
   contextMenuStyles['--position-x'] = `${dimensions.positionX}px`;
   contextMenuStyles['--position-y'] = `${dimensions.positionY}px`;
   contextMenuStyles['--transform-origin'] = `${dimensions.transformOrigin}`;
 
-  React.useLayoutEffect(() => {
+  useLayoutEffect(() => {
     const { pageX, pageY } = contextMenuData;
 
     if (contextMenuRef.current) {
@@ -51,7 +53,7 @@ const ContextMenu = React.memo(() => {
     }
   }, [contextMenuData]);
 
-  const contextMenuItems = React.useMemo(
+  const contextMenuItems = useMemo(
     () =>
       menuItems
         .filter((menuItem) => !menuItem.isDisabled)
@@ -59,7 +61,6 @@ const ContextMenu = React.memo(() => {
           if (menuItem.isContextMenuItemSeperator)
             return (
               <div
-                // eslint-disable-next-line react/no-array-index-key
                 key={index}
                 role="separator"
                 className="context-menu-item-seperator float-right my-2 h-[1px] w-[95%] bg-[hsla(0deg,0%,57%,0.5)]"
@@ -83,7 +84,7 @@ const ContextMenu = React.memo(() => {
         isVisible ? 'scale-100 opacity-100' : 'invisible scale-75 opacity-0'
       } ${
         !data && 'pt-2'
-      } absolute z-50 h-fit w-fit min-w-[13.75rem] origin-top-left overflow-hidden overflow-y-auto rounded-lg bg-context-menu-background/90 pb-1 pt-1 text-font-color-black shadow-[10px_0px_53px_0px_rgba(0,0,0,0.22)] backdrop-blur-sm transition-[opacity,transform,visibility,width,height] dark:bg-dark-context-menu-background/90 dark:text-font-color-white `}
+      } absolute z-50 h-fit w-fit min-w-[15rem] origin-top-left overflow-hidden overflow-y-auto rounded-lg bg-context-menu-background/90 pb-1 pt-1 text-font-color-black shadow-[10px_0px_53px_0px_rgba(0,0,0,0.22)] backdrop-blur-md transition-[opacity,transform,visibility,width,height] dark:bg-dark-context-menu-background/90 dark:text-font-color-white`}
       onClick={(e) => e.stopPropagation()}
       style={{
         top: dimensions.positionY,

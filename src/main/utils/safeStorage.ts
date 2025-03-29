@@ -1,6 +1,5 @@
-/* eslint-disable prefer-destructuring */
 import crypto from 'crypto';
-import log from '../log';
+import logger from '../logger';
 
 // Encryption function
 export function encrypt(data: string) {
@@ -18,7 +17,7 @@ export function encrypt(data: string) {
 
     return encrypted;
   } catch (error) {
-    log('Error occurred when encrypting data.', { error }, 'ERROR');
+    logger.debug('Failed to encrypting data.', { error });
     throw error;
   }
 }
@@ -38,7 +37,7 @@ export function decrypt(encryptedData: string): string {
 
     return decryptedData;
   } catch (error) {
-    log('Error occurred when decrypting data.', { error }, 'ERROR');
+    logger.debug('Failed to decrypting data.', { error });
     throw error;
   }
 }
@@ -50,18 +49,7 @@ export function compare(data: string, encryptedData: string) {
 
     return isTheSame;
   } catch (error) {
-    log('Error occurred when comparing encrypted data.', { error }, 'ERROR');
+    logger.error('Failed to compare encrypted data.', { error });
     return false;
   }
 }
-
-// // Example usage
-// const sensitiveData = 'This is sensitive information';
-
-// // Encrypt the data
-// const encrypted = encryptData(sensitiveData);
-// console.log('Encrypted Data:', encrypted);
-
-// // Decrypt the data
-// const decrypted = decryptData(encrypted);
-// console.log('Decrypted Data:', decrypted);

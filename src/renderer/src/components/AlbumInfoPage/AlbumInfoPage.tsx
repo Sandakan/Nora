@@ -1,19 +1,17 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { useContext } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
-
 import MainContainer from '../MainContainer';
 import Song from '../SongsPage/Song';
 import TitleContainer from '../TitleContainer';
 import AlbumImgAndInfoContainer from './AlbumImgAndInfoContainer';
 import OnlineAlbumInfoContainer from './OnlineAlbumInfoContainer';
 import { songSortOptions } from '../SongsPage/SongOptions';
-import { LastFMAlbumInfo } from 'src/@types/last_fm_album_info_api';
+import type { LastFMAlbumInfo } from 'src/types/last_fm_album_info_api';
 import VirtualizedList from '../VirtualizedList';
+import { useStore } from '@tanstack/react-store';
+import { store } from '../../store';
 
 interface AlbumContentReducer {
   albumData: Album;
@@ -30,6 +28,7 @@ type AlbumContentReducerActions =
 
 const reducer = (
   state: AlbumContentReducer,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   action: { type: AlbumContentReducerActions; data: any }
 ): AlbumContentReducer => {
   switch (action.type) {
@@ -59,7 +58,10 @@ const reducer = (
 };
 
 const AlbumInfoPage = () => {
-  const { currentlyActivePage, queue, localStorageData } = useContext(AppContext);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+  const preferences = useStore(store, (state) => state?.localStorage?.preferences);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+
   const {
     createQueue,
     updateQueueData,
@@ -69,27 +71,32 @@ const AlbumInfoPage = () => {
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const [albumContent, dispatch] = React.useReducer(reducer, {
+  const [albumContent, dispatch] = useReducer(reducer, {
     albumData: {} as Album,
     songsData: [] as SongData[],
     sortingOrder: 'trackNoAscending' as SongSortTypes
   });
 
-  React.useEffect(() => {
-    if (currentlyActivePage.data.albumId)
+  const albumId = useMemo(
+    () => currentlyActivePage?.data?.albumId as string,
+    [currentlyActivePage?.data?.albumId]
+  );
+
+  useEffect(() => {
+    if (albumId)
       window.api.albumsData
-        .getAlbumInfoFromLastFM(currentlyActivePage.data.albumId)
+        .getAlbumInfoFromLastFM(albumId)
         .then((res) => {
           if (res) dispatch({ type: 'OTHER_ALBUM_DATA_UPDATE', data: res });
           return undefined;
         })
         .catch((err) => console.error(err));
-  }, [currentlyActivePage.data.albumId]);
+  }, [albumId]);
 
-  const fetchAlbumData = React.useCallback(() => {
-    if (currentlyActivePage.data.albumId) {
+  const fetchAlbumData = useCallback(() => {
+    if (albumId) {
       window.api.albumsData
-        .getAlbumData([currentlyActivePage.data.albumId as string])
+        .getAlbumData([albumId as string])
         .then((res) => {
           if (res && res.length > 0 && res[0]) {
             dispatch({ type: 'ALBUM_DATA_UPDATE', data: res[0] });
@@ -98,9 +105,9 @@ const AlbumInfoPage = () => {
         })
         .catch((err) => console.error(err));
     }
-  }, [currentlyActivePage.data.albumId]);
+  }, [albumId]);
 
-  const fetchAlbumSongs = React.useCallback(() => {
+  const fetchAlbumSongs = useCallback(() => {
     if (albumContent.albumData.songs && albumContent.albumData.songs.length > 0) {
       window.api.audioLibraryControls
         .getSongInfo(
@@ -117,7 +124,7 @@ const AlbumInfoPage = () => {
     }
   }, [albumContent.albumData, albumContent.sortingOrder]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchAlbumData();
     const manageDataUpdatesInAlbumsInfoPage = (e: Event) => {
       if ('detail' in e) {
@@ -134,7 +141,7 @@ const AlbumInfoPage = () => {
     };
   }, [fetchAlbumData]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchAlbumSongs();
     const manageAlbumSongUpdatesInAlbumInfoPage = (e: Event) => {
       const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
@@ -159,7 +166,7 @@ const AlbumInfoPage = () => {
 
   const selectAllHandler = useSelectAllHandler(albumContent.songsData, 'songs', 'songId');
 
-  const handleSongPlayBtnClick = React.useCallback(
+  const handleSongPlayBtnClick = useCallback(
     (currSongId: string) => {
       const queueSongIds = albumContent.songsData
         .filter((song) => !song.isBlacklisted)
@@ -170,7 +177,7 @@ const AlbumInfoPage = () => {
     [albumContent.songsData, albumContent.albumData.albumId, createQueue, playSong]
   );
 
-  const listItems = React.useMemo(() => {
+  const listItems = useMemo(() => {
     const items: (Album | SongData | LastFMAlbumInfo)[] = [
       albumContent.albumData,
       ...albumContent.songsData
@@ -183,7 +190,7 @@ const AlbumInfoPage = () => {
 
   return (
     <MainContainer
-      className="album-info-page-container appear-from-bottom h-full !pb-0 pl-8 "
+      className="album-info-page-container appear-from-bottom h-full !pb-0 pl-8"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {
@@ -224,7 +231,7 @@ const AlbumInfoPage = () => {
               addNewNotifications([
                 {
                   id: albumContent.albumData.albumId,
-                  delay: 5000,
+                  duration: 5000,
                   content: t('notifications.addedToQueue', {
                     count: albumContent.songsData.length
                   })
@@ -277,14 +284,12 @@ const AlbumInfoPage = () => {
               <Song
                 key={index}
                 index={index}
-                isIndexingSongs={localStorageData?.preferences.isSongIndexingEnabled}
+                isIndexingSongs={preferences?.isSongIndexingEnabled}
                 onPlayClick={handleSongPlayBtnClick}
                 selectAllHandler={selectAllHandler}
                 {...item}
                 trackNo={
-                  localStorageData?.preferences?.showTrackNumberAsSongIndex
-                    ? item.trackNo ?? '--'
-                    : undefined
+                  preferences?.showTrackNumberAsSongIndex ? (item.trackNo ?? '--') : undefined
                 }
               />
             );

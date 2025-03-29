@@ -1,27 +1,28 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable import/prefer-default-export */
-import React from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../contexts/AppContext';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import SongArtist from '../SongsPage/SongArtist';
 import DefaultAlbumCover from '../../assets/images/webp/album_cover_default.webp';
 import Button from '../Button';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 interface AlbumProp extends Album {
-  // eslint-disable-next-line react/no-unused-prop-types
   index: number;
   className?: string;
   selectAllHandler?: (_upToId?: string) => void;
 }
 
 export const Album = (props: AlbumProp) => {
-  const { currentlyActivePage, queue, isMultipleSelectionEnabled, multipleSelectionsData } =
-    React.useContext(AppContext);
+  const isMultipleSelectionEnabled = useStore(
+    store,
+    (state) => state.multipleSelectionsData.isEnabled
+  );
+  const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
+  const queue = useStore(store, (state) => state.localStorage.queue);
+  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
 
   const {
     changeCurrentActivePage,
@@ -31,10 +32,10 @@ export const Album = (props: AlbumProp) => {
     addNewNotifications,
     updateMultipleSelections,
     toggleMultipleSelections
-  } = React.useContext(AppUpdateContext);
+  } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const playAlbumSongs = React.useCallback(
+  const playAlbumSongs = useCallback(
     (isShuffle = false) => {
       return window.api.audioLibraryControls
         .getSongInfo(
@@ -59,7 +60,7 @@ export const Album = (props: AlbumProp) => {
     [createQueue, props.albumId, props.songs]
   );
 
-  const playAlbumSongsForMultipleSelections = React.useCallback(
+  const playAlbumSongsForMultipleSelections = useCallback(
     (isShuffle = false) => {
       const { multipleSelections: albumIds } = multipleSelectionsData;
 
@@ -97,7 +98,7 @@ export const Album = (props: AlbumProp) => {
     [createQueue, multipleSelectionsData]
   );
 
-  const addToQueueForMultipleSelections = React.useCallback(() => {
+  const addToQueueForMultipleSelections = useCallback(() => {
     const { multipleSelections: albumIds } = multipleSelectionsData;
     window.api.genresData
       .getGenresData(albumIds)
@@ -124,7 +125,7 @@ export const Album = (props: AlbumProp) => {
           addNewNotifications([
             {
               id: 'newSongsToQueue',
-              delay: 5000,
+              duration: 5000,
               content: t('notifications.addedToQueue', { count: songs.length })
             }
           ]);
@@ -134,7 +135,7 @@ export const Album = (props: AlbumProp) => {
       .catch((err) => console.error(err));
   }, [addNewNotifications, multipleSelectionsData, queue.queue, t, updateQueueData]);
 
-  const showAlbumInfoPage = React.useCallback(
+  const showAlbumInfoPage = useCallback(
     () =>
       currentlyActivePage?.data?.albumId !== props.albumId &&
       changeCurrentActivePage('AlbumInfo', {
@@ -143,7 +144,7 @@ export const Album = (props: AlbumProp) => {
     [changeCurrentActivePage, currentlyActivePage?.data, props.albumId]
   );
 
-  const isAMultipleSelection = React.useMemo(() => {
+  const isAMultipleSelection = useMemo(() => {
     if (!multipleSelectionsData.isEnabled) return false;
     if (multipleSelectionsData.selectionType !== 'album') return false;
     if (multipleSelectionsData.multipleSelections.length <= 0) return false;
@@ -154,7 +155,7 @@ export const Album = (props: AlbumProp) => {
     return false;
   }, [multipleSelectionsData, props.albumId]);
 
-  const albumArtists = React.useMemo(() => {
+  const albumArtists = useMemo(() => {
     const { artists } = props;
     if (Array.isArray(artists) && artists.length > 0) {
       return artists
@@ -184,7 +185,7 @@ export const Album = (props: AlbumProp) => {
     return <span className="text-xs font-normal">{t('common.unknownArtist')}</span>;
   }, [isAMultipleSelection, props, t]);
 
-  const contextMenuItems: ContextMenuItem[] = React.useMemo(() => {
+  const contextMenuItems: ContextMenuItem[] = useMemo(() => {
     const isMultipleSelectionsEnabled =
       multipleSelectionsData.selectionType === 'album' &&
       multipleSelectionsData.multipleSelections.length !== 1 &&
@@ -221,7 +222,7 @@ export const Album = (props: AlbumProp) => {
             addNewNotifications([
               {
                 id: 'newSongsToQueue',
-                delay: 5000,
+                duration: 5000,
                 content: t(`notifications.addedToQueue`, {
                   count: props.songs.length
                 })
@@ -282,7 +283,7 @@ export const Album = (props: AlbumProp) => {
     updateQueueData
   ]);
 
-  const contextMenuItemData = React.useMemo(
+  const contextMenuItemData = useMemo(
     (): ContextMenuAdditionalData =>
       isMultipleSelectionEnabled &&
       multipleSelectionsData.selectionType === 'album' &&
@@ -314,9 +315,10 @@ export const Album = (props: AlbumProp) => {
   );
 
   return (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
-      className={`album appear-from-bottom h-68 group mb-2 mr-6 flex w-48 flex-col justify-between overflow-hidden rounded-md p-4 ${
+      className={`album h-68 group mb-2 mr-6 flex w-48 flex-col justify-between overflow-hidden rounded-md p-4 ${
         props.className ?? ''
       } ${
         isAMultipleSelection
@@ -360,7 +362,7 @@ export const Album = (props: AlbumProp) => {
             fallbackSrc={DefaultAlbumCover}
             loading="lazy"
             alt="Album Cover"
-            className="h-full max-h-full w-full object-cover object-center"
+            className="aspect-square h-full max-h-full w-full object-cover object-center"
             enableImgFadeIns={!isMultipleSelectionEnabled}
           />
         </div>

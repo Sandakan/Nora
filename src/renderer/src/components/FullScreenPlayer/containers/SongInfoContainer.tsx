@@ -1,6 +1,5 @@
-import React from 'react';
+import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppContext } from '../../../contexts/AppContext';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import calculateTime from '../../../utils/calculateTime';
 
@@ -9,32 +8,45 @@ import Img from '../../Img';
 import UpNextSongPopup from '../../SongsControlsContainer/UpNextSongPopup';
 
 import DefaultSongCover from '../../../assets/images/webp/song_cover_default.webp';
+import VolumeSlider from '../../VolumeSlider';
+import { useStore } from '@tanstack/react-store';
+import { store } from '@renderer/store';
 
 type Props = {
   songPos: number;
   isLyricsVisible: boolean;
   isLyricsAvailable: boolean;
+  isMouseActive: boolean;
   setIsLyricsVisible: (callback: (state: boolean) => boolean) => void;
 };
 
 const SongInfoContainer = (props: Props) => {
-  const { localStorageData, currentSongData, isCurrentSongPlaying } = React.useContext(AppContext);
-  const { toggleIsFavorite, handleSkipBackwardClick, handleSkipForwardClick, toggleSongPlayback } =
-    React.useContext(AppUpdateContext);
+  const currentSongData = useStore(store, (state) => state.currentSongData);
+  const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
+  const isMuted = useStore(store, (state) => state.player.volume.isMuted);
+  const volume = useStore(store, (state) => state.player.volume.value);
+  const preferences = useStore(store, (state) => state.localStorage.preferences);
+
+  const {
+    toggleIsFavorite,
+    handleSkipBackwardClick,
+    handleSkipForwardClick,
+    toggleSongPlayback,
+    toggleMutedState
+  } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const { songPos, isLyricsVisible, setIsLyricsVisible, isLyricsAvailable } = props;
+  const { songPos, isLyricsVisible, setIsLyricsVisible, isLyricsAvailable, isMouseActive } = props;
 
-  const [isNextSongPopupVisible, setIsNextSongPopupVisible] = React.useState(false);
+  const [isNextSongPopupVisible, setIsNextSongPopupVisible] = useState(false);
 
-  const songDuration =
-    localStorageData && localStorageData.preferences.showSongRemainingTime
-      ? currentSongData.duration - Math.floor(songPos) >= 0
-        ? calculateTime(currentSongData.duration - Math.floor(songPos))
-        : calculateTime(0)
-      : calculateTime(songPos);
+  const songDuration = preferences.showSongRemainingTime
+    ? currentSongData.duration - Math.floor(songPos) >= 0
+      ? calculateTime(currentSongData.duration - Math.floor(songPos))
+      : calculateTime(0)
+    : calculateTime(songPos);
 
-  const songArtistsImages = React.useMemo(() => {
+  const songArtistsImages = useMemo(() => {
     if (
       currentSongData.songId &&
       Array.isArray(currentSongData.artists) &&
@@ -57,14 +69,14 @@ const SongInfoContainer = (props: Props) => {
     return undefined;
   }, [currentSongData.artists, currentSongData.songId]);
 
-  const handleSkipForwardClickWithParams = React.useCallback(
+  const handleSkipForwardClickWithParams = useCallback(
     () => handleSkipForwardClick('USER_SKIP'),
     [handleSkipForwardClick]
   );
 
   return (
     <div
-      className={`song-info-container peer/songInfoContainer group box-border flex max-h-80 w-full max-w-full flex-col gap-2 px-12 py-16 transition-[visibility,opacity] delay-200 ${
+      className={`song-info-container peer/songInfoContainer group/songInfoContainer box-border flex max-h-80 w-full max-w-full flex-col gap-2 px-12 py-16 transition-[visibility,opacity] delay-200 ${
         isLyricsVisible && isLyricsAvailable
           ? 'invisible opacity-0 group-hover/fullScreenPlayer:visible group-hover/fullScreenPlayer:opacity-100'
           : 'visible opacity-100'
@@ -118,7 +130,7 @@ const SongInfoContainer = (props: Props) => {
               removeFocusOnClick
             />
             <Button
-              className="skip-backward-btn h-fit cursor-pointer !border-0 !bg-background-color-3/15 !p-2 text-font-color-white outline-1 outline-offset-1 !backdrop-blur-lg transition-[background] hover:!bg-background-color-3/30 focus-visible:!outline dark:text-font-color-white"
+              className="skip-next-btn h-fit cursor-pointer !border-0 !bg-background-color-3/15 !p-2 text-font-color-white outline-1 outline-offset-1 !backdrop-blur-lg transition-[background] hover:!bg-background-color-3/30 focus-visible:!outline dark:text-font-color-white"
               tooltipLabel={t('player.nextSong')}
               iconClassName="!text-3xl material-icons-round-outlined"
               clickHandler={handleSkipForwardClickWithParams}
@@ -126,7 +138,7 @@ const SongInfoContainer = (props: Props) => {
               removeFocusOnClick
             />
             <Button
-              className={`lyrics-btn h-fit cursor-pointer !border-0 !bg-background-color-3/15 !p-3 text-font-color-white outline-1 outline-offset-1 !backdrop-blur-lg transition-[background] after:absolute after:h-1 hover:!bg-background-color-3/30 focus-visible:!outline dark:text-font-color-white  ${
+              className={`lyrics-btn h-fit cursor-pointer !border-0 !bg-background-color-3/15 !p-3 text-font-color-white outline-1 outline-offset-1 !backdrop-blur-lg transition-[background] after:absolute after:h-1 hover:!bg-background-color-3/30 focus-visible:!outline dark:text-font-color-white ${
                 isLyricsVisible && '!text-dark-background-color-3 after:opacity-100'
               }`}
               iconClassName="!text-2xl"
@@ -135,6 +147,21 @@ const SongInfoContainer = (props: Props) => {
               tooltipLabel={t('player.lyrics')}
               removeFocusOnClick
             />
+            <Button
+              className={`volume-btn h-fit cursor-pointer !border-0 !bg-background-color-3/15 !p-3 text-font-color-white outline-1 outline-offset-1 !backdrop-blur-lg transition-[background] after:absolute after:h-1 hover:!bg-background-color-3/30 focus-visible:!outline dark:text-font-color-white ${
+                isMuted && '!text-dark-background-color-3 after:opacity-100'
+              }`}
+              tooltipLabel={t('player.muteUnmute')}
+              iconClassName="!text-2xl"
+              iconName={isMuted ? 'volume_off' : volume > 50 ? 'volume_up' : 'volume_down_alt'}
+              clickHandler={() => toggleMutedState(!isMuted)}
+            />
+
+            <div
+              className={`volume-slider-container invisible mr-4 min-w-[4rem] max-w-[6rem] opacity-0 transition-[visibility,opacity] delay-150 ease-in-out lg:mr-4 ${isMouseActive && 'group-hover/songInfoContainer:visible group-hover/songInfoContainer:opacity-100'}`}
+            >
+              <VolumeSlider name="player-volume-slider" id="volumeSlider" />
+            </div>
           </div>
           <div className="song-info-container">
             {currentSongData.title && (
@@ -161,7 +188,7 @@ const SongInfoContainer = (props: Props) => {
                 className="song-artists appear-from-bottom flex items-center text-lg leading-none text-font-color-white/80"
                 title={currentSongData.artists?.map((artist) => artist.name).join(', ')}
               >
-                {localStorageData?.preferences.showArtistArtworkNearSongControls &&
+                {preferences?.showArtistArtworkNearSongControls &&
                   songArtistsImages &&
                   songArtistsImages.length > 0 && (
                     <span
@@ -186,7 +213,7 @@ const SongInfoContainer = (props: Props) => {
             />
           </div>
           <div className="song-duration opacity-75">
-            {localStorageData && localStorageData.preferences.showSongRemainingTime ? '-' : ''}
+            {preferences?.showSongRemainingTime ? '-' : ''}
             {songDuration.minutes}:{songDuration.seconds}
           </div>
         </div>

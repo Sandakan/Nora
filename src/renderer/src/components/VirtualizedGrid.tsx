@@ -1,5 +1,12 @@
-import React, { CSSProperties, ReactNode, forwardRef, useContext, useMemo } from 'react';
-import { GridComponents, VirtuosoGrid, VirtuosoHandle } from 'react-virtuoso';
+import {
+  type CSSProperties,
+  type ForwardedRef,
+  type ReactNode,
+  forwardRef,
+  useContext,
+  useMemo
+} from 'react';
+import { type GridComponents, VirtuosoGrid, type VirtuosoHandle } from 'react-virtuoso';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import debounce from '../utils/debounce';
 
@@ -10,6 +17,7 @@ type Props<T extends object> = {
   scrollTopOffset?: number;
   itemContent: (index: number, item: T) => ReactNode;
   components?: GridComponents<T>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   scrollerRef?: any;
   useWindowScroll?: boolean;
   style?: CSSProperties;
@@ -34,8 +42,7 @@ const Grid = <T extends object>(props: Props<T>, ref) => {
 
   const gridComponents = useMemo(
     () => ({
-      // eslint-disable-next-line react/display-name
-      List: forwardRef<HTMLDivElement, { style?: CSSProperties; children?: any }>(
+      List: forwardRef<HTMLDivElement, { style?: CSSProperties; children?: ReactNode }>(
         ({ style, children, ...props }, ref) => (
           <div
             ref={ref}
@@ -49,20 +56,18 @@ const Grid = <T extends object>(props: Props<T>, ref) => {
             {children}
           </div>
         )
+      ),
+      Item: ({ children, ...props }: { children?: ReactNode }) => (
+        <div
+          {...props}
+          style={{
+            justifySelf: 'center',
+            alignSelf: 'center'
+          }}
+        >
+          {children}
+        </div>
       )
-      // Item: ({ children, ...props }: { children?: any }) => (
-      //   <div
-      //     {...props}
-      //     style={{
-      //       padding: '0.5rem',
-      //       display: 'flex',
-      //       alignItems: 'center',
-      //       justifyContent: 'center'
-      //     }}
-      //   >
-      //     {children}
-      //   </div>
-      // )
     }),
     [fixedItemWidth]
   );
@@ -100,7 +105,7 @@ const Grid = <T extends object>(props: Props<T>, ref) => {
 };
 
 const VirtualizedGrid = forwardRef(Grid) as <T extends object>(
-  props: Props<T> & { ref?: React.ForwardedRef<VirtuosoHandle> }
+  props: Props<T> & { ref?: ForwardedRef<VirtuosoHandle> }
 ) => ReturnType<typeof Grid>;
 
 export default VirtualizedGrid;
