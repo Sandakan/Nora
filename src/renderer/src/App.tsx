@@ -63,7 +63,7 @@ import AudioPlayer from './other/player';
 import { dispatch, store } from './store';
 import { type AppReducer } from './other/appReducer';
 import i18n from './i18n';
-import { getShortcuts, normalizedKeys } from './other/appShortcuts';
+import { normalizedKeys } from './other/appShortcuts';
 
 // ? CONSTANTS
 const LOW_RESPONSE_DURATION = 100;
@@ -1564,10 +1564,10 @@ export default function App() {
     }
   }, []);
 
-  const manageKeyboardShortcuts = useCallback((e) => {
-    const shortcuts = getShortcuts().flatMap(category => category.shortcuts);
+  const manageKeyboardShortcuts = useCallback((e: KeyboardEvent) => {
+    const shortcuts = storage.keyboardShortcuts.getKeyboardShortcuts().flatMap(category => category.shortcuts);
   
-    const formatKey = (key) => {
+    const formatKey = (key: string) => {
       switch (key) {
         case ' ': return normalizedKeys.spaceKey;
         case 'ArrowUp': return normalizedKeys.upArrowKey;
@@ -1599,7 +1599,7 @@ export default function App() {
   
     if (matchedShortcut) {
       e.preventDefault();
-      let updatedPlaybackRate;
+      let updatedPlaybackRate: number;
       switch (matchedShortcut.label) {
         case i18n.t('appShortcutsPrompt.playPause'):
           toggleSongPlayback();

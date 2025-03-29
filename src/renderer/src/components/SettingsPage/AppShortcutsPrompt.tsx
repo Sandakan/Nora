@@ -1,19 +1,16 @@
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import ShortcutButton from './ShortcutButton';
-import {
-  getShortcuts,
-  resetShortcutsToDefaults,
-  updateShortcutKeys,
-  type Shortcut
-} from '@renderer/other/appShortcuts';
 import SensitiveActionConfirmPrompt from '../SensitiveActionConfirmPrompt';
 import Button from '../Button';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+import storage from '../../utils/localStorage';
 
 const AppShortcutsPrompt = () => {
   const { t } = useTranslation();
-  const [shortcuts, setShortcuts] = React.useState(getShortcuts());
+  const [shortcuts, setShortcuts] = React.useState(
+    storage.keyboardShortcuts.getKeyboardShortcuts()
+  );
   const [newShortcut, setNewShortcut] = useState<Shortcut | null>(null);
   const [newKeys, setNewKeys] = useState<string[]>([]);
   const [editingShortcut, setEditingShortcut] = React.useState<string | null>(null);
@@ -68,7 +65,9 @@ const AppShortcutsPrompt = () => {
       const shortcutElements = document.querySelectorAll('.shortcut.editing');
       const clickedOutside = Array.from(shortcutElements).every((el) => !el.contains(e.target));
 
-      const allShortcuts = getShortcuts().flatMap((category) => category.shortcuts);
+      const allShortcuts = storage.keyboardShortcuts
+        .getKeyboardShortcuts()
+        .flatMap((category) => category.shortcuts);
       const duplicate = allShortcuts.some(
         (shortcut) =>
           shortcut.label !== editingShortcut &&
@@ -92,8 +91,8 @@ const AppShortcutsPrompt = () => {
 
       if (clickedOutside) {
         if (newShortcut && !duplicate) {
-          updateShortcutKeys(newShortcut.label, newShortcut.keys);
-          setShortcuts(getShortcuts());
+          storage.keyboardShortcuts.setKeyboardShortcuts(newShortcut.label, newShortcut.keys);
+          setShortcuts(storage.keyboardShortcuts.getKeyboardShortcuts());
         }
         setEditingShortcut(null);
       }
@@ -197,7 +196,7 @@ const AppShortcutsPrompt = () => {
                 confirmButton={{
                   label: 'RESET',
                   clickHandler: () => {
-                    resetShortcutsToDefaults();
+                    storage.keyboardShortcuts.resetShortcutsToDefaults();
                     addNewNotifications([
                       {
                         id: 'shortcutsReset',
