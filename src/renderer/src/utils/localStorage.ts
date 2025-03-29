@@ -86,7 +86,7 @@ const checkLocalStorage = () => {
   return console.log('local storage check successful.');
 };
 
-export const getLocalStorage = (): LocalStorage => {
+const getLocalStorage = (): LocalStorage => {
   const storageString = localStorage.getItem('localStorage');
   if (storageString) {
     try {

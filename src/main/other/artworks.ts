@@ -15,7 +15,11 @@ import albumCoverImage from '../../renderer/src/assets/images/webp/album_cover_d
 import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_default.webp?asset';
 import playlistCoverImage from '../../renderer/src/assets/images/webp/playlist_cover_default.webp?asset';
 
-const createArtworks = async (id: string, artworkType: QueueTypes, artwork?: Buffer | string) => {
+const createArtworks = async (
+  id: string,
+  artworkType: QueueTypes,
+  artwork?: Buffer | Uint8Array | string
+) => {
   const defaultPath = path.join(
     DEFAULT_FILE_URL,
     artworkType === 'playlist'
@@ -86,7 +90,7 @@ const checkForDefaultArtworkSaveLocation = async () => {
 export const storeArtworks = async (
   id: string,
   artworkType: QueueTypes,
-  artwork?: Buffer | string
+  artwork?: Buffer | Uint8Array | string
 ): Promise<ArtworkPaths> => {
   try {
     // const start = timeStart();

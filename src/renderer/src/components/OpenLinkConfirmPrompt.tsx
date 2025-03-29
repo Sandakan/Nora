@@ -1,4 +1,3 @@
-/* eslint-disable react/require-default-props */
 import { useContext, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';

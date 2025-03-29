@@ -3,7 +3,7 @@ import { dataUpdateEvent, getBackgroundColor, mainWindow } from '../main';
 import { getUserData, setUserData } from '../filesystem';
 import logger from '../logger';
 
-export const changeAppTheme = (theme?: AppTheme) => {
+const changeAppTheme = (theme?: AppTheme) => {
   const { theme: themeData } = getUserData();
   logger.debug(`Theme update requested`, { theme });
 

@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 const sortAtoZ = <T extends (Album | SavableAlbum)[]>(arr: T) =>
   arr.sort((a, b) =>
     a.title.toLowerCase().replace(/\W/gi, '') > b.title.toLowerCase().replace(/\W/gi, '')

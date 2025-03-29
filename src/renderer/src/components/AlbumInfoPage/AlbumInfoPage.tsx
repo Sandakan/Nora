@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-/* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -30,6 +28,7 @@ type AlbumContentReducerActions =
 
 const reducer = (
   state: AlbumContentReducer,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   action: { type: AlbumContentReducerActions; data: any }
 ): AlbumContentReducer => {
   switch (action.type) {

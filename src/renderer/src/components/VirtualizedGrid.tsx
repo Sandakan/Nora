@@ -17,6 +17,7 @@ type Props<T extends object> = {
   scrollTopOffset?: number;
   itemContent: (index: number, item: T) => ReactNode;
   components?: GridComponents<T>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   scrollerRef?: any;
   useWindowScroll?: boolean;
   style?: CSSProperties;
@@ -41,8 +42,7 @@ const Grid = <T extends object>(props: Props<T>, ref) => {
 
   const gridComponents = useMemo(
     () => ({
-      // eslint-disable-next-line react/display-name
-      List: forwardRef<HTMLDivElement, { style?: CSSProperties; children?: any }>(
+      List: forwardRef<HTMLDivElement, { style?: CSSProperties; children?: ReactNode }>(
         ({ style, children, ...props }, ref) => (
           <div
             ref={ref}
@@ -57,7 +57,7 @@ const Grid = <T extends object>(props: Props<T>, ref) => {
           </div>
         )
       ),
-      Item: ({ children, ...props }: { children?: any }) => (
+      Item: ({ children, ...props }: { children?: ReactNode }) => (
         <div
           {...props}
           style={{

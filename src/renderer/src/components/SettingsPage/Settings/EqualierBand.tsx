@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react';
+
 type Props = {
   value: number;
   hertzValue: number;
@@ -7,7 +9,7 @@ type Props = {
 const EqualierBand = (props: Props) => {
   const { onChange, value, hertzValue } = props;
 
-  const bandWidthStyle: any = {};
+  const bandWidthStyle: CSSProperties = {};
   bandWidthStyle[`--equalizer-band`] = `${((value + 12) / 24) * 100}%`;
 
   return (

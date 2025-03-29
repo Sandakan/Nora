@@ -1,4 +1,3 @@
-/* eslint-disable react/no-array-index-key */
 import { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../../Button';

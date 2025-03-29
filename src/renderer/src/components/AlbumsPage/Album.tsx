@@ -315,6 +315,7 @@ export const Album = (props: AlbumProp) => {
   );
 
   return (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       // style={{ animationDelay: `${50 * (props.index + 1)}ms` }}
       className={`album h-68 group mb-2 mr-6 flex w-48 flex-col justify-between overflow-hidden rounded-md p-4 ${

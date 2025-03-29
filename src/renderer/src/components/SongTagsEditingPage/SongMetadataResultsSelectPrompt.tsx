@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -123,7 +122,6 @@ const SongMetadataResultsSelectPage = (props: SongMetadataResultsSelectPageProp)
 
       <div
         className={`song-results-container flex min-h-[15rem] flex-col items-center justify-center overflow-y-auto ${
-          // eslint-disable-next-line no-nested-ternary
           loadingStates === 'PENDING'
             ? `after:absolute after:h-5 after:w-5 after:animate-spin-ease after:rounded-full after:border-2 after:border-[transparent] after:border-t-font-color-black after:content-[''] dark:after:border-t-font-color-white`
             : loadingStates === 'EMPTY'

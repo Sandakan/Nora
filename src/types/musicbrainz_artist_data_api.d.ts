@@ -1,5 +1,3 @@
-/* eslint-disable no-shadow */
-/* eslint-disable no-use-before-define */
 // https://musicbrainz.org/ws/2/artist/f225e9cb-022f-4fe2-988d-dd24e2440ebb?inc=url-rels+release-groups&fmt=json
 // Artist info about ILLIRA
 
@@ -17,10 +15,10 @@ export interface MusicBrainzArtistDataAPI {
   relations: Relation[];
   'type-id': string;
   'end-area': null;
-  ipis: any[];
+  ipis: string[];
   disambiguation: string;
   'life-span': LifeSpan;
-  isnis: any[];
+  isnis: string[];
   'sort-name': string;
   begin_area: Area;
   gender: string;
@@ -50,7 +48,7 @@ export interface Relation {
   type: string;
   'target-credit': string;
   url: URL;
-  attributes: any[];
+  attributes: string[];
   'source-credit': SourceCredit;
   'attribute-values': Attribute;
   begin: null | string;
@@ -81,8 +79,8 @@ export interface URL {
 }
 
 export interface ReleaseGroup {
-  'secondary-types': any[];
-  'secondary-type-ids': any[];
+  'secondary-types': string[];
+  'secondary-type-ids': string[];
   'primary-type': PrimaryType;
   id: string;
   title: string;

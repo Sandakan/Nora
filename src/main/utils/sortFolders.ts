@@ -1,5 +1,3 @@
-/* eslint-disable no-nested-ternary */
-
 import { getBlacklistData } from '../filesystem';
 
 const isFolderBlacklisted = (folderPath: string) => {

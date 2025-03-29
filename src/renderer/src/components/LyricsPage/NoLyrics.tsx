@@ -13,7 +13,6 @@ const NoLyrics = (props: NoLyricsProp) => {
 
   const buttonComponents = useMemo(() => {
     return buttons.map((button, i) => {
-      // eslint-disable-next-line react/jsx-props-no-spreading
       return <Button key={i} {...button} />;
     });
   }, [buttons]);

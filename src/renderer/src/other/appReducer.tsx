@@ -1,4 +1,4 @@
-import { getLocalStorage } from '@renderer/utils/localStorage';
+import storage from '@renderer/utils/localStorage';
 import { type ReactNode } from 'react';
 
 export interface AppReducer {
@@ -487,7 +487,7 @@ export const USER_DATA_TEMPLATE: UserData = {
   recentSearches: []
 };
 
-const localStorage = getLocalStorage();
+const localStorage = storage.getLocalStorage();
 
 export const DEFAULT_REDUCER_DATA: AppReducer = {
   isDarkMode: false,

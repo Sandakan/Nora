@@ -1,4 +1,3 @@
-/* eslint-disable react/no-array-index-key */
 import { useTranslation } from 'react-i18next';
 
 import calculateElapsedTime from '../../utils/calculateElapsedTime';

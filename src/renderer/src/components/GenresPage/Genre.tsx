@@ -11,7 +11,6 @@ import { store } from '@renderer/store';
 import { useStore } from '@tanstack/react-store';
 
 interface GenreProp {
-  // eslint-disable-next-line react/no-unused-prop-types
   index: number;
   genreId: string;
   title: string;

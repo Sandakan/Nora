@@ -1,12 +1,13 @@
 import { accessSync, constants } from 'fs';
+import { isAnErrorWithCode } from './isAnErrorWithCode';
 
 export const dirExistsSync = (dir: string, mode = constants.F_OK) => {
   try {
     accessSync(dir, mode);
     return true;
   } catch (error) {
-    if ('code' in (error as any)) {
-      switch ((error as NodeJS.ErrnoException).code) {
+    if (isAnErrorWithCode(error)) {
+      switch (error.code) {
         case 'ENOENT':
           // Requested location doesn't exist.
           break;

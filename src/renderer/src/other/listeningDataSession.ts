@@ -1,4 +1,3 @@
-/* eslint-disable lines-between-class-members */
 import calculateTime from '../utils/calculateTime';
 
 class ListeningDataSession {

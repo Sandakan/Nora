@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
 import { useContext, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 

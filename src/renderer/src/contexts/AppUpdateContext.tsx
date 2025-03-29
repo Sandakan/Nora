@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { createContext, type ReactNode } from 'react';
 
 export interface AppUpdateContextType {

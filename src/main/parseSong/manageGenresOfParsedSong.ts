@@ -2,7 +2,7 @@ import path from 'path';
 
 import { generateRandomId } from '../utils/randomId';
 
-export const manageGenresOfParsedSong = (
+const manageGenresOfParsedSong = (
   allGenres: SavableGenre[],
   songInfo: SavableSongData,
   songArtworkPaths?: ArtworkPaths

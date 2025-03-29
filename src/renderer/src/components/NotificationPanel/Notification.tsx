@@ -1,4 +1,11 @@
-import { useCallback, useContext, useLayoutEffect, useMemo, useRef } from 'react';
+import {
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  type CSSProperties
+} from 'react';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
 import { useStore } from '@tanstack/react-store';
@@ -22,7 +29,7 @@ const Notification = (props: AppNotification) => {
   const notificationRef = useRef(null as HTMLDivElement | null);
   const notificationTimeoutIdRef = useRef(undefined as NodeJS.Timeout | undefined);
 
-  const notificationPanelStyles: any = {};
+  const notificationPanelStyles: CSSProperties = {};
   notificationPanelStyles['--loading-bar-progress'] =
     `${(progressBarData.value / progressBarData.total) * 100}%`;
   notificationPanelStyles['--notification-duration'] = `${duration}ms`;

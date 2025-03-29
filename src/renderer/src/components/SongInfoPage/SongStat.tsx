@@ -2,7 +2,7 @@ import { type ReactElement, memo } from 'react';
 
 interface SongStatProp {
   title: string;
-  value: number | string | ReactElement<any, any>;
+  value: number | string | ReactElement;
   className?: string;
 }
 

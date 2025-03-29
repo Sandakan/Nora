@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import { lazy, useCallback, useContext, useEffect, useReducer } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -31,6 +30,7 @@ type SongPageReducerActionTypes = 'SONGS_DATA' | 'SORTING_ORDER' | 'FILTERING_OR
 
 const reducer = (
   state: SongPageReducer,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   action: { type: SongPageReducerActionTypes; data: any }
 ): SongPageReducer => {
   switch (action.type) {
