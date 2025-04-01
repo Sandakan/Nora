@@ -37,7 +37,7 @@ import addWatchersToParentFolders from './fs/addWatchersToParentFolders';
 import manageTaskbarPlaybackButtonControls from './core/manageTaskbarPlaybackButtonControls';
 import checkForStartUpSongs from './core/checkForStartUpSongs';
 import checkForNewSongs from './core/checkForNewSongs';
-import { changeAppTheme } from './core/changeAppTheme';
+import changeAppTheme from './core/changeAppTheme';
 import { savePendingSongLyrics } from './saveLyricsToSong';
 import { closeAllAbortControllers, saveAbortController } from './fs/controlAbortControllers';
 import resetAppData from './resetAppData';

@@ -1,8 +1,15 @@
-/* eslint-disable promise/always-return */
 /* eslint-disable promise/catch-or-return */
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode
+} from 'react';
 import { useTranslation } from 'react-i18next';
-// eslint-disable-next-line import/named
+
 import { Draggable, Droppable, DragDropContext, type DropResult } from '@hello-pangea/dnd';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';
@@ -411,7 +418,7 @@ const CurrentQueuePage = () => {
                     scrollerRef={droppableProvided.innerRef}
                     scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
                     components={{
-                      Item: ({ children, ...props }: { children?: any }) => (
+                      Item: ({ children, ...props }: { children?: ReactNode }) => (
                         <div {...props} className="height-preserving-container">
                           {children}
                         </div>

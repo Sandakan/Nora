@@ -1,4 +1,4 @@
-const filterUniqueObjects = <Result extends Record<string, any>>(
+const filterUniqueObjects = <Result extends object>(
   results: Result[],
   uniqueFieldName: keyof Result
 ) => {

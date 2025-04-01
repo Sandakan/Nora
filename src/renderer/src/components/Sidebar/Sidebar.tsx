@@ -1,10 +1,3 @@
-/* eslint-disable react/no-unused-prop-types */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable no-else-return */
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable react/self-closing-comp */
-/* eslint-disable no-nested-ternary */
-/* eslint-disable import/prefer-default-export */
 import { memo, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import { useTranslation } from 'react-i18next';

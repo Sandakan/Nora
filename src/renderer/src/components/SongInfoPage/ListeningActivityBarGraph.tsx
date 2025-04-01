@@ -87,7 +87,6 @@ const ListeningActivityBarGraph = (props: Props) => {
       return lastMonths.map((month, index) => {
         return (
           <ListeningActivityBar
-            // eslint-disable-next-line react/no-array-index-key
             key={index}
             index={index}
             monthName={month.month}

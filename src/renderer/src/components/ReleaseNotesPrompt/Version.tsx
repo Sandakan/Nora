@@ -1,4 +1,3 @@
-/* eslint-disable react/no-array-index-key */
 import { useTranslation } from 'react-i18next';
 
 import calculateElapsedTime from '../../utils/calculateElapsedTime';
@@ -14,6 +13,7 @@ interface VersionProp {
     new?: VersionNoteProps[];
     fixed?: VersionNoteProps[];
     knownIssues?: VersionNoteProps[];
+    developerUpdates?: VersionNoteProps[];
   };
 }
 
@@ -86,6 +86,20 @@ const Version = (props: VersionProp) => {
           <h3 className="mb-2 px-4 text-lg">{t('releaseNotesPrompt.issuesAndBugs')}</h3>
           <ul className="notes list-disc px-8 font-light text-[hsla(0,0%,0%,0.8)] marker:text-font-color-highlight dark:text-[hsla(0,0%,100%,0.8)] dark:marker:text-dark-font-color-highlight">
             {notes.knownIssues.map((note, index) => (
+              <VersionNote
+                key={`${version}-issue-${index}`}
+                note={note.note}
+                artworkPath={note.artworkPath}
+              />
+            ))}
+          </ul>
+        </>
+      )}
+      {Array.isArray(notes.developerUpdates) && notes.developerUpdates.length > 0 && (
+        <>
+          <h3 className="mb-2 px-4 text-lg">{t('releaseNotesPrompt.developerUpdates')}</h3>
+          <ul className="notes list-disc px-8 font-light text-[hsla(0,0%,0%,0.8)] marker:text-font-color-highlight dark:text-[hsla(0,0%,100%,0.8)] dark:marker:text-dark-font-color-highlight">
+            {notes.developerUpdates.map((note, index) => (
               <VersionNote
                 key={`${version}-issue-${index}`}
                 note={note.note}

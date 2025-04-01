@@ -9,6 +9,7 @@ type Props<T extends object> = {
   scrollTopOffset?: number;
   itemContent: (index: number, item: T) => ReactNode;
   components?: Components<T>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   scrollerRef?: any;
   useWindowScroll?: boolean;
   style?: CSSProperties;

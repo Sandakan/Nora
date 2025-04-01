@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-no-useless-fragment */
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import useSelectAllHandler from '../../hooks/useSelectAllHandler';

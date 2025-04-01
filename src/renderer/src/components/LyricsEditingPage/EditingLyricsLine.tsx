@@ -122,7 +122,6 @@ const EditingLyricsLine = (props: Props) => {
       {typeof content.text === 'string'
         ? content.text
         : content.text.map((word, i) => (
-            // eslint-disable-next-line react/no-array-index-key
             <EditingLyricWord isPlaying={isPlaying} wordData={word} key={i} />
           ))}
     </span>

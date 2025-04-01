@@ -1,6 +1,5 @@
 /* eslint-disable promise/catch-or-return */
-/* eslint-disable no-console */
-/* eslint-disable react/no-unescaped-entities */
+
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 

@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-props-no-spreading */
 import { type ReactNode, useMemo } from 'react';
 import Button, { type ButtonProps } from './Button';
 import Dropdown, { type DropdownProp } from './Dropdown';

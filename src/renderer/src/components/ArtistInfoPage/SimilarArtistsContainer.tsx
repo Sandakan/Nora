@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-// eslint-disable-next-line import/namespace
 import { Artist } from '../ArtistPage/Artist';
 import UnAvailableArtist from './UnAvailableArtist';
 import TitleContainer from '../TitleContainer';

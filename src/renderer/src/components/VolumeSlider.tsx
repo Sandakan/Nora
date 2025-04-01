@@ -1,4 +1,4 @@
-import { useContext, useRef } from 'react';
+import { useContext, useRef, type CSSProperties } from 'react';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import { useStore } from '@tanstack/react-store';
 import { store } from '../store';
@@ -20,7 +20,7 @@ const VolumeSlider = (props: Props) => {
 
   const volumeSliderRef = useRef<HTMLInputElement>(null);
 
-  const volumeBarCssProperties: any = {};
+  const volumeBarCssProperties: CSSProperties = {};
   volumeBarCssProperties['--volume-before-width'] = `${volume}%`;
   if (sliderOpacity !== undefined) volumeBarCssProperties['--slider-opacity'] = `${sliderOpacity}`;
 

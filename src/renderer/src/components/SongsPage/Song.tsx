@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/no-noninteractive-tabindex */
-/* eslint-disable react/jsx-props-no-spreading */
+
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import {
@@ -15,7 +15,7 @@ import {
   useState
 } from 'react';
 import { useTranslation } from 'react-i18next';
-// eslint-disable-next-line import/named
+
 import { type DraggableProvided } from '@hello-pangea/dnd';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -103,6 +103,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
     year,
     trackNo,
     selectAllHandler,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     provided = {} as any,
     onPlayClick
   } = props;

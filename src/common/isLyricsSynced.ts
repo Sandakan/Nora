@@ -5,7 +5,6 @@ export const LYRICS_LINE_REGEX =
 export const SYNCED_LYRICS_REGEX =
   /^(\[(?:lang:)?(?<lang>\w{2,3})])?(?<timestamp>\[(?<sec>\d+):(?<ms>\d{1,2}\.\d{1,3})])(\[(?:lang:)?(?:\w{2,3})])?(?=(?<lyric>.+$))/gm;
 export const EXTENDED_SYNCED_LYRICS_LINE_REGEX =
-  // eslint-disable-next-line no-useless-escape
   /(?<extSyncTimeStamp>[\[<]\d+:\d{1,2}\.\d{1,3}[\]>]) ?(?=(?<lyric>[^<>\n]+))/gm;
 export const EXTENDED_SYNCED_LYRICS_REGEX =
   /(?<extSyncTimeStamp><\d+:\d{1,2}\.\d{1,3}>) ?(?=(?<lyric>[^<>\n]+))/gm;

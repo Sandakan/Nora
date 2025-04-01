@@ -1,4 +1,3 @@
-/* eslint-disable prefer-destructuring */
 import { decrypt } from '../../utils/safeStorage';
 import { getUserData } from '../../filesystem';
 

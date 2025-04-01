@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import { memo, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { memo, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import ContextMenuItem from './ContextMenuItem';
 import ContextMenuDataItem from './ContextMenuDataItem';
 import { useStore } from '@tanstack/react-store';
@@ -19,7 +19,7 @@ const ContextMenu = memo(() => {
     transformOrigin: 'top left'
   });
 
-  const contextMenuStyles: any = {};
+  const contextMenuStyles: CSSProperties = {};
   contextMenuStyles['--position-x'] = `${dimensions.positionX}px`;
   contextMenuStyles['--position-y'] = `${dimensions.positionY}px`;
   contextMenuStyles['--transform-origin'] = `${dimensions.transformOrigin}`;
@@ -61,7 +61,6 @@ const ContextMenu = memo(() => {
           if (menuItem.isContextMenuItemSeperator)
             return (
               <div
-                // eslint-disable-next-line react/no-array-index-key
                 key={index}
                 role="separator"
                 className="context-menu-item-seperator float-right my-2 h-[1px] w-[95%] bg-[hsla(0deg,0%,57%,0.5)]"

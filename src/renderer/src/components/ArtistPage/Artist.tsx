@@ -1,7 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable import/prefer-default-export */
+
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -13,7 +12,6 @@ import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store';
 
 interface ArtistProp {
-  // eslint-disable-next-line react/no-unused-prop-types
   index: number;
   className?: string;
   artistId: string;

@@ -28,7 +28,7 @@ type Props = {
   synchronizedLyrics?: string;
   unsynchronizedLyrics?: string;
   isLyricsSavingPending?: boolean;
-  // eslint-disable-next-line no-unused-vars
+
   updateSongInfo: (callback: (prevSongInfo: SongTags) => SongTags) => void;
 };
 

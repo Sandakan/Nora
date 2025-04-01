@@ -41,7 +41,6 @@ const AlbumImgAndInfoContainer = (props: Props) => {
   }, [albumData?.artists, t]);
 
   return (
-    // eslint-disable-next-line react/jsx-no-useless-fragment
     <>
       {albumData && (
         <div className="album-img-and-info-container flex flex-row items-center pb-6">

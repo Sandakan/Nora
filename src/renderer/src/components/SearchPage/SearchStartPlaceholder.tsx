@@ -1,5 +1,3 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-/* eslint-disable react/no-array-index-key */
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -13,7 +11,7 @@ import SearchSomethingImage from '../../assets/images/svg/Flying kite_Monochroma
 type Props = {
   searchInput: string;
   searchResults: SearchResult;
-  // eslint-disable-next-line no-unused-vars
+
   updateSearchInput: (input: string) => void;
 };
 

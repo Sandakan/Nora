@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-no-useless-fragment */
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -39,6 +38,7 @@ const ReleaseNotesPrompt = () => {
     const latestVersion = sortedReleaseNotes[0];
 
     // ! / / / / TO BE DEPRECATED CODE / / /
+    // TODO: Will be deprectated in the next major release
     /** @deprecated  */
     if (releaseNotes.latestVersion) {
       latestVersion.artwork ||= releaseNotes.latestVersion.artwork;

@@ -86,7 +86,6 @@ const getSecondsFromLyricsLine = (lyric: string) => {
 };
 
 const getSecondsFromExtendedTimeStamp = (text: string) => {
-  // eslint-disable-next-line no-useless-escape
   const extendedReplaceRegex = /[<>\[\]]/gm;
 
   const [sec, ms] = text.replaceAll(extendedReplaceRegex, '').split(':');

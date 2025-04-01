@@ -1,5 +1,3 @@
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable import/prefer-default-export */
 import Body from './Body';
 import NotificationPanel from './NotificationPanel/NotificationPanel';
 import Sidebar from './Sidebar/Sidebar';

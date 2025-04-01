@@ -1241,6 +1241,7 @@ declare global {
     new: ChangelogNote[];
     fixed: ChangelogNote[];
     knownIssues: ChangelogNote[];
+    developerUpdates: ChangelogNote[];
   }
 
   export interface ChangelogNote {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /** 
  
 The return function should be invoked for throttle effect to work correctly.

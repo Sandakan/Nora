@@ -1,6 +1,5 @@
 /* eslint-disable jsx-a11y/no-autofocus */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable promise/always-return */
+
 /* eslint-disable promise/catch-or-return */
 import { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -44,7 +43,7 @@ const NewPlaylistPrompt = (props: NewPlaylistPromptProp) => {
               {
                 id: 'playlistCreateFailed',
                 duration: 5000,
-                // eslint-disable-next-line react/jsx-no-useless-fragment
+
                 content: <>{res.message}</>
               }
             ]);
@@ -77,7 +76,7 @@ const NewPlaylistPrompt = (props: NewPlaylistPromptProp) => {
             window.api.songUpdates
               .getImgFileLocation()
               .then((res) => setArtworkPath(res))
-              // eslint-disable-next-line no-console
+
               .catch((err) => console.error(err))
           }
         />

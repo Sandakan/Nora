@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
-
 import { useTranslation } from 'react-i18next';
 
 type Props = {

@@ -23,11 +23,7 @@ const hasArrayChanged = (oldArr: unknown[], newArr: unknown[]) => {
  *@param newObj New object to be compared to
  */
 
-function hasDataChanged(
-  oldObj: Record<string, any>,
-  newObj: Record<string, any>,
-  returnBoolean = false
-) {
+function hasDataChanged(oldObj: object, newObj: object, returnBoolean = false) {
   try {
     const oldObjEntries = Object.keys(oldObj);
     const newObjEntries = Object.keys(newObj);
@@ -78,7 +74,7 @@ function hasDataChanged(
   }
 }
 
-export const isDataChanged = (oldObj: Record<string, any>, newObj: Record<string, any>) => {
+export const isDataChanged = <T extends object>(oldObj: T, newObj: T) => {
   const isChanged = hasDataChanged(oldObj, newObj, true);
   if (typeof isChanged === 'boolean') return isChanged;
   throw new Error('hasDataChanged retuned a non boolean output eventhough returnBoolean is true.');

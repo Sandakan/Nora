@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -475,7 +474,6 @@ const ArtistInfoPage = () => {
                   : 'text-font-color-black dark:text-font-color-white'
               } mb-4 mt-1 pr-4 text-2xl`}
               otherItems={[
-                // eslint-disable-next-line react/jsx-key
                 <p className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
                   {isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'songs'
                     ? t('common.selectionWithCount', {
