@@ -17,6 +17,7 @@ import {
   net,
   powerSaveBlocker,
   screen,
+  session as electronSession,
   type OpenDialogOptions,
   type SaveDialogOptions,
   type Display
@@ -135,6 +136,17 @@ const APP_INFO = {
 
 logger.debug(`Starting up Nora`, { APP_INFO });
 
+function launchExtensionBackgroundWorkers(session = electronSession.defaultSession) {
+  return Promise.all(
+    session.getAllExtensions().map(async (extension) => {
+      const manifest = extension.manifest;
+      if (manifest.manifest_version === 3 && manifest?.background?.service_worker) {
+        await session.serviceWorkers.startWorkerForScope(extension.url);
+      }
+    })
+  );
+}
+
 const installExtensions = async () => {
   try {
     const { default: installExtension, REACT_DEVELOPER_TOOLS } = await import(
@@ -147,6 +159,7 @@ const installExtensions = async () => {
       forceDownload
     });
     logger.debug(`Added Extension: ${ext}`);
+    await launchExtensionBackgroundWorkers();
   } catch (error) {
     logger.error(`Failed to install extensions to devtools`, { error });
   }

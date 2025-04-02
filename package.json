@@ -94,6 +94,7 @@
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
+    "@headlessui/react": "^2.2.0",
     "@hello-pangea/dnd": "^18.0.1",
     "@neos21/detect-chinese": "^0.0.2",
     "@sglkc/kuroshiro": "^1.0.1",

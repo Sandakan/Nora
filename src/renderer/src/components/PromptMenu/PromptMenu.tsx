@@ -1,8 +1,6 @@
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-import { type MutableRefObject, Suspense, useCallback, useContext, useEffect, useRef } from 'react';
+import { Suspense, useCallback, useContext, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react';
 
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
@@ -18,45 +16,13 @@ const PromptMenu = () => {
   const { changePromptMenuData, updatePromptMenuHistoryIndex } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
-  const promptMenuRef = useRef() as MutableRefObject<HTMLDialogElement>;
+  const promptMenuRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     const dialog = promptMenuRef.current;
 
     if (promptMenuData.isVisible && dialog && !dialog.open) dialog.showModal();
   }, [promptMenuData.isVisible]);
-
-  useEffect(() => {
-    const dialog = promptMenuRef.current;
-
-    const manageDialogClose = (e: MouseEvent) => {
-      const rect = dialog.getBoundingClientRect();
-      const isCursorInDialogBoundary =
-        rect.top <= e.clientY &&
-        e.clientY <= rect.top + rect.height &&
-        rect.left <= e.clientX &&
-        e.clientX <= rect.left + rect.width;
-
-      if (!isCursorInDialogBoundary) changePromptMenuData(false);
-    };
-
-    const manageDialogAnimationEnd = () => {
-      if (!promptMenuData.isVisible) {
-        dialog.close();
-        changePromptMenuData(false, null);
-      }
-    };
-
-    if (dialog) {
-      dialog.addEventListener('click', manageDialogClose);
-      dialog.addEventListener('animationend', manageDialogAnimationEnd);
-    }
-
-    return () => {
-      dialog?.removeEventListener('click', manageDialogClose);
-      dialog?.removeEventListener('animationend', manageDialogAnimationEnd);
-    };
-  }, [promptMenuData.isVisible, changePromptMenuData]);
 
   const manageKeyboardShortcuts = useCallback(
     (e: KeyboardEvent) => {
@@ -69,56 +35,92 @@ const PromptMenu = () => {
     [updatePromptMenuHistoryIndex]
   );
 
-  const manageDialogCloseEvent = useCallback(() => {
-    changePromptMenuData(false, null);
-  }, [changePromptMenuData]);
-
   useEffect(() => {
     const promptMenu = promptMenuRef.current;
 
-    promptMenu?.addEventListener('close', manageDialogCloseEvent);
     promptMenu?.addEventListener('keydown', manageKeyboardShortcuts);
     return () => {
       promptMenu?.removeEventListener('keydown', manageKeyboardShortcuts);
-      promptMenu?.removeEventListener('close', manageDialogCloseEvent);
     };
-  }, [manageDialogCloseEvent, manageKeyboardShortcuts]);
+  }, [manageKeyboardShortcuts]);
 
   return (
-    <dialog
-      className={`dialog-menu bg-background-color-1 dark:bg-dark-background-color-1 relative top-1/2 left-1/2 h-fit max-h-[80%] min-h-[300px] w-[80%] max-w-[90%] min-w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-3xl pb-10 shadow-[rgba(100,100,111,0.2)_0px_7px_29px_0px] transition-[transform,visibility,opacity] ease-in-out open:backdrop:transition-[background,backdrop-filter] ${
-        promptMenuData.isVisible
-          ? 'open:animate-dialog-appear-ease-in-out open:backdrop:bg-[hsla(228deg,7%,14%,0.75)] dark:open:backdrop:bg-[hsla(228deg,7%,14%,0.75)]'
-          : 'animate-dialog-dissappear-ease-in-out backdrop:bg-[hsla(228deg,7%,14%,0)] dark:backdrop:bg-[hsla(228deg,7%,14%,0)]'
-      } `}
-      id="prompt-menu"
-      onClick={(e) => {
-        e.stopPropagation();
-      }}
-      ref={promptMenuRef}
-    >
-      <div className="my-4 flex w-full items-center justify-between px-6">
-        <PromptMenuNavigationControlsContainer />
-        <Button
-          key={0}
-          className="prompt-menu-close-btn previousPageBtn hover:bg-background-color-2 hover:text-font-color-highlight dark:hover:bg-dark-background-color-2 dark:hover:text-dark-font-color-highlight m-0! flex h-fit rounded-md! border-0! p-0! px-2! py-1! outline-offset-1 transition-[background,transform,visibility,opacity]!"
-          iconName="close"
-          tooltipLabel={t('titleBar.close')}
-          iconClassName="leading-none! text-xl!"
-          clickHandler={(e) => {
-            e.stopPropagation();
-            changePromptMenuData(false);
-          }}
-        />
-      </div>
-      <MainContainer
-        className={`prompt-menu-inner text-font-color-black dark:text-font-color-white relative max-h-full px-8 pb-2 ${
-          promptMenuData.className ?? ''
-        }`}
+    <>
+      <Dialog
+        open={promptMenuData.isVisible}
+        ref={promptMenuRef}
+        onClose={() => changePromptMenuData(false)}
+        className="relative z-100"
       >
-        <Suspense fallback={<SuspenseLoader />}>{promptMenuData.prompt}</Suspense>
-      </MainContainer>
-    </dialog>
+        <DialogBackdrop
+          transition
+          className="fixed inset-0 h-screen bg-black/25 backdrop-blur-xs transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+        />
+
+        <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+          <div className="flex h-screen items-center justify-center p-4 text-center sm:items-center sm:p-0">
+            <DialogPanel
+              transition
+              className="bg-background-color-1 dark:bg-dark-background-color-1 relative h-fit max-h-[80%] min-h-[300px] w-[80%] max-w-[90%] min-w-[800px] transform overflow-hidden overflow-y-auto rounded-2xl text-left shadow-xl transition-all data-closed:scale-95 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg"
+            >
+              <div className="my-4 flex w-full items-center justify-between px-6">
+                <PromptMenuNavigationControlsContainer />
+                <Button
+                  key={0}
+                  className="prompt-menu-close-btn previousPageBtn hover:bg-background-color-2 hover:text-font-color-highlight dark:hover:bg-dark-background-color-2 dark:hover:text-dark-font-color-highlight m-0! flex h-fit rounded-md! border-0! p-0! px-2! py-1! outline-offset-1 transition-all!"
+                  iconName="close"
+                  tooltipLabel={t('titleBar.close')}
+                  iconClassName="leading-none! text-xl!"
+                  clickHandler={(e) => {
+                    e.stopPropagation();
+                    changePromptMenuData(false);
+                  }}
+                />
+              </div>
+              <MainContainer
+                className={`prompt-menu-inner text-font-color-black dark:text-font-color-white relative max-h-full min-h-[250px] px-8 pb-2 ${
+                  promptMenuData.className ?? ''
+                }`}
+              >
+                <Suspense fallback={<SuspenseLoader />}>{promptMenuData.prompt}</Suspense>
+              </MainContainer>
+            </DialogPanel>
+          </div>
+        </div>
+      </Dialog>
+
+      {/* <dialog
+        className={`dialog-menu bg-background-color-1 dark:bg-dark-background-color-1 absolute top-1/2 left-1/2 m-auto h-fit max-h-[80%] min-h-[300px] w-[80%] max-w-[90%] min-w-[800px] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-3xl pb-10 open:backdrop:bg-[hsla(228deg,7%,14%,0.75)] open:backdrop:transition-[background,backdrop-filter] dark:backdrop:bg-[hsla(228deg,7%,14%,0)] dark:open:backdrop:bg-[hsla(228deg,7%,14%,0.75)]`}
+        open={promptMenuData.isVisible}
+        id="prompt-menu"
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+        ref={promptMenuRef}
+      >
+        <div className="my-4 flex w-full items-center justify-between px-6">
+          <PromptMenuNavigationControlsContainer />
+          <Button
+            key={0}
+            className="prompt-menu-close-btn previousPageBtn hover:bg-background-color-2 hover:text-font-color-highlight dark:hover:bg-dark-background-color-2 dark:hover:text-dark-font-color-highlight m-0! flex h-fit rounded-md! border-0! p-0! px-2! py-1! outline-offset-1 transition-all!"
+            iconName="close"
+            tooltipLabel={t('titleBar.close')}
+            iconClassName="leading-none! text-xl!"
+            clickHandler={(e) => {
+              e.stopPropagation();
+              changePromptMenuData(false);
+            }}
+          />
+        </div>
+        <MainContainer
+          className={`prompt-menu-inner text-font-color-black dark:text-font-color-white relative max-h-full px-8 pb-2 ${
+            promptMenuData.className ?? ''
+          }`}
+        >
+          <Suspense fallback={<SuspenseLoader />}>{promptMenuData.prompt}</Suspense>
+        </MainContainer>
+      </dialog> */}
+    </>
   );
 };
 

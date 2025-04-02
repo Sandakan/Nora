@@ -24,10 +24,10 @@ const PromptMenuNavigationControlsContainer = () => {
       <Button
         iconName="arrow_back"
         iconClassName="material-icons-round-outlined text-xl!"
-        className={`previousPageBtn hover:bg-background-color-2 hover:text-font-color-highlight dark:hover:bg-dark-background-color-2 dark:hover:text-dark-font-color-highlight !mr-0 flex h-fit !rounded-md !border-0 !px-2 !py-1 outline-offset-1 !transition-[background,transform,visibility,opacity] ${
+        className={`previousPageBtn hover:bg-background-color-2 hover:text-font-color-highlight dark:hover:bg-dark-background-color-2 dark:hover:text-dark-font-color-highlight invisible !mr-0 flex h-fit -translate-x-8 !rounded-md !border-0 !px-2 !py-1 opacity-0 outline-offset-1 transition-all! ${
           promptActiveIndex > 1
-            ? 'available visible translate-x-0 opacity-100 focus-visible:outline!'
-            : 'invisible -translate-x-8 opacity-0'
+            ? 'app-region-no-drag visible translate-x-0 opacity-100 focus-visible:outline!'
+            : ''
         }`}
         clickHandler={() => updatePromptMenuHistoryIndex('decrement')}
         tooltipLabel={t('titleBar.goBack')}
@@ -36,10 +36,10 @@ const PromptMenuNavigationControlsContainer = () => {
       <Button
         iconName="arrow_forward"
         iconClassName="material-icons-round-outlined text-xl!"
-        className={`forwardPageBtn hover:bg-background-color-2 hover:text-font-color-highlight dark:hover:bg-dark-background-color-2 dark:hover:text-dark-font-color-highlight !mr-0 flex h-fit !rounded-md !border-0 !px-2 !py-1 outline-offset-1 !transition-[background,transform,visibility,opacity] ${
+        className={`forwardPageBtn hover:bg-background-color-2 hover:text-font-color-highlight dark:hover:bg-dark-background-color-2 dark:hover:text-dark-font-color-highlight invisible !mr-0 flex h-fit translate-x-8 !rounded-md !border-0 !px-2 !py-1 opacity-0 outline-offset-1 transition-all! ${
           noOfPrompts !== 0 && promptActiveIndex < noOfPrompts
-            ? 'available visible translate-x-0 opacity-100 focus-visible:outline!'
-            : 'invisible translate-x-8 opacity-0'
+            ? 'app-region-no-drag visible translate-x-0 opacity-100 focus-visible:outline!'
+            : ''
         }`}
         clickHandler={() => updatePromptMenuHistoryIndex('increment')}
         tooltipLabel={t('titleBar.goForward')}

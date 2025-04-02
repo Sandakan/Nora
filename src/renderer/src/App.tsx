@@ -1911,7 +1911,7 @@ export default function App() {
       <AppUpdateContext.Provider value={appUpdateContextValues}>
         {playerType === 'normal' ? (
           <div
-            className={`App select-none ${
+            className={`App relative select-none ${
               isDarkMode ? 'dark bg-dark-background-color-1' : 'bg-background-color-1'
             } ${
               isReducedMotion

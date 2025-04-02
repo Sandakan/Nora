@@ -27,6 +27,39 @@
   }
 }
 
+@theme {
+  --dialog-appear: dialogAppear 1s ease-out forwards;
+  --dialog-dissappear: dialogDisappear 1s ease-in forwards;
+
+  @keyframes dialogAppear {
+    from {
+      opacity: 0;
+      visibility: hidden;
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    to {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+
+  @keyframes dialogDisappear {
+    from {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    to {
+      opacity: 0;
+      visibility: hidden;
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+  }
+}
+
 /* ? POPPINS FONT CONFIG */
 @font-face {
   font-family: 'Poppins';
@@ -250,7 +283,7 @@ body * {
   -webkit-user-select: none;
 }
 
-:is(.previousPageBtn, .forwardPageBtn, .goToHomePageBtn).available,
+:is(.previousPageBtn, .forwardPageBtn, .goToHomePageBtn).app-region-no-drag,
 .mini-player-title-bar .special-controls-container,
 .special-controls-and-indicators-container :is(.indicators-container, .special-controls-container),
 .window-controls-container :is(.minimize-btn, .maximize-btn, .close-btn),
@@ -467,34 +500,6 @@ input[type='checkbox']:checked ~ .checkmark .icon {
 @keyframes loading {
   50% {
     transform: translateX(var(--loading-bar-width));
-  }
-}
-
-@keyframes dialogAppear {
-  from {
-    opacity: 0;
-    visibility: hidden;
-    transform: translate(-50%, -50%) scale(1.1);
-  }
-
-  to {
-    opacity: 1;
-    visibility: visible;
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
-
-@keyframes dialogDisappear {
-  from {
-    opacity: 1;
-    visibility: visible;
-    transform: translate(-50%, -50%) scale(1);
-  }
-
-  to {
-    opacity: 0;
-    visibility: hidden;
-    transform: translate(-50%, -50%) scale(1.1);
   }
 }
 
