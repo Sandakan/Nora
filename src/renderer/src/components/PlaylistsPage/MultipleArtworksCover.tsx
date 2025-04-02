@@ -60,7 +60,6 @@ const MultipleArtworksCover = (props: Props) => {
 
           return (
             <Img
-              // eslint-disable-next-line react/no-array-index-key
               key={i}
               className={`inline shadow-xl ${type === 1 ? 'rounded-md' : 'rounded-xs'} ${
                 cond && 'col-span-2 row-span-2 rounded-md!'

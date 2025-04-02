@@ -193,18 +193,13 @@ const AppShortcutsPrompt = () => {
 
           const shortcutKeyComponents = keys.map((key, index) => (
             <>
-              {/*  eslint-disable-next-line react/no-array-index-key */}
               <ShortcutButton shortcutKey={key} key={index} />
               {index !== keys.length - 1 && <span className="mx-2 text-font-color-dimmed">+</span>}
             </>
           ));
 
           return (
-            <div
-              // eslint-disable-next-line react/no-array-index-key
-              key={i}
-              className="shortcut mb-4 flex w-[45%] items-center justify-between p-2"
-            >
+            <div key={i} className="shortcut mb-4 flex w-[45%] items-center justify-between p-2">
               <div className="shortcut-label opacity-75">{label}</div>
               <div className="shortcut-keys flex items-center">{shortcutKeyComponents}</div>
             </div>
@@ -212,7 +207,6 @@ const AppShortcutsPrompt = () => {
         });
 
         return (
-          // eslint-disable-next-line react/no-array-index-key
           <li key={categoryIndex} className="shortcut-category mt-8">
             <div className="shortcut-category-title text-2xl text-font-color-highlight dark:text-dark-font-color-highlight">
               {shortcutCategoryTitle}

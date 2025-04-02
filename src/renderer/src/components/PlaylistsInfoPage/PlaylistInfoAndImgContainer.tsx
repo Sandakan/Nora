@@ -27,7 +27,6 @@ const PlaylistInfoAndImgContainer = (props: Props) => {
   }, [songs]);
 
   return (
-    // eslint-disable-next-line react/jsx-no-useless-fragment
     <>
       {playlist?.songs && (
         <div className="playlist-img-and-info-container mb-8 flex flex-row items-center justify-start">

@@ -38,6 +38,7 @@ type HomePageReducerActionTypes =
 
 const reducer = (
   state: HomePageReducer,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   action: { type: HomePageReducerActionTypes; data?: any }
 ): HomePageReducer => {
   switch (action.type) {

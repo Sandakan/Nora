@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-escape */
 import os from 'os';
 import childProcess from 'node:child_process';
 import path from 'path';

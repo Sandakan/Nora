@@ -1,4 +1,3 @@
-/* eslint-disable react/no-array-index-key */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import useMouseActiveState from '../../hooks/useMouseActiveState';
 

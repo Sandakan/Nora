@@ -1,4 +1,5 @@
 import {
+  type CSSProperties,
   type ChangeEvent,
   type WheelEvent,
   useCallback,
@@ -35,7 +36,7 @@ const SeekBarSlider = (props: Props) => {
   const seekbarRef = useRef(null as HTMLInputElement | null);
   const lowResponseSongPositionRef = useRef(0);
 
-  const seekBarCssProperties: any = {};
+  const seekBarCssProperties: CSSProperties = {};
   seekBarCssProperties['--seek-before-width'] = `${
     (songPos /
       ((currentSongData.duration || 0) >= songPos ? currentSongData.duration || 0 : songPos)) *

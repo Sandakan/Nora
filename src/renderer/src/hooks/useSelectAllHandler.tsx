@@ -10,6 +10,7 @@ const slice = (arr: string[], start: number, end: number) => {
   return arr.slice(start, end + 1);
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const useSelectAllHandler = <Obj extends Record<string, any>>(
   arr: Obj[],
   selectionType: QueueTypes,

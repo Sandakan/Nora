@@ -1,7 +1,3 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable import/prefer-default-export */
 import { memo } from 'react';
 import Button from '../Button';
 

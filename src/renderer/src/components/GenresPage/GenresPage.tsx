@@ -1,7 +1,3 @@
-/* eslint-disable react/jsx-no-useless-fragment */
-/* eslint-disable react/no-unescaped-entities */
-/* eslint-disable no-nested-ternary */
-/* eslint-disable react/no-array-index-key */
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -61,7 +57,7 @@ const GenresPage = () => {
         if (genres && genres.length > 0) return setGenresData(genres);
         return setGenresData(null);
       })
-      // eslint-disable-next-line no-console
+
       .catch((err) => console.error(err));
   }, [sortingOrder]);
 

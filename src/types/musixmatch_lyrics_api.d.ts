@@ -44,7 +44,7 @@ export interface Track {
   track_soundcloud_id: number;
   track_xboxmusic_id: string;
   track_name: string;
-  track_name_translation_list: any[];
+  track_name_translation_list: string[];
   track_rating: number;
   track_length: number;
   commontrack_id: number;
@@ -131,8 +131,8 @@ export interface Lyrics {
   pixel_tracking_url: string;
   html_tracking_url: string;
   lyrics_copyright: string;
-  writer_list: any[];
-  publisher_list: any[];
+  writer_list: string[];
+  publisher_list: string[];
   backlink_url: string;
   updated_time: string;
 }
@@ -197,8 +197,8 @@ export interface Subtitle {
   script_tracking_url: string;
   pixel_tracking_url: string;
   html_tracking_url: string;
-  writer_list: any[];
-  publisher_list: any[];
+  writer_list: string[];
+  publisher_list: string[];
   updated_time: string;
 }
 
@@ -231,7 +231,7 @@ export interface IndigoHeader {
   status_code: number;
   execute_time: number;
   pid: number;
-  surrogate_key_list: any[];
+  surrogate_key_list: string[];
 }
 
 export interface MusixmatchLyricsLine {

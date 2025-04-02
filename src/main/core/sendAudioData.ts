@@ -6,7 +6,7 @@ import { getArtistsData, getSongsData } from '../filesystem';
 import { getSongArtworkPath, resolveSongFilePath } from '../fs/resolveFilePaths';
 import logger from '../logger';
 import getArtistInfoFromNet from './getArtistInfoFromNet';
-import addToSongsHistory from './addToSongsHistory';
+import { addToSongsHistory } from './addToSongsHistory';
 import updateSongListeningData from './updateSongListeningData';
 // import { setDiscordRpcActivity } from '../other/discordRPC';
 import { setCurrentSongPath } from '../main';
@@ -60,7 +60,7 @@ const getRelevantArtistData = (
   return relevantArtists;
 };
 
-export const sendAudioData = async (audioId: string): Promise<AudioPlayerData> => {
+const sendAudioData = async (audioId: string): Promise<AudioPlayerData> => {
   logger.debug(`Fetching song data for song id -${audioId}-`);
   try {
     const songs = getSongsData();

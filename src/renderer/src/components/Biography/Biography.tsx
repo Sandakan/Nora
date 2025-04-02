@@ -44,7 +44,6 @@ const Biography = (props: Props) => {
   }, [bio]);
 
   const tagComponents = useMemo(
-    // eslint-disable-next-line react/jsx-props-no-spreading
     () => tags.map((tag) => <HashTag key={tag.url} {...tag} />),
     [tags]
   );

@@ -29,6 +29,12 @@
             "$ref": "#/definitions/Fixed"
           }
         },
+        "developerUpdates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Fixed"
+          }
+        },
         "knownIssues": {
           "type": "array",
           "items": {

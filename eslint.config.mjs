@@ -29,14 +29,14 @@ export default tsLint.config(
   eslint.configs.recommended,
   electronToolkit.configs.recommended,
   jsxA11y.flatConfigs.recommended,
+  reactHooks.configs['recommended-latest'],
+  reactRefresh.configs.recommended,
   {
     files: ['**/**/*.{js,ts,jsx,tsx}'],
     plugins: {
-      'react-refresh': reactRefresh,
-      react: react,
-      'react-hooks': reactHooks
+      react: react
     },
-    extends: [importPlugin.flatConfigs.recommended],
+    extends: [importPlugin.flatConfigs.recommended, importPlugin.flatConfigs.typescript],
     settings: {
       'import/parsers': {
         '@typescript-eslint/parser': ['.ts', '.tsx']
@@ -58,7 +58,6 @@ export default tsLint.config(
   promiseConfigs.configs['flat/recommended'],
   {
     rules: {
-      ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': 'warn',
       '@typescript-eslint/explicit-function-return-type': 'off',
       'import/no-unresolved': 'off',

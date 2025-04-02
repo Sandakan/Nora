@@ -32,5 +32,3 @@ export const addToSongsHistory = (songId: string) => {
   logger.error(errMessage, { playlists, songId });
   throw new Error(errMessage);
 };
-
-export default addToSongsHistory;

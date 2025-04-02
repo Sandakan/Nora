@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 import { getArtistArtworkPath } from '../fs/resolveFilePaths';
 import { getArtistsData } from '../filesystem';
 

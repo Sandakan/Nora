@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../../Button';
 import calculateElapsedTime from '../../../utils/calculateElapsedTime';
@@ -89,8 +89,8 @@ const StorageSettings = () => {
     return undefined;
   }, [storageMetrics]);
 
-  const appStorageBarCssProperties: any = {};
-  const appDataStorageBarCssProperties: any = {};
+  const appStorageBarCssProperties: CSSProperties = {};
+  const appDataStorageBarCssProperties: CSSProperties = {};
 
   appStorageBarCssProperties['--other-applications-size-storage-bar-width'] =
     `${appStorageBarWidths?.otherApplicationSizesWidth || 0}%`;

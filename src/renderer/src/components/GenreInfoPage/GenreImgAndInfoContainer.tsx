@@ -22,7 +22,6 @@ const GenreImgAndInfoContainer = (props: Props) => {
   );
 
   return (
-    // eslint-disable-next-line react/jsx-no-useless-fragment
     <>
       {genreData && genreData.genreId && (
         <div className="genre-img-and-info-container flex flex-row items-center pb-8 text-font-color-black dark:text-font-color-white">

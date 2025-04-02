@@ -59,7 +59,6 @@ const SongInfoPage = () => {
     if (currentlyActivePage.data && currentlyActivePage.data.songId) {
       console.time('fetchTime');
 
-      // eslint-disable-next-line prefer-destructuring
       const songId = currentlyActivePage.data.songId as string;
 
       window.api.audioLibraryControls

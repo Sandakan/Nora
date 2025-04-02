@@ -1,4 +1,3 @@
-/* eslint-disable react/no-array-index-key */
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 

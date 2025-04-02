@@ -1,4 +1,3 @@
-/* eslint-disable react/require-default-props */
 import { type ReactNode } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 

@@ -1,6 +1,5 @@
 import roundTo from '../../../common/roundTo';
 
-/* eslint-disable no-param-reassign */
 const calculateTime = (secs: number = 0, roundOutput = true) => {
   if (typeof secs !== 'number' || Number.isNaN(secs) || secs < 0) secs = 0;
 

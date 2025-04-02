@@ -1,7 +1,6 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable react/destructuring-assignment */
-/* eslint-disable import/prefer-default-export */
+
 import { lazy, useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -19,7 +18,6 @@ const ConfirmDeletePlaylistsPrompt = lazy(() => import('./ConfirmDeletePlaylists
 const RenamePlaylistPrompt = lazy(() => import('./RenamePlaylistPrompt'));
 
 interface PlaylistProp extends Playlist {
-  // eslint-disable-next-line react/no-unused-prop-types
   index: number;
   selectAllHandler?: (_upToId?: string) => void;
 }
