@@ -40,21 +40,28 @@
         "npm install --offline",
         "npm run build:flatpak",
         "cp -a dist/linux*unpacked /app/main",
-        "install -Dm755 -t /app/bin/ run.sh",
+        "install -Dm755 -t /app/bin/ ../run.sh",
         "install -Dm644 resources/logo_light_mode.png /app/share/icons/hicolor/scalable/apps/app.netlify.noramusic.Nora.png",
         "install -Dm644 flatpak/app.netlify.noramusic.Nora.desktop /app/share/applications/app.netlify.noramusic.Nora.desktop",
         "install -Dm644 flatpak/app.netlify.noramusic.Nora.metainfo.xml /app/share/metainfo/app.netlify.noramusic.Nora.appdata.xml"
       ],
+      "subdir": "main",
       "sources": [
         {
+          "type": "file",
+          "path": "../package.json"
+        },
+        {
           "type": "dir",
-          "path": ".."
+          "path": "..",
+          "dest": "main"
         },
         "generated-sources.json",
         {
           "type": "script",
           "dest-filename": "run.sh",
           "commands": [
+            "cd /",
             "zypak-wrapper.sh /app/main/Nora --ozone-platform-hint=auto \"$@\""
           ]
         }
