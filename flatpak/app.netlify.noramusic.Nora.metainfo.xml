@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop">
+  <id>app.netlify.noramusic.Nora</id>
+  <launchable type="desktop-id">app.netlify.noramusic.Nora.desktop</launchable>
+  <name>Nora</name>
+  <developer id="app.netlify.noramusic">
+    <name>Nora Music Developers</name>
+  </developer>
+  <summary>An elegant music player inspired from Oto Music</summary>
+  <project_license>MIT</project_license>
+  <metadata_license>MIT</metadata_license>
+  <url type="homepage">https://noramusic.netlify.app/</url>
+  <url type="bugtracker">https://github.com/Sandakan/Nora/issues</url>
+  <url type="vcs-browser">https://github.com/Sandakan/Nora</url>
+  <description>
+    <p><em>Experience Everything a Music Player Should Have</em></p>
+    <p>Nora is an elegant music player built using Electron and React. It is inspired from Oto Music for Android by Piyush Mamidwar.</p>
+    <p>With simplicity and design in mind, this app was made to overcome problems when using default music apps on platforms that lack essential features.</p>
+    <p><em>App features</em></p>
+    <ul>
+      <li>Organize your songs, artists, albums, and playlists with ease.</li>
+      <li>Create playlists that meet your needs.</li>
+      <li>Sing along with song lyrics.</li>
+      <li>Support for synced lyrics.</li>
+      <li>Keep your favorite songs and artists close to you.</li>
+      <li>Read your favorite artist's biography.</li>
+      <li>Change between Light and Dark themes with ease.</li>
+      <li>A mini-player to help focus on what matters at the moment.</li>
+      <li>Edit the metadata of your songs easily and conveniently.</li>
+      <li>Search through your library with the help of song filters.</li>
+    </ul>
+  </description>
+  <screenshots>
+    <screenshot type="default">
+      <image>
+        https://github.com/Sandakan/Nora/raw/refs/heads/master/resources/other/artwork%200.webp
+      </image>
+      <caption>Main artowork</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/Sandakan/Nora/raw/refs/heads/master/resources/other/artwork%201.webp</image>
+      <caption>Support for online and offline lyrics</caption>
+    </screenshot>
+
+    <screenshot>
+      <image>https://github.com/Sandakan/Nora/raw/refs/heads/master/resources/other/artwork%202.webp</image>
+      <caption>Switch between light and dark mode</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/Sandakan/Nora/raw/refs/heads/master/resources/other/artwork%203.webp</image>
+      <caption>Supports Last.FM Scrobbling</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/Sandakan/Nora/raw/refs/heads/master/resources/other/artwork%204.webp</image>
+      <caption>Organize your music library with ease</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/Sandakan/Nora/raw/refs/heads/master/resources/other/artwork%205.webp</image>
+      <caption>See how your favorite artists appear on songs and albums</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/Sandakan/Nora/raw/refs/heads/master/resources/other/artwork%206.webp</image>
+      <caption>Keep your favorites closer to you</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/Sandakan/Nora/raw/refs/heads/master/resources/other/artwork%207.webp</image>
+      <caption>Search through your music library easily and efficiently</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/Sandakan/Nora/raw/refs/heads/master/resources/other/artwork%208.webp</image>
+      <caption>Edit song metadata and organize your library</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/Sandakan/Nora/raw/refs/heads/master/resources/other/artwork%209.webp</image>
+      <caption>Listen with the mini player</caption>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.0" />
+  <releases>
+    <release version="3.1.0" date="2024-03-29">
+    <url type="details">https://github.com/Sandakan/Nora/blob/master/changelog.md#v310-stable----29th-of-march-2025-</url>
+    <description>
+      <p>🎉 New Features and Updates</p>
+      <ul>
+        <li>Added experimental playback support for m4a and opus songs. Fixes #247 #242.</li>
+        <li>Added support for fetching lyrics from LRCLIB. Fixes #252.</li>
+        <li>Added Vietnamese translation. Thanks @ElectroHeavenVN.</li>
+        <li>Added flil translation support for lyrics.</li>
+        <li>Original lyric will now be shown along with the translated lyric.</li>
+        <li>Added support for reading LRC files without the relevant song extension.</li>
+        <li>Added support for symbolic links in file paths. Thanks @Brunight.</li>
+        <li>Configured to build Nora in the rpm package. Fixes #261.</li>
+        <li>Configured to build Nora for arm systems. Fixes #268.</li>
+        <li>Added support for copying lyrics lines. Fixes #253.</li>
+        <li>Added a blurred background for the flil and mini player.</li>
+        <li>Added a how to use prompt when visiting the lyrics editor for the first time.</li>
+        <li>Added a new shortcut to open the shortcuts prompt</li>
+        <li>Added skip lyrics lines functionality to the mini and flil-screen player</li>
+        <li>Added volume control to flil-screen player.</li>
+        <li>Added support for lyrics romanization for supported languages. Thanks @ElectroHeavenVN.</li>
+      </ul>
+
+      <p>🔨 Fixes and Improvements</p>
+      <ul>
+        <li>Fixed a bug where the correct lyrics line won't scroll to the center of the screen if the song is paused.</li>
+        <li>Fixed a bug where items in ArtistPage, AlbumPage, PlaylistPage, and GenrePage are not centered in their grid cells.</li>
+        <li>Fixed a bug where Discord Presence doesn't update as the player state changes. Fixes #244.</li>
+        <li>Fixed a bug where the sidebar shows a dynamic theme color in dark mode even though dynamic themes are disabled.</li>
+        <li>Fixed a bug where some views show light mode even though the dark mode is selected.</li>
+        <li>Fixed a bug where some buttons in the About section of the Settings page are misaligned.</li>
+        <li>Fixed a bug where non-library songs were not showing in Last.FM.</li>
+        <li>Fixed localization issue in LyricsPage title, not allowing changing lyrics offline/online status.</li>
+        <li>Fixed a bug where lyric metadata are lost when saving lyrics from lrclib to lrc files.</li>
+        <li>Fixed a bug where the first metadata line in LRC lyrics is considered a lyric line.</li>
+        <li>Fixed a bug where the app starts with the white splash even though the app is in dark mode. Fixes #272.</li>
+        <li>Updated hyperlinks always to be underlined.</li>
+        <li>Fixed lyrics that were not updated on LyricsPage right after modifying them in LyricsEditingPage.</li>
+        <li>Fixed lyrics lines in LyricsEditingPage don't follow dynamic theme colors.</li>
+        <li>Fixed app name showing "Electron" instead of Nora. Fixes #288.</li>
+        <li>Removed full-screen player that starts with lyrics showing.</li>
+        <li>Updated discord-rich-presence to display the current song position. Thanks @ElectroHeavenVN.</li>
+        <li>Fixed song filenames cut off at periods. Fixes #308.</li>
+        <li>Added a fix for file names with special characters that cannot be played in Nora player. Fixes #323.</li>
+        <li>Set true to disable background artworks as default to improve app accessibility and to maintain text contrast.</li>
+        <li>Update font-family stack in styles.css for improved typography consistency.</li>
+        <li>Added an advanced settings section with an experimental setting to toggle saving verbose logs.</li>
+        <li>Fixed translated lyrics do not show their original lyric above them.</li>
+        <li>Added a fix for image alignment issues. Fixes #307.</li>
+        <li>Added a fix for the app description shown when Nora is viewed in Task Manager. Fixes #333.</li>
+        <li>Fixed the like button not working in the mini-player. Fixes #341.</li>
+        <li>Fixed incorrect song ordering in playlists. Fixes #342.</li>
+        <li>Fixed the shuffle button not working and some shuffling issues. Fixes #343.</li>
+      </ul>
+
+      <p>🚀 Development updates</p>
+      <ul>
+        <li>Migrated to @tanstack/store for efficient app state management reducing unnecessary re-renders and resource usage.</li>
+        <li>Nora was fully converted to an ESM-packaged app.</li>
+        <li>Fixed some localization errors in the en.json file.</li>
+        <li>Updated the build workflow to fix a bug for the Nora app that is missing sharp dependencies in Linux environments.</li>
+        <li>Updated app dependencies.</li>
+      </ul>
+
+      <p>🐜 Known Issues and Bugs</p>
+      <ul>
+        <li>Artist names are split when the name has a comma. #321.</li>
+        <li>Bigger song libraries make the interface unresponsive and halt the song parsing process. #313.</li>
+      </ul>
+    </description>
+    </release>
+  </releases>
+</component>
