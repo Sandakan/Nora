@@ -5,6 +5,7 @@ import { resolve } from 'path';
 import { defineConfig, externalizeDepsPlugin, swcPlugin } from 'electron-vite';
 import react from '@vitejs/plugin-react-swc';
 import tailwindcss from '@tailwindcss/vite';
+import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
 
 export default defineConfig({
   main: {
@@ -32,6 +33,10 @@ export default defineConfig({
         '@types': resolve(import.meta.dirname, './src/@types')
       }
     },
-    plugins: [react(), tailwindcss()]
+    plugins: [
+      react(),
+      tailwindcss(),
+      TanStackRouterVite({ target: 'react', autoCodeSplitting: true })
+    ]
   }
 });
