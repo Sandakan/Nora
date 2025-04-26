@@ -11,6 +11,7 @@ export default defineConfig({
   main: {
     build: {
       sourcemap: true,
+      minify: true,
       rollupOptions: { input: '/src/main/main.ts', external: ['sharp'] }
     },
     plugins: [externalizeDepsPlugin(), swcPlugin()]
@@ -20,11 +21,13 @@ export default defineConfig({
 
     build: {
       sourcemap: true,
+      minify: true,
       rollupOptions: { output: { format: 'cjs', entryFileNames: '[name].mjs' } }
     }
   },
   renderer: {
     build: {
+      minify: true,
       sourcemap: true
     },
     resolve: {
