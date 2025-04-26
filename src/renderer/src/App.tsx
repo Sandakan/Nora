@@ -62,6 +62,9 @@ import shuffleQueueRandomly from './other/shuffleQueueRandomly';
 import AudioPlayer from './other/player';
 import { dispatch, store } from './store';
 import { type AppReducer } from './other/appReducer';
+import i18n from './i18n';
+import { normalizedKeys } from './other/appShortcuts';
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 
 // ? CONSTANTS
 const LOW_RESPONSE_DURATION = 100;
@@ -1564,127 +1567,202 @@ export default function App() {
 
   const manageKeyboardShortcuts = useCallback(
     (e: KeyboardEvent) => {
-      const ctrlCombinations = [
-        'ArrowUp',
-        'ArrowDown',
-        'ArrowRight',
-        'ArrowLeft',
-        'm',
-        's',
-        't',
-        'h',
-        'l',
-        'n',
-        'q',
-        'f',
-        '[',
-        ']',
-        '\\',
-        '/'
-      ];
-      const shiftCombinations = ['ArrowRight', 'ArrowLeft'];
-      const altCombinations = ['ArrowRight', 'ArrowLeft', 'Home'];
-      const functionCombinations = ['F12', 'F5'];
-      if (
-        (e.ctrlKey && ctrlCombinations.some((x) => e.key === x)) ||
-        (e.shiftKey && shiftCombinations.some((x) => e.key === x)) ||
-        (e.altKey && altCombinations.some((x) => e.key === x)) ||
-        functionCombinations.some((x) => e.key === x) ||
-        e.code === 'Space'
-      )
+      const shortcuts = storage.keyboardShortcuts
+        .getKeyboardShortcuts()
+        .flatMap((category) => category.shortcuts);
+
+      const formatKey = (key: string) => {
+        switch (key) {
+          case ' ':
+            return normalizedKeys.spaceKey;
+          case 'ArrowUp':
+            return normalizedKeys.upArrowKey;
+          case 'ArrowDown':
+            return normalizedKeys.downArrowKey;
+          case 'ArrowLeft':
+            return normalizedKeys.leftArrowKey;
+          case 'ArrowRight':
+            return normalizedKeys.rightArrowKey;
+          case 'Enter':
+            return normalizedKeys.enterKey;
+          case 'End':
+            return normalizedKeys.endKey;
+          case 'Home':
+            return normalizedKeys.homeKey;
+          case ']':
+            return ']';
+          case '[':
+            return '[';
+          case '\\':
+            return '\\';
+          default:
+            return key.length === 1 ? key.toUpperCase() : key;
+        }
+      };
+
+      const pressedKeys = [
+        e.ctrlKey ? 'Ctrl' : null,
+        e.shiftKey ? 'Shift' : null,
+        e.altKey ? 'Alt' : null,
+        formatKey(e.key)
+      ].filter(Boolean);
+
+      const matchedShortcut = shortcuts.find((shortcut) => {
+        const storedKeys = shortcut.keys.map(formatKey).sort();
+        const comboKeys = pressedKeys.sort();
+        return JSON.stringify(storedKeys) === JSON.stringify(comboKeys);
+      });
+
+      if (matchedShortcut) {
         e.preventDefault();
-
-      // ctrl combinations
-      if (e.ctrlKey && e.key === 'ArrowUp')
-        updateVolume(player.volume + 0.05 <= 1 ? player.volume * 100 + 5 : 100);
-      else if (e.ctrlKey && e.key === 'ArrowDown')
-        updateVolume(player.volume - 0.05 >= 0 ? player.volume * 100 - 5 : 0);
-      else if (e.ctrlKey && e.key === 'm') toggleMutedState(!store.state.player.volume.isMuted);
-      else if (e.ctrlKey && e.key === 'ArrowRight') handleSkipForwardClick();
-      else if (e.ctrlKey && e.key === 'ArrowLeft') handleSkipBackwardClick();
-      else if (e.ctrlKey && e.key === 's') toggleShuffling();
-      else if (e.ctrlKey && e.key === 't') toggleRepeat();
-      else if (e.ctrlKey && e.key === 'h') toggleIsFavorite();
-      else if (e.ctrlKey && e.key === 'y') window.api.theme.changeAppTheme();
-      else if (e.ctrlKey && e.key === 'l') {
-        const currentlyActivePage =
-          store.state.navigationHistory.history[store.state.navigationHistory.pageHistoryIndex];
-        if (currentlyActivePage.pageTitle === 'Lyrics') changeCurrentActivePage('Home');
-        else changeCurrentActivePage('Lyrics');
-      } else if (e.ctrlKey && e.key === 'n')
-        updatePlayerType(store.state.playerType === 'mini' ? 'normal' : 'mini');
-      else if (e.ctrlKey && e.key === 'q') {
-        const currentlyActivePage =
-          store.state.navigationHistory.history[store.state.navigationHistory.pageHistoryIndex];
-        if (currentlyActivePage.pageTitle === 'CurrentQueue') changeCurrentActivePage('Home');
-        else changeCurrentActivePage('CurrentQueue');
-      } else if (e.ctrlKey && e.key === 'f') changeCurrentActivePage('Search');
-      else if (e.ctrlKey && e.key === ']') {
-        let updatedPlaybackRate = store.state.localStorage.playback.playbackRate || 1;
-
-        if (updatedPlaybackRate + 0.05 > 4) updatedPlaybackRate = 4;
-        else updatedPlaybackRate += 0.05;
-
-        updatedPlaybackRate = parseFloat(updatedPlaybackRate.toFixed(2));
-
-        storage.setItem('playback', 'playbackRate', updatedPlaybackRate);
-        addNewNotifications([
-          {
-            id: 'playbackRate',
-            iconName: 'avg_pace',
-            content: t('notifications.playbackRateChanged', {
-              val: updatedPlaybackRate
-            })
-          }
-        ]);
-      } else if (e.ctrlKey && e.key === '[') {
-        let updatedPlaybackRate = store.state.localStorage.playback.playbackRate || 1;
-
-        if (updatedPlaybackRate - 0.05 < 0.25) updatedPlaybackRate = 0.25;
-        else updatedPlaybackRate -= 0.05;
-
-        updatedPlaybackRate = parseFloat(updatedPlaybackRate.toFixed(2));
-
-        storage.setItem('playback', 'playbackRate', updatedPlaybackRate);
-        addNewNotifications([
-          {
-            id: 'playbackRate',
-            iconName: 'avg_pace',
-            content: t('notifications.playbackRateChanged', {
-              val: updatedPlaybackRate
-            })
-          }
-        ]);
-      } else if (e.ctrlKey && e.key === '\\') {
-        storage.setItem('playback', 'playbackRate', 1);
-        addNewNotifications([
-          {
-            id: 'playbackRate',
-            iconName: 'avg_pace',
-            content: t('notifications.playbackRateReset')
-          }
-        ]);
-      } else if (e.ctrlKey && e.key === '/') changePromptMenuData(true, <AppShortcutsPrompt />);
-      // default combinations
-      else if (e.code === 'Escape') toggleMultipleSelections(false);
-      else if (e.code === 'Space') toggleSongPlayback();
-      // shift combinations
-      else if (e.shiftKey && e.key === 'ArrowLeft') {
-        if (player.currentTime - 10 >= 0) player.currentTime -= 10;
-        else player.currentTime = 0;
-      } else if (e.shiftKey && e.key === 'ArrowRight') {
-        if (player.currentTime + 10 < player.duration) player.currentTime += 10;
+        let updatedPlaybackRate: number;
+        switch (matchedShortcut.label) {
+          case i18n.t('appShortcutsPrompt.playPause'):
+            toggleSongPlayback();
+            break;
+          case i18n.t('appShortcutsPrompt.toggleMute'):
+            toggleMutedState(!store.state.player.volume.isMuted);
+            break;
+          case i18n.t('appShortcutsPrompt.nextSong'):
+            handleSkipForwardClick();
+            break;
+          case i18n.t('appShortcutsPrompt.prevSong'):
+            handleSkipBackwardClick();
+            break;
+          case i18n.t('appShortcutsPrompt.tenSecondsForward'):
+            if (player.currentTime + 10 < player.duration) player.currentTime += 10;
+            break;
+          case i18n.t('appShortcutsPrompt.tenSecondsBackward'):
+            if (player.currentTime - 10 >= 0) player.currentTime -= 10;
+            else player.currentTime = 0;
+            break;
+          case i18n.t('appShortcutsPrompt.upVolume'):
+            updateVolume(player.volume + 0.05 <= 1 ? player.volume * 100 + 5 : 100);
+            break;
+          case i18n.t('appShortcutsPrompt.downVolume'):
+            updateVolume(player.volume - 0.05 >= 0 ? player.volume * 100 - 5 : 0);
+            break;
+          case i18n.t('appShortcutsPrompt.toggleShuffle'):
+            toggleShuffling();
+            break;
+          case i18n.t('appShortcutsPrompt.toggleRepeat'):
+            toggleRepeat();
+            break;
+          case i18n.t('appShortcutsPrompt.toggleFavorite'):
+            toggleIsFavorite();
+            break;
+          case i18n.t('appShortcutsPrompt.upPlaybackRate'):
+            updatedPlaybackRate = store.state.localStorage.playback.playbackRate || 1;
+            if (updatedPlaybackRate + 0.05 > 4) updatedPlaybackRate = 4;
+            else updatedPlaybackRate += 0.05;
+            updatedPlaybackRate = parseFloat(updatedPlaybackRate.toFixed(2));
+            storage.setItem('playback', 'playbackRate', updatedPlaybackRate);
+            addNewNotifications([
+              {
+                id: 'playbackRate',
+                iconName: 'avg_pace',
+                content: t('notifications.playbackRateChanged', { val: updatedPlaybackRate })
+              }
+            ]);
+            break;
+          case i18n.t('appShortcutsPrompt.downPlaybackRate'):
+            updatedPlaybackRate = store.state.localStorage.playback.playbackRate || 1;
+            if (updatedPlaybackRate - 0.05 < 0.25) updatedPlaybackRate = 0.25;
+            else updatedPlaybackRate -= 0.05;
+            updatedPlaybackRate = parseFloat(updatedPlaybackRate.toFixed(2));
+            storage.setItem('playback', 'playbackRate', updatedPlaybackRate);
+            addNewNotifications([
+              {
+                id: 'playbackRate',
+                iconName: 'avg_pace',
+                content: t('notifications.playbackRateChanged', { val: updatedPlaybackRate })
+              }
+            ]);
+            break;
+          case i18n.t('appShortcutsPrompt.resetPlaybackRate'):
+            storage.setItem('playback', 'playbackRate', 1);
+            addNewNotifications([
+              {
+                id: 'playbackRate',
+                iconName: 'avg_pace',
+                content: t('notifications.playbackRateReset')
+              }
+            ]);
+            break;
+          case i18n.t('appShortcutsPrompt.goToSearch'):
+            changeCurrentActivePage('Search');
+            break;
+          case i18n.t('appShortcutsPrompt.goToLyrics'):
+            {
+              const current =
+                store.state.navigationHistory.history[
+                  store.state.navigationHistory.pageHistoryIndex
+                ];
+              changeCurrentActivePage(current.pageTitle === 'Lyrics' ? 'Home' : 'Lyrics');
+            }
+            break;
+          case i18n.t('appShortcutsPrompt.goToQueue'):
+            {
+              const current =
+                store.state.navigationHistory.history[
+                  store.state.navigationHistory.pageHistoryIndex
+                ];
+              changeCurrentActivePage(
+                current.pageTitle === 'CurrentQueue' ? 'Home' : 'CurrentQueue'
+              );
+            }
+            break;
+          case i18n.t('appShortcutsPrompt.goHome'):
+            updatePageHistoryIndex('home');
+            break;
+          case i18n.t('appShortcutsPrompt.goBack'):
+            updatePageHistoryIndex('decrement');
+            break;
+          case i18n.t('appShortcutsPrompt.goForward'):
+            updatePageHistoryIndex('increment');
+            break;
+          case i18n.t('appShortcutsPrompt.openMiniPlayer'):
+            updatePlayerType(store.state.playerType === 'mini' ? 'normal' : 'mini');
+            break;
+          case i18n.t('appShortcutsPrompt.selectMultipleItems'):
+            toggleMultipleSelections(true);
+            break;
+          case i18n.t('appShortcutsPrompt.selectNextLyricsLine'):
+            // MISSING IMPLEMENTATION.
+            break;
+          case i18n.t('appShortcutsPrompt.selectPrevLyricsLine'):
+            // MISSING IMPLEMENTATION.
+            break;
+          case i18n.t('appShortcutsPrompt.selectCustomLyricsLine'):
+            // MISSING IMPLEMENTATION.
+            break;
+          case i18n.t('appShortcutsPrompt.playNextLyricsLine'):
+            // Implement logic to jump to next lyrics line. MISSING IMPLEMENTATION.
+            break;
+          case i18n.t('appShortcutsPrompt.playPrevLyricsLine'):
+            // Implement logic to jump to previous lyrics line. MISSING IMPLEMENTATION.
+            break;
+          case i18n.t('appShortcutsPrompt.toggleTheme'):
+            window.api.theme.changeAppTheme();
+            break;
+          case i18n.t('appShortcutsPrompt.toggleMiniPlayerAlwaysOnTop'):
+            // Implement logic to jump to to trigger mini player always on top. MISSING IMPLEMENTATION.
+            break;
+          case i18n.t('appShortcutsPrompt.reload'):
+            window.api.appControls.restartRenderer?.('Shortcut: Ctrl+R');
+            break;
+          case i18n.t('appShortcutsPrompt.openAppShortcutsPrompt'):
+            changePromptMenuData(true, <AppShortcutsPrompt />);
+            break;
+          case i18n.t('appShortcutsPrompt.openDevtools'):
+            if (!window.api.properties.isInDevelopment) {
+              window.api.settingsHelpers.openDevtools();
+            }
+            break;
+          default:
+            console.warn(`Unhandled shortcut action: ${matchedShortcut.label}`);
+        }
       }
-      // alt combinations
-      else if (e.altKey && e.key === 'Home') updatePageHistoryIndex('home');
-      else if (e.altKey && e.key === 'ArrowLeft') updatePageHistoryIndex('decrement');
-      else if (e.altKey && e.key === 'ArrowRight') updatePageHistoryIndex('increment');
-      // function key combinations
-      else if (e.key === 'F5') {
-        e.preventDefault();
-        window.api.appControls.restartRenderer(`User request through F5.`);
-      } else if (e.key === 'F12' && !window.api.properties.isInDevelopment)
-        window.api.settingsHelpers.openDevtools();
     },
     [
       updateVolume,
@@ -1948,6 +2026,8 @@ export default function App() {
             <TitleBar />
             <BodyAndSideBarContainer />
             <SongControlsContainer />
+
+            <TanStackRouterDevtools position="bottom-left" />
           </div>
         ) : (
           <ErrorBoundary>

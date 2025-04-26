@@ -166,7 +166,7 @@ const LyricLine = (props: LyricProp) => {
                 ? 'text-font-color-highlight/100! dark:text-dark-font-color-highlight/100! scale-100! font-medium blur-none! [&>div>span]:mr-3!'
                 : 'scale-75!'
             }`
-          : 'text-4xl!'
+          : 'text-font-color-black! dark:text-font-color-white! scale-100! text-4xl! font-medium blur-none! [&>div>span]:mr-3'
       } ${playerType === 'mini' && 'text-font-color-white/20! mb-2! text-2xl!'} ${
         playerType === 'full' &&
         'text-font-color-white/20! mb-6! origin-left items-start! justify-start! text-left! text-7xl!'
