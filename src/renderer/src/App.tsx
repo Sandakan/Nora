@@ -2,7 +2,6 @@
 import {
   type DragEvent,
   type ReactNode,
-  Suspense,
   lazy,
   useCallback,
   useEffect,
@@ -24,17 +23,9 @@ import { AppUpdateContext, type AppUpdateContextType } from './contexts/AppUpdat
 import useNetworkConnectivity from './hooks/useNetworkConnectivity';
 
 // ? MAIN APP COMPONENTS
-import TitleBar from './components/TitleBar/TitleBar';
-import SongControlsContainer from './components/SongsControlsContainer/SongControlsContainer';
-import BodyAndSideBarContainer from './components/BodyAndSidebarContainer';
-import PromptMenu from './components/PromptMenu/PromptMenu';
-import ContextMenu from './components/ContextMenu/ContextMenu';
 import ErrorPrompt from './components/ErrorPrompt';
-import Img from './components/Img';
-import Preloader from './components/Preloader/Preloader';
 import ErrorBoundary from './components/ErrorBoundary';
 import toggleSongIsFavorite from './other/toggleSongIsFavorite';
-import SuspenseLoader from './components/SuspenseLoader';
 
 // ? PROMPTS
 const ReleaseNotesPrompt = lazy(() => import('./components/ReleaseNotesPrompt/ReleaseNotesPrompt'));
@@ -45,8 +36,6 @@ const SongUnplayableErrorPrompt = lazy(() => import('./components/SongUnplayable
 const AppShortcutsPrompt = lazy(() => import('./components/SettingsPage/AppShortcutsPrompt'));
 
 // ? SCREENS
-const MiniPlayer = lazy(() => import('./components/MiniPlayer/MiniPlayer'));
-const FullScreenPlayer = lazy(() => import('./components/FullScreenPlayer/FullScreenPlayer'));
 
 // ? UTILS
 import isLatestVersion from './utils/isLatestVersion';
@@ -61,10 +50,10 @@ import updateQueueOnSongPlay from './other/updateQueueOnSongPlay';
 import shuffleQueueRandomly from './other/shuffleQueueRandomly';
 import AudioPlayer from './other/player';
 import { dispatch, store } from './store';
-import { type AppReducer } from './other/appReducer';
 import i18n from './i18n';
 import { normalizedKeys } from './other/appShortcuts';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
+import { Outlet } from '@tanstack/react-router';
 
 // ? CONSTANTS
 const LOW_RESPONSE_DURATION = 100;
@@ -110,7 +99,7 @@ export default function App() {
   // const contentRef = useRef(DEFAULT_REDUCER_DATA);
 
   const AppRef = useRef(null as HTMLDivElement | null);
-  const storeRef = useRef<AppReducer>(undefined);
+  // const storeRef = useRef<AppReducer>(undefined);
 
   const [, startTransition] = useTransition();
   const refStartPlay = useRef(false);
@@ -1967,17 +1956,7 @@ export default function App() {
     ]
   );
 
-  const isReducedMotion = useStore(store, (state) => {
-    storeRef.current = state;
-
-    return (
-      state.localStorage.preferences.isReducedMotion ||
-      (state.isOnBatteryPower && state.localStorage.preferences.removeAnimationsOnBatteryPower)
-    );
-  });
   const isDarkMode = useStore(store, (state) => state.isDarkMode);
-  const playerType = useStore(store, (state) => state.playerType);
-  const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
 
   useEffect(() => {
     if (isDarkMode) document.body.classList.add('dark');
@@ -1987,68 +1966,21 @@ export default function App() {
   return (
     <ErrorBoundary>
       <AppUpdateContext.Provider value={appUpdateContextValues}>
-        {playerType === 'normal' ? (
-          <div
-            className={`App relative select-none ${
-              isDarkMode ? 'dark bg-dark-background-color-1' : 'bg-background-color-1'
-            } ${
-              isReducedMotion
-                ? 'reduced-motion animate-none transition-none delay-0! duration-0! [&.dialog-menu]:backdrop-blur-none!'
-                : 'transition-colors duration-200'
-            } after:text-font-color-white dark:after:text-font-color-white grid !h-screen min-h-screen w-full grid-rows-[auto_1fr_auto] items-center overflow-y-hidden after:invisible after:absolute after:-z-10 after:grid after:h-full after:w-full after:place-items-center after:bg-[rgba(0,0,0,0)] after:text-4xl after:font-medium after:content-["Drop_your_song_here"] dark:after:bg-[rgba(0,0,0,0)] [&.blurred_#title-bar]:opacity-40 [&.fullscreen_#window-controls-container]:hidden [&.song-drop]:after:visible [&.song-drop]:after:z-20 [&.song-drop]:after:border-4 [&.song-drop]:after:border-dashed [&.song-drop]:after:border-[#ccc] [&.song-drop]:after:bg-[rgba(0,0,0,0.7)] [&.song-drop]:after:transition-[background,visibility,color] dark:[&.song-drop]:after:border-[#ccc] dark:[&.song-drop]:after:bg-[rgba(0,0,0,0.7)]`}
-            ref={AppRef}
-            onDragEnter={addSongDropPlaceholder}
-            onDragLeave={removeSongDropPlaceholder}
-            onDragOver={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-            onDrop={onSongDrop}
-          >
-            <Preloader />
-            {bodyBackgroundImage && (
-              <div
-                className={`body-background-image-container bg-dark-background-color-1! absolute h-full w-full overflow-hidden bg-center`}
-              >
-                <Img
-                  className={`blur-0 w-full bg-cover opacity-100 brightness-100 transition-[filter,opacity] duration-500 ${
-                    bodyBackgroundImage &&
-                    'opacity-100! blur-[1.5rem]! brightness-[.75]! dark:brightness-[.5]!'
-                  }`}
-                  loading="eager"
-                  src={bodyBackgroundImage}
-                  alt=""
-                />
-              </div>
-            )}
-            <ContextMenu />
-            <PromptMenu />
-            <TitleBar />
-            <BodyAndSideBarContainer />
-            <SongControlsContainer />
-
-            <TanStackRouterDevtools position="bottom-left" />
-          </div>
-        ) : (
-          <ErrorBoundary>
-            {playerType === 'mini' ? (
-              <Suspense fallback={<SuspenseLoader />}>
-                <MiniPlayer
-                  className={`${
-                    isReducedMotion
-                      ? 'reduced-motion animate-none transition-none duration-0! [&.dialog-menu]:backdrop-blur-none!'
-                      : ''
-                  }`}
-                />
-              </Suspense>
-            ) : (
-              <Suspense fallback={<SuspenseLoader />}>
-                <FullScreenPlayer />
-              </Suspense>
-            )}
-          </ErrorBoundary>
-        )}
+        <div
+          className="main-app bg-background-color-1 dark:bg-dark-background-color-1 relative !h-screen min-h-screen w-full overflow-hidden"
+          ref={AppRef}
+          onDragEnter={addSongDropPlaceholder}
+          onDragLeave={removeSongDropPlaceholder}
+          onDragOver={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onDrop={onSongDrop}
+        >
+          <Outlet />
+        </div>
       </AppUpdateContext.Provider>
+      <TanStackRouterDevtools position="bottom-left" />
     </ErrorBoundary>
   );
 }

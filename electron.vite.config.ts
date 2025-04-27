@@ -39,7 +39,11 @@ export default defineConfig({
     plugins: [
       react(),
       tailwindcss(),
-      TanStackRouterVite({ target: 'react', autoCodeSplitting: true })
+      TanStackRouterVite({
+        target: 'react',
+        routesDirectory: 'src/renderer/src/routes',
+        autoCodeSplitting: true
+      })
     ]
   }
 });

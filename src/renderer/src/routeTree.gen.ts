@@ -11,14 +11,17 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as AboutImport } from './routes/about'
+import { Route as MainPlayerRouteImport } from './routes/main-player/route'
 import { Route as IndexImport } from './routes/index'
+import { Route as MiniPlayerIndexImport } from './routes/mini-player/index'
+import { Route as FullscreenPlayerIndexImport } from './routes/fullscreen-player/index'
+import { Route as MainPlayerHomeIndexImport } from './routes/main-player/home/index'
 
 // Create/Update Routes
 
-const AboutRoute = AboutImport.update({
-  id: '/about',
-  path: '/about',
+const MainPlayerRouteRoute = MainPlayerRouteImport.update({
+  id: '/main-player',
+  path: '/main-player',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -26,6 +29,24 @@ const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRoute,
+} as any)
+
+const MiniPlayerIndexRoute = MiniPlayerIndexImport.update({
+  id: '/mini-player/',
+  path: '/mini-player/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const FullscreenPlayerIndexRoute = FullscreenPlayerIndexImport.update({
+  id: '/fullscreen-player/',
+  path: '/fullscreen-player/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MainPlayerHomeIndexRoute = MainPlayerHomeIndexImport.update({
+  id: '/home/',
+  path: '/home/',
+  getParentRoute: () => MainPlayerRouteRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -39,51 +60,113 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutImport
+    '/main-player': {
+      id: '/main-player'
+      path: '/main-player'
+      fullPath: '/main-player'
+      preLoaderRoute: typeof MainPlayerRouteImport
       parentRoute: typeof rootRoute
+    }
+    '/fullscreen-player/': {
+      id: '/fullscreen-player/'
+      path: '/fullscreen-player'
+      fullPath: '/fullscreen-player'
+      preLoaderRoute: typeof FullscreenPlayerIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/mini-player/': {
+      id: '/mini-player/'
+      path: '/mini-player'
+      fullPath: '/mini-player'
+      preLoaderRoute: typeof MiniPlayerIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/main-player/home/': {
+      id: '/main-player/home/'
+      path: '/home'
+      fullPath: '/main-player/home'
+      preLoaderRoute: typeof MainPlayerHomeIndexImport
+      parentRoute: typeof MainPlayerRouteImport
     }
   }
 }
 
 // Create and export the route tree
 
+interface MainPlayerRouteRouteChildren {
+  MainPlayerHomeIndexRoute: typeof MainPlayerHomeIndexRoute
+}
+
+const MainPlayerRouteRouteChildren: MainPlayerRouteRouteChildren = {
+  MainPlayerHomeIndexRoute: MainPlayerHomeIndexRoute,
+}
+
+const MainPlayerRouteRouteWithChildren = MainPlayerRouteRoute._addFileChildren(
+  MainPlayerRouteRouteChildren,
+)
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/main-player': typeof MainPlayerRouteRouteWithChildren
+  '/fullscreen-player': typeof FullscreenPlayerIndexRoute
+  '/mini-player': typeof MiniPlayerIndexRoute
+  '/main-player/home': typeof MainPlayerHomeIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/main-player': typeof MainPlayerRouteRouteWithChildren
+  '/fullscreen-player': typeof FullscreenPlayerIndexRoute
+  '/mini-player': typeof MiniPlayerIndexRoute
+  '/main-player/home': typeof MainPlayerHomeIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/main-player': typeof MainPlayerRouteRouteWithChildren
+  '/fullscreen-player/': typeof FullscreenPlayerIndexRoute
+  '/mini-player/': typeof MiniPlayerIndexRoute
+  '/main-player/home/': typeof MainPlayerHomeIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about'
+  fullPaths:
+    | '/'
+    | '/main-player'
+    | '/fullscreen-player'
+    | '/mini-player'
+    | '/main-player/home'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about'
-  id: '__root__' | '/' | '/about'
+  to:
+    | '/'
+    | '/main-player'
+    | '/fullscreen-player'
+    | '/mini-player'
+    | '/main-player/home'
+  id:
+    | '__root__'
+    | '/'
+    | '/main-player'
+    | '/fullscreen-player/'
+    | '/mini-player/'
+    | '/main-player/home/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
+  MainPlayerRouteRoute: typeof MainPlayerRouteRouteWithChildren
+  FullscreenPlayerIndexRoute: typeof FullscreenPlayerIndexRoute
+  MiniPlayerIndexRoute: typeof MiniPlayerIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
+  MainPlayerRouteRoute: MainPlayerRouteRouteWithChildren,
+  FullscreenPlayerIndexRoute: FullscreenPlayerIndexRoute,
+  MiniPlayerIndexRoute: MiniPlayerIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -97,14 +180,29 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/about"
+        "/main-player",
+        "/fullscreen-player/",
+        "/mini-player/"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/about": {
-      "filePath": "about.tsx"
+    "/main-player": {
+      "filePath": "main-player/route.tsx",
+      "children": [
+        "/main-player/home/"
+      ]
+    },
+    "/fullscreen-player/": {
+      "filePath": "fullscreen-player/index.tsx"
+    },
+    "/mini-player/": {
+      "filePath": "mini-player/index.tsx"
+    },
+    "/main-player/home/": {
+      "filePath": "main-player/home/index.tsx",
+      "parent": "/main-player"
     }
   }
 }
