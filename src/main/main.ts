@@ -449,7 +449,9 @@ const handleFileProtocol = async (request: GlobalRequest): Promise<GlobalRespons
       /(nora:[\/\\]{1,2}localfiles[\/\\]{1,2})|(\?ts\=\d+$)?/gm,
       ''
     );
-    const [filePath] = urlWithQueries.split('?');
+    let [filePath] = urlWithQueries.split('?');
+
+    if (os.platform() === 'darwin') filePath = '/' + filePath;
 
     // logger.verbose('Serving file from nora://', { filePath });
 
@@ -838,3 +840,4 @@ export function stopScreenSleeping() {
   powerSaveBlockerId = powerSaveBlocker.start('prevent-display-sleep');
   logger.debug('Screen sleeping prevented.', { powerSaveBlockerId });
 }
+
