@@ -6,7 +6,7 @@ import Img from '../Img';
 import AppIcon from '../../assets/images/webp/logo_light_mode.webp';
 
 const contentLoadStart = window.performance.now();
-const hidePreloader = () => router.navigate({ to: '/main-player/home' });
+const hidePreloader = () => router.navigate({ to: '/main-player/home', replace: true });
 
 window.addEventListener(
   'load',
@@ -37,3 +37,4 @@ const Preloader = () => {
 };
 
 export default Preloader;
+
