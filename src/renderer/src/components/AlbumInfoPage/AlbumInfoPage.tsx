@@ -12,6 +12,11 @@ import type { LastFMAlbumInfo } from 'src/types/last_fm_album_info_api';
 import VirtualizedList from '../VirtualizedList';
 import { useStore } from '@tanstack/react-store';
 import { store } from '../../store';
+import type { BaseInfoPageSearchParams } from '@renderer/utils/zod/baseInfoPageSearchParamsSchema';
+
+interface AlbumInfoPageProps extends BaseInfoPageSearchParams {
+  albumId: string;
+}
 
 interface AlbumContentReducer {
   albumData: Album;
@@ -57,8 +62,9 @@ const reducer = (
   }
 };
 
-const AlbumInfoPage = () => {
-  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+const AlbumInfoPage = (props: AlbumInfoPageProps) => {
+  const { albumId, scrollTopOffset } = props;
+
   const preferences = useStore(store, (state) => state?.localStorage?.preferences);
   const queue = useStore(store, (state) => state.localStorage.queue);
 
@@ -76,11 +82,6 @@ const AlbumInfoPage = () => {
     songsData: [] as SongData[],
     sortingOrder: 'trackNoAscending' as SongSortTypes
   });
-
-  const albumId = useMemo(
-    () => currentlyActivePage?.data?.albumId as string,
-    [currentlyActivePage?.data?.albumId]
-  );
 
   useEffect(() => {
     if (albumId)
@@ -277,7 +278,7 @@ const AlbumInfoPage = () => {
       <VirtualizedList
         data={listItems}
         fixedItemHeight={60}
-        scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
+        scrollTopOffset={scrollTopOffset}
         itemContent={(index, item) => {
           if ('songId' in item)
             return (

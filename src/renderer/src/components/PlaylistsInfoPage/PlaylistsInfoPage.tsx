@@ -13,11 +13,16 @@ import { songSortOptions, songFilterOptions } from '../SongsPage/SongOptions';
 import VirtualizedList from '../VirtualizedList';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store';
+import type { BaseInfoPageSearchParams } from '@renderer/utils/zod/baseInfoPageSearchParamsSchema';
+import { useNavigate } from '@tanstack/react-router';
 
 const SensitiveActionConfirmPrompt = lazy(() => import('../SensitiveActionConfirmPrompt'));
 
-const PlaylistInfoPage = () => {
-  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+interface PlaylistInfoPageProps extends BaseInfoPageSearchParams {
+  playlistId: string;
+}
+
+const PlaylistInfoPage = (props: PlaylistInfoPageProps) => {
   const queue = useStore(store, (state) => state.localStorage.queue);
   const playlistSortingState = useStore(
     store,
@@ -33,25 +38,25 @@ const PlaylistInfoPage = () => {
     playSong
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate({ from: '/main-player/playlists/$playlistId' });
+
+  const { playlistId, scrollTopOffset, sortingOrder = playlistSortingState } = props;
 
   const [playlistData, setPlaylistData] = useState({} as Playlist);
   const [playlistSongs, setPlaylistSongs] = useState([] as SongData[]);
-  const [sortingOrder, setSortingOrder] = useState<SongSortTypes>(
-    (currentlyActivePage?.data?.sortingOrder as SongSortTypes) || playlistSortingState
-  );
   const [filteringOrder, setFilteringOrder] = useState<SongFilterTypes>('notSelected');
 
   const fetchPlaylistData = useCallback(() => {
-    if (currentlyActivePage.data?.playlistId) {
+    if (playlistId) {
       window.api.playlistsData
-        .getPlaylistData([currentlyActivePage.data.playlistId as string])
+        .getPlaylistData([playlistId])
         .then((res) => {
           if (res && res.length > 0 && res[0]) setPlaylistData(res[0]);
           return undefined;
         })
         .catch((err) => console.error(err));
     }
-  }, [currentlyActivePage.data]);
+  }, [playlistId]);
 
   const fetchPlaylistSongsData = useCallback(() => {
     const preserveAddedOrder = sortingOrder === 'addedOrder';
@@ -197,7 +202,7 @@ const PlaylistInfoPage = () => {
 
   return (
     <MainContainer
-      className="main-container playlist-info-page-container h-full! px-8 pb-0! pr-0!"
+      className="main-container playlist-info-page-container h-full! px-8 pr-0! pb-0!"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {
@@ -254,16 +259,14 @@ const PlaylistInfoPage = () => {
             name: 'PlaylistPageSortDropdown',
             type: `${t('common.sortBy')} :`,
             value: sortingOrder,
-            options: songSortOptions.concat([
-              { label: t('sortTypes.addedOrder'), value: 'addedOrder' }
-            ]),
+            options: songSortOptions,
             onChange: (e) => {
               const order = e.currentTarget.value as SongSortTypes;
               updateCurrentlyActivePageData((currentPageData) => ({
                 ...currentPageData,
                 sortingOrder: order
               }));
-              setSortingOrder(order);
+              navigate({ search: (prev) => ({ ...prev, sortingOrder: order }) });
             },
             isDisabled: !(playlistData.songs && playlistData.songs.length > 0)
           }
@@ -272,7 +275,7 @@ const PlaylistInfoPage = () => {
       <VirtualizedList
         data={listItems}
         fixedItemHeight={60}
-        scrollTopOffset={currentlyActivePage.data?.scrollTopOffset}
+        scrollTopOffset={scrollTopOffset}
         itemContent={(index, item) => {
           if ('songId' in item)
             return (
@@ -315,7 +318,7 @@ const PlaylistInfoPage = () => {
         }}
       />
       {playlistSongs.length === 0 && (
-        <div className="no-songs-container appear-from-bottom relative flex h-full grow flex-col items-center justify-center text-center text-lg font-light text-font-color-black opacity-80! dark:text-font-color-white">
+        <div className="no-songs-container appear-from-bottom text-font-color-black dark:text-font-color-white relative flex h-full grow flex-col items-center justify-center text-center text-lg font-light opacity-80!">
           <span className="material-icons-round-outlined mb-4 text-5xl">brightness_empty</span>
           {t('playlist.empty')}
         </div>

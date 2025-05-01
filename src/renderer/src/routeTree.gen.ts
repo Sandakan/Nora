@@ -24,7 +24,12 @@ import { Route as MainPlayerGenresIndexImport } from './routes/main-player/genre
 import { Route as MainPlayerFoldersIndexImport } from './routes/main-player/folders/index'
 import { Route as MainPlayerArtistsIndexImport } from './routes/main-player/artists/index'
 import { Route as MainPlayerAlbumsIndexImport } from './routes/main-player/albums/index'
-import { Route as MainPlayerSongsIdImport } from './routes/main-player/songs/$id'
+import { Route as MainPlayerSongsSongIdImport } from './routes/main-player/songs/$songId'
+import { Route as MainPlayerPlaylistsPlaylistIdImport } from './routes/main-player/playlists/$playlistId'
+import { Route as MainPlayerGenresGenreIdImport } from './routes/main-player/genres/$genreId'
+import { Route as MainPlayerFoldersFolderPathImport } from './routes/main-player/folders/$folderPath'
+import { Route as MainPlayerArtistsArtistIdImport } from './routes/main-player/artists/$artistId'
+import { Route as MainPlayerAlbumsAlbumIdImport } from './routes/main-player/albums/$albumId'
 
 // Create/Update Routes
 
@@ -106,9 +111,41 @@ const MainPlayerAlbumsIndexRoute = MainPlayerAlbumsIndexImport.update({
   getParentRoute: () => MainPlayerRouteRoute,
 } as any)
 
-const MainPlayerSongsIdRoute = MainPlayerSongsIdImport.update({
-  id: '/songs/$id',
-  path: '/songs/$id',
+const MainPlayerSongsSongIdRoute = MainPlayerSongsSongIdImport.update({
+  id: '/songs/$songId',
+  path: '/songs/$songId',
+  getParentRoute: () => MainPlayerRouteRoute,
+} as any)
+
+const MainPlayerPlaylistsPlaylistIdRoute =
+  MainPlayerPlaylistsPlaylistIdImport.update({
+    id: '/playlists/$playlistId',
+    path: '/playlists/$playlistId',
+    getParentRoute: () => MainPlayerRouteRoute,
+  } as any)
+
+const MainPlayerGenresGenreIdRoute = MainPlayerGenresGenreIdImport.update({
+  id: '/genres/$genreId',
+  path: '/genres/$genreId',
+  getParentRoute: () => MainPlayerRouteRoute,
+} as any)
+
+const MainPlayerFoldersFolderPathRoute =
+  MainPlayerFoldersFolderPathImport.update({
+    id: '/folders/$folderPath',
+    path: '/folders/$folderPath',
+    getParentRoute: () => MainPlayerRouteRoute,
+  } as any)
+
+const MainPlayerArtistsArtistIdRoute = MainPlayerArtistsArtistIdImport.update({
+  id: '/artists/$artistId',
+  path: '/artists/$artistId',
+  getParentRoute: () => MainPlayerRouteRoute,
+} as any)
+
+const MainPlayerAlbumsAlbumIdRoute = MainPlayerAlbumsAlbumIdImport.update({
+  id: '/albums/$albumId',
+  path: '/albums/$albumId',
   getParentRoute: () => MainPlayerRouteRoute,
 } as any)
 
@@ -144,11 +181,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MiniPlayerIndexImport
       parentRoute: typeof rootRoute
     }
-    '/main-player/songs/$id': {
-      id: '/main-player/songs/$id'
-      path: '/songs/$id'
-      fullPath: '/main-player/songs/$id'
-      preLoaderRoute: typeof MainPlayerSongsIdImport
+    '/main-player/albums/$albumId': {
+      id: '/main-player/albums/$albumId'
+      path: '/albums/$albumId'
+      fullPath: '/main-player/albums/$albumId'
+      preLoaderRoute: typeof MainPlayerAlbumsAlbumIdImport
+      parentRoute: typeof MainPlayerRouteImport
+    }
+    '/main-player/artists/$artistId': {
+      id: '/main-player/artists/$artistId'
+      path: '/artists/$artistId'
+      fullPath: '/main-player/artists/$artistId'
+      preLoaderRoute: typeof MainPlayerArtistsArtistIdImport
+      parentRoute: typeof MainPlayerRouteImport
+    }
+    '/main-player/folders/$folderPath': {
+      id: '/main-player/folders/$folderPath'
+      path: '/folders/$folderPath'
+      fullPath: '/main-player/folders/$folderPath'
+      preLoaderRoute: typeof MainPlayerFoldersFolderPathImport
+      parentRoute: typeof MainPlayerRouteImport
+    }
+    '/main-player/genres/$genreId': {
+      id: '/main-player/genres/$genreId'
+      path: '/genres/$genreId'
+      fullPath: '/main-player/genres/$genreId'
+      preLoaderRoute: typeof MainPlayerGenresGenreIdImport
+      parentRoute: typeof MainPlayerRouteImport
+    }
+    '/main-player/playlists/$playlistId': {
+      id: '/main-player/playlists/$playlistId'
+      path: '/playlists/$playlistId'
+      fullPath: '/main-player/playlists/$playlistId'
+      preLoaderRoute: typeof MainPlayerPlaylistsPlaylistIdImport
+      parentRoute: typeof MainPlayerRouteImport
+    }
+    '/main-player/songs/$songId': {
+      id: '/main-player/songs/$songId'
+      path: '/songs/$songId'
+      fullPath: '/main-player/songs/$songId'
+      preLoaderRoute: typeof MainPlayerSongsSongIdImport
       parentRoute: typeof MainPlayerRouteImport
     }
     '/main-player/albums/': {
@@ -220,7 +292,12 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface MainPlayerRouteRouteChildren {
-  MainPlayerSongsIdRoute: typeof MainPlayerSongsIdRoute
+  MainPlayerAlbumsAlbumIdRoute: typeof MainPlayerAlbumsAlbumIdRoute
+  MainPlayerArtistsArtistIdRoute: typeof MainPlayerArtistsArtistIdRoute
+  MainPlayerFoldersFolderPathRoute: typeof MainPlayerFoldersFolderPathRoute
+  MainPlayerGenresGenreIdRoute: typeof MainPlayerGenresGenreIdRoute
+  MainPlayerPlaylistsPlaylistIdRoute: typeof MainPlayerPlaylistsPlaylistIdRoute
+  MainPlayerSongsSongIdRoute: typeof MainPlayerSongsSongIdRoute
   MainPlayerAlbumsIndexRoute: typeof MainPlayerAlbumsIndexRoute
   MainPlayerArtistsIndexRoute: typeof MainPlayerArtistsIndexRoute
   MainPlayerFoldersIndexRoute: typeof MainPlayerFoldersIndexRoute
@@ -233,7 +310,12 @@ interface MainPlayerRouteRouteChildren {
 }
 
 const MainPlayerRouteRouteChildren: MainPlayerRouteRouteChildren = {
-  MainPlayerSongsIdRoute: MainPlayerSongsIdRoute,
+  MainPlayerAlbumsAlbumIdRoute: MainPlayerAlbumsAlbumIdRoute,
+  MainPlayerArtistsArtistIdRoute: MainPlayerArtistsArtistIdRoute,
+  MainPlayerFoldersFolderPathRoute: MainPlayerFoldersFolderPathRoute,
+  MainPlayerGenresGenreIdRoute: MainPlayerGenresGenreIdRoute,
+  MainPlayerPlaylistsPlaylistIdRoute: MainPlayerPlaylistsPlaylistIdRoute,
+  MainPlayerSongsSongIdRoute: MainPlayerSongsSongIdRoute,
   MainPlayerAlbumsIndexRoute: MainPlayerAlbumsIndexRoute,
   MainPlayerArtistsIndexRoute: MainPlayerArtistsIndexRoute,
   MainPlayerFoldersIndexRoute: MainPlayerFoldersIndexRoute,
@@ -254,7 +336,12 @@ export interface FileRoutesByFullPath {
   '/main-player': typeof MainPlayerRouteRouteWithChildren
   '/fullscreen-player': typeof FullscreenPlayerIndexRoute
   '/mini-player': typeof MiniPlayerIndexRoute
-  '/main-player/songs/$id': typeof MainPlayerSongsIdRoute
+  '/main-player/albums/$albumId': typeof MainPlayerAlbumsAlbumIdRoute
+  '/main-player/artists/$artistId': typeof MainPlayerArtistsArtistIdRoute
+  '/main-player/folders/$folderPath': typeof MainPlayerFoldersFolderPathRoute
+  '/main-player/genres/$genreId': typeof MainPlayerGenresGenreIdRoute
+  '/main-player/playlists/$playlistId': typeof MainPlayerPlaylistsPlaylistIdRoute
+  '/main-player/songs/$songId': typeof MainPlayerSongsSongIdRoute
   '/main-player/albums': typeof MainPlayerAlbumsIndexRoute
   '/main-player/artists': typeof MainPlayerArtistsIndexRoute
   '/main-player/folders': typeof MainPlayerFoldersIndexRoute
@@ -271,7 +358,12 @@ export interface FileRoutesByTo {
   '/main-player': typeof MainPlayerRouteRouteWithChildren
   '/fullscreen-player': typeof FullscreenPlayerIndexRoute
   '/mini-player': typeof MiniPlayerIndexRoute
-  '/main-player/songs/$id': typeof MainPlayerSongsIdRoute
+  '/main-player/albums/$albumId': typeof MainPlayerAlbumsAlbumIdRoute
+  '/main-player/artists/$artistId': typeof MainPlayerArtistsArtistIdRoute
+  '/main-player/folders/$folderPath': typeof MainPlayerFoldersFolderPathRoute
+  '/main-player/genres/$genreId': typeof MainPlayerGenresGenreIdRoute
+  '/main-player/playlists/$playlistId': typeof MainPlayerPlaylistsPlaylistIdRoute
+  '/main-player/songs/$songId': typeof MainPlayerSongsSongIdRoute
   '/main-player/albums': typeof MainPlayerAlbumsIndexRoute
   '/main-player/artists': typeof MainPlayerArtistsIndexRoute
   '/main-player/folders': typeof MainPlayerFoldersIndexRoute
@@ -289,7 +381,12 @@ export interface FileRoutesById {
   '/main-player': typeof MainPlayerRouteRouteWithChildren
   '/fullscreen-player/': typeof FullscreenPlayerIndexRoute
   '/mini-player/': typeof MiniPlayerIndexRoute
-  '/main-player/songs/$id': typeof MainPlayerSongsIdRoute
+  '/main-player/albums/$albumId': typeof MainPlayerAlbumsAlbumIdRoute
+  '/main-player/artists/$artistId': typeof MainPlayerArtistsArtistIdRoute
+  '/main-player/folders/$folderPath': typeof MainPlayerFoldersFolderPathRoute
+  '/main-player/genres/$genreId': typeof MainPlayerGenresGenreIdRoute
+  '/main-player/playlists/$playlistId': typeof MainPlayerPlaylistsPlaylistIdRoute
+  '/main-player/songs/$songId': typeof MainPlayerSongsSongIdRoute
   '/main-player/albums/': typeof MainPlayerAlbumsIndexRoute
   '/main-player/artists/': typeof MainPlayerArtistsIndexRoute
   '/main-player/folders/': typeof MainPlayerFoldersIndexRoute
@@ -308,7 +405,12 @@ export interface FileRouteTypes {
     | '/main-player'
     | '/fullscreen-player'
     | '/mini-player'
-    | '/main-player/songs/$id'
+    | '/main-player/albums/$albumId'
+    | '/main-player/artists/$artistId'
+    | '/main-player/folders/$folderPath'
+    | '/main-player/genres/$genreId'
+    | '/main-player/playlists/$playlistId'
+    | '/main-player/songs/$songId'
     | '/main-player/albums'
     | '/main-player/artists'
     | '/main-player/folders'
@@ -324,7 +426,12 @@ export interface FileRouteTypes {
     | '/main-player'
     | '/fullscreen-player'
     | '/mini-player'
-    | '/main-player/songs/$id'
+    | '/main-player/albums/$albumId'
+    | '/main-player/artists/$artistId'
+    | '/main-player/folders/$folderPath'
+    | '/main-player/genres/$genreId'
+    | '/main-player/playlists/$playlistId'
+    | '/main-player/songs/$songId'
     | '/main-player/albums'
     | '/main-player/artists'
     | '/main-player/folders'
@@ -340,7 +447,12 @@ export interface FileRouteTypes {
     | '/main-player'
     | '/fullscreen-player/'
     | '/mini-player/'
-    | '/main-player/songs/$id'
+    | '/main-player/albums/$albumId'
+    | '/main-player/artists/$artistId'
+    | '/main-player/folders/$folderPath'
+    | '/main-player/genres/$genreId'
+    | '/main-player/playlists/$playlistId'
+    | '/main-player/songs/$songId'
     | '/main-player/albums/'
     | '/main-player/artists/'
     | '/main-player/folders/'
@@ -389,7 +501,12 @@ export const routeTree = rootRoute
     "/main-player": {
       "filePath": "main-player/route.tsx",
       "children": [
-        "/main-player/songs/$id",
+        "/main-player/albums/$albumId",
+        "/main-player/artists/$artistId",
+        "/main-player/folders/$folderPath",
+        "/main-player/genres/$genreId",
+        "/main-player/playlists/$playlistId",
+        "/main-player/songs/$songId",
         "/main-player/albums/",
         "/main-player/artists/",
         "/main-player/folders/",
@@ -407,8 +524,28 @@ export const routeTree = rootRoute
     "/mini-player/": {
       "filePath": "mini-player/index.tsx"
     },
-    "/main-player/songs/$id": {
-      "filePath": "main-player/songs/$id.tsx",
+    "/main-player/albums/$albumId": {
+      "filePath": "main-player/albums/$albumId.tsx",
+      "parent": "/main-player"
+    },
+    "/main-player/artists/$artistId": {
+      "filePath": "main-player/artists/$artistId.tsx",
+      "parent": "/main-player"
+    },
+    "/main-player/folders/$folderPath": {
+      "filePath": "main-player/folders/$folderPath.tsx",
+      "parent": "/main-player"
+    },
+    "/main-player/genres/$genreId": {
+      "filePath": "main-player/genres/$genreId.tsx",
+      "parent": "/main-player"
+    },
+    "/main-player/playlists/$playlistId": {
+      "filePath": "main-player/playlists/$playlistId.tsx",
+      "parent": "/main-player"
+    },
+    "/main-player/songs/$songId": {
+      "filePath": "main-player/songs/$songId.tsx",
       "parent": "/main-player"
     },
     "/main-player/albums/": {

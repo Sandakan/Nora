@@ -98,42 +98,6 @@ const Sidebar = memo(() => {
     setData(linkData);
   }, [linkData]);
 
-  // const addActiveToSidebarItem = useCallback((id: string) => {
-  //   setData((prevData) => {
-  //     if (prevData)
-  //       return prevData.map((link) => {
-  //         if (link.content === id) {
-  //           return link.parentClassName.includes('active')
-  //             ? link
-  //             : {
-  //                 ...link,
-  //                 isActive: true,
-  //                 parentClassName: `${link.parentClassName} active`
-  //               };
-  //         } else {
-  //           return {
-  //             ...link,
-  //             isActive: false,
-  //             parentClassName: link.parentClassName.replace('active', '').trim()
-  //           };
-  //         }
-  //       });
-  //     return [];
-  //   });
-  // }, []);
-
-  // const clickHandler = useCallback(
-  //   (id: string, pageData?: PageData) => {
-  //     changeCurrentActivePage(id as PageTitles, pageData);
-  //     // addActiveToSidebarItem(id);
-  //   },
-  //   [changeCurrentActivePage]
-  // );
-
-  // useEffect(() => {
-  //   addActiveToSidebarItem(currentlyActivePage.pageTitle);
-  // }, [addActiveToSidebarItem, currentlyActivePage]);
-
   const sideBarItems = useMemo(
     () =>
       data
@@ -141,12 +105,9 @@ const Sidebar = memo(() => {
             <SideBarItem
               to={link.to}
               key={link.id}
-              id={link.id}
               parentClassName={link.parentClassName}
               icon={link.icon}
               content={link.content}
-              handleClick={() => {}}
-              isActive={link.isActive}
             />
           ))
         : [],
@@ -172,4 +133,3 @@ const Sidebar = memo(() => {
 
 Sidebar.displayName = 'Sidebar';
 export default Sidebar;
-

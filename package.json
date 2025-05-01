@@ -104,6 +104,7 @@
     "@tanstack/react-router": "^1.114.34",
     "@tanstack/react-store": "^0.7.0",
     "@tanstack/react-virtual": "^3.10.4",
+    "@tanstack/zod-adapter": "^1.119.0",
     "@vitalets/google-translate-api": "^9.2.0",
     "didyoumean2": "^7.0.2",
     "discord-rpc": "^4.0.1",
@@ -123,7 +124,8 @@
     "songlyrics": "^2.4.5",
     "tailwind-merge": "^3.0.2",
     "wanakana": "^5.3.1",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "zod": "^3.24.3"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-ts": "^3.0.0",

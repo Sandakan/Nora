@@ -41,7 +41,7 @@ const NavigationControlsContainer = (props: Props) => {
           className={`goToHomePageBtn app-region-no-drag hover:bg-background-color-2 hover:text-font-color-highlight dark:hover:bg-dark-background-color-2 dark:hover:text-dark-font-color-highlight invisible mr-0! flex h-fit scale-50 rounded-md! border-0! bg-transparent px-2! py-1! opacity-0 outline-offset-1 transition-all! dark:bg-transparent ${
             canGoBack ? 'visible! scale-100! opacity-100! focus-visible:outline!' : ''
           } `}
-          clickHandler={() => navigate({ to: '/main-player/home' })}
+          clickHandler={() => navigate({ to: '/main-player/home', replace: true })}
           tooltipLabel={t('titleBar.goHome')}
         />
       )}
@@ -62,4 +62,3 @@ const NavigationControlsContainer = (props: Props) => {
 };
 
 export default NavigationControlsContainer;
-

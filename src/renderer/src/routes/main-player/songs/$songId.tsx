@@ -1,26 +1,34 @@
+import Button from '@renderer/components/Button';
+import Img from '@renderer/components/Img';
+import MainContainer from '@renderer/components/MainContainer';
+import SecondaryContainer from '@renderer/components/SecondaryContainer';
+import ListeningActivityBarGraph from '@renderer/components/SongInfoPage/ListeningActivityBarGraph';
+import SimilarTracksContainer from '@renderer/components/SongInfoPage/SimilarTracksContainer';
+import SongAdditionalInfoContainer from '@renderer/components/SongInfoPage/SongAdditionalInfoContainer';
+import SongStat from '@renderer/components/SongInfoPage/SongStat';
+import SongsWithFeaturingArtistsSuggestion from '@renderer/components/SongInfoPage/SongsWithFeaturingArtistSuggestion';
+import SongArtist from '@renderer/components/SongsPage/SongArtist';
+import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
+import { store } from '@renderer/store';
+import calculateTimeFromSeconds from '@renderer/utils/calculateTimeFromSeconds';
+import log from '@renderer/utils/log';
+import { valueRounder } from '@renderer/utils/valueRounder';
+import { baseInfoPageSearchParamsSchema } from '@renderer/utils/zod/baseInfoPageSearchParamsSchema';
+import { createFileRoute } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
+import { zodValidator } from '@tanstack/zod-adapter';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import calculateTimeFromSeconds from '../../utils/calculateTimeFromSeconds';
-import log from '../../utils/log';
-import { valueRounder } from '../../utils/valueRounder';
 
-import Button from '../Button';
-import Img from '../Img';
-import MainContainer from '../MainContainer';
-import SecondaryContainer from '../SecondaryContainer';
-import SongArtist from '../SongsPage/SongArtist';
-import ListeningActivityBarGraph from './ListeningActivityBarGraph';
-import SongStat from './SongStat';
-import SongsWithFeaturingArtistsSuggestion from './SongsWithFeaturingArtistSuggestion';
-import SongAdditionalInfoContainer from './SongAdditionalInfoContainer';
-import SimilarTracksContainer from './SimilarTracksContainer';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+export const Route = createFileRoute('/main-player/songs/$songId')({
+  validateSearch: zodValidator(baseInfoPageSearchParamsSchema),
+  component: SongInfoPage
+});
 
-const SongInfoPage = () => {
+function SongInfoPage() {
+  const { songId } = Route.useParams();
+
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
-  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
 
   const { changeCurrentActivePage, updateBodyBackgroundImage, updateContextMenuData } =
     useContext(AppUpdateContext);
@@ -56,10 +64,8 @@ const SongInfoPage = () => {
   }, []);
 
   const fetchSongInfo = useCallback(() => {
-    if (currentlyActivePage.data && currentlyActivePage.data.songId) {
+    if (songId) {
       console.time('fetchTime');
-
-      const songId = currentlyActivePage.data.songId as string;
 
       window.api.audioLibraryControls
         .getSongInfo([songId])
@@ -82,7 +88,7 @@ const SongInfoPage = () => {
         })
         .catch((err) => log(err));
     }
-  }, [currentlyActivePage.data, updateBodyBackgroundImage]);
+  }, [songId, updateBodyBackgroundImage]);
 
   useEffect(() => {
     fetchSongInfo();
@@ -242,14 +248,14 @@ const SongInfoPage = () => {
               {t('common.song_one')}
             </div>
             <div
-              className={`title info-type-1 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-5xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight ${
+              className={`title info-type-1 text-font-color-highlight dark:text-dark-font-color-highlight mb-1 overflow-hidden text-5xl font-medium text-ellipsis whitespace-nowrap ${
                 bodyBackgroundImage && 'text-dark-font-color-highlight!'
               }`}
               title={songInfo.title}
             >
               {songInfo.title}
             </div>
-            <div className="song-artists info-type-2 mb-1 flex items-center overflow-hidden text-ellipsis whitespace-nowrap text-base">
+            <div className="song-artists info-type-2 mb-1 flex items-center overflow-hidden text-base text-ellipsis whitespace-nowrap">
               {songArtists}
             </div>
             <Button
@@ -267,20 +273,20 @@ const SongInfoPage = () => {
               }}
             />
             <div
-              className="info-type-3 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm"
+              className="info-type-3 mb-1 overflow-hidden text-sm text-ellipsis whitespace-nowrap"
               title={songDuration}
             >
               {songDuration}
             </div>
 
             {songInfo && songInfo.sampleRate && (
-              <div className="info-type-3 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm">
+              <div className="info-type-3 mb-1 overflow-hidden text-sm text-ellipsis whitespace-nowrap">
                 {songInfo.sampleRate / 1000} KHZ
               </div>
             )}
 
             {songInfo && songInfo.bitrate && (
-              <div className="info-type-3 mb-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm">
+              <div className="info-type-3 mb-1 overflow-hidden text-sm text-ellipsis whitespace-nowrap">
                 {Math.floor(songInfo.bitrate / 1000)} Kbps
               </div>
             )}
@@ -363,14 +369,9 @@ const SongInfoPage = () => {
             </div>
           )}
           <SongAdditionalInfoContainer songInfo={songInfo} songDurationStr={songDuration} />
-          {(currentlyActivePage.data?.songId as string) && (
-            <SimilarTracksContainer songId={currentlyActivePage.data?.songId as string} />
-          )}
+          {songId && <SimilarTracksContainer songId={songId} />}
         </SecondaryContainer>
       </>
     </MainContainer>
   ) : null;
-};
-
-SongInfoPage.displayName = 'SongInfoPage';
-export default SongInfoPage;
+}

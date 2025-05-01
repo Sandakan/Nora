@@ -13,6 +13,7 @@ import DefaultPlaylistCover from '../../assets/images/webp/playlist_cover_defaul
 import MultipleArtworksCover from './MultipleArtworksCover';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store';
+import { useNavigate } from '@tanstack/react-router';
 
 const ConfirmDeletePlaylistsPrompt = lazy(() => import('./ConfirmDeletePlaylistsPrompt'));
 const RenamePlaylistPrompt = lazy(() => import('./RenamePlaylistPrompt'));
@@ -34,7 +35,6 @@ export const Playlist = (props: PlaylistProp) => {
   const {
     updateQueueData,
     updateContextMenuData,
-    changeCurrentActivePage,
     changePromptMenuData,
     createQueue,
     toggleMultipleSelections,
@@ -42,13 +42,15 @@ export const Playlist = (props: PlaylistProp) => {
     addNewNotifications
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const openPlaylistInfoPage = useCallback(
     () =>
-      changeCurrentActivePage('PlaylistInfo', {
-        playlistId: props.playlistId
+      navigate({
+        to: '/main-player/playlists/$playlistId',
+        params: { playlistId: props.playlistId }
       }),
-    [changeCurrentActivePage, props.playlistId]
+    [navigate, props.playlistId]
   );
 
   const isAMultipleSelection = useMemo(() => {

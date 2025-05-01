@@ -20,6 +20,7 @@ const DeleteSongsFromSystemConfrimPrompt = lazy(
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import { useStore } from '@tanstack/react-store';
 import { store } from '../../store';
+import { useNavigate } from '@tanstack/react-router';
 
 interface SongCardProp {
   index: number;
@@ -63,6 +64,7 @@ const SongCard = (props: SongCardProp) => {
     createQueue
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const {
     title,
@@ -380,8 +382,9 @@ const SongCard = (props: SongCardProp) => {
         iconName: 'album',
         handlerFunction: () =>
           album &&
-          changeCurrentActivePage('AlbumInfo', {
-            albumId: album?.albumId
+          navigate({
+            to: '/main-player/albums/$albumId',
+            params: { albumId: album.albumId }
           }),
         isDisabled: !album
       },
@@ -459,9 +462,9 @@ const SongCard = (props: SongCardProp) => {
     ];
     return items;
   }, [
-    t,
     multipleSelectionsData,
     isAMultipleSelection,
+    t,
     isSongAFavorite,
     album,
     isBlacklisted,
@@ -482,6 +485,7 @@ const SongCard = (props: SongCardProp) => {
     isMultipleSelectionEnabled,
     updateMultipleSelections,
     changeCurrentActivePage,
+    navigate,
     path,
     doNotShowBlacklistSongConfirm
   ]);
@@ -522,7 +526,7 @@ const SongCard = (props: SongCardProp) => {
         currentSongData.songId === songId && 'current-song'
       } ${
         isSongPlaying && 'playing'
-      } group/songCard border-background-color-2 dark:border-dark-background-color-2 relative mr-2 mb-2 aspect-2/1 max-w-[24rem] min-w-[15rem] overflow-hidden rounded-2xl border-[transparent] shadow-xl transition-[border-color] ease-in-out ${
+      } group/songCard relative mr-2 mb-2 aspect-2/1 max-w-[24rem] min-w-[15rem] overflow-hidden rounded-2xl border-[transparent] shadow-xl transition-[border-color] ease-in-out ${
         className || ''
       } ${
         isMultipleSelectionEnabled && multipleSelectionsData.selectionType === 'songs' && 'border-4'

@@ -2,6 +2,7 @@ import NodeID3 from 'node-id3';
 import { ReactElement, ReactNode } from 'react';
 import { ButtonProps } from '../renderer/src/components/Button';
 import { DropdownOption } from '../renderer/src/components/Dropdown';
+import { songSortTypes } from '../renderer/src/components/SongsPage/SongOptions';
 import { api } from '../preload';
 import { LastFMSessionData } from './last_fm_api';
 import { SimilarArtist, Tag } from './last_fm_artist_info_api';
@@ -308,39 +309,39 @@ declare global {
   // node-id3 synchronisedLyrics types.
   type UnsynchronisedLyrics =
     | {
-        language: string;
-        text: string;
-      }
+      language: string;
+      text: string;
+    }
     | undefined;
 
   type SynchronisedLyrics =
     | Array<{
+      /**
+       * 3 letter ISO 639-2 language code, for example: eng
+       * @see {@link https://id3.org/ISO%20639-2 ISO 639-2}
+       */
+      language: string;
+      /**
+       * Absolute time unit:
+       * {@link TagConstants.TimeStampFormat}
+       */
+      timeStampFormat: number;
+      /**
+       * {@link TagConstants.SynchronisedLyrics.ContentType}
+       */
+      contentType: number;
+      /**
+       * Content descriptor
+       */
+      shortText?: string;
+      synchronisedText: Array<{
+        text: string;
         /**
-         * 3 letter ISO 639-2 language code, for example: eng
-         * @see {@link https://id3.org/ISO%20639-2 ISO 639-2}
+         * Absolute time in unit according to `timeStampFormat`.
          */
-        language: string;
-        /**
-         * Absolute time unit:
-         * {@link TagConstants.TimeStampFormat}
-         */
-        timeStampFormat: number;
-        /**
-         * {@link TagConstants.SynchronisedLyrics.ContentType}
-         */
-        contentType: number;
-        /**
-         * Content descriptor
-         */
-        shortText?: string;
-        synchronisedText: Array<{
-          text: string;
-          /**
-           * Absolute time in unit according to `timeStampFormat`.
-           */
-          timeStamp: number;
-        }>;
-      }>
+        timeStamp: number;
+      }>;
+    }>
     | undefined;
 
   interface LyricsMetadataFromShortText {
@@ -1004,27 +1005,7 @@ declare global {
 
   type SongFilterTypes = 'notSelected' | 'blacklistedSongs' | 'whitelistedSongs';
 
-  type SongSortTypes =
-    | 'aToZ'
-    | 'zToA'
-    | 'addedOrder'
-    | 'dateAddedAscending'
-    | 'dateAddedDescending'
-    | 'releasedYearAscending'
-    | 'releasedYearDescending'
-    | 'trackNoAscending'
-    | 'trackNoDescending'
-    | 'artistNameAscending'
-    | 'artistNameDescending'
-    | 'allTimeMostListened'
-    | 'allTimeLeastListened'
-    | 'monthlyMostListened'
-    | 'monthlyLeastListened'
-    | 'artistNameDescending'
-    | 'albumNameAscending'
-    | 'albumNameDescending'
-    | 'blacklistedSongs'
-    | 'whitelistedSongs';
+  type SongSortTypes = (typeof songSortTypes)[number];
 
   type ArtistFilterTypes = 'notSelected' | 'favorites';
 
@@ -1279,4 +1260,9 @@ declare global {
     | 'favorites_artwork'
     | 'genre_artwork'
     | 'playlist_artwork';
+
+
+  interface SearchUrlParams {
+    scrollTopOffset?: number;
+  }
 }

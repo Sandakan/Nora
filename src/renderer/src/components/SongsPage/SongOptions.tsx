@@ -1,7 +1,31 @@
 import i18n from '../../i18n';
 import { type DropdownOption } from '../Dropdown';
 
+export const songSortTypes = [
+  'aToZ',
+  'zToA',
+  'addedOrder',
+  'dateAddedAscending',
+  'dateAddedDescending',
+  'releasedYearAscending',
+  'releasedYearDescending',
+  'trackNoAscending',
+  'trackNoDescending',
+  'artistNameAscending',
+  'artistNameDescending',
+  'allTimeMostListened',
+  'allTimeLeastListened',
+  'monthlyMostListened',
+  'monthlyLeastListened',
+  'artistNameDescending',
+  'albumNameAscending',
+  'albumNameDescending',
+  'blacklistedSongs',
+  'whitelistedSongs'
+] as const;
+
 export const songSortOptions: DropdownOption<SongSortTypes>[] = [
+  { label: i18n.t('sortTypes.addedOrder'), value: 'addedOrder' },
   { label: i18n.t('sortTypes.aToZ'), value: 'aToZ' },
   { label: i18n.t('sortTypes.zToA'), value: 'zToA' },
   {

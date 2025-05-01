@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
-
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import {
@@ -36,6 +34,8 @@ import Button from '../Button';
 import { appPreferences } from '../../../../../package.json';
 import { useStore } from '@tanstack/react-store';
 import { store } from '../../store';
+import NavLink from '../NavLink';
+import { useNavigate } from '@tanstack/react-router';
 
 interface SongProp {
   songId: string;
@@ -71,7 +71,6 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
     (state) => state.multipleSelectionsData.isEnabled
   );
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
-  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
 
   const {
     playSong,
@@ -86,6 +85,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
     createQueue
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const {
     index,
@@ -195,36 +195,10 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [artists, currentSongData.songId, isAMultipleSelection, songId]);
 
-  const goToSongInfoPage = useCallback(() => {
-    if (
-      currentlyActivePage.pageTitle !== 'SongInfo' &&
-      currentlyActivePage?.data?.songId !== songId
-    )
-      changeCurrentActivePage('SongInfo', {
-        songId
-      });
-  }, [
-    changeCurrentActivePage,
-    currentlyActivePage?.data?.songId,
-    currentlyActivePage.pageTitle,
-    songId
-  ]);
-
-  const goToAlbumInfoPage = useCallback(() => {
-    if (
-      album?.albumId &&
-      currentlyActivePage.pageTitle !== 'AlbumInfo' &&
-      currentlyActivePage?.data?.albumId !== album.albumId
-    )
-      changeCurrentActivePage('AlbumInfo', {
-        albumId: album.albumId
-      });
-  }, [
-    album?.albumId,
-    changeCurrentActivePage,
-    currentlyActivePage?.data?.albumId,
-    currentlyActivePage.pageTitle
-  ]);
+  const goToSongInfoPage = useCallback(
+    () => navigate({ to: '/main-player/songs/$songId', params: { songId } }),
+    [navigate, songId]
+  );
 
   const contextMenuItems: ContextMenuItem[] = useMemo(() => {
     const isMultipleSelectionsEnabled =
@@ -436,8 +410,9 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         iconName: 'album',
         handlerFunction: () =>
           album &&
-          changeCurrentActivePage('AlbumInfo', {
-            albumId: album?.albumId
+          navigate({
+            to: '/main-player/albums/$albumId',
+            params: { albumId: album.albumId }
           }),
         isDisabled: !album
       },
@@ -543,6 +518,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
     changePromptMenuData,
     isMultipleSelectionEnabled,
     updateMultipleSelections,
+    navigate,
     changeCurrentActivePage,
     path,
     localStorageData?.preferences.doNotShowBlacklistSongConfirm
@@ -687,29 +663,28 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
           'dark:text-font-color-black!'
         }`}
       >
-        <div
-          className="song-title truncate text-base font-normal outline-offset-1 transition-none focus-visible:outline!"
-          tabIndex={0}
-          onKeyDown={(e) => e.key === 'Enter' && goToSongInfoPage()}
+        <NavLink
+          to="/main-player/songs/$songId"
+          params={{ songId }}
           title={title}
+          className="song-title truncate text-base font-normal outline-offset-1 transition-none focus-visible:outline!"
         >
           {title}
-        </div>
+        </NavLink>
         <div className="song-artists w-full truncate text-xs font-normal transition-none">
           {songArtists}
         </div>
         <div className="song-album w-full truncate text-xs transition-none sm:hidden md:hidden lg:hidden">
           {album?.name ? (
-            <span
+            <NavLink
+              to="/main-player/albums/$albumId"
+              params={{ albumId: album?.albumId }}
+              disabled={album?.albumId === undefined}
               className="cursor-pointer -outline-offset-1 hover:underline focus-visible:outline!"
-              tabIndex={0}
               title={album.name}
-              role="button"
-              onClick={goToAlbumInfoPage}
-              onKeyDown={(e) => e.key === 'Enter' && goToAlbumInfoPage()}
             >
               {album.name}
-            </span>
+            </NavLink>
           ) : (
             t('common.unknownAlbum')
           )}

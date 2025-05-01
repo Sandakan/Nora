@@ -79,7 +79,8 @@
   "files.readonlyInclude": {
     "**/routeTree.gen.ts": true
   },
-  "files.watcherExclude": {
-    "**/routeTree.gen.ts": true
+  "editor.tokenColorCustomizations": {
+    "comments": "#657bae",
+    "textMateRules": [ ]
   },
 }

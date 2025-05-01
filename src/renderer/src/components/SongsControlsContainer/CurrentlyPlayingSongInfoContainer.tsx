@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/no-noninteractive-tabindex */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 import { lazy, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
@@ -11,6 +9,8 @@ import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import UpNextSongPopup from './UpNextSongPopup';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store';
+import NavLink from '../NavLink';
+import { useNavigate } from '@tanstack/react-router';
 
 const AddSongsToPlaylistsPrompt = lazy(() => import('../SongsPage/AddSongsToPlaylistsPrompt'));
 const BlacklistSongConfrimPrompt = lazy(() => import('../SongsPage/BlacklistSongConfirmPrompt'));
@@ -21,6 +21,7 @@ const DeleteSongsFromSystemConfrimPrompt = lazy(
 const CurrentlyPlayingSongInfoContainer = () => {
   const currentSongData = useStore(store, (state) => state.currentSongData);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
+  const navigate = useNavigate();
 
   const {
     changeCurrentActivePage,
@@ -50,17 +51,17 @@ const CurrentlyPlayingSongInfoContainer = () => {
             className={`border-background-color-1 dark:border-dark-background-color-1 absolute aspect-square w-6 rounded-full border-2 ${
               index === 0 ? 'z-2' : '-translate-x-2'
             }`}
-            onClick={() => {
-              changeCurrentActivePage('ArtistInfo', {
-                artistName: artist.name,
-                artistId: artist.artistId
-              });
-            }}
+            onClick={() =>
+              navigate({
+                to: '/main-player/artists/$artistId',
+                params: { artistId: artist.artistId }
+              })
+            }
             alt=""
           />
         ));
     return undefined;
-  }, [changeCurrentActivePage, currentSongData.artists, currentSongData.songId]);
+  }, [currentSongData.artists, currentSongData.songId, navigate]);
 
   const showSongInfoPage = useCallback(
     (songId: string) =>
@@ -276,14 +277,15 @@ const CurrentlyPlayingSongInfoContainer = () => {
       <div className="song-info-container relative flex h-full w-full flex-col items-start justify-center drop-shadow-lg lg:ml-4 lg:w-full">
         {currentSongData.title && (
           <div className="song-title flex w-full items-center">
-            <div
+            <NavLink
+              to="/main-player/songs/$songId"
+              params={{ songId: currentSongData.songId }}
               className={`text-font-color-highlight w-fit max-w-full cursor-pointer overflow-hidden text-2xl font-medium text-ellipsis whitespace-nowrap outline-offset-1 focus-visible:!outline ${
                 currentSongData.isKnownSource && 'hover:underline'
               }`}
+              disabled={!currentSongData.isKnownSource}
               id="currentSongTitle"
               title={currentSongData.title}
-              onClick={() => showSongInfoPage(currentSongData.songId)}
-              onKeyDown={(e) => e.key === 'Enter' && showSongInfoPage(currentSongData.songId)}
               onContextMenu={(e) => {
                 e.stopPropagation();
                 updateContextMenuData(
@@ -297,7 +299,7 @@ const CurrentlyPlayingSongInfoContainer = () => {
               tabIndex={0}
             >
               {currentSongData.title}
-            </div>
+            </NavLink>
             {!currentSongData.isKnownSource && (
               <span
                 className="material-icons-round-outlined text-font-color-highlight dark:text-dark-font-color-highlight ml-2 cursor-pointer text-xl font-light hover:underline"
