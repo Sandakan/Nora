@@ -24,6 +24,7 @@ import { Route as MainPlayerGenresIndexImport } from './routes/main-player/genre
 import { Route as MainPlayerFoldersIndexImport } from './routes/main-player/folders/index'
 import { Route as MainPlayerArtistsIndexImport } from './routes/main-player/artists/index'
 import { Route as MainPlayerAlbumsIndexImport } from './routes/main-player/albums/index'
+import { Route as MainPlayerSongsIdImport } from './routes/main-player/songs/$id'
 
 // Create/Update Routes
 
@@ -105,6 +106,12 @@ const MainPlayerAlbumsIndexRoute = MainPlayerAlbumsIndexImport.update({
   getParentRoute: () => MainPlayerRouteRoute,
 } as any)
 
+const MainPlayerSongsIdRoute = MainPlayerSongsIdImport.update({
+  id: '/songs/$id',
+  path: '/songs/$id',
+  getParentRoute: () => MainPlayerRouteRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -136,6 +143,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/mini-player'
       preLoaderRoute: typeof MiniPlayerIndexImport
       parentRoute: typeof rootRoute
+    }
+    '/main-player/songs/$id': {
+      id: '/main-player/songs/$id'
+      path: '/songs/$id'
+      fullPath: '/main-player/songs/$id'
+      preLoaderRoute: typeof MainPlayerSongsIdImport
+      parentRoute: typeof MainPlayerRouteImport
     }
     '/main-player/albums/': {
       id: '/main-player/albums/'
@@ -206,6 +220,7 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 interface MainPlayerRouteRouteChildren {
+  MainPlayerSongsIdRoute: typeof MainPlayerSongsIdRoute
   MainPlayerAlbumsIndexRoute: typeof MainPlayerAlbumsIndexRoute
   MainPlayerArtistsIndexRoute: typeof MainPlayerArtistsIndexRoute
   MainPlayerFoldersIndexRoute: typeof MainPlayerFoldersIndexRoute
@@ -218,6 +233,7 @@ interface MainPlayerRouteRouteChildren {
 }
 
 const MainPlayerRouteRouteChildren: MainPlayerRouteRouteChildren = {
+  MainPlayerSongsIdRoute: MainPlayerSongsIdRoute,
   MainPlayerAlbumsIndexRoute: MainPlayerAlbumsIndexRoute,
   MainPlayerArtistsIndexRoute: MainPlayerArtistsIndexRoute,
   MainPlayerFoldersIndexRoute: MainPlayerFoldersIndexRoute,
@@ -238,6 +254,7 @@ export interface FileRoutesByFullPath {
   '/main-player': typeof MainPlayerRouteRouteWithChildren
   '/fullscreen-player': typeof FullscreenPlayerIndexRoute
   '/mini-player': typeof MiniPlayerIndexRoute
+  '/main-player/songs/$id': typeof MainPlayerSongsIdRoute
   '/main-player/albums': typeof MainPlayerAlbumsIndexRoute
   '/main-player/artists': typeof MainPlayerArtistsIndexRoute
   '/main-player/folders': typeof MainPlayerFoldersIndexRoute
@@ -254,6 +271,7 @@ export interface FileRoutesByTo {
   '/main-player': typeof MainPlayerRouteRouteWithChildren
   '/fullscreen-player': typeof FullscreenPlayerIndexRoute
   '/mini-player': typeof MiniPlayerIndexRoute
+  '/main-player/songs/$id': typeof MainPlayerSongsIdRoute
   '/main-player/albums': typeof MainPlayerAlbumsIndexRoute
   '/main-player/artists': typeof MainPlayerArtistsIndexRoute
   '/main-player/folders': typeof MainPlayerFoldersIndexRoute
@@ -271,6 +289,7 @@ export interface FileRoutesById {
   '/main-player': typeof MainPlayerRouteRouteWithChildren
   '/fullscreen-player/': typeof FullscreenPlayerIndexRoute
   '/mini-player/': typeof MiniPlayerIndexRoute
+  '/main-player/songs/$id': typeof MainPlayerSongsIdRoute
   '/main-player/albums/': typeof MainPlayerAlbumsIndexRoute
   '/main-player/artists/': typeof MainPlayerArtistsIndexRoute
   '/main-player/folders/': typeof MainPlayerFoldersIndexRoute
@@ -289,6 +308,7 @@ export interface FileRouteTypes {
     | '/main-player'
     | '/fullscreen-player'
     | '/mini-player'
+    | '/main-player/songs/$id'
     | '/main-player/albums'
     | '/main-player/artists'
     | '/main-player/folders'
@@ -304,6 +324,7 @@ export interface FileRouteTypes {
     | '/main-player'
     | '/fullscreen-player'
     | '/mini-player'
+    | '/main-player/songs/$id'
     | '/main-player/albums'
     | '/main-player/artists'
     | '/main-player/folders'
@@ -319,6 +340,7 @@ export interface FileRouteTypes {
     | '/main-player'
     | '/fullscreen-player/'
     | '/mini-player/'
+    | '/main-player/songs/$id'
     | '/main-player/albums/'
     | '/main-player/artists/'
     | '/main-player/folders/'
@@ -367,6 +389,7 @@ export const routeTree = rootRoute
     "/main-player": {
       "filePath": "main-player/route.tsx",
       "children": [
+        "/main-player/songs/$id",
         "/main-player/albums/",
         "/main-player/artists/",
         "/main-player/folders/",
@@ -383,6 +406,10 @@ export const routeTree = rootRoute
     },
     "/mini-player/": {
       "filePath": "mini-player/index.tsx"
+    },
+    "/main-player/songs/$id": {
+      "filePath": "main-player/songs/$id.tsx",
+      "parent": "/main-player"
     },
     "/main-player/albums/": {
       "filePath": "main-player/albums/index.tsx",
