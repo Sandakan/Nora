@@ -1,14 +1,14 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
+import { SYNCED_LYRICS_REGEX } from '@common/isLyricsSynced';
+import { store } from '@renderer/store';
+import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import roundTo from '../../../../common/roundTo';
-import { syncedLyricsRegex } from './LyricsPage';
-import LyricsProgressBar from './LyricsProgressBar';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import EnhancedSyncedLyricWord from '../LyricsEditingPage/EnhancedSyncedLyricWord';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import LyricsProgressBar from './LyricsProgressBar';
 
 interface LyricProp {
   lyric: string | SyncedLyricsLineWord[];
@@ -19,9 +19,19 @@ interface LyricProp {
   isAutoScrolling?: boolean;
 }
 
+// const syncedLyricsRegex = /^\[\d+:\d{1,2}\.\d{1,3}]/gm;
+
 const lyricsScrollIntoViewEvent = new CustomEvent('lyrics/scrollIntoView', {
   detail: 'scrollingUsingScrollIntoView'
 });
+
+const getLyricText = (lyrics: string) => {
+  const match = SYNCED_LYRICS_REGEX.exec(lyrics);
+  SYNCED_LYRICS_REGEX.lastIndex = 0;
+
+  if (match && match.groups && match.groups.lyric) return match.groups.lyric.trim();
+  return lyrics;
+};
 
 const LyricLine = (props: LyricProp) => {
   const playerType = useStore(store, (state) => state.playerType);
@@ -79,7 +89,7 @@ const LyricLine = (props: LyricProp) => {
   }, [handleLyricsActivity]);
 
   const lyricString = useMemo(() => {
-    if (typeof lyric === 'string') return lyric.replaceAll(syncedLyricsRegex, '').trim();
+    if (typeof lyric === 'string') return getLyricText(lyric);
 
     const extendedLyricLines = lyric.map((extendedText, i) => {
       return (
@@ -101,8 +111,7 @@ const LyricLine = (props: LyricProp) => {
     if (translatedLyricLines.length === 0) return undefined;
 
     const translatedLyric = translatedLyricLines[0].text;
-    if (typeof translatedLyric === 'string')
-      return translatedLyric.replaceAll(syncedLyricsRegex, '').trim();
+    if (typeof translatedLyric === 'string') return getLyricText(translatedLyric);
 
     const extendedLyricLines = translatedLyric.map((extendedText, i) => {
       return (
@@ -122,8 +131,7 @@ const LyricLine = (props: LyricProp) => {
 
   const convertedLyricString = useMemo(() => {
     if (!convertedLyric || convertedLyric.length === 0) return undefined;
-    if (typeof convertedLyric === 'string')
-      return convertedLyric.replaceAll(syncedLyricsRegex, '').trim();
+    if (typeof convertedLyric === 'string') return getLyricText(convertedLyric);
 
     const extendedLyricLines = convertedLyric.map((extendedText, i) => {
       return (
@@ -191,7 +199,7 @@ const LyricLine = (props: LyricProp) => {
               handlerFunction: () =>
                 window.navigator.clipboard.writeText(
                   typeof lyric === 'string'
-                    ? lyric.replaceAll(syncedLyricsRegex, '').trim()
+                    ? getLyricText(lyric)
                     : lyric.map((x) => x.text).join(' ')
                 )
             }

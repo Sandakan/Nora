@@ -1,22 +1,21 @@
+import { store } from '@renderer/store';
+import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
+import NavLink from '../NavLink';
 import SeekBarContainer from './SeekBarContainer';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
 
 const SongControlsAndSeekbarContainer = () => {
   const isAFavorite = useStore(store, (state) => state.currentSongData.isAFavorite);
   const isKnownSource = useStore(store, (state) => state.currentSongData.isKnownSource);
-  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
   const isShuffling = useStore(store, (state) => state.player.isShuffling);
   const isRepeating = useStore(store, (state) => state.player.isRepeating);
   const isCurrentSongPlaying = useStore(store, (state) => state.player.isCurrentSongPlaying);
   const isPlayerStalled = useStore(store, (state) => state.player.isPlayerStalled);
 
   const {
-    changeCurrentActivePage,
     updateQueueData,
     toggleIsFavorite,
     toggleRepeat,
@@ -103,22 +102,17 @@ const SongControlsAndSeekbarContainer = () => {
           clickHandler={() => toggleRepeat()}
         />
 
-        <Button
-          className={`lyrics-btn after:bg-font-color-highlight dark:after:bg-dark-font-color-highlight !m-0 !rounded-none !border-0 bg-transparent !p-0 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent ${
-            currentlyActivePage.pageTitle === 'Lyrics' && 'active after:opacity-100'
-          }`}
-          tooltipLabel={t('player.lyrics')}
-          iconName="notes"
-          iconClassName={`material-icons-round !text-2xl opacity-60 transition-opacity hover:opacity-80 ${
-            currentlyActivePage.pageTitle === 'Lyrics' &&
-            'text-font-color-highlight! dark:text-dark-font-color-highlight! opacity-100!'
-          }`}
-          clickHandler={() =>
-            currentlyActivePage.pageTitle === 'Lyrics'
-              ? changeCurrentActivePage('Home')
-              : changeCurrentActivePage('Lyrics')
-          }
-        />
+        <NavLink
+          to="/main-player/lyrics"
+          className={`lyrics-btn group after:bg-font-color-highlight dark:after:bg-dark-font-color-highlight !m-0 flex items-center justify-center !border-0 bg-transparent !p-0 outline-offset-1 after:absolute after:h-1 after:w-1 after:translate-y-4 after:rounded-full after:opacity-0 after:transition-opacity hover:bg-transparent focus-visible:!outline dark:bg-transparent dark:hover:bg-transparent [&.active]:after:opacity-100`}
+          title={t('player.lyrics')}
+        >
+          <span
+            className={`material-icons-round group-[.active]:text-font-color-highlight! dark:group-[.active]:text-dark-font-color-highlight! !text-2xl opacity-60 transition-[color,_opacity] group-[.active]:opacity-100! hover:opacity-80`}
+          >
+            notes
+          </span>
+        </NavLink>
       </div>
       <SeekBarContainer />
     </div>

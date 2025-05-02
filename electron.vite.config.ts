@@ -1,11 +1,11 @@
 /**
  * @type {import('electron-vite').UserConfig}
  */
-import { resolve } from 'path';
-import { defineConfig, externalizeDepsPlugin, swcPlugin } from 'electron-vite';
-import react from '@vitejs/plugin-react-swc';
 import tailwindcss from '@tailwindcss/vite';
 import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
+import react from '@vitejs/plugin-react-swc';
+import { defineConfig, externalizeDepsPlugin, swcPlugin } from 'electron-vite';
+import { resolve } from 'path';
 
 export default defineConfig({
   main: {
@@ -33,7 +33,8 @@ export default defineConfig({
     resolve: {
       alias: {
         '@renderer': resolve(import.meta.dirname, './src/renderer/src'),
-        '@types': resolve(import.meta.dirname, './src/@types')
+        '@types': resolve(import.meta.dirname, './src/@types'),
+        '@common': resolve(import.meta.dirname, './src/common'),
       }
     },
     plugins: [

@@ -19,6 +19,9 @@
       "@renderer/*": [
         "src/renderer/src/*"
       ],
+      "@common/*": [
+        "src/common/*"
+      ],
     },
     "types": [ "vite/client" ],
     "verbatimModuleSyntax": true,

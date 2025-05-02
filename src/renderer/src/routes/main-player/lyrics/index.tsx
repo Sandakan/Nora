@@ -1,28 +1,27 @@
+import { isLyricsEnhancedSynced } from '@common/isLyricsSynced';
+import Button from '@renderer/components/Button';
+import type { LyricData } from '@renderer/components/LyricsEditingPage/LyricsEditingPage';
+import LyricLine from '@renderer/components/LyricsPage/LyricLine';
+import LyricsMetadata from '@renderer/components/LyricsPage/LyricsMetadata';
+import NoLyrics from '@renderer/components/LyricsPage/NoLyrics';
+import MainContainer from '@renderer/components/MainContainer';
+import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
+import useNetworkConnectivity from '@renderer/hooks/useNetworkConnectivity';
+import useSkipLyricsLines from '@renderer/hooks/useSkipLyricsLines';
+import i18n from '@renderer/i18n';
+import { store } from '@renderer/store';
+import debounce from '@renderer/utils/debounce';
+import { createFileRoute } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
-import i18n from '../../i18n';
-import debounce from '../../utils/debounce';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import useNetworkConnectivity from '../../hooks/useNetworkConnectivity';
-
-import LyricLine from './LyricLine';
-import LyricsMetadata from './LyricsMetadata';
-import NoLyrics from './NoLyrics';
-import MainContainer from '../MainContainer';
-import Button from '../Button';
-
-import { appPreferences } from '../../../../../package.json';
-import { type LyricData } from '../LyricsEditingPage/LyricsEditingPage';
-import { isLyricsEnhancedSynced } from '../../../../common/isLyricsSynced';
-import useSkipLyricsLines from '../../hooks/useSkipLyricsLines';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { appPreferences } from '../../../../../../package.json';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const syncedLyricsRegex = /^\[\d+:\d{1,2}\.\d{1,3}]/gm;
+export const Route = createFileRoute('/main-player/lyrics/')({
+  component: LyricsPage
+});
 
 // // substracted 350 milliseconds to keep lyrics in sync with the lyrics line animations.
 // export const delay = 0.35;
@@ -32,7 +31,7 @@ let isScrollingByCode = false;
 //   isScrollingByCode = true;
 // });
 
-const LyricsPage = () => {
+function LyricsPage() {
   const preferences = useStore(store, (state) => state.localStorage.preferences);
   const currentSongData = useStore(store, (state) => state.currentSongData);
 
@@ -51,7 +50,7 @@ const LyricsPage = () => {
 
   const copyright = useMemo(() => lyrics?.lyrics?.copyright, [lyrics]);
 
-  const requestedLyricsTitle = useRef<string>();
+  const requestedLyricsTitle = useRef<string>(undefined);
 
   useEffect(() => {
     if (requestedLyricsTitle.current !== currentSongData.title) {
@@ -227,10 +226,10 @@ const LyricsPage = () => {
     ]
   );
 
-  const pathExt = useMemo(
-    () => window.api.utils.getExtension(currentSongData.path),
-    [currentSongData.path]
-  );
+  const pathExt = useMemo(() => {
+    if (currentSongData.path) return window.api.utils.getExtension(currentSongData.path);
+    return '';
+  }, [currentSongData.path]);
 
   const showOfflineLyrics = useCallback(
     (_: unknown, setIsDisabled: (state: boolean) => void) => {
@@ -398,9 +397,9 @@ const LyricsPage = () => {
         {isOnline || lyrics ? (
           lyrics && lyrics.lyrics.parsedLyrics.length > 0 ? (
             <>
-              <div className="title-container relative flex w-full items-center justify-between py-2 pl-8 pr-2 text-2xl text-font-color-highlight dark:text-dark-font-color-highlight">
+              <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight relative flex w-full items-center justify-between py-2 pr-2 pl-8 text-2xl">
                 <div className="flex max-w-[40%] items-center">
-                  <span className="overflow-hidden text-ellipsis whitespace-nowrap font-medium">
+                  <span className="overflow-hidden font-medium text-ellipsis whitespace-nowrap">
                     {t(
                       lyrics.source === 'IN_SONG_LYRICS'
                         ? 'lyricsPage.offlineLyricsForSong'
@@ -627,6 +626,5 @@ const LyricsPage = () => {
       </>
     </MainContainer>
   );
-};
+}
 
-export default LyricsPage;

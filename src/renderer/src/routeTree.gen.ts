@@ -19,6 +19,7 @@ import { Route as MainPlayerSongsIndexImport } from './routes/main-player/songs/
 import { Route as MainPlayerSettingsIndexImport } from './routes/main-player/settings/index'
 import { Route as MainPlayerSearchIndexImport } from './routes/main-player/search/index'
 import { Route as MainPlayerPlaylistsIndexImport } from './routes/main-player/playlists/index'
+import { Route as MainPlayerLyricsIndexImport } from './routes/main-player/lyrics/index'
 import { Route as MainPlayerHomeIndexImport } from './routes/main-player/home/index'
 import { Route as MainPlayerGenresIndexImport } from './routes/main-player/genres/index'
 import { Route as MainPlayerFoldersIndexImport } from './routes/main-player/folders/index'
@@ -78,6 +79,12 @@ const MainPlayerSearchIndexRoute = MainPlayerSearchIndexImport.update({
 const MainPlayerPlaylistsIndexRoute = MainPlayerPlaylistsIndexImport.update({
   id: '/playlists/',
   path: '/playlists/',
+  getParentRoute: () => MainPlayerRouteRoute,
+} as any)
+
+const MainPlayerLyricsIndexRoute = MainPlayerLyricsIndexImport.update({
+  id: '/lyrics/',
+  path: '/lyrics/',
   getParentRoute: () => MainPlayerRouteRoute,
 } as any)
 
@@ -258,6 +265,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainPlayerHomeIndexImport
       parentRoute: typeof MainPlayerRouteImport
     }
+    '/main-player/lyrics/': {
+      id: '/main-player/lyrics/'
+      path: '/lyrics'
+      fullPath: '/main-player/lyrics'
+      preLoaderRoute: typeof MainPlayerLyricsIndexImport
+      parentRoute: typeof MainPlayerRouteImport
+    }
     '/main-player/playlists/': {
       id: '/main-player/playlists/'
       path: '/playlists'
@@ -303,6 +317,7 @@ interface MainPlayerRouteRouteChildren {
   MainPlayerFoldersIndexRoute: typeof MainPlayerFoldersIndexRoute
   MainPlayerGenresIndexRoute: typeof MainPlayerGenresIndexRoute
   MainPlayerHomeIndexRoute: typeof MainPlayerHomeIndexRoute
+  MainPlayerLyricsIndexRoute: typeof MainPlayerLyricsIndexRoute
   MainPlayerPlaylistsIndexRoute: typeof MainPlayerPlaylistsIndexRoute
   MainPlayerSearchIndexRoute: typeof MainPlayerSearchIndexRoute
   MainPlayerSettingsIndexRoute: typeof MainPlayerSettingsIndexRoute
@@ -321,6 +336,7 @@ const MainPlayerRouteRouteChildren: MainPlayerRouteRouteChildren = {
   MainPlayerFoldersIndexRoute: MainPlayerFoldersIndexRoute,
   MainPlayerGenresIndexRoute: MainPlayerGenresIndexRoute,
   MainPlayerHomeIndexRoute: MainPlayerHomeIndexRoute,
+  MainPlayerLyricsIndexRoute: MainPlayerLyricsIndexRoute,
   MainPlayerPlaylistsIndexRoute: MainPlayerPlaylistsIndexRoute,
   MainPlayerSearchIndexRoute: MainPlayerSearchIndexRoute,
   MainPlayerSettingsIndexRoute: MainPlayerSettingsIndexRoute,
@@ -347,6 +363,7 @@ export interface FileRoutesByFullPath {
   '/main-player/folders': typeof MainPlayerFoldersIndexRoute
   '/main-player/genres': typeof MainPlayerGenresIndexRoute
   '/main-player/home': typeof MainPlayerHomeIndexRoute
+  '/main-player/lyrics': typeof MainPlayerLyricsIndexRoute
   '/main-player/playlists': typeof MainPlayerPlaylistsIndexRoute
   '/main-player/search': typeof MainPlayerSearchIndexRoute
   '/main-player/settings': typeof MainPlayerSettingsIndexRoute
@@ -369,6 +386,7 @@ export interface FileRoutesByTo {
   '/main-player/folders': typeof MainPlayerFoldersIndexRoute
   '/main-player/genres': typeof MainPlayerGenresIndexRoute
   '/main-player/home': typeof MainPlayerHomeIndexRoute
+  '/main-player/lyrics': typeof MainPlayerLyricsIndexRoute
   '/main-player/playlists': typeof MainPlayerPlaylistsIndexRoute
   '/main-player/search': typeof MainPlayerSearchIndexRoute
   '/main-player/settings': typeof MainPlayerSettingsIndexRoute
@@ -392,6 +410,7 @@ export interface FileRoutesById {
   '/main-player/folders/': typeof MainPlayerFoldersIndexRoute
   '/main-player/genres/': typeof MainPlayerGenresIndexRoute
   '/main-player/home/': typeof MainPlayerHomeIndexRoute
+  '/main-player/lyrics/': typeof MainPlayerLyricsIndexRoute
   '/main-player/playlists/': typeof MainPlayerPlaylistsIndexRoute
   '/main-player/search/': typeof MainPlayerSearchIndexRoute
   '/main-player/settings/': typeof MainPlayerSettingsIndexRoute
@@ -416,6 +435,7 @@ export interface FileRouteTypes {
     | '/main-player/folders'
     | '/main-player/genres'
     | '/main-player/home'
+    | '/main-player/lyrics'
     | '/main-player/playlists'
     | '/main-player/search'
     | '/main-player/settings'
@@ -437,6 +457,7 @@ export interface FileRouteTypes {
     | '/main-player/folders'
     | '/main-player/genres'
     | '/main-player/home'
+    | '/main-player/lyrics'
     | '/main-player/playlists'
     | '/main-player/search'
     | '/main-player/settings'
@@ -458,6 +479,7 @@ export interface FileRouteTypes {
     | '/main-player/folders/'
     | '/main-player/genres/'
     | '/main-player/home/'
+    | '/main-player/lyrics/'
     | '/main-player/playlists/'
     | '/main-player/search/'
     | '/main-player/settings/'
@@ -512,6 +534,7 @@ export const routeTree = rootRoute
         "/main-player/folders/",
         "/main-player/genres/",
         "/main-player/home/",
+        "/main-player/lyrics/",
         "/main-player/playlists/",
         "/main-player/search/",
         "/main-player/settings/",
@@ -566,6 +589,10 @@ export const routeTree = rootRoute
     },
     "/main-player/home/": {
       "filePath": "main-player/home/index.tsx",
+      "parent": "/main-player"
+    },
+    "/main-player/lyrics/": {
+      "filePath": "main-player/lyrics/index.tsx",
       "parent": "/main-player"
     },
     "/main-player/playlists/": {
