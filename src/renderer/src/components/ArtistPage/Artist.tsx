@@ -1,15 +1,16 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 
+import { store } from '@renderer/store';
+import { useNavigate } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import DefaultArtistCover from '../../assets/images/webp/artist_cover_default.webp';
+import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
 import Img from '../Img';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
 
 interface ArtistProp {
   index: number;
@@ -36,9 +37,8 @@ export const Artist = (props: ArtistProp) => {
   const queue = useStore(store, (state) => state.localStorage.queue);
 
   const { t } = useTranslation();
-
+  const navigate = useNavigate();
   const {
-    changeCurrentActivePage,
     updateContextMenuData,
     createQueue,
     updateQueueData,
@@ -51,12 +51,10 @@ export const Artist = (props: ArtistProp) => {
 
   const [isAFavorite, setIsAFavorite] = useState(props.isAFavorite);
 
-  const goToArtistInfoPage = useCallback(() => {
-    changeCurrentActivePage('ArtistInfo', {
-      artistName: props.name,
-      artistId: props.artistId
-    });
-  }, [changeCurrentActivePage, props.artistId, props.name]);
+  const goToArtistInfoPage = useCallback(
+    () => navigate({ to: '/main-player/artists/$artistId', params: { artistId: props.artistId } }),
+    [navigate, props.artistId]
+  );
 
   const playArtistSongs = useCallback(
     (isShuffle = false) =>
