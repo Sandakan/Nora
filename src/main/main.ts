@@ -138,7 +138,7 @@ logger.debug(`Starting up Nora`, { APP_INFO });
 
 function launchExtensionBackgroundWorkers(session = electronSession.defaultSession) {
   return Promise.all(
-    session.getAllExtensions().map(async (extension) => {
+    session.extensions.getAllExtensions().map(async (extension) => {
       const manifest = extension.manifest;
       if (manifest.manifest_version === 3 && manifest?.background?.service_worker) {
         await session.serviceWorkers.startWorkerForScope(extension.url);
