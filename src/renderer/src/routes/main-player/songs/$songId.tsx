@@ -13,15 +13,12 @@ import { store } from '@renderer/store';
 import calculateTimeFromSeconds from '@renderer/utils/calculateTimeFromSeconds';
 import log from '@renderer/utils/log';
 import { valueRounder } from '@renderer/utils/valueRounder';
-import { baseInfoPageSearchParamsSchema } from '@renderer/utils/zod/baseInfoPageSearchParamsSchema';
 import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { zodValidator } from '@tanstack/zod-adapter';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/main-player/songs/$songId')({
-  validateSearch: zodValidator(baseInfoPageSearchParamsSchema),
   component: SongInfoPage
 });
 

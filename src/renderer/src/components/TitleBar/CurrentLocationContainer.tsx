@@ -5,7 +5,7 @@ const CurrentLocationContainer = () => {
 
   return (
     <div className="text-font-color-dimmed dark:text-dark-font-color-dimmed text-sm">
-      {location.pathname}
+      {location.href}
     </div>
   );
 };

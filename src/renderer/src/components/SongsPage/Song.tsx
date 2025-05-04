@@ -636,10 +636,10 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
         >
           <div className="play-btn-container absolute top-1/2 left-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
             <Button
-              className="m-0! rounded-none! border-0! bg-transparent p-0! outline-offset-1 hover:bg-transparent focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent"
-              iconClassName={`!text-3xl text-font-color-white text-opacity-0 !leading-none ${
-                currentSongData.songId === songId && 'text-opacity-100'
-              } group-focus-within:text-opacity-100 group-hover:text-opacity-100 ${
+              className="m-0! rounded-none! border-0! bg-transparent p-0! outline-offset-1 transition-colors! hover:bg-transparent focus-visible:outline! dark:bg-transparent dark:hover:bg-transparent"
+              iconClassName={`!text-3xl text-font-color-white/0 !leading-none ${
+                currentSongData.songId === songId && 'text-font-color-white/100'
+              } group-focus-within:text-font-color-white/100 group-hover:text-font-color-white/100 ${
                 isSongPlaying && 'text-font-color-white/75!'
               }`}
               clickHandler={handlePlayBtnClick}
@@ -650,7 +650,7 @@ const Song = forwardRef((props: SongProp, ref: ForwardedRef<HTMLDivElement>) => 
             src={artworkPaths?.optimizedArtworkPath || DefaultSongCover}
             loading="eager"
             alt="Song cover"
-            className={`aspect-square max-h-full min-w-full object-contain py-[0.1rem] transition-[filter] duration-300 group-focus-within:brightness-50 group-hover:brightness-50 ${
+            className={`aspect-square max-h-full min-w-full object-contain py-[0.1rem] transition-[filter]! duration-300 group-focus-within:brightness-50 group-hover:brightness-50 ${
               isSongPlaying ? 'brightness-50' : ''
             }`}
             enableImgFadeIns={false}

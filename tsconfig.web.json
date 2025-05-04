@@ -22,6 +22,9 @@
       "@common/*": [
         "src/common/*"
       ],
+      "@assets/*": [
+        "src/renderer/src/assets/*"
+      ]
     },
     "types": [ "vite/client" ],
     "verbatimModuleSyntax": true,

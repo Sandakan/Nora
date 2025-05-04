@@ -35,6 +35,7 @@ export default defineConfig({
         '@renderer': resolve(import.meta.dirname, './src/renderer/src'),
         '@types': resolve(import.meta.dirname, './src/@types'),
         '@common': resolve(import.meta.dirname, './src/common'),
+        '@assets': resolve(import.meta.dirname, './src/renderer/src/assets'),
       }
     },
     plugins: [
