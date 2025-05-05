@@ -7,6 +7,7 @@ import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 import { store } from '@renderer/store';
 import { useStore } from '@tanstack/react-store';
+import { useNavigate } from '@tanstack/react-router';
 
 type Props = {
   artists: Artist[];
@@ -22,8 +23,9 @@ const ArtistsSearchResultsContainer = (props: Props) => {
     store,
     (state) => state.multipleSelectionsData.isEnabled
   );
-  const { toggleMultipleSelections, changeCurrentActivePage } = useContext(AppUpdateContext);
+  const { toggleMultipleSelections } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const selectAllHandler = useSelectAllHandler(artists, 'artist', 'artistId');
 
@@ -69,7 +71,7 @@ const ArtistsSearchResultsContainer = (props: Props) => {
     >
       <>
         <div
-          className={`title-container mb-8 mt-1 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight ${
+          className={`title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-8 flex items-center pr-4 text-2xl font-medium ${
             artistResults.length > 0 && 'visible opacity-100'
           }`}
         >
@@ -115,11 +117,9 @@ const ArtistsSearchResultsContainer = (props: Props) => {
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>
-                  changeCurrentActivePage('AllSearchResults', {
-                    searchQuery: searchInput,
-                    searchFilter: 'Artists' as SearchFilters,
-                    searchResults: artists,
-                    isPredictiveSearchEnabled
+                  navigate({
+                    to: '/main-player/search/all',
+                    search: { keyword: searchInput, isPredictiveSearchEnabled, filterBy: 'Artists' }
                   })
                 }
               />
@@ -133,3 +133,4 @@ const ArtistsSearchResultsContainer = (props: Props) => {
 };
 
 export default ArtistsSearchResultsContainer;
+

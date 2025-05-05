@@ -6,6 +6,7 @@ import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import Img from '../Img';
 import Button from '../Button';
+import { useNavigate } from '@tanstack/react-router';
 
 export interface MostRelevantResultProp {
   resultType: 'artist' | 'song' | 'album' | 'playlist' | 'genre';
@@ -19,8 +20,9 @@ export interface MostRelevantResultProp {
 }
 
 export const MostRelevantResult = (props: MostRelevantResultProp) => {
-  const { playSong, updateContextMenuData, changeCurrentActivePage } = useContext(AppUpdateContext);
+  const { playSong, updateContextMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const {
     id,
@@ -34,36 +36,23 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
   } = props;
 
   const goToSongInfoPage = useCallback(
-    (songId: string) =>
-      changeCurrentActivePage('SongInfo', {
-        songId
-      }),
-    [changeCurrentActivePage]
+    (songId: string) => navigate({ to: '/main-player/songs/$songId', params: { songId } }),
+    [navigate]
   );
 
   const goToArtistInfoPage = useCallback(
-    (artistName: string, artistId: string) =>
-      changeCurrentActivePage('ArtistInfo', {
-        artistName,
-        artistId
-      }),
-    [changeCurrentActivePage]
+    (artistId: string) => navigate({ to: '/main-player/artists/$artistId', params: { artistId } }),
+    [navigate]
   );
 
   const goToAlbumInfoPage = useCallback(
-    (albumId: string) =>
-      changeCurrentActivePage('AlbumInfo', {
-        albumId
-      }),
-    [changeCurrentActivePage]
+    (albumId: string) => navigate({ to: '/main-player/albums/$albumId', params: { albumId } }),
+    [navigate]
   );
 
   const goToGenreInfoPage = useCallback(
-    (genreId: string) =>
-      changeCurrentActivePage('GenreInfo', {
-        genreId
-      }),
-    [changeCurrentActivePage]
+    (genreId: string) => navigate({ to: '/main-player/genres/$genreId', params: { genreId } }),
+    [navigate]
   );
 
   return (
@@ -76,7 +65,7 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
       }}
       onClick={() => {
         if (resultType === 'song') return goToSongInfoPage(id);
-        if (resultType === 'artist') return goToArtistInfoPage(title, id);
+        if (resultType === 'artist') return goToArtistInfoPage(id);
         if (resultType === 'album') return goToAlbumInfoPage(id);
         if (resultType === 'genre') return goToGenreInfoPage(id);
 
@@ -123,3 +112,4 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
     </div>
   );
 };
+

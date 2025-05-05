@@ -12,7 +12,10 @@ type Props = { songData: SongData[] };
 
 const AllSongResults = (prop: Props) => {
   const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
-  const preferences = useStore(store, (state) => state.localStorage.preferences);
+  const isSongIndexingEnabled = useStore(
+    store,
+    (state) => state.localStorage.preferences.isSongIndexingEnabled
+  );
 
   const { createQueue, playSong } = useContext(AppUpdateContext);
 
@@ -53,7 +56,7 @@ const AllSongResults = (prop: Props) => {
                 <Song
                   key={index}
                   index={index}
-                  isIndexingSongs={preferences?.isSongIndexingEnabled}
+                  isIndexingSongs={isSongIndexingEnabled}
                   onPlayClick={handleSongPlayBtnClick}
                   selectAllHandler={selectAllHandler}
                   {...song}
@@ -68,3 +71,4 @@ const AllSongResults = (prop: Props) => {
 };
 
 export default AllSongResults;
+

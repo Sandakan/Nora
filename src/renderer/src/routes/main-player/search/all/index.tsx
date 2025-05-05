@@ -1,35 +1,34 @@
+import Button from '@renderer/components/Button';
+import MainContainer from '@renderer/components/MainContainer';
+import AllAlbumResults from '@renderer/components/SearchPage/All_Search_Result_Containers/AllAlbumResults';
+import AllArtistResults from '@renderer/components/SearchPage/All_Search_Result_Containers/AllArtistResults';
+import AllGenreResults from '@renderer/components/SearchPage/All_Search_Result_Containers/AllGenreResults';
+import AllPlaylistResults from '@renderer/components/SearchPage/All_Search_Result_Containers/AllPlaylistResults';
+import AllSongResults from '@renderer/components/SearchPage/All_Search_Result_Containers/AllSongResults';
+import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
+import { store } from '@renderer/store';
+import log from '@renderer/utils/log';
+import { searchPageSchema } from '@renderer/utils/zod/searchPageSchema';
+import { createFileRoute } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
+import { zodValidator } from '@tanstack/zod-adapter';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
-import log from '../../utils/log';
 
-import Button from '../Button';
-import MainContainer from '../MainContainer';
+export const Route = createFileRoute('/main-player/search/all/')({
+  validateSearch: zodValidator(searchPageSchema),
+  component: RouteComponent
+});
 
-import AllSongResults from './All_Search_Result_Containers/AllSongResults';
-import AllArtistResults from './All_Search_Result_Containers/AllArtistResults';
-import AllPlaylistResults from './All_Search_Result_Containers/AllPlaylistResults';
-import AllAlbumResults from './All_Search_Result_Containers/AllAlbumResults';
-import AllGenreResults from './All_Search_Result_Containers/AllGenreResults';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
-
-type AllSearchResultProp = {
-  searchQuery: string;
-  searchFilter: SearchFilters;
-  isPredictiveSearchEnabled: boolean;
-};
-
-const AllSearchResultsPage = () => {
-  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+function RouteComponent() {
   const isMultipleSelectionEnabled = useStore(
     store,
     (state) => state.multipleSelectionsData.isEnabled
   );
 
   const { toggleMultipleSelections } = useContext(AppUpdateContext);
-  const data = currentlyActivePage.data as AllSearchResultProp;
   const { t } = useTranslation();
+  const { keyword, isPredictiveSearchEnabled, filterBy } = Route.useSearch();
 
   const [searchResults, setSearchResults] = useState({
     albums: [],
@@ -41,18 +40,18 @@ const AllSearchResultsPage = () => {
   } as SearchResult);
 
   const selectedType = useMemo((): QueueTypes | undefined => {
-    if (data.searchFilter === 'Songs') return 'songs';
-    if (data.searchFilter === 'Artists') return 'artist';
-    if (data.searchFilter === 'Playlists') return 'playlist';
-    if (data.searchFilter === 'Albums') return 'album';
-    if (data.searchFilter === 'Genres') return 'genre';
+    if (filterBy === 'Songs') return 'songs';
+    if (filterBy === 'Artists') return 'artist';
+    if (filterBy === 'Playlists') return 'playlist';
+    if (filterBy === 'Albums') return 'album';
+    if (filterBy === 'Genres') return 'genre';
     return undefined;
-  }, [data.searchFilter]);
+  }, [filterBy]);
 
   const fetchSearchResults = useCallback(() => {
-    if (data.searchQuery.trim() !== '') {
+    if (keyword.trim() !== '') {
       window.api.search
-        .search(data.searchFilter, data.searchQuery, false, data.isPredictiveSearchEnabled)
+        .search(filterBy, keyword, false, isPredictiveSearchEnabled)
         .then((results) => {
           return setSearchResults(results);
         })
@@ -66,7 +65,7 @@ const AllSearchResultsPage = () => {
         genres: [],
         availableResults: []
       });
-  }, [data]);
+  }, [filterBy, isPredictiveSearchEnabled, keyword]);
 
   useEffect(() => {
     fetchSearchResults();
@@ -101,14 +100,14 @@ const AllSearchResultsPage = () => {
   return (
     <MainContainer className="main-container all-search-results-container h-full! pb-0!">
       <>
-        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
+        <div className="title-container text-font-color-black dark:text-font-color-white mt-1 mb-8 flex items-center pr-4 text-3xl font-medium">
           <div className="container flex">
             <Trans
               i18nKey={`searchPage.${
-                data.searchFilter === 'All' ? 'showingResultsFor' : 'showingResultsForWithFilter'
+                filterBy === 'All' ? 'showingResultsFor' : 'showingResultsForWithFilter'
               }`}
               values={{
-                query: data.searchQuery,
+                query: keyword,
                 filter: t(
                   `common.${
                     selectedType === undefined || selectedType === 'songs' ? 'song' : selectedType
@@ -117,7 +116,7 @@ const AllSearchResultsPage = () => {
               }}
               components={{
                 span: (
-                  <span className="search-query mx-2 text-font-color-highlight dark:text-dark-font-color-highlight" />
+                  <span className="search-query text-font-color-highlight dark:text-dark-font-color-highlight mx-2" />
                 )
               }}
             />
@@ -136,16 +135,13 @@ const AllSearchResultsPage = () => {
           </div>
         </div>
 
-        {data.searchFilter === 'Songs' && <AllSongResults songData={searchResults.songs} />}
-        {data.searchFilter === 'Artists' && <AllArtistResults artistData={searchResults.artists} />}
-        {data.searchFilter === 'Playlists' && (
-          <AllPlaylistResults playlistData={searchResults.playlists} />
-        )}
-        {data.searchFilter === 'Albums' && <AllAlbumResults albumData={searchResults.albums} />}
-        {data.searchFilter === 'Genres' && <AllGenreResults genreData={searchResults.genres} />}
+        {filterBy === 'Songs' && <AllSongResults songData={searchResults.songs} />}
+        {filterBy === 'Artists' && <AllArtistResults artistData={searchResults.artists} />}
+        {filterBy === 'Playlists' && <AllPlaylistResults playlistData={searchResults.playlists} />}
+        {filterBy === 'Albums' && <AllAlbumResults albumData={searchResults.albums} />}
+        {filterBy === 'Genres' && <AllGenreResults genreData={searchResults.genres} />}
       </>
     </MainContainer>
   );
-};
+}
 
-export default AllSearchResultsPage;

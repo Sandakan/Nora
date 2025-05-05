@@ -7,6 +7,7 @@ import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
 import { store } from '@renderer/store';
 import { useStore } from '@tanstack/react-store';
+import { useNavigate } from '@tanstack/react-router';
 
 type Props = {
   albums: Album[];
@@ -22,8 +23,9 @@ const AlbumSearchResultsContainer = (props: Props) => {
     store,
     (state) => state.multipleSelectionsData.isEnabled
   );
-  const { toggleMultipleSelections, changeCurrentActivePage } = useContext(AppUpdateContext);
+  const { toggleMultipleSelections } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const selectAllHandler = useSelectAllHandler(albums, 'album', 'albumId');
 
@@ -67,7 +69,7 @@ const AlbumSearchResultsContainer = (props: Props) => {
       }}
     >
       <>
-        <div className="title-container mb-8 mt-1 flex items-center pr-4 text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-8 flex items-center pr-4 text-2xl font-medium">
           <div className="container flex">
             Albums{' '}
             <div className="other-stats-container ml-12 flex items-center text-xs">
@@ -110,11 +112,9 @@ const AlbumSearchResultsContainer = (props: Props) => {
                 iconName="apps"
                 className="show-all-btn text-sm font-normal"
                 clickHandler={() =>
-                  changeCurrentActivePage('AllSearchResults', {
-                    searchQuery: searchInput,
-                    searchFilter: 'Albums' as SearchFilters,
-                    searchResults: albums,
-                    isPredictiveSearchEnabled
+                  navigate({
+                    to: '/main-player/search/all',
+                    search: { keyword: searchInput, isPredictiveSearchEnabled, filterBy: 'Albums' }
                   })
                 }
               />
@@ -128,3 +128,4 @@ const AlbumSearchResultsContainer = (props: Props) => {
 };
 
 export default AlbumSearchResultsContainer;
+
