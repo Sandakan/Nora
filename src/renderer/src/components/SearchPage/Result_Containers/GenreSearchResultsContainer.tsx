@@ -128,4 +128,3 @@ const GenreSearchResultsContainer = (props: Props) => {
 };
 
 export default GenreSearchResultsContainer;
-

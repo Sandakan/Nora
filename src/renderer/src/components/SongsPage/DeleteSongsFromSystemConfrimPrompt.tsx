@@ -36,7 +36,7 @@ const DeleteSongFromSystemConfirmPrompt = (props: { songIds: string[] }) => {
 
   return (
     <>
-      <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
+      <div className="title-container text-font-color-black dark:text-font-color-white mt-1 mb-8 flex items-center pr-4 text-3xl font-medium">
         {t('deleteSongFromSystemConfirmPrompt.title', {
           count: songsData.length,
           title: songsData[0]?.title
@@ -67,7 +67,7 @@ const DeleteSongFromSystemConfirmPrompt = (props: { songIds: string[] }) => {
       <div className="buttons-container flex items-center justify-end">
         <Button
           label={t('deleteSongFromSystemConfirmPrompt.deleteSong')}
-          className="delete-song-confirm-btn danger-btn float-right mt-6 h-10 w-48 cursor-pointer rounded-lg bg-font-color-crimson! font-medium text-font-color-white outline-hidden ease-in-out hover:border-font-color-crimson dark:bg-font-color-crimson! dark:text-font-color-white dark:hover:border-font-color-crimson"
+          className="delete-song-confirm-btn danger-btn bg-font-color-crimson! text-font-color-white hover:border-font-color-crimson dark:bg-font-color-crimson! dark:text-font-color-white dark:hover:border-font-color-crimson float-right mt-6 h-10 w-48 cursor-pointer rounded-lg font-medium outline-hidden ease-in-out"
           clickHandler={() => {
             changePromptMenuData(false);
             return window.api.audioLibraryControls

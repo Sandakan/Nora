@@ -71,7 +71,7 @@ const Notification = (props: AppNotification) => {
     if (iconName)
       return (
         <span
-          className={`animate-dur text-xl text-font-color-highlight dark:text-dark-font-color-highlight ${
+          className={`animate-dur text-font-color-highlight dark:text-dark-font-color-highlight text-xl ${
             iconClassName ?? 'material-icons-round'
           }`}
         >
@@ -83,13 +83,13 @@ const Notification = (props: AppNotification) => {
 
   return (
     <div
-      className="notification appear-from-bottom group relative mt-2 flex h-fit max-h-32 min-h-[50px] w-fit max-w-md justify-between rounded-full bg-context-menu-background/90 text-sm font-light text-font-color-black shadow-[5px_25px_50px_0px_rgba(0,0,0,0.2)] backdrop-blur-xs transition-[opacity,transform,visibility] ease-in-out first-of-type:mt-2 dark:bg-dark-context-menu-background/90 dark:text-font-color-white"
+      className="notification appear-from-bottom group bg-context-menu-background/90 text-font-color-black dark:bg-dark-context-menu-background/90 dark:text-font-color-white relative mt-2 flex h-fit max-h-32 min-h-[50px] w-fit max-w-md justify-between rounded-full text-sm font-light shadow-[5px_25px_50px_0px_rgba(0,0,0,0.2)] backdrop-blur-xs transition-[opacity,transform,visibility] ease-in-out first-of-type:mt-2"
       id="notificationPanelsContainer"
       ref={notificationRef}
       style={notificationPanelStyles}
     >
       <div
-        className={`progress-bar-container absolute h-full w-full overflow-hidden rounded-full before:absolute before:h-full before:w-0 before:rounded-xs before:bg-font-color-highlight/25 before:opacity-0 before:transition-[opacity,width] before:content-[''] dark:before:bg-dark-font-color-highlight/25 ${
+        className={`progress-bar-container before:bg-font-color-highlight/25 dark:before:bg-dark-font-color-highlight/25 absolute h-full w-full overflow-hidden rounded-full before:absolute before:h-full before:w-0 before:rounded-xs before:opacity-0 before:transition-[opacity,width] before:content-[''] ${
           type === 'WITH_PROGRESS_BAR' &&
           progressBarData &&
           progressBarData.total !== progressBarData.value &&
@@ -103,7 +103,7 @@ const Notification = (props: AppNotification) => {
       />
       <div className="close-button-container invisible absolute top-1/2 flex -translate-x-10 -translate-y-1/2 flex-col items-center justify-center overflow-hidden opacity-0 transition-[transform,visibility,opacity] delay-200 group-hover:visible group-hover:-translate-x-14 group-hover:opacity-100">
         <span
-          className="material-icons-round icon relative my-2 ml-2 mr-8 rounded-full bg-context-menu-background/90 p-2 text-xl shadow-md hover:text-[crimson] dark:bg-dark-context-menu-background/90 dark:hover:bg-dark-context-menu-background/90 dark:hover:text-[crimson]"
+          className="material-icons-round icon bg-context-menu-background/90 dark:bg-dark-context-menu-background/90 dark:hover:bg-dark-context-menu-background/90 relative my-2 mr-8 ml-2 rounded-full p-2 text-xl shadow-md hover:text-[crimson] dark:hover:text-[crimson]"
           onClick={removeNotification}
           onKeyDown={removeNotification}
           role="button"
@@ -121,7 +121,7 @@ const Notification = (props: AppNotification) => {
           <div className="icon-container relative flex h-6 w-fit items-center justify-center [&>img]:aspect-square [&>img]:h-4">
             {notificationIcon}
           </div>
-          <div className="message-container text overflow-hidden text-ellipsis py-1 leading-none">
+          <div className="message-container text overflow-hidden py-1 leading-none text-ellipsis">
             {content}
           </div>
         </div>
@@ -133,7 +133,7 @@ const Notification = (props: AppNotification) => {
                 label={button.label}
                 iconName={button.iconName}
                 iconClassName={button.iconClassName}
-                className={`mb-1 ml-4 mr-0 mt-2 border-2 px-2 py-1 font-medium text-background-color-3 dark:border-background-color-2 dark:text-background-color-2 ${button.className}`}
+                className={`text-background-color-3 dark:border-background-color-2 dark:text-background-color-2 mt-2 mr-0 mb-1 ml-4 border-2 px-2 py-1 font-medium ${button.className}`}
                 clickHandler={(e, setIsDisabled, setIsPending) => {
                   removeNotification();
                   button.clickHandler(e, setIsDisabled, setIsPending);

@@ -331,7 +331,7 @@ const LyricsEditingPage = () => {
                   components={{
                     br: <br />,
                     p: <p />,
-                    span: <span className="font-medium text-font-color-crimson" />
+                    span: <span className="text-font-color-crimson font-medium" />
                   }}
                 />
               }
@@ -362,7 +362,7 @@ const LyricsEditingPage = () => {
 
   return (
     <MainContainer
-      className="appear-from-bottom relative h-full! overflow-hidden pb-0! text-font-color-black dark:text-font-color-white"
+      className="appear-from-bottom text-font-color-black dark:text-font-color-white relative h-full! overflow-hidden pb-0!"
       onKeyDown={handleShortcuts}
       onFocus={() => setIsFocused(true)}
       onBlur={() => setIsFocused(false)}
@@ -371,26 +371,26 @@ const LyricsEditingPage = () => {
       autoFocus
     >
       {!isTheEditingSongTheCurrSong && (
-        <div className="absolute z-10 flex h-full w-full flex-col items-center justify-center bg-background-color-1/25 pr-8 dark:bg-dark-background-color-1/25">
-          <span className="material-icons-round-outlined text-5xl text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="bg-background-color-1/25 dark:bg-dark-background-color-1/25 absolute z-10 flex h-full w-full flex-col items-center justify-center pr-8">
+          <span className="material-icons-round-outlined text-font-color-highlight dark:text-dark-font-color-highlight text-5xl">
             error
           </span>
-          <p className="mt-2 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+          <p className="text-font-color-highlight dark:text-dark-font-color-highlight mt-2 text-3xl font-medium">
             {t('lyricsEditingPage.incorrectSongTitle')}
           </p>
           <p>{t('lyricsEditingPage.incorrectSongMessage', { title: songTitle })}</p>
           <Button
             label={t('common.play')}
             iconName="play_arrow"
-            className="mr-0! mt-4"
+            className="mt-4 mr-0!"
             clickHandler={() => songId && playSong(songId)}
           />
         </div>
       )}
-      <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-8 flex items-center pr-4 text-3xl font-medium">
         <div className="gap-4s container grid grid-cols-[clamp(5rem,1fr,10rem)_1fr] items-center">
           {t('lyricsEditingPage.lyricsEditor')}{' '}
-          <div className="other-stats-container truncate text-xs text-font-color-black dark:text-font-color-white">
+          <div className="other-stats-container text-font-color-black dark:text-font-color-white truncate text-xs">
             <span>
               {t('lyricsEditingPage.playbackSpeed')} : {playback.playbackRate}x
             </span>

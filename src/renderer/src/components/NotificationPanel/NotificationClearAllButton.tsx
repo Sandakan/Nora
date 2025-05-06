@@ -12,7 +12,7 @@ const NotificationClearAllButton = () => {
       label={t('notifications.clearAll')}
       key="ClearAllBtn"
       clickHandler={() => updateNotifications(() => [])}
-      className="notification appear-from-bottom group mr-0! mt-4 flex h-fit max-h-32 min-h-[40px] w-fit max-w-sm justify-between rounded-2xl border-0! bg-context-menu-background/90 py-2 text-sm font-light text-font-color-black shadow-[5px_25px_50px_0px_rgba(0,0,0,0.2)] backdrop-blur-xs transition-[opacity,transform,visibility] duration-100! ease-in-out animate-delay-200! first:mt-0 hover:text-font-color-highlight dark:bg-dark-context-menu-background/90 dark:text-font-color-white dark:hover:text-dark-font-color-highlight"
+      className="notification appear-from-bottom group bg-context-menu-background/90 text-font-color-black animate-delay-200! hover:text-font-color-highlight dark:bg-dark-context-menu-background/90 dark:text-font-color-white dark:hover:text-dark-font-color-highlight mt-4 mr-0! flex h-fit max-h-32 min-h-[40px] w-fit max-w-sm justify-between rounded-2xl border-0! py-2 text-sm font-light shadow-[5px_25px_50px_0px_rgba(0,0,0,0.2)] backdrop-blur-xs transition-[opacity,transform,visibility] duration-100! ease-in-out first:mt-0"
       iconName="close"
     />
   );

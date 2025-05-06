@@ -194,12 +194,12 @@ const LyricsEditorSavePrompt = (props: Props) => {
 
   return (
     <div className="flex flex-col items-center justify-center">
-      <div className="title-container mb-4 flex w-full items-center text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mb-4 flex w-full items-center text-3xl font-medium">
         <span className="material-icons-round-outlined mr-2 text-4xl">save</span>{' '}
         {t('lyricsEditorSavePrompt.saveEditedLyrics')}
       </div>
       <textarea
-        className="h-[40vh] max-h-full min-h-[10rem] w-full overflow-y-auto rounded-lg bg-background-color-2 p-4 dark:bg-dark-background-color-2"
+        className="bg-background-color-2 dark:bg-dark-background-color-2 h-[40vh] max-h-full min-h-[10rem] w-full overflow-y-auto rounded-lg p-4"
         value={parsedLyrics?.lyrics.unparsedLyrics}
         readOnly
       />

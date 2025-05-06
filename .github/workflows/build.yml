@@ -7,7 +7,7 @@ on:
   pull_request:
     branches: ['master']
 
-  workflow_dispatch: 
+  workflow_dispatch:
 
 env:
   MAIN_VITE_MUSIXMATCH_DEFAULT_USER_TOKEN: ${{ secrets.MUSIXMATCH_DEFAULT_USER_TOKEN }}

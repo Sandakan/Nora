@@ -583,4 +583,3 @@ function ArtistInfoPage() {
     </MainContainer>
   );
 }
-

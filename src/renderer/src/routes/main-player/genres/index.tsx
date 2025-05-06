@@ -8,4 +8,3 @@ export const Route = createFileRoute('/main-player/genres/')({
 function RouteComponent() {
   return <GenresPage />;
 }
-

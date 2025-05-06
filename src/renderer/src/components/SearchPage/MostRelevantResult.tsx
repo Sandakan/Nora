@@ -112,4 +112,3 @@ export const MostRelevantResult = (props: MostRelevantResultProp) => {
     </div>
   );
 };
-

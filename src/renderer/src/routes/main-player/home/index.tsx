@@ -469,4 +469,3 @@ function HomePage() {
     </MainContainer>
   );
 }
-

@@ -313,4 +313,3 @@ function AlbumInfoPage() {
     </MainContainer>
   );
 }
-

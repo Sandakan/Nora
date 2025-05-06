@@ -19,7 +19,7 @@ const BlacklistedSong = (props: BlacklistedSongProp) => {
   const { title, index, songId, songPath } = props;
 
   return (
-    <div className="blacklisted-song mb-2 flex w-full items-center justify-between rounded-md px-4 py-2 last:mb-0 only:mb-0 hover:bg-background-color-2 dark:hover:bg-dark-background-color-2">
+    <div className="blacklisted-song hover:bg-background-color-2 dark:hover:bg-dark-background-color-2 mb-2 flex w-full items-center justify-between rounded-md px-4 py-2 last:mb-0 only:mb-0">
       <span
         className="blacklisted-song-name w-1/4 overflow-hidden text-ellipsis whitespace-nowrap"
         title={title}
@@ -28,13 +28,13 @@ const BlacklistedSong = (props: BlacklistedSongProp) => {
         <span>{title}</span>
       </span>
       <span
-        className="blacklisted-song-path w-1/2 overflow-hidden text-ellipsis whitespace-nowrap text-xs font-light"
+        className="blacklisted-song-path w-1/2 overflow-hidden text-xs font-light text-ellipsis whitespace-nowrap"
         title={songPath}
       >
         {songPath}
       </span>
       <Button
-        className="blacklisted-song-restore-btn mr-0 rounded-none border-none text-base font-medium hover:text-font-color-highlight! dark:hover:text-dark-font-color-highlight!"
+        className="blacklisted-song-restore-btn hover:text-font-color-highlight! dark:hover:text-dark-font-color-highlight! mr-0 rounded-none border-none text-base font-medium"
         label="RESTORE"
         clickHandler={() =>
           window.api.audioLibraryControls.restoreBlacklistedSongs([songId]).then(() =>

@@ -14,4 +14,3 @@ function RouteComponent() {
 
   return <PlaylistInfoPage playlistId={playlistId} scrollTopOffset={scrollTopOffset} />;
 }
-

@@ -38,7 +38,7 @@ const PlaylistInfoAndImgContainer = (props: Props) => {
                   src={playlist.artworkPaths.artworkPath}
                   alt="Playlist Cover"
                   loading="eager"
-                  className="absolute! bottom-4 right-4 h-16 w-16 rounded-lg!"
+                  className="absolute! right-4 bottom-4 h-16 w-16 rounded-lg!"
                 />
               </div>
             ) : (
@@ -51,14 +51,14 @@ const PlaylistInfoAndImgContainer = (props: Props) => {
               />
             )}
           </div>
-          <div className="playlist-info-container ml-8 text-font-color-black dark:text-font-color-white">
-            <div className="font-semibold uppercase tracking-wider opacity-50">
+          <div className="playlist-info-container text-font-color-black dark:text-font-color-white ml-8">
+            <div className="font-semibold tracking-wider uppercase opacity-50">
               {t('common.playlist_one')}
             </div>
-            <div className="playlist-name mb-2 w-full overflow-hidden text-ellipsis whitespace-nowrap text-5xl text-font-color-highlight dark:text-dark-font-color-highlight">
+            <div className="playlist-name text-font-color-highlight dark:text-dark-font-color-highlight mb-2 w-full overflow-hidden text-5xl text-ellipsis whitespace-nowrap">
               {playlist.name}
             </div>
-            <div className="playlist-no-of-songs w-full overflow-hidden text-ellipsis whitespace-nowrap text-base">
+            <div className="playlist-no-of-songs w-full overflow-hidden text-base text-ellipsis whitespace-nowrap">
               {t('common.songWithCount', { count: playlist.songs.length })}
             </div>
             {songs.length > 0 && (

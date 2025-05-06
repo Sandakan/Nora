@@ -8,4 +8,3 @@ export const Route = createFileRoute('/main-player/settings/')({
 function RouteComponent() {
   return <SettingsPage />;
 }
-

@@ -34,18 +34,18 @@ const ThemeSettings = () => {
 
   return theme ? (
     <li className="main-container appearance-settings-container mb-16">
-      <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">dark_mode</span>
         {t('settingsPage.appearance')}
       </div>
-      <ul className="list-disc pl-6 marker:bg-font-color-highlight dark:marker:bg-dark-font-color-highlight">
+      <ul className="marker:bg-font-color-highlight dark:marker:bg-dark-font-color-highlight list-disc pl-6">
         <li>
           <div className="description">{t('settingsPage.changeTheme')}</div>
-          <div className="theme-change-radio-btns flex max-w-3xl items-center justify-between pl-4 pt-4">
+          <div className="theme-change-radio-btns flex max-w-3xl items-center justify-between pt-4 pl-4">
             <label
               htmlFor="lightThemeRadioBtn"
               tabIndex={0}
-              className={`theme-change-radio-btn mb-2 flex cursor-pointer flex-col items-center rounded-md bg-background-color-2/75 p-6 outline-offset-1 focus-within:outline-2 hover:bg-background-color-2 dark:bg-dark-background-color-2/75 dark:hover:bg-dark-background-color-2 ${
+              className={`theme-change-radio-btn bg-background-color-2/75 hover:bg-background-color-2 dark:bg-dark-background-color-2/75 dark:hover:bg-dark-background-color-2 mb-2 flex cursor-pointer flex-col items-center rounded-md p-6 outline-offset-1 focus-within:outline-2 ${
                 !theme.useSystemTheme &&
                 !theme.isDarkMode &&
                 'bg-background-color-3! dark:bg-dark-background-color-3!'
@@ -70,7 +70,7 @@ const ThemeSettings = () => {
             <label
               htmlFor="darkThemeRadioBtn"
               tabIndex={0}
-              className={`theme-change-radio-btn mb-2 flex cursor-pointer flex-col items-center rounded-md bg-background-color-2/75 p-6 outline-offset-1 focus-within:outline-2 hover:bg-background-color-2 dark:bg-dark-background-color-2/75 dark:hover:bg-dark-background-color-2 ${
+              className={`theme-change-radio-btn bg-background-color-2/75 hover:bg-background-color-2 dark:bg-dark-background-color-2/75 dark:hover:bg-dark-background-color-2 mb-2 flex cursor-pointer flex-col items-center rounded-md p-6 outline-offset-1 focus-within:outline-2 ${
                 !theme.useSystemTheme &&
                 theme.isDarkMode &&
                 'bg-background-color-3! dark:bg-dark-background-color-3!'
@@ -95,7 +95,7 @@ const ThemeSettings = () => {
             <label
               htmlFor="systemThemeRadioBtn"
               tabIndex={0}
-              className={`theme-change-radio-btn hover:bg-background-color mb-2 flex cursor-pointer flex-col items-center rounded-md bg-background-color-2/75 p-6 outline-offset-1 focus-within:outline-2 dark:bg-dark-background-color-2/75 dark:hover:bg-dark-background-color-2 ${
+              className={`theme-change-radio-btn hover:bg-background-color bg-background-color-2/75 dark:bg-dark-background-color-2/75 dark:hover:bg-dark-background-color-2 mb-2 flex cursor-pointer flex-col items-center rounded-md p-6 outline-offset-1 focus-within:outline-2 ${
                 theme.useSystemTheme && 'bg-background-color-3! dark:bg-dark-background-color-3!'
               } `}
               onKeyDown={focusInput}

@@ -133,4 +133,3 @@ const ArtistsSearchResultsContainer = (props: Props) => {
 };
 
 export default ArtistsSearchResultsContainer;
-

@@ -11,7 +11,7 @@ const ClearLocalStoragePrompt = () => {
 
   return (
     <>
-      <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-8 flex items-center pr-4 text-3xl font-medium">
         {t('clearLocalStoragePrompt.title')}
       </div>
       <p>{t('clearLocalStoragePrompt.description')}</p>
@@ -22,7 +22,7 @@ const ClearLocalStoragePrompt = () => {
           components={{
             p: <p className="mb-1" />,
             ul: (
-              <ul className="ml-4 list-inside list-disc marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight" />
+              <ul className="marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight ml-4 list-inside list-disc" />
             ),
             li: <li className="text-sm font-light" />
           }}
@@ -34,7 +34,7 @@ const ClearLocalStoragePrompt = () => {
       <div className="buttons-container flex items-center justify-end">
         <Button
           label={t('settingsPage.clearOptionalData')}
-          className="confirm-app-reset-btn danger-btn float-right mt-6 h-10 w-48 cursor-pointer rounded-lg bg-font-color-crimson! text-font-color-white outline-hidden ease-in-out hover:border-font-color-crimson dark:bg-font-color-crimson! dark:text-font-color-white dark:hover:border-font-color-crimson"
+          className="confirm-app-reset-btn danger-btn bg-font-color-crimson! text-font-color-white hover:border-font-color-crimson dark:bg-font-color-crimson! dark:text-font-color-white dark:hover:border-font-color-crimson float-right mt-6 h-10 w-48 cursor-pointer rounded-lg outline-hidden ease-in-out"
           clickHandler={() => {
             resetLocalStorage();
             window.api.appControls.restartRenderer('LOCAL_STORAGE_CLEARED');

@@ -59,7 +59,7 @@ const MostLovedSongs = (props: Props) => {
           }}
         >
           <>
-            <div className="title-container mb-4 mt-1 flex items-center justify-between text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+            <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center justify-between text-2xl font-medium">
               {t('homePage.mostLovedSongs')}
               <Button
                 label={t('common.showAll')}

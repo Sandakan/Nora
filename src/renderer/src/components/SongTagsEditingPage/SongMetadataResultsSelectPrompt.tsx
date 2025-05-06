@@ -84,7 +84,7 @@ const SongMetadataResultsSelectPage = (props: SongMetadataResultsSelectPageProp)
           <input
             type="text"
             id="songTitleInput"
-            className="mr-8 h-10 w-80 rounded-md bg-background-color-2 px-2 py-1 dark:bg-dark-background-color-2"
+            className="bg-background-color-2 dark:bg-dark-background-color-2 mr-8 h-10 w-80 rounded-md px-2 py-1"
             value={songData.songTitle}
             onChange={(e) => {
               setSongData((prevData) => ({
@@ -99,7 +99,7 @@ const SongMetadataResultsSelectPage = (props: SongMetadataResultsSelectPageProp)
           <input
             type="text"
             id="songArtistsInput"
-            className="h-10 w-80 rounded-md bg-background-color-2 px-2 py-1 dark:bg-dark-background-color-2"
+            className="bg-background-color-2 dark:bg-dark-background-color-2 h-10 w-80 rounded-md px-2 py-1"
             value={songData.songArtists}
             onChange={(e) => {
               setSongData((prevData) => ({
@@ -116,16 +116,16 @@ const SongMetadataResultsSelectPage = (props: SongMetadataResultsSelectPageProp)
           clickHandler={() =>
             fetchSongResults(songData.songTitle, songData.songArtists.split(', '))
           }
-          className="w-32! bg-background-color-3! px-8 text-lg text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:hover:border-background-color-3"
+          className="bg-background-color-3! text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:hover:border-background-color-3 w-32! px-8 text-lg"
         />
       </div>
 
       <div
         className={`song-results-container flex min-h-[15rem] flex-col items-center justify-center overflow-y-auto ${
           loadingStates === 'PENDING'
-            ? `after:absolute after:h-5 after:w-5 after:animate-spin-ease after:rounded-full after:border-2 after:border-[transparent] after:border-t-font-color-black after:content-[''] dark:after:border-t-font-color-white`
+            ? `after:animate-spin-ease after:border-t-font-color-black dark:after:border-t-font-color-white after:absolute after:h-5 after:w-5 after:rounded-full after:border-2 after:border-[transparent] after:content-['']`
             : loadingStates === 'EMPTY'
-              ? `flex items-center justify-center text-font-color-dimmed after:absolute after:content-["We_couldn't_find_any_results."]`
+              ? `text-font-color-dimmed flex items-center justify-center after:absolute after:content-["We_couldn't_find_any_results."]`
               : ''
         }`}
       >

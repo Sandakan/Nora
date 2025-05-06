@@ -24,7 +24,7 @@ const SongUnplayableErrorPrompt = (props: Props) => {
   const { err } = props;
   return (
     <div>
-      <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-8 flex items-center pr-4 text-3xl font-medium">
         <span className="material-icons-round-outlined mr-4">play_disabled</span>
         {t('songUnplayableErrorPrompt.title')}
       </div>
@@ -32,7 +32,7 @@ const SongUnplayableErrorPrompt = (props: Props) => {
       <div className="mt-6">ERROR: {err?.message.split(':').at(-1) ?? 'UNKNOWN'}</div>
       <Button
         label={t('common.ok')}
-        className="remove-song-from-library-btn float-right mt-2 w-[10rem] bg-background-color-3! text-font-color-black hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3"
+        className="remove-song-from-library-btn bg-background-color-3! text-font-color-black hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3 float-right mt-2 w-[10rem]"
         clickHandler={() => changePromptMenuData(false)}
       />
     </div>

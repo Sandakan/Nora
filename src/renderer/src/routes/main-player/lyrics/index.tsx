@@ -627,4 +627,3 @@ function LyricsPage() {
     </MainContainer>
   );
 }
-

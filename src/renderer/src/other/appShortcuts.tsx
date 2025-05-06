@@ -15,5 +15,5 @@ export class normalizedKeys {
   static homeKey = i18n.t('appShortcutsPrompt.homeKey');
   static mouseClick = i18n.t('appShortcutsPrompt.mouseClick');
   static doubleClick = i18n.t('appShortcutsPrompt.doubleClick');
-  static endKey = "End";
+  static endKey = 'End';
 }

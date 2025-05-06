@@ -60,7 +60,7 @@ const RecentlyAddedSongs = forwardRef((props: Props, ref: ForwardedRef<HTMLDivEl
     >
       {latestSongs.length > 0 && latestSongs[0] !== null && (
         <>
-          <div className="title-container my-4 flex items-center justify-between text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+          <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight my-4 flex items-center justify-between text-2xl font-medium">
             {t('homePage.recentlyAddedSongs')}
             <Button
               label={t('common.showAll')}

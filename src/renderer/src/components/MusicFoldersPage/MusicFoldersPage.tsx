@@ -155,7 +155,7 @@ const MusicFoldersPage = () => {
 
   return (
     <MainContainer
-      className="music-folders-page appear-from-bottom relative h-full! pb-0! pr-4!"
+      className="music-folders-page appear-from-bottom relative h-full! pr-4! pb-0!"
       focusable
       onKeyDown={(e) => {
         if (e.ctrlKey && e.key === 'a') {
@@ -166,12 +166,12 @@ const MusicFoldersPage = () => {
     >
       <>
         {musicFolders && musicFolders.length > 0 && (
-          <div className="title-container mb-8 mt-2 flex items-center justify-between text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+          <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-2 mb-8 flex items-center justify-between text-3xl font-medium">
             <div className="container flex">
               {t('foldersPage.musicFolders')}
-              <div className="other-stats-container ml-12 flex items-center text-xs text-font-color-black dark:text-font-color-white">
+              <div className="other-stats-container text-font-color-black dark:text-font-color-white ml-12 flex items-center text-xs">
                 {isMultipleSelectionEnabled ? (
-                  <div className="text-sm text-font-color-highlight dark:text-dark-font-color-highlight">
+                  <div className="text-font-color-highlight dark:text-dark-font-color-highlight text-sm">
                     {t('common.selectionWithCount', {
                       count: multipleSelectionsData.multipleSelections.length
                     })}
@@ -233,7 +233,7 @@ const MusicFoldersPage = () => {
         </div>
 
         {musicFolders.length === 0 && (
-          <div className="no-folders-container flex h-full flex-col items-center justify-center text-lg text-font-color-black dark:text-font-color-white">
+          <div className="no-folders-container text-font-color-black dark:text-font-color-white flex h-full flex-col items-center justify-center text-lg">
             <Img src={NoFoldersImage} className="w-60" />
             <br />
             <p> {t('foldersPage.empty')}</p>
@@ -241,7 +241,7 @@ const MusicFoldersPage = () => {
             <div className="flex items-center justify-between">
               <Button
                 label={t('foldersPage.addFolder')}
-                className="mt-4 bg-background-color-3! px-8 text-lg text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black dark:hover:border-background-color-3"
+                className="bg-background-color-3! text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black dark:hover:border-background-color-3 mt-4 px-8 text-lg"
                 iconName="create_new_folder"
                 pendingAnimationOnDisabled
                 iconClassName="material-icons-round-outlined"
@@ -250,7 +250,7 @@ const MusicFoldersPage = () => {
               <Button
                 label={t('settingsPage.importAppData')}
                 iconName="upload"
-                className="mt-4 bg-background-color-3! px-8 text-lg text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3"
+                className="bg-background-color-3! text-font-color-black! hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3 mt-4 px-8 text-lg"
                 clickHandler={importAppData}
               />
             </div>

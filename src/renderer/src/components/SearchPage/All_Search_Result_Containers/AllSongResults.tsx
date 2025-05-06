@@ -71,4 +71,3 @@ const AllSongResults = (prop: Props) => {
 };
 
 export default AllSongResults;
-

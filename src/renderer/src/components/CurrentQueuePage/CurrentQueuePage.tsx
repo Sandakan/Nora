@@ -259,7 +259,7 @@ const CurrentQueuePage = () => {
       }}
     >
       <>
-        <div className="title-container mb-4 mt-2 flex items-center justify-between pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+        <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-2 mb-4 flex items-center justify-between pr-4 text-3xl font-medium">
           {t('currentQueuePage.queue')}
           <div className="other-controls-container float-right flex">
             <Button
@@ -337,7 +337,7 @@ const CurrentQueuePage = () => {
           </div>
         </div>
         {currentQueue.length > 0 && (
-          <div className="queue-info-container mb-6 ml-8 flex items-center text-font-color-black dark:text-font-color-white">
+          <div className="queue-info-container text-font-color-black dark:text-font-color-white mb-6 ml-8 flex items-center">
             <div className="cover-img-container mr-8">
               <Img
                 className={`h-20 w-20 rounded-md shadow-lg ${

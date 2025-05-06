@@ -137,4 +137,3 @@ const PlaylistSearchResultsContainer = (props: Props) => {
 };
 
 export default PlaylistSearchResultsContainer;
-

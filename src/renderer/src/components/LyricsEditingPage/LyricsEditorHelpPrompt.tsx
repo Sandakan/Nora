@@ -24,7 +24,7 @@ const LyricsEditorHelpPrompt = (props: Props) => {
 
   return (
     <div>
-      <div className="title-container mb-4 flex items-center justify-between text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mb-4 flex items-center justify-between">
         <span className="flex items-center text-3xl font-medium">
           <span className="material-icons-round-outlined mr-2 text-4xl">help</span>{' '}
           {t('lyricsEditorHelpPrompt.title')}
@@ -67,7 +67,7 @@ const LyricsEditorHelpPrompt = (props: Props) => {
                 components={{
                   Button: (
                     <Button
-                      className="mr-0! inline! border-0! p-0! text-base! text-font-color-highlight-2! hover:underline dark:text-dark-font-color-highlight-2!"
+                      className="text-font-color-highlight-2! dark:text-dark-font-color-highlight-2! mr-0! inline! border-0! p-0! text-base! hover:underline"
                       clickHandler={() => changePromptMenuData(true, <AppShortcutsPrompt />)}
                     />
                   )

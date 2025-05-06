@@ -16,7 +16,7 @@ const BlacklistFolderConfrimPrompt = (props: { folderPaths: string[]; folderName
   const [isDoNotShowAgain, setIsDoNotShowAgain] = useState(false);
   return (
     <>
-      <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-8 flex items-center pr-4 text-3xl font-medium">
         Confirm Blacklisting{' '}
         {folderPaths.length === 1 && folderName ? (
           <>&apos;{folderName}&apos; folder</>
@@ -32,7 +32,7 @@ const BlacklistFolderConfrimPrompt = (props: { folderPaths: string[]; folderName
 
         <div className="mt-4">
           {t('blacklistFolderConfirmPrompt.effectTitle')}
-          <ul className="list-inside list-disc pl-4 marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight">
+          <ul className="marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight list-inside list-disc pl-4">
             <li>
               <Trans
                 i18nKey="blacklistFolderConfirmPrompt.effect1"
@@ -48,7 +48,7 @@ const BlacklistFolderConfrimPrompt = (props: { folderPaths: string[]; folderName
         </div>
         <div className="mt-4">
           {t('blacklistFolderConfirmPrompt.effectTitle2')}
-          <ul className="list-inside list-disc pl-4 marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight">
+          <ul className="marker:text-font-color-highlight dark:marker:text-dark-font-color-highlight list-inside list-disc pl-4">
             <li>
               <Trans
                 i18nKey="blacklistSongConfirmPrompt.effect1"
@@ -96,7 +96,7 @@ const BlacklistFolderConfrimPrompt = (props: { folderPaths: string[]; folderName
       <div className="buttons-container flex items-center justify-end">
         <Button
           label={`Blacklist Folder${folderPaths.length !== 1 ? 's' : ''}`}
-          className="blacklist-folders-btn mt-4 bg-background-color-3! px-8 text-lg text-font-color-black hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3"
+          className="blacklist-folders-btn bg-background-color-3! text-font-color-black hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3 mt-4 px-8 text-lg"
           clickHandler={() => {
             return window.api.folderData.blacklistFolders(folderPaths).then(() => {
               addNewNotifications([

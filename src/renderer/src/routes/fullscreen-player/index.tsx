@@ -8,4 +8,3 @@ export const Route = createFileRoute('/fullscreen-player/')({
 function RouteComponent() {
   return <FullScreenPlayer />;
 }
-

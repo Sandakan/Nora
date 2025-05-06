@@ -7,7 +7,9 @@ const hasArrayChanged = (oldArr: unknown[], newArr: unknown[]) => {
   const arePropertiesEqual = newArr.every((newValue, index) => {
     const oldValue = oldArr[index];
     if (isAnObject(oldValue) && isAnObject(newValue)) {
-      const isChanged = hasDataChanged(oldValue, newValue, true);
+      const hasChanged = hasDataChanged(oldValue, newValue);
+      const isChanged = Object.values(hasChanged).some((value) => value.isModified);
+
       return !isChanged;
     }
     return oldValue === newValue;
@@ -23,13 +25,15 @@ const hasArrayChanged = (oldArr: unknown[], newArr: unknown[]) => {
  *@param newObj New object to be compared to
  */
 
-function hasDataChanged(oldObj: object, newObj: object, returnBoolean = false) {
+type ModifiedData = { isModified: boolean; prev: unknown; current: unknown };
+
+function hasDataChanged(oldObj: object, newObj: object) {
+  const comp: Record<string, ModifiedData> = {};
+
   try {
     const oldObjEntries = Object.keys(oldObj);
     const newObjEntries = Object.keys(newObj);
     const entries = [...new Set([...oldObjEntries, ...newObjEntries])];
-    const comp: Record<string, unknown> = {};
-    let isDataChanged = false;
 
     for (let i = 0; i < entries.length; i += 1) {
       const entry = entries[i];
@@ -44,38 +48,38 @@ function hasDataChanged(oldObj: object, newObj: object, returnBoolean = false) {
             const oldArr = oldObjEntry;
             const isArrayDataChanged = hasArrayChanged(oldArr, newArr);
 
-            if (isArrayDataChanged) isDataChanged = true;
-            comp[entry] = isArrayDataChanged;
+            comp[entry] = { isModified: isArrayDataChanged, prev: oldArr, current: newArr };
           } else {
             // newObj is an object but not an array
 
-            const isObjDataChanged = hasDataChanged(oldObjEntry, newObjEntry, true) as boolean;
+            const hasObjDataChanged = hasDataChanged(oldObjEntry, newObjEntry);
+            const isObjDataChanged = Object.values(hasObjDataChanged).some(
+              (value) => value.isModified
+            );
 
-            if (isObjDataChanged) isDataChanged = true;
-            comp[entry] = isObjDataChanged;
+            comp[entry] = { isModified: isObjDataChanged, prev: oldObjEntry, current: newObjEntry };
           }
         } else if (newObj[entry] === oldObj[entry]) {
-          comp[entry] = false;
+          comp[entry] = { isModified: false, prev: oldObj[entry], current: newObj[entry] };
         } else {
-          isDataChanged = true;
-          comp[entry] = true;
+          comp[entry] = { isModified: true, prev: oldObj[entry], current: newObj[entry] };
         }
       } else {
-        isDataChanged = true;
-        comp[entry] = true;
+        comp[entry] = { isModified: true, prev: oldObj[entry], current: newObj[entry] };
       }
     }
 
-    if (returnBoolean) return isDataChanged;
     return comp;
   } catch (error) {
     console.error(error);
-    return false;
+    return comp;
   }
 }
 
 export const isDataChanged = <T extends object>(oldObj: T, newObj: T) => {
-  const isChanged = hasDataChanged(oldObj, newObj, true);
+  const hasChanged = hasDataChanged(oldObj, newObj);
+  const isChanged = Object.values(hasChanged).some((value) => value.isModified);
+
   if (typeof isChanged === 'boolean') return isChanged;
   throw new Error('hasDataChanged retuned a non boolean output eventhough returnBoolean is true.');
 };

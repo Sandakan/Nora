@@ -128,4 +128,3 @@ const AlbumSearchResultsContainer = (props: Props) => {
 };
 
 export default AlbumSearchResultsContainer;
-

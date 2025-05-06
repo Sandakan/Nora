@@ -77,7 +77,7 @@ const MultipleArtworksCover = (props: Props) => {
   return (
     <div className={`relative overflow-hidden rounded-lg shadow-md ${className}`}>
       <div
-        className={`relative grid rotate-45 scale-150 grid-flow-row gap-1 p-1 ${
+        className={`relative grid scale-150 rotate-45 grid-flow-row gap-1 p-1 ${
           type === 1 ? 'grid-cols-5' : 'grid-cols-3'
         } ${holderClassName}`}
       >

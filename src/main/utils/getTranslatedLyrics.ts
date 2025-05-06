@@ -76,11 +76,14 @@ const getTranslatedLyrics = async (languageCode: string) => {
           const translatedText = translatedLyric.trans.trim();
 
           if (translatedText !== INSTRUMENTAL_LYRIC_IDENTIFIER) {
-            const isTranslatedTextTheSame = (
-              typeof lyric.originalText === 'string' && lyric.originalText.trim() === INSTRUMENTAL_LYRIC_IDENTIFIER
-            ) || (
-                Array.isArray(lyric.originalText) && lyric.originalText.map((x) => x.text).join(' ').trim() === INSTRUMENTAL_LYRIC_IDENTIFIER
-              );
+            const isTranslatedTextTheSame =
+              (typeof lyric.originalText === 'string' &&
+                lyric.originalText.trim() === INSTRUMENTAL_LYRIC_IDENTIFIER) ||
+              (Array.isArray(lyric.originalText) &&
+                lyric.originalText
+                  .map((x) => x.text)
+                  .join(' ')
+                  .trim() === INSTRUMENTAL_LYRIC_IDENTIFIER);
 
             if (!isTranslatedTextTheSame) {
               lyric.translatedTexts.push({

@@ -55,20 +55,20 @@ const AlbumImgAndInfoContainer = (props: Props) => {
             )}{' '}
           </div>
           {albumData.title && albumData.artists && albumData.artists.length > 0 && (
-            <div className="album-info-container max-w-[70%] text-font-color-black dark:text-font-color-white">
-              <div className="font-semibold uppercase tracking-wider opacity-50">
+            <div className="album-info-container text-font-color-black dark:text-font-color-white max-w-[70%]">
+              <div className="font-semibold tracking-wider uppercase opacity-50">
                 {t(`common.album_one`)}
               </div>
-              <div className="album-title h-fit w-full overflow-hidden text-ellipsis whitespace-nowrap py-2 text-5xl text-font-color-highlight dark:text-dark-font-color-highlight">
+              <div className="album-title text-font-color-highlight dark:text-dark-font-color-highlight h-fit w-full overflow-hidden py-2 text-5xl text-ellipsis whitespace-nowrap">
                 {albumData.title}
               </div>
-              <div className="album-artists m-0 flex h-[unset] w-full cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap text-xl">
+              <div className="album-artists m-0 flex h-[unset] w-full cursor-pointer overflow-hidden text-xl text-ellipsis whitespace-nowrap">
                 {albumArtistComponents}
               </div>
               {songsData.length > 0 && (
                 <div className="album-songs-total-duration">{albumDuration}</div>
               )}
-              <div className="album-no-of-songs w-full overflow-hidden text-ellipsis whitespace-nowrap text-base">
+              <div className="album-no-of-songs w-full overflow-hidden text-base text-ellipsis whitespace-nowrap">
                 {t(`common.songWithCount`, { count: albumData.songs.length })}
               </div>
               {albumData.year && <div className="album-year">{albumData.year}</div>}

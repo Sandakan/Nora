@@ -28,11 +28,11 @@ const UnAvailableTrack = (props: Props) => {
   return (
     <button
       type="button"
-      className="mb-2 mr-3 flex items-center rounded-3xl bg-background-color-2 px-4 py-1 last:mr-0 dark:bg-dark-background-color-2 dark:text-font-color-white"
+      className="bg-background-color-2 dark:bg-dark-background-color-2 dark:text-font-color-white mr-3 mb-2 flex items-center rounded-3xl px-4 py-1 last:mr-0"
       title={t('artistInfoPage.viewInLastFm', { name: title })}
       onClick={handleButtonClick}
     >
-      <span className="material-icons-round-outlined mr-2 text-lg text-font-color-highlight dark:text-dark-font-color-highlight">
+      <span className="material-icons-round-outlined text-font-color-highlight dark:text-dark-font-color-highlight mr-2 text-lg">
         open_in_new
       </span>
       <p className="text-sm">

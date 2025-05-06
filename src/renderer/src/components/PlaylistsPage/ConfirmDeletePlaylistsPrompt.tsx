@@ -58,7 +58,7 @@ const ConfirmDeletePlaylistsPrompt = (props: ConfirmDeletePlaylistProp) => {
 
   return (
     <>
-      <div className="title-container mb-8 mt-1 flex items-center pr-4 text-3xl font-medium text-font-color-black dark:text-font-color-white">
+      <div className="title-container text-font-color-black dark:text-font-color-white mt-1 mb-8 flex items-center pr-4 text-3xl font-medium">
         {t('confirmDeletePlaylistsPrompt.confirmPlaylistDeleteWithCount', {
           count: playlistIds.length,
           playlistName
@@ -80,7 +80,7 @@ const ConfirmDeletePlaylistsPrompt = (props: ConfirmDeletePlaylistProp) => {
         </div>
       </div>
       {!arePlaylistsRemovable && (
-        <h4 className="mt-8 flex items-center justify-center font-medium text-font-color-crimson">
+        <h4 className="text-font-color-crimson mt-8 flex items-center justify-center font-medium">
           <span className="material-icons-round-outlined mr-2 text-lg">warning</span>{' '}
           {t('resetAppConfirmationPrompt.systemPlaylistsRemovalProhibited')}
         </h4>
@@ -91,7 +91,7 @@ const ConfirmDeletePlaylistsPrompt = (props: ConfirmDeletePlaylistProp) => {
             label={t('playlist.deletePlaylist', {
               count: playlistsData.length
             })}
-            className="delete-playlist-btn danger-btn float-right h-10 w-48 cursor-pointer rounded-lg border-[transparent] bg-font-color-crimson! text-font-color-white outline-hidden ease-in-out hover:border-font-color-crimson dark:bg-font-color-crimson! dark:text-font-color-white dark:hover:border-font-color-crimson"
+            className="delete-playlist-btn danger-btn bg-font-color-crimson! text-font-color-white hover:border-font-color-crimson dark:bg-font-color-crimson! dark:text-font-color-white dark:hover:border-font-color-crimson float-right h-10 w-48 cursor-pointer rounded-lg border-[transparent] outline-hidden ease-in-out"
             clickHandler={removePlaylists}
           />
         </div>

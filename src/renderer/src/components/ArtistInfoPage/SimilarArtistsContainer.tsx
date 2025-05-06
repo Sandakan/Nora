@@ -68,7 +68,7 @@ const SimilarArtistsContainer = (props: Props) => {
               bodyBackgroundImage
                 ? 'text-font-color-white'
                 : 'text-font-color-black dark:text-font-color-white'
-            } mb-4 mt-1 pr-4 text-2xl`}
+            } mt-1 mb-4 pr-4 text-2xl`}
           />
           <div className="my-2 flex flex-wrap">{availArtistComponents}</div>
         </>
@@ -82,7 +82,7 @@ const SimilarArtistsContainer = (props: Props) => {
               bodyBackgroundImage
                 ? 'text-font-color-white'
                 : 'text-font-color-black dark:text-font-color-white'
-            } mb-4 mt-1 pr-4 text-2xl`}
+            } mt-1 mb-4 pr-4 text-2xl`}
           />
           <div className="flex flex-wrap">{unAvailArtistComponents}</div>
         </>

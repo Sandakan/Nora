@@ -72,7 +72,7 @@ function SongMetadataResult(props: SongMetadataResultProp) {
   ]);
 
   return (
-    <div className="mb-2 flex h-32 min-h-[5rem] w-full cursor-pointer items-center justify-between rounded-md bg-background-color-2/70 p-1 backdrop-blur-md hover:bg-background-color-2 dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2">
+    <div className="bg-background-color-2/70 hover:bg-background-color-2 dark:bg-dark-background-color-2/70 dark:hover:bg-dark-background-color-2 mb-2 flex h-32 min-h-[5rem] w-full cursor-pointer items-center justify-between rounded-md p-1 backdrop-blur-md">
       <div className="flex h-full max-w-[70%]">
         <div className="img-container m-1 mr-4 overflow-hidden rounded-md">
           <Img
@@ -82,18 +82,18 @@ function SongMetadataResult(props: SongMetadataResultProp) {
             alt=""
           />
         </div>
-        <div className="song-result-info-container flex max-w-[75%] flex-col justify-center text-font-color-black dark:text-font-color-white">
-          <p className="song-result-title relative w-full overflow-hidden text-ellipsis whitespace-nowrap text-xl">
+        <div className="song-result-info-container text-font-color-black dark:text-font-color-white flex max-w-[75%] flex-col justify-center">
+          <p className="song-result-title relative w-full overflow-hidden text-xl text-ellipsis whitespace-nowrap">
             {title}
           </p>
-          <p className="song-result-artists font-light text-opacity-75">{artists.join(', ')}</p>
-          {album && <p className="song-result-album text-sm font-light text-opacity-75">{album}</p>}
-          <span className="song-result-album flex text-sm font-light text-opacity-75">
+          <p className="song-result-artists text-opacity-75 font-light">{artists.join(', ')}</p>
+          {album && <p className="song-result-album text-opacity-75 text-sm font-light">{album}</p>}
+          <span className="song-result-album text-opacity-75 flex text-sm font-light">
             {releasedYear && <span>{releasedYear}</span>}
             {releasedYear && <span className="mx-2">&bull;</span>}
             {lyrics && (
               <span className="flex items-center">
-                <span className="material-icons-round-outlined mr-2 text-font-color-highlight dark:text-dark-font-color-highlight">
+                <span className="material-icons-round-outlined text-font-color-highlight dark:text-dark-font-color-highlight mr-2">
                   verified
                 </span>{' '}
                 {lyrics && t('songTagsEditingPage.lyricsIncluded')}
@@ -106,12 +106,12 @@ function SongMetadataResult(props: SongMetadataResultProp) {
         <Button
           label={t('songTagsEditingPage.addToMetadata')}
           iconName="add"
-          className="h-fit bg-background-color-3! px-8 text-lg text-font-color-black hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3"
+          className="bg-background-color-3! text-font-color-black hover:border-background-color-3 dark:bg-dark-background-color-3! dark:text-font-color-black! dark:hover:border-background-color-3 h-fit px-8 text-lg"
           clickHandler={addToMetadata}
         />
         <Button
           key={0}
-          className="more-options-btn text-sm hover:border-background-color-3! md:text-lg dark:border-dark-background-color-1! dark:hover:border-dark-background-color-3! md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
+          className="more-options-btn hover:border-background-color-3! dark:border-dark-background-color-1! dark:hover:border-dark-background-color-3! text-sm md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
           iconName="tune"
           clickHandler={() => {
             changePromptMenuData(

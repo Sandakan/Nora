@@ -21,11 +21,11 @@ const AccountsSettings = () => {
 
   return (
     <li className="main-container startup-settings-container mb-16">
-      <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">account_circle</span>
         {t('settingsPage.accounts')}
       </div>
-      <ul className="list-disc pl-6 marker:bg-background-color-3 dark:marker:bg-background-color-3">
+      <ul className="marker:bg-background-color-3 dark:marker:bg-background-color-3 list-disc pl-6">
         <li className="discord-rpc-integration mb-4">
           <div className="description">{t('settingsPage.enableDiscordRpcDescription')}</div>
           <Checkbox
@@ -91,7 +91,7 @@ const AccountsSettings = () => {
               />
             </div>
           </div>
-          <ul className="mt-4 list-disc pl-8 marker:bg-background-color-3 dark:marker:bg-background-color-3">
+          <ul className="marker:bg-background-color-3 dark:marker:bg-background-color-3 mt-4 list-disc pl-8">
             <li
               className={`last-fm-integration mb-4 transition-opacity ${
                 !isLastFmConnected && 'cursor-not-allowed opacity-50'

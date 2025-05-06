@@ -8,4 +8,3 @@ export const Route = createFileRoute('/main-player/folders/')({
 function RouteComponent() {
   return <MusicFoldersPage />;
 }
-

@@ -10,12 +10,12 @@ const SongNameInput = (props: Props) => {
 
   const { updateSongInfo, songTitle } = props;
   return (
-    <div className="tag-input flex min-w-[10rem] max-w-2xl flex-col">
+    <div className="tag-input flex max-w-2xl min-w-[10rem] flex-col">
       <label htmlFor="song-name-id3-tag">{t('songTagsEditingPage.songName')}</label>
       <input
         type="text"
         id="song-name-id3-tag"
-        className="mr-2 mt-2 w-[90%] rounded-3xl border-[.15rem] border-background-color-2 bg-background-color-2 px-4 py-3 text-font-color-black transition-colors focus:border-font-color-highlight dark:border-dark-background-color-2 dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:border-dark-font-color-highlight"
+        className="border-background-color-2 bg-background-color-2 text-font-color-black focus:border-font-color-highlight dark:border-dark-background-color-2 dark:bg-dark-background-color-2 dark:text-font-color-white dark:focus:border-dark-font-color-highlight mt-2 mr-2 w-[90%] rounded-3xl border-[.15rem] px-4 py-3 transition-colors"
         name="song-name"
         placeholder={t('songTagsEditingPage.songName')}
         value={songTitle}

@@ -309,39 +309,39 @@ declare global {
   // node-id3 synchronisedLyrics types.
   type UnsynchronisedLyrics =
     | {
-      language: string;
-      text: string;
-    }
+        language: string;
+        text: string;
+      }
     | undefined;
 
   type SynchronisedLyrics =
     | Array<{
-      /**
-       * 3 letter ISO 639-2 language code, for example: eng
-       * @see {@link https://id3.org/ISO%20639-2 ISO 639-2}
-       */
-      language: string;
-      /**
-       * Absolute time unit:
-       * {@link TagConstants.TimeStampFormat}
-       */
-      timeStampFormat: number;
-      /**
-       * {@link TagConstants.SynchronisedLyrics.ContentType}
-       */
-      contentType: number;
-      /**
-       * Content descriptor
-       */
-      shortText?: string;
-      synchronisedText: Array<{
-        text: string;
         /**
-         * Absolute time in unit according to `timeStampFormat`.
+         * 3 letter ISO 639-2 language code, for example: eng
+         * @see {@link https://id3.org/ISO%20639-2 ISO 639-2}
          */
-        timeStamp: number;
-      }>;
-    }>
+        language: string;
+        /**
+         * Absolute time unit:
+         * {@link TagConstants.TimeStampFormat}
+         */
+        timeStampFormat: number;
+        /**
+         * {@link TagConstants.SynchronisedLyrics.ContentType}
+         */
+        contentType: number;
+        /**
+         * Content descriptor
+         */
+        shortText?: string;
+        synchronisedText: Array<{
+          text: string;
+          /**
+           * Absolute time in unit according to `timeStampFormat`.
+           */
+          timeStamp: number;
+        }>;
+      }>
     | undefined;
 
   interface LyricsMetadataFromShortText {
@@ -1260,7 +1260,6 @@ declare global {
     | 'favorites_artwork'
     | 'genre_artwork'
     | 'playlist_artwork';
-
 
   interface SearchUrlParams {
     scrollTopOffset?: number;

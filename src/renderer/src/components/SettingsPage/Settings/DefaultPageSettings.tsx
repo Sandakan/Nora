@@ -11,11 +11,11 @@ const DefaultPageSettings = () => {
 
   return (
     <li className="main-container mb-16">
-      <div className="title-container mb-4 mt-1 flex items-center text-2xl font-medium text-font-color-highlight dark:text-dark-font-color-highlight">
+      <div className="title-container text-font-color-highlight dark:text-dark-font-color-highlight mt-1 mb-4 flex items-center text-2xl font-medium">
         <span className="material-icons-round-outlined mr-2">home</span>
         {t('settingsPage.defaultPage')}
       </div>
-      <ul className="list-disc pl-6 marker:bg-background-color-3 dark:marker:bg-background-color-3">
+      <ul className="marker:bg-background-color-3 dark:marker:bg-background-color-3 list-disc pl-6">
         <li className="default-page-dropdown-container">
           <div className="description"> {t('settingsPage.changeDefaultPageDescription')}</div>
 

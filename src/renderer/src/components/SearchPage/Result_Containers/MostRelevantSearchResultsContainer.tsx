@@ -399,4 +399,3 @@ const MostRelevantSearchResultsContainer = (props: Props) => {
 };
 
 export default MostRelevantSearchResultsContainer;
-

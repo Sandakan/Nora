@@ -840,4 +840,3 @@ export function stopScreenSleeping() {
   powerSaveBlockerId = powerSaveBlocker.start('prevent-display-sleep');
   logger.debug('Screen sleeping prevented.', { powerSaveBlockerId });
 }
-

@@ -65,7 +65,7 @@ const Body = memo(() => {
 
   return (
     <div
-      className="body relative order-2 h-full! w-full overflow-hidden rounded-tl-lg lg:pl-14 *:overflow-x-hidden"
+      className="body relative order-2 h-full! w-full overflow-hidden rounded-tl-lg *:overflow-x-hidden lg:pl-14"
       ref={bodyRef}
     >
       <ErrorBoundary>
