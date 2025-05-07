@@ -9,6 +9,7 @@ import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import Button from '../Button';
 import { store } from '@renderer/store';
 import { useStore } from '@tanstack/react-store';
+import { useNavigate } from '@tanstack/react-router';
 
 interface GenreProp {
   index: number;
@@ -31,7 +32,6 @@ const Genre = (props: GenreProp) => {
   const queue = useStore(store, (state) => state.localStorage.queue);
 
   const {
-    changeCurrentActivePage,
     createQueue,
     updateQueueData,
     addNewNotifications,
@@ -40,13 +40,15 @@ const Genre = (props: GenreProp) => {
     updateMultipleSelections
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const goToGenreInfoPage = useCallback(
     () =>
-      changeCurrentActivePage('GenreInfo', {
-        genreId
+      navigate({
+        to: '/main-player/genres/$genreId',
+        params: { genreId }
       }),
-    [changeCurrentActivePage, genreId]
+    [genreId, navigate]
   );
 
   const backgroundColor = useMemo(() => {
@@ -341,3 +343,4 @@ const Genre = (props: GenreProp) => {
 };
 
 export default Genre;
+
