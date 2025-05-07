@@ -33,7 +33,6 @@ const Folder = (props: FolderProps) => {
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
 
   const {
-    changeCurrentActivePage,
     updateContextMenuData,
     changePromptMenuData,
     updateMultipleSelections,
@@ -94,11 +93,9 @@ const Folder = (props: FolderProps) => {
 
   const openMusicFolderInfoPage = useCallback(() => {
     if (folderPath) {
-      changeCurrentActivePage('MusicFolderInfo', {
-        folderPath
-      });
+      navigate({ to: '/main-player/folders/$folderPath', params: { folderPath } });
     }
-  }, [changeCurrentActivePage, folderPath]);
+  }, [folderPath, navigate]);
 
   const contextMenuItems = useMemo((): ContextMenuItem[] => {
     const { multipleSelections: folderPaths } = multipleSelectionsData;
@@ -335,3 +332,4 @@ const Folder = (props: FolderProps) => {
 };
 
 export default Folder;
+
