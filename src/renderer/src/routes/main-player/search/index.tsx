@@ -2,17 +2,16 @@ import Button from '@renderer/components/Button';
 import MainContainer from '@renderer/components/MainContainer';
 import { searchFilter } from '@renderer/components/SearchPage/SearchOptions';
 import SearchResultsFilter from '@renderer/components/SearchPage/SearchResultsFilter';
-import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useResizeObserver from '@renderer/hooks/useResizeObserver';
 import { store } from '@renderer/store';
 import { searchPageSchema } from '@renderer/utils/zod/searchPageSchema';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { zodValidator } from '@tanstack/zod-adapter';
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useTranslation } from 'react-i18next';
 import storage from '@renderer/utils/localStorage';
-import debounce from '@renderer/utils/debounce';
+import { useDebouncedValue } from '@tanstack/react-pacer';
 
 import GenreSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/GenreSearchResultsContainer';
 import PlaylistSearchResultsContainer from '@renderer/components/SearchPage/Result_Containers/PlaylistSearchResultsContainer';
@@ -39,7 +38,6 @@ function SearchPage() {
     (state) => state.localStorage.preferences.isPredictiveSearchEnabled
   );
 
-  const { updateCurrentlyActivePageData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
   const navigate = useNavigate({ from: Route.fullPath });
   const {
@@ -50,6 +48,8 @@ function SearchPage() {
 
   const searchContainerRef = useRef(null);
   const { width } = useResizeObserver(searchContainerRef);
+  const [, startTransition] = useTransition();
+  const [debouncedKeyword] = useDebouncedValue(keyword, { wait: 500 });
 
   const [searchResults, setSearchResults] = useState({
     albums: [],
@@ -92,15 +92,18 @@ function SearchPage() {
   const fetchSearchResults = useCallback(() => {
     if (keyword.trim() !== '') {
       if (timeOutIdRef.current) clearTimeout(timeOutIdRef.current);
-      timeOutIdRef.current = setTimeout(
-        () =>
-          window.api.search
-            .search(filterBy, keyword, true, isPredictiveSearchEnabled)
-            .then((results) => {
-              return setSearchResults(results);
-            }),
-        250
-      );
+      timeOutIdRef.current = setTimeout(async () => {
+        const results = await window.api.search.search(
+          filterBy,
+          debouncedKeyword,
+          true,
+          isPredictiveSearchEnabled
+        );
+
+        startTransition(() => {
+          setSearchResults(results);
+        });
+      }, 250);
     } else
       setSearchResults({
         albums: [],
@@ -110,7 +113,7 @@ function SearchPage() {
         genres: [],
         availableResults: []
       });
-  }, [filterBy, keyword, timeOutIdRef, isPredictiveSearchEnabled]);
+  }, [keyword, filterBy, debouncedKeyword, isPredictiveSearchEnabled]);
 
   useEffect(() => {
     fetchSearchResults();
@@ -140,7 +143,9 @@ function SearchPage() {
   }, [fetchSearchResults]);
 
   const updateSearchInput = useCallback(
-    (input: string) => navigate({ search: (prev) => ({ ...prev, keyword: input }) }),
+    (input: string) => {
+      navigate({ search: (prev) => ({ ...prev, keyword: input }), replace: true });
+    },
     [navigate]
   );
 
@@ -184,17 +189,7 @@ function SearchPage() {
               aria-label="Search"
               placeholder={t('searchPage.searchForAnything')}
               value={keyword}
-              onChange={(e) => {
-                debounce(
-                  () =>
-                    updateCurrentlyActivePageData((currentData) => ({
-                      ...currentData,
-                      keyword: e.target.value
-                    })),
-                  500
-                );
-                navigate({ search: (prev) => ({ ...prev, keyword: e.target.value }) });
-              }}
+              onChange={(e) => updateSearchInput(e.currentTarget.value)}
               onKeyDown={(e) => e.stopPropagation()}
               // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
