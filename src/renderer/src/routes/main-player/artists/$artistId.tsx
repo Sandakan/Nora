@@ -393,9 +393,13 @@ function ArtistInfoPage() {
         </div>
       </div>
 
-      <SeparateArtistsSuggestion name={artistData?.name} artistId={artistData?.artistId} />
+      {artistData && (
+        <>
+          <SeparateArtistsSuggestion name={artistData.name} artistId={artistData.artistId} />
 
-      <DuplicateArtistsSuggestion name={artistData?.name} artistId={artistData?.artistId} />
+          <DuplicateArtistsSuggestion name={artistData.name} artistId={artistData.artistId} />
+        </>
+      )}
 
       {albums && albums.length > 0 && (
         <MainContainer

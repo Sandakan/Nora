@@ -8,6 +8,7 @@ import DefaultAlbumCover from '../../assets/images/webp/album_cover_default.webp
 import Button from '../Button';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store';
+import { useNavigate } from '@tanstack/react-router';
 
 interface AlbumProp extends Album {
   index: number;
@@ -22,10 +23,8 @@ export const Album = (props: AlbumProp) => {
   );
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
   const queue = useStore(store, (state) => state.localStorage.queue);
-  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
 
   const {
-    changeCurrentActivePage,
     createQueue,
     updateContextMenuData,
     updateQueueData,
@@ -34,6 +33,7 @@ export const Album = (props: AlbumProp) => {
     toggleMultipleSelections
   } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const playAlbumSongs = useCallback(
     (isShuffle = false) => {
@@ -137,11 +137,11 @@ export const Album = (props: AlbumProp) => {
 
   const showAlbumInfoPage = useCallback(
     () =>
-      currentlyActivePage?.data?.albumId !== props.albumId &&
-      changeCurrentActivePage('AlbumInfo', {
-        albumId: props.albumId
+      navigate({
+        to: '/main-player/albums/$albumId',
+        params: { albumId: props.albumId }
       }),
-    [changeCurrentActivePage, currentlyActivePage?.data, props.albumId]
+    [navigate, props.albumId]
   );
 
   const isAMultipleSelection = useMemo(() => {

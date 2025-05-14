@@ -6,22 +6,22 @@ import storage from '../../utils/localStorage';
 import Button from '../Button';
 import { useStore } from '@tanstack/react-store';
 import { store } from '@renderer/store';
+import { useNavigate } from '@tanstack/react-router';
 
 type Props = {
-  name?: string;
-  artistId?: string;
+  name: string;
+  artistId: string;
 };
 
 const DuplicateArtistsSuggestion = (props: Props) => {
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);
   const currentSongData = useStore(store, (state) => state.currentSongData);
-  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
 
-  const { addNewNotifications, changeCurrentActivePage, updateCurrentSongData } =
-    useContext(AppUpdateContext);
+  const { addNewNotifications, updateCurrentSongData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
-  const { name = '', artistId = '' } = props;
+  const { name, artistId } = props;
 
   const [isVisible, setIsVisible] = useState(true);
   const [duplicateArtists, setDuplicateArtists] = useState<Artist[]>([]);
@@ -58,9 +58,9 @@ const DuplicateArtistsSuggestion = (props: Props) => {
               label={artist.name}
               clickHandler={() =>
                 artistId !== artist.artistId &&
-                changeCurrentActivePage('ArtistInfo', {
-                  artistName: artist.name,
-                  artistId: artist.artistId
+                navigate({
+                  to: '/main-player/artists/$artistId',
+                  params: { artistId: artist.artistId }
                 })
               }
             />
@@ -74,7 +74,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
       return artists;
     }
     return [];
-  }, [artistId, changeCurrentActivePage, duplicateArtists, t]);
+  }, [artistId, duplicateArtists, navigate, t]);
 
   const linkToArtist = useCallback(
     (
@@ -99,8 +99,7 @@ const DuplicateArtistsSuggestion = (props: Props) => {
             }));
           }
           setIsVisible(false);
-          if (duplicateIds.includes(currentlyActivePage.data?.artistId))
-            changeCurrentActivePage('Home');
+          if (duplicateIds.includes(artistId)) navigate({ to: '/main-player/home' });
           return addNewNotifications([
             {
               content: t('common.artistConflictResolved'),
@@ -117,11 +116,11 @@ const DuplicateArtistsSuggestion = (props: Props) => {
         .catch((err) => console.error(err));
     },
     [
-      addNewNotifications,
-      changeCurrentActivePage,
-      currentSongData.songId,
-      currentlyActivePage.data?.artistId,
       duplicateArtists,
+      currentSongData.songId,
+      artistId,
+      navigate,
+      addNewNotifications,
       t,
       updateCurrentSongData
     ]
