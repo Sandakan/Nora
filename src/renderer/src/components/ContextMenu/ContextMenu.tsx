@@ -3,7 +3,7 @@ import { memo, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } 
 import ContextMenuItem from './ContextMenuItem';
 import ContextMenuDataItem from './ContextMenuDataItem';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const ContextMenu = memo(() => {
   const contextMenuData = useStore(store, (state) => state.contextMenuData);

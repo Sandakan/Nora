@@ -4,7 +4,7 @@ import { version } from '../../../../package.json';
 import log from './log';
 import addMissingPropsToAnObject from './addMissingPropsToAnObject';
 import isLatestVersion from './isLatestVersion';
-import { dispatch, store } from '@renderer/store';
+import { dispatch, store } from '@renderer/store/store';
 import { LOCAL_STORAGE_DEFAULT_TEMPLATE } from '@renderer/other/appReducer';
 
 // import isLatestVersion from './isLatestVersion';

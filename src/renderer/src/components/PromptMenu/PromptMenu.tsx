@@ -9,7 +9,7 @@ import MainContainer from '../MainContainer';
 import PromptMenuNavigationControlsContainer from './PromptMenuNavigationControlsContainer';
 import SuspenseLoader from '../SuspenseLoader';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const PromptMenu = () => {
   const promptMenuData = useStore(store, (state) => state.promptMenuData);

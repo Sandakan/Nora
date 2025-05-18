@@ -5,7 +5,7 @@ import SecondaryContainer from '../../SecondaryContainer';
 import Song from '../../SongsPage/Song';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
 
 type Props = {

@@ -7,7 +7,7 @@ import SongArtist from '../SongsPage/SongArtist';
 import DefaultAlbumCover from '../../assets/images/webp/album_cover_default.webp';
 import Button from '../Button';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
 
 interface AlbumProp extends Album {

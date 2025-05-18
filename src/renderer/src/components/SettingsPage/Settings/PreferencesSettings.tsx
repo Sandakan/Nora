@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import storage from '../../../utils/localStorage';
 import Checkbox from '../../Checkbox';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const PreferencesSettings = () => {
   const userData = useStore(store, (state) => state.userData);

@@ -5,7 +5,7 @@ import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import Button from '../Button';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const PromptMenuNavigationControlsContainer = () => {
   const promptMenuData = useStore(store, (state) => state.promptMenuData);

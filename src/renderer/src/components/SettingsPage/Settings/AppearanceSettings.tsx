@@ -12,7 +12,7 @@ import HomeImgLightDark from '../../../assets/images/webp/home-skeleton-light-da
 import Checkbox from '../../Checkbox';
 import DynamicThemeSettings from './DynamicThemeSettings';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const ThemeSettings = () => {
   const theme = useStore(store, (state) => state.userData.theme);

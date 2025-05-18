@@ -10,7 +10,7 @@ import Dropdown, { type DropdownOption } from '../../Dropdown';
 
 import i18n from '../../../i18n';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const MusixmatchSettingsPrompt = lazy(() => import('../MusixmatchSettingsPrompt'));
 const MusixmatchDisclaimerPrompt = lazy(() => import('../MusixmatchDisclaimerPrompt'));

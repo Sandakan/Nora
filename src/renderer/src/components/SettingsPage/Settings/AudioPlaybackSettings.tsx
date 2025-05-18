@@ -7,7 +7,7 @@ import Button from '../../Button';
 import Checkbox from '../../Checkbox';
 import i18n from '../../../i18n';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const second = i18n.t('settingsPage.second');
 const seconds = i18n.t('settingsPage.second_other');

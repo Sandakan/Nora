@@ -5,7 +5,7 @@ import storage from '../../utils/localStorage';
 
 import Button from '../Button';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
 
 type Props = {

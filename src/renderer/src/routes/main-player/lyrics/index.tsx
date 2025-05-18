@@ -1,6 +1,5 @@
 import { isLyricsEnhancedSynced } from '@common/isLyricsSynced';
 import Button from '@renderer/components/Button';
-import type { LyricData } from '@renderer/components/LyricsEditingPage/LyricsEditingPage';
 import LyricLine from '@renderer/components/LyricsPage/LyricLine';
 import LyricsMetadata from '@renderer/components/LyricsPage/LyricsMetadata';
 import NoLyrics from '@renderer/components/LyricsPage/NoLyrics';
@@ -9,18 +8,22 @@ import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useNetworkConnectivity from '@renderer/hooks/useNetworkConnectivity';
 import useSkipLyricsLines from '@renderer/hooks/useSkipLyricsLines';
 import i18n from '@renderer/i18n';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import debounce from '@renderer/utils/debounce';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { appPreferences } from '../../../../../../package.json';
+import { lyricsSchema } from '@renderer/utils/zod/lyricsSchema';
+import { zodValidator } from '@tanstack/zod-adapter';
+import { updateRouteState } from '@renderer/store/routeStateStore';
 
 const { metadataEditingSupportedExtensions } = appPreferences;
 
 export const Route = createFileRoute('/main-player/lyrics/')({
-  component: LyricsPage
+  component: LyricsPage,
+  validateSearch: zodValidator(lyricsSchema)
 });
 
 // // substracted 350 milliseconds to keep lyrics in sync with the lyrics line animations.
@@ -35,17 +38,16 @@ function LyricsPage() {
   const preferences = useStore(store, (state) => state.localStorage.preferences);
   const currentSongData = useStore(store, (state) => state.currentSongData);
 
-  const { addNewNotifications, updateCurrentlyActivePageData, changeCurrentActivePage } =
-    useContext(AppUpdateContext);
+  const { addNewNotifications } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const { isAutoScrolling } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
 
   const [lyrics, setLyrics] = useState(null as SongLyrics | undefined | null);
 
   const lyricsLinesContainerRef = useRef<HTMLDivElement>(null);
-  const [isAutoScrolling, setIsAutoScrolling] = useState(true);
-
-  useSkipLyricsLines(lyrics);
   const { isOnline } = useNetworkConnectivity();
+  useSkipLyricsLines(lyrics);
   // const [isOfflineLyricAvailable, setIsOfflineLyricsAvailable] = useState(false);
 
   const copyright = useMemo(() => lyrics?.lyrics?.copyright, [lyrics]);
@@ -109,12 +111,6 @@ function LyricsPage() {
     preferences.autoTranslateLyrics,
     preferences.autoConvertLyrics
   ]);
-
-  useEffect(() => {
-    updateCurrentlyActivePageData((prevData) => {
-      return { ...prevData, isLowResponseRequired: lyrics?.lyrics.isSynced };
-    });
-  }, [lyrics?.lyrics.isSynced, updateCurrentlyActivePageData]);
 
   const lyricsComponents = useMemo(() => {
     if (lyrics && lyrics?.lyrics) {
@@ -372,18 +368,22 @@ function LyricsPage() {
       }));
     }
 
-    changeCurrentActivePage('LyricsEditor', {
-      lyrics: lines,
-      songId: currentSongData.songId,
-      songTitle: currentSongData.title,
-      isEditingEnhancedSyncedLyrics: lyrics?.lyrics?.isSynced && isSynchronizedLyricsEnhancedSynced
+    updateRouteState('lyrics-editor', { lyrics: lines, songId: currentSongData.songId });
+    navigate({
+      to: '/main-player/lyrics/editor/$songId',
+      params: { songId: currentSongData.songId },
+      search: {
+        songTitle: currentSongData.title,
+        isEditingEnhancedSyncedLyrics:
+          lyrics?.lyrics?.isSynced && (isSynchronizedLyricsEnhancedSynced ?? false)
+      }
     });
   }, [
-    changeCurrentActivePage,
     currentSongData.songId,
     currentSongData.title,
     isSynchronizedLyricsEnhancedSynced,
-    lyrics
+    lyrics,
+    navigate
   ]);
 
   return (
@@ -436,7 +436,11 @@ function LyricsPage() {
                       pendingAnimationOnDisabled
                       className="show-online-lyrics-btn text-sm! md:text-lg md:[&>.button-label-text]:hidden md:[&>.icon]:mr-0"
                       iconName={isAutoScrolling ? 'flash_off' : 'flash_on'}
-                      clickHandler={() => setIsAutoScrolling((prevState) => !prevState)}
+                      clickHandler={() =>
+                        navigate({
+                          search: (prev) => ({ ...prev, isAutoScrolling: !isAutoScrolling })
+                        })
+                      }
                     />
                   )}
                   {lyrics && !lyrics.lyrics.isTranslated && (

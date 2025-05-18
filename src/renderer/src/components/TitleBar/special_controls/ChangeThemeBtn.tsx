@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 
 import Button from '../../Button';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const ChangeThemeBtn = () => {
   const isDarkMode = useStore(store, (state) => state.isDarkMode);

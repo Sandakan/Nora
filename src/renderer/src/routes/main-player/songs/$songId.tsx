@@ -9,7 +9,7 @@ import SongStat from '@renderer/components/SongInfoPage/SongStat';
 import SongsWithFeaturingArtistsSuggestion from '@renderer/components/SongInfoPage/SongsWithFeaturingArtistSuggestion';
 import SongArtist from '@renderer/components/SongsPage/SongArtist';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import calculateTimeFromSeconds from '@renderer/utils/calculateTimeFromSeconds';
 import log from '@renderer/utils/log';
 import { valueRounder } from '@renderer/utils/valueRounder';

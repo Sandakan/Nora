@@ -6,7 +6,7 @@ import MainContainer from '@renderer/components/MainContainer';
 import VirtualizedGrid from '@renderer/components/VirtualizedGrid';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import { albumSearchSchema } from '@renderer/utils/zod/albumSchema';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';

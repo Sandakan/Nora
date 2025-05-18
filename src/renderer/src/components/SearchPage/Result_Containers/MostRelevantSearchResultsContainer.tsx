@@ -5,7 +5,7 @@ import SecondaryContainer from '../../SecondaryContainer';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import { MostRelevantResult } from '../MostRelevantResult';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
 
 type Props = { searchResults: SearchResult };

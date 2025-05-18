@@ -19,7 +19,7 @@ const DeleteSongsFromSystemConfrimPrompt = lazy(
 
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import { useStore } from '@tanstack/react-store';
-import { store } from '../../store';
+import { store } from '../../store/store';
 import { useNavigate } from '@tanstack/react-router';
 
 interface SongCardProp {

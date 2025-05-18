@@ -2,7 +2,7 @@ import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import Button from '../../Button';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
 
 type Props = { isLyricsVisible: boolean };

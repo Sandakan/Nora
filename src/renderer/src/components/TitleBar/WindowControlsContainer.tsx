@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import Button from '../Button';
 import { useStore } from '@tanstack/react-store';
-import { store } from '../../store';
+import { store } from '../../store/store';
 
 const WindowControlsContainer = () => {
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);

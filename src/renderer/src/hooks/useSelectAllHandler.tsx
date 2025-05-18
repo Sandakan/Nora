@@ -1,7 +1,7 @@
 import { useCallback, useContext } from 'react';
 import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import { useStore } from '@tanstack/react-store';
-import { store } from '../store';
+import { store } from '../store/store';
 
 const slice = (arr: string[], start: number, end: number) => {
   if (start > end) {

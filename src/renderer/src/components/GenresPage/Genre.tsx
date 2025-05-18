@@ -7,7 +7,7 @@ import Img from '../Img';
 import DefaultGenreCover from '../../assets/images/webp/genre-cover-default.webp';
 import MultipleSelectionCheckbox from '../MultipleSelectionCheckbox';
 import Button from '../Button';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
 import { useNavigate } from '@tanstack/react-router';
 
@@ -343,4 +343,3 @@ const Genre = (props: GenreProp) => {
 };
 
 export default Genre;
-

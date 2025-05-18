@@ -1,91 +1,72 @@
 /* eslint-disable jsx-a11y/no-autofocus */
+import roundTo from '@common/roundTo';
+import Button from '@renderer/components/Button';
+import EditingLyricsLine from '@renderer/components/LyricsEditingPage/EditingLyricsLine';
+import LyricsEditingPageDurationCounter from '@renderer/components/LyricsEditingPage/LyricsEditingPageDurationCounter';
+import MainContainer from '@renderer/components/MainContainer';
+import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
+import { routeStateStore } from '@renderer/store/routeStateStore';
+import { store } from '@renderer/store/store';
+import { lyricsEditorSchema } from '@renderer/utils/zod/lyricsEditorSchema';
+import { createFileRoute } from '@tanstack/react-router';
+import { useStore } from '@tanstack/react-store';
+import { zodValidator } from '@tanstack/zod-adapter';
 import {
-  type KeyboardEvent,
   lazy,
   useCallback,
   useContext,
   useEffect,
   useMemo,
   useRef,
-  useState
+  useState,
+  type KeyboardEvent
 } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 
-import { AppUpdateContext } from '../../contexts/AppUpdateContext';
+export const Route = createFileRoute('/main-player/lyrics/editor/$songId')({
+  component: LyricsEditingPage,
+  validateSearch: zodValidator(lyricsEditorSchema)
+});
 
-import roundTo from '../../../../common/roundTo';
+const LyricsEditorHelpPrompt = lazy(
+  () => import('@renderer/components/LyricsEditingPage/LyricsEditorHelpPrompt')
+);
+const SensitiveActionConfirmPrompt = lazy(
+  () => import('@renderer/components/SensitiveActionConfirmPrompt')
+);
+const LyricsEditorSettingsPrompt = lazy(
+  () => import('@renderer/components/LyricsEditingPage/LyricsEditorSettingsPrompt')
+);
+const LyricsEditorSavePrompt = lazy(
+  () => import('@renderer/components/LyricsEditingPage/LyricsEditorSavePrompt')
+);
+const PageFocusPrompt = lazy(
+  () => import('@renderer/components/LyricsEditingPage/PageFocusPrompt')
+);
 
-import MainContainer from '../MainContainer';
-import EditingLyricsLine from './EditingLyricsLine';
-import Button from '../Button';
-import LyricsEditingPageDurationCounter from './LyricsEditingPageDurationCounter';
-import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
-
-const LyricsEditorHelpPrompt = lazy(() => import('./LyricsEditorHelpPrompt'));
-const SensitiveActionConfirmPrompt = lazy(() => import('../SensitiveActionConfirmPrompt'));
-const LyricsEditorSettingsPrompt = lazy(() => import('./LyricsEditorSettingsPrompt'));
-const LyricsEditorSavePrompt = lazy(() => import('./LyricsEditorSavePrompt'));
-const PageFocusPrompt = lazy(() => import('./PageFocusPrompt'));
-
-export interface LyricData {
-  text: string | Omit<SyncedLyricsLineWord, 'unparsedText'>[];
-  start?: number;
-  end?: number;
-}
-
-export interface LyricsLineData {
-  text: string;
-  start?: number;
-  end?: number;
-  unparsedText?: string;
-  isActive: boolean;
-}
-
-export interface EditingLyricsLineData {
-  text: string | LyricsLineData[];
-  start?: number;
-  end?: number;
-}
-export interface ExtendedEditingLyricsLineData extends EditingLyricsLineData {
-  index: number;
-  isActive: boolean;
-}
-const LyricsEditingPage = () => {
-  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
+function LyricsEditingPage() {
   const currentSongData = useStore(store, (state) => state.currentSongData);
-  const lyricsEditorSettings = useStore(store, (state) => state.localStorage.lyricsEditorSettings);
+  const offset = useStore(store, (state) => state.localStorage.lyricsEditorSettings.offset || 0);
   const preferences = useStore(store, (state) => state.localStorage.preferences);
   const playback = useStore(store, (state) => state.localStorage.playback);
 
-  const { changePromptMenuData, playSong, updateCurrentlyActivePageData, updateContextMenuData } =
-    useContext(AppUpdateContext);
+  const { changePromptMenuData, playSong, updateContextMenuData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
+  const { songId } = Route.useParams();
+  const { songTitle, isEditingEnhancedSyncedLyrics } = Route.useSearch();
 
+  const lyrics = useStore(routeStateStore, (state) => {
+    const data = state['lyrics-editor'];
+
+    if (data?.songId === songId) return data.lyrics || [];
+    return [];
+  });
   const songPositionRef = useRef<number>(0);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const [isEditingEnhancedSyncedLyrics, setIsEditingEnhancedSyncedLyrics] = useState(false);
   const [lyricsLines, setLyricsLines] = useState<ExtendedEditingLyricsLineData[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const offset = lyricsEditorSettings.offset || 0;
-  // const roundedSongPostion = roundTo(songPosition + offset, 2);
-
-  const { songId, lyrics, songTitle } = useMemo(() => {
-    const { data } = currentlyActivePage;
-
-    const isEnhancedSynced =
-      !!data && typeof data.lyrics === 'object' && !!data.isEditingEnhancedSyncedLyrics;
-    setIsEditingEnhancedSyncedLyrics(isEnhancedSynced);
-
-    return {
-      songId: data?.songId as string | undefined,
-      lyrics: (data?.lyrics || []) as LyricData[],
-      songTitle: data?.songTitle as string | undefined
-    };
-  }, [currentlyActivePage]);
 
   const isTheEditingSongTheCurrSong = useMemo(
     () => currentSongData.songId === songId,
@@ -115,14 +96,14 @@ const LyricsEditingPage = () => {
     }
   }, [isEditingEnhancedSyncedLyrics, lyrics]);
 
-  useEffect(() => {
-    updateCurrentlyActivePageData((prevData) => {
-      return {
-        ...prevData,
-        isLowResponseRequired: isTheEditingSongTheCurrSong && isPlaying
-      };
-    });
-  }, [isPlaying, isTheEditingSongTheCurrSong, updateCurrentlyActivePageData]);
+  // useEffect(() => {
+  //   updateCurrentlyActivePageData((prevData) => {
+  //     return {
+  //       ...prevData,
+  //       isLowResponseRequired: isTheEditingSongTheCurrSong && isPlaying
+  //     };
+  //   });
+  // }, [isPlaying, isTheEditingSongTheCurrSong, updateCurrentlyActivePageData]);
 
   useEffect(() => {
     const durationUpdateFunction = (ev: Event) => {
@@ -465,6 +446,5 @@ const LyricsEditingPage = () => {
       />
     </MainContainer>
   );
-};
+}
 
-export default LyricsEditingPage;

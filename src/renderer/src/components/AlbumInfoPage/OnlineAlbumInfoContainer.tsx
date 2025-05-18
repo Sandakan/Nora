@@ -5,7 +5,7 @@ import TitleContainer from '../TitleContainer';
 import UnAvailableTrack from '../SongInfoPage/UnAvailableTrack';
 import type { LastFMAlbumInfo } from 'src/types/last_fm_album_info_api';
 import { useStore } from '@tanstack/react-store';
-import { store } from '../../store';
+import { store } from '../../store/store';
 
 type Props = {
   albumTitle: string;

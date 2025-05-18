@@ -1264,4 +1264,34 @@ declare global {
   interface SearchUrlParams {
     scrollTopOffset?: number;
   }
+
+  interface LyricData {
+    text: string | Omit<SyncedLyricsLineWord, 'unparsedText'>[];
+    start?: number;
+    end?: number;
+  }
+
+  interface LyricsLineData {
+    text: string;
+    start?: number;
+    end?: number;
+    unparsedText?: string;
+    isActive: boolean;
+  }
+
+  interface EditingLyricsLineData {
+    text: string | LyricsLineData[];
+    start?: number;
+    end?: number;
+  }
+  interface ExtendedEditingLyricsLineData extends EditingLyricsLineData {
+    index: number;
+    isActive: boolean;
+  }
+
+  type Routes = 'lyrics-editor';
+  type LyricsEditorRouteState = { songId: string; lyrics?: LyricData[] };
+  interface RouteStates {
+    'lyrics-editor': LyricsEditorRouteState;
+  }
 }

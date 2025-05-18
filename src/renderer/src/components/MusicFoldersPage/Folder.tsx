@@ -12,7 +12,7 @@ const BlacklistFolderConfrimPrompt = lazy(() => import('./BlacklistFolderConfirm
 
 import FolderImg from '../../assets/images/webp/empty-folder.webp';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import { useNavigate } from '@tanstack/react-router';
 
 type FolderProps = {
@@ -332,4 +332,3 @@ const Folder = (props: FolderProps) => {
 };
 
 export default Folder;
-

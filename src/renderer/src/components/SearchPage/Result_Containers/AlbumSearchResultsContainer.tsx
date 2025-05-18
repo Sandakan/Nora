@@ -5,7 +5,7 @@ import Button from '../../Button';
 import SecondaryContainer from '../../SecondaryContainer';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import useSelectAllHandler from '../../../hooks/useSelectAllHandler';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
 import { useNavigate } from '@tanstack/react-router';
 

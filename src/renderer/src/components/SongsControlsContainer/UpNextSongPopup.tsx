@@ -6,7 +6,7 @@ import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
 import Button from '../Button';
 import { useStore } from '@tanstack/react-store';
-import { store } from '../../store';
+import { store } from '../../store/store';
 
 type Props = {
   onPopupAppears: (isVisible: boolean) => void;

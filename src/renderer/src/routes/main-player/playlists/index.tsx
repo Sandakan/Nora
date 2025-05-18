@@ -7,7 +7,7 @@ import VirtualizedGrid from '@renderer/components/VirtualizedGrid';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
 import i18n from '@renderer/i18n';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { lazy, useCallback, useContext, useEffect, useState } from 'react';

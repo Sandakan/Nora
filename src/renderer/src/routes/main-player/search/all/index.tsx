@@ -6,7 +6,7 @@ import AllGenreResults from '@renderer/components/SearchPage/All_Search_Result_C
 import AllPlaylistResults from '@renderer/components/SearchPage/All_Search_Result_Containers/AllPlaylistResults';
 import AllSongResults from '@renderer/components/SearchPage/All_Search_Result_Containers/AllSongResults';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import log from '@renderer/utils/log';
 import { searchPageSchema } from '@renderer/utils/zod/searchPageSchema';
 import { createFileRoute } from '@tanstack/react-router';

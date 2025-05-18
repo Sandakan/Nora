@@ -8,7 +8,7 @@ import Hyperlink from '../Hyperlink';
 
 import log from '../../utils/log';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const MusixmatchSettingsPrompt = () => {
   const userData = useStore(store, (state) => state.userData);

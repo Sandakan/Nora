@@ -3,7 +3,7 @@ import MainContainer from '@renderer/components/MainContainer';
 import { searchFilter } from '@renderer/components/SearchPage/SearchOptions';
 import SearchResultsFilter from '@renderer/components/SearchPage/SearchResultsFilter';
 import useResizeObserver from '@renderer/hooks/useResizeObserver';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import { searchPageSchema } from '@renderer/utils/zod/searchPageSchema';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';

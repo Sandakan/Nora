@@ -7,7 +7,7 @@ import Checkbox from '../../Checkbox';
 
 import LastFMIcon from '../../../assets/images/webp/last-fm-logo.webp';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const AccountsSettings = () => {
   const userData = useStore(store, (state) => state.userData);

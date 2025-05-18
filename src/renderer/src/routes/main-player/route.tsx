@@ -4,7 +4,7 @@ import Img from '@renderer/components/Img';
 import PromptMenu from '@renderer/components/PromptMenu/PromptMenu';
 import SongControlsContainer from '@renderer/components/SongsControlsContainer/SongControlsContainer';
 import TitleBar from '@renderer/components/TitleBar/TitleBar';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 

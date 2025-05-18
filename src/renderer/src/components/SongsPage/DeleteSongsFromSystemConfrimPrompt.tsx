@@ -6,7 +6,7 @@ import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import Button from '../Button';
 import Checkbox from '../Checkbox';
 import { useStore } from '@tanstack/react-store';
-import { store } from '../../store';
+import { store } from '../../store/store';
 
 const DeleteSongFromSystemConfirmPrompt = (props: { songIds: string[] }) => {
   const currentSongData = useStore(store, (state) => state.currentSongData);

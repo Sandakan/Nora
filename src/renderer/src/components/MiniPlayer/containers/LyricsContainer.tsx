@@ -6,7 +6,7 @@ import LyricLine from '../../LyricsPage/LyricLine';
 import useSkipLyricsLines from '../../../hooks/useSkipLyricsLines';
 import LyricsMetadata from '../../LyricsPage/LyricsMetadata';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 type Props = { isLyricsVisible: boolean };
 

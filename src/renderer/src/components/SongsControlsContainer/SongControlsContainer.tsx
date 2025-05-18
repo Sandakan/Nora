@@ -3,7 +3,7 @@ import CurrentlyPlayingSongInfoContainer from './CurrentlyPlayingSongInfoContain
 import OtherSongControlsContainer from './OtherSongControlsContainer';
 import SongControlsAndSeekbarContainer from './SongControlsAndSeekbarContainer';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const SongControlsContainer = () => {
   const bodyBackgroundImage = useStore(store, (state) => state.bodyBackgroundImage);

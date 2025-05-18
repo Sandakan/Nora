@@ -49,7 +49,7 @@ import ListeningDataSession from './other/listeningDataSession';
 import updateQueueOnSongPlay from './other/updateQueueOnSongPlay';
 import shuffleQueueRandomly from './other/shuffleQueueRandomly';
 import AudioPlayer from './other/player';
-import { dispatch, store } from './store';
+import { dispatch, store } from './store/store';
 import i18n from './i18n';
 import { normalizedKeys } from './other/appShortcuts';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';

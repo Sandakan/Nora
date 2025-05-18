@@ -22,7 +22,7 @@ import GithubLightIcon from '../../../assets/images/svg/github-white.svg';
 import DiscordDarkIcon from '../../../assets/images/svg/discord_light_mode.svg';
 import DiscordLightIcon from '../../../assets/images/svg/discord_dark_mode.svg';
 import SLFlag from '../../../assets/images/webp/sl-flag.webp';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
 
 const ReleaseNotesPrompt = lazy(() => import('../../ReleaseNotesPrompt/ReleaseNotesPrompt'));

@@ -4,7 +4,7 @@ import Dropdown from '../../Dropdown';
 import { AppUpdateContext } from '../../../contexts/AppUpdateContext';
 import i18n, { supportedLanguagesDropdownOptions } from '../../../i18n';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const LanguageSettings = () => {
   const { t } = useTranslation();

@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import Button from '../Button';
 import { useStore } from '@tanstack/react-store';
-import { store } from '../../store';
+import { store } from '../../store/store';
 import { useRouter } from '@tanstack/react-router';
 
 type Props = { disableHomeButton?: boolean };

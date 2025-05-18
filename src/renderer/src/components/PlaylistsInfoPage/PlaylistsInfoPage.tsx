@@ -12,7 +12,7 @@ import TitleContainer from '../TitleContainer';
 import { songSortOptions, songFilterOptions } from '../SongsPage/SongOptions';
 import VirtualizedList from '../VirtualizedList';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import type { BaseInfoPageSearchParams } from '@renderer/utils/zod/baseInfoPageSearchParamsSchema';
 import { useNavigate } from '@tanstack/react-router';
 

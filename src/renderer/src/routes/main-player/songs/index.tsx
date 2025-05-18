@@ -1,5 +1,5 @@
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';

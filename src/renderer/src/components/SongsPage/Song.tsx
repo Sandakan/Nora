@@ -33,7 +33,7 @@ import Button from '../Button';
 
 import { appPreferences } from '../../../../../package.json';
 import { useStore } from '@tanstack/react-store';
-import { store } from '../../store';
+import { store } from '../../store/store';
 import NavLink from '../NavLink';
 import { useNavigate } from '@tanstack/react-router';
 

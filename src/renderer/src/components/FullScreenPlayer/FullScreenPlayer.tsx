@@ -9,7 +9,7 @@ import LyricsContainer from './containers/LyricsContainer';
 import SongInfoContainer from './containers/SongInfoContainer';
 import SeekBarSlider from '../SeekBarSlider';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 // type Props = {};
 

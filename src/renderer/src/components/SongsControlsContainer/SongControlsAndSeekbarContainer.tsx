@@ -1,4 +1,4 @@
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
 import { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';

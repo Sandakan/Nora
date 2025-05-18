@@ -1,4 +1,4 @@
-import { store } from '../store';
+import { store } from '../store/store';
 import { equalizerBandHertzData } from './equalizerData';
 
 const AUDIO_FADE_INTERVAL = 50;

@@ -26,7 +26,7 @@ import Song from '../SongsPage/Song';
 import VirtualizedList from '../VirtualizedList';
 import { type VirtuosoHandle } from 'react-virtuoso';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 interface QueueInfo {
   artworkPath: string;

@@ -3,9 +3,9 @@ import {
   type AppReducerStateActions,
   DEFAULT_REDUCER_DATA,
   reducer as appReducer
-} from './other/appReducer';
-import storage from './utils/localStorage';
-import hasDataChanged from './utils/hasDataChanged';
+} from '../other/appReducer';
+import storage from '../utils/localStorage';
+import hasDataChanged from '../utils/hasDataChanged';
 
 storage.checkLocalStorage();
 export const store = new Store(DEFAULT_REDUCER_DATA);

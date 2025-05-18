@@ -4,7 +4,7 @@ import Img from '../Img';
 
 import DefaultImgCover from '../../assets/images/webp/song_cover_default.webp';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 type Props = {
   className?: string;

@@ -6,7 +6,7 @@ import MultipleArtworksCover from '../PlaylistsPage/MultipleArtworksCover';
 import DefaultPlaylistCover from '../../assets/images/webp/playlist_cover_default.webp';
 import { useMemo } from 'react';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 type Props = {
   playlist: Playlist;

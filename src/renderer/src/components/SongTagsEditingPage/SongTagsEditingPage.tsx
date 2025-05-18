@@ -23,7 +23,7 @@ import SongAlbumArtistsInput from './input_containers/SongAlbumArtistInput';
 import hasDataChanged, { isDataChanged } from '../../utils/hasDataChanged';
 import { appPreferences } from '../../../../../package.json';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const SongMetadataResultsSelectPage = lazy(() => import('./SongMetadataResultsSelectPrompt'));
 const ResetTagsToDefaultPrompt = lazy(() => import('./ResetTagsToDefaultPrompt'));

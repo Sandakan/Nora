@@ -1,5 +1,5 @@
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import { folderSearchSchema } from '@renderer/utils/zod/folderSchema';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';

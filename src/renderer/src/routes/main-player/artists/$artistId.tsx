@@ -12,7 +12,7 @@ import TitleContainer from '@renderer/components/TitleContainer';
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import useResizeObserver from '@renderer/hooks/useResizeObserver';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import calculateTimeFromSeconds from '@renderer/utils/calculateTimeFromSeconds';
 import { createFileRoute } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';

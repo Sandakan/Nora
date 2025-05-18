@@ -6,7 +6,7 @@ import Song from '../../SongsPage/Song';
 import SecondaryContainer from '../../SecondaryContainer';
 import VirtualizedList from '../../VirtualizedList';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 type Props = { songData: SongData[] };
 

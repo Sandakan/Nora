@@ -6,7 +6,7 @@ import Button from '../Button';
 import ShortcutButton from '../SettingsPage/ShortcutButton';
 import Checkbox from '../Checkbox';
 import storage from '../../../src/utils/localStorage';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import { useStore } from '@tanstack/react-store';
 
 const AppShortcutsPrompt = lazy(() => import('../SettingsPage/AppShortcutsPrompt'));

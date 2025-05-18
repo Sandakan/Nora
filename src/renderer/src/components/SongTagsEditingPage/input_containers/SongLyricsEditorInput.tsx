@@ -9,7 +9,7 @@ import useNetworkConnectivity from '../../../hooks/useNetworkConnectivity';
 import parseLyrics from '../../../../../common/parseLyrics';
 import isLyricsSynced, { isLyricsEnhancedSynced } from '../../../../../common/isLyricsSynced';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 type CurrentLyricsTYpe = 'synced' | 'unsynced';
 

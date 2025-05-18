@@ -13,7 +13,7 @@ import WindowControlsContainer from './WindowControlsContainer';
 import LightModeLogo from '../../assets/images/webp/logo_light_mode.webp';
 import GoToMainPlayerBtn from './special_controls/GoToMainPlayerBtn';
 import { useStore } from '@tanstack/react-store';
-import { store } from '../../store';
+import { store } from '../../store/store';
 import CurrentLocationContainer from './CurrentLocationContainer';
 
 const appReleasePhase = getVersionInfoFromString(version)?.releasePhase || 'stable';
@@ -25,7 +25,7 @@ const TitleBar = memo(() => {
   return (
     <header
       id="title-bar"
-      className={`text-font-color-black dark:text-font-color-white relative top-0 z-40 flex h-10 w-full items-center justify-between overflow-hidden bg-transparent transition-opacity ${
+      className={`text-font-color-black dark:text-font-color-white relative top-0 z-40 grid h-10 w-full grid-cols-[clamp(10rem,30%,18rem)_1fr_auto] items-center justify-between overflow-hidden bg-transparent transition-opacity ${
         bodyBackgroundImage &&
         'bg-background-color-1/50 text-font-color-white! dark:bg-dark-background-color-1/70 backdrop-blur-md'
       }`}
@@ -54,8 +54,8 @@ const TitleBar = memo(() => {
           </span>
         </div>
         {playerType !== 'full' && <NavigationControlsContainer />}
-        {window.api.properties.isInDevelopment && <CurrentLocationContainer />}
       </div>
+      {window.api.properties.isInDevelopment && <CurrentLocationContainer />}
       <div className="window-controls-and-special-controls-and-indicators-container flex h-full flex-row">
         <div className="special-controls-and-indicators-container mr-2 flex items-center justify-between py-1">
           <div className="indicators-container flex flex-row">

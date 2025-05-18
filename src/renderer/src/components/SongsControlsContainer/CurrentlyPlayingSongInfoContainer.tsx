@@ -8,7 +8,7 @@ import SongArtist from '../SongsPage/SongArtist';
 import DefaultSongCover from '../../assets/images/webp/song_cover_default.webp';
 import UpNextSongPopup from './UpNextSongPopup';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 import NavLink from '../NavLink';
 import { useNavigate } from '@tanstack/react-router';
 

@@ -3,7 +3,7 @@ import { Suspense, lazy, memo, useEffect, useRef } from 'react';
 import SuspenseLoader from './SuspenseLoader';
 import ErrorBoundary from './ErrorBoundary';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const HomePage = lazy(() => import('./HomePage/HomePage'));
 const ArtistPage = lazy(() => import('./ArtistPage/ArtistPage'));

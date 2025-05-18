@@ -6,7 +6,7 @@ import debounce from '../../utils/debounce';
 
 import Checkbox from '../Checkbox';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const LyricsEditorSettingsPrompt = () => {
   const lyricsEditorSettings = useStore(store, (state) => state.localStorage.lyricsEditorSettings);

@@ -10,7 +10,7 @@ import UpNextSongPopup from '../../SongsControlsContainer/UpNextSongPopup';
 import DefaultSongCover from '../../../assets/images/webp/song_cover_default.webp';
 import VolumeSlider from '../../VolumeSlider';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 type Props = {
   songPos: number;

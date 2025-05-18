@@ -12,7 +12,7 @@ import { AppUpdateContext } from '../contexts/AppUpdateContext';
 import calculateTime from '../utils/calculateTime';
 import debounce from '../utils/debounce';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 type Props = {
   id: string;

@@ -6,7 +6,7 @@ import storage from '../../utils/localStorage';
 import Button from '../Button';
 import splitFeaturingArtists from '../../utils/splitFeaturingArtists';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 type Props = {
   name?: string;

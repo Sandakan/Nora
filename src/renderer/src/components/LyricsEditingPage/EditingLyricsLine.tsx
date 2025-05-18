@@ -2,15 +2,10 @@ import { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useSta
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
-import type {
-  EditingLyricsLineData,
-  ExtendedEditingLyricsLineData,
-  LyricsLineData
-} from './LyricsEditingPage';
 import Button from '../Button';
 import EditingLyricWord from './EditingLyricWord';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 interface Props extends ExtendedEditingLyricsLineData {
   isPlaying: boolean;

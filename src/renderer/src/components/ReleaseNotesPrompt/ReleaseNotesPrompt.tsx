@@ -14,7 +14,7 @@ import { version, releaseNotes as currentReleaseNotes, urls } from '../../../../
 import localReleseNotes from '../../../../../release-notes.json';
 import ReleaseNotesAppUpdateInfo from './ReleaseNotesAppUpdateInfo';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 const ReleaseNotesPrompt = () => {
   const appUpdatesState = useStore(store, (state) => state.appUpdatesState);

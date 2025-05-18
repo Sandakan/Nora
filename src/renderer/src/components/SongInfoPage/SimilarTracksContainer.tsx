@@ -6,7 +6,7 @@ import UnAvailableTrack from './UnAvailableTrack';
 import TitleContainer from '../TitleContainer';
 import Song from '../SongsPage/Song';
 import { useStore } from '@tanstack/react-store';
-import { store } from '@renderer/store';
+import { store } from '@renderer/store/store';
 
 type Props = { songId: string };
 
