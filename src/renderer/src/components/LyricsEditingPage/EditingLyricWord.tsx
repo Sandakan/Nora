@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { type LyricsLineData } from './LyricsEditingPage';
 
 type Props = {
   isPlaying: boolean;
@@ -54,3 +53,4 @@ const EditingLyricWord = (props: Props) => {
 };
 
 export default EditingLyricWord;
+

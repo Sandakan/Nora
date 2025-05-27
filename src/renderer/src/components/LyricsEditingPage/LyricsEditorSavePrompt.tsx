@@ -6,7 +6,6 @@ import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 import calculateTime from '../../utils/calculateTime';
 import isLyricsSynced from '../../../../common/isLyricsSynced';
 
-import { type ExtendedEditingLyricsLineData } from './LyricsEditingPage';
 import Button from '../Button';
 import Hyperlink from '../Hyperlink';
 
@@ -243,3 +242,4 @@ const LyricsEditorSavePrompt = (props: Props) => {
 };
 
 export default LyricsEditorSavePrompt;
+
