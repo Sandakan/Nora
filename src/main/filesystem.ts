@@ -21,9 +21,24 @@ import type { LastFMSessionData } from '../types/last_fm_api';
 import { DEFAULT_SONG_PALETTE } from './other/generatePalette';
 import isPathADir from './utils/isPathADir';
 import { clearDiscordRpcActivity } from './other/discordRPC';
+import { drizzle } from 'drizzle-orm/pglite';
+import { migrate } from 'drizzle-orm/pglite/migrator';
 
 export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(app.getPath('userData'), 'song_covers');
 export const DEFAULT_FILE_URL = 'nora://localfiles/';
+
+const db = drizzle(app.getPath('userData') + '/database.db');
+migrate(db, { migrationsFolder: path.resolve(import.meta.dirname, '../../resources/drizzle/') });
+
+// const user: typeof usersTable.$inferInsert = {
+//   name: 'John',
+//   age: 30,
+//   email: 'john@example.com'
+// };
+// await db.insert(usersTable).values(user);
+// console.log('New user created!');
+// const users = await db.select().from(usersTable);
+// console.log('Getting all users from the database: ', users);
 
 export const USER_DATA_TEMPLATE: UserData = {
   language: 'en',
@@ -624,3 +639,4 @@ export const resetAppCache = () => {
   playlistDataStore.store = { version, playlists: PLAYLIST_DATA_TEMPLATE };
   logger.info(`In-app cache reset successfully.`);
 };
+

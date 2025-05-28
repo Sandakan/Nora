@@ -1,0 +1,1398 @@
+{
+  "id": "392fe755-e834-4643-b64b-56fc292e0df7",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.albums": {
+      "name": "albums",
+      "schema": "",
+      "columns": {
+        "album_id": {
+          "name": "album_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "year": {
+          "name": "year",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "artwork_id": {
+          "name": "artwork_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "albums_artwork_id_artworks_artwork_id_fk": {
+          "name": "albums_artwork_id_artworks_artwork_id_fk",
+          "tableFrom": "albums",
+          "tableTo": "artworks",
+          "columnsFrom": [
+            "artwork_id"
+          ],
+          "columnsTo": [
+            "artwork_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "albums_album_id_unique": {
+          "name": "albums_album_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "album_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.albums_artists": {
+      "name": "albums_artists",
+      "schema": "",
+      "columns": {
+        "album_id": {
+          "name": "album_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "artist_id": {
+          "name": "artist_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "albums_artists_album_id_albums_album_id_fk": {
+          "name": "albums_artists_album_id_albums_album_id_fk",
+          "tableFrom": "albums_artists",
+          "tableTo": "albums",
+          "columnsFrom": [
+            "album_id"
+          ],
+          "columnsTo": [
+            "album_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "albums_artists_artist_id_artists_artist_id_fk": {
+          "name": "albums_artists_artist_id_artists_artist_id_fk",
+          "tableFrom": "albums_artists",
+          "tableTo": "artists",
+          "columnsFrom": [
+            "artist_id"
+          ],
+          "columnsTo": [
+            "artist_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "albums_artists_album_id_artist_id_pk": {
+          "name": "albums_artists_album_id_artist_id_pk",
+          "columns": [
+            "album_id",
+            "artist_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.albums_artists_songs": {
+      "name": "albums_artists_songs",
+      "schema": "",
+      "columns": {
+        "album_id": {
+          "name": "album_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "song_id": {
+          "name": "song_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "artist_id": {
+          "name": "artist_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "albums_artists_songs_album_id_albums_album_id_fk": {
+          "name": "albums_artists_songs_album_id_albums_album_id_fk",
+          "tableFrom": "albums_artists_songs",
+          "tableTo": "albums",
+          "columnsFrom": [
+            "album_id"
+          ],
+          "columnsTo": [
+            "album_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "albums_artists_songs_song_id_songs_song_id_fk": {
+          "name": "albums_artists_songs_song_id_songs_song_id_fk",
+          "tableFrom": "albums_artists_songs",
+          "tableTo": "songs",
+          "columnsFrom": [
+            "song_id"
+          ],
+          "columnsTo": [
+            "song_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "albums_artists_songs_artist_id_artists_artist_id_fk": {
+          "name": "albums_artists_songs_artist_id_artists_artist_id_fk",
+          "tableFrom": "albums_artists_songs",
+          "tableTo": "artists",
+          "columnsFrom": [
+            "artist_id"
+          ],
+          "columnsTo": [
+            "artist_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "albums_artists_songs_album_id_song_id_artist_id_pk": {
+          "name": "albums_artists_songs_album_id_song_id_artist_id_pk",
+          "columns": [
+            "album_id",
+            "song_id",
+            "artist_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.artists": {
+      "name": "artists",
+      "schema": "",
+      "columns": {
+        "artist_id": {
+          "name": "artist_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "artwork_id": {
+          "name": "artwork_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "online_artist_artwork_id": {
+          "name": "online_artist_artwork_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "artists_artwork_id_artworks_artwork_id_fk": {
+          "name": "artists_artwork_id_artworks_artwork_id_fk",
+          "tableFrom": "artists",
+          "tableTo": "artworks",
+          "columnsFrom": [
+            "artwork_id"
+          ],
+          "columnsTo": [
+            "artwork_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "artists_online_artist_artwork_id_online_artist_artworks_online_artist_artwork_id_fk": {
+          "name": "artists_online_artist_artwork_id_online_artist_artworks_online_artist_artwork_id_fk",
+          "tableFrom": "artists",
+          "tableTo": "online_artist_artworks",
+          "columnsFrom": [
+            "online_artist_artwork_id"
+          ],
+          "columnsTo": [
+            "online_artist_artwork_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "artists_artist_id_unique": {
+          "name": "artists_artist_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "artist_id"
+          ]
+        },
+        "artists_name_unique": {
+          "name": "artists_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.artists_songs": {
+      "name": "artists_songs",
+      "schema": "",
+      "columns": {
+        "song_id": {
+          "name": "song_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "artist_id": {
+          "name": "artist_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "artists_songs_song_id_songs_song_id_fk": {
+          "name": "artists_songs_song_id_songs_song_id_fk",
+          "tableFrom": "artists_songs",
+          "tableTo": "songs",
+          "columnsFrom": [
+            "song_id"
+          ],
+          "columnsTo": [
+            "song_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "artists_songs_artist_id_artists_artist_id_fk": {
+          "name": "artists_songs_artist_id_artists_artist_id_fk",
+          "tableFrom": "artists_songs",
+          "tableTo": "artists",
+          "columnsFrom": [
+            "artist_id"
+          ],
+          "columnsTo": [
+            "artist_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "artists_songs_song_id_artist_id_pk": {
+          "name": "artists_songs_song_id_artist_id_pk",
+          "columns": [
+            "song_id",
+            "artist_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.artworks": {
+      "name": "artworks",
+      "schema": "",
+      "columns": {
+        "artwork_id": {
+          "name": "artwork_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "file_path": {
+          "name": "file_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "artworks_artwork_id_unique": {
+          "name": "artworks_artwork_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "artwork_id"
+          ]
+        },
+        "artworks_file_path_unique": {
+          "name": "artworks_file_path_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "file_path"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.folder_blacklist": {
+      "name": "folder_blacklist",
+      "schema": "",
+      "columns": {
+        "folder_blacklist_id": {
+          "name": "folder_blacklist_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "folder_path": {
+          "name": "folder_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "folder_blacklist_folder_blacklist_id_unique": {
+          "name": "folder_blacklist_folder_blacklist_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "folder_blacklist_id"
+          ]
+        },
+        "folder_blacklist_folder_path_unique": {
+          "name": "folder_blacklist_folder_path_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "folder_path"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.genres": {
+      "name": "genres",
+      "schema": "",
+      "columns": {
+        "genre_id": {
+          "name": "genre_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "artwork_id": {
+          "name": "artwork_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "palette_id": {
+          "name": "palette_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "genres_artwork_id_artworks_artwork_id_fk": {
+          "name": "genres_artwork_id_artworks_artwork_id_fk",
+          "tableFrom": "genres",
+          "tableTo": "artworks",
+          "columnsFrom": [
+            "artwork_id"
+          ],
+          "columnsTo": [
+            "artwork_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "genres_palette_id_palettes_palette_id_fk": {
+          "name": "genres_palette_id_palettes_palette_id_fk",
+          "tableFrom": "genres",
+          "tableTo": "palettes",
+          "columnsFrom": [
+            "palette_id"
+          ],
+          "columnsTo": [
+            "palette_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "genres_genre_id_unique": {
+          "name": "genres_genre_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "genre_id"
+          ]
+        },
+        "genres_name_unique": {
+          "name": "genres_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.genres_songs": {
+      "name": "genres_songs",
+      "schema": "",
+      "columns": {
+        "song_id": {
+          "name": "song_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "genre_id": {
+          "name": "genre_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "genres_songs_song_id_songs_song_id_fk": {
+          "name": "genres_songs_song_id_songs_song_id_fk",
+          "tableFrom": "genres_songs",
+          "tableTo": "songs",
+          "columnsFrom": [
+            "song_id"
+          ],
+          "columnsTo": [
+            "song_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "genres_songs_genre_id_genres_genre_id_fk": {
+          "name": "genres_songs_genre_id_genres_genre_id_fk",
+          "tableFrom": "genres_songs",
+          "tableTo": "genres",
+          "columnsFrom": [
+            "genre_id"
+          ],
+          "columnsTo": [
+            "genre_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "genres_songs_song_id_genre_id_pk": {
+          "name": "genres_songs_song_id_genre_id_pk",
+          "columns": [
+            "song_id",
+            "genre_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.listening_data": {
+      "name": "listening_data",
+      "schema": "",
+      "columns": {
+        "listening_data_id": {
+          "name": "listening_data_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "skip_count": {
+          "name": "skip_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "full_listens_count": {
+          "name": "full_listens_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "added_playlist_count": {
+          "name": "added_playlist_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "song_id": {
+          "name": "song_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "listening_data_song_id_songs_song_id_fk": {
+          "name": "listening_data_song_id_songs_song_id_fk",
+          "tableFrom": "listening_data",
+          "tableTo": "songs",
+          "columnsFrom": [
+            "song_id"
+          ],
+          "columnsTo": [
+            "song_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "listening_data_listening_data_id_unique": {
+          "name": "listening_data_listening_data_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "listening_data_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.online_artist_artworks": {
+      "name": "online_artist_artworks",
+      "schema": "",
+      "columns": {
+        "online_artist_artwork_id": {
+          "name": "online_artist_artwork_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "small_artwork_path": {
+          "name": "small_artwork_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "medium_artwork_path": {
+          "name": "medium_artwork_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "large_artwork_path": {
+          "name": "large_artwork_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "online_artist_artworks_online_artist_artwork_id_unique": {
+          "name": "online_artist_artworks_online_artist_artwork_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "online_artist_artwork_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.palette_swatches": {
+      "name": "palette_swatches",
+      "schema": "",
+      "columns": {
+        "palette_swatch_id": {
+          "name": "palette_swatch_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "population": {
+          "name": "population",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hex": {
+          "name": "hex",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hsl": {
+          "name": "hsl",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "swatch_type_id": {
+          "name": "swatch_type_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "palette_id": {
+          "name": "palette_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "palette_swatches_swatch_type_id_swatch_types_swatch_type_id_fk": {
+          "name": "palette_swatches_swatch_type_id_swatch_types_swatch_type_id_fk",
+          "tableFrom": "palette_swatches",
+          "tableTo": "swatch_types",
+          "columnsFrom": [
+            "swatch_type_id"
+          ],
+          "columnsTo": [
+            "swatch_type_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "palette_swatches_palette_id_palettes_palette_id_fk": {
+          "name": "palette_swatches_palette_id_palettes_palette_id_fk",
+          "tableFrom": "palette_swatches",
+          "tableTo": "palettes",
+          "columnsFrom": [
+            "palette_id"
+          ],
+          "columnsTo": [
+            "palette_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "palette_swatches_palette_swatch_id_unique": {
+          "name": "palette_swatches_palette_swatch_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "palette_swatch_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.palettes": {
+      "name": "palettes",
+      "schema": "",
+      "columns": {
+        "palette_id": {
+          "name": "palette_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "palettes_palette_id_unique": {
+          "name": "palettes_palette_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "palette_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.playlists": {
+      "name": "playlists",
+      "schema": "",
+      "columns": {
+        "playlist_id": {
+          "name": "playlist_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "artwork_id": {
+          "name": "artwork_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "playlists_artwork_id_artworks_artwork_id_fk": {
+          "name": "playlists_artwork_id_artworks_artwork_id_fk",
+          "tableFrom": "playlists",
+          "tableTo": "artworks",
+          "columnsFrom": [
+            "artwork_id"
+          ],
+          "columnsTo": [
+            "artwork_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "playlists_playlist_id_unique": {
+          "name": "playlists_playlist_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "playlist_id"
+          ]
+        },
+        "playlists_name_unique": {
+          "name": "playlists_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.playlists_songs": {
+      "name": "playlists_songs",
+      "schema": "",
+      "columns": {
+        "playlist_id": {
+          "name": "playlist_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "song_id": {
+          "name": "song_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "playlists_songs_playlist_id_playlists_playlist_id_fk": {
+          "name": "playlists_songs_playlist_id_playlists_playlist_id_fk",
+          "tableFrom": "playlists_songs",
+          "tableTo": "playlists",
+          "columnsFrom": [
+            "playlist_id"
+          ],
+          "columnsTo": [
+            "playlist_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "playlists_songs_song_id_songs_song_id_fk": {
+          "name": "playlists_songs_song_id_songs_song_id_fk",
+          "tableFrom": "playlists_songs",
+          "tableTo": "songs",
+          "columnsFrom": [
+            "song_id"
+          ],
+          "columnsTo": [
+            "song_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "playlists_songs_playlist_id_song_id_pk": {
+          "name": "playlists_songs_playlist_id_song_id_pk",
+          "columns": [
+            "playlist_id",
+            "song_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.song_blacklist": {
+      "name": "song_blacklist",
+      "schema": "",
+      "columns": {
+        "song_blacklist_id": {
+          "name": "song_blacklist_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "song_id": {
+          "name": "song_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "song_blacklist_song_id_songs_song_id_fk": {
+          "name": "song_blacklist_song_id_songs_song_id_fk",
+          "tableFrom": "song_blacklist",
+          "tableTo": "songs",
+          "columnsFrom": [
+            "song_id"
+          ],
+          "columnsTo": [
+            "song_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "song_blacklist_song_blacklist_id_unique": {
+          "name": "song_blacklist_song_blacklist_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "song_blacklist_id"
+          ]
+        },
+        "song_blacklist_song_id_unique": {
+          "name": "song_blacklist_song_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "song_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.song_listens": {
+      "name": "song_listens",
+      "schema": "",
+      "columns": {
+        "song_listen_id": {
+          "name": "song_listen_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "listen_count": {
+          "name": "listen_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "listened_at": {
+          "name": "listened_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "yearly_listen_id": {
+          "name": "yearly_listen_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "song_listens_yearly_listen_id_yearly_listens_yearly_listen_id_fk": {
+          "name": "song_listens_yearly_listen_id_yearly_listens_yearly_listen_id_fk",
+          "tableFrom": "song_listens",
+          "tableTo": "yearly_listens",
+          "columnsFrom": [
+            "yearly_listen_id"
+          ],
+          "columnsTo": [
+            "yearly_listen_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "song_listens_song_listen_id_unique": {
+          "name": "song_listens_song_listen_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "song_listen_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.song_seeks": {
+      "name": "song_seeks",
+      "schema": "",
+      "columns": {
+        "song_seek_id": {
+          "name": "song_seek_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "position": {
+          "name": "position",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "seek_count": {
+          "name": "seek_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "listening_data_id": {
+          "name": "listening_data_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "song_seeks_listening_data_id_listening_data_listening_data_id_fk": {
+          "name": "song_seeks_listening_data_id_listening_data_listening_data_id_fk",
+          "tableFrom": "song_seeks",
+          "tableTo": "listening_data",
+          "columnsFrom": [
+            "listening_data_id"
+          ],
+          "columnsTo": [
+            "listening_data_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "song_seeks_song_seek_id_unique": {
+          "name": "song_seeks_song_seek_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "song_seek_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.songs": {
+      "name": "songs",
+      "schema": "",
+      "columns": {
+        "song_id": {
+          "name": "song_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "duration": {
+          "name": "duration",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "path": {
+          "name": "path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sample_rate": {
+          "name": "sample_rate",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bit_rate": {
+          "name": "bit_rate",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "no_of_channels": {
+          "name": "no_of_channels",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "file_created_at": {
+          "name": "file_created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "file_modified_at": {
+          "name": "file_modified_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "artwork_id": {
+          "name": "artwork_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "album_id": {
+          "name": "album_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "palette_id": {
+          "name": "palette_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "year": {
+          "name": "year",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "disk_number": {
+          "name": "disk_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "track_number": {
+          "name": "track_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "songs_artwork_id_artworks_artwork_id_fk": {
+          "name": "songs_artwork_id_artworks_artwork_id_fk",
+          "tableFrom": "songs",
+          "tableTo": "artworks",
+          "columnsFrom": [
+            "artwork_id"
+          ],
+          "columnsTo": [
+            "artwork_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "songs_album_id_albums_album_id_fk": {
+          "name": "songs_album_id_albums_album_id_fk",
+          "tableFrom": "songs",
+          "tableTo": "albums",
+          "columnsFrom": [
+            "album_id"
+          ],
+          "columnsTo": [
+            "album_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "songs_palette_id_palettes_palette_id_fk": {
+          "name": "songs_palette_id_palettes_palette_id_fk",
+          "tableFrom": "songs",
+          "tableTo": "palettes",
+          "columnsFrom": [
+            "palette_id"
+          ],
+          "columnsTo": [
+            "palette_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "songs_song_id_unique": {
+          "name": "songs_song_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "song_id"
+          ]
+        },
+        "songs_path_unique": {
+          "name": "songs_path_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "path"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.swatch_types": {
+      "name": "swatch_types",
+      "schema": "",
+      "columns": {
+        "swatch_type_id": {
+          "name": "swatch_type_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "swatch_types_swatch_type_id_unique": {
+          "name": "swatch_types_swatch_type_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "swatch_type_id"
+          ]
+        },
+        "swatch_types_name_unique": {
+          "name": "swatch_types_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user_data": {
+      "name": "user_data",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "user_data_id_unique": {
+          "name": "user_data_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.yearly_listens": {
+      "name": "yearly_listens",
+      "schema": "",
+      "columns": {
+        "yearly_listen_id": {
+          "name": "yearly_listen_id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "year": {
+          "name": "year",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "listening_data_id": {
+          "name": "listening_data_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "yearly_listens_listening_data_id_listening_data_listening_data_id_fk": {
+          "name": "yearly_listens_listening_data_id_listening_data_listening_data_id_fk",
+          "tableFrom": "yearly_listens",
+          "tableTo": "listening_data",
+          "columnsFrom": [
+            "listening_data_id"
+          ],
+          "columnsTo": [
+            "listening_data_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "yearly_listens_yearly_listen_id_unique": {
+          "name": "yearly_listens_yearly_listen_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "yearly_listen_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
