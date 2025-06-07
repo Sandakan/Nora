@@ -1,70 +1,33 @@
-import path from 'path';
+import { createArtist, getArtistWithName } from '@main/db/queries/artists';
+import { linkArtistToAlbum } from '@main/db/queries/albums';
+import type { artists } from '@main/db/schema';
 
-import { generateRandomId } from '../utils/randomId';
-
-const manageAlbumArtistOfParsedSong = (
-  allArtists: SavableArtist[],
-  songInfo: SavableSongData,
-  songArtworkPaths?: ArtworkPaths,
-  relevantAlbum?: SavableAlbum
+const manageAlbumArtistOfParsedSong = async (
+  data: { albumArtists: string[] },
+  trx: DB | DBTransaction
 ) => {
-  const newAlbumArtists: SavableArtist[] = [];
-  const relevantAlbumArtists: SavableArtist[] = [];
-  const { title, songId, albumArtists } = songInfo;
+  const newAlbumArtists: (typeof artists.$inferSelect)[] = [];
+  const relevantAlbumArtists: (typeof artists.$inferSelect)[] = [];
+  const { albumArtists } = data;
 
-  if (Array.isArray(allArtists)) {
-    if (albumArtists && albumArtists.length > 0) {
-      for (const albumArtist of albumArtists) {
-        const albumArtistName = albumArtist.name.trim();
+  if (albumArtists && albumArtists.length > 0) {
+    for (const albumArtist of albumArtists) {
+      const albumArtistName = albumArtist.trim();
 
-        const availableAlbumArtist = allArtists.find((artist) => artist.name === albumArtistName);
+      const availableAlbumArtist = await getArtistWithName(albumArtistName, trx);
 
-        if (availableAlbumArtist) {
-          if (relevantAlbum) {
-            const isAlbumLinkedToArtist = availableAlbumArtist.albums?.some(
-              (album) => album.albumId === relevantAlbum.albumId
-            );
-
-            if (!isAlbumLinkedToArtist)
-              availableAlbumArtist.albums?.push({
-                title: relevantAlbum.title,
-                albumId: relevantAlbum.albumId
-              });
-          }
-          relevantAlbumArtists.push(availableAlbumArtist);
-        } else {
-          const artist: SavableArtist = {
-            name: albumArtistName,
-            artistId: generateRandomId(),
-            songs: [{ songId, title }],
-            artworkName:
-              songArtworkPaths && !songArtworkPaths.isDefaultArtwork
-                ? path.basename(songArtworkPaths.artworkPath)
-                : undefined,
-            albums: relevantAlbum
-              ? [
-                  {
-                    title: relevantAlbum.title,
-                    albumId: relevantAlbum.albumId
-                  }
-                ]
-              : [],
-            isAFavorite: false
-          };
-          relevantAlbumArtists.push(artist);
-          newAlbumArtists.push(artist);
-          allArtists.push(artist);
-        }
+      if (availableAlbumArtist) {
+        linkArtistToAlbum(availableAlbumArtist.id, availableAlbumArtist.id, trx);
+        relevantAlbumArtists.push(availableAlbumArtist);
+      } else {
+        const artist = await createArtist({ name: albumArtistName }, trx);
+        linkArtistToAlbum(artist.id, artist.id, trx);
+        relevantAlbumArtists.push(artist);
+        newAlbumArtists.push(artist);
       }
     }
-    return {
-      updatedArtists: allArtists,
-      newAlbumArtists,
-      relevantAlbumArtists
-    };
   }
   return {
-    updatedArtists: [],
     newAlbumArtists,
     relevantAlbumArtists
   };

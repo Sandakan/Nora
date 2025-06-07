@@ -21,14 +21,10 @@ import type { LastFMSessionData } from '../types/last_fm_api';
 import { DEFAULT_SONG_PALETTE } from './other/generatePalette';
 import isPathADir from './utils/isPathADir';
 import { clearDiscordRpcActivity } from './other/discordRPC';
-import { drizzle } from 'drizzle-orm/pglite';
-import { migrate } from 'drizzle-orm/pglite/migrator';
+import '@db/db';
 
 export const DEFAULT_ARTWORK_SAVE_LOCATION = path.join(app.getPath('userData'), 'song_covers');
 export const DEFAULT_FILE_URL = 'nora://localfiles/';
-
-const db = drizzle(app.getPath('userData') + '/database.db');
-migrate(db, { migrationsFolder: path.resolve(import.meta.dirname, '../../resources/drizzle/') });
 
 // const user: typeof usersTable.$inferInsert = {
 //   name: 'John',

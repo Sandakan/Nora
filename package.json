@@ -56,6 +56,7 @@
   },
   "overrides": {
     "phin": "^3.7.1",
+    "esbuild": "v0.25.0",
     "cross-spawn": "^6.0.5",
     "node-vibrant": {
       "@vibrant/image-node": {
@@ -90,7 +91,14 @@
     "build:win": "npm run build && electron-builder --win --publish=never",
     "build:win-x64": "npm run build && electron-builder --win --x64 --publish=never",
     "build:mac": "npm run build && electron-builder --mac --publish=never",
-    "build:linux": "npm run build && electron-builder --linux --publish=never"
+    "build:mac-arm64": "npm run build && electron-builder --mac --arm64 --publish=never",
+    "build:linux": "npm run build && electron-builder --linux --publish=never",
+    "db:migrate": "drizzle-kit migrate",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:pull": "drizzle-kit pull",
+    "db:studio": "drizzle-kit studio",
+    "db:seed": "drizzle-kit seed"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.3.2",
@@ -111,7 +119,7 @@
     "didyoumean2": "^7.0.2",
     "discord-rpc": "^4.0.1",
     "dotenv": "^16.5.0",
-    "drizzle-orm": "^0.43.1",
+    "drizzle-orm": "^0.44.0",
     "electron-store": "^10.0.0",
     "electron-updater": "^6.2.1",
     "i18next": "^25.0.0",
@@ -149,6 +157,8 @@
     "@types/react": "^19.0.10",
     "@types/react-beautiful-dnd": "^13.1.8",
     "@types/react-dom": "^19.0.4",
+    "@typescript-eslint/eslint-plugin": "^8.33.0",
+    "@typescript-eslint/parser": "^8.33.0",
     "@vitejs/plugin-react-swc": "^3.8.0",
     "drizzle-kit": "^0.31.1",
     "electron": "^36.0.0",
@@ -158,6 +168,7 @@
     "electron-vite": "^3.1.0-beta.0",
     "eslint": "^9.12.0",
     "eslint-import-resolver-typescript": "^4.1.1",
+    "eslint-plugin-drizzle": "^0.2.3",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jsx-a11y": "^6.8.0",
     "eslint-plugin-promise": "^7.1.0",

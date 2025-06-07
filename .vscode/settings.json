@@ -81,6 +81,7 @@
   },
   "editor.tokenColorCustomizations": {
     "comments": "#657bae",
-    "textMateRules": []
-  }
+    "textMateRules": [ ]
+  },
+  "editor.wordWrap": "off"
 }

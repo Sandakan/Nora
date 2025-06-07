@@ -34,11 +34,13 @@ export const songs = pgTable('songs', {
   sampleRate: integer('sample_rate'),
   bitRate: integer('bit_rate'),
   noOfChannels: integer('no_of_channels'),
-  fileCreatedAt: timestamp('file_created_at', { withTimezone: false }).notNull(),
-  fileModifiedAt: timestamp('file_modified_at', { withTimezone: false }).notNull(),
   year: integer('year'),
   diskNumber: integer('disk_number'),
-  trackNumber: integer('track_number')
+  trackNumber: integer('track_number'),
+  fileCreatedAt: timestamp('file_created_at', { withTimezone: false }).notNull(),
+  fileModifiedAt: timestamp('file_modified_at', { withTimezone: false }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: false }).notNull().defaultNow()
 });
 
 export const artworks = pgTable('artworks', {
@@ -47,14 +49,15 @@ export const artworks = pgTable('artworks', {
   source: artworkSourceEnum('source').notNull().default('LOCAL'),
   width: integer('width').notNull(),
   height: integer('height').notNull(),
-  paletteId: integer('palette_id').references(() => palettes.id)
+  createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
 });
 
 export const palettes = pgTable('palettes', {
   id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  songId: integer('song_id')
+  artworkId: integer('artwork_id')
     .notNull()
-    .references(() => songs.id)
+    .references(() => artworks.id),
+  createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
 });
 
 export const paletteSwatches = pgTable('palette_swatches', {
@@ -65,18 +68,21 @@ export const paletteSwatches = pgTable('palette_swatches', {
   swatchType: swatchTypeEnum('swatch_type').notNull().default('VIBRANT'),
   paletteId: integer('palette_id')
     .notNull()
-    .references(() => palettes.id)
+    .references(() => palettes.id),
+  createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
 });
 
 export const albums = pgTable('albums', {
   id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
   title: varchar('title', { length: 255 }).notNull(),
-  year: integer('year')
+  year: integer('year'),
+  createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
 });
 
 export const genres = pgTable('genres', {
   id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  name: varchar('name', { length: 255 }).notNull()
+  name: varchar('name', { length: 255 }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
 });
 
 export const playlists = pgTable('playlists', {
@@ -137,9 +143,7 @@ export const artworksSongs = pgTable(
       .notNull()
       .references(() => artworks.id)
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.songId, table.artworkId] })
-  })
+  (table) => [primaryKey({ columns: [table.songId, table.artworkId] })]
 );
 
 export const artistsArtworks = pgTable(
@@ -152,9 +156,7 @@ export const artistsArtworks = pgTable(
       .notNull()
       .references(() => artworks.id)
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.artistId, table.artworkId] })
-  })
+  (table) => [primaryKey({ columns: [table.artistId, table.artworkId] })]
 );
 
 export const albumsArtworks = pgTable(
@@ -167,9 +169,7 @@ export const albumsArtworks = pgTable(
       .notNull()
       .references(() => artworks.id)
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.albumId, table.artworkId] })
-  })
+  (table) => [primaryKey({ columns: [table.albumId, table.artworkId] })]
 );
 
 export const artistsSongs = pgTable(
@@ -182,12 +182,10 @@ export const artistsSongs = pgTable(
       .notNull()
       .references(() => artists.id)
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.songId, table.artistId] })
-  })
+  (table) => [primaryKey({ columns: [table.songId, table.artistId] })]
 );
 
-export const albumSongs = pgTable(
+export const albumsSongs = pgTable(
   'album_songs',
   {
     albumId: integer('album_id')
@@ -197,9 +195,7 @@ export const albumSongs = pgTable(
       .notNull()
       .references(() => songs.id)
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.albumId, table.songId] })
-  })
+  (table) => [primaryKey({ columns: [table.albumId, table.songId] })]
 );
 
 export const genresSongs = pgTable(
@@ -212,9 +208,7 @@ export const genresSongs = pgTable(
       .notNull()
       .references(() => songs.id)
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.genreId, table.songId] })
-  })
+  (table) => [primaryKey({ columns: [table.genreId, table.songId] })]
 );
 
 export const artworksGenres = pgTable(
@@ -227,9 +221,7 @@ export const artworksGenres = pgTable(
       .notNull()
       .references(() => artworks.id)
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.genreId, table.artworkId] })
-  })
+  (table) => [primaryKey({ columns: [table.genreId, table.artworkId] })]
 );
 
 export const playlistsSongs = pgTable(
@@ -242,9 +234,7 @@ export const playlistsSongs = pgTable(
       .notNull()
       .references(() => songs.id)
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.playlistId, table.songId] })
-  })
+  (table) => [primaryKey({ columns: [table.playlistId, table.songId] })]
 );
 
 export const artworksPlaylists = pgTable(
@@ -257,13 +247,11 @@ export const artworksPlaylists = pgTable(
       .notNull()
       .references(() => artworks.id)
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.playlistId, table.artworkId] })
-  })
+  (table) => [primaryKey({ columns: [table.playlistId, table.artworkId] })]
 );
 
-export const albumArtists = pgTable(
-  'album_artists',
+export const albumsArtists = pgTable(
+  'albums_artists',
   {
     albumId: integer('album_id')
       .notNull()
@@ -272,8 +260,5 @@ export const albumArtists = pgTable(
       .notNull()
       .references(() => artists.id)
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.albumId, table.artistId] })
-  })
+  (table) => [primaryKey({ columns: [table.albumId, table.artistId] })]
 );
-

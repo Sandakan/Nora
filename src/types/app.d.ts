@@ -7,6 +7,7 @@ import { api } from '../preload';
 import { LastFMSessionData } from './last_fm_api';
 import { SimilarArtist, Tag } from './last_fm_artist_info_api';
 import { resources } from 'src/renderer/src/i18n';
+import type { db } from '@main/db/db';
 
 declare global {
   interface Window {
@@ -1294,4 +1295,7 @@ declare global {
   interface RouteStates {
     'lyrics-editor': LyricsEditorRouteState;
   }
+
+  type DB = typeof db;
+  type DBTransaction = Parameters<Parameters<DB['transaction']>[0]>[0];
 }

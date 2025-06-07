@@ -455,40 +455,21 @@ const handleFileProtocol = async (request: GlobalRequest): Promise<GlobalRespons
 
     // logger.verbose('Serving file from nora://', { filePath });
 
-    if (!existsSync(filePath)) {
-      logger.error(`File not found: ${filePath}`);
-      return new Response('File not found', { status: 404 });
+    const rangeHeader = request.headers.get('Range');
+    let response;
+    if (!rangeHeader) {
+      response = await net.fetch(asFileUrl);
+    } else {
+      response = await net.fetch(asFileUrl, {
+        headers: {
+          Range: rangeHeader,
+        },
+      });
     }
 
-    const fileStat = statSync(filePath);
-    const range = request.headers.get('range');
-    let start = 0,
-      end = fileStat.size - 1;
+    response.headers.set('X-Content-Type-Options', 'nosniff');
 
-    if (range) {
-      const match = range.match(/bytes=(\d*)-(\d*)/);
-      if (match) {
-        start = match[1] ? parseInt(match[1], 10) : start;
-        end = match[2] ? parseInt(match[2], 10) : end;
-      }
-    }
-
-    const chunkSize = end - start + 1;
-    // logger.verbose(`Serving range: ${start}-${end}/${fileStat.size}`);
-
-    const mimeType = mime.getType(filePath) || 'application/octet-stream';
-
-    const stream = createReadStream(filePath, { start, end });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return new Response(stream as any, {
-      status: range ? 206 : 200,
-      headers: {
-        'Content-Type': mimeType,
-        'Content-Range': `bytes ${start}-${end}/${fileStat.size}`,
-        'Accept-Ranges': 'bytes',
-        'Content-Length': chunkSize.toString()
-      }
-    });
+    return response;
   } catch (error) {
     logger.error('Error handling media protocol:', { error });
     return new Response('Internal Server Error', { status: 500 });

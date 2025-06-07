@@ -14,6 +14,8 @@ import { isAnErrorWithCode } from '../utils/isAnErrorWithCode';
 import albumCoverImage from '../../renderer/src/assets/images/webp/album_cover_default.webp?asset';
 import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_default.webp?asset';
 import playlistCoverImage from '../../renderer/src/assets/images/webp/playlist_cover_default.webp?asset';
+import { saveArtworks } from '@main/db/queries/artworks';
+import { db } from '@main/db/db';
 
 const createArtworks = async (
   id: string,
@@ -88,22 +90,30 @@ const checkForDefaultArtworkSaveLocation = async () => {
 };
 
 export const storeArtworks = async (
-  id: string,
   artworkType: QueueTypes,
-  artwork?: Buffer | Uint8Array | string
-): Promise<ArtworkPaths> => {
+  artwork?: Buffer | Uint8Array | string,
+  trx: DB | DBTransaction = db
+) => {
   try {
     // const start = timeStart();
 
+    const id = generateRandomId();
     await checkForDefaultArtworkSaveLocation();
 
     // const start1 = timeEnd(start, 'Time to check for default artwork location');
 
     const result = await createArtworks(id, artworkType, artwork);
+    const data = await saveArtworks(
+      [
+        { path: result.artworkPath, width: 1000, height: 1000, source: 'LOCAL' }, // Full resolution song artwork
+        { path: result.artworkPath, width: 50, height: 50, source: 'LOCAL' } // Optimized song artwork
+      ],
+      trx
+    );
 
     // timeEnd(start, 'Time to create artwork');
     // timeEnd(start1, 'Total time to finish artwork storing process');
-    return result;
+    return data;
   } catch (error) {
     logger.error(`Failed to store song artwork.`, { error });
     throw error;

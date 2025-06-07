@@ -13,6 +13,7 @@ import electronToolkit from '@electron-toolkit/eslint-config-ts';
 import importPlugin from 'eslint-plugin-import';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import promiseConfigs from 'eslint-plugin-promise';
+import drizzleConfig from 'eslint-plugin-drizzle';
 
 // mimic CommonJS variables -- not needed if using CommonJS
 const __filename = fileURLToPath(import.meta.url);
@@ -34,7 +35,8 @@ export default tsLint.config(
   {
     files: ['**/**/*.{js,ts,jsx,tsx}'],
     plugins: {
-      react: react
+      react: react,
+      drizzle: drizzleConfig
     },
     extends: [importPlugin.flatConfigs.recommended, importPlugin.flatConfigs.typescript],
     settings: {
