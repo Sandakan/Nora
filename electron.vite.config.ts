@@ -14,7 +14,13 @@ export default defineConfig({
       minify: true,
       rollupOptions: { input: '/src/main/main.ts', external: ['sharp'] }
     },
-    plugins: [externalizeDepsPlugin(), swcPlugin()]
+    plugins: [externalizeDepsPlugin(), swcPlugin()],
+    resolve: {
+      alias: {
+        '@db': resolve(import.meta.dirname, './src/main/db'),
+        '@main': resolve(import.meta.dirname, './src/main')
+      }
+    }
   },
   preload: {
     plugins: [externalizeDepsPlugin()],

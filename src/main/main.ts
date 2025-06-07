@@ -54,6 +54,7 @@ import noraAppIcon from '../../resources/logo_light_mode.png?asset';
 import logger from './logger';
 import roundTo from '../common/roundTo';
 import { createReadStream, existsSync, statSync } from 'fs';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -449,11 +450,20 @@ const handleFileProtocol = async (request: GlobalRequest): Promise<GlobalRespons
       /(nora:[\/\\]{1,2}localfiles[\/\\]{1,2})|(\?ts\=\d+$)?/gm,
       ''
     );
-    let [filePath] = urlWithQueries.split('?');
+    let [fileDir] = urlWithQueries.split('?');
 
-    if (os.platform() === 'darwin') filePath = '/' + filePath;
+    if (os.platform() === 'darwin') fileDir = '/' + fileDir;
 
     // logger.verbose('Serving file from nora://', { filePath });
+
+    const asFileUrl = pathToFileURL(fileDir).toString();
+    const filePath = fileURLToPath(asFileUrl);
+
+    if (filePath.startsWith('..')) {
+      return new Response('Invalid URL (not absolute)', {
+        status: 400
+      });
+    }
 
     const rangeHeader = request.headers.get('Range');
     let response;
@@ -462,8 +472,8 @@ const handleFileProtocol = async (request: GlobalRequest): Promise<GlobalRespons
     } else {
       response = await net.fetch(asFileUrl, {
         headers: {
-          Range: rangeHeader,
-        },
+          Range: rangeHeader
+        }
       });
     }
 
