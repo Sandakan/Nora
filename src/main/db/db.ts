@@ -4,8 +4,12 @@ import { app } from 'electron';
 import path from 'path';
 
 import * as schema from '@db/schema';
+import logger from '@main/logger';
 
 const DB_PATH = app.getPath('userData') + '/database.db';
+const migrationsFolder = path.resolve(import.meta.dirname, '../../resources/drizzle/');
+logger.debug(`Migrations folder: ${migrationsFolder}`);
 
 export const db = drizzle(DB_PATH, { schema });
-migrate(db, { migrationsFolder: path.resolve(import.meta.dirname, '../../../resources/drizzle/') });
+
+await migrate(db, { migrationsFolder });

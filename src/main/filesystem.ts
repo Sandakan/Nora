@@ -635,4 +635,3 @@ export const resetAppCache = () => {
   playlistDataStore.store = { version, playlists: PLAYLIST_DATA_TEMPLATE };
   logger.info(`In-app cache reset successfully.`);
 };
-

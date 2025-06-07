@@ -1,6 +1,5 @@
 import path, { join } from 'path';
 import os from 'os';
-import mime from 'mime';
 import {
   app,
   BrowserWindow,
@@ -53,7 +52,6 @@ import { is } from '@electron-toolkit/utils';
 import noraAppIcon from '../../resources/logo_light_mode.png?asset';
 import logger from './logger';
 import roundTo from '../common/roundTo';
-import { createReadStream, existsSync, statSync } from 'fs';
 import { fileURLToPath, pathToFileURL } from 'url';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
