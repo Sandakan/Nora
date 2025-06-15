@@ -9,6 +9,7 @@ import { dirExistsSync } from '../utils/dirExists';
 import checkForFolderModifications from './checkForFolderModifications';
 import { saveAbortController } from './controlAbortControllers';
 import { saveFolderStructures } from './parseFolderStructuresForSongPaths';
+import { getAllFolderStructures } from '@main/db/queries/folders';
 
 const checkForFolderUpdates = async (folder: FolderStructure) => {
   try {
@@ -90,34 +91,29 @@ export const addWatcherToFolder = async (folder: MusicFolderData) => {
 };
 
 const addWatchersToFolders = async (folders?: FolderStructure[]) => {
-  const musicFolders = folders ?? getUserData().musicFolders;
+  const musicFolders = folders ?? (await getAllFolderStructures());
 
   if (folders === undefined)
     logger.debug(`${musicFolders.length} music folders found in user data.`);
 
-  if (Array.isArray(musicFolders)) {
-    for (const musicFolder of musicFolders) {
-      try {
-        const doesFolderExist = dirExistsSync(musicFolder.path);
+  for (const musicFolder of musicFolders) {
+    try {
+      const doesFolderExist = dirExistsSync(musicFolder.path);
 
-        if (doesFolderExist) {
-          await checkForFolderUpdates(musicFolder);
-          await addWatcherToFolder(musicFolder);
-        } else checkForFolderModifications(path.basename(musicFolder.path));
+      if (doesFolderExist) {
+        await checkForFolderUpdates(musicFolder);
+        await addWatcherToFolder(musicFolder);
+      } else checkForFolderModifications(path.basename(musicFolder.path));
 
-        if (musicFolder.subFolders.length > 0) addWatchersToFolders(musicFolder.subFolders);
-      } catch (error) {
-        logger.error(`Failed to add a watcher to a folder.`, {
-          error,
-          folderPath: musicFolder.path
-        });
-      }
+      if (musicFolder.subFolders.length > 0) addWatchersToFolders(musicFolder.subFolders);
+    } catch (error) {
+      logger.error(`Failed to add a watcher to a folder.`, {
+        error,
+        folderPath: musicFolder.path
+      });
     }
-    return;
   }
-  logger.debug(`Failed to read music folders array in user data. Tt was possibly empty.`, {
-    musicFolders: typeof musicFolders
-  });
+  return;
 };
 
 export default addWatchersToFolders;

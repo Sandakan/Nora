@@ -6,10 +6,15 @@ import {
   timestamp,
   decimal,
   text,
-  primaryKey
+  primaryKey,
+  index,
+  type AnyPgColumn
 } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 
+// ============================================================================
 // Enums
+// ============================================================================
 export const artworkSourceEnum = pgEnum('artwork_source', ['LOCAL', 'REMOTE']);
 export const swatchTypeEnum = pgEnum('swatch_type', [
   'VIBRANT',
@@ -20,11 +25,34 @@ export const swatchTypeEnum = pgEnum('swatch_type', [
   'DARK_MUTED'
 ]);
 
+// ============================================================================
 // Tables
+// ============================================================================
 export const artists = pgTable('artists', {
   id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
   name: varchar('name', { length: 1024 }).notNull()
 });
+
+export const musicFolders = pgTable(
+  'music_folders',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    path: text('path').notNull().unique(),
+    name: varchar('name', { length: 512 }).notNull(),
+    parentId: integer('parent_id').references((): AnyPgColumn => musicFolders.id),
+    /*   When the folder itself was created on the file system */
+    folderCreatedAt: timestamp('folder_created_at', { withTimezone: false }),
+    /*   When the folder metadata (like permissions or timestamps) last changed */
+    lastModifiedAt: timestamp('last_modified_at', { withTimezone: false }),
+    /*   When file contents inside the folder were changed (more volatile) */
+    lastChangedAt: timestamp('last_changed_at', { withTimezone: false }),
+    /*   When your app last parsed or indexed the contents of this folder */
+    lastParsedAt: timestamp('last_parsed_at', { withTimezone: false }),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
+  },
+  (t) => [index('idx_parent_id').on(t.parentId)]
+);
 
 export const songs = pgTable('songs', {
   id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
@@ -37,6 +65,7 @@ export const songs = pgTable('songs', {
   year: integer('year'),
   diskNumber: integer('disk_number'),
   trackNumber: integer('track_number'),
+  folderId: integer('folder_id').references(() => musicFolders.id),
   fileCreatedAt: timestamp('file_created_at', { withTimezone: false }).notNull(),
   fileModifiedAt: timestamp('file_modified_at', { withTimezone: false }).notNull(),
   createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow(),
@@ -119,20 +148,22 @@ export const skipEvents = pgTable('skip_events', {
 });
 
 export const songBlacklist = pgTable('song_blacklist', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
   songId: integer('song_id')
-    .notNull()
-    .unique()
+    .primaryKey()
     .references(() => songs.id),
   createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
 });
 
 export const folderBlacklist = pgTable('folder_blacklist', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  path: text('path').notNull().unique()
+  folderId: integer('folder_id')
+    .primaryKey()
+    .references(() => musicFolders.id),
+  createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull()
 });
 
-// Many-to-many linking tables
+// ============================================================================
+// Many-to-Many Junction Tables
+// ============================================================================
 export const artworksSongs = pgTable(
   'artworks_songs',
   {
@@ -262,3 +293,223 @@ export const albumsArtists = pgTable(
   },
   (table) => [primaryKey({ columns: [table.albumId, table.artistId] })]
 );
+
+// ============================================================================
+// Relations
+// ============================================================================
+
+// Main Table Relations
+export const artistsRelations = relations(artists, ({ many }) => ({
+  songs: many(artistsSongs),
+  albums: many(albumsArtists),
+  artworks: many(artistsArtworks)
+}));
+
+export const musicFoldersRelations = relations(musicFolders, ({ one, many }) => ({
+  children: many(musicFolders, {
+    relationName: 'music_folder_children'
+  }),
+  parent: one(musicFolders, {
+    fields: [musicFolders.parentId],
+    references: [musicFolders.id],
+    relationName: 'music_folder_children'
+  }),
+  songs: many(songs)
+}));
+
+export const songsRelations = relations(songs, ({ one, many }) => ({
+  folder: one(musicFolders, {
+    fields: [songs.folderId],
+    references: [musicFolders.id]
+  }),
+  artists: many(artistsSongs),
+  albums: many(albumsSongs),
+  genres: many(genresSongs),
+  artworks: many(artworksSongs),
+  playlists: many(playlistsSongs),
+  blacklist: one(songBlacklist),
+  playEvents: many(playEvents),
+  seekEvents: many(seekEvents),
+  skipEvents: many(skipEvents)
+}));
+
+export const artworksRelations = relations(artworks, ({ many, one }) => ({
+  songs: many(artworksSongs),
+  artists: many(artistsArtworks),
+  albums: many(albumsArtworks),
+  genres: many(artworksGenres),
+  playlists: many(artworksPlaylists),
+  palette: one(palettes)
+}));
+
+export const palettesRelations = relations(palettes, ({ one, many }) => ({
+  artwork: one(artworks, {
+    fields: [palettes.artworkId],
+    references: [artworks.id]
+  }),
+  swatches: many(paletteSwatches)
+}));
+
+export const paletteSwatchesRelations = relations(paletteSwatches, ({ one }) => ({
+  palette: one(palettes, {
+    fields: [paletteSwatches.paletteId],
+    references: [palettes.id]
+  })
+}));
+
+export const genresRelations = relations(genres, ({ many }) => ({
+  songs: many(genresSongs),
+  artworks: many(artworksGenres)
+}));
+
+export const playlistsRelations = relations(playlists, ({ many }) => ({
+  songs: many(playlistsSongs),
+  artworks: many(artworksPlaylists)
+}));
+
+export const playEventsRelations = relations(playEvents, ({ one }) => ({
+  song: one(songs, {
+    fields: [playEvents.songId],
+    references: [songs.id]
+  })
+}));
+
+export const seekEventsRelations = relations(seekEvents, ({ one }) => ({
+  song: one(songs, {
+    fields: [seekEvents.songId],
+    references: [songs.id]
+  })
+}));
+
+export const skipEventsRelations = relations(skipEvents, ({ one }) => ({
+  song: one(songs, {
+    fields: [skipEvents.songId],
+    references: [songs.id]
+  })
+}));
+
+export const songBlacklistRelations = relations(songBlacklist, ({ one }) => ({
+  song: one(songs, {
+    fields: [songBlacklist.songId],
+    references: [songs.id]
+  })
+}));
+
+export const folderBlacklistRelations = relations(folderBlacklist, ({ one }) => ({
+  folder: one(musicFolders, {
+    fields: [folderBlacklist.folderId],
+    references: [musicFolders.id]
+  })
+}));
+
+// Junction Table Relations
+export const artistsSongsRelations = relations(artistsSongs, ({ one }) => ({
+  artist: one(artists, {
+    fields: [artistsSongs.artistId],
+    references: [artists.id]
+  }),
+  song: one(songs, {
+    fields: [artistsSongs.songId],
+    references: [songs.id]
+  })
+}));
+
+export const albumsSongsRelations = relations(albumsSongs, ({ one }) => ({
+  album: one(albums, {
+    fields: [albumsSongs.albumId],
+    references: [albums.id]
+  }),
+  song: one(songs, {
+    fields: [albumsSongs.songId],
+    references: [songs.id]
+  })
+}));
+
+export const albumsArtistsRelations = relations(albumsArtists, ({ one }) => ({
+  album: one(albums, {
+    fields: [albumsArtists.albumId],
+    references: [albums.id]
+  }),
+  artist: one(artists, {
+    fields: [albumsArtists.artistId],
+    references: [artists.id]
+  })
+}));
+
+export const artworksSongsRelations = relations(artworksSongs, ({ one }) => ({
+  artwork: one(artworks, {
+    fields: [artworksSongs.artworkId],
+    references: [artworks.id]
+  }),
+  song: one(songs, {
+    fields: [artworksSongs.songId],
+    references: [songs.id]
+  })
+}));
+
+export const artistsArtworksRelations = relations(artistsArtworks, ({ one }) => ({
+  artist: one(artists, {
+    fields: [artistsArtworks.artistId],
+    references: [artists.id]
+  }),
+  artwork: one(artworks, {
+    fields: [artistsArtworks.artworkId],
+    references: [artworks.id]
+  })
+}));
+
+export const albumsArtworksRelations = relations(albumsArtworks, ({ one }) => ({
+  album: one(albums, {
+    fields: [albumsArtworks.albumId],
+    references: [albums.id]
+  }),
+  artwork: one(artworks, {
+    fields: [albumsArtworks.artworkId],
+    references: [artworks.id]
+  })
+}));
+
+export const genresSongsRelations = relations(genresSongs, ({ one }) => ({
+  genre: one(genres, {
+    fields: [genresSongs.genreId],
+    references: [genres.id]
+  }),
+  song: one(songs, {
+    fields: [genresSongs.songId],
+    references: [songs.id]
+  })
+}));
+
+export const artworksGenresRelations = relations(artworksGenres, ({ one }) => ({
+  artwork: one(artworks, {
+    fields: [artworksGenres.artworkId],
+    references: [artworks.id]
+  }),
+  genre: one(genres, {
+    fields: [artworksGenres.genreId],
+    references: [genres.id]
+  })
+}));
+
+export const playlistsSongsRelations = relations(playlistsSongs, ({ one }) => ({
+  playlist: one(playlists, {
+    fields: [playlistsSongs.playlistId],
+    references: [playlists.id]
+  }),
+  song: one(songs, {
+    fields: [playlistsSongs.songId],
+    references: [songs.id]
+  })
+}));
+
+export const artworksPlaylistsRelations = relations(artworksPlaylists, ({ one }) => ({
+  artwork: one(artworks, {
+    fields: [artworksPlaylists.artworkId],
+    references: [artworks.id]
+  }),
+  playlist: one(playlists, {
+    fields: [artworksPlaylists.playlistId],
+    references: [playlists.id]
+  })
+}));
+

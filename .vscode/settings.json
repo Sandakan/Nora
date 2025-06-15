@@ -83,5 +83,6 @@
     "comments": "#657bae",
     "textMateRules": [ ]
   },
-  "editor.wordWrap": "off"
+  "editor.wordWrap": "off",
+  "window.zoomLevel": 0
 }

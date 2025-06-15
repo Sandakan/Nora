@@ -8,18 +8,18 @@ import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import { generatePalettes } from '../other/generatePalette';
 import { timeEnd, timeStart } from '../utils/measureTimeUsage';
 
-const removeAlreadyAvailableStructures = (structures: FolderStructure[]) => {
+const removeAlreadyAvailableStructures = async (structures: FolderStructure[]) => {
   const parents: FolderStructure[] = [];
   for (const structure of structures) {
-    const doesParentStructureExist = doesFolderExistInFolderStructure(structure.path);
+    const doesParentStructureExist = await doesFolderExistInFolderStructure(structure.path);
 
     if (doesParentStructureExist) {
       if (structure.subFolders.length > 0) {
-        const subFolders = removeAlreadyAvailableStructures(structure.subFolders);
+        const subFolders = await removeAlreadyAvailableStructures(structure.subFolders);
         parents.push(...subFolders);
       }
     } else {
-      const subFolders = removeAlreadyAvailableStructures(structure.subFolders);
+      const subFolders = await removeAlreadyAvailableStructures(structure.subFolders);
       parents.push({ ...structure, subFolders });
     }
   }
@@ -36,7 +36,7 @@ const addMusicFromFolderStructures = async (
     folderPaths: structures.map((x) => x.path)
   });
 
-  const eligableStructures = removeAlreadyAvailableStructures(structures);
+  const eligableStructures = await removeAlreadyAvailableStructures(structures);
   const songPaths = await parseFolderStructuresForSongPaths(eligableStructures);
 
   if (songPaths) {

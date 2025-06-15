@@ -1,27 +1,25 @@
 import path from 'path';
 import fs from 'fs/promises';
-import { getBlacklistData, getSongsData, supportedMusicExtensions } from '../filesystem';
+import { supportedMusicExtensions } from '../filesystem';
 import logger from '../logger';
 import removeSongsFromLibrary from '../removeSongsFromLibrary';
 import { tryToParseSong } from '../parseSong/parseSong';
 import { saveAbortController } from './controlAbortControllers';
 import { generatePalettes } from '../other/generatePalette';
+import { getSongsRelativeToFolder } from '@main/db/queries/songs';
 
 const abortController = new AbortController();
 saveAbortController('checkFolderForUnknownContentModifications', abortController);
 
-const getSongPathsRelativeToFolder = (folderPath: string) => {
-  const songPaths = getSongsData()?.map((song) => song.path) ?? [];
+const getSongPathsRelativeToFolder = async (folderPath: string) => {
+  const relevantSongs = await getSongsRelativeToFolder(folderPath, {
+    skipBlacklistedFolders: true,
+    skipBlacklistedSongs: true
+  });
 
-  const blacklistedSongPaths = getBlacklistData().songBlacklist ?? [];
-  if (Array.isArray(songPaths)) {
-    const allSongPaths = songPaths.concat(blacklistedSongPaths);
-    const relevantSongPaths = allSongPaths.filter(
-      (songPath) => path.dirname(songPath) === folderPath
-    );
-    return relevantSongPaths;
-  }
-  return [];
+  const relevantSongPaths = relevantSongs.map((song) => song.path);
+
+  return relevantSongPaths;
 };
 
 const getFullPathsOfFolderDirs = async (folderPath: string) => {
@@ -80,7 +78,7 @@ const addNewlyAddedSongsToLibrary = async (
 };
 
 const checkFolderForUnknownModifications = async (folderPath: string) => {
-  const relevantFolderSongPaths = getSongPathsRelativeToFolder(folderPath);
+  const relevantFolderSongPaths = await getSongPathsRelativeToFolder(folderPath);
 
   if (relevantFolderSongPaths.length > 0) {
     const dirs = await getFullPathsOfFolderDirs(folderPath);

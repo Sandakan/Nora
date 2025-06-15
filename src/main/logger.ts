@@ -115,8 +115,8 @@ export const toggleVerboseLogs = (isEnabled: boolean) => {
   //   }
   // });
   if (isEnabled) {
-    transports.console.level = 'verbose';
-    transports.file.level = 'verbose';
+    transports.console.level = 'debug';
+    transports.file.level = 'debug';
   } else {
     transports.console.level = DEFAULT_LOGGER_LEVEL;
     transports.file.level = DEFAULT_LOGGER_LEVEL;

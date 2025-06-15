@@ -144,7 +144,7 @@ export const parseSong = async (
         year: metadata.common?.year,
         path: absoluteFilePath,
         sampleRate: metadata.format.sampleRate,
-        bitRate: metadata?.format?.bitrate,
+        bitRate: metadata?.format?.bitrate ? Math.ceil(metadata.format.bitrate) : undefined,
         noOfChannels: metadata?.format?.numberOfChannels,
         diskNumber: metadata?.common?.disk?.no ?? undefined,
         trackNumber: metadata?.common?.track?.no ?? undefined,
@@ -165,7 +165,7 @@ export const parseSong = async (
         const { relevantAlbum, newAlbum } = await manageAlbumsOfParsedSong(
           {
             songId: songData.id,
-            artworkId: artworkData[0].id,
+            artworkId: 1 /*artworkData[0].id*/,
             songYear: songData.year,
             artists: artistsData,
             albumArtists: albumArtistsData,
@@ -187,7 +187,7 @@ export const parseSong = async (
         // );
         const { newArtists, relevantArtists } = await manageArtistsOfParsedSong(
           {
-            artworkId: artworkData[0].id,
+            artworkId: 1 /*artworkData[0].id*/,
             songId: songData.id,
             songArtists: artistsData
           },
@@ -206,7 +206,7 @@ export const parseSong = async (
         // );
 
         const { newGenres, relevantGenres } = await manageGenresOfParsedSong(
-          { artworkId: artworkData[0].id, songId: songData.id, songGenres: genresData },
+          { artworkId: 1 /*artworkData[0].id*/, songId: songData.id, songGenres: genresData },
           trx
         );
 

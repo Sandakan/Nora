@@ -5,6 +5,8 @@ import logger from '../logger';
 import { closeAbortController } from './controlAbortControllers';
 import addWatchersToFolders from './addWatchersToFolders';
 import { sendMessageToRenderer } from '../main';
+import type { musicFolders } from '@main/db/schema';
+import { getAllFolders, getAllFolderStructures } from '@main/db/queries/folders';
 
 export const getAllFoldersFromFolderStructures = (folderStructures: FolderStructure[]) => {
   const folderData: MusicFolderData[] = [];
@@ -43,15 +45,18 @@ export const getAllFilesFromFolderStructures = (folderStructures: FolderStructur
   return allFiles;
 };
 
-export const doesFolderExistInFolderStructure = (dir: string, folders?: FolderStructure[]) => {
-  let musicFolders: FolderStructure[] = [];
-  if (folders === undefined) musicFolders = getUserData().musicFolders;
-  else musicFolders = folders;
+export const doesFolderExistInFolderStructure = async (
+  dir: string,
+  folders?: FolderStructure[]
+) => {
+  let songFolders: FolderStructure[] = [];
+  if (folders === undefined) songFolders = await getAllFolderStructures();
+  else songFolders = folders;
 
-  for (const folder of musicFolders) {
+  for (const folder of songFolders) {
     if (folder.path === dir) return true;
     if (folder.subFolders.length > 0) {
-      const isFolderExistInSubDirs = doesFolderExistInFolderStructure(dir, folder.subFolders);
+      const isFolderExistInSubDirs = await doesFolderExistInFolderStructure(dir, folder.subFolders);
       if (isFolderExistInSubDirs) return true;
     }
   }

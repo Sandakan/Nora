@@ -45,12 +45,12 @@ const checkFolderForContentModifications = async (
 
   const dirs = await getFolderDirs(folderPath);
   const songs = getSongsData();
+  const isSongExtensionSupported = supportedMusicExtensions.includes(path.extname(filename));
+
   if (Array.isArray(dirs) && songs && Array.isArray(songs)) {
     const songPath = path.normalize(path.join(folderPath, filename));
     // checks whether the songs is newly added or deleted.
-    const isNewlyAddedSong =
-      dirs.some((dir) => dir === filename) &&
-      supportedMusicExtensions.includes(path.extname(filename));
+    const isNewlyAddedSong = dirs.some((dir) => dir === filename) && isSongExtensionSupported;
     const isADeletedSong = songs.some((song) => song.path === songPath);
 
     if (isNewlyAddedSong) return tryToParseSong(songPath, false, true);
@@ -60,3 +60,4 @@ const checkFolderForContentModifications = async (
 };
 
 export default checkFolderForContentModifications;
+

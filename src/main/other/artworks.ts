@@ -16,6 +16,7 @@ import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_def
 import playlistCoverImage from '../../renderer/src/assets/images/webp/playlist_cover_default.webp?asset';
 import { saveArtworks } from '@main/db/queries/artworks';
 import { db } from '@main/db/db';
+import type { artworks } from '@main/db/schema';
 
 const createArtworks = async (
   id: string,
@@ -33,7 +34,9 @@ const createArtworks = async (
   const defaultArtworkPaths = {
     isDefaultArtwork: true,
     artworkPath: defaultPath,
-    optimizedArtworkPath: defaultPath
+    optimizedArtworkPath: defaultPath,
+    realArtworkPath: defaultPath,
+    realOptimizedArtworkPath: defaultPath
   };
   // const start = timeStart();
   if (artwork) {
@@ -67,7 +70,9 @@ const createArtworks = async (
       return {
         isDefaultArtwork: false,
         artworkPath: path.join(DEFAULT_FILE_URL, imgPath),
-        optimizedArtworkPath: path.join(DEFAULT_FILE_URL, optimizedImgPath)
+        optimizedArtworkPath: path.join(DEFAULT_FILE_URL, optimizedImgPath),
+        realArtworkPath: imgPath,
+        realOptimizedArtworkPath: optimizedImgPath
       };
     } catch (error) {
       logger.error(`Failed to create a song artwork.`, { error });
@@ -93,7 +98,7 @@ export const storeArtworks = async (
   artworkType: QueueTypes,
   artwork?: Buffer | Uint8Array | string,
   trx: DB | DBTransaction = db
-) => {
+): Promise<(typeof artworks.$inferSelect)[]> => {
   try {
     // const start = timeStart();
 
@@ -103,17 +108,18 @@ export const storeArtworks = async (
     // const start1 = timeEnd(start, 'Time to check for default artwork location');
 
     const result = await createArtworks(id, artworkType, artwork);
-    const data = await saveArtworks(
-      [
-        { path: result.artworkPath, width: 1000, height: 1000, source: 'LOCAL' }, // Full resolution song artwork
-        { path: result.artworkPath, width: 50, height: 50, source: 'LOCAL' } // Optimized song artwork
-      ],
-      trx
-    );
+    // const data = await saveArtworks(
+    //   [
+    //     { path: result.realArtworkPath, width: 1000, height: 1000, source: 'LOCAL' }, // Full resolution song artwork
+    //     { path: result.realOptimizedArtworkPath, width: 50, height: 50, source: 'LOCAL' } // Optimized song artwork
+    //   ],
+    //   trx
+    // );
 
     // timeEnd(start, 'Time to create artwork');
     // timeEnd(start1, 'Total time to finish artwork storing process');
-    return data;
+    // return data;
+    return [];
   } catch (error) {
     logger.error(`Failed to store song artwork.`, { error });
     throw error;
