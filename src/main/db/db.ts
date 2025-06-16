@@ -21,4 +21,12 @@ class MyLogger implements Logger {
 const instance = await PGlite.create(DB_PATH, { debug: 5 });
 export const db = drizzle(instance, { schema, logger: new MyLogger() });
 
-// await migrate(db, { migrationsFolder });
+export const closeDatabaseInstance = async () => {
+  if (instance.closed) return logger.debug('Database instance already closed.');
+
+  await instance.close();
+  logger.debug('Database instance closed.');
+};
+
+await migrate(db, { migrationsFolder });
+

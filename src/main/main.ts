@@ -53,6 +53,7 @@ import noraAppIcon from '../../resources/logo_light_mode.png?asset';
 import logger from './logger';
 import roundTo from '../common/roundTo';
 import { fileURLToPath, pathToFileURL } from 'url';
+import { closeDatabaseInstance } from './db/db';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -278,6 +279,8 @@ app
 
     app.on('before-quit', handleBeforeQuit);
 
+    app.on('will-quit', closeDatabaseInstance);
+
     mainWindow.on('moved', manageAppMoveEvent);
 
     mainWindow.on('resized', () => {
@@ -362,17 +365,30 @@ function manageWindowFinishLoad() {
   });
 }
 
-function handleBeforeQuit() {
-  try {
-    savePendingSongLyrics(currentSongPath, true);
-    savePendingMetadataUpdates(currentSongPath, true);
-    closeAllAbortControllers();
-    clearTempArtworkFolder();
-    clearDiscordRpcActivity();
-    mainWindow.webContents.send('app/beforeQuitEvent');
-    logger.debug(`Quiting Nora`, { uptime: `${Math.floor(process.uptime())} seconds` });
-  } catch (error) {
-    logger.error('Error occurred when quiting the app.', { error });
+let asyncOperationDone = false;
+async function handleBeforeQuit() {
+  if (!asyncOperationDone) {
+    try {
+      try {
+        await clearDiscordRpcActivity();
+      } catch (error) {
+        logger.error('Optional cleanup functions failed when quiting the app.', { error });
+      }
+
+      savePendingSongLyrics(currentSongPath, true);
+      savePendingMetadataUpdates(currentSongPath, true);
+      closeAllAbortControllers();
+      clearTempArtworkFolder();
+      mainWindow.webContents.send('app/beforeQuitEvent');
+      await closeDatabaseInstance();
+
+      logger.debug(`Quiting Nora`, { uptime: `${Math.floor(process.uptime())} seconds` });
+      asyncOperationDone = true;
+    } catch (error) {
+      asyncOperationDone = true;
+      console.error(error);
+      logger.error('Error occurred when quiting the app.', { error });
+    }
   }
 }
 
@@ -829,3 +845,4 @@ export function stopScreenSleeping() {
   powerSaveBlockerId = powerSaveBlocker.start('prevent-display-sleep');
   logger.debug('Screen sleeping prevented.', { powerSaveBlockerId });
 }
+

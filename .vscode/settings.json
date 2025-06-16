@@ -84,5 +84,5 @@
     "textMateRules": [ ]
   },
   "editor.wordWrap": "off",
-  "window.zoomLevel": 0
+  "window.zoomLevel": -1
 }
