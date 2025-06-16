@@ -2,6 +2,7 @@ import { drizzle } from 'drizzle-orm/pglite';
 import { migrate } from 'drizzle-orm/pglite/migrator';
 import { app } from 'electron';
 import path from 'path';
+import { mkdirSync } from 'fs';
 
 import * as schema from '@db/schema';
 import logger from '@main/logger';
@@ -18,6 +19,7 @@ class MyLogger implements Logger {
   }
 }
 
+mkdirSync(DB_PATH, {recursive: true});
 const instance = await PGlite.create(DB_PATH, { debug: 5 });
 export const db = drizzle(instance, { schema, logger: new MyLogger() });
 
