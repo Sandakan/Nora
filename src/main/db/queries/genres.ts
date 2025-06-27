@@ -2,14 +2,14 @@ import { db } from '@db/db';
 import { eq } from 'drizzle-orm';
 import { genres, genresSongs } from '@db/schema';
 
-export const isGenreWithIdAvailable = async (genreId: number) => {
-  const data = await db.select({}).from(genres).where(eq(genres.id, genreId));
+export const isGenreWithIdAvailable = async (genreId: number, trx: DB | DBTransaction = db) => {
+  const data = await trx.select({}).from(genres).where(eq(genres.id, genreId));
 
   return data.length > 0;
 };
 
-export const isGenreWithTitleAvailable = async (name: string) => {
-  const data = await db.select({}).from(genres).where(eq(genres.name, name));
+export const isGenreWithTitleAvailable = async (name: string, trx: DB | DBTransaction = db) => {
+  const data = await trx.select({}).from(genres).where(eq(genres.name, name));
 
   return data.length > 0;
 };

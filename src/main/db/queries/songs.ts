@@ -65,7 +65,8 @@ export async function getSongsInFolders(
   options?: {
     skipBlacklistedSongs?: boolean;
     skipBlacklistedFolders?: boolean;
-  }
+  },
+  trx: DB | DBTransaction = db
 ) {
   if (folderIds.length === 0) return [];
 
@@ -73,7 +74,7 @@ export async function getSongsInFolders(
 
   // Filter out blacklisted folders if needed
   if (options?.skipBlacklistedFolders) {
-    const blacklistedFolders = await db.query.folderBlacklist.findMany({
+    const blacklistedFolders = await trx.query.folderBlacklist.findMany({
       where: inArray(folderBlacklist.folderId, folderIds),
       columns: { folderId: true }
     });
@@ -87,14 +88,14 @@ export async function getSongsInFolders(
   // Prepare to filter out blacklisted songs if needed
   let blacklistedSongIds: number[] = [];
   if (options?.skipBlacklistedSongs) {
-    const blacklistedSongs = await db.query.songBlacklist.findMany({
+    const blacklistedSongs = await trx.query.songBlacklist.findMany({
       columns: { songId: true }
     });
     blacklistedSongIds = blacklistedSongs.map((entry) => entry.songId);
   }
 
   // Query the songs
-  const result = await db.query.songs.findMany({
+  const result = await trx.query.songs.findMany({
     where: (s) =>
       and(
         inArray(s.folderId, validFolderIds),

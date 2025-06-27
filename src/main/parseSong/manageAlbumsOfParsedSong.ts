@@ -25,16 +25,16 @@ const manageAlbumsOfParsedSong = async (
   else if (artists.length > 0) relevantAlbumArtists.push(...artists);
 
   if (songAlbumName) {
-    const availableAlbum = await getAlbumWithTitle(songAlbumName);
+    const availableAlbum = await getAlbumWithTitle(songAlbumName, trx);
 
     if (availableAlbum) {
-      linkSongToAlbum(availableAlbum.id, songId, trx);
+      await linkSongToAlbum(availableAlbum.id, songId, trx);
       relevantAlbum = availableAlbum;
     } else {
       const album = await createAlbum({ title: songAlbumName, year: songYear }, trx);
 
-      linkArtworksToAlbum([{ albumId: album.id, artworkId }], trx);
-      linkSongToAlbum(album.id, songId, trx);
+      await linkArtworksToAlbum([{ albumId: album.id, artworkId }], trx);
+      await linkSongToAlbum(album.id, songId, trx);
 
       relevantAlbum = album;
       newAlbum = album;

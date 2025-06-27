@@ -157,7 +157,10 @@ export const parseSong = async (
 
         const artworkData = await storeArtworks(
           'songs',
-          metadata.common?.picture?.at(0) ? Buffer.from(metadata.common.picture[0].data) : undefined
+          metadata.common?.picture?.at(0)
+            ? Buffer.from(metadata.common.picture[0].data)
+            : undefined,
+          trx
         );
 
         // const start8 = timeEnd(start6, 'Time to create songInfo basic object');
@@ -165,7 +168,7 @@ export const parseSong = async (
         const { relevantAlbum, newAlbum } = await manageAlbumsOfParsedSong(
           {
             songId: songData.id,
-            artworkId: 1 /*artworkData[0].id*/,
+            artworkId: artworkData[0].id,
             songYear: songData.year,
             artists: artistsData,
             albumArtists: albumArtistsData,
@@ -187,7 +190,7 @@ export const parseSong = async (
         // );
         const { newArtists, relevantArtists } = await manageArtistsOfParsedSong(
           {
-            artworkId: 1 /*artworkData[0].id*/,
+            artworkId: artworkData[0].id,
             songId: songData.id,
             songArtists: artistsData
           },
@@ -196,7 +199,7 @@ export const parseSong = async (
         // const start11 = timeEnd(start10, 'Time to manage artists');
 
         const { newAlbumArtists, relevantAlbumArtists } = await manageAlbumArtistOfParsedSong(
-          { albumArtists: albumArtistsData },
+          { albumArtists: albumArtistsData, albumId: relevantAlbum?.id },
           trx
         );
 
@@ -206,7 +209,7 @@ export const parseSong = async (
         // );
 
         const { newGenres, relevantGenres } = await manageGenresOfParsedSong(
-          { artworkId: 1 /*artworkData[0].id*/, songId: songData.id, songGenres: genresData },
+          { artworkId: artworkData[0].id, songId: songData.id, songGenres: genresData },
           trx
         );
 

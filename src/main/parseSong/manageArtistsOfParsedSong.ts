@@ -18,16 +18,17 @@ const manageArtistsOfParsedSong = async (
     for (const songArtist of songArtists) {
       const newArtistName = songArtist.trim();
 
-      const availableArtist = await getArtistWithName(newArtistName);
+      const availableArtist = await getArtistWithName(newArtistName, trx);
 
       if (availableArtist) {
-        linkSongToArtist(availableArtist.id, songId, trx);
+        await linkSongToArtist(availableArtist.id, songId, trx);
         relevantArtists.push(availableArtist);
       } else {
         const artist = await createArtist({ name: newArtistName }, trx);
 
-        linkArtworksToArtist([{ artistId: artist.id, artworkId: artworkId }], trx);
-        linkSongToArtist(artist.id, songId, trx);
+        await linkArtworksToArtist([{ artistId: artist.id, artworkId: artworkId }], trx);
+        await linkSongToArtist(artist.id, songId, trx);
+
         relevantArtists.push(artist);
         newArtists.push(artist);
       }

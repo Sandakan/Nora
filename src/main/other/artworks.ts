@@ -108,18 +108,17 @@ export const storeArtworks = async (
     // const start1 = timeEnd(start, 'Time to check for default artwork location');
 
     const result = await createArtworks(id, artworkType, artwork);
-    // const data = await saveArtworks(
-    //   [
-    //     { path: result.realArtworkPath, width: 1000, height: 1000, source: 'LOCAL' }, // Full resolution song artwork
-    //     { path: result.realOptimizedArtworkPath, width: 50, height: 50, source: 'LOCAL' } // Optimized song artwork
-    //   ],
-    //   trx
-    // );
+    const data = await saveArtworks(
+      [
+        { path: result.realArtworkPath, width: 1000, height: 1000, source: 'LOCAL' }, // Full resolution song artwork
+        { path: result.realOptimizedArtworkPath, width: 50, height: 50, source: 'LOCAL' } // Optimized song artwork
+      ],
+      trx
+    );
 
     // timeEnd(start, 'Time to create artwork');
     // timeEnd(start1, 'Total time to finish artwork storing process');
-    // return data;
-    return [];
+    return data;
   } catch (error) {
     logger.error(`Failed to store song artwork.`, { error });
     throw error;

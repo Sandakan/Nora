@@ -2,20 +2,20 @@ import { db } from '@db/db';
 import { eq } from 'drizzle-orm';
 import { albumsArtists, albums, albumsSongs } from '@db/schema';
 
-export const isAlbumWithIdAvailable = async (albumId: number) => {
-  const data = await db.select({}).from(albums).where(eq(albums.id, albumId));
+export const isAlbumWithIdAvailable = async (albumId: number, trx: DB | DBTransaction = db) => {
+  const data = await trx.select({}).from(albums).where(eq(albums.id, albumId));
 
   return data.length > 0;
 };
 
-export const isAlbumWithTitleAvailable = async (title: string) => {
-  const data = await db.select({}).from(albums).where(eq(albums.title, title));
+export const isAlbumWithTitleAvailable = async (title: string, trx: DB | DBTransaction = db) => {
+  const data = await trx.select({}).from(albums).where(eq(albums.title, title));
 
   return data.length > 0;
 };
 
-export const getAlbumWithTitle = async (title: string) => {
-  const data = await db.select().from(albums).where(eq(albums.title, title));
+export const getAlbumWithTitle = async (title: string, trx: DB | DBTransaction = db) => {
+  const data = await trx.select().from(albums).where(eq(albums.title, title));
 
   return data[0];
 };

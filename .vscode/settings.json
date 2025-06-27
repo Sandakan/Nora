@@ -84,5 +84,6 @@
     "textMateRules": [ ]
   },
   "editor.wordWrap": "off",
-  "window.zoomLevel": -1
+  "window.zoomLevel": -1,
+  "gutterpreview.imagePreviewMaxWidth": 0
 }

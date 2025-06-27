@@ -7,10 +7,11 @@ export const getAllFolders = async (trx: DB | DBTransaction = db) => {
 };
 
 export const getFolderStructure = async (
-  parentId: number | null = null
+  parentId: number | null = null,
+  trx: DB | DBTransaction = db
 ): Promise<FolderStructure[]> => {
   // Fetch folders with the given parentId
-  const folders = await db
+  const folders = await trx
     .select()
     .from(musicFolders)
     .where(parentId === null ? isNull(musicFolders.parentId) : eq(musicFolders.parentId, parentId));
@@ -35,8 +36,10 @@ export const getFolderStructure = async (
   return result;
 };
 
-export const getAllFolderStructures = async (): Promise<FolderStructure[]> => {
-  const rootFolders = await db.select().from(musicFolders).where(isNull(musicFolders.parentId));
+export const getAllFolderStructures = async (
+  trx: DB | DBTransaction = db
+): Promise<FolderStructure[]> => {
+  const rootFolders = await trx.select().from(musicFolders).where(isNull(musicFolders.parentId));
 
   const structures = await Promise.all(
     rootFolders.map(async (folder) => ({
