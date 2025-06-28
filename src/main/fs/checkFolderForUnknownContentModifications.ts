@@ -7,6 +7,7 @@ import { tryToParseSong } from '../parseSong/parseSong';
 import { saveAbortController } from './controlAbortControllers';
 import { generatePalettes } from '../other/generatePalette';
 import { getSongsRelativeToFolder } from '@main/db/queries/songs';
+import { getFolderFromPath } from '@main/db/queries/folders';
 
 const abortController = new AbortController();
 saveAbortController('checkFolderForUnknownContentModifications', abortController);
@@ -48,9 +49,12 @@ const removeDeletedSongsFromLibrary = async (
 };
 
 const addNewlyAddedSongsToLibrary = async (
+  folderPath: string,
   newlyAddedSongPaths: string[],
   abortSignal: AbortSignal
 ) => {
+  const folder = await getFolderFromPath(folderPath);
+
   for (let i = 0; i < newlyAddedSongPaths.length; i += 1) {
     const newlyAddedSongPath = newlyAddedSongPaths[i];
 
@@ -63,7 +67,7 @@ const addNewlyAddedSongsToLibrary = async (
     }
 
     try {
-      await tryToParseSong(newlyAddedSongPath, false, false);
+      await tryToParseSong(newlyAddedSongPath, folder?.id, false, false);
       logger.debug(`${path.basename(newlyAddedSongPath)} song added.`, {
         songPath: newlyAddedSongPath
       });
@@ -109,7 +113,7 @@ const checkFolderForUnknownModifications = async (folderPath: string) => {
 
       if (newlyAddedSongPaths.length > 0) {
         // parses new songs that added before application launch
-        await addNewlyAddedSongsToLibrary(newlyAddedSongPaths, abortController.signal);
+        await addNewlyAddedSongsToLibrary(folderPath, newlyAddedSongPaths, abortController.signal);
       }
     }
   }

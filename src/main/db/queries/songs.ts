@@ -106,3 +106,6 @@ export async function getSongsInFolders(
   return result;
 }
 
+export const getAllSongs = async (trx: DB | DBTransaction = db) =>
+  trx.query.songs.findMany({ with: {} });
+

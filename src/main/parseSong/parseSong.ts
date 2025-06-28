@@ -13,12 +13,14 @@ import manageAlbumArtistOfParsedSong from './manageAlbumArtistOfParsedSong';
 import { isSongWithPathAvailable, saveSong } from '@main/db/queries/songs';
 import type { songs } from '@main/db/schema';
 import { db } from '@main/db/db';
+import { linkArtworksToSong } from '@main/db/queries/artworks';
 // import { timeEnd, timeStart } from './utils/measureTimeUsage';
 
-let pathsQueue: string[] = [];
+const pathsQueue = new Set<string>();
 
 export const tryToParseSong = (
   songPath: string,
+  folderId?: number,
   reparseToSync = false,
   generatePalettesAfterParsing = false,
   noRendererMessages = false
@@ -26,20 +28,20 @@ export const tryToParseSong = (
   let timeOutId: NodeJS.Timeout;
 
   const songFileName = path.basename(songPath);
-  const isSongInPathsQueue = pathsQueue.includes(songPath);
+  const isSongInPathsQueue = pathsQueue.has(songPath);
 
   // Here paths queue is used to prevent parsing the same song multiple times due to the event being fired multiple times for the same song even before they are parsed. So if the same is going to start the parsing process, it will stop the process if the song path is in the songPaths queue.
   if (!isSongInPathsQueue) {
-    pathsQueue.push(songPath);
+    pathsQueue.add(songPath);
 
     const tryParseSong = async (errRetryCount = 0): Promise<void> => {
       try {
-        await parseSong(songPath, reparseToSync, noRendererMessages);
+        await parseSong(songPath, folderId, reparseToSync, noRendererMessages);
         logger.debug(`song added to the library.`, { songPath });
         if (generatePalettesAfterParsing) setTimeout(generatePalettes, 1500);
 
         dataUpdateEvent('songs/newSong');
-        pathsQueue = pathsQueue.filter((x) => x !== songPath);
+        pathsQueue.delete(songPath);
       } catch (error) {
         if (errRetryCount < 5) {
           // THIS ERROR OCCURRED WHEN THE APP STARTS READING DATA WHILE THE SONG IS STILL WRITING TO THE DISK. POSSIBLE SOLUTION IS TO SET A TIMEOUT AND REDO THE PROCESS.
@@ -73,10 +75,11 @@ export const tryToParseSong = (
   return undefined;
 };
 
-let parseQueue: string[] = [];
+const parseQueue = new Set<string>();
 
 export const parseSong = async (
   absoluteFilePath: string,
+  folderId?: number,
   reparseToSync = false,
   noRendererMessages = false
 ): Promise<SongData | undefined> => {
@@ -104,12 +107,12 @@ export const parseSong = async (
     // const start2 = timeEnd(start1, 'Time to fetch stats and parse metadata');
 
     const isSongAvailable = await isSongWithPathAvailable(absoluteFilePath);
-    const isSongInParseQueue = parseQueue.includes(absoluteFilePath);
+    const isSongInParseQueue = parseQueue.has(absoluteFilePath);
     const isSongEligibleForParsing =
       metadata && (reparseToSync || !isSongAvailable) && !isSongInParseQueue;
 
     if (isSongEligibleForParsing) {
-      parseQueue.push(absoluteFilePath);
+      parseQueue.add(absoluteFilePath);
 
       // timeEnd(start2, 'Time to start organizing metadata');
 
@@ -149,7 +152,8 @@ export const parseSong = async (
         diskNumber: metadata?.common?.disk?.no ?? undefined,
         trackNumber: metadata?.common?.track?.no ?? undefined,
         fileCreatedAt: stats ? stats.birthtime : new Date(),
-        fileModifiedAt: stats ? stats.mtime : new Date()
+        fileModifiedAt: stats ? stats.mtime : new Date(),
+        folderId
       };
 
       const res = await db.transaction(async (trx) => {
@@ -160,6 +164,11 @@ export const parseSong = async (
           metadata.common?.picture?.at(0)
             ? Buffer.from(metadata.common.picture[0].data)
             : undefined,
+          trx
+        );
+
+        const linkedArtworks = await linkArtworksToSong(
+          artworkData.map((artwork) => ({ songId: songData.id, artworkId: artwork.id })),
           trx
         );
 
@@ -215,6 +224,7 @@ export const parseSong = async (
 
         return {
           songData,
+          linkedArtworks,
           relevantAlbum,
           newAlbum,
           newArtists,
@@ -236,7 +246,7 @@ export const parseSong = async (
 
       dataUpdateEvent('songs/newSong', [res.songData.id.toString()]);
 
-      parseQueue = parseQueue.filter((dir) => dir !== absoluteFilePath);
+      parseQueue.delete(absoluteFilePath);
 
       // timeEnd(start14, 'Time to reach end of the parsing process.');
 
@@ -292,7 +302,7 @@ export const parseSong = async (
     logger.error(`Error occurred when parsing a song.`, { error, absoluteFilePath });
     throw error;
   } finally {
-    parseQueue = parseQueue.filter((dir) => dir !== absoluteFilePath);
+    parseQueue.delete(absoluteFilePath);
   }
 };
 

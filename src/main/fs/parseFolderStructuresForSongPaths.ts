@@ -1,12 +1,12 @@
 import path from 'path';
 import fsSync from 'fs';
-import { getUserData, setUserData, supportedMusicExtensions } from '../filesystem';
+import { supportedMusicExtensions } from '../filesystem';
 import logger from '../logger';
 import { closeAbortController } from './controlAbortControllers';
 import addWatchersToFolders from './addWatchersToFolders';
 import { sendMessageToRenderer } from '../main';
-import type { musicFolders } from '@main/db/schema';
-import { getAllFolders, getAllFolderStructures } from '@main/db/queries/folders';
+import { getAllFolderStructures, saveAllFolderStructures } from '@main/db/queries/folders';
+import { db } from '@main/db/db';
 
 export const getAllFoldersFromFolderStructures = (folderStructures: FolderStructure[]) => {
   const folderData: MusicFolderData[] = [];
@@ -97,8 +97,8 @@ const updateStructure = (
   return musicFolders;
 };
 
-const clearAllFolderWatches = () => {
-  const { musicFolders } = getUserData();
+const clearAllFolderWatches = async () => {
+  const musicFolders = await getAllFolderStructures();
   const folderPaths = getAllFoldersFromFolderStructures(musicFolders);
 
   for (const folderPath of folderPaths) {
@@ -111,17 +111,20 @@ export const saveFolderStructures = async (
   structures: FolderStructure[],
   resetWatchers = false
 ) => {
-  let musicFolders = [...getUserData().musicFolders];
+  const data = await db.transaction(async (trx) => {
+    let musicFolders = await getAllFolderStructures(trx);
 
-  for (const structure of structures) {
-    musicFolders = updateStructure(structure, musicFolders);
-  }
-  if (resetWatchers) clearAllFolderWatches();
+    for (const structure of structures) {
+      musicFolders = updateStructure(structure, musicFolders);
+    }
+    if (resetWatchers) clearAllFolderWatches();
 
-  setUserData('musicFolders', musicFolders);
+    const result = await saveAllFolderStructures(musicFolders, trx);
+    return result;
+  });
 
-  if (resetWatchers) return addWatchersToFolders();
-  return undefined;
+  if (resetWatchers) addWatchersToFolders();
+  return data;
 };
 
 const parseFolderStructuresForSongPaths = async (folderStructures: FolderStructure[]) => {
@@ -135,18 +138,21 @@ const parseFolderStructuresForSongPaths = async (folderStructures: FolderStructu
     }
   });
 
-  const allFiles = getAllFilesFromFolderStructures(folderStructures);
+  const { addedFolders } = await saveFolderStructures(folderStructures, true);
 
-  await saveFolderStructures(folderStructures, true);
-
-  const allSongPaths = allFiles.filter((filePath) => {
-    const fileExtension = path.extname(filePath);
+  const allFilesData = addedFolders
+    .map((folder) =>
+      getAllFilePathsFromFolder(folder.path).map((songPath) => ({ songPath, folder }))
+    )
+    .flat();
+  const allSongPaths = allFilesData.filter((file) => {
+    const fileExtension = path.extname(file.songPath);
     return supportedMusicExtensions.includes(fileExtension);
   });
 
   logger.info(`Parsed selected folders successfully.`, {
     songCount: allSongPaths.length,
-    totalFileCount: allFiles.length,
+    totalFileCount: allFilesData.length,
     subFolderCount: foldersWithStatData.length,
     selectedFolderCount: folderStructures.length
   });

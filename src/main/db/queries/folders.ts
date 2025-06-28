@@ -1,9 +1,16 @@
-import { eq, isNull } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { db } from '../db';
 import { musicFolders } from '../schema';
+import { basename } from 'path';
 
 export const getAllFolders = async (trx: DB | DBTransaction = db) => {
   return trx.select().from(musicFolders);
+};
+
+export const getFolderFromPath = async (path: string, trx: DB | DBTransaction = db) => {
+  const data = await trx.select().from(musicFolders).where(eq(musicFolders.path, path));
+
+  return data.at(0);
 };
 
 export const getFolderStructure = async (
@@ -55,4 +62,79 @@ export const getAllFolderStructures = async (
   );
 
   return structures;
+};
+
+export const saveAllFolderStructures = async (
+  structures: FolderStructure[],
+  trx: DBTransaction
+) => {
+  const addedFolders: (typeof musicFolders.$inferSelect)[] = [];
+  const updatedFolders: (typeof musicFolders.$inferSelect)[] = [];
+
+  for (const structure of structures) {
+    const result = await createOrUpdateFolderStructure(structure, trx, undefined);
+
+    addedFolders.push(...result.addedFolders);
+    updatedFolders.push(...result.updatedFolders);
+  }
+
+  return { addedFolders, updatedFolders };
+};
+
+const createOrUpdateFolderStructure = async (
+  structure: FolderStructure,
+  trx: DBTransaction,
+  parentId?: number
+) => {
+  const addedFolders: (typeof musicFolders.$inferSelect)[] = [];
+  const updatedFolders: (typeof musicFolders.$inferSelect)[] = [];
+
+  const currentFolderData = {
+    name: basename(structure.path),
+    path: structure.path,
+    lastModifiedAt: structure.stats.lastModifiedDate,
+    lastChangedAt: structure.stats.lastChangedDate,
+    folderCreatedAt: structure.stats.fileCreatedDate,
+    lastParsedAt: structure.stats.lastParsedDate,
+    parentId
+  };
+
+  const folder = await trx
+    .select()
+    .from(musicFolders)
+    .where(
+      and(
+        eq(musicFolders.path, structure.path),
+        parentId === null
+          ? isNull(musicFolders.parentId)
+          : eq(musicFolders.parentId, parentId as number)
+      )
+    )
+    .limit(1);
+  const selectedFolder = folder.at(0);
+
+  if (selectedFolder) {
+    const data = await trx
+      .update(musicFolders)
+      .set(currentFolderData)
+      .where(eq(musicFolders.id, selectedFolder.id))
+      .returning();
+
+    updatedFolders.push(data[0]);
+  } else {
+    const addedFolder = await trx.insert(musicFolders).values(currentFolderData).returning();
+
+    addedFolders.push(addedFolder[0]);
+  }
+
+  if (structure.subFolders.length > 0) {
+    for (const subFolder of structure.subFolders) {
+      const res = await createOrUpdateFolderStructure(subFolder, trx, folder[0]?.id);
+
+      addedFolders.push(...res.addedFolders);
+      updatedFolders.push(...res.updatedFolders);
+    }
+  }
+
+  return { addedFolders, updatedFolders };
 };

@@ -1,5 +1,11 @@
 import { db } from '../db';
-import { albumsArtworks, artistsArtworks, artworks, artworkSourceEnum } from '../schema';
+import {
+  albumsArtworks,
+  artistsArtworks,
+  artworks,
+  artworkSourceEnum,
+  artworksSongs
+} from '../schema';
 
 export const saveArtworks = async (
   data: {
@@ -13,6 +19,13 @@ export const saveArtworks = async (
   const res = await trx.insert(artworks).values(data).returning();
 
   return res;
+};
+
+export const linkArtworksToSong = async (
+  data: (typeof artworksSongs.$inferInsert)[],
+  trx: DB | DBTransaction = db
+) => {
+  return trx.insert(artworksSongs).values(data).returning();
 };
 
 export const linkArtworksToAlbum = async (

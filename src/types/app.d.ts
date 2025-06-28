@@ -488,10 +488,20 @@ declare global {
     noOfSongs?: number;
   }
 
+  interface SavedFolderStructure extends FolderStructure {
+    id: number;
+    subFolders: SavedFolderStructure[];
+  }
+
   interface MusicFolder extends FolderStructure {
     songIds: string[];
     isBlacklisted: boolean;
     subFolders: MusicFolder[];
+  }
+
+  interface SavedMusicFolder extends MusicFolder {
+    id: number;
+    subFolders: SavedMusicFolder[];
   }
 
   // ? LocalStorage related types

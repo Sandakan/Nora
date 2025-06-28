@@ -37,11 +37,11 @@ const addMusicFromFolderStructures = async (
   });
 
   const eligableStructures = await removeAlreadyAvailableStructures(structures);
-  const songPaths = await parseFolderStructuresForSongPaths(eligableStructures);
+  const songPathsData = await parseFolderStructuresForSongPaths(eligableStructures);
 
-  if (songPaths) {
+  if (songPathsData) {
     const startTime = timeStart();
-    for (let i = 0; i < songPaths.length; i += 1) {
+    for (let i = 0; i < songPathsData.length; i += 1) {
       if (abortSignal?.aborted) {
         logger.warn('Parsing songs in music folders aborted by an abortController signal.', {
           reason: abortSignal?.reason
@@ -49,24 +49,30 @@ const addMusicFromFolderStructures = async (
         break;
       }
 
-      const songPath = songPaths[i];
+      const songPathData = songPathsData[i];
       try {
-        await tryToParseSong(songPath, false, false, i >= 10);
+        await tryToParseSong(songPathData.songPath, songPathData.folder.id, false, false, i >= 10);
         sendMessageToRenderer({
           messageCode: 'AUDIO_PARSING_PROCESS_UPDATE',
-          data: { total: songPaths.length, value: i + 1 }
+          data: { total: songPathsData.length, value: i + 1 }
         });
       } catch (error) {
-        logger.error(`Failed to parse '${path.basename(songPath)}'.`, { error, songPath });
+        logger.error(`Failed to parse '${path.basename(songPathData.songPath)}'.`, {
+          error,
+          songPath: songPathData.songPath
+        });
       }
     }
     timeEnd(startTime, 'Time to parse the whole folder');
     setTimeout(generatePalettes, 1500);
   } else throw new Error('Failed to get song paths from music folders.');
 
-  logger.debug(`Successfully parsed ${songPaths.length} songs from the selected music folders.`, {
-    folderPaths: eligableStructures.map((x) => x.path)
-  });
+  logger.debug(
+    `Successfully parsed ${songPathsData.length} songs from the selected music folders.`,
+    {
+      folderPaths: eligableStructures.map((x) => x.path)
+    }
+  );
   dataUpdateEvent('userData/musicFolder');
 };
 
