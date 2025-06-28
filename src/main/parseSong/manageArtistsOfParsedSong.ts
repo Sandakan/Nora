@@ -21,6 +21,9 @@ const manageArtistsOfParsedSong = async (
       const availableArtist = await getArtistWithName(newArtistName, trx);
 
       if (availableArtist) {
+        // const linkedSongArtist = await getLinkedSongArtist(availableArtist.id, songId, trx);
+        // if (linkedSongArtist) continue;
+
         await linkSongToArtist(availableArtist.id, songId, trx);
         relevantArtists.push(availableArtist);
       } else {

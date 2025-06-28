@@ -1,4 +1,9 @@
-import { linkSongToAlbum, createAlbum, getAlbumWithTitle } from '@main/db/queries/albums';
+import {
+  linkSongToAlbum,
+  createAlbum,
+  getAlbumWithTitle
+  // getLinkedAlbumSong
+} from '@main/db/queries/albums';
 import type { albums } from '@main/db/schema';
 import { linkArtworksToAlbum } from '@main/db/queries/artworks';
 
@@ -28,6 +33,13 @@ const manageAlbumsOfParsedSong = async (
     const availableAlbum = await getAlbumWithTitle(songAlbumName, trx);
 
     if (availableAlbum) {
+      // const linkedAlbumSong = await getLinkedAlbumSong(availableAlbum.id, songId, trx);
+      // if (linkedAlbumSong) {
+      //   relevantAlbum = availableAlbum;
+
+      //   return { relevantAlbum, newAlbum };
+      // }
+
       await linkSongToAlbum(availableAlbum.id, songId, trx);
       relevantAlbum = availableAlbum;
     } else {

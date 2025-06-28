@@ -1,5 +1,5 @@
 import { db } from '@db/db';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { genres, genresSongs } from '@db/schema';
 
 export const isGenreWithIdAvailable = async (genreId: number, trx: DB | DBTransaction = db) => {
@@ -35,4 +35,18 @@ export const createGenre = async (
   const data = await trx.insert(genres).values(genre).returning();
 
   return data[0];
+};
+
+export const getLinkedSongGenre = async (
+  genreId: number,
+  songId: number,
+  trx: DB | DBTransaction = db
+) => {
+  const data = await trx
+    .select()
+    .from(genresSongs)
+    .where(and(eq(genresSongs.genreId, genreId), eq(genresSongs.songId, songId)))
+    .limit(1);
+
+  return data.at(0);
 };

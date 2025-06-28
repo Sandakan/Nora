@@ -1,4 +1,4 @@
-import { createArtist, getArtistWithName } from '@main/db/queries/artists';
+import { createArtist, getLinkedAlbumArtist, getArtistWithName } from '@main/db/queries/artists';
 import { linkArtistToAlbum } from '@main/db/queries/albums';
 import type { artists } from '@main/db/schema';
 
@@ -14,12 +14,15 @@ const manageAlbumArtistOfParsedSong = async (
     for (const albumArtist of albumArtists) {
       const albumArtistName = albumArtist.trim();
 
-      const availableAlbumArtist = await getArtistWithName(albumArtistName, trx);
+      const availableArtist = await getArtistWithName(albumArtistName, trx);
 
-      if (availableAlbumArtist) {
-        await linkArtistToAlbum(albumId, availableAlbumArtist.id, trx);
+      if (availableArtist) {
+        const availableAlbumArtist = await getLinkedAlbumArtist(albumId, availableArtist.id, trx);
+        if (availableAlbumArtist) continue;
 
-        relevantAlbumArtists.push(availableAlbumArtist);
+        await linkArtistToAlbum(albumId, availableArtist.id, trx);
+
+        relevantAlbumArtists.push(availableArtist);
       } else {
         const artist = await createArtist({ name: albumArtistName }, trx);
         await linkArtistToAlbum(albumId, artist.id, trx);

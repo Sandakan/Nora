@@ -15,7 +15,6 @@ const manageGenresOfParsedSong = async (
 
     if (availableGenre) {
       await linkSongToGenre(availableGenre.id, songId, trx);
-
       relevantGenres.push(availableGenre);
     } else {
       const genre = await createGenre({ name: songGenreName }, trx);

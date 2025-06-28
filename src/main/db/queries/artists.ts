@@ -1,6 +1,6 @@
 import { db } from '@db/db';
-import { eq } from 'drizzle-orm';
-import { artists, artistsSongs } from '@db/schema';
+import { and, eq } from 'drizzle-orm';
+import { albumsArtists, artists, artistsSongs } from '@db/schema';
 
 export const isArtistWithNameAvailable = async (name: string, trx: DB | DBTransaction = db) => {
   const data = await trx.select({}).from(artists).where(eq(artists.name, name)).limit(1);
@@ -28,4 +28,32 @@ export const createArtist = async (
   const data = await trx.insert(artists).values(artist).returning();
 
   return data[0];
+};
+
+export const getLinkedAlbumArtist = async (
+  albumId: number,
+  artistId: number,
+  trx: DB | DBTransaction = db
+) => {
+  const data = await trx
+    .select()
+    .from(albumsArtists)
+    .where(and(eq(albumsArtists.albumId, albumId), eq(albumsArtists.artistId, artistId)))
+    .limit(1);
+
+  return data.at(0);
+};
+
+export const getLinkedSongArtist = async (
+  songId: number,
+  artistId: number,
+  trx: DB | DBTransaction = db
+) => {
+  const data = await trx
+    .select()
+    .from(artistsSongs)
+    .where(and(eq(artistsSongs.songId, songId), eq(artistsSongs.artistId, artistId)))
+    .limit(1);
+
+  return data.at(0);
 };
