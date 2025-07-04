@@ -1,5 +1,5 @@
 {
-  "id": "4095049d-b2e9-48ca-8ff0-25624eb83d7c",
+  "id": "30b52f70-dce0-4820-8cb1-023d77e68738",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -934,7 +934,7 @@
         },
         "hsl": {
           "name": "hsl",
-          "type": "varchar(255)",
+          "type": "json",
           "primaryKey": false,
           "notNull": true
         },

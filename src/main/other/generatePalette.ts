@@ -1,18 +1,14 @@
 import { Vibrant } from 'node-vibrant/node';
 import { timeEnd, timeStart } from '../utils/measureTimeUsage';
 import logger from '../logger';
-import {
-  getGenresData,
-  getPaletteData,
-  getSongsData,
-  setGenresData,
-  setPaletteData,
-  setSongsData
-} from '../filesystem';
-import { generateCoverBuffer } from '../parseSong/generateCoverBuffer';
+import { getPaletteData } from '../filesystem';
 import { dataUpdateEvent, sendMessageToRenderer } from '../main';
 import roundTo from '../../common/roundTo';
 import { generateRandomId } from '../utils/randomId';
+import { createArtworkPalette, getLowResArtworksWithoutPalettes } from '@main/db/queries/palettes';
+import { db } from '@main/db/db';
+import { swatchTypeEnum } from '@db/schema';
+import generateCoverBuffer from '@main/parseSong/generateCoverBuffer';
 
 export const DEFAULT_SONG_PALETTE: PaletteData = {
   paletteId: 'DEFAULT_PALETTE',
@@ -96,53 +92,92 @@ const generatePalette = async (artwork?: Buffer | string): Promise<PaletteData |
 };
 
 const generatePalettesForSongs = async () => {
-  const songs = getSongsData();
-  const palettes = getPaletteData();
+  const artworks = await getLowResArtworksWithoutPalettes();
 
-  if (Array.isArray(songs) && songs.length > 0) {
+  if (artworks.length > 0) {
     let x = 0;
-    const noOfNoPaletteSongs = songs.reduce((acc, song) => (!song.paletteId ? acc + 1 : acc), 0);
+    const noOfNoPaletteArtworks = artworks.reduce(
+      (acc, artwork) => (!artwork.paletteId ? acc + 1 : acc),
+      0
+    );
 
-    if (noOfNoPaletteSongs > 0) {
+    if (noOfNoPaletteArtworks > 0) {
       const start = timeStart();
 
-      for (let i = 0; i < songs.length; i += 1) {
-        const song = songs[i];
-        if (!song.paletteId) {
-          // const metadata = await musicMetaData.parseFile(song.path);
+      await db.transaction(async (trx) => {
+        for (let i = 0; i < artworks.length; i += 1) {
+          const artwork = artworks[i];
 
-          const coverBuffer = await generateCoverBuffer(
-            song.isArtworkAvailable ? `${song.songId}-optimized.webp` : undefined,
-            true
-          );
+          if (!artwork.paletteId) {
+            // const metadata = await musicMetaData.parseFile(song.path);
 
-          const palette = await generatePalette(coverBuffer);
+            const buffer = await generateCoverBuffer(artwork.path, false, false);
+            const palette = await generatePalette(buffer);
 
-          // const swatch =
-          //   palette && palette.DarkVibrant && palette.LightVibrant
-          //     ? {
-          //         DarkVibrant: palette.DarkVibrant,
-          //         LightVibrant: palette.LightVibrant
-          //       }
-          //     : undefined;
+            // const swatch =
+            //   palette && palette.DarkVibrant && palette.LightVibrant
+            //     ? {
+            //         DarkVibrant: palette.DarkVibrant,
+            //         LightVibrant: palette.LightVibrant
+            //       }
+            //     : undefined;
 
-          song.paletteId = palette?.paletteId;
-          if (palette) palettes.push(palette);
-          x += 1;
+            await savePalette(artwork.id, palette, trx);
+            x += 1;
 
-          sendMessageToRenderer({
-            messageCode: 'SONG_PALETTE_GENERATING_PROCESS_UPDATE',
-            data: { total: noOfNoPaletteSongs, value: x }
-          });
+            sendMessageToRenderer({
+              messageCode: 'SONG_PALETTE_GENERATING_PROCESS_UPDATE',
+              data: { total: noOfNoPaletteArtworks, value: x }
+            });
+          }
         }
-      }
+      });
 
       timeEnd(start, 'Time to finish generating palettes for songs');
 
-      setSongsData(songs);
-      setPaletteData(palettes);
       dataUpdateEvent('songs/palette');
     } else sendMessageToRenderer({ messageCode: 'NO_MORE_SONG_PALETTES' });
+  }
+};
+
+const savePalette = async (
+  artworkId: number,
+  palette: PaletteData | undefined,
+  trx: DBTransaction
+) => {
+  if (palette) {
+    const swatches: Parameters<typeof createArtworkPalette>[0]['swatches'] = [];
+
+    const swatchTypes: {
+      key: keyof typeof palette;
+      label: (typeof swatchTypeEnum.enumValues)[number];
+    }[] = [
+      { key: 'DarkVibrant', label: 'DARK_VIBRANT' },
+      { key: 'LightVibrant', label: 'LIGHT_VIBRANT' },
+      { key: 'DarkMuted', label: 'DARK_MUTED' },
+      { key: 'LightMuted', label: 'LIGHT_MUTED' },
+      { key: 'Muted', label: 'MUTED' },
+      { key: 'Vibrant', label: 'VIBRANT' }
+    ];
+
+    swatchTypes.forEach(({ key, label }) => {
+      const swatch = palette[key];
+
+      if (swatch && typeof swatch === 'object') {
+        swatches.push({
+          hex: swatch.hex,
+          hsl: {
+            h: swatch.hsl[0],
+            s: swatch.hsl[1],
+            l: swatch.hsl[2]
+          },
+          population: swatch.population,
+          swatchType: label
+        });
+      }
+    });
+
+    await createArtworkPalette({ artworkId, swatches }, trx);
   }
 };
 
@@ -157,63 +192,63 @@ export const getSelectedPaletteData = (paletteId?: string) => {
   return undefined;
 };
 
-const generatePalettesForGenres = async () => {
-  const genres = getGenresData();
-  const songs = getSongsData();
+// const generatePalettesForGenres = async () => {
+//   const genres = getGenresData();
+//   const songs = getSongsData();
 
-  if (Array.isArray(songs) && Array.isArray(genres) && songs.length > 0 && genres.length > 0) {
-    let x = 0;
-    const noOfNoPaletteGenres = genres.reduce(
-      (acc, genre) => (!genre?.paletteId ? acc + 1 : acc),
-      0
-    );
+//   if (Array.isArray(songs) && Array.isArray(genres) && songs.length > 0 && genres.length > 0) {
+//     let x = 0;
+//     const noOfNoPaletteGenres = genres.reduce(
+//       (acc, genre) => (!genre?.paletteId ? acc + 1 : acc),
+//       0
+//     );
 
-    if (noOfNoPaletteGenres > 0) {
-      const start = timeStart();
+//     if (noOfNoPaletteGenres > 0) {
+//       const start = timeStart();
 
-      for (let i = 0; i < genres.length; i += 1) {
-        const genreArtworkName = genres[i].artworkName;
-        if (!genres[i]?.paletteId) {
-          if (genreArtworkName) {
-            const artNameWithoutExt = genreArtworkName.split('.')[0];
+//       for (let i = 0; i < genres.length; i += 1) {
+//         const genreArtworkName = genres[i].artworkName;
+//         if (!genres[i]?.paletteId) {
+//           if (genreArtworkName) {
+//             const artNameWithoutExt = genreArtworkName.split('.')[0];
 
-            for (const song of songs) {
-              if (song.songId === artNameWithoutExt) {
-                genres[i].paletteId = song.paletteId;
-                x += 1;
-                break;
-              }
-            }
-          } else {
-            const coverBuffer = await generateCoverBuffer(
-              genreArtworkName?.replace('.webp', '-optimized.webp'),
-              true
-            );
+//             for (const song of songs) {
+//               if (song.songId === artNameWithoutExt) {
+//                 genres[i].paletteId = song.paletteId;
+//                 x += 1;
+//                 break;
+//               }
+//             }
+//           } else {
+//             const coverBuffer = await generateCoverBuffer(
+//               genreArtworkName?.replace('.webp', '-optimized.webp'),
+//               true
+//             );
 
-            const palette = await generatePalette(coverBuffer);
+//             const palette = await generatePalette(coverBuffer);
 
-            genres[i].paletteId = palette?.paletteId;
-            x += 1;
-          }
+//             genres[i].paletteId = palette?.paletteId;
+//             x += 1;
+//           }
 
-          sendMessageToRenderer({
-            messageCode: 'SONG_PALETTE_GENERATING_PROCESS_UPDATE',
-            data: { total: noOfNoPaletteGenres, value: x }
-          });
-        }
-      }
-      timeEnd(start, 'Time to finish generating palettes for genres');
+//           sendMessageToRenderer({
+//             messageCode: 'SONG_PALETTE_GENERATING_PROCESS_UPDATE',
+//             data: { total: noOfNoPaletteGenres, value: x }
+//           });
+//         }
+//       }
+//       timeEnd(start, 'Time to finish generating palettes for genres');
 
-      setGenresData(genres);
-      dataUpdateEvent('genres/backgroundColor');
-    } else sendMessageToRenderer({ messageCode: 'NO_MORE_SONG_PALETTES' });
-  }
-};
+//       setGenresData(genres);
+//       dataUpdateEvent('genres/backgroundColor');
+//     } else sendMessageToRenderer({ messageCode: 'NO_MORE_SONG_PALETTES' });
+//   }
+// };
 
 export const generatePalettes = async () => {
-  return generatePalettesForSongs()
+  generatePalettesForSongs()
     .then(() => {
-      setTimeout(generatePalettesForGenres, 1000);
+      // setTimeout(generatePalettesForGenres, 1000);
       return undefined;
     })
     .catch((error) => logger.error('Failed to generating palettes.', { error }));

@@ -4,6 +4,70 @@ import logger from '../logger';
 import paginateData from '../utils/paginateData';
 import { getAllSongs as getAllSavedSongs } from '@main/db/queries/songs';
 
+type SongArtwork = Awaited<
+  ReturnType<typeof getAllSavedSongs>
+>[number]['artworks'][number]['artwork'];
+const parsePaletteFromArtworks = (artworks: SongArtwork[]): PaletteData | undefined => {
+  const artworkWithPalette = artworks.find((artwork) => !!artwork.palette);
+
+  if (artworkWithPalette) {
+    const palette: PaletteData = { paletteId: String(artworkWithPalette.palette?.id) };
+
+    if (artworkWithPalette.palette && artworkWithPalette.palette.swatches.length > 0) {
+      for (const swatch of artworkWithPalette.palette.swatches) {
+        switch (swatch.swatchType) {
+          case 'DARK_VIBRANT':
+            palette.DarkVibrant = {
+              hex: swatch.hex,
+              population: swatch.population,
+              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
+            };
+            break;
+          case 'LIGHT_VIBRANT':
+            palette.LightVibrant = {
+              hex: swatch.hex,
+              population: swatch.population,
+              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
+            };
+            break;
+          case 'DARK_MUTED':
+            palette.DarkMuted = {
+              hex: swatch.hex,
+              population: swatch.population,
+              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
+            };
+            break;
+          case 'LIGHT_MUTED':
+            palette.LightMuted = {
+              hex: swatch.hex,
+              population: swatch.population,
+              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
+            };
+            break;
+          case 'MUTED':
+            palette.Muted = {
+              hex: swatch.hex,
+              population: swatch.population,
+              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
+            };
+            break;
+          case 'VIBRANT':
+            palette.Vibrant = {
+              hex: swatch.hex,
+              population: swatch.population,
+              hsl: [swatch.hsl.h, swatch.hsl.s, swatch.hsl.l]
+            };
+            break;
+        }
+      }
+    }
+
+    return palette;
+  }
+
+  return undefined;
+};
+
 const getAllSongs = async (
   sortType = 'aToZ' as SongSortTypes,
   filterType?: SongFilterTypes,
@@ -66,21 +130,21 @@ const getAllSongs = async (
         const addedDate = song.createdAt ? new Date(song.createdAt).getTime() : 0;
         // isAFavorite: You must join your favorites table if you have one. Here we default to false.
         const isAFavorite = false;
-        // Palette data: You must join palettes if you want this. Here we default to undefined.
-        const paletteData = undefined;
+
+        const artworks = song.artworks.map((a) => a.artwork);
 
         return {
           title: song.title,
           artists,
           album,
           duration: Number(song.duration),
-          artworkPaths: parseSongArtworks(song.artworks.map((a) => a.artwork)),
+          artworkPaths: parseSongArtworks(artworks),
           path: song.path,
           songId: String(song.id),
           addedDate,
           isAFavorite,
           year: song.year ?? undefined,
-          paletteData,
+          paletteData: parsePaletteFromArtworks(artworks),
           isBlacklisted,
           trackNo
         };

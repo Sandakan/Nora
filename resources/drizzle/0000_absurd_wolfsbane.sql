@@ -104,7 +104,7 @@ CREATE TABLE "palette_swatches" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "palette_swatches_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
 	"population" integer NOT NULL,
 	"hex" varchar(255) NOT NULL,
-	"hsl" varchar(255) NOT NULL,
+	"hsl" json NOT NULL,
 	"swatch_type" "swatch_type" DEFAULT 'VIBRANT' NOT NULL,
 	"palette_id" integer NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL

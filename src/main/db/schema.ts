@@ -8,7 +8,8 @@ import {
   text,
   primaryKey,
   index,
-  type AnyPgColumn
+  type AnyPgColumn,
+  json
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -93,7 +94,7 @@ export const paletteSwatches = pgTable('palette_swatches', {
   id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
   population: integer('population').notNull(),
   hex: varchar('hex', { length: 255 }).notNull(),
-  hsl: varchar('hsl', { length: 255 }).notNull(),
+  hsl: json('hsl').$type<{ h: number; s: number; l: number }>().notNull(),
   swatchType: swatchTypeEnum('swatch_type').notNull().default('VIBRANT'),
   paletteId: integer('palette_id')
     .notNull()

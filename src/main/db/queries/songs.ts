@@ -111,7 +111,6 @@ export const getAllSongs = async (trx: DB | DBTransaction = db) => {
   const songsData = await trx.query.songs.findMany({
     with: {
       artists: {
-        columns: {},
         with: {
           artist: {
             columns: { id: true, name: true }
@@ -119,7 +118,6 @@ export const getAllSongs = async (trx: DB | DBTransaction = db) => {
         }
       },
       albums: {
-        columns: {},
         with: {
           album: {
             columns: { id: true, title: true }
@@ -127,9 +125,17 @@ export const getAllSongs = async (trx: DB | DBTransaction = db) => {
         }
       },
       artworks: {
-        columns: {},
         with: {
-          artwork: {}
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
         }
       },
       blacklist: {
