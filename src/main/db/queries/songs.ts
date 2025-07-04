@@ -106,6 +106,38 @@ export async function getSongsInFolders(
   return result;
 }
 
-export const getAllSongs = async (trx: DB | DBTransaction = db) =>
-  trx.query.songs.findMany({ with: {} });
+export const getAllSongs = async (trx: DB | DBTransaction = db) => {
+  // Fetch all songs with their relations
+  const songsData = await trx.query.songs.findMany({
+    with: {
+      artists: {
+        columns: {},
+        with: {
+          artist: {
+            columns: { id: true, name: true }
+          }
+        }
+      },
+      albums: {
+        columns: {},
+        with: {
+          album: {
+            columns: { id: true, title: true }
+          }
+        }
+      },
+      artworks: {
+        columns: {},
+        with: {
+          artwork: {}
+        }
+      },
+      blacklist: {
+        columns: { songId: true }
+      }
+    }
+  });
+
+  return songsData;
+};
 

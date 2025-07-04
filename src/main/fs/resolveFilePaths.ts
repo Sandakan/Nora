@@ -4,6 +4,7 @@ import { join as joinPath } from 'node:path/posix';
 import { platform } from 'process';
 
 import { DEFAULT_ARTWORK_SAVE_LOCATION, DEFAULT_FILE_URL } from '../filesystem';
+import { artworks as artworksSchema } from '@db/schema';
 
 import albumCoverImage from '../../renderer/src/assets/images/webp/album_cover_default.webp?asset';
 import songCoverImage from '../../renderer/src/assets/images/webp/song_cover_default.webp?asset';
@@ -68,6 +69,38 @@ export const getSongArtworkPath = (
   const defaultPath = joinPath(FILE_URL, songCoverImage) + timestampStr;
   return {
     isDefaultArtwork: isArtworkAvailable,
+    artworkPath: defaultPath,
+    optimizedArtworkPath: defaultPath
+  };
+};
+
+export const parseSongArtworks = (
+  artworks: (typeof artworksSchema.$inferSelect)[],
+  resetCache = false,
+  sendRealPath = false
+): ArtworkPaths => {
+  if (resetCache) resetArtworkCache('songArtworks');
+
+  const FILE_URL = sendRealPath ? '' : DEFAULT_FILE_URL;
+  const timestampStr = sendRealPath ? '' : `?ts=${timestamps.songArtworks}`;
+  const isArtworkAvailable = artworks.length > 0;
+
+  if (isArtworkAvailable) {
+    const highResImage = artworks.find((artwork) => artwork.width >= 500 && artwork.height >= 500);
+    const lowResImage = artworks.find((artwork) => artwork.width < 500 && artwork.height < 500);
+
+    if (highResImage && lowResImage) {
+      return {
+        isDefaultArtwork: !isArtworkAvailable,
+        artworkPath: joinPath(FILE_URL, highResImage.path) + timestampStr,
+        optimizedArtworkPath: joinPath(FILE_URL, lowResImage.path) + timestampStr
+      };
+    }
+  }
+
+  const defaultPath = joinPath(FILE_URL, songCoverImage) + timestampStr;
+  return {
+    isDefaultArtwork: true,
     artworkPath: defaultPath,
     optimizedArtworkPath: defaultPath
   };
