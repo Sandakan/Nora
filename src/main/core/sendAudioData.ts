@@ -1,16 +1,12 @@
 import { app } from 'electron';
 import { parseFile } from 'music-metadata';
 
-import { isSongBlacklisted } from '../utils/isBlacklisted';
-import { getArtistsData, getSongsData } from '../filesystem';
-import { getSongArtworkPath, resolveSongFilePath } from '../fs/resolveFilePaths';
+import { parseSongArtworks, resolveSongFilePath } from '../fs/resolveFilePaths';
 import logger from '../logger';
-import getArtistInfoFromNet from './getArtistInfoFromNet';
-import { addToSongsHistory } from './addToSongsHistory';
-import updateSongListeningData from './updateSongListeningData';
 // import { setDiscordRpcActivity } from '../other/discordRPC';
 import { setCurrentSongPath } from '../main';
-import { getSelectedPaletteData } from '../other/generatePalette';
+import { getSongById } from '@main/db/queries/songs';
+import { parsePaletteFromArtworks } from './getAllSongs';
 
 const IS_DEVELOPMENT = !app.isPackaged || process.env.NODE_ENV === 'development';
 
@@ -21,107 +17,99 @@ const getArtworkData = (artworkData?: Buffer | Uint8Array) => {
   return artworkData;
 };
 
-const getRelevantArtistData = (
-  songArtists?: {
-    artistId: string;
-    name: string;
-  }[]
-) => {
-  const artists = getArtistsData();
-  const relevantArtists: {
-    artistId: string;
-    artworkName?: string;
-    name: string;
-    onlineArtworkPaths?: OnlineArtistArtworks;
-  }[] = [];
+// const getRelevantArtistData = (
+//   songArtists?: {
+//     artistId: string;
+//     name: string;
+//   }[]
+// ) => {
+//   const artists = getArtistsData();
+//   const relevantArtists: {
+//     artistId: string;
+//     artworkName?: string;
+//     name: string;
+//     onlineArtworkPaths?: OnlineArtistArtworks;
+//   }[] = [];
 
-  if (songArtists) {
-    for (const songArtist of songArtists) {
-      for (const artist of artists) {
-        if (artist.artistId === songArtist.artistId) {
-          if (!artist.onlineArtworkPaths)
-            getArtistInfoFromNet(artist.artistId).catch((error) =>
-              logger.warn('Failed to get artist info from net', { err: error })
-            );
+//   if (songArtists) {
+//     for (const songArtist of songArtists) {
+//       for (const artist of artists) {
+//         if (artist.artistId === songArtist.artistId) {
+//           if (!artist.onlineArtworkPaths)
+//             getArtistInfoFromNet(artist.artistId).catch((error) =>
+//               logger.warn('Failed to get artist info from net', { err: error })
+//             );
 
-          const { artistId, name, artworkName, onlineArtworkPaths } = artist;
+//           const { artistId, name, artworkName, onlineArtworkPaths } = artist;
 
-          relevantArtists.push({
-            artistId,
-            name,
-            artworkName,
-            onlineArtworkPaths
-          });
-        }
-      }
-    }
-  }
+//           relevantArtists.push({
+//             artistId,
+//             name,
+//             artworkName,
+//             onlineArtworkPaths
+//           });
+//         }
+//       }
+//     }
+//   }
 
-  return relevantArtists;
-};
+//   return relevantArtists;
+// };
 
-const sendAudioData = async (audioId: string): Promise<AudioPlayerData> => {
-  logger.debug(`Fetching song data for song id -${audioId}-`);
+const sendAudioData = async (songId: string): Promise<AudioPlayerData> => {
+  logger.debug(`Fetching song data for song id -${songId}-`);
   try {
-    const songs = getSongsData();
+    const song = await getSongById(Number(songId));
 
-    if (songs) {
-      for (let x = 0; x < songs.length; x += 1) {
-        if (songs[x].songId === audioId) {
-          const song = songs[x];
-          // TODO: Unknown type error
-          const metadata = await parseFile(song.path);
+    if (song) {
+      const metadata = await parseFile(song.path);
 
-          if (metadata) {
-            const artworkData = metadata.common.picture
-              ? metadata.common.picture[0].data
-              : undefined;
+      if (metadata) {
+        const artworkData = metadata.common.picture ? metadata.common.picture[0].data : undefined;
 
-            addToSongsHistory(song.songId);
-            const songArtists = getRelevantArtistData(song.artists);
+        // addToSongsHistory(song.songId);
+        const artists =
+          song.artists?.map((a) => ({ artistId: String(a.artist.id), name: a.artist.name })) ?? [];
+        const artworks = song.artworks.map((a) => a.artwork);
+        const albumObj = song.albums?.[0]?.album;
+        const album = albumObj ? { albumId: String(albumObj.id), name: albumObj.title } : undefined;
+        const isBlacklisted = !!song.blacklist;
 
-            const data: AudioPlayerData = {
-              title: song.title,
-              artists: songArtists.length > 0 ? songArtists : song.artists,
-              duration: song.duration,
-              // artwork: await getArtworkLink(artworkData),
-              artwork: getArtworkData(artworkData),
-              artworkPath: getSongArtworkPath(song.songId, song.isArtworkAvailable).artworkPath,
-              path: resolveSongFilePath(song.path),
-              songId: song.songId,
-              isAFavorite: song.isAFavorite,
-              album: song.album,
-              paletteData: getSelectedPaletteData(song.paletteId),
-              isKnownSource: true,
-              isBlacklisted: isSongBlacklisted(song.songId, song.path)
-            };
+        const data: AudioPlayerData = {
+          title: song.title,
+          artists,
+          duration: Number(song.duration),
+          artwork: getArtworkData(artworkData),
+          artworkPath: parseSongArtworks(artworks).artworkPath,
+          path: resolveSongFilePath(song.path),
+          songId: String(song.id),
+          isAFavorite: false, // TODO: Add logic to check if song is a favorite
+          album,
+          paletteData: parsePaletteFromArtworks(artworks),
+          isKnownSource: true,
+          isBlacklisted
+        };
 
-            updateSongListeningData(song.songId, 'listens', 1);
+        // updateSongListeningData(song.songId, 'listens', 1); // TODO: Add logic to update song listening data
 
-            // const now = Date.now();
-            // setDiscordRpcActivity({
-            //   details: `Listening to '${data.title}'`,
-            //   state: `By ${data.artists?.map((artist) => artist.name).join(', ')}`,
-            //   largeImageKey: 'nora_logo',
-            //   smallImageKey: 'song_artwork',
-            //   startTimestamp: now,
-            //   endTimestamp: now + data.duration * 1000
-            // });
-            setCurrentSongPath(song.path);
-            return data;
-            // returnlogger.debug(`total : ${console.timeEnd('total')}`);
-          }
-          logger.error(`Failed to parse the song to get metadata`, { audioId });
-          throw new Error('ERROR OCCURRED WHEN PARSING THE SONG TO GET METADATA');
-        }
+        // const now = Date.now();
+        // setDiscordRpcActivity({
+        //   details: `Listening to '${data.title}'`,
+        //   state: `By ${data.artists?.map((artist) => artist.name).join(', ')}`,
+        //   largeImageKey: 'nora_logo',
+        //   smallImageKey: 'song_artwork',
+        //   startTimestamp: now,
+        //   endTimestamp: now + data.duration * 1000
+        // });
+        setCurrentSongPath(song.path);
+        return data;
+        // returnlogger.debug(`total : ${console.timeEnd('total')}`);
       }
-      logger.error(`No matching song to send audio data`, { audioId });
+      logger.error(`No matching song to send audio data`, { audioId: songId });
       throw new Error('SONG_NOT_FOUND' as ErrorCodes);
     }
     logger.error(`Failed to read data.json because it doesn't exist or is empty.`, {
-      audioId,
-      songs: typeof songs,
-      isArray: Array.isArray(songs)
+      audioId: songId
     });
     throw new Error('EMPTY_SONG_ARRAY' as ErrorCodes);
   } catch (error) {

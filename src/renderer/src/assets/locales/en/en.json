@@ -147,8 +147,8 @@
   "sortTypes": {
     "aToZ": "A to Z",
     "zToA": "Z to A",
-    "dateAddedAscending": "Newest",
-    "dateAddedDescending": "Oldest",
+    "dateAddedAscending": "Oldest",
+    "dateAddedDescending": "Newest",
     "releasedYearAscending": "Released year (Ascending)",
     "releasedYearDescending": "Released year (Descending)",
     "allTimeMostListened": "Most-listened (All time)",

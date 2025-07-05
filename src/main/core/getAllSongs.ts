@@ -1,13 +1,12 @@
 // import { getListeningData } from '../filesystem';
 import { parseSongArtworks } from '@main/fs/resolveFilePaths';
 import logger from '../logger';
-import paginateData from '../utils/paginateData';
 import { getAllSongs as getAllSavedSongs } from '@main/db/queries/songs';
 
 type SongArtwork = Awaited<
   ReturnType<typeof getAllSavedSongs>
->[number]['artworks'][number]['artwork'];
-const parsePaletteFromArtworks = (artworks: SongArtwork[]): PaletteData | undefined => {
+>['data'][number]['artworks'][number]['artwork'];
+export const parsePaletteFromArtworks = (artworks: SongArtwork[]): PaletteData | undefined => {
   const artworkWithPalette = artworks.find((artwork) => !!artwork.palette);
 
   if (artworkWithPalette) {
@@ -73,91 +72,105 @@ const getAllSongs = async (
   filterType?: SongFilterTypes,
   paginatingData?: PaginatingData
 ) => {
-  const songsData = await getAllSavedSongs();
+  const songsData = await getAllSavedSongs({
+    start: paginatingData?.start ?? 0,
+    end: paginatingData?.end ?? 0,
+    filterType,
+    sortType
+  });
   // const listeningData = getListeningData();
 
-  let result = paginateData([] as AudioInfo[], sortType, paginatingData);
+  const result: PaginatedResult<AudioInfo, SongSortTypes> = {
+    data: [],
+    total: 0,
+    sortType,
+    start: 0,
+    end: 0
+  };
 
-  if (songsData && songsData.length > 0) {
-    const audioData: AudioInfo[] =
-      // sortSongs(
-      // filterSongs(songsData, filterType),
-      // sortType,
-      // listeningData
-      // )
+  if (songsData && songsData.data.length > 0) {
+    // const audioData = sortSongs(
+    //   filterSongs(songsData, filterType),
+    //   sortType,
+    //   undefined
+    //   // listeningData
+    // );
 
-      songsData.map((song) => {
-        // Artists
-        const artists =
-          song.artists?.map((a) => ({ artistId: String(a.artist.id), name: a.artist.name })) ?? [];
+    result.data = songsData.data.map((song) => {
+      // Artists
+      const artists =
+        song.artists?.map((a) => ({ artistId: String(a.artist.id), name: a.artist.name })) ?? [];
 
-        // Album (pick first if multiple)
-        const albumObj = song.albums?.[0]?.album;
-        const album = albumObj ? { albumId: String(albumObj.id), name: albumObj.title } : undefined;
+      // Album (pick first if multiple)
+      const albumObj = song.albums?.[0]?.album;
+      const album = albumObj ? { albumId: String(albumObj.id), name: albumObj.title } : undefined;
 
-        // // Artworks (pick highest and lowest resolution)
-        // let artworkPath = '';
-        // let optimizedArtworkPath = '';
-        // let isDefaultArtwork = true;
-        // if (song.artworks && song.artworks.length > 0) {
-        //   // Sort by resolution (width * height), fallback to 0 if missing
-        //   const sortedArtworks = song.artworks
-        //     .map((a) => a.artwork)
-        //     .filter((a) => !!a)
-        //     .sort((a, b) => {
-        //       const aRes = a.width * a.height;
-        //       const bRes = b.width * b.height;
+      // // Artworks (pick highest and lowest resolution)
+      // let artworkPath = '';
+      // let optimizedArtworkPath = '';
+      // let isDefaultArtwork = true;
+      // if (song.artworks && song.artworks.length > 0) {
+      //   // Sort by resolution (width * height), fallback to 0 if missing
+      //   const sortedArtworks = song.artworks
+      //     .map((a) => a.artwork)
+      //     .filter((a) => !!a)
+      //     .sort((a, b) => {
+      //       const aRes = a.width * a.height;
+      //       const bRes = b.width * b.height;
 
-        //       return aRes - bRes;
-        //     });
-        //   if (sortedArtworks.length > 0) {
-        //     isDefaultArtwork = false;
-        //     optimizedArtworkPath = sortedArtworks[0]?.path ?? '';
-        //     artworkPath = sortedArtworks[sortedArtworks.length - 1]?.path ?? '';
-        //   }
-        // }
-        // const artworkPaths = {
-        //   isDefaultArtwork,
-        //   artworkPath,
-        //   optimizedArtworkPath
-        // };
+      //       return aRes - bRes;
+      //     });
+      //   if (sortedArtworks.length > 0) {
+      //     isDefaultArtwork = false;
+      //     optimizedArtworkPath = sortedArtworks[0]?.path ?? '';
+      //     artworkPath = sortedArtworks[sortedArtworks.length - 1]?.path ?? '';
+      //   }
+      // }
+      // const artworkPaths = {
+      //   isDefaultArtwork,
+      //   artworkPath,
+      //   optimizedArtworkPath
+      // };
 
-        // Blacklist
-        const isBlacklisted = !!song.blacklist;
-        // Track number
-        const trackNo = song.trackNumber ?? undefined;
-        // Added date
-        const addedDate = song.createdAt ? new Date(song.createdAt).getTime() : 0;
-        // isAFavorite: You must join your favorites table if you have one. Here we default to false.
-        const isAFavorite = false;
+      // Blacklist
+      const isBlacklisted = !!song.blacklist;
+      // Track number
+      const trackNo = song.trackNumber ?? undefined;
+      // Added date
+      const addedDate = song.createdAt ? new Date(song.createdAt).getTime() : 0;
+      // isAFavorite: You must join your favorites table if you have one. Here we default to false.
+      const isAFavorite = false;
 
-        const artworks = song.artworks.map((a) => a.artwork);
+      const artworks = song.artworks.map((a) => a.artwork);
 
-        return {
-          title: song.title,
-          artists,
-          album,
-          duration: Number(song.duration),
-          artworkPaths: parseSongArtworks(artworks),
-          path: song.path,
-          songId: String(song.id),
-          addedDate,
-          isAFavorite,
-          year: song.year ?? undefined,
-          paletteData: parsePaletteFromArtworks(artworks),
-          isBlacklisted,
-          trackNo
-        };
-      });
+      return {
+        title: song.title,
+        artists,
+        album,
+        duration: Number(song.duration),
+        artworkPaths: parseSongArtworks(artworks),
+        path: song.path,
+        songId: String(song.id),
+        addedDate,
+        isAFavorite,
+        year: song.year ?? undefined,
+        paletteData: parsePaletteFromArtworks(artworks),
+        isBlacklisted,
+        trackNo
+      };
+    });
 
-    result = paginateData(audioData, sortType, paginatingData);
+    // result = paginateData(parsedData, sortType, paginatingData);
+    result.total = songsData.data.length;
+    result.start = songsData.start;
+    result.end = songsData.end;
   }
 
   logger.debug(`Sending data related to all the songs`, {
     sortType,
     filterType,
-    start: result.start,
-    end: result.end
+    start: songsData.start,
+    end: songsData.end
   });
   return result;
 };

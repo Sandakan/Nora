@@ -1,6 +1,6 @@
 import { db } from '@db/db';
 import { folderBlacklist, musicFolders, songs } from '@db/schema';
-import { and, eq, inArray, notInArray } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, notInArray } from 'drizzle-orm';
 
 export const isSongWithPathAvailable = async (path: string, trx: DB | DBTransaction = db) => {
   const song = await trx.select({ songId: songs.id }).from(songs).where(eq(songs.path, path));
@@ -106,9 +106,98 @@ export async function getSongsInFolders(
   return result;
 }
 
-export const getAllSongs = async (trx: DB | DBTransaction = db) => {
+export type GetAllSongsReturnType = Awaited<ReturnType<typeof getAllSongs>>['data'];
+const defaultGetAllSongsOptions = {
+  start: 0,
+  end: 0,
+  filterType: 'notSelected' as SongFilterTypes,
+  sortType: 'aToZ' as SongSortTypes
+};
+export type GetAllSongsOptions = Partial<typeof defaultGetAllSongsOptions>;
+
+export const getAllSongs = async (
+  options: GetAllSongsOptions = defaultGetAllSongsOptions,
+  trx: DB | DBTransaction = db
+) => {
+  const { start = 0, end = 0, filterType = 'notSelected', sortType = 'aToZ' } = options;
+  const limit = end - start === 0 ? undefined : end - start;
+
   // Fetch all songs with their relations
   const songsData = await trx.query.songs.findMany({
+    with: {
+      artists: {
+        with: {
+          artist: {
+            columns: { id: true, name: true }
+          }
+        }
+      },
+      albums: {
+        with: {
+          album: {
+            columns: { id: true, title: true }
+          }
+        }
+      },
+      artworks: {
+        with: {
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
+        }
+      },
+      blacklist: {
+        columns: { songId: true }
+        // where: (songs) => {
+        //   // Apply filter for blacklisted songs if needed
+        //   const filters: SQL[] = [];
+
+        //   // if (filterType === 'blacklistedSongs') {
+        //   //   filters.push(eq(songs.blacklist.length, 1));
+        //   // } else if (filterType === 'notBlacklisted') {
+        //   //   filters.push(eq(songs.blacklist.length, 0));
+        //   // }
+
+        //   return or(...filters);
+        // }
+      }
+    },
+    orderBy: (songs) => {
+      if (sortType === 'aToZ') return [asc(songs.title)];
+      if (sortType === 'zToA') return [desc(songs.title)];
+      if (sortType === 'releasedYearAscending') return [asc(songs.year), asc(songs.title)];
+      if (sortType === 'releasedYearDescending') return [desc(songs.year), asc(songs.title)];
+      if (sortType === 'trackNoAscending') return [asc(songs.trackNumber), asc(songs.title)];
+      if (sortType === 'trackNoDescending') return [desc(songs.trackNumber), asc(songs.title)];
+      if (sortType === 'dateAddedAscending') return [asc(songs.fileModifiedAt), asc(songs.title)];
+      if (sortType === 'dateAddedDescending') return [desc(songs.fileModifiedAt), asc(songs.title)];
+      if (sortType === 'addedOrder') return [desc(songs.createdAt), asc(songs.title)];
+
+      return [];
+    },
+    offset: start,
+    limit: limit
+  });
+
+  return {
+    data: songsData,
+    sortType,
+    filterType,
+    start,
+    end
+  };
+};
+
+export const getSongById = async (songId: number, trx: DB | DBTransaction = db) => {
+  const song = await trx.query.songs.findFirst({
+    where: eq(songs.id, songId),
     with: {
       artists: {
         with: {
@@ -143,7 +232,6 @@ export const getAllSongs = async (trx: DB | DBTransaction = db) => {
       }
     }
   });
-
-  return songsData;
+  return song;
 };
 

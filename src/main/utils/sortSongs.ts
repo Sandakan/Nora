@@ -1,4 +1,4 @@
-import { isSongBlacklisted } from './isBlacklisted';
+import type { GetAllSongsReturnType } from '@main/db/queries/songs';
 
 const getListeningDataOfASong = (songId: string, listeningData: SongListeningData[]) => {
   if (listeningData.length > 0) {
@@ -48,11 +48,11 @@ const parseListeningData = (listeningData?: SongListeningData) => {
   };
 };
 
-function sortSongs<T extends (SavableSongData | SongData)[]>(
-  data: T,
+function sortSongs(
+  data: GetAllSongsReturnType,
   sortType?: SongSortTypes,
   listeningData?: SongListeningData[]
-): T {
+): GetAllSongsReturnType {
   if (data && data.length > 0 && sortType) {
     if (sortType === 'aToZ')
       return data.sort((a, b) => {
@@ -91,17 +91,17 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
         data
           // sort with the track number
           .sort((a, b) => {
-            if (a.trackNo !== undefined && b.trackNo !== undefined) {
-              if (a.trackNo > b.trackNo) return 1;
-              if (a.trackNo < b.trackNo) return -1;
+            if (a.trackNumber !== null && b.trackNumber !== null) {
+              if (a.trackNumber > b.trackNumber) return 1;
+              if (a.trackNumber < b.trackNumber) return -1;
             }
             return 0;
           })
           // sort with the disk number
           .sort((a, b) => {
-            if (a.discNo !== undefined && b.discNo !== undefined) {
-              if (a.discNo > b.discNo) return 1;
-              if (a.discNo < b.discNo) return -1;
+            if (a.diskNumber !== null && b.diskNumber !== null) {
+              if (a.diskNumber > b.diskNumber) return 1;
+              if (a.diskNumber < b.diskNumber) return -1;
             }
             return 0;
           })
@@ -109,16 +109,16 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
     if (sortType === 'trackNoDescending')
       return data
         .sort((a, b) => {
-          if (a.trackNo !== undefined && b.trackNo !== undefined) {
-            if (a.trackNo < b.trackNo) return 1;
-            if (a.trackNo > b.trackNo) return -1;
+          if (a.trackNumber !== null && b.trackNumber !== null) {
+            if (a.trackNumber < b.trackNumber) return 1;
+            if (a.trackNumber > b.trackNumber) return -1;
           }
           return 0;
         })
         .sort((a, b) => {
-          if (a.discNo !== undefined && b.discNo !== undefined) {
-            if (a.discNo < b.discNo) return 1;
-            if (a.discNo > b.discNo) return -1;
+          if (a.diskNumber !== null && b.diskNumber !== null) {
+            if (a.diskNumber < b.diskNumber) return 1;
+            if (a.diskNumber > b.diskNumber) return -1;
           }
           return 0;
         });
@@ -127,22 +127,22 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
         if (a.artists && b.artists) {
           if (
             a.artists
-              .map((artist) => artist.name)
+              .map((artist) => artist.artist.name)
               .join(',')
               .toLowerCase() >
             b.artists
-              .map((artist) => artist.name)
+              .map((artist) => artist.artist.name)
               .join(',')
               .toLowerCase()
           )
             return 1;
           if (
             a.artists
-              .map((artist) => artist.name)
+              .map((artist) => artist.artist.name)
               .join(',')
               .toLowerCase() <
             b.artists
-              .map((artist) => artist.name)
+              .map((artist) => artist.artist.name)
               .join(',')
               .toLowerCase()
           )
@@ -155,22 +155,22 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
         if (a.artists && b.artists) {
           if (
             a.artists
-              .map((artist) => artist.name)
+              .map((artist) => artist.artist.name)
               .join(',')
               .toLowerCase() <
             b.artists
-              .map((artist) => artist.name)
+              .map((artist) => artist.artist.name)
               .join(',')
               .toLowerCase()
           )
             return 1;
           if (
             a.artists
-              .map((artist) => artist.name)
+              .map((artist) => artist.artist.name)
               .join(',')
               .toLowerCase() >
             b.artists
-              .map((artist) => artist.name)
+              .map((artist) => artist.artist.name)
               .join(',')
               .toLowerCase()
           )
@@ -180,25 +180,65 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
       });
     if (sortType === 'albumNameAscending')
       return data.sort((a, b) => {
-        if (a.album && b.album) {
-          if (a.album.name.toLowerCase() > b.album.name.toLowerCase()) return 1;
-          if (a.album.name.toLowerCase() < b.album.name.toLowerCase()) return -1;
+        if (a.albums && b.albums) {
+          if (
+            a.albums
+              .map((album) => album.album.title)
+              .join(',')
+              .toLowerCase() >
+            b.albums
+              .map((album) => album.album.title)
+              .join(',')
+              .toLowerCase()
+          )
+            return 1;
+          if (
+            a.albums
+              .map((album) => album.album.title)
+              .join(',')
+              .toLowerCase() <
+            b.albums
+              .map((album) => album.album.title)
+              .join(',')
+              .toLowerCase()
+          )
+            return -1;
         }
         return 0;
       });
     if (sortType === 'albumNameDescending')
       return data.sort((a, b) => {
-        if (a.album && b.album) {
-          if (a.album.name.toLowerCase() < b.album.name.toLowerCase()) return 1;
-          if (a.album.name.toLowerCase() > b.album.name.toLowerCase()) return -1;
+        if (a.albums && b.albums) {
+          if (
+            a.albums
+              .map((album) => album.album.title)
+              .join(',')
+              .toLowerCase() <
+            b.albums
+              .map((album) => album.album.title)
+              .join(',')
+              .toLowerCase()
+          )
+            return 1;
+          if (
+            a.albums
+              .map((album) => album.album.title)
+              .join(',')
+              .toLowerCase() >
+            b.albums
+              .map((album) => album.album.title)
+              .join(',')
+              .toLowerCase()
+          )
+            return -1;
         }
         return 0;
       });
     if (listeningData) {
       if (sortType === 'allTimeMostListened')
         return data.sort((a, b) => {
-          const listeningDataOfA = getListeningDataOfASong(a.songId, listeningData);
-          const listeningDataOfB = getListeningDataOfASong(b.songId, listeningData);
+          const listeningDataOfA = getListeningDataOfASong(a.id.toString(), listeningData);
+          const listeningDataOfB = getListeningDataOfASong(b.id.toString(), listeningData);
           const parsedListeningDataOfA = parseListeningData(listeningDataOfA);
           const parsedListeningDataOfB = parseListeningData(listeningDataOfB);
           if (parsedListeningDataOfA.allTimeListens < parsedListeningDataOfB.allTimeListens)
@@ -209,8 +249,8 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
         });
       if (sortType === 'allTimeLeastListened')
         return data.sort((a, b) => {
-          const listeningDataOfA = getListeningDataOfASong(a.songId, listeningData);
-          const listeningDataOfB = getListeningDataOfASong(b.songId, listeningData);
+          const listeningDataOfA = getListeningDataOfASong(a.id.toString(), listeningData);
+          const listeningDataOfB = getListeningDataOfASong(b.id.toString(), listeningData);
           const parsedListeningDataOfA = parseListeningData(listeningDataOfA);
           const parsedListeningDataOfB = parseListeningData(listeningDataOfB);
           if (parsedListeningDataOfA.allTimeListens > parsedListeningDataOfB.allTimeListens)
@@ -221,8 +261,8 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
         });
       if (sortType === 'monthlyMostListened')
         return data.sort((a, b) => {
-          const listeningDataOfA = getListeningDataOfASong(a.songId, listeningData);
-          const listeningDataOfB = getListeningDataOfASong(b.songId, listeningData);
+          const listeningDataOfA = getListeningDataOfASong(a.id.toString(), listeningData);
+          const listeningDataOfB = getListeningDataOfASong(b.id.toString(), listeningData);
           const parsedListeningDataOfA = parseListeningData(listeningDataOfA);
           const parsedListeningDataOfB = parseListeningData(listeningDataOfB);
           if (parsedListeningDataOfA.thisMonthListens < parsedListeningDataOfB.thisMonthListens)
@@ -233,8 +273,8 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
         });
       if (sortType === 'monthlyLeastListened')
         return data.sort((a, b) => {
-          const listeningDataOfA = getListeningDataOfASong(a.songId, listeningData);
-          const listeningDataOfB = getListeningDataOfASong(b.songId, listeningData);
+          const listeningDataOfA = getListeningDataOfASong(a.id.toString(), listeningData);
+          const listeningDataOfB = getListeningDataOfASong(b.id.toString(), listeningData);
           const parsedListeningDataOfA = parseListeningData(listeningDataOfA);
           const parsedListeningDataOfB = parseListeningData(listeningDataOfB);
           if (parsedListeningDataOfA.thisMonthListens > parsedListeningDataOfB.thisMonthListens)
@@ -254,8 +294,10 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
           return 0;
         })
         .sort((a, b) => {
-          if (a.modifiedDate && b.modifiedDate) {
-            return new Date(a.modifiedDate).getTime() < new Date(b.modifiedDate).getTime() ? 1 : -1;
+          if (a.fileModifiedAt && b.fileModifiedAt) {
+            return new Date(a.fileModifiedAt).getTime() < new Date(b.fileModifiedAt).getTime()
+              ? 1
+              : -1;
           }
           return 0;
         });
@@ -269,31 +311,33 @@ function sortSongs<T extends (SavableSongData | SongData)[]>(
           return 0;
         })
         .sort((a, b) => {
-          if (a.addedDate && b.addedDate) {
-            return new Date(a.addedDate).getTime() > new Date(b.addedDate).getTime() ? 1 : -1;
+          if (a.fileCreatedAt && b.fileCreatedAt) {
+            return new Date(a.fileCreatedAt).getTime() > new Date(b.fileCreatedAt).getTime()
+              ? 1
+              : -1;
           }
           return 0;
         });
     if (sortType === 'blacklistedSongs')
-      return (data.filter((song) => isSongBlacklisted(song.songId, song.path)) as T).sort(
-        (a, b) => {
+      return data
+        .filter((song) => !!song.blacklist)
+        .sort((a, b) => {
           if (a.title.toLowerCase().replace(/\W/gi, '') > b.title.toLowerCase().replace(/\W/gi, ''))
             return 1;
           if (a.title.toLowerCase().replace(/\W/gi, '') < b.title.toLowerCase().replace(/\W/gi, ''))
             return -1;
           return 0;
-        }
-      );
+        });
     if (sortType === 'whitelistedSongs')
-      return (data.filter((song) => !isSongBlacklisted(song.songId, song.path)) as T).sort(
-        (a, b) => {
+      return data
+        .filter((song) => !song.blacklist)
+        .sort((a, b) => {
           if (a.title.toLowerCase().replace(/\W/gi, '') > b.title.toLowerCase().replace(/\W/gi, ''))
             return 1;
           if (a.title.toLowerCase().replace(/\W/gi, '') < b.title.toLowerCase().replace(/\W/gi, ''))
             return -1;
           return 0;
-        }
-      );
+        });
   }
   return data;
 }

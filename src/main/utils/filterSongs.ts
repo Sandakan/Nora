@@ -1,17 +1,11 @@
-import { isSongBlacklisted } from './isBlacklisted';
+import type { GetAllSongsReturnType } from '@main/db/queries/songs';
 
-function filterSongs<T extends (SavableSongData | SongData)[]>(
-  data: T,
-  filterType?: SongFilterTypes
-  //   listeningData?: SongListeningData[]
-): T {
+function filterSongs(data: GetAllSongsReturnType, filterType?: SongFilterTypes) {
   if (data && data.length > 0 && filterType) {
     if (filterType === 'notSelected') return data;
 
-    if (filterType === 'blacklistedSongs')
-      return data.filter((song) => isSongBlacklisted(song.songId, song.path)) as T;
-    if (filterType === 'whitelistedSongs')
-      return data.filter((song) => !isSongBlacklisted(song.songId, song.path)) as T;
+    if (filterType === 'blacklistedSongs') return data.filter((song) => !!song.blacklist);
+    if (filterType === 'whitelistedSongs') return data.filter((song) => !song.blacklist);
   }
 
   return data;
