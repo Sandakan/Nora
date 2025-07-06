@@ -4,7 +4,7 @@ import { songSearchSchema } from '@renderer/utils/zod/songSchema';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
 import { zodValidator } from '@tanstack/zod-adapter';
-import { lazy, useCallback, useContext, useEffect, useState } from 'react';
+import { lazy, useCallback, useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import storage from '@renderer/utils/localStorage';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
@@ -18,9 +18,30 @@ import Song from '@renderer/components/SongsPage/Song';
 import DataFetchingImage from '@assets/images/svg/Road trip_Monochromatic.svg';
 import NoSongsImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg';
 import Img from '@renderer/components/Img';
+import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
+import { queryClient } from '@renderer/index';
+
+const fetchSongsData = async (sortingOrder: SongSortTypes, filteringOrder: SongFilterTypes) => {
+  const songs = window.api.audioLibraryControls.getAllSongs(sortingOrder, filteringOrder);
+  return songs;
+};
+
+const songsQueryOptions = (sortingOrder: SongSortTypes, filteringOrder: SongFilterTypes) =>
+  queryOptions({
+    queryKey: ['songs', { sortingOrder }, { filteringOrder }],
+    queryFn: () => fetchSongsData(sortingOrder, filteringOrder)
+  });
 
 export const Route = createFileRoute('/main-player/songs/')({
   validateSearch: zodValidator(songSearchSchema),
+  loaderDeps: ({ search }) => ({
+    sortingOrder: search.sortingOrder,
+    filteringOrder: search.filteringOrder
+  }),
+  loader: ({ deps }) =>
+    queryClient.ensureQueryData(
+      songsQueryOptions(deps.sortingOrder ?? 'aToZ', deps.filteringOrder ?? 'notSelected')
+    ),
   component: SongsPage
 });
 
@@ -58,27 +79,29 @@ function SongsPage() {
   } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
 
-  const [songData, setSongData] = useState<AudioInfo[]>([]);
+  const {
+    data: { data: songData }
+  } = useSuspenseQuery(songsQueryOptions(sortingOrder, filteringOrder));
 
-  const fetchSongsData = useCallback(() => {
-    console.time('songs');
+  // const fetchSongsData = useCallback(() => {
+  //   console.time('songs');
 
-    window.api.audioLibraryControls
-      .getAllSongs(sortingOrder, filteringOrder)
-      .then((audioInfoArray) => {
-        console.timeEnd('songs');
+  //   window.api.audioLibraryControls
+  //     .getAllSongs(sortingOrder, filteringOrder)
+  //     .then((audioInfoArray) => {
+  //       console.timeEnd('songs');
 
-        if (audioInfoArray) {
-          if (audioInfoArray.data.length === 0) setSongData([]);
-          else setSongData(audioInfoArray.data);
-        }
-        return undefined;
-      })
-      .catch((err) => console.error(err));
-  }, [filteringOrder, sortingOrder]);
+  //       if (audioInfoArray) {
+  //         if (audioInfoArray.data.length === 0) setSongData([]);
+  //         else setSongData(audioInfoArray.data);
+  //       }
+  //       return undefined;
+  //     })
+  //     .catch((err) => console.error(err));
+  // }, [filteringOrder, sortingOrder]);
 
   useEffect(() => {
-    fetchSongsData();
+    // fetchSongsData();
     const manageSongsDataUpdatesInSongsPage = (e: Event) => {
       if ('detail' in e) {
         const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
@@ -90,7 +113,7 @@ function SongsPage() {
             event.dataType === 'blacklist/songBlacklist' ||
             (event.dataType === 'songs/likes' && event.eventData.length > 1)
           )
-            fetchSongsData();
+            queryClient.invalidateQueries(songsQueryOptions(sortingOrder, filteringOrder));
         }
       }
     };
@@ -98,7 +121,7 @@ function SongsPage() {
     return () => {
       document.removeEventListener('app/dataUpdates', manageSongsDataUpdatesInSongsPage);
     };
-  }, [fetchSongsData]);
+  }, [filteringOrder, sortingOrder]);
 
   useEffect(() => {
     storage.sortingStates.setSortingStates('songsPage', sortingOrder);
@@ -108,26 +131,26 @@ function SongsPage() {
     changePromptMenuData(
       true,
       <AddMusicFoldersPrompt
-        onSuccess={(songs) => {
-          const relevantSongsData: AudioInfo[] = songs.map((song) => {
-            return {
-              title: song.title,
-              songId: song.songId,
-              artists: song.artists,
-              duration: song.duration,
-              path: song.path,
-              artworkPaths: song.artworkPaths,
-              addedDate: song.addedDate,
-              isAFavorite: song.isAFavorite,
-              isBlacklisted: song.isBlacklisted
-            };
-          });
-          setSongData(relevantSongsData);
+        onSuccess={() => {
+          // const relevantSongsData: AudioInfo[] = songs.map((song) => {
+          //   return {
+          //     title: song.title,
+          //     songId: song.songId,
+          //     artists: song.artists,
+          //     duration: song.duration,
+          //     path: song.path,
+          //     artworkPaths: song.artworkPaths,
+          //     addedDate: song.addedDate,
+          //     isAFavorite: song.isAFavorite,
+          //     isBlacklisted: song.isBlacklisted
+          //   };
+          // });
+          queryClient.invalidateQueries(songsQueryOptions(sortingOrder, filteringOrder));
         }}
-        onFailure={() => setSongData([])}
+        // onFailure={() => setSongData([])}
       />
     );
-  }, [changePromptMenuData]);
+  }, [changePromptMenuData, filteringOrder, sortingOrder]);
 
   const importAppData = useCallback(
     (
