@@ -108,7 +108,7 @@
     "@neos21/detect-chinese": "^0.0.2",
     "@sglkc/kuroshiro": "^1.0.1",
     "@sglkc/kuroshiro-analyzer-kuromoji": "^1.0.1",
-    "@tanstack/react-pacer": "^0.8.0",
+    "@tanstack/react-pacer": "^0.11.0",
     "@tanstack/react-query": "^5.74.7",
     "@tanstack/react-query-devtools": "^5.52.2",
     "@tanstack/react-router": "^1.114.34",
@@ -137,7 +137,7 @@
     "tailwind-merge": "^3.0.2",
     "wanakana": "^5.3.1",
     "winston": "^3.17.0",
-    "zod": "^3.24.3"
+    "zod": "^4.0.10"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-ts": "^3.0.0",
@@ -178,7 +178,7 @@
     "globals": "^16.0.0",
     "husky": "^9.0.11",
     "jest": "^30.0.4",
-    "material-symbols": "^0.32.0",
+    "material-symbols": "^0.33.0",
     "postcss": "^8.4.35",
     "prettier": "^3.2.4",
     "prettier-plugin-tailwindcss": "^0.6.11",
