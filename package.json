@@ -137,7 +137,7 @@
     "tailwind-merge": "^3.0.2",
     "wanakana": "^5.3.1",
     "winston": "^3.17.0",
-    "zod": "^4.0.10"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-ts": "^3.0.0",
