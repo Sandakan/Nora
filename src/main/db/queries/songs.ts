@@ -284,4 +284,3 @@ export const updateSongByPath = async (
   const updatedSong = await trx.update(songs).set(song).where(eq(songs.path, path)).returning();
   return updatedSong;
 };
-

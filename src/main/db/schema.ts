@@ -513,4 +513,3 @@ export const artworksPlaylistsRelations = relations(artworksPlaylists, ({ one })
     references: [playlists.id]
   })
 }));
-

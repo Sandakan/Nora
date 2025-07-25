@@ -30,7 +30,6 @@
   - Added volume control to full-screen player.
   - Added support for lyrics romanization for supported languages. Thanks @ElectroHeavenVN.
 - ### 🔨 Fixes and Improvements
-
   - Fixed a bug where the correct lyrics line won't scroll to the center of the screen if the song is paused.
   - Fixed a bug where items in ArtistPage, AlbumPage, PlaylistPage, and GenrePage are not centered in their grid cells.
   - Fixed a bug where Discord Presence doesn't update as the player state changes. Fixes [#244](https://github.com/Sandakan/Nora/issues/244).
@@ -61,7 +60,6 @@
   - Fixed the shuffle button not working and some shuffling issues. Fixes [#343](https://github.com/Sandakan/Nora/issues/343).
 
 - ### 🚀 Development updates
-
   - Migrated to [@tanstack/store](https://tanstack.com/store/latest) for efficient app state management reducing unnecessary re-renders and resource usage.
   - Nora was fully converted to an ESM-packaged app.
   - Fixed some localization errors in the en.json file.
@@ -83,7 +81,6 @@
 - ### **v3.0.0-stable - ( 9<sup>th</sup> of May 2024 )**
 
 - ### 🎉 New Features and Updates
-
   - Added an experimental full-screen player mode. Fixes #222.
   - Added support for translating lyrics. Fixes #239.
   - Added support for dynamic themes based on the currently playing song.
@@ -132,7 +129,6 @@
 <br>
 
 - ### **v2.4.3-stable - ( 21<sup>th</sup> of October 2023 )**
-
   - ### 🔨 Fixes and Improvements
     - Updated dependencies to fix some security vulnerabilities.
 
@@ -141,7 +137,6 @@
 <br>
 
 - ### **v2.4.2-stable - ( 10<sup>th</sup> of September 2023 )**
-
   - ### 🔨 Fixes and Improvements
     - Fixed a bug where the installer doesn't include required environment variables.
     - Fixed a bug where users can't apply custom musixmatch tokens.
@@ -150,16 +145,13 @@
 <br>
 
 - ### **v2.4.1-stable - ( 10<sup>th</sup> of September 2023 )**
-
   - ### 🔨 Fixes and Improvements
     - Fixed a bug where environment variables are not initialized when migrating the database to a newer version. Fixes [#195](https://github.com/Sandakan/Nora/issues/195).
 
 <br>
 
 - ### **v2.4.0-stable - ( 09<sup>th</sup> of September 2023 )**
-
   - ### 🎉 New Features and Updates
-
     - Added support for authenticating Last.FM users from Nora.
     - Added support for Last.Fm scrobbling. Fixes #187.
     - Added support for sending favorites data to Last.Fm.
@@ -177,7 +169,6 @@
     - Added an option to display song track number instead of the index number when in Albums Info Page. Fixes [#194](https://github.com/Sandakan/Nora/issues/194).
 
   - ### 🔨 Fixes and Improvements
-
     - Fixed a bug where suggestion prompts don't hide when clicked on the button with an up arrow.
     - Updated the feature to edit the next line's start tag with the current line's end tag and vice versa automatically.
     - Fixed a bug where saved lyrics will be overwritten if the user selected the 'Synchronized Lyrics Only' or 'Un-synchronized and Synchronized Lyrics Only' options to save lyrics automatically and clicked the 'Show Online Lyrics' button.
@@ -211,9 +202,7 @@
 <br>
 
 - ### **v2.3.0-stable - ( 30<sup>th</sup> of June 2023 )**
-
   - ### 🎉 New Features and Features
-
     - Added support for enhanced synced lyrics in Nora (Experimental).
     - Added support for syncing unsynced lyrics right from the app (Experimental).
     - Added support for importing and exporting app data (Experimental).
@@ -271,16 +260,13 @@
 <br>
 
 - ### **v2.2.0-stable - ( 20<sup>th</sup> of May 2023 )**
-
   - ### 🎉 New Features and Features
-
     - Added the feature to save some images that appear in the app.
     - Added an experimental fix for the bug where other music players like Groove Music don't recognize artworks edited by
       Nora.
     - Added a new keyboard shortcut to quickly navigate to Search. Fixes [#173](https://github.com/Sandakan/Nora/issues/173).
 
   - ### 🔨 Fixes and Improvements
-
     - Improved the artists' splitting algorithm of suggestions.
     - Fixed a bug where images and lyrics lines are draggable.
     - Fixed a bug where playlist images aren't positioned correctly when the "artworks made from song covers" feature is
@@ -302,9 +288,7 @@
 <br>
 
 - ### **v2.1.0-stable - ( 13<sup>th</sup> of May 2023 )**
-
   - ### 🎉 New Features and Features
-
     - Added a new design for the song cards on the Home page. Thanks to [**@Shapalapa** for the design inspiration](https://discord.com/channels/727373643935645727/1096107720358248571/1096107720358248571).
     - Now songs show their album name next to their artist names.
     - Added support for a new suggestion in the SongInfoPage that gets triggered when there are names of featured artists in the title of a song asking to add them to the song artists.
@@ -319,7 +303,6 @@
     - Added a new context menu option for folders to show the relevant folder on the Windows Explorer.
 
   - ### 🔨 Fixes and Improvements
-
     - Fixed some bugs related to draggable songs in the queue. Fixes [#63](https://github.com/Sandakan/Nora/issues/63).
     - Fixed some bugs related to sorting content in the app. Fixes https://github.com/Sandakan/Nora/issues/156.
     - Fixed a bug where clicking `Play next` would add the song next to the next song.
@@ -358,9 +341,7 @@
 <br>
 
 - ### **v2.0.0-stable - ( 23<sup>th</sup> of April 2023 )**
-
   - ### 🎉 New Features and Features
-
     - Added the 'Generate Palettes' button to the About section of the Settings to generate palettes on demand.
     - Added playback-only experimental support for audio formats like FLAC, AAC, and M4R. Fixes
       [#148](https://github.com/Sandakan/Nora/issues/148), [#142](https://github.com/Sandakan/Nora/issues/142), [#154](https://github.com/Sandakan/Nora/issues/154).
@@ -391,7 +372,6 @@
       periodically.
 
   - ### 🔨 Fixes and Improvements
-
     - Reduced the parsing time of a newly created library by around 30%.
     - Fixed a bug where the app theme will change when changing the system's theme even though the user didn't select to
       use the system theme in the app.
@@ -464,9 +444,7 @@
 <br>
 
 - ### **v1.2.0-stable - ( 9<sup>th</sup> of March 2023 )**
-
   - ### 🎉 New Features and Features
-
     - Added new AppStats section to the SettingsPage.
     - Added a new notification type that shows the progression of the song parsing process and song deletion process.
     - Added a 'See All' button for Recently Added Songs and Recently Played Songs sections in HomePage. Closes [#118](https://github.com/Sandakan/Nora/issues/118).
@@ -507,7 +485,6 @@
 <br>
 
 - ### **v1.1.0-stable - ( 26<sup>th</sup> of February 2023 )**
-
   - ### 🎉 New Features and Features
     - Support for editing audio files outside the library.
     - Support for further customizations when downloading song metadata from the internet.
@@ -549,7 +526,6 @@
 <br>
 
 - ### **v1.0.0-stable - ( 17<sup>th</sup> of February 2023 )**
-
   - ### 🎉 New Features and Updates
     - Now LyricsPage will show the copyright info of the lyrics at the bottom of the page.
     - Metadata of Musixmatch for songs now include artworks from Spotify.
@@ -671,7 +647,6 @@
 <br>
 
 - ### **v0.8.0-alpha - ( 19<sup>th</sup> of August 2022 )**
-
   - ### 🎉 New Features and Updates
     - Now double-clicking on a supported song in the File Explorer would play it on the app. Be sure if you made Nora the default audio player for the respective audio file. (Experimental).
     - Now users can drag and drop a supported audio file to play it on the player. (Experimental)
@@ -709,7 +684,6 @@
 <br>
 
 - ### **v0.7.0-alpha - ( 27<sup>th</sup> of July 2022 )**
-
   - ### 🎉 New Features and Updates
     - Support for .ogg and .wav file extensions as songs. Now you can play them in the player. (Experimental).
     - Added a Release Notes page to display information about the updates of the app. It will inform the user if he/she uses an outdated app.
@@ -767,7 +741,6 @@
 <br>
 
 - ### **v0.6.0-alpha - ( 24<sup>th</sup> of June 2022 )**
-
   - ### 🎉 New Features and Features
     - Added the support to edit song id3 tags. Right click on a song and select Edit song tags to go to the SongID3TagEditorPage. Currently changes to those data wouldn't be updated on the app. (Experimental)
     - Added the basement to provide support for m3u files to import and export playlists.
@@ -808,9 +781,7 @@
 <br/>
 
 - ### **v0.5.0-alpha - ( 25<sup>th</sup> of May 2022 )**
-
   - ### 🎉New Features and Features
-
     - Now queues and some other features save their states between sessions (Experimental).
     - Now Currently Playing Queue shows information about the current queue including playlist name, artwork etc (Experimental).
     - Updated settings page to provide information about app version, github repository etc (Experimental).
@@ -829,7 +800,6 @@
     - Added new buttons in ArtistInfoPage, AlbumInfoPage, PlaylistInfoPage, CurrentQueuePage to provide functions like play all, shuffle and play, and add to queue etc.
 
   - ### 🔨 Fixes and Improvements
-
     - Fixed a bug related to npm packages.
     - Updated parseSong to differentiate between currently added songs and new songs. Previously this problem will duplicate the data related to the song in the library.
     - Fixed some music playback issues.
@@ -848,7 +818,6 @@
 <br/>
 
 - ### **v0.5.0-alpha - ( 25<sup>th</sup> of May 2022 )**
-
   - Migrated the song player to the root of the app to provide support for features such as mini-player (Experimental).
   - Updated readme file.
   - Improved the codebase.
@@ -856,7 +825,6 @@
 <br/>
 
 - ### **v0.4.0-alpha - ( 14<sup>th</sup> of May 2022 )**
-
   - Added song queuing. Now users can queue songs.
   - Started using useContext React api to reduce prop drilling.
   - Started using useReducer React api to avoid rendering issues occurred when using useState.
@@ -889,7 +857,6 @@
 <br/>
 
 - ### **v0.3.1-alpha - ( 07<sup>th</sup> of May 2022 )**
-
   - Migration from FontAwesome icons to Google Material Icons.
   - Improved styles to support Google material icons functionality.
   - Offloaded creation and optimization of cover arts to Sharp package.
@@ -902,7 +869,6 @@
 <br/>
 
 - ### **v0.3.0-alpha - ( 02<sup>nd</sup> of May 2022 )**
-
   - Added function to sort songs, artists and albums.
   - Added a PlaylistsInfoPage to display information related to playlists.
   - Removed unnecessary react props to improve performance.
@@ -911,7 +877,6 @@
 <br/>
 
 - ### **v0.2.0-alpha - ( 29<sup>th</sup> of April 2022 )**
-
   - Added new styles for AlbumInfoPage, ArtistInfoPage, and updated some styles on other componenets.
   - Now ArtistInfoPage shows information of the artists from Deezer and Last.fm apis.
   - Fixed some bugs when parsing songs.
@@ -922,13 +887,11 @@
 <br/>
 
 - ### **v0.1.1-alpha - ( 01<sup>st</sup> of April 2022 )**
-
   - Added a context menu option for songs to open them in the File Explorer.
 
 <br/>
 
 - ### **v0.1.0-alpha - ( 23<sup>rd</sup> of March 2022 )**
-
   - Fixed bugs related to instant identification of newly added songs.
   - Added a feature to monitor song listening patterns of the user for better shuffling.
   - Fixed some bugs in the search feature.

@@ -62,4 +62,3 @@ const checkFolderForContentModifications = async (
 };
 
 export default checkFolderForContentModifications;
-

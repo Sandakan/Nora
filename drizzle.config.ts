@@ -11,4 +11,3 @@ export default defineConfig({
     url: process.env.DATABASE_PATH!
   }
 });
-

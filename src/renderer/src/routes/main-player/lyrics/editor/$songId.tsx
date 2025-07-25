@@ -447,4 +447,3 @@ function LyricsEditingPage() {
     </MainContainer>
   );
 }
-

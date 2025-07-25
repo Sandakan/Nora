@@ -242,4 +242,3 @@ const LyricsEditorSavePrompt = (props: Props) => {
 };
 
 export default LyricsEditorSavePrompt;
-
