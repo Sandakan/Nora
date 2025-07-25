@@ -52,7 +52,7 @@ import { is } from '@electron-toolkit/utils';
 import noraAppIcon from '../../resources/logo_light_mode.png?asset';
 import logger from './logger';
 import roundTo from '../common/roundTo';
-import { fileURLToPath, pathToFileURL } from 'url';
+// import { fileURLToPath, pathToFileURL } from 'url';
 import { closeDatabaseInstance } from './db/db';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
@@ -217,18 +217,18 @@ const createWindow = async () => {
   // });
 };
 
-protocol.registerSchemesAsPrivileged([
-  {
-    scheme: 'nora',
-    privileges: {
-      standard: true,
-      secure: true,
-      supportFetchAPI: true,
-      stream: true,
-      bypassCSP: true
-    }
-  }
-]);
+// protocol.registerSchemesAsPrivileged([
+//   {
+//     scheme: 'nora',
+//     privileges: {
+//       standard: true,
+//       secure: true,
+//       supportFetchAPI: true,
+//       stream: true,
+//       bypassCSP: true
+//     }
+//   }
+// ]);
 
 app
   .whenReady()
@@ -249,8 +249,8 @@ app
       else logger.warn('Default protocol registration failed.');
     }
 
-    // protocol.registerFileProtocol('nora', registerFileProtocol);
-    protocol.handle('nora', handleFileProtocol);
+    protocol.registerFileProtocol('nora', registerFileProtocol);
+    // protocol.handle('nora', handleFileProtocol);
 
     tray = new Tray(appIcon);
     const trayContextMenu = Menu.buildFromTemplate([
@@ -443,62 +443,62 @@ function addEventsToCache(dataType: DataUpdateEventTypes, data = [] as string[],
   return dataEventsCache.push(obj);
 }
 
-// function registerFileProtocol(request: { url: string }, callback: (arg: string) => void) {
-//   const urlWithQueries = decodeURI(request.url).replace(
-//     /nora:[/\\]{1,2}localfiles[/\\]{1,2}/gm,
-//     ''
-//   );
+function registerFileProtocol(request: { url: string }, callback: (arg: string) => void) {
+  const urlWithQueries = decodeURI(request.url).replace(
+    /nora:[/\\]{1,2}localfiles[/\\]{1,2}/gm,
+    ''
+  );
 
-//   try {
-//     const [url] = urlWithQueries.split('?');
-//     return callback(url);
-//   } catch (error) {
-//     logger.error(`Failed to locate a resource in the system.`, { urlWithQueries, error });
-//     return callback('404');
-//   }
-// }
-
-const handleFileProtocol = async (request: GlobalRequest): Promise<GlobalResponse> => {
   try {
-    const urlWithQueries = decodeURI(request.url).replace(
-      /(nora:[\/\\]{1,2}localfiles[\/\\]{1,2})|(\?ts\=\d+$)?/gm,
-      ''
-    );
-    let [fileDir] = urlWithQueries.split('?');
-
-    if (os.platform() === 'darwin') fileDir = '/' + fileDir;
-
-    // logger.verbose('Serving file from nora://', { filePath });
-
-    const asFileUrl = pathToFileURL(fileDir).toString();
-    const filePath = fileURLToPath(asFileUrl);
-
-    if (filePath.startsWith('..')) {
-      return new Response('Invalid URL (not absolute)', {
-        status: 400
-      });
-    }
-
-    const rangeHeader = request.headers.get('Range');
-    let response;
-    if (!rangeHeader) {
-      response = await net.fetch(asFileUrl);
-    } else {
-      response = await net.fetch(asFileUrl, {
-        headers: {
-          Range: rangeHeader
-        }
-      });
-    }
-
-    response.headers.set('X-Content-Type-Options', 'nosniff');
-
-    return response;
+    const [url] = urlWithQueries.split('?');
+    return callback(url);
   } catch (error) {
-    logger.error('Error handling media protocol:', { error });
-    return new Response('Internal Server Error', { status: 500 });
+    logger.error(`Failed to locate a resource in the system.`, { urlWithQueries, error });
+    return callback('404');
   }
-};
+}
+
+// const handleFileProtocol = async (request: GlobalRequest): Promise<GlobalResponse> => {
+//   try {
+//     const urlWithQueries = decodeURI(request.url).replace(
+//       /(nora:[\/\\]{1,2}localfiles[\/\\]{1,2})|(\?ts\=\d+$)?/gm,
+//       ''
+//     );
+//     let [fileDir] = urlWithQueries.split('?');
+
+//     if (os.platform() === 'darwin') fileDir = '/' + fileDir;
+
+//     // logger.verbose('Serving file from nora://', { filePath });
+
+//     const asFileUrl = pathToFileURL(fileDir).toString();
+//     const filePath = fileURLToPath(asFileUrl);
+
+//     if (filePath.startsWith('..')) {
+//       return new Response('Invalid URL (not absolute)', {
+//         status: 400
+//       });
+//     }
+
+//     const rangeHeader = request.headers.get('Range');
+//     let response;
+//     if (!rangeHeader) {
+//       response = await net.fetch(asFileUrl);
+//     } else {
+//       response = await net.fetch(asFileUrl, {
+//         headers: {
+//           Range: rangeHeader
+//         }
+//       });
+//     }
+
+//     response.headers.set('X-Content-Type-Options', 'nosniff');
+
+//     return response;
+//   } catch (error) {
+//     logger.error('Error handling media protocol:', { error });
+//     return new Response('Internal Server Error', { status: 500 });
+//   }
+// };
 
 // const handleFileProtocol = async (req: GlobalRequest) => {
 //   try {
@@ -845,4 +845,3 @@ export function stopScreenSleeping() {
   powerSaveBlockerId = powerSaveBlocker.start('prevent-display-sleep');
   logger.debug('Screen sleeping prevented.', { powerSaveBlockerId });
 }
-

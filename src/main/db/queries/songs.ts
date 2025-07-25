@@ -3,9 +3,9 @@ import { folderBlacklist, musicFolders, songs } from '@db/schema';
 import { and, asc, desc, eq, inArray, notInArray } from 'drizzle-orm';
 
 export const isSongWithPathAvailable = async (path: string, trx: DB | DBTransaction = db) => {
-  const song = await trx.select({ songId: songs.id }).from(songs).where(eq(songs.path, path));
+  const count = await trx.$count(songs, eq(songs.path, path));
 
-  return song.length > 0;
+  return count > 0;
 };
 
 export const saveSong = async (data: typeof songs.$inferInsert, trx: DB | DBTransaction = db) => {
@@ -195,6 +195,7 @@ export const getAllSongs = async (
   };
 };
 
+export type GetNonNullSongReturnType = NonNullable<Awaited<ReturnType<typeof getSongById>>>;
 export const getSongById = async (songId: number, trx: DB | DBTransaction = db) => {
   const song = await trx.query.songs.findFirst({
     where: eq(songs.id, songId),
@@ -233,5 +234,54 @@ export const getSongById = async (songId: number, trx: DB | DBTransaction = db) 
     }
   });
   return song;
+};
+
+export const getSongByPath = async (path: string, trx: DB | DBTransaction = db) => {
+  const song = await trx.query.songs.findFirst({
+    where: eq(songs.path, path),
+    with: {
+      artists: {
+        with: {
+          artist: {
+            columns: { id: true, name: true }
+          }
+        }
+      },
+      albums: {
+        with: {
+          album: {
+            columns: { id: true, title: true }
+          }
+        }
+      },
+      artworks: {
+        with: {
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
+        }
+      },
+      blacklist: {
+        columns: { songId: true }
+      }
+    }
+  });
+  return song;
+};
+
+export const updateSongByPath = async (
+  path: string,
+  song: Partial<typeof songs.$inferInsert>,
+  trx: DB | DBTransaction = db
+) => {
+  const updatedSong = await trx.update(songs).set(song).where(eq(songs.path, path)).returning();
+  return updatedSong;
 };
 
