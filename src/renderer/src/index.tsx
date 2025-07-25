@@ -9,7 +9,13 @@ import './i18n';
 import { routeTree } from './routeTree.gen';
 
 // Create a new router instance
-export const queryClient = new QueryClient();
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false // default: true
+    }
+  }
+});
 
 const history = createHashHistory();
 // Create a new router instance

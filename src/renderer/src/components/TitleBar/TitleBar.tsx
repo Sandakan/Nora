@@ -53,7 +53,7 @@ const TitleBar = memo(() => {
             </span>
           </span>
         </div>
-        {playerType !== 'full' && <NavigationControlsContainer />}
+        {playerType !== 'full' ? <NavigationControlsContainer /> : <div />}
       </div>
       {window.api.properties.isInDevelopment && <CurrentLocationContainer />}
       <div className="window-controls-and-special-controls-and-indicators-container flex h-full flex-row">

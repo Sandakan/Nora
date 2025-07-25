@@ -1,6 +1,6 @@
 import { db } from '@db/db';
 import { folderBlacklist, musicFolders, songs } from '@db/schema';
-import { and, asc, desc, eq, inArray, notInArray } from 'drizzle-orm';
+import { and, asc, desc, eq, ilike, inArray, notInArray, or } from 'drizzle-orm';
 
 export const isSongWithPathAvailable = async (path: string, trx: DB | DBTransaction = db) => {
   const count = await trx.$count(songs, eq(songs.path, path));
@@ -283,4 +283,44 @@ export const updateSongByPath = async (
 ) => {
   const updatedSong = await trx.update(songs).set(song).where(eq(songs.path, path)).returning();
   return updatedSong;
+};
+
+export const searchSongs = async (keyword: string, trx: DB | DBTransaction = db) => {
+  const data = await trx.query.songs.findMany({
+    where: or(ilike(songs.title, `%${keyword}%`)),
+    with: {
+      artists: {
+        with: {
+          artist: {
+            columns: { id: true, name: true }
+          }
+        }
+      },
+      albums: {
+        with: {
+          album: {
+            columns: { id: true, title: true }
+          }
+        }
+      },
+      artworks: {
+        with: {
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
+        }
+      },
+      blacklist: {
+        columns: { songId: true }
+      }
+    }
+  });
+  return data;
 };

@@ -1,5 +1,5 @@
 import { db } from '@db/db';
-import { and, eq } from 'drizzle-orm';
+import { and, asc, desc, eq } from 'drizzle-orm';
 import { albumsArtists, artists, artistsSongs } from '@db/schema';
 
 export const isArtistWithNameAvailable = async (name: string, trx: DB | DBTransaction = db) => {
@@ -56,4 +56,57 @@ export const getLinkedSongArtist = async (
     .limit(1);
 
   return data.at(0);
+};
+
+export type GetAllArtistsReturnType = Awaited<ReturnType<typeof getAllArtists>>['data'];
+const defaultGetAllArtistsOptions = {
+  start: 0,
+  end: 0,
+  filterType: 'notSelected' as ArtistFilterTypes,
+  sortType: 'aToZ' as ArtistSortTypes
+};
+export type GetAllArtistsOptions = Partial<typeof defaultGetAllArtistsOptions>;
+
+export const getAllArtists = async (
+  options: GetAllArtistsOptions,
+  trx: DB | DBTransaction = db
+) => {
+  const { start = 0, end = 0, filterType = 'notSelected', sortType = 'aToZ' } = options;
+  const limit = end - start === 0 ? undefined : end - start;
+
+  const data = await trx.query.artists.findMany({
+    with: {
+      songs: { with: { song: { columns: { id: true, title: true } } } },
+      artworks: {
+        with: {
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    limit,
+    offset: start,
+    orderBy: (artists) => {
+      if (sortType === 'aToZ') return [asc(artists.name)];
+      if (sortType === 'zToA') return [desc(artists.name)];
+
+      return [];
+    }
+  });
+
+  return {
+    data,
+    sortType,
+    filterType,
+    start,
+    end
+  };
 };

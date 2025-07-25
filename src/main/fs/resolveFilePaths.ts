@@ -132,6 +132,37 @@ export const getArtistArtworkPath = (artworkName?: string, resetCache = false): 
   };
 };
 
+export const parseArtistArtworks = (
+  artworks: (typeof artworksSchema.$inferSelect)[],
+  resetCache = false,
+  sendRealPath = false
+): ArtworkPaths => {
+  if (resetCache) resetArtworkCache('artistArtworks');
+
+  const FILE_URL = sendRealPath ? '' : DEFAULT_FILE_URL;
+  const timestampStr = sendRealPath ? '' : `?ts=${timestamps.artistArtworks}`;
+  const isArtworkAvailable = artworks.length > 0;
+
+  if (isArtworkAvailable) {
+    const highResImage = artworks.find((artwork) => artwork.width >= 500 && artwork.height >= 500);
+
+    if (highResImage) {
+      return {
+        isDefaultArtwork: !isArtworkAvailable,
+        artworkPath: joinPath(FILE_URL, highResImage.path) + timestampStr,
+        optimizedArtworkPath: joinPath(FILE_URL, highResImage.path) + timestampStr
+      };
+    }
+  }
+
+  const defaultPath = joinPath(FILE_URL, artistCoverImage) + timestampStr;
+  return {
+    isDefaultArtwork: true,
+    artworkPath: defaultPath,
+    optimizedArtworkPath: defaultPath
+  };
+};
+
 export const getAlbumArtworkPath = (artworkName?: string, resetCache = false): ArtworkPaths => {
   if (resetCache) resetArtworkCache('albumArtworks');
 
