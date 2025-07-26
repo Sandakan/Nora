@@ -835,9 +835,7 @@
     "lyricOffsetInput": "অফছেট (+ বা -)"
   },
 
-  "pageFocusPrompt": {
-    "pageNotFocused": "পৃষ্ঠাত ফ'কাচ কৰা হোৱা নাই।"
-  },
+  "pageFocusPrompt": {"pageNotFocused": "পৃষ্ঠাত ফ'কাচ কৰা হোৱা নাই।"},
 
   "releaseNotesPrompt": {
     "latestVersion": "আপোনাৰ ওচৰত শেহতীয়া সংস্কৰণ আছে।",
