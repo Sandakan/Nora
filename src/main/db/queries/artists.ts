@@ -90,6 +90,16 @@ export const getAllArtists = async (
             }
           }
         }
+      },
+      albums: {
+        with: {
+          album: {
+            columns: {
+              title: true,
+              id: true
+            }
+          }
+        }
       }
     },
     limit,

@@ -189,6 +189,37 @@ export const getAlbumArtworkPath = (artworkName?: string, resetCache = false): A
   };
 };
 
+export const parseAlbumArtworks = (
+  artworks: (typeof artworksSchema.$inferSelect)[],
+  resetCache = false,
+  sendRealPath = false
+): ArtworkPaths => {
+  if (resetCache) resetArtworkCache('albumArtworks');
+
+  const FILE_URL = sendRealPath ? '' : DEFAULT_FILE_URL;
+  const timestampStr = sendRealPath ? '' : `?ts=${timestamps.albumArtworks}`;
+  const isArtworkAvailable = artworks.length > 0;
+
+  if (isArtworkAvailable) {
+    const highResImage = artworks.find((artwork) => artwork.width >= 500 && artwork.height >= 500);
+
+    if (highResImage) {
+      return {
+        isDefaultArtwork: !isArtworkAvailable,
+        artworkPath: joinPath(FILE_URL, highResImage.path) + timestampStr,
+        optimizedArtworkPath: joinPath(FILE_URL, highResImage.path) + timestampStr
+      };
+    }
+  }
+
+  const defaultPath = joinPath(FILE_URL, albumCoverImage) + timestampStr;
+  return {
+    isDefaultArtwork: true,
+    artworkPath: defaultPath,
+    optimizedArtworkPath: defaultPath
+  };
+};
+
 export const getGenreArtworkPath = (artworkName?: string, resetCache = false): ArtworkPaths => {
   if (resetCache) resetArtworkCache('genreArtworks');
 
@@ -210,6 +241,37 @@ export const getGenreArtworkPath = (artworkName?: string, resetCache = false): A
   const defaultPath = joinPath(DEFAULT_FILE_URL, songCoverImage);
   return {
     isDefaultArtwork: !artworkName,
+    artworkPath: defaultPath,
+    optimizedArtworkPath: defaultPath
+  };
+};
+
+export const parseGenreArtworks = (
+  artworks: (typeof artworksSchema.$inferSelect)[],
+  resetCache = false,
+  sendRealPath = false
+): ArtworkPaths => {
+  if (resetCache) resetArtworkCache('genreArtworks');
+
+  const FILE_URL = sendRealPath ? '' : DEFAULT_FILE_URL;
+  const timestampStr = sendRealPath ? '' : `?ts=${timestamps.genreArtworks}`;
+  const isArtworkAvailable = artworks.length > 0;
+
+  if (isArtworkAvailable) {
+    const highResImage = artworks.find((artwork) => artwork.width >= 500 && artwork.height >= 500);
+
+    if (highResImage) {
+      return {
+        isDefaultArtwork: !isArtworkAvailable,
+        artworkPath: joinPath(FILE_URL, highResImage.path) + timestampStr,
+        optimizedArtworkPath: joinPath(FILE_URL, highResImage.path) + timestampStr
+      };
+    }
+  }
+
+  const defaultPath = joinPath(FILE_URL, songCoverImage) + timestampStr;
+  return {
+    isDefaultArtwork: true,
     artworkPath: defaultPath,
     optimizedArtworkPath: defaultPath
   };
@@ -237,6 +299,37 @@ export const getPlaylistArtworkPath = (
     isDefaultArtwork: !isArtworkAvailable,
     artworkPath,
     optimizedArtworkPath: artworkPath
+  };
+};
+
+export const parsePlaylistArtworks = (
+  artworks: (typeof artworksSchema.$inferSelect)[],
+  resetCache = false,
+  sendRealPath = false
+): ArtworkPaths => {
+  if (resetCache) resetArtworkCache('playlistArtworks');
+
+  const FILE_URL = sendRealPath ? '' : DEFAULT_FILE_URL;
+  const timestampStr = sendRealPath ? '' : `?ts=${timestamps.playlistArtworks}`;
+  const isArtworkAvailable = artworks.length > 0;
+
+  if (isArtworkAvailable) {
+    const highResImage = artworks.find((artwork) => artwork.width >= 500 && artwork.height >= 500);
+
+    if (highResImage) {
+      return {
+        isDefaultArtwork: !isArtworkAvailable,
+        artworkPath: joinPath(FILE_URL, highResImage.path) + timestampStr,
+        optimizedArtworkPath: joinPath(FILE_URL, highResImage.path) + timestampStr
+      };
+    }
+  }
+
+  const defaultPath = joinPath(FILE_URL, playlistCoverImage) + timestampStr;
+  return {
+    isDefaultArtwork: true,
+    artworkPath: defaultPath,
+    optimizedArtworkPath: defaultPath
   };
 };
 

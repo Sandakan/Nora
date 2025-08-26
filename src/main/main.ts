@@ -444,20 +444,20 @@ function addEventsToCache(dataType: DataUpdateEventTypes, data = [] as string[],
   return dataEventsCache.push(obj);
 }
 
-function registerFileProtocol(request: { url: string }, callback: (arg: string) => void) {
-  const urlWithQueries = decodeURI(request.url).replace(
-    /nora:[/\\]{1,2}localfiles[/\\]{1,2}/gm,
-    ''
-  );
+// function registerFileProtocol(request: { url: string }, callback: (arg: string) => void) {
+//   const urlWithQueries = decodeURI(request.url).replace(
+//     /nora:[/\\]{1,2}localfiles[/\\]{1,2}/gm,
+//     ''
+//   );
 
-  try {
-    const [url] = urlWithQueries.split('?');
-    return callback(url);
-  } catch (error) {
-    logger.error(`Failed to locate a resource in the system.`, { urlWithQueries, error });
-    return callback('404');
-  }
-}
+//   try {
+//     const [url] = urlWithQueries.split('?');
+//     return callback(url);
+//   } catch (error) {
+//     logger.error(`Failed to locate a resource in the system.`, { urlWithQueries, error });
+//     return callback('404');
+//   }
+// }
 
 // const handleFileProtocol = async (request: GlobalRequest): Promise<GlobalResponse> => {
 //   try {

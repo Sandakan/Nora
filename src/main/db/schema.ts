@@ -499,6 +499,12 @@ export const albumsArtists = pgTable(
 // ============================================================================
 
 // Main Table Relations
+export const albumsRelations = relations(albums, ({ many }) => ({
+  songs: many(albumsSongs),
+  artists: many(albumsArtists),
+  artworks: many(albumsArtworks)
+}));
+
 export const artistsRelations = relations(artists, ({ many }) => ({
   songs: many(artistsSongs),
   albums: many(albumsArtists),
