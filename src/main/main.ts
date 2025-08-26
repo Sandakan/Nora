@@ -54,6 +54,8 @@ import logger from './logger';
 import roundTo from '../common/roundTo';
 // import { fileURLToPath, pathToFileURL } from 'url';
 import { closeDatabaseInstance } from './db/db';
+import { pathToFileURL } from 'url';
+import { stat } from 'fs/promises';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -217,18 +219,17 @@ const createWindow = async () => {
   // });
 };
 
-// protocol.registerSchemesAsPrivileged([
-//   {
-//     scheme: 'nora',
-//     privileges: {
-//       standard: true,
-//       secure: true,
-//       supportFetchAPI: true,
-//       stream: true,
-//       bypassCSP: true
-//     }
-//   }
-// ]);
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'nora',
+    privileges: {
+      standard: true,
+      secure: true,
+      supportFetchAPI: true,
+      stream: true
+    }
+  }
+]);
 
 app
   .whenReady()
@@ -249,8 +250,8 @@ app
       else logger.warn('Default protocol registration failed.');
     }
 
-    protocol.registerFileProtocol('nora', registerFileProtocol);
-    // protocol.handle('nora', handleFileProtocol);
+    // protocol.registerFileProtocol('nora', registerFileProtocol);
+    protocol.handle('nora', handleFileProtocol);
 
     tray = new Tray(appIcon);
     const trayContextMenu = Menu.buildFromTemplate([
@@ -500,35 +501,35 @@ function registerFileProtocol(request: { url: string }, callback: (arg: string) 
 //   }
 // };
 
-// const handleFileProtocol = async (req: GlobalRequest) => {
-//   try {
-//     logger.debug('Serving file from nora://', { url: req.url });
-//     const { pathname } = new URL(req.url);
-//     const filePath = decodeURI(pathname).replace(/^[/\\]{1,2}/gm, '');
+const handleFileProtocol = async (req: GlobalRequest) => {
+  try {
+    logger.debug('Serving file from nora://', { url: req.url });
+    const { pathname } = new URL(req.url);
+    const filePath = decodeURI(pathname).replace(/^[/\\]{1,2}/gm, '');
 
-//     const pathToServe = path.resolve(import.meta.dirname, filePath);
-//     // const relativePath = path.relative(import.meta.dirname, pathToServe);
-//     // const isSafe = relativePath && !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
+    const pathToServe = path.resolve(import.meta.dirname, filePath);
+    // const relativePath = path.relative(import.meta.dirname, pathToServe);
+    // const isSafe = relativePath && !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
 
-//     // if (!isSafe) {
-//     //   return new Response('bad', {
-//     //     status: 400,
-//     //     headers: { 'content-type': 'text/html' }
-//     //   });
-//     // }
+    // if (!isSafe) {
+    //   return new Response('bad', {
+    //     status: 400,
+    //     headers: { 'content-type': 'text/html' }
+    //   });
+    // }
 
-//     const fileUrl = pathToFileURL(pathToServe).toString();
-//     const stats = await stat(pathToServe);
-//     // req.headers.append('Content-Length', stats.size.toString());
-//     const res = await net.fetch(fileUrl, req);
-//     res.headers.append('Content-Length', stats.size.toString());
+    const fileUrl = pathToFileURL(pathToServe).toString();
+    const stats = await stat(pathToServe);
+    req.headers.append('Content-Length', stats.size.toString());
+    const res = await net.fetch(fileUrl, req);
+    res.headers.append('Content-Length', stats.size.toString());
 
-//     return res;
-//   } catch (error) {
-//     logger.error('Error handling media protocol:', { error });
-//     return new Response('Internal Server Error', { status: 500 });
-//   }
-// };
+    return res;
+  } catch (error) {
+    logger.error('Error handling media protocol:', { error });
+    return new Response('Internal Server Error', { status: 500 });
+  }
+};
 
 export const setCurrentSongPath = (songPath: string) => {
   currentSongPath = songPath;

@@ -19,7 +19,7 @@ import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 import { queryClient } from '@renderer/index';
 
 const fetchLatestSongs = async (noOfRecentlyAddedSongCards: number) =>
-  window.api.audioLibraryControls.getAllSongs('dateAddedAscending', undefined, {
+  window.api.audioLibraryControls.getAllSongs('dateAddedDescending', undefined, {
     start: 0,
     end: noOfRecentlyAddedSongCards
   });
