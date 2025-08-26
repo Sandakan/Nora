@@ -11,7 +11,7 @@ import {
   type AnyPgColumn,
   json
 } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 
 // ============================================================================
 // Enums
@@ -29,10 +29,17 @@ export const swatchTypeEnum = pgEnum('swatch_type', [
 // ============================================================================
 // Tables
 // ============================================================================
-export const artists = pgTable('artists', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  name: varchar('name', { length: 1024 }).notNull()
-});
+export const artists = pgTable(
+  'artists',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    name: varchar('name', { length: 1024 }).notNull()
+  },
+  (t) => [
+    // Index for name-based lookups and sorting (aToZ, zToA)
+    index('idx_artists_name').on(t.name)
+  ]
+);
 
 export const musicFolders = pgTable(
   'music_folders',
@@ -52,115 +59,257 @@ export const musicFolders = pgTable(
     createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: false }).defaultNow().notNull()
   },
-  (t) => [index('idx_parent_id').on(t.parentId)]
+  (t) => [
+    // Existing index for hierarchical queries
+    index('idx_parent_id').on(t.parentId),
+    // Index for path-based lookups
+    index('idx_music_folders_path').on(t.path),
+    // Composite index for hierarchical queries with path
+    index('idx_music_folders_parent_path').on(t.parentId, t.path)
+  ]
 );
 
-export const songs = pgTable('songs', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  title: varchar('title', { length: 4096 }).notNull(),
-  duration: decimal('duration', { precision: 10, scale: 3 }).notNull(),
-  path: text('path').notNull().unique(),
-  sampleRate: integer('sample_rate'),
-  bitRate: integer('bit_rate'),
-  noOfChannels: integer('no_of_channels'),
-  year: integer('year'),
-  diskNumber: integer('disk_number'),
-  trackNumber: integer('track_number'),
-  folderId: integer('folder_id').references(() => musicFolders.id),
-  fileCreatedAt: timestamp('file_created_at', { withTimezone: false }).notNull(),
-  fileModifiedAt: timestamp('file_modified_at', { withTimezone: false }).notNull(),
-  createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: false }).notNull().defaultNow()
-});
+export const songs = pgTable(
+  'songs',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    title: varchar('title', { length: 4096 }).notNull(),
+    duration: decimal('duration', { precision: 10, scale: 3 }).notNull(),
+    path: text('path').notNull().unique(),
+    sampleRate: integer('sample_rate'),
+    bitRate: integer('bit_rate'),
+    noOfChannels: integer('no_of_channels'),
+    year: integer('year'),
+    diskNumber: integer('disk_number'),
+    trackNumber: integer('track_number'),
+    folderId: integer('folder_id').references(() => musicFolders.id),
+    fileCreatedAt: timestamp('file_created_at', { withTimezone: false }).notNull(),
+    fileModifiedAt: timestamp('file_modified_at', { withTimezone: false }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: false }).notNull().defaultNow()
+  },
+  (t) => [
+    // Single column indexes for common sort operations
+    index('idx_songs_title').on(t.title),
+    index('idx_songs_year').on(t.year),
+    index('idx_songs_track_number').on(t.trackNumber),
+    index('idx_songs_created_at').on(t.createdAt),
+    index('idx_songs_file_modified_at').on(t.fileModifiedAt),
+    index('idx_songs_folder_id').on(t.folderId),
+    index('idx_songs_path').on(t.path),
 
-export const artworks = pgTable('artworks', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  path: text('path').notNull(),
-  source: artworkSourceEnum('source').notNull().default('LOCAL'),
-  width: integer('width').notNull(),
-  height: integer('height').notNull(),
-  createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
-});
+    // Composite indexes for common sorting patterns
+    index('idx_songs_year_title').on(t.year, t.title),
+    index('idx_songs_track_title').on(t.trackNumber, t.title),
+    index('idx_songs_created_title').on(t.createdAt, t.title),
+    index('idx_songs_modified_title').on(t.fileModifiedAt, t.title),
 
-export const palettes = pgTable('palettes', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  artworkId: integer('artwork_id')
-    .notNull()
-    .references(() => artworks.id),
-  createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
-});
+    // Index for folder-based queries
+    index('idx_songs_folder_title').on(t.folderId, t.title),
 
-export const paletteSwatches = pgTable('palette_swatches', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  population: integer('population').notNull(),
-  hex: varchar('hex', { length: 255 }).notNull(),
-  hsl: json('hsl').$type<{ h: number; s: number; l: number }>().notNull(),
-  swatchType: swatchTypeEnum('swatch_type').notNull().default('VIBRANT'),
-  paletteId: integer('palette_id')
-    .notNull()
-    .references(() => palettes.id),
-  createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
-});
+    // Index for text search on title (case-insensitive)
+    index('idx_songs_title_text')
+      .on(t.title)
+      .where(sql`${t.title} IS NOT NULL`)
+  ]
+);
 
-export const albums = pgTable('albums', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  title: varchar('title', { length: 255 }).notNull(),
-  year: integer('year'),
-  createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
-});
+export const artworks = pgTable(
+  'artworks',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    path: text('path').notNull(),
+    source: artworkSourceEnum('source').notNull().default('LOCAL'),
+    width: integer('width').notNull(),
+    height: integer('height').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
+  },
+  (t) => [
+    // Index for path-based lookups
+    index('idx_artworks_path').on(t.path),
+    // Index for source filtering
+    index('idx_artworks_source').on(t.source),
+    // Index for dimension-based queries
+    index('idx_artworks_dimensions').on(t.width, t.height)
+  ]
+);
 
-export const genres = pgTable('genres', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  name: varchar('name', { length: 255 }).notNull(),
-  createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
-});
+export const palettes = pgTable(
+  'palettes',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    artworkId: integer('artwork_id')
+      .notNull()
+      .references(() => artworks.id),
+    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
+  },
+  (t) => [
+    // Index for artwork-based palette lookups
+    index('idx_palettes_artwork_id').on(t.artworkId)
+  ]
+);
 
-export const playlists = pgTable('playlists', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  name: varchar('name', { length: 255 }).notNull(),
-  createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
-});
+export const paletteSwatches = pgTable(
+  'palette_swatches',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    population: integer('population').notNull(),
+    hex: varchar('hex', { length: 255 }).notNull(),
+    hsl: json('hsl').$type<{ h: number; s: number; l: number }>().notNull(),
+    swatchType: swatchTypeEnum('swatch_type').notNull().default('VIBRANT'),
+    paletteId: integer('palette_id')
+      .notNull()
+      .references(() => palettes.id),
+    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
+  },
+  (t) => [
+    // Index for palette-based swatch lookups
+    index('idx_palette_swatches_palette_id').on(t.paletteId),
+    // Index for swatch type filtering
+    index('idx_palette_swatches_type').on(t.swatchType),
+    // Composite index for palette + type queries
+    index('idx_palette_swatches_palette_type').on(t.paletteId, t.swatchType),
+    // Index for hex color lookups
+    index('idx_palette_swatches_hex').on(t.hex)
+  ]
+);
 
-export const playEvents = pgTable('play_events', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  playbackPercentage: decimal('playback_percentage', { precision: 5, scale: 1 }).notNull(),
-  songId: integer('song_id')
-    .notNull()
-    .references(() => songs.id),
-  createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
-});
+export const albums = pgTable(
+  'albums',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    title: varchar('title', { length: 255 }).notNull(),
+    year: integer('year'),
+    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
+  },
+  (t) => [
+    // Index for title-based lookups and sorting
+    index('idx_albums_title').on(t.title),
+    // Index for year-based filtering and sorting
+    index('idx_albums_year').on(t.year),
+    // Composite index for year + title sorting
+    index('idx_albums_year_title').on(t.year, t.title)
+  ]
+);
 
-export const seekEvents = pgTable('seek_events', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  position: decimal('position', { precision: 8, scale: 3 }).notNull(),
-  songId: integer('song_id')
-    .notNull()
-    .references(() => songs.id),
-  createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
-});
+export const genres = pgTable(
+  'genres',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    name: varchar('name', { length: 255 }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
+  },
+  (t) => [
+    // Index for name-based lookups and sorting
+    index('idx_genres_name').on(t.name)
+  ]
+);
 
-export const skipEvents = pgTable('skip_events', {
-  id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-  position: decimal('position', { precision: 8, scale: 3 }).notNull(),
-  songId: integer('song_id')
-    .notNull()
-    .references(() => songs.id),
-  createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
-});
+export const playlists = pgTable(
+  'playlists',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    name: varchar('name', { length: 255 }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
+  },
+  (t) => [
+    // Index for name-based lookups and sorting
+    index('idx_playlists_name').on(t.name),
+    // Index for creation date sorting
+    index('idx_playlists_created_at').on(t.createdAt)
+  ]
+);
 
-export const songBlacklist = pgTable('song_blacklist', {
-  songId: integer('song_id')
-    .primaryKey()
-    .references(() => songs.id),
-  createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
-});
+export const playEvents = pgTable(
+  'play_events',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    playbackPercentage: decimal('playback_percentage', { precision: 5, scale: 1 }).notNull(),
+    songId: integer('song_id')
+      .notNull()
+      .references(() => songs.id),
+    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
+  },
+  (t) => [
+    // Index for song-based event lookups
+    index('idx_play_events_song_id').on(t.songId),
+    // Index for time-based queries
+    index('idx_play_events_created_at').on(t.createdAt),
+    // Composite index for song + time queries (for play statistics)
+    index('idx_play_events_song_created').on(t.songId, t.createdAt),
+    // Index for playback percentage analysis
+    index('idx_play_events_percentage').on(t.playbackPercentage)
+  ]
+);
 
-export const folderBlacklist = pgTable('folder_blacklist', {
-  folderId: integer('folder_id')
-    .primaryKey()
-    .references(() => musicFolders.id),
-  createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull()
-});
+export const seekEvents = pgTable(
+  'seek_events',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    position: decimal('position', { precision: 8, scale: 3 }).notNull(),
+    songId: integer('song_id')
+      .notNull()
+      .references(() => songs.id),
+    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
+  },
+  (t) => [
+    // Index for song-based event lookups
+    index('idx_seek_events_song_id').on(t.songId),
+    // Index for time-based queries
+    index('idx_seek_events_created_at').on(t.createdAt),
+    // Composite index for song + time queries
+    index('idx_seek_events_song_created').on(t.songId, t.createdAt)
+  ]
+);
+
+export const skipEvents = pgTable(
+  'skip_events',
+  {
+    id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
+    position: decimal('position', { precision: 8, scale: 3 }).notNull(),
+    songId: integer('song_id')
+      .notNull()
+      .references(() => songs.id),
+    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
+  },
+  (t) => [
+    // Index for song-based event lookups
+    index('idx_skip_events_song_id').on(t.songId),
+    // Index for time-based queries
+    index('idx_skip_events_created_at').on(t.createdAt),
+    // Composite index for song + time queries
+    index('idx_skip_events_song_created').on(t.songId, t.createdAt)
+  ]
+);
+
+export const songBlacklist = pgTable(
+  'song_blacklist',
+  {
+    songId: integer('song_id')
+      .primaryKey()
+      .references(() => songs.id),
+    createdAt: timestamp('created_at', { withTimezone: false }).notNull().defaultNow()
+  },
+  (t) => [
+    // Index for blacklist lookups (though primary key already covers this)
+    // Adding for consistency and potential composite queries
+    index('idx_song_blacklist_created_at').on(t.createdAt)
+  ]
+);
+
+export const folderBlacklist = pgTable(
+  'folder_blacklist',
+  {
+    folderId: integer('folder_id')
+      .primaryKey()
+      .references(() => musicFolders.id),
+    createdAt: timestamp('created_at', { withTimezone: false }).defaultNow().notNull()
+  },
+  (t) => [
+    // Index for blacklist creation time queries
+    index('idx_folder_blacklist_created_at').on(t.createdAt)
+  ]
+);
 
 // ============================================================================
 // Many-to-Many Junction Tables
@@ -175,7 +324,12 @@ export const artworksSongs = pgTable(
       .notNull()
       .references(() => artworks.id)
   },
-  (table) => [primaryKey({ columns: [table.songId, table.artworkId] })]
+  (table) => [
+    primaryKey({ columns: [table.songId, table.artworkId] }),
+    // Indexes for reverse lookups
+    index('idx_artworks_songs_artwork_id').on(table.artworkId),
+    index('idx_artworks_songs_song_id').on(table.songId)
+  ]
 );
 
 export const artistsArtworks = pgTable(
@@ -188,7 +342,12 @@ export const artistsArtworks = pgTable(
       .notNull()
       .references(() => artworks.id)
   },
-  (table) => [primaryKey({ columns: [table.artistId, table.artworkId] })]
+  (table) => [
+    primaryKey({ columns: [table.artistId, table.artworkId] }),
+    // Indexes for reverse lookups
+    index('idx_artists_artworks_artwork_id').on(table.artworkId),
+    index('idx_artists_artworks_artist_id').on(table.artistId)
+  ]
 );
 
 export const albumsArtworks = pgTable(
@@ -201,7 +360,12 @@ export const albumsArtworks = pgTable(
       .notNull()
       .references(() => artworks.id)
   },
-  (table) => [primaryKey({ columns: [table.albumId, table.artworkId] })]
+  (table) => [
+    primaryKey({ columns: [table.albumId, table.artworkId] }),
+    // Indexes for reverse lookups
+    index('idx_albums_artworks_artwork_id').on(table.artworkId),
+    index('idx_albums_artworks_album_id').on(table.albumId)
+  ]
 );
 
 export const artistsSongs = pgTable(
@@ -214,7 +378,12 @@ export const artistsSongs = pgTable(
       .notNull()
       .references(() => artists.id)
   },
-  (table) => [primaryKey({ columns: [table.songId, table.artistId] })]
+  (table) => [
+    primaryKey({ columns: [table.songId, table.artistId] }),
+    // Indexes for reverse lookups - crucial for artist-based queries
+    index('idx_artists_songs_artist_id').on(table.artistId),
+    index('idx_artists_songs_song_id').on(table.songId)
+  ]
 );
 
 export const albumsSongs = pgTable(
@@ -227,7 +396,12 @@ export const albumsSongs = pgTable(
       .notNull()
       .references(() => songs.id)
   },
-  (table) => [primaryKey({ columns: [table.albumId, table.songId] })]
+  (table) => [
+    primaryKey({ columns: [table.albumId, table.songId] }),
+    // Indexes for reverse lookups - crucial for album-based queries
+    index('idx_album_songs_album_id').on(table.albumId),
+    index('idx_album_songs_song_id').on(table.songId)
+  ]
 );
 
 export const genresSongs = pgTable(
@@ -240,7 +414,12 @@ export const genresSongs = pgTable(
       .notNull()
       .references(() => songs.id)
   },
-  (table) => [primaryKey({ columns: [table.genreId, table.songId] })]
+  (table) => [
+    primaryKey({ columns: [table.genreId, table.songId] }),
+    // Indexes for reverse lookups
+    index('idx_genres_songs_genre_id').on(table.genreId),
+    index('idx_genres_songs_song_id').on(table.songId)
+  ]
 );
 
 export const artworksGenres = pgTable(
@@ -253,7 +432,12 @@ export const artworksGenres = pgTable(
       .notNull()
       .references(() => artworks.id)
   },
-  (table) => [primaryKey({ columns: [table.genreId, table.artworkId] })]
+  (table) => [
+    primaryKey({ columns: [table.genreId, table.artworkId] }),
+    // Indexes for reverse lookups
+    index('idx_artworks_genres_genre_id').on(table.genreId),
+    index('idx_artworks_genres_artwork_id').on(table.artworkId)
+  ]
 );
 
 export const playlistsSongs = pgTable(
@@ -266,7 +450,12 @@ export const playlistsSongs = pgTable(
       .notNull()
       .references(() => songs.id)
   },
-  (table) => [primaryKey({ columns: [table.playlistId, table.songId] })]
+  (table) => [
+    primaryKey({ columns: [table.playlistId, table.songId] }),
+    // Indexes for reverse lookups - crucial for playlist operations
+    index('idx_playlists_songs_playlist_id').on(table.playlistId),
+    index('idx_playlists_songs_song_id').on(table.songId)
+  ]
 );
 
 export const artworksPlaylists = pgTable(
@@ -279,7 +468,12 @@ export const artworksPlaylists = pgTable(
       .notNull()
       .references(() => artworks.id)
   },
-  (table) => [primaryKey({ columns: [table.playlistId, table.artworkId] })]
+  (table) => [
+    primaryKey({ columns: [table.playlistId, table.artworkId] }),
+    // Indexes for reverse lookups
+    index('idx_artworks_playlists_playlist_id').on(table.playlistId),
+    index('idx_artworks_playlists_artwork_id').on(table.artworkId)
+  ]
 );
 
 export const albumsArtists = pgTable(
@@ -292,7 +486,12 @@ export const albumsArtists = pgTable(
       .notNull()
       .references(() => artists.id)
   },
-  (table) => [primaryKey({ columns: [table.albumId, table.artistId] })]
+  (table) => [
+    primaryKey({ columns: [table.albumId, table.artistId] }),
+    // Indexes for reverse lookups
+    index('idx_albums_artists_album_id').on(table.albumId),
+    index('idx_albums_artists_artist_id').on(table.artistId)
+  ]
 );
 
 // ============================================================================

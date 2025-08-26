@@ -1,5 +1,5 @@
 {
-  "id": "30b52f70-dce0-4820-8cb1-023d77e68738",
+  "id": "e8227220-8eea-41b9-b4d5-2426cb19d9e4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -45,7 +45,59 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_albums_title": {
+          "name": "idx_albums_title",
+          "columns": [
+            {
+              "expression": "title",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_albums_year": {
+          "name": "idx_albums_year",
+          "columns": [
+            {
+              "expression": "year",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_albums_year_title": {
+          "name": "idx_albums_year_title",
+          "columns": [
+            {
+              "expression": "year",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "title",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -70,14 +122,49 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_albums_artists_album_id": {
+          "name": "idx_albums_artists_album_id",
+          "columns": [
+            {
+              "expression": "album_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_albums_artists_artist_id": {
+          "name": "idx_albums_artists_artist_id",
+          "columns": [
+            {
+              "expression": "artist_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "albums_artists_album_id_albums_id_fk": {
           "name": "albums_artists_album_id_albums_id_fk",
           "tableFrom": "albums_artists",
           "tableTo": "albums",
-          "columnsFrom": ["album_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "album_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -85,8 +172,12 @@
           "name": "albums_artists_artist_id_artists_id_fk",
           "tableFrom": "albums_artists",
           "tableTo": "artists",
-          "columnsFrom": ["artist_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "artist_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -94,7 +185,10 @@
       "compositePrimaryKeys": {
         "albums_artists_album_id_artist_id_pk": {
           "name": "albums_artists_album_id_artist_id_pk",
-          "columns": ["album_id", "artist_id"]
+          "columns": [
+            "album_id",
+            "artist_id"
+          ]
         }
       },
       "uniqueConstraints": {},
@@ -119,14 +213,49 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_albums_artworks_artwork_id": {
+          "name": "idx_albums_artworks_artwork_id",
+          "columns": [
+            {
+              "expression": "artwork_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_albums_artworks_album_id": {
+          "name": "idx_albums_artworks_album_id",
+          "columns": [
+            {
+              "expression": "album_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "albums_artworks_album_id_albums_id_fk": {
           "name": "albums_artworks_album_id_albums_id_fk",
           "tableFrom": "albums_artworks",
           "tableTo": "albums",
-          "columnsFrom": ["album_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "album_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -134,8 +263,12 @@
           "name": "albums_artworks_artwork_id_artworks_id_fk",
           "tableFrom": "albums_artworks",
           "tableTo": "artworks",
-          "columnsFrom": ["artwork_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "artwork_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -143,7 +276,10 @@
       "compositePrimaryKeys": {
         "albums_artworks_album_id_artwork_id_pk": {
           "name": "albums_artworks_album_id_artwork_id_pk",
-          "columns": ["album_id", "artwork_id"]
+          "columns": [
+            "album_id",
+            "artwork_id"
+          ]
         }
       },
       "uniqueConstraints": {},
@@ -168,14 +304,49 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_album_songs_album_id": {
+          "name": "idx_album_songs_album_id",
+          "columns": [
+            {
+              "expression": "album_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_album_songs_song_id": {
+          "name": "idx_album_songs_song_id",
+          "columns": [
+            {
+              "expression": "song_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "album_songs_album_id_albums_id_fk": {
           "name": "album_songs_album_id_albums_id_fk",
           "tableFrom": "album_songs",
           "tableTo": "albums",
-          "columnsFrom": ["album_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "album_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -183,8 +354,12 @@
           "name": "album_songs_song_id_songs_id_fk",
           "tableFrom": "album_songs",
           "tableTo": "songs",
-          "columnsFrom": ["song_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "song_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -192,7 +367,10 @@
       "compositePrimaryKeys": {
         "album_songs_album_id_song_id_pk": {
           "name": "album_songs_album_id_song_id_pk",
-          "columns": ["album_id", "song_id"]
+          "columns": [
+            "album_id",
+            "song_id"
+          ]
         }
       },
       "uniqueConstraints": {},
@@ -228,7 +406,23 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_artists_name": {
+          "name": "idx_artists_name",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -253,14 +447,49 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_artists_artworks_artwork_id": {
+          "name": "idx_artists_artworks_artwork_id",
+          "columns": [
+            {
+              "expression": "artwork_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_artists_artworks_artist_id": {
+          "name": "idx_artists_artworks_artist_id",
+          "columns": [
+            {
+              "expression": "artist_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "artists_artworks_artist_id_artists_id_fk": {
           "name": "artists_artworks_artist_id_artists_id_fk",
           "tableFrom": "artists_artworks",
           "tableTo": "artists",
-          "columnsFrom": ["artist_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "artist_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -268,8 +497,12 @@
           "name": "artists_artworks_artwork_id_artworks_id_fk",
           "tableFrom": "artists_artworks",
           "tableTo": "artworks",
-          "columnsFrom": ["artwork_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "artwork_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -277,7 +510,10 @@
       "compositePrimaryKeys": {
         "artists_artworks_artist_id_artwork_id_pk": {
           "name": "artists_artworks_artist_id_artwork_id_pk",
-          "columns": ["artist_id", "artwork_id"]
+          "columns": [
+            "artist_id",
+            "artwork_id"
+          ]
         }
       },
       "uniqueConstraints": {},
@@ -302,14 +538,49 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_artists_songs_artist_id": {
+          "name": "idx_artists_songs_artist_id",
+          "columns": [
+            {
+              "expression": "artist_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_artists_songs_song_id": {
+          "name": "idx_artists_songs_song_id",
+          "columns": [
+            {
+              "expression": "song_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "artists_songs_song_id_songs_id_fk": {
           "name": "artists_songs_song_id_songs_id_fk",
           "tableFrom": "artists_songs",
           "tableTo": "songs",
-          "columnsFrom": ["song_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "song_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -317,8 +588,12 @@
           "name": "artists_songs_artist_id_artists_id_fk",
           "tableFrom": "artists_songs",
           "tableTo": "artists",
-          "columnsFrom": ["artist_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "artist_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -326,7 +601,10 @@
       "compositePrimaryKeys": {
         "artists_songs_song_id_artist_id_pk": {
           "name": "artists_songs_song_id_artist_id_pk",
-          "columns": ["song_id", "artist_id"]
+          "columns": [
+            "song_id",
+            "artist_id"
+          ]
         }
       },
       "uniqueConstraints": {},
@@ -389,7 +667,59 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_artworks_path": {
+          "name": "idx_artworks_path",
+          "columns": [
+            {
+              "expression": "path",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_artworks_source": {
+          "name": "idx_artworks_source",
+          "columns": [
+            {
+              "expression": "source",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_artworks_dimensions": {
+          "name": "idx_artworks_dimensions",
+          "columns": [
+            {
+              "expression": "width",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "height",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -414,14 +744,49 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_artworks_genres_genre_id": {
+          "name": "idx_artworks_genres_genre_id",
+          "columns": [
+            {
+              "expression": "genre_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_artworks_genres_artwork_id": {
+          "name": "idx_artworks_genres_artwork_id",
+          "columns": [
+            {
+              "expression": "artwork_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "artworks_genres_genre_id_genres_id_fk": {
           "name": "artworks_genres_genre_id_genres_id_fk",
           "tableFrom": "artworks_genres",
           "tableTo": "genres",
-          "columnsFrom": ["genre_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "genre_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -429,8 +794,12 @@
           "name": "artworks_genres_artwork_id_artworks_id_fk",
           "tableFrom": "artworks_genres",
           "tableTo": "artworks",
-          "columnsFrom": ["artwork_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "artwork_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -438,7 +807,10 @@
       "compositePrimaryKeys": {
         "artworks_genres_genre_id_artwork_id_pk": {
           "name": "artworks_genres_genre_id_artwork_id_pk",
-          "columns": ["genre_id", "artwork_id"]
+          "columns": [
+            "genre_id",
+            "artwork_id"
+          ]
         }
       },
       "uniqueConstraints": {},
@@ -463,14 +835,49 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_artworks_playlists_playlist_id": {
+          "name": "idx_artworks_playlists_playlist_id",
+          "columns": [
+            {
+              "expression": "playlist_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_artworks_playlists_artwork_id": {
+          "name": "idx_artworks_playlists_artwork_id",
+          "columns": [
+            {
+              "expression": "artwork_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "artworks_playlists_playlist_id_playlists_id_fk": {
           "name": "artworks_playlists_playlist_id_playlists_id_fk",
           "tableFrom": "artworks_playlists",
           "tableTo": "playlists",
-          "columnsFrom": ["playlist_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "playlist_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -478,8 +885,12 @@
           "name": "artworks_playlists_artwork_id_artworks_id_fk",
           "tableFrom": "artworks_playlists",
           "tableTo": "artworks",
-          "columnsFrom": ["artwork_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "artwork_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -487,7 +898,10 @@
       "compositePrimaryKeys": {
         "artworks_playlists_playlist_id_artwork_id_pk": {
           "name": "artworks_playlists_playlist_id_artwork_id_pk",
-          "columns": ["playlist_id", "artwork_id"]
+          "columns": [
+            "playlist_id",
+            "artwork_id"
+          ]
         }
       },
       "uniqueConstraints": {},
@@ -512,14 +926,49 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_artworks_songs_artwork_id": {
+          "name": "idx_artworks_songs_artwork_id",
+          "columns": [
+            {
+              "expression": "artwork_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_artworks_songs_song_id": {
+          "name": "idx_artworks_songs_song_id",
+          "columns": [
+            {
+              "expression": "song_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "artworks_songs_song_id_songs_id_fk": {
           "name": "artworks_songs_song_id_songs_id_fk",
           "tableFrom": "artworks_songs",
           "tableTo": "songs",
-          "columnsFrom": ["song_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "song_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -527,8 +976,12 @@
           "name": "artworks_songs_artwork_id_artworks_id_fk",
           "tableFrom": "artworks_songs",
           "tableTo": "artworks",
-          "columnsFrom": ["artwork_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "artwork_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -536,7 +989,10 @@
       "compositePrimaryKeys": {
         "artworks_songs_song_id_artwork_id_pk": {
           "name": "artworks_songs_song_id_artwork_id_pk",
-          "columns": ["song_id", "artwork_id"]
+          "columns": [
+            "song_id",
+            "artwork_id"
+          ]
         }
       },
       "uniqueConstraints": {},
@@ -562,14 +1018,34 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_folder_blacklist_created_at": {
+          "name": "idx_folder_blacklist_created_at",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "folder_blacklist_folder_id_music_folders_id_fk": {
           "name": "folder_blacklist_folder_id_music_folders_id_fk",
           "tableFrom": "folder_blacklist",
           "tableTo": "music_folders",
-          "columnsFrom": ["folder_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "folder_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -615,7 +1091,23 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_genres_name": {
+          "name": "idx_genres_name",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -640,14 +1132,49 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_genres_songs_genre_id": {
+          "name": "idx_genres_songs_genre_id",
+          "columns": [
+            {
+              "expression": "genre_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_genres_songs_song_id": {
+          "name": "idx_genres_songs_song_id",
+          "columns": [
+            {
+              "expression": "song_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "genres_songs_genre_id_genres_id_fk": {
           "name": "genres_songs_genre_id_genres_id_fk",
           "tableFrom": "genres_songs",
           "tableTo": "genres",
-          "columnsFrom": ["genre_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "genre_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -655,8 +1182,12 @@
           "name": "genres_songs_song_id_songs_id_fk",
           "tableFrom": "genres_songs",
           "tableTo": "songs",
-          "columnsFrom": ["song_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "song_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -664,7 +1195,10 @@
       "compositePrimaryKeys": {
         "genres_songs_genre_id_song_id_pk": {
           "name": "genres_songs_genre_id_song_id_pk",
-          "columns": ["genre_id", "song_id"]
+          "columns": [
+            "genre_id",
+            "song_id"
+          ]
         }
       },
       "uniqueConstraints": {},
@@ -765,6 +1299,42 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "idx_music_folders_path": {
+          "name": "idx_music_folders_path",
+          "columns": [
+            {
+              "expression": "path",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_music_folders_parent_path": {
+          "name": "idx_music_folders_parent_path",
+          "columns": [
+            {
+              "expression": "parent_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "path",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -772,8 +1342,12 @@
           "name": "music_folders_parent_id_music_folders_id_fk",
           "tableFrom": "music_folders",
           "tableTo": "music_folders",
-          "columnsFrom": ["parent_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "parent_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -783,7 +1357,9 @@
         "music_folders_path_unique": {
           "name": "music_folders_path_unique",
           "nullsNotDistinct": false,
-          "columns": ["path"]
+          "columns": [
+            "path"
+          ]
         }
       },
       "policies": {},
@@ -851,14 +1427,85 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_palette_swatches_palette_id": {
+          "name": "idx_palette_swatches_palette_id",
+          "columns": [
+            {
+              "expression": "palette_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_palette_swatches_type": {
+          "name": "idx_palette_swatches_type",
+          "columns": [
+            {
+              "expression": "swatch_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_palette_swatches_palette_type": {
+          "name": "idx_palette_swatches_palette_type",
+          "columns": [
+            {
+              "expression": "palette_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "swatch_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_palette_swatches_hex": {
+          "name": "idx_palette_swatches_hex",
+          "columns": [
+            {
+              "expression": "hex",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "palette_swatches_palette_id_palettes_id_fk": {
           "name": "palette_swatches_palette_id_palettes_id_fk",
           "tableFrom": "palette_swatches",
           "tableTo": "palettes",
-          "columnsFrom": ["palette_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "palette_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -904,14 +1551,34 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_palettes_artwork_id": {
+          "name": "idx_palettes_artwork_id",
+          "columns": [
+            {
+              "expression": "artwork_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "palettes_artwork_id_artworks_id_fk": {
           "name": "palettes_artwork_id_artworks_id_fk",
           "tableFrom": "palettes",
           "tableTo": "artworks",
-          "columnsFrom": ["artwork_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "artwork_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -963,14 +1630,85 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_play_events_song_id": {
+          "name": "idx_play_events_song_id",
+          "columns": [
+            {
+              "expression": "song_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_play_events_created_at": {
+          "name": "idx_play_events_created_at",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_play_events_song_created": {
+          "name": "idx_play_events_song_created",
+          "columns": [
+            {
+              "expression": "song_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_play_events_percentage": {
+          "name": "idx_play_events_percentage",
+          "columns": [
+            {
+              "expression": "playback_percentage",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "play_events_song_id_songs_id_fk": {
           "name": "play_events_song_id_songs_id_fk",
           "tableFrom": "play_events",
           "tableTo": "songs",
-          "columnsFrom": ["song_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "song_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1016,7 +1754,38 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_playlists_name": {
+          "name": "idx_playlists_name",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_playlists_created_at": {
+          "name": "idx_playlists_created_at",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -1041,14 +1810,49 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_playlists_songs_playlist_id": {
+          "name": "idx_playlists_songs_playlist_id",
+          "columns": [
+            {
+              "expression": "playlist_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_playlists_songs_song_id": {
+          "name": "idx_playlists_songs_song_id",
+          "columns": [
+            {
+              "expression": "song_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "playlists_songs_playlist_id_playlists_id_fk": {
           "name": "playlists_songs_playlist_id_playlists_id_fk",
           "tableFrom": "playlists_songs",
           "tableTo": "playlists",
-          "columnsFrom": ["playlist_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "playlist_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1056,8 +1860,12 @@
           "name": "playlists_songs_song_id_songs_id_fk",
           "tableFrom": "playlists_songs",
           "tableTo": "songs",
-          "columnsFrom": ["song_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "song_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1065,7 +1873,10 @@
       "compositePrimaryKeys": {
         "playlists_songs_playlist_id_song_id_pk": {
           "name": "playlists_songs_playlist_id_song_id_pk",
-          "columns": ["playlist_id", "song_id"]
+          "columns": [
+            "playlist_id",
+            "song_id"
+          ]
         }
       },
       "uniqueConstraints": {},
@@ -1114,14 +1925,70 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_seek_events_song_id": {
+          "name": "idx_seek_events_song_id",
+          "columns": [
+            {
+              "expression": "song_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_seek_events_created_at": {
+          "name": "idx_seek_events_created_at",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_seek_events_song_created": {
+          "name": "idx_seek_events_song_created",
+          "columns": [
+            {
+              "expression": "song_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "seek_events_song_id_songs_id_fk": {
           "name": "seek_events_song_id_songs_id_fk",
           "tableFrom": "seek_events",
           "tableTo": "songs",
-          "columnsFrom": ["song_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "song_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1173,14 +2040,70 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_skip_events_song_id": {
+          "name": "idx_skip_events_song_id",
+          "columns": [
+            {
+              "expression": "song_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_skip_events_created_at": {
+          "name": "idx_skip_events_created_at",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_skip_events_song_created": {
+          "name": "idx_skip_events_song_created",
+          "columns": [
+            {
+              "expression": "song_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "skip_events_song_id_songs_id_fk": {
           "name": "skip_events_song_id_songs_id_fk",
           "tableFrom": "skip_events",
           "tableTo": "songs",
-          "columnsFrom": ["song_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "song_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1209,14 +2132,34 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_song_blacklist_created_at": {
+          "name": "idx_song_blacklist_created_at",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "song_blacklist_song_id_songs_id_fk": {
           "name": "song_blacklist_song_id_songs_id_fk",
           "tableFrom": "song_blacklist",
           "tableTo": "songs",
-          "columnsFrom": ["song_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "song_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1335,14 +2278,245 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "idx_songs_title": {
+          "name": "idx_songs_title",
+          "columns": [
+            {
+              "expression": "title",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_songs_year": {
+          "name": "idx_songs_year",
+          "columns": [
+            {
+              "expression": "year",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_songs_track_number": {
+          "name": "idx_songs_track_number",
+          "columns": [
+            {
+              "expression": "track_number",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_songs_created_at": {
+          "name": "idx_songs_created_at",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_songs_file_modified_at": {
+          "name": "idx_songs_file_modified_at",
+          "columns": [
+            {
+              "expression": "file_modified_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_songs_folder_id": {
+          "name": "idx_songs_folder_id",
+          "columns": [
+            {
+              "expression": "folder_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_songs_path": {
+          "name": "idx_songs_path",
+          "columns": [
+            {
+              "expression": "path",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_songs_year_title": {
+          "name": "idx_songs_year_title",
+          "columns": [
+            {
+              "expression": "year",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "title",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_songs_track_title": {
+          "name": "idx_songs_track_title",
+          "columns": [
+            {
+              "expression": "track_number",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "title",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_songs_created_title": {
+          "name": "idx_songs_created_title",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "title",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_songs_modified_title": {
+          "name": "idx_songs_modified_title",
+          "columns": [
+            {
+              "expression": "file_modified_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "title",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_songs_folder_title": {
+          "name": "idx_songs_folder_title",
+          "columns": [
+            {
+              "expression": "folder_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "title",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_songs_title_text": {
+          "name": "idx_songs_title_text",
+          "columns": [
+            {
+              "expression": "title",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "where": "\"songs\".\"title\" IS NOT NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "songs_folder_id_music_folders_id_fk": {
           "name": "songs_folder_id_music_folders_id_fk",
           "tableFrom": "songs",
           "tableTo": "music_folders",
-          "columnsFrom": ["folder_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "folder_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1352,7 +2526,9 @@
         "songs_path_unique": {
           "name": "songs_path_unique",
           "nullsNotDistinct": false,
-          "columns": ["path"]
+          "columns": [
+            "path"
+          ]
         }
       },
       "policies": {},
@@ -1364,12 +2540,22 @@
     "public.artwork_source": {
       "name": "artwork_source",
       "schema": "public",
-      "values": ["LOCAL", "REMOTE"]
+      "values": [
+        "LOCAL",
+        "REMOTE"
+      ]
     },
     "public.swatch_type": {
       "name": "swatch_type",
       "schema": "public",
-      "values": ["VIBRANT", "LIGHT_VIBRANT", "DARK_VIBRANT", "MUTED", "LIGHT_MUTED", "DARK_MUTED"]
+      "values": [
+        "VIBRANT",
+        "LIGHT_VIBRANT",
+        "DARK_VIBRANT",
+        "MUTED",
+        "LIGHT_MUTED",
+        "DARK_MUTED"
+      ]
     }
   },
   "schemas": {},

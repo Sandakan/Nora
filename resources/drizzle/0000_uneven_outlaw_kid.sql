@@ -202,4 +202,66 @@ ALTER TABLE "seek_events" ADD CONSTRAINT "seek_events_song_id_songs_id_fk" FOREI
 ALTER TABLE "skip_events" ADD CONSTRAINT "skip_events_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "song_blacklist" ADD CONSTRAINT "song_blacklist_song_id_songs_id_fk" FOREIGN KEY ("song_id") REFERENCES "public"."songs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "songs" ADD CONSTRAINT "songs_folder_id_music_folders_id_fk" FOREIGN KEY ("folder_id") REFERENCES "public"."music_folders"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-CREATE INDEX "idx_parent_id" ON "music_folders" USING btree ("parent_id");
+CREATE INDEX "idx_albums_title" ON "albums" USING btree ("title");--> statement-breakpoint
+CREATE INDEX "idx_albums_year" ON "albums" USING btree ("year");--> statement-breakpoint
+CREATE INDEX "idx_albums_year_title" ON "albums" USING btree ("year","title");--> statement-breakpoint
+CREATE INDEX "idx_albums_artists_album_id" ON "albums_artists" USING btree ("album_id");--> statement-breakpoint
+CREATE INDEX "idx_albums_artists_artist_id" ON "albums_artists" USING btree ("artist_id");--> statement-breakpoint
+CREATE INDEX "idx_albums_artworks_artwork_id" ON "albums_artworks" USING btree ("artwork_id");--> statement-breakpoint
+CREATE INDEX "idx_albums_artworks_album_id" ON "albums_artworks" USING btree ("album_id");--> statement-breakpoint
+CREATE INDEX "idx_album_songs_album_id" ON "album_songs" USING btree ("album_id");--> statement-breakpoint
+CREATE INDEX "idx_album_songs_song_id" ON "album_songs" USING btree ("song_id");--> statement-breakpoint
+CREATE INDEX "idx_artists_name" ON "artists" USING btree ("name");--> statement-breakpoint
+CREATE INDEX "idx_artists_artworks_artwork_id" ON "artists_artworks" USING btree ("artwork_id");--> statement-breakpoint
+CREATE INDEX "idx_artists_artworks_artist_id" ON "artists_artworks" USING btree ("artist_id");--> statement-breakpoint
+CREATE INDEX "idx_artists_songs_artist_id" ON "artists_songs" USING btree ("artist_id");--> statement-breakpoint
+CREATE INDEX "idx_artists_songs_song_id" ON "artists_songs" USING btree ("song_id");--> statement-breakpoint
+CREATE INDEX "idx_artworks_path" ON "artworks" USING btree ("path");--> statement-breakpoint
+CREATE INDEX "idx_artworks_source" ON "artworks" USING btree ("source");--> statement-breakpoint
+CREATE INDEX "idx_artworks_dimensions" ON "artworks" USING btree ("width","height");--> statement-breakpoint
+CREATE INDEX "idx_artworks_genres_genre_id" ON "artworks_genres" USING btree ("genre_id");--> statement-breakpoint
+CREATE INDEX "idx_artworks_genres_artwork_id" ON "artworks_genres" USING btree ("artwork_id");--> statement-breakpoint
+CREATE INDEX "idx_artworks_playlists_playlist_id" ON "artworks_playlists" USING btree ("playlist_id");--> statement-breakpoint
+CREATE INDEX "idx_artworks_playlists_artwork_id" ON "artworks_playlists" USING btree ("artwork_id");--> statement-breakpoint
+CREATE INDEX "idx_artworks_songs_artwork_id" ON "artworks_songs" USING btree ("artwork_id");--> statement-breakpoint
+CREATE INDEX "idx_artworks_songs_song_id" ON "artworks_songs" USING btree ("song_id");--> statement-breakpoint
+CREATE INDEX "idx_folder_blacklist_created_at" ON "folder_blacklist" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "idx_genres_name" ON "genres" USING btree ("name");--> statement-breakpoint
+CREATE INDEX "idx_genres_songs_genre_id" ON "genres_songs" USING btree ("genre_id");--> statement-breakpoint
+CREATE INDEX "idx_genres_songs_song_id" ON "genres_songs" USING btree ("song_id");--> statement-breakpoint
+CREATE INDEX "idx_parent_id" ON "music_folders" USING btree ("parent_id");--> statement-breakpoint
+CREATE INDEX "idx_music_folders_path" ON "music_folders" USING btree ("path");--> statement-breakpoint
+CREATE INDEX "idx_music_folders_parent_path" ON "music_folders" USING btree ("parent_id","path");--> statement-breakpoint
+CREATE INDEX "idx_palette_swatches_palette_id" ON "palette_swatches" USING btree ("palette_id");--> statement-breakpoint
+CREATE INDEX "idx_palette_swatches_type" ON "palette_swatches" USING btree ("swatch_type");--> statement-breakpoint
+CREATE INDEX "idx_palette_swatches_palette_type" ON "palette_swatches" USING btree ("palette_id","swatch_type");--> statement-breakpoint
+CREATE INDEX "idx_palette_swatches_hex" ON "palette_swatches" USING btree ("hex");--> statement-breakpoint
+CREATE INDEX "idx_palettes_artwork_id" ON "palettes" USING btree ("artwork_id");--> statement-breakpoint
+CREATE INDEX "idx_play_events_song_id" ON "play_events" USING btree ("song_id");--> statement-breakpoint
+CREATE INDEX "idx_play_events_created_at" ON "play_events" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "idx_play_events_song_created" ON "play_events" USING btree ("song_id","created_at");--> statement-breakpoint
+CREATE INDEX "idx_play_events_percentage" ON "play_events" USING btree ("playback_percentage");--> statement-breakpoint
+CREATE INDEX "idx_playlists_name" ON "playlists" USING btree ("name");--> statement-breakpoint
+CREATE INDEX "idx_playlists_created_at" ON "playlists" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "idx_playlists_songs_playlist_id" ON "playlists_songs" USING btree ("playlist_id");--> statement-breakpoint
+CREATE INDEX "idx_playlists_songs_song_id" ON "playlists_songs" USING btree ("song_id");--> statement-breakpoint
+CREATE INDEX "idx_seek_events_song_id" ON "seek_events" USING btree ("song_id");--> statement-breakpoint
+CREATE INDEX "idx_seek_events_created_at" ON "seek_events" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "idx_seek_events_song_created" ON "seek_events" USING btree ("song_id","created_at");--> statement-breakpoint
+CREATE INDEX "idx_skip_events_song_id" ON "skip_events" USING btree ("song_id");--> statement-breakpoint
+CREATE INDEX "idx_skip_events_created_at" ON "skip_events" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "idx_skip_events_song_created" ON "skip_events" USING btree ("song_id","created_at");--> statement-breakpoint
+CREATE INDEX "idx_song_blacklist_created_at" ON "song_blacklist" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "idx_songs_title" ON "songs" USING btree ("title");--> statement-breakpoint
+CREATE INDEX "idx_songs_year" ON "songs" USING btree ("year");--> statement-breakpoint
+CREATE INDEX "idx_songs_track_number" ON "songs" USING btree ("track_number");--> statement-breakpoint
+CREATE INDEX "idx_songs_created_at" ON "songs" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "idx_songs_file_modified_at" ON "songs" USING btree ("file_modified_at");--> statement-breakpoint
+CREATE INDEX "idx_songs_folder_id" ON "songs" USING btree ("folder_id");--> statement-breakpoint
+CREATE INDEX "idx_songs_path" ON "songs" USING btree ("path");--> statement-breakpoint
+CREATE INDEX "idx_songs_year_title" ON "songs" USING btree ("year","title");--> statement-breakpoint
+CREATE INDEX "idx_songs_track_title" ON "songs" USING btree ("track_number","title");--> statement-breakpoint
+CREATE INDEX "idx_songs_created_title" ON "songs" USING btree ("created_at","title");--> statement-breakpoint
+CREATE INDEX "idx_songs_modified_title" ON "songs" USING btree ("file_modified_at","title");--> statement-breakpoint
+CREATE INDEX "idx_songs_folder_title" ON "songs" USING btree ("folder_id","title");--> statement-breakpoint
+CREATE INDEX "idx_songs_title_text" ON "songs" USING btree ("title") WHERE "songs"."title" IS NOT NULL;
