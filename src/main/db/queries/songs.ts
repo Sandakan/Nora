@@ -1,5 +1,6 @@
 import { db } from '@db/db';
 import { folderBlacklist, musicFolders, songs } from '@db/schema';
+import { timeEnd, timeStart } from '@main/utils/measureTimeUsage';
 import { and, asc, desc, eq, ilike, inArray, notInArray, or } from 'drizzle-orm';
 
 export const isSongWithPathAvailable = async (path: string, trx: DB | DBTransaction = db) => {
@@ -108,6 +109,7 @@ export async function getSongsInFolders(
 
 export type GetAllSongsReturnType = Awaited<ReturnType<typeof getAllSongs>>['data'];
 const defaultGetAllSongsOptions = {
+  songIds: [] as number[],
   start: 0,
   end: 0,
   filterType: 'notSelected' as SongFilterTypes,
@@ -119,11 +121,24 @@ export const getAllSongs = async (
   options: GetAllSongsOptions = defaultGetAllSongsOptions,
   trx: DB | DBTransaction = db
 ) => {
-  const { start = 0, end = 0, filterType = 'notSelected', sortType = 'aToZ' } = options;
+  const {
+    start = 0,
+    end = 0,
+    filterType = 'notSelected',
+    sortType = 'aToZ',
+    songIds = []
+  } = options;
   const limit = end - start === 0 ? undefined : end - start;
 
+  const timer = timeStart();
   // Fetch all songs with their relations
   const songsData = await trx.query.songs.findMany({
+    where: (s) => {
+      if (songIds && songIds.length > 0) {
+        return inArray(s.id, songIds);
+      }
+      return undefined;
+    },
     with: {
       artists: {
         with: {
@@ -185,6 +200,7 @@ export const getAllSongs = async (
     offset: start,
     limit: limit
   });
+  timeEnd(timer);
 
   return {
     data: songsData,

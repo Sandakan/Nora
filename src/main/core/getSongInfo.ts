@@ -1,10 +1,8 @@
 import { isSongBlacklisted } from '../utils/isBlacklisted';
-import { getListeningData, getSongsData } from '../filesystem';
 import { getSongArtworkPath } from '../fs/resolveFilePaths';
 import logger from '../logger';
-import sortSongs from '../utils/sortSongs';
 import { getSelectedPaletteData } from '../other/generatePalette';
-import filterSongs from '../utils/filterSongs';
+import { getAllSongs } from '@main/db/queries/songs';
 
 const getSongInfo = async (
   songIds: string[],
@@ -22,8 +20,11 @@ const getSongInfo = async (
     noBlacklistedSongs
   });
   if (songIds.length > 0) {
-    const songsData = getSongsData();
-    const listeningData = getListeningData();
+    const songsData = await getAllSongs({
+      sortType,
+      filterType,
+      songIds: songIds.map((id) => Number(id))
+    });
 
     if (Array.isArray(songsData) && songsData.length > 0) {
       const results: SavableSongData[] = [];
@@ -58,15 +59,6 @@ const getSongInfo = async (
         if (noBlacklistedSongs)
           updatedResults = updatedResults.filter((result) => !result.isBlacklisted);
 
-        if (limit) {
-          if (typeof sortType === 'string' || typeof filterType === 'string')
-            return sortSongs(
-              filterSongs(updatedResults, filterType),
-              sortType,
-              listeningData
-            ).filter((_, index) => index < limit);
-          return updatedResults.filter((_, index) => index < limit);
-        }
         return updatedResults;
       }
       logger.warn(`Failed to get songs info of songs`, {

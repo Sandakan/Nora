@@ -22,7 +22,7 @@ const Preloader = () => {
   useEffect(() => {
     router.preloadRoute({ to: '/main-player/home' });
     // this removes preloader in 5 seconds no matter what didn't load.
-    const timeoutId = setTimeout(() => hidePreloader(), 5000);
+    const timeoutId = setTimeout(() => hidePreloader(), 2000);
 
     return () => {
       clearTimeout(timeoutId);
