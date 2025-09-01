@@ -57,7 +57,7 @@ export const getAllFolderStructures = async (
         fileCreatedDate: folder.folderCreatedAt!,
         lastParsedDate: folder.lastParsedAt!
       },
-      subFolders: await getFolderStructure(folder.id)
+      subFolders: await getFolderStructure(folder.id, trx)
     }))
   );
 

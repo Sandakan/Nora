@@ -526,7 +526,7 @@ const handleFileProtocol = async (req: GlobalRequest) => {
 
     return res;
   } catch (error) {
-    logger.error('Error handling media protocol:', { error });
+    logger.error('Error handling media protocol:', { ...(error as Error) });
     return new Response('Internal Server Error', { status: 500 });
   }
 };
