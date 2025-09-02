@@ -1,5 +1,6 @@
 import path, { join } from 'path';
 import os from 'os';
+import mime from 'mime';
 import {
   app,
   BrowserWindow,
@@ -54,8 +55,7 @@ import logger from './logger';
 import roundTo from '../common/roundTo';
 // import { fileURLToPath, pathToFileURL } from 'url';
 import { closeDatabaseInstance } from './db/db';
-import { pathToFileURL } from 'url';
-import { stat } from 'fs/promises';
+import { createReadStream, existsSync, statSync } from 'fs';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -507,7 +507,8 @@ const handleFileProtocol = async (req: GlobalRequest) => {
     const { pathname } = new URL(req.url);
     const filePath = decodeURI(pathname).replace(/^[/\\]{1,2}/gm, '');
 
-    const pathToServe = path.resolve(import.meta.dirname, filePath);
+    // const pathToServe = path.resolve(import.meta.dirname, filePath);
+    // const fileUrl = pathToFileURL(pathToServe).toString();
     // const relativePath = path.relative(import.meta.dirname, pathToServe);
     // const isSafe = relativePath && !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
 
@@ -518,15 +519,52 @@ const handleFileProtocol = async (req: GlobalRequest) => {
     //   });
     // }
 
-    const fileUrl = pathToFileURL(pathToServe).toString();
-    const stats = await stat(pathToServe);
-    req.headers.append('Content-Length', stats.size.toString());
-    const res = await net.fetch(fileUrl, req);
-    res.headers.append('Content-Length', stats.size.toString());
+    if (!existsSync(filePath)) {
+      return new Response('File not found', { status: 404 });
+    }
 
-    return res;
+    const mimeType = mime.getType(filePath) || 'application/octet-stream';
+
+    const stat = statSync(filePath);
+    const fileSize = stat.size;
+    const range = req.headers.get('range');
+
+    const headers: Record<string, string> = {
+      'Content-Type': mimeType,
+      'Accept-Ranges': 'bytes'
+    };
+
+    if (range) {
+      const parts = range.replace(/bytes=/, '').split('-');
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+      if (start >= fileSize || end >= fileSize) {
+        return new Response(null, { status: 416, headers });
+      }
+
+      const chunksize = end - start + 1;
+
+      const stream = createReadStream(filePath, { start, end });
+
+      headers['Content-Range'] = `bytes ${start}-${end}/${fileSize}`;
+      headers['Content-Length'] = chunksize.toString();
+
+      return new Response(stream as unknown as ReadableStream, {
+        status: 206,
+        headers
+      });
+    } else {
+      const stream = createReadStream(filePath);
+      headers['Content-Length'] = fileSize.toString();
+
+      return new Response(stream as unknown as ReadableStream, {
+        status: 200,
+        headers
+      });
+    }
   } catch (error) {
-    logger.error('Error handling media protocol:', { ...(error as Error) });
+    logger.error('Error handling media protocol:', { error }, error);
     return new Response('Internal Server Error', { status: 500 });
   }
 };

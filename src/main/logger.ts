@@ -127,8 +127,10 @@ const logger = {
   info: (message: string, data = {} as object) => {
     log.info(message, { process: 'MAIN', data });
   },
-  error: (message: string, data = {} as object) => {
-    log.error(message, { process: 'MAIN', data });
+  error: (message: string, data = {} as object, error?: unknown) => {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    log.error(message, { process: 'MAIN', error: errorMessage, data });
   },
   warn: (message: string, data = {} as object) => {
     log.warn(message, { process: 'MAIN', data });

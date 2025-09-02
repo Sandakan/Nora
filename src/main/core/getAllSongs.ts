@@ -1,7 +1,7 @@
 // import { getListeningData } from '../filesystem';
-import { parseSongArtworks } from '@main/fs/resolveFilePaths';
 import logger from '../logger';
 import { getAllSongs as getAllSavedSongs } from '@main/db/queries/songs';
+import { convertToSongData } from '../../common/convert';
 
 type SongArtwork = Awaited<
   ReturnType<typeof getAllSavedSongs>
@@ -96,69 +96,7 @@ const getAllSongs = async (
     //   // listeningData
     // );
 
-    result.data = songsData.data.map((song) => {
-      // Artists
-      const artists =
-        song.artists?.map((a) => ({ artistId: String(a.artist.id), name: a.artist.name })) ?? [];
-
-      // Album (pick first if multiple)
-      const albumObj = song.albums?.[0]?.album;
-      const album = albumObj ? { albumId: String(albumObj.id), name: albumObj.title } : undefined;
-
-      // // Artworks (pick highest and lowest resolution)
-      // let artworkPath = '';
-      // let optimizedArtworkPath = '';
-      // let isDefaultArtwork = true;
-      // if (song.artworks && song.artworks.length > 0) {
-      //   // Sort by resolution (width * height), fallback to 0 if missing
-      //   const sortedArtworks = song.artworks
-      //     .map((a) => a.artwork)
-      //     .filter((a) => !!a)
-      //     .sort((a, b) => {
-      //       const aRes = a.width * a.height;
-      //       const bRes = b.width * b.height;
-
-      //       return aRes - bRes;
-      //     });
-      //   if (sortedArtworks.length > 0) {
-      //     isDefaultArtwork = false;
-      //     optimizedArtworkPath = sortedArtworks[0]?.path ?? '';
-      //     artworkPath = sortedArtworks[sortedArtworks.length - 1]?.path ?? '';
-      //   }
-      // }
-      // const artworkPaths = {
-      //   isDefaultArtwork,
-      //   artworkPath,
-      //   optimizedArtworkPath
-      // };
-
-      // Blacklist
-      const isBlacklisted = !!song.blacklist;
-      // Track number
-      const trackNo = song.trackNumber ?? undefined;
-      // Added date
-      const addedDate = song.createdAt ? new Date(song.createdAt).getTime() : 0;
-      // isAFavorite: You must join your favorites table if you have one. Here we default to false.
-      const isAFavorite = false;
-
-      const artworks = song.artworks.map((a) => a.artwork);
-
-      return {
-        title: song.title,
-        artists,
-        album,
-        duration: Number(song.duration),
-        artworkPaths: parseSongArtworks(artworks),
-        path: song.path,
-        songId: String(song.id),
-        addedDate,
-        isAFavorite,
-        year: song.year ?? undefined,
-        paletteData: parsePaletteFromArtworks(artworks),
-        isBlacklisted,
-        trackNo
-      };
-    });
+    result.data = songsData.data.map((song) => convertToSongData(song));
 
     // result = paginateData(parsedData, sortType, paginatingData);
     result.total = songsData.data.length;

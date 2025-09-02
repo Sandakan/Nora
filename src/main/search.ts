@@ -1,15 +1,9 @@
-import { default as stringSimilarity, ReturnTypeEnums } from 'didyoumean2';
-import { getUserData, setUserData, getBlacklistData } from './filesystem';
+import { getUserData, setUserData } from './filesystem';
 import {
-  getAlbumArtworkPath,
-  getArtistArtworkPath,
-  getPlaylistArtworkPath,
-  getSongArtworkPath,
   parseAlbumArtworks,
   parseArtistArtworks,
   parseGenreArtworks,
-  parsePlaylistArtworks,
-  parseSongArtworks
+  parsePlaylistArtworks
 } from './fs/resolveFilePaths';
 import logger from './logger';
 import {
@@ -19,166 +13,8 @@ import {
   searchPlaylistsByName,
   searchSongsByName
 } from './db/queries/search';
-import { parsePaletteFromArtworks } from './core/getAllSongs';
 import { timeEnd, timeStart } from './utils/measureTimeUsage';
-
-const getSongSearchResults = (
-  songs: SavableSongData[],
-  keyword: string,
-  filter: SearchFilters,
-  isPredictiveSearchEnabled = true
-): SongData[] => {
-  if (Array.isArray(songs) && songs.length > 0 && (filter === 'Songs' || filter === 'All')) {
-    const { songBlacklist } = getBlacklistData();
-    let returnValue: SavableSongData[] = [];
-
-    if (isPredictiveSearchEnabled)
-      returnValue = stringSimilarity(keyword, songs as unknown as Record<string, unknown>[], {
-        caseSensitive: false,
-        matchPath: ['title'],
-        returnType: ReturnTypeEnums.ALL_SORTED_MATCHES
-      }) as unknown as SavableSongData[];
-
-    if (returnValue.length === 0) {
-      const regex = new RegExp(keyword, 'gim');
-      const results = songs.filter((song) => {
-        const isTitleAMatch = regex.test(song.title);
-        const isArtistsAMatch = song.artists
-          ? regex.test(song.artists.map((artist) => artist.name).join(' '))
-          : false;
-
-        return isTitleAMatch || isArtistsAMatch;
-      });
-
-      returnValue = results;
-    }
-    return returnValue.map((x) => {
-      const isBlacklisted = songBlacklist?.includes(x.songId);
-      return {
-        ...x,
-        artworkPaths: getSongArtworkPath(x.songId, x.isArtworkAvailable),
-        isBlacklisted
-      };
-    });
-  }
-  return [];
-};
-
-const getArtistSearchResults = (
-  artists: SavableArtist[],
-  keyword: string,
-  filter: SearchFilters,
-  isPredictiveSearchEnabled = true
-): Artist[] => {
-  if (Array.isArray(artists) && artists.length > 0 && (filter === 'Artists' || filter === 'All')) {
-    let returnValue: SavableArtist[] = [];
-
-    if (isPredictiveSearchEnabled)
-      returnValue = stringSimilarity(keyword, artists as unknown as Record<string, unknown>[], {
-        caseSensitive: false,
-        matchPath: ['name'],
-        returnType: ReturnTypeEnums.ALL_SORTED_MATCHES
-      }) as unknown as SavableArtist[];
-
-    if (returnValue.length === 0) {
-      returnValue = artists.filter((artist) => new RegExp(keyword, 'gim').test(artist.name));
-    }
-
-    return returnValue.map((x) => ({
-      ...x,
-      artworkPaths: getArtistArtworkPath(x.artworkName)
-    }));
-  }
-  return [];
-};
-
-const getAlbumSearchResults = (
-  albums: SavableAlbum[],
-  keyword: string,
-  filter: SearchFilters,
-  isPredictiveSearchEnabled = true
-): Album[] => {
-  if (Array.isArray(albums) && albums.length > 0 && (filter === 'Albums' || filter === 'All')) {
-    let returnValue: SavableAlbum[] = [];
-
-    if (isPredictiveSearchEnabled)
-      returnValue = stringSimilarity(keyword, albums as unknown as Record<string, unknown>[], {
-        caseSensitive: false,
-        matchPath: ['title'],
-        returnType: ReturnTypeEnums.ALL_SORTED_MATCHES
-      }) as unknown as SavableAlbum[];
-
-    if (returnValue.length === 0) {
-      returnValue = albums.filter((album) => new RegExp(keyword, 'gim').test(album.title));
-    }
-
-    return returnValue.map((x) => ({
-      ...x,
-      artworkPaths: getAlbumArtworkPath(x.artworkName)
-    }));
-  }
-  return [];
-};
-
-const getPlaylistSearchResults = (
-  playlists: SavablePlaylist[],
-  keyword: string,
-  filter: SearchFilters,
-  isPredictiveSearchEnabled = true
-): Playlist[] => {
-  if (
-    Array.isArray(playlists) &&
-    playlists.length > 0 &&
-    (filter === 'Playlists' || filter === 'All')
-  ) {
-    let returnValue: SavablePlaylist[] = [];
-
-    if (isPredictiveSearchEnabled)
-      returnValue = stringSimilarity(keyword, playlists as unknown as Record<string, unknown>[], {
-        caseSensitive: false,
-        matchPath: ['name'],
-        returnType: ReturnTypeEnums.ALL_SORTED_MATCHES
-      }) as unknown as SavablePlaylist[];
-
-    if (returnValue.length === 0) {
-      returnValue = playlists.filter((playlist) => new RegExp(keyword, 'gim').test(playlist.name));
-    }
-
-    return returnValue.map((x) => ({
-      ...x,
-      artworkPaths: getPlaylistArtworkPath(x.playlistId, x.isArtworkAvailable)
-    }));
-  }
-  return [];
-};
-
-const getGenreSearchResults = (
-  genres: SavableGenre[],
-  keyword: string,
-  filter: SearchFilters,
-  isPredictiveSearchEnabled = true
-): Genre[] => {
-  if (Array.isArray(genres) && genres.length > 0 && (filter === 'Genres' || filter === 'All')) {
-    let returnValue: SavableGenre[] = [];
-
-    if (isPredictiveSearchEnabled)
-      returnValue = stringSimilarity(keyword, genres as unknown as Record<string, unknown>[], {
-        caseSensitive: false,
-        matchPath: ['name'],
-        returnType: ReturnTypeEnums.ALL_SORTED_MATCHES
-      }) as unknown as SavableGenre[];
-
-    if (returnValue.length === 0) {
-      returnValue = genres.filter((genre) => new RegExp(keyword, 'gim').test(genre.name));
-    }
-
-    return returnValue.map((x) => ({
-      ...x,
-      artworkPaths: getAlbumArtworkPath(x.artworkName)
-    }));
-  }
-  return [];
-};
+import { convertToSongData } from '../common/convert';
 
 let recentSearchesTimeoutId: NodeJS.Timeout;
 const search = async (
@@ -189,43 +25,7 @@ const search = async (
 ): Promise<SearchResult> => {
   const timer = timeStart();
   const [songs, artists, albums, playlists, genres] = await Promise.all([
-    searchSongsByName(value).then((data) =>
-      data.map((song) => {
-        const artists =
-          song.artists?.map((a) => ({ artistId: String(a.artist.id), name: a.artist.name })) ?? [];
-
-        // Album (pick first if multiple)
-        const albumObj = song.albums?.[0]?.album;
-        const album = albumObj ? { albumId: String(albumObj.id), name: albumObj.title } : undefined;
-
-        // Blacklist
-        const isBlacklisted = !!song.blacklist;
-        // Track number
-        const trackNo = song.trackNumber ?? undefined;
-        // Added date
-        const addedDate = song.createdAt ? new Date(song.createdAt).getTime() : 0;
-        // isAFavorite: You must join your favorites table if you have one. Here we default to false.
-        const isAFavorite = false;
-
-        const artworks = song.artworks.map((a) => a.artwork);
-        return {
-          title: song.title,
-          artists,
-          album,
-          duration: Number(song.duration),
-          artworkPaths: parseSongArtworks(artworks),
-          path: song.path,
-          songId: String(song.id),
-          addedDate,
-          isAFavorite,
-          year: song.year ?? undefined,
-          paletteData: parsePaletteFromArtworks(artworks),
-          isBlacklisted,
-          trackNo,
-          isArtworkAvailable: artworks.length > 0
-        } satisfies SongData;
-      })
-    ),
+    searchSongsByName(value).then((data) => data.map((song) => convertToSongData(song))),
     searchArtistsByName(value).then((data) =>
       data.map((artist) => {
         const artworks = artist.artworks.map((a) => a.artwork);

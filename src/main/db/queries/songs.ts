@@ -113,7 +113,8 @@ const defaultGetAllSongsOptions = {
   start: 0,
   end: 0,
   filterType: 'notSelected' as SongFilterTypes,
-  sortType: 'aToZ' as SongSortTypes
+  sortType: 'aToZ' as SongSortTypes,
+  preserveIdOrder: false
 };
 export type GetAllSongsOptions = Partial<typeof defaultGetAllSongsOptions>;
 
@@ -126,8 +127,10 @@ export const getAllSongs = async (
     end = 0,
     filterType = 'notSelected',
     sortType = 'aToZ',
-    songIds = []
+    songIds = [],
+    preserveIdOrder = false
   } = options;
+
   const limit = end - start === 0 ? undefined : end - start;
 
   const timer = timeStart();
@@ -202,8 +205,19 @@ export const getAllSongs = async (
   });
   timeEnd(timer);
 
+  // If preserveIdOrder is true, sort the results to match the input songIds order
+  let sortedData = songsData;
+  if (preserveIdOrder && songIds.length > 0) {
+    const idToIndex = new Map(songIds.map((id, index) => [id, index]));
+    sortedData = songsData.sort((a, b) => {
+      const indexA = idToIndex.get(a.id) ?? Number.MAX_SAFE_INTEGER;
+      const indexB = idToIndex.get(b.id) ?? Number.MAX_SAFE_INTEGER;
+      return indexA - indexB;
+    });
+  }
+
   return {
-    data: songsData,
+    data: sortedData,
     sortType,
     filterType,
     start,
