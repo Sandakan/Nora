@@ -9,7 +9,8 @@ import {
   primaryKey,
   index,
   type AnyPgColumn,
-  json
+  json,
+  boolean
 } from 'drizzle-orm/pg-core';
 import { relations, sql } from 'drizzle-orm';
 
@@ -33,11 +34,13 @@ export const artists = pgTable(
   'artists',
   {
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
-    name: varchar('name', { length: 1024 }).notNull()
+    name: varchar('name', { length: 1024 }).notNull(),
+    isFavorite: boolean('is_favorite').notNull().default(false)
   },
   (t) => [
     // Index for name-based lookups and sorting (aToZ, zToA)
-    index('idx_artists_name').on(t.name)
+    index('idx_artists_name').on(t.name),
+    index('idx_artists_is_favorite').on(t.isFavorite)
   ]
 );
 

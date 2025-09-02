@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useContext, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppUpdateContext } from '../../contexts/AppUpdateContext';
 
@@ -7,6 +7,9 @@ import Img from '../Img';
 import RecentSearchResult from './RecentSearchResult';
 
 import SearchSomethingImage from '../../assets/images/svg/Flying kite_Monochromatic.svg';
+import { useSuspenseQuery, queryOptions } from '@tanstack/react-query';
+import { queryClient } from '@renderer/index';
+import { searchQuery } from '@renderer/queries/search';
 
 type Props = {
   searchInput: string;
@@ -15,33 +18,24 @@ type Props = {
   updateSearchInput: (input: string) => void;
 };
 
+const recentSearchResultsQueryOptions = queryOptions(searchQuery.recentResults);
+
 const SearchStartPlaceholder = (props: Props) => {
   const { updateCurrentlyActivePageData } = useContext(AppUpdateContext);
   const { t } = useTranslation();
 
   const { searchResults, searchInput, updateSearchInput } = props;
 
-  const [recentSearchResults, setRecentSearchResults] = useState([] as string[]);
-
-  const fetchRecentSearchResults = useCallback(() => {
-    window.api.userData
-      .getUserData()
-      .then((data) => {
-        if (data && Array.isArray(data.recentSearches))
-          return setRecentSearchResults(data.recentSearches);
-        return undefined;
-      })
-      .catch((err) => console.error(err));
-  }, []);
+  const { data: recentSearchResults } = useSuspenseQuery(recentSearchResultsQueryOptions);
 
   useEffect(() => {
-    fetchRecentSearchResults();
     const manageSearchResultsUpdatesInSearchPage = (e: Event) => {
       if ('detail' in e) {
         const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
         for (let i = 0; i < dataEvents.length; i += 1) {
           const event = dataEvents[i];
-          if (event.dataType === 'userData/recentSearches') fetchRecentSearchResults();
+          if (event.dataType === 'userData/recentSearches')
+            queryClient.invalidateQueries(recentSearchResultsQueryOptions);
         }
       }
     };
@@ -49,9 +43,7 @@ const SearchStartPlaceholder = (props: Props) => {
     return () => {
       document.removeEventListener('app/dataUpdates', manageSearchResultsUpdatesInSearchPage);
     };
-  }, [fetchRecentSearchResults]);
-
-  useEffect(() => fetchRecentSearchResults(), [fetchRecentSearchResults]);
+  }, []);
 
   const recentSearchResultComponents = useMemo(
     () =>

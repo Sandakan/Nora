@@ -17,12 +17,9 @@ import NoSongsImage from '../../../assets/images/svg/Empty Inbox _Monochromatic.
 import DataFetchingImage from '../../../assets/images/svg/Umbrella_Monochromatic.svg';
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 import { queryClient } from '@renderer/index';
+import { songQuery } from '@renderer/queries/songs';
+import { artistQuery } from '@renderer/queries/aritsts';
 
-const fetchLatestSongs = async (noOfRecentlyAddedSongCards: number) =>
-  window.api.audioLibraryControls.getAllSongs('dateAddedDescending', undefined, {
-    start: 0,
-    end: noOfRecentlyAddedSongCards
-  });
 const fetchRecentlyPlayedSongs = async (
   noOfRecentlyAddedSongCards: number
 ): Promise<SongData[]> => [];
@@ -30,12 +27,6 @@ const fetchRecentSongArtists = async (
   noOfRecentlyAddedArtistCards: number
 ): Promise<Artist[]> => [];
 const fetchMostLovedSongs = async (noOfMostLovedSongCards: number): Promise<AudioInfo[]> => [];
-const fetchMostLovedArtists = async (noOfMostLovedArtistCards: number): Promise<Artist[]> => [];
-
-const latestSongQueryOptions = queryOptions({
-  queryKey: ['latestSongs'],
-  queryFn: () => fetchLatestSongs(30)
-});
 
 const recentlyPlayedSongQueryOptions = queryOptions({
   queryKey: ['recentlyPlayedSongs'],
@@ -49,19 +40,24 @@ const mostLovedSongsQueryOptions = queryOptions({
   queryKey: ['mostLovedSongs'],
   queryFn: () => fetchMostLovedSongs(30)
 });
-const mostLovedArtistsQueryOptions = queryOptions({
-  queryKey: ['mostLovedArtists'],
-  queryFn: () => fetchMostLovedArtists(30)
-});
 
 export const Route = createFileRoute('/main-player/home/')({
   component: HomePage,
   loader: async () => {
-    const latestSongs = await queryClient.ensureQueryData(latestSongQueryOptions);
+    const latestSongs = await queryClient.ensureQueryData(
+      songQuery.all({ sortType: 'dateAddedDescending', start: 0, end: 30 })
+    );
     const recentlyPlayedSongs = await queryClient.ensureQueryData(recentlyPlayedSongQueryOptions);
     const recentSongArtists = await queryClient.ensureQueryData(recentSongArtistsQueryOptions);
     const mostLovedSongs = await queryClient.ensureQueryData(mostLovedSongsQueryOptions);
-    const mostLovedArtists = await queryClient.ensureQueryData(mostLovedArtistsQueryOptions);
+    const mostLovedArtists = await queryClient.ensureQueryData(
+      artistQuery.all({
+        sortType: 'mostLovedDescending',
+        filterType: 'notSelected',
+        start: 0,
+        end: 30
+      })
+    );
 
     return {
       latestSongs,
@@ -85,14 +81,16 @@ function HomePage() {
 
   const {
     data: { data: latestSongs }
-  } = useSuspenseQuery(latestSongQueryOptions);
+  } = useSuspenseQuery(songQuery.all({ sortType: 'dateAddedDescending', start: 0, end: 30 }));
   const { data: recentlyPlayedSongs } = useSuspenseQuery(recentlyPlayedSongQueryOptions);
 
   const { data: recentSongArtists } = useSuspenseQuery(recentSongArtistsQueryOptions);
 
   const { data: mostLovedSongs } = useSuspenseQuery(mostLovedSongsQueryOptions);
 
-  const { data: mostLovedArtists } = useSuspenseQuery(mostLovedArtistsQueryOptions);
+  const { data: mostLovedArtists } = useSuspenseQuery(
+    artistQuery.all({ sortType: 'aToZ', start: 0, end: 30 })
+  );
 
   const SONG_CARD_MIN_WIDTH = 280;
   const ARTIST_WIDTH = 175;

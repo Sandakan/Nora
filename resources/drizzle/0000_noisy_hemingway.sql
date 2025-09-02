@@ -27,7 +27,8 @@ CREATE TABLE "album_songs" (
 --> statement-breakpoint
 CREATE TABLE "artists" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "artists_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
-	"name" varchar(1024) NOT NULL
+	"name" varchar(1024) NOT NULL,
+	"is_favorite" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "artists_artworks" (
@@ -212,6 +213,7 @@ CREATE INDEX "idx_albums_artworks_album_id" ON "albums_artworks" USING btree ("a
 CREATE INDEX "idx_album_songs_album_id" ON "album_songs" USING btree ("album_id");--> statement-breakpoint
 CREATE INDEX "idx_album_songs_song_id" ON "album_songs" USING btree ("song_id");--> statement-breakpoint
 CREATE INDEX "idx_artists_name" ON "artists" USING btree ("name");--> statement-breakpoint
+CREATE INDEX "idx_artists_is_favorite" ON "artists" USING btree ("is_favorite");--> statement-breakpoint
 CREATE INDEX "idx_artists_artworks_artwork_id" ON "artists_artworks" USING btree ("artwork_id");--> statement-breakpoint
 CREATE INDEX "idx_artists_artworks_artist_id" ON "artists_artworks" USING btree ("artist_id");--> statement-breakpoint
 CREATE INDEX "idx_artists_songs_artist_id" ON "artists_songs" USING btree ("artist_id");--> statement-breakpoint

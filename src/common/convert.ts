@@ -59,7 +59,7 @@ export const convertToArtist = (artist: GetAllArtistsReturnType[number]) => {
       title: s.song.title,
       songId: String(s.song.id)
     })),
-    isAFavorite: false
+    isAFavorite: artist.isFavorite
   } satisfies Artist;
 };
 

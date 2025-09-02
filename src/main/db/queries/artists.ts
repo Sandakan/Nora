@@ -1,5 +1,5 @@
 import { db } from '@db/db';
-import { and, asc, desc, eq } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray } from 'drizzle-orm';
 import { albumsArtists, artists, artistsSongs } from '@db/schema';
 
 export const isArtistWithNameAvailable = async (name: string, trx: DB | DBTransaction = db) => {
@@ -60,6 +60,7 @@ export const getLinkedSongArtist = async (
 
 export type GetAllArtistsReturnType = Awaited<ReturnType<typeof getAllArtists>>['data'];
 const defaultGetAllArtistsOptions = {
+  artistIds: [] as number[],
   start: 0,
   end: 0,
   filterType: 'notSelected' as ArtistFilterTypes,
@@ -71,10 +72,22 @@ export const getAllArtists = async (
   options: GetAllArtistsOptions,
   trx: DB | DBTransaction = db
 ) => {
-  const { start = 0, end = 0, filterType = 'notSelected', sortType = 'aToZ' } = options;
+  const {
+    artistIds = [],
+    start = 0,
+    end = 0,
+    filterType = 'notSelected',
+    sortType = 'aToZ'
+  } = options;
   const limit = end - start === 0 ? undefined : end - start;
 
   const data = await trx.query.artists.findMany({
+    where: (s) => {
+      if (artistIds && artistIds.length > 0) {
+        return inArray(s.id, artistIds);
+      }
+      return undefined;
+    },
     with: {
       songs: { with: { song: { columns: { id: true, title: true } } } },
       artworks: {

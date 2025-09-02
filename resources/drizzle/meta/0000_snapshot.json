@@ -1,5 +1,5 @@
 {
-  "id": "e8227220-8eea-41b9-b4d5-2426cb19d9e4",
+  "id": "cc192080-575f-425b-930b-60230e2c08b1",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -404,6 +404,13 @@
           "type": "varchar(1024)",
           "primaryKey": false,
           "notNull": true
+        },
+        "is_favorite": {
+          "name": "is_favorite",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         }
       },
       "indexes": {
@@ -412,6 +419,21 @@
           "columns": [
             {
               "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_artists_is_favorite": {
+          "name": "idx_artists_is_favorite",
+          "columns": [
+            {
+              "expression": "is_favorite",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
