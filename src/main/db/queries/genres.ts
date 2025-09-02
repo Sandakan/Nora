@@ -1,5 +1,5 @@
 import { db } from '@db/db';
-import { and, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 import { genres, genresSongs } from '@db/schema';
 
 export const isGenreWithIdAvailable = async (genreId: number, trx: DB | DBTransaction = db) => {
@@ -12,6 +12,32 @@ export const isGenreWithTitleAvailable = async (name: string, trx: DB | DBTransa
   const data = await trx.select({}).from(genres).where(eq(genres.name, name));
 
   return data.length > 0;
+};
+
+export type GetAllGenresReturnType = Awaited<ReturnType<typeof getAllGenres>>;
+export const getAllGenres = async (trx: DB | DBTransaction = db) => {
+  const data = await trx.query.genres.findMany({
+    orderBy: [asc(genres.name)],
+    with: {
+      songs: { with: { song: { columns: { id: true, title: true } } } },
+      artworks: {
+        with: {
+          artwork: {
+            with: {
+              palette: {
+                columns: { id: true },
+                with: {
+                  swatches: {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  });
+
+  return data;
 };
 
 export const getGenreWithTitle = async (name: string, trx: DB | DBTransaction = db) => {

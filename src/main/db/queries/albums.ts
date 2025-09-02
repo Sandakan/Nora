@@ -1,5 +1,5 @@
 import { db } from '@db/db';
-import { and, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 import { albumsArtists, albums, albumsSongs } from '@db/schema';
 
 export const isAlbumWithIdAvailable = async (albumId: number, trx: DB | DBTransaction = db) => {
@@ -12,6 +12,33 @@ export const isAlbumWithTitleAvailable = async (title: string, trx: DB | DBTrans
   const data = await trx.select({}).from(albums).where(eq(albums.title, title));
 
   return data.length > 0;
+};
+
+export type GetAllAlbumsReturnType = Awaited<ReturnType<typeof getAllAlbums>>;
+export const getAllAlbums = async (trx: DB | DBTransaction = db) => {
+  const data = await trx.query.albums.findMany({
+    orderBy: [asc(albums.title)],
+    with: {
+      artists: {
+        with: {
+          artist: {
+            columns: {
+              name: true,
+              id: true
+            }
+          }
+        }
+      },
+      songs: { with: { song: { columns: { id: true, title: true } } } },
+      artworks: {
+        with: {
+          artwork: {}
+        }
+      }
+    }
+  });
+
+  return data;
 };
 
 export const getAlbumWithTitle = async (title: string, trx: DB | DBTransaction = db) => {

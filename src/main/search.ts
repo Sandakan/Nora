@@ -1,20 +1,21 @@
 import { getUserData, setUserData } from './filesystem';
-import {
-  parseAlbumArtworks,
-  parseArtistArtworks,
-  parseGenreArtworks,
-  parsePlaylistArtworks
-} from './fs/resolveFilePaths';
 import logger from './logger';
 import {
   searchAlbumsByName,
   searchArtistsByName,
+  searchForAvailableResults,
   searchGenresByName,
   searchPlaylistsByName,
   searchSongsByName
 } from './db/queries/search';
 import { timeEnd, timeStart } from './utils/measureTimeUsage';
-import { convertToSongData } from '../common/convert';
+import {
+  convertToAlbum,
+  convertToArtist,
+  convertToGenre,
+  convertToPlaylist,
+  convertToSongData
+} from '../common/convert';
 
 let recentSearchesTimeoutId: NodeJS.Timeout;
 const search = async (
@@ -26,62 +27,12 @@ const search = async (
   const timer = timeStart();
   const [songs, artists, albums, playlists, genres] = await Promise.all([
     searchSongsByName(value).then((data) => data.map((song) => convertToSongData(song))),
-    searchArtistsByName(value).then((data) =>
-      data.map((artist) => {
-        const artworks = artist.artworks.map((a) => a.artwork);
-        return {
-          artistId: String(artist.id),
-          name: artist.name,
-          artworkPaths: parseArtistArtworks(artworks),
-          songs: artist.songs.map((s) => ({
-            title: s.song.title,
-            songId: String(s.song.id)
-          })),
-          isAFavorite: false
-        } satisfies Artist;
-      })
-    ),
-    searchAlbumsByName(value).then((data) =>
-      data.map((album) => {
-        const artworks = album.artworks.map((a) => a.artwork);
-        return {
-          albumId: String(album.id),
-          title: album.title,
-          artworkPaths: parseAlbumArtworks(artworks),
-          songs: album.songs.map((s) => ({
-            title: s.song.title,
-            songId: String(s.song.id)
-          }))
-        } satisfies Album;
-      })
-    ),
+    searchArtistsByName(value).then((data) => data.map((artist) => convertToArtist(artist))),
+    searchAlbumsByName(value).then((data) => data.map((album) => convertToAlbum(album))),
     searchPlaylistsByName(value).then((data) =>
-      data.map((playlist) => {
-        const artworks = playlist.artworks.map((a) => a.artwork);
-        return {
-          playlistId: String(playlist.id),
-          name: playlist.name,
-          artworkPaths: parsePlaylistArtworks(artworks),
-          songs: playlist.songs.map((s) => String(s.song.id)),
-          isArtworkAvailable: artworks.length > 0,
-          createdDate: playlist.createdAt
-        } satisfies Playlist;
-      })
+      data.map((playlist) => convertToPlaylist(playlist))
     ),
-    searchGenresByName(value).then((data) =>
-      data.map((genre) => {
-        const artworks = genre.artworks.map((a) => a.artwork);
-        return {
-          genreId: String(genre.id),
-          name: genre.name,
-          artworkPaths: parseGenreArtworks(artworks),
-          songs: genre.songs.map((s) => ({
-            title: s.song.title,
-            songId: String(s.song.id)
-          }))
-        } satisfies Genre;
-      })
-    )
+    searchGenresByName(value).then((data) => data.map((genre) => convertToGenre(genre)))
   ]);
   timeEnd(timer, 'Total Search');
 
@@ -114,29 +65,28 @@ const search = async (
     }, 2000);
   }
 
-  // const availableResults: string[] = [];
-  // if (
-  //   songs.length === 0 &&
-  //   artists.length === 0 &&
-  //   albums.length === 0 &&
-  //   playlists.length === 0 &&
-  //   genres.length === 0
-  // ) {
-  //   let input = value;
-  //   while (availableResults.length < 5 && input.length > 0) {
-  //     input = input.substring(0, input.length - 1);
-  //     const results = getSongSearchResults(songsData, input, filter);
-  //     if (results.length > 0) {
-  //       for (let i = 0; i < results.length; i += 1) {
-  //         const element = results[i].title.split(' ').slice(0, 3).join(' ');
-  //         if (!availableResults.includes(element)) {
-  //           availableResults.push(element);
-  //           break;
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+  const availableResults = new Set<string>();
+  if (
+    songs.length === 0 &&
+    artists.length === 0 &&
+    albums.length === 0 &&
+    playlists.length === 0 &&
+    genres.length === 0
+  ) {
+    let input = value;
+    while (availableResults.size < 5 && input.length > 0) {
+      input = input.substring(0, input.length - 1);
+      const results = await searchForAvailableResults(input, 5);
+
+      if (results.length > 0) {
+        for (let i = 0; i < results.length; i += 1) {
+          const result = results[i];
+
+          availableResults.add(result);
+        }
+      }
+    }
+  }
 
   return {
     songs,
@@ -144,7 +94,7 @@ const search = async (
     albums,
     playlists,
     genres,
-    availableResults: []
+    availableResults: Array.from(availableResults)
   };
 };
 
