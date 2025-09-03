@@ -29,10 +29,10 @@ const AppStats = () => {
     window.api.artistsData
       .getArtistData()
       .then((artists) => {
-        if (Array.isArray(artists))
+        if (Array.isArray(artists.data))
           return setStats((prevStats) => ({
             ...prevStats,
-            artists: artists.length
+            artists: artists.data.length
           }));
         return undefined;
       })

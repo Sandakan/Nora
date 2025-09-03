@@ -1,38 +1,38 @@
-import { getArtistsData, setArtistsData } from '../filesystem';
-import { getArtistArtworkPath } from '../fs/resolveFilePaths';
+import { getArtistFavoriteStatus, updateArtistFavoriteStatus } from '@main/db/queries/artists';
 import logger from '../logger';
-import { dataUpdateEvent, sendMessageToRenderer } from '../main';
+import { dataUpdateEvent } from '../main';
+import { db } from '@main/db/db';
 
-const dislikeArtist = (artist: SavableArtist) => {
-  artist.isAFavorite = false;
-  // result.success = true;
-  sendMessageToRenderer({
-    messageCode: 'ARTIST_DISLIKE',
-    data: {
-      name: artist.name.length > 20 ? `${artist.name.substring(0, 20).trim()}...` : artist.name,
-      artworkPath: getArtistArtworkPath(artist.artworkName),
-      onlineArtworkPaths: artist.onlineArtworkPaths
-    }
-  });
-  return artist;
-};
+// const dislikeArtist = (artist: SavableArtist) => {
+//   artist.isAFavorite = false;
+//   // result.success = true;
+//   sendMessageToRenderer({
+//     messageCode: 'ARTIST_DISLIKE',
+//     data: {
+//       name: artist.name.length > 20 ? `${artist.name.substring(0, 20).trim()}...` : artist.name,
+//       artworkPath: getArtistArtworkPath(artist.artworkName),
+//       onlineArtworkPaths: artist.onlineArtworkPaths
+//     }
+//   });
+//   return artist;
+// };
 
-const likeArtist = (artist: SavableArtist) => {
-  artist.isAFavorite = true;
-  // result.success = true;
-  sendMessageToRenderer({
-    messageCode: 'ARTIST_LIKE',
-    data: {
-      name: artist.name.length > 20 ? `${artist.name.substring(0, 20).trim()}...` : artist.name,
-      artworkPath: getArtistArtworkPath(artist.artworkName),
-      onlineArtworkPaths: artist.onlineArtworkPaths
-    }
-  });
-  return artist;
-};
+// const likeArtist = (artist: SavableArtist) => {
+//   artist.isAFavorite = true;
+//   // result.success = true;
+//   sendMessageToRenderer({
+//     messageCode: 'ARTIST_LIKE',
+//     data: {
+//       name: artist.name.length > 20 ? `${artist.name.substring(0, 20).trim()}...` : artist.name,
+//       artworkPath: getArtistArtworkPath(artist.artworkName),
+//       onlineArtworkPaths: artist.onlineArtworkPaths
+//     }
+//   });
+//   return artist;
+// };
 
 const toggleLikeArtists = async (artistIds: string[], isLikeArtist?: boolean) => {
-  const artists = getArtistsData();
+  const artists = await getArtistFavoriteStatus(artistIds.map((id) => Number(id)));
   const result: ToggleLikeSongReturnValue = {
     likes: [],
     dislikes: []
@@ -44,33 +44,27 @@ const toggleLikeArtists = async (artistIds: string[], isLikeArtist?: boolean) =>
     } artists with ids -${artistIds.join(', ')}-`
   );
   if (artists.length > 0) {
-    const updatedArtists = artists.map((artist) => {
-      if (artistIds.includes(artist.artistId)) {
-        if (artist.isAFavorite) {
-          if (isLikeArtist !== true) {
-            const updatedArtist = dislikeArtist(artist);
-            result.dislikes.push(updatedArtist.artistId);
-            return updatedArtist;
-          }
-          logger.debug(
-            `Tried to like an artist with a artist id -${artist.artistId}- that has been already been liked.`
-          );
-          return artist;
-        }
+    const favoriteGroupedArtists = Object.groupBy(artists, (artist) =>
+      artist.isFavorite ? 'favorite' : 'notFavorite'
+    );
 
-        if (isLikeArtist !== false) {
-          const updatedArtist = likeArtist(artist);
-          result.likes.push(updatedArtist.artistId);
-          return updatedArtist;
-        }
-        logger.debug(
-          `Tried to dislike an artist with a artist id -${artist.artistId}- that has been already been disliked.`
-        );
-        return artist;
+    await db.transaction(async (trx) => {
+      if (favoriteGroupedArtists.favorite) {
+        const artistIds = favoriteGroupedArtists.favorite.map((artist) => artist.id);
+
+        await updateArtistFavoriteStatus(artistIds, isLikeArtist === true, trx);
+
+        result.likes.push(...artistIds.map((id) => String(id)));
       }
-      return artist;
+
+      if (favoriteGroupedArtists.notFavorite) {
+        const artistIds = favoriteGroupedArtists.notFavorite.map((artist) => artist.id);
+        await updateArtistFavoriteStatus(artistIds, isLikeArtist === false, trx);
+
+        result.dislikes.push(...artistIds.map((id) => String(id)));
+      }
     });
-    setArtistsData(updatedArtists);
+
     dataUpdateEvent('artists/likes', [...result.likes, ...result.dislikes]);
     return result;
   }

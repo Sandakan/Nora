@@ -51,6 +51,7 @@ function ArtistPage() {
     () =>
       window.api.artistsData
         .getArtistData([], sortingOrder as ArtistSortTypes, filteringOrder)
+        .then((res) => res.data)
         .then((res) => {
           if (res && Array.isArray(res)) {
             if (res.length > 0) return setArtistsData(res);

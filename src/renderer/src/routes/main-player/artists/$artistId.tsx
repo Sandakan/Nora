@@ -66,6 +66,7 @@ function ArtistInfoPage() {
     if (artistId) {
       window.api.artistsData
         .getArtistData([artistId])
+        .then((res) => res.data)
         .then((res) => {
           if (res && res.length > 0) {
             if (res[0].onlineArtworkPaths?.picture_medium)

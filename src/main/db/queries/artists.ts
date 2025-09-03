@@ -133,3 +133,18 @@ export const getAllArtists = async (
     end
   };
 };
+
+export const getArtistFavoriteStatus = (artistIds: number[], trx: DB | DBTransaction = db) => {
+  return trx
+    .select({ id: artists.id, isFavorite: artists.isFavorite })
+    .from(artists)
+    .where(inArray(artists.id, artistIds));
+};
+
+export const updateArtistFavoriteStatus = async (
+  artistIds: number[],
+  isFavorite: boolean,
+  trx: DB | DBTransaction = db
+) => {
+  return trx.update(artists).set({ isFavorite }).where(inArray(artists.id, artistIds));
+};

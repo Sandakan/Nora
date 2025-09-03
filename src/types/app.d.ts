@@ -173,7 +173,7 @@ declare global {
 
   interface PaginatedResult<DataType, SortType extends string> {
     data: DataType[];
-    sortType: SortType;
+    sortType?: SortType;
     start: number;
     end: number;
     total: number;

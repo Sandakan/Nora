@@ -324,7 +324,7 @@ const artistsData = {
     sortType?: ArtistSortTypes,
     filterType?: ArtistFilterTypes,
     limit?: number
-  ): Promise<Artist[]> =>
+  ): Promise<PaginatedResult<Artist, ArtistSortTypes>> =>
     ipcRenderer.invoke('app/getArtistData', artistIdsOrNames, sortType, filterType, limit),
   toggleLikeArtists: (
     artistIds: string[],

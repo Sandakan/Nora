@@ -88,9 +88,9 @@ function HomePage() {
 
   const { data: mostLovedSongs } = useSuspenseQuery(mostLovedSongsQueryOptions);
 
-  const { data: mostLovedArtists } = useSuspenseQuery(
-    artistQuery.all({ sortType: 'aToZ', start: 0, end: 30 })
-  );
+  const {
+    data: { data: mostLovedArtists }
+  } = useSuspenseQuery(artistQuery.all({ sortType: 'aToZ', start: 0, end: 30 }));
 
   const SONG_CARD_MIN_WIDTH = 280;
   const ARTIST_WIDTH = 175;

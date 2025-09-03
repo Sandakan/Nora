@@ -7,7 +7,15 @@ const fetchArtistData = async (
   sortType?: ArtistSortTypes,
   filterType?: ArtistFilterTypes,
   limit = 0
-): Promise<Artist[]> => {
+): Promise<PaginatedResult<Artist, ArtistSortTypes>> => {
+  const result: PaginatedResult<Artist, ArtistSortTypes> = {
+    data: [],
+    total: 0,
+    sortType,
+    start: 0,
+    end: 0
+  };
+
   if (artistIdsOrNames) {
     logger.debug(`Requested artists data`, {
       artistIdsOrNamesCount: artistIdsOrNames.length,
@@ -25,10 +33,14 @@ const fetchArtistData = async (
     if (artists.data.length > 0) {
       const results: Artist[] = artists.data.map((artist) => convertToArtist(artist));
 
-      return results;
+      result.data = results;
+      result.total = artists.data.length;
+      result.start = artists.start;
+      result.end = artists.end;
     }
   }
-  return [];
+
+  return result;
 };
 
 export default fetchArtistData;

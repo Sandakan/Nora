@@ -81,8 +81,10 @@ export const Artist = (props: ArtistProp) => {
       return window.api.artistsData
         .getArtistData(artistIds)
         .then((res) => {
-          if (Array.isArray(res) && res.length > 0) {
-            const songIds = res.map((artist) => artist.songs.map((song) => song.songId)).flat();
+          if (Array.isArray(res.data) && res.data.length > 0) {
+            const songIds = res.data
+              .map((artist) => artist.songs.map((song) => song.songId))
+              .flat();
             return window.api.audioLibraryControls.getSongInfo(songIds);
           }
           return undefined;
@@ -148,7 +150,7 @@ export const Artist = (props: ArtistProp) => {
           if (isMultipleSelectionsEnabled) {
             const { multipleSelections: artistIds } = multipleSelectionsData;
             return window.api.artistsData.getArtistData(artistIds).then((artists) => {
-              const songIds = artists
+              const songIds = artists.data
                 .map((artist) => artist.songs.map((song) => song.songId))
                 .flat();
               const uniqueSongIds = [...new Set(songIds)];

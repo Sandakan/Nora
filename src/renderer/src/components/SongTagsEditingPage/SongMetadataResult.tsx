@@ -37,7 +37,7 @@ function SongMetadataResult(props: SongMetadataResultProp) {
 
   const addToMetadata = useCallback(async () => {
     const albumData = album ? await window.api.albumsData.getAlbumData([album]) : [];
-    const artistData = await window.api.artistsData.getArtistData(artists);
+    const artistData = await window.api.artistsData.getArtistData(artists).then((res) => res.data);
     const genreData = genres ? await window.api.genresData.getGenresData(genres) : [];
 
     updateSongInfo((prevData): SongTags => {

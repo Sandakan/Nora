@@ -115,15 +115,15 @@ const CurrentQueuePage = () => {
       if (queue.queueId) {
         if (queue.queueType === 'artist') {
           window.api.artistsData.getArtistData([queue.queueId]).then((res) => {
-            if (res && Array.isArray(res) && res[0]) {
+            if (res && Array.isArray(res.data) && res.data[0]) {
               setQueueInfo((prevData) => {
                 return {
                   ...prevData,
-                  artworkPath: res[0].artworkPaths.artworkPath,
-                  onlineArtworkPath: res[0].onlineArtworkPaths
-                    ? res[0].onlineArtworkPaths.picture_medium
+                  artworkPath: res.data[0].artworkPaths.artworkPath,
+                  onlineArtworkPath: res.data[0].onlineArtworkPaths
+                    ? res.data[0].onlineArtworkPaths.picture_medium
                     : undefined,
-                  title: res[0].name
+                  title: res.data[0].name
                 };
               });
             }
