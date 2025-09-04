@@ -56,11 +56,11 @@ const getLogFilePath = () => {
 
 export const logFilePath = getLogFilePath();
 
-const DEFAULT_LOGGER_LEVEL = IS_DEVELOPMENT ? 'verbose' : 'debug';
+const DEFAULT_LOGGER_LEVEL = IS_DEVELOPMENT ? 'silly' : 'debug';
 
 const transports = {
   console: new winston.transports.Console({
-    level: DEFAULT_LOGGER_LEVEL,
+    level: 'silly',
     format: winston.format.combine(
       winston.format.timestamp({
         format: 'YYYY-MM-DD hh:mm:ss.SSS A'
@@ -77,7 +77,6 @@ const transports = {
 };
 
 const log = winston.createLogger({
-  level: DEFAULT_LOGGER_LEVEL,
   transports: [transports.console, transports.file]
 });
 //   message: Error | string,
