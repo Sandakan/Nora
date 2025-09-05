@@ -31,8 +31,8 @@ export const Route = createFileRoute('/main-player/artists/')({
     sortingOrder: search.sortingOrder,
     filteringOrder: search.filteringOrder
   }),
-  loader: async ({ deps }) => {
-    const mostLovedArtists = await queryClient.ensureQueryData(
+  loader: ({ deps }) => {
+    queryClient.ensureQueryData(
       artistQuery.all({
         sortType: deps.sortingOrder || 'aToZ',
         filterType: deps.filteringOrder || 'notSelected',
@@ -40,10 +40,6 @@ export const Route = createFileRoute('/main-player/artists/')({
         end: 30
       })
     );
-
-    return {
-      mostLovedArtists
-    };
   }
 });
 

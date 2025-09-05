@@ -43,14 +43,14 @@ const mostLovedSongsQueryOptions = queryOptions({
 
 export const Route = createFileRoute('/main-player/home/')({
   component: HomePage,
-  loader: async () => {
-    const latestSongs = await queryClient.ensureQueryData(
+  loader: () => {
+    queryClient.ensureQueryData(
       songQuery.all({ sortType: 'dateAddedDescending', start: 0, end: 30 })
     );
-    const recentlyPlayedSongs = await queryClient.ensureQueryData(recentlyPlayedSongQueryOptions);
-    const recentSongArtists = await queryClient.ensureQueryData(recentSongArtistsQueryOptions);
-    const mostLovedSongs = await queryClient.ensureQueryData(mostLovedSongsQueryOptions);
-    const mostLovedArtists = await queryClient.ensureQueryData(
+    queryClient.ensureQueryData(recentlyPlayedSongQueryOptions);
+    queryClient.ensureQueryData(recentSongArtistsQueryOptions);
+    queryClient.ensureQueryData(mostLovedSongsQueryOptions);
+    queryClient.ensureQueryData(
       artistQuery.all({
         sortType: 'mostLovedDescending',
         filterType: 'notSelected',
@@ -58,14 +58,6 @@ export const Route = createFileRoute('/main-player/home/')({
         end: 30
       })
     );
-
-    return {
-      latestSongs,
-      recentlyPlayedSongs,
-      recentSongArtists,
-      mostLovedSongs,
-      mostLovedArtists
-    };
   }
 });
 

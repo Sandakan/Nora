@@ -1,43 +1,31 @@
-import { getAlbumsData } from '../filesystem';
-import { getAlbumArtworkPath } from '../fs/resolveFilePaths';
+import { getAllAlbums } from '@main/db/queries/albums';
 import logger from '../logger';
-import sortAlbums from '../utils/sortAlbums';
+import { convertToAlbum } from '../../common/convert';
 
 const fetchAlbumData = async (
   albumTitlesOrIds: string[] = [],
   sortType?: AlbumSortTypes
-): Promise<Album[]> => {
+): Promise<PaginatedResult<Album, AlbumSortTypes>> => {
+  const result: PaginatedResult<Album, AlbumSortTypes> = {
+    data: [],
+    total: 0,
+    sortType,
+    start: 0,
+    end: 0
+  };
+
   if (albumTitlesOrIds) {
     logger.debug(`Requested albums data for ids`, { albumTitlesOrIds });
-    const albums = getAlbumsData();
+    const albums = await getAllAlbums({ albumIds: albumTitlesOrIds.map((x) => Number(x)) });
 
-    if (albums.length > 0) {
-      let results: SavableAlbum[] = [];
-      if (albumTitlesOrIds.length === 0) results = albums;
-      else {
-        for (let x = 0; x < albums.length; x += 1) {
-          for (let y = 0; y < albumTitlesOrIds.length; y += 1) {
-            if (
-              albums[x].albumId === albumTitlesOrIds[y] ||
-              albums[x].title === albumTitlesOrIds[y]
-            )
-              results.push(albums[x]);
-          }
-        }
-      }
+    const output = albums.data.map((x) => convertToAlbum(x));
 
-      const output = results.map(
-        (x) =>
-          ({
-            ...x,
-            artworkPaths: getAlbumArtworkPath(x.artworkName)
-          }) satisfies Album
-      );
-      if (sortType) return sortAlbums(output, sortType);
-      return output;
-    }
+    result.data = output;
+    result.total = albums.data.length;
+    result.start = albums.start;
+    result.end = albums.end;
   }
-  return [];
+  return result;
 };
 
 export default fetchAlbumData;

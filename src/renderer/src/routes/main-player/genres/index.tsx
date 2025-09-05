@@ -1,8 +1,8 @@
 import { AppUpdateContext } from '@renderer/contexts/AppUpdateContext';
 import { store } from '@renderer/store/store';
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useStore } from '@tanstack/react-store';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import storage from '@renderer/utils/localStorage';
 import useSelectAllHandler from '@renderer/hooks/useSelectAllHandler';
@@ -14,9 +14,27 @@ import Genre from '@renderer/components/GenresPage/Genre';
 import NoSongsImage from '@assets/images/svg/Summer landscape_Monochromatic.svg';
 import Img from '@renderer/components/Img';
 import { genreSortOptions } from '@renderer/components/GenresPage/genreOptions';
+import { zodValidator } from '@tanstack/zod-adapter';
+import { genreSearchSchema } from '@renderer/utils/zod/genreSchema';
+import { queryClient } from '@renderer/index';
+import { genreQuery } from '@renderer/queries/genres';
+import { useSuspenseQuery } from '@tanstack/react-query';
 
 export const Route = createFileRoute('/main-player/genres/')({
-  component: GenresPage
+  validateSearch: zodValidator(genreSearchSchema),
+  component: GenresPage,
+  loaderDeps: ({ search }) => ({
+    sortingOrder: search.sortingOrder
+  }),
+  loader: ({ deps }) => {
+    queryClient.ensureQueryData(
+      genreQuery.all({
+        sortType: deps.sortingOrder || 'aToZ',
+        start: 0,
+        end: 30
+      })
+    );
+  }
 });
 
 const MIN_ITEM_WIDTH = 320;
@@ -28,46 +46,36 @@ function GenresPage() {
     (state) => state.multipleSelectionsData.isEnabled
   );
   const multipleSelectionsData = useStore(store, (state) => state.multipleSelectionsData);
-  const currentlyActivePage = useStore(store, (state) => state.currentlyActivePage);
-  const sortingStates = useStore(store, (state) => state.localStorage.sortingStates);
 
   const { updateCurrentlyActivePageData, toggleMultipleSelections } = useContext(AppUpdateContext);
   const { t } = useTranslation();
-
-  const [genresData, setGenresData] = useState([] as Genre[] | null);
-  const [sortingOrder, setSortingOrder] = useState<GenreSortTypes>(
-    (currentlyActivePage?.data?.sortingOrder as GenreSortTypes) ||
-      sortingStates?.genresPage ||
-      'aToZ'
+  const genresPageSortingState = useStore(
+    store,
+    (state) => state.localStorage.sortingStates.genresPage
   );
+  const { sortingOrder = genresPageSortingState || 'aToZ' } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
 
-  const fetchGenresData = useCallback(() => {
-    window.api.genresData
-      .getGenresData([], sortingOrder)
-      .then((genres) => {
-        if (genres && genres.length > 0) return setGenresData(genres);
-        return setGenresData(null);
-      })
+  const {
+    data: { data: genresData }
+  } = useSuspenseQuery(genreQuery.all({ sortType: sortingOrder }));
 
-      .catch((err) => console.error(err));
-  }, [sortingOrder]);
-
-  useEffect(() => {
-    fetchGenresData();
-    const manageGenreDataUpdatesInGenresPage = (e: Event) => {
-      if ('detail' in e) {
-        const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
-        for (let i = 0; i < dataEvents.length; i += 1) {
-          const event = dataEvents[i];
-          if (event.dataType === 'genres') fetchGenresData();
-        }
-      }
-    };
-    document.addEventListener('app/dataUpdates', manageGenreDataUpdatesInGenresPage);
-    return () => {
-      document.removeEventListener('app/dataUpdates', manageGenreDataUpdatesInGenresPage);
-    };
-  }, [fetchGenresData]);
+  // useEffect(() => {
+  //   fetchGenresData();
+  //   const manageGenreDataUpdatesInGenresPage = (e: Event) => {
+  //     if ('detail' in e) {
+  //       const dataEvents = (e as DetailAvailableEvent<DataUpdateEvent[]>).detail;
+  //       for (let i = 0; i < dataEvents.length; i += 1) {
+  //         const event = dataEvents[i];
+  //         if (event.dataType === 'genres') fetchGenresData();
+  //       }
+  //     }
+  //   };
+  //   document.addEventListener('app/dataUpdates', manageGenreDataUpdatesInGenresPage);
+  //   return () => {
+  //     document.removeEventListener('app/dataUpdates', manageGenreDataUpdatesInGenresPage);
+  //   };
+  // }, [fetchGenresData]);
 
   useEffect(
     () => storage.sortingStates.setSortingStates('genresPage', sortingOrder),
@@ -125,7 +133,12 @@ function GenresPage() {
                     ...currentData,
                     sortingOrder: e.currentTarget.value as ArtistSortTypes
                   }));
-                  setSortingOrder(e.currentTarget.value as GenreSortTypes);
+                  navigate({
+                    search: (prev) => ({
+                      ...prev,
+                      sortingOrder: e.currentTarget.value as AlbumSortTypes
+                    })
+                  });
                 }}
               />
             </div>

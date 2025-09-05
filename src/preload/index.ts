@@ -337,13 +337,19 @@ const artistsData = {
 
 // $ GENRES DATA
 const genresData = {
-  getGenresData: (genreNamesOrIds?: string[], sortType?: GenreSortTypes): Promise<Genre[]> =>
+  getGenresData: (
+    genreNamesOrIds?: string[],
+    sortType?: GenreSortTypes
+  ): Promise<PaginatedResult<Genre, GenreSortTypes>> =>
     ipcRenderer.invoke('app/getGenresData', genreNamesOrIds, sortType)
 };
 
 // $ ALBUMS DATA
 const albumsData = {
-  getAlbumData: (albumTitlesOrIds?: string[], sortType?: AlbumSortTypes): Promise<Album[]> =>
+  getAlbumData: (
+    albumTitlesOrIds?: string[],
+    sortType?: AlbumSortTypes
+  ): Promise<PaginatedResult<Album, AlbumSortTypes>> =>
     ipcRenderer.invoke('app/getAlbumData', albumTitlesOrIds, sortType),
   getAlbumInfoFromLastFM: (albumId: string): Promise<LastFMAlbumInfo | undefined> =>
     ipcRenderer.invoke('app/getAlbumInfoFromLastFM', albumId)

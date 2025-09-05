@@ -1,5 +1,5 @@
 import { db } from '@db/db';
-import { and, asc, eq } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, SQL } from 'drizzle-orm';
 import { albumsArtists, albums, albumsSongs } from '@db/schema';
 
 export const isAlbumWithIdAvailable = async (albumId: number, trx: DB | DBTransaction = db) => {
@@ -14,10 +14,33 @@ export const isAlbumWithTitleAvailable = async (title: string, trx: DB | DBTrans
   return data.length > 0;
 };
 
-export type GetAllAlbumsReturnType = Awaited<ReturnType<typeof getAllAlbums>>;
-export const getAllAlbums = async (trx: DB | DBTransaction = db) => {
+export type GetAllAlbumsReturnType = Awaited<ReturnType<typeof getAllAlbums>>['data'];
+const defaultGetAllAlbumsOptions = {
+  albumIds: [] as number[],
+  start: 0,
+  end: 0,
+  sortType: 'aToZ' as AlbumSortTypes
+};
+export type GetAllAlbumsOptions = Partial<typeof defaultGetAllAlbumsOptions>;
+export const getAllAlbums = async (
+  options: GetAllAlbumsOptions = defaultGetAllAlbumsOptions,
+  trx: DB | DBTransaction = db
+) => {
+  const { albumIds = [], start = 0, end = 0, sortType = 'aToZ' } = options;
+
+  const limit = end - start === 0 ? undefined : end - start;
+
   const data = await trx.query.albums.findMany({
-    orderBy: [asc(albums.title)],
+    where: (s) => {
+      const filters: SQL[] = [];
+
+      // Filter by album IDs
+      if (albumIds && albumIds.length > 0) {
+        filters.push(inArray(s.id, albumIds));
+      }
+
+      return and(...filters);
+    },
     with: {
       artists: {
         with: {
@@ -35,10 +58,23 @@ export const getAllAlbums = async (trx: DB | DBTransaction = db) => {
           artwork: {}
         }
       }
-    }
+    },
+    orderBy: (albums) => {
+      if (sortType === 'aToZ') return [asc(albums.title)];
+      if (sortType === 'zToA') return [desc(albums.title)];
+
+      return [];
+    },
+    limit,
+    offset: start
   });
 
-  return data;
+  return {
+    data,
+    sortType,
+    start,
+    end
+  };
 };
 
 export const getAlbumWithTitle = async (title: string, trx: DB | DBTransaction = db) => {
