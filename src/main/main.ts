@@ -1,6 +1,5 @@
 import path, { join } from 'path';
 import os from 'os';
-import mime from 'mime';
 import {
   app,
   BrowserWindow,
@@ -55,7 +54,7 @@ import logger from './logger';
 import roundTo from '../common/roundTo';
 // import { fileURLToPath, pathToFileURL } from 'url';
 import { closeDatabaseInstance } from './db/db';
-import { createReadStream, existsSync, statSync } from 'fs';
+import { handleFileProtocol } from './handleFileProtocol';
 
 // / / / / / / / CONSTANTS / / / / / / / / /
 const DEFAULT_APP_PROTOCOL = 'nora';
@@ -453,6 +452,7 @@ function addEventsToCache(dataType: DataUpdateEventTypes, data = [] as string[],
 //   try {
 //     const [url] = urlWithQueries.split('?');
 //     return callback(url);
+
 //   } catch (error) {
 //     logger.error(`Failed to locate a resource in the system.`, { urlWithQueries, error });
 //     return callback('404');
@@ -500,74 +500,6 @@ function addEventsToCache(dataType: DataUpdateEventTypes, data = [] as string[],
 //     return new Response('Internal Server Error', { status: 500 });
 //   }
 // };
-
-const handleFileProtocol = async (req: GlobalRequest) => {
-  try {
-    logger.debug('Serving file from nora://', { url: req.url });
-    const { pathname } = new URL(req.url);
-    const filePath = decodeURI(pathname).replace(/^[/\\]{1,2}/gm, '');
-
-    // const pathToServe = path.resolve(import.meta.dirname, filePath);
-    // const fileUrl = pathToFileURL(pathToServe).toString();
-    // const relativePath = path.relative(import.meta.dirname, pathToServe);
-    // const isSafe = relativePath && !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
-
-    // if (!isSafe) {
-    //   return new Response('bad', {
-    //     status: 400,
-    //     headers: { 'content-type': 'text/html' }
-    //   });
-    // }
-
-    if (!existsSync(filePath)) {
-      return new Response('File not found', { status: 404 });
-    }
-
-    const mimeType = mime.getType(filePath) || 'application/octet-stream';
-
-    const stat = statSync(filePath);
-    const fileSize = stat.size;
-    const range = req.headers.get('range');
-
-    const headers: Record<string, string> = {
-      'Content-Type': mimeType,
-      'Accept-Ranges': 'bytes'
-    };
-
-    if (range) {
-      const parts = range.replace(/bytes=/, '').split('-');
-      const start = parseInt(parts[0], 10);
-      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
-
-      if (start >= fileSize || end >= fileSize) {
-        return new Response(null, { status: 416, headers });
-      }
-
-      const chunksize = end - start + 1;
-
-      const stream = createReadStream(filePath, { start, end });
-
-      headers['Content-Range'] = `bytes ${start}-${end}/${fileSize}`;
-      headers['Content-Length'] = chunksize.toString();
-
-      return new Response(stream as unknown as ReadableStream, {
-        status: 206,
-        headers
-      });
-    } else {
-      const stream = createReadStream(filePath);
-      headers['Content-Length'] = fileSize.toString();
-
-      return new Response(stream as unknown as ReadableStream, {
-        status: 200,
-        headers
-      });
-    }
-  } catch (error) {
-    logger.error('Error handling media protocol:', { error }, error);
-    return new Response('Internal Server Error', { status: 500 });
-  }
-};
 
 export const setCurrentSongPath = (songPath: string) => {
   currentSongPath = songPath;

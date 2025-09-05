@@ -50,18 +50,23 @@ const toggleLikeArtists = async (artistIds: string[], isLikeArtist?: boolean) =>
 
     await db.transaction(async (trx) => {
       if (favoriteGroupedArtists.favorite) {
-        const artistIds = favoriteGroupedArtists.favorite.map((artist) => artist.id);
+        const status = isLikeArtist ?? false;
 
-        await updateArtistFavoriteStatus(artistIds, isLikeArtist === true, trx);
+        const dislikedArtistIds = favoriteGroupedArtists.favorite.map((a) => a.id);
 
-        result.likes.push(...artistIds.map((id) => String(id)));
+        await updateArtistFavoriteStatus(dislikedArtistIds, status, trx);
+
+        result.dislikes.push(...dislikedArtistIds.map((id) => id.toString()));
       }
 
       if (favoriteGroupedArtists.notFavorite) {
-        const artistIds = favoriteGroupedArtists.notFavorite.map((artist) => artist.id);
-        await updateArtistFavoriteStatus(artistIds, isLikeArtist === false, trx);
+        const status = isLikeArtist ?? true;
 
-        result.dislikes.push(...artistIds.map((id) => String(id)));
+        const likedArtistIds = favoriteGroupedArtists.notFavorite.map((a) => a.id);
+
+        await updateArtistFavoriteStatus(likedArtistIds, status, trx);
+
+        result.likes.push(...likedArtistIds.map((id) => id.toString()));
       }
     });
 

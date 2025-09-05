@@ -1,5 +1,5 @@
 import { db } from '@db/db';
-import { and, asc, desc, eq, inArray } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, SQL } from 'drizzle-orm';
 import { albumsArtists, artists, artistsSongs } from '@db/schema';
 
 export const isArtistWithNameAvailable = async (name: string, trx: DB | DBTransaction = db) => {
@@ -83,10 +83,17 @@ export const getAllArtists = async (
 
   const data = await trx.query.artists.findMany({
     where: (s) => {
+      const filters: SQL[] = [];
+
+      // Filter by artist IDs
       if (artistIds && artistIds.length > 0) {
-        return inArray(s.id, artistIds);
+        filters.push(inArray(s.id, artistIds));
       }
-      return undefined;
+
+      // Apply additional filters based on filterType
+      if (filterType === 'favorites') filters.push(eq(s.isFavorite, true));
+
+      return and(...filters);
     },
     with: {
       songs: { with: { song: { columns: { id: true, title: true } } } },
