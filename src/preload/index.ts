@@ -323,9 +323,19 @@ const artistsData = {
     artistIdsOrNames?: string[],
     sortType?: ArtistSortTypes,
     filterType?: ArtistFilterTypes,
+    start?: number,
+    end?: number,
     limit?: number
   ): Promise<PaginatedResult<Artist, ArtistSortTypes>> =>
-    ipcRenderer.invoke('app/getArtistData', artistIdsOrNames, sortType, filterType, limit),
+    ipcRenderer.invoke(
+      'app/getArtistData',
+      artistIdsOrNames,
+      sortType,
+      filterType,
+      start,
+      end,
+      limit
+    ),
   toggleLikeArtists: (
     artistIds: string[],
     likeArtist?: boolean
@@ -339,18 +349,22 @@ const artistsData = {
 const genresData = {
   getGenresData: (
     genreNamesOrIds?: string[],
-    sortType?: GenreSortTypes
+    sortType?: GenreSortTypes,
+    start?: number,
+    end?: number
   ): Promise<PaginatedResult<Genre, GenreSortTypes>> =>
-    ipcRenderer.invoke('app/getGenresData', genreNamesOrIds, sortType)
+    ipcRenderer.invoke('app/getGenresData', genreNamesOrIds, sortType, start, end)
 };
 
 // $ ALBUMS DATA
 const albumsData = {
   getAlbumData: (
     albumTitlesOrIds?: string[],
-    sortType?: AlbumSortTypes
+    sortType?: AlbumSortTypes,
+    start?: number,
+    end?: number
   ): Promise<PaginatedResult<Album, AlbumSortTypes>> =>
-    ipcRenderer.invoke('app/getAlbumData', albumTitlesOrIds, sortType),
+    ipcRenderer.invoke('app/getAlbumData', albumTitlesOrIds, sortType, start, end),
   getAlbumInfoFromLastFM: (albumId: string): Promise<LastFMAlbumInfo | undefined> =>
     ipcRenderer.invoke('app/getAlbumInfoFromLastFM', albumId)
 };
@@ -360,9 +374,18 @@ const playlistsData = {
   getPlaylistData: (
     playlistIds?: string[],
     sortType?: PlaylistSortTypes,
+    start?: number,
+    end?: number,
     onlyMutablePlaylists?: boolean
   ): Promise<Playlist[]> =>
-    ipcRenderer.invoke('app/getPlaylistData', playlistIds, sortType, onlyMutablePlaylists),
+    ipcRenderer.invoke(
+      'app/getPlaylistData',
+      playlistIds,
+      sortType,
+      start,
+      end,
+      onlyMutablePlaylists
+    ),
   addNewPlaylist: (
     playlistName: string,
     songIds?: string[],

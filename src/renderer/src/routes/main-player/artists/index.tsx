@@ -31,8 +31,8 @@ export const Route = createFileRoute('/main-player/artists/')({
     sortingOrder: search.sortingOrder,
     filteringOrder: search.filteringOrder
   }),
-  loader: ({ deps }) => {
-    queryClient.ensureQueryData(
+  loader: async ({ deps }) => {
+    await queryClient.ensureQueryData(
       artistQuery.all({
         sortType: deps.sortingOrder || 'aToZ',
         filterType: deps.filteringOrder || 'notSelected',

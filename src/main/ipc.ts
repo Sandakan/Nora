@@ -286,26 +286,34 @@ export function initializeIPC(mainWindow: BrowserWindow, abortSignal: AbortSigna
         artistIdsOrNames?: string[],
         sortType?: ArtistSortTypes,
         filterType?: ArtistFilterTypes,
+        start?: number,
+        end?: number,
         limit?: number
-      ) => fetchArtistData(artistIdsOrNames, sortType, filterType, limit)
+      ) => fetchArtistData(artistIdsOrNames, sortType, filterType, start, end, limit)
     );
 
     ipcMain.handle(
       'app/getGenresData',
-      (_, genreNamesOrIds?: string[], sortType?: GenreSortTypes) =>
-        getGenresInfo(genreNamesOrIds, sortType)
+      (_, genreNamesOrIds?: string[], sortType?: GenreSortTypes, start?: number, end?: number) =>
+        getGenresInfo(genreNamesOrIds, sortType, start, end)
     );
 
     ipcMain.handle(
       'app/getAlbumData',
-      (_, albumTitlesOrIds?: string[], sortType?: AlbumSortTypes) =>
-        fetchAlbumData(albumTitlesOrIds, sortType)
+      (_, albumTitlesOrIds?: string[], sortType?: AlbumSortTypes, start?: number, end?: number) =>
+        fetchAlbumData(albumTitlesOrIds, sortType, start, end)
     );
 
     ipcMain.handle(
       'app/getPlaylistData',
-      (_, playlistIds?: string[], sortType?: AlbumSortTypes, onlyMutablePlaylists = false) =>
-        sendPlaylistData(playlistIds, sortType, onlyMutablePlaylists)
+      (
+        _,
+        playlistIds?: string[],
+        sortType?: AlbumSortTypes,
+        start?: number,
+        end?: number,
+        onlyMutablePlaylists = false
+      ) => sendPlaylistData(playlistIds, sortType, start, end, onlyMutablePlaylists)
     );
 
     ipcMain.handle('app/getArtistDuplicates', (_, artistName: string) =>

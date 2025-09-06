@@ -6,7 +6,7 @@ export const albumQuery = createQueryKeys('albums', {
 
     return {
       queryKey: [`sortType=${sortType}`, `start=${start}`, `end=${end}`, `limit=${end - start}`],
-      queryFn: () => window.api.albumsData.getAlbumData([], sortType as AlbumSortTypes)
+      queryFn: () => window.api.albumsData.getAlbumData([], sortType as AlbumSortTypes, start, end)
     };
   }
 });

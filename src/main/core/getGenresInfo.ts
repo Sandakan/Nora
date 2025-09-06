@@ -3,27 +3,26 @@ import { convertToGenre } from '../../common/convert';
 
 const getGenresInfo = async (
   genreNamesOrIds: string[] = [],
-  sortType?: GenreSortTypes
+  sortType?: GenreSortTypes,
+  start = 0,
+  end = 0
 ): Promise<PaginatedResult<Genre, GenreSortTypes>> => {
-  const result: PaginatedResult<Genre, GenreSortTypes> = {
-    data: [],
-    total: 0,
+  const genres = await getAllGenres({
+    genreIds: genreNamesOrIds.map((id) => Number(id)).filter((id) => !isNaN(id)),
+    start,
+    end,
+    sortType
+  });
+
+  const output = genres.data.map((x) => convertToGenre(x));
+
+  return {
+    data: output,
+    total: genres.data.length,
     sortType,
-    start: 0,
-    end: 0
-  };
-
-  if (genreNamesOrIds) {
-    const genres = await getAllGenres({});
-
-    const output = genres.data.map((x) => convertToGenre(x));
-
-    result.data = output;
-    result.total = genres.data.length;
-    result.start = genres.start;
-    result.end = genres.end;
-  }
-  return result;
+    start: genres.start,
+    end: genres.end
+  } satisfies PaginatedResult<Genre, GenreSortTypes>;
 };
 
 export default getGenresInfo;

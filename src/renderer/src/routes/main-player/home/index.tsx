@@ -43,14 +43,14 @@ const mostLovedSongsQueryOptions = queryOptions({
 
 export const Route = createFileRoute('/main-player/home/')({
   component: HomePage,
-  loader: () => {
-    queryClient.ensureQueryData(
+  loader: async () => {
+    await queryClient.ensureQueryData(
       songQuery.all({ sortType: 'dateAddedDescending', start: 0, end: 30 })
     );
-    queryClient.ensureQueryData(recentlyPlayedSongQueryOptions);
-    queryClient.ensureQueryData(recentSongArtistsQueryOptions);
-    queryClient.ensureQueryData(mostLovedSongsQueryOptions);
-    queryClient.ensureQueryData(
+    await queryClient.ensureQueryData(recentlyPlayedSongQueryOptions);
+    await queryClient.ensureQueryData(recentSongArtistsQueryOptions);
+    await queryClient.ensureQueryData(mostLovedSongsQueryOptions);
+    await queryClient.ensureQueryData(
       artistQuery.all({
         sortType: 'mostLovedDescending',
         filterType: 'notSelected',

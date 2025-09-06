@@ -20,17 +20,7 @@ import NoSongsImage from '@assets/images/svg/Empty Inbox _Monochromatic.svg';
 import Img from '@renderer/components/Img';
 import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 import { queryClient } from '@renderer/index';
-
-const fetchSongsData = async (sortingOrder: SongSortTypes, filteringOrder: SongFilterTypes) => {
-  const songs = window.api.audioLibraryControls.getAllSongs(sortingOrder, filteringOrder);
-  return songs;
-};
-
-const songsQueryOptions = (sortingOrder: SongSortTypes, filteringOrder: SongFilterTypes) =>
-  queryOptions({
-    queryKey: ['songs', { sortingOrder }, { filteringOrder }],
-    queryFn: () => fetchSongsData(sortingOrder, filteringOrder)
-  });
+import { songQuery } from '@renderer/queries/songs';
 
 export const Route = createFileRoute('/main-player/songs/')({
   validateSearch: zodValidator(songSearchSchema),
@@ -38,10 +28,16 @@ export const Route = createFileRoute('/main-player/songs/')({
     sortingOrder: search.sortingOrder,
     filteringOrder: search.filteringOrder
   }),
-  loader: ({ deps }) =>
-    queryClient.ensureQueryData(
-      songsQueryOptions(deps.sortingOrder ?? 'aToZ', deps.filteringOrder ?? 'notSelected')
-    ),
+  loader: async ({ deps }) => {
+    await queryClient.ensureQueryData(
+      songQuery.all({
+        sortType: deps.sortingOrder ?? 'aToZ',
+        filterType: deps.filteringOrder ?? 'notSelected',
+        start: 0,
+        end: 0
+      })
+    );
+  },
   component: SongsPage
 });
 
@@ -81,7 +77,9 @@ function SongsPage() {
 
   const {
     data: { data: songData }
-  } = useSuspenseQuery(songsQueryOptions(sortingOrder, filteringOrder));
+  } = useSuspenseQuery(
+    songQuery.all({ sortType: sortingOrder, filterType: filteringOrder, start: 0, end: 0 })
+  );
 
   // const fetchSongsData = useCallback(() => {
   //   console.time('songs');
@@ -113,7 +111,14 @@ function SongsPage() {
             event.dataType === 'blacklist/songBlacklist' ||
             (event.dataType === 'songs/likes' && event.eventData.length > 1)
           )
-            queryClient.invalidateQueries(songsQueryOptions(sortingOrder, filteringOrder));
+            queryClient.invalidateQueries(
+              songQuery.all({
+                sortType: sortingOrder,
+                filterType: filteringOrder,
+                start: 0,
+                end: 0
+              })
+            );
         }
       }
     };
@@ -145,7 +150,14 @@ function SongsPage() {
           //     isBlacklisted: song.isBlacklisted
           //   };
           // });
-          queryClient.invalidateQueries(songsQueryOptions(sortingOrder, filteringOrder));
+          queryClient.invalidateQueries(
+            songQuery.all({
+              sortType: sortingOrder,
+              filterType: filteringOrder,
+              start: 0,
+              end: 0
+            })
+          );
         }}
         // onFailure={() => setSongData([])}
       />

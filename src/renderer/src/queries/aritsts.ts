@@ -22,7 +22,9 @@ export const artistQuery = createQueryKeys('artists', {
         window.api.artistsData.getArtistData(
           [],
           sortType as ArtistSortTypes,
-          filterType as ArtistFilterTypes
+          filterType as ArtistFilterTypes,
+          start,
+          end
         )
     };
   }

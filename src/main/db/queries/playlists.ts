@@ -1,11 +1,34 @@
-import { asc } from 'drizzle-orm';
-import { playlists } from '../schema';
+import { and, asc, desc, inArray, SQL } from 'drizzle-orm';
 import { db } from '@db/db';
 
 export type GetAllPlaylistsReturnType = Awaited<ReturnType<typeof getAllPlaylists>>;
-export const getAllPlaylists = async (trx: DB | DBTransaction = db) => {
+const defaultGetAllPlaylistsOptions = {
+  playlistIds: [] as number[],
+  start: 0,
+  end: 0,
+  sortType: 'aToZ' as PlaylistSortTypes
+};
+export type GetAllPlaylistsOptions = Partial<typeof defaultGetAllPlaylistsOptions>;
+
+export const getAllPlaylists = async (
+  options: GetAllPlaylistsOptions,
+  trx: DB | DBTransaction = db
+) => {
+  const { playlistIds = [], start = 0, end = 0, sortType = 'aToZ' } = options;
+
+  const limit = end - start === 0 ? undefined : end - start;
+
   const data = await trx.query.playlists.findMany({
-    orderBy: [asc(playlists.name)],
+    where: (s) => {
+      const filters: SQL[] = [];
+
+      // Filter by playlist IDs
+      if (playlistIds && playlistIds.length > 0) {
+        filters.push(inArray(s.id, playlistIds));
+      }
+
+      return and(...filters);
+    },
     with: {
       songs: { with: { song: { columns: { id: true } } } },
       artworks: {
@@ -22,8 +45,21 @@ export const getAllPlaylists = async (trx: DB | DBTransaction = db) => {
           }
         }
       }
-    }
+    },
+    orderBy: (playlists) => {
+      if (sortType === 'aToZ') return [asc(playlists.name)];
+      if (sortType === 'zToA') return [desc(playlists.name)];
+
+      return [];
+    },
+    limit,
+    offset: start
   });
 
-  return data;
+  return {
+    data,
+    sortType,
+    start,
+    end
+  };
 };

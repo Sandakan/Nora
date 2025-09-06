@@ -26,8 +26,8 @@ export const Route = createFileRoute('/main-player/albums/')({
   loaderDeps: ({ search }) => ({
     sortingOrder: search.sortingOrder
   }),
-  loader: ({ deps }) => {
-    queryClient.ensureQueryData(
+  loader: async ({ deps }) => {
+    await queryClient.ensureQueryData(
       albumQuery.all({
         sortType: deps.sortingOrder || 'aToZ',
         start: 0,
